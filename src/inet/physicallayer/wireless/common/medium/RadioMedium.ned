@@ -40,6 +40,8 @@ module RadioMedium like IRadioMedium
         bool recordTransmissionLog = default(false); // When enabled, the medium writes one line per transmission into the communication log file
         bool recordReceptionLog = default(false);    // When enabled, the medium writes one line per reception into the communication log file
 
+        string sameTransmissionStartTimeCheck @enum("ignore", "warning", "error") = default("error"); // Specifies what should happen if two transmissions start at the same moment
+
         @class(RadioMedium);
         @display("i=misc/sun");
 

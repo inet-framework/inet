@@ -53,7 +53,7 @@ jobs:
           echo "::group::Installing Python packages"
           python3 -m venv $GITHUB_WORKSPACE/venv
           source $GITHUB_WORKSPACE/venv/bin/activate
-          python3 -m pip install --upgrade matplotlib numpy pandas seaborn scipy ipython posix-ipc cppyy sewar dask distributed optimparallel requests
+          python3 -m pip install --upgrade matplotlib numpy pandas seaborn scipy ipython posix-ipc cppyy sewar dask distributed optimparallel requests setuptools
           echo "::endgroup::"
 
           source $GITHUB_WORKSPACE/inet/_scripts/github/build-inet.sh

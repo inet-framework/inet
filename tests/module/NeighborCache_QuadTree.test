@@ -78,6 +78,9 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.wlan[*].mac.rng-0 = 2
 ned-path = .;../../../../src;../../lib
 
+# radio medium
+*.radioMedium.sameTransmissionStartTimeCheck = "ignore"
+
 # channel physical parameters
 **.wlan[*].typename = "AckingWirelessInterface"
 **.wlan[*].bitrate = 2Mbps

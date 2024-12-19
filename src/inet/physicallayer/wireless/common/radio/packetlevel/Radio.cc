@@ -543,7 +543,7 @@ bool Radio::isListeningPossible() const
     const simtime_t now = simTime();
     const Coord& position = antenna->getMobility()->getCurrentPosition();
     // TODO use 2 * minInterferenceTime for lookahead? or maybe simply use 0 duration listening?
-    const IListening *listening = receiver->createListening(this, now, now + 1E-12, position, position);
+    const IListening *listening = receiver->createListening(this, now, now + SimTime::fromRaw(1), position, position);
     const IListeningDecision *listeningDecision = medium->listenOnMedium(this, listening);
     bool isListeningPossible = listeningDecision->isListeningPossible();
     delete listening;

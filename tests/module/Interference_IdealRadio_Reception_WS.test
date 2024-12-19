@@ -52,6 +52,8 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 *.hostSender2.mobility.initialX = 800m
 *.hostReceiver.mobility.initialX = 400m
 
+*.radioMedium.sameTransmissionStartTimeCheck = "ignore"
+
 # nic
 *.host*.wlan[*].typename = "AckingWirelessInterface"
 *.host*.wlan[*].bitrate = 2Mbps

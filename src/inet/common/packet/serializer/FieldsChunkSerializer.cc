@@ -15,19 +15,14 @@ namespace inet {
 void FieldsChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, b offset, b length) const
 {
     auto fieldsChunk = staticPtrCast<const FieldsChunk>(chunk);
-    if (length == b(-1))
-        length = fieldsChunk->getChunkLength() - offset;
     auto& chunkStream = fieldsChunk->getSerializedDataForUpdate();
     if (chunkStream.getLength() == b(0)) {
         chunkStream.setCapacity(fieldsChunk->getChunkLength());
         serialize(chunkStream, fieldsChunk);
         ChunkSerializer::totalSerializedLength += chunkStream.getLength();
     }
-
-    CHUNK_CHECK_USAGE(chunkStream.getLength() == fieldsChunk->getChunkLength(), "serialized length is incorrect: serialized=%" PRId64 " bit, chunk=%" PRId64 " bit",
-            chunkStream.getLength().get<b>(), chunk->getChunkLength().get<b>());
-
-    stream.writeData(chunkStream.getData(), offset, length);
+    CHUNK_CHECK_USAGE(chunkStream.getLength() == fieldsChunk->getChunkLength(), "serialized length is incorrect: serialized=%" PRId64 " bit, chunk=%" PRId64 " bit", chunkStream.getLength().get<b>(), chunk->getChunkLength().get<b>());
+    stream.writeData(chunkStream.getData(), offset, length == b(-1) ? fieldsChunk->getChunkLength() - offset : length);
 }
 
 const Ptr<Chunk> FieldsChunkSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
@@ -38,8 +33,6 @@ const Ptr<Chunk> FieldsChunkSerializer::deserialize(MemoryInputStream& stream, c
     auto chunkLength = endPosition - startPosition;
     ChunkSerializer::totalDeserializedLength += chunkLength;
     fieldsChunk->setChunkLength(chunkLength);
-    auto serializedBytes = new std::vector<uint8_t>();
-    stream.copyData(*serializedBytes, startPosition, chunkLength);
     auto& chunkStream = fieldsChunk->getSerializedDataForUpdate();
     chunkStream.clear();
     chunkStream.writeData(stream.getData(), startPosition, chunkLength);

@@ -54,6 +54,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 # radio medium
 *.radioMedium.backgroundNoise.power = -110dBm
+*.radioMedium.sameTransmissionStartTimeCheck = "ignore"
 
 # nic
 *.host*.wlan[*].typename = "AckingWirelessInterface"

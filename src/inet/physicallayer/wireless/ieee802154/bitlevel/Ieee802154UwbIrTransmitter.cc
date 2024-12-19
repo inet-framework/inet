@@ -82,7 +82,7 @@ void Ieee802154UwbIrTransmitter::generateSyncPreamble(std::map<simsec, WpHz>& da
             if (Ieee802154UwbIrMode::C31[Ieee802154UwbIrMode::Ci - 1][pos] != 0) {
                 if (n == 0 && pos == 0)
                     // we slide the first pulse slightly in time to get the first point "inside" the signal
-                    time = 1E-12 + n * cfg.sync_symbol_duration + pos * cfg.spreadingdL * cfg.pulse_duration;
+                    time = SimTime::fromRaw(1) + n * cfg.sync_symbol_duration + pos * cfg.spreadingdL * cfg.pulse_duration;
                 else
                     time = n * cfg.sync_symbol_duration + pos * cfg.spreadingdL * cfg.pulse_duration;
 //                generatePulse(data, time, startTime, C31[Ci - 1][pos], IEEE802154A::maxPulse, IEEE802154A::mandatory_pulse);
