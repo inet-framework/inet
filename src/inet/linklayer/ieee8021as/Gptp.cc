@@ -38,7 +38,6 @@ simsignal_t Gptp::gptpSyncSuccessfulSignal = cComponent::registerSignal("gptpSyn
 // MAC address:
 //   01-80-C2-00-00-0E for Announce and Signaling messages, for Sync, Follow_Up,
 //   Pdelay_Req, Pdelay_Resp, and Pdelay_Resp_Follow_Up messages (ieee 802.1as-2020, 10.5.3 and 11.3.4)
-//   TODO: This does not seem to be correct
 const MacAddress Gptp::GPTP_MULTICAST_ADDRESS("01:80:C2:00:00:0E");
 
 // EtherType:
@@ -365,7 +364,6 @@ void Gptp::sendAnnounce()
 
         auto gptp = makeShared<GptpAnnounce>();
         gptp->setDomainNumber(domainNumber);
-        // TODO: IEEE 1588-2019 specifies that it also might be 0, check what this means
         gptp->setOriginTimestamp(clock->getClockTime());
         gptp->setSequenceId(sequenceId++);
 
@@ -468,8 +466,7 @@ void Gptp::processAnnounce(Packet *packet, const GptpAnnounce *announce)
     }
     receivedAnnounces[incomingNicId] = announce->dup();
 
-    // TODO: Use parameter
-    auto gptpAnnounceTimeoutTime = clocktime_t(3000, SIMTIME_MS);
+    clocktime_t gptpAnnounceTimeoutTime = par("announceTimeout");
     if (announceTimeouts.find(incomingNicId) != announceTimeouts.end()) {
         rescheduleClockEventAfter(gptpAnnounceTimeoutTime, announceTimeouts[incomingNicId]);
     }

@@ -35,6 +35,8 @@ simple Gptp like IGptp
         double syncInitialOffset @unit(s) = default(syncInterval); // Time of first SYNC message
         double pdelayInitialOffset @unit(s) = default(0s); // Time of first link delay measurement
         double announceInitialOffset @unit(s) = default(0s); // Time of first Announce message (BMCA mode only)
+        double announceTimeout @unit(s) = default(announceInterval * 3); // Timeout for Announce messages (BMCA mode only)
+
         int grandmasterPriority1 = default(255); // Priority1 value for BMCA
 
         // following parameters are used to schedule follow_up and pdelay_resp messages.
