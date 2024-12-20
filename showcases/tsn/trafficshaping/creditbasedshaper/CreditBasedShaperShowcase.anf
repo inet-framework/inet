@@ -1344,7 +1344,7 @@ inet.scave.plot.plot_vectors_separate(df, props, global_style={'alpha': 0.5}, sh
 
 utils.postconfigure_plot(props)
 
-plt.subplots_adjust(left = 0.07, right = 0.97, top = 0.9, bottom = 0.1, wspace=0.1, hspace=0.1)
+#plt.subplots_adjust(left = 0.07, right = 0.97, top = 0.9, bottom = 0.1, wspace=0.1, hspace=0.1)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)]]></script>
@@ -1985,7 +1985,7 @@ inet.scave.plot.plot_vectors_separate(df, props, share_axes='both')
 
 utils.postconfigure_plot(props)
 
-plt.subplots_adjust(left = 0.07, right = 0.97, top = 0.9, bottom = 0.1, wspace=0.1, hspace=0.1)
+#plt.subplots_adjust(left = 0.07, right = 0.97, top = 0.9, bottom = 0.1, wspace=0.1, hspace=0.1)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)]]></script>
@@ -2630,7 +2630,7 @@ import matplotlib as mpl
 mpl.rcParams['savefig.transparent'] = True
 #workaround end
 
-plt.subplots_adjust(left = 0.05, right = 0.99, top = 0.9, bottom = 0.1, wspace=0.1, hspace=0.1)
+#plt.subplots_adjust(left = 0.05, right = 0.99, top = 0.9, bottom = 0.1, wspace=0.1, hspace=0.1)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)]]></script>
@@ -3270,7 +3270,7 @@ utils.plot_vectors_separate(df, props)
 
 utils.postconfigure_plot(props)
 
-plt.subplots_adjust(left = 0.07, right = 0.98, top = 0.9, bottom = 0.1, wspace=0.1, hspace=0.1)
+#plt.subplots_adjust(left = 0.07, right = 0.98, top = 0.9, bottom = 0.1, wspace=0.1, hspace=0.1)
 
 for a in plt.gcf().axes:
     xmin, xmax = a.get_xlim()

@@ -4645,7 +4645,7 @@ ax2.callbacks.connect('ylim_changed', on_ylims_change)
 on_ylims_change(ax1)
 on_ylims_change(ax2)
 
-plt.subplots_adjust(left = 0.1, right = 0.98, top = 0.87, bottom = 0.12, wspace=0.1, hspace=0.2)
+#plt.subplots_adjust(left = 0.1, right = 0.98, top = 0.87, bottom = 0.12, wspace=0.1, hspace=0.2)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)

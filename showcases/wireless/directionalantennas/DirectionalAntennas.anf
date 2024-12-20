@@ -3860,7 +3860,7 @@ plt.xticks([0,60,120,180,240,300,360])
 ax1.grid(linestyle='--')
 ax2.grid(linestyle='--')
 
-plt.subplots_adjust(left = 0.1, right = 0.98, top = 0.93, bottom = 0.12, wspace=0.1, hspace=0.2)
+#plt.subplots_adjust(left = 0.1, right = 0.98, top = 0.93, bottom = 0.12, wspace=0.1, hspace=0.2)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
