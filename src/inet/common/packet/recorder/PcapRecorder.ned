@@ -39,8 +39,8 @@ simple PcapRecorder
         int timePrecision = default(6); // Time precision in recorded file. pcap supports only 6 (usec) or 9 (nanosec), pcapng supports more values (see 'if_tsresol' option in pcapng file format).
         bool dumpBadFrames = default(true); // Enable dump of frames with hasBitError
         string moduleNamePatterns = default("wlan[*] eth[*] ppp[*]"); // Space-separated list of sibling module names to listen on
-        string sendingSignalNames = default("packetSentToLower"); // Space-separated list of outbound packet signals to subscribe to
-        string receivingSignalNames = default("packetReceivedFromLower"); // Space-separated list of inbound packet signals to subscribe to
+        string sendingSignalNames = default("transmissionEnded"); // Space-separated list of outbound packet signals to subscribe to
+        string receivingSignalNames = default("receptionEnded"); // Space-separated list of inbound packet signals to subscribe to
         string dumpProtocols = default("ethernetmac ppp ieee80211mac"); // Space-separated list of protocol names as defined in the Protocol class
         object packetFilter = default("*"); // Which packets are considered, matches all packets by default
         string helpers = default("");    // Usable PcapRecorder::IHelper helpers for accept packettype and store/convert packet as specified linktype
