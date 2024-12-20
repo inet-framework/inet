@@ -33,8 +33,23 @@ void Ieee80211MgmtBase::initialize(int stage)
         myIface = getContainingNicModule(this);
         numMgmtFramesReceived = 0;
         numMgmtFramesDropped = 0;
+        getContainingNicModule(this)->subscribe(modesetChangedSignal, this);
         WATCH(numMgmtFramesReceived);
         WATCH(numMgmtFramesDropped);
+    }
+}
+
+void Ieee80211MgmtBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+{
+    Enter_Method("%s", cComponent::getSignalName(signalID));
+
+    if (signalID == modesetChangedSignal) {
+        modeSet = check_and_cast<physicallayer::Ieee80211ModeSet *>(obj);
+        supportedRates.numRates = std::min(8, modeSet->getNumModes());
+        int rateIndex = 0;
+        for (int i = 0; i < supportedRates.numRates; i++)
+            if (modeSet->isMandatory(i))
+                supportedRates.rate[rateIndex++] = modeSet->getMode(i)->getDataMode()->getNetBitrate().get<Mbps>();
     }
 }
 
