@@ -19,10 +19,6 @@ module EthernetPreemptingPhyLayer like IEthernetPhyLayer
 {
     parameters:
         volatile double bitrate @unit(bps);
-        outboundEmitter.signalName = "packetSentToLower";
-        outboundEmitter.direction = "outbound";
-        inboundEmitter.signalName = "packetReceivedFromLower";
-        inboundEmitter.direction = "inbound";
         *.bitrate = default(this.bitrate);
         @display("i=block/layer");
     gates:
@@ -48,12 +44,9 @@ module EthernetPreemptingPhyLayer like IEthernetPhyLayer
             duration = default(96s / dropUnit(parent.bitrate));
             @display("p=200,400");
         }
-        outboundEmitter: <default("PacketEmitter")> like IPacketFlow {
-            @display("p=200,500");
-        }
         transmitter: <default("StreamThroughTransmitter")> like IPacketTransmitter {
             datarate = default(parent.bitrate);
-            @display("p=200,600");
+            @display("p=200,500");
         }
         m2: PacketMultiplexer {
             @display("p=600,100");
@@ -68,12 +61,9 @@ module EthernetPreemptingPhyLayer like IEthernetPhyLayer
             classifierClass = default("inet::PacketEthernetPreambleTypeClassifier");
             @display("p=600,300");
         }
-        inboundEmitter: <default("PacketEmitter")> like IPacketFlow {
-            @display("p=600,500");
-        }
         receiver: <default("DestreamingReceiver")> like IPacketReceiver {
             datarate = default(parent.bitrate);
-            @display("p=600,600");
+            @display("p=600,500");
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> c1.in;
@@ -82,13 +72,11 @@ module EthernetPreemptingPhyLayer like IEthernetPhyLayer
         phyHeaderInserter.out --> m1.in++;
         fragmentPhyHeaderInserter.out --> m1.in++;
         m1.out --> interFrameGapInserter.in;
-        interFrameGapInserter.out --> outboundEmitter.in;
-        outboundEmitter.out --> transmitter.in;
+        interFrameGapInserter.out --> transmitter.in;
         transmitter.out --> { @display("m=s"); } --> lowerLayerOut;
 
         lowerLayerIn --> { @display("m=s"); } --> receiver.in;
-        receiver.out --> inboundEmitter.in;
-        inboundEmitter.out --> c2.in;
+        receiver.out --> c2.in;
         c2.out++ --> phyHeaderChecker.in;
         c2.out++ --> fragmentPhyHeaderChecker.in;
         phyHeaderChecker.out --> m2.in++;

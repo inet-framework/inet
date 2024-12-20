@@ -20,10 +20,6 @@ module EthernetStreamingMacLayer like IEthernetMacLayer
         *.bitrate = default(this.bitrate);
         lifetimer.collectionModule = default("^.queue");
         streamer.minPacketLength = 60B;
-        outboundEmitter.signalName = "packetSentToLower";
-        outboundEmitter.direction = "outbound";
-        inboundEmitter.signalName = "packetReceivedFromLower";
-        inboundEmitter.direction = "inbound";
         @display("i=block/layer");
     gates:
         input upperLayerIn;
@@ -40,23 +36,15 @@ module EthernetStreamingMacLayer like IEthernetMacLayer
         streamer: <default("PacketStreamer")> like IPacketFlow {
             @display("p=200,200");
         }
-        outboundEmitter: <default("PacketEmitter")> like IPacketFlow {
-            @display("p=200,300");
-        }
         fcsChecker: <default("EthernetFcsChecker")> like IPacketFilter {
             popFcs = default(false);
             @display("p=500,200");
         }
-        inboundEmitter: <default("PacketEmitter")> like IPacketFlow {
-            @display("p=500,300");
-        }
     connections:
         upperLayerIn --> { @display("m=n"); } --> queue.in;
         queue.out --> streamer.in;
-        streamer.out --> outboundEmitter.in;
-        outboundEmitter.out --> { @display("m=s"); } --> lowerLayerOut;
+        streamer.out --> { @display("m=s"); } --> lowerLayerOut;
 
-        lowerLayerIn --> { @display("m=s"); } --> inboundEmitter.in;
-        inboundEmitter.out --> fcsChecker.in;
+        lowerLayerIn --> { @display("m=s"); } --> fcsChecker.in;
         fcsChecker.out --> { @display("m=n"); } --> upperLayerOut;
 }
