@@ -12,13 +12,16 @@
 
 #include "inet/common/DirectionTag_m.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/ProtocolTag_m.h"
-#include "inet/common/StringFormat.h"
-#include "inet/common/packet/recorder/PcapWriter.h"
 #include "inet/common/packet/recorder/PcapngWriter.h"
+#include "inet/common/packet/recorder/PcapWriter.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/stlutils.h"
+#include "inet/common/StringFormat.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/InterfaceTable.h"
+#include "inet/physicallayer/common/Signal.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IReception.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmission.h"
 
 namespace inet {
 
@@ -179,12 +182,17 @@ void PcapRecorder::receiveSignal(cComponent *source, simsignal_t signalID, cObje
     Enter_Method("%s", cComponent::getSignalName(signalID));
 
     if (pcapWriter->isOpen()) {
-        cPacket *packet = dynamic_cast<cPacket *>(obj);
-
-        if (packet) {
-            auto i = signalList.find(signalID);
-            Direction direction = (i != signalList.end()) ? i->second : DIRECTION_UNDEFINED;
+        auto i = signalList.find(signalID);
+        ASSERT(i != signalList.end());
+        Direction direction = i->second;
+        if (auto signal = dynamic_cast<const physicallayer::Signal *>(obj))
+            recordPacket(signal->getEncapsulatedPacket(), direction, source);
+        else if (auto packet = dynamic_cast<cPacket *>(obj))
             recordPacket(packet, direction, source);
+        else if (auto transmission = dynamic_cast<const physicallayer::ITransmission *>(obj))
+            recordPacket(transmission->getPacket(), direction, source);
+        else if (auto reception = dynamic_cast<const physicallayer::IReception *>(obj))
+            recordPacket(reception->getTransmission()->getPacket(), direction, source);
     }
 }
 
