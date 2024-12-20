@@ -3344,7 +3344,7 @@ utils.postconfigure_plot(props)
 
 plt.grid(linestyle='--')
 plt.legend(ncol=4, markerscale=2)
-plt.tight_layout(pad=0)
+#plt.tight_layout(pad=0)
 
 utils.export_image_if_needed(props)
 #utils.export_data_if_needed(df, props)

@@ -41,7 +41,7 @@ utils.plot_vectors(df, props)
 
 utils.postconfigure_plot(props)
 
-plt.tight_layout(pad=0.1)
+#plt.tight_layout(pad=0.1)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -1305,7 +1305,7 @@ utils.plot_vectors(df, props)
 
 utils.postconfigure_plot(props)
 
-plt.tight_layout(pad=0.1)
+#plt.tight_layout(pad=0.1)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)

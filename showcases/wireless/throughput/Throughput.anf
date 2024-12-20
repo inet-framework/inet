@@ -5,7 +5,7 @@
         <input pattern="/inet/showcases/wireless/throughput/results/General-*.sca"/>
     </inputs>
     <charts>
-        <chart createdWith="" icon="icons/full/obj/scatterchart.png" id="490329163" name="Analytical vs simulated throughput" resultTypes="" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/scatterchart.png" id="875246180" name="Analytical vs simulated throughput" resultTypes="" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
             <script><![CDATA[from omnetpp.scave import results, chart, utils, ideplot
 import pandas as pd
 import os
@@ -110,8 +110,6 @@ ax2.grid(axis='y', linestyle='--', color='lightblue')
 plt.xticks([6,9,12,18,24,36,48,54])
 
 ax2.set_zorder(0)
-
-plt.tight_layout()
 
 ax = plt.gca()
 handles, labels = ax.get_legend_handles_labels()

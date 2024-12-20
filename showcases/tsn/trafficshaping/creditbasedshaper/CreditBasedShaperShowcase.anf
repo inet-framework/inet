@@ -5,7 +5,7 @@
         <input pattern="results/General-#0.vec"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/linechart.png" id="334386820" name="Client Application Traffic and Shaper Incoming Traffic" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="850735656" name="Client Application Traffic and Shaper Incoming Traffic" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 import matplotlib.pyplot as plt
@@ -60,8 +60,6 @@ legend_style = [('client application', {'linestyle': 'dashed', 'color': 'black'}
 handles, labels = inet.scave.plot.create_custom_legend(props, style_tuple_list=legend_style)
 
 plt.legend(handles, labels, ncol=2)
-
-plt.tight_layout()
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -663,7 +661,7 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc" value="savefig.transparent : True"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1461564623" name="Traffic shaper queue lengths" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="180802182" name="Traffic shaper queue lengths" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
@@ -1304,7 +1302,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_prefer_module_display_paths" value="true"/>
             <property name="legend_prefer_result_titles" value="true"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1224189292" name="Traffic shaper number of credits" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="2087727238" name="Traffic shaper number of credits" resultTypes="" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from omnetpp.scave import results, chart, utils
@@ -1945,7 +1943,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="matplotlibrc" value="savefig.transparent : True"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1611721812" name="Traffic shaper number of credits - zoomed" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="630834106" name="Traffic shaper number of credits - zoomed" resultTypes="" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from omnetpp.scave import results, chart, utils
@@ -2586,7 +2584,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="matplotlibrc" value="savefig.transparent : True"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="62910124" name="Transmitting state and gate states" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="289550816" name="Transmitting state and gate states" resultTypes="" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import re
 import math
 import matplotlib.pyplot as plt
@@ -3231,7 +3229,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="matplotlibrc" value=""/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="203873503" name="Traffic shaping" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="803083484" name="Traffic shaping" resultTypes="" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import re
 import numpy
 import math
@@ -3883,7 +3881,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="matplotlibrc" value="savefig.transparent : True"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1640861623" name="Shaper Incoming and Outgoing Traffic" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1213530008" name="Shaper Incoming and Outgoing Traffic" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -4539,7 +4537,7 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc" value="savefig.transparent : True"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="450804235" name="Shaper Outgoing Traffic and Server Application Traffic" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1685953841" name="Shaper Outgoing Traffic and Server Application Traffic" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import matplotlib.pyplot as plt
@@ -4591,8 +4589,6 @@ legend_style = [('shaper outgoing', {'linestyle': '-', 'color': 'black'}),
 
 handles, labels = inet.scave.plot.create_custom_legend(props, legend_style)
 plt.legend(handles, labels, ncol=2)
-
-plt.tight_layout()
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)

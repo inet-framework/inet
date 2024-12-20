@@ -15,7 +15,7 @@
         <input pattern="results/RealisticPriorityQueueing-#0.vec"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/linechart.png" id="255609871" name="End-to-end delay, 1200-Byte packet length" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="255609871" name="End-to-end delay, 1200-Byte packet length" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -58,8 +58,6 @@ utils.postconfigure_plot(props)
 
 # modify legend
 plt.legend(ls.alternate_handles, ls.alternate_labels, markerscale=4, ncol=2, loc='lower left')
-
-plt.tight_layout()
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -660,7 +658,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_format" value=""/>
             <property name="simplify" value="false"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="376220435" name="End-to-end delay, realistic packet length" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="376220435" name="End-to-end delay, realistic packet length" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -713,8 +711,6 @@ if add_rectangle:
     plt.text((ls.xmin+ls.xmax)/2, ls.ymax + ls.text_offset, "This area is shown in another chart", ha='center')
     
 plt.legend(ls.alternate_handles, ls.alternate_labels, markerscale=4, ncol=2, loc=legend_loc)
-
-plt.tight_layout()
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -1315,7 +1311,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="2032539938" name="End-to-end delay, realistic packet length zoomed" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="2032539938" name="End-to-end delay, realistic packet length zoomed" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -1362,8 +1358,6 @@ plt.ylim(ls.ymin,ls.ymax)
 legend_loc = 'upper right'
     
 plt.legend(ls.alternate_handles, ls.alternate_labels, markerscale=4, ncol=2, loc=legend_loc)
-
-plt.tight_layout()
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -1964,7 +1958,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="176728346" name="Time average of queue length" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="176728346" name="Time average of queue length" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 

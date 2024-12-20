@@ -7,7 +7,7 @@
         <input pattern="results/Qos-#0.vec"/>
     </inputs>
     <charts>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1601932711" name="End-to-end delay, Non-QoS" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="191659264" name="End-to-end delay, Non-QoS" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import matplotlib.pyplot as plt
@@ -40,7 +40,6 @@ utils.postconfigure_plot(props)
 
 plt.legend(markerscale=4, loc=2)
 plt.grid(linestyle='--')
-plt.tight_layout()
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -641,7 +640,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="127217488" name="End-to-end delay, QoS" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1457154425" name="End-to-end delay, QoS" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import matplotlib.pyplot as plt
@@ -675,7 +674,6 @@ utils.postconfigure_plot(props)
 plt.yticks([0, 0.5, 1, 1.5, 2])
 plt.legend(markerscale=4, loc=2)
 plt.grid(linestyle='--')
-plt.tight_layout()
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -1276,7 +1274,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1049841227" name="Instantaneous packet delay variation, non-QoS" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="777429836" name="Instantaneous packet delay variation, non-QoS" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import solid_x_axis as sxa
@@ -1931,7 +1929,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="661838294" name="Instantaneous packet delay variation, QoS" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1917627749" name="Instantaneous packet delay variation, QoS" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import solid_x_axis as sxa
@@ -2601,7 +2599,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="2046729205" name="Instantaneous packet delay variation, QoS, zoomed" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1698315227" name="Instantaneous packet delay variation, QoS, zoomed" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import solid_x_axis as sxa
@@ -3272,7 +3270,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1582377849" name="Throughput, non-QoS" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1943658569" name="Throughput, non-QoS" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import matplotlib.pyplot as plt
@@ -3906,7 +3904,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1202733311" name="Throughput, QoS" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="706039566" name="Throughput, QoS" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import matplotlib.pyplot as plt
@@ -4540,7 +4538,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1922047564" name="Instantaneous packet delay variation, both" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="606445043" name="Instantaneous packet delay variation, both" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -4618,7 +4616,7 @@ inet.scave.plot.fix_labels_for_subplots([ax1, ax2], props, 'horizontal', remove_
 
 ax1.legend(loc=1, ncol=4, handletextpad=0.1, columnspacing=0.1, markerscale=3)
 ax2.legend(loc=1, ncol=4, handletextpad=0.1, columnspacing=0.1, markerscale=3)
-plt.tight_layout(pad=1.5)
+#plt.tight_layout(pad=1.5)
 ax1.grid(linestyle='--')
 ax2.grid(linestyle='--')
 
