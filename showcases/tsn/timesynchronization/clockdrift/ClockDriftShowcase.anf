@@ -7250,7 +7250,7 @@ ax_gptp.legend(handles, labels, loc='upper left', title='gPTP')
 
 ax_gptp.set_ylabel("")
 
-plt.subplots_adjust(left = 0.08, right = 0.98, top = 0.94, bottom = 0.1, wspace=0.2, hspace=0.1)
+#plt.subplots_adjust(left = 0.08, right = 0.98, top = 0.94, bottom = 0.1, wspace=0.2, hspace=0.1)
 
 utils.export_image_if_needed(props)
 #utils.export_data_if_needed(df, props)
@@ -9217,7 +9217,7 @@ ax_rand.legend(handles, labels, loc='upper left', title='Random drift')
 
 ax_rand.set_ylabel("")
 
-plt.subplots_adjust(left = 0.06, right = 0.98, top = 0.94, bottom = 0.1, wspace=0.1, hspace=0.1)
+#plt.subplots_adjust(left = 0.06, right = 0.98, top = 0.94, bottom = 0.1, wspace=0.1, hspace=0.1)
 
 utils.export_image_if_needed(props)
 #utils.export_data_if_needed(df, props)

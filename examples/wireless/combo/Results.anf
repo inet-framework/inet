@@ -45,7 +45,7 @@ for x, radio in enumerate(["Generic", "Apsk", "Ieee80211"]):
 
 
 utils.postconfigure_plot(props)
-plt.subplots_adjust(0.05, 0.1, 0.98, 0.95, 0.25, 0.5)
+#plt.subplots_adjust(0.05, 0.1, 0.98, 0.95, 0.25, 0.5)
 
 utils.export_image_if_needed(props)
 ]]></script>
@@ -665,7 +665,7 @@ for x, radio in enumerate(["Generic", "Apsk", "Ieee80211"]):
 
 
 utils.postconfigure_plot(props)
-plt.subplots_adjust(0.05, 0.1, 0.98, 0.95, 0.25, 0.5)
+#plt.subplots_adjust(0.05, 0.1, 0.98, 0.95, 0.25, 0.5)
 
 utils.export_image_if_needed(props)
 ]]></script>
