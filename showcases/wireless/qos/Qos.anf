@@ -40,7 +40,6 @@ utils.postconfigure_plot(props)
 
 plt.legend(markerscale=4, loc=2)
 plt.grid(linestyle='--')
-plt.tight_layout()
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -675,7 +674,6 @@ utils.postconfigure_plot(props)
 plt.yticks([0, 0.5, 1, 1.5, 2])
 plt.legend(markerscale=4, loc=2)
 plt.grid(linestyle='--')
-plt.tight_layout()
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -4618,7 +4616,6 @@ inet.scave.plot.fix_labels_for_subplots([ax1, ax2], props, 'horizontal', remove_
 
 ax1.legend(loc=1, ncol=4, handletextpad=0.1, columnspacing=0.1, markerscale=3)
 ax2.legend(loc=1, ncol=4, handletextpad=0.1, columnspacing=0.1, markerscale=3)
-plt.tight_layout(pad=1.5)
 ax1.grid(linestyle='--')
 ax2.grid(linestyle='--')
 
@@ -4645,7 +4642,6 @@ ax2.callbacks.connect('ylim_changed', on_ylims_change)
 on_ylims_change(ax1)
 on_ylims_change(ax2)
 
-plt.subplots_adjust(left = 0.1, right = 0.98, top = 0.87, bottom = 0.12, wspace=0.1, hspace=0.2)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)

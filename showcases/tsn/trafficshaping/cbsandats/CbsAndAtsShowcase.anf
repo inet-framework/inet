@@ -61,8 +61,6 @@ plt.legend(handles, labels, ncol=3)
 plt.axhline(y=20.84, color='black', linestyle='dashdot', linewidth=0.5, zorder=-10)      # shaper data rate
 plt.axhline(y=41.68, color='black', linestyle='dashdot', linewidth=0.5, zorder=-10)      # shaper data rate
 
-plt.tight_layout()
-
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
 ]]></script>

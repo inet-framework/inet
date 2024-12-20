@@ -59,8 +59,6 @@ utils.postconfigure_plot(props)
 # modify legend
 plt.legend(ls.alternate_handles, ls.alternate_labels, markerscale=4, ncol=2, loc='lower left')
 
-plt.tight_layout()
-
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
 ]]></script>
@@ -714,8 +712,6 @@ if add_rectangle:
     
 plt.legend(ls.alternate_handles, ls.alternate_labels, markerscale=4, ncol=2, loc=legend_loc)
 
-plt.tight_layout()
-
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
 ]]></script>
@@ -1362,8 +1358,6 @@ plt.ylim(ls.ymin,ls.ymax)
 legend_loc = 'upper right'
     
 plt.legend(ls.alternate_handles, ls.alternate_labels, markerscale=4, ncol=2, loc=legend_loc)
-
-plt.tight_layout()
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
