@@ -642,7 +642,7 @@ def postconfigure_plot(props):
                     args.update(_legend_loc_outside_args(loc))
                 args["frameon"] =utils._parse_optional_bool(get_prop("legend_border"))
                 plt.legend(**args)
-        plt.tight_layout()
+        #plt.tight_layout()
 
 def add_to_dataframe(df, style_tuple_list=None, default_dict=None, order=None):
     """
