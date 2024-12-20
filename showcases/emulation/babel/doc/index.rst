@@ -162,8 +162,11 @@ These network namespaces could be set up by shell scripts, but we can also use t
 commands to run on the host OS from the ini file. This makes the simulation setup self-contained (we don't need to run shell scripts). Also, this way the commands can be
 grouped logically with the network node they are associated with.
 
-In this simulation, we're using unshared user namespaces, so that processes started by these modules have their own separate user and group IDs, allowing them to act as root inside the namespace without affecting the host system.
-This is useful because we can run commands without ``sudo``:
+In this simulation, we're unsharing user and network namespaces with the host OS, so that 
+we can use priviliged operations without ``sudo``, and without affecting the host OS.
+This also allows running multiple emulations concurrently, without them affecting each other.
+However, a disadvantage of this is not being able to see the network configuration and network state of the host OS's external processes.
+In general, this can be worked around with ``nsenter``. Here is the unshare setting in omnetpp.ini:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -229,9 +232,9 @@ We also employ an :ned:`ExternalApp` module to start the ping command in ``host0
 
    .. code-block:: shell
 
-      sudo setcap cap_sys_admin=ep /path/to/opp_run
-      sudo setcap cap_sys_admin=ep /path/to/opp_run_release
-      sudo setcap cap_sys_admin=ep /path/to/opp_run_dbg
+      sudo setcap cap_sys_admin=ep $(which opp_run)
+      sudo setcap cap_sys_admin=ep $(which opp_run_release)
+      sudo setcap cap_sys_admin=ep $(which opp_run_dbg)
 
 .. (:ned:`ExternalApp` contains both an :ned:`ExternalEnvironment` and
   an :ned:`ExternalProcess` submodule.)
@@ -315,26 +318,28 @@ such as loopback interfaces and unused protocols:
    :end-at: hasIpv6
    :language: ini
 
-Accessing unshared network namespaces
--------------------------------------
+Watching Routing Tables and Capturing Packets
+---------------------------------------------
 
 Unshared network namespaces are not visible from the host OS environment as they are isolated (e.g. ``ip netns list`` doesn't list them).
-However, they can be accessed based on Process ID (PID). The babeld processes export their PIDs to files (``babel*.pid``).
-We can run the following command in a terminal to watch routing tables in the network namespace:
+However, they can be accessed based on Process ID (PID) using ``nsenter``. The babeld processes export their PIDs to files (``babel*.pid``).
+We can run the following command in a terminal to watch the routing table of ``host[0]``:
 
 .. code:: shell
 
-   watch -n 0.1 "sudo nsenter -t $(cat babel0.pid) -n ip route"
+   watch -n 0.1 sudo nsenter -t $(cat babel0.pid) -n ip route
 
-This enters the network namespace (``nsenter``) specified by the PID in ``babel0.pid``, and runs the ``ip route`` command to display the routing table.
+This enters the network namespace (``nsenter``) of the process specified by the
+PID in ``babel0.pid``, and runs the ``ip route`` command to display the routing
+table.
 
-Similarly, we can use Wireshark to monitor traffic on the virtual network interfaces; just replace the command with ``wireshark``:
+Similarly, we can use Wireshark to capture traffic on the virtual network interfaces; just replace the command with ``wireshark``:
 
 .. code:: shell
 
    sudo nsenter -t $(cat babel0.pid) -n wireshark
 
-.. note:: ``sudo lsns -t net`` can be used to list process IDs in unshared network namespaces.
+.. note:: ``sudo lsns -t net`` can be used to list process IDs in all network namespaces.
 
 Results
 -------
@@ -345,7 +350,10 @@ The simulation can be started with the ``inet`` command from a terminal:
 
    inet
 
-**TODO** cut video 10 seconds
+.. **TODO** this creates network namespaces, virtual network config, start babeld processes, and cleans up after itself. -> ezt kidomborit
+
+This creates the network namespaces, configures the virtual network, starts the babeld and ping processes, starts the simulation, and cleans
+up after the simulation has concluded.
 
 Here is a video of the simulation running:
 
@@ -393,6 +401,8 @@ Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`BabelShowcase.ned 
 
 Try It Yourself
 ---------------
+
+TODO you need setcap
 
 If you already have INET and OMNeT++ installed, start the IDE by typing
 ``omnetpp``, import the INET project into the IDE, then navigate to the
