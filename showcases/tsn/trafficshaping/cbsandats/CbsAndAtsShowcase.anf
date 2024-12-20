@@ -5,7 +5,7 @@
         <input pattern="results/General-#0.vec"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/linechart.png" id="587404414" name="Shaper Incoming And Outgoing Traffic" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="587404414" name="Shaper Incoming And Outgoing Traffic" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -60,8 +60,6 @@ plt.legend(handles, labels, ncol=3)
 
 plt.axhline(y=20.84, color='black', linestyle='dashdot', linewidth=0.5, zorder=-10)      # shaper data rate
 plt.axhline(y=41.68, color='black', linestyle='dashdot', linewidth=0.5, zorder=-10)      # shaper data rate
-
-plt.tight_layout()
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
