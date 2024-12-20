@@ -39,6 +39,23 @@ PcapRecorder::PcapRecorder() : cSimpleModule()
 {
 }
 
+bool PcapRecorder::shouldDissectProtocolDataUnit(const Protocol *protocol)
+{
+    return !contains(dumpProtocols, protocol);
+}
+
+void PcapRecorder::visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol)
+{
+    if (!contains(dumpProtocols, protocol)) {
+        if (dumpProtocol == nullptr)
+            frontOffset += chunk->getChunkLength();
+        else
+            backOffset += chunk->getChunkLength();
+    }
+    else
+        dumpProtocol = protocol;
+}
+
 void PcapRecorder::initialize()
 {
     verbose = par("verbose");
@@ -168,7 +185,28 @@ void PcapRecorder::receiveSignal(cComponent *source, simsignal_t signalID, cObje
             auto i = signalList.find(signalID);
             Direction direction = (i != signalList.end()) ? i->second : DIRECTION_UNDEFINED;
             recordPacket(packet, direction, source);
+    }
+}
+
+void PcapRecorder::writePacket(const Protocol *protocol, const Packet *packet, b frontOffset, b backOffset, Direction direction, NetworkInterface *networkInterface)
+{
+    auto pcapLinkType = protocolToLinkType(protocol);
+    if (pcapLinkType == LINKTYPE_INVALID)
+        throw cRuntimeError("Cannot determine the PCAP link type from protocol '%s'", protocol->getName());
+    if (matchesLinkType(pcapLinkType, protocol)) {
+        pcapWriter->writePacket(simTime(), packet, frontOffset, backOffset, direction, networkInterface, pcapLinkType);
+        numRecorded++;
+        emit(packetRecordedSignal, packet);
+    }
+    else {
+        if (auto convertedPacket = tryConvertToLinkType(packet, pcapLinkType, protocol)) {
+            pcapWriter->writePacket(simTime(), convertedPacket, b(0), b(0), direction, networkInterface, pcapLinkType);
+            numRecorded++;
+            emit(packetRecordedSignal, packet);
+            delete convertedPacket;
         }
+        else
+            throw cRuntimeError("The protocol '%s' doesn't match PCAP link type %d", protocol->getName(), pcapLinkType);
     }
 }
 
@@ -206,26 +244,17 @@ void PcapRecorder::recordPacket(const cPacket *cpacket, Direction direction, cCo
 
             const auto& packetProtocolTag = packet->getTag<PacketProtocolTag>();
             auto protocol = packetProtocolTag->getProtocol();
-            if (packetProtocolTag->getFrontOffset() == b(0) && packetProtocolTag->getBackOffset() == b(0) && contains(dumpProtocols, protocol)) {
-                auto pcapLinkType = protocolToLinkType(protocol);
-                if (pcapLinkType == LINKTYPE_INVALID)
-                    throw cRuntimeError("Cannot determine the PCAP link type from protocol '%s'", protocol->getName());
-
-                if (matchesLinkType(pcapLinkType, protocol)) {
-                    pcapWriter->writePacket(simTime(), packet, direction, networkInterface, pcapLinkType);
-                    numRecorded++;
-                    emit(packetRecordedSignal, packet);
-                }
-                else {
-                    if (auto convertedPacket = tryConvertToLinkType(packet, pcapLinkType, protocol)) {
-                        pcapWriter->writePacket(simTime(), convertedPacket, direction, networkInterface, pcapLinkType);
-                        numRecorded++;
-                        emit(packetRecordedSignal, packet);
-                        delete convertedPacket;
-                    }
-                    else
-                        throw cRuntimeError("The protocol '%s' doesn't match PCAP link type %d", protocol->getName(), pcapLinkType);
-                }
+            if (contains(dumpProtocols, protocol))
+                writePacket(protocol, packet, packetProtocolTag->getFrontOffset(), packetProtocolTag->getBackOffset(), direction, networkInterface);
+            else {
+                frontOffset = b(0);
+                backOffset = b(0);
+                dumpProtocol = nullptr;
+                Packet dissectedPacket(*packet);
+                PacketDissector packetDissector(ProtocolDissectorRegistry::getInstance(), *this);
+                packetDissector.dissectPacket(&dissectedPacket);
+                if (dumpProtocol != nullptr)
+                    writePacket(dumpProtocol, packet, frontOffset, backOffset, direction, networkInterface);
             }
         }
     }
