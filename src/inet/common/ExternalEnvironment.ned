@@ -16,6 +16,21 @@ package inet.common;
 // starts, or it can be created as a global namespace under /var/run/netns/, or
 // it can be created as a process-local namespace.
 //
+// To run a command that requires elevated privileges without sudo, user and
+// network namespaces need to be unshared from the host OS (unshare-namespaces = true).
+// In this case, the state of the host OS's external processes are not accessible
+// from the unshared namespace in the usual way (e.g. displaying routing tables with `ip route`).
+// To work around this, use `nsenter`:
+//
+//    sudo nsenter -t <PID> -n <command>
+//
+// PID is the ID of the process running in the unshared namespace.
+//
+// To list process IDs in all network namespaces:
+//
+//    sudo lsns -t net
+//
+//
 // @see ~ExternalApp, ~ExternalProcess
 //
 simple ExternalEnvironment
