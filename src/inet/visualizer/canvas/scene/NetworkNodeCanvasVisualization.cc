@@ -233,14 +233,12 @@ void NetworkNodeCanvasVisualization::layout()
     std::sort(annotations.begin(), annotations.end(), Annotation::comparePlacementPriority);
 
     // delete all annotation positions
-    for (auto it = annotations.begin(); it != annotations.end(); it++) {
-        auto& annotation = *it;
+    for (auto& annotation : annotations) {
         annotation.bounds.x = NaN;
         annotation.bounds.y = NaN;
     }
 
-    for (auto it = annotations.begin(); it != annotations.end(); it++) {
-        auto& annotation = *it;
+    for (auto& annotation : annotations) {
         if (!annotation.figure->isVisible())
             continue;
         cFigure::Point rs = cFigure::Point(annotation.bounds.width + annotationSpacing, annotation.bounds.height + annotationSpacing);
