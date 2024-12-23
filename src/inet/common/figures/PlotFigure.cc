@@ -324,19 +324,17 @@ void PlotFigure::layout()
     double fontSize = xTicks.size() > 0 && xTicks[0].number ? xTicks[0].number->getFont().pointSize : 12;
     labelFigure->setPosition(Point(b.getCenter().x, b.y + b.height + fontSize * LABEL_Y_DISTANCE_FACTOR + labelOffset));
     xAxisLabelFigure->setPosition(Point(b.x + b.width / 2, b.y - 5));
-    yAxisLabelFigure->setPosition(Point(-5, b.height / 2));
+    yAxisLabelFigure->setPosition(Point(b.x - 5, b.y + b.height / 2));
 
     bounds = backgroundFigure->getBounds();
     if (!opp_isempty(labelFigure->getText()))
         bounds = rectangleUnion(bounds, labelFigure->getBounds());
-    if (!yTicks.empty()) {
-        bounds.x -= fontSize;
+    bounds = rectangleUnion(bounds, xAxisLabelFigure->getBounds());
+    bounds = rectangleUnion(bounds, yAxisLabelFigure->getBounds());
+    if (!yTicks.empty())
         bounds.width += 2 * fontSize;
-    }
-    if (!xTicks.empty()) {
-        bounds.y -= fontSize;
+    if (!xTicks.empty())
         bounds.height += 2 * fontSize;
-    }
     invalidLayout = false;
 }
 
