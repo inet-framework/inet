@@ -98,6 +98,17 @@ To run the simulation, use the ``run_mininet.sh`` script:
 
   $ ./run_mininet.sh
 
+.. note:: When starting Mininet, the following error might occur:
+   
+   .. code-block:: shell
+   
+      Exception: Please shut down the controller which is running on port 6653:
+      Active Internet connections (servers and established)
+      tcp        0      0 0.0.0.0:6653            0.0.0.0:*               LISTEN      1335/ovs-testcontro
+
+   If that happens, kill the controller process with ``sudo kill -9 <PID>``. In this case, the PID is 1335.
+
+
 When the simulations in Qtenv are loaded, make sure to start the receiver one
 first, and run both in Fast or Express mode. After the simulations are finished,
 exit the Mininet prompt with Ctrl-D to delete the virtual network
