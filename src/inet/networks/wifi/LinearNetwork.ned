@@ -7,7 +7,6 @@ package inet.networks.wifi;
 
 import inet.networks.base.WirelessNetworkBase;
 import inet.node.contract.INetworkNode;
-import inet.node.wireless.AccessPoint;
 
 network LinearNetwork extends WirelessNetworkBase
 {
@@ -15,7 +14,7 @@ network LinearNetwork extends WirelessNetworkBase
         client: <default("WirelessHost")> like INetworkNode {
             @display("p=350,200");
         }
-        ap: AccessPoint {
+        ap: <default("AccessPoint")> like INetworkNode {
             @display("p=550,200");
         }
         server: <default("WirelessHost")> like INetworkNode {
