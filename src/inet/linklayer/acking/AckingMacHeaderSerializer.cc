@@ -66,11 +66,12 @@ PcapLinkType AckingMacToEthernetPcapRecorderHelper::protocolToLinkType(const Pro
     return LINKTYPE_INVALID;
 }
 
-Packet *AckingMacToEthernetPcapRecorderHelper::tryConvertToLinkType(const Packet *packet, PcapLinkType pcapLinkType, const Protocol *protocol) const
+Packet *AckingMacToEthernetPcapRecorderHelper::tryConvertToLinkType(const Packet *packet, b frontOffset, b backOffset, PcapLinkType pcapLinkType, const Protocol *protocol) const
 {
 #if defined(INET_WITH_ETHERNET)
     if (*protocol == Protocol::ackingMac && pcapLinkType == LINKTYPE_ETHERNET) {
         auto newPacket = packet->dup();
+        const auto& frontPart = frontOffset != b(0) ? newPacket->removeAtFront(frontOffset) : nullptr;
         auto ackingHdr = newPacket->popAtFront<AckingMacHeader>();
         newPacket->trimFront();
         auto ethHeader = makeShared<EthernetMacHeader>();
@@ -79,6 +80,8 @@ Packet *AckingMacToEthernetPcapRecorderHelper::tryConvertToLinkType(const Packet
         ethHeader->setTypeOrLength(ackingHdr->getNetworkProtocol());
         newPacket->insertAtFront(ethHeader);
         newPacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
+        if (frontPart != nullptr)
+            newPacket->insertAtFront(frontPart);
         return newPacket;
     }
 #endif // defined(INET_WITH_ETHERNET)
