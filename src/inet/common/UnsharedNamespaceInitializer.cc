@@ -15,7 +15,7 @@
 
 namespace inet {
 
-Register_GlobalConfigOption(CFGID_UNSHARE_USER_NAMESPACE, "unshare-user-namespace", CFG_BOOL, "false", "Unshares the user namespace using the unshare() system call. The simulation continues running as the root user in the new user namespace. This allows creating new network namespaces and assign network resources without using sudo or setting capabilities for opp_run.");
+Register_GlobalConfigOption(CFGID_UNSHARE_NAMESPACES, "unshare-namespaces", CFG_BOOL, "false", "Unshares the user and network namespaces using the unshare() system call. The simulation continues running as the root user in the new user namespace. This allows creating new network namespaces and assign network resources without using sudo or setting capabilities for opp_run.");
 
 UnsharedNamespaceInitializer UnsharedNamespaceInitializer::singleton;
 
@@ -31,7 +31,7 @@ void UnsharedNamespaceInitializer::lifecycleEvent(SimulationLifecycleEventType e
     // TODO KLUDGE LF_ON_STARTUP removed
     if (eventType == LF_ON_STARTUP) {
         auto config = cSimulation::getActiveEnvir()->getConfig();
-        if (config->getAsBool(CFGID_UNSHARE_USER_NAMESPACE)) {
+        if (config->getAsBool(CFGID_UNSHARE_NAMESPACES)) {
             // unsharing the user namespace allows to switch to the root user
             // which in turn allows to freely create network namespaces for external processes, etc.
             unshareUserNamespace();
