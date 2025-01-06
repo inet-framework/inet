@@ -207,7 +207,7 @@ void PcapRecorder::writePacket(const Protocol *protocol, const Packet *packet, b
         emit(packetRecordedSignal, packet);
     }
     else {
-        if (auto convertedPacket = tryConvertToLinkType(packet, pcapLinkType, protocol)) {
+        if (auto convertedPacket = tryConvertToLinkType(packet, frontOffset, backOffset, pcapLinkType, protocol)) {
             pcapWriter->writePacket(simTime(), convertedPacket, b(0), b(0), direction, networkInterface, pcapLinkType);
             numRecorded++;
             emit(packetRecordedSignal, packet);
@@ -324,10 +324,10 @@ PcapLinkType PcapRecorder::protocolToLinkType(const Protocol *protocol) const
     return LINKTYPE_INVALID;
 }
 
-Packet *PcapRecorder::tryConvertToLinkType(const Packet *packet, PcapLinkType pcapLinkType, const Protocol *protocol) const
+Packet *PcapRecorder::tryConvertToLinkType(const Packet *packet, b frontOffset, b backOffset, PcapLinkType pcapLinkType, const Protocol *protocol) const
 {
     for (IHelper *helper : helpers) {
-        if (auto newPacket = helper->tryConvertToLinkType(packet, pcapLinkType, protocol))
+        if (auto newPacket = helper->tryConvertToLinkType(packet, frontOffset, backOffset, pcapLinkType, protocol))
             return newPacket;
     }
     return nullptr;

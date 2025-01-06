@@ -34,7 +34,7 @@ class INET_API PcapRecorder : public cSimpleModule, protected cListener, public 
         virtual bool matchesLinkType(PcapLinkType pcapLinkType, const Protocol *protocol) const = 0;
 
         /// Create a new Packet or return nullptr. The new packet contains the original packet converted to pcapLinkType format.
-        virtual Packet *tryConvertToLinkType(const Packet *packet, PcapLinkType pcapLinkType, const Protocol *protocol) const = 0;
+        virtual Packet *tryConvertToLinkType(const Packet *packet, b frontOffset, b backOffset, PcapLinkType pcapLinkType, const Protocol *protocol) const = 0;
     };
 
   protected:
@@ -79,7 +79,7 @@ class INET_API PcapRecorder : public cSimpleModule, protected cListener, public 
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
     virtual void recordPacket(const cPacket *msg, Direction direction, cComponent *source);
     virtual bool matchesLinkType(PcapLinkType pcapLinkType, const Protocol *protocol) const;
-    virtual Packet *tryConvertToLinkType(const Packet *packet, PcapLinkType pcapLinkType, const Protocol *protocol) const;
+    virtual Packet *tryConvertToLinkType(const Packet *packet, b frontOffset, b backOffset, PcapLinkType pcapLinkType, const Protocol *protocol) const;
     virtual PcapLinkType protocolToLinkType(const Protocol *protocol) const;
     virtual void writePacket(const Protocol *protocol, const Packet *packet, b frontOffset, b backOffset, Direction direction, NetworkInterface *networkInterface);
 };
