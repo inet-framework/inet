@@ -97,7 +97,8 @@ class MultipleChartTestTasks(MultipleTestTasks):
 
     def run_protected(self, **kwargs):
         multiple_simulation_task_results = self.multiple_simulation_tasks.run_protected(**kwargs)
-        return super().run_protected(**kwargs)
+        # avoid reusing the processes from the process pool because matplotlib can generate different images due to tight layout
+        return super().run_protected(**kwargs, maxtasksperchild=1)
 
 def get_chart_test_tasks(simulation_project=None, run_simulations=True, filter="showcases", working_directory_filter=None, chart_filter=None, exclude_chart_filter=None, **kwargs):
     """
@@ -207,7 +208,8 @@ class MultipleChartUpdateTasks(MultipleUpdateTasks):
 
     def run_protected(self, **kwargs):
         multiple_simulation_task_results = self.multiple_simulation_tasks.run_protected(**kwargs)
-        return super().run_protected(**kwargs)
+        # avoid reusing the processes from the process pool because matplotlib can generate different images due to tight layout
+        return super().run_protected(**kwargs, maxtasksperchild=1)
 
 def get_update_chart_tasks(simulation_project=None, run_simulations=True, filter=None, working_directory_filter=None, chart_filter=None, exclude_chart_filter=None, **kwargs):
     """
