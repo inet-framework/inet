@@ -60,7 +60,7 @@ void GateScheduleCanvasVisualizer::addGateVisualization(const GateVisualization 
     GateScheduleVisualizerBase::addGateVisualization(gateVisualization);
     auto gateCanvasVisualization = static_cast<const GateCanvasVisualization *>(gateVisualization);
     auto figure = gateCanvasVisualization->figure;
-    gateCanvasVisualization->networkNodeVisualization->addAnnotation(figure, figure->getBounds().getSize(), placementHint, placementPriority);
+    gateCanvasVisualization->networkNodeVisualization->addAnnotation(figure, figure->getBounds(), placementHint, placementPriority);
 }
 
 void GateScheduleCanvasVisualizer::removeGateVisualization(const GateVisualization *gateVisualization)

@@ -61,7 +61,7 @@ void QueueCanvasVisualizer::addQueueVisualization(const QueueVisualization *queu
     QueueVisualizerBase::addQueueVisualization(queueVisualization);
     auto queueCanvasVisualization = static_cast<const QueueCanvasVisualization *>(queueVisualization);
     auto figure = queueCanvasVisualization->figure;
-    queueCanvasVisualization->networkNodeVisualization->addAnnotation(figure, figure->getBounds().getSize(), placementHint, placementPriority);
+    queueCanvasVisualization->networkNodeVisualization->addAnnotation(figure, figure->getBounds(), placementHint, placementPriority);
 }
 
 void QueueCanvasVisualizer::removeQueueVisualization(const QueueVisualization *queueVisualization)
