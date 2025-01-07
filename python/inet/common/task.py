@@ -557,9 +557,13 @@ class MultipleTasks:
             if self.randomize:
                 tasks = random.sample(tasks, k=len(tasks))
             if self.concurrent:
-                pool_class = multiprocessing.pool.ThreadPool if self.scheduler == "thread" else (multiprocessing.Pool if self.scheduler == "process" else None)
                 try:
-                    pool = pool_class(multiprocessing.cpu_count())
+                    if self.scheduler == "thread":
+                        pool = multiprocessing.pool.ThreadPool(multiprocessing.cpu_count())
+                    elif self.scheduler == "process":
+                        pool = multiprocessing.Pool(multiprocessing.cpu_count(), **{k: v for k, v in kwargs.items() if k == "maxtasksperchild"})
+                    else:
+                        raise Exception("Unknown scheduler")
                     partially_applied_function = functools.partial(run_task_with_capturing_output, tasks=tasks, task_count=task_count, **dict(kwargs, keyboard_interrupt_handler=None))
                     map_results = pool.map_async(partially_applied_function, tasks, chunksize=self.chunksize)
                     task_results = map_results.get(0xFFFF)
