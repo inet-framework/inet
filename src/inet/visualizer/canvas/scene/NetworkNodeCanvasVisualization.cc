@@ -19,6 +19,16 @@ namespace visualizer {
 NetworkNodeCanvasVisualization::Annotation::Annotation(cFigure *figure, const cFigure::Point& size, Placement placementHint, double placementPriority) :
     figure(figure),
     bounds(cFigure::Rectangle(NaN, NaN, size.x, size.y)),
+    topLeft(0.0, 0.0),
+    placementHint(placementHint),
+    placementPriority(placementPriority)
+{
+}
+
+NetworkNodeCanvasVisualization::Annotation::Annotation(cFigure *figure, const cFigure::Point& topLeft, const cFigure::Point& size, Placement placementHint, double placementPriority) :
+    figure(figure),
+    bounds(cFigure::Rectangle(NaN, NaN, size.x, size.y)),
+    topLeft(topLeft),
     placementHint(placementHint),
     placementPriority(placementPriority)
 {
@@ -56,9 +66,9 @@ void NetworkNodeCanvasVisualization::refreshDisplay()
     }
 }
 
-void NetworkNodeCanvasVisualization::addAnnotation(cFigure *figure, cFigure::Point size, Placement placementHint, double placementPriority)
+void NetworkNodeCanvasVisualization::addAnnotation(cFigure *figure, cFigure::Rectangle bounds, Placement placementHint, double placementPriority)
 {
-    annotations.push_back(Annotation(figure, size, placementHint, placementPriority));
+    annotations.push_back(Annotation(figure, cFigure::Point(bounds.x, bounds.y), bounds.getSize(), placementHint, placementPriority));
     annotationFigure->addFigure(figure);
     isLayoutInvalid = true;
 }
@@ -327,7 +337,7 @@ void NetworkNodeCanvasVisualization::layout()
         // store position and rectangle
         annotation.bounds.x = bestRc.x + annotationSpacing / 2;
         annotation.bounds.y = bestRc.y + annotationSpacing / 2;
-        annotation.figure->setTransform(cFigure::Transform().translate(annotation.bounds.x, annotation.bounds.y));
+        annotation.figure->setTransform(cFigure::Transform().translate(annotation.bounds.x - annotation.topLeft.x, annotation.bounds.y - annotation.topLeft.y));
 
         // delete candidate points covered by best rc
         for (auto j = pts.begin(); j != pts.end();) {

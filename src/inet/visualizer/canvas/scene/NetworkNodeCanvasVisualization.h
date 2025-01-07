@@ -22,11 +22,13 @@ class INET_API NetworkNodeCanvasVisualization : public NetworkNodeVisualizerBase
       public:
         cFigure *figure;
         cFigure::Rectangle bounds;
+        cFigure::Point topLeft;
         Placement placementHint;
         double placementPriority;
 
       public:
         Annotation(cFigure *figure, const cFigure::Point& size, Placement placement, double placementPriority);
+        Annotation(cFigure *figure, const cFigure::Point& topLeft, const cFigure::Point& size, Placement placement, double placementPriority);
 
         static bool comparePlacementPriority(const Annotation& a1, const Annotation& a2);
     };
@@ -52,7 +54,7 @@ class INET_API NetworkNodeCanvasVisualization : public NetworkNodeVisualizerBase
     virtual cImageFigure *getImageFigure() { return imageFigure; }
 
     virtual int getNumAnnotations() const { return annotations.size(); }
-    virtual void addAnnotation(cFigure *figure, cFigure::Point size, Placement placement = PLACEMENT_ANY, double placementPriority = 0);
+    virtual void addAnnotation(cFigure *figure, cFigure::Rectangle bounds, Placement placement = PLACEMENT_ANY, double placementPriority = 0);
     virtual void removeAnnotation(cFigure *figure);
     virtual void removeAnnotation(int index);
     virtual void setAnnotationSize(cFigure *figure, cFigure::Point size);
