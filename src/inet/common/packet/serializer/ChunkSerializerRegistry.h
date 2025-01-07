@@ -8,6 +8,8 @@
 #ifndef __INET_CHUNKSERIALIZERREGISTRY_H
 #define __INET_CHUNKSERIALIZERREGISTRY_H
 
+#include <typeindex>
+
 #include "inet/common/packet/serializer/ChunkSerializer.h"
 
 namespace inet {
@@ -17,7 +19,7 @@ namespace inet {
 class INET_API ChunkSerializerRegistry
 {
   protected:
-    std::map<const std::type_info *, const ChunkSerializer *> serializers;
+    std::unordered_map<std::type_index, const ChunkSerializer *> serializers;
 
   public:
     ~ChunkSerializerRegistry();
