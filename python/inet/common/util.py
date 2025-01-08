@@ -82,21 +82,11 @@ def initialize_logging(log_level, external_command_log_level, log_file):
     handler = logging.StreamHandler()
     handler.setFormatter(formatter)
     logger = logging.getLogger()
-    logger.setLevel(log_level)
     logger.handlers = []
     logger.addHandler(handler)
-    logging.getLogger("make").setLevel(external_command_log_level)
-    logging.getLogger("opp_featuretool").setLevel(external_command_log_level)
-    logging.getLogger("opp_makemake").setLevel(external_command_log_level)
-    logging.getLogger("opp_run").setLevel(external_command_log_level)
-    logging.getLogger("opp_run_dbg").setLevel(external_command_log_level)
-    logging.getLogger("opp_run_release").setLevel(external_command_log_level)
-    logging.getLogger("opp_run_sanitize").setLevel(external_command_log_level)
-    logging.getLogger("opp_run_coverage").setLevel(external_command_log_level)
-    logging.getLogger("opp_run_profile").setLevel(external_command_log_level)
-    logging.getLogger("opp_test").setLevel(external_command_log_level)
     logging.addLevelName(STDOUT_LEVEL, "STDOUT")
     logging.addLevelName(STDERR_LEVEL, "STDERR")
+    set_logging_levels(log_level, external_command_log_level)
     _logging_initialized = True
 
 def ensure_logging_initialized(log_level, external_command_log_level, log_file):
@@ -109,6 +99,25 @@ def ensure_logging_initialized(log_level, external_command_log_level, log_file):
 def get_logging_formatter():
     logger = logging.getLogger()
     return logger.handlers[0].formatter
+
+def set_logging_levels(log_level, external_command_log_level="WARN"):
+    logger = logging.getLogger()
+    logger.setLevel(log_level)
+    logging.getLogger("make").setLevel(external_command_log_level)
+    logging.getLogger("opp_charttool").setLevel(external_command_log_level)
+    logging.getLogger("opp_eventlogtool").setLevel(external_command_log_level)
+    logging.getLogger("opp_featuretool").setLevel(external_command_log_level)
+    logging.getLogger("opp_msgtool").setLevel(external_command_log_level)
+    logging.getLogger("opp_nedtool").setLevel(external_command_log_level)
+    logging.getLogger("opp_scavetool").setLevel(external_command_log_level)
+    logging.getLogger("opp_makemake").setLevel(external_command_log_level)
+    logging.getLogger("opp_run").setLevel(external_command_log_level)
+    logging.getLogger("opp_run_dbg").setLevel(external_command_log_level)
+    logging.getLogger("opp_run_release").setLevel(external_command_log_level)
+    logging.getLogger("opp_run_sanitize").setLevel(external_command_log_level)
+    logging.getLogger("opp_run_coverage").setLevel(external_command_log_level)
+    logging.getLogger("opp_run_profile").setLevel(external_command_log_level)
+    logging.getLogger("opp_test").setLevel(external_command_log_level)
 
 def get_omnetpp_relative_path(path):
     return os.path.abspath(os.path.join(os.environ["__omnetpp_root_dir"], path)) if "__omnetpp_root_dir" in os.environ else None
