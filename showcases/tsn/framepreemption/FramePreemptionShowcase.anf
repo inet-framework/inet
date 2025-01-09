@@ -15,7 +15,7 @@
         <input pattern="results/RealisticPriorityQueueing-#0.vec"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/linechart.png" id="255609871" name="End-to-end delay, 1200-Byte packet length" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="255609871" name="End-to-end delay, 1200-Byte packet length" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -658,7 +658,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_format" value=""/>
             <property name="simplify" value="false"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="376220435" name="End-to-end delay, realistic packet length" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="376220435" name="End-to-end delay, realistic packet length" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -1311,7 +1311,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="2032539938" name="End-to-end delay, realistic packet length zoomed" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="2032539938" name="End-to-end delay, realistic packet length zoomed" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -1958,7 +1958,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="176728346" name="Time average of queue length" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="176728346" name="Time average of queue length" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
