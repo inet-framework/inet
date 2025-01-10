@@ -889,14 +889,7 @@ void Gptp::synchronize()
 
     newLocalTimeAtTimeSync = clock->getClockTime();
 
-    switch(servoClock->getClockState()) {
-    case ServoClockBase::ClockState::INIT:
-        changeSyncState(SyncState::UNSYNCED);
-        break;
-    case ServoClockBase::ClockState::SYNCED:
-        changeSyncState(SyncState::SYNCED);
-        break;
-    }
+    updateSyncStateAndRescheduleSyncTimeout(servoClock);
 
     /************** Rate ratio calculation *************************************
      * It is calculated based on interval between two successive Sync messages *
@@ -930,17 +923,28 @@ void Gptp::synchronize()
     syncIngressTimestampLast = syncIngressTimestamp;
     preciseOriginTimestampLast = preciseOriginTimestamp;
 
+    emit(receivedRateRatioSignal, receivedRateRatio);
+    emit(gmRateRatioSignal, gmRateRatio);
+    emit(localTimeSignal, CLOCKTIME_AS_SIMTIME(newLocalTimeAtTimeSync));
+    emit(timeDifferenceSignal, CLOCKTIME_AS_SIMTIME(newLocalTimeAtTimeSync) - now);
+}
+void Gptp::updateSyncStateAndRescheduleSyncTimeout(const ServoClockBase *servoClock)
+{
+    switch(servoClock->getClockState()) {
+    case ServoClockBase::INIT:
+        changeSyncState(UNSYNCED);
+        break;
+    case ServoClockBase::SYNCED:
+        changeSyncState(SYNCED);
+        break;
+    }
+
     if (selfMsgSyncTimeout->isScheduled()) {
         rescheduleClockEventAfter(par("syncTimeout"), selfMsgSyncTimeout);
     }
     else if (!isGM()) {
         scheduleClockEventAfter(par("syncTimeout"), selfMsgSyncTimeout);
     }
-
-    emit(receivedRateRatioSignal, receivedRateRatio);
-    emit(gmRateRatioSignal, gmRateRatio);
-    emit(localTimeSignal, CLOCKTIME_AS_SIMTIME(newLocalTimeAtTimeSync));
-    emit(timeDifferenceSignal, CLOCKTIME_AS_SIMTIME(newLocalTimeAtTimeSync) - now);
 }
 
 void Gptp::changeSyncState(SyncState state) {

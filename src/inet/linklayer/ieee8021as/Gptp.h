@@ -207,6 +207,7 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
                                                                      PortIdentity bReceiverIdentity);
     void changeSyncState(SyncState state);
     void handleSyncTimeout(cMessage *pMessage);
+    void updateSyncStateAndRescheduleSyncTimeout(const ServoClockBase *servoClock);
 };
 
 } // namespace inet
