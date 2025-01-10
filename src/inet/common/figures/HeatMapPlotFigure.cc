@@ -408,7 +408,14 @@ void HeatMapPlotFigure::layout()
     if (!opp_isempty(labelFigure->getText()))
         bounds = rectangleUnion(bounds, labelFigure->getBounds());
     bounds = rectangleUnion(bounds, xAxisLabelFigure->getBounds());
-    bounds = rectangleUnion(bounds, yAxisLabelFigure->getBounds());
+
+    // TODO cLabelFigure::getBounds() ignores 'angle' value at calculation
+    // Uses the cAbstractTextFigure::getBounds() instead of cLabelFigure::getBounds() and calculates the 90 deg rotation manually.
+    // Usage of cAbstractTextFigure::getBounds() prevents the duplicated rotation when the cLabelFigure::getBounds() will be fixed in omnetpp.
+    Rectangle lb = yAxisLabelFigure->cAbstractTextFigure::getBounds();
+    Rectangle lbr(lb.x + lb.width / 2 - lb.height, lb.y + lb.height - lb.width / 2, lb.height, lb.width); // rotated yAxisLabel
+    bounds = rectangleUnion(bounds, lbr);
+
     if (!std::isnan(yTickSize))
         bounds.width += 2 * fontSize;
     if (!std::isnan(xTickSize))
