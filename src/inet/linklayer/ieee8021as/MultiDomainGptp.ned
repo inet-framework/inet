@@ -27,6 +27,7 @@ module MultiDomainGptp like IGptp
         string interfaceTableModule; // Relative module path of the interface table
         int numDomains; // Number of time synchronization domains
         string gptpNodeType; // @enum("GptpNodeType"): MASTER_NODE, BRIDGE_NODE, SLAVE_NODE
+        bool hasHotStandby = default(true);
         @display("i=block/app");
     gates:
         input socketIn;
@@ -46,7 +47,8 @@ module MultiDomainGptp like IGptp
             classifierClass = default("inet::GptpDomainNumberClassifier");
             @display("p=300,350");
         }
-        hotstandby: HotStandby {
+        hotstandby: HotStandby if hasHotStandby {
+            clockModule = default(absPath(parent.clockModule));
             @display("p=450,350");
         }
 

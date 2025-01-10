@@ -57,6 +57,8 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     double receivedRateRatio = 1.0;
     double neighborRateRatio = 1.0;
 
+    SyncState syncState = SyncState::UNSYNCED;
+
     uint16_t sequenceId = 0;
     // == Propagation Delay Measurement Procedure ==
     // Timestamps corresponding to the PDelayRequest and PDelayResponse mechanism
@@ -107,6 +109,7 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     ClockEvent *selfMsgSync = nullptr;
     ClockEvent *selfMsgDelayReq = nullptr;
     ClockEvent *selfMsgAnnounce = nullptr;
+    ClockEvent *selfMsgSyncTimeout = nullptr;
 
     std::set<GptpReqAnswerEvent *> reqAnswerEvents;
 
@@ -126,7 +129,7 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
 
   public:
     static const MacAddress GPTP_MULTICAST_ADDRESS;
-    static simsignal_t gptpSyncSuccessfulSignal;
+    static simsignal_t gptpSyncStateChanged;
 
     uint8_t getDomainNumber() const {return this->domainNumber;};
     clocktime_t getSyncInterval() const {return syncInterval;};
@@ -141,6 +144,8 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     virtual void handleMessage(cMessage *msg) override;
 
     virtual void handleSelfMessage(cMessage *msg);
+
+    virtual void handleParameterChange(const char *name) override;
 
     virtual void handleClockJump(ServoClockBase::ClockJumpDetails *clockJumpDetails);
 
@@ -194,12 +199,14 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     void calculateGmRatio();
     void executeBmca();
     void initPorts();
-    void scheduleMessageOnTopologyChange();
+    virtual void scheduleMessageOnTopologyChange();
     void handleAnnounceTimeout(cMessage *pMessage);
     bool isGM() const { return gptpNodeType == MASTER_NODE || (gptpNodeType == BMCA_NODE && slavePortId == -1); };
-    Gptp::BmcaPriorityVectorComparisonResult compareAnnounceMessages(GptpAnnounce *a, GptpAnnounce *b,
+    static Gptp::BmcaPriorityVectorComparisonResult compareAnnounceMessages(GptpAnnounce *a, GptpAnnounce *b,
                                                                      PortIdentity aReceiverIdentity,
                                                                      PortIdentity bReceiverIdentity);
+    void changeSyncState(SyncState state);
+    void handleSyncTimeout(cMessage *pMessage);
 };
 
 } // namespace inet

@@ -1,0 +1,9 @@
+<scenario>
+	<!-- Master clock goes offline, secondary domain takes over -->
+    <set-channel-param t="3.1s" src-module="tsnClock1" dest-module="tsnSwitch1" par="disabled" value="true"/>
+    <set-channel-param t="7.1s" src-module="tsnClock1" dest-module="tsnSwitch1" par="disabled" value="false"/>
+    
+    <!-- Network breaks in half -->
+    <set-channel-param t="10.1s" src-module="tsnSwitch1" dest-module="tsnSwitch2" par="disabled" value="true"/>
+    <set-channel-param t="14.1s" src-module="tsnSwitch1" dest-module="tsnSwitch2" par="disabled" value="false"/>
+</scenario>

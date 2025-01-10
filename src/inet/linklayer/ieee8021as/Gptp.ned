@@ -36,8 +36,9 @@ simple Gptp like IGptp
         double pdelayInitialOffset @unit(s) = default(0s); // Time of first link delay measurement
         double announceInitialOffset @unit(s) = default(0s); // Time of first Announce message (BMCA mode only)
         double announceTimeout @unit(s) = default(announceInterval * 3); // Timeout for Announce messages (BMCA mode only)
+        double syncTimeout @unit(s) = default(syncInterval * 3); // When to assume we are out of sync
 
-        int grandmasterPriority1 = default(255); // Priority1 value for BMCA
+        int grandmasterPriority1 @mutable = default(255); // Priority1 value for BMCA
 
         // following parameters are used to schedule follow_up and pdelay_resp messages.
         // These numbers must be large enough to prevent creating a queue in the MAC layer.
@@ -56,7 +57,7 @@ simple Gptp like IGptp
         @signal[residenceTime](type=simtime_t);
         @signal[correctionFieldIngress](type=simtime_t);
         @signal[correctionFieldEgress](type=simtime_t);
-        @signal[gptpSyncSuccessfulSignal](type=simtime_t);
+        @signal[gptpSyncStateChanged](type=int);
         @signal[packetDropped](type=inet::Packet);
         @statistic[localTime](record=vector; interpolationmode=linear);
         @statistic[timeDifference](record=vector; interpolationmode=linear);

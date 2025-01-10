@@ -17,6 +17,11 @@ namespace inet {
 class ServoClockBase : public OscillatorBasedClock, public IScriptable
 {
   public:
+    enum ClockState {
+        INIT,
+        SYNCED
+    };
+
     struct ClockJumpDetails : public cObject {
         clocktime_t oldClockTime;
         clocktime_t newClockTime;
@@ -31,6 +36,7 @@ class ServoClockBase : public OscillatorBasedClock, public IScriptable
                                          // means the clock compensates 100 microseconds for every second in clock time
     // 100 ppm value means the oscillator tick length is compensated to be smaller by a factor of (1 / (1 + 100 / 1E+6))
     // than the actual tick length measured in clock time
+    ClockState clockState = INIT;
 
   protected:
     virtual void rescheduleClockEvents(clocktime_t oldClockTime, clocktime_t newClockTime);
@@ -45,6 +51,7 @@ class ServoClockBase : public OscillatorBasedClock, public IScriptable
     virtual void jumpClockTo(clocktime_t newClockTime, bool notifyListeners = true);
     virtual void setOscillatorCompensation(ppm oscillatorCompensationValue);
     virtual void resetOscillator() const;
+    virtual ClockState getClockState() const { return clockState; }
 };
 
 } /* namespace inet */

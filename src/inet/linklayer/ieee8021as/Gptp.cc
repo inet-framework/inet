@@ -33,7 +33,7 @@ simsignal_t Gptp::peerDelaySignal = cComponent::registerSignal("peerDelay");
 simsignal_t Gptp::residenceTimeSignal = cComponent::registerSignal("residenceTime");
 simsignal_t Gptp::correctionFieldIngressSignal = cComponent::registerSignal("correctionFieldIngress");
 simsignal_t Gptp::correctionFieldEgressSignal = cComponent::registerSignal("correctionFieldEgress");
-simsignal_t Gptp::gptpSyncSuccessfulSignal = cComponent::registerSignal("gptpSyncSuccessfulSignal");
+simsignal_t Gptp::gptpSyncStateChanged = cComponent::registerSignal("gptpSyncStateChanged");
 
 // MAC address:
 //   01-80-C2-00-00-0E for Announce and Signaling messages, for Sync, Follow_Up,
@@ -54,7 +54,7 @@ Gptp::~Gptp()
     if (selfMsgAnnounce)
         cancelAndDeleteClockEvent(selfMsgAnnounce);
     for (auto &reqAnswerEvent : reqAnswerEvents)
-        delete reqAnswerEvent;
+        cancelAndDeleteClockEvent(reqAnswerEvent);
     for (auto &announce : receivedAnnounces)
         delete announce.second;
     for (auto &announceTimeout : announceTimeouts) {
@@ -193,6 +193,10 @@ void Gptp::scheduleMessageOnTopologyChange()
             cancelAndDeleteClockEvent(selfMsgDelayReq);
             selfMsgDelayReq = nullptr;
         }
+        if (selfMsgSyncTimeout) {
+            cancelAndDeleteClockEvent(selfMsgSyncTimeout);
+            selfMsgSyncTimeout = nullptr;
+        }
     }
 
     /* Only grandmaster in the domain can initialize the synchronization message
@@ -205,6 +209,10 @@ void Gptp::scheduleMessageOnTopologyChange()
         clocktime_t scheduleSync = par("syncInitialOffset");
         preciseOriginTimestamp = clock->getClockTime() + scheduleSync;
         scheduleClockEventAfter(scheduleSync, selfMsgSync);
+        changeSyncState(SYNCED);
+    } else {
+        selfMsgSyncTimeout = new ClockEvent("selfMsgSyncTimeout", GPTP_SELF_MSG_SYNC_TIMEOUT);
+        scheduleClockEventAfter(par("syncTimeout"), selfMsgSyncTimeout);
     }
     if (slavePortId != -1) {
         // Schedule Pdelay_Req message is sent by slave port
@@ -256,6 +264,9 @@ void Gptp::handleSelfMessage(cMessage *msg)
         break;
     case GPTP_SELF_MSG_ANNOUNCE_TIMEOUT:
         handleAnnounceTimeout(msg);
+        break;
+    case GPTP_SELF_MSG_SYNC_TIMEOUT:
+        handleSyncTimeout(msg);
         break;
     default:
         throw cRuntimeError("Unknown self message (%s)%s, kind=%d", msg->getClassName(), msg->getName(),
@@ -878,6 +889,15 @@ void Gptp::synchronize()
 
     newLocalTimeAtTimeSync = clock->getClockTime();
 
+    switch(servoClock->getClockState()) {
+    case ServoClockBase::ClockState::INIT:
+        changeSyncState(SyncState::UNSYNCED);
+        break;
+    case ServoClockBase::ClockState::SYNCED:
+        changeSyncState(SyncState::SYNCED);
+        break;
+    }
+
     /************** Rate ratio calculation *************************************
      * It is calculated based on interval between two successive Sync messages *
      ***************************************************************************/
@@ -910,12 +930,25 @@ void Gptp::synchronize()
     syncIngressTimestampLast = syncIngressTimestamp;
     preciseOriginTimestampLast = preciseOriginTimestamp;
 
+    if (selfMsgSyncTimeout->isScheduled()) {
+        rescheduleClockEventAfter(par("syncTimeout"), selfMsgSyncTimeout);
+    }
+    else if (!isGM()) {
+        scheduleClockEventAfter(par("syncTimeout"), selfMsgSyncTimeout);
+    }
+
     emit(receivedRateRatioSignal, receivedRateRatio);
     emit(gmRateRatioSignal, gmRateRatio);
     emit(localTimeSignal, CLOCKTIME_AS_SIMTIME(newLocalTimeAtTimeSync));
     emit(timeDifferenceSignal, CLOCKTIME_AS_SIMTIME(newLocalTimeAtTimeSync) - now);
-    emit(gptpSyncSuccessfulSignal,
-         CLOCKTIME_AS_SIMTIME(newLocalTimeAtTimeSync)); // TODO: check if the time stamp is correct
+}
+
+void Gptp::changeSyncState(SyncState state) {
+    auto prevSyncState = syncState;
+    syncState = state;
+    if (prevSyncState != syncState) {
+        emit(gptpSyncStateChanged, syncState);
+    }
 }
 
 void Gptp::calculateGmRatio()
@@ -1117,6 +1150,11 @@ void Gptp::handleAnnounceTimeout(cMessage *pMessage)
     executeBmca();
 }
 
+void Gptp::handleSyncTimeout(cMessage *pMessage) {
+    changeSyncState(SyncState::UNSYNCED);
+    simTime();
+}
+
 void Gptp::handleTransmissionStartedSignal(const GptpBase *gptp, cComponent *source)
 {
     int portId = getContainingNicModule(check_and_cast<cModule *>(source))->getInterfaceId();
@@ -1191,6 +1229,16 @@ void Gptp::handleClockJump(ServoClockBase::ClockJumpDetails *clockJumpDetails)
     // the gPTP module, which to my knowledge is currently not configurable in the INET modules.
     // Should this behavior change in the future, this timestamping adjustment mechanism needs to be changed as well to
     // somehow also adjust the timestamps already attaches as tags to the gPTP packets.
+}
+void Gptp::handleParameterChange(const char *name) {
+    // TODO: Maybe one could make more paremeters mutable (e.g. syncInterval might be interesting for some people)
+
+    // Compare if parameter is grandmasterPriority1
+    if (!strcmp(name, "grandmasterPriority1")) {
+        // Update local priority vector
+        localPriorityVector.grandmasterPriority1 = par("grandmasterPriority1");
+        executeBmca();
+    }
 }
 
 } // namespace inet

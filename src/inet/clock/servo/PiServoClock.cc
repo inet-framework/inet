@@ -44,6 +44,7 @@ void PiServoClock::adjustClockTo(clocktime_t newClockTime) {
             EV_INFO << "Offset is too large, resetting phase\n";
             EV_INFO << "Offset: " << offsetUs << " maxOffset: " << offsetThresholdUs << "\n";
             phase = 0;
+            clockState = INIT;
         }
 
         switch (phase) {
@@ -71,6 +72,7 @@ void PiServoClock::adjustClockTo(clocktime_t newClockTime) {
 
             setOscillatorCompensation(drift);
 
+            clockState = SYNCED;
             phase = 2;
             break;
         case 2:

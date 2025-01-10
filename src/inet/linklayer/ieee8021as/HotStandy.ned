@@ -21,5 +21,5 @@ simple HotStandby
         @display("i=block/blackboard");
         @class(HotStandby);
         @selfMessageKinds(inet::GptpSelfMsgKind);
-        double delta @unit(s) = default(100us);
+        string clockModule = default("");
 }

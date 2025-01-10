@@ -79,7 +79,12 @@ enum GptpSelfMsgKind {
     GPTP_SELF_MSG_PDELAY_REQ = 103;
     GPTP_SELF_MSG_ANNOUNCE = 104;
     GPTP_SELF_MSG_ANNOUNCE_TIMEOUT = 105;
-    GPTP_CLOCK_DOWN_MSG = 106;
+    GPTP_SELF_MSG_SYNC_TIMEOUT = 106;
+}
+
+enum SyncState {
+    UNSYNCED = 0;
+    SYNCED = 1;
 }
 
 // ieee802.1AS-2020 10.6.2.2.8: flags (Octet2)

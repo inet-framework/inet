@@ -21,6 +21,7 @@ void InstantServoClock::initialize(int stage)
         }
         offsetPrev = -1;
         localPrev = -1;
+        clockState = INIT;
     }
 }
 
@@ -45,6 +46,7 @@ void InstantServoClock::adjustClockTo(clocktime_t newClockTime)
             drift += ppm(1e6 * (offsetPrev - offset) / (localPrev - local));
             EV_INFO << "Drift: " << drift << "\n";
             setOscillatorCompensation(drift);
+            clockState = SYNCED;
         }
 
         offsetPrev = offset;

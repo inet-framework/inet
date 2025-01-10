@@ -12,30 +12,23 @@
 #include "inet/common/clock/ClockUserModuleBase.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee8021as/Gptp.h"
+#include "inet/clock/model/MultiClock.h"
 
 namespace inet {
 
 class INET_API HotStandby : public ClockUserModuleBase, public cListener
 {
   protected:
-    std::map<uint8_t , clocktime_t> gptpSyncTime; // store each gptp sync time
-    ClockEvent *standByMsg = nullptr;
-    const Gptp *gptpModule = nullptr;
-    clocktime_t delta;
-    clocktime_t timer = 0;
+    std::map<int, SyncState> syncStates; // store each gptp sync time
+    MultiClock *multiClock;
 
-  public:
-    virtual ~HotStandby();
+  protected:
     virtual void initialize(int stage) override;
-    virtual void receiveSignal(cComponent *source, simsignal_t simSignal, const SimTime& t, cObject *details) override;
-    void handleGptpSyncSuccessfulSignal(const Gptp *gptp, const SimTime& t);
+    virtual void receiveSignal(cComponent *source, simsignal_t simSignal, intval_t t, cObject *details) override;
+    void handleSyncStateChanged(const Gptp *gptp, SyncState syncState);
     virtual int numInitStages() const override { return NUM_INIT_STAGES; };
-    virtual void handleMessage(cMessage *msg) override;
-    void dropDomain(uint8_t domainNumber);
 };
 
 } // namespace inet
 
 #endif
-
-;
