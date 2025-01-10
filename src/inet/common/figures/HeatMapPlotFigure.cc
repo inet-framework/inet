@@ -198,7 +198,9 @@ void HeatMapPlotFigure::setYTickSize(double size)
 
 void HeatMapPlotFigure::setYTickCount(int count)
 {
-    if (count != 0 && std::isfinite(minY) && std::isfinite(maxY))
+    if (count == 0)
+        setYTickSize(NaN);
+    else if(std::isfinite(minY) && std::isfinite(maxY))
         setYTickSize((maxY - minY) / (count - 1));
     else
         setYTickSize(INFINITY);
@@ -219,7 +221,9 @@ void HeatMapPlotFigure::setXTickSize(double size)
 
 void HeatMapPlotFigure::setXTickCount(int count)
 {
-    if (count != 0 && std::isfinite(minX) && std::isfinite(maxX))
+    if (count == 0)
+        setXTickSize(NaN);
+    else if (std::isfinite(minX) && std::isfinite(maxX))
         setXTickSize((maxX - minX) / (count - 1));
     else
         setXTickSize(INFINITY);
@@ -405,9 +409,9 @@ void HeatMapPlotFigure::layout()
         bounds = rectangleUnion(bounds, labelFigure->getBounds());
     bounds = rectangleUnion(bounds, xAxisLabelFigure->getBounds());
     bounds = rectangleUnion(bounds, yAxisLabelFigure->getBounds());
-    if (!yTicks.empty())
+    if (!std::isnan(yTickSize))
         bounds.width += 2 * fontSize;
-    if (!xTicks.empty())
+    if (!std::isnan(xTickSize))
         bounds.height += 2 * fontSize;
     invalidLayout = false;
 }

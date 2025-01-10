@@ -106,7 +106,9 @@ void PlotFigure::setYTickSize(double size)
 
 void PlotFigure::setYTickCount(int count)
 {
-    if (count != 0 && std::isfinite(minY) && std::isfinite(maxY))
+    if (count == 0)
+        setYTickSize(NaN);
+    else if (std::isfinite(minY) && std::isfinite(maxY))
         setYTickSize((maxY - minY) / (count - 1));
     else
         setYTickSize(INFINITY);
@@ -140,7 +142,9 @@ void PlotFigure::setXTickSize(double size)
 
 void PlotFigure::setXTickCount(int count)
 {
-    if (count != 0 && std::isfinite(minX) && std::isfinite(maxX))
+    if (count == 0)
+        setXTickSize(NaN);
+    else if(std::isfinite(minX) && std::isfinite(maxX))
         setXTickSize((maxX - minX) / (count - 1));
     else
         setXTickSize(INFINITY);
@@ -331,9 +335,9 @@ void PlotFigure::layout()
         bounds = rectangleUnion(bounds, labelFigure->getBounds());
     bounds = rectangleUnion(bounds, xAxisLabelFigure->getBounds());
     bounds = rectangleUnion(bounds, yAxisLabelFigure->getBounds());
-    if (!yTicks.empty())
+    if (!std::isnan(yTickSize))
         bounds.width += 2 * fontSize;
-    if (!xTicks.empty())
+    if (!std::isnan(xTickSize))
         bounds.height += 2 * fontSize;
     invalidLayout = false;
 }
@@ -406,7 +410,7 @@ void PlotFigure::redrawXTicks()
     double maxX = std::isnan(timeWindow) ? this->maxX : simTime().dbl();
 
     double shifting = 0;
-    if (!std::isnan(timeWindow)) {
+    if (!std::isnan(timeWindow) && !std::isnan(xTickSize)) {
         double fraction = std::abs(fmod((minX / xTickSize), 1));
         shifting = xTickSize * (minX < 0 ? fraction : 1 - fraction);
         // if fraction == 0 then shifting == xTickSize therefore don't have to shift the X ticks
