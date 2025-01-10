@@ -928,6 +928,7 @@ void Gptp::synchronize()
     emit(localTimeSignal, CLOCKTIME_AS_SIMTIME(newLocalTimeAtTimeSync));
     emit(timeDifferenceSignal, CLOCKTIME_AS_SIMTIME(newLocalTimeAtTimeSync) - now);
 }
+
 void Gptp::updateSyncStateAndRescheduleSyncTimeout(const ServoClockBase *servoClock)
 {
     switch(servoClock->getClockState()) {
