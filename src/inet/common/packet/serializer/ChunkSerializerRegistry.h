@@ -9,6 +9,7 @@
 #define __INET_CHUNKSERIALIZERREGISTRY_H
 
 #include <typeindex>
+#include <unordered_map>
 
 #include "inet/common/packet/serializer/ChunkSerializer.h"
 
