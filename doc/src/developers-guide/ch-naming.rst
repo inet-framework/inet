@@ -50,7 +50,7 @@ C++ Classes
 -----------
 
 -  \*Chunk: packet data representation
--  \*Serializer: protocol specific header and message serialiers
+-  \*Serializer: protocol specific header and message serializers
 -  \*ProtocolDissector: protocol specific header and message dissectors
 -  \*ProtocolPrinter: protocol specific header and message printers
 -  \*Signal: physical layer signals (in contrast with binary data)
