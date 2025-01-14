@@ -22,14 +22,6 @@ class ServoClockBase : public OscillatorBasedClock, public IScriptable
         SYNCED
     };
 
-    struct ClockJumpDetails : public cObject {
-        clocktime_t oldClockTime;
-        clocktime_t newClockTime;
-    };
-
-  public:
-    static simsignal_t clockJumpSignal;
-
   protected:
     OverdueClockEventHandlingMode defaultOverdueClockEventHandlingMode = UNSPECIFIED;
     ppm oscillatorCompensation = ppm(0); // 0 means no compensation, higher value means faster clock, e.g. 100 ppm value

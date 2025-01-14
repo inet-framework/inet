@@ -19,8 +19,15 @@ namespace inet {
 class INET_API ClockBase : public cSimpleModule, public IClock, public StringFormat::IDirectiveResolver, public cListener
 {
   public:
-    static simsignal_t timeChangedSignal;
-    static simsignal_t timeDifferenceToReferenceSignal;
+    struct ClockJumpDetails : public cObject {
+        clocktime_t oldClockTime;
+        clocktime_t newClockTime;
+    };
+
+  public:
+    static simsignal_t timeChangedSignal; // Called every time there is a change in the speed of the clock oscillator
+    static simsignal_t timeDifferenceToReferenceSignal; // Called every time there is a change in the speed of the clock oscillator
+    static simsignal_t timeJumpedSignal; // Only called when the clock performs an immediate jump to a new time
     ModuleRefByPar<IClock> referenceClockModule;
 
   protected:

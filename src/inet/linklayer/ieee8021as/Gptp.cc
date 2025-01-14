@@ -57,9 +57,11 @@ Gptp::~Gptp()
         cancelAndDeleteClockEvent(reqAnswerEvent);
     for (auto &announce : receivedAnnounces)
         delete announce.second;
-    for (auto &announceTimeout : announceTimeouts) {
+    for (auto &announceTimeout : announceTimeouts)
         cancelAndDeleteClockEvent(announceTimeout.second);
-    }
+    if (selfMsgSyncTimeout)
+        cancelAndDeleteClockEvent(selfMsgSyncTimeout);
+
     delete bestAnnounce;
 }
 
@@ -106,8 +108,10 @@ void Gptp::initialize(int stage)
             scheduleClockEventAfter(par("announceInitialOffset"), selfMsgAnnounce);
         }
 
-        auto servoClock = check_and_cast<ClockBase *>(clock.get());
-        servoClock->subscribe(ServoClockBase::clockJumpSignal, this);
+        // We cast to cComponent, because clock can also be a MultiClock which does not extend from ClockBase,
+        //  but also implements the clockJumpSignal
+        auto servoClock = check_and_cast<cComponent *>(clock.get());
+        servoClock->subscribe(ClockBase::timeJumpedSignal, this);
 
         WATCH(meanLinkDelay);
     }
@@ -210,7 +214,8 @@ void Gptp::scheduleMessageOnTopologyChange()
         preciseOriginTimestamp = clock->getClockTime() + scheduleSync;
         scheduleClockEventAfter(scheduleSync, selfMsgSync);
         changeSyncState(SYNCED);
-    } else {
+    }
+    else {
         selfMsgSyncTimeout = new ClockEvent("selfMsgSyncTimeout", GPTP_SELF_MSG_SYNC_TIMEOUT);
         scheduleClockEventAfter(par("syncTimeout"), selfMsgSyncTimeout);
     }
@@ -536,7 +541,8 @@ void Gptp::executeBmca()
         // Received an Announce message, but best clock is still the same
     }
     else if (bestAnnounce && bestAnnounce->getPriorityVector() == bestAnnounceCurr->getPriorityVector() &&
-             slavePortId == bestAnnounceReceiverIdentityCurr.portNumber) {
+             slavePortId == bestAnnounceReceiverIdentityCurr.portNumber)
+    {
         // Same priority vector but newer Announce, no topology change because priority vector is the same
         // Store the new Announce
         delete bestAnnounce;
@@ -622,8 +628,8 @@ void Gptp::executeBmca()
             }
 
             // Clock class >= 128
-            auto compareLocalToBest = compareAnnounceMessages(ownAnnounce, bestAnnounce, ownPortIdentity,
-                                                              bestAnnounceReceiverIdentityCurr);
+            auto compareLocalToBest =
+                compareAnnounceMessages(ownAnnounce, bestAnnounce, ownPortIdentity, bestAnnounceReceiverIdentityCurr);
 
             if (compareLocalToBest == A_BETTER_THAN_B || compareLocalToBest == A_BETTER_THAN_B_BY_TOPOLOGY) {
                 // Local better than best => Master
@@ -639,8 +645,8 @@ void Gptp::executeBmca()
                 continue;
             }
 
-            auto compareBestToPort = compareAnnounceMessages(
-                bestAnnounce, portAnnounce, bestAnnounceReceiverIdentityCurr, receiverPortIdentity);
+            auto compareBestToPort = compareAnnounceMessages(bestAnnounce, portAnnounce,
+                                                             bestAnnounceReceiverIdentityCurr, receiverPortIdentity);
             if (compareBestToPort == A_BETTER_THAN_B_BY_TOPOLOGY) {
                 passivePortIds.insert(portId);
             }
@@ -931,7 +937,7 @@ void Gptp::synchronize()
 
 void Gptp::updateSyncStateAndRescheduleSyncTimeout(const ServoClockBase *servoClock)
 {
-    switch(servoClock->getClockState()) {
+    switch (servoClock->getClockState()) {
     case ServoClockBase::INIT:
         changeSyncState(UNSYNCED);
         break;
@@ -948,7 +954,8 @@ void Gptp::updateSyncStateAndRescheduleSyncTimeout(const ServoClockBase *servoCl
     }
 }
 
-void Gptp::changeSyncState(SyncState state) {
+void Gptp::changeSyncState(SyncState state)
+{
     auto prevSyncState = syncState;
     syncState = state;
     if (prevSyncState != syncState) {
@@ -1102,9 +1109,9 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj
 {
     Enter_Method("%s", cComponent::getSignalName(simSignal));
 
-    auto servoClock = check_and_cast<ClockBase *>(clock.get());
+    auto clockBase = check_and_cast<cComponent *>(clock.get());
 
-    if (simSignal == ServoClockBase::clockJumpSignal && obj == servoClock) {
+    if (simSignal == ClockBase::timeJumpedSignal && obj == clockBase) {
         auto clockJumpDetails = check_and_cast<ServoClockBase::ClockJumpDetails *>(details);
         handleClockJump(clockJumpDetails);
     }
@@ -1155,7 +1162,8 @@ void Gptp::handleAnnounceTimeout(cMessage *pMessage)
     executeBmca();
 }
 
-void Gptp::handleSyncTimeout(cMessage *pMessage) {
+void Gptp::handleSyncTimeout(cMessage *pMessage)
+{
     changeSyncState(SyncState::UNSYNCED);
     simTime();
 }
@@ -1235,7 +1243,8 @@ void Gptp::handleClockJump(ServoClockBase::ClockJumpDetails *clockJumpDetails)
     // Should this behavior change in the future, this timestamping adjustment mechanism needs to be changed as well to
     // somehow also adjust the timestamps already attaches as tags to the gPTP packets.
 }
-void Gptp::handleParameterChange(const char *name) {
+void Gptp::handleParameterChange(const char *name)
+{
     // TODO: Maybe one could make more paremeters mutable (e.g. syncInterval might be interesting for some people)
 
     // Compare if parameter is grandmasterPriority1

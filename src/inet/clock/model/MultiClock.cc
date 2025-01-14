@@ -18,6 +18,7 @@ void MultiClock::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         activeClock = check_and_cast<IClock *>(getSubmodule("clock", par("activeClockIndex")));
         subscribe(ClockBase::timeChangedSignal, this);
+        subscribe(ClockBase::timeJumpedSignal, this);
     }
 }
 
@@ -35,6 +36,9 @@ void MultiClock::receiveSignal(cComponent *source, int signal, const simtime_t& 
     if (signal == ClockBase::timeChangedSignal) {
         if (check_and_cast<IClock *>(source) == activeClock)
             emit(ClockBase::timeChangedSignal, time, details);
+    } else if (signal == ClockBase::timeJumpedSignal) {
+        if (check_and_cast<IClock *>(source) == activeClock)
+            emit(ClockBase::timeJumpedSignal, details);
     }
     else
         throw cRuntimeError("Unknown signal");

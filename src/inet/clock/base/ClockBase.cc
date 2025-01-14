@@ -12,6 +12,7 @@ namespace inet {
 
 simsignal_t ClockBase::timeChangedSignal = cComponent::registerSignal("timeChanged");
 simsignal_t ClockBase::timeDifferenceToReferenceSignal = cComponent::registerSignal("timeDifferenceToReference");
+simsignal_t ClockBase::timeJumpedSignal = cComponent::registerSignal("timeJumped");
 
 void ClockBase::initialize(int stage)
 {

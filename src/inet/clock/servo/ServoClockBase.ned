@@ -14,7 +14,6 @@ module ServoClockBase extends OscillatorBasedClock
 {
     parameters:
         string defaultOverdueClockEventHandlingMode @enum("execute","skip","error") = default("error");
-        @signal[clockJump]();
         @class(ServoClockBase);
 }
 

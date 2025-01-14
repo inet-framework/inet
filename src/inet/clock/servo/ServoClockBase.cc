@@ -9,7 +9,6 @@
 namespace inet {
 
 Register_Abstract_Class(ServoClockBase);
-simsignal_t ServoClockBase::clockJumpSignal = cComponent::registerSignal("clockJump");
 
 void ServoClockBase::initialize(int stage)
 {
@@ -126,7 +125,7 @@ void ServoClockBase::jumpClockTo(clocktime_t newClockTime, bool notifyListeners)
         timeJumpDetails.oldClockTime = oldClockTime;
         timeJumpDetails.newClockTime = newClockTime;
         if (notifyListeners) {
-            emit(clockJumpSignal, this, &timeJumpDetails);
+            emit(timeJumpedSignal, this, &timeJumpDetails);
         }
         emit(timeChangedSignal, newClockTime.asSimTime());
     }
