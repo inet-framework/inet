@@ -12,8 +12,8 @@ packet data filter is configured to send packets which contain 0 to output 0, an
 that contain 1 to output 1.
 
 .. figure:: media/ContentBasedClassifier.png
-   :width: 80%
    :align: center
+   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network ContentBasedClassifierTutorialStep

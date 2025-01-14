@@ -14,8 +14,8 @@ in this network, but the server has 10 initial tokens to process packets; the to
 Packets are consumed by a passive packet sink (:ned:`PassivePacketSink`).
 
 .. figure:: media/TokenBasedServer.png
-   :width: 80%
    :align: center
+   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network TokenBasedServerTutorialStep
