@@ -15,7 +15,6 @@ the weights [1,3,2], thus the classifier forwards 1, 3, and 2 packet(s)
 to the three sinks in one round.
 
 .. figure:: media/WrrClassifier.png
-   :width: 80%
    :align: center
 
 .. literalinclude:: ../QueueingTutorial.ned

@@ -11,7 +11,6 @@ active packet sink (:ned:`ActivePacketSink`), and provided by a passive packet s
    a filter (:ned:`ContentBasedFilter`). Every second packet is dropped.
 
 .. figure:: media/Filter2.png
-   :width: 80%
    :align: center
 
 .. literalinclude:: ../QueueingTutorial.ned

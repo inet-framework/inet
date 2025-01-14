@@ -10,7 +10,6 @@ The packets are pushed into a drop-tail queue (:ned:`DropTailQueue`) with a capa
 The packets are popped from the queue at random intervals by an active packet sink (:ned:`ActivePacketSink`).
 
 .. figure:: media/DropTailQueue.png
-   :width: 90%
    :align: center
 
 .. literalinclude:: ../QueueingTutorial.ned
