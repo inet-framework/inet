@@ -23,9 +23,11 @@ an active packet sink (:ned:`ActivePacketSink`).
 
 .. figure:: media/CompoundQueue.png
    :align: center
+   :width: 100%
 
 .. figure:: media/CompoundQueue_Queue.png
    :align: center
+   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network CompoundPacketQueueTutorialStep

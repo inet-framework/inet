@@ -13,6 +13,7 @@ that contain 1 to output 1.
 
 .. figure:: media/ContentBasedClassifier.png
    :align: center
+   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network ContentBasedClassifierTutorialStep

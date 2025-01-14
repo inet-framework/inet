@@ -12,6 +12,7 @@ by a passive packet source (:ned:`PassivePacketSource`) and consumed by a passiv
 
 .. figure:: media/Server.png
    :align: center
+   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network ServerTutorialStep

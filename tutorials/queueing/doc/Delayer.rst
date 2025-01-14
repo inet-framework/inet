@@ -9,6 +9,7 @@ amount of time. Finally, the packets are pushed into a passive packet sink (:ned
 
 .. figure:: media/Delayer.png
    :align: center
+   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network DelayerTutorialStep

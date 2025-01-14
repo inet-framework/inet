@@ -11,6 +11,7 @@ Tokens are generated at random intervals by a :ned:`TimeBasedTokenGenerator`.
 
 .. figure:: media/TimeBasedTokenGenerator.png
    :align: center
+   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network TimeBasedTokenGeneratorTutorialStep

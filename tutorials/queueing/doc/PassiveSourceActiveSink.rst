@@ -11,6 +11,7 @@ can be popped from the module.
 
 .. figure:: media/PassiveSourceActiveSink.png
    :align: center
+   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network ProviderCollectorTutorialStep

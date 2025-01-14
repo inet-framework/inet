@@ -17,6 +17,7 @@ from the three providers in one round.
 
 .. figure:: media/Scheduler.png
    :align: center
+   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network WrrSchedulerTutorialStep

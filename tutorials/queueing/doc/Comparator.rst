@@ -20,6 +20,7 @@ a series of ordered sequences.
 
 .. figure:: media/Comparator.png
    :align: center
+   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network ComparatorTutorialStep
@@ -45,8 +46,10 @@ without the comparator function:
 
 .. figure:: media/nocomparator.png
    :align: center
+   :width: 100%
 
 And this one using the comparator function (head at the top, tail at the bottom):
 
 .. figure:: media/withcomparator.png
    :align: center
+   :width: 100%

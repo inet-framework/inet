@@ -12,6 +12,7 @@ forwards packets.
 
 .. figure:: media/Multiplexer.png
    :align: center
+   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network MultiplexerTutorialStep

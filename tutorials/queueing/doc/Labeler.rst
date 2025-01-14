@@ -25,6 +25,7 @@ and the ``large`` text label to 2-byte packets. The labeler pushes packets into 
 
 .. figure:: media/Labeler.png
    :align: center
+   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network LabelerTutorialStep

@@ -16,6 +16,7 @@ state of the Markov process.
 
 .. figure:: media/MarkovScheduler.png
    :align: center
+   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network MarkovSchedulerTutorialStep

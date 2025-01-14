@@ -13,6 +13,7 @@ which observes the queue and generates a token whenever the queue is empty.
 
 .. figure:: media/QueueBasedTokenGenerator.png
    :align: center
+   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network QueueBasedTokenGenerator

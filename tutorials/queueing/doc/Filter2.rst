@@ -12,6 +12,7 @@ active packet sink (:ned:`ActivePacketSink`), and provided by a passive packet s
 
 .. figure:: media/Filter2.png
    :align: center
+   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network Filter2TutorialStep

@@ -13,6 +13,7 @@ an infinite amount of packets would be generated and dropped in zero simulation 
 
 .. figure:: media/SignalBasedTokenGenerator.png
    :align: center
+   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network SignalBasedTokenGenerator

@@ -13,6 +13,7 @@ pops packets from the queue at random intervals.
 
 .. figure:: media/PacketQueue.png
    :align: center
+   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network PacketQueueTutorialStep
