@@ -2625,7 +2625,6 @@ inet.scave.plot.plot_vectors_separate(df, props)
 
 utils.postconfigure_plot(props)
 
-plt.subplots_adjust(left = 0.05, right = 0.99, top = 0.9, bottom = 0.1, wspace=0.1, hspace=0.1)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)]]></script>

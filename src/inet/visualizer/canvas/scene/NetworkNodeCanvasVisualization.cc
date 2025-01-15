@@ -19,6 +19,16 @@ namespace visualizer {
 NetworkNodeCanvasVisualization::Annotation::Annotation(cFigure *figure, const cFigure::Point& size, Placement placementHint, double placementPriority) :
     figure(figure),
     bounds(cFigure::Rectangle(NaN, NaN, size.x, size.y)),
+    figureOffset(0.0, 0.0),
+    placementHint(placementHint),
+    placementPriority(placementPriority)
+{
+}
+
+NetworkNodeCanvasVisualization::Annotation::Annotation(cFigure *figure, const cFigure::Rectangle& bounds,Placement placementHint, double placementPriority) :
+    figure(figure),
+    bounds(cFigure::Rectangle(NaN, NaN, bounds.width, bounds.height)),
+    figureOffset(-bounds.x, -bounds.y),
     placementHint(placementHint),
     placementPriority(placementPriority)
 {
@@ -56,9 +66,9 @@ void NetworkNodeCanvasVisualization::refreshDisplay()
     }
 }
 
-void NetworkNodeCanvasVisualization::addAnnotation(cFigure *figure, cFigure::Point size, Placement placementHint, double placementPriority)
+void NetworkNodeCanvasVisualization::addAnnotation(cFigure *figure, cFigure::Rectangle bounds, Placement placementHint, double placementPriority)
 {
-    annotations.push_back(Annotation(figure, size, placementHint, placementPriority));
+    annotations.push_back(Annotation(figure, bounds, placementHint, placementPriority));
     annotationFigure->addFigure(figure);
     isLayoutInvalid = true;
 }
@@ -233,14 +243,12 @@ void NetworkNodeCanvasVisualization::layout()
     std::sort(annotations.begin(), annotations.end(), Annotation::comparePlacementPriority);
 
     // delete all annotation positions
-    for (auto it = annotations.begin(); it != annotations.end(); it++) {
-        auto& annotation = *it;
+    for (auto& annotation : annotations) {
         annotation.bounds.x = NaN;
         annotation.bounds.y = NaN;
     }
 
-    for (auto it = annotations.begin(); it != annotations.end(); it++) {
-        auto& annotation = *it;
+    for (auto& annotation : annotations) {
         if (!annotation.figure->isVisible())
             continue;
         cFigure::Point rs = cFigure::Point(annotation.bounds.width + annotationSpacing, annotation.bounds.height + annotationSpacing);
@@ -329,7 +337,7 @@ void NetworkNodeCanvasVisualization::layout()
         // store position and rectangle
         annotation.bounds.x = bestRc.x + annotationSpacing / 2;
         annotation.bounds.y = bestRc.y + annotationSpacing / 2;
-        annotation.figure->setTransform(cFigure::Transform().translate(annotation.bounds.x, annotation.bounds.y));
+        annotation.figure->setTransform(cFigure::Transform().translate(annotation.bounds.x + annotation.figureOffset.x, annotation.bounds.y + annotation.figureOffset.y));
 
         // delete candidate points covered by best rc
         for (auto j = pts.begin(); j != pts.end();) {

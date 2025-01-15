@@ -8,15 +8,19 @@
 #include "Gptp.h"
 
 #include "GptpPacket_m.h"
+
+#include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/clock/ClockUserModuleBase.h"
 #include "inet/clock/servo/PiServoClock.h"
 #include "inet/clock/servo/ServoClockBase.h"
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/common/clock/ClockUserModuleBase.h"
+#include "inet/common/packet/dissector/PacketDissector.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ethernet/common/Ethernet.h"
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
+#include "inet/linklayer/ieee8021as/GptpPacket_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/physicallayer/wired/ethernet/EthernetPhyHeader_m.h"
 
@@ -1092,17 +1096,11 @@ void Gptp::processPdelayRespFollowUp(Packet *packet, const GptpPdelayRespFollowU
 
 const GptpBase *Gptp::extractGptpHeader(Packet *packet)
 {
-    auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
-    if (*protocol != Protocol::ethernetPhy)
-        return nullptr;
-
-    const auto &ethPhyHeader = packet->peekAtFront<physicallayer::EthernetPhyHeader>();
-    const auto &ethMacHeader = packet->peekDataAt<EthernetMacHeader>(ethPhyHeader->getChunkLength());
-    if (ethMacHeader->getTypeOrLength() != ETHERTYPE_GPTP)
-        return nullptr;
-
-    b offset = ethPhyHeader->getChunkLength() + ethMacHeader->getChunkLength();
-    return packet->peekDataAt<GptpBase>(offset).get();
+    PacketDissector::ChunkFinder chunkFinder(&Protocol::gptp);
+    PacketDissector packetDissector(ProtocolDissectorRegistry::getInstance(), chunkFinder);
+    packetDissector.dissectPacket(packet);
+    const auto& chunk = staticPtrCast<const GptpBase>(chunkFinder.getChunk());
+    return chunk != nullptr ? chunk.get() : nullptr;
 }
 
 void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj, cObject *details)

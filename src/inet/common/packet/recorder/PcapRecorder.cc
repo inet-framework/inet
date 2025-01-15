@@ -12,13 +12,19 @@
 
 #include "inet/common/DirectionTag_m.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/ProtocolTag_m.h"
-#include "inet/common/StringFormat.h"
-#include "inet/common/packet/recorder/PcapWriter.h"
 #include "inet/common/packet/recorder/PcapngWriter.h"
+#include "inet/common/packet/recorder/PcapWriter.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/stlutils.h"
+#include "inet/common/StringFormat.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/InterfaceTable.h"
+
+#ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
+#include "inet/physicallayer/common/Signal.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IReception.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmission.h"
+#endif
 
 namespace inet {
 
@@ -37,6 +43,23 @@ PcapRecorder::~PcapRecorder()
 
 PcapRecorder::PcapRecorder() : cSimpleModule()
 {
+}
+
+bool PcapRecorder::shouldDissectProtocolDataUnit(const Protocol *protocol)
+{
+    return !contains(dumpProtocols, protocol);
+}
+
+void PcapRecorder::visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol)
+{
+    if (!contains(dumpProtocols, protocol)) {
+        if (dumpProtocol == nullptr)
+            frontOffset += chunk->getChunkLength();
+        else
+            backOffset += chunk->getChunkLength();
+    }
+    else
+        dumpProtocol = protocol;
 }
 
 void PcapRecorder::initialize()
@@ -162,13 +185,41 @@ void PcapRecorder::receiveSignal(cComponent *source, simsignal_t signalID, cObje
     Enter_Method("%s", cComponent::getSignalName(signalID));
 
     if (pcapWriter->isOpen()) {
-        cPacket *packet = dynamic_cast<cPacket *>(obj);
-
-        if (packet) {
-            auto i = signalList.find(signalID);
-            Direction direction = (i != signalList.end()) ? i->second : DIRECTION_UNDEFINED;
+        auto i = signalList.find(signalID);
+        ASSERT(i != signalList.end());
+        Direction direction = i->second;
+        if (auto packet = dynamic_cast<cPacket *>(obj))
             recordPacket(packet, direction, source);
+#ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
+        else if (auto signal = dynamic_cast<const physicallayer::Signal *>(obj))
+            recordPacket(signal->getEncapsulatedPacket(), direction, source);
+        else if (auto transmission = dynamic_cast<const physicallayer::ITransmission *>(obj))
+            recordPacket(transmission->getPacket(), direction, source);
+        else if (auto reception = dynamic_cast<const physicallayer::IReception *>(obj))
+            recordPacket(reception->getTransmission()->getPacket(), direction, source);
+#endif
+    }
+}
+
+void PcapRecorder::writePacket(const Protocol *protocol, const Packet *packet, b frontOffset, b backOffset, Direction direction, NetworkInterface *networkInterface)
+{
+    auto pcapLinkType = protocolToLinkType(protocol);
+    if (pcapLinkType == LINKTYPE_INVALID)
+        throw cRuntimeError("Cannot determine the PCAP link type from protocol '%s'", protocol->getName());
+    if (matchesLinkType(pcapLinkType, protocol)) {
+        pcapWriter->writePacket(simTime(), packet, frontOffset, backOffset, direction, networkInterface, pcapLinkType);
+        numRecorded++;
+        emit(packetRecordedSignal, packet);
+    }
+    else {
+        if (auto convertedPacket = tryConvertToLinkType(packet, frontOffset, backOffset, pcapLinkType, protocol)) {
+            pcapWriter->writePacket(simTime(), convertedPacket, b(0), b(0), direction, networkInterface, pcapLinkType);
+            numRecorded++;
+            emit(packetRecordedSignal, packet);
+            delete convertedPacket;
         }
+        else
+            throw cRuntimeError("The protocol '%s' doesn't match PCAP link type %d", protocol->getName(), pcapLinkType);
     }
 }
 
@@ -206,26 +257,17 @@ void PcapRecorder::recordPacket(const cPacket *cpacket, Direction direction, cCo
 
             const auto& packetProtocolTag = packet->getTag<PacketProtocolTag>();
             auto protocol = packetProtocolTag->getProtocol();
-            if (packetProtocolTag->getFrontOffset() == b(0) && packetProtocolTag->getBackOffset() == b(0) && contains(dumpProtocols, protocol)) {
-                auto pcapLinkType = protocolToLinkType(protocol);
-                if (pcapLinkType == LINKTYPE_INVALID)
-                    throw cRuntimeError("Cannot determine the PCAP link type from protocol '%s'", protocol->getName());
-
-                if (matchesLinkType(pcapLinkType, protocol)) {
-                    pcapWriter->writePacket(simTime(), packet, direction, networkInterface, pcapLinkType);
-                    numRecorded++;
-                    emit(packetRecordedSignal, packet);
-                }
-                else {
-                    if (auto convertedPacket = tryConvertToLinkType(packet, pcapLinkType, protocol)) {
-                        pcapWriter->writePacket(simTime(), convertedPacket, direction, networkInterface, pcapLinkType);
-                        numRecorded++;
-                        emit(packetRecordedSignal, packet);
-                        delete convertedPacket;
-                    }
-                    else
-                        throw cRuntimeError("The protocol '%s' doesn't match PCAP link type %d", protocol->getName(), pcapLinkType);
-                }
+            if (contains(dumpProtocols, protocol))
+                writePacket(protocol, packet, packetProtocolTag->getFrontOffset(), packetProtocolTag->getBackOffset(), direction, networkInterface);
+            else {
+                frontOffset = b(0);
+                backOffset = b(0);
+                dumpProtocol = nullptr;
+                Packet dissectedPacket(*packet);
+                PacketDissector packetDissector(ProtocolDissectorRegistry::getInstance(), *this);
+                packetDissector.dissectPacket(&dissectedPacket);
+                if (dumpProtocol != nullptr)
+                    writePacket(dumpProtocol, packet, frontOffset, backOffset, direction, networkInterface);
             }
         }
     }
@@ -287,10 +329,10 @@ PcapLinkType PcapRecorder::protocolToLinkType(const Protocol *protocol) const
     return LINKTYPE_INVALID;
 }
 
-Packet *PcapRecorder::tryConvertToLinkType(const Packet *packet, PcapLinkType pcapLinkType, const Protocol *protocol) const
+Packet *PcapRecorder::tryConvertToLinkType(const Packet *packet, b frontOffset, b backOffset, PcapLinkType pcapLinkType, const Protocol *protocol) const
 {
     for (IHelper *helper : helpers) {
-        if (auto newPacket = helper->tryConvertToLinkType(packet, pcapLinkType, protocol))
+        if (auto newPacket = helper->tryConvertToLinkType(packet, frontOffset, backOffset, pcapLinkType, protocol))
             return newPacket;
     }
     return nullptr;

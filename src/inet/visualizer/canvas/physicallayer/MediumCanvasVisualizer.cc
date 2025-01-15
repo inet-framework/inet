@@ -125,7 +125,7 @@ void MediumCanvasVisualizer::initialize(int stage)
                     powerDensityMapFigure->setPlotSize(cFigure::Point(powerDensityMapFigureWidth, powerDensityMapFigureHeight), cFigure::Point(powerDensityMapPixmapWidth, powerDensityMapPixmapHeight));
                     // TODO center on node to align in space coordinates
                     powerDensityMapFigure->refreshDisplay();
-                    networkNodeVisualization->addAnnotation(powerDensityMapFigure, powerDensityMapFigure->getPlotSize(), PLACEMENT_CENTER_CENTER, -1);
+                    networkNodeVisualization->addAnnotation(powerDensityMapFigure, powerDensityMapFigure->getBounds(), PLACEMENT_CENTER_CENTER, -1);
                     powerDensityMapFigures[networkNode->getId()] = powerDensityMapFigure;
                 }
                 if (displaySpectrums) {
@@ -143,7 +143,7 @@ void MediumCanvasVisualizer::initialize(int stage)
                     spectrumFigure->setYValueFormat("%.3g");
                     spectrumFigure->setPlotSize(cFigure::Point(spectrumFigureWidth, spectrumFigureHeight));
                     spectrumFigure->refreshDisplay();
-                    networkNodeVisualization->addAnnotation(spectrumFigure, spectrumFigure->getPlotSize(), spectrumPlacementHint, spectrumPlacementPriority);
+                    networkNodeVisualization->addAnnotation(spectrumFigure, spectrumFigure->getBounds(), spectrumPlacementHint, spectrumPlacementPriority);
                     spectrumFigures[networkNode->getId()] = spectrumFigure;
                 }
                 if (displaySpectrograms) {
@@ -158,7 +158,7 @@ void MediumCanvasVisualizer::initialize(int stage)
                     spectrogramFigure->invertYAxis();
                     spectrogramFigure->setPlotSize(cFigure::Point(spectrogramFigureWidth, spectrogramFigureHeight), cFigure::Point(spectrogramPixmapWidth, spectrogramPixmapHeight));
                     spectrogramFigure->refreshDisplay();
-                    networkNodeVisualization->addAnnotation(spectrogramFigure, spectrogramFigure->getPlotSize(), spectrogramPlacementHint, spectrogramPlacementPriority);
+                    networkNodeVisualization->addAnnotation(spectrogramFigure, spectrogramFigure->getBounds(), spectrogramPlacementHint, spectrogramPlacementPriority);
                     spectrogramFigures[networkNode->getId()] = spectrogramFigure;
                 }
                 if (displayPowerDensityMaps || displaySpectrums || displaySpectrograms)
@@ -954,7 +954,7 @@ void MediumCanvasVisualizer::handleRadioAdded(const IRadio *radio)
                 iconFigure->setAnchor(cFigure::ANCHOR_NW);
                 auto labelFigure = signalDepartureFigure->getLabelFigure();
                 labelFigure->setPosition(iconFigure->getBounds().getSize() / 2);
-                networkNodeVisualization->addAnnotation(signalDepartureFigure, signalDepartureFigure->getBounds().getSize(), signalDeparturePlacementHint, signalDeparturePlacementPriority);
+                networkNodeVisualization->addAnnotation(signalDepartureFigure, signalDepartureFigure->getBounds(), signalDeparturePlacementHint, signalDeparturePlacementPriority);
                 setSignalDepartureFigure(radio, signalDepartureFigure);
             }
             if (displaySignalArrivals) {
@@ -968,7 +968,7 @@ void MediumCanvasVisualizer::handleRadioAdded(const IRadio *radio)
                 iconFigure->setAnchor(cFigure::ANCHOR_NW);
                 auto labelFigure = signalArrivalFigure->getLabelFigure();
                 labelFigure->setPosition(iconFigure->getBounds().getSize() / 2);
-                networkNodeVisualization->addAnnotation(signalArrivalFigure, signalArrivalFigure->getBounds().getSize(), signalArrivalPlacementHint, signalArrivalPlacementPriority);
+                networkNodeVisualization->addAnnotation(signalArrivalFigure, signalArrivalFigure->getBounds(), signalArrivalPlacementHint, signalArrivalPlacementPriority);
                 setSignalArrivalFigure(radio, signalArrivalFigure);
             }
         }

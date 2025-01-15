@@ -118,11 +118,11 @@ void RadioCanvasVisualizer::addRadioVisualization(const RadioVisualization *radi
     RadioVisualizerBase::addRadioVisualization(radioVisualization);
     auto radioCanvasVisualization = static_cast<const RadioCanvasVisualization *>(radioVisualization);
     if (displayRadioMode)
-        radioCanvasVisualization->networkNodeVisualization->addAnnotation(radioCanvasVisualization->radioModeFigure, radioCanvasVisualization->radioModeFigure->getSize(), placementHint, placementPriority);
+        radioCanvasVisualization->networkNodeVisualization->addAnnotation(radioCanvasVisualization->radioModeFigure, radioCanvasVisualization->radioModeFigure->getBounds(), placementHint, placementPriority);
     if (displayReceptionState)
-        radioCanvasVisualization->networkNodeVisualization->addAnnotation(radioCanvasVisualization->receptionStateFigure, radioCanvasVisualization->receptionStateFigure->getSize(), placementHint, placementPriority);
+        radioCanvasVisualization->networkNodeVisualization->addAnnotation(radioCanvasVisualization->receptionStateFigure, radioCanvasVisualization->receptionStateFigure->getBounds(), placementHint, placementPriority);
     if (displayTransmissionState)
-        radioCanvasVisualization->networkNodeVisualization->addAnnotation(radioCanvasVisualization->transmissionStateFigure, radioCanvasVisualization->transmissionStateFigure->getSize(), placementHint, placementPriority);
+        radioCanvasVisualization->networkNodeVisualization->addAnnotation(radioCanvasVisualization->transmissionStateFigure, radioCanvasVisualization->transmissionStateFigure->getBounds(), placementHint, placementPriority);
     if (displayAntennaLobes) {
         radioCanvasVisualization->networkNodeVisualization->addFigure(radioCanvasVisualization->antennaLobeFigure);
         radioCanvasVisualization->networkNodeVisualization->addFigure(radioCanvasVisualization->antennaLobeUnitGainFigure);

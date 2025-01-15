@@ -147,6 +147,7 @@ bool ExtEthernetTapDevice::notify(int fd)
         Packet *packet = new Packet(nullptr, makeShared<BytesChunk>(buffer + 4, nread - 4));
         auto ethernetFcs = makeShared<EthernetFcs>();
         ethernetFcs->setFcsMode(FCS_COMPUTED); // TODO get fcsMode from NED parameter
+        ethernetFcs->setFcs(computeEthernetFcs(packet, FCS_COMPUTED));
         packet->insertAtBack(ethernetFcs);
         packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
         packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);

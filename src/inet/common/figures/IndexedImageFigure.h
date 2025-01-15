@@ -69,6 +69,8 @@ class INET_API IndexedImageFigure : public cGroupFigure, public inet::IIndicator
 
     Anchor getAnchor() const;
     void setAnchor(Anchor anchor);
+
+    Rectangle getBounds() const;
 };
 
 } // namespace inet

@@ -111,8 +111,6 @@ plt.xticks([6,9,12,18,24,36,48,54])
 
 ax2.set_zorder(0)
 
-plt.tight_layout()
-
 ax = plt.gca()
 handles, labels = ax.get_legend_handles_labels()
 inet.scave.plot.create_custom_legend(props)

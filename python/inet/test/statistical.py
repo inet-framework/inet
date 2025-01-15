@@ -23,6 +23,7 @@ from inet.test.fingerprint import *
 from inet.test.simulation import *
 
 _logger = logging.getLogger(__name__)
+_append_args = ["--**.param-recording=false", "--output-scalar-file=${resultdir}/${inifile}-${configname}-#${repetition}.sca", "--output-vector-file=${resultdir}/${inifile}-${configname}-#${repetition}.vec"]
 
 def _read_scalar_result_file(file_name):
     df = read_result_files(file_name, include_fields_as_scalars=True)
@@ -35,6 +36,32 @@ def _write_diff_file(a_file_name, b_file_name, diff_file_name):
     with open(diff_file_name, "w") as file:
         subprocess.call(diff_command, stdout=file)
 
+def _remove_attr_lines(file_path):
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+
+    # Variables to track state
+    new_lines = []
+    in_attr_block = False
+    attr_block_found = False
+
+    for line in lines:
+        if line.startswith('attr '):
+            if not attr_block_found:
+                if not in_attr_block:
+                    in_attr_block = True
+                new_lines.append(line)
+            else:
+                in_attr_block = False
+        else:
+            if in_attr_block:
+                attr_block_found = True
+            in_attr_block = False
+            new_lines.append(line)
+
+    with open(file_path, 'w') as file:
+        file.writelines(new_lines)
+
 class StatisticalTestTask(SimulationTestTask):
     def __init__(self, simulation_config=None, run_number=0, name="statistical test", task_result_class=SimulationTestTaskResult, **kwargs):
         super().__init__(simulation_task=SimulationTask(simulation_config=simulation_config, run_number=run_number, name=name, **kwargs), task_result_class=task_result_class, **kwargs)
@@ -42,16 +69,21 @@ class StatisticalTestTask(SimulationTestTask):
         self.locals.pop("self")
         self.kwargs = kwargs
 
-    def get_scalar_file_name(self):
+    def get_result_file_name(self, extension):
         simulation_config = self.simulation_task.simulation_config
-        return f"{simulation_config.ini_file}-{simulation_config.config}-#{self.simulation_task.run_number}.sca"
+        return f"{simulation_config.ini_file}-{simulation_config.config}-#{self.simulation_task.run_number}.{extension}"
 
     def check_simulation_task_result(self, simulation_task_result, result_name_filter=None, exclude_result_name_filter=None, result_module_filter=None, exclude_result_module_filter=None, full_match=False, **kwargs):
         simulation_config = self.simulation_task.simulation_config
         simulation_project = simulation_config.simulation_project
         working_directory = simulation_config.working_directory
-        current_scalar_result_file_name = simulation_project.get_full_path(os.path.join(working_directory, "results", self.get_scalar_file_name()))
-        stored_scalar_result_file_name = simulation_project.get_full_path(os.path.join(simulation_project.statistics_folder, working_directory, self.get_scalar_file_name()))
+        current_scalar_result_file_name = simulation_project.get_full_path(os.path.join(working_directory, "results", self.get_result_file_name("sca")))
+        current_vector_result_file_name = simulation_project.get_full_path(os.path.join(working_directory, "results", self.get_result_file_name("vec")))
+        if os.path.exists(current_vector_result_file_name):
+            run_command_with_logging(["opp_scavetool", "x", "--type", "sth", "-w", current_scalar_result_file_name, current_vector_result_file_name, "-o", current_scalar_result_file_name])
+            os.remove(current_vector_result_file_name)
+        _remove_attr_lines(current_scalar_result_file_name)
+        stored_scalar_result_file_name = simulation_project.get_full_path(os.path.join(simulation_project.statistics_folder, working_directory, self.get_result_file_name("sca")))
         _logger.debug(f"Reading result file {current_scalar_result_file_name}")
         current_df = _read_scalar_result_file(current_scalar_result_file_name)
         scalar_result_diff_file_name = re.sub(r".sca$", ".diff", stored_scalar_result_file_name)
@@ -121,7 +153,7 @@ def run_statistical_tests(**kwargs):
         an object that contains a list of :py:class:`SimulationTestTaskResult` objects. Each object describes the result of running one test task.
     """
     multiple_statistical_test_tasks = get_statistical_test_tasks(**kwargs)
-    return multiple_statistical_test_tasks.run(append_args=["--**.param-recording=false", "--**.vector-recording=false", "--output-scalar-file=${resultdir}/${inifile}-${configname}-#${repetition}.sca"], **kwargs)
+    return multiple_statistical_test_tasks.run(append_args=_append_args, **kwargs)
 
 class StatisticalResultsUpdateTask(SimulationUpdateTask):
     def __init__(self, simulation_config=None, run_number=0, name="statistical results update", **kwargs):
@@ -130,9 +162,9 @@ class StatisticalResultsUpdateTask(SimulationUpdateTask):
         self.locals.pop("self")
         self.kwargs = kwargs
 
-    def get_scalar_file_name(self):
+    def get_result_file_name(self, extension):
         simulation_config = self.simulation_task.simulation_config
-        return f"{simulation_config.ini_file}-{simulation_config.config}-#{self.simulation_task.run_number}.sca"
+        return f"{simulation_config.ini_file}-{simulation_config.config}-#{self.simulation_task.run_number}.{extension}"
 
     def run_protected(self, **kwargs):
         simulation_config = self.simulation_task.simulation_config
@@ -142,7 +174,7 @@ class StatisticalResultsUpdateTask(SimulationUpdateTask):
         os.makedirs(target_results_directory, exist_ok=True)
         update_result = super().run_protected(**kwargs)
         if update_result.result == "INSERT" or update_result.result == "UPDATE":
-            stored_scalar_result_file_name = simulation_project.get_full_path(os.path.join(working_directory, "results", self.get_scalar_file_name()))
+            stored_scalar_result_file_name = simulation_project.get_full_path(os.path.join(working_directory, "results", self.get_result_file_name("sca")))
             shutil.copy(stored_scalar_result_file_name, target_results_directory)
         return update_result
 
@@ -150,8 +182,13 @@ class StatisticalResultsUpdateTask(SimulationUpdateTask):
         simulation_config = self.simulation_task.simulation_config
         simulation_project = simulation_config.simulation_project
         working_directory = simulation_config.working_directory
-        current_scalar_result_file_name = simulation_project.get_full_path(os.path.join(working_directory, "results", self.get_scalar_file_name()))
-        stored_scalar_result_file_name = simulation_project.get_full_path(os.path.join(simulation_project.statistics_folder, working_directory, self.get_scalar_file_name()))
+        current_scalar_result_file_name = simulation_project.get_full_path(os.path.join(working_directory, "results", self.get_result_file_name("sca")))
+        current_vector_result_file_name = simulation_project.get_full_path(os.path.join(working_directory, "results", self.get_result_file_name("vec")))
+        if os.path.exists(current_vector_result_file_name):
+            run_command_with_logging(["opp_scavetool", "x", "--type", "sth", "-w", current_scalar_result_file_name, current_vector_result_file_name, "-o", current_scalar_result_file_name])
+            os.remove(current_vector_result_file_name)
+        _remove_attr_lines(current_scalar_result_file_name)
+        stored_scalar_result_file_name = simulation_project.get_full_path(os.path.join(simulation_project.statistics_folder, working_directory, self.get_result_file_name("sca")))
         _logger.debug(f"Reading result file {current_scalar_result_file_name}")
         current_df = _read_scalar_result_file(current_scalar_result_file_name)
         scalar_result_diff_file_name = re.sub(r".sca$", ".diff", stored_scalar_result_file_name)
@@ -195,4 +232,4 @@ def update_statistical_results(sim_time_limit=get_statistical_test_sim_time_limi
         an object that contains a list of :py:class:`UpdateTaskResult` objects. Each object describes the result of running one update task.
     """
     multiple_update_statistical_result_tasks = get_update_statistical_result_tasks(sim_time_limit=sim_time_limit, **kwargs)
-    return multiple_update_statistical_result_tasks.run(sim_time_limit=sim_time_limit, append_args=["--**.param-recording=false", "--**.vector-recording=false", "--output-scalar-file=${resultdir}/${inifile}-${configname}-#${repetition}.sca"], **kwargs)
+    return multiple_update_statistical_result_tasks.run(sim_time_limit=sim_time_limit, append_args=_append_args, **kwargs)

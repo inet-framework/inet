@@ -20,7 +20,7 @@ namespace ieee80211 {
  * Used in 802.11 infrastructure mode: handles management frames for
  * an access point (AP). See corresponding NED file for a detailed description.
  */
-class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase, protected cListener
+class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase
 {
   public:
     /** Describes a STA */
@@ -54,7 +54,6 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase, protected cListener
     int channelNumber = -1;
     simtime_t beaconInterval;
     int numAuthSteps = 0;
-    Ieee80211SupportedRatesElement supportedRates;
 
     // state
     StaList staList; ///< list of STAs

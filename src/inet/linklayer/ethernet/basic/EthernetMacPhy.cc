@@ -130,9 +130,11 @@ void EthernetMacPhy::startFrameTransmission()
     }
     signal->encapsulate(frame);
     ASSERT(curTxSignal == nullptr);
-    curTxSignal = signal->dup();
+    simtime_t duration = signal->getBitLength() / curEtherDescr.bitrate;
+    signal->setDuration(duration);
     emit(transmissionStartedSignal, signal);
-    send(signal, SendOptions().transmissionId(curTxSignal->getId()), physOutGate);
+    curTxSignal = signal->dup();
+    send(signal, SendOptions().transmissionId(curTxSignal->getId()).duration(duration), physOutGate);
     scheduleAt(transmissionChannel->getTransmissionFinishTime(), endTxTimer);
     changeTransmissionState(TRANSMITTING_STATE);
 }

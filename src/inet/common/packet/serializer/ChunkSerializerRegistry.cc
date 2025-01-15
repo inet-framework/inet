@@ -18,12 +18,12 @@ ChunkSerializerRegistry::~ChunkSerializerRegistry()
 void ChunkSerializerRegistry::registerSerializer(const std::type_info& typeInfo, const ChunkSerializer *serializer)
 {
     CHUNK_CHECK_USAGE(serializer != nullptr, "invalid serializer");
-    serializers[&typeInfo] = serializer;
+    serializers[typeInfo] = serializer;
 }
 
 const ChunkSerializer *ChunkSerializerRegistry::getSerializer(const std::type_info& typeInfo) const
 {
-    auto it = serializers.find(&typeInfo);
+    auto it = serializers.find(typeInfo);
     if (it != serializers.end())
         return it->second;
     else

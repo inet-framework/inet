@@ -92,7 +92,7 @@ void PcapWriter::writeHeader(PcapLinkType linkType)
     fwrite(&fh, sizeof(fh), 1, dumpfile);
 }
 
-void PcapWriter::writePacket(simtime_t stime, const Packet *packet, Direction direction, NetworkInterface *ie, PcapLinkType linkTypePar)
+void PcapWriter::writePacket(simtime_t stime, const Packet *packet, b frontOffset, b backOffset, Direction direction, NetworkInterface *ie, PcapLinkType linkTypePar)
 {
     if (!dumpfile)
         throw cRuntimeError("Cannot write frame: pcap output file is not open");
@@ -123,7 +123,7 @@ void PcapWriter::writePacket(simtime_t stime, const Packet *packet, Direction di
         case 9: ph.ts_usec = (uint32_t)(stime.inUnit(SIMTIME_NS) - (uint32_t)1000000000 * stime.inUnit(SIMTIME_S)); break;
         default: throw cRuntimeError("Unsupported time precision (%d) in PcapWriter.", timePrecision);
     }
-    auto data = packet->peekDataAsBytes();
+    auto data = packet->peekDataAt<BytesChunk>(frontOffset, packet->getDataLength() - frontOffset - backOffset);
     auto bytes = data->getBytes();
     for (size_t i = 0; i < bytes.size(); i++) {
         buf[i] = bytes[i];

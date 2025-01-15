@@ -45,6 +45,10 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
 
     const char *getName() const override { return name.c_str(); }
 
+    int getNumModes() const { return entries.size(); }
+    const IIeee80211Mode *getMode(int index) { return entries[index].mode; }
+    bool isMandatory(int index) { return entries[index].isMandatory; }
+
     bool containsMode(const IIeee80211Mode *mode) const { return findModeIndex(mode) != -1; }
     bool getIsMandatory(const IIeee80211Mode *mode) const;
 

@@ -398,8 +398,8 @@ void EthernetMacBase::readChannelParameters(bool errorWhenAsymmetric)
     if (connected && ((!outTrChannel) || (!inTrChannel)))
         throw cRuntimeError("Ethernet phys gate must be connected using a transmission channel");
 
-    double txRate = outTrChannel ? outTrChannel->getNominalDatarate() : 0.0;
-    double rxRate = inTrChannel ? inTrChannel->getNominalDatarate() : 0.0;
+    double txRate = 0.0;
+    double rxRate = 0.0;
 
     bool rxDisabled = !inTrChannel || inTrChannel->isDisabled();
     bool txDisabled = !outTrChannel || outTrChannel->isDisabled();
@@ -425,6 +425,18 @@ void EthernetMacBase::readChannelParameters(bool errorWhenAsymmetric)
     else {
         if (outTrChannel && !transmissionChannel)
             outTrChannel->subscribe(POST_MODEL_CHANGE, this);
+
+        // TODO The NetworkInterface::computeDatarate() function does something similar to the following code:
+        if (networkInterface && networkInterface->hasPar("bitrate"))
+            txRate = rxRate = networkInterface->par("bitrate");
+        double channelTxRate = outTrChannel->getNominalDatarate();
+        if (txRate == 0.0) {
+            txRate = channelTxRate;
+            rxRate = inTrChannel ? inTrChannel->getNominalDatarate() : 0.0;
+        }
+        else if (channelTxRate != 0 && txRate != channelTxRate)
+            throw cRuntimeError("Wired network interface datarate is set on both the network interface module and on the corresponding transmission channel and the two values are different");
+
         transmissionChannel = outTrChannel;
         dataratesDiffer = (txRate != rxRate);
     }
@@ -561,30 +573,7 @@ void EthernetMacBase::addPaddingAndSetFcs(Packet *packet, B requiredMinBytes) co
         ethPadding->setChunkLength(paddingLength);
         packet->insertAtBack(ethPadding);
     }
-
-    switch (ethFcs->getFcsMode()) {
-        case FCS_DECLARED_CORRECT:
-            ethFcs->setFcs(0xC00DC00DL);
-            break;
-        case FCS_DECLARED_INCORRECT:
-            ethFcs->setFcs(0xBAADBAADL);
-            break;
-        case FCS_COMPUTED: { // calculate FCS
-            auto ethBytes = packet->peekDataAsBytes();
-            auto bufferLength = ethBytes->getChunkLength().get<B>();
-            auto buffer = new uint8_t[bufferLength];
-            // 1. fill in the data
-            ethBytes->copyToBuffer(buffer, bufferLength);
-            // 2. compute the FCS
-            auto computedFcs = ethernetCRC(buffer, bufferLength);
-            delete[] buffer;
-            ethFcs->setFcs(computedFcs);
-            break;
-        }
-        default:
-            throw cRuntimeError("Unknown FCS mode: %d", (int)(ethFcs->getFcsMode()));
-    }
-
+    ethFcs->setFcs(computeEthernetFcs(packet, fcsMode));
     packet->insertAtBack(ethFcs);
 }
 

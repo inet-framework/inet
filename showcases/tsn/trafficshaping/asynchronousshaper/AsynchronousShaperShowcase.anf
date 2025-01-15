@@ -712,8 +712,6 @@ plt.axhline(y=41.12, color='grey', linestyle='dashdot', linewidth=1)
 
 plt.legend(handles, labels, ncol=3)
 
-#plt.tight_layout()
-
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
 ]]></script>
@@ -2036,8 +2034,6 @@ utils.postconfigure_plot(props)
 
 plt.legend(handles, labels, ncol=3)
 
-#plt.tight_layout()
-
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
 ]]></script>
@@ -2692,8 +2688,6 @@ inet.scave.plot.plot_vectors(df, props)
 utils.postconfigure_plot(props)
 
 plt.legend(handles, labels, ncol=2)
-
-plt.tight_layout()
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -3372,7 +3366,6 @@ ax1.set_ylim(0,60)
 ax2.set_ylim(0,60)
 ax3.set_ylim(0,640)
 
-#plt.subplots_adjust(left = 0.07, right = 0.99, top = 0.95, bottom = 0.1, wspace=0.1, hspace=0.2)
 
 utils.export_image_if_needed(props)
 #utils.export_data_if_needed(df, props)]]></script>
@@ -4050,7 +4043,6 @@ ax1.set_ylim(0,40)
 ax2.set_ylim(0,40)
 ax3.set_ylim(0,320)
 
-#plt.subplots_adjust(left = 0.07, right = 0.99, top = 0.95, bottom = 0.1, wspace=0.1, hspace=0.2)
 
 utils.export_image_if_needed(props)
 #utils.export_data_if_needed(df, props)]]></script>
@@ -6035,7 +6027,6 @@ ax_txstate.set_yticklabels(['idle', 'transmitting'])
 ax_gatestate_vi.set_yticklabels(['closed', 'open'])
 
 
-plt.subplots_adjust(left = 0.1, right = 0.99, top = 0.95, bottom = 0.1, wspace=0.1, hspace=0.4)
 
 #for a in plt.gcf().axes:
 #    xmin, xmax = a.get_xlim()
@@ -6752,7 +6743,6 @@ ax_txstate.set_yticklabels(['idle', 'transmitting'])
 ax_gatestate_vi.set_yticklabels(['closed', 'open'])
 
 
-plt.subplots_adjust(left = 0.1, right = 0.99, top = 0.95, bottom = 0.1, wspace=0.1, hspace=0.4)
 
 #for a in plt.gcf().axes:
 #    xmin, xmax = a.get_xlim()

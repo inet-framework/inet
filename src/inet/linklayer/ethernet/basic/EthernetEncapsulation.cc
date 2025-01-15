@@ -9,6 +9,7 @@
 #include "inet/common/INETUtils.h"
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/stlutils.h"
+#include "inet/common/checksum/EthernetCRC.h"
 #include "inet/linklayer/common/FcsMode_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -187,6 +188,7 @@ void EthernetEncapsulation::processPacketFromHigherLayer(Packet *packet)
     packet->insertAtFront(ethHeader);
     const auto& ethernetFcs = makeShared<EthernetFcs>();
     ethernetFcs->setFcsMode(fcsMode);
+    ethernetFcs->setFcs(computeEthernetFcs(packet, fcsMode));
     packet->insertAtBack(ethernetFcs);
     protocolTag->setProtocol(&Protocol::ethernetMac);
     packet->removeTagIfPresent<DispatchProtocolReq>();
@@ -289,6 +291,7 @@ void EthernetEncapsulation::handleSendPause(cMessage *msg)
     packet->insertAtFront(hdr);
     const auto& ethernetFcs = makeShared<EthernetFcs>();
     ethernetFcs->setFcsMode(fcsMode);
+    ethernetFcs->setFcs(computeEthernetFcs(packet, fcsMode));
     packet->insertAtBack(ethernetFcs);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
 

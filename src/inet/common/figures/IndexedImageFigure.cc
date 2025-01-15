@@ -158,6 +158,11 @@ void IndexedImageFigure::setAnchor(Anchor anchor)
     image->setAnchor(anchor);
 }
 
+cFigure::Rectangle IndexedImageFigure::getBounds() const
+{
+    return Rectangle(0.0, 0.0, image->getWidth(), image->getHeight());
+}
+
 void IndexedImageFigure::parse(cProperty *property)
 {
     ASSERT(property->getNumValues(PKEY_IMAGES));

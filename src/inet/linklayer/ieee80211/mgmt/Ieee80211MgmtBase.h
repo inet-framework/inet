@@ -17,6 +17,7 @@
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 
 namespace inet {
 
@@ -26,13 +27,15 @@ namespace ieee80211 {
  * Abstract base class for 802.11 infrastructure mode management components.
  *
  */
-class INET_API Ieee80211MgmtBase : public OperationalBase
+class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener
 {
   protected:
     // configuration
     ModuleRefByPar<Ieee80211Mib> mib;
     ModuleRefByPar<IInterfaceTable> interfaceTable;
     NetworkInterface *myIface = nullptr;
+    physicallayer::Ieee80211ModeSet *modeSet = nullptr;
+    Ieee80211SupportedRatesElement supportedRates;
 
     // statistics
     long numMgmtFramesReceived;
@@ -41,6 +44,7 @@ class INET_API Ieee80211MgmtBase : public OperationalBase
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
     /** Dispatches incoming messages to handleTimer(), handleUpperMessage() or processFrame(). */
     virtual void handleMessageWhenUp(cMessage *msg) override;

@@ -22,7 +22,7 @@ namespace ieee80211 {
  * a station (STA). See corresponding NED file for a detailed description.
  *
  */
-class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase, protected cListener
+class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
 {
   public:
     //

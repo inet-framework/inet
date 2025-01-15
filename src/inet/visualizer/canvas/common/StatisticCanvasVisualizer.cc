@@ -90,10 +90,12 @@ void StatisticCanvasVisualizer::addStatisticVisualization(const StatisticVisuali
     StatisticVisualizerBase::addStatisticVisualization(statisticVisualization);
     auto statisticCanvasVisualization = static_cast<const StatisticCanvasVisualization *>(statisticVisualization);
     auto figure = statisticCanvasVisualization->figure;
-    if (auto indicatorFigure = dynamic_cast<IIndicatorFigure *>(figure))
-        statisticCanvasVisualization->networkNodeVisualization->addAnnotation(statisticCanvasVisualization->figure, indicatorFigure->getSize(), placementHint, placementPriority);
+    if (auto indicatorFigure = dynamic_cast<IIndicatorFigure *>(figure)) {
+        auto size = indicatorFigure->getSize();
+        statisticCanvasVisualization->networkNodeVisualization->addAnnotation(statisticCanvasVisualization->figure, cFigure::Rectangle(0.0, 0.0, size.x, size.y), placementHint, placementPriority);
+    }
     else if (auto boxedLabelFigure = check_and_cast<BoxedLabelFigure *>(figure))
-        statisticCanvasVisualization->networkNodeVisualization->addAnnotation(statisticCanvasVisualization->figure, boxedLabelFigure->getBounds().getSize(), placementHint, placementPriority);
+        statisticCanvasVisualization->networkNodeVisualization->addAnnotation(statisticCanvasVisualization->figure, boxedLabelFigure->getBounds(), placementHint, placementPriority);
 }
 
 void StatisticCanvasVisualizer::removeStatisticVisualization(const StatisticVisualization *statisticVisualization)

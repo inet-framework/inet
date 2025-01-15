@@ -490,30 +490,7 @@ void EthernetCsmaMac::addPaddingAndSetFcs(Packet *packet, B requiredMinBytes) co
         ethPadding->setChunkLength(paddingLength);
         packet->insertAtBack(ethPadding);
     }
-
-    switch (ethFcs->getFcsMode()) {
-        case FCS_DECLARED_CORRECT:
-            ethFcs->setFcs(0xC00DC00DL);
-            break;
-        case FCS_DECLARED_INCORRECT:
-            ethFcs->setFcs(0xBAADBAADL);
-            break;
-        case FCS_COMPUTED: { // calculate FCS
-            auto ethBytes = packet->peekDataAsBytes();
-            auto bufferLength = ethBytes->getChunkLength().get<B>();
-            auto buffer = new uint8_t[bufferLength];
-            // 1. fill in the data
-            ethBytes->copyToBuffer(buffer, bufferLength);
-            // 2. compute the FCS
-            auto computedFcs = ethernetCRC(buffer, bufferLength);
-            delete[] buffer;
-            ethFcs->setFcs(computedFcs);
-            break;
-        }
-        default:
-            throw cRuntimeError("Unknown FCS mode: %d", (int)(ethFcs->getFcsMode()));
-    }
-
+    ethFcs->setFcs(computeEthernetFcs(packet, fcsMode));
     packet->insertAtBack(ethFcs);
 }
 

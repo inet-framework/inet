@@ -80,7 +80,7 @@ void PlotFigure::setBounds(const Rectangle& rect)
     invalidLayout = true;
 }
 
-const cFigure::Color& PlotFigure::getBackgrouncColor() const
+const cFigure::Color& PlotFigure::getBackgroundColor() const
 {
     return backgroundFigure->getFillColor();
 }
@@ -106,7 +106,9 @@ void PlotFigure::setYTickSize(double size)
 
 void PlotFigure::setYTickCount(int count)
 {
-    if (count != 0 && std::isfinite(minY) && std::isfinite(maxY))
+    if (count == 0)
+        setYTickSize(NaN);
+    else if (std::isfinite(minY) && std::isfinite(maxY))
         setYTickSize((maxY - minY) / (count - 1));
     else
         setYTickSize(INFINITY);
@@ -140,7 +142,9 @@ void PlotFigure::setXTickSize(double size)
 
 void PlotFigure::setXTickCount(int count)
 {
-    if (count != 0 && std::isfinite(minX) && std::isfinite(maxX))
+    if (count == 0)
+        setXTickSize(NaN);
+    else if(std::isfinite(minX) && std::isfinite(maxX))
         setXTickSize((maxX - minX) / (count - 1));
     else
         setXTickSize(INFINITY);
@@ -324,19 +328,24 @@ void PlotFigure::layout()
     double fontSize = xTicks.size() > 0 && xTicks[0].number ? xTicks[0].number->getFont().pointSize : 12;
     labelFigure->setPosition(Point(b.getCenter().x, b.y + b.height + fontSize * LABEL_Y_DISTANCE_FACTOR + labelOffset));
     xAxisLabelFigure->setPosition(Point(b.x + b.width / 2, b.y - 5));
-    yAxisLabelFigure->setPosition(Point(-5, b.height / 2));
+    yAxisLabelFigure->setPosition(Point(b.x - 5, b.y + b.height / 2));
 
     bounds = backgroundFigure->getBounds();
     if (!opp_isempty(labelFigure->getText()))
         bounds = rectangleUnion(bounds, labelFigure->getBounds());
-    if (!yTicks.empty()) {
-        bounds.x -= fontSize;
+    bounds = rectangleUnion(bounds, xAxisLabelFigure->getBounds());
+
+    // TODO cLabelFigure::getBounds() ignores 'angle' value at calculation
+    // Uses the cAbstractTextFigure::getBounds() instead of cLabelFigure::getBounds() and calculates the 90 deg rotation manually.
+    // Usage of cAbstractTextFigure::getBounds() prevents the duplicated rotation when the cLabelFigure::getBounds() will be fixed in omnetpp.
+    Rectangle lb = yAxisLabelFigure->cAbstractTextFigure::getBounds();
+    Rectangle lbr(lb.x + lb.width / 2 - lb.height, lb.y + lb.height - lb.width / 2, lb.height, lb.width); // rotated yAxisLabel
+    bounds = rectangleUnion(bounds, lbr);
+
+    if (!std::isnan(yTickSize))
         bounds.width += 2 * fontSize;
-    }
-    if (!xTicks.empty()) {
-        bounds.y -= fontSize;
+    if (!std::isnan(xTickSize))
         bounds.height += 2 * fontSize;
-    }
     invalidLayout = false;
 }
 
@@ -408,7 +417,7 @@ void PlotFigure::redrawXTicks()
     double maxX = std::isnan(timeWindow) ? this->maxX : simTime().dbl();
 
     double shifting = 0;
-    if (!std::isnan(timeWindow)) {
+    if (!std::isnan(timeWindow) && !std::isnan(xTickSize)) {
         double fraction = std::abs(fmod((minX / xTickSize), 1));
         shifting = xTickSize * (minX < 0 ? fraction : 1 - fraction);
         // if fraction == 0 then shifting == xTickSize therefore don't have to shift the X ticks

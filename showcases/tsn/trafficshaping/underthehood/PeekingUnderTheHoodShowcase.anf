@@ -92,7 +92,6 @@ for i in [0, 1, 2]:
     handles, labels = inet.scave.plot.create_custom_legend(props, style_tuple_list = [('shaper limit', {'linestyle': 'dashdot', 'color': 'grey'})], ax_list=[ax], handles=handles, labels=labels)
     ax.legend(handles, labels, loc=props['legend_placement'])
 
-plt.subplots_adjust(left = 0.08, right = 0.99, top = 0.95, bottom = 0.1, wspace=0.1, hspace=0.1)
 
 utils.export_image_if_needed(props)
 #utils.export_data_if_needed(df, props)

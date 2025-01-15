@@ -81,7 +81,7 @@ class INET_API PlotFigure : public cGroupFigure, public inet::IIndicatorFigure
     const Rectangle& getBounds() const;
     void setBounds(const Rectangle& rect);
 
-    const Color& getBackgrouncColor() const;
+    const Color& getBackgroundColor() const;
     void setBackgroundColor(const Color& color);
 
     double getXTickSize() const;

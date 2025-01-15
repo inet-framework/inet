@@ -375,6 +375,7 @@ void Ieee80211MgmtSta::sendProbeRequest()
     EV << "Sending Probe Request, BSSID=" << scanning.bssid << ", SSID=\"" << scanning.ssid << "\"\n";
     const auto& body = makeShared<Ieee80211ProbeRequestFrame>();
     body->setSSID(scanning.ssid.c_str());
+    body->setSupportedRates(supportedRates);
     body->setChunkLength(B((2 + scanning.ssid.length()) + (2 + body->getSupportedRates().numRates)));
     sendManagementFrame("ProbeReq", body, ST_PROBEREQUEST, scanning.bssid);
 }
