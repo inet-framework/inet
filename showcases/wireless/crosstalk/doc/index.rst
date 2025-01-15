@@ -67,7 +67,7 @@ All simulations use variations of the same network, which is
 illustrated by the image below:
 
 .. figure:: media/basenetwork.png
-   :width: 60%
+   :width: 50%
    :align: center
 
 The networks contain four :ned:`AdhocHost`'s, named ``host1`` to
