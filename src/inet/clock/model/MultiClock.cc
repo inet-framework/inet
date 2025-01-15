@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 #include "inet/clock/model/MultiClock.h"
 
 #include "inet/clock/base/ClockBase.h"
@@ -31,18 +30,21 @@ void MultiClock::handleParameterChange(const char *name)
     }
 }
 
-void MultiClock::receiveSignal(cComponent *source, int signal, const simtime_t& time, cObject *details)
+void MultiClock::receiveSignal(cComponent *source, int signal, const simtime_t &time, cObject *details)
 {
     if (signal == ClockBase::timeChangedSignal) {
         if (check_and_cast<IClock *>(source) == activeClock)
             emit(ClockBase::timeChangedSignal, time, details);
-    } else if (signal == ClockBase::timeJumpedSignal) {
+    }
+}
+void MultiClock::receiveSignal(cComponent *source, int signal, cObject *obj, cObject *details)
+{
+    if (signal == ClockBase::timeJumpedSignal) {
         if (check_and_cast<IClock *>(source) == activeClock)
-            emit(ClockBase::timeJumpedSignal, details);
+            emit(ClockBase::timeJumpedSignal, this, details);
     }
     else
         throw cRuntimeError("Unknown signal");
 }
 
 } // namespace inet
-

@@ -33,6 +33,7 @@ class INET_API MultiClock : public cModule, public virtual IClock, public cListe
     virtual void handleClockEvent(ClockEvent *event) override { activeClock->handleClockEvent(event); }
 
     virtual void receiveSignal(cComponent *source, int signal, const simtime_t& time, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, int signal, cObject *obj, cObject *details) override;
 };
 
 } // namespace inet
