@@ -1163,7 +1163,6 @@ void Gptp::handleAnnounceTimeout(cMessage *pMessage)
 void Gptp::handleSyncTimeout(cMessage *pMessage)
 {
     changeSyncState(SyncState::UNSYNCED);
-    simTime();
 }
 
 void Gptp::handleTransmissionStartedSignal(const GptpBase *gptp, cComponent *source)
