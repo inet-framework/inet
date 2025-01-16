@@ -6,12 +6,12 @@ Goals
 
 Visualizing the network traffic activity in a simulation at various layers of the
 network stack is often useful for understanding and analyzing the network's
-behavior. In this showcase, we will focus on :ned:`PhysicalLinkVisualizer` that
+behavior. In this showcase, we will focus on :ned:`PhysicalLinkCanvasVisualizer` that
 provides graphical representation of the physical layer traffic in the form of
 arrows that fade as the traffic ceases.
 
 This showcase consists of three simulation models that demonstrate the different
-capabilities of :ned:`PhysicalLinkVisualizer`.
+capabilities of :ned:`PhysicalLinkCanvasVisualizer`.
 
 | INET version: ``4.0``
 | Source files location: `inet/showcases/visualizer/physicallinkactivity <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/physicallinkactivity>`__
@@ -20,13 +20,13 @@ About the Visualizer
 --------------------
 
 In INET, physical link activity can be visualized by including a
-:ned:`PhysicalLinkVisualizer` module in the simulation. Adding an
-:ned:`IntegratedVisualizer` module is also an option because it also
-contains a :ned:`PhysicalLinkVisualizer` module. Physical link activity
+:ned:`PhysicalLinkCanvasVisualizer` module in the simulation. Adding an
+:ned:`IntegratedCanvasVisualizer` module is also an option because it also
+contains a :ned:`PhysicalLinkCanvasVisualizer` module. Physical link activity
 visualization is disabled by default; it can be enabled by setting the
 visualizer's :par:`displayLinks` parameter to true.
 
-:ned:`PhysicalLinkVisualizer` observes frames that pass through the
+:ned:`PhysicalLinkCanvasVisualizer` observes frames that pass through the
 physical layer, i.e. are received correctly.
 
 The activity between two nodes is represented visually by a dotted arrow
@@ -49,7 +49,7 @@ simulation for an ad-hoc wireless network. The simulation can be run by
 choosing the ``EnablingVisualization`` configuration from the ini file.
 
 The network contains two :ned:`AdhocHost`'s, ``source`` and ``destination``.
-The ``linkVisualizer's`` type is :ned:`PhysicalLinkVisualizer`. In this
+The ``linkVisualizer's`` type is :ned:`PhysicalLinkCanvasVisualizer`. In this
 simulation, ``source`` will be pinging ``destination``.
 
 .. figure:: media/PhysicalLinkVisualizerSimple.png
@@ -71,11 +71,11 @@ The following animation shows what happens when we start the simulation.
 At the beginning of the animation, a red strip appears and moves from
 ``source`` to ``destination``. This strip is the standard OMNeT++
 animation for packet transmissions and has nothing to do with
-:ned:`PhysicalLinkVisualizer`. A blue dotted line also appears at the same
+:ned:`PhysicalLinkCanvasVisualizer`. A blue dotted line also appears at the same
 time. It can be ignored, as it is also part of the standard OMNeT++
 animation for packet transmission. When the frame is received in whole
 by ``destination`` (the red strip disappears), a dotted arrow is added
-by :ned:`PhysicalLinkVisualizer` between the two hosts, indicating physical
+by :ned:`PhysicalLinkCanvasVisualizer` between the two hosts, indicating physical
 link activity. The frame's name is also displayed on the arrow. In this
 simulation, the arrow fades out quickly, because the ``fadeOutTime``
 parameter of the visualizer is set to a small value.
@@ -105,9 +105,9 @@ frames correctly from each other.
    :width: 100%
 
 For this network, the type of ``visualizer`` module is
-:ned:`IntegratedVisualizer`. Physical link activity visualization is
+:ned:`IntegratedCanvasVisualizer`. Physical link activity visualization is
 filtered to display only ping traffic. Other frames, e.g. Beacon frames
-and ACK frames, are not displayed by :ned:`PhysicalLinkVisualizer`.
+and ACK frames, are not displayed by :ned:`PhysicalLinkCanvasVisualizer`.
 
 We use the following configuration for the visualization.
 
@@ -124,7 +124,7 @@ with ``accessPoint``.
    :width: 90%
 
 You can see that although there are also ACK frames, Beacon frames and
-ping traffic in the network, :ned:`PhysicalLinkVisualizer` displays only
+ping traffic in the network, :ned:`PhysicalLinkCanvasVisualizer` displays only
 ping traffic, due to the presence of :par:`packetFilter`. The ping frames travel
 between ``source`` and ``destination`` through ``accessPoint``, but
 ``host1`` also receives ping frames from ``accessPoint`` and ``source``.
@@ -183,7 +183,7 @@ More Information
 
 This example only demonstrates the key features of physical link
 visualization. For more information, refer to the
-:ned:`PhysicalLinkVisualizer` NED documentation.
+:ned:`PhysicalLinkCanvasVisualizer` NED documentation.
 
 
 Try It Yourself

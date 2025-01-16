@@ -12,13 +12,14 @@ import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211RadioMedium;
 import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
-import inet.visualizer.common.TransportRouteVisualizer;
+import inet.visualizer.canvas.transportlayer.TransportRouteCanvasVisualizer;
+
 
 network TransportPathVisualizerSimpleWiredShowcase
 {
     @display("bgb=500,250");
     submodules:
-        pathVisualizer: TransportRouteVisualizer {
+        pathVisualizer: TransportRouteCanvasVisualizer {
             @display("p=80,80");
         }
         configurator: Ipv4NetworkConfigurator {
@@ -39,7 +40,7 @@ network TransportPathVisualizerSimpleWirelessShowcase
 {
     @display("bgb=500,250");
     submodules:
-        pathVisualizer: TransportRouteVisualizer {
+        pathVisualizer: TransportRouteCanvasVisualizer {
             @display("p=80,50");
         }
         configurator: Ipv4NetworkConfigurator {

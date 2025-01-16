@@ -216,8 +216,8 @@ has IP forwarding enabled, and its management module is set to
 ``source``, a destination host named ``destination``, and a number of
 other hosts, which are named ``node1`` up to ``node10`` (their numbers
 vary in the different networks). In addition to mobile nodes, both
-:ned:`Ipv4NetworkConfigurator`, and an :ned:`IntegratedMultiVisualizer`
 networks contain an :ned:`Ieee80211RadioMedium`, an
+:ned:`Ipv4NetworkConfigurator`, and an :ned:`IntegratedMultiCanvasVisualizer`
 module. The nodes' default PHY model (IEEE 802.11) will suffice because
 we're focusing on the routing protocols.
 
