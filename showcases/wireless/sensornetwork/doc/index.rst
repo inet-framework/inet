@@ -150,8 +150,8 @@ will use the same network, :ned:`SensorNetworkShowcaseA`, defined in
 In the network, the wireless sensor nodes are of the type
 :ned:`SensorNode`, named ``sensor1`` up to ``sensor4``, and ``gateway``.
 The node named ``server`` is a :ned:`StandardHost`. The network also
-contains an :ned:`Ipv4NetworkConfigurator`, an :ned:`IntegratedVisualizer`,
 and an :ned:`ScalarRadioMedium` module. The nodes are placed against
+contains an :ned:`Ipv4NetworkConfigurator`, an :ned:`IntegratedCanvasVisualizer`,
 the backdrop of a warehouse floorplan. The scene size is 60x30
 meters. The warehouse is just a background image providing context.
 Obstacle loss is not modeled, so the background image doesn't affect

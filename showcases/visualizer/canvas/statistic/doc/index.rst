@@ -23,8 +23,8 @@ of the visualization.
 About the visualizer
 --------------------
 
-The :ned:`StatisticVisualizer` (included in the network as part of
-:ned:`IntegratedVisualizer`) is capable of displaying a statistic for
+The :ned:`StatisticCanvasVisualizer` (included in the network as part of
+:ned:`IntegratedCanvasVisualizer`) is capable of displaying a statistic for
 multiple network nodes. The visualizer keeps track of the last values of
 statistics and displays them next to the icon of the network node.
 

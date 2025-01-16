@@ -24,7 +24,7 @@ About the visualizer
 --------------------
 
 The :ned:`InterfaceTableVisualizer` module (included in the network as part
-of :ned:`IntegratedVisualizer`) displays data about network nodes'
+of :ned:`IntegratedCanvasVisualizer`) displays data about network nodes'
 interfaces. (Interfaces are contained in interface tables, hence the
 name.) By default, the visualization is turned off. When it is enabled
 using the :par:`displayInterfaceTables` parameter, the default is that
