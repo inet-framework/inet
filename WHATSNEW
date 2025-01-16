@@ -1,8 +1,8 @@
 Recent changes in the INET Framework
 ====================================
 
-INET-4.5 (April 2023) - Stable
-------------------------------
+INET-4.5.0 (April 2023) - Stable
+--------------------------------
 
 This is a new minor stable release within the INET 4.x branch. The main feature
 of this release is the ability to concurrently run multiple simulations within
