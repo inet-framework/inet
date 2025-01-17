@@ -41,6 +41,7 @@ class INET_API ClockBase : public cSimpleModule, public IClock, public StringFor
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
+    void emitTimeDifferenceToReference();
     virtual void finish() override;
     virtual void refreshDisplay() const override;
     virtual void updateDisplayString() const;

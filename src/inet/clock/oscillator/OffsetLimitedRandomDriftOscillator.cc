@@ -4,14 +4,14 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 #include "inet/clock/oscillator/OffsetLimitedRandomDriftOscillator.h"
 
 namespace inet {
 
 Define_Module(OffsetLimitedRandomDriftOscillator);
 
-void OffsetLimitedRandomDriftOscillator::initialize(int stage) {
+void OffsetLimitedRandomDriftOscillator::initialize(int stage)
+{
     RandomDriftOscillator::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         maxOffset = &par("maxOffset");
@@ -37,7 +37,8 @@ void OffsetLimitedRandomDriftOscillator::handleMessage(cMessage *message)
             // Adjust the drift rate to bring the offset back within limits
             if (currentOffset > 0) {
                 driftRateChangeTotal += maxDriftRateAdjustment;
-            } else {
+            }
+            else {
                 driftRateChangeTotal -= maxDriftRateAdjustment;
             }
         }
@@ -50,6 +51,4 @@ void OffsetLimitedRandomDriftOscillator::handleMessage(cMessage *message)
         throw cRuntimeError("Unknown message");
 }
 
-
 } // namespace inet
-

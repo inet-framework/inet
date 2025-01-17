@@ -36,6 +36,7 @@ void ClockBase::initialize(int stage)
         }
         updateDisplayString();
         emit(timeChangedSignal, getClockTime().asSimTime());
+        emitTimeDifferenceToReference();
     }
 }
 
@@ -43,18 +44,25 @@ void ClockBase::handleMessage(cMessage *msg)
 {
     if (msg == timer) {
         emit(timeChangedSignal, getClockTime().asSimTime());
+        emitTimeDifferenceToReference();
         scheduleAfter(emitClockTimeInterval, timer);
     }
     else
         throw cRuntimeError("Unknown message");
 }
 
+void ClockBase::emitTimeDifferenceToReference()
+{
+    if (referenceClockModule == nullptr)
+        return;
+    auto referenceTime = referenceClockModule->getClockTime();
+    auto timeDifference = getClockTime() - referenceTime;
+    emit(timeDifferenceToReferenceSignal, timeDifference.asSimTime());
+}
 void ClockBase::receiveSignal(cComponent *source, int signal, const simtime_t& time, cObject *details)
 {
     if (signal == ClockBase::timeChangedSignal) {
-        auto referenceTime = referenceClockModule->getClockTime();
-        auto timeDifference = getClockTime() - referenceTime;
-        emit(timeDifferenceToReferenceSignal, timeDifference.asSimTime());
+        emitTimeDifferenceToReference();
     }
     else
         throw cRuntimeError("Unknown signal");
