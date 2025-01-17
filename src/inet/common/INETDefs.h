@@ -35,7 +35,7 @@ using namespace omnetpp;
 #  error At least OMNeT++/OMNEST version 6.0 required
 #endif
 
-#define INET_VERSION        0x0405
+#define INET_VERSION        0x0406
 #define INET_PATCH_LEVEL    0x00
 
 #if defined(INET_EXPORT)
