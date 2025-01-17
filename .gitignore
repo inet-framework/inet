@@ -61,6 +61,7 @@ precompiled_*.h.*
 *.synctex.gz
 .buildlog*
 compile_commands.json
+/inet-*-src.tgz
 
 # ignore binary files
 out/
