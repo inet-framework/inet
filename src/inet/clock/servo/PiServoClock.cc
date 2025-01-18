@@ -80,8 +80,7 @@ void PiServoClock::adjustClockTo(clocktime_t newClockTime) {
 
             // differenceOffsetNanosecond = offsetNanosecond - offsetNanosecond_prev;
 
-            originSimulationTime = simTime();
-            originClockTime = oldClockTime;
+            setNewOriginTime(simTime(), oldClockTime);
 
             // As our timestamps is in nanoseconds, to get ppm we need to multiply by 1e-3
             kpTerm = ppm(kp * offsetUs);

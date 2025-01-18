@@ -62,7 +62,6 @@ class INET_API ClockBase : public cSimpleModule, public IClock, public StringFor
     virtual void handleClockEvent(ClockEvent *event) override;
     virtual void receiveSignal(cComponent *source, int signal, const simtime_t& time, cObject *details) override;
 
-
     virtual std::string resolveDirective(char directive) const override;
 };
 

@@ -116,8 +116,7 @@ void ServoClockBase::jumpClockTo(clocktime_t newClockTime, bool notifyListeners)
         simtime_t currentSimTime = simTime();
         EV_DEBUG << "Setting clock time from " << oldClockTime << " to " << newClockTime << " at simtime "
                  << currentSimTime << ".\n";
-        originSimulationTime = simTime();
-        originClockTime = newClockTime;
+        setNewOriginTime(simTime(), newClockTime);
 
         ASSERT(newClockTime == getClockTime());
         rescheduleClockEvents(oldClockTime, newClockTime);
