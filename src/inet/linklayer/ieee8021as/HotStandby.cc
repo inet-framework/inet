@@ -12,18 +12,31 @@ namespace inet {
 
 Define_Module(HotStandby);
 
+// TODO: Fix: Domain mumber isn't neccessarily the same as the clock index
 void HotStandby::initialize(int stage)
 {
     ClockUserModuleBase::initialize(stage);
     if (stage == INITSTAGE_LINK_LAYER) {
         auto parent = getParentModule();
         auto numDomains = parent->par("numDomains").intValue();
+
+        multiClock = check_and_cast<MultiClock *>(clock.get());
+
         for (int i = 0; i < numDomains; i++) {
             auto gptp = parent->getSubmodule("domain", i);
             gptp->subscribe(Gptp::gptpSyncStateChanged, this);
+            ModuleRefByPar<ClockBase> currentClock;
+            currentClock.reference(gptp, "clockModule", true);
+            auto clockParent = currentClock->getParentModule();
+            if (clockParent != multiClock) {
+                EV_WARN
+                    << "Clock module is not a child of MultiClock, cannot determine clock index and ignoring this clock"
+                    << endl;
+            }
+            else {
+                domainNumberToClockIndex[i] = currentClock->getIndex();
+            }
         }
-
-        multiClock = check_and_cast<MultiClock *>(clock.get());
     }
 }
 
@@ -51,20 +64,22 @@ void HotStandby::handleSyncStateChanged(const Gptp *gptp, const SyncState syncSt
         return;
     }
 
-    int bestDomainIndex = std::numeric_limits<int>::max();
+    int bestDomainNumber = std::numeric_limits<int>::max();
     for (auto &entry : syncStates) {
-        if (entry.second == SYNCED && entry.first < bestDomainIndex) {
-            bestDomainIndex = entry.first;
+        if (entry.second == SYNCED && entry.first < bestDomainNumber) {
+            bestDomainNumber = entry.first;
         }
     }
 
-    if (bestDomainIndex == std::numeric_limits<int>::max()) {
+    if (bestDomainNumber == std::numeric_limits<int>::max()) {
         EV_WARN << "All domains out of sync, cannot switch to backup domain" << endl;
         return;
     }
 
-    EV_INFO << "Switching to domain " << bestDomainIndex << endl;
-    multiClock->par("activeClockIndex").setIntValue(bestDomainIndex);
+    auto clockIndex = domainNumberToClockIndex[bestDomainNumber];
+
+    EV_INFO << "Switching to domain " << bestDomainNumber << " - clock index " << clockIndex << endl;
+    multiClock->par("activeClockIndex").setIntValue(clockIndex);
 }
 
 } // namespace inet

@@ -8,9 +8,9 @@
 package inet.linklayer.ieee8021as;
 
 import inet.linklayer.contract.IGptp;
-import inet.queueing.classifier.PacketClassifier;
 import inet.queueing.common.PacketMultiplexer;
-import inet.linklayer.ieee8021as.HotStandby;
+import inet.queueing.contract.IPacketClassifier;
+
 
 //
 // This module combines multiple ~Gptp modules, one per time domain into a multi
@@ -43,8 +43,7 @@ module MultiDomainGptp like IGptp
         multiplexer: PacketMultiplexer {
             @display("p=150,350");
         }
-        classifier: PacketClassifier {
-            classifierClass = default("inet::GptpDomainNumberClassifier");
+        classifier: <default("GptpDomainClassifier")> like IPacketClassifier {
             @display("p=300,350");
         }
         hotstandby: HotStandby if hasHotStandby {
