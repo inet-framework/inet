@@ -106,8 +106,8 @@ We use the following network for this showcase:
 .. figure:: media/NetworkPathComplex_v0703.png
    :width: 100%
 
-The network consists of five ``routers`` (``router0..router4``), four
-``etherSwitches`` (``etherSwitch0..etherSwitch3``) and eight
+The network consists of five :ned:`Router` modules (``router0..router4``), four
+:ned:`EthernetSwitch` modules (``etherSwitch0..etherSwitch3``) and eight
 :ned:`StandardHost`'s. There are two source hosts, ``source1`` and
 ``source2``, which will be pinging the two destination hosts,
 ``destination1`` and ``destination2``. The ``videoServer`` node streams

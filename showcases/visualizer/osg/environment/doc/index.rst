@@ -33,8 +33,8 @@ properties are defined in the XML configuration of the
 .. note:: For more information about the XML format in which the physical environment (geometry, materials, etc.) can be defined, see the NED documentation of the :ned:`PhysicalEnvironment` module.
 
 The two-dimensional projection of physical objects is determined by the
-:ned:`SceneCanvasVisualizer` module. (This is because the projection is
-also needed by other visualizers, for example, :ned:`MobilityVisualizer`.)
+:ned:`SceneCanvasVisualizer` module (projection is
+also needed by other visualizers, for example, :ned:`MobilityVisualizer`).
 The default view is the top view (z-axis), but you can also configure side
 view (x and y axes), or isometric or orthographic projection.
 

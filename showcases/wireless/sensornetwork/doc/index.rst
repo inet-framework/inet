@@ -212,7 +212,7 @@ be routed via the gateway. Here are the application settings in
 The MAC-specific parameters are set in the configurations for the
 individual MACs.
 
-For B-MAC, the wireless interface's :par:`macType` parameter is set to
+For B-MAC, the wireless interface's mac module type is set to
 :ned:`BMac`. Also, the :par:`slotDuration` parameter is set to 0.025s (an
 arbitrary value). This parameter is essentially the nodes' sleep
 duration. Here is the configuration in
@@ -223,7 +223,7 @@ duration. Here is the configuration in
    :start-at: Config BMac
    :end-at: slotDuration
 
-For X-MAC, the wireless interface's :par:`macType` parameter is set to
+For X-MAC, the wireless interface's mac module type is set to
 :ned:`XMac`. The MAC's :par:`slotDuration` parameter determines the duration
 of the nodes' sleep periods. It is set to 0.25s for the sensor nodes
 and 0.1s for the gateway. Nodes transmit preambles for the duration of
@@ -240,7 +240,7 @@ configuration in :download:`omnetpp.ini <../omnetpp.ini>`.
    :start-at: Config XMac
    :end-at: sensor
 
-For LMAC, the wireless interface's :par:`macType` parameter is set to
+For LMAC, the wireless interface's mac module type is set to
 :ned:`LMac`. The :par:`numSlots` parameter is set to 8, as it is sufficient
 (there are only five nodes in the wireless sensor network). The
 :par:`reservedMobileSlots` parameter reserves some of the slots for mobile
