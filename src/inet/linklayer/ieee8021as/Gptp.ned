@@ -37,6 +37,7 @@ simple Gptp like IGptp
         double announceInitialOffset @unit(s) = default(0s); // Time of first Announce message (BMCA mode only)
         double announceTimeout @unit(s) = default(announceInterval * 3); // Timeout for Announce messages (BMCA mode only)
         double syncTimeout @unit(s) = default(syncInterval * 3); // When to assume we are out of sync
+        bool resetClockStateOnSyncLoss = default(true); // Resets the clock state to INIT after sync timeout
 
         int grandmasterPriority1 @mutable = default(255); // Priority1 value for BMCA
 

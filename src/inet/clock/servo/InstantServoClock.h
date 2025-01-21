@@ -23,6 +23,7 @@ class INET_API InstantServoClock : public ServoClockBase
   public:
     virtual void adjustClockTo(clocktime_t newClockTime) override;
     virtual void initialize(int stage) override;
+  virtual void resetClockState() override;
 };
 
 } // namespace inet

@@ -37,6 +37,10 @@ void ServoClockBase::resetOscillator() const
     if (auto constantDriftOscillator = dynamic_cast<ConstantDriftOscillator *>(oscillator))
         constantDriftOscillator->setTickOffset(0);
 }
+void ServoClockBase::resetClockState()
+{
+    clockState = INIT;
+}
 
 void ServoClockBase::rescheduleClockEvents(clocktime_t oldClockTime, clocktime_t newClockTime)
 {

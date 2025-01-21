@@ -882,18 +882,6 @@ void Gptp::synchronize()
     clocktime_t newTime = preciseOriginTimestamp + correctionField + gmRateRatio * (meanLinkDelay + residenceTime);
 
     auto servoClock = check_and_cast<ServoClockBase *>(clock.get());
-
-    // Only change the oscillator if we have new information about our nrr
-    // TODO: We should change this to a clock servo model in the future anyways!
-    //    ppm newOscillatorCompensation;
-    //    if (!hasNewRateRatioForOscillatorCompensation) {
-    //        newOscillatorCompensation = unit(piControlClock->getOscillatorCompensation());
-    //    }
-    //    else {
-    //        newOscillatorCompensation =
-    //            unit(gmRateRatio * (1 + unit(piControlClock->getOscillatorCompensation()).get()) - 1);
-    //        hasNewRateRatioForOscillatorCompensation = false;
-    //    }
     servoClock->adjustClockTo(newTime);
     //    EV_INFO << "newOscillatorCompensation " << newOscillatorCompensation << endl;
 
@@ -964,6 +952,11 @@ void Gptp::changeSyncState(SyncState state)
     syncState = state;
     if (prevSyncState != syncState) {
         emit(gptpSyncStateChanged, syncState);
+
+        auto servoClock = dynamic_cast<ServoClockBase *>(clock.get());
+        if (state == UNSYNCED && servoClock != nullptr && par("resetClockStateOnSyncLoss").boolValue()) {
+            servoClock->resetClockState();
+        }
     }
 }
 

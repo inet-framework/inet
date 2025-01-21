@@ -23,7 +23,7 @@ void HotStandby::initialize(int stage)
         multiClock = check_and_cast<MultiClock *>(clock.get());
 
         for (int i = 0; i < numDomains; i++) {
-            auto gptp = parent->getSubmodule("domain", i);
+            auto gptp = check_and_cast<Gptp *>(parent->getSubmodule("domain", i));
             gptp->subscribe(Gptp::gptpSyncStateChanged, this);
             ModuleRefByPar<ClockBase> currentClock;
             currentClock.reference(gptp, "clockModule", true);
@@ -34,7 +34,7 @@ void HotStandby::initialize(int stage)
                     << endl;
             }
             else {
-                domainNumberToClockIndex[i] = currentClock->getIndex();
+                domainNumberToClockIndex[gptp->getDomainNumber()] = currentClock->getIndex();
             }
         }
     }

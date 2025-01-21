@@ -17,10 +17,7 @@ namespace inet {
 class ServoClockBase : public OscillatorBasedClock, public IScriptable
 {
   public:
-    enum ClockState {
-        INIT,
-        SYNCED
-    };
+    enum ClockState { INIT, SYNCED };
 
   protected:
     OverdueClockEventHandlingMode defaultOverdueClockEventHandlingMode = UNSPECIFIED;
@@ -43,6 +40,7 @@ class ServoClockBase : public OscillatorBasedClock, public IScriptable
     virtual void jumpClockTo(clocktime_t newClockTime, bool notifyListeners = true);
     virtual void setOscillatorCompensation(ppm oscillatorCompensationValue);
     virtual void resetOscillator() const;
+    virtual void resetClockState();
     virtual ClockState getClockState() const { return clockState; }
 };
 

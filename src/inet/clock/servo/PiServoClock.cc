@@ -28,7 +28,8 @@ void PiServoClock::initialize(int stage)
     }
 }
 
-void PiServoClock::adjustClockTo(clocktime_t newClockTime) {
+void PiServoClock::adjustClockTo(clocktime_t newClockTime)
+{
     Enter_Method("adjustClockTo");
     clocktime_t oldClockTime = getClockTime();
 
@@ -91,8 +92,8 @@ void PiServoClock::adjustClockTo(clocktime_t newClockTime) {
             kiTerm = std::max(kiTermMin, std::min(kiTermMax, kiTerm));
             // kdTerm = std::max(kdTermMin, std::min(kdTermMax, kdTerm));
 
-            EV_INFO << "kpTerm: " << kpTerm << " kiTerm: " << kiTerm << " offsetUs: " << offsetUs
-                    << " drift: " << drift << "\n";
+            EV_INFO << "kpTerm: " << kpTerm << " kiTerm: " << kiTerm << " offsetUs: " << offsetUs << " drift: " << drift
+                    << "\n";
 
             setOscillatorCompensation(kpTerm + kiTerm + drift);
 
@@ -104,6 +105,12 @@ void PiServoClock::adjustClockTo(clocktime_t newClockTime) {
     }
 
     emit(driftSignal, drift.get());
+}
+
+void PiServoClock::resetClockState()
+{
+    clockState = INIT;
+    phase = 0;
 }
 
 } // namespace inet

@@ -25,6 +25,12 @@ void InstantServoClock::initialize(int stage)
     }
 }
 
+void InstantServoClock::resetClockState()
+{
+    clockState = INIT;
+    offsetPrev = -1;
+}
+
 void InstantServoClock::adjustClockTo(clocktime_t newClockTime)
 {
     Enter_Method("adjustClockTo");

@@ -23,7 +23,7 @@ class INET_API PiServoClock : public ServoClockBase
 
     cPar *offsetThreshold;
 
-    double kp;   // proportional gain
+    double kp; // proportional gain
     double ki; // integral gain
 
     ppm kpTerm = ppm(0);
@@ -40,7 +40,8 @@ class INET_API PiServoClock : public ServoClockBase
     virtual void initialize(int stage) override;
 
   public:
-    void adjustClockTo(clocktime_t newClockTime) override;
+    virtual void adjustClockTo(clocktime_t newClockTime) override;
+    virtual void resetClockState() override;
 };
 
 } // namespace inet
