@@ -8,12 +8,10 @@
 #include "Gptp.h"
 
 #include "GptpPacket_m.h"
-
-#include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/common/clock/ClockUserModuleBase.h"
 #include "inet/clock/servo/PiServoClock.h"
 #include "inet/clock/servo/ServoClockBase.h"
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/clock/ClockUserModuleBase.h"
 #include "inet/common/packet/dissector/PacketDissector.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddress.h"
@@ -387,7 +385,7 @@ void Gptp::sendAnnounce()
         gptp->setOriginTimestamp(clock->getClockTime());
         gptp->setSequenceId(sequenceId++);
 
-        if (bestAnnounce == nullptr || bestAnnounce->getPriorityVector() == localPriorityVector) {
+        if (bestAnnounce == nullptr || bestAnnounce->getPriorityVector().grandmasterIdentity == localPriorityVector.grandmasterIdentity) {
             gptp->setPriorityVector(localPriorityVector);
         }
         else {
@@ -476,7 +474,13 @@ void Gptp::processAnnounce(Packet *packet, const GptpAnnounce *announce)
     if (announce->getPriorityVector().stepsRemoved >= 255) {
         // IEEE 1588-2019 9.3.2.5 d)
         EV_WARN << "Announce message dropped because stepsRemoved is 255" << endl;
-        delete packet;
+        return;
+    }
+    if (announce->getPriorityVector().grandmasterIdentity == clockIdentity) {
+        EV_WARN
+            << "Announce message dropped because grandmasterIdentity is own clockIdentity - "
+               "why does this even happen?"
+            << endl;
         return;
     }
 
@@ -554,7 +558,7 @@ void Gptp::executeBmca()
     }
     else {
         // Topology change, update ports and send Announce
-        bool doSendAnnounce = true;
+        bool newInfo = true;
 
         if (bestAnnounceCurr->getPriorityVector().grandmasterIdentity != clockIdentity) {
             // We are not the GM
@@ -580,7 +584,7 @@ void Gptp::executeBmca()
                 // We were already GM, no need to send Announce again
                 // Should only happen in the bootup phase
                 // (otherwise priority vector would be the same and earlier case would apply)
-                doSendAnnounce = false;
+                newInfo = true;
             }
             masterPortIds = bmcaPortIds;
             passivePortIds.clear();
@@ -590,7 +594,7 @@ void Gptp::executeBmca()
         delete bestAnnounce;
         bestAnnounce = bestAnnounceCurr->dup();
 
-        if (doSendAnnounce) {
+        if (newInfo) {
             sendAnnounce();
         }
         scheduleMessageOnTopologyChange();
@@ -1092,7 +1096,7 @@ const GptpBase *Gptp::extractGptpHeader(Packet *packet)
     PacketDissector::ChunkFinder chunkFinder(&Protocol::gptp);
     PacketDissector packetDissector(ProtocolDissectorRegistry::getInstance(), chunkFinder);
     packetDissector.dissectPacket(packet);
-    const auto& chunk = staticPtrCast<const GptpBase>(chunkFinder.getChunk());
+    const auto &chunk = staticPtrCast<const GptpBase>(chunkFinder.getChunk());
     return chunk != nullptr ? chunk.get() : nullptr;
 }
 
@@ -1153,10 +1157,7 @@ void Gptp::handleAnnounceTimeout(cMessage *pMessage)
     executeBmca();
 }
 
-void Gptp::handleSyncTimeout(cMessage *pMessage)
-{
-    changeSyncState(SyncState::UNSYNCED);
-}
+void Gptp::handleSyncTimeout(cMessage *pMessage) { changeSyncState(SyncState::UNSYNCED); }
 
 void Gptp::handleTransmissionStartedSignal(const GptpBase *gptp, cComponent *source)
 {

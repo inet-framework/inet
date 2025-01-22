@@ -26,7 +26,9 @@ module MultiClock like IClock
         @class(MultiClock);
         @signal[timeChanged](type=simtime_t);
         @signal[timeJumped]();
+        @signal[timeDifferenceToReference](type=simtime_t);
         @statistic[timeChanged](title="Clock time"; source=localSignal(timeChanged); record=vector; interpolationmode=linear);
+        @statistic[timeDifferenceToReference](title="Time difference to reference"; source=localSignal(timeDifferenceToReference); record=vector; interpolationmode=linear);
     submodules:
         clock[numClocks]: <default("PiServoClock")> like IClock {
             @display("p=200,200,row,200");

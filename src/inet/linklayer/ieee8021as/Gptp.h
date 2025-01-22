@@ -197,7 +197,7 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
 
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details) override;
     void calculateGmRatio();
-    void executeBmca();
+    virtual void executeBmca();
     void initPorts();
     virtual void scheduleMessageOnTopologyChange();
     void handleAnnounceTimeout(cMessage *pMessage);

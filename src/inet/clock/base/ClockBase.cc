@@ -59,6 +59,7 @@ void ClockBase::emitTimeDifferenceToReference()
     auto timeDifference = getClockTime() - referenceTime;
     emit(timeDifferenceToReferenceSignal, timeDifference.asSimTime());
 }
+
 void ClockBase::receiveSignal(cComponent *source, int signal, const simtime_t& time, cObject *details)
 {
     if (signal == ClockBase::timeChangedSignal) {
