@@ -150,8 +150,8 @@ will use the same network, :ned:`SensorNetworkShowcaseA`, defined in
 In the network, the wireless sensor nodes are of the type
 :ned:`SensorNode`, named ``sensor1`` up to ``sensor4``, and ``gateway``.
 The node named ``server`` is a :ned:`StandardHost`. The network also
-and an :ned:`ScalarRadioMedium` module. The nodes are placed against
 contains an :ned:`Ipv4NetworkConfigurator`, an :ned:`IntegratedCanvasVisualizer`,
+and an :ned:`RadioMedium` module. The nodes are placed against
 the backdrop of a warehouse floorplan. The scene size is 60x30
 meters. The warehouse is just a background image providing context.
 Obstacle loss is not modeled, so the background image doesn't affect
@@ -161,22 +161,24 @@ The wireless interface in the sensor nodes and the gateway is specified
 in :download:`omnetpp.ini <../omnetpp.ini>` to be the generic
 :ned:`WirelessInterface` (instead of the IEEE 802.15.4 specific
 :ned:`Ieee802154NarrowbandInterface`, which is the default WLAN interface
-in :ned:`SensorNode`). The radio type is set to :ned:`ApskScalarRadio`.
+in :ned:`SensorNode`). The radio type is set to :ned:`ApskRadio`,
+and configured to use the scalar analog model.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: typename
-   :end-at: radio.typename
+   :end-at: radio.signalAnalogRepresentation
 
 Note that the wireless interface module's name is ``wlan`` in all host
 types that have a wireless interface. The term doesn't imply that it's
 WiFi but stands for wireless LAN.
 
-We are using :ned:`ApskScalarRadio` here because it is a relatively
+We are using :ned:`ApskRadio` here because it is a relatively
 simple, generic radio. It uses amplitude and phase-shift keying
 modulations (e.g. BPSK, QAM-16 or QAM-64, BPSK by default), without
 additional features such as forward error correction, interleaving or
-spreading. We set the bitrate in
+spreading. Also, the scalar analog model is adequate in this scenario, because
+we're not interested in the details of signal reception. We set the bitrate in
 :download:`omnetpp.ini <../omnetpp.ini>` to 19200 bps to match the
 default MAC bitrates (which is 19200 bps for all three MAC types).
 The :par:`preambleDuration` is set to be very short for better compatibility with the MACs.
@@ -620,7 +622,7 @@ implementations:
    Radio for Wireless Sensor Networks?
    (X-MAC) <http://ieeexplore.ieee.org/document/7024195/>`__
 -  `A Lightweight Medium Access Protocol (LMAC) for Wireless Sensor
-   Networks <https://ris.utwente.nl/ws/portalfiles/portal/5427399>`__
+   Networks <https://www.researchgate.net/publication/242150051_A_Lightweight_Medium_Access_Protocol_LMAC_for_Wireless_Sensor_Networks_Reducing_Preamble_Transmissions_and_Transceiver_State_Switches>`__
 
 
 Try It Yourself
