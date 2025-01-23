@@ -80,22 +80,28 @@ typedef pow<internal::none, 0> unit;
 template<typename Value, typename Units>
 class value
 {
+  private:
+    void instantiateStrMethod() { static const auto _ = &value<Value, Units>::str; (void)_; } // str() is needed for pretty printing in debugger
+
   public:
     typedef Value value_type;
     typedef Units unit;
 
     value() : m_rep()
     {
+        instantiateStrMethod();
     }
 
     explicit value(const value_type& v) : m_rep(v)
     {
+        instantiateStrMethod();
     }
 
     template<typename OtherValue, typename OtherUnits>
     value(const value<OtherValue, OtherUnits>& v) :
         m_rep(internal::convert<OtherUnits, Units>::fn(v.get()))
     {
+        instantiateStrMethod();
     }
 
     std::string str() const
@@ -124,6 +130,7 @@ class value
     template<typename OtherValue, typename OtherUnits>
     value& operator=(const value<OtherValue, OtherUnits>& other)
     {
+        instantiateStrMethod();
         m_rep = value(other).get();
         return *this;
     }
