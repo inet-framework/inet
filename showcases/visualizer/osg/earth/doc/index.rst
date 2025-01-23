@@ -40,7 +40,7 @@ following network:
    :width: 20%
    :align: center
 
-The network contains an :ned:`IntegratedVisualizer` and an
+The network contains an :ned:`IntegratedCanvasVisualizer` and an
 :ned:`OsgGeographicCoordinateSystem` module. The configuration from
 :download:`omnetpp.ini <../omnetpp.ini>` is the following:
 
@@ -50,7 +50,7 @@ The network contains an :ned:`IntegratedVisualizer` and an
    :language: ini
 
 By default, the type of the scene visualizer module in
-:ned:`IntegratedVisualizer` is :ned:`SceneOsgVisualizer`. Inserting the map
+:ned:`IntegratedCanvasVisualizer` is :ned:`SceneOsgVisualizer`. Inserting the map
 requires the :ned:`SceneOsgEarthVisualizer` module, thus, the default OSG
 scene visualizer is replaced. The :ned:`SceneOsgEarthVisualizer`
 provides the same functionality as :ned:`SceneOsgVisualizer` and adds
