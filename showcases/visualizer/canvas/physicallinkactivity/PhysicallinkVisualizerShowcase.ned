@@ -10,13 +10,14 @@ import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211RadioMedium;
 import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
-import inet.visualizer.common.PhysicalLinkVisualizer;
+import inet.visualizer.canvas.physicallayer.PhysicalLinkCanvasVisualizer;
+
 
 network PhysicalLinkVisualizerEnablingShowcase
 {
     @display("bgb=600,300");
     submodules:
-        linkVisualizer: PhysicalLinkVisualizer {
+        linkVisualizer: PhysicalLinkCanvasVisualizer {
             parameters:
                 @display("p=100,50");
         }
