@@ -90,7 +90,7 @@ Further information
 -------------------
 
 For more information, refer to the NED documentation of
-:ned:`PhysicalEnvironmentVisualizer` and :ned:`SceneCanvasVisualizer`.
+:ned:`PhysicalEnvironmentVisualizer`, :ned:`SceneCanvasVisualizer` and :ned:`SceneOsgVisualizerBase`.
 
 
 Try It Yourself
