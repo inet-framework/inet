@@ -89,9 +89,9 @@ simulation to work. Most of the time, one could just use RadioMedium with its
 default parameters (with the exception of setting the analog signal representation
 type to dimensional when simulating CTI).
 
-For our simulation, we'll use :ned:`RadioMedium`. Since we'll have two different
-protocols, the analog model and the background noise of the radio medium and the
-protocol specific radios need to match (the analog model needs to be dimensional).
+For our simulation, we'll use :ned:`RadioMedium`, because we'll have two different
+protocols. The analog model and the background noise of the radio medium and the
+protocol specific radios need to be dimensional.
 We'll set just these two parameters, and leave the others on default.
 
 In INET, different types of radio modules (e.g. 802.11 and 802.15.4) can detect
@@ -175,7 +175,7 @@ The simulation is defined in the ``Coexistence`` configuration in
 :download:`omnetpp.ini <../omnetpp.ini>`. The radio medium module in the network
 is a :ned:`RadioMedium`. It is configured to use the :ned:`DimensionalMediumAnalogModel`.
 The background noise type is set to :ned:`IsotropicDimensionalBackgroundNoise`,
-with a spectral power density of -113 dBmW/MHz. Here is the radio medium configuration in
+with a power spectral density of -113 dBmW/MHz. Here is the radio medium configuration in
 :download:`omnetpp.ini <../omnetpp.ini>`:
 
 .. literalinclude:: ../omnetpp.ini

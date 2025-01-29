@@ -32,7 +32,7 @@ The transmission, propagation, and reception process is as follows:
 - The analog model submodule of the radio medium module applies attenuation (potentially in a space, time, and frequency-dependent way).
 - The receiver module gets a physical representation of the signal and the calculated signal-to-noise-and-interference-ratio (SNIR) from the radio medium module.
 
-The different types of transmitter, receivers and radio mediums each have a :par:`signalAnalogRepresentation` parameter
+The different types of transmitters, receivers and radio mediums each have a :par:`signalAnalogRepresentation` parameter
 to select one of the analog models.
 
 INET contains the following analog model types, presented in the order of increasing complexity:
@@ -63,7 +63,7 @@ Here are some of radio types available in INET:
 
 - :ned:`GenericRadio`: simple radio model with parameters for bitrate, header length and preamble duration; contains :ned:`GenericTransmitter` and :ned:`GenericReceiver`
 - :ned:`ApskRadio`: a hypotetical radio that uses one of the well-known modulations without utilizing techniques such as forward error correction, interleaving, or spreading; contains :ned:`ApskTransmitter` and :ned:`ApskReceiver`
-- :ned:`Ieee80211Radio`: Wifi radio; contains :ned:`Ieee80211Transmitter`, :ned:`Ieee80211Receiver`, and :ned:`Ieee80211Mac`
+- :ned:`Ieee80211Radio`: Wifi radio; contains :ned:`Ieee80211Transmitter` and :ned:`Ieee80211Receiver`.
 
 Unit Disk Model
 ---------------
@@ -165,8 +165,7 @@ spectra are not supported by this model (and result in an error).
    :align: center
    :width: 60%
 
-INET supports the scalar analog model in radio and radio medium modules for all available wireless technologies,
-such as IEEE 802.11, 802.15.4 and the generic :ned:`ApskRadio`.
+INET supports the scalar analog model in several radio and radio medium modules, such as IEEE 802.11, 802.15.4 and the generic :ned:`ApskRadio`.
 
 The scalar model is more realistic than the unit disk model but also more computationally intensive.
 It can't simulate partially overlapping spectra, only completely overlapping or not overlapping at all.
@@ -176,7 +175,7 @@ error modeling is needed.
 .. note:: In showcases and tutorials, the scalar model is the most commonly used, it's a kind of arbitrary default. When a less complex model is adequate in a showcase or tutorial, the unit disk model is used; when a more complex one is needed, the dimensional is chosen.
 
 Example: SNIR and Packet Error Rate vs. Distance
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In the example simulation, an :ned:`AdhocHost` sends UDP packets to another. The source host is stationary,
 the destination host moves away from the source host. As the distance increases between them,
@@ -288,8 +287,8 @@ The dimensional transmitters in INET use the API to create transmissions. For ex
 
 .. note:: The dimensional transmitters in INET select the most optimal representation for the signal, depending on the gains parameters (described later). For example, if the parameters describe a flat signal, they'll use a boxcar function (in 1D or 2D, whether the signal is flat in one or two dimensions). If the gains parameters describe a complex function, they'll use the generic interpolated function; the gains parameter string actually maps to the samples and the types of interpolation between them.
 
-All radios in INET, such as IEEE 802.11, narrowband and ultra-wideband 802.15.4,
-and APSK radio support the dimensional analog model (the 802.15.4 ultra-wideband version only supports the dimensional model).
+Several radios in INET, such as IEEE 802.11, narrowband and ultra-wideband 802.15.4,
+and APSK radio support the dimensional analog model.
 
 The signal shapes in frequency and time can be defined with the :par:`frequencyGains`
 and :par:`timeGains` parameters of transmitter modules. Here is an example signal spectrum definition:
