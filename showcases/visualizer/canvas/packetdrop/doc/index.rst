@@ -40,7 +40,7 @@ The format string can contain the following directives:
 - `%r`: drop reason number
 - `%s`: drop reason string
 
-Here are some reasons packets can be dropped:
+Here are some reasons for which packets can be dropped:
 
 .. For example, packets can be dropped for the following reasons:
 

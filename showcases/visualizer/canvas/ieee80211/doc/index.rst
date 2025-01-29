@@ -36,7 +36,7 @@ interfaces of all nodes are considered.
 
 Furthermore, the visualization takes the signal strength of the various Wifi networks into account, 
 indicating it with the number of levels in the Wifi icon. The visualizer's :par:`minPower` and :par:`maxPower`
-parameter can configure the indicated power levels.
+parameters control the range of indicated power levels.
 
 Basic use
 ---------
