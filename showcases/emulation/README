@@ -8,13 +8,15 @@ privilege after you're finished using network namespaces.
 
 Run the following commands to add the CAP_SYS_ADMIN privilege to opp_run:
 
-$> sudo setcap cap_sys_admin+ep /${your-omnetpp-root}/bin/opp_run_release
-$> sudo setcap cap_sys_admin+ep /${your-omnetpp-root}/bin/opp_run_dbg
+$> sudo setcap cap_sys_admin+ep $(which opp_run)
+$> sudo setcap cap_sys_admin+ep $(which opp_run_release)
+$> sudo setcap cap_sys_admin+ep $(which opp_run_dbg)
 
 To remove extra privileges after you're finished using network namespaces, use the following commands:
 
-$> sudo setcap -r /${your-omnetpp-root}/bin/opp_run_release
-$> sudo setcap -r /${your-omnetpp-root}/bin/opp_run_dbg
+$> sudo setcap -r $(which opp_run)
+$> sudo setcap -r $(which opp_run_release)
+$> sudo setcap -r $(which opp_run_dbg)
 
 Some Linux systems (Ubuntu 24.04 for example) use AppArmor for fine grained access control.
 On systems with AppArmor you need additional configuration to make the certain emulation showcases work:
