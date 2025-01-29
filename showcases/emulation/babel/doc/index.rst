@@ -159,14 +159,15 @@ We assign the following IP addresses:
 
 These network namespaces could be set up by shell scripts, but we can also use the
 :ned:`ExternalEnvironment` and :ned:`ExternalProcess` modules to specify
-commands to run on the host OS from the ini file. This makes the simulation setup self-contained (we don't need to run shell scripts). Also, this way the commands can be
+commands to run on the host OS. This makes the simulation self-contained (we don't need to run shell scripts). Also, this way the commands can be
 grouped logically with the network node they are associated with.
 
 In this simulation, we're unsharing user and network namespaces with the host OS, so that 
 we can use priviliged operations without ``sudo``, and without affecting the host OS.
 This also allows running multiple emulations concurrently, without them affecting each other.
-However, a disadvantage of this is not being able to see the network configuration and network state of the host OS's external processes.
-In general, this can be worked around with ``nsenter``. Here is the unshare setting in omnetpp.ini:
+However, a disadvantage of unsharing is not being able to see the network configuration and network state of the host OS's external processes
+in the usual way, with ``ip ns exec``.
+This can be worked around with ``nsenter``, as will be shown later. Here is the unshare setting in omnetpp.ini:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -175,7 +176,7 @@ In general, this can be worked around with ``nsenter``. Here is the unshare sett
 
 The :ned:`ExternalEnvironment` module deals with preparing the host OS environment
 for running the emulation, then cleaning up afterwards. Specifically, the module's :par:`setupCommand` is executed at module creation, and :ned:`teardownCommand` at module destruction.
-We use these parameters to create and destroy network namespaces and virtual network interfaces in the host OS for the containing network node.
+We use these parameters to create and destroy network namespaces and virtual network interfaces in the host OS for each network node.
 We include an :ned:`ExternalEnvironment` module in hosts by setting the :par:`hasEnvironment` parameter to ``true``:
 
 .. As the name suggests, :par:`setupCommand` is executed at module creation, and :ned:`teardownCommand` at module destruction.
@@ -232,9 +233,9 @@ We also employ an :ned:`ExternalApp` module to start the ping command in ``host0
 
    .. code-block:: shell
 
-      sudo setcap cap_sys_admin=ep $(which opp_run)
-      sudo setcap cap_sys_admin=ep $(which opp_run_release)
-      sudo setcap cap_sys_admin=ep $(which opp_run_dbg)
+      sudo setcap cap_sys_admin+ep $(which opp_run)
+      sudo setcap cap_sys_admin+ep $(which opp_run_release)
+      sudo setcap cap_sys_admin+ep $(which opp_run_dbg)
 
 .. (:ned:`ExternalApp` contains both an :ned:`ExternalEnvironment` and
   an :ned:`ExternalProcess` submodule.)
@@ -344,7 +345,7 @@ Similarly, we can use Wireshark to capture traffic on the virtual network interf
 Results
 -------
 
-The simulation can be started with the ``inet`` command from a terminal:
+The simulation can be started just like any other simulation (without setup/teardown) with the ``inet`` command from a terminal:
 
 .. code:: shell
 
@@ -415,8 +416,8 @@ Ensure that ``opp_env`` is installed on your system, then execute:
 
 .. code-block:: bash
 
-    $ opp_env run inet-4.6 --init -w inet-workspace --install --chdir \
-       -c 'cd inet-4.6.*/showcases/emulation/babel && inet'
+    $ opp_env run inet-4.6 --init -w inet-workspace --install --no-isolated --build-modes=release --options=full --chdir \
+       -c 'cd inet-4.6.*/showcases/emulation/babel && which sudo && sudo setcap cap_sys_admin=ep $(which opp_run_release) && inet'
 
 This command creates an ``inet-workspace`` directory, installs the appropriate
 versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
@@ -427,7 +428,7 @@ workspace and then open an interactive shell:
 
 .. code-block:: bash
 
-    $ opp_env install --init -w inet-workspace inet-4.6
+    $ opp_env install --init -w inet-workspace inet-4.6 --build-modes=release --options=full
     $ cd inet-workspace
     $ opp_env shell
 
