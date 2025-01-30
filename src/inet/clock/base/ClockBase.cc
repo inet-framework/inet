@@ -62,6 +62,21 @@ clocktime_t ClockBase::getClockTime() const
     return computeClockTimeFromSimTime(simTime());
 }
 
+simtime_t ClockBase::computeScheduleTime(clocktime_t clockTime)
+{
+    simtime_t currentSimulationTime = simTime();
+    simtime_t lowerSimulationTime = computeSimTimeFromClockTime(clockTime, true);
+    if (lowerSimulationTime >= currentSimulationTime)
+        return lowerSimulationTime;
+    else {
+        simtime_t upperSimulationTime = computeSimTimeFromClockTime(clockTime, false);
+        if (currentSimulationTime < upperSimulationTime)
+            return currentSimulationTime;
+        else
+            return lowerSimulationTime;
+    }
+}
+
 void ClockBase::scheduleClockEventAt(clocktime_t t, ClockEvent *msg)
 {
     if (t < getClockTime())
@@ -70,7 +85,7 @@ void ClockBase::scheduleClockEventAt(clocktime_t t, ClockEvent *msg)
     msg->setClock(this);
     msg->setRelative(false);
     msg->setArrivalClockTime(t);
-    targetModule->scheduleAt(computeSimTimeFromClockTime(t), msg);
+    targetModule->scheduleAt(computeScheduleTime(t), msg);
 }
 
 void ClockBase::scheduleClockEventAfter(clocktime_t clockTimeDelay, ClockEvent *msg)
@@ -83,7 +98,7 @@ void ClockBase::scheduleClockEventAfter(clocktime_t clockTimeDelay, ClockEvent *
     clocktime_t nowClock = getClockTime();
     clocktime_t arrivalClockTime = nowClock + clockTimeDelay;
     msg->setArrivalClockTime(arrivalClockTime);
-    simtime_t simTimeDelay = clockTimeDelay.isZero() ? SIMTIME_ZERO : computeSimTimeFromClockTime(arrivalClockTime) - simTime();
+    simtime_t simTimeDelay = clockTimeDelay.isZero() ? SIMTIME_ZERO : computeScheduleTime(arrivalClockTime) - simTime();
     targetModule->scheduleAfter(simTimeDelay, msg);
 }
 
