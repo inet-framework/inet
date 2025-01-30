@@ -30,6 +30,10 @@ class INET_API SettableClock : public OscillatorBasedClock, public IScriptable
     virtual void processCommand(const cXMLElement& node) override;
 
   public:
+    virtual void scheduleClockEventAt(clocktime_t t, ClockEvent *event) override;
+    virtual void scheduleClockEventAfter(clocktime_t delay, ClockEvent *event) override;
+    virtual ClockEvent *cancelClockEvent(ClockEvent *event) override;
+    virtual void handleClockEvent(ClockEvent *event) override;
     virtual ppm getOscillatorCompensation() const override { return oscillatorCompensation; }
 
     /**
