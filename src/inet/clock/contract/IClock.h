@@ -98,7 +98,7 @@ class INET_API IClock
      * current clock time, otherwise an error is raised. See CLOCKTIME_AS_SIMTIME
      * macro for simple type conversion.
      */
-    virtual simtime_t computeSimTimeFromClockTime(clocktime_t time) const = 0;
+    virtual simtime_t computeSimTimeFromClockTime(clocktime_t time, bool lowerBound = true) const = 0;
 
     /**
      * Schedules an event to be delivered to the caller module (i.e. the context
