@@ -416,7 +416,7 @@ Ensure that ``opp_env`` is installed on your system, then execute:
 
 .. code-block:: bash
 
-    $ opp_env run inet-4.6 --init -w inet-workspace --install --no-isolated --build-modes=release --options=full --chdir \
+    $ opp_env run inet-4.6 --init -w inet-workspace --install --no-isolated --build-modes=release --options=inet:full --chdir \
        -c 'cd inet-4.6.*/showcases/emulation/babel && which sudo && sudo setcap cap_sys_admin=ep $(which opp_run_release) && inet'
 
 This command creates an ``inet-workspace`` directory, installs the appropriate
@@ -428,9 +428,10 @@ workspace and then open an interactive shell:
 
 .. code-block:: bash
 
-    $ opp_env install --init -w inet-workspace inet-4.6 --build-modes=release --options=full
+    $ opp_env install --init -w inet-workspace inet-4.6 --build-modes=release --options=inet:full
     $ cd inet-workspace
-    $ opp_env shell
+    $ sudo setcap cap_sys_admin+ep omnetpp-*/bin/opp_run_release
+    $ opp_env shell --options=inet:full
 
 Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
 then start exploring.
