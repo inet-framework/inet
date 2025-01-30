@@ -1379,11 +1379,17 @@ std::string unit2string(const value<Value, Unit>& value) {
 
 } // namespace values
 
-template<typename Value>
-std::ostream& operator<<(std::ostream& os, const value<Value, units::b>& value)
+template <typename T>
+bool isDivisibleBy8(T value) {
+    if constexpr (std::is_integral_v<T>) return value % 8 == 0;
+    else if constexpr (std::is_floating_point_v<T>) return std::fmod(value, 8.0) == 0.0;
+    else return false;
+}
+
+template<typename Value> std::ostream& operator<<(std::ostream& os, const value<Value, units::b>& value)
 {
-    if (value.get() % 8 == 0)
-        os << values::B(value);
+    if (isDivisibleBy8(value.get()))
+        os << values::B(value.get() / 8);
     else {
         os << value.get() << ' ';
         output_unit<units::b>::fn(os);
