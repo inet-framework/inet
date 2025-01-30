@@ -1,0 +1,66 @@
+%description:
+Tests constant drift oscillator.
+
+%includes:
+#include "inet/clock/contract/IOscillator.h"
+
+using namespace omnetpp;
+using namespace inet;
+
+%file: TestNetwork.ned
+
+import inet.clock.oscillator.ConstantDriftOscillator;
+
+network TestNetwork
+{
+    submodules:
+        test: Test;
+        oscillator: ConstantDriftOscillator;
+}
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+network = TestNetwork
+
+*.oscillator.nominalTickLength = 1ms
+*.oscillator.driftRate = -500000 ppm
+*.oscillator.tickOffset = 300us
+
+%activity:
+
+#define CHECK(x) { auto r = oscillator->x; std::cout << #x << " -> "<< r << std::endl; }
+
+auto oscillator = check_and_cast<IOscillator *>(cSimulation::getActiveSimulation()->getModuleByPath("oscillator"));
+CHECK(computeTicksForInterval(0));
+CHECK(computeTicksForInterval(0.0016999999));
+CHECK(computeTicksForInterval(0.0017));
+CHECK(computeTicksForInterval(0.0036999999));
+CHECK(computeTicksForInterval(0.0037));
+CHECK(computeTicksForInterval(0.9996999999));
+CHECK(computeTicksForInterval(0.9997));
+CHECK(computeTicksForInterval(1.9996999999));
+CHECK(computeTicksForInterval(1.9997));
+
+CHECK(computeIntervalForTicks(0));
+CHECK(computeIntervalForTicks(1));
+CHECK(computeIntervalForTicks(2));
+CHECK(computeIntervalForTicks(500));
+CHECK(computeIntervalForTicks(1000));
+
+%contains-regex: stdout
+.*?computeTicksForInterval\(0\) -> 0
+.*?computeTicksForInterval\(0.0016999999\) -> 0
+.*?computeTicksForInterval\(0.0017\) -> 1
+.*?computeTicksForInterval\(0.0036999999\) -> 1
+.*?computeTicksForInterval\(0.0037\) -> 2
+.*?computeTicksForInterval\(0.9996999999\) -> 499
+.*?computeTicksForInterval\(0.9997\) -> 500
+.*?computeTicksForInterval\(1.9996999999\) -> 999
+.*?computeTicksForInterval\(1.9997\) -> 1000
+.*?computeIntervalForTicks\(0\) -> 0
+.*?computeIntervalForTicks\(1\) -> 0.0017
+.*?computeIntervalForTicks\(2\) -> 0.0037
+.*?computeIntervalForTicks\(500\) -> 0.9997
+.*?computeIntervalForTicks\(1000\) -> 1.9997
+$
