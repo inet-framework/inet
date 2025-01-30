@@ -7,7 +7,7 @@
 
 #include "inet/clock/model/SettableClock.h"
 
-#include "inet/clock/oscillator/ConstantDriftOscillator.h"
+#include "inet/clock/base/DriftingOscillatorBase.h"
 #include "inet/common/XMLUtils.h"
 
 namespace inet {
@@ -98,8 +98,8 @@ void SettableClock::setClockTime(clocktime_t newClockTime, ppm oscillatorCompens
     if (newClockTime != oldClockTime) {
         emit(timeChangedSignal, oldClockTime.asSimTime());
         if (resetOscillator) {
-            if (auto constantDriftOscillator = dynamic_cast<ConstantDriftOscillator *>(oscillator))
-                constantDriftOscillator->setTickOffset(0);
+            if (auto driftingOscillator = dynamic_cast<DriftingOscillatorBase *>(oscillator))
+                driftingOscillator->setTickOffset(0);
         }
         simtime_t currentSimTime = simTime();
         EV_INFO << "Setting clock time from " << oldClockTime << " to " << newClockTime << " at simtime " << currentSimTime << ".\n";
