@@ -41,6 +41,8 @@ class INET_API ClockBase : public SimpleModule, public IClock
         return target;
     }
 
+    simtime_t computeScheduleTime(clocktime_t time);
+
   public:
     virtual clocktime_t getClockTime() const override;
 

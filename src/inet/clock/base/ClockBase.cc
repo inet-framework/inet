@@ -49,6 +49,27 @@ clocktime_t ClockBase::getClockTime() const
     return clockEventTime != -1 ? clockEventTime : computeClockTimeFromSimTime(simTime());
 }
 
+simtime_t ClockBase::computeScheduleTime(clocktime_t clockTime)
+{
+    DEBUG_ENTER(clockTime);
+    simtime_t currentSimulationTime = simTime();
+    simtime_t lowerSimulationTime = computeSimTimeFromClockTime(clockTime, true);
+    DEBUG_OUT << DEBUG_FIELD(lowerSimulationTime) << std::endl;
+    simtime_t result;
+    if (lowerSimulationTime >= currentSimulationTime)
+        result = lowerSimulationTime;
+    else {
+        simtime_t upperSimulationTime = computeSimTimeFromClockTime(clockTime, false);
+        DEBUG_OUT << DEBUG_FIELD(upperSimulationTime) << std::endl;
+        if (currentSimulationTime < upperSimulationTime)
+            result = currentSimulationTime;
+        else
+            result = lowerSimulationTime; // NOTE: upperSimulationTime is exclusive
+    }
+    DEBUG_LEAVE(result);
+    return result;
+}
+
 void ClockBase::scheduleClockEventAt(clocktime_t t, ClockEvent *msg)
 {
     if (t < getClockTime())
@@ -57,7 +78,7 @@ void ClockBase::scheduleClockEventAt(clocktime_t t, ClockEvent *msg)
     msg->setClock(this);
     msg->setRelative(false);
     msg->setArrivalClockTime(t);
-    targetModule->scheduleAt(computeSimTimeFromClockTime(t), msg);
+    targetModule->scheduleAt(computeScheduleTime(t), msg);
 }
 
 void ClockBase::scheduleClockEventAfter(clocktime_t clockTimeDelay, ClockEvent *msg)
@@ -70,7 +91,7 @@ void ClockBase::scheduleClockEventAfter(clocktime_t clockTimeDelay, ClockEvent *
     clocktime_t nowClock = getClockTime();
     clocktime_t arrivalClockTime = nowClock + clockTimeDelay;
     msg->setArrivalClockTime(arrivalClockTime);
-    simtime_t simTimeDelay = clockTimeDelay.isZero() ? SIMTIME_ZERO : computeSimTimeFromClockTime(arrivalClockTime) - simTime();
+    simtime_t simTimeDelay = clockTimeDelay.isZero() ? SIMTIME_ZERO : computeScheduleTime(arrivalClockTime) - simTime();
     targetModule->scheduleAfter(simTimeDelay, msg);
 }
 
