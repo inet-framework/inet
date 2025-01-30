@@ -31,11 +31,11 @@ C:(ClockTestApp)ClockTestNetwork.host.app: arrived After_1.2: simtime: 2.4, cloc
 C:(ClockTestApp)ClockTestNetwork.host.app: schedule After_1.2 after clock: 1.2, scheduled simtime: 4.8, scheduled clock: 3.4
 C:(ScenarioManager)ClockTestNetwork.scenarioManager: processing <set-clock> command...
 C:(SettableClock)ClockTestNetwork.host.clock: Setting clock time from 2.25 to 5 at simtime 2.5.
-C:(SettableClock)ClockTestNetwork.host.clock: Scheduling overdue clock event Timer_2.89 to current simulation time.
-C:(SettableClock)ClockTestNetwork.host.clock: Scheduling overdue clock event Timer_2.9999999 to current simulation time.
-C:(SettableClock)ClockTestNetwork.host.clock: Scheduling overdue clock event Timer_3.11 to current simulation time.
+C:(SettableClock)ClockTestNetwork.host.clock: Executing overdue clock event Timer_2.89.
 C:(ClockTestApp)ClockTestNetwork.host.app: arrived Timer_2.89: simtime: 2.5, clock: 2.89
+C:(SettableClock)ClockTestNetwork.host.clock: Executing overdue clock event Timer_2.9999999.
 C:(ClockTestApp)ClockTestNetwork.host.app: arrived Timer_2.9999999: simtime: 2.5, clock: 2.9999999
+C:(SettableClock)ClockTestNetwork.host.clock: Executing overdue clock event Timer_3.11.
 C:(ClockTestApp)ClockTestNetwork.host.app: arrived Timer_3.11: simtime: 2.5, clock: 3.11
 C:(ClockTestApp)ClockTestNetwork.host.app: arrived After_1.2: simtime: 4.8, clock: 6.15
 C:(ClockTestApp)ClockTestNetwork.host.app: schedule After_1.2 after clock: 1.2, scheduled simtime: 7.2, scheduled clock: 7.35
