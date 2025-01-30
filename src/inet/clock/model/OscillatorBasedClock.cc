@@ -81,12 +81,13 @@ clocktime_t OscillatorBasedClock::computeClockTimeFromSimTime(simtime_t t) const
                                 oscillator->getNominalTickLength() * (1 + getOscillatorCompensation().get<unit>()));
 }
 
-simtime_t OscillatorBasedClock::computeSimTimeFromClockTime(clocktime_t t) const
+simtime_t OscillatorBasedClock::computeSimTimeFromClockTime(clocktime_t t, bool lowerBound) const
 {
     ASSERT(t >= getClockTime());
-    return oscillator->getComputationOrigin() +
-           oscillator->computeIntervalForTicks((t - originClockTime).dbl() / oscillator->getNominalTickLength() / (1 + getOscillatorCompensation().get<unit>()) +
-                                               oscillator->computeTicksForInterval(originSimulationTime - oscillator->getComputationOrigin()));
+    uint64_t numTicks = (t - originClockTime).dbl() / oscillator->getNominalTickLength() / (1 + getOscillatorCompensation().get<unit>()) +
+                        oscillator->computeTicksForInterval(originSimulationTime - oscillator->getComputationOrigin()) +
+                        (lowerBound ? 0 : 1);
+    return oscillator->getComputationOrigin() + oscillator->computeIntervalForTicks(numTicks);
 }
 
 void OscillatorBasedClock::scheduleClockEventAt(clocktime_t time, ClockEvent *event)
