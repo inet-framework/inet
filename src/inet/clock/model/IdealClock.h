@@ -14,10 +14,6 @@ namespace inet {
 
 class INET_API IdealClock : public ClockBase
 {
-  protected:
-    virtual void initialize(int stage) override;
-    virtual void finish() override;
-
   public:
     virtual clocktime_t computeClockTimeFromSimTime(simtime_t t) const override;
     virtual simtime_t computeSimTimeFromClockTime(clocktime_t t) const override;
