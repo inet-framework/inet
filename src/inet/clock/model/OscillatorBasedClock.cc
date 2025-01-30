@@ -102,6 +102,7 @@ simtime_t OscillatorBasedClock::computeSimTimeFromClockTime(clocktime_t t) const
 
 void OscillatorBasedClock::scheduleClockEventAt(clocktime_t time, ClockEvent *event)
 {
+    ASSERTCMP(>=, time, getClockTime());
     int64_t roundedTime = roundingFunction(time.raw(), oscillator->getNominalTickLength().raw());
     ClockBase::scheduleClockEventAt(ClockTime().setRaw(roundedTime), event);
     events.push_back(event);
@@ -109,6 +110,7 @@ void OscillatorBasedClock::scheduleClockEventAt(clocktime_t time, ClockEvent *ev
 
 void OscillatorBasedClock::scheduleClockEventAfter(clocktime_t delay, ClockEvent *event)
 {
+    ASSERTCMP(>=, delay, 0);
     int64_t roundedDelay = roundingFunction(delay.raw(), oscillator->getNominalTickLength().raw());
     ClockBase::scheduleClockEventAfter(ClockTime().setRaw(roundedDelay), event);
     events.push_back(event);
