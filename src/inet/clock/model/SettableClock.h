@@ -24,7 +24,6 @@ class INET_API SettableClock : public OscillatorBasedClock, public IScriptable
     virtual void initialize(int stage) override;
 
     virtual OverdueClockEventHandlingMode getOverdueClockEventHandlingMode(ClockEvent *event) const;
-    virtual simtime_t handleOverdueClockEvent(ClockEvent *event, simtime_t t);
 
     // IScriptable implementation
     virtual void processCommand(const cXMLElement& node) override;
@@ -34,6 +33,7 @@ class INET_API SettableClock : public OscillatorBasedClock, public IScriptable
     virtual void scheduleClockEventAfter(clocktime_t delay, ClockEvent *event) override;
     virtual ClockEvent *cancelClockEvent(ClockEvent *event) override;
     virtual void handleClockEvent(ClockEvent *event) override;
+
     virtual ppm getOscillatorCompensation() const override { return oscillatorCompensation; }
 
     /**
