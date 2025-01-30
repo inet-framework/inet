@@ -65,11 +65,22 @@ void OscillatorBasedClock::initialize(int stage)
         WATCH_PTRVECTOR(events);
     }
     else if (stage == INITSTAGE_CLOCK) {
-        originSimulationTime = simTime();
-        originClockTime = par("initialClockTime");
+        setOrigin(simTime(), par("initialClockTime"));
         if (originClockTime.raw() % oscillator->getNominalTickLength().raw() != 0)
             throw cRuntimeError("Initial clock time must be a multiple of the oscillator nominal tick length");
     }
+}
+
+void OscillatorBasedClock::setOrigin(simtime_t simulationTime, clocktime_t clockTime)
+{
+    originSimulationTime = simulationTime;
+    originClockTime = clockTime;
+    lastClockTime = clockTime;
+    ASSERTCMP(<=, originSimulationTime, simTime());
+    ASSERTCMP(>=, originSimulationTime, oscillator->getComputationOrigin());
+    ASSERTCMP(>=, originSimulationTime, computeSimTimeFromClockTime(originClockTime, true));
+    ASSERTCMP(<=, originSimulationTime, computeSimTimeFromClockTime(originClockTime, false));
+    ASSERTCMP(==, originClockTime, computeClockTimeFromSimTime(originSimulationTime));
 }
 
 clocktime_t OscillatorBasedClock::computeClockTimeFromSimTime(simtime_t t) const
@@ -132,9 +143,7 @@ void OscillatorBasedClock::receiveSignal(cComponent *source, int signal, cObject
     Enter_Method("%s", cComponent::getSignalName(signal));
 
     if (signal == IOscillator::preOscillatorStateChangedSignal) {
-        // NOTE: the origin clock must be set first
-        originClockTime = getClockTime();
-        originSimulationTime = simTime();
+        setOrigin(simTime(), getClockTime());
     }
     else if (signal == IOscillator::postOscillatorStateChangedSignal) {
         simtime_t currentSimTime = simTime();
