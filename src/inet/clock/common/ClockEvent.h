@@ -13,10 +13,12 @@
 namespace inet {
 
 class ClockBase;
+class SettableClock;
 
 class INET_API ClockEvent : public ClockEvent_Base
 {
   friend ClockBase;
+  friend SettableClock;
 
   protected:
     virtual void execute() override;
