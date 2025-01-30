@@ -1,0 +1,46 @@
+%description:
+Tests constant drift oscillator emitting numTicks signals.
+
+%includes:
+#include "inet/clock/contract/IOscillator.h"
+
+using namespace omnetpp;
+using namespace inet;
+
+%file: TestNetwork.ned
+
+import inet.clock.oscillator.ConstantDriftOscillator;
+
+network TestNetwork
+{
+    submodules:
+        oscillator: ConstantDriftOscillator;
+}
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+network = TestNetwork
+sim-time-limit = 1.3s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%t: "
+
+*.oscillator.emitNumTicksSignal = true
+*.oscillator.nominalTickLength = 1ms
+*.oscillator.driftRate = -500000 ppm
+*.oscillator.tickOffset = 300us
+
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
+%contains-regex: stdout
+0: Initialized oscillator.*?numTicks = 0\.
+
+%contains-regex: stdout
+0\.0017: Handling oscillator tick event.*?numTicks = 1\.
+
+%contains-regex: stdout
+0\.0037: Handling oscillator tick event.*?numTicks = 2\.
+
+%contains-regex: stdout
+1\.0017: Handling oscillator tick event.*?numTicks = 501\.
