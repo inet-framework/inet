@@ -30,6 +30,8 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
   protected:
     virtual void initialize(int stage) override;
 
+    virtual void setOrigin(simtime_t simulationTime, clocktime_t clockTime);
+
   public:
     virtual ~OscillatorBasedClock();
 
