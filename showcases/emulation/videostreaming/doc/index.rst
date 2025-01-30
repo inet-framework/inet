@@ -171,9 +171,10 @@ Ensure that ``opp_env`` is installed on your system, then execute:
 
 .. code-block:: bash
 
-    $ opp_env install --init -w inet-workspace inet-latest --options=inet:full
+    $ opp_env install --init -w inet-workspace inet-latest --build-modes=release --options=inet:full
     $ cd inet-workspace
-    $ opp_env shell
+    $ sudo setcap cap_sys_admin+ep omnetpp-*/bin/opp_run_release
+    $ opp_env shell --options=inet:full
 
 This command creates an ``inet-workspace`` directory, installs the appropriate
 versions of INET and OMNeT++ within it, and opens an interactive shell. (The
