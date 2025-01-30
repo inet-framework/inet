@@ -1,0 +1,46 @@
+%description:
+Tests clock oscillator compensation factor.
+
+%includes:
+#include "inet/clock/model/SettableClock.h"
+
+using namespace omnetpp;
+using namespace inet;
+
+%file: TestNetwork.ned
+
+import inet.clock.model.SettableClock;
+
+network TestNetwork
+{
+    submodules:
+        test: Test;
+        clock: SettableClock;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = TestNetwork
+*.clock.oscillatorCompensation = 100000ppm
+*.clock.oscillator.nominalTickLength = 1us
+
+%activity:
+
+#define CHECK(x) { auto r = clock->x; std::cout << #x << " -> "<< r << std::endl; }
+
+auto clock = check_and_cast<SettableClock *>(cSimulation::getActiveSimulation()->getModuleByPath("clock"));
+CHECK(computeSimTimeFromClockTime(0));
+CHECK(computeSimTimeFromClockTime(0.000001));
+CHECK(computeSimTimeFromClockTime(1));
+
+CHECK(computeClockTimeFromSimTime(0));
+CHECK(computeClockTimeFromSimTime(0.000000909091));
+CHECK(computeClockTimeFromSimTime(0.909091));
+
+%contains-regex: stdout
+.*?computeSimTimeFromClockTime\(0\) -> 0
+.*?computeSimTimeFromClockTime\(0.000001\) -> 0.000000909091
+.*?computeSimTimeFromClockTime\(1\) -> 0.909090909091
+.*?computeClockTimeFromSimTime\(0\) -> 0
+.*?computeClockTimeFromSimTime\(0.000000909091\) -> 0.000001
+.*?computeClockTimeFromSimTime\(0.909091\) -> 1
