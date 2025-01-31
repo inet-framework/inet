@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
+#ifdef INET_WITH_SELFDOC
 
 #include "inet/common/selfdoc/SelfDocumenterFingerprintCalculator.h"
 
@@ -100,3 +101,4 @@ void SelfDocumenterFingerprintCalculator::addEvent(cEvent *event)
 
 } // namespace
 
+#endif // INET_WITH_SELFDOC
