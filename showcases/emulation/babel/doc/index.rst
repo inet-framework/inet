@@ -417,7 +417,7 @@ Ensure that ``opp_env`` is installed on your system, then execute:
 .. code-block:: bash
 
     $ opp_env run inet-4.6 --init -w inet-workspace --install --no-isolated --build-modes=release --options=inet:full --chdir \
-       -c 'cd inet-4.6.*/showcases/emulation/babel && which sudo && sudo setcap cap_sys_admin=ep $(which opp_run_release) && inet'
+       -c 'cd inet-4.6.*/showcases/emulation/babel && sudo setcap cap_sys_admin=ep $(which opp_run_release) && inet'
 
 This command creates an ``inet-workspace`` directory, installs the appropriate
 versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
