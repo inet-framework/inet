@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="/inet/examples/ethernet/TenBaseT1S/results/Latency-*.vec"/>
-        <input pattern="/inet/examples/ethernet/TenBaseT1S/results/Latency-*.sca"/>
+        <input pattern="results/Latency-*.vec"/>
+        <input pattern="results/Latency-*.sca"/>
     </inputs>
     <charts>
         <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1944502628" name="queue length of node[0]" resultTypes="vector" template="linechart_native" type="LINE">

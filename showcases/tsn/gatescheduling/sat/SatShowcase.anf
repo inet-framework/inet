@@ -2,7 +2,7 @@
 <analysis version="2">
     <inputs>
         <input pattern="results/SAT-#0.vec"/>
-        <input pattern="/inet/showcases/tsn/gatescheduling/eager/results/Eager-#0.vec"/>
+        <input pattern="results/Eager-#0.vec"/>
     </inputs>
     <charts>
         <chart icon="icons/full/obj/linechart.png" id="1196566184" name="Application End-to-End Delay" template="linechart_native" type="LINE">

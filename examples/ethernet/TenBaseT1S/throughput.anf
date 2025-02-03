@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="/inet/examples/ethernet/TenBaseT1S/results/Throughput-*.vec"/>
-        <input pattern="/inet/examples/ethernet/TenBaseT1S/results/Throughput-*.sca"/>
+        <input pattern="results/Throughput-*.vec"/>
+        <input pattern="results/Throughput-*.sca"/>
     </inputs>
     <charts>
         <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1302576114" name="queue length of node[0]" resultTypes="vector" template="linechart_native" type="LINE">

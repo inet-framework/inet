@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="/inet/examples/ethernet/TenBaseT1S/results/Smoke-*.vec"/>
-        <input pattern="/inet/examples/ethernet/TenBaseT1S/results/Smoke-*.sca"/>
+        <input pattern="results/Smoke-*.vec"/>
+        <input pattern="results/Smoke-*.sca"/>
     </inputs>
     <charts/>
 </analysis>
