@@ -9,7 +9,9 @@ package inet.clock.servo;
 
 import inet.clock.model.OscillatorBasedClock;
 
-// TODO: Write documentation
+// A base module for servo clocks that extends the OscillatorBasedClock.
+// This module serves as a foundation for implementing servo clock mechanisms,
+// providing a structured approach for handling clock adjustments and overdue events.
 module ServoClockBase extends OscillatorBasedClock
 {
     parameters:

@@ -59,7 +59,14 @@ and the network interface levels. The following clock models are available:
 -  :ned:`IdealClock`: clock time is identical to the simulation time.
 -  :ned:`OscillatorBasedClock`: clock time is the number of oscillator ticks
    multiplied by the nominal tick length.
--  :ned:`SettableClock`: a clock that can be set to a different clock time.
+-  :ned:`ServoClockBase`: A based servo clock module provides core functionalities 
+   for clock adjustment and overdue event handling.
+-  :ned:`PiServoClock`: A PI-based servo clock using proportional (kp) and 
+   integral (ki) gains to synchronize with an external time source and compensate for drift.
+-  :ned:`InstantServoClock`: A simple clock servo module that supports three modes 
+   of operation to adjust the clock and drift.
+-  :ned:`MultiClock`: Manages multiple subclocks with a programmatically switchable 
+   active clock, useful for multi-domain gPTP synchronization.
 
 Clock Time
 ----------
@@ -134,10 +141,12 @@ provides clocks and oscillators that implement the interface required by the
 oscillator states from the :ned:`ScenarioManager` XML script and also to mix
 these operations with many other supported operations.
 
-For example, the :ned:`SettableClock` model supports setting the clock time and
-optionally resetting the oscillator at a specific moment of simulation time
-as follows:
+For example, the :ned:`ServoClockBase` model supports setting the clock time and
+optionally resetting the oscillator at a specific moment of simulation time.
+The :ned:`InstantServoClock` model is the extended version of the :ned:`ServoClockBase`,
+which supports adjusting the clock time, as well as the oscillator drift rate as follows:
 
+.. TODO: Check if the following XML code is correct.
 .. code-block:: xml
 
    <set-clock at="10 s" module="server.clock" time="1.2 s" reset-oscillator="true"/>
