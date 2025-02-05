@@ -5,14 +5,9 @@
         <input pattern="results/General-#0.vec"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/linechart.png" id="1618213748" name="Client application traffic and traffic shaper incoming traffic" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="2108925469" name="Client application traffic and traffic shaper incoming traffic" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-import os
-import sys
-# TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
-sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
-import matplotlib.pyplot as plt
 import inet.scave.plot
 import matplotlib.pyplot as plt
 default_colors = inet.scave.plot.default_colors
@@ -25,10 +20,11 @@ utils.preconfigure_plot(props)
 filter_expression = props["filter"]
 start_time = float(props["vector_start_time"] or -math.inf)
 end_time = float(props["vector_end_time"] or math.inf)
+omit_empty_vectors = props["omit_empty_vectors"] == "true"
 
 # query vector data into a data frame
 try:
-    df = results.get_vectors(filter_expression, include_attrs=True, include_runattrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
+    df = results.get_vectors(filter_expression, include_attrs=True, include_runattrs=True, include_itervars=True, start_time=start_time, end_time=end_time, omit_empty_vectors=omit_empty_vectors)
 except results.ResultQueryError as e:
     raise chart.ChartScriptError("Error while querying results: " + str(e))
 
@@ -76,33 +72,43 @@ utils.export_data_if_needed(df, props)
     <styledText x:id="filter" x:style="BORDER|V_SCROLL|H_SCROLL" x:id.contentAssist="filter" x:id.resultType="vector">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
     </styledText>
-    <button x:id="simplify" x:style="PUSH" text="Simplify" x:id.role="simplify" x:id.targetControl="filter">
-      <layoutData x:class="GridData" horizontalAlignment="END" />
-    </button>
+
+    <composite>
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" />
+      <layout x:class="GridLayout" numColumns="2" makeColumnsEqualWidth="false" marginWidth="0" />
+      <x:children>
+        <button x:id="omit_empty_vectors" x:style="CHECK" x:id.default="false" text="Omit empty vectors">
+          <layoutData x:class="GridData" horizontalAlignment="BEGINNING" verticalAlignment="BEGINNING" />
+        </button>
+        <button x:id="simplify" x:style="PUSH" text="Simplify" x:id.role="simplify" x:id.targetControl="filter">
+          <layoutData x:class="GridData" horizontalAlignment="END" grabExcessHorizontalSpace="true"/>
+        </button>
+      </x:children>
+    </composite>
     <composite>
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" />
       <layout x:class="GridLayout" numColumns="2" makeColumnsEqualWidth="false" />
       <x:children>
-        <group text="Vector operations (one per line)">
-          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
-          <layout x:class="GridLayout" numColumns="1" />
-          <x:children>
-            <text x:id="vector_operations" x:style="BORDER|MULTI|V_SCROLL|H_SCROLL" x:id.contentAssist="vectorops">
-              <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
-            </text>
-          </x:children>
-        </group>
         <group text="Crop interval">
           <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="false" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
           <layout x:class="GridLayout" numColumns="2" />
           <x:children>
             <label text="Start time (sec):" />
             <text x:id="vector_start_time" x:style="BORDER">
-              <layoutData x:class="GridData" widthHint="120" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false" />
+              <layoutData x:class="GridData" widthHint="180" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false" />
             </text>
             <label text="End time (sec):" />
             <text x:id="vector_end_time" x:style="BORDER">
-              <layoutData x:class="GridData" widthHint="120" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false" />
+              <layoutData x:class="GridData" widthHint="180" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false" />
+            </text>
+          </x:children>
+        </group>
+        <group text="Vector operations (one per line)">
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
+          <layout x:class="GridLayout" numColumns="1" />
+          <x:children>
+            <text x:id="vector_operations" x:style="BORDER|MULTI|V_SCROLL|H_SCROLL" x:id.contentAssist="vectorops">
+              <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
             </text>
           </x:children>
         </group>
@@ -124,7 +130,7 @@ utils.export_data_if_needed(df, props)
     <package name="org.omnetpp.ned.editor.wizards.support" />
     <package name="org.omnetpp.cdt.wizard.support" />
   </import>
-  <layout x:class="GridLayout" numColumns="2"/>
+  <layout x:class="GridLayout" numColumns="2" makeColumnsEqualWidth="true"/>
 
   <x:children>
 
@@ -198,7 +204,29 @@ utils.export_data_if_needed(df, props)
 
     <label text="Marker size:"/>
     <spinner x:id="markersize" x:id.default="5" selection="6" minimum="0" maximum="100" x:style="BORDER"/>
+      </x:children>
+    </group>
 
+    <group text="Hints">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+      <layout x:class="GridLayout" numColumns="1"/>
+      <x:children>
+
+        <label x:style="WRAP" text="* To change the set of colors/markers used in Auto mode, choose a different cycle seed on the Styling page">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
+
+        <label x:style="WRAP" text="* To have more control over the specific colors/markers chosen, add properties in the Advanced page. Examples:">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
+
+        <label x:style="WRAP" text="       `axes.prop_cycle: cycler('color', ['blue', 'green', 'red'])`  # on a Matplotlib chart: selects colors">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
+
+        <label x:style="WRAP" text="       `Line.Color/3: yellow`  # on a native chart: selects the color of the 3rd line">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
       </x:children>
     </group>
 
@@ -412,11 +440,15 @@ utils.export_data_if_needed(df, props)
           <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
           <layout x:class="GridLayout" numColumns="1" />
           <x:children>
-            <label text="Sed-style regex replacements inside the labels (/foo/bar/, one per line):" />
-            <styledText x:id="legend_replacements" x:style="BORDER|V_SCROLL|H_SCROLL">
+            <label x:style='WRAP' text="Enter string replacements (foo --&gt; bar) or sed-style replacements (/foo-regex/bar-regex/) to be applied to the labels, one per line:">
+              <layoutData x:class='GridData' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+            </label>
+            <styledText x:id="legend_replacements" x:style="BORDER|V_SCROLL|H_SCROLL" x:id.contentAssist="columns">
               <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
             </styledText>
-            <label text="Hint: Use \1, \2, etc. to refer back to parenthesized groups; data frame colums ($name, ${name}) also recognized"/>
+            <label x:style='WRAP' text="Hint: $name or ${name} inserts the content of a data frame column; use $$ to insert dollar sign">
+              <layoutData x:class='GridData' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+            </label>
             <!--
             <label text="Examples:"/>
             <label text='- &quot;/tcp/TCP/&quot; ==&gt; change &quot;tcp&quot; to &quot;TCP&quot;'/>
@@ -430,6 +462,57 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>]]></dialogPage>
+            <dialogPage id="ORDERING" label="Ordering"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+<xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
+
+  <import xmlns='http://sweet_swt.sf.net/xswt'>
+    <package name='java.lang'/>
+    <package name='org.eclipse.swt.widgets' />
+    <package name='org.eclipse.swt.graphics' />
+    <package name='org.eclipse.swt.layout' />
+    <package name='org.eclipse.swt.custom' />
+    <package name='org.omnetpp.common.wizard.support' />
+    <package name='org.omnetpp.ned.editor.wizards.support' />
+    <package name='org.omnetpp.cdt.wizard.support' />
+  </import>
+
+  <layout x:class='GridLayout'/>
+
+  <x:children>
+
+    <group text="Ordering of items on the legend and on the plot">
+      <layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+        <!-- ordering_regex_list -->
+        <label text='Primary ordering (one regex per line):'/>
+        <label text='Secondary ordering (one regex per line):'/>
+        <text x:id='ordering_regex_list' x:style='BORDER|WRAP|MULTI|V_SCROLL'>
+          <layoutData x:class='GridData' heightHint='60' horizontalAlignment='FILL' verticalAlignment='FILL' grabExcessHorizontalSpace='true' grabExcessVerticalSpace='true'/>
+        </text>
+
+        <!-- secondary_ordering_regex_list -->
+        <text x:id='secondary_ordering_regex_list' x:style='BORDER|WRAP|MULTI|V_SCROLL'>
+          <layoutData x:class='GridData' heightHint='60' horizontalAlignment='FILL' verticalAlignment='FILL' grabExcessHorizontalSpace='true' grabExcessVerticalSpace='true'/>
+        </text>
+
+        <!-- hint -->
+        <label x:style='WRAP' text='NOTE: Items will be ordered based on legend labels. Specify a series of regexes, one per line, to define the ranking of items. Each item&apos;s rank will be determined by the index of the first regex it matches. After sorting, items matching the first regex will appear at the top, those matching the second regex will be placed below, and so forth. Case-sensitive substring match is used.'>
+          <layoutData x:class='GridData' horizontalSpan='2' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+        </label>
+
+        <!-- sorting -->
+        <button x:id='sorting' text='Use alphabetical sorting as tertiary ordering' x:style='CHECK' x:id.default="true">
+          <layoutData x:class='GridData' horizontalSpan='2'/>
+        </button>
+
+      </x:children>
+    </group>
+
+  </x:children>
+</xswt>
+]]></dialogPage>
             <dialogPage id="STYLING" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
@@ -656,14 +739,14 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value="1"/>
             <property name="image_export_width" value="9"/>
             <property name="matplotlibrc" value="savefig.transparent : True"/>
+            <property name="ordering_regex_list" value=""/>
+            <property name="sorting" value="true"/>
+            <property name="secondary_ordering_regex_list" value=""/>
+            <property name="omit_empty_vectors" value="false"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="882358521" name="Shaper Incoming and Outgoing Traffic" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1968183458" name="Shaper Incoming and Outgoing Traffic" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-import os
-import sys
-# TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
-sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
 import inet.scave.plot
 default_colors = inet.scave.plot.default_colors
@@ -676,10 +759,11 @@ utils.preconfigure_plot(props)
 filter_expression = props["filter"]
 start_time = float(props["vector_start_time"] or -math.inf)
 end_time = float(props["vector_end_time"] or math.inf)
+omit_empty_vectors = props["omit_empty_vectors"] == "true"
 
 # query vector data into a data frame
 try:
-    df = results.get_vectors(filter_expression, include_attrs=True, include_runattrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
+    df = results.get_vectors(filter_expression, include_attrs=True, include_runattrs=True, include_itervars=True, start_time=start_time, end_time=end_time, omit_empty_vectors=omit_empty_vectors)
 except results.ResultQueryError as e:
     raise chart.ChartScriptError("Error while querying results: " + str(e))
 
@@ -728,33 +812,43 @@ utils.export_data_if_needed(df, props)
     <styledText x:id="filter" x:style="BORDER|V_SCROLL|H_SCROLL" x:id.contentAssist="filter" x:id.resultType="vector">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
     </styledText>
-    <button x:id="simplify" x:style="PUSH" text="Simplify" x:id.role="simplify" x:id.targetControl="filter">
-      <layoutData x:class="GridData" horizontalAlignment="END" />
-    </button>
+
+    <composite>
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" />
+      <layout x:class="GridLayout" numColumns="2" makeColumnsEqualWidth="false" marginWidth="0" />
+      <x:children>
+        <button x:id="omit_empty_vectors" x:style="CHECK" x:id.default="false" text="Omit empty vectors">
+          <layoutData x:class="GridData" horizontalAlignment="BEGINNING" verticalAlignment="BEGINNING" />
+        </button>
+        <button x:id="simplify" x:style="PUSH" text="Simplify" x:id.role="simplify" x:id.targetControl="filter">
+          <layoutData x:class="GridData" horizontalAlignment="END" grabExcessHorizontalSpace="true"/>
+        </button>
+      </x:children>
+    </composite>
     <composite>
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" />
       <layout x:class="GridLayout" numColumns="2" makeColumnsEqualWidth="false" />
       <x:children>
-        <group text="Vector operations (one per line)">
-          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
-          <layout x:class="GridLayout" numColumns="1" />
-          <x:children>
-            <text x:id="vector_operations" x:style="BORDER|MULTI|V_SCROLL|H_SCROLL" x:id.contentAssist="vectorops">
-              <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
-            </text>
-          </x:children>
-        </group>
         <group text="Crop interval">
           <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="false" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
           <layout x:class="GridLayout" numColumns="2" />
           <x:children>
             <label text="Start time (sec):" />
             <text x:id="vector_start_time" x:style="BORDER">
-              <layoutData x:class="GridData" widthHint="120" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false" />
+              <layoutData x:class="GridData" widthHint="180" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false" />
             </text>
             <label text="End time (sec):" />
             <text x:id="vector_end_time" x:style="BORDER">
-              <layoutData x:class="GridData" widthHint="120" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false" />
+              <layoutData x:class="GridData" widthHint="180" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false" />
+            </text>
+          </x:children>
+        </group>
+        <group text="Vector operations (one per line)">
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
+          <layout x:class="GridLayout" numColumns="1" />
+          <x:children>
+            <text x:id="vector_operations" x:style="BORDER|MULTI|V_SCROLL|H_SCROLL" x:id.contentAssist="vectorops">
+              <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
             </text>
           </x:children>
         </group>
@@ -776,7 +870,7 @@ utils.export_data_if_needed(df, props)
     <package name="org.omnetpp.ned.editor.wizards.support" />
     <package name="org.omnetpp.cdt.wizard.support" />
   </import>
-  <layout x:class="GridLayout" numColumns="2"/>
+  <layout x:class="GridLayout" numColumns="2" makeColumnsEqualWidth="true"/>
 
   <x:children>
 
@@ -850,7 +944,29 @@ utils.export_data_if_needed(df, props)
 
     <label text="Marker size:"/>
     <spinner x:id="markersize" x:id.default="5" selection="6" minimum="0" maximum="100" x:style="BORDER"/>
+      </x:children>
+    </group>
 
+    <group text="Hints">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+      <layout x:class="GridLayout" numColumns="1"/>
+      <x:children>
+
+        <label x:style="WRAP" text="* To change the set of colors/markers used in Auto mode, choose a different cycle seed on the Styling page">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
+
+        <label x:style="WRAP" text="* To have more control over the specific colors/markers chosen, add properties in the Advanced page. Examples:">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
+
+        <label x:style="WRAP" text="       `axes.prop_cycle: cycler('color', ['blue', 'green', 'red'])`  # on a Matplotlib chart: selects colors">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
+
+        <label x:style="WRAP" text="       `Line.Color/3: yellow`  # on a native chart: selects the color of the 3rd line">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
       </x:children>
     </group>
 
@@ -1064,11 +1180,15 @@ utils.export_data_if_needed(df, props)
           <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
           <layout x:class="GridLayout" numColumns="1" />
           <x:children>
-            <label text="Sed-style regex replacements inside the labels (/foo/bar/, one per line):" />
-            <styledText x:id="legend_replacements" x:style="BORDER|V_SCROLL|H_SCROLL">
+            <label x:style='WRAP' text="Enter string replacements (foo --&gt; bar) or sed-style replacements (/foo-regex/bar-regex/) to be applied to the labels, one per line:">
+              <layoutData x:class='GridData' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+            </label>
+            <styledText x:id="legend_replacements" x:style="BORDER|V_SCROLL|H_SCROLL" x:id.contentAssist="columns">
               <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
             </styledText>
-            <label text="Hint: Use \1, \2, etc. to refer back to parenthesized groups; data frame colums ($name, ${name}) also recognized"/>
+            <label x:style='WRAP' text="Hint: $name or ${name} inserts the content of a data frame column; use $$ to insert dollar sign">
+              <layoutData x:class='GridData' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+            </label>
             <!--
             <label text="Examples:"/>
             <label text='- &quot;/tcp/TCP/&quot; ==&gt; change &quot;tcp&quot; to &quot;TCP&quot;'/>
@@ -1082,6 +1202,57 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>]]></dialogPage>
+            <dialogPage id="ORDERING" label="Ordering"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+<xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
+
+  <import xmlns='http://sweet_swt.sf.net/xswt'>
+    <package name='java.lang'/>
+    <package name='org.eclipse.swt.widgets' />
+    <package name='org.eclipse.swt.graphics' />
+    <package name='org.eclipse.swt.layout' />
+    <package name='org.eclipse.swt.custom' />
+    <package name='org.omnetpp.common.wizard.support' />
+    <package name='org.omnetpp.ned.editor.wizards.support' />
+    <package name='org.omnetpp.cdt.wizard.support' />
+  </import>
+
+  <layout x:class='GridLayout'/>
+
+  <x:children>
+
+    <group text="Ordering of items on the legend and on the plot">
+      <layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+        <!-- ordering_regex_list -->
+        <label text='Primary ordering (one regex per line):'/>
+        <label text='Secondary ordering (one regex per line):'/>
+        <text x:id='ordering_regex_list' x:style='BORDER|WRAP|MULTI|V_SCROLL'>
+          <layoutData x:class='GridData' heightHint='60' horizontalAlignment='FILL' verticalAlignment='FILL' grabExcessHorizontalSpace='true' grabExcessVerticalSpace='true'/>
+        </text>
+
+        <!-- secondary_ordering_regex_list -->
+        <text x:id='secondary_ordering_regex_list' x:style='BORDER|WRAP|MULTI|V_SCROLL'>
+          <layoutData x:class='GridData' heightHint='60' horizontalAlignment='FILL' verticalAlignment='FILL' grabExcessHorizontalSpace='true' grabExcessVerticalSpace='true'/>
+        </text>
+
+        <!-- hint -->
+        <label x:style='WRAP' text='NOTE: Items will be ordered based on legend labels. Specify a series of regexes, one per line, to define the ranking of items. Each item&apos;s rank will be determined by the index of the first regex it matches. After sorting, items matching the first regex will appear at the top, those matching the second regex will be placed below, and so forth. Case-sensitive substring match is used.'>
+          <layoutData x:class='GridData' horizontalSpan='2' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+        </label>
+
+        <!-- sorting -->
+        <button x:id='sorting' text='Use alphabetical sorting as tertiary ordering' x:style='CHECK' x:id.default="true">
+          <layoutData x:class='GridData' horizontalSpan='2'/>
+        </button>
+
+      </x:children>
+    </group>
+
+  </x:children>
+</xswt>
+]]></dialogPage>
             <dialogPage id="STYLING" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
@@ -1308,14 +1479,14 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="9"/>
             <property name="matplotlibrc" value="savefig.transparent : True"/>
+            <property name="ordering_regex_list" value=""/>
+            <property name="sorting" value="true"/>
+            <property name="secondary_ordering_regex_list" value=""/>
+            <property name="omit_empty_vectors" value="false"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="2034792245" name="Traffic Shaper Outgoing Traffic and Server Application Traffic" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1171661421" name="Traffic Shaper Outgoing Traffic and Server Application Traffic" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-import os
-import sys
-# TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
-sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
 import inet.scave.plot
 default_colors = inet.scave.plot.default_colors
@@ -1328,10 +1499,11 @@ utils.preconfigure_plot(props)
 filter_expression = props["filter"]
 start_time = float(props["vector_start_time"] or -math.inf)
 end_time = float(props["vector_end_time"] or math.inf)
+omit_empty_vectors = props["omit_empty_vectors"] == "true"
 
 # query vector data into a data frame
 try:
-    df = results.get_vectors(filter_expression, include_attrs=True, include_runattrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
+    df = results.get_vectors(filter_expression, include_attrs=True, include_runattrs=True, include_itervars=True, start_time=start_time, end_time=end_time, omit_empty_vectors=omit_empty_vectors)
 except results.ResultQueryError as e:
     raise chart.ChartScriptError("Error while querying results: " + str(e))
 
@@ -1379,33 +1551,43 @@ utils.export_data_if_needed(df, props)
     <styledText x:id="filter" x:style="BORDER|V_SCROLL|H_SCROLL" x:id.contentAssist="filter" x:id.resultType="vector">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
     </styledText>
-    <button x:id="simplify" x:style="PUSH" text="Simplify" x:id.role="simplify" x:id.targetControl="filter">
-      <layoutData x:class="GridData" horizontalAlignment="END" />
-    </button>
+
+    <composite>
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" />
+      <layout x:class="GridLayout" numColumns="2" makeColumnsEqualWidth="false" marginWidth="0" />
+      <x:children>
+        <button x:id="omit_empty_vectors" x:style="CHECK" x:id.default="false" text="Omit empty vectors">
+          <layoutData x:class="GridData" horizontalAlignment="BEGINNING" verticalAlignment="BEGINNING" />
+        </button>
+        <button x:id="simplify" x:style="PUSH" text="Simplify" x:id.role="simplify" x:id.targetControl="filter">
+          <layoutData x:class="GridData" horizontalAlignment="END" grabExcessHorizontalSpace="true"/>
+        </button>
+      </x:children>
+    </composite>
     <composite>
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" />
       <layout x:class="GridLayout" numColumns="2" makeColumnsEqualWidth="false" />
       <x:children>
-        <group text="Vector operations (one per line)">
-          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
-          <layout x:class="GridLayout" numColumns="1" />
-          <x:children>
-            <text x:id="vector_operations" x:style="BORDER|MULTI|V_SCROLL|H_SCROLL" x:id.contentAssist="vectorops">
-              <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
-            </text>
-          </x:children>
-        </group>
         <group text="Crop interval">
           <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="false" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
           <layout x:class="GridLayout" numColumns="2" />
           <x:children>
             <label text="Start time (sec):" />
             <text x:id="vector_start_time" x:style="BORDER">
-              <layoutData x:class="GridData" widthHint="120" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false" />
+              <layoutData x:class="GridData" widthHint="180" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false" />
             </text>
             <label text="End time (sec):" />
             <text x:id="vector_end_time" x:style="BORDER">
-              <layoutData x:class="GridData" widthHint="120" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false" />
+              <layoutData x:class="GridData" widthHint="180" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false" />
+            </text>
+          </x:children>
+        </group>
+        <group text="Vector operations (one per line)">
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
+          <layout x:class="GridLayout" numColumns="1" />
+          <x:children>
+            <text x:id="vector_operations" x:style="BORDER|MULTI|V_SCROLL|H_SCROLL" x:id.contentAssist="vectorops">
+              <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
             </text>
           </x:children>
         </group>
@@ -1427,7 +1609,7 @@ utils.export_data_if_needed(df, props)
     <package name="org.omnetpp.ned.editor.wizards.support" />
     <package name="org.omnetpp.cdt.wizard.support" />
   </import>
-  <layout x:class="GridLayout" numColumns="2"/>
+  <layout x:class="GridLayout" numColumns="2" makeColumnsEqualWidth="true"/>
 
   <x:children>
 
@@ -1501,7 +1683,29 @@ utils.export_data_if_needed(df, props)
 
     <label text="Marker size:"/>
     <spinner x:id="markersize" x:id.default="5" selection="6" minimum="0" maximum="100" x:style="BORDER"/>
+      </x:children>
+    </group>
 
+    <group text="Hints">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+      <layout x:class="GridLayout" numColumns="1"/>
+      <x:children>
+
+        <label x:style="WRAP" text="* To change the set of colors/markers used in Auto mode, choose a different cycle seed on the Styling page">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
+
+        <label x:style="WRAP" text="* To have more control over the specific colors/markers chosen, add properties in the Advanced page. Examples:">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
+
+        <label x:style="WRAP" text="       `axes.prop_cycle: cycler('color', ['blue', 'green', 'red'])`  # on a Matplotlib chart: selects colors">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
+
+        <label x:style="WRAP" text="       `Line.Color/3: yellow`  # on a native chart: selects the color of the 3rd line">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
       </x:children>
     </group>
 
@@ -1715,11 +1919,15 @@ utils.export_data_if_needed(df, props)
           <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
           <layout x:class="GridLayout" numColumns="1" />
           <x:children>
-            <label text="Sed-style regex replacements inside the labels (/foo/bar/, one per line):" />
-            <styledText x:id="legend_replacements" x:style="BORDER|V_SCROLL|H_SCROLL">
+            <label x:style='WRAP' text="Enter string replacements (foo --&gt; bar) or sed-style replacements (/foo-regex/bar-regex/) to be applied to the labels, one per line:">
+              <layoutData x:class='GridData' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+            </label>
+            <styledText x:id="legend_replacements" x:style="BORDER|V_SCROLL|H_SCROLL" x:id.contentAssist="columns">
               <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
             </styledText>
-            <label text="Hint: Use \1, \2, etc. to refer back to parenthesized groups; data frame colums ($name, ${name}) also recognized"/>
+            <label x:style='WRAP' text="Hint: $name or ${name} inserts the content of a data frame column; use $$ to insert dollar sign">
+              <layoutData x:class='GridData' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+            </label>
             <!--
             <label text="Examples:"/>
             <label text='- &quot;/tcp/TCP/&quot; ==&gt; change &quot;tcp&quot; to &quot;TCP&quot;'/>
@@ -1733,6 +1941,57 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>]]></dialogPage>
+            <dialogPage id="ORDERING" label="Ordering"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+<xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
+
+  <import xmlns='http://sweet_swt.sf.net/xswt'>
+    <package name='java.lang'/>
+    <package name='org.eclipse.swt.widgets' />
+    <package name='org.eclipse.swt.graphics' />
+    <package name='org.eclipse.swt.layout' />
+    <package name='org.eclipse.swt.custom' />
+    <package name='org.omnetpp.common.wizard.support' />
+    <package name='org.omnetpp.ned.editor.wizards.support' />
+    <package name='org.omnetpp.cdt.wizard.support' />
+  </import>
+
+  <layout x:class='GridLayout'/>
+
+  <x:children>
+
+    <group text="Ordering of items on the legend and on the plot">
+      <layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+        <!-- ordering_regex_list -->
+        <label text='Primary ordering (one regex per line):'/>
+        <label text='Secondary ordering (one regex per line):'/>
+        <text x:id='ordering_regex_list' x:style='BORDER|WRAP|MULTI|V_SCROLL'>
+          <layoutData x:class='GridData' heightHint='60' horizontalAlignment='FILL' verticalAlignment='FILL' grabExcessHorizontalSpace='true' grabExcessVerticalSpace='true'/>
+        </text>
+
+        <!-- secondary_ordering_regex_list -->
+        <text x:id='secondary_ordering_regex_list' x:style='BORDER|WRAP|MULTI|V_SCROLL'>
+          <layoutData x:class='GridData' heightHint='60' horizontalAlignment='FILL' verticalAlignment='FILL' grabExcessHorizontalSpace='true' grabExcessVerticalSpace='true'/>
+        </text>
+
+        <!-- hint -->
+        <label x:style='WRAP' text='NOTE: Items will be ordered based on legend labels. Specify a series of regexes, one per line, to define the ranking of items. Each item&apos;s rank will be determined by the index of the first regex it matches. After sorting, items matching the first regex will appear at the top, those matching the second regex will be placed below, and so forth. Case-sensitive substring match is used.'>
+          <layoutData x:class='GridData' horizontalSpan='2' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+        </label>
+
+        <!-- sorting -->
+        <button x:id='sorting' text='Use alphabetical sorting as tertiary ordering' x:style='CHECK' x:id.default="true">
+          <layoutData x:class='GridData' horizontalSpan='2'/>
+        </button>
+
+      </x:children>
+    </group>
+
+  </x:children>
+</xswt>
+]]></dialogPage>
             <dialogPage id="STYLING" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
@@ -1959,10 +2218,14 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value="1"/>
             <property name="image_export_width" value="9"/>
             <property name="matplotlibrc" value="savefig.transparent : True"/>
+            <property name="ordering_regex_list" value=""/>
+            <property name="sorting" value="true"/>
+            <property name="secondary_ordering_regex_list" value=""/>
+            <property name="omit_empty_vectors" value="false"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1850832415" name="Traffic shaper queue lengths" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1404085699" name="Traffic shaper queue lengths" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
-from omnetpp.scave import results, chart, utils, ideplot
+from omnetpp.scave import results, chart, utils
 
 # get chart properties
 props = chart.get_properties()
@@ -1972,11 +2235,12 @@ utils.preconfigure_plot(props)
 filter_expression = props["filter"]
 start_time = float(props["vector_start_time"] or -math.inf)
 end_time = float(props["vector_end_time"] or math.inf)
+omit_empty_vectors = props["omit_empty_vectors"] == "true"
 
 # query vector data into a data frame
 try:
-    df = results.get_vectors(filter_expression, include_attrs=True, include_runattrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
-except ValueError as e:
+    df = results.get_vectors(filter_expression, include_attrs=True, include_runattrs=True, include_itervars=True, start_time=start_time, end_time=end_time, omit_empty_vectors=omit_empty_vectors)
+except results.ResultQueryError as e:
     raise chart.ChartScriptError("Error while querying results: " + str(e))
 
 if df.empty:
@@ -1986,7 +2250,9 @@ if df.empty:
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
 # plot
-utils.plot_vectors(df, props)
+utils.add_legend_labels(df, props)
+utils.sort_rows_by_legend(df, props)
+utils.plot_vectors(df, props, sort=False)
 
 utils.postconfigure_plot(props)
 
@@ -2014,33 +2280,43 @@ utils.export_data_if_needed(df, props)
     <styledText x:id="filter" x:style="BORDER|V_SCROLL|H_SCROLL" x:id.contentAssist="filter" x:id.resultType="vector">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
     </styledText>
-    <button x:id="simplify" x:style="PUSH" text="Simplify" x:id.role="simplify" x:id.targetControl="filter">
-      <layoutData x:class="GridData" horizontalAlignment="END" />
-    </button>
+
+    <composite>
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" />
+      <layout x:class="GridLayout" numColumns="2" makeColumnsEqualWidth="false" marginWidth="0" />
+      <x:children>
+        <button x:id="omit_empty_vectors" x:style="CHECK" x:id.default="false" text="Omit empty vectors">
+          <layoutData x:class="GridData" horizontalAlignment="BEGINNING" verticalAlignment="BEGINNING" />
+        </button>
+        <button x:id="simplify" x:style="PUSH" text="Simplify" x:id.role="simplify" x:id.targetControl="filter">
+          <layoutData x:class="GridData" horizontalAlignment="END" grabExcessHorizontalSpace="true"/>
+        </button>
+      </x:children>
+    </composite>
     <composite>
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" />
       <layout x:class="GridLayout" numColumns="2" makeColumnsEqualWidth="false" />
       <x:children>
-        <group text="Vector operations (one per line)">
-          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
-          <layout x:class="GridLayout" numColumns="1" />
-          <x:children>
-            <text x:id="vector_operations" x:style="BORDER|MULTI|V_SCROLL|H_SCROLL" x:id.contentAssist="vectorops">
-              <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
-            </text>
-          </x:children>
-        </group>
         <group text="Crop interval">
           <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="false" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
           <layout x:class="GridLayout" numColumns="2" />
           <x:children>
             <label text="Start time (sec):" />
             <text x:id="vector_start_time" x:style="BORDER">
-              <layoutData x:class="GridData" widthHint="120" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false" />
+              <layoutData x:class="GridData" widthHint="180" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false" />
             </text>
             <label text="End time (sec):" />
             <text x:id="vector_end_time" x:style="BORDER">
-              <layoutData x:class="GridData" widthHint="120" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false" />
+              <layoutData x:class="GridData" widthHint="180" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false" />
+            </text>
+          </x:children>
+        </group>
+        <group text="Vector operations (one per line)">
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
+          <layout x:class="GridLayout" numColumns="1" />
+          <x:children>
+            <text x:id="vector_operations" x:style="BORDER|MULTI|V_SCROLL|H_SCROLL" x:id.contentAssist="vectorops">
+              <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
             </text>
           </x:children>
         </group>
@@ -2062,7 +2338,7 @@ utils.export_data_if_needed(df, props)
     <package name="org.omnetpp.ned.editor.wizards.support" />
     <package name="org.omnetpp.cdt.wizard.support" />
   </import>
-  <layout x:class="GridLayout" numColumns="2"/>
+  <layout x:class="GridLayout" numColumns="2" makeColumnsEqualWidth="true"/>
 
   <x:children>
 
@@ -2136,7 +2412,29 @@ utils.export_data_if_needed(df, props)
 
     <label text="Marker size:"/>
     <spinner x:id="markersize" x:id.default="5" selection="6" minimum="0" maximum="100" x:style="BORDER"/>
+      </x:children>
+    </group>
 
+    <group text="Hints">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+      <layout x:class="GridLayout" numColumns="1"/>
+      <x:children>
+
+        <label x:style="WRAP" text="* To change the set of colors/markers used in Auto mode, choose a different cycle seed on the Styling page">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
+
+        <label x:style="WRAP" text="* To have more control over the specific colors/markers chosen, add properties in the Advanced page. Examples:">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
+
+        <label x:style="WRAP" text="       `axes.prop_cycle: cycler('color', ['blue', 'green', 'red'])`  # on a Matplotlib chart: selects colors">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
+
+        <label x:style="WRAP" text="       `Line.Color/3: yellow`  # on a native chart: selects the color of the 3rd line">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
       </x:children>
     </group>
 
@@ -2350,11 +2648,15 @@ utils.export_data_if_needed(df, props)
           <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
           <layout x:class="GridLayout" numColumns="1" />
           <x:children>
-            <label text="Sed-style regex replacements inside the labels (/foo/bar/, one per line):" />
-            <styledText x:id="legend_replacements" x:style="BORDER|V_SCROLL|H_SCROLL">
+            <label x:style='WRAP' text="Enter string replacements (foo --&gt; bar) or sed-style replacements (/foo-regex/bar-regex/) to be applied to the labels, one per line:">
+              <layoutData x:class='GridData' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+            </label>
+            <styledText x:id="legend_replacements" x:style="BORDER|V_SCROLL|H_SCROLL" x:id.contentAssist="columns">
               <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
             </styledText>
-            <label text="Hint: Use \1, \2, etc. to refer back to parenthesized groups; data frame colums ($name, ${name}) also recognized"/>
+            <label x:style='WRAP' text="Hint: $name or ${name} inserts the content of a data frame column; use $$ to insert dollar sign">
+              <layoutData x:class='GridData' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+            </label>
             <!--
             <label text="Examples:"/>
             <label text='- &quot;/tcp/TCP/&quot; ==&gt; change &quot;tcp&quot; to &quot;TCP&quot;'/>
@@ -2368,6 +2670,57 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>]]></dialogPage>
+            <dialogPage id="ORDERING" label="Ordering"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+<xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
+
+  <import xmlns='http://sweet_swt.sf.net/xswt'>
+    <package name='java.lang'/>
+    <package name='org.eclipse.swt.widgets' />
+    <package name='org.eclipse.swt.graphics' />
+    <package name='org.eclipse.swt.layout' />
+    <package name='org.eclipse.swt.custom' />
+    <package name='org.omnetpp.common.wizard.support' />
+    <package name='org.omnetpp.ned.editor.wizards.support' />
+    <package name='org.omnetpp.cdt.wizard.support' />
+  </import>
+
+  <layout x:class='GridLayout'/>
+
+  <x:children>
+
+    <group text="Ordering of items on the legend and on the plot">
+      <layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+        <!-- ordering_regex_list -->
+        <label text='Primary ordering (one regex per line):'/>
+        <label text='Secondary ordering (one regex per line):'/>
+        <text x:id='ordering_regex_list' x:style='BORDER|WRAP|MULTI|V_SCROLL'>
+          <layoutData x:class='GridData' heightHint='60' horizontalAlignment='FILL' verticalAlignment='FILL' grabExcessHorizontalSpace='true' grabExcessVerticalSpace='true'/>
+        </text>
+
+        <!-- secondary_ordering_regex_list -->
+        <text x:id='secondary_ordering_regex_list' x:style='BORDER|WRAP|MULTI|V_SCROLL'>
+          <layoutData x:class='GridData' heightHint='60' horizontalAlignment='FILL' verticalAlignment='FILL' grabExcessHorizontalSpace='true' grabExcessVerticalSpace='true'/>
+        </text>
+
+        <!-- hint -->
+        <label x:style='WRAP' text='NOTE: Items will be ordered based on legend labels. Specify a series of regexes, one per line, to define the ranking of items. Each item&apos;s rank will be determined by the index of the first regex it matches. After sorting, items matching the first regex will appear at the top, those matching the second regex will be placed below, and so forth. Case-sensitive substring match is used.'>
+          <layoutData x:class='GridData' horizontalSpan='2' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+        </label>
+
+        <!-- sorting -->
+        <button x:id='sorting' text='Use alphabetical sorting as tertiary ordering' x:style='CHECK' x:id.default="true">
+          <layoutData x:class='GridData' horizontalSpan='2'/>
+        </button>
+
+      </x:children>
+    </group>
+
+  </x:children>
+</xswt>
+]]></dialogPage>
             <dialogPage id="STYLING" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
@@ -2600,10 +2953,13 @@ utils.export_data_if_needed(df, props)
             <property name="legend_replacements" value="/.*\.(.*)/\1/"/>
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
+            <property name="ordering_regex_list" value=""/>
+            <property name="omit_empty_vectors" value="false"/>
+            <property name="sorting" value="true"/>
+            <property name="secondary_ordering_regex_list" value=""/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1878941422" name="Transmitting state and gate states" template="linechart_separate_mpl" type="MATPLOTLIB">
-            <script><![CDATA[import re
-import math
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1658521433" name="Transmitting state and gate states" resultTypes="" template="linechart_separate_mpl" type="MATPLOTLIB">
+            <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from omnetpp.scave import results, chart, utils
 
@@ -2617,11 +2973,12 @@ utils.preconfigure_plot(props)
 filter_expression = props["filter"]
 start_time = float(props["vector_start_time"] or -math.inf)
 end_time = float(props["vector_end_time"] or math.inf)
+omit_empty_vectors = props["omit_empty_vectors"] == "true"
 
 # query vector data into a data frame
 try:
-    df = results.get_vectors(filter_expression, include_attrs=True, include_runattrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
-except ValueError as e:
+    df = results.get_vectors(filter_expression, include_attrs=True, include_runattrs=True, include_itervars=True, start_time=start_time, end_time=end_time, omit_empty_vectors=omit_empty_vectors)
+except results.ResultQueryError as e:
     raise chart.ChartScriptError("Error while querying results: " + str(e))
 
 if df.empty:
@@ -2629,16 +2986,15 @@ if df.empty:
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
-df["moduledisplaypath"].fillna(df["module"], inplace=True)
-df["legend"] = df["moduledisplaypath"] + ", " + df["title"]
-df["legend"] = df["legend"].apply(lambda legend: re.sub(".*\\.(.*) dilated.*", "\\1", str(legend)))
-df["title"] = df["legend"]
 
 # plot
-utils.plot_vectors_separate(df, props)
+utils.add_legend_labels(df, props)
+utils.sort_rows_by_legend(df, props)
+utils.plot_vectors_separate(df, props, sort=False)
 
 utils.postconfigure_plot(props)
 
+plt.subplots_adjust(left = 0.05, right = 0.99, top = 0.9, bottom = 0.1, wspace=0.1, hspace=0.1)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)]]></script>
@@ -2657,33 +3013,43 @@ utils.export_data_if_needed(df, props)]]></script>
     <styledText x:id="filter" x:style="BORDER|V_SCROLL|H_SCROLL" x:id.contentAssist="filter" x:id.resultType="vector">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
     </styledText>
-    <button x:id="simplify" x:style="PUSH" text="Simplify" x:id.role="simplify" x:id.targetControl="filter">
-      <layoutData x:class="GridData" horizontalAlignment="END" />
-    </button>
+
+    <composite>
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" />
+      <layout x:class="GridLayout" numColumns="2" makeColumnsEqualWidth="false" marginWidth="0" />
+      <x:children>
+        <button x:id="omit_empty_vectors" x:style="CHECK" x:id.default="false" text="Omit empty vectors">
+          <layoutData x:class="GridData" horizontalAlignment="BEGINNING" verticalAlignment="BEGINNING" />
+        </button>
+        <button x:id="simplify" x:style="PUSH" text="Simplify" x:id.role="simplify" x:id.targetControl="filter">
+          <layoutData x:class="GridData" horizontalAlignment="END" grabExcessHorizontalSpace="true"/>
+        </button>
+      </x:children>
+    </composite>
     <composite>
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" />
       <layout x:class="GridLayout" numColumns="2" makeColumnsEqualWidth="false" />
       <x:children>
-        <group text="Vector operations (one per line)">
-          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
-          <layout x:class="GridLayout" numColumns="1" />
-          <x:children>
-            <text x:id="vector_operations" x:style="BORDER|MULTI|V_SCROLL|H_SCROLL" x:id.contentAssist="vectorops">
-              <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
-            </text>
-          </x:children>
-        </group>
         <group text="Crop interval">
           <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="false" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
           <layout x:class="GridLayout" numColumns="2" />
           <x:children>
             <label text="Start time (sec):" />
             <text x:id="vector_start_time" x:style="BORDER">
-              <layoutData x:class="GridData" widthHint="120" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false" />
+              <layoutData x:class="GridData" widthHint="180" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false" />
             </text>
             <label text="End time (sec):" />
             <text x:id="vector_end_time" x:style="BORDER">
-              <layoutData x:class="GridData" widthHint="120" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false" />
+              <layoutData x:class="GridData" widthHint="180" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false" />
+            </text>
+          </x:children>
+        </group>
+        <group text="Vector operations (one per line)">
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
+          <layout x:class="GridLayout" numColumns="1" />
+          <x:children>
+            <text x:id="vector_operations" x:style="BORDER|MULTI|V_SCROLL|H_SCROLL" x:id.contentAssist="vectorops">
+              <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
             </text>
           </x:children>
         </group>
@@ -2705,9 +3071,18 @@ utils.export_data_if_needed(df, props)]]></script>
     <package name="org.omnetpp.ned.editor.wizards.support" />
     <package name="org.omnetpp.cdt.wizard.support" />
   </import>
-  <layout x:class="GridLayout" numColumns="2"/>
+  <layout x:class="GridLayout" numColumns="2" makeColumnsEqualWidth="true"/>
 
   <x:children>
+
+    <group text="Enums">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+      <layout x:class="GridLayout"/>
+      <x:children>
+        <button x:id="enum_as_strip" x:id.default="true" text="Display enums as colored strips" x:style="CHECK" />
+        <button x:id="enum_strip_edges" x:id.default="false" text="Draw edges around regions (affects performance)" x:style="CHECK" x:id.enablerButton="enum_as_strip" />
+      </x:children>
+    </group>
 
     <group text="Lines">
       <layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
@@ -2779,7 +3154,29 @@ utils.export_data_if_needed(df, props)]]></script>
 
     <label text="Marker size:"/>
     <spinner x:id="markersize" x:id.default="5" selection="6" minimum="0" maximum="100" x:style="BORDER"/>
+      </x:children>
+    </group>
 
+    <group text="Hints">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+      <layout x:class="GridLayout" numColumns="1"/>
+      <x:children>
+
+        <label x:style="WRAP" text="* To change the set of colors/markers used in Auto mode, choose a different cycle seed on the Styling page">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
+
+        <label x:style="WRAP" text="* To have more control over the specific colors/markers chosen, add properties in the Advanced page. Examples:">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
+
+        <label x:style="WRAP" text="       `axes.prop_cycle: cycler('color', ['blue', 'green', 'red'])`  # on a Matplotlib chart: selects colors">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
+
+        <label x:style="WRAP" text="       `Line.Color/3: yellow`  # on a native chart: selects the color of the 3rd line">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
       </x:children>
     </group>
 
@@ -2993,11 +3390,15 @@ utils.export_data_if_needed(df, props)]]></script>
           <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
           <layout x:class="GridLayout" numColumns="1" />
           <x:children>
-            <label text="Sed-style regex replacements inside the labels (/foo/bar/, one per line):" />
-            <styledText x:id="legend_replacements" x:style="BORDER|V_SCROLL|H_SCROLL">
+            <label x:style='WRAP' text="Enter string replacements (foo --&gt; bar) or sed-style replacements (/foo-regex/bar-regex/) to be applied to the labels, one per line:">
+              <layoutData x:class='GridData' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+            </label>
+            <styledText x:id="legend_replacements" x:style="BORDER|V_SCROLL|H_SCROLL" x:id.contentAssist="columns">
               <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
             </styledText>
-            <label text="Hint: Use \1, \2, etc. to refer back to parenthesized groups; data frame colums ($name, ${name}) also recognized"/>
+            <label x:style='WRAP' text="Hint: $name or ${name} inserts the content of a data frame column; use $$ to insert dollar sign">
+              <layoutData x:class='GridData' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+            </label>
             <!--
             <label text="Examples:"/>
             <label text='- &quot;/tcp/TCP/&quot; ==&gt; change &quot;tcp&quot; to &quot;TCP&quot;'/>
@@ -3011,6 +3412,57 @@ utils.export_data_if_needed(df, props)]]></script>
 
   </x:children>
 </xswt>]]></dialogPage>
+            <dialogPage id="ORDERING" label="Ordering"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+<xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
+
+  <import xmlns='http://sweet_swt.sf.net/xswt'>
+    <package name='java.lang'/>
+    <package name='org.eclipse.swt.widgets' />
+    <package name='org.eclipse.swt.graphics' />
+    <package name='org.eclipse.swt.layout' />
+    <package name='org.eclipse.swt.custom' />
+    <package name='org.omnetpp.common.wizard.support' />
+    <package name='org.omnetpp.ned.editor.wizards.support' />
+    <package name='org.omnetpp.cdt.wizard.support' />
+  </import>
+
+  <layout x:class='GridLayout'/>
+
+  <x:children>
+
+    <group text="Ordering of items on the legend and on the plot">
+      <layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+        <!-- ordering_regex_list -->
+        <label text='Primary ordering (one regex per line):'/>
+        <label text='Secondary ordering (one regex per line):'/>
+        <text x:id='ordering_regex_list' x:style='BORDER|WRAP|MULTI|V_SCROLL'>
+          <layoutData x:class='GridData' heightHint='60' horizontalAlignment='FILL' verticalAlignment='FILL' grabExcessHorizontalSpace='true' grabExcessVerticalSpace='true'/>
+        </text>
+
+        <!-- secondary_ordering_regex_list -->
+        <text x:id='secondary_ordering_regex_list' x:style='BORDER|WRAP|MULTI|V_SCROLL'>
+          <layoutData x:class='GridData' heightHint='60' horizontalAlignment='FILL' verticalAlignment='FILL' grabExcessHorizontalSpace='true' grabExcessVerticalSpace='true'/>
+        </text>
+
+        <!-- hint -->
+        <label x:style='WRAP' text='NOTE: Items will be ordered based on legend labels. Specify a series of regexes, one per line, to define the ranking of items. Each item&apos;s rank will be determined by the index of the first regex it matches. After sorting, items matching the first regex will appear at the top, those matching the second regex will be placed below, and so forth. Case-sensitive substring match is used.'>
+          <layoutData x:class='GridData' horizontalSpan='2' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+        </label>
+
+        <!-- sorting -->
+        <button x:id='sorting' text='Use alphabetical sorting as tertiary ordering' x:style='CHECK' x:id.default="true">
+          <layoutData x:class='GridData' horizontalSpan='2'/>
+        </button>
+
+      </x:children>
+    </group>
+
+  </x:children>
+</xswt>
+]]></dialogPage>
             <dialogPage id="STYLING" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
@@ -3202,10 +3654,10 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="vector_end_time" value=""/>
             <property name="linecolor" value=""/>
             <property name="matplotlibrc.figure.facecolor" value=""/>
-            <property name="legend_prefer_result_titles" value="true"/>
+            <property name="legend_prefer_result_titles" value="false"/>
             <property name="legend_manual" value="false"/>
             <property name="yaxis_title" value=""/>
-            <property name="legend_replacements" value=""/>
+            <property name="legend_replacements" value="/[0-9] in //&#10;/TsnLinearNetwork.switch.eth\[1\].//&#10;/macLayer.queue.//&#10;/phyLayer.//&#10;/best effort/best effort, gate state/&#10;/video/video, gate state/&#10;/transmitter/transmitter, transmitting state/&#10;/, type=.*//"/>
             <property name="title" value="Transmitting State and Gate States"/>
             <property name="legend_automatic" value="true"/>
             <property name="vector_operations" value="apply: timedilation(c=1000)"/>
@@ -3237,9 +3689,14 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="xaxis_max" value="600"/>
             <property name="image_export_width" value="9"/>
             <property name="matplotlibrc" value="savefig.transparent : True"/>
-            <property name="include_fields" value="false"/>
+            <property name="ordering_regex_list" value=""/>
+            <property name="enum_as_strip" value="false"/>
+            <property name="sorting" value="true"/>
+            <property name="enum_strip_edges" value="false"/>
+            <property name="secondary_ordering_regex_list" value=""/>
+            <property name="omit_empty_vectors" value="false"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="357540503" name="Traffic shaping" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1208203850" name="Traffic shaping" resultTypes="" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import re
 import numpy
 import math

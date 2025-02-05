@@ -5,7 +5,7 @@
         <input pattern="results/Ieee802154Power-#0.sca"/>
     </inputs>
     <charts>
-        <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/barchart.png" id="1366488475" name="Power consumption" resultTypes="scalar" template="barchart_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/barchart.png" id="591112839" name="Power consumption" resultTypes="scalar" template="barchart_mpl" type="MATPLOTLIB">
             <script><![CDATA[from omnetpp.scave import results, chart, utils
 
 # get chart properties
@@ -31,9 +31,10 @@ utils.add_legend_labels(df, props, groups + series)
 utils.sort_rows_by_legend(df, props)
 del df["legend"]
 
+confidence_level = utils.get_confidence_level(props)
+
 df['module'] = df['module'].replace(regex="Ieee802154Showcase.(.*?).energyStorage",value="\\1")
 
-confidence_level = utils.get_confidence_level(props)
 valuedf, errorsdf, metadf = utils.pivot_for_barchart(df, groups, series, confidence_level, sort=False)
 
 valuedf *= -1

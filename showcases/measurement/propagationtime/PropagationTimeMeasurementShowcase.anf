@@ -5,7 +5,7 @@
         <input pattern="results/General-*.sca"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/barchart.png" id="151" name="Packet propagation time on the channel" template="barchart_native" type="BAR">
+        <chart createdWith="" icon="icons/full/obj/barchart.png" id="56719201" name="Packet propagation time on the channel" resultTypes="" template="barchart_native" type="BAR">
             <script><![CDATA[from omnetpp.scave import results, chart, utils
 
 # get chart properties
@@ -19,19 +19,24 @@ include_fields = props["include_fields"] == "true"
 # query scalar data into dataframe
 try:
     df = results.get_scalars(filter_expression, include_fields=include_fields, include_attrs=True, include_runattrs=True, include_itervars=True)
-except ValueError as e:
+except results.ResultQueryError as e:
     raise chart.ChartScriptError("Error while querying results: " + str(e))
 
 if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
 
 groups, series = utils.select_groups_series(df, props)
+
+utils.add_legend_labels(df, props, groups + series)
+utils.sort_rows_by_legend(df, props)
+del df["legend"]
+
 confidence_level = utils.get_confidence_level(props)
-valuedf, errorsdf, metadf = utils.pivot_for_barchart(df, groups, series, confidence_level)
+valuedf, errorsdf, metadf = utils.pivot_for_barchart(df, groups, series, confidence_level, sort=False)
 
 valuedf *= 1000000000
 
-utils.plot_bars(valuedf, errorsdf, metadf, props)
+utils.plot_bars(valuedf, errorsdf, metadf, props, sort=False)
 
 utils.postconfigure_plot(props)
 
@@ -138,6 +143,30 @@ utils.export_data_if_needed(df, props)
           <add x:p0="60"/>
           <add x:p0="90"/>
         </combo>
+
+      </x:children>
+    </group>
+
+    <group text="Hints">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+      <layout x:class="GridLayout" numColumns="1"/>
+      <x:children>
+
+        <label x:style="WRAP" text="* To change the set of bar colors used, choose a different cycle seed on the Styling page">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
+
+        <label x:style="WRAP" text="* To have more control over the specific colors, add properties in the Advanced page. Examples:">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
+
+        <label x:style="WRAP" text="       `axes.prop_cycle: cycler('color', ['blue', 'green', 'red'])`  # on a Matplotlib chart: selects colors">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
+
+        <label x:style="WRAP" text="       `Bar.Color/3: yellow`  # on a native chart: selects the color of the 3rd series">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
 
       </x:children>
     </group>
@@ -338,11 +367,15 @@ utils.export_data_if_needed(df, props)
           <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
           <layout x:class="GridLayout" numColumns="1" />
           <x:children>
-            <label text="Sed-style regex replacements inside the labels (/foo/bar/, one per line):" />
-            <styledText x:id="legend_replacements" x:style="BORDER|V_SCROLL|H_SCROLL">
+            <label x:style='WRAP' text="Enter string replacements (foo --&gt; bar) or sed-style replacements (/foo-regex/bar-regex/) to be applied to the labels, one per line:">
+              <layoutData x:class='GridData' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+            </label>
+            <styledText x:id="legend_replacements" x:style="BORDER|V_SCROLL|H_SCROLL" x:id.contentAssist="columns">
               <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
             </styledText>
-            <label text="Hint: Use \1, \2, etc. to refer back to parenthesized groups; data frame colums ($name, ${name}) also recognized"/>
+            <label x:style='WRAP' text="Hint: $name or ${name} inserts the content of a data frame column; use $$ to insert dollar sign">
+              <layoutData x:class='GridData' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+            </label>
             <!--
             <label text="Examples:"/>
             <label text='- &quot;/tcp/TCP/&quot; ==&gt; change &quot;tcp&quot; to &quot;TCP&quot;'/>
@@ -356,6 +389,57 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>]]></dialogPage>
+            <dialogPage id="ORDERING" label="Ordering"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+<xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
+
+  <import xmlns='http://sweet_swt.sf.net/xswt'>
+    <package name='java.lang'/>
+    <package name='org.eclipse.swt.widgets' />
+    <package name='org.eclipse.swt.graphics' />
+    <package name='org.eclipse.swt.layout' />
+    <package name='org.eclipse.swt.custom' />
+    <package name='org.omnetpp.common.wizard.support' />
+    <package name='org.omnetpp.ned.editor.wizards.support' />
+    <package name='org.omnetpp.cdt.wizard.support' />
+  </import>
+
+  <layout x:class='GridLayout'/>
+
+  <x:children>
+
+    <group text="Ordering of items on the legend and on the plot">
+      <layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+        <!-- ordering_regex_list -->
+        <label text='Primary ordering (one regex per line):'/>
+        <label text='Secondary ordering (one regex per line):'/>
+        <text x:id='ordering_regex_list' x:style='BORDER|WRAP|MULTI|V_SCROLL'>
+          <layoutData x:class='GridData' heightHint='60' horizontalAlignment='FILL' verticalAlignment='FILL' grabExcessHorizontalSpace='true' grabExcessVerticalSpace='true'/>
+        </text>
+
+        <!-- secondary_ordering_regex_list -->
+        <text x:id='secondary_ordering_regex_list' x:style='BORDER|WRAP|MULTI|V_SCROLL'>
+          <layoutData x:class='GridData' heightHint='60' horizontalAlignment='FILL' verticalAlignment='FILL' grabExcessHorizontalSpace='true' grabExcessVerticalSpace='true'/>
+        </text>
+
+        <!-- hint -->
+        <label x:style='WRAP' text='NOTE: Items will be ordered based on legend labels. Specify a series of regexes, one per line, to define the ranking of items. Each item&apos;s rank will be determined by the index of the first regex it matches. After sorting, items matching the first regex will appear at the top, those matching the second regex will be placed below, and so forth. Case-sensitive substring match is used.'>
+          <layoutData x:class='GridData' horizontalSpan='2' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+        </label>
+
+        <!-- sorting -->
+        <button x:id='sorting' text='Use alphabetical sorting as tertiary ordering' x:style='CHECK' x:id.default="true">
+          <layoutData x:class='GridData' horizontalSpan='2'/>
+        </button>
+
+      </x:children>
+    </group>
+
+  </x:children>
+</xswt>
+]]></dialogPage>
             <dialogPage id="STYLING" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
@@ -582,6 +666,9 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
             <property name="include_fields" value="false"/>
+            <property name="ordering_regex_list" value=""/>
+            <property name="sorting" value="true"/>
+            <property name="secondary_ordering_regex_list" value=""/>
         </chart>
     </charts>
 </analysis>

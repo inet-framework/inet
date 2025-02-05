@@ -8,11 +8,6 @@
         <chart createdWith="" icon="icons/full/obj/scatterchart.png" id="490329163" name="Analytical vs simulated throughput" resultTypes="" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
             <script><![CDATA[from omnetpp.scave import results, chart, utils, ideplot
 import pandas as pd
-import os
-import sys
-from omnetpp.scave.utils import make_legend_label
-# TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
-sys.path.append(os.path.join(os.getcwd(), "../../../python"))
 import matplotlib.pyplot as plt
 import inet.scave.plot
 default_colors = inet.scave.plot.default_colors
@@ -38,6 +33,9 @@ try:
     df = results.get_scalars(filter_expression, include_fields=include_fields, include_attrs=True, include_runattrs=True, include_itervars=True)
 except results.ResultQueryError as e:
     raise chart.ChartScriptError("Error while querying results: " + str(e))
+
+if df.empty:
+    raise chart.ChartScriptError("The result filter returned no data.")
 
 analytical_data = [[326,258,210,174,154,134,126,122],
                    [1526,1058,810,574,454,334,278,258],
@@ -181,7 +179,7 @@ utils.export_data_if_needed(df, props)
     <package name="org.omnetpp.ned.editor.wizards.support" />
     <package name="org.omnetpp.cdt.wizard.support" />
   </import>
-  <layout x:class="GridLayout" numColumns="2"/>
+  <layout x:class="GridLayout" numColumns="2" makeColumnsEqualWidth="true"/>
 
   <x:children>
 
@@ -255,7 +253,29 @@ utils.export_data_if_needed(df, props)
 
     <label text="Marker size:"/>
     <spinner x:id="markersize" x:id.default="5" selection="6" minimum="0" maximum="100" x:style="BORDER"/>
+      </x:children>
+    </group>
 
+    <group text="Hints">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+      <layout x:class="GridLayout" numColumns="1"/>
+      <x:children>
+
+        <label x:style="WRAP" text="* To change the set of colors/markers used in Auto mode, choose a different cycle seed on the Styling page">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
+
+        <label x:style="WRAP" text="* To have more control over the specific colors/markers chosen, add properties in the Advanced page. Examples:">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
+
+        <label x:style="WRAP" text="       `axes.prop_cycle: cycler('color', ['blue', 'green', 'red'])`  # on a Matplotlib chart: selects colors">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
+
+        <label x:style="WRAP" text="       `Line.Color/3: yellow`  # on a native chart: selects the color of the 3rd line">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
       </x:children>
     </group>
 
