@@ -1,15 +1,4 @@
-# ----workaround start----
-# workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
-# remove when it's part of a release
-# replace it with:
-#     import modifiedplot
-try:
-    import inet.scave.plot
-except:
-    import modifiedplot_fp
-    import inet.scave.plot
-import matplotlib.pyplot as plt
-# ----workaround end----
+import inet.scave.plot
 from matplotlib.lines import Line2D
 
 alternate_handles = [Line2D([0], [0], color='black', lw=1, linestyle=':', label='Line'),
