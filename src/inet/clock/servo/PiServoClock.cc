@@ -109,7 +109,7 @@ void PiServoClock::adjustClockTo(clocktime_t newClockTime)
 
 void PiServoClock::resetClockState()
 {
-    clockState = INIT;
+    ServoClockBase::resetClockState();
     phase = 0;
 }
 

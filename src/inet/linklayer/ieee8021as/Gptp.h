@@ -24,6 +24,9 @@ namespace inet {
 
 class INET_API Gptp : public ClockUserModuleBase, public cListener
 {
+  public:
+    static std::map<std::string, std::string> clockIdentityToFullPath;
+
   protected:
     enum BmcaPriorityVectorComparisonResult {
         A_BETTER_THAN_B,
@@ -37,7 +40,7 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     ModuleRefByPar<IInterfaceTable> interfaceTable;
 
     // Configuration
-    GptpNodeType gptpNodeType;
+    GptpNodeType gptpNodeType = GptpNodeType::BMCA_NODE;
     int domainNumber = -1;
     int slavePortId = -1;         // interface ID of slave port
     std::set<int> masterPortIds;  // interface IDs of master ports
@@ -104,6 +107,7 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     GptpAnnounce *bestAnnounce = nullptr;
     std::map<int, ClockEvent *> announceTimeouts;
     std::map<int, GptpAnnounce *> receivedAnnounces;
+    bool sendAnnounceImmediately = false;
 
     // self timers:
     ClockEvent *selfMsgSync = nullptr;
@@ -131,8 +135,8 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     static const MacAddress GPTP_MULTICAST_ADDRESS;
     static simsignal_t gptpSyncStateChanged;
 
-    uint8_t getDomainNumber() const {return this->domainNumber;};
-    clocktime_t getSyncInterval() const {return syncInterval;};
+    uint8_t getDomainNumber() const { return this->domainNumber; };
+    clocktime_t getSyncInterval() const { return syncInterval; };
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -203,8 +207,8 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     void handleAnnounceTimeout(cMessage *pMessage);
     bool isGM() const { return gptpNodeType == MASTER_NODE || (gptpNodeType == BMCA_NODE && slavePortId == -1); };
     static Gptp::BmcaPriorityVectorComparisonResult compareAnnounceMessages(GptpAnnounce *a, GptpAnnounce *b,
-                                                                     PortIdentity aReceiverIdentity,
-                                                                     PortIdentity bReceiverIdentity);
+                                                                            PortIdentity aReceiverIdentity,
+                                                                            PortIdentity bReceiverIdentity);
     void changeSyncState(SyncState state);
     void handleSyncTimeout(cMessage *pMessage);
     void updateSyncStateAndRescheduleSyncTimeout(const ServoClockBase *servoClock);

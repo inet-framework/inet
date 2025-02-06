@@ -41,6 +41,7 @@ simsignal_t Gptp::gptpSyncStateChanged = cComponent::registerSignal("gptpSyncSta
 //   01-80-C2-00-00-0E for Announce and Signaling messages, for Sync, Follow_Up,
 //   Pdelay_Req, Pdelay_Resp, and Pdelay_Resp_Follow_Up messages (ieee 802.1as-2020, 10.5.3 and 11.3.4)
 const MacAddress Gptp::GPTP_MULTICAST_ADDRESS("01:80:C2:00:00:0E");
+std::map<std::string, std::string> inet::Gptp::clockIdentityToFullPath;
 
 // EtherType:
 //   0x8809 for TimeSync (ieee 802.1as-2020, 13.3.1.2)
@@ -86,10 +87,12 @@ void Gptp::initialize(int stage)
         pDelayReqProcessingTime = par("pDelayReqProcessingTime");
         std::hash<std::string> strHash;
         clockIdentity = strHash(getFullPath());
+        clockIdentityToFullPath[std::to_string(clockIdentity)] = getFullPath();
 
         if (gptpNodeType == BMCA_NODE) {
             initBmca();
         }
+        sendAnnounceImmediately = par("sendAnnounceImmediately");
     }
     if (stage == INITSTAGE_LINK_LAYER) {
         meanLinkDelay = 0;
@@ -540,10 +543,11 @@ void Gptp::executeBmca()
 
     EV_INFO << "############## BMCA ################################" << endl;
     EV_INFO << "Choosing from " << receivedAnnounces.size() << " Announces" << endl;
-    EV_INFO << "Selected Grandmaster Identity - " << bestAnnounceCurr->getPriorityVector().grandmasterIdentity << endl;
-    EV_INFO << "Selected Grandmaster Priority1 - " << (int)bestAnnounceCurr->getPriorityVector().grandmasterPriority1
+    EV_INFO << "Selected Grandmaster Identity      - " << bestAnnounceCurr->getPriorityVector().grandmasterIdentity << endl;
+    EV_INFO << "Selected Grandmaster Name          - " << clockIdentityToFullPath[std::to_string(bestAnnounceCurr->getPriorityVector().grandmasterIdentity)] << endl;
+    EV_INFO << "Selected Grandmaster Priority1     - " << (int)bestAnnounceCurr->getPriorityVector().grandmasterPriority1
             << endl;
-    EV_INFO << "Selected Slave Port Identity - " << bestAnnounceReceiverIdentityCurr.portNumber << endl;
+    EV_INFO << "Selected Slave Port Identity       - " << bestAnnounceReceiverIdentityCurr.portNumber << endl;
 
     if (bestAnnounce == bestAnnounceCurr) {
         // Received an Announce message, but best clock is still the same
@@ -562,6 +566,8 @@ void Gptp::executeBmca()
 
         if (bestAnnounceCurr->getPriorityVector().grandmasterIdentity != clockIdentity) {
             // We are not the GM
+            auto oldSlavePortId = slavePortId;
+
             slavePortId = bestAnnounceReceiverIdentityCurr.portNumber;
             masterPortIds.clear();
             passivePortIds.clear();
@@ -574,8 +580,13 @@ void Gptp::executeBmca()
                                   ->getRxTransmissionChannel()
                                   ->getSourceGate()
                                   ->getOwnerModule()
-                                  ->getName();
+                                  ->getFullName();
             getContainingNode(this)->bubble(("My master is " + std::string(masterName)).c_str());
+
+            // In this case we have a new master we need to reset out clock to initialize
+            if (oldSlavePortId != slavePortId) {
+                changeSyncState(UNSYNCED);
+            }
         }
         else {
             // We are the GM:
@@ -594,7 +605,7 @@ void Gptp::executeBmca()
         delete bestAnnounce;
         bestAnnounce = bestAnnounceCurr->dup();
 
-        if (newInfo) {
+        if (newInfo && sendAnnounceImmediately) {
             sendAnnounce();
         }
         scheduleMessageOnTopologyChange();
@@ -956,11 +967,11 @@ void Gptp::changeSyncState(SyncState state)
     syncState = state;
     if (prevSyncState != syncState) {
         emit(gptpSyncStateChanged, syncState);
+    }
 
-        auto servoClock = dynamic_cast<ServoClockBase *>(clock.get());
-        if (state == UNSYNCED && servoClock != nullptr && par("resetClockStateOnSyncLoss").boolValue()) {
-            servoClock->resetClockState();
-        }
+    auto servoClock = dynamic_cast<ServoClockBase *>(clock.get());
+    if (state == UNSYNCED && servoClock != nullptr && par("resetClockStateOnSyncLoss").boolValue()) {
+        servoClock->resetClockState();
     }
 }
 

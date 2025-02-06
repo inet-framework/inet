@@ -40,6 +40,7 @@ void ServoClockBase::resetOscillator() const
 void ServoClockBase::resetClockState()
 {
     clockState = INIT;
+    EV_INFO << "Resetting clock state" << endl;
 }
 
 void ServoClockBase::rescheduleClockEvents(clocktime_t oldClockTime, clocktime_t newClockTime)
