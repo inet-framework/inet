@@ -3,6 +3,7 @@ import logging
 import os
 import re
 import subprocess
+from inet.common.util import *
 
 __sphinx_mock__ = True # ignore this module in documentation
 
