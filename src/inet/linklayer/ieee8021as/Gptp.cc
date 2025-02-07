@@ -451,6 +451,14 @@ void Gptp::sendFollowUp(int portId, const GptpSync *sync, const clocktime_t &syn
         gptp->setCorrectionField(residenceTime);
     }
     else if (gptpNodeType == BRIDGE_NODE || gptpNodeType == BMCA_NODE) {
+        if (syncIngressTimestamp == -1) {
+            // There is a rare case when a SYNC message is in transmission, while BMCA selects a new GM, the followup
+            // message contains a wrong timestamp.
+            // In this case we simply drop the message.
+            delete packet;
+            return;
+        }
+
         residenceTime = syncEgressTimestampOwn - syncIngressTimestamp;
         // meanLinkDelay and residence time are in the local time base
         // In the correctionField we need to express it in the grandmaster's time base
@@ -583,10 +591,9 @@ void Gptp::executeBmca()
                                   ->getFullName();
             getContainingNode(this)->bubble(("My master is " + std::string(masterName)).c_str());
 
-            // In this case we have a new master we need to reset out clock to initialize
-            if (oldSlavePortId != slavePortId) {
-                changeSyncState(UNSYNCED);
-            }
+            // In this case we have a new master we need to reset stuff for everything to function properly
+            resetGptpAfterMasterChange();
+
         }
         else {
             // We are the GM:
@@ -961,7 +968,7 @@ void Gptp::updateSyncStateAndRescheduleSyncTimeout(const ServoClockBase *servoCl
     }
 }
 
-void Gptp::changeSyncState(SyncState state)
+void Gptp::changeSyncState(SyncState state, bool resetClock)
 {
     auto prevSyncState = syncState;
     syncState = state;
@@ -970,7 +977,7 @@ void Gptp::changeSyncState(SyncState state)
     }
 
     auto servoClock = dynamic_cast<ServoClockBase *>(clock.get());
-    if (state == UNSYNCED && servoClock != nullptr && par("resetClockStateOnSyncLoss").boolValue()) {
+    if (resetClock && state == UNSYNCED && servoClock != nullptr && par("resetClockStateOnSyncLoss").boolValue()) {
         servoClock->resetClockState();
     }
 }
@@ -992,6 +999,19 @@ void Gptp::calculateGmRatio()
         peerSentTimeSyncLast = peerSentTimeSync;
         break;
     }
+}
+
+void Gptp::resetGptpAfterMasterChange()
+{
+    // Reset GPTP variables
+    neighborRateRatio = 1.0;
+    rcvdGptpSync = false;
+    rcvdPdelayResp = false;
+    meanLinkDelay = CLOCKTIME_ZERO;
+    syncIngressTimestamp = -1;
+    syncIngressTimestampLast = -1;
+
+    changeSyncState(UNSYNCED, true);
 }
 
 void Gptp::processPdelayReq(Packet *packet, const GptpPdelayReq *gptp)
@@ -1168,7 +1188,7 @@ void Gptp::handleAnnounceTimeout(cMessage *pMessage)
     executeBmca();
 }
 
-void Gptp::handleSyncTimeout(cMessage *pMessage) { changeSyncState(SyncState::UNSYNCED); }
+void Gptp::handleSyncTimeout(cMessage *pMessage) { changeSyncState(UNSYNCED, true); }
 
 void Gptp::handleTransmissionStartedSignal(const GptpBase *gptp, cComponent *source)
 {

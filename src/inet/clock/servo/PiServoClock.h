@@ -29,11 +29,6 @@ class INET_API PiServoClock : public ServoClockBase
     ppm kpTerm = ppm(0);
     ppm kiTerm = ppm(0);
 
-    ppm kpTermMax = ppm(100);
-    ppm kpTermMin = ppm(-100);
-    ppm kiTermMax = ppm(100);
-    ppm kiTermMin = ppm(-100);
-
     ppm drift = ppm(0);
 
   protected:

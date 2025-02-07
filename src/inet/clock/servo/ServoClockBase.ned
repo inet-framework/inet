@@ -14,6 +14,8 @@ module ServoClockBase extends OscillatorBasedClock
 {
     parameters:
         string defaultOverdueClockEventHandlingMode @enum("execute","skip","error") = default("error");
+        double minOscillatorCompensation @unit(ppm) = default(-inf ppm); // Expressed as a ratio in parts per million
+        double maxOscillatorCompensation @unit(ppm) = default(inf ppm); // Expressed as a ratio in parts per million
         @class(ServoClockBase);
 }
 

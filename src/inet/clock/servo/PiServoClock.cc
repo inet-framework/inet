@@ -86,11 +86,6 @@ void PiServoClock::adjustClockTo(clocktime_t newClockTime)
             // As our timestamps is in nanoseconds, to get ppm we need to multiply by 1e-3
             kpTerm = ppm(kp * offsetUs);
             kiTerm = ppm(ki * offsetUs);
-            // kdTerm = ppm (kd * differenceOffsetNanosecond);
-
-            kpTerm = std::max(kpTermMin, std::min(kpTermMax, kpTerm));
-            kiTerm = std::max(kiTermMin, std::min(kiTermMax, kiTerm));
-            // kdTerm = std::max(kdTermMin, std::min(kdTermMax, kdTerm));
 
             EV_INFO << "kpTerm: " << kpTerm << " kiTerm: " << kiTerm << " offsetUs: " << offsetUs << " drift: " << drift
                     << "\n";

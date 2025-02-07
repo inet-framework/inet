@@ -25,6 +25,10 @@ class ServoClockBase : public OscillatorBasedClock, public IScriptable
                                          // means the clock compensates 100 microseconds for every second in clock time
     // 100 ppm value means the oscillator tick length is compensated to be smaller by a factor of (1 / (1 + 100 / 1E+6))
     // than the actual tick length measured in clock time
+
+    ppm minOscillatorCompensation = ppm(-std::numeric_limits<double>::infinity());
+    ppm maxOscillatorCompensation = ppm(std::numeric_limits<double>::infinity());
+
     ClockState clockState = INIT;
 
   protected:

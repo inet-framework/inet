@@ -14,6 +14,9 @@ void ServoClockBase::initialize(int stage)
 {
     OscillatorBasedClock::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        minOscillatorCompensation = ppm(par("minOscillatorCompensation"));
+        maxOscillatorCompensation = ppm(par("maxOscillatorCompensation"));
+
         const char *text = par("defaultOverdueClockEventHandlingMode");
         if (!strcmp(text, "execute"))
             defaultOverdueClockEventHandlingMode = EXECUTE;
@@ -28,6 +31,7 @@ void ServoClockBase::initialize(int stage)
 
 void ServoClockBase::setOscillatorCompensation(ppm oscillatorCompensationValue)
 {
+    oscillatorCompensationValue = std::max(minOscillatorCompensation, std::min(maxOscillatorCompensation, oscillatorCompensationValue));
     this->oscillatorCompensation = oscillatorCompensationValue;
 }
 
@@ -101,8 +105,8 @@ void ServoClockBase::processCommand(const cXMLElement &node)
     }
     if (!strcmp(node.getTagName(), "set-oscillator-compensation")) {
         // TODO: Refactor to directly read ppm
-        const char* valueStr = xmlutils::getMandatoryFilledAttribute(node, "value");
-        double valueDouble = std::atof(valueStr); // Convert string to double
+        const char *valueStr = xmlutils::getMandatoryFilledAttribute(node, "value");
+        double valueDouble = std::atof(valueStr);           // Convert string to double
         ppm oscillatorCompensationValue = ppm(valueDouble); // Create ppm object from double
         setOscillatorCompensation(oscillatorCompensationValue);
     }
@@ -113,7 +117,8 @@ void ServoClockBase::processCommand(const cXMLElement &node)
         throw cRuntimeError("Invalid command: %s", node.getTagName());
 }
 
-void ServoClockBase::jumpClockTo(clocktime_t newClockTime, bool notifyListeners) {
+void ServoClockBase::jumpClockTo(clocktime_t newClockTime, bool notifyListeners)
+{
     auto oldClockTime = getClockTime();
 
     if (newClockTime != oldClockTime) {
@@ -133,7 +138,6 @@ void ServoClockBase::jumpClockTo(clocktime_t newClockTime, bool notifyListeners)
         }
         emit(timeChangedSignal, newClockTime.asSimTime());
     }
-
 }
 
 } // namespace inet

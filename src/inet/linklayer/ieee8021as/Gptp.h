@@ -193,6 +193,7 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     {
         if (timestamp != -1) {
             timestamp += difference;
+          return;
         }
         else {
             EV_INFO << "Timestamp is -1, cannot adjust it." << endl;
@@ -200,16 +201,17 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     }
 
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details) override;
-    void calculateGmRatio();
+    virtual void calculateGmRatio();
+    virtual void resetGptpAfterMasterChange();
     virtual void executeBmca();
-    void initPorts();
+    virtual void initPorts();
     virtual void scheduleMessageOnTopologyChange();
     void handleAnnounceTimeout(cMessage *pMessage);
     bool isGM() const { return gptpNodeType == MASTER_NODE || (gptpNodeType == BMCA_NODE && slavePortId == -1); };
-    static Gptp::BmcaPriorityVectorComparisonResult compareAnnounceMessages(GptpAnnounce *a, GptpAnnounce *b,
+    static BmcaPriorityVectorComparisonResult compareAnnounceMessages(GptpAnnounce *a, GptpAnnounce *b,
                                                                             PortIdentity aReceiverIdentity,
                                                                             PortIdentity bReceiverIdentity);
-    void changeSyncState(SyncState state);
+    void changeSyncState(SyncState state, bool resetClock = false);
     void handleSyncTimeout(cMessage *pMessage);
     void updateSyncStateAndRescheduleSyncTimeout(const ServoClockBase *servoClock);
 };
