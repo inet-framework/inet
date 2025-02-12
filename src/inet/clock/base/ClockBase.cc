@@ -51,7 +51,11 @@ void ClockBase::refreshDisplay() const
 
 clocktime_t ClockBase::getClockTime() const
 {
-    return computeClockTimeFromSimTime(simTime());
+    clocktime_t currentClockTime = computeClockTimeFromSimTime(simTime());
+    // NOTE: IClock interface 1. invariant
+    ASSERTCMP(>=, currentClockTime, lastClockTime);
+    lastClockTime = currentClockTime;
+    return currentClockTime;
 }
 
 simtime_t ClockBase::computeScheduleTime(clocktime_t clockTime)
@@ -78,6 +82,7 @@ void ClockBase::scheduleClockEventAt(clocktime_t t, ClockEvent *msg)
     msg->setRelative(false);
     msg->setArrivalClockTime(t);
     targetModule->scheduleAt(computeScheduleTime(t), msg);
+    checkClockEvent(msg);
 }
 
 void ClockBase::scheduleClockEventAfter(clocktime_t clockTimeDelay, ClockEvent *msg)
@@ -92,6 +97,7 @@ void ClockBase::scheduleClockEventAfter(clocktime_t clockTimeDelay, ClockEvent *
     msg->setArrivalClockTime(arrivalClockTime);
     simtime_t simTimeDelay = clockTimeDelay.isZero() ? SIMTIME_ZERO : computeScheduleTime(arrivalClockTime) - simTime();
     targetModule->scheduleAfter(simTimeDelay, msg);
+    checkClockEvent(msg);
 }
 
 ClockEvent *ClockBase::cancelClockEvent(ClockEvent *msg)
