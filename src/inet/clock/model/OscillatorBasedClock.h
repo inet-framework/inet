@@ -16,13 +16,28 @@ namespace inet {
 
 using namespace units::values;
 
+/**
+ * @brief A clock model that is counting the ticks of an oscillator.
+ *
+ * The following properties always hold for all oscillator based clocks:
+ *
+ * 1. The clock origin simulation time is always less than or equal to the computation origin of the oscillator.
+ *
+ * @note For detailed configuration, see the corresponding NED file.
+ */
 class INET_API OscillatorBasedClock : public ClockBase, public cListener
 {
   protected:
     IOscillator *oscillator = nullptr;
     int64_t (*roundingFunction)(int64_t, int64_t) = nullptr;
 
+    /**
+     * The simulation time from which the clock computes the mapping between future simulation times and clock times.
+     */
     simtime_t originSimulationTime;
+    /**
+     * The clock time from which the clock computes the mapping between future simulation times and clock times.
+     */
     clocktime_t originClockTime;
 
     std::vector<ClockEvent *> events;
