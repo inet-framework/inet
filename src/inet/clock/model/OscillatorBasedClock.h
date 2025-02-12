@@ -119,6 +119,8 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
   public:
     virtual ~OscillatorBasedClock();
 
+    virtual clocktime_t getClockTime() const override;
+
     virtual const IOscillator *getOscillator() const { return oscillator; }
     virtual ppm getOscillatorCompensation() const { return ppm(0); }
 
