@@ -90,22 +90,29 @@ void OscillatorBasedClock::setOrigin(simtime_t simulationTime, clocktime_t clock
     ASSERTCMP(==, originClockTime, computeClockTimeFromSimTime(originSimulationTime));
 }
 
-clocktime_t OscillatorBasedClock::computeClockTimeFromSimTime(simtime_t t) const
+clocktime_t OscillatorBasedClock::computeClockTimeFromSimTime(simtime_t simulationTime) const
 {
-    ASSERT(t >= simTime());
-    return originClockTime +
-           SIMTIME_AS_CLOCKTIME((oscillator->computeTicksForInterval(t - oscillator->getComputationOrigin()) -
-                                 oscillator->computeTicksForInterval(originSimulationTime - oscillator->getComputationOrigin())) *
-                                oscillator->getNominalTickLength() * (1 + getOscillatorCompensation().get<unit>()));
+    ASSERT(simulationTime >= simTime());
+    ASSERT(originSimulationTime >= oscillator->getComputationOrigin());
+    int64_t numTicksFromOscillatorOriginToSimulationTime = oscillator->computeTicksForInterval(simulationTime - oscillator->getComputationOrigin());
+    int64_t numTicksFromOscillatorOriginToClockOrigin = oscillator->computeTicksForInterval(originSimulationTime - oscillator->getComputationOrigin());
+    int64_t numTicks = numTicksFromOscillatorOriginToSimulationTime - numTicksFromOscillatorOriginToClockOrigin;
+    clocktime_t clockTimeFromClockOrigin = SIMTIME_AS_CLOCKTIME(numTicks * oscillator->getNominalTickLength() * (1 + getOscillatorCompensation().get<unit>()));
+    clocktime_t result = originClockTime + clockTimeFromClockOrigin;
+    return result;
 }
 
-simtime_t OscillatorBasedClock::computeSimTimeFromClockTime(clocktime_t t, bool lowerBound) const
+simtime_t OscillatorBasedClock::computeSimTimeFromClockTime(clocktime_t clockTime, bool lowerBound) const
 {
-    ASSERT(t >= getClockTime());
-    uint64_t numTicks = (t - originClockTime).dbl() / oscillator->getNominalTickLength() / (1 + getOscillatorCompensation().get<unit>()) +
-                        oscillator->computeTicksForInterval(originSimulationTime - oscillator->getComputationOrigin()) +
-                        (lowerBound ? 0 : 1);
-    return oscillator->getComputationOrigin() + oscillator->computeIntervalForTicks(numTicks);
+    ASSERT(clockTime >= getClockTime());
+    ASSERT(originSimulationTime >= oscillator->getComputationOrigin());
+    int64_t numTicksFromClockOriginToClockTime = (clockTime - originClockTime).raw() / oscillator->getNominalTickLength().raw() / (1 + getOscillatorCompensation().get<unit>());
+    int64_t numTicksFromOscillatorOriginToClockOrigin = oscillator->computeTicksForInterval(originSimulationTime - oscillator->getComputationOrigin());
+    int64_t numTicks = numTicksFromClockOriginToClockTime +
+                       numTicksFromOscillatorOriginToClockOrigin +
+                       (lowerBound ? 0 : 1);
+    simtime_t result = oscillator->getComputationOrigin() + oscillator->computeIntervalForTicks(numTicks);
+    return result;
 }
 
 void OscillatorBasedClock::scheduleClockEventAt(clocktime_t time, ClockEvent *event)
