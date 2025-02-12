@@ -25,10 +25,7 @@ void DriftingOscillatorBase::initialize(int stage)
         simtime_t tickOffset = par("tickOffset");
         if (tickOffset < 0 || tickOffset >= currentTickLength)
             throw cRuntimeError("First tick offset must be in the range [0, currentTickLength)");
-        if (tickOffset == 0)
-            nextTickFromOrigin = 0;
-        else
-            nextTickFromOrigin = currentTickLength - tickOffset;
+        nextTickFromOrigin = currentTickLength - tickOffset;
         WATCH(nominalTickLength);
         WATCH(driftRate);
         WATCH(driftFactor);
@@ -46,13 +43,8 @@ void DriftingOscillatorBase::setDriftRate(ppm newDriftRate)
         simtime_t currentTickLength = getCurrentTickLength();
         simtime_t baseTickTime = origin + nextTickFromOrigin - currentTickLength;
         simtime_t elapsedTickTime = fmod(currentSimTime - baseTickTime, currentTickLength);
-        if (elapsedTickTime == SIMTIME_ZERO)
-            nextTickFromOrigin = 0;
-        else {
-            int64_t v = increaseWithDriftRate(currentTickLength.raw() - elapsedTickTime.raw());
-            nextTickFromOrigin = SimTime::fromRaw(decreaseWithDriftRate(v, newInverseDriftRate));
-        }
         double long newDriftFactor = 1.0L + newDriftRate.get() / 1E+6L;
+        nextTickFromOrigin = SimTime::fromRaw((currentTickLength.raw() - elapsedTickTime.raw()) * driftFactor / newDriftFactor);
         driftRate = newDriftRate;
         driftFactor = newDriftFactor;
         origin = currentSimTime;
@@ -73,10 +65,7 @@ void DriftingOscillatorBase::setTickOffset(simtime_t newTickOffset)
         emit(preOscillatorStateChangedSignal, this);
         EV_DEBUG << "Setting oscillator tick offset from " << oldTickOffset << " to " << newTickOffset << " at simtime " << currentSimTime << ".\n";
         origin = currentSimTime;
-        if (newTickOffset == 0)
-            nextTickFromOrigin = 0;
-        else
-            nextTickFromOrigin = currentTickLength - newTickOffset;
+        nextTickFromOrigin = currentTickLength - newTickOffset;
         emit(postOscillatorStateChangedSignal, this);
         updateDisplayString();
     }
