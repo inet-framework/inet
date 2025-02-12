@@ -32,7 +32,7 @@ static int64_t roundNone(int64_t t, int64_t l)
 {
     if (t % l != 0)
         throw cRuntimeError("Clock time/delay value is not multiple of nominal tick length");
-    return t / l;
+    return t;
 }
 
 OscillatorBasedClock::~OscillatorBasedClock()
