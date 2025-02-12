@@ -285,6 +285,11 @@ class INET_API ClockTime
     int64_t raw() const { return impl.raw(); }
 
     /**
+     * Creates a ClockTime by setting its underlying 64-bit integer.
+     */
+    static ClockTime fromRaw(int64_t l) { ClockTime tmp; tmp.impl.setRaw(l); return tmp; }
+
+    /**
      * Directly sets the underlying 64-bit integer.
      */
     const ClockTime& setRaw(int64_t l) { impl.setRaw(l); return *this; }
