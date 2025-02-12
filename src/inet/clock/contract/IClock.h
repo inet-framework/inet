@@ -57,14 +57,23 @@ public:
  * clock related methods or the methods of this interface on the inherited clock
  * field.
  *
- * The clock interface requires the following properties.
+ * The following properties always hold for all clocks and clock events:
  *
- * 1. When a clock event is executed the clock time is guaranteed to be equal to
- *    the arrival clock time of the event.
+ * 1. The clock time of a clock increases monotonically with simulation time
+ *    unless the clock time is explicitly modified.
  *
- * 2. The scheduling and the execution of a new independent clock event doesn't
- *    change the arrival simulation times (and of course arrival clock times) of
- *    all other events.
+ * 2. When a clock event is executed, the clock time is equal to the arrival
+ *    clock time of the event.
+ *
+ * 3. The arrival clock time of a scheduled clock event is always greater than
+ *    or equal to the current clock time.
+ *
+ * 4. The arrival simulation time of a scheduled clock event is equal to the
+ *    expected simulation time when the clock will be at the arrival clock time
+ *    of the clock event.
+ *
+ * 5. The arrival clock time of a scheduled clock event is equal to the expected
+ *    clock time of the clock at the arrival simulation time of the clock event.
  */
 class INET_API IClock
 {
@@ -90,13 +99,15 @@ class INET_API IClock
     virtual clocktime_t computeClockTimeFromSimTime(simtime_t time) const = 0;
 
     /**
-     * Returns the simulation time (first moment) for the specified future clock
-     * time according to the current state of the clock. This method implements
-     * a monotonic function with respect to the clock time argument. It's allowed
-     * to return a different value for the same argument value if the clock is
-     * set between calls. The time argument must be greater or than equal to the
-     * current clock time, otherwise an error is raised. See CLOCKTIME_AS_SIMTIME
-     * macro for simple type conversion.
+     * Returns the simulation time for the specified future clock time according
+     * to the current state of the clock. The clock time may be the same for a
+     * non-zero length of simulation interval. This method can return both lower
+     * and upper bounds of the corresponding simulation interval. This method
+     * implements a monotonic function with respect to the clock time argument.
+     * It's allowed to return a different value for the same argument value if
+     * the clock is set between calls. The time argument must be greater or than
+     * equal to the current clock time, otherwise an error is raised. See
+     * CLOCKTIME_AS_SIMTIME macro for simple type conversion.
      */
     virtual simtime_t computeSimTimeFromClockTime(clocktime_t time, bool lowerBound = true) const = 0;
 
