@@ -32,6 +32,11 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
 
     virtual void setOrigin(simtime_t simulationTime, clocktime_t clockTime);
 
+    void checkAllClockEvents() {
+        for (auto event : events)
+            checkClockEvent(event);
+    }
+
   public:
     virtual ~OscillatorBasedClock();
 
