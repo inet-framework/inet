@@ -129,6 +129,7 @@ void SettableClock::setClockTime(clocktime_t newClockTime, ppm oscillatorCompens
             cSimpleModule *targetModule = check_and_cast<cSimpleModule *>(event->getArrivalModule());
             cContextSwitcher contextSwitcher(targetModule);
             targetModule->rescheduleAt(computeScheduleTime(event->getArrivalClockTime()), event);
+            checkClockEvent(event);
         }
         emit(timeChangedSignal, newClockTime.asSimTime());
     }

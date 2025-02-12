@@ -15,8 +15,11 @@ Register_Class(ClockEvent)
 
 void ClockEvent::execute()
 {
-    if (clock != nullptr)
+    if (clock != nullptr) {
+        // NOTE: IClock interface 2. invariant
+        ASSERT(getArrivalClockTime() == clock->getClockTime());
         clock->handleClockEvent(this);
+    }
     else {
         // TODO: this should be part of setArrival if clock is nullptr
         arrivalClockTime = SIMTIME_AS_CLOCKTIME(getArrivalTime());
