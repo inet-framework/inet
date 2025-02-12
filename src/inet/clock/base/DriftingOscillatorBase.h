@@ -25,7 +25,7 @@ class INET_API DriftingOscillatorBase : public OscillatorBase, public IScriptabl
                               // 100 ppm value means the current tick length is smaller by a factor of (1 / (1 + 100 / 1E+6)) than the nominal tick length measured in simulation time
     long double driftFactor;
 
-    simtime_t origin; // simulation time from which the computeClockTicksForInterval and computeIntervalForClockTicks is measured
+    simtime_t origin; // simulation time from which the computeClockTicksForInterval and computeIntervalForClockTicks is measured, it is always in the past
     simtime_t nextTickFromOrigin; // simulation time interval from the computation origin to the next tick
 
   protected:
