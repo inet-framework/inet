@@ -37,8 +37,9 @@ class INET_API SettableClock : public OscillatorBasedClock, public IScriptable
     virtual ppm getOscillatorCompensation() const override { return oscillatorCompensation; }
 
     /**
-     * Sets the clock time immediately to the given value. Greater than 1 oscillator
-     * compensation factor means the clock measures time faster.
+     * Sets the clock time to the given value. Scheduled overdue clock events
+     * can be executed synchronously before return.
+     * Greater than 1 oscillator compensation factor means the clock measures time faster.
      */
     virtual void setClockTime(clocktime_t time, ppm oscillatorCompensation, bool resetOscillator);
 };
