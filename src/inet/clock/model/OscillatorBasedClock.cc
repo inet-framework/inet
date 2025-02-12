@@ -50,6 +50,13 @@ OscillatorBasedClock::~OscillatorBasedClock()
         event->setClock(nullptr);
 }
 
+clocktime_t OscillatorBasedClock::getClockTime() const
+{
+    clocktime_t currentClockTime = ClockBase::getClockTime();
+    ASSERT(currentClockTime.raw() % oscillator->getNominalTickLength().raw() == 0);
+    return currentClockTime;
+}
+
 void OscillatorBasedClock::initialize(int stage)
 {
     ClockBase::initialize(stage);
