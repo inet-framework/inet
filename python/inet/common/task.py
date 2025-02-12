@@ -126,6 +126,16 @@ class TaskResult:
     def get_error_message(self, **kwargs):
         return self.error_message or self.stderr or (self.exception and str(self.exception)) or "<No error message>"
 
+    def print_stdout(self):
+        lines = [p for p in self.stdout.split("\n") if p]
+        for line in lines:
+            print(COLOR_GREEN + "STDOUT" + COLOR_RESET + " " + line)
+
+    def print_stderr(self):
+        lines = [p for p in self.stderr.split("\n") if p]
+        for line in lines:
+            print(COLOR_RED + "STDERR" + COLOR_RESET + " " + line)
+
     def print_result(self, complete_error_message=False, output_stream=sys.stdout, **kwargs):
         print(self.get_description(complete_error_message=complete_error_message), file=output_stream)
 
@@ -216,6 +226,13 @@ class MultipleTaskResults:
             if value != 0:
                 return False
         return True
+
+    def print_std(self):
+        for task_result in self.results:
+            print(COLOR_CYAN + "TEST" + COLOR_RESET + " ", end="")
+            task_result.task.print_run_start(print_end="\n")
+            task_result.print_stdout()
+            task_result.print_stderr()
 
     def print_result(self, output_stream=sys.stdout, **kwargs):
         print(self.get_summary(), file=output_stream)
