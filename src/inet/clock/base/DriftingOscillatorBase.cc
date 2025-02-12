@@ -19,8 +19,8 @@ void DriftingOscillatorBase::initialize(int stage)
             nominalTickLength.setRaw(1);
         else if (std::abs(nominalTickLength.dbl() - nominalTickLengthAsDouble) / nominalTickLengthAsDouble > 1E-15)
             throw cRuntimeError("The nominalTickLength parameter value %lg cannot be accurately represented with the current simulation time precision, conversion result: %s", nominalTickLengthAsDouble, nominalTickLength.ustr().c_str());
-        inverseDriftRate = invertDriftRate(driftRate);
         origin = simTime();
+        driftFactor = 1.0L + driftRate.get() / 1E+6L;
         simtime_t currentTickLength = getCurrentTickLength();
         simtime_t tickOffset = par("tickOffset");
         if (tickOffset < 0 || tickOffset >= currentTickLength)
@@ -31,7 +31,7 @@ void DriftingOscillatorBase::initialize(int stage)
             nextTickFromOrigin = currentTickLength - tickOffset;
         WATCH(nominalTickLength);
         WATCH(driftRate);
-        WATCH(inverseDriftRate);
+        WATCH(driftFactor);
         WATCH(nextTickFromOrigin);
     }
 }
@@ -46,15 +46,15 @@ void DriftingOscillatorBase::setDriftRate(ppm newDriftRate)
         simtime_t currentTickLength = getCurrentTickLength();
         simtime_t baseTickTime = origin + nextTickFromOrigin - currentTickLength;
         simtime_t elapsedTickTime = fmod(currentSimTime - baseTickTime, currentTickLength);
-        ppm newInverseDriftRate = invertDriftRate(newDriftRate);
         if (elapsedTickTime == SIMTIME_ZERO)
             nextTickFromOrigin = 0;
         else {
             int64_t v = increaseWithDriftRate(currentTickLength.raw() - elapsedTickTime.raw());
             nextTickFromOrigin = SimTime::fromRaw(decreaseWithDriftRate(v, newInverseDriftRate));
         }
+        double long newDriftFactor = 1.0L + newDriftRate.get() / 1E+6L;
         driftRate = newDriftRate;
-        inverseDriftRate = newInverseDriftRate;
+        driftFactor = newDriftFactor;
         origin = currentSimTime;
         emit(driftRateChangedSignal, driftRate.get<ppm>());
         emit(postOscillatorStateChangedSignal, this);
@@ -83,17 +83,16 @@ void DriftingOscillatorBase::setTickOffset(simtime_t newTickOffset)
 int64_t DriftingOscillatorBase::computeTicksForInterval(simtime_t timeInterval) const
 {
     ASSERT(timeInterval >= 0);
-    return increaseWithDriftRate(timeInterval.raw() + nextTickFromOrigin.raw()) / nominalTickLength.raw();
+    int64_t result = floor((timeInterval - nextTickFromOrigin).raw() * driftFactor / nominalTickLength.raw()) + 1;
+    return result;
 }
 
 simtime_t DriftingOscillatorBase::computeIntervalForTicks(int64_t numTicks) const
 {
-    if (numTicks == 0)
-        return 0;
-    else if (nextTickFromOrigin == 0)
-        return SimTime::fromRaw(decreaseWithDriftRate(nominalTickLength.raw() * numTicks));
-    else
-        return SimTime::fromRaw(decreaseWithDriftRate(nominalTickLength.raw() * (numTicks - 1))) + nextTickFromOrigin;
+    simtime_t result = SimTime::fromRaw(ceil((nominalTickLength.raw() * (numTicks - 1)) / driftFactor)) + nextTickFromOrigin;
+    if (result < 0)
+        result = 0;
+    return result;
 }
 
 void DriftingOscillatorBase::processCommand(const cXMLElement& node)
