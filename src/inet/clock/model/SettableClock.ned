@@ -17,6 +17,7 @@ package inet.clock.model;
 module SettableClock extends OscillatorBasedClock
 {
     parameters:
+        double initialOscillatorCompensation @unit(ppm) = default(0ppm);
         string defaultOverdueClockEventHandlingMode @enum("execute","skip","error") = default("execute");
         @class(SettableClock);
 }

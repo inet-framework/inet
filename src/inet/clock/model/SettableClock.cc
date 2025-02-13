@@ -18,6 +18,7 @@ void SettableClock::initialize(int stage)
 {
     OscillatorBasedClock::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        oscillatorCompensation = ppm(par("initialOscillatorCompensation"));
         const char *text = par("defaultOverdueClockEventHandlingMode");
         if (!strcmp(text, "execute"))
             defaultOverdueClockEventHandlingMode = EXECUTE;
