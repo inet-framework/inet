@@ -37,7 +37,7 @@ void RandomDriftOscillator::handleMessage(cMessage *message)
         scheduleAfter(changeIntervalParameter->doubleValue(), changeTimer);
     }
     else
-        throw cRuntimeError("Unknown message");
+        DriftingOscillatorBase::handleMessage(message);
 }
 
 } // namespace inet
