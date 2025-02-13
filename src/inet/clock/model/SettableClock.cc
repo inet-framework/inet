@@ -70,6 +70,7 @@ void SettableClock::setClockTime(clocktime_t newClockTime, ppm oscillatorCompens
 {
     Enter_Method("setClockTime");
     clocktime_t oldClockTime = getClockTime();
+    newClockTime.setRaw(roundingFunction(newClockTime.raw(), oscillator->getNominalTickLength().raw()));
     if (newClockTime != oldClockTime) {
         clocktime_t clockDelta = newClockTime - oldClockTime;
         emit(timeChangedSignal, oldClockTime.asSimTime());
