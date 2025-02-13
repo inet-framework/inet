@@ -31,6 +31,8 @@ class INET_API DriftingOscillatorBase : public OscillatorBase, public IScriptabl
   protected:
     virtual void initialize(int stage) override;
 
+    virtual void setOrigin(simtime_t origin);
+
     // IScriptable implementation
     virtual void processCommand(const cXMLElement& node) override;
 
