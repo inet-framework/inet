@@ -6,6 +6,8 @@
 
 
 #include "inet/clock/base/DriftingOscillatorBase.h"
+#include "inet/common/DebugDefs.h"
+#include "inet/common/IPrintableObject.h"
 
 namespace inet {
 
@@ -20,7 +22,7 @@ void DriftingOscillatorBase::initialize(int stage)
         else if (std::abs(nominalTickLength.dbl() - nominalTickLengthAsDouble) / nominalTickLengthAsDouble > 1E-15)
             throw cRuntimeError("The nominalTickLength parameter value %lg cannot be accurately represented with the current simulation time precision, conversion result: %s", nominalTickLengthAsDouble, nominalTickLength.ustr().c_str());
         inverseDriftRate = invertDriftRate(driftRate);
-        origin = simTime();
+        setOrigin(simTime());
         simtime_t currentTickLength = getCurrentTickLength();
         simtime_t tickOffset = par("tickOffset");
         if (tickOffset < 0 || tickOffset >= currentTickLength)
@@ -34,6 +36,14 @@ void DriftingOscillatorBase::initialize(int stage)
         WATCH(inverseDriftRate);
         WATCH(nextTickFromOrigin);
     }
+}
+
+void DriftingOscillatorBase::setOrigin(simtime_t origin)
+{
+    EV_DEBUG << "Setting oscillator origin" << EV_FIELD(origin) << EV_ENDL;
+    DEBUG_CMP(origin, <=, simTime());
+    DEBUG_CMP(this->origin, <=, origin);
+    this->origin = origin;
 }
 
 void DriftingOscillatorBase::setDriftRate(ppm newDriftRate)
@@ -55,7 +65,7 @@ void DriftingOscillatorBase::setDriftRate(ppm newDriftRate)
         }
         driftRate = newDriftRate;
         inverseDriftRate = newInverseDriftRate;
-        origin = currentSimTime;
+        setOrigin(currentSimTime);
         emit(driftRateChangedSignal, driftRate.get<ppm>());
         emit(postOscillatorStateChangedSignal, this);
     }
@@ -71,7 +81,7 @@ void DriftingOscillatorBase::setTickOffset(simtime_t newTickOffset)
     if (newTickOffset != oldTickOffset) {
         emit(preOscillatorStateChangedSignal, this);
         EV_DEBUG << "Setting oscillator tick offset from " << oldTickOffset << " to " << newTickOffset << " at simtime " << currentSimTime << ".\n";
-        origin = currentSimTime;
+        setOrigin(currentSimTime);
         if (newTickOffset == 0)
             nextTickFromOrigin = 0;
         else
