@@ -39,6 +39,7 @@ module Router extends ApplicationLayerNodeBase
         bool hasDhcp = default(false);
         hasUdp = default(hasRip || hasDhcp);
         hasTcp = default(hasBgp);
+        hasQuic = default(false);
         *.routingTableModule = default("^.ipv4.routingTable");
 
     submodules:

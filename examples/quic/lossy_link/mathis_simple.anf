@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scave:Analysis xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:scave="http://www.omnetpp.org/omnetpp/scave">
+  <inputs>
+    <inputs name="results/mathis_simple*.vec"/>
+    <inputs name="results/mathis_simple*.sca"/>
+  </inputs>
+  <datasets>
+    <datasets name="ack every packet">
+      <items xsi:type="scave:Add" filterPattern="file(/inet-quic/examples/quic/lossy_link/results/mathis_simple.vec) AND attr:configname(ack_every_packet) AND attr:runnumber(0) AND module(lossy_link_shared.client.quic) AND name(bytesInFlight_cid=0:vector)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="file(/inet-quic/examples/quic/lossy_link/results/mathis_simple.vec) AND attr:configname(ack_every_packet) AND attr:runnumber(0) AND module(lossy_link_shared.client.quic) AND name(cwnd_cid=0:vector)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="file(/inet-quic/examples/quic/lossy_link/results/mathis_simple.vec) AND attr:configname(ack_every_packet) AND attr:runnumber(0) AND module(lossy_link_shared.client.quic) AND name(partialBytesAcked_cid=0:vector)" type="VECTOR"/>
+      <items xsi:type="scave:LineChart" name="ack every packet" lineNameFormat="">
+        <properties name="Legend.Display" value="true"/>
+        <properties name="Line.Type" value="SampleHold"/>
+      </items>
+    </datasets>
+    <datasets name="ack every other packet">
+      <items xsi:type="scave:Add" filterPattern="file(/inet-quic/examples/quic/lossy_link/results/mathis_simple_delayed.vec) AND attr:configname(ack_every_other_packet) AND attr:runnumber(0) AND module(lossy_link_shared.client.quic) AND name(bytesInFlight_cid=0:vector)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="file(/inet-quic/examples/quic/lossy_link/results/mathis_simple_delayed.vec) AND attr:configname(ack_every_other_packet) AND attr:runnumber(0) AND module(lossy_link_shared.client.quic) AND name(cwnd_cid=0:vector)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="file(/inet-quic/examples/quic/lossy_link/results/mathis_simple_delayed.vec) AND attr:configname(ack_every_other_packet) AND attr:runnumber(0) AND module(lossy_link_shared.client.quic) AND name(partialBytesAcked_cid=0:vector)" type="VECTOR"/>
+      <items xsi:type="scave:LineChart" name="ack every other packet" lineNameFormat="">
+        <properties name="Legend.Display" value="true"/>
+        <properties name="Line.Type" value="SampleHold"/>
+      </items>
+    </datasets>
+  </datasets>
+  <chartSheets>
+    <chartSheets name="default" charts="//@datasets/@datasets.0/@items.3 //@datasets/@datasets.1/@items.3"/>
+  </chartSheets>
+</scave:Analysis>

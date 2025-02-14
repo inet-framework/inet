@@ -1,0 +1,9 @@
+<config> 
+	<interface hosts="**" address="10.x.x.x" netmask="255.x.x.x"/>
+	
+	<route hosts="router1" destination="10.0.0.14" netmask="255.255.255.255" interface="ppp1" metric="1"/>
+	<route hosts="router1" destination="10.0.0.14" netmask="255.255.255.255" interface="ppp2" metric="2"/>
+	
+	<route hosts="router2" destination="10.0.0.1" netmask="255.255.255.255" interface="ppp0" metric="1"/>
+	<route hosts="router2" destination="10.0.0.1" netmask="255.255.255.255" interface="ppp1" metric="2"/>
+</config>

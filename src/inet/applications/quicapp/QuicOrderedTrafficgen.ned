@@ -1,0 +1,34 @@
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+// 
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see http://www.gnu.org/licenses/.
+// 
+
+package inet.applications.quicapp;
+
+import inet.applications.trafficgen.ITrafficgenHandler;
+
+simple QuicOrderedTrafficgen  like ITrafficgenHandler
+{
+    parameters:
+        string localAddress = default(""); // comma separated list of addresses
+        int localPort = default(0); // port number to listen on
+        string connectAddress;  // server address (may be symbolic)
+        int connectPort; // port number to connect to
+        
+	gates:
+        input socketIn;
+        output socketOut;
+        
+        input generatorIn[];
+    	output generatorOut[];
+}

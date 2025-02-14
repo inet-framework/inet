@@ -106,6 +106,7 @@ class INET_API Protocol
     static const Protocol ospf;
     static const Protocol pim;
     static const Protocol ppp;
+    static const Protocol quic;
     static const Protocol rip;
     static const Protocol rsvpTe;
     static const Protocol rtsp;

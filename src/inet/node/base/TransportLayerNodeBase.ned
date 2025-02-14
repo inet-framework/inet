@@ -11,6 +11,7 @@ import inet.common.MessageDispatcher;
 import inet.transportlayer.contract.ISctp;
 import inet.transportlayer.contract.ITcp;
 import inet.transportlayer.contract.IUdp;
+import inet.transportlayer.contract.IQuic;
 
 //
 // An extension of the network layer node base with transport layer protocols.
@@ -28,6 +29,7 @@ module TransportLayerNodeBase extends NetworkLayerNodeBase
         bool hasUdp = default(firstAvailableOrEmpty("Udp") != "");
         bool hasTcp = default(firstAvailableOrEmpty("Tcp", "TcpLwip", "TcpNsc") != "");
         bool hasSctp = default(false);
+        bool hasQuic = default(firstAvailableOrEmpty("Quic") != "");
         @figure[transportLayer](type=rectangle; pos=250,158; size=1000,134; fillColor=#ff0000; lineColor=#808080; cornerRadius=5; fillOpacity=0.1);
         @figure[transportLayer.title](type=text; pos=1245,163; anchor=ne; text="transport layer");
     submodules:
@@ -39,6 +41,10 @@ module TransportLayerNodeBase extends NetworkLayerNodeBase
         }
         sctp: <default(firstAvailableOrEmpty("Sctp"))> like ISctp if hasSctp {
             @display("p=675,225");
+        }
+        quic: <default(firstAvailableOrEmpty("Quic"))> like IQuic if hasQuic {
+            parameters:
+                @display("p=825,226");
         }
         tn: MessageDispatcher {
             @display("p=750,300;b=1000,5,,,,1");
@@ -52,6 +58,9 @@ module TransportLayerNodeBase extends NetworkLayerNodeBase
 
         sctp.ipOut --> tn.in++ if hasSctp;
         tn.out++ --> sctp.ipIn if hasSctp;
+
+        quic.udpOut --> tn.in++ if hasQuic;
+        tn.out++ --> quic.udpIn if hasQuic;
 
         tn.out++ --> ipv4.transportIn if hasIpv4;
         tn.in++ <-- ipv4.transportOut if hasIpv4;

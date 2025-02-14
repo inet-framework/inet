@@ -50,6 +50,9 @@ module ApplicationLayerNodeBase extends TransportLayerNodeBase
         at.out++ --> sctp.appIn if hasSctp;
         at.in++ <-- sctp.appOut if hasSctp;
 
+        at.out++ --> quic.appIn if hasQuic;
+        at.in++ <-- quic.appOut if hasQuic;
+
         at.out++ --> tn.in++;
         at.in++ <-- tn.out++;
 }

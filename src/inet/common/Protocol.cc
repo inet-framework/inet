@@ -141,6 +141,7 @@ const Protocol Protocol::ospf("ospf", "OSPF");
 const Protocol Protocol::eigrp("eigrp", "EIGRP");
 const Protocol Protocol::pim("pim", "PIM");
 const Protocol Protocol::ppp("ppp", "PPP", Protocol::LinkLayer);
+const Protocol Protocol::quic("quic", "QUIC", Protocol::TransportLayer);
 const Protocol Protocol::rip("rip", "RIP");
 const Protocol Protocol::rsvpTe("rsvpte", "RSVP-TE");
 const Protocol Protocol::rtsp("rtsp", "RTSP");
