@@ -1190,7 +1190,8 @@ void Udp::processICMPv4Error(Packet *packet)
         if (sd) {
             // send UDP_I_ERROR to socket
             EV_DETAIL << "Source socket is sockId=" << sd->sockId << ", notifying.\n";
-            sendUpErrorIndication(sd, localAddr, localPort, remoteAddr, remotePort);
+            packet->setFrontOffset(packet->getFrontOffset() - ipv4Header->getChunkLength() - icmpHeader->getChunkLength());
+            sendUpErrorIndication(sd, localAddr, localPort, remoteAddr, remotePort, packet);
         }
         else {
             EV_WARN << "No socket on that local port, ignoring ICMP error\n";
@@ -1251,7 +1252,7 @@ void Udp::processICMPv6Error(Packet *packet)
         if (sd) {
             // send UDP_I_ERROR to socket
             EV_DETAIL << "Source socket is sockId=" << sd->sockId << ", notifying.\n";
-            sendUpErrorIndication(sd, localAddr, localPort, remoteAddr, remotePort);
+            sendUpErrorIndication(sd, localAddr, localPort, remoteAddr, remotePort, packet);
         }
         else {
             EV_WARN << "No socket on that local port, ignoring ICMPv6 error\n";
@@ -1265,11 +1266,10 @@ void Udp::processICMPv6Error(Packet *packet)
     delete packet;
 }
 
-void Udp::sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort localPort, const L3Address& remoteAddr, ushort remotePort)
+void Udp::sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort localPort, const L3Address& remoteAddr, ushort remotePort, Packet *icmpPacket)
 {
     auto indication = new Indication("ERROR", UDP_I_ERROR);
-    UdpErrorIndication *udpCtrl = new UdpErrorIndication();
-    indication->setControlInfo(udpCtrl);
+    indication->setControlInfo(icmpPacket->dup());
     // FIXME notifyMsg->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceId);
     indication->addTag<SocketInd>()->setSocketId(sd->sockId);
     auto addresses = indication->addTag<L3AddressInd>();
