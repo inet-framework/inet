@@ -42,6 +42,7 @@ public:
     QuicPacket *buildAckElicitingPacket(std::vector<QuicPacket*> *sentPackets, int maxPacketSize, bool skipPacketNumber=false);
     QuicPacket *buildPingPacket();
     QuicPacket *buildDplpmtudProbePacket(int packetSize, Dplpmtud *dplpmtud);
+    QuicPacket *buildInitialPacket();
     void setConnectionId(uint64_t connectionId) {
         this->connectionId = connectionId;
     }

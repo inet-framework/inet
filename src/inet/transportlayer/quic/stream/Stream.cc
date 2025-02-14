@@ -295,7 +295,7 @@ uint64_t Stream::checkAndGetAvailableRwnd()
 bool Stream::isAllowedToReceivedData(uint64_t dataSize)
 {
     if(connection->getRoundConsumedDataValue()){
-        auto maxStreamDataSizeInQuicPacket = connection->getPath()->getMaxQuicPacketSize() - ShortPacketHeader::SIZE;
+        auto maxStreamDataSizeInQuicPacket = connection->getPath()->getMaxQuicPacketSize() - OneRttPacketHeader::SIZE;
         if(connectionFlowControlResponder->getRcvwnd() + maxStreamDataSizeInQuicPacket >= dataSize && streamFlowControlResponder->getRcvwnd() + maxStreamDataSizeInQuicPacket >= dataSize) return true;
         else {throw cRuntimeError("FLOW_CONTROL_ERROR");}
     }else{

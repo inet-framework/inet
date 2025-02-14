@@ -43,11 +43,11 @@ void PacketBuilder::readParameters(cModule *module)
 Ptr<ShortPacketHeader> PacketBuilder::createHeader()
 {
     // create short header
-    Ptr<ShortPacketHeader> packetHeader = makeShared<ShortPacketHeader>();
+    Ptr<OneRttPacketHeader> packetHeader = makeShared<OneRttPacketHeader>();
     packetHeader->setPacketNumber(shortPacketNumber++);
-    packetHeader->setConnectionID(connectionId);
+    packetHeader->setDstConnectionId(connectionId);
     // TODO: set appropriate chunk length --> actual packet header size according to the spec
-    packetHeader->setChunkLength(B(ShortPacketHeader::SIZE));
+    packetHeader->setChunkLength(B(OneRttPacketHeader::SIZE));
 
     return packetHeader;
 }
@@ -58,7 +58,7 @@ QuicPacket *PacketBuilder::createPacket(bool skipPacketNumber)
         shortPacketNumber++;
     }
     std::stringstream packetName;
-    packetName << "ShortPacket:" << shortPacketNumber;
+    packetName << "1-RTT[" << shortPacketNumber << "]";
     QuicPacket *packet = new QuicPacket(packetName.str());;
 
     // set short header
@@ -109,7 +109,7 @@ QuicPacket *PacketBuilder::addFrameToPacket(QuicPacket *packet, QuicFrame *frame
 size_t PacketBuilder::getPacketSize(QuicPacket *packet)
 {
     if (packet == nullptr) {
-        return ShortPacketHeader::SIZE;
+        return OneRttPacketHeader::SIZE;
     }
     return packet->getSize();
 }
@@ -327,6 +327,37 @@ QuicPacket *PacketBuilder::buildDplpmtudProbePacket(int packetSize, Dplpmtud *dp
     */
     packet->addFrame(createPaddingFrame(remainingBytes));
 
+    return packet;
+}
+
+QuicPacket *PacketBuilder::buildInitialPacket() {
+    static uint64_t initialPacketNumber = 0;
+
+    std::stringstream packetName;
+    packetName << "Initial[" << initialPacketNumber << "]";
+    QuicPacket *packet = new QuicPacket(packetName.str());;
+
+    // set header
+    Ptr<InitialPacketHeader> packetHeader = makeShared<InitialPacketHeader>();
+    packetHeader->setSrcConnectionIdLength(1);
+    packetHeader->setSrcConnectionId(1);
+    packetHeader->setDstConnectionIdLength(8);
+    packetHeader->setDstConnectionId(0x1122334455667788);
+    /*
+    uint8_t packetNumberLength;
+    VariableLengthInteger tokenLength;
+    uint64_t token;
+    VariableLengthInteger length;
+    uint32_t packetNumber;
+    */
+    packetHeader->setPacketNumberLength(1);
+    packetHeader->setPacketNumber(initialPacketNumber++);
+    packetHeader->setTokenLength(0);
+    packetHeader->setToken(0);
+    packetHeader->setLength(1);
+    // TODO: set appropriate chunk length --> actual packet header size according to the spec
+    packetHeader->setChunkLength(B(OneRttPacketHeader::SIZE));
+    packet->setHeader(packetHeader);
     return packet;
 }
 

@@ -65,11 +65,14 @@ ConnectionState *ConnectionState::processPacket(Packet *pkt)
     auto packetHeader = pkt->popAtFront<PacketHeader>();
     EV_DEBUG << "process packet, found chunk: " << packetHeader << endl;
 
-    switch (packetHeader->getPacketType()) {
-        case PACKET_HEADER_TYPE_INITIAL:
-            return processInitialPacket(staticPtrCast<const InitialPacketHeader>(packetHeader), pkt);
-        case PACKET_HEADER_TYPE_SHORT:
-            return processShortPacket(staticPtrCast<const ShortPacketHeader>(packetHeader), pkt);
+    switch (packetHeader->getHeaderForm()) {
+        case PACKET_HEADER_FORM_LONG:
+            switch (staticPtrCast<const LongPacketHeader>(packetHeader)->getLongPacketType()) {
+                case LONG_PACKET_HEADER_TYPE_INITIAL:
+                    return processInitialPacket(staticPtrCast<const InitialPacketHeader>(packetHeader), pkt);
+            }
+        case PACKET_HEADER_FORM_SHORT:
+            return processOneRttPacket(staticPtrCast<const OneRttPacketHeader>(packetHeader), pkt);
     }
 
     throw cRuntimeError("Unknown Packet Header Type");
@@ -80,9 +83,9 @@ ConnectionState *ConnectionState::processInitialPacket(const Ptr<const InitialPa
     throw cRuntimeError("Initial packet unexpected in the current state");
 }
 
-ConnectionState *ConnectionState::processShortPacket(const Ptr<const ShortPacketHeader>& packetHeader, Packet *pkt)
+ConnectionState *ConnectionState::processOneRttPacket(const Ptr<const OneRttPacketHeader>& packetHeader, Packet *pkt)
 {
-    throw cRuntimeError("Short packet unexpected in the current state");
+    throw cRuntimeError("1-RTT packet unexpected in the current state");
 }
 
 ConnectionState *ConnectionState::processIcmpPtb(Packet *droppedPkt, int ptbMtu)
@@ -91,9 +94,9 @@ ConnectionState *ConnectionState::processIcmpPtb(Packet *droppedPkt, int ptbMtu)
     EV_DEBUG << "process ICMP PTB, found chunk: " << packetHeader << endl;
 
     uint32_t packetNumber = 0;
-    switch (packetHeader->getPacketType()) {
-        case PACKET_HEADER_TYPE_SHORT: {
-            Ptr<const ShortPacketHeader> shortPacketHeader = dynamicPtrCast<const ShortPacketHeader>(packetHeader);
+    switch (packetHeader->getHeaderForm()) {
+        case PACKET_HEADER_FORM_SHORT: {
+            Ptr<const ShortPacketHeader> shortPacketHeader = staticPtrCast<const ShortPacketHeader>(packetHeader);
             packetNumber = shortPacketHeader->getPacketNumber();
             break;
         }
@@ -112,7 +115,7 @@ void ConnectionState::processFrames(Packet *pkt)
         processFrame(pkt);
         frameHeader = nullptr;
         if (pkt->getByteLength() > 0) {
-            frameHeader = dynamicPtrCast<const FrameHeader>(pkt->peekAtFront<Chunk>());
+            frameHeader = staticPtrCast<const FrameHeader>(pkt->peekAtFront<Chunk>());
         }
     } while (frameHeader != nullptr);
 }

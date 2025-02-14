@@ -15,42 +15,101 @@
 
 
 import inet.common.packet.chunk.Chunk;
+import inet.transportlayer.quic.packet.VariableLengthInteger;
 
 namespace inet::quic;
 
-enum PacketHeaderType {
-    PACKET_HEADER_TYPE_INITIAL = 0xc; // 1100
-    PACKET_HEADER_TYPE_0RTT = 0xd; // 1101
-    PACKET_HEADER_TYPE_HANDSHAKE = 0xe; // 1110
-    PACKET_HEADER_TYPE_RETRY = 0xf; // 1111
-    PACKET_HEADER_TYPE_SHORT = 0x4; // 0100
+enum PacketHeaderForm {
+    PACKET_HEADER_FORM_SHORT = 0;
+    PACKET_HEADER_FORM_LONG = 1;
+}
+
+enum LongPacketHeaderType {
+    LONG_PACKET_HEADER_TYPE_INITIAL = 0x00;
+    LONG_PACKET_HEADER_TYPE_0RTT = 0x01;
+    LONG_PACKET_HEADER_TYPE_HANDSHAKE = 0x02;
+    LONG_PACKET_HEADER_TYPE_RETRY = 0x03;
 }
 
 class PacketHeader extends FieldsChunk
 {
-    uint8_t packetType;
+    uint8_t headerForm;
 }
 
-class InitialPacketHeader extends PacketHeader
+class LongPacketHeader extends PacketHeader
 {
-    
+    headerForm = PACKET_HEADER_FORM_LONG;
+    uint8_t longPacketType;
+    uint32_t version = 1;
+    uint8_t dstConnectionIdLength;
+    uint64_t dstConnectionId;
+    uint8_t srcConnectionIdLength;
+    uint64_t srcConnectionId;
+}
+
+class VersionNegotiationPacketHeader extends LongPacketHeader
+{
+    longPacketType = 0;
+    version = 0;
+    uint32_t supportedVersion[];
+}
+
+class InitialPacketHeader extends LongPacketHeader
+{
+    longPacketType = LONG_PACKET_HEADER_TYPE_INITIAL;
+    uint8_t packetNumberLength;
+    VariableLengthInteger tokenLength;
+    uint64_t token;
+    VariableLengthInteger length;
+    uint32_t packetNumber;
+    // payload
+}
+
+class ZeroRttPacketHeader extends LongPacketHeader
+{
+	longPacketType = LONG_PACKET_HEADER_TYPE_0RTT;
+	uint8_t packetNumberLength;
+    VariableLengthInteger length;
+    uint32_t packetNumber;
+    // payload
+}
+
+class HandshakePacketHeader extends LongPacketHeader
+{
+    longPacketType = LONG_PACKET_HEADER_TYPE_HANDSHAKE;
+    uint8_t packetNumberLength;
+    VariableLengthInteger length;
+    uint32_t packetNumber;
+    // payload
+}
+
+class RetryPacketHeader extends LongPacketHeader
+{
+    longPacketType = LONG_PACKET_HEADER_TYPE_RETRY;
+    uint64_t retryToken;
+    uint64_t retryIntegrityTag;
 }
 
 class ShortPacketHeader extends PacketHeader
 {
-    packetType = PACKET_HEADER_TYPE_SHORT;
-    uint64_t connectionID;
+    headerForm = PACKET_HEADER_FORM_SHORT;
+    uint64_t dstConnectionId;
     uint32_t packetNumber;
+    // payload
+}
+
+class OneRttPacketHeader extends ShortPacketHeader
+{
     bool iBit = false;
 }
-cplusplus(ShortPacketHeader) {{
+cplusplus(OneRttPacketHeader) {{
   public:
     static const size_t SIZE = 13;
     std::string str() const override {
         std::ostringstream os;
-        os << "Short[connectionID=" << connectionID
-            << ", packetNumber=" << packetNumber
-            << "]";
+        os << "1-RTT[dstConnectionId=" << dstConnectionId
+           << ", packetNumber=" << packetNumber
+           << "]";
         return os.str();
     }
 }}

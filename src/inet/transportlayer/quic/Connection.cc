@@ -20,6 +20,8 @@
 #include "inet/common/socket/SocketTag_m.h"
 #include "AppSocket.h"
 #include "connectionstate/ConnectionState.h"
+#include "connectionstate/EstablishedConnectionState.h"
+#include "connectionstate/InitialConnectionState.h"
 #include "PacketBuilder.h"
 #include "scheduler/RRScheduler.h"
 #include "congestioncontrol/CongestionControlFactory.h"
@@ -51,7 +53,7 @@ Connection::Connection(Quic *quicSimpleMod, UdpSocket *udpSocket, AppSocket *app
         dplpmutdInIntialBase = true;
     }
 
-    this->connectionState = new EstablishedConnectionState(this);
+    this->connectionState = new InitialConnectionState(this);
 
     transportParameter = new TransportParameter(quicSimpleMod);
 
@@ -338,11 +340,14 @@ std::vector<uint64_t> Connection::getConnectionIds()
 
 void Connection::connect()
 {
+    sendPacket(packetBuilder->buildInitialPacket());
+    /*
     appSocket->sendEstablished();
 
     if (path->usesDplpmtud()) {
         path->getDplpmtud()->start();
     }
+    */
 }
 
 void Connection::accept()

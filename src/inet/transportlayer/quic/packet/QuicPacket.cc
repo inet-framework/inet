@@ -34,8 +34,8 @@ QuicPacket::~QuicPacket() {
 
 uint64_t QuicPacket::getPacketNumber()
 {
-    switch (header->getPacketType()) {
-        case PACKET_HEADER_TYPE_SHORT:
+    switch (header->getHeaderForm()) {
+        case PACKET_HEADER_FORM_SHORT:
             return staticPtrCast<const ShortPacketHeader>(header)->getPacketNumber();
         default:
             cRuntimeError("getPacketNumber not implemented for packet header type other than short packet header.");
@@ -95,7 +95,7 @@ void QuicPacket::onPacketAcked()
 
 void QuicPacket::setIBit(bool iBit)
 {
-    staticPtrCast<ShortPacketHeader>(header)->setIBit(iBit);
+    staticPtrCast<OneRttPacketHeader>(header)->setIBit(iBit);
 }
 
 bool QuicPacket::isDplpmtudProbePacket()

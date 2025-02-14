@@ -36,7 +36,7 @@ public:
 
     virtual ConnectionState *processPacket(Packet *msg);
     virtual ConnectionState *processInitialPacket(const Ptr<const InitialPacketHeader>& packetHeader, Packet *pkt);
-    virtual ConnectionState *processShortPacket(const Ptr<const ShortPacketHeader>& packetHeader, Packet *pkt);
+    virtual ConnectionState *processOneRttPacket(const Ptr<const OneRttPacketHeader>& packetHeader, Packet *pkt);
 
     virtual void processFrames(Packet *pkt);
     virtual void processStreamFrame(const Ptr<const StreamFrameHeader>& frameHeader, Packet *pkt);
@@ -59,27 +59,6 @@ protected:
     Connection *context;
     std::string name;
     bool ackElicitingPacket;
-};
-
-class EstablishedConnectionState: public ConnectionState {
-public:
-    EstablishedConnectionState(Connection *context) : ConnectionState(context) {
-        name = "Established";
-    }
-
-    virtual ConnectionState *processSendAppCommand(cMessage *msg);
-    virtual ConnectionState *processShortPacket(const Ptr<const ShortPacketHeader>& packetHeader, Packet *pkt);
-    virtual void processStreamFrame(const Ptr<const StreamFrameHeader>& frameHeader, Packet *pkt);
-    virtual void processAckFrame(const Ptr<const AckFrameHeader>& frameHeader);
-    virtual void processMaxDataFrame(const Ptr<const MaxDataFrameHeader>& frameHeader);
-    virtual void processMaxStreamDataFrame(const Ptr<const MaxStreamDataFrameHeader>& frameHeader);
-    virtual void processStreamDataBlockedFrame(const Ptr<const StreamDataBlockedFrameHeader>& frameHeader);
-    virtual void processDataBlockedFrame(const Ptr<const DataBlockedFrameHeader>& frameHeader);
-    virtual ConnectionState *processLossDetectionTimeout(cMessage *msg);
-    virtual ConnectionState *processAckDelayTimeout(cMessage *msg);
-    virtual ConnectionState *processRecvAppCommand(cMessage *msg);
-    virtual ConnectionState *processIcmpPtb(uint32_t droppedPacketNumber, int ptbMtu);
-    virtual ConnectionState *processDplpmtudRaiseTimeout(cMessage *msg);
 };
 
 } /* namespace quic */

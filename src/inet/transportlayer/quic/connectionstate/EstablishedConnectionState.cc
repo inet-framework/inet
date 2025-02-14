@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "ConnectionState.h"
+#include "EstablishedConnectionState.h"
 
 namespace inet {
 namespace quic {
@@ -38,9 +38,9 @@ ConnectionState *EstablishedConnectionState::processRecvAppCommand(cMessage *msg
     return this;
 }
 
-ConnectionState *EstablishedConnectionState::processShortPacket(const Ptr<const ShortPacketHeader>& packetHeader, Packet *pkt)
+ConnectionState *EstablishedConnectionState::processOneRttPacket(const Ptr<const OneRttPacketHeader>& packetHeader, Packet *pkt)
 {
-    EV_DEBUG << "processShortPacket in " << name << endl;
+    EV_DEBUG << "processOneRttPacket in " << name << endl;
 
     ackElicitingPacket = false;
     processFrames(pkt);
