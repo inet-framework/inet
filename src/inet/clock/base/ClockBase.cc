@@ -10,6 +10,8 @@
 
 namespace inet {
 
+int stdcoutindent = 0;
+
 simsignal_t ClockBase::timeChangedSignal = cComponent::registerSignal("timeChanged");
 
 void ClockBase::initialize(int stage)
@@ -68,17 +70,22 @@ clocktime_t ClockBase::getClockTime() const
 
 simtime_t ClockBase::computeScheduleTime(clocktime_t clockTime)
 {
+    StdCoutIndentGuard x;
+    STDCOUT << "-> computeScheduleTime(" << clockTime.raw() << ")\n";
     simtime_t currentSimulationTime = simTime();
     simtime_t lowerSimulationTime = computeSimTimeFromClockTime(clockTime, true);
+    simtime_t result;
     if (lowerSimulationTime >= currentSimulationTime)
-        return lowerSimulationTime;
+        result = lowerSimulationTime;
     else {
         simtime_t upperSimulationTime = computeSimTimeFromClockTime(clockTime, false);
         if (currentSimulationTime < upperSimulationTime)
-            return currentSimulationTime;
+            result = currentSimulationTime;
         else
-            return lowerSimulationTime;
+            result = lowerSimulationTime; // NOTE: upperSimulationTime is exclusive
     }
+    STDCOUT << "   computeScheduleTime(" << clockTime.raw() << ") -> " << result << std::endl;
+    return result;
 }
 
 void ClockBase::scheduleClockEventAt(clocktime_t t, ClockEvent *msg)

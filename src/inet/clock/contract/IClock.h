@@ -11,7 +11,27 @@
 #include "inet/clock/contract/ClockEvent.h"
 #include "inet/clock/contract/ClockTime.h"
 
+#define SKIP_STDOUT
+
+#ifdef SKIP_STDOUT
+  #include <sstream>
+  static std::ostringstream devnull;
+  #define STDCOUT devnull
+#else
+  #include <iostream>
+  #include <iomanip>
+  #define STDCOUT std::cout << std::setprecision(24) << std::string(stdcoutindent * 3, ' ')
+#endif
+
 namespace inet {
+
+extern int stdcoutindent;
+
+class StdCoutIndentGuard {
+public:
+    StdCoutIndentGuard() { ++stdcoutindent; }
+    ~StdCoutIndentGuard() { --stdcoutindent; }
+};
 
 /**
  * This class defines the interface for clocks. See the corresponding NED file for details.

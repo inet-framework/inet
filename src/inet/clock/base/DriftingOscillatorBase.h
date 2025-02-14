@@ -9,6 +9,7 @@
 #define __INET_DRIFTINGOSCILLATORBASE_H
 
 #include "inet/clock/base/OscillatorBase.h"
+#include "inet/clock/contract/IClock.h"
 #include "inet/common/INETMath.h"
 #include "inet/common/scenario/IScriptable.h"
 #include "inet/common/Units.h"

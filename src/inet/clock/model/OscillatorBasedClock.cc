@@ -80,6 +80,8 @@ void OscillatorBasedClock::initialize(int stage)
 
 void OscillatorBasedClock::setOrigin(simtime_t simulationTime, clocktime_t clockTime)
 {
+    StdCoutIndentGuard x;
+    STDCOUT << "-> setOrigin(" << simulationTime << ", " << clockTime << ")\n";
     originSimulationTime = simulationTime;
     originClockTime = clockTime;
     lastClockTime = clockTime;
@@ -88,10 +90,13 @@ void OscillatorBasedClock::setOrigin(simtime_t simulationTime, clocktime_t clock
     ASSERT(originSimulationTime >= computeSimTimeFromClockTime(originClockTime, true));
     ASSERT(originSimulationTime <= computeSimTimeFromClockTime(originClockTime, false));
     ASSERT(originClockTime == computeClockTimeFromSimTime(originSimulationTime));
+    STDCOUT << "   setOrigin() -> void\n";
 }
 
 clocktime_t OscillatorBasedClock::computeClockTimeFromSimTime(simtime_t simulationTime) const
 {
+    StdCoutIndentGuard x;
+    STDCOUT << "-> computeClockTimeFromSimTime(" << simulationTime.raw() << ")\n";
     ASSERT(simulationTime >= simTime());
     ASSERT(originSimulationTime >= oscillator->getComputationOrigin());
     int64_t numTicksFromOscillatorOriginToSimulationTime = oscillator->computeTicksForInterval(simulationTime - oscillator->getComputationOrigin());
@@ -99,11 +104,21 @@ clocktime_t OscillatorBasedClock::computeClockTimeFromSimTime(simtime_t simulati
     int64_t numTicks = numTicksFromOscillatorOriginToSimulationTime - numTicksFromOscillatorOriginToClockOrigin;
     clocktime_t clockTimeFromClockOrigin = SIMTIME_AS_CLOCKTIME(numTicks * oscillator->getNominalTickLength() * (1 + getOscillatorCompensation().get<unit>()));
     clocktime_t result = originClockTime + clockTimeFromClockOrigin;
+    STDCOUT << "   : " << "numTicksFromOscillatorOriginToSimulationTime = " << numTicksFromOscillatorOriginToSimulationTime << ", "
+                       << "numTicksFromOscillatorOriginToClockOrigin = " << numTicksFromOscillatorOriginToClockOrigin << ", "
+                       << "numTicks = " << numTicks << ", "
+                       << "clockTimeFromClockOrigin = " << clockTimeFromClockOrigin << ", "
+                       << "oscillatorComputationOrigin = " << oscillator->getComputationOrigin() << ", "
+                       << "originSimulationTime = " << originSimulationTime << ", "
+                       << "originClockTime = " << originClockTime << std::endl;
+    STDCOUT << "   computeClockTimeFromSimTime(" << simulationTime.raw() << ") -> " << result.raw() << std::endl;
     return result;
 }
 
 simtime_t OscillatorBasedClock::computeSimTimeFromClockTime(clocktime_t clockTime, bool lowerBound) const
 {
+    StdCoutIndentGuard x;
+    STDCOUT << "-> computeSimTimeFromClockTime(" << clockTime.raw() << ")\n";
     ASSERT(clockTime >= getClockTime());
     ASSERT(originSimulationTime >= oscillator->getComputationOrigin());
     int64_t numTicksFromClockOriginToClockTime = (clockTime - originClockTime).raw() / oscillator->getNominalTickLength().raw() / (1 + getOscillatorCompensation().get<unit>());
@@ -111,7 +126,14 @@ simtime_t OscillatorBasedClock::computeSimTimeFromClockTime(clocktime_t clockTim
     int64_t numTicks = numTicksFromClockOriginToClockTime +
                        numTicksFromOscillatorOriginToClockOrigin +
                        (lowerBound ? 0 : 1);
+    STDCOUT << "   : " << "numTicksFromClockOriginToClockTime = " << numTicksFromClockOriginToClockTime << ", "
+                       << "numTicksFromOscillatorOriginToClockOrigin = " << numTicksFromOscillatorOriginToClockOrigin << ", "
+                       << "numTicks = " << numTicks << ", "
+                       << "oscillatorComputationOrigin = " << oscillator->getComputationOrigin() << ", "
+                       << "originSimulationTime = " << originSimulationTime << ", "
+                       << "originClockTime = " << originClockTime << std::endl;
     simtime_t result = oscillator->getComputationOrigin() + oscillator->computeIntervalForTicks(numTicks);
+    STDCOUT << "   computeSimTimeFromClockTime(" << clockTime.raw() << ") -> " << result.raw() << std::endl;
     return result;
 }
 
