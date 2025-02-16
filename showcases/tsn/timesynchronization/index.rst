@@ -13,3 +13,5 @@ The following showcases demonstrate topics related to time synchronization:
 
    clockdrift/doc/index
    gptp/doc/index
+   gptp_bmca/doc/index
+   gptp_hotstandby/doc/index
