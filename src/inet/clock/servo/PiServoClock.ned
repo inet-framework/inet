@@ -7,7 +7,15 @@
 
 package inet.clock.servo;
 
-// TODO: Write documentation
+// A PI-based servo clock with adjustable proportional (kp) and integral (ki) gains.
+// It synchronizes the clock with an external time source by estimating and compensating drift.
+// The clock operates in three phases:
+//
+// 1. Initialize: Collects initial offset data without adjustments.
+//
+// 2. Estimate Drift: Computes drift based on the difference between consecutive offsets.
+//
+// 3. Synchronize: Adjusts the clock using proportional and integral terms to minimize offset.
 module PiServoClock extends ServoClockBase
 {
     parameters:
