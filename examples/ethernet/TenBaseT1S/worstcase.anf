@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="/inet/examples/ethernet/TenBaseT1S/results/WorstCase-*.vec"/>
-        <input pattern="/inet/examples/ethernet/TenBaseT1S/results/WorstCase-*.sca"/>
+        <input pattern="results/WorstCase-*.vec"/>
+        <input pattern="results/WorstCase-*.sca"/>
     </inputs>
     <charts>
         <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="68967254" name="transmit opportunity ID" resultTypes="vector" template="linechart_native" type="LINE">

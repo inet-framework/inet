@@ -14,6 +14,8 @@ network.
 It contains three example configurations of increasing complexity, each
 demonstrating various features of the visualization.
 
+.. note:: This showcase requires OMNeT++ built with OSG and osgEarth enabled. Currently, this is only possible on Windows.
+
 | INET version: ``4.0``
 | Source files location: `inet/showcases/visualizer/earth <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/earth>`__
 
@@ -38,7 +40,7 @@ following network:
    :width: 20%
    :align: center
 
-The network contains an :ned:`IntegratedVisualizer` and an
+The network contains an :ned:`IntegratedCanvasVisualizer` and an
 :ned:`OsgGeographicCoordinateSystem` module. The configuration from
 :download:`omnetpp.ini <../omnetpp.ini>` is the following:
 
@@ -48,7 +50,7 @@ The network contains an :ned:`IntegratedVisualizer` and an
    :language: ini
 
 By default, the type of the scene visualizer module in
-:ned:`IntegratedVisualizer` is :ned:`SceneOsgVisualizer`. Inserting the map
+:ned:`IntegratedCanvasVisualizer` is :ned:`SceneOsgVisualizer`. Inserting the map
 requires the :ned:`SceneOsgEarthVisualizer` module, thus, the default OSG
 scene visualizer is replaced. The :ned:`SceneOsgEarthVisualizer`
 provides the same functionality as :ned:`SceneOsgVisualizer` and adds
@@ -200,6 +202,19 @@ Further Information
 
 For further information about the visualizer, refer to the NED documentation of
 :ned:`SceneOsgEarthVisualizer` and :ned:`OsgGeographicCoordinateSystem`.
+
+
+Try It Yourself
+---------------
+
+First, install INET and OMNeT++. Then, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/visualizer/osg/earth`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Currently, `opp_env <https://omnetpp.org/opp_env>`__-based installation is not
+available for the 3D visualization (OSG-based) showcases.
+
 
 Discussion
 ----------

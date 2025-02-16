@@ -69,10 +69,10 @@ recorded.
 
 In addition to the two hosts named ``source`` and ``destination``,
 the network also contains a :ned:`PhysicalEnvironment` module, an
-:ned:`Ipv4NetworkConfigurator`, and a :ned:`Ieee80211ScalarRadioMedium`:
+:ned:`Ipv4NetworkConfigurator`, and a :ned:`Ieee80211RadioMedium`:
 
 .. figure:: media/network.png
-   :width: 80%
+   :width: 50%
    :align: center
 
 .. todo::
@@ -186,6 +186,40 @@ in general (not about the INET implementation):
 -  `Rician fading <https://en.wikipedia.org/wiki/Rician_fading>`__
 -  `Log-normal
    shadowing <https://en.wikipedia.org/wiki/Log-distance_path_loss_model>`__
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/wireless/pathloss`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env run inet-4.0 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-4.0.*/showcases/wireless/pathloss && inet'
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
+showcase directory for interactive simulation.
+
+Alternatively, for a more hands-on experience, you can first set up the
+workspace and then open an interactive shell:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-4.0
+    $ cd inet-workspace
+    $ opp_env shell
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
 
 Discussion
 ----------

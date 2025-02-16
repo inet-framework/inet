@@ -73,7 +73,7 @@ contains the statistics of the previous step (ACK off, blue) and the
 current step (ACK on, red).
 
 .. figure:: media/wireless-step7-seqno.png
-   :width: 100%
+   :width: 80%
 
 When ACKs are turned on, each successfully received UDPData packet has
 to be acknowledged before the next one can be sent. Lost packets are
@@ -107,5 +107,5 @@ Discussion
 ----------
 
 Use `this
-page <https://github.com/inet-framework/inet-tutorials/issues/1>`__ in
+page <https://github.com/inet-framework/inet/discussions/998>`__ in
 the GitHub issue tracker for commenting on this tutorial.

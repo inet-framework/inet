@@ -52,7 +52,7 @@ yet (it will be configured in a later step). Therefore, no packets are
 received by host B.
 
 .. figure:: media/wireless-step3-2.png
-   :width: 100%
+   :width: 80%
 
 Host R1's MAC submodule logs indicate that it is discarding the received
 packets, as they are not addressed to it:
@@ -69,5 +69,5 @@ Discussion
 ----------
 
 Use `this
-page <https://github.com/inet-framework/inet-tutorials/issues/1>`__ in
+page <https://github.com/inet-framework/inet/discussions/998>`__ in
 the GitHub issue tracker for commenting on this tutorial.

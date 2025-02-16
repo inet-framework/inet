@@ -18,8 +18,8 @@ a packet from the scheduler every second. The scheduler's packet data filter is 
 to first match packets containing 1, then those containing 0.
 
 .. figure:: media/ContentBasedScheduler.png
-   :width: 80%
    :align: center
+   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network ContentBasedSchedulerTutorialStep

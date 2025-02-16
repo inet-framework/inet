@@ -83,8 +83,8 @@ The Model
 ~~~~~~~~~
 
 The example simulation uses a network that contains two :ned:`AdhocHost` modules,
-an :ned:`Ipv4NetworkConfigurator`, an :ned:`Ieee80211ScalarRadioMedium` and
-an :ned:`IntegratedVisualizer` module. During simulation, ``host1`` will send
+an :ned:`Ipv4NetworkConfigurator`, an :ned:`Ieee80211RadioMedium` and
+an :ned:`IntegratedCanvasVisualizer` module. During simulation, ``host1`` will send
 UDP packets to ``host2``.
 
 .. figure:: media/network.png
@@ -160,7 +160,7 @@ Here is the starting frame sequence at the beginning of the simulation displayed
 Qtenv's packet traffic view:
 
 .. figure:: media/startingframesequence.png
-   :width: 100%
+   :width: 90%
    :align: center
 
 First, ``host1`` sends a UDP packet, then an ADDBA request frame. ``host2`` replies
@@ -181,21 +181,21 @@ with a block ack. The block ack frame acknowledges the five previous frames. Her
 request frame displayed in Qtenv's packet inspector:
 
 .. figure:: media/blockackreq.png
-   :width: 90%
+   :width: 80%
    :align: center
 
 The block ack request contains the starting sequence number, which indicates the
 first packet to be acked. Here is the block ack response frame:
 
 .. figure:: media/blockackresp.png
-   :width: 80%
+   :width: 70%
    :align: center
 
 The block ack response frame also contains the starting sequence number and the bitmap, which specifies
 which packets were received correctly. Here is the bitmap:
 
 .. figure:: media/bitmap.png
-   :width: 80%
+   :width: 70%
    :align: center
 
 The first five entries are used. It acknowledges the five packets, starting from sequence number 1.
@@ -214,7 +214,7 @@ and ``Data-18``, were not received correctly, as indicated in the block ack's bi
 sequence number is 16, corresponding to ``Data-16``):
 
 .. figure:: media/retxblockack2.png
-   :width: 80%
+   :width: 70%
    :align: center
 
 The next block starts with ``host1`` retransmitting these two frames, and then transmitting
@@ -290,7 +290,7 @@ all the packets sent by the MAC, so the block ack bitmap contains the (already a
 packets as well:
 
 .. figure:: media/mixed_blockack.png
-   :width: 100%
+   :width: 80%
    :align: center
 
 Furthermore, the block ack is lost, so the not-yet-acked packets in the previous block (``Data-6``
@@ -306,6 +306,40 @@ to ``Data-10``) are retransmitted.
    So far, we enabled block acks in both hosts. Host2 didnt send any data, but if it did, there would be a block ack agreement in the host2->host1 direction as well.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`BlockAckShowcase.ned <../BlockAckShowcase.ned>`
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/wireless/blockack`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env run inet-4.1 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-4.1.*/showcases/wireless/blockack && inet'
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
+showcase directory for interactive simulation.
+
+Alternatively, for a more hands-on experience, you can first set up the
+workspace and then open an interactive shell:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-4.1
+    $ cd inet-workspace
+    $ opp_env shell
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
 
 Discussion
 ----------

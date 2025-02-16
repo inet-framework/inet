@@ -55,9 +55,7 @@ scene in 3D:
    :start-at: # scene visualization
    :end-at: *.visualizer.osgVisualizer.sceneVisualizer.axisLength = 1000m
 
-By default, :ned:`IntegratedVisualizer` only contains an :ned:`IntegratedCanvasVisualizer`
-as submodule, but no OSG visualizer. To add it, we need to set the ``osgVisualizer`` submodule
-type to :ned:`IntegratedOsgVisualizer`. We use the ``desert`` image as the ground,
+We use the ``desert`` image as the ground,
 and set the background color (:par:`clearColor`) to ``skyblue``.
 The coordinate axes can be displayed by setting the :par:`axisLength` parameter.
 Additional settings (not shown above) stretch the rendered scene a little larger
@@ -140,6 +138,18 @@ The following video shows the movement of the drones:
    :align: center
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`SpatialMobilityShowcase.ned <../SpatialMobilityShowcase.ned>`
+
+
+Try It Yourself
+---------------
+
+First, install INET and OMNeT++. Then, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/mobility/spatial`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Currently, `opp_env <https://omnetpp.org/opp_env>`__-based installation is not
+recommended for the showcases making use of OSG.
 
 Discussion
 ----------

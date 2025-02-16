@@ -6,6 +6,8 @@
 // @author: Zoltan Bojthe
 //
 
+#ifdef INET_WITH_SELFDOC
+
 #include <cstdarg>
 #include <fstream>
 
@@ -149,3 +151,4 @@ std::string SelfDoc::gateInfo(cGate *gate)
 
 } // namespace inet
 
+#endif // INET_WITH_SELFDOC

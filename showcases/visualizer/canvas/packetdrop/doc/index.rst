@@ -37,9 +37,10 @@ The format string can contain the following directives:
 
 - `%n`: packet name
 - `%c`: packet class
-- `%r`: drop reason
+- `%r`: drop reason number
+- `%s`: drop reason string
 
-Packets can be dropped for the following reasons:
+Here are some reasons packets can be dropped:
 
 .. For example, packets can be dropped for the following reasons:
 
@@ -190,7 +191,7 @@ routes. The configuration is ``NoRouteToDestination`` in the ini file.
 The network is the following:
 
 .. figure:: media/noroutenetwork.png
-   :width: 60%
+   :width: 40%
    :align: center
 
 It contains two connected :ned:`StandardHost`'s. The
@@ -201,7 +202,7 @@ The ping packets can't be routed, so the IP module drops them. This scenario is
 illustrated in the following video:
 
 .. video:: media/noroute.mp4
-   :width: 416
+   :width: 40%
 
 Here is also a log excerpt illustrating this:
 
@@ -241,6 +242,40 @@ Further information
 
 For more information, refer to the :ned:`PacketDropVisualizer` NED
 documentation.
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/visualizer/canvas/packetdrop`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env run inet-4.0 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-4.0.*/showcases/visualizer/canvas/packetdrop && inet'
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
+showcase directory for interactive simulation.
+
+Alternatively, for a more hands-on experience, you can first set up the
+workspace and then open an interactive shell:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-4.0
+    $ cd inet-workspace
+    $ opp_env shell
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
 
 Discussion
 ----------

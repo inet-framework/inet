@@ -24,8 +24,8 @@ and the ``large`` text label to 2-byte packets. The labeler pushes packets into 
 ``consumer1``, and packets labeled ``large`` to ``consumer2``.
 
 .. figure:: media/Labeler.png
-   :width: 90%
    :align: center
+   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network LabelerTutorialStep

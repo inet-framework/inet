@@ -12,20 +12,20 @@ Each host contains a packet source and a packet sink application, connected to
 the network level by an interface module (``ExampleInterface``).
 
 .. figure:: media/Network_TestCable.png
-   :width: 30%
    :align: center
+   :width: 100%
 
 .. figure:: media/Network.png
-   :width: 50%
    :align: center
+   :width: 100%
 
 .. figure:: media/Network_TestHost.png
-   :width: 60%
    :align: center
+   :width: 100%
 
 .. figure:: media/NetworkInterface.png
-   :width: 50%
    :align: center
+   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network ExampleNetworkTutorialStep

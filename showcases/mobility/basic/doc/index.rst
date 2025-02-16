@@ -46,7 +46,7 @@ The Model
 
 All simulations use the :ned:`BasicMobilityShowcase` network.
 The size of the scene is 400x400x0 meters. It contains a configurable
-number of hosts and an :ned:`IntegratedVisualizer` module to
+number of hosts and an :ned:`IntegratedCanvasVisualizer` module to
 visualize aspects of mobility. The following image shows the layout of the network:
 
 .. figure:: media/scene.png
@@ -96,7 +96,7 @@ LinearMobility
 ~~~~~~~~~~~~~~
 
 The :ned:`LinearMobility` module describes linear motion with a constant speed or
-constant acceleration. As such, it has parameters for speed, acceleration, and starting angle.
+constant acceleration. As such, it has parameters for speed and starting angle.
 The model also has parameters for initial positioning (:par:`initialX`,
 :par:`initialY`, :par:`initialZ`), which, by default, are random
 values inside the constraint area.
@@ -108,8 +108,8 @@ The configuration in omnetpp.ini is the following:
    :start-at: *.host[*].mobility.typename = "LinearMobility"
    :end-at: speed
 
-We leave both acceleration and angle on their default values, which is
-zero for acceleration and a random value for the angle.
+We leave the angle parameter on its default value, which is
+a random value.
 
 The following video shows the motion of the nodes:
 
@@ -184,7 +184,7 @@ It has an :par:`alpha` parameter which can run from 0
 (totally random motion) to 1 (deterministic linear motion), with the
 default value of 0.5.
 The random variable has a mean of 0, and its variance can be set by
-the :par:`variance` parameter.
+the :par:`speedStdDev` and :par:`angleStdDev` parameters.
 The :par:`margin` parameter adds a margin to the boundaries of the constraint
 area, so that the mobility bounces back before reaching it.
 
@@ -195,7 +195,7 @@ Here is the configuration in omnetpp.ini:
    :start-at: *.host[*].mobility.typename = "GaussMarkovMobility"
    :end-at: alpha
 
-The mobility module is set to totally random motion, with a variance of 0.5.
+The mobility module is set to totally random motion, with a variance of 0.5mps and 0.5rad for the speed and the angle, respectively.
 
 The following video shows the resulting random motion:
 
@@ -329,6 +329,40 @@ The configuration just sets the mobility type. Here is what it looks like when t
    :align: center
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`BasicMobilityShowcase.ned <../BasicMobilityShowcase.ned>`
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/mobility/basic`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env run inet-4.0 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-4.0.*/showcases/mobility/basic && inet'
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
+showcase directory for interactive simulation.
+
+Alternatively, for a more hands-on experience, you can first set up the
+workspace and then open an interactive shell:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-4.0
+    $ cd inet-workspace
+    $ opp_env shell
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
 
 Discussion
 ----------

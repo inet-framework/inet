@@ -153,7 +153,7 @@ such as with VLAN ID, or PCP number. We assign the best effort stream to PCP 0, 
    :end-at: video
    :language: ini
 
-The Ieee8021qProtocol module in the link layer adds 802.1q headers to packets and sets the PCP field according to the request tags.
+The :ned:`Ieee8021qProtocol` module in the link layer adds 802.1q headers to packets and sets the PCP field according to the request tags.
 
 The traffic shaping takes place in the outgoing network interface of the switch
 where both streams pass through. We enable egress traffic shaping in the switch:
@@ -267,6 +267,40 @@ schedules, and this limits the average data rate of the two streams to the speci
 It only changes significantly in the shaper.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/tsn/trafficshaping/timeawareshaper`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env run inet-4.4 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-4.4.*/showcases/tsn/trafficshaping/timeawareshaper && inet'
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
+showcase directory for interactive simulation.
+
+Alternatively, for a more hands-on experience, you can first set up the
+workspace and then open an interactive shell:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-4.4
+    $ cd inet-workspace
+    $ opp_env shell
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
 
 Discussion
 ----------

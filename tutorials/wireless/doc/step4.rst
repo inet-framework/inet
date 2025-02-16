@@ -81,7 +81,7 @@ and can be inspected in the runtime GUI. The routing table of host A
 gateway (gw) value.
 
 .. figure:: media/wireless-step4-rt.png
-   :width: 100%
+   :width: 90%
 
 When the first packet sent by host A arrives at host R1, a dotted dark
 yellow arrow appears between the two hosts indicating a successful
@@ -125,5 +125,5 @@ Sources: :download:`omnetpp.ini <../omnetpp.ini>`,
 Discussion
 ----------
 
-Use `this page <https://github.com/inet-framework/inet-tutorials/issues/1>`__ in
+Use `this page <https://github.com/inet-framework/inet/discussions/998>`__ in
 the GitHub issue tracker for commenting on this tutorial.

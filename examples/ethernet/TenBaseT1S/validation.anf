@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="/inet/examples/ethernet/TenBaseT1S/results/PLCA-*.vec"/>
-        <input pattern="/inet/examples/ethernet/TenBaseT1S/results/PLCA-*.sca"/>
-        <input pattern="/inet/examples/ethernet/TenBaseT1S/results/CSMACD-*.vec"/>
-        <input pattern="/inet/examples/ethernet/TenBaseT1S/results/CSMACD-*.sca"/>
-        <input pattern="/inet/examples/ethernet/TenBaseT1S/results/HalfDuplex-*.vec"/>
-        <input pattern="/inet/examples/ethernet/TenBaseT1S/results/HalfDuplex-*.sca"/>
+        <input pattern="results/PLCA-*.vec"/>
+        <input pattern="results/PLCA-*.sca"/>
+        <input pattern="results/CSMACD-*.vec"/>
+        <input pattern="results/CSMACD-*.sca"/>
+        <input pattern="results/HalfDuplex-*.vec"/>
+        <input pattern="results/HalfDuplex-*.sca"/>
     </inputs>
     <charts>
         <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="704119498" name="controller" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">

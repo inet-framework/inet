@@ -47,7 +47,7 @@ be a few independent channels, where there is no cross-channel
 interference, e.g., Channels 1, 6, and 11, as illustrated below.
 
 .. figure:: media/channels.png
-   :width: 100%
+   :width: 90%
    :align: center
 
 In INET, the scalar analog model represents signals with a scalar signal power,
@@ -67,13 +67,13 @@ All simulations use variations of the same network, which is
 illustrated by the image below:
 
 .. figure:: media/basenetwork.png
-   :width: 80%
+   :width: 50%
    :align: center
 
 The networks contain four :ned:`AdhocHost`'s, named ``host1`` to
 ``host4``. The networks also contain an :ned:`Ipv4NetworkConfigurator`
-module, an :ned:`IntegratedVisualizer` module, and one or two radio medium modules.
-The number and type of the radio medium modules vary in the networks
+module, an :ned:`IntegratedCanvasVisualizer` module, and one or two :ned:`Ieee80211RadioMedium` modules.
+The number of the radio medium modules varies in the networks
 for the different simulations. All hosts
 are within communication range of each other.
 The hosts are arranged in
@@ -96,12 +96,13 @@ of the ``General`` configuration, so it's empty:
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: CompletelyOverlappingFrequencyBands
-   :end-before: IndependentFrequencyBandsOneScalarRadioMediumModule
+   :end-before: IndependentFrequencyBandsOneRadioMediumModule
    :language: ini
 
 Since the frequency and bandwidth of transmissions for all
 hosts are exactly the same, inferring which transmissions interfere is
-obvious (all of them). In this case, a scalar analog model is sufficient.
+obvious (all of them). In this case, all hosts need to use the same radio medium module,
+and the scalar analog model is sufficient.
 The following video shows the node-pairs communicating; the number of
 sent/received packets is displayed above the nodes, as well as the state
 of the contention modules of the transmitting hosts.
@@ -128,13 +129,13 @@ interference. The scalar analog model is sufficient for this case.
 
 In the first configuration for this case, the hosts use the same radio
 medium module. The simulation can be run by choosing the
-``IndependentFrequencyBandsOneScalarRadioMediumModule`` configuration
+``IndependentFrequencyBandsOneRadioMediumModule`` configuration
 from the ini file. The radios of the two host pairs are configured
 to use the non-overlapping Channels 1 and 6:
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: IndependentFrequencyBandsOneScalarRadioMediumModule
-   :end-at: 6
+   :start-at: IndependentFrequencyBandsOneRadioMediumModule
+   :end-at: 5
    :language: ini
 
 .. note:: The channel numbers are set to 0 and 5 because in INET's 802.11 model, the channels are numbered from 0, so that this setting corresponds to Wifi Channels 1 and 6.
@@ -167,12 +168,12 @@ By using two radio medium modules, the simulation scales better as the number of
 
 The second example simulation demonstrates the use of two radio medium
 modules to optimize the simulation. The simulation can be run by
-choosing the ``IndependentFrequencyBandsTwoScalarRadioMediumModules``
+choosing the ``IndependentFrequencyBandsTwoRadioMediumModules``
 configuration from the ini file:
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: IndependentFrequencyBandsTwoScalarRadioMediumModules
-   :end-at: 6
+   :start-at: IndependentFrequencyBandsTwoRadioMediumModules
+   :end-at: 5
    :language: ini
 
 Here, the radios of each host pair are set to use one of the two radio medium modules
@@ -200,10 +201,10 @@ In this case, the host pairs communicate on different Wifi channels, which
 partially overlap in frequency. The scalar analog model is insufficient to
 simulate partially overlapping channels, thus we use the dimensional analog model.
 The example simulation for this case uses the
-``CrosstalkShowcasePartiallyOverlappingFrequencyBands`` network, which contains
-a :ned:`Ieee80211DimensionalRadioMedium` module. The simulation is specified
+``CrosstalkShowcaseOneRadioMediumModule`` network. 
+The simulation is specified
 in the ``PartiallyOverlappingFrequencyBands`` configuration.
-The hosts are configured to have :ned:`Ieee80211DimensionalRadio` modules.
+The radio medium module and radios in the hosts are configured to use the dimensional analog model.
 The host pairs are set to adjacent Wifi Channels 1 and 2.
 Also, a more realistic signal spectrum is configured, based on the spectral mask
 of OFDM transmissions, as in the 802.11 standard:
@@ -234,6 +235,40 @@ Due to the collision avoidance mechanism, one of the transmitting hosts
 defers from transmitting, and the subsequent transmissions are successful.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`Crosstalk.ned <../Crosstalk.ned>`
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/wireless/crosstalk`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env run inet-4.2 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-4.2.*/showcases/wireless/crosstalk && inet'
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
+showcase directory for interactive simulation.
+
+Alternatively, for a more hands-on experience, you can first set up the
+workspace and then open an interactive shell:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-4.2
+    $ cd inet-workspace
+    $ opp_env shell
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
 
 Discussion
 ----------

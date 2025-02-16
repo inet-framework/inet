@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="/inet/examples/timing/results/General-*.vec"/>
-        <input pattern="/inet/examples/timing/results/General-*.sca"/>
+        <input pattern="results/General-*.vec"/>
+        <input pattern="results/General-*.sca"/>
     </inputs>
     <charts>
         <chart icon="icons/full/obj/histogramchart.png" id="7" name="Server2, Queueing time, histograms (by name)" template="histogramchart_native" type="HISTOGRAM">

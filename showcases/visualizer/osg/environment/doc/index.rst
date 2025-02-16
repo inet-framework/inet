@@ -15,6 +15,8 @@ help understand the simulation better. This feature is available both in
 This showcase demonstrates the visualization of physical objects through displaying
 the floorplan and walls of an apartment.
 
+.. note:: This showcase requires OMNeT++ built with OSG enabled.
+
 | INET version: ``4.0``
 | Source files location: `inet/showcases/visualizer/environment <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/environment>`__
 
@@ -31,8 +33,8 @@ properties are defined in the XML configuration of the
 .. note:: For more information about the XML format in which the physical environment (geometry, materials, etc.) can be defined, see the NED documentation of the :ned:`PhysicalEnvironment` module.
 
 The two-dimensional projection of physical objects is determined by the
-:ned:`SceneCanvasVisualizer` module. (This is because the projection is
-also needed by other visualizers, for example, :ned:`MobilityVisualizer`.)
+:ned:`SceneCanvasVisualizer` module (projection is
+also needed by other visualizers, for example, :ned:`MobilityVisualizer`).
 The default view is the top view (z-axis), but you can also configure side
 view (x and y axes), or isometric or orthographic projection.
 
@@ -88,7 +90,20 @@ Further information
 -------------------
 
 For more information, refer to the NED documentation of
-:ned:`PhysicalEnvironmentVisualizer` and :ned:`SceneCanvasVisualizer`.
+:ned:`PhysicalEnvironmentVisualizer`, :ned:`SceneCanvasVisualizer` and :ned:`SceneOsgVisualizerBase`.
+
+
+Try It Yourself
+---------------
+
+First, install INET and OMNeT++. Then, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/visualizer/osg/environment`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Currently, `opp_env <https://omnetpp.org/opp_env>`__-based installation is not
+available for the 3D visualization (OSG-based) showcases.
+
 
 Discussion
 ----------

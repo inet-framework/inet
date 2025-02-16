@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="/inet/showcases/measurement/utilization/results/General-*.vec"/>
-        <input pattern="/inet/showcases/measurement/utilization/results/General-*.sca"/>
+        <input pattern="results/General-*.vec"/>
+        <input pattern="results/General-*.sca"/>
     </inputs>
     <charts>
         <chart icon="icons/full/obj/linechart.png" id="1382687626" name="Channel utilization, vector" template="linechart_native" type="LINE">

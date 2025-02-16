@@ -19,8 +19,8 @@ Finally, the packets are all sent into a passive packet
 sink (:ned:`PassivePacketSink`).
 
 .. figure:: media/Duplicator.png
-   :width: 80%
    :align: center
+   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network DuplicatorTutorialStep

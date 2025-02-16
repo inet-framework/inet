@@ -7,7 +7,7 @@ Goals
 When simulating networks, it is often useful to have a visual representation of
 network traffic. INET provides several visualizers for this purpose, each
 operating at different levels of the network stack. The focus of this showcase
-is on the :ned:`NetworkRouteVisualizer`, which graphically displays network layer
+is on the :ned:`NetworkRouteCanvasVisualizer`, which graphically displays network layer
 traffic in the form of polyline arrows along the path that fade as the traffic ceases.
 
 The showcase contains four simulation models, each demonstrating different
@@ -20,13 +20,13 @@ About the Visualizer
 --------------------
 
 In INET, network path activity can be visualized by including a
-:ned:`NetworkRouteVisualizer` module in the simulation. Adding an
-:ned:`IntegratedVisualizer` module is also an option because it also
-contains a :ned:`NetworkRouteVisualizer` module. Network path activity
+:ned:`NetworkRouteCanvasVisualizer` module in the simulation. Adding an
+:ned:`IntegratedCanvasVisualizer` module is also an option because it also
+contains a :ned:`NetworkRouteCanvasVisualizer` module. Network path activity
 visualization is disabled by default; it can be enabled by setting the
 visualizer's :par:`displayRoutes` parameter to true.
 
-:ned:`NetworkRouteVisualizer` currently observes packets that pass through
+:ned:`NetworkRouteCanvasVisualizer` currently observes packets that pass through
 the network layer (i.e. carry data from/to higher layers), but not those
 that are internal to the operation of the network layer protocol. That
 is, packets such as ARP, although potentially useful, will not trigger
@@ -35,7 +35,7 @@ INET revisions.
 
 The activity between two nodes is represented visually by a polyline
 arrow which points from the source node to the destination node.
-:ned:`NetworkRouteVisualizer` follows packet throughout its path, so the
+:ned:`NetworkRouteCanvasVisualizer` follows packet throughout its path, so the
 polyline goes through all nodes that are part of the packet's path. The
 arrow appears after the first packet has been received, then gradually
 fades out unless it is reinforced by further packets. Color, fading time
@@ -59,10 +59,10 @@ The network contains two :ned:`StandardHost`'s, a ``source`` host and a
 pinging the ``destination`` host.
 
 .. figure:: media/NetworkPathSimple.png
-   :width: 80%
+   :width: 70%
    :align: center
 
-The ``pathVisualizer's`` type is :ned:`NetworkRouteVisualizer`. We enable
+The ``pathVisualizer's`` type is :ned:`NetworkRouteCanvasVisualizer`. We enable
 network path activity visualization by setting the ``displayRoutes``
 parameter to true.
 
@@ -74,15 +74,15 @@ parameter to true.
 The following video shows what happens when we start the simulation.
 
 .. video:: media/EnablingVisualization_v0614.m4v
-   :width: 560
+   :width: 60%
    :align: center
 
 At the beginning of the video, a red strip appears and moves from
 ``source`` to ``destination``. This strip is the standard OMNeT++
 animation for packet transmissions and has nothing to do with
-:ned:`NetworkRouteVisualizer`. When the packet is received in whole by
+:ned:`NetworkRouteCanvasVisualizer`. When the packet is received in whole by
 ``destination`` (the red strip disappears), an arrow is added by
-:ned:`NetworkRouteVisualizer` between the two hosts, indicating network
+:ned:`NetworkRouteCanvasVisualizer` between the two hosts, indicating network
 path activity. The packet's name is also displayed on the arrow. The
 arrow fades out quickly because the :par:`fadeOutTime` parameter of the
 visualizer is set to a small value.
@@ -106,15 +106,15 @@ We use the following network for this showcase:
 .. figure:: media/NetworkPathComplex_v0703.png
    :width: 100%
 
-The network consists of five ``routers`` (``router0..router4``), four
-``etherSwitches`` (``etherSwitch0..etherSwitch3``) and eight
+The network consists of five :ned:`Router` modules (``router0..router4``), four
+:ned:`EthernetSwitch` modules (``etherSwitch0..etherSwitch3``) and eight
 :ned:`StandardHost`'s. There are two source hosts, ``source1`` and
 ``source2``, which will be pinging the two destination hosts,
 ``destination1`` and ``destination2``. The ``videoServer`` node streams
 a video to the ``videoClient`` node. The remaining two endpoints
 (``host1`` and ``host2``) are inactive in this simulation.
 
-For this network, the visualizer's type is :ned:`IntegratedVisualizer`.
+For this network, the visualizer's type is :ned:`IntegratedCanvasVisualizer`.
 Network path visualization is filtered to display only ping traffic. The
 video stream packets are not visualized by network path activity
 visualizer. The :par:`fadeOutMode` and :par:`fadeOutTime` parameters have been
@@ -133,7 +133,7 @@ The following video shows what happens when the simulation is run.
 
 Each arrow has a different color indicating different paths. You can see
 that although there are both video stream and ping traffic in the
-network, :ned:`NetworkRouteVisualizer` displays only the latter, due to the
+network, :ned:`NetworkRouteCanvasVisualizer` displays only the latter, due to the
 presence of the :par:`packetFilter` parameter.
 
 Visualizing Network Path Activity in a Mobile Ad-Hoc Network
@@ -152,7 +152,7 @@ typically only communicate by using multi-hop paths. The nodes will also
 randomly roam within predefined borders.
 
 .. figure:: media/NetworkPathMobileShowcase_v0606.png
-   :width: 100%
+   :width: 60%
 
 The routing protocol is AODV, a reactive (on-demand) MANET routing
 protocol. AODV operates with RREQ and RRES messages, but these messages
@@ -172,7 +172,7 @@ We use the following configuration for the visualization.
 The following video shows what happens when the simulation is run.
 
 .. video:: media/Mobile_v0614.m4v
-   :width: 100%
+   :width: 60%
 
 Blue circles are displays the communication range of ``source`` and
 ``destination``.
@@ -262,7 +262,41 @@ More Information
 
 This example only demonstrated the key features of network path
 visualization. For more information, refer to the
-:ned:`NetworkRouteVisualizer` NED documentation.
+:ned:`NetworkRouteCanvasVisualizer` NED documentation.
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/visualizer/canvas/networkpathactivity`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env run inet-4.0 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-4.0.*/showcases/visualizer/canvas/networkpathactivity && inet'
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
+showcase directory for interactive simulation.
+
+Alternatively, for a more hands-on experience, you can first set up the
+workspace and then open an interactive shell:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-4.0
+    $ cd inet-workspace
+    $ opp_env shell
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
 
 Discussion
 ----------

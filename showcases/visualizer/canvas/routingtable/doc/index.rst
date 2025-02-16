@@ -21,7 +21,7 @@ About the visualizer
 --------------------
 
 In INET, the :ned:`RoutingTableVisualizer` module (included in the network
-as part of :ned:`IntegratedVisualizer`) is responsible for visualizing
+as part of :ned:`IntegratedCanvasVisualizer`) is responsible for visualizing
 routing table entries.
 
 The visualizer basically annotates network links with labeled arrows
@@ -63,7 +63,7 @@ be run by choosing the ``DisplayingAll`` configuration from the ini
 file. The network for the simulation contains two :ned:`StandardHost`'s,
 each connected to a :ned:`Router`. IP addresses are assigned by the
 :ned:`Ipv4NetworkConfigurator` module, which also fills in the routing tables
-automatically. The visualizer module is an :ned:`IntegratedVisualizer`
+automatically. The visualizer module is an :ned:`IntegratedCanvasVisualizer`
 which contains all available visualizers as submodules.
 
 The configuration contains one line, which enables the visualization of
@@ -131,7 +131,7 @@ simulations demonstrate the visualization when it is unfiltered and when
 it is filtered. The network looks like the following:
 
 .. figure:: media/filtersnetwork.png
-   :width: 80%
+   :width: 60%
    :align: center
 
 It consists of a router connected to a switch. Two :ned:`StandardHost`'s are
@@ -186,7 +186,7 @@ and the changes take effect immediately. Just select the
 inspector panel:
 
 .. figure:: media/parameters.png
-   :width: 100%
+   :width: 80%
 
 Visualizing changing routing tables
 -----------------------------------
@@ -217,7 +217,7 @@ configures the routing tables. To reduce clutter, we set the
 The following animation depicts what happens when the simulation is run.
 
 .. video:: media/routingtablevisualizer2.mp4
-   :width: 100%
+   :width: 90%
 
 When ``destinationHost`` starts to move downwards, packets get routed
 along the chain to the host that is currently adjacent to
@@ -239,6 +239,40 @@ More information
 This example only demonstrated the key features of routing table
 visualization. For more information, refer to the
 :ned:`RoutingTableVisualizer` NED documentation.
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/visualizer/canvas/routingtable`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env run inet-3.6 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-3.6.*/showcases/visualizer/canvas/routingtable && inet'
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
+showcase directory for interactive simulation.
+
+Alternatively, for a more hands-on experience, you can first set up the
+workspace and then open an interactive shell:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-3.6
+    $ cd inet-workspace
+    $ opp_env shell
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
 
 Discussion
 ----------

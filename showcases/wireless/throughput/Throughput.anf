@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="/inet/showcases/wireless/throughput/results/General-*.vec"/>
-        <input pattern="/inet/showcases/wireless/throughput/results/General-*.sca"/>
+        <input pattern="results/General-*.vec"/>
+        <input pattern="results/General-*.sca"/>
     </inputs>
     <charts>
         <chart createdWith="" icon="icons/full/obj/scatterchart.png" id="490329163" name="Analytical vs simulated throughput" resultTypes="" template="scatterchart_itervars_mpl" type="MATPLOTLIB">

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="/inet/examples/test/results/General-*.vec"/>
-        <input pattern="/inet/examples/test/results/General-*.sca"/>
+        <input pattern="results/General-*.vec"/>
+        <input pattern="results/General-*.sca"/>
     </inputs>
     <charts>
         <chart icon="icons/full/obj/histogramchart.png" id="9" name="Data age, histogram" template="histogramchart_native" type="HISTOGRAM">

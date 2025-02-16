@@ -29,7 +29,7 @@ This step uses the :ned:`ConfiguratorD` network, defined in
 looks like this:
 
 .. figure:: media/step10network.png
-   :width: 100%
+   :width: 90%
 
 It contains seven ``AODVRouters`` laid out in a chain.
 
@@ -153,5 +153,5 @@ Sources: :download:`omnetpp.ini <../omnetpp.ini>`,
 Discussion
 ----------
 
-Use `this page <https://github.com/inet-framework/inet-tutorials/issues/2>`__ in
+Use `this page <https://github.com/inet-framework/inet/discussions/999>`__ in
 the GitHub issue tracker for commenting on this tutorial.

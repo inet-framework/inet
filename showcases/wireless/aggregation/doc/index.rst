@@ -34,7 +34,7 @@ There are two kinds of frame aggregation in 802.11:
 - MAC Protocol Data Unit (MPDU) aggregation: MPDUs are frames passed from the MAC to the PHY layer. Each MPDU has a MAC header and trailer. Multiple MPDUs are bundled together to create an aggregate MPDU (a-MPDU), which is transmitted with a PHY header by the radio.
 
 .. figure:: media/dataunits3.png
-   :width: 100%
+   :width: 80%
    :align: center
 
 When using aggregation, the reduced number of contention periods, interframe spaces and ACKs might have a greater effect
@@ -100,12 +100,12 @@ The simulation uses the following network, defined in
 :download:`AggregationShowcase.ned <../AggregationShowcase.ned>`:
 
 .. figure:: media/network.png
-   :width: 90%
+   :width: 60%
    :align: center
 
 It contains two :ned:`AdhocHost`'s, ``host1`` and ``host2``.
 It also contains an :ned:`Ipv4NetworkConfigurator` and an
-:ned:`Ieee80211ScalarRadioMedium` module.
+:ned:`Ieee80211RadioMedium` module.
 
 Configurations
 ~~~~~~~~~~~~~~
@@ -260,6 +260,40 @@ the MAC actually assembles an additional aggregate frame before sending the curr
 thus increasing delay. This is an implementation detail.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`AggregationShowcase.ned <../AggregationShowcase.ned>`
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/wireless/aggregation`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env run inet-4.0 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-4.0.*/showcases/wireless/aggregation && inet'
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
+showcase directory for interactive simulation.
+
+Alternatively, for a more hands-on experience, you can first set up the
+workspace and then open an interactive shell:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-4.0
+    $ cd inet-workspace
+    $ opp_env shell
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
 
 Discussion
 ----------

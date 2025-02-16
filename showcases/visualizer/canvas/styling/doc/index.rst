@@ -40,15 +40,15 @@ following configuration is used for the visualizer:
    :end-at: dataLinkVisualizer.lineShift
    :language: ini
 
-Move the mouse over the image to see the differences between the default
-and the customized visualization.
+Here are the differences between the default
+and the customized visualization:
 
 .. figure:: media/Line_default_v0727.png
-   :width: 80%
+   :width: 70%
    :align: center
 
 .. figure:: media/Line_custom_v0727.png
-   :width: 80%
+   :width: 70%
    :align: center
 
 The :par:`lineColor` parameter specifies the color of the arrow, and it
@@ -85,15 +85,15 @@ To customize the fonts used in labels, we configure
    :end-at: dataLinkVisualizer.labelColor
    :language: ini
 
-Move the mouse over the image to see the differences between the default
-and the customized visualization.
+Here are the differences between the default
+and the customized visualization:
 
 .. figure:: media/Font_default_v0727.png
-   :width: 80%
+   :width: 70%
    :align: center
 
 .. figure:: media/Font_custom_v0727.png
-   :width: 80%
+   :width: 70%
    :align: center
 
 Font family, font size and font style can be set by using the
@@ -131,15 +131,15 @@ icons:
    :end-at: transportConnectionVisualizer.iconColor
    :language: ini
 
-Move the mouse over the image to see the differences between the default
-and the customized visualization.
+Here are the differences between the default
+and the customized visualization:
 
 .. figure:: media/Icon_default_v0727.png
-   :width: 80%
+   :width: 70%
    :align: center
 
 .. figure:: media/Icon_custom_v0727.png
-   :width: 80%
+   :width: 70%
    :align: center
 
 The :par:`icon` parameter specifies the icon to be used. The OMNeT++ image
@@ -188,15 +188,15 @@ We use the following configuration to place the annotation icons.
    :end-at: placementHint
    :language: ini
 
-Move the mouse over the image to see the differences between the default
-and the customized visualization.
+Here are the differences between the default
+and the customized visualization:
 
 .. figure:: media/Annotation_default_v0802.png
-   :width: 80%
+   :width: 70%
    :align: center
 
 .. figure:: media/Annotation_custom_v0802.png
-   :width: 80%
+   :width: 70%
    :align: center
 
 The :par:`placementHint` parameter determines where the annotations will be
@@ -220,6 +220,40 @@ More Information
 ----------------
 
 For more information, refer to the visualizers' NED documentation.
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/visualizer/canvas/styling`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env run inet-4.0 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-4.0.*/showcases/visualizer/canvas/styling && inet'
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
+showcase directory for interactive simulation.
+
+Alternatively, for a more hands-on experience, you can first set up the
+workspace and then open an interactive shell:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-4.0
+    $ cd inet-workspace
+    $ opp_env shell
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
 
 Discussion
 ----------

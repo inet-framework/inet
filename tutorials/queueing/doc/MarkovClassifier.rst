@@ -24,8 +24,8 @@ The classifier pushes packets into one of the packet sinks based on the current 
 the Markov process.
 
 .. figure:: media/MarkovClassifier.png
-   :width: 80%
    :align: center
+   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network MarkovClassifierTutorialStep

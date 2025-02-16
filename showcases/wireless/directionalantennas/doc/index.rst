@@ -104,7 +104,7 @@ the ``DirectionalAntennasShowcase`` network:
 
 The network contains two :ned:`AdhocHost` s, named ``source`` and
 ``destination``. There is also an :ned:`Ipv4NetworkConfigurator`, an
-:ned:`IntegratedVisualizer`, and an :ned:`Ieee80211ScalarRadioMedium` module.
+:ned:`IntegratedCanvasVisualizer`, and an :ned:`Ieee80211RadioMedium` module.
 
 The source host is positioned in the center of the playground. The
 destination host is configured to circle the source host, while the
@@ -341,6 +341,40 @@ Here are the results for all antennas on one plot, for comparison:
       :width: 100%
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`DirectionalAntennasShowcase.ned <../DirectionalAntennasShowcase.ned>`
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/wireless/directionalantennas`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env run inet-4.1 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-4.1.*/showcases/wireless/directionalantennas && inet'
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
+showcase directory for interactive simulation.
+
+Alternatively, for a more hands-on experience, you can first set up the
+workspace and then open an interactive shell:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-4.1
+    $ cd inet-workspace
+    $ opp_env shell
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
 
 Discussion
 ----------

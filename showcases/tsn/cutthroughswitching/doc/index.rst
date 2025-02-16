@@ -36,31 +36,21 @@ start forwarding it before the whole packet is received.
 The example simulation contains two :ned:`TsnDevice` nodes connected by two
 :ned:`TsnSwitch` nodes (all connections are 1 Gbps):
 
-.. .. figure:: media/Network.png
+.. figure:: media/Network.png
    :align: center
-   :width: 100%
 
-In the simulation, ``device1`` sends 1000-Byte UDP packets to ``device2``, with a mean arrival time of 100ms,
-and X ms jitter. There are two configurations in omnetpp.ini, ``StoreAndForward`` and ``CutthroughSwitching``,
+In the simulation, ``device1`` sends 1000-Byte UDP packets to ``device2``, with a mean arrival time of 200ms,
+and 50ms jitter. There are two configurations in omnetpp.ini, ``StoreAndForward`` and ``CutthroughSwitching``,
 which only differ in the use of cut-through switching.
 
-Here are the two configurations:
+Here are the configurations:
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: StoreAndForward
-   :end-at: phyLayer
    :language: ini
 
 
-The default :ned:`EthernetInterface` in Ethernet switches doesn't support cut-through. In order to use 
-cut-through, we replace the default interface with :ned:`EthernetCutthroughInterface`. Cut-through is 
-disabled in this interface by default, thus it needs to be enabled by setting the :par:`enableCutthrough` 
-parameter to ``true``.
-
-In addition, all necessary components in the switch need to support packet streaming.
-The cut-through interface in the switches supports packet streaming by default; the default PHY layer in 
-hosts need to be replaced with
-:ned:`EthernetStreamingPhyLayer`, which supports packet streaming.
+The default :ned:`LayeredEthernetInterface` in :ned:`TsnDevice` and :ned:`TsnSwitch` has cut-through disabled by default. In order to use 
+Cut-through is enabled by setting the :par:`hasCutthroughSwitching` parameter to ``true``.
 
 Results
 -------
@@ -68,13 +58,13 @@ Results
 The following video shows the store-and-forward behavior in Qtenv:
 
 .. video:: media/storeandforward.mp4
-   :width: 90%
+   :width: 80%
    :align: center
 
 The next video shows the cut-through behavior:
 
 .. video:: media/cutthrough1.mp4
-   :width: 90%
+   :width: 80%
    :align: center
 
 The following sequence chart excerpt shows a packet sent from ``device1`` to ``device2`` via the switches,
@@ -93,13 +83,47 @@ vs cut-through switching:
 
 .. figure:: media/delay.png
    :align: center
-   :width: 100%
+   :width: 90%
 
 We can verify that result analytically. In the case of store-and-forward, the end-to-end duration
-is ``3 * (transmission time + propagation time)``, around 25.296 ms. In the case of cut-through,
-the duration is ``1 * transmission time + 3 propagation time + 2 * cut-through delay``, around 8.432 ms.
+is ``3 * (transmission time + propagation time)``, around 30.246us. In the case of cut-through,
+the duration is ``1 * transmission time + 3 propagation time + 2 * cut-through delay``, around 10.534us.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`CutthroughSwitchingShowcase.ned <../CutthroughSwitchingShowcase.ned>`
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/tsn/cutthroughswitching`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env run inet-4.3 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-4.3.*/showcases/tsn/cutthroughswitching && inet'
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
+showcase directory for interactive simulation.
+
+Alternatively, for a more hands-on experience, you can first set up the
+workspace and then open an interactive shell:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-4.3
+    $ cd inet-workspace
+    $ opp_env shell
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
 
 Discussion
 ----------

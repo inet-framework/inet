@@ -63,7 +63,7 @@ reduce latency.
 The following image shows the layout of the network:
 
 .. figure:: media/diffserv_network_layout.png
-   :width: 100%
+   :width: 90%
 
 In our setup, ``voipPhone1`` will transmit VoIP packets to ``voipPhone2``.
 ``client`` will generate background traffic towards ``server``.
@@ -105,14 +105,14 @@ If both of them are used, the layout of the interface looks like the following:
    :align: center
 
 In the ``VoIP_WithPolicing`` and ``VoIP_WithPolicingAndQueuing``
-configurations, INET's :ned:`TrafficConditioner` module is used in the
+configurations, INET's :ned:`DiffservTrafficConditioner` module is used in the
 router's PPP interface to achieve the required policing.
 
 .. figure:: media/TrafficConditioner.png
    :scale: 100%
    :align: center
 
-In :ned:`TrafficConditioner`, the ``mfClassifier`` submodule is used for
+In :ned:`DiffservTrafficConditioner`, the ``mfClassifier`` submodule is used for
 separating packets of different flows for marking with different DSCP values.
 It contains a list of filters that identifies the flow and determines their classes.
 Each filter can match the source and destination address, IP protocol
@@ -199,7 +199,7 @@ which is way too much compared to a real phone call. The following plot
 shows the delay of each VoIP packet:
 
 .. figure:: media/VoIP_WithoutQoS_delay.png
-   :width: 100%
+   :width: 80%
 
 The dropouts you hear can also easily be observed if we zoom into the
 timeline of the received audio using `Audacity <https://www.audacityteam.org/>`__:
@@ -231,7 +231,7 @@ at the beginning of the recording:
 The following plot shows the delay of the VoIP packets:
 
 .. figure:: media/VoIP_WithPolicing_delay.png
-   :width: 100%
+   :width: 80%
 
 Although the delay of the packets is much less than it was with the
 previous configuration (0.3s instead of 2.5s), it is still very high for
@@ -268,9 +268,43 @@ the previous configuration are almost inaudible now.
 As seen from the next plot, the delay of voice packets has been reduced to about 0.11s:
 
 .. figure:: media/VoIP_WithPolicingAndQueueing_delay.png
-   :width: 100%
+   :width: 80%
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`DiffservNetwork.ned <../DiffservNetwork.ned>`
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/general/diffserv`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env run inet-4.0 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-4.0.*/showcases/general/diffserv && inet'
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
+showcase directory for interactive simulation.
+
+Alternatively, for a more hands-on experience, you can first set up the
+workspace and then open an interactive shell:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-4.0
+    $ cd inet-workspace
+    $ opp_env shell
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
 
 Discussion
 ----------

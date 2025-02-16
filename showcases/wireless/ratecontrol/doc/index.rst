@@ -64,7 +64,7 @@ INET has different rate control models, such as :ned:`ArfRateControl`,
 The network
 ~~~~~~~~~~~
 
-Two :ned:`StandardHost`'s (``sourceHost`` and ``sinkHost``) are placed on
+Two :ned:`WirelessHost`'s (``sourceHost`` and ``sinkHost``) are placed on
 the edge of the scene. During the simulation, they will move along
 the edge of the scene with different speeds, while ``sourceHost``
 will send UDP packets to ``sinkHost``. There is a forest in the middle
@@ -108,8 +108,7 @@ forest.
 
 Bitrate and throughput are recorded during the simulations. The
 following plots show the nominal data bitrate and the actual application
-level throughput for the two configurations (the values are in s and
-bps).
+level throughput for the two configurations.
 
 .. figure:: media/noratecontrol2.png
    :width: 100%
@@ -136,8 +135,10 @@ rate for the two scenarios can be compared on the following plots.
 .. image:: media/bitrate2.png
    :width: 100%
 
-The received packet count at ``sinkHost`` is 18366 for 'No rate
-control', and 35966 for 'AarfRateControl'.
+Here is the received packet count at ``sinkHost``:
+
+.. figure:: media/numpackets.png
+   :width: 50%
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`RateControlShowcase.ned <../RateControlShowcase.ned>`
 
@@ -148,6 +149,40 @@ These results show that rate control is effective in increasing the performance
 of the wireless network, as it increases throughput during varying
 channel conditions. Also, throughput is not zero in situations when it
 would be if rate control weren't used.
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/wireless/ratecontrol`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env run inet-4.0 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-4.0.*/showcases/wireless/ratecontrol && inet'
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
+showcase directory for interactive simulation.
+
+Alternatively, for a more hands-on experience, you can first set up the
+workspace and then open an interactive shell:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-4.0
+    $ cd inet-workspace
+    $ opp_env shell
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
 
 Discussion
 ----------

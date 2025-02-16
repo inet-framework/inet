@@ -49,7 +49,7 @@ protocol names registered in INET (see
 The parameter's default value is ``"ethernetmac ppp ieee80211mac"``.
 
 By default, the PCAP recorder module records L2 frames, but setting the
-``moduleNamePatterns`` to ``ipv4``, for example, lets one record L3
+:par:`moduleNamePatterns` to ``ipv4``, for example, lets one record L3
 frames (note that the parameter's value is lowercase because it refers
 to the actual ``ipv4`` module in the host, not the module type.)
 
@@ -59,12 +59,10 @@ a boolean value indicating a match. The expression can contain the packet's
 fields (such as its name), contained chunks and their fields, protocol
 headers, etc. The default value is ``*`` that matches all packets, 
 thus no packets are filtered.  For more information on the packet filter, 
-refer to the TODO section in the INET User's Guide.
+refer to the :ref:`ug:sec:results:recording-pcap-traces` section in the INET User's Guide.
 
 To summarize: the :par:`moduleNamePatterns` parameter specifies which
-modules' outputs should be captured. The :par:`pcapNetwork` parameter sets
-the link-layer header type according to the captured module outputs, so
-PCAP programs can interpret the PCAP file correctly. The
+modules' outputs should be captured. The
 :par:`dumpProtocols` parameter can narrow the set of recorded protocols at
 the level of capture. The :par:`packetFilter` parameter can further 
 narrow the set of captured packets.
@@ -88,8 +86,8 @@ and two :ned:`StandardHost`\ s named ``ethHost1`` and ``ethHost2``. There
 are two :ned:`Router` modules (``router1`` and ``router2``), which are
 connected by PPP. Each wired host is connected to one of
 the routers via Ethernet. The network also contains an
-:ned:`Ipv4NetworkConfigurator`, an :ned:`Ieee80211ScalarRadioMedium`, and an
-:ned:`IntegratedMultiVisualizer` module.
+:ned:`Ipv4NetworkConfigurator`, an :ned:`Ieee80211RadioMedium`, and an
+:ned:`IntegratedMultiCanvasVisualizer` module.
 
 Traffic generation is set up the following way: ``host1`` is configured
 to send a UDP stream to ``host2`` (via 802.11), ``ethHost1`` is
@@ -122,9 +120,7 @@ file (via Ethernet). Additionally, ``ethHost1`` is configured to ping
 We set up multiple PCAP recorder modules in various hosts in the
 network:
 
-In ``host1``, we'll record 802.11 traffic on the ``wlan0`` interface. We
-configure ``host1``'s PCAP recorder to use the 802.11 link-layer
-headers:
+In ``host1``, we'll record 802.11 traffic on the ``wlan0`` interface:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -132,8 +128,8 @@ headers:
    :end-at: /host1.pcap
 
 In ``host2``, we'll record only the ARP packets from the 802.11 traffic
-on ``wlan0``. The link-layer header type is set to 802.11, and the
-:par:`packetFilter` is set to record only to packets of ``ArpPacket``
+on ``wlan0``. The
+:par:`packetFilter` is set to record only packets of ``ArpPacket``
 class:
 
 .. literalinclude:: ../omnetpp.ini
@@ -150,7 +146,7 @@ packet inspector on the following image:
    :align: center
 
 In ``ethHost1``, we'll record Ethernet traffic on the ``eth0``
-interface. We set the link-layer header type to ethernet:
+interface:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -169,8 +165,7 @@ PCAP recorder modules, because ``router1`` has two interfaces.
 
 In ``router2``, we'll record only packets carrying TCP data on the
 ``eth0`` interface. ``router2`` has two interfaces, so the
-:par:`moduleNamePatters` parameter needs to be set. The link-layer header
-type is set to ethernet, and the packet data filter is set to match
+:par:`moduleNamePatters` parameter needs to be set. The packet data filter is set to match
 packets containing an ``Ipv4Header``, and where the ``totalLengthField``
 field's value is 576 (the size of TCP data packets with IP
 encapsulation):
@@ -268,14 +263,48 @@ where the set of recorded packets were narrowed with
 The ARP packets from ``host2``:
 
 .. figure:: media/arp.png
-   :width: 100%
+   :width: 90%
 
 The TCP data packets from ``router2``:
 
 .. figure:: media/tcpdata.png
-   :width: 100%
+   :width: 90%
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`PcapRecordingShowcase.ned <../PcapRecordingShowcase.ned>`
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/general/pcaprecording`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env run inet-4.0 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-4.0.*/showcases/general/pcaprecording && inet'
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
+showcase directory for interactive simulation.
+
+Alternatively, for a more hands-on experience, you can first set up the
+workspace and then open an interactive shell:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-4.0
+    $ cd inet-workspace
+    $ opp_env shell
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
 
 Discussion
 ----------

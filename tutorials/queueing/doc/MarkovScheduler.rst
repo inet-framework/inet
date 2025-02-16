@@ -15,8 +15,8 @@ The scheduler in turn pops packets from one of the packet sources, based on the 
 state of the Markov process.
 
 .. figure:: media/MarkovScheduler.png
-   :width: 80%
    :align: center
+   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network MarkovSchedulerTutorialStep

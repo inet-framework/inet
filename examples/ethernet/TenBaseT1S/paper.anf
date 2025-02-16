@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="/inet/examples/ethernet/TenBaseT1S/results/Paper-*.vec"/>
-        <input pattern="/inet/examples/ethernet/TenBaseT1S/results/Paper-*.sca"/>
+        <input pattern="results/Paper-*.vec"/>
+        <input pattern="results/Paper-*.sca"/>
     </inputs>
     <charts>
         <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/scatterchart.png" id="1997160908" name="end-to-end delay maximum, part 1" resultTypes="scalar" template="scatterchart_itervars_native" type="LINE">

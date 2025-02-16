@@ -36,7 +36,7 @@ The simulations will be run using 20 hosts. Here is what the network
 will look like when the simulation is run:
 
 .. figure:: media/network4.png
-   :width: 80%
+   :width: 60%
    :align: center
 
 Configuration and behavior
@@ -90,7 +90,7 @@ module's :par:`nodeShutdownCapacity` and :par:`nodeStartCapacity` parameters.
 Radio modes and states
 ~~~~~~~~~~~~~~~~~~~~~~
 
-In the :ned:`Ieee80211ScalarRadio` model used in this simulation (and in
+In the :ned:`Ieee80211Radio` model used in this simulation (and in
 other radio models), there are different modes in which radios operate,
 such as off, sleep, receiver, and transmitter. The mode is set by the model
 and does not depend on external effects. In addition to mode, radios
@@ -209,6 +209,40 @@ needs to zoom in on the graph to see this effect.
    :width: 80%
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`PowerConsumptionShowcase.ned <../PowerConsumptionShowcase.ned>`
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/wireless/power`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env run inet-4.0 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-4.0.*/showcases/wireless/power && inet'
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
+showcase directory for interactive simulation.
+
+Alternatively, for a more hands-on experience, you can first set up the
+workspace and then open an interactive shell:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-4.0
+    $ cd inet-workspace
+    $ opp_env shell
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
 
 Discussion
 ----------

@@ -67,7 +67,7 @@ the various simulations. Hosts A and C both send UDP packets to Host B,
 which is able to receive the transmissions of both hosts.
 
 .. figure:: media/network.png
-   :width: 80%
+   :width: 70%
    :align: center
 
 The RTS/CTS mechanism can be enabled or disabled by setting the
@@ -166,11 +166,44 @@ overhead, more packets are received correctly at Host B. When RTS/CTS is
 used, the number of packets received correctly at Host B is
 approximately the same regardless of the presence of the wall.
 
-The number of received packets at Host B (wall removed, RTS/CTS off):
-**1966**\ The number of received packets at Host B (wall removed,
-RTS/CTS on): **1987**
+| The number of received packets at Host B (wall removed, RTS/CTS off): **1966** 
+| The number of received packets at Host B (wall removed, RTS/CTS on): **1987**
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`HiddenNodeShowcase.ned <../HiddenNodeShowcase.ned>`
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/wireless/hiddennode`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env run inet-4.0 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-4.0.*/showcases/wireless/hiddennode && inet'
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
+showcase directory for interactive simulation.
+
+Alternatively, for a more hands-on experience, you can first set up the
+workspace and then open an interactive shell:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-4.0
+    $ cd inet-workspace
+    $ opp_env shell
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
 
 Discussion
 ----------

@@ -59,7 +59,7 @@ interval. As expected, in the case of the two-ray ground reflection
 model, the bit error rate is greater.
 
 .. figure:: media/wireless-step13.png
-   :width: 100%
+   :width: 70%
 
 **Number of packets received by host B: 679**
 
@@ -70,5 +70,5 @@ Discussion
 ----------
 
 Use `this
-page <https://github.com/inet-framework/inet-tutorials/issues/1>`__ in
+page <https://github.com/inet-framework/inet/discussions/998>`__ in
 the GitHub issue tracker for commenting on this tutorial.
