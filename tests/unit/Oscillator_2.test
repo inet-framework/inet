@@ -49,3 +49,4 @@ CHECK(computeIntervalForTicks(1000));
 .*?computeIntervalForTicks\(0\) -> 0
 .*?computeIntervalForTicks\(1\) -> 0.001
 .*?computeIntervalForTicks\(1000\) -> 1
+$

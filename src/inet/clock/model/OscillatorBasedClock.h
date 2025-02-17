@@ -49,12 +49,15 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
   protected:
     virtual void initialize(int stage) override;
 
-    virtual void setOrigin(simtime_t simulationTimeLowerBound, simtime_t simulationTime, clocktime_t clockTime);
+    virtual void setOrigin(simtime_t simulationTime, clocktime_t clockTime);
 
     void checkAllClockEvents() {
         for (auto event : events)
             checkClockEvent(event);
     }
+
+    clocktime_t doComputeClockTimeFromSimTime(simtime_t t) const;
+    simtime_t doComputeSimTimeFromClockTime(clocktime_t t, bool lowerBound) const;
 
   public:
     virtual ~OscillatorBasedClock();

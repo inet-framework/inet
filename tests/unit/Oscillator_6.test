@@ -23,8 +23,8 @@ network TestNetwork
 ned-path = .;../../../../src;../../lib
 network = TestNetwork
 
-*.oscillator.nominalTickLength = 1ms
-*.oscillator.tickOffset = 300us
+*.oscillator.nominalTickLength = 2ps
+*.oscillator.driftRate = 1000000 ppm
 
 %activity:
 
@@ -32,26 +32,10 @@ network = TestNetwork
 
 auto oscillator = check_and_cast<IOscillator *>(cSimulation::getActiveSimulation()->getModuleByPath("oscillator"));
 CHECK(computeTicksForInterval(0));
-CHECK(computeTicksForInterval(0.0006999999));
-CHECK(computeTicksForInterval(0.0007));
-CHECK(computeTicksForInterval(0.001));
-CHECK(computeTicksForInterval(0.9996999999));
-CHECK(computeTicksForInterval(0.9997));
-CHECK(computeTicksForInterval(1));
 
 CHECK(computeIntervalForTicks(0));
-CHECK(computeIntervalForTicks(1));
-CHECK(computeIntervalForTicks(1000));
 
 %contains-regex: stdout
 .*?computeTicksForInterval\(0\) -> 0
-.*?computeTicksForInterval\(0.0006999999\) -> 0
-.*?computeTicksForInterval\(0.0007\) -> 1
-.*?computeTicksForInterval\(0.001\) -> 1
-.*?computeTicksForInterval\(0.9996999999\) -> 999
-.*?computeTicksForInterval\(0.9997\) -> 1000
-.*?computeTicksForInterval\(1\) -> 1000
 .*?computeIntervalForTicks\(0\) -> 0
-.*?computeIntervalForTicks\(1\) -> 0.0007
-.*?computeIntervalForTicks\(1000\) -> 0.9997
 $

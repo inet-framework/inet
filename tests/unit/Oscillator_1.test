@@ -47,3 +47,4 @@ CHECK(computeIntervalForTicks(1000000000000));
 .*?computeIntervalForTicks\(1\) -> 0.000000000001
 .*?computeIntervalForTicks\(1000\) -> 0.000000001
 .*?computeIntervalForTicks\(1000000000000\) -> 1
+$

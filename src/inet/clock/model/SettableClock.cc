@@ -103,8 +103,7 @@ void SettableClock::setClockTime(clocktime_t newClockTime, ppm oscillatorCompens
                     EV_WARN << "Executing overdue clock event " << event->getName() << ".\n";
                     cSimpleModule *targetModule = check_and_cast<cSimpleModule *>(event->getArrivalModule());
                     cContextSwitcher contextSwitcher(targetModule);
-                    clocktime_t arrivalClockTime = event->getArrivalClockTime();
-                    setOrigin(currentSimTime, currentSimTime, arrivalClockTime);
+                    setOrigin(currentSimTime, event->getArrivalClockTime());
                     targetModule->cancelEvent(event);
                     event->setClock(nullptr);
                     event->execute();
@@ -125,7 +124,7 @@ void SettableClock::setClockTime(clocktime_t newClockTime, ppm oscillatorCompens
             }
         }
         this->oscillatorCompensation = oscillatorCompensation;
-        setOrigin(currentSimTime, currentSimTime, newClockTime);
+        setOrigin(currentSimTime, newClockTime);
         for (auto event : events) {
             cSimpleModule *targetModule = check_and_cast<cSimpleModule *>(event->getArrivalModule());
             cContextSwitcher contextSwitcher(targetModule);

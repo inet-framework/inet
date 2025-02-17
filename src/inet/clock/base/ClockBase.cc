@@ -10,7 +10,9 @@
 
 namespace inet {
 
+bool stdcoutenabled = true;
 int stdcoutindent = 0;
+std::ostringstream devnull;
 
 simsignal_t ClockBase::timeChangedSignal = cComponent::registerSignal("timeChanged");
 
@@ -63,7 +65,7 @@ clocktime_t ClockBase::getClockTime() const
 {
     clocktime_t currentClockTime = computeClockTimeFromSimTime(simTime());
     // NOTE: IClock interface 1. invariant
-    ASSERT(currentClockTime >= lastClockTime);
+    ASSERTCMP(>=, currentClockTime, lastClockTime);
     lastClockTime = currentClockTime;
     return currentClockTime;
 }

@@ -21,6 +21,11 @@ void DriftingOscillatorBase::initialize(int stage)
             throw cRuntimeError("The nominalTickLength parameter value %lg cannot be accurately represented with the current simulation time precision, conversion result: %s", nominalTickLengthAsDouble, nominalTickLength.ustr().c_str());
         setOrigin(simTime());
         driftFactor = 1.0L + driftRate.get() / 1E+6L;
+        // TODO check the relationship between nominalTickLength and simulation time precision and fail if they are too close (whatever that means) use a parameter for this? minimum
+
+        // TODO check if tick becomes smaller than what can be represented in simtime and error out
+        // TODO what if the precision is just not enough to represent the tick properly
+        // TODO should there be some wrap around calculation to check that?
         simtime_t currentTickLength = getCurrentTickLength();
         simtime_t tickOffset = par("tickOffset");
         if (tickOffset < 0 || tickOffset >= currentTickLength)
@@ -33,10 +38,11 @@ void DriftingOscillatorBase::initialize(int stage)
     }
 }
 
-void DriftingOscillatorBase::setOrigin(simtime_t origin)
+void DriftingOscillatorBase::setOrigin(simtime_t newOrigin)
 {
-    ASSERT(origin <= simTime());
-    this->origin = origin;
+    ASSERTCMP(<=, newOrigin, simTime());
+    ASSERTCMP(<=, origin, newOrigin);
+    origin = newOrigin;
 }
 
 void DriftingOscillatorBase::setDriftRate(ppm newDriftRate)
@@ -53,6 +59,11 @@ void DriftingOscillatorBase::setDriftRate(ppm newDriftRate)
         nextTickFromOrigin = SimTime::fromRaw((currentTickLength.raw() - elapsedTickTime.raw()) * driftFactor / newDriftFactor);
         driftRate = newDriftRate;
         driftFactor = newDriftFactor;
+        if (driftRate != ppm(0)) {
+            simtime_t currentTickLength = getCurrentTickLength();
+            ASSERTCMP(!=, nominalTickLength, currentTickLength);
+            ASSERTCMP(==, nominalTickLength, currentTickLength * driftFactor);
+        }
         setOrigin(currentSimTime);
         emit(driftRateChangedSignal, driftRate.get<ppm>());
         emit(postOscillatorStateChangedSignal, this);
@@ -77,27 +88,53 @@ void DriftingOscillatorBase::setTickOffset(simtime_t newTickOffset)
     }
 }
 
-int64_t DriftingOscillatorBase::computeTicksForInterval(simtime_t timeInterval) const
+int64_t DriftingOscillatorBase::doComputeTicksForInterval(simtime_t timeInterval) const
 {
-    ASSERT(timeInterval >= 0);
     StdCoutIndentGuard x;
     STDCOUT << "-> computeTicksForInterval(" << timeInterval.raw() << ")\n";
-    int64_t result = floorl((timeInterval - nextTickFromOrigin).raw() * driftFactor / nominalTickLength.raw()) + 1;
-    STDCOUT << "   : " << "f = " << driftFactor << ", "
+    STDCOUT << "   : " << "driftFactor = " << driftFactor << ", "
                        << "nextTickFromOrigin = " << nextTickFromOrigin << ", "
                        << "nominalTickLength = " << nominalTickLength << std::endl;
+    if (timeInterval == 0) // TODO: this should be the result of the computation anyway, but it's not always the case?
+        return 0;
+    int64_t result = floor((timeInterval - nextTickFromOrigin).raw() * driftFactor / nominalTickLength.raw()) + 1;
+    if (result < 0)
+        result = 0;
     STDCOUT << "   computeTicksForInterval(" << timeInterval.raw() << ") -> " << result << std::endl;
+    return result;
+}
+
+int64_t DriftingOscillatorBase::computeTicksForInterval(simtime_t timeInterval) const
+{
+    ASSERTCMP(>=, timeInterval, 0);
+    int64_t result = doComputeTicksForInterval(timeInterval);
+    ASSERTCMP(>=, result, 0);
+    ASSERTCMP(<=, doComputeIntervalForTicks(result), timeInterval);
+    return result;
+}
+
+simtime_t DriftingOscillatorBase::doComputeIntervalForTicks(int64_t numTicks) const
+{
+    StdCoutIndentGuard x;
+    STDCOUT << "-> computeIntervalForTicks(" << numTicks << ")\n";
+    STDCOUT << "   : " << "driftFactor = " << driftFactor << ", "
+                       << "nextTickFromOrigin = " << nextTickFromOrigin << ", "
+                       << "nominalTickLength = " << nominalTickLength << std::endl;
+    if (numTicks == 0) // TODO: this should be the result of the computation anyway, but it's not always the case?
+        return 0;
+    simtime_t result = SimTime::fromRaw(ceil((nominalTickLength.raw() * (numTicks - 1)) / driftFactor)) + nextTickFromOrigin;
+    if (result < 0)
+        result = 0;
+    STDCOUT << "   computeIntervalForTicks(" << numTicks << ") -> " << result.raw() << std::endl;
     return result;
 }
 
 simtime_t DriftingOscillatorBase::computeIntervalForTicks(int64_t numTicks) const
 {
-    StdCoutIndentGuard x;
-    STDCOUT << "-> computeIntervalForTicks(" << numTicks << ")\n";
-    simtime_t result = SimTime::fromRaw(ceill((nominalTickLength.raw() * (numTicks - 1)) / driftFactor)) + nextTickFromOrigin;
-    if (result < 0)
-        result = 0;
-    STDCOUT << "   computeIntervalForTicks(" << numTicks << ") -> " << result.raw() << std::endl;
+    ASSERTCMP(>=, numTicks, 0);
+    simtime_t result = doComputeIntervalForTicks(numTicks);
+    ASSERTCMP(>=, result, 0);
+    ASSERTCMP(==, doComputeTicksForInterval(result), numTicks);
     return result;
 }
 

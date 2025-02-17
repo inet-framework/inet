@@ -21,12 +21,13 @@ network TestNetwork
 
 %inifile: omnetpp.ini
 [General]
+ned-path = .;../../../../src;../../lib
 network = TestNetwork
 *.clock.oscillator.nominalTickLength = 1us
 
 %activity:
 
-#define CHECK(x) { auto r = clock->x; std::cout << #x << " -> "<< r << std::endl; }
+#define CHECK(x) { auto r = clock->x; std::cout << "CHECK: " << #x << " -> "<< r << std::endl; }
 
 auto clock = check_and_cast<SettableClock *>(cSimulation::getActiveSimulation()->getModuleByPath("clock"));
 //auto oscillator = check_and_cast<ConstantDriftOscillator *>(cSimulation::getActiveSimulation()->getModuleByPath("clock.oscillator"));
@@ -44,8 +45,10 @@ CHECK(computeSimTimeFromClockTime(1));
 CHECK(computeClockTimeFromSimTime(0.55));
 std::cout << "#####################################################################################\n";
 
-%contains-regex: stdout
-.*?computeSimTimeFromClockTime\(1\) -> 1
-.*?computeClockTimeFromSimTime\(1\) -> 1
-.*?computeSimTimeFromClockTime\(1\) -> 0.55
-.*?computeClockTimeFromSimTime\(0.55\) -> 1
+%postrun-command: grep CHECK test.out > filtered.out
+
+%contains-regex: filtered.out
+CHECK: computeSimTimeFromClockTime(1) -> 1
+CHECK: computeClockTimeFromSimTime(1) -> 1
+CHECK: computeSimTimeFromClockTime(1) -> 0.55
+CHECK: computeClockTimeFromSimTime(0.55) -> 1

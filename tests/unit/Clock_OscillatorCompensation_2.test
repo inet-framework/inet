@@ -20,13 +20,14 @@ network TestNetwork
 
 %inifile: omnetpp.ini
 [General]
+ned-path = .;../../../../src;../../lib
 network = TestNetwork
 *.clock.oscillatorCompensation = 1000000ppm
 *.clock.oscillator.nominalTickLength = 1us
 
 %activity:
 
-#define CHECK(x) { auto r = clock->x; std::cout << #x << " -> "<< r << std::endl; }
+#define CHECK(x) { auto r = clock->x; std::cout << "CHECK: " << #x << " -> "<< r << std::endl; }
 
 auto clock = check_and_cast<SettableClock *>(cSimulation::getActiveSimulation()->getModuleByPath("clock"));
 CHECK(computeSimTimeFromClockTime(0));
@@ -37,10 +38,12 @@ CHECK(computeClockTimeFromSimTime(0));
 CHECK(computeClockTimeFromSimTime(0.0000005));
 CHECK(computeClockTimeFromSimTime(0.5));
 
-%contains-regex: stdout
-.*?computeSimTimeFromClockTime\(0\) -> 0
-.*?computeSimTimeFromClockTime\(0.000001\) -> 0.0000005
-.*?computeSimTimeFromClockTime\(1\) -> 0.5
-.*?computeClockTimeFromSimTime\(0\) -> 0
-.*?computeClockTimeFromSimTime\(0.0000005\) -> 0.000001
-.*?computeClockTimeFromSimTime\(0.5\) -> 1
+%postrun-command: grep CHECK test.out > filtered.out
+
+%contains-regex: filtered.out
+CHECK: computeSimTimeFromClockTime(0) -> 0
+CHECK: computeSimTimeFromClockTime(0.000001) -> 0.0000005
+CHECK: computeSimTimeFromClockTime(1) -> 0.5
+CHECK: computeClockTimeFromSimTime(0) -> 0
+CHECK: computeClockTimeFromSimTime(0.0000005) -> 0.000001
+CHECK: computeClockTimeFromSimTime(0.5) -> 1

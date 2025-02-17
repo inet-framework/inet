@@ -48,13 +48,13 @@ class INET_API ClockBase : public cSimpleModule, public IClock, public StringFor
 
     void checkClockEvent(const ClockEvent *event) {
         ASSERT(event->isScheduled());
-        ASSERT(event->getArrivalTime() >= simTime());
+        ASSERTCMP(>=, event->getArrivalTime(), simTime());
         // NOTE: IClock interface 3. invariant
-        ASSERT(event->getArrivalClockTime() >= getClockTime());
+        ASSERTCMP(>=, event->getArrivalClockTime(), getClockTime());
         // NOTE: IClock interface 4. invariant
-        ASSERT(event->getArrivalTime() == computeScheduleTime(event->getArrivalClockTime()));
+        ASSERTCMP(==, event->getArrivalTime(), computeScheduleTime(event->getArrivalClockTime()));
         // NOTE: IClock interface 5. invariant
-        ASSERT(event->getArrivalClockTime() == computeClockTimeFromSimTime(event->getArrivalTime()));
+        ASSERTCMP(==, event->getArrivalClockTime(), computeClockTimeFromSimTime(event->getArrivalTime()));
     }
 
   public:

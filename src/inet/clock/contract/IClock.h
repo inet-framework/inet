@@ -15,22 +15,31 @@
 
 #ifdef SKIP_STDOUT
   #include <sstream>
-  static std::ostringstream devnull;
   #define STDCOUT devnull
 #else
   #include <iostream>
   #include <iomanip>
-  #define STDCOUT std::cout << std::setprecision(24) << std::string(stdcoutindent * 3, ' ')
+  #define STDCOUT !stdcoutenabled ? devnull : std::cout << std::setprecision(24) << std::string(stdcoutindent * 3, ' ')
 #endif
+
+#define ASSERTCMP(cmp, o1, o2) { StdCoutDisabledBlock b; auto _o1 = (o1); auto _o2 = (o2); if (!(_o1 cmp _o2)) std::cout << "*** Assertion: " << #o1 << " " << #cmp << " " << #o2 << " as " << _o1 << " " << #cmp << " " << _o2 << " fails." << std::endl; ASSERT(o1 cmp o2); }
 
 namespace inet {
 
+extern bool stdcoutenabled;
 extern int stdcoutindent;
+extern std::ostringstream devnull;
 
 class StdCoutIndentGuard {
 public:
     StdCoutIndentGuard() { ++stdcoutindent; }
     ~StdCoutIndentGuard() { --stdcoutindent; }
+};
+
+class StdCoutDisabledBlock {
+public:
+    StdCoutDisabledBlock() { stdcoutenabled = false; }
+    ~StdCoutDisabledBlock() { stdcoutenabled = true; }
 };
 
 /**
