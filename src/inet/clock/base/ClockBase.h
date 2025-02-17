@@ -52,8 +52,10 @@ class INET_API ClockBase : public cSimpleModule, public IClock, public StringFor
         // NOTE: IClock interface 3. invariant
         ASSERT(event->getArrivalClockTime() >= getClockTime());
         // NOTE: IClock interface 4. invariant
+        ASSERTEQ(event->getArrivalTime(), computeScheduleTime(event->getArrivalClockTime()));
         ASSERT(event->getArrivalTime() == computeScheduleTime(event->getArrivalClockTime()));
         // NOTE: IClock interface 5. invariant
+        ASSERTEQ(event->getArrivalClockTime(), computeClockTimeFromSimTime(event->getArrivalTime()));
         ASSERT(event->getArrivalClockTime() == computeClockTimeFromSimTime(event->getArrivalTime()));
     }
 

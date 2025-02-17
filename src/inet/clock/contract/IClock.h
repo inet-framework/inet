@@ -23,6 +23,8 @@
   #define STDCOUT std::cout << std::setprecision(24) << std::string(stdcoutindent * 3, ' ')
 #endif
 
+#define ASSERTEQ(o1, o2) if (o1 != o2) std::cout << #o1 << " != " << #o2 << " as in " << o1 << " != " << o2 << std::endl;
+
 namespace inet {
 
 extern int stdcoutindent;
