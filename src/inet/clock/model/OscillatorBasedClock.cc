@@ -105,10 +105,10 @@ clocktime_t OscillatorBasedClock::computeClockTimeFromSimTime(simtime_t simulati
     STDCOUT << "-> computeClockTimeFromSimTime(" << simulationTime.raw() << ")\n";
     ASSERT(simulationTime >= simTime());
     ASSERT(originSimulationTime >= oscillator->getComputationOrigin());
-    int64_t numTicksFromOscillatorOriginToSimulationTime = oscillator->computeTicksForInterval(simulationTime - oscillator->getComputationOrigin());
+    int64_t numTicksFromOscillatorOriginToSimulationTime = oscillator->computeTicksForInterval((simulationTime - originSimulationTime) * (1 + getOscillatorCompensation().get<unit>()) + (originSimulationTime - oscillator->getComputationOrigin()));
     int64_t numTicksFromOscillatorOriginToClockOrigin = oscillator->computeTicksForInterval(originSimulationTime - oscillator->getComputationOrigin());
     int64_t numTicks = numTicksFromOscillatorOriginToSimulationTime - numTicksFromOscillatorOriginToClockOrigin;
-    clocktime_t clockTimeFromClockOrigin = SIMTIME_AS_CLOCKTIME(numTicks * oscillator->getNominalTickLength() * (1 + getOscillatorCompensation().get<unit>()));
+    clocktime_t clockTimeFromClockOrigin = SIMTIME_AS_CLOCKTIME(numTicks * oscillator->getNominalTickLength());
     clocktime_t result = originClockTime + clockTimeFromClockOrigin;
     STDCOUT << "   : " << "numTicksFromOscillatorOriginToSimulationTime = " << numTicksFromOscillatorOriginToSimulationTime << ", "
                        << "numTicksFromOscillatorOriginToClockOrigin = " << numTicksFromOscillatorOriginToClockOrigin << ", "
@@ -127,7 +127,7 @@ simtime_t OscillatorBasedClock::computeSimTimeFromClockTime(clocktime_t clockTim
     STDCOUT << "-> computeSimTimeFromClockTime(" << clockTime.raw() << ")\n";
     ASSERT(clockTime >= getClockTime());
     ASSERT(originSimulationTime >= oscillator->getComputationOrigin());
-    int64_t numTicksFromClockOriginToClockTime = (clockTime - originClockTime).raw() / oscillator->getNominalTickLength().raw() / (1 + getOscillatorCompensation().get<unit>());
+    int64_t numTicksFromClockOriginToClockTime = (clockTime - originClockTime).raw() / oscillator->getNominalTickLength().raw();
     int64_t numTicksFromOscillatorOriginToClockOrigin = oscillator->computeTicksForInterval(originSimulationTime - oscillator->getComputationOrigin());
     int64_t numTicks = numTicksFromClockOriginToClockTime +
                        numTicksFromOscillatorOriginToClockOrigin +
@@ -138,7 +138,8 @@ simtime_t OscillatorBasedClock::computeSimTimeFromClockTime(clocktime_t clockTim
                        << "oscillatorComputationOrigin = " << oscillator->getComputationOrigin() << ", "
                        << "originSimulationTime = " << originSimulationTime << ", "
                        << "originClockTime = " << originClockTime << std::endl;
-    simtime_t result = oscillator->getComputationOrigin() + oscillator->computeIntervalForTicks(numTicks);
+    simtime_t simulationTimeInterval = oscillator->computeIntervalForTicks(numTicks);
+    simtime_t result = originSimulationTime + (oscillator->getComputationOrigin() + simulationTimeInterval - originSimulationTime) / (1 + getOscillatorCompensation().get<unit>());
     STDCOUT << "   computeSimTimeFromClockTime(" << clockTime.raw() << ") -> " << result.raw() << std::endl;
     return result;
 }
