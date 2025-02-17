@@ -67,24 +67,30 @@ void OscillatorBasedClock::initialize(int stage)
             roundingFunction = roundNone;
         else
             throw cRuntimeError("Unknown rounding mode");
+        WATCH(originSimulationTimeLowerBound);
         WATCH(originSimulationTime);
         WATCH(originClockTime);
         WATCH_PTRVECTOR(events);
     }
     else if (stage == INITSTAGE_CLOCK) {
-        setOrigin(simTime(), par("initialClockTime"));
+        setOrigin(simTime(), simTime(), par("initialClockTime"));
         if (originClockTime.raw() % oscillator->getNominalTickLength().raw() != 0)
             throw cRuntimeError("Initial clock time must be a multiple of the oscillator nominal tick length");
     }
 }
 
-void OscillatorBasedClock::setOrigin(simtime_t simulationTime, clocktime_t clockTime)
+void OscillatorBasedClock::setOrigin(simtime_t simulationTimeLowerBound, simtime_t simulationTime, clocktime_t clockTime)
 {
     StdCoutIndentGuard x;
-    STDCOUT << "-> setOrigin(" << simulationTime << ", " << clockTime << ")\n";
+    STDCOUT << "-> setOrigin(" << simulationTimeLowerBound << ", " << simulationTime << ", " << clockTime << ")\n";
+    originSimulationTimeLowerBound = simulationTimeLowerBound;
     originSimulationTime = simulationTime;
     originClockTime = clockTime;
     lastClockTime = clockTime;
+    ASSERT(originSimulationTimeLowerBound <= originSimulationTime);
+    ASSERT(originSimulationTimeLowerBound <= simTime());
+    ASSERT(originSimulationTimeLowerBound >= oscillator->getComputationOrigin());
+    ASSERT(originSimulationTimeLowerBound == computeSimTimeFromClockTime(originClockTime, true));
     ASSERT(originSimulationTime <= simTime());
     ASSERT(originSimulationTime >= oscillator->getComputationOrigin());
     ASSERT(originSimulationTime >= computeSimTimeFromClockTime(originClockTime, true));
@@ -186,7 +192,9 @@ void OscillatorBasedClock::receiveSignal(cComponent *source, int signal, cObject
 
     if (signal == IOscillator::preOscillatorStateChangedSignal) {
         checkAllClockEvents();
-        setOrigin(simTime(), getClockTime());
+        clocktime_t clockTime = getClockTime();
+        simtime_t simulationTimeLowerBound = computeSimTimeFromClockTime(clockTime);
+        setOrigin(simulationTimeLowerBound, simTime(), clockTime);
         checkAllClockEvents();
     }
     else if (signal == IOscillator::postOscillatorStateChangedSignal) {
