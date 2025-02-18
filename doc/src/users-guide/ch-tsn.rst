@@ -61,8 +61,12 @@ can still be used to keep track of time in the network nodes.
 
 -  :ned:`OscillatorBasedClock` models a clock that has a potentially drifting
    oscillator
--  :ned:`SettableClock` extends the previous model with the capability of setting
-   the clock time
+-  :ned:`ServoClockBase` extends the previous model with the approach for clock
+   adjustments and overdue events
+-  :ned:`InstantServoClock` extends :ned:`ServoClockBase` with the capability of
+   adjusting clock and drift
+-  :ned:`PiServoClock` extends :ned:`ServoClockBase` for synchronizing the clock
+   with an external time source
 
 Similarly to the above, the following gPTP time synchronization related protocol
 modules and network nodes can also be used to build time synchronization in a
@@ -93,6 +97,15 @@ in various predefined network nodes:
    specific network nodes
 -  :par:`hasGptp` parameter enables the gPTP time synchronization protocol in
    gPTP specific network nodes
+
+Moreover, gPTP relies on specific clock election and failover mechanisms to 
+maintain synchronization accuracy, ensuring precise timing across different 
+devices. The following modules introduce two key mechanisms: Best Master Clock 
+Algorithm (BMCA) and Hot-Standby redundancy, both of which enhance the reliability 
+of high-precision time synchronization.
+
+- :ned:`HotStandby` ensures seamless time synchronization by automatically switching 
+  to a standby clock if the primary clock fails
 
 .. _ug:sec:tsn:streamfiltering:
 
