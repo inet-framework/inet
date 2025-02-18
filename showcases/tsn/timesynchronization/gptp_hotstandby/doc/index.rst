@@ -1,14 +1,34 @@
 Using gPTP Hotstandby
 =====================
 
-Goals
------
+Overview
+~~~~~~~~
 
+In time-sensitive networking (TSN), precise and uninterrupted time synchronization
+is fundamental to ensuring deterministic network behavior. Many real-time applications,
+such as industrial automation, financial trading, and vehicular communication, depend on
+synchronized clocks with minimal jitter and drift. However, conventional network simulations
+often assume a globally shared clock, which does not account for real-world clock
+discrepancies and failures.
 
+In practice, hardware clocks are prone to drift, and failures in the primary time source can
+introduce significant disruptions. To mitigate these risks, the concept of a hot-standby master
+clock is introduced. This approach enhances the robustness of time synchronization mechanisms by
+ensuring that a backup master clock seamlessly takes over in the event of a failure, minimizing
+synchronization loss and preventing cascading system failures.
 
-| INET version: ``4.5``
-| Source files location: `inet/showcases/tsn/timesynchronization/gptp <https://github.com/inet-framework/inet/tree/master/showcases/tsn/timesynchronization/gptp_hotstandby>`__
+The gPTP Hot-Standby model aims to simulate such a resilient setup within a communication network,
+demonstrating how redundancy in master clocks ensures continued synchronization even under failure
+conditions.
 
+The gPTP Hot-Standby model simulates a redundant time synchronization architecture comprising the
+following components:
+
+- Primary Master Clock: The primary source of time synchronization for all connected slave clocks.
+- Hot-Standby Clock: A backup master clock that takes over in the event of a failure in the
+  primary master clock.
+- Slave Clocks: Devices that synchronize their clocks with the master clock, ensuring a consistent
+  time reference across the network.
 
 The Model
 ---------
@@ -45,7 +65,6 @@ failure.
 
 The network contains two clock nodes (:ned:`TsnClock`) and four TSN device nodes (:ned:`TsnDevice`), connected by two TSN switches (:ned:`TsnSwitch`):
 
-.. **TODO** change to media instead of using image directly
 .. figure:: media/PrimaryAndHotStandbyNetwork.png
    :align: center
 
@@ -198,7 +217,6 @@ synchronization.
 .. **TODO** time sync: any given moment moment of time, between any two network nodes, time difference is bounded (has an upper bound); itt lehet demonstralni hogy actually true;
    pl a charton; ha az upper bound is small enough its good enough;
 
-.. **TODO** change the figure path if needed
 Two Master Clocks Exploiting Network Redundancy
 -----------------------------------------------
 
@@ -315,6 +333,22 @@ synced to the primary master periodically).
 .. note:: The charts for all domains are available in the .anf file in the showcase's folder.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`GptpShowcase.ned <../GptpShowcase.ned>`
+
+Adjusting Clock Failure Scenario in HotStandby
+----------------------------------------------
+
+The :ned:`HotStandby` module is instantiated in network nodes where redundancy is required. The module follows the
+INET time synchronization framework and integrates seamlessly with the gPTP implementation. In the event of a failure,
+the HotStandby module automatically switches to the standby master clock, ensuring uninterrupted synchronization.
+It supports creating a failure scenario with the following command:
+
+.. code-block:: xml
+
+   <set-channel-param t="3.1s" src-module="tsnClock1" dest-module="tsnSwitch1" par="disabled" value="true"/>
+   <set-channel-param t="7.1s" src-module="tsnClock1" dest-module="tsnSwitch1" par="disabled" value="false"/>
+
+The above command disables the channel between the primary master clock and the switch at 3.1 seconds and re-enables
+it at 7.1 seconds, simulating a failure and recovery scenario.
 
 Discussion
 ----------
