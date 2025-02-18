@@ -33,8 +33,8 @@
 #include "Statistics.h"
 #include "dplpmtud/Dplpmtud.h"
 #include "Path.h"
-
 #include "stream/Stream.h"
+#include "packet/ConnectionId.h"
 
 namespace inet {
 namespace quic {
@@ -69,15 +69,13 @@ class Connection
     Connection(Quic *quicSimpleMod, UdpSocket *udpSocket, AppSocket *appSocket, L3Address remoteAddr, int remotePort);
     virtual ~Connection();
     virtual void processAppCommand(cMessage *msg);
-    virtual void connect();
     virtual void accept();
     virtual void processPackets(Packet *pkt);
     virtual void processTimeout(cMessage *msg);
-    virtual std::vector<uint64_t> getConnectionIds();
     void sendPackets();
     void newStreamData(uint64_t streamId, Ptr<const Chunk> data);
     void processReceivedData(uint64_t streamId, uint64_t offset, Ptr<const Chunk> data);
-    void accountReceivedPacket(uint64_t packetNumber, bool ackEliciting, bool isIBitSet);
+    void accountReceivedPacket(uint64_t packetNumber, bool ackEliciting, PacketNumberSpace space, bool isIBitSet);
     void onMaxDataFrameReceived(uint64_t maxData);
     void onMaxStreamDataFrameReceived(uint64_t streamId, uint64_t maxStreamData);
     void onStreamDataBlockedFrameReceived(uint64_t streamId, uint64_t streamDataLimit);
@@ -86,16 +84,20 @@ class Connection
     Timer *createTimer(TimerType kind, std::string name);
     Timer *createTimer(cMessage *msg);
     void sendProbePacket(uint ptoCount);
+    void sendInitialPacket();
+    void sendHandshakePacket();
     void sendDataToApp(uint64_t streamId, B expectedDataSize);
     void handleAckFrame(const Ptr<const AckFrameHeader>& frameHeader);
     void processIcmpPtb(Packet *droppedPkt, int ptbMtu);
     void reportPtb(int droppedPacketNumber, int ptbMtu);
+    bool isHandshakeConfirmed();
+    void addDstConnectionId(uint64_t id, uint8_t length);
 
     ReliabilityManager *getReliabilityManager() {
         return this->reliabilityManager;
     }
-    ReceivedPacketsAccountant *getReceivedPacketsAccountant() {
-        return receivedPacketsAccountant;
+    ReceivedPacketsAccountant *getReceivedPacketsAccountant(PacketNumberSpace space) {
+        return receivedPacketsAccountants[space];
     }
 
     TransportParameter *getTransportParameters() {
@@ -134,14 +136,22 @@ class Connection
         dplpmutdInIntialBase = false;
     }
 
+    std::vector<ConnectionId*> getSrcConnectionIds(){
+        return srcConnectionIds;
+    }
+
+    std::vector<ConnectionId*> getDstConnectionIds() {
+        return dstConnectionIds;
+    }
+
 
   private:
     Quic *quicSimpleMod;
     AppSocket *appSocket;
     UdpSocket *udpSocket;
 
-    std::vector<uint64_t> connectionIds;
-    uint64_t mainConnectionId;
+    std::vector<ConnectionId*> srcConnectionIds;
+    std::vector<ConnectionId*> dstConnectionIds;
     ConnectionState *connectionState;
 
     std::vector<QuicFrame *> controlQueue;
@@ -152,7 +162,7 @@ class Connection
     ConnectionFlowController *connectionFlowController = nullptr;
     ConnectionFlowControlResponder *connectionFlowControlResponder = nullptr;
 
-    ReceivedPacketsAccountant *receivedPacketsAccountant;
+    ReceivedPacketsAccountant *receivedPacketsAccountants[3];
     ReliabilityManager *reliabilityManager;
 
     ICongestionController *congestionController;
@@ -180,7 +190,7 @@ class Connection
     simsignal_t packetNumberSentStat;
 
 
-    void sendPacket(QuicPacket *packet);
+    void sendPacket(QuicPacket *packet, PacketNumberSpace pnSpace);
     Stream *findOrCreateStream(uint64_t streamid);
     uint64_t getStreamsSendQueueLength();
     void measureReceiveGoodput(uint64_t receivedDataLength);

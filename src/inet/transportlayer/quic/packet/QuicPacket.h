@@ -23,6 +23,12 @@
 namespace inet {
 namespace quic {
 
+enum PacketNumberSpace {
+    Initial,
+    Handshake,
+    ApplicationData
+};
+
 class QuicPacket {
 public:
     QuicPacket(std::string name);

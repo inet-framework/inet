@@ -37,10 +37,9 @@ Connection::Connection(Quic *quicSimpleMod, UdpSocket *udpSocket, AppSocket *app
 
     bool useDplpmtud = quicSimpleMod->par("useDplpmtud");
 
-    connectionIds.push_back(0);
-    mainConnectionId = 0;
+    srcConnectionIds.push_back(new ConnectionId(0, 1));
 
-    stats = new Statistics(quicSimpleMod, "_cid=" + std::to_string(mainConnectionId));
+    stats = new Statistics(quicSimpleMod, "_cid=" + std::to_string(srcConnectionIds[0]->getId()));
 
     lastMaxQuicPacketSize = 0;
     usedMaxQuicPacketSizeStat = stats->createStatisticEntry("usedMaxQuicPacketSize");
@@ -70,10 +69,18 @@ Connection::Connection(Quic *quicSimpleMod, UdpSocket *udpSocket, AppSocket *app
 
     // TODO: create Scheduler depending on ned file parameter
     scheduler = new RRScheduler(&streamMap);
-    receivedPacketsAccountant = new ReceivedPacketsAccountant(createTimer(TimerType::ACK_DELAY_TIMER, "AckDelayTimer"), transportParameter);
-    receivedPacketsAccountant->readParameters(quicSimpleMod);
-    packetBuilder = new PacketBuilder(&controlQueue, scheduler, receivedPacketsAccountant);
-    packetBuilder->setConnectionId(mainConnectionId);
+
+    //receivedPacketsAccountant = new ReceivedPacketsAccountant(createTimer(TimerType::ACK_DELAY_TIMER, "AckDelayTimer"), transportParameter);
+    //receivedPacketsAccountant->readParameters(quicSimpleMod);
+
+    receivedPacketsAccountants[PacketNumberSpace::ApplicationData] = new ReceivedPacketsAccountant(createTimer(TimerType::ACK_DELAY_TIMER, "AckDelayTimer"), transportParameter);
+    receivedPacketsAccountants[PacketNumberSpace::ApplicationData]->readParameters(quicSimpleMod);
+
+    receivedPacketsAccountants[PacketNumberSpace::Initial] = new ReceivedPacketsAccountant(nullptr, transportParameter);
+    receivedPacketsAccountants[PacketNumberSpace::Handshake] = new ReceivedPacketsAccountant(nullptr, transportParameter);
+
+    packetBuilder = new PacketBuilder(&controlQueue, scheduler, receivedPacketsAccountants);
+    packetBuilder->setSrcConnectionId(srcConnectionIds[0]);
     packetBuilder->readParameters(quicSimpleMod);
 
     congestionController = CongestionControlFactory::getInstance()->createCongestionController(quicSimpleMod->par("congestionControl"));
@@ -81,7 +88,7 @@ Connection::Connection(Quic *quicSimpleMod, UdpSocket *udpSocket, AppSocket *app
     congestionController->setStatistics(stats);
     congestionController->setPath(path);
 
-    reliabilityManager = new ReliabilityManager(this, transportParameter, receivedPacketsAccountant, congestionController, stats);
+    reliabilityManager = new ReliabilityManager(this, transportParameter, receivedPacketsAccountants[PacketNumberSpace::ApplicationData], congestionController, stats);
 
     connectionFlowController = new ConnectionFlowController(transportParameter->initial_max_data, stats);
     connectionFlowControlResponder = new ConnectionFlowControlResponder(this, transportParameter->initial_max_data, maxDataFrameThreshold, roundConsumedDataValue, stats);
@@ -89,7 +96,9 @@ Connection::Connection(Quic *quicSimpleMod, UdpSocket *udpSocket, AppSocket *app
 
 Connection::~Connection() {
     delete reliabilityManager;
-    delete receivedPacketsAccountant;
+    delete receivedPacketsAccountants[PacketNumberSpace::ApplicationData];
+    delete receivedPacketsAccountants[PacketNumberSpace::Initial];
+    delete receivedPacketsAccountants[PacketNumberSpace::Handshake];
     delete congestionController;
     delete connectionFlowController;
     delete connectionFlowControlResponder;
@@ -106,6 +115,12 @@ Connection::~Connection() {
     // delete stream objects
     for (auto it = streamMap.begin(); it != streamMap.end(); it++) {
         delete it->second;
+    }
+    for (ConnectionId *connectionId : dstConnectionIds) {
+        delete connectionId;
+    }
+    for (ConnectionId *connectionId : srcConnectionIds) {
+        delete connectionId;
     }
 }
 
@@ -167,6 +182,7 @@ Stream *Connection::findOrCreateStream(uint64_t streamId)
 
 void Connection::processPackets(Packet *pkt)
 {
+    EV_TRACE << "enter Connection::processPackets" << endl;
     stats->getMod()->emit(packetReceivedSignal, pkt);
 
     // process each QUIC packet in udp datagram
@@ -183,6 +199,7 @@ void Connection::processPackets(Packet *pkt)
             throw cRuntimeError("no packet processing happened");
         }
     }
+    EV_TRACE << "leave Connection::processPackets" << endl;
 }
 
 void Connection::processTimeout(cMessage *msg)
@@ -252,14 +269,14 @@ void Connection::sendPackets()
             // this is the last packet the current congestion window allows to send -> set I-Bit.
             packet->setIBit(true);
         }
-        sendPacket(packet); // updates cwnd
+        sendPacket(packet, PacketNumberSpace::ApplicationData); // updates cwnd
     }
-    if (receivedPacketsAccountant->wantsToSendAckImmediately()) {
+    if (receivedPacketsAccountants[PacketNumberSpace::ApplicationData]->wantsToSendAckImmediately()) {
         // ReceivedPacketsAccountant still needs to send an ACK frame
         // CongestionController might prohibit sending, but we can still send an Ack-only-packet
         // restrict the size of the packet by a safe upper limit, because for a non-ack-eliciting packet we have no PMTU validation.
-        QuicPacket *packet = packetBuilder->buildAckOnlyPacket(path->getSafeQuicPacketSize());
-        sendPacket(packet);
+        QuicPacket *packet = packetBuilder->buildAckOnlyPacket(path->getSafeQuicPacketSize(), PacketNumberSpace::ApplicationData);
+        sendPacket(packet, PacketNumberSpace::ApplicationData);
     }
 }
 
@@ -302,7 +319,7 @@ void Connection::sendProbePacket(uint ptoCount)
     if (packet == nullptr) {
         EV_DEBUG << "no new data available, try to retransmit data" << endl;
         // 2. retransmit unacked packet
-        std::vector<QuicPacket*> *ackElicitingSentPackets = reliabilityManager->getAckElicitingSentPackets();
+        std::vector<QuicPacket*> *ackElicitingSentPackets = reliabilityManager->getAckElicitingSentPackets(PacketNumberSpace::ApplicationData);
         if (!ackElicitingSentPackets->empty()) {
             packet = packetBuilder->buildAckElicitingPacket(ackElicitingSentPackets, maxQuicPacketSize);
         }
@@ -321,33 +338,25 @@ void Connection::sendProbePacket(uint ptoCount)
     }
 
     EV_DEBUG << "sendProbePacket: send packet" << endl;
-    sendPacket(packet);
+    sendPacket(packet, PacketNumberSpace::ApplicationData);
 }
 
-void Connection::sendPacket(QuicPacket *packet)
+void Connection::sendInitialPacket() {
+    int maxQuicPacketSize = path->getMaxQuicPacketSize();
+    sendPacket(packetBuilder->buildInitialPacket(maxQuicPacketSize), PacketNumberSpace::Initial);
+}
+
+void Connection::sendHandshakePacket() {
+    EV_DEBUG << "sendHandshakePacket" << endl;
+}
+
+void Connection::sendPacket(QuicPacket *packet, PacketNumberSpace pnSpace)
 {
     stats->getMod()->emit(packetNumberSentStat, packet->getPacketNumber());
     Packet *pkt = packet->createOmnetPacket();
     stats->getMod()->emit(packetSentSignal, pkt);
     udpSocket->sendto(path->getRemoteAddr(), path->getRemotePort(), pkt);
-    reliabilityManager->onPacketSent(packet);
-}
-
-std::vector<uint64_t> Connection::getConnectionIds()
-{
-    return this->connectionIds;
-}
-
-void Connection::connect()
-{
-    sendPacket(packetBuilder->buildInitialPacket());
-    /*
-    appSocket->sendEstablished();
-
-    if (path->usesDplpmtud()) {
-        path->getDplpmtud()->start();
-    }
-    */
+    reliabilityManager->onPacketSent(packet, pnSpace);
 }
 
 void Connection::accept()
@@ -421,12 +430,24 @@ void Connection::sendDataToApp(uint64_t streamId, B expectedDataSize)
     }
 }
 
-void Connection::accountReceivedPacket(uint64_t packetNumber, bool ackEliciting, bool isIBitSet)
+void Connection::accountReceivedPacket(uint64_t packetNumber, bool ackEliciting, PacketNumberSpace pnSpace, bool isIBitSet)
 {
     stats->getMod()->emit(packetNumberReceivedStat, packetNumber);
-    receivedPacketsAccountant->onPacketReceived(packetNumber, ackEliciting, isIBitSet);
-    if (receivedPacketsAccountant->wantsToSendAckImmediately()) {
-        sendPackets();
+    receivedPacketsAccountants[pnSpace]->onPacketReceived(packetNumber, ackEliciting, isIBitSet);
+    if (receivedPacketsAccountants[pnSpace]->wantsToSendAckImmediately()) {
+        int maxQuicPacketSize = path->getMaxQuicPacketSize();
+        switch (pnSpace) {
+            case PacketNumberSpace::Initial:
+            case PacketNumberSpace::Handshake: {
+                sendPacket(packetBuilder->buildAckOnlyPacket(maxQuicPacketSize, pnSpace), pnSpace);
+                break;
+            }
+            case PacketNumberSpace::ApplicationData: {
+                sendPackets();
+                break;
+            }
+        }
+
     }
 }
 
@@ -476,7 +497,7 @@ void Connection::onDataBlockedFrameReceived(uint64_t dataLimit){
 
 void Connection::handleAckFrame(const Ptr<const AckFrameHeader>& frameHeader)
 {
-    reliabilityManager->onAckReceived(frameHeader);
+    reliabilityManager->onAckReceived(frameHeader, PacketNumberSpace::ApplicationData);
 
     if (!acceptDataFromApp) {
         if (getStreamsSendQueueLength() < sendQueueLimit*sendQueueLowWaterRatio) {
@@ -492,7 +513,7 @@ void Connection::handleAckFrame(const Ptr<const AckFrameHeader>& frameHeader)
 
 void Connection::reportPtb(int droppedPacketNumber, int ptbMtu)
 {
-    QuicPacket *packet = reliabilityManager->getSentPacket(droppedPacketNumber);
+    QuicPacket *packet = reliabilityManager->getSentPacket(PacketNumberSpace::ApplicationData, droppedPacketNumber);
     if (packet == nullptr) {
         EV_WARN << "could not find sent packet that matches to the packet reflected inside the ICMP packet" << endl;
         return;
@@ -500,6 +521,20 @@ void Connection::reportPtb(int droppedPacketNumber, int ptbMtu)
 
     if (path->usesDplpmtud()) {
         path->getDplpmtud()->onPtbReceived(packet->getSize(), ptbMtu);
+    }
+}
+
+bool Connection::isHandshakeConfirmed() {
+    // TODO: implement
+    return true;
+}
+
+
+void Connection::addDstConnectionId(uint64_t id, uint8_t length) {
+    ConnectionId *connectionId = new ConnectionId(id, length);
+    dstConnectionIds.push_back(connectionId);
+    if (dstConnectionIds.size() == 1) {
+        packetBuilder->setDstConnectionId(connectionId);
     }
 }
 

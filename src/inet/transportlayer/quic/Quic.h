@@ -58,7 +58,7 @@ class Quic : public OperationalBase
     void handleTimeout(cMessage *msg);
     void handleMessageFromApp(cMessage *msg);
     void handleMessageFromUdp(cMessage *msg);
-    Connection *findConnection(uint64_t connectionId);
+    Connection *findConnection(uint64_t srcConnectionId);
     Connection *findConnectionByDstConnectionId(uint64_t connectionId);
     UdpSocket *findUdpSocket(int socketId);
     UdpSocket *findUdpSocket(L3Address addr, int port);

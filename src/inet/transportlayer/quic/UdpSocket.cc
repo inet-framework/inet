@@ -56,7 +56,7 @@ void UdpSocket::processAppCommand(AppSocket *appSocket, cMessage *msg) {
             L3Address remoteAddr = quicOpen->getRemoteAddr();
             int remotePort = quicOpen->getRemotePort();
             Connection *connection = createConnection(appSocket, remoteAddr, remotePort);
-            connection->connect();
+            connection->processAppCommand(msg);
             break;
         }
         case QUIC_C_ACCEPT: { // accept

@@ -37,11 +37,11 @@ public:
     ReliabilityManager(Connection *connection, TransportParameter *transportParameter, ReceivedPacketsAccountant *receivedPacketsAccountant, ICongestionController *congestionController, Statistics *stats);
     virtual ~ReliabilityManager();
 
-    void onAckReceived(const Ptr<const AckFrameHeader>& ackFrame);
-    void onPacketSent(QuicPacket *packet);
+    void onAckReceived(const Ptr<const AckFrameHeader>& ackFrame, PacketNumberSpace pnSpace);
+    void onPacketSent(QuicPacket *packet, PacketNumberSpace pnSpace);
     void onLossDetectionTimeout();
-    std::vector<QuicPacket*> *getAckElicitingSentPackets();
-    QuicPacket *getSentPacket(uint64_t droppedPacketNumber);
+    std::vector<QuicPacket*> *getAckElicitingSentPackets(PacketNumberSpace pnSpace);
+    QuicPacket *getSentPacket(PacketNumberSpace pnSpace, uint64_t droppedPacketNumber);
 
     bool reducePacketSize(int minSize, int maxSize);
 
@@ -59,10 +59,10 @@ private:
     ReceivedPacketsAccountant *receivedPacketsAccountant;
     ICongestionController *congestionController;
     Timer *lossDetectionTimer;
-    std::map<uint64_t, QuicPacket*> sentPackets;
-    uint64_t largestAckedPacketNumber;
-    simtime_t lastSentAckElicitingPacketTime;
-    simtime_t lossTime;
+    std::map<uint64_t, QuicPacket*> sentPackets[3];
+    uint64_t largestAckedPacketNumber[3];
+    simtime_t lastSentAckElicitingPacketTime[3];
+    simtime_t lossTime[3];
     simtime_t latestRtt;
     simtime_t minRtt;
     simtime_t firstRttSample;
@@ -73,19 +73,20 @@ private:
     Statistics *stats;
     //simsignal_t packetLostSignal = cComponent::registerSignal("packetLost");
 
-    std::vector<QuicPacket*> *detectAndRemoveAckedPackets(const Ptr<const AckFrameHeader>& ackFrame);
+    std::vector<QuicPacket*> *detectAndRemoveAckedPackets(const Ptr<const AckFrameHeader>& ackFrame, PacketNumberSpace pnSpace);
     void updateRtt(uint64_t ackDelay);
     bool includesAckEliciting(std::vector<QuicPacket*> *packets);
     void onPacketAcked(QuicPacket *ackedPacket);
-    std::vector<QuicPacket*> *detectAndRemoveLostPackets();
+    std::vector<QuicPacket*> *detectAndRemoveLostPackets(PacketNumberSpace pnSpace);
     void setLossDetectionTimer();
 
-    void moveNewlyAckedPackets(std::vector<QuicPacket*> *newlyAckedPackets, uint64_t largestAck, uint64_t smallestAck);
-    simtime_t getEarliestLossTime();
+    void moveNewlyAckedPackets(std::vector<QuicPacket*> *newlyAckedPackets, uint64_t largestAck, uint64_t smallestAck, PacketNumberSpace pnSpace);
+    bool areAckElicitingPacketsInFlight(PacketNumberSpace pnSpace);
     bool areAckElicitingPacketsInFlight();
 
+    simtime_t getLossTimeAndSpace(PacketNumberSpace *retSpace);
     bool inPersistentCongestion(std::vector<QuicPacket *> *lostPackets, QuicPacket *&firstAckEliciting);
-    simtime_t getPtoTime();
+    simtime_t getPtoTimeAndSpace(PacketNumberSpace *retSpace);
     void onPacketsLost(std::vector<QuicPacket *> *lostPackets);
 
     void deleteOldNonInFlightPackets();

@@ -19,19 +19,19 @@ public:
         name = "Established";
     }
 
-    virtual ConnectionState *processSendAppCommand(cMessage *msg);
-    virtual ConnectionState *processOneRttPacket(const Ptr<const OneRttPacketHeader>& packetHeader, Packet *pkt);
-    virtual void processStreamFrame(const Ptr<const StreamFrameHeader>& frameHeader, Packet *pkt);
-    virtual void processAckFrame(const Ptr<const AckFrameHeader>& frameHeader);
-    virtual void processMaxDataFrame(const Ptr<const MaxDataFrameHeader>& frameHeader);
-    virtual void processMaxStreamDataFrame(const Ptr<const MaxStreamDataFrameHeader>& frameHeader);
-    virtual void processStreamDataBlockedFrame(const Ptr<const StreamDataBlockedFrameHeader>& frameHeader);
-    virtual void processDataBlockedFrame(const Ptr<const DataBlockedFrameHeader>& frameHeader);
-    virtual ConnectionState *processLossDetectionTimeout(cMessage *msg);
-    virtual ConnectionState *processAckDelayTimeout(cMessage *msg);
-    virtual ConnectionState *processRecvAppCommand(cMessage *msg);
-    virtual ConnectionState *processIcmpPtb(uint32_t droppedPacketNumber, int ptbMtu);
-    virtual ConnectionState *processDplpmtudRaiseTimeout(cMessage *msg);
+    virtual ConnectionState *processSendAppCommand(cMessage *msg) override;
+    virtual ConnectionState *processOneRttPacket(const Ptr<const OneRttPacketHeader>& packetHeader, Packet *pkt) override;
+    virtual void processStreamFrame(const Ptr<const StreamFrameHeader>& frameHeader, Packet *pkt) override;
+    virtual void processAckFrame(const Ptr<const AckFrameHeader>& frameHeader) override;
+    virtual void processMaxDataFrame(const Ptr<const MaxDataFrameHeader>& frameHeader) override;
+    virtual void processMaxStreamDataFrame(const Ptr<const MaxStreamDataFrameHeader>& frameHeader) override;
+    virtual void processStreamDataBlockedFrame(const Ptr<const StreamDataBlockedFrameHeader>& frameHeader) override;
+    virtual void processDataBlockedFrame(const Ptr<const DataBlockedFrameHeader>& frameHeader) override;
+    virtual ConnectionState *processLossDetectionTimeout(cMessage *msg) override;
+    virtual ConnectionState *processAckDelayTimeout(cMessage *msg) override;
+    virtual ConnectionState *processRecvAppCommand(cMessage *msg) override;
+    virtual ConnectionState *processIcmpPtb(uint32_t droppedPacketNumber, int ptbMtu) override;
+    virtual ConnectionState *processDplpmtudRaiseTimeout(cMessage *msg) override;
 };
 
 } /* namespace quic */

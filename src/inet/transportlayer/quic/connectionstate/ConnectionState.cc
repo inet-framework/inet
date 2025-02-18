@@ -31,6 +31,8 @@ ConnectionState::~ConnectionState() {
 ConnectionState *ConnectionState::processAppCommand(cMessage *msg)
 {
     switch (msg->getKind()) {
+        case QUIC_C_OPEN_ACTIVE: // connect
+            return processConnectAppCommand(msg);
         case QUIC_C_SEND: // send
             return processSendAppCommand(msg);
         case QUIC_C_RECEIVE:
@@ -42,6 +44,11 @@ ConnectionState *ConnectionState::processAppCommand(cMessage *msg)
     }
 
     return nullptr;
+}
+
+ConnectionState *ConnectionState::processConnectAppCommand(cMessage *msg)
+{
+    throw cRuntimeError("Connect app command unexpected in the current state");
 }
 
 ConnectionState *ConnectionState::processSendAppCommand(cMessage *msg)
@@ -81,6 +88,11 @@ ConnectionState *ConnectionState::processPacket(Packet *pkt)
 ConnectionState *ConnectionState::processInitialPacket(const Ptr<const InitialPacketHeader>& packetHeader, Packet *pkt)
 {
     throw cRuntimeError("Initial packet unexpected in the current state");
+}
+
+ConnectionState *ConnectionState::processHandshakePacket(const Ptr<const HandshakePacketHeader>& packetHeader, Packet *pkt)
+{
+    throw cRuntimeError("1-RTT packet unexpected in the current state");
 }
 
 ConnectionState *ConnectionState::processOneRttPacket(const Ptr<const OneRttPacketHeader>& packetHeader, Packet *pkt)
@@ -143,6 +155,7 @@ void ConnectionState::processFrame(Packet *pkt)
             return processStreamDataBlockedFrame(staticPtrCast<const StreamDataBlockedFrameHeader>(frameHeader));
         case FRAME_HEADER_TYPE_PADDING:
         case FRAME_HEADER_TYPE_PING:
+        case FRAME_HEADER_TYPE_CRYPTO:
             return;
         default:
             throw cRuntimeError("Unknown Frame Header Type");

@@ -64,6 +64,21 @@ class InitialPacketHeader extends LongPacketHeader
     uint32_t packetNumber;
     // payload
 }
+cplusplus(InitialPacketHeader) {{
+  public:
+    void calcChunkLength() {
+        int64_t len = 1 + 4 + 1 + dstConnectionIdLength + 1 + srcConnectionIdLength + length.getSize() + packetNumberLength;
+        this->setChunkLength(B(len));
+    }
+       
+    std::string str() const override {
+        std::ostringstream os;
+        os << "Initial[dstConnectionId=" << dstConnectionId
+           << ", packetNumber=" << packetNumber
+           << "]";
+        return os.str();
+    }
+}}
 
 class ZeroRttPacketHeader extends LongPacketHeader
 {
@@ -73,6 +88,16 @@ class ZeroRttPacketHeader extends LongPacketHeader
     uint32_t packetNumber;
     // payload
 }
+cplusplus(ZeroRttPacketHeader) {{
+  public:
+    std::string str() const override {
+        std::ostringstream os;
+        os << "0-RTT[dstConnectionId=" << dstConnectionId
+           << ", packetNumber=" << packetNumber
+           << "]";
+        return os.str();
+    }
+}}
 
 class HandshakePacketHeader extends LongPacketHeader
 {
@@ -82,6 +107,21 @@ class HandshakePacketHeader extends LongPacketHeader
     uint32_t packetNumber;
     // payload
 }
+cplusplus(HandshakePacketHeader) {{
+  public:
+    void calcChunkLength() {
+        int64_t len = 1 + 4 + 1 + dstConnectionIdLength + 1 + srcConnectionIdLength + length.getSize() + packetNumberLength;
+        this->setChunkLength(B(len));
+    }
+    
+    std::string str() const override {
+        std::ostringstream os;
+        os << "Handshake[dstConnectionId=" << dstConnectionId
+           << ", packetNumber=" << packetNumber
+           << "]";
+        return os.str();
+    }
+}}
 
 class RetryPacketHeader extends LongPacketHeader
 {

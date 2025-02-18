@@ -45,7 +45,7 @@ ConnectionState *EstablishedConnectionState::processOneRttPacket(const Ptr<const
     ackElicitingPacket = false;
     processFrames(pkt);
 
-    context->accountReceivedPacket(packetHeader->getPacketNumber(), ackElicitingPacket, packetHeader->getIBit());
+    context->accountReceivedPacket(packetHeader->getPacketNumber(), ackElicitingPacket, PacketNumberSpace::ApplicationData, packetHeader->getIBit());
 
     return this;
 }
@@ -107,8 +107,8 @@ ConnectionState *EstablishedConnectionState::processLossDetectionTimeout(cMessag
 
 ConnectionState *EstablishedConnectionState::processAckDelayTimeout(cMessage *msg)
 {
-    context->getReceivedPacketsAccountant()->onAckDelayTimeout();
-    if (context->getReceivedPacketsAccountant()->wantsToSendAckImmediately()) {
+    context->getReceivedPacketsAccountant(PacketNumberSpace::ApplicationData)->onAckDelayTimeout();
+    if (context->getReceivedPacketsAccountant(PacketNumberSpace::ApplicationData)->wantsToSendAckImmediately()) {
         context->sendPackets();
     }
 

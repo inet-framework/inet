@@ -33,7 +33,9 @@ ReceivedPacketsAccountant::ReceivedPacketsAccountant(Timer *ackDelayTimer, Trans
 }
 
 ReceivedPacketsAccountant::~ReceivedPacketsAccountant() {
-    delete ackDelayTimer;
+    if (ackDelayTimer != nullptr) {
+        delete ackDelayTimer;
+    }
 }
 
 void ReceivedPacketsAccountant::readParameters(cModule *module)
@@ -71,21 +73,27 @@ void ReceivedPacketsAccountant::onPacketReceived(uint64_t packetNumber, bool ack
         newAckInfoAboutAckElicitings = true;
         numAckElicitingsReceivedSinceAck++;
 
-        // send ack immediately ...
-        if (numAckElicitingsReceivedSinceAck >= kNumReceivedAckElicitingsBeforeAck // if kNumReceivedAckElicitingsBeforeAck (default 2) ack-elicitings were received
-         || packetReceivedOutOfOrder // if this packet received out of order
-         || hasGapsSince(lastReceivedAckEliciting) // if there were gaps in the sequence of received packet numbers since the last ack-eliciting packet were received
-         || (useIBit && isIBitSet) // ... if the IBit is set
-         || (packetNumber == 0)) { // ... if it is the first packet (helps the sender to measure a more accurate RTT. Normally the first RTT measurement would be after the handshake which isn't delayed)
-
-            ackDelayTimer->cancel();
+        if (ackDelayTimer == nullptr) {
+            // Packet number space is Initial or Handshake -> no ack delay
             sendAckImmediately = true;
-            if (packetReceivedOutOfOrder) {
-                timeLastAckElicitingReceivedOutOfOrder = simTime();
-            }
         } else {
-            if (!ackDelayTimer->isScheduled()) {
-                ackDelayTimer->scheduleAt(simTime() + transportParameter->maxAckDelay);
+
+            // send ack immediately ...
+            if (numAckElicitingsReceivedSinceAck >= kNumReceivedAckElicitingsBeforeAck // if kNumReceivedAckElicitingsBeforeAck (default 2) ack-elicitings were received
+             || packetReceivedOutOfOrder // if this packet received out of order
+             || hasGapsSince(lastReceivedAckEliciting) // if there were gaps in the sequence of received packet numbers since the last ack-eliciting packet were received
+             || (useIBit && isIBitSet) // ... if the IBit is set
+             || (packetNumber == 0)) { // ... if it is the first packet (helps the sender to measure a more accurate RTT. Normally the first RTT measurement would be after the handshake which isn't delayed)
+
+                ackDelayTimer->cancel();
+                sendAckImmediately = true;
+                if (packetReceivedOutOfOrder) {
+                    timeLastAckElicitingReceivedOutOfOrder = simTime();
+                }
+            } else {
+                if (!ackDelayTimer->isScheduled()) {
+                    ackDelayTimer->scheduleAt(simTime() + transportParameter->maxAckDelay);
+                }
             }
         }
         lastReceivedAckEliciting = packetNumber;
@@ -166,7 +174,9 @@ void ReceivedPacketsAccountant::onPacketReceived(uint64_t packetNumber, bool ack
  */
 QuicFrame *ReceivedPacketsAccountant::generateAckFrame(size_t maxSize)
 {
-    ackDelayTimer->cancel();
+    if (ackDelayTimer != nullptr) {
+        ackDelayTimer->cancel();
+    }
     newAckInfo = false;
     newAckInfoAboutAckElicitings = false;
     sendAckImmediately = false;

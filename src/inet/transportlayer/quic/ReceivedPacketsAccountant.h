@@ -69,7 +69,7 @@ private:
     Timer *ackDelayTimer;
     TransportParameter *transportParameter;
     simtime_t timeLastAckElicitingReceivedOutOfOrder;
-    bool useIBit;
+    bool useIBit = false;
 
     void removeOldGapRanges();
     bool hasGapsSince(uint64_t packetNumber);

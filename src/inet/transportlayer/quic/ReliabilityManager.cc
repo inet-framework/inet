@@ -43,35 +43,39 @@ ReliabilityManager::ReliabilityManager(Connection *connection, TransportParamete
     firstRttSample = SIMTIME_ZERO;
 
     // should be per packet number space
-    largestAckedPacketNumber = std::numeric_limits<uint64_t>::max();
-    lastSentAckElicitingPacketTime = SIMTIME_ZERO;
-    lossTime = SIMTIME_ZERO;
+    for (PacketNumberSpace pnSpace : {PacketNumberSpace::Initial, PacketNumberSpace::Handshake, PacketNumberSpace::ApplicationData} ) {
+        largestAckedPacketNumber[pnSpace] = std::numeric_limits<uint64_t>::max();
+        lastSentAckElicitingPacketTime[pnSpace] = SIMTIME_ZERO;
+        lossTime[pnSpace] = SIMTIME_ZERO;
+    }
 
     //lastSentCryptoPacketTime = SIMTIME_ZERO;
 }
 
 ReliabilityManager::~ReliabilityManager() {
     delete lossDetectionTimer;
-    if (sentPackets.size() > 0) {
-        int memSize = 0;
-        for (auto& mapEntry: sentPackets) {
-            QuicPacket *unacked = mapEntry.second;
-            if (unacked->isAckEliciting()) {
-                if (connection && connection->getModule() && connection->getModule()->getParentModule()) {
-                    EV_WARN << connection->getModule()->getParentModule()->getName() << ": ";
+    int memSize = 0;
+    for (PacketNumberSpace pnSpace : {PacketNumberSpace::Initial, PacketNumberSpace::Handshake, PacketNumberSpace::ApplicationData} ) {
+        if (sentPackets[pnSpace].size() > 0) {
+            for (auto& mapEntry: sentPackets[pnSpace]) {
+                QuicPacket *unacked = mapEntry.second;
+                if (unacked->isAckEliciting()) {
+                    if (connection && connection->getModule() && connection->getModule()->getParentModule()) {
+                        EV_WARN << connection->getModule()->getParentModule()->getName() << ": ";
+                    }
+                    EV_WARN << "ReliabilityManager still had the unacked ack-eliciting sentPacket " << mapEntry.first << " when destructed" << endl;
                 }
-                EV_WARN << "ReliabilityManager still had the unacked ack-eliciting sentPacket " << mapEntry.first << " when destructed" << endl;
+                memSize += sizeof(mapEntry);
+                memSize += unacked->getMemorySize();
+                delete unacked;
             }
-            memSize += sizeof(mapEntry);
-            memSize += unacked->getMemorySize();
-            delete unacked;
         }
-        if (memSize > 0 ) {
-            if (connection && connection->getModule() && connection->getModule()->getParentModule()) {
-                EV_INFO << connection->getModule()->getParentModule()->getName() << ": ";
-            }
-            EV_INFO << "ReliabilityManager stored unacked packets with a total memory size of " << memSize << " B before destruction" << endl;
+    }
+    if (memSize > 0 ) {
+        if (connection && connection->getModule() && connection->getModule()->getParentModule()) {
+            EV_INFO << connection->getModule()->getParentModule()->getName() << ": ";
         }
+        EV_INFO << "ReliabilityManager stored unacked packets with a total memory size of " << memSize << " B before destruction" << endl;
     }
 }
 
@@ -81,7 +85,7 @@ void ReliabilityManager::deleteOldNonInFlightPackets()
 
     // find old non in-flight packets
     std::vector<QuicPacket*> oldNonInFlightPackets;
-    for (auto& mapEntry: sentPackets) {
+    for (auto& mapEntry: sentPackets[PacketNumberSpace::ApplicationData]) {
         QuicPacket *unacked = mapEntry.second;
         if (!unacked->countsAsInFlight() && unacked->getTimeSent() <= oldSendTime) {
             oldNonInFlightPackets.push_back(unacked);
@@ -89,7 +93,7 @@ void ReliabilityManager::deleteOldNonInFlightPackets()
     }
     // delete these non in-flight packets to free up memory
     for (QuicPacket *oldNonInFlightPacket: oldNonInFlightPackets) {
-        sentPackets.erase(oldNonInFlightPacket->getPacketNumber());
+        sentPackets[PacketNumberSpace::ApplicationData].erase(oldNonInFlightPacket->getPacketNumber());
         delete oldNonInFlightPacket;
     }
 }
@@ -98,9 +102,10 @@ void ReliabilityManager::deleteOldNonInFlightPackets()
  * Called by Connection, when a new packet were sent.
  * \param packet The sent packet.
  */
-void ReliabilityManager::onPacketSent(QuicPacket *packet)
+void ReliabilityManager::onPacketSent(QuicPacket *packet, PacketNumberSpace pnSpace)
 {
-    sentPackets.insert({ packet->getPacketNumber(), packet });
+    EV_TRACE << "enter ReliabilityManager::onPacketSent" << endl;
+    sentPackets[pnSpace].insert({ packet->getPacketNumber(), packet });
 
     //static SimTime lastTimeSent = SimTime(-1, SimTimeUnit::SIMTIME_S);
     //static int packetsSentAtSameTime = 0;
@@ -116,12 +121,13 @@ void ReliabilityManager::onPacketSent(QuicPacket *packet)
     packet->setTimeSent(simTime());
     if (packet->countsAsInFlight()) {
         if (packet->isAckEliciting()) {
-            lastSentAckElicitingPacketTime = simTime();
+            lastSentAckElicitingPacketTime[pnSpace] = simTime();
         }
         congestionController->onPacketSent(packet);
         setLossDetectionTimer();
     }
     deleteOldNonInFlightPackets();
+    EV_TRACE << "leave ReliabilityManager::onPacketSent" << endl;
 }
 
 /**
@@ -129,18 +135,18 @@ void ReliabilityManager::onPacketSent(QuicPacket *packet)
  * \param ackFrame The received ack frame.
  * TODO: consider different packet number spaces
  */
-void ReliabilityManager::onAckReceived(const Ptr<const AckFrameHeader>& ackFrame)
+void ReliabilityManager::onAckReceived(const Ptr<const AckFrameHeader>& ackFrame, PacketNumberSpace pnSpace)
 {
     EV_TRACE << "enter ReliabilityManager::onAckReceived" << endl;
 
-    if (largestAckedPacketNumber == std::numeric_limits<uint64_t>::max()) {
-        largestAckedPacketNumber = ackFrame->getLargestAck();
+    if (largestAckedPacketNumber[pnSpace] == std::numeric_limits<uint64_t>::max()) {
+        largestAckedPacketNumber[pnSpace] = ackFrame->getLargestAck();
     } else {
-        largestAckedPacketNumber = std::max(largestAckedPacketNumber, ackFrame->getLargestAck().getIntValue());
+        largestAckedPacketNumber[pnSpace] = std::max(largestAckedPacketNumber[pnSpace], ackFrame->getLargestAck().getIntValue());
     }
 
-    QuicPacket *largestAcknolwedNewlyAcked = getSentPacket(ackFrame->getLargestAck());
-    std::vector<QuicPacket*> *newlyAckedPackets = detectAndRemoveAckedPackets(ackFrame);
+    QuicPacket *largestAcknolwedNewlyAcked = getSentPacket(pnSpace, ackFrame->getLargestAck());
+    std::vector<QuicPacket*> *newlyAckedPackets = detectAndRemoveAckedPackets(ackFrame, pnSpace);
 
     // Nothing to do if there are no newly acked packets.
     if (newlyAckedPackets->empty()) {
@@ -161,7 +167,7 @@ void ReliabilityManager::onAckReceived(const Ptr<const AckFrameHeader>& ackFrame
     /* TODO:
     // Process ECN information if present.
     if (ACK frame contains ECN information):
-        ProcessECN(ack)
+        ProcessECN(ack, pnSpace)
     */
 
     // report acked packets before reporting lost packets to the PMTU Validator
@@ -169,7 +175,7 @@ void ReliabilityManager::onAckReceived(const Ptr<const AckFrameHeader>& ackFrame
         connection->getPath()->getPmtuValidator()->onPacketsAcked(newlyAckedPackets);
     }
 
-    std::vector<QuicPacket*> *lostPackets = detectAndRemoveLostPackets();
+    std::vector<QuicPacket*> *lostPackets = detectAndRemoveLostPackets(pnSpace);
     if (!lostPackets->empty()) {
         onPacketsLost(lostPackets);
     } else {
@@ -200,14 +206,14 @@ void ReliabilityManager::onAckReceived(const Ptr<const AckFrameHeader>& ackFrame
  * \param ackFrame The ack frame to analyze.
  * \return Pointer to a vector with all newly acked packets.
  */
-std::vector<QuicPacket*> *ReliabilityManager::detectAndRemoveAckedPackets(const Ptr<const AckFrameHeader>& ackFrame)
+std::vector<QuicPacket*> *ReliabilityManager::detectAndRemoveAckedPackets(const Ptr<const AckFrameHeader>& ackFrame, PacketNumberSpace pnSpace)
 {
     std::vector<QuicPacket*> *newlyAckedPackets = new std::vector<QuicPacket*>();
-    uint64_t smallestUnack = sentPackets.begin()->first;
+    uint64_t smallestUnack = sentPackets[pnSpace].begin()->first;
 
     uint64_t largestAck = ackFrame->getLargestAck();
     uint64_t smallestAck = ackFrame->getLargestAck() - ackFrame->getFirstAckRange();
-    moveNewlyAckedPackets(newlyAckedPackets, largestAck, smallestAck);
+    moveNewlyAckedPackets(newlyAckedPackets, largestAck, smallestAck, pnSpace);
     for (int i=0; i<ackFrame->getAckRangeArraySize(); i++) {
         const AckRange &ackRange = ackFrame->getAckRange(i);
         largestAck = smallestAck - ackRange.gap - 2;
@@ -217,23 +223,25 @@ std::vector<QuicPacket*> *ReliabilityManager::detectAndRemoveAckedPackets(const 
             break;
         }
         smallestAck = largestAck - ackRange.ackRange;
-        moveNewlyAckedPackets(newlyAckedPackets, largestAck, smallestAck);
+        moveNewlyAckedPackets(newlyAckedPackets, largestAck, smallestAck, pnSpace);
     }
 
     return newlyAckedPackets;
 }
+
 /**
  * Moves all packets with packet numbers from largestAck to smallestAck from the sentPackets map to the newlyAckedPackets vector.
  * \param newlyAckedPackets Adds packets to this vector.
  * \param largestAck Packet number of the first packet to add.
  * \param smallestAck Packet number of the last packet to add.
  */
-void ReliabilityManager::moveNewlyAckedPackets(std::vector<QuicPacket*> *newlyAckedPackets, uint64_t largestAck, uint64_t smallestAck) {
+void ReliabilityManager::moveNewlyAckedPackets(std::vector<QuicPacket*> *newlyAckedPackets, uint64_t largestAck, uint64_t smallestAck, PacketNumberSpace pnSpace)
+{
     for (uint64_t packetNumber=largestAck; packetNumber>=smallestAck; packetNumber--) {
-        auto result = sentPackets.find(packetNumber);
-        if (result != sentPackets.end()) {
+        auto result = sentPackets[pnSpace].find(packetNumber);
+        if (result != sentPackets[pnSpace].end()) {
             newlyAckedPackets->push_back(result->second);
-            sentPackets.erase(packetNumber);
+            sentPackets[pnSpace].erase(packetNumber);
         }
         if (packetNumber == 0) {
             // if we don't leave the for loop now, we will never, since packetNumber is an unsigned int.
@@ -309,16 +317,27 @@ void ReliabilityManager::onPacketAcked(QuicPacket *ackedPacket)
 }
 
 /**
- * Determines the loss time that expires next.
- * Each packet number space has its own lossTime. One different packet number spaces are handled, this method becomes more complex.
+ * Determines the loss time that expires next and the corresponding packet number space.
+ * \param retSpace Out parameter for the corresponding packet number space.
  * \return The loss time that expires next.
  */
-simtime_t ReliabilityManager::getEarliestLossTime()
+simtime_t ReliabilityManager::getLossTimeAndSpace(PacketNumberSpace *retSpace)
 {
-    return lossTime;
+    simtime_t time = lossTime[PacketNumberSpace::Initial];
+    PacketNumberSpace space = PacketNumberSpace::Initial;
+    for (PacketNumberSpace pnSpace : {PacketNumberSpace::Handshake, PacketNumberSpace::ApplicationData} ) {
+        if (time == SIMTIME_ZERO || lossTime[pnSpace] < time) {
+            time = lossTime[pnSpace];
+            space = pnSpace;
+        }
+    }
+    if (retSpace != nullptr) {
+        *retSpace = space;
+    }
+    return time;
 }
 
-simtime_t ReliabilityManager::getPtoTime()
+simtime_t ReliabilityManager::getPtoTimeAndSpace(PacketNumberSpace *retSpace)
 {
     Path *path = connection->getPath();
     SimTime duration = (path->smoothedRtt + SimTime().setRaw(std::max(4 * path->rttVar.raw(), kGranularity.raw()))) * (1 << ptoCount);
@@ -333,26 +352,32 @@ simtime_t ReliabilityManager::getPtoTime()
         return (now() + duration), Initial
     */
 
-    SimTime ptoTimeout;
-    /* TODO:
-    ptoTimeout = infinite
-    ptoSpace = Initial
-    for space in [ Initial, Handshake, ApplicationData ]:
-       if (no in-flight packets in space):
-           continue;
-       if (space == ApplicationData):
-         // Skip Application Data until handshake confirmed.
-         if (handshake is not confirmed):
-           return pto_timeout, pto_space
-         // Include max_ack_delay and backoff for Application Data.
-         duration += max_ack_delay * (2 ^ pto_count)
-
-       t = time_of_last_ack_eliciting_packet[space] + duration
-       if (t < pto_timeout):
-     */
-
-    duration += transportParameter->maxAckDelay * (1 << ptoCount);
-    ptoTimeout = lastSentAckElicitingPacketTime + duration;
+    SimTime ptoTimeout = SIMTIME_MAX;
+    PacketNumberSpace ptoSpace = PacketNumberSpace::Initial;
+    for (PacketNumberSpace space : {PacketNumberSpace::Initial, PacketNumberSpace::Handshake, PacketNumberSpace::ApplicationData} ) {
+        if (!areAckElicitingPacketsInFlight(space)) {
+            continue;
+        }
+        if (space == PacketNumberSpace::ApplicationData) {
+            // Skip Application Data until handshake confirmed.
+            if (!connection->isHandshakeConfirmed()) {
+                if (retSpace != nullptr) {
+                    *retSpace = ptoSpace;
+                }
+                return ptoTimeout;
+            }
+            // Include max_ack_delay and backoff for Application Data.
+            duration += transportParameter->maxAckDelay * (1 << ptoCount);
+        }
+        SimTime t = lastSentAckElicitingPacketTime[space] + duration;
+        if (t < ptoTimeout) {
+            ptoTimeout = t;
+            ptoSpace = space;
+        }
+    }
+    if (retSpace != nullptr) {
+        *retSpace = ptoSpace;
+    }
     return ptoTimeout;
 }
 
@@ -361,7 +386,7 @@ simtime_t ReliabilityManager::getPtoTime()
  */
 void ReliabilityManager::setLossDetectionTimer()
 {
-    simtime_t earliestLossTime = getEarliestLossTime();
+    simtime_t earliestLossTime = getLossTimeAndSpace(nullptr);
     if (earliestLossTime != SimTime::ZERO) {
         // Time threshold loss detection.
         lossDetectionTimer->update(earliestLossTime);
@@ -384,7 +409,7 @@ void ReliabilityManager::setLossDetectionTimer()
     }
     EV_DEBUG << "there are still ack eliciting packets in flight -> update lossDetectionTimer" << endl;
 
-    SimTime timeout = getPtoTime();
+    SimTime timeout = getPtoTimeAndSpace(nullptr);
     if (timeout < simTime()) {
         timeout = simTime();
     }
@@ -397,10 +422,11 @@ void ReliabilityManager::setLossDetectionTimer()
  */
 void ReliabilityManager::onLossDetectionTimeout()
 {
-    SimTime earliestLossTime = getEarliestLossTime();
+    PacketNumberSpace pnSpace;
+    SimTime earliestLossTime = getLossTimeAndSpace(&pnSpace);
     if (earliestLossTime != SimTime::ZERO) {
         // Time threshold loss Detection
-        std::vector<QuicPacket*> *lostPackets = detectAndRemoveLostPackets();
+        std::vector<QuicPacket*> *lostPackets = detectAndRemoveLostPackets(pnSpace);
         ASSERT(!lostPackets->empty());
         onPacketsLost(lostPackets);
         delete lostPackets;
@@ -408,26 +434,27 @@ void ReliabilityManager::onLossDetectionTimeout()
         return;
     }
 
-    /* TODO:
-    if (bytes_in_flight > 0):
-    */
+    if (!areAckElicitingPacketsInFlight()) {
+        //assert(!PeerCompletedAddressValidation())
+        // Client sends an anti-deadlock packet: Initial is padded
+        // to earn more anti-amplification credit,
+        // a Handshake packet proves address ownership.
+        /* TODO:
+        if (has Handshake keys):
+          SendOneAckElicitingHandshakePacket()
+        else:
+          SendOneAckElicitingPaddedInitialPacket()
+        */
+    } else {
         // PTO. Send new data if available, else retransmit old data.
         // If neither is available, send a single PING frame.
         if (ptoCount == kMaxProbePackets) {
             throw NoResponseException("ReliabilityManager: Sent already kMaxProbePackets (10?) probe packets. Won't send more. Peer isn't answering.");
         }
+        // TODO: pass pnSpace
+        //_, pn_space = GetPtoTimeAndSpace()
         connection->sendProbePacket(ptoCount+1);
-    /*
-    else:
-       assert(!PeerCompletedAddressValidation())
-       // Client sends an anti-deadlock packet: Initial is padded
-       // to earn more anti-amplification credit,
-       // a Handshake packet proves address ownership.
-       if (has Handshake keys):
-         SendOneAckElicitingHandshakePacket()
-       else:
-         SendOneAckElicitingPaddedInitialPacket()
-    */
+    }
 
     ptoCount++;
     setLossDetectionTimer();
@@ -437,12 +464,12 @@ void ReliabilityManager::onLossDetectionTimeout()
  * Detects packets as lost, if their sent time is old enough
  * or if enough new packets, sent after them, were already acked.
  */
-std::vector<QuicPacket*> *ReliabilityManager::detectAndRemoveLostPackets()
+std::vector<QuicPacket*> *ReliabilityManager::detectAndRemoveLostPackets(PacketNumberSpace pnSpace)
 {
-    ASSERT(largestAckedPacketNumber != std::numeric_limits<uint64_t>::max());
+    ASSERT(largestAckedPacketNumber[pnSpace] != std::numeric_limits<uint64_t>::max());
     Path *path = connection->getPath();
 
-    lossTime = SimTime::ZERO;
+    lossTime[pnSpace] = SimTime::ZERO;
     simtime_t lossDelay = kTimeThreshold * SimTime().setRaw(std::max(latestRtt.raw(), path->smoothedRtt.raw()));
 
     // Minimum time of kGranularity before packets are deemed lost.
@@ -452,16 +479,16 @@ std::vector<QuicPacket*> *ReliabilityManager::detectAndRemoveLostPackets()
     simtime_t lostSendTime = simTime() - lossDelay;
 
     // Packets with packet numbers before this are deemed lost.
-    uint64_t lostPacketNumber = largestAckedPacketNumber - kPacketThreshold;
+    uint64_t lostPacketNumber = largestAckedPacketNumber[pnSpace] - kPacketThreshold;
     bool lostPacketNumberOverflow = false;
-    if (kPacketThreshold > largestAckedPacketNumber) {
+    if (kPacketThreshold > largestAckedPacketNumber[pnSpace]) {
         lostPacketNumberOverflow = true;
     }
 
     std::vector<QuicPacket*> *lostPackets = new std::vector<QuicPacket*>();
-    for (auto& mapEntry: sentPackets) {
+    for (auto& mapEntry: sentPackets[pnSpace]) {
         QuicPacket *unacked = mapEntry.second;
-        if (unacked->getPacketNumber() > largestAckedPacketNumber) {
+        if (unacked->getPacketNumber() > largestAckedPacketNumber[pnSpace]) {
             continue;
         }
 
@@ -476,16 +503,16 @@ std::vector<QuicPacket*> *ReliabilityManager::detectAndRemoveLostPackets()
             //stats->getMod()->emit(packetLostSignal, pkt);
             //delete(pkt);
         } else {
-            if (lossTime == SimTime::ZERO) {
-                lossTime = unacked->getTimeSent() + lossDelay;
+            if (lossTime[pnSpace] == SimTime::ZERO) {
+                lossTime[pnSpace] = unacked->getTimeSent() + lossDelay;
             } else {
-                lossTime = SimTime().setRaw(std::min(lossTime.raw(), (unacked->getTimeSent() + lossDelay).raw()));
+                lossTime[pnSpace] = SimTime().setRaw(std::min(lossTime[pnSpace].raw(), (unacked->getTimeSent() + lossDelay).raw()));
             }
         }
     }
 
     for (QuicPacket *lostPacket: *lostPackets) {
-        sentPackets.erase(lostPacket->getPacketNumber());
+        sentPackets[pnSpace].erase(lostPacket->getPacketNumber());
     }
 
     return lostPackets;
@@ -552,11 +579,21 @@ bool ReliabilityManager::inPersistentCongestion(std::vector<QuicPacket *> *lostP
  * Checks if ack eliciting packets are outstanding.
  * \return True if ack eliciting packets are outstanding, false otherwise.
  */
-bool ReliabilityManager::areAckElicitingPacketsInFlight()
+bool ReliabilityManager::areAckElicitingPacketsInFlight(PacketNumberSpace pnSpace)
 {
-    for (auto &mapEntry : sentPackets) {
+    for (auto &mapEntry : sentPackets[pnSpace]) {
         QuicPacket *packet = mapEntry.second;
         if (packet->isAckEliciting()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool ReliabilityManager::areAckElicitingPacketsInFlight()
+{
+    for (PacketNumberSpace pnSpace : {PacketNumberSpace::Initial, PacketNumberSpace::Handshake, PacketNumberSpace::ApplicationData} ) {
+        if (areAckElicitingPacketsInFlight(pnSpace)) {
             return true;
         }
     }
@@ -567,10 +604,10 @@ bool ReliabilityManager::areAckElicitingPacketsInFlight()
  * Creates a vector of all ack eliciting packets that are outstanding.
  * \return Pointer to a vector of QuicPackets, that are ack eliciting and outstanding. Might be empty.
  */
-std::vector<QuicPacket*> *ReliabilityManager::getAckElicitingSentPackets()
+std::vector<QuicPacket*> *ReliabilityManager::getAckElicitingSentPackets(PacketNumberSpace pnSpace)
 {
     std::vector<QuicPacket*> *ackElicitingSentPackets = new std::vector<QuicPacket*>();
-    for (auto &mapEntry : sentPackets) {
+    for (auto &mapEntry : sentPackets[pnSpace]) {
         QuicPacket *packet = mapEntry.second;
         if (packet->isAckEliciting()) {
             ackElicitingSentPackets->push_back(packet);
@@ -579,10 +616,10 @@ std::vector<QuicPacket*> *ReliabilityManager::getAckElicitingSentPackets()
     return ackElicitingSentPackets;
 }
 
-QuicPacket *ReliabilityManager::getSentPacket(uint64_t droppedPacketNumber)
+QuicPacket *ReliabilityManager::getSentPacket(PacketNumberSpace pnSpace, uint64_t droppedPacketNumber)
 {
-    auto it = sentPackets.find(droppedPacketNumber);
-    if (it == sentPackets.end()) {
+    auto it = sentPackets[pnSpace].find(droppedPacketNumber);
+    if (it == sentPackets[pnSpace].end()) {
         return nullptr;
     }
     return it->second;
@@ -624,12 +661,13 @@ SimTime ReliabilityManager::getReducePacketSizeTime() {
 }
 
 bool ReliabilityManager::reducePacketSize(int minSize, int maxSize) {
+    PacketNumberSpace pnSpace = PacketNumberSpace::ApplicationData;
     if (reducePacketTimeThreshold == SimTime::ZERO) {
         return false;
     }
     SimTime w = getReducePacketSizeTime();
     //EV_DEBUG << "ReliabilityManager: reducePacketSize with w = " << w << endl;
-    for (auto &mapEntry : sentPackets) {
+    for (auto &mapEntry : sentPackets[pnSpace]) {
         QuicPacket *packet = mapEntry.second;
         //EV_DEBUG << "* packet sent at " << packet->getTimeSent() << ", PMTU probe: " << packet->isDplpmtudProbePacket() << ", packet number larger than largestAcked: " << (packet->getPacketNumber() > largestAckedPacketNumber) << ", size within limits: " << (minSize < packet->getSize() && packet->getSize() <= maxSize) << endl;
         if (packet->getTimeSent() > w) {
@@ -637,7 +675,7 @@ bool ReliabilityManager::reducePacketSize(int minSize, int maxSize) {
         }
         if (packet->isAckEliciting()
                 && !packet->isDplpmtudProbePacket()
-                && packet->getPacketNumber() > largestAckedPacketNumber
+                && packet->getPacketNumber() > largestAckedPacketNumber[pnSpace]
                 && minSize < packet->getSize() && packet->getSize() <= maxSize) {
             return true;
         }

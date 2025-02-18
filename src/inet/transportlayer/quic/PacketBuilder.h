@@ -23,6 +23,7 @@
 #include "packet/QuicPacket.h"
 #include "packet/DplpmtudProbePacket.h"
 #include "dplpmtud/Dplpmtud.h"
+#include "packet/ConnectionId.h"
 
 namespace inet {
 namespace quic {
@@ -32,38 +33,47 @@ class IScheduler;
 
 class PacketBuilder {
 public:
-    PacketBuilder(std::vector<QuicFrame*> *controlQueue, IScheduler *scheduler, ReceivedPacketsAccountant *receivedPacketsAccountant);
+    PacketBuilder(std::vector<QuicFrame*> *controlQueue, IScheduler *scheduler, ReceivedPacketsAccountant *receivedPacketsAccountant[]);
     virtual ~PacketBuilder();
 
     void readParameters(cModule *module);
     QuicPacket *buildPacket(int maxPacketSize, int safePacketSize);
-    QuicPacket *buildAckOnlyPacket(int maxPacketSize);
+    QuicPacket *buildAckOnlyPacket(int maxPacketSize, PacketNumberSpace pnSpace);
     QuicPacket *buildAckElicitingPacket(int maxPacketSize);
     QuicPacket *buildAckElicitingPacket(std::vector<QuicPacket*> *sentPackets, int maxPacketSize, bool skipPacketNumber=false);
     QuicPacket *buildPingPacket();
     QuicPacket *buildDplpmtudProbePacket(int packetSize, Dplpmtud *dplpmtud);
-    QuicPacket *buildInitialPacket();
-    void setConnectionId(uint64_t connectionId) {
-        this->connectionId = connectionId;
+    QuicPacket *buildInitialPacket(int maxPacketSize);
+    void setSrcConnectionId(ConnectionId *connectionId) {
+        this->srcConnectionId = connectionId;
+    }
+    void setDstConnectionId(ConnectionId *connectionId) {
+        this->dstConnectionId = connectionId;
     }
 
 private:
     std::vector<QuicFrame*> *controlQueue;
     IScheduler *scheduler;
-    ReceivedPacketsAccountant *receivedPacketsAccountant;
+    ReceivedPacketsAccountant **receivedPacketsAccountant;
 
-    uint64_t shortPacketNumber;
-    uint64_t connectionId;
+    uint64_t packetNumber[3];
+    ConnectionId *srcConnectionId = nullptr;
+    ConnectionId *dstConnectionId = nullptr;
     bool bundleAckForNonAckElicitingPackets;
     bool skipPacketNumberForDplpmtudProbePackets;
 
-    QuicPacket *createPacket(bool skipPacketNumber=false);
-    Ptr<ShortPacketHeader> createHeader();
+    QuicPacket *createPacket(PacketNumberSpace pnSpace, bool skipPacketNumber);
+    Ptr<InitialPacketHeader> createInitialHeader();
+    Ptr<HandshakePacketHeader> createHandshakeHeader();
+    QuicPacket *createOneRttPacket(bool skipPacketNumber=false);
+    Ptr<ShortPacketHeader> createOneRttHeader();
     QuicPacket *addFramesFromControlQueue(QuicPacket *packet, int maxPacketSize);
     QuicPacket *addFrameToPacket(QuicPacket *packet, QuicFrame *frame, bool skipPacketNumber=false);
     size_t getPacketSize(QuicPacket *packet);
     QuicFrame *createPingFrame();
     QuicFrame *createPaddingFrame(int length = 1);
+    QuicFrame *createCryptoFrame();
+    void fillLongHeader(Ptr<LongPacketHeader> packetHeader);
 };
 
 } /* namespace quic */

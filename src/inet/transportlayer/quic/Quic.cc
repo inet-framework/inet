@@ -24,6 +24,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/ipv4/IcmpHeader_m.h"
 #include "NoResponseException.h"
+#include "packet/ConnectionId.h"
 
 namespace inet {
 namespace quic {
@@ -85,7 +86,7 @@ void Quic::handleTimeout(cMessage *msg)
         connection->processTimeout(msg);
     } catch (NoResponseException& e) {
         EV_WARN << e.what() << endl;
-        connectionIdConnectionMap.erase(connection->getConnectionIds()[0]);
+        connectionIdConnectionMap.erase(connection->getSrcConnectionIds()[0]->getId());
         delete connection;
     }
 }
@@ -189,20 +190,20 @@ AppSocket *Quic::findOrCreateAppSocket(int socketId)
     return appSocket;
 }
 
-Connection *Quic::findConnection(uint64_t connectionId)
+Connection *Quic::findConnection(uint64_t srcConnectionId)
 {
-    EV_DEBUG << "find connection for ID " << connectionId << endl;
-    auto it = connectionIdConnectionMap.find(connectionId);
+    EV_DEBUG << "find connection for ID " << srcConnectionId << endl;
+    auto it = connectionIdConnectionMap.find(srcConnectionId);
     if (it == connectionIdConnectionMap.end()) {
         return nullptr;
     }
     return it->second;
 }
 
-Connection *Quic::findConnectionByDstConnectionId(uint64_t connectionId)
+Connection *Quic::findConnectionByDstConnectionId(uint64_t dstConnectionId)
 {
-    EV_DEBUG << "find connection for DST ID " << connectionId << endl;
-    return findConnection(connectionId); // TODO: Implement way to find a connection by dst conn id
+    EV_DEBUG << "find connection for DST ID " << dstConnectionId << endl;
+    return findConnection(dstConnectionId); // TODO: Implement way to find a connection by dst conn id
 }
 
 UdpSocket *Quic::findUdpSocket(int socketId)
@@ -226,9 +227,9 @@ UdpSocket *Quic::findUdpSocket(L3Address addr, int port)
 
 void Quic::addConnection(Connection *connection)
 {
-    for (uint64_t connectionId : connection->getConnectionIds()) {
-        EV_DEBUG << "add connection for ID " << connectionId << endl;
-        auto result = connectionIdConnectionMap.insert({ connectionId, connection });
+    for (ConnectionId *srcConnectionId : connection->getSrcConnectionIds()) {
+        EV_DEBUG << "add connection for ID " << srcConnectionId->getId() << endl;
+        auto result = connectionIdConnectionMap.insert({ srcConnectionId->getId(), connection });
         if (!result.second) {
             throw cRuntimeError("Cannot insert connection. A connection for the connection id already exists.");
         }

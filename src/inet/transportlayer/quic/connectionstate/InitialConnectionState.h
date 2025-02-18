@@ -19,7 +19,8 @@ public:
         name = "Initial";
     }
 
-    virtual ConnectionState *processInitialPacket(const Ptr<const InitialPacketHeader>& packetHeader, Packet *pkt);
+    virtual ConnectionState *processConnectAppCommand(cMessage *msg) override;
+    virtual ConnectionState *processInitialPacket(const Ptr<const InitialPacketHeader>& packetHeader, Packet *pkt) override;
     //virtual void processAckFrame(const Ptr<const AckFrameHeader>& frameHeader);
     //virtual ConnectionState *processLossDetectionTimeout(cMessage *msg);
     //virtual ConnectionState *processAckDelayTimeout(cMessage *msg);

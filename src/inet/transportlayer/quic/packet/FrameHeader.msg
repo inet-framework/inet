@@ -23,6 +23,7 @@ enum FrameHeaderType {
     FRAME_HEADER_TYPE_PING = 0x01;
     FRAME_HEADER_TYPE_STREAM = 0x0e;
     FRAME_HEADER_TYPE_ACK = 0x02;
+    FRAME_HEADER_TYPE_CRYPTO = 0x06;
     FRAME_HEADER_TYPE_MAX_DATA = 0x10;
     FRAME_HEADER_TYPE_MAX_STREAM_DATA = 0x11;   
     FRAME_HEADER_TYPE_DATA_BLOCKED = 0x14;   
@@ -201,3 +202,28 @@ cplusplus(PaddingFrameHeader) {{
         this->setChunkLength(B(lengthInByte));
     }
 }}
+
+class CryptoFrameHeader extends FrameHeader
+{
+    frameType = FRAME_HEADER_TYPE_CRYPTO;
+    VariableLengthInteger offset;
+    VariableLengthInteger length;
+}
+cplusplus(CryptoFrameHeader) {{
+  public:
+    static const size_t MAX_HEADER_SIZE = 1 + 8 + 8;
+    static const size_t MIN_HEADER_SIZE = 1 + 1 + 1;
+
+    void calcChunkLength() {
+        int64_t len = 1 + offset.getSize() + length.getSize();
+        this->setChunkLength(B(len));
+    }
+    std::string str() const override {
+        std::ostringstream os;
+        os << "CRYPTO[offset=" << offset
+            << ", length=" << length
+            << "]";
+        return os.str();
+    }
+}}
+

@@ -30,12 +30,14 @@ public:
     virtual ~ConnectionState();
 
     virtual ConnectionState *processAppCommand(cMessage *msg);
+    virtual ConnectionState *processConnectAppCommand(cMessage *msg);
     virtual ConnectionState *processSendAppCommand(cMessage *msg);
     virtual ConnectionState *processCloseAppCommand(cMessage *msg);
     virtual ConnectionState *processRecvAppCommand(cMessage *msg);
 
     virtual ConnectionState *processPacket(Packet *msg);
     virtual ConnectionState *processInitialPacket(const Ptr<const InitialPacketHeader>& packetHeader, Packet *pkt);
+    virtual ConnectionState *processHandshakePacket(const Ptr<const HandshakePacketHeader>& packetHeader, Packet *pkt);
     virtual ConnectionState *processOneRttPacket(const Ptr<const OneRttPacketHeader>& packetHeader, Packet *pkt);
 
     virtual void processFrames(Packet *pkt);
