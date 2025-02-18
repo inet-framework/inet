@@ -104,11 +104,14 @@ devices. The following modules introduce two key mechanisms: Best Master Clock
 Algorithm (BMCA) and Hot-Standby redundancy, both of which enhance the reliability 
 of high-precision time synchronization.
 
+To implement the Best Master Clock Algorithm (BMCA),three networks BmcaShowcaseSimple,
+BmcaShowcaseDiamond, and BmcaShowcaseDiamondAsymmetric are implemented, which extend
+TsnNetworkBase.
+
 - :ned:`HotStandby` ensures seamless time synchronization by automatically switching 
   to a standby clock if the primary clock fails
 
-To implement the Best Master Clock Algorithm (BMCA), the :ned:`GptpShowcase` in folder ./showcases/tsn/timesynchronization/gptp_bmca/ contains a showcase for the BMCA algorithm,
-in which three networks BmcaShowcaseSimple, BmcaShowcaseDiamond, and BmcaShowcaseDiamondAsymmetric are implemented. These networks extend TsnNetworkBase.
+
 
 .. _ug:sec:tsn:streamfiltering:
 
