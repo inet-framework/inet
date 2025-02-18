@@ -46,7 +46,7 @@ failure.
 The network contains two clock nodes (:ned:`TsnClock`) and four TSN device nodes (:ned:`TsnDevice`), connected by two TSN switches (:ned:`TsnSwitch`):
 
 .. **TODO** change to media instead of using image directly
-.. figure:: PrimaryAndHotStandbyMasterClocks.png
+.. figure:: media/PrimaryAndHotStandbyNetwork.png
    :align: center
 
 Our goal is to configure the two gPTP spanning trees for the two time domains.
