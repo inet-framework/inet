@@ -107,6 +107,14 @@ of high-precision time synchronization.
 - :ned:`HotStandby` ensures seamless time synchronization by automatically switching 
   to a standby clock if the primary clock fails
 
+To implement the Best Master Clock Algorithm (BMCA), the following parameters are used:
+-  :par:`gptpNodeType` parameter can be set to 'BMCA_NODE'
+-  :par:`bmcaPorts` defines the ports that are used for the BMCA algorithm in tsn devices and tsn switches
+
+And the :ned:`GptpShowcase` in folder ./showcases/tsn/timesynchronization/gptp_bmca/ contains a showcase for the BMCA algorithm,
+in which three networks BmcaShowcaseSimple, BmcaShowcaseDiamond, and BmcaShowcaseDiamondAsymmetric are implemented.
+These networks extend TsnNetworkBase.
+
 .. _ug:sec:tsn:streamfiltering:
 
 Per-stream Filtering and Policing
