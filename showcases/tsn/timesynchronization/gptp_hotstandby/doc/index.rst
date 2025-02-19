@@ -1,5 +1,5 @@
-Using gPTP Hotstandby
-=====================
+gPTP Hotstandby
+===============
 
 Overview
 ~~~~~~~~
@@ -33,7 +33,8 @@ following components:
 The Model
 ---------
 
-In this showcase, we demonstrate the setup and operation of gPTP with HotStandby module.
+In this showcase, we demonstrate the setup and operation of gPTP with HotStandby module:
+
 - **Primary and Hot-Standby Master Clocks**: More complex setup with two time domains for a primary and a hot-standby master clock. If the primary master node goes offline,
   the stand-by clock can take over and become the new Master Clock.
 - **Two Master Clocks Exploiting Network Redundancy**: A larger network containing a primary and a hot-standby master node, with two time domains each. Time synchronization is protected against the failure of a master node and any link in the network.
