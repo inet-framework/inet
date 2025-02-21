@@ -44,17 +44,22 @@ class INET_API ClockBase : public cSimpleModule, public IClock, public StringFor
         return target;
     }
 
+    virtual void scheduleTargetModuleClockEventAt(simtime_t time, ClockEvent *event);
+    virtual void scheduleTargetModuleClockEventAfter(simtime_t time, ClockEvent *event);
+    virtual ClockEvent *cancelTargetModuleClockEvent(ClockEvent *event);
+
     simtime_t computeScheduleTime(clocktime_t time);
 
     void checkClockEvent(const ClockEvent *event) {
-        ASSERT(event->isScheduled());
-        ASSERTCMP(>=, event->getArrivalTime(), simTime());
         // NOTE: IClock interface 3. invariant
         ASSERTCMP(>=, event->getArrivalClockTime(), getClockTime());
-        // NOTE: IClock interface 4. invariant
-        ASSERTCMP(==, event->getArrivalTime(), computeScheduleTime(event->getArrivalClockTime()));
-        // NOTE: IClock interface 5. invariant
-        ASSERTCMP(==, event->getArrivalClockTime(), computeClockTimeFromSimTime(event->getArrivalTime()));
+        if (event->isScheduled()) {
+            ASSERTCMP(>=, event->getArrivalTime(), simTime());
+            // NOTE: IClock interface 4. invariant
+            ASSERTCMP(==, event->getArrivalTime(), computeScheduleTime(event->getArrivalClockTime()));
+            // NOTE: IClock interface 5. invariant
+            ASSERTCMP(==, event->getArrivalClockTime(), computeClockTimeFromSimTime(event->getArrivalTime()));
+        }
     }
 
   public:

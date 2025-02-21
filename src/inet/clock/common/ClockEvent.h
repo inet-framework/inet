@@ -13,11 +13,13 @@
 namespace inet {
 
 class ClockBase;
+class OscillatorBasedClock;
 class SettableClock;
 
 class INET_API ClockEvent : public ClockEvent_Base
 {
   friend ClockBase;
+  friend OscillatorBasedClock;
   friend SettableClock;
 
   protected:

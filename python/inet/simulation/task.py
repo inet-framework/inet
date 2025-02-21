@@ -20,6 +20,7 @@ from inet.simulation.build import *
 from inet.simulation.config import *
 from inet.simulation.project import *
 from inet.simulation.subprocess import *
+from inet.simulation.iderunner import *
 
 _logger = logging.getLogger(__name__)
 
@@ -74,9 +75,25 @@ class SimulationTaskResult(TaskResult):
             self.last_event_number = int(match.group(2)) if match else None
             self.last_simulation_time = match.group(1) if match else None
             self.elapsed_cpu_time = None # TODO
-            match = re.search(r"<!> Error: (.*) -- in module (.*)", stderr)
-            self.error_message = match.group(1).strip() if match else None
-            self.error_module = match.group(2).strip() if match else None
+            regex = r"<!> Error: (.*) -- in module \((.*?)\) (.*?) \(.*?\), at t=(.*?)s, event #(.*)"
+            match = re.search(regex, stderr)
+            if match:
+                self.error_message = match.group(1)
+                self.error_module = "(" + match.group(2) + ") " + match.group(3)
+                self.error_simulation_time = match.group(4)
+                self.error_event_number = int(match.group(5))
+            else:
+                match = re.search(regex, stdout)
+                if match:
+                    self.error_message = match.group(1)
+                    self.error_module = "(" + match.group(2) + ") " + match.group(3)
+                    self.error_simulation_time = match.group(4)
+                    self.error_event_number = int(match.group(5))
+                else:
+                    self.error_message = None
+                    self.error_module = None
+                    self.error_simulation_time = None
+                    self.error_event_number = None
             matching_lines = [re.sub(r"instantiated NED type: (.*)", "\\1", line) for line in stdout.split("\n") if re.search(r"inet\.", line)]
             self.used_types = sorted(list(set(matching_lines)))
             if self.error_message is None:
@@ -262,7 +279,7 @@ class SimulationTask(Task):
         """
         return super().run(**kwargs)
 
-    def run_protected(self, prepend_args=[], append_args=[],  simulation_runner="subprocess", simulation_runner_class=None, **kwargs):
+    def run_protected(self, prepend_args=[], append_args=[],  simulation_runner=None, simulation_runner_class=None, debug=False, **kwargs):
         simulation_project = self.simulation_config.simulation_project
         working_directory = self.simulation_config.working_directory
         ini_file = self.simulation_config.ini_file
@@ -272,6 +289,7 @@ class SimulationTask(Task):
         cpu_time_limit_args = ["--cpu-time-limit", self.get_cpu_time_limit()] if self.cpu_time_limit else []
         record_eventlog_args = ["--record-eventlog", "true"] if self.record_eventlog else []
         record_pcap_args = ["--**.numPcapRecorders=1", "--**.crcMode=\"computed\"", "--**.fcsMode=\"computed\""] if self.record_pcap else []
+        simulation_runner = "ide" if debug else "subprocess"
         executable = simulation_project.get_executable(mode=self.mode)
         default_args = simulation_project.get_default_args()
         args = [*prepend_args, executable, *default_args, "-s", "-u", self.user_interface, "-f", ini_file, "-c", config, "-r", str(self.run_number), *result_folder_args, *sim_time_limit_args, *cpu_time_limit_args, *record_eventlog_args, *record_pcap_args, *append_args]
@@ -282,6 +300,8 @@ class SimulationTask(Task):
             elif simulation_runner == "inprocess":
                 import inet.cffi
                 simulation_runner_class = inet.cffi.InprocessSimulationRunner
+            elif simulation_runner == "ide":
+                simulation_runner_class = IdeSimulationRunner
             else:
                 raise Exception("Unknown simulation_runner")
         subprocess_result = simulation_runner_class().run(self, args)
@@ -384,7 +404,7 @@ class MultipleSimulationTasks(MultipleTasks):
             build_project(**dict(kwargs, simulation_project=self.simulation_project, mode=self.mode))
         return super().run_protected(**kwargs)
 
-def get_simulation_tasks(simulation_project=None, simulation_configs=None, mode="release", run_number=None, run_number_filter=None, exclude_run_number_filter=None, sim_time_limit=None, cpu_time_limit=None, concurrent=True, expected_num_tasks=None, simulation_task_class=SimulationTask, multiple_simulation_tasks_class=MultipleSimulationTasks, **kwargs):
+def get_simulation_tasks(simulation_project=None, simulation_configs=None, mode=None, debug=False, run_number=None, run_number_filter=None, exclude_run_number_filter=None, sim_time_limit=None, cpu_time_limit=None, concurrent=True, expected_num_tasks=None, simulation_task_class=SimulationTask, multiple_simulation_tasks_class=MultipleSimulationTasks, **kwargs):
     """
     Returns multiple simulation tasks matching the filter criteria. The returned tasks can be run by calling the
     :py:meth:`run <inet.common.task.MultipleTasks.run>` method.
@@ -442,6 +462,8 @@ def get_simulation_tasks(simulation_project=None, simulation_configs=None, mode=
         An object that contains a list of :py:class:`SimulationTask` matching the filter criteria. Each simulation task
         describes a simulation that can be run (and re-run) without providing additional parameters.
     """
+    if mode is None:
+        mode = "debug" if debug else "release"
     if simulation_project is None:
         simulation_project = get_default_simulation_project()
     if simulation_configs is None:

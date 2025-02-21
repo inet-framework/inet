@@ -11,9 +11,9 @@
 #include "inet/clock/contract/ClockEvent.h"
 #include "inet/clock/contract/ClockTime.h"
 
-#define SKIP_STDOUT
+//#define CLOCK_LOG_IMPELEMENTATION
 
-#ifdef SKIP_STDOUT
+#ifndef CLOCK_LOG_IMPELEMENTATION
   #include <sstream>
   #define STDCOUT devnull
 #else
@@ -22,7 +22,13 @@
   #define STDCOUT !stdcoutenabled ? devnull : std::cout << std::setprecision(24) << std::string(stdcoutindent * 3, ' ')
 #endif
 
+#define CLOCK_CHECK_IMPLEMENTATION
+
+#ifdef CLOCK_CHECK_IMPLEMENTATION
 #define ASSERTCMP(cmp, o1, o2) { StdCoutDisabledBlock b; auto _o1 = (o1); auto _o2 = (o2); if (!(_o1 cmp _o2)) std::cout << "*** Assertion: " << #o1 << " " << #cmp << " " << #o2 << " as " << _o1 << " " << #cmp << " " << _o2 << " fails." << std::endl; ASSERT(o1 cmp o2); }
+#else
+#define ASSERTCMP(cmp, o1, o2)
+#endif
 
 namespace inet {
 

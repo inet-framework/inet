@@ -30,7 +30,7 @@ class OppTestTask(TestTask):
     def get_parameters_string(self, **kwargs):
         return self.test_file_name
 
-    def run_protected(self, **kwargs):
+    def run_protected(self, debug=False, **kwargs):
         binary_suffix = "_dbg" if self.mode == "debug" else ""
         test_binary_name = re.sub(r"\.test", "", self.test_file_name)
         test_directory = os.path.join(self.working_directory, f"work/{test_binary_name}")
@@ -48,7 +48,8 @@ class OppTestTask(TestTask):
         subprocess_result = run_command_with_logging(args, cwd=test_directory, env=self.simulation_project.get_env())
         if subprocess_result.returncode != 0:
             return self.task_result_class(self, result="ERROR", stderr=subprocess_result.stderr)
-        args = ["opp_test", "run", "-v", "-p", f"{test_binary_name}/{test_binary_name}{binary_suffix}", self.test_file_name, "-a", "--check-signals=false", "-lINET", "-n", f"../../../../src:.:{'../../lib' if has_lib else ''}"]
+        simulation_runner = "ide" if debug else "subprocess"
+        args = ["opp_test", "run", "-v", "-d", "-p", f"{test_binary_name}/{test_binary_name}{binary_suffix}", self.test_file_name, "-a", "--check-signals=false", *debug_args, "-lINET", "-n", f"../../../../src:.:{'../../lib' if has_lib else ''}"]
         subprocess_result = run_command_with_logging(args, cwd=self.working_directory, env=self.simulation_project.get_env())
         stdout = subprocess_result.stdout
         stderr = subprocess_result.stderr
