@@ -157,8 +157,7 @@ The spanning tree is visualized as the datalink-layer gPTP message
 transmissions. This outlines the flow of timing information in the network,
 originating from the master clock:
 
-.. **TODO** add PrimaryAndHotStandbyMasterClocks_tree.png here
-.. figure::
+.. figure:: media/PrimaryAndHotStandbyMasterClocks_tree.png
    :align: center
 
 Let's examine some clock drift charts. Instead of plotting clock drift for all
@@ -166,8 +165,7 @@ clocks in one chart, let's use three charts so they are less cluttered. Here is
 the clock drift (clock time difference to simulation time) of the two `master
 clocks`:
 
-.. **TODO** add PrimaryAndHotStandBy_masterclocks.png
-.. figure::
+.. figure:: media/PrimaryAndHotStandBy_masterclocks.png
    :align: center
 
 Both master clocks have a random drift rate, but the hot-standby master clock's
@@ -175,8 +173,7 @@ time and clock drift rate are periodically synchronized to the primary.
 
 Here is the clock drift of all clocks in `time domain 0` (primary master):
 
-.. **TODO** add PrimaryAndHotStandBy_timedomain0_zoomed.png
-.. figure::
+.. figure:: media/PrimaryAndHotStandBy_timedomain0.png
    :align: center
 
 Each slave clock has a distinct but constant drift rate, while the master
@@ -192,8 +189,7 @@ same drift rate.
 
 Let's see the clock drift for all clocks in `time domain 1` (hot-standby master):
 
-.. **TODO** add PrimaryAndHotStandBy_timedomain1_zoomed.png
-.. figure:: media/
+.. figure:: media/PrimaryAndHotStandBy_timedomain1.png
    :align: center
 
 The clocks have different drift rates, and they are periodically synchronized to
@@ -350,9 +346,4 @@ It supports creating a failure scenario with the following command:
 
 The above command disables the channel between the primary master clock and the switch at 3.1 seconds and re-enables
 it at 7.1 seconds, simulating a failure and recovery scenario.
-
-Discussion
-----------
-
-Use `this <https://github.com/inet-framework/inet/discussions/798>`__ page in the GitHub issue tracker for commenting on this showcase.
 
