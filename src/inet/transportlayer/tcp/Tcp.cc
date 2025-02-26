@@ -148,6 +148,22 @@ void Tcp::handleLowerPacket(Packet *packet)
         // must be a TcpHeader
         auto tcpHeader = packet->peekAtFront<TcpHeader>();
 
+#if 0
+        {
+            //cParsimCommunications c;
+            cCommBuffer *b = check_and_cast<cCommBuffer *>(createOne("omnetpp::cMemCommBuffer"));
+            tcpHeader.get()->parsimPack(b);
+            auto h = makeShared<TcpHeader>();
+            h->parsimUnpack(b);
+            ASSERT(h->getChunkLength() == tcpHeader->getChunkLength());
+            ASSERT(h->getHeaderOptionArrayLength() == tcpHeader->getHeaderOptionArrayLength());
+            MemoryOutputStream s1, s2;
+            Chunk::serialize(s1, tcpHeader);
+            Chunk::serialize(s2, h);
+            ASSERT(s1.getData() == s2.getData());
+        }
+#endif
+
         // get src/dest addresses
         L3Address srcAddr, destAddr;
         srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress();
