@@ -39,7 +39,7 @@ def run_repl_main():
             _logger.info("OMNeT++ Python support is loaded.")
             app = IPython.terminal.ipapp.TerminalIPythonApp.instance()
             app.display_banner = False
-            app.exec_lines = ["from inet import *", "enable_autoreload()"]
+            app.exec_lines = ["from inet import *", "enable_autoreload()", "register_key_bindings()"]
             app.initialize(argv=[])
             app.start()
     except KeyboardInterrupt:

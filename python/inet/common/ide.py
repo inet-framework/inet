@@ -1,3 +1,4 @@
+import IPython
 import logging
 import os
 
@@ -41,3 +42,12 @@ def goto_event_number(editor, event_number):
     event = eventlog.getEventForEventNumber(event_number)
     wrapped_sequence_chart = org.omnetpp.remoting.py4j.DisplayThreadInvocationHandler.wrap(sequence_chart)
     wrapped_sequence_chart.gotoElement(event)
+
+def register_key_bindings():
+    ip = IPython.get_ipython()
+    @ip.pt_app.key_bindings.add('c-t')
+    def _(event):
+        get_org_package().omnetpp.python.Activator.executeActivateEditorAction()
+    @ip.pt_app.key_bindings.add('c-n')
+    def _(event):
+        get_org_package().omnetpp.python.Activator.executeToggleMaximizeViewAction()
