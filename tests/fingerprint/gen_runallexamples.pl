@@ -24,16 +24,11 @@ foreach $i ( @the_skiplist )
 #print "-",join("-\n-",keys(%skiplist)),"-\n";
 #die();
 
-$DN = `dirname $0`;
-chomp $DN;
-#print "DN='$DN'\n";
+$PROJECT_ROOT=$ENV{'INET_ROOT'};
+chomp $PROJECT_ROOT;
+#print "INETROOT='$PROJECT_ROOT'\n";
 
-chdir "$DN/../..";
-
-$INETROOT=`pwd`;
-chomp $INETROOT;
-#print "INETROOT='$INETROOT'\n";
-
+chdir "$PROJECT_ROOT";
 
 @inifiles = sort `find examples -name '*.ini'`;
 
