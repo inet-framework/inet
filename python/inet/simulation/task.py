@@ -20,6 +20,7 @@ from inet.simulation.build import *
 from inet.simulation.config import *
 from inet.simulation.project import *
 from inet.simulation.subprocess import *
+from inet.simulation.iderunner import *
 
 _logger = logging.getLogger(__name__)
 
@@ -295,7 +296,7 @@ class SimulationTask(Task):
         """
         return super().run(**kwargs)
 
-    def run_protected(self, prepend_args=[], append_args=[],  simulation_runner="subprocess", simulation_runner_class=None, **kwargs):
+    def run_protected(self, prepend_args=[], append_args=[],  simulation_runner=None, simulation_runner_class=None, **kwargs):
         simulation_project = self.simulation_config.simulation_project
         working_directory = self.simulation_config.working_directory
         ini_file = self.simulation_config.ini_file
@@ -309,12 +310,16 @@ class SimulationTask(Task):
         default_args = simulation_project.get_default_args()
         args = [*prepend_args, executable, *default_args, "-s", "-u", self.user_interface, "-f", ini_file, "-c", config, "-r", str(self.run_number), *result_folder_args, *sim_time_limit_args, *cpu_time_limit_args, *record_eventlog_args, *record_pcap_args, *append_args]
         expected_result = self.get_expected_result()
+        if simulation_runner is None:
+            simulation_runner = "ide" if self.debug else "subprocess"
         if simulation_runner_class is None:
             if simulation_runner == "subprocess":
                 simulation_runner_class = SubprocessSimulationRunner
             elif simulation_runner == "inprocess":
                 import inet.cffi
                 simulation_runner_class = inet.cffi.InprocessSimulationRunner
+            elif simulation_runner == "ide":
+                simulation_runner_class = IdeSimulationRunner
             else:
                 raise Exception("Unknown simulation_runner")
         subprocess_result = simulation_runner_class().run(self, args)
