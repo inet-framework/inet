@@ -1,3 +1,4 @@
+
 """
 This module provides functionality for running multiple tests using the :command:`opp_test` command.
 
@@ -7,17 +8,40 @@ filter criteria.
 
 import builtins
 import glob
+import io
 import logging
 import signal
 import subprocess
+import types
+
+from omnetpp.opp_test import *
 
 from inet.simulation.project import *
 from inet.test.task import *
 
 _logger = logging.getLogger(__name__)
 
+class IdeOppTest(OppTest):
+    def __init__(self, remove_launch=True, **kwargs):
+        super().__init__(**kwargs)
+        self.print_stream = io.StringIO()
+        self.remove_launch = remove_launch
+
+    def lprint(self, level, *args, **kwargs):
+        if level <= self.args.verbose:
+            print(*args, **kwargs, file=self.print_stream)
+
+    def exec_program(self, cmd, wdir, outfile, errfile):
+        args = list(filter(None, cmd.split(' ')))
+        program = os.path.join(wdir, args[0])
+        name = os.path.basename(program)
+        args = args[1:]
+        self.subprocess_result = debug_program(name, program, args, wdir, remove_launch=self.remove_launch)
+        self.lprint(1, self.subprocess_result.stdout)
+        return self.subprocess_result.returncode
+
 class OppTestTask(TestTask):
-    def __init__(self, simulation_project, working_directory, test_file_name, mode="debug", **kwargs):
+    def __init__(self, simulation_project, working_directory, test_file_name, mode="debug", debug=False, remove_launch=True, **kwargs):
         super().__init__(**kwargs)
         self.locals = locals()
         self.locals.pop("self")
@@ -26,12 +50,15 @@ class OppTestTask(TestTask):
         self.working_directory = working_directory
         self.test_file_name = test_file_name
         self.mode = mode
+        self.debug = debug
+        self.remove_launch = remove_launch
 
     def get_parameters_string(self, **kwargs):
         return self.test_file_name
 
     def run_protected(self, **kwargs):
         binary_suffix = "_dbg" if self.mode == "debug" else ""
+        test_file_name = os.path.join(self.working_directory, self.test_file_name)
         test_binary_name = re.sub(r"\.test", "", self.test_file_name)
         test_directory = os.path.join(self.working_directory, f"work/{test_binary_name}")
         has_lib = os.path.exists(os.path.join(self.working_directory, "lib"))
@@ -48,9 +75,22 @@ class OppTestTask(TestTask):
         subprocess_result = run_command_with_logging(args, cwd=test_directory, env=self.simulation_project.get_env())
         if subprocess_result.returncode != 0:
             return self.task_result_class(self, result="ERROR", stderr=subprocess_result.stderr)
-        args = ["opp_test", "run", "-v", "-p", f"{test_binary_name}/{test_binary_name}{binary_suffix}", self.test_file_name, "-a", "--check-signals=false", "-lINET", "-n", f"../../../../src:.:{'../../lib' if has_lib else ''}"]
-        subprocess_result = run_command_with_logging(args, cwd=self.working_directory, env=self.simulation_project.get_env())
-        stdout = subprocess_result.stdout
+        test_program = f"{test_binary_name}/{test_binary_name}{binary_suffix}"
+        simulation_args = ["--check-signals=false", "-lINET", "-n", f"../../../../src:.:{'../../lib' if has_lib else ''}"]
+        if not self.debug:
+            args = ["opp_test", "run", "-v", "-p", test_program, self.test_file_name, "-a", *simulation_args]
+            subprocess_result = run_command_with_logging(args, cwd=self.working_directory, env=self.simulation_project.get_env())
+            stdout = subprocess_result.stdout
+        else:
+            ide_opp_test = IdeOppTest(remove_launch=self.remove_launch)
+            ide_opp_test.args = types.SimpleNamespace(verbose=True, workdir=os.path.join(self.working_directory, "work"), mode="run", testprogram=test_program, extraargs=" ".join(simulation_args), filenames=[test_file_name])
+            ide_opp_test.saveOriginalEnv()
+            ide_opp_test.parse_testfile(test_file_name)
+            ide_opp_test.run_tests()
+            ide_opp_test.restoreOriginalEnv()
+            subprocess_result = ide_opp_test.subprocess_result
+            stdout = ide_opp_test.print_stream.getvalue()
+            stdout = re.sub(r'\x1b\[[0-9;]*[mGKH]', '', stdout)
         stderr = subprocess_result.stderr
         match = re.search(r"Aggregate result: (\w+)", stdout)
         if match:
