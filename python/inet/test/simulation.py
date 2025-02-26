@@ -99,12 +99,12 @@ class SimulationTestTask(TestTask):
         return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result=result, expected_result=expected_result, reason=simulation_task_result.reason)
 
 class MultipleSimulationTestTasks(MultipleTestTasks):
-    def __init__(self, build=True, mode="debug", simulation_project=None, **kwargs):
-        super().__init__(build=build, simulation_project=simulation_project, **kwargs)
+    def __init__(self, build=None, mode="debug", simulation_project=None, **kwargs):
+        super().__init__(build=build or get_default_build_argument(), simulation_project=simulation_project, **kwargs)
         self.locals = locals()
         self.locals.pop("self")
         self.kwargs = kwargs
-        self.build = build
+        self.build = build or get_default_build_argument()
         self.mode = mode
         self.simulation_project = simulation_project
 

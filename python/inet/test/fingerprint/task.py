@@ -488,11 +488,11 @@ class MultipleFingerprintUpdateTasks(MultipleSimulationUpdateTasks):
         self.kwargs = kwargs
         self.multiple_simulation_tasks = multiple_simulation_tasks
 
-    def run(self, simulation_project=None, concurrent=None, build=True, **kwargs):
+    def run(self, simulation_project=None, concurrent=None, build=None, **kwargs):
         if concurrent is None:
             concurrent = self.multiple_simulation_tasks.concurrent
         simulation_project = simulation_project or self.multiple_simulation_tasks.simulation_project
-        if build:
+        if build or get_default_build_argument():
             build_project(simulation_project=simulation_project, **kwargs)
         multiple_fingerprint_update_results = super().run(**kwargs)
         correct_fingerprint_store = get_correct_fingerprint_store(simulation_project)

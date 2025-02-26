@@ -343,7 +343,7 @@ class MultipleSimulationTasks(MultipleTasks):
     """
     Represents multiple simulation tasks that can be run together.
     """
-    def __init__(self, simulation_project=None, mode="release", build=True, name="simulation", **kwargs):
+    def __init__(self, simulation_project=None, mode="release", build=None, name="simulation", **kwargs):
         """
         Initializes a new multiple simulation tasks object.
 
@@ -357,12 +357,12 @@ class MultipleSimulationTasks(MultipleTasks):
             kwargs (dict):
                 Additional arguments are inherited from :py:class:`MultipleTasks <inet.common.task.MultipleTasks>` constructor.
         """
-        super().__init__(build=build, name=name, **kwargs)
+        super().__init__(build=build or get_default_build_argument(), name=name, **kwargs)
         self.locals = locals()
         self.locals.pop("self")
         self.kwargs = kwargs
         self.mode = mode
-        self.build = build
+        self.build = build or get_default_build_argument()
         self.simulation_project = simulation_project
 
     def run(self, **kwargs):
