@@ -131,7 +131,7 @@ class SimulationTask(Task):
     Please note that undocumented features are not supposed to be called by the user.
     """
 
-    def __init__(self, simulation_config=None, run_number=0, itervars=None, mode="release", debug=None, break_at_event_number=None, break_at_matching_event=None, user_interface=None, result_folder="results", sim_time_limit=None, cpu_time_limit=None, record_eventlog=None, record_pcap=None, name="simulation", task_result_class=SimulationTaskResult, **kwargs):
+    def __init__(self, simulation_config=None, run_number=0, itervars=None, mode="release", debug=None, remove_launch=True, break_at_event_number=None, break_at_matching_event=None, user_interface=None, result_folder="results", sim_time_limit=None, cpu_time_limit=None, record_eventlog=None, record_pcap=None, name="simulation", task_result_class=SimulationTaskResult, **kwargs):
         """
         Parameters:
             simulation_config (:py:class:`SimulationConfig <inet.simulation.config.SimulationConfig>`):
@@ -148,6 +148,9 @@ class SimulationTask(Task):
 
             debug (bool):
                 Specifies that the IDE debugger should be attached to the running simulation.
+
+            remove_launch (bool):
+                Specifies if the IDE should remove the launch after the simulation terminates.
 
             break_at_event_number (int):
                 Specifies an event number at which a breakpoint is to be set.
@@ -190,6 +193,7 @@ class SimulationTask(Task):
         self.itervars = itervars
         self.mode = mode
         self.debug = debug or (True if break_at_event_number is not None or break_at_matching_event is not None else False)
+        self.remove_launch = remove_launch
         self.break_at_event_number = break_at_event_number
         self.break_at_matching_event = break_at_matching_event
         self.user_interface = user_interface or ("Dbgenv" if debug else "Cmdenv")
