@@ -30,7 +30,7 @@ chomp $PROJECT_ROOT;
 
 chdir "$PROJECT_ROOT";
 
-@inifiles = sort `find examples -name '*.ini'`;
+@inifiles = sort `find examples -name '*.ini' -type f`;
 
 die("Not found ini files\n") if ($#inifiles lt 0);
 
