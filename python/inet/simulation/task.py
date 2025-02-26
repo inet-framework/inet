@@ -74,9 +74,25 @@ class SimulationTaskResult(TaskResult):
             self.last_event_number = int(match.group(2)) if match else None
             self.last_simulation_time = match.group(1) if match else None
             self.elapsed_cpu_time = None # TODO
-            match = re.search(r"<!> Error: (.*) -- in module (.*)", stderr)
-            self.error_message = match.group(1).strip() if match else None
-            self.error_module = match.group(2).strip() if match else None
+            regex = r"<!> Error: (.*) -- in module \((.*?)\) (.*?) \(.*?\), at t=(.*?)s, event #(.*)"
+            match = re.search(regex, stderr)
+            if match:
+                self.error_message = match.group(1)
+                self.error_module = "(" + match.group(2) + ") " + match.group(3)
+                self.error_simulation_time = match.group(4)
+                self.error_event_number = int(match.group(5))
+            else:
+                match = re.search(regex, stdout)
+                if match:
+                    self.error_message = match.group(1)
+                    self.error_module = "(" + match.group(2) + ") " + match.group(3)
+                    self.error_simulation_time = match.group(4)
+                    self.error_event_number = int(match.group(5))
+                else:
+                    self.error_message = None
+                    self.error_module = None
+                    self.error_simulation_time = None
+                    self.error_event_number = None
             matching_lines = [re.sub(r"instantiated NED type: (.*)", "\\1", line) for line in stdout.split("\n") if re.search(r"inet\.", line)]
             self.used_types = sorted(list(set(matching_lines)))
             if self.error_message is None:
@@ -100,9 +116,10 @@ class SimulationTaskResult(TaskResult):
             self.error_module = None
 
     def get_error_message(self, complete_error_message=True, **kwargs):
-        error_message = self.error_message or "<Error message not found>"
-        error_module = self.error_module or "<Error module not found>"
-        return error_message + " -- in module " + error_module if complete_error_message else error_message
+        if complete_error_message and self.error_module and self.error_message:
+            return self.error_message + " -- in module " + self.error_module
+        else:
+            return self.error_message or ""
 
     def get_subprocess_result(self):
         return self.subprocess_result
