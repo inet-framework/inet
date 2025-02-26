@@ -120,6 +120,16 @@ def set_logging_levels(log_level, external_command_log_level="WARN"):
     logging.getLogger("opp_run_profile").setLevel(external_command_log_level)
     logging.getLogger("opp_test").setLevel(external_command_log_level)
 
+_default_build_argument = True
+
+def get_default_build_argument():
+    global _default_build_argument
+    return _default_build_argument
+
+def set_default_build_argument(value):
+    global _default_build_argument
+    _default_build_argument = value
+
 def get_omnetpp_relative_path(path):
     return os.path.abspath(os.path.join(os.environ["__omnetpp_root_dir"], path)) if "__omnetpp_root_dir" in os.environ else None
 
