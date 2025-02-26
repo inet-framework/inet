@@ -45,6 +45,16 @@ def goto_event_number(editor, event_number):
     wrapped_sequence_chart = org.omnetpp.python.DisplayThreadInvocationHandler.wrap(sequence_chart)
     wrapped_sequence_chart.gotoElement(event)
 
+def launch_program(name, program, args, working_directory, remove_launch=True):
+    org = get_org_package()
+    launch_configuration = org.omnetpp.dsp.DSPUtils.createLaunchConfiguration(name, program, args, working_directory)
+    return org.omnetpp.dsp.DSPUtils.runConfiguration(launch_configuration, remove_launch)
+
+def debug_program(name, program, args, working_directory, remove_launch=True, debugger_init_commands=[]):
+    org = get_org_package()
+    launch_configuration = org.omnetpp.dsp.DSPUtils.createDebugConfiguration(name, program, args, working_directory, debugger_init_commands)
+    return org.omnetpp.dsp.DSPUtils.debugConfiguration(launch_configuration, remove_launch)
+
 def register_key_bindings():
     ip = IPython.get_ipython()
     @ip.pt_app.key_bindings.add('c-t')
