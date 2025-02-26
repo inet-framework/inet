@@ -131,7 +131,7 @@ class SimulationTask(Task):
     Please note that undocumented features are not supposed to be called by the user.
     """
 
-    def __init__(self, simulation_config=None, run_number=0, itervars=None, mode="release", user_interface="Cmdenv", result_folder="results", sim_time_limit=None, cpu_time_limit=None, record_eventlog=None, record_pcap=None, name="simulation", task_result_class=SimulationTaskResult, **kwargs):
+    def __init__(self, simulation_config=None, run_number=0, itervars=None, mode="release", debug=None, break_at_event_number=None, break_at_matching_event=None, user_interface=None, result_folder="results", sim_time_limit=None, cpu_time_limit=None, record_eventlog=None, record_pcap=None, name="simulation", task_result_class=SimulationTaskResult, **kwargs):
         """
         Parameters:
             simulation_config (:py:class:`SimulationConfig <inet.simulation.config.SimulationConfig>`):
@@ -145,6 +145,15 @@ class SimulationTask(Task):
 
             mode (string):
                 The build mode that is used to run this simulation task. Valid values are "release", "debug", and "sanitize".
+
+            debug (bool):
+                Specifies that the IDE debugger should be attached to the running simulation.
+
+            break_at_event_number (int):
+                Specifies an event number at which a breakpoint is to be set.
+
+            break_at_matching_event (string):
+                Specifies a C++ expression at which a breakpoint is to be set.
 
             user_interface (string):
                 The user interface that is used to run this simulation task. Valid values are "Cmdenv", and "Qtenv".
@@ -180,7 +189,10 @@ class SimulationTask(Task):
         self.run_number = run_number
         self.itervars = itervars
         self.mode = mode
-        self.user_interface = user_interface
+        self.debug = debug or (True if break_at_event_number is not None or break_at_matching_event is not None else False)
+        self.break_at_event_number = break_at_event_number
+        self.break_at_matching_event = break_at_matching_event
+        self.user_interface = user_interface or ("Dbgenv" if debug else "Cmdenv")
         self.result_folder = result_folder
         self.sim_time_limit = sim_time_limit
         self.cpu_time_limit = cpu_time_limit
@@ -401,7 +413,7 @@ class MultipleSimulationTasks(MultipleTasks):
             build_project(**dict(kwargs, simulation_project=self.simulation_project, mode=self.mode))
         return super().run_protected(**kwargs)
 
-def get_simulation_tasks(simulation_project=None, simulation_configs=None, mode="release", run_number=None, run_number_filter=None, exclude_run_number_filter=None, sim_time_limit=None, cpu_time_limit=None, concurrent=True, expected_num_tasks=None, simulation_task_class=SimulationTask, multiple_simulation_tasks_class=MultipleSimulationTasks, **kwargs):
+def get_simulation_tasks(simulation_project=None, simulation_configs=None, mode=None, debug=None, break_at_event_number=None, break_at_matching_event=None, run_number=None, run_number_filter=None, exclude_run_number_filter=None, sim_time_limit=None, cpu_time_limit=None, concurrent=True, expected_num_tasks=None, simulation_task_class=SimulationTask, multiple_simulation_tasks_class=MultipleSimulationTasks, **kwargs):
     """
     Returns multiple simulation tasks matching the filter criteria. The returned tasks can be run by calling the
     :py:meth:`run <inet.common.task.MultipleTasks.run>` method.
@@ -418,6 +430,15 @@ def get_simulation_tasks(simulation_project=None, simulation_configs=None, mode=
         mode (string):
             Determines the build mode for the simulation project before running any of the returned simulation tasks.
             Valid values are "debug" and "release".
+
+        debug (bool):
+            Specifies that the IDE debugger should be attached to the running simulation.
+
+        break_at_event_number (int):
+            Specifies an event number at which a breakpoint is to be set.
+
+        break_at_matching_event (string):
+            Specifies a C++ expression at which a breakpoint is to be set.
 
         run_number (int or None):
             The simulation run number of all returned simulation tasks. If not specified, then this filter criteria is
@@ -459,6 +480,10 @@ def get_simulation_tasks(simulation_project=None, simulation_configs=None, mode=
         An object that contains a list of :py:class:`SimulationTask` matching the filter criteria. Each simulation task
         describes a simulation that can be run (and re-run) without providing additional parameters.
     """
+    if debug is None:
+        debug = True if break_at_event_number or break_at_matching_event else False
+    if mode is None:
+        mode = "debug" if debug else "release"
     if simulation_project is None:
         simulation_project = get_default_simulation_project()
     if simulation_configs is None:
@@ -467,13 +492,13 @@ def get_simulation_tasks(simulation_project=None, simulation_configs=None, mode=
     for simulation_config in simulation_configs:
         if run_number is not None:
             simulation_run_sim_time_limit = sim_time_limit(simulation_config, run_number) if callable(sim_time_limit) else sim_time_limit
-            simulation_task = simulation_task_class(simulation_config=simulation_config, run_number=run_number, mode=mode, sim_time_limit=simulation_run_sim_time_limit, cpu_time_limit=cpu_time_limit, **kwargs)
+            simulation_task = simulation_task_class(simulation_config=simulation_config, run_number=run_number, mode=mode, debug=debug, break_at_event_number=break_at_event_number, break_at_matching_event=break_at_matching_event, sim_time_limit=simulation_run_sim_time_limit, cpu_time_limit=cpu_time_limit, **kwargs)
             simulation_tasks.append(simulation_task)
         else:
             for generated_run_number in range(0, simulation_config.num_runs):
                 if matches_filter(str(generated_run_number), run_number_filter, exclude_run_number_filter, True):
                     simulation_run_sim_time_limit = sim_time_limit(simulation_config, generated_run_number) if callable(sim_time_limit) else sim_time_limit
-                    simulation_task = simulation_task_class(simulation_config=simulation_config, run_number=generated_run_number, mode=mode, sim_time_limit=simulation_run_sim_time_limit, cpu_time_limit=cpu_time_limit, **kwargs)
+                    simulation_task = simulation_task_class(simulation_config=simulation_config, run_number=generated_run_number, mode=mode, debug=debug, break_at_event_number=break_at_event_number, break_at_matching_event=break_at_matching_event, sim_time_limit=simulation_run_sim_time_limit, cpu_time_limit=cpu_time_limit, **kwargs)
                     simulation_tasks.append(simulation_task)
     if expected_num_tasks is not None and len(simulation_tasks) != expected_num_tasks:
         raise Exception("Number of found and expected simulation tasks mismatch")
