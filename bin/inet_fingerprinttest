@@ -44,6 +44,7 @@ writeOutfile = True
 useColors = sys.stdout.isatty()
 
 defaultFingerprintCalculator = 'inet::FingerprintCalculator'
+defaultExecutable = "inet"
 
 txtPASS = "PASS"
 txtPASS_unexpected = "PASS (unexpected)"
@@ -798,7 +799,7 @@ if __name__ == "__main__":
     parser.add_argument('-x', '--exclude', action='append', metavar='regex', help='Negative line filter: a line (more precisely, workingdir+SPACE+args) must NOT match any of the regular expressions in order for that test case to be run')
     parser.add_argument('-t', '--threads', type=int, default=defaultNumThreads, help='number of parallel threads (default: number of CPUs, currently '+str(defaultNumThreads)+')')
     parser.add_argument('-r', '--repeat', type=int, default=1, help='number of repeating each test (default: 1)')
-    parser.add_argument('-e', '--executable', default='inet', help='Determines which binary to execute (e.g. opp_run_dbg, opp_run_release) if the command column in the CSV file does not specify one.')
+    parser.add_argument('-e', '--executable', default=defaultExecutable, help='Determines which binary to execute (e.g. opp_run_dbg, opp_run_release) if the command column in the CSV file does not specify one.')
     parser.add_argument('-C', '--directory', help='Change to DIRECTORY before executing the tests. Working dirs in the CSV files are relative to this.')
     parser.add_argument('-d', '--debug', action='store_true', help='Run debug executables: use the debug version of the executable (appends _dbg to the executable name)')
     parser.add_argument('-s', '--release', action='store_true', help='Run release executables: use the release version of the executable (appends _release to the executable name)')
