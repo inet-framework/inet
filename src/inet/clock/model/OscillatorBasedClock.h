@@ -52,6 +52,9 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
             checkClockEvent(event);
     }
 
+    clocktime_t doComputeClockTimeFromSimTime(simtime_t t) const;
+    simtime_t doComputeSimTimeFromClockTime(clocktime_t t, bool lowerBound) const;
+
   public:
     virtual ~OscillatorBasedClock();
 
