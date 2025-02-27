@@ -94,21 +94,33 @@ void DriftingOscillatorBase::setTickOffset(simtime_t newTickOffset)
 
 int64_t DriftingOscillatorBase::doComputeTicksForInterval(simtime_t timeInterval) const
 {
+    ClockCoutIndent indent;
+    CLOCK_COUT << "-> computeTicksForInterval(" << timeInterval.raw() << ")\n";
+    CLOCK_COUT << "   : " << "driftFactor = " << driftFactor << ", "
+                          << "nextTickFromOrigin = " << nextTickFromOrigin << ", "
+                          << "nominalTickLength = " << nominalTickLength << std::endl;
     if (timeInterval == 0)
         return 0;
     int64_t result = floor((timeInterval - nextTickFromOrigin).raw() * driftFactor / nominalTickLength.raw()) + 1;
     if (result < 0)
         result = 0;
+    CLOCK_COUT << "   computeTicksForInterval(" << timeInterval.raw() << ") -> " << result << std::endl;
     return result;
 }
 
 simtime_t DriftingOscillatorBase::doComputeIntervalForTicks(int64_t numTicks) const
 {
+    ClockCoutIndent indent;
+    CLOCK_COUT << "-> computeIntervalForTicks(" << numTicks << ")\n";
+    CLOCK_COUT << "   : " << "driftFactor = " << driftFactor << ", "
+                          << "nextTickFromOrigin = " << nextTickFromOrigin << ", "
+                          << "nominalTickLength = " << nominalTickLength << std::endl;
     if (numTicks == 0)
         return 0;
     simtime_t result = SimTime::fromRaw(ceil((nominalTickLength.raw() * (numTicks - 1)) / driftFactor)) + nextTickFromOrigin;
     if (result < 0)
         result = 0;
+    CLOCK_COUT << "   computeIntervalForTicks(" << numTicks << ") -> " << result.raw() << std::endl;
     return result;
 }
 
