@@ -94,12 +94,18 @@ void DriftingOscillatorBase::setTickOffset(simtime_t newTickOffset)
 
 int64_t DriftingOscillatorBase::doComputeTicksForInterval(simtime_t timeInterval) const
 {
+    if (timeInterval == 0)
+        return 0;
     int64_t result = floor((timeInterval - nextTickFromOrigin).raw() * driftFactor / nominalTickLength.raw()) + 1;
+    if (result < 0)
+        result = 0;
     return result;
 }
 
 simtime_t DriftingOscillatorBase::doComputeIntervalForTicks(int64_t numTicks) const
 {
+    if (numTicks == 0)
+        return 0;
     simtime_t result = SimTime::fromRaw(ceil((nominalTickLength.raw() * (numTicks - 1)) / driftFactor)) + nextTickFromOrigin;
     if (result < 0)
         result = 0;
