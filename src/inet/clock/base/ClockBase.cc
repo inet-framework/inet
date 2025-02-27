@@ -70,15 +70,33 @@ simtime_t ClockBase::computeScheduleTime(clocktime_t clockTime)
     return result;
 }
 
+void ClockBase::scheduleTargetModuleClockEventAt(simtime_t time, ClockEvent *msg)
+{
+    cSimpleModule *targetModule = getTargetModule();
+    targetModule->scheduleAt(time, msg);
+}
+
+void ClockBase::scheduleTargetModuleClockEventAfter(simtime_t time, ClockEvent *msg)
+{
+    cSimpleModule *targetModule = getTargetModule();
+    targetModule->scheduleAfter(time, msg);
+}
+
+ClockEvent *ClockBase::cancelTargetModuleClockEvent(ClockEvent *msg)
+{
+    cSimpleModule *targetModule = getTargetModule();
+    targetModule->cancelEvent(msg);
+    return msg;
+}
+
 void ClockBase::scheduleClockEventAt(clocktime_t t, ClockEvent *msg)
 {
     if (t < getClockTime())
         throw cRuntimeError("Cannot schedule clock event in the past");
-    cSimpleModule *targetModule = getTargetModule();
     msg->setClock(this);
     msg->setRelative(false);
     msg->setArrivalClockTime(t);
-    targetModule->scheduleAt(computeScheduleTime(t), msg);
+    scheduleTargetModuleClockEventAt(computeScheduleTime(t), msg);
     checkClockEvent(msg);
 }
 
@@ -86,20 +104,19 @@ void ClockBase::scheduleClockEventAfter(clocktime_t clockTimeDelay, ClockEvent *
 {
     if (clockTimeDelay < 0)
         throw cRuntimeError("Cannot schedule clock event with negative delay");
-    cSimpleModule *targetModule = getTargetModule();
     msg->setClock(this);
     msg->setRelative(true);
     clocktime_t nowClock = getClockTime();
     clocktime_t arrivalClockTime = nowClock + clockTimeDelay;
     msg->setArrivalClockTime(arrivalClockTime);
     simtime_t simTimeDelay = clockTimeDelay.isZero() ? SIMTIME_ZERO : computeScheduleTime(arrivalClockTime) - simTime();
-    targetModule->scheduleAfter(simTimeDelay, msg);
+    scheduleTargetModuleClockEventAfter(simTimeDelay, msg);
     checkClockEvent(msg);
 }
 
 ClockEvent *ClockBase::cancelClockEvent(ClockEvent *msg)
 {
-    getTargetModule()->cancelEvent(msg);
+    cancelTargetModuleClockEvent(msg);
     msg->setClock(nullptr);
     return msg;
 }
