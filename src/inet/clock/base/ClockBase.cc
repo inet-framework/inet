@@ -60,17 +60,22 @@ clocktime_t ClockBase::getClockTime() const
 
 simtime_t ClockBase::computeScheduleTime(clocktime_t clockTime)
 {
+    ClockCoutIndent indent;
+    CLOCK_COUT << "-> computeScheduleTime(" << clockTime << ")\n";
     simtime_t currentSimulationTime = simTime();
     simtime_t lowerSimulationTime = computeSimTimeFromClockTime(clockTime, true);
+    simtime_t result;
     if (lowerSimulationTime >= currentSimulationTime)
-        return lowerSimulationTime;
+        result = lowerSimulationTime;
     else {
         simtime_t upperSimulationTime = computeSimTimeFromClockTime(clockTime, false);
         if (currentSimulationTime < upperSimulationTime)
-            return currentSimulationTime;
+            result = currentSimulationTime;
         else
-            return lowerSimulationTime;
+            result = lowerSimulationTime; // NOTE: upperSimulationTime is exclusive
     }
+    CLOCK_COUT << "   computeScheduleTime(" << clockTime << ") -> " << result << std::endl;
+    return result;
 }
 
 void ClockBase::scheduleTargetModuleClockEventAt(simtime_t time, ClockEvent *msg)
