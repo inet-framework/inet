@@ -8,6 +8,7 @@
 #ifndef __INET_OSCILLATORBASE_H
 #define __INET_OSCILLATORBASE_H
 
+#include "inet/clock/contract/IClock.h"
 #include "inet/clock/contract/IOscillator.h"
 #include "inet/common/StringFormat.h"
 

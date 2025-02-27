@@ -21,6 +21,11 @@ void DriftingOscillatorBase::initialize(int stage)
             throw cRuntimeError("The nominalTickLength parameter value %lg cannot be accurately represented with the current simulation time precision, conversion result: %s", nominalTickLengthAsDouble, nominalTickLength.ustr().c_str());
         setOrigin(simTime());
         driftFactor = 1.0L + driftRate.get() / 1E+6L;
+        // TODO check the relationship between nominalTickLength and simulation time precision and fail if they are too close (whatever that means) use a parameter for this? minimum
+
+        // TODO check if tick becomes smaller than what can be represented in simtime and error out
+        // TODO what if the precision is just not enough to represent the tick properly
+        // TODO should there be some wrap around calculation to check that?
         simtime_t currentTickLength = getCurrentTickLength();
         simtime_t tickOffset = par("tickOffset");
         if (tickOffset < 0 || tickOffset >= currentTickLength)

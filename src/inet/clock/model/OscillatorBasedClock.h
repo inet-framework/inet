@@ -42,6 +42,10 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
     int64_t (*roundingFunction)(int64_t, int64_t) = nullptr;
 
     /**
+     * The lower bound of the simulation time where the clock time equals with origin clock time.
+     */
+    simtime_t originSimulationTimeLowerBound;
+    /**
      * The simulation time from which the clock computes the mapping between future simulation times and clock times.
      */
     simtime_t originSimulationTime;
