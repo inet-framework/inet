@@ -38,6 +38,9 @@ class INET_API DriftingOscillatorBase : public OscillatorBase, public IScriptabl
     // IScriptable implementation
     virtual void processCommand(const cXMLElement& node) override;
 
+    int64_t doComputeTicksForInterval(simtime_t timeInterval) const;
+    simtime_t doComputeIntervalForTicks(int64_t numTicks) const;
+
   public:
     virtual simtime_t getComputationOrigin() const override { return origin; }
     virtual simtime_t getNominalTickLength() const override { return nominalTickLength; }
