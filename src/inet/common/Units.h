@@ -26,6 +26,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <type_traits>
 
 #include "inet/common/INETMath.h" // M_PI
 
