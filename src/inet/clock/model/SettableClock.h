@@ -17,6 +17,13 @@ class INET_API SettableClock : public OscillatorBasedClock, public IScriptable
 {
   protected:
     OverdueClockEventHandlingMode defaultOverdueClockEventHandlingMode = UNSPECIFIED;
+
+    // TODO explain that the time dilation along the clock step function is the same as if
+    // the clock would add a little bit more or less to its internal integer counter than what is required according to the nominal tick length
+    // for example, the clock would add 1000000 by default for 1us nominal tick length using 1ps time precision
+    // when oscillator compensation is used, the clock adds 1000010 or 999970, etc. instead
+    // each time the clock is asked for the clock time, it simply returns the internal counter divided by 1000000
+
     ppm oscillatorCompensation = ppm(0); // 0 means no compensation, higher value means faster clock, e.g. 100 ppm value means the clock compensates 100 microseconds for every second in clock time
                                          // 100 ppm value means the oscillator tick length is compensated to be smaller by a factor of (1 / (1 + 100 / 1E+6)) than the actual tick length measured in clock time
 

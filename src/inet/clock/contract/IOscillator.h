@@ -12,6 +12,8 @@
 
 namespace inet {
 
+// TODO the API was designed such that any algorithm can be simulation that could be simulated with individual oscillator events
+
 /**
  * TODO: oscillator computation origin may not have a tick
  *
@@ -88,6 +90,8 @@ class INET_API IOscillator
     virtual int64_t computeTicksForInterval(simtime_t timeInterval) const = 0;
 
     /**
+     * TODO: mention that computeTicksForInterval and computeIntervalForTicks implement the same step function
+     *
      * @brief Computes the minimal time interval that contains a specified number of ticks.
      *
      * This method determines the smallest simulation time interval (starting at the computation origin)

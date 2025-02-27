@@ -19,7 +19,7 @@ void OscillatorBase::initialize(int stage)
         displayStringTextFormat = par("displayStringTextFormat");
         if (par("emitNumTicksSignal")) {
             tickTimer = new cMessage("TickTimer");
-            scheduleAfter(0, tickTimer);
+            tickTimer->setSchedulingPriority(par("tickSchedulingPriority"));
         }
     }
     else if (stage == INITSTAGE_LAST)
@@ -37,7 +37,8 @@ void OscillatorBase::handleMessage(cMessage *msg)
 void OscillatorBase::handleTickTimer()
 {
     EV_INFO << "Handling tick" << EV_FIELD(numTicks) << EV_ENDL;
-    emit(numTicksChangedSignal, numTicks);
+    if (numTicks != 0)
+        emit(numTicksChangedSignal, numTicks);
     scheduleTickTimer();
     numTicks++;
 }
