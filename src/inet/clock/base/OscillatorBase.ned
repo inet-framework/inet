@@ -14,7 +14,7 @@ simple OscillatorBase
 {
     parameters:
         string displayStringTextFormat = default("%n"); // Determines the text that is written on top of the submodule
-        bool emitNumTicksSignal = default(false); // enables emitting a signal at each oscillator tick, can be useful for validating the behavior of the more efficient implementation without events
+        bool emitNumTicksSignal = default(true); // enables emitting a signal at each oscillator tick, can be useful for validating the behavior of the more efficient implementation without events
         @class(OscillatorBase);
         @display("i=block/tunnel");
         @signal[numTicksChanged](type=long);

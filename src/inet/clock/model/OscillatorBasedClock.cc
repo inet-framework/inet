@@ -7,6 +7,8 @@
 
 #include "inet/clock/model/OscillatorBasedClock.h"
 
+#include "inet/common/IPrintableObject.h"
+
 #include <algorithm>
 
 namespace inet {
@@ -73,6 +75,7 @@ void OscillatorBasedClock::initialize(int stage)
             roundingFunction = roundNone;
         else
             throw cRuntimeError("Unknown rounding mode");
+        WATCH(originSimulationTimeLowerBound);
         WATCH(originSimulationTime);
         WATCH(originClockTime);
         WATCH_PTRVECTOR(events);
@@ -88,9 +91,16 @@ void OscillatorBasedClock::setOrigin(simtime_t simulationTime, clocktime_t clock
 {
     ClockCoutIndent indent;
     CLOCK_COUT << "-> setOrigin(" << simulationTime << ", " << clockTime << ")\n";
+    // TODO setOrigin can only be set forward in terms of simulation time!
     originSimulationTime = simulationTime;
     originClockTime = clockTime;
-    lastClockTime = clockTime;
+    lastClockTime = clockTime; // TODO this should only happen setClockTime but not when the oscillator changes its way of oscillation
+    originSimulationTimeLowerBound = oscillator->computeIntervalForTicks(oscillator->computeTicksForInterval(originSimulationTime - oscillator->getComputationOrigin())) + oscillator->getComputationOrigin();
+    CLOCK_COUT << "   : " << "originSimulationTimeLowerBound = " << originSimulationTimeLowerBound << std::endl;
+    ASSERTCMP(<=, originSimulationTimeLowerBound, originSimulationTime);
+    ASSERTCMP(<=, originSimulationTimeLowerBound, simTime());
+    ASSERTCMP(>=, originSimulationTimeLowerBound, oscillator->getComputationOrigin());
+    ASSERTCMP(==, originSimulationTimeLowerBound, computeSimTimeFromClockTime(originClockTime, true));
     ASSERTCMP(<=, originSimulationTime, simTime());
     ASSERTCMP(>=, originSimulationTime, oscillator->getComputationOrigin());
     ASSERTCMP(>=, originSimulationTime, computeSimTimeFromClockTime(originClockTime, true));
@@ -107,11 +117,15 @@ clocktime_t OscillatorBasedClock::doComputeClockTimeFromSimTime(simtime_t simula
                           << "originClockTime = " << originClockTime << ", "
                           << "oscillatorComputationOrigin = " << oscillator->getComputationOrigin() << ", "
                           << "oscillatorCompensation = " << getOscillatorCompensation() << std::endl;
+    // time dilation between clock origin and simulationTime
+
+// TODO: revive compensation    int64_t numTicksFromOscillatorOriginToSimulationTime = oscillator->computeTicksForInterval((simulationTime - originSimulationTime) * (1 + getOscillatorCompensation().get<unit>()) + (originSimulationTime - oscillator->getComputationOrigin()));
     int64_t numTicksFromOscillatorOriginToSimulationTime = oscillator->computeTicksForInterval(simulationTime - oscillator->getComputationOrigin());
+
     int64_t numTicksFromOscillatorOriginToClockOrigin = oscillator->computeTicksForInterval(originSimulationTime - oscillator->getComputationOrigin());
     int64_t numTicks = numTicksFromOscillatorOriginToSimulationTime - numTicksFromOscillatorOriginToClockOrigin;
     ASSERTCMP(>=, numTicks, 0);
-    clocktime_t clockTimeFromClockOrigin = SIMTIME_AS_CLOCKTIME(numTicks * oscillator->getNominalTickLength() * (1 + getOscillatorCompensation().get<unit>()));
+    clocktime_t clockTimeFromClockOrigin = SIMTIME_AS_CLOCKTIME(numTicks * oscillator->getNominalTickLength());
     clocktime_t result = originClockTime + clockTimeFromClockOrigin;
     CLOCK_COUT << "   : " << "numTicksFromOscillatorOriginToSimulationTime = " << numTicksFromOscillatorOriginToSimulationTime << ", "
                           << "numTicksFromOscillatorOriginToClockOrigin = " << numTicksFromOscillatorOriginToClockOrigin << ", "
@@ -129,13 +143,17 @@ simtime_t OscillatorBasedClock::doComputeSimTimeFromClockTime(clocktime_t clockT
                           << "originClockTime = " << originClockTime << ", "
                           << "oscillatorComputationOrigin = " << oscillator->getComputationOrigin() << ", "
                           << "oscillatorCompensation = " << getOscillatorCompensation() << std::endl;
-    int64_t numTicksFromClockOriginToClockTime = (clockTime - originClockTime).raw() / oscillator->getNominalTickLength().raw() / (1 + getOscillatorCompensation().get<unit>());
+    // TODO but clockTime is not necessarily a multiple of nominalTickLength?! some rounding?
+    int64_t numTicksFromClockOriginToClockTime = (clockTime - originClockTime).raw() / oscillator->getNominalTickLength().raw();
     int64_t numTicksFromOscillatorOriginToClockOrigin = oscillator->computeTicksForInterval(originSimulationTime - oscillator->getComputationOrigin());
     int64_t numTicks = numTicksFromClockOriginToClockTime +
                        numTicksFromOscillatorOriginToClockOrigin +
                        (lowerBound ? 0 : 1);
     ASSERTCMP(>=, numTicks, 0);
-    simtime_t result = oscillator->getComputationOrigin() + oscillator->computeIntervalForTicks(numTicks);
+    simtime_t simulationTimeInterval = oscillator->computeIntervalForTicks(numTicks);
+    simtime_t result = oscillator->getComputationOrigin() + simulationTimeInterval;
+    // time dilation between clock origin and clockTime
+// TODO: revive compensation simtime_t result = originSimulationTime + (oscillator->getComputationOrigin() + simulationTimeInterval - originSimulationTime) / (1 + getOscillatorCompensation().get<unit>());
     CLOCK_COUT << "   : " << "numTicksFromClockOriginToClockTime = " << numTicksFromClockOriginToClockTime << ", "
                           << "numTicksFromOscillatorOriginToClockOrigin = " << numTicksFromOscillatorOriginToClockOrigin << ", "
                           << "numTicks = " << numTicks << std::endl;
