@@ -16,6 +16,15 @@ namespace inet {
 
 using namespace units::values;
 
+static bool compareClockEvents(const ClockEvent *e1, const ClockEvent *e2) {
+    return e2->getArrivalClockTime() < e1->getArrivalClockTime() ? true :
+           e2->getArrivalClockTime() > e1->getArrivalClockTime() ? false :
+           e2->getSchedulingPriority() == e1->getSchedulingPriority() ? e2->getInsertOrder() < e1->getInsertOrder() :
+           e2->getSchedulingPriority() < e1->getSchedulingPriority() ? true :
+           e2->getSchedulingPriority() > e1->getSchedulingPriority() ? false :
+           e2->getInsertOrder() < e1->getInsertOrder();
+}
+
 /**
  * @brief A clock model that is counting the ticks of an oscillator.
  *
@@ -28,6 +37,7 @@ using namespace units::values;
 class INET_API OscillatorBasedClock : public ClockBase, public cListener
 {
   protected:
+    bool useFutureEventSet = false;
     IOscillator *oscillator = nullptr;
     int64_t (*roundingFunction)(int64_t, int64_t) = nullptr;
 
@@ -44,6 +54,10 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
 
   protected:
     virtual void initialize(int stage) override;
+
+    virtual void scheduleTargetModuleClockEventAt(simtime_t time, ClockEvent *event) override;
+    virtual void scheduleTargetModuleClockEventAfter(simtime_t time, ClockEvent *event) override;
+    virtual ClockEvent *cancelTargetModuleClockEvent(ClockEvent *event) override;
 
     virtual void setOrigin(simtime_t simulationTime, clocktime_t clockTime);
 
@@ -73,6 +87,7 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
 
     virtual std::string resolveDirective(char directive) const override;
 
+    virtual void receiveSignal(cComponent *source, int signal, long value, cObject *details) override;
     virtual void receiveSignal(cComponent *source, int signal, cObject *obj, cObject *details) override;
 };
 
