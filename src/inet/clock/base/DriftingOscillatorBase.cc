@@ -87,18 +87,30 @@ void DriftingOscillatorBase::setTickOffset(simtime_t newTickOffset)
     }
 }
 
-int64_t DriftingOscillatorBase::computeTicksForInterval(simtime_t timeInterval) const
+int64_t DriftingOscillatorBase::doComputeTicksForInterval(simtime_t timeInterval) const
 {
     ASSERT(timeInterval >= 0);
     int64_t result = floor((timeInterval - nextTickFromOrigin).raw() * driftFactor / nominalTickLength.raw()) + 1;
     return result;
 }
 
-simtime_t DriftingOscillatorBase::computeIntervalForTicks(int64_t numTicks) const
+simtime_t DriftingOscillatorBase::doComputeIntervalForTicks(int64_t numTicks) const
 {
     simtime_t result = SimTime::fromRaw(ceil((nominalTickLength.raw() * (numTicks - 1)) / driftFactor)) + nextTickFromOrigin;
     if (result < 0)
         result = 0;
+    return result;
+}
+
+int64_t DriftingOscillatorBase::computeTicksForInterval(simtime_t timeInterval) const
+{
+    int64_t result = doComputeTicksForInterval(timeInterval);
+    return result;
+}
+
+simtime_t DriftingOscillatorBase::computeIntervalForTicks(int64_t numTicks) const
+{
+    simtime_t result = doComputeIntervalForTicks(numTicks);
     return result;
 }
 
