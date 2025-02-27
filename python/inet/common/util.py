@@ -103,7 +103,7 @@ def get_logging_formatter():
 def set_logging_levels(log_level, external_command_log_level="WARN"):
     logger = logging.getLogger()
     logger.setLevel(log_level)
-    logging.getLogger("py4j.clientserver").setLevel("WARN")
+    logging.getLogger("py4j").setLevel(external_command_log_level)
     logging.getLogger("make").setLevel(external_command_log_level)
     logging.getLogger("opp_charttool").setLevel(external_command_log_level)
     logging.getLogger("opp_eventlogtool").setLevel(external_command_log_level)
