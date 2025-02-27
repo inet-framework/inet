@@ -37,8 +37,11 @@ static int64_t roundNone(int64_t t, int64_t l)
 
 OscillatorBasedClock::~OscillatorBasedClock()
 {
-    for (auto event : events)
+    for (auto event : events) {
         event->setClock(nullptr);
+        if (!useFutureEventSet)
+            delete event;
+    }
 }
 
 clocktime_t OscillatorBasedClock::getClockTime() const
@@ -52,8 +55,11 @@ void OscillatorBasedClock::initialize(int stage)
 {
     ClockBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        useFutureEventSet = par("useFutureEventSet");
         auto oscillatorModule = getSubmodule("oscillator");
         oscillator = check_and_cast<IOscillator *>(oscillatorModule);
+        if (!useFutureEventSet)
+            oscillatorModule->subscribe(IOscillator::numTicksChangedSignal, this);
         oscillatorModule->subscribe(IOscillator::preOscillatorStateChangedSignal, this);
         oscillatorModule->subscribe(IOscillator::postOscillatorStateChangedSignal, this);
         const char *roundingMode = par("roundingMode");
@@ -137,6 +143,30 @@ simtime_t OscillatorBasedClock::computeSimTimeFromClockTime(clocktime_t clockTim
     return result;
 }
 
+void OscillatorBasedClock::scheduleTargetModuleClockEventAt(simtime_t time, ClockEvent *event)
+{
+    if (useFutureEventSet)
+        ClockBase::scheduleTargetModuleClockEventAt(time, event);
+    else
+        event->setArrival(getTargetModule()->getId(), -1);
+}
+
+void OscillatorBasedClock::scheduleTargetModuleClockEventAfter(simtime_t time, ClockEvent *event)
+{
+    if (useFutureEventSet)
+        ClockBase::scheduleTargetModuleClockEventAfter(time, event);
+    else
+        event->setArrival(getTargetModule()->getId(), -1);
+}
+
+ClockEvent *OscillatorBasedClock::cancelTargetModuleClockEvent(ClockEvent *event)
+{
+    if (useFutureEventSet)
+        return ClockBase::cancelTargetModuleClockEvent(event);
+    else
+        return event;
+}
+
 void OscillatorBasedClock::scheduleClockEventAt(clocktime_t time, ClockEvent *event)
 {
     ASSERTCMP(>=, time, getClockTime());
@@ -180,6 +210,28 @@ std::string OscillatorBasedClock::resolveDirective(char directive) const
     }
 }
 
+void OscillatorBasedClock::receiveSignal(cComponent *source, int signal, long value, cObject *details)
+{
+    Enter_Method("%s", cComponent::getSignalName(signal));
+
+    if (signal == IOscillator::numTicksChangedSignal) {
+        clocktime_t clockTime = SIMTIME_AS_CLOCKTIME(oscillator->getNominalTickLength() * value);
+        setOrigin(simTime(), clockTime);
+        std::make_heap(events.begin(), events.end(), compareClockEvents);
+        while (!events.empty() && events.front()->getArrivalClockTime() == getClockTime())
+        {
+            std::pop_heap(events.begin(), events.end(), compareClockEvents);
+            auto event = events.back();
+            events.erase(std::remove(events.begin(), events.end(), event), events.end());
+            event->setClock(nullptr);
+            cSimpleModule *targetModule = check_and_cast<cSimpleModule *>(event->getArrivalModule());
+            cContextSwitcher contextSwitcher(targetModule);
+            EV_INFO << "Executing event on oscillator tick" << EV_FIELD(event) << EV_FIELD(clockTime) << EV_ENDL;
+            event->execute();
+        }
+    }
+}
+
 void OscillatorBasedClock::receiveSignal(cComponent *source, int signal, cObject *obj, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(signal));
@@ -190,24 +242,26 @@ void OscillatorBasedClock::receiveSignal(cComponent *source, int signal, cObject
         checkAllClockEvents();
     }
     else if (signal == IOscillator::postOscillatorStateChangedSignal) {
-        simtime_t currentSimTime = simTime();
-        for (auto event : events) {
-            if (event->getRelative()) {
-                simtime_t simTimeDelay = computeSimTimeFromClockTime(event->getArrivalClockTime()) - currentSimTime;
-                ASSERT(simTimeDelay >= 0);
-                cSimpleModule *targetModule = check_and_cast<cSimpleModule *>(event->getArrivalModule());
-                cContextSwitcher contextSwitcher(targetModule);
-                targetModule->rescheduleAfter(simTimeDelay, event);
+        if (useFutureEventSet) {
+            simtime_t currentSimTime = simTime();
+            for (auto event : events) {
+                if (event->getRelative()) {
+                    simtime_t simTimeDelay = computeSimTimeFromClockTime(event->getArrivalClockTime()) - currentSimTime;
+                    ASSERT(simTimeDelay >= 0);
+                    cSimpleModule *targetModule = check_and_cast<cSimpleModule *>(event->getArrivalModule());
+                    cContextSwitcher contextSwitcher(targetModule);
+                    targetModule->rescheduleAfter(simTimeDelay, event);
+                }
+                else {
+                    clocktime_t arrivalClockTime = event->getArrivalClockTime();
+                    simtime_t arrivalSimTime = computeSimTimeFromClockTime(arrivalClockTime);
+                    ASSERT(arrivalSimTime >= currentSimTime);
+                    cSimpleModule *targetModule = check_and_cast<cSimpleModule *>(event->getArrivalModule());
+                    cContextSwitcher contextSwitcher(targetModule);
+                    targetModule->rescheduleAt(arrivalSimTime, event);
+                }
+                checkClockEvent(event);
             }
-            else {
-                clocktime_t arrivalClockTime = event->getArrivalClockTime();
-                simtime_t arrivalSimTime = computeSimTimeFromClockTime(arrivalClockTime);
-                ASSERT(arrivalSimTime >= currentSimTime);
-                cSimpleModule *targetModule = check_and_cast<cSimpleModule *>(event->getArrivalModule());
-                cContextSwitcher contextSwitcher(targetModule);
-                targetModule->rescheduleAt(arrivalSimTime, event);
-            }
-            checkClockEvent(event);
         }
         emit(timeChangedSignal, CLOCKTIME_AS_SIMTIME(getClockTime()));
     }
