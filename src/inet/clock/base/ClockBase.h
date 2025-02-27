@@ -50,14 +50,15 @@ class INET_API ClockBase : public cSimpleModule, public IClock, public StringFor
     simtime_t computeScheduleTime(clocktime_t time);
 
     void checkClockEvent(const ClockEvent *event) {
-        ASSERT(event->isScheduled());
-        ASSERTCMP(>=, event->getArrivalTime(), simTime());
         // NOTE: IClock interface 3. invariant
         ASSERTCMP(>=, event->getArrivalClockTime(), getClockTime());
-        // NOTE: IClock interface 4. invariant
-        ASSERTCMP(==, event->getArrivalTime(), computeScheduleTime(event->getArrivalClockTime()));
-        // NOTE: IClock interface 5. invariant
-        ASSERTCMP(==, event->getArrivalClockTime(), computeClockTimeFromSimTime(event->getArrivalTime()));
+        if (event->isScheduled()) {
+            ASSERTCMP(>=, event->getArrivalTime(), simTime());
+            // NOTE: IClock interface 4. invariant
+            ASSERTCMP(==, event->getArrivalTime(), computeScheduleTime(event->getArrivalClockTime()));
+            // NOTE: IClock interface 5. invariant
+            ASSERTCMP(==, event->getArrivalClockTime(), computeClockTimeFromSimTime(event->getArrivalTime()));
+        }
     }
 
   public:
