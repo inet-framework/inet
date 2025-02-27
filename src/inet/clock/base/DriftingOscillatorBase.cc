@@ -48,6 +48,7 @@ void DriftingOscillatorBase::scheduleTickTimer()
 void DriftingOscillatorBase::setOrigin(simtime_t origin)
 {
     ASSERTCMP(<=, origin, simTime());
+    ASSERTCMP(<=, origin, newOrigin);
     this->origin = origin;
 }
 
@@ -65,6 +66,10 @@ void DriftingOscillatorBase::setDriftRate(ppm newDriftRate)
         nextTickFromOrigin = SimTime::fromRaw((currentTickLength.raw() - elapsedTickTime.raw()) * driftFactor / newDriftFactor);
         driftRate = newDriftRate;
         driftFactor = newDriftFactor;
+        if (driftRate != ppm(0)) {
+            ASSERTCMP(!=, nominalTickLength, currentTickLength);
+            ASSERTCMP(==, nominalTickLength, currentTickLength * driftFactor);
+        }
         setOrigin(currentSimTime);
         emit(driftRateChangedSignal, driftRate.get<ppm>());
         emit(postOscillatorStateChangedSignal, this);
@@ -89,7 +94,6 @@ void DriftingOscillatorBase::setTickOffset(simtime_t newTickOffset)
 
 int64_t DriftingOscillatorBase::doComputeTicksForInterval(simtime_t timeInterval) const
 {
-    ASSERT(timeInterval >= 0);
     int64_t result = floor((timeInterval - nextTickFromOrigin).raw() * driftFactor / nominalTickLength.raw()) + 1;
     return result;
 }
@@ -104,13 +108,19 @@ simtime_t DriftingOscillatorBase::doComputeIntervalForTicks(int64_t numTicks) co
 
 int64_t DriftingOscillatorBase::computeTicksForInterval(simtime_t timeInterval) const
 {
+    ASSERTCMP(>=, timeInterval, 0);
     int64_t result = doComputeTicksForInterval(timeInterval);
+    ASSERTCMP(>=, result, 0);
+    ASSERTCMP(<=, doComputeIntervalForTicks(result), timeInterval);
     return result;
 }
 
 simtime_t DriftingOscillatorBase::computeIntervalForTicks(int64_t numTicks) const
 {
+    ASSERTCMP(>=, numTicks, 0);
     simtime_t result = doComputeIntervalForTicks(numTicks);
+    ASSERTCMP(>=, result, 0);
+    ASSERTCMP(==, doComputeTicksForInterval(result), numTicks);
     return result;
 }
 
