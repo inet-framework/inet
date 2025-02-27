@@ -14,15 +14,6 @@ namespace inet {
 
 Define_Module(SettableClock);
 
-static bool compareClockEvents(const ClockEvent *e1, const ClockEvent *e2) {
-    return e2->getArrivalClockTime() < e1->getArrivalClockTime() ? true :
-           e2->getArrivalClockTime() > e1->getArrivalClockTime() ? false :
-           e2->getSchedulingPriority() == e1->getSchedulingPriority() ? e2->getInsertOrder() < e1->getInsertOrder() :
-           e2->getSchedulingPriority() < e1->getSchedulingPriority() ? true :
-           e2->getSchedulingPriority() > e1->getSchedulingPriority() ? false :
-           e2->getInsertOrder() < e1->getInsertOrder();
-}
-
 void SettableClock::initialize(int stage)
 {
     OscillatorBasedClock::initialize(stage);
@@ -125,11 +116,13 @@ void SettableClock::setClockTime(clocktime_t newClockTime, ppm oscillatorCompens
         }
         this->oscillatorCompensation = oscillatorCompensation;
         setOrigin(currentSimTime, newClockTime);
-        for (auto event : events) {
-            cSimpleModule *targetModule = check_and_cast<cSimpleModule *>(event->getArrivalModule());
-            cContextSwitcher contextSwitcher(targetModule);
-            targetModule->rescheduleAt(computeScheduleTime(event->getArrivalClockTime()), event);
-            checkClockEvent(event);
+        if (useFutureEventSet) {
+            for (auto event : events) {
+                cSimpleModule *targetModule = check_and_cast<cSimpleModule *>(event->getArrivalModule());
+                cContextSwitcher contextSwitcher(targetModule);
+                targetModule->rescheduleAt(computeScheduleTime(event->getArrivalClockTime()), event);
+                checkClockEvent(event);
+            }
         }
         emit(timeChangedSignal, newClockTime.asSimTime());
     }
