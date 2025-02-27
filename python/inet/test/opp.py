@@ -8,37 +8,43 @@ filter criteria.
 
 import builtins
 import glob
+import importlib.util
 import io
 import logging
 import signal
 import subprocess
 import types
 
-from omnetpp.opp_test import *
-
 from inet.simulation.project import *
 from inet.test.task import *
 
 _logger = logging.getLogger(__name__)
 
-class IdeOppTest(OppTest):
-    def __init__(self, remove_launch=True, **kwargs):
-        super().__init__(**kwargs)
-        self.print_stream = io.StringIO()
-        self.remove_launch = remove_launch
+if importlib.util.find_spec("omnetpp.opp_test"):
+    from omnetpp.opp_test import *
 
-    def lprint(self, level, *args, **kwargs):
-        if level <= self.args.verbose:
-            print(*args, **kwargs, file=self.print_stream)
+    class IdeOppTest(OppTest):
+        def __init__(self, remove_launch=True, **kwargs):
+            super().__init__(**kwargs)
+            self.print_stream = io.StringIO()
+            self.remove_launch = remove_launch
 
-    def exec_program(self, cmd, wdir, outfile, errfile):
-        args = list(filter(None, cmd.split(' ')))
-        program = os.path.join(wdir, args[0])
-        name = os.path.basename(program)
-        args = args[1:]
-        self.subprocess_result = debug_program(name, program, args, wdir, remove_launch=self.remove_launch)
-        self.lprint(1, self.subprocess_result.stdout)
-        return self.subprocess_result.returncode
+        def lprint(self, level, *args, **kwargs):
+            if level <= self.args.verbose:
+                print(*args, **kwargs, file=self.print_stream)
+
+        def exec_program(self, cmd, wdir, outfile, errfile):
+            args = list(filter(None, cmd.split(' ')))
+            program = os.path.join(wdir, args[0])
+            name = os.path.basename(program)
+            args = args[1:]
+            self.subprocess_result = debug_program(name, program, args, wdir, remove_launch=self.remove_launch)
+            self.lprint(1, self.subprocess_result.stdout)
+            with open(os.path.join(wdir, outfile), "w") as f:
+                f.write(self.subprocess_result.stdout)
+            with open(os.path.join(wdir, errfile), "w") as f:
+                f.write(self.subprocess_result.stderr)
+            return self.subprocess_result.returncode
 
 class OppTestTask(TestTask):
     def __init__(self, simulation_project, working_directory, test_file_name, mode="debug", debug=False, remove_launch=True, **kwargs):
