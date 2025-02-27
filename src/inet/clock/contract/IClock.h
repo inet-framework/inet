@@ -13,6 +13,42 @@
 
 namespace inet {
 
+#undef CLOCK_LOG_IMPELEMENTATION
+
+extern std::ostringstream devnull;
+
+#ifndef CLOCK_LOG_IMPELEMENTATION
+  #include <sstream>
+  #define CLOCK_COUT devnull
+#else
+  #include <iostream>
+  #include <iomanip>
+  #define CLOCK_COUT !stdcoutenabled ? devnull : std::cout << std::setprecision(24) << std::string(stdcoutindent * 3, ' ')
+#endif
+
+#undef CLOCK_CHECK_IMPLEMENTATION
+
+#ifdef CLOCK_CHECK_IMPLEMENTATION
+#define ASSERTCMP(cmp, o1, o2) { ClockCoutDisabledBlock b; auto _o1 = (o1); auto _o2 = (o2); if (!(_o1 cmp _o2)) std::cout << "*** Assertion: " << #o1 << " " << #cmp << " " << #o2 << " as " << _o1 << " " << #cmp << " " << _o2 << " fails." << std::endl; ASSERT(o1 cmp o2); }
+#else
+#define ASSERTCMP(cmp, o1, o2) ;
+#endif
+
+extern bool clockCoutEnabled;
+extern int clockCoutIndentLevel;
+
+class ClockCoutIndent {
+public:
+    ClockCoutIndent() { ++clockCoutIndentLevel; }
+    ~ClockCoutIndent() { --clockCoutIndentLevel; }
+};
+
+class ClockCoutDisabledBlock {
+public:
+    ClockCoutDisabledBlock() { clockCoutEnabled = false; }
+    ~ClockCoutDisabledBlock() { clockCoutEnabled = true; }
+};
+
 /**
  * This class defines the interface for clocks. See the corresponding NED file for details.
  *
