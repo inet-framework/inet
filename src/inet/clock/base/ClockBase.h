@@ -43,6 +43,10 @@ class INET_API ClockBase : public cSimpleModule, public IClock, public StringFor
         return target;
     }
 
+    virtual void scheduleTargetModuleClockEventAt(simtime_t time, ClockEvent *event);
+    virtual void scheduleTargetModuleClockEventAfter(simtime_t time, ClockEvent *event);
+    virtual ClockEvent *cancelTargetModuleClockEvent(ClockEvent *event);
+
     simtime_t computeScheduleTime(clocktime_t time);
 
     void checkClockEvent(const ClockEvent *event) {
