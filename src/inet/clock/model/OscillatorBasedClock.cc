@@ -90,7 +90,7 @@ void OscillatorBasedClock::setOrigin(simtime_t simulationTime, clocktime_t clock
     ASSERTCMP(==, originClockTime, computeClockTimeFromSimTime(originSimulationTime));
 }
 
-clocktime_t OscillatorBasedClock::computeClockTimeFromSimTime(simtime_t simulationTime) const
+clocktime_t OscillatorBasedClock::doComputeClockTimeFromSimTime(simtime_t simulationTime) const
 {
     ASSERT(simulationTime >= simTime());
     ASSERT(originSimulationTime >= oscillator->getComputationOrigin());
@@ -102,7 +102,7 @@ clocktime_t OscillatorBasedClock::computeClockTimeFromSimTime(simtime_t simulati
     return result;
 }
 
-simtime_t OscillatorBasedClock::computeSimTimeFromClockTime(clocktime_t clockTime, bool lowerBound) const
+simtime_t OscillatorBasedClock::doComputeSimTimeFromClockTime(clocktime_t clockTime, bool lowerBound) const
 {
     ASSERT(clockTime >= getClockTime());
     ASSERT(originSimulationTime >= oscillator->getComputationOrigin());
@@ -112,6 +112,18 @@ simtime_t OscillatorBasedClock::computeSimTimeFromClockTime(clocktime_t clockTim
                        numTicksFromOscillatorOriginToClockOrigin +
                        (lowerBound ? 0 : 1);
     simtime_t result = oscillator->getComputationOrigin() + oscillator->computeIntervalForTicks(numTicks);
+    return result;
+}
+
+clocktime_t OscillatorBasedClock::computeClockTimeFromSimTime(simtime_t simulationTime) const
+{
+    clocktime_t result = doComputeClockTimeFromSimTime(simulationTime);
+    return result;
+}
+
+simtime_t OscillatorBasedClock::computeSimTimeFromClockTime(clocktime_t clockTime, bool lowerBound) const
+{
+    simtime_t result = doComputeSimTimeFromClockTime(clockTime, lowerBound);
     return result;
 }
 
