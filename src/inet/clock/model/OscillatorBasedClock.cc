@@ -86,6 +86,8 @@ void OscillatorBasedClock::initialize(int stage)
 
 void OscillatorBasedClock::setOrigin(simtime_t simulationTime, clocktime_t clockTime)
 {
+    ClockCoutIndent indent;
+    CLOCK_COUT << "-> setOrigin(" << simulationTime << ", " << clockTime << ")\n";
     originSimulationTime = simulationTime;
     originClockTime = clockTime;
     lastClockTime = clockTime;
@@ -94,21 +96,39 @@ void OscillatorBasedClock::setOrigin(simtime_t simulationTime, clocktime_t clock
     ASSERTCMP(>=, originSimulationTime, computeSimTimeFromClockTime(originClockTime, true));
     ASSERTCMP(<=, originSimulationTime, computeSimTimeFromClockTime(originClockTime, false));
     ASSERTCMP(==, originClockTime, computeClockTimeFromSimTime(originSimulationTime));
+    CLOCK_COUT << "   setOrigin() -> void\n";
 }
 
 clocktime_t OscillatorBasedClock::doComputeClockTimeFromSimTime(simtime_t simulationTime) const
 {
+    ClockCoutIndent indent;
+    CLOCK_COUT << "-> computeClockTimeFromSimTime(" << simulationTime << ")\n";
+    CLOCK_COUT << "   : " << "originSimulationTime = " << originSimulationTime << ", "
+                          << "originClockTime = " << originClockTime << ", "
+                          << "oscillatorComputationOrigin = " << oscillator->getComputationOrigin() << ", "
+                          << "oscillatorCompensation = " << getOscillatorCompensation() << std::endl;
     int64_t numTicksFromOscillatorOriginToSimulationTime = oscillator->computeTicksForInterval(simulationTime - oscillator->getComputationOrigin());
     int64_t numTicksFromOscillatorOriginToClockOrigin = oscillator->computeTicksForInterval(originSimulationTime - oscillator->getComputationOrigin());
     int64_t numTicks = numTicksFromOscillatorOriginToSimulationTime - numTicksFromOscillatorOriginToClockOrigin;
     ASSERTCMP(>=, numTicks, 0);
     clocktime_t clockTimeFromClockOrigin = SIMTIME_AS_CLOCKTIME(numTicks * oscillator->getNominalTickLength() * (1 + getOscillatorCompensation().get<unit>()));
     clocktime_t result = originClockTime + clockTimeFromClockOrigin;
+    CLOCK_COUT << "   : " << "numTicksFromOscillatorOriginToSimulationTime = " << numTicksFromOscillatorOriginToSimulationTime << ", "
+                          << "numTicksFromOscillatorOriginToClockOrigin = " << numTicksFromOscillatorOriginToClockOrigin << ", "
+                          << "numTicks = " << numTicks << ", "
+                          << "clockTimeFromClockOrigin = " << clockTimeFromClockOrigin << std::endl;
+    CLOCK_COUT << "   computeClockTimeFromSimTime(" << simulationTime << ") -> " << result << std::endl;
     return result;
 }
 
 simtime_t OscillatorBasedClock::doComputeSimTimeFromClockTime(clocktime_t clockTime, bool lowerBound) const
 {
+    ClockCoutIndent indent;
+    CLOCK_COUT << "-> computeSimTimeFromClockTime(" << clockTime << ", " << (lowerBound ? "true" : "false") << ")\n";
+    CLOCK_COUT << "   : " << "originSimulationTime = " << originSimulationTime << ", "
+                          << "originClockTime = " << originClockTime << ", "
+                          << "oscillatorComputationOrigin = " << oscillator->getComputationOrigin() << ", "
+                          << "oscillatorCompensation = " << getOscillatorCompensation() << std::endl;
     int64_t numTicksFromClockOriginToClockTime = (clockTime - originClockTime).raw() / oscillator->getNominalTickLength().raw() / (1 + getOscillatorCompensation().get<unit>());
     int64_t numTicksFromOscillatorOriginToClockOrigin = oscillator->computeTicksForInterval(originSimulationTime - oscillator->getComputationOrigin());
     int64_t numTicks = numTicksFromClockOriginToClockTime +
@@ -116,6 +136,10 @@ simtime_t OscillatorBasedClock::doComputeSimTimeFromClockTime(clocktime_t clockT
                        (lowerBound ? 0 : 1);
     ASSERTCMP(>=, numTicks, 0);
     simtime_t result = oscillator->getComputationOrigin() + oscillator->computeIntervalForTicks(numTicks);
+    CLOCK_COUT << "   : " << "numTicksFromClockOriginToClockTime = " << numTicksFromClockOriginToClockTime << ", "
+                          << "numTicksFromOscillatorOriginToClockOrigin = " << numTicksFromOscillatorOriginToClockOrigin << ", "
+                          << "numTicks = " << numTicks << std::endl;
+    CLOCK_COUT << "   computeSimTimeFromClockTime(" << clockTime << ", " << (lowerBound ? "true" : "false") << ") -> " << result << std::endl;
     return result;
 }
 
