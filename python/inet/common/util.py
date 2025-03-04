@@ -352,7 +352,7 @@ class DebugLevel(LoggerLevel):
     def __init__(self, logger):
         super().__init__(self, logger, logging.DEBUG)
 
-def run_command_with_logging(args, error_message=None, nice=10, **kwargs):
+def run_command_with_logging(args, error_message=None, nice=10, wait=True, **kwargs):
     logger = logging.getLogger(os.path.basename(args[0]))
     def log_stream(stream, logger, lines):
         for line in iter(stream.readline, ""):
@@ -367,18 +367,21 @@ def run_command_with_logging(args, error_message=None, nice=10, **kwargs):
     stderr_thread = threading.Thread(target=log_stream, args=(process.stderr, logger.stderr, stderr_lines))
     stdout_thread.start()
     stderr_thread.start()
-    try:
-        stdout_thread.join()
-        stderr_thread.join()
-        process.wait()
-    except KeyboardInterrupt:
-        process.kill()
-        raise
-    if process.returncode == -signal.SIGINT:
-        raise KeyboardInterrupt()
-    if error_message and process.returncode != 0:
-        raise Exception(error_message)
-    return subprocess.CompletedProcess(args, process.returncode, "".join(stdout_lines), ''.join(stderr_lines))
+    if wait:
+        try:
+            stdout_thread.join()
+            stderr_thread.join()
+            process.wait()
+        except KeyboardInterrupt:
+            process.kill()
+            raise
+        if process.returncode == -signal.SIGINT:
+            raise KeyboardInterrupt()
+        if error_message and process.returncode != 0:
+            raise Exception(error_message)
+        return subprocess.CompletedProcess(args, process.returncode, "".join(stdout_lines), "".join(stderr_lines))
+    else:
+        return subprocess.CompletedProcess(args, 0, "", "")
 
 def open_file_with_default_editor(file_path):
     if platform.system() == "Windows":
