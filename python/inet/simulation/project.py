@@ -390,7 +390,7 @@ class SimulationProject:
         def local_collect_ini_file_simulation_configs(ini_path, **kwargs):
             return self.collect_ini_file_simulation_configs(ini_path, **kwargs)
         _logger.info(f"Collecting {self.name} simulation configs started")
-        ini_paths = list(itertools.chain.from_iterable(map(lambda g: glob.glob(g, recursive=True), ini_path_globs)))
+        ini_paths = [f for f in itertools.chain.from_iterable(map(lambda g: glob.glob(g, recursive=True), ini_path_globs)) if os.path.isfile(f)]
         if concurrent:
             pool = multiprocessing.pool.ThreadPool(multiprocessing.cpu_count())
             result = list(itertools.chain.from_iterable(pool.map(local_collect_ini_file_simulation_configs, ini_paths)))
