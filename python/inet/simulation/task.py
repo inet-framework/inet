@@ -132,7 +132,7 @@ class SimulationTask(Task):
     Please note that undocumented features are not supposed to be called by the user.
     """
 
-    def __init__(self, simulation_config=None, run_number=0, itervars=None, mode="release", debug=None, remove_launch=True, break_at_event_number=None, break_at_matching_event=None, user_interface=None, result_folder="results", sim_time_limit=None, cpu_time_limit=None, record_eventlog=None, record_pcap=None, name="simulation", task_result_class=SimulationTaskResult, **kwargs):
+    def __init__(self, simulation_config=None, run_number=0, itervars=None, mode="release", debug=None, remove_launch=True, break_at_event_number=None, break_at_matching_event=None, user_interface=None, result_folder="results", sim_time_limit=None, cpu_time_limit=None, record_eventlog=None, record_pcap=None, wait=True, name="simulation", task_result_class=SimulationTaskResult, **kwargs):
         """
         Parameters:
             simulation_config (:py:class:`SimulationConfig <inet.simulation.config.SimulationConfig>`):
@@ -177,6 +177,9 @@ class SimulationTask(Task):
             record_pcap (bool):
                 Specifies whether PCAP files should be recorded or not.
 
+            wait (bool):
+                Determines if running the task waits the simulation to complete or not.
+
             task_result_class (type):
                 The Python class that is used to return the result.
 
@@ -203,6 +206,7 @@ class SimulationTask(Task):
         self.cpu_time_limit = cpu_time_limit
         self.record_eventlog = record_eventlog
         self.record_pcap = record_pcap
+        self.wait = wait
         # self.dependency_source_file_paths = None
 
     def get_hash(self, complete=True, binary=True, **kwargs):
