@@ -92,11 +92,11 @@ class FingerprintTestTaskResult(SimulationTestTaskResult):
         eventlog_file = open(eventlog_file_path)
         fingerprints = []
         for line in eventlog_file:
-            match = re.match(r"E # .* f (.*)", line)
+            match = re.match(r"E # .* f (.*?)/(.*?)", line)
             if match:
-                fingerprints.append(Fingerprint(match.group(1)))
+                fingerprints.append(Fingerprint(match.group(1), match.group(2)))
         eventlog_file.close()
-        return FingerprintTrajectory(self.simulation_result, self.task.ingredients, fingerprints, range(0, len(fingerprints)))
+        return FingerprintTrajectory(self.simulation_task_result, self.task.ingredients, fingerprints, range(0, len(fingerprints)))
 
     def run_baseline_fingerprint_test(self, baseline_simulation_project=inet_baseline_project, **kwargs):
         simulation_task = self.simulation_result.simulation_task
@@ -258,7 +258,7 @@ class FingerprintTrajectory:
             unique_fingerprints.append(fingerprint)
             event_numbers.append(j - 1)
             i = j
-        return FingerprintTrajectory(self.ingredients, unique_fingerprints, event_numbers)
+        return FingerprintTrajectory(self.simulation_result, self.ingredients, unique_fingerprints, event_numbers)
 
     def find_divergence_position(self, other):
         min_size = min(len(self.fingerprints), len(other.fingerprints))
@@ -266,8 +266,8 @@ class FingerprintTrajectory:
             self_fingerprint = self.fingerprints[i]
             other_fingerprint = other.fingerprints[i]
             if self_fingerprint.fingerprint != other_fingerprint.fingerprint:
-                return FingerprintTrajectoryDivergencePosition(SimulationEvent(self.simulation_result.simulation_task, self.event_numbers[i]),
-                                                               SimulationEvent(other.simulation_result.simulation_task, other.event_numbers[i]))
+                return FingerprintTrajectoryDivergencePosition(SimulationEvent(self.simulation_result.task, self.event_numbers[i]),
+                                                               SimulationEvent(other.simulation_result.task, other.event_numbers[i]))
         return None
 
 class FingerprintTrajectoryDivergencePosition:
