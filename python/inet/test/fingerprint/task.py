@@ -20,6 +20,7 @@ from inet.test.simulation import *
 _logger = logging.getLogger(__name__)
 all_fingerprint_ingredients = ["tplx", "~tNl", "~tND", "tyf"]
 all_fingerprint_ingredients_append_args = {
+    "~tNl": {},
     "~tND": {"--**.crcMode=\"computed\"",
              "--**.fcsMode=\"computed\""},
     "tyf" : {"--cmdenv-fake-gui=true",
@@ -34,7 +35,8 @@ all_fingerprint_ingredients_append_args = {
 
 def get_ingredients_append_args(ingredients):
     global all_fingerprint_ingredients_append_args
-    return list(all_fingerprint_ingredients_append_args[ingredients]) if ingredients in all_fingerprint_ingredients_append_args else []
+    append_args = ["--fingerprintcalculator-class", "inet::FingerprintCalculator"] if "~" in ingredients else []
+    return append_args + list(all_fingerprint_ingredients_append_args[ingredients]) if ingredients in all_fingerprint_ingredients_append_args else []
 
 class Fingerprint:
     def __init__(self, fingerprint, ingredients):
@@ -182,7 +184,6 @@ class FingerprintTestTask(SimulationTestTask):
 
     def get_append_args(self, simulation_project, fingerprint_arg):
         return ["--fingerprint", fingerprint_arg, "--vector-recording", "false", "--scalar-recording", "false"]
-        # return ["-n", simulation_project.get_full_path(".") + "/tests/networks", "--fingerprintcalculator-class", "inet::FingerprintCalculator", "--fingerprint", fingerprint_arg, "--vector-recording", "false", "--scalar-recording", "false"]
 
 class FingerprintTestGroupTask(MultipleTestTasks):
     def __init__(self, sim_time_limit=None, **kwargs):
@@ -473,7 +474,6 @@ class FingerprintUpdateTask(SimulationUpdateTask):
         else:
             correct_fingerprint = None
         fingerprint_arg = "0000-0000/" + ingredients
-        append_args = ["--fingerprintcalculator-class", "inet::FingerprintCalculator"] if simulation_config.simulation_project.name == "inet" else []
         append_args = append_args + ["--fingerprint", fingerprint_arg, "--vector-recording", "false", "--scalar-recording", "false"] + get_ingredients_append_args(ingredients)
         self.simulation_task.sim_time_limit = sim_time_limit
         simulation_task_result = self.simulation_task.run_protected(sim_time_limit=sim_time_limit, output_stream=output_stream, append_args=append_args, **kwargs)
