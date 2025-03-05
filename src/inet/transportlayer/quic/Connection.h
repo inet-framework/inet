@@ -69,7 +69,6 @@ class Connection
     Connection(Quic *quicSimpleMod, UdpSocket *udpSocket, AppSocket *appSocket, L3Address remoteAddr, int remotePort);
     virtual ~Connection();
     virtual void processAppCommand(cMessage *msg);
-    virtual void accept();
     virtual void processPackets(Packet *pkt);
     virtual void processTimeout(cMessage *msg);
     void sendPackets();
@@ -87,11 +86,13 @@ class Connection
     void sendInitialPacket();
     void sendHandshakePacket();
     void sendDataToApp(uint64_t streamId, B expectedDataSize);
-    void handleAckFrame(const Ptr<const AckFrameHeader>& frameHeader);
+    void handleAckFrame(const Ptr<const AckFrameHeader>& frameHeader, PacketNumberSpace pnSpace);
     void processIcmpPtb(Packet *droppedPkt, int ptbMtu);
     void reportPtb(int droppedPacketNumber, int ptbMtu);
     bool isHandshakeConfirmed();
     void addDstConnectionId(uint64_t id, uint8_t length);
+    void sendAck(PacketNumberSpace pnSpace);
+    void established();
 
     ReliabilityManager *getReliabilityManager() {
         return this->reliabilityManager;

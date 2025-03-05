@@ -23,7 +23,7 @@ public:
     //virtual void processAckFrame(const Ptr<const AckFrameHeader>& frameHeader);
     //virtual ConnectionState *processLossDetectionTimeout(cMessage *msg);
     //virtual ConnectionState *processAckDelayTimeout(cMessage *msg);
-    void processAckFrame(const Ptr<const AckFrameHeader>& frameHeader);
+    void processAckFrame(const Ptr<const AckFrameHeader>& frameHeader, PacketNumberSpace pnSpace);
 };
 
 } /* namespace quic */

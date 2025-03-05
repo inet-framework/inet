@@ -89,8 +89,6 @@ void UdpSocket::processPacket(Packet *pkt)
     int remotePort = tags.getTag<L4PortInd>()->getSrcPort();
     Connection *connection = createConnection(listeningAppSocket, remoteAddr, remotePort);
     connection->processPackets(pkt);
-
-    connection->accept();
 }
 
 int UdpSocket::getSocketId()

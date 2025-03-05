@@ -17,6 +17,7 @@ namespace quic {
 
 ConnectionState *InitialConnectionState::processConnectAppCommand(cMessage *msg)
 {
+    // send client hello
     context->sendInitialPacket();
 
     return new InitialSentConnectionState(context);
@@ -26,12 +27,16 @@ ConnectionState *InitialConnectionState::processConnectAppCommand(cMessage *msg)
 ConnectionState *InitialConnectionState::processInitialPacket(const Ptr<const InitialPacketHeader>& packetHeader, Packet *pkt) {
     EV_DEBUG << "processInitialPacket in " << name << endl;
 
-    processFrames(pkt);
+    processFrames(pkt, PacketNumberSpace::Initial);
 
     context->addDstConnectionId(packetHeader->getDstConnectionId(), packetHeader->getDstConnectionIdLength());
     context->accountReceivedPacket(packetHeader->getPacketNumber(), ackElicitingPacket, PacketNumberSpace::Initial, false);
 
+    // send server hello
     context->sendInitialPacket();
+
+    // send Encrypted Extensions, Certificate, Certificate Verify, and Finished
+    context->sendHandshakePacket();
 
     return new EstablishedConnectionState(context);
 }

@@ -131,6 +131,7 @@ void Connection::processAppCommand(cMessage *msg)
         // state transition
         delete connectionState;
         connectionState = newState;
+        connectionState->start();
     }
 }
 
@@ -194,6 +195,7 @@ void Connection::processPackets(Packet *pkt)
             // state transition
             delete connectionState;
             connectionState = newState;
+            connectionState->start();
         }
         if (pkt->getByteLength() >= byteLengthBefore) {
             throw cRuntimeError("no packet processing happened");
@@ -209,6 +211,7 @@ void Connection::processTimeout(cMessage *msg)
         // state transition
         delete connectionState;
         connectionState = newState;
+        connectionState->start();
     }
 }
 
@@ -219,6 +222,7 @@ void Connection::processIcmpPtb(Packet *droppedPkt, int ptbMtu)
         // state transition
         delete connectionState;
         connectionState = newState;
+        connectionState->start();
     }
 }
 
@@ -347,7 +351,8 @@ void Connection::sendInitialPacket() {
 }
 
 void Connection::sendHandshakePacket() {
-    EV_DEBUG << "sendHandshakePacket" << endl;
+    int maxQuicPacketSize = path->getMaxQuicPacketSize();
+    sendPacket(packetBuilder->buildHandshakePacket(maxQuicPacketSize), PacketNumberSpace::Handshake);
 }
 
 void Connection::sendPacket(QuicPacket *packet, PacketNumberSpace pnSpace)
@@ -357,13 +362,6 @@ void Connection::sendPacket(QuicPacket *packet, PacketNumberSpace pnSpace)
     stats->getMod()->emit(packetSentSignal, pkt);
     udpSocket->sendto(path->getRemoteAddr(), path->getRemotePort(), pkt);
     reliabilityManager->onPacketSent(packet, pnSpace);
-}
-
-void Connection::accept()
-{
-    if (path->usesDplpmtud()) {
-        path->getDplpmtud()->start();
-    }
 }
 
 void Connection::measureReceiveGoodput(uint64_t receivedDataLength)
@@ -434,20 +432,8 @@ void Connection::accountReceivedPacket(uint64_t packetNumber, bool ackEliciting,
 {
     stats->getMod()->emit(packetNumberReceivedStat, packetNumber);
     receivedPacketsAccountants[pnSpace]->onPacketReceived(packetNumber, ackEliciting, isIBitSet);
-    if (receivedPacketsAccountants[pnSpace]->wantsToSendAckImmediately()) {
-        int maxQuicPacketSize = path->getMaxQuicPacketSize();
-        switch (pnSpace) {
-            case PacketNumberSpace::Initial:
-            case PacketNumberSpace::Handshake: {
-                sendPacket(packetBuilder->buildAckOnlyPacket(maxQuicPacketSize, pnSpace), pnSpace);
-                break;
-            }
-            case PacketNumberSpace::ApplicationData: {
-                sendPackets();
-                break;
-            }
-        }
-
+    if (pnSpace == PacketNumberSpace::ApplicationData && receivedPacketsAccountants[pnSpace]->wantsToSendAckImmediately()) {
+        sendPackets();
     }
 }
 
@@ -495,9 +481,9 @@ void Connection::onDataBlockedFrameReceived(uint64_t dataLimit){
     connectionFlowControlResponder->onDataBlockedFrameReceived(dataLimit);
 }
 
-void Connection::handleAckFrame(const Ptr<const AckFrameHeader>& frameHeader)
+void Connection::handleAckFrame(const Ptr<const AckFrameHeader>& frameHeader, PacketNumberSpace pnSpace)
 {
-    reliabilityManager->onAckReceived(frameHeader, PacketNumberSpace::ApplicationData);
+    reliabilityManager->onAckReceived(frameHeader, pnSpace);
 
     if (!acceptDataFromApp) {
         if (getStreamsSendQueueLength() < sendQueueLimit*sendQueueLowWaterRatio) {
@@ -524,17 +510,36 @@ void Connection::reportPtb(int droppedPacketNumber, int ptbMtu)
     }
 }
 
-bool Connection::isHandshakeConfirmed() {
+bool Connection::isHandshakeConfirmed()
+{
     // TODO: implement
     return true;
 }
 
 
-void Connection::addDstConnectionId(uint64_t id, uint8_t length) {
+void Connection::addDstConnectionId(uint64_t id, uint8_t length)
+{
     ConnectionId *connectionId = new ConnectionId(id, length);
     dstConnectionIds.push_back(connectionId);
     if (dstConnectionIds.size() == 1) {
         packetBuilder->setDstConnectionId(connectionId);
+    }
+}
+
+void Connection::sendAck(PacketNumberSpace pnSpace)
+{
+    if (receivedPacketsAccountants[pnSpace]->hasNewAckInfoAboutAckElicitings()) {
+        int maxQuicPacketSize = path->getMaxQuicPacketSize();
+        sendPacket(packetBuilder->buildAckOnlyPacket(maxQuicPacketSize, pnSpace), pnSpace);
+    }
+}
+
+void Connection::established()
+{
+    appSocket->sendEstablished();
+
+    if (path->usesDplpmtud()) {
+        path->getDplpmtud()->start();
     }
 }
 

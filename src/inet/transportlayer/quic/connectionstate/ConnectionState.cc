@@ -28,6 +28,11 @@ ConnectionState::~ConnectionState() {
 
 }
 
+void ConnectionState::start()
+{
+
+}
+
 ConnectionState *ConnectionState::processAppCommand(cMessage *msg)
 {
     switch (msg->getKind()) {
@@ -77,7 +82,10 @@ ConnectionState *ConnectionState::processPacket(Packet *pkt)
             switch (staticPtrCast<const LongPacketHeader>(packetHeader)->getLongPacketType()) {
                 case LONG_PACKET_HEADER_TYPE_INITIAL:
                     return processInitialPacket(staticPtrCast<const InitialPacketHeader>(packetHeader), pkt);
+                case LONG_PACKET_HEADER_TYPE_HANDSHAKE:
+                    return processHandshakePacket(staticPtrCast<const HandshakePacketHeader>(packetHeader), pkt);
             }
+            break;
         case PACKET_HEADER_FORM_SHORT:
             return processOneRttPacket(staticPtrCast<const OneRttPacketHeader>(packetHeader), pkt);
     }
@@ -92,7 +100,7 @@ ConnectionState *ConnectionState::processInitialPacket(const Ptr<const InitialPa
 
 ConnectionState *ConnectionState::processHandshakePacket(const Ptr<const HandshakePacketHeader>& packetHeader, Packet *pkt)
 {
-    throw cRuntimeError("1-RTT packet unexpected in the current state");
+    throw cRuntimeError("Handshake packet unexpected in the current state");
 }
 
 ConnectionState *ConnectionState::processOneRttPacket(const Ptr<const OneRttPacketHeader>& packetHeader, Packet *pkt)
@@ -120,11 +128,11 @@ ConnectionState *ConnectionState::processIcmpPtb(Packet *droppedPkt, int ptbMtu)
     return processIcmpPtb(packetNumber, ptbMtu);
 }
 
-void ConnectionState::processFrames(Packet *pkt)
+void ConnectionState::processFrames(Packet *pkt, PacketNumberSpace pnSpace)
 {
     Ptr<const FrameHeader> frameHeader = nullptr;
     do {
-        processFrame(pkt);
+        processFrame(pkt, pnSpace);
         frameHeader = nullptr;
         if (pkt->getByteLength() > 0) {
             frameHeader = staticPtrCast<const FrameHeader>(pkt->peekAtFront<Chunk>());
@@ -132,7 +140,7 @@ void ConnectionState::processFrames(Packet *pkt)
     } while (frameHeader != nullptr);
 }
 
-void ConnectionState::processFrame(Packet *pkt)
+void ConnectionState::processFrame(Packet *pkt, PacketNumberSpace pnSpace)
 {
     auto frameHeader = pkt->popAtFront<FrameHeader>();
     EV_DEBUG << "process frame, found chunk: " << frameHeader << endl;
@@ -144,7 +152,7 @@ void ConnectionState::processFrame(Packet *pkt)
         case FRAME_HEADER_TYPE_STREAM:
             return processStreamFrame(staticPtrCast<const StreamFrameHeader>(frameHeader), pkt);
         case FRAME_HEADER_TYPE_ACK:
-            return processAckFrame(staticPtrCast<const AckFrameHeader>(frameHeader));
+            return processAckFrame(staticPtrCast<const AckFrameHeader>(frameHeader), pnSpace);
         case FRAME_HEADER_TYPE_MAX_DATA:
             return processMaxDataFrame(staticPtrCast<const MaxDataFrameHeader>(frameHeader));
         case FRAME_HEADER_TYPE_MAX_STREAM_DATA:
@@ -168,7 +176,7 @@ void ConnectionState::processStreamFrame(const Ptr<const StreamFrameHeader>& fra
     throw cRuntimeError("Stream frame unexpected in the current state");
 }
 
-void ConnectionState::processAckFrame(const Ptr<const AckFrameHeader>& frameHeader)
+void ConnectionState::processAckFrame(const Ptr<const AckFrameHeader>& frameHeader, PacketNumberSpace pnSpace)
 {
     throw cRuntimeError("Ack frame unexpected in the current state");
 }

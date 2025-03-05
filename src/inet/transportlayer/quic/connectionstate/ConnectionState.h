@@ -19,6 +19,7 @@
 #include "../Connection.h"
 #include "../packet/PacketHeader_m.h"
 #include "../packet/FrameHeader_m.h"
+#include "../packet/QuicPacket.h"
 #include "inet/transportlayer/contract/quic/QuicCommand_m.h"
 
 namespace inet {
@@ -29,6 +30,7 @@ public:
     ConnectionState(Connection *context);
     virtual ~ConnectionState();
 
+    virtual void start();
     virtual ConnectionState *processAppCommand(cMessage *msg);
     virtual ConnectionState *processConnectAppCommand(cMessage *msg);
     virtual ConnectionState *processSendAppCommand(cMessage *msg);
@@ -40,10 +42,10 @@ public:
     virtual ConnectionState *processHandshakePacket(const Ptr<const HandshakePacketHeader>& packetHeader, Packet *pkt);
     virtual ConnectionState *processOneRttPacket(const Ptr<const OneRttPacketHeader>& packetHeader, Packet *pkt);
 
-    virtual void processFrames(Packet *pkt);
+    virtual void processFrames(Packet *pkt, PacketNumberSpace pnSpace);
     virtual void processStreamFrame(const Ptr<const StreamFrameHeader>& frameHeader, Packet *pkt);
-    virtual void processAckFrame(const Ptr<const AckFrameHeader>& frameHeader);
-    virtual void processFrame(Packet *pkt);
+    virtual void processAckFrame(const Ptr<const AckFrameHeader>& frameHeader, PacketNumberSpace pnSpace);
+    virtual void processFrame(Packet *pkt, PacketNumberSpace pnSpace);
     virtual void processMaxDataFrame(const Ptr<const MaxDataFrameHeader>& frameHeader);
     virtual void processMaxStreamDataFrame(const Ptr<const MaxStreamDataFrameHeader>& frameHeader);
     virtual void processStreamDataBlockedFrame(const Ptr<const StreamDataBlockedFrameHeader>& frameHeader);

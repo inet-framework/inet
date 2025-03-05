@@ -104,19 +104,18 @@ QuicPacket *PacketBuilder::createPacket(PacketNumberSpace pnSpace, bool skipPack
     std::stringstream packetName;
     switch (pnSpace) {
         case PacketNumberSpace::Initial:
-            packetName << "Initial";
+            packetName << "Initial[" << packetNumber[pnSpace] << "]";
             header = createInitialHeader();
             break;
         case PacketNumberSpace::Handshake:
-            packetName << "Handshake";
+            packetName << "Handshake[" << packetNumber[pnSpace] << "]";
             header = createHandshakeHeader();
             break;
         case PacketNumberSpace::ApplicationData:
-            packetName << "1-RTT";
+            packetName << "1-RTT[" << packetNumber[pnSpace] << "]";
             header = createOneRttHeader();
             break;
     }
-    packetName << "[" << packetNumber[pnSpace] << "]";
     QuicPacket *packet = new QuicPacket(packetName.str());;
     packet->setHeader(header);
 
@@ -400,8 +399,7 @@ QuicPacket *PacketBuilder::buildDplpmtudProbePacket(int packetSize, Dplpmtud *dp
     return packet;
 }
 
-QuicPacket *PacketBuilder::buildInitialPacket(int maxPacketSize) {
-    std::stringstream packetName;
+QuicPacket *PacketBuilder::buildInitialPacket(int maxPacketSize) {;
     QuicPacket *packet = createPacket(PacketNumberSpace::Initial, false);
 
     packet->addFrame(createCryptoFrame());
@@ -409,6 +407,22 @@ QuicPacket *PacketBuilder::buildInitialPacket(int maxPacketSize) {
     // check if we would like to bundle an ack frame
     if (receivedPacketsAccountant[PacketNumberSpace::Initial]->hasNewAckInfoAboutAckElicitings() || (receivedPacketsAccountant[PacketNumberSpace::Initial]->hasNewAckInfo() && bundleAckForNonAckElicitingPackets)) {
         QuicFrame *ackFrame = receivedPacketsAccountant[PacketNumberSpace::Initial]->generateAckFrame(maxPacketSize - getPacketSize(packet));
+        if (ackFrame != nullptr) {
+            packet->addFrame(ackFrame);
+        }
+    }
+
+    return packet;
+}
+
+QuicPacket *PacketBuilder::buildHandshakePacket(int maxPacketSize) {
+    QuicPacket *packet = createPacket(PacketNumberSpace::Handshake, false);
+
+    packet->addFrame(createCryptoFrame());
+
+    // check if we would like to bundle an ack frame
+    if (receivedPacketsAccountant[PacketNumberSpace::Handshake]->hasNewAckInfoAboutAckElicitings() || (receivedPacketsAccountant[PacketNumberSpace::Handshake]->hasNewAckInfo() && bundleAckForNonAckElicitingPackets)) {
+        QuicFrame *ackFrame = receivedPacketsAccountant[PacketNumberSpace::Handshake]->generateAckFrame(maxPacketSize - getPacketSize(packet));
         if (ackFrame != nullptr) {
             packet->addFrame(ackFrame);
         }

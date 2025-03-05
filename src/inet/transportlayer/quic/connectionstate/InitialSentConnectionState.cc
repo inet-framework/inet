@@ -14,18 +14,17 @@ namespace quic {
 
 ConnectionState *InitialSentConnectionState::processInitialPacket(const Ptr<const InitialPacketHeader>& packetHeader, Packet *pkt) {
     EV_DEBUG << "processInitialPacket in " << name << endl;
-    processFrames(pkt);
+    processFrames(pkt, PacketNumberSpace::Initial);
 
     context->addDstConnectionId(packetHeader->getDstConnectionId(), packetHeader->getDstConnectionIdLength());
     context->accountReceivedPacket(packetHeader->getPacketNumber(), ackElicitingPacket, PacketNumberSpace::Initial, false);
-
-    context->sendHandshakePacket();
+    context->sendAck(PacketNumberSpace::Initial);
 
     return new HandshakeConnectionState(context);
 }
 
 
-void InitialSentConnectionState::processAckFrame(const Ptr<const AckFrameHeader>& frameHeader)
+void InitialSentConnectionState::processAckFrame(const Ptr<const AckFrameHeader>& frameHeader, PacketNumberSpace pnSpace)
 {
     context->getReliabilityManager()->onAckReceived(frameHeader, PacketNumberSpace::Initial);
 }

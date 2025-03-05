@@ -44,6 +44,7 @@ public:
     QuicPacket *buildPingPacket();
     QuicPacket *buildDplpmtudProbePacket(int packetSize, Dplpmtud *dplpmtud);
     QuicPacket *buildInitialPacket(int maxPacketSize);
+    QuicPacket *buildHandshakePacket(int maxPacketSize);
     void setSrcConnectionId(ConnectionId *connectionId) {
         this->srcConnectionId = connectionId;
     }

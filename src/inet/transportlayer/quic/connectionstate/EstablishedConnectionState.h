@@ -19,10 +19,11 @@ public:
         name = "Established";
     }
 
+    virtual void start() override;
     virtual ConnectionState *processSendAppCommand(cMessage *msg) override;
     virtual ConnectionState *processOneRttPacket(const Ptr<const OneRttPacketHeader>& packetHeader, Packet *pkt) override;
     virtual void processStreamFrame(const Ptr<const StreamFrameHeader>& frameHeader, Packet *pkt) override;
-    virtual void processAckFrame(const Ptr<const AckFrameHeader>& frameHeader) override;
+    virtual void processAckFrame(const Ptr<const AckFrameHeader>& frameHeader, PacketNumberSpace pnSpace) override;
     virtual void processMaxDataFrame(const Ptr<const MaxDataFrameHeader>& frameHeader) override;
     virtual void processMaxStreamDataFrame(const Ptr<const MaxStreamDataFrameHeader>& frameHeader) override;
     virtual void processStreamDataBlockedFrame(const Ptr<const StreamDataBlockedFrameHeader>& frameHeader) override;
@@ -32,6 +33,8 @@ public:
     virtual ConnectionState *processRecvAppCommand(cMessage *msg) override;
     virtual ConnectionState *processIcmpPtb(uint32_t droppedPacketNumber, int ptbMtu) override;
     virtual ConnectionState *processDplpmtudRaiseTimeout(cMessage *msg) override;
+    virtual ConnectionState *processInitialPacket(const Ptr<const InitialPacketHeader>& packetHeader, Packet *pkt) override;
+    virtual ConnectionState *processHandshakePacket(const Ptr<const HandshakePacketHeader>& packetHeader, Packet *pkt) override;
 };
 
 } /* namespace quic */

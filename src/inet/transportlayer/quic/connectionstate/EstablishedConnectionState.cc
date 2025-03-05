@@ -1,4 +1,4 @@
-//
+ //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -18,6 +18,10 @@
 namespace inet {
 namespace quic {
 
+void EstablishedConnectionState::start()
+{
+    context->established();
+}
 
 ConnectionState *EstablishedConnectionState::processSendAppCommand(cMessage *msg)
 {
@@ -43,7 +47,7 @@ ConnectionState *EstablishedConnectionState::processOneRttPacket(const Ptr<const
     EV_DEBUG << "processOneRttPacket in " << name << endl;
 
     ackElicitingPacket = false;
-    processFrames(pkt);
+    processFrames(pkt, PacketNumberSpace::ApplicationData);
 
     context->accountReceivedPacket(packetHeader->getPacketNumber(), ackElicitingPacket, PacketNumberSpace::ApplicationData, packetHeader->getIBit());
 
@@ -61,9 +65,9 @@ void EstablishedConnectionState::processStreamFrame(const Ptr<const StreamFrameH
     context->processReceivedData(frameHeader->getStreamId(), frameHeader->getOffset(), data);
 }
 
-void EstablishedConnectionState::processAckFrame(const Ptr<const AckFrameHeader>& frameHeader)
+void EstablishedConnectionState::processAckFrame(const Ptr<const AckFrameHeader>& frameHeader, PacketNumberSpace pnSpace)
 {
-    context->handleAckFrame(frameHeader);
+    context->handleAckFrame(frameHeader, pnSpace);
 }
 
 void EstablishedConnectionState::processMaxDataFrame(const Ptr<const MaxDataFrameHeader>& frameHeader){
@@ -120,6 +124,28 @@ ConnectionState *EstablishedConnectionState::processDplpmtudRaiseTimeout(cMessag
     context->getPath()->getDplpmtud()->onRaiseTimeout();
     return this;
 }
+
+ConnectionState *EstablishedConnectionState::processInitialPacket(const Ptr<const InitialPacketHeader>& packetHeader, Packet *pkt) {
+    EV_DEBUG << "processInitialPacket in " << name << endl;
+
+    processFrames(pkt, PacketNumberSpace::Initial);
+
+    context->accountReceivedPacket(packetHeader->getPacketNumber(), ackElicitingPacket, PacketNumberSpace::Initial, false);
+
+    return this;
+}
+
+ConnectionState *EstablishedConnectionState::processHandshakePacket(const Ptr<const HandshakePacketHeader>& packetHeader, Packet *pkt) {
+    EV_DEBUG << "processHandshakePacket in " << name << endl;
+
+    processFrames(pkt, PacketNumberSpace::Handshake);
+
+    context->accountReceivedPacket(packetHeader->getPacketNumber(), ackElicitingPacket, PacketNumberSpace::Handshake, false);
+    context->sendAck(PacketNumberSpace::Handshake);
+
+    return this;
+}
+
 
 } /* namespace quic */
 } /* namespace inet */

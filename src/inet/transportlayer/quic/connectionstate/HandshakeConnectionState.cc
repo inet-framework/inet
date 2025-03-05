@@ -15,9 +15,12 @@ namespace quic {
 
 ConnectionState *HandshakeConnectionState::processHandshakePacket(const Ptr<const HandshakePacketHeader>& packetHeader, Packet *pkt) {
     EV_DEBUG << "processHandshakePacket in " << name << endl;
-    processFrames(pkt);
+    processFrames(pkt, PacketNumberSpace::Handshake);
 
     context->accountReceivedPacket(packetHeader->getPacketNumber(), ackElicitingPacket, PacketNumberSpace::Handshake, false);
+
+    // send Finished
+    context->sendHandshakePacket();
 
     return new EstablishedConnectionState(context);
 }
