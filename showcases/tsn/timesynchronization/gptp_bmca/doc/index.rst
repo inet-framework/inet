@@ -10,8 +10,10 @@ Overview
 
 The Best Master Clock Algorithm (BMCA) is a fundamental part of the IEEE 1588 Precision Time Protocol (PTP).
 It enables automatic selection of the best master clock in a distributed network to ensure accurate synchronization.
+
 Imagine that a master clock in the network that provides time for the entire network.
 When losing the time synchronization signal and the clock goes offline, with a single clock, the timing network may go into hold for a limited time, after which time synchronization is lost.
+
 Then the BMCA comes into play, which selects the best master clock in the network to ensure accurate synchronization.
 It decides which of the clocks should act as the master clock. Each clock sends a message to the network to detect other clocks, and then proceeds data set compare.
 This compares the data strings from each device and determines which clock is best suited to maintain the timing network.
@@ -20,14 +22,38 @@ This algorithm runs independently on each device in a PTP domain and determines 
 PTP networks operate in a hierarchical structure with a single Grandmaster Clock at the top, distributing time to all slave clocks.
 BMCA ensures that the best available clock is always selected dynamically without manual intervention.
 
-A basic implementation of bmca is provided.
+A basic implementation of BMCA is provided.
 
 | Source files location: `inet/showcases/tsn/timesynchronization/gptp_bmca <https://github.com/inet-framework/inet/tree/master/showcases/tsn/timesynchronization/gptp_bmca>`__
 
 
-
-
 .. _ug:sec:bmca:steps:
+
+
+Network Structure
+-----------------
+
+We provide three BMCA structures in the showcase: BmcaDiamondBase, BmcaDiamond and BmcaDiamondAsymmetric.
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: [Config BmcaDiamondBase]
+   :end-at: *.tsnSwitch*.clock.displayStringTextFormat = "diff: %d"
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: [Config BmcaDiamond]
+   :end-at: *.scenarioManager.script = xmldoc("diamond-link-failure.xml")
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: [Config BmcaDiamondAsymmetric]
+   :end-at: *.scenarioManager.script = xmldoc("asym-diamond-link-failure.xml")
+
+Among them, BmcaDiamondBase is the basic structure, and BmcaDiamond and BmcaDiamondAsymmetric are the extended structures.
+
+
+.. _ug:sec:bmca:initialization:
 
 Basic Steps
 -----------
@@ -37,16 +63,28 @@ Basic Steps
 - Select: Select the best clock.
 - Update: Update the port states based on the selected clock.
 
-
-
-.. _ug:sec:bmca:initialization:
-
 Initialization
 --------------
 
 Initialization so that the BMCA ports can subscribe to the transmission and reception signals.
 Only BMCA nodes should have the BMCA ports.
 They are able to receive multicast PTP messages.
+
+In the configuration file omnetpp.ini, the bmcaPorts are set for both tsnDevice and tsnSwitch:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: *.tsnDevice*.gptp.bmcaPorts = ["eth0"]
+   :end-at: *.tsnSwitch.gptp.bmcaPorts = ["eth0", "eth1", "eth2"]
+
+Furthermore, we set the grandmasterPriority1 for both tsnDevice1 and tsnDevice3, which will be used later in comparison:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: *.tsnDevice1.gptp.grandmasterPriority1 = 2
+   :end-at: *.tsnDevice3.gptp.grandmasterPriority1 = 3
+
+
 
 
 
@@ -65,6 +103,23 @@ Lower values represent higher precision.
 - Priority 2 (0): Another user-defined priority.
 - GrandmasterIdentity: uniquely identifies this clock in the network.
 - Steps Removed (0):This The number of hops from the Grandmaster. A device directly connected to the Grandmaster has stepsRemoved = 0.
+
+.. literalinclude:: inet/src/inet/linklayer/ieee8021as/Gptp.cc
+   :language: cc
+   :start-at: localPriorityVector.grandmasterPriority1 = par("grandmasterPriority1");
+   :end-at: localPriorityVector.stepsRemoved = 0;
+
+
+.. code-block:: cc
+
+   localPriorityVector.grandmasterPriority1 = par("grandmasterPriority1");
+    localPriorityVector.grandmasterClockQuality.clockClass = 248;
+    localPriorityVector.grandmasterClockQuality.clockAccuracy = 0;
+    localPriorityVector.grandmasterClockQuality.offsetScaledLogVariance = 0;
+    localPriorityVector.grandmasterPriority2 = 0;
+    localPriorityVector.grandmasterIdentity = clockIdentity;
+    localPriorityVector.stepsRemoved = 0;
+
 
 
 
@@ -105,6 +160,7 @@ It compares two gPTP Announce messages based on their Priority Vector and topolo
 - If grandmasterIdentity is different: Compare entire Priority Vector. Uses lexicographical comparison on PriorityVector (grandmasterPriority1, grandmasterClockQuality, grandmasterPriority2, grandmasterIdentity, stepsRemoved).
 - Error Handling for Unexpected Cases.
 
-This function follows IEEE 1588-2019 BMCA rules.
+This function follows IEEE 1588-2019 BMCA rules. (Reference: `1588-2019 - IEEE Standard for a Precision Clock Synchronization Protocol for Networked Measurement and Control Systems <https://ieeexplore.ieee.org/document/9120376>`__)
+
 It prioritizes the best path, resolves tie-breakers, and detects invalid conditions.
 
