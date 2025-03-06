@@ -132,7 +132,7 @@ class SimulationTask(Task):
     Please note that undocumented features are not supposed to be called by the user.
     """
 
-    def __init__(self, simulation_config=None, run_number=0, itervars=None, mode="release", debug=None, remove_launch=True, break_at_event_number=None, break_at_matching_event=None, user_interface=None, result_folder="results", sim_time_limit=None, cpu_time_limit=None, record_eventlog=None, record_pcap=None, wait=True, name="simulation", task_result_class=SimulationTaskResult, **kwargs):
+    def __init__(self, simulation_config=None, run_number=0, itervars=None, mode="release", debug=None, remove_launch=True, break_at_event_number=None, break_at_matching_event=None, user_interface="Cmdenv", result_folder="results", sim_time_limit=None, cpu_time_limit=None, record_eventlog=None, record_pcap=None, wait=True, name="simulation", task_result_class=SimulationTaskResult, **kwargs):
         """
         Parameters:
             simulation_config (:py:class:`SimulationConfig <inet.simulation.config.SimulationConfig>`):
@@ -200,7 +200,7 @@ class SimulationTask(Task):
         self.remove_launch = remove_launch
         self.break_at_event_number = break_at_event_number
         self.break_at_matching_event = break_at_matching_event
-        self.user_interface = user_interface or ("Dbgenv" if debug else "Cmdenv")
+        self.user_interface = user_interface
         self.result_folder = result_folder
         self.sim_time_limit = sim_time_limit
         self.cpu_time_limit = cpu_time_limit
