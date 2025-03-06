@@ -20,8 +20,8 @@ from inet.test.task import *
 
 _logger = logging.getLogger(__name__)
 
-if importlib.util.find_spec("omnetpp.opp_test"):
-    from omnetpp.opp_test import *
+if importlib.util.find_spec("omnetpp.test"):
+    from omnetpp.test import *
 
     class IdeOppTest(OppTest):
         def __init__(self, remove_launch=True, **kwargs):
