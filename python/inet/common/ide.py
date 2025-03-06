@@ -57,7 +57,7 @@ def debug_program(name, program, args, working_directory, remove_launch=True, de
 
 def register_key_bindings():
     ip = IPython.get_ipython()
-    @ip.pt_app.key_bindings.add('c-t')
+    @ip.pt_app.key_bindings.add('c-e')
     def _(event):
         get_org_package().omnetpp.python.Activator.executeActivateEditorAction()
     @ip.pt_app.key_bindings.add('c-n')
