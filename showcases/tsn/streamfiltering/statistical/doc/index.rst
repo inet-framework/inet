@@ -4,49 +4,163 @@ Statistical Policing
 Goals
 -----
 
-In this example, we combine a sliding window rate meter with a probabilistic packet
-dropper to achieve simple statistical policing.
+In this example, we demonstrate a statistical policing mechanism combining a
+sliding window rate meter with a probabilistic packet dropper. This approach
+provides a flexible method for traffic shaping and policing that can adapt to
+varying network conditions while maintaining statistical guarantees on bandwidth
+allocation.
+
+.. note:: This statistical policing model is not part of any TSN standard. It is an experimental proprietary model developed for INET for research and demonstration purposes.
 
 | INET version: ``4.4``
 | Source files location: `inet/showcases/tsn/streamfiltering/statistical <https://github.com/inet-framework/inet/tree/master/showcases/tsn/streamfiltering/statistical>`__
 
+Background
+----------
+
+Traffic policing is a critical component in network quality of service (QoS)
+management, particularly in Time-Sensitive Networking (TSN) environments where
+different traffic classes have varying requirements. Unlike deterministic
+policing mechanisms, statistical policing employs probabilistic methods to
+manage traffic flows. This could be generally useful for low-priority best
+effort traffic. 
+
 The Model
 ---------
-In this configuration, we use a sliding window rate meter in combination with a
-statistical rate limiter. The former measures the throughput by summing up the
-packet bytes over the time window, the latter drops packets in a probabilistic
-way by comparing the measured data rate to the maximum allowed data rate.
 
-Here is the network:
+In this configuration, we implement statistical policing using two key components:
+
+1. **Sliding Window Rate Meter**: Measures the current traffic rate by tracking packet arrivals within a configurable time window
+2. **Statistical Rate Limiter**: Probabilistically drops packets based on how much the measured rate exceeds the configured maximum rate
+
+Here is the network topology:
 
 .. figure:: media/Network.png
    :align: center
    :width: 100%
 
-Here is the configuration:
+The network consists of three nodes:
+
+- A client generating two traffic streams (best effort and video)
+- A switch implementing the statistical policing mechanism
+- A server receiving the traffic
+
+**Sliding Window Rate Meter**
+
+The sliding window rate meter (:ned:`SlidingWindowRateMeter`) maintains a record
+of packet lengths indexed by their arrival times. The key NED parameter is
+:par:`timeWindow` (configured as 10ms in this showcase), which determines the
+duration of the measurement window. For each new packet:
+
+1. The packet's length is added to the current total
+2. Packets that have fallen outside the time window are removed
+3. Current data rate and packet rate are calculated based on the window contents
+4. These rates are attached to the packet as a RateTag for use by downstream components
+
+The time window determines the sensitivity of the rate measurement. A smaller
+window makes the meter more responsive to short-term rate variations, while a
+larger window provides a more stable long-term rate estimate.
+
+**Statistical Rate Limiter**
+
+The statistical rate limiter (:ned:`StatisticalRateLimiter`) uses the rates
+measured by the sliding window rate meter to make probabilistic dropping
+decisions. The key NED parameters are :par:`maxDatarate` (configured as 40Mbps
+for best effort and 20Mbps for video traffic) and :par:`maxPacketrate` (not used
+in this showcase). For each packet:
+
+1. It extracts the RateTag from each packet
+2. Compares the measured data rate with the configured maximum data rate
+3. If the measured rate exceeds the maximum, it calculates a drop probability proportional to the excess:
+   
+   p = (measured_rate - max_rate) / measured_rate
+   
+4. A random number is generated, and if it's less than the drop probability, the packet is dropped
+
+This approach ensures that as the measured traffic exceeds the configured limit,
+an increasing proportion of packets are dropped.
+
+**Traffic Configuration**
+
+The showcase includes two traffic streams with different characteristics:
+
+1. **Best Effort Traffic**:
+
+   - Target rate of approximately 40Mbps
+   - Packet size of 1000 bytes
+   - Production interval varies sinusoidally to simulate complex traffic patterns
+   - Assigned Priority Code Point (PCP) value of 0
+
+2. **Video Traffic**:
+
+   - Target rate of approximately 20Mbps
+   - Packet size of 500 bytes
+   - Production interval varies sinusoidally at a different frequency
+   - Assigned PCP value of 4 (higher priority)
+
+The sinusoidal variation in production intervals creates complex traffic
+patterns with natural bursts and lulls, providing a good test case for the
+statistical policing mechanism.
+
+Here is the traffic configuration:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
+   :start-at: best-effort stream
+   :end-before: enable outgoing streams
+
+And here is the per-stream filtering configuration:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: # per-stream filtering
 
 Results
 -------
 
-Here are the results:
+The simulation results demonstrate how the statistical policing mechanism
+affects the traffic streams as they pass through the switch. The following
+figures show the traffic patterns at different points in the network.
+
+**Client Application Traffic**
 
 .. figure:: media/ClientApplicationTraffic.png
    :align: center
 
+This figure shows the traffic generated by the client applications. The blue
+line represents the best effort traffic (~40Mbps), while the red line shows the
+video traffic (~20Mbps). Note the sinusoidal variations in both traffic streams,
+creating natural bursts that exceed the target rates at times.
+
+**Best Effort Traffic Class**
+
 .. figure:: media/BestEffortTrafficClass.png
    :align: center
+
+This figure shows the best effort traffic after passing through the statistical
+policing mechanism. When the traffic rate exceeds the configured maximum of
+40Mbps, packets are probabilistically dropped, bringing the overall rate back
+within bounds. The statistical nature of the policing is evident in how the
+traffic peaks are "shaved off" rather than strictly capped.
+
+**Video Traffic Class**
 
 .. figure:: media/VideoTrafficClass.png
    :align: center
 
+Similarly, this figure shows the video traffic after policing. The configured
+maximum rate of 20Mbps is enforced through probabilistic packet dropping. Notice
+how the traffic still maintains its sinusoidal pattern but with peaks that
+exceed the threshold being reduced.
+
+**Server Application Traffic**
+
 .. figure:: media/ServerApplicationTraffic.png
    :align: center
 
-Sources: :download:`omnetpp.ini <../omnetpp.ini>`
+This figure shows the combined traffic as received by the server applications.
 
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`
 
 Try It Yourself
 ---------------
@@ -85,4 +199,3 @@ Discussion
 ----------
 
 Use `this <https://github.com/inet-framework/inet/discussions/794>`__ page in the GitHub issue tracker for commenting on this showcase.
-
