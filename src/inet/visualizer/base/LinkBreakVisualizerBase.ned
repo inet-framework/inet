@@ -8,14 +8,26 @@
 package inet.visualizer.base;
 
 //
-// This is a base module for link break visualizer simple modules. It keeps
-// track of link breaks in a network. Link breaks are not displayed by
-// default, see module parameters for how to enable the visualization. The
-// actual visualization of link breaks is done in derived modules.
+// This is a base module for link break visualizer simple modules. It visualizes
+// link failures in wireless and wired networks, showing where and when
+// communication links between nodes have been broken.
 //
-// This module subscribes to `linkBroken` on the module determined by the
-// `visualizationSubjectModule` parameter. If the visualizer receives a link break signal,
-// then it stores the broken link and starts the link break visualization.
+// By default, link breaks are not displayed. To enable visualization, set the
+// displayLinkBreaks parameter to true and use the filters to select which
+// nodes, interfaces, and packets to monitor for link breaks.
+//
+// The visualizer shows link breaks as stop icons at the locations where
+// links have failed. This helps identify connectivity issues, understand
+// the impact of mobility on network topology, and debug routing protocols
+// that need to adapt to changing network conditions.
+//
+// This module subscribes to `linkBroken` signals on the module determined by the
+// `visualizationSubjectModule` parameter. When it receives a link break signal,
+// it stores the broken link information and starts the visualization, which
+// will fade out after the configured time.
+//
+// The actual rendering of link break indicators is implemented in derived
+// modules for specific user interfaces (canvas or OSG).
 //
 // @see ~LinkBreakCanvasVisualizer, ~LinkBreakOsgVisualizer, ~ILinkBreakVisualizer, ~VisualizerBase
 //
@@ -38,4 +50,3 @@ simple LinkBreakVisualizerBase extends VisualizerBase
 
         @class(LinkBreakVisualizerBase);
 }
-

@@ -8,13 +8,30 @@
 package inet.visualizer.base;
 
 //
-// This is a base module for medium visualizer simple modules. It keeps track
-// of ongoing signal departures, ongoing signal arrivals, and propagating signals.
+// This is a base module for medium visualizer simple modules. It provides
+// comprehensive visualization of wireless signal propagation and radio medium
+// properties in the network.
 //
-// It subscribes to `signalSourceAdded`, `signalSourceRemoved`, `signalAdded`,
+// The visualizer offers multiple visualization options:
+// - Propagating signals as expanding circles
+// - Signal departures and arrivals with icons
+// - Communication and interference ranges as circles around radios
+// - Power density maps showing signal strength distribution
+// - Spectrum figures displaying power spectral density
+// - Spectrograms showing power density over time and frequency
+//
+// By default, all visualizations are disabled. Each can be enabled individually
+// through the corresponding display parameters.
+//
+// This module subscribes to `signalSourceAdded`, `signalSourceRemoved`, `signalAdded`,
 // `signalRemoved`, `signalDepartureStarted`, `signalDepartureEnded`, `signalArrivalStarted`,
 // `signalArrivalEnded` simulation signals at the module determined by the `mediumModule`
-// parameter. The actual visualization of the medium is done in derived modules.
+// parameter. The actual rendering of the visualizations is implemented in derived
+// modules for specific user interfaces (canvas or OSG).
+//
+// The medium visualizer is particularly useful for understanding wireless signal
+// propagation, analyzing interference patterns, debugging radio communication
+// issues, and visualizing spectral properties of the wireless medium.
 //
 // @see ~MediumCanvasVisualizer, ~MediumOsgVisualizer, ~IMediumVisualizer, ~VisualizerBase
 //
@@ -123,4 +140,3 @@ simple MediumVisualizerBase extends VisualizerBase
 
         @class(MediumVisualizerBase);
 }
-

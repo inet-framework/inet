@@ -8,14 +8,23 @@
 package inet.visualizer.base;
 
 //
-// This is a base module for packet drop visualizer simple modules. It keeps
-// track of dropped packets in a network. Packet drops are not displayed by
-// default, see module parameters for how to enable the visualization. The
-// actual visualization of packet drops is done in derived modules.
+// This is a base module for packet drop visualizer simple modules. It visualizes
+// locations and reasons for packet drops in the network, helping identify
+// communication problems and bottlenecks.
 //
-// This module subscribes to `packetDropped` on the module determined by the
-// `visualizationSubjectModule` parameter. If the visualizer receives a packet dropped
-// signal, then it stores the dropped packet and starts the visualization.
+// By default, packet drops are not displayed. To enable visualization, set the
+// displayPacketDrops parameter to true and use the filters to select which
+// nodes, interfaces, packets, and drop reasons to visualize.
+//
+// The visualizer shows packet drops as icons at the locations where packets
+// were discarded, with optional labels indicating the packet name or drop reason.
+// Common drop reasons include queue overflow, address resolution failure,
+// routing issues, TTL expiration, and bit errors.
+//
+// This module subscribes to `packetDropped` signals on the module determined by the
+// `visualizationSubjectModule` parameter. When it receives a packet dropped
+// signal, it stores the dropped packet information and starts the visualization,
+// which will fade out after the configured time.
 //
 // The format string can contain the following directives:
 //  - %n packet name
@@ -49,4 +58,3 @@ simple PacketDropVisualizerBase extends VisualizerBase
 
         @class(PacketDropVisualizerBase);
 }
-

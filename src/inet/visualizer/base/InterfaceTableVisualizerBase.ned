@@ -9,9 +9,17 @@ package inet.visualizer.base;
 
 //
 // This is a base module for interface table visualizer simple modules.
-// It displays information of network interfaces at network nodes. Network
-// interfaces are not displayed by default, see module parameters for how to
-// enable the visualization.
+// It displays information about network interfaces (such as Ethernet, Wi-Fi,
+// PPP, etc.) at network nodes, showing their names, addresses, and status.
+//
+// By default, network interfaces are not displayed. To enable visualization,
+// set the displayInterfaceTables parameter to true and use the filters to
+// select which nodes and interfaces to visualize.
+//
+// The visualizer shows interface information as text annotations, which can
+// be placed at the network nodes or at the connections for wired interfaces.
+// It dynamically updates when interfaces are created, deleted, or their
+// configuration changes.
 //
 // This module subscribes to `interfaceCreated`, `interfaceDeleted`,
 // `interfaceConfigChanged`, and `interfaceIpv4ConfigChanged` on the
@@ -57,4 +65,3 @@ simple InterfaceTableVisualizerBase extends VisualizerBase
 
         @class(InterfaceTableVisualizerBase);
 }
-

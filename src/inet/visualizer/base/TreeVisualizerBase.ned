@@ -7,6 +7,25 @@
 
 package inet.visualizer.base;
 
+//
+// This is a base module for tree visualizer simple modules. It visualizes
+// tree structures in the network, such as multicast trees, spanning trees,
+// or other hierarchical relationships between network nodes.
+//
+// By default, trees are not displayed. To enable visualization, set the
+// displayTrees parameter to true and configure the derived visualizer module
+// with appropriate parameters for the specific tree type.
+//
+// The visualizer shows tree structures as a set of connected arrows between
+// network nodes, with the root node at the top and child nodes below. This
+// helps understand hierarchical relationships, routing paths, and network
+// organization.
+//
+// The actual rendering of tree structures is implemented in derived modules
+// for specific tree types and user interfaces (canvas or OSG).
+//
+// @see ~VisualizerBase
+//
 simple TreeVisualizerBase extends VisualizerBase
 {
     parameters:
@@ -25,4 +44,3 @@ simple TreeVisualizerBase extends VisualizerBase
 
         @class(TreeVisualizerBase);
 }
-

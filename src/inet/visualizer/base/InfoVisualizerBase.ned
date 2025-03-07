@@ -9,10 +9,21 @@ package inet.visualizer.base;
 
 //
 // This is a base module for submodule information visualizer simple modules.
-// It displays some information on network nodes originating from one of their
-// corresponding submodules. No information is displayed by default, see module
-// parameters for how to enable the visualization. The actual visualization is
-// done in derived modules.
+// It displays textual information about network nodes and their submodules as
+// annotations attached to the nodes.
+//
+// The visualizer allows displaying various properties of modules, such as their
+// names, paths, or display string text. This is particularly useful for debugging,
+// creating informative visualizations, or annotating specific aspects of the
+// simulation model.
+//
+// By default, information display is enabled, but no modules are selected.
+// To visualize module information, set the modules parameter to specify which
+// submodules to consider, and use the format parameter to determine what
+// information is displayed.
+//
+// The actual rendering of information annotations is implemented in derived
+// modules for specific user interfaces (canvas or OSG).
 //
 // The format string can contain the following directives:
 //  - %n module full name
@@ -43,4 +54,3 @@ simple InfoVisualizerBase extends VisualizerBase
 
         @class(InfoVisualizerBase);
 }
-
