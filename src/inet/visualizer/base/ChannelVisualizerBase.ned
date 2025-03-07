@@ -7,6 +7,30 @@
 
 package inet.visualizer.base;
 
+//
+// This is a base module for channel visualizer simple modules. It visualizes
+// communication channels as arrows pointing from source to destination nodes.
+// This visualization helps understand active communication paths and traffic
+// patterns in the network.
+//
+// By default, channels are not displayed. To enable visualization, set the
+// displayChannelActivity parameter to true and use the filters to select which
+// channels to display.
+//
+// The visualizer dynamically updates when packets are transmitted through
+// channels, showing active communication paths and fading them out when they
+// become inactive.
+//
+// The actual rendering of channels is implemented in derived modules for specific
+// user interfaces (canvas or OSG).
+//
+// Label Format:
+// The labelFormat parameter determines what information is displayed on the channel
+// arrows. It can contain the following directives:
+//  - %n name - Channel name
+//
+// @see ~ChannelCanvasVisualizer, ~ChannelOsgVisualizer, ~ChannelVisualizer, ~IChannelVisualizer
+//
 simple ChannelVisualizerBase extends VisualizerBase
 {
     parameters:
@@ -37,4 +61,3 @@ simple ChannelVisualizerBase extends VisualizerBase
 
         @class(ChannelVisualizerBase);
 }
-

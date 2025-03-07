@@ -8,14 +8,31 @@
 package inet.visualizer.base;
 
 //
-// Serves as a base module for all visualizer simple modules. Visualizers add graphical
-// annotations to network elements or draw lines/shapes on the canvas to represent
-// various aspects of the simulation. This base module provides common parameters and
-// functionality for determining what to visualize and where to display the visualization.
+// Serves as the foundation for all visualizer simple modules in the INET framework.
+// This module provides the core functionality and parameters that are common to
+// all visualizers, establishing a consistent architecture for visualization components.
 //
-// Visualizers typically operate by subscribing to signals emitted by simulation modules,
-// processing the received information, and creating/updating visual representations
-// accordingly. The visual elements are added to either a canvas (2D) or OSG (3D) scene.
+// Visualizers enhance simulation understanding by adding graphical annotations to
+// network elements or drawing lines/shapes on the canvas to represent various aspects
+// of the simulation. They make complex network behavior visible and help debug
+// protocol implementations by providing visual feedback.
+//
+// The visualization architecture in INET follows a layered design:
+// - VisualizerBase: Provides common parameters and core functionality
+// - Specialized base modules: Extend VisualizerBase for specific visualization tasks
+// - Canvas/OSG implementations: Implement the actual rendering for 2D or 3D scenes
+//
+// Visualizers typically operate by:
+// 1. Subscribing to signals emitted by simulation modules
+// 2. Processing the received information to determine what to display
+// 3. Creating/updating visual representations in the user interface
+// 4. Managing the lifecycle of visual elements as the simulation progresses
+//
+// The visualizationTargetModule parameter determines where the visualization appears,
+// while visualizationSubjectModule specifies what part of the simulation is visualized.
+// This separation allows for flexible configuration of visualizations.
+//
+// @see ~IVisualizer, ~IntegratedVisualizer
 //
 simple VisualizerBase
 {

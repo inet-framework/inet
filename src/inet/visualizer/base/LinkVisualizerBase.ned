@@ -8,17 +8,33 @@
 package inet.visualizer.base;
 
 //
-// This is a base module for link visualizer simple modules. It keeps track of
-// active links in a network. A link between two network nodes is considered
-// active if a packet has been sent recently between the corresponding layers. Active
-// links are not displayed by default, see the module parameters for how to
-// enable the visualization. The actual visualization of active links is done
-// in derived modules.
+// This is a base module for link visualizer simple modules. It provides the
+// foundation for visualizing active communication links between network nodes
+// at various protocol layers (physical, data link, network, etc.).
 //
-// This module subscribes to signals at the provided subscription module. When
-// determining active links, it only considers packets matched by the provided
-// filters. The filters use the format of `cMatchExpression` with the packet name
-// as the default attribute.
+// By default, links are not displayed. To enable visualization, set the
+// displayLinks parameter to true in the derived visualizer module and use
+// the filters to select which nodes, interfaces, and packets to monitor.
+//
+// The visualizer shows active links as arrows between network nodes, with
+// optional labels showing packet information. A link is considered active
+// when a packet successfully travels from one node to another at the
+// corresponding protocol layer. Links fade out after a configurable amount
+// of time if no new packets are transmitted.
+//
+// This module subscribes to signals at the provided subscription module and
+// tracks packet transmissions between nodes. When determining active links,
+// it only considers packets matched by the provided filters. The filters use
+// the format of `cMatchExpression` with the packet name as the default attribute.
+//
+// The activityLevel parameter determines what level of communication is visualized:
+// - service: visualizes application-level communication (end-to-end)
+// - peer: visualizes protocol-level communication (peer-to-peer)
+// - protocol: visualizes all protocol-internal communication
+//
+// This base module is extended by specific link visualizers for different
+// protocol layers, such as PhysicalLinkVisualizer for physical layer links
+// and DataLinkVisualizer for data link layer connections.
 //
 // The format string can contain the following directives:
 //  - %n packet name
@@ -58,4 +74,3 @@ simple LinkVisualizerBase extends VisualizerBase
 
         @class(LinkVisualizerBase);
 }
-

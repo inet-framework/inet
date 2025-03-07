@@ -8,10 +8,28 @@
 package inet.visualizer.base;
 
 //
-// This is a base module for mobility visualizer simple modules. It subscribes
-// to the `mobilityStateChanged` signal in the module determined by the
-// `visualizationSubjectModule` parameter. The actual visualization of mobility is done in
-// derived modules.
+// This is a base module for mobility visualizer simple modules. It visualizes
+// the movement, position, orientation, and velocity of network nodes in the
+// simulation.
+//
+// The visualizer offers multiple visualization options:
+// - Current positions as colored circles
+// - Current orientations as pie slices
+// - Current velocities as arrows
+// - Movement trails showing the recent path of nodes
+//
+// By default, only basic mobility visualization is enabled. The additional
+// visualizations (positions, orientations, velocities, and trails) can be
+// enabled individually through their corresponding display parameters.
+//
+// This module subscribes to the `mobilityStateChanged` signal in the module
+// determined by the `visualizationSubjectModule` parameter. The actual rendering
+// of the visualizations is implemented in derived modules for specific user
+// interfaces (canvas or OSG).
+//
+// The mobility visualizer is particularly useful for understanding node movement
+// patterns, analyzing the impact of mobility on network performance, and
+// debugging mobility models.
 //
 // @see ~MobilityCanvasVisualizer, ~MobilityOsgVisualizer, ~IMobilityVisualizer, ~VisualizerBase
 //
@@ -54,4 +72,3 @@ simple MobilityVisualizerBase extends VisualizerBase
 
         @class(MobilityVisualizerBase);
 }
-

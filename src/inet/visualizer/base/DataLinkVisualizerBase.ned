@@ -9,20 +9,29 @@ package inet.visualizer.base;
 
 //
 // This is a base module for data link layer link visualizer simple modules. It
-// keeps track of active links in a network. A link between two network nodes is
-// considered active if a packet is sent recently between their link layers.
-// Active links are not displayed by default, see the module parameters for how
-// to enable the visualization. The actual visualization of active links is done
-// in derived modules.
+// visualizes active communication links at the data link (MAC) layer, showing
+// successful frame transmissions between network nodes.
 //
-// This module subscribes for `packetReceivedFromUpper` and `packetSentToUpper` on
-// the module determined by the `visualizationSubjectModule` parameter. If the visualizer
-// receives a `packetReceivedFromUpper` from a MAC protocol module, then it stores
-// the corresponding packet id. If later on the visualizer receives a
-// `packetSentToUpper` from another MAC protocol module with the same packet id,
-// then it adds an active link between the source and the destination nodes.
-// After a certain amount of time, the link becomes inactive unless it is
-// reinforced by another packet.
+// By default, data link layer links are not displayed. To enable visualization,
+// set the displayLinks parameter to true in the derived visualizer module and
+// use the filters to select which nodes, interfaces, and packets to monitor.
+//
+// The visualizer shows data link layer connections as dark cyan arrows between
+// network nodes, with optional labels showing packet information. Links become
+// active when a frame successfully travels from one node's MAC layer to another's,
+// and fade out after a configurable amount of time if no new frames are transmitted.
+//
+// This module subscribes for `packetReceivedFromUpper` and `packetSentToUpper` signals
+// on the module determined by the `visualizationSubjectModule` parameter. When a packet
+// is handed down to a MAC protocol module (packetReceivedFromUpper), the visualizer
+// stores its ID. When that same packet ID is later detected being passed up from
+// another MAC protocol module (packetSentToUpper), the visualizer creates or
+// refreshes a link between the source and destination nodes.
+//
+// Data link visualization is particularly useful for understanding MAC layer
+// communication patterns, analyzing which nodes are actively exchanging frames,
+// debugging MAC protocol issues, and observing the effects of wireless interference
+// on successful frame delivery.
 //
 // @see ~DataLinkCanvasVisualizer, ~DataLinkOsgVisualizer, ~IDataLinkVisualizer, ~VisualizerBase
 //
@@ -33,4 +42,3 @@ simple DataLinkVisualizerBase extends LinkVisualizerBase
         labelColor = default("darkcyan");
         @class(DataLinkVisualizerBase);
 }
-

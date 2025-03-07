@@ -8,14 +8,24 @@
 package inet.visualizer.base;
 
 //
-// This is a base module for statistic visualizer simple modules. It keeps track
-// of the last value of a statistic for multiple network nodes. The actual
-// visualization of statistic values is done in derived modules. It subscribes
-// for the signal determined by the `signalName` parameter at the module specified
-// by the `visualizationSubjectModule` parameter. If the visualizer receives such a signal,
-// it checks if the source matches the `sourceFilter` parameter. If the signal
-// passes the check, it determines the last value of the statistic specified by
-// the `statisticName` parameter.
+// This is a base module for statistic visualizer simple modules. It visualizes
+// various statistics from network nodes as text annotations, allowing real-time
+// monitoring of simulation metrics.
+//
+// By default, statistics are not displayed. To enable visualization, set the
+// displayStatistics parameter to true, specify the signalName and statisticName
+// parameters, and use the sourceFilter to select which modules to monitor.
+//
+// The visualizer tracks the last value of a specified statistic for multiple
+// network nodes. It subscribes to the signal determined by the signalName
+// parameter at the module specified by the visualizationSubjectModule parameter.
+// When it receives such a signal, it checks if the source matches the sourceFilter
+// parameter. If the signal passes the check, it determines and displays the last
+// value of the statistic specified by the statisticName parameter.
+//
+// This visualizer is particularly useful for monitoring performance metrics,
+// analyzing protocol behavior, debugging simulation issues, and observing
+// the dynamic evolution of network parameters during simulation.
 //
 // The format string can contain the following directives:
 //  - %s: signal name
@@ -50,4 +60,3 @@ simple StatisticVisualizerBase extends VisualizerBase
 
         @class(StatisticVisualizerBase);
 }
-

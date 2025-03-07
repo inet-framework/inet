@@ -8,24 +8,34 @@
 package inet.visualizer.base;
 
 //
-// This is a base module for path visualizer simple modules. It keeps track of
-// active routes in a network. A route between two nodes is considered active
-// if a packet is sent recently between their corresponding layers. Active
-// routes are not displayed by default, see the module parameters for how to
-// enable the visualization. The actual visualization of active routes is done
-// in derived modules.
+// This is a base module for path visualizer simple modules. It visualizes
+// the routes that packets take through the network, showing end-to-end paths
+// and intermediate hops as animated polyline arrows.
 //
-// This module subscribes to `packetReceivedFromUpper`, `packetSentToUpper`, and
-// `packetReceivedFromLower` on the module determined by the `visualizationSubjectModule`
-// parameter. If the visualizer receives a `packetReceivedFromUpper` from
-// a protocol module, then it stores the corresponding packet id. If later on,
-// the visualizer receives a `packetSentToUpper` from another corresponding protocol
-// module with the same packet id, then it adds an active route between the
-// source and the destination nodes. During the route discovery, if the
-// visualizer receives a `packetReceivedFromLower` from a corresponding protocol
-// module, then it adds the node to the intermediate nodes of the route. After
-// a certain amount of time, the route becomes inactive unless it is reinforced
-// by another packet.
+// By default, routes are not displayed. To enable visualization, set the
+// displayRoutes parameter to true and use the filters to select which
+// nodes and packets to monitor.
+//
+// The visualizer tracks packet paths by monitoring protocol modules at different
+// layers of the network stack. It works by:
+// - Detecting when packets enter the network stack from applications (packetReceivedFromUpper)
+// - Tracking packets as they pass through intermediate nodes (packetReceivedFromLower)
+// - Identifying when packets reach their final destination (packetSentToUpper)
+//
+// When a complete path is detected, the visualizer draws a polyline arrow
+// connecting the source, intermediate nodes, and destination. These paths
+// fade out after a configurable amount of time unless reinforced by new packets
+// following the same route.
+//
+// The path visualization includes:
+// - Colored arrows showing the complete route from source to destination
+// - Automatic shifting of overlapping paths for better visibility
+// - Optional labels with packet information
+// - Smooth animation and fade-out effects
+//
+// This visualizer is particularly useful for understanding routing behavior,
+// analyzing network traffic patterns, debugging protocol implementations,
+// and demonstrating how packets traverse the network.
 //
 // The format string can contain the following directives:
 //  - %n packet name
@@ -67,4 +77,3 @@ simple PathVisualizerBase extends VisualizerBase
 
         @class(PathVisualizerBase);
 }
-

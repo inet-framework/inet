@@ -8,7 +8,26 @@
 package inet.visualizer.base;
 
 //
-// This is a base module for radio visualizer simple modules.
+// This is a base module for radio visualizer simple modules. It visualizes
+// radio devices in network nodes, showing their operational mode, transmission
+// and reception states, and antenna radiation patterns.
+//
+// By default, radios themselves are not displayed, but their states can be shown.
+// To enable full visualization, set the displayRadios parameter to true and use
+// the radioFilter to select which radios to visualize.
+//
+// The visualizer offers multiple visualization options:
+// - Radio mode (off, sleep, receiver, transmitter, transceiver) with different icons
+// - Reception state (idle, busy, receiving) with visual indicators
+// - Transmission state (idle, transmitting) with visual indicators
+// - Antenna radiation patterns as 2D lobes showing directional gain
+//
+// The antenna lobe visualization is particularly useful for understanding
+// directional antennas, analyzing coverage patterns, and debugging radio
+// communication issues related to antenna orientation.
+//
+// The actual rendering of radio visualizations is implemented in derived
+// modules for specific user interfaces (canvas or OSG).
 //
 // @see ~RadioCanvasVisualizer, ~RadioOsgVisualizer, ~IRadioVisualizer, ~VisualizerBase
 //
@@ -51,4 +70,3 @@ simple RadioVisualizerBase extends VisualizerBase
 
         @class(RadioVisualizerBase);
 }
-

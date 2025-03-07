@@ -9,12 +9,25 @@ package inet.visualizer.base;
 
 //
 // This is a base module for IEEE 802.11 association visualizer simple modules.
-// It keeps track of wireless interface associations by subscribing to a number
-// of signals at the provided subscription module.
+// It visualizes Wi-Fi associations between stations and access points, showing
+// connection status and signal strength with appropriate icons.
 //
-// This module subscribes to l2Associated, l2Disassociated,
-// `l2ApAssociated`, `l2ApDisassociated` on the module determined by the
-// `visualizationSubjectModule` parameter.
+// By default, associations are not displayed. To enable visualization, set the
+// displayAssociations parameter to true and use the filters to select which
+// nodes and interfaces to visualize.
+//
+// The visualizer shows:
+// - Wi-Fi association status between stations and access points
+// - Signal strength indicators with different icons based on received power
+// - SSID labels for the wireless networks
+//
+// The visualizer dynamically updates when stations associate or disassociate
+// with access points by subscribing to l2Associated, l2Disassociated,
+// l2ApAssociated, and l2ApDisassociated signals on the module determined by the
+// visualizationSubjectModule parameter.
+//
+// The actual rendering of associations is implemented in derived modules for
+// specific user interfaces (canvas or OSG).
 //
 // @see ~Ieee80211CanvasVisualizer, ~Ieee80211OsgVisualizer, ~IIeee80211Visualizer, ~VisualizerBase
 //
@@ -40,4 +53,3 @@ simple Ieee80211VisualizerBase extends VisualizerBase
 
         @class(Ieee80211VisualizerBase);
 }
-

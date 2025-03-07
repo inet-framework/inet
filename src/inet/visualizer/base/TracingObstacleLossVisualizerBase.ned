@@ -9,8 +9,25 @@ package inet.visualizer.base;
 
 //
 // This is a base module for tracing obstacle loss visualizer simple modules. It
-// subscribes to the obstacle loss module for physical object penetrated signals.
-// The actual visualization of obstacle loss is done in derived modules.
+// visualizes how wireless signals interact with physical objects in the environment,
+// showing the points where signals penetrate through walls, buildings, and other obstacles.
+//
+// By default, intersections are not displayed. To enable visualization, set the
+// displayIntersections parameter to true. You can also enable the display of face
+// normal vectors at intersection points by setting displayFaceNormalVectors to true.
+//
+// The visualizer shows the intersection points between signal paths and physical
+// objects as red lines, with optional grey normal vectors indicating the orientation
+// of the penetrated surface. These visualizations fade out after a configurable
+// amount of time.
+//
+// This visualizer is particularly useful for understanding signal propagation in
+// complex environments, analyzing the impact of obstacles on wireless communication,
+// and debugging obstacle loss models that calculate signal attenuation through
+// different materials.
+//
+// The actual rendering of obstacle loss visualizations is implemented in derived
+// modules for specific user interfaces (canvas or OSG).
 //
 // @see ~TracingObstacleLossCanvasVisualizer, ~TracingObstacleLossOsgVisualizer, ~ITracingObstacleLossVisualizer, ~VisualizerBase
 //
@@ -33,4 +50,3 @@ simple TracingObstacleLossVisualizerBase extends VisualizerBase
 
         @class(TracingObstacleLossVisualizerBase);
 }
-

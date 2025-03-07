@@ -8,12 +8,25 @@
 package inet.visualizer.base;
 
 //
-// This is a base module for scene visualizer simple modules. It determines the
-// bounds of the scene, which is the minimum area where the whole simulation
-// fits in. The scene encloses all physical objects and the constraint area
-// of all mobile nodes. The visualizer also provides a timer that can be used
-// to periodically update the user interface independently of the underlying
-// simulation. The actual visualization of the scene is done in derived modules.
+// This is a base module for scene visualizer simple modules. It provides the
+// fundamental spatial context for all other visualizers by determining the
+// bounds of the simulation area.
+//
+// The scene visualizer calculates the minimum area that encloses all physical
+// objects and the constraint areas of all mobile nodes. This establishes the
+// coordinate system and spatial boundaries for the entire visualization.
+//
+// The visualizer can optionally display coordinate axes to help with spatial
+// orientation, and it provides a timer mechanism that enables smooth animation
+// and periodic user interface updates independent of the simulation events.
+//
+// The scene visualizer is typically the first visualizer to be initialized and
+// serves as the foundation for all other visualizations. It determines how the
+// simulation space is mapped to the screen or 3D view.
+//
+// The actual rendering of the scene is implemented in derived modules for
+// specific user interfaces (canvas or OSG). The OSG version provides a more
+// realistic 3D visualization with perspective and camera controls.
 //
 // @see ~SceneCanvasVisualizer, ~SceneOsgVisualizer, ~ISceneVisualizer, ~VisualizerBase
 //
