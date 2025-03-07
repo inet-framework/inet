@@ -8,7 +8,21 @@
 package inet.queueing.queue;
 
 //
-// This is a limited packet queue that drops packets at the head of the queue.
+// Packet queue with a limited capacity that drops packets at the head of the queue
+// when it becomes full. This queue management strategy provides different behavior
+// compared to the more common drop-tail approach.
+//
+// When the queue reaches its capacity limit (packetCapacity), any newly arriving
+// packet causes the oldest packet (the one at the head/beginning of the queue) to
+// be dropped. This behavior is implemented using the PacketAtCollectionBeginDropper.
+//
+// Drop-head queuing has several distinctive characteristics:
+// - Favors newer packets over older ones, which can be beneficial for real-time traffic
+// - Helps prevent head-of-line blocking in certain scenarios
+// - Can provide better quality of service for time-sensitive applications
+// - May improve performance for applications where newer data is more valuable than older data
+//
+// @see ~DropTailQueue, ~PacketQueue, ~PacketAtCollectionBeginDropper
 //
 simple DropHeadQueue extends PacketQueue
 {

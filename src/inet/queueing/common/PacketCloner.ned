@@ -11,9 +11,30 @@ import inet.queueing.base.PacketProcessorBase;
 import inet.queueing.contract.IPassivePacketSink;
 
 //
-// This module connects one packet producer to one packet consumer. It can be
-// pushed with packets from the connected packet producer. When this happens,
-// a separate copy of the packet is pushed to each output gate.
+// Creates identical copies of each incoming packet and forwards them to multiple
+// output gates. Serves as a packet distribution point where each outgoing connection
+// receives the same packet content.
+//
+// Key features:
+// - Creates exact copies of each incoming packet
+// - Distributes copies to all connected output gates
+// - Preserves all packet attributes and data in each copy
+// - Operates in push mode (passive sink, active source)
+// - Supports dynamic number of output connections
+//
+// Operation mechanism:
+// - When a packet arrives at the input gate, the module creates a separate copy
+//   for each output gate
+// - Each copy is identical to the original packet, including all headers, data,
+//   and metadata
+// - The copies are then pushed to their respective output gates
+// - The original packet is consumed in the process
+//
+// Note: Unlike PacketDuplicator which sends duplicates to the same output,
+// PacketCloner sends copies to different outputs, effectively implementing
+// a one-to-many distribution pattern.
+//
+// @see ~PacketDuplicator, ~OrdinalBasedDuplicator, ~PacketMultiplexer
 //
 simple PacketCloner extends PacketProcessorBase like IPassivePacketSink // IActivePacketSource // TODO out gate is vector
 {

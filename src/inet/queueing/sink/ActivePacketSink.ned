@@ -11,19 +11,34 @@ import inet.queueing.base.ActivePacketSinkBase;
 import inet.queueing.contract.IActivePacketSink;
 
 //
-// This module is an active packet sink which pulls packets from the connected
-// module. It pulls whole packets through the in gate at every collection interval.
-// It pulls the first packet after the initial collection offset.
+// Active packet sink that pulls packets at regular intervals from connected
+// modules and consumes them. This module is a fundamental traffic consumption
+// component in the queueing framework.
 //
-// If backpressure is present at the end of a collection interval, then it waits
-// until the backpressure disappears, and then pulls in a packet. The collection
-// interval timer always starts after the module pulls a packet in.
+// The module operates by:
+// 1. Actively requesting packets from connected providers at specified intervals
+// 2. Pulling packets through the input gate using the pull mechanism
+// 3. Processing and consuming the received packets (counting and deleting them)
+// 4. Respecting backpressure conditions from upstream modules
 //
-// All pulled packets are counted and deleted.
+// Key features:
+// - Configurable collection interval for precise traffic consumption patterns
+// - Initial collection offset to control when the first packet is collected
+// - Backpressure awareness to prevent pulling when providers cannot supply packets
+// - Support for custom clock modules for synchronized packet collection
+// - Comprehensive packet statistics collection
+//
+// Timing behavior:
+// - The first packet is collected after initialCollectionOffset (or immediately if negative)
+// - Subsequent packets are collected every collectionInterval
+// - If backpressure is present, packet collection is delayed until backpressure is removed
+// - The collection interval timer always starts after a packet is successfully pulled in
 //
 // Invariants:
-//  - two subsequent packets are always pulled in at least `collectionInterval` time apart
-//  - backpressure prevents packets from being pulled in
+// - Two subsequent packets are always pulled in at least `collectionInterval` time apart
+// - Backpressure prevents packets from being pulled in
+//
+// @see ~PassivePacketSink, ~FullPacketSink, ~PcapFilePacketConsumer
 //
 simple ActivePacketSink extends ActivePacketSinkBase like IActivePacketSink
 {
@@ -36,4 +51,3 @@ simple ActivePacketSink extends ActivePacketSinkBase like IActivePacketSink
     gates:
         input in @labels(pull);
 }
-

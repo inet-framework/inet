@@ -10,6 +10,35 @@ package inet.queueing.flow;
 import inet.queueing.base.PacketFlowBase;
 import inet.queueing.contract.IPacketFlow;
 
+//
+// Initiates detailed packet flow measurements by marking packets and starting
+// the tracking of various timing metrics. Works in conjunction with the
+// FlowMeasurementRecorder to provide comprehensive packet flow analysis.
+//
+// Flow measurement capabilities:
+// - Marks packets to begin bit-level tracking through the network
+// - Configurable to measure specific packet types or parts of packets
+// - Initiates timing measurements for queueing, processing, transmission, etc.
+// - Creates a unique flow identity that can be recognized by recorders
+//
+// Key features:
+// - Bit-level granularity for precise measurements
+// - Flexible packet filtering
+// - Customizable measurement regions within packets
+// - Named flows to separate different measurement scenarios
+// - Selective measurement of specific timing components
+//
+// Typical usage involves placing a FlowMeasurementStarter at the beginning
+// of a network path and one or more FlowMeasurementRecorder modules at points
+// of interest along the path. The starter initiates the measurement process,
+// while the recorders collect and analyze the timing data.
+//
+// The starter can be configured to measure only specific parts of packets
+// (using offset and length parameters) and to track only certain timing
+// components (using the measure parameter).
+//
+// @see ~FlowMeasurementRecorder
+//
 simple FlowMeasurementStarter extends PacketFlowBase like IPacketFlow
 {
     parameters:

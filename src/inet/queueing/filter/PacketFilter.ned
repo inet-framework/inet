@@ -11,12 +11,26 @@ import inet.queueing.base.PacketFilterBase;
 import inet.queueing.contract.IPacketFilter;
 
 //
-// This module filters packets that match the configured filter criteria.
-// When the filter is pushed by a connected packet producer, it either pushes
-// the packet to the connected packet consumer or drops it depending on the
-// configured packet filter. Similarly, when the filter is pulled by a connected
-// packet collector, it pulls packets from the connected packet provider until
-// it finds one that matches the configured packet filter.
+// Extensible packet filter that uses a pluggable filtering function to selectively
+// forward packets. This module provides a framework for implementing custom packet
+// filtering algorithms.
+//
+// Operation mechanism:
+// - In push mode: Receives packets from a producer, forwards matching packets to
+//   the consumer and drops non-matching packets
+// - In pull mode: Pulls packets from a provider until finding one that matches
+//   the filter criteria, then forwards it to the collector
+// - The filtering decision is made by the configured filter function
+//
+// The PacketFilter serves as a base for implementing custom filtering algorithms
+// without having to implement a complete filter module. By providing different
+// filter function implementations, various filtering policies can be realized.
+//
+// The filterClass parameter specifies the C++ class that implements the
+// filtering algorithm. This class must implement the IPacketFilterFunction
+// interface and be registered via Register_Class.
+//
+// @see ~ContentBasedFilter, ~LabelFilter, ~RedDropper, ~OrdinalBasedDropper
 //
 simple PacketFilter extends PacketFilterBase like IPacketFilter
 {

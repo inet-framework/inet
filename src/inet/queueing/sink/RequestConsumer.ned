@@ -13,12 +13,28 @@ import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.IPacketServer;
 
 //
-// This module processes incoming packets one by one in the order they arrive.
-// First, it classifies a packet according to the configured classifier function,
-// then it generates tokens for the selected category in the configured response
-// producer.
+// This module implements a request-response pattern for packet processing.
+// It acts as the consumer side of a request-response pair, working in conjunction
+// with a ResponseProducer to model bidirectional communication patterns.
 //
-// @see ~ResponseProducer
+// Key features:
+// - Processes incoming request packets sequentially
+// - Classifies requests into different categories using a configurable classifier
+// - Generates tokens for the appropriate response category in the paired ResponseProducer
+// - Controls processing rate through a token-based server
+// - Supports multiple request/response types through the numKind parameter
+//
+// Operation mechanism:
+// 1. Incoming request packets are stored in a queue
+// 2. The server processes one packet at a time (controlled by tokens)
+// 3. The classifier determines the request type/category
+// 4. The corresponding token generator creates tokens in the ResponseProducer
+// 5. These tokens enable the ResponseProducer to generate appropriate responses
+//
+// Typically used with a ResponseProducer module that generates the corresponding
+// responses based on the tokens produced by this module.
+//
+// @see ~ResponseProducer, ~TokenBasedServer, ~PacketBasedTokenGenerator
 //
 module RequestConsumer like IPassivePacketSink
 {

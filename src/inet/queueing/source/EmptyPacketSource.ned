@@ -13,10 +13,22 @@ import inet.queueing.contract.IPacketSource;
 import inet.queueing.contract.IPassivePacketSource;
 
 //
-// This module is an active/passive empty packet source. It doesn't push packets
-// into the connected module, and it doesn't allow packets to be pulled from it
-// by the connected module. The output gate generates backpressure for pull packet
-// operations.
+// This module simulates a permanently inactive or unavailable packet source.
+// It implements both active and passive packet source interfaces but never
+// produces any packets and always generates backpressure when packets are
+// requested from it.
+//
+// Key features:
+// - Implements all packet source interfaces for compatibility
+// - Never pushes packets to connected modules
+// - Always rejects pull requests with backpressure
+// - Maintains statistics on attempted operations
+// - Provides a placeholder for a packet source that is temporarily unavailable
+//
+// This module is the source counterpart to the FullPacketSink, which similarly
+// never accepts any packets.
+//
+// @see ~FullPacketSink, ~ActivePacketSource, ~PassivePacketSource
 //
 simple EmptyPacketSource extends PacketProcessorBase like IPacketSource, IActivePacketSource, IPassivePacketSource
 {

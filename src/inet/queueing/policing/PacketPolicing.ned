@@ -12,10 +12,28 @@ import inet.queueing.contract.IPacketMeter;
 import inet.queueing.contract.IPacketPolicing;
 
 //
-// This module combines a packet meter and a packet filter into a packet policing
-// module. The meter measures the packet flow that is passing through and attaches
-// some meta information to the packets. The filter drops the packets that do not
-// match the implemented filter criteria.
+// Implements a basic packet policing mechanism by combining a packet meter
+// and a packet filter in sequence. Enforces traffic policies by measuring traffic
+// characteristics and then selectively dropping packets that exceed defined limits.
+//
+// Key features:
+// - Two-stage traffic policing (metering followed by filtering)
+// - Configurable metering algorithm to measure traffic characteristics
+// - Configurable filtering criteria for packet acceptance/dropping
+// - Push-based packet processing model
+// - Implements standard traffic policing patterns like token bucket and leaky bucket
+//
+// Operation mechanism:
+// 1. The meter component measures traffic characteristics (e.g., rate, burst size)
+//    and attaches meta information to packets (typically color markings)
+// 2. The filter component examines the meta information and decides whether to
+//    forward or drop each packet based on configured criteria
+//
+// By default, this module uses DualRateThreeColorMeter and LabelFilter components,
+// which implement the two rate three color marker (trTCM) algorithm as defined in
+// RFC 2698, but these can be customized to implement various policing strategies.
+//
+// @see ~MultiPacketPolicing, ~DualRateThreeColorMeter, ~SingleRateThreeColorMeter, ~LabelFilter
 //
 module PacketPolicing like IPacketPolicing
 {
@@ -36,4 +54,3 @@ module PacketPolicing like IPacketPolicing
         meter.out --> filter.in;
         filter.out --> { @display("m=e"); } --> out;
 }
-

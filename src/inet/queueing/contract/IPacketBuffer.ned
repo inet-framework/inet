@@ -8,12 +8,17 @@
 package inet.queueing.contract;
 
 //
-// This module interface is implemented by packet buffer modules. A packet
-// buffer is often used by packet queues to store packets in a limited shared
-// resource. Packets can be added to and removed from a packet buffer. When the
-// buffer becomes overloaded, one or more packets are dropped according to the
-// configured dropping strategy. For each dropped packet, the packet owner is
-// notified in order to update its internal state.
+// Defines the contract for packet buffer implementations
+// in the queueing framework. A packet buffer provides a shared storage space
+// for packets that can be used by multiple packet queues.
+//
+// Key responsibilities:
+// - Storing packets in a shared resource with configurable capacity limits
+// - Managing packet storage when capacity limits are reached
+// - Implementing packet dropping strategies when buffer becomes overloaded
+// - Notifying packet owners when their packets are dropped
+//
+// Implementations of this interface include PacketBuffer and PriorityBuffer.
 //
 moduleinterface IPacketBuffer
 {

@@ -8,9 +8,19 @@
 package inet.queueing.contract;
 
 //
-// This module interface is implemented by packet pushers. A packet pusher
-// connects one input to one output. Packets can be pushed into its input
-// and it pushes packets into its output.
+// Interface for packet pusher modules in the queueing framework.
+// Packet pushers are key components in push-based packet processing,
+// where packet flow is driven by producers sending packets to consumers.
+//
+// Key features:
+// - Acts as both a passive packet sink and an active packet source
+// - Operates in push mode (passive consumer, active provider)
+// - Receives packets from upstream modules and forwards them downstream
+// - Maintains packet flow integrity during transfer
+// - Serves as an adapter between different packet processing stages
+// - May implement various forwarding or processing logic
+//
+// @see ~PacketPusherBase, ~IPacketPuller, ~IPassivePacketSink, ~IActivePacketSource
 //
 moduleinterface IPacketPusher extends IPassivePacketSink, IActivePacketSource
 {

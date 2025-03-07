@@ -13,13 +13,29 @@ import inet.queueing.server.TokenBasedServer;
 import inet.queueing.tokengenerator.SignalBasedTokenGenerator;
 
 //
-// This module is capable of generating several different streams of packets,
-// one after the other. For each traffic category, the packets are produced by
-// a separate token-based server. The traffic stream can be started by adding
-// tokens to the corresponding server module. The packet data, packet length, and
-// timing distributions can be configured in the corresponding packet provider.
+// This module implements the producer side of a request-response pattern for
+// packet processing. It works in conjunction with a RequestConsumer to model
+// bidirectional communication patterns where responses are generated based on
+// received requests.
 //
-// @see ~RequestConsumer
+// Key features:
+// - Supports multiple response types through separate packet providers
+// - Token-based activation mechanism for precise response timing
+// - Configurable packet characteristics for each response type
+// - Signal-based coordination with the RequestConsumer
+// - Multiplexes different response streams into a single output
+//
+// Operation mechanism:
+// 1. The RequestConsumer processes incoming request packets
+// 2. Based on the request type, it generates tokens for the appropriate server
+// 3. The tokenGenerator monitors these tokens and activates the corresponding server
+// 4. The activated server pulls packets from its provider
+// 5. The multiplexer combines all response streams into a single output
+//
+// Typically used with a RequestConsumer module that processes incoming requests
+// and triggers the appropriate response generation through token signaling.
+//
+// @see ~RequestConsumer, ~TokenBasedServer, ~SignalBasedTokenGenerator
 //
 module ResponseProducer like IActivePacketSource
 {

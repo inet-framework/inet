@@ -11,14 +11,42 @@ import inet.queueing.base.PacketFlowBase;
 import inet.queueing.contract.IPacketFlow;
 
 //
-// This module is part of the flow measurement infrastructure. It can be used
-// to record the collected statistics and also to terminate the flow measurements.
+// Records detailed packet flow statistics and optionally terminates flow measurements
+// that were previously started by a FlowMeasurementStarter module. Provides comprehensive
+// bit-level tracking of packets as they move through the network.
 //
-// The flow measurement statistics are collected for every bit individually.
-// The measurement starts from the moment the bit enters the flow and continues
-// up to the point where the bit exits the flow. The collected statistics can
-// be recorded multiple times during this time. The flow measurement tracks
-// bits individually using their unique identity.
+// Flow measurement capabilities:
+// - Tracks individual bits through their entire journey in the network
+// - Records multiple timing statistics for each bit (queueing, processing, transmission, etc.)
+// - Calculates aggregate statistics per packet, per region, and across the entire flow
+// - Supports filtering to measure specific packet types or parts of packets
+// - Can terminate measurements or allow them to continue through the network
+//
+// Key features:
+// - Bit-level granularity for precise measurements
+// - Comprehensive timing statistics collection
+// - Flexible packet filtering
+// - Optional measurement termination
+// - JSON output for detailed analysis
+// - Extensive statistical recording options
+//
+// The recorder collects statistics for various timing components:
+// - Elapsed time: Time since a bit entered the flow
+// - Delaying time: Time spent in delayers
+// - Queueing time: Time spent in queues
+// - Processing time: Time spent in processors
+// - Transmission time: Time spent in transmitters
+// - Propagation time: Time spent in channels
+//
+// Statistics are collected at multiple levels:
+// - Per bit: Individual timing for each bit
+// - Per region: Timing for groups of bits within a packet
+// - Per packet: Aggregate timing across all bits in a packet
+//
+// Advanced metrics include:
+// - Flow data rate (throughput)
+// - Packet jitter (variation in delay between packets)
+// - Delay variation (standard deviation of delays)
 //
 // @see ~FlowMeasurementStarter
 //
@@ -30,8 +58,8 @@ simple FlowMeasurementRecorder extends PacketFlowBase like IPacketFlow
         int length @unit(b) = default(-1b); // Designates the packet part to be measured
         string flowName = default(""); // Use packet flow to separate measurement from other measurements
         string measure = default("not packetEvent"); // Match expression for a combination of: packetEvent, elapsedTime, delayingTime, queueingTime, processingTime, transmissionTime, propagationTime
-        bool endMeasurement = default(true);
-        string packetEventFileName = default("results/" + expand("${configname}-") + fullPath() + "-packetEvent.json");
+        bool endMeasurement = default(true); // Whether to terminate the flow measurement at this point
+        string packetEventFileName = default("results/" + expand("${configname}-") + fullPath() + "-packetEvent.json"); // File to record packet events
         @class(FlowMeasurementRecorder);
         @display("i=block/timer");
         @signal[packetFlowMeasured](type=inet::Packet);

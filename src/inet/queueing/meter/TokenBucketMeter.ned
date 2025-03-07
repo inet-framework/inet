@@ -11,24 +11,61 @@ import inet.queueing.base.PacketMeterBase;
 import inet.queueing.contract.IPacketMeter;
 
 //
-// This module labels each packet if the token bucket contains enough tokens for
-// the packet that is passing through. The amount of required tokens is equal to
-// the packet length in bits and is subtracted from the number of stored tokens.
-// New tokens are generated with the provided constant rate and they may also be
-// added by other modules.
+// This module implements the classic token bucket algorithm for traffic measurement,
+// rate limiting, and packet labeling. It is a fundamental building block for
+// implementing Quality of Service (QoS) mechanisms in network simulations.
+//
+// The token bucket algorithm works as follows:
+// - Tokens are generated at a constant rate (tokenProductionRate) and stored in a bucket
+// - The bucket has a maximum capacity (maxNumTokens) to limit burst size
+// - When a packet arrives, the meter checks if enough tokens are available
+// - If sufficient tokens exist, they are consumed (based on packet size or fixed amount)
+//   and the packet is labeled with the specified label
+// - If insufficient tokens exist, the packet is labeled with the defaultLabel
+// - Excess tokens that would overflow the bucket can be forwarded to another module
+//
+// Key features and capabilities:
+// - Precise traffic rate control through token production rate configuration
+// - Burst tolerance through bucket capacity configuration
+// - Flexible token consumption based on packet size or fixed amounts per packet
+// - Packet labeling for downstream processing (e.g., by filters or classifiers)
+// - Token sharing between multiple buckets via the excessTokenModule parameter
+// - Color-aware operation through the labelPriority parameter
+// - Comprehensive statistics collection for monitoring and analysis
+//
+// Configuration examples:
+// 1. Basic rate limiter (1 Mbps with 64 KB burst tolerance):
+//    tokenProductionRate = 125000; // bytes/s (1 Mbps)
+//    maxNumTokens = 65536; // bytes (64 KB)
+//    tokenConsumptionPerBit = 0.125; // 1 token per byte
+//    label = "conformant";
+//    defaultLabel = "excess";
+//
+// 2. Packet counter (limit to 100 packets per second):
+//    tokenProductionRate = 100; // tokens/s
+//    maxNumTokens = 100; // maximum burst
+//    tokenConsumptionPerPacket = 1; // 1 token per packet
+//    tokenConsumptionPerBit = 0; // ignore packet size
+//
+// The TokenBucketMeter serves as the foundation for more complex metering schemes
+// such as the SingleRateTwoColorMeter, SingleRateThreeColorMeter, and
+// DualRateThreeColorMeter, which implement standardized traffic conditioning
+// algorithms used in DiffServ architectures.
+//
+// @see ~MultiTokenBucketMeter, ~SingleRateTwoColorMeter, ~SingleRateThreeColorMeter, ~DualRateThreeColorMeter
 //
 simple TokenBucketMeter extends PacketMeterBase like IPacketMeter
 {
     parameters:
-        double initialNumTokens = default(0); // Initial number of tokens in the bucket
-        double maxNumTokens = default(inf); // Maximum number of tokens in the bucket
-        double tokenProductionRate; // The rate of internal token production per second
-        double tokenConsumptionPerPacket = default(0); // How many tokens are consumed per packet
-        double tokenConsumptionPerBit = default(1); // How many tokens are consumed per bit
-        string label; // The label that is attached to packets if there are enough tokens in the bucket
-        string defaultLabel = default(""); // The label that is attached to packets if there are not enough tokens in the bucket, no label by default
-        object labelPriority = default([]); // The list of labels in the order of priority, if specified packets can only be promoted in this order
-        string excessTokenModule = default(""); // Specifies the module (~ITokenStorage) that receives the excess tokens that are produced by this module when overflowed
+        double initialNumTokens = default(0); // Initial number of tokens in the bucket at simulation start
+        double maxNumTokens = default(inf); // Maximum number of tokens the bucket can hold (burst tolerance)
+        double tokenProductionRate; // Rate at which tokens are generated per second
+        double tokenConsumptionPerPacket = default(0); // Fixed number of tokens consumed per packet (regardless of size)
+        double tokenConsumptionPerBit = default(1); // Number of tokens consumed per bit of packet length
+        string label; // Label attached to packets when sufficient tokens are available
+        string defaultLabel = default(""); // Label attached to packets when insufficient tokens are available (empty string means no label)
+        object labelPriority = default([]); // List of labels in order of priority for color-aware operation (empty list means color-blind mode)
+        string excessTokenModule = default(""); // Path to another module (~ITokenStorage) that receives excess tokens when this bucket overflows
         displayStringTextFormat = default("contains %n tk\nmetered %p pk (%l)");
         @signal[tokensChanged](type=double);
         @statistic[numTokens](title="number of tokens"; source=tokensChanged; record=vector; unit=tk; interpolationmode=linear);

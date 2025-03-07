@@ -11,12 +11,26 @@ import inet.queueing.base.PacketClassifierBase;
 import inet.queueing.contract.IPacketClassifier;
 
 //
-// This module connects one packet producer to multiple packet consumers. It
-// can be pushed with packets from the connected packet producer. When this
-// happens, the classifier pushes the packet to one of its connected packet
-// consumers based on the configured packet classifier function. The packet
-// classifier function takes a packet and returns an integer which in turn
-// is used for determining the output gate.
+// Extensible packet classifier that uses a pluggable classification function to
+// determine which output gate to forward packets to. This provides a framework
+// for implementing custom packet classification algorithms.
+//
+// Operation mechanism:
+// - Receives packets from a single input (producer)
+// - Invokes the configured classifier function for each packet
+// - The function examines the packet and returns an integer
+// - This integer determines which output gate the packet is forwarded to
+//
+// The PacketClassifier serves as a base for implementing custom classification
+// algorithms without having to implement a complete classifier module. By providing
+// different classifier function implementations, various classification policies
+// can be realized.
+//
+// The classifierClass parameter specifies the C++ class that implements the
+// classification algorithm. This class must implement the IPacketClassifierFunction
+// interface and be registered via Register_Class.
+//
+// @see ~PriorityClassifier, ~ContentBasedClassifier, ~LabelClassifier, ~MarkovClassifier
 //
 simple PacketClassifier extends PacketClassifierBase like IPacketClassifier
 {

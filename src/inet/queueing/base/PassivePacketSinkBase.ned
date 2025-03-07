@@ -8,9 +8,21 @@
 package inet.queueing.base;
 
 //
-// This is a base module for various active packet sink modules.
+// Base module for passive packet sink components in the queueing framework.
+// Passive packet sinks wait for packets to be pushed into them by active
+// packet sources, as opposed to actively pulling packets from sources.
 //
-// @see ~PacketSinkBase
+// Passive sinks operate in push mode, where they receive packets when
+// active sources decide to send them. This is in contrast to active sinks
+// that operate in pull mode, where they initiate packet transfers.
+//
+// Key features:
+// - Receives packets pushed by active sources
+// - Collects extensive statistics on received packets
+// - Tracks packet ordering, duplicates, and timing characteristics
+// - Provides detailed metrics for QoS analysis and performance evaluation
+//
+// @see ~PacketSinkBase, ~PassivePacketSink, ~IPassivePacketSink
 //
 simple PassivePacketSinkBase extends PacketSinkBase
 {

@@ -8,10 +8,21 @@
 package inet.queueing.contract;
 
 //
-// This module interface is implemented by packet shaper modules. A packet
-// shaper connects one input to one output. It operates in passive mode both
-// on its input and its output. These modules may delay and reorder packets
-// but they never modify or drop packets.
+// Interface for packet shaper modules in the queueing framework.
+// Packet shapers regulate traffic flow by controlling the timing
+// of packet transmissions, without dropping or modifying packet
+// contents.
+//
+// Key features:
+// - Acts as both a passive packet sink and an active packet source
+// - Controls packet transmission timing and rate
+// - May delay packets to conform to traffic specifications
+// - May reorder packets based on priority or other criteria
+// - Never drops or modifies packet contents
+// - Preserves overall packet count
+// - Operates in push mode (passive sink, active source)
+//
+// @see ~PacketShaper, ~TokenBucket, ~LeakyBucket, ~PriorityShaper, ~TimeAwareShaper
 //
 moduleinterface IPacketShaper extends IPassivePacketSink, IActivePacketSource
 {

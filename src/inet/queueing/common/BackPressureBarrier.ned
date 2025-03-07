@@ -10,11 +10,29 @@ package inet.queueing.common;
 import inet.queueing.base.PacketFlowBase;
 
 //
-// This module prevents backpressure propagation from its output to its input
-// and vice versa. It always allows pushing and pulling packets independently
-// of what the connected modules would allow to do in their current state. Both
-// pushed and pulled packets pass through unchanged, but the operations may raise
-// a runtime error due to this module preventing backpressure propagation.
+// Prevents backpressure propagation between connected queueing modules by isolating
+// flow control signals. Acts as a barrier that decouples the push/pull behavior
+// between upstream and downstream components in a packet processing pipeline.
+//
+// Key features:
+// - Isolates flow control between connected modules
+// - Allows pushing packets regardless of downstream module state
+// - Allows pulling packets regardless of upstream module state
+// - Passes packets through unchanged
+// - Enables independent operation of connected modules
+//
+// Operation mechanism:
+// - When a packet is pushed from upstream, it immediately accepts it regardless of
+//   whether the downstream module is ready to receive
+// - When a packet is pulled from downstream, it immediately provides one regardless of
+//   whether the upstream module is ready to provide
+// - May raise runtime errors if actual packet availability doesn't match expectations
+//
+// Warning: Using this module may lead to packet loss or runtime errors if the
+// connected modules cannot handle the decoupled flow control properly. It should
+// be used with caution and typically in combination with appropriate buffering.
+//
+// @see ~PacketQueue, ~PacketBuffer, ~PacketDelayer
 //
 simple BackPressureBarrier extends PacketFlowBase
 {

@@ -8,10 +8,18 @@
 package inet.queueing.contract;
 
 //
-// This module interface must be implemented by passive packet sink modules.
-// A passive packet sink, also called a consumer, has one input that must be
-// connected to an active packet source module. The connected active packet
-// source is expected to push packets into the passive packet sink over time.
+// Interface for passive packet sink modules in the queueing framework.
+// Passive packet sinks are terminal points for packets in push-based
+// packet processing, where packet flow is driven by producers sending
+// packets to consumers.
+//
+// Key features:
+// - Operates in push mode (passive consumer)
+// - Receives packets from active packet sources
+// - Serves as a terminal point for packet flows
+// - Reacts to incoming packets rather than requesting them
+// - May process, collect statistics, or simply consume packets
+// - Can implement various packet handling strategies
 //
 // @see ~PassivePacketSink, ~PacketQueue, ~PacketClassifier, ~IActivePacketSource
 //

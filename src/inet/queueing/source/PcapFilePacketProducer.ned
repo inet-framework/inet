@@ -11,17 +11,27 @@ import inet.queueing.base.ActivePacketSourceBase;
 import inet.queueing.contract.IActivePacketSource;
 
 //
-// This module is an active packet source which pushes packets into the connected
-// packet consumer. All pushed packets are read from a PCAP file.
+// This module generates network traffic by reading packets from a PCAP file
+// and injecting them into a simulation. It allows realistic traffic patterns
+// captured from real networks to be replayed in simulated environments.
 //
-// Available packet name format directives:
-//  %s - source address and/or port
-//  %d - destination address and/or port
-//  %p - innermost packet protocol
-//  %t - innermost packet protocol subtype
-//  %l - packet length
-//  %i - packet data information
-//  %n - number of packets read so far
+// Key features:
+// - Reads standard PCAP/PCAPNG files created by Wireshark, tcpdump, etc.
+// - Preserves original packet contents, sizes, and protocols
+// - Configurable packet naming with format directives
+// - Actively pushes packets to connected modules
+// - Maintains the IActivePacketSource interface for compatibility
+//
+// Operation mechanism:
+// - Reads packets sequentially from the specified PCAP file
+// - Creates simulation packets with the same content as the captured packets
+// - Pushes these packets to the connected consumer module
+// - Optionally applies custom naming based on packet attributes
+//
+// The packet naming can be customized using format directives to include
+// information about the packet source, destination, protocol, length, etc.
+//
+// @see ~PcapFilePacketConsumer, ~PacketFlowPcapFileRecorder
 //
 simple PcapFilePacketProducer extends ActivePacketSourceBase like IActivePacketSource
 {

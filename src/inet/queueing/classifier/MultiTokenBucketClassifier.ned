@@ -11,9 +11,29 @@ import inet.queueing.base.PacketClassifierBase;
 import inet.queueing.contract.IPacketClassifier;
 
 //
-// This module classifies packets into the first bucket that contains the required
-// number of tokens. The packet is forwarded to the output gate that corresponds to
-// the selected bucket.
+// This packet classifier implements a multi-token bucket algorithm that uses
+// multiple token buckets to classify packets into different categories based
+// on their conformance to various traffic profiles.
+//
+// The classifier operates by:
+// - Maintaining multiple token buckets, each with its own parameters
+// - Checking each bucket in sequence for the required number of tokens
+// - Classifying the packet to the first bucket that has enough tokens
+// - Forwarding the packet to the output gate corresponding to that bucket
+//
+// Key features:
+// - Supports an arbitrary number of token buckets
+// - Each bucket can have different token production rates and capacities
+// - Configurable token consumption per packet or per bit
+// - Optional token overflow between buckets
+// - Comprehensive statistics collection for each bucket
+//
+// The buckets parameter allows detailed configuration of each token bucket,
+// including initial token count, maximum capacity, and token production rate.
+// Tokens can optionally overflow from one bucket to another through the
+// excessTokenModule parameter.
+//
+// @see ~TokenBucketClassifier, ~SingleRateThreeColorClassifier, ~DualRateThreeColorClassifier
 //
 simple MultiTokenBucketClassifier extends PacketClassifierBase like IPacketClassifier
 {

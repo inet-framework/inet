@@ -10,8 +10,20 @@ package inet.queueing.filter;
 import inet.queueing.contract.IPacketFilter;
 
 //
-// This module implements the given module interface and can be used as an omitted
-// optional module that removes itself from the module hierarchy during initialization.
+// Placeholder module that implements the IPacketFilter interface but removes itself
+// from the module hierarchy during initialization. This module enables flexible
+// network configurations with optional filtering components.
+//
+// Operation mechanism:
+// - Directly connects its input gate to its output gate
+// - Removes itself from the module hierarchy during initialization
+// - Effectively creates a transparent pass-through for packets
+// - No filtering is performed on packets passing through
+//
+// This module is part of INET's module omission mechanism that allows for
+// flexible configuration of network models without changing the module structure.
+//
+// @see ~OmittedModule, ~OmittedPacketQueue, ~OmittedPacketServer
 //
 module OmittedPacketFilter like IPacketFilter
 {
@@ -24,4 +36,3 @@ module OmittedPacketFilter like IPacketFilter
     connections:
         in --> out;
 }
-

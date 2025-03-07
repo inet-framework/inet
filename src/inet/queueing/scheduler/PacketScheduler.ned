@@ -11,12 +11,24 @@ import inet.queueing.base.PacketSchedulerBase;
 import inet.queueing.contract.IPacketScheduler;
 
 //
-// This module connects one packet collector to multiple packet providers. When
-// the packet collector pulls a pull packet from it, the scheduler pulls
-// a packet from one of its packet providers based
-// on the configured scheduler function. The packet scheduler function takes a
-// list of packet providers and returns an integer which in turn is used for
-// determining the input gate.
+// Extensible packet scheduler that uses a pluggable scheduling function to
+// select which input gate to pull packets from. This provides a framework for
+// implementing custom scheduling algorithms.
+//
+// Operation mechanism:
+// - When a packet is requested, the scheduler invokes the configured scheduler function
+// - The function examines the available packet providers and returns an integer
+// - This integer determines which input gate to pull a packet from
+//
+// The PacketScheduler serves as a base for implementing custom scheduling algorithms
+// without having to implement a complete scheduler module. By providing different
+// scheduler function implementations, various scheduling policies can be realized.
+//
+// The schedulerClass parameter specifies the C++ class that implements the
+// scheduling algorithm. This class must implement the IPacketSchedulerFunction
+// interface and be registered via Register_Class.
+//
+// @see ~PriorityScheduler, ~WrrScheduler, ~MarkovScheduler
 //
 simple PacketScheduler extends PacketSchedulerBase like IPacketScheduler
 {

@@ -8,12 +8,27 @@
 package inet.queueing.contract;
 
 //
-// This module interface is implemented by packet marker modules. A packet marker
-// connects one input to one output. It can operate in both active and passive
-// mode. Packets can be pushed into its input or packets can be pulled from its
-// output. When processing a packet, a marker attaches some information (such as
-// a label) to the packet based on the data and metadata it contains. The packets
-// are processed individually.
+// Module interface for packet marker components in the queueing framework.
+// Packet markers attach metadata to packets as they pass through, without
+// changing the packet's content or flow.
+//
+// Key characteristics:
+// - Has one input and one output
+// - Can operate in both push and pull modes
+// - Processes packets individually
+// - Attaches labels, tags, or other metadata to packets
+// - Does not delay, reorder, or drop packets
+// - Marks packets based on their content, metadata, or external criteria
+//
+// Packet markers are commonly used in network devices to:
+// - Set quality of service (QoS) indicators like DSCP or priority values
+// - Add flow identification information
+// - Mark packets for special handling by downstream components
+// - Implement Explicit Congestion Notification (ECN)
+// - Support differentiated services in routers and switches
+//
+// Common implementations include PacketLabeler, PacketTagger, ContentBasedLabeler,
+// ContentBasedTagger, and EcnMarker.
 //
 moduleinterface IPacketMarker extends IPacketFlow
 {

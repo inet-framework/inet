@@ -14,7 +14,26 @@ import inet.queueing.contract.ITokenGenerator;
 
 
 //
-// This module produces packets in order to prevent a queue from becoming empty.
+// This module implements an adaptive packet source that monitors a queue's
+// occupancy and generates packets as needed to prevent the queue from becoming
+// empty. It helps maintain a minimum level of traffic and ensures continuous
+// packet availability for downstream consumers.
+//
+// Key features:
+// - Monitors queue occupancy through a token generator
+// - Produces packets only when the queue needs replenishment
+// - Adapts packet production rate to queue consumption rate
+// - Prevents queue starvation while minimizing unnecessary packet generation
+// - Configurable packet provider for different packet types and characteristics
+//
+// Operation mechanism:
+// 1. The tokenGenerator monitors the target queue's occupancy
+// 2. When the queue level drops below a threshold, tokens are generated
+// 3. These tokens enable the server to request packets from the provider
+// 4. The provider creates packets which are then sent to the queue
+// 5. This feedback loop maintains the queue at the desired occupancy level
+//
+// @see ~QueueBasedTokenGenerator, ~TokenBasedServer, ~PassivePacketSource
 //
 module QueueFiller like IActivePacketSource
 {

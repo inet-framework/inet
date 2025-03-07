@@ -11,17 +11,32 @@ import inet.queueing.base.PacketClassifierBase;
 import inet.queueing.contract.IPacketClassifier;
 
 //
-// This module implements a weighted round-robin classifier.
+// Implements a weighted round-robin (WRR) packet classifier that distributes
+// packets among its output gates based on assigned weights. WRR provides
+// proportional bandwidth allocation while ensuring that all queues receive service.
 //
-// There is a weight associated with each output gate.
-// Initially, each output gate gets as many tokens as its weight.
-// When a packet is pushed, the first output gate is selected that has a packet and enough tokens,
-// and one token is consumed. When there are not enough tokens to classify a packet, then each token bucket
-// is filled up.
+// Key features:
+// - Fair bandwidth allocation according to predefined weights
+// - Prevents starvation of low-priority traffic
+// - Provides QoS differentiation while maintaining throughput guarantees
+// - Token-based implementation for accurate weight enforcement
+//
+// Operation mechanism:
+// - Each output gate is assigned a weight via the weights parameter
+// - Initially, each output gate receives tokens equal to its weight
+// - When classifying a packet, the first output gate with available packets and tokens is selected
+// - One token is consumed from the selected gate's allocation
+// - When no gates have enough tokens to classify a packet, all token buckets are refilled
+//
+// The weights parameter specifies relative bandwidth allocation. For example,
+// with weights="3 2 1", the first output will receive 50% of bandwidth,
+// the second 33%, and the third 17% (assuming all queues are backlogged).
+//
+// @see ~WrrScheduler, ~PriorityClassifier, ~MarkovClassifier
 //
 simple WrrClassifier extends PacketClassifierBase like IPacketClassifier
 {
     parameters:
-        string weights;
+        string weights; // Space-separated list of weights for each output gate (e.g., "3 2 1")
         @class(WrrClassifier);
 }
