@@ -10,13 +10,13 @@ package inet.visualizer.base;
 //
 // This is a base module for gate schedule visualizer simple modules. It visualizes
 // the state and timing of gates in Time-Sensitive Networking (TSN) applications,
-// showing when gates are open or closed over time.
+// showing when gates are open or closed over time. TODO and queueing networks
 //
 // By default, gate schedules are not displayed. To enable visualization, set the
-// displayGateSchedules parameter to true and use the gateFilter to select which
+// displayGateSchedules parameter to true and use the gateFilter parameter to select which
 // gates to visualize.
 //
-// The visualizer shows a timeline representation of gate operations, with the
+// The visualizer shows a timeline representation of gate state, with the
 // current simulation time indicated. This helps understand the temporal behavior
 // of time-aware networks, gate control lists (GCLs), and scheduled traffic.
 //

@@ -10,7 +10,7 @@ package inet.visualizer.base;
 //
 // This is a base module for link break visualizer simple modules. It visualizes
 // link failures in wireless and wired networks, showing where and when
-// communication links between nodes have been broken.
+// communication links between nodes have been broken. TODO
 //
 // By default, link breaks are not displayed. To enable visualization, set the
 // displayLinkBreaks parameter to true and use the filters to select which

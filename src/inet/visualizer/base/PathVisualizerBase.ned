@@ -10,7 +10,7 @@ package inet.visualizer.base;
 //
 // This is a base module for path visualizer simple modules. It visualizes
 // the routes that packets take through the network, showing end-to-end paths
-// and intermediate hops as animated polyline arrows.
+// and intermediate hops as animated polyline arrows. TODO animated?
 //
 // By default, routes are not displayed. To enable visualization, set the
 // displayRoutes parameter to true and use the filters to select which
@@ -31,7 +31,7 @@ package inet.visualizer.base;
 // - Colored arrows showing the complete route from source to destination
 // - Automatic shifting of overlapping paths for better visibility
 // - Optional labels with packet information
-// - Smooth animation and fade-out effects
+// - Smooth animation and fade-out effects TODO animation?
 //
 // This visualizer is particularly useful for understanding routing behavior,
 // analyzing network traffic patterns, debugging protocol implementations,

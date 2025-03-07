@@ -13,7 +13,7 @@ package inet.visualizer.base;
 // showing the current charge level.
 //
 // By default, energy storages are not displayed. To enable visualization, set the
-// displayEnergyStorages parameter to true and use the energyStorageFilter to select
+// displayEnergyStorages parameter to true and use the energyStorageFilter parameter to select
 // which energy storage devices to visualize.
 //
 // The visualizer dynamically updates the level indicators as energy storage charge

@@ -31,7 +31,7 @@ package inet.visualizer.base;
 // Data link visualization is particularly useful for understanding MAC layer
 // communication patterns, analyzing which nodes are actively exchanging frames,
 // debugging MAC protocol issues, and observing the effects of wireless interference
-// on successful frame delivery.
+// on successful frame delivery. TODO
 //
 // @see ~DataLinkCanvasVisualizer, ~DataLinkOsgVisualizer, ~IDataLinkVisualizer, ~VisualizerBase
 //

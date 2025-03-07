@@ -27,7 +27,7 @@ package inet.visualizer.base;
 // it only considers packets matched by the provided filters. The filters use
 // the format of `cMatchExpression` with the packet name as the default attribute.
 //
-// The activityLevel parameter determines what level of communication is visualized:
+// The activityLevel parameter determines what level of communication is visualized: TODO
 // - service: visualizes application-level communication (end-to-end)
 // - peer: visualizes protocol-level communication (peer-to-peer)
 // - protocol: visualizes all protocol-internal communication

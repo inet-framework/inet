@@ -12,8 +12,8 @@ package inet.visualizer.base;
 // radio devices in network nodes, showing their operational mode, transmission
 // and reception states, and antenna radiation patterns.
 //
-// By default, radios themselves are not displayed, but their states can be shown.
-// To enable full visualization, set the displayRadios parameter to true and use
+// By default, the visualizations are disabled. TODO enable visualization options with the parameters
+// To enable visualization, set the displayRadios parameter to true and use
 // the radioFilter to select which radios to visualize.
 //
 // The visualizer offers multiple visualization options:

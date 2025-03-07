@@ -10,7 +10,7 @@ package inet.visualizer.base;
 //
 // This is a base module for connection visualizer simple modules. It visualizes
 // physical connections between network nodes, such as wired links, as lines
-// in the simulation.
+// in the simulation. TODO what is this
 //
 // By default, network connections are displayed. To disable visualization or
 // filter which connections are shown, use the displayNetworkConnections and

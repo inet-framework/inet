@@ -9,8 +9,8 @@ package inet.visualizer.base;
 
 //
 // This is a base module for medium visualizer simple modules. It provides
-// comprehensive visualization of wireless signal propagation and radio medium
-// properties in the network.
+// visualization of wireless signal propagation and radio medium
+// properties in the network. TODO radio medium properties?
 //
 // The visualizer offers multiple visualization options:
 // - Propagating signals as expanding circles
