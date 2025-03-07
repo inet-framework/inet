@@ -11,13 +11,19 @@ import inet.visualizer.base.PathVisualizerBase;
 import inet.visualizer.contract.ITransportRouteVisualizer;
 
 //
-// This module visualizes transport layer routes on a 2D canvas. It displays a
-// polyline arrow for each active route in the network. See the documentation
-// of the base module for what constitutes an active route. The arrow points
-// from the source towards the destination. If a route is used in both directions
-// then there are separate paths for them. Each polyline fades out over time
-// as the route becomes inactive unless it is reinforced by another packet. The
-// polyline automatically follows the movement of mobile nodes.
+// Visualizes transport layer packet paths on a 2D canvas. Displays polyline arrows
+// showing the complete path that packets take through the network at the transport layer.
+//
+// The visualization includes:
+// - Polyline arrows following the path from source to destination
+// - Separate arrows for each direction when bidirectional communication occurs
+// - Gradual fading of paths that are no longer active
+// - Dynamic updates when routes change due to mobility or network topology changes
+// - Filtering options to visualize only specific packet types or nodes
+//
+// Particularly useful for understanding end-to-end communication patterns,
+// analyzing transport protocol behavior, and troubleshooting application-level
+// connectivity issues.
 //
 // @see ~TransportRouteOsgVisualizer, ~TransportRouteVisualizer, ~PathVisualizerBase, ~ITransportRouteVisualizer
 //
@@ -27,4 +33,3 @@ simple TransportRouteCanvasVisualizer extends PathVisualizerBase like ITransport
         double zIndex = default(4); // Determines the drawing order of figures relative to other visualizers
         @class(TransportRouteCanvasVisualizer);
 }
-

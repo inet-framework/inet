@@ -11,11 +11,19 @@ import inet.visualizer.base.MobilityVisualizerBase;
 import inet.visualizer.contract.IMobilityVisualizer;
 
 //
-// This module visualizes multiple mobilities on a 2D canvas. It moves visual
-// representations according to their mobility model. It also displays recent
-// movement as a polyline, current velocity vector, and current orientation.
+// Visualizes node mobility on a 2D canvas. Displays movement trails, velocity vectors,
+// and orientation indicators to help track and understand node movement.
 //
-// @see ~MobilityOsgVisualizer, ~MobilityVisualizer, ~MobilityVisualizerBase, ~MobilityVisualizer
+// The visualization includes:
+// - Movement trails showing the recent path of mobile nodes (with configurable fading)
+// - Velocity vectors represented as arrows indicating speed and direction
+// - Orientation arcs showing which way nodes are facing
+// - Automatic updates as nodes move according to their mobility models
+//
+// Particularly useful for tracking node movement in wireless networks, analyzing
+// mobility patterns, and verifying that mobility models are working as expected.
+//
+// @see ~MobilityOsgVisualizer, ~MobilityVisualizer, ~MobilityVisualizerBase
 //
 simple MobilityCanvasVisualizer extends MobilityVisualizerBase like IMobilityVisualizer
 {
@@ -23,4 +31,3 @@ simple MobilityCanvasVisualizer extends MobilityVisualizerBase like IMobilityVis
         double zIndex = default(0); // Determines the drawing order of figures relative to other visualizers
         @class(MobilityCanvasVisualizer);
 }
-

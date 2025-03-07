@@ -34,10 +34,30 @@ import inet.visualizer.contract.ITransportConnectionVisualizer;
 import inet.visualizer.contract.ITransportRouteVisualizer;
 
 //
-// This module integrates all osg visualizers into a single module. It supports
-// disabling any submodule visualizer by providing an empty string as its type.
+// Integrates all OSG visualizers into a single comprehensive visualization module.
+// Provides a complete visual representation of the network in 3D using OpenSceneGraph
+// by combining visualizers for different aspects of the simulation.
 //
-// @see ~IntegratedOsgVisualizer, ~IntegratedVisualizer, ~IIntegratedVisualizer.
+// The visualization capabilities include:
+// - Physical layer: signal propagation, transmission/reception, radio medium activity
+// - Link layer: data link activity, interface information, IEEE 802.11 associations
+// - Network layer: routing tables, network paths, packet drops
+// - Transport layer: transport connections, transport paths
+// - Infrastructure: mobility patterns, physical environment
+// - Statistics and information: figures, statistics, submodule information
+//
+// Key features:
+// - Modular design with individually configurable visualizer submodules
+// - Consistent visualization settings across different aspects
+// - Ability to enable/disable specific visualizations to focus on areas of interest
+// - Simplified configuration through a single module
+// - Full 3D visualization with camera control and perspective views
+//
+// Particularly useful for understanding complex network behavior in 3D space,
+// creating realistic visualizations of physical environments, and producing
+// high-quality visual demonstrations of network simulations.
+//
+// @see ~IntegratedCanvasVisualizer, ~IntegratedVisualizer, ~IIntegratedVisualizer
 //
 module IntegratedOsgVisualizer like IIntegratedVisualizer
 {
@@ -143,4 +163,3 @@ module IntegratedOsgVisualizer like IIntegratedVisualizer
                 @display("p=450,1200");
         }
 }
-

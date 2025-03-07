@@ -8,9 +8,9 @@
 package inet.visualizer.contract;
 
 //
-// This module interface allows configuring different
-// ~IPhysicalEnvironmentVisualizer submodules from INI files. Such a visualizer
-// displays the physical objects present in the physical environment.
+// Interface for physical environment visualizers. Physical environment visualizers
+// display objects such as buildings, walls, and other physical structures that
+// affect signal propagation in the simulation.
 //
 // @see ~PhysicalEnvironmentCanvasVisualizer, ~PhysicalEnvironmentOsgVisualizer, ~PhysicalEnvironmentVisualizer, ~PhysicalEnvironmentVisualizerBase
 //
@@ -19,4 +19,3 @@ moduleinterface IPhysicalEnvironmentVisualizer extends IVisualizer
     parameters:
         @display("i=block/app");
 }
-

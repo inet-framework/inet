@@ -8,8 +8,8 @@
 package inet.visualizer.contract;
 
 //
-// This module interface allows configuring different ~IEnergyStorageVisualizer
-// submodules from INI files. Such a visualizer displays energy storages.
+// Interface for energy storage visualizers. Energy storage visualizers display
+// the charge level and state of energy storage components in network nodes.
 //
 // @see ~EnergyStorageCanvasVisualizer, ~EnergyStorageOsgVisualizer,
 // ~EnergyStorageVisualizer, ~EnergyStorageVisualizerBase
@@ -19,4 +19,3 @@ moduleinterface IEnergyStorageVisualizer extends IVisualizer
     parameters:
         @display("i=block/app");
 }
-

@@ -11,12 +11,18 @@ import inet.visualizer.base.PhysicalEnvironmentVisualizerBase;
 import inet.visualizer.contract.IPhysicalEnvironmentVisualizer;
 
 //
-// This module visualizes a physical environment on a 2D canvas. It displays the
-// physical objects present in the physical environment. Since this is not a 3D
-// visualization, the physical objects are projected to a 2D plane according
-// to the view angle of the corresponding ~SceneCanvasVisualizer. Apart from this,
-// the visualizer considers all object properties that affect the appearance
-// such as position, orientation, shape, colors, opacity, etc.
+// Visualizes physical environments on a 2D canvas. Displays buildings, walls,
+// and other physical objects that can affect signal propagation.
+//
+// The visualization includes:
+// - 2D projections of 3D physical objects according to the view angle
+// - Proper representation of object positions, orientations, and shapes
+// - Visual properties like colors and opacity as defined in the environment
+// - Automatic updates when objects change or move
+//
+// Particularly useful for understanding signal propagation in environments with
+// obstacles, verifying object placement in simulations, and creating realistic
+// visualizations of indoor or urban scenarios.
 //
 // @see ~PhysicalEnvironmentOsgVisualizer, ~PhysicalEnvironmentVisualizer, ~PhysicalEnvironmentVisualizerBase, ~IPhysicalEnvironmentVisualizer
 //
@@ -26,4 +32,3 @@ simple PhysicalEnvironmentCanvasVisualizer extends PhysicalEnvironmentVisualizer
         double zIndex = default(0); // Determines the drawing order of figures relative to other visualizers
         @class(PhysicalEnvironmentCanvasVisualizer);
 }
-

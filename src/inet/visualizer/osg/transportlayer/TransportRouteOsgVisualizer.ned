@@ -11,13 +11,25 @@ import inet.visualizer.base.PathVisualizerBase;
 import inet.visualizer.contract.ITransportRouteVisualizer;
 
 //
-// This module visualizes transport layer routes on a 3D osg scene. It displays
-// a polyline arrow for each active route in the network. See the documentation
-// of the base module for what constitutes an active route. The arrow points
-// from the source towards the destination. If a route is used in both directions
-// then there are separate paths for them. Each polyline fades out over time
-// as the route becomes inactive unless it is reinforced by another packet. The
-// polyline automatically follows the movement of mobile nodes.
+// Visualizes transport layer packet routes in a 3D scene using OpenSceneGraph (OSG).
+// Displays the paths that packets take through the network at the transport layer
+// (TCP, UDP, SCTP).
+//
+// The visualization includes:
+// - 3D polyline arrows showing active transport routes between nodes
+// - Directional indicators showing packet flow from source to destination
+// - Separate paths for bidirectional communication
+// - Temporal fading as routes become inactive over time
+// - Automatic updates when new packets travel along routes
+// - Dynamic positioning that follows mobile node movement
+//
+// A transport route becomes active when a packet travels along a sequence of
+// network nodes at the transport layer. The polyline representing this route
+// gradually fades unless reinforced by subsequent packets following the same path.
+//
+// Particularly useful for understanding end-to-end communication patterns,
+// analyzing transport protocol behavior, debugging connection issues, and
+// creating dynamic visualizations of application traffic flows in 3D space.
 //
 // @see ~TransportRouteCanvasVisualizer, ~TransportRouteVisualizer, ~PathVisualizerBase, ~ITransportRouteVisualizer
 //
@@ -26,4 +38,3 @@ simple TransportRouteOsgVisualizer extends PathVisualizerBase like ITransportRou
     parameters:
         @class(TransportRouteOsgVisualizer);
 }
-

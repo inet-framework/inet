@@ -8,8 +8,8 @@
 package inet.visualizer.contract;
 
 //
-// This module interface allows configuring different ~IQueueVisualizer
-// submodules from INI files. Such a visualizer displays queues.
+// Interface for queue visualizers. Queue visualizers display the state and
+// occupancy of packet queues in network nodes.
 //
 // @see ~QueueCanvasVisualizer, ~QueueOsgVisualizer, ~QueueVisualizer, ~QueueVisualizerBase
 //
@@ -18,4 +18,3 @@ moduleinterface IQueueVisualizer extends IVisualizer
     parameters:
         @display("i=block/app");
 }
-

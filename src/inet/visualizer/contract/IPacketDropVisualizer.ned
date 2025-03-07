@@ -8,9 +8,8 @@
 package inet.visualizer.contract;
 
 //
-// This module interface allows configuring different ~IPacketDropVisualizer
-// submodules from INI files. Such a visualizer displays the packet drops
-// in a network.
+// Interface for packet drop visualizers. Packet drop visualizers display
+// indicators at locations where packets are dropped during network simulation.
 //
 // @see ~PacketDropCanvasVisualizer, ~PacketDropOsgVisualizer, ~PacketDropVisualizer, ~PacketDropVisualizerBase
 //
@@ -19,4 +18,3 @@ moduleinterface IPacketDropVisualizer extends IVisualizer
     parameters:
         @display("i=block/app");
 }
-

@@ -11,12 +11,23 @@ import inet.visualizer.base.PhysicalEnvironmentVisualizerBase;
 import inet.visualizer.contract.IPhysicalEnvironmentVisualizer;
 
 //
-// This module visualizes a physical environment on a 3D osg scene. It displays
-// the physical objects present in the physical environment. The visualizer
-// considers all object properties that affect appearance such as position,
-// orientation, shape, colors, opacity, etc.
+// Visualizes physical environments in a 3D scene using OpenSceneGraph (OSG).
+// Displays buildings, walls, and other physical objects that can affect signal
+// propagation.
 //
-// @see ~PhysicalEnvironmentOsgVisualizer, ~PhysicalEnvironmentVisualizer, ~PhysicalEnvironmentVisualizerBase, ~IPhysicalEnvironmentVisualizer
+// The visualization includes:
+// - Realistic 3D representations of physical objects
+// - Proper positioning, orientation, and scaling of objects
+// - Material properties including colors and transparency
+// - Support for complex shapes and object hierarchies
+// - Optional transparency for seeing inside buildings
+//
+// Particularly useful for understanding signal propagation in environments with
+// obstacles, visualizing complex indoor or urban scenarios, analyzing coverage
+// problems due to physical barriers, and creating realistic 3D visualizations
+// of network environments.
+//
+// @see ~PhysicalEnvironmentCanvasVisualizer, ~PhysicalEnvironmentVisualizer, ~PhysicalEnvironmentVisualizerBase, ~IPhysicalEnvironmentVisualizer
 //
 simple PhysicalEnvironmentOsgVisualizer extends PhysicalEnvironmentVisualizerBase like IPhysicalEnvironmentVisualizer
 {
@@ -24,4 +35,3 @@ simple PhysicalEnvironmentOsgVisualizer extends PhysicalEnvironmentVisualizerBas
         @class(PhysicalEnvironmentOsgVisualizer);
         bool enableObjectOpacity = default(true); // Display physical objects potentially transparently as specified in the opacity attribute (might cause z-fighting for transparent objects)
 }
-

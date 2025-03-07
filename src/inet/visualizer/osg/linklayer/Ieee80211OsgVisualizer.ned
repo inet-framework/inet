@@ -11,8 +11,19 @@ import inet.visualizer.base.Ieee80211VisualizerBase;
 import inet.visualizer.contract.IIeee80211Visualizer;
 
 //
-// This module visualizes IEEE 802.11 associations in a 3D osg scene. It displays
-// an icon labeled with the SSID for each associated wireless interface.
+// Visualizes IEEE 802.11 wireless LAN associations in a 3D scene using OpenSceneGraph (OSG).
+// Displays connection status between wireless stations and access points.
+//
+// The visualization includes:
+// - 3D icons showing wireless interfaces with their associated network names (SSIDs)
+// - Different icons for access points and stations
+// - Automatic updates when association status changes
+// - Filtering options to visualize only specific networks or nodes
+// - Support for multiple wireless networks in the same simulation
+//
+// Particularly useful for understanding wireless connectivity patterns,
+// analyzing Wi-Fi network coverage, debugging association issues, and
+// creating visual representations of wireless network topologies in 3D space.
 //
 // @see ~Ieee80211CanvasVisualizer, ~Ieee80211Visualizer, ~Ieee80211VisualizerBase, ~IIeee80211Visualizer
 //
@@ -21,4 +32,3 @@ simple Ieee80211OsgVisualizer extends Ieee80211VisualizerBase like IIeee80211Vis
     parameters:
         @class(Ieee80211OsgVisualizer);
 }
-

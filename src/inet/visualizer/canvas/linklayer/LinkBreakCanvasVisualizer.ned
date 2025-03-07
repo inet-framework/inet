@@ -11,10 +11,18 @@ import inet.visualizer.base.LinkBreakVisualizerBase;
 import inet.visualizer.contract.ILinkBreakVisualizer;
 
 //
-// This module visualizes link breaks on a 2D canvas. It displays an icon
-// for each link break in the network. See the documentation of the base
-// module for what constitutes a link break. The icon is positioned at the
-// midpoint of the link.
+// Visualizes link breaks on a 2D canvas. Displays icons at locations where
+// communication links between network nodes fail.
+//
+// The visualization includes:
+// - Icons appearing at the midpoint of broken links
+// - Visual indication of when and where link failures occur
+// - Automatic updates when new link breaks are detected
+// - Filtering options to visualize only specific link types or nodes
+//
+// Particularly useful for understanding network topology changes, debugging
+// mobility-related connectivity issues, analyzing wireless link reliability,
+// and identifying problematic areas in the network.
 //
 // @see ~LinkBreakOsgVisualizer, ~LinkBreakVisualizer, ~LinkBreakVisualizerBase, ~ILinkBreakVisualizer
 //
@@ -24,4 +32,3 @@ simple LinkBreakCanvasVisualizer extends LinkBreakVisualizerBase like ILinkBreak
         double zIndex = default(2); // Determines the drawing order of figures relative to other visualizers
         @class(LinkBreakCanvasVisualizer);
 }
-

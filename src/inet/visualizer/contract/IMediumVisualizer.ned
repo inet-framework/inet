@@ -8,9 +8,8 @@
 package inet.visualizer.contract;
 
 //
-// This module interface allows configuring different ~IMediumVisualizer
-// submodules from INI files. Such a visualizer displays transmitting nodes,
-// receiving nodes, and propagating radio signals on a medium.
+// Interface for medium visualizers. Medium visualizers display radio signal
+// propagation, transmission and reception activities in wireless networks.
 //
 // @see ~MediumCanvasVisualizer, ~MediumOsgVisualizer, ~MediumVisualizer, ~MediumVisualizerBase
 //
@@ -19,4 +18,3 @@ moduleinterface IMediumVisualizer extends IVisualizer
     parameters:
         @display("i=block/app");
 }
-

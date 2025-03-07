@@ -11,16 +11,29 @@ import inet.visualizer.base.MediumVisualizerBase;
 import inet.visualizer.contract.IMediumVisualizer;
 
 //
-// This module visualizes a medium using a 3D osg scene. It displays
-// communication ranges and interference ranges as circles around network nodes.
-// It displays an image at network nodes which are currently transmitting, and
-// a different image at other network nodes which are currently receiving. It
-// also displays radio signals as a growing 2D ring or a 3D sphere as they
-// propagate through the medium. All 2D shapes such as circles, rings, and
-// images can be displayed in 4 different planes: camera, xy, xz, and yz. It's
-// also possible to use animated images.
+// Visualizes radio medium activity in a 3D scene using OpenSceneGraph (OSG).
+// Displays propagating signals, transmission/reception indicators, and
+// communication/interference ranges.
 //
-// @see ~MediumOsgVisualizer, ~MediumVisualizer, ~MediumVisualizerBase, ~IMediumVisualizer
+// The visualization includes:
+// - Propagating signals as animated rings or 3D spheres with configurable appearance
+// - Signal departure indicators showing transmission activity
+// - Signal arrival indicators showing reception activity
+// - Communication ranges as circles showing the maximum distance for successful reception
+// - Interference ranges as circles showing the maximum distance where signals can cause interference
+// - Flexible placement options with support for different visualization planes (camera, xy, xz, yz)
+//
+// The visualizer offers extensive customization of signal appearance including:
+// - Shape selection (ring, sphere, or both)
+// - Wave properties (length, amplitude, fading)
+// - Plane selection for 2D elements
+// - Animation speed control
+//
+// Particularly useful for understanding wireless signal propagation in 3D space,
+// analyzing transmission patterns, troubleshooting interference issues, and
+// creating compelling visualizations of wireless communication.
+//
+// @see ~MediumCanvasVisualizer, ~MediumVisualizer, ~MediumVisualizerBase, ~IMediumVisualizer
 //
 simple MediumOsgVisualizer extends MediumVisualizerBase like IMediumVisualizer
 {
@@ -41,4 +54,3 @@ simple MediumOsgVisualizer extends MediumVisualizerBase like IMediumVisualizer
 
         @class(MediumOsgVisualizer);
 }
-

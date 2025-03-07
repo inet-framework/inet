@@ -10,6 +10,22 @@ package inet.visualizer.canvas.flow;
 import inet.visualizer.base.PathVisualizerBase;
 import inet.visualizer.contract.IPacketFlowVisualizer;
 
+//
+// Visualizes packet flows on a 2D canvas. Displays dashed arrows representing
+// the complete path of packet flows through the network.
+//
+// The visualization includes:
+// - Dashed arrows showing the path from source to destination
+// - Labels indicating packet counts and flow information
+// - Paths that persist rather than fade out (by default)
+// - Filtering options to visualize only specific packet types or nodes
+//
+// Particularly useful for understanding overall traffic patterns, analyzing
+// application data flows, and visualizing the complete path of packets through
+// multiple protocol layers.
+//
+// @see ~PacketFlowOsgVisualizer, ~PacketFlowVisualizer, ~PathVisualizerBase, ~IPacketFlowVisualizer
+//
 simple PacketFlowCanvasVisualizer extends PathVisualizerBase like IPacketFlowVisualizer
 {
     parameters:
@@ -21,4 +37,3 @@ simple PacketFlowCanvasVisualizer extends PathVisualizerBase like IPacketFlowVis
         double zIndex = default(4); // Determines the drawing order of figures relative to other visualizers
         @class(PacketFlowCanvasVisualizer);
 }
-

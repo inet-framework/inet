@@ -8,10 +8,8 @@
 package inet.visualizer.contract;
 
 //
-// This module interface allows configuring different ~IMobilityVisualizer
-// submodules from INI files. Such a visualizer updates the position (among
-// others) of visual representations according to the corresponding mobility
-// model.
+// Interface for mobility visualizers. Mobility visualizers display movement
+// patterns and trajectories of network nodes based on their mobility models.
 //
 // @see ~MobilityCanvasVisualizer, ~MobilityOsgVisualizer, ~MobilityVisualizer, ~MobilityVisualizerBase
 //
@@ -20,4 +18,3 @@ moduleinterface IMobilityVisualizer extends IVisualizer
     parameters:
         @display("i=block/app");
 }
-

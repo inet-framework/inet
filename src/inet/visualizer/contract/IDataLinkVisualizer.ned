@@ -8,9 +8,8 @@
 package inet.visualizer.contract;
 
 //
-// This module interface allows configuring different ~IDataLinkVisualizer
-// submodules from INI files. Such a visualizer displays the active data link
-// layer links in a network.
+// Interface for data link visualizers. Data link visualizers display active
+// connections between network nodes at the data link layer (Layer 2).
 //
 // @see ~DataLinkCanvasVisualizer, ~DataLinkOsgVisualizer, ~DataLinkVisualizer, ~DataLinkVisualizerBase
 //
@@ -19,4 +18,3 @@ moduleinterface IDataLinkVisualizer extends IVisualizer
     parameters:
         @display("i=block/app");
 }
-

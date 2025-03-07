@@ -11,10 +11,17 @@ import inet.visualizer.base.RoutingTableVisualizerBase;
 import inet.visualizer.contract.IRoutingTableVisualizer;
 
 //
-// This module visualizes routes in the routing tables on a 2D canvas. It displays
-// an arrow for each route in the routing tables of the network. The arrow points
-// from the node containing the routing table towards the gateway. The arrow
-// automatically follows the movement of mobile nodes.
+// Visualizes routes from routing tables on a 2D canvas. Displays arrows pointing
+// from source nodes to next hop nodes with labels showing routing information.
+//
+// The visualization includes:
+// - Arrows representing routes between nodes (source to next hop)
+// - Labels showing route details in format "destination/mask -> gateway (interface)"
+// - Dynamic updates when routing tables change (e.g., due to DHCP or routing protocols)
+// - Filtering options to focus on specific nodes or destinations
+//
+// Particularly useful for understanding routing paths in complex networks,
+// troubleshooting connectivity issues, and observing dynamic routing protocol behavior.
 //
 // @see ~RoutingTableOsgVisualizer, ~RoutingTableVisualizer, ~RoutingTableVisualizerBase, ~IRoutingTableVisualizer
 //
@@ -24,4 +31,3 @@ simple RoutingTableCanvasVisualizer extends RoutingTableVisualizerBase like IRou
         double zIndex = default(0); // Determines the drawing order of figures relative to other visualizers
         @class(RoutingTableCanvasVisualizer);
 }
-

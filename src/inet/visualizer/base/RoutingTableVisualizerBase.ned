@@ -8,53 +8,66 @@
 package inet.visualizer.base;
 
 //
-// This is a base module for routing table visualizer simple modules. It displays
-// routes in the routing tables of the network. Routes present are not displayed
-// by default, see the module parameters for how to enable the visualization.
-// The actual visualization of routes is done in derived modules.
+// This is a base module for routing table visualizer simple modules. It visualizes
+// routes from the IP routing tables of network nodes as arrows pointing from the
+// source node to the gateway. This visualization helps understand how packets are
+// forwarded through the network and how routing tables are configured.
 //
-// This module subscribes for `routeAdded`, `routeChanged`, `routeDeleted`,
-// `interfaceIpv4ConfigChanged` on the module determined by the `visualizationSubjectModule`
-// parameter.
+// By default, routes are not displayed. To enable visualization, set the
+// displayRoutingTables parameter to true and use the filters to select which
+// routes to display.
 //
-// The format string can contain the following directives:
-//  - %m mask
-//  - %g gateway
-//  - %d destination
-//  - %e metric
-//  - %n interface name
-//  - %i IRoute::info()
-//  - %s IRoute::str()
+// The visualizer dynamically updates when routing tables change by subscribing to
+// the following signals: `routeAdded`, `routeChanged`, `routeDeleted`, and
+// `interfaceIpv4ConfigChanged` on the modules determined by the
+// `visualizationSubjectModule` parameter.
+//
+// The actual rendering of routes is implemented in derived modules for specific
+// user interfaces (canvas or OSG).
+//
+// Label Format:
+// The labelFormat parameter determines what information is displayed on the route
+// arrows. It can contain the following directives:
+//  - %m mask - Network mask
+//  - %g gateway - Gateway address
+//  - %d destination - Destination network address
+//  - %e metric - Route metric
+//  - %n interface name - Name of the outgoing interface
+//  - %i IRoute::info() - Detailed route information
+//  - %s IRoute::str() - String representation of the route
 //
 // @see ~RoutingTableCanvasVisualizer, ~RoutingTableOsgVisualizer, ~IRoutingTableVisualizer, ~VisualizerBase
 //
 simple RoutingTableVisualizerBase extends VisualizerBase
 {
     parameters:
-        bool displayRoutingTables = default(false); // Displays routing table data, disabled by default
-        bool displayRoutesIndividually = default(true); // Displays routes between the same network nodes individually, enabled by default
-        bool displayLabels = default(true); // Displays labels on arrows, enabled by default
+        // Visualization control
+        bool displayRoutingTables = default(false); // Enables/disables routing table visualization, disabled by default
+        bool displayRoutesIndividually = default(true); // When true, displays each route as a separate arrow even if they share source and destination nodes
+        bool displayLabels = default(true); // Enables/disables labels on route arrows
 
-        string destinationFilter @mutable = default("*"); // Determines the destinations that are considered, matches all destinations by default
-        string nodeFilter @mutable = default("*"); // Determines the nodes that are considered, matches all nodes by default
-        string multicastSourceNodeFilter @mutable = default("*"); // Determines the multicast source nodes that are considered, matches all nodes by default
-        string multicastSourceAddressFilter @mutable = default("*"); // Determines the multicast source addresses that are considered, matches all addresses by default
-        string multicastGroupFilter @mutable = default("*"); // Determines the multicast group addresses that are considered, matches all group addresses by default
+        // Filtering parameters
+        string destinationFilter @mutable = default("*"); // Selects which destination networks to visualize (supports wildcards and expressions)
+        string nodeFilter @mutable = default("*"); // Selects which nodes' routing tables to visualize (supports wildcards and expressions)
+        string multicastSourceNodeFilter @mutable = default("*"); // Selects which multicast source nodes to visualize
+        string multicastSourceAddressFilter @mutable = default("*"); // Selects which multicast source addresses to visualize
+        string multicastGroupFilter @mutable = default("*"); // Selects which multicast group addresses to visualize
 
-        string lineColor = default("black"); // Route line color, black by default
-        string lineStyle = default("solid"); // Route line style (solid, dashed, dotted)
-        double lineWidth = default(2); // Route line width
+        // Arrow appearance
+        string lineColor = default("black"); // Color of the route arrows
+        string lineStyle = default("solid"); // Style of the route arrows (solid, dashed, dotted)
+        double lineWidth = default(2); // Width of the route arrows in pixels
 
-        double lineShift = default(16); // Line shift to avoid overlapping lines
-        string lineShiftMode = default("normal"); // Determines how overlapping lines are shifted, possible values are: none, normal, x, y, z; optional prefix + or -
+        // Arrow positioning
+        double lineShift = default(16); // Distance to shift arrows to avoid overlapping
+        string lineShiftMode = default("normal"); // How to shift overlapping arrows: none, normal, x, y, z; optional prefix + or -
+        double lineContactSpacing = default(3); // Gap between arrow end and node icon
+        string lineContactMode @enum("circular", "rectangular") = default("rectangular"); // How arrows connect to node icons
 
-        double lineContactSpacing = default(3); // Spacing between arrow end and submodule icon
-        string lineContactMode @enum("circular", "rectangular") = default("rectangular"); // Determines how arrows are clipped at the submodules
-
-        string labelFormat @mutable = default("%d/%m -> %g (%n)"); // Determines what route data is displayed
-        string labelFont = default("<default>, 8px"); // Label font, automatic by default
-        string labelColor = default("black"); // Label color, black by default
+        // Label appearance
+        string labelFormat @mutable = default("%d/%m -> %g (%n)"); // Format string for route labels
+        string labelFont = default("<default>, 8px"); // Font for route labels
+        string labelColor = default("black"); // Color of route labels
 
         @class(RoutingTableVisualizerBase);
 }
-

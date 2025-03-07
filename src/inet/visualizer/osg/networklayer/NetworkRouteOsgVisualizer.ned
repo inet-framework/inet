@@ -11,11 +11,23 @@ import inet.visualizer.base.PathVisualizerBase;
 import inet.visualizer.contract.INetworkRouteVisualizer;
 
 //
-// This module visualizes network routes on a 3D osg scene. It displays a
-// polyline for each active route in the network. See the documentation of the
-// base module for what constitutes an active route. Each polyline fades out
-// over time until the route becomes inactive unless it is reinforced by another
-// packet. The polyline automatically follows the movement of mobile nodes.
+// Visualizes network layer packet routes in a 3D scene using OpenSceneGraph (OSG).
+// Displays the paths that packets take through the network at the IP layer.
+//
+// The visualization includes:
+// - 3D polylines showing active network routes between nodes
+// - Temporal fading as routes become inactive over time
+// - Automatic updates when new packets travel along routes
+// - Dynamic positioning that follows mobile node movement
+// - Customizable appearance including colors, line styles, and fading parameters
+//
+// A route becomes active when a packet travels along a sequence of network nodes.
+// The polyline representing this route gradually fades unless reinforced by
+// subsequent packets following the same path.
+//
+// Particularly useful for understanding routing patterns, analyzing network layer
+// connectivity, debugging routing protocols, and creating dynamic visualizations
+// of network traffic flows in 3D space.
 //
 // @see ~NetworkRouteCanvasVisualizer, ~NetworkRouteVisualizer, ~PathVisualizerBase, ~INetworkRouteVisualizer
 //
@@ -24,4 +36,3 @@ simple NetworkRouteOsgVisualizer extends PathVisualizerBase like INetworkRouteVi
     parameters:
         @class(NetworkRouteOsgVisualizer);
 }
-

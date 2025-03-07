@@ -11,13 +11,19 @@ import inet.visualizer.base.DataLinkVisualizerBase;
 import inet.visualizer.contract.IDataLinkVisualizer;
 
 //
-// This module visualizes data link layer links on a 2D canvas. It displays an
-// arrow for each active link in the network. See the documentation of the base
-// module for what constitutes an active link. The arrow points from the source
-// towards the destination. If a link is used in both directions, then there are
-// separate arrows for them. Each arrow fades out over time as the link becomes
-// inactive unless it is reinforced by another packet. The arrow automatically
-// follows the movement of mobile nodes.
+// Visualizes data link layer activity on a 2D canvas. Displays arrows representing
+// active links between network nodes at the data link layer.
+//
+// The visualization includes:
+// - Arrows pointing from source to destination nodes
+// - Packet names displayed on the arrows
+// - Gradual fading of arrows as links become inactive
+// - Dynamic updates when nodes move
+// - Multiple observation levels (service, peer, protocol) for different aspects of link activity
+// - Filtering options to visualize only specific packet types, interfaces, or nodes
+//
+// Particularly useful for understanding network traffic patterns, analyzing protocol
+// behavior in wireless networks, and troubleshooting connectivity issues.
 //
 // @see ~DataLinkOsgVisualizer, ~DataLinkVisualizer, ~DataLinkVisualizerBase, ~IDataLinkVisualizer
 //
@@ -27,4 +33,3 @@ simple DataLinkCanvasVisualizer extends DataLinkVisualizerBase like IDataLinkVis
         double zIndex = default(2); // Determines the drawing order of figures relative to other visualizers
         @class(DataLinkCanvasVisualizer);
 }
-
