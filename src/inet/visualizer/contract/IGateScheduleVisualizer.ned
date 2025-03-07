@@ -8,8 +8,8 @@
 package inet.visualizer.contract;
 
 //
-// This module interface allows configuring different ~IGateScheduleVisualizer
-// submodules from INI files. Such a visualizer displays gates.
+// Interface for gate schedule visualizers. Gate schedule visualizers display
+// the state and timing of gates in time-aware network devices.
 //
 // @see ~GateScheduleCanvasVisualizer, ~GateScheduleOsgVisualizer, ~GateScheduleVisualizer, ~GateScheduleVisualizerBase
 //
@@ -18,4 +18,3 @@ moduleinterface IGateScheduleVisualizer extends IVisualizer
     parameters:
         @display("i=block/app");
 }
-

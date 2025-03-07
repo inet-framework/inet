@@ -37,19 +37,37 @@ import inet.visualizer.contract.ITransportConnectionVisualizer;
 import inet.visualizer.contract.ITransportRouteVisualizer;
 
 //
-// This module integrates all canvas visualizers into a single module. It
-// supports disabling any submodule visualizer by providing an empty string as
-// its type.
+// Integrates all canvas visualizers into a single comprehensive visualization module.
+// Provides a complete visual representation of the network on a 2D canvas by combining
+// visualizers for different aspects of the simulation.
 //
-// @see ~IntegratedOsgVisualizer, ~IntegratedVisualizer, ~IIntegratedVisualizer.
+// The visualization capabilities include:
+// - Physical layer: signal propagation, transmission/reception, radio medium activity
+// - Link layer: data link activity, interface information, IEEE 802.11 associations
+// - Network layer: routing tables, network paths, packet drops
+// - Transport layer: transport connections, transport paths
+// - Infrastructure: mobility patterns, physical environment
+// - Statistics and information: figures, statistics, submodule information
+//
+// Key features:
+// - Modular design with individually configurable visualizer submodules
+// - Consistent visualization settings across different aspects
+// - Ability to enable/disable specific visualizations to focus on areas of interest
+// - Simplified configuration through a single module
+//
+// Particularly useful for understanding complex network behavior, debugging protocols,
+// and creating visual demonstrations of network simulations.
+//
+// @see ~IntegratedOsgVisualizer, ~IntegratedVisualizer, ~IIntegratedVisualizer
 //
 module IntegratedCanvasVisualizer like IIntegratedVisualizer
 {
     parameters:
         @display("i=block/app");
-        *.visualizationTargetModule = default("^.^");
-        *.visualizationSubjectModule = default("^.^");
+        *.visualizationTargetModule = default("^.^"); // All visualizers use the same target module by default
+        *.visualizationSubjectModule = default("^.^"); // All visualizers visualize the same subject module by default
     submodules:
+        // Scene and environment visualizers
         sceneVisualizer: <default("SceneCanvasVisualizer")> like ISceneVisualizer if typename != "" {
             parameters:
                 @display("p=150,100");
@@ -58,6 +76,8 @@ module IntegratedCanvasVisualizer like IIntegratedVisualizer
             parameters:
                 @display("p=150,200");
         }
+
+        // Node and network structure visualizers
         networkNodeVisualizer: <default("NetworkNodeCanvasVisualizer")> like INetworkNodeVisualizer if typename != "" {
             parameters:
                 @display("p=150,300");
@@ -66,6 +86,8 @@ module IntegratedCanvasVisualizer like IIntegratedVisualizer
             parameters:
                 @display("p=150,400");
         }
+
+        // Movement and statistics visualizers
         mobilityVisualizer: <default("MobilityCanvasVisualizer")> like IMobilityVisualizer if typename != "" {
             parameters:
                 @display("p=150,500");
@@ -78,6 +100,8 @@ module IntegratedCanvasVisualizer like IIntegratedVisualizer
             parameters:
                 @display("p=150,700");
         }
+
+        // Energy and physical medium visualizers
         energyStorageVisualizer: <default("EnergyStorageCanvasVisualizer")> like IEnergyStorageVisualizer if typename != "" {
             parameters:
                 @display("p=150,800");
@@ -90,6 +114,8 @@ module IntegratedCanvasVisualizer like IIntegratedVisualizer
             parameters:
                 @display("p=150,1000");
         }
+
+        // Packet and queue visualizers
         packetDropVisualizer: <default("PacketDropCanvasVisualizer")> like IPacketDropVisualizer if typename != "" {
             parameters:
                 @display("p=150,1100");
@@ -102,6 +128,8 @@ module IntegratedCanvasVisualizer like IIntegratedVisualizer
             parameters:
                 @display("p=450,100");
         }
+
+        // Scheduling and radio visualizers
         gateScheduleVisualizer: <default("GateScheduleCanvasVisualizer")> like IGateScheduleVisualizer if typename != "" {
             parameters:
                 @display("p=450,200");
@@ -110,6 +138,8 @@ module IntegratedCanvasVisualizer like IIntegratedVisualizer
             parameters:
                 @display("p=450,300");
         }
+
+        // Link layer visualizers
         physicalLinkVisualizer: <default("PhysicalLinkCanvasVisualizer")> like IPhysicalLinkVisualizer if typename != "" {
             parameters:
                 @display("p=450,400");
@@ -130,6 +160,8 @@ module IntegratedCanvasVisualizer like IIntegratedVisualizer
             parameters:
                 @display("p=450,800");
         }
+
+        // Network and transport layer visualizers
         networkRouteVisualizer: <default("NetworkRouteCanvasVisualizer")> like INetworkRouteVisualizer if typename != "" {
             parameters:
                 @display("p=450,900");
@@ -146,6 +178,8 @@ module IntegratedCanvasVisualizer like IIntegratedVisualizer
             parameters:
                 @display("p=450,1200");
         }
+
+        // Configuration and channel visualizers
         failureProtectionConfigurationVisualizer: <default("FailureProtectionConfigurationCanvasVisualizer")> like IFailureProtectionConfigurationVisualizer if typename != "" {
             parameters:
                 @display("p=750,100");
@@ -159,4 +193,3 @@ module IntegratedCanvasVisualizer like IIntegratedVisualizer
                 @display("p=750,300");
         }
 }
-

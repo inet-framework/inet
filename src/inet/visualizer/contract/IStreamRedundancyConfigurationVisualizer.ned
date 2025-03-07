@@ -8,15 +8,14 @@
 package inet.visualizer.contract;
 
 //
-// This module interface allows configuring different ~IStreamRedundancyConfigurationVisualizer
-// submodules from INI files. Such a visualizer displays the `StreamRedundancy` configuration
-// in a network.
+// Interface for stream redundancy configuration visualizers. Stream redundancy
+// configuration visualizers display redundant paths for data streams in
+// Time-Sensitive Networking (TSN) applications.
 //
-// @see ~StreamRedundancyConfigurationCanvasVisualizer
+// @see ~StreamRedundancyConfigurationCanvasVisualizer, ~StreamRedundancyConfigurationOsgVisualizer, ~StreamRedundancyConfigurationVisualizer
 //
 moduleinterface IStreamRedundancyConfigurationVisualizer extends IVisualizer
 {
     parameters:
         @display("i=block/app");
 }
-

@@ -8,9 +8,9 @@
 package inet.visualizer.contract;
 
 //
-// This module interface allows configuring different ~IPhysicalLinkVisualizer
-// submodules from INI files. Such a visualizer displays the active physical
-// layer links in a network.
+// Interface for physical link visualizers. Physical link visualizers display
+// active connections between wireless transmitters and receivers at the
+// physical layer.
 //
 // @see ~PhysicalLinkCanvasVisualizer, ~PhysicalLinkOsgVisualizer, ~PhysicalLinkVisualizer, ~PhysicalLinkVisualizerBase
 //
@@ -19,4 +19,3 @@ moduleinterface IPhysicalLinkVisualizer extends IVisualizer
     parameters:
         @display("i=block/app");
 }
-

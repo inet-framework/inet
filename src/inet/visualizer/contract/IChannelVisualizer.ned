@@ -7,9 +7,14 @@
 
 package inet.visualizer.contract;
 
-moduleinterface IChannelVisualizer
+//
+// Interface for channel visualizers. Channel visualizers display communication
+// channels and their properties in wireless and wired networks.
+//
+// @see ~ChannelCanvasVisualizer, ~ChannelOsgVisualizer, ~ChannelVisualizer, ~ChannelVisualizerBase
+//
+moduleinterface IChannelVisualizer extends IVisualizer
 {
     parameters:
         @display("i=block/app");
 }
-

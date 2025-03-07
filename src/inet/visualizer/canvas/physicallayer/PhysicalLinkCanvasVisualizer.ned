@@ -11,13 +11,19 @@ import inet.visualizer.base.PhysicalLinkVisualizerBase;
 import inet.visualizer.contract.IPhysicalLinkVisualizer;
 
 //
-// This module visualizes physical layer links on a 2D canvas. It displays an
-// arrow for each active link in the network. See the documentation of the base
-// module for what constitutes an active link. The arrow points from the source
-// towards the destination. If a link is used in both directions then there are
-// separate arrows for them. Each arrow fades out over time as the link becomes
-// inactive unless it is reinforced by another packet. The arrow automatically
-// follows the movement of mobile nodes.
+// Visualizes physical layer links on a 2D canvas. Displays arrows representing
+// active communication at the physical layer between network nodes.
+//
+// The visualization includes:
+// - Arrows pointing from transmitter to receiver nodes
+// - Separate arrows for each direction when bidirectional communication occurs
+// - Gradual fading of arrows as links become inactive
+// - Dynamic updates when nodes move
+// - Filtering options to visualize only specific packet types or nodes
+//
+// Particularly useful for understanding physical connectivity patterns,
+// analyzing wireless transmission paths, and troubleshooting physical layer
+// communication issues.
 //
 // @see ~PhysicalLinkOsgVisualizer, ~PhysicalLinkVisualizer, ~PhysicalLinkVisualizerBase, ~IPhysicalLinkVisualizer
 //
@@ -27,4 +33,3 @@ simple PhysicalLinkCanvasVisualizer extends PhysicalLinkVisualizerBase like IPhy
         double zIndex = default(1); // Determines the drawing order of figures relative to other visualizers
         @class(PhysicalLinkCanvasVisualizer);
 }
-

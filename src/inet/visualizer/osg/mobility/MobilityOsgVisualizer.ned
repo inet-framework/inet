@@ -11,9 +11,19 @@ import inet.visualizer.base.MobilityVisualizerBase;
 import inet.visualizer.contract.IMobilityVisualizer;
 
 //
-// This module visualizes multiple mobilities on a 3D osg scene. It moves the
-// visual representation according to their mobility model. It also displays
-// recent movement as a polyline, current velocity vector, and current orientation.
+// Visualizes node mobility in a 3D scene using OpenSceneGraph (OSG). Displays
+// movement patterns, velocity, and orientation of mobile network nodes.
+//
+// The visualization includes:
+// - Dynamic positioning of nodes according to their mobility models
+// - Movement trails showing recent node trajectories as 3D polylines
+// - Velocity vectors indicating current speed and direction
+// - Orientation indicators showing which way nodes are facing
+// - Automatic updates as nodes move through the 3D environment
+//
+// Particularly useful for understanding movement patterns in mobile networks,
+// analyzing spatial relationships between nodes, debugging mobility models,
+// and creating realistic visualizations of node movement in 3D space.
 //
 // @see ~MobilityCanvasVisualizer, ~MobilityVisualizer, ~MobilityVisualizerBase, ~IMobilityVisualizer
 //
@@ -22,4 +32,3 @@ simple MobilityOsgVisualizer extends MobilityVisualizerBase like IMobilityVisual
     parameters:
         @class(MobilityOsgVisualizer);
 }
-

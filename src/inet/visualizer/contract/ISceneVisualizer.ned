@@ -8,9 +8,9 @@
 package inet.visualizer.contract;
 
 //
-// This module interface allows configuring different ~ISceneVisualizer
-// submodules from INI files. Such a visualizer displays the scene, the
-// coordinate axes, sets up the initial viewpoint, etc.
+// Interface for scene visualizers. Scene visualizers display the simulation
+// environment, coordinate axes, and set up the initial viewpoint for the
+// visualization.
 //
 // @see ~SceneCanvasVisualizer, ~SceneOsgVisualizer, ~SceneVisualizer, ~SceneVisualizerBase
 //
@@ -19,4 +19,3 @@ moduleinterface ISceneVisualizer extends IVisualizer
     parameters:
         @display("i=block/app");
 }
-

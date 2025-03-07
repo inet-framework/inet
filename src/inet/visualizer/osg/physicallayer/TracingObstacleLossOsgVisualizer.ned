@@ -11,15 +11,24 @@ import inet.visualizer.base.TracingObstacleLossVisualizerBase;
 import inet.visualizer.contract.ITracingObstacleLossVisualizer;
 
 //
-// This module visualizes obstacle loss on a 3D osg scene. It displays a line at
-// the intersections of signal propagation paths with physical objects, and
-// normal vectors of physical object faces at intersection points.
+// Visualizes signal obstacle interactions in a 3D scene using OpenSceneGraph (OSG).
+// Displays the points where wireless signals intersect with physical objects.
 //
-// @see ~TracingObstacleLossOsgVisualizer, ~TracingObstacleLossVisualizer, ~TracingObstacleLossVisualizerBase, ~ITracingObstacleLossVisualizer
+// The visualization includes:
+// - Lines marking the exact intersection points of signals with obstacles
+// - Normal vectors showing the orientation of object faces at intersection points
+// - Visual indication of signal path obstructions
+// - 3D representation of how signals interact with the physical environment
+//
+// Particularly useful for understanding signal propagation in complex environments,
+// analyzing coverage problems due to obstacles, debugging obstacle loss models,
+// and creating realistic visualizations of wireless signal behavior in the
+// presence of physical barriers.
+//
+// @see ~TracingObstacleLossCanvasVisualizer, ~TracingObstacleLossVisualizer, ~TracingObstacleLossVisualizerBase, ~ITracingObstacleLossVisualizer
 //
 simple TracingObstacleLossOsgVisualizer extends TracingObstacleLossVisualizerBase like ITracingObstacleLossVisualizer
 {
     parameters:
         @class(TracingObstacleLossOsgVisualizer);
 }
-

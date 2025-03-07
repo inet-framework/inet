@@ -11,13 +11,25 @@ import inet.visualizer.base.DataLinkVisualizerBase;
 import inet.visualizer.contract.IDataLinkVisualizer;
 
 //
-// This module visualizes data link layer links on a 3D osg scene. It displays an
-// arrow for each active link in the network. See the documentation of the base
-// module for what constitutes an active link. The arrow points from the source
-// towards the destination. If a link is used in both directions then there are
-// separate arrows for them. Each arrow fades out over time as the link becomes
-// inactive unless it is reinforced by another packet. The arrow automatically
-// follows the movement of mobile nodes.
+// Visualizes data link layer connections in a 3D scene using OpenSceneGraph (OSG).
+// Displays directional arrows representing active link layer communication between
+// network nodes.
+//
+// The visualization includes:
+// - 3D arrows showing active data link layer connections
+// - Directional indicators showing packet flow from source to destination
+// - Separate arrows for bidirectional communication
+// - Temporal fading as links become inactive over time
+// - Automatic updates when new packets travel along links
+// - Dynamic positioning that follows mobile node movement
+//
+// A data link becomes active when a packet is successfully sent from one network
+// interface to another at the link layer. The arrow representing this link
+// gradually fades unless reinforced by subsequent packets following the same path.
+//
+// Particularly useful for understanding MAC-level connectivity patterns,
+// analyzing link layer protocol behavior, debugging link establishment issues,
+// and creating dynamic visualizations of link layer activity in 3D space.
 //
 // @see ~DataLinkCanvasVisualizer, ~DataLinkVisualizer, ~DataLinkVisualizerBase, ~IDataLinkVisualizer
 //
@@ -26,4 +38,3 @@ simple DataLinkOsgVisualizer extends DataLinkVisualizerBase like IDataLinkVisual
     parameters:
         @class(DataLinkOsgVisualizer);
 }
-

@@ -11,11 +11,19 @@ import inet.visualizer.base.StatisticVisualizerBase;
 import inet.visualizer.contract.IStatisticVisualizer;
 
 //
-// This module visualizes a statistic on a 3D osg scene. See the base module for
-// how to configure which statistic is displayed. If configured properly, then
-// it displays the last value of the statistic just above the visualization of
-// the corresponding network node. The value and the unit are wrapped in a filled
-// rectangle.
+// Visualizes statistics in a 3D scene using OpenSceneGraph (OSG). Displays
+// numerical values of various metrics collected during simulation.
+//
+// The visualization includes:
+// - 3D text labels showing statistic values above network nodes
+// - Values and units wrapped in filled rectangles for better visibility
+// - Automatic updates as statistic values change during simulation
+// - Support for custom indicator figures through templates
+// - Filtering options to visualize only specific statistics or nodes
+//
+// Particularly useful for monitoring performance metrics in 3D space, analyzing
+// protocol behavior, comparing different configurations, and creating informative
+// visualizations for presentations or debugging in a realistic 3D environment.
 //
 // @see ~StatisticCanvasVisualizer, ~StatisticVisualizer, ~StatisticVisualizerBase, ~IStatisticVisualizer
 //
@@ -24,4 +32,3 @@ simple StatisticOsgVisualizer extends StatisticVisualizerBase like IStatisticVis
     parameters:
         @class(StatisticOsgVisualizer);
 }
-

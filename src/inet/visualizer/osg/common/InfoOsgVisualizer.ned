@@ -11,8 +11,18 @@ import inet.visualizer.base.InfoVisualizerBase;
 import inet.visualizer.contract.IInfoVisualizer;
 
 //
-// This module visualizes some information of a submodule for each network node
-// on a 3D osg scene.
+// Visualizes module information in a 3D scene using OpenSceneGraph (OSG).
+// Displays customizable text annotations for network nodes based on their submodules.
+//
+// The visualization includes:
+// - 3D text labels showing information about specific submodules
+// - Customizable format strings with module names, paths, and display strings
+// - Configurable appearance (font, colors, alignment, background)
+// - Flexible placement options around network nodes
+//
+// Particularly useful for displaying module status information in 3D space,
+// debugging module configurations, creating informative labels for presentations,
+// and providing context for complex simulations in a realistic 3D environment.
 //
 // @see ~InfoCanvasVisualizer, ~InfoVisualizer, ~InfoVisualizerBase, ~IInfoVisualizer
 //
@@ -21,4 +31,3 @@ simple InfoOsgVisualizer extends InfoVisualizerBase like IInfoVisualizer
     parameters:
         @class(InfoOsgVisualizer);
 }
-

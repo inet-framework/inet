@@ -11,9 +11,18 @@ import inet.visualizer.base.TransportConnectionVisualizerBase;
 import inet.visualizer.contract.ITransportConnectionVisualizer;
 
 //
-// This module visualizes transport layer connections on a 2D canvas.
-// It displays a pair of colored icons for each connection at the network nodes
-// where the connection starts or ends.
+// Visualizes transport layer connections on a 2D canvas. Displays colored icons
+// at network nodes to represent active transport connections (TCP, UDP, etc.).
+//
+// The visualization includes:
+// - Pairs of icons at source and destination nodes for each connection
+// - Color coding to distinguish different connections
+// - Automatic updates when connections are established or closed
+// - Filtering options to show only specific connections or nodes
+//
+// Particularly useful for understanding connection patterns in client-server
+// applications, tracking connection establishment, and debugging transport
+// layer issues.
 //
 // @see ~TransportConnectionOsgVisualizer, ~TransportConnectionVisualizer, ~TransportConnectionVisualizerBase, ~ITransportConnectionVisualizer
 //
@@ -23,4 +32,3 @@ simple TransportConnectionCanvasVisualizer extends TransportConnectionVisualizer
         double zIndex = default(4); // Determines the drawing order of figures relative to other visualizers
         @class(TransportConnectionCanvasVisualizer);
 }
-

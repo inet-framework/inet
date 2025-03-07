@@ -8,8 +8,8 @@
 package inet.visualizer.contract;
 
 //
-// This module interface allows configuring different ~IRadioVisualizer
-// submodules from INI files. Such a visualizer displays radios.
+// Interface for radio visualizers. Radio visualizers display the state and
+// operating mode of radio modules in network nodes.
 //
 // @see ~RadioCanvasVisualizer, ~RadioOsgVisualizer, ~RadioVisualizer, ~RadioVisualizerBase
 //
@@ -18,4 +18,3 @@ moduleinterface IRadioVisualizer extends IVisualizer
     parameters:
         @display("i=block/app");
 }
-

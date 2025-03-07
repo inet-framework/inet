@@ -11,13 +11,26 @@ import inet.visualizer.base.PhysicalLinkVisualizerBase;
 import inet.visualizer.contract.IPhysicalLinkVisualizer;
 
 //
-// This module visualizes physical layer links on a 3D osg scene. It displays an
-// arrow for each active link in the network. See the documentation of the base
-// module for what constitutes an active link. The arrow points from the source
-// towards the destination. If a link is used in both directions, then there are
-// separate arrows for them. Each arrow fades out over time as the link becomes
-// inactive unless it is reinforced by another packet. The arrow automatically
-// follows the movement of mobile nodes.
+// Visualizes physical layer links in a 3D scene using OpenSceneGraph (OSG).
+// Displays directional arrows representing active wireless connections between
+// network nodes.
+//
+// The visualization includes:
+// - 3D arrows showing active physical layer links between nodes
+// - Directional indicators showing transmission source and destination
+// - Temporal fading as links become inactive over time
+// - Automatic updates as new transmissions occur
+// - Dynamic positioning that follows mobile node movement
+// - Separate arrows for bidirectional communication
+//
+// A physical link becomes active when a packet is successfully received at the
+// physical layer. The arrow representing this link gradually fades unless
+// reinforced by subsequent packet receptions.
+//
+// Particularly useful for understanding wireless connectivity patterns,
+// analyzing physical layer communication success, visualizing network topology
+// at the physical layer, and creating dynamic visualizations of wireless
+// network activity.
 //
 // @see ~PhysicalLinkCanvasVisualizer, ~PhysicalLinkVisualizer, ~PhysicalLinkVisualizerBase, ~IPhysicalLinkVisualizer
 //
@@ -26,4 +39,3 @@ simple PhysicalLinkOsgVisualizer extends PhysicalLinkVisualizerBase like IPhysic
     parameters:
         @class(PhysicalLinkOsgVisualizer);
 }
-

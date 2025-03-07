@@ -8,9 +8,8 @@
 package inet.visualizer.contract;
 
 //
-// This module interface allows configuring different ~ITransportRouteVisualizer
-// submodules from INI files. Such a visualizer displays active transport routes
-// in a network.
+// Interface for transport route visualizers. Transport route visualizers display
+// the path that packets take through the network at the transport layer.
 //
 // @see ~TransportRouteCanvasVisualizer, ~TransportRouteOsgVisualizer, ~TransportRouteVisualizer
 //
@@ -19,4 +18,3 @@ moduleinterface ITransportRouteVisualizer extends IVisualizer
     parameters:
         @display("i=block/app");
 }
-

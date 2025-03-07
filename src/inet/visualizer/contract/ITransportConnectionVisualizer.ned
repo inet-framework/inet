@@ -8,9 +8,8 @@
 package inet.visualizer.contract;
 
 //
-// This module interface allows configuring different ~ITransportConnectionVisualizer
-// submodules from INI files. Such a visualizer displays the active transport
-// connections in a network.
+// Interface for transport connection visualizers. Transport connection visualizers
+// display active transport layer connections (TCP, UDP, SCTP) between network nodes.
 //
 // @see ~TransportConnectionCanvasVisualizer, ~TransportConnectionOsgVisualizer, ~TransportConnectionVisualizer, ~TransportConnectionVisualizerBase
 //
@@ -19,4 +18,3 @@ moduleinterface ITransportConnectionVisualizer extends IVisualizer
     parameters:
         @display("i=block/app");
 }
-

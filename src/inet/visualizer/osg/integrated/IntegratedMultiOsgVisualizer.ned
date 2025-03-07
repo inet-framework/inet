@@ -33,10 +33,27 @@ import inet.visualizer.contract.ITransportConnectionVisualizer;
 import inet.visualizer.contract.ITransportRouteVisualizer;
 
 //
-// This module integrates all osg visualizers into a single module. It supports
-// disabling any submodule visualizer by providing an empty string as its type.
+// Integrates multiple instances of each OSG visualizer type into a single module.
+// Provides advanced 3D visualization capabilities with support for multiple
+// concurrent visualizations of the same aspect.
 //
-// @see ~IntegratedOsgVisualizer, ~IntegratedVisualizer, ~IIntegratedVisualizer.
+// The visualization capabilities include:
+// - All features of IntegratedOsgVisualizer
+// - Support for multiple instances of each visualizer type
+// - Ability to visualize different subsets of the network with different settings
+// - Configurable number of instances for each visualizer type
+//
+// Key features:
+// - Arrays of visualizer modules for each visualization aspect
+// - Independent configuration of each visualizer instance
+// - Shared network node visualizer reference for consistent node representation
+// - Full 3D visualization with OpenSceneGraph
+//
+// Particularly useful for complex simulations requiring different visualization
+// settings for different parts of the network, comparative visualizations,
+// and advanced multi-view 3D presentations.
+//
+// @see ~IntegratedOsgVisualizer, ~IntegratedVisualizer, ~IIntegratedVisualizer
 //
 module IntegratedMultiOsgVisualizer like IIntegratedVisualizer
 {
@@ -162,4 +179,3 @@ module IntegratedMultiOsgVisualizer like IIntegratedVisualizer
                 @display("p=450,1200,row,100");
         }
 }
-

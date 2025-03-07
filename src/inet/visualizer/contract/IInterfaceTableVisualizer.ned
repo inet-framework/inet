@@ -8,9 +8,8 @@
 package inet.visualizer.contract;
 
 //
-// This module interface allows configuring different ~IInterfaceTableVisualizer
-// submodules from INI files. Such a visualizer displays various information
-// for network interfaces present in the interface tables of a network.
+// Interface for interface table visualizers. Interface table visualizers display
+// information about network interfaces such as names, addresses, and states.
 //
 // @see ~InterfaceTableCanvasVisualizer, ~InterfaceTableOsgVisualizer, ~InterfaceTableVisualizer, ~InterfaceTableVisualizerBase
 //
@@ -19,4 +18,3 @@ moduleinterface IInterfaceTableVisualizer extends IVisualizer
     parameters:
         @display("i=block/app");
 }
-

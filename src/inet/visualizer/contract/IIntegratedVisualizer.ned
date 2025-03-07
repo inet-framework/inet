@@ -8,11 +8,14 @@
 package inet.visualizer.contract;
 
 //
-// This module interface allows configuring different ~IIntegratedVisualizer
-// submodules from INI files. Integrated visualizers are compound modules, they
-// do not display anything on their own. Instead, they combine multiple
-// visualizers, most often simple modules, to provide a convenient way to add
-// complex visualizations to a simulation.
+// Interface for integrated visualizers. Integrated visualizers are compound
+// modules that combine multiple visualizer modules to provide a comprehensive
+// visualization of the network simulation.
+//
+// Integrated visualizers do not display anything on their own but rather
+// coordinate multiple specialized visualizers to create a complete visual
+// representation of the simulation, offering a convenient way to add
+// complex visualizations with a single module.
 //
 // @see ~IntegratedCanvasVisualizer, ~IntegratedOsgVisualizer, ~IntegratedVisualizer
 //
@@ -21,4 +24,3 @@ moduleinterface IIntegratedVisualizer
     parameters:
         @display("i=block/app");
 }
-

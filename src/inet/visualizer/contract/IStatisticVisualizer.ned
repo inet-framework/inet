@@ -8,9 +8,8 @@
 package inet.visualizer.contract;
 
 //
-// This module interface allows configuring different ~IStatisticVisualizer
-// submodules from INI files. Such a visualizer displays a statistic for
-// multiple network nodes.
+// Interface for statistic visualizers. Statistic visualizers display numerical
+// values and metrics from simulation modules as text or graphical indicators.
 //
 // @see ~StatisticCanvasVisualizer, ~StatisticOsgVisualizer, ~StatisticVisualizer, ~StatisticVisualizerBase
 //
@@ -19,4 +18,3 @@ moduleinterface IStatisticVisualizer extends IVisualizer
     parameters:
         @display("i=block/app");
 }
-

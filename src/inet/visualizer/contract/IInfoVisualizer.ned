@@ -8,9 +8,8 @@
 package inet.visualizer.contract;
 
 //
-// This module interface allows configuring different ~IInfoVisualizer
-// submodules from INI files. Such a visualizer displays various information
-// from submodules of network nodes.
+// Interface for info visualizers. Info visualizers display textual information
+// about network nodes and their submodules.
 //
 // @see ~InfoCanvasVisualizer, ~InfoOsgVisualizer, ~InfoVisualizer, ~InfoVisualizerBase
 //
@@ -19,4 +18,3 @@ moduleinterface IInfoVisualizer extends IVisualizer
     parameters:
         @display("i=block/app");
 }
-

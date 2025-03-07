@@ -8,8 +8,14 @@
 package inet.visualizer.base;
 
 //
-// This is a base module for visualizer simple modules. It simply provides the
-// visualization target module for derived modules.
+// Serves as a base module for all visualizer simple modules. Visualizers add graphical
+// annotations to network elements or draw lines/shapes on the canvas to represent
+// various aspects of the simulation. This base module provides common parameters and
+// functionality for determining what to visualize and where to display the visualization.
+//
+// Visualizers typically operate by subscribing to signals emitted by simulation modules,
+// processing the received information, and creating/updating visual representations
+// accordingly. The visual elements are added to either a canvas (2D) or OSG (3D) scene.
 //
 simple VisualizerBase
 {
@@ -20,4 +26,3 @@ simple VisualizerBase
         @class(VisualizerBase);
         @display("i=block/app");
 }
-
