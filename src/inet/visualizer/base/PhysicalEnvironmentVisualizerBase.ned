@@ -10,7 +10,7 @@ package inet.visualizer.base;
 //
 // This is a base module for physical environment visualizer simple modules. It
 // visualizes physical objects such as buildings, walls, obstacles, and terrain
-// features that affect signal propagation in wireless networks.
+// features that can affect signal propagation in wireless networks.
 //
 // By default, physical objects are displayed. To disable visualization, set the
 // displayObjects parameter to false.
@@ -22,7 +22,7 @@ package inet.visualizer.base;
 //
 // The actual rendering of physical objects is implemented in derived modules
 // for specific user interfaces (canvas or OSG). The OSG visualizer provides
-// particularly realistic 3D visualization of the physical environment.
+// 3D visualization of the physical environment.
 //
 // This visualizer is particularly useful for understanding how the physical
 // environment affects wireless communication, analyzing signal propagation

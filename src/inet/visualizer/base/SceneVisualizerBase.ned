@@ -10,7 +10,7 @@ package inet.visualizer.base;
 //
 // This is a base module for scene visualizer simple modules. It provides the
 // fundamental spatial context for all other visualizers by determining the
-// bounds of the simulation area.
+// bounds of the simulation area. TODO!
 //
 // The scene visualizer calculates the minimum area that encloses all physical
 // objects and the constraint areas of all mobile nodes. This establishes the

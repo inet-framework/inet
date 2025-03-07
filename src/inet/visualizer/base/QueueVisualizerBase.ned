@@ -10,11 +10,11 @@ package inet.visualizer.base;
 
 //
 // This is a base module for queue visualizer simple modules. It visualizes
-// packet queues in network nodes, showing their current utilization and
+// packet queues in network nodes, showing their current
 // fill level.
 //
 // By default, queues are not displayed. To enable visualization, set the
-// displayQueues parameter to true and use the queueFilter to select which
+// displayQueues parameter to true and use the queueFilter parameter to select which
 // queues to visualize.
 //
 // The visualizer shows queues as vertical bars attached to network nodes,

@@ -7,7 +7,7 @@
 
 package inet.visualizer.base;
 
-//
+// TODO what?
 // This is a base module for tree visualizer simple modules. It visualizes
 // tree structures in the network, such as multicast trees, spanning trees,
 // or other hierarchical relationships between network nodes.

@@ -28,7 +28,7 @@ package inet.visualizer.base;
 // 3. Creating/updating visual representations in the user interface
 // 4. Managing the lifecycle of visual elements as the simulation progresses
 //
-// The visualizationTargetModule parameter determines where the visualization appears,
+// The visualizationTargetModule parameter determines where the visualization appears, TODO
 // while visualizationSubjectModule specifies what part of the simulation is visualized.
 // This separation allows for flexible configuration of visualizations.
 //

@@ -10,7 +10,7 @@ package inet.visualizer.base;
 //
 // This is a base module for physical layer link visualizer simple modules. It
 // visualizes active communication links at the physical layer, showing successful
-// packet transmissions between radio devices.
+// packet transmissions between network interfaces.
 //
 // By default, physical links are not displayed. To enable visualization, set the
 // displayLinks parameter to true in the derived visualizer module and use the

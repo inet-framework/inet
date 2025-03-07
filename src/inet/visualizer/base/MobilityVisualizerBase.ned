@@ -20,7 +20,7 @@ package inet.visualizer.base;
 //
 // By default, only basic mobility visualization is enabled. The additional
 // visualizations (positions, orientations, velocities, and trails) can be
-// enabled individually through their corresponding display parameters.
+// enabled individually through their corresponding display parameters. TODO
 //
 // This module subscribes to the `mobilityStateChanged` signal in the module
 // determined by the `visualizationSubjectModule` parameter. The actual rendering
