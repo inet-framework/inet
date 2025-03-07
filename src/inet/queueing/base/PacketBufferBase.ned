@@ -8,8 +8,19 @@
 package inet.queueing.base;
 
 //
-// This is a base module for various packet buffer modules which maintains a few
-// statistics.
+// Base module for packet buffer implementations in the queueing framework.
+// Packet buffers store packets temporarily while maintaining various statistics.
+// They are typically used with queues to implement different packet dropping
+// strategies when the queue capacity is reached.
+//
+// Packet buffers track:
+// - Current number of stored packets and their total length
+// - Number of packets added to the buffer
+// - Number of packets removed from the buffer
+// - Number of packets dropped due to buffer management policies
+//
+// Derived modules implement specific buffer management strategies such as
+// dropping packets based on priority, size, or other criteria.
 //
 // Available display string format directives:
 // - %p - number of packets
@@ -18,7 +29,7 @@ package inet.queueing.base;
 // - %r - number of removed packets
 // - %d - number of dropped packets
 //
-// @see ~IPacketBuffer
+// @see ~IPacketBuffer, ~PacketBuffer, ~PriorityBuffer
 //
 simple PacketBufferBase extends PacketProcessorBase
 {

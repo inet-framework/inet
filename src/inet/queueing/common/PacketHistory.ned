@@ -12,10 +12,24 @@ import inet.queueing.contract.IActivePacketSource;
 import inet.queueing.contract.IPacketQueue;
 
 //
-// This module connects one packet producer to one packet consumer. It can be
-// pushed with packets from the connected packet producer. It keeps a copy of
-// the last N packets pushed into its input. The packets are available in the
-// runtime user interface (Qtenv) for inspection.
+// Packet history recorder that keeps copies of packets for inspection and debugging.
+// Connects a packet producer to a consumer while maintaining a record of recent packets.
+//
+// Operation mechanism:
+// - Receives packets via push operations from a connected producer
+// - Forwards packets to the connected consumer without modification
+// - Creates a copy of each packet and stores it in an internal queue
+// - Maintains the last N packets (configurable via the size parameter)
+// - Makes packet history available in the runtime user interface (Qtenv)
+//
+// This module is particularly useful for:
+// - Debugging packet processing pipelines
+// - Analyzing packet flows during simulation
+// - Inspecting packet contents and metadata
+// - Verifying correct packet handling in complex queueing networks
+// - Creating packet traces for post-simulation analysis
+//
+// @see ~PacketQueue, ~PacketCloner
 //
 module PacketHistory like IPassivePacketSink, IActivePacketSource
 {
@@ -40,4 +54,3 @@ module PacketHistory like IPassivePacketSink, IActivePacketSource
         cloner.out++ --> { @display("m=e"); } --> out;
         cloner.out++ --> queue.in;
 }
-

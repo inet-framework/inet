@@ -8,13 +8,17 @@
 package inet.queueing.base;
 
 //
-// This is a base module for various packet source modules. Packets are created
-// randomly with regard to packet length and packet data. The representation of
-// packet data can also be configured.
+// Base module for packet source components in the queueing framework.
+// Packet sources generate packets with configurable content and attributes,
+// serving as the starting points for packet flows in network simulations.
+//
+// This module provides extensive configuration options for:
+// - Packet naming with customizable format directives
+// - Packet length and data content generation
+// - Packet representation and protocol specification
+// - Automatic tag attachment for tracking and identification
 //
 // Available packet name format directives:
-// source, application, network node
-// display name or full name, full path
 //
 //  - %a: automatic application display name or application full name or module display name or module full name
 //  - %n: module display name or module full name
@@ -29,20 +33,31 @@ package inet.queueing.base;
 //  - %t: simulation time
 //  - %e: event number
 //
-// @see ~IPacketSource
+// Derived modules can implement specific packet generation strategies
+// by defining when packets are created and how they are forwarded.
+//
+// @see ~IPacketSource, ~ActivePacketSource, ~PassivePacketSource
 //
 simple PacketSourceBase extends PacketProcessorBase
 {
     parameters:
-        string packetNameFormat = default("%a-%c"); // See directives in module documentation
-        string packetRepresentation @units("bitCount","bits","byteCount","bytes","applicationPacket") = default("byteCount"); // Determines the chunk of the packet data
-        string packetProtocol = default("unknown");
-        volatile int packetLength @unit(b);
-        volatile int packetData = default(-1);
-        bool attachCreationTimeTag = default(true);
-        bool attachIdentityTag = default(true);
-        bool attachDirectionTag = default(true);
+        // Packet naming and identification
+        string packetNameFormat = default("%a-%c"); // Format string for packet names using directives listed in module documentation
+        bool attachIdentityTag = default(true);     // When true, attaches an identifier tag to created packets
+
+        // Packet content configuration
+        string packetRepresentation @units("bitCount","bits","byteCount","bytes","applicationPacket") = default("byteCount"); // Determines the chunk type for packet data
+        string packetProtocol = default("unknown"); // Protocol identifier for created packets
+        volatile int packetLength @unit(b);         // Length of generated packets in bits
+        volatile int packetData = default(-1);      // Data value to include in packets (-1 for random)
+
+        // Tag configuration
+        bool attachCreationTimeTag = default(true); // When true, attaches creation time information to packets
+        bool attachDirectionTag = default(true);    // When true, attaches direction information to packets
+
+        // Display configuration
         displayStringTextFormat = default("created %p pk (%l)");
+
         @class(PacketSourceBase);
         @display("i=block/source");
         @signal[packetCreated](type=inet::Packet);

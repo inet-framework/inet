@@ -8,7 +8,27 @@
 package inet.queueing.base;
 
 //
-// This is a base module for various token generator modules.
+// Base module for token generator components in the queueing framework.
+// Token generators create abstract tokens that are used to control packet
+// processing in token-based modules such as servers, meters, and classifiers.
+//
+// Token-based processing is a fundamental concept in traffic management
+// and quality of service implementations, allowing for:
+// - Rate limiting and traffic shaping
+// - Bandwidth allocation and reservation
+// - Prioritization of traffic flows
+// - Implementation of leaky bucket and token bucket algorithms
+//
+// Key features:
+// - Generates tokens and adds them to a connected token storage
+// - Supports various token generation patterns and rates
+// - Collects statistics on token creation events
+// - Provides the foundation for implementing traffic control mechanisms
+//
+// Derived modules can implement specific token generation strategies
+// by defining when and how many tokens are created and added to the storage.
+//
+// @see ~TokenBasedServer, ~TokenBucketMeter, ~TokenBucketClassifier
 //
 simple TokenGeneratorBase extends PacketProcessorBase
 {

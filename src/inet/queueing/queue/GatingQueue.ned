@@ -19,7 +19,36 @@ import inet.queueing.contract.IPacketGate;
 import inet.queueing.contract.IPacketQueue;
 
 //
-// This module implements a queue having its own periodic gate.
+// Queue with a periodic gate that controls when packets can be transmitted.
+// It is a key component for implementing Time-Sensitive Networking (TSN)
+// and other time-scheduled communication systems.
+//
+// The GatingQueue consists of:
+// - A standard packet queue that stores packets waiting for transmission
+// - A periodic gate that opens and closes according to a configured schedule
+//
+// The periodic gate controls the flow of packets from the queue to the output,
+// allowing packets to be transmitted only during specific time windows. This
+// enables precise timing control for packet transmissions, which is essential
+// for deterministic networking applications.
+//
+// Key features and applications:
+// - Enables time-triggered communication with precise timing guarantees
+// - Supports implementation of IEEE 802.1Qbv Time-Aware Shaper for TSN
+// - Allows for traffic shaping and bandwidth allocation based on time slots
+// - Can be used to implement cyclic transmission schedules
+// - Helps prevent queue congestion by controlling when packets can leave the queue
+//
+// The bitrate parameter specifies the transmission rate when the gate is open,
+// and the extraLength parameter accounts for additional overhead (e.g., Ethernet PHY header).
+//
+// This queue is particularly useful in:
+// - Industrial automation networks requiring deterministic communication
+// - Automotive in-vehicle networks with real-time requirements
+// - Professional audio/video systems with precise timing needs
+// - Any application requiring time-synchronized packet transmission
+//
+// @see ~PeriodicGate, ~PacketQueue, ~GatingPriorityQueue
 //
 module GatingQueue extends CompoundPacketQueueBase
 {

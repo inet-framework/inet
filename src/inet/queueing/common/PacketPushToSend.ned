@@ -10,6 +10,25 @@ package inet.queueing.common;
 import inet.queueing.base.PassivePacketSinkBase;
 import inet.queueing.contract.IPassivePacketSink;
 
+//
+// Protocol adapter that converts between push-based and send-based packet handling.
+// Enables integration between queueing framework modules and traditional OMNeT++ modules.
+//
+// Operation mechanism:
+// - Receives packets via push operations from queueing framework modules
+// - Forwards packets using send operations to traditional OMNeT++ modules
+// - Acts as a passive packet sink in the queueing framework
+// - Serves as a bridge between different module communication paradigms
+//
+// This module is particularly useful for:
+// - Connecting queueing framework components to standard protocol modules
+// - Integrating push-based packet processing with event-based simulation
+// - Building hybrid simulation models with mixed communication patterns
+// - Creating protocol stack adapters between different module types
+// - Transitioning between different packet handling mechanisms
+//
+// @see ~PacketSendToPush
+//
 simple PacketPushToSend extends PassivePacketSinkBase like IPassivePacketSink
 {
     parameters:

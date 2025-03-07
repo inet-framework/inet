@@ -11,9 +11,29 @@ import inet.queueing.base.PacketClassifierBase;
 import inet.queueing.contract.IPacketClassifier;
 
 //
-// This module implements a packet classifier using a Markov process that has
-// as many states as output gates the classifier has. The output gate for
-// a given packet is determined by the current state of the Markov process.
+// Stochastic packet classifier that uses a Markov process to determine output gates.
+// This module enables probabilistic traffic distribution with time-dependent behavior
+// and state transitions.
+//
+// Operation mechanism:
+// - Maintains an internal Markov process with as many states as output gates
+// - The current state determines which output gate receives the next packet
+// - State transitions occur according to the configured transition probabilities
+// - The classifier remains in each state for a configurable amount of time
+//
+// The MarkovClassifier is particularly useful for:
+// - Modeling time-varying traffic patterns
+// - Simulating bursty traffic distribution
+// - Testing system behavior under probabilistic traffic allocation
+// - Implementing load balancing with temporal correlation
+// - Modeling channel switching in wireless networks
+//
+// Key parameters:
+// - initialState: The starting state of the Markov process
+// - transitionProbabilities: N×N matrix defining state transition probabilities
+// - waitIntervals: How long the process stays in each state before transitioning
+//
+// @see ~PacketClassifier, ~ContentBasedClassifier, ~LabelClassifier
 //
 simple MarkovClassifier extends PacketClassifierBase like IPacketClassifier
 {

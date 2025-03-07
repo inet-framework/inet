@@ -13,8 +13,35 @@ import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.IPacketScheduler;
 
 //
-// This module implements a priority queue with multiple inner queues and an
-// optional shared memory buffer.
+// Priority queue that consists of multiple internal queues with different priority
+// levels and an optional shared memory buffer. It provides a comprehensive solution
+// for Quality of Service (QoS) and traffic prioritization in network devices.
+//
+// The PriorityQueue operates by:
+// 1. Using a classifier to direct incoming packets to different internal queues
+//    based on packet attributes (e.g., TOS field, DSCP value, or user priority)
+// 2. Maintaining separate queues for different priority levels
+// 3. Using a priority scheduler to select packets from the highest priority
+//    non-empty queue when pulling packets
+// 4. Optionally sharing a common buffer among all queues to optimize memory usage
+//
+// The module consists of the following components:
+// - Classifier: Determines which internal queue a packet should be directed to
+// - Multiple internal queues: Store packets of different priority levels
+// - Scheduler: Selects which queue to pull packets from (typically highest priority first)
+// - Optional shared buffer: Manages memory allocation across all queues
+//
+// This queue is commonly used in:
+// - Network routers and switches implementing QoS mechanisms
+// - Traffic management systems that need to prioritize certain flows
+// - Systems implementing Differentiated Services (DiffServ) architecture
+// - Any network device that needs to provide preferential treatment to specific traffic types
+//
+// The default implementation uses PacketClassifier and PriorityScheduler, but these
+// can be customized through parameters to implement different classification and
+// scheduling strategies.
+//
+// @see ~PacketClassifier, ~PriorityScheduler, ~IPacketBuffer
 //
 module PriorityQueue extends CompoundPacketQueueBase
 {
@@ -46,4 +73,3 @@ module PriorityQueue extends CompoundPacketQueueBase
         }
         scheduler.out --> { @display("m=e"); } --> out;
 }
-

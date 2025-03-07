@@ -8,7 +8,9 @@
 package inet.queueing.contract;
 
 //
-// This module interface is implemented by token generators.
+// Token generators produce tokens at specific rates or based on events,
+// which can be used by other modules for traffic shaping, rate limiting,
+// and access control.
 //
 moduleinterface ITokenGenerator
 {

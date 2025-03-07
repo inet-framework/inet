@@ -8,9 +8,24 @@
 package inet.queueing.base;
 
 //
-// This is a base module for various packet sink modules.
+// Base module for packet sink components in the queueing framework.
+// Packet sinks are terminal points in packet flow paths that consume
+// and destroy packets, representing endpoints of communication.
 //
-// @see ~IPacketSink
+// Packet sinks serve several important functions in network simulations:
+// - Representing application endpoints that consume packets
+// - Modeling packet drop points in the network
+// - Collecting statistics on received or dropped packets
+// - Terminating packet flows in simulation models
+//
+// This module provides comprehensive statistics collection for:
+// - Dropped packet counts and lengths
+// - Data rates of dropped packets
+//
+// Derived modules can implement specific sink behaviors by defining
+// how packets are processed upon arrival and when they should be dropped.
+//
+// @see ~IPacketSink, ~ActivePacketSink, ~PassivePacketSink
 //
 simple PacketSinkBase extends PacketProcessorBase
 {

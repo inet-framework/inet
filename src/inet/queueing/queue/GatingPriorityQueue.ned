@@ -14,16 +14,36 @@ import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.IPacketScheduler;
 
 //
-// This module implements a priority queue with multiple inner queues each having
-// its own periodic gate for packet selection and an optional shared memory buffer.
+// Priority queue with multiple inner queues each having its own periodic gate
+// for packet selection and an optional shared memory buffer. This module combines
+// the functionality of PriorityQueue and GatingQueue to provide both traffic
+// prioritization and time-based transmission control.
+//
+// The GatingPriorityQueue operates by:
+// 1. Classifying incoming packets into different priority queues
+// 2. Controlling when packets from each queue can be transmitted using individual gates
+// 3. Using a priority scheduler to select packets from the highest priority
+//    non-empty queue when multiple gates are open
+//
+// This queue is particularly useful for implementing advanced Time-Sensitive Networking
+// (TSN) features such as:
+// - IEEE 802.1Qbv Time-Aware Shaper with multiple traffic classes
+// - Credit-based shaping combined with time-gated transmission
+// - Scheduled traffic with different priority levels
+// - Mixed-criticality networks with both time-critical and best-effort traffic
+//
+// The bitrate parameter specifies the transmission rate, and the extraLength
+// parameter accounts for additional overhead (e.g., Ethernet PHY header).
+//
+// @see ~PriorityQueue, ~GatingQueue, ~PeriodicGate, ~PriorityScheduler
 //
 module GatingPriorityQueue extends CompoundPacketQueueBase
 {
     parameters:
-        int numQueues;
-        double bitrate @unit(bps);
-        *.bitrate = default(this.bitrate);
-        *.extraLength = default(64b); // Overhead for Ethernet PHY header
+        int numQueues; // Number of priority queues to create
+        double bitrate @unit(bps); // Transmission rate when gates are open
+        *.bitrate = default(this.bitrate); // Propagate bitrate to submodules
+        *.extraLength = default(64b); // Overhead for Ethernet PHY header (preamble, SFD, IFG)
     submodules:
         buffer: <default("")> like IPacketBuffer if typename != "" {
             parameters:
@@ -55,4 +75,3 @@ module GatingPriorityQueue extends CompoundPacketQueueBase
         }
         scheduler.out --> { @display("m=e"); } --> out;
 }
-

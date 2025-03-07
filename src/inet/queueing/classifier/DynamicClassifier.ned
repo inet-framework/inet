@@ -7,10 +7,38 @@
 
 package inet.queueing.classifier;
 
+//
+// This packet classifier dynamically creates and uses other classifier modules
+// during simulation runtime. It allows for flexible and adaptable packet
+// classification strategies that can change based on simulation conditions.
+//
+// The DynamicClassifier works by:
+// - Creating classifier modules of the specified type on demand
+// - Using these dynamically created classifiers to determine packet routing
+// - Allowing classification strategies to evolve during simulation
+//
+// Key features:
+// - Runtime creation of classifier modules
+// - Flexible adaptation to changing network conditions
+// - Support for dynamic classification policies
+// - Ability to switch between different classification strategies
+//
+// This classifier is particularly useful for:
+// - Adaptive traffic management systems
+// - Self-optimizing networks
+// - Testing different classification strategies during a single simulation
+// - Implementing learning-based classification algorithms
+// - Modeling systems that change classification policies based on network state
+//
+// The moduleType parameter specifies the type of classifier module to create,
+// while submoduleName defines the name pattern for the created modules.
+//
+// @see ~PacketClassifier, ~ContentBasedClassifier, ~PriorityClassifier
+//
 simple DynamicClassifier extends PacketClassifier
 {
     parameters:
-        string submoduleName;
-        string moduleType;
+        string submoduleName; // Name pattern for dynamically created classifier modules
+        string moduleType;    // Type of classifier module to create dynamically
         @class(DynamicClassifier);
 }

@@ -8,10 +8,20 @@
 package inet.queueing.contract;
 
 //
-// This module interface is implemented by packet source modules which are both
-// active and passive simultaneously.
+// Interface for packet source modules in the queueing framework.
+// Packet sources are starting points for packets in a network that
+// can operate in both active and passive modes simultaneously,
+// providing maximum flexibility for packet generation.
 //
-// @see ~IPassivePacketSource, ~IActivePacketSource
+// Key features:
+// - Serves as a starting point for packet flows
+// - Supports both push and pull packet processing modes
+// - Can actively push packets to sinks (push mode)
+// - Can passively provide packets when requested (pull mode)
+// - Provides a unified interface for packet generation
+// - Adapts to different packet processing paradigms
+//
+// @see ~IPassivePacketSource, ~IActivePacketSource, ~PacketSourceBase
 //
 moduleinterface IPacketSource
 {

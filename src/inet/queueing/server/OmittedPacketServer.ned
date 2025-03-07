@@ -10,8 +10,21 @@ package inet.queueing.server;
 import inet.queueing.contract.IPacketServer;
 
 //
-// This module implements the given interface and can be used as an optional
-// module that removes itself from the module hierarchy during initialization.
+// Optional placeholder module that implements the IPacketServer interface but
+// removes itself from the module hierarchy during initialization. This creates
+// a direct connection between the input and output gates.
+//
+// The OmittedPacketServer is useful in scenarios where:
+// - A server is conditionally needed based on simulation parameters
+// - Model variants need to be tested with and without processing delays
+// - A simplified model is desired without changing the overall network structure
+// - Processing delays need to be selectively enabled or disabled
+//
+// When this module is used, packets flow directly from the input to the output
+// without any processing delay or state changes, effectively creating a zero-delay
+// passthrough connection.
+//
+// @see ~PacketServer, ~InstantServer, ~PreemptingServer, ~TokenBasedServer
 //
 module OmittedPacketServer like IPacketServer
 {
@@ -24,4 +37,3 @@ module OmittedPacketServer like IPacketServer
     connections:
         in --> out;
 }
-

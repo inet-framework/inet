@@ -8,11 +8,29 @@
 package inet.queueing.base;
 
 //
-// This is a base module for various packet flow modules. A packet flow module
-// passes or streams all pushed or pulled packets after processing them from
-// its input to its output.
+// Base module for packet flow components in the queueing framework.
+// Packet flow modules process packets as they pass through, without
+// storing or delaying them.
 //
-// @see ~IPacketFlow
+// These modules support both push and pull packet processing modes:
+// - In push mode, packets are pushed into the module's input and then
+//   pushed out through its output after processing
+// - In pull mode, packets are pulled from the module's input when they
+//   are pulled from its output
+//
+// Packet flow modules are used to implement various packet processing
+// functions that don't affect the timing or order of packets:
+// - Packet filtering (accepting or dropping packets based on criteria)
+// - Packet marking (attaching tags or modifying packet headers)
+// - Packet metering (measuring packet rates and characteristics)
+// - Packet classification (identifying packet types or flows)
+//
+// The module provides comprehensive statistics collection for:
+// - Incoming and outgoing packet counts and lengths
+// - Data rates for both incoming and outgoing traffic
+// - Per-flow statistics for detailed traffic analysis
+//
+// @see ~IPacketFlow, ~PacketFilter, ~PacketMarker, ~PacketMeter, ~PacketTagger
 //
 simple PacketFlowBase extends PacketProcessorBase
 {

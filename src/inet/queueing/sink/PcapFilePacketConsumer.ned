@@ -11,8 +11,37 @@ import inet.queueing.base.PassivePacketSinkBase;
 import inet.queueing.contract.IPassivePacketSink;
 
 //
-// This module is a passive packet sink which is pushed with packets by the
-// connected packet producer. All pushed packets are written to a PCAP file.
+// This module captures network traffic and writes it to a PCAP file for later analysis.
+// It acts as a passive packet sink that receives packets from a connected packet producer
+// and records them in a standard packet capture format compatible with Wireshark and
+// other network analysis tools.
+//
+// Key features:
+// - Supports both pcap and pcapng file formats
+// - Configurable network type to match different link layer protocols
+// - Adjustable snapshot length to control packet truncation
+// - Configurable time precision for accurate packet timing
+// - Optional immediate flushing for crash-resilient captures
+// - Direction flag to indicate inbound or outbound traffic
+//
+// Applications:
+// - Network traffic analysis and debugging
+// - Protocol verification and validation
+// - Performance measurement and benchmarking
+// - Creating test datasets for network tools
+// - Documenting network behavior for reference
+//
+// The PcapFilePacketConsumer is particularly useful in scenarios where:
+// - You need to analyze simulation results with external tools
+// - You want to compare simulation traffic with real-world captures
+// - You need to document network behavior for later reference
+// - You're developing or testing network protocols
+// - You want to visualize packet flows using packet analysis tools
+//
+// The captured PCAP files can be opened with tools like Wireshark, tcpdump,
+// or any other PCAP-compatible network analyzer for detailed inspection.
+//
+// @see ~PcapFilePacketProducer, ~PacketFlowPcapFileRecorder
 //
 simple PcapFilePacketConsumer extends PassivePacketSinkBase like IPassivePacketSink
 {
@@ -28,4 +57,3 @@ simple PcapFilePacketConsumer extends PassivePacketSinkBase like IPassivePacketS
     gates:
         input in @labels(push);
 }
-

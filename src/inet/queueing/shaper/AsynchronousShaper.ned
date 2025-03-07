@@ -8,16 +8,45 @@
 package inet.queueing.shaper;
 
 //
-// This module implements an asynchronous shaper. The queue sorts packets based
-// on the transmission eligibility time (~EligibilityTimeTag) attached to each
-// packet. The gate prevents packets from being transmitted earlier than the attached
-// transmission eligibility time.
+// This module implements an asynchronous shaper as defined in IEEE 802.1Q-2018
+// (formerly IEEE 802.1Qcr) for Time-Sensitive Networking (TSN). It provides
+// deterministic latency bounds while allowing for efficient network utilization.
+//
+// The asynchronous shaper operates based on per-packet eligibility times:
+// - Each packet is assigned a transmission eligibility time (~EligibilityTimeTag)
+// - Packets are stored in a queue sorted by their eligibility times
+// - The gate prevents packets from being transmitted before their eligibility time
+// - When a packet becomes eligible, it is released for transmission
+//
+// Key features:
+// - Provides bounded latency guarantees without synchronized clocks
+// - Supports traffic shaping with minimal jitter
+// - Enables efficient bandwidth utilization
+// - Compatible with other TSN mechanisms
+// - Preserves packet ordering within flows
+//
+// Applications:
+// - Time-Sensitive Networking (TSN)
+// - Industrial automation networks
+// - Automotive Ethernet
+// - Deterministic packet delivery with bounded latency
+// - Mixed-criticality networks with QoS requirements
+//
+// The asynchronous shaper is particularly useful in scenarios where:
+// - Deterministic latency bounds are required
+// - Network resources need to be efficiently utilized
+// - Clock synchronization is difficult or impossible
+// - Multiple traffic classes with different QoS requirements coexist
+//
+// This implementation uses specialized queue and gate components:
+// - EligibilityTimeQueue: Sorts packets based on their eligibility times
+// - EligibilityTimeGate: Releases packets only after they become eligible
 //
 // @see ~EligibilityTimeMeter, ~EligibilityTimeFilter, ~EligibilityTimeQueue, ~EligibilityTimeGate
 //
 module AsynchronousShaper extends PacketShaper
 {
     parameters:
-        queue.typename = default("EligibilityTimeQueue");
-        gate.typename = default("EligibilityTimeGate");
+        queue.typename = default("EligibilityTimeQueue"); // Queue that sorts packets by eligibility time
+        gate.typename = default("EligibilityTimeGate");   // Gate that enforces eligibility time constraints
 }

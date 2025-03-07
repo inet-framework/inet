@@ -8,11 +8,9 @@
 package inet.queueing.contract;
 
 //
-// This module interface is implemented by traffic conditioner modules. A traffic
-// conditioner connects one input to one output. It operates in passive mode on
-// its input and in active mode on its output. Packets can be pushed into its
-// input and packets can be pulled from its output. A traffic conditioner can
-// drop, delay, and reorder packets, but it doesn't modify packets in any way.
+// Traffic conditioners connect one input to one output, operating in passive
+// mode on input and active mode on output. They can drop, delay, and reorder
+// packets without modifying packet contents.
 //
 moduleinterface ITrafficConditioner extends IPassivePacketSink, IActivePacketSource
 {

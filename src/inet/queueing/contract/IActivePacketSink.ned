@@ -8,10 +8,18 @@
 package inet.queueing.contract;
 
 //
-// This module interface must be implemented by active packet sink modules.
-// An active packet sink, also called a collector, has one input that must be
-// connected to a passive packet source module. The active packet sink is
-// expected to pull packets from the connected passive packet source over time.
+// Interface for active packet sink modules in the queueing framework.
+// Active packet sinks are terminal points for packets in pull-based
+// packet processing, where packet flow is driven by consumers requesting
+// packets from producers.
+//
+// Key features:
+// - Operates in pull mode (active consumer)
+// - Actively requests packets from passive packet sources
+// - Controls the timing and rate of packet collection
+// - Initiates packet flow in the network
+// - Serves as a terminal point for packet flows
+// - Determines when packets are processed in the system
 //
 // @see ~ActivePacketSink, ~PacketServer, ~PacketScheduler, ~IPassivePacketSource
 //

@@ -11,8 +11,27 @@ import inet.queueing.base.PacketMarkerBase;
 import inet.queueing.contract.IPacketMarker;
 
 //
-// This module attaches a ~LabelsTag to packets based on the configured filters.
-// For each matching filter, a new label is attached.
+// Packet labeling module that attaches identifying tags to packets based on configurable
+// filter criteria. This module enables dynamic packet classification and processing
+// by attaching metadata that can be used by downstream modules.
+//
+// Operation mechanism:
+// - Evaluates each packet against a set of filter functions
+// - For each matching filter, attaches the corresponding label to the packet
+// - Multiple labels can be attached to a single packet if it matches multiple filters
+// - Labels are stored in a ~LabelsTag that is attached to the packet
+//
+// The PacketLabeler is particularly useful for:
+// - Implementing Quality of Service (QoS) mechanisms
+// - Creating traffic classification systems
+// - Supporting policy-based routing
+// - Enabling content-aware processing in downstream modules
+// - Building multi-criteria packet processing pipelines
+//
+// The module uses pluggable filter functions that implement the IPacketFilterFunction
+// interface, allowing for flexible and extensible packet classification criteria.
+//
+// @see ~LabelFilter, ~LabelClassifier, ~LabelScheduler, ~LabelsTag
 //
 simple PacketLabeler extends PacketMarkerBase like IPacketMarker
 {
