@@ -21,6 +21,27 @@ import inet.protocolelement.selectivity.SendToMacAddress;
 import inet.protocolelement.transceiver.PacketTransmitter;
 import inet.queueing.common.PacketMultiplexer;
 
+//
+// Provides a comprehensive network interface implementation with MAC addressing,
+// acknowledgment-based reliability, protocol-based dispatching, and error detection.
+// Extends the NetworkInterface base class with a complete protocol stack.
+//
+// Operation:
+// - Transmission path (upper to lower):
+//   * Adds MAC address headers to outgoing packets
+//   * Implements packet retransmission for reliability
+//   * Handles acknowledgment-based flow control
+//   * Adds protocol identification
+//   * Inserts CRC headers for error detection
+//   * Transmits packets to the physical layer
+// - Reception path (lower to upper):
+//   * Verifies CRC headers for error detection
+//   * Processes protocol identification
+//   * Handles acknowledgment generation
+//   * Filters packets based on MAC address
+//
+// @see ~DataService, ~ForwardingService, ~MacService, ~SelectivityService
+//
 module InterfaceService extends NetworkInterface
 {
     parameters:

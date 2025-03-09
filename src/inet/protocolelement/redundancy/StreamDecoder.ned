@@ -11,12 +11,18 @@ import inet.queueing.base.PacketFlowBase;
 import inet.queueing.contract.IPacketFlow;
 
 //
-// This module decodes the stream of a packet by matching various tags on the
-// packet against the mapping. It can check for network interface, source address,
-// destination address, VLAN id, and PCP. If a match was found, then the stream
-// is attached to the packet in a ~StreamInd tag.
+// Identifies packet streams based on network parameters and attaches stream
+// identification tags. Enables stream-based processing by mapping network-level
+// attributes to logical stream identifiers.
 //
-// @see ~StreamEncoder
+// Operation:
+// - Examines incoming packets for network interface, addresses, VLAN ID, and PCP
+// - Matches packet attributes against configurable mapping rules
+// - Attaches StreamInd tags to packets when matches are found
+// - Maintains packet flow while adding stream identification
+// - Provides the receiving side of stream-based communication
+//
+// @see ~StreamEncoder, ~StreamCoderLayer
 //
 simple StreamDecoder extends PacketFlowBase like IPacketFlow
 {

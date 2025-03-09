@@ -7,6 +7,20 @@
 
 package inet.protocolelement.fragmentation.contract;
 
+//
+// Defines the interface for packet fragmentation policy modules that determine
+// how packets should be split into fragments. Fragmentation policies provide
+// the rules and parameters for dividing packets into smaller units.
+//
+// Operation:
+// - Determines fragment sizes based on configurable parameters
+// - Provides fragmentation rules to fragmenter modules
+// - Calculates optimal fragment boundaries
+// - Ensures fragments meet size constraints
+// - Maintains consistency in fragmentation decisions
+//
+// @see ~LengthBasedFragmenterPolicy, ~IPacketFragmenter
+//
 moduleinterface IFragmenterPolicy
 {
     parameters:

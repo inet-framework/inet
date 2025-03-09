@@ -10,10 +10,15 @@ package inet.protocolelement.shaper;
 import inet.queueing.queue.PacketQueue;
 
 //
-// This module is a packet queue that keeps the packets in ascending order based
-// on the eligibility time in the attached ~EligibilityTimeTag of the packets.
+// Stores packets in ascending order of their eligibility times, providing
+// priority-based queuing for asynchronous traffic shaping.
 //
-// This module is part of the asynchronous shaper infrastructure.
+// Operation:
+// - Sorts packets based on their EligibilityTimeTag values
+// - Maintains packets in earliest-eligibility-time-first order
+// - Uses a specialized comparator to determine packet ordering
+// - Ensures packets with earlier eligibility times are processed first
+// - Preserves packet order within the same eligibility time
 //
 // @see ~EligibilityTimeGate, ~EligibilityTimeFilter, ~EligibilityTimeMeter, ~EligibilityTimeTag
 //

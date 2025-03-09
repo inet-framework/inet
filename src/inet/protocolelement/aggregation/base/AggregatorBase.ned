@@ -10,6 +10,20 @@ package inet.protocolelement.aggregation.base;
 import inet.protocolelement.aggregation.contract.IAggregatorPolicy;
 import inet.queueing.base.PacketPusherBase;
 
+//
+// Base module for packet aggregators that provides common functionality for
+// combining multiple packets into a single aggregated packet. Uses a pluggable
+// aggregation policy to determine when and how to aggregate packets.
+//
+// Operation:
+// - Collects packets from upper layers
+// - Consults the aggregation policy to determine aggregation timing
+// - Combines multiple packets into a single aggregated packet
+// - Adds necessary information to identify subpacket boundaries
+// - Forwards aggregated packets to lower layers
+//
+// @see ~DeaggregatorBase, ~IAggregatorPolicy
+//
 module AggregatorBase extends PacketPusherBase
 {
     parameters:

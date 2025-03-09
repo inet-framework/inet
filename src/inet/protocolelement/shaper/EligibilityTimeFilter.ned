@@ -11,13 +11,16 @@ import inet.queueing.base.PacketFilterBase;
 import inet.queueing.contract.IPacketFilter;
 
 //
-// This module is a packet filter that operates based on the ~EligibilityTimeTag
-// attached to the packet that is passing through. Packets are dropped if the tag
-// is missing. If the `maxResidenceTime` parameter is set, then the filter also drops
-// the packets for which the eligibility time in the attached ~EligibilityTimeTag
-// is greater than the current simulation time plus the maximum residence time.
+// Filters packets based on their eligibility time tags, dropping packets that
+// don't meet timing requirements for transmission according to asynchronous
+// traffic shaping rules.
 //
-// This module is part of the asynchronous shaper architecture.
+// Operation:
+// - Examines the EligibilityTimeTag attached to each packet
+// - Drops packets that are missing the required tag
+// - Optionally enforces maximum residence time constraints
+// - Verifies that eligibility times are within acceptable bounds
+// - Provides timing-based admission control for packet flows
 //
 // @see ~EligibilityTimeGate, ~EligibilityTimeQueue, ~EligibilityTimeMeter, ~EligibilityTimeTag
 //

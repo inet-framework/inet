@@ -9,6 +9,19 @@ package inet.protocolelement.common;
 
 import inet.queueing.base.PacketProcessorBase;
 
+//
+// Inserts time gaps between consecutive packets to simulate interpacket delays
+// in network transmissions. Ensures a minimum time separation between packets
+// based on a configurable duration parameter.
+//
+// Operation:
+// - Delays packet forwarding to maintain minimum time gaps between consecutive packets
+// - Uses a timer to schedule packet processing after the required gap elapses
+// - Supports both synchronous and asynchronous packet handling
+// - Can be configured to assume the channel was busy before simulation started
+//
+// @see ~PacketProcessorBase
+//
 simple InterpacketGapInserter extends PacketProcessorBase
 {
     parameters:

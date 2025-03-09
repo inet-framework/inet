@@ -7,6 +7,20 @@
 
 package inet.protocolelement.socket;
 
+//
+// Defines the interface for socket layer modules that handle socket-based
+// communication in protocol stacks. Socket layers typically manage connections,
+// addressing, and data transfer between applications and network protocols.
+//
+// Operation:
+// - Processes packets from upper layers (applications) and lower layers (protocols)
+// - Manages socket connections and their states
+// - Handles addressing and multiplexing between applications and protocols
+// - Provides socket-specific services like connection establishment and termination
+// - Implements flow control and buffering mechanisms
+//
+// @see ~OmittedSocketLayer
+//
 moduleinterface ISocketLayer
 {
     parameters:
@@ -17,4 +31,3 @@ moduleinterface ISocketLayer
         input lowerLayerIn;
         output lowerLayerOut;
 }
-

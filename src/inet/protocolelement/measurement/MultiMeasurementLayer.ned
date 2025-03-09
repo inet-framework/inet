@@ -9,6 +9,20 @@ package inet.protocolelement.measurement;
 
 import inet.queueing.contract.IPacketFlow;
 
+//
+// Extends the measurement layer concept to support multiple measurement modules
+// in sequence. Allows for layered or multi-faceted packet flow measurements
+// with different measurement types or purposes.
+//
+// Operation:
+// - Chains multiple measurement starter modules for outgoing packets
+// - Chains multiple measurement recorder modules for incoming packets
+// - Processes packets through each measurement module in sequence
+// - Supports configurable number of measurement modules
+// - Maintains proper measurement order in both directions
+//
+// @see ~IMeasurementLayer, ~MeasurementLayer, ~OmittedMeasurementLayer
+//
 module MultiMeasurementLayer like IMeasurementLayer
 {
     parameters:
@@ -41,4 +55,3 @@ module MultiMeasurementLayer like IMeasurementLayer
         }
         measurementMaker[0].out --> { @display("m=n"); } --> upperLayerOut;
 }
-

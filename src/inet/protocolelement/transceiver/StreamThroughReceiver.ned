@@ -11,13 +11,21 @@ import inet.protocolelement.transceiver.base.StreamingReceiverBase;
 import inet.protocolelement.transceiver.contract.IPacketReceiver;
 
 //
-// This module receives signals from the transmission medium (wire) as a stream and
-// also sends packets to the upper layer as a stream. The stream start and stream
-// end are sent separately allowing the preemption of signals.
+// Receives signals from the physical medium as streams and forwards them to
+// upper layers as streams. Maintains streaming mode throughout the entire
+// processing chain, enabling signal preemption.
+//
+// Operation:
+// - Processes incoming signal streams incrementally
+// - Forwards signal parts to upper layers as they arrive
+// - Preserves streaming nature of signals end-to-end
+// - Supports preemption of ongoing transmissions
+// - Maintains minimal processing delay for time-sensitive applications
+//
+// @see ~StreamThroughTransmitter, ~DestreamingReceiver, ~PacketReceiver
 //
 simple StreamThroughReceiver extends StreamingReceiverBase like IPacketReceiver
 {
     parameters:
         @class(StreamThroughReceiver);
 }
-

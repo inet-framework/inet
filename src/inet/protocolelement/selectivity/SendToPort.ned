@@ -7,6 +7,18 @@
 
 package inet.protocolelement.selectivity;
 
+//
+// Adds a destination port header to outgoing packets. Prepares packets
+// for delivery to a specific transport layer port.
+//
+// Operation:
+// - Creates a destination port header with the configured port number
+// - Inserts the header at the front of outgoing packets
+// - Registers with AccessoryProtocol service
+// - Enables port-based multiplexing at the transport layer
+//
+// @see ~ReceiveAtPort, ~SendToL3Address, ~SendToMacAddress
+//
 simple SendToPort
 {
     parameters:

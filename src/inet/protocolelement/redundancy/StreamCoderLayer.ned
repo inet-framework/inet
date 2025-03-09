@@ -11,9 +11,18 @@ import inet.protocolelement.contract.IProtocolLayer;
 import inet.queueing.contract.IPacketFlow;
 
 //
-// This module combines a stream decoder and a stream encoder into a layer. For
-// incoming packets, the stream decoder determines the stream of the packet. For
-// outgoing packets, the stream encoder determines the VLAN id, etc. of the packet.
+// Combines stream encoding and decoding functionality into a single protocol layer.
+// Provides bidirectional stream identification and mapping capabilities for
+// implementing redundant communication systems.
+//
+// Operation:
+// - Processes incoming packets through the stream decoder
+// - Processes outgoing packets through the stream encoder
+// - Maps network parameters (interface, addresses, VLAN) to stream identifiers
+// - Maps stream identifiers to network parameters
+// - Maintains separate processing paths for upward and downward packet flows
+//
+// @see ~StreamEncoder, ~StreamDecoder, ~StreamRelayLayer
 //
 module StreamCoderLayer like IProtocolLayer
 {

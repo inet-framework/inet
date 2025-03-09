@@ -11,12 +11,15 @@ import inet.queueing.base.PacketMeterBase;
 import inet.queueing.contract.IPacketMeter;
 
 //
-// This module is a packet meter which measures the packet flow that is passing
-// through and optionally attaches an ~EligibilityTimeTag to the packets. The
-// tag contains the calculated simulation time when the packet becomes eligible
-// for transmission according to the asynchronous shaper algorithm.
+// Calculates and assigns packet transmission eligibility times based on traffic
+// parameters, implementing the core algorithm for asynchronous traffic shaping.
 //
-// This module is part of the asynchronous shaper infrastructure.
+// Operation:
+// - Measures incoming packet flow characteristics
+// - Calculates eligibility times using token bucket algorithm
+// - Attaches EligibilityTimeTag to each packet
+// - Enforces committed information rate and burst size constraints
+// - Optionally limits maximum packet residence time
 //
 // @see ~EligibilityTimeGate, ~EligibilityTimeFilter, ~EligibilityTimeQueue, ~EligibilityTimeTag
 //

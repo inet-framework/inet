@@ -10,6 +10,19 @@ package inet.protocolelement.aggregation;
 import inet.protocolelement.aggregation.base.AggregatorBase;
 import inet.protocolelement.aggregation.contract.IPacketAggregator;
 
+//
+// Implements a packet aggregator that uses length headers to mark subpacket
+// boundaries within aggregated packets, enabling efficient deaggregation.
+//
+// Operation:
+// - Collects packets for aggregation according to policy
+// - Prepends each subpacket with a length header
+// - Combines multiple subpackets into a single aggregated packet
+// - Preserves packet boundaries through explicit length information
+// - Forwards aggregated packets to lower layers
+//
+// @see ~SubpacketLengthHeaderBasedDeaggregator, ~AggregatorBase
+//
 module SubpacketLengthHeaderBasedAggregator extends AggregatorBase like IPacketAggregator
 {
     parameters:

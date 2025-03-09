@@ -11,10 +11,18 @@ import inet.queueing.base.PacketFilterBase;
 import inet.queueing.contract.IPacketFilter;
 
 //
-// This module merges the packets of the same stream by removing duplicates. In
-// addition, it also replaces the stream name on the packet based on the mapping
-// parameter. For merging, it maintains a separate finite buffer per stream with
-// the last seen sequence numbers.
+// Merges packets from redundant streams by eliminating duplicates and optionally
+// remapping stream identifiers. Provides a key mechanism for implementing packet-level
+// redundancy in communication systems.
+//
+// Operation:
+// - Tracks sequence numbers for each stream
+// - Identifies and removes duplicate packets
+// - Maintains a configurable buffer of recently seen sequence numbers
+// - Optionally remaps input stream names to different output streams
+// - Provides the receiving side of redundant stream communication
+//
+// @see ~StreamSplitter, ~StreamRelayLayer
 //
 simple StreamMerger extends PacketFilterBase like IPacketFilter
 {

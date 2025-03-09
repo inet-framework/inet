@@ -12,10 +12,18 @@ import inet.queueing.contract.IPacketFilter;
 import inet.queueing.contract.IPacketPusher;
 
 //
-// This module combines a stream merger and a stream splitter module into a
-// stream relay layer. For incoming packets, the identified streams are merged
-// by the stream merger. For outgoing packets, the requested streams are split
-// by the stream splitter.
+// Combines stream merging and splitting functionality into a single protocol layer.
+// Provides bidirectional redundancy capabilities for implementing fault-tolerant
+// communication systems.
+//
+// Operation:
+// - Processes incoming packets through the stream merger
+// - Processes outgoing packets through the stream splitter
+// - Eliminates duplicate packets from redundant streams
+// - Creates redundant packet copies for multiple transmission paths
+// - Maintains separate processing paths for upward and downward packet flows
+//
+// @see ~StreamMerger, ~StreamSplitter, ~StreamCoderLayer
 //
 module StreamRelayLayer like IProtocolLayer
 {

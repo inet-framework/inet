@@ -7,6 +7,20 @@
 
 package inet.protocolelement.transceiver.base;
 
+//
+// Base module for streaming receivers that provides common functionality for
+// processing signals as continuous streams rather than discrete packets.
+// Extends packet receiver capabilities with streaming support.
+//
+// Operation:
+// - Receives signals from the physical medium as streams
+// - Processes signal parts as they arrive
+// - Supports incremental signal processing
+// - Handles partial signal reception and continuation
+// - Provides foundation for specialized streaming receiver implementations
+//
+// @see ~StreamingTransmitterBase, ~PacketReceiverBase, ~StreamThroughReceiver
+//
 simple StreamingReceiverBase extends PacketReceiverBase
 {
     parameters:

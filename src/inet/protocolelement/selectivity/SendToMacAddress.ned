@@ -7,6 +7,20 @@
 
 package inet.protocolelement.selectivity;
 
+//
+// Adds a destination MAC address header to outgoing packets. Prepares packets
+// for delivery to a specific MAC address, either configured directly or taken
+// from packet tags.
+//
+// Operation:
+// - Creates a destination MAC address header
+// - Uses address from MacAddressReq tag if present, otherwise uses configured address
+// - Inserts the header at the front of outgoing packets
+// - Adds appropriate protocol tags for packet processing
+// - Registers with AccessoryProtocol service
+//
+// @see ~ReceiveAtMacAddress, ~SendToL3Address, ~SendToPort
+//
 simple SendToMacAddress
 {
     parameters:

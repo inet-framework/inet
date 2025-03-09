@@ -9,6 +9,20 @@ package inet.protocolelement.fragmentation.policy;
 
 import inet.protocolelement.fragmentation.contract.IFragmenterPolicy;
 
+//
+// Implements a fragmentation policy that divides packets into fragments based
+// on configurable length constraints. Determines fragment sizes to ensure they
+// meet network transmission requirements.
+//
+// Operation:
+// - Calculates fragment sizes based on maximum fragment length parameter
+// - Ensures fragments are not smaller than minimum fragment length
+// - Rounds fragment lengths to specified boundaries for alignment
+// - Accounts for fragment header overhead in size calculations
+// - Provides consistent fragmentation decisions to fragmenter modules
+//
+// @see ~IFragmenterPolicy, ~FragmenterBase
+//
 simple LengthBasedFragmenterPolicy like IFragmenterPolicy
 {
     parameters:

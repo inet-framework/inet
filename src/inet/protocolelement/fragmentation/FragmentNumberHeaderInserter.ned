@@ -9,6 +9,20 @@ package inet.protocolelement.fragmentation;
 
 import inet.queueing.base.PacketFlowBase;
 
+//
+// Inserts fragment number headers into packets to enable fragmentation and
+// reassembly. Provides the header infrastructure needed for packet fragmentation
+// without performing the actual fragmentation.
+//
+// Operation:
+// - Adds FragmentNumberHeader to packets
+// - Sets appropriate fragment flags and sequence numbers
+// - Inserts headers at configurable position (front or back)
+// - Prepares packets for potential fragmentation
+// - Maintains packet flow while adding fragmentation capability
+//
+// @see ~FragmentNumberHeaderChecker, ~FragmentNumberHeaderBasedFragmenter
+//
 simple FragmentNumberHeaderInserter extends PacketFlowBase
 {
     parameters:

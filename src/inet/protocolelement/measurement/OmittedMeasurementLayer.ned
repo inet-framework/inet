@@ -8,8 +8,18 @@
 package inet.protocolelement.measurement;
 
 //
-// This module implements the module given interface and can be used as an omitted
-// optional module that removes itself from the module hierarchy during initialization.
+// Provides a placeholder implementation of the measurement layer interface
+// that can be used when measurement functionality is not needed. Automatically
+// removes itself from the module hierarchy during initialization and directly
+// connects upper and lower layers.
+//
+// Operation:
+// - Connects upper layer input directly to lower layer output
+// - Connects lower layer input directly to upper layer output
+// - Removes itself from the module hierarchy during initialization
+// - Provides transparent packet flow between connected layers
+//
+// @see ~IMeasurementLayer, ~MeasurementLayer, ~MultiMeasurementLayer
 //
 module OmittedMeasurementLayer like IMeasurementLayer
 {
@@ -25,4 +35,3 @@ module OmittedMeasurementLayer like IMeasurementLayer
         upperLayerIn --> lowerLayerOut;
         lowerLayerIn --> upperLayerOut;
 }
-

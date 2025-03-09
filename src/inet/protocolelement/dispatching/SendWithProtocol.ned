@@ -7,6 +7,20 @@
 
 package inet.protocolelement.dispatching;
 
+//
+// Encapsulates outgoing packets with protocol headers containing protocol
+// identification information. Acts as a protocol multiplexer in layered
+// protocol stacks.
+//
+// Operation:
+// - Extracts protocol information from the packet's PacketProtocolTag
+// - Creates a ProtocolHeader with the appropriate protocol ID
+// - Inserts the protocol header at the front of the packet
+// - Registers with protocol services to handle protocol multiplexing
+// - Forwards the encapsulated packet to lower layers
+//
+// @see ~ReceiveWithProtocol, ~ProtocolHeader
+//
 simple SendWithProtocol
 {
     parameters:

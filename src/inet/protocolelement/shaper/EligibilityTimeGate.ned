@@ -11,12 +11,16 @@ import inet.queueing.base.PacketGateBase;
 import inet.queueing.contract.IPacketGate;
 
 //
-// This module is a packet gate that operates based on the ~EligibilityTimeTag
-// attached to the next packet waiting to be pulled through. The gate is closed
-// if the eligibility time is greater than the current simulation time, otherwise, it is
-// open.
+// Controls packet flow based on eligibility time tags, allowing packets to pass
+// only when their scheduled transmission time has been reached according to
+// asynchronous traffic shaping rules.
 //
-// This module is part of the asynchronous shaper architecture.
+// Operation:
+// - Examines the EligibilityTimeTag of the next packet in queue
+// - Opens the gate when current time reaches or exceeds eligibility time
+// - Keeps the gate closed while packets are not yet eligible for transmission
+// - Tracks and reports remaining time until next packet becomes eligible
+// - Provides time-based traffic shaping without packet reordering
 //
 // @see ~EligibilityTimeQueue, ~EligibilityTimeFilter, ~EligibilityTimeMeter, ~EligibilityTimeTag
 //

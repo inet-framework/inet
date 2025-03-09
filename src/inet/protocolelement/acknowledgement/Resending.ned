@@ -9,6 +9,20 @@ package inet.protocolelement.acknowledgement;
 
 import inet.queueing.base.PacketPusherBase;
 
+//
+// Implements packet retransmission with a configurable number of retry attempts.
+// Provides a simple mechanism for reliable communication by resending packets
+// until successful delivery or maximum retries are reached.
+//
+// Operation:
+// - Forwards packets to the next module
+// - Tracks packet delivery success/failure
+// - Retransmits packets when delivery fails
+// - Limits retransmissions to configured maximum attempts
+// - Notifies producer about final delivery status
+//
+// @see ~SendWithAcknowledge, ~ReceiveWithAcknowledge
+//
 simple Resending extends PacketPusherBase
 {
     parameters:

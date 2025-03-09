@@ -12,6 +12,21 @@ import inet.protocolelement.forwarding.Forwarding;
 import inet.protocolelement.forwarding.ReceiveWithHopLimit;
 import inet.protocolelement.forwarding.SendWithHopLimit;
 
+//
+// Provides network layer packet forwarding functionality with hop limit control.
+// Combines protocol elements to implement basic routing and forwarding services
+// similar to IP forwarding.
+//
+// Operation:
+// - Uses a message dispatcher to direct packets to appropriate modules
+// - Implements packet forwarding based on destination addresses
+// - Adds hop limit control to prevent routing loops
+// - Processes outgoing packets through SendWithHopLimit
+// - Processes incoming packets through ReceiveWithHopLimit
+// - Drops packets when hop limit reaches zero
+//
+// @see ~DataService, ~InterfaceService, ~MacService, ~SelectivityService
+//
 module ForwardingService
 {
     parameters:

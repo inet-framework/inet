@@ -7,13 +7,17 @@
 package inet.protocolelement.shaper;
 
 //
-// This module extends the `EligibilityTimeMeter` with scheduler groups.
-// The calculation of the eligibility time takes into account the eligibility times of all
-// streams of the same group.
+// Extends eligibility time calculation to consider stream groups, enabling
+// coordinated traffic shaping across multiple related packet flows.
 //
-// This module is part of the asynchronous shaper infrastructure.
+// Operation:
+// - Groups related streams based on ingress port and priority
+// - Coordinates eligibility times across streams in the same group
+// - Consults a shared eligibility time table for group information
+// - Ensures consistent shaping behavior for grouped streams
+// - Maintains per-group state for accurate eligibility calculation
 //
-// @see ~ATS8021qFilter, ~EligibilityTimeGate, ~EligibilityTimeFilter, ~EligibilityTimeQueue, ~EligibilityTimeTag
+// @see ~GroupEligibilityTimeTable, ~EligibilityTimeMeter, ~EligibilityTimeGate, ~EligibilityTimeFilter
 //
 
 simple GroupEligibilityTimeMeter extends EligibilityTimeMeter

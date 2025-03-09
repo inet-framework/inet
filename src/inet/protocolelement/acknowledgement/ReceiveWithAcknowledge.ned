@@ -7,6 +7,20 @@
 
 package inet.protocolelement.acknowledgement;
 
+//
+// Receives packets with sequence numbers and generates acknowledgment packets
+// in response. Implements the receiver side of a reliable communication protocol
+// with positive acknowledgments.
+//
+// Operation:
+// - Extracts sequence number from incoming data packets
+// - Forwards data packets to upper layers
+// - Creates acknowledgment packets with matching sequence numbers
+// - Sends acknowledgments through dedicated gate
+// - Registers with AccessoryProtocol service
+//
+// @see ~SendWithAcknowledge, ~Resending
+//
 simple ReceiveWithAcknowledge
 {
     parameters:

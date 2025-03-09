@@ -10,8 +10,17 @@ package inet.protocolelement.common;
 import inet.protocolelement.contract.IProtocolLayer;
 
 //
-// This module implements the module given interface and can be used as an omitted
-// optional module that removes itself from the module hierarchy during initialization.
+// Implements a placeholder for an optional protocol layer that removes itself
+// from the module hierarchy during initialization, creating a direct connection
+// between adjacent layers.
+//
+// Operation:
+// - Connects upper and lower layer interfaces directly
+// - Automatically removes itself during initialization phase
+// - Maintains proper signal propagation between connected layers
+// - Preserves the logical structure of the protocol stack
+//
+// @see ~IProtocolLayer
 //
 module OmittedProtocolLayer like IProtocolLayer
 {

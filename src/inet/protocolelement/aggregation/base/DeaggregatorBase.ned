@@ -9,6 +9,19 @@ package inet.protocolelement.aggregation.base;
 
 import inet.queueing.base.PacketPusherBase;
 
+//
+// Base module for packet deaggregators that provides common functionality for
+// extracting multiple original packets from a single aggregated packet.
+//
+// Operation:
+// - Receives aggregated packets from lower layers
+// - Identifies subpacket boundaries within the aggregated packet
+// - Extracts individual packets from the aggregated packet
+// - Restores original packet structure and headers
+// - Forwards extracted packets to upper layers
+//
+// @see ~AggregatorBase, ~IPacketDeaggregator
+//
 simple DeaggregatorBase extends PacketPusherBase
 {
     parameters:

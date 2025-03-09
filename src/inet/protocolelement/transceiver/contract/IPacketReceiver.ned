@@ -7,6 +7,20 @@
 
 package inet.protocolelement.transceiver.contract;
 
+//
+// Defines the interface for packet receiver modules that convert signals from
+// the physical medium into packets for upper protocol layers. Provides the
+// foundation for different signal reception strategies.
+//
+// Operation:
+// - Receives signals from the physical medium
+// - Processes signals according to specific reception strategy
+// - Converts signals into packets for upper layer processing
+// - Handles timing and synchronization aspects of reception
+// - Provides statistics about reception performance
+//
+// @see ~IPacketTransmitter, ~PacketReceiverBase
+//
 moduleinterface IPacketReceiver
 {
     parameters:
@@ -15,4 +29,3 @@ moduleinterface IPacketReceiver
         input in;
         output out;
 }
-

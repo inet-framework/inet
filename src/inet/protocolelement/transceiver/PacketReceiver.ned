@@ -11,12 +11,21 @@ import inet.protocolelement.transceiver.base.StreamingReceiverBase;
 import inet.protocolelement.transceiver.contract.IPacketReceiver;
 
 //
-// This module receives signals from the physical medium (wire) as a whole. It
-// also sends up packets to the upper layer as a whole.
+// Receives signals from the physical medium as complete units and forwards
+// them to upper layers as whole packets. Implements a straightforward
+// packet-based reception model.
+//
+// Operation:
+// - Processes incoming signals as atomic units
+// - Converts complete signals to packets
+// - Handles reception as a single operation
+// - Maintains packet boundaries during reception
+// - Provides simple packet-based reception without streaming
+//
+// @see ~PacketTransmitter, ~DestreamingReceiver, ~StreamThroughReceiver
 //
 simple PacketReceiver extends StreamingReceiverBase like IPacketReceiver
 {
     parameters:
         @class(PacketReceiver);
 }
-

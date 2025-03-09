@@ -11,8 +11,18 @@ import inet.protocolelement.contract.IProtocolLayer;
 import inet.queueing.contract.IPacketFlow;
 
 //
-// This module wraps a stream identifier into a protocol layer so that it can
-// be used in a layered compound module.
+// Wraps a stream identifier module into a protocol layer for use in layered
+// network architectures. Provides stream identification capabilities while
+// maintaining compatibility with the protocol layer interface.
+//
+// Operation:
+// - Processes outgoing packets through the stream identifier
+// - Attaches stream identification tags based on packet content
+// - Passes incoming packets directly to upper layers
+// - Maintains separate processing paths for upward and downward packet flows
+// - Integrates stream identification into layered protocol stacks
+//
+// @see ~StreamIdentifier, ~StreamCoderLayer, ~StreamRelayLayer
 //
 module StreamIdentifierLayer like IProtocolLayer
 {

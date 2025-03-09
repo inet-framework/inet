@@ -9,6 +9,20 @@ package inet.protocolelement.transceiver.base;
 
 import inet.queueing.base.PacketProcessorBase;
 
+//
+// Base module for packet transmitters that provides common functionality for
+// converting packets into signals for the physical medium. Handles timing,
+// statistics, and basic signal generation.
+//
+// Operation:
+// - Receives packets from upper protocol layers
+// - Processes packets at a configurable datarate
+// - Tracks transmission start and end events
+// - Collects comprehensive transmission statistics
+// - Provides foundation for specialized transmitter implementations
+//
+// @see ~PacketReceiverBase, ~StreamingTransmitterBase, ~IPacketTransmitter
+//
 simple PacketTransmitterBase extends PacketProcessorBase
 {
     parameters:

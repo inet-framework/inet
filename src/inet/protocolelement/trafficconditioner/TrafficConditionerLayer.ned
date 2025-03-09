@@ -9,6 +9,20 @@ package inet.protocolelement.trafficconditioner;
 
 import inet.queueing.contract.ITrafficConditioner;
 
+//
+// Provides bidirectional traffic conditioning functionality as a protocol layer.
+// Contains separate traffic conditioners for ingress (incoming) and egress (outgoing)
+// packet flows, enabling comprehensive traffic management.
+//
+// Operation:
+// - Processes incoming packets through the ingress conditioner
+// - Processes outgoing packets through the egress conditioner
+// - Supports configurable traffic conditioner implementations
+// - Enables different conditioning policies for each direction
+// - Integrates with the interface table for network interface information
+//
+// @see ~ITrafficConditionerLayer, ~OmittedTrafficConditionerLayer
+//
 module TrafficConditionerLayer like ITrafficConditionerLayer
 {
     parameters:
@@ -34,4 +48,3 @@ module TrafficConditionerLayer like ITrafficConditionerLayer
         lowerLayerIn --> { @display("m=s"); } --> egressConditioner.in;
         egressConditioner.out --> { @display("m=n"); } --> upperLayerOut;
 }
-
