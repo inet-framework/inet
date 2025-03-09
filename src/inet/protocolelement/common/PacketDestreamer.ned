@@ -11,7 +11,23 @@ import inet.queueing.base.PacketProcessorBase;
 import inet.queueing.contract.IPacketFlow;
 
 //
-// This module takes packets streamed to its input and passes them to its output.
+// Converts streamed packet fragments back into complete packets by collecting
+// packet start, progress, and end events into a single packet object.
+//
+// Operation:
+// - Receives packet streaming events (start, progress, end) at its input
+// - Reconstructs the complete packet from these streaming fragments
+// - Forwards the complete packet through its output when streaming ends
+// - Supports both push and pull packet processing modes
+//
+// Particularly useful for:
+// - Converting from streaming-based interfaces to packet-based interfaces
+// - Implementing protocol adapters between different network layers
+// - Connecting streaming-capable modules to non-streaming modules
+// - Terminating packet streaming at protocol boundaries
+// - Collecting fragmented transmission data into complete packets
+//
+// @see ~PacketStreamer, ~PacketProcessorBase, ~IPacketFlow
 //
 simple PacketDestreamer extends PacketProcessorBase like IPacketFlow
 {

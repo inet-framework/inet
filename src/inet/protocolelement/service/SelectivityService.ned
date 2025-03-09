@@ -12,6 +12,30 @@ import inet.protocolelement.selectivity.ReceiveAtPort;
 import inet.protocolelement.selectivity.SendToL3Address;
 import inet.protocolelement.selectivity.SendToPort;
 
+//
+// Provides comprehensive packet addressing and filtering services at both
+// transport and network layers. Combines protocol elements to handle port
+// and address-based selectivity in a layered architecture.
+//
+// Operation:
+// - Transmission path (upper to lower):
+//   * Adds port headers to outgoing packets
+//   * Adds network layer address headers
+//   * Enables addressing at multiple protocol layers
+// - Reception path (lower to upper):
+//   * Filters packets based on network layer address
+//   * Filters packets based on port number
+//   * Removes addressing headers from matching packets
+//
+// Particularly useful for:
+// - Implementing multi-layer addressing schemes
+// - Building protocol stacks with address-based selectivity
+// - Creating custom socket-like communication endpoints
+// - Supporting both transport and network layer filtering
+// - Implementing basic socket and IP-like functionality
+//
+// @see ~DataService, ~ForwardingService, ~InterfaceService, ~MacService
+//
 module SelectivityService
 {
     parameters:

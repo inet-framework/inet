@@ -9,6 +9,27 @@ package inet.protocolelement.processing;
 
 import inet.queueing.contract.IPacketDelayer;
 
+//
+// Implements a protocol layer that models processing delays for packets
+// traveling in both directions through a network device. Uses separate
+// packet delayer components for ingress and egress paths.
+//
+// Operation:
+// - Delays packets traveling from upper to lower layers (egress path)
+// - Delays packets traveling from lower to upper layers (ingress path)
+// - Uses configurable packet delayer modules for each direction
+// - Preserves packet order within each processing path
+// - Supports different delay models through delayer module selection
+//
+// Particularly useful for:
+// - Modeling CPU processing time in network devices
+// - Simulating protocol stack processing overhead
+// - Representing hardware-specific packet processing delays
+// - Creating realistic timing models for network protocols
+// - Studying the impact of processing delays on network performance
+//
+// @see ~IProcessingDelayLayer, ~OmittedProcessingDelayLayer
+//
 module ProcessingDelayLayer like IProcessingDelayLayer
 {
     parameters:
@@ -34,4 +55,3 @@ module ProcessingDelayLayer like IProcessingDelayLayer
         lowerLayerIn --> { @display("m=s"); } --> ingress.in;
         ingress.out --> { @display("m=n"); } --> upperLayerOut;
 }
-

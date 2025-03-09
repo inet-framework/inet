@@ -8,8 +8,25 @@
 package inet.protocolelement.processing;
 
 //
-// This module implements the module given interface and can be used as an omitted
-// optional module that removes itself from the module hierarchy during initialization.
+// Provides a placeholder implementation of the processing delay layer interface
+// that can be used when processing delay modeling is not needed. Automatically
+// removes itself from the module hierarchy during initialization and directly
+// connects upper and lower layers.
+//
+// Operation:
+// - Connects upper layer input directly to lower layer output
+// - Connects lower layer input directly to upper layer output
+// - Removes itself from the module hierarchy during initialization
+// - Provides transparent packet flow between connected layers
+//
+// Particularly useful for:
+// - Creating configurable protocol stacks where processing delays are optional
+// - Simplifying network models when processing delays are not relevant
+// - Building protocol stacks with consistent interfaces
+// - Supporting modular protocol design with optional components
+// - Implementing protocol variants with and without processing delays
+//
+// @see ~IProcessingDelayLayer, ~ProcessingDelayLayer
 //
 module OmittedProcessingDelayLayer like IProcessingDelayLayer
 {
@@ -25,4 +42,3 @@ module OmittedProcessingDelayLayer like IProcessingDelayLayer
         upperLayerIn --> lowerLayerOut;
         lowerLayerIn --> upperLayerOut;
 }
-

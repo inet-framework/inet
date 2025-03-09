@@ -15,7 +15,32 @@ import inet.protocolelement.ordering.SequenceNumbering;
 import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.IPacketServer;
 
-
+//
+// Provides comprehensive data processing services for packet-based communication.
+// Combines multiple protocol elements to handle aggregation, fragmentation,
+// sequencing, and queuing in both transmission and reception paths.
+//
+// Operation:
+// - Transmission path (upper to lower):
+//   * Aggregates small packets into larger ones
+//   * Fragments large packets if needed
+//   * Adds sequence numbers for reliable delivery
+//   * Queues packets for transmission
+//   * Serves packets according to configured policy
+// - Reception path (lower to upper):
+//   * Reorders packets based on sequence numbers
+//   * Reassembles fragmented packets
+//   * Extracts original packets from aggregated ones
+//
+// Particularly useful for:
+// - Implementing reliable data transfer services
+// - Building protocol stacks with comprehensive data handling
+// - Supporting efficient bandwidth utilization
+// - Ensuring ordered packet delivery
+// - Creating custom transport layer implementations
+//
+// @see ~ForwardingService, ~InterfaceService, ~MacService, ~SelectivityService
+//
 module DataService
 {
     parameters:

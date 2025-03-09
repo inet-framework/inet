@@ -9,6 +9,27 @@ package inet.protocolelement.measurement;
 
 import inet.queueing.contract.IPacketFlow;
 
+//
+// Implements a protocol layer that measures packet flow performance metrics.
+// Uses separate components for starting measurements on outgoing packets and
+// recording results on incoming packets.
+//
+// Operation:
+// - Outgoing path: Marks packets with measurement start information
+// - Incoming path: Records measurement data when packets return
+// - Uses configurable measurement starter and recorder modules
+// - Supports various flow measurement techniques
+// - Maintains bidirectional measurement capabilities
+//
+// Particularly useful for:
+// - Measuring end-to-end packet delay
+// - Calculating throughput and packet loss statistics
+// - Analyzing protocol performance characteristics
+// - Implementing network monitoring functionality
+// - Supporting performance testing and validation
+//
+// @see ~IMeasurementLayer, ~MultiMeasurementLayer, ~OmittedMeasurementLayer
+//
 module MeasurementLayer like IMeasurementLayer
 {
     parameters:
@@ -34,4 +55,3 @@ module MeasurementLayer like IMeasurementLayer
         lowerLayerIn --> { @display("m=s"); } --> measurementRecorder.in;
         measurementRecorder.out --> { @display("m=n"); } --> upperLayerOut;
 }
-

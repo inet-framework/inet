@@ -7,6 +7,26 @@
 
 package inet.protocolelement.selectivity;
 
+//
+// Filters packets based on their destination port number. Only forwards
+// packets that are addressed to the configured port number.
+//
+// Operation:
+// - Examines incoming packets for destination port headers
+// - Compares the destination port with the configured port
+// - Passes packets with matching destination port
+// - Removes the port header from matching packets
+// - Registers with AccessoryProtocol service
+//
+// Particularly useful for:
+// - Implementing transport layer port filtering
+// - Creating protocol stacks with port-based selectivity
+// - Building virtual services listening on specific ports
+// - Supporting TCP/UDP-like port-based demultiplexing
+// - Implementing basic transport layer multiplexing functionality
+//
+// @see ~SendToPort, ~ReceiveAtL3Address, ~ReceiveAtMacAddress
+//
 simple ReceiveAtPort
 {
     parameters:

@@ -11,9 +11,25 @@ import inet.queueing.base.PacketFlowBase;
 import inet.queueing.contract.IPacketFlow;
 
 //
-// This module identifies the stream of a packet using packet filter expressions.
-// It can check for arbitrary packet data and assign an if a match was found then
-// the stream is attached to the packet in the ~StreamReq tag.
+// Identifies packet streams based on packet content and attaches stream request
+// tags. Enables flexible stream-based processing by mapping packet characteristics
+// to logical stream identifiers.
+//
+// Operation:
+// - Examines packets using configurable packet filter expressions
+// - Matches packet content against mapping rules
+// - Attaches StreamReq tags to packets when matches are found
+// - Optionally adds sequence numbering to streams
+// - Provides the foundation for stream-based redundancy
+//
+// Particularly useful for:
+// - Implementing content-based stream identification
+// - Creating flexible redundant communication systems
+// - Supporting application-specific traffic classification
+// - Building systems with multiple redundant paths
+// - Enabling advanced stream-based packet processing
+//
+// @see ~StreamDecoder, ~StreamIdentifierLayer
 //
 simple StreamIdentifier extends PacketFlowBase like IPacketFlow
 {

@@ -8,8 +8,25 @@
 package inet.protocolelement.socket;
 
 //
-// This module implements the module given interface and can be used as an omitted
-// optional module that removes itself from the module hierarchy during initialize.
+// Implements a placeholder for an optional socket layer that removes itself
+// from the module hierarchy during initialization, creating a direct connection
+// between adjacent protocol layers.
+//
+// Operation:
+// - Connects upper and lower layer interfaces directly
+// - Automatically removes itself during initialization phase
+// - Maintains proper packet flow between connected layers
+// - Preserves the logical structure of the protocol stack
+// - Allows for simplified protocol stack configurations
+//
+// Particularly useful for:
+// - Creating configurable protocol stacks where socket layers may be optional
+// - Simplifying network models by omitting unnecessary socket processing
+// - Supporting protocol stack variants without changing the overall architecture
+// - Enabling runtime protocol stack composition based on simulation parameters
+// - Testing the impact of socket layers by easily enabling/disabling them
+//
+// @see ~ISocketLayer
 //
 module OmittedSocketLayer like ISocketLayer
 {
@@ -25,4 +42,3 @@ module OmittedSocketLayer like ISocketLayer
         upperLayerIn --> lowerLayerOut;
         lowerLayerIn --> upperLayerOut;
 }
-

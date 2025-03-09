@@ -10,6 +10,25 @@ package inet.protocolelement.common;
 import inet.queueing.base.PacketFlowBase;
 import inet.queueing.contract.IPacketFlow;
 
+//
+// Emits signals for packets that match a specified filter, allowing for
+// packet monitoring and analysis without affecting packet flow.
+//
+// Operation:
+// - Filters packets based on a configurable expression
+// - Emits signals for matching packets using the specified signal name
+// - Can set packet direction tags (inbound, outbound, or undefined)
+// - Passes packets through without modification
+//
+// Particularly useful for:
+// - Collecting statistics on specific packet types
+// - Monitoring packet flow at key points in the network
+// - Implementing traffic analysis and measurement
+// - Creating packet traces for debugging and visualization
+// - Supporting protocol-specific packet monitoring
+//
+// @see ~PacketFlowBase, ~IPacketFlow
+//
 simple PacketEmitter extends PacketFlowBase like IPacketFlow
 {
     parameters:

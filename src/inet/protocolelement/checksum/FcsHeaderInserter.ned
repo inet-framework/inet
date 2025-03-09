@@ -9,6 +9,26 @@ package inet.protocolelement.checksum;
 
 import inet.protocolelement.checksum.base.FcsInserterBase;
 
+//
+// Calculates and inserts Frame Check Sequence (FCS) headers into packets
+// to enable integrity verification during transmission at the data link layer.
+//
+// Operation:
+// - Calculates 32-bit FCS values for packet content
+// - Creates FCS headers with the computed values
+// - Inserts headers at specified position (typically at the back)
+// - Supports multiple FCS modes: disabled, declared, computed
+// - Registers with the AccessoryProtocol service
+//
+// Particularly useful for:
+// - Implementing Ethernet frame generation
+// - Adding frame integrity checking to custom protocols
+// - Creating realistic data link layer protocol behavior
+// - Building protocol stacks with trailer-based checksums
+// - Testing error detection mechanisms in network simulations
+//
+// @see ~FcsHeaderChecker, ~CrcHeaderInserter, ~FcsInserterBase
+//
 simple FcsHeaderInserter extends FcsInserterBase
 {
     parameters:

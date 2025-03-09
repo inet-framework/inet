@@ -6,14 +6,24 @@
 package inet.protocolelement.shaper;
 
 //
-// This module is a table containing the group eligibility times needed
-// for the `GroupEligibilityTimeMeter`. 
-// Groups are dynamically added when a frame with a new combination of ingress port and priority
-// values is seen. 
+// Maintains a shared repository of eligibility times for stream groups in
+// asynchronous traffic shaping, enabling coordinated transmission scheduling.
 //
-// This module is part of the asynchronous shaper infrastructure.
+// Operation:
+// - Stores eligibility times for stream groups
+// - Dynamically creates groups based on ingress port and priority combinations
+// - Provides lookup services for GroupEligibilityTimeMeter modules
+// - Tracks the latest eligibility time for each group
+// - Ensures consistent shaping behavior across related streams
 //
-// @see ~ATS8021qFilter, ~GroupEligibilityTimeMeter, ~EligibilityTimeGate, ~EligibilityTimeFilter, ~EligibilityTimeQueue, ~EligibilityTimeTag
+// Particularly useful for:
+// - Implementing IEEE 802.1Qcr asynchronous traffic shaping
+// - Coordinating traffic flows with shared resources
+// - Supporting hierarchical traffic shaping architectures
+// - Building advanced time-sensitive networking systems
+// - Enabling group-based traffic management policies
+//
+// @see ~GroupEligibilityTimeMeter, ~EligibilityTimeGate, ~EligibilityTimeFilter, ~EligibilityTimeQueue
 
 simple GroupEligibilityTimeTable
 {

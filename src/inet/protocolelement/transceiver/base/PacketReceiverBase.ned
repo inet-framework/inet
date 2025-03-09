@@ -9,6 +9,27 @@ package inet.protocolelement.transceiver.base;
 
 import inet.queueing.base.PacketProcessorBase;
 
+//
+// Base module for packet receivers that provides common functionality for
+// converting signals from the physical medium into packets. Handles timing,
+// statistics, and basic signal processing.
+//
+// Operation:
+// - Receives signals from the physical medium
+// - Processes signals at a configurable datarate
+// - Tracks reception start and end events
+// - Collects comprehensive reception statistics
+// - Provides foundation for specialized receiver implementations
+//
+// Particularly useful for:
+// - Creating different types of packet receivers
+// - Implementing physical layer reception in protocol stacks
+// - Building modular network interfaces with consistent behavior
+// - Supporting performance analysis through statistics
+// - Simulating realistic signal reception with timing constraints
+//
+// @see ~PacketTransmitterBase, ~StreamingReceiverBase, ~IPacketReceiver
+//
 simple PacketReceiverBase extends PacketProcessorBase
 {
     parameters:
@@ -26,4 +47,3 @@ simple PacketReceiverBase extends PacketProcessorBase
         input in;
         output out;
 }
-

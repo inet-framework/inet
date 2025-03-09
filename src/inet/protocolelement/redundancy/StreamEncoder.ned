@@ -11,11 +11,25 @@ import inet.queueing.base.PacketFlowBase;
 import inet.queueing.contract.IPacketFlow;
 
 //
-// This module encodes the stream name of a packet into several request tags
-// attached to the packet. It looks up the stream in the mapping and attaches
-// the necessary request tags to the packet based on the specified parameters.
+// Translates stream identifiers into network parameters by attaching appropriate
+// request tags to packets. Enables stream-based communication by mapping logical
+// stream identifiers to network-level attributes.
 //
-// @see ~StreamDecoder
+// Operation:
+// - Examines packets for stream identification
+// - Maps stream names to network parameters using configurable mapping
+// - Attaches request tags (e.g., VLAN ID, PCP) based on stream identity
+// - Maintains packet flow while adding network parameter requests
+// - Provides the sending side of stream-based communication
+//
+// Particularly useful for:
+// - Implementing stream-based transmission in redundant networks
+// - Creating stream-aware protocol stacks
+// - Supporting Quality of Service differentiation
+// - Building systems with multiple redundant paths
+// - Enabling stream-based packet processing and routing
+//
+// @see ~StreamDecoder, ~StreamCoderLayer
 //
 simple StreamEncoder extends PacketFlowBase like IPacketFlow
 {

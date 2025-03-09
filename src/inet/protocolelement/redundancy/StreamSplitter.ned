@@ -11,13 +11,24 @@ import inet.queueing.base.PacketPusherBase;
 import inet.queueing.contract.IPacketPusher;
 
 //
-// This module duplicates incoming packets based on the stream they are part of.
-// The stream is determined by the `StreamReq` tag that is attached to the packet.
-// The number of outgoing packets is determined by the mapping parameter. Each
-// outgoing packet will have an attached `StreamReq` with the tag name taken from
-// the mapping parameter.
+// Duplicates packets into multiple streams for redundant transmission. Provides
+// a key mechanism for implementing packet-level redundancy in communication systems.
 //
-// @see ~StreamMerger
+// Operation:
+// - Examines packets for stream identification tags
+// - Creates copies of packets based on configurable stream mapping
+// - Assigns different stream identifiers to each copy
+// - Forwards redundant copies to the same output gate
+// - Provides the sending side of redundant stream communication
+//
+// Particularly useful for:
+// - Implementing packet-level redundancy
+// - Building fault-tolerant communication systems
+// - Creating systems with multiple redundant paths
+// - Supporting seamless packet duplication in protocol stacks
+// - Implementing Parallel Redundancy Protocol (PRP) or similar concepts
+//
+// @see ~StreamMerger, ~StreamRelayLayer
 //
 simple StreamSplitter extends PacketPusherBase like IPacketPusher
 {
