@@ -12,8 +12,8 @@ where they are stored temporarily. An active packet sink (:ned:`ActivePacketSink
 pops packets from the queue at random intervals.
 
 .. figure:: media/PacketQueue.png
+   :width: 90%
    :align: center
-   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network PacketQueueTutorialStep

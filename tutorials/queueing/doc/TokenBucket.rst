@@ -13,12 +13,12 @@ into a passive packet sink (:ned:`PassivePacketSink`). A token generator (:ned:`
 generates tokens periodically into the token bucket module.
 
 .. figure:: media/TokenBucket.png
+   :width: 60%
    :align: center
-   :width: 100%
 
 .. figure:: media/TokenBucket_Bucket.png
+   :width: 80%
    :align: center
-   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network TokenBucketTutorialStep

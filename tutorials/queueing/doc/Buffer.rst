@@ -17,8 +17,8 @@ as the dropper function, the buffer drops packets from the beginning of
 the buffer when it gets overloaded.
 
 .. figure:: media/Buffer.png
+   :width: 80%
    :align: center
-   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network BufferTutorialStep

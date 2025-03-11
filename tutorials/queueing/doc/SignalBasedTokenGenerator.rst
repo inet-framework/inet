@@ -12,8 +12,8 @@ Setting a providing interval is necessary because otherwise (if the provider cou
 an infinite amount of packets would be generated and dropped in zero simulation time, resulting in an error.
 
 .. figure:: media/SignalBasedTokenGenerator.png
+   :width: 80%
    :align: center
-   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network SignalBasedTokenGenerator

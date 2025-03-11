@@ -13,8 +13,8 @@ packet sink (:ned:`PassivePacketSink`). The time of opening and closing the gate
 configured via parameters.
 
 .. figure:: media/Gate1.png
+   :width: 80%
    :align: center
-   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network Gate1TutorialStep
