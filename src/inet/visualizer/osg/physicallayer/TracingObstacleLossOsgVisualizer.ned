@@ -10,7 +10,7 @@ package inet.visualizer.osg.physicallayer;
 import inet.visualizer.base.TracingObstacleLossVisualizerBase;
 import inet.visualizer.contract.ITracingObstacleLossVisualizer;
 
-//
+// TODO
 // Visualizes signal obstacle interactions in a 3D scene using OpenSceneGraph (OSG).
 // Displays the points where wireless signals intersect with physical objects.
 //

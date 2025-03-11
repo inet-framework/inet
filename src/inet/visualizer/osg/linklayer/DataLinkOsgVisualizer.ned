@@ -29,7 +29,7 @@ import inet.visualizer.contract.IDataLinkVisualizer;
 //
 // Particularly useful for understanding MAC-level connectivity patterns,
 // analyzing link layer protocol behavior, debugging link establishment issues,
-// and creating dynamic visualizations of link layer activity in 3D space.
+// and creating dynamic visualizations of link layer activity in 3D view.
 //
 // @see ~DataLinkCanvasVisualizer, ~DataLinkVisualizer, ~DataLinkVisualizerBase, ~IDataLinkVisualizer
 //

@@ -25,9 +25,7 @@ import inet.visualizer.contract.INetworkNodeVisualizer;
 // - A 3D model specified in the node's 'osgModel' parameter
 // - A 2D icon from the node's display string that automatically rotates to face the camera
 //
-// Particularly useful as the base visualization layer for 3D simulations,
-// providing realistic device representations, creating immersive visualizations,
-// and supporting complex 3D network topologies.
+// Provides the base visualization layer for 3D simulations.
 //
 // @see ~NetworkNodeCanvasVisualizer, ~NetworkNodeVisualizer, ~NetworkNodeVisualizerBase, ~INetworkNodeVisualizer
 //

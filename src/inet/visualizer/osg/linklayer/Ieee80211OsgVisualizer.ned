@@ -15,15 +15,14 @@ import inet.visualizer.contract.IIeee80211Visualizer;
 // Displays connection status between wireless stations and access points.
 //
 // The visualization includes:
-// - 3D icons showing wireless interfaces with their associated network names (SSIDs)
-// - Different icons for access points and stations
+// - Icons showing wireless interfaces with their associated network names (SSIDs)
+// - Different icons for access points and stations TODO ? also, does it have the variable power icons?
 // - Automatic updates when association status changes
 // - Filtering options to visualize only specific networks or nodes
-// - Support for multiple wireless networks in the same simulation
 //
 // Particularly useful for understanding wireless connectivity patterns,
 // analyzing Wi-Fi network coverage, debugging association issues, and
-// creating visual representations of wireless network topologies in 3D space.
+// creating visual representations of wireless network topologies in 3D view.
 //
 // @see ~Ieee80211CanvasVisualizer, ~Ieee80211Visualizer, ~Ieee80211VisualizerBase, ~IIeee80211Visualizer
 //

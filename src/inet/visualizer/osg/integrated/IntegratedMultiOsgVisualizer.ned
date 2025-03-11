@@ -44,14 +44,14 @@ import inet.visualizer.contract.ITransportRouteVisualizer;
 // - Configurable number of instances for each visualizer type
 //
 // Key features:
-// - Arrays of visualizer modules for each visualization aspect
+// - Arrays of visualizer modules for each visualizer type
 // - Independent configuration of each visualizer instance
 // - Shared network node visualizer reference for consistent node representation
-// - Full 3D visualization with OpenSceneGraph
+// - 3D visualization with OpenSceneGraph
 //
 // Particularly useful for complex simulations requiring different visualization
 // settings for different parts of the network, comparative visualizations,
-// and advanced multi-view 3D presentations.
+// and complex 3D presentations.
 //
 // @see ~IntegratedOsgVisualizer, ~IntegratedVisualizer, ~IIntegratedVisualizer
 //

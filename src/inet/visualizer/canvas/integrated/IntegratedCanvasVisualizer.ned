@@ -40,6 +40,7 @@ import inet.visualizer.contract.ITransportRouteVisualizer;
 // Integrates all canvas visualizers into a single comprehensive visualization module.
 // Provides a complete visual representation of the network on a 2D canvas by combining
 // visualizers for different aspects of the simulation.
+// Compound module containing all canvas visualizer types.TODO
 //
 // The visualization capabilities include:
 // - Physical layer: signal propagation, transmission/reception, radio medium activity

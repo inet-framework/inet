@@ -12,18 +12,17 @@ import inet.visualizer.contract.IInterfaceTableVisualizer;
 
 //
 // Visualizes network interfaces in a 3D scene using OpenSceneGraph (OSG).
-// Displays information about network interface cards (NICs) in network nodes.
+// Displays information about network interfaces in network nodes.
 //
 // The visualization includes:
-// - 3D labels showing interface names, addresses, and status information
+// - Labels showing interface names, addresses, and status information
 // - Customizable display format with various interface properties
 // - Filtering options to visualize only specific interfaces or nodes
-// - Support for all interface types (Ethernet, Wi-Fi, PPP, etc.)
 // - Automatic updates when interface properties change
 //
 // Particularly useful for understanding network topology at the interface level,
 // debugging address assignment issues, verifying interface configurations, and
-// creating informative visualizations of network connectivity in 3D space.
+// creating informative visualizations of network connectivity in 3D view.
 //
 // @see ~InterfaceTableCanvasVisualizer, ~InterfaceTableVisualizer, ~InterfaceTableVisualizerBase, ~IInterfaceTableVisualizer
 //

@@ -9,15 +9,15 @@ import inet.node.inet.AdhocHost;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211RadioMedium;
-import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
-import inet.visualizer.canvas.physicallayer.PhysicalLinkCanvasVisualizer;
+import inet.visualizer.osg.integrated.IntegratedOsgVisualizer;
+import inet.visualizer.osg.physicallayer.PhysicalLinkOsgVisualizer;
 
 
 network PhysicalLinkVisualizerEnablingShowcase
 {
     @display("bgb=600,300");
     submodules:
-        linkVisualizer: PhysicalLinkCanvasVisualizer {
+        linkVisualizer: PhysicalLinkOsgVisualizer {
             parameters:
                 @display("p=100,50");
         }
@@ -42,7 +42,7 @@ network PhysicalLinkVisualizerFilteringShowcase
 {
     @display("bgb=780,330");
     submodules:
-        visualizer: IntegratedCanvasVisualizer {
+        visualizer: IntegratedOsgVisualizer {
             parameters:
                 @display("p=100,50");
         }
@@ -72,7 +72,7 @@ network PhysicalLinkVisualizerMobileShowcase
 {
     @display("bgb=660,630");
     submodules:
-        visualizer: IntegratedCanvasVisualizer {
+        visualizer: IntegratedOsgVisualizer {
             @display("p=100,50");
         }
         configurator: Ipv4NetworkConfigurator {

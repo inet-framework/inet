@@ -15,7 +15,7 @@ import inet.visualizer.contract.IEnergyStorageVisualizer;
 // Displays power sources such as batteries and their current charge levels.
 //
 // The visualization includes:
-// - 3D indicators showing energy storage charge levels
+// - 3D indicators showing energy storage charge levels TODO 3D?
 // - Color-coded representations of remaining energy
 // - Automatic updates as energy levels change during simulation
 // - Support for various energy storage types (batteries, capacitors, etc.)
@@ -23,8 +23,8 @@ import inet.visualizer.contract.IEnergyStorageVisualizer;
 //
 // Particularly useful for understanding power consumption patterns in wireless
 // networks, analyzing battery lifetime in mobile devices, debugging energy
-// harvesting systems, and creating realistic visualizations of energy-constrained
-// networks in 3D space.
+// harvesting systems, and creating visualizations of energy-constrained
+// networks in 3D view.
 //
 // @see ~EnergyStorageCanvasVisualizer, ~EnergyStorageVisualizer, ~EnergyStorageVisualizerBase, ~IEnergyStorageVisualizer
 //

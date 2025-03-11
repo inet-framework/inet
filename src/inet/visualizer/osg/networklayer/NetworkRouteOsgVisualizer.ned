@@ -27,7 +27,7 @@ import inet.visualizer.contract.INetworkRouteVisualizer;
 //
 // Particularly useful for understanding routing patterns, analyzing network layer
 // connectivity, debugging routing protocols, and creating dynamic visualizations
-// of network traffic flows in 3D space.
+// of network traffic flows in 3D view.
 //
 // @see ~NetworkRouteCanvasVisualizer, ~NetworkRouteVisualizer, ~PathVisualizerBase, ~INetworkRouteVisualizer
 //

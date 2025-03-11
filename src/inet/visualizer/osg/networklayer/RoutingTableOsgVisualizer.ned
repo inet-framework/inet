@@ -28,7 +28,7 @@ import inet.visualizer.contract.IRoutingTableVisualizer;
 //
 // Particularly useful for understanding routing topologies, analyzing routing
 // protocol behavior, debugging routing configurations, and creating visual
-// representations of network routing structures in 3D space.
+// representations of network routing structures in 3D view.
 //
 // @see ~RoutingTableCanvasVisualizer, ~RoutingTableVisualizer, ~RoutingTableVisualizerBase, ~IRoutingTableVisualizer
 //

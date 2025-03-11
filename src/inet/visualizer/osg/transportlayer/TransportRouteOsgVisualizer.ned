@@ -29,7 +29,7 @@ import inet.visualizer.contract.ITransportRouteVisualizer;
 //
 // Particularly useful for understanding end-to-end communication patterns,
 // analyzing transport protocol behavior, debugging connection issues, and
-// creating dynamic visualizations of application traffic flows in 3D space.
+// creating dynamic visualizations of application traffic flows in 3D view.
 //
 // @see ~TransportRouteCanvasVisualizer, ~TransportRouteVisualizer, ~PathVisualizerBase, ~ITransportRouteVisualizer
 //

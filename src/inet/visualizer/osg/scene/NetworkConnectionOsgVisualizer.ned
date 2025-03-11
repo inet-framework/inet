@@ -17,7 +17,7 @@ import inet.visualizer.contract.INetworkConnectionVisualizer;
 // The visualization includes:
 // - 3D lines showing connections between network devices
 // - Support for filtering which connections are displayed
-// - Integration with the standard OMNeT++ connection visualization in 3D
+// - Integration with the standard OMNeT++ connection visualization in 3D TODO is this correct? seems to do the same, not integrate
 //
 // Note: This visualizer is typically disabled by default because OMNeT++
 // already displays network connections in its default visualization.

@@ -23,7 +23,7 @@ import inet.visualizer.contract.IMobilityVisualizer;
 //
 // Particularly useful for understanding movement patterns in mobile networks,
 // analyzing spatial relationships between nodes, debugging mobility models,
-// and creating realistic visualizations of node movement in 3D space.
+// and creating realistic visualizations of node movement in 3D view.
 //
 // @see ~MobilityCanvasVisualizer, ~MobilityVisualizer, ~MobilityVisualizerBase, ~IMobilityVisualizer
 //

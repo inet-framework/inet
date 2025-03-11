@@ -3,13 +3,13 @@ package inet.showcases.visualizer.canvas.submoduleinfo;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211RadioMedium;
-import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
+import inet.visualizer.common.IntegratedVisualizer;
 
 
 network SubmoduleInformationVisualizationShowcase
 {
     submodules:
-        visualizer: IntegratedCanvasVisualizer {
+        visualizer: IntegratedVisualizer {
             @display("p=100,100");
         }
         configurator: Ipv4NetworkConfigurator {

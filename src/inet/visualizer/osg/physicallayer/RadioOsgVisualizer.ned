@@ -12,18 +12,16 @@ import inet.visualizer.contract.IRadioVisualizer;
 
 //
 // Visualizes radio modules in a 3D scene using OpenSceneGraph (OSG). Displays
-// icons and state information for radio equipment in network nodes.
+// icons and state information for radio modules in network nodes.
 //
 // The visualization includes:
 // - 3D indicators for radio state (transmitting, receiving, idle)
 // - Power indicators showing transmission power levels
 // - Mode indicators showing the current radio mode
 // - Automatic updates when radio states change
-// - Integration with the 3D scene for realistic positioning
 //
 // Particularly useful for understanding wireless network behavior in 3D space,
-// debugging radio state transitions, monitoring transmission activities, and
-// creating realistic visualizations of wireless communication equipment.
+// debugging radio state transitions, monitoring transmission activities.
 //
 // @see ~RadioCanvasVisualizer, ~RadioVisualizer, ~RadioVisualizerBase, ~IRadioVisualizer
 //

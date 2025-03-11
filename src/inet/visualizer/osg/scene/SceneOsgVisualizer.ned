@@ -21,13 +21,10 @@ import inet.visualizer.osg.base.SceneOsgVisualizerBase;
 // - Automatic initial viewpoint calculation based on network node positions
 // - Full 3D perspective view with camera controls
 //
-// The initial viewpoint is intelligently positioned opposite to the coordinate
+// The initial viewpoint is positioned opposite to the coordinate
 // system origin with respect to the bounding sphere of all network nodes, facing
 // toward the center of the network for optimal viewing.
 //
-// Particularly useful for creating realistic 3D visualizations, understanding
-// spatial relationships in the network, and producing high-quality visual
-// presentations of simulations.
 //
 // @see ~SceneCanvasVisualizer, ~SceneVisualizer, ~SceneVisualizerBase, ~ISceneVisualizer
 //

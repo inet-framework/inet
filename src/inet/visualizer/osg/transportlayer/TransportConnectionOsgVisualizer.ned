@@ -15,7 +15,7 @@ import inet.visualizer.contract.ITransportConnectionVisualizer;
 // Displays indicators for active TCP, UDP, and SCTP connections between network nodes.
 //
 // The visualization includes:
-// - Colored 3D icons at both endpoints of each connection
+// - Colored icons at both endpoints of each connection
 // - Different colors for different connection types or states
 // - Automatic updates when connections are established or closed
 // - Filtering options to visualize only specific connections or protocols
@@ -27,7 +27,7 @@ import inet.visualizer.contract.ITransportConnectionVisualizer;
 //
 // Particularly useful for understanding application communication patterns,
 // analyzing transport protocol usage, debugging connection establishment issues,
-// and creating visual representations of end-to-end connectivity in 3D space.
+// and creating visual representations of end-to-end connectivity in 3D view.
 //
 // @see ~TransportConnectionCanvasVisualizer, ~TransportConnectionVisualizer, ~TransportConnectionVisualizerBase, ~ITransportConnectionVisualizer
 //

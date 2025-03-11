@@ -25,8 +25,7 @@ import inet.visualizer.osg.base.SceneOsgVisualizerBase;
 // in their actual geographic context.
 //
 // Particularly useful for simulating networks with geographic dependencies,
-// visualizing coverage areas in real-world locations, analyzing terrain effects
-// on wireless propagation, and creating compelling demonstrations of location-based
+// visualizing coverage areas in real-world locations, and creating compelling demonstrations of location-based
 // network applications.
 //
 // @see ~SceneCanvasVisualizer, ~SceneVisualizer, ~SceneVisualizerBase, ~ISceneVisualizer

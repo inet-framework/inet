@@ -34,7 +34,7 @@ import inet.visualizer.contract.ITransportConnectionVisualizer;
 import inet.visualizer.contract.ITransportRouteVisualizer;
 
 //
-// Integrates all OSG visualizers into a single comprehensive visualization module.
+// Compound module containing all OSG visualizer types.
 // Provides a complete visual representation of the network in 3D using OpenSceneGraph
 // by combining visualizers for different aspects of the simulation.
 //

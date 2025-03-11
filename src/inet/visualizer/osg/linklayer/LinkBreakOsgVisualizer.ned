@@ -22,11 +22,11 @@ import inet.visualizer.contract.ILinkBreakVisualizer;
 //
 // A link break occurs when a previously working communication link between
 // two network nodes fails. This typically happens due to node mobility (moving
-// out of range), interference, or explicit link failures in wired networks.
+// out of range), interference, or explicit link failures in wired networks. TODO more precisely?
 //
 // Particularly useful for understanding connectivity problems in mobile networks,
 // analyzing network resilience, debugging routing protocol reactions to topology
-// changes, and creating visual representations of network dynamics in 3D space.
+// changes, and creating visual representations of network dynamics in 3D view.
 //
 // @see ~LinkBreakCanvasVisualizer, ~LinkBreakVisualizer, ~LinkBreakVisualizerBase, ~ILinkBreakVisualizer
 //
