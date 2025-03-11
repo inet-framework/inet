@@ -12,12 +12,12 @@ a passive packet sink (:ned:`PassivePacketSink`). The leaky bucket is configured
 processing time of 1s, and a packet capacity of 1.
 
 .. figure:: media/LeakyBucket.png
+   :width: 60%
    :align: center
-   :width: 100%
 
 .. figure:: media/LeakyBucket_Bucket.png
+   :width: 65%
    :align: center
-   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network LeakyBucketTutorialStep

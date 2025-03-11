@@ -16,8 +16,8 @@ scheduler are configured to have the weights [1, 3, 2], thus the scheduler pops 
 from the three providers in one round.
 
 .. figure:: media/Scheduler.png
+   :width: 80%
    :align: center
-   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network WrrSchedulerTutorialStep
