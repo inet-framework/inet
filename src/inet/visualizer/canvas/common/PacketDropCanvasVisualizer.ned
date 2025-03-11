@@ -17,7 +17,7 @@ import inet.visualizer.contract.IPacketDropVisualizer;
 // The visualization includes:
 // - Icons appearing at the exact locations of packet drops
 // - Animations showing packets falling to the ground
-// - Different icons for various drop reasons (queue overflow, bit error, etc.)
+// - Different icons for various drop reasons (queue overflow, bit error, etc.) TODO no such feature; repeat format string directives?
 // - Filtering options to visualize only specific packet types or nodes
 //
 // Particularly useful for debugging network issues, identifying congestion points,

@@ -11,8 +11,9 @@ import inet.visualizer.base.InfoVisualizerBase;
 import inet.visualizer.contract.IInfoVisualizer;
 
 //
-// Visualizes module information on a 2D canvas. Displays customizable text
-// annotations for network nodes based on their submodules.
+// Visualizes module information on a 2D canvas.
+// It displays textual information about network nodes and their submodules as
+// annotations attached to the nodes.
 //
 // The visualization includes:
 // - Text labels showing information about specific submodules
@@ -20,9 +21,11 @@ import inet.visualizer.contract.IInfoVisualizer;
 // - Configurable appearance (font, colors, alignment, background)
 // - Flexible placement options around network nodes
 //
-// Particularly useful for displaying module status information, debugging
+// Particularly useful for displaying module/submodule status information, debugging
 // module configurations, creating informative labels for presentations,
 // and providing context for complex simulations.
+//
+// TODO: repeat format string directives?
 //
 // @see ~InfoOsgVisualizer, ~InfoVisualizer, ~InfoVisualizerBase, ~IInfoVisualizer
 //

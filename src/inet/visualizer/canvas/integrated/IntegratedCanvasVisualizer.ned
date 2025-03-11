@@ -36,7 +36,7 @@ import inet.visualizer.contract.ITracingObstacleLossVisualizer;
 import inet.visualizer.contract.ITransportConnectionVisualizer;
 import inet.visualizer.contract.ITransportRouteVisualizer;
 
-//
+// TODO
 // Integrates all canvas visualizers into a single comprehensive visualization module.
 // Provides a complete visual representation of the network on a 2D canvas by combining
 // visualizers for different aspects of the simulation.

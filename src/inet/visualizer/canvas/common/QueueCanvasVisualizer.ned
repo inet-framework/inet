@@ -12,15 +12,15 @@ import inet.visualizer.contract.IQueueVisualizer;
 
 //
 // Visualizes packet queues on a 2D canvas. Displays indicators showing
-// queue occupancy and status in network nodes.
+// queue occupancy in network nodes.
 //
 // The visualization includes:
 // - Colored bars representing the current queue fill levels
 // - Customizable size, color, and placement of queue indicators
-// - Automatic updates as queue occupancy changes during simulation
+// - Automatic updates as queue occupancy changes during simulation TODO trivial?
 // - Filtering options to visualize only specific queues
 //
-// Particularly useful for understanding buffer usage patterns, identifying
+// Particularly useful for understanding queue usage patterns, identifying
 // potential bottlenecks, analyzing congestion points, and debugging
 // queueing-related issues in the network.
 //

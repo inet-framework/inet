@@ -17,11 +17,11 @@ import inet.visualizer.contract.IPhysicalEnvironmentVisualizer;
 // The visualization includes:
 // - 2D projections of 3D physical objects according to the view angle
 // - Proper representation of object positions, orientations, and shapes
-// - Visual properties like colors and opacity as defined in the environment
-// - Automatic updates when objects change or move
+// - Visual properties like colors and opacity as defined in the environment TODO
+// - Automatic updates when objects change or move TODO
 //
 // Particularly useful for understanding signal propagation in environments with
-// obstacles, verifying object placement in simulations, and creating realistic
+// obstacles, verifying object placement in simulations, and creating
 // visualizations of indoor or urban scenarios.
 //
 // @see ~PhysicalEnvironmentOsgVisualizer, ~PhysicalEnvironmentVisualizer, ~PhysicalEnvironmentVisualizerBase, ~IPhysicalEnvironmentVisualizer

@@ -11,17 +11,17 @@ import inet.visualizer.base.TreeVisualizerBase;
 import inet.visualizer.contract.IFailureProtectionConfigurationVisualizer;
 
 //
-// Visualizes failure protection configurations on a 2D canvas. Displays the primary
-// and backup paths configured for network resilience.
+// Visualizes failure protection configurations on a 2D canvas. Displays the
+// redundant paths configured for network resilience.
 //
 // The visualization includes:
-// - Tree-like structures showing primary and backup paths through the network
+// - Tree-like structures showing redundant paths through the network
 // - Colored lines representing different protection paths
 // - Customizable line styles and appearance
 // - Filtering options to visualize only specific streams
 //
 // Particularly useful for verifying network resilience designs, analyzing protection
-// path configurations, debugging redundancy mechanisms, and understanding how the
+// path configurations, debugging redundancy mechanisms TODO?, and understanding how the
 // network will respond to failures.
 //
 // @see ~FailureProtectionConfigurationOsgVisualizer, ~FailureProtectionConfigurationVisualizer, ~TreeVisualizerBase, ~IFailureProtectionConfigurationVisualizer

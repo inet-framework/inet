@@ -20,7 +20,8 @@ import inet.visualizer.contract.IMediumVisualizer;
 // - Signal arrival indicators (red) showing reception power in dBW
 // - Communication ranges as circles showing the maximum distance for successful reception
 // - Interference ranges as circles showing the maximum distance where signals can cause interference
-// - Overlapping signals to indicate potential collisions
+// - Overlapping signals to indicate potential collisions TODO overlapping signals are not included in this visualizer
+// - Potential collisions can be indicated by overlapping signal visualizations
 //
 // Particularly useful for understanding wireless signal propagation, analyzing
 // transmission patterns, troubleshooting interference issues, and visualizing

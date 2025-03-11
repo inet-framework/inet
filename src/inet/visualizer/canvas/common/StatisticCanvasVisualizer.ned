@@ -11,15 +11,16 @@ import inet.visualizer.base.StatisticVisualizerBase;
 import inet.visualizer.contract.IStatisticVisualizer;
 
 //
-// Visualizes statistics on a 2D canvas. Displays numerical values of various
-// metrics collected during simulation.
+// Visualizes statistics on a 2D canvas. Displays the last values of a selected
+// statistic collected during simulation.
 //
 // The visualization includes:
 // - Text labels showing statistic values next to network nodes
 // - Values and units wrapped in filled rectangles for better visibility
-// - Automatic updates as statistic values change during simulation
-// - Support for custom indicator figures through templates
+// - Automatic updates as statistic values change during simulation TODO trivial
+// - Support for custom indicator figures through templates TODO?
 // - Filtering options to visualize only specific statistics or nodes
+// - Options to filter for specific statistics or nodes TODO v2
 //
 // Particularly useful for monitoring performance metrics, analyzing protocol
 // behavior, comparing different configurations, and creating informative

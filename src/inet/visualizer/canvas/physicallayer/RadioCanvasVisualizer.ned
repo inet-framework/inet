@@ -12,13 +12,13 @@ import inet.visualizer.contract.IRadioVisualizer;
 
 //
 // Visualizes radio modules on a 2D canvas. Displays icons and state information
-// for radio equipment in network nodes.
+// for radio submodules in network nodes.
 //
 // The visualization includes:
 // - Radio state indicators (transmitting, receiving, idle)
 // - Power indicators showing transmission power levels
 // - Mode indicators showing the current radio mode
-// - Automatic updates when radio states change
+// - Automatic updates when radio states change TODO trivial
 //
 // Particularly useful for understanding wireless network behavior, debugging radio
 // state transitions, and monitoring transmission activities in the simulation.

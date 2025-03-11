@@ -10,7 +10,7 @@ package inet.visualizer.canvas.configurator;
 import inet.visualizer.base.TreeVisualizerBase;
 import inet.visualizer.contract.IStreamRedundancyConfigurationVisualizer;
 
-//
+// TODO
 // Visualizes stream redundancy configurations on a 2D canvas. Displays redundant
 // paths for data streams in Time-Sensitive Networking (TSN) applications.
 //

@@ -12,7 +12,7 @@ import inet.visualizer.contract.IIeee80211Visualizer;
 
 //
 // Visualizes IEEE 802.11 associations on a 2D canvas. Displays information
-// about wireless network connections between access points and stations.
+// about 802.11 network membership of access points and stations.
 //
 // The visualization includes:
 // - Icons labeled with SSIDs for each associated wireless interface

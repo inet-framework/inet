@@ -10,7 +10,7 @@ package inet.visualizer.canvas.flow;
 import inet.visualizer.base.PathVisualizerBase;
 import inet.visualizer.contract.IPacketFlowVisualizer;
 
-//
+// TODO
 // Visualizes packet flows on a 2D canvas. Displays dashed arrows representing
 // the complete path of packet flows through the network.
 //
