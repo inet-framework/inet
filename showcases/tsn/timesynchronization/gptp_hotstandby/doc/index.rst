@@ -30,6 +30,8 @@ following components:
 - Slave Clocks: Devices that synchronize their clocks with the master clock, ensuring a consistent
   time reference across the network.
 
+.. TODO: Create inet source file location
+
 The Model
 ---------
 

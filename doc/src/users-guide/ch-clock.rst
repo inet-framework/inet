@@ -146,7 +146,6 @@ optionally resetting the oscillator at a specific moment of simulation time.
 The :ned:`InstantServoClock` model is the extended version of the :ned:`ServoClockBase`,
 which supports adjusting the clock time, as well as the oscillator drift rate as follows:
 
-.. TODO: Check if the following XML code is correct.
 .. code-block:: xml
 
    <set-clock at="10 s" module="server.clock" time="1.2 s" reset-oscillator="true"/>

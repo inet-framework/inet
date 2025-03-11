@@ -1,150 +1,126 @@
-.. _ug:cha:bmca:
-
 The Best Master Clock Algorithm (BMCA)
 ======================================
 
-.. _ug:sec:bmca:overview:
-
 Overview
---------
+~~~~~~~~
 
-The Best Master Clock Algorithm (BMCA) is a fundamental part of the IEEE 1588 Precision Time Protocol (PTP).
-It enables automatic selection of the best master clock in a distributed network to ensure accurate synchronization.
+The Best Master Clock Algorithm (BMCA) is a fundamental component of the IEEE 1588 Precision Time Protocol (PTP). 
+It dynamically selects the most suitable master clock in a distributed network to ensure accurate synchronization 
+without manual intervention.
 
-Imagine that a master clock in the network that provides time for the entire network.
-When losing the time synchronization signal and the clock goes offline, with a single clock, the timing network may go into hold for a limited time, after which time synchronization is lost.
+BMCA continuously evaluates available clocks based on predefined criteria, ensuring that the highest-quality 
+clock is chosen as the Grandmaster Clock. If the current master clock becomes unavailable, BMCA promptly re-evaluates 
+the network and selects the next best candidate to maintain synchronization.
 
-Then the BMCA comes into play, which selects the best master clock in the network to ensure accurate synchronization.
-It decides which of the clocks should act as the master clock. Each clock sends a message to the network to detect other clocks, and then proceeds data set compare.
-This compares the data strings from each device and determines which clock is best suited to maintain the timing network.
-This algorithm runs independently on each device in a PTP domain and determines whether it should act as the master or follow another device as a slave.
+.. TODO: Create inet source file location
 
-PTP networks operate in a hierarchical structure with a single Grandmaster Clock at the top, distributing time to all slave clocks.
-BMCA ensures that the best available clock is always selected dynamically without manual intervention.
+The Model
+---------
 
-A basic implementation of BMCA is provided.
+In this showcase, we provide three BMCA network scenarios in the showcase: BmcaShowcaseSimple, BmcaPrioChange, BmcaDiamond and BmcaDiamondAsymmetric.
 
-| Source files location: `inet/showcases/tsn/timesynchronization/gptp_bmca <https://github.com/inet-framework/inet/tree/master/showcases/tsn/timesynchronization/gptp_bmca>`__
+- **BMCA Simple Network**: A basic setup with a single switch connecting three devices. The best master clock is selected dynamically based on BMCA rules, 
+  ensuring time synchronization across the network.
+- **BMCA with Priority Change**: Similar to the simple setup but introduces dynamic priority changes. Devices with different priorities compete for the best master clock role, 
+  showcasing BMCA’s adaptability.
+- **BMCA Diamond Topology**: A redundant diamond-shaped network where devices are connected through two switches. The best master clock is determined dynamically, 
+  ensuring synchronization even if a switch or link fails.
+- **BMCA Asymmetric Diamond**: An asymmetric variation of the diamond topology, introducing different link configurations and priorities. 
+  Demonstrates BMCA’s ability to handle uneven network structures while maintaining synchronization.
 
+.. TODO: .. TODO: Consider updating the notation for `gptp_hotstandby` if needed.
 
-.. _ug:sec:bmca:steps:
-
-
-Network Structure
------------------
-
-We provide three BMCA structures in the showcase: BmcaDiamondBase, BmcaDiamond and BmcaDiamondAsymmetric.
-
-.. literalinclude:: ../omnetpp.ini
-   :language: ini
-   :start-at: [Config BmcaDiamondBase]
-   :end-at: *.tsnSwitch*.clock.displayStringTextFormat = "diff: %d"
+In the ``General`` configuration, which has a similar setup to `gptp_hotstandby`, we enable :ned:`Gptp` modules in all network nodes.
+We configure a random clock drift rate for the master clocks, while the clocks in slave and bridge nodes operate with a constant drift rate, each defined by a random distribution:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-at: [Config BmcaDiamond]
-   :end-at: *.scenarioManager.script = xmldoc("diamond-link-failure.xml")
+   :start-at: enable time synchronization
+   :end-at: driftRate
 
-.. literalinclude:: ../omnetpp.ini
-   :language: ini
-   :start-at: [Config BmcaDiamondAsymmetric]
-   :end-at: *.scenarioManager.script = xmldoc("asym-diamond-link-failure.xml")
+Each simulation is detailed in the following sections.
 
-Among them, BmcaDiamondBase is the basic structure, and BmcaDiamond and BmcaDiamondAsymmetric are the extended structures.
+BMCA Simple Network
+-------------------
 
+In the BMCA Simple Network, we have a basic setup with a single switch connecting two devices. The best master clock is selected dynamically 
+based on BMCA rules, ensuring time synchronization across the network.
 
-.. _ug:sec:bmca:initialization:
+The network consists of three devices (`TsnDevice1`, `TsnDevice2`, and `TsnDevice3`) connected through a switch. Both devices have a Gptp module, 
+which synchronizes their clocks. The switch acts as a transparent bridge, forwarding gPTP messages between devices.
 
-Basic Steps
------------
+.. figure:: media/BmcaShowcaseSimple.png
+   :align: center
 
-- Initialize: Generate the local clock's priority vector.
-- Compare: Compare the priority vectors of the local clock and the received Announce messages.
-- Select: Select the best clock.
-- Update: Update the port states based on the selected clock.
+Our goal is to demonstrate BMCA’s ability to select the best master clock in a simple network. We configure the devices with different priorities,
+which compete for the grandmaster clock role. The network topology is straightforward, allowing us to observe BMCA’s behavior in a controlled environment.
 
-Initialization
---------------
+The link failure settings can be adjusted in the XML file as follows:
 
-Initialization so that the BMCA ports can subscribe to the transmission and reception signals.
-Only BMCA nodes should have the BMCA ports.
-They are able to receive multicast PTP messages.
+.. code-block:: xml
 
-In the configuration file omnetpp.ini, the bmcaPorts are set for both tsnDevice and tsnSwitch:
+   <scenario>
+      <set-channel-param t="7.5s" src-module="tsnDevice1" dest-module="tsnSwitch" par="disabled" value="true"/>
+      <set-channel-param t="14.5s" src-module="tsnDevice1" dest-module="tsnSwitch" par="disabled" value="false"/>
+   </scenario>
 
-.. literalinclude:: ../omnetpp.ini
-   :language: ini
-   :start-at: *.tsnDevice*.gptp.bmcaPorts = ["eth0"]
-   :end-at: *.tsnSwitch.gptp.bmcaPorts = ["eth0", "eth1", "eth2"]
-
-Furthermore, we set the grandmasterPriority1 for both tsnDevice1 and tsnDevice3, which will be used later in comparison:
+The following configuration defines the grandmaster priority settings:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: *.tsnDevice1.gptp.grandmasterPriority1 = 2
-   :end-at: *.tsnDevice3.gptp.grandmasterPriority1 = 3
+   :end-at: .tsnDevice3.gptp.grandmasterPriority1 = 3
 
+In this setup:
+- `TsnDevice1` has the highest priority with a value of 2
+- `TsnDevice3` follows with a priority of 3. 
+- `TsnDevice2` has the lowest priority, as its value is not explicitly set.
 
+According to the link failure settings:
+- At 7.5 seconds, `TsnDevice1` will lose its connection to the switch, triggering a link failure. 
+- The devices detect the failure, and BMCA initiates the grandmaster re-election process
+- Since `TsnDevice1` is no longer reachable, the grandmaster clock role will be reassigned based on BMCA rules.
+- Due to the priority settings, `TsnDevice3` becomes the new grandmaster clock.
+- Time synchronization is maintained between `TsnDevice2` and `TsnDevice3` until the link is restored.
+- At 14.5 seconds, the link between :ned:TsnDevice1 and the switch is restored, allowing BMCA to reevaluate and resume normal operation.
 
+Here is the clock synchronization chart for the three devices and the switch:
 
+.. figure:: media/BMCA.png
+   :align: center
 
-.. _ug:sec:bmca:priority:
+As shown in the chart, the grandmaster clock role is reassigned from `TsnDevice1` to `TsnDevice3` after the link failure at 7.5 seconds.
+The drift rates of the devices are also visible, demonstrating the clock synchronization process. Once the link is restored at 14.5 seconds, 
+the grandmaster clock role reverts to :ned:TsnDevice1, resuming normal synchronization.
 
-Set the Local Priority Vector
------------------------------
+BMCA with Priority Change
+-------------------------
 
-Set up the local priority vector, which determines the node's eligibility to become the Grandmaster in a PTP network.
-Lower values represent higher precision.
+This scenario extends the BMCA Simple Network by introducing dynamic priority changes. Unlike the original setup, where priority remains static, 
+this scenario demonstrates BMCA's adaptability when device priorities change over time.
 
-- Priority 1: ser-defined value that affects master clock selection.
-- Clock Class (248): Indicates a generic clock with no special timing source.
-- Clock Accuracy (0):Placeholder value; should be set dynamically based on actual clock performance.
-- Offset Scaled Log Variance (0): Represents clock stability; ideally, should be dynamically calculated.
-- Priority 2 (0): Another user-defined priority.
-- GrandmasterIdentity: uniquely identifies this clock in the network.
-- Steps Removed (0):This The number of hops from the Grandmaster. A device directly connected to the Grandmaster has stepsRemoved = 0.
+To achieve this, we modify the grandmaster priority at a specific time using an XML configuration:
 
-.. literalinclude:: inet/src/inet/linklayer/ieee8021as/Gptp.cc
-   :language: cc
-   :start-at: localPriorityVector.grandmasterPriority1 = par("grandmasterPriority1");
-   :end-at: localPriorityVector.stepsRemoved = 0;
+.. code-block:: xml
+   
+   <scenario>
+      <set-param t="10s" module="tsnDevice3.gptp" par="grandmasterPriority1" value="1"/>
+   </scenario>
 
+- At 10 seconds, the grandmaster priority of `TsnDevice3` is changed to 1, making it the highest priority device in the network.
+- The change triggers the BMCA selection process, resulting in the reassignment of the grandmaster clock role.
+- The network automatically adjusts time synchronization based on the new grandmaster.
 
-.. code-block:: cc
+.. figure:: media/BMCAPrioChange.png
+   :align: center
 
-   localPriorityVector.grandmasterPriority1 = par("grandmasterPriority1");
-    localPriorityVector.grandmasterClockQuality.clockClass = 248;
-    localPriorityVector.grandmasterClockQuality.clockAccuracy = 0;
-    localPriorityVector.grandmasterClockQuality.offsetScaledLogVariance = 0;
-    localPriorityVector.grandmasterPriority2 = 0;
-    localPriorityVector.grandmasterIdentity = clockIdentity;
-    localPriorityVector.stepsRemoved = 0;
+The grandmaster clock role transitions from `TsnDevice1` to `TsnDevice3` after the priority change at 10 seconds. The clock drift rates of 
+the devices become visible, demonstrating BMCA’s dynamic synchronization mechanism. As a result, The network seamlessly adapts to the priority change, 
+maintaining accurate time synchronization.
 
+BMCA Diamond Topology
+---------------------
 
-
-
-.. _ug:sec:bmca:execution:
-
-Execution
----------
-
-Evaluates Announce messages, selects the best Grandmaster, and updates the port states accordingly.
-
-- Initialize Local Announce Message: Creates an Announce message for the local nodes which contains the local clock’s priority vector.
-- Select the Best Announce Message: Iterates through received Announce messages from other nodes. Calls "compareAnnounceMessages()" to determine the best Announce message, which is the one with the highest priority according to IEEE 1588-2019.
-- Prints debugging information about the selected Grandmaster.
-- Handle Grandmaster Selection Changes: If the best Announce remains the same, no topology changes occur.
-                                        If a better Announce is received, the node updates its role:
-                                        If the new Grandmaster is someone else, the node becomes a slave.
-                                        If the node itself is the Grandmaster, it updates its ports.
-                                        Announce messages are sent to notify others if a new Grandmaster is selected.
-- Update Port States: Updates port roles based on the IEEE 1588-2019 standard.
-                      Passive ports are identified (e.g., when a port connects to a better clock).
-                      Master ports are determined by comparing the local clock with the best Announce.
-
-
-
-.. _ug:sec:bmca:comparision:
 
 Comparison
 ----------
