@@ -27,6 +27,19 @@ COLOR_RESET = "\033[0;0m"
 STDOUT_LEVEL = 25  # between INFO (20) and WARNING (30)
 STDERR_LEVEL = 35  # between WARNING (30) and ERROR (40)
 
+class StopExecutionException(Exception):
+    pass
+
+class TerminalInteractiveShell(IPython.terminal.interactiveshell.TerminalInteractiveShell):
+    def _showtraceback(self, etype, evalue, stb):
+        if isinstance(evalue, StopExecutionException):
+            _logger.warning("Execution stopped programmatically by calling stop_execution()")
+            return None
+        super()._showtraceback(etype, evalue, stb)
+
+def stop_execution():
+    raise StopExecutionException()
+
 def enable_autoreload():
     ipython = IPython.get_ipython()
     ipython.magic("load_ext autoreload")
