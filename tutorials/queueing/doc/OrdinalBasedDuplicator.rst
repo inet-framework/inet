@@ -14,7 +14,6 @@ The duplicator is configured to duplicate every second packet based on its ordin
 The packets are then consumed by a passive packet sink (:ned:`PassivePacketSink`).
 
 .. figure:: media/OrdinalBasedDuplicator.png
-   :width: 60%
    :align: center
 
 .. literalinclude:: ../QueueingTutorial.ned
