@@ -298,8 +298,13 @@ class SimulationProject:
             msg_files = msg_files + list(map(lambda file_path: self.get_relative_path(file_path), file_paths))
         return msg_files
 
+    def build(self, **kwargs):
+        import inet.simulation.build
+        inet.simulation.build.build_project(simulation_project=self, **kwargs)
+
     # KLUDGE TODO replace this with a Python binding to the C++ configuration reader
     def collect_ini_file_simulation_configs(self, ini_path):
+        self.build(mode="release")
         def get_sim_time_limit(config_dicts, config):
             config_dict = config_dicts[config]
             if "sim_time_limit" in config_dict:
