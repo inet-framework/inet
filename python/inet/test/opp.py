@@ -17,6 +17,7 @@ import types
 
 from inet.simulation.project import *
 from inet.test.task import *
+from inet.test.simulation import *
 
 _logger = logging.getLogger(__name__)
 
@@ -129,17 +130,15 @@ def get_opp_test_tasks(test_folder, simulation_project=None, filter=".*", full_m
     test_tasks = list(map(create_test_task, test_file_names))
     return MultipleOppTestTasks(tasks=test_tasks, simulation_project=simulation_project, test_folder=test_folder, multiple_task_results_class=MultipleTestTaskResults, **kwargs)
 
-class MultipleOppTestTasks(MultipleTestTasks):
-    def __init__(self, simulation_project=None, test_folder=None, mode="debug", **kwargs):
+class MultipleOppTestTasks(MultipleSimulationTestTasks):
+    def __init__(self, test_folder=None, **kwargs):
         super().__init__(**kwargs)
         self.locals = locals()
         self.locals.pop("self")
         self.kwargs = kwargs
-        self.simulation_project = simulation_project
         self.test_folder = test_folder
-        self.mode = mode
 
-    def run_protected(self, **kwargs):
+    def build_before_run(self):
         test_directory = self.simulation_project.get_full_path(self.test_folder)
         lib_directory = os.path.join(test_directory, "lib")
         if os.path.exists(lib_directory):
@@ -147,7 +146,6 @@ class MultipleOppTestTasks(MultipleTestTasks):
             subprocess_result = run_command_with_logging(args, cwd=lib_directory, env=self.simulation_project.get_env())
             if subprocess_result.returncode != 0:
                 raise Exception("Cannot build lib")
-        return super().run_protected(**kwargs)
 
 def run_opp_tests(test_folder, **kwargs):
     """

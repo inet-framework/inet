@@ -421,9 +421,12 @@ class MultipleSimulationTasks(MultipleTasks):
         """
         return super().run(**kwargs)
 
+    def build_before_run(self):
+        build_project(**dict(kwargs, simulation_project=self.simulation_project, mode=self.mode))
+
     def run_protected(self, **kwargs):
         if self.build:
-            build_project(**dict(kwargs, simulation_project=self.simulation_project, mode=self.mode))
+            build_before_run()
         return super().run_protected(**kwargs)
 
 def get_simulation_tasks(simulation_project=None, simulation_configs=None, mode=None, debug=None, break_at_event_number=None, break_at_matching_event=None, run_number=None, run_number_filter=None, exclude_run_number_filter=None, sim_time_limit=None, cpu_time_limit=None, concurrent=True, expected_num_tasks=None, simulation_task_class=SimulationTask, multiple_simulation_tasks_class=MultipleSimulationTasks, **kwargs):
