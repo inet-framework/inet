@@ -15,11 +15,9 @@ to a priority queue (:ned:`PriorityQueue`) with two inner queues (:ned:`PacketQu
 The packets are collected at random intervals by an active packet sink (:ned:`ActivePacketSink`).
 
 .. figure:: media/PriorityQueue.png
-   :width: 70%
    :align: center
 
 .. figure:: media/PriorityQueue_Queue.png
-   :width: 80%
    :align: center
 
 .. literalinclude:: ../QueueingTutorial.ned

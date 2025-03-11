@@ -17,7 +17,6 @@ In this example, we'll build a network containing three packet sources, a switch
 queueing components. The queues in the switch are in the input "interfaces". Here is the network, with the conceptual network nodes highlighted:
 
 .. figure:: media/InputQueueSwitching.png
-   :width: 100%
    :align: center
 
 The sources generate packets, which randomly contain either 0 or 1 as data. The classifier in the switch sends

@@ -10,7 +10,6 @@ on the number of packets contained in the queue (:ned:`PacketQueue`) connected t
 The packets are collected by an active packet sink (:ned:`ActivePacketSink`).
 
 .. figure:: media/RedDropper.png
-   :width: 100%
    :align: center
 
 .. literalinclude:: ../QueueingTutorial.ned

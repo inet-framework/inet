@@ -11,7 +11,6 @@ Every second packet is dropped based on its ordinal number.
 Packets that are not dropped are consumed by a passive packet sink (:ned:`PassivePacketSink`).
 
 .. figure:: media/OrdinalBasedDropper.png
-   :width: 80%
    :align: center
 
 .. literalinclude:: ../QueueingTutorial.ned
