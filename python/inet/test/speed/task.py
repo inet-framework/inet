@@ -75,7 +75,7 @@ class MultipleSpeedUpdateTasks(MultipleSimulationUpdateTasks):
 
     def run(self, simulation_project=None, build=None, **kwargs):
         simulation_project = simulation_project or self.multiple_simulation_tasks.simulation_project
-        if build or get_default_build_argument():
+        if build if build is not None else get_default_build_argument():
             build_project(simulation_project=simulation_project, mode="profile", **kwargs)
         multiple_speed_update_results = super().run(**kwargs)
         speed_measurement_store = get_speed_measurement_store(simulation_project)

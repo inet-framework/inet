@@ -399,12 +399,12 @@ class MultipleSimulationTasks(MultipleTasks):
             kwargs (dict):
                 Additional arguments are inherited from :py:class:`MultipleTasks <inet.common.task.MultipleTasks>` constructor.
         """
-        super().__init__(build=build or get_default_build_argument(), name=name, **kwargs)
+        super().__init__(name=name, **kwargs)
         self.locals = locals()
         self.locals.pop("self")
         self.kwargs = kwargs
         self.mode = mode
-        self.build = build or get_default_build_argument()
+        self.build = build if build is not None else get_default_build_argument()
         self.simulation_project = simulation_project
 
     def run(self, **kwargs):
