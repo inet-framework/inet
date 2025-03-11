@@ -546,21 +546,23 @@ class MultipleTasks:
         Returns (:py:class:`MultipleTaskResults`):
             The task results.
         """
-        _logger.info(f"Running {len(self.tasks)} {self.get_description()} started")
-        if self.cancel:
-            task_results = list(map(lambda task: task.task_result_class(task=task, result="CANCEL", reason="Cancel by user"), self.tasks))
-            multiple_task_results = self.multiple_task_results_class(multiple_tasks=self, results=task_results)
-        else:
-            try:
-                start_time = time.time()
-                multiple_task_results = self.run_protected(**kwargs)
-                end_time = time.time()
-                multiple_task_results.elapsed_wall_time = end_time - start_time
-            except KeyboardInterrupt:
+        def run_internal(**kwargs):
+            _logger.info(f"Running {len(self.tasks)} {self.get_description()} started")
+            if self.cancel:
                 task_results = list(map(lambda task: task.task_result_class(task=task, result="CANCEL", reason="Cancel by user"), self.tasks))
                 multiple_task_results = self.multiple_task_results_class(multiple_tasks=self, results=task_results)
-        _logger.info(f"Running {len(self.tasks)} {self.get_description()} ended")
-        return multiple_task_results
+            else:
+                try:
+                    start_time = time.time()
+                    multiple_task_results = self.run_protected(**kwargs)
+                    end_time = time.time()
+                    multiple_task_results.elapsed_wall_time = end_time - start_time
+                except KeyboardInterrupt:
+                    task_results = list(map(lambda task: task.task_result_class(task=task, result="CANCEL", reason="Cancel by user"), self.tasks))
+                    multiple_task_results = self.multiple_task_results_class(multiple_tasks=self, results=task_results)
+            _logger.info(f"Running {len(self.tasks)} {self.get_description()} ended")
+            return multiple_task_results
+        run_with_log_levels(run_internal, **kwargs)
 
     def run_protected(self, **kwargs):
         if self.scheduler == "cluster":
