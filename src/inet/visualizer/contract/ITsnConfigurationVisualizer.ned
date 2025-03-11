@@ -9,7 +9,7 @@ package inet.visualizer.contract;
 
 //
 // Interface for failure protection configuration visualizers. Failure protection
-// configuration visualizers display the primary and backup paths configured for
+// configuration visualizers display the redundant paths configured for
 // network resilience.
 //
 // @see ~FailureProtectionConfigurationCanvasVisualizer, ~FailureProtectionConfigurationOsgVisualizer, ~FailureProtectionConfigurationVisualizer

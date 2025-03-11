@@ -9,7 +9,7 @@ package inet.visualizer.contract;
 
 //
 // Interface for statistic visualizers. Statistic visualizers display numerical
-// values and metrics from simulation modules as text or graphical indicators.
+// values and metrics from simulation modules as text or graphical indicators. TODO graphical indicators?
 //
 // @see ~StatisticCanvasVisualizer, ~StatisticOsgVisualizer, ~StatisticVisualizer, ~StatisticVisualizerBase
 //

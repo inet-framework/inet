@@ -15,15 +15,15 @@ import inet.visualizer.contract.IQueueVisualizer;
 // indicators showing queue occupancy and status in network nodes.
 //
 // The visualization includes:
-// - 3D bars representing the current queue fill levels
+// - 3D bars representing the current queue fill levels TODO is it 3D?
 // - Customizable size, color, and placement of queue indicators
 // - Automatic updates as queue occupancy changes during simulation
 // - Filtering options to visualize only specific queues
 //
-// Particularly useful for understanding buffer usage patterns, identifying
+// Particularly useful for understanding queue usage patterns, identifying
 // potential bottlenecks, analyzing congestion points, debugging
 // queueing-related issues, and creating visual representations of network
-// buffering behavior in 3D space.
+// queueing behavior in 3D view.
 //
 // @see ~QueueCanvasVisualizer, ~QueueVisualizer, ~QueueVisualizerBase, ~IQueueVisualizer
 //

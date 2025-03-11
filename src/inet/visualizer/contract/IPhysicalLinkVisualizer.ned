@@ -9,7 +9,7 @@ package inet.visualizer.contract;
 
 //
 // Interface for physical link visualizers. Physical link visualizers display
-// active connections between wireless transmitters and receivers at the
+// active connections between network interfaces at the
 // physical layer.
 //
 // @see ~PhysicalLinkCanvasVisualizer, ~PhysicalLinkOsgVisualizer, ~PhysicalLinkVisualizer, ~PhysicalLinkVisualizerBase

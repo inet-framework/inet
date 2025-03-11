@@ -15,7 +15,7 @@ import inet.visualizer.contract.ISceneVisualizer;
 // Provides a realistic geographic background for network simulations.
 //
 // The visualization includes:
-// - Roads, buildings, and other map features from the OpenStreetMap file
+// - Roads, buildings, and other map features from the OpenStreetMap file TODO?
 // - Geographic positioning of network nodes based on the coordinate system
 // - Automatic adjustment of the background box to match map bounds
 //

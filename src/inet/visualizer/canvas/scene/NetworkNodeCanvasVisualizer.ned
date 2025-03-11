@@ -13,7 +13,7 @@ import inet.visualizer.contract.INetworkNodeVisualizer;
 //
 // Visualizes network nodes on a 2D canvas. Creates and maintains visual
 // representations of network devices that serve as the foundation for
-// other visualizations.
+// other visualizations. TODO more like other visualizers attach to the network node visualization?
 //
 // The visualization includes:
 // - Graphical figures representing each network node in the simulation

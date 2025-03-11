@@ -10,7 +10,7 @@ package inet.visualizer.contract;
 //
 // Interface for scene visualizers. Scene visualizers display the simulation
 // environment, coordinate axes, and set up the initial viewpoint for the
-// visualization.
+// visualization. TODO initial viewpoint for the scene?
 //
 // @see ~SceneCanvasVisualizer, ~SceneOsgVisualizer, ~SceneVisualizer, ~SceneVisualizerBase
 //

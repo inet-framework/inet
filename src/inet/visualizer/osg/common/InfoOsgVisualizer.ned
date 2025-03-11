@@ -22,7 +22,7 @@ import inet.visualizer.contract.IInfoVisualizer;
 //
 // Particularly useful for displaying module status information in 3D space,
 // debugging module configurations, creating informative labels for presentations,
-// and providing context for complex simulations in a realistic 3D environment.
+// and providing context for complex simulations in a 3D view.
 //
 // @see ~InfoCanvasVisualizer, ~InfoVisualizer, ~InfoVisualizerBase, ~IInfoVisualizer
 //

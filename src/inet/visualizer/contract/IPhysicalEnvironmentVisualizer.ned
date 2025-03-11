@@ -9,7 +9,7 @@ package inet.visualizer.contract;
 
 //
 // Interface for physical environment visualizers. Physical environment visualizers
-// display objects such as buildings, walls, and other physical structures that
+// display objects such as buildings, walls, and other physical structures that can
 // affect signal propagation in the simulation.
 //
 // @see ~PhysicalEnvironmentCanvasVisualizer, ~PhysicalEnvironmentOsgVisualizer, ~PhysicalEnvironmentVisualizer, ~PhysicalEnvironmentVisualizerBase

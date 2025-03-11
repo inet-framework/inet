@@ -27,7 +27,7 @@ import inet.visualizer.contract.IPacketFlowVisualizer;
 //
 // Particularly useful for understanding complex network behavior, analyzing
 // cross-layer packet processing, debugging packet flow issues, and creating
-// comprehensive visualizations of network traffic in 3D space.
+// comprehensive visualizations of network traffic in 3D view.
 //
 // @see ~PacketFlowCanvasVisualizer, ~PacketFlowVisualizer, ~PathVisualizerBase, ~IPacketFlowVisualizer
 //

@@ -15,7 +15,7 @@ import inet.visualizer.contract.IPacketDropVisualizer;
 // indicators at locations where packets are discarded in the network.
 //
 // The visualization includes:
-// - 3D icons showing where packets are dropped
+// - 3D icons showing where packets are dropped TODO is this really 3D?
 // - Different icons for different packet drop reasons
 // - Automatic updates when new packet drops occur
 // - Filtering options to visualize only specific drop causes or nodes
@@ -27,7 +27,7 @@ import inet.visualizer.contract.IPacketDropVisualizer;
 //
 // Particularly useful for debugging network issues, identifying bottlenecks,
 // analyzing protocol behavior under stress, and creating visual representations
-// of network performance problems in 3D space.
+// of network performance problems in 3D view.
 //
 // @see ~PacketDropCanvasVisualizer, ~PacketDropVisualizer, ~PacketDropVisualizerBase, ~IPacketDropVisualizer
 //

@@ -13,6 +13,7 @@ import inet.visualizer.contract.ISceneVisualizer;
 //
 // Visualizes the simulation scene on a 2D canvas. Provides the coordinate system
 // and projection that serves as the foundation for all other canvas visualizers.
+// TODO This is used to get a consistent visualization across all visualizers
 //
 // The visualization includes:
 // - 2D orthographic projection of the 3D coordinate system
@@ -21,7 +22,7 @@ import inet.visualizer.contract.ISceneVisualizer;
 // - Support for displaying the active configuration description
 //
 // Particularly useful for establishing a consistent visual reference frame
-// across all visualizers and controlling the overall view of the simulation.
+// across all visualizers and controlling the overall view of the simulation. TODO its not useful but essential
 //
 // @see ~SceneOsgVisualizer, ~SceneVisualizer, ~SceneVisualizerBase, ~ISceneVisualizer
 //

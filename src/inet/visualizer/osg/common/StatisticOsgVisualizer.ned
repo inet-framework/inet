@@ -15,15 +15,15 @@ import inet.visualizer.contract.IStatisticVisualizer;
 // numerical values of various metrics collected during simulation.
 //
 // The visualization includes:
-// - 3D text labels showing statistic values above network nodes
-// - Values and units wrapped in filled rectangles for better visibility
+// - Text labels showing statistic values above network nodes
+// - Values and units wrapped in filled rectangles for better visibility TODO?
 // - Automatic updates as statistic values change during simulation
 // - Support for custom indicator figures through templates
 // - Filtering options to visualize only specific statistics or nodes
 //
-// Particularly useful for monitoring performance metrics in 3D space, analyzing
+// Particularly useful for monitoring performance metrics in 3D view, analyzing
 // protocol behavior, comparing different configurations, and creating informative
-// visualizations for presentations or debugging in a realistic 3D environment.
+// visualizations for presentations or debugging in 3D view.
 //
 // @see ~StatisticCanvasVisualizer, ~StatisticVisualizer, ~StatisticVisualizerBase, ~IStatisticVisualizer
 //

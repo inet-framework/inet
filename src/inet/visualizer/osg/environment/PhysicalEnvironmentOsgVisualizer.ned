@@ -16,15 +16,15 @@ import inet.visualizer.contract.IPhysicalEnvironmentVisualizer;
 // propagation.
 //
 // The visualization includes:
-// - Realistic 3D representations of physical objects
+// - 3D representations of physical objects
 // - Proper positioning, orientation, and scaling of objects
 // - Material properties including colors and transparency
-// - Support for complex shapes and object hierarchies
-// - Optional transparency for seeing inside buildings
+// - Support for complex shapes and object hierarchies TODO?
+// - Optional transparency for seeing inside buildings TODO?
 //
 // Particularly useful for understanding signal propagation in environments with
 // obstacles, visualizing complex indoor or urban scenarios, analyzing coverage
-// problems due to physical barriers, and creating realistic 3D visualizations
+// problems due to physical barriers, and creating complex 3D visualizations
 // of network environments.
 //
 // @see ~PhysicalEnvironmentCanvasVisualizer, ~PhysicalEnvironmentVisualizer, ~PhysicalEnvironmentVisualizerBase, ~IPhysicalEnvironmentVisualizer

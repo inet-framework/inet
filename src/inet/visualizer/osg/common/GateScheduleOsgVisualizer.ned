@@ -22,8 +22,7 @@ import inet.visualizer.contract.IGateScheduleVisualizer;
 // - Configurable time window to focus on specific schedule periods
 //
 // Particularly useful for debugging TSN configurations in 3D space, analyzing
-// time-synchronized network behavior, verifying gate scheduling algorithms, and
-// understanding deterministic networking operations in a realistic 3D environment.
+// time-synchronized network behavior, verifying gate scheduling algorithms.
 //
 // @see ~GateScheduleCanvasVisualizer, ~GateScheduleVisualizer, ~GateScheduleVisualizerBase, ~IGateScheduleVisualizer
 //

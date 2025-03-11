@@ -18,7 +18,7 @@ import inet.visualizer.contract.ITracingObstacleLossVisualizer;
 // - Lines at intersection points where signals pass through physical objects
 // - Normal vectors showing the orientation of object faces at intersection points
 // - Visual indication of signal attenuation due to obstacles
-// - Dynamic updates as signals propagate through the environment
+// - Dynamic updates as signals propagate through the environment TODO trivial
 //
 // Particularly useful for understanding signal propagation in environments with
 // obstacles, analyzing coverage problems due to physical barriers, and verifying
