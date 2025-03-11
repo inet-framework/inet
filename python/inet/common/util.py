@@ -28,17 +28,27 @@ STDOUT_LEVEL = 25  # between INFO (20) and WARNING (30)
 STDERR_LEVEL = 35  # between WARNING (30) and ERROR (40)
 
 class StopExecutionException(Exception):
-    pass
+    def __init__(self, **kwargs):
+        super().__init__()
+        self.value = kwargs.get("value", None)
+        self.value_provided = "value" in kwargs
 
 class TerminalInteractiveShell(IPython.terminal.interactiveshell.TerminalInteractiveShell):
     def _showtraceback(self, etype, evalue, stb):
         if isinstance(evalue, StopExecutionException):
-            _logger.warning("Execution stopped programmatically by calling stop_execution()")
+            if evalue.value_provided:
+                _logger.warning("Execution stopped programmatically by calling stop_execution(...) with:")
+                print(evalue.value)
+            else:
+                _logger.warning("Execution stopped programmatically by calling stop_execution()")
             return None
         super()._showtraceback(etype, evalue, stb)
 
-def stop_execution():
-    raise StopExecutionException()
+def stop_execution(*args):
+    if len(args) == 0:
+        raise StopExecutionException()
+    else:
+        raise StopExecutionException(value=args[0])
 
 def enable_autoreload():
     ipython = IPython.get_ipython()
