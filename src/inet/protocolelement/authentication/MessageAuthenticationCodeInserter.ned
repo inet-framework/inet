@@ -21,6 +21,13 @@ import inet.queueing.base.PacketFlowBase;
 // - Enables verification at the receiving end
 // - Provides protection against tampering and forgery
 //
+// Particularly useful for:
+// - Implementing secure communication protocols
+// - Ensuring packet integrity and authenticity
+// - Protecting against packet modification attacks
+// - Building secure network protocol stacks
+// - Complementing encryption with authentication
+//
 // @see ~MessageAuthenticationCodeChecker, ~PacketFlowBase
 //
 simple MessageAuthenticationCodeInserter extends PacketFlowBase like IProtocolHeaderInserter

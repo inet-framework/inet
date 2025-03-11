@@ -22,6 +22,13 @@ import inet.queueing.contract.IPacketFlow;
 // - Maps stream identifiers to network parameters
 // - Maintains separate processing paths for upward and downward packet flows
 //
+// Particularly useful for:
+// - Implementing bidirectional stream-aware protocol stacks
+// - Building redundant communication systems
+// - Creating protocol layers that handle stream identification
+// - Supporting Quality of Service differentiation
+// - Integrating stream-based redundancy with existing protocols
+//
 // @see ~StreamEncoder, ~StreamDecoder, ~StreamRelayLayer
 //
 module StreamCoderLayer like IProtocolLayer

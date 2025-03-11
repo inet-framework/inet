@@ -22,6 +22,13 @@ import inet.protocolelement.fragmentation.contract.IPacketFragmenter;
 // - Preserves packet structure while enabling fragmentation
 // - Forwards fragments to lower layers with appropriate tags
 //
+// Particularly useful for:
+// - Implementing fragmentation in simulation-only scenarios
+// - Testing fragmentation without protocol header overhead
+// - Creating simplified fragmentation mechanisms
+// - Studying fragmentation effects without protocol specifics
+// - Implementing custom fragmentation schemes
+//
 // @see ~FragmentTagBasedDefragmenter, ~FragmenterBase
 //
 module FragmentTagBasedFragmenter extends FragmenterBase like IPacketFragmenter

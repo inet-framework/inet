@@ -19,6 +19,13 @@ package inet.protocolelement.selectivity;
 // - Removes the MAC address header from matching packets
 // - Sets the MAC address of the containing network interface
 //
+// Particularly useful for:
+// - Implementing link layer address filtering
+// - Creating protocol stacks with MAC-based selectivity
+// - Building virtual network interfaces with specific MAC addresses
+// - Supporting Ethernet-based packet filtering
+// - Implementing basic link layer switching functionality
+//
 // @see ~SendToMacAddress, ~ReceiveAtL3Address, ~ReceiveAtPort
 //
 simple ReceiveAtMacAddress

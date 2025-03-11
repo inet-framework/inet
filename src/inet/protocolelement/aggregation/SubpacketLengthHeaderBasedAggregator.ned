@@ -21,6 +21,13 @@ import inet.protocolelement.aggregation.contract.IPacketAggregator;
 // - Preserves packet boundaries through explicit length information
 // - Forwards aggregated packets to lower layers
 //
+// Particularly useful for:
+// - Creating self-describing aggregated packets
+// - Supporting efficient deaggregation without additional context
+// - Implementing protocol-independent packet bundling
+// - Building aggregation systems with explicit boundary markers
+// - Enabling dynamic subpacket extraction at the receiver
+//
 // @see ~SubpacketLengthHeaderBasedDeaggregator, ~AggregatorBase
 //
 module SubpacketLengthHeaderBasedAggregator extends AggregatorBase like IPacketAggregator

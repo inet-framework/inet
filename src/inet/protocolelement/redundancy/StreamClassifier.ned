@@ -22,6 +22,13 @@ import inet.queueing.contract.IPacketClassifier;
 // - Supports different classification modes (request, indication, or both)
 // - Falls back to default gate when no matching stream is found
 //
+// Particularly useful for:
+// - Implementing stream-based traffic separation
+// - Building redundant communication systems
+// - Creating parallel processing paths for different streams
+// - Supporting Quality of Service differentiation
+// - Implementing stream-aware protocol stacks
+//
 // @see ~StreamFilter, ~StreamMerger, ~StreamSplitter
 //
 simple StreamClassifier extends PacketClassifierBase like IPacketClassifier

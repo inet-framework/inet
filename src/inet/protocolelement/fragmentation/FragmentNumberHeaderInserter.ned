@@ -21,6 +21,13 @@ import inet.queueing.base.PacketFlowBase;
 // - Prepares packets for potential fragmentation
 // - Maintains packet flow while adding fragmentation capability
 //
+// Particularly useful for:
+// - Preparing packets for fragmentation
+// - Implementing protocol-specific fragmentation headers
+// - Supporting fragmentation in protocol stacks
+// - Testing fragmentation header processing
+// - Building modular fragmentation systems
+//
 // @see ~FragmentNumberHeaderChecker, ~FragmentNumberHeaderBasedFragmenter
 //
 simple FragmentNumberHeaderInserter extends PacketFlowBase

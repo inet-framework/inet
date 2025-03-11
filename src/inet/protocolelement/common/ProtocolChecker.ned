@@ -20,6 +20,13 @@ import inet.queueing.base.PacketFilterBase;
 // - Drops packets with unrecognized protocols or missing protocol tags
 // - Emits signals when packets are dropped
 //
+// Particularly useful for:
+// - Enforcing protocol compliance at layer boundaries
+// - Implementing protocol-specific filtering in network nodes
+// - Detecting and handling protocol errors in simulations
+// - Validating packet flows in complex protocol stacks
+// - Testing protocol implementation correctness
+//
 // @see ~PacketFilterBase
 //
 simple ProtocolChecker extends PacketFilterBase

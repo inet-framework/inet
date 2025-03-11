@@ -19,6 +19,13 @@ package inet.protocolelement.processing;
 // - Removes itself from the module hierarchy during initialization
 // - Provides transparent packet flow between connected layers
 //
+// Particularly useful for:
+// - Creating configurable protocol stacks where processing delays are optional
+// - Simplifying network models when processing delays are not relevant
+// - Building protocol stacks with consistent interfaces
+// - Supporting modular protocol design with optional components
+// - Implementing protocol variants with and without processing delays
+//
 // @see ~IProcessingDelayLayer, ~ProcessingDelayLayer
 //
 module OmittedProcessingDelayLayer like IProcessingDelayLayer

@@ -18,6 +18,13 @@ package inet.protocolelement.selectivity;
 // - Removes the L3 address header from matching packets
 // - Registers with AccessoryProtocol service
 //
+// Particularly useful for:
+// - Implementing network layer address filtering
+// - Creating protocol stacks with address-based selectivity
+// - Building virtual network interfaces with specific addresses
+// - Supporting IP-based packet filtering
+// - Implementing basic network layer routing functionality
+//
 // @see ~SendToL3Address, ~ReceiveAtMacAddress, ~ReceiveAtPort
 //
 simple ReceiveAtL3Address

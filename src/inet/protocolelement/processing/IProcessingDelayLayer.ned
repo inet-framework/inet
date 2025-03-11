@@ -19,6 +19,13 @@ package inet.protocolelement.processing;
 // - Preserves packet order within each processing path
 // - Can be inserted at any point in a protocol stack
 //
+// Particularly useful for:
+// - Modeling realistic processing times in network devices
+// - Simulating CPU-intensive protocol operations
+// - Representing hardware acceleration or bottlenecks
+// - Creating accurate timing models for network protocols
+// - Studying the effects of processing delays on network performance
+//
 // @see ~ProcessingDelayLayer, ~OmittedProcessingDelayLayer
 //
 moduleinterface IProcessingDelayLayer

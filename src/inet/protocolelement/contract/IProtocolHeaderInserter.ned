@@ -20,6 +20,13 @@ import inet.queueing.contract.IPacketFlow;
 // - Attaches headers to packets in the correct format
 // - Forwards packets with headers to lower layers
 //
+// Particularly useful for:
+// - Implementing protocol-specific header generation
+// - Building protocol stacks with proper encapsulation
+// - Supporting various header formats and protocols
+// - Creating protocol extensions and options
+// - Implementing protocol version transitions
+//
 // @see ~IProtocolHeaderChecker, ~CrcHeaderInserter, ~FcsHeaderInserter
 //
 moduleinterface IProtocolHeaderInserter extends IPacketFlow

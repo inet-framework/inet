@@ -18,6 +18,13 @@ package inet.protocolelement.selectivity;
 // - Registers with AccessoryProtocol service
 // - Enables forwarding to the specified destination
 //
+// Particularly useful for:
+// - Implementing network layer addressing
+// - Creating protocol stacks with address-based routing
+// - Building virtual network interfaces with specific addressing
+// - Supporting IP-based packet forwarding
+// - Implementing basic network layer routing functionality
+//
 // @see ~ReceiveAtL3Address, ~SendToMacAddress, ~SendToPort
 //
 simple SendToL3Address

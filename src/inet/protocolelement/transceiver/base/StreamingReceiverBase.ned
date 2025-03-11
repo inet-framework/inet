@@ -19,6 +19,13 @@ package inet.protocolelement.transceiver.base;
 // - Handles partial signal reception and continuation
 // - Provides foundation for specialized streaming receiver implementations
 //
+// Particularly useful for:
+// - Implementing preemptible signal reception
+// - Creating receivers for time-sensitive networking
+// - Supporting signal processing with partial information
+// - Building receivers that can handle interrupted transmissions
+// - Simulating realistic streaming communication systems
+//
 // @see ~StreamingTransmitterBase, ~PacketReceiverBase, ~StreamThroughReceiver
 //
 simple StreamingReceiverBase extends PacketReceiverBase

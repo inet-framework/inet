@@ -19,6 +19,13 @@ package inet.protocolelement.measurement;
 // - Provides standardized measurement capabilities across protocol stacks
 // - Can be inserted at any point in a protocol stack
 //
+// Particularly useful for:
+// - Collecting network performance statistics
+// - Analyzing protocol behavior and efficiency
+// - Implementing Quality of Service (QoS) monitoring
+// - Supporting network diagnostics and troubleshooting
+// - Evaluating protocol stack performance
+//
 // @see ~MeasurementLayer, ~MultiMeasurementLayer, ~OmittedMeasurementLayer
 //
 moduleinterface IMeasurementLayer

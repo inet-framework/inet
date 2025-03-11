@@ -40,6 +40,13 @@ import inet.queueing.common.PacketMultiplexer;
 //   * Handles acknowledgment generation
 //   * Filters packets based on MAC address
 //
+// Particularly useful for:
+// - Implementing complete network interfaces
+// - Building reliable link layer protocols
+// - Creating custom network adapters
+// - Supporting error detection and correction
+// - Implementing MAC-based addressing and filtering
+//
 // @see ~DataService, ~ForwardingService, ~MacService, ~SelectivityService
 //
 module InterfaceService extends NetworkInterface

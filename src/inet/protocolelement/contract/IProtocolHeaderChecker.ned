@@ -20,6 +20,13 @@ import inet.queueing.contract.IPacketFilter;
 // - Passes valid packets to upper layers
 // - Filters out packets with invalid headers
 //
+// Particularly useful for:
+// - Implementing protocol-specific validation logic
+// - Building robust protocol stacks with error detection
+// - Filtering malformed or corrupted packets
+// - Creating security mechanisms against protocol attacks
+// - Supporting protocol conformance testing
+//
 // @see ~IProtocolHeaderInserter, ~CrcHeaderChecker, ~FcsHeaderChecker
 //
 moduleinterface IProtocolHeaderChecker extends IPacketFilter

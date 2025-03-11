@@ -22,6 +22,13 @@ import inet.queueing.contract.IPacketFilter;
 // - Verifies that eligibility times are within acceptable bounds
 // - Provides timing-based admission control for packet flows
 //
+// Particularly useful for:
+// - Implementing IEEE 802.1Qcr asynchronous traffic shaping
+// - Enforcing timing constraints in time-sensitive networking
+// - Preventing excessive queuing delays in network switches
+// - Building deterministic packet scheduling systems
+// - Creating bounded-latency communication channels
+//
 // @see ~EligibilityTimeGate, ~EligibilityTimeQueue, ~EligibilityTimeMeter, ~EligibilityTimeTag
 //
 simple EligibilityTimeFilter extends PacketFilterBase like IPacketFilter

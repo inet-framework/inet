@@ -18,6 +18,13 @@ package inet.protocolelement.contract;
 // - Provides timing information for protocol operations
 // - Supports time-based packet management policies
 //
+// Particularly useful for:
+// - Implementing Time-To-Live (TTL) mechanisms
+// - Preventing packet loops in networks
+// - Managing packet expiration in caches and buffers
+// - Supporting time-sensitive networking applications
+// - Building protocols with timing constraints
+//
 // @see ~CarrierBasedLifeTimer
 //
 moduleinterface IPacketLifeTimer

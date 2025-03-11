@@ -22,6 +22,13 @@ import inet.queueing.contract.IPacketGate;
 // - Tracks and reports remaining time until next packet becomes eligible
 // - Provides time-based traffic shaping without packet reordering
 //
+// Particularly useful for:
+// - Implementing IEEE 802.1Qcr asynchronous traffic shaping
+// - Creating deterministic packet scheduling systems
+// - Enforcing rate constraints while preserving packet order
+// - Building time-sensitive networking infrastructure
+// - Implementing credit-based traffic shapers with timing guarantees
+//
 // @see ~EligibilityTimeQueue, ~EligibilityTimeFilter, ~EligibilityTimeMeter, ~EligibilityTimeTag
 //
 simple EligibilityTimeGate extends PacketGateBase like IPacketGate

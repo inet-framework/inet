@@ -21,6 +21,13 @@ import inet.queueing.base.PacketPusherBase;
 // - Limits retransmissions to configured maximum attempts
 // - Notifies producer about final delivery status
 //
+// Particularly useful for:
+// - Implementing basic reliability mechanisms
+// - Creating simple ARQ (Automatic Repeat Request) schemes
+// - Building custom error recovery protocols
+// - Testing network resilience with controlled retransmissions
+// - Simulating protocols with limited retry attempts
+//
 // @see ~SendWithAcknowledge, ~ReceiveWithAcknowledge
 //
 simple Resending extends PacketPusherBase

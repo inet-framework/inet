@@ -22,6 +22,13 @@ import inet.queueing.contract.IPacketFilter;
 // - Drops packets with non-matching stream names
 // - Supports different filtering modes (request, indication, or both)
 //
+// Particularly useful for:
+// - Implementing stream-based traffic selection
+// - Building redundant communication systems
+// - Creating stream-specific processing paths
+// - Supporting Quality of Service differentiation
+// - Implementing stream isolation in protocol stacks
+//
 // @see ~StreamClassifier, ~StreamMerger, ~StreamSplitter
 //
 simple StreamFilter extends PacketFilterBase like IPacketFilter

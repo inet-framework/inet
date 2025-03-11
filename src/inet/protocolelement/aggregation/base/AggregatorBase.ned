@@ -22,6 +22,13 @@ import inet.queueing.base.PacketPusherBase;
 // - Adds necessary information to identify subpacket boundaries
 // - Forwards aggregated packets to lower layers
 //
+// Particularly useful for:
+// - Creating protocol-specific aggregators with shared base functionality
+// - Supporting different aggregation strategies through policy modules
+// - Implementing packet bundling for efficiency
+// - Building protocol stacks with aggregation capabilities
+// - Providing a foundation for specialized aggregator implementations
+//
 // @see ~DeaggregatorBase, ~IAggregatorPolicy
 //
 module AggregatorBase extends PacketPusherBase

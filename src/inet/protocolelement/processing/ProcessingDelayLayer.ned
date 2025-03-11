@@ -21,6 +21,13 @@ import inet.queueing.contract.IPacketDelayer;
 // - Preserves packet order within each processing path
 // - Supports different delay models through delayer module selection
 //
+// Particularly useful for:
+// - Modeling CPU processing time in network devices
+// - Simulating protocol stack processing overhead
+// - Representing hardware-specific packet processing delays
+// - Creating realistic timing models for network protocols
+// - Studying the impact of processing delays on network performance
+//
 // @see ~IProcessingDelayLayer, ~OmittedProcessingDelayLayer
 //
 module ProcessingDelayLayer like IProcessingDelayLayer

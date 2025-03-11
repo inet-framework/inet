@@ -19,6 +19,13 @@ package inet.protocolelement.transceiver.contract;
 // - Handles timing and synchronization aspects of reception
 // - Provides statistics about reception performance
 //
+// Particularly useful for:
+// - Implementing physical layer reception in protocol stacks
+// - Creating different signal reception strategies
+// - Building modular network interfaces
+// - Supporting various transmission technologies
+// - Simulating realistic signal reception behavior
+//
 // @see ~IPacketTransmitter, ~PacketReceiverBase
 //
 moduleinterface IPacketReceiver

@@ -21,6 +21,13 @@ import inet.queueing.base.PacketFilterBase;
 // - Filters out packets with invalid or missing fragment headers
 // - Processes headers at configurable position (front or back)
 //
+// Particularly useful for:
+// - Implementing robust fragmentation protocols
+// - Protecting defragmenters from malformed fragments
+// - Filtering out corrupted fragments before processing
+// - Validating fragment header information
+// - Building reliable protocol stacks with fragmentation support
+//
 // @see ~FragmentNumberHeaderBasedDefragmenter, ~FragmentNumberHeaderInserter
 //
 simple FragmentNumberHeaderChecker extends PacketFilterBase

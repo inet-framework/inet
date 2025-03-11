@@ -19,6 +19,13 @@ package inet.protocolelement.socket;
 // - Preserves the logical structure of the protocol stack
 // - Allows for simplified protocol stack configurations
 //
+// Particularly useful for:
+// - Creating configurable protocol stacks where socket layers may be optional
+// - Simplifying network models by omitting unnecessary socket processing
+// - Supporting protocol stack variants without changing the overall architecture
+// - Enabling runtime protocol stack composition based on simulation parameters
+// - Testing the impact of socket layers by easily enabling/disabling them
+//
 // @see ~ISocketLayer
 //
 module OmittedSocketLayer like ISocketLayer

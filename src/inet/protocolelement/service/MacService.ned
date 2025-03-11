@@ -21,6 +21,12 @@ import inet.queueing.common.PacketMultiplexer;
 // - Multiplexes packets from different processing paths
 // - Supports dynamic creation and deletion of defragmenters
 //
+// Particularly useful for:
+// - Implementing peer-to-peer communication services
+// - Building point-to-point protocol stacks
+// - Supporting fragmentation in peer connections
+// - Creating custom MAC sublayers for specific peers
+//
 // @see ~MacService
 //
 module PeerService
@@ -60,6 +66,13 @@ module PeerService
 // - Routes packets to the corresponding peer service
 // - Multiplexes packets from different peers into a single output
 // - Supports dynamic peer configuration
+//
+// Particularly useful for:
+// - Implementing MAC layer functionality
+// - Building multi-peer communication systems
+// - Supporting point-to-multipoint protocols
+// - Creating custom MAC layers with peer-specific processing
+// - Implementing wireless or shared medium protocols
 //
 // @see ~PeerService, ~DataService, ~ForwardingService, ~InterfaceService, ~SelectivityService
 //

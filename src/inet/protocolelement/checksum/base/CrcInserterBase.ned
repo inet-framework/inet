@@ -21,6 +21,13 @@ import inet.queueing.base.PacketFlowBase;
 // - Processes packets without modifying their core content
 // - Maintains packet flow while adding error detection capability
 //
+// Particularly useful for:
+// - Implementing error detection in protocol simulations
+// - Creating realistic protocol behavior with integrity checks
+// - Supporting various checksum calculation methods
+// - Building protocol stacks with error detection capabilities
+// - Testing network resilience with different CRC modes
+//
 // @see ~CrcCheckerBase, ~FcsInserterBase, ~PacketFlowBase
 //
 simple CrcInserterBase extends PacketFlowBase

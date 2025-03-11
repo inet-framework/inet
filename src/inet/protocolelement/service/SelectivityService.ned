@@ -27,6 +27,13 @@ import inet.protocolelement.selectivity.SendToPort;
 //   * Filters packets based on port number
 //   * Removes addressing headers from matching packets
 //
+// Particularly useful for:
+// - Implementing multi-layer addressing schemes
+// - Building protocol stacks with address-based selectivity
+// - Creating custom socket-like communication endpoints
+// - Supporting both transport and network layer filtering
+// - Implementing basic socket and IP-like functionality
+//
 // @see ~DataService, ~ForwardingService, ~InterfaceService, ~MacService
 //
 module SelectivityService

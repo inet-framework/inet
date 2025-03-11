@@ -21,6 +21,13 @@ import inet.queueing.contract.ITrafficConditioner;
 // - Enables different conditioning policies for each direction
 // - Integrates with the interface table for network interface information
 //
+// Particularly useful for:
+// - Implementing Quality of Service (QoS) mechanisms
+// - Building protocol stacks with traffic shaping capabilities
+// - Creating rate-limited or prioritized communication channels
+// - Supporting differentiated services in network protocols
+// - Implementing traffic policing at protocol boundaries
+//
 // @see ~ITrafficConditionerLayer, ~OmittedTrafficConditionerLayer
 //
 module TrafficConditionerLayer like ITrafficConditionerLayer

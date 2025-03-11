@@ -22,6 +22,13 @@ import inet.protocolelement.transceiver.contract.IPacketReceiver;
 // - Maintains packet boundaries during reception
 // - Provides simple packet-based reception without streaming
 //
+// Particularly useful for:
+// - Implementing basic packet-based receivers
+// - Creating simple protocol stacks without streaming
+// - Simulating traditional packet-based communication
+// - Building receivers for protocols with fixed-size packets
+// - Testing network behavior with atomic packet handling
+//
 // @see ~PacketTransmitter, ~DestreamingReceiver, ~StreamThroughReceiver
 //
 simple PacketReceiver extends StreamingReceiverBase like IPacketReceiver

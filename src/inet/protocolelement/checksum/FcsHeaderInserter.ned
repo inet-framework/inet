@@ -20,6 +20,13 @@ import inet.protocolelement.checksum.base.FcsInserterBase;
 // - Supports multiple FCS modes: disabled, declared, computed
 // - Registers with the AccessoryProtocol service
 //
+// Particularly useful for:
+// - Implementing Ethernet frame generation
+// - Adding frame integrity checking to custom protocols
+// - Creating realistic data link layer protocol behavior
+// - Building protocol stacks with trailer-based checksums
+// - Testing error detection mechanisms in network simulations
+//
 // @see ~FcsHeaderChecker, ~CrcHeaderInserter, ~FcsInserterBase
 //
 simple FcsHeaderInserter extends FcsInserterBase

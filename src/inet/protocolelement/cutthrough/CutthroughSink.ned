@@ -20,6 +20,13 @@ import inet.protocolelement.common.PacketStreamer;
 // - Maintains proper timing of packet reception
 // - Completes the cut-through switching path
 //
+// Particularly useful for:
+// - Implementing cut-through switching in network devices
+// - Reducing end-to-end latency in time-sensitive networks
+// - Creating low-latency forwarding paths in switches
+// - Supporting time-sensitive networking applications
+// - Modeling specialized hardware switching architectures
+//
 // @see ~CutthroughSource, ~PacketStreamer
 //
 simple CutthroughSink extends PacketStreamer

@@ -19,6 +19,13 @@ package inet.protocolelement.forwarding;
 // - Adds appropriate protocol tags for packet processing
 // - Prepares packets for forwarding through the network
 //
+// Particularly useful for:
+// - Implementing TTL/hop limit functionality in network protocols
+// - Limiting packet propagation distance in networks
+// - Preventing routing loops in complex topologies
+// - Building protocol stacks with hop count restrictions
+// - Creating bounded-scope multicast mechanisms
+//
 // @see ~ReceiveWithHopLimit, ~Forwarding
 //
 simple SendWithHopLimit

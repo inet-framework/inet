@@ -20,6 +20,13 @@ import inet.queueing.base.PacketProcessorBase;
 // - Supports both synchronous and asynchronous packet handling
 // - Can be configured to assume the channel was busy before simulation started
 //
+// Particularly useful for:
+// - Simulating realistic network transmission timing
+// - Implementing rate limiting mechanisms
+// - Modeling medium access control protocols
+// - Emulating physical layer constraints in wireless networks
+// - Testing protocol behavior with specific timing requirements
+//
 // @see ~PacketProcessorBase
 //
 simple InterpacketGapInserter extends PacketProcessorBase

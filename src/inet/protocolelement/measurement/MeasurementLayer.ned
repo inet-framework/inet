@@ -21,6 +21,13 @@ import inet.queueing.contract.IPacketFlow;
 // - Supports various flow measurement techniques
 // - Maintains bidirectional measurement capabilities
 //
+// Particularly useful for:
+// - Measuring end-to-end packet delay
+// - Calculating throughput and packet loss statistics
+// - Analyzing protocol performance characteristics
+// - Implementing network monitoring functionality
+// - Supporting performance testing and validation
+//
 // @see ~IMeasurementLayer, ~MultiMeasurementLayer, ~OmittedMeasurementLayer
 //
 module MeasurementLayer like IMeasurementLayer

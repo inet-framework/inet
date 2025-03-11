@@ -19,6 +19,13 @@ package inet.protocolelement.acknowledgement;
 // - Sends acknowledgments through dedicated gate
 // - Registers with AccessoryProtocol service
 //
+// Particularly useful for:
+// - Implementing reliable communication protocols
+// - Creating acknowledgment-based flow control
+// - Building custom ARQ (Automatic Repeat Request) schemes
+// - Testing network reliability mechanisms
+// - Simulating protocols with positive acknowledgment
+//
 // @see ~SendWithAcknowledge, ~Resending
 //
 simple ReceiveWithAcknowledge

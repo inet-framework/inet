@@ -20,6 +20,13 @@ import inet.protocolelement.aggregation.contract.IAggregatorPolicy;
 // - Enforces maximum limits on aggregated packet size
 // - Provides configurable parameters for fine-tuning aggregation behavior
 //
+// Particularly useful for:
+// - Optimizing network efficiency by combining small packets
+// - Implementing size-based packet bundling strategies
+// - Controlling overhead in aggregation protocols
+// - Balancing between latency and throughput in packet processing
+// - Creating predictable aggregation behavior based on packet sizes
+//
 // @see ~IAggregatorPolicy, ~AggregatorBase
 //
 simple LengthBasedAggregatorPolicy like IAggregatorPolicy

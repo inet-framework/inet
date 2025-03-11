@@ -19,6 +19,13 @@ package inet.protocolelement.acknowledgement;
 // - Retransmits packets if acknowledgment timeout occurs
 // - Registers with AccessoryProtocol service
 //
+// Particularly useful for:
+// - Implementing reliable communication protocols
+// - Creating timeout-based retransmission schemes
+// - Building custom ARQ (Automatic Repeat Request) mechanisms
+// - Testing network reliability and congestion control
+// - Simulating protocols with positive acknowledgment
+//
 // @see ~ReceiveWithAcknowledge, ~Resending
 //
 simple SendWithAcknowledge

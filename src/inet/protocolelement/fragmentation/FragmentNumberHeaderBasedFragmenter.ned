@@ -22,6 +22,13 @@ import inet.protocolelement.fragmentation.contract.IPacketFragmenter;
 // - Inserts headers at configurable position (front or back)
 // - Forwards fragments to lower layers with appropriate headers
 //
+// Particularly useful for:
+// - Implementing protocol-realistic fragmentation
+// - Creating IP-like fragmentation mechanisms
+// - Testing fragmentation with explicit header information
+// - Building protocol stacks with standard fragmentation capabilities
+// - Simulating real-world network fragmentation behavior
+//
 // @see ~FragmentNumberHeaderBasedDefragmenter, ~FragmentNumberHeaderInserter, ~FragmenterBase
 //
 module FragmentNumberHeaderBasedFragmenter extends FragmenterBase like IPacketFragmenter

@@ -22,6 +22,13 @@ import inet.protocolelement.transceiver.contract.IPacketTransmitter;
 // - Enables incremental signal transmission
 // - Maintains packet integrity while supporting streaming
 //
+// Particularly useful for:
+// - Implementing streaming transmitters with packet-based inputs
+// - Creating interfaces between packet and streaming domains
+// - Supporting preemptible transmission systems
+// - Building time-sensitive networking components
+// - Simulating realistic signal transmission with timing control
+//
 // @see ~DestreamingReceiver, ~PacketTransmitter, ~StreamThroughTransmitter
 //
 simple StreamingTransmitter extends StreamingTransmitterBase like IPacketTransmitter

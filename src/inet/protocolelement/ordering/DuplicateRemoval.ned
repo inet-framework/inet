@@ -21,6 +21,13 @@ import inet.queueing.base.PacketPusherBase;
 // - Discards packets with duplicate sequence numbers
 // - Removes sequence number headers from forwarded packets
 //
+// Particularly useful for:
+// - Implementing reliable transport protocols
+// - Preventing duplicate packet processing
+// - Handling packet retransmissions in error-prone networks
+// - Supporting acknowledgment-based protocols
+// - Ensuring exactly-once packet delivery semantics
+//
 // @see ~SequenceNumbering, ~Reordering
 //
 simple DuplicateRemoval extends PacketPusherBase

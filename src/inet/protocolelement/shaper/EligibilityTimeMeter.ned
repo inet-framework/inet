@@ -21,6 +21,13 @@ import inet.queueing.contract.IPacketMeter;
 // - Enforces committed information rate and burst size constraints
 // - Optionally limits maximum packet residence time
 //
+// Particularly useful for:
+// - Implementing IEEE 802.1Qcr asynchronous traffic shaping
+// - Creating deterministic delay bounds for critical traffic
+// - Building credit-based traffic shapers
+// - Supporting time-sensitive networking applications
+// - Implementing rate-controlled service disciplines
+//
 // @see ~EligibilityTimeGate, ~EligibilityTimeFilter, ~EligibilityTimeQueue, ~EligibilityTimeTag
 //
 simple EligibilityTimeMeter extends PacketMeterBase like IPacketMeter

@@ -23,6 +23,13 @@ import inet.queueing.contract.IPacketPusher;
 // - Creates redundant packet copies for multiple transmission paths
 // - Maintains separate processing paths for upward and downward packet flows
 //
+// Particularly useful for:
+// - Implementing bidirectional redundant communication
+// - Building fault-tolerant protocol stacks
+// - Creating systems with multiple redundant paths
+// - Supporting seamless redundancy in existing protocols
+// - Implementing Parallel Redundancy Protocol (PRP) or similar concepts
+//
 // @see ~StreamMerger, ~StreamSplitter, ~StreamCoderLayer
 //
 module StreamRelayLayer like IProtocolLayer

@@ -21,6 +21,13 @@ import inet.queueing.base.PacketFlowBase;
 // - Uses Ethernet CRC-32 polynomial for computation
 // - Processes frames without modifying their core content
 //
+// Particularly useful for:
+// - Implementing Ethernet frame generation
+// - Creating realistic data link layer protocol behavior
+// - Supporting various FCS calculation methods
+// - Building protocol stacks with error detection capabilities
+// - Testing network resilience with different FCS modes
+//
 // @see ~FcsCheckerBase, ~CrcInserterBase, ~PacketFlowBase
 //
 simple FcsInserterBase extends PacketFlowBase

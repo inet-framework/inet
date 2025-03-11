@@ -19,6 +19,13 @@ package inet.protocolelement.measurement;
 // - Removes itself from the module hierarchy during initialization
 // - Provides transparent packet flow between connected layers
 //
+// Particularly useful for:
+// - Creating configurable protocol stacks where measurement is optional
+// - Simplifying network models when measurement is not needed
+// - Building protocol stacks with consistent interfaces
+// - Supporting modular protocol design with optional components
+// - Implementing protocol variants with and without measurement
+//
 // @see ~IMeasurementLayer, ~MeasurementLayer, ~MultiMeasurementLayer
 //
 module OmittedMeasurementLayer like IMeasurementLayer

@@ -17,6 +17,13 @@ package inet.protocolelement.shaper;
 // - Ensures consistent shaping behavior for grouped streams
 // - Maintains per-group state for accurate eligibility calculation
 //
+// Particularly useful for:
+// - Implementing IEEE 802.1Qcr asynchronous traffic shaping
+// - Coordinating traffic flows with shared resources
+// - Preventing interference between related streams
+// - Building advanced time-sensitive networking systems
+// - Creating hierarchical traffic shaping architectures
+//
 // @see ~GroupEligibilityTimeTable, ~EligibilityTimeMeter, ~EligibilityTimeGate, ~EligibilityTimeFilter
 //
 

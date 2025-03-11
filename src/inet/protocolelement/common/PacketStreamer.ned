@@ -20,6 +20,13 @@ import inet.queueing.contract.IPacketFlow;
 // - Forwards these fragments through its output at a configurable datarate
 // - Supports both push and pull packet processing modes
 //
+// Particularly useful for:
+// - Simulating gradual packet transmission over physical media
+// - Converting from packet-based interfaces to streaming-based interfaces
+// - Implementing realistic transmission timing in network simulations
+// - Modeling bit-by-bit or byte-by-byte transmission processes
+// - Creating protocol adapters between different network layers
+//
 // @see ~PacketDestreamer, ~PacketProcessorBase, ~IPacketFlow
 //
 simple PacketStreamer extends PacketProcessorBase like IPacketFlow

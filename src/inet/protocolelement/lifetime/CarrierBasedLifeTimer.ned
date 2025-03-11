@@ -21,6 +21,13 @@ import inet.protocolelement.contract.IPacketLifeTimer;
 // - Drops packets with appropriate notification signals
 // - Checks carrier state when new packets are pushed to the collection
 //
+// Particularly useful for:
+// - Implementing interface down behavior in network protocols
+// - Preventing packet buildup in queues when links are down
+// - Simulating carrier-dependent packet lifetime management
+// - Modeling realistic network interface behavior
+// - Implementing clean queue management during link failures
+//
 // @see ~IPacketLifeTimer
 //
 simple CarrierBasedLifeTimer like IPacketLifeTimer

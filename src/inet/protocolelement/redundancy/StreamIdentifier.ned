@@ -22,6 +22,13 @@ import inet.queueing.contract.IPacketFlow;
 // - Optionally adds sequence numbering to streams
 // - Provides the foundation for stream-based redundancy
 //
+// Particularly useful for:
+// - Implementing content-based stream identification
+// - Creating flexible redundant communication systems
+// - Supporting application-specific traffic classification
+// - Building systems with multiple redundant paths
+// - Enabling advanced stream-based packet processing
+//
 // @see ~StreamDecoder, ~StreamIdentifierLayer
 //
 simple StreamIdentifier extends PacketFlowBase like IPacketFlow

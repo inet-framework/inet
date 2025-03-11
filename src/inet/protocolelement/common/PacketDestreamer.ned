@@ -20,6 +20,13 @@ import inet.queueing.contract.IPacketFlow;
 // - Forwards the complete packet through its output when streaming ends
 // - Supports both push and pull packet processing modes
 //
+// Particularly useful for:
+// - Converting from streaming-based interfaces to packet-based interfaces
+// - Implementing protocol adapters between different network layers
+// - Connecting streaming-capable modules to non-streaming modules
+// - Terminating packet streaming at protocol boundaries
+// - Collecting fragmented transmission data into complete packets
+//
 // @see ~PacketStreamer, ~PacketProcessorBase, ~IPacketFlow
 //
 simple PacketDestreamer extends PacketProcessorBase like IPacketFlow

@@ -20,6 +20,13 @@ import inet.queueing.contract.IPacketFlow;
 // - Can set packet direction tags (inbound, outbound, or undefined)
 // - Passes packets through without modification
 //
+// Particularly useful for:
+// - Collecting statistics on specific packet types
+// - Monitoring packet flow at key points in the network
+// - Implementing traffic analysis and measurement
+// - Creating packet traces for debugging and visualization
+// - Supporting protocol-specific packet monitoring
+//
 // @see ~PacketFlowBase, ~IPacketFlow
 //
 simple PacketEmitter extends PacketFlowBase like IPacketFlow

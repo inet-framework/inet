@@ -19,6 +19,13 @@ package inet.protocolelement.fragmentation.contract;
 // - Forwards fragments to lower layers
 // - Maintains relationships between original packets and their fragments
 //
+// Particularly useful for:
+// - Implementing IP fragmentation
+// - Adapting large packets to network constraints
+// - Supporting networks with different MTU sizes
+// - Enabling transmission of packets larger than link capacity
+// - Implementing protocol-specific fragmentation mechanisms
+//
 // @see ~IPacketDefragmenter, ~IFragmenterPolicy
 //
 moduleinterface IPacketFragmenter

@@ -22,6 +22,13 @@ import inet.queueing.base.PacketPusherBase;
 // - Adds necessary information to identify fragment relationships
 // - Forwards fragments to lower layers
 //
+// Particularly useful for:
+// - Creating protocol-specific fragmenters with shared base functionality
+// - Supporting different fragmentation strategies through policy modules
+// - Implementing MTU-based packet splitting
+// - Building protocol stacks with fragmentation capabilities
+// - Providing a foundation for specialized fragmenter implementations
+//
 // @see ~DefragmenterBase, ~IFragmenterPolicy
 //
 module FragmenterBase extends PacketPusherBase

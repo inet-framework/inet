@@ -32,6 +32,13 @@ import inet.queueing.contract.IPacketServer;
 //   * Reassembles fragmented packets
 //   * Extracts original packets from aggregated ones
 //
+// Particularly useful for:
+// - Implementing reliable data transfer services
+// - Building protocol stacks with comprehensive data handling
+// - Supporting efficient bandwidth utilization
+// - Ensuring ordered packet delivery
+// - Creating custom transport layer implementations
+//
 // @see ~ForwardingService, ~InterfaceService, ~MacService, ~SelectivityService
 //
 module DataService

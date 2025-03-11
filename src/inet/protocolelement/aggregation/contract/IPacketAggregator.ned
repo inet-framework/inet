@@ -18,6 +18,13 @@ package inet.protocolelement.aggregation.contract;
 // - Applies protocol-specific aggregation rules and headers
 // - Forwards aggregated packets to lower layers
 //
+// Particularly useful for:
+// - Reducing protocol overhead in network transmissions
+// - Improving efficiency for small packet transmissions
+// - Implementing packet bundling in various protocols
+// - Supporting frame aggregation in wireless networks
+// - Creating protocol-specific aggregation mechanisms
+//
 // @see ~IPacketDeaggregator, ~AggregatorBase
 //
 moduleinterface IPacketAggregator

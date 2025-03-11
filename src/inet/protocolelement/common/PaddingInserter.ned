@@ -20,6 +20,13 @@ import inet.queueing.contract.IPacketFlow;
 // - Can insert padding at either front or back of packet
 // - Uses bit or byte padding depending on alignment requirements
 //
+// Particularly useful for:
+// - Implementing minimum frame size requirements (e.g., Ethernet's 64-byte minimum)
+// - Ensuring packets meet protocol-specific size constraints
+// - Aligning packet lengths to word or block boundaries
+// - Implementing cryptographic padding requirements
+// - Standardizing packet sizes for consistent processing
+//
 // @see ~PacketFlowBase, ~IPacketFlow
 //
 simple PaddingInserter extends PacketFlowBase like IPacketFlow

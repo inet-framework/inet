@@ -20,6 +20,13 @@ import inet.queueing.base.PacketPusherBase;
 // - Restores original packet structure and headers
 // - Forwards extracted packets to upper layers
 //
+// Particularly useful for:
+// - Creating protocol-specific deaggregators with shared base functionality
+// - Implementing the receiving end of packet bundling systems
+// - Building protocol stacks with deaggregation capabilities
+// - Providing a foundation for specialized deaggregator implementations
+// - Complementing aggregator modules in network protocols
+//
 // @see ~AggregatorBase, ~IPacketDeaggregator
 //
 simple DeaggregatorBase extends PacketPusherBase

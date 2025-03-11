@@ -22,6 +22,13 @@ import inet.queueing.contract.IPacketFlow;
 // - Maintains separate processing paths for upward and downward packet flows
 // - Integrates stream identification into layered protocol stacks
 //
+// Particularly useful for:
+// - Implementing stream identification in layered protocol stacks
+// - Building redundant communication systems
+// - Creating modular network architectures with stream awareness
+// - Supporting Quality of Service differentiation
+// - Enabling stream-based redundancy in existing protocol stacks
+//
 // @see ~StreamIdentifier, ~StreamCoderLayer, ~StreamRelayLayer
 //
 module StreamIdentifierLayer like IProtocolLayer

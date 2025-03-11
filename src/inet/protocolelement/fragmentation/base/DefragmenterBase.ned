@@ -21,6 +21,13 @@ import inet.queueing.base.PacketPusherBase;
 // - Reassembles original packets from collected fragments
 // - Forwards complete packets to upper layers
 //
+// Particularly useful for:
+// - Creating protocol-specific defragmenters with shared base functionality
+// - Implementing reliable packet reconstruction
+// - Handling out-of-order fragment arrival
+// - Building protocol stacks with defragmentation capabilities
+// - Providing a foundation for specialized defragmenter implementations
+//
 // @see ~FragmenterBase, ~IPacketDefragmenter
 //
 simple DefragmenterBase extends PacketPusherBase

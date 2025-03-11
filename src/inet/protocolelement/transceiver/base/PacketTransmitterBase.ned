@@ -21,6 +21,13 @@ import inet.queueing.base.PacketProcessorBase;
 // - Collects comprehensive transmission statistics
 // - Provides foundation for specialized transmitter implementations
 //
+// Particularly useful for:
+// - Creating different types of packet transmitters
+// - Implementing physical layer transmission in protocol stacks
+// - Building modular network interfaces with consistent behavior
+// - Supporting performance analysis through statistics
+// - Simulating realistic signal transmission with timing constraints
+//
 // @see ~PacketReceiverBase, ~StreamingTransmitterBase, ~IPacketTransmitter
 //
 simple PacketTransmitterBase extends PacketProcessorBase

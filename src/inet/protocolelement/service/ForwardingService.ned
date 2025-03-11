@@ -25,6 +25,13 @@ import inet.protocolelement.forwarding.SendWithHopLimit;
 // - Processes incoming packets through ReceiveWithHopLimit
 // - Drops packets when hop limit reaches zero
 //
+// Particularly useful for:
+// - Implementing network layer routing functionality
+// - Building protocol stacks with forwarding capabilities
+// - Creating custom IP-like network protocols
+// - Supporting multi-hop communication in networks
+// - Implementing Time-To-Live (TTL) functionality
+//
 // @see ~DataService, ~InterfaceService, ~MacService, ~SelectivityService
 //
 module ForwardingService

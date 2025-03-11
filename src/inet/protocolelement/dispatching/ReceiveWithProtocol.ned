@@ -19,6 +19,13 @@ package inet.protocolelement.dispatching;
 // - Adds DispatchProtocolReq tag to guide further packet processing
 // - Forwards the packet to the appropriate upper layer protocol handler
 //
+// Particularly useful for:
+// - Implementing protocol demultiplexing in network stacks
+// - Building multi-protocol network devices
+// - Creating protocol gateways and converters
+// - Supporting dynamic protocol selection
+// - Implementing protocol tunneling mechanisms
+//
 // @see ~SendWithProtocol, ~ProtocolHeader
 //
 simple ReceiveWithProtocol

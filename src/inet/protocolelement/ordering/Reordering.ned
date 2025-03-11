@@ -21,6 +21,13 @@ import inet.queueing.base.PacketPusherBase;
 // - Maintains an expected sequence number counter
 // - Removes sequence number headers from forwarded packets
 //
+// Particularly useful for:
+// - Implementing reliable transport protocols
+// - Handling packets that arrive out of order
+// - Supporting networks with multiple paths or variable delays
+// - Ensuring in-order delivery for applications that require it
+// - Complementing retransmission mechanisms in error recovery
+//
 // @see ~SequenceNumbering, ~DuplicateRemoval
 //
 simple Reordering extends PacketPusherBase

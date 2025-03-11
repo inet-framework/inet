@@ -19,6 +19,13 @@ package inet.protocolelement.forwarding;
 // - Handles both direct delivery and forwarding cases
 // - Maintains protocol dispatch information for protocol stack
 //
+// Particularly useful for:
+// - Implementing routing functionality in network protocols
+// - Building custom forwarding mechanisms
+// - Creating simplified routing demonstrations
+// - Testing network topologies with multiple hops
+// - Implementing protocol-specific forwarding behavior
+//
 // @see ~SendWithHopLimit, ~ReceiveWithHopLimit
 //
 simple Forwarding

@@ -20,6 +20,13 @@ import inet.queueing.queue.PacketQueue;
 // - Ensures packets with earlier eligibility times are processed first
 // - Preserves packet order within the same eligibility time
 //
+// Particularly useful for:
+// - Implementing IEEE 802.1Qcr asynchronous traffic shaping
+// - Creating priority queues based on eligibility times
+// - Supporting time-sensitive networking applications
+// - Building deterministic packet scheduling systems
+// - Implementing earliest deadline first scheduling
+//
 // @see ~EligibilityTimeGate, ~EligibilityTimeFilter, ~EligibilityTimeMeter, ~EligibilityTimeTag
 //
 simple EligibilityTimeQueue extends PacketQueue

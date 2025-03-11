@@ -21,6 +21,13 @@ import inet.queueing.base.PacketProcessorBase;
 // - Collects comprehensive reception statistics
 // - Provides foundation for specialized receiver implementations
 //
+// Particularly useful for:
+// - Creating different types of packet receivers
+// - Implementing physical layer reception in protocol stacks
+// - Building modular network interfaces with consistent behavior
+// - Supporting performance analysis through statistics
+// - Simulating realistic signal reception with timing constraints
+//
 // @see ~PacketTransmitterBase, ~StreamingReceiverBase, ~IPacketReceiver
 //
 simple PacketReceiverBase extends PacketProcessorBase

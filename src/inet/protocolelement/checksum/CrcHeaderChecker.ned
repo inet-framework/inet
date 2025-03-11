@@ -20,6 +20,13 @@ import inet.protocolelement.checksum.base.CrcCheckerBase;
 // - Drops packets with invalid CRC values
 // - Registers with the AccessoryProtocol service
 //
+// Particularly useful for:
+// - Implementing protocol-specific CRC verification
+// - Adding integrity checking to custom protocols
+// - Simulating realistic error detection in network protocols
+// - Building protocol stacks with header-based checksums
+// - Testing protocol robustness against transmission errors
+//
 // @see ~CrcHeaderInserter, ~FcsHeaderChecker, ~CrcCheckerBase
 //
 simple CrcHeaderChecker extends CrcCheckerBase

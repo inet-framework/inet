@@ -18,6 +18,13 @@ package inet.protocolelement.aggregation.contract;
 // - Provides aggregation parameters and constraints
 // - Supports different aggregation strategies through implementations
 //
+// Particularly useful for:
+// - Implementing various packet aggregation algorithms
+// - Creating customized aggregation behaviors
+// - Supporting protocol-specific aggregation requirements
+// - Separating aggregation decisions from mechanism
+// - Building flexible and configurable aggregation systems
+//
 // @see ~AggregatorBase, ~LengthBasedAggregatorPolicy
 //
 moduleinterface IAggregatorPolicy

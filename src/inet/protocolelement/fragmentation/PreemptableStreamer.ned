@@ -22,6 +22,13 @@ import inet.queueing.contract.IPacketFlow;
 // - Rounds fragment sizes to specified boundaries
 // - Provides configurable datarate for streaming
 //
+// Particularly useful for:
+// - Implementing time-sensitive networking (TSN) features
+// - Reducing latency for high-priority traffic
+// - Simulating IEEE 802.1Qbu frame preemption
+// - Testing mixed-criticality network scenarios
+// - Building networks with quality of service guarantees
+//
 // @see ~PacketStreamer, ~IPacketFlow
 //
 simple PreemptableStreamer extends PacketProcessorBase like IPacketFlow

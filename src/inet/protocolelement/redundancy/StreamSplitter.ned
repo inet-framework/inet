@@ -21,6 +21,13 @@ import inet.queueing.contract.IPacketPusher;
 // - Forwards redundant copies to the same output gate
 // - Provides the sending side of redundant stream communication
 //
+// Particularly useful for:
+// - Implementing packet-level redundancy
+// - Building fault-tolerant communication systems
+// - Creating systems with multiple redundant paths
+// - Supporting seamless packet duplication in protocol stacks
+// - Implementing Parallel Redundancy Protocol (PRP) or similar concepts
+//
 // @see ~StreamMerger, ~StreamRelayLayer
 //
 simple StreamSplitter extends PacketPusherBase like IPacketPusher

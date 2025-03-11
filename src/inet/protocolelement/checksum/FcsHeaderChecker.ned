@@ -20,6 +20,13 @@ import inet.protocolelement.checksum.base.FcsCheckerBase;
 // - Drops packets with invalid FCS values
 // - Registers with the AccessoryProtocol service
 //
+// Particularly useful for:
+// - Implementing data link layer protocol verification
+// - Adding frame integrity checking to custom protocols
+// - Simulating realistic error detection in Ethernet and similar protocols
+// - Building protocol stacks with trailer-based checksums
+// - Testing protocol robustness against transmission errors
+//
 // @see ~FcsHeaderInserter, ~CrcHeaderChecker, ~FcsCheckerBase
 //
 simple FcsHeaderChecker extends FcsCheckerBase

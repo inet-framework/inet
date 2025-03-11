@@ -20,6 +20,13 @@ import inet.protocolelement.checksum.base.CrcInserterBase;
 // - Supports multiple CRC modes: disabled, declared, computed
 // - Registers with the AccessoryProtocol service
 //
+// Particularly useful for:
+// - Adding integrity checking to custom protocols
+// - Implementing protocol-specific CRC generation
+// - Creating realistic protocol behavior with error detection
+// - Building protocol stacks with header-based checksums
+// - Testing error detection mechanisms in network simulations
+//
 // @see ~CrcHeaderChecker, ~FcsHeaderInserter, ~CrcInserterBase
 //
 simple CrcHeaderInserter extends CrcInserterBase

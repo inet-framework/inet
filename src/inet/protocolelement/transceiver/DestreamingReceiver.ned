@@ -21,6 +21,13 @@ import inet.protocolelement.transceiver.contract.IPacketReceiver;
 // - Assembles complete packets from signal streams
 // - Delivers whole packets to upper layers
 //
+// Particularly useful for:
+// - Implementing receivers that interface between streaming and packet domains
+// - Creating receivers for preemptible transmission systems
+// - Supporting time-sensitive networking with packet-based upper layers
+// - Building protocol stacks with mixed streaming/packet processing
+// - Converting stream-based physical layer to packet-based data link layer
+//
 // @see ~StreamingTransmitter, ~PacketReceiver, ~StreamThroughReceiver
 //
 simple DestreamingReceiver extends PacketReceiverBase like IPacketReceiver

@@ -19,6 +19,13 @@ package inet.protocolelement.fragmentation.contract;
 // - Ensures fragments meet size constraints
 // - Maintains consistency in fragmentation decisions
 //
+// Particularly useful for:
+// - Implementing protocol-specific fragmentation algorithms
+// - Adapting packet sizes to network constraints
+// - Creating custom fragmentation strategies
+// - Supporting different fragmentation schemes in the same simulation
+// - Separating fragmentation logic from packet processing
+//
 // @see ~LengthBasedFragmenterPolicy, ~IPacketFragmenter
 //
 moduleinterface IFragmenterPolicy

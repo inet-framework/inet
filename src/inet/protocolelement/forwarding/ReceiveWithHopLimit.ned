@@ -19,6 +19,13 @@ package inet.protocolelement.forwarding;
 // - Adds hop limit indication tags for upper layer protocols
 // - Maintains protocol dispatch information
 //
+// Particularly useful for:
+// - Implementing TTL/hop limit functionality in network protocols
+// - Preventing routing loops in network topologies
+// - Building protocol stacks with hop count restrictions
+// - Implementing distance-limited packet propagation
+// - Creating bounded-scope multicast mechanisms
+//
 // @see ~SendWithHopLimit, ~Forwarding
 //
 simple ReceiveWithHopLimit

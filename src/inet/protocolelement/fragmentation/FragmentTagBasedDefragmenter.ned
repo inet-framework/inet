@@ -22,6 +22,13 @@ import inet.protocolelement.fragmentation.contract.IPacketDefragmenter;
 // - Reassembles original packets from collected fragments
 // - Forwards complete packets to upper layers
 //
+// Particularly useful for:
+// - Implementing defragmentation in simulation-only scenarios
+// - Testing defragmentation without protocol header overhead
+// - Creating simplified defragmentation mechanisms
+// - Studying defragmentation effects without protocol specifics
+// - Implementing custom defragmentation schemes
+//
 // @see ~FragmentTagBasedFragmenter, ~DefragmenterBase
 //
 simple FragmentTagBasedDefragmenter extends DefragmenterBase like IPacketDefragmenter

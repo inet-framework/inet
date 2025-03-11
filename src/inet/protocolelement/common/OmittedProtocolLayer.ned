@@ -20,6 +20,13 @@ import inet.protocolelement.contract.IProtocolLayer;
 // - Maintains proper signal propagation between connected layers
 // - Preserves the logical structure of the protocol stack
 //
+// Particularly useful for:
+// - Creating configurable protocol stacks where some layers may be optional
+// - Simplifying network models by omitting unnecessary protocol layers
+// - Supporting protocol stack variants without changing the overall architecture
+// - Enabling runtime protocol stack composition based on simulation parameters
+// - Testing the impact of specific protocol layers by easily enabling/disabling them
+//
 // @see ~IProtocolLayer
 //
 module OmittedProtocolLayer like IProtocolLayer

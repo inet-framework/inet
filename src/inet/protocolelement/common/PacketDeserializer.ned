@@ -19,6 +19,13 @@ import inet.queueing.base.PacketFlowBase;
 // - Reconstructs the packet with properly structured protocol chunks
 // - Maintains the original packet data while providing protocol-aware representation
 //
+// Particularly useful for:
+// - Processing packets received from physical layer simulations
+// - Analyzing packet contents after network transmission
+// - Enabling protocol-specific processing after packet serialization
+// - Implementing protocol analyzers and packet inspection tools
+// - Converting between different packet representations in protocol stacks
+//
 // @see ~PacketSerializer, ~PacketFlowBase
 //
 simple PacketDeserializer extends PacketFlowBase

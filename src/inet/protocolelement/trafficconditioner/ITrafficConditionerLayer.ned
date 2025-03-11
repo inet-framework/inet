@@ -19,6 +19,13 @@ package inet.protocolelement.trafficconditioner;
 // - May mark packets for downstream processing
 // - Implements Quality of Service (QoS) mechanisms
 //
+// Particularly useful for:
+// - Implementing traffic shaping and policing
+// - Building QoS-aware protocol stacks
+// - Creating rate-limited communication channels
+// - Supporting differentiated services
+// - Implementing traffic management policies
+//
 // @see ~OmittedTrafficConditionerLayer, ~TrafficConditionerLayer
 //
 moduleinterface ITrafficConditionerLayer

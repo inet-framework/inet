@@ -22,6 +22,13 @@ import inet.queueing.contract.IPacketFlow;
 // - Maintains packet flow while adding stream identification
 // - Provides the receiving side of stream-based communication
 //
+// Particularly useful for:
+// - Implementing stream identification in redundant networks
+// - Creating stream-aware protocol stacks
+// - Supporting Quality of Service differentiation
+// - Building systems with multiple redundant paths
+// - Enabling stream-based packet processing and filtering
+//
 // @see ~StreamEncoder, ~StreamCoderLayer
 //
 simple StreamDecoder extends PacketFlowBase like IPacketFlow

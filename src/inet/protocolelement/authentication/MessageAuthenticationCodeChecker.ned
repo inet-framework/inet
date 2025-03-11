@@ -21,6 +21,13 @@ import inet.queueing.base.PacketFilterBase;
 // - Drops packets with invalid authentication codes
 // - Provides security against tampering and forgery
 //
+// Particularly useful for:
+// - Implementing secure communication protocols
+// - Verifying packet integrity and authenticity
+// - Protecting against packet modification attacks
+// - Building secure network protocol stacks
+// - Complementing encryption with authentication
+//
 // @see ~MessageAuthenticationCodeInserter, ~PacketFilterBase
 //
 simple MessageAuthenticationCodeChecker extends PacketFilterBase like IProtocolHeaderChecker

@@ -22,6 +22,13 @@ import inet.protocolelement.fragmentation.contract.IPacketDefragmenter;
 // - Buffers fragments until all pieces of a packet are received
 // - Reassembles original packets from collected fragments in correct order
 //
+// Particularly useful for:
+// - Implementing protocol-realistic defragmentation
+// - Creating IP-like defragmentation mechanisms
+// - Testing defragmentation with explicit header information
+// - Building protocol stacks with standard defragmentation capabilities
+// - Simulating real-world network defragmentation behavior
+//
 // @see ~FragmentNumberHeaderBasedFragmenter, ~FragmentNumberHeaderChecker, ~DefragmenterBase
 //
 simple FragmentNumberHeaderBasedDefragmenter extends DefragmenterBase like IPacketDefragmenter

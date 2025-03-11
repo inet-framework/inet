@@ -21,6 +21,13 @@ import inet.protocolelement.aggregation.contract.IPacketDeaggregator;
 // - Removes length headers from extracted subpackets
 // - Forwards extracted packets to upper layers
 //
+// Particularly useful for:
+// - Processing self-describing aggregated packets
+// - Extracting subpackets without additional context
+// - Implementing the receiving end of length-header-based aggregation
+// - Supporting protocol-independent packet extraction
+// - Complementing the SubpacketLengthHeaderBasedAggregator
+//
 // @see ~SubpacketLengthHeaderBasedAggregator, ~DeaggregatorBase
 //
 simple SubpacketLengthHeaderBasedDeaggregator extends DeaggregatorBase like IPacketDeaggregator

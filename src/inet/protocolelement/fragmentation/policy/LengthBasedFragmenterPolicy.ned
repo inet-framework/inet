@@ -21,6 +21,13 @@ import inet.protocolelement.fragmentation.contract.IFragmenterPolicy;
 // - Accounts for fragment header overhead in size calculations
 // - Provides consistent fragmentation decisions to fragmenter modules
 //
+// Particularly useful for:
+// - Implementing MTU-based fragmentation in IP networks
+// - Adapting packets to link-layer frame size limitations
+// - Creating uniformly sized fragments for efficient transmission
+// - Supporting networks with specific alignment requirements
+// - Implementing protocol-specific fragmentation rules
+//
 // @see ~IFragmenterPolicy, ~FragmenterBase
 //
 simple LengthBasedFragmenterPolicy like IFragmenterPolicy

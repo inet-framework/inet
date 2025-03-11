@@ -19,6 +19,13 @@ package inet.protocolelement.transceiver.base;
 // - Handles transmission start and end as separate events
 // - Provides foundation for specialized streaming transmitter implementations
 //
+// Particularly useful for:
+// - Implementing preemptible signal transmission
+// - Creating transmitters for time-sensitive networking
+// - Supporting incremental packet transmission
+// - Building transmitters that can interrupt ongoing transmissions
+// - Simulating realistic streaming communication systems
+//
 // @see ~StreamingReceiverBase, ~PacketTransmitterBase, ~StreamThroughTransmitter
 //
 simple StreamingTransmitterBase extends PacketTransmitterBase

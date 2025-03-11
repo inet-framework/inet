@@ -21,6 +21,13 @@ import inet.queueing.base.PacketFilterBase;
 // - Filters out frames with invalid FCS values
 // - Passes through frames with valid FCS values
 //
+// Particularly useful for:
+// - Implementing Ethernet frame validation
+// - Simulating realistic frame error detection
+// - Testing data link layer protocol robustness
+// - Building protocol stacks with integrity verification
+// - Creating custom frame validation mechanisms
+//
 // @see ~FcsInserterBase, ~CrcCheckerBase, ~PacketFilterBase
 //
 simple FcsCheckerBase extends PacketFilterBase

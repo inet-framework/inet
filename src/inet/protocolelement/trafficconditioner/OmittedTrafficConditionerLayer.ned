@@ -19,6 +19,13 @@ package inet.protocolelement.trafficconditioner;
 // - Removes itself from the module hierarchy during initialization
 // - Provides transparent packet flow between connected layers
 //
+// Particularly useful for:
+// - Creating configurable protocol stacks where traffic conditioning is optional
+// - Simplifying network models when traffic shaping is not needed
+// - Building protocol stacks with consistent interfaces
+// - Supporting modular protocol design with optional components
+// - Implementing protocol variants with and without traffic conditioning
+//
 // @see ~ITrafficConditionerLayer, ~TrafficConditionerLayer
 //
 module OmittedTrafficConditionerLayer like ITrafficConditionerLayer

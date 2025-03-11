@@ -20,6 +20,13 @@ import inet.queueing.base.PacketFlowBase;
 // - Adds appropriate protocol tags to the packet
 // - Passes the modified packet to the next module
 //
+// Particularly useful for:
+// - Implementing reliable transport protocols
+// - Supporting packet reordering at the receiver
+// - Enabling duplicate packet detection
+// - Providing the foundation for acknowledgment-based protocols
+// - Ensuring correct packet processing order in multi-path networks
+//
 // @see ~Reordering, ~DuplicateRemoval
 //
 simple SequenceNumbering extends PacketFlowBase

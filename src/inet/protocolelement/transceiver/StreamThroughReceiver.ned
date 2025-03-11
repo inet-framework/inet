@@ -22,6 +22,13 @@ import inet.protocolelement.transceiver.contract.IPacketReceiver;
 // - Supports preemption of ongoing transmissions
 // - Maintains minimal processing delay for time-sensitive applications
 //
+// Particularly useful for:
+// - Implementing fully streaming protocol stacks
+// - Creating receivers for time-sensitive networking
+// - Supporting preemptible transmission systems
+// - Building low-latency communication systems
+// - Simulating realistic streaming communication with preemption
+//
 // @see ~StreamThroughTransmitter, ~DestreamingReceiver, ~PacketReceiver
 //
 simple StreamThroughReceiver extends StreamingReceiverBase like IPacketReceiver

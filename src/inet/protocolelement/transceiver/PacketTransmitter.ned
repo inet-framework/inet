@@ -21,6 +21,13 @@ import inet.protocolelement.transceiver.contract.IPacketTransmitter;
 // - Maintains packet boundaries during transmission
 // - Provides simple packet-based transmission without streaming
 //
+// Particularly useful for:
+// - Implementing basic packet-based transmitters
+// - Creating simple protocol stacks without streaming
+// - Simulating traditional packet-based communication
+// - Building transmitters for protocols with fixed-size packets
+// - Testing network behavior with atomic packet handling
+//
 // @see ~PacketReceiver, ~StreamingTransmitter, ~StreamThroughTransmitter
 //
 simple PacketTransmitter extends PacketTransmitterBase like IPacketTransmitter

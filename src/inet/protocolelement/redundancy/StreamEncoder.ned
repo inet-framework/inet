@@ -22,6 +22,13 @@ import inet.queueing.contract.IPacketFlow;
 // - Maintains packet flow while adding network parameter requests
 // - Provides the sending side of stream-based communication
 //
+// Particularly useful for:
+// - Implementing stream-based transmission in redundant networks
+// - Creating stream-aware protocol stacks
+// - Supporting Quality of Service differentiation
+// - Building systems with multiple redundant paths
+// - Enabling stream-based packet processing and routing
+//
 // @see ~StreamDecoder, ~StreamCoderLayer
 //
 simple StreamEncoder extends PacketFlowBase like IPacketFlow

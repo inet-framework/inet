@@ -20,6 +20,13 @@ import inet.queueing.base.PacketFilterBase;
 // - Filters out packets with invalid checksums
 // - Passes through packets with valid checksums
 //
+// Particularly useful for:
+// - Building error detection mechanisms in protocol implementations
+// - Simulating realistic packet validation in noisy channels
+// - Testing protocol robustness against transmission errors
+// - Implementing protocol-specific CRC verification
+// - Creating custom error detection schemes
+//
 // @see ~CrcInserterBase, ~FcsCheckerBase, ~PacketFilterBase
 //
 simple CrcCheckerBase extends PacketFilterBase

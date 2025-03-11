@@ -19,6 +19,13 @@ package inet.protocolelement.selectivity;
 // - Adds appropriate protocol tags for packet processing
 // - Registers with AccessoryProtocol service
 //
+// Particularly useful for:
+// - Implementing link layer addressing
+// - Creating protocol stacks with MAC-based routing
+// - Building virtual network interfaces with specific addressing
+// - Supporting Ethernet-based packet forwarding
+// - Implementing basic link layer switching functionality
+//
 // @see ~ReceiveAtMacAddress, ~SendToL3Address, ~SendToPort
 //
 simple SendToMacAddress

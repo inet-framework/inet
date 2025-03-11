@@ -19,6 +19,13 @@ package inet.protocolelement.fragmentation.contract;
 // - Reassembles original packets from collected fragments
 // - Forwards complete packets to upper layers
 //
+// Particularly useful for:
+// - Implementing IP defragmentation
+// - Reconstructing packets split due to network constraints
+// - Handling out-of-order fragment arrival
+// - Supporting reliable communication over fragmentation-prone networks
+// - Implementing protocol-specific defragmentation mechanisms
+//
 // @see ~IPacketFragmenter
 //
 moduleinterface IPacketDefragmenter

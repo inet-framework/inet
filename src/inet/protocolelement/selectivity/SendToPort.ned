@@ -17,6 +17,13 @@ package inet.protocolelement.selectivity;
 // - Registers with AccessoryProtocol service
 // - Enables port-based multiplexing at the transport layer
 //
+// Particularly useful for:
+// - Implementing transport layer port addressing
+// - Creating protocol stacks with port-based multiplexing
+// - Building virtual services with specific port numbers
+// - Supporting TCP/UDP-like port-based communication
+// - Implementing basic transport layer multiplexing functionality
+//
 // @see ~ReceiveAtPort, ~SendToL3Address, ~SendToMacAddress
 //
 simple SendToPort

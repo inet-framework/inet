@@ -21,6 +21,13 @@ import inet.queueing.contract.IPacketFlow;
 // - Supports configurable number of measurement modules
 // - Maintains proper measurement order in both directions
 //
+// Particularly useful for:
+// - Implementing multi-level performance measurements
+// - Collecting different types of statistics simultaneously
+// - Creating hierarchical measurement systems
+// - Supporting complex measurement scenarios
+// - Combining different measurement techniques in one layer
+//
 // @see ~IMeasurementLayer, ~MeasurementLayer, ~OmittedMeasurementLayer
 //
 module MultiMeasurementLayer like IMeasurementLayer
