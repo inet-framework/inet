@@ -11,8 +11,8 @@ The source pushes packets into a filter (:ned:`ContentBasedFilter`), which
 pushes 1-byte packets into a passive packet sink (:ned:`PassivePacketSink`) and drops 2-byte ones.
 
 .. figure:: media/Filter1.png
+   :width: 80%
    :align: center
-   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network Filter1TutorialStep

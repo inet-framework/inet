@@ -12,8 +12,8 @@ The packet source pushes packets into the cloner (:ned:`PacketCloner`), which pu
 of the packet into the two passive packet sources (:ned:`PassivePacketSource`) it is connected to.
 
 .. figure:: media/Cloner.png
+   :width: 80%
    :align: center
-   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network ClonerTutorialStep

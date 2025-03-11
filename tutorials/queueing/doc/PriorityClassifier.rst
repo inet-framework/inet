@@ -12,8 +12,8 @@ The classifier sends packets to the queues, favoring ``queue1``. It will only co
 The packets are popped from the queues by two active packet sinks (:ned:`ActivePacketSink`).
 
 .. figure:: media/PriorityClassifier.png
+   :width: 90%
    :align: center
-   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network PriorityClassifierTutorialStep
