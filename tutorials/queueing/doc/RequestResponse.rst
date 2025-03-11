@@ -24,6 +24,7 @@ The client consumes the response packets by a passive packet sink (:ned:`Passive
 
 .. figure:: media/RequestResponse.png
    :align: center
+   :width: 40%
 
 .. figure:: media/RequestConsumer.png
    :align: center
