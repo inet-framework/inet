@@ -34,6 +34,14 @@ import inet.queueing.contract.IPacketDelayer;
 // The total delay is calculated as:
 //   totalDelay = delay + packetLength / bitrate
 //
+// Applications:
+// - Modeling transmission delays in communication links
+// - Simulating propagation delays in physical media
+// - Representing processing delays in network devices
+// - Approximating complex queueing behavior
+// - Creating artificial delays for testing protocol robustness
+// - Implementing jitter and variable delay scenarios
+//
 // @see ~QueueingPacketDelayer, ~OmittedPacketDelayer, ~PacketServer
 //
 simple PacketDelayer extends PacketDelayerBase like IPacketDelayer

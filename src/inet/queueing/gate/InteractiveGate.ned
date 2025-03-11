@@ -22,6 +22,21 @@ import inet.queueing.contract.IPacketGate;
 // - Immediate effect on packet flow when state changes
 // - Mutable parameter for programmatic control if needed
 //
+// Applications:
+// - Interactive demonstrations and educational scenarios
+// - Debugging complex network behaviors
+// - Testing network resilience to link failures
+// - Simulating manual network configuration changes
+// - Exploring "what-if" scenarios during presentations
+// - Validating protocol behavior under controlled conditions
+//
+// Usage examples:
+// - Simulating manual link failures by closing gates at specific points
+// - Demonstrating congestion control by selectively enabling traffic flows
+// - Testing failover mechanisms by controlling primary/backup path availability
+// - Creating interactive network management demonstrations
+// - Implementing user-controlled traffic engineering experiments
+//
 // To use interactively:
 // 1. Run the simulation
 // 2. Pause at the desired moment

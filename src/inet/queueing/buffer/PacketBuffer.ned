@@ -26,6 +26,12 @@ import inet.queueing.contract.IPacketBuffer;
 // packet dropping strategy can selectively drop packets from any of the connected
 // queues based on various criteria such as packet priority, size, or queue length.
 //
+// Typical applications:
+// - Shared memory in network switches and routers
+// - Implementing complex buffer management schemes like RED, WRED, or tail drop
+// - Optimizing memory usage across multiple queues
+// - Enforcing quality of service policies through selective packet dropping
+//
 // @see ~IPacketQueue, ~PriorityBuffer
 //
 simple PacketBuffer extends PacketBufferBase like IPacketBuffer

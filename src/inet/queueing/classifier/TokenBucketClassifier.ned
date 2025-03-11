@@ -32,6 +32,13 @@ import inet.queueing.contract.IPacketClassifier;
 // - Optional token overflow to other modules via the excessTokenModule parameter
 // - Comprehensive statistics collection for monitoring token usage
 //
+// This classifier is particularly useful for:
+// - Traffic policing and shaping
+// - Rate limiting and bandwidth allocation
+// - Implementing quality of service mechanisms
+// - Differentiated Services (DiffServ) traffic conditioning
+// - Leaky bucket and token bucket algorithm implementations
+//
 // The TokenBucketClassifier serves as the base for more specialized classifiers
 // like SingleRateTwoColorClassifier, SingleRateThreeColorClassifier, and
 // DualRateThreeColorClassifier.

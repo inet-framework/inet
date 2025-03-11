@@ -20,6 +20,13 @@ import inet.queueing.contract.IPacketClassifier;
 // - Forwards the packet to the first consumer that is not full
 // - If all consumers are full, the classifier itself becomes full and cannot accept more packets
 //
+// The PriorityClassifier is particularly useful for:
+// - Load balancing across multiple queues with priority ordering
+// - Overflow protection in multi-queue systems
+// - Implementing fallback paths for packet processing
+// - Simple traffic management without complex classification rules
+// - Ensuring packets are not dropped when alternative paths exist
+//
 // Unlike other classifiers that use packet attributes to determine the output,
 // this classifier bases its decision solely on the state of the connected consumers.
 //

@@ -12,6 +12,13 @@ package inet.queueing.base;
 // Packet schedulers select packets from multiple inputs based on specific
 // scheduling algorithms, providing traffic management capabilities.
 //
+// Packet schedulers are essential for implementing:
+// - Quality of Service (QoS) mechanisms
+// - Traffic prioritization schemes
+// - Bandwidth allocation strategies
+// - Fair queueing algorithms
+// - Service differentiation
+//
 // Schedulers typically operate by:
 // 1. Receiving pull requests from their output
 // 2. Selecting one of their inputs based on a scheduling algorithm

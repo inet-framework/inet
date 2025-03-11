@@ -29,6 +29,13 @@ import inet.queueing.contract.ITokenGenerator;
 // 3. The module generates the specified number of tokens (numTokens)
 // 4. These tokens are added to the configured token storage module
 //
+// Applications:
+// - Maximizing network interface utilization by keeping queues from emptying
+// - Implementing feedback-based flow control mechanisms
+// - Creating self-regulating packet processing systems
+// - Preventing queue starvation in complex queueing networks
+// - Implementing adaptive rate control based on queue occupancy
+//
 // Particularly useful in scenarios where you want to ensure
 // that a queue always has packets available for processing, which helps
 // maximize throughput and utilization of downstream components.

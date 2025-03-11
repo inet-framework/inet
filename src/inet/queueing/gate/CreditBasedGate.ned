@@ -33,6 +33,19 @@ import inet.queueing.contract.IPacketGate;
 // - Supports configurable credit rates and limits
 // - Integrates with TSN infrastructure for deterministic networking
 //
+// Applications:
+// - Audio/Video Bridging (AVB) networks
+// - Time-Sensitive Networking (TSN)
+// - Industrial automation requiring deterministic communication
+// - Automotive Ethernet networks
+// - Professional media networks with strict timing requirements
+//
+// The credit-based shaper is particularly useful in scenarios where:
+// - Multiple traffic classes share a common network infrastructure
+// - Guaranteed bandwidth allocation is required for critical streams
+// - Traffic shaping is needed to prevent congestion and reduce jitter
+// - Deterministic latency bounds must be maintained
+//
 // @see ~CreditGateTag, ~PacketQueue, ~CreditBasedShaper
 //
 simple CreditBasedGate extends PacketGateBase like IPacketGate

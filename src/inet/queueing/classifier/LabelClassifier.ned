@@ -21,6 +21,13 @@ import inet.queueing.contract.IPacketClassifier;
 // - If a packet has multiple labels, the first matching label determines the output
 // - If no labels match or the packet has no LabelsTag, uses the defaultGateIndex
 //
+// The LabelClassifier is particularly useful for:
+// - Implementing MPLS-like label switching
+// - Efficient classification of pre-processed packets
+// - Multi-stage classification pipelines
+// - Service differentiation based on application-level tagging
+// - Implementing policy-based routing with minimal overhead
+//
 // The labelsToGateIndices parameter specifies the mapping between labels and
 // output gates as a space-separated list of "label gateIndex" pairs.
 //

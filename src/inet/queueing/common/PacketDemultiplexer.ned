@@ -30,6 +30,13 @@ import inet.queueing.contract.IActivePacketSink;
 // - If multiple consumers request packets simultaneously, they are served
 //   in an implementation-defined order
 //
+// Applications:
+// - Sharing a single packet source among multiple consumers
+// - Implementing load distribution across multiple processing paths
+// - Creating fan-out topologies in pull-based packet processing networks
+// - Connecting a single queue to multiple packet processors
+// - Building flexible packet processing pipelines
+//
 // Note: Unlike PacketMultiplexer which combines multiple sources into one output,
 // PacketDemultiplexer allows multiple consumers to access a single source.
 // It is the pull-based counterpart to the push-based PacketCloner.

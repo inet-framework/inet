@@ -29,6 +29,19 @@ import inet.queueing.scheduler.MarkovScheduler;
 // - The MarkovScheduler switches between the two sources based on a Markov process
 // - The resulting traffic exhibits periods of normal activity interspersed with bursts
 //
+// Applications:
+// - Modeling realistic Internet traffic with self-similar properties
+// - Simulating bursty application traffic (e.g., video streaming, web browsing)
+// - Testing network equipment under variable load conditions
+// - Evaluating congestion control algorithms
+// - Benchmarking buffer sizing in network devices
+//
+// The BurstyPacketProducer is particularly useful in scenarios where:
+// - Traffic patterns exhibit on-off behavior
+// - Network performance under variable load needs to be evaluated
+// - More realistic traffic models are required than simple Poisson processes
+// - Self-similar or long-range dependent traffic needs to be generated
+//
 // @see ~ActivePacketSource, ~MarkovScheduler
 //
 module BurstyPacketProducer like IActivePacketSource

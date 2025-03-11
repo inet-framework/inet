@@ -20,6 +20,13 @@ import inet.queueing.contract.IActivePacketSource;
 // - Acts as an active packet source in the queueing framework
 // - Serves as a bridge between different module communication paradigms
 //
+// This module is particularly useful for:
+// - Connecting standard protocol modules to queueing framework components
+// - Integrating event-based simulation with push-based packet processing
+// - Building hybrid simulation models with mixed communication patterns
+// - Creating protocol stack adapters between different module types
+// - Transitioning between different packet handling mechanisms
+//
 // @see ~PacketPushToSend
 //
 simple PacketSendToPush extends PacketProcessorBase like IActivePacketSource

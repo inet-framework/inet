@@ -17,6 +17,13 @@ package inet.queueing.classifier;
 // - Routes the packet to the output gate corresponding to its priority value
 // - Supports the standard 802.1D/802.11e priority levels (0-7)
 //
+// This classifier is particularly useful for:
+// - Implementing priority-based packet scheduling
+// - Modeling QoS mechanisms in wired and wireless networks
+// - Supporting Differentiated Services (DiffServ) implementations
+// - Simulating traffic prioritization in multimedia networks
+// - Implementing IEEE 802.11e EDCA (Enhanced Distributed Channel Access)
+//
 // The number of output gates should match the number of priority levels
 // being used in the simulation.
 //

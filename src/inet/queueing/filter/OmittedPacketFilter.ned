@@ -20,6 +20,13 @@ import inet.queueing.contract.IPacketFilter;
 // - Effectively creates a transparent pass-through for packets
 // - No filtering is performed on packets passing through
 //
+// The OmittedPacketFilter is particularly useful for:
+// - Creating configurable network models where filtering is optional
+// - Maintaining consistent module interfaces across different configurations
+// - Simplifying parameter studies by allowing filters to be easily enabled/disabled
+// - Supporting modular design with optional components
+// - Providing backward compatibility when adding new filtering capabilities
+//
 // This module is part of INET's module omission mechanism that allows for
 // flexible configuration of network models without changing the module structure.
 //

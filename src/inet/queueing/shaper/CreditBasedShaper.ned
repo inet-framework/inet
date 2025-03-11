@@ -25,6 +25,19 @@ package inet.queueing.shaper;
 // - Compatible with other TSN mechanisms
 // - Supports multiple priority levels when used with priority queues
 //
+// Applications:
+// - Audio/Video Bridging (AVB) networks
+// - Time-Sensitive Networking (TSN)
+// - Industrial automation networks
+// - Automotive Ethernet
+// - Professional media networks
+//
+// The credit-based shaper is particularly useful in scenarios where:
+// - Bandwidth guarantees are required for specific traffic classes
+// - Traffic bursts need to be smoothed to reduce jitter
+// - Multiple streams with different priorities need to share limited bandwidth
+// - Deterministic network behavior is required
+//
 // This implementation uses a specialized CreditBasedGate component that
 // manages the credit accounting and controls packet transmission based on
 // the current credit value.

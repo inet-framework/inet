@@ -21,6 +21,16 @@ import inet.queueing.contract.ITrafficConditioner;
 // - Useful for conditional traffic conditioning in network models
 // - Zero overhead when traffic conditioning is not needed
 //
+// Applications:
+// - Creating configurable network models where traffic conditioning can be
+//   easily enabled or disabled
+// - Simplifying model structure when traffic conditioning is not needed
+//   in certain scenarios
+// - Maintaining consistent module interfaces throughout a model while
+//   selectively omitting functionality in specific instances
+// - Facilitating parameter studies where the impact of traffic conditioning
+//   needs to be evaluated
+//
 // Usage example:
 // In a network configuration, you can use a parameter to conditionally select
 // either a functional traffic conditioner or an OmittedTrafficConditioner:

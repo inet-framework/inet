@@ -32,6 +32,13 @@ import inet.queueing.contract.IPacketClassifier;
 // with weights="3 2 1", the first output will receive 50% of bandwidth,
 // the second 33%, and the third 17% (assuming all queues are backlogged).
 //
+// Applications:
+// - Quality of Service (QoS) implementation
+// - Traffic prioritization with fairness guarantees
+// - Bandwidth allocation in multi-tenant environments
+// - Load balancing with proportional distribution
+// - Service differentiation in network devices
+//
 // @see ~WrrScheduler, ~PriorityClassifier, ~MarkovClassifier
 //
 simple WrrClassifier extends PacketClassifierBase like IPacketClassifier

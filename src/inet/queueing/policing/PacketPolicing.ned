@@ -29,6 +29,14 @@ import inet.queueing.contract.IPacketPolicing;
 // 2. The filter component examines the meta information and decides whether to
 //    forward or drop each packet based on configured criteria
 //
+// Applications:
+// - Traffic rate limiting and shaping
+// - Quality of Service (QoS) enforcement
+// - Bandwidth management
+// - Congestion prevention
+// - Service Level Agreement (SLA) enforcement
+// - Differentiated Services (DiffServ) implementation
+//
 // By default, this module uses DualRateThreeColorMeter and LabelFilter components,
 // which implement the two rate three color marker (trTCM) algorithm as defined in
 // RFC 2698, but these can be customized to implement various policing strategies.

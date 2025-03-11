@@ -12,6 +12,13 @@ package inet.queueing.base;
 // Packet servers process packets for a specified amount of time before
 // forwarding them, modeling service time in queueing systems.
 //
+// Packet servers are essential for modeling:
+// - Processing delay in network devices
+// - Service time in queueing theory models
+// - CPU processing in network nodes
+// - Protocol processing overhead
+// - Physical transmission time
+//
 // Servers typically operate by:
 // 1. Pulling a packet from their input (usually a queue)
 // 2. Processing the packet for a specified service time

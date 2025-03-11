@@ -31,6 +31,19 @@ import inet.queueing.tokengenerator.SignalBasedTokenGenerator;
 // 4. The activated server pulls packets from its provider
 // 5. The multiplexer combines all response streams into a single output
 //
+// Applications:
+// - Client-server communication modeling
+// - Request-response protocol simulation
+// - Service-oriented architecture simulation
+// - API call modeling
+// - Transaction processing systems
+//
+// The ResponseProducer is particularly useful in scenarios where:
+// - Different types of requests require different types of responses
+// - Response generation needs to be coordinated with request processing
+// - Response timing and characteristics need to be precisely controlled
+// - Multiple response types need to be multiplexed into a single stream
+//
 // Typically used with a RequestConsumer module that processes incoming requests
 // and triggers the appropriate response generation through token signaling.
 //

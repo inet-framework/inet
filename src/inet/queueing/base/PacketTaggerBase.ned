@@ -12,6 +12,14 @@ package inet.queueing.base;
 // Packet taggers attach protocol-specific tags to packets, enabling
 // proper handling by protocol layers and network devices.
 //
+// Packet taggers are essential for implementing:
+// - Quality of Service (QoS) mechanisms through DSCP/TOS/ECN marking
+// - Virtual LAN (VLAN) tagging and priority control
+// - Interface selection for multi-homed devices
+// - Hop limit configuration for network layer protocols
+// - Transmission power settings for wireless communications
+// - Protocol encapsulation specifications
+//
 // Taggers operate transparently in packet processing pipelines by:
 // 1. Receiving packets (either pushed to their input or pulled from their output)
 // 2. Attaching appropriate protocol-specific tags based on configuration

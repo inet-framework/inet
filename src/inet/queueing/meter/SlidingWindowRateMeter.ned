@@ -35,6 +35,13 @@ import inet.queueing.contract.IPacketMeter;
 // - Automatic removal of outdated measurements
 // - Immediate response to traffic pattern changes
 //
+// This meter is particularly useful for:
+// - Adaptive rate control mechanisms that need recent traffic measurements
+// - Traffic monitoring and analysis with focus on current conditions
+// - Congestion detection based on recent traffic patterns
+// - Input to traffic shapers that need accurate current rate information
+// - QoS mechanisms that adapt to current network conditions
+//
 // @see ~ExponentialRateMeter, ~TokenBucketMeter
 //
 simple SlidingWindowRateMeter extends PacketMeterBase like IPacketMeter

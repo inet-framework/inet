@@ -33,6 +33,19 @@ import inet.queueing.contract.ITokenGenerator;
 // 4. The provider creates packets which are then sent to the queue
 // 5. This feedback loop maintains the queue at the desired occupancy level
 //
+// Applications:
+// - Ensuring continuous packet availability for processing
+// - Preventing queue starvation in processing pipelines
+// - Implementing minimum traffic guarantees
+// - Creating background traffic that adapts to available capacity
+// - Testing queue behavior under varying but continuous load
+//
+// The QueueFiller is particularly useful in scenarios where:
+// - A queue must never be allowed to become completely empty
+// - Processing elements require a minimum throughput to function properly
+// - System performance depends on having packets always available
+// - You need to maintain a baseline traffic level that adapts to consumption
+//
 // @see ~QueueBasedTokenGenerator, ~TokenBasedServer, ~PassivePacketSource
 //
 module QueueFiller like IActivePacketSource

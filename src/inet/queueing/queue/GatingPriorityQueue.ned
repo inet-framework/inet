@@ -25,6 +25,13 @@ import inet.queueing.contract.IPacketScheduler;
 // 3. Using a priority scheduler to select packets from the highest priority
 //    non-empty queue when multiple gates are open
 //
+// This queue is particularly useful for implementing advanced Time-Sensitive Networking
+// (TSN) features such as:
+// - IEEE 802.1Qbv Time-Aware Shaper with multiple traffic classes
+// - Credit-based shaping combined with time-gated transmission
+// - Scheduled traffic with different priority levels
+// - Mixed-criticality networks with both time-critical and best-effort traffic
+//
 // The bitrate parameter specifies the transmission rate, and the extraLength
 // parameter accounts for additional overhead (e.g., Ethernet PHY header).
 //

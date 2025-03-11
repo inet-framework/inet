@@ -23,6 +23,19 @@ import inet.queueing.contract.IPassivePacketSink;
 // - Never pulls packets from connected modules
 // - Simulates a permanently congested or unavailable destination
 //
+// Applications:
+// - Testing network behavior under congestion conditions
+// - Simulating failed or unavailable network endpoints
+// - Modeling backpressure propagation through a network
+// - Stress testing flow control mechanisms
+// - Evaluating congestion control algorithms
+//
+// The FullPacketSink is particularly useful in scenarios where:
+// - You need to test how a network responds to congestion
+// - You want to simulate a destination that has reached its capacity limit
+// - You need to model backpressure effects in a queueing network
+// - You want to evaluate how upstream components handle downstream congestion
+//
 // @see ~ActivePacketSink, ~PassivePacketSink
 //
 simple FullPacketSink extends PacketProcessorBase like IPacketSink, IActivePacketSink, IPassivePacketSink

@@ -18,6 +18,14 @@ package inet.queueing.contract;
 // - Implementing packet dropping strategies when buffer becomes overloaded
 // - Notifying packet owners when their packets are dropped
 //
+// Packet buffers are particularly useful in network devices where multiple
+// queues need to share a limited memory resource. They allow for implementing
+// various buffer management schemes such as:
+// - Complete sharing: all queues have equal access to the entire buffer
+// - Complete partitioning: buffer space is strictly divided among queues
+// - Partial sharing: combination of sharing and partitioning approaches
+// - Dynamic threshold schemes: buffer allocation adapts to traffic conditions
+//
 // Implementations of this interface include PacketBuffer and PriorityBuffer.
 //
 moduleinterface IPacketBuffer

@@ -27,6 +27,12 @@ import inet.queueing.contract.IPassivePacketSink;
 // - Support for custom clock modules for synchronized packet consumption
 // - Comprehensive packet statistics collection
 //
+// Typical applications:
+// - Modeling traffic endpoints in push-based communication systems
+// - Implementing network protocol termination points
+// - Testing producer modules under various consumption constraints
+// - Creating traffic sinks for push-based queueing networks
+//
 // Timing behavior:
 // - The first packet can be consumed after initialConsumptionOffset
 // - Subsequent packets can be consumed every consumptionInterval

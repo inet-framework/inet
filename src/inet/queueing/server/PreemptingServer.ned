@@ -23,6 +23,14 @@ import inet.queueing.contract.IPacketServer;
 // - After the preempting packet is completed, the server can resume processing
 //   of previously preempted packets
 //
+// The PreemptingServer is particularly useful for modeling:
+// - Priority-based processing systems where high-priority packets must be
+//   handled immediately
+// - Real-time systems with deadline constraints
+// - Interrupt-driven hardware devices
+// - Preemptive scheduling in operating systems and network devices
+// - Quality of Service implementations with preemption capabilities
+//
 // The datarate parameter determines how fast packets are processed, affecting
 // the processing time of each packet based on its length.
 //

@@ -33,6 +33,13 @@ import inet.queueing.base.PacketDuplicatorBase;
 // a semicolon-separated list of ordinal numbers. For example, "5;6;12;13;"
 // will duplicate the 5th, 6th, 12th, and 13th packets in the stream.
 //
+// Applications:
+// - Testing protocol robustness against duplicate packets
+// - Simulating specific network error conditions
+// - Evaluating duplicate detection and handling mechanisms
+// - Creating reproducible test scenarios
+// - Modeling imperfect transmission channels
+//
 // @see ~PacketDuplicator, ~OrdinalBasedDropper, ~ContentBasedDuplicator
 //
 simple OrdinalBasedDuplicator extends PacketDuplicatorBase

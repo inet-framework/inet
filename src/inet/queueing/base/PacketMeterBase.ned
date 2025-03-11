@@ -12,6 +12,13 @@ package inet.queueing.base;
 // Packet meters measure various characteristics of packet flows and
 // attach tags with the measurement results for use by other modules.
 //
+// Packet meters are essential for implementing:
+// - Traffic monitoring and measurement
+// - Rate limiting and token bucket algorithms
+// - Quality of Service (QoS) mechanisms
+// - Bandwidth management
+// - Traffic analysis and statistics collection
+//
 // Meters typically operate by:
 // 1. Receiving packets (either pushed to their input or pulled from their output)
 // 2. Measuring packet characteristics (size, rate, timing, etc.)

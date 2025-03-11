@@ -22,6 +22,11 @@ package inet.queueing.queue;
 // - Can provide better quality of service for time-sensitive applications
 // - May improve performance for applications where newer data is more valuable than older data
 //
+// This queue is particularly useful in scenarios like:
+// - Real-time multimedia streaming where newer frames are more important
+// - Control systems where the most recent command should take precedence
+// - Applications where stale data has diminished value
+//
 // @see ~DropTailQueue, ~PacketQueue, ~PacketAtCollectionBeginDropper
 //
 simple DropHeadQueue extends PacketQueue

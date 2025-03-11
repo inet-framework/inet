@@ -28,6 +28,12 @@ import inet.queueing.contract.IActivePacketSink;
 // - Support for custom clock modules for synchronized packet collection
 // - Comprehensive packet statistics collection
 //
+// Typical applications:
+// - Modeling traffic sinks in network simulations
+// - Testing network elements under specific consumption patterns
+// - Measuring throughput and latency in queueing networks
+// - Implementing pull-based traffic management systems
+//
 // Timing behavior:
 // - The first packet is collected after initialCollectionOffset (or immediately if negative)
 // - Subsequent packets are collected every collectionInterval

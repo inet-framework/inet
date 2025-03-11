@@ -23,6 +23,13 @@ package inet.queueing.classifier;
 // - Support for dynamic classification policies
 // - Ability to switch between different classification strategies
 //
+// This classifier is particularly useful for:
+// - Adaptive traffic management systems
+// - Self-optimizing networks
+// - Testing different classification strategies during a single simulation
+// - Implementing learning-based classification algorithms
+// - Modeling systems that change classification policies based on network state
+//
 // The moduleType parameter specifies the type of classifier module to create,
 // while submoduleName defines the name pattern for the created modules.
 //

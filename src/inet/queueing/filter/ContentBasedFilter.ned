@@ -21,6 +21,13 @@ import inet.queueing.contract.IPacketFilter;
 // - In push mode: Processes packets from producer, forwards matching ones to consumer
 // - In pull mode: Pulls packets from provider until finding a matching one
 //
+// The ContentBasedFilter is particularly useful for:
+// - Protocol-specific filtering based on header fields
+// - Application-layer content filtering
+// - Implementing complex firewall rules
+// - Quality of Service packet selection
+// - Testing protocol implementations with specific packet patterns
+//
 // The packetFilter parameter contains filter expressions that determine which
 // packets are allowed to pass through. The default value "*" matches all packets.
 // Filter expressions can examine any aspect of the packet, including headers,

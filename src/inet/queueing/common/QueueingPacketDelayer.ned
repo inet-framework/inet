@@ -24,6 +24,13 @@ import inet.queueing.contract.IPacketServer;
 // - Outputs packets after the delay period has elapsed
 // - Supports external clock module for synchronized timing
 //
+// This module is particularly useful for:
+// - Simulating transmission delays in communication networks
+// - Modeling processing time in network devices
+// - Creating realistic propagation delays in physical media
+// - Implementing rate-limited channels with delay characteristics
+// - Testing protocol behavior under various delay conditions
+//
 // The compound structure with separate queue and server components allows
 // for more realistic behavior than a simple timer-based delayer, especially
 // under high load conditions.

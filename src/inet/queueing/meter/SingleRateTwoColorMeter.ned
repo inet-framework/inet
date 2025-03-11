@@ -27,6 +27,11 @@ package inet.queueing.meter;
 // - In color-aware mode, packets can only be demoted (green→red) and
 //   never promoted, respecting any pre-existing color markings.
 //
+// This meter is particularly useful for implementing basic traffic policing
+// and simple Differentiated Services (DiffServ) mechanisms, where:
+// - Green packets receive the standard service level
+// - Red packets may receive a lower service level or be dropped
+//
 // The single-rate two-color marker is simpler than the three-color variants
 // (SingleRateThreeColorMeter and DualRateThreeColorMeter) as it only
 // distinguishes between two traffic categories rather than three.

@@ -28,6 +28,19 @@ import inet.queueing.contract.IActivePacketSource;
 // - Pushes these packets to the connected consumer module
 // - Optionally applies custom naming based on packet attributes
 //
+// Applications:
+// - Replaying real network traffic in simulations
+// - Testing protocol implementations with real-world traffic patterns
+// - Validating network models against captured data
+// - Creating reproducible test scenarios
+// - Benchmarking network components with realistic traffic
+//
+// The PcapFilePacketProducer is particularly useful in scenarios where:
+// - You need to test with realistic traffic patterns
+// - You want to compare simulation results with real-world measurements
+// - You need to reproduce specific network conditions
+// - You're validating protocol implementations against real traffic
+//
 // The packet naming can be customized using format directives to include
 // information about the packet source, destination, protocol, length, etc.
 //

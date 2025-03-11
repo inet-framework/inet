@@ -24,6 +24,19 @@ import inet.queueing.contract.IPassivePacketSource;
 // - Maintains statistics on attempted operations
 // - Provides a placeholder for a packet source that is temporarily unavailable
 //
+// Applications:
+// - Modeling network endpoints that are offline or unavailable
+// - Testing how networks handle source unavailability
+// - Simulating failed or disconnected network nodes
+// - Creating placeholder components in network topologies
+// - Temporarily disabling packet generation without changing network structure
+//
+// The EmptyPacketSource is particularly useful in scenarios where:
+// - You need to test how a network responds to source unavailability
+// - You want to temporarily disable packet generation from a source
+// - You need to maintain the network structure while simulating a failed component
+// - You want to model a network endpoint that is temporarily offline
+//
 // This module is the source counterpart to the FullPacketSink, which similarly
 // never accepts any packets.
 //

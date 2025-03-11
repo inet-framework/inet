@@ -28,6 +28,14 @@ import inet.queueing.base.PacketFlowBase;
 //   whether the upstream module is ready to provide
 // - May raise runtime errors if actual packet availability doesn't match expectations
 //
+// Applications:
+// - Decoupling components with different processing rates
+// - Breaking circular dependencies in flow control
+// - Isolating different parts of a packet processing pipeline
+// - Preventing congestion propagation across network boundaries
+// - Testing module behavior in isolation
+// - Creating asynchronous processing boundaries
+//
 // Warning: Using this module may lead to packet loss or runtime errors if the
 // connected modules cannot handle the decoupled flow control properly. It should
 // be used with caution and typically in combination with appropriate buffering.

@@ -22,6 +22,13 @@ import inet.queueing.contract.IPacketFilter;
 // - In push mode: Processes packets from producer, forwards matching ones to consumer
 // - In pull mode: Pulls packets from provider until finding one with matching labels
 //
+// The LabelFilter is particularly useful for:
+// - Implementing MPLS-like label-based forwarding
+// - Efficient filtering of pre-processed packets
+// - Multi-stage filtering pipelines
+// - Service differentiation based on application-level tagging
+// - Implementing policy-based routing with minimal overhead
+//
 // The labelFilter parameter supports complex expressions with wildcards and
 // Boolean operators (AND, OR, NOT), allowing for sophisticated filtering rules
 // based on packet labels.

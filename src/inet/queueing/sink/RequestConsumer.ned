@@ -31,6 +31,19 @@ import inet.queueing.contract.IPacketServer;
 // 4. The corresponding token generator creates tokens in the ResponseProducer
 // 5. These tokens enable the ResponseProducer to generate appropriate responses
 //
+// Applications:
+// - Client-server communication modeling
+// - Request-response protocol simulation
+// - Service-oriented architecture simulation
+// - API call modeling
+// - Transaction processing systems
+//
+// The RequestConsumer is particularly useful in scenarios where:
+// - Different types of requests require different types of responses
+// - Request processing needs to be rate-limited
+// - The system needs to model realistic request handling with queuing
+// - Response generation depends on request classification
+//
 // Typically used with a ResponseProducer module that generates the corresponding
 // responses based on the tokens produced by this module.
 //

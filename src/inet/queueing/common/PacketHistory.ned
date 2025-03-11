@@ -22,6 +22,13 @@ import inet.queueing.contract.IPacketQueue;
 // - Maintains the last N packets (configurable via the size parameter)
 // - Makes packet history available in the runtime user interface (Qtenv)
 //
+// This module is particularly useful for:
+// - Debugging packet processing pipelines
+// - Analyzing packet flows during simulation
+// - Inspecting packet contents and metadata
+// - Verifying correct packet handling in complex queueing networks
+// - Creating packet traces for post-simulation analysis
+//
 // @see ~PacketQueue, ~PacketCloner
 //
 module PacketHistory like IPassivePacketSink, IActivePacketSource

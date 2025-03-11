@@ -32,6 +32,13 @@ import inet.queueing.contract.IPacketPolicing;
 // 3. The filter in each path allows or drops packets based on their markings
 // 4. The multiplexer combines the outputs from all paths into a single stream
 //
+// Applications:
+// - Quality of Service (QoS) enforcement for different traffic classes
+// - Differentiated Services (DiffServ) implementation
+// - Traffic rate limiting with class-specific policies
+// - Multi-tenant network resource allocation
+// - Complex traffic management scenarios requiring different policies for different flows
+//
 // By default, this module uses PacketClassifier, DualRateThreeColorMeter, and LabelFilter
 // components, but these can be customized to implement various policing strategies.
 //

@@ -33,6 +33,13 @@ import inet.queueing.contract.IPacketMeter;
 // - For example, with labelPriority=["green", "yellow", "red"], a packet already
 //   marked as "yellow" can only be marked as "yellow" or "red", never "green"
 //
+// This meter is particularly useful for:
+// - Implementing complex traffic conditioning mechanisms
+// - Multi-level traffic marking for Differentiated Services (DiffServ)
+// - Quality of Service implementations with multiple service levels
+// - Hierarchical bandwidth allocation schemes
+// - Traffic policing with multiple conformance levels
+//
 // The buckets parameter allows detailed configuration of each token bucket,
 // including initial token count, maximum capacity, token production rate,
 // and the label to apply when that bucket has enough tokens.

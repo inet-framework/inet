@@ -30,6 +30,13 @@ package inet.queueing.gate;
 // - Supports configurable cycle times and gate schedules
 // - Allows for complex traffic shaping patterns
 //
+// Applications:
+// - Time-Sensitive Networking (TSN)
+// - Industrial automation requiring deterministic communication
+// - Automotive Ethernet networks
+// - Professional audio/video networks
+// - Mission-critical systems requiring deterministic packet delivery
+//
 // Example configuration:
 // - durations = [4ms, 2ms, 2ms, 2ms]
 // - gateStates = ["10000000", "01111111", "10000000", "01111111"]

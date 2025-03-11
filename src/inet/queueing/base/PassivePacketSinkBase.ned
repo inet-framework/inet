@@ -22,6 +22,12 @@ package inet.queueing.base;
 // - Tracks packet ordering, duplicates, and timing characteristics
 // - Provides detailed metrics for QoS analysis and performance evaluation
 //
+// This module is particularly useful for:
+// - Modeling network endpoints that passively receive traffic
+// - Analyzing packet delivery characteristics like jitter and delay variation
+// - Detecting out-of-order packet delivery and duplicates
+// - Measuring end-to-end performance metrics
+//
 // @see ~PacketSinkBase, ~PassivePacketSink, ~IPassivePacketSink
 //
 simple PassivePacketSinkBase extends PacketSinkBase

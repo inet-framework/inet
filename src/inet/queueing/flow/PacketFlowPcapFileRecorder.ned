@@ -23,6 +23,14 @@ import inet.queueing.contract.IPacketFlow;
 // - Direction flag to indicate packet flow direction
 // - Optional immediate file flushing for crash-resilient captures
 //
+// Applications:
+// - Protocol analysis and debugging
+// - Network traffic monitoring and inspection
+// - Performance evaluation and troubleshooting
+// - Security analysis and intrusion detection
+// - Validation of simulation results with real-world tools
+// - Interoperability testing with external analysis software
+//
 // The recorder can be placed at any point in a network path where packet
 // inspection is desired. Multiple recorders can be used simultaneously
 // at different points to compare traffic patterns or analyze protocol
@@ -36,6 +44,12 @@ import inet.queueing.contract.IPacketFlow;
 // - 229: IPv6
 //
 // For a complete list of network types, see: http://www.tcpdump.org/linktypes.html
+//
+// Usage examples:
+// - Capturing packets at network interfaces for protocol analysis
+// - Recording traffic at specific points in the network for bottleneck analysis
+// - Saving simulation traffic for comparison with real-world captures
+// - Creating test datasets for network analysis tools
 //
 simple PacketFlowPcapFileRecorder extends PacketFlowBase like IPacketFlow
 {

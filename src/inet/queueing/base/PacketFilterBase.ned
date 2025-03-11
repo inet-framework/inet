@@ -12,6 +12,13 @@ package inet.queueing.base;
 // Packet filters selectively pass or drop packets based on specific
 // criteria, enabling traffic control and policy enforcement.
 //
+// Packet filters are essential for implementing:
+// - Access control and traffic policing
+// - Congestion management and avoidance
+// - Quality of Service (QoS) enforcement
+// - Security policies and firewalls
+// - Rate limiting and bandwidth management
+//
 // Filters typically operate by:
 // 1. Receiving packets (either pushed to their input or pulled from their output)
 // 2. Evaluating each packet against filter criteria

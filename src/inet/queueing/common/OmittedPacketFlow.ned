@@ -27,6 +27,13 @@ import inet.queueing.contract.IPacketFlow;
 // - Packets flow directly from input to output without any processing
 // - No packet modification, filtering, or state tracking occurs
 //
+// Applications:
+// - Creating configurable network models where packet flow processing is optional
+// - Maintaining consistent model structure across different simulation scenarios
+// - Simplifying model parameterization without changing topology
+// - Supporting gradual model refinement and complexity management
+// - Enabling easy A/B testing of different packet processing configurations
+//
 // This module is part of INET's "omitted" module family, which provides
 // placeholder implementations that can be easily replaced with functional
 // modules when needed, without changing the overall model structure.

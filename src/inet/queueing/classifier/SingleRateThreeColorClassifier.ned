@@ -27,6 +27,12 @@ package inet.queueing.classifier;
 //   the second bucket.
 // - If neither bucket has enough tokens, the packet is classified as "red" (output 2).
 //
+// This classifier is particularly useful for implementing Differentiated Services
+// (DiffServ) traffic conditioning, where:
+// - Green packets receive the best service level
+// - Yellow packets receive a lower service level
+// - Red packets may be dropped during congestion
+//
 // The key difference between this and the DualRateThreeColorClassifier is that
 // this classifier uses a single token production rate (CIR), while the dual-rate
 // version uses two independent rates.

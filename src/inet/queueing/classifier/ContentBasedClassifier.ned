@@ -22,6 +22,13 @@ import inet.queueing.contract.IPacketClassifier;
 // - Filter expressions can examine any aspect of the packet, including headers,
 //   payload, and attached tags
 //
+// The ContentBasedClassifier is particularly useful for:
+// - Deep packet inspection and content-based routing
+// - Protocol-specific traffic management
+// - Implementing complex Quality of Service policies
+// - Security filtering and traffic segregation
+// - Application-layer traffic classification
+//
 // The packetFilters parameter contains an array of filter expressions that are
 // evaluated in order, with the first match determining the output gate to use.
 //

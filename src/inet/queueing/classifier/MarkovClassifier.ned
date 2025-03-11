@@ -21,6 +21,13 @@ import inet.queueing.contract.IPacketClassifier;
 // - State transitions occur according to the configured transition probabilities
 // - The classifier remains in each state for a configurable amount of time
 //
+// The MarkovClassifier is particularly useful for:
+// - Modeling time-varying traffic patterns
+// - Simulating bursty traffic distribution
+// - Testing system behavior under probabilistic traffic allocation
+// - Implementing load balancing with temporal correlation
+// - Modeling channel switching in wireless networks
+//
 // Key parameters:
 // - initialState: The starting state of the Markov process
 // - transitionProbabilities: N×N matrix defining state transition probabilities

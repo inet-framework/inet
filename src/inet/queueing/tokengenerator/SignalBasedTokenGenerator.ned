@@ -31,6 +31,18 @@ import inet.queueing.contract.ITokenGenerator;
 //    generates the specified number of tokens (numTokens)
 // 4. These tokens are added to the configured token storage module
 //
+// Applications:
+// - Coordinating packet processing with external events
+// - Implementing complex control mechanisms across different parts of a network
+// - Creating event-driven traffic shaping and policing
+// - Synchronizing packet flows with protocol state changes
+// - Building reactive queueing systems that respond to network conditions
+//
+// Particularly useful for creating sophisticated feedback loops
+// and control mechanisms that span multiple components in a network simulation.
+// For example, it can be used to trigger packet processing in response to
+// congestion signals, link state changes, or application-level events.
+//
 // @see ~TokenBasedServer, ~PacketBasedTokenGenerator, ~QueueBasedTokenGenerator, ~TimeBasedTokenGenerator
 //
 simple SignalBasedTokenGenerator extends TokenGeneratorBase like ITokenGenerator

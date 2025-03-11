@@ -21,6 +21,13 @@ import inet.queueing.contract.IPacketFilter;
 // - The order of filters matters, as each filter processes only packets
 //   that passed all previous filters
 //
+// The MultiPacketFilter is particularly useful for:
+// - Implementing multi-stage filtering policies
+// - Combining different filtering criteria (e.g., rate limiting + content filtering)
+// - Creating complex traffic management solutions
+// - Layering security and QoS policies
+// - Building modular and reusable filtering configurations
+//
 // The numFilters parameter determines how many filters are in the chain,
 // while the filter[] submodule vector allows specifying different filter types
 // for each position in the chain.

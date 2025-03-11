@@ -14,6 +14,11 @@ import inet.queueing.contract.IPacketQueue;
 // removes itself from the module hierarchy during initialization. This creates
 // a direct connection between the input and output gates.
 //
+// The OmittedPacketQueue is useful in scenarios where:
+// - A queue is conditionally needed based on simulation parameters
+// - Model variants need to be tested with and without queuing
+// - A simplified model is desired without changing the overall network structure
+//
 // When this module is used, packets flow directly from the input to the output
 // without any queuing delay or processing, effectively creating a zero-delay
 // passthrough connection.

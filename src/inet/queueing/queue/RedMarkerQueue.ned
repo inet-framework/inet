@@ -34,6 +34,12 @@ import inet.queueing.marker.RedMarker;
 // The RedMarker handles the RED algorithm logic and ECN marking, while the queue
 // (by default a PacketQueue) stores all packets.
 //
+// RED-ECN queues are particularly useful in:
+// - Data center networks where low latency is critical
+// - Internet routers supporting ECN
+// - Networks with ECN-capable endpoints
+// - Any network where congestion control without packet loss is desirable
+//
 // Note: For this mechanism to be effective, both endpoints must support ECN,
 // and the network path must preserve ECN markings.
 //

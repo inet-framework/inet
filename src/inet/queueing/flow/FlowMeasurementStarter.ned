@@ -28,6 +28,14 @@ import inet.queueing.contract.IPacketFlow;
 // - Named flows to separate different measurement scenarios
 // - Selective measurement of specific timing components
 //
+// Applications:
+// - Performance analysis of network protocols
+// - End-to-end delay measurement
+// - Protocol optimization
+// - Quality of Service (QoS) validation
+// - Network bottleneck identification
+// - Comparative analysis of different network configurations
+//
 // Typical usage involves placing a FlowMeasurementStarter at the beginning
 // of a network path and one or more FlowMeasurementRecorder modules at points
 // of interest along the path. The starter initiates the measurement process,

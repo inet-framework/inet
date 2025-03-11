@@ -21,6 +21,13 @@ import inet.queueing.contract.IPacketMarker;
 // - Multiple labels can be attached to a single packet if it matches multiple filters
 // - Labels are stored in a ~LabelsTag that is attached to the packet
 //
+// The ContentBasedLabeler is particularly useful for:
+// - Implementing deep packet inspection (DPI) systems
+// - Creating content-aware traffic classification
+// - Supporting policy-based routing based on packet content
+// - Enabling advanced QoS mechanisms that consider packet payload
+// - Building multi-criteria packet processing pipelines
+//
 // The module uses filter expressions that can examine any aspect of the packet,
 // including headers, payload, and metadata, allowing for sophisticated packet
 // classification based on actual content.

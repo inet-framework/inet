@@ -12,6 +12,13 @@ package inet.queueing.base;
 // Packet gates control the flow of packets by selectively allowing or blocking
 // transmission based on their open/closed state.
 //
+// Packet gates are essential components for implementing:
+// - Time-sensitive networking (TSN) features
+// - Traffic shaping and bandwidth allocation
+// - Scheduled transmission of packets
+// - Flow control mechanisms
+// - Quality of Service (QoS) policies
+//
 // When a gate is open, packets can flow through it; when closed, packets are blocked.
 // Gates can operate in both push and pull mode, allowing them to be used in various
 // packet processing pipelines.

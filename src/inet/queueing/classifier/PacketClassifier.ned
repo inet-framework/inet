@@ -26,6 +26,13 @@ import inet.queueing.contract.IPacketClassifier;
 // different classifier function implementations, various classification policies
 // can be realized.
 //
+// This classifier is particularly useful for:
+// - Traffic differentiation based on packet attributes
+// - Quality of Service implementations
+// - Protocol-specific routing of packets
+// - Load balancing across multiple processing paths
+// - Implementing experimental classification algorithms
+//
 // The classifierClass parameter specifies the C++ class that implements the
 // classification algorithm. This class must implement the IPacketClassifierFunction
 // interface and be registered via Register_Class.

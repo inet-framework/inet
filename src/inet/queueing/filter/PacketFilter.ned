@@ -26,6 +26,13 @@ import inet.queueing.contract.IPacketFilter;
 // without having to implement a complete filter module. By providing different
 // filter function implementations, various filtering policies can be realized.
 //
+// This filter is particularly useful for:
+// - Traffic shaping and policing
+// - Protocol-specific packet filtering
+// - Implementing firewall-like functionality
+// - Quality of Service implementations
+// - Testing network behavior with selective packet dropping
+//
 // The filterClass parameter specifies the C++ class that implements the
 // filtering algorithm. This class must implement the IPacketFilterFunction
 // interface and be registered via Register_Class.

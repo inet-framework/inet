@@ -25,6 +25,19 @@ package inet.queueing.shaper;
 // - Compatible with other TSN mechanisms
 // - Preserves packet ordering within flows
 //
+// Applications:
+// - Time-Sensitive Networking (TSN)
+// - Industrial automation networks
+// - Automotive Ethernet
+// - Deterministic packet delivery with bounded latency
+// - Mixed-criticality networks with QoS requirements
+//
+// The asynchronous shaper is particularly useful in scenarios where:
+// - Deterministic latency bounds are required
+// - Network resources need to be efficiently utilized
+// - Clock synchronization is difficult or impossible
+// - Multiple traffic classes with different QoS requirements coexist
+//
 // This implementation uses specialized queue and gate components:
 // - EligibilityTimeQueue: Sorts packets based on their eligibility times
 // - EligibilityTimeGate: Releases packets only after they become eligible

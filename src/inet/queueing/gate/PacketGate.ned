@@ -29,6 +29,21 @@ import inet.queueing.contract.IPacketGate;
 // - Optional clock synchronization for distributed simulations
 // - Simple binary operation model
 //
+// Applications:
+// - Modeling time-division multiplexing systems
+// - Simulating scheduled network access
+// - Creating controlled traffic patterns
+// - Testing protocol behavior under intermittent connectivity
+// - Implementing basic time-aware shaping
+// - Modeling duty-cycled networks
+//
+// Usage examples:
+// - Implementing time slots in TDMA networks
+// - Creating periodic connectivity patterns
+// - Simulating scheduled access in industrial networks
+// - Modeling energy-saving protocols with periodic wake/sleep cycles
+// - Testing application resilience to intermittent connectivity
+//
 // @see ~PeriodicGate, ~CreditBasedGate, ~InteractiveGate
 //
 simple PacketGate extends PacketGateBase like IPacketGate

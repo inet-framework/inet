@@ -21,6 +21,13 @@ import inet.queueing.contract.IPacketFilter;
 // - Drops packets when the consumer cannot accept them
 // - Transparently forwards protocol registration between input and output gates
 //
+// The BackPressureBasedFilter is particularly useful for:
+// - Implementing flow control between network components
+// - Preventing packet loss due to buffer overflow in downstream modules
+// - Creating conditional packet forwarding based on downstream state
+// - Interfacing between modules with different processing capabilities
+// - Working with gated modules to filter packets when gates are closed
+//
 // Unlike other filters that make decisions based on packet content, this filter
 // bases its decision solely on the state of the connected consumer module.
 //

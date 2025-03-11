@@ -22,6 +22,13 @@ import inet.queueing.contract.IPacketMarker;
 //   VLAN ID, PCP, user priority, interface selection, transmission power, and
 //   encapsulation protocols
 //
+// The PacketTagger is particularly useful for:
+// - Implementing Quality of Service (QoS) mechanisms
+// - Configuring protocol-specific parameters for selected traffic flows
+// - Setting up differentiated services in IP networks
+// - Controlling packet routing and forwarding behavior
+// - Configuring physical layer parameters for wireless transmissions
+//
 // The module uses a pluggable filter function that implements the IPacketFilterFunction
 // interface, allowing for flexible and extensible packet selection criteria.
 //

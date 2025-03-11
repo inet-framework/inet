@@ -30,6 +30,12 @@ package inet.queueing.meter;
 // - In color-aware mode, packets can only be demoted (green→yellow→red) and
 //   never promoted, respecting any pre-existing color markings.
 //
+// This meter is particularly useful for implementing Differentiated Services
+// (DiffServ) traffic conditioning, where:
+// - Green packets receive the best service level
+// - Yellow packets receive a lower service level
+// - Red packets may be dropped during congestion
+//
 // By default, packets consume 1 token per byte (8 bits per token).
 //
 // @see ~SingleRateTwoColorMeter, ~SingleRateThreeColorMeter

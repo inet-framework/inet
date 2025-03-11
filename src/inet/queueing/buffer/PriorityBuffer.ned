@@ -23,6 +23,11 @@ package inet.queueing.buffer;
 // - Drops packets from lower priority queues (higher module IDs) first
 // - Useful for implementing basic quality of service mechanisms
 //
+// Typical applications:
+// - Simple priority-based buffer management
+// - Protecting high-priority traffic during congestion
+// - Basic quality of service implementations
+//
 // @see ~PacketBuffer
 //
 simple PriorityBuffer extends PacketBuffer

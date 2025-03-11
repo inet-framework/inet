@@ -32,6 +32,14 @@ import inet.queueing.contract.IPassivePacketSink;
 //   data, and metadata
 // - Setting numDuplicates to 0 means no duplication occurs (pass-through mode)
 //
+// Applications:
+// - Simulating unreliable transmission channels
+// - Testing protocol robustness against duplicate packets
+// - Modeling network errors and anomalies
+// - Evaluating duplicate detection and handling mechanisms
+// - Performance testing under non-ideal network conditions
+// - Creating stress test scenarios for network protocols
+//
 // Note: Unlike PacketCloner which sends copies to different outputs,
 // PacketDuplicator sends all copies to the same output, effectively
 // implementing packet duplication rather than distribution.

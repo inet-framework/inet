@@ -30,6 +30,19 @@ import inet.queueing.contract.ITrafficConditioner;
 // - Flexible queue type for different packet handling policies
 // - Token-based server for precise rate control
 //
+// Applications:
+// - Traffic shaping with burst tolerance
+// - Bandwidth allocation and management
+// - Quality of Service (QoS) implementation
+// - Rate limiting with flexibility for short-term traffic variations
+// - Congestion prevention
+//
+// The token bucket is particularly useful in scenarios where:
+// - Traffic is naturally bursty but requires long-term rate control
+// - Short traffic bursts should be accommodated without packet loss
+// - Average bandwidth needs to be limited while allowing for peak usage
+// - A balance between strict rate limiting and traffic flexibility is required
+//
 // This implementation consists of:
 // - A configurable queue that stores packets when insufficient tokens are available
 // - A token-based server that controls packet transmission based on token availability

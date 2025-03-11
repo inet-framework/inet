@@ -27,6 +27,12 @@ import inet.queueing.contract.IPassivePacketSource;
 // - Support for custom clock modules for synchronized packet generation
 // - Ability to generate various packet types and sizes
 //
+// Typical applications:
+// - Modeling responsive traffic sources that only generate traffic when needed
+// - Implementing pull-based communication protocols
+// - Testing consumer-driven packet processing systems
+// - Creating traffic sources for pull-based queueing networks
+//
 // Timing behavior:
 // - The first packet can be provided after initialProvidingOffset
 // - Subsequent packets can be provided every providingInterval

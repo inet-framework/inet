@@ -26,6 +26,12 @@ import inet.queueing.contract.IPacketScheduler;
 // - The scheduler selects packets from the input gate corresponding to the current state
 // - If the selected input gate has no packets, no packet is scheduled until the next state transition
 //
+// This scheduler is particularly useful for:
+// - Modeling time-varying channel access in wireless networks
+// - Simulating bursty traffic patterns with temporal correlation
+// - Implementing statistical multiplexing with complex behavior
+// - Testing protocol performance under stochastic scheduling conditions
+//
 // The transitionProbabilities parameter defines an N×N matrix (where N is the number of
 // input gates) specifying the probability of transitioning from one state to another.
 // The waitIntervals parameter defines how long the scheduler stays in each state.

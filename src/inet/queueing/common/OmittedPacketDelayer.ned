@@ -27,6 +27,13 @@ import inet.queueing.contract.IPacketDelayer;
 // - Packets flow directly from input to output without any delay
 // - No packet processing occurs
 //
+// Applications:
+// - Creating flexible network models where packet delay is optional
+// - Maintaining consistent model structure across different configurations
+// - Simplifying model parameterization without changing topology
+// - Allowing for easy enabling/disabling of packet delay in simulations
+// - Supporting gradual model refinement
+//
 // This module is part of INET's "omitted" module family, which provides
 // placeholder implementations that can be easily replaced with functional
 // modules when needed, without changing the overall model structure.

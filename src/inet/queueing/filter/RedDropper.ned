@@ -29,6 +29,13 @@ import inet.queueing.base.PacketFilterBase;
 // where wq is the queue weight parameter that determines how quickly
 // the average adapts to changes in the actual queue length.
 //
+// The RedDropper is particularly useful for:
+// - Preventing global synchronization of TCP flows
+// - Maintaining high throughput and low delay during congestion
+// - Ensuring fair bandwidth allocation among multiple flows
+// - Reducing packet loss in networks with bursty traffic
+// - Implementing differentiated services with multiple drop priorities
+//
 // The module supports multiple gates, allowing different drop parameters
 // for different traffic classes or priorities.
 //

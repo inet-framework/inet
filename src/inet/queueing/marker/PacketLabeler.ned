@@ -21,6 +21,13 @@ import inet.queueing.contract.IPacketMarker;
 // - Multiple labels can be attached to a single packet if it matches multiple filters
 // - Labels are stored in a ~LabelsTag that is attached to the packet
 //
+// The PacketLabeler is particularly useful for:
+// - Implementing Quality of Service (QoS) mechanisms
+// - Creating traffic classification systems
+// - Supporting policy-based routing
+// - Enabling content-aware processing in downstream modules
+// - Building multi-criteria packet processing pipelines
+//
 // The module uses pluggable filter functions that implement the IPacketFilterFunction
 // interface, allowing for flexible and extensible packet classification criteria.
 //

@@ -20,6 +20,13 @@ import inet.queueing.contract.IPacketServer;
 // architectural consistency. It pulls packets from its input and immediately
 // pushes them to its output in the same simulation event.
 //
+// This server is particularly useful for:
+// - Modeling idealized network elements with no processing overhead
+// - Baseline comparisons when evaluating the impact of processing delays
+// - Simplifying models where processing time is negligible
+// - Creating hierarchical models where processing delays are handled elsewhere
+// - Testing and debugging queueing networks
+//
 // @see ~PacketServer, ~PreemptingServer, ~TokenBasedServer
 //
 simple InstantServer extends PacketServerBase like IPacketServer

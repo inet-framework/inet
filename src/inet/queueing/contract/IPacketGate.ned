@@ -20,6 +20,13 @@ package inet.queueing.contract;
 // - Preserves packet order and integrity
 // - Provides temporal isolation between traffic streams
 //
+// Packet gates are commonly used in network devices to:
+// - Implement time-sensitive networking (TSN) mechanisms
+// - Control traffic bursts and provide traffic shaping
+// - Enforce time-based access control policies
+// - Create time-division multiplexing schemes
+// - Implement credit-based traffic control
+//
 // Common implementations include PacketGate, PeriodicGate, CreditBasedGate,
 // and GateControlList. When a gate is not needed in a model, OmittedPacketGate
 // can be used as a placeholder.

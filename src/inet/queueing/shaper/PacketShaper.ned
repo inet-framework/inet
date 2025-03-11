@@ -26,6 +26,13 @@ import inet.queueing.contract.IPacketShaper;
 // - Can be extended to implement specific shaping algorithms (e.g., token bucket, leaky bucket)
 // - Provides a clean separation between packet storage/ordering and transmission timing
 //
+// Common applications:
+// - Traffic rate limiting
+// - Burst control
+// - Bandwidth allocation
+// - Delay-based traffic shaping
+// - Quality of Service (QoS) mechanisms
+//
 // The behavior of the shaper is determined by the specific queue and gate implementations used.
 // For example:
 // - Using a DropTailQueue with a TokenBucketGate creates a token bucket shaper

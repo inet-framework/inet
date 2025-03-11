@@ -28,6 +28,19 @@ import inet.queueing.contract.ITrafficConditioner;
 // - Simple to implement and understand
 // - Configurable queue type for different drop policies
 //
+// Applications:
+// - Traffic shaping to ensure constant bit rate (CBR)
+// - Bandwidth allocation and enforcement
+// - Congestion prevention
+// - QoS implementation
+// - Network traffic policing
+//
+// The leaky bucket is particularly useful in scenarios where:
+// - A strict output rate must be maintained
+// - Traffic bursts need to be completely smoothed out
+// - Predictable delay characteristics are required
+// - Simple rate limiting is needed without complex policies
+//
 // This implementation consists of:
 // - A configurable queue that stores incoming packets
 // - A server that processes packets at a constant rate

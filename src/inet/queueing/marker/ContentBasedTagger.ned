@@ -22,6 +22,13 @@ import inet.queueing.contract.IPacketMarker;
 //   VLAN ID, PCP, user priority, interface selection, transmission power, and
 //   encapsulation protocols
 //
+// The ContentBasedTagger is particularly useful for:
+// - Implementing content-aware Quality of Service (QoS) mechanisms
+// - Configuring protocol-specific parameters based on packet content
+// - Setting up differentiated services based on deep packet inspection
+// - Controlling packet routing and forwarding behavior based on payload
+// - Configuring physical layer parameters for specific traffic types
+//
 // The module uses a filter expression that can examine any aspect of the packet,
 // including headers, payload, and metadata, allowing for sophisticated protocol
 // parameter configuration based on actual content.

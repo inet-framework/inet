@@ -26,6 +26,19 @@ package inet.queueing.shaper;
 // - Configurable transmission schedules
 // - Compatible with other TSN mechanisms
 //
+// Applications:
+// - Time-Sensitive Networking (TSN)
+// - Industrial automation and control networks
+// - Automotive Ethernet
+// - Professional audio/video networks
+// - Mission-critical systems requiring deterministic communication
+//
+// The time-aware shaper is particularly useful in scenarios where:
+// - Strict timing guarantees are required
+// - Traffic streams need protection from interference
+// - Network resources must be allocated in a time-division manner
+// - Synchronized clocks are available across the network
+//
 // This implementation uses a PeriodicGate component that opens and closes
 // according to a configurable schedule, providing the time-based control
 // mechanism required for deterministic packet delivery.

@@ -22,6 +22,11 @@ package inet.queueing.classifier;
 // - If the token bucket doesn't have enough tokens, the packet is classified as
 //   "non-conforming" (output 1) and no tokens are removed.
 //
+// This classifier is particularly useful for implementing basic traffic policing
+// and simple Differentiated Services (DiffServ) mechanisms, where:
+// - Conforming (green) packets receive the standard service level
+// - Non-conforming (red) packets may receive a lower service level or be dropped
+//
 // The single-rate two-color marker is simpler than the three-color variants
 // (SingleRateThreeColorClassifier and DualRateThreeColorClassifier) as it only
 // distinguishes between two traffic categories rather than three.

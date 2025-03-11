@@ -33,6 +33,14 @@ import inet.queueing.contract.IPacketMeter;
 // - Color-aware operation through the labelPriority parameter
 // - Comprehensive statistics collection for monitoring and analysis
 //
+// Common applications:
+// - Traffic policing: Marking packets that exceed a specified rate
+// - Traffic shaping: When combined with queues and schedulers
+// - Bandwidth allocation: Ensuring fair resource distribution
+// - Burst control: Limiting traffic bursts while allowing short-term rate variations
+// - Service differentiation: Basis for implementing DiffServ mechanisms
+// - Rate limiting: Foundation for leaky bucket and other rate control algorithms
+//
 // Configuration examples:
 // 1. Basic rate limiter (1 Mbps with 64 KB burst tolerance):
 //    tokenProductionRate = 125000; // bytes/s (1 Mbps)

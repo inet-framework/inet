@@ -28,6 +28,13 @@ import inet.queueing.contract.IPacketClassifier;
 // - Optional token overflow between buckets
 // - Comprehensive statistics collection for each bucket
 //
+// This classifier is particularly useful for:
+// - Implementing complex traffic conditioning mechanisms
+// - Multi-level traffic shaping and policing
+// - Differentiated Services (DiffServ) traffic conditioning
+// - Quality of Service implementations with multiple service levels
+// - Hierarchical bandwidth allocation schemes
+//
 // The buckets parameter allows detailed configuration of each token bucket,
 // including initial token count, maximum capacity, and token production rate.
 // Tokens can optionally overflow from one bucket to another through the

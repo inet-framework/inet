@@ -24,6 +24,20 @@ import inet.queueing.contract.IPassivePacketSink;
 // - Optional immediate flushing for crash-resilient captures
 // - Direction flag to indicate inbound or outbound traffic
 //
+// Applications:
+// - Network traffic analysis and debugging
+// - Protocol verification and validation
+// - Performance measurement and benchmarking
+// - Creating test datasets for network tools
+// - Documenting network behavior for reference
+//
+// The PcapFilePacketConsumer is particularly useful in scenarios where:
+// - You need to analyze simulation results with external tools
+// - You want to compare simulation traffic with real-world captures
+// - You need to document network behavior for later reference
+// - You're developing or testing network protocols
+// - You want to visualize packet flows using packet analysis tools
+//
 // The captured PCAP files can be opened with tools like Wireshark, tcpdump,
 // or any other PCAP-compatible network analyzer for detailed inspection.
 //

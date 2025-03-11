@@ -22,6 +22,12 @@ package inet.queueing.base;
 // - Collects statistics on generated packets
 // - Supports on-demand packet creation for efficient resource usage
 //
+// This module is particularly useful for:
+// - Modeling network endpoints that respond to requests
+// - Implementing packet generators that produce traffic on demand
+// - Creating data sources for pull-based communication patterns
+// - Simulating server responses in client-server architectures
+//
 // @see ~PacketSourceBase, ~PassivePacketSource, ~IPassivePacketSource
 //
 simple PassivePacketSourceBase extends PacketSourceBase

@@ -21,6 +21,13 @@ import inet.queueing.contract.IPacketServer;
 // - Processing continues until available tokens are insufficient
 // - Processing resumes when new tokens become available
 //
+// The TokenBasedServer is particularly useful for modeling:
+// - Rate-limited processing systems with burst capabilities
+// - Resource allocation in shared processing environments
+// - Credit-based flow control mechanisms
+// - Token bucket traffic shapers and rate limiters
+// - Systems with processing budgets that replenish over time
+//
 // The token consumption can be configured to be:
 // - Fixed per packet (tokenConsumptionPerPacket)
 // - Variable based on packet size (tokenConsumptionPerBit)

@@ -26,6 +26,19 @@ import inet.queueing.contract.IPacketMeter;
 // - Compatible with any module that implements the IPacketMeter interface
 // - Preserves all tags applied by each meter in the chain
 //
+// This module is particularly useful for:
+// - Implementing multi-stage traffic conditioning
+// - Combining different metering algorithms (e.g., token bucket + rate measurement)
+// - Creating hierarchical metering systems
+// - Applying multiple tags to packets based on different criteria
+// - Building complex QoS measurement and marking pipelines
+//
+// Example applications:
+// - Measuring both short-term and long-term traffic rates
+// - Combining color marking with rate measurement
+// - Implementing multi-field packet classification and tagging
+// - Creating custom DiffServ traffic conditioning blocks
+//
 // @see ~TokenBucketMeter, ~ExponentialRateMeter, ~SlidingWindowRateMeter
 //
 module MultiPacketMeter like IPacketMeter

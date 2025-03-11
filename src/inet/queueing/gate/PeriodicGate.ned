@@ -29,6 +29,13 @@ import inet.queueing.contract.IPacketGate;
 // - Enables precise control over traffic timing
 // - Guard band functionality prevents packet fragmentation across cycle boundaries
 //
+// Applications:
+// - Time-Sensitive Networking (TSN)
+// - Industrial automation requiring deterministic communication
+// - Automotive Ethernet networks
+// - Professional audio/video networks
+// - Mission-critical systems requiring deterministic packet delivery
+//
 // Example configuration:
 // - durations = [0.3ms, 0.7ms, 0.5ms, 0.5ms]
 // - initiallyOpen = true

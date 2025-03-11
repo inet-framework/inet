@@ -30,6 +30,14 @@ import inet.queueing.contract.IPacketFlow;
 // - JSON output for detailed analysis
 // - Extensive statistical recording options
 //
+// Applications:
+// - Performance analysis of network protocols
+// - Bottleneck identification in complex networks
+// - End-to-end delay measurement and jitter analysis
+// - Queue behavior and processing time studies
+// - Protocol optimization based on detailed timing data
+// - Validation of QoS mechanisms
+//
 // The recorder collects statistics for various timing components:
 // - Elapsed time: Time since a bit entered the flow
 // - Delaying time: Time spent in delayers

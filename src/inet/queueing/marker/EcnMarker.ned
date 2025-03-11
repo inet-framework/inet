@@ -20,6 +20,13 @@ import inet.queueing.base.PacketMarkerBase;
 // - Updates the IPv4 header checksum to maintain packet integrity
 // - Supports both direct IP packets and Ethernet-encapsulated IP packets
 //
+// The EcnMarker is particularly useful for:
+// - Implementing Active Queue Management (AQM) mechanisms
+// - Supporting TCP congestion control with ECN
+// - Reducing packet drops in congested networks
+// - Improving latency for real-time applications
+// - Enabling end-to-end notification of network congestion
+//
 // ECN allows routers to signal impending congestion without dropping packets,
 // which can significantly improve performance for TCP and other protocols that
 // support ECN.

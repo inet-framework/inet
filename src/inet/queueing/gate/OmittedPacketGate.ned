@@ -21,6 +21,20 @@ import inet.queueing.contract.IPacketGate;
 // - Zero overhead when gate functionality is not needed
 // - Simplifies model structure by eliminating unnecessary components
 //
+// Applications:
+// - Creating configurable network models where gates can be conditionally included
+// - Maintaining consistent module interfaces throughout a model while selectively
+//   omitting functionality in specific instances
+// - Facilitating parameter studies where the impact of gates needs to be evaluated
+// - Simplifying complex models by removing unnecessary processing steps
+// - Supporting gradual model development by providing placeholders for future components
+//
+// Usage example:
+// In a network configuration, you can use a parameter to conditionally select
+// either a functional gate or an OmittedPacketGate:
+//
+// gate: <default("OmittedPacketGate")> like IPacketGate if enableGate else OmittedPacketGate;
+//
 // @see ~PacketGate, ~PeriodicGate, ~CreditBasedGate
 //
 module OmittedPacketGate like IPacketGate

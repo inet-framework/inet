@@ -27,6 +27,12 @@ import inet.queueing.contract.IActivePacketSource;
 // - Support for custom clock modules for synchronized packet generation
 // - Ability to generate various packet types and sizes
 //
+// Typical applications:
+// - Modeling traffic sources in network simulations
+// - Testing network elements under specific load patterns
+// - Generating background traffic in complex network scenarios
+// - Benchmarking queue and server performance
+//
 // Timing behavior:
 // - The first packet is generated after initialProductionOffset (or immediately if negative)
 // - Subsequent packets are generated every productionInterval

@@ -31,6 +31,16 @@ import inet.queueing.contract.ITokenGenerator;
 // 3. The generated tokens are added to the configured token storage module
 // 4. The packet is consumed (removed from the simulation)
 //
+// Applications:
+// - Implementing request-response patterns where responses are generated based on requests
+// - Creating feedback control mechanisms in network processing
+// - Modeling credit-based flow control systems
+// - Implementing rate control based on packet processing
+// - Building complex queueing systems with interdependent processing rates
+//
+// Particularly useful in scenarios where the processing rate
+// of one component should depend on the packet flow through another component.
+//
 // @see ~TokenBasedServer, ~QueueBasedTokenGenerator, ~TimeBasedTokenGenerator, ~SignalBasedTokenGenerator
 //
 simple PacketBasedTokenGenerator extends TokenGeneratorBase like ITokenGenerator, IPassivePacketSink

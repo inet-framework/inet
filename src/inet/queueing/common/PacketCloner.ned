@@ -30,6 +30,14 @@ import inet.queueing.contract.IPassivePacketSink;
 // - The copies are then pushed to their respective output gates
 // - The original packet is consumed in the process
 //
+// Applications:
+// - Multicast packet distribution
+// - Network traffic monitoring and analysis
+// - Parallel packet processing pipelines
+// - Redundant transmission paths
+// - Testing multiple protocol implementations with identical traffic
+// - Simulation of packet replication in broadcast networks
+//
 // Note: Unlike PacketDuplicator which sends duplicates to the same output,
 // PacketCloner sends copies to different outputs, effectively implementing
 // a one-to-many distribution pattern.

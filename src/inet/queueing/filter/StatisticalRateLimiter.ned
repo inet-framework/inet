@@ -22,6 +22,13 @@ import inet.queueing.contract.IPacketFilter;
 // - Packets exceeding limits are dropped with probability proportional to the excess
 // - Packets within limits are always forwarded
 //
+// The StatisticalRateLimiter is particularly useful for:
+// - Implementing traffic shaping with gradual degradation
+// - Enforcing Quality of Service (QoS) policies
+// - Preventing network congestion through controlled packet dropping
+// - Simulating rate-limiting network devices
+// - Creating fair bandwidth allocation among multiple flows
+//
 // The module can limit based on data rate (bits per second), packet rate (packets
 // per second), or both simultaneously. When both limits are configured, the more
 // restrictive one (resulting in higher drop probability) is applied.

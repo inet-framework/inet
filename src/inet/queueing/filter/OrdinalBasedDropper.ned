@@ -20,6 +20,13 @@ import inet.queueing.base.PacketFilterBase;
 // - Drops packets whose ordinal numbers match entries in the dropsVector
 // - Forwards all other packets to the connected consumer
 //
+// The OrdinalBasedDropper is particularly useful for:
+// - Testing protocol resilience to specific packet loss patterns
+// - Simulating deterministic network failures
+// - Validating error recovery mechanisms
+// - Creating reproducible test scenarios
+// - Benchmarking application performance under controlled packet loss
+//
 // The dropsVector parameter specifies the ordinal numbers of packets to be dropped
 // as a semicolon-separated list of ascending packet numbers (e.g., "5;6;12;13;").
 //

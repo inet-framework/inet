@@ -12,6 +12,13 @@ package inet.queueing.base;
 // Packet classifiers direct incoming packets to different outputs based on
 // specific classification criteria, enabling traffic differentiation.
 //
+// Packet classifiers are essential for implementing:
+// - Traffic classification for Quality of Service (QoS)
+// - Flow-based routing and forwarding
+// - Service differentiation in networks
+// - Policy-based traffic management
+// - Multi-path packet distribution
+//
 // Classifiers typically operate by:
 // 1. Receiving packets pushed to their input
 // 2. Examining packet properties based on classification criteria

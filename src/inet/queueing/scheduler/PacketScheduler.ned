@@ -24,6 +24,12 @@ import inet.queueing.contract.IPacketScheduler;
 // without having to implement a complete scheduler module. By providing different
 // scheduler function implementations, various scheduling policies can be realized.
 //
+// This scheduler is particularly useful for:
+// - Implementing experimental scheduling algorithms
+// - Creating composite scheduling behaviors
+// - Testing different scheduling strategies without modifying module code
+// - Extending the framework with custom scheduling policies
+//
 // The schedulerClass parameter specifies the C++ class that implements the
 // scheduling algorithm. This class must implement the IPacketSchedulerFunction
 // interface and be registered via Register_Class.

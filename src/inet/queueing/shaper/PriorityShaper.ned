@@ -29,6 +29,19 @@ import inet.queueing.queue.CompoundPacketQueueBase;
 // - Configurable number of shapers for different traffic classes
 // - Customizable classifier and scheduler components
 //
+// Applications:
+// - Differentiated Services (DiffServ) implementation
+// - Quality of Service (QoS) enforcement
+// - Traffic management in converged networks
+// - Multi-level traffic conditioning
+// - Hierarchical bandwidth allocation
+//
+// The priority shaper is particularly useful in scenarios where:
+// - Different traffic types require different treatment
+// - Both rate limiting and prioritization are needed
+// - Complex traffic management policies must be implemented
+// - Network resources need to be allocated based on traffic importance
+//
 // Typical configuration uses a PriorityScheduler that always serves the
 // highest priority non-empty shaper first, but other schedulers like
 // WrrScheduler can be used for more sophisticated bandwidth sharing.

@@ -33,6 +33,13 @@ import inet.queueing.contract.IPacketMeter;
 // - Lower alpha values (closer to 0) give more weight to history (more stable, less responsive)
 // - Higher alpha values (closer to 1) give more weight to recent packets (more responsive, less stable)
 //
+// This meter is particularly useful for:
+// - Adaptive rate control mechanisms
+// - Traffic monitoring and analysis
+// - Input to congestion control algorithms
+// - Dynamic QoS adjustments based on current traffic conditions
+// - Feeding into rate-based traffic shapers and policers
+//
 // @see ~StatisticalRateLimiter, ~SlidingWindowRateMeter
 //
 simple ExponentialRateMeter extends PacketMeterBase like IPacketMeter
