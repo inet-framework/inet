@@ -52,8 +52,8 @@ def stop_execution(*args):
 
 def enable_autoreload():
     ipython = IPython.get_ipython()
-    ipython.magic("load_ext autoreload")
-    ipython.magic("autoreload 2")
+    ipython.run_line_magic("load_ext", "autoreload")
+    ipython.run_line_magic("autoreload", "2")
 
 _file_handler = None
 
