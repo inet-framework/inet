@@ -12,18 +12,17 @@ import inet.node.base.NetworkLayerNodeBase;
 
 
 //
-// This module is an IPv4 router that can delay or drop packets (while retaining their order)
-// based on which interface card the packet arrived on and on which interface
-// it is leaving the cloud. The delayer module is replaceable.
+// InternetCloud models a large network such as part of the Internet or a corporate
+// backbone network with realistic delay, packet loss, and datarate characteristics.
+// It abstracts away the internal structure of the network while preserving the
+// end-to-end behavior that applications would experience.
 //
-// By default, the delayer module is ~MatrixCloudDelayer which lets you configure
-// the delay, drop, and data rate parameters in an XML file. Packet flows, as defined
-// by incoming and outgoing interface pairs, are independent of each other.
-//
-// The ~InternetCloud module can be used only to model the delay between two hops, but
-// it is possible to build more complex networks using several ~InternetCloud modules.
-//
-// @see ~MatrixCloudDelayer
+// Key features:
+// - Configurable delay, packet loss, and datarate for different paths
+// - Preservation of packet order within each flow
+// - Support for IPv4, IPv6, and generic network protocols
+// - Replaceable delayer module with customizable behavior
+// - Ability to model complex network effects without detailed topology
 //
 module InternetCloud extends NetworkLayerNodeBase
 {

@@ -8,7 +8,15 @@
 package inet.node.contract;
 
 //
-// This is the module interface for all Ethernet node types in a network.
+// Interface for all network nodes that have Ethernet connectivity. Extends the base
+// INetworkNode interface by adding Ethernet-specific gates and parameters.
+//
+// This interface is implemented by various node types that participate in
+// Ethernet networks, such as hosts, switches, and routers with Ethernet interfaces.
+// It ensures that all Ethernet-capable nodes have the necessary gates to connect
+// to Ethernet networks.
+//
+// @see ~EthernetHost, ~EthernetSwitch, ~StandardHost, ~Router
 //
 moduleinterface IEthernetNetworkNode extends INetworkNode
 {

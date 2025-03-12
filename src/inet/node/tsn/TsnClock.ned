@@ -10,9 +10,19 @@ package inet.node.tsn;
 import inet.linklayer.ieee8021as.GptpMaster;
 
 //
-// This module represents a hardware device containing a high-precision hardware
-// clock. The device also contains a gPTP protocol implementation and acts as a
-// gPTP master node on the network.
+// A specialized network device that serves as the master clock for Time-Sensitive
+// Networking (TSN) simulations.
+//
+// This module represents a dedicated hardware device with a high-precision
+// oscillator-based clock. It implements the IEEE 802.1AS-2020 (gPTP) protocol
+// and acts as the grandmaster clock, distributing time information to all other
+// devices in the network to achieve network-wide time synchronization.
+//
+// The TsnClock is a critical component in TSN networks, as precise time synchronization
+// is fundamental to many TSN mechanisms such as time-aware scheduling, frame preemption,
+// and redundancy management.
+//
+// @see ~TsnSwitch, ~TsnDevice
 //
 module TsnClock extends GptpMaster
 {

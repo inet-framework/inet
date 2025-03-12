@@ -10,8 +10,11 @@ package inet.node.ipv6;
 import inet.node.inet.StandardHost;
 
 //
-// IPv6 host with TCP, SCTP and UDP layers and applications.
-// see ~StandardHost for configuration.
+// An IPv6 host with TCP, UDP, and SCTP transport layer protocols. It extends the
+// standard host model by configuring it to use IPv6 as the network layer protocol
+// while disabling IPv4 by default.
+//
+// @see ~Router6
 //
 module StandardHost6 extends StandardHost
 {
