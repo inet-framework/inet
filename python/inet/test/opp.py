@@ -138,7 +138,7 @@ class MultipleOppTestTasks(MultipleSimulationTestTasks):
         self.kwargs = kwargs
         self.test_folder = test_folder
 
-    def build_before_run(self):
+    def build_before_run(self, **kwargs):
         test_directory = self.simulation_project.get_full_path(self.test_folder)
         lib_directory = os.path.join(test_directory, "lib")
         if os.path.exists(lib_directory):

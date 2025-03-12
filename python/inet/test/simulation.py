@@ -111,9 +111,12 @@ class MultipleSimulationTestTasks(MultipleTestTasks):
     def get_description(self):
         return ((self.simulation_project.get_name() + " ") if self.simulation_project else "") + super().get_description()
 
+    def build_before_run(self, **kwargs):
+        build_project(**dict(kwargs, simulation_project=self.simulation_project, mode=self.mode))
+
     def run_protected(self, **kwargs):
         if self.build:
-            build_project(**dict(kwargs, simulation_project=self.simulation_project, mode=self.mode))
+            self.build_before_run(**kwargs)
         return super().run_protected(**kwargs)
 
 def get_simulation_test_tasks(simulation_test_task_class=SimulationTestTask, multiple_simulation_test_tasks_class=MultipleSimulationTestTasks, **kwargs):
