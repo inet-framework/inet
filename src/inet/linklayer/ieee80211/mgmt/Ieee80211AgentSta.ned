@@ -25,7 +25,7 @@ simple Ieee80211AgentSta like IIeee80211Agent
         double authenticationTimeout @unit(s) = default(5s); // Timeout for the authentication procedure
         double associationTimeout @unit(s) = default(5s); // Timeout for the association procedure
         double startingTime @unit(s) = default(-1s); // Agent starting time.
-        string defaultSsid = default("SSID"); // List of allowed SSIDs to connect to; leave empty for no filtering
+        string defaultSsid = default(""); // List of allowed SSIDs to connect to; leave empty for no filtering
         @display("i=block/control");
         @signal[sentRequest](type=long); // ENUM! ~Ieee80211PrimRequestCode
         @signal[acceptConfirm](type=long); // ENUM! ~Ieee80211PrimConfirmCode
