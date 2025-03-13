@@ -46,7 +46,8 @@ private:
     uint32_t ssthresh;
     uint32_t partialBytesAcked;
 
-    bool appLimited;
+    bool appLimited = true;
+    bool allowOnePacket = false;
 
     Statistics *stats;
     simsignal_t cwndStat;

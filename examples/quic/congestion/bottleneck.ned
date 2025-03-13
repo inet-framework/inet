@@ -19,29 +19,34 @@ import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 
-network Congestion
+network bottleneck
 {
     parameters:
-        double bottleneckPer = default(0);
-        double bottleneckDelay @unit(s) = default(0ms);
-        double bottleneckDatarate @unit(bps) = default(10Mbps);
+        double linkDelay @unit(s) = default(0ms);
+        double linkDatarate @unit(bps) = default(100Gbps);
 
     types:
-        channel etherline extends ned.DatarateChannel
+        channel link extends ned.DatarateChannel
         {
-            delay = 0ms;
-            datarate = 1000Mbps;
+            datarate = parent.linkDatarate;
+            delay = parent.linkDelay;
+            per = 0;
         }
-        channel bottleneck extends ned.DatarateChannel
+        channel idealLink extends ned.DatarateChannel
         {
-            datarate = bottleneckDatarate;
-            delay = bottleneckDelay;
-            per = bottleneckPer;
+            datarate = 1000Gbps;
+            delay = 0ms;
+            per = 0;
         }
     submodules:
         configurator: Ipv4NetworkConfigurator {
             parameters:
                 @display("p=222,32");
+        }
+
+        sender: StandardHost {
+            parameters:
+                @display("p=57,137");
         }
 
         router1: Router {
@@ -54,21 +59,15 @@ network Congestion
                 @display("p=305,137");
         }
 
-        client: StandardHost {
+        receiver: StandardHost {
             parameters:
-                @display("i=device/laptop;p=57,137");
-        }
-
-
-        server: StandardHost {
-            parameters:
-                @display("p=390,137;i=device/server_l");
+                @display("p=390,137");
         }
 
     connections:
-        client.pppg++ <--> etherline <--> router1.pppg++;
+        sender.pppg++ <--> idealLink <--> router1.pppg++;
 
-        router1.pppg++ <--> bottleneck <--> router2.pppg++;
+        router2.pppg++ <--> idealLink <--> receiver.pppg++;
 
-        router2.pppg++ <--> etherline <--> server.pppg++;
+        router1.pppg++ <--> link <--> router2.pppg++;
 }

@@ -85,6 +85,12 @@ void NewRenoCongestionController::onPacketAcked(QuicPacket *ackedPacket)
     if (inCongestionRecovery(ackedPacket->getTimeSent())) {
         // Do not increase congestion window in recovery period.
         EV_DEBUG << "NewRenoCongestionController: inCongestionRecovery - congestionWindow=" << congestionWindow << ", bytesInFlight=" << bytesInFlight << endl;
+
+        if (congestionWindow >= ssthresh && accurateIncreaseInNewRenoCongestionAvoidance) {
+            // count acked bytes.
+            partialBytesAcked += ackedPacket->getSize();
+            emitStatValue(partialBytesAckedStat, partialBytesAcked);
+        }
         return;
     }
     if (isAppLimited()) {
@@ -172,7 +178,8 @@ void NewRenoCongestionController::onPacketsLost(std::vector<QuicPacket *> *lostP
         congestionEvent(largestLostPacket->getTimeSent());
     }
 
-    // Collapse congestion window if persistent congestion
+    // Reset the congestion window if the loss of these
+    // packets indicates persistent congestion.
     if (inPersistentCongestion) {
         congestionWindow = getMinimumWindow();
         congestionRecoveryStartTime = SimTime::ZERO;
@@ -183,6 +190,10 @@ void NewRenoCongestionController::onPacketsLost(std::vector<QuicPacket *> *lostP
 
 uint32_t NewRenoCongestionController::getRemainingCongestionWindow()
 {
+    if (allowOnePacket) {
+        allowOnePacket = false;
+        return getMaxDatagramSize();
+    }
     if (bytesInFlight > congestionWindow) {
         return 0;
     }
@@ -191,7 +202,7 @@ uint32_t NewRenoCongestionController::getRemainingCongestionWindow()
 
 bool NewRenoCongestionController::inCongestionRecovery(simtime_t sentTime)
 {
-    return (sentTime <= congestionRecoveryStartTime);
+    return (sentTime < congestionRecoveryStartTime);
 }
 
 void NewRenoCongestionController::setAppLimited(bool appLimited)
@@ -206,17 +217,19 @@ bool NewRenoCongestionController::isAppLimited()
 
 void NewRenoCongestionController::congestionEvent(simtime_t sentTime)
 {
-    // Start a new congestion event if packet was sent after the
-    // start of the previous congestion recovery period.
-    if (!inCongestionRecovery(sentTime)) {
-        congestionRecoveryStartTime = simTime();
-        congestionWindow *= kLossReductionFactor;
-        congestionWindow = std::max(congestionWindow, getMinimumWindow());
-        ssthresh = congestionWindow;
-        partialBytesAcked = 0;
-        emitStatValue(partialBytesAckedStat, partialBytesAcked);
-        emitStatValue(cwndStat, congestionWindow);
+    // No reaction if already in a recovery period.
+    if (inCongestionRecovery(sentTime)) {
+        return;
     }
+
+    // Enter recovery period.
+    congestionRecoveryStartTime = simTime();
+    ssthresh = congestionWindow * kLossReductionFactor;
+    congestionWindow = std::max(ssthresh, getMinimumWindow());
+    allowOnePacket = true;
+    partialBytesAcked = 0;
+    emitStatValue(partialBytesAckedStat, partialBytesAcked);
+    emitStatValue(cwndStat, congestionWindow);
 }
 
 /* TODO
