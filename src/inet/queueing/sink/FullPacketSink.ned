@@ -13,10 +13,9 @@ import inet.queueing.contract.IPacketSink;
 import inet.queueing.contract.IPassivePacketSink;
 
 //
-// This module implements a special packet sink that simulates a full or congested
-// destination. It rejects all incoming packets by generating permanent backpressure
-// on its input gate, effectively modeling a destination that cannot accept any
-// more packets.
+// Special packet sink that simulates a full or congested destination. Rejects
+// all incoming packets by generating permanent backpressure on its input gate,
+// effectively modeling a destination that cannot accept any more packets.
 //
 // Key features:
 // - Implements both active and passive sink interfaces for compatibility

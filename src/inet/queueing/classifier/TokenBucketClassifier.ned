@@ -11,8 +11,8 @@ import inet.queueing.base.PacketClassifierBase;
 import inet.queueing.contract.IPacketClassifier;
 
 //
-// This module implements a basic token bucket classifier that forms the foundation
-// for various traffic conditioning mechanisms in the queueing framework.
+// Basic token bucket classifier that forms the foundation for various traffic
+// conditioning mechanisms in the queueing framework.
 //
 // The token bucket algorithm works by:
 // - Maintaining a bucket of tokens that fills at a constant rate

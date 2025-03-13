@@ -8,10 +8,10 @@
 package inet.queueing.meter;
 
 //
-// This module implements the Single Rate Two Color Marker (srTCM) algorithm,
-// a simplified version of the traffic conditioning mechanisms defined in RFC 2697.
-// It measures and marks packets with color labels (green or red) based on
-// their conformance to a committed information rate.
+// Implements the Single Rate Two Color Marker (srTCM) algorithm, a simplified
+// version of the traffic conditioning mechanisms defined in RFC 2697. Measures
+// and marks packets with color labels (green or red) based on their conformance
+// to a committed information rate.
 //
 // The meter uses a single token bucket that is filled at the Committed
 // Information Rate (CIR) and has a capacity equal to the Committed Burst Size (CBS).

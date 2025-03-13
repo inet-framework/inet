@@ -8,9 +8,9 @@
 package inet.queueing.classifier;
 
 //
-// This module classifies packets based on the attached ~UserPriority tag.
-// It routes packets to different output gates according to their priority level,
-// enabling Quality of Service (QoS) differentiation in network simulations.
+// Classifies packets based on the attached ~UserPriority tag. Routes packets
+// to different output gates according to their priority level, enabling
+// Quality of Service (QoS) differentiation in network simulations.
 //
 // The classifier uses the PacketUserPriorityReqClassifier implementation which:
 // - Examines each packet for a UserPriority tag

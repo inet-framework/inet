@@ -8,10 +8,9 @@
 package inet.queueing.meter;
 
 //
-// This packet meter implements the Two Rate Three Color Marker (trTCM) algorithm
-// as defined in RFC 2698. It measures and marks packets with color labels
-// (green, yellow, or red) based on their conformance to committed and excess
-// information rates.
+// Implements the Two Rate Three Color Marker (trTCM) algorithm as defined in
+// RFC 2698. Measures and marks packets with color labels (green, yellow, or red)
+// based on their conformance to committed and excess information rates.
 //
 // The meter uses two token buckets operating in series:
 // 1. The first bucket (C) is filled at the Committed Information Rate (CIR) and

@@ -8,9 +8,9 @@
 package inet.queueing.classifier;
 
 //
-// This packet classifier implements the Single Rate Three Color Marker (srTCM) algorithm
-// as defined in RFC 2697. It classifies packets into three categories (typically
-// green, yellow, and red) based on their conformance to a committed information rate.
+// Implements the Single Rate Three Color Marker (srTCM) algorithm as defined in
+// RFC 2697. Classifies packets into three categories (typically green, yellow,
+// and red) based on their conformance to a committed information rate.
 //
 // The classifier uses two token buckets operating in series:
 // 1. The first bucket (C) is filled at the Committed Information Rate (CIR) and

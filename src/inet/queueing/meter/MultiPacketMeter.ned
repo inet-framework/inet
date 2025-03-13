@@ -10,9 +10,9 @@ package inet.queueing.meter;
 import inet.queueing.contract.IPacketMeter;
 
 //
-// This module implements a composite packet meter that chains multiple packet
-// meters together in series. Each packet passes through all the meters in sequence,
-// allowing for multi-stage packet metering and tagging.
+// Composite packet meter that chains multiple packet meters together in series.
+// Each packet passes through all the meters in sequence, allowing for multi-stage
+// packet metering and tagging.
 //
 // The module creates a pipeline of packet meters where:
 // - Packets enter through the input gate

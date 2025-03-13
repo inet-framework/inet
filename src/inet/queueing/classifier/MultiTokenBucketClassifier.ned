@@ -11,9 +11,9 @@ import inet.queueing.base.PacketClassifierBase;
 import inet.queueing.contract.IPacketClassifier;
 
 //
-// This packet classifier implements a multi-token bucket algorithm that uses
-// multiple token buckets to classify packets into different categories based
-// on their conformance to various traffic profiles.
+// Implements a multi-token bucket algorithm that uses multiple token buckets
+// to classify packets into different categories based on their conformance to
+// various traffic profiles.
 //
 // The classifier operates by:
 // - Maintaining multiple token buckets, each with its own parameters

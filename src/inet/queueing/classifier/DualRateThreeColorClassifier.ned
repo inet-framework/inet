@@ -8,10 +8,9 @@
 package inet.queueing.classifier;
 
 //
-// This packet classifier implements the Two Rate Three Color Marker (trTCM) algorithm
-// as defined in RFC 2698. It classifies packets into three categories (typically
-// green, yellow, and red) based on their conformance to committed and excess
-// information rates.
+// Implements the Two Rate Three Color Marker (trTCM) algorithm as defined in
+// RFC 2698. Classifies packets into three categories (typically green, yellow,
+// and red) based on their conformance to committed and excess information rates.
 //
 // The classifier uses two token buckets operating in series:
 // 1. The first bucket (C) is filled at the Committed Information Rate (CIR) and

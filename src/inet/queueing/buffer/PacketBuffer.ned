@@ -11,9 +11,9 @@ import inet.queueing.base.PacketBufferBase;
 import inet.queueing.contract.IPacketBuffer;
 
 //
-// Shared packet buffer that can be used by multiple
-// packet queues to optimize storage space. It provides centralized packet
-// storage with configurable capacity limits and customizable packet dropping
+// Shared packet buffer that store packets on behalf of multiple queues,
+// modeling bounded shared storage space. It provides centralized packet storage
+// with configurable capacity limits and customizable packet dropping
 // strategies.
 //
 // Key features:

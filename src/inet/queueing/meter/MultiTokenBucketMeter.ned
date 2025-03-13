@@ -11,8 +11,8 @@ import inet.queueing.base.PacketMeterBase;
 import inet.queueing.contract.IPacketMeter;
 
 //
-// This module implements a multi-token bucket meter that uses multiple token buckets
-// to label packets based on their conformance to different traffic profiles.
+// Multi-token bucket meter that uses multiple token buckets to label packets
+// based on their conformance to different traffic profiles.
 //
 // The meter operates by:
 // - Maintaining multiple token buckets, each with its own parameters

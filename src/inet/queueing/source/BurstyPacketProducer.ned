@@ -11,10 +11,10 @@ import inet.queueing.contract.IActivePacketSource;
 import inet.queueing.scheduler.MarkovScheduler;
 
 //
-// This module generates realistic bursty network traffic by combining two packet
-// sources with different characteristics. It uses a Markov-based scheduler to
-// switch between normal and burst modes, creating traffic patterns that exhibit
-// both sustained background traffic and intermittent high-volume bursts.
+// Generates realistic bursty network traffic by combining two packet sources
+// with different characteristics. Uses a Markov-based scheduler to switch
+// between normal and burst modes, creating traffic patterns that exhibit both
+// sustained background traffic and intermittent high-volume bursts.
 //
 // Key features:
 // - Combines two independent packet sources with different configurations

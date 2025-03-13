@@ -8,10 +8,10 @@
 package inet.queueing.classifier;
 
 //
-// This packet classifier implements the Single Rate Two Color Marker (srTCM) algorithm,
-// a simplified version of the traffic conditioning mechanisms defined in RFC 2697.
-// It classifies packets into two categories (typically green and red) based on
-// their conformance to a committed information rate.
+// Implements the Single Rate Two Color Marker (srTCM) algorithm, a simplified
+// version of the traffic conditioning mechanisms defined in RFC 2697. Classifies
+// packets into two categories (typically green and red) based on their conformance
+// to a committed information rate.
 //
 // The classifier uses a single token bucket that is filled at the Committed
 // Information Rate (CIR) and has a capacity equal to the Committed Burst Size (CBS).

@@ -13,10 +13,9 @@ import inet.queueing.server.TokenBasedServer;
 import inet.queueing.tokengenerator.SignalBasedTokenGenerator;
 
 //
-// This module implements the producer side of a request-response pattern for
-// packet processing. It works in conjunction with a RequestConsumer to model
-// bidirectional communication patterns where responses are generated based on
-// received requests.
+// Implements the producer side of a request-response pattern for packet
+// processing. Works in conjunction with a RequestConsumer to model bidirectional
+// communication patterns where responses are generated based on received requests.
 //
 // Key features:
 // - Supports multiple response types through separate packet providers

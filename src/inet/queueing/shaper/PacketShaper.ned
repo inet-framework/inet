@@ -12,9 +12,9 @@ import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.IPacketShaper;
 
 //
-// This module implements a generic packet shaper that combines a queue and a gate
-// to control the rate and timing of packet transmissions. It serves as a foundational
-// building block for implementing various traffic shaping mechanisms.
+// Generic packet shaper that combines a queue and a gate to control the rate
+// and timing of packet transmissions. Serves as a foundational building block
+// for implementing various traffic shaping mechanisms.
 //
 // The packet shaper consists of two main components:
 // 1. A queue that stores and orders packets according to its specific ordering policy

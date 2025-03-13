@@ -14,10 +14,10 @@ import inet.queueing.contract.ITokenGenerator;
 
 
 //
-// This module implements an adaptive packet source that monitors a queue's
-// occupancy and generates packets as needed to prevent the queue from becoming
-// empty. It helps maintain a minimum level of traffic and ensures continuous
-// packet availability for downstream consumers.
+// Adaptive packet source that monitors a queue's occupancy and generates packets
+// as needed to prevent the queue from becoming empty. Helps maintain a minimum
+// level of traffic and ensures continuous packet availability for downstream
+// consumers.
 //
 // Key features:
 // - Monitors queue occupancy through a token generator

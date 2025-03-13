@@ -9,9 +9,9 @@ package inet.queueing.base;
 
 //
 // Base module for packet buffer implementations in the queueing framework.
-// Packet buffers store packets temporarily while maintaining various statistics.
-// They are typically used with queues to implement different packet dropping
-// strategies when the queue capacity is reached.
+// Packet buffers store packets on behalf of multiple queues, modeling bounded
+// shared storage space. They are typically used to implement different packet
+// dropping strategies when the shared storage capacity is reached.
 //
 // Packet buffers track:
 // - Current number of stored packets and their total length

@@ -13,9 +13,9 @@ import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.IPacketServer;
 
 //
-// This module implements a request-response pattern for packet processing.
-// It acts as the consumer side of a request-response pair, working in conjunction
-// with a ResponseProducer to model bidirectional communication patterns.
+// Implements a request-response pattern for packet processing. Acts as the
+// consumer side of a request-response pair, working in conjunction with a
+// ResponseProducer to model bidirectional communication patterns.
 //
 // Key features:
 // - Processes incoming request packets sequentially

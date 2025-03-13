@@ -8,9 +8,9 @@
 package inet.queueing.shaper;
 
 //
-// This module implements an asynchronous shaper as defined in IEEE 802.1Q-2018
-// (formerly IEEE 802.1Qcr) for Time-Sensitive Networking (TSN). It provides
-// deterministic latency bounds while allowing for efficient network utilization.
+// Implements an asynchronous shaper as defined in IEEE 802.1Q-2018 (formerly
+// IEEE 802.1Qcr) for Time-Sensitive Networking (TSN). Provides deterministic
+// latency bounds while allowing for efficient network utilization.
 //
 // The asynchronous shaper operates based on per-packet eligibility times:
 // - Each packet is assigned a transmission eligibility time (~EligibilityTimeTag)

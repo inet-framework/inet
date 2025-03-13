@@ -11,9 +11,9 @@ import inet.queueing.base.ActivePacketSourceBase;
 import inet.queueing.contract.IActivePacketSource;
 
 //
-// This module generates network traffic by reading packets from a PCAP file
-// and injecting them into a simulation. It allows realistic traffic patterns
-// captured from real networks to be replayed in simulated environments.
+// Generates network traffic by reading packets from a PCAP file and injecting
+// them into a simulation. Allows realistic traffic patterns captured from real
+// networks to be replayed in simulated environments.
 //
 // Key features:
 // - Reads standard PCAP/PCAPNG files created by Wireshark, tcpdump, etc.

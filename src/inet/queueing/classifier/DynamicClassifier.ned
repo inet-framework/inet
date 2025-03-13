@@ -8,9 +8,9 @@
 package inet.queueing.classifier;
 
 //
-// This packet classifier dynamically creates and uses other classifier modules
-// during simulation runtime. It allows for flexible and adaptable packet
-// classification strategies that can change based on simulation conditions.
+// Dynamically creates and uses other classifier modules during simulation runtime.
+// Allows for flexible and adaptable packet classification strategies that can
+// change based on simulation conditions.
 //
 // The DynamicClassifier works by:
 // - Creating classifier modules of the specified type on demand

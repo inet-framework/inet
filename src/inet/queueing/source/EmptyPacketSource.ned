@@ -13,10 +13,9 @@ import inet.queueing.contract.IPacketSource;
 import inet.queueing.contract.IPassivePacketSource;
 
 //
-// This module simulates a permanently inactive or unavailable packet source.
-// It implements both active and passive packet source interfaces but never
-// produces any packets and always generates backpressure when packets are
-// requested from it.
+// Simulates a permanently inactive or unavailable packet source. Implements
+// both active and passive packet source interfaces but never produces any
+// packets and always generates backpressure when packets are requested from it.
 //
 // Key features:
 // - Implements all packet source interfaces for compatibility

@@ -8,9 +8,9 @@
 package inet.queueing.meter;
 
 //
-// This module implements the Single Rate Three Color Marker (srTCM) algorithm
-// as defined in RFC 2697. It measures and marks packets with color labels
-// (green, yellow, or red) based on their conformance to a committed information rate.
+// Implements the Single Rate Three Color Marker (srTCM) algorithm as defined in
+// RFC 2697. Measures and marks packets with color labels (green, yellow, or red)
+// based on their conformance to a committed information rate.
 //
 // The meter uses two token buckets operating in series:
 // 1. The first bucket (C) is filled at the Committed Information Rate (CIR) and

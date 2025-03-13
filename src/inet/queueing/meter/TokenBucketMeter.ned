@@ -11,8 +11,8 @@ import inet.queueing.base.PacketMeterBase;
 import inet.queueing.contract.IPacketMeter;
 
 //
-// This module implements the classic token bucket algorithm for traffic measurement,
-// rate limiting, and packet labeling. It is a fundamental building block for
+// Implements the classic token bucket algorithm for traffic measurement, rate
+// limiting, and packet labeling. Serves as a fundamental building block for
 // implementing Quality of Service (QoS) mechanisms in network simulations.
 //
 // The token bucket algorithm works as follows:
