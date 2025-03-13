@@ -11,8 +11,24 @@ import inet.applications.contract.IApp;
 import inet.node.inet.StandardHost;
 
 //
-// This module implements a gPTP end station that contains a clock module and
-// a gPTP protocol.
+// Provides a base module for IEEE 802.1AS gPTP end stations, extending the standard
+// host with time synchronization capabilities. This module serves as the foundation
+// for both master and slave nodes in a gPTP network.
+//
+// The module integrates:
+// - A settable clock module that can be adjusted by the gPTP protocol
+// - A gPTP protocol implementation for time synchronization
+// - Standard networking capabilities inherited from StandardHost
+//
+// The clock module is configured to be settable by default, allowing the gPTP
+// protocol to adjust its time based on synchronization messages. This is essential
+// for maintaining precise time synchronization across the network.
+//
+// This module is typically not used directly but serves as a base class for more
+// specific implementations such as ~GptpMaster and ~GptpSlave, which configure
+// the gPTP protocol for their specific roles in the time synchronization hierarchy.
+//
+// @see ~GptpMaster, ~GptpSlave, ~Gptp
 //
 module GptpEndstation extends StandardHost
 {
@@ -26,4 +42,3 @@ module GptpEndstation extends StandardHost
         gptp.socketOut --> at.in++ if exists(gptp);
         at.out++ --> gptp.socketIn if exists(gptp);
 }
-

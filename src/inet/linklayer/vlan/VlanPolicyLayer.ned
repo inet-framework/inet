@@ -7,6 +7,23 @@
 
 package inet.linklayer.vlan;
 
+//
+// Implements a comprehensive VLAN policy enforcement layer that processes both
+// incoming and outgoing packets. This module combines VLAN mapping and filtering
+// capabilities to enforce network segmentation, implement VLAN translation, and
+// control VLAN-based traffic flows.
+//
+// The layer consists of four key components:
+// - outboundMapper: Transforms VLAN IDs on outgoing packets (typically VlanReqMapper)
+// - outboundFilter: Filters outgoing packets based on VLAN IDs (typically VlanReqFilter)
+// - inboundFilter: Filters incoming packets based on VLAN IDs (typically VlanIndFilter)
+// - inboundMapper: Optional component for transforming incoming packets' VLAN information
+//
+// This module is typically inserted between the network layer and the MAC layer
+// to enforce VLAN policies before packets are transmitted or after they are received.
+//
+// @see ~VlanReqMapper, ~VlanReqFilter, ~VlanIndFilter
+//
 import inet.protocolelement.contract.IProtocolLayer;
 import inet.queueing.contract.IPacketFilter;
 import inet.queueing.contract.IPacketFlow;

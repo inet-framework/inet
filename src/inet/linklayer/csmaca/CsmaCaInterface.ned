@@ -10,7 +10,26 @@ package inet.linklayer.csmaca;
 import inet.linklayer.common.WirelessInterface;
 
 //
-// Module interface for CSMA/CA network interfaces.
+// Provides a complete wireless network interface that uses the CSMA/CA protocol
+// for medium access control. This interface combines the CSMA/CA MAC protocol
+// with appropriate radio and queue components to create a ready-to-use network
+// interface.
+//
+// The CSMA/CA (Carrier Sense Multiple Access with Collision Avoidance) protocol
+// is widely used in wireless networks to manage shared medium access. It works by
+// sensing the channel before transmission and using random backoff mechanisms to
+// reduce collision probability.
+//
+// The interface uses:
+// - CsmaCaMac: A configurable implementation of the CSMA/CA protocol with optional
+//   acknowledgments and retry mechanisms
+// - ApskRadio: Default radio model for wireless transmission
+// - DropTailQueue: Simple FIFO queue with configurable capacity
+//
+// This interface can be used for general wireless network simulations and can
+// approximate basic 802.11b ad-hoc mode operation with appropriate settings.
+//
+// @see ~CsmaCaMac, ~WirelessInterface
 //
 module CsmaCaInterface extends WirelessInterface
 {
@@ -20,4 +39,3 @@ module CsmaCaInterface extends WirelessInterface
         queue.typename = default("DropTailQueue");
         queue.packetCapacity = default(-1);
 }
-

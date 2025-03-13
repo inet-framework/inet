@@ -13,9 +13,30 @@ import inet.linklayer.contract.IMacProtocol;
 
 
 //
-// Implementation of B-MAC (also called Berkeley MAC, Low Power Listening, or
-// LPL).
-// See C++ documentation for details.
+// Implements the B-MAC (Berkeley MAC) protocol, also known as Low Power Listening
+// (LPL), designed for energy-efficient communication in wireless sensor networks.
+// B-MAC uses a preamble sampling approach where nodes periodically wake up to
+// check for channel activity.
+//
+// Key features of B-MAC include:
+// - Long preamble transmission to ensure receiver detection during periodic wake-ups
+// - Clear Channel Assessment (CCA) to detect ongoing transmissions
+// - Configurable duty cycling for energy conservation
+// - Optional MAC-level acknowledgments for reliability
+//
+// The protocol operates as follows:
+// - Nodes sleep for a configurable duration (slotDuration)
+// - Upon waking, nodes perform CCA to check for transmissions
+// - If a transmission is detected, nodes stay awake to receive the data packet
+// - When sending, nodes first transmit preambles for at least slotDuration to
+//   wake up potential receivers, then send the actual data packet
+// - If MAC acknowledgments are enabled, receivers send an immediate ACK after
+//   receiving a data packet
+//
+// B-MAC is widely used in wireless sensor networks, including in the TinyOS
+// operating system, due to its simplicity and energy efficiency.
+//
+// The protocol's finite state machine is illustrated in the BMAC-FSM.png file.
 //
 module BMac extends MacProtocolBase like IMacProtocol
 {
@@ -57,4 +78,3 @@ module BMac extends MacProtocolBase like IMacProtocol
 
         @selfMessageKinds(inet::BMacType);
 }
-

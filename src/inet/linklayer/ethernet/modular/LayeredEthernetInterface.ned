@@ -16,7 +16,30 @@ import inet.protocolelement.processing.IProcessingDelayLayer;
 import inet.protocolelement.trafficconditioner.ITrafficConditionerLayer;
 
 //
-// This module implements an Ethernet network interface.
+// Implements a highly modular Ethernet network interface with a layered architecture
+// that separates different protocol functions into distinct, replaceable components.
+// This design allows for flexible customization and extension of Ethernet functionality
+// while maintaining standard compliance.
+//
+// The interface is structured as a vertical stack of protocol layers, each handling
+// specific aspects of Ethernet communication:
+// - Processing Delay Layer: Simulates processing delays in the interface
+// - Traffic Conditioner Layer: Shapes and conditions traffic (policing, shaping)
+// - Measurement Layer: Collects performance statistics
+// - MAC Layer: Handles medium access control and framing
+// - PHY Layer: Manages physical signaling and transmission
+//
+// Each layer is connected to its adjacent layers through standardized gates,
+// creating a clean separation of concerns. This modular approach enables:
+// - Easy replacement of individual protocol components
+// - Insertion of new protocol layers for extended functionality
+// - Precise modeling of different Ethernet variants
+// - Simplified testing and validation of protocol implementations
+//
+// The interface supports standard Ethernet features including automatic address
+// assignment, configurable bitrates, and MTU settings.
+//
+// @see ~EthernetMacLayer, ~EthernetPhyLayer, ~IEthernetInterface
 //
 module LayeredEthernetInterface extends NetworkInterface like IEthernetInterface
 {
@@ -72,4 +95,3 @@ module LayeredEthernetInterface extends NetworkInterface like IEthernetInterface
         trafficConditionerLayer.upperLayerOut --> processingDelayLayer.lowerLayerIn;
         processingDelayLayer.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
 }
-

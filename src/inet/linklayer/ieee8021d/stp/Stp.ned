@@ -10,21 +10,33 @@ package inet.linklayer.ieee8021d.stp;
 import inet.linklayer.contract.ISpanningTree;
 
 //
-// The Spanning Tree Protocol (STP) is a network protocol that ensures a loop-free
-// topology for any bridged Ethernet local area network. The basic function of STP
-// is to prevent bridge loops and the broadcast radiation that results from them.
-// Spanning tree also allows a network design to include spare (redundant) links to
-// provide automatic backup paths if an active link fails, without the danger of
-// bridge loops or the need for manually enabling/disabling these backup links.
+// Implements the original Spanning Tree Protocol (STP) as defined in IEEE 802.1D-1998.
+// STP creates a loop-free logical topology in Ethernet networks with redundant links,
+// preventing broadcast storms while maintaining network resilience.
 //
-// There are various versions of Spanning Tree algorithm and protocol. This module
-// implements it according to the IEEE 802.1D-1998 specification.
+// The protocol operates by:
+// - Electing a single root bridge based on bridge priority and MAC address
+// - Calculating the shortest path from each bridge to the root bridge
+// - Blocking redundant ports that would create loops
+// - Transitioning ports through multiple states (blocking, listening, learning, forwarding)
+// - Reconfiguring the network topology when links fail or bridges are added/removed
 //
-// STP makes use of per-port configuration data such as cost and priority.
-// They can be set using ~L2NetworkConfigurator. Port state is kept in the switch's
-// ~InterfaceTable.
+// Key features:
+// - Automatic root bridge election through Bridge Protocol Data Units (BPDUs)
+// - Path cost calculation based on link speeds
+// - Port state management (blocking, listening, learning, forwarding)
+// - Topology change detection and propagation
+// - Relatively slow convergence (typically 30-50 seconds)
 //
-// @see ~L2NetworkConfigurator, ~InterfaceTable
+// The module exchanges BPDU messages with other bridges to determine the network
+// topology. It maintains port states in the ~InterfaceTable and can be configured
+// using the ~L2NetworkConfigurator. The visualization option allows observing the
+// spanning tree topology in the network graphics.
+//
+// This implementation is now considered legacy, as it has been superseded by
+// the Rapid Spanning Tree Protocol (~Rstp) which provides faster convergence.
+//
+// @see ~Rstp, ~Ieee8021dRelay, ~L2NetworkConfigurator, ~InterfaceTable
 //
 simple Stp like ISpanningTree
 {
@@ -61,4 +73,3 @@ simple Stp like ISpanningTree
         input relayIn;
         output relayOut;
 }
-

@@ -11,7 +11,13 @@ import inet.linklayer.contract.ILoopbackInterface;
 import inet.networklayer.common.NetworkInterface;
 
 //
-// This module implements a loopback network interface.
+// Provides a loopback network interface that loops back packets from the
+// network layer to itself without any packet loss or transformation.
+// Commonly used to represent the loopback interface (lo0, localhost) in
+// network nodes, enabling applications and protocols to communicate within
+// the same node.
+//
+// @see ~Loopback, ~ILoopbackInterface
 //
 module LoopbackInterface extends NetworkInterface like ILoopbackInterface
 {
@@ -31,4 +37,3 @@ module LoopbackInterface extends NetworkInterface like ILoopbackInterface
         upperLayerIn --> { @display("m=n"); } --> lo.upperLayerIn;
         lo.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
 }
-

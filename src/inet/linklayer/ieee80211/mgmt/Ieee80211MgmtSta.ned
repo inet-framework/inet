@@ -8,19 +8,35 @@
 package inet.linklayer.ieee80211.mgmt;
 
 //
-// Used in 802.11 infrastructure mode: handles management frames for a station (STA).
+// Implements the station (STA) management functionality for IEEE 802.11 networks
+// operating in infrastructure mode. This module handles all management aspects
+// of a wireless station connecting to and communicating with access points.
 //
-// This module accepts commands such as Scan, Authenticate, Deauthenticate,
-// Associate, Reassociate, Deassociate from a connected agent module, and carries
-// out the requested action by sending/receiving management frames, switching
-// channels, etc.
+// The management module is responsible for the complete connection lifecycle:
+// - Network discovery through scanning (both passive and active)
+// - Authentication with access points
+// - Association/reassociation to establish data connectivity
+// - Monitoring connection quality and handling roaming
+// - Graceful disconnection through deauthentication/disassociation
 //
-// It implements both active and passive scanning (where active means sending
-// Probe frames). The authentication process is simulated by exchanging dummy
-// messages, i.e. there is no actual cryptography or its detailed simulation
-// involved.
+// Key features:
+// - Dual scanning modes: passive (listening for beacons) and active (sending probes)
+// - Complete state machine implementation for IEEE 802.11 station operation
+// - Support for management frame exchange with access points
+// - Automatic channel switching during scanning operations
+// - Connection quality monitoring with beacon loss detection
+// - Interface with an agent module that can initiate management operations
 //
-// Relies on the MAC layer (~Ieee80211Mac) for reception and transmission of frames.
+// The module processes management commands from the agent (such as scan requests
+// or association commands) and translates them into appropriate management frame
+// exchanges with access points. It maintains the current state of the connection
+// and notifies upper layers about significant events like successful association
+// or beacon loss.
+//
+// The authentication process is simplified and does not implement actual security
+// mechanisms, focusing instead on the frame exchange patterns defined in the standard.
+//
+// @see ~IIeee80211Mgmt, ~Ieee80211MgmtAp, ~Ieee80211Mac
 //
 simple Ieee80211MgmtSta like IIeee80211Mgmt
 {
@@ -38,4 +54,3 @@ simple Ieee80211MgmtSta like IIeee80211Mgmt
         input agentIn;   // Used for attaching an agent algorithm
         output agentOut; // Used for attaching an agent algorithm
 }
-

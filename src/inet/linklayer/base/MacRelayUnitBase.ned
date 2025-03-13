@@ -7,6 +7,28 @@
 
 package inet.linklayer.base;
 
+//
+// Provides a common base module for implementing MAC relay units (switches/bridges)
+// in the INET framework. This module handles the basic infrastructure needed by all
+// MAC relay units, allowing derived modules to focus on specific switching behaviors.
+//
+// MAC relay units forward frames between different network interfaces based on
+// destination MAC addresses. They maintain a forwarding table that maps MAC addresses
+// to outgoing interfaces, which can be populated through learning or configuration.
+//
+// Key features provided by this base module:
+// - Integration with MAC forwarding tables
+// - Interface table access for port management
+// - Common frame processing infrastructure
+// - Broadcast handling capabilities
+// - Statistics collection for monitoring
+//
+// This module serves as the foundation for various switch implementations,
+// including basic learning switches, VLAN-aware switches, and more advanced
+// bridging devices that implement spanning tree protocols.
+//
+// @see ~IMacRelayUnit, ~IMacForwardingTable
+//
 simple MacRelayUnitBase
 {
     parameters:
@@ -25,4 +47,3 @@ simple MacRelayUnitBase
         input upperLayerIn;
         output upperLayerOut;
 }
-

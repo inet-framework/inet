@@ -14,7 +14,20 @@ import inet.queueing.contract.ITrafficConditioner;
 
 
 //
-// This module implements a PPP network interface.
+// Provides a complete Point-to-Point Protocol (PPP) interface for wired serial
+// connections. Integrates traffic conditioning, queuing, and the core PPP
+// functionality into a single network interface module.
+//
+// Contains three key components:
+// - Traffic conditioners (ingress/egress): Process packets entering/leaving the interface
+// - Queue: Stores packets waiting for transmission, implementing buffer management
+// - PPP: Handles the actual protocol encapsulation/decapsulation and transmission
+//
+// The default configuration uses a DropTailQueue with configurable capacity and
+// OmittedTrafficConditioner for both ingress and egress paths, but these can be
+// replaced with custom implementations.
+//
+// @see ~Ppp, ~IPppInterface, ~IPacketQueue, ~ITrafficConditioner
 //
 module PppInterface extends NetworkInterface like IPppInterface
 {
@@ -53,4 +66,3 @@ module PppInterface extends NetworkInterface like IPppInterface
         ppp.upperLayerOut --> ingressTC.in;
         ingressTC.out --> { @display("m=n"); } --> upperLayerOut;
 }
-

@@ -11,7 +11,20 @@ import inet.queueing.base.PacketFilterBase;
 import inet.queueing.contract.IPacketFilter;
 
 //
-// This module filters out packets based on the attached `VlanInd` tag.
+// Filters incoming packets based on their VLAN ID as indicated by the attached
+// `VlanInd` tag. This module allows selective processing of packets from specific
+// VLANs, enabling VLAN-based traffic segregation and policy enforcement.
+//
+// The module uses the `acceptedVlanIds` parameter to determine which packets to
+// accept or drop. This parameter maps network interface names to lists of accepted
+// VLAN IDs. Special values include:
+// - '*' as interface name: Matches all interfaces
+// - -1 as VLAN ID: Matches packets without a VLAN tag
+//
+// Packets that don't match the acceptance criteria are dropped, while matching
+// packets are forwarded to the output gate for further processing.
+//
+// @see ~VlanReqFilter, ~VlanPolicyLayer
 //
 simple VlanIndFilter extends PacketFilterBase like IPacketFilter
 {
@@ -21,4 +34,3 @@ simple VlanIndFilter extends PacketFilterBase like IPacketFilter
         @class(VlanIndFilter);
         @display("i=block/filter");
 }
-

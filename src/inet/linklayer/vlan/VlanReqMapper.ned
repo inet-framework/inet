@@ -11,7 +11,23 @@ import inet.queueing.base.PacketFlowBase;
 import inet.queueing.contract.IPacketFlow;
 
 //
-// This module updates the `VlanReq` tag on packets.
+// Transforms VLAN IDs on outgoing packets by updating the `VlanReq` tag according
+// to a configurable mapping. This module enables VLAN translation, which is essential
+// for connecting different VLAN domains, implementing VLAN hierarchies, or enforcing
+// network segmentation policies.
+//
+// The module uses the `mappedVlanIds` parameter to determine how to transform VLAN IDs.
+// This parameter maps network interface names to another map which maps source VLAN IDs
+// to destination VLAN IDs. Special values include:
+// - '*' as interface name: Applies to all interfaces
+// - -1 as VLAN ID: Represents packets without a VLAN tag
+//
+// Common use cases include:
+// - VLAN translation at network boundaries
+// - Implementing Q-in-Q tunneling (VLAN stacking)
+// - Normalizing VLAN IDs across different network segments
+//
+// @see ~VlanReqFilter, ~VlanPolicyLayer
 //
 simple VlanReqMapper extends PacketFlowBase like IPacketFlow
 {
@@ -22,4 +38,3 @@ simple VlanReqMapper extends PacketFlowBase like IPacketFlow
         @class(VlanReqMapper);
         @display("i=block/switch");
 }
-

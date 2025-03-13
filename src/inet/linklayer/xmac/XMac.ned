@@ -12,8 +12,25 @@ import inet.linklayer.contract.IMacProtocol;
 
 
 //
-// Implementation of X-MAC.
-// See C++ documentation for details.
+// Implements the X-MAC protocol, an energy-efficient MAC protocol designed for
+// wireless sensor networks. X-MAC uses a preamble sampling approach to reduce
+// power consumption in duty-cycled networks where nodes periodically wake up
+// to check for transmissions.
+//
+// Key features of X-MAC include:
+// - Short preamble bursts with target address instead of a long continuous preamble
+// - Early acknowledgment mechanism that allows receivers to interrupt the preamble
+//   once they detect it, reducing energy consumption and latency
+// - Duty cycling with configurable sleep and wake periods
+// - Optional MAC-level acknowledgments for reliability
+//
+// The protocol operates through a state machine that transitions between sleep,
+// channel assessment, preamble transmission/reception, and data transmission/reception
+// states. Parameters allow fine-tuning of timing, power consumption, and reliability.
+//
+// For detailed protocol description, see the paper:
+// "X-MAC: A Short Preamble MAC Protocol for Duty-Cycled Wireless Sensor Networks"
+// http://www.cs.cmu.edu/~andersoe/papers/xmac-sensys.pdf
 //
 module XMac extends MacProtocolBase like IMacProtocol
 {
@@ -67,4 +84,3 @@ module XMac extends MacProtocolBase like IMacProtocol
         @signal[packetDropped](type=inet::Packet);
         @selfMessageKinds(inet::XMacTypes);
 }
-

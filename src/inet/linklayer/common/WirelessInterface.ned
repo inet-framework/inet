@@ -15,7 +15,23 @@ import inet.queueing.contract.IPacketQueue;
 
 
 //
-// This module implements a generic wireless network interface.
+// Provides a generic, configurable wireless network interface that serves as
+// the foundation for various wireless interface implementations. This module
+// combines essential components needed for wireless communication into a
+// flexible and extensible architecture.
+//
+// The interface consists of four key components:
+// - QoS classifier: Categorizes incoming packets based on QoS requirements
+// - Packet queue: Buffers packets before transmission
+// - MAC protocol: Handles medium access control
+// - Radio: Manages physical layer transmission and reception
+//
+// This module is designed to be extended by specific wireless interface
+// implementations (e.g., IEEE 802.11, IEEE 802.15.4) by configuring appropriate
+// submodules. The flexible architecture allows for easy customization while
+// maintaining a consistent interface to the upper layers.
+//
+// @see ~IWirelessInterface, ~NetworkInterface
 //
 module WirelessInterface extends NetworkInterface like IWirelessInterface
 {
@@ -56,4 +72,3 @@ module WirelessInterface extends NetworkInterface like IWirelessInterface
         radio.upperLayerOut --> mac.lowerLayerIn if exists(radio);
         mac.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
 }
-

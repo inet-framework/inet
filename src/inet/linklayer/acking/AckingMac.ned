@@ -12,15 +12,27 @@ import inet.linklayer.contract.ILinkLayer;
 import inet.linklayer.contract.IMacProtocol;
 
 //
-// This module implements a trivial MAC protocol for use in ~AckingWirelessInterface.
+// Implements a simplified MAC protocol with optional acknowledgments, designed
+// for use in idealized wireless network simulations where detailed MAC behavior
+// is not important. This protocol provides basic packet encapsulation and
+// addressing functionality without the complexity of real-world MAC protocols.
 //
-// The implementation provides packet encapsulation and decapsulation, but it
-// doesn't have a real medium access protocol. It doesn't provide carrier sense
-// mechanism, collision avoidance, or collision detection, but it provides optional
-// out-of-band acknowledgement. Higher layer packets should have `MacAddressReq`
-// tag.
+// Key features:
+// - Simple packet encapsulation and decapsulation
+// - Optional out-of-band acknowledgment mechanism
+// - Configurable bitrate and full/half duplex operation
+// - No carrier sensing, collision avoidance, or collision detection
+// - No backoff mechanism or retransmission strategy
 //
-// See ~AckingWirelessInterface for rationale and details.
+// This protocol is particularly useful for:
+// - Testing higher layer protocols without MAC layer interference
+// - Simulating idealized wireless networks with perfect transmission
+// - Educational scenarios where MAC complexity would be distracting
+// - Rapid prototyping of wireless network applications
+//
+// Higher layer packets must include a `MacAddressReq` tag for proper addressing.
+//
+// @see ~AckingWirelessInterface, ~UnitDiskRadioMedium
 //
 module AckingMac extends MacProtocolBase like ILinkLayer, IMacProtocol
 {
@@ -47,4 +59,3 @@ module AckingMac extends MacProtocolBase like ILinkLayer, IMacProtocol
         @statistic[packetDropInterfaceDown](title="packet drop: interface down"; source=packetDropReasonIsInterfaceDown(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
 }
-

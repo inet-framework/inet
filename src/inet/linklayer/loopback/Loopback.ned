@@ -8,9 +8,12 @@
 package inet.linklayer.loopback;
 
 //
-// Loopback interface module implementation.
+// Implements a loopback interface that immediately sends back any received packet
+// to the upper layer. Packets are not altered in any way. This module is used to
+// support the loopback interface in network nodes, allowing internal communication
+// between protocols within the same node.
 //
-// @see ~LoopbackInterface
+// @see ~LoopbackInterface, ~ILoopbackInterface
 //
 simple Loopback
 {
@@ -28,4 +31,3 @@ simple Loopback
         input upperLayerIn;
         output upperLayerOut;
 }
-

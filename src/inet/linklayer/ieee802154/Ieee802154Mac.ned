@@ -25,8 +25,27 @@ import inet.linklayer.contract.IMacProtocol;
 
 
 //
-// Generic CSMA protocol supporting Mac-ACKs as well as
-// constant, linear or exponential backoff times.
+// Implements the IEEE 802.15.4 MAC (Medium Access Control) protocol for
+// low-rate wireless personal area networks (LR-WPANs). This module provides
+// the core CSMA/CA (Carrier Sense Multiple Access with Collision Avoidance)
+// functionality with support for acknowledgments and various backoff strategies.
+//
+// The IEEE 802.15.4 standard is designed for low-power, low-data-rate wireless
+// communication between simple devices, commonly used in wireless sensor networks,
+// home automation, and Internet of Things (IoT) applications.
+//
+// Key features:
+// - CSMA/CA medium access with configurable backoff methods (constant, linear, exponential)
+// - Optional MAC-level acknowledgments for unicast frames
+// - Frame retransmission with configurable retry limits
+// - Clear Channel Assessment (CCA) for collision avoidance
+// - Comprehensive statistics collection for performance analysis
+//
+// The module can be configured with different backoff strategies and timing
+// parameters to adapt to various network conditions and application requirements.
+// All timing parameters are based on the IEEE 802.15.4 standard specifications.
+//
+// @see ~Ieee802154NarrowbandMac, ~Ieee802154NarrowbandInterface
 //
 module Ieee802154Mac extends MacProtocolBase like IMacProtocol
 {
@@ -96,4 +115,3 @@ module Ieee802154Mac extends MacProtocolBase like IMacProtocol
         @statistic[packetDropRetryLimitReached](title="packet drop: retry limit reached"; source=packetDropReasonIsRetryLimitReached(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropBackoffLimitReached](title="packet drop: backoff limit reached"; source=packetDropReasonIsCongestion(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
 }
-

@@ -10,11 +10,29 @@ package inet.linklayer.ieee8021as;
 import inet.linklayer.contract.IGptp;
 
 //
-// This module implements the IEEE 802.1as protocol also known as gPTP. It
-// measures link delays to neighboring gPTP network nodes periodically. The
-// slave and master ports specify where the connected gPTP network nodes
-// and their roles in the time synchronization domain. The time synchronization
-// is done periodically and the clock module is set.
+// Implements the IEEE 802.1AS Generalized Precision Time Protocol (gPTP) for precise
+// time synchronization in Ethernet networks. This protocol enables network devices
+// to achieve sub-microsecond clock synchronization, which is essential for
+// time-sensitive networking applications.
+//
+// The module performs several key functions:
+// - Measures link delays to neighboring gPTP nodes through peer delay mechanism
+// - Exchanges timing information through Sync, Follow_Up, and other messages
+// - Calculates clock offsets and rate ratios between nodes
+// - Periodically updates the local clock to maintain synchronization
+// - Supports multiple time synchronization domains
+//
+// The module can operate in three different roles:
+// - Master: Provides the reference time for the network
+// - Bridge: Forwards and processes time synchronization messages
+// - Slave: Synchronizes its local clock to the master clock
+//
+// The slavePort parameter specifies the port for receiving time from upstream nodes,
+// while masterPorts specifies the ports for distributing time to downstream nodes.
+// Various timing parameters control the frequency of synchronization messages and
+// delay measurements.
+//
+// @see ~GptpMaster, ~GptpSlave, ~GptpBridge, ~MultiDomainGptp
 //
 simple Gptp like IGptp
 {
@@ -54,4 +72,3 @@ simple Gptp like IGptp
         input socketIn;
         output socketOut;
 }
-

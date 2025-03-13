@@ -17,46 +17,44 @@ import inet.networklayer.common.NetworkInterface;
 import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
 
 //
-// This module implements an IEEE 802.11 network interface. It implements
-// a large subset of the IEEE 802.11 standard, and may use radio models
-// and wireless signal representations of varying levels of detail.
-// It is also extremely configurable, and its component structure makes
-// it easy to experiment with various details of the protocol.
+// Implements a comprehensive IEEE 802.11 wireless network interface supporting
+// multiple standards (a/b/g/n/p/ac) and operational modes (infrastructure, ad hoc).
+// This module provides a highly modular and configurable implementation of the
+// IEEE 802.11 protocol family for wireless local area networks (WLANs).
 //
-// The main components of the interface are the MAC and the radio submodules.
-// Most configuration parameters are in the MAC (~Ieee80211Mac) and its
-// numerous subcomponents. Most subcomponents are replaceable to facilitate
-// experimentation by using typename assignments in the configuration.
+// The interface integrates multiple components that work together to provide
+// complete WLAN functionality:
 //
-// The default radio is ~Ieee80211ScalarRadio, but it can be replaced
-// with any of several compatible radio types using typename assignments
-// in the configuration. Several radio models of varying levels of detail
-// are available, from simple unit disk radio models to layered radio models
-// that explicitly model forward error correction, scrambling, symbol
-// encoding/decoding, etc, and may represent radio signals with a
-// multi-dimensional power density function over time and frequency.
-// The INET User Guide elaborates on the possibilities.
+// - MAC: Implements medium access control with support for DCF (Distributed
+//   Coordination Function) and optional QoS extensions (EDCA). The MAC handles
+//   frame transmission/reception, acknowledgments, retransmissions, and channel
+//   access according to the CSMA/CA mechanism.
 //
-// The type of the management submodule is also configurable. The type of this
-// submodule decides whether the interfaces acts as an AP, a STA, or is in ad hoc mode.
-// Use ~Ieee80211MgmtSta or ~Ieee80211MgmtStaSimplified for STA,
-// ~Ieee80211MgmtAp or ~Ieee80211MgmtApSimplified for AP, and
-// ~Ieee80211MgmtAdhoc for ad hoc mode.
+// - Management: Controls the operational state of the interface through management
+//   frames. Different management modules support different roles:
+//   * ~Ieee80211MgmtSta for station mode (client)
+//   * ~Ieee80211MgmtAp for access point mode
+//   * ~Ieee80211MgmtAdhoc for ad hoc networks
 //
-// The agent submodule is responsible for initiating the process of connecting
-// to an AP and similar tasks normally done from "user space".
+// - Agent: Provides higher-level control of the management functions, such as
+//   initiating scanning, authentication, and association processes.
 //
-// The LLC submodule is responsible for adding/removing the LLC header on packets.
+// - LLC: Handles logical link control, adding/removing LLC headers for
+//   communication with upper layers. Supports both EPD (Ethertype Protocol
+//   Discrimination) and LPD (LLC Protocol Discrimination) modes.
 //
-// A classifier is responsible for assigning a 802.1d User Priority (UP) to
-// packets and is only needed if QoS is involved.
+// - Radio: Provides physical layer functionality with multiple implementation
+//   options ranging from simple unit disk models to sophisticated models with
+//   detailed signal representation and propagation characteristics.
 //
-// The clock submodule would allow clock skew modeling -- this is currently not used.
+// - QoS Classifier: Assigns appropriate priority levels to packets when
+//   quality of service is enabled.
 //
-// Note about the implementation:
+// The module is highly customizable through parameter settings and submodule
+// type assignments, making it suitable for a wide range of simulation scenarios
+// from simple connectivity studies to detailed protocol analysis.
 //
-// Despite its appearance, Ieee80211Interface is not a plain compound module.
-// It has an underlying custom C++ class that inherits from `cModule`.
+// @see ~Ieee80211Mac, ~IIeee80211Mgmt, ~IRadio
 //
 module Ieee80211Interface extends NetworkInterface like IWirelessInterface
 {
@@ -130,4 +128,3 @@ module Ieee80211Interface extends NetworkInterface like IWirelessInterface
 
         classifier.in <-- { @display("m=n"); } <-- upperLayerIn;
 }
-

@@ -12,39 +12,40 @@ import inet.linklayer.contract.IMacProtocol;
 
 
 //
-// Implements an imaginary CSMA/CA-based MAC protocol with optional
-// acknowledgements and a retry mechanism. With the appropriate settings,
-// it can approximate basic 802.11b ad-hoc mode operation.
+// Implements a configurable CSMA/CA (Carrier Sense Multiple Access with Collision
+// Avoidance) MAC protocol with optional acknowledgements and a retry mechanism.
+// This implementation can be used for general wireless network simulations and
+// can approximate basic 802.11b ad-hoc mode operation with appropriate settings.
 //
-// Parameters include:
-// - acknowledgements on/off
-// - bit rate (this is used for both data and ACK frames)
-// - protocol overhead: MAC header length, ACK frame length
-// - backoff parameters: minimum/maximum contention window (in slots),
-//   slot time, maximum retry count
-// - timing: interval to wait before transmitting ACK frame (SIFS) and
-//   before data frames in addition to the backoff slots (DIFS)
+// The CSMA/CA protocol operates by sensing the medium before transmission (carrier
+// sense) and backing off if the medium is busy (collision avoidance). This approach
+// reduces the probability of collisions while maintaining good channel utilization.
 //
-// When acknowledgements are turned off, the MAC assumes that its transmissions
-// are successful, so no frame is ever retransmitted.
+// Key features and configuration parameters:
 //
-// When acknowledgements are turned on, the operation is as follows.
-// On the receiver side, the change is quite simple: when the MAC correctly
-// receives a data frame addressed to it, it responds with an ACK frame after
-// a fixed-length gap (SIFS). If the originator of the data frame does not
-// receive the ACK correctly within the due time, it will initiate a
-// retransmission. The contention window (from which the random backoff period is
-// drawn) will be doubled for each retransmission until it reaches the maximum
-// (and then it will stay constant for further retransmissions). After a given
-// number of unsuccessful retries, the MAC will give up and discard the data
-// frame and will take the next data frame from the queue. The next frame
-// will start with a clean slate (i.e., the contention window and the retry
-// count will be reset). Giving up a frame will cause a link break signal
-// to be emitted.
+// - Medium access control:
+//   * Carrier sensing before transmission
+//   * Random backoff mechanism with configurable contention window
+//   * DIFS (DCF Interframe Space) before data transmission
+//   * SIFS (Short Interframe Space) before ACK transmission
 //
-// Note: This module does not contain a duplicate detection algorithm in order
-// to keep its code simple and accessible, so lost ACKs will cause duplicates
-// in the stream of packets sent up to higher layers.
+// - Reliability mechanisms:
+//   * Optional acknowledgements (can be enabled/disabled)
+//   * Configurable retry limit for failed transmissions
+//   * Exponential backoff for retransmissions (contention window doubles after each failure)
+//
+// - Timing and performance parameters:
+//   * Configurable bit rate for both data and ACK frames
+//   * Customizable protocol overhead (header length, ACK frame length)
+//   * Adjustable timing parameters (SIFS, DIFS, slot time)
+//
+// When acknowledgements are disabled, the MAC assumes all transmissions are successful.
+// When enabled, the receiver responds with an ACK after SIFS, and the sender retransmits
+// if no ACK is received within the timeout period. After reaching the retry limit,
+// the frame is discarded, and a link break signal is emitted.
+//
+// Note: This implementation does not include duplicate detection to maintain simplicity,
+// so lost ACKs may cause duplicate packets to be delivered to higher layers.
 //
 module CsmaCaMac extends MacProtocolBase like IMacProtocol
 {
@@ -75,4 +76,3 @@ module CsmaCaMac extends MacProtocolBase like IMacProtocol
         @statistic[packetDropQueueOverflow](title="packet drop: queue overflow"; source=packetDropReasonIsQueueOverflow(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropRetryLimitReached](title="packet drop: retry limit reached"; source=packetDropReasonIsRetryLimitReached(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
 }
-

@@ -16,7 +16,33 @@ import inet.queueing.gate.GateControlList;
 import inet.queueing.queue.CompoundPacketQueueBase;
 
 //
-// This module implements the IEEE 802.1Q time aware shaper.
+// Implements the IEEE 802.1Q Time-Aware Shaper (TAS) for Time-Sensitive Networking
+// (TSN) applications. This compound module provides deterministic packet scheduling
+// based on a global time reference, enabling precise control over traffic timing
+// for applications with strict latency requirements.
+//
+// The Time-Aware Shaper is a key component of IEEE 802.1Q TSN extensions that
+// enables deterministic communication by:
+// - Classifying incoming traffic into multiple traffic classes
+// - Queuing packets in separate queues based on their traffic class
+// - Applying transmission selection algorithms to each queue
+// - Controlling transmission gates according to a predefined schedule
+// - Prioritizing traffic classes during transmission selection
+//
+// Key components of the module:
+// - Traffic classifier: Assigns incoming packets to appropriate traffic classes
+// - Per-class queues: Store packets for each traffic class separately
+// - Transmission selection algorithms: Apply class-specific traffic shaping
+// - Transmission gates: Control when each traffic class can transmit
+// - Transmission selection: Prioritizes traffic from enabled gates
+//
+// The module can be configured with an optional Gate Control List (GCL) that
+// defines the precise timing for opening and closing transmission gates. This
+// enables time-triggered communication with minimal jitter and deterministic
+// latency, which is essential for applications like industrial control systems,
+// automotive networks, and professional audio/video systems.
+//
+// @see ~Ieee8021qCreditBasedShaper, ~PcpTrafficClassClassifier
 //
 module Ieee8021qTimeAwareShaper extends CompoundPacketQueueBase
 {
@@ -67,4 +93,3 @@ module Ieee8021qTimeAwareShaper extends CompoundPacketQueueBase
         }
         transmissionSelection.out --> { @display("m=e"); } --> out;
 }
-

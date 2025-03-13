@@ -11,8 +11,37 @@ import inet.linklayer.contract.IIeee8021qLayer;
 import inet.queueing.contract.IPacketFlow;
 
 //
-// This module implements the IEEE 802.1Q protocol encapsulation/decapsulation.
-// It also provides socket support so applications can use the protocol directly.
+// Implements the core IEEE 802.1Q protocol functionality for VLAN tagging and
+// frame processing. This module handles the encapsulation and decapsulation of
+// Ethernet frames with IEEE 802.1Q tags, enabling VLAN separation and priority-based
+// traffic handling.
+//
+// The module processes frames in both directions:
+// - For outgoing frames: Adds appropriate VLAN tags based on configuration or
+//   socket commands
+// - For incoming frames: Extracts and interprets VLAN tags, then forwards frames
+//   to the appropriate destination
+//
+// Key features:
+// - Support for different VLAN tag types (C-TAG, S-TAG, etc.) through the vlanTagType
+//   parameter
+// - Optional socket interface allowing applications to directly control VLAN
+//   parameters for their traffic
+// - Modular design with separate components for tag insertion/checking and
+//   socket processing
+//
+// The module consists of several components:
+// - Socket table: Maintains socket registrations when socket support is enabled
+// - Socket command processor: Processes commands from applications
+// - Tag header inserter: Adds IEEE 802.1Q tags to outgoing frames
+// - Tag header checker: Extracts and validates tags from incoming frames
+// - Socket packet processor: Delivers incoming frames to registered applications
+//
+// This implementation supports the Ethertype Protocol Discrimination (EPD) method
+// for frame identification and can be configured to work with different VLAN tag
+// formats as specified in the IEEE 802.1Q standard.
+//
+// @see ~Ieee8021qLayer, ~Ieee8021qTagEpdHeaderInserter, ~Ieee8021qTagEpdHeaderChecker
 //
 module Ieee8021qProtocol like IIeee8021qLayer
 {

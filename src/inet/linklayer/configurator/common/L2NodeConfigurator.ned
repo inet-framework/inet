@@ -10,20 +10,28 @@ package inet.linklayer.configurator.common;
 import inet.linklayer.configurator.contract.IL2NodeConfigurator;
 
 //
-// This module has one instance per network node, and it acts like a bridge
-// between the node and the network's global configurator module,
-// ~L2NetworkConfigurator.
+// Provides node-level configuration for layer 2 protocols by acting as a bridge
+// between individual network nodes and the global ~L2NetworkConfigurator module.
+// Each network node that requires layer 2 configuration should contain an instance
+// of this module.
 //
-// ~L2NetworkConfigurator only computes and remembers configuration data
-// (port priority, link cost, etc.), but doesn't configure the nodes'
-// routing tables and interfaces accordingly. The actual configuration is
-// carried out by this module, at network initialization time and also when
-// the node restarts (i.e. after a shutdown or a crash.)
+// While the global ~L2NetworkConfigurator computes and stores configuration data
+// (such as port priorities, link costs, and other spanning tree parameters),
+// it doesn't directly apply these settings to the nodes. This module performs
+// the actual configuration of the node's interfaces and tables at two key times:
+// - During network initialization
+// - After node restart events (following shutdowns or crashes)
 //
-// This module is needed because of failure/restart scenarios:
-// ~L2NetworkConfigurator would not be able to configure the node after
-// a restart, because, being a global module, it doesn't know about node
-// lifecycle events.
+// This architecture separates the configuration computation (centralized in
+// ~L2NetworkConfigurator) from the configuration application (distributed in
+// L2NodeConfigurator instances). This separation is crucial for handling node
+// lifecycle events properly, as the global configurator has no awareness of
+// individual node restarts.
+//
+// The module connects to both the interface table of the node and the global
+// configurator to transfer the necessary configuration information.
+//
+// @see ~L2NetworkConfigurator, ~IL2NodeConfigurator
 //
 simple L2NodeConfigurator like IL2NodeConfigurator
 {
@@ -32,4 +40,3 @@ simple L2NodeConfigurator like IL2NodeConfigurator
         string interfaceTableModule;
         string l2ConfiguratorModule = default("l2NetworkConfigurator"); // The absolute path to the ~L2NetworkConfigurator; use "" if there is no configurator
 }
-

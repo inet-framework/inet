@@ -14,7 +14,26 @@ import inet.queueing.contract.IPacketQueue;
 
 
 //
-// This module implements an IEEE 802.15.4 narrowband network interface.
+// Implements a complete IEEE 802.15.4 narrowband network interface for low-rate
+// wireless personal area networks (LR-WPANs). This module integrates all the
+// necessary components to provide a standards-compliant interface for wireless
+// sensor networks and other low-power applications.
+//
+// The IEEE 802.15.4 narrowband interface operates in various frequency bands
+// (868 MHz, 915 MHz, and 2.4 GHz) with data rates ranging from 20 kbps to 250 kbps.
+// It is designed for low-power, low-cost, and low-complexity wireless communication
+// in applications such as wireless sensor networks, home automation, and IoT devices.
+//
+// The interface consists of three main components:
+// - Queue: Buffers packets from upper layers before transmission
+// - MAC: Implements the IEEE 802.15.4 narrowband MAC protocol with CSMA/CA
+// - Radio: Provides the physical layer functionality for wireless transmission
+//
+// This module can be used in any network node that requires IEEE 802.15.4
+// narrowband communication capabilities. It connects to the upper network layers
+// and provides a standard wireless interface implementation.
+//
+// @see ~Ieee802154NarrowbandMac, ~Ieee802154Mac, ~IWirelessInterface
 //
 module Ieee802154NarrowbandInterface extends NetworkInterface like IWirelessInterface
 {
@@ -51,4 +70,3 @@ module Ieee802154NarrowbandInterface extends NetworkInterface like IWirelessInte
         radio.upperLayerOut --> mac.lowerLayerIn;
         mac.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
 }
-

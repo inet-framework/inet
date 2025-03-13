@@ -13,17 +13,28 @@ import inet.networklayer.common.NetworkInterface;
 import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
 
 //
-// This module implements a highly abstracted wireless network interface (NIC)
-// that uses a trivial MAC protocol. It offers simplicity for scenarios where
-// Layer 1 and 2 effects can be completely ignored, for example testing the
-// basic functionality of a wireless ad-hoc routing protocol.
+// Provides a highly abstracted wireless network interface that uses a simplified
+// MAC protocol with optional acknowledgments. This interface is designed for
+// scenarios where physical and data link layer effects can be idealized or
+// completely ignored.
 //
-// The most important parameter this model accepts is the transmission range.
-// When a radio transmits a frame, all other radios within transmission range
-// will receive the frame correctly, and radios that are out of range will not be
-// affected at all.
+// The interface creates a perfect transmission environment where:
+// - All nodes within transmission range receive frames perfectly
+// - Nodes outside the transmission range receive nothing
+// - No interference, fading, or other physical layer effects are modeled
+// - Optional acknowledgments provide basic reliability
 //
-// This module requires an ~UnitDiskRadioMedium instance in the network.
+// This abstraction is particularly valuable for:
+// - Testing and debugging higher layer protocols (especially routing protocols)
+// - Educational scenarios where lower layer complexity would be distracting
+// - Rapid prototyping of wireless network applications
+// - Focusing on network layer behavior without physical/link layer interference
+//
+// The transmission range is the key parameter that determines connectivity.
+// It is configured through the radio module (typically ~UnitDiskRadio) and
+// the associated ~UnitDiskRadioMedium, which must be present in the network.
+//
+// @see ~AckingMac, ~UnitDiskRadio, ~UnitDiskRadioMedium
 //
 module AckingWirelessInterface extends NetworkInterface like IWirelessInterface
 {
@@ -60,4 +71,3 @@ module AckingWirelessInterface extends NetworkInterface like IWirelessInterface
         radio.upperLayerOut --> mac.lowerLayerIn;
         mac.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
 }
-

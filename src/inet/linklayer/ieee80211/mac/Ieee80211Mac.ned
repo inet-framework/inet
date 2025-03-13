@@ -17,62 +17,50 @@ import inet.linklayer.ieee80211.mac.contract.ITx;
 
 
 //
-// Implementation of the 802.11 MAC protocol. This module is intended
-// to be used in combination with the ~Ieee80211Radio module as the physical
-// layer.
+// Provides a highly modular implementation of the IEEE 802.11 MAC (Medium Access
+// Control) protocol with support for multiple amendments and operational modes.
+// This module implements the core MAC functionality for wireless LANs according
+// to the IEEE 802.11 standard family.
 //
-// This module has been heavily modularized to enable customization
-// and extension of almost any aspect of its operation, with the aim of
-// better supporting experimentation and research. Because of that, its
-// features and details of operation are determined by its several
-// subcomponents, and can be altered by extending or replacing the
-// appropriate subcomponents.
+// The implementation features a component-based architecture where specific MAC
+// functions are delegated to specialized submodules. This design enables high
+// flexibility for customization, extension, and experimentation by allowing
+// individual components to be replaced or modified independently.
 //
-// Some noteworthy features are:
+// Key features and capabilities:
 //
-// - Support for 802.11a/b/g/e/p, as well as partial/incomplete support for
-//   later WiFi standards such as n and ac.
+// - Standards support: Implements 802.11a/b/g/e/p with partial support for newer
+//   amendments like 802.11n and 802.11ac
 //
-// - Implements DCF and HCF channel access, including support for QoS (EDCA).
+// - Channel access mechanisms:
+//   * DCF (Distributed Coordination Function) with CSMA/CA for basic access
+//   * HCF (Hybrid Coordination Function) with EDCA (Enhanced Distributed Channel
+//     Access) for QoS support
 //
-// - Support for both infrastructure mode and ad hoc mode operation.
+// - Operation modes:
+//   * Infrastructure mode (stations connecting to access points)
+//   * Ad hoc mode (direct station-to-station communication)
 //
-// - In infrastructure mode, authentication and association can be
-//   implicit, or explicitly modeled using frame exchanges.
+// - Advanced MAC features:
+//   * Frame aggregation for improved throughput
+//   * Fragmentation for handling large packets
+//   * Block acknowledgment for efficient frame acknowledgment
+//   * Dynamic rate selection with support for various rate control algorithms
+//   * RTS/CTS mechanism for hidden node problem mitigation
 //
-// - Support for advanced MAC features such as frame aggregation,
-//   fragmentation, block acknowledgement and block agreements,
-//   rate selection and adaptive rate control algorithms like AARF and
-//   ONOE.
+// - Modular components:
+//   * DCF: Handles basic CSMA/CA channel access
+//   * HCF: Provides QoS support through EDCA
+//   * DS: Manages distribution system services
+//   * RX: Processes incoming frames
+//   * TX: Manages outgoing frame transmission
 //
-// - Ability to work with radio models of varying levels of detail,
-//   from simple unit disk radio models to layered radio models that
-//   explicitly model forward error correction, scrambling, symbol
-//   encoding/decoding, etc, and may represent radio signals with a
-//   multi-dimensional power density function over time and frequency.
+// The module works in conjunction with the management layer (~IIeee80211Mgmt)
+// that handles operations like scanning, authentication, and association, and
+// the physical layer (~IRadio) that handles the actual transmission and reception
+// of signals over the wireless medium.
 //
-// - Support for energy consumption modeling.
-//
-// The IEEE 802.11 header is represented by ~Ieee80211MacHeader and its
-// subclasses.
-//
-// Note about the implementation:
-//
-// Despite its appearance, Ieee80211Mac is not a plain compound module.
-// Although the bulk of its functionality is outsourced to submodules,
-// it is an active module with an underlying C++ class that subclasses
-// from `cSimpleModule`, and receives/sends messages on its own behalf.
-//
-// Notable omissions:
-//
-// - PCF is missing
-// - HCCA is currently not implemented. (The module exists, but it is
-//   currently a placeholder.)
-// - Fields related to unsupported features are omitted from frame formats
-//   as well (for example, FH/DS/CF parameter sets, beacon/probe timestamp
-//   which is related to physical layer synchronization, listen interval
-//   which is related to power management, capability information
-//   which is related to PCF and other non-modeled features).
+// @see ~Ieee80211Interface, ~IIeee80211Mac, ~IIeee80211Mgmt
 //
 module Ieee80211Mac extends MacProtocolBase like IIeee80211Mac
 {
@@ -130,4 +118,3 @@ module Ieee80211Mac extends MacProtocolBase like IIeee80211Mac
                 @display("p=250,200");
         }
 }
-

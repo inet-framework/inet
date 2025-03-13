@@ -11,7 +11,16 @@ import inet.linklayer.contract.ITunnelInterface;
 import inet.networklayer.common.NetworkInterface;
 
 //
-// This module implements a TUN network interface.
+// Provides a TUN (network tunnel) interface that creates a virtual network
+// interface in the simulation. TUN interfaces capture and inject packets at
+// the network layer (IP), allowing applications to process network packets
+// directly without requiring physical hardware.
+//
+// This module is commonly used for implementing VPNs, network namespaces,
+// virtual routing and forwarding (VRF), and other network virtualization
+// scenarios where applications need direct access to network layer packets.
+//
+// @see ~Tun, ~ITunnelInterface, ~TunSocket
 //
 module TunInterface extends NetworkInterface like ITunnelInterface
 {
@@ -33,4 +42,3 @@ module TunInterface extends NetworkInterface like ITunnelInterface
         upperLayerIn --> { @display("m=n"); } --> tun.upperLayerIn;
         tun.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
 }
-

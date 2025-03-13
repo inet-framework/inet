@@ -8,28 +8,26 @@
 package inet.linklayer.ppp;
 
 //
-// PPP implementation.
+// Implements the Point-to-Point Protocol (PPP) for serial data transmission.
+// Encapsulates packets in ~PppHeader and ~PppTrailer for transmission over
+// point-to-point links.
 //
-// Packets are encapsulated in ~PppHeader and ~PppTrailer.
+// Focuses on the data encapsulation/decapsulation and queuing aspects of PPP,
+// while omitting the complex link configuration and maintenance features of
+// the full protocol.
 //
-// PPP is a complex protocol with strong support for link configuration
-// and maintenance. This model ignores those details, and only performs
-// simple encapsulation/decapsulation and queuing.
+// In router configurations, works with an external queue module (see ~IPacketQueue)
+// to model finite buffers, implement QoS, and support RED. Requests packets
+// from this external queue one-by-one as the physical link becomes available.
 //
-// In routers, PPP relies on an external queue module (see ~IPacketQueue)
-// to model finite buffer, implement QoS and/or RED, and requests packets
-// from this external queue one-by-one.
+// In host configurations, uses an internal queue for packets awaiting transmission.
+// The queue is conceptually infinite, but a hard limit can be specified via
+// the `packetCapacity` parameter for diagnostic purposes.
 //
-// In hosts, no such queue is used, so PPP contains an internal
-// queue to store packets waiting for transmission.
-// Conceptually, the queue is of infinite size, but for better diagnostics
-// one can specify a hard limit in the `packetCapacity` parameter -- if this is
-// exceeded, the simulation stops with an error.
+// Received packets are immediately decapsulated and forwarded to the upper layer
+// without additional buffering.
 //
-// There is no buffering done on received packets -- they are just decapsulated
-// and sent up immediately.
-//
-// @see ~PppInterface
+// @see ~PppInterface, ~IPppInterface, ~PppFrame
 //
 simple Ppp
 {
@@ -65,4 +63,3 @@ simple Ppp
         output upperLayerOut;
         inout phys @labels(PppFrame);
 }
-

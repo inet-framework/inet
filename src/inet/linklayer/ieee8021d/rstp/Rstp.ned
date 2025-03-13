@@ -10,23 +10,34 @@ package inet.linklayer.ieee8021d.rstp;
 import inet.linklayer.contract.ISpanningTree;
 
 //
-// Implements the Rapid Spanning Tree Protocol (IEEE 802.D-2004) for IEC 48-bit
-// MAC addresses. It is a complete implementation except it doesn't fall back
-// to STP when peers don't support RSTP.
+// Implements the Rapid Spanning Tree Protocol (RSTP) as defined in IEEE 802.1D-2004.
+// RSTP is an evolution of the original Spanning Tree Protocol (STP) that provides
+// significantly faster convergence when topology changes occur in Ethernet networks.
 //
-// RSTP is a network protocol that ensures a loop-free topology for any
-// bridged Ethernet local area network. The basic function of RSTP
-// is to prevent bridge loops and the broadcast radiation that results from them.
-// Spanning tree also allows a network design to include spare (redundant) links to
-// provide automatic backup paths if an active link fails, without the danger of
-// bridge loops, or the need for manual enabling/disabling of these backup links.
-// RSTP is an improved version of STP, providing faster convergence.
+// The protocol creates a loop-free logical topology in networks with redundant links by:
+// - Electing a single root bridge based on bridge priority and MAC address
+// - Calculating the shortest path from each bridge to the root bridge
+// - Blocking redundant ports that would create loops
+// - Rapidly transitioning ports to forwarding state through proposal/agreement handshakes
+// - Quickly responding to topology changes with direct notifications
 //
-// RSTP makes use of per-port configuration data such as cost and priority.
-// They can be set using ~L2NetworkConfigurator. Port state is kept in the switch's
-// ~InterfaceTable.
+// Key improvements over STP:
+// - Faster convergence: typically 1-3 seconds vs. 30-50 seconds in STP
+// - Rapid transition to forwarding through proposal/agreement mechanism
+// - Backup/alternate port roles for faster failover
+// - Direct topology change notification without using the root bridge as relay
+// - Edge port concept for immediate transition to forwarding
+// - Point-to-point link detection for faster handshakes
 //
-// @see ~L2NetworkConfigurator, ~InterfaceTable
+// This implementation supports all core RSTP features but does not include the
+// fallback mechanism to legacy STP when communicating with older bridges that
+// don't support RSTP. The module exchanges BPDU messages with other bridges and
+// maintains port states in the ~InterfaceTable.
+//
+// The visualization option allows observing the spanning tree topology in the
+// network graphics, with port roles and states clearly indicated.
+//
+// @see ~Stp, ~Ieee8021dRelay, ~L2NetworkConfigurator, ~InterfaceTable
 //
 simple Rstp like ISpanningTree
 {
@@ -72,4 +83,3 @@ simple Rstp like ISpanningTree
         input relayIn;
         output relayOut;
 }
-

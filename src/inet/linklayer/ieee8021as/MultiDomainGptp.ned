@@ -12,12 +12,33 @@ import inet.queueing.classifier.PacketClassifier;
 import inet.queueing.common.PacketMultiplexer;
 
 //
-// This module combines multiple ~Gptp modules, one per time domain into a multi
-// time domain time synchronization module. Each gPTP time domain is automatically
-// configured to use the corresponding subclock of the clock passed into this
-// module.
+// Implements support for multiple IEEE 802.1AS time synchronization domains within
+// a single network device. This module enables a device to participate in several
+// independent time domains simultaneously, each with its own time reference.
 //
-// @see ~MultiClock
+// Multiple time domains are useful in scenarios where:
+// - Different applications require different time references
+// - Network segments need to be isolated for redundancy or security
+// - Hierarchical time distribution is required
+// - Different timing accuracy requirements exist within the same network
+//
+// The module operates by:
+// - Creating a separate gPTP instance for each time domain
+// - Associating each gPTP instance with a corresponding subclock
+// - Routing incoming gPTP messages to the appropriate domain based on the domain number
+// - Multiplexing outgoing gPTP messages from all domains
+//
+// Each time domain operates independently with its own:
+// - Grandmaster clock
+// - Synchronization hierarchy
+// - Timing parameters
+// - Domain number identifier
+//
+// This implementation requires a ~MultiClock module that provides separate subclock
+// instances for each time domain. The module automatically configures each gPTP
+// instance to use the corresponding subclock.
+//
+// @see ~MultiClock, ~Gptp, ~GptpMaster, ~GptpSlave, ~GptpBridge
 //
 module MultiDomainGptp like IGptp
 {
@@ -55,4 +76,3 @@ module MultiDomainGptp like IGptp
         socketIn --> { @display("m=s"); } --> classifier.in;
         multiplexer.out --> { @display("m=s"); } --> socketOut;
 }
-

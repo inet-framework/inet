@@ -11,8 +11,29 @@ import inet.protocolelement.contract.IProtocolLayer;
 import inet.protocolelement.processing.IProcessingDelayLayer;
 
 //
-// This module provides various layer 2 services such as packet forwarding,
-// interface selection, virtual LAN handling, stream handling.
+// Implements a modular bridging layer that provides comprehensive layer 2 services
+// for Ethernet networks. This compound module integrates multiple protocol elements
+// to support advanced bridging functionality including frame forwarding, interface
+// selection, VLAN processing, and Time-Sensitive Networking (TSN) features.
+//
+// The bridging layer consists of several protocol sublayers arranged in a processing
+// pipeline, each handling specific aspects of layer 2 functionality:
+// - Processing delay: Simulates the processing time required for frame handling
+// - Direction reverser: Handles bidirectional packet flow through the layer
+// - Stream identifier: Identifies and classifies traffic streams
+// - Stream relay: Forwards streams between interfaces
+// - Stream filter: Filters streams based on configured rules
+// - Stream coder: Encodes/decodes stream-specific information
+// - Interface relay: Selects appropriate outgoing interfaces
+// - VLAN policy: Applies VLAN tagging and filtering policies
+//
+// This modular architecture allows for flexible configuration of bridging behavior
+// by enabling or disabling specific sublayers or replacing them with custom
+// implementations. The module can be used in various network devices that require
+// advanced layer 2 functionality, such as bridges, switches, and routers with
+// integrated switching capabilities.
+//
+// @see ~MacRelayUnit, ~MacForwardingTable, ~InterfaceRelayLayer
 //
 module BridgingLayer like IProtocolLayer
 {

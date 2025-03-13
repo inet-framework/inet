@@ -1,0 +1,255 @@
+# INET Framework Link Layer NED Documentation Review Progress
+
+This file tracks the review progress of NED documentation in the INET Framework's link layer modules.
+
+Status legend:
+- TODO: Documentation needs to be reviewed and improved
+- REVIEWED: Documentation has been reviewed but not yet improved
+- IMPROVED: Documentation has been reviewed and improved
+
+## Link Layer NED Files
+
+### acking/
+- Status: IMPROVED
+- Files:
+  - AckingMac.ned: Improved documentation with detailed description of functionality and use cases
+  - AckingWirelessInterface.ned: Improved documentation with clear description of features and applications
+
+### base/
+- Status: IMPROVED
+- Files:
+  - MacProtocolBase.ned: Improved documentation with clear description of base functionality for MAC protocols
+  - MacRelayUnitBase.ned: Added comprehensive description of base functionality for MAC relay units
+
+### bmac/
+- Status: IMPROVED
+- Files:
+  - BMac.ned: Improved documentation with detailed description of protocol operation and features
+  - BMacInterface.ned: Improved documentation with clear description of components and use cases
+
+### common/
+- Status: IMPROVED
+- Files:
+  - WirelessInterface.ned: Improved documentation with clear description of architecture and components
+  - IIeee8021dQosClassifier.ned: Enhanced documentation explaining IEEE 802.1d QoS classification
+  - OmittedIeee8021dQosClassifier.ned: Added detailed description of its purpose and behavior
+  - QosClassifier.ned: Improved documentation with clear explanation of classification mechanisms
+  - ExampleQosClassifier.ned: Added description of its educational and reference purpose
+  - RandomQosClassifier.ned: Enhanced documentation explaining its testing applications
+
+### configurator/
+- Status: IMPROVED
+- Files:
+  - common/L2NetworkConfigurator.ned: Improved documentation with clear description of layer 2 configuration capabilities
+  - common/L2NodeConfigurator.ned: Enhanced documentation explaining its role in node-level configuration
+  - contract/IL2NodeConfigurator.ned: Added detailed description of the interface for layer 2 node configurators
+  - common/MacForwardingTableConfigurator.ned: Improved documentation with clear explanation of MAC table configuration
+  - common/FailureProtectionConfigurator.ned: Added comprehensive description of TSN failure protection mechanisms
+  - common/StreamRedundancyConfigurator.ned: Enhanced documentation explaining TSN stream redundancy configuration
+
+### contract/
+- Status: IMPROVED
+- Files:
+  - INetworkInterface.ned: Improved documentation with clear description of base interface functionality
+  - IWiredInterface.ned: Enhanced documentation explaining wired interface characteristics
+  - IWirelessInterface.ned: Added detailed description of wireless interface requirements
+  - ILinkLayer.ned: Improved documentation for all three interfaces with clear explanations
+  - IMacProtocol.ned: Added comprehensive description of MAC protocol responsibilities
+  - IMrp.ned: Enhanced documentation explaining MRP interface and functionality in ring topologies
+
+### csmaca/
+- Status: IMPROVED
+- Files:
+  - CsmaCaMac.ned: Improved documentation with detailed description of protocol operation and features
+  - CsmaCaInterface.ned: Improved documentation with clear description of components and use cases
+
+### ethernet/
+- Status: IMPROVED
+- Files:
+  - EthernetPlcaInterface.ned: Improved documentation with detailed description of PLCA functionality
+  - basic/EthernetCsmaMac.ned: Enhanced documentation explaining CSMA/CD protocol operation
+  - basic/EthernetCsmaMacPhy.ned: Improved documentation with detailed explanation of combined MAC/PHY functionality
+  - basic/EthernetEncapsulation.ned: Added comprehensive description of Ethernet frame encapsulation
+  - basic/EthernetInterface.ned: Enhanced documentation explaining interface features and operation modes
+  - basic/EthernetMacPhy.ned: Improved documentation with clear explanation of MAC/PHY integration
+  - basic/OmittedEthernetEncapsulation.ned: Added description of pass-through encapsulation functionality
+  - common/BridgingLayer.ned: Enhanced documentation explaining modular bridging architecture
+  - common/DirectionReverserLayer.ned: Improved documentation with detailed explanation of frame direction reversal
+  - common/EthernetFrameClassifier.ned: Added comprehensive description of frame classification functionality
+  - common/EthernetQosQueue.ned: Enhanced documentation explaining QoS queuing for Ethernet frames
+  - common/InterfaceRelayLayer.ned: Improved documentation with clear explanation of MAC learning and forwarding
+  - common/LocalDelivery.ned: Added detailed description of local frame delivery functionality
+  - common/MacForwardingTable.ned: Enhanced documentation explaining MAC address table functionality
+  - common/MacRelayUnit.ned: Improved documentation with detailed explanation of Ethernet switching
+  - common/PacketDirectionReverser.ned: Added comprehensive description of packet direction reversal
+  - common/RelayInterfaceLearner.ned: Enhanced documentation explaining MAC address learning functionality
+  - common/RelayInterfaceSelector.ned: Improved documentation with clear explanation of interface selection
+  - contract/IEthernetMacLayer.ned: Added detailed description of Ethernet MAC layer interface
+  - modular/EthernetAddressChecker.ned: IMPROVED - Enhanced documentation explaining address verification functionality
+  - modular/EthernetAddressInserter.ned: IMPROVED - Improved documentation with detailed explanation of address insertion
+  - modular/EthernetFcsChecker.ned: IMPROVED - Added comprehensive description of FCS verification process
+  - modular/EthernetFcsInserter.ned: IMPROVED - Enhanced documentation explaining FCS calculation and insertion modes
+  - modular/EthernetCutthroughBarrier.ned: Added comprehensive description of cut-through switching barrier
+  - modular/EthernetCutthroughInterface.ned: Enhanced documentation explaining cut-through interface functionality
+  - modular/EthernetCutthroughLayer.ned: Improved documentation with clear explanation of cut-through layer
+  - modular/EthernetCutthroughSink.ned: Added detailed description of cut-through sink functionality
+  - modular/EthernetCutthroughSource.ned: Enhanced documentation explaining cut-through source operation
+  - modular/EthernetFcsChecker.ned: Improved documentation with detailed explanation of FCS verification
+  - modular/EthernetFcsInserter.ned: Added comprehensive description of FCS calculation and insertion
+  - modular/EthernetFragmentFcsChecker.ned: Enhanced documentation explaining fragment FCS verification
+  - modular/EthernetFragmentFcsInserter.ned: Improved documentation with clear explanation of fragment FCS insertion
+  - modular/EthernetFragmentingMacLayer.ned: Added detailed description of frame fragmentation functionality
+  - modular/EthernetGatingQueue.ned: Enhanced documentation explaining time-aware gating for TSN
+  - modular/EthernetLayer.ned: Improved documentation with detailed explanation of Ethernet layer composition
+  - modular/EthernetMacHeaderChecker.ned: IMPROVED - Added comprehensive description of MAC header verification
+  - modular/EthernetMacHeaderInserter.ned: IMPROVED - Enhanced documentation explaining MAC header insertion
+  - modular/EthernetMacLayer.ned: Improved documentation with clear explanation of modular MAC components
+  - modular/EthernetPauseCommandProcessor.ned: Added detailed description of PAUSE frame processing
+  - modular/EthernetPreemptingMacLayer.ned: Enhanced documentation explaining frame preemption for 802.1Qbu
+  - modular/EthernetPriorityQueue.ned: Improved documentation with detailed explanation of priority queuing
+  - modular/EthernetSocketCommandProcessor.ned: Added comprehensive description of socket command processing
+  - modular/EthernetSocketPacketProcessor.ned: Enhanced documentation explaining socket packet processing
+  - modular/EthernetSocketTable.ned: Improved documentation with clear explanation of socket registration
+  - modular/EthernetStreamingMacLayer.ned: Added detailed description of streaming MAC functionality
+  - modular/EthernetTypeOrLengthChecker.ned: IMPROVED - Enhanced documentation explaining EtherType/Length field verification
+  - modular/EthernetTypeOrLengthInserter.ned: IMPROVED - Improved documentation with detailed explanation of field insertion
+  - modular/LayeredEthernetInterface.ned: Added comprehensive description of layered interface architecture
+
+### ieee802/
+- Status: N/A
+- Note: This directory doesn't contain any NED files, only .msg, .cc, and .h implementation files
+
+### ieee8021ae/
+- Status: IMPROVED
+- Files:
+  - IIeee8021aeTagEpdHeaderInserter.ned: Improved documentation with clear explanation of MACsec header insertion
+  - IIeee8021aeTagEpdHeaderChecker.ned: Enhanced documentation explaining MACsec header checking functionality
+  - Ieee8021aeTagEpdHeaderInserter.ned: Added comprehensive description of header insertion implementation
+  - Ieee8021aeTagEpdHeaderChecker.ned: Improved documentation with detailed explanation of header checking
+
+### ieee8021as/
+- Status: IMPROVED
+- Files:
+  - contract/IGptp.ned: Improved documentation with clear explanation of gPTP interface and roles
+  - Gptp.ned: Enhanced documentation explaining gPTP protocol operation and features
+  - GptpEndstation.ned: Added comprehensive description of base module for gPTP end stations
+  - GptpMaster.ned: Improved documentation with detailed explanation of grandmaster functionality
+  - GptpSlave.ned: Added detailed description of slave node operation and use cases
+  - GptpBridge.ned: Enhanced documentation explaining bridge role in time synchronization
+  - MultiDomainGptp.ned: Added comprehensive description of multi-domain time synchronization
+
+### ieee8021d/
+- Status: IMPROVED
+- Files:
+  - contract/ISpanningTree.ned: Improved documentation with clear explanation of spanning tree protocol interface
+  - stp/Stp.ned: Enhanced documentation explaining STP operation, features, and limitations
+  - rstp/Rstp.ned: Added comprehensive description of RSTP improvements over STP
+  - relay/Ieee8021dRelay.ned: Improved documentation with detailed explanation of STP-aware relay functionality
+
+### ieee8021q/
+- Status: IMPROVED
+- Files:
+  - contract/IIeee8021qLayer.ned: Improved documentation with clear explanation of IEEE 802.1Q layer interface
+  - Ieee8021qLayer.ned: Added comprehensive description of modular IEEE 802.1Q layer architecture
+  - Ieee8021qProtocol.ned: Enhanced documentation explaining protocol functionality and VLAN tagging
+  - Ieee8021qCreditBasedGate.ned: Improved documentation with detailed explanation of credit-based shaping
+  - Ieee8021qCreditBasedShaper.ned: Added comprehensive description of CBS implementation
+  - Ieee8021qTimeAwareShaper.ned: Enhanced documentation explaining time-aware shaping for TSN
+
+### ieee8021r/
+- Status: IMPROVED
+- Files:
+  - contract/IIeee8021rLayer.ned: Improved documentation with clear explanation of FRER protocol interface
+  - Ieee8021rLayer.ned: Enhanced documentation explaining modular layer architecture and components
+  - Ieee8021rProtocol.ned: Added comprehensive description of protocol operation and functionality
+  - IIeee8021rTagEpdHeaderInserter.ned: Improved documentation with detailed explanation of header insertion
+  - IIeee8021rTagEpdHeaderChecker.ned: Added detailed description of header checking and duplicate elimination
+  - Ieee8021rTagEpdHeaderInserter.ned: Enhanced documentation explaining sequence number management
+  - Ieee8021rTagEpdHeaderChecker.ned: Added comprehensive description of duplicate frame detection
+
+### ieee8022/
+- Status: IMPROVED
+- Files:
+  - Ieee8022Llc.ned: Improved documentation with detailed description of LLC protocol functionality
+  - contract/IIeee8022Llc.ned: Enhanced documentation explaining the interface for LLC implementations
+  - Ieee8022LlcLayer.ned: Added comprehensive description of the modular LLC layer architecture
+  - IIeee8022LlcLayer.ned: Improved documentation with clear explanation of the LLC layer interface
+  - Ieee8022LlcChecker.ned: Added detailed description of LLC header checking functionality
+  - Ieee8022LlcInserter.ned: Enhanced documentation explaining LLC header insertion process
+  - Ieee8022SnapChecker.ned: Added comprehensive description of SNAP header checking
+  - Ieee8022SnapInserter.ned: Improved documentation with clear explanation of SNAP header insertion
+
+### ieee80211/
+- Status: IMPROVED
+- Files:
+  - Ieee80211Interface.ned: Improved documentation with comprehensive description of IEEE 802.11 interface architecture
+  - IIeee80211Mac.ned: Enhanced documentation explaining MAC layer responsibilities and features
+  - mac/Ieee80211Mac.ned: Added detailed description of modular MAC implementation and capabilities
+  - mgmt/IIeee80211Mgmt.ned: Improved documentation with clear explanation of management layer interface
+  - mgmt/Ieee80211MgmtSta.ned: Enhanced documentation explaining station management functionality
+
+### ieee802154/
+- Status: IMPROVED
+- Files:
+  - Ieee802154Mac.ned: Improved documentation with detailed description of IEEE 802.15.4 MAC protocol
+  - Ieee802154NarrowbandMac.ned: Enhanced documentation explaining narrowband-specific configurations
+  - Ieee802154NarrowbandInterface.ned: Added comprehensive description of narrowband interface architecture
+  - Ieee802154UwbIrInterface.ned: Improved documentation with clear explanation of UWB-IR capabilities
+
+### lmac/
+- Status: IMPROVED
+- Files:
+  - LMac.ned: Improved documentation with detailed description of protocol operation and features
+  - LMacInterface.ned: Improved documentation with clear description of components and use cases
+
+### loopback/
+- Status: IMPROVED
+- Files:
+  - Loopback.ned: Improved documentation with clear description of functionality
+  - LoopbackInterface.ned: Improved documentation with clear description of functionality
+
+### mrp/
+- Status: IMPROVED
+- Files:
+  - Mrp.ned: Documentation already comprehensive, no changes needed
+  - MrpInterconnection.ned: Documentation already comprehensive, no changes needed
+  - MrpMacForwardingTable.ned: Improved documentation with detailed explanation of functionality and features
+  - MrpRelay.ned: Documentation already comprehensive, no changes needed
+
+### ppp/
+- Status: IMPROVED
+- Files:
+  - Ppp.ned: Improved documentation with clear description of functionality and components
+  - PppInterface.ned: Improved documentation with clear description of functionality and components
+
+### shortcut/
+- Status: IMPROVED
+- Files:
+  - ShortcutMac.ned: Improved documentation with enhanced description of functionality and use cases
+  - ShortcutInterface.ned: Improved documentation with clear description of functionality and use cases
+
+### tun/
+- Status: IMPROVED
+- Files:
+  - Tun.ned: Improved documentation with clear description of functionality and use cases
+  - TunInterface.ned: Improved documentation with clear description of functionality and use cases
+
+### virtual/
+- Status: IMPROVED
+- Files:
+  - VirtualTunnel.ned: Improved documentation with clear description of functionality and parameters
+  - VirtualInterface.ned: Improved documentation with clear description of functionality and use cases
+
+### vlan/
+- Status: IMPROVED
+- Files:
+  - VlanIndFilter.ned: Improved documentation with clear description of functionality and parameters
+  - VlanReqFilter.ned: Improved documentation with clear description of functionality and parameters
+  - VlanReqMapper.ned: Improved documentation with clear description of functionality and use cases
+  - VlanPolicyLayer.ned: Improved documentation with clear description of functionality and components
+
+### xmac/
+- Status: IMPROVED
+- Files:
+  - XMac.ned: Improved documentation with detailed description of protocol operation and features
+  - XMacInterface.ned: Improved documentation with clear description of components and use cases

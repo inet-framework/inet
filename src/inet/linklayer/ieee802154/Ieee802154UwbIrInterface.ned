@@ -14,7 +14,30 @@ import inet.networklayer.common.NetworkInterface;
 import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
 
 //
-// This module implements an IEEE 802.15.4 UWB-IR network interface.
+// Implements an IEEE 802.15.4 Ultra-Wideband Impulse Radio (UWB-IR) network
+// interface for high-precision ranging and localization applications. This module
+// provides a specialized interface for the UWB-IR physical layer option defined
+// in the IEEE 802.15.4a-2007 amendment to the standard.
+//
+// The UWB-IR physical layer operates in frequency bands from 3.1 GHz to 10.6 GHz
+// with very wide bandwidth signals (>500 MHz), enabling:
+// - High-precision ranging and localization (centimeter-level accuracy)
+// - Low power consumption due to short transmission bursts
+// - Resistance to multipath fading and interference
+// - Potential for high data rates over short distances
+//
+// Unlike the narrowband variant, this interface uses the ~AckingMac module for
+// medium access control, which provides a simplified MAC implementation with
+// basic acknowledgment capabilities. The interface consists of:
+// - Queue: Buffers packets from upper layers before transmission
+// - MAC: Implements a simplified MAC protocol with acknowledgments
+// - Radio: Provides the UWB-IR physical layer functionality
+//
+// This module is particularly useful for simulating applications that require
+// precise positioning, such as asset tracking, industrial automation, and
+// healthcare monitoring.
+//
+// @see ~AckingMac, ~Ieee802154NarrowbandInterface, ~IWirelessInterface
 //
 module Ieee802154UwbIrInterface extends NetworkInterface like IWirelessInterface
 {
@@ -49,4 +72,3 @@ module Ieee802154UwbIrInterface extends NetworkInterface like IWirelessInterface
         radio.upperLayerOut --> mac.lowerLayerIn;
         mac.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
 }
-

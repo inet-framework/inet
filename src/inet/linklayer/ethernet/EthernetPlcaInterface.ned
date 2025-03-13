@@ -16,19 +16,26 @@ import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.ITrafficConditioner;
 
 //
-// This module implements a network interface that is suitable for use in Ethernet
-// 10BASE-T1S multidrop links. Such a multidrop link uses the Ethernet Phyisical
-// Layer Collision Avoidance (PLCA) protocol. The protocol is defined in the IEEE
-// 802.3cg-2019 standard. This network interface can be used in any network node
-// module (e.g. ~StandardHost) that allows replacing its network interfaces. All
-// network interfaces on the same multidrop link must use this module.
+// Implements a specialized Ethernet network interface for 10BASE-T1S multidrop
+// links using the Physical Layer Collision Avoidance (PLCA) protocol as defined
+// in IEEE 802.3cg-2019. This interface enables multiple nodes to share a single
+// physical medium while coordinating access to prevent collisions.
 //
-// This module contains separate Ethernet MAC, Ethernet PLCA, and Ethernet PHY
-// protocol modules. If the PLCA module is omitted, then this module implements
-// a half-duplex Ethernet CSMA/CD network interface. If the PLCA module is present,
-// then this module implements an Ethernet 10BASE-T1S network interface that
-// supports multidrop links. In a multidrop link network nodes can be connected
-// using ~WireJunction modules and ~EthernetLink channels.
+// The interface architecture consists of three key components:
+// - Ethernet MAC: Handles MAC-level framing and addressing
+// - Ethernet PLCA: Coordinates medium access using the PLCA protocol
+// - Ethernet PHY: Manages physical layer signaling and transmission
+//
+// The PLCA protocol provides deterministic access to the shared medium by
+// implementing a round-robin token passing scheme at the physical layer.
+// This allows multiple nodes to communicate over a single wire without the
+// performance penalties of traditional CSMA/CD collision handling.
+//
+// When the PLCA module is present, the interface operates as a full 10BASE-T1S
+// network interface supporting multidrop connections. If the PLCA module is
+// omitted, the interface falls back to standard half-duplex Ethernet CSMA/CD
+// operation. In multidrop configurations, nodes are typically connected using
+// ~WireJunction modules and ~EthernetLink channels.
 //
 // @see ~EthernetPlcaHost, ~EthernetPlca, ~EthernetCsmaMac, ~EthernetCsmaPhy, ~EthernetLink, ~WireJunction
 //
@@ -90,4 +97,3 @@ module EthernetPlcaInterface extends NetworkInterface like IEthernetInterface
         mac.upperLayerOut --> ingressTC.in;
         ingressTC.out --> { @display("m=n"); } --> upperLayerOut;
 }
-

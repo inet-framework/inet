@@ -15,7 +15,30 @@ import inet.queueing.contract.ITrafficConditioner;
 
 
 //
-// This module represents an Ethernet network interface.
+// Provides a standard Ethernet network interface implementation that supports
+// both half-duplex and full-duplex operation modes. This module represents the
+// traditional Ethernet interface model in the INET framework and serves as the
+// foundation for Ethernet connectivity in network simulations.
+//
+// The interface architecture consists of:
+// - Traffic conditioners: Optional components for traffic shaping and policing
+//   on both ingress and egress paths
+// - Packet queue: Buffers outgoing packets before transmission
+// - MAC module: Handles medium access control, addressing, and framing
+//
+// Key features:
+// - Configurable duplex mode (half or full)
+// - Optional CSMA/CD support for half-duplex operation
+// - Adjustable bitrate for different Ethernet standards (10Mbps to 10Gbps)
+// - Flexible MAC address assignment (auto-generated or manually specified)
+// - Frame Check Sequence (FCS) handling options
+//
+// The module automatically selects the appropriate MAC implementation based on
+// the configured duplex mode and CSMA/CD settings. For half-duplex operation
+// with CSMA/CD, it uses EthernetCsmaMacPhy; for full-duplex operation, it uses
+// EthernetMacPhy.
+//
+// @see ~IEthernetInterface, ~EthernetCsmaMacPhy, ~EthernetMacPhy
 //
 module EthernetInterface extends NetworkInterface like IEthernetInterface
 {
@@ -66,4 +89,3 @@ module EthernetInterface extends NetworkInterface like IEthernetInterface
         mac.upperLayerOut --> ingressTC.in;
         ingressTC.out --> { @display("m=n"); } --> upperLayerOut;
 }
-

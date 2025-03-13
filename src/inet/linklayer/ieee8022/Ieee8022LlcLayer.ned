@@ -13,6 +13,31 @@ import inet.queueing.common.PacketMultiplexer;
 import inet.queueing.contract.IPacketClassifier;
 import inet.queueing.contract.IPacketFlow;
 
+//
+// Implements a comprehensive IEEE 802.2 Logical Link Control (LLC) layer with
+// a modular architecture that separates different protocol functions into distinct
+// components. This compound module provides a more feature-rich alternative to
+// the simpler ~Ieee8022Llc module.
+//
+// The LLC layer handles protocol multiplexing between the network layer and the
+// MAC sublayer through Service Access Point (SAP) identifiers. This implementation
+// supports both standard LLC headers and SubNetwork Access Protocol (SNAP) headers
+// for extended protocol identification.
+//
+// Key components:
+// - Socket support: Optional socket interface for direct LLC communication
+// - Protocol classification: Directs packets to appropriate processing paths
+// - LLC header processing: Insertion and checking of LLC headers
+// - SNAP header processing: Insertion and checking of SNAP headers for extended protocol IDs
+// - Message dispatching: Routes packets between different processing components
+//
+// The modular design allows for flexible configuration, with optional components
+// that can be enabled or disabled based on requirements. The module can be
+// configured to support direct socket communication with the LLC layer through
+// the hasSocketSupport parameter.
+//
+// @see ~IIeee8022LlcLayer, ~Ieee8022Llc, ~Ieee8022LlcHeader, ~Ieee8022SnapHeader
+//
 module Ieee8022LlcLayer like IIeee8022LlcLayer
 {
     parameters:

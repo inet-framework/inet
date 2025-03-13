@@ -8,24 +8,40 @@
 package inet.linklayer.configurator.common;
 
 //
-// This module allows to configure network scenarios at layer 2.
-// The ~Stp and ~Rstp related parameters such as link cost, port priority
-// and the "is-edge" flag can be configured with XML files.
+// Provides centralized configuration for layer 2 network scenarios, particularly
+// for spanning tree protocols (STP/RSTP) and other link layer parameters. This module
+// uses XML-based configuration to set port costs, priorities, and other interface
+// attributes across the network.
 //
-// This module is based on ~Ipv4NetworkConfigurator. The optional selector
-// attributes: @hosts, @names, @towards, @among also come with this
-// configurator and each of them behaves similarly to its ~Ipv4NetworkConfigurator equivalent.
-// @ports selector added to configuring per-port parameters in `Ieee8021dInterfaceData`.
+// The configurator operates on a network-wide basis, analyzing the topology and
+// applying configurations to multiple devices simultaneously. It inherits the powerful
+// selector mechanism from ~Ipv4NetworkConfigurator, allowing precise targeting of
+// specific hosts or interfaces.
 //
-// The following example configures port 5 (if it exists) on all switches to cost 19 and
-// priority 32768:
+// Key features:
+// - XML-based configuration for layer 2 parameters
+// - Support for spanning tree protocol configuration (STP/RSTP)
+// - Flexible node and interface selection using patterns
+// - Port-specific parameter configuration
+//
+// The configuration uses selector attributes to target specific elements:
+// - @hosts: Selects host modules by name pattern
+// - @names: Selects interfaces by name
+// - @towards: Selects interfaces facing specific nodes
+// - @among: Selects interfaces between specified node groups
+// - @ports: Selects specific ports on devices
+//
+// Example configuration:
 // <pre>
 // <config>
 //   <interface hosts='**' ports='5' cost='19' priority='32768'/>
 // </config>
-// <pre>
+// </pre>
 //
-// For more information about the usage of the selector attributes see ~Ipv4NetworkConfigurator.
+// This example sets port 5 on all switches to have a cost of 19 and priority of 32768,
+// which affects spanning tree protocol path selection.
+//
+// @see ~Ipv4NetworkConfigurator, ~Stp, ~Rstp
 //
 simple L2NetworkConfigurator
 {
@@ -33,4 +49,3 @@ simple L2NetworkConfigurator
         @display("i=block/cogwheel");
         xml config = default(xml("<config><interface hosts='**' ports='**' cost='19' priority='128' edge='false'/></config>"));
 }
-

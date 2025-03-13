@@ -17,10 +17,31 @@ import inet.linklayer.contract.IMacProtocol;
 
 
 //
-// Implementation of L-MAC (Lightweight Medium Access Protocol for
-// Wireless Sensor Networks).
+// Implements the L-MAC (Lightweight Medium Access Protocol) for wireless sensor
+// networks, designed to provide energy-efficient, collision-free communication
+// through a time-slotted approach.
 //
-// See C++ documentation for details.
+// Key features of L-MAC include:
+// - Time division: The time is divided into frames, and each frame is divided into slots
+// - Slot assignment: Each node claims a unique timeslot for transmission
+// - Collision avoidance: Nodes detect and resolve slot collisions by selecting new slots
+// - Energy efficiency: Nodes sleep during unused slots to conserve energy
+//
+// The protocol operates as follows:
+// - During initialization, nodes select their own unique timeslots
+// - In its own timeslot, a node wakes up, performs clear channel assessment (CCA),
+//   sends a control packet, and if it has data to send, transmits a data packet
+// - In foreign timeslots, a node briefly wakes up to check for control packets
+//   addressed to it, and if found, stays awake to receive the data packet
+// - If slot collisions are detected, nodes automatically select new available slots
+//
+// L-MAC is particularly suitable for static wireless sensor networks where
+// predictable, energy-efficient communication is required.
+//
+// The protocol's finite state machine is illustrated in the LMAC-FSM.jpg file.
+//
+// For more details, see: L. van Hoesel and P. Havinga, "A lightweight medium access
+// protocol (LMAC) for wireless sensor networks," IPSN 2004.
 //
 module LMac extends MacProtocolBase like IMacProtocol
 {
@@ -49,4 +70,3 @@ module LMac extends MacProtocolBase like IMacProtocol
         @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @selfMessageKinds(inet::LMacType);
 }
-
