@@ -86,10 +86,10 @@ class INET_API Ieee80211AgentSta : public cSimpleModule, public cListener // TOD
     //@}
 
     /** Choose one AP from the list to associate with */
-    virtual int chooseBSS(Ieee80211Prim_ScanConfirm *resp);
+    virtual const Ieee80211Prim_BssDescription *chooseBSS(const std::vector<const Ieee80211Prim_BssDescription *>& bssList);
 
     // utility method, for debugging
-    virtual void dumpAPList(Ieee80211Prim_ScanConfirm *resp);
+    virtual void dumpAPList(const std::vector<const Ieee80211Prim_BssDescription *>& bssList);
 };
 
 } // namespace ieee80211
@@ -97,4 +97,3 @@ class INET_API Ieee80211AgentSta : public cSimpleModule, public cListener // TOD
 } // namespace inet
 
 #endif
-
