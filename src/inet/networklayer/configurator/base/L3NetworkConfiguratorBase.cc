@@ -504,15 +504,26 @@ std::string L3NetworkConfiguratorBase::getWirelessId(NetworkInterface *networkIn
     }
     cModule *mgmtModule = interfaceModule->getSubmodule("mgmt");
     if (mgmtModule != nullptr && mgmtModule->hasPar("ssid")) {
-        const char *value = mgmtModule->par("ssid");
-        if (*value)
-            return value;
+        const char *ssid = mgmtModule->par("ssid");
+        return ssid; // even if it is empty (i.e. not specified)
     }
     cModule *agentModule = interfaceModule->getSubmodule("agent");
     if (agentModule != nullptr && agentModule->hasPar("defaultSsid")) {
-        const char *value = agentModule->par("defaultSsid");
-        if (*value)
-            return value;
+        const char *defaultSsids = agentModule->par("defaultSsid");
+        std::vector<std::string> ssids = cStringTokenizer(defaultSsids).asVector();
+        if (ssids.size() == 1) {
+            return ssids[0];
+        }
+        else if (ssids.size() > 1) {
+            // we ought to emulate Ieee80211MgmtSta and choose the SSID of the AP with the highest signal strength,
+            // but that info is not available here, so just return the first one
+            return ssids[0];
+        }
+        else {
+            // none given; if there is only one AP int the network, we could return its SSID,
+            // but for now, let's return the default SSID string Ieee80211MgmtAp
+            return "SSID";
+        }
     }
 #endif // INET_WITH_IEEE80211
 #ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
@@ -527,7 +538,7 @@ std::string L3NetworkConfiguratorBase::getWirelessId(NetworkInterface *networkIn
 #endif // defined(INET_WITH_IEEE80211) || defined(INET_WITH_PHYSICALLAYERWIRELESSCOMMON)
 
     // default: put all such wireless interfaces on the same LAN
-    return "SSID";
+    return "default-wireless-id";
 }
 
 /**
