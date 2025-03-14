@@ -10,8 +10,14 @@ package inet.linklayer.ieee80211.mac.rateselection;
 import inet.linklayer.ieee80211.mac.contract.IRateSelection;
 
 //
-// Implements the default rate selection algorithm. Rate selection decides what bit rate
-// (or MCS) should be used for control frames, management frames and data frames.
+// Default implementation of IEEE 802.11 rate selection that determines appropriate 
+// transmission rates for different frame types. Applies configurable policies to select 
+// bit rates for control frames (RTS/CTS/ACK), management frames, and data frames. 
+// Works in conjunction with rate control algorithms to apply frame-specific rate 
+// selection rules while respecting the overall rate adaptation strategy. Supports 
+// configuration of different rates for unicast, multicast, and broadcast frames.
+//
+// @see ~IRateSelection, ~QosRateSelection
 //
 simple RateSelection like IRateSelection
 {
@@ -31,4 +37,3 @@ simple RateSelection like IRateSelection
         double controlFrameBitrate @unit(bps) = default(-1bps);
         @display("i=block/cogwheel");
 }
-

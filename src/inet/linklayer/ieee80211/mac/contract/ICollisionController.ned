@@ -8,13 +8,17 @@
 package inet.linklayer.ieee80211.mac.contract;
 
 //
-// Interface for collision controllers. A collision controller is used
-// with EDCA, and it detects and reports internal collisions among
-// ~Edcaf instances.
+// Interface for IEEE 802.11e collision controllers used with EDCA. Detects and 
+// manages internal collisions that occur when multiple access categories (ACs) 
+// complete their backoff procedures simultaneously. Implements the collision 
+// resolution mechanism that grants channel access to the highest priority AC 
+// and triggers a backoff procedure for lower priority ACs, as if an external 
+// collision had occurred.
+//
+// @see ~EdcaCollisionController, ~Edca, ~Edcaf
 //
 moduleinterface ICollisionController
 {
     parameters:
         @display("i=block/switch");
 }
-

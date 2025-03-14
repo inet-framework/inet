@@ -8,8 +8,12 @@
 package inet.linklayer.ieee8022;
 
 //
-// This module implements the module given interface and can be used as an omitted
-// optional module that removes itself from the module hierarchy during initialization.
+// Placeholder module that implements the IEEE 802.2 SNAP inserter interface but removes itself from the 
+// module hierarchy during initialization. Provides a direct connection between input and output gates 
+// when SNAP header insertion functionality is not needed. Useful in protocol stacks where SNAP header 
+// creation is optional or when packets should be sent without SNAP encapsulation.
+//
+// @see ~IIeee8022SnapInserter, ~Ieee8022SnapInserter, ~OmittedModule
 //
 module OmittedIeee8022SnapInserter like IIeee8022SnapInserter
 {
@@ -22,4 +26,3 @@ module OmittedIeee8022SnapInserter like IIeee8022SnapInserter
     connections:
         in --> out;
 }
-

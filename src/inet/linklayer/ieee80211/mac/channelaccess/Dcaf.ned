@@ -12,7 +12,13 @@ import inet.linklayer.ieee80211.mac.contract.IContention;
 import inet.linklayer.ieee80211.mac.queue.InProgressFrames;
 
 //
-// Implements the DCAF (Distributed Channel Access Function) for IEEE 802.11.
+// Distributed Channel Access Function (DCAF) implementation for IEEE 802.11 DCF. 
+// Manages medium access using CSMA/CA with binary exponential backoff. Maintains 
+// a queue of pending frames, tracks frames in progress, and coordinates with the 
+// contention mechanism to determine when to transmit. Provides the core channel 
+// access functionality for the Distributed Coordination Function.
+//
+// @see ~Dcf, ~Contention, ~InProgressFrames
 //
 module Dcaf
 {
@@ -42,4 +48,3 @@ module Dcaf
                 @display("p=100,300");
         }
 }
-

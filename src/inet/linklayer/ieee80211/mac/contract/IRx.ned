@@ -8,16 +8,17 @@
 package inet.linklayer.ieee80211.mac.contract;
 
 //
-// Interface for Rx processes. The Rx process checks received frames for
-// errors, manages the NAV, and notifies other processes about the channel state
-// (free or busy). The channel is free only if it is free according to both
-// the physical (CCA) and the virtual (NAV-based) carrier sense algorithms.
-// Correctly received frames are sent up to upper layers, corrupted
-// frames are discarded.
+// Interface for IEEE 802.11 receiver components that process incoming frames and manage 
+// channel state information. Defines functionality for frame error checking, Network 
+// Allocation Vector (NAV) management, and channel state notification. Implementations 
+// combine physical carrier sense (Clear Channel Assessment) with virtual carrier sense 
+// (NAV) to determine medium availability, forwarding valid frames while discarding 
+// corrupted ones.
+//
+// @see ~Rx
 //
 moduleinterface IRx
 {
     parameters:
         @display("i=block/rx");
 }
-

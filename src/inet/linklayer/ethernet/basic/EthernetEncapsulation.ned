@@ -10,7 +10,9 @@ package inet.linklayer.ethernet.basic;
 import inet.linklayer.contract.IEthernetLayer;
 
 //
-// Performs Ethernet II or Ethernet with LLC/SNAP encapsulation/decapsulation.
+// Handles encapsulation and decapsulation of frames for Ethernet networks. Supports both Ethernet II and 
+// Ethernet with LLC/SNAP frame formats, converting between the packet format used by higher layers and 
+// the Ethernet frame format. Also processes PAUSE frames for flow control.
 //
 // Expected environment:
 // - `lowerLayerIn`, `lowerLayerOut` gates should be connected to an ~EthernetCsmaMacPhy
@@ -18,17 +20,19 @@ import inet.linklayer.contract.IEthernetLayer;
 //   protocol or application
 //
 // Functionality:
-// - packets coming from upper layers will be encapsulated in an `EthernetII` frame
+// - Packets coming from upper layers will be encapsulated in an `EthernetII` frame
 //   (~EthernetMacHeader) or Ethernet SNAP frame (~Ieee8022LlcSnapHeader)
 //   depending on the `useSNAP` module parameter,
 //   and sent to the MAC. The ~EtherType is taken from the ~PacketProtocolTag tag
 //   attached to the packet. The source address will be filled in by ~EthernetCsmaMacPhy.
-// - also accepts SENDPAUSE command (message kind=IEEE802CTRL_SENDPAUSE) from
+// - Also accepts SENDPAUSE command (message kind=IEEE802CTRL_SENDPAUSE) from
 //   the higher layer: it will send a PAUSE frame, as described in
 //   <a href="ether-pause.html">PAUSE frames</a>.
 // - Ethernet frames arriving from MAC will be decapsulated and sent up to the
 //   higher layers. Accepts ~EthernetMacHeader, ~Ieee8022LlcHeader, and
 //   ~Ieee8022LlcSnapHeader too.
+//
+// @see ~EthernetCsmaMacPhy, ~EthernetMacPhy, ~Ieee8022Llc, ~EthernetMacHeader, ~Ieee8022LlcSnapHeader
 //
 simple EthernetEncapsulation like IEthernetLayer
 {

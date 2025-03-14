@@ -8,15 +8,17 @@
 package inet.linklayer.ieee80211.mac.contract;
 
 //
-// Interface for modules that implement the frame Distribution Service
-// for IEEE 802.11. The job of the Distribution Service is deciding what
-// to do with correctly received frames. They may be discarded (e.g. on
-// address mismatch), sent up to higher layers, and/or transmitted back
-// on the wireless LAN after switching addresses.
+// Interface for IEEE 802.11 Distribution Service (DS) implementations that determine 
+// the fate of correctly received frames. The DS examines frame addressing information 
+// to decide whether frames should be delivered to higher layers, forwarded to other 
+// stations, or discarded. Essential for implementing access point functionality where 
+// frames may need to be relayed between stations or between the wireless network and 
+// the distribution system.
+//
+// @see ~Ds
 //
 moduleinterface IDs
 {
     parameters:
         @display("i=block/routing");
 }
-

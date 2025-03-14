@@ -15,15 +15,12 @@ import inet.queueing.contract.IPacketGate;
 import inet.queueing.contract.IPacketMeter;
 
 //
-// This module implements the IEEE 802.1Q per-stream filtering and policing.
-// The relationship between streams, gates, and meters is not one-to-one. The
-// number of streams, gates, and meters can be different, and the module will take
-// care of the connections between the submodules based on the `streamFilterTable`
-// parameter.
+// Flexible implementation of IEEE 802.1Q per-stream filtering and policing with configurable many-to-many 
+// relationships between streams, gates, and meters. Allows complex traffic management scenarios where 
+// multiple streams can share gates and meters in various combinations. Uses a stream filter table to 
+// define the mapping between components, supporting wildcard stream matching for default path behavior.
 //
-// In order to define the behavior of a default path, you can add an entry to the
-// `streamFilterTable` that matches all streams:
-// {stream: "*", gate: n, meter: n}
+// @see ~SimpleIeee8021qFilter, ~DualIeee8021qFilter, ~ATSIeee8021qFilter, ~IPacketFilter, ~IPacketGate
 //
 module Ieee8021qFilter like IPacketFilter
 {

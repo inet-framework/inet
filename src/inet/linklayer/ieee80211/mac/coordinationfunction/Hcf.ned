@@ -23,7 +23,14 @@ import inet.linklayer.ieee80211.mac.recipient.RecipientQosMacDataService;
 
 
 //
-// Implements the HCF (Hybrid Coordination Function) for IEEE 802.11.
+// Implementation of the IEEE 802.11 Hybrid Coordination Function (HCF) that combines 
+// contention-based and controlled channel access methods. Integrates EDCA (Enhanced 
+// Distributed Channel Access) for prioritized traffic with multiple access categories 
+// and HCCA (HCF Controlled Channel Access) for parameterized QoS. Supports QoS 
+// enhancements including traffic differentiation, block acknowledgment, and protection 
+// mechanisms introduced in IEEE 802.11e.
+//
+// @see ~IHcf, ~Edca, ~Edcaf, ~Hcca
 //
 module Hcf like IHcf
 {
@@ -133,4 +140,3 @@ module Hcf like IHcf
                 @display("p=550,600");
         }
 }
-

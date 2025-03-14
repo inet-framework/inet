@@ -12,10 +12,11 @@ import inet.linklayer.contract.IEtherMac;
 
 
 //
-// Ethernet MAC layer. MAC performs transmission and reception of frames.
-// See the ~IEtherMac for the Ethernet MAC layer general information.
-// Doesn't do encapsulation/decapsulation; see ~Ieee8022Llc and ~EthernetEncapsulation for
-// that.
+// Implements the Ethernet MAC layer with CSMA/CD protocol support. Handles frame transmission and reception
+// according to the IEEE 802.3 standard. Supports both half-duplex operation with collision detection and
+// full-duplex operation. In half-duplex mode, implements carrier sensing, collision detection, binary
+// exponential backoff, and optional carrier extension and frame bursting for Gigabit Ethernet.
+// Doesn't perform encapsulation/decapsulation; see ~Ieee8022Llc and ~EthernetEncapsulation for that.
 //
 // Supported variations:
 // - 10Mb Ethernet (duplex and half-duplex, coaxial cable or twisted pair)
@@ -94,7 +95,7 @@ import inet.linklayer.contract.IEtherMac;
 // Please see <a href="physical.html">Messaging on the physical layer</a>.
 //
 // @see ~EthernetMacPhy, ~EthernetInterface, ~IPacketQueue, ~EthernetEncapsulation, ~Ieee8022Llc
-// @see ~EthernetMacHeader, ~Ieee8022LlcHeader, ~EthernetFcs
+// @see ~EthernetMacHeader, ~Ieee8022LlcHeader, ~EthernetFcs, ~IEtherMac
 //
 module EthernetCsmaMacPhy like IEtherMac
 {
@@ -149,4 +150,3 @@ module EthernetCsmaMacPhy like IEtherMac
         output upperLayerOut @labels(EtherFrame);  // To ~EthernetEncapsulation or ~IMacRelayUnit
         inout phys @labels(EthernetSignal); // To the network
 }
-

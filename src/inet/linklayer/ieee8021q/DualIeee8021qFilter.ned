@@ -14,12 +14,12 @@ import inet.queueing.contract.IPacketGate;
 import inet.queueing.contract.IPacketMeter;
 
 //
-// This module combines two meters and their corresponding filters per path. This
-// is primarily useful for combining a token bucket based metering with an
-// asynchronous packet shaper. Note that the asynchronous packet shaper also has
-// parts in the network interface queue module.
+// Advanced IEEE 802.1Q filter that combines two different metering and filtering mechanisms in sequence 
+// for each traffic stream. Typically pairs token bucket metering (for bandwidth control) with eligibility 
+// time-based shaping (for delay control). Provides comprehensive traffic management by applying multiple 
+// quality of service constraints to each stream independently.
 //
-// @see ~EligibilityTimeQueue, ~EligibilityTimeGate
+// @see ~SimpleIeee8021qFilter, ~ATSIeee8021qFilter, ~EligibilityTimeMeter, ~DualRateThreeColorMeter, ~EligibilityTimeQueue
 //
 module DualIeee8021qFilter like IPacketFilter
 {

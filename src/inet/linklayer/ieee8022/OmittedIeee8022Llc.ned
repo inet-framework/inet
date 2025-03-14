@@ -10,8 +10,12 @@ package inet.linklayer.ieee8022;
 import inet.linklayer.contract.IIeee8022Llc;
 
 //
-// This module implements the given module interface and can be used as an optional
-// module that removes itself from the module hierarchy during initialization.
+// Placeholder module that implements the IEEE 802.2 LLC interface but removes itself from the module 
+// hierarchy during initialization. Provides a direct connection between upper and lower layers when 
+// LLC functionality is not needed. Useful in network configurations where the LLC layer is optional 
+// or when protocol stacks need to be configurable with or without LLC processing.
+//
+// @see ~IIeee8022Llc, ~Ieee8022Llc, ~OmittedModule
 //
 module OmittedIeee8022Llc like IIeee8022Llc
 {
@@ -27,4 +31,3 @@ module OmittedIeee8022Llc like IIeee8022Llc
         upperLayerIn --> lowerLayerOut;
         lowerLayerIn --> upperLayerOut;
 }
-

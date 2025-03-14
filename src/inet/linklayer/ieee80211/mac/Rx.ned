@@ -10,11 +10,13 @@ package inet.linklayer.ieee80211.mac;
 import inet.linklayer.ieee80211.mac.contract.IRx;
 
 //
-// Responsible for checking frames received over the radio for errors,
-// for managing the NAV, and for notifying other processes about the channel
-// state (free or busy).
+// Receiver component for IEEE 802.11 that processes incoming frames from the physical layer. 
+// Performs error checking on received frames, manages the Network Allocation Vector (NAV) 
+// for virtual carrier sensing, and provides channel state information to other MAC components. 
+// Maintains timing information for medium access control and implements the virtual carrier 
+// sensing mechanism essential for CSMA/CA operation.
 //
-// This is the default implementation of thr ~IRx module interface.
+// @see ~IRx
 //
 simple Rx like IRx
 {
@@ -24,4 +26,3 @@ simple Rx like IRx
         @signal[packetDropped](type=inet::Packet);
         @statistic[nav](title="network allocation vector"; source=navChanged; record=vector; interpolationmode=linear);
 }
-

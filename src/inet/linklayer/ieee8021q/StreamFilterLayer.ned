@@ -11,9 +11,12 @@ import inet.protocolelement.contract.IProtocolLayer;
 import inet.queueing.contract.IPacketFilter;
 
 //
-// This module combines two packet filters into a protocol layer so that it can
-// be used in a layered compound module. There are separate submodules for ingress
-// and egress traffic, but in most cases only the ingress filter is used.
+// Protocol layer that implements IEEE 802.1Q stream filtering functionality with separate filters for 
+// ingress and egress traffic. Provides a framework for applying filtering policies to network streams 
+// based on various criteria such as VLAN IDs, PCP values, or stream identifiers. Typically configured 
+// with a SimpleIeee8021qFilter for ingress traffic, while the egress filter is optional.
+//
+// @see ~IProtocolLayer, ~SimpleIeee8021qFilter, ~StreamPolicyLayer, ~IPacketFilter
 //
 module StreamFilterLayer like IProtocolLayer
 {
@@ -38,4 +41,3 @@ module StreamFilterLayer like IProtocolLayer
         lowerLayerIn --> { @display("m=s"); } --> ingress.in;
         ingress.out --> { @display("m=n"); } --> upperLayerOut;
 }
-

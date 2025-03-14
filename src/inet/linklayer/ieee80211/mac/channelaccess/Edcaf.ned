@@ -15,8 +15,14 @@ import inet.linklayer.ieee80211.mac.originator.TxopProcedure;
 import inet.linklayer.ieee80211.mac.queue.InProgressFrames;
 
 //
-// Implements EDCAF (Enhanced Distributed Channel Access Function) for IEEE 802.11.
-// EDCAF represents one access category within EDCA.
+// Enhanced Distributed Channel Access Function (EDCAF) implementation for IEEE 802.11e/n/ac. 
+// Represents a single access category (AC) within the EDCA mechanism, providing prioritized 
+// channel access for a specific traffic class. Manages its own queue, contention parameters 
+// (AIFSN, CWmin, CWmax), and backoff procedure. Coordinates with other ACs through the 
+// collision controller to handle internal collisions when multiple ACs gain channel access 
+// simultaneously.
+//
+// @see ~Edca, ~EdcaCollisionController, ~TxopProcedure, ~QosRecoveryProcedure
 //
 module Edcaf
 {
@@ -72,4 +78,3 @@ module Edcaf
                 @display("p=100,600");
         }
 }
-

@@ -10,8 +10,9 @@ package inet.linklayer.ethernet.basic;
 import inet.linklayer.contract.IEtherMac;
 
 //
-// Ethernet MAC which supports full-duplex operation ONLY.
-// See the ~IEtherMac for general information.
+// Simplified Ethernet MAC implementation supporting full-duplex operation only. Provides frame transmission 
+// and reception capabilities without the complexity of CSMA/CD protocol. Designed for modern switched 
+// Ethernet networks where collisions are eliminated by point-to-point connections.
 //
 // Most of today's Ethernet networks are switched and operate
 // in full-duplex mode. Full-duplex transmission can be used for
@@ -101,7 +102,7 @@ import inet.linklayer.contract.IEtherMac;
 // Please see <a href="physical.html">Messaging on the physical layer</a>.
 //
 // @see ~EthernetCsmaMacPhy, ~EthernetInterface, ~IPacketQueue, ~EthernetEncapsulation, ~Ieee8022Llc
-// @see ~EthernetMacHeader, ~Ieee8022LlcHeader, ~EthernetFcs
+// @see ~EthernetMacHeader, ~Ieee8022LlcHeader, ~EthernetFcs, ~IEtherMac
 //
 module EthernetMacPhy like IEtherMac
 {
@@ -156,4 +157,3 @@ module EthernetMacPhy like IEtherMac
         output upperLayerOut @labels(EtherFrame);  // To ~EthernetEncapsulation or ~IMacRelayUnit
         inout phys @labels(EthernetSignal);        // To the network
 }
-

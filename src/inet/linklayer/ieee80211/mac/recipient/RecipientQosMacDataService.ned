@@ -7,6 +7,20 @@
 
 package inet.linklayer.ieee80211.mac.recipient;
 
+//
+// Implements the IEEE 802.11e/n/ac QoS MAC data service for recipient stations, extending 
+// the basic MAC data service with Quality of Service capabilities. This module processes 
+// incoming frames by handling both defragmentation and deaggregation operations. It can 
+// process A-MSDU (Aggregated MAC Service Data Unit) frames by extracting the individual 
+// MSDUs that were combined by the originator, and can handle A-MPDU (Aggregated MAC 
+// Protocol Data Unit) frames by processing multiple MAC frames that were transmitted 
+// in a single PHY transmission. The module also performs duplicate detection to identify 
+// and discard frames that have been received multiple times due to retransmissions. 
+// Statistics are maintained on defragmented and deaggregated packets, as well as packets 
+// dropped due to duplicate detection.
+//
+// @see ~RecipientMacDataService, ~OriginatorQosMacDataService
+//
 module RecipientQosMacDataService
 {
     parameters:
@@ -19,4 +33,3 @@ module RecipientQosMacDataService
         @statistic[packetDeaggregated](title="packets deaggregated"; record=count);
         @statistic[packetDropDuplicateDetected](title="packet drops: duplicate detected"; source=packetDropReasonIsDuplicateDetected(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
 }
-

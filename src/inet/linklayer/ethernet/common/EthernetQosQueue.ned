@@ -15,7 +15,11 @@ import inet.queueing.queue.CompoundPacketQueueBase;
 import inet.queueing.queue.DropTailQueue;
 
 //
-// Queue module that gives the PAUSE frames a higher priority.
+// Specialized queue for Ethernet frames that prioritizes frames based on their type. Uses a comparator 
+// to order frames, typically giving PAUSE frames higher priority than data frames to ensure timely 
+// processing of flow control messages.
+//
+// @see ~EthernetQosQueue, ~EthernetQosRedQueue, ~DropTailQueue
 //
 //# TODO rename to `EthernetQosQueue` or keep name as it is?
 module EthernetQueue extends DropTailQueue
@@ -25,9 +29,12 @@ module EthernetQueue extends DropTailQueue
 }
 
 //
-// Queue module that gives the PAUSE frames a higher priority,
-// and can be parametrized with an ~IPacketQueue for serving the
-// data frames.
+// Compound queue module that implements Quality of Service for Ethernet frames. Separates PAUSE frames 
+// from data frames using a classifier and processes them through separate queues with different priorities. 
+// Ensures flow control frames receive higher priority treatment while allowing customization of the data 
+// queue implementation.
+//
+// @see ~EthernetQueue, ~EthernetQosRedQueue, ~IPacketQueue, ~EthernetFrameClassifier
 //
 //# TODO rename to `CompoundEtherQueue`? or `CompoundEtherQosQueue`?
 module EthernetQosQueue extends CompoundPacketQueueBase like IPacketQueue
@@ -61,10 +68,12 @@ module EthernetQosQueue extends CompoundPacketQueueBase like IPacketQueue
 }
 
 //
-// Queue module that gives the PAUSE frames a higher priority,
-// and using Random Early Detection algorithm on data frames,
-// and can be parametrized with an ~IPacketQueue for serving the
-// data frames.
+// Enhanced QoS queue for Ethernet that combines priority handling with congestion management. Separates 
+// PAUSE frames for high-priority processing while applying Random Early Detection (RED) to data frames 
+// to prevent queue overflow. Provides congestion control by selectively dropping packets based on queue 
+// occupancy before the queue becomes full.
+//
+// @see ~EthernetQueue, ~EthernetQosQueue, ~RedDropper, ~IPacketQueue
 //
 module EthernetQosRedQueue extends CompoundPacketQueueBase like IPacketQueue
 {
@@ -99,4 +108,3 @@ module EthernetQosRedQueue extends CompoundPacketQueueBase like IPacketQueue
         scheduler.out --> out;
         redFilter.out --> dataQueue.in;
 }
-

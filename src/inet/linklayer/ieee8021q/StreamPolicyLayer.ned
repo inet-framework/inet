@@ -9,7 +9,14 @@ package inet.linklayer.ieee8021q;
 
 import inet.protocolelement.contract.IProtocolLayer;
 
-
+//
+// Compound protocol layer that implements IEEE 802.1Q stream processing functionality through a series 
+// of specialized sublayers. Combines stream identification, relay, and coding operations in sequence to 
+// provide comprehensive stream handling. Processes packets through three stages: identification (tagging 
+// streams), relay (forwarding between interfaces), and coding (adding redundancy or other encoding).
+//
+// @see ~IProtocolLayer, ~StreamFilterLayer, ~StreamIdentifierLayer, ~StreamRelayLayer, ~StreamCoderLayer
+//
 module StreamPolicyLayer like IProtocolLayer
 {
     parameters:

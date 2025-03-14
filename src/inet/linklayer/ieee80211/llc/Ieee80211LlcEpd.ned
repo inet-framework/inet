@@ -7,9 +7,12 @@
 package inet.linklayer.ieee80211.llc;
 
 //
-// An LLC implementation that encapsulates packets with the IEEE 802 `EtherType`
-// Protocol Discrimination (EPD) header, as defined in section 9.2 `EtherTypes`
-// of the IEEE Std 802-2014 standard. See ~Ieee802EpdHeader.
+// IEEE 802.11 Logical Link Control (LLC) implementation that uses EtherType Protocol 
+// Discrimination (EPD) for identifying upper layer protocols. Encapsulates packets with 
+// the IEEE 802 EtherType header as defined in section 9.2 of IEEE Std 802-2014. Provides 
+// a standardized way to identify which network layer protocol is carried in the frame.
+//
+// @see ~IIeee80211Llc, ~Ieee80211LlcLpd, ~Ieee802EpdHeader
 //
 simple Ieee80211LlcEpd like IIeee80211Llc
 {

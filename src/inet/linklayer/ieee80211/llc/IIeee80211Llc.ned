@@ -6,6 +6,15 @@
 
 package inet.linklayer.ieee80211.llc;
 
+//
+// Interface for IEEE 802.11 Logical Link Control (LLC) implementations that handle 
+// encapsulation and decapsulation of packets between the MAC and network layers. 
+// Provides protocol discrimination to identify the upper layer protocol being carried 
+// in the frame. Implementations include EPD (EtherType Protocol Discrimination) and 
+// LPD (LLC Protocol Discrimination) variants.
+//
+// @see ~Ieee80211LlcEpd, ~Ieee80211LlcLpd, ~Ieee8022Llc
+//
 moduleinterface IIeee80211Llc
 {
     parameters:

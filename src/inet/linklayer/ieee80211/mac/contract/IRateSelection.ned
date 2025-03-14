@@ -8,13 +8,17 @@
 package inet.linklayer.ieee80211.mac.contract;
 
 //
-// Interface for frame rate selection modules. Rate selection decides what bit rate
-// (or MCS) should be used for frames of various types, such as control frames,
-// management frames, and data frames.
+// Interface for IEEE 802.11 frame rate selection modules that determine appropriate 
+// transmission rates for different frame types. Rate selection modules apply specific 
+// policies to choose bit rates (or MCS values) for control frames (RTS/CTS/ACK), 
+// management frames, and data frames. These modules work in conjunction with rate 
+// control algorithms but focus on immediate frame-by-frame decisions rather than 
+// long-term adaptation.
+//
+// @see ~RateSelection, ~QosRateSelection
 //
 moduleinterface IRateSelection
 {
     parameters:
         @display("i=block/cogwheel");
 }
-

@@ -11,12 +11,12 @@ import inet.queueing.base.PacketClassifierBase;
 import inet.queueing.contract.IPacketClassifier;
 
 //
-// Classifier that forwards Ethernet PAUSE frames
-// to the `pauseOut` gate, and other frames to the `defaultOut`
-// gate.
+// Packet classifier that separates Ethernet PAUSE frames from other frame types. Forwards PAUSE frames 
+// to the first output gate and all other Ethernet frames to the second output gate. Enables prioritized 
+// handling of flow control frames in Ethernet networks by allowing PAUSE frames to bypass normal queuing 
+// mechanisms.
 //
-// This component can be used to build a QoS queue that gives
-// the PAUSE frames the highest priority.
+// @see ~EthernetMacHeader, ~IPacketClassifier, ~PacketClassifierBase
 //
 simple EthernetFrameClassifier extends PacketClassifierBase like IPacketClassifier
 {
@@ -24,4 +24,3 @@ simple EthernetFrameClassifier extends PacketClassifierBase like IPacketClassifi
         @class(EthernetFrameClassifier);
         @display("i=block/classifier");
 }
-

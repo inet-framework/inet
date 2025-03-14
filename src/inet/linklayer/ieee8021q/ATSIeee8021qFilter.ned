@@ -9,12 +9,13 @@ package inet.linklayer.ieee8021q;
 import inet.linklayer.ieee8021q.SimpleIeee8021qFilter;
 import inet.protocolelement.shaper.GroupEligibilityTimeTable;
 
-// This module implements a filtering module for the asynchronous traffic shaper
-// taking scheduler groups into account.
 //
-// This module is part of the asynchronous shaper infrastructure.
+// Specialized IEEE 802.1Q filter for Asynchronous Traffic Shaping (ATS) that manages traffic streams 
+// based on eligibility time groups. Extends the simple IEEE 802.1Q filter with group-based eligibility 
+// time metering and filtering capabilities. Implements traffic shaping according to IEEE 802.1Qcr, 
+// allowing streams to be forwarded only when their eligibility time has been reached.
 //
-// @see ~EligibilityTimeGate, ~GroupEligibilityTimeMeter, ~EligibilityTimeFilter, ~EligibilityTimeQueue, ~EligibilityTimeTag
+// @see ~SimpleIeee8021qFilter, ~GroupEligibilityTimeTable, ~GroupEligibilityTimeMeter, ~EligibilityTimeFilter
 //
 module ATSIeee8021qFilter extends SimpleIeee8021qFilter
 {

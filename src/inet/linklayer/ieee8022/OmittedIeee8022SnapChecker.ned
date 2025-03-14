@@ -8,8 +8,12 @@
 package inet.linklayer.ieee8022;
 
 //
-// This module implements the module given interface and can be used as an omitted
-// optional module that removes itself from the module hierarchy during initialization.
+// Placeholder module that implements the IEEE 802.2 SNAP checker interface but removes itself from the 
+// module hierarchy during initialization. Provides a direct connection between input and output gates 
+// when SNAP header checking functionality is not needed. Useful in protocol stacks where SNAP header 
+// processing is optional or when packets are known to not contain SNAP headers.
+//
+// @see ~IIeee8022SnapChecker, ~Ieee8022SnapChecker, ~OmittedModule
 //
 module OmittedIeee8022SnapChecker like IIeee8022SnapChecker
 {
@@ -22,4 +26,3 @@ module OmittedIeee8022SnapChecker like IIeee8022SnapChecker
     connections:
         in --> out;
 }
-

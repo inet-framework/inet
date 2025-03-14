@@ -11,7 +11,15 @@ import inet.linklayer.ieee80211.mac.contract.IRtsPolicy;
 
 
 //
-// Implements the default RTS policy for QoS stations.
+// Implements the IEEE 802.11e/n/ac QoS-aware Request-to-Send (RTS) policy for 
+// Quality of Service stations. This policy extends the standard RTS functionality 
+// with QoS considerations, determining when to use the RTS/CTS handshake before 
+// transmitting QoS data frames. Like the basic RTS policy, it uses a configurable 
+// threshold to decide when to send RTS frames, but additionally considers traffic 
+// categories and access categories when making decisions. This helps prioritize 
+// medium access for different types of traffic in QoS-enabled networks.
+//
+// @see ~IRtsPolicy, ~RtsPolicy, ~QosCtsPolicy
 //
 simple QosRtsPolicy like IRtsPolicy
 {
@@ -21,4 +29,3 @@ simple QosRtsPolicy like IRtsPolicy
         int rtsThreshold @unit(B) = default(2346B);
         @display("i=block/control");
 }
-

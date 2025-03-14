@@ -11,9 +11,15 @@ import inet.linklayer.ieee80211.mac.contract.ICollisionController;
 import inet.linklayer.ieee80211.mac.originator.NonQosRecoveryProcedure;
 
 //
-// Implements EDCA (Enhanced Distributed Channel Access) for IEEE 802.11.
-// The implementation allows for a configurable number of access categories,
-// not just four as defined by the standard.
+// Enhanced Distributed Channel Access (EDCA) implementation for IEEE 802.11e/n/ac QoS. 
+// Provides prioritized channel access through multiple access categories (ACs), each 
+// with its own channel access parameters. Manages traffic differentiation by assigning 
+// different contention parameters (AIFS, CWmin, CWmax) to each AC, allowing higher 
+// priority traffic classes to gain channel access with higher probability. Supports 
+// configurable number of access categories beyond the standard's four (AC_BK, AC_BE, 
+// AC_VI, AC_VO).
+//
+// @see ~Edcaf, ~ICollisionController, ~EdcaCollisionController
 //
 module Edca
 {
@@ -49,4 +55,3 @@ module Edca
                 @display("p=400,200");
         }
 }
-

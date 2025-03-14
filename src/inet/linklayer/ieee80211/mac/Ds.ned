@@ -10,11 +10,13 @@ package inet.linklayer.ieee80211.mac;
 import inet.linklayer.ieee80211.mac.contract.IDs;
 
 //
-// Implements the DS (Distribution Service) for IEEE 802.11, which is
-// responsible for distributing correctly received frames to the higher
-// layer, to the wireless LAN, etc.
+// Distribution Service (DS) component for IEEE 802.11 that determines the appropriate 
+// handling of correctly received frames. Makes forwarding decisions based on frame 
+// addressing information, determining whether frames should be delivered to higher layers, 
+// forwarded to other stations, or discarded. Acts as a central routing mechanism within 
+// the MAC layer, particularly important in access point operation.
 //
-// This is the default implementation of the ~IDs module interface.
+// @see ~IDs
 //
 simple Ds like IDs
 {
@@ -23,4 +25,3 @@ simple Ds like IDs
         @display("i=block/routing");
         @signal[packetDropped];
 }
-

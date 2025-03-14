@@ -10,7 +10,14 @@ package inet.linklayer.ieee80211.mac.contention;
 import inet.linklayer.ieee80211.mac.contract.IContention;
 
 //
-// The default implementation of IContention.
+// Default implementation of the IEEE 802.11 contention mechanism that provides 
+// CSMA/CA functionality. Manages the timing of channel access by implementing 
+// interframe spaces (DIFS/AIFS/EIFS), random backoff procedures, and channel 
+// sensing. Tracks contention states (IDLE, DEFER, IFS_AND_BACKOFF) and provides 
+// notifications when channel access is granted. Essential component for both DCF 
+// and EDCA channel access methods.
+//
+// @see ~IContention, ~Dcaf, ~Edcaf
 //
 simple Contention like IContention
 {
@@ -29,4 +36,3 @@ simple Contention like IContention
         @statistic[stateChanged](title="contention state changed"; type=enum; enum=IDLE, DEFER, IFS_AND_BACKOFF; record=count,vector; interpolationmode=none);
         @defaultStatistic(stateChanged:vector);
 }
-

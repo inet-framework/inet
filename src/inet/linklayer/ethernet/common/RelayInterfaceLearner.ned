@@ -11,9 +11,12 @@ import inet.queueing.base.PacketFlowBase;
 import inet.queueing.contract.IPacketFlow;
 
 //
-// This module extracts the source MAC address of the packet passing through and
-// stores the mapping from this MAC address to the incoming network interface in
-// the MAC address table (forwarding information database).
+// Learning module for Ethernet switches that builds the MAC address forwarding table. Examines the source 
+// MAC address of each passing packet and associates it with the incoming interface in the MAC forwarding 
+// table. Implements the self-learning mechanism of Ethernet switches, enabling them to forward frames to 
+// the correct port based on destination MAC addresses.
+//
+// @see ~IMacForwardingTable, ~MacForwardingTable, ~IInterfaceTable, ~PacketFlowBase
 //
 simple RelayInterfaceLearner extends PacketFlowBase like IPacketFlow
 {
@@ -23,4 +26,3 @@ simple RelayInterfaceLearner extends PacketFlowBase like IPacketFlow
         @class(RelayInterfaceLearner);
         @display("i=block/blackboard");
 }
-

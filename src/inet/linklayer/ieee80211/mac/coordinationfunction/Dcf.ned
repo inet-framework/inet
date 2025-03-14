@@ -23,7 +23,13 @@ import inet.linklayer.ieee80211.mac.recipient.RecipientMacDataService;
 
 
 //
-// Implements the DCF (Distributed Coordination Function) for IEEE 802.11.
+// Implementation of the IEEE 802.11 Distributed Coordination Function (DCF) that provides 
+// contention-based access to the wireless medium. Manages frame transmission using CSMA/CA 
+// with binary exponential backoff, handling acknowledgments, retransmissions, and RTS/CTS 
+// protection. Integrates channel access, MAC data services, rate selection, and recovery 
+// procedures to provide reliable frame delivery in a shared wireless environment.
+//
+// @see ~IDcf, ~Dcaf, ~Contention, ~OriginatorMacDataService, ~RecipientMacDataService
 //
 module Dcf like IDcf
 {
@@ -121,4 +127,3 @@ module Dcf like IDcf
                 @display("p=550,400");
         }
 }
-

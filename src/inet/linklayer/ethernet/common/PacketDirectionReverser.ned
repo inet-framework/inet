@@ -11,9 +11,12 @@ import inet.queueing.base.PacketFlowBase;
 import inet.queueing.contract.IPacketFlow;
 
 //
-// This module is part of the layer 2 architecture. It turns an incoming packet
-// into an outgoing packet simply by removing all attached indication tags and
-// turning some of them into an attached request tag on the packet.
+// Packet processing module that converts inbound packets to outbound packets by transforming indication tags 
+// to request tags. Preserves essential packet attributes like MAC addresses, VLAN IDs, and priority codes 
+// while changing the packet direction. Supports packet forwarding in Ethernet networks by maintaining 
+// addressing information and other relevant metadata during direction reversal.
+//
+// @see ~DirectionReverserLayer, ~IPacketFlow, ~PacketFlowBase
 //
 simple PacketDirectionReverser extends PacketFlowBase like IPacketFlow
 {
@@ -23,4 +26,3 @@ simple PacketDirectionReverser extends PacketFlowBase like IPacketFlow
         object excludeEncapsulationProtocols = default([]);
         @class(PacketDirectionReverser);
 }
-

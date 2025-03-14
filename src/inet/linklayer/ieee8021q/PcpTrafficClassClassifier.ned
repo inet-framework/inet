@@ -11,11 +11,13 @@ import inet.queueing.base.PacketClassifierBase;
 import inet.queueing.contract.IPacketClassifier;
 
 //
-// This module classifies packets based on the attached PCP value [0, 7]. The
-// PCP is determined by a `PcpReq` or a `PcpInd` or both. The output gate index is
-// the value found in the mapping matrix using the PCP value as the row index
-// and the number of connected consumers (traffic categories) as the column
-// index.
+// Advanced classifier that maps IEEE 802.1Q Priority Code Point (PCP) values to traffic classes 
+// according to IEEE 802.1Q standard recommendations. Uses a two-dimensional mapping table where 
+// rows represent PCP values (0-7) and columns represent the number of available traffic classes. 
+// Dynamically adapts to the number of connected output gates, implementing the standard's recommended 
+// priority-to-traffic class mappings.
+//
+// @see ~PcpClassifier, ~IPacketClassifier, ~PcpTag
 //
 module PcpTrafficClassClassifier extends PacketClassifierBase like IPacketClassifier
 {

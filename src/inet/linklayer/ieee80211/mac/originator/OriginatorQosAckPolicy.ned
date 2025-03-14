@@ -11,7 +11,16 @@ import inet.linklayer.ieee80211.mac.contract.IOriginatorQosAckPolicy;
 
 
 //
-// Implements the default originator ACK policy for QoS stations.
+// Implements the IEEE 802.11e/n/ac originator Quality of Service (QoS) Acknowledgment 
+// policy for QoS stations. This module extends the basic ACK policy with QoS-aware 
+// features, including support for Block Acknowledgment (Block ACK) which allows 
+// multiple frames to be acknowledged with a single response. The policy determines 
+// when to use normal ACKs versus Block ACKs based on frame characteristics, traffic 
+// categories, and configurable thresholds. It manages both immediate and delayed 
+// Block ACK agreements and calculates appropriate timeout periods for different 
+// acknowledgment types.
+//
+// @see ~IOriginatorQosAckPolicy, ~OriginatorAckPolicy, ~RecipientQosAckPolicy
 //
 simple OriginatorQosAckPolicy like IOriginatorQosAckPolicy
 {
@@ -25,4 +34,3 @@ simple OriginatorQosAckPolicy like IOriginatorQosAckPolicy
 
         @display("i=block/control");
 }
-

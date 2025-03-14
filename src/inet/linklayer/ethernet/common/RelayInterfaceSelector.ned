@@ -11,11 +11,13 @@ import inet.queueing.base.PacketPusherBase;
 import inet.queueing.contract.IPacketFlow;
 
 //
-// This module selects the outgoing interface for the packet passing through
-// from the MAC address table (forwarding information database) based on the
-// destination MAC address. The selected interface is attached to the packet
-// in an ~InterfaceReq. The packet may be duplicated if multiple interfaces
-// are found.
+// Forwarding module for Ethernet switches that determines the outgoing interface for each packet. 
+// Consults the MAC forwarding table to find the appropriate interface based on the destination MAC 
+// address. Handles unicast, multicast, and broadcast traffic with different forwarding strategies. 
+// For unicast addresses, forwards to the specific interface; for unknown addresses or broadcasts, 
+// duplicates the packet to all interfaces except the incoming one.
+//
+// @see ~IMacForwardingTable, ~MacForwardingTable, ~IInterfaceTable, ~RelayInterfaceLearner
 //
 simple RelayInterfaceSelector extends PacketPusherBase like IPacketFlow
 {
@@ -27,4 +29,3 @@ simple RelayInterfaceSelector extends PacketPusherBase like IPacketFlow
         @signal[packetDropped](type=inet::Packet);
         @statistic[packetDropped](title="packets dropped"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
 }
-

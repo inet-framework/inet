@@ -10,8 +10,11 @@ package inet.linklayer.ethernet.basic;
 import inet.linklayer.contract.IEthernetLayer;
 
 //
-// This module implements the given module interface and can be used as an optional
-// module that removes itself from the module hierarchy during initialization.
+// Placeholder module that implements the Ethernet encapsulation interface but removes itself from the module 
+// hierarchy during initialization. Provides a direct connection between upper and lower layers, effectively 
+// bypassing Ethernet encapsulation/decapsulation when it's not needed in a simulation.
+//
+// @see ~EthernetEncapsulation, ~IEthernetLayer, ~EthernetMacPhy, ~EthernetCsmaMacPhy
 //
 module OmittedEthernetEncapsulation like IEthernetLayer
 {
@@ -27,4 +30,3 @@ module OmittedEthernetEncapsulation like IEthernetLayer
         upperLayerIn --> lowerLayerOut;
         lowerLayerIn --> upperLayerOut;
 }
-

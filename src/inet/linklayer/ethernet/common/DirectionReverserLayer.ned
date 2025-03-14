@@ -14,9 +14,12 @@ import inet.queueing.contract.IPacketDelayer;
 import inet.queueing.contract.IPacketFlow;
 
 //
-// This module provides a layer that combines the decision for local delivery
-// with the service of reversing the direction of an incoming packet to outgoing
-// for packet forwarding.
+// Protocol layer that handles packet direction reversal for forwarding in Ethernet networks. Converts 
+// incoming packets to outgoing packets by reversing their direction and preserving necessary tags and 
+// attributes. Supports packet forwarding by transforming inbound packets to outbound packets while 
+// maintaining addressing, VLAN, priority, and other relevant information.
+//
+// @see ~PacketDirectionReverser, ~IProtocolLayer, ~MessageDispatcher
 //
 module DirectionReverserLayer like IProtocolLayer
 {

@@ -8,8 +8,12 @@
 package inet.linklayer.ieee8022;
 
 //
-// This module implements the module given interface and can be used as an omitted
-// optional module that removes itself from the module hierarchy during initialize.
+// Placeholder module that implements the IEEE 802.2 LLC inserter interface but removes itself from the 
+// module hierarchy during initialization. Provides a direct connection between input and output gates 
+// when LLC header insertion functionality is not needed. Useful in protocol stacks where LLC header 
+// creation is optional or when packets should be sent without LLC encapsulation.
+//
+// @see ~IIeee8022LlcInserter, ~Ieee8022LlcInserter, ~OmittedModule
 //
 module OmittedIeee8022LlcInserter like IIeee8022LlcInserter
 {
@@ -22,4 +26,3 @@ module OmittedIeee8022LlcInserter like IIeee8022LlcInserter
     connections:
         in --> out;
 }
-

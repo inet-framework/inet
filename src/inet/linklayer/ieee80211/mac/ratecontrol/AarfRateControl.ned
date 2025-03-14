@@ -10,9 +10,18 @@ package inet.linklayer.ieee80211.mac.ratecontrol;
 import inet.linklayer.ieee80211.mac.contract.IRateControl;
 
 //
-// Implements the Adaptive ARF (AARF) rate control mechanism, which was
-// initially described in IEEE 802.11 Rate Adaptation: A Practical Approach,
-// by M. Lacage, M.H. Manshaei, and T. Turletti, 2004.
+// Implements the Adaptive Auto Rate Fallback (AARF) rate control algorithm for 
+// IEEE 802.11 networks. AARF dynamically adjusts transmission rates based on 
+// success/failure patterns, extending the ARF algorithm with adaptive threshold 
+// adjustment. When probe packets fail, AARF increases the success threshold 
+// exponentially, making it more conservative about rate increases in challenging 
+// environments. This adaptation provides better performance than standard ARF in 
+// varying channel conditions.
+//
+// Reference: M. Lacage, M.H. Manshaei, and T. Turletti, "IEEE 802.11 Rate Adaptation: 
+// A Practical Approach," 2004.
+//
+// @see ~IRateControl, ~ArfRateControl
 //
 simple AarfRateControl like IRateControl
 {
@@ -28,4 +37,3 @@ simple AarfRateControl like IRateControl
         @signal[datarateChanged];
         @statistic[datarateChanged](title="datarate"; record=vector; interpolationmode=sample-hold);
 }
-
