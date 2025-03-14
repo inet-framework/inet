@@ -8,9 +8,26 @@
 package inet.queueing.base;
 
 //
-// This is a base module for various active packet source modules.
+// Base module for active packet source components in the queueing framework.
+// Extends PacketSourceBase with functionality specific to active packet generation.
 //
-// @see ~PacketSourceBase
+// Active packet sources initiate packet flow by actively pushing packets to
+// connected passive packet sinks. This module provides the foundation for
+// implementing various active packet source behaviors with different generation
+// strategies and timing mechanisms.
+//
+// Key features:
+// - Implements the IActivePacketSource interface
+// - Provides signals and statistics for pushed packets
+// - Collects detailed metrics on packet generation, including:
+//   * Packet counts and lengths
+//   * Data rates
+//
+// Derived modules can implement specific generation strategies by defining
+// when and how packets are created and pushed to sinks. Common implementations
+// include periodic generators, bursty traffic sources, and trace-driven sources.
+//
+// @see ~PacketSourceBase, ~IActivePacketSource, ~IPassivePacketSink
 //
 simple ActivePacketSourceBase extends PacketSourceBase
 {

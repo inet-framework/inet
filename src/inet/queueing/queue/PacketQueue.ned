@@ -11,13 +11,13 @@ import inet.queueing.base.PacketQueueBase;
 import inet.queueing.contract.IPacketQueue;
 
 //
-// This module implements a configurable packet queue, which is suitable for use
-// in MAC protocols, traffic conditioning, and quality of services, among others.
-// This is a passive component: packets are pushed into it on its input, and pulled
-// from it on its output. This module can be used on its own, but it's also often supplemented
-// by additional queueing components such as servers, classifiers, schedulers,
-// multiplexers, etc. This kind of composition allows to form a larger module
-// which can act as a packet queue with more complex behavior.
+// Configurable packet queue suitable for use in MAC protocols, traffic conditioning,
+// and quality of service implementations. This passive component receives packets
+// pushed to its input and provides packets when pulled from its output.
+//
+// The queue can be used standalone or combined with other queueing components
+// such as servers, classifiers, schedulers, and multiplexers to create more
+// complex queueing behaviors through composition.
 //
 // By default, this module acts as a standard FIFO queue with an infinite
 // internal buffer. Nevertheless, it can also be configured to limit the number

@@ -8,9 +8,27 @@
 package inet.queueing.base;
 
 //
-// This is a base module for various active packet sink modules.
+// Base module for active packet sink components in the queueing framework.
+// Extends PacketSinkBase with functionality specific to active packet collection.
 //
-// @see ~PacketSinkBase
+// Active packet sinks initiate packet flow by actively pulling packets from
+// connected passive packet sources. This module provides the foundation for
+// implementing various active packet sink behaviors with different collection
+// strategies and timing mechanisms.
+//
+// Key features:
+// - Implements the IActivePacketSink interface
+// - Provides signals and statistics for pulled packets
+// - Collects detailed metrics on packet processing, including:
+//   * Packet counts and lengths
+//   * Data rates
+//   * Packet lifetime statistics
+//   * Jitter and delay variation measurements
+//
+// Derived modules can implement specific collection strategies by defining
+// when and how packets are pulled from sources.
+//
+// @see ~PacketSinkBase, ~IActivePacketSink
 //
 simple ActivePacketSinkBase extends PacketSinkBase
 {

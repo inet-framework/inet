@@ -8,12 +8,28 @@
 package inet.queueing.contract;
 
 //
-// This module interface is implemented by packet meter modules. A packet meter
-// connects one input to one output. It can operate in both active and passive
-// mode. Packets can be pushed into its input or packets can be pulled from its
-// output. When processing packets, a meter attaches some information (such as
-// the packet rate) to the packets based on the data and metadata they contain.
-// The packets are processed as part of a stream.
+// Module interface for packet meter components in the queueing framework.
+// Packet meters measure traffic characteristics and attach this information
+// to packets as they flow through the network.
+//
+// Key characteristics:
+// - Has one input and one output
+// - Can operate in both push and pull modes
+// - Processes packets as part of a stream (considers packet relationships)
+// - Measures traffic properties like rate, burst size, or conformance
+// - Attaches measurement results as metadata to packets
+// - Does not delay, reorder, or drop packets
+//
+// Packet meters are commonly used in network devices to:
+// - Implement traffic policing and shaping mechanisms
+// - Support quality of service (QoS) policies
+// - Measure conformance to traffic contracts
+// - Classify traffic into different service categories
+// - Provide input for congestion control algorithms
+//
+// Common implementations include TokenBucketMeter, which classifies packets
+// as conforming or non-conforming based on a token bucket algorithm. When a
+// meter is not needed in a model, OmittedPacketMeter can be used as a placeholder.
 //
 moduleinterface IPacketMeter extends IPacketFlow
 {

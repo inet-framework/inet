@@ -11,8 +11,29 @@ import inet.queueing.base.PassivePacketSourceBase;
 import inet.queueing.contract.IPassivePacketSource;
 
 //
-// This module is a passive packet source which can be pulled for packets from
-// the connected packet collector.
+// Passive packet source that generates packets on demand when pulled by
+// connected modules. This module complements ActivePacketSource in the
+// queueing framework by providing demand-driven traffic generation.
+//
+// The module operates by:
+// 1. Creating packets according to configured packet length and data parameters
+// 2. Providing packets when requested by connected collectors via pull requests
+// 3. Controlling packet generation rate through providing interval parameter
+//
+// Key features:
+// - On-demand packet generation based on consumer needs
+// - Configurable providing interval to limit packet generation rate
+// - Initial providing offset to control when packets become available
+// - Support for custom clock modules for synchronized packet generation
+// - Ability to generate various packet types and sizes
+//
+// Timing behavior:
+// - The first packet can be provided after initialProvidingOffset
+// - Subsequent packets can be provided every providingInterval
+// - When providingInterval is 0, any number of packets can be pulled at the same simulation time
+// - The providing interval timer starts after a packet is successfully pulled out
+//
+// @see ~ActivePacketSource, ~EmptyPacketSource, ~PcapFilePacketProducer
 //
 simple PassivePacketSource extends PassivePacketSourceBase like IPassivePacketSource
 {

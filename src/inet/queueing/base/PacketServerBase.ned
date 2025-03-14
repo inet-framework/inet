@@ -8,9 +8,33 @@
 package inet.queueing.base;
 
 //
-// This is a base module for various packet server modules.
+// Base module for packet server components in the queueing framework.
+// Packet servers process packets for a specified amount of time before
+// forwarding them, modeling service time in queueing systems.
 //
-// @see ~IPacketServer
+// Servers typically operate by:
+// 1. Pulling a packet from their input (usually a queue)
+// 2. Processing the packet for a specified service time
+// 3. Pushing the packet to their output when processing completes
+//
+// The service time can be:
+// - Constant (fixed processing time)
+// - Random (following statistical distributions)
+// - Data-dependent (based on packet size)
+// - State-dependent (based on system load)
+//
+// Derived server modules implement various service disciplines including:
+// - Standard servers with configurable service time
+// - Preempting servers that can interrupt processing
+// - Token-based servers with rate limiting
+// - Specialized servers for specific protocols
+//
+// The module provides comprehensive statistics collection for:
+// - Number of packets processed
+// - Packet lengths and data rates
+// - Service time measurements
+//
+// @see ~IPacketServer, ~PacketServer, ~PreemptingServer, ~TokenBasedServer
 //
 simple PacketServerBase extends PacketProcessorBase
 {

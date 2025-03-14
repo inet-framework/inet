@@ -13,10 +13,17 @@ import inet.queueing.contract.IPacketSink;
 import inet.queueing.contract.IPassivePacketSink;
 
 //
-// This module is an active/passive full packet sink. It doesn't pull packets
-// from the connected module, and it doesn't allow packets to be pushed by
-// the connected module. The input gate generates backpressure for push packet
-// operations.
+// Special packet sink that simulates a full or congested destination. Rejects
+// all incoming packets by generating permanent backpressure on its input gate,
+// effectively modeling a destination that cannot accept any more packets.
+//
+// Key features:
+// - Implements both active and passive sink interfaces for compatibility
+// - Always generates backpressure for push operations
+// - Never pulls packets from connected modules
+// - Simulates a permanently congested or unavailable destination
+//
+// @see ~ActivePacketSink, ~PassivePacketSink
 //
 simple FullPacketSink extends PacketProcessorBase like IPacketSink, IActivePacketSink, IPassivePacketSink
 {

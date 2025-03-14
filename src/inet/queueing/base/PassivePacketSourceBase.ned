@@ -8,9 +8,21 @@
 package inet.queueing.base;
 
 //
-// This is a base module for various active packet source modules.
+// Base module for passive packet source components in the queueing framework.
+// Passive packet sources wait for packets to be pulled from them by active
+// packet sinks, as opposed to actively pushing packets to sinks.
 //
-// @see ~PacketSourceBase
+// Passive sources operate in pull mode, where they generate packets on demand
+// when active sinks request them. This is in contrast to active sources
+// that operate in push mode, where they initiate packet transfers.
+//
+// Key features:
+// - Generates packets when requested by active sinks
+// - Provides packets with configurable content and attributes
+// - Collects statistics on generated packets
+// - Supports on-demand packet creation for efficient resource usage
+//
+// @see ~PacketSourceBase, ~PassivePacketSource, ~IPassivePacketSource
 //
 simple PassivePacketSourceBase extends PacketSourceBase
 {

@@ -11,8 +11,22 @@ import inet.queueing.base.PacketQueueBase;
 import inet.queueing.contract.IPacketQueue;
 
 //
-// This compound module serves as a base module for complex packet queues formed
-// by combining several queueing components.
+// Base module for complex packet queues formed by combining several queueing
+// components. It provides the foundation for creating composite queue structures
+// while maintaining a standard queue interface.
+//
+// CompoundPacketQueueBase allows for the creation of sophisticated queueing
+// behaviors by connecting multiple queueing components (such as classifiers,
+// schedulers, gates, buffers, etc.) while presenting a unified queue interface
+// to the rest of the network. This modular approach enables the implementation
+// of advanced queueing disciplines without modifying the components that use queues.
+//
+// The module provides comprehensive statistics collection for the compound queue,
+// including queue length, queueing time, data rates, and dropped packets. These
+// statistics are collected at the compound level, regardless of the internal
+// structure of the queue.
+//
+// @see ~PriorityQueue, ~GatingQueue, ~GatingPriorityQueue, ~RedMarkerQueue
 //
 module CompoundPacketQueueBase extends PacketQueueBase like IPacketQueue
 {

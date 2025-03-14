@@ -11,7 +11,19 @@ import inet.queueing.base.PacketSchedulerBase;
 import inet.queueing.contract.IPacketScheduler;
 
 //
-// This module schedules packets based on the attached labels in a ~LabelsTag.
+// Packet scheduler that selects packets based on labels attached to them via
+// the LabelsTag. This enables content-aware scheduling where the packet's
+// metadata determines its priority or routing.
+//
+// The scheduler examines each packet's LabelsTag and compares the labels against
+// a configured priority list. It selects the first input gate that contains a
+// packet with the highest priority matching label. If no matching labels are found,
+// it uses the defaultGateIndex.
+//
+// The labels parameter specifies a space-separated list of labels in order of
+// priority, with the highest priority label listed first.
+//
+// @see ~LabelsTag, ~PriorityScheduler
 //
 simple LabelScheduler extends PacketSchedulerBase like IPacketScheduler
 {

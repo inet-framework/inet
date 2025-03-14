@@ -11,8 +11,16 @@ import inet.queueing.base.PacketServerBase;
 import inet.queueing.contract.IPacketServer;
 
 //
-// This module repeatedly pulls packets from the connected packet provider and
-// pushes the packet into the connected packet consumer without delay.
+// Zero-delay packet server that immediately forwards packets from provider to
+// consumer without introducing any processing time. This module models an ideal
+// server with infinite processing capacity.
+//
+// The InstantServer is functionally equivalent to a direct connection between
+// a packet provider and consumer, but maintains the server interface for
+// architectural consistency. It pulls packets from its input and immediately
+// pushes them to its output in the same simulation event.
+//
+// @see ~PacketServer, ~PreemptingServer, ~TokenBasedServer
 //
 simple InstantServer extends PacketServerBase like IPacketServer
 {

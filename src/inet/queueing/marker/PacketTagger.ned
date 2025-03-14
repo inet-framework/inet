@@ -11,7 +11,21 @@ import inet.queueing.base.PacketTaggerBase;
 import inet.queueing.contract.IPacketMarker;
 
 //
-// This module attaches various request tags to packets.
+// Network protocol parameter tagger that attaches various request tags to packets
+// based on configurable filter criteria. This module enables protocol-specific
+// parameter configuration for packets as they flow through the network stack.
+//
+// Operation mechanism:
+// - Evaluates each packet against a filter function
+// - For matching packets, attaches multiple protocol-specific request tags
+// - Supports a wide range of network parameters including DSCP, ECN, ToS, hop limit,
+//   VLAN ID, PCP, user priority, interface selection, transmission power, and
+//   encapsulation protocols
+//
+// The module uses a pluggable filter function that implements the IPacketFilterFunction
+// interface, allowing for flexible and extensible packet selection criteria.
+//
+// @see ~DscpReq, ~EcnReq, ~TosReq, ~HopLimitReq, ~VlanReq, ~PcpReq, ~UserPriorityReq
 //
 simple PacketTagger extends PacketTaggerBase like IPacketMarker
 {

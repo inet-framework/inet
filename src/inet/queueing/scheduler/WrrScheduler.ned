@@ -11,15 +11,29 @@ import inet.queueing.base.PacketSchedulerBase;
 import inet.queueing.contract.IPacketScheduler;
 
 //
-// This module implements weighted round-robin scheduling.
+// Weighted Round-Robin (WRR) packet scheduler that allocates bandwidth
+// proportionally to configured weights. This provides fair sharing of
+// resources while preventing starvation of lower-priority traffic.
 //
-// There is a weight associated with each input gate.
-// Initially, each input gate gets as many tokens as their
-// weight. When a packet is requested, then the first input
-// gate is selected that has a packet and enough tokens,
-// and one token is consumed. When there are waiting input
-// packets, but there are not enough tokens to schedule one,
-// then each token bucket is filled up.
+// Operation mechanism:
+// - Each input gate has an associated weight specified in the weights parameter
+// - Initially, each input gate receives tokens equal to its weight
+// - When a packet is requested, the scheduler selects the first input gate that:
+//   1. Has a packet available
+//   2. Has at least one token
+// - One token is consumed when a packet is pulled from an input gate
+// - When packets are waiting but no gate has enough tokens, all token buckets are refilled
+//
+// The WRR scheduler is commonly used in:
+// - Quality of Service (QoS) implementations requiring fair bandwidth allocation
+// - Network devices that need to balance traffic from multiple sources
+// - Systems where strict priority scheduling would cause starvation
+// - Implementing Class-Based Queuing (CBQ) and other fair queuing mechanisms
+//
+// The weights parameter specifies relative bandwidth allocation as a comma-separated
+// list of integers, with one weight per input gate.
+//
+// @see ~PriorityScheduler, ~MarkovScheduler
 //
 simple WrrScheduler extends PacketSchedulerBase like IPacketScheduler
 {
@@ -27,4 +41,3 @@ simple WrrScheduler extends PacketSchedulerBase like IPacketScheduler
         string weights;
         @class(WrrScheduler);
 }
-

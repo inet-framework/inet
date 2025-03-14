@@ -10,12 +10,28 @@ package inet.queueing.meter;
 import inet.queueing.contract.IPacketMeter;
 
 //
-// This module combines multiple packet meters into one.
+// Composite packet meter that chains multiple packet meters together in series.
+// Each packet passes through all the meters in sequence, allowing for multi-stage
+// packet metering and tagging.
+//
+// The module creates a pipeline of packet meters where:
+// - Packets enter through the input gate
+// - Pass through each meter in the chain in order
+// - Exit through the output gate
+//
+// Key features:
+// - Supports an arbitrary number of packet meters in sequence
+// - Each meter can perform different measurements or apply different tags
+// - Allows for complex, multi-criteria packet metering
+// - Compatible with any module that implements the IPacketMeter interface
+// - Preserves all tags applied by each meter in the chain
+//
+// @see ~TokenBucketMeter, ~ExponentialRateMeter, ~SlidingWindowRateMeter
 //
 module MultiPacketMeter like IPacketMeter
 {
     parameters:
-        int numMeters;
+        int numMeters; // Number of packet meters in the chain
         @display("i=block/star");
     gates:
         input in @labels(send,push,pull,pass,stream);

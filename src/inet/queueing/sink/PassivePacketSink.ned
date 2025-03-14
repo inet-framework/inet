@@ -11,8 +11,29 @@ import inet.queueing.base.PassivePacketSinkBase;
 import inet.queueing.contract.IPassivePacketSink;
 
 //
-// This module is a passive packet sink which is pushed with packets by the
-// connected packet producer. All pushed packets are counted and deleted.
+// Passive packet sink that receives packets pushed to it by connected
+// modules and consumes them. This module complements ActivePacketSink
+// in the queueing framework by providing push-based traffic consumption.
+//
+// The module operates by:
+// 1. Passively receiving packets pushed to its input gate
+// 2. Processing and consuming the received packets (counting and deleting them)
+// 3. Optionally controlling the rate at which packets can be consumed
+//
+// Key features:
+// - Push-based operation where producers determine when packets are sent
+// - Configurable consumption interval to limit packet processing rate
+// - Initial consumption offset to control when packets can first be consumed
+// - Support for custom clock modules for synchronized packet consumption
+// - Comprehensive packet statistics collection
+//
+// Timing behavior:
+// - The first packet can be consumed after initialConsumptionOffset
+// - Subsequent packets can be consumed every consumptionInterval
+// - When consumptionInterval is 0, any number of packets can be pushed at the same simulation time
+// - The consumption interval timer starts after a packet is successfully consumed
+//
+// @see ~ActivePacketSink, ~FullPacketSink, ~PcapFilePacketConsumer
 //
 simple PassivePacketSink extends PassivePacketSinkBase like IPassivePacketSink
 {
@@ -25,4 +46,3 @@ simple PassivePacketSink extends PassivePacketSinkBase like IPassivePacketSink
     gates:
         input in @labels(push);
 }
-

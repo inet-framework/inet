@@ -11,8 +11,23 @@ import inet.queueing.base.PassivePacketSinkBase;
 import inet.queueing.contract.IPassivePacketSink;
 
 //
-// This module is a passive packet sink which is pushed with packets by the
-// connected packet producer. All pushed packets are written to a PCAP file.
+// Captures network traffic and writes it to a PCAP file for later analysis.
+// Acts as a passive packet sink that receives packets from a connected packet
+// producer and records them in a standard packet capture format compatible with
+// Wireshark and other network analysis tools.
+//
+// Key features:
+// - Supports both pcap and pcapng file formats
+// - Configurable network type to match different link layer protocols
+// - Adjustable snapshot length to control packet truncation
+// - Configurable time precision for accurate packet timing
+// - Optional immediate flushing for crash-resilient captures
+// - Direction flag to indicate inbound or outbound traffic
+//
+// The captured PCAP files can be opened with tools like Wireshark, tcpdump,
+// or any other PCAP-compatible network analyzer for detailed inspection.
+//
+// @see ~PcapFilePacketProducer, ~PacketFlowPcapFileRecorder
 //
 simple PcapFilePacketConsumer extends PassivePacketSinkBase like IPassivePacketSink
 {
@@ -28,4 +43,3 @@ simple PcapFilePacketConsumer extends PassivePacketSinkBase like IPassivePacketS
     gates:
         input in @labels(push);
 }
-

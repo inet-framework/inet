@@ -12,9 +12,31 @@ import inet.queueing.contract.IActivePacketSource;
 import inet.queueing.contract.IPassivePacketSink;
 
 //
-// This module connects one packet producer to one packet consumer. It can be
-// pushed with packets from the connected packet producer. When this happens,
-// one or more copies of the packet are pushed to the output gate.
+// Creates exact copies of packets and forwards both the original and duplicates
+// to the same output. Provides a simple way to simulate packet duplication that
+// occurs in real networks due to various transmission issues.
+//
+// Key features:
+// - Configurable number of duplicates per packet
+// - Preserves all packet attributes and data in duplicates
+// - Operates in push mode (passive sink, active source)
+// - Supports both constant and random (volatile) duplication counts
+// - Maintains packet order with duplicates following the original
+//
+// Operation mechanism:
+// - When a packet arrives at the input, the module creates the specified
+//   number of exact copies
+// - Both the original packet and all duplicates are pushed to the output
+//   in sequence
+// - Each copy is identical to the original packet, including all headers,
+//   data, and metadata
+// - Setting numDuplicates to 0 means no duplication occurs (pass-through mode)
+//
+// Note: Unlike PacketCloner which sends copies to different outputs,
+// PacketDuplicator sends all copies to the same output, effectively
+// implementing packet duplication rather than distribution.
+//
+// @see ~OrdinalBasedDuplicator, ~PacketCloner, ~ContentBasedDuplicator
 //
 simple PacketDuplicator extends PacketDuplicatorBase like IPassivePacketSink, IActivePacketSource
 {

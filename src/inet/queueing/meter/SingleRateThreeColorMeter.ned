@@ -8,16 +8,34 @@
 package inet.queueing.meter;
 
 //
-// This packet meter module measures the packet flow that is passing through
-// using two token buckets. The meter attaches a ~LabelsTag to each packet with
-// either green, yellow, or red color depending on which token bucket contains
-// the required number of tokens for the packet.
+// Implements the Single Rate Three Color Marker (srTCM) algorithm as defined in
+// RFC 2697. Measures and marks packets with color labels (green, yellow, or red)
+// based on their conformance to a committed information rate.
 //
-// The first token bucket is filled with tokens using the committed information
-// rate. The maximum number of tokens is determined by the committed burst size.
-// Excess tokens from the first token bucket overflow into the second token bucket.
+// The meter uses two token buckets operating in series:
+// 1. The first bucket (C) is filled at the Committed Information Rate (CIR) and
+//    has a capacity equal to the Committed Burst Size (CBS).
+// 2. The second bucket (E) is not filled independently but receives excess tokens
+//    that overflow from the first bucket. It has a capacity equal to the Excess
+//    Burst Size (EBS).
 //
-// By default, packets consume 1 token per byte.
+// Packet marking works as follows:
+// - If the first bucket has enough tokens, the packet is marked as "green"
+//   and tokens are removed from the first bucket.
+// - If the first bucket doesn't have enough tokens but the second bucket does,
+//   the packet is marked as "yellow" and tokens are removed from the second bucket.
+// - If neither bucket has enough tokens, the packet is marked as "red".
+//
+// The meter supports both color-blind and color-aware modes:
+// - In color-blind mode, the meter ignores any pre-existing color markings.
+// - In color-aware mode, packets can only be demoted (green→yellow→red) and
+//   never promoted, respecting any pre-existing color markings.
+//
+// The key difference between this and the DualRateThreeColorMeter is that
+// this meter uses a single token production rate (CIR), while the dual-rate
+// version uses two independent rates.
+//
+// By default, packets consume 1 token per byte (8 bits per token).
 //
 // @see ~SingleRateTwoColorMeter, ~DualRateThreeColorMeter
 // @see ~SingleRateTwoColorClassifier, ~SingleRateThreeColorClassifier, ~DualRateThreeColorClassifier
@@ -25,11 +43,11 @@ package inet.queueing.meter;
 simple SingleRateThreeColorMeter extends MultiTokenBucketMeter
 {
     parameters:
-        double committedInformationRate @unit(bps); // Committed information rate
-        int committedBurstSize @unit(b); // Committed burst size
-        int excessBurstSize @unit(b); // Excess burst size
-        int bitsPerToken = default(8); // How many bits are represented by 1 token
-        bool colorAware = default(false); // Enables color-aware mode where packets can only be demoted
+        double committedInformationRate @unit(bps); // Committed information rate (CIR) - the guaranteed bandwidth
+        int committedBurstSize @unit(b); // Committed burst size (CBS) - maximum burst size for guaranteed bandwidth
+        int excessBurstSize @unit(b); // Excess burst size (EBS) - additional burst allowance for temporary traffic spikes
+        int bitsPerToken = default(8); // How many bits are represented by 1 token (default: 1 token per byte)
+        bool colorAware = default(false); // When true, enables color-aware mode where packets can only be demoted (green→yellow→red)
         buckets = [{initialNumTokens: dropUnit(committedBurstSize) / bitsPerToken, maxNumTokens: dropUnit(committedBurstSize) / bitsPerToken, tokenProductionRate: dropUnit(committedInformationRate) / bitsPerToken, label: "green"},
                    {initialNumTokens: dropUnit(excessBurstSize) / bitsPerToken, maxNumTokens: dropUnit(excessBurstSize) / bitsPerToken, tokenProductionRate: 0, label: "yellow"}];
         tokenConsumptionPerBit = 1 / bitsPerToken;

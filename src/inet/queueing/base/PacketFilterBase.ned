@@ -8,16 +8,46 @@
 package inet.queueing.base;
 
 //
-// This is a base module for various packet filter modules. Derived modules must
-// implement a single packet matcher function which determines if a packet is to
-// be passed through or filtered out.
+// Base module for packet filter components in the queueing framework.
+// Packet filters selectively pass or drop packets based on specific
+// criteria, enabling traffic control and policy enforcement.
 //
-// @see ~IPacketFilter
+// Filters typically operate by:
+// 1. Receiving packets (either pushed to their input or pulled from their output)
+// 2. Evaluating each packet against filter criteria
+// 3. Either forwarding the packet or dropping it based on the evaluation
+// 4. Maintaining statistics about passed and dropped packets
+//
+// The filtering decision can be based on various criteria:
+// - Packet headers or content
+// - Packet metadata or attached tags
+// - Traffic patterns or rates
+// - Statistical properties or random sampling
+// - System state or external conditions
+//
+// The backpressure parameter determines how the filter behaves when
+// packets are dropped in push mode:
+// - When true, the filter signals back to prevent further packet pushes
+// - When false, packets are silently dropped without backpressure
+//
+// Derived filter modules implement various filtering strategies including:
+// - Content-based filtering
+// - Label-based filtering
+// - Statistical rate limiting
+// - Random early detection
+// - Ordinal-based dropping
+//
+// The module provides comprehensive statistics collection for:
+// - Incoming, outgoing, and dropped packets
+// - Packet lengths and data rates
+// - Per-flow statistics for detailed traffic analysis
+//
+// @see ~IPacketFilter, ~PacketFilter, ~ContentBasedFilter, ~OrdinalBasedDropper
 //
 simple PacketFilterBase extends PacketProcessorBase
 {
     parameters:
-        bool backpressure = default(false);
+        bool backpressure = default(false); // When true, the filter applies backpressure when dropping packets in push mode
         displayStringTextFormat = default("dropped %d/%p pk (%k/%l)"); // Determines the text that is written on top of the submodule
         @class(PacketFilterBase);
         @display("i=block/downarrow");

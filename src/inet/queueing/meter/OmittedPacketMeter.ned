@@ -10,8 +10,17 @@ package inet.queueing.meter;
 import inet.queueing.contract.IPacketMeter;
 
 //
-// This module implements the module given interface and can be used as an optional
-// module that removes itself from the module hierarchy during initialize.
+// Placeholder implementation of the IPacketMeter interface that automatically
+// removes itself from the module hierarchy during initialization. Creates a direct
+// connection between its input and output gates, effectively bypassing the
+// metering functionality.
+//
+// When this module is used, packets pass through unchanged without any metering,
+// labeling, or tagging operations being performed.
+//
+// meter: <default("OmittedPacketMeter")> like IPacketMeter if enableMetering else OmittedPacketMeter;
+//
+// @see ~TokenBucketMeter, ~MultiTokenBucketMeter, ~ExponentialRateMeter
 //
 module OmittedPacketMeter like IPacketMeter
 {
@@ -24,4 +33,3 @@ module OmittedPacketMeter like IPacketMeter
     connections:
         in --> out;
 }
-

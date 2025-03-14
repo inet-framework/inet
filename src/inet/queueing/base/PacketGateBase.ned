@@ -8,9 +8,24 @@
 package inet.queueing.base;
 
 //
-// This is a base module for various packet gate modules.
+// Base module for various packet gate modules in the queueing framework.
+// Packet gates control the flow of packets by selectively allowing or blocking
+// transmission based on their open/closed state.
 //
-// @see ~IPacketGate
+// When a gate is open, packets can flow through it; when closed, packets are blocked.
+// Gates can operate in both push and pull mode, allowing them to be used in various
+// packet processing pipelines.
+//
+// Parameters:
+// - bitrate: Specifies the transmission rate when the gate is open
+// - extraLength: Accounts for additional packet overhead (e.g., headers)
+// - extraDuration: Adds extra processing time for each packet
+//
+// The gate state (open/closed) is tracked and can be visualized during simulation.
+// Derived modules implement specific gate opening/closing behaviors, such as
+// periodic scheduling or credit-based operation.
+//
+// @see ~PeriodicGate, ~CreditBasedGate, ~PacketGate, ~IPacketGate
 //
 simple PacketGateBase extends PacketFlowBase
 {

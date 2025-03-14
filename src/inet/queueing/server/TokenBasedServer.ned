@@ -11,10 +11,25 @@ import inet.queueing.base.PacketServerBase;
 import inet.queueing.contract.IPacketServer;
 
 //
-// This module repeatedly pulls packets from the connected packet provider and
-// it pushes them into the connected packet consumer. The packets are processed
-// in zero simulation time, and the process continues until the available number
-// of tokens is not sufficient anymore.
+// Resource-constrained packet server that processes packets based on token
+// availability. This module models systems with limited processing resources
+// that must be allocated for each packet.
+//
+// Operation mechanism:
+// - Processes packets in zero simulation time when tokens are available
+// - Each packet consumes tokens based on packet count and/or bit length
+// - Processing continues until available tokens are insufficient
+// - Processing resumes when new tokens become available
+//
+// The token consumption can be configured to be:
+// - Fixed per packet (tokenConsumptionPerPacket)
+// - Variable based on packet size (tokenConsumptionPerBit)
+// - A combination of both fixed and variable components
+//
+// Tokens can be added externally by other modules to model resource
+// replenishment, enabling complex resource allocation strategies.
+//
+// @see ~PacketServer, ~InstantServer, ~PreemptingServer
 //
 simple TokenBasedServer extends PacketServerBase like IPacketServer
 {

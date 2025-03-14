@@ -13,14 +13,32 @@ import inet.queueing.contract.IPacketShaper;
 import inet.queueing.queue.CompoundPacketQueueBase;
 
 //
-// This module combines a classifier, a scheduler, and several traffic shapers
-// into a single packet shaper. Packets are classified into one of the traffic
-// shapers, and the scheduler prioritizes among them.
+// Implements a priority-based traffic shaping mechanism that classifies incoming
+// packets into multiple traffic classes, applies separate shaping to each class,
+// and then schedules packets according to their priority.
+//
+// The priority shaper architecture consists of three main components:
+// - A classifier that directs incoming packets to appropriate traffic shapers
+// - Multiple traffic shapers (one per traffic class) that control the rate of each flow
+// - A scheduler that selects packets from the shapers based on priority
+//
+// Key features:
+// - Supports multiple traffic classes with different QoS requirements
+// - Applies independent traffic shaping to each class
+// - Prioritizes higher-priority traffic over lower-priority traffic
+// - Configurable number of shapers for different traffic classes
+// - Customizable classifier and scheduler components
+//
+// Typical configuration uses a PriorityScheduler that always serves the
+// highest priority non-empty shaper first, but other schedulers like
+// WrrScheduler can be used for more sophisticated bandwidth sharing.
+//
+// @see ~PacketShaper, ~PriorityScheduler, ~WrrScheduler
 //
 module PriorityShaper extends CompoundPacketQueueBase like IPacketShaper
 {
     parameters:
-        int numShapers;
+        int numShapers; // Number of traffic shapers (one per traffic class)
     submodules:
         classifier: <default("PacketClassifier")> like IPacketClassifier {
             @display("p=100,150");
