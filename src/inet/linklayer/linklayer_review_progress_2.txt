@@ -1,0 +1,383 @@
+# INET Framework Link Layer NED Documentation Review Progress
+
+This file tracks the review progress of NED documentation in the INET Framework's link layer modules.
+
+Status legend:
+- TODO: Documentation needs to be reviewed and improved
+- REVIEWED: Documentation has been reviewed but not yet improved
+- IMPROVED: Documentation has been reviewed and improved
+
+## Link Layer NED Files
+
+### acking/
+- Status: IMPROVED
+- Files:
+  - AckingMac.ned: IMPROVED
+  - AckingWirelessInterface.ned: IMPROVED
+
+### base/
+- Status: IMPROVED
+- Files:
+  - MacProtocolBase.ned: IMPROVED
+  - MacRelayUnitBase.ned: IMPROVED
+
+### bmac/
+- Status: IMPROVED
+- Files:
+  - BMac.ned: IMPROVED
+  - BMacInterface.ned: IMPROVED
+
+### common/
+- Status: IMPROVED
+- Files:
+  - ExampleQosClassifier.ned: IMPROVED
+  - IIeee8021dQosClassifier.ned: IMPROVED
+  - OmittedIeee8021dQosClassifier.ned: IMPROVED
+  - QosClassifier.ned: IMPROVED
+  - RandomQosClassifier.ned: IMPROVED
+  - WirelessInterface.ned: IMPROVED
+
+### configurator/
+- Status: IMPROVED
+- Files:
+  - common/FailureProtectionConfigurator.ned: IMPROVED
+  - common/L2NetworkConfigurator.ned: IMPROVED
+  - common/L2NodeConfigurator.ned: IMPROVED
+  - common/MacForwardingTableConfigurator.ned: IMPROVED
+  - common/StreamRedundancyConfigurator.ned: IMPROVED
+  - contract/IL2NodeConfigurator.ned: IMPROVED
+  - gatescheduling/base/GateScheduleConfiguratorBase.ned: IMPROVED
+  - gatescheduling/common/AlwaysOpenGateScheduleConfigurator.ned: IMPROVED
+  - gatescheduling/common/EagerGateScheduleConfigurator.ned: IMPROVED
+  - gatescheduling/common/TSNschedGateScheduleConfigurator.ned: IMPROVED
+  - gatescheduling/contract/IGateScheduleConfigurator.ned: IMPROVED
+  - gatescheduling/z3/Z3GateScheduleConfigurator.ned: IMPROVED
+
+### contract/
+- Status: IMPROVED
+- Files:
+  - IEthernetInterface.ned: IMPROVED
+  - IEthernetLayer.ned: IMPROVED
+  - IEthernetMac.ned: IMPROVED
+  - IExternalInterface.ned: IMPROVED
+  - IGptp.ned: IMPROVED
+  - IIeee8021qLayer.ned: IMPROVED
+  - IIeee8021rLayer.ned: IMPROVED
+  - IIeee8022Llc.ned: IMPROVED
+  - ILinkLayer.ned: IMPROVED
+  - ILoopbackInterface.ned: IMPROVED
+  - IMacForwardingTable.ned: IMPROVED
+  - IMacProtocol.ned: IMPROVED
+  - IMacRelayUnit.ned: IMPROVED
+  - IMrp.ned: IMPROVED
+  - INetworkInterface.ned: IMPROVED
+  - IPppInterface.ned: IMPROVED
+  - ISpanningTree.ned: IMPROVED
+  - ITunnelInterface.ned: IMPROVED
+  - IVirtualInterface.ned: IMPROVED
+  - IWiredInterface.ned: IMPROVED
+  - IWirelessInterface.ned: IMPROVED
+
+### csmaca/
+- Status: IMPROVED
+- Files:
+  - CsmaCaInterface.ned: IMPROVED
+  - CsmaCaMac.ned: IMPROVED
+
+### ethernet/
+- Status: MIXED
+- Files:
+  - EthernetPlcaInterface.ned: IMPROVED
+  - basic/EthernetCsmaMac.ned: IMPROVED
+  - basic/EthernetCsmaMacPhy.ned: IMPROVED
+  - basic/EthernetEncapsulation.ned: IMPROVED
+  - basic/EthernetInterface.ned: IMPROVED
+  - basic/EthernetMacPhy.ned: IMPROVED
+  - basic/OmittedEthernetEncapsulation.ned: IMPROVED
+  - common/BridgingLayer.ned: IMPROVED
+  - common/DirectionReverserLayer.ned: IMPROVED
+  - common/EthernetFrameClassifier.ned: IMPROVED
+  - common/EthernetQosQueue.ned: IMPROVED
+  - common/InterfaceRelayLayer.ned: IMPROVED
+  - common/LocalDelivery.ned: IMPROVED
+  - common/MacForwardingTable.ned: IMPROVED
+  - common/MacRelayUnit.ned: IMPROVED
+  - common/PacketDirectionReverser.ned: IMPROVED
+  - common/RelayInterfaceLearner.ned: IMPROVED
+  - common/RelayInterfaceSelector.ned: IMPROVED
+  - contract/IEthernetMacLayer.ned: IMPROVED
+  - modular/EthernetAddressChecker.ned: IMPROVED
+  - modular/EthernetAddressInserter.ned: IMPROVED
+  - modular/EthernetCutthroughBarrier.ned: IMPROVED
+  - modular/EthernetCutthroughInterface.ned: IMPROVED
+  - modular/EthernetCutthroughLayer.ned: IMPROVED
+  - modular/EthernetCutthroughSink.ned: IMPROVED
+  - modular/EthernetCutthroughSource.ned: IMPROVED
+  - modular/EthernetFcsChecker.ned: IMPROVED
+  - modular/EthernetFcsInserter.ned: IMPROVED
+  - modular/EthernetFragmentFcsChecker.ned: IMPROVED
+  - modular/EthernetFragmentFcsInserter.ned: IMPROVED
+  - modular/EthernetFragmentingMacLayer.ned: IMPROVED
+  - modular/EthernetGatingQueue.ned: IMPROVED
+  - modular/EthernetLayer.ned: IMPROVED
+  - modular/EthernetMacHeaderChecker.ned: IMPROVED
+  - modular/EthernetMacHeaderInserter.ned: IMPROVED
+  - modular/EthernetMacLayer.ned: IMPROVED
+  - modular/EthernetPauseCommandProcessor.ned: IMPROVED
+  - modular/EthernetPreemptingMacLayer.ned: IMPROVED
+  - modular/EthernetPriorityQueue.ned: IMPROVED
+  - modular/EthernetSocketCommandProcessor.ned: IMPROVED
+  - modular/EthernetSocketPacketProcessor.ned: IMPROVED
+  - modular/EthernetSocketTable.ned: IMPROVED
+  - modular/EthernetStreamingMacLayer.ned: IMPROVED
+  - modular/EthernetTypeOrLengthChecker.ned: IMPROVED
+  - modular/EthernetTypeOrLengthInserter.ned: IMPROVED
+  - modular/LayeredEthernetInterface.ned: IMPROVED
+
+### ieee80211/
+- Status: MIXED
+- Files:
+  - IIeee80211Mac.ned: IMPROVED
+  - Ieee80211Interface.ned: IMPROVED
+  - llc/IIeee80211Llc.ned: IMPROVED
+  - llc/Ieee80211LlcEpd.ned: IMPROVED
+  - llc/Ieee80211LlcLpd.ned: IMPROVED
+  - mac/Ds.ned: IMPROVED
+  - mac/Ieee80211Mac.ned: IMPROVED
+  - mac/Rx.ned: IMPROVED
+  - mac/Tx.ned: IMPROVED
+  - mac/aggregation/BasicMpduAggregationPolicy.ned: IMPROVED
+  - mac/aggregation/BasicMsduAggregationPolicy.ned: IMPROVED
+  - mac/blockack/OriginatorBlockAckAgreementHandler.ned: IMPROVED
+  - mac/blockack/OriginatorBlockAckAgreementPolicy.ned: IMPROVED
+  - mac/blockack/RecipientBlockAckAgreementHandler.ned: IMPROVED
+  - mac/blockack/RecipientBlockAckAgreementPolicy.ned: IMPROVED
+  - mac/channelaccess/Dcaf.ned: IMPROVED
+  - mac/channelaccess/Edca.ned: IMPROVED
+  - mac/channelaccess/Edcaf.ned: IMPROVED
+  - mac/channelaccess/Hcca.ned: IMPROVED
+  - mac/contention/Contention.ned: IMPROVED
+  - mac/contention/EdcaCollisionController.ned: IMPROVED
+  - mac/contract/ICollisionController.ned: IMPROVED
+  - mac/contract/IContention.ned: IMPROVED
+  - mac/contract/ICtsPolicy.ned: IMPROVED
+  - mac/contract/IDcf.ned: IMPROVED
+  - mac/contract/IDs.ned: IMPROVED
+  - mac/contract/IFragmentationPolicy.ned: IMPROVED
+  - mac/contract/IHcf.ned: IMPROVED
+  - mac/contract/IMpduAggregationPolicy.ned: IMPROVED
+  - mac/contract/IMsduAggregationPolicy.ned: IMPROVED
+  - mac/contract/IOriginatorAckPolicy.ned: IMPROVED
+  - mac/contract/IOriginatorBlockAckAgreementPolicy.ned: IMPROVED
+  - mac/contract/IOriginatorQosAckPolicy.ned: IMPROVED
+  - mac/contract/IRateControl.ned: IMPROVED
+  - mac/contract/IRateSelection.ned: IMPROVED
+  - mac/contract/IRecipientAckPolicy.ned: IMPROVED
+  - mac/contract/IRecipientBlockAckAgreementPolicy.ned: IMPROVED
+  - mac/contract/IRecipientQosAckPolicy.ned: IMPROVED
+  - mac/contract/IRtsPolicy.ned: IMPROVED
+  - mac/contract/IRx.ned: IMPROVED
+  - mac/contract/ITx.ned: IMPROVED
+  - mac/coordinationfunction/Dcf.ned: IMPROVED
+  - mac/coordinationfunction/Hcf.ned: IMPROVED
+  - mac/coordinationfunction/Mcf.ned: IMPROVED
+  - mac/coordinationfunction/Pcf.ned: IMPROVED
+  - mac/fragmentation/BasicFragmentationPolicy.ned: IMPROVED
+  - mac/originator/AckHandler.ned: IMPROVED
+  - mac/originator/NonQosRecoveryProcedure.ned: IMPROVED
+  - mac/originator/OriginatorAckPolicy.ned: IMPROVED
+  - mac/originator/OriginatorMacDataService.ned: IMPROVED
+  - mac/originator/OriginatorQosAckPolicy.ned: IMPROVED
+  - mac/originator/OriginatorQosMacDataService.ned: IMPROVED
+  - mac/originator/QosAckHandler.ned: IMPROVED
+  - mac/originator/QosRecoveryProcedure.ned: IMPROVED
+  - mac/originator/QosRtsPolicy.ned: IMPROVED
+  - mac/originator/RtsPolicy.ned: IMPROVED
+  - mac/originator/TxopProcedure.ned: IMPROVED
+  - mac/package.ned: IMPROVED
+  - mac/protectionmechanism/OriginatorProtectionMechanism.ned: IMPROVED
+  - mac/protectionmechanism/SingleProtectionMechanism.ned: IMPROVED
+  - mac/queue/CompoundPendingQueue.ned: IMPROVED
+  - mac/queue/InProgressFrames.ned: IMPROVED
+  - mac/queue/PendingQueue.ned: IMPROVED
+  - mac/ratecontrol/AarfRateControl.ned: IMPROVED
+  - mac/ratecontrol/ArfRateControl.ned: IMPROVED
+  - mac/ratecontrol/OnoeRateControl.ned: IMPROVED
+  - mac/rateselection/QosRateSelection.ned: IMPROVED
+  - mac/rateselection/RateSelection.ned: IMPROVED
+  - mac/recipient/CtsPolicy.ned: IMPROVED
+  - mac/recipient/QosCtsPolicy.ned: IMPROVED
+  - mac/recipient/RecipientAckPolicy.ned: IMPROVED
+  - mac/recipient/RecipientMacDataService.ned: IMPROVED
+  - mac/recipient/RecipientQosAckPolicy.ned: IMPROVED
+  - mac/recipient/RecipientQosMacDataService.ned: IMPROVED
+  - mgmt/IIeee80211Agent.ned: IMPROVED
+  - mgmt/IIeee80211Mgmt.ned: IMPROVED
+  - mgmt/Ieee80211AgentSta.ned: IMPROVED
+  - mgmt/Ieee80211MgmtAdhoc.ned: IMPROVED
+  - mgmt/Ieee80211MgmtAp.ned: IMPROVED
+  - mgmt/Ieee80211MgmtApSimplified.ned: IMPROVED
+  - mgmt/Ieee80211MgmtSta.ned: IMPROVED
+  - mgmt/Ieee80211MgmtStaSimplified.ned: IMPROVED
+  - mib/Ieee80211Mib.ned: IMPROVED
+  - package.ned: IMPROVED
+  - portal/Ieee80211Portal.ned: IMPROVED
+
+### ieee802154/
+- Status: IMPROVED
+- Files:
+  - Ieee802154Mac.ned: IMPROVED
+  - Ieee802154NarrowbandInterface.ned: IMPROVED
+  - Ieee802154NarrowbandMac.ned: IMPROVED
+  - Ieee802154UwbIrInterface.ned: IMPROVED
+
+### ieee8021ae/
+- Status: IMPROVED
+- Files:
+  - IIeee8021aeTagEpdHeaderChecker.ned: IMPROVED
+  - IIeee8021aeTagEpdHeaderInserter.ned: IMPROVED
+  - Ieee8021aeTagEpdHeaderChecker.ned: IMPROVED
+  - Ieee8021aeTagEpdHeaderInserter.ned: IMPROVED
+
+### ieee8021as/
+- Status: IMPROVED
+- Files:
+  - Gptp.ned: IMPROVED
+  - GptpBridge.ned: IMPROVED
+  - GptpEndstation.ned: IMPROVED
+  - GptpMaster.ned: IMPROVED
+  - GptpSlave.ned: IMPROVED
+  - MultiDomainGptp.ned: IMPROVED
+
+### ieee8021d/
+- Status: IMPROVED
+- Files:
+  - relay/Ieee8021dRelay.ned: IMPROVED
+  - rstp/Rstp.ned: IMPROVED
+  - stp/Stp.ned: IMPROVED
+  - tester/StpTester.ned: IMPROVED
+
+### ieee8021q/
+- Status: MIXED
+- Files:
+  - ATSIeee8021qFilter.ned: IMPROVED
+  - DualIeee8021qFilter.ned: IMPROVED
+  - IIeee8021qTagEpdHeaderChecker.ned: IMPROVED
+  - IIeee8021qTagEpdHeaderInserter.ned: IMPROVED
+  - IIeee8021qTagTpidHeaderChecker.ned: IMPROVED
+  - IIeee8021qTagTpidHeaderInserter.ned: IMPROVED
+  - Ieee8021qAsynchronousShaper.ned: IMPROVED
+  - Ieee8021qCreditBasedGate.ned: IMPROVED
+  - Ieee8021qCreditBasedShaper.ned: IMPROVED
+  - Ieee8021qFilter.ned: IMPROVED
+  - Ieee8021qLayer.ned: IMPROVED
+  - Ieee8021qProtocol.ned: IMPROVED
+  - Ieee8021qSocketCommandProcessor.ned: IMPROVED
+  - Ieee8021qSocketPacketProcessor.ned: IMPROVED
+  - Ieee8021qSocketTable.ned: IMPROVED
+  - Ieee8021qTagEpdHeaderChecker.ned: IMPROVED
+  - Ieee8021qTagEpdHeaderInserter.ned: IMPROVED
+  - Ieee8021qTagTpidHeaderChecker.ned: IMPROVED
+  - Ieee8021qTagTpidHeaderInserter.ned: IMPROVED
+  - Ieee8021qTimeAwareShaper.ned: IMPROVED
+  - OmittedIeee8021qTagEpdHeaderChecker.ned: IMPROVED
+  - OmittedIeee8021qTagEpdHeaderInserter.ned: IMPROVED
+  - OmittedIeee8021qTagTpidHeaderChecker.ned: IMPROVED
+  - OmittedIeee8021qTagTpidHeaderInserter.ned: IMPROVED
+  - PcpClassifier.ned: IMPROVED
+  - PcpTrafficClassClassifier.ned: IMPROVED
+  - SimpleIeee8021qFilter.ned: IMPROVED
+  - StreamFilterLayer.ned: IMPROVED
+  - StreamPolicyLayer.ned: IMPROVED
+
+### ieee8021r/
+- Status: IMPROVED
+- Files:
+  - IIeee8021rTagEpdHeaderChecker.ned: IMPROVED
+  - IIeee8021rTagEpdHeaderInserter.ned: IMPROVED
+  - Ieee8021rLayer.ned: IMPROVED
+  - Ieee8021rProtocol.ned: IMPROVED
+  - Ieee8021rTagEpdHeaderChecker.ned: IMPROVED
+  - Ieee8021rTagEpdHeaderInserter.ned: IMPROVED
+
+### ieee8022/
+- Status: IMPROVED
+- Files:
+  - IIeee8022LlcChecker.ned: IMPROVED
+  - IIeee8022LlcInserter.ned: IMPROVED
+  - IIeee8022LlcLayer.ned: IMPROVED
+  - IIeee8022SnapChecker.ned: IMPROVED
+  - IIeee8022SnapInserter.ned: IMPROVED
+  - Ieee8022Llc.ned: IMPROVED
+  - Ieee8022LlcChecker.ned: IMPROVED
+  - Ieee8022LlcInserter.ned: IMPROVED
+  - Ieee8022LlcLayer.ned: IMPROVED
+  - Ieee8022LlcSocketCommandProcessor.ned: IMPROVED
+  - Ieee8022LlcSocketPacketProcessor.ned: IMPROVED
+  - Ieee8022LlcSocketTable.ned: IMPROVED
+  - Ieee8022SnapChecker.ned: IMPROVED
+  - Ieee8022SnapInserter.ned: IMPROVED
+  - OmittedIeee8022Llc.ned: IMPROVED
+  - OmittedIeee8022LlcChecker.ned: IMPROVED
+  - OmittedIeee8022LlcInserter.ned: IMPROVED
+  - OmittedIeee8022LlcLayer.ned: IMPROVED
+  - OmittedIeee8022SnapChecker.ned: IMPROVED
+  - OmittedIeee8022SnapInserter.ned: IMPROVED
+
+### lmac/
+- Status: IMPROVED
+- Files:
+  - LMac.ned: IMPROVED
+  - LMacInterface.ned: IMPROVED
+
+### loopback/
+- Status: IMPROVED
+- Files:
+  - Loopback.ned: IMPROVED
+  - LoopbackInterface.ned: IMPROVED
+
+### mrp/
+- Status: IMPROVED
+- Files:
+  - Mrp.ned: IMPROVED
+  - MrpInterconnection.ned: IMPROVED
+  - MrpMacForwardingTable.ned: IMPROVED
+  - MrpRelay.ned: IMPROVED
+
+### ppp/
+- Status: IMPROVED
+- Files:
+  - Ppp.ned: IMPROVED
+  - PppInterface.ned: IMPROVED
+
+### shortcut/
+- Status: IMPROVED
+- Files:
+  - ShortcutInterface.ned: IMPROVED
+  - ShortcutMac.ned: IMPROVED
+
+### tun/
+- Status: IMPROVED
+- Files:
+  - Tun.ned: IMPROVED
+  - TunInterface.ned: IMPROVED
+
+### virtual/
+- Status: IMPROVED
+- Files:
+  - VirtualInterface.ned: IMPROVED
+  - VirtualTunnel.ned: IMPROVED
+
+### vlan/
+- Status: IMPROVED
+- Files:
+  - VlanIndFilter.ned: IMPROVED
+  - VlanPolicyLayer.ned: IMPROVED
+  - VlanReqFilter.ned: IMPROVED
+  - VlanReqMapper.ned: IMPROVED
+
+### xmac/
+- Status: IMPROVED
+- Files:
+  - XMac.ned: IMPROVED
+  - XMacInterface.ned: IMPROVED
