@@ -14,7 +14,6 @@
 // 
 
 #include "Stream.h"
-#include "../packet/VariableLengthInteger_m.h"
 #include "../packet/QuicStreamFrame.h"
 
 namespace inet {

@@ -142,7 +142,7 @@ void ReliabilityManager::onAckReceived(const Ptr<const AckFrameHeader>& ackFrame
     if (largestAckedPacketNumber[pnSpace] == std::numeric_limits<uint64_t>::max()) {
         largestAckedPacketNumber[pnSpace] = ackFrame->getLargestAck();
     } else {
-        largestAckedPacketNumber[pnSpace] = std::max(largestAckedPacketNumber[pnSpace], ackFrame->getLargestAck().getIntValue());
+        largestAckedPacketNumber[pnSpace] = std::max(largestAckedPacketNumber[pnSpace], ackFrame->getLargestAck());
     }
 
     QuicPacket *largestAcknolwedNewlyAcked = getSentPacket(pnSpace, ackFrame->getLargestAck());

@@ -67,7 +67,7 @@ class InitialPacketHeader extends LongPacketHeader
 cplusplus(InitialPacketHeader) {{
   public:
     void calcChunkLength() {
-        int64_t len = 1 + 4 + 1 + dstConnectionIdLength + 1 + srcConnectionIdLength + length.getSize() + packetNumberLength;
+        int64_t len = 1 + 4 + 1 + dstConnectionIdLength + 1 + srcConnectionIdLength + getVariableLengthIntegerSize(length) + packetNumberLength;
         this->setChunkLength(B(len));
     }
        
@@ -110,7 +110,7 @@ class HandshakePacketHeader extends LongPacketHeader
 cplusplus(HandshakePacketHeader) {{
   public:
     void calcChunkLength() {
-        int64_t len = 1 + 4 + 1 + dstConnectionIdLength + 1 + srcConnectionIdLength + length.getSize() + packetNumberLength;
+        int64_t len = 1 + 4 + 1 + dstConnectionIdLength + 1 + srcConnectionIdLength + getVariableLengthIntegerSize(length) + packetNumberLength;
         this->setChunkLength(B(len));
     }
     

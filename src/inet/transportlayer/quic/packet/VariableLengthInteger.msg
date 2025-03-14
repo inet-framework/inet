@@ -15,27 +15,35 @@
 
 namespace inet::quic;
 
-class VariableLengthInteger {
-    uint64_t intValue;
-}
-cplusplus(VariableLengthInteger) {{
-  public:
-    VariableLengthInteger(uint64_t intValue) {
-        setIntValue(intValue);
-    }
-    operator uint64_t() const { return intValue; }
-    size_t getSize() const {
-        if (intValue < 64ull) {
+cplusplus(h) {{
+    #include <stddef.h>
+
+    typedef uint64_t VariableLengthInteger;
+
+    size_t getVariableLengthIntegerSize(VariableLengthInteger i);
+}}
+
+cplusplus(cc) {{
+    size_t getVariableLengthIntegerSize(VariableLengthInteger i) {
+        if (i < 64ull) {
             return 1;
         }
-        if (intValue < (1ull << 14)) {
+        if (i < (1ull << 14)) {
             return 2;
         }
-        if (intValue < (1ull << 30)) {
+        if (i < (1ull << 30)) {
             return 4;
         }
         return 8;
     }
 }}
 
-
+class VariableLengthInteger {
+    @existingClass;
+    @primitive;
+    @fromString(string2uint64($));
+    @toString(uint642string($));
+    @defaultValue(0);
+    @toValue((omnetpp::intval_t)($));
+    @fromValue(omnetpp::checked_int_cast<uint64_t>($.intValue()));
+}

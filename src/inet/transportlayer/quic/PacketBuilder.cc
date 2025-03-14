@@ -342,8 +342,8 @@ QuicPacket *PacketBuilder::buildAckElicitingPacket(std::vector<QuicPacket*> *sen
             if (frame->getType() == FRAME_HEADER_TYPE_STREAM) {
                 // TODO: check if stream is still open
                 QuicStreamFrame *streamFrame = (QuicStreamFrame *) frame;
-                uint64_t offset = streamFrame->getStreamHeader()->getOffset().getIntValue();
-                uint64_t length = streamFrame->getStreamHeader()->getLength().getIntValue();
+                uint64_t offset = streamFrame->getStreamHeader()->getOffset();
+                uint64_t length = streamFrame->getStreamHeader()->getLength();
                 if ((getPacketSize(packet) + frame->getSize()) > maxPacketSize) {
                     length -= (getPacketSize(packet) + frame->getSize()) - maxPacketSize;
                 }

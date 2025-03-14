@@ -227,7 +227,7 @@ QuicFrame *ReceivedPacketsAccountant::generateAckFrame(size_t maxSize)
                 ackRange.ackRange = (currentGapRange.firstMissing - 1) - smallestAck;
             }
 
-            currentSize += ackRange.ackRange.getSize() + ackRange.gap.getSize();
+            currentSize += getVariableLengthIntegerSize(ackRange.ackRange) + getVariableLengthIntegerSize(ackRange.gap);
             if (currentSize > maxSize) {
                 // we cannot add any more gap-ack-ranges, not even this one
                 break;

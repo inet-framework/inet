@@ -32,12 +32,12 @@ void QuicStreamFrame::setHeader(Ptr<const FrameHeader> header)
 
 size_t QuicStreamFrame::getDataSize()
 {
-    return streamHeader->getLength().getIntValue();
+    return streamHeader->getLength();
 }
 
 Ptr<const Chunk> QuicStreamFrame::getData()
 {
-    return stream->getDataToSend(streamHeader->getOffset().getIntValue(), streamHeader->getLength().getIntValue());
+    return stream->getDataToSend(streamHeader->getOffset(), streamHeader->getLength());
 }
 
 void QuicStreamFrame::setData(Ptr<const Chunk> data)
@@ -47,12 +47,12 @@ void QuicStreamFrame::setData(Ptr<const Chunk> data)
 
 void QuicStreamFrame::onFrameLost()
 {
-    stream->streamDataLost(streamHeader->getOffset().getIntValue(), streamHeader->getLength().getIntValue());
+    stream->streamDataLost(streamHeader->getOffset(), streamHeader->getLength());
 }
 
 void QuicStreamFrame::onFrameAcked()
 {
-    stream->streamDataAcked(streamHeader->getOffset().getIntValue(), streamHeader->getLength().getIntValue());
+    stream->streamDataAcked(streamHeader->getOffset(), streamHeader->getLength());
 }
 
 bool QuicStreamFrame::equals(const QuicFrame *other)
@@ -60,8 +60,8 @@ bool QuicStreamFrame::equals(const QuicFrame *other)
     const QuicStreamFrame *otherStreamFrame = dynamic_cast<const QuicStreamFrame*>(other);
     if (otherStreamFrame != nullptr
      && stream == otherStreamFrame->stream
-     && streamHeader->getOffset().getIntValue() == otherStreamFrame->streamHeader->getOffset().getIntValue()
-     && streamHeader->getLength().getIntValue() == otherStreamFrame->streamHeader->getLength().getIntValue()) {
+     && streamHeader->getOffset() == otherStreamFrame->streamHeader->getOffset()
+     && streamHeader->getLength() == otherStreamFrame->streamHeader->getLength()) {
         return true;
     }
 

@@ -49,7 +49,7 @@ cplusplus(StreamFrameHeader) {{
     static const size_t MIN_HEADER_SIZE = 1 + 1 + 1 + 1;
 
     void calcChunkLength() {
-        int64_t len = 1 + streamId.getSize() + offset.getSize() + length.getSize();
+        int64_t len = 1 + getVariableLengthIntegerSize(streamId) + getVariableLengthIntegerSize(offset) + getVariableLengthIntegerSize(length);
         this->setChunkLength(B(len));
     }
     std::string str() const override {
@@ -82,11 +82,11 @@ class AckFrameHeader extends FrameHeader
 cplusplus(AckFrameHeader) {{
   public:
     void calcChunkLength() {
-        int64_t len = 1 + largestAck.getSize() + ackDelay.getSize() + ackRangeCount.getSize() + firstAckRange.getSize();
+        int64_t len = 1 + getVariableLengthIntegerSize(largestAck) + getVariableLengthIntegerSize(ackDelay) + getVariableLengthIntegerSize(ackRangeCount) + getVariableLengthIntegerSize(firstAckRange);
         for (int i=0; i<getAckRangeArraySize(); i++) {
             const AckRange& ackRangeItem = getAckRange(i);
-            len += ackRangeItem.gap.getSize();
-            len += ackRangeItem.ackRange.getSize();
+            len += getVariableLengthIntegerSize(ackRangeItem.gap);
+            len += getVariableLengthIntegerSize(ackRangeItem.ackRange);
         }
         this->setChunkLength(B(len));
     }
@@ -116,7 +116,7 @@ class MaxDataFrameHeader extends FrameHeader
 cplusplus(MaxDataFrameHeader) {{
   public:
     void calcChunkLength() {
-        int64_t len = 1 + maximumData.getSize();
+        int64_t len = 1 + getVariableLengthIntegerSize(maximumData);
         this->setChunkLength(B(len));
     }
     std::string str() const override {
@@ -136,7 +136,7 @@ class MaxStreamDataFrameHeader extends FrameHeader
 cplusplus(MaxStreamDataFrameHeader) {{
   public:
     void calcChunkLength() {
-        int64_t len = 1 + streamId.getSize() + maximumStreamData.getSize();
+        int64_t len = 1 + getVariableLengthIntegerSize(streamId) + getVariableLengthIntegerSize(maximumStreamData);
         this->setChunkLength(B(len));
     }
     std::string str() const override {
@@ -155,7 +155,7 @@ class DataBlockedFrameHeader extends FrameHeader
 cplusplus(DataBlockedFrameHeader) {{
   public:
     void calcChunkLength() {
-        int64_t len = 1 + dataLimit.getSize();
+        int64_t len = 1 + getVariableLengthIntegerSize(dataLimit);
         this->setChunkLength(B(len));
     }
     std::string str() const override {
@@ -175,7 +175,7 @@ class StreamDataBlockedFrameHeader extends FrameHeader
 cplusplus(StreamDataBlockedFrameHeader) {{
   public:
     void calcChunkLength() {
-        int64_t len = 1 + streamId.getSize() + streamDataLimit.getSize();
+        int64_t len = 1 + getVariableLengthIntegerSize(streamId) + getVariableLengthIntegerSize(streamDataLimit);
         this->setChunkLength(B(len));
     }
     std::string str() const override {
@@ -215,7 +215,7 @@ cplusplus(CryptoFrameHeader) {{
     static const size_t MIN_HEADER_SIZE = 1 + 1 + 1;
 
     void calcChunkLength() {
-        int64_t len = 1 + offset.getSize() + length.getSize();
+        int64_t len = 1 + getVariableLengthIntegerSize(offset) + getVariableLengthIntegerSize(length);
         this->setChunkLength(B(len));
     }
     std::string str() const override {
