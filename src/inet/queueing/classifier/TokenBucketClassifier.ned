@@ -11,22 +11,31 @@ import inet.queueing.base.PacketClassifierBase;
 import inet.queueing.contract.IPacketClassifier;
 
 //
-// This module classifies packets to the first output gate if the bucket contains
-// enough number of tokens for the packet passing through, otherwise the second
-// output gate is used. The amount of required tokens is equal to the packet
-// length in bits and is subtracted from the number of stored tokens. New tokens
-// are generated with the provided constant rate and they may also be added by
-// other modules.
+// Basic token bucket classifier that forms the foundation for various traffic
+// conditioning mechanisms in the queueing framework.
+//
+// The token bucket algorithm works by:
+// - Maintaining a bucket of tokens that fills at a constant rate
+// - Checking if enough tokens are available when a packet arrives
+// - Consuming tokens equal to the packet size when forwarding a packet
+//
+// Packet classification works as follows:
+// - If the bucket contains enough tokens for the packet, the packet is classified
+//   as "conforming" (output 0) and tokens are removed from the bucket.
+// - If the bucket doesn't have enough tokens, the packet is classified as
+//   "non-conforming" (output 1) and no tokens are removed.
+//
+// @see ~SingleRateTwoColorClassifier, ~SingleRateThreeColorClassifier, ~DualRateThreeColorClassifier
 //
 simple TokenBucketClassifier extends PacketClassifierBase like IPacketClassifier
 {
     parameters:
-        double initialNumTokens = default(0); // Initial number of tokens
-        double maxNumTokens = default(inf); // Maximum number of tokens
-        double tokenProductionRate;
-        double tokenConsumptionPerPacket = default(0); // How many tokens are consumed per packet
-        double tokenConsumptionPerBit = default(1); // How many tokens are consumed per bit
-        string excessTokenModule = default(""); // Specifies the module (~ITokenStorage) that receives the excess tokens that are produced by this module
+        double initialNumTokens = default(0); // Initial number of tokens in the bucket
+        double maxNumTokens = default(inf); // Maximum number of tokens the bucket can hold (bucket capacity)
+        double tokenProductionRate; // Rate at which new tokens are generated (tokens per second)
+        double tokenConsumptionPerPacket = default(0); // Fixed number of tokens consumed per packet (regardless of size)
+        double tokenConsumptionPerBit = default(1); // Number of tokens consumed per bit of packet length
+        string excessTokenModule = default(""); // Specifies the module (~ITokenStorage) that receives the excess tokens that are produced when this bucket is full
         displayStringTextFormat = default("contains %n tk\nmetered %p pk (%l)");
         @signal[tokensChanged](type=double);
         @statistic[numTokens](title="number of tokens"; source=tokensChanged; record=vector; unit=tk; interpolationmode=linear);

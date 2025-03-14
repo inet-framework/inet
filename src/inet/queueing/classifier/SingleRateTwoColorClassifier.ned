@@ -8,14 +8,24 @@
 package inet.queueing.classifier;
 
 //
-// This packet classifier module classifies packets using one token bucket. Each
-// packet is classified depending on whether the token bucket contains the required
-// number of tokens for the packet.
+// Implements the Single Rate Two Color Marker (srTCM) algorithm. Classifies
+// packets into two categories (typically green and red) based on their conformance
+// to a committed information rate.
 //
-// The token bucket is filled with tokens using the committed information rate.
-// The maximum number of tokens is determined by the committed burst size.
+// The classifier uses a single token bucket that is filled at the Committed
+// Information Rate (CIR) and has a capacity equal to the Committed Burst Size (CBS).
 //
-// By default, packets consume 1 token per byte.
+// Packet classification works as follows:
+// - If the token bucket has enough tokens, the packet is classified as "conforming" (output 0)
+//   and tokens are removed from the bucket.
+// - If the token bucket doesn't have enough tokens, the packet is classified as
+//   "non-conforming" (output 1) and no tokens are removed.
+//
+// The single-rate two-color marker is simpler than the three-color variants
+// (SingleRateThreeColorClassifier and DualRateThreeColorClassifier) as it only
+// distinguishes between two traffic categories rather than three.
+//
+// By default, packets consume 1 token per byte (8 bits per token).
 //
 // @see ~SingleRateTwoColorMeter, ~SingleRateThreeColorMeter, ~DualRateThreeColorMeter
 // @see ~SingleRateThreeColorClassifier, ~DualRateThreeColorClassifier
@@ -23,9 +33,9 @@ package inet.queueing.classifier;
 simple SingleRateTwoColorClassifier extends TokenBucketClassifier
 {
     parameters:
-        double committedInformationRate @unit(bps); // Committed information rate
-        int committedBurstSize @unit(b); // Committed burst size
-        int bitsPerToken = default(8); // How many bits are represented by 1 token
+        double committedInformationRate @unit(bps); // Committed information rate (CIR) - the guaranteed bandwidth
+        int committedBurstSize @unit(b); // Committed burst size (CBS) - maximum burst size for guaranteed bandwidth
+        int bitsPerToken = default(8); // How many bits are represented by 1 token (default: 1 token per byte)
         initialNumTokens = default(maxNumTokens);
         maxNumTokens = dropUnit(committedBurstSize) / bitsPerToken;
         tokenProductionRate = dropUnit(committedInformationRate) / bitsPerToken;

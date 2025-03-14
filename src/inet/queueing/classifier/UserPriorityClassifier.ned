@@ -8,7 +8,17 @@
 package inet.queueing.classifier;
 
 //
-// This module classifies packets based on the attached ~UserPriority tag.
+// Classifies packets based on the attached ~UserPriority tag. Routes packets
+// to different output gates according to their priority level, enabling
+// Quality of Service (QoS) differentiation.
+//
+// The classifier uses the PacketUserPriorityReqClassifier implementation which:
+// - Examines each packet for a UserPriority tag
+// - Routes the packet to the output gate corresponding to its priority value
+// - Supports the standard 802.1D/802.11e priority levels (0-7)
+//
+// The number of output gates should match the number of priority levels
+// being used.
 //
 simple UserPriorityClassifier extends PacketClassifier
 {

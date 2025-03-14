@@ -11,8 +11,18 @@ import inet.queueing.base.PacketFilterBase;
 import inet.queueing.contract.IPacketFilter;
 
 //
-// This packet filter module drops packets that don't match the given packet
-// label filter criteria. The criteria can use wildcards and Boolean operators.
+// Tag-based packet filter that selectively forwards packets based on attached labels.
+// This module enables efficient filtering of pre-tagged packets without requiring
+// deep packet inspection.
+//
+// Operation mechanism:
+// - Examines the LabelsTag attached to each packet
+// - Compares packet labels against the configured labelFilter expression
+// - Forwards packets with matching labels, drops non-matching packets
+// - In push mode: Processes packets from producer, forwards matching ones to consumer
+// - In pull mode: Pulls packets from provider until finding one with matching labels
+//
+// @see ~LabelClassifier
 //
 simple LabelFilter extends PacketFilterBase like IPacketFilter
 {

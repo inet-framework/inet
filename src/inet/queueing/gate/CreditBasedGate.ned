@@ -11,23 +11,27 @@ import inet.queueing.base.PacketGateBase;
 import inet.queueing.contract.IPacketGate;
 
 //
-// This module is a packet gate that operates based on the number of credits
-// it contains. The gate is open if the number of credits is greater than the
-// configured transmit credit limit, otherwise it is closed. The module attaches
-// a ~CreditGateTag to all packets that pass through. The attached tag allows
-// the gate module to determine if a packet belongs to it when the packet is
-// eventually transmitted.
+// Implements a credit-based shaper algorithm. Controls packet flow based on a
+// credit system that ensures bandwidth allocation while limiting traffic bursts.
+// This module requires to be placed inside a NetworkInterface module.
 //
-// The number of credits decreases if a packet that passed through this gate is
-// currently being transmitted by the network interface. Otherwise, the number
-// of credits increases below the transmit credit limit or if there are packets
-// waiting to be transmitted. Besides, the number of credits immediately drops
-// down to the transmit credit limit if no more packets are available after the
-// network interface finishes a transmission from this gate.
+// Operation mechanism:
+// - The gate is open when credits exceed the transmit credit limit
+// - Credits increase at idleCreditGainRate when the flow is idle
+// - Credits decrease at transmitCreditSpendRate when the flow is transmitting
+// - Credits are bounded by minCredit and maxCredit parameters
+// - When transmission completes with no waiting packets, credits reset to transmitCreditLimit
 //
-// This module is part of the credit-based shaper infrastructure.
+// The module attaches a ~CreditGateTag to all packets that pass through, allowing
+// it to track which packets belong to its flow when they reach the network interface
+// for transmission. This tracking is essential for proper credit accounting.
 //
-// @see ~CreditGateTag, ~PacketQueue
+// Key features:
+// - Provides guaranteed bandwidth allocation for time-sensitive streams
+// - Prevents traffic bursts through credit-based flow control
+// - Supports configurable credit rates and limits
+//
+// @see ~Ieee8021qCreditBasedGate, ~CreditGateTag, ~PacketQueue, ~CreditBasedShaper
 //
 simple CreditBasedGate extends PacketGateBase like IPacketGate
 {

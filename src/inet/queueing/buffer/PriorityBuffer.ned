@@ -8,8 +8,10 @@
 package inet.queueing.buffer;
 
 //
-// This buffer drops packets among the connected packet queues based on their
-// module ID.
+// The PriorityBuffer is a specialized version of PacketBuffer that uses the
+// PacketWithHighestOwnerModuleIdDropper strategy by default. This implements
+// a simple priority scheme where queues with lower module IDs have higher
+// priority (their packets are less likely to be dropped).
 //
 simple PriorityBuffer extends PacketBuffer
 {

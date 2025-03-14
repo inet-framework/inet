@@ -10,7 +10,12 @@ package inet.queueing.filter;
 import inet.queueing.contract.IPacketFilter;
 
 //
-// This module combines multiple packet filters into one.
+// Composite packet filter that chains multiple filters in series to create
+// complex filtering behavior.
+//
+// The numFilters parameter determines how many filters are in the chain,
+// while the filter[] submodule vector allows specifying different filter types
+// for each position in the chain.
 //
 module MultiPacketFilter like IPacketFilter
 {

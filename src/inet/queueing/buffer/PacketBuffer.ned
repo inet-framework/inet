@@ -11,12 +11,22 @@ import inet.queueing.base.PacketBufferBase;
 import inet.queueing.contract.IPacketBuffer;
 
 //
-// This module provides packet storage for sharing and optimizing storage space
-// between multiple packet queues. When a packet buffer becomes overloaded, the
-// packet dropping strategy can drop any number of packets from any number of
-// connected packet queues.
+// Shared packet buffer that store packets on behalf of multiple queues,
+// modeling bounded shared storage space. It provides centralized packet storage
+// with configurable capacity limits and customizable packet dropping
+// strategies.
 //
-// @see ~IPacketQueue
+// Key features:
+// - Configurable packet capacity (maximum number of packets)
+// - Configurable data capacity (maximum total bit length of all packets)
+// - Customizable packet dropping strategy via the dropperClass parameter
+// - Comprehensive statistics collection for monitoring buffer performance
+//
+// When the buffer becomes overloaded (exceeds capacity limits), the configured
+// packet dropping strategy can selectively drop packets from any of the connected
+// queues based on various criteria such as packet priority, size, or queue length.
+//
+// @see ~IPacketQueue, ~PriorityBuffer
 //
 simple PacketBuffer extends PacketBufferBase like IPacketBuffer
 {

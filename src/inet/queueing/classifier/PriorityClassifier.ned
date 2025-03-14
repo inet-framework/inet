@@ -11,8 +11,18 @@ import inet.queueing.base.PacketClassifierBase;
 import inet.queueing.contract.IPacketClassifier;
 
 //
-// This classifier pushes packets into the first non-full among its connected
-// packet consumers.
+// Back-pressure aware packet classifier that forwards packets to the first
+// accepting output.
+//
+// Operation mechanism:
+// - Examines connected consumers in order, starting from index 0 (highest priority)
+// - Forwards the packet to the first consumer that doesn't provide back-pressure
+// - If no consumers are accepting, the classifier itself provides back-pressure
+//
+// Unlike other classifiers that use packet attributes to determine the output,
+// this classifier bases its decision solely on the state of the connected consumers.
+//
+// @see ~PacketClassifier, ~ContentBasedClassifier, ~LabelClassifier
 //
 simple PriorityClassifier extends PacketClassifierBase like IPacketClassifier
 {

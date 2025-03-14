@@ -10,8 +10,16 @@ package inet.queueing.filter;
 import inet.queueing.base.PacketFilterBase;
 
 //
-// This module drops packets based on the ordinal number of the packet in the
-// received stream of packets.
+// Deterministic packet dropper that selectively discards packets based on their
+// position in the packet stream. This module enables precise control over which
+// specific packets are dropped.
+//
+// Operation mechanism:
+// - Maintains a counter tracking the ordinal number of each packet in the stream
+// - Drops packets whose ordinal numbers match entries in the dropsVector
+//
+// The dropsVector parameter specifies the ordinal numbers of packets to be dropped
+// as a semicolon-separated list of ascending packet numbers (e.g., "5;6;12;13;").
 //
 simple OrdinalBasedDropper extends PacketFilterBase
 {
