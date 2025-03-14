@@ -8,7 +8,13 @@
 package inet.linklayer.contract;
 
 //
-// Interface for MAC address tables
+// Module interface for MAC forwarding tables that map MAC addresses to outgoing interfaces
+// in Ethernet switches and bridges. These tables maintain the association between destination
+// MAC addresses and the ports through which those addresses can be reached, enabling
+// efficient frame forwarding in layer 2 networks. The tables support dynamic learning,
+// aging of entries, and can be pre-loaded from configuration files.
+//
+// @see MacForwardingTable, MrpMacForwardingTable, MacRelayUnit
 //
 moduleinterface IMacForwardingTable
 {
@@ -17,4 +23,3 @@ moduleinterface IMacForwardingTable
         double agingTime @unit(s);
         string forwardingTableFile;
 }
-

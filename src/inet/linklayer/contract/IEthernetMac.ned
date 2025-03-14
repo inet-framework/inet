@@ -8,19 +8,15 @@
 package inet.linklayer.contract;
 
 //
-// Interface for Ethernet MAC implementations. All Ethernet MAC implementations
-// should implement this (i.e. declared as: `EthernetCsmaMacPhy` like `IEtherMac`).
-// The existing implementations are these: ~EthernetCsmaMacPhy and ~EthernetMacPhy.
-//
-// Doesn't do encapsulation/decapsulation; see ~EthernetEncapsulation for that.
+// Module interface for Ethernet MAC (Media Access Control) implementations that handle
+// frame transmission and reception according to the Ethernet protocol. Provides functionality
+// for queuing and transmitting frames using CSMA/CD in half-duplex mode or direct transmission
+// in full-duplex mode, handling collisions, and processing PAUSE frames for flow control.
 //
 // Expected environment:
 // - phys$i and phys$o should be connected to the "network"
 // - `upperLayerIn` and `upperLayerOut` are usually connected to ~EthernetEncapsulation (in hosts)
 //   or ~IMacRelayUnit (in a switch)
-//
-// The module does not perform encapsulation or decapsulation of frames --
-// this is done by higher layers (~EthernetEncapsulation).
 //
 // When a frame is received from the higher layers, it must be an Ethernet frame,
 // and with all protocol fields filled out (including the destination MAC address).
@@ -33,6 +29,8 @@ package inet.linklayer.contract;
 // Also, the module properly responds to PAUSE frames, but never sends them
 // by itself -- however, it transmits PAUSE frames received from upper layers.
 // See <a href="ether-pause.html">PAUSE handling</a> for more info.
+//
+// @see EthernetCsmaMacPhy, EthernetMacPhy, EthernetEncapsulation
 //
 moduleinterface IEtherMac
 {
@@ -47,4 +45,3 @@ moduleinterface IEtherMac
         output upperLayerOut @labels(EtherFrame);  // To ~EthernetEncapsulation or ~IMacRelayUnit
         inout phys @labels(EthernetSignal); // To the network
 }
-

@@ -11,18 +11,19 @@ import inet.linklayer.configurator.gatescheduling.base.GateScheduleConfiguratorB
 import inet.linklayer.configurator.gatescheduling.contract.IGateScheduleConfigurator;
 
 //
-// This module provides a gate scheduling algorithm that eagerly reserves time
-// slots for the configured streams in the order of their priority (0 being the
-// lowest). The allocation makes sure that only one gate (traffic category) is
-// open in all network interfaces at any given moment of time. This strategy
-// may result in wasting too much time of the gate cycle and thus end up failing.
+// Gate scheduling configurator that implements a priority-based algorithm which eagerly
+// reserves time slots for configured streams in priority order (0 being lowest priority).
+// Ensures that only one traffic category gate is open in all network interfaces at any
+// given time, providing strict traffic isolation but potentially wasting gate cycle time
+// and failing to accommodate all streams due to inefficient resource allocation.
 //
-// This configurator is primarily useful to produce statistical results that can
-// be used as a baseline in comparison with more advanced configurators.
+// Primarily useful as a baseline for comparison with more advanced Time-Sensitive
+// Networking (TSN) scheduling algorithms that implement more efficient time slot allocation.
+//
+// @see GateScheduleConfiguratorBase, AlwaysOpenGateScheduleConfigurator, TSNschedGateScheduleConfigurator, Z3GateScheduleConfigurator
 //
 simple EagerGateScheduleConfigurator extends GateScheduleConfiguratorBase like IGateScheduleConfigurator
 {
     parameters:
         @class(EagerGateScheduleConfigurator);
 }
-

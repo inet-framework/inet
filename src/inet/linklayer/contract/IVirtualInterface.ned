@@ -8,11 +8,16 @@
 package inet.linklayer.contract;
 
 //
-// This module interface is implemented by virtual network interfaces.
+// Module interface for virtual network interfaces that can be attached to real network
+// interfaces, allowing multiple logical interfaces to share the same physical connectivity.
+// Virtual interfaces enable network virtualization, traffic isolation, and specialized
+// handling of different traffic types, similar to virtual interfaces in operating systems
+// (e.g., eth0.1, vlan0).
+//
+// @see VirtualInterface, VirtualTunnel
 //
 moduleinterface IVirtualInterface extends INetworkInterface
 {
     parameters:
         @display("i=block/tunnel");
 }
-

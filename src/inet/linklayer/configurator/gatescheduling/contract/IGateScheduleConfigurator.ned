@@ -10,13 +10,19 @@ package inet.linklayer.configurator.gatescheduling.contract;
 import inet.networklayer.configurator.contract.INetworkConfigurator;
 
 //
-// This module interface is implemented by gate scheduling configurator modules.
-// A gate scheduling configurator is responsible for configuring all ~PeriodicGate
-// modules of all traffic categories in all network interfaces in the network.
+// Module interface for Time-Sensitive Networking (TSN) gate scheduling configurators
+// that compute and configure gate schedules across a network. Gate scheduling configurators
+// determine when each traffic class gate should be open or closed in every network interface,
+// enabling time-based traffic control for deterministic communication.
+//
+// Implementations are responsible for configuring all PeriodicGate modules of all traffic
+// categories in all network interfaces, ensuring that time-critical traffic flows meet
+// their timing requirements while efficiently utilizing network resources.
+//
+// @see GateScheduleConfiguratorBase, AlwaysOpenGateScheduleConfigurator, EagerGateScheduleConfigurator, TSNschedGateScheduleConfigurator, Z3GateScheduleConfigurator
 //
 moduleinterface IGateScheduleConfigurator extends INetworkConfigurator
 {
     parameters:
         @display("i=block/cogwheel");
 }
-

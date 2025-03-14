@@ -11,12 +11,15 @@ import inet.linklayer.configurator.gatescheduling.base.GateScheduleConfiguratorB
 import inet.linklayer.configurator.gatescheduling.contract.IGateScheduleConfigurator;
 
 //
-// This module provides a trivial gate scheduling algorithm that keeps all gates
-// in the network open all the time.
+// Gate scheduling configurator that implements a trivial algorithm which keeps all
+// gates in the network open all the time. This provides a baseline configuration where
+// Time-Sensitive Networking (TSN) gates never block traffic, effectively disabling
+// the time-based traffic control while maintaining the TSN infrastructure.
+//
+// @see GateScheduleConfiguratorBase, EagerGateScheduleConfigurator, TSNschedGateScheduleConfigurator, Z3GateScheduleConfigurator
 //
 simple AlwaysOpenGateScheduleConfigurator extends GateScheduleConfiguratorBase like IGateScheduleConfigurator
 {
     parameters:
         @class(AlwaysOpenGateScheduleConfigurator);
 }
-

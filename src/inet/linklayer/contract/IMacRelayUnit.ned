@@ -9,32 +9,25 @@ package inet.linklayer.contract;
 import inet.protocolelement.contract.IProtocolLayer;
 
 //
-// Module interface for modules providing Ethernet switch functionality.
-// These modules handle the mapping between ports and MAC addresses,
-// and forward frames to appropriate ports.
+// Module interface for Ethernet switch functionality that handles MAC address learning
+// and frame forwarding between different ports. Relay units maintain a mapping between
+// destination MAC addresses and output ports, allowing frames to be forwarded only to
+// the appropriate ports rather than flooding all ports.
 //
 // Functions:
-// - relays frames based on their dest MAC addresses (dest-->port mapping)
-// - models finite buffer size (drops) and finite processing power (latency, queuing)
+// - Relays frames based on destination MAC addresses (dest-->port mapping)
+// - Models finite buffer size (drops) and processing power (latency, queuing)
+// - Supports address learning through a dynamic lookup table
+// - Handles broadcast/multicast by flooding frames to all ports except the incoming one
+// - Supports aging of MAC table entries to handle topology changes
 //
-// Address caching is modeled by a fixed-size lookup table.
-// When the table is full, the oldest address is kicked out of the cache.
+// Concrete implementations add capacity and performance aspects to the model, such as
+// the number of frames processed per second and the amount of memory available in the switch.
 //
-// Entries are also deleted if their age exceeds a certain limit.
-//
-// If needed, address tables can be pre-loaded from text files at the beginning
-// of the simulation; this is controlled by the `forwardingTableFile` module parameter.
-//
-// This module is not a concrete implementation, it just defines gates and
-// parameters an ~IMacRelayUnit should have. Concrete implementations add
-// capacity and performance aspects to the model (number of frames processed
-// per second, amount of memory available in the switch, etc.)
-//
-// Known implementations are ~MacRelayUnit and ~Ieee8021dRelay.
+// @see MacRelayUnit, Ieee8021dRelay, MrpRelay
 //
 moduleinterface IMacRelayUnit extends IProtocolLayer
 {
     parameters:
         @display("i=block/switch");
 }
-

@@ -8,8 +8,15 @@
 package inet.linklayer.ieee8021q;
 
 //
-// This module implements the module given interface and can be used as an omitted
-// optional module that removes itself from the module hierarchy during initialize.
+// Placeholder module that implements the IEEE 802.1Q VLAN tag header checker interface
+// but removes itself from the module hierarchy during initialization. Provides a direct
+// connection between input and output gates, effectively bypassing TPID-based VLAN tag
+// checking functionality when VLAN processing is not needed in a particular configuration.
+//
+// This module is useful in network configurations where the same model structure is
+// maintained but VLAN tag processing is selectively disabled in certain paths.
+//
+// @see IIeee8021qTagTpidHeaderChecker, Ieee8021qTagTpidHeaderChecker
 //
 module OmittedIeee8021qTagTpidHeaderChecker like IIeee8021qTagTpidHeaderChecker
 {
@@ -23,4 +30,3 @@ module OmittedIeee8021qTagTpidHeaderChecker like IIeee8021qTagTpidHeaderChecker
     connections:
         in --> out;
 }
-

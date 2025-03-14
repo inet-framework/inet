@@ -11,26 +11,21 @@ import inet.linklayer.configurator.gatescheduling.base.GateScheduleConfiguratorB
 import inet.linklayer.configurator.gatescheduling.contract.IGateScheduleConfigurator;
 
 //
-// This module provides a gate scheduling algorithm that uses the open source
-// z3 SAT solver from Microsoft. In order to be able to use this module, the
-// corresponding 'Z3 Gate Scheduling Configurator' feature must be enabled and
-// the libz3-dev package must be installed.
+// Advanced gate scheduling configurator that uses the Z3 SAT solver from Microsoft to
+// generate optimal Time-Sensitive Networking (TSN) gate schedules. Formulates the scheduling
+// problem as a constraint satisfaction problem, creating variables for transmission and
+// reception times of each packet in each flow across all network interfaces.
 //
-// This configurator computes the gate schedule by creating SAT variables for
-// the transmission start/end times and reception start/end times for each packet
-// for each flow in all network interfaces along the path. All communication
-// network-specific constraints such as transmission duration, propagation time,
-// subsequent transmissions along the flow, queuing to avoid reordering packets,
-// and taking traffic class priority into consideration are translated into SAT
-// constraints among the above variables. All additional user constraints such
-// as the maximum end-to-end delay and maximum jitter are also added to the model.
+// Translates network-specific constraints (transmission duration, propagation time, packet
+// ordering, traffic class priorities) and user requirements (maximum end-to-end delay, jitter
+// limits) into SAT constraints. The solver finds a solution satisfying all constraints, which
+// is then configured in the network. Can optionally optimize the schedule to minimize total
+// end-to-end delay across all flows.
 //
-// Finally, the SAT solver is used to find a solution that fulfills all constraints,
-// and the result values are extracted and configured in the network.
+// Requires the 'Z3 Gate Scheduling Configurator' feature to be enabled and the libz3-dev
+// package to be installed.
 //
-// The `optimizeSchedule` parameter can be used to control whether any solution is
-// accepted or it should also be optimal with respect to the total end-to-end delay
-// among all packets of all flows in the network.
+// @see GateScheduleConfiguratorBase, AlwaysOpenGateScheduleConfigurator, EagerGateScheduleConfigurator, TSNschedGateScheduleConfigurator
 //
 simple Z3GateScheduleConfigurator extends GateScheduleConfiguratorBase like IGateScheduleConfigurator
 {

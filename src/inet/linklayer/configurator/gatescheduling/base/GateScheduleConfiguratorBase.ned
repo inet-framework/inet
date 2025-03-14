@@ -8,14 +8,14 @@
 package inet.linklayer.configurator.gatescheduling.base;
 
 //
-// This module serves as a basis for gate scheduling configurator modules. It
-// provides methods for derived modules to easily extract the input parameters
-// from the network topology and also to carry out the actual configuration of
-// the resulting schedule. The schedule is automatically configured in all of
-// the ~PeriodicGate submodules of all queue submodules in the network interface
-// MAC layer submodules. Besides, the application start offsets are also configured.
-// This allows the derived modules to focus on the implementation of the actual
-// scheduling algorithm.
+// Base module for gate scheduling configurators that provides infrastructure for
+// Time-Sensitive Networking (TSN) gate control. Extracts input parameters from network
+// topology and configures the resulting schedule in PeriodicGate submodules across the
+// network. Handles configuration of gate cycles, application start offsets, and packet
+// flow specifications, allowing derived modules to focus on implementing specific
+// scheduling algorithms.
+//
+// @see AlwaysOpenGateScheduleConfigurator, EagerGateScheduleConfigurator, TSNschedGateScheduleConfigurator, Z3GateScheduleConfigurator, IGateScheduleConfigurator
 //
 // The configuration is an array of objects where each object describes a packet
 // flow through the network.
@@ -39,4 +39,3 @@ simple GateScheduleConfiguratorBase
                                                      // example: [{name: "s1", type: "unicast", application: "app[0]", pcp: 0, gateIndex: 0, source: "wheel*", destination: "hud", packetLength: 100B, packetInterval: 5ms, maxLatency: 100us, maxJitter: 10us, pathFragments: [["a", "b", "c"]]}]
         @display("i=block/cogwheel");
 }
-

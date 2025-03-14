@@ -8,8 +8,13 @@
 package inet.linklayer.ieee8021d.tester;
 
 //
-// Network tester module.
-// Shows if a network topology is loop-free, all nodes are connected, or it has a tree topology.
+// Diagnostic module for analyzing Spanning Tree Protocol (STP) network configurations.
+// Extracts the network topology considering only enabled links (state=FORWARDING),
+// then performs graph analysis to verify if the resulting topology is loop-free,
+// fully connected, and forms a proper tree structure. Uses a modified depth-first
+// search algorithm with cycle detection to analyze the network graph.
+//
+// @see Stp, Rstp, Ieee8021dRelay
 //
 simple StpTester
 {
@@ -18,4 +23,3 @@ simple StpTester
 
         @display("i=block/cogwheel");
 }
-

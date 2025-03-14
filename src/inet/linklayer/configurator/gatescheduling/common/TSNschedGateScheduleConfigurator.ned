@@ -11,19 +11,20 @@ import inet.linklayer.configurator.gatescheduling.base.GateScheduleConfiguratorB
 import inet.linklayer.configurator.gatescheduling.contract.IGateScheduleConfigurator;
 
 //
-// This module provides a gate scheduling configurator that uses the TSNsched
-// tool which is available at https://github.com/ACassimiro/TSNsched.
-// Tested revision: 3f3bf663d196ec6c03e81a1e1392d4aefd158e3e
+// Gate scheduling configurator that integrates with the external TSNsched tool to generate
+// optimized Time-Sensitive Networking (TSN) gate schedules. Leverages advanced scheduling
+// algorithms from TSNsched to efficiently allocate time slots for traffic streams while
+// meeting timing constraints and maximizing network utilization.
 //
-// In order to be able to use this module, the above tool must be installed
-// along with a Java SDK and all other necessary tools. The module communicates
-// with TSNsched via reading and writing files and using system commands. The
-// TSNsched tool is found using the TSNSCHED_ROOT environment variable, which
-// must be properly set to the installation folder.
+// Requires the TSNsched tool (https://github.com/ACassimiro/TSNsched) to be installed
+// along with a Java SDK. The module communicates with TSNsched through file I/O and
+// system commands, using the TSNSCHED_ROOT environment variable to locate the tool.
+// Tested with TSNsched revision: 3f3bf663d196ec6c03e81a1e1392d4aefd158e3e.
+//
+// @see GateScheduleConfiguratorBase, AlwaysOpenGateScheduleConfigurator, EagerGateScheduleConfigurator, Z3GateScheduleConfigurator
 //
 simple TSNschedGateScheduleConfigurator extends GateScheduleConfiguratorBase like IGateScheduleConfigurator
 {
     parameters:
         @class(TSNschedGateScheduleConfigurator);
 }
-
