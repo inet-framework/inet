@@ -8,10 +8,19 @@
 package inet.linklayer.ieee80211.mgmt;
 
 //
-// Used in 802.11 infrastructure mode in an access point (AP).
+// Provides a simplified access point (AP) management module for IEEE 802.11 infrastructure 
+// mode networks. Unlike the full ~Ieee80211MgmtAp implementation, this variant completely 
+// bypasses the standard management procedures by treating all stations as permanently 
+// associated without requiring any authentication or association processes. It drops all 
+// management frames it receives and does not generate any management frames of its own 
+// (such as beacons).
 //
-// This management module variant does not send or expect to receive any
-// management frames -- it simply treats all stations as associated all the time.
+// This module is useful for simulations where the focus is on data transmission rather 
+// than management procedures, or when simplified network setup is desired. It allows 
+// stations to immediately start sending data frames without going through the standard 
+// connection establishment process, reducing simulation complexity and overhead.
+//
+// @see ~IIeee80211Mgmt, ~Ieee80211MgmtAp, ~Ieee80211MgmtSta
 //
 simple Ieee80211MgmtApSimplified like IIeee80211Mgmt
 {

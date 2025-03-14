@@ -8,9 +8,18 @@
 package inet.linklayer.ieee80211.mgmt;
 
 //
-// Used in 802.11 infrastructure mode: in a station (STA), this module
-// controls channel scanning, association and handovers, by sending commands
-// (e.g. ~Ieee80211Prim_ScanRequest) to the management module (~Ieee80211MgmtSta).
+// Implements the station (STA) agent functionality for IEEE 802.11 infrastructure mode networks.
+// This module controls the entire connection lifecycle including channel scanning, access point
+// selection, authentication, association, and handovers between access points. It operates by
+// sending management primitives (e.g., ~Ieee80211Prim_ScanRequest) to the management module
+// (~Ieee80211MgmtSta) and processing the corresponding confirms.
+//
+// The agent supports both active scanning (sending probe requests) and passive scanning
+// (listening for beacons). When scanning completes, it selects an access point based on
+// signal strength, authenticates with it, and then attempts to associate. It also monitors
+// the connection quality and can initiate handovers to better access points when necessary.
+//
+// @see ~IIeee80211Agent, ~Ieee80211MgmtSta
 //
 simple Ieee80211AgentSta like IIeee80211Agent
 {
@@ -40,4 +49,3 @@ simple Ieee80211AgentSta like IIeee80211Agent
         input mgmtIn;
         output mgmtOut;
 }
-

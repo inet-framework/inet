@@ -8,15 +8,22 @@
 package inet.linklayer.ieee80211.mgmt;
 
 //
-// Used in 802.11 infrastructure mode in an access point (AP).
+// Implements the management functionality for an access point (AP) in IEEE 802.11 infrastructure 
+// mode networks. This module handles various management frames including authentication, 
+// association/disassociation, beacon transmission, and probe requests/responses. It maintains 
+// a list of associated stations and their states, periodically broadcasts beacon frames 
+// containing network information (SSID, supported rates, etc.), processes authentication 
+// and association requests from stations, and relays data frames between associated stations 
+// or to/from the distribution system.
 //
-// This module expects ~Ieee80211MgmtSta modules to be present in the stations.
+// The module supports different authentication methods (Open System or WEP) based on the 
+// numAuthSteps parameter. It operates on the channel configured for the physical layer 
+// (see channelNumber in ~Ieee80211Radio) and does not perform channel switching. It relies 
+// on a connected ~Ieee80211Mac module for the actual transmission and reception of frames.
 //
-// This module never switches channels, that is, it will operate on the channel
-// the physical layer is configured for (see `channelNumber` in ~Ieee80211Radio).
+// This module expects ~Ieee80211MgmtSta modules to be present in the client stations.
 //
-// This module relies on a connected ~Ieee80211Mac for actual
-// reception and transmission of frames.
+// @see ~IIeee80211Mgmt, ~Ieee80211MgmtSta, ~Ieee80211MgmtAdhoc
 //
 simple Ieee80211MgmtAp like IIeee80211Mgmt
 {

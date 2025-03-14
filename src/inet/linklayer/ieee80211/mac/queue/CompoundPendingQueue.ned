@@ -12,6 +12,18 @@ import inet.queueing.queue.CompoundPacketQueueBase;
 import inet.queueing.queue.PacketQueue;
 import inet.queueing.scheduler.PriorityScheduler;
 
+//
+// Implements a hierarchical queue structure for IEEE 802.11 MAC frames awaiting transmission. 
+// This module classifies incoming packets into three separate queues: management, multicast, 
+// and unicast, using a packet classifier (by default MgmtOverDataClassifier). A priority 
+// scheduler then selects packets from these queues, giving highest priority to management 
+// frames, followed by multicast frames, and finally unicast frames. This prioritization 
+// ensures that control frames are transmitted before data frames, improving network 
+// management and control operations. The module has a configurable packet capacity with 
+// a default limit of 100 frames.
+//
+// @see ~PendingQueue, ~InProgressFrames
+//
 module CompoundPendingQueue extends CompoundPacketQueueBase
 {
     parameters:
@@ -48,4 +60,3 @@ module CompoundPendingQueue extends CompoundPacketQueueBase
         unicastQueue.out --> prioritizer.in++;
         prioritizer.out --> out;
 }
-

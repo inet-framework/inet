@@ -8,11 +8,23 @@
 package inet.linklayer.ieee80211.mgmt;
 
 //
-// Used in 802.11 infrastructure mode for a station (STA).
+// Provides a simplified station (STA) management module for IEEE 802.11 infrastructure 
+// mode networks. Unlike the full ~Ieee80211MgmtSta implementation, this variant completely 
+// bypasses the standard management procedures by treating the station as permanently 
+// associated with the configured access point (AP) without requiring any scanning, 
+// authentication, or association processes. It drops all management frames it receives 
+// and does not generate any management frames of its own.
 //
-// This management module variant does not implement scanning, nor does
-// it send or expect to receive any management frames. It simply treats the
-// station as associated to the configured AP all the time.
+// During initialization, this module automatically configures itself as associated with 
+// the AP specified by the accessPointAddress parameter. It also registers itself with 
+// the AP's management module so that the AP recognizes the station as associated. This 
+// allows immediate data frame exchange without the overhead of the standard connection 
+// establishment process.
+//
+// This module is useful for simulations where the focus is on data transmission rather 
+// than management procedures, or when simplified network setup is desired.
+//
+// @see ~IIeee80211Mgmt, ~Ieee80211MgmtSta, ~Ieee80211MgmtAp, ~Ieee80211MgmtApSimplified
 //
 simple Ieee80211MgmtStaSimplified like IIeee80211Mgmt
 {
