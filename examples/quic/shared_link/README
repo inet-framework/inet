@@ -1,0 +1,16 @@
+Three senders that have to share the bandwidth of one bottleneck link. Sender1
+starts sending. After a few seconds, Sender2 and, after a few more, Sender3 
+start sending. All three send for a few seconds together before, first Sender1,
+then Sender2, and then Sender3 stop sending. A fourth sender generates traffic
+to add randomness. 
+ 
+Seconds 0   2    4    6    8    10   12   14
+        |   |    |    |    |    |    |    |
+Sender1     xxxxxxxxxxxxxxx
+Sender2          xxxxxxxxxxxxxxx
+Sender3               xxxxxxxxxxxxxxx
+
+share_validation.py calculates the achieved throughput of all senders every 
+100 ms and prints it. The congestion controls have to adjust the throughput
+such that each active sender gets a fair share of the available bandwidth.
+Thus, the throughput values of active senders should be similar.  

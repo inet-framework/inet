@@ -1,10 +1,10 @@
-Sender sends as much bytes as congestion control permits. Periodic packet loss 
+Sender sends as many bytes as congestion control permits. Periodic packet loss 
 (set by the packet loss rate p) regulates the congestion window. The network
 has a fixed RTT, roughly given by twice the link delay (set by delay variable).
 Receiver acknowledges every packet (not only every other).
 
 In this setup, the sender should have a sending behavior in congestion 
-avoidance as described by Mathis et. al. [1]. They presented a forumula to
+avoidance as described by Mathis et al. [1]. They presented a formula to
 calculate the throughput:
 
 Tp = maxQuicPacketSize / (p * RTT * sqrt(2/(3p))
@@ -14,8 +14,9 @@ this is 1252 B (1280 B minus 20 B IP header minus 8 B UDP header).
 
 throughput _validation.py reads the results from the simulation, calculates
 the achieved throughput by the arrived bytes at the receiver over ten seconds
-(with shorter times the calculated throughput depends more on the exact times),
-and prints it together with the theoretical throughput given by the formula.
+(with shorter times, the calculated throughput depends more on the exact 
+times), and prints it together with the theoretical throughput given by the
+formula.
 
 [1] Matthew Mathis, Jeffrey Semke, Jamshid Mahdavi, and Teunis Ott. The 
     Macroscopic Behavior of the TCP Congestion Avoidance Algorithm. SIGCOMM 
