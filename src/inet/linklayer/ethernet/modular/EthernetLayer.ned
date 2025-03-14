@@ -13,6 +13,27 @@ import inet.protocolelement.contract.IProtocolHeaderInserter;
 import inet.queueing.contract.IPacketFilter;
 import inet.queueing.contract.IPacketFlow;
 
+//
+// Modular implementation of the Ethernet protocol stack that processes incoming
+// and outgoing Ethernet frames. Handles MAC header insertion and checking, frame
+// padding to minimum size, and Frame Check Sequence (FCS) calculation and verification.
+// Optionally provides socket support for direct Ethernet communication from
+// applications. Connects to upper layer protocols and lower layer physical interfaces
+// through standardized gates.
+//
+// The processing pipeline for outgoing packets includes:
+// - Socket command processing (when socket support is enabled)
+// - MAC header insertion with source and destination addresses
+// - Padding insertion to ensure minimum frame size (60 bytes)
+// - FCS calculation and insertion
+//
+// The processing pipeline for incoming packets includes:
+// - FCS verification to detect transmission errors
+// - MAC header checking and address filtering
+// - Socket packet delivery (when socket support is enabled)
+//
+// @see ~EthernetMacHeaderInserter, ~EthernetMacHeaderChecker, ~EthernetFcsInserter, ~EthernetFcsChecker, ~LayeredEthernetInterface
+//
 module EthernetLayer like IEthernetLayer
 {
     parameters:

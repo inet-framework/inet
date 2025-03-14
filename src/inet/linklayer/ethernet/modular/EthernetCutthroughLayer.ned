@@ -7,6 +7,16 @@
 
 package inet.linklayer.ethernet.modular;
 
+//
+// Implements Ethernet cut-through switching functionality by combining source and sink
+// components. Provides a layer that enables packets to begin transmission before their
+// reception is complete, significantly reducing end-to-end delay in Ethernet networks.
+// Connects to upper and lower layers, passing packets through the appropriate cut-through
+// components based on direction. Requires a MAC table for forwarding decisions and
+// configures all submodules with the specified bitrate.
+//
+// @see EthernetCutthroughBarrier, EthernetCutthroughSource, EthernetCutthroughSink, EthernetCutthroughInterface
+//
 module EthernetCutthroughLayer
 {
     parameters:
@@ -34,4 +44,3 @@ module EthernetCutthroughLayer
         lowerLayerIn --> { @display("m=s"); } --> cutthroughSource.in;
         cutthroughSource.out --> { @display("m=n"); } --> upperLayerOut;
 }
-

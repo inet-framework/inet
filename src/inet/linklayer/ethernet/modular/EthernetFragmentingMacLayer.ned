@@ -15,6 +15,30 @@ import inet.queueing.contract.IPacketFlow;
 import inet.queueing.contract.IPacketGate;
 import inet.queueing.contract.IPacketQueue;
 
+//
+// Implements an Ethernet MAC layer with frame fragmentation support, enabling
+// IEEE 802.3br frame preemption functionality. Allows higher-priority frames to
+// interrupt (preempt) the transmission of lower-priority frames by fragmenting
+// the preemptable frames and reassembling them at the receiver.
+//
+// The module processes outgoing packets through a pipeline that:
+// - Queues packets waiting for transmission
+// - Removes any existing FCS from packets
+// - Streams packets with potential preemption via PreemptableStreamer
+// - Controls transmission timing through an optional gate
+// - Adds fragment-specific FCS to each fragment
+//
+// For incoming packets, the module:
+// - Verifies fragment FCS integrity
+// - Reassembles fragments into complete frames
+// - Adds a new FCS to the reassembled frame
+//
+// This implementation is typically used as the preemptable traffic path in
+// the EthernetPreemptingMacLayer, working alongside an express path that
+// handles high-priority traffic with preemption capabilities.
+//
+// @see ~EthernetPreemptingMacLayer, ~EthernetFragmentFcsInserter, ~EthernetFragmentFcsChecker, ~PreemptableStreamer
+//
 module EthernetFragmentingMacLayer like IEthernetMacLayer
 {
     parameters:

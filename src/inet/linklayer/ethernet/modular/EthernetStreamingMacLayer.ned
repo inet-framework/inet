@@ -13,6 +13,27 @@ import inet.queueing.contract.IPacketFilter;
 import inet.queueing.contract.IPacketFlow;
 import inet.queueing.contract.IPacketQueue;
 
+//
+// Implements a streaming Ethernet MAC layer that processes packets as continuous
+// streams rather than discrete units. Provides standard Ethernet MAC functionality
+// with a simplified processing pipeline optimized for continuous transmission.
+//
+// The module processes outgoing packets through a pipeline that:
+// - Queues packets waiting for transmission
+// - Streams packets to the lower layer with minimum packet length enforcement
+// - Emits signals for outbound packet statistics
+//
+// For incoming packets, the module:
+// - Verifies FCS integrity
+// - Emits signals for inbound packet statistics
+//
+// This implementation is typically used as the express traffic path in the
+// EthernetPreemptingMacLayer, where it handles high-priority traffic that
+// can preempt lower-priority traffic. Unlike the EthernetFragmentingMacLayer,
+// it does not support packet fragmentation.
+//
+// @see ~EthernetPreemptingMacLayer, ~EthernetFragmentingMacLayer, ~EthernetMacLayer
+//
 module EthernetStreamingMacLayer like IEthernetMacLayer
 {
     parameters:

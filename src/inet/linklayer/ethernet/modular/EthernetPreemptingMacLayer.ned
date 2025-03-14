@@ -16,6 +16,31 @@ import inet.queueing.contract.IPacketQueue;
 import inet.queueing.scheduler.PriorityScheduler;
 import inet.queueing.server.PreemptingServer;
 
+//
+// Implements IEEE 802.3br Ethernet frame preemption, allowing high-priority
+// (express) traffic to interrupt the transmission of low-priority (preemptable)
+// traffic. This significantly reduces latency for time-critical applications
+// while maintaining bandwidth efficiency for best-effort traffic.
+//
+// The module separates incoming packets into two paths:
+// - Express path: For high-priority traffic that can preempt other transmissions
+// - Preemptable path: For lower-priority traffic that can be interrupted
+//
+// Key components include:
+// - Outbound classifier: Separates outgoing packets based on VLAN priority
+// - Express MAC layer: Handles high-priority frames without fragmentation
+// - Preemptable MAC layer: Processes lower-priority frames with fragmentation support
+// - Priority scheduler: Gives preference to express traffic
+// - Preempting server: Implements the actual preemption mechanism
+// - Inbound classifier: Directs incoming packets to the appropriate processing path
+//
+// Frame preemption works by allowing the transmission of an express frame to
+// interrupt a preemptable frame in progress. The interrupted frame is fragmented,
+// and its transmission resumes after the express frame completes. This mechanism
+// is transparent to higher layers, which see complete Ethernet frames.
+//
+// @see ~EthernetFragmentingMacLayer, ~EthernetStreamingMacLayer, ~PreemptingServer
+//
 module EthernetPreemptingMacLayer like IEthernetMacLayer
 {
     parameters:
