@@ -121,10 +121,10 @@ simple Quic like IQuic
         @signal[packetNumberSent*];
         @statisticTemplate[packetNumberSent](record=vector);
 
-        int initialMaxData @unit("B") = default(15MB);
-        int initialMaxStreamDataUni @unit("B") = default(6MB);
-        int initialMaxStreamDataBidiLocal @unit("B") = default(6MB);
-        int initialMaxStreamDataBidiRemote @unit("B") = default(6MB);
+        int initialMaxData @unit("B") = default(15MB); // Connection level flow control credit. Used as own and peer's value.
+        int initialMaxStreamDataUni @unit("B") = default(6MB); // Stream level flow control credit for unidirectional streams. Used as own and peer's value.
+        int initialMaxStreamDataBidiLocal @unit("B") = default(6MB); // Stream level flow control credit for bidirectional streams opened by the local host. Used as own and peer's value.
+        int initialMaxStreamDataBidiRemote @unit("B") = default(6MB); // Stream level flow control credit for bidirectional streams opened by the remote host. Used as own and peer's value.
         
         double maxStreamDataFrameThreshold @unit("B") = default(0.5*initialMaxData); // defines when MaxStreamDataFrame in StreamFlowControl will be send. Now absolte value is used. TODO: Define it as ratio = consumedData/maxReceiveOffset
         double maxDataFrameThreshold @unit("B") = default(0.5*initialMaxStreamDataUni); // defines when MaxDataFrame in ConnectionFlowControl will be send.Now absolte value is used. TODO: Define it as ratio = consumedData/maxReceiveOffset
