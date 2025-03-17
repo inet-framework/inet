@@ -9,6 +9,21 @@ package inet.applications.sctpapp;
 
 import inet.applications.contract.IApp;
 
+//
+// Specialized SCTP peer application designed for testing NAT traversal scenarios
+// and SCTP's multi-homing capabilities in networks with address translation.
+// Combines client and server functionality with additional parameters for NAT-specific
+// features such as rendezvous connection establishment and multi-homed operation.
+//
+// Supports various connection establishment methods including standard client-server
+// and rendezvous modes where both peers initiate connection simultaneously. Provides
+// comprehensive control over SCTP-specific features including stream management,
+// partial reliability, and stream reset capabilities. The peer identification parameters
+// (ownName, peerName) enable proper addressing in complex NAT scenarios where
+// traditional addressing may be ambiguous.
+//
+// @see ~SctpNatServer, ~SctpPeer, ~SctpSocket
+//
 simple SctpNatPeer like IApp
 {
     parameters:

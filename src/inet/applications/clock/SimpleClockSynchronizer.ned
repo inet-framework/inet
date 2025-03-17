@@ -10,10 +10,21 @@ package inet.applications.clock;
 import inet.applications.contract.IApp;
 
 //
-// This module periodically synchronizes the slave clock to the master clock with
-// the specified accuracy. The synchronization happens directly using C++ method
-// calls and without any packet exchange. This is primarily useful when the overhead
-// of the time synchronization protocol messages can be safely ignored.
+// Implements a lightweight clock synchronization mechanism that periodically aligns
+// a slave clock with a master clock at configurable intervals and with adjustable
+// precision. Performs direct synchronization through C++ method calls without
+// simulating network packet exchanges, providing an efficient way to model time
+// synchronization in scenarios where protocol overhead is negligible.
+//
+// Supports configurable synchronization accuracy through parameters that control
+// both the time error (difference between master and slave clock times after
+// synchronization) and oscillator compensation error (difference in clock speeds
+// after synchronization). These error parameters enable realistic modeling of
+// imperfect synchronization scenarios while maintaining simulation efficiency.
+// Particularly useful for simulating distributed systems that require synchronized
+// clocks without the overhead of explicit synchronization protocols.
+//
+// @see ~IClock, ~OscillatorBasedClock
 //
 simple SimpleClockSynchronizer like IApp
 {
@@ -29,4 +40,3 @@ simple SimpleClockSynchronizer like IApp
         input socketIn @loose;
         output socketOut @loose;
 }
-

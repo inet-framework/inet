@@ -10,19 +10,26 @@ package inet.applications.tcpapp;
 import inet.applications.contract.IApp;
 
 //
-// Models Telnet sessions with a specific user behavior.
-// The server app should be ~TcpGenericServerApp.
-// Compatible with both ~Ipv4 and ~Ipv6.
+// Simulates interactive terminal sessions with stochastic user behavior patterns,
+// modeling the traffic characteristics of traditional Telnet applications.
+// Designed for studying the performance of interactive command-line applications
+// over TCP/IP networks in both IPv4 and IPv6 environments.
 //
-// NOTE: This module emulates a very specific user behavior, and as such,
-// it should be viewed as an example rather than a generic Telnet model.
-// If you want to model realistic Telnet traffic, you are encouraged
-// to gather statistics from packet traces on a real network, and
-// write your model accordingly.
+// Implements a detailed behavioral model with configurable parameters for session
+// timing, command frequency, typing patterns, and server response characteristics.
+// Each simulated user establishes sessions, types commands with realistic inter-keystroke
+// delays, waits for responses, and exhibits think times between commands. Includes
+// parameters for idle periods between sessions and reconnection attempts after
+// connection failures. Collects comprehensive statistics on traffic patterns,
+// session counts, and connection states.
 //
-// By default, reading from the socket is not rate limited. To allow rate
-// limiting, set autoRead=false, and use the `readSize` and `readDelay` parameters
-// to set a rate limit. This will allow TCP flow control to come into effect.
+// NOTE: Represents a specific user behavior profile and should be considered an
+// example implementation rather than a generic Telnet model. For realistic traffic
+// modeling, consider gathering statistics from actual network traces and adapting
+// the parameters accordingly. Supports configurable reception rate limiting through
+// the autoRead, readSize, and readDelay parameters.
+//
+// @see ~TcpGenericServerApp, ~TelnetClientApp, ~TelnetServerApp
 //
 simple TelnetApp like IApp
 {
@@ -63,4 +70,3 @@ simple TelnetApp like IApp
         input socketIn @labels(TcpCommand/up);
         output socketOut @labels(TcpCommand/down);
 }
-

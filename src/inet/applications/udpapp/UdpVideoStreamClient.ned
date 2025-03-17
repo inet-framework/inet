@@ -10,12 +10,19 @@ package inet.applications.udpapp;
 import inet.applications.contract.IApp;
 
 //
-// Video streaming client.
+// Implements a client application for requesting and receiving video streams over UDP.
+// Initiates the streaming process by sending a single request message to a configured
+// server address and port at a specified start time. Upon receiving this request, the
+// ~UdpVideoStreamServer begins transmitting the video stream as a sequence of UDP packets.
 //
-// This module sends one "video streaming request" to `serverAddress:serverPort` at time `startTime`
-// and receives a stream from the ~UdpVideoStreamServer server.
+// Collects comprehensive statistics on the received stream, including packet count,
+// throughput, and end-to-end delay measurements. These metrics are essential for
+// evaluating network performance in video streaming scenarios. The client is designed
+// to work with the ~UdpVideoStreamServer module, forming a complete video streaming
+// simulation framework suitable for studying various network conditions and their
+// impact on streaming applications.
 //
-// @see ~UdpVideoStreamServer
+// @see ~UdpVideoStreamServer, ~UdpSocket
 //
 simple UdpVideoStreamClient like IApp
 {
@@ -36,4 +43,3 @@ simple UdpVideoStreamClient like IApp
         input socketIn @labels(UdpCommand/up);
         output socketOut @labels(UdpCommand/down);
 }
-

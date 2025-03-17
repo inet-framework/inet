@@ -8,12 +8,20 @@
 package inet.applications.udpapp;
 
 //
-// This module is a generic request/response-based server application. For each
-// request it receives, it generates different traffic based on the data the
-// request contains. The client application can be any source that is capable
-// of generating packets with different data. The first byte of the packet data
-// determines the response traffic, which can be configured to produce complex
-// streams of packets with various data and timing distributions.
+// Implements a content-aware UDP server application that generates customized responses
+// based on the content of incoming request packets. Extends the UdpApp framework to
+// provide intelligent traffic generation capabilities where the response pattern is
+// determined by examining the request data. The first byte of each request packet is
+// used to classify the request and trigger the appropriate response pattern.
+//
+// Designed for modeling complex UDP-based server behaviors where different client
+// requests require different types of responses. The application uses a RequestConsumer
+// to process incoming packets and a ResponseProducer to generate appropriate response
+// traffic. The response generation can be configured to create various traffic patterns
+// with different packet sizes, timing distributions, and data content, enabling the
+// simulation of sophisticated application-level protocols over UDP.
+//
+// @see ~UdpApp, ~RequestConsumer, ~ResponseProducer, ~UdpSocket
 //
 module UdpRequestResponseApp extends UdpApp
 {

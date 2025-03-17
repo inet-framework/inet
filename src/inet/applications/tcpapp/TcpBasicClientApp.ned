@@ -10,32 +10,23 @@ package inet.applications.tcpapp;
 import inet.applications.contract.IApp;
 
 //
-// Client for a generic request-response style protocol over TCP, to be used
-// with ~TcpGenericServerApp.
+// Implements a request-response client application operating over TCP, designed to work
+// with ~TcpGenericServerApp. Establishes session-based communication where each session
+// consists of opening a TCP connection, exchanging multiple request-response pairs, and
+// then closing the connection. The client always waits for a complete response before
+// sending the next request, making it suitable for modeling synchronous protocols.
 //
-// The model communicates with the server in sessions. During a session, the
-// client opens a single TCP connection to the server, sends several requests
-// (always waiting for the complete reply to arrive before sending a new
-// request), and closes the connection. Requests and responses are represented
-// by messages of class ~GenericAppMsg.
+// Provides configurable parameters for controlling session behavior, including the number
+// of requests per session, request and response sizes, think time between requests, and
+// idle intervals between sessions. Supports rate-limited reading from sockets through
+// the autoRead, readSize, and readDelay parameters, enabling TCP flow control when needed.
 //
-// By default, reading from the socket is not rate limited. To allow rate
-// limiting, set autoRead=false, and use the `readSize` and `readDelay` parameters
-// to set a rate limit. This will allow TCP flow control to come into effect.
+// Can be parameterized to model various application behaviors, such as HTTP sessions
+// (HTTP/1.0: numRequestsPerSession=1, HTTP/1.1 with keepalive: numRequestsPerSession=exponential(5)),
+// file downloads, or other request-response protocols with configurable message sizes
+// and timing characteristics.
 //
-// Compatible with both IPv4 (~Ipv4) and IPv6 (~Ipv6).
-//
-// As an example, the following parameterization can be used as a very rough
-// model of an HTTP session where the client downloads a file, or several files.
-//
-// <pre>
-//    numRequestsPerSession = 1 <i>(HTTP 1.0)</i>
-//    numRequestsPerSession = exponential(5) <i>(HTTP 1.1, with keepalive)</i>
-//    requestLength = 1B*int(truncnormal(350,20))
-//    replyLength = 1B*int(exponential(2000))
-// </pre>
-//
-// @see ~TcpGenericServerApp, ~GenericAppMsg, ~TelnetApp
+// @see ~TcpGenericServerApp, ~GenericAppMsg, ~TelnetApp, ~TcpAppBase
 //
 simple TcpBasicClientApp like IApp
 {
@@ -74,4 +65,3 @@ simple TcpBasicClientApp like IApp
         input socketIn @labels(TcpCommand/up);
         output socketOut @labels(TcpCommand/down);
 }
-

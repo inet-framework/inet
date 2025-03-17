@@ -8,7 +8,19 @@
 package inet.applications.ipapp;
 
 //
-// This module provides IP socket handling for generic applications.
+// Provides a bridge between application-level traffic and IP protocol, handling
+// the details of socket management and packet transmission. Acts as an adapter
+// that converts between application data and IP socket commands, simplifying the
+// development of IP-based applications by abstracting away the complexities of
+// socket operations.
+//
+// Offers configuration options for IP communication including local and destination
+// addressing and protocol selection. The module maintains statistics on sent and
+// received packets, enabling detailed analysis of traffic patterns. Designed to be
+// used as a component within modular IP applications, particularly those built with
+// the queueing model architecture.
+//
+// @see ~IpApp, ~IpSocket
 //
 simple IpSocketIo
 {

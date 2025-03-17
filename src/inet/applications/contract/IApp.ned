@@ -8,7 +8,19 @@
 package inet.applications.contract;
 
 //
-// Generic application interface.
+// Defines the standard interface for all application modules in the INET Framework.
+// Serves as a contract that application implementations must fulfill, providing
+// a consistent connection point between applications and underlying transport
+// protocols. The interface specifies input and output gates that allow applications
+// to exchange messages with transport layer protocols through standardized socket
+// APIs.
+//
+// By implementing this interface, application modules can be easily interchanged
+// in network simulations while maintaining compatibility with the transport layer.
+// This modularity enables flexible network architecture design and simplifies the
+// creation of diverse simulation scenarios with different application behaviors.
+//
+// @see ~UdpBasicApp, ~TcpBasicClientApp, ~UdpVideoStreamServer, ~PingApp
 //
 moduleinterface IApp
 {
@@ -18,4 +30,3 @@ moduleinterface IApp
         input socketIn;
         output socketOut;
 }
-

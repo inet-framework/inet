@@ -8,19 +8,25 @@
 package inet.applications.tcpapp;
 
 //
-// This module opens a TCP connection to a given address and port and lets the
-// module connected to its `trafficIn` and `trafficOut` gates send and receive
-// data over that connection. When data is received on the `trafficIn` gate, it is
-// forwarded on the TCP connection via the `socketOut` gate, and vice versa. This
-// module simplifies the task of data exchange over a TCP connection. The TCP
-// connection is opened when the module first receives data on its `trafficIn`
-// gate.
+// Provides a transparent TCP client socket interface that bridges between application
+// traffic and the TCP protocol. Establishes and manages a TCP connection to a specified
+// server address and port, handling the details of connection setup and data transfer.
+// The module acts as an adapter that converts between application-level traffic and
+// TCP socket commands, simplifying the development of TCP-based applications.
 //
-// By default, reading from the socket is not rate limited. To allow rate
-// limiting, set autoRead=false, and use the `readSize` and `readDelay` parameters
-// to set a rate limit. This will allow TCP flow control to come into effect.
+// Operates in a lazy connection establishment mode, where the TCP connection is only
+// initiated when the first data packet arrives on the trafficIn gate. This design
+// allows applications to focus on data exchange logic without handling connection
+// management details. All incoming data from the application is forwarded to the
+// TCP connection, and all data received from the TCP connection is forwarded to
+// the application.
 //
-// @see ~TcpServerSocketIo
+// Supports optional rate limiting for reading from the socket through the autoRead,
+// readSize, and readDelay parameters. When rate limiting is enabled, TCP flow control
+// mechanisms can be exercised, allowing simulation of bandwidth-constrained clients
+// or testing server behavior under various client reception conditions.
+//
+// @see ~TcpServerSocketIo, ~TcpClientApp, ~TcpSocket
 //
 simple TcpClientSocketIo
 {

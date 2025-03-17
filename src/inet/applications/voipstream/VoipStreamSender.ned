@@ -10,16 +10,21 @@ package inet.applications.voipstream;
 import inet.applications.contract.IApp;
 
 //
-// VoipStreamSender accepts an audio file and a destination IP address/port as
-// input, and will transmit the file's contents as voice traffic over UDP n
-// times (by default once). For transmission, the audio is resampled at the
-// specified frequency and depth, and encoded with the specified codec at the
-// specified bit rate, and chopped into packets that each carry a specified
-// number of milliseconds of voice. Those values come from module parameters.
-// Packets that are all silence (all samples are below a given threshold in
-// absolute value) are transmitted as special "silence" packets. The module
-// does not simulate any particular VoIP protocol (e.g. RTP), but instead
-// accepts a "header size" parameter that can be set accordingly.
+// Implements a realistic VoIP traffic source that processes actual audio files to
+// generate network traffic with authentic voice characteristics. Reads audio data
+// from a specified file, processes it through a complete audio pipeline including
+// resampling, encoding with industry-standard codecs (using FFmpeg libraries), and
+// packetization, then transmits the resulting stream over UDP to a specified destination.
+//
+// Provides extensive configuration options for audio processing parameters including
+// sample rate, codec selection, compression bit rate, and packet timing. Implements
+// silence detection to identify and specially mark silent periods in the audio stream,
+// optimizing bandwidth usage. The module can be configured to repeat the audio file
+// multiple times, allowing for extended simulation scenarios with consistent audio
+// patterns. While not implementing a specific VoIP protocol like RTP, it includes
+// configurable header size to accurately model protocol overhead.
+//
+// @see ~VoipStreamReceiver, ~UdpSocket
 //
 simple VoipStreamSender like IApp
 {
@@ -47,4 +52,3 @@ simple VoipStreamSender like IApp
         input socketIn @labels(UdpCommand/up);
         output socketOut @labels(UdpCommand/down);
 }
-

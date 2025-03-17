@@ -8,20 +8,25 @@
 package inet.applications.tcpapp;
 
 //
-// Accepts any number of incoming TCP connections, and sends back the data that
-// arrives on them. The `echoFactor` parameter controls the amount of data to be
-// sent back. If echoFactor==1, the received data is echoed back without change.
-// For any other positive value of `echoFactor`, a message of appropriate length
-// (datalen*`echoFactor`) without content (see `ByteCountChunk` C++ class) is sent
-// back.
+// Implements a TCP echo service that listens for incoming connections and echoes back
+// received data with configurable modifications. Extends ~TcpServerHostApp to handle
+// multiple concurrent connections by creating a separate thread (TcpEchoAppThread) for
+// each client. Provides flexible echo behavior through the echoFactor parameter, which
+// controls the response size relative to the received data, and echoDelay, which allows
+// introducing a constant delay before sending responses.
 //
-// The reply can also be delayed by a constant time (`echoDelay` parameter).
+// Supports both exact echoing (when echoFactor=1) and scaled responses (when echoFactor≠1),
+// making it useful for various network testing scenarios including bandwidth testing,
+// latency measurement, and TCP flow control evaluation. The optional rate limiting
+// capability (controlled by autoRead, readSize, and readDelay parameters) enables
+// simulation of constrained server resources and allows TCP flow control mechanisms
+// to be exercised.
 //
-// By default, reading from the socket is not rate-limited. To allow rate
-// limiting, set autoRead=false, and use the `readSize` and `readDelay` parameters
-// to set a rate limit. This will allow TCP flow control to come into effect.
+// Collects comprehensive statistics on data transfer including packet counts, bytes
+// transferred, and end-to-end delays, providing metrics for analyzing TCP connection
+// performance under different conditions.
 //
-// Compatible with both ~Ipv4 and ~Ipv6.
+// @see ~TcpServerHostApp, ~TcpEchoAppThread, ~TcpSocket
 //
 simple TcpEchoApp extends TcpServerHostApp
 {

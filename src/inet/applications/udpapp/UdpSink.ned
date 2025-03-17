@@ -10,7 +10,19 @@ package inet.applications.udpapp;
 import inet.applications.contract.IApp;
 
 //
-// Consumes and prints packets received from the ~Udp module.
+// Acts as a passive UDP packet receiver that collects and processes incoming UDP packets.
+// Designed to serve as an endpoint for traffic generators and network testing applications,
+// it binds to a specified local port and can be configured to receive unicast, broadcast,
+// and multicast packets. The module maintains statistics on received packets including
+// count, throughput, end-to-end delay, and sequence numbers.
+//
+// Supports lifecycle operations for controlled startup and shutdown, and can be limited
+// to operate within specific time windows through startTime and stopTime parameters.
+// When receiving multicast traffic, it can be configured to listen to specific multicast
+// groups and filter by source addresses, making it suitable for various multicast testing
+// scenarios.
+//
+// @see ~UdpBasicApp, ~UdpSocket, ~UdpEchoApp
 //
 simple UdpSink like IApp
 {
@@ -37,4 +49,3 @@ simple UdpSink like IApp
         input socketIn @labels(UdpCommand/up);
         output socketOut @labels(UdpCommand/down);
 }
-

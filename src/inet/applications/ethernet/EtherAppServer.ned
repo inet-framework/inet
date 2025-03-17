@@ -7,10 +7,19 @@
 package inet.applications.ethernet;
 
 //
-// Server side of the ~EtherAppClient model -- generates packets containing
-// ~EtherAppResp chunks with the number of bytes requested by the client in
-// corresponding ~EtherAppReq. It should be connected directly to ~Ieee8022Llc
-// module.
+// Server component that responds to requests from EtherAppClient applications
+// operating directly at the data link layer. Processes incoming request packets
+// containing EtherAppReq chunks and generates response packets with EtherAppResp
+// chunks sized according to the client's specifications.
+//
+// Designed to work in tandem with EtherAppClient for testing and benchmarking
+// Ethernet networks and other Layer 2 technologies. Maintains statistics on
+// traffic patterns including packet counts, bytes transferred, and end-to-end
+// delay measurements. The server listens on a configurable Service Access Point
+// (SAP) identifier and should be connected directly to an Ieee8022Llc module
+// to handle the LLC encapsulation and addressing.
+//
+// @see ~EtherAppClient, ~Ieee8022Llc, ~EtherAppReq, ~EtherAppResp
 //
 simple EtherAppServer
 {
@@ -29,4 +38,3 @@ simple EtherAppServer
         input in @labels(Ieee802Ctrl/up) @messageKinds(inet::SocketStatusInd);
         output out @labels(Ieee802Ctrl/down) @messageKinds(inet::SocketCommandCode);
 }
-

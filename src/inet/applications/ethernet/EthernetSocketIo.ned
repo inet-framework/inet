@@ -8,7 +8,21 @@
 package inet.applications.ethernet;
 
 //
-// This module provides Ethernet socket handling for generic applications.
+// Provides a bridge between application-level traffic and Ethernet protocol,
+// handling the details of socket management and packet transmission. Acts as an
+// adapter that converts between application data and Ethernet socket commands,
+// simplifying the development of data link layer applications by abstracting
+// away the complexities of Ethernet socket operations.
+//
+// Offers configuration options for Ethernet communication including interface
+// selection, local and remote MAC addresses, and protocol type. The module
+// maintains statistics on sent and received packets, enabling detailed analysis
+// of traffic patterns. Designed to be used as a component within modular Ethernet
+// applications, particularly those built with the queueing model architecture.
+// Supports lifecycle operations for controlled startup and shutdown in simulation
+// scenarios.
+//
+// @see ~EthernetApp, ~EthernetSourceApp, ~EthernetSinkApp, ~EthernetSocket
 //
 simple EthernetSocketIo
 {

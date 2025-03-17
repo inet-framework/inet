@@ -13,8 +13,23 @@ import inet.queueing.contract.IPacketFlow;
 import inet.queueing.contract.IPassivePacketSink;
 
 //
-// This module generates traffic for a UDP application. The traffic source and
-// traffic sink modules can be built from queueing model elements.
+// Provides a modular framework for building UDP-based applications using the queueing
+// model architecture. Implements a flexible processing pipeline for UDP traffic with
+// configurable components for traffic generation, processing, and consumption. The
+// architecture separates packet creation, processing, and reception into distinct
+// components that can be independently customized.
+//
+// The module consists of a packet source for generating outgoing traffic, a packet
+// sink for processing incoming traffic, and a UDP socket interface that handles the
+// communication. Additional processing elements like taggers and measurement modules
+// can be inserted into the pipeline to implement custom traffic handling behaviors.
+//
+// This design enables the creation of various UDP applications by simply configuring
+// different component types without modifying the application framework itself. The
+// parametric approach allows for extensive customization while maintaining a consistent
+// interface, making it suitable as a base class for specialized UDP applications.
+//
+// @see ~UdpSocket, ~IActivePacketSource, ~IPassivePacketSink
 //
 module UdpApp like IApp
 {

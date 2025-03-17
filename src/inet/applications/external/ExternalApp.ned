@@ -11,9 +11,21 @@ import inet.common.ExternalEnvironment;
 import inet.common.ExternalProcess;
 
 //
-// This module provides an external application that uses a host OS external process.
+// Enables integration of real-world applications running as external processes on
+// the host operating system with the simulation environment. Creates a bridge between
+// the simulated network and actual executable applications, allowing realistic
+// application behavior to be incorporated into network simulations without reimplementing
+// the application logic.
 //
-// @see ~ExternalProcess, ~ExternalEnvironment
+// Leverages the external environment and process management capabilities to establish
+// communication channels between the simulation and host OS processes. Supports optional
+// network namespace configuration for isolating the external application's network
+// stack, particularly useful for containerized or virtualized testing scenarios.
+// The module handles the lifecycle management of the external process, including
+// startup, communication, and termination, synchronizing its execution with the
+// simulation timeline.
+//
+// @see ~ExternalProcess, ~ExternalEnvironment, ~ExternalInterface
 //
 module ExternalApp like IApp
 {
@@ -35,4 +47,3 @@ module ExternalApp like IApp
         }
     connections allowunconnected:
 }
-

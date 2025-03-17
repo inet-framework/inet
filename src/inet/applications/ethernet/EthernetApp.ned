@@ -13,8 +13,21 @@ import inet.queueing.contract.IPacketFlow;
 import inet.queueing.contract.IPassivePacketSink;
 
 //
-// This module generates traffic as an Ethernet application. The traffic source
-// and traffic sink modules can be built from queueing model elements.
+// Provides a modular framework for building applications that communicate directly
+// over Ethernet, bypassing the network and transport layers. Implements a flexible
+// processing pipeline for Ethernet traffic with configurable components for traffic
+// generation, processing, and consumption.
+//
+// The module consists of a packet source for generating outgoing traffic, a packet
+// sink for processing incoming traffic, and an Ethernet socket interface that handles
+// the communication. Additional processing elements like taggers and measurement
+// modules can be inserted into the pipeline to implement custom traffic handling
+// behaviors. This architecture enables direct communication at the data link layer,
+// which is particularly useful for industrial automation protocols, real-time
+// applications, and specialized communication scenarios that require minimal
+// protocol overhead.
+//
+// @see ~EthernetSocketIo, ~EthernetSourceApp, ~EthernetSinkApp, ~EthernetSocket
 //
 module EthernetApp like IApp
 {

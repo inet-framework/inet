@@ -7,10 +7,19 @@
 package inet.applications.ethernet;
 
 //
-// A simple traffic generator for the Ethernet model and the 802.11 model,
-// and generally for any L2 model that accepts ~Ieee802SapReq tags on the
-// packets. It generates packets containing ~EtherAppReq chunks. It should
-// be connected directly to ~Ieee8022Llc.
+// Client application that generates request-response traffic directly at the data
+// link layer, bypassing the network and transport layers. Designed for testing and
+// benchmarking Ethernet networks, 802.11 wireless networks, and other Layer 2
+// technologies that support IEEE 802 Service Access Points (SAPs).
+//
+// Periodically sends request packets containing EtherAppReq chunks to a specified
+// destination MAC address, with configurable timing and size parameters. Each request
+// specifies the desired size of the corresponding response. Collects comprehensive
+// statistics including packet counts, bytes transferred, and end-to-end delay
+// measurements. Supports lifecycle operations for controlled startup and shutdown
+// in simulation scenarios.
+//
+// @see ~EtherAppServer, ~Ieee8022Llc, ~EtherAppReq, ~EtherAppResp
 //
 simple EtherAppClient
 {
@@ -38,4 +47,3 @@ simple EtherAppClient
         input in @labels(Ieee802Ctrl/up) @messageKinds(inet::SocketStatusInd);
         output out @labels(Ieee802Ctrl/down) @messageKinds(inet::SocketCommandCode);
 }
-

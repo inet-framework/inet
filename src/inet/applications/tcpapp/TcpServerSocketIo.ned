@@ -8,18 +8,20 @@
 package inet.applications.tcpapp;
 
 //
-// Manages an established TCP connection. It handles data transmission to and
-// from a module connected via the `trafficIn` and `trafficOut` gates. When data is
-// received on the `trafficIn` gate, it is forwarded on the TCP connection via the
-// `socketOut` gate, and vice versa. This module simplifies the task of data
-// exchange over an established TCP connection.
+// Bidirectional adapter for established TCP server connections that bridges between
+// application traffic and TCP socket communication. Provides a clean separation
+// between application logic and network transport, enabling modular design of
+// TCP-based server applications.
 //
-// Note that reading from the socket is only rate limited if the connection was
-// originally created with the autoRead=false setting. Then, you can use the
-// `readSize` and `readDelay` parameters to set a rate limit. This will allow TCP
-// flow control to come into effect.
+// Functions as a data relay that forwards incoming application data from the trafficIn
+// gate to the TCP socket via socketOut, and delivers received TCP data from socketIn
+// to the application via trafficOut. Supports configurable rate limiting through
+// readSize and readDelay parameters when used with connections created with autoRead=false,
+// enabling effective TCP flow control for managing network congestion and preventing
+// buffer overflows. Typically instantiated by TcpServerConnection modules to handle
+// the data exchange aspects of accepted connections.
 //
-// @see ~TcpServerConnection, ~TcpServerListener, ~TcpClientSocketIo
+// @see ~TcpServerConnection, ~TcpServerListener, ~TcpClientSocketIo, ~TcpSocket
 //
 simple TcpServerSocketIo
 {

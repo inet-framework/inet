@@ -11,11 +11,20 @@ package inet.applications.dhcp;
 import inet.applications.contract.IApp;
 
 //
-// Implements the DHCP server protocol. DHCP (Dynamic Host Configuration Protocol),
-// described in RFC 2131, provides configuration parameters to Internet hosts.
-// Requires UDP.
+// Implements a standards-compliant DHCP server that dynamically assigns network
+// configuration to client hosts. Follows the Dynamic Host Configuration Protocol
+// as specified in RFC 2131, providing automatic allocation of IP addresses, subnet
+// masks, default gateways, and other network parameters to requesting clients.
 //
-// @see ~DhcpClient, ~DhcpMessage
+// The server maintains an address pool and lease database, tracking which addresses
+// are assigned to which clients and for how long. When receiving DHCPDISCOVER messages,
+// it offers available addresses from its pool; when receiving DHCPREQUEST messages,
+// it confirms the allocation and records the lease. The server handles address reuse
+// after lease expiration and supports various configuration options including custom
+// lease times and gateway specification. Designed to work with standard DHCP clients
+// and supports lifecycle operations for controlled startup and shutdown.
+//
+// @see ~DhcpClient, ~DhcpMessage, ~UdpSocket
 //
 simple DhcpServer like IApp
 {
@@ -35,4 +44,3 @@ simple DhcpServer like IApp
         input socketIn @labels(UdpCommand/up);
         output socketOut @labels(UdpCommand/down);
 }
-

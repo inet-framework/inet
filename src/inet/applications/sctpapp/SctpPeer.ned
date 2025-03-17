@@ -9,6 +9,23 @@ package inet.applications.sctpapp;
 
 import inet.applications.contract.IApp;
 
+//
+// Implements a versatile SCTP peer application that combines both client and server
+// functionality in a single module. Capable of initiating connections to other peers
+// while simultaneously listening for incoming connections, enabling the simulation of
+// peer-to-peer communication patterns and symmetric network topologies. Provides
+// comprehensive control over SCTP-specific features including multi-streaming,
+// partial reliability, and stream prioritization.
+//
+// Supports various operational modes including configurable message exchange patterns,
+// echo functionality with adjustable delay, and controlled reading behavior. The peer
+// can be configured to establish connections at specific times, process a defined
+// number of packets, and manage connection teardown with precise timing control.
+// Particularly useful for testing SCTP protocol features in peer-to-peer scenarios
+// and evaluating application performance under different network conditions.
+//
+// @see ~SctpClient, ~SctpServer, ~SctpSocket
+//
 simple SctpPeer like IApp
 {
     parameters:
@@ -47,4 +64,3 @@ simple SctpPeer like IApp
         input socketIn @labels(SctpCommand/up);
         output socketOut @labels(SctpCommand/down);
 }
-

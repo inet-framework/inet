@@ -10,25 +10,23 @@ package inet.applications.tcpapp;
 import inet.applications.contract.IApp;
 
 //
-// Generic server application for modeling TCP-based request-reply style
-// protocols or applications.
+// Provides a generic server implementation for TCP-based request-response protocols,
+// designed to work with clients like ~TcpBasicClientApp. Listens for incoming connections
+// on a configurable port and processes ~GenericAppMsg messages from clients. Each received
+// message specifies the desired response size, which the server uses to generate and send
+// back appropriately sized replies.
 //
-// The module listens on the designated TCP port, accepting incoming TCP
-// connections. When a TCP connection is established, the model expects to
-// receive messages of class ~GenericAppMsg on it. A message should contain how
-// large the reply should be (number of bytes). For each received
-// ~GenericAppMsg, ~TcpGenericServerApp will create another ~GenericAppMsg with
-// the requested length as a response and send it back. The reply can be delayed
-// by a constant time (`replyDelay` parameter).
+// Offers flexible configuration options including optional response delays and rate-limited
+// socket reading. When rate limiting is enabled (by setting autoRead=false and configuring
+// readSize/readDelay parameters), the server can simulate processing constraints and enable
+// TCP flow control mechanisms to regulate traffic. This allows for modeling various server
+// behaviors from high-performance servers to resource-constrained systems.
 //
-// By default, the server does not impose rate limiting on data reads from the
-// socket. To enable rate limiting, you can set `autoRead` to "false" and
-// configure the `readSize` and `readDelay` parameters, thereby facilitating TCP
-// flow control.
+// Supports both IPv4 and IPv6 addressing, making it suitable for diverse network simulation
+// scenarios. The simple request-response behavior can be used as a foundation for modeling
+// various application protocols like HTTP, FTP, or custom client-server interactions.
 //
-// Compatible with both ~Ipv4 and ~Ipv6.
-//
-// @see ~GenericAppMsg, ~TcpBasicClientApp, ~TelnetApp
+// @see ~GenericAppMsg, ~TcpBasicClientApp, ~TelnetApp, ~TcpServerHostApp
 //
 simple TcpGenericServerApp like IApp
 {
@@ -52,4 +50,3 @@ simple TcpGenericServerApp like IApp
         input socketIn @labels(TcpCommand/up);
         output socketOut @labels(TcpCommand/down);
 }
-

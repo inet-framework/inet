@@ -11,7 +11,19 @@ import inet.applications.contract.IApp;
 import inet.queueing.contract.IActivePacketSource;
 
 //
-// This module implements a generic source application.
+// Provides a minimal, protocol-independent packet source application that generates
+// and sends packets through any transport protocol. Serves as a flexible traffic
+// generator for network testing scenarios where only the traffic generation
+// behavior is relevant, without implementing any specific application-layer protocol.
+//
+// The module uses a configurable packet source component that can be customized to
+// implement different packet generation behaviors. By default, it uses an active
+// packet source that produces packets according to its configuration, but it can be
+// replaced with other source implementations that provide different traffic patterns,
+// packet contents, or timing characteristics. Designed to be used in conjunction
+// with various traffic sinks for network performance testing and evaluation.
+//
+// @see ~SinkApp, ~IActivePacketSource, ~ActivePacketSource
 //
 module SourceApp like IApp
 {
@@ -28,4 +40,3 @@ module SourceApp like IApp
     connections allowunconnected:
         source.out --> socketOut;
 }
-

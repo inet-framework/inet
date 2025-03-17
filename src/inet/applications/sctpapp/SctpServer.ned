@@ -11,8 +11,20 @@ package inet.applications.sctpapp;
 import inet.applications.contract.IApp;
 
 //
-// Server app for SCTP-based request-reply protocols.
-// Handles a single session (and SCTP connection) at a time.
+// Implements a configurable SCTP server application that listens for incoming
+// connections and processes client requests. Provides extensive control over
+// SCTP-specific features including multi-streaming, partial reliability, and
+// stream reset capabilities, enabling detailed simulation of advanced SCTP
+// communication scenarios.
+//
+// Supports various operational modes including request-response patterns with
+// configurable message sizes and timing, echo functionality with adjustable delay,
+// and controlled reading behavior. The server can be configured to process a specific
+// number of packets per client, send responses with precise timing control, and
+// manage connection teardown. Particularly useful for testing SCTP protocol features
+// and evaluating application performance under different network conditions.
+//
+// @see ~SctpClient, ~SctpSocket
 //
 simple SctpServer like IApp
 {
@@ -44,4 +56,3 @@ simple SctpServer like IApp
         input socketIn;
         output socketOut;
 }
-

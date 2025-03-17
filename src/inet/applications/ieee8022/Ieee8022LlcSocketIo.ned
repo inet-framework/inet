@@ -8,7 +8,19 @@
 package inet.applications.ieee8022;
 
 //
-// This module provides IEEE 802.2 LLC socket handling for generic applications.
+// Provides a bridge between application-level traffic and IEEE 802.2 Logical Link
+// Control (LLC) protocol, handling the details of socket management and packet
+// transmission. Acts as an adapter that converts between application data and LLC
+// socket commands, simplifying the development of data link layer applications by
+// abstracting away the complexities of LLC socket operations.
+//
+// Offers configuration options for LLC communication including interface selection,
+// local and remote MAC addresses, and Service Access Point (SAP) identifiers. The
+// module maintains statistics on sent and received packets, enabling detailed
+// analysis of traffic patterns. Designed to be used as a component within modular
+// LLC applications, particularly those built with the queueing model architecture.
+//
+// @see ~Ieee8022LlcApp, ~Ieee8022LlcSourceApp, ~Ieee8022LlcSinkApp, ~Ieee8022LlcSocket
 //
 simple Ieee8022LlcSocketIo
 {

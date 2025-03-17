@@ -11,11 +11,19 @@ package inet.applications.dhcp;
 import inet.applications.contract.IApp;
 
 //
-// Implements the DHCP client protocol. DHCP (Dynamic Host Configuration Protocol),
-// described in RFC 2131, provides configuration parameters to Internet hosts.
-// Requires UDP.
+// Implements a standards-compliant DHCP client that automatically obtains network
+// configuration from a DHCP server. Follows the Dynamic Host Configuration Protocol
+// as specified in RFC 2131, enabling hosts to acquire IP addresses, subnet masks,
+// default gateways, and other network parameters dynamically without manual configuration.
 //
-// @see ~DhcpServer, ~DhcpMessage
+// The client progresses through the standard DHCP state machine (INIT, SELECTING,
+// REQUESTING, BOUND) and handles lease renewal and rebinding according to the protocol
+// specification. When started, it broadcasts DHCPDISCOVER messages to locate available
+// servers, selects from received offers, requests the selected configuration, and
+// applies the received parameters to the specified network interface. Supports
+// lifecycle operations for controlled startup and shutdown.
+//
+// @see ~DhcpServer, ~DhcpMessage, ~UdpSocket
 //
 simple DhcpClient like IApp
 {
@@ -33,4 +41,3 @@ simple DhcpClient like IApp
         input socketIn @labels(UdpCommand/up);
         output socketOut @labels(UdpCommand/down);
 }
-

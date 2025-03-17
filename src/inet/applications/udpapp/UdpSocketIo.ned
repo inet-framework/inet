@@ -8,7 +8,20 @@
 package inet.applications.udpapp;
 
 //
-// This module provides UDP socket handling for generic applications.
+// Provides a bridge between application-level traffic and UDP protocol, handling
+// the details of socket management and packet transmission. Acts as an adapter
+// that converts between application data and UDP socket commands, simplifying the
+// development of UDP-based applications by abstracting away the complexities of
+// socket operations.
+//
+// Offers comprehensive configuration options for UDP communication including local
+// and destination addressing, multicast support, TTL settings, DSCP/TOS values,
+// and broadcast capabilities. The module maintains statistics on sent and received
+// packets, enabling detailed analysis of traffic patterns. Designed to be used as
+// a component within modular UDP applications, particularly those built with the
+// queueing model architecture.
+//
+// @see ~UdpApp, ~UdpSocket, ~UdpBasicApp
 //
 simple UdpSocketIo
 {

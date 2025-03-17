@@ -21,21 +21,26 @@ import inet.applications.contract.IApp;
 
 
 //
-// Application model for comparing the performance of various transport
-// protocols.
+// Advanced benchmarking application for comparing the performance of various
+// transport protocols under identical application workloads. Generates configurable
+// bidirectional traffic patterns and precisely measures throughput, latency, jitter,
+// and other QoS metrics for each flow.
 //
-// The ~NetPerfMeter model simultaneously transmits bidirectional flows to an
-// endpoint, and measures the resulting flow bandwidths and QoS. Since the
-// application behavior is the same for all underlying transport layer
-// protocols, it allows for comparing the performance of various transport
-// protocols, e.g. TCP vs. SCTP.
+// Provides comprehensive control over traffic characteristics including frame rates,
+// frame sizes, reliability levels, and stream configurations. Supports multiple
+// transport protocols (SCTP, TCP, UDP) with protocol-specific features such as
+// multi-streaming and partial reliability for SCTP. The application can operate in
+// both client and server modes, with configurable on-off cycles to simulate
+// intermittent connectivity patterns.
 //
-// The model closely mimics the operation of the real-world NetPerfMeter
-// application (https://www.uni-due.de/~~be0001/netperfmeter/), a tool for
-// measuring UDP, TCP, MPTCP, SCTP and DCCP performance over IPv4 and IPv6.
-// Since the parametrization and features are similar to the real-world
-// application, the model also makes comparisons of simulation results and
-// real-world measurements easy.
+// Closely mimics the operation of the real-world NetPerfMeter application
+// (https://www.uni-due.de/~be0001/netperfmeter/), facilitating direct comparisons
+// between simulation results and real-world measurements. Particularly valuable for
+// transport protocol research, network performance evaluation, and protocol comparison
+// studies where identical application behavior across different transport protocols
+// is essential.
+//
+// @see ~ScpSocket, ~TcpSocket, ~UdpSocket
 //
 simple NetPerfMeter like IApp
 {
@@ -75,4 +80,3 @@ simple NetPerfMeter like IApp
         input socketIn;
         output socketOut;
 }
-

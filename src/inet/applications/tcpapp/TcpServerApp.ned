@@ -11,12 +11,25 @@ import inet.applications.contract.IApp;
 import inet.common.MessageDispatcher;
 
 //
-// This module is a generic, modular TCP server application. It is composed of a
-// listener module that listens on a port to accept TCP connections, and for each
-// incoming TCP connection it dynamically creates a new module in the connection[]
-// submodule vector to handle the connection.
+// Implements a modular, composite TCP server application with a flexible architecture
+// for handling multiple client connections. Consists of a listener component that
+// manages connection acceptance and a dynamic array of connection handler modules
+// that process individual client sessions. This design separates connection management
+// from application-specific processing logic.
 //
-// @see ~TcpClientApp, ~TcpServerListener, ~TcpServerConnection
+// The architecture uses a message dispatcher to route messages between the socket
+// interface, the listener, and the connection handlers. When a new connection arrives,
+// the listener creates a new connection module in the connection[] vector to handle
+// that specific client. Each connection module can implement custom application logic
+// while sharing the server's socket interface.
+//
+// This modular approach enables the creation of various TCP server applications by
+// simply configuring different connection handler module types without modifying the
+// server framework itself. The server can be used for implementing HTTP servers,
+// FTP servers, custom application protocols, or any service requiring TCP connection
+// handling.
+//
+// @see ~TcpClientApp, ~TcpServerListener, ~TcpServerConnection, ~MessageDispatcher
 //
 module TcpServerApp like IApp
 {

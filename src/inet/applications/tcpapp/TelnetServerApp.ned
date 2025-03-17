@@ -8,9 +8,20 @@
 package inet.applications.tcpapp;
 
 //
-// This server application accepts and creates telnet server connections.
+// Specialized TCP server application that handles telnet connections from
+// multiple clients. Extends the generic TcpServerApp by configuring it to
+// create TelnetServerConnection modules for each incoming connection.
 //
-// @see ~TelnetClientApp, ~TelnetServerConnection
+// Designed to work with TelnetClientApp modules, this server listens for
+// incoming connections and dynamically instantiates connection handlers
+// that process client commands and generate appropriate responses. The
+// server architecture supports concurrent connections from multiple clients,
+// with each connection managed by a separate TelnetServerConnection instance
+// that implements the telnet protocol behavior. Inherits all the connection
+// management capabilities of TcpServerApp while providing telnet-specific
+// functionality.
+//
+// @see ~TelnetClientApp, ~TelnetServerConnection, ~TelnetApp, ~TcpServerApp
 //
 module TelnetServerApp extends TcpServerApp
 {

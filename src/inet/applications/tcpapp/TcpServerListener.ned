@@ -10,19 +10,20 @@ package inet.applications.tcpapp;
 import inet.applications.contract.IApp;
 
 //
-// This module opens a TCP socket to listen on a port, accepts incoming
-// connections, and dynamically creates modules to handle them. The type of
-// modules to be created can be specified in a parameter. The new modules
-// will be appended to the connection[] submodule array of the parent of
-// this module, i.e., they will be siblings of this module.
+// TCP server component that listens for incoming connections and dynamically creates
+// handler modules for each accepted connection. Designed as a building block for
+// implementing scalable server applications that can handle multiple concurrent
+// client connections.
 //
-// Accepted TCP connections will inherit the `autoRead` setting of this module. To
-// allow rate limiting on the connections, set autoRead=false here, and use
-// corresponding parameters of the connection handling module (e.g., `readSize` and
-// `readDelay`) to set a rate limit. This will allow TCP flow control to come into
-// effect.
+// Acts as a connection factory that binds to a specified local address and port,
+// then spawns configurable connection handler modules when clients connect. The
+// newly created handler modules become siblings of this module in the simulation
+// hierarchy. Provides flow control capabilities through the autoRead parameter,
+// which when set to false allows connection handlers to implement rate limiting
+// through parameters like readSize and readDelay, enabling TCP's built-in flow
+// control mechanisms to regulate traffic.
 //
-// @see ~TcpServerApp, ~TcpServerConnection
+// @see ~TcpServerApp, ~TcpServerConnection, ~TcpSocket
 //
 simple TcpServerListener
 {

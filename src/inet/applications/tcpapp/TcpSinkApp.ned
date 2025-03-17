@@ -8,15 +8,20 @@
 package inet.applications.tcpapp;
 
 //
-// Accepts any number of incoming TCP connections, and discards whatever
-// arrives on them. Compatible with both ~Ipv4 and ~Ipv6.
+// Multi-connection TCP traffic sink that accepts and consumes incoming data
+// without generating responses. Designed for testing network performance,
+// throughput measurement, and traffic generation scenarios where only the
+// receiving side behavior is of interest.
 //
-// Each incoming connection is handled by a separate, dynamically created module,
-// which allows collecting per-connection statistics in a convenient way.
+// Creates a separate thread module (TcpSinkAppThread) for each incoming connection,
+// enabling detailed per-connection statistics collection and independent handling
+// of multiple simultaneous connections. Supports both IPv4 and IPv6 networks with
+// configurable reception rate limiting through the autoRead, readSize, and readDelay
+// parameters. When rate limiting is enabled (autoRead=false), TCP flow control
+// mechanisms become active, allowing realistic simulation of network congestion
+// and backpressure effects.
 //
-// By default, reading from the socket is not rate limited. To allow rate
-// limiting, set autoRead=false, and use the `readSize` and `readDelay` parameters
-// to set a rate limit. This will allow TCP flow control to come into effect.
+// @see ~TcpServerHostApp, ~TcpSinkAppThread, ~UdpSink
 //
 module TcpSinkApp extends TcpServerHostApp
 {
@@ -42,4 +47,3 @@ simple TcpSinkAppThread
         @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[endToEndDelay](title="end-to-end delay"; source="dataAge(packetReceived)"; unit=s; record=histogram,weightedHistogram,vector; interpolationmode=none);
 }
-

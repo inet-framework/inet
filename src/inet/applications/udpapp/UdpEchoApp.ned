@@ -10,9 +10,17 @@ package inet.applications.udpapp;
 import inet.applications.contract.IApp;
 
 //
-// Listens on a UDP port and sends back each received packet to its sender.
-// Note: when used together with ~UdpBasicApp, ~UdpBasicApp's "received packet
-// lifetime" statistic will record round-trip times.
+// Implements a simple UDP echo service that listens on a specified port and echoes back
+// any received packets to their original sender without modifying their contents. This
+// application provides a straightforward way to test network connectivity, measure
+// round-trip times, and evaluate basic UDP communication in simulated networks.
+//
+// When paired with clients like ~UdpBasicApp, it enables round-trip time measurements
+// through the client's "received packet lifetime" statistics. The application maintains
+// a count of echoed packets and can join multicast groups defined in the interface table,
+// making it suitable for both unicast and multicast testing scenarios.
+//
+// @see ~UdpBasicApp, ~UdpSocket, ~UdpSink
 //
 simple UdpEchoApp like IApp
 {
@@ -29,4 +37,3 @@ simple UdpEchoApp like IApp
         input socketIn @labels(UdpCommand/up);
         output socketOut @labels(UdpCommand/down);
 }
-

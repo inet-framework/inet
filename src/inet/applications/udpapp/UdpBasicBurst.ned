@@ -11,8 +11,12 @@ package inet.applications.udpapp;
 import inet.applications.contract.IApp;
 
 //
-// Sends UDP packets to the given IP address(es) in bursts, or acts as a
-// packet sink. Compatible with both IPv4 (~Ipv4) and IPv6 (~Ipv6).
+// Implements a configurable traffic generator that transmits UDP packets in bursts,
+// allowing for realistic modeling of bursty network traffic patterns. Provides extensive
+// control over burst timing, destination selection, and packet characteristics, making
+// it suitable for simulating various application behaviors from periodic data transfers
+// to randomized traffic with complex temporal patterns. Can also function as a packet
+// sink when no destination addresses are specified.
 //
 // <b>Addressing:</b>
 //
@@ -127,4 +131,3 @@ simple UdpBasicBurst like IApp
         input socketIn @labels(UdpCommand/up);
         output socketOut @labels(UdpCommand/down);
 }
-

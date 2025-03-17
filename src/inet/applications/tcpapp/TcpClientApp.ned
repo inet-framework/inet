@@ -13,11 +13,21 @@ import inet.queueing.contract.IPacketFlow;
 import inet.queueing.contract.IPassivePacketSink;
 
 //
-// This module is a generic, very modular TCP client application, similar to
-// ~TcpServerApp. The traffic source and traffic sink modules can be built from
-// queueing model elements.
+// Provides a highly modular and customizable TCP client application framework based
+// on the queueing model. Implements a flexible pipeline architecture where traffic
+// generation, packet processing, and measurement components can be independently
+// configured and connected. The modular design allows for creating diverse client
+// behaviors by simply replacing or reconfiguring the component modules.
 //
-// @see ~TcpServerApp
+// The architecture consists of a packet source that generates traffic, optional
+// processing stages (tagger, measurement starter), a TCP socket interface module
+// that handles the connection, and a processing pipeline for received data
+// (measurement recorder, sink). Each component in the pipeline can be customized
+// or replaced to implement specific application requirements, enabling the
+// simulation of various client behaviors from simple data transfer to complex
+// application protocols.
+//
+// @see ~TcpServerApp, ~TcpClientSocketIo, ~IActivePacketSource, ~IPassivePacketSink
 //
 module TcpClientApp like IApp
 {

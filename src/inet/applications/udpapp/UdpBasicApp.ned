@@ -10,21 +10,19 @@ package inet.applications.udpapp;
 import inet.applications.contract.IApp;
 
 //
-// Sends UDP packets to the given IP address at the given interval.
-// Compatible with both ~Ipv4 and ~Ipv6.
+// Generates and sends UDP packets to specified destination addresses at configurable intervals.
+// Supports both IPv4 and IPv6 addressing, with the ability to target multiple destinations
+// by randomly selecting from a space-separated list of addresses for each transmission.
+// The sending interval can be configured as a constant or random value (e.g., exponential
+// distribution), making it suitable for modeling various traffic patterns and network load
+// scenarios.
 //
-// The sending interval can be a constant or a random value (e.g. exponential(1)).
-// If the `destAddresses` parameter contains more than one address, one
-// of them is randomly chosen for each packet. An address may be given in the
-// dotted decimal notation, or with the module name. (The `L3AddressResolver`
-// class is used to resolve the address.) To disable the model, set
-// `destAddresses` to "".
+// While primarily designed as a traffic generator, the module also counts received packets,
+// though it doesn't process their contents. It can be paired with various UDP receivers
+// such as ~UdpSink, another ~UdpBasicApp, or ~UdpEchoApp. When used with ~UdpEchoApp,
+// the module can measure round-trip times through the rcvdPkLifetime statistic.
 //
-// Received packets are discarded.
-//
-// The peer can be a ~UdpSink, another ~UdpBasicApp (it handles received packets
-// like ~UdpSink), or a ~UdpEchoApp. When used with ~UdpEchoApp, the `rcvdPkLifetime`
-// statistic will contain the round-trip times.
+// @see ~UdpSink, ~UdpEchoApp, ~UdpSocket
 //
 simple UdpBasicApp like IApp
 {
@@ -62,4 +60,3 @@ simple UdpBasicApp like IApp
         input socketIn @labels(UdpCommand/up);
         output socketOut @labels(UdpCommand/down);
 }
-

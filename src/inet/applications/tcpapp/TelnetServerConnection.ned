@@ -17,10 +17,22 @@ import inet.queueing.contract.IPassivePacketSource;
 import inet.queueing.tokengenerator.PacketBasedTokenGenerator;
 
 //
-// This module contains a configurable pre-composed telnet traffic source and
-// traffic sink as part of a telnet server application.
+// Connection handler module for telnet server applications that processes client
+// commands and generates appropriate responses using a sophisticated queueing-based
+// architecture. Dynamically created by TelnetServerApp for each incoming client
+// connection.
 //
-// @see ~TelnetClientApp, ~TelnetServerApp
+// Implements a complex packet processing pipeline that distinguishes between
+// regular character input and enter key presses from clients. The module clones
+// incoming packets and processes them through a classifier that separates character
+// and enter key packets. Character packets are consumed, while enter key presses
+// trigger token generation that activates the response server to generate replies.
+// This architecture enables realistic simulation of command processing behavior,
+// where the server responds only after complete commands are received (signaled by
+// enter key presses). The response generation is configurable through the
+// responseProvider and responseServer components.
+//
+// @see ~TelnetClientApp, ~TelnetServerApp, ~TcpServerSocketIo, ~PacketClassifier
 //
 module TelnetServerConnection like IApp
 {

@@ -10,16 +10,20 @@ package inet.applications.voipstream;
 import inet.applications.contract.IApp;
 
 //
-// VoipStreamReceiver listens on a UDP port and expects to receive VoIP packets on
-// it. The received voice is then saved into a result audio file that can be
-// compared with the original for further evaluation. VoIP packets are
-// numbered, and out-of-order packets are discarded (the corresponding voice
-// interval will be recorded as silence into the file). VoIP packets that miss
-// their deadlines will similarly be discarded. It is assumed that the audio is
-// played back with a delay (by default 20ms), which allows some jitter for the
-// incoming packets. The resulting audio file is closed when the simulation
-// completes (i.e., in the OMNeT++ finish() function). Only one voice session
-// ("call") may be underway at a time.
+// Implements a realistic VoIP receiver that processes incoming audio packets and
+// reconstructs the original audio stream with consideration for network impairments.
+// Listens on a specified UDP port for packets from a VoipStreamSender, decodes the
+// audio data, and saves the reconstructed stream to a file for quality assessment
+// and comparison with the original audio.
+//
+// Incorporates sophisticated packet handling mechanisms that model real VoIP systems,
+// including playout buffering with configurable delay to absorb network jitter,
+// packet sequence checking to handle out-of-order delivery, and deadline enforcement
+// to discard late packets. Maintains detailed statistics on various quality metrics
+// including packet loss, silence periods, and end-to-end delay, providing comprehensive
+// data for analyzing VoIP performance under different network conditions.
+//
+// @see ~VoipStreamSender, ~UdpSocket
 //
 simple VoipStreamReceiver like IApp
 {
@@ -47,4 +51,3 @@ simple VoipStreamReceiver like IApp
         input socketIn @labels(UdpCommand/up);
         output socketOut @labels(UdpCommand/down);
 }
-

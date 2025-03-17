@@ -13,10 +13,21 @@ import inet.queueing.contract.IPacketScheduler;
 import inet.queueing.contract.IPassivePacketSink;
 
 //
-// This client application contains a configurable pre-composed telnet traffic
-// source and traffic sink.
+// Modular telnet client application that simulates interactive terminal behavior
+// using a queueing-based architecture. Generates realistic keystroke patterns
+// including regular characters, enter key presses, and think-time pauses to
+// model human typing behavior in terminal sessions.
 //
-// @see ~TelnetServerApp
+// Implements a sophisticated traffic generation model with three packet producers
+// (for characters, enter keys, and pauses) and a Markov scheduler that creates
+// realistic typing sequences. The character producer generates lowercase ASCII
+// characters at configurable typing speeds, while the scheduler controls the
+// transition between typing characters, pressing enter, and pausing to simulate
+// user think time. All generated traffic is sent to a TCP server through the
+// TcpClientSocketIo module, with received server responses handled by a
+// configurable packet sink.
+//
+// @see ~TelnetServerApp, ~TelnetApp, ~TcpClientSocketIo, ~MarkovScheduler
 //
 module TelnetClientApp like IApp
 {

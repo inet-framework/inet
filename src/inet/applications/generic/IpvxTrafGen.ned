@@ -8,16 +8,23 @@
 package inet.applications.generic;
 
 //
-// Sends IP or IPv6 datagrams to the given address at the given `sendInterval`.
-// The `sendInterval` can be a constant or a random value (e.g. exponential(1)).
-// If the `destAddresses` parameter contains more than one address, one
-// of them is randomly chosen for each packet. An address may be given in the
-// dotted decimal notation (or, for IPv6, in the usual notation with colons),
-// or with the module name. (The `L3AddressResolver` class is used to resolve
-// the address.) To disable the model, set `destAddresses` to "".
+// Generates configurable traffic directly over IPv4 or IPv6, bypassing transport
+// protocols like TCP and UDP. Sends datagrams to specified destination addresses
+// at regular or stochastically determined intervals. When multiple destination
+// addresses are configured, randomly selects one for each packet, enabling various
+// traffic distribution patterns.
 //
-// The peer can be ~IpvxTrafSink or another ~IpvxTrafGen (it handles received packets
-// exactly like ~IpvxTrafSink).
+// Provides extensive configuration options including start/stop times, packet size,
+// sending interval, and protocol field values. The module can be configured to send
+// a specific number of packets or to operate continuously until simulation end.
+// Supports both deterministic and random traffic patterns through the volatile
+// parameters, making it suitable for various network testing scenarios.
+//
+// Can communicate with ~IpvxTrafSink modules or other ~IpvxTrafGen instances, as
+// it also includes packet reception capabilities. Collects statistics on sent and
+// received packets, including counts, sizes, and end-to-end delays.
+//
+// @see ~IpvxTrafSink, ~IIpvxTrafficGenerator
 //
 simple IpvxTrafGen like IIpvxTrafficGenerator
 {
@@ -40,4 +47,3 @@ simple IpvxTrafGen like IIpvxTrafficGenerator
         input ipIn @labels(Ipv4ControlInfo/up,Ipv6ControlInfo/up);
         output ipOut @labels(Ipv4ControlInfo/down,Ipv6ControlInfo/down);
 }
-

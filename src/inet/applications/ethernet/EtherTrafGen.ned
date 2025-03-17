@@ -8,9 +8,18 @@
 package inet.applications.ethernet;
 
 //
-// A simple traffic generator for the Ethernet model and the 802.11 model, and
-// generally for any L2 model that accepts ~Ieee802SapReq tag on packets. It
-// should be connected directly to ~Ieee8022Llc module.
+// Lightweight traffic generator for data link layer testing that produces configurable
+// packet patterns directly at the Ethernet or 802.11 level. Designed for benchmarking
+// and stress-testing Layer 2 networks without the overhead of higher layer protocols.
+//
+// Generates packets with customizable length and timing parameters, supporting both
+// continuous streams and burst patterns. Each packet is tagged with an Ieee802SapReq
+// to enable proper handling by the LLC sublayer. Maintains comprehensive statistics
+// on traffic patterns including packet counts, bytes transferred, and end-to-end delay
+// measurements. Supports lifecycle operations for controlled startup and shutdown in
+// simulation scenarios.
+//
+// @see ~Ieee8022Llc, ~EthernetSocket, ~EthernetInterface
 //
 simple EtherTrafGen
 {
@@ -38,4 +47,3 @@ simple EtherTrafGen
         input in @labels(Ieee802Ctrl/up) @messageKinds(inet::SocketStatusInd);
         output out @labels(Ieee802Ctrl/down) @messageKinds(inet::SocketCommandCode);
 }
-

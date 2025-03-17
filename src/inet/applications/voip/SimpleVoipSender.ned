@@ -10,28 +10,23 @@ package inet.applications.voip;
 import inet.applications.contract.IApp;
 
 //
-// Implements a simple VoIP source. It is a constant bitrate source, with
-// talk spurt support added. Packets do not contain actual voice data.
-// Connection setup/teardown is not modeled. The peer must be a
-// ~SimpleVoipReceiver.
+// Simulates a VoIP traffic source that generates packet streams with realistic
+// speech patterns, alternating between talk spurts and silence periods. During talk
+// spurts, packets of configurable size are sent at regular intervals, while no packets
+// are transmitted during silence periods. The durations of both talk and silence phases
+// can be configured with statistical distributions (default: Weibull) to model natural
+// conversation patterns.
 //
-// The source alternates between two states: talk and silence. The length
-// the module spends in each state is controlled by the `talkspurtDuration` and
-// `silenceDuration` parameters. In the talk state, the module acts as a CBR source,
-// and sends packets of size `talkPacketSize` every `packetizationInterval` seconds
-// to the destination over UDP. Silence is implicit: in the silence state, no packets
-// are sent, and there is no explicit signaling of silence either.
+// Each packet contains metadata including timestamps, talkspurt identification, and
+// sequence information, allowing the receiver to calculate quality metrics such as
+// packet loss, delay, and jitter. The implementation focuses on traffic pattern
+// simulation rather than actual voice encoding, making it suitable for network
+// performance studies without the computational overhead of real audio processing.
 //
-// Packets are of type `SimpleVoipPacket`. In addition to packet ID and timestamp,
-// packets also contain a talkspurt ID and the total number of packets in the
-// talkspurt to facilitate statistics on the receiver's side. (It allows the receiver
-// to detect the loss of packets at the end of a talkspurt; a full talkspurt can still
-// be lost unnoticed.)
+// Designed to work with ~SimpleVoipReceiver, which calculates quality metrics including
+// Mean Opinion Score (MOS) based on the received packet stream characteristics.
 //
-// The destination address/port, the local port, start and stop times can be
-// set via parameters.
-//
-// @author: Adriano
+// @see ~SimpleVoipReceiver, ~SimpleVoipPacket, ~UdpSocket
 //
 simple SimpleVoipSender like IApp
 {
@@ -51,4 +46,3 @@ simple SimpleVoipSender like IApp
         input socketIn @labels(UdpCommand/up);
         output socketOut @labels(UdpCommand/down);
 }
-

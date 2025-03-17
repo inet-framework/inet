@@ -9,8 +9,20 @@
 package inet.applications.rtpapp;
 
 //
-// An application which uses RTP. It acts as a sender if the parameter `fileName` is
-// set, and as a receiver if the parameter is empty.
+// Implements a versatile RTP (Real-time Transport Protocol) application that can
+// function as either a sender or receiver based on configuration. When configured
+// with a filename, operates as a media sender, transmitting the file contents over
+// RTP with precise timing control. Without a filename, functions as a receiver that
+// processes incoming RTP streams. Provides comprehensive session management including
+// controlled entry, participation, and departure from RTP sessions.
+//
+// Offers extensive configuration options for RTP session parameters including bandwidth
+// management, payload type specification, and timing controls for transmission start/stop
+// and session participation. Designed to work with standard RTP profiles (typically
+// RtpAvProfile) and supports the fundamental RTP mechanisms for real-time media
+// transmission in network simulations.
+//
+// @see ~RtpProfile, ~RtpAvProfile, ~RtpInterfacePacket
 //
 simple RtpApplication
 {
@@ -33,4 +45,3 @@ simple RtpApplication
         output rtpOut @labels(RtpInterfacePacket/down);
         input rtpIn @labels(RtpInterfacePacket/up);
 }
-

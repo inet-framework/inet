@@ -1,0 +1,113 @@
+# INET Applications NED Documentation Review Progress
+
+This file tracks the progress of reviewing and improving NED documentation for files in src/inet/applications.
+
+## Status Legend
+- todo: File needs documentation review and improvement
+- reviewed: File has been reviewed but not yet improved
+- improved: File documentation has been improved
+
+## Files Status
+
+### Clock Applications
+src/inet/applications/clock/SimpleClockSynchronizer.ned: improved
+
+### Common Applications
+src/inet/applications/common/SinkApp.ned: improved
+src/inet/applications/common/SourceApp.ned: improved
+
+### Contract Interfaces
+src/inet/applications/contract/IApp.ned: improved
+
+### DHCP Applications
+src/inet/applications/dhcp/DhcpClient.ned: improved
+src/inet/applications/dhcp/DhcpServer.ned: improved
+
+### Ethernet Applications
+src/inet/applications/ethernet/EtherAppClient.ned: improved
+src/inet/applications/ethernet/EtherAppServer.ned: improved
+src/inet/applications/ethernet/EthernetApp.ned: improved
+src/inet/applications/ethernet/EthernetSinkApp.ned: improved
+src/inet/applications/ethernet/EthernetSocketIo.ned: improved
+src/inet/applications/ethernet/EthernetSourceApp.ned: improved
+src/inet/applications/ethernet/EtherTrafGen.ned: improved
+
+### External Applications
+src/inet/applications/external/ExternalApp.ned: improved
+
+### Generic Applications
+src/inet/applications/generic/IIpvxTrafficGenerator.ned: improved
+src/inet/applications/generic/IpvxTrafGen.ned: improved
+src/inet/applications/generic/IpvxTrafSink.ned: improved
+
+### IEEE 802.2 Applications
+src/inet/applications/ieee8022/Ieee8022LlcApp.ned: improved
+src/inet/applications/ieee8022/Ieee8022LlcSinkApp.ned: improved
+src/inet/applications/ieee8022/Ieee8022LlcSocketIo.ned: improved
+src/inet/applications/ieee8022/Ieee8022LlcSourceApp.ned: improved
+
+### IP Applications
+src/inet/applications/ipapp/IpApp.ned: improved
+src/inet/applications/ipapp/IpSinkApp.ned: improved
+src/inet/applications/ipapp/IpSocketIo.ned: improved
+src/inet/applications/ipapp/IpSourceApp.ned: improved
+
+### NetPerfMeter Applications
+src/inet/applications/netperfmeter/NetPerfMeter.ned: improved
+
+### Ping Applications
+src/inet/applications/pingapp/PingApp.ned: improved
+
+### RTP Applications
+src/inet/applications/rtpapp/RtpApplication.ned: improved
+
+### SCTP Applications
+src/inet/applications/sctpapp/SctpClient.ned: improved
+src/inet/applications/sctpapp/SctpNatPeer.ned: improved
+src/inet/applications/sctpapp/SctpNatServer.ned: improved
+src/inet/applications/sctpapp/SctpPeer.ned: improved
+src/inet/applications/sctpapp/SctpServer.ned: improved
+
+### TCP Applications
+src/inet/applications/tcpapp/TcpBasicClientApp.ned: improved
+src/inet/applications/tcpapp/TcpClientApp.ned: improved
+src/inet/applications/tcpapp/TcpClientSocketIo.ned: improved
+src/inet/applications/tcpapp/TcpEchoApp.ned: improved
+src/inet/applications/tcpapp/TcpGenericServerApp.ned: improved
+src/inet/applications/tcpapp/TcpRequestResponseApp.ned: improved
+src/inet/applications/tcpapp/TcpServerApp.ned: improved
+src/inet/applications/tcpapp/TcpServerConnection.ned: improved
+src/inet/applications/tcpapp/TcpServerHostApp.ned: improved
+src/inet/applications/tcpapp/TcpServerListener.ned: improved
+src/inet/applications/tcpapp/TcpServerSocketIo.ned: improved
+src/inet/applications/tcpapp/TcpSessionApp.ned: improved
+src/inet/applications/tcpapp/TcpSinkApp.ned: improved
+src/inet/applications/tcpapp/TelnetApp.ned: improved
+src/inet/applications/tcpapp/TelnetClientApp.ned: improved
+src/inet/applications/tcpapp/TelnetServerApp.ned: improved
+src/inet/applications/tcpapp/TelnetServerConnection.ned: improved
+
+### TUN Applications
+src/inet/applications/tunapp/TunLoopbackApp.ned: improved
+src/inet/applications/tunapp/TunnelApp.ned: improved
+
+### UDP Applications
+src/inet/applications/udpapp/UdpApp.ned: improved
+src/inet/applications/udpapp/UdpBasicApp.ned: improved
+src/inet/applications/udpapp/UdpBasicBurst.ned: improved
+src/inet/applications/udpapp/UdpEchoApp.ned: improved
+src/inet/applications/udpapp/UdpRequestResponseApp.ned: improved
+src/inet/applications/udpapp/UdpSinkApp.ned: improved
+src/inet/applications/udpapp/UdpSink.ned: improved
+src/inet/applications/udpapp/UdpSocketIo.ned: improved
+src/inet/applications/udpapp/UdpSourceApp.ned: improved
+src/inet/applications/udpapp/UdpVideoStreamClient.ned: improved
+src/inet/applications/udpapp/UdpVideoStreamServer.ned: improved
+
+### VoIP Applications
+src/inet/applications/voip/SimpleVoipReceiver.ned: improved
+src/inet/applications/voip/SimpleVoipSender.ned: improved
+
+### VoIP Stream Applications
+src/inet/applications/voipstream/VoipStreamReceiver.ned: improved
+src/inet/applications/voipstream/VoipStreamSender.ned: improved
