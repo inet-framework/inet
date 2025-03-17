@@ -15,27 +15,8 @@
 
 namespace inet::quic;
 
-cplusplus(h) {{
-    #include <stddef.h>
-
+cplusplus{{
     typedef uint64_t VariableLengthInteger;
-
-    size_t getVariableLengthIntegerSize(VariableLengthInteger i);
-}}
-
-cplusplus(cc) {{
-    size_t getVariableLengthIntegerSize(VariableLengthInteger i) {
-        if (i < 64ull) {
-            return 1;
-        }
-        if (i < (1ull << 14)) {
-            return 2;
-        }
-        if (i < (1ull << 30)) {
-            return 4;
-        }
-        return 8;
-    }
 }}
 
 class VariableLengthInteger {

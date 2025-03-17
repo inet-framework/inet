@@ -17,6 +17,10 @@
 import inet.common.packet.chunk.Chunk;
 import inet.transportlayer.quic.packet.VariableLengthInteger;
 
+cplusplus{{
+    #include "VariableLengthInteger.h"
+}}
+
 namespace inet::quic;
 
 enum PacketHeaderForm {
