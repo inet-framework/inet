@@ -1,0 +1,19 @@
+Can a QUIC sender fully utilize the bandwidth of a link?
+
+To check that, the sender sends as many bytes as the congestion control
+permits. After some time, the queue of the router before the bottleneck link
+is full, and the router has to drop packets. This regulates the sender's
+congestion control.
+
+The sender should be able to achieve the maximum throughput, which is:
+
+Tp = quicPacketSize / wirePacketSize * Bw 
+
+where quicPacketSize is the maximum QUIC packet size (i.e., UDP payload size),
+wirePacketSize is the maximum packet size on the wire (e.g., including the 
+link layer header) and Bw is the bandwidth of the bottleneck link.
+
+One important parameter is the queue size of the router before the bottleneck
+link. If it is too small, the sender achieves a smaller throughput. If it is
+too large, the queue delay is high. A good value for the queue size is the
+Bandwidth-Delay-Product (BDP), where delay actually means RTT.
