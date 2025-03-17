@@ -19,7 +19,7 @@ import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 
-network bottleneck_link
+network bottleneck
 {
     parameters:
         double linkDelay @unit(s) = default(0ms);
