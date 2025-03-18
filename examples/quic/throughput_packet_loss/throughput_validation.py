@@ -9,7 +9,6 @@ path = dirname + "results/throughput_validation_"
 ps = [".008", ".01", ".02"]
 rtts_measured = [20, 40, 60]
 S = 1252
-print("---")
 for p_str in ps:
 	p = float(p_str)
 
@@ -23,18 +22,13 @@ for p_str in ps:
 			raise RuntimeError('Cannot open '+file) from e
 		c = conn.cursor()
 		
-		print("p=" + str(p*100) + "%, RTT=" + str(rtt) + "ms")
-		tp_mathis = (S*8)/(1000*rtt) * 1/math.sqrt(2*p/3)
-		print("should be: " + "{:.3f}".format(tp_mathis) + "Mb/s")
+		start = 4000
+		end  = 14000
 		
-		#first = 0
-		#last = 0
+		first = 0
+		last = 0
 		data = 0
 
-		t0Int = 4000 
-		t0 = str( t0Int * 1000000000 )
-		t1Int = 14000
-		t1 = str( t1Int * 1000000000 )
 		for row in c.execute("""
 select simtimeRaw, value 
 from vectorData 
@@ -42,19 +36,19 @@ where vectorId = (
 	select vectorId 
 	from vector 
 	where moduleName = 'bottleneck.receiver.quic' and vectorName = 'packetReceived:vector(packetBytes)'
-) and simtimeRaw between """ + t0 + " and " + t1 + """
+) and simtimeRaw between """ + str(start * 1000000000) + " and " + str(end * 1000000000) + """
 order by simtimeRaw
 """):
-			#if first == 0:
-			#	first = row[0]
-			#else:
-			#	data += int(row[1])
-			#last = row[0]
-			data += int(row[1])
-		
-		tp = data*8 / ((t1Int - t0Int)*1000)
-		print(str(t0Int) + "ms - " + str(t1Int) + "ms: " + "{:.3f}".format(tp) + "Mb/s (" + "{:.2f}".format((1-(tp/tp_mathis))*100) +"%)")
+			if first == 0:
+				first = row[0]
+			else:
+				data += int(row[1])
+			last = row[0]
+			#data += int(row[1])
+
 		c.close()
 		conn.close()
-		print("---")
 
+		tp = data*8*1000000 / (last - first)
+		tp_should = (S*8)/(1000*rtt) * 1/math.sqrt(2*p/3)
+		print("p=" + str(p*100) + "%, RTT=" + str(rtt) + "ms: " + "{:.3f}".format(tp) + "Mb/s, should be " + "{:.3f}".format(tp_should) + "Mb/s (" + "{:.2f}".format((1-(tp/tp_should))*100) +"%)")
