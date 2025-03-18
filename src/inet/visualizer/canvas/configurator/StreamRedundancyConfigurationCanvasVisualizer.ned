@@ -10,6 +10,9 @@ package inet.visualizer.canvas.configurator;
 import inet.visualizer.base.TreeVisualizerBase;
 import inet.visualizer.contract.IStreamRedundancyConfigurationVisualizer;
 
+//
+// TODO
+//
 simple StreamRedundancyConfigurationCanvasVisualizer extends TreeVisualizerBase like IStreamRedundancyConfigurationVisualizer
 {
     parameters:

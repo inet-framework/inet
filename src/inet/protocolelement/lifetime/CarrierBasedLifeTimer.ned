@@ -9,6 +9,9 @@ package inet.protocolelement.lifetime;
 
 import inet.protocolelement.contract.IPacketLifeTimer;
 
+//
+// TODO
+//
 simple CarrierBasedLifeTimer like IPacketLifeTimer
 {
     parameters:

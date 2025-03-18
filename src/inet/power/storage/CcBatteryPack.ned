@@ -9,6 +9,9 @@ package inet.power.storage;
 
 import inet.power.storage.SimpleCcBattery;
 
+//
+// TODO
+//
 simple CcBatteryPack extends SimpleCcBattery
 {
    parameters:

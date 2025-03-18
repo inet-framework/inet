@@ -13,6 +13,9 @@ import inet.queueing.common.PacketMultiplexer;
 import inet.queueing.contract.IPacketClassifier;
 import inet.queueing.contract.IPacketFlow;
 
+//
+// TODO
+//
 module Ieee8022LlcLayer like IIeee8022LlcLayer
 {
     parameters:

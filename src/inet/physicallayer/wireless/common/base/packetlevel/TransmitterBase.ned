@@ -9,6 +9,9 @@ package inet.physicallayer.wireless.common.base.packetlevel;
 
 import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitterAnalogModel;
 
+//
+// TODO
+//
 module TransmitterBase
 {
     parameters:

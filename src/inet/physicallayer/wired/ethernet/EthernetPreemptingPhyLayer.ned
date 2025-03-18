@@ -15,6 +15,9 @@ import inet.queueing.common.PacketMultiplexer;
 import inet.queueing.contract.IPacketFilter;
 import inet.queueing.contract.IPacketFlow;
 
+//
+// TODO
+//
 module EthernetPreemptingPhyLayer like IEthernetPhyLayer
 {
     parameters:

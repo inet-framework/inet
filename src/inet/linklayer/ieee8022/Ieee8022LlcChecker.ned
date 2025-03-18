@@ -9,6 +9,9 @@ package inet.linklayer.ieee8022;
 
 import inet.queueing.base.PacketFilterBase;
 
+//
+// TODO
+//
 simple Ieee8022LlcChecker extends PacketFilterBase like IIeee8022LlcChecker
 {
     parameters:

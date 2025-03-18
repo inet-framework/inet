@@ -10,6 +10,9 @@ package inet.visualizer.osg.flow;
 import inet.visualizer.base.PathVisualizerBase;
 import inet.visualizer.contract.IPacketFlowVisualizer;
 
+//
+// TODO
+//
 simple PacketFlowOsgVisualizer extends PathVisualizerBase like IPacketFlowVisualizer
 {
     parameters:

@@ -7,6 +7,9 @@
 
 package inet.visualizer.contract;
 
+//
+// TODO
+//
 moduleinterface IPacketFlowVisualizer extends IVisualizer
 {
     parameters:

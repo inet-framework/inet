@@ -7,6 +7,9 @@
 
 package inet.queueing.classifier;
 
+//
+// TODO
+//
 simple DynamicClassifier extends PacketClassifier
 {
     parameters:

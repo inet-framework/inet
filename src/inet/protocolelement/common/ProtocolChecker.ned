@@ -9,6 +9,9 @@ package inet.protocolelement.common;
 
 import inet.queueing.base.PacketFilterBase;
 
+//
+// TODO
+//
 simple ProtocolChecker extends PacketFilterBase
 {
     parameters:

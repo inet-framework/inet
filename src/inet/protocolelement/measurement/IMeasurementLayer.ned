@@ -7,6 +7,9 @@
 
 package inet.protocolelement.measurement;
 
+//
+// TODO
+//
 moduleinterface IMeasurementLayer
 {
     parameters:

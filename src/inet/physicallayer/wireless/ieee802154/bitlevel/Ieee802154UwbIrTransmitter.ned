@@ -9,6 +9,9 @@ package inet.physicallayer.wireless.ieee802154.bitlevel;
 
 import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitter;
 
+//
+// TODO
+//
 module Ieee802154UwbIrTransmitter like ITransmitter
 {
     parameters:

@@ -9,6 +9,9 @@ package inet.protocolelement.cutthrough;
 
 import inet.protocolelement.common.PacketDestreamer;
 
+//
+// TODO
+//
 simple CutthroughSource extends PacketDestreamer
 {
     parameters:

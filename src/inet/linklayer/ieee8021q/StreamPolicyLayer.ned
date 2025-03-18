@@ -10,6 +10,9 @@ package inet.linklayer.ieee8021q;
 import inet.protocolelement.contract.IProtocolLayer;
 
 
+//
+// TODO
+//
 module StreamPolicyLayer like IProtocolLayer
 {
     parameters:

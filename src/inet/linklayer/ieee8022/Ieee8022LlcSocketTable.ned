@@ -7,6 +7,9 @@
 
 package inet.linklayer.ieee8022;
 
+//
+// TODO
+//
 simple Ieee8022LlcSocketTable
 {
     parameters:

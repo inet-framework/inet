@@ -9,6 +9,9 @@ package inet.physicallayer.wireless.ieee802154.packetlevel;
 
 import inet.physicallayer.wireless.common.base.packetlevel.NarrowbandTransmitterBase;
 
+//
+// TODO
+//
 module Ieee802154NarrowbandTransmitter extends NarrowbandTransmitterBase
 {
     parameters:

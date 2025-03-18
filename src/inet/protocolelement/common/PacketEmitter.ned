@@ -10,6 +10,9 @@ package inet.protocolelement.common;
 import inet.queueing.base.PacketFlowBase;
 import inet.queueing.contract.IPacketFlow;
 
+//
+// TODO
+//
 simple PacketEmitter extends PacketFlowBase like IPacketFlow
 {
     parameters:

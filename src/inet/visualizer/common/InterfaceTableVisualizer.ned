@@ -9,6 +9,9 @@ package inet.visualizer.common;
 
 import inet.visualizer.contract.IInterfaceTableVisualizer;
 
+//
+// TODO
+//
 module InterfaceTableVisualizer like IInterfaceTableVisualizer
 {
     parameters:

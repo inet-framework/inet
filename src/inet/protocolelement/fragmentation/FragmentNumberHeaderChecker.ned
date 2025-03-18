@@ -9,6 +9,9 @@ package inet.protocolelement.fragmentation;
 
 import inet.queueing.base.PacketFilterBase;
 
+//
+// TODO
+//
 simple FragmentNumberHeaderChecker extends PacketFilterBase
 {
     parameters:

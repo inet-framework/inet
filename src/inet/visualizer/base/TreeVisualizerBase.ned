@@ -7,6 +7,9 @@
 
 package inet.visualizer.base;
 
+//
+// TODO
+//
 simple TreeVisualizerBase extends VisualizerBase
 {
     parameters:

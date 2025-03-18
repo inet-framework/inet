@@ -10,6 +10,9 @@ package inet.visualizer.canvas.physicallayer;
 import inet.visualizer.base.ChannelVisualizerBase;
 import inet.visualizer.contract.IChannelVisualizer;
 
+//
+// TODO
+//
 simple ChannelCanvasVisualizer extends ChannelVisualizerBase like IChannelVisualizer
 {
     parameters:

@@ -9,6 +9,9 @@ package inet.emulation.networklayer.ipv4;
 
 import inet.networklayer.ipv4.IIpv4;
 
+//
+// TODO
+//
 module ExtLowerIpv4 like IIpv4
 {
     gates:

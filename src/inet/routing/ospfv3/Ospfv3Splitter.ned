@@ -1,6 +1,9 @@
 
 package inet.routing.ospfv3;
 
+//
+// TODO
+//
 simple Ospfv3Splitter
 {
     parameters:                     // these are parameters which need to be filled in the omnetpp.ini file

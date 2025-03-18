@@ -9,6 +9,9 @@ package inet.linklayer.ieee8022;
 
 import inet.queueing.base.PacketFilterBase;
 
+//
+// TODO
+//
 simple Ieee8022SnapChecker extends PacketFilterBase like IIeee8022SnapChecker
 {
     parameters:

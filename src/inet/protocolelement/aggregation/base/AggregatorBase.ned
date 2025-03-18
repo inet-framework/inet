@@ -10,6 +10,9 @@ package inet.protocolelement.aggregation.base;
 import inet.protocolelement.aggregation.contract.IAggregatorPolicy;
 import inet.queueing.base.PacketPusherBase;
 
+//
+// TODO
+//
 module AggregatorBase extends PacketPusherBase
 {
     parameters:

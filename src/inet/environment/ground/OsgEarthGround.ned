@@ -9,6 +9,9 @@ package inet.environment.ground;
 
 import inet.environment.contract.IGround;
 
+//
+// TODO
+//
 module OsgEarthGround like IGround
 {
     parameters:

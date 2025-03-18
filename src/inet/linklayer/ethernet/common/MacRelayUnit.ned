@@ -10,6 +10,9 @@ package inet.linklayer.ethernet.common;
 import inet.linklayer.base.MacRelayUnitBase;
 import inet.linklayer.contract.IMacRelayUnit;
 
+//
+// TODO
+//
 simple MacRelayUnit extends MacRelayUnitBase like IMacRelayUnit
 {
     parameters:

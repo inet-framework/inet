@@ -12,6 +12,9 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IAntenna;
 import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
 import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitter;
 
+//
+// TODO
+//
 module NoiseSource like IRadio
 {
     parameters:

@@ -9,6 +9,9 @@ package inet.linklayer.contract;
 
 import inet.protocolelement.contract.IProtocolLayer;
 
+//
+// TODO
+//
 moduleinterface IIeee8021qLayer extends IProtocolLayer
 {
     parameters:

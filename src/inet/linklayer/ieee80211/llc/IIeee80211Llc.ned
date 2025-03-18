@@ -6,6 +6,9 @@
 
 package inet.linklayer.ieee80211.llc;
 
+//
+// TODO
+//
 moduleinterface IIeee80211Llc
 {
     parameters:

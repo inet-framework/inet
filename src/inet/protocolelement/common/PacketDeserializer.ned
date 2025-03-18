@@ -9,6 +9,9 @@ package inet.protocolelement.common;
 
 import inet.queueing.base.PacketFlowBase;
 
+//
+// TODO
+//
 simple PacketDeserializer extends PacketFlowBase
 {
     parameters:

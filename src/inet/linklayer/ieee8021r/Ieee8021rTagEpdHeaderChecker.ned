@@ -9,6 +9,9 @@ package inet.linklayer.ieee8021r;
 
 import inet.queueing.base.PacketFilterBase;
 
+//
+// TODO
+//
 simple Ieee8021rTagEpdHeaderChecker extends PacketFilterBase like IIeee8021rTagEpdHeaderChecker
 {
     parameters:

@@ -9,6 +9,9 @@ package inet.physicallayer.wireless.common.analogmodel.scalar;
 
 import inet.physicallayer.wireless.common.contract.packetlevel.IReceiverAnalogModel;
 
+//
+// TODO
+//
 simple ScalarReceiverAnalogModel like IReceiverAnalogModel
 {
     parameters:

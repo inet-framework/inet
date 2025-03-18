@@ -10,6 +10,9 @@ package inet.linklayer.ieee80211.portal;
 import inet.linklayer.ieee80211.llc.IIeee80211Llc;
 import inet.linklayer.contract.IIeee8022Llc;
 
+//
+// TODO
+//
 simple Ieee80211Portal like IIeee8022Llc, IIeee80211Llc
 {
     parameters:

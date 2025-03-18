@@ -16,6 +16,9 @@ import inet.queueing.contract.IPacketQueue;
 import inet.queueing.scheduler.PriorityScheduler;
 import inet.queueing.server.PreemptingServer;
 
+//
+// TODO
+//
 module EthernetPreemptingMacLayer like IEthernetMacLayer
 {
     parameters:

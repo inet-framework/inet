@@ -9,6 +9,9 @@ package inet.protocolelement.contract;
 
 import inet.queueing.contract.IPacketFlow;
 
+//
+// TODO
+//
 moduleinterface IProtocolHeaderInserter extends IPacketFlow
 {
     parameters:

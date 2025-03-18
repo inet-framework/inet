@@ -10,6 +10,9 @@ package inet.physicallayer.wired.ethernet;
 import inet.queueing.base.PacketFilterBase;
 import inet.queueing.contract.IPacketFilter;
 
+//
+// TODO
+//
 simple EthernetPhyHeaderChecker extends PacketFilterBase like IPacketFilter
 {
     parameters:

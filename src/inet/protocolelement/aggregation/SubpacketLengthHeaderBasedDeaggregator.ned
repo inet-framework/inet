@@ -10,6 +10,9 @@ package inet.protocolelement.aggregation;
 import inet.protocolelement.aggregation.base.DeaggregatorBase;
 import inet.protocolelement.aggregation.contract.IPacketDeaggregator;
 
+//
+// TODO
+//
 simple SubpacketLengthHeaderBasedDeaggregator extends DeaggregatorBase like IPacketDeaggregator
 {
     parameters:

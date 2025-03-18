@@ -9,6 +9,9 @@ package inet.protocolelement.trafficconditioner;
 
 import inet.queueing.contract.ITrafficConditioner;
 
+//
+// TODO
+//
 module TrafficConditionerLayer like ITrafficConditionerLayer
 {
     parameters:

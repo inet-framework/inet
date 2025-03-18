@@ -7,6 +7,9 @@
 
 package inet.physicallayer.wired.ethernet;
 
+//
+// TODO
+//
 module EthernetStreamingPhyLayer extends EthernetPhyLayer
 {
     parameters:

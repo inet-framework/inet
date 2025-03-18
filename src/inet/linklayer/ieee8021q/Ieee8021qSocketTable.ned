@@ -7,6 +7,9 @@
 
 package inet.linklayer.ieee8021q;
 
+//
+// TODO
+//
 simple Ieee8021qSocketTable
 {
     parameters:

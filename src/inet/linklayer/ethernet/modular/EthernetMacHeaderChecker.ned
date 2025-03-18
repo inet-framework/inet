@@ -10,6 +10,9 @@ package inet.linklayer.ethernet.modular;
 import inet.protocolelement.contract.IProtocolHeaderChecker;
 import inet.queueing.base.PacketFilterBase;
 
+//
+// TODO
+//
 simple EthernetMacHeaderChecker extends PacketFilterBase like IProtocolHeaderChecker
 {
     parameters:

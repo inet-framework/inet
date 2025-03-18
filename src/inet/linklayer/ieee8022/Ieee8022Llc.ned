@@ -9,6 +9,9 @@ package inet.linklayer.ieee8022;
 
 import inet.linklayer.contract.IIeee8022Llc;
 
+//
+// TODO
+//
 simple Ieee8022Llc like IIeee8022Llc
 {
     parameters:

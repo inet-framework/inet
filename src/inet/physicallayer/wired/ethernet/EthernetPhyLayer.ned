@@ -13,6 +13,9 @@ import inet.protocolelement.transceiver.contract.IPacketTransmitter;
 import inet.queueing.contract.IPacketFilter;
 import inet.queueing.contract.IPacketFlow;
 
+//
+// TODO
+//
 module EthernetPhyLayer like IEthernetPhyLayer
 {
     parameters:

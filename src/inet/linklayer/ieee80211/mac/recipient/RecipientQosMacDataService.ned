@@ -7,6 +7,9 @@
 
 package inet.linklayer.ieee80211.mac.recipient;
 
+//
+// TODO
+//
 module RecipientQosMacDataService
 {
     parameters:

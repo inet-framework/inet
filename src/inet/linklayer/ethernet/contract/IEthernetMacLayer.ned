@@ -7,6 +7,9 @@
 
 package inet.linklayer.ethernet.contract;
 
+//
+// TODO
+//
 moduleinterface IEthernetMacLayer
 {
     parameters:

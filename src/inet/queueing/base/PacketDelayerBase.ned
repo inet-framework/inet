@@ -7,6 +7,9 @@
 
 package inet.queueing.base;
 
+//
+// TODO
+//
 simple PacketDelayerBase extends PacketProcessorBase
 {
     parameters:
