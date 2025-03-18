@@ -8,7 +8,11 @@
 package inet.linklayer.ieee802154;
 
 //
-// TODO
+// Implements the IEEE 802.15.4 narrowband MAC protocol for low-rate wireless
+// personal area networks (LR-WPAN). Configures the generic CSMA/CA mechanism
+// with specific parameters defined in the standard, including exponential
+// backoff, acknowledgment handling, and frame size limitations. Provides
+// reliable communication through frame retransmissions and collision avoidance.
 //
 module Ieee802154NarrowbandMac extends Ieee802154Mac
 {
@@ -48,4 +52,3 @@ module Ieee802154NarrowbandMac extends Ieee802154Mac
         // 802.15.4-2006, page 163
         macMaxBE = default(5);
 }
-

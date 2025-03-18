@@ -16,7 +16,14 @@ import inet.queueing.contract.IPacketGate;
 import inet.queueing.contract.IPacketQueue;
 
 //
-// TODO
+// Implements an Ethernet MAC layer with frame fragmentation capabilities. This
+// module breaks large frames into smaller fragments for transmission and
+// reassembles them at the receiving end. It uses a PreemptableStreamer for
+// packet streaming with preemption support, allowing high-priority frames to
+// interrupt the transmission of lower-priority ones. The module includes
+// fragment-specific FCS (Frame Check Sequence) handling and a defragmenter to
+// reconstruct original frames from received fragments. Particularly useful for
+// time-sensitive networking applications where transmission latency is critical.
 //
 module EthernetFragmentingMacLayer like IEthernetMacLayer
 {

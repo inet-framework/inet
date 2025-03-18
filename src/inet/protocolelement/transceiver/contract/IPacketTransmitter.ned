@@ -8,7 +8,10 @@
 package inet.protocolelement.transceiver.contract;
 
 //
-// TODO
+// Defines a module interface for packet transmitter implementations. Packet
+// transmitters are responsible for converting packets to signals and transmitting
+// them over a channel. They handle signal encoding, transmission timing, and
+// channel access coordination.
 //
 moduleinterface IPacketTransmitter
 {

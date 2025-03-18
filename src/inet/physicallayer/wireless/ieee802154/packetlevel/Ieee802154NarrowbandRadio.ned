@@ -10,7 +10,11 @@ package inet.physicallayer.wireless.ieee802154.packetlevel;
 import inet.physicallayer.wireless.common.base.packetlevel.FlatRadioBase;
 
 //
-// TODO
+// Radio model for IEEE 802.15.4 narrowband PHY operating in the 2.4 GHz band
+// with 250 kbps data rate. Implements the physical layer parameters specified in
+// IEEE 802.15.4-2006 standard with DSSS-OQPSK modulation. Configured with
+// realistic values from the ATmega256RFR2 chip for sensitivity, power levels,
+// and other radio characteristics.
 //
 module Ieee802154NarrowbandRadio extends FlatRadioBase
 {
@@ -61,4 +65,3 @@ module Ieee802154NarrowbandRadio extends FlatRadioBase
 
         @class(FlatRadioBase);
 }
-

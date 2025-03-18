@@ -8,7 +8,11 @@
 package inet.linklayer.ieee80211.mgmt;
 
 //
-// TODO
+// Module interface for IEEE 802.11 agent modules that control management
+// operations in wireless stations. Agents handle channel scanning, association,
+// authentication, and handovers by sending commands to the management module.
+// Implementations of this interface provide the decision logic for selecting
+// access points and managing wireless connections.
 //
 moduleinterface IIeee80211Agent
 {
@@ -18,4 +22,3 @@ moduleinterface IIeee80211Agent
         input mgmtIn;
         output mgmtOut;
 }
-

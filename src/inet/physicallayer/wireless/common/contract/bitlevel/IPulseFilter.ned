@@ -8,11 +8,15 @@
 package inet.physicallayer.wireless.common.contract.bitlevel;
 
 //
-// TODO
+// Module interface for pulse filters in wireless communication systems. Pulse
+// filters convert between the sample domain and the symbol domain in the
+// receiver's signal processing chain. They take a reception sample model as
+// input and produce a reception symbol model as output by extracting symbols
+// from the received signal samples based on the configured samples per symbol
+// ratio.
 //
 moduleinterface IPulseFilter
 {
     parameters:
         @display("i=block/opticaldelay");
 }
-

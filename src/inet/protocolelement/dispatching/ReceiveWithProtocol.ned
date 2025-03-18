@@ -8,7 +8,9 @@
 package inet.protocolelement.dispatching;
 
 //
-// TODO
+// Extracts the protocol from a packet by removing the protocol header, and attaches
+// protocol tags to the packet. The protocol information is used for dispatching the
+// packet to the appropriate protocol module.
 //
 simple ReceiveWithProtocol
 {

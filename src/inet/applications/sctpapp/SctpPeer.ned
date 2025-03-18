@@ -10,7 +10,12 @@ package inet.applications.sctpapp;
 import inet.applications.contract.IApp;
 
 //
-// TODO
+// Implements a versatile SCTP application that can function as both client and
+// server simultaneously. Supports sending and receiving data with configurable
+// parameters including multi-streaming, PR-SCTP, and stream reset capabilities.
+// Provides options for echo functionality, ordered/unordered delivery, and
+// configurable think times between transmissions. Collects comprehensive
+// statistics on data transfer performance.
 //
 simple SctpPeer like IApp
 {
@@ -50,4 +55,3 @@ simple SctpPeer like IApp
         input socketIn @labels(SctpCommand/up);
         output socketOut @labels(SctpCommand/down);
 }
-

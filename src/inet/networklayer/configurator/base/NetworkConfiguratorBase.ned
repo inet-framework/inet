@@ -8,11 +8,14 @@
 package inet.networklayer.configurator.base;
 
 //
-// TODO
+// Base module for network configurators in the INET framework. Provides
+// fundamental functionality for extracting network topology by identifying
+// network nodes and their connections. Serves as a foundation for more
+// specialized configurators that handle tasks like address assignment and
+// routing table configuration.
 //
 simple NetworkConfiguratorBase
 {
     parameters:
         @display("i=block/cogwheel");
 }
-

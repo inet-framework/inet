@@ -8,7 +8,11 @@
 package inet.linklayer.ieee80211.mac.originator;
 
 //
-// TODO
+// Implements the Transmission Opportunity (TXOP) mechanism in IEEE 802.11 QoS
+// networks. Manages TXOP periods during which a station has the right to transmit
+// multiple frames. Tracks TXOP limits based on access category (AC) and PHY mode,
+// with different durations for voice and video traffic. Supports both single and
+// multiple protection mechanisms to protect frame exchanges during the TXOP.
 //
 simple TxopProcedure
 {
@@ -21,4 +25,3 @@ simple TxopProcedure
         @statistic[txopDuration](title="txop duration"; source=txopDuration(txopEnded); record=histogram,vector?; interpolationmode=none);
         @statistic[txopActive](title="txop active"; source=warmup(count(txopStarted)-count(txopEnded)); record=vector; interpolationmode=sample-hold; autoWarmupFilter=false);
 }
-

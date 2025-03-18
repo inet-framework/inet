@@ -20,7 +20,9 @@ moduleinterface INetworkLayerUpper
 }
 
 //
-// TODO
+// Defines the interface between the network layer and link layer. Provides
+// gates for sending and receiving packets to and from network interfaces.
+// Implemented by various network layer modules like IPv4, IPv6, MPLS, etc.
 //
 moduleinterface INetworkLayerLower
 {
@@ -32,11 +34,13 @@ moduleinterface INetworkLayerLower
 }
 
 //
-// TODO
+// Complete network layer interface that combines upper (transport) and lower
+// (link) layer interfaces. Provides a unified interface for network protocols
+// like IPv4, IPv6, MPLS, etc. Implementations typically include routing tables,
+// address resolution protocols, and protocol-specific modules.
 //
 moduleinterface INetworkLayer extends INetworkLayerUpper, INetworkLayerLower
 {
     parameters:
         @display("i=block/fork");
 }
-

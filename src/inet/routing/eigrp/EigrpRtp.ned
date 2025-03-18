@@ -13,7 +13,10 @@
 package inet.routing.eigrp;
 
 //
-// TODO
+// Implements the Reliable Transport Protocol (RTP) for EIGRP IPv4. Handles
+// reliable delivery of EIGRP messages, including sequence numbering, acknowledgments,
+// and retransmissions. This IPv4-specific version works with the EigrpIpv4Pdm
+// module to ensure reliable communication between EIGRP routers.
 //
 simple EigrpRtp
 {

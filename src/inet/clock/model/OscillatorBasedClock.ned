@@ -28,10 +28,6 @@ import inet.clock.contract.IOscillator;
 //  -s: origin simulation time
 //  -c: origin clock time
 //
-
-//
-// TODO
-//
 module OscillatorBasedClock extends ClockBase like IClock
 {
     parameters:
@@ -44,4 +40,3 @@ module OscillatorBasedClock extends ClockBase like IClock
             @display("p=100,100");
         }
 }
-

@@ -8,7 +8,12 @@
 package inet.linklayer.tun;
 
 //
-// TODO
+// Implements a TUN (network tunnel) interface that provides a virtual network
+// interface for applications. Allows applications to send and receive packets
+// directly to/from the network layer using a socket-like API. Maintains a list
+// of registered sockets and handles commands for opening, closing, and using
+// the TUN interface. Processes packets between upper layers and the network
+// layer, adding appropriate tags for routing.
 //
 simple Tun
 {
@@ -26,4 +31,3 @@ simple Tun
         input upperLayerIn @messageKinds(inet::TunCommandCode);    // From upper layers
         output upperLayerOut @messageKinds(inet::TunSocketIndication);  // To upper layers
 }
-

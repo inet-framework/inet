@@ -8,7 +8,10 @@
 package inet.queueing.base;
 
 //
-// TODO
+// Base module for packet duplicator implementations. Provides common functionality
+// for creating and forwarding multiple copies of incoming packets. Derived
+// modules can implement specific duplication strategies by overriding the
+// getNumPacketDuplicates method.
 //
 simple PacketDuplicatorBase extends PacketProcessorBase
 {

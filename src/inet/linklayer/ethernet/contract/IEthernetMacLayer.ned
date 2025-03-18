@@ -8,7 +8,12 @@
 package inet.linklayer.ethernet.contract;
 
 //
-// TODO
+// Module interface for Ethernet MAC (Media Access Control) layer implementations.
+// Defines the standard interface for various MAC layer variants in the modular
+// Ethernet architecture. Provides connection points to upper layers (e.g., LLC)
+// and lower layers (e.g., PHY) through standardized gates. Implementations
+// include basic MAC, streaming MAC, preempting MAC, and fragmenting MAC, each
+// offering different capabilities for frame transmission and processing.
 //
 moduleinterface IEthernetMacLayer
 {

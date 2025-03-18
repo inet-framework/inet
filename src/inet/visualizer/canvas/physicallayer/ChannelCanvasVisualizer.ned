@@ -11,7 +11,12 @@ import inet.visualizer.base.ChannelVisualizerBase;
 import inet.visualizer.contract.IChannelVisualizer;
 
 //
-// TODO
+// Visualizes communication channels between network nodes on a canvas. Displays
+// arrows representing active communication channels with customizable appearance
+// (color, style, width). Shows packet information as labels on the arrows and
+// supports animation effects like fading for inactive channels. Provides visual
+// feedback about network traffic patterns and helps with debugging communication
+// between nodes in the simulation.
 //
 simple ChannelCanvasVisualizer extends ChannelVisualizerBase like IChannelVisualizer
 {
@@ -19,4 +24,3 @@ simple ChannelCanvasVisualizer extends ChannelVisualizerBase like IChannelVisual
         double zIndex = default(1); // Determines the drawing order of figures relative to other visualizers.
         @class(ChannelCanvasVisualizer);
 }
-

@@ -11,7 +11,11 @@ import inet.queueing.base.PacketFilterBase;
 import inet.queueing.contract.IPacketFilter;
 
 //
-// TODO
+// Verifies the Frame Check Sequence (FCS) in Ethernet frame fragments to detect
+// transmission errors. Filters out fragments with incorrect FCS and maintains
+// state between fragments to verify the complete frame's FCS. Updates fragment
+// tags to indicate if a fragment is the last one based on the mCRC field and
+// removes the FCS from fragments that pass the check.
 //
 simple EthernetFragmentFcsChecker extends PacketFilterBase like IPacketFilter
 {

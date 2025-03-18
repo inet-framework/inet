@@ -9,7 +9,11 @@
 package inet.transportlayer.tcp;
 
 //
-// TODO
+// Represents a single TCP connection in the TCP protocol implementation.
+// Implements the TCP state machine and handles connection establishment,
+// data transfer, flow control, congestion control, and connection termination.
+// Provides extensive statistics collection for various TCP metrics including
+// window sizes, sequence numbers, RTT measurements, and congestion parameters.
 //
 simple TcpConnection {
     parameters:
@@ -78,4 +82,3 @@ simple TcpConnection {
         @statistic[calcLoad](record=vector; interpolationmode=sample-hold);    // Will record calcLoad (currently only with DcTcp)
         @statistic[markingProb](record=vector; interpolationmode=sample-hold);    // Will record marking probability (currently only with DcTcp)
 }
-

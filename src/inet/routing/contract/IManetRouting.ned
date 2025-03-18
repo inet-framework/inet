@@ -8,7 +8,10 @@
 package inet.routing.contract;
 
 //
-// TODO
+// Defines a module interface for Mobile Ad-hoc Network (MANET) routing protocols.
+// MANET routing protocols are designed for wireless networks where nodes can
+// move and the topology changes dynamically. Implementations include GPSR, DSDV,
+// and DYMO protocols.
 //
 moduleinterface IManetRouting
 {
@@ -18,4 +21,3 @@ moduleinterface IManetRouting
         input ipIn;
         output ipOut;
 }
-

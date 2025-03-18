@@ -9,7 +9,11 @@
 package inet.transportlayer.tcp_lwip;
 
 //
-// TODO
+// Represents a single TCP connection in the LwIP (Lightweight IP) TCP stack
+// implementation. Manages connection state, processes application commands,
+// handles data transfer through send and receive queues, and provides
+// statistics about connection parameters such as window sizes and sequence
+// numbers.
 //
 simple TcpLwipConnection {
     parameters:
@@ -28,4 +32,3 @@ simple TcpLwipConnection {
         @statistic[rcvSeq](record=vector; interpolationmode=sample-hold);    // Received seqNo
         @statistic[rcvAck](record=vector; interpolationmode=sample-hold);    // Received ackNo (=snd_una)
 }
-

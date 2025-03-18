@@ -8,7 +8,11 @@
 package inet.linklayer.ieee8022;
 
 //
-// TODO
+// Module interface for IEEE 802.2 SNAP (SubNetwork Access Protocol) header
+// checker implementations. Defines a component that validates and processes
+// SNAP headers in LLC frames. Implementations check if incoming packets have
+// valid SNAP headers with recognized protocol identifiers, extract protocol
+// information, and forward valid packets while dropping invalid ones.
 //
 moduleinterface IIeee8022SnapChecker
 {
@@ -18,4 +22,3 @@ moduleinterface IIeee8022SnapChecker
         input in;
         output out;
 }
-

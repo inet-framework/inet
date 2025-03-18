@@ -8,7 +8,9 @@
 package inet.protocolelement.forwarding;
 
 //
-// TODO
+// Adds a hop limit header to outgoing packets. The hop limit value is
+// configurable and determines how many network hops the packet can traverse
+// before being discarded.
 //
 simple SendWithHopLimit
 {

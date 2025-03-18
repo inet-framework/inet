@@ -10,7 +10,11 @@ package inet.visualizer.common;
 import inet.visualizer.contract.IInterfaceTableVisualizer;
 
 //
-// TODO
+// Visualizes network interface information from interface tables in the network.
+// This compound module integrates both canvas (2D) and OSG (3D) visualizers,
+// automatically selecting the appropriate one based on the runtime environment.
+// It displays interface data such as addresses, state, and traffic statistics
+// for network nodes.
 //
 module InterfaceTableVisualizer like IInterfaceTableVisualizer
 {
@@ -30,4 +34,3 @@ module InterfaceTableVisualizer like IInterfaceTableVisualizer
                 @display("p=100,200");
         }
 }
-

@@ -10,7 +10,9 @@ package inet.protocolelement.fragmentation;
 import inet.queueing.base.PacketFilterBase;
 
 //
-// TODO
+// Verifies fragment number headers in incoming packets. Checks the validity
+// of fragment sequence numbers and other header fields to ensure proper
+// fragment processing.
 //
 simple FragmentNumberHeaderChecker extends PacketFilterBase
 {

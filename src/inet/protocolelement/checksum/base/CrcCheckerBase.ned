@@ -10,7 +10,11 @@ package inet.protocolelement.checksum.base;
 import inet.queueing.base.PacketFilterBase;
 
 //
-// TODO
+// Base module for CRC (Cyclic Redundancy Check) checkers that verify the
+// integrity of packets. This module filters packets based on their CRC value,
+// dropping packets with invalid checksums. It supports multiple CRC modes:
+// disabled, declared correct, declared incorrect, and computed. When in computed
+// mode, it calculates the actual CRC and compares it with the received value.
 //
 simple CrcCheckerBase extends PacketFilterBase
 {

@@ -10,7 +10,9 @@ package inet.protocolelement.ordering;
 import inet.queueing.base.PacketFlowBase;
 
 //
-// TODO
+// Adds sequence numbers to outgoing packets. Maintains an internal counter
+// to assign unique, sequential numbers to packets, enabling downstream modules
+// to detect duplicates and reorder packets.
 //
 simple SequenceNumbering extends PacketFlowBase
 {

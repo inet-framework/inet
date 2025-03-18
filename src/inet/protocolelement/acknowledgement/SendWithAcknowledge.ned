@@ -8,7 +8,13 @@
 package inet.protocolelement.acknowledgement;
 
 //
-// TODO
+// Sends packets with sequence numbers and waits for acknowledgements. Adds a
+// sequence number header to outgoing packets and sets up a timer for each packet.
+// If an acknowledgement is received before the timer expires, the packet is
+// considered successfully delivered. If the timer expires (no acknowledgement
+// received), it notifies the producer that the packet was not processed. Works in
+// conjunction with ReceiveWithAcknowledge to implement reliable communication with
+// acknowledgements.
 //
 simple SendWithAcknowledge
 {

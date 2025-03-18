@@ -8,7 +8,12 @@
 package inet.linklayer.ieee80211.mac.blockack;
 
 //
-// TODO
+// Manages Block Acknowledgment (Block Ack) agreements for the recipient side
+// in IEEE 802.11 networks. Processes ADDBA requests from originators, creates
+// and maintains Block Ack agreements, handles timeouts, and generates appropriate
+// responses. Implements the recipient side of the Block Ack mechanism as defined
+// in IEEE 802.11 standard section 9.21.3 for efficient acknowledgment of multiple
+// frames.
 //
 simple RecipientBlockAckAgreementHandler
 {
@@ -17,4 +22,3 @@ simple RecipientBlockAckAgreementHandler
 
         @display("i=block/cogwheel");
 }
-

@@ -10,11 +10,16 @@ package inet.protocolelement.contract;
 import inet.queueing.contract.IPacketFilter;
 
 //
-// TODO
+// Module interface for protocol header checker components. Modules that
+// implement this interface verify protocol-specific headers in packets and
+// typically remove them after successful validation. These components act as
+// packet filters that can drop invalid packets based on header information,
+// ensuring protocol compliance and integrity. They are commonly used in
+// protocol stacks to process incoming packets before passing them to higher
+// layers.
 //
 moduleinterface IProtocolHeaderChecker extends IPacketFilter
 {
     parameters:
         @display("i=block/checker");
 }
-

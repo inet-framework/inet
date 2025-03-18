@@ -8,7 +8,10 @@
 package inet.protocolelement.socket;
 
 //
-// TODO
+// Defines a module interface for socket layer implementations. Socket layers
+// provide an abstraction for communication between applications and network
+// protocols. They manage socket connections, handle socket commands, and route
+// packets between upper and lower protocol layers based on socket bindings.
 //
 moduleinterface ISocketLayer
 {
@@ -20,4 +23,3 @@ moduleinterface ISocketLayer
         input lowerLayerIn;
         output lowerLayerOut;
 }
-

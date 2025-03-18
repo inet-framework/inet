@@ -8,7 +8,12 @@
 package inet.linklayer.virtual;
 
 //
-// TODO
+// Creates a virtual network interface that tunnels traffic through an existing
+// real network interface. Supports tunneling via Ethernet or IEEE 802.1Q
+// protocols, with optional VLAN tagging for traffic separation. Can copy
+// properties from the real interface or generate new ones (e.g., MAC address).
+// Handles packet forwarding between the virtual interface and the underlying
+// real interface, adding appropriate tags for routing and identification.
 //
 simple VirtualTunnel
 {

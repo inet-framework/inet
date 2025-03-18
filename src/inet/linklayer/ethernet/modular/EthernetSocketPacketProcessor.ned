@@ -11,7 +11,11 @@ import inet.queueing.base.PacketPusherBase;
 import inet.queueing.contract.IPacketFlow;
 
 //
-// TODO
+// Processes packets for Ethernet sockets. Handles incoming packets by delivering
+// them to the appropriate socket based on packet matching criteria. Manages the
+// packet flow between the network interface and the socket layer. Works in
+// conjunction with the EthernetSocketTable and EthernetSocketCommandProcessor to
+// provide socket-based access to Ethernet services.
 //
 simple EthernetSocketPacketProcessor extends PacketPusherBase like IPacketFlow
 {
@@ -20,4 +24,3 @@ simple EthernetSocketPacketProcessor extends PacketPusherBase like IPacketFlow
         @display("i=block/cogwheel");
         string socketTableModule;
 }
-

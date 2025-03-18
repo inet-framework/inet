@@ -12,7 +12,11 @@
 package inet.routing.eigrp.tables;
 
 //
-// TODO
+// Maintains the IPv6-specific EIGRP topology table, which stores all routes
+// learned from neighbors. Contains both feasible successors (routes used for
+// forwarding) and non-feasible successors (potential backup routes). Implements
+// the DUAL (Diffusing Update Algorithm) for loop-free path selection and
+// convergence.
 //
 simple EigrpIpv6TopologyTable
 {
