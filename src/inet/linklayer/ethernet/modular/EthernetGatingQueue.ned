@@ -9,6 +9,9 @@ package inet.linklayer.ethernet.modular;
 
 import inet.queueing.queue.GatingPriorityQueue;
 
+//
+// TODO
+//
 module EthernetGatingQueue extends GatingPriorityQueue
 {
     parameters:

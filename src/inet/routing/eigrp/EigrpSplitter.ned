@@ -11,6 +11,9 @@
 
 package inet.routing.eigrp;
 
+//
+// TODO
+//
 simple EigrpSplitter
 {
     gates:

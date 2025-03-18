@@ -11,6 +11,9 @@ import inet.protocolelement.fragmentation.FragmentNumberHeaderBasedDefragmenter;
 import inet.queueing.classifier.DynamicClassifier;
 import inet.queueing.common.PacketMultiplexer;
 
+//
+// TODO
+//
 module PeerService
 {
     parameters:
@@ -38,6 +41,9 @@ module PeerService
         multiplexer.out --> out;
 }
 
+//
+// TODO
+//
 module MacService
 {
     parameters:

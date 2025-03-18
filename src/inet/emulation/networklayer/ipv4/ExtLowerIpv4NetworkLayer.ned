@@ -11,6 +11,9 @@ import inet.networklayer.contract.INetworkLayer;
 import inet.networklayer.ipv4.IIpv4;
 
 
+//
+// TODO
+//
 module ExtLowerIpv4NetworkLayer like INetworkLayer
 {
     parameters:

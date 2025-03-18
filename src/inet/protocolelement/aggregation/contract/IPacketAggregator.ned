@@ -7,6 +7,9 @@
 
 package inet.protocolelement.aggregation.contract;
 
+//
+// TODO
+//
 moduleinterface IPacketAggregator
 {
     parameters:

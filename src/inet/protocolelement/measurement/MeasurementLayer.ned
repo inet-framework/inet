@@ -9,6 +9,9 @@ package inet.protocolelement.measurement;
 
 import inet.queueing.contract.IPacketFlow;
 
+//
+// TODO
+//
 module MeasurementLayer like IMeasurementLayer
 {
     parameters:

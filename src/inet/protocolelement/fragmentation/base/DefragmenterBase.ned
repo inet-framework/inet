@@ -9,6 +9,9 @@ package inet.protocolelement.fragmentation.base;
 
 import inet.queueing.base.PacketPusherBase;
 
+//
+// TODO
+//
 simple DefragmenterBase extends PacketPusherBase
 {
     parameters:

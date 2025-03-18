@@ -29,6 +29,9 @@ import inet.clock.contract.IOscillator;
 //  -c: origin clock time
 //
 
+//
+// TODO
+//
 module OscillatorBasedClock extends ClockBase like IClock
 {
     parameters:

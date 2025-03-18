@@ -20,6 +20,9 @@ package inet.physicallayer.wireless.noise;
 import inet.physicallayer.wireless.common.base.packetlevel.TransmitterBase;
 import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitter;
 
+//
+// TODO
+//
 module NoiseTransmitter extends TransmitterBase like ITransmitter
 {
     parameters:

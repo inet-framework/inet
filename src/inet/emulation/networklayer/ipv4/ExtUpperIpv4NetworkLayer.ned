@@ -15,6 +15,9 @@ import inet.networklayer.ipv4.IIpv4;
 import inet.networklayer.ipv4.Ipv4RoutingTable;
 
 
+//
+// TODO
+//
 module ExtUpperIpv4NetworkLayer like INetworkLayer
 {
     parameters:

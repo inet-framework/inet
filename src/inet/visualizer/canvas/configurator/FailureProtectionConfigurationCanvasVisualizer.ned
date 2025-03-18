@@ -10,6 +10,9 @@ package inet.visualizer.canvas.configurator;
 import inet.visualizer.base.TreeVisualizerBase;
 import inet.visualizer.contract.IFailureProtectionConfigurationVisualizer;
 
+//
+// TODO
+//
 simple FailureProtectionConfigurationCanvasVisualizer extends TreeVisualizerBase like IFailureProtectionConfigurationVisualizer
 {
     parameters:

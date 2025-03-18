@@ -7,6 +7,9 @@
 
 package inet.physicallayer.wireless.common.pathloss;
 
+//
+// TODO
+//
 module LogNormalShadowing extends FreeSpacePathLoss
 {
     parameters:

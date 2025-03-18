@@ -7,6 +7,9 @@
 
 package inet.linklayer.contract;
 
+//
+// TODO
+//
 moduleinterface IEthernetLayer
 {
     parameters:

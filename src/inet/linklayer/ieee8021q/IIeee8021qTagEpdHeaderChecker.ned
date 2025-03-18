@@ -9,6 +9,9 @@ package inet.linklayer.ieee8021q;
 
 import inet.protocolelement.contract.IProtocolHeaderChecker;
 
+//
+// TODO
+//
 moduleinterface IIeee8021qTagEpdHeaderChecker extends IProtocolHeaderChecker
 {
     parameters:

@@ -10,6 +10,9 @@ package inet.protocolelement.authentication;
 import inet.protocolelement.contract.IProtocolHeaderInserter;
 import inet.queueing.base.PacketFlowBase;
 
+//
+// TODO
+//
 simple MessageAuthenticationCodeInserter extends PacketFlowBase like IProtocolHeaderInserter
 {
     parameters:

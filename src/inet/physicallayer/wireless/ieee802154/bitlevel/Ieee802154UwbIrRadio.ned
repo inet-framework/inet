@@ -9,6 +9,9 @@ package inet.physicallayer.wireless.ieee802154.bitlevel;
 
 import inet.physicallayer.wireless.common.radio.packetlevel.Radio;
 
+//
+// TODO
+//
 module Ieee802154UwbIrRadio extends Radio
 {
     parameters:

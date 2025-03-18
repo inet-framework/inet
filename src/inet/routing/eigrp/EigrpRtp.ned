@@ -12,6 +12,9 @@
 
 package inet.routing.eigrp;
 
+//
+// TODO
+//
 simple EigrpRtp
 {
     parameters:

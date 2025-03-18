@@ -7,6 +7,9 @@
 
 package inet.protocolelement.transceiver.contract;
 
+//
+// TODO
+//
 moduleinterface IPacketReceiver
 {
     parameters:

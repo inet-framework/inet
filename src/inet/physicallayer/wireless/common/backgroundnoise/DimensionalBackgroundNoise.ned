@@ -9,6 +9,9 @@ package inet.physicallayer.wireless.common.backgroundnoise;
 
 import inet.physicallayer.wireless.common.contract.packetlevel.IBackgroundNoise;
 
+//
+// TODO
+//
 module DimensionalBackgroundNoise like IBackgroundNoise
 {
     parameters:

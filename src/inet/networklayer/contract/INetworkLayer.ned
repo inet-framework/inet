@@ -19,6 +19,9 @@ moduleinterface INetworkLayerUpper
         output transportOut @labels(ITransportPacket/up);
 }
 
+//
+// TODO
+//
 moduleinterface INetworkLayerLower
 {
     parameters:
@@ -28,6 +31,9 @@ moduleinterface INetworkLayerLower
         output ifOut @labels(INetworkHeader/down);
 }
 
+//
+// TODO
+//
 moduleinterface INetworkLayer extends INetworkLayerUpper, INetworkLayerLower
 {
     parameters:

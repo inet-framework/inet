@@ -7,6 +7,9 @@
 
 package inet.linklayer.ieee802154;
 
+//
+// TODO
+//
 module Ieee802154NarrowbandMac extends Ieee802154Mac
 {
     parameters:

@@ -7,6 +7,9 @@
 
 package inet.protocolelement.socket;
 
+//
+// TODO
+//
 moduleinterface ISocketLayer
 {
     parameters:

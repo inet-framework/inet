@@ -7,6 +7,9 @@
 
 package inet.linklayer.ethernet.common;
 
+//
+// TODO
+//
 simple LocalDelivery
 {
     parameters:

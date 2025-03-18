@@ -11,6 +11,9 @@ import inet.linklayer.ieee80211.mac.contract.IFragmentationPolicy;
 import inet.linklayer.ieee80211.mac.contract.IMsduAggregationPolicy;
 import inet.linklayer.ieee80211.mac.contract.IMpduAggregationPolicy;
 
+//
+// TODO
+//
 module OriginatorQosMacDataService
 {
     parameters:

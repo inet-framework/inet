@@ -8,6 +8,9 @@
 
 package inet.transportlayer.tcp;
 
+//
+// TODO
+//
 simple TcpConnection {
     parameters:
         @signal[state];    // FSM state

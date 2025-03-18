@@ -79,6 +79,9 @@ package inet.networklayer.rsvpte;
 // RSVP-TE communicates with the following components in the system: ~Ted, ~Mpls, and may receive commands from ~ScenarioManager.
 //
 
+//
+// TODO
+//
 simple RsvpTe
 {
     parameters:

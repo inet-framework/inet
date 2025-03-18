@@ -7,6 +7,9 @@
 
 package inet.linklayer.ethernet.modular;
 
+//
+// TODO
+//
 module EthernetCutthroughLayer
 {
     parameters:

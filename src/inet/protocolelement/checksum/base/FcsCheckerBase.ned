@@ -9,6 +9,9 @@ package inet.protocolelement.checksum.base;
 
 import inet.queueing.base.PacketFilterBase;
 
+//
+// TODO
+//
 simple FcsCheckerBase extends PacketFilterBase
 {
     parameters:

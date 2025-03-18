@@ -9,6 +9,9 @@ package inet.protocolelement.checksum;
 
 import inet.protocolelement.checksum.base.CrcInserterBase;
 
+//
+// TODO
+//
 simple CrcHeaderInserter extends CrcInserterBase
 {
     parameters:

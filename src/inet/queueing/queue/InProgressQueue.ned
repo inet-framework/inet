@@ -7,6 +7,9 @@
 
 package inet.queueing.queue;
 
+//
+// TODO
+//
 simple InProgressQueue extends PacketQueue
 {
     parameters:

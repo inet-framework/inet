@@ -9,6 +9,9 @@ package inet.linklayer.ieee8022;
 
 import inet.queueing.base.PacketFlowBase;
 
+//
+// TODO
+//
 simple Ieee8022SnapInserter extends PacketFlowBase like IIeee8022SnapInserter
 {
     parameters:

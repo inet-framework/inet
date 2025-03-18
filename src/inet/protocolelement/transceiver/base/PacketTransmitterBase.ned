@@ -9,6 +9,9 @@ package inet.protocolelement.transceiver.base;
 
 import inet.queueing.base.PacketProcessorBase;
 
+//
+// TODO
+//
 simple PacketTransmitterBase extends PacketProcessorBase
 {
     parameters:

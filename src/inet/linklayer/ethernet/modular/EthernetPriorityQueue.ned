@@ -9,6 +9,9 @@ package inet.linklayer.ethernet.modular;
 
 import inet.queueing.queue.PriorityQueue;
 
+//
+// TODO
+//
 module EthernetPriorityQueue extends PriorityQueue
 {
     parameters:

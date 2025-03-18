@@ -9,6 +9,9 @@ package inet.visualizer.common;
 
 import inet.visualizer.contract.IPacketFlowVisualizer;
 
+//
+// TODO
+//
 module PacketFlowVisualizer like IPacketFlowVisualizer
 {
     parameters:

@@ -10,6 +10,9 @@ package inet.queueing.common;
 import inet.queueing.base.PassivePacketSinkBase;
 import inet.queueing.contract.IPassivePacketSink;
 
+//
+// TODO
+//
 simple PacketPushToSend extends PassivePacketSinkBase like IPassivePacketSink
 {
     parameters:

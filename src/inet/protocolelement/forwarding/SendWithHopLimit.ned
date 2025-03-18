@@ -7,6 +7,9 @@
 
 package inet.protocolelement.forwarding;
 
+//
+// TODO
+//
 simple SendWithHopLimit
 {
     parameters:

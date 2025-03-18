@@ -7,6 +7,9 @@
 
 package inet.physicallayer.wireless.generic;
 
+//
+// TODO
+//
 module GenericUnitDiskRadio extends GenericRadio
 {
     parameters:

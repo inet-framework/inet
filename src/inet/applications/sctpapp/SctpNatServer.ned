@@ -9,6 +9,9 @@ package inet.applications.sctpapp;
 
 import inet.applications.contract.IApp;
 
+//
+// TODO
+//
 simple SctpNatServer like IApp
 {
     parameters:

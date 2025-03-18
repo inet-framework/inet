@@ -9,6 +9,9 @@ package inet.protocolelement.checksum.base;
 
 import inet.queueing.base.PacketFlowBase;
 
+//
+// TODO
+//
 simple FcsInserterBase extends PacketFlowBase
 {
     parameters:

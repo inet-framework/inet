@@ -7,6 +7,9 @@
 
 package inet.protocolelement.trafficconditioner;
 
+//
+// TODO
+//
 moduleinterface ITrafficConditionerLayer
 {
     parameters:

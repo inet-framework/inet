@@ -16,6 +16,9 @@ import inet.mobility.base.MovingMobilityBase;
 // When all waypoints have been reached, it loops back to the first one.
 //
 
+//
+// TODO
+//
 simple VehicleMobility extends MovingMobilityBase
 {
     parameters:

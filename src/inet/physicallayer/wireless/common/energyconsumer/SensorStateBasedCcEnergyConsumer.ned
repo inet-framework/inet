@@ -17,6 +17,9 @@ package inet.physicallayer.wireless.common.energyconsumer;
 // the datasheet for the CC2500 RF transceiver.
 //
 
+//
+// TODO
+//
 simple SensorStateBasedCcEnergyConsumer extends StateBasedCcEnergyConsumer
 {
     parameters:

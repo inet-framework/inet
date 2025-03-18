@@ -9,6 +9,9 @@ package inet.protocolelement.checksum;
 
 import inet.protocolelement.checksum.base.FcsInserterBase;
 
+//
+// TODO
+//
 simple FcsHeaderInserter extends FcsInserterBase
 {
     parameters:

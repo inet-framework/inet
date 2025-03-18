@@ -9,6 +9,9 @@ package inet.linklayer.ethernet.modular;
 
 import inet.protocolelement.common.PacketDestreamer;
 
+//
+// TODO
+//
 simple EthernetCutthroughSource extends PacketDestreamer
 {
     parameters:

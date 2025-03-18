@@ -9,6 +9,9 @@ package inet.protocolelement.checksum;
 
 import inet.protocolelement.checksum.base.CrcCheckerBase;
 
+//
+// TODO
+//
 simple CrcHeaderChecker extends CrcCheckerBase
 {
     parameters:

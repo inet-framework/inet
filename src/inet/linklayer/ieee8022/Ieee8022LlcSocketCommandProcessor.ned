@@ -10,6 +10,9 @@ package inet.linklayer.ieee8022;
 import inet.queueing.base.PacketFlowBase;
 import inet.queueing.contract.IPacketFlow;
 
+//
+// TODO
+//
 simple Ieee8022LlcSocketCommandProcessor extends PacketFlowBase like IPacketFlow
 {
     parameters:

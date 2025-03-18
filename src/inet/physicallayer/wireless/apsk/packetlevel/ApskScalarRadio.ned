@@ -7,6 +7,9 @@
 
 package inet.physicallayer.wireless.apsk.packetlevel;
 
+//
+// TODO
+//
 module ApskScalarRadio extends ApskRadio
 {
     parameters:

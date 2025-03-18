@@ -9,6 +9,9 @@ package inet.protocolelement.aggregation.base;
 
 import inet.queueing.base.PacketPusherBase;
 
+//
+// TODO
+//
 simple DeaggregatorBase extends PacketPusherBase
 {
     parameters:
