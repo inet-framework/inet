@@ -9,6 +9,9 @@ package inet.physicallayer.wireless.ieee802154.bitlevel;
 
 import inet.physicallayer.wireless.common.medium.RadioMedium;
 
+//
+// TODO
+//
 module Ieee802154UwbIrRadioMedium extends RadioMedium
 {
     parameters:

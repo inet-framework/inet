@@ -9,6 +9,9 @@ package inet.protocolelement.cutthrough;
 
 import inet.protocolelement.common.PacketStreamer;
 
+//
+// TODO
+//
 simple CutthroughSink extends PacketStreamer
 {
     parameters:

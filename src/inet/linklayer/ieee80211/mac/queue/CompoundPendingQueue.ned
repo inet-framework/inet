@@ -12,6 +12,9 @@ import inet.queueing.queue.CompoundPacketQueueBase;
 import inet.queueing.queue.PacketQueue;
 import inet.queueing.scheduler.PriorityScheduler;
 
+//
+// TODO
+//
 module CompoundPendingQueue extends CompoundPacketQueueBase
 {
     parameters:

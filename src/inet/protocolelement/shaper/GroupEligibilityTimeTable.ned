@@ -9,12 +9,15 @@ package inet.protocolelement.shaper;
 // A table containing the group eligibility times needed
 // for the `GroupEligibilityTimeMeter`.
 // Groups are dynamically added when a frame with a new combination of ingress port and priority
-// values is seen. 
+// values is seen.
 //
 // This module is part of the asynchronous shaper infrastructure.
 //
 // @see ~ATS8021qFilter, ~GroupEligibilityTimeMeter, ~EligibilityTimeGate, ~EligibilityTimeFilter, ~EligibilityTimeQueue, ~EligibilityTimeTag
 
+//
+// TODO
+//
 simple GroupEligibilityTimeTable
 {
     parameters:

@@ -15,6 +15,9 @@ import inet.queueing.contract.IPacketFlow;
 import inet.queueing.contract.IPacketGate;
 import inet.queueing.contract.IPacketQueue;
 
+//
+// TODO
+//
 module EthernetFragmentingMacLayer like IEthernetMacLayer
 {
     parameters:

@@ -7,6 +7,9 @@
 
 package inet.physicallayer.wireless.common.medium;
 
+//
+// TODO
+//
 module DimensionalRadioMedium extends RadioMedium
 {
     parameters:

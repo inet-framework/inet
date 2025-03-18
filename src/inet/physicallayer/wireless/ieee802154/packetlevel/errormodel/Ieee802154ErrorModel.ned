@@ -9,6 +9,9 @@ package inet.physicallayer.wireless.ieee802154.packetlevel.errormodel;
 
 import inet.physicallayer.wireless.common.base.packetlevel.ErrorModelBase;
 
+//
+// TODO
+//
 module Ieee802154ErrorModel extends ErrorModelBase
 {
     parameters:

@@ -10,6 +10,9 @@ package inet.protocolelement.aggregation;
 import inet.protocolelement.aggregation.base.AggregatorBase;
 import inet.protocolelement.aggregation.contract.IPacketAggregator;
 
+//
+// TODO
+//
 module SubpacketLengthHeaderBasedAggregator extends AggregatorBase like IPacketAggregator
 {
     parameters:

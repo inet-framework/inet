@@ -10,6 +10,9 @@ package inet.physicallayer.wired.ethernet;
 import inet.queueing.base.PacketFlowBase;
 import inet.queueing.contract.IPacketFlow;
 
+//
+// TODO
+//
 simple EthernetFragmentPhyHeaderInserter extends PacketFlowBase like IPacketFlow
 {
     parameters:

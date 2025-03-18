@@ -21,6 +21,9 @@ import inet.protocolelement.selectivity.SendToMacAddress;
 import inet.protocolelement.transceiver.PacketTransmitter;
 import inet.queueing.common.PacketMultiplexer;
 
+//
+// TODO
+//
 module InterfaceService extends NetworkInterface
 {
     parameters:

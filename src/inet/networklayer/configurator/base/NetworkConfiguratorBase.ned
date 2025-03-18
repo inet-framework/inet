@@ -7,6 +7,9 @@
 
 package inet.networklayer.configurator.base;
 
+//
+// TODO
+//
 simple NetworkConfiguratorBase
 {
     parameters:

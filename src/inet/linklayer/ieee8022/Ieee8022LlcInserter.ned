@@ -9,6 +9,9 @@ package inet.linklayer.ieee8022;
 
 import inet.queueing.base.PacketFlowBase;
 
+//
+// TODO
+//
 simple Ieee8022LlcInserter extends PacketFlowBase like IIeee8022LlcInserter
 {
     parameters:

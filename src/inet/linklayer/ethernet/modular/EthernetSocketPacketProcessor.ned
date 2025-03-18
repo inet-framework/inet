@@ -10,6 +10,9 @@ package inet.linklayer.ethernet.modular;
 import inet.queueing.base.PacketPusherBase;
 import inet.queueing.contract.IPacketFlow;
 
+//
+// TODO
+//
 simple EthernetSocketPacketProcessor extends PacketPusherBase like IPacketFlow
 {
     parameters:

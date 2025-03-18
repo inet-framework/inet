@@ -22,6 +22,9 @@ import inet.routing.eigrp.tables.EigrpIpv6NeighborTable;
 import inet.routing.eigrp.tables.EigrpIpv6TopologyTable;
 
 
+//
+// TODO
+//
 module EigrpProcessDS like IEigrp
 {
     parameters:

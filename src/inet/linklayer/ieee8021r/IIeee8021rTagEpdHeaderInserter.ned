@@ -9,6 +9,9 @@ package inet.linklayer.ieee8021r;
 
 import inet.protocolelement.contract.IProtocolHeaderInserter;
 
+//
+// TODO
+//
 moduleinterface IIeee8021rTagEpdHeaderInserter extends IProtocolHeaderInserter
 {
     parameters:

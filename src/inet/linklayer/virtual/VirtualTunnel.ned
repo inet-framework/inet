@@ -7,6 +7,9 @@
 
 package inet.linklayer.virtual;
 
+//
+// TODO
+//
 simple VirtualTunnel
 {
     parameters:

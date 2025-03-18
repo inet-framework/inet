@@ -9,6 +9,9 @@ package inet.physicallayer.wireless.common.analogmodel.dimensional;
 
 import inet.physicallayer.wireless.common.contract.packetlevel.IReceiverAnalogModel;
 
+//
+// TODO
+//
 simple DimensionalReceiverAnalogModel like IReceiverAnalogModel
 {
     parameters:

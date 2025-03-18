@@ -10,6 +10,9 @@ package inet.networklayer.diffserv;
 import inet.queueing.base.PacketProcessorBase;
 
 
+//
+// TODO
+//
 simple PacketMeterBase extends PacketProcessorBase
 {
     parameters:

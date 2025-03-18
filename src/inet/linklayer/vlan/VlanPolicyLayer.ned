@@ -11,6 +11,9 @@ import inet.protocolelement.contract.IProtocolLayer;
 import inet.queueing.contract.IPacketFilter;
 import inet.queueing.contract.IPacketFlow;
 
+//
+// TODO
+//
 module VlanPolicyLayer like IProtocolLayer
 {
     parameters:

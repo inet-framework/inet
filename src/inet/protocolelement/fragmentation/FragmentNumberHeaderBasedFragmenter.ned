@@ -10,6 +10,9 @@ package inet.protocolelement.fragmentation;
 import inet.protocolelement.fragmentation.base.FragmenterBase;
 import inet.protocolelement.fragmentation.contract.IPacketFragmenter;
 
+//
+// TODO
+//
 module FragmentNumberHeaderBasedFragmenter extends FragmenterBase like IPacketFragmenter
 {
     parameters:

@@ -7,6 +7,9 @@
 
 package inet.physicallayer.wireless.common.contract.packetlevel;
 
+//
+// TODO
+//
 moduleinterface ICommunicationCache
 {
     parameters:

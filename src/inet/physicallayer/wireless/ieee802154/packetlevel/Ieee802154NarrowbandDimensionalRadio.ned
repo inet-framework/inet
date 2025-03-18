@@ -7,6 +7,9 @@
 
 package inet.physicallayer.wireless.ieee802154.packetlevel;
 
+//
+// TODO
+//
 module Ieee802154NarrowbandDimensionalRadio extends Ieee802154NarrowbandRadio
 {
     parameters:

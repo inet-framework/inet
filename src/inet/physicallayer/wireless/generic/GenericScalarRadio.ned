@@ -7,6 +7,9 @@
 
 package inet.physicallayer.wireless.generic;
 
+//
+// TODO
+//
 module GenericScalarRadio extends GenericRadio
 {
     parameters:

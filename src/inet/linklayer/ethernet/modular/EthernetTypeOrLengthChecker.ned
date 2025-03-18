@@ -10,6 +10,9 @@ package inet.linklayer.ethernet.modular;
 import inet.queueing.base.PacketFilterBase;
 import inet.queueing.contract.IPacketFilter;
 
+//
+// TODO
+//
 simple EthernetTypeOrLengthChecker extends PacketFilterBase like IPacketFilter
 {
     parameters:

@@ -7,6 +7,9 @@
 
 package inet.physicallayer.wireless.ieee80211.packetlevel;
 
+//
+// TODO
+//
 module Ieee80211ScalarRadio extends Ieee80211Radio
 {
     parameters:

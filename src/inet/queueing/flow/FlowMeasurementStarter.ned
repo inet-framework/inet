@@ -10,6 +10,9 @@ package inet.queueing.flow;
 import inet.queueing.base.PacketFlowBase;
 import inet.queueing.contract.IPacketFlow;
 
+//
+// TODO
+//
 simple FlowMeasurementStarter extends PacketFlowBase like IPacketFlow
 {
     parameters:

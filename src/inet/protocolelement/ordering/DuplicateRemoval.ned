@@ -9,6 +9,9 @@ package inet.protocolelement.ordering;
 
 import inet.queueing.base.PacketPusherBase;
 
+//
+// TODO
+//
 simple DuplicateRemoval extends PacketPusherBase
 {
     parameters:

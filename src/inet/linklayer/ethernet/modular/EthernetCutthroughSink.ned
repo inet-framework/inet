@@ -9,6 +9,9 @@ package inet.linklayer.ethernet.modular;
 
 import inet.protocolelement.common.PacketStreamer;
 
+//
+// TODO
+//
 simple EthernetCutthroughSink extends PacketStreamer
 {
     parameters:

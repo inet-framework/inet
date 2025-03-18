@@ -8,6 +8,9 @@
 
 package inet.transportlayer.tcp_lwip;
 
+//
+// TODO
+//
 simple TcpLwipConnection {
     parameters:
         @signal[state];    // FSM state

@@ -8,6 +8,9 @@ package inet.applications.tunapp;
 
 import inet.applications.contract.IApp;
 
+//
+// TODO
+//
 simple TunnelApp like IApp
 {
     parameters:

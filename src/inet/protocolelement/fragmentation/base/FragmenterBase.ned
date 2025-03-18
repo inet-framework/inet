@@ -10,6 +10,9 @@ package inet.protocolelement.fragmentation.base;
 import inet.protocolelement.fragmentation.contract.IFragmenterPolicy;
 import inet.queueing.base.PacketPusherBase;
 
+//
+// TODO
+//
 module FragmenterBase extends PacketPusherBase
 {
     parameters:

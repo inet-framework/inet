@@ -7,6 +7,9 @@
 
 package inet.protocolelement.transceiver.base;
 
+//
+// TODO
+//
 simple StreamingTransmitterBase extends PacketTransmitterBase
 {
     parameters:

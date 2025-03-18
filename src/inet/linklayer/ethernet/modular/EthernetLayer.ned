@@ -13,6 +13,9 @@ import inet.protocolelement.contract.IProtocolHeaderInserter;
 import inet.queueing.contract.IPacketFilter;
 import inet.queueing.contract.IPacketFlow;
 
+//
+// TODO
+//
 module EthernetLayer like IEthernetLayer
 {
     parameters:

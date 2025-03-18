@@ -7,6 +7,9 @@
 
 package inet.linklayer.base;
 
+//
+// TODO
+//
 simple MacRelayUnitBase
 {
     parameters:

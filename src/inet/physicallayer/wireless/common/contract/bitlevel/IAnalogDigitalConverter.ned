@@ -7,6 +7,9 @@
 
 package inet.physicallayer.wireless.common.contract.bitlevel;
 
+//
+// TODO
+//
 moduleinterface IAnalogDigitalConverter
 {
     parameters:

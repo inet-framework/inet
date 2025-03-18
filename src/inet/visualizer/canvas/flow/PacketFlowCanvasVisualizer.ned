@@ -10,6 +10,9 @@ package inet.visualizer.canvas.flow;
 import inet.visualizer.base.PathVisualizerBase;
 import inet.visualizer.contract.IPacketFlowVisualizer;
 
+//
+// TODO
+//
 simple PacketFlowCanvasVisualizer extends PathVisualizerBase like IPacketFlowVisualizer
 {
     parameters:

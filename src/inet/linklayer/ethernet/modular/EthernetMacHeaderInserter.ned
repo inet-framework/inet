@@ -10,6 +10,9 @@ package inet.linklayer.ethernet.modular;
 import inet.protocolelement.contract.IProtocolHeaderInserter;
 import inet.queueing.base.PacketFlowBase;
 
+//
+// TODO
+//
 simple EthernetMacHeaderInserter extends PacketFlowBase like IProtocolHeaderInserter
 {
     parameters:

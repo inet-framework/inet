@@ -8,6 +8,9 @@
 
 package inet.routing.contract;
 
+//
+// TODO
+//
 moduleinterface IPim
 {
     parameters:

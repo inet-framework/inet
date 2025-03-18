@@ -9,6 +9,9 @@ package inet.linklayer.ieee8021q;
 
 import inet.queueing.base.PacketFlowBase;
 
+//
+// TODO
+//
 simple Ieee8021qTagTpidHeaderInserter extends PacketFlowBase like IIeee8021qTagTpidHeaderInserter
 {
     parameters:

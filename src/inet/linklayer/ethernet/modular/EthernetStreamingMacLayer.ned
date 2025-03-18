@@ -13,6 +13,9 @@ import inet.queueing.contract.IPacketFilter;
 import inet.queueing.contract.IPacketFlow;
 import inet.queueing.contract.IPacketQueue;
 
+//
+// TODO
+//
 module EthernetStreamingMacLayer like IEthernetMacLayer
 {
     parameters:

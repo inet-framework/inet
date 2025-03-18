@@ -9,6 +9,9 @@ package inet.protocolelement.ordering;
 
 import inet.queueing.base.PacketFlowBase;
 
+//
+// TODO
+//
 simple SequenceNumbering extends PacketFlowBase
 {
     parameters:

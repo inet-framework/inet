@@ -10,6 +10,9 @@ package inet.protocolelement.authentication;
 import inet.protocolelement.contract.IProtocolHeaderChecker;
 import inet.queueing.base.PacketFilterBase;
 
+//
+// TODO
+//
 simple MessageAuthenticationCodeChecker extends PacketFilterBase like IProtocolHeaderChecker
 {
     parameters:

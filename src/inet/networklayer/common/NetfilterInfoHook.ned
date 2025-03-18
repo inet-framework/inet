@@ -7,6 +7,9 @@
 
 package inet.networklayer.common;
 
+//
+// TODO
+//
 simple NetfilterInfoHook
 {
     parameters:

@@ -9,6 +9,9 @@ package inet.protocolelement.contract;
 
 import inet.queueing.contract.IPacketFilter;
 
+//
+// TODO
+//
 moduleinterface IProtocolHeaderChecker extends IPacketFilter
 {
     parameters:

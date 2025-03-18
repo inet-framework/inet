@@ -15,6 +15,9 @@ import inet.routing.pim.modes.PimSm;
 import inet.routing.pim.tables.PimInterfaceTable;
 import inet.routing.pim.tables.PimNeighborTable;
 
+//
+// TODO
+//
 module Pim like IPim
 {
     parameters:
@@ -73,6 +76,9 @@ module Pim like IPim
         pimSplitter.ipIn <-- { @display("m=s"); } <-- networkLayerIn;
 }
 
+//
+// TODO
+//
 simple PimChecksumInsertionHook
 {
 }

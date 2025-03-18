@@ -10,6 +10,9 @@ package inet.protocolelement.fragmentation;
 import inet.protocolelement.fragmentation.base.DefragmenterBase;
 import inet.protocolelement.fragmentation.contract.IPacketDefragmenter;
 
+//
+// TODO
+//
 simple FragmentNumberHeaderBasedDefragmenter extends DefragmenterBase like IPacketDefragmenter
 {
     parameters:

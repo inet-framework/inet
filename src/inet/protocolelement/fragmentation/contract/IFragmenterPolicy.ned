@@ -7,6 +7,9 @@
 
 package inet.protocolelement.fragmentation.contract;
 
+//
+// TODO
+//
 moduleinterface IFragmenterPolicy
 {
     parameters:

@@ -9,6 +9,9 @@ package inet.protocolelement.fragmentation.policy;
 
 import inet.protocolelement.fragmentation.contract.IFragmenterPolicy;
 
+//
+// TODO
+//
 simple LengthBasedFragmenterPolicy like IFragmenterPolicy
 {
     parameters:

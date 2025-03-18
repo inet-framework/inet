@@ -7,6 +7,9 @@
 
 package inet.environment.contract;
 
+//
+// TODO
+//
 moduleinterface IPhysicalEnvironment
 {
     parameters:

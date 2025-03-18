@@ -12,6 +12,9 @@ import inet.protocolelement.forwarding.Forwarding;
 import inet.protocolelement.forwarding.ReceiveWithHopLimit;
 import inet.protocolelement.forwarding.SendWithHopLimit;
 
+//
+// TODO
+//
 module ForwardingService
 {
     parameters:

@@ -7,6 +7,9 @@
 
 package inet.transportlayer.tcp_common;
 
+//
+// TODO
+//
 simple TcpChecksumInsertionHook
 {
 }

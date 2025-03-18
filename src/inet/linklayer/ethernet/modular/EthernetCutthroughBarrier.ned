@@ -10,6 +10,9 @@ package inet.linklayer.ethernet.modular;
 import inet.queueing.base.PacketDelayerBase;
 import inet.queueing.contract.IPacketDelayer;
 
+//
+// TODO
+//
 simple EthernetCutthroughBarrier extends PacketDelayerBase like IPacketDelayer
 {
     parameters:
