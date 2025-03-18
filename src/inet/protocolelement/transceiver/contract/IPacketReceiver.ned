@@ -5,8 +5,15 @@
 //
 
 
+//TODO review
 package inet.protocolelement.transceiver.contract;
 
+//
+// Defines a module interface for packet receiver implementations. Packet
+// receivers are responsible for receiving signals from a channel and converting
+// them back to packets. They handle signal reception, decoding, and delivery
+// to upper protocol layers.
+//
 moduleinterface IPacketReceiver
 {
     parameters:
@@ -15,4 +22,3 @@ moduleinterface IPacketReceiver
         input in;
         output out;
 }
-

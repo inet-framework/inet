@@ -5,10 +5,20 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
+//TODO review
 package inet.physicallayer.wireless.ieee802154.packetlevel;
 
 import inet.physicallayer.wireless.common.medium.RadioMedium;
 
+//
+// Radio medium model for IEEE 802.15.4 narrowband networks that uses scalar
+// representation for signal power. Configured with parameters from the IEEE
+// 802.15.4-2006 standard, including a dual-slope breakpoint path loss model with
+// a breakpoint distance of 8 meters. Provides a computationally efficient
+// simulation of signal propagation in the 2.4 GHz band with appropriate
+// background noise and path loss characteristics for low-power wireless personal
+// area networks.
+//
 module Ieee802154NarrowbandScalarRadioMedium extends RadioMedium
 {
     parameters:

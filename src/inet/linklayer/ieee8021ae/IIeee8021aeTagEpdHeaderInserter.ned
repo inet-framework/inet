@@ -23,4 +23,3 @@ moduleinterface IIeee8021aeTagEpdHeaderInserter
         input in;
         output out;
 }
-

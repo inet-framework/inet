@@ -5,10 +5,16 @@
 //
 
 
+//TODO review
 package inet.protocolelement.processing;
 
 import inet.queueing.contract.IPacketDelayer;
 
+//
+// Implements a processing delay layer that models packet processing time in
+// network devices. Contains separate delayer modules for ingress and egress
+// packet flows to simulate realistic processing delays.
+//
 module ProcessingDelayLayer like IProcessingDelayLayer
 {
     parameters:
@@ -34,4 +40,3 @@ module ProcessingDelayLayer like IProcessingDelayLayer
         lowerLayerIn --> { @display("m=s"); } --> ingress.in;
         ingress.out --> { @display("m=n"); } --> upperLayerOut;
 }
-

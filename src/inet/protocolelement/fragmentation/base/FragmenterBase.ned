@@ -5,11 +5,17 @@
 //
 
 
+//TODO review
 package inet.protocolelement.fragmentation.base;
 
 import inet.protocolelement.fragmentation.contract.IFragmenterPolicy;
 import inet.queueing.base.PacketPusherBase;
 
+//
+// Base module for packet fragmenters that split packets into smaller fragments
+// when they exceed the maximum allowed size. Uses a configurable fragmentation
+// policy to determine fragment sizes.
+//
 module FragmenterBase extends PacketPusherBase
 {
     parameters:

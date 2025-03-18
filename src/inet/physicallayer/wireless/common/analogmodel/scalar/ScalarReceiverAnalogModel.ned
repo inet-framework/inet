@@ -5,11 +5,20 @@
 //
 
 
+//TODO review
 package inet.physicallayer.wireless.common.analogmodel.scalar;
 
 import inet.common.SimpleModule;
 import inet.physicallayer.wireless.common.contract.packetlevel.IReceiverAnalogModel;
 
+//
+// Receiver analog model using scalar representation for wireless communications.
+// Models reception by representing signal power as a single scalar value rather
+// than as a function of time and frequency. Determines whether reception is
+// possible by comparing received signal power with the receiver's sensitivity.
+// Provides a simpler and more computationally efficient alternative to
+// dimensional models.
+//
 simple ScalarReceiverAnalogModel extends SimpleModule like IReceiverAnalogModel
 {
     parameters:

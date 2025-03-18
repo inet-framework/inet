@@ -5,8 +5,16 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
+//TODO review
 package inet.linklayer.ieee802154;
 
+//
+// Implements the IEEE 802.15.4 narrowband MAC protocol for low-rate wireless
+// personal area networks (LR-WPAN). Configures the generic CSMA/CA mechanism
+// with specific parameters defined in the standard, including exponential
+// backoff, acknowledgment handling, and frame size limitations. Provides
+// reliable communication through frame retransmissions and collision avoidance.
+//
 module Ieee802154NarrowbandMac extends Ieee802154Mac
 {
     parameters:

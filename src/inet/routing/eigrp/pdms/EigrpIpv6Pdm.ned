@@ -10,10 +10,18 @@
 // @copyright Brno University of Technology (www.fit.vutbr.cz) under GPLv3
 
 
+//TODO review
 package inet.routing.eigrp.pdms;
 
 import inet.common.SimpleModule;
 
+//
+// Protocol Dependent Module (PDM) for EIGRP IPv6 implementation. Handles the
+// IPv6-specific aspects of EIGRP routing, including route computation, neighbor
+// relationship management, and topology table maintenance. Communicates with
+// the Reliable Transport Protocol (RTP) module for message delivery and the
+// splitter for network layer interaction.
+//
 simple EigrpIpv6Pdm extends SimpleModule
 {
     parameters:

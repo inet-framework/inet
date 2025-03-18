@@ -5,8 +5,18 @@
 //
 
 
+//TODO review
 package inet.linklayer.contract;
 
+//
+// Module interface for IEEE 802.2 Logical Link Control (LLC) protocol
+// implementations. Provides protocol multiplexing at the link layer through
+// Service Access Points (SAPs). Supports both standard LLC headers with DSAP/SSAP
+// fields and SNAP (SubNetwork Access Protocol) headers for EtherType
+// encapsulation. Enables multiple higher-layer protocols to share the same
+// physical medium. Implementations handle encapsulation/decapsulation of frames
+// and can provide socket-based access to LLC services for applications.
+//
 moduleinterface IIeee8022Llc
 {
     parameters:
@@ -17,4 +27,3 @@ moduleinterface IIeee8022Llc
         input lowerLayerIn;
         output lowerLayerOut;
 }
-

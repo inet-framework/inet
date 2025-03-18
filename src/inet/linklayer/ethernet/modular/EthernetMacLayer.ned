@@ -5,6 +5,7 @@
 //
 
 
+//TODO review
 package inet.linklayer.ethernet.modular;
 
 import inet.common.Module;
@@ -15,6 +16,13 @@ import inet.queueing.contract.IPacketFlow;
 import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.IPacketServer;
 
+//
+// Implements the MAC (Media Access Control) layer for Ethernet networks with
+// configurable bitrate. Handles packet queuing and transmission, and processes
+// incoming packets. Monitors the carrier state of the network interface and
+// clears the queue when carrier is lost. Uses packet emitters to track traffic
+// statistics and an FCS checker to verify incoming frames.
+//
 module EthernetMacLayer extends Module like IEthernetMacLayer
 {
     parameters:

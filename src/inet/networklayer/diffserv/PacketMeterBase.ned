@@ -5,11 +5,19 @@
 //
 
 
+//TODO review
 package inet.networklayer.diffserv;
 
 import inet.queueing.base.PacketProcessorBase;
 
 
+//
+// Base module for packet meters in the DiffServ architecture. Provides common
+// functionality for different meter implementations that classify packets
+// according to various traffic conditioning algorithms. Derived meters are used
+// to determine whether packets conform to traffic profiles and mark them
+// accordingly for differentiated quality of service.
+//
 simple PacketMeterBase extends PacketProcessorBase
 {
     parameters:

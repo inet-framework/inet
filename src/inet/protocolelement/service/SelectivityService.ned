@@ -5,6 +5,7 @@
 //
 
 
+//TODO review
 package inet.protocolelement.service;
 
 import inet.protocolelement.selectivity.ReceiveAtL3Address;
@@ -12,6 +13,12 @@ import inet.protocolelement.selectivity.ReceiveAtPort;
 import inet.protocolelement.selectivity.SendToL3Address;
 import inet.protocolelement.selectivity.SendToPort;
 
+//
+// Provides packet filtering based on both port and network layer address.
+// Outgoing packets are processed by SendToPort and SendToL3Address modules,
+// while incoming packets are filtered by ReceiveAtL3Address and ReceiveAtPort
+// modules to ensure they match the configured destination criteria.
+//
 module SelectivityService
 {
     parameters:

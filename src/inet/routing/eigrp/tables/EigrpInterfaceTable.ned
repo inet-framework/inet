@@ -9,10 +9,17 @@
 // @author Vladimir Vesely (ivesely@fit.vutbr.cz)
 // @copyright Brno University of Technology (www.fit.vutbr.cz) under GPLv3
 
+//TODO review
 package inet.routing.eigrp.tables;
 
 import inet.common.SimpleModule;
 
+//
+// Maintains a table of EIGRP-enabled interfaces with their properties and
+// configuration. Stores interface parameters such as bandwidth, delay, reliability,
+// and load metrics used for EIGRP route calculations. Also tracks interface state,
+// hello/hold timers, and neighbor relationships for each interface.
+//
 simple EigrpInterfaceTable extends SimpleModule
 {
     parameters:

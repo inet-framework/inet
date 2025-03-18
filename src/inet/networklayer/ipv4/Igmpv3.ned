@@ -5,10 +5,18 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
+//TODO review
 package inet.networklayer.ipv4;
 
 import inet.common.SimpleModule;
 
+//
+// Implementation of Internet Group Management Protocol version 3 (IGMPv3)
+// as specified in RFC 3376. Manages multicast group memberships for IPv4
+// networks, supporting source-specific multicast. Handles both host-side
+// functionality (joining/leaving groups) and router-side functionality
+// (querying hosts and tracking memberships).
+//
 simple Igmpv3 extends SimpleModule like IIgmp
 {
     parameters:

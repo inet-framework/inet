@@ -5,8 +5,17 @@
 //
 
 
+//TODO review
 package inet.linklayer.ieee8022;
 
+//
+// Module interface for IEEE 802.2 Logical Link Control (LLC) layer implementations.
+// Defines the interface for modules that process packets from upper layers by
+// adding LLC headers before forwarding to lower layers, and process packets from
+// lower layers by checking and removing LLC headers before forwarding to upper
+// layers. Implementations may support both standard LLC headers and SubNetwork
+// Access Protocol (SNAP) headers.
+//
 moduleinterface IIeee8022LlcLayer
 {
     parameters:

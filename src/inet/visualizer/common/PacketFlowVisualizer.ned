@@ -5,10 +5,18 @@
 //
 
 
+//TODO review
 package inet.visualizer.common;
 
 import inet.visualizer.contract.IPacketFlowVisualizer;
 
+//
+// Visualizes packet flows through the network as animated paths. This compound
+// module integrates both canvas (2D) and OSG (3D) visualizers, automatically
+// selecting the appropriate one based on the runtime environment. It tracks and
+// displays the routes that packets take between network nodes, providing insight
+// into network traffic patterns and protocol behavior.
+//
 module PacketFlowVisualizer like IPacketFlowVisualizer
 {
     parameters:

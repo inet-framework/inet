@@ -9,10 +9,18 @@
 // @author Vladimir Vesely (ivesely@fit.vutbr.cz)
 // @copyright Brno University of Technology (www.fit.vutbr.cz) under GPLv3
 
+//TODO review
 package inet.routing.eigrp.tables;
 
 import inet.common.SimpleModule;
 
+//
+// Maintains the IPv6-specific EIGRP topology table, which stores all routes
+// learned from neighbors. Contains both feasible successors (routes used for
+// forwarding) and non-feasible successors (potential backup routes). Implements
+// the DUAL (Diffusing Update Algorithm) for loop-free path selection and
+// convergence.
+//
 simple EigrpIpv6TopologyTable extends SimpleModule
 {
     parameters:

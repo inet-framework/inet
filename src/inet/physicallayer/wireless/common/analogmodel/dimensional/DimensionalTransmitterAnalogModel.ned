@@ -5,11 +5,19 @@
 //
 
 
+//TODO review
 package inet.physicallayer.wireless.common.analogmodel.dimensional;
 
 import inet.common.Module;
 import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitterAnalogModel;
 
+//
+// Transmitter analog model using dimensional analysis for wireless communications.
+// Models transmission by representing signal power as a function of time and
+// frequency. Supports configurable time-varying and frequency-varying gain
+// patterns with various interpolation methods. Enables realistic simulation of
+// signal propagation characteristics in the analog domain.
+//
 module DimensionalTransmitterAnalogModel extends Module like ITransmitterAnalogModel
 {
     parameters:

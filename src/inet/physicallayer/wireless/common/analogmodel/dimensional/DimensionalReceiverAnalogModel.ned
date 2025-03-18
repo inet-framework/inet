@@ -5,11 +5,19 @@
 //
 
 
+//TODO review
 package inet.physicallayer.wireless.common.analogmodel.dimensional;
 
 import inet.common.SimpleModule;
 import inet.physicallayer.wireless.common.contract.packetlevel.IReceiverAnalogModel;
 
+//
+// Receiver analog model using dimensional analysis for wireless communications.
+// Models reception by analyzing signal power as a function of time and frequency.
+// Determines if reception is possible by comparing minimum reception power with
+// sensitivity threshold. Works with dimensional transmitter models to provide
+// accurate physical layer simulation.
+//
 simple DimensionalReceiverAnalogModel extends SimpleModule like IReceiverAnalogModel
 {
     parameters:

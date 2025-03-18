@@ -5,8 +5,17 @@
 //
 
 
+//TODO review
 package inet.linklayer.ethernet.modular;
 
+//
+// Implements cutthrough switching for Ethernet frames, enabling transmission to
+// begin before the entire packet is received. Provides low-latency packet
+// forwarding by connecting EthernetCutthroughSink and EthernetCutthroughSource
+// modules. Reduces switching delays compared to traditional store-and-forward
+// switching by analyzing packet headers early and making forwarding decisions
+// based on MAC table information.
+//
 module EthernetCutthroughLayer
 {
     parameters:
