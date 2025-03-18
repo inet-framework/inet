@@ -8,7 +8,7 @@
 package inet.queueing.contract;
 
 //
-// This module interface is implemented by packet marker modules. A packet marker
+// Interface for packet marker modules. A packet marker
 // connects one input to one output. It can operate in both active and passive
 // mode. Packets can be pushed into its input or packets can be pulled from its
 // output. When processing a packet, a marker attaches some information (such as

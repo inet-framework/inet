@@ -11,7 +11,7 @@ import inet.queueing.base.PacketMeterBase;
 import inet.queueing.contract.IPacketMeter;
 
 //
-// This module attaches a ~RateTag to each packet specifying the data rate and
+// Attaches a ~RateTag to each packet specifying the data rate and
 // packet rate of the received stream of packets. The algorithm takes packets
 // into account only in the given time window.
 //

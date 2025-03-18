@@ -10,7 +10,7 @@ package inet.physicallayer.wireless.apsk.bitlevel;
 import inet.physicallayer.wireless.common.contract.bitlevel.IModulator;
 
 //
-// This module is part of a simple hypothetical layered transmitter. It computes
+// Part of a simple hypothetical layered transmitter. It computes
 // the symbol domain representation from the bit domain representation by applying
 // the configured modulation.
 //

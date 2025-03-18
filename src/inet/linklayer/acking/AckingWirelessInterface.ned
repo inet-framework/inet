@@ -13,7 +13,7 @@ import inet.networklayer.common.NetworkInterface;
 import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
 
 //
-// This module implements a highly abstracted wireless network interface (NIC)
+// Implements a highly abstracted wireless network interface (NIC)
 // that uses a trivial MAC protocol. It offers simplicity for scenarios where
 // Layer 1 and 2 effects can be completely ignored, for example testing the
 // basic functionality of a wireless ad-hoc routing protocol.
@@ -23,7 +23,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
 // will receive the frame correctly, and radios that are out of range will not be
 // affected at all.
 //
-// This module requires an ~UnitDiskRadioMedium instance in the network.
+// Requires an ~UnitDiskRadioMedium instance in the network.
 //
 module AckingWirelessInterface extends NetworkInterface like IWirelessInterface
 {

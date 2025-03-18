@@ -12,7 +12,7 @@ import inet.linklayer.contract.ILinkLayer;
 import inet.linklayer.contract.IMacProtocol;
 
 //
-// This module implements a trivial MAC protocol for use in ~AckingWirelessInterface.
+// Implements a trivial MAC protocol for use in ~AckingWirelessInterface.
 //
 // The implementation provides packet encapsulation and decapsulation, but it
 // doesn't have a real medium access protocol. It doesn't provide carrier sense

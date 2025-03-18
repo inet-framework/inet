@@ -13,7 +13,7 @@ import inet.networklayer.common.EchoProtocol;
 import inet.networklayer.contract.INetworkLayer;
 
 //
-// This module provides a network layer for the next hop forwarding.
+// Provides a network layer for the next hop forwarding.
 //
 module NextHopNetworkLayer like INetworkLayer
 {

@@ -10,7 +10,7 @@ package inet.physicallayer.wireless.common.base.packetlevel;
 import inet.physicallayer.wireless.common.contract.packetlevel.IReceiver;
 
 //
-// This module serves as a base module for SNIR receiver models.
+// Serves as a base module for SNIR receiver models.
 //
 module SnirReceiverBase extends ReceiverBase like IReceiver
 {

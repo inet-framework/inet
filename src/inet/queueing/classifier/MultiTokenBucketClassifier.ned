@@ -11,7 +11,7 @@ import inet.queueing.base.PacketClassifierBase;
 import inet.queueing.contract.IPacketClassifier;
 
 //
-// This module classifies packets into the first bucket that contains the required
+// Classifies packets into the first bucket that contains the required
 // number of tokens. The packet is forwarded to the output gate that corresponds to
 // the selected bucket.
 //

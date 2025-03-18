@@ -10,12 +10,12 @@ package inet.common;
 import inet.queueing.base.PacketProcessorBase;
 
 //
-// This module facilitates the interconnection of applications, protocols, and network interfaces,
+// Facilitates the interconnection of applications, protocols, and network interfaces,
 // dispatching messages and packets among them. It supports diverse configurations, ranging from
 // layered architectures with distinct message dispatchers for separate communication layers, to
 // centralized structures where a single dispatcher manages connections to all components.
 //
-// This module keeps track of four different mappings for dispatching messages and packets:
+// Keeps track of four different mappings for dispatching messages and packets:
 //  - network interface mapping specifies which gate should be used when dispatching towards a specific
 //    network interface
 //  - service mapping specifies which gate should be used when dispatching service data units (SDUs)

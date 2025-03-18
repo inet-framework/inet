@@ -11,7 +11,7 @@ import inet.visualizer.base.MobilityVisualizerBase;
 import inet.visualizer.contract.IMobilityVisualizer;
 
 //
-// This module visualizes multiple mobilities on a 3D osg scene. It moves the
+// Visualizes multiple mobilities on a 3D osg scene. It moves the
 // visual representation according to their mobility model. It also displays
 // recent movement as a polyline, current velocity vector, and current orientation.
 //

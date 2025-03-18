@@ -14,7 +14,7 @@ import inet.queueing.contract.ITokenGenerator;
 
 
 //
-// This module produces packets in order to prevent a queue from becoming empty.
+// Produces packets in order to prevent a queue from becoming empty.
 //
 module QueueFiller like IActivePacketSource
 {

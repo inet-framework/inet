@@ -11,7 +11,7 @@ import inet.queueing.base.PacketFilterBase;
 import inet.queueing.contract.IPacketFilter;
 
 //
-// This module limits the datarate or the packetrate of a stream of packets based
+// Limits the datarate or the packetrate of a stream of packets based
 // on the ~RateTag attached to the packets.
 //
 // @see ~ExponentialRateMeter

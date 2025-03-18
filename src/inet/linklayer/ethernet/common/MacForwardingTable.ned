@@ -10,7 +10,7 @@ package inet.linklayer.ethernet.common;
 import inet.linklayer.contract.IMacForwardingTable;
 
 //
-// This module handles the mapping between ports and MAC addresses.
+// Handles the mapping between ports and MAC addresses.
 //
 // Entries are deleted if their age exceeds a certain limit.
 //

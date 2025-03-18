@@ -11,7 +11,7 @@ import inet.visualizer.base.TracingObstacleLossVisualizerBase;
 import inet.visualizer.contract.ITracingObstacleLossVisualizer;
 
 //
-// This module visualizes obstacle loss on a 2D canvas. It displays a line at
+// Visualizes obstacle loss on a 2D canvas. It displays a line at
 // the intersections of signal propagation paths with physical objects, and
 // normal vectors of physical object faces at intersection points.
 //

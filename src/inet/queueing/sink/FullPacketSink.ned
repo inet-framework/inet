@@ -13,7 +13,7 @@ import inet.queueing.contract.IPacketSink;
 import inet.queueing.contract.IPassivePacketSink;
 
 //
-// This module is an active/passive full packet sink. It doesn't pull packets
+// An active/passive full packet sink. It doesn't pull packets
 // from the connected module, and it doesn't allow packets to be pushed by
 // the connected module. The input gate generates backpressure for push packet
 // operations.

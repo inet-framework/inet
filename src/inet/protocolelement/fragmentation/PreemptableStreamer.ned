@@ -12,7 +12,7 @@ import inet.queueing.contract.IPacketFlow;
 
 
 //
-// This module takes packets passed to its input and streams them to its output.
+// Takes packets passed to its input and streams them to its output.
 //
 simple PreemptableStreamer extends PacketProcessorBase like IPacketFlow
 {

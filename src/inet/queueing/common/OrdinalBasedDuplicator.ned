@@ -11,7 +11,7 @@ import inet.queueing.base.PacketDuplicatorBase;
 
 
 //
-// This module duplicates packets based on the ordinal number of the packet in
+// Duplicates packets based on the ordinal number of the packet in
 // the received stream of packets.
 //
 simple OrdinalBasedDuplicator extends PacketDuplicatorBase

@@ -8,7 +8,7 @@
 package inet.clock.contract;
 
 //
-// This module interface is implemented by oscillator models. Oscillators are
+// Interface for oscillator models. Oscillators are
 // typically simple modules, and are used by other modules via direct C++ method
 // calls.
 //

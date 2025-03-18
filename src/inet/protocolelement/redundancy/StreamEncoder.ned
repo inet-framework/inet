@@ -11,7 +11,7 @@ import inet.queueing.base.PacketFlowBase;
 import inet.queueing.contract.IPacketFlow;
 
 //
-// This module encodes the stream name of a packet into several request tags
+// Encodes the stream name of a packet into several request tags
 // attached to the packet. It looks up the stream in the mapping and attaches
 // the necessary request tags to the packet based on the specified parameters.
 //

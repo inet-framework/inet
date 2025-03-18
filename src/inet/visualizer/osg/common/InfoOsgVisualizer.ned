@@ -11,7 +11,7 @@ import inet.visualizer.base.InfoVisualizerBase;
 import inet.visualizer.contract.IInfoVisualizer;
 
 //
-// This module visualizes some information of a submodule for each network node
+// Visualizes some information of a submodule for each network node
 // on a 3D osg scene.
 //
 // @see ~InfoCanvasVisualizer, ~InfoVisualizer, ~InfoVisualizerBase, ~IInfoVisualizer

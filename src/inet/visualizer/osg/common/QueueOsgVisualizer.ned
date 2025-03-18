@@ -11,7 +11,7 @@ import inet.visualizer.base.QueueVisualizerBase;
 import inet.visualizer.contract.IQueueVisualizer;
 
 //
-// This module visualizes queues on a 3D osg scene.
+// Visualizes queues on a 3D osg scene.
 //
 // @see ~QueueCanvasVisualizer, ~QueueVisualizer, ~QueueVisualizerBase, ~IQueueVisualizer
 //

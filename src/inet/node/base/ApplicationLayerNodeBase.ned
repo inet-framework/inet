@@ -15,7 +15,7 @@ import inet.common.MessageDispatcher;
 // Provides the highest level of abstraction for network nodes, completing the full
 // network stack from physical to application layer.
 //
-// This module adds an application layer with configurable application modules and
+// Adds an application layer with configurable application modules and
 // a message dispatcher that connects applications to the transport protocols.
 // It serves as the foundation for end-user devices like hosts and specialized nodes
 // that need application functionality.

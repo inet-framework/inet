@@ -11,7 +11,7 @@ import inet.visualizer.base.RadioVisualizerBase;
 import inet.visualizer.contract.IRadioVisualizer;
 
 //
-// This module visualizes radios on a 3D osg scene.
+// Visualizes radios on a 3D osg scene.
 //
 // @see ~RadioCanvasVisualizer, ~RadioVisualizer, ~RadioVisualizerBase, ~IRadioVisualizer
 //

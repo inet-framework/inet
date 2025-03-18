@@ -14,7 +14,7 @@ import inet.queueing.contract.IPacketMeter;
 import inet.queueing.contract.IPacketPolicing;
 
 //
-// This module combines multiple packet policing modules into one.
+// Combines multiple packet policing modules into one.
 //
 module MultiPacketPolicing like IPacketPolicing
 {

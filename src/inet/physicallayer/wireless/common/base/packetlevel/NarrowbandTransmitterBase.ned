@@ -10,7 +10,7 @@ package inet.physicallayer.wireless.common.base.packetlevel;
 import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitter;
 
 //
-// This module serves as a base module for narrowband transmitter models.
+// Serves as a base module for narrowband transmitter models.
 //
 module NarrowbandTransmitterBase extends TransmitterBase like ITransmitter
 {

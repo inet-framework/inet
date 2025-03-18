@@ -11,7 +11,7 @@ import inet.queueing.base.PassivePacketSinkBase;
 import inet.queueing.contract.IPassivePacketSink;
 
 //
-// This module is a passive packet sink which is pushed with packets by the
+// A passive packet sink which is pushed with packets by the
 // connected packet producer. All pushed packets are counted and deleted.
 //
 simple PassivePacketSink extends PassivePacketSinkBase like IPassivePacketSink

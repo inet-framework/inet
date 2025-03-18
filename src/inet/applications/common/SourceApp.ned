@@ -11,7 +11,7 @@ import inet.applications.contract.IApp;
 import inet.queueing.contract.IActivePacketSource;
 
 //
-// This module implements a generic source application.
+// Implements a generic source application.
 //
 module SourceApp like IApp
 {

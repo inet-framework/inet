@@ -11,7 +11,7 @@ import inet.queueing.base.PacketFlowBase;
 import inet.queueing.contract.IPacketFlow;
 
 //
-// This module identifies the stream of a packet using packet filter expressions.
+// Identifies the stream of a packet using packet filter expressions.
 // It can check for arbitrary packet data and assign an if a match was found then
 // the stream is attached to the packet in the ~StreamReq tag.
 //

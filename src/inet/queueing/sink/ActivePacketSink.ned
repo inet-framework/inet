@@ -11,7 +11,7 @@ import inet.queueing.base.ActivePacketSinkBase;
 import inet.queueing.contract.IActivePacketSink;
 
 //
-// This module is an active packet sink which pulls packets from the connected
+// An active packet sink which pulls packets from the connected
 // module. It pulls whole packets through the in gate at every collection interval.
 // It pulls the first packet after the initial collection offset.
 //

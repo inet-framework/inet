@@ -11,7 +11,7 @@ import inet.applications.contract.IApp;
 import inet.queueing.contract.IPassivePacketSink;
 
 //
-// This module implements a generic sink application.
+// Implements a generic sink application.
 //
 module SinkApp like IApp
 {

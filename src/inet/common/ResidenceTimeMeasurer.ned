@@ -8,7 +8,7 @@
 package inet.common;
 
 //
-// This module measures the residence time of packet data in network nodes. The
+// Measures the residence time of packet data in network nodes. The
 // measurement is done by tracking every bit individually using their unique
 // identity. For each bit, the measurement starts when the incoming enclosing
 // packet reception ends (or starts) in the network node. Similarly, for each

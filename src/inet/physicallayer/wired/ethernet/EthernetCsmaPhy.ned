@@ -8,7 +8,7 @@
 package inet.physicallayer.wired.ethernet;
 
 //
-// This module implements the Ethernet CSMA/CD PHY protocol. It supports building
+// Implements the Ethernet CSMA/CD PHY protocol. It supports building
 // both Ethernet CSMA/CD and Ethernet PLCA network interfaces.
 //
 // This module detects the carrier signal and collisions on the channel. Frames

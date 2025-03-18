@@ -11,7 +11,7 @@ import inet.protocolelement.transceiver.base.StreamingTransmitterBase;
 import inet.protocolelement.transceiver.contract.IPacketTransmitter;
 
 //
-// This module receives packets from the upper layer as a stream and also
+// Receives packets from the upper layer as a stream and also
 // sends signals to the transmission medium as a stream. The stream start and
 // stream end are sent separately allowing the preemption of signals.
 //

@@ -13,7 +13,7 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IInterleaver;
 import inet.physicallayer.wireless.common.contract.bitlevel.IScrambler;
 
 //
-// This module is part of a simple hypothetical layered receiver. It computes
+// Part of a simple hypothetical layered receiver. It computes
 // the packet domain representation from the bit domain representation by applying
 // the configured descrambling, forward error correction decoding, and deinterleaving.
 //

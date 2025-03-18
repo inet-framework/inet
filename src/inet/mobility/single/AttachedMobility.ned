@@ -10,7 +10,7 @@ package inet.mobility.single;
 import inet.mobility.base.MobilityBase;
 
 //
-// This module provides a mobility that is attached to another mobility at a
+// Provides a mobility that is attached to another mobility at a
 // given offset. The position, velocity, and acceleration are all affected by
 // the respective quantities and the orientation of the mobility where this one
 // is attached.

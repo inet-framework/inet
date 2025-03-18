@@ -15,7 +15,7 @@ import inet.queueing.contract.IPacketQueue;
 
 
 //
-// This module implements a generic wireless network interface.
+// Implements a generic wireless network interface.
 //
 module WirelessInterface extends NetworkInterface like IWirelessInterface
 {

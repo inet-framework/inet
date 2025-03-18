@@ -11,7 +11,7 @@ import inet.queueing.base.PacketServerBase;
 import inet.queueing.contract.IPacketServer;
 
 //
-// This module repeatedly pulls packets from the connected packet provider and
+// Repeatedly pulls packets from the connected packet provider and
 // pushes the packet into the connected packet consumer without delay.
 //
 simple InstantServer extends PacketServerBase like IPacketServer

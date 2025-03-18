@@ -16,7 +16,7 @@ import inet.queueing.gate.GateControlList;
 import inet.queueing.queue.CompoundPacketQueueBase;
 
 //
-// This module implements the IEEE 802.1Q time aware shaper.
+// Implements the IEEE 802.1Q time aware shaper.
 //
 module Ieee8021qTimeAwareShaper extends CompoundPacketQueueBase
 {

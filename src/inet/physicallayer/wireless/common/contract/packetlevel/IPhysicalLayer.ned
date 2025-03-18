@@ -8,7 +8,7 @@
 package inet.physicallayer.wireless.common.contract.packetlevel;
 
 //
-// This module interface provides an abstraction for the interface of different
+// Interface for the interface of different
 // physical layers.
 //
 moduleinterface IPhysicalLayer

@@ -37,7 +37,7 @@ import inet.visualizer.contract.ITransportRouteVisualizer;
 
 
 //
-// This module integrates all canvas visualizers into a single module. It
+// Integrates all canvas visualizers into a single module. It
 // supports disabling any submodule visualizer by providing an empty string as
 // its type.
 //

@@ -11,7 +11,7 @@ import inet.visualizer.base.PhysicalEnvironmentVisualizerBase;
 import inet.visualizer.contract.IPhysicalEnvironmentVisualizer;
 
 //
-// This module visualizes a physical environment on a 2D canvas. It displays the
+// Visualizes a physical environment on a 2D canvas. It displays the
 // physical objects present in the physical environment. Since this is not a 3D
 // visualization, the physical objects are projected to a 2D plane according
 // to the view angle of the corresponding ~SceneCanvasVisualizer. Apart from this,

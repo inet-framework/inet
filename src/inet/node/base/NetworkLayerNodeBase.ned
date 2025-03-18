@@ -14,7 +14,7 @@ import inet.networklayer.contract.INetworkLayer;
 // An extension of the link layer node base with network layer functionality.
 // Provides support for multiple network protocols, including IPv4 and IPv6.
 //
-// This module adds network layer capabilities to the node architecture, enabling
+// Adds network layer capabilities to the node architecture, enabling
 // end-to-end connectivity across different networks.
 //
 module NetworkLayerNodeBase extends LinkLayerNodeBase

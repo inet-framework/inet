@@ -11,7 +11,7 @@ import inet.clock.base.DriftingOscillatorBase;
 import inet.clock.contract.IOscillator;
 
 //
-// This module generates ticks periodically using a constant drift in the clock
+// Generates ticks periodically using a constant drift in the clock
 // speed. The first tick is at the simulation time of the module initialization
 // optionally shifted with an offset. The constant drift can be set from C++ or
 // using a <set-oscillator module="..." drift-rate="..." tick-offset=".."/>

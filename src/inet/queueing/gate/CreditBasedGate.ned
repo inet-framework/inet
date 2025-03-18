@@ -11,7 +11,7 @@ import inet.queueing.base.PacketGateBase;
 import inet.queueing.contract.IPacketGate;
 
 //
-// This module is a packet gate that operates based on the number of credits
+// A packet gate that operates based on the number of credits
 // it contains. The gate is open if the number of credits is greater than the
 // configured transmit credit limit, otherwise it is closed. The module attaches
 // a ~CreditGateTag to all packets that pass through. The attached tag allows

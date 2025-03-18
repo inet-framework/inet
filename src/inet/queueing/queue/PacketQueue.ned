@@ -11,7 +11,7 @@ import inet.queueing.base.PacketQueueBase;
 import inet.queueing.contract.IPacketQueue;
 
 //
-// This module implements a configurable packet queue, which is suitable for use
+// Implements a configurable packet queue, which is suitable for use
 // in MAC protocols, traffic conditioning, and quality of services, among others.
 // This is a passive component: packets are pushed into it on its input, and pulled
 // from it on its output. This module can be used on its own, but it's also often supplemented

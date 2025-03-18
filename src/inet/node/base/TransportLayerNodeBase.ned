@@ -17,7 +17,7 @@ import inet.transportlayer.contract.IUdp;
 // Provides support for UDP, TCP, and SCTP, enabling end-to-end communication
 // services for applications.
 //
-// This module adds transport layer capabilities to the node architecture, bridging
+// Adds transport layer capabilities to the node architecture, bridging
 // the gap between applications and the network layer. It handles connection management,
 // reliability, flow control, and congestion control depending on the transport
 // protocol used.

@@ -10,7 +10,7 @@ package inet.queueing.common;
 import inet.queueing.base.PacketFlowBase;
 
 //
-// This module prevents backpressure propagation from its output to its input
+// Prevents backpressure propagation from its output to its input
 // and vice versa. It always allows pushing and pulling packets independently
 // of what the connected modules would allow to do in their current state. Both
 // pushed and pulled packets pass through unchanged, but the operations may raise

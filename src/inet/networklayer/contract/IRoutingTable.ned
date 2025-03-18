@@ -8,7 +8,7 @@
 package inet.networklayer.contract;
 
 //
-// This module interface provides an abstraction for different routing tables.
+// Interface for different routing tables.
 //
 moduleinterface IRoutingTable
 {

@@ -10,7 +10,7 @@ package inet.linklayer.ieee8021q;
 import inet.queueing.gate.CreditBasedGate;
 
 //
-// This module is a packet gate that can be used to implement the IEEE 802.1q
+// A packet gate that can be used to implement the IEEE 802.1q
 // credit-based shaper algorithm in combination with a packet queue.
 //
 simple Ieee8021qCreditBasedGate extends CreditBasedGate

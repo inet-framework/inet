@@ -11,7 +11,7 @@ import inet.linklayer.contract.IIeee8021qLayer;
 import inet.queueing.contract.IPacketFlow;
 
 //
-// This module implements the IEEE 802.1Q protocol encapsulation/decapsulation.
+// Implements the IEEE 802.1Q protocol encapsulation/decapsulation.
 // It also provides socket support so applications can use the protocol directly.
 //
 module Ieee8021qProtocol like IIeee8021qLayer

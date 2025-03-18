@@ -11,7 +11,7 @@ import inet.queueing.base.PacketGateBase;
 import inet.queueing.contract.IPacketGate;
 
 //
-// This module allows or forbids packets to pass through depending on whether
+// Allows or forbids packets to pass through depending on whether
 // the gate is open or closed.
 //
 simple PacketGate extends PacketGateBase like IPacketGate

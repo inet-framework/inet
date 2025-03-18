@@ -11,7 +11,7 @@ import inet.queueing.base.PacketProcessorBase;
 import inet.queueing.contract.IActivePacketSink;
 
 //
-// This module connects multiple packet collectors to one packet provider. When
+// Connects multiple packet collectors to one packet provider. When
 // a packet is pulled by one of the connected packet collectors, then the demultiplexer
 // simply pulls a packet from the connected packet provider.
 //

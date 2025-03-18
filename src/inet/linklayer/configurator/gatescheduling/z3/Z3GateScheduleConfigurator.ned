@@ -11,7 +11,7 @@ import inet.linklayer.configurator.gatescheduling.base.GateScheduleConfiguratorB
 import inet.linklayer.configurator.gatescheduling.contract.IGateScheduleConfigurator;
 
 //
-// This module provides a gate scheduling algorithm that uses the open source
+// Provides a gate scheduling algorithm that uses the open source
 // z3 SAT solver from Microsoft. In order to be able to use this module, the
 // corresponding 'Z3 Gate Scheduling Configurator' feature must be enabled and
 // the libz3-dev package must be installed.

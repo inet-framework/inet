@@ -10,7 +10,7 @@ package inet.networklayer.diffserv;
 import inet.queueing.base.PacketProcessorBase;
 
 //
-// This module sets the DSCP field (lower six bit of Tos/TrafficClass) of IP datagrams
+// Sets the DSCP field (lower six bit of Tos/TrafficClass) of IP datagrams
 // to the value specified by the `dscps` parameter.
 //
 // The `dscps` parameter is a space-separated list of DSCP values.

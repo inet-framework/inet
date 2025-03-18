@@ -11,7 +11,7 @@ import inet.queueing.base.PacketClassifierBase;
 import inet.queueing.contract.IPacketClassifier;
 
 //
-// This module classifies packets to the first output gate if the bucket contains
+// Classifies packets to the first output gate if the bucket contains
 // enough number of tokens for the packet passing through, otherwise the second
 // output gate is used. The amount of required tokens is equal to the packet
 // length in bits and is subtracted from the number of stored tokens. New tokens

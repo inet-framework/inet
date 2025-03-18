@@ -10,7 +10,7 @@ package inet.emulation.transportlayer.udp;
 import inet.transportlayer.contract.IUdp;
 
 //
-// This module provides UDP protocol services suitable for emulation.
+// Provides UDP protocol services suitable for emulation.
 // The lower part of the UDP protocol is realized in the real world using
 // real UDP sockets of the host computer which is running the simulation.
 //

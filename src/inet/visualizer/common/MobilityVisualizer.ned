@@ -10,7 +10,7 @@ package inet.visualizer.common;
 import inet.visualizer.contract.IMobilityVisualizer;
 
 //
-// This module integrates canvas and osg mobility visualizers into a single module.
+// Integrates canvas and osg mobility visualizers into a single module.
 //
 // @see ~MobilityCanvasVisualizer, ~MobilityOsgVisualizer, ~MobilityVisualizerBase, ~IMobilityVisualizer
 //

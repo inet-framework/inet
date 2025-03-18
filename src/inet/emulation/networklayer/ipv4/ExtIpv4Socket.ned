@@ -8,7 +8,7 @@
 package inet.emulation.networklayer.ipv4;
 
 //
-// This module provides a bidirectional connection to an IPv4 socket of the host
+// Provides a bidirectional connection to an IPv4 socket of the host
 // computer which is running the simulation. It writes the packets arrived on
 // `upperLayerIn` gate to the specified real socket, and sends out packets arrived
 // from the real socket on `upperLayerOut` gate.

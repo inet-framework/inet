@@ -11,7 +11,7 @@ import inet.queueing.base.PacketMeterBase;
 import inet.queueing.contract.IPacketMeter;
 
 //
-// This module labels each packet if the token bucket contains enough tokens for
+// Labels each packet if the token bucket contains enough tokens for
 // the packet that is passing through. The amount of required tokens is equal to
 // the packet length in bits and is subtracted from the number of stored tokens.
 // New tokens are generated with the provided constant rate and they may also be

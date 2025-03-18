@@ -11,7 +11,7 @@ import inet.visualizer.base.LinkBreakVisualizerBase;
 import inet.visualizer.contract.ILinkBreakVisualizer;
 
 //
-// This module visualizes link breaks on a 3D osg scene. It displays an icon
+// Visualizes link breaks on a 3D osg scene. It displays an icon
 // for each link break in the network. See the documentation of the base
 // module for what constitutes a link break. The icon is positioned at the
 // middle point of the link.

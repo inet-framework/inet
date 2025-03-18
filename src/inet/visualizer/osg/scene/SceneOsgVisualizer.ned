@@ -11,7 +11,7 @@ import inet.visualizer.contract.ISceneVisualizer;
 import inet.visualizer.osg.base.SceneOsgVisualizerBase;
 
 //
-// This module visualizes the scene using osg. It displays the scene and
+// Visualizes the scene using osg. It displays the scene and
 // the coordinate system axes. It sets the initial viewpoint of the 3D scene
 // based on the bounding sphere of all network nodes. The viewpoint is located
 // opposite to the coordinate system origin with respect to the sphere, and it

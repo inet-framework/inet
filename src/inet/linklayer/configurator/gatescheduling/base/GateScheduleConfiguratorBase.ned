@@ -8,7 +8,7 @@
 package inet.linklayer.configurator.gatescheduling.base;
 
 //
-// This module serves as a basis for gate scheduling configurator modules. It
+// Serves as a basis for gate scheduling configurator modules. It
 // provides methods for derived modules to easily extract the input parameters
 // from the network topology and also to carry out the actual configuration of
 // the resulting schedule. The schedule is automatically configured in all of

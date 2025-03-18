@@ -10,10 +10,10 @@ package inet.linklayer.ethernet.basic;
 import inet.linklayer.base.MacProtocolBase;
 
 //
-// This module implements the Ethernet CSMA/CD MAC protocol. It supports building
+// Implements the Ethernet CSMA/CD MAC protocol. It supports building
 // both Ethernet CSMA/CD and Ethernet PLCA network interfaces.
 //
-// This module implements the exponential backoff algorithm, sends jam signal
+// Implements the exponential backoff algorithm, sends jam signal
 // when a collision is detected, and maintains IFG between signals on the channel.
 // It expects complete Ethernet MAC protocol frames containing an Ethernet MAC
 // header and an Ethernet FCS.

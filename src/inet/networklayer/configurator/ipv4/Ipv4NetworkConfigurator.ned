@@ -10,7 +10,7 @@ package inet.networklayer.configurator.ipv4;
 import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 
 //
-// This module assigns IPv4 addresses and sets up static routing for an IPv4 network.
+// Assigns IPv4 addresses and sets up static routing for an IPv4 network.
 // It assigns per-interface IP addresses, strives to take subnets into account,
 // and can also optimize the generated routing tables by merging routing entries.
 //

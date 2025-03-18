@@ -28,7 +28,7 @@ import inet.protocolelement.contract.IProtocolLayer;
 // functionality. Provides support for various network interfaces and link layer
 // protocols, forming the foundation for network connectivity.
 //
-// This module adds an interface table and multiple types of network interfaces,
+// Adds an interface table and multiple types of network interfaces,
 // including Ethernet, PPP, wireless, loopback, tunnel, and virtual interfaces.
 // It also includes support for link layer protocols such as LLC, bridging,
 // and various Ethernet encapsulation methods.

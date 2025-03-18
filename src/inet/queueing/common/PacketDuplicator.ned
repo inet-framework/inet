@@ -12,7 +12,7 @@ import inet.queueing.contract.IActivePacketSource;
 import inet.queueing.contract.IPassivePacketSink;
 
 //
-// This module connects one packet producer to one packet consumer. It can be
+// Connects one packet producer to one packet consumer. It can be
 // pushed with packets from the connected packet producer. When this happens,
 // one or more copies of the packet are pushed to the output gate.
 //

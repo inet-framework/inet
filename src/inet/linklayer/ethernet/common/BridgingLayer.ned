@@ -11,7 +11,7 @@ import inet.protocolelement.contract.IProtocolLayer;
 import inet.protocolelement.processing.IProcessingDelayLayer;
 
 //
-// This module provides various layer 2 services such as packet forwarding,
+// Provides various layer 2 services such as packet forwarding,
 // interface selection, virtual LAN handling, stream handling.
 //
 module BridgingLayer like IProtocolLayer

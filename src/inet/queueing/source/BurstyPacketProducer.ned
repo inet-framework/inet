@@ -11,7 +11,7 @@ import inet.queueing.contract.IActivePacketSource;
 import inet.queueing.scheduler.MarkovScheduler;
 
 //
-// This module mixes two different packet sources to generate bursty traffic.
+// Mixes two different packet sources to generate bursty traffic.
 //
 module BurstyPacketProducer like IActivePacketSource
 {

@@ -10,7 +10,7 @@ package inet.linklayer.shortcut;
 import inet.linklayer.common.WirelessInterface;
 
 //
-// This module implements a simplistic network interface that uses a shortcut to
+// Implements a simplistic network interface that uses a shortcut to
 // the receiver at the MAC layer.
 //
 module ShortcutInterface extends WirelessInterface

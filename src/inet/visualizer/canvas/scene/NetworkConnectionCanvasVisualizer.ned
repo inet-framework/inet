@@ -11,7 +11,7 @@ import inet.visualizer.base.NetworkConnectionVisualizerBase;
 import inet.visualizer.contract.INetworkConnectionVisualizer;
 
 //
-// This module visualizes multiple network connections on a 2D canvas.
+// Visualizes multiple network connections on a 2D canvas.
 //
 // @see ~NetworkConnectionCanvasVisualizer, ~NetworkConnectionVisualizer, ~NetworkConnectionVisualizerBase, ~INetworkConnectionVisualizer
 //

@@ -10,7 +10,7 @@ package inet.applications.tcpapp;
 import inet.applications.contract.IApp;
 
 //
-// This module hosts TCP-based server applications. It dynamically creates
+// Hosts TCP-based server applications. It dynamically creates
 // and launches a new "thread" object for each incoming connection.
 //
 // Server threads should be subclassed from the `TcpServerThreadBase`

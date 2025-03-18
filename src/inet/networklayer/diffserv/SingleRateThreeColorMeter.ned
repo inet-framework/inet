@@ -8,7 +8,7 @@
 package inet.networklayer.diffserv;
 
 //
-// This module implements a Single Rate Three Color Meter (RFC 2697).
+// Implements a Single Rate Three Color Meter (RFC 2697).
 //
 // IP packets are classified according to three parameters,
 // Committed Information Rate (cir), Committed Burst Size (cbs),

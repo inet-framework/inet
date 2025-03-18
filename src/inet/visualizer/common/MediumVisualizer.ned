@@ -10,7 +10,7 @@ package inet.visualizer.common;
 import inet.visualizer.contract.IMediumVisualizer;
 
 //
-// This module integrates canvas and osg medium visualizers into a single module.
+// Integrates canvas and osg medium visualizers into a single module.
 //
 // @see ~MediumCanvasVisualizer, ~MediumOsgVisualizer, ~MediumVisualizerBase, ~IMediumVisualizer
 //

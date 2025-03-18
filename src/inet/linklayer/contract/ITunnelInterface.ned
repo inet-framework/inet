@@ -8,7 +8,7 @@
 package inet.linklayer.contract;
 
 //
-// This module interface is implemented by tunnel network interfaces.
+// Interface for tunnel network interfaces.
 //
 moduleinterface ITunnelInterface extends INetworkInterface
 {

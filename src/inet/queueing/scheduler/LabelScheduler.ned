@@ -11,7 +11,7 @@ import inet.queueing.base.PacketSchedulerBase;
 import inet.queueing.contract.IPacketScheduler;
 
 //
-// This module schedules packets based on the attached labels in a ~LabelsTag.
+// Schedules packets based on the attached labels in a ~LabelsTag.
 //
 simple LabelScheduler extends PacketSchedulerBase like IPacketScheduler
 {

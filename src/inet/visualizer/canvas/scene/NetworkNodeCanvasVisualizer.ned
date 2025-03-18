@@ -11,7 +11,7 @@ import inet.visualizer.base.NetworkNodeVisualizerBase;
 import inet.visualizer.contract.INetworkNodeVisualizer;
 
 //
-// This module visualizes multiple network nodes on a 2D canvas. It maintains a
+// Visualizes multiple network nodes on a 2D canvas. It maintains a
 // `NetworkNodeCanvasVisualization` figure for each node in the network which can
 // be annotated by other visualizers.
 //

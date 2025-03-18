@@ -11,7 +11,7 @@ import inet.visualizer.base.StatisticVisualizerBase;
 import inet.visualizer.contract.IStatisticVisualizer;
 
 //
-// This module visualizes statistics on a 2D canvas. See the base module for
+// Visualizes statistics on a 2D canvas. See the base module for
 // how to configure which statistic is displayed. If configured properly, then
 // it displays the last value of the statistic to the right of the visualization
 // of the corresponding network node. The value and the unit are wrapped in a
