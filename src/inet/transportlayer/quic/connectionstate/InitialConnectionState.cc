@@ -18,7 +18,7 @@ namespace quic {
 ConnectionState *InitialConnectionState::processConnectAppCommand(cMessage *msg)
 {
     // send client hello
-    context->sendInitialPacket();
+    context->sendClientInitialPacket();
 
     return new InitialSentConnectionState(context);
 }
@@ -33,7 +33,7 @@ ConnectionState *InitialConnectionState::processInitialPacket(const Ptr<const In
     context->accountReceivedPacket(packetHeader->getPacketNumber(), ackElicitingPacket, PacketNumberSpace::Initial, false);
 
     // send server hello
-    context->sendInitialPacket();
+    context->sendServerInitialPacket();
 
     // send Encrypted Extensions, Certificate, Certificate Verify, and Finished
     context->sendHandshakePacket();

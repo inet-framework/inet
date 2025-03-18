@@ -345,9 +345,14 @@ void Connection::sendProbePacket(uint ptoCount)
     sendPacket(packet, PacketNumberSpace::ApplicationData);
 }
 
-void Connection::sendInitialPacket() {
+void Connection::sendClientInitialPacket() {
     int maxQuicPacketSize = path->getMaxQuicPacketSize();
-    sendPacket(packetBuilder->buildInitialPacket(maxQuicPacketSize), PacketNumberSpace::Initial);
+    sendPacket(packetBuilder->buildClientInitialPacket(maxQuicPacketSize), PacketNumberSpace::Initial);
+}
+
+void Connection::sendServerInitialPacket() {
+    int maxQuicPacketSize = path->getMaxQuicPacketSize();
+    sendPacket(packetBuilder->buildServerInitialPacket(maxQuicPacketSize), PacketNumberSpace::Initial);
 }
 
 void Connection::sendHandshakePacket() {

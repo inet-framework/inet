@@ -83,7 +83,8 @@ class Connection
     Timer *createTimer(TimerType kind, std::string name);
     Timer *createTimer(cMessage *msg);
     void sendProbePacket(uint ptoCount);
-    void sendInitialPacket();
+    void sendClientInitialPacket();
+    void sendServerInitialPacket();
     void sendHandshakePacket();
     void sendDataToApp(uint64_t streamId, B expectedDataSize);
     void handleAckFrame(const Ptr<const AckFrameHeader>& frameHeader, PacketNumberSpace pnSpace);

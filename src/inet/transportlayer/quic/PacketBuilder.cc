@@ -134,6 +134,9 @@ QuicFrame *PacketBuilder::createPingFrame() {
 
 QuicFrame *PacketBuilder::createPaddingFrame(int length) {
     Ptr<PaddingFrameHeader> frameHeader = makeShared<PaddingFrameHeader>();
+    // By specification, a PADDING frame is one byte in size.
+    // However, instead of adding multiple PADDING frames, for simulation,
+    // QUIC adds one and adjusts its length
     frameHeader->setLength(length);
     return new QuicFrame(frameHeader);
 }
@@ -399,7 +402,16 @@ QuicPacket *PacketBuilder::buildDplpmtudProbePacket(int packetSize, Dplpmtud *dp
     return packet;
 }
 
-QuicPacket *PacketBuilder::buildInitialPacket(int maxPacketSize) {;
+QuicPacket *PacketBuilder::buildClientInitialPacket(int maxPacketSize) {;
+    QuicPacket *packet = createPacket(PacketNumberSpace::Initial, false);
+
+    packet->addFrame(createCryptoFrame());
+    packet->addFrame(createPaddingFrame(1200 - packet->getSize()));
+
+    return packet;
+}
+
+QuicPacket *PacketBuilder::buildServerInitialPacket(int maxPacketSize) {;
     QuicPacket *packet = createPacket(PacketNumberSpace::Initial, false);
 
     packet->addFrame(createCryptoFrame());
