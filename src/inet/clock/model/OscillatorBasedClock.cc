@@ -253,14 +253,17 @@ void OscillatorBasedClock::receiveSignal(cComponent *source, int signal, long va
     Enter_Method("%s", cComponent::getSignalName(signal));
 
     if (signal == IOscillator::numTicksChangedSignal) {
-        clockTimeCompensation += SIMTIME_AS_CLOCKTIME(oscillator->getNominalTickLength() * (1 + getOscillatorCompensation().get<unit>()));
-        int64_t numTicks = clockTimeCompensation.raw() / oscillator->getNominalTickLength().raw();
-        clocktime_t clockTimeDelta = SIMTIME_AS_CLOCKTIME(numTicks * oscillator->getNominalTickLength());
-        clocktime_t clockTime = originClockTime + clockTimeDelta;
-        clockTimeCompensation -= clockTimeDelta;
-        setOrigin(simTime(), clockTime);
+        if (value != 0) {
+            clockTimeCompensation += SIMTIME_AS_CLOCKTIME(oscillator->getNominalTickLength() * (1 + getOscillatorCompensation().get<unit>()));
+            int64_t numTicks = clockTimeCompensation.raw() / oscillator->getNominalTickLength().raw();
+            clocktime_t clockTimeDelta = SIMTIME_AS_CLOCKTIME(numTicks * oscillator->getNominalTickLength());
+            clocktime_t clockTime = originClockTime + clockTimeDelta;
+            clockTimeCompensation -= clockTimeDelta;
+            setOrigin(simTime(), clockTime);
+        }
+        clocktime_t clockTime = getClockTime();
         std::make_heap(events.begin(), events.end(), compareClockEvents);
-        while (!events.empty() && events.front()->getArrivalClockTime() <= getClockTime())
+        while (!events.empty() && events.front()->getArrivalClockTime() <= clockTime)
         {
             std::pop_heap(events.begin(), events.end(), compareClockEvents);
             auto event = events.back();
