@@ -80,7 +80,10 @@ package inet.networklayer.rsvpte;
 //
 
 //
-// TODO
+// Resource Reservation Protocol - Traffic Engineering (RSVP-TE) implementation
+// for MPLS networks. Processes signaling messages, establishes and maintains
+// Label Switched Paths (LSPs), and manages resource reservations. Supports both
+// static configuration via XML and dynamic path setup through ScenarioManager.
 //
 simple RsvpTe
 {
@@ -102,4 +105,3 @@ simple RsvpTe
         input mplsSwitchIn;
         input appIn;
 }
-

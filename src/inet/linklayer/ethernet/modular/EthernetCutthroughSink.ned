@@ -10,7 +10,12 @@ package inet.linklayer.ethernet.modular;
 import inet.protocolelement.common.PacketStreamer;
 
 //
-// TODO
+// Completes the cutthrough switching process for Ethernet frames by handling
+// packets marked with cutthrough tags. Processes streamed packets by replacing
+// stream buffer chunks with actual data at the end of streaming. Works in
+// conjunction with EthernetCutthroughSource to implement low-latency packet
+// forwarding, reducing switching delays compared to traditional store-and-forward
+// switching.
 //
 simple EthernetCutthroughSink extends PacketStreamer
 {

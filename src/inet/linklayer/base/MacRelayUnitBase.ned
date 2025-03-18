@@ -8,7 +8,13 @@
 package inet.linklayer.base;
 
 //
-// TODO
+// Base module for MAC relay unit implementations (Ethernet switches). Provides
+// core functionality for MAC address learning and frame forwarding in bridged
+// Ethernet networks. Maintains a MAC address table that maps addresses to ports,
+// learns addresses from incoming frames, and forwards frames to appropriate
+// interfaces. Handles unicast, multicast, and broadcast traffic according to
+// standard Ethernet switching rules. Tracks statistics for processed and dropped
+// frames. Extended by concrete implementations like MacRelayUnit.
 //
 simple MacRelayUnitBase
 {
@@ -28,4 +34,3 @@ simple MacRelayUnitBase
         input upperLayerIn;
         output upperLayerOut;
 }
-

@@ -14,7 +14,12 @@ import inet.queueing.contract.IPacketFlow;
 import inet.queueing.contract.IPacketQueue;
 
 //
-// TODO
+// Implements a streaming-based MAC layer for Ethernet networks. Queues packets
+// from the upper layer and streams them at the configured bitrate. Enforces
+// minimum packet length (60 bytes) through the streamer component. Validates
+// incoming packets using frame check sequence (FCS) verification. Provides
+// packet lifetime tracking and signal emission for both outbound and inbound
+// packet flows.
 //
 module EthernetStreamingMacLayer like IEthernetMacLayer
 {

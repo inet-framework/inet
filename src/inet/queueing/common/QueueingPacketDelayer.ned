@@ -12,7 +12,12 @@ import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.IPacketServer;
 
 //
-// TODO
+// Compound module that delays packets for a specified amount of time while
+// preserving their order. Implements the IPacketDelayer interface using a queue
+// and server architecture. The queue stores packets while they wait, and the
+// server processes each packet with a processing time equal to the configured
+// delay. Unlike the simple PacketDelayer module, this implementation always
+// maintains packet order regardless of delay distribution.
 //
 module QueueingPacketDelayer like IPacketDelayer
 {
@@ -39,4 +44,3 @@ module QueueingPacketDelayer like IPacketDelayer
         queue.out --> server.in;
         server.out --> { @display("m=e"); } --> out;
 }
-

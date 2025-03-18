@@ -10,7 +10,9 @@ package inet.protocolelement.ordering;
 import inet.queueing.base.PacketPusherBase;
 
 //
-// TODO
+// Filters out duplicate packets based on sequence numbers. Keeps track of the
+// last processed sequence number and discards packets with the same sequence
+// number to prevent duplicate packet processing.
 //
 simple DuplicateRemoval extends PacketPusherBase
 {

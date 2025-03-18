@@ -8,7 +8,9 @@
 package inet.protocolelement.forwarding;
 
 //
-// TODO
+// Forwards packets based on their destination address. Determines the next hop
+// address and interface for outgoing packets, and attaches the appropriate
+// address and interface tags to the packet.
 //
 simple Forwarding
 {

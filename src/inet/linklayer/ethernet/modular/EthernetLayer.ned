@@ -14,7 +14,13 @@ import inet.queueing.contract.IPacketFilter;
 import inet.queueing.contract.IPacketFlow;
 
 //
-// TODO
+// Implements the Ethernet link layer as a modular component. Processes Ethernet
+// frames between upper and lower layers with separate processing paths for
+// outgoing and incoming packets. For outgoing packets, it handles socket
+// command processing (if enabled), MAC header insertion, padding to ensure
+// minimum frame size (60 bytes by default), and FCS insertion. For incoming
+// packets, it performs FCS checking, MAC header checking, and socket packet
+// processing (if enabled).
 //
 module EthernetLayer like IEthernetLayer
 {

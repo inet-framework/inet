@@ -11,7 +11,11 @@ import inet.visualizer.base.TreeVisualizerBase;
 import inet.visualizer.contract.IFailureProtectionConfigurationVisualizer;
 
 //
-// TODO
+// Visualizes failure protection configurations on a canvas by displaying
+// polyline arrows representing redundant paths for streams. Uses information
+// from the FailureProtectionConfigurator module to identify and display the
+// network paths configured for fault tolerance in Time-Sensitive Networking
+// (TSN) applications.
 //
 simple FailureProtectionConfigurationCanvasVisualizer extends TreeVisualizerBase like IFailureProtectionConfigurationVisualizer
 {
@@ -21,4 +25,3 @@ simple FailureProtectionConfigurationCanvasVisualizer extends TreeVisualizerBase
         double zIndex = default(3); // Determines the drawing order of figures relative to other visualizers
         @class(FailureProtectionConfigurationCanvasVisualizer);
 }
-

@@ -8,7 +8,9 @@
 package inet.protocolelement.selectivity;
 
 //
-// TODO
+// Filters packets based on the destination port. Only packets with a matching
+// destination port are passed to the output gate, while other packets are
+// dropped.
 //
 simple ReceiveAtPort
 {

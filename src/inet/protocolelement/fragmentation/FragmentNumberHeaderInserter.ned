@@ -10,7 +10,9 @@ package inet.protocolelement.fragmentation;
 import inet.queueing.base.PacketFlowBase;
 
 //
-// TODO
+// Inserts fragment number headers into packets. The headers contain sequence
+// information that allows fragments to be properly ordered and reassembled
+// at the destination.
 //
 simple FragmentNumberHeaderInserter extends PacketFlowBase
 {

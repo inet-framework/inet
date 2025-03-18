@@ -10,7 +10,12 @@ package inet.linklayer.ieee8022;
 import inet.linklayer.contract.IIeee8022Llc;
 
 //
-// TODO
+// Implements the IEEE 802.2 Logical Link Control (LLC) protocol. Provides
+// protocol multiplexing at the link layer through Service Access Points (SAPs).
+// Supports both standard LLC headers with DSAP/SSAP fields and SNAP (SubNetwork
+// Access Protocol) headers for EtherType encapsulation. Enables direct socket-based
+// access to LLC services for applications and handles protocol registration for
+// higher layer protocols.
 //
 simple Ieee8022Llc like IIeee8022Llc
 {
@@ -24,4 +29,3 @@ simple Ieee8022Llc like IIeee8022Llc
         input lowerLayerIn;
         output lowerLayerOut;
 }
-

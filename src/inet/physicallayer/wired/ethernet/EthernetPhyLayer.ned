@@ -14,7 +14,11 @@ import inet.queueing.contract.IPacketFilter;
 import inet.queueing.contract.IPacketFlow;
 
 //
-// TODO
+// Implements a modular Ethernet physical layer with separate components for
+// different functions. Handles physical headers, interframe gaps, and packet
+// transmission/reception. Provides signal emission for statistics collection
+// and optional cut-through switching support. Serves as the base module for
+// specialized Ethernet PHY layers with configurable bitrate.
 //
 module EthernetPhyLayer like IEthernetPhyLayer
 {

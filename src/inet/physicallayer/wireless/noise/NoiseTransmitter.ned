@@ -21,7 +21,11 @@ import inet.physicallayer.wireless.common.base.packetlevel.TransmitterBase;
 import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitter;
 
 //
-// TODO
+// Transmitter module that generates noise signals with configurable parameters.
+// Creates noise transmissions with specified duration, center frequency,
+// bandwidth, and power. Used by NoiseSource to produce interference in wireless
+// networks for testing protocol robustness and simulating realistic channel
+// conditions.
 //
 module NoiseTransmitter extends TransmitterBase like ITransmitter
 {
@@ -34,4 +38,3 @@ module NoiseTransmitter extends TransmitterBase like ITransmitter
         @class(NoiseTransmitter);
         @display("i=block/wtx");
 }
-

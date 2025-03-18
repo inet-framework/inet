@@ -17,7 +17,9 @@ import inet.queueing.contract.IPacketServer;
 
 
 //
-// TODO
+// Provides a comprehensive data service with packet aggregation, fragmentation,
+// sequence numbering, queuing, and scheduling in the outgoing path, and
+// reordering, defragmentation, and deaggregation in the incoming path.
 //
 module DataService
 {

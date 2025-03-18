@@ -8,7 +8,11 @@
 package inet.linklayer.ieee80211.mac.rateselection;
 
 //
-// TODO
+// Implements rate selection for IEEE 802.11 QoS frames according to the standard.
+// Selects appropriate transmission rates for different frame types (data, management,
+// control, response) based on configured parameters and dynamic conditions. Supports
+// different bitrates for multicast frames, response frames (ACK, CTS, BlockAck), and
+// can use a rate control module for dynamic rate adaptation.
 //
 simple QosRateSelection
 {
@@ -29,4 +33,3 @@ simple QosRateSelection
         double controlFrameBitrate @unit(bps) = default(-1bps);
         @display("i=block/cogwheel");
 }
-

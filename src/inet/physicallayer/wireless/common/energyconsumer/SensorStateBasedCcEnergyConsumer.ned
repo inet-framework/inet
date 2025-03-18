@@ -18,7 +18,11 @@ package inet.physicallayer.wireless.common.energyconsumer;
 //
 
 //
-// TODO
+// Current consumption model for low-power wireless sensor nodes based on radio
+// state. Provides realistic current consumption values for different operational
+// states (sleep, idle, receiving, transmitting) based on the CC2500 RF
+// transceiver specifications. Used for accurate battery life simulation in
+// wireless sensor networks.
 //
 simple SensorStateBasedCcEnergyConsumer extends StateBasedCcEnergyConsumer
 {
@@ -32,4 +36,3 @@ simple SensorStateBasedCcEnergyConsumer extends StateBasedCcEnergyConsumer
         transmitterIdleCurrentConsumption @unit(A) = default(2mA);
         transmitterTransmittingCurrentConsumption @unit(A) = default(25mA);
 }
-

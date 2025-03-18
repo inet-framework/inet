@@ -2,7 +2,10 @@
 package inet.routing.ospfv3;
 
 //
-// TODO
+// Routes OSPFv3 packets between the network layer and the appropriate OSPFv3
+// process modules. Manages multiple routing processes, directing incoming packets
+// to the correct process based on configuration. Handles both IPv4 and IPv6
+// routing tables, allowing OSPFv3 to support dual-stack environments.
 //
 simple Ospfv3Splitter
 {
@@ -21,4 +24,3 @@ simple Ospfv3Splitter
         input processIn[];
         output processOut[];
 }
-

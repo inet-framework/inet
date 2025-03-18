@@ -9,7 +9,11 @@ package inet.applications.tunapp;
 import inet.applications.contract.IApp;
 
 //
-// TODO
+// Creates a network tunnel between a TUN interface and a remote endpoint using
+// either UDP or IPv4 protocols. Captures packets from the specified TUN
+// interface and forwards them to the configured destination, while also
+// receiving packets from the remote endpoint and injecting them into the TUN
+// interface. Supports lifecycle operations for controlled startup and shutdown.
 //
 simple TunnelApp like IApp
 {

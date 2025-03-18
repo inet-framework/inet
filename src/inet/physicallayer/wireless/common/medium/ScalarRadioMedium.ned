@@ -8,11 +8,14 @@
 package inet.physicallayer.wireless.common.medium;
 
 //
-// TODO
+// Radio medium model that uses scalar representation for signal power. Provides
+// a simpler and more computationally efficient alternative to dimensional models
+// by representing signals as single scalar values rather than as functions of
+// time and frequency. Suitable for simulations where detailed physical layer
+// behavior is not required.
 //
 module ScalarRadioMedium extends RadioMedium
 {
     parameters:
         signalAnalogRepresentation = default("scalar");
 }
-

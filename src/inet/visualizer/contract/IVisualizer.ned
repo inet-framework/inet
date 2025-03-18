@@ -8,7 +8,11 @@
 package inet.visualizer.contract;
 
 //
-// TODO
+// Base interface for all visualizer module interfaces in the INET Framework.
+// Defines common parameters for specifying visualization target and subject
+// modules. Visualizers provide graphical representation of various aspects of
+// network simulation, such as links, traffic flows, routing paths, and network
+// state information.
 //
 moduleinterface IVisualizer
 {
@@ -17,4 +21,3 @@ moduleinterface IVisualizer
         string visualizationSubjectModule;
         @display("i=block/app");
 }
-

@@ -8,7 +8,11 @@
 package inet.linklayer.ethernet.common;
 
 //
-// TODO
+// Determines whether a received packet should be delivered locally or forwarded
+// based on its destination MAC address. Packets addressed to the local interface
+// are sent to the deliveryOut gate, while packets addressed to other nodes are
+// sent to the forwardingOut gate. Handles unicast, broadcast, and multicast
+// addresses appropriately.
 //
 simple LocalDelivery
 {
@@ -19,4 +23,3 @@ simple LocalDelivery
         output deliveryOut;
         output forwardingOut;
 }
-

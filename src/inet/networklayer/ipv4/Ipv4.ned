@@ -8,7 +8,10 @@
 package inet.networklayer.ipv4;
 
 //
-// TODO
+// Module interface for IPv4 protocol implementations. Defines gates and
+// parameters for modules that provide IPv4 protocol functionality. IPv4
+// modules handle datagram routing, fragmentation, and addressing between
+// network interfaces and transport layer protocols.
 //
 moduleinterface IIpv4
 {
@@ -120,4 +123,3 @@ simple Ipv4 like IIpv4
         input queueIn @labels(Ipv4Header,ArpPacket,Ieee802Ctrl);
         output queueOut @labels(Ipv4Header,ArpPacket,Ieee802Ctrl);
 }
-

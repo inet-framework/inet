@@ -8,7 +8,11 @@
 package inet.visualizer.base;
 
 //
-// TODO
+// Base module for channel visualizer modules that display communication channels
+// as arrows between network nodes. Visualizes active packet flows by drawing
+// animated arrows along the communication paths. Provides extensive configuration
+// options for arrow appearance, animation timing, and filtering of displayed
+// channels based on nodes and packet types.
 //
 simple ChannelVisualizerBase extends VisualizerBase
 {
@@ -40,4 +44,3 @@ simple ChannelVisualizerBase extends VisualizerBase
 
         @class(ChannelVisualizerBase);
 }
-

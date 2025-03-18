@@ -11,7 +11,10 @@ import inet.queueing.base.PacketServerBase;
 import inet.queueing.contract.IPacketServer;
 
 //
-// TODO
+// Implements a server that can be preempted during packet processing. Supports
+// streaming mode where packet transmission can be interrupted and resumed.
+// Processes packets at a configurable datarate and handles clock synchronization
+// for accurate timing.
 //
 simple PreemptingServer extends PacketServerBase like IPacketServer
 {

@@ -10,7 +10,10 @@ package inet.protocolelement.transceiver.base;
 import inet.queueing.base.PacketProcessorBase;
 
 //
-// TODO
+// Base module for packet receiver implementations. Provides common functionality
+// for receiving signals and converting them to packets. Tracks reception statistics
+// such as throughput, propagation time, and reception time. Handles lifecycle
+// operations and supports operational state changes.
 //
 simple PacketReceiverBase extends PacketProcessorBase
 {
@@ -29,4 +32,3 @@ simple PacketReceiverBase extends PacketProcessorBase
         input in;
         output out;
 }
-

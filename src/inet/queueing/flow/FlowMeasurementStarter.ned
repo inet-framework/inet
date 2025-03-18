@@ -11,7 +11,11 @@ import inet.queueing.base.PacketFlowBase;
 import inet.queueing.contract.IPacketFlow;
 
 //
-// TODO
+// Initiates packet flow measurements by adding time tags to packets. Supports
+// measuring various timing aspects including elapsed time, delaying time,
+// queueing time, processing time, transmission time, and propagation time.
+// Can be configured to measure specific packet regions and to filter which
+// packets are measured.
 //
 simple FlowMeasurementStarter extends PacketFlowBase like IPacketFlow
 {

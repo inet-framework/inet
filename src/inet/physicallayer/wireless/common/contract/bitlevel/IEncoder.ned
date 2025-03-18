@@ -8,11 +8,14 @@
 package inet.physicallayer.wireless.common.contract.bitlevel;
 
 //
-// TODO
+// Module interface for bit-level encoders used in wireless communication
+// systems. Encoders transform packet models into bit models by applying
+// techniques such as scrambling, forward error correction (FEC), and
+// interleaving. These processes add redundancy and structure to the data stream
+// to improve transmission reliability over noisy channels.
 //
 moduleinterface IEncoder
 {
     parameters:
         @display("i=block/blackboard");
 }
-

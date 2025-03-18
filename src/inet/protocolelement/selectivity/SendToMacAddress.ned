@@ -8,7 +8,10 @@
 package inet.protocolelement.selectivity;
 
 //
-// TODO
+// Adds a destination MAC address header to packets. The header contains either
+// the configured destination address or the address from the packet's
+// MacAddressReq tag. Used by the corresponding ReceiveAtMacAddress module to
+// filter packets.
 //
 simple SendToMacAddress
 {

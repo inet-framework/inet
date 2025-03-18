@@ -9,7 +9,11 @@
 package inet.networklayer.contract;
 
 //
-// TODO
+// Interface for Address Resolution Protocol (ARP) implementations. Provides
+// address resolution services for mapping network layer addresses (e.g., IPv4)
+// to link layer addresses (e.g., MAC). Modules implementing this interface
+// maintain a cache of address mappings and handle resolution requests from
+// the network layer.
 //
 moduleinterface IArp
 {
@@ -22,4 +26,3 @@ moduleinterface IArp
         input ifIn @labels(ArpPacket,Ieee802Ctrl);
         output ifOut @labels(ArpPacket,Ieee802Ctrl);
 }
-

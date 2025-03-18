@@ -8,7 +8,11 @@
 package inet.linklayer.ethernet.modular;
 
 //
-// TODO
+// Processes Ethernet PAUSE commands for flow control. Intercepts
+// Ieee802PauseCommand control messages and creates EthernetPauseFrame packets
+// with the specified pause time. Sends these frames to the destination address
+// (or the multicast pause address if unspecified) and tracks statistics about
+// sent PAUSE commands. Passes through all other messages unchanged.
 //
 simple EthernetPauseCommandProcessor
 {

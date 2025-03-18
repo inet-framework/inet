@@ -17,7 +17,11 @@ import inet.mobility.base.MovingMobilityBase;
 //
 
 //
-// TODO
+// Mobility model for ground vehicles that follow waypoints with realistic
+// turning behavior. Reads waypoints from a file and moves the vehicle along
+// them at a specified speed, calculating appropriate angular velocity for turns.
+// Supports terrain following by projecting positions onto the ground and
+// orienting the vehicle according to the ground normal.
 //
 simple VehicleMobility extends MovingMobilityBase
 {

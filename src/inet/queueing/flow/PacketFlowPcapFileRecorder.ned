@@ -11,7 +11,10 @@ import inet.queueing.base.PacketFlowBase;
 import inet.queueing.contract.IPacketFlow;
 
 //
-// TODO
+// Records packets passing through the module to a PCAP or PCAPNG file. Supports
+// configurable file format, network type, snapshot length, time precision, and
+// direction flags. Can be configured to flush the file after each write to ensure
+// all packets are captured even in case of a crash.
 //
 simple PacketFlowPcapFileRecorder extends PacketFlowBase like IPacketFlow
 {
@@ -25,4 +28,3 @@ simple PacketFlowPcapFileRecorder extends PacketFlowBase like IPacketFlow
         bool alwaysFlush = default(false); // flush the PCAP file after each write to ensure that all packets are captured in case of a crash
         @class(PacketFlowPcapFileRecorder);
 }
-

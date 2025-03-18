@@ -10,7 +10,13 @@ package inet.physicallayer.wireless.common.base.packetlevel;
 import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitterAnalogModel;
 
 //
-// TODO
+// Base module for wireless transmitters in the packet-level simulation of
+// physical layer. Provides configuration for the analog representation of
+// transmissions in the wireless medium. Supports three signal representation
+// types: unitDisk (simple range-based model), scalar (power/frequency as scalar
+// values), and dimensional (power spectral density as a function). The
+// appropriate analog model is automatically selected based on the
+// signalAnalogRepresentation parameter.
 //
 module TransmitterBase
 {
@@ -23,4 +29,3 @@ module TransmitterBase
             @display("p=100,100");
         }
 }
-
