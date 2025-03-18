@@ -8,7 +8,7 @@
 package inet.visualizer.base;
 
 //
-// This is a base module for node visualizer simple modules. The actual
+// Base module for node visualizer simple modules. The actual
 // visualization of network nodes is done in derived modules.
 //
 // @see ~NetworkNodeCanvasVisualizer, ~NetworkNodeOsgVisualizer, ~INetworkNodeVisualizer, ~VisualizerBase

@@ -8,7 +8,7 @@
 package inet.visualizer.base;
 
 //
-// This is a base module for path visualizer simple modules. It keeps track of
+// Base module for path visualizer simple modules. It keeps track of
 // active routes in a network. A route between two nodes is considered active
 // if a packet is sent recently between their corresponding layers. Active
 // routes are not displayed by default, see the module parameters for how to

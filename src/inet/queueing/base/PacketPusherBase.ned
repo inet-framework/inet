@@ -8,7 +8,7 @@
 package inet.queueing.base;
 
 //
-// This is a base module for various packet pusher modules.
+// Base module for various packet pusher modules.
 //
 simple PacketPusherBase extends PacketProcessorBase
 {

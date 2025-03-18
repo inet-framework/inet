@@ -10,7 +10,7 @@ package inet.mobility.static;
 import inet.mobility.base.MobilityBase;
 
 //
-// This mobility module does nothing; it can be used for stationary nodes.
+// Mobility module for stationary nodes.
 //
 simple StationaryMobility extends MobilityBase
 {

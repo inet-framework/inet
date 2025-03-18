@@ -8,7 +8,7 @@
 package inet.visualizer.base;
 
 //
-// This is a base module for link break visualizer simple modules. It keeps
+// Base module for link break visualizer simple modules. It keeps
 // track of link breaks in a network. Link breaks are not displayed by
 // default, see module parameters for how to enable the visualization. The
 // actual visualization of link breaks is done in derived modules.

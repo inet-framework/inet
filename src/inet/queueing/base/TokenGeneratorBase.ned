@@ -8,7 +8,7 @@
 package inet.queueing.base;
 
 //
-// This is a base module for various token generator modules.
+// Base module for various token generator modules.
 //
 simple TokenGeneratorBase extends PacketProcessorBase
 {

@@ -8,7 +8,7 @@
 package inet.visualizer.base;
 
 //
-// This is a base module for routing table visualizer simple modules. It displays
+// Base module for routing table visualizer simple modules. It displays
 // routes in the routing tables of the network. Routes present are not displayed
 // by default, see the module parameters for how to enable the visualization.
 // The actual visualization of routes is done in derived modules.

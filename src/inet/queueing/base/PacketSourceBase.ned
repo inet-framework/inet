@@ -8,7 +8,7 @@
 package inet.queueing.base;
 
 //
-// This is a base module for various packet source modules. Packets are created
+// Base module for various packet source modules. Packets are created
 // randomly with regard to packet length and packet data. The representation of
 // packet data can also be configured.
 //

@@ -8,7 +8,7 @@
 package inet.clock.base;
 
 //
-// This is a base module for clocks.
+// Base module for clocks.
 //
 module ClockBase
 {

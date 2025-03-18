@@ -8,7 +8,7 @@
 package inet.visualizer.base;
 
 //
-// This is a base module for connection visualizer simple modules. The actual
+// Base module for connection visualizer simple modules. The actual
 // visualization of network connections is done in derived modules.
 //
 // @see ~NetworkConnectionCanvasVisualizer, ~NetworkConnectionOsgVisualizer, ~INetworkConnectionVisualizer, ~VisualizerBase

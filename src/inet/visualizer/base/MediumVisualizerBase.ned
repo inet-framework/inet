@@ -8,7 +8,7 @@
 package inet.visualizer.base;
 
 //
-// This is a base module for medium visualizer simple modules. It keeps track
+// Base module for medium visualizer simple modules. It keeps track
 // of ongoing signal departures, ongoing signal arrivals, and propagating signals.
 //
 // It subscribes to `signalSourceAdded`, `signalSourceRemoved`, `signalAdded`,

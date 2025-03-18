@@ -8,7 +8,7 @@
 package inet.clock.base;
 
 //
-// This is a base module for oscillators.
+// Base module for oscillators.
 //
 simple OscillatorBase
 {

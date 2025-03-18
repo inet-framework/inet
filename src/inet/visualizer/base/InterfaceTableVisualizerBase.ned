@@ -8,7 +8,7 @@
 package inet.visualizer.base;
 
 //
-// This is a base module for interface table visualizer simple modules.
+// Base module for interface table visualizer simple modules.
 // It displays information of network interfaces at network nodes. Network
 // interfaces are not displayed by default, see module parameters for how to
 // enable the visualization.
