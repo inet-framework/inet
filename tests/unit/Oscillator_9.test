@@ -33,13 +33,13 @@ cmdenv-log-prefix = "%t: "
 %subst: /\x1B\[[0-9;]*m//
 
 %contains-regex: stdout
-0: Handling tick.*?numTicks = 0\.
+0: Handling oscillator tick.*?numTicks = 0\.
 
 %contains-regex: stdout
-0\.0007: Handling tick.*?numTicks = 1\.
+0\.0007: Handling oscillator tick.*?numTicks = 1\.
 
 %contains-regex: stdout
-0\.0017: Handling tick.*?numTicks = 2\.
+0\.0017: Handling oscillator tick.*?numTicks = 2\.
 
 %contains-regex: stdout
-1\.0007: Handling tick.*?numTicks = 1001\.
+1\.0007: Handling oscillator tick.*?numTicks = 1001\.

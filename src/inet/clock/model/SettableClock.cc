@@ -8,6 +8,7 @@
 #include "inet/clock/model/SettableClock.h"
 
 #include "inet/clock/base/DriftingOscillatorBase.h"
+#include "inet/common/IPrintableObject.h"
 #include "inet/common/XMLUtils.h"
 
 namespace inet {
@@ -78,7 +79,7 @@ void SettableClock::setClockTime(clocktime_t newClockTime, ppm oscillatorCompens
                 driftingOscillator->setTickOffset(0);
         }
         simtime_t currentSimTime = simTime();
-        EV_DEBUG << "Setting clock time from " << oldClockTime << " to " << newClockTime << " at simtime " << currentSimTime << ".\n";
+        EV_INFO << "Setting clock time from " << oldClockTime << " to " << newClockTime << " at simtime " << currentSimTime << ".\n";
         for (auto event : events)
             if (event->getRelative())
                 event->setArrivalClockTime(event->getArrivalClockTime() + clockDelta);

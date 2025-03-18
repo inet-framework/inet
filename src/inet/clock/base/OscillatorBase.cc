@@ -40,7 +40,7 @@ void OscillatorBase::handleMessage(cMessage *msg)
 
 void OscillatorBase::handleTickTimer()
 {
-    EV_INFO << "Handling tick" << EV_FIELD(numTicks) << EV_ENDL;
+    EV_DEBUG << "Handling oscillator tick" << EV_FIELD(numTicks) << EV_ENDL;
     emit(numTicksChangedSignal, numTicks);
     scheduleTickTimer();
     numTicks++;

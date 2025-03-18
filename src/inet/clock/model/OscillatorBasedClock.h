@@ -58,6 +58,8 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
      */
     clocktime_t clockTimeCompensation;
 
+    uint64_t lastNumTicks = 0;
+
     std::vector<ClockEvent *> events;
 
   protected:
@@ -95,7 +97,7 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
 
     virtual std::string resolveDirective(char directive) const override;
 
-    virtual void receiveSignal(cComponent *source, int signal, long value, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, int signal, uintval_t value, cObject *details) override;
     virtual void receiveSignal(cComponent *source, int signal, cObject *obj, cObject *details) override;
 };
 

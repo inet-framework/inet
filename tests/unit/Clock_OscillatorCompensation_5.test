@@ -32,16 +32,28 @@ sim-time-limit = 0.1s
 
 %contains: stdout
 ** Event #1  t=0.000001  0% completed  (0% total)   TestNetwork.clock.oscillator (ConstantDriftOscillator, id=3)
-Handling tick, numTicks = 1.
-Oscillator tick processed, clockTime = 0.000002.
+Setting oscillator origin, origin = 0.000001.
+Handling oscillator tick, numTicks = 1.
+Handling tick signal, clockTime = 0.
+Setting clock origin, simulationTime = 0.000001, clockTime = 0.000002.
+
+%contains: stdout
 ** Event #2  t=0.000002  0% completed  (0% total)   TestNetwork.clock.oscillator (ConstantDriftOscillator, id=3)
-Handling tick, numTicks = 2.
-Oscillator tick processed, clockTime = 0.000004.
+Setting oscillator origin, origin = 0.000002.
+Handling oscillator tick, numTicks = 2.
+Handling tick signal, clockTime = 0.000002.
+Setting clock origin, simulationTime = 0.000002, clockTime = 0.000004.
 
 %contains: stdout
 ** Event #99999  t=0.099999  99% completed  (99% total)   TestNetwork.clock.oscillator (ConstantDriftOscillator, id=3)
-Handling tick, numTicks = 99999.
-Oscillator tick processed, clockTime = 0.199998.
+Setting oscillator origin, origin = 0.099999.
+Handling oscillator tick, numTicks = 99999.
+Handling tick signal, clockTime = 0.199996.
+Setting clock origin, simulationTime = 0.099999, clockTime = 0.199998.
+
+%contains: stdout
 ** Event #100000  t=0.1  100% completed  (100% total)   TestNetwork.clock.oscillator (ConstantDriftOscillator, id=3)
-Handling tick, numTicks = 100000.
-Oscillator tick processed, clockTime = 0.2.
+Setting oscillator origin, origin = 0.1.
+Handling oscillator tick, numTicks = 100000.
+Handling tick signal, clockTime = 0.199998.
+Setting clock origin, simulationTime = 0.1, clockTime = 0.2.
