@@ -40,26 +40,7 @@ void QuicTrafficgen::handleStartOperation(LifecycleOperation *operation)
 {
     EV_DEBUG << "initialize QuicTrafficgen" << endl;
 
-
     connectPort = par("connectPort");
-    //inStreams = par("inboundStreams");
-    //outStreams = par("outboundStreams");
-    //queueLimit = par("queueLimit");
-    //socket.setInboundStreams(inStreams);
-    //socket.setOutboundStreams(outStreams);
-
-    /*
-    if (par("runtimeLimit").intValue() > 0) {
-        scheduleAt(simTime() + par("runtimeLimit"), timerLimitRuntime);
-    }
-
-    NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-    bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-
-    if (!isOperational){
-        throw cRuntimeError("This module doesn't support starting in node DOWN state");
-    }
-    */
     connectAddress = L3AddressResolver().resolve(par("connectAddress"));
     socket.setOutputGate(gate("socketOut"));
     socket.setCallback(this);
@@ -67,6 +48,10 @@ void QuicTrafficgen::handleStartOperation(LifecycleOperation *operation)
     L3Address localAddress = L3AddressResolver().resolve(par("localAddress"));
     int localPort = par("localPort");
     socket.bind(localAddress, localPort);
+
+    if (!sendingAllowed) {
+        sendGeneratorControl(TRAFFICGEN_STOP_SENDING);
+    }
 
     scheduleAt(simTime(), timerConnect);
 }
@@ -127,11 +112,12 @@ void QuicTrafficgen::handleMessageFromGenerator(cMessage *msg)
             handleGeneratorInfo(check_and_cast<TrafficgenInfo*>(msg));
             break;
         case TRAFFICGEN_MSG_DATA:
-            if (!sendingAllowed) {
+            if (sendingAllowed) {
+                sendData(check_and_cast<TrafficgenData*>(msg));
+            } else {
                 sendGeneratorControl(TRAFFICGEN_STOP_SENDING);
                 EV_INFO << "Sending not allowed but generator triggered message" << endl;
             }
-            sendData(check_and_cast<TrafficgenData*>(msg));
             break;
         default:
             throw cRuntimeError("Invalid message from generator: %d", (int) msg->getKind());
@@ -171,13 +157,8 @@ void QuicTrafficgen::handleGeneratorInfo(TrafficgenInfo* msg) {
 
 void QuicTrafficgen::socketEstablished(QuicSocket *socket) {
     EV_INFO << "socketEstablished" << endl;
-    /*
-    // set stream priorities
-    for (auto const &stream : streams) {
-        socket->setStreamPriority(stream.first,stream.second.priority);
-    }
-    setQueueLimit(queueLimit);
-    */
+    sendGeneratorControl(TRAFFICGEN_START_SENDING);
+    sendingAllowed = true;
     setStatusString("connected");
 }
 

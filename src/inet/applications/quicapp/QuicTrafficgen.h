@@ -72,7 +72,7 @@ class QuicTrafficgen : public ApplicationBase, public QuicSocket::ICallback
       std::map<uint32_t,Stream> streams;
       L3Address connectAddress;
       unsigned int connectPort;
-      bool sendingAllowed = true;
+      bool sendingAllowed = false;
 
       void handleTimeout(cMessage *msg);
       void handleMessageFromGenerator(cMessage *msg);
