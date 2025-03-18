@@ -82,8 +82,8 @@ void ReceivedPacketsAccountant::onPacketReceived(uint64_t packetNumber, bool ack
             if (numAckElicitingsReceivedSinceAck >= kNumReceivedAckElicitingsBeforeAck // if kNumReceivedAckElicitingsBeforeAck (default 2) ack-elicitings were received
              || packetReceivedOutOfOrder // if this packet received out of order
              || hasGapsSince(lastReceivedAckEliciting) // if there were gaps in the sequence of received packet numbers since the last ack-eliciting packet were received
-             || (useIBit && isIBitSet) // ... if the IBit is set
-             || (packetNumber == 0)) { // ... if it is the first packet (helps the sender to measure a more accurate RTT. Normally the first RTT measurement would be after the handshake which isn't delayed)
+             || (useIBit && isIBitSet)) { // ... if the IBit is set
+             //|| (packetNumber == 0)) { // ... if it is the first packet (helps the sender to measure a more accurate RTT. Normally the first RTT measurement would be after the handshake which isn't delayed)
 
                 ackDelayTimer->cancel();
                 sendAckImmediately = true;
