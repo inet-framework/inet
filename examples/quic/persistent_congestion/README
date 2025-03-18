@@ -1,0 +1,7 @@
+Simple example to check the reaction to persistent congestion.
+
+A QUIC sender established persistent congestion if it declares all packets
+as lost during a specific time frame. To simulate this, the sender sends
+data while router2 shuts down for 500 ms. After the outage, the sender
+should establish persistent congestion and, as one consequence, reset its
+congestion window.

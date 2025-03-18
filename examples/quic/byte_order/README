@@ -1,0 +1,5 @@
+Simple example to check if QUIC delivers the bytes in the correct order.
+
+Sender runs the QuicOrderedTrafficgen app that sends bytes in ascending order.
+Receiver runs QuicOrderedReceiver app that checks if the received bytes are in
+ascending order and throws a cRuntimeError if not.
