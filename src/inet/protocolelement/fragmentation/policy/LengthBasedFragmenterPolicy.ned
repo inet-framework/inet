@@ -5,11 +5,18 @@
 //
 
 
+//TODO review
 package inet.protocolelement.fragmentation.policy;
 
 import inet.common.SimpleModule;
 import inet.protocolelement.fragmentation.contract.IFragmenterPolicy;
 
+//
+// Implements a fragmentation policy based on packet length constraints.
+// Determines fragment sizes based on configurable minimum and maximum fragment
+// lengths, with options for length rounding and accounting for fragment header
+// overhead.
+//
 simple LengthBasedFragmenterPolicy extends SimpleModule like IFragmenterPolicy
 {
     parameters:

@@ -5,10 +5,17 @@
 //
 
 
+//TODO review
 package inet.protocolelement.transceiver.base;
 
 import inet.queueing.base.PacketProcessorBase;
 
+//
+// Base module for packet transmitter implementations. Provides common functionality
+// for converting packets to signals and transmitting them over a channel. Tracks
+// transmission statistics such as throughput, utilization, propagation time, and
+// transmission time. Supports clock synchronization and lifecycle operations.
+//
 simple PacketTransmitterBase extends PacketProcessorBase
 {
     parameters:

@@ -5,6 +5,7 @@
 //
 
 
+//TODO review
 package inet.protocolelement.service;
 
 import inet.common.MessageDispatcher;
@@ -21,6 +22,12 @@ import inet.protocolelement.selectivity.SendToMacAddress;
 import inet.protocolelement.transceiver.PacketTransmitter;
 import inet.queueing.common.PacketMultiplexer;
 
+//
+// Implements a network interface with comprehensive protocol processing
+// capabilities. Provides MAC address filtering, packet acknowledgment and
+// resending, protocol-based dispatching, and CRC verification. Extends the
+// NetworkInterface module with protocol elements for reliable communication.
+//
 module InterfaceService extends NetworkInterface
 {
     parameters:

@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
+//TODO review
 package inet.networklayer.rsvpte;
 
 import inet.common.SimpleModule;
@@ -81,6 +82,12 @@ import inet.common.SimpleModule;
 // RSVP-TE communicates with the following components in the system: ~Ted, ~Mpls, and may receive commands from ~ScenarioManager.
 //
 
+//
+// Resource Reservation Protocol - Traffic Engineering (RSVP-TE) implementation
+// for MPLS networks. Processes signaling messages, establishes and maintains
+// Label Switched Paths (LSPs), and manages resource reservations. Supports both
+// static configuration via XML and dynamic path setup through ScenarioManager.
+//
 simple RsvpTe extends SimpleModule
 {
     parameters:

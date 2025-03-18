@@ -5,10 +5,17 @@
 //
 
 
+//TODO review
 package inet.physicallayer.wireless.common.errormodel.bitlevel;
 
 import inet.physicallayer.wireless.common.base.bitlevel.LayeredErrorModelBase;
 
+//
+// Implements a stochastic error model for wireless communications that applies
+// random errors at different protocol layers based on configurable error rates.
+// Supports bit-level and symbol-level error modeling with specified error
+// probabilities, allowing simulation of transmission errors in wireless channels.
+//
 module StochasticLayeredErrorModel extends LayeredErrorModelBase
 {
     parameters:
@@ -17,4 +24,3 @@ module StochasticLayeredErrorModel extends LayeredErrorModelBase
         double symbolErrorRate = default(nan);
         @class(StochasticLayeredErrorModel);
 }
-

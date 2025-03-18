@@ -5,6 +5,7 @@
 //
 
 
+//TODO review
 package inet.emulation.networklayer.ipv4;
 
 import inet.common.MessageDispatcher;
@@ -15,6 +16,13 @@ import inet.networklayer.ipv4.IIpv4;
 import inet.networklayer.ipv4.Ipv4RoutingTable;
 
 
+//
+// Provides a network layer that connects the simulation to a real network on the
+// host computer using a TUN device. Allows simulated applications to send and
+// receive packets through the host's networking stack at the IP layer. Contains
+// standard components like routing table and ARP, and uses ExtUpperIpv4 with a
+// TUN device for external connectivity.
+//
 module ExtUpperIpv4NetworkLayer like INetworkLayer
 {
     parameters:

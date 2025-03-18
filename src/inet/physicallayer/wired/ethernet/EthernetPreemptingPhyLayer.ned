@@ -5,6 +5,7 @@
 //
 
 
+//TODO review
 package inet.physicallayer.wired.ethernet;
 
 import inet.protocolelement.common.InterpacketGapInserter;
@@ -15,6 +16,13 @@ import inet.queueing.common.PacketMultiplexer;
 import inet.queueing.contract.IPacketFilter;
 import inet.queueing.contract.IPacketFlow;
 
+//
+// Implements an Ethernet PHY layer that supports IEEE 802.1Qbu frame preemption.
+// Allows high-priority frames to interrupt (preempt) the transmission of
+// low-priority frames, reducing latency for critical traffic. Uses specialized
+// components to handle frame fragments and their headers, with separate paths for
+// regular frames and frame fragments in both transmission and reception.
+//
 module EthernetPreemptingPhyLayer like IEthernetPhyLayer
 {
     parameters:

@@ -5,12 +5,20 @@
 //
 
 
+//TODO review
 package inet.linklayer.vlan;
 
 import inet.protocolelement.contract.IProtocolLayer;
 import inet.queueing.contract.IPacketFilter;
 import inet.queueing.contract.IPacketFlow;
 
+//
+// Implements VLAN (Virtual LAN) policy functionality for filtering and mapping
+// VLAN tags. Processes both outbound and inbound packets, applying VLAN ID
+// mapping and filtering based on configured policies. Supports interface-specific
+// VLAN configurations for network segmentation and traffic control in Ethernet
+// networks.
+//
 module VlanPolicyLayer like IProtocolLayer
 {
     parameters:

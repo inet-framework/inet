@@ -5,6 +5,7 @@
 //
 
 
+//TODO review
 package inet.linklayer.ethernet.modular;
 
 import inet.linklayer.ethernet.contract.IEthernetMacLayer;
@@ -16,6 +17,15 @@ import inet.queueing.contract.IPacketQueue;
 import inet.queueing.scheduler.PriorityScheduler;
 import inet.queueing.server.PreemptingServer;
 
+//
+// Implements IEEE 802.1Qbu frame preemption for Ethernet networks. Classifies
+// traffic into express (high-priority) and preemptable (low-priority) paths,
+// allowing high-priority frames to interrupt transmission of low-priority ones.
+// Uses separate MAC layers for each traffic type: a streaming layer for express
+// traffic and a fragmenting layer for preemptable traffic. Includes a priority
+// scheduler and preempting server to manage transmission priorities and handle
+// the preemption mechanism.
+//
 module EthernetPreemptingMacLayer like IEthernetMacLayer
 {
     parameters:

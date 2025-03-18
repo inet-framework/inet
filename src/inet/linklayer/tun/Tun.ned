@@ -5,10 +5,19 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
+//TODO review
 package inet.linklayer.tun;
 
 import inet.common.SimpleModule;
 
+//
+// Implements a TUN (network tunnel) interface that provides a virtual network
+// interface for applications. Allows applications to send and receive packets
+// directly to/from the network layer using a socket-like API. Maintains a list
+// of registered sockets and handles commands for opening, closing, and using
+// the TUN interface. Processes packets between upper layers and the network
+// layer, adding appropriate tags for routing.
+//
 simple Tun extends SimpleModule
 {
     parameters:
@@ -26,4 +35,3 @@ simple Tun extends SimpleModule
         input upperLayerIn @messageKinds(inet::TunCommandCode);    // From upper layers
         output upperLayerOut @messageKinds(inet::TunSocketIndication);  // To upper layers
 }
-

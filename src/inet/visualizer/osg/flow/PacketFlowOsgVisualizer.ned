@@ -5,11 +5,19 @@
 //
 
 
+//TODO review
 package inet.visualizer.osg.flow;
 
 import inet.visualizer.base.PathVisualizerBase;
 import inet.visualizer.contract.IPacketFlowVisualizer;
 
+//
+// Visualizes packet flows through the network using 3D graphics with OSG
+// (OpenSceneGraph). Displays animated paths that packets take as they traverse
+// the network, with customizable line styles, colors, and labels. Tracks flows
+// through network elements like Ethernet switches and IEEE 802.1d bridges,
+// helping to understand network traffic patterns and routing behavior.
+//
 simple PacketFlowOsgVisualizer extends PathVisualizerBase like IPacketFlowVisualizer
 {
     parameters:

@@ -5,6 +5,7 @@
 //
 
 
+//TODO review
 package inet.protocolelement.service;
 
 import inet.protocolelement.aggregation.SubpacketLengthHeaderBasedAggregator;
@@ -16,6 +17,11 @@ import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.IPacketServer;
 
 
+//
+// Provides a comprehensive data service with packet aggregation, fragmentation,
+// sequence numbering, queuing, and scheduling in the outgoing path, and
+// reordering, defragmentation, and deaggregation in the incoming path.
+//
 module DataService
 {
     parameters:

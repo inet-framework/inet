@@ -10,10 +10,17 @@
 // @copyright Brno University of Technology (www.fit.vutbr.cz) under GPLv3
 
 
+//TODO review
 package inet.routing.eigrp;
 
 import inet.common.SimpleModule;
 
+//
+// Implements the Reliable Transport Protocol (RTP) for EIGRP IPv4. Handles
+// reliable delivery of EIGRP messages, including sequence numbering, acknowledgments,
+// and retransmissions. This IPv4-specific version works with the EigrpIpv4Pdm
+// module to ensure reliable communication between EIGRP routers.
+//
 simple EigrpRtp extends SimpleModule
 {
     parameters:

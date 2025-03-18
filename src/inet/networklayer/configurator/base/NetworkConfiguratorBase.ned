@@ -5,14 +5,21 @@
 //
 
 
+//TODO review
 package inet.networklayer.configurator.base;
 
 import inet.common.SimpleModule;
 
+//
+// Base module for network configurators in the INET framework. Provides
+// fundamental functionality for extracting network topology by identifying
+// network nodes and their connections. Serves as a foundation for more
+// specialized configurators that handle tasks like address assignment and
+// routing table configuration.
+//
 simple NetworkConfiguratorBase extends SimpleModule
 {
     parameters:
         @class(NetworkConfiguratorBase);
         @display("i=block/cogwheel");
 }
-

@@ -5,6 +5,7 @@
 //
 
 
+//TODO review
 package inet.protocolelement.service;
 
 import inet.common.MessageDispatcher;
@@ -12,6 +13,12 @@ import inet.protocolelement.forwarding.Forwarding;
 import inet.protocolelement.forwarding.ReceiveWithHopLimit;
 import inet.protocolelement.forwarding.SendWithHopLimit;
 
+//
+// Provides packet forwarding functionality with hop limit management. Combines
+// address-based forwarding with hop limit processing for both outgoing and
+// incoming packets. Uses a message dispatcher to route packets between the
+// appropriate processing elements.
+//
 module ForwardingService
 {
     parameters:

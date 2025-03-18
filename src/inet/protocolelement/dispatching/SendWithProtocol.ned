@@ -5,10 +5,16 @@
 //
 
 
+//TODO review
 package inet.protocolelement.dispatching;
 
 import inet.common.SimpleModule;
 
+//
+// Prepends a protocol header to outgoing packets based on the protocol tag
+// attached to the packet. Registers the protocol with the appropriate gates to
+// enable protocol-based dispatching.
+//
 simple SendWithProtocol extends SimpleModule
 {
     parameters:

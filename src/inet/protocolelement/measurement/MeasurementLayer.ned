@@ -5,10 +5,16 @@
 //
 
 
+//TODO review
 package inet.protocolelement.measurement;
 
 import inet.queueing.contract.IPacketFlow;
 
+//
+// Implements a measurement layer that collects performance metrics on packet
+// flows. Contains measurement starter and recorder submodules that track
+// packets as they pass through the network stack.
+//
 module MeasurementLayer like IMeasurementLayer
 {
     parameters:
@@ -34,4 +40,3 @@ module MeasurementLayer like IMeasurementLayer
         lowerLayerIn --> { @display("m=s"); } --> measurementRecorder.in;
         measurementRecorder.out --> { @display("m=n"); } --> upperLayerOut;
 }
-

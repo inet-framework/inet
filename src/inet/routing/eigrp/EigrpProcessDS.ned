@@ -10,6 +10,7 @@
 // @copyright Brno University of Technology (www.fit.vutbr.cz) under GPLv3
 
 
+//TODO review
 package inet.routing.eigrp;
 
 import inet.routing.contract.IEigrp;
@@ -22,6 +23,12 @@ import inet.routing.eigrp.tables.EigrpIpv6NeighborTable;
 import inet.routing.eigrp.tables.EigrpIpv6TopologyTable;
 
 
+//
+// Implements the Enhanced Interior Gateway Routing Protocol (EIGRP) with dual-stack
+// support for both IPv4 and IPv6. Coordinates protocol data modules (PDMs), routing
+// tables, neighbor tables, and topology tables for both address families. Uses
+// reliable transport protocol (RTP) modules to handle packet transmission.
+//
 module EigrpProcessDS like IEigrp
 {
     parameters:

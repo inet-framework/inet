@@ -5,11 +5,20 @@
 //
 
 
+//TODO review
 package inet.linklayer.ieee8021q;
 
 import inet.protocolelement.contract.IProtocolLayer;
 
 
+//
+// Implements Time-Sensitive Networking (TSN) stream policy functionality for
+// Ethernet networks. This module coordinates stream identification, relay, and
+// coding operations through a layered architecture. It processes both outbound
+// and inbound traffic flows, enabling deterministic communication with bounded
+// latency for time-critical applications. The layer supports stream reservation
+// and management to provide quality of service guarantees for real-time traffic.
+//
 module StreamPolicyLayer like IProtocolLayer
 {
     parameters:

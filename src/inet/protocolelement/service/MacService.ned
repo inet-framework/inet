@@ -5,12 +5,18 @@
 //
 
 
+//TODO review
 package inet.protocolelement.service;
 
 import inet.protocolelement.fragmentation.FragmentNumberHeaderBasedDefragmenter;
 import inet.queueing.classifier.DynamicClassifier;
 import inet.queueing.common.PacketMultiplexer;
 
+//
+// Provides packet defragmentation services for a specific peer. Uses a dynamic
+// classifier to route packets to the appropriate defragmenter based on packet
+// attributes, then multiplexes the processed packets to a single output.
+//
 module PeerService
 {
     parameters:
@@ -38,6 +44,11 @@ module PeerService
         multiplexer.out --> out;
 }
 
+//
+// Manages multiple peer services for MAC-level packet processing. Uses a
+// dynamic classifier to route packets to the appropriate peer service based on
+// packet attributes, then multiplexes the processed packets to a single output.
+//
 module MacService
 {
     parameters:
