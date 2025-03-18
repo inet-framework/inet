@@ -1,0 +1,25 @@
+Shows how DPLPMTUD works to find the PMTU in seven configs:
+
+1. MaxEqualsPmtu: All links have the same MTU. Thus, the sender's max PMTU
+   candidate is equal to the actual PMTU.
+
+2. MaxLargerPmtu: Sender's local link has a larger MTU than the PMTU. The
+   sender will send a probe packet larger than the PMTU during its discovery.
+
+3. MaxLargerPmtuWithoutPtb: Same as 2., but in this config, the sender
+   does not use the PTB message from the router for the discovery.
+
+4. IncreasingPmtu: Same as 2., but in this config, at second 5, the path
+   changes and the PMTU increases. The sender periodically checks for a larger
+   to determine that.
+
+5. IncreasingPmtuWithoutPtb: Same as 4., but in this config, the sender
+   does not use the PTB message from the router for the discovery.
+
+6. DecreasingPmtu: Same as 2., but in this config, at second 5, the path
+   changes and the PMTU decreases. The sender determines that when receiving
+   a PTB message.
+
+7. DecreasingPmtuWithoutPtb: Same as 6., but in this config, the sender
+   does not use the PTB message from the router for the discovery. Instead
+   it determines the PMTU decrease on a specific packet loss pattern.
