@@ -1,0 +1,13 @@
+Sender sends as many bytes as flow control permits. Congestion control is
+disabled and bandwidth is high enough to not be limiting factors.
+
+When the sender fully used the flow control credit, it has to wait for more
+credit, which takes about one RTT before it arrives. This gives the formula
+for the goodput.
+
+Gp = fc_credit / RTT
+
+flow_control_validation.py reads the results from the simulation, calculates
+the achieved goodput by the arrived bytes from the application at the receiver
+over one second, and prints it together with the theoretical goodput given by
+the formula.
