@@ -8,7 +8,10 @@
 package inet.linklayer.ieee80211.mac.recipient;
 
 //
-// TODO
+// Implements the MAC data service for the recipient side in IEEE 802.11 networks.
+// Processes received frames by performing defragmentation and duplicate detection.
+// Handles different frame types (data, management, control) and maintains statistics
+// for defragmented and deaggregated packets, as well as dropped duplicate packets.
 //
 module RecipientMacDataService
 {
@@ -22,4 +25,3 @@ module RecipientMacDataService
         @statistic[packetDeaggregated](title="packets deaggregated"; record=count);
         @statistic[packetDropDuplicateDetected](title="packet drops: duplicate detected"; source=packetDropReasonIsDuplicateDetected(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
 }
-

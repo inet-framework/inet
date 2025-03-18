@@ -13,7 +13,11 @@
 package inet.routing.eigrp.pdms;
 
 //
-// TODO
+// Protocol Dependent Module (PDM) for EIGRP IPv4 implementation. Handles the
+// IPv4-specific aspects of EIGRP routing, including route computation, neighbor
+// relationship management, and topology table maintenance. Communicates with
+// the Reliable Transport Protocol (RTP) module for message delivery and the
+// splitter for network layer interaction.
 //
 simple EigrpIpv4Pdm
 {

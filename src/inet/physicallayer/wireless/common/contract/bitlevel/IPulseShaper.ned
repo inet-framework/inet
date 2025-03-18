@@ -8,11 +8,14 @@
 package inet.physicallayer.wireless.common.contract.bitlevel;
 
 //
-// TODO
+// Interface for pulse shaping components in wireless communications. Transforms
+// symbol-domain signals into sample-domain signals by applying pulse shaping to
+// digital symbols, creating a continuous-time waveform. Used in detailed
+// physical layer simulations to reduce spectral leakage and intersymbol
+// interference, improving spectral efficiency of wireless transmissions.
 //
 moduleinterface IPulseShaper
 {
     parameters:
         @display("i=block/opticaldelay");
 }
-

@@ -8,11 +8,15 @@
 package inet.linklayer.ieee8021q;
 
 //
-// TODO
+// Maintains a table of IEEE 802.1Q VLAN sockets. Each socket entry contains a
+// socket ID, protocol, VLAN ID, and a flag indicating whether to steal packets.
+// The module provides functionality to add, remove, and find sockets based on
+// protocol and VLAN ID criteria. It enables applications to communicate through
+// specific VLANs by associating sockets with VLAN tags, facilitating the
+// routing of packets to the appropriate protocol handlers.
 //
 simple Ieee8021qSocketTable
 {
     parameters:
         @display("i=block/table");
 }
-

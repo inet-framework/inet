@@ -9,7 +9,10 @@
 package inet.routing.contract;
 
 //
-// TODO
+// Defines a module interface for Protocol Independent Multicast (PIM) routing
+// protocol implementations. PIM is used for multicast routing across IP networks,
+// building distribution trees for multicast data. Implementations include PIM-DM
+// (Dense Mode) and PIM-SM (Sparse Mode) variants.
 //
 moduleinterface IPim
 {
@@ -19,4 +22,3 @@ moduleinterface IPim
         input networkLayerIn;
         output networkLayerOut;
 }
-

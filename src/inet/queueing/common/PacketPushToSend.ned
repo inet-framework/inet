@@ -11,7 +11,11 @@ import inet.queueing.base.PassivePacketSinkBase;
 import inet.queueing.contract.IPassivePacketSink;
 
 //
-// TODO
+// Acts as an adapter between the queueing framework and standard OMNeT++
+// modules. It receives packets through the push mechanism (as a passive packet
+// sink) and forwards them using the standard OMNeT++ send operation. This
+// module is useful for connecting queueing components to non-queueing modules
+// that expect to receive packets via direct message sending.
 //
 simple PacketPushToSend extends PassivePacketSinkBase like IPassivePacketSink
 {

@@ -8,7 +8,11 @@
 package inet.linklayer.ieee80211.mac.originator;
 
 //
-// TODO
+// Implements frame retransmission and recovery procedures for non-QoS frames in
+// IEEE 802.11 networks. Manages short and long retry counters, adjusts contention
+// window size based on transmission outcomes, and enforces retry limits. Handles
+// different retry procedures for frames below and above the RTS threshold as
+// specified in IEEE 802.11 standard section 9.19.2.6.
 //
 simple NonQosRecoveryProcedure
 {
@@ -23,4 +27,3 @@ simple NonQosRecoveryProcedure
         @statistic[contentionWindowChanged](title="contention window"; record=vector; interpolationmode=sample-hold);
         @statistic[retryLimitReached](title="retry limit reached"; record=count);
 }
-

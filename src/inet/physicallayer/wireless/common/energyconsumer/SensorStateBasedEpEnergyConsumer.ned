@@ -18,7 +18,11 @@ package inet.physicallayer.wireless.common.energyconsumer;
 //
 
 //
-// TODO
+// Energy consumption model for low-power wireless sensor nodes based on radio
+// state. Provides realistic power consumption values for different operational
+// states (sleep, idle, receiving, transmitting) based on the CC2500 RF
+// transceiver specifications. Used for accurate energy consumption simulation
+// in wireless sensor networks.
 //
 simple SensorStateBasedEpEnergyConsumer extends StateBasedEpEnergyConsumer
 {
@@ -32,4 +36,3 @@ simple SensorStateBasedEpEnergyConsumer extends StateBasedEpEnergyConsumer
         transmitterIdlePowerConsumption = default(5mW);
         transmitterTransmittingPowerConsumption = default(75mW);
 }
-

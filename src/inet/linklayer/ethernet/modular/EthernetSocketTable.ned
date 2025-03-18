@@ -8,11 +8,15 @@
 package inet.linklayer.ethernet.modular;
 
 //
-// TODO
+// Maintains a table of active Ethernet sockets. Stores socket descriptors and
+// their associated parameters such as protocol-specific filtering criteria.
+// Provides lookup functionality for the EthernetSocketCommandProcessor and
+// EthernetSocketPacketProcessor to map between socket IDs and their
+// configurations. Essential component of the socket-based interface to Ethernet
+// services.
 //
 simple EthernetSocketTable
 {
     parameters:
         @display("i=block/table");
 }
-

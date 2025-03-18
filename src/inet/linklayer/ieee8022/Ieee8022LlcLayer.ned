@@ -14,7 +14,12 @@ import inet.queueing.contract.IPacketClassifier;
 import inet.queueing.contract.IPacketFlow;
 
 //
-// TODO
+// Implements the IEEE 802.2 Logical Link Control (LLC) layer. Processes packets
+// from upper layers by adding LLC headers before forwarding to lower layers, and
+// processes packets from lower layers by checking and removing LLC headers before
+// forwarding to upper layers. Supports both standard LLC headers and SubNetwork
+// Access Protocol (SNAP) headers. Provides optional socket support for direct
+// access to the LLC layer from applications.
 //
 module Ieee8022LlcLayer like IIeee8022LlcLayer
 {

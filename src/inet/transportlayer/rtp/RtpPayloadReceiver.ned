@@ -25,7 +25,10 @@ moduleinterface IRTPPayloadReceiver
 }
 
 //
-// TODO
+// Base module for RTP payload receivers that process incoming RTP data packets.
+// Provides common functionality such as opening and closing output files,
+// handling incoming packets, and recording statistics. Serves as the foundation
+// for specific payload type implementations.
 //
 simple RtpPayloadReceiver like IRTPPayloadReceiver
 {
@@ -41,7 +44,9 @@ simple RtpPayloadReceiver like IRTPPayloadReceiver
 }
 
 //
-// TODO
+// Specialized RTP payload receiver for PCM audio data (payload type 10) in the
+// RTP audio/video profile. Processes incoming RTP packets containing PCM audio
+// samples and writes them to an output file for playback or analysis.
 //
 simple RTPAVProfilePayload10Receiver like IRTPPayloadReceiver
 {
@@ -55,7 +60,10 @@ simple RTPAVProfilePayload10Receiver like IRTPPayloadReceiver
 }
 
 //
-// TODO
+// Specialized RTP payload receiver for MPEG video data (payload type 32) in the
+// RTP audio/video profile. Processes incoming RTP packets containing MPEG video
+// frames, performs packet reordering, and writes the data to an output file.
+// Corresponds to the RtpAvProfilePayload32Sender module.
 //
 simple RtpAvProfilePayload32Receiver like IRTPPayloadReceiver
 {
@@ -69,7 +77,10 @@ simple RtpAvProfilePayload32Receiver like IRTPPayloadReceiver
 }
 
 //
-// TODO
+// Base class for RTP payload receivers that handle sample-based audio formats in
+// the RTP audio/video profile. Provides functionality for processing audio
+// samples from RTP packets, handling timing information, and writing the
+// received audio data to output files for playback or analysis.
 //
 simple RTPAVProfileSampleBasedAudioReceiver like IRTPPayloadReceiver
 {
@@ -81,4 +92,3 @@ simple RTPAVProfileSampleBasedAudioReceiver like IRTPPayloadReceiver
         input profileIn @labels(RtpInnerPacket);
         output profileOut @labels(RtpInnerPacket);
 }
-

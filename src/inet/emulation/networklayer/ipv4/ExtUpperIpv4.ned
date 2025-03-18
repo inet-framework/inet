@@ -10,7 +10,11 @@ package inet.emulation.networklayer.ipv4;
 import inet.networklayer.ipv4.IIpv4;
 
 //
-// TODO
+// Provides IPv4 layer functionality for network emulation that connects
+// simulated applications to a real network on the host computer. Uses a TUN
+// device to capture and inject packets at the IP layer, allowing simulated
+// applications to communicate with real-world network endpoints through the
+// host's networking stack.
 //
 module ExtUpperIpv4 like IIpv4
 {

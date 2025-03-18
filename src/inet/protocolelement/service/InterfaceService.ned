@@ -22,7 +22,10 @@ import inet.protocolelement.transceiver.PacketTransmitter;
 import inet.queueing.common.PacketMultiplexer;
 
 //
-// TODO
+// Implements a network interface with comprehensive protocol processing
+// capabilities. Provides MAC address filtering, packet acknowledgment and
+// resending, protocol-based dispatching, and CRC verification. Extends the
+// NetworkInterface module with protocol elements for reliable communication.
 //
 module InterfaceService extends NetworkInterface
 {

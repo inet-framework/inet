@@ -11,7 +11,10 @@ import inet.queueing.base.PacketFilterBase;
 import inet.queueing.contract.IPacketFilter;
 
 //
-// TODO
+// Validates and removes Ethernet fragment PHY headers from incoming packet
+// fragments. Used in frame preemption (IEEE 802.1Qbu) to process fragments of
+// preempted frames. Checks if the fragment headers are correct and properly
+// represented, dropping fragments with invalid headers.
 //
 simple EthernetFragmentPhyHeaderChecker extends PacketFilterBase like IPacketFilter
 {

@@ -12,7 +12,10 @@
 package inet.routing.eigrp.tables;
 
 //
-// TODO
+// Maintains a table of EIGRP-enabled interfaces with their properties and
+// configuration. Stores interface parameters such as bandwidth, delay, reliability,
+// and load metrics used for EIGRP route calculations. Also tracks interface state,
+// hello/hold timers, and neighbor relationships for each interface.
 //
 simple EigrpInterfaceTable
 {

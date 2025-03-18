@@ -8,7 +8,9 @@
 package inet.protocolelement.selectivity;
 
 //
-// TODO
+// Filters packets based on the destination network layer address. Only packets
+// with a matching destination address are passed to the output gate, while
+// other packets are dropped.
 //
 simple ReceiveAtL3Address
 {

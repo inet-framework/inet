@@ -11,7 +11,11 @@ import inet.visualizer.base.TreeVisualizerBase;
 import inet.visualizer.contract.IStreamRedundancyConfigurationVisualizer;
 
 //
-// TODO
+// Visualizes stream redundancy configurations on a canvas by displaying
+// polyline arrows representing redundant paths for streams. Uses information
+// from the StreamRedundancyConfigurator module to identify and display the
+// network paths used for redundant stream transmission in Time-Sensitive
+// Networking (TSN) applications.
 //
 simple StreamRedundancyConfigurationCanvasVisualizer extends TreeVisualizerBase like IStreamRedundancyConfigurationVisualizer
 {
@@ -21,4 +25,3 @@ simple StreamRedundancyConfigurationCanvasVisualizer extends TreeVisualizerBase 
         double zIndex = default(3); // Determines the drawing order of figures relative to other visualizers
         @class(StreamRedundancyConfigurationCanvasVisualizer);
 }
-

@@ -8,7 +8,10 @@
 package inet.visualizer.base;
 
 //
-// TODO
+// Base module for tree visualizer modules that display network tree structures
+// such as multicast routing trees, spanning trees, or other hierarchical network
+// relationships. Visualizes tree structures as a set of connected arrows between
+// network nodes, with configurable appearance properties for the connecting lines.
 //
 simple TreeVisualizerBase extends VisualizerBase
 {
@@ -28,4 +31,3 @@ simple TreeVisualizerBase extends VisualizerBase
 
         @class(TreeVisualizerBase);
 }
-

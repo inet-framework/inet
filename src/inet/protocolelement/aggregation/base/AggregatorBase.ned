@@ -11,7 +11,12 @@ import inet.protocolelement.aggregation.contract.IAggregatorPolicy;
 import inet.queueing.base.PacketPusherBase;
 
 //
-// TODO
+// Base module for packet aggregation. Collects multiple packets and combines them
+// into a single aggregated packet based on a configurable aggregation policy.
+// Aggregation improves network efficiency by reducing header overhead when
+// transmitting multiple small packets. The module maintains the aggregation state
+// and delegates the aggregation decision to a policy module that determines if a
+// packet can be aggregated with the current set.
 //
 module AggregatorBase extends PacketPusherBase
 {

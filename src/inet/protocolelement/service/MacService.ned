@@ -12,7 +12,9 @@ import inet.queueing.classifier.DynamicClassifier;
 import inet.queueing.common.PacketMultiplexer;
 
 //
-// TODO
+// Provides packet defragmentation services for a specific peer. Uses a dynamic
+// classifier to route packets to the appropriate defragmenter based on packet
+// attributes, then multiplexes the processed packets to a single output.
 //
 module PeerService
 {
@@ -42,7 +44,9 @@ module PeerService
 }
 
 //
-// TODO
+// Manages multiple peer services for MAC-level packet processing. Uses a
+// dynamic classifier to route packets to the appropriate peer service based on
+// packet attributes, then multiplexes the processed packets to a single output.
 //
 module MacService
 {

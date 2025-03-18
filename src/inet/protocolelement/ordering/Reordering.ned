@@ -10,7 +10,9 @@ package inet.protocolelement.ordering;
 import inet.queueing.base.PacketPusherBase;
 
 //
-// TODO
+// Reorders out-of-sequence packets based on their sequence numbers. Buffers
+// packets until they can be delivered in the correct order, ensuring sequential
+// processing of packets despite network reordering.
 //
 simple Reordering extends PacketPusherBase
 {

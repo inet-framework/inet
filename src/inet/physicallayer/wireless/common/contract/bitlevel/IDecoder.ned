@@ -8,11 +8,16 @@
 package inet.physicallayer.wireless.common.contract.bitlevel;
 
 //
-// TODO
+// Interface for decoders in wireless communications. Decoders convert bit-level
+// signal representations back into packet-level representations, performing the
+// reverse of the encoding process. This typically involves operations such as
+// descrambling, forward error correction (FEC) decoding, and deinterleaving.
+// Implementations of this interface handle different wireless standards and
+// encoding schemes, providing the final step in recovering transmitted data
+// from received bits.
 //
 moduleinterface IDecoder
 {
     parameters:
         @display("i=block/blackboard");
 }
-

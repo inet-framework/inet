@@ -12,7 +12,11 @@ import inet.networklayer.ipv4.IIpv4;
 
 
 //
-// TODO
+// Provides a simplified network layer for emulation that connects the simulation
+// to a real network on the host computer. Uses ExtLowerIpv4 to send packets from
+// the simulation to the real network and receive packets from the real network
+// into the simulation using raw sockets. Unlike ExtUpperIpv4NetworkLayer, it
+// doesn't include components like routing table or ARP.
 //
 module ExtLowerIpv4NetworkLayer like INetworkLayer
 {
@@ -35,4 +39,3 @@ module ExtLowerIpv4NetworkLayer like INetworkLayer
         transportIn --> ip.transportIn;
         transportOut <-- ip.transportOut;
 }
-

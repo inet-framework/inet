@@ -10,7 +10,12 @@ package inet.physicallayer.wireless.ieee802154.packetlevel;
 import inet.physicallayer.wireless.common.medium.RadioMedium;
 
 //
-// TODO
+// Radio medium model for IEEE 802.15.4 narrowband networks that uses dimensional
+// analysis for signal representation. Configured with parameters from the IEEE
+// 802.15.4-2006 standard, including a dual-slope breakpoint path loss model with
+// a breakpoint distance of 8 meters. Provides realistic simulation of signal
+// propagation in the 2.4 GHz band with appropriate background noise and path
+// loss characteristics for low-power wireless personal area networks.
 //
 module Ieee802154NarrowbandDimensionalRadioMedium extends RadioMedium
 {
@@ -32,4 +37,3 @@ module Ieee802154NarrowbandDimensionalRadioMedium extends RadioMedium
         // TODO couple with sensitivity
         backgroundNoise.power = default(-96.616dBm);
 }
-

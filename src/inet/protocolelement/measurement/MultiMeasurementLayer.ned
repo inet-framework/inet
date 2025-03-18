@@ -10,7 +10,9 @@ package inet.protocolelement.measurement;
 import inet.queueing.contract.IPacketFlow;
 
 //
-// TODO
+// Extends the measurement layer concept to support multiple measurement modules
+// in sequence. Allows for collecting different types of metrics or measurements
+// at various points in the packet processing pipeline.
 //
 module MultiMeasurementLayer like IMeasurementLayer
 {
@@ -44,4 +46,3 @@ module MultiMeasurementLayer like IMeasurementLayer
         }
         measurementMaker[0].out --> { @display("m=n"); } --> upperLayerOut;
 }
-

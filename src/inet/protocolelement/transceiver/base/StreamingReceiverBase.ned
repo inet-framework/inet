@@ -8,7 +8,10 @@
 package inet.protocolelement.transceiver.base;
 
 //
-// TODO
+// Extends the PacketReceiverBase with streaming capabilities. Monitors the
+// transmission channel for changes and handles dynamic channel modifications
+// during simulation. Designed for continuous reception of signals over
+// potentially changing channel conditions.
 //
 simple StreamingReceiverBase extends PacketReceiverBase
 {

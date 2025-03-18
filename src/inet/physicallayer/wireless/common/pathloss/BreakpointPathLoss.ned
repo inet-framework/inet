@@ -10,7 +10,12 @@ package inet.physicallayer.wireless.common.pathloss;
 import inet.physicallayer.wireless.common.contract.packetlevel.IPathLoss;
 
 //
-// TODO
+// Path loss model that uses a dual-slope approach with different path loss
+// exponents for different distance ranges. Models signal attenuation with a
+// breakpoint distance that divides propagation into two regions, each with its
+// own path loss characteristics. Particularly useful for environments where
+// propagation behavior changes significantly at a certain distance, such as
+// indoor/outdoor transitions or urban scenarios with varying obstacle densities.
 //
 module BreakpointPathLoss like IPathLoss
 {
@@ -22,4 +27,3 @@ module BreakpointPathLoss like IPathLoss
         double breakpointDistance @unit(m);
         @class(BreakpointPathLoss);
 }
-

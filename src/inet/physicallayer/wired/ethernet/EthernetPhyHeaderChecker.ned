@@ -11,7 +11,10 @@ import inet.queueing.base.PacketFilterBase;
 import inet.queueing.contract.IPacketFilter;
 
 //
-// TODO
+// Validates and removes Ethernet PHY headers from incoming packets. Checks if
+// the headers are correct and properly represented, dropping packets with invalid
+// headers. Updates protocol tags to indicate the packet now contains Ethernet MAC
+// data and should be dispatched to the MAC layer.
 //
 simple EthernetPhyHeaderChecker extends PacketFilterBase like IPacketFilter
 {

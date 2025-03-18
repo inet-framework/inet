@@ -10,7 +10,11 @@ package inet.routing.ospfv3;
 import inet.routing.contract.IOspf;
 
 //
-// TODO
+// Implements the OSPFv3 (Open Shortest Path First version 3) routing protocol
+// for IPv6 networks. This module supports dynamic routing based on link state
+// advertisements, allowing routers to discover and maintain routes to all
+// destinations in an autonomous system. OSPFv3 is designed specifically for
+// IPv6 addressing and routing.
 //
 module Ospfv3 like IOspf
 {
@@ -35,4 +39,3 @@ module Ospfv3 like IOspf
         ipIn --> ospfv3Splitter.ipIn;
         ipOut <-- ospfv3Splitter.ipOut;
 }
-
