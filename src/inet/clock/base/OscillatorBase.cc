@@ -22,6 +22,10 @@ void OscillatorBase::initialize(int stage)
             tickTimer->setSchedulingPriority(par("tickSchedulingPriority"));
         }
     }
+    else if (stage == INITSTAGE_CLOCK) {
+        if (tickTimer != nullptr)
+            handleTickTimer();
+    }
     else if (stage == INITSTAGE_LAST)
         updateDisplayString();
 }
@@ -37,8 +41,7 @@ void OscillatorBase::handleMessage(cMessage *msg)
 void OscillatorBase::handleTickTimer()
 {
     EV_INFO << "Handling tick" << EV_FIELD(numTicks) << EV_ENDL;
-    if (numTicks != 0)
-        emit(numTicksChangedSignal, numTicks);
+    emit(numTicksChangedSignal, numTicks);
     scheduleTickTimer();
     numTicks++;
 }

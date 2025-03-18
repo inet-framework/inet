@@ -22,10 +22,6 @@ void IdealOscillator::initialize(int stage)
         WATCH(tickLength);
         emit(driftRateChangedSignal, 0.0);
     }
-    else if (stage == INITSTAGE_CLOCK) {
-        if (tickTimer != nullptr)
-            handleTickTimer();
-    }
 }
 
 void IdealOscillator::finish()

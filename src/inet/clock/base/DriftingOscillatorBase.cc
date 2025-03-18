@@ -36,21 +36,13 @@ void DriftingOscillatorBase::initialize(int stage)
         WATCH(driftFactor);
         WATCH(nextTickFromOrigin);
     }
-    else if (stage == INITSTAGE_CLOCK) {
-        if (tickTimer != nullptr) {
-            if (nextTickFromOrigin == getCurrentTickLength())
-                handleTickTimer();
-            else
-                scheduleTickTimer();
-        }
-    }
 }
 
 void DriftingOscillatorBase::handleTickTimer()
 {
     setOrigin(simTime());
-    nextTickFromOrigin = getCurrentTickLength();
     OscillatorBase::handleTickTimer();
+    nextTickFromOrigin = getCurrentTickLength();
 }
 
 void DriftingOscillatorBase::scheduleTickTimer()

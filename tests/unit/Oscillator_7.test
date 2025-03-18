@@ -38,4 +38,7 @@ cmdenv-log-prefix = "%t: "
 0\.001: Handling tick.*?numTicks = 1\.
 
 %contains-regex: stdout
+0\.002: Handling tick.*?numTicks = 2\.
+
+%contains-regex: stdout
 1: Handling tick.*?numTicks = 100\.
