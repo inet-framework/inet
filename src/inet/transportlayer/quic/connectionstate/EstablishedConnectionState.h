@@ -28,6 +28,8 @@ public:
     virtual void processMaxStreamDataFrame(const Ptr<const MaxStreamDataFrameHeader>& frameHeader) override;
     virtual void processStreamDataBlockedFrame(const Ptr<const StreamDataBlockedFrameHeader>& frameHeader) override;
     virtual void processDataBlockedFrame(const Ptr<const DataBlockedFrameHeader>& frameHeader) override;
+    virtual void processCryptoFrame(const Ptr<const CryptoFrameHeader>& frameHeader) override;
+    virtual void processHandshakeDoneFrame() override;
     virtual ConnectionState *processLossDetectionTimeout(cMessage *msg) override;
     virtual ConnectionState *processAckDelayTimeout(cMessage *msg) override;
     virtual ConnectionState *processRecvAppCommand(cMessage *msg) override;
@@ -35,6 +37,9 @@ public:
     virtual ConnectionState *processDplpmtudRaiseTimeout(cMessage *msg) override;
     virtual ConnectionState *processInitialPacket(const Ptr<const InitialPacketHeader>& packetHeader, Packet *pkt) override;
     virtual ConnectionState *processHandshakePacket(const Ptr<const HandshakePacketHeader>& packetHeader, Packet *pkt) override;
+
+private:
+    bool gotCryptoFin = false;
 };
 
 } /* namespace quic */

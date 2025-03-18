@@ -90,10 +90,12 @@ class Connection
     void handleAckFrame(const Ptr<const AckFrameHeader>& frameHeader, PacketNumberSpace pnSpace);
     void processIcmpPtb(Packet *droppedPkt, int ptbMtu);
     void reportPtb(int droppedPacketNumber, int ptbMtu);
+    void setHandshakeConfirmed(bool value);
     bool isHandshakeConfirmed();
     void addDstConnectionId(uint64_t id, uint8_t length);
     void sendAck(PacketNumberSpace pnSpace);
     void established();
+    void sendHandshakeDone();
 
     ReliabilityManager *getReliabilityManager() {
         return this->reliabilityManager;
@@ -181,6 +183,8 @@ class Connection
     //bool reduceTlpSizeOnlyIfPmtuInvalidPossible;
 
     bool dplpmutdInIntialBase;
+
+    bool handshakeConfirmed;
 
     Statistics *stats;
 

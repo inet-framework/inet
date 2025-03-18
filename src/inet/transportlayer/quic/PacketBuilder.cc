@@ -127,12 +127,14 @@ QuicPacket *PacketBuilder::createOneRttPacket(bool skipPacketNumber)
     return createPacket(PacketNumberSpace::ApplicationData, skipPacketNumber);
 }
 
-QuicFrame *PacketBuilder::createPingFrame() {
+QuicFrame *PacketBuilder::createPingFrame()
+{
     Ptr<PingFrameHeader> frameHeader = makeShared<PingFrameHeader>();
     return new QuicFrame(frameHeader);
 }
 
-QuicFrame *PacketBuilder::createPaddingFrame(int length) {
+QuicFrame *PacketBuilder::createPaddingFrame(int length)
+{
     Ptr<PaddingFrameHeader> frameHeader = makeShared<PaddingFrameHeader>();
     // By specification, a PADDING frame is one byte in size.
     // However, instead of adding multiple PADDING frames, for simulation,
@@ -141,11 +143,18 @@ QuicFrame *PacketBuilder::createPaddingFrame(int length) {
     return new QuicFrame(frameHeader);
 }
 
-QuicFrame *PacketBuilder::createCryptoFrame() {
+QuicFrame *PacketBuilder::createCryptoFrame()
+{
     Ptr<CryptoFrameHeader> frameHeader = makeShared<CryptoFrameHeader>();
     frameHeader->setOffset(0);
     frameHeader->setLength(0);
     frameHeader->calcChunkLength();
+    return new QuicFrame(frameHeader);
+}
+
+QuicFrame *PacketBuilder::createHandshakeDoneFrame()
+{
+    Ptr<HandshakeDoneFrameHeader> frameHeader = makeShared<HandshakeDoneFrameHeader>();
     return new QuicFrame(frameHeader);
 }
 
@@ -370,13 +379,15 @@ QuicPacket *PacketBuilder::buildAckElicitingPacket(std::vector<QuicPacket*> *sen
     return packet;
 }
 
-QuicPacket *PacketBuilder::buildPingPacket() {
+QuicPacket *PacketBuilder::buildPingPacket()
+{
     QuicPacket *packet = createOneRttPacket();
     addFrameToPacket(packet, createPingFrame());
     return packet;
 }
 
-QuicPacket *PacketBuilder::buildDplpmtudProbePacket(int packetSize, Dplpmtud *dplpmtud) {
+QuicPacket *PacketBuilder::buildDplpmtudProbePacket(int packetSize, Dplpmtud *dplpmtud)
+{
     if (this->skipPacketNumberForDplpmtudProbePackets) {
         // skip a packet number
         packetNumber[PacketNumberSpace::ApplicationData]++;
@@ -402,7 +413,8 @@ QuicPacket *PacketBuilder::buildDplpmtudProbePacket(int packetSize, Dplpmtud *dp
     return packet;
 }
 
-QuicPacket *PacketBuilder::buildClientInitialPacket(int maxPacketSize) {;
+QuicPacket *PacketBuilder::buildClientInitialPacket(int maxPacketSize)
+{
     QuicPacket *packet = createPacket(PacketNumberSpace::Initial, false);
 
     packet->addFrame(createCryptoFrame());
@@ -411,7 +423,8 @@ QuicPacket *PacketBuilder::buildClientInitialPacket(int maxPacketSize) {;
     return packet;
 }
 
-QuicPacket *PacketBuilder::buildServerInitialPacket(int maxPacketSize) {;
+QuicPacket *PacketBuilder::buildServerInitialPacket(int maxPacketSize)
+{
     QuicPacket *packet = createPacket(PacketNumberSpace::Initial, false);
 
     packet->addFrame(createCryptoFrame());
@@ -427,7 +440,8 @@ QuicPacket *PacketBuilder::buildServerInitialPacket(int maxPacketSize) {;
     return packet;
 }
 
-QuicPacket *PacketBuilder::buildHandshakePacket(int maxPacketSize) {
+QuicPacket *PacketBuilder::buildHandshakePacket(int maxPacketSize)
+{
     QuicPacket *packet = createPacket(PacketNumberSpace::Handshake, false);
 
     packet->addFrame(createCryptoFrame());
@@ -441,6 +455,11 @@ QuicPacket *PacketBuilder::buildHandshakePacket(int maxPacketSize) {
     }
 
     return packet;
+}
+
+void PacketBuilder::addHandshakeDone()
+{
+    controlQueue->push_back(createHandshakeDoneFrame());
 }
 
 } /* namespace quic */

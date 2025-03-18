@@ -50,6 +50,8 @@ public:
     virtual void processMaxStreamDataFrame(const Ptr<const MaxStreamDataFrameHeader>& frameHeader);
     virtual void processStreamDataBlockedFrame(const Ptr<const StreamDataBlockedFrameHeader>& frameHeader);
     virtual void processDataBlockedFrame(const Ptr<const DataBlockedFrameHeader>& frameHeader);
+    virtual void processCryptoFrame(const Ptr<const CryptoFrameHeader>& frameHeader);
+    virtual void processHandshakeDoneFrame();
 
     virtual ConnectionState *processIcmpPtb(Packet *droppedPacket, int ptbMtu);
     virtual ConnectionState *processIcmpPtb(uint32_t droppedPacketNumber, int ptbMtu);

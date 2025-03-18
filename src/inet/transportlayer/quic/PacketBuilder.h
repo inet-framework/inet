@@ -46,6 +46,7 @@ public:
     QuicPacket *buildClientInitialPacket(int maxPacketSize);
     QuicPacket *buildServerInitialPacket(int maxPacketSize);
     QuicPacket *buildHandshakePacket(int maxPacketSize);
+    void addHandshakeDone();
     void setSrcConnectionId(ConnectionId *connectionId) {
         this->srcConnectionId = connectionId;
     }
@@ -76,6 +77,7 @@ private:
     QuicFrame *createPaddingFrame(int length = 1);
     QuicFrame *createCryptoFrame();
     void fillLongHeader(Ptr<LongPacketHeader> packetHeader);
+    QuicFrame *createHandshakeDoneFrame();
 };
 
 } /* namespace quic */

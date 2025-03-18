@@ -93,6 +93,18 @@ void EstablishedConnectionState::processDataBlockedFrame(const Ptr<const DataBlo
     context->onDataBlockedFrameReceived(frameHeader->getDataLimit());
 }
 
+void EstablishedConnectionState::processCryptoFrame(const Ptr<const CryptoFrameHeader>& frameHeader)
+{
+    EV_DEBUG << "CryptoFrameHeader in " << name << endl;
+    gotCryptoFin = true;
+}
+
+void EstablishedConnectionState::processHandshakeDoneFrame()
+{
+    EV_DEBUG << "HandshakeDoneFrameHeader in " << name << endl;
+    context->setHandshakeConfirmed(true);
+}
+
 ConnectionState *EstablishedConnectionState::processIcmpPtb(uint32_t droppedPacketNumber, int ptbMtu)
 {
     context->reportPtb(droppedPacketNumber, ptbMtu);
@@ -142,6 +154,11 @@ ConnectionState *EstablishedConnectionState::processHandshakePacket(const Ptr<co
 
     context->accountReceivedPacket(packetHeader->getPacketNumber(), ackElicitingPacket, PacketNumberSpace::Handshake, false);
     context->sendAck(PacketNumberSpace::Handshake);
+    if (gotCryptoFin) {
+        gotCryptoFin = false;
+        context->setHandshakeConfirmed(true);
+        context->sendHandshakeDone();
+    }
 
     return this;
 }

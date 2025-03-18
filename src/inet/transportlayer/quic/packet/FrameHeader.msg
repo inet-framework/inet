@@ -32,6 +32,7 @@ enum FrameHeaderType {
     FRAME_HEADER_TYPE_MAX_STREAM_DATA = 0x11;   
     FRAME_HEADER_TYPE_DATA_BLOCKED = 0x14;   
     FRAME_HEADER_TYPE_STREAM_DATA_BLOCKED = 0x15;
+    FRAME_HEADER_TYPE_HANDSHAKE_DONE = 0x1e;
 }
 
 class FrameHeader extends FieldsChunk
@@ -230,4 +231,10 @@ cplusplus(CryptoFrameHeader) {{
         return os.str();
     }
 }}
+
+class HandshakeDoneFrameHeader extends FrameHeader
+{
+    chunkLength = B(1);
+    frameType = FRAME_HEADER_TYPE_HANDSHAKE_DONE;
+}
 

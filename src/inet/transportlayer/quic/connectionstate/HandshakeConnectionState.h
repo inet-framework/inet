@@ -20,9 +20,7 @@ public:
     }
 
     virtual ConnectionState *processHandshakePacket(const Ptr<const HandshakePacketHeader>& packetHeader, Packet *pkt) override;
-    //virtual void processAckFrame(const Ptr<const AckFrameHeader>& frameHeader);
-    //virtual ConnectionState *processLossDetectionTimeout(cMessage *msg);
-    //virtual ConnectionState *processAckDelayTimeout(cMessage *msg);
+    virtual void processCryptoFrame(const Ptr<const CryptoFrameHeader>& frameHeader) override {}
 };
 
 } /* namespace quic */

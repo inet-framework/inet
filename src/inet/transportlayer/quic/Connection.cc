@@ -515,10 +515,14 @@ void Connection::reportPtb(int droppedPacketNumber, int ptbMtu)
     }
 }
 
+void Connection::setHandshakeConfirmed(bool value)
+{
+    handshakeConfirmed = value;
+}
+
 bool Connection::isHandshakeConfirmed()
 {
-    // TODO: implement
-    return true;
+    return handshakeConfirmed;
 }
 
 
@@ -546,6 +550,12 @@ void Connection::established()
     if (path->usesDplpmtud()) {
         path->getDplpmtud()->start();
     }
+}
+
+void Connection::sendHandshakeDone()
+{
+    packetBuilder->addHandshakeDone();
+    sendPackets();
 }
 
 } /* namespace quic */

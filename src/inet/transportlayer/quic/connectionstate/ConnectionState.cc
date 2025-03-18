@@ -161,9 +161,12 @@ void ConnectionState::processFrame(Packet *pkt, PacketNumberSpace pnSpace)
             return processDataBlockedFrame(staticPtrCast<const DataBlockedFrameHeader>(frameHeader));
         case FRAME_HEADER_TYPE_STREAM_DATA_BLOCKED:
             return processStreamDataBlockedFrame(staticPtrCast<const StreamDataBlockedFrameHeader>(frameHeader));
+        case FRAME_HEADER_TYPE_CRYPTO:
+            return processCryptoFrame(staticPtrCast<const CryptoFrameHeader>(frameHeader));
+        case FRAME_HEADER_TYPE_HANDSHAKE_DONE:
+            return processHandshakeDoneFrame();
         case FRAME_HEADER_TYPE_PADDING:
         case FRAME_HEADER_TYPE_PING:
-        case FRAME_HEADER_TYPE_CRYPTO:
             return;
         default:
             throw cRuntimeError("Unknown Frame Header Type");
@@ -199,6 +202,16 @@ void ConnectionState::processStreamDataBlockedFrame(const Ptr<const StreamDataBl
 void ConnectionState::processDataBlockedFrame(const Ptr<const DataBlockedFrameHeader>& frameHeader)
 {
     throw cRuntimeError("Data_Blocked frame unexpected in the current state");
+}
+
+void ConnectionState::processCryptoFrame(const Ptr<const CryptoFrameHeader>& frameHeader)
+{
+    throw cRuntimeError("CRYPTO frame unexpected in the current state");
+}
+
+void ConnectionState::processHandshakeDoneFrame()
+{
+    throw cRuntimeError("HANDSHAKE_DONE frame unexpected in the current state");
 }
 
 ConnectionState *ConnectionState::processIcmpPtb(uint32_t droppedPacketNumber, int ptbMtu)
