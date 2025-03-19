@@ -20,6 +20,7 @@ precompiled_*.h.*
 /statistics
 **/MoBAN_Pattern*.txt
 **/__pycache__
+python/levy.py
 
 # output and result files
 .settings/
