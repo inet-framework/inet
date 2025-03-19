@@ -18,7 +18,7 @@ simple OscillatorBase
         int tickSchedulingPriority = default(0); // priority of the tick event
         @class(OscillatorBase);
         @display("i=block/tunnel");
-        @signal[numTicksChanged](type=long);
+        @signal[numTicksChanged](type=unsigned long);
         @signal[driftRateChanged](type=double);
         @statistic[numTicksChanged](title="number of ticks"; record=vector; interpolationmode=sample-hold);
         @statistic[driftRateChanged](title="Oscillator drift rate"; record=vector; interpolationmode=sample-hold; unit=ppm);

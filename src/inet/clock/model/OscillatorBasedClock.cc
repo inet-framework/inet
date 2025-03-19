@@ -252,7 +252,6 @@ std::string OscillatorBasedClock::resolveDirective(char directive) const
 void OscillatorBasedClock::receiveSignal(cComponent *source, int signal, uintval_t value, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(signal));
-
     if (signal == IOscillator::numTicksChangedSignal) {
         clocktime_t clockTime = getClockTime();
         EV_DEBUG << "Handling tick signal" << EV_FIELD(clockTime) << EV_ENDL;
@@ -285,18 +284,17 @@ void OscillatorBasedClock::receiveSignal(cComponent *source, int signal, uintval
 void OscillatorBasedClock::receiveSignal(cComponent *source, int signal, cObject *obj, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(signal));
-
-    if (signal == IOscillator::preOscillatorStateChangedSignal) {
-        clocktime_t clockTime = getClockTime();
-        EV_DEBUG << "Handling pre-oscillator state changed signal" << EV_FIELD(clockTime) << EV_ENDL;
-        checkAllClockEvents();
-        setOrigin(simTime(), clockTime);
-        checkAllClockEvents();
-    }
-    else if (signal == IOscillator::postOscillatorStateChangedSignal) {
-        clocktime_t clockTime = getClockTime();
-        EV_DEBUG << "Handling post-oscillator state changed signal" << EV_FIELD(clockTime) << EV_ENDL;
-        if (useFutureEventSet) {
+    if (useFutureEventSet) {
+        if (signal == IOscillator::preOscillatorStateChangedSignal) {
+            clocktime_t clockTime = getClockTime();
+            EV_DEBUG << "Handling pre-oscillator state changed signal" << EV_FIELD(clockTime) << EV_ENDL;
+            checkAllClockEvents();
+            setOrigin(simTime(), clockTime);
+            checkAllClockEvents();
+        }
+        else if (signal == IOscillator::postOscillatorStateChangedSignal) {
+            clocktime_t clockTime = getClockTime();
+            EV_DEBUG << "Handling post-oscillator state changed signal" << EV_FIELD(clockTime) << EV_ENDL;
             simtime_t currentSimTime = simTime();
             for (auto event : events) {
                 if (event->getRelative()) {
@@ -316,8 +314,8 @@ void OscillatorBasedClock::receiveSignal(cComponent *source, int signal, cObject
                 }
                 checkClockEvent(event);
             }
+            emit(timeChangedSignal, CLOCKTIME_AS_SIMTIME(clockTime));
         }
-        emit(timeChangedSignal, CLOCKTIME_AS_SIMTIME(clockTime));
     }
 }
 
