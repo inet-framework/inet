@@ -8,7 +8,7 @@
 package inet.visualizer.base;
 
 //
-// This is a base module for statistic visualizer simple modules. It keeps track
+// Base module for statistic visualizer simple modules. It keeps track
 // of the last value of a statistic for multiple network nodes. The actual
 // visualization of statistic values is done in derived modules. It subscribes
 // for the signal determined by the `signalName` parameter at the module specified

@@ -8,7 +8,7 @@
 package inet.visualizer.contract;
 
 //
-// This module interface allows configuring different ~IInfoVisualizer
+// Interface allows configuring different ~IInfoVisualizer
 // submodules from INI files. Such a visualizer displays various information
 // from submodules of network nodes.
 //

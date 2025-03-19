@@ -11,7 +11,7 @@ import inet.queueing.base.PassivePacketSourceBase;
 import inet.queueing.contract.IPassivePacketSource;
 
 //
-// This module is a passive packet source which can be pulled for packets from
+// A passive packet source which can be pulled for packets from
 // the connected packet collector.
 //
 simple PassivePacketSource extends PassivePacketSourceBase like IPassivePacketSource

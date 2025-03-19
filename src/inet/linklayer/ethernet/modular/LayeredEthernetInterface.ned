@@ -16,7 +16,7 @@ import inet.protocolelement.processing.IProcessingDelayLayer;
 import inet.protocolelement.trafficconditioner.ITrafficConditionerLayer;
 
 //
-// This module implements an Ethernet network interface.
+// Implements an Ethernet network interface.
 //
 module LayeredEthernetInterface extends NetworkInterface like IEthernetInterface
 {

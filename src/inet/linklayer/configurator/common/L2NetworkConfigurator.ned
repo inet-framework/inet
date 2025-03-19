@@ -8,7 +8,7 @@
 package inet.linklayer.configurator.common;
 
 //
-// This module allows to configure network scenarios at layer 2.
+// Allows configuring network scenarios at layer 2.
 // The ~Stp and ~Rstp related parameters such as link cost, port priority
 // and the "is-edge" flag can be configured with XML files.
 //

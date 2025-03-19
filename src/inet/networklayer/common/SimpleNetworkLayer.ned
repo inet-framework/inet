@@ -13,7 +13,7 @@ import inet.networklayer.contract.INetworkLayer;
 import inet.networklayer.contract.INetworkProtocol;
 
 //
-// This module provides a simple network layer.
+// Provides a simple network layer.
 //
 module SimpleNetworkLayer like INetworkLayer
 {

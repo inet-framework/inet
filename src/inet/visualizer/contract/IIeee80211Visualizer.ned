@@ -8,7 +8,7 @@
 package inet.visualizer.contract;
 
 //
-// This module interface allows configuring different ~IIeee80211Visualizer
+// Interface allows configuring different ~IIeee80211Visualizer
 // submodules from INI files. Such a visualizer displays IEEE 802.11 network
 // interface associations.
 //

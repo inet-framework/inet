@@ -8,7 +8,7 @@
 package inet.linklayer.contract;
 
 //
-// This module interface is implemented by Ethernet network interfaces.
+// Interface for Ethernet network interfaces.
 //
 moduleinterface IEthernetInterface extends IWiredInterface
 {

@@ -11,7 +11,7 @@ import inet.queueing.base.PacketClassifierBase;
 import inet.queueing.contract.IPacketClassifier;
 
 //
-// This module classifies packets based on the stream they are part of. The stream
+// Classifies packets based on the stream they are part of. The stream
 // is determined by a `StreamReq` or a `StreamInd` or both.
 //
 simple StreamClassifier extends PacketClassifierBase like IPacketClassifier

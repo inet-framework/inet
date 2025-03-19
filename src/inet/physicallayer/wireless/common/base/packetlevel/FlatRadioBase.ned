@@ -8,7 +8,7 @@
 package inet.physicallayer.wireless.common.base.packetlevel;
 
 //
-// This module serves as a base module for flat radio models.
+// Serves as a base module for flat radio models.
 //
 module FlatRadioBase extends NarrowbandRadioBase
 {

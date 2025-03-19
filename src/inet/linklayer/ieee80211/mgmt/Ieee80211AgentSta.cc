@@ -10,6 +10,7 @@
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
+#include "inet/common/stlutils.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211Primitives_m.h"
 
 namespace inet {
@@ -198,70 +199,61 @@ void Ieee80211AgentSta::sendDisassociateRequest(const MacAddress& address, Ieee8
 
 void Ieee80211AgentSta::processScanConfirm(Ieee80211Prim_ScanConfirm *resp)
 {
+    std::vector<const Ieee80211Prim_BssDescription *> bssList(resp->getBssListArraySize());
+    for (size_t i = 0; i < resp->getBssListArraySize(); i++)
+        bssList[i] = &resp->getBssList(i);
+
     // choose best AP
+    auto bss = chooseBSS(bssList);
 
-    int bssIndex = -1;
-    if (this->defaultSsid == "") {
-        // no default ssid, so pick the best one
-        bssIndex = chooseBSS(resp);
-    }
-    else {
-        // search if the defaultSsid is in the list, otherwise
-        // keep searching.
-        for (size_t i = 0; i < resp->getBssListArraySize(); i++) {
-            std::string resp_ssid = resp->getBssList(i).getSSID();
-            if (resp_ssid == this->defaultSsid) {
-                EV << "found default SSID " << resp_ssid << endl;
-                bssIndex = i;
-                break;
-            }
-        }
-    }
-
-    if (bssIndex == -1) {
+    if (bss == nullptr) {
         EV << "No (suitable) AP found, continue scanning\n";
         emit(dropConfirmSignal, PR_SCAN_CONFIRM);
         sendScanRequest();
         return;
     }
 
-    dumpAPList(resp);
+    dumpAPList(bssList);
     emit(acceptConfirmSignal, PR_SCAN_CONFIRM);
 
-    const Ieee80211Prim_BssDescription& bssDesc = resp->getBssList(bssIndex);
-    EV << "Chosen AP address=" << bssDesc.getBSSID() << " from list, starting authentication\n";
-    sendAuthenticateRequest(bssDesc.getBSSID());
+    EV << "Chosen AP address=" << bss->getBSSID() << " from list, starting authentication\n";
+    sendAuthenticateRequest(bss->getBSSID());
 }
 
-void Ieee80211AgentSta::dumpAPList(Ieee80211Prim_ScanConfirm *resp)
+void Ieee80211AgentSta::dumpAPList(const std::vector<const Ieee80211Prim_BssDescription *>& bssList)
 {
     EV << "Received AP list:\n";
-    for (size_t i = 0; i < resp->getBssListArraySize(); i++) {
-        const Ieee80211Prim_BssDescription& bssDesc = resp->getBssList(i);
-        EV << "    " << i << ". "
-           << " address=" << bssDesc.getBSSID()
-           << " channel=" << bssDesc.getChannelNumber()
-           << " SSID=" << bssDesc.getSSID()
-           << " beaconIntvl=" << bssDesc.getBeaconInterval()
-           << " rxPower=" << bssDesc.getRxPower()
+    for (auto bss : bssList) {
+        EV << " SSID=" << bss->getSSID()
+           << " address=" << bss->getBSSID()
+           << " channel=" << bss->getChannelNumber()
+           << " beaconIntvl=" << bss->getBeaconInterval()
+           << " rxPower=" << bss->getRxPower()
            << endl;
         // later: supportedRates
     }
 }
 
-int Ieee80211AgentSta::chooseBSS(Ieee80211Prim_ScanConfirm *resp)
+const Ieee80211Prim_BssDescription *Ieee80211AgentSta::chooseBSS(const std::vector<const Ieee80211Prim_BssDescription *>& bssList)
 {
-    if (resp->getBssListArraySize() == 0)
-        return -1;
+    if (bssList.empty())
+        return nullptr;
+
+    std::vector<std::string> acceptedSsids = cStringTokenizer(defaultSsid.c_str()).asVector();
+
+    std::vector<const Ieee80211Prim_BssDescription*> filteredBssList;
+    for (const auto& bss : bssList)
+        if (acceptedSsids.empty() || contains(acceptedSsids, bss->getSSID()))
+            filteredBssList.push_back(bss);
 
     // here, just choose the one with the greatest receive power
     // TODO and which supports a good data rate we support
-    int bestIndex = 0;
-    for (size_t i = 0; i < resp->getBssListArraySize(); i++)
-        if (resp->getBssList(i).getRxPower() > resp->getBssList(bestIndex).getRxPower())
-            bestIndex = i;
+    const Ieee80211Prim_BssDescription *bestBss = nullptr;
+    for (const auto bss : filteredBssList)
+        if (bestBss == nullptr || bss->getRxPower() > bestBss->getRxPower())
+            bestBss = bss;
 
-    return bestIndex;
+    return bestBss;
 }
 
 void Ieee80211AgentSta::processAuthenticateConfirm(Ieee80211Prim_AuthenticateConfirm *resp)
@@ -325,4 +317,3 @@ void Ieee80211AgentSta::processReassociateConfirm(Ieee80211Prim_ReassociateConfi
 } // namespace ieee80211
 
 } // namespace inet
-

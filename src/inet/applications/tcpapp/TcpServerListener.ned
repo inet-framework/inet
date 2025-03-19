@@ -10,7 +10,7 @@ package inet.applications.tcpapp;
 import inet.applications.contract.IApp;
 
 //
-// This module opens a TCP socket to listen on a port, accepts incoming
+// Opens a TCP socket to listen on a port, accepts incoming
 // connections, and dynamically creates modules to handle them. The type of
 // modules to be created can be specified in a parameter. The new modules
 // will be appended to the connection[] submodule array of the parent of

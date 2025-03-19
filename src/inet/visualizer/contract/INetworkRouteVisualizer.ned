@@ -8,7 +8,7 @@
 package inet.visualizer.contract;
 
 //
-// This module interface allows configuring different ~INetworkRouteVisualizer
+// Interface allows configuring different ~INetworkRouteVisualizer
 // submodules from INI files. Such a visualizer displays active network routes
 // in a network.
 //

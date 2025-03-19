@@ -8,7 +8,7 @@
 package inet.applications.ethernet;
 
 //
-// This module provides Ethernet socket handling for generic applications.
+// Provides Ethernet socket handling for generic applications.
 //
 simple EthernetSocketIo
 {

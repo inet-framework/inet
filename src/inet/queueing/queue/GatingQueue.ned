@@ -19,7 +19,7 @@ import inet.queueing.contract.IPacketGate;
 import inet.queueing.contract.IPacketQueue;
 
 //
-// This module implements a queue having its own periodic gate.
+// Implements a queue having its own periodic gate.
 //
 module GatingQueue extends CompoundPacketQueueBase
 {

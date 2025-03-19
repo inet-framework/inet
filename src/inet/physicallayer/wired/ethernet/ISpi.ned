@@ -18,7 +18,7 @@ package inet.physicallayer.wired.ethernet;
 import inet.queueing.common.PacketDelayer;
 
 //
-// This module interface is used by models implementing a Serial Peripheral
+// Interface for models implementing a Serial Peripheral
 // Interface (SPI).
 //
 moduleinterface ISpi

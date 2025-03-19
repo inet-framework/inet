@@ -8,7 +8,7 @@
 package inet.visualizer.contract;
 
 //
-// This module interface allows configuring different ~IGateScheduleVisualizer
+// Interface allows configuring different ~IGateScheduleVisualizer
 // submodules from INI files. Such a visualizer displays gates.
 //
 // @see ~GateScheduleCanvasVisualizer, ~GateScheduleOsgVisualizer, ~GateScheduleVisualizer, ~GateScheduleVisualizerBase

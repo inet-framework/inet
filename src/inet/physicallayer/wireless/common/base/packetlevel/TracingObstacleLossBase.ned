@@ -10,7 +10,7 @@ package inet.physicallayer.wireless.common.base.packetlevel;
 import inet.physicallayer.wireless.common.contract.packetlevel.IObstacleLoss;
 
 //
-// This module serves as a base module for tracing obstacle loss models.
+// Serves as a base module for tracing obstacle loss models.
 //
 module TracingObstacleLossBase like IObstacleLoss
 {

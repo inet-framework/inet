@@ -11,7 +11,7 @@ import inet.common.ExternalEnvironment;
 import inet.common.ExternalProcess;
 
 //
-// This module provides an external application that uses a host OS external process.
+// Provides an external application that uses a host OS external process.
 //
 // @see ~ExternalProcess, ~ExternalEnvironment
 //

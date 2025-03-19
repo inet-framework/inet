@@ -11,7 +11,7 @@ import inet.visualizer.base.GateScheduleVisualizerBase;
 import inet.visualizer.contract.IGateScheduleVisualizer;
 
 //
-// This module visualizes gates on a 3D osg scene.
+// Visualizes gates on a 3D osg scene.
 //
 // @see ~GateScheduleCanvasVisualizer, ~GateScheduleVisualizer, ~GateScheduleVisualizerBase, ~IGateScheduleVisualizer
 //

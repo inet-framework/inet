@@ -10,7 +10,7 @@ package inet.visualizer.common;
 import inet.visualizer.contract.IRoutingTableVisualizer;
 
 //
-// This module integrates canvas and osg routing table visualizers into a single module.
+// Integrates canvas and osg routing table visualizers into a single module.
 //
 // @see ~RoutingTableCanvasVisualizer, ~RoutingTableOsgVisualizer, ~RoutingTableVisualizerBase, ~IRoutingTableVisualizer
 //

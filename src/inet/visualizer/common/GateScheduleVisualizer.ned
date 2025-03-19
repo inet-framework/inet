@@ -10,7 +10,7 @@ package inet.visualizer.common;
 import inet.visualizer.contract.IGateScheduleVisualizer;
 
 //
-// This module integrates canvas and osg gate visualizers into a single module.
+// Integrates canvas and osg gate visualizers into a single module.
 //
 // @see ~GateScheduleCanvasVisualizer, ~GateScheduleOsgVisualizer, ~GateScheduleVisualizerBase, ~IGateScheduleVisualizer
 //

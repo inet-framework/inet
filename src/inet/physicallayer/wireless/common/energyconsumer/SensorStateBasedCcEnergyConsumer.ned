@@ -8,7 +8,7 @@
 package inet.physicallayer.wireless.common.energyconsumer;
 
 //
-// This module provides a radio energy consumer model. The current consumption is
+// Provides a radio energy consumer model. The current consumption is
 // determined by the radio mode, the transmitter state, and the receiver state
 // using constant parameters.
 //

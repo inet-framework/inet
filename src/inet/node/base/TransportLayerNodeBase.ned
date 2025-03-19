@@ -12,6 +12,16 @@ import inet.transportlayer.contract.ISctp;
 import inet.transportlayer.contract.ITcp;
 import inet.transportlayer.contract.IUdp;
 
+//
+// An extension of the network layer node base with transport layer protocols.
+// Provides support for UDP, TCP, and SCTP, enabling end-to-end communication
+// services for applications.
+//
+// Adds transport layer capabilities to the node architecture, bridging
+// the gap between applications and the network layer. It handles connection management,
+// reliability, flow control, and congestion control depending on the transport
+// protocol used.
+//
 module TransportLayerNodeBase extends NetworkLayerNodeBase
 {
     parameters:

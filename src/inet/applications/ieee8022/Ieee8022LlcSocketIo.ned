@@ -8,7 +8,7 @@
 package inet.applications.ieee8022;
 
 //
-// This module provides IEEE 802.2 LLC socket handling for generic applications.
+// Provides IEEE 802.2 LLC socket handling for generic applications.
 //
 simple Ieee8022LlcSocketIo
 {

@@ -11,7 +11,7 @@ import inet.queueing.base.ActivePacketSourceBase;
 import inet.queueing.contract.IActivePacketSource;
 
 //
-// This module is an active packet source which pushes packets into the connected
+// An active packet source which pushes packets into the connected
 // module. It pushes whole packets through the out gate at every production
 // interval. It pushes the first packet after the initial production offset.
 //

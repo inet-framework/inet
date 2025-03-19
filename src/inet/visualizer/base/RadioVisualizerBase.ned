@@ -8,7 +8,7 @@
 package inet.visualizer.base;
 
 //
-// This is a base module for radio visualizer simple modules.
+// Base module for radio visualizer simple modules.
 //
 // @see ~RadioCanvasVisualizer, ~RadioOsgVisualizer, ~IRadioVisualizer, ~VisualizerBase
 //

@@ -8,7 +8,7 @@
 package inet.applications.udpapp;
 
 //
-// This module implements a UDP application that only sends packets.
+// Implements a UDP application that only sends packets.
 //
 module UdpSourceApp extends UdpApp
 {

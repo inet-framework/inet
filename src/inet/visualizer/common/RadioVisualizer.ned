@@ -10,7 +10,7 @@ package inet.visualizer.common;
 import inet.visualizer.contract.IRadioVisualizer;
 
 //
-// This module integrates canvas and osg radio visualizers into a single module.
+// Integrates canvas and osg radio visualizers into a single module.
 //
 // @see ~RadioCanvasVisualizer, ~RadioOsgVisualizer, ~RadioVisualizerBase, ~IRadioVisualizer
 //

@@ -11,7 +11,7 @@ import inet.queueing.base.PacketGateBase;
 import inet.queueing.contract.IPacketGate;
 
 //
-// This module is a packet gate that operates based on the ~EligibilityTimeTag
+// A packet gate that operates based on the ~EligibilityTimeTag
 // attached to the next packet waiting to be pulled through. The gate is closed
 // if the eligibility time is greater than the current simulation time, otherwise, it is
 // open.

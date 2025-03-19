@@ -10,9 +10,8 @@ package inet.networklayer.configurator.ipv4;
 import inet.networklayer.configurator.contract.IIpv4NodeConfigurator;
 
 //
-// This module has one instance per network node, and it acts like a bridge
-// between the node and the network's global configurator module,
-// ~Ipv4NetworkConfigurator.
+// Configures the containing network node using information provided by
+// the network's global configurator modue  ~Ipv4NetworkConfigurator.
 //
 // ~Ipv4NetworkConfigurator only computes and remembers configuration data
 // (assigned IP addresses, static routes, etc), but doesn't configure the nodes'

@@ -8,7 +8,7 @@
 package inet.applications.ipapp;
 
 //
-// This module provides IP socket handling for generic applications.
+// Provides IP socket handling for generic applications.
 //
 simple IpSocketIo
 {

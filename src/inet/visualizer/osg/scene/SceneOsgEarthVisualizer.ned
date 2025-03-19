@@ -11,7 +11,7 @@ import inet.visualizer.contract.ISceneVisualizer;
 import inet.visualizer.osg.base.SceneOsgVisualizerBase;
 
 //
-// This module visualizes the scene using `osgEarth`. It displays a 3D osg map of
+// Visualizes the scene using `osgEarth`. It displays a 3D osg map of
 // some part of the earth as an integrated part of the 3D visualization of the
 // simulation. The map is loaded from an external resource specified by the
 // `mapFile` parameter. The scene is placed on the map according to the

@@ -13,7 +13,7 @@ import inet.queueing.contract.IPacketFlow;
 import inet.queueing.contract.IPassivePacketSink;
 
 //
-// This module generates traffic for a IP application. The traffic source and
+// Generates traffic for a IP application. The traffic source and
 // traffic sink modules can be built from queueing model elements.
 //
 module IpApp like IApp

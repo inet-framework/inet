@@ -13,7 +13,7 @@ import inet.queueing.contract.IPacketFlow;
 import inet.queueing.contract.IPassivePacketSink;
 
 //
-// This module generates traffic as an IEEE 802.2 LLC application. The traffic
+// Generates traffic as an IEEE 802.2 LLC application. The traffic
 // source and traffic sink modules can be built from queueing model elements.
 //
 module Ieee8022LlcApp like IApp

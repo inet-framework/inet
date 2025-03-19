@@ -9,9 +9,11 @@ package inet.node.ipv6;
 import inet.node.inet.Router;
 
 //
-// IPv6 router.
+// An IPv6 router for next-generation Internet Protocol networks. It
+// extends the standard Router module by configuring it to use IPv6 as the
+// network layer protocol while disabling IPv4 by default.
 //
-// See ~Router for configuration options.
+// @see ~StandardHost6
 //
 module Router6 extends Router
 {

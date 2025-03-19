@@ -8,7 +8,7 @@
 package inet.networklayer.contract;
 
 //
-// This module interface provides an abstraction for different network layers.
+// Interface for different network layers.
 //
 moduleinterface INetworkLayerUpper
 {

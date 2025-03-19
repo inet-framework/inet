@@ -10,7 +10,7 @@ package inet.linklayer.configurator.common;
 import inet.networklayer.configurator.contract.INetworkConfigurator;
 
 //
-// This module configures the forwarding database (MAC address table) of all
+// Configures the forwarding database (MAC address table) of all
 // network nodes in the network based on the automatically discovered network
 // topology. The configurator uses the shortest path algorithm to determine the
 // outgoing network interface for all network nodes and all destination network

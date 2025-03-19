@@ -8,7 +8,7 @@
 package inet.visualizer.base;
 
 //
-// This is a base module for tracing obstacle loss visualizer simple modules. It
+// Base module for tracing obstacle loss visualizer simple modules. It
 // subscribes to the obstacle loss module for physical object penetrated signals.
 // The actual visualization of obstacle loss is done in derived modules.
 //

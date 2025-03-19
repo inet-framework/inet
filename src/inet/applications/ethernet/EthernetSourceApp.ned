@@ -8,7 +8,7 @@
 package inet.applications.ethernet;
 
 //
-// This module implements an Ethernet application that only sends packets.
+// Implements an Ethernet application that only sends packets.
 //
 module EthernetSourceApp extends EthernetApp
 {

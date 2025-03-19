@@ -11,7 +11,7 @@ import inet.queueing.base.PacketFlowBase;
 import inet.queueing.contract.IPacketFlow;
 
 //
-// This module is part of the flow measurement infrastructure. It can be used
+// Part of the flow measurement infrastructure. It can be used
 // to record the collected statistics and also to terminate the flow measurements.
 //
 // The flow measurement statistics are collected for every bit individually.

@@ -11,7 +11,7 @@ import inet.linklayer.contract.ILoopbackInterface;
 import inet.networklayer.common.NetworkInterface;
 
 //
-// This module implements a loopback network interface.
+// Implements a loopback network interface.
 //
 module LoopbackInterface extends NetworkInterface like ILoopbackInterface
 {

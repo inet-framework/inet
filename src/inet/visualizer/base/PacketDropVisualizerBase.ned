@@ -8,7 +8,7 @@
 package inet.visualizer.base;
 
 //
-// This is a base module for packet drop visualizer simple modules. It keeps
+// Base module for packet drop visualizer simple modules. It keeps
 // track of dropped packets in a network. Packet drops are not displayed by
 // default, see module parameters for how to enable the visualization. The
 // actual visualization of packet drops is done in derived modules.

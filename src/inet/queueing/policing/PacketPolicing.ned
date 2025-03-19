@@ -12,7 +12,7 @@ import inet.queueing.contract.IPacketMeter;
 import inet.queueing.contract.IPacketPolicing;
 
 //
-// This module combines a packet meter and a packet filter into a packet policing
+// Combines a packet meter and a packet filter into a packet policing
 // module. The meter measures the packet flow that is passing through and attaches
 // some meta information to the packets. The filter drops the packets that do not
 // match the implemented filter criteria.

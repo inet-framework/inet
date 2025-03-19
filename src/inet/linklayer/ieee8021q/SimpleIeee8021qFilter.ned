@@ -15,7 +15,7 @@ import inet.queueing.contract.IPacketGate;
 import inet.queueing.contract.IPacketMeter;
 
 //
-// This module implements a simplified version of the IEEE 802.1Q per-stream
+// Implements a simplified version of the IEEE 802.1Q per-stream
 // filtering and policing. Each filtered stream has its own path where metering
 // and filtering happens independently of any other stream.
 //

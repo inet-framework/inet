@@ -23,6 +23,16 @@ import inet.networklayer.common.InterfaceTable;
 import inet.node.contract.IEthernetNetworkNode;
 import inet.protocolelement.contract.IProtocolLayer;
 
+//
+// An extension of the basic node infrastructure with link layer
+// functionality. Provides support for various network interfaces and link layer
+// protocols, forming the foundation for network connectivity.
+//
+// Adds an interface table and multiple types of network interfaces,
+// including Ethernet, PPP, wireless, loopback, tunnel, and virtual interfaces.
+// It also includes support for link layer protocols such as LLC, bridging,
+// and various Ethernet encapsulation methods.
+//
 module LinkLayerNodeBase extends NodeBase like IEthernetNetworkNode
 {
     parameters:

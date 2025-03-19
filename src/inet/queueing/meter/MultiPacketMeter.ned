@@ -10,7 +10,7 @@ package inet.queueing.meter;
 import inet.queueing.contract.IPacketMeter;
 
 //
-// This module combines multiple packet meters into one.
+// Combines multiple packet meters into one.
 //
 module MultiPacketMeter like IPacketMeter
 {

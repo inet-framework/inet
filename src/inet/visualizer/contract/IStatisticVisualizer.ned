@@ -8,7 +8,7 @@
 package inet.visualizer.contract;
 
 //
-// This module interface allows configuring different ~IStatisticVisualizer
+// Interface allows configuring different ~IStatisticVisualizer
 // submodules from INI files. Such a visualizer displays a statistic for
 // multiple network nodes.
 //

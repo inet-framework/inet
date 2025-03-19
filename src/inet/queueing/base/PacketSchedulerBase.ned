@@ -8,7 +8,7 @@
 package inet.queueing.base;
 
 //
-// This is a base module for various packet scheduler modules. Derived modules
+// Base module for various packet scheduler modules. Derived modules
 // must implement a single packet scheduler function which determines the index
 // of the input gate for the pulled packet.
 //

@@ -10,7 +10,7 @@ package inet.visualizer.common;
 import inet.visualizer.contract.IEnergyStorageVisualizer;
 
 //
-// This module integrates canvas and osg `energyStorage` visualizers into a single module.
+// Integrates canvas and osg `energyStorage` visualizers into a single module.
 //
 // @see ~EnergyStorageCanvasVisualizer, ~EnergyStorageOsgVisualizer, ~EnergyStorageVisualizerBase, ~IEnergyStorageVisualizer
 //

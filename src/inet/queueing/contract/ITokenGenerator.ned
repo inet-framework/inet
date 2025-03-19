@@ -8,7 +8,7 @@
 package inet.queueing.contract;
 
 //
-// This module interface is implemented by token generators.
+// Interface for token generators.
 //
 moduleinterface ITokenGenerator
 {

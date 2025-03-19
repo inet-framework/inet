@@ -26,6 +26,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <type_traits>
 
 #include "inet/common/INETMath.h" // M_PI
 
@@ -80,22 +81,28 @@ typedef pow<internal::none, 0> unit;
 template<typename Value, typename Units>
 class value
 {
+  private:
+    void instantiateStrMethod() { static const auto _ = &value<Value, Units>::str; (void)_; } // str() is needed for pretty printing in debugger
+
   public:
     typedef Value value_type;
     typedef Units unit;
 
     value() : m_rep()
     {
+        instantiateStrMethod();
     }
 
     explicit value(const value_type& v) : m_rep(v)
     {
+        instantiateStrMethod();
     }
 
     template<typename OtherValue, typename OtherUnits>
     value(const value<OtherValue, OtherUnits>& v) :
         m_rep(internal::convert<OtherUnits, Units>::fn(v.get()))
     {
+        instantiateStrMethod();
     }
 
     std::string str() const
@@ -124,6 +131,7 @@ class value
     template<typename OtherValue, typename OtherUnits>
     value& operator=(const value<OtherValue, OtherUnits>& other)
     {
+        instantiateStrMethod();
         m_rep = value(other).get();
         return *this;
     }
@@ -1372,11 +1380,17 @@ std::string unit2string(const value<Value, Unit>& value) {
 
 } // namespace values
 
-template<typename Value>
-std::ostream& operator<<(std::ostream& os, const value<Value, units::b>& value)
+template <typename T>
+bool isDivisibleBy8(T value) {
+    if constexpr (std::is_integral_v<T>) return value % 8 == 0;
+    else if constexpr (std::is_floating_point_v<T>) return std::fmod(value, 8.0) == 0.0;
+    else return false;
+}
+
+template<typename Value> std::ostream& operator<<(std::ostream& os, const value<Value, units::b>& value)
 {
-    if (value.get() % 8 == 0)
-        os << values::B(value);
+    if (isDivisibleBy8(value.get()))
+        os << values::B(value.get() / 8);
     else {
         os << value.get() << ' ';
         output_unit<units::b>::fn(os);

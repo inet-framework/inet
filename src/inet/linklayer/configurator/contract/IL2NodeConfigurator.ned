@@ -8,7 +8,7 @@
 package inet.linklayer.configurator.contract;
 
 //
-// This module interface is implemented by all layer 2 node configurators.
+// Interface for all layer 2 node configurators.
 //
 moduleinterface IL2NodeConfigurator
 {

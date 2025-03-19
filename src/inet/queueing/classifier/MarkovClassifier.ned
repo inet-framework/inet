@@ -11,7 +11,7 @@ import inet.queueing.base.PacketClassifierBase;
 import inet.queueing.contract.IPacketClassifier;
 
 //
-// This module implements a packet classifier using a Markov process that has
+// Implements a packet classifier using a Markov process that has
 // as many states as output gates the classifier has. The output gate for
 // a given packet is determined by the current state of the Markov process.
 //

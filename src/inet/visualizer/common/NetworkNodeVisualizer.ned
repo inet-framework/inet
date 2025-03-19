@@ -10,7 +10,7 @@ package inet.visualizer.common;
 import inet.visualizer.contract.INetworkNodeVisualizer;
 
 //
-// This module integrates canvas and osg node visualizers into a single module.
+// Integrates canvas and osg node visualizers into a single module.
 //
 // @see ~NetworkNodeCanvasVisualizer, ~NetworkNodeOsgVisualizer, ~NetworkNodeVisualizerBase, ~INetworkNodeVisualizer
 //

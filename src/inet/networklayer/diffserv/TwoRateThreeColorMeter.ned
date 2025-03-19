@@ -8,7 +8,7 @@
 package inet.networklayer.diffserv;
 
 //
-// This module implements a Two Rate Three Color Meter (RFC 2698).
+// Implements a Two Rate Three Color Meter (RFC 2698).
 //
 // It classifies IP packets based on two rates, Peak Information Rate (PIR)
 // and Committed Information Rate (CIR), and their associated burst sizes

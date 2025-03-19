@@ -8,7 +8,7 @@
 package inet.queueing.contract;
 
 //
-// This module interface is implemented by packet scheduler modules. A packet
+// Interface for packet scheduler modules. A packet
 // scheduler is a passive module which has multiple active inputs and one
 // passive output. Packets pulled from the passive output are provided by
 // one of the inputs without any delay and reordering.

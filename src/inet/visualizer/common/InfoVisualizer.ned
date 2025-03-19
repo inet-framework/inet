@@ -10,7 +10,7 @@ package inet.visualizer.common;
 import inet.visualizer.contract.IInfoVisualizer;
 
 //
-// This module integrates canvas and osg info visualizers into a single module.
+// Integrates canvas and osg info visualizers into a single module.
 //
 // @see ~InfoCanvasVisualizer, ~InfoOsgVisualizer, ~InfoVisualizerBase, ~IInfoVisualizer
 //

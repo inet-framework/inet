@@ -10,7 +10,7 @@ package inet.networklayer.nexthop;
 import inet.networklayer.contract.IRoutingTable;
 
 //
-// This module stores next hop routes used by the next hop forwarding protocol.
+// Stores next hop routes used by the next hop forwarding protocol.
 //
 simple NextHopRoutingTable like IRoutingTable
 {

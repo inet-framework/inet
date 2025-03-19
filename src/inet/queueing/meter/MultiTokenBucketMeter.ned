@@ -11,7 +11,7 @@ import inet.queueing.base.PacketMeterBase;
 import inet.queueing.contract.IPacketMeter;
 
 //
-// This module labels packets according to the first token bucket that contains
+// Labels packets according to the first token bucket that contains
 // the required number of tokens. If no such token bucket is found then the
 // default label is attached to the packet.
 //

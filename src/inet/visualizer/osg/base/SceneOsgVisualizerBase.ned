@@ -10,7 +10,7 @@ package inet.visualizer.osg.base;
 import inet.visualizer.base.SceneVisualizerBase;
 
 //
-// This is a base module for scene visualizer simple modules on a 3D osg scene.
+// Base module for scene visualizer simple modules on a 3D osg scene.
 // It displays the scene either as a filled rectangle or as an image.
 //
 // @see ~SceneOsgVisualizer, ~SceneOsgEarthVisualizer, ~SceneVisualizerBase

@@ -8,7 +8,7 @@
 package inet.visualizer.base;
 
 //
-// This is a base module for IEEE 802.11 association visualizer simple modules.
+// Base module for IEEE 802.11 association visualizer simple modules.
 // It keeps track of wireless interface associations by subscribing to a number
 // of signals at the provided subscription module.
 //

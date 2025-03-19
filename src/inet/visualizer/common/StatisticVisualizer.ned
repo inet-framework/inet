@@ -10,7 +10,7 @@ package inet.visualizer.common;
 import inet.visualizer.contract.IStatisticVisualizer;
 
 //
-// This module integrates canvas and osg statistic visualizers into a single module.
+// Integrates canvas and osg statistic visualizers into a single module.
 //
 // @see ~StatisticCanvasVisualizer, ~StatisticOsgVisualizer, ~StatisticVisualizerBase, ~IStatisticVisualizer
 //

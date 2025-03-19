@@ -11,7 +11,7 @@ import inet.queueing.base.PacketMarkerBase;
 import inet.queueing.contract.IPacketMarker;
 
 //
-// This module attaches a ~LabelsTag to packets based on the configured filters.
+// Attaches a ~LabelsTag to packets based on the configured filters.
 // For each matching filter, a new label is attached.
 //
 simple PacketLabeler extends PacketMarkerBase like IPacketMarker

@@ -11,7 +11,7 @@ import inet.queueing.base.PacketFlowBase;
 import inet.queueing.contract.IPacketFlow;
 
 //
-// This module extracts the source MAC address of the packet passing through and
+// Extracts the source MAC address of the packet passing through and
 // stores the mapping from this MAC address to the incoming network interface in
 // the MAC address table (forwarding information database).
 //

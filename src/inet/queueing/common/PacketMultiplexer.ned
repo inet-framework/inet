@@ -11,7 +11,7 @@ import inet.queueing.base.PacketProcessorBase;
 import inet.queueing.contract.IActivePacketSource;
 
 //
-// This module connects multiple packet producers to one packet consumer. When
+// Connects multiple packet producers to one packet consumer. When
 // a packet is pushed by one of the connected packet producers, then the multiplexer
 // simply pushes the packet to the connected packet consumer.
 //

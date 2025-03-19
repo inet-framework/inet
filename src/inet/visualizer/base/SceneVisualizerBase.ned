@@ -8,7 +8,7 @@
 package inet.visualizer.base;
 
 //
-// This is a base module for scene visualizer simple modules. It determines the
+// Base module for scene visualizer simple modules. It determines the
 // bounds of the scene, which is the minimum area where the whole simulation
 // fits in. The scene encloses all physical objects and the constraint area
 // of all mobile nodes. The visualizer also provides a timer that can be used

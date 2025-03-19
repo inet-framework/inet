@@ -10,13 +10,27 @@ package inet.node.tsn;
 import inet.node.ethernet.EthernetSwitch;
 
 //
-// This module represents a Time-Sensitive Networking (TSN) switch that supports
-// time synchronization, per-stream filtering and policing, scheduling and traffic
-// shaping, frame replication and elimination, frame preemption and cut-through
-// switching for Ethernet networks. All TSN features are optional and they can
-// be combined with other Ethernet features.
+// An Ethernet switch with Time-Sensitive Networking (TSN) capabilities. It
+// extends the standard EthernetSwitch with various TSN features defined in the
+// IEEE 802.1 standards suite for deterministic, low-latency communication over
+// Ethernet networks.
 //
-// TODO move cut-through switching from `EthernetSwitch` to `TsnSwitch`?
+// This module provides a comprehensive implementation of TSN features, all of which are
+// optional and can be enabled or disabled individually. The switch supports time synchronization,
+// traffic filtering and shaping, stream redundancy, frame preemption, and cut-through switching.
+// These features can be combined to meet the requirements of different industrial, automotive,
+// and professional audio/video applications.
+//
+// Key features:
+// - IEEE 802.1AS time synchronization
+// - IEEE 802.1Qci per-stream filtering and policing for traffic control
+// - IEEE 802.1Q traffic shaping
+// - IEEE 802.1CB frame replication and elimination for seamless redundancy
+// - IEEE 802.1Qbu frame preemption for reduced latency of critical traffic
+// - Cut-through switching for minimal forwarding latency
+//
+// @see ~TsnClock, ~TsnDevice
+//
 module TsnSwitch extends EthernetSwitch
 {
     parameters:

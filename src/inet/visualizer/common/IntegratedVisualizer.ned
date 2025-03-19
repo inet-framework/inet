@@ -10,7 +10,7 @@ package inet.visualizer.common;
 import inet.visualizer.contract.IIntegratedVisualizer;
 
 //
-// This module integrates canvas and osg visualizers into a single module.
+// Integrates canvas and osg visualizers into a single module.
 //
 module IntegratedVisualizer like IIntegratedVisualizer
 {

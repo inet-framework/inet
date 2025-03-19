@@ -14,7 +14,7 @@ import inet.queueing.contract.ITrafficConditioner;
 
 
 //
-// This module implements a PPP network interface.
+// Implements a PPP network interface.
 //
 module PppInterface extends NetworkInterface like IPppInterface
 {

@@ -14,7 +14,7 @@ import inet.networklayer.common.NetworkInterface;
 import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
 
 //
-// This module implements an IEEE 802.15.4 UWB-IR network interface.
+// Implements an IEEE 802.15.4 UWB-IR network interface.
 //
 module Ieee802154UwbIrInterface extends NetworkInterface like IWirelessInterface
 {

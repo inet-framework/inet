@@ -10,7 +10,7 @@ package inet.visualizer.common;
 import inet.visualizer.contract.IQueueVisualizer;
 
 //
-// This module integrates canvas and osg queue visualizers into a single module.
+// Integrates canvas and osg queue visualizers into a single module.
 //
 // @see ~QueueCanvasVisualizer, ~QueueOsgVisualizer, ~QueueVisualizerBase, ~IQueueVisualizer
 //

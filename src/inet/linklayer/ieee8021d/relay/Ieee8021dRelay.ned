@@ -12,7 +12,7 @@ import inet.linklayer.contract.IMacRelayUnit;
 
 
 //
-// This module forwards frames (~EtherFrame) based on their destination MAC addresses to appropriate ports.
+// Forwards frames (~EtherFrame) based on their destination MAC addresses to appropriate ports.
 //
 // It can work in two modes:
 // - STP unaware mode (If no module is connected to its STP gate):

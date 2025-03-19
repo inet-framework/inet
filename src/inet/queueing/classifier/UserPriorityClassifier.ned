@@ -8,7 +8,7 @@
 package inet.queueing.classifier;
 
 //
-// This module classifies packets based on the attached ~UserPriority tag.
+// Classifies packets based on the attached ~UserPriority tag.
 //
 simple UserPriorityClassifier extends PacketClassifier
 {

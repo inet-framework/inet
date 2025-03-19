@@ -6,6 +6,7 @@ import omnetpp
 from omnetpp.scave.analysis import *
 from omnetpp.scave.results import *
 
+from inet.common import *
 from inet.project.omnetpp import *
 from inet.simulation import *
 from inet.test import *
@@ -38,8 +39,9 @@ def run_repl_main():
         else:
             _logger.info("OMNeT++ Python support is loaded.")
             app = IPython.terminal.ipapp.TerminalIPythonApp.instance()
+            app.interactive_shell_class = TerminalInteractiveShell
             app.display_banner = False
-            app.exec_lines = ["from inet import *", "enable_autoreload()"]
+            app.exec_lines = ["from inet import *", "enable_autoreload()", "register_key_bindings()"]
             app.initialize(argv=[])
             app.start()
     except KeyboardInterrupt:

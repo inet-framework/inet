@@ -11,7 +11,7 @@ import inet.visualizer.base.DataLinkVisualizerBase;
 import inet.visualizer.contract.IDataLinkVisualizer;
 
 //
-// This module visualizes data link layer links on a 3D osg scene. It displays an
+// Visualizes data link layer links on a 3D osg scene. It displays an
 // arrow for each active link in the network. See the documentation of the base
 // module for what constitutes an active link. The arrow points from the source
 // towards the destination. If a link is used in both directions then there are

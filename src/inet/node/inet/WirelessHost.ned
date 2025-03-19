@@ -8,11 +8,15 @@
 package inet.node.inet;
 
 //
-// Models a host with (default) one wireless (802.11) card in infrastructure mode.
-// This module is basically a ~StandardHost with an ~Ieee80211Interface with
-// mgmt.typename = ~Ieee80211MgmtSta added.
-// It should be used in conjunction with ~AccessPoint, or any other AP model
-// which contains ~Ieee80211Interface with mgmt.typename = ~Ieee80211MgmtAp.
+// A mobile device with wireless connectivity operating in infrastructure mode.
+// Extends StandardHost by adding a preconfigured IEEE 802.11 wireless interface, making it suitable
+// for simulating devices in WiFi networks.
+//
+// The WirelessHost is designed to connect to wireless access points and operates in infrastructure mode
+// by default. It includes an IEEE 802.11 management module configured as a station (STA), allowing it
+// to associate with access points, perform scanning, authentication, and other WiFi management functions.
+//
+// @see ~AccessPoint
 //
 module WirelessHost extends StandardHost
 {

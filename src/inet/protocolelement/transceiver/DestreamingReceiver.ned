@@ -11,7 +11,7 @@ import inet.protocolelement.transceiver.base.PacketReceiverBase;
 import inet.protocolelement.transceiver.contract.IPacketReceiver;
 
 //
-// This module receives signals from the transmission medium (wire) as a stream.
+// Receives signals from the transmission medium (wire) as a stream.
 // It receives the signal start and signal end separately. It sends packets to
 // the upper layer as a whole.
 //

@@ -11,7 +11,7 @@ import inet.queueing.base.TokenGeneratorBase;
 import inet.queueing.contract.ITokenGenerator;
 
 //
-// This module generates tokens for a ~TokenBasedServer based on the observed state
+// Generates tokens for a ~TokenBasedServer based on the observed state
 // changes of a packet queue. Its primary purpose is to allow applications to
 // produce traffic which completely utilizes a network interface. This is achieved
 // by generating tokens whenever the observed packet queue becomes empty.

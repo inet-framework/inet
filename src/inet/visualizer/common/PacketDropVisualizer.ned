@@ -10,7 +10,7 @@ package inet.visualizer.common;
 import inet.visualizer.contract.IPacketDropVisualizer;
 
 //
-// This module integrates canvas and osg packet drop visualizers into a single module.
+// Integrates canvas and osg packet drop visualizers into a single module.
 //
 // @see ~PacketDropCanvasVisualizer, ~PacketDropOsgVisualizer, ~PacketDropVisualizerBase, ~IPacketDropVisualizer
 //

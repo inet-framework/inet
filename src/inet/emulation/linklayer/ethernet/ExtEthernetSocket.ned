@@ -8,7 +8,7 @@
 package inet.emulation.linklayer.ethernet;
 
 //
-// This module provides a bidirectional connection to an Ethernet socket of the
+// Provides a bidirectional connection to an Ethernet socket of the
 // host computer which is running the simulation. It writes the packets that arrive
 // on `upperLayerIn` gate to the specified real socket and sends out packets
 // that arrive from the real socket on the `upperLayerOut` gate.

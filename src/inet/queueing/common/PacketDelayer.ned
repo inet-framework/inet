@@ -11,7 +11,7 @@ import inet.queueing.base.PacketDelayerBase;
 import inet.queueing.contract.IPacketDelayer;
 
 //
-// This module connects one packet producer to one packet consumer. It can be
+// Connects one packet producer to one packet consumer. It can be
 // pushed with packets from the connected packet producer. When this happens,
 // the packet is delayed and eventually pushed to the output. Note that the
 // order of packets may change if the delay parameter is configured to be a

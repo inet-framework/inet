@@ -8,7 +8,7 @@
 package inet.visualizer.base;
 
 //
-// This is a base module for energy storage visualizer simple modules.
+// Base module for energy storage visualizer simple modules.
 //
 // @see ~EnergyStorageCanvasVisualizer, ~EnergyStorageOsgVisualizer, ~IEnergyStorageVisualizer, ~VisualizerBase
 //

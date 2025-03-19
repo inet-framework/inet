@@ -11,7 +11,7 @@ import inet.physicallayer.wireless.common.base.packetlevel.PhysicalLayerBase;
 import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
 
 //
-// This module implements a simple shortcut to peer radio protocol that completely
+// Implements a simple shortcut to peer radio protocol that completely
 // bypasses the physical medium. This radio module directly sends packets to the
 // other radio module without any physical layer processing in the radio medium.
 // Packets received from the upper layer protocols may be lost. Physical layer

@@ -8,7 +8,7 @@
 package inet.queueing.contract;
 
 //
-// This module interface is implemented by packet pullers. A packet puller
+// Interface for packet pullers. A packet puller
 // connects one input to one output. Packets can be pulled from its output
 // and it pulls packets from its input.
 //

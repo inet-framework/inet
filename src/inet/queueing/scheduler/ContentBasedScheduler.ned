@@ -11,7 +11,7 @@ import inet.queueing.base.PacketSchedulerBase;
 import inet.queueing.contract.IPacketScheduler;
 
 //
-// This module connects one packet collector to multiple packet providers. It
+// Connects one packet collector to multiple packet providers. It
 // can be pulled for packets by the connected packet collector. When this
 // happens, the scheduler pulls a packet from one of its packet providers based
 // on the configured packet filters. The first matching expression determines

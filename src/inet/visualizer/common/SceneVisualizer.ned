@@ -10,7 +10,7 @@ package inet.visualizer.common;
 import inet.visualizer.contract.ISceneVisualizer;
 
 //
-// This module integrates canvas and osg scene visualizers into a single module.
+// Integrates canvas and osg scene visualizers into a single module.
 //
 // @see ~SceneCanvasVisualizer, ~SceneOsgVisualizer, ~SceneVisualizerBase, ~ISceneVisualizer
 //

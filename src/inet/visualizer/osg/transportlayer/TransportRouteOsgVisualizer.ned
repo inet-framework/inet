@@ -11,7 +11,7 @@ import inet.visualizer.base.PathVisualizerBase;
 import inet.visualizer.contract.ITransportRouteVisualizer;
 
 //
-// This module visualizes transport layer routes on a 3D osg scene. It displays
+// Visualizes transport layer routes on a 3D osg scene. It displays
 // a polyline arrow for each active route in the network. See the documentation
 // of the base module for what constitutes an active route. The arrow points
 // from the source towards the destination. If a route is used in both directions

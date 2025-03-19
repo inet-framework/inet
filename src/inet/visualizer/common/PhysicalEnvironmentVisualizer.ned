@@ -10,7 +10,7 @@ package inet.visualizer.common;
 import inet.visualizer.contract.IPhysicalEnvironmentVisualizer;
 
 //
-// This module integrates canvas and OSG physical environment visualizers into a single module.
+// Integrates canvas and OSG physical environment visualizers into a single module.
 //
 // @see ~PhysicalEnvironmentCanvasVisualizer, ~PhysicalEnvironmentOsgVisualizer, ~PhysicalEnvironmentVisualizerBase, ~IPhysicalEnvironmentVisualizer
 //

@@ -8,7 +8,7 @@
 package inet.visualizer.base;
 
 //
-// This is a base module for visualizer simple modules. It simply provides the
+// Base module for visualizer simple modules. It simply provides the
 // visualization target module for derived modules.
 //
 simple VisualizerBase

@@ -14,7 +14,7 @@ import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.IPacketScheduler;
 
 //
-// This module implements a priority queue with multiple inner queues each having
+// Implements a priority queue with multiple inner queues each having
 // its own periodic gate for packet selection and an optional shared memory buffer.
 //
 module GatingPriorityQueue extends CompoundPacketQueueBase

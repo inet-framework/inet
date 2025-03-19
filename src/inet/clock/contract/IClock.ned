@@ -8,7 +8,7 @@
 package inet.clock.contract;
 
 //
-// This module interface is implemented by clock models. Clocks are typically
+// Interface for clock models. Clocks are typically
 // modules, and are used by other modules via direct C++ method calls.
 //
 // The IClock C++ interface provides an API similar to the standard OMNeT++

@@ -11,7 +11,7 @@ import inet.mobility.contract.IMobility;
 import inet.physicallayer.wireless.common.contract.packetlevel.IAntenna;
 
 //
-// This module serves as the base module for antenna models.
+// Serves as the base module for antenna models.
 //
 module AntennaBase like IAntenna
 {

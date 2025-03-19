@@ -11,7 +11,7 @@ import inet.queueing.base.PacketFilterBase;
 import inet.queueing.contract.IPacketFilter;
 
 //
-// This module filters packets that match the configured filter criteria.
+// Filters packets that match the configured filter criteria.
 // When the filter is pushed by a connected packet producer, it either pushes
 // the packet to the connected packet consumer or drops it, depending on the
 // configured packet filter. Similarly, when the filter is pulled by a connected

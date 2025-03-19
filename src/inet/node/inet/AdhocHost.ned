@@ -8,17 +8,13 @@
 package inet.node.inet;
 
 //
-// A wireless host containing routing, mobility, and energy components. Supports
-// the IPv4 network protocol, TCP, UDP, and SCTP as transport protocols.
-// This is a typical mobile node that can participate in adhoc routing
-// and may have TCP/UDP applications installed. It also supports ICMP (ping).
+// A mobile wireless node that participates in ad hoc networks without
+// centralized infrastructure. Extends WirelessHost by configuring the wireless interface
+// for ad hoc mode operation and enabling packet forwarding.
 //
-// - By default, it contains a single wireless card, but it can be configured
-//   using the `numWlanInterfaces` parameter. The wireless card type is configured by the
-//   **.wlan[*].typename parameter. See: inet.linklayer.ieee80211 or other
-//   modules implementing ~IWirelessInterface.
-// - Node mobility can be set using the **.mobility.typename
-//   see: inet.mobility and ~IMobility.
+// In ad hoc mode, nodes communicate directly with each other without requiring an access point.
+// This model is suitable for simulating mobile ad hoc networks (MANETs), wireless mesh networks,
+// and other decentralized wireless scenarios.
 //
 module AdhocHost extends WirelessHost
 {

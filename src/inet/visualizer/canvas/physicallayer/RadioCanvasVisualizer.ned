@@ -11,7 +11,7 @@ import inet.visualizer.base.RadioVisualizerBase;
 import inet.visualizer.contract.IRadioVisualizer;
 
 //
-// This module visualizes radios on a 2D canvas.
+// Visualizes radios on a 2D canvas.
 //
 // @see ~RadioOsgVisualizer, ~RadioVisualizer, ~RadioVisualizerBase, ~IRadioVisualizer
 //

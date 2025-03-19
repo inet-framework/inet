@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Pull Docker image
-        run: docker pull ghcr.io/inet-framework/ci-inet:6.0.1-230503
+        run: docker pull ghcr.io/inet-framework/ci-inet:6.1.0-250303
       - run: mkdir /home/runner/work/ccache
       - uses: actions/cache@v4
         with:
@@ -29,4 +29,4 @@ jobs:
         run: |
           docker run -i --env TARGET_PLATFORM=windows --env MODE=${{ matrix.mode }} --env GITHUB_WORKSPACE \
             -v $GITHUB_WORKSPACE:$GITHUB_WORKSPACE -v /home/runner/work/ccache:/root/.ccache \
-            ghcr.io/inet-framework/ci-inet:6.0.1-230503 /bin/bash $GITHUB_WORKSPACE/_scripts/github/cross-build.sh
+            ghcr.io/inet-framework/ci-inet:6.1.0-250303 /bin/bash $GITHUB_WORKSPACE/_scripts/github/cross-build.sh

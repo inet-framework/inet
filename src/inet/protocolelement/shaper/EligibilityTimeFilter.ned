@@ -11,7 +11,7 @@ import inet.queueing.base.PacketFilterBase;
 import inet.queueing.contract.IPacketFilter;
 
 //
-// This module is a packet filter that operates based on the ~EligibilityTimeTag
+// A packet filter that operates based on the ~EligibilityTimeTag
 // attached to the packet that is passing through. Packets are dropped if the tag
 // is missing. If the `maxResidenceTime` parameter is set, then the filter also drops
 // the packets for which the eligibility time in the attached ~EligibilityTimeTag

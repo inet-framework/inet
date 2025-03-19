@@ -10,7 +10,7 @@ package inet.visualizer.common;
 import inet.visualizer.contract.ILinkBreakVisualizer;
 
 //
-// This module integrates canvas and osg link break visualizers into a single module.
+// Integrates canvas and osg link break visualizers into a single module.
 //
 // @see ~LinkBreakCanvasVisualizer, ~LinkBreakOsgVisualizer, ~LinkBreakVisualizerBase, ~ILinkBreakVisualizer
 //

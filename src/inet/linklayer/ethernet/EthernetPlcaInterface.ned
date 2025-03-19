@@ -16,14 +16,14 @@ import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.ITrafficConditioner;
 
 //
-// This module implements a network interface that is suitable for use in Ethernet
+// Implements a network interface that is suitable for use in Ethernet
 // 10BASE-T1S multidrop links. Such a multidrop link uses the Ethernet Phyisical
 // Layer Collision Avoidance (PLCA) protocol. The protocol is defined in the IEEE
 // 802.3cg-2019 standard. This network interface can be used in any network node
 // module (e.g. ~StandardHost) that allows replacing its network interfaces. All
 // network interfaces on the same multidrop link must use this module.
 //
-// This module contains separate Ethernet MAC, Ethernet PLCA, and Ethernet PHY
+// Contains separate Ethernet MAC, Ethernet PLCA, and Ethernet PHY
 // protocol modules. If the PLCA module is omitted, then this module implements
 // a half-duplex Ethernet CSMA/CD network interface. If the PLCA module is present,
 // then this module implements an Ethernet 10BASE-T1S network interface that

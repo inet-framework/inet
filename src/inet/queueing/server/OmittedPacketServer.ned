@@ -10,7 +10,7 @@ package inet.queueing.server;
 import inet.queueing.contract.IPacketServer;
 
 //
-// This module implements the given interface and can be used as an optional
+// Implements the given interface and can be used as an optional
 // module that removes itself from the module hierarchy during initialization.
 //
 module OmittedPacketServer like IPacketServer

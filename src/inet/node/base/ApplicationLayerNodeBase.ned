@@ -10,6 +10,18 @@ package inet.node.base;
 import inet.applications.contract.IApp;
 import inet.common.MessageDispatcher;
 
+//
+// An extension of the transport layer node base that adds support for applications.
+// Provides the highest level of abstraction for network nodes, completing the full
+// network stack from physical to application layer.
+//
+// Adds an application layer with configurable application modules and
+// a message dispatcher that connects applications to the transport protocols.
+// It serves as the foundation for end-user devices like hosts and specialized nodes
+// that need application functionality.
+//
+// @see ~TransportLayerNodeBase, ~NetworkLayerNodeBase, ~StandardHost
+//
 module ApplicationLayerNodeBase extends TransportLayerNodeBase
 {
     parameters:

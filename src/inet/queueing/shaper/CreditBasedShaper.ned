@@ -8,7 +8,7 @@
 package inet.queueing.shaper;
 
 //
-// This module implements a credit-based shaper using a gate submodule to manage
+// Implements a credit-based shaper using a gate submodule to manage
 // the number of credits.
 //
 // @see ~CreditBasedGate

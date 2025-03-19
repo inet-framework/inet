@@ -12,7 +12,7 @@ import inet.linklayer.contract.ILinkLayer;
 import inet.linklayer.contract.IMacProtocol;
 
 //
-// This module implements a simple shortcut to peer MAC protocol that completely
+// Implements a simple shortcut to peer MAC protocol that completely
 // bypasses the physical layer. Packets received from the upper layer protocols
 // are never lost. The MAC protocol directly sends packets to the destination
 // MAC protocol without any physical layer processing. Physical layer overhead

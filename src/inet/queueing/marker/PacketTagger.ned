@@ -11,7 +11,7 @@ import inet.queueing.base.PacketTaggerBase;
 import inet.queueing.contract.IPacketMarker;
 
 //
-// This module attaches various request tags to packets.
+// Attaches various request tags to packets.
 //
 simple PacketTagger extends PacketTaggerBase like IPacketMarker
 {

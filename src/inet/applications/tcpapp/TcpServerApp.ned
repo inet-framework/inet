@@ -11,7 +11,7 @@ import inet.applications.contract.IApp;
 import inet.common.MessageDispatcher;
 
 //
-// This module is a generic, modular TCP server application. It is composed of a
+// A generic, modular TCP server application. It is composed of a
 // listener module that listens on a port to accept TCP connections, and for each
 // incoming TCP connection it dynamically creates a new module in the connection[]
 // submodule vector to handle the connection.

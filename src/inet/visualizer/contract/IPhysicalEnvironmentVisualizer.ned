@@ -8,7 +8,7 @@
 package inet.visualizer.contract;
 
 //
-// This module interface allows configuring different
+// Interface allows configuring different
 // ~IPhysicalEnvironmentVisualizer submodules from INI files. Such a visualizer
 // displays the physical objects present in the physical environment.
 //

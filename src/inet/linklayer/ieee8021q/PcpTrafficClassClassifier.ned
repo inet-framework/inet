@@ -11,7 +11,7 @@ import inet.queueing.base.PacketClassifierBase;
 import inet.queueing.contract.IPacketClassifier;
 
 //
-// This module classifies packets based on the attached PCP value [0, 7]. The
+// Classifies packets based on the attached PCP value [0, 7]. The
 // PCP is determined by a `PcpReq` or a `PcpInd` or both. The output gate index is
 // the value found in the mapping matrix using the PCP value as the row index
 // and the number of connected consumers (traffic categories) as the column

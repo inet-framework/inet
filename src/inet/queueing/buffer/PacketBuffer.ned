@@ -11,7 +11,7 @@ import inet.queueing.base.PacketBufferBase;
 import inet.queueing.contract.IPacketBuffer;
 
 //
-// This module provides packet storage for sharing and optimizing storage space
+// Provides packet storage for sharing and optimizing storage space
 // between multiple packet queues. When a packet buffer becomes overloaded, the
 // packet dropping strategy can drop any number of packets from any number of
 // connected packet queues.
