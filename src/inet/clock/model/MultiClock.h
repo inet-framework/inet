@@ -46,6 +46,9 @@ class INET_API MultiClock : public cModule, public virtual IClock, public cListe
 
     virtual void receiveSignal(cComponent *source, int signal, const simtime_t &time, cObject *details) override;
     virtual void receiveSignal(cComponent *source, int signal, cObject *obj, cObject *details) override;
+
+  public:
+    static simsignal_t activeClockIndexChangedSignal;
 };
 
 } // namespace inet

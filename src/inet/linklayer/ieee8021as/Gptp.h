@@ -127,6 +127,7 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     static simsignal_t residenceTimeSignal;
     static simsignal_t correctionFieldIngressSignal;
     static simsignal_t correctionFieldEgressSignal;
+    static simsignal_t gmIdSignal;
 
     // Packet receive signals:
     std::map<uint16_t, clocktime_t> ingressTimeMap; // <sequenceId,ingressTime
@@ -193,7 +194,7 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     {
         if (timestamp != -1) {
             timestamp += difference;
-          return;
+            return;
         }
         else {
             EV_INFO << "Timestamp is -1, cannot adjust it." << endl;
@@ -209,8 +210,8 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     void handleAnnounceTimeout(cMessage *pMessage);
     bool isGM() const { return gptpNodeType == MASTER_NODE || (gptpNodeType == BMCA_NODE && slavePortId == -1); };
     static BmcaPriorityVectorComparisonResult compareAnnounceMessages(GptpAnnounce *a, GptpAnnounce *b,
-                                                                            PortIdentity aReceiverIdentity,
-                                                                            PortIdentity bReceiverIdentity);
+                                                                      PortIdentity aReceiverIdentity,
+                                                                      PortIdentity bReceiverIdentity);
     void changeSyncState(SyncState state, bool resetClock = false);
     void handleSyncTimeout(cMessage *pMessage);
     void updateSyncStateAndRescheduleSyncTimeout(const ServoClockBase *servoClock);
