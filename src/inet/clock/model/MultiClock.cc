@@ -12,6 +12,8 @@ namespace inet {
 
 Define_Module(MultiClock);
 
+simsignal_t MultiClock::activeClockIndexChangedSignal = cComponent::registerSignal("activeClockIndexChanged");
+
 void MultiClock::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
@@ -19,14 +21,18 @@ void MultiClock::initialize(int stage)
         subscribe(ClockBase::timeChangedSignal, this);
         subscribe(ClockBase::timeJumpedSignal, this);
         subscribe(ClockBase::timeDifferenceToReferenceSignal, this);
+        int activeClockIndex = par("activeClockIndex");
+        emit(activeClockIndexChangedSignal, activeClockIndex);
     }
 }
 
 void MultiClock::handleParameterChange(const char *name)
 {
     if (!strcmp(name, "activeClockIndex")) {
+        int activeClockIndex = par("activeClockIndex");
         emit(ClockBase::timeChangedSignal, getClockTime().asSimTime());
         activeClock = check_and_cast<IClock *>(getSubmodule("clock", par("activeClockIndex")));
+        emit(activeClockIndexChangedSignal, activeClockIndex);
         emit(ClockBase::timeChangedSignal, getClockTime().asSimTime());
     }
 }

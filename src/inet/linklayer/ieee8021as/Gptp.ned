@@ -61,6 +61,7 @@ simple Gptp like IGptp
         @signal[correctionFieldEgress](type=simtime_t);
         @signal[gptpSyncStateChanged](type=int);
         @signal[packetDropped](type=inet::Packet);
+        @signal[gmId](type=int);
         @statistic[localTime](record=vector; interpolationmode=linear);
         @statistic[timeDifference](record=vector; interpolationmode=linear);
         @statistic[rateRatio](record=vector; interpolationmode=sample-hold);
@@ -68,6 +69,8 @@ simple Gptp like IGptp
         @statistic[residenceTime](record=vector;interpolationmode=none);
         @statistic[correctionFieldIngress](record=vector; interpolationmode=none);
         @statistic[correctionFieldEgress](record=vector; interpolationmode=none);
+        @statistic[gmId](record=vector; interpolationmode=sample-hold);
+        @statistic[gptpSyncStateChanged](record=vector; interpolationmode=sample-hold);
         @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @selfMessageKinds(inet::GptpSelfMsgKind);
 

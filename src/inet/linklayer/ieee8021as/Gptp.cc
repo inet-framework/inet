@@ -36,6 +36,7 @@ simsignal_t Gptp::residenceTimeSignal = cComponent::registerSignal("residenceTim
 simsignal_t Gptp::correctionFieldIngressSignal = cComponent::registerSignal("correctionFieldIngress");
 simsignal_t Gptp::correctionFieldEgressSignal = cComponent::registerSignal("correctionFieldEgress");
 simsignal_t Gptp::gptpSyncStateChanged = cComponent::registerSignal("gptpSyncStateChanged");
+simsignal_t Gptp::gmIdSignal = cComponent::registerSignal("gmId");
 
 // MAC address:
 //   01-80-C2-00-00-0E for Announce and Signaling messages, for Sync, Follow_Up,
@@ -388,7 +389,9 @@ void Gptp::sendAnnounce()
         gptp->setOriginTimestamp(clock->getClockTime());
         gptp->setSequenceId(sequenceId++);
 
-        if (bestAnnounce == nullptr || bestAnnounce->getPriorityVector().grandmasterIdentity == localPriorityVector.grandmasterIdentity) {
+        if (bestAnnounce == nullptr ||
+            bestAnnounce->getPriorityVector().grandmasterIdentity == localPriorityVector.grandmasterIdentity)
+        {
             gptp->setPriorityVector(localPriorityVector);
         }
         else {
@@ -488,10 +491,9 @@ void Gptp::processAnnounce(Packet *packet, const GptpAnnounce *announce)
         return;
     }
     if (announce->getPriorityVector().grandmasterIdentity == clockIdentity) {
-        EV_WARN
-            << "Announce message dropped because grandmasterIdentity is own clockIdentity - "
-               "why does this even happen?"
-            << endl;
+        EV_WARN << "Announce message dropped because grandmasterIdentity is own clockIdentity - "
+                   "why does this even happen?"
+                << endl;
         return;
     }
 
@@ -549,12 +551,17 @@ void Gptp::executeBmca()
         }
     }
 
+    auto fullGmPath = clockIdentityToFullPath[std::to_string(bestAnnounceCurr->getPriorityVector().grandmasterIdentity)];
+
     EV_INFO << "############## BMCA ################################" << endl;
     EV_INFO << "Choosing from " << receivedAnnounces.size() << " Announces" << endl;
-    EV_INFO << "Selected Grandmaster Identity      - " << bestAnnounceCurr->getPriorityVector().grandmasterIdentity << endl;
-    EV_INFO << "Selected Grandmaster Name          - " << clockIdentityToFullPath[std::to_string(bestAnnounceCurr->getPriorityVector().grandmasterIdentity)] << endl;
-    EV_INFO << "Selected Grandmaster Priority1     - " << (int)bestAnnounceCurr->getPriorityVector().grandmasterPriority1
+    EV_INFO << "Selected Grandmaster Identity      - " << bestAnnounceCurr->getPriorityVector().grandmasterIdentity
             << endl;
+    EV_INFO << "Selected Grandmaster Name          - "
+            << clockIdentityToFullPath[std::to_string(bestAnnounceCurr->getPriorityVector().grandmasterIdentity)]
+            << endl;
+    EV_INFO << "Selected Grandmaster Priority1     - "
+            << (int)bestAnnounceCurr->getPriorityVector().grandmasterPriority1 << endl;
     EV_INFO << "Selected Slave Port Identity       - " << bestAnnounceReceiverIdentityCurr.portNumber << endl;
 
     if (bestAnnounce == bestAnnounceCurr) {
@@ -591,9 +598,11 @@ void Gptp::executeBmca()
                                   ->getFullName();
             getContainingNode(this)->bubble(("My master is " + std::string(masterName)).c_str());
 
+            auto gmId = getModuleByPath(fullGmPath.c_str())->getId();
+            emit(gmIdSignal, gmId);
+
             // In this case we have a new master we need to reset stuff for everything to function properly
             resetGptpAfterMasterChange();
-
         }
         else {
             // We are the GM:
@@ -607,6 +616,8 @@ void Gptp::executeBmca()
             masterPortIds = bmcaPortIds;
             passivePortIds.clear();
             slavePortId = -1;
+
+            emit(gmIdSignal, getId());
         }
 
         delete bestAnnounce;
