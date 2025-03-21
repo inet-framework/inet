@@ -24,6 +24,54 @@ from inet.simulation.iderunner import *
 
 _logger = logging.getLogger(__name__)
 
+class Fingerprint:
+    def __init__(self, fingerprint, ingredients):
+        self.fingerprint = fingerprint
+        self.ingredients = ingredients
+
+    def __repr__(self):
+        return repr(self)
+
+    def __str__(self):
+        return self.fingerprint + "/" + self.ingredients
+
+    def __eq__(self, other):
+        return other and self.fingerprint == other.fingerprint and self.ingredients == other.ingredients
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __composite_values__(self):
+        return self.fingerprint, self.ingredients
+
+    @classmethod
+    def parse(self, text):
+        match = re.match(r"(.*)/(.*)", text)
+        fingerprint = match.groups()[0]
+        ingredients = match.groups()[1]
+        return Fingerprint(fingerprint, ingredients)
+
+class FingerprintTrajectory:
+    def __init__(self, simulation_result, ingredients, fingerprints, event_numbers):
+        self.simulation_result = simulation_result
+        self.ingredients = ingredients
+        self.fingerprints = fingerprints
+        self.event_numbers = event_numbers
+
+    def get_unique(self):
+        i = 0
+        unique_fingerprints = []
+        event_numbers = []
+        while i < len(self.fingerprints):
+            fingerprint = self.fingerprints[i]
+            j = i
+            while (j < len(self.fingerprints)) and (fingerprint == self.fingerprints[j]):
+                j = j + 1
+            unique_fingerprints.append(fingerprint)
+            event_numbers.append(j - 1)
+            i = j
+        return FingerprintTrajectory(self.simulation_result, self.ingredients, unique_fingerprints, event_numbers)
+
 # TODO: the task result depends on the following:
 #
 # 1. Binary distribution
@@ -110,6 +158,7 @@ class SimulationTaskResult(TaskResult):
             self.elapsed_cpu_time = float(match.group(1)) if match else None
             self.num_cpu_cycles = int(match.group(2)) if match else None
             self.num_cpu_instructions = int(match.group(3)) if match else None
+            self.eventlog_file_path = self.task.eventlog_file_path or f"results/{self.task.simulation_config.config}-#{str(self.task.run_number)}.elog"
         else:
             self.last_event_number = None
             self.last_simulation_time = None
@@ -125,6 +174,22 @@ class SimulationTaskResult(TaskResult):
     def get_subprocess_result(self):
         return self.subprocess_result
 
+    def get_fingerprint_trajectory(self):
+        simulation_task = self.task
+        simulation_config = simulation_task.simulation_config
+        simulation_project = simulation_config.simulation_project
+        file_path = simulation_project.get_full_path(simulation_config.working_directory + "/" + self.eventlog_file_path)
+        eventlog_file = open(file_path)
+        fingerprints = []
+        ingredients = None
+        for line in eventlog_file:
+            match = re.match(r"E # .* f (.*?)/(.*?)", line)
+            if match:
+                ingredients = match.group(2)
+                fingerprints.append(Fingerprint(match.group(1), match.group(2)))
+        eventlog_file.close()
+        return FingerprintTrajectory(self, ingredients, fingerprints, range(0, len(fingerprints)))
+
 class SimulationTask(Task):
     """
     Represents a simulation task that can be run as a separate process or in the process where Python is running.
@@ -132,7 +197,7 @@ class SimulationTask(Task):
     Please note that undocumented features are not supposed to be called by the user.
     """
 
-    def __init__(self, simulation_config=None, run_number=0, itervars=None, mode="release", debug=None, remove_launch=True, break_at_event_number=None, break_at_matching_event=None, user_interface="Cmdenv", result_folder="results", sim_time_limit=None, cpu_time_limit=None, record_eventlog=None, record_pcap=None, wait=True, name="simulation", task_result_class=SimulationTaskResult, **kwargs):
+    def __init__(self, simulation_config=None, run_number=0, inifile_entries=[], itervars=None, mode="release", debug=None, remove_launch=True, break_at_event_number=None, break_at_matching_event=None, user_interface="Cmdenv", result_folder="results", sim_time_limit=None, cpu_time_limit=None, record_eventlog=None, eventlog_file_path=None, record_pcap=None, wait=True, name="simulation", task_result_class=SimulationTaskResult, **kwargs):
         """
         Parameters:
             simulation_config (:py:class:`SimulationConfig <inet.simulation.config.SimulationConfig>`):
@@ -140,6 +205,9 @@ class SimulationTask(Task):
 
             run_number (number):
                 The number uniquely identifying the simulation run.
+
+            inifile_entries (list):
+                A list of additional inifile entries.
 
             itervars (string):
                 The list of iteration variables.
@@ -174,6 +242,9 @@ class SimulationTask(Task):
             record_eventlog (bool):
                 Specifies whether the eventlog file should be recorded or not.
 
+            eventlog_file_path (string):
+                Overrides the relative file path of the eventlog file, not set by default.
+
             record_pcap (bool):
                 Specifies whether PCAP files should be recorded or not.
 
@@ -192,6 +263,7 @@ class SimulationTask(Task):
         self.locals.pop("self")
         self.kwargs = kwargs
         self.simulation_config = simulation_config
+        self.inifile_entries = inifile_entries
         self.interactive = None # NOTE delayed to is_interactive()
         self.run_number = run_number
         self.itervars = itervars
@@ -205,6 +277,7 @@ class SimulationTask(Task):
         self.sim_time_limit = sim_time_limit
         self.cpu_time_limit = cpu_time_limit
         self.record_eventlog = record_eventlog
+        self.eventlog_file_path = eventlog_file_path
         self.record_pcap = record_pcap
         self.wait = wait
         # self.dependency_source_file_paths = None
@@ -305,14 +378,16 @@ class SimulationTask(Task):
         working_directory = self.simulation_config.working_directory
         ini_file = self.simulation_config.ini_file
         config = self.simulation_config.config
+        inifile_entries_args = list(map(lambda inifile_entry: "--" + inifile_entry, self.inifile_entries))
         result_folder_args = ["--result-dir", self.result_folder] if self.result_folder != "results" else []
         sim_time_limit_args = ["--sim-time-limit", self.get_sim_time_limit()] if self.sim_time_limit else []
         cpu_time_limit_args = ["--cpu-time-limit", self.get_cpu_time_limit()] if self.cpu_time_limit else []
         record_eventlog_args = ["--record-eventlog", "true"] if self.record_eventlog else []
+        eventlog_file_args = ["--eventlog-file=" + self.eventlog_file_path] if self.eventlog_file_path else []
         record_pcap_args = ["--**.numPcapRecorders=1", "--**.crcMode=\"computed\"", "--**.fcsMode=\"computed\""] if self.record_pcap else []
         executable = simulation_project.get_executable(mode=self.mode)
         default_args = simulation_project.get_default_args()
-        args = [*prepend_args, executable, *default_args, "-s", "-u", self.user_interface, "-f", ini_file, "-c", config, "-r", str(self.run_number), *result_folder_args, *sim_time_limit_args, *cpu_time_limit_args, *record_eventlog_args, *record_pcap_args, *append_args]
+        args = [*prepend_args, executable, *default_args, "-s", "-u", self.user_interface, "-f", ini_file, "-c", config, "-r", str(self.run_number), *inifile_entries_args, *result_folder_args, *sim_time_limit_args, *cpu_time_limit_args, *record_eventlog_args, *eventlog_file_args, *record_pcap_args, *append_args]
         expected_result = self.get_expected_result()
         if simulation_runner is None:
             simulation_runner = "ide" if self.debug else "subprocess"
@@ -519,6 +594,13 @@ def get_simulation_tasks(simulation_project=None, simulation_configs=None, mode=
     if expected_num_tasks is not None and len(simulation_tasks) != expected_num_tasks:
         raise Exception("Number of found and expected simulation tasks mismatch")
     return multiple_simulation_tasks_class(tasks=simulation_tasks, simulation_project=simulation_project, mode=mode, concurrent=concurrent, **kwargs)
+
+def get_simulation_task(**kwargs):
+    multiple_simulation_tasks = get_simulation_tasks(**kwargs)
+    num_tasks = len(multiple_simulation_tasks.tasks)
+    if num_tasks != 1:
+        raise Exception(f"Found {num_tasks} simulation tasks instead of one")
+    return multiple_simulation_tasks.tasks[0]
 
 def run_simulations(**kwargs):
     """
