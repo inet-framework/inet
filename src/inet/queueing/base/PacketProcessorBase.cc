@@ -22,13 +22,10 @@ void PacketProcessorBase::initialize(int stage)
         WATCH(numProcessedPackets);
         WATCH(processedTotalLength);
     }
-    else if (stage == INITSTAGE_LAST)
-        updateDisplayString();
 }
 
 void PacketProcessorBase::refreshDisplay() const
 {
-    updateDisplayString();
 }
 
 void PacketProcessorBase::handlePacketProcessed(Packet *packet)

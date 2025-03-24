@@ -71,7 +71,6 @@ void StreamIdentifier::processPacket(Packet *packet)
         }
     }
     handlePacketProcessed(packet);
-    updateDisplayString();
 }
 
 } // namespace inet

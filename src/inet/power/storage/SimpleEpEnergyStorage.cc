@@ -54,7 +54,6 @@ void SimpleEpEnergyStorage::handleMessage(cMessage *message)
 
 void SimpleEpEnergyStorage::refreshDisplay() const
 {
-    updateDisplayString();
 }
 
 void SimpleEpEnergyStorage::updateDisplayString() const

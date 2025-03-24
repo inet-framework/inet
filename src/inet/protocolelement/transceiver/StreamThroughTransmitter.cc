@@ -26,7 +26,6 @@ void StreamThroughTransmitter::handleMessageWhenUp(cMessage *message)
         throw cRuntimeError("Buffer underrun during transmission");
     else
         StreamingTransmitterBase::handleMessageWhenUp(message);
-    updateDisplayString();
 }
 
 void StreamThroughTransmitter::handleStopOperation(LifecycleOperation *operation)
@@ -184,7 +183,6 @@ void StreamThroughTransmitter::pushPacketStart(Packet *packet, const cGate *gate
     Enter_Method("pushPacketStart");
     take(packet);
     startTx(packet, datarate, b(0));
-    updateDisplayString();
 }
 
 void StreamThroughTransmitter::pushPacketEnd(Packet *packet, const cGate *gate)
@@ -197,7 +195,6 @@ void StreamThroughTransmitter::pushPacketEnd(Packet *packet, const cGate *gate)
     }
     else
         progressTx(packet, txDatarate, packet->getDataLength());
-    updateDisplayString();
 }
 
 void StreamThroughTransmitter::pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength)
@@ -208,7 +205,6 @@ void StreamThroughTransmitter::pushPacketProgress(Packet *packet, const cGate *g
         progressTx(packet, datarate, position);
     else
         startTx(packet, datarate, position);
-    updateDisplayString();
 }
 
 } // namespace inet

@@ -80,7 +80,6 @@ void EthernetCutthroughSource::pushPacketStart(Packet *packet, const cGate *gate
         b cutthroughPosition = getCutthroughSwitchingHeaderSize(packet);
         simtime_t delay = (cutthroughPosition / datarate).get<s>();
         scheduleAt(simTime() + delay, cutthroughTimer);
-        updateDisplayString();
     }
 }
 
@@ -100,7 +99,6 @@ void EthernetCutthroughSource::pushPacketEnd(Packet *packet, const cGate *gate)
         numProcessedPackets++;
         processedTotalLength += packet->getTotalLength();
         delete packet;
-        updateDisplayString();
     }
     else
         PacketDestreamer::pushPacketEnd(packet, gate);

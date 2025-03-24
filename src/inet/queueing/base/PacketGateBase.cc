@@ -50,7 +50,6 @@ void PacketGateBase::open()
     if (collector != nullptr)
         collector.handleCanPullPacketChanged();
     emit(gateStateChangedSignal, isOpen_);
-    updateDisplayString();
 }
 
 void PacketGateBase::close()
@@ -70,7 +69,6 @@ void PacketGateBase::close()
     if (collector != nullptr)
         collector.handleCanPullPacketChanged();
     emit(gateStateChangedSignal, isOpen_);
-    updateDisplayString();
 }
 
 int PacketGateBase::getNumPackets() const

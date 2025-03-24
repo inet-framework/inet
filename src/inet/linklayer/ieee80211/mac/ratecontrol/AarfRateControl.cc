@@ -32,7 +32,6 @@ void AarfRateControl::initialize(int stage)
         WATCH(numberOfConsSuccTransmissions);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
-        updateDisplayString();
     }
 }
 
@@ -54,7 +53,6 @@ void AarfRateControl::frameTransmitted(Packet *frame, int retryCount, bool isSuc
         numberOfConsSuccTransmissions = 0;
         currentMode = decreaseRateIfPossible(currentMode);
         emitDatarateChangedSignal();
-        updateDisplayString();
         EV_DETAIL << "Decreased rate to " << *currentMode << endl;
         multiplyIncreaseThreshold(factor);
         resetTimer();
@@ -63,7 +61,6 @@ void AarfRateControl::frameTransmitted(Packet *frame, int retryCount, bool isSuc
         numberOfConsSuccTransmissions = 0;
         currentMode = decreaseRateIfPossible(currentMode);
         emitDatarateChangedSignal();
-        updateDisplayString();
         EV_DETAIL << "Decreased rate to " << *currentMode << endl;
         resetIncreaseThreshdold();
         resetTimer();
@@ -75,7 +72,6 @@ void AarfRateControl::frameTransmitted(Packet *frame, int retryCount, bool isSuc
         numberOfConsSuccTransmissions = 0;
         currentMode = increaseRateIfPossible(currentMode);
         emitDatarateChangedSignal();
-        updateDisplayString();
         EV_DETAIL << "Increased rate to " << *currentMode << endl;
         resetTimer();
         probing = true;
@@ -106,7 +102,6 @@ void AarfRateControl::increaseRateIfTimerIsExpired()
     if (simTime() - timer >= interval) {
         currentMode = increaseRateIfPossible(currentMode);
         emitDatarateChangedSignal();
-        updateDisplayString();
         EV_DETAIL << "Increased rate to " << *currentMode << endl;
         resetTimer();
     }

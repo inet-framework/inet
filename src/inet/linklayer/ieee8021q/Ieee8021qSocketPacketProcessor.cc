@@ -57,7 +57,6 @@ void Ieee8021qSocketPacketProcessor::pushPacket(Packet *packet, const cGate *gat
         delete packet;
     else
         pushOrSendPacket(packet, outputGate, consumer);
-    updateDisplayString();
 }
 
 } // namespace inet

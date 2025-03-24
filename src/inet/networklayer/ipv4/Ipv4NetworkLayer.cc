@@ -15,7 +15,6 @@ Define_Module(Ipv4NetworkLayer);
 
 void Ipv4NetworkLayer::refreshDisplay() const
 {
-    updateDisplayString();
 }
 
 void Ipv4NetworkLayer::updateDisplayString() const

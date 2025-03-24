@@ -15,8 +15,6 @@ void OscillatorBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
         displayStringTextFormat = par("displayStringTextFormat");
-    else if (stage == INITSTAGE_LAST)
-        updateDisplayString();
 }
 
 void OscillatorBase::updateDisplayString() const

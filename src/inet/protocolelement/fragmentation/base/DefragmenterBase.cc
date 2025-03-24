@@ -71,7 +71,6 @@ void DefragmenterBase::defragmentPacket(Packet *fragmentPacket, bool firstFragme
         else
             delete fragmentPacket;
     }
-    updateDisplayString();
 }
 
 } // namespace inet

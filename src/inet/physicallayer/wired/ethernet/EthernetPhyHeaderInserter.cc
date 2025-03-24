@@ -34,7 +34,6 @@ void EthernetPhyHeaderInserter::pushPacketStart(Packet *packet, const cGate *gat
     startPacketStreaming(packet);
     processPacket(packet);
     pushOrSendPacketProgress(packet, outputGate, consumer, datarate, B(8), b(0), packet->getTransmissionId());
-    updateDisplayString();
 }
 
 } // namespace physicallayer

@@ -74,7 +74,6 @@ void Hcf::handleMessage(cMessage *msg)
     if (msg == startRxTimer) {
         if (!isReceptionInProgress()) {
             frameSequenceHandler->handleStartRxTimeout();
-            updateDisplayString();
         }
     }
     else if (msg == inactivityTimer) {
@@ -159,7 +158,6 @@ void Hcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&
         // TODO always call processResponse?
         if ((!isForUs(header) && !startRxTimer->isScheduled()) || isForUs(header)) {
             frameSequenceHandler->processResponse(packet);
-            updateDisplayString();
         }
         else {
             EV_INFO << "This frame is not for us" << std::endl;
@@ -214,7 +212,6 @@ void Hcf::startFrameSequence(AccessCategory ac)
 {
     frameSequenceHandler->startFrameSequence(new HcfFs(), buildContext(ac), this);
     emit(IFrameSequenceHandler::frameSequenceStartedSignal, frameSequenceHandler->getContext());
-    updateDisplayString();
 }
 
 void Hcf::handleInternalCollision(std::vector<Edcaf *> internallyCollidedEdcafs)
@@ -361,7 +358,6 @@ void Hcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeade
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {
         frameSequenceHandler->transmissionComplete();
-        updateDisplayString();
     }
     else if (hcca->isOwning())
         throw cRuntimeError("Hcca is unimplemented!");
@@ -755,7 +751,6 @@ void Hcf::corruptedFrameReceived()
     Enter_Method("corruptedFrameReceived");
     if (frameSequenceHandler->isSequenceRunning() && !startRxTimer->isScheduled()) {
         frameSequenceHandler->handleStartRxTimeout();
-        updateDisplayString();
     }
     else
         EV_DEBUG << "Ignoring received corrupt frame.\n";

@@ -56,7 +56,6 @@ void FragmenterBase::pushPacket(Packet *packet, const cGate *gate)
     }
     processedTotalLength += packet->getDataLength();
     numProcessedPackets++;
-    updateDisplayString();
     if (deleteSelf)
         deleteModule();
     delete packet;

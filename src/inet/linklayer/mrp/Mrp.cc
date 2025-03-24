@@ -1957,7 +1957,6 @@ void Mrp::colorLink(NetworkInterface *ie, bool forwarding) const
 
 void Mrp::refreshDisplay() const
 {
-    updateDisplayString();
 
     if (visualize) {
         for (unsigned int i = 0; i < interfaceTable->getNumInterfaces(); i++) {

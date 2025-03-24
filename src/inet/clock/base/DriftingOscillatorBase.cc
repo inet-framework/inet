@@ -58,7 +58,6 @@ void DriftingOscillatorBase::setDriftRate(ppm newDriftRate)
         origin = currentSimTime;
         emit(driftRateChangedSignal, driftRate.get<ppm>());
         emit(postOscillatorStateChangedSignal, this);
-        updateDisplayString();
     }
 }
 
@@ -78,7 +77,6 @@ void DriftingOscillatorBase::setTickOffset(simtime_t newTickOffset)
         else
             nextTickFromOrigin = currentTickLength - newTickOffset;
         emit(postOscillatorStateChangedSignal, this);
-        updateDisplayString();
     }
 }
 

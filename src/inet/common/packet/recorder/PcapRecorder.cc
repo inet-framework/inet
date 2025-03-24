@@ -159,7 +159,6 @@ void PcapRecorder::handleMessage(cMessage *msg)
 
 void PcapRecorder::refreshDisplay() const
 {
-    updateDisplayString();
 }
 
 std::string PcapRecorder::resolveDirective(char directive) const

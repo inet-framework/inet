@@ -62,7 +62,6 @@ void PreemptableStreamer::endStreaming()
     streamedPacket = nullptr;
     numProcessedPackets++;
     processedTotalLength += packetLength;
-    updateDisplayString();
 }
 
 bool PreemptableStreamer::canPushSomePacket(const cGate *gate) const
@@ -151,7 +150,6 @@ Packet *PreemptableStreamer::pullPacketStart(const cGate *gate, bps datarate)
     EV_INFO << "Starting streaming packet" << EV_FIELD(packet) << EV_ENDL;
     if (collector != nullptr)
         animatePullPacketStart(packet, outputGate, collector.getReferencedGate(), streamDatarate, streamedPacket->getId());
-    updateDisplayString();
     return packet;
 }
 
@@ -190,7 +188,6 @@ Packet *PreemptableStreamer::pullPacketEnd(const cGate *gate)
     if (collector != nullptr)
         animatePullPacketEnd(packet, outputGate, collector.getReferencedGate(), streamedPacket->getId());
     streamedPacket = nullptr;
-    updateDisplayString();
     return packet;
 }
 
@@ -202,7 +199,6 @@ Packet *PreemptableStreamer::pullPacketProgress(const cGate *gate, bps datarate,
     auto packet = streamedPacket->dup();
     if (collector != nullptr)
         animatePullPacketProgress(packet, outputGate, collector.getReferencedGate(), streamDatarate, position, extraProcessableLength, streamedPacket->getId());
-    updateDisplayString();
     return packet;
 }
 

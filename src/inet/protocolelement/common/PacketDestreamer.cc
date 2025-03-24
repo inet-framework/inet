@@ -76,7 +76,6 @@ void PacketDestreamer::pushPacketEnd(Packet *packet, const cGate *gate)
     streamedPacket = nullptr;
     numProcessedPackets++;
     processedTotalLength += packetLength;
-    updateDisplayString();
 }
 
 void PacketDestreamer::pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength)
@@ -130,7 +129,6 @@ Packet *PacketDestreamer::pullPacket(const cGate *gate)
     handlePacketProcessed(packet);
     if (collector != nullptr)
         animatePullPacket(streamedPacket, outputGate, collector.getReferencedGate());
-    updateDisplayString();
     streamedPacket = nullptr;
     return packet;
 }

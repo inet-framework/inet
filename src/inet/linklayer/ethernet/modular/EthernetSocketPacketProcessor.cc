@@ -60,7 +60,6 @@ void EthernetSocketPacketProcessor::pushPacket(Packet *packet, const cGate *gate
         delete packet;
     else
         pushOrSendPacket(packet, outputGate, consumer);
-    updateDisplayString();
 }
 
 } // namespace inet

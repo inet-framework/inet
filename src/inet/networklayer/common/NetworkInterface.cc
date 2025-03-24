@@ -279,7 +279,6 @@ void NetworkInterface::pushPacketEnd(Packet *packet, const cGate *gate)
 
 void NetworkInterface::refreshDisplay() const
 {
-    updateDisplayString();
 }
 
 void NetworkInterface::updateDisplayString() const

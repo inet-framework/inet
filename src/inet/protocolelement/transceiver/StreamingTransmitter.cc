@@ -19,7 +19,6 @@ void StreamingTransmitter::handleMessageWhenUp(cMessage *message)
         endTx();
     else
         PacketTransmitterBase::handleMessageWhenUp(message);
-    updateDisplayString();
 }
 
 void StreamingTransmitter::handleStopOperation(LifecycleOperation *operation)
@@ -39,7 +38,6 @@ void StreamingTransmitter::pushPacket(Packet *packet, const cGate *gate)
     Enter_Method("pushPacket");
     take(packet);
     startTx(packet);
-    updateDisplayString();
 }
 
 void StreamingTransmitter::startTx(Packet *packet)

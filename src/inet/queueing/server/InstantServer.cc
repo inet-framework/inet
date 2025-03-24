@@ -89,7 +89,6 @@ void InstantServer::processPackets()
         while (canProcessPacket())
             processPacket();
         isProcessing = false;
-        updateDisplayString();
     }
 }
 

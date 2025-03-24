@@ -105,7 +105,6 @@ void MacForwardingTable::handleMessageWhenUp(cMessage *)
 
 void MacForwardingTable::refreshDisplay() const
 {
-    updateDisplayString();
 }
 
 void MacForwardingTable::updateDisplayString() const

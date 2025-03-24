@@ -60,7 +60,6 @@ void Dcf::handleMessage(cMessage *msg)
     if (msg == startRxTimer) {
         if (!isReceptionInProgress()) {
             frameSequenceHandler->handleStartRxTimeout();
-            updateDisplayString();
         }
     }
     else
@@ -84,7 +83,6 @@ void Dcf::channelGranted(IChannelAccess *channelAccess)
     if (!frameSequenceHandler->isSequenceRunning()) {
         frameSequenceHandler->startFrameSequence(new DcfFs(), buildContext(), this);
         emit(IFrameSequenceHandler::frameSequenceStartedSignal, frameSequenceHandler->getContext());
-        updateDisplayString();
     }
 }
 
@@ -150,7 +148,6 @@ void Dcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&
         // TODO always call processResponses
         if ((!isForUs(header) && !startRxTimer->isScheduled()) || isForUs(header)) {
             frameSequenceHandler->processResponse(packet);
-            updateDisplayString();
         }
         else {
             EV_INFO << "This frame is not for us" << std::endl;
@@ -252,7 +249,6 @@ void Dcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeade
     Enter_Method("transmissionComplete");
     if (frameSequenceHandler->isSequenceRunning()) {
         frameSequenceHandler->transmissionComplete();
-        updateDisplayString();
     }
     else
         recipientProcessTransmittedControlResponseFrame(packet, header);
@@ -387,7 +383,6 @@ void Dcf::corruptedFrameReceived()
     Enter_Method("corruptedFrameReceived");
     if (frameSequenceHandler->isSequenceRunning() && !startRxTimer->isScheduled()) {
         frameSequenceHandler->handleStartRxTimeout();
-        updateDisplayString();
     }
     else
         EV_DEBUG << "Ignoring received corrupt frame.\n";

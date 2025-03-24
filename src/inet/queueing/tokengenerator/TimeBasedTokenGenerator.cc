@@ -37,7 +37,6 @@ void TimeBasedTokenGenerator::handleMessage(cMessage *message)
         emit(tokensCreatedSignal, numTokens);
         storage->addTokens(numTokens);
         scheduleGenerationTimer();
-        updateDisplayString();
     }
     else
         throw cRuntimeError("Unknown message");

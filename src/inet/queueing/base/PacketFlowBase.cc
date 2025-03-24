@@ -79,7 +79,6 @@ void PacketFlowBase::pushPacket(Packet *packet, const cGate *gate)
     handlePacketProcessed(packet);
     emit(packetPushedOutSignal, packet);
     pushOrSendPacket(packet, outputGate, consumer);
-    updateDisplayString();
 }
 
 void PacketFlowBase::pushPacketStart(Packet *packet, const cGate *gate, bps datarate)
@@ -92,7 +91,6 @@ void PacketFlowBase::pushPacketStart(Packet *packet, const cGate *gate, bps data
     startPacketStreaming(packet);
     processPacket(packet);
     pushOrSendPacketStart(packet, outputGate, consumer, datarate, packet->getTransmissionId());
-    updateDisplayString();
 }
 
 void PacketFlowBase::pushPacketEnd(Packet *packet, const cGate *gate)
@@ -108,7 +106,6 @@ void PacketFlowBase::pushPacketEnd(Packet *packet, const cGate *gate)
     emit(packetPushedOutSignal, packet);
     endPacketStreaming(packet);
     pushOrSendPacketEnd(packet, outputGate, consumer, packet->getTransmissionId());
-    updateDisplayString();
 }
 
 void PacketFlowBase::pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength)
@@ -129,7 +126,6 @@ void PacketFlowBase::pushPacketProgress(Packet *packet, const cGate *gate, bps d
     }
     else
         pushOrSendPacketProgress(packet, outputGate, consumer, datarate, position, extraProcessableLength, packet->getTransmissionId());
-    updateDisplayString();
 }
 
 void PacketFlowBase::handleCanPushPacketChanged(const cGate *gate)
@@ -169,7 +165,6 @@ Packet *PacketFlowBase::pullPacket(const cGate *gate)
     emit(packetPulledOutSignal, packet);
     if (collector != nullptr)
         animatePullPacket(packet, outputGate, collector.getReferencedGate());
-    updateDisplayString();
     return packet;
 }
 
@@ -185,7 +180,6 @@ Packet *PacketFlowBase::pullPacketStart(const cGate *gate, bps datarate)
     emit(packetPulledOutSignal, packet);
     if (collector != nullptr)
         animatePullPacketStart(packet, outputGate, collector.getReferencedGate(), datarate, packet->getTransmissionId());
-    updateDisplayString();
     return packet;
 }
 
@@ -202,7 +196,6 @@ Packet *PacketFlowBase::pullPacketEnd(const cGate *gate)
     endPacketStreaming(packet);
     if (collector != nullptr)
         animatePullPacketEnd(packet, outputGate, collector.getReferencedGate(), packet->getTransmissionId());
-    updateDisplayString();
     return packet;
 }
 
@@ -221,7 +214,6 @@ Packet *PacketFlowBase::pullPacketProgress(const cGate *gate, bps datarate, b po
     }
     if (collector != nullptr)
         animatePullPacketProgress(packet, outputGate, collector.getReferencedGate(), datarate, position, extraProcessableLength, packet->getTransmissionId());
-    updateDisplayString();
     return packet;
 }
 

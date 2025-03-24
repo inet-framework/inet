@@ -27,7 +27,6 @@ void DeaggregatorBase::pushPacket(Packet *aggregatedPacket, const cGate *gate)
     }
     processedTotalLength += aggregatedPacket->getDataLength();
     numProcessedPackets++;
-    updateDisplayString();
     delete aggregatedPacket;
     if (deleteSelf)
         deleteModule();

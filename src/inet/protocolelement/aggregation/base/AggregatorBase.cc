@@ -71,7 +71,6 @@ void AggregatorBase::pushPacket(Packet *subpacket, const cGate *gate)
     continueAggregation(subpacket);
     EV_INFO << "Aggregating packet" << EV_FIELD(subpacket) << EV_FIELD(packet, *aggregatedPacket) << EV_ENDL;
     delete subpacket;
-    updateDisplayString();
 }
 
 } // namespace inet

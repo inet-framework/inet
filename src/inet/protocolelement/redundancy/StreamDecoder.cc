@@ -110,7 +110,6 @@ void StreamDecoder::processPacket(Packet *packet)
         }
     }
     handlePacketProcessed(packet);
-    updateDisplayString();
 }
 
 } // namespace inet

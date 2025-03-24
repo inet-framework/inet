@@ -24,7 +24,6 @@ void ClockBase::initialize(int stage)
     }
     else if (stage == INITSTAGE_LAST) {
         referenceClockModule.reference(this, "referenceClock", false);
-        updateDisplayString();
         emit(timeChangedSignal, getClockTime().asSimTime());
     }
 }
@@ -46,7 +45,6 @@ void ClockBase::finish()
 
 void ClockBase::refreshDisplay() const
 {
-    updateDisplayString();
 }
 
 void ClockBase::updateDisplayString() const
