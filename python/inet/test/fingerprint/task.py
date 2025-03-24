@@ -68,18 +68,6 @@ class FingerprintTestTaskResult(SimulationTestTaskResult):
         multiple_test_results = multiple_test_tasks.run(**kwargs)
         return multiple_test_results.results[0]
 
-    def find_fingerprint_trajectory_divergence(self, baseline_fingerprint_test_result=None, baseline_simulation_project=inet_baseline_project):
-        if baseline_fingerprint_test_result is None:
-            baseline_fingerprint_test_result = self.run_baseline_fingerprint_test(baseline_simulation_project, record_eventlog=True)
-        baseline_fingerprint_trajectory = baseline_fingerprint_test_result.get_fingerprint_trajectory()
-        current_fingerprint_trajectory = self.get_fingerprint_trajectory()
-        return baseline_fingerprint_trajectory.find_divergence_position(current_fingerprint_trajectory)
-
-    def debug_fingerprint_trajectory_divergence(self, baseline_fingerprint_test_result=None, baseline_simulation_project=inet_baseline_project):
-        (baseline_simulation_event, current_simulation_event) = self.find_fingerprint_trajectory_divergence(baseline_fingerprint_test_result)
-        baseline_simulation_event.debug()
-        current_simulation_event.debug()
-
 class MultipleFingerprintTestTaskResults(MultipleTestTaskResults):
     def __init__(self, **kwargs):
         super().__init(**kwargs)
@@ -209,16 +197,6 @@ class FingerprintTrajectoryDivergencePosition:
         return "Fingerprint trajectory divergence at " + \
                COLOR_CYAN + simulation_project_1.get_name() + COLOR_RESET + " #" + COLOR_YELLOW + str(self.simulation_event_1.event_number) + COLOR_RESET + ", " + \
                COLOR_CYAN + simulation_project_2.get_name() + COLOR_RESET + " #" + COLOR_YELLOW + str(self.simulation_event_2.event_number) + COLOR_RESET
-
-    def open_sequence_charts(self):
-        project_name1 = self.simulation_event_1.simulation_result.task.simulation_config.simulation_project.get_name()
-        project_name2 = self.simulation_event_2.simulation_result.task.simulation_config.simulation_project.get_name()
-        path_name1 = "/" + project_name1 + "/" + self.simulation_event_1.simulation_result.task.simulation_config.working_directory + "/" + self.simulation_event_1.simulation_result.eventlog_file_path
-        path_name2 = "/" + project_name2 + "/" + self.simulation_event_2.simulation_result.task.simulation_config.working_directory + "/" + self.simulation_event_2.simulation_result.eventlog_file_path
-        editor1 = open_editor(path_name1)
-        editor2 = open_editor(path_name2)
-        goto_event_number(editor1, self.simulation_event_1.event_number)
-        goto_event_number(editor2, self.simulation_event_2.event_number)
 
 class SimulationEvent:
     def __init__(self, simulation_result, event_number):
