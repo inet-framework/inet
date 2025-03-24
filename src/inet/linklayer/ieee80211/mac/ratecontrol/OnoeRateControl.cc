@@ -27,7 +27,7 @@ void OnoeRateControl::initialize(int stage)
     }
 }
 
-void OnoeRateControl::updateDisplayString() const
+void OnoeRateControl::refreshDisplay() const
 {
     getDisplayString().setTagArg("t", 0, currentMode->getName());
 }

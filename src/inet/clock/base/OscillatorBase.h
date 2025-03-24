@@ -24,7 +24,7 @@ class INET_API OscillatorBase : public cSimpleModule, public IOscillator, public
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void updateDisplayString() const;
+    virtual void refreshDisplay() const;
 
   public:
     virtual std::string resolveDirective(char directive) const override;

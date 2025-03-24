@@ -47,7 +47,7 @@ void ClockBase::refreshDisplay() const
 {
 }
 
-void ClockBase::updateDisplayString() const
+void ClockBase::refreshDisplay() const
 {
     if (getEnvir()->isGUI()) {
         auto text = StringFormat::formatString(displayStringTextFormat, this);

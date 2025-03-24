@@ -88,7 +88,7 @@ void Hcf::handleMessage(cMessage *msg)
         throw cRuntimeError("Unknown msg type");
 }
 
-void Hcf::updateDisplayString() const
+void Hcf::refreshDisplay() const
 {
     if (frameSequenceHandler->isSequenceRunning()) {
         auto history = frameSequenceHandler->getFrameSequence()->getHistory();

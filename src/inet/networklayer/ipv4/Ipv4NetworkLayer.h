@@ -17,7 +17,7 @@ class INET_API Ipv4NetworkLayer : public cModule, public StringFormat::IDirectiv
 {
   protected:
     virtual void refreshDisplay() const override;
-    virtual void updateDisplayString() const;
+    virtual void refreshDisplay() const;
     virtual std::string resolveDirective(char directive) const override;
 };
 

@@ -66,7 +66,7 @@ void Dcf::handleMessage(cMessage *msg)
         throw cRuntimeError("Unknown msg type");
 }
 
-void Dcf::updateDisplayString() const
+void Dcf::refreshDisplay() const
 {
     if (frameSequenceHandler->isSequenceRunning()) {
         auto history = frameSequenceHandler->getFrameSequence()->getHistory();

@@ -281,7 +281,7 @@ void NetworkInterface::refreshDisplay() const
 {
 }
 
-void NetworkInterface::updateDisplayString() const
+void NetworkInterface::refreshDisplay() const
 {
     if (getEnvir()->isGUI()) {
         auto text = StringFormat::formatString(par("displayStringTextFormat"), this);

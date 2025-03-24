@@ -35,7 +35,7 @@ class INET_API ClockBase : public cSimpleModule, public IClock, public StringFor
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
     virtual void refreshDisplay() const override;
-    virtual void updateDisplayString() const;
+    virtual void refreshDisplay() const;
 
     cSimpleModule *getTargetModule() const {
         cSimpleModule *target = getSimulation()->getContextSimpleModule();

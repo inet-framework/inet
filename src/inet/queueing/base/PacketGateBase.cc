@@ -153,9 +153,9 @@ bool PacketGateBase::canPacketFlowThrough(Packet *packet) const
     return true;
 }
 
-void PacketGateBase::updateDisplayString() const
+void PacketGateBase::refreshDisplay() const
 {
-    PacketFlowBase::updateDisplayString();
+    PacketFlowBase::refreshDisplay();
     getDisplayString().setTagArg("i", 1, isOpen_ ? "green" : "red");
     getDisplayString().setTagArg("i", 2, 50);
 }

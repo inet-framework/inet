@@ -1985,7 +1985,7 @@ void Mrp::refreshDisplay() const
     }
 }
 
-void Mrp::updateDisplayString() const
+void Mrp::refreshDisplay() const
 {
     if (getEnvir()->isGUI()) {
         auto text = StringFormat::formatString(par("displayStringTextFormat"), this);

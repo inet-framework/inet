@@ -56,7 +56,7 @@ void SimpleEpEnergyStorage::refreshDisplay() const
 {
 }
 
-void SimpleEpEnergyStorage::updateDisplayString() const
+void SimpleEpEnergyStorage::refreshDisplay() const
 {
     if (getEnvir()->isGUI()) {
         auto text = StringFormat::formatString(par("displayStringTextFormat"), this);

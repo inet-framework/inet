@@ -225,7 +225,7 @@ protected:
     virtual void clearFDB(simtime_t time);
     virtual void colorLink(NetworkInterface* ie, bool forwarding) const;
     virtual void refreshDisplay() const override;
-    virtual void updateDisplayString() const;
+    virtual void refreshDisplay() const;
     virtual std::string resolveDirective(char directive) const override;
     static const char *getMrpRoleName(MrpRole role, bool acronym);
     static const char *getNodeStateName(NodeState state);

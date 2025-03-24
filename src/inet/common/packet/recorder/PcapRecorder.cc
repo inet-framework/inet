@@ -171,7 +171,7 @@ std::string PcapRecorder::resolveDirective(char directive) const
     }
 }
 
-void PcapRecorder::updateDisplayString() const
+void PcapRecorder::refreshDisplay() const
 {
     if (getEnvir()->isGUI()) {
         auto text = StringFormat::formatString(par("displayStringTextFormat"), this);

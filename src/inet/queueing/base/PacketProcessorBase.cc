@@ -398,7 +398,7 @@ void PacketProcessorBase::dropPacket(Packet *packet, PacketDropReason reason, in
     delete packet;
 }
 
-void PacketProcessorBase::updateDisplayString() const
+void PacketProcessorBase::refreshDisplay() const
 {
     if (getEnvir()->isGUI() && displayStringTextFormat != nullptr) {
         auto text = StringFormat::formatString(displayStringTextFormat, this);

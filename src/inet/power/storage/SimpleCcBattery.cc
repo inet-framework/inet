@@ -38,7 +38,7 @@ void SimpleCcBattery::refreshDisplay() const
 {
 }
 
-void SimpleCcBattery::updateDisplayString() const
+void SimpleCcBattery::refreshDisplay() const
 {
     if (getEnvir()->isGUI()) {
         auto text = StringFormat::formatString(par("displayStringTextFormat"), this);

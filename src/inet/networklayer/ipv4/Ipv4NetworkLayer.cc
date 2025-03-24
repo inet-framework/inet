@@ -17,7 +17,7 @@ void Ipv4NetworkLayer::refreshDisplay() const
 {
 }
 
-void Ipv4NetworkLayer::updateDisplayString() const
+void Ipv4NetworkLayer::refreshDisplay() const
 {
     if (getEnvir()->isGUI()) {
         auto text = StringFormat::formatString(par("displayStringTextFormat"), this);

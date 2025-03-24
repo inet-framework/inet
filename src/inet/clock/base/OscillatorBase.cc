@@ -17,7 +17,7 @@ void OscillatorBase::initialize(int stage)
         displayStringTextFormat = par("displayStringTextFormat");
 }
 
-void OscillatorBase::updateDisplayString() const
+void OscillatorBase::refreshDisplay() const
 {
     if (getEnvir()->isGUI()) {
         auto text = StringFormat::formatString(displayStringTextFormat, this);

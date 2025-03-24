@@ -36,7 +36,7 @@ class INET_API SimpleCcBattery : public CcEnergyStorageBase, public StringFormat
   protected:
     virtual void initialize(int stage) override;
     virtual void refreshDisplay() const override;
-    virtual void updateDisplayString() const;
+    virtual void refreshDisplay() const;
     virtual std::string resolveDirective(char directive) const override;
 
     virtual void updateTotalCurrentConsumption() override;
