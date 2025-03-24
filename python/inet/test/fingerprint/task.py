@@ -204,36 +204,32 @@ class FingerprintTrajectoryDivergencePosition:
         self.simulation_event_2 = simulation_event_2
 
     def __repr__(self):
-        simulation_project_1 = self.simulation_event_1.simulation_task.simulation_config.simulation_project
-        simulation_project_2 = self.simulation_event_2.simulation_task.simulation_config.simulation_project
+        simulation_project_1 = self.simulation_event_1.simulation_result.task.simulation_config.simulation_project
+        simulation_project_2 = self.simulation_event_2.simulation_result.task.simulation_config.simulation_project
         return "Fingerprint trajectory divergence at " + \
-               simulation_project_1.get_name() + " #" + str(self.simulation_event_1.event_number) + ", " + \
-               simulation_project_2.get_name() + " #" + str(self.simulation_event_2.event_number)
+               COLOR_CYAN + simulation_project_1.get_name() + COLOR_RESET + " #" + COLOR_YELLOW + str(self.simulation_event_1.event_number) + COLOR_RESET + ", " + \
+               COLOR_CYAN + simulation_project_2.get_name() + COLOR_RESET + " #" + COLOR_YELLOW + str(self.simulation_event_2.event_number) + COLOR_RESET
 
     def open_sequence_charts(self):
-        project_name1 = self.simulation_event_1.simulation_task.simulation_config.simulation_project.get_name()
-        project_name2 = self.simulation_event_2.simulation_task.simulation_config.simulation_project.get_name()
-        path_name1 = "/" + project_name1 + "/" + self.simulation_event_1.simulation_task.simulation_config.working_directory + "/results/" + self.simulation_event_1.simulation_task.simulation_config.config + "-#" + str(self.simulation_event_1.simulation_task.run_number) + ".elog"
-        path_name2 = "/" + project_name2 + "/" + self.simulation_event_2.simulation_task.simulation_config.working_directory + "/results/" + self.simulation_event_2.simulation_task.simulation_config.config + "-#" + str(self.simulation_event_2.simulation_task.run_number) + ".elog"
+        project_name1 = self.simulation_event_1.simulation_result.task.simulation_config.simulation_project.get_name()
+        project_name2 = self.simulation_event_2.simulation_result.task.simulation_config.simulation_project.get_name()
+        path_name1 = "/" + project_name1 + "/" + self.simulation_event_1.simulation_result.task.simulation_config.working_directory + "/" + self.simulation_event_1.simulation_result.eventlog_file_path
+        path_name2 = "/" + project_name2 + "/" + self.simulation_event_2.simulation_result.task.simulation_config.working_directory + "/" + self.simulation_event_2.simulation_result.eventlog_file_path
         editor1 = open_editor(path_name1)
         editor2 = open_editor(path_name2)
         goto_event_number(editor1, self.simulation_event_1.event_number)
         goto_event_number(editor2, self.simulation_event_2.event_number)
 
-    def debug_simulations(self):
-        pass
-        # TODO
-
 class SimulationEvent:
-    def __init__(self, simulation_task, event_number):
-        self.simulation_task = simulation_task
+    def __init__(self, simulation_result, event_number):
+        self.simulation_result = simulation_result
         self.event_number = event_number
 
     def __repr__(self):
         return repr(self)
 
     def debug(self):
-        self.simulation_task.run(debug_event_number=self.event_number)
+        self.simulation_result.task.run(debug_event_number=self.event_number)
 
 def get_calculated_fingerprint(simulation_result, ingredients):
     stdout = simulation_result.subprocess_result.stdout
