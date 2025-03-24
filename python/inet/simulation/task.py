@@ -18,6 +18,7 @@ import time
 from inet.common import *
 from inet.simulation.build import *
 from inet.simulation.config import *
+from inet.simulation.fingerprint import *
 from inet.simulation.project import *
 from inet.simulation.subprocess import *
 from inet.simulation.iderunner import *
@@ -127,6 +128,22 @@ class SimulationTaskResult(TaskResult):
 
     def get_subprocess_result(self):
         return self.subprocess_result
+
+    def get_fingerprint_trajectory(self):
+        simulation_task = self.task
+        simulation_config = simulation_task.simulation_config
+        simulation_project = simulation_config.simulation_project
+        file_path = simulation_project.get_full_path(simulation_config.working_directory + "/" + self.eventlog_file_path)
+        eventlog_file = open(file_path)
+        fingerprints = []
+        ingredients = None
+        for line in eventlog_file:
+            match = re.match(r"E # .* f (.*?)/(.*?)", line)
+            if match:
+                ingredients = match.group(2)
+                fingerprints.append(Fingerprint(match.group(1), match.group(2)))
+        eventlog_file.close()
+        return FingerprintTrajectory(self, ingredients, fingerprints, range(0, len(fingerprints)))
 
 class SimulationTask(Task):
     """

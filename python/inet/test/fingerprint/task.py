@@ -58,21 +58,6 @@ class FingerprintTestTaskResult(SimulationTestTaskResult):
         if matches_filter(self.result, test_result_filter, exclude_test_result_filter, True):
             print(self.get_description(complete_error_message=complete_error_message), file=output_stream)
 
-    def get_fingerprint_trajectory(self):
-        simulation_task = self.task.simulation_task
-        simulation_config = simulation_task.simulation_config
-        simulation_project = simulation_config.simulation_project
-        eventlog_file_name = simulation_config.config + "-#" + str(simulation_task.run_number) + ".elog"
-        eventlog_file_path = simulation_project.get_full_path(simulation_config.working_directory + "/results/" + eventlog_file_name)
-        eventlog_file = open(eventlog_file_path)
-        fingerprints = []
-        for line in eventlog_file:
-            match = re.match(r"E # .* f (.*?)/(.*?)", line)
-            if match:
-                fingerprints.append(Fingerprint(match.group(1), match.group(2)))
-        eventlog_file.close()
-        return FingerprintTrajectory(self.simulation_task_result, self.task.ingredients, fingerprints, range(0, len(fingerprints)))
-
     def run_baseline_fingerprint_test(self, baseline_simulation_project=inet_baseline_project, **kwargs):
         simulation_task = self.simulation_result.simulation_task
         simulation_config = self.simulation_result.simulation_task.simulation_config
