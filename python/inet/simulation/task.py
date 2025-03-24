@@ -543,6 +543,13 @@ def get_simulation_tasks(simulation_project=None, simulation_configs=None, mode=
         raise Exception("Number of found and expected simulation tasks mismatch")
     return multiple_simulation_tasks_class(tasks=simulation_tasks, simulation_project=simulation_project, mode=mode, concurrent=concurrent, **kwargs)
 
+def get_simulation_task(**kwargs):
+    multiple_simulation_tasks = get_simulation_tasks(**kwargs)
+    num_tasks = len(multiple_simulation_tasks.tasks)
+    if num_tasks != 1:
+        raise Exception(f"Found {num_tasks} simulation tasks instead of one")
+    return multiple_simulation_tasks.tasks[0]
+
 def run_simulations(**kwargs):
     """
     Runs one or more simulations that match the provided filter criteria. The simulations can be run sequentially or
