@@ -6,6 +6,7 @@ import io
 import IPython
 import logging
 import os
+import pandas
 import platform
 import pickle
 import re
@@ -546,3 +547,9 @@ def collect_referenced_non_existing_ned_types():
     existing_msg_types = collect_existing_msg_types()
     existing_cpp_types = collect_existing_cpp_types()
     return referenced_ned_types.difference(existing_ned_types).difference(existing_msg_types).difference(existing_cpp_types)
+
+def set_data_frame_print_options_to_print_more_details():
+    pandas.set_option('display.max_rows', None)
+    pandas.set_option('display.max_columns', None)
+    pandas.set_option("display.precision", 19)
+    pandas.set_option('display.width', 1000)
