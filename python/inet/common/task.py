@@ -562,7 +562,7 @@ class MultipleTasks:
                     multiple_task_results = self.multiple_task_results_class(multiple_tasks=self, results=task_results)
             _logger.info(f"Running {len(self.tasks)} {self.get_description()} ended")
             return multiple_task_results
-        run_with_log_levels(run_internal, **kwargs)
+        return run_with_log_levels(run_internal, **kwargs)
 
     def run_protected(self, **kwargs):
         if self.scheduler == "cluster":
