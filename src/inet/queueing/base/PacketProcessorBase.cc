@@ -26,7 +26,7 @@ void PacketProcessorBase::initialize(int stage)
 
 void PacketProcessorBase::refreshDisplay() const
 {
-    if (getEnvir()->isGUI() && displayStringTextFormat != nullptr) {
+    if (displayStringTextFormat != nullptr) {
         auto text = StringFormat::formatString(displayStringTextFormat, this);
         getDisplayString().setTagArg("t", 0, text.c_str());
     }

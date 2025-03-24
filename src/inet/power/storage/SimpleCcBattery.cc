@@ -36,10 +36,8 @@ void SimpleCcBattery::initialize(int stage)
 
 void SimpleCcBattery::refreshDisplay() const
 {
-    if (getEnvir()->isGUI()) {
-        auto text = StringFormat::formatString(par("displayStringTextFormat"), this);
-        getDisplayString().setTagArg("t", 0, text.c_str());
-    }
+    auto text = StringFormat::formatString(par("displayStringTextFormat"), this);
+    getDisplayString().setTagArg("t", 0, text.c_str());
 }
 
 std::string SimpleCcBattery::resolveDirective(char directive) const
