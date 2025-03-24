@@ -37,7 +37,7 @@ class INET_API OnoeRateControl : public RateControlBase
     virtual void computeMode();
     virtual void resetStatisticalVariables();
     virtual void computeModeIfTimerIsExpired();
-    virtual void refreshDisplay() const;
+    virtual void refreshDisplay() const override;
 
   public:
     virtual const physicallayer::IIeee80211Mode *getRate() override;

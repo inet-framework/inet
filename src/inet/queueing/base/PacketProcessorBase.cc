@@ -26,6 +26,10 @@ void PacketProcessorBase::initialize(int stage)
 
 void PacketProcessorBase::refreshDisplay() const
 {
+    if (getEnvir()->isGUI() && displayStringTextFormat != nullptr) {
+        auto text = StringFormat::formatString(displayStringTextFormat, this);
+        getDisplayString().setTagArg("t", 0, text.c_str());
+    }
 }
 
 void PacketProcessorBase::handlePacketProcessed(Packet *packet)
@@ -396,14 +400,6 @@ void PacketProcessorBase::dropPacket(Packet *packet, PacketDropReason reason, in
     details.setLimit(limit);
     emit(packetDroppedSignal, packet, &details);
     delete packet;
-}
-
-void PacketProcessorBase::refreshDisplay() const
-{
-    if (getEnvir()->isGUI() && displayStringTextFormat != nullptr) {
-        auto text = StringFormat::formatString(displayStringTextFormat, this);
-        getDisplayString().setTagArg("t", 0, text.c_str());
-    }
 }
 
 std::string PacketProcessorBase::resolveDirective(char directive) const

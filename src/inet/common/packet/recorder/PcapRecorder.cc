@@ -157,10 +157,6 @@ void PcapRecorder::handleMessage(cMessage *msg)
     throw cRuntimeError("This module does not handle messages");
 }
 
-void PcapRecorder::refreshDisplay() const
-{
-}
-
 std::string PcapRecorder::resolveDirective(char directive) const
 {
     switch (directive) {

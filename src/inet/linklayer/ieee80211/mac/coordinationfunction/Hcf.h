@@ -107,7 +107,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void initialize(int stage) override;
     virtual void forEachChild(cVisitor *v) override;
     virtual void handleMessage(cMessage *msg) override;
-    virtual void refreshDisplay() const;
+    virtual void refreshDisplay() const override;
 
     void startFrameSequence(AccessCategory ac);
     void handleInternalCollision(std::vector<Edcaf *> internallyCollidedEdcafs);

@@ -38,7 +38,7 @@ class INET_API AarfRateControl : public RateControlBase
     virtual void resetIncreaseThreshdold();
     virtual void resetTimer();
     virtual void increaseRateIfTimerIsExpired();
-    virtual void refreshDisplay() const;
+    virtual void refreshDisplay() const override;
 
   public:
     virtual const physicallayer::IIeee80211Mode *getRate() override;

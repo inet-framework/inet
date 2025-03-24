@@ -1983,10 +1983,6 @@ void Mrp::refreshDisplay() const
             }
         }
     }
-}
-
-void Mrp::refreshDisplay() const
-{
     if (getEnvir()->isGUI()) {
         auto text = StringFormat::formatString(par("displayStringTextFormat"), this);
         getDisplayString().setTagArg("t", 0, text.c_str());

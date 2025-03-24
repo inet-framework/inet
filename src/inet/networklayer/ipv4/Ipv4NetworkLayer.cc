@@ -15,10 +15,6 @@ Define_Module(Ipv4NetworkLayer);
 
 void Ipv4NetworkLayer::refreshDisplay() const
 {
-}
-
-void Ipv4NetworkLayer::refreshDisplay() const
-{
     if (getEnvir()->isGUI()) {
         auto text = StringFormat::formatString(par("displayStringTextFormat"), this);
         getDisplayString().setTagArg("t", 0, text.c_str());
