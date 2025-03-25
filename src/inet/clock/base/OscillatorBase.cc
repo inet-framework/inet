@@ -7,14 +7,37 @@
 
 #include "inet/clock/base/OscillatorBase.h"
 
+#include "inet/common/IPrintableObject.h"
+
 namespace inet {
 
 simsignal_t OscillatorBase::driftRateChangedSignal = cComponent::registerSignal("driftRateChanged");
 
 void OscillatorBase::initialize(int stage)
 {
-    if (stage == INITSTAGE_LOCAL)
+    if (stage == INITSTAGE_LOCAL) {
         displayStringTextFormat = par("displayStringTextFormat");
+        if (par("emitNumTicksSignal")) {
+            tickTimer = new cMessage("TickTimer");
+            scheduleAfter(0, tickTimer);
+        }
+    }
+}
+
+void OscillatorBase::handleMessage(cMessage *msg)
+{
+    if (msg == tickTimer)
+        handleTickTimer();
+    else
+        throw cRuntimeError("Unknown message");
+}
+
+void OscillatorBase::handleTickTimer()
+{
+    EV_INFO << "Handling tick" << EV_FIELD(numTicks) << EV_ENDL;
+    emit(numTicksChangedSignal, numTicks);
+    scheduleTickTimer();
+    numTicks++;
 }
 
 void OscillatorBase::refreshDisplay() const

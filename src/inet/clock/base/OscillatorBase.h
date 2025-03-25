@@ -20,13 +20,21 @@ class INET_API OscillatorBase : public cSimpleModule, public IOscillator, public
 
   protected:
     const char *displayStringTextFormat = nullptr;
+    cMessage *tickTimer = nullptr;
+
+    int64_t numTicks = 0;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void refreshDisplay() const override;
+    virtual void handleMessage(cMessage *msg) override;
+
+    virtual void handleTickTimer();
+    virtual void scheduleTickTimer() = 0;
 
   public:
+    virtual ~OscillatorBase() { cancelAndDelete(tickTimer); }
     virtual std::string resolveDirective(char directive) const override;
 };
 

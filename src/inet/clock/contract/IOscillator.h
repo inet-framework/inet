@@ -39,6 +39,8 @@ namespace inet {
 class INET_API IOscillator
 {
   public:
+    /// Signal emitted each time a tick occurs
+    static simsignal_t numTicksChangedSignal;
     /// Signal emitted before a change in tick computation occurs.
     static simsignal_t preOscillatorStateChangedSignal;
     /// Signal emitted after a change in tick computation occurs.
