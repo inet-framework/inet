@@ -33,7 +33,7 @@ void RandomDriftOscillator::handleMessage(cMessage *message)
         driftRateChangeTotal += ppm(driftRateChangeParameter->doubleValue());
         driftRateChangeTotal = std::max(driftRateChangeTotal, driftRateChangeLowerLimit);
         driftRateChangeTotal = std::min(driftRateChangeTotal, driftRateChangeUpperLimit);
-        setDriftRate(initialDriftRate + driftRateChangeTotal);
+        setDriftRate(ppm(std::round((initialDriftRate + driftRateChangeTotal).get<ppm>())));
         scheduleAfter(changeIntervalParameter->doubleValue(), changeTimer);
     }
     else

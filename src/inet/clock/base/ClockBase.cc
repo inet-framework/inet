@@ -6,6 +6,7 @@
 
 
 #include "inet/clock/base/ClockBase.h"
+#include "inet/common/IPrintableObject.h"
 #include "inet/common/ModuleRefByPar.h"
 
 namespace inet {
@@ -99,6 +100,7 @@ ClockEvent *ClockBase::cancelTargetModuleClockEvent(ClockEvent *msg)
 
 void ClockBase::scheduleClockEventAt(clocktime_t t, ClockEvent *msg)
 {
+    EV_DEBUG << "Scheduling clock event at" << EV_FIELD(t) << EV_FIELD(msg) << EV_ENDL;
     if (t < getClockTime())
         throw cRuntimeError("Cannot schedule clock event in the past");
     msg->setClock(this);
@@ -110,6 +112,7 @@ void ClockBase::scheduleClockEventAt(clocktime_t t, ClockEvent *msg)
 
 void ClockBase::scheduleClockEventAfter(clocktime_t clockTimeDelay, ClockEvent *msg)
 {
+    EV_DEBUG << "Scheduling clock event after" << EV_FIELD(clockTimeDelay) << EV_FIELD(msg) << EV_ENDL;
     if (clockTimeDelay < 0)
         throw cRuntimeError("Cannot schedule clock event with negative delay");
     msg->setClock(this);
@@ -124,6 +127,7 @@ void ClockBase::scheduleClockEventAfter(clocktime_t clockTimeDelay, ClockEvent *
 
 ClockEvent *ClockBase::cancelClockEvent(ClockEvent *msg)
 {
+    EV_DEBUG << "Canceling clock event" << EV_FIELD(msg) << EV_ENDL;
     cancelTargetModuleClockEvent(msg);
     msg->setClock(nullptr);
     return msg;
@@ -131,6 +135,8 @@ ClockEvent *ClockBase::cancelClockEvent(ClockEvent *msg)
 
 void ClockBase::handleClockEvent(ClockEvent *msg)
 {
+    clocktime_t clockTime = getClockTime();
+    EV_DEBUG << "Handling clock event" << EV_FIELD(clockTime) << EV_FIELD(msg) << EV_ENDL;
     msg->setClock(nullptr);
     msg->callBaseExecute();
 }

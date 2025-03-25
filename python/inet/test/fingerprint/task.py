@@ -186,29 +186,6 @@ class FingerprintTrajectoryTestTaskResult(TestTaskResult):
         # TODO
         pass
 
-class FingerprintTrajectoryDivergencePosition:
-    def __init__(self, simulation_event_1, simulation_event_2):
-        self.simulation_event_1 = simulation_event_1
-        self.simulation_event_2 = simulation_event_2
-
-    def __repr__(self):
-        simulation_project_1 = self.simulation_event_1.simulation_result.task.simulation_config.simulation_project
-        simulation_project_2 = self.simulation_event_2.simulation_result.task.simulation_config.simulation_project
-        return "Fingerprint trajectory divergence at " + \
-               COLOR_CYAN + simulation_project_1.get_name() + COLOR_RESET + " #" + COLOR_YELLOW + str(self.simulation_event_1.event_number) + COLOR_RESET + ", " + \
-               COLOR_CYAN + simulation_project_2.get_name() + COLOR_RESET + " #" + COLOR_YELLOW + str(self.simulation_event_2.event_number) + COLOR_RESET
-
-class SimulationEvent:
-    def __init__(self, simulation_result, event_number):
-        self.simulation_result = simulation_result
-        self.event_number = event_number
-
-    def __repr__(self):
-        return repr(self)
-
-    def debug(self):
-        self.simulation_result.task.run(debug_event_number=self.event_number)
-
 def get_calculated_fingerprint(simulation_result, ingredients):
     stdout = simulation_result.subprocess_result.stdout
     stderr = simulation_result.subprocess_result.stderr

@@ -34,76 +34,110 @@ class CompareSimulationsTaskResult(MultipleTaskResults):
         super().__init__(**kwargs)
         if self.result == "DONE":
             self.divergence_position = self._find_divergence_position(self)
-            self.different_statistical_results = self._get_different_statistical_results(exclude_result_name_filter="numTicks")
-            if self.divergence_position:
-                self.result = "DIVERGENT"
-                self.color = COLOR_YELLOW
+            self._compare_statistical_results(**self.multiple_tasks.kwargs)
+            if self.different_statistical_results is not None:
+                self.statistical_comparison_result = "DIFFERENT"
+                self.statistical_comparison_color = COLOR_YELLOW
             else:
-                self.result = "IDENTICAL"
+                self.statistical_comparison_result = "IDENTICAL"
+                self.statistical_comparison_color = COLOR_GREEN
+            if self.divergence_position:
+                self.trajectory_comparison_result = "DIVERGENT"
+                self.trajectory_comparison_color = COLOR_YELLOW
+            else:
+                self.trajectory_comparison_result = "IDENTICAL"
+                self.trajectory_comparison_color = COLOR_GREEN
         else:
             self.divergence_position = None
             self.different_statistical_results = pd.DataFrame()
 
     def __repr__(self):
-        divergence_description = "\n" + self.divergence_position.__repr__() if self.divergence_position else ""
-        statistical_desription = "\nFound " + COLOR_YELLOW + str(len(self.different_statistical_results)) + COLOR_RESET + " different statistical results" if not self.different_statistical_results.empty else ""
+        if self.divergence_position:
+            divergence_description = f"\nFingerprint trajectory comparison result: {self.trajectory_comparison_color}{self.trajectory_comparison_result}{COLOR_RESET}\n{self.divergence_position.get_description()}"
+        else:
+            divergence_description = ""
+        if self.different_statistical_results is not None and not self.different_statistical_results.empty:
+            max_num_different_statistics = 3
+            different_unique_modules = self.different_statistical_results["module"].unique()
+            different_unique_statistics = self.different_statistical_results["name"].unique()
+            different_modules = ", ".join(map(lambda s: f"{COLOR_CYAN}{s}{COLOR_RESET}", different_unique_modules[0:max_num_different_statistics])) + (", ..." if len(different_unique_modules) > max_num_different_statistics else "")
+            different_statistics = ", ".join(map(lambda s: f"{COLOR_GREEN}{s}{COLOR_RESET}", different_unique_statistics[0:max_num_different_statistics])) + (", ..." if len(different_unique_statistics) > max_num_different_statistics else "")
+            statistical_desription = f"\nStatistical comparison result: {self.statistical_comparison_color}{self.statistical_comparison_result}{COLOR_RESET}, summary: {str(len(self.df_1))} and {str(len(self.df_2))} TOTAL, {COLOR_GREEN}{str(len(self.identical_statistical_results))} IDENTICAL{COLOR_RESET}, {COLOR_YELLOW}{str(len(self.different_statistical_results))} DIFFERENT{COLOR_RESET}, some differences: {different_statistics} in {different_modules}"
+        else:
+            statistical_desription = ""
         return MultipleTaskResults.__repr__(self) + divergence_description + statistical_desription
 
-    def debug_at_divergence_position(self, **kwargs):
+    def debug_at_divergence_position(self, num_cause_events=0, **kwargs):
         if self.divergence_position:
+            event_number_1 = self._get_cause_event_number(self.divergence_position.simulation_event_1, num_cause_events)
+            event_number_2 = self._get_cause_event_number(self.divergence_position.simulation_event_2, num_cause_events)
             task_1 = copy.copy(self.multiple_tasks.tasks[0])
             task_1.debug = True
             task_1.mode = "debug"
-            task_1.break_at_event_number = self.divergence_position.simulation_event_1.event_number
+            task_1.break_at_event_number = event_number_1
             task_2 = copy.copy(self.multiple_tasks.tasks[1])
             task_2.debug = True
             task_2.mode = "debug"
-            task_2.break_at_event_number = self.divergence_position.simulation_event_2.event_number
+            task_2.break_at_event_number = event_number_2
             multiple_tasks = copy.copy(self.multiple_tasks)
             multiple_tasks.tasks = [task_1, task_2]
             multiple_tasks.run(**kwargs)
 
-    def run_until_divergence_position(self, **kwargs):
+    def run_until_divergence_position(self, num_cause_events=0, append_args=[], **kwargs):
         if self.divergence_position:
-            for task in self.multiple_tasks.tasks:
-                task = copy.copy(task)
-                task.user_interface = "Qtenv"
-                task.wait = False
-                task.run(**kwargs)
+            # NOTE: add 1 to complete the event that causes the fingerprint trajectory divergence
+            event_number_1 = self._get_cause_event_number(self.divergence_position.simulation_event_1, num_cause_events) + 1
+            event_number_2 = self._get_cause_event_number(self.divergence_position.simulation_event_2, num_cause_events) + 1
+            task_1 = copy.copy(self.multiple_tasks.tasks[0])
+            task_1.user_interface = "Qtenv"
+            task_1.wait = False
+            task_1.run(append_args=append_args + [f"--qtenv-stop-event-number={event_number_1}"], **kwargs)
+            task_2 = copy.copy(self.multiple_tasks.tasks[1])
+            task_2.user_interface = "Qtenv"
+            task_2.wait = False
+            task_2.run(append_args=append_args + [f"--qtenv-stop-event-number={event_number_2}"], **kwargs)
 
     def show_divergence_posisiton_in_sequence_chart(self):
         if self.divergence_position:
-            simulation_event_1 = self.divergence_position.simulation_event_1
-            simulation_event_2 = self.divergence_position.simulation_event_2
-            project_name1 = simulation_event_1.simulation_result.task.simulation_config.simulation_project.get_name()
-            project_name2 = simulation_event_2.simulation_result.task.simulation_config.simulation_project.get_name()
-            path_name1 = "/" + project_name1 + "/" + simulation_event_1.simulation_result.task.simulation_config.working_directory + "/" + simulation_event_1.simulation_result.eventlog_file_path
-            path_name2 = "/" + project_name2 + "/" + simulation_event_2.simulation_result.task.simulation_config.working_directory + "/" + simulation_event_2.simulation_result.eventlog_file_path
-            editor1 = open_editor(path_name1)
-            editor2 = open_editor(path_name2)
-            goto_event_number(editor1, simulation_event_1.event_number)
-            goto_event_number(editor2, simulation_event_2.event_number)
+            self.divergence_position.show_in_sequence_chart()
 
-    def print_different_statistical_results(self):
-        print(self.different_statistical_results)
+    def print_divergence_position_cause_chain(self, **kwargs):
+        if self.divergence_position:
+            self.divergence_position.print_cause_chain(**kwargs)
+
+    def print_different_statistic_modules(self):
+        print("\n".join(self.different_statistical_results["module"].unique()))
+
+    def print_different_statistic_names(self):
+        print("\n".join(self.different_statistical_results["name"].unique()))
+
+    def print_different_statistical_results(self, drop_columns_with_equals_values=True, include_absolute_errors=False, include_relative_errors=False, **kwargs):
+        df = self.different_statistical_results
+        if drop_columns_with_equals_values:
+            df = df.loc[:, df.nunique() > 1]
+        if not include_absolute_errors:
+            df = df.drop("absolute_error", axis=1)
+        if not include_relative_errors:
+            df = df.drop("relative_error", axis=1)
+        print(df.to_string(index=False, **kwargs))
+
+    def _get_cause_event_number(self, simulation_event, num_cause_events):
+        event = simulation_event.get_event()
+        while num_cause_events > 0:
+            event = event.getCauseEvent()
+            num_cause_events = num_cause_events - 1
+        return event.getEventNumber()
 
     def _find_divergence_position(self, multiple_task_results):
         fingerprint_trajectory_1 = multiple_task_results.results[0].get_fingerprint_trajectory().get_unique()
         fingerprint_trajectory_2 = multiple_task_results.results[1].get_fingerprint_trajectory().get_unique()
-        min_size = min(len(fingerprint_trajectory_1.fingerprints), len(fingerprint_trajectory_2.fingerprints))
-        for i in range(0, min_size):
-            trajectory_fingerprint_1 = fingerprint_trajectory_1.fingerprints[i]
-            trajectory_fingerprint_2 = fingerprint_trajectory_2.fingerprints[i]
-            if trajectory_fingerprint_1.fingerprint != trajectory_fingerprint_2.fingerprint:
-                return FingerprintTrajectoryDivergencePosition(SimulationEvent(fingerprint_trajectory_1.simulation_result, fingerprint_trajectory_1.event_numbers[i]),
-                                                               SimulationEvent(fingerprint_trajectory_2.simulation_result, fingerprint_trajectory_2.event_numbers[i]))
-        return None
+        return find_fingerprint_trajectory_divergence_position(fingerprint_trajectory_1, fingerprint_trajectory_2)
 
-    def _get_different_statistical_results(self, result_name_filter=None, exclude_result_name_filter=None, result_module_filter=None, exclude_result_module_filter=None, full_match=False):
-        df_1 = self._get_result_data_frame(self.results[0])
-        df_2 = self._get_result_data_frame(self.results[1])
-        if not df_1.equals(df_2):
-            merged = df_1.merge(df_2, on=['experiment', 'measurement', 'replication', 'module', 'name'], how='outer', suffixes=('_1', '_2'))
+    def _compare_statistical_results(self, result_name_filter=None, exclude_result_name_filter=None, result_module_filter=None, exclude_result_module_filter=None, full_match=False, **kwargs):
+        self.df_1 = self._get_result_data_frame(self.results[0])
+        self.df_2 = self._get_result_data_frame(self.results[1])
+        if not self.df_1.equals(self.df_2):
+            merged = self.df_1.merge(self.df_2, on=['experiment', 'measurement', 'replication', 'module', 'name'], how='outer', suffixes=('_1', '_2'))
             df = merged[
                 (merged['value_1'].isna() & merged['value_2'].notna()) |
                 (merged['value_1'].notna() & merged['value_2'].isna()) |
@@ -113,9 +147,10 @@ class CompareSimulationsTaskResult(MultipleTaskResults):
             df = df[df.apply(lambda row: matches_filter(row["name"], result_name_filter, exclude_result_name_filter, full_match) and \
                                          matches_filter(row["module"], result_module_filter, exclude_result_module_filter, full_match), axis=1)]
             sorted_df = df.sort_values(by="relative_error", ascending=False)
-            return sorted_df
+            self.different_statistical_results = sorted_df
+            self.identical_statistical_results = pd.merge(self.df_1, self.df_2, how="inner")
         else:
-            return pd.DataFrame()
+            self.different_statistical_results = pd.DataFrame()
 
     def _get_result_file_name(self, simulation_task, extension):
         simulation_config = simulation_task.simulation_config

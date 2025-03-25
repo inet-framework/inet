@@ -7,6 +7,8 @@
 
 #include "inet/clock/base/DriftingOscillatorBase.h"
 
+#include "inet/common/IPrintableObject.h"
+
 namespace inet {
 
 void DriftingOscillatorBase::initialize(int stage)
@@ -21,6 +23,11 @@ void DriftingOscillatorBase::initialize(int stage)
             throw cRuntimeError("The nominalTickLength parameter value %lg cannot be accurately represented with the current simulation time precision, conversion result: %s", nominalTickLengthAsDouble, nominalTickLength.ustr().c_str());
         setOrigin(simTime());
         driftFactor = 1.0L + driftRate.get() / 1E+6L;
+        // TODO check the relationship between nominalTickLength and simulation time precision and fail if they are too close (whatever that means) use a parameter for this? minimum
+
+        // TODO check if tick becomes smaller than what can be represented in simtime and error out
+        // TODO what if the precision is just not enough to represent the tick properly
+        // TODO should there be some wrap around calculation to check that?
         simtime_t currentTickLength = getCurrentTickLength();
         simtime_t tickOffset = par("tickOffset");
         if (tickOffset < 0 || tickOffset >= currentTickLength)
@@ -36,8 +43,8 @@ void DriftingOscillatorBase::initialize(int stage)
 void DriftingOscillatorBase::handleTickTimer()
 {
     setOrigin(simTime());
-    nextTickFromOrigin = getCurrentTickLength();
     OscillatorBase::handleTickTimer();
+    nextTickFromOrigin = getCurrentTickLength();
 }
 
 void DriftingOscillatorBase::scheduleTickTimer()
@@ -45,11 +52,12 @@ void DriftingOscillatorBase::scheduleTickTimer()
     scheduleAfter(nextTickFromOrigin, tickTimer);
 }
 
-void DriftingOscillatorBase::setOrigin(simtime_t origin)
+void DriftingOscillatorBase::setOrigin(simtime_t newOrigin)
 {
-    ASSERTCMP(<=, origin, simTime());
+    EV_DEBUG << "Setting oscillator origin" << EV_FIELD(newOrigin) << EV_ENDL;
+    ASSERTCMP(<=, newOrigin, simTime());
     ASSERTCMP(<=, origin, newOrigin);
-    this->origin = origin;
+    origin = newOrigin;
 }
 
 void DriftingOscillatorBase::setDriftRate(ppm newDriftRate)
@@ -58,17 +66,18 @@ void DriftingOscillatorBase::setDriftRate(ppm newDriftRate)
     if (newDriftRate != driftRate) {
         emit(preOscillatorStateChangedSignal, this);
         simtime_t currentSimTime = simTime();
-        EV_DEBUG << "Setting oscillator drift rate from " << driftRate << " to " << newDriftRate << " at simtime " << currentSimTime << ".\n";
-        simtime_t currentTickLength = getCurrentTickLength();
-        simtime_t baseTickTime = origin + nextTickFromOrigin - currentTickLength;
-        simtime_t elapsedTickTime = fmod(currentSimTime - baseTickTime, currentTickLength);
-        double long newDriftFactor = 1.0L + newDriftRate.get() / 1E+6L;
-        nextTickFromOrigin = SimTime::fromRaw((currentTickLength.raw() - elapsedTickTime.raw()) * driftFactor / newDriftFactor);
+        EV_INFO << "Setting oscillator drift rate from " << driftRate << " to " << newDriftRate << " at simtime " << currentSimTime << ".\n";
+        simtime_t oldCurrentTickLength = getCurrentTickLength();
+        simtime_t baseTickTime = origin + nextTickFromOrigin - oldCurrentTickLength;
+        simtime_t elapsedTickTime = fmod(currentSimTime - baseTickTime, oldCurrentTickLength);
+        double newDriftFactor = 1.0L + newDriftRate.get() / 1E+6L;
+        nextTickFromOrigin = SimTime::fromRaw((oldCurrentTickLength.raw() - elapsedTickTime.raw()) * driftFactor / newDriftFactor);
         driftRate = newDriftRate;
         driftFactor = newDriftFactor;
         if (driftRate != ppm(0)) {
-            ASSERTCMP(!=, nominalTickLength, currentTickLength);
-            ASSERTCMP(==, nominalTickLength, currentTickLength * driftFactor);
+            simtime_t newCurrentTickLength = getCurrentTickLength();
+            ASSERTCMP(!=, nominalTickLength, newCurrentTickLength);
+            ASSERTCMP(==, nominalTickLength, newCurrentTickLength * driftFactor);
         }
         setOrigin(currentSimTime);
         emit(driftRateChangedSignal, driftRate.get<ppm>());
@@ -85,7 +94,7 @@ void DriftingOscillatorBase::setTickOffset(simtime_t newTickOffset)
     simtime_t oldTickOffset = fmod(currentSimTime - baseTickTime, currentTickLength);
     if (newTickOffset != oldTickOffset) {
         emit(preOscillatorStateChangedSignal, this);
-        EV_DEBUG << "Setting oscillator tick offset from " << oldTickOffset << " to " << newTickOffset << " at simtime " << currentSimTime << ".\n";
+        EV_INFO << "Setting oscillator tick offset from " << oldTickOffset << " to " << newTickOffset << " at simtime " << currentSimTime << ".\n";
         setOrigin(currentSimTime);
         nextTickFromOrigin = currentTickLength - newTickOffset;
         emit(postOscillatorStateChangedSignal, this);
@@ -102,6 +111,12 @@ int64_t DriftingOscillatorBase::doComputeTicksForInterval(simtime_t timeInterval
     if (timeInterval == 0)
         return 0;
     int64_t result = floor((timeInterval - nextTickFromOrigin).raw() * driftFactor / nominalTickLength.raw()) + 1;
+//    int64_t result = 1;
+//    timeInterval -= nextTickFromOrigin;
+//    while (timeInterval > 0) {
+//        timeInterval -= getCurrentTickLength();
+//        result++;
+//    }
     if (result < 0)
         result = 0;
     CLOCK_COUT << "   computeTicksForInterval(" << timeInterval.raw() << ") -> " << result << std::endl;
@@ -118,6 +133,9 @@ simtime_t DriftingOscillatorBase::doComputeIntervalForTicks(int64_t numTicks) co
     if (numTicks == 0)
         return 0;
     simtime_t result = SimTime::fromRaw(ceil((nominalTickLength.raw() * (numTicks - 1)) / driftFactor)) + nextTickFromOrigin;
+//    simtime_t result = nextTickFromOrigin;
+//    for (int i = 0; i < numTicks - 1; i++)
+//        result += getCurrentTickLength();
     if (result < 0)
         result = 0;
     CLOCK_COUT << "   computeIntervalForTicks(" << numTicks << ") -> " << result.raw() << std::endl;

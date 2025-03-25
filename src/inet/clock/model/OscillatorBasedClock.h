@@ -38,9 +38,14 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
 {
   protected:
     bool useFutureEventSet = false;
+    uint64_t insertCount = 0;
     IOscillator *oscillator = nullptr;
     int64_t (*roundingFunction)(int64_t, int64_t) = nullptr;
 
+    /**
+     * The lower bound of the simulation time where the clock time equals with origin clock time.
+     */
+    simtime_t originSimulationTimeLowerBound;
     /**
      * The simulation time from which the clock computes the mapping between future simulation times and clock times.
      */
@@ -49,6 +54,12 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
      * The clock time from which the clock computes the mapping between future simulation times and clock times.
      */
     clocktime_t originClockTime;
+    /**
+     * The clock time accumulated from the oscillator compensation.
+     */
+    clocktime_t clockTimeCompensation;
+
+    uint64_t lastNumTicks = 0;
 
     std::vector<ClockEvent *> events;
 
@@ -87,7 +98,7 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
 
     virtual std::string resolveDirective(char directive) const override;
 
-    virtual void receiveSignal(cComponent *source, int signal, long value, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, int signal, uintval_t value, cObject *details) override;
     virtual void receiveSignal(cComponent *source, int signal, cObject *obj, cObject *details) override;
 };
 

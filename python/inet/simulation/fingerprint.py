@@ -3,6 +3,7 @@ This module provides abstractions for fingerprints.
 """
 
 import logging
+import os
 
 from inet.common import *
 
@@ -50,10 +51,114 @@ class FingerprintTrajectory:
         event_numbers = []
         while i < len(self.fingerprints):
             fingerprint = self.fingerprints[i]
+            event_number = self.event_numbers[i]
             j = i
             while (j < len(self.fingerprints)) and (fingerprint == self.fingerprints[j]):
                 j = j + 1
             unique_fingerprints.append(fingerprint)
-            event_numbers.append(j - 1)
+            event_numbers.append(event_number)
             i = j
         return FingerprintTrajectory(self.simulation_result, self.ingredients, unique_fingerprints, event_numbers)
+
+    def print_trajectory(self):
+        for fingerprint, event_number in zip(self.fingerprints, self.event_numbers):
+            print(f"#{event_number} {fingerprint}")
+
+class SimulationEvent:
+    def __init__(self, simulation_result, event_number, eventlog=None):
+        self.simulation_result = simulation_result
+        self.event_number = event_number
+        self.eventlog = eventlog
+
+    def __repr__(self):
+        return repr(self)
+
+    def get_eventlog(self):
+        if not self.eventlog:
+            simulation_config = self.simulation_result.task.simulation_config
+            simulation_project = simulation_config.simulation_project
+            eventlog_file_path = simulation_project.get_full_path(os.path.join(simulation_config.working_directory, self.simulation_result.eventlog_file_path))
+            self.eventlog = create_eventlog(eventlog_file_path)
+        return self.eventlog
+
+    def get_event(self):
+        return self.get_eventlog().getEventForEventNumber(self.event_number)
+
+    def get_module_path(self):
+        eventlog = self.get_eventlog()
+        event = self.get_event()
+        module_description_entry = event.getModuleDescriptionEntry()
+        path = []
+        eventlog_cache = eventlog.getEventLogEntryCache()
+        while module_description_entry:
+            full_name = module_description_entry.getFullName()
+            path.append(full_name)
+            module_description_entry = eventlog_cache.getModuleDescriptionEntry(module_description_entry.getParentModuleId())
+        path.reverse()
+        return ".".join(path)
+
+    def get_description(self):
+        event = self.get_event()
+        simulation_time = event.getSimulationTime()
+        module_description_entry = event.getModuleDescriptionEntry()
+        full_path = self.get_module_path()
+        ned_type_name = module_description_entry.getNedTypeName()
+        cause_begin_send_entry = event.getCauseBeginSendEntry()
+        message_name = event.getCauseBeginSendEntry().getMessageName() if cause_begin_send_entry else None
+        event_description = f"#{COLOR_GREEN}{self.event_number}{COLOR_RESET} at {COLOR_GREEN}{simulation_time}{COLOR_RESET} in {COLOR_CYAN}{full_path}{COLOR_RESET} ({COLOR_GREEN}{ned_type_name}{COLOR_RESET})" + (f" on {COLOR_GREEN}{message_name}{COLOR_RESET}" if message_name else "")
+        return event_description
+
+    def print_cause_chain(self, num_cause_events=3):
+        simulation_event = self
+        while num_cause_events > 0 and simulation_event:
+            print(simulation_event.get_description())
+            cause_event = simulation_event.get_event().getCauseEvent() if simulation_event else None 
+            simulation_event = SimulationEvent(simulation_event.simulation_result, cause_event.getEventNumber(), simulation_event.get_eventlog()) if cause_event else None
+            num_cause_events = num_cause_events - 1
+
+class FingerprintTrajectoryDivergencePosition:
+    def __init__(self, simulation_event_1, simulation_event_2):
+        self.simulation_event_1 = simulation_event_1
+        self.simulation_event_2 = simulation_event_2
+
+    def __repr__(self):
+        return f"Fingerprint trajectory divergence point:\n{self.get_description()}"
+
+    def get_description(self):
+        event_description_1 = self.simulation_event_1.get_description()
+        event_description_2 = self.simulation_event_2.get_description()
+        return f"  {event_description_1}\n  {event_description_2}"
+
+    def print_cause_chain(self, num_cause_events=3):
+        print("Simulation event cause chain 1:")
+        self.simulation_event_1.print_cause_chain(num_cause_events=num_cause_events)
+        print("Simulation event cause chain 2:")
+        self.simulation_event_2.print_cause_chain(num_cause_events=num_cause_events)
+
+    def show_in_sequence_chart(self):
+        simulation_event_1 = self.simulation_event_1
+        simulation_event_2 = self.simulation_event_2
+        project_name1 = simulation_event_1.simulation_result.task.simulation_config.simulation_project.get_name()
+        project_name2 = simulation_event_2.simulation_result.task.simulation_config.simulation_project.get_name()
+        path_name1 = "/" + project_name1 + "/" + simulation_event_1.simulation_result.task.simulation_config.working_directory + "/" + simulation_event_1.simulation_result.eventlog_file_path
+        path_name2 = "/" + project_name2 + "/" + simulation_event_2.simulation_result.task.simulation_config.working_directory + "/" + simulation_event_2.simulation_result.eventlog_file_path
+        editor1 = open_editor(path_name1)
+        editor2 = open_editor(path_name2)
+        goto_event_number(editor1, simulation_event_1.event_number)
+        goto_event_number(editor2, simulation_event_2.event_number)
+
+def find_fingerprint_trajectory_divergence_position(fingerprint_trajectory_1, fingerprint_trajectory_2):
+    min_size = min(len(fingerprint_trajectory_1.fingerprints), len(fingerprint_trajectory_2.fingerprints))
+    for i in range(0, min_size):
+        trajectory_fingerprint_1 = fingerprint_trajectory_1.fingerprints[i]
+        trajectory_fingerprint_2 = fingerprint_trajectory_2.fingerprints[i]
+        if trajectory_fingerprint_1.fingerprint != trajectory_fingerprint_2.fingerprint:
+            # NOTE: if the fingerprints are first different at event_number_1 and event_number_2
+            # then something works differently at one event earlier because the event fingerprint
+            # contains the hash of the simulation trajectory up to the given event
+            event_number_1 = fingerprint_trajectory_1.event_numbers[i] - 1
+            event_number_2 = fingerprint_trajectory_2.event_numbers[i] - 1
+            return FingerprintTrajectoryDivergencePosition(SimulationEvent(fingerprint_trajectory_1.simulation_result, event_number_1),
+                                                           SimulationEvent(fingerprint_trajectory_2.simulation_result, event_number_2))
+    return None
+
