@@ -5,7 +5,6 @@
 //
 
 
-//TODO review
 package inet.queueing.common;
 
 import inet.queueing.base.PacketProcessorBase;

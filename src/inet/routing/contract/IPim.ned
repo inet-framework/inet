@@ -6,14 +6,12 @@
 
 // Authors: Veronika Rybova, Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
 
-//TODO review
 package inet.routing.contract;
 
 //
 // Defines a module interface for Protocol Independent Multicast (PIM) routing
 // protocol implementations. PIM is used for multicast routing across IP networks,
-// building distribution trees for multicast data. Implementations include PIM-DM
-// (Dense Mode) and PIM-SM (Sparse Mode) variants.
+// building distribution trees for multicast data.
 //
 moduleinterface IPim
 {

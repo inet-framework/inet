@@ -5,7 +5,6 @@
 //
 
 
-//TODO review
 package inet.applications.sctpapp;
 
 import inet.applications.contract.IApp;
@@ -14,8 +13,7 @@ import inet.applications.contract.IApp;
 // Implements a peer application for SCTP NAT traversal. Supports both standard
 // and rendezvous connection establishment methods to traverse NAT devices.
 // Exchanges NAT traversal information with other peers and handles data transfer
-// with configurable parameters. Provides statistics collection for monitoring
-// connection performance and supports multi-homing with multiple addresses.
+// with configurable parameters. Supports multi-homing with multiple addresses.
 //
 simple SctpNatPeer like IApp
 {

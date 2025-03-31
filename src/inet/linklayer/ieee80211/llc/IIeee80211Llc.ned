@@ -4,12 +4,11 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-//TODO review
 package inet.linklayer.ieee80211.llc;
 
 //
 // Module interface for IEEE 802.11 Logical Link Control (LLC) implementations.
-// Defines the interface between the MAC layer and network layer in IEEE 802.11
+// LLC defines the interface between the MAC layer and network layer in IEEE 802.11
 // networks. Implementations handle encapsulation and decapsulation of packets,
 // using either EtherType Protocol Discrimination (EPD) or Link Protocol
 // Discrimination (LPD) methods.

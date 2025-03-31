@@ -5,7 +5,6 @@
 //
 
 
-//TODO review
 package inet.linklayer.ieee80211.mac.recipient;
 
 //
@@ -14,6 +13,8 @@ package inet.linklayer.ieee80211.mac.recipient;
 // deaggregation, A-MSDU deaggregation, and block ACK reordering. Processes received
 // frames according to the MAC data plane architecture described in the IEEE 802.11
 // standard.
+//
+// @see RecipientMacDataService
 //
 module RecipientQosMacDataService
 {

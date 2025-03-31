@@ -5,7 +5,6 @@
 //
 
 
-//TODO review
 package inet.linklayer.ieee80211.mac.queue;
 
 import inet.queueing.queue.DropTailQueue;
@@ -15,6 +14,8 @@ import inet.queueing.queue.DropTailQueue;
 // determine the order in which frames are processed. By default, prioritizes
 // management frames over data frames, but can be configured to use different
 // prioritization schemes such as management over multicast over unicast frames.
+//
+// @see CompoundPendingQueue
 //
 simple PendingQueue extends DropTailQueue
 {

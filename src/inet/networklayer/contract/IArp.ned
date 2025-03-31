@@ -6,7 +6,6 @@
 //
 
 
-//TODO review
 package inet.networklayer.contract;
 
 //

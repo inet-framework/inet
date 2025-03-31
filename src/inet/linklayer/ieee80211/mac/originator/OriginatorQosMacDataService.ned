@@ -5,7 +5,6 @@
 //
 
 
-//TODO review
 package inet.linklayer.ieee80211.mac.originator;
 
 import inet.linklayer.ieee80211.mac.contract.IFragmentationPolicy;
@@ -18,7 +17,7 @@ import inet.linklayer.ieee80211.mac.contract.IMpduAggregationPolicy;
 // MSDU aggregation (A-MSDU) and MPDU aggregation (A-MPDU). Processes outgoing
 // frames by assigning sequence numbers, performing aggregation, and fragmentation
 // based on configured policies. Follows the MAC data plane architecture described
-// in IEEE 802.11 standard section 5.1.5.
+// in IEEE 802.11 standard.
 //
 module OriginatorQosMacDataService
 {

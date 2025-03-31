@@ -5,7 +5,6 @@
 //
 
 
-//TODO review
 package inet.queueing.common;
 
 import inet.queueing.contract.IPacketDelayer;
@@ -17,8 +16,9 @@ import inet.queueing.contract.IPacketServer;
 // preserving their order. Implements the IPacketDelayer interface using a queue
 // and server architecture. The queue stores packets while they wait, and the
 // server processes each packet with a processing time equal to the configured
-// delay. Unlike the simple PacketDelayer module, this implementation always
-// maintains packet order regardless of delay distribution.
+// delay. Note that the actual packet delay will be the sum of the queueing time
+// and the configured delay. Unlike the simple PacketDelayer module, this 
+// implementation always maintains packet order regardless of delay distribution.
 //
 module QueueingPacketDelayer like IPacketDelayer
 {

@@ -5,7 +5,6 @@
 //
 
 
-//TODO review
 package inet.linklayer.ieee80211.mac.protectionmechanism;
 
 //
@@ -13,9 +12,7 @@ package inet.linklayer.ieee80211.mac.protectionmechanism;
 // in the standard section 8.2.5.2. This module calculates the Duration/ID field
 // values for different frame types (RTS, CTS, BlockAckReq, BlockAck, data,
 // management) to properly set the Network Allocation Vector (NAV) in receiving
-// stations. It accounts for frame transmission times, acknowledgments, and
-// interframe spaces to ensure complete frame exchanges are protected from
-// interference.
+// stations.
 //
 simple SingleProtectionMechanism
 {
