@@ -297,5 +297,23 @@ void AckingMac::handleCrashOperation(LifecycleOperation *operation)
     }
 }
 
+const char *AckingMac::getTransmissionStateName(physicallayer::IRadio::TransmissionState state) const
+{
+    switch (state) {
+        case physicallayer::IRadio::TRANSMISSION_STATE_UNDEFINED: return "UNDEFINED";
+        case physicallayer::IRadio::TRANSMISSION_STATE_IDLE: return "IDLE";
+        case physicallayer::IRadio::TRANSMISSION_STATE_TRANSMITTING: return "TRANSMITTING";
+        default: return "???";
+    }
+}
+
+std::string AckingMac::resolveDirective(char directive) const
+{
+    switch (directive) {
+        case 's': return getTransmissionStateName(transmissionState);
+        default: throw cRuntimeError("Unknown directive: %c", directive);
+    }
+}
+
 } // namespace inet
 

@@ -22,6 +22,9 @@ import inet.linklayer.contract.IMacProtocol;
 //
 // See ~AckingWirelessInterface for rationale and details.
 //
+// The format string can contain the following directives:
+//  - %s transmission state
+//
 module AckingMac extends MacProtocolBase like ILinkLayer, IMacProtocol
 {
     parameters:
@@ -35,6 +38,7 @@ module AckingMac extends MacProtocolBase like ILinkLayer, IMacProtocol
         bool fullDuplex = default(true);    // Allows transmitting and receiving simultaneously (transceiver radio mode)
         bool useAck = default(true);
         double ackTimeout @unit(s) = default(100ms);
+        string displayStringTextFormat = default("state: %s");
 
         @class(AckingMac);
         @signal[linkBroken](type=inet::Packet);

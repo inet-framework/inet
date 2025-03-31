@@ -198,6 +198,11 @@ class INET_API CsmaCaMac : public MacProtocolBase, public IMacProtocol, public q
     virtual queueing::IPassivePacketSource *getProvider(const cGate *gate) override;
     virtual void handleCanPullPacketChanged(const cGate *gate) override;
     virtual void handlePullPacketProcessed(Packet *packet, const cGate *gate, bool successful) override;
+
+    // For display string
+    virtual std::string resolveDirective(char directive) const;
+    const char *getTransmissionStateName(physicallayer::IRadio::TransmissionState state) const;
+    const char *getFsmStateName(State state) const;
 };
 
 } // namespace inet

@@ -38,6 +38,10 @@ class INET_API AckingMac : public MacProtocolBase, public IMacProtocol, public q
     simtime_t ackTimeout;
     cMessage *ackTimeoutMsg = nullptr;
 
+    // For display string
+    virtual std::string resolveDirective(char directive) const;
+    const char *getTransmissionStateName(physicallayer::IRadio::TransmissionState state) const;
+
   protected:
     /** implements MacBase functions */
     //@{

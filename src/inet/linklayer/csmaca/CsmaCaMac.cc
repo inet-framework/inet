@@ -677,5 +677,48 @@ void CsmaCaMac::handlePullPacketProcessed(Packet *packet, const cGate *gate, boo
     throw cRuntimeError("Not supported callback");
 }
 
+const char *CsmaCaMac::getFsmStateName(State state) const
+{
+    switch (state) {
+        case IDLE: return "IDLE";
+        case DEFER: return "DEFER";
+        case WAITDIFS: return "WAITDIFS";
+        case BACKOFF: return "BACKOFF";
+        case TRANSMIT: return "TRANSMIT";
+        case WAITACK: return "WAITACK";
+        case RECEIVE: return "RECEIVE";
+        case WAITSIFS: return "WAITSIFS";
+        default: return "???";
+    }
+}
+
+const char *CsmaCaMac::getTransmissionStateName(physicallayer::IRadio::TransmissionState state) const
+{
+    switch (state) {
+        case physicallayer::IRadio::TRANSMISSION_STATE_UNDEFINED: return "UNDEFINED";
+        case physicallayer::IRadio::TRANSMISSION_STATE_IDLE: return "IDLE";
+        case physicallayer::IRadio::TRANSMISSION_STATE_TRANSMITTING: return "TRANSMITTING";
+        default: return "???";
+    }
+}
+
+std::string CsmaCaMac::resolveDirective(char directive) const
+{
+    switch (directive) {
+        case 's': return getTransmissionStateName(transmissionState);
+        case 'f': return getFsmStateName(fsm.getState());
+        case 'r': return std::to_string(retryCounter);
+        case 'a': return std::to_string(numRetry);
+        case 'b': return std::to_string(numSentWithoutRetry);
+        case 'c': return std::to_string(numGivenUp);
+        case 'd': return std::to_string(numCollision);
+        case 'e': return std::to_string(numSent);
+        case 'g': return std::to_string(numReceived);
+        case 'h': return std::to_string(numSentBroadcast);
+        case 'i': return std::to_string(numReceivedBroadcast);
+        default: throw cRuntimeError("Unknown directive: %c", directive);
+    }
+}
+
 } // namespace inet
 

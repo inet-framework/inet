@@ -46,6 +46,19 @@ import inet.linklayer.contract.IMacProtocol;
 // to keep its code simple and accessible, so lost ACKs will cause duplicates
 // in the stream of packets sent up to higher layers.
 //
+// The format string can contain the following directives:
+//  - %s transmission state
+//  - %f MAC state (fsm state)
+//  - %r retry counter
+//  - %a number of retries
+//  - %b number of sent packets without retry
+//  - %c number of packets given up
+//  - %d number of collisions
+//  - %e number of sent packets
+//  - %g number of received packets
+//  - %h number of sent broadcast packets
+//  - %i number of received broadcast packets
+//
 module CsmaCaMac extends MacProtocolBase like IMacProtocol
 {
     parameters:
@@ -67,6 +80,7 @@ module CsmaCaMac extends MacProtocolBase like IMacProtocol
         int cwMax = default(1023); // Maximum contention window
         int cwMulticast = default(cwMin); // Multicast contention window
         int retryLimit = default(7); // Maximum number of retries
+        string displayStringTextFormat = default("state: %f\nsent: %e\nrcvd: %g");
         @class(CsmaCaMac);
         @signal[linkBroken](type=inet::Packet);
         @statistic[linkBroken](title="link break"; source=linkBroken; record=count; interpolationmode=none);
