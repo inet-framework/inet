@@ -5,6 +5,7 @@
 //
 
 
+//TODO review
 package inet.applications.sctpapp;
 
 import inet.applications.contract.IApp;
