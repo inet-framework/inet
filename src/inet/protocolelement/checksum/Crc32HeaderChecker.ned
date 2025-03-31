@@ -5,7 +5,6 @@
 //
 
 
-//TODO review
 package inet.protocolelement.checksum;
 
 import inet.protocolelement.checksum.ChecksumHeaderChecker;
@@ -17,7 +16,6 @@ import inet.protocolelement.checksum.ChecksumHeaderChecker;
 // packet). It processes packets by creating a new CRC header, computing the
 // CRC value based on the packet content and CRC mode, setting the CRC value
 // and mode in the header, and inserting the header at the specified position.
-// It registers with the AccessoryProtocol service for CRC insertion.
 //
 simple Crc32HeaderChecker extends ChecksumHeaderChecker
 {

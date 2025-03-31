@@ -5,7 +5,6 @@
 //
 
 
-//TODO review
 package inet.linklayer.ieee80211.mac.protectionmechanism;
 
 //
@@ -13,9 +12,7 @@ package inet.linklayer.ieee80211.mac.protectionmechanism;
 // Network Allocation Vector (NAV) mechanism for virtual carrier sensing. This
 // module computes appropriate duration values for different frame types (RTS,
 // data, management) based on IEEE 802.11 standard rules. For RTS frames, it
-// calculates time needed for the complete RTS-CTS-DATA-ACK exchange. For data
-// and management frames, it determines duration based on frame fragmentation
-// status and destination address type.
+// calculates time needed for the complete RTS-CTS-DATA-ACK exchange.
 //
 simple OriginatorProtectionMechanism
 {

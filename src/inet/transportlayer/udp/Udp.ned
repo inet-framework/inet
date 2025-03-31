@@ -5,7 +5,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-//TODO review
 package inet.transportlayer.udp;
 
 import inet.transportlayer.contract.IUdp;

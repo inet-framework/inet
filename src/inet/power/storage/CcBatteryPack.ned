@@ -5,7 +5,6 @@
 //
 
 
-//TODO review
 package inet.power.storage;
 
 import inet.power.storage.SimpleCcBattery;

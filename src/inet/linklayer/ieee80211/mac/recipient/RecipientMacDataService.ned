@@ -5,14 +5,13 @@
 //
 
 
-//TODO review
 package inet.linklayer.ieee80211.mac.recipient;
 
 //
-// Implements the MAC data service for the recipient side in IEEE 802.11 networks.
+// Implements the MAC data service for the recipient side in non-QoS IEEE 802.11 networks.
 // Processes received frames by performing defragmentation and duplicate detection.
-// Handles different frame types (data, management, control) and maintains statistics
-// for defragmented and deaggregated packets, as well as dropped duplicate packets.
+//
+// @see RecipientQosMacDataService
 //
 module RecipientMacDataService
 {

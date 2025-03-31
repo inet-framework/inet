@@ -5,7 +5,6 @@
 //
 
 
-//TODO review
 package inet.linklayer.ieee80211.mac.originator;
 
 //
@@ -14,6 +13,8 @@ package inet.linklayer.ieee80211.mac.originator;
 // window size based on transmission outcomes, and enforces retry limits. Handles
 // different retry procedures for frames below and above the RTS threshold as
 // specified in IEEE 802.11 standard section 9.19.2.6.
+//
+// @see IRtsPolicy, Dcaf
 //
 simple NonQosRecoveryProcedure
 {

@@ -5,7 +5,6 @@
 //
 
 
-//TODO review
 package inet.linklayer.ieee80211.mac.originator;
 
 //
@@ -14,6 +13,8 @@ package inet.linklayer.ieee80211.mac.originator;
 // contention window size, and enforces retry limits. Maintains separate short and
 // long retry counters based on frame size relative to RTS threshold, and tracks
 // per-TID frame status to support Quality of Service requirements.
+//
+// @see IRtsPolicy, Dcaf, Edcaf
 //
 simple QosRecoveryProcedure
 {

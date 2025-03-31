@@ -5,7 +5,6 @@
 //
 
 
-//TODO review
 package inet.linklayer.ethernet.common;
 
 import inet.linklayer.base.MacRelayUnitBase;

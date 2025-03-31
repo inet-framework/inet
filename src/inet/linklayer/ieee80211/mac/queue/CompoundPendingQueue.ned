@@ -5,7 +5,6 @@
 //
 
 
-//TODO review
 package inet.linklayer.ieee80211.mac.queue;
 
 import inet.queueing.classifier.PacketClassifier;
@@ -17,8 +16,9 @@ import inet.queueing.scheduler.PriorityScheduler;
 // Implements a prioritized queue system for IEEE 802.11 MAC frames. Uses a classifier
 // to separate incoming packets into three queues: management frames (highest priority),
 // multicast frames (medium priority), and unicast frames (lowest priority). A priority
-// scheduler then selects packets from these queues in order of priority, ensuring
-// time-sensitive management frames are processed before data frames.
+// scheduler then selects packets from these queues in order of priority.
+//
+// @see PendingQueue
 //
 module CompoundPendingQueue extends CompoundPacketQueueBase
 {

@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
-//TODO review
 package inet.applications.sctpapp;
 
 import inet.applications.contract.IApp;
@@ -15,8 +13,7 @@ import inet.applications.contract.IApp;
 // server simultaneously. Supports sending and receiving data with configurable
 // parameters including multi-streaming, PR-SCTP, and stream reset capabilities.
 // Provides options for echo functionality, ordered/unordered delivery, and
-// configurable think times between transmissions. Collects comprehensive
-// statistics on data transfer performance.
+// configurable think times between transmissions.
 //
 simple SctpPeer like IApp
 {
