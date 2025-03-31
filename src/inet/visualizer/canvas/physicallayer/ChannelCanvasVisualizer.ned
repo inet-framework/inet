@@ -5,6 +5,7 @@
 //
 
 
+//TODO review
 package inet.visualizer.canvas.physicallayer;
 
 import inet.visualizer.base.ChannelVisualizerBase;

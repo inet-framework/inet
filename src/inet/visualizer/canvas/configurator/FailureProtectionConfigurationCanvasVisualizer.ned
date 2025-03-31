@@ -5,6 +5,7 @@
 //
 
 
+//TODO review
 package inet.visualizer.canvas.configurator;
 
 import inet.visualizer.base.TreeVisualizerBase;
