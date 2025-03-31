@@ -1,6 +1,6 @@
 # Task: Add resolveDirective() Methods to INET Framework Classes
 
-Your task is to add resolveDirective() methods to specific classes in the INET Framework and update their corresponding NED file documentation. The resolveDirective() methods allow modules to display dynamic information in their visualization text.
+Your task is to add 'std::string resolveDirective()' methods to specific classes in the INET Framework and update their corresponding NED file documentation. The resolveDirective() methods allow modules to display dynamic information in their visualization text.
 
 ## Background
 
@@ -12,18 +12,17 @@ For example, in MacRelayUnitBase.cc, the resolveDirective() method handles direc
 std::string MacRelayUnitBase::resolveDirective(char directive) const
 {
     switch (directive) {
-        case 'p':
-            return std::to_string(numProcessedFrames);
-        case 'd':
-            return std::to_string(numDroppedFrames);
-        default:
-            throw cRuntimeError("Unknown directive: %c", directive);
+        case 'p': return std::to_string(numProcessedFrames);
+        case 'd': return std::to_string(numDroppedFrames);
+        default: throw cRuntimeError("Unknown directive: %c", directive);
     }
 }
 ```
 
 The corresponding NED file should:
+
 1. Include a default format string in the displayStringTextFormat parameter
+   (prefer state enums and counters)
 2. Document the directives in the main comment above the module definition
 
 For example, in MacRelayUnitBase.ned:
@@ -51,10 +50,11 @@ For each class in the input file:
 
 1. Add a resolveDirective() method to the .cc file that handles the specified directives,
    and also declare it as protected method in the .h file
-2. Update the corresponding .ned file to:
+2. If a field list contains an enum for which there is no function to convert it to a string, add one to the file that declares the enum and use it in resolveDirective()
+3. Update the corresponding .ned file to:
    - Document the directives in the main comment above the module definition
    - Set an appropriate default format string in the displayStringTextFormat parameter
-3. Generate appropriate descriptions for each directive based on the variable name and purpose
+4. Generate appropriate descriptions for each directive based on the variable name and purpose
 
 ## Input File Format
 
@@ -70,8 +70,10 @@ anotherpath/file.cc:AnotherClass
 ```
 
 For each class, you need to:
+
 - Examine the code to understand what each variable represents
 - Generate appropriate descriptions for each directive
+- always use LOWERCASE letters for the directive characters
 - Implement the resolveDirective() method with proper handling of each variable type
 - Update the NED file with documentation and format string
 
@@ -102,11 +104,25 @@ common/QosClassifier.cc:QosClassifier
 ## Implementation Guidelines
 
 1. For each class, add a resolveDirective() method that handles the specified directives
-2. If the base class already has a resolveDirective() method:
+2. If the base class already has a resolveDirective() you must:
    - Declare the method with the override keyword
    - Call the base class method for unhandled directives instead of throwing an error
 3. The method should return a string representation of the corresponding variable
-4. For enum types (like macState), convert to a meaningful string representation
+4. For enum types (like macState), convert to a meaningful string representation using
+   a dedicated helper function for clarity and maintainability, like this:
+
+   ```cpp
+   const char *YourClassName::getSomeStateName(SomeState state)
+   {
+       switch (state) {
+           case STATE_A: return "STATE_A";
+           case STATE_B: return "STATE_B";
+           // ... other states ...
+           default: return "???";
+       }
+   }
+   ```
+
 5. For classes without a base class implementation, add a default case that throws an error for unknown directives
 6. Update the .ned file to document the directives in the main comment above the module definition and set an appropriate default format string
 7. Make sure to declare any new member variables needed (e.g., numPacketsProcessed, numClassified)
@@ -137,14 +153,10 @@ protected:
 std::string MacRelayUnitBase::resolveDirective(char directive) const
 {
     switch (directive) {
-        case 'p':
-            return std::to_string(numProcessedFrames);
-        case 'd':
-            return std::to_string(numDroppedFrames);
-        case 't':
-            return std::to_string(processingTime.dbl()) + " s";
-        default:
-            throw cRuntimeError("Unknown directive: %c", directive);
+        case 'p': return std::to_string(numProcessedFrames);
+        case 'd': return std::to_string(numDroppedFrames);
+        case 't': return processingTime.str() + " s";
+        default: throw cRuntimeError("Unknown directive: %c", directive);
     }
 }
 
@@ -152,14 +164,10 @@ std::string MacRelayUnitBase::resolveDirective(char directive) const
 std::string MacRelayUnitBase::resolveDirective(char directive) const
 {
     switch (directive) {
-        case 'p':
-            return std::to_string(numProcessedFrames);
-        case 'd':
-            return std::to_string(numDroppedFrames);
-        case 't':
-            return std::to_string(processingTime.dbl()) + " s";
-        default:
-            return LayeredProtocolBase::resolveDirective(directive);
+        case 'p': return std::to_string(numProcessedFrames);
+        case 'd': return std::to_string(numDroppedFrames);
+        case 't': return processingTime.str() + " s";
+        default: return LayeredProtocolBase::resolveDirective(directive);
     }
 }
 ```
