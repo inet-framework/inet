@@ -83,6 +83,7 @@ void GateScheduleVisualizerBase::handleParameterChange(const char *name)
 
 void GateScheduleVisualizerBase::refreshDisplay() const
 {
+    VisualizerBase::refreshDisplay();
     if (simTime() - lastRefreshTime > CLOCKTIME_AS_SIMTIME(displayDuration) / width) {
         for (auto gateVisualization : gateVisualizations)
             refreshGateVisualization(gateVisualization);

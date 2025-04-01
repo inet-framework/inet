@@ -93,6 +93,7 @@ void PathVisualizerBase::handleParameterChange(const char *name)
 
 void PathVisualizerBase::refreshDisplay() const
 {
+    VisualizerBase::refreshDisplay();
     if (fadeOutTime > 0) {
         AnimationPosition currentAnimationPosition;
         std::vector<const PathVisualization *> removedPathVisualizations;
