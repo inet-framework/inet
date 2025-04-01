@@ -41,6 +41,10 @@ simple Gptp like IGptp
         bool sendAnnounceImmediately = default(false); // Send Announce message immediately after entering executing BMCA (otherwise wait until next announceInterval)
 
         int grandmasterPriority1 @mutable = default(255); // Priority1 value for BMCA
+        int clockClass @mutable = default(248); // ClockClass value for BMCA
+        int clockAccuracy @mutable = default(254); // ClockAccuracy value for BMCA
+        int offsetScaledLogVariance @mutable = default(17258); // OffsetScaledLogVariance value for BMCA
+        int grandmasterPriority2 @mutable = default(248); // Priority2 value for BMCA
 
         // following parameters are used to schedule follow_up and pdelay_resp messages.
         // These numbers must be large enough to prevent creating a queue in the MAC layer.

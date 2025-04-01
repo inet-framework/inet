@@ -235,10 +235,10 @@ void Gptp::initBmca()
 {
     // TODO: harcoded for now
     localPriorityVector.grandmasterPriority1 = par("grandmasterPriority1");
-    localPriorityVector.grandmasterClockQuality.clockClass = 248;
-    localPriorityVector.grandmasterClockQuality.clockAccuracy = 0;
-    localPriorityVector.grandmasterClockQuality.offsetScaledLogVariance = 0;
-    localPriorityVector.grandmasterPriority2 = 0;
+    localPriorityVector.grandmasterClockQuality.clockClass = par("clockClass");
+    localPriorityVector.grandmasterClockQuality.clockAccuracy = par("clockAccuracy");
+    localPriorityVector.grandmasterClockQuality.offsetScaledLogVariance = par("offsetScaledLogVariance");
+    localPriorityVector.grandmasterPriority2 = par("grandmasterPriority2");
     localPriorityVector.grandmasterIdentity = clockIdentity;
     localPriorityVector.stepsRemoved = 0;
 }
@@ -1289,6 +1289,25 @@ void Gptp::handleParameterChange(const char *name)
         // Update local priority vector
         localPriorityVector.grandmasterPriority1 = par("grandmasterPriority1");
         executeBmca();
+    }
+    else if (!strcmp(name, "clockClass")) {
+        localPriorityVector.grandmasterClockQuality.clockClass = par("clockClass");
+        executeBmca();
+    }
+    else if (!strcmp(name, "clockAccuracy")) {
+        localPriorityVector.grandmasterClockQuality.clockAccuracy = par("clockAccuracy");
+        executeBmca();
+    }
+    else if (!strcmp(name, "offsetScaledLogVariance")) {
+        localPriorityVector.grandmasterClockQuality.offsetScaledLogVariance = par("offsetScaledLogVariance");
+        executeBmca();
+    }
+    else if (!strcmp(name, "priority2")) {
+        localPriorityVector.grandmasterPriority2 = par("priority2");
+        executeBmca();
+    }
+    else {
+        throw cRuntimeError("Parameter %s is not mutable", name);
     }
 }
 
