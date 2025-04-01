@@ -19,16 +19,19 @@ namespace inet {
 
 namespace visualizer {
 
-class INET_API VisualizerBase : public cSimpleModule
+class INET_API VisualizerBase : public cSimpleModule, public StringFormat::IDirectiveResolver
 {
   protected:
     cModule *visualizationTargetModule = nullptr;
     cModule *visualizationSubjectModule = nullptr;
     const char *tags = nullptr;
+    StringFormat format;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
+    virtual std::string resolveDirective(char directive) const override;
+    virtual void refreshDisplay() const override;
 
     virtual Coord getPosition(const cModule *networkNode) const;
     virtual Coord getContactPosition(const cModule *networkNode, const Coord& fromPosition, const char *contactMode, double contactSpacing) const;
