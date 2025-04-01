@@ -14,7 +14,7 @@ void StringFormat::parseFormat(const char *format)
     this->format = format;
 }
 
-std::string StringFormat::formatString(IDirectiveResolver *resolver) const
+std::string StringFormat::formatString(const IDirectiveResolver *resolver) const
 {
     return formatString(format.c_str(), resolver);
 }

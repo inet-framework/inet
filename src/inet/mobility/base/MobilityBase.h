@@ -34,19 +34,8 @@ namespace inet {
  * @ingroup mobility
  * @ingroup basicModules
  */
-class INET_API MobilityBase : public cSimpleModule, public IMobility
+class INET_API MobilityBase : public cSimpleModule, public IMobility, public StringFormat::IDirectiveResolver
 {
-  protected:
-    class INET_API DirectiveResolver : public StringFormat::IDirectiveResolver {
-      protected:
-        IMobility *mobility = nullptr;
-
-      public:
-        DirectiveResolver(IMobility *mobility) : mobility(mobility) {}
-
-        virtual std::string resolveDirective(char directive) const override;
-    };
-
   public:
     /**
      * Selects how a mobility module should behave if it reaches the edge of the constraint area.
@@ -103,6 +92,7 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
     /** @brief Moves the visual representation module's icon to the new position on the screen. */
     virtual void refreshDisplay() const override;
     virtual void updateDisplayStringFromMobilityState() const;
+    virtual std::string resolveDirective(char directive) const override;
 
     /** @brief Allows changing parameters from the GUI. */
     virtual void handleParameterChange(const char *name) override;
