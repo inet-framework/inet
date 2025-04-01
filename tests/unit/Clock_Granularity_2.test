@@ -7,15 +7,18 @@ Tests clock granularity.:
 ned-path = .;../../../../src;../../lib
 network = inet.test.unittest.lib.ClockTestNetwork
 cmdenv-express-mode = false
-cmdenv-log-prefix = "C:%C: "
+cmdenv-event-banners = false
+cmdenv-log-prefix = "%l %C: "
+**.cmdenv-log-level = INFO
 
 *.host.clock.typename = "OscillatorBasedClock"
 *.host.clock.oscillator.tickOffset = 0.03s
 *.host.clock.oscillator.nominalTickLength = 0.1s
 %#--------------------------------------------------------------------------------------------------------------
-%postrun-command: grep "^C:" test.out > clock.out || true
+%extraargs: -s
+%subst: /\n<!> No more events, simulation completed.*?\n//
 %#--------------------------------------------------------------------------------------------------------------
-%contains: clock.out
+%contains: stdout
 INFO (ClockTestApp)ClockTestNetwork.host.app: start: simtime: 0, clock: 0, computed simtime: 0
 INFO (ClockTestApp)ClockTestNetwork.host.app: schedule Timer_1.1 to clock: 1.1, scheduled simtime: 1.07, scheduled clock: 1.1
 INFO (ClockTestApp)ClockTestNetwork.host.app: schedule Timer_2.11 to clock: 2.11, scheduled simtime: 2.17, scheduled clock: 2.2

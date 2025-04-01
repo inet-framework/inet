@@ -7,7 +7,9 @@ Tests clock granularity on a settable clock.
 ned-path = .;../../../../src;../../lib
 network = inet.test.unittest.lib.ClockTestNetwork
 cmdenv-express-mode = false
-cmdenv-log-prefix = "C:%C: "
+cmdenv-event-banners = false
+cmdenv-log-prefix = "%l %C: "
+**.cmdenv-log-level = INFO
 
 *.host.clock.typename = "SettableClock"
 *.host.clock.initialClockTime = 1s
@@ -16,9 +18,10 @@ cmdenv-log-prefix = "C:%C: "
 *.host.clock.defaultOverdueClockEventHandlingMode = "execute"
 *.scenarioManager.script = xml("<scenario><set-clock t='2.5s' module='host.clock' time='2.9s' reset-oscillator='false'/></scenario>")
 %#--------------------------------------------------------------------------------------------------------------
-%postrun-command: grep "^C:" test.out > clock.out || true
+%extraargs: -s
+%subst: /\n<!> No more events, simulation completed.*?\n//
 %#--------------------------------------------------------------------------------------------------------------
-%contains: clock.out
+%contains: stdout
 INFO (ClockTestApp)ClockTestNetwork.host.app: start: simtime: 0, clock: 1, computed simtime: 0
 INFO (ClockTestApp)ClockTestNetwork.host.app: schedule Timer_1.1 to clock: 1.1, scheduled simtime: 0.2, scheduled clock: 1.1
 INFO (ClockTestApp)ClockTestNetwork.host.app: schedule Timer_2.11 to clock: 2.11, scheduled simtime: 2.4, scheduled clock: 2.2
