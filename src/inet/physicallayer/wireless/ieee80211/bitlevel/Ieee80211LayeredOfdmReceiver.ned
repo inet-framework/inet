@@ -16,7 +16,7 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IPulseFilter;
 import inet.physicallayer.wireless.common.contract.packetlevel.IReceiver;
 
 //
-// This module implements an IEEE 802.11 OFDM receiver.
+// Implements an IEEE 802.11 OFDM receiver.
 // The implementation details are based on the following standard:
 // IEEE Std 802.11-2012 PART 11: WIRELESS LAN MAC AND PHY SPECIFICATIONS
 //

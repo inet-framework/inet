@@ -11,7 +11,7 @@ import inet.queueing.base.ActivePacketSourceBase;
 import inet.queueing.contract.IActivePacketSource;
 
 //
-// This module is an active packet source which pushes packets into the connected
+// An active packet source which pushes packets into the connected
 // packet consumer. All pushed packets are read from a PCAP file.
 //
 // Available packet name format directives:

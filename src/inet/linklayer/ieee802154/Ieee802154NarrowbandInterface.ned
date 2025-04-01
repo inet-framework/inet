@@ -14,7 +14,7 @@ import inet.queueing.contract.IPacketQueue;
 
 
 //
-// This module implements an IEEE 802.15.4 narrowband network interface.
+// Implements an IEEE 802.15.4 narrowband network interface.
 //
 module Ieee802154NarrowbandInterface extends NetworkInterface like IWirelessInterface
 {

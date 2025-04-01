@@ -12,7 +12,7 @@ import inet.queueing.contract.IActivePacketSource;
 import inet.queueing.contract.IPacketQueue;
 
 //
-// This module connects one packet producer to one packet consumer. It can be
+// Connects one packet producer to one packet consumer. It can be
 // pushed with packets from the connected packet producer. It keeps a copy of
 // the last N packets pushed into its input. The packets are available in the
 // runtime user interface (Qtenv) for inspection.

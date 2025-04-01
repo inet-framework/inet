@@ -44,7 +44,6 @@ void PacketBasedTokenGenerator::pushPacket(Packet *packet, const cGate *gate)
     storage->addTokens(numTokens);
     numProcessedPackets++;
     processedTotalLength += packet->getDataLength();
-    updateDisplayString();
     delete packet;
 }
 

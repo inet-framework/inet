@@ -11,7 +11,7 @@ import inet.linklayer.contract.IExternalInterface;
 import inet.networklayer.common.NetworkInterface;
 
 //
-// This module is a base for external network interfaces, network interface
+// A base for external network interfaces, network interface
 // modules that connect the simulation to the network stack of the host OS.
 //
 // Each external interface module is associated with a specific network device

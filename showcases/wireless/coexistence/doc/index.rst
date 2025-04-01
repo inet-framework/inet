@@ -44,7 +44,7 @@ networks to actually use overlapping channels. The channel spectra for both
 technologies are shown on the following image:
 
 .. figure:: media/channels.png
-   :width: 100%
+   :width: 90%
    :align: center
 
 For the WPAN, we'll use INET's 802.15.4 narrowband version, in which transmissions
@@ -80,7 +80,7 @@ path loss, background noise, and analog signal representation modules.
 
 The standard radio medium module in INET is :ned:`RadioMedium`. Wireless protocols
 in INET (such as 802.11 or 802.15.4) often have their own radio medium module types
-(e.g. :ned:`Ieee80211DimensionalRadioMedium`), but these modules are actually
+(e.g. :ned:`Ieee80211RadioMedium`), but these modules are actually
 :ned:`RadioMedium`, just with different default parameterizations (each
 parameterized for its typical use case). For example, they might have different
 defaults for path loss type, background noise power, or analog signal representation
@@ -91,7 +91,7 @@ type to dimensional when simulating CTI).
 
 For our simulation, we'll use :ned:`RadioMedium`. Since we'll have two different
 protocols, the analog model and the background noise of the radio medium and the
-protocol specific radios need to match (they need to be dimensional).
+protocol specific radios need to match (the analog model needs to be dimensional).
 We'll set just these two parameters, and leave the others on default.
 
 In INET, different types of radio modules (e.g. 802.11 and 802.15.4) can detect
@@ -175,7 +175,7 @@ The simulation is defined in the ``Coexistence`` configuration in
 :download:`omnetpp.ini <../omnetpp.ini>`. The radio medium module in the network
 is a :ned:`RadioMedium`. It is configured to use the :ned:`DimensionalMediumAnalogModel`.
 The background noise type is set to :ned:`IsotropicDimensionalBackgroundNoise`,
-with a power of -110 dBm. Here is the radio medium configuration in
+with a spectral power density of -113 dBmW/MHz. Here is the radio medium configuration in
 :download:`omnetpp.ini <../omnetpp.ini>`:
 
 .. literalinclude:: ../omnetpp.ini
@@ -183,28 +183,28 @@ with a power of -110 dBm. Here is the radio medium configuration in
    :end-at: radioMedium.backgroundNoise.power
    :language: ini
 
-The Wifi hosts are configured to have :ned:`Ieee80211DimensionalRadio`.
-The default ``timeGains`` parameter is not changed in the transmitter,
+The radios of Wifi hosts are configured to use the dimensional analog model.
+The default :par:`timeGains` parameter is not changed in the transmitter,
 so the radio uses a flat signal in time. In frequency, instead of the
 default flat signal, we configure a more realistic shape.
 We'll use the 802.11 OFDM spectral mask, as in the standard:
 
 .. figure:: media/spectralmask_wifi.png
-   :width: 100%
+   :width: 90%
    :align: center
 
-Here is the ``frequencyGains`` parameter value specifying this spectrum:
+Here is the :par:`frequencyGains` parameter value specifying this spectrum:
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: wifiHost*.wlan[*].radio.transmitter.frequencyGains
-   :end-at: wifiHost*.wlan[*].radio.transmitter.frequencyGains
+   :start-at: wifiHost*.wlan[*].radio.transmitter.analogModel.frequencyGains
+   :end-at: wifiHost*.wlan[*].radio.transmitter.analogModel.frequencyGains
    :language: ini
 
 Briefly about the syntax:
 
 - The parameter uses frequency and gain pairs to define points on the frequency/gain graph. ``c`` is the center frequency and ``b`` is the bandwidth. These values are properties of the transmission, i.e. the receiver listens on the frequency band defined by the center frequency and bandwidth. However, the signal can have radio energy outside of this range, which can cause interference.
 - Between these points, the interpolation mode can be specified, e.g. ``left`` (take value of the left point), ``greater`` (take the greater of the two points), ``linear``, etc.
-- The ``-inf Hz/-inf dB`` and the ``+inf Hz/+inf dB`` points are implicit (hence the ``frequencyGains`` string starts with an interpolation mode).
+- The ``-inf Hz/-inf dB`` and the ``+inf Hz/-inf dB`` points are implicit (hence the ``frequencyGains`` string starts with an interpolation mode).
 
 For more on the syntax, see :ned:`DimensionalTransmitterBase`.
 
@@ -238,42 +238,43 @@ don't overlap significantly in the time-frequency space. That is, the WPAN frame
 spectrum is much smaller than the Wifi's; similarly, the Wifi frame is much shorter
 than the WPAN.
 
-The Wifi channel is set to Channel 9 (center frequency of 2452MHz) to ensure that
+The analog model is configured to be dimensional, and the Wifi channel is set to Channel 9 (center frequency of 2452MHz) to ensure that
 the Wifi transmissions overlap with the 802.15.4 transmissions in frequency.
 Here is the configuration for the Wifi host radios in
 :download:`omnetpp.ini <../omnetpp.ini>`:
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: Ieee80211DimensionalRadio
+   :start-at: signalAnalogRepresentation
    :end-at: channelNumber
    :language: ini
 
 .. note:: The channel number is set to 8 because in INET's 802.11 model, the channels are numbered from 0, so that this setting corresponds to Wifi Channel 9.
 
 The WPAN hosts are configured to have an :ned:`Ieee802154NarrowbandInterface`,
-with a :ned:`Ieee802154NarrowbandDimensionalRadio`. As in the case of the Wifi hosts,
+with a :ned:`Ieee802154NarrowbandRadio`. As in the case of the Wifi hosts,
 the default flat signal shape is used in time. In frequency, we'll use a more
 realistic shape, based on the modulated spectrum of the CC2420 Zigbee transmitter:
 
 .. figure:: media/spectrum_wpan.png
-   :width: 100%
+   :width: 90%
    :align: center
 
-We'll use the approximation indicated with red. Here is the ``frequencyGains``
+We'll use the approximation indicated with red. Here is the :par:`frequencyGains`
 parameter value specifying this spectrum:
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: wpanHost*.wlan[*].radio.transmitter.frequencyGains = "left c-5MHz
-   :end-at: wpanHost*.wlan[*].radio.transmitter.frequencyGains = "left c-5MHz
+   :start-at: wpanHost*.wlan[*].radio.transmitter.analogModel.frequencyGains = "left c-5MHz
+   :end-at: wpanHost*.wlan[*].radio.transmitter.analogModel.frequencyGains = "left c-5MHz
    :language: ini
 
 The default carrier frequency (2450 MHz) and bandwidth (2.8 MHz) is not changed.
+The analog model is configured to be dimensional.
 Here is the configuration for the WPAN host radios in
 :download:`omnetpp.ini <../omnetpp.ini>`:
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: Ieee802154NarrowbandInterface
-   :end-at: Ieee802154NarrowbandDimensionalRadio
+   :end-at: dimensional
    :language: ini
 
 The transmission power parameters for both technologies are left on default
@@ -341,7 +342,7 @@ The simulation can be run by choosing the ``Coexistence`` configuration from
 omnepp.ini. It looks like the following when the simulation is run:
 
 .. video:: media/coexistence9.mp4
-   :width: 100%
+   :width: 90%
    :align: center
 
 The Wifi hosts have the MAC contention state, and the WPAN hosts have the
@@ -406,6 +407,40 @@ from the fact that hosts defer from transmitting when they detect ongoing
 transmissions.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`CoexistenceShowcase.ned <../CoexistenceShowcase.ned>`
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/wireless/coexistence`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env run inet-4.2 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-4.2.*/showcases/wireless/coexistence && inet'
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
+showcase directory for interactive simulation.
+
+Alternatively, for a more hands-on experience, you can first set up the
+workspace and then open an interactive shell:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-4.2
+    $ cd inet-workspace
+    $ opp_env shell
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
 
 Discussion
 ----------

@@ -11,7 +11,7 @@ import inet.visualizer.base.Ieee80211VisualizerBase;
 import inet.visualizer.contract.IIeee80211Visualizer;
 
 //
-// This module visualizes IEEE 802.11 associations on a 2D canvas. It displays
+// Visualizes IEEE 802.11 associations on a 2D canvas. It displays
 // an icon labeled with the SSID for each associated wireless interface.
 //
 // @see ~Ieee80211OsgVisualizer, ~Ieee80211Visualizer, ~Ieee80211VisualizerBase, ~IIeee80211Visualizer

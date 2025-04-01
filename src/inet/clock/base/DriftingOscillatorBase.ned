@@ -8,7 +8,7 @@
 package inet.clock.base;
 
 //
-// This is a base module for oscillators that drift relative to the nominal tick
+// Base module for oscillators that drift relative to the nominal tick
 // length over time.
 //
 simple DriftingOscillatorBase extends OscillatorBase

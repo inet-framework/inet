@@ -77,7 +77,7 @@ Additional settings pertaining to routing are specified in the
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: General
-   :end-before: Wireless
+   :end-before: ####
 
 The ``dumpTopology``, ``dumpLinks``, and ``dumpRoutes`` parameters are
 set to ``true``. These parameter settings instruct the configurator to
@@ -190,5 +190,5 @@ Sources: :download:`omnetpp.ini <../omnetpp.ini>`,
 Discussion
 ----------
 
-Use `this page <https://github.com/inet-framework/inet-tutorials/issues/2>`__ in
+Use `this page <https://github.com/inet-framework/inet/discussions/999>`__ in
 the GitHub issue tracker for commenting on this tutorial.

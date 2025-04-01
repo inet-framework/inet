@@ -159,7 +159,6 @@ void Ieee8021dRelay::handleLowerPacket(Packet *incomingPacket)
         }
         delete incomingPacket;
     }
-    updateDisplayString();
 }
 
 void Ieee8021dRelay::handleUpperPacket(Packet *packet)

@@ -17,7 +17,6 @@ void PacketReceiver::handleMessageWhenUp(cMessage *message)
         receiveSignal(check_and_cast<Signal *>(message));
     else
         PacketReceiverBase::handleMessageWhenUp(message);
-    updateDisplayString();
 }
 
 void PacketReceiver::receiveSignal(Signal *signal)

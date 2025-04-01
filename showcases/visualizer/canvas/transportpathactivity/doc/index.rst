@@ -6,7 +6,7 @@ Goals
 
 INET offers a range of network traffic visualizers that operate at different
 levels of the network stack. In this showcase, we will
-focus on :ned:`TransportRouteVisualizer` that provides a graphical representation of
+focus on :ned:`TransportRouteCanvasVisualizer` that provides a graphical representation of
 transport layer traffic between two endpoints by displaying a polyline arrow along
 the path that fades as the traffic ceases.
 
@@ -21,18 +21,18 @@ About the Visualizer
 --------------------
 
 In INET, transport path activity can be visualized by including a
-:ned:`TransportRouteVisualizer` module in the simulation. Adding an
-:ned:`IntegratedVisualizer` is also an option because it also contains a
-:ned:`TransportRouteVisualizer`. Transport path activity visualization is
+:ned:`TransportRouteCanvasVisualizer` module in the simulation. Adding an
+:ned:`IntegratedCanvasVisualizer` is also an option because it also contains a
+:ned:`TransportRouteCanvasVisualizer`. Transport path activity visualization is
 disabled by default, and it can be enabled by setting the visualizer's
 :par:`displayRoutes` parameter to true.
 
-:ned:`TransportRouteVisualizer` observes packets that pass through the
+:ned:`TransportRouteCanvasVisualizer` observes packets that pass through the
 transport layer, i.e., carry data from/to higher layers.
 
 The activity between two nodes is represented visually by a polyline
 arrow which points from the source node to the destination node.
-:ned:`TransportRouteVisualizer` follows packets throughout their path so
+:ned:`TransportRouteCanvasVisualizer` follows packets throughout their path so
 that the polyline goes through all nodes that are part of the path
 of packets. The arrow appears after the first packet has been received,
 then gradually fades out unless it is reinforced by further packets.
@@ -63,7 +63,7 @@ The ``source`` node will continuously send UDP packets to the
 ``destination`` node by using a :ned:`UdpBasicApp` application.
 
 In this simulation, the ``pathVisualizer's`` type is
-:ned:`TransportRouteVisualizer`. It is enabled by setting the
+:ned:`TransportRouteCanvasVisualizer`. It is enabled by setting the
 :par:`displayRoutes` parameter to true.
 
 .. literalinclude:: ../omnetpp.ini
@@ -79,9 +79,9 @@ The following video shows what happens when the simulation is run.
 At the beginning of the video, a red strip appears and moves from
 ``source`` to ``destination``. This strip is the standard OMNeT++
 animation for packet transmissions and has nothing to do with
-:ned:`TransportRouteVisualizer`. When the packet is received in whole by
+:ned:`TransportRouteCanvasVisualizer`. When the packet is received in whole by
 ``destination`` (the red strip disappears), an arrow is added by
-:ned:`TransportRouteVisualizer` between the two hosts, indicating transport
+:ned:`TransportRouteCanvasVisualizer` between the two hosts, indicating transport
 path activity. The packet's name is also displayed above the arrow.
 
 Note, however, that the ARP packets do not activate the visualization,
@@ -123,8 +123,8 @@ In this simulation, we show how to use :par:`packetFilter` and
 :par:`nodeFilter`. The simulation can be run by choosing the ``Filtering``
 configuration from the ini file.
 
-We set up a complex network with five ``routers``
-(``router0..router4``), four ``etherSwitches`` (``switch0..switch4``)
+We set up a complex network with five :ned:`Router` modules
+(``router0..router4``), four :ned:`EthernetSwitch` modules (``switch0..switch4``)
 and eight endpoints. The source nodes (``source1`` and ``source2``) are
 continuously generating traffic by a :ned:`UdpBasicApp` application, which
 is handled by a :ned:`UdpSink` application in the destination nodes
@@ -146,8 +146,8 @@ does not fade out completely before the next ``UDPBasicAppData`` packet
 arrives.
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: transportRouteVisualizer.displayRoutes
-   :end-at: transportRouteVisualizer.packetFilter
+   :start-at: TransportRouteCanvasVisualizer.displayRoutes
+   :end-at: TransportRouteCanvasVisualizer.packetFilter
    :language: ini
 
 The following video has been captured from the simulation and shows
@@ -157,7 +157,7 @@ what happens if :par:`packetFilter` is set.
    :width: 100%
 
 You can see that although there is both video stream and
-``UDPBasicAppData`` traffic in the network, :ned:`TransportRouteVisualizer`
+``UDPBasicAppData`` traffic in the network, :ned:`TransportRouteCanvasVisualizer`
 displays only the latter, due to the presence of the :par:`packetFilter`
 parameter.
 
@@ -196,7 +196,41 @@ More Information
 
 This example only demonstrates the key features of transport path
 visualization. For more information, refer to the
-:ned:`TransportRouteVisualizer` NED documentation.
+:ned:`TransportRouteCanvasVisualizer` NED documentation.
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/visualizer/canvas/transportpathactivity`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env run inet-4.0 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-4.0.*/showcases/visualizer/canvas/transportpathactivity && inet'
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
+showcase directory for interactive simulation.
+
+Alternatively, for a more hands-on experience, you can first set up the
+workspace and then open an interactive shell:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-4.0
+    $ cd inet-workspace
+    $ opp_env shell
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
 
 Discussion
 ----------

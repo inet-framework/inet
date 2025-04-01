@@ -14,7 +14,6 @@ classifier's output where the output index matches the data contained in the pac
 Thus, packets with data 0 are pushed to ``consumer1``, and those with data 1 are pushed to ``consumer2``.
 
 .. figure:: media/GenericClassifier.png
-   :width: 80%
    :align: center
 
 .. literalinclude:: ../QueueingTutorial.ned

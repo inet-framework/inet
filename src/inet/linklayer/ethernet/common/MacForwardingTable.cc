@@ -105,15 +105,8 @@ void MacForwardingTable::handleMessageWhenUp(cMessage *)
 
 void MacForwardingTable::refreshDisplay() const
 {
-    updateDisplayString();
-}
-
-void MacForwardingTable::updateDisplayString() const
-{
-    if (getEnvir()->isGUI()) {
-        auto text = StringFormat::formatString(par("displayStringTextFormat"), this);
-        getDisplayString().setTagArg("t", 0, text.c_str());
-    }
+    auto text = StringFormat::formatString(par("displayStringTextFormat"), this);
+    getDisplayString().setTagArg("t", 0, text.c_str());
 }
 
 std::string MacForwardingTable::resolveDirective(char directive) const

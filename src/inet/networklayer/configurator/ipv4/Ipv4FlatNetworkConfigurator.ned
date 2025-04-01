@@ -14,7 +14,7 @@ import inet.networklayer.configurator.contract.IL3NetworkConfigurator;
 // "flat" meaning that all hosts and routers will have the same
 // network address and will only differ in the host part.
 //
-// This module doesn't connect to any other modules (it has no gates),
+// Doesn't connect to any other modules (it has no gates),
 // and should have only one instance in the whole model. The module
 // will only run once, at the beginning of the simulation.
 // When it runs, it will:

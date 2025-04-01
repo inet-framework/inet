@@ -86,7 +86,6 @@ void InterpacketGapInserter::handleMessage(cMessage *message)
         else
             throw cRuntimeError("Unknown message");
     }
-    updateDisplayString();
 }
 
 void InterpacketGapInserter::receivePacketStart(cPacket *cpacket, cGate *gate, double datarate)
@@ -140,7 +139,6 @@ void InterpacketGapInserter::pushPacket(Packet *packet, const cGate *gate)
         progress->setContextPointer(packet);
         scheduleClockEventAt(now + packetDelay, progress);
     }
-    updateDisplayString();
 }
 
 void InterpacketGapInserter::handleCanPushPacketChanged(const cGate *gate)
@@ -163,7 +161,6 @@ void InterpacketGapInserter::pushPacketStart(Packet *packet, const cGate *gate, 
     take(packet);
     streamDatarate = datarate;
     pushOrSendOrSchedulePacketProgress(packet, gate, datarate, b(0), b(0));
-    updateDisplayString();
 }
 
 void InterpacketGapInserter::pushPacketEnd(Packet *packet, const cGate *gate)
@@ -172,7 +169,6 @@ void InterpacketGapInserter::pushPacketEnd(Packet *packet, const cGate *gate)
     take(packet);
     pushOrSendOrSchedulePacketProgress(packet, gate, streamDatarate, packet->getDataLength(), b(0));
     streamDatarate = bps(NaN);
-    updateDisplayString();
 }
 
 void InterpacketGapInserter::pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength)
@@ -181,7 +177,6 @@ void InterpacketGapInserter::pushPacketProgress(Packet *packet, const cGate *gat
     take(packet);
     streamDatarate = datarate;
     pushOrSendOrSchedulePacketProgress(packet, gate, datarate, position, extraProcessableLength);
-    updateDisplayString();
 }
 
 void InterpacketGapInserter::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)

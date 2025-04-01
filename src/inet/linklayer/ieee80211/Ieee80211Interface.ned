@@ -17,7 +17,7 @@ import inet.networklayer.common.NetworkInterface;
 import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
 
 //
-// This module implements an IEEE 802.11 network interface. It implements
+// Implements an IEEE 802.11 network interface. It implements
 // a large subset of the IEEE 802.11 standard, and may use radio models
 // and wireless signal representations of varying levels of detail.
 // It is also extremely configurable, and its component structure makes

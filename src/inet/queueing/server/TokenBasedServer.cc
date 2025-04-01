@@ -26,8 +26,6 @@ void TokenBasedServer::initialize(int stage)
         maxNumTokens = par("maxNumTokens");
         WATCH(numTokens);
     }
-    else if (stage == INITSTAGE_LAST)
-        updateDisplayString();
 }
 
 void TokenBasedServer::processPackets()
@@ -51,7 +49,6 @@ void TokenBasedServer::processPackets()
                 numProcessedPackets++;
                 numTokens -= numRequiredTokens;
                 emit(tokensRemovedSignal, numTokens);
-                updateDisplayString();
             }
             else {
                 if (!tokensDepletedSignaled) {
@@ -73,7 +70,6 @@ void TokenBasedServer::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     processPackets();
-    updateDisplayString();
 }
 
 void TokenBasedServer::addTokens(double tokens)
@@ -85,7 +81,6 @@ void TokenBasedServer::addTokens(double tokens)
     emit(tokensAddedSignal, numTokens);
     tokensDepletedSignaled = false;
     processPackets();
-    updateDisplayString();
 }
 
 std::string TokenBasedServer::resolveDirective(char directive) const

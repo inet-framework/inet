@@ -8,7 +8,7 @@
 package inet.queueing.base;
 
 //
-// This is a base module for various packet buffer modules which maintains a few
+// Base module for various packet buffer modules which maintains a few
 // statistics.
 //
 // Available display string format directives:

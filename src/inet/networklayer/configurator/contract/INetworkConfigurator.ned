@@ -8,7 +8,7 @@
 package inet.networklayer.configurator.contract;
 
 //
-// This module interface is implemented by all network-wide configurator modules.
+// Interface for all network-wide configurator modules.
 //
 moduleinterface INetworkConfigurator
 {

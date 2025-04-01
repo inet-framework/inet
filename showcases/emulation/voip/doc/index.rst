@@ -133,11 +133,19 @@ The simulations are defined in separate configurations of :download:`omnetpp.ini
 
 The :ned:`VoipStreamSender` and :ned:`VoipStreamReceiver` modules are configured
 just like they would be in a fully simulated scenario, no special configuration
-is needed. Here is the relevant configuration:
+is needed. Here is the relevant configuration for :ned:`VoipStreamSender`:
 
-.. literalinclude:: ../omnetpp.ini
+.. literalinclude:: ../voipsender.ini
    :language: ini
-   :end-before: VoipSenderLoopback
+   :start-after: General
+   :end-before: Loopback
+
+Here is the relevant configuration for :ned:`VoipStreamReceiver`:
+
+.. literalinclude:: ../voipreceiver.ini
+   :language: ini
+   :start-after: General
+   :end-before: Loopback
 
 Running
 -------
@@ -331,6 +339,38 @@ Sources: :download:`voipsender.ini <../voipsender.ini>`,
 :download:`AppContainer.ned <../AppContainer.ned>`,
 :download:`run_loopback <../run_loopback>`, :download:`run_veth <../run_veth>`,
 :download:`veth_setup <../veth_setup>`, :download:`veth_teardown <../veth_teardown>`
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/emulation/voip`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-latest --options=inet:full
+    $ cd inet-workspace
+    $ opp_env shell
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and opens an interactive shell. (The
+``--options=inet:full`` argument is required to enable the Emulation feature in
+opp_env.)
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
+
+To experiment with the emulation examples, navigate to the
+``inet/showcases/emulation/voip`` directory. From there, you can execute the
+commands outlined in the previous sections.
+
 
 Discussion
 ----------

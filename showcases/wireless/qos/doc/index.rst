@@ -94,7 +94,7 @@ The Configuration
 The example simulation uses the following network:
 
 .. figure:: media/network4.png
-   :width: 100%
+   :width: 80%
    :align: center
 
 It contains two :ned:`WirelessHost`'s named ``client`` and ``server``,
@@ -147,7 +147,7 @@ End-to-End Delay
 Here is the plot of the end-to-end delay of received packets in the non-QoS case:
 
 .. figure:: media/delay_nonqos.png
-   :width: 100%
+   :width: 90%
    :align: center
 
 The end-to-end delay vector data points for the four access
@@ -161,7 +161,7 @@ and packets are dropped. Note that dropped packets are not indicated on the char
 as we're plotting UDP packets received by ``server``.
 
 .. figure:: media/delay_qos.png
-   :width: 100%
+   :width: 90%
    :align: center
 
 In the QoS case, as expected, the higher priority access categories (video, voice) have lower
@@ -199,13 +199,13 @@ Jitter
 Let's take a look at jitter:
 
 .. figure:: media/jitter_nonqos.png
-   :width: 100%
+   :width: 90%
 
 In the non-QoS case, the jitter data points are scattered with the same pattern
 for all four traffic categories.
 
 .. figure:: media/jitter_qos.png
-   :width: 100%
+   :width: 90%
 
 In the QoS case, the jitter is lower for the video
 and voice categories (lowest for voice), and higher for background and best effort.
@@ -262,11 +262,11 @@ Throughput
 Let's see the throughput:
 
 .. figure:: media/throughput_nonqos_.png
-   :width: 90%
+   :width: 80%
    :align: center
 
 .. figure:: media/throughput_qos_.png
-   :width: 90%
+   :width: 80%
    :align: center
 
 In the non-QoS case, the throughput for the four applications is more or less proportional
@@ -285,6 +285,40 @@ to saturate the channel on their own. Thus the video and voice categories need Q
 sustain nominal throughput.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`QosShowcase.ned <../QosShowcase.ned>`
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/wireless/qos`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env run inet-4.1 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-4.1.*/showcases/wireless/qos && inet'
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
+showcase directory for interactive simulation.
+
+Alternatively, for a more hands-on experience, you can first set up the
+workspace and then open an interactive shell:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-4.1
+    $ cd inet-workspace
+    $ opp_env shell
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
 
 Discussion
 ----------

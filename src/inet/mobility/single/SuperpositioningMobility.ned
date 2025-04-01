@@ -11,8 +11,8 @@ import inet.mobility.base.MobilityBase;
 import inet.mobility.contract.IMobility;
 
 //
-// This mobility module combines the trajectory of several other mobility modules
-// using superposition. In other words, the position, velocity, and acceleration
+// Combines the trajectory of several other mobility modules using superposition.
+// In other words, the position, velocity, and acceleration
 // are the sum of the respective quantities of all submodules.
 //
 // This module allows forming a group mobility model by using a shared mobility

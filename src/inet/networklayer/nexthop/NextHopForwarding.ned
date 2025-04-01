@@ -8,7 +8,7 @@
 package inet.networklayer.nexthop;
 
 //
-// This module is a simplified next hop forwarding that routes
+// A simplified next hop forwarding that routes
 // datagrams using different kinds of network addresses.
 //
 simple NextHopForwarding

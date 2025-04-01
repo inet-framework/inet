@@ -23,4 +23,9 @@ inet_project = define_simulation_project("inet", version=None,
                                          external_libraries=["avcodec", "avformat", "avutil", "swresample", "osg", "osgText", "osgDB", "osgGA", "osgViewer", "osgUtil", "OpenThreads", "z3", "omp"],
                                          external_include_folders=["/usr/include/x86_64-linux-gnu"])
 
-inet_baseline_project = define_simulation_project("inet-baseline", folder_environment_variable="INET_ROOT", folder="../inet-baseline") if os.path.exists(get_workspace_path("inet-baseline")) else None
+inet_baseline_project = define_simulation_project("inet-baseline",
+                                                  folder_environment_variable="INET_ROOT",
+                                                  folder="../inet-baseline",
+                                                  library_folder="src",
+                                                  dynamic_libraries=["INET"],
+                                                  ned_folders=["src", "examples", "showcases", "tutorials", "tests/networks"]) if os.path.exists(get_workspace_path("inet-baseline")) else None

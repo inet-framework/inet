@@ -37,7 +37,6 @@ void StreamThroughReceiver::handleMessageWhenUp(cMessage *message)
     }
     else
         StreamingReceiverBase::handleMessage(message);
-    updateDisplayString();
 }
 
 void StreamThroughReceiver::receivePacketStart(cPacket *cpacket, cGate *gate, bps datarate)

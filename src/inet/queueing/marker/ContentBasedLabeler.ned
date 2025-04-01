@@ -11,7 +11,7 @@ import inet.queueing.base.PacketLabelerBase;
 import inet.queueing.contract.IPacketMarker;
 
 //
-// This module attaches various request labels to packets.
+// Attaches various request labels to packets.
 //
 simple ContentBasedLabeler extends PacketLabelerBase like IPacketMarker
 {

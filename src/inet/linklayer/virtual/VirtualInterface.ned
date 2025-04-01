@@ -11,7 +11,7 @@ import inet.linklayer.contract.IVirtualInterface;
 import inet.networklayer.common.NetworkInterface;
 
 //
-// This module implements a virtual network interface.
+// Implements a virtual network interface.
 //
 module VirtualInterface extends NetworkInterface like IVirtualInterface
 {

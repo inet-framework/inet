@@ -34,7 +34,7 @@ import inet.visualizer.contract.ITransportConnectionVisualizer;
 import inet.visualizer.contract.ITransportRouteVisualizer;
 
 //
-// This module integrates all osg visualizers into a single module. It supports
+// Integrates all osg visualizers into a single module. It supports
 // disabling any submodule visualizer by providing an empty string as its type.
 //
 // @see ~IntegratedOsgVisualizer, ~IntegratedVisualizer, ~IIntegratedVisualizer.

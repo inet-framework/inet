@@ -11,7 +11,7 @@ import inet.protocolelement.contract.IProtocolLayer;
 import inet.queueing.contract.IPacketFilter;
 
 //
-// This module combines two packet filters into a protocol layer so that it can
+// Combines two packet filters into a protocol layer so that it can
 // be used in a layered compound module. There are separate submodules for ingress
 // and egress traffic, but in most cases only the ingress filter is used.
 //

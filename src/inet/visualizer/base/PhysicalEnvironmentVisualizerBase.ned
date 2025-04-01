@@ -8,7 +8,7 @@
 package inet.visualizer.base;
 
 //
-// This is a base module for physical environment visualizer simple modules. It
+// Base module for physical environment visualizer simple modules. It
 // provides the physical objects through the physical environment module for
 // derived modules. The actual visualization of physical objects is done in
 // derived modules.

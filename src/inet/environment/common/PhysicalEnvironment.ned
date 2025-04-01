@@ -17,7 +17,7 @@ import inet.environment.contract.IPhysicalEnvironment;
 // For example, signals can be absorbed by objects, can pass through objects,
 // can be refracted by surfaces, can be reflected from surfaces, etc.
 //
-// This module represents the physical environment. The physical environment
+// Represents the physical environment. The physical environment
 // defines a set of physical objects. The physical objects are loaded from an
 // XML configuration file. The file must contain exactly one <config> root
 // element. Under the root element, there can be multiple of the following

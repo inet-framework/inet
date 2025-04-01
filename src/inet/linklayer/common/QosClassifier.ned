@@ -8,7 +8,7 @@
 package inet.linklayer.common;
 
 //
-// This module classifies packets and assigns a User Priority based on the IP
+// Classifies packets and assigns a User Priority based on the IP
 // protocol or the transport protocol port numbers.
 //
 simple QosClassifier like IIeee8021dQosClassifier

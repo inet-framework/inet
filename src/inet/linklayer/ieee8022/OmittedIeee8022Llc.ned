@@ -10,7 +10,7 @@ package inet.linklayer.ieee8022;
 import inet.linklayer.contract.IIeee8022Llc;
 
 //
-// This module implements the given module interface and can be used as an optional
+// Implements the given module interface and can be used as an optional
 // module that removes itself from the module hierarchy during initialization.
 //
 module OmittedIeee8022Llc like IIeee8022Llc

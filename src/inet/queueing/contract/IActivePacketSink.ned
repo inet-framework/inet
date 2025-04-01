@@ -8,7 +8,7 @@
 package inet.queueing.contract;
 
 //
-// This module interface must be implemented by active packet sink modules.
+// Interface for active packet sink modules.
 // An active packet sink, also called a collector, has one input that must be
 // connected to a passive packet source module. The active packet sink is
 // expected to pull packets from the connected passive packet source over time.

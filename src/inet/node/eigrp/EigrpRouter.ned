@@ -16,6 +16,18 @@ package inet.node.eigrp;
 
 import inet.node.inet.Router;
 
+//
+// A router that uses the Enhanced Interior Gateway Routing Protocol (EIGRP). It
+// extends the standard Router module with EIGRP functionality and dual-stack
+// (IPv4/IPv6) support.
+//
+// EIGRP is an advanced distance-vector routing protocol developed by Cisco Systems.
+// It combines features of both distance-vector and link-state routing protocols,
+// providing fast convergence, loop-free operation, and efficient use of bandwidth
+// and processing resources.
+//
+// @see ~OspfRouter, ~RipRouter
+//
 module EigrpRouter extends Router
 {
     parameters:
@@ -24,4 +36,3 @@ module EigrpRouter extends Router
         *.routingTableModule = default("^.^.ipv4.routingTable");
         *.routingTableModule6 = default("^.^.ipv6.routingTable");
 }
-

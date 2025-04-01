@@ -98,6 +98,17 @@ To run the simulation, use the ``run_mininet.sh`` script:
 
   $ ./run_mininet.sh
 
+.. note:: When starting Mininet, the following error might occur:
+   
+   .. code-block:: shell
+   
+      Exception: Please shut down the controller which is running on port 6653:
+      Active Internet connections (servers and established)
+      tcp        0      0 0.0.0.0:6653            0.0.0.0:*               LISTEN      1335/ovs-testcontro
+
+   If that happens, kill the controller process with ``sudo kill -9 <PID>``. In this case, the PID is 1335.
+
+
 When the simulations in Qtenv are loaded, make sure to start the receiver one
 first, and run both in Fast or Express mode. After the simulations are finished,
 exit the Mininet prompt with Ctrl-D to delete the virtual network
@@ -125,6 +136,36 @@ Sources: :download:`voipsender.ini <../voipsender.ini>`,
 :download:`voipreceiver.ini <../voipreceiver.ini>`,
 :download:`AppContainer.ned <../AppContainer.ned>`,
 :download:`run_mininet.py <../run_mininet.sh>`
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/emulation/voip`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-latest --options=inet:full
+    $ cd inet-workspace
+    $ opp_env shell
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and opens an interactive shell. (The
+``--options=inet:full`` argument is required to enable the Emulation feature in
+opp_env.)
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
+
+To experiment with the emulation examples, navigate to the
+``inet/showcases/emulation/voip`` directory. From there, you can execute the
+commands outlined in the previous sections.
 
 Discussion
 ----------

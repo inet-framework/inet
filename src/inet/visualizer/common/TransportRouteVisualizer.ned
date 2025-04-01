@@ -10,7 +10,7 @@ package inet.visualizer.common;
 import inet.visualizer.contract.ITransportRouteVisualizer;
 
 //
-// This module integrates canvas and osg transport route visualizers into a single module.
+// Integrates canvas and osg transport route visualizers into a single module.
 //
 // @see ~TransportRouteCanvasVisualizer, ~TransportRouteOsgVisualizer, ~PathVisualizerBase, ~ITransportRouteVisualizer
 //

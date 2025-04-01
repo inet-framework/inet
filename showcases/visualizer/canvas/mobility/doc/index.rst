@@ -18,7 +18,7 @@ About the Visualizer
 --------------------
 
 In INET, the mobility of nodes can be visualized by :ned:`MobilityVisualizer`
-module (included in the network as part of :ned:`IntegratedVisualizer`). By
+module (included in the network as part of :ned:`IntegratedCanvasVisualizer`). By
 default, mobility visualization is enabled; it can be disabled by
 setting :par:`displayMovements` parameter to false.
 
@@ -42,7 +42,7 @@ The visualizer has several important features:
    default value is 0.25, i.e. a quarter of a circle.
 
 These features are disabled by default; they can be enabled by setting
-the visualizer's ``displayMovementTrails``, ``displayVelocities`` and
+the visualizer's :par:`displayMovementTrails`, :par:`displayVelocities` and
 :par:`displayOrientations` parameters to true.
 
 Visualizing Mobility Features
@@ -60,7 +60,7 @@ The following video has been captured from the simulation. The default
 settings of mobility visualization are used.
 
 .. video:: media/NoFeatures_v0620.m4v
-   :width: 100%
+   :width: 80%
 
 It is difficult to track the nodes because they are moving randomly and
 quite fast. In our next experiment, we enable movement trails, velocity
@@ -75,7 +75,7 @@ easier.
 The following video shows what happens when we run the simulation.
 
 .. video:: media/VisualizingFeatures_v0627.m4v
-   :width: 100%
+   :width: 80%
 
 Compare this video to the previous one! The first thing you may notice
 is that the hosts' movement is the same as in the previous video.
@@ -91,6 +91,40 @@ More Information
 This example only demonstrates the key features of mobility
 visualization. For more information, refer to the :ned:`MobilityVisualizer`
 NED documentation.
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/visualizer/canvas/mobility`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env run inet-4.0 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-4.0.*/showcases/visualizer/canvas/mobility && inet'
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
+showcase directory for interactive simulation.
+
+Alternatively, for a more hands-on experience, you can first set up the
+workspace and then open an interactive shell:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-4.0
+    $ cd inet-workspace
+    $ opp_env shell
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
 
 Discussion
 ----------

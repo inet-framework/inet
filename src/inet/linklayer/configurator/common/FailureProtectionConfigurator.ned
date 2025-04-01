@@ -10,7 +10,7 @@ package inet.linklayer.configurator.common;
 import inet.networklayer.configurator.contract.INetworkConfigurator;
 
 //
-// This module provides Time-Sensitive Networking (TSN) configuration using other
+// Provides Time-Sensitive Networking (TSN) configuration using other
 // configurators. One is used to provide the stream redundancy (stream splitting
 // and stream merging) configuration, the other one is used to provide the gate
 // scheduling configuration.

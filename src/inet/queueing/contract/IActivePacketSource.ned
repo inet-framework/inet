@@ -8,7 +8,7 @@
 package inet.queueing.contract;
 
 //
-// This module interface must be implemented by active packet source modules.
+// Interface for active packet source modules.
 // An active packet source, also called a producer, has one output that must
 // be connected to a passive packet sink module. The active packet source is
 // expected to push packets into the connected passive packet sink over time.

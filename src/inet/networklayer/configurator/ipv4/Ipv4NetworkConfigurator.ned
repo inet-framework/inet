@@ -10,7 +10,7 @@ package inet.networklayer.configurator.ipv4;
 import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 
 //
-// This module assigns IPv4 addresses and sets up static routing for an IPv4 network.
+// Assigns IPv4 addresses and sets up static routing for an IPv4 network.
 // It assigns per-interface IP addresses, strives to take subnets into account,
 // and can also optimize the generated routing tables by merging routing entries.
 //
@@ -409,7 +409,7 @@ simple Ipv4NetworkConfigurator extends L3NetworkConfiguratorBase
         bool addStaticRoutes = default(true);  // Add static routes to the routing tables of all nodes to route to all destination interfaces (only where applicable; turn off when config file contains manual routes)
         bool addDefaultRoutes = default(true); // Add default routes if all routes from a source node go through the same gateway (used only if addStaticRoutes is true)
         bool addSubnetRoutes = default(true);  // Add subnet routes instead of destination interface routes (only where applicable; used only if addStaticRoutes is true)
-        bool addDirectRoutes = default(true);  // Add direct routes (i.e. directly connected interfaces) to the routing table (used only if addStaticRoutes is true)
+        bool addDirectRoutes = default(true);  // Add direct routes towards local network members (i.e. directly connected interfaces) to the routing table (used only if addStaticRoutes is true)
         bool optimizeRoutes = default(true); // Optimize routing tables by merging routes, the resulting routing table might route more packets than the original (used only if addStaticRoutes is true)
         bool updateRoutes = default(false);  // Recalculate static routes if an interface goes down/up or a carrier is lost/back
         bool dumpTopology = default(false);  // Print extracted network topology to the module output

@@ -28,12 +28,24 @@ import inet.node.contract.IEthernetNetworkNode;
 import inet.protocolelement.contract.IProtocolLayer;
 
 //
-// Model of an Ethernet switch.
+// EthernetSwitch models a Layer 2 Ethernet switch with support for various IEEE 802.1
+// protocols and features. It provides frame forwarding based on MAC addresses and
+// implements multiple switching technologies.
 //
-// The `duplexChannel` attributes of the MACs must be set according to the
-// medium connected to the port; if collisions are possible (it's a bus or hub)
-// it must be set to false, otherwise it can be set to true.
-// By default used half duples CSMA/CD mac
+// The switch maintains a MAC address table (forwarding database) that maps MAC addresses
+// to ports. It learns these mappings by examining the source address of incoming frames.
+// When a frame arrives with an unknown destination, the switch floods it to all ports
+// except the incoming one.
+//
+// Key features:
+// - MAC address learning and forwarding
+// - Support for Spanning Tree Protocol (STP/RSTP) to prevent loops
+// - Optional VLAN support through IEEE 802.1Q
+// - Optional Media Redundancy Protocol (MRP) support
+// - Optional Generalized Precision Time Protocol (gPTP) for time synchronization
+// - Support for cut-through switching for reduced latency
+// - Configurable number of Ethernet interfaces
+// - Optional PCAP recording for traffic analysis
 //
 module EthernetSwitch like IEthernetNetworkNode
 {

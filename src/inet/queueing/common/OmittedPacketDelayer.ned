@@ -10,7 +10,7 @@ package inet.queueing.common;
 import inet.queueing.contract.IPacketDelayer;
 
 //
-// This module implements the given module interface and can be used as an optional
+// Implements the given module interface and can be used as an optional
 // module that removes itself from the module hierarchy during initialization.
 //
 module OmittedPacketDelayer like IPacketDelayer

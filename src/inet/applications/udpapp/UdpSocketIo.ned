@@ -8,7 +8,7 @@
 package inet.applications.udpapp;
 
 //
-// This module provides UDP socket handling for generic applications.
+// Provides UDP socket handling for generic applications.
 //
 simple UdpSocketIo
 {

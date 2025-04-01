@@ -35,7 +35,7 @@ To test the router, we'll use two hosts, one on each wireless LAN.
 The network will look like the following:
 
 .. figure:: media/network.png
-   :width: 70%
+   :width: 60%
    :align: center
 
 The network contains the wireless router named ``accessPoint``, and
@@ -71,11 +71,45 @@ The transmissions for the two different networks (both disks and arrows) are col
 differently (red for wlan2.4 and blue for wlan5).
 
 .. video:: media/ping3.mp4
-   :width: 100%
+   :width: 80%
 
 .. run until sendPing, zoom 1.3, no animation speed, playback speed 0.4
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`MultiRadioShowcase.ned <../MultiRadioShowcase.ned>`
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/wireless/multiradio`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env run inet-4.0 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-4.0.*/showcases/wireless/multiradio && inet'
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
+showcase directory for interactive simulation.
+
+Alternatively, for a more hands-on experience, you can first set up the
+workspace and then open an interactive shell:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-4.0
+    $ cd inet-workspace
+    $ opp_env shell
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
 
 Discussion
 ----------

@@ -95,7 +95,6 @@ void RelayInterfaceSelector::pushPacket(Packet *packet, const cGate *gates)
         }
     }
     numProcessedFrames++;
-    updateDisplayString();
 }
 
 void RelayInterfaceSelector::broadcastPacket(Packet *outgoingPacket, const MacAddress& destinationAddress, NetworkInterface *incomingInterface)

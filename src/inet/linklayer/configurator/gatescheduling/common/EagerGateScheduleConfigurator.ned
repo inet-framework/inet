@@ -11,7 +11,7 @@ import inet.linklayer.configurator.gatescheduling.base.GateScheduleConfiguratorB
 import inet.linklayer.configurator.gatescheduling.contract.IGateScheduleConfigurator;
 
 //
-// This module provides a gate scheduling algorithm that eagerly reserves time
+// Provides a gate scheduling algorithm that eagerly reserves time
 // slots for the configured streams in the order of their priority (0 being the
 // lowest). The allocation makes sure that only one gate (traffic category) is
 // open in all network interfaces at any given moment of time. This strategy

@@ -17,7 +17,6 @@ void PacketTransmitter::handleMessageWhenUp(cMessage *message)
         endTx();
     else
         PacketTransmitterBase::handleMessageWhenUp(message);
-    updateDisplayString();
 }
 
 void PacketTransmitter::handleStopOperation(LifecycleOperation *operation)
@@ -35,7 +34,6 @@ void PacketTransmitter::pushPacket(Packet *packet, const cGate *gate)
     Enter_Method("pushPacket");
     take(packet);
     startTx(packet);
-    updateDisplayString();
 }
 
 void PacketTransmitter::startTx(Packet *packet)

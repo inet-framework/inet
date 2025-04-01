@@ -9,7 +9,7 @@
 package inet.visualizer.base;
 
 //
-// This is a base module for queue visualizer simple modules.
+// Base module for queue visualizer simple modules.
 //
 // @see ~QueueCanvasVisualizer, ~QueueOsgVisualizer, ~IQueueVisualizer, ~VisualizerBase
 //

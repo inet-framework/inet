@@ -8,7 +8,7 @@
 package inet.queueing.contract;
 
 //
-// This module interface is implemented by traffic conditioner modules. A traffic
+// Interface for traffic conditioner modules. A traffic
 // conditioner connects one input to one output. It operates in passive mode on
 // its input and in active mode on its output. Packets can be pushed into its
 // input and packets can be pulled from its output. A traffic conditioner can

@@ -10,7 +10,7 @@ package inet.physicallayer.wireless.common.antenna;
 import inet.physicallayer.wireless.common.base.packetlevel.AntennaBase;
 
 //
-// This model is based on a parabolic approximation of the main lobe radiation
+// Defines an antenna based on a parabolic approximation of the main lobe radiation
 // pattern. A similar model appears in
 //
 // George Calcev and Matt Dillon, "Antenna Tilt Control in CDMA Networks"

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="/inet/tutorials/wireless/results/Wireless*.vec"/>
-        <input pattern="/inet/tutorials/wireless/results/Wireless*.sca"/>
+        <input pattern="results/Wireless*.vec"/>
+        <input pattern="results/Wireless*.sca"/>
     </inputs>
     <charts>
         <chart icon="icons/full/obj/linechart.png" id="1235307621" name="Received packet seq numbers in Step 6 and 7" template="linechart_native" type="LINE">

@@ -9,6 +9,8 @@
 #ifndef __INET_SELFDOC_H
 #define __INET_SELFDOC_H
 
+#ifdef INET_WITH_SELFDOC
+
 namespace inet {
 
 class INET_API SelfDoc
@@ -61,7 +63,7 @@ class INET_API SelfDocTempOffClass
 #endif
 
 #define __Enter_Method_SelfDoc(...) \
-        if (SelfDoc::notInInitialize(__VA_ARGS__) && (__GET_SIMULATION()->__CSIMULATION_GET_SIMULATION_STAGE() != STAGE(CLEANUP))) { \
+        if (SelfDoc::generateSelfdoc && SelfDoc::notInInitialize(__VA_ARGS__) && (__GET_SIMULATION()->__CSIMULATION_GET_SIMULATION_STAGE() != STAGE(CLEANUP))) { \
             auto __from = __ctx.getCallerContext(); \
             std::string fromModuleName = __from ? __from->getParentModule() ? __from->getComponentType()->getFullName() : "-=Network=-" : "-=unknown=-"; \
             std::string toModuleName = __GET_SIMULATION()->getContext()->getComponentType()->getFullName(); \
@@ -97,3 +99,4 @@ class INET_API SelfDocTempOffClass
 
 #endif
 
+#endif

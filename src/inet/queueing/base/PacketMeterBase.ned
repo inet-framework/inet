@@ -8,7 +8,7 @@
 package inet.queueing.base;
 
 //
-// This is a base module for various packet meter modules. Derived modules must
+// Base module for various packet meter modules. Derived modules must
 // implement a single `meterPacket()` function which meters the flow of and attaches
 // the required tags.
 //

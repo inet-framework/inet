@@ -12,7 +12,7 @@ import inet.queueing.contract.IPacketServer;
 import inet.queueing.contract.ITrafficConditioner;
 
 //
-// This module implements a parameterizable token bucket algorithm.
+// Implements a parameterizable token bucket algorithm.
 //
 module TokenBucket like ITrafficConditioner
 {

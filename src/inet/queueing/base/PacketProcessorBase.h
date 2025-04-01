@@ -73,8 +73,6 @@ class INET_API PacketProcessorBase : public cSimpleModule, public virtual IPacke
 
     virtual void dropPacket(Packet *packet, PacketDropReason reason, int limit = -1);
 
-    virtual void updateDisplayString() const;
-
   public:
     virtual bool supportsPacketSending(const cGate *gate) const override { return true; }
     virtual bool supportsPacketPassing(const cGate *gate) const override { return true; }

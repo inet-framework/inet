@@ -8,7 +8,7 @@
 package inet.visualizer.base;
 
 //
-// This is a base module for transport connection visualizer simple modules. It
+// Base module for transport connection visualizer simple modules. It
 // keeps track of open transport connections in a network. Open connections are
 // not displayed by default, see the module parameters for how to enable the
 // visualization. The actual visualization of transport connections is done

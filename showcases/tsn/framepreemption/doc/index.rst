@@ -93,10 +93,10 @@ These simulations are the extension of the three configurations mentioned above,
 in the ini file as the configurations with the ``Realistic`` prefix.
 
 In the ``General`` configuration, the hosts are configured to use the layered Ethernet model 
-instead of the default, which must be disabled:
+instead of the default:
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: encap.typename
+   :start-at: EthernetLayer
    :end-at: LayeredEthernetInterface
    :language: ini
 
@@ -124,7 +124,7 @@ We set up a high-bitrate background traffic (96 Mbps) and a lower-bitrate high-p
 (we want non-empty queues); excess packets will be dropped.
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: app[0].source.packetLength
+   :start-after: io.destPort = 1001
    :end-at: app[1].source.productionInterval
    :language: ini
 
@@ -152,7 +152,7 @@ default :ned:`PacketQueue` to :ned:`PriorityQueue`:
 
 The priority queue utilizes two internal queues for the two traffic categories. To limit 
 the queueing time's effect on the measured end-to-end delay, we also limit the length of 
-internal queues to 4. We also disable the shared buffer and set the queue type to 
+internal queues to 4. We also set the queue type to 
 :ned:`DropTailQueue`. We use the priority queue's classifier to put packets into the 
 two traffic categories.
 
@@ -169,8 +169,7 @@ which support preemption.
 There is no priority queue in this configuration. The two MAC submodules both have their own queues.
 We also limit the queue length to 4 and configure the queue type to be :ned:`DropTailQueue`.
 
-.. note:: We could also have just one shared priority queue in the EthernetPreemptableMac module, 
-but this is not covered here.
+.. note:: We could also have just one shared priority queue in the EthernetPreemptableMac module, but this is not covered here.
 
 We use the following traffic for the ``RealisticFifoQueueing``, ``RealisticPriorityQueueing``, 
 and ``RealisticFramePreemption`` configurations:
@@ -297,7 +296,7 @@ Here is the same frame sequence displayed in Wireshark:
 
 .. figure:: media/wireshark.png
    :align: center
-   :width: 100%
+   :width: 90%
 
 The frames are recorded in the PCAP file at the end of the transmission of 
 each frame or fragment, so the originally intended 1243B ``background-3`` 
@@ -432,6 +431,40 @@ both the background and high-priority packets had the same length, so they could
 be compared for better demonstration).
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`FramePreemptionShowcase.ned <../FramePreemptionShowcase.ned>`
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/tsn/framepreemption`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env run inet-4.3 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-4.3.*/showcases/tsn/framepreemption && inet'
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
+showcase directory for interactive simulation.
+
+Alternatively, for a more hands-on experience, you can first set up the
+workspace and then open an interactive shell:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-4.3
+    $ cd inet-workspace
+    $ opp_env shell
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
 
 Discussion
 ----------

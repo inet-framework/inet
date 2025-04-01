@@ -19,7 +19,7 @@ About the visualizer
 --------------------
 
 The :ned:`TransportConnectionVisualizer` module (also part of
-:ned:`IntegratedVisualizer`) displays color-coded icons above the two
+:ned:`IntegratedCanvasVisualizer`) displays color-coded icons above the two
 endpoints of an active, established transport layer level connection.
 The icons will appear when the connection is established and disappear
 when it is closed. Naturally, there can be multiple connections open at
@@ -58,7 +58,7 @@ following network:
 The network contains two :ned:`StandardHost`'s connected to each other, each
 containing a TCP application. IP addresses and routing tables are
 configured by an :ned:`Ipv4NetworkConfigurator` module. The visualizer
-module is a :ned:`TransportConnectionVisualizer`. The application in
+module is an :ned:`IntegratedCanvasVisualizer`. The application in
 ``host1`` is configured to open a TCP connection to ``host2`` and send
 data to it. The visualization of transport connections is enabled with
 the visualizer's :par:`displayTransportConnections` parameter:
@@ -91,7 +91,7 @@ There are two :ned:`StandardHost`'s connected to a switch, which is
 connected via a router to the server, another :ned:`StandardHost`. IP
 addresses and routing tables are configured by an
 :ned:`Ipv4NetworkConfigurator` module. The visualizer module is an
-:ned:`IntegratedVisualizer`.
+:ned:`IntegratedCanvasVisualizer`.
 
 The hosts are configured to open TCP connections to the server:
 
@@ -150,6 +150,40 @@ Further information
 
 For more information, refer to the :ned:`TransportConnectionVisualizer` NED
 documentation.
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/visualizer/canvas/transportconnection`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env run inet-3.6 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-3.6.*/showcases/visualizer/canvas/transportconnection && inet'
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
+showcase directory for interactive simulation.
+
+Alternatively, for a more hands-on experience, you can first set up the
+workspace and then open an interactive shell:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-3.6
+    $ cd inet-workspace
+    $ opp_env shell
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
 
 Discussion
 ----------

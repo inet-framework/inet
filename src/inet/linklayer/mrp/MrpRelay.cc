@@ -202,7 +202,6 @@ void MrpRelay::handleLowerPacket(Packet *incomingPacket)
         numDispatchedNonMRPFrames++;
         delete incomingPacket;
     }
-    updateDisplayString();
 }
 
 bool MrpRelay::isForwardingInterface(NetworkInterface *networkInterface) const

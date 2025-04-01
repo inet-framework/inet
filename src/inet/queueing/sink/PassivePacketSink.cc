@@ -78,7 +78,6 @@ void PassivePacketSink::consumePacket(Packet *packet)
     EV_INFO << "Consuming packet" << EV_FIELD(packet) << EV_ENDL;
     numProcessedPackets++;
     processedTotalLength += packet->getDataLength();
-    updateDisplayString();
     dropPacket(packet, OTHER_PACKET_DROP);
 }
 

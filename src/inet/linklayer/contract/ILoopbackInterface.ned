@@ -8,7 +8,7 @@
 package inet.linklayer.contract;
 
 //
-// This module interface is implemented by loopback network interfaces.
+// Interface for loopback network interfaces.
 //
 moduleinterface ILoopbackInterface extends INetworkInterface
 {

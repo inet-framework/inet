@@ -13,7 +13,7 @@ import inet.queueing.contract.IPacketSource;
 import inet.queueing.contract.IPassivePacketSource;
 
 //
-// This module is an active/passive empty packet source. It doesn't push packets
+// An active/passive empty packet source. It doesn't push packets
 // into the connected module, and it doesn't allow packets to be pulled from it
 // by the connected module. The output gate generates backpressure for pull packet
 // operations.

@@ -12,7 +12,7 @@ import inet.queueing.contract.IPassivePacketSink;
 import inet.queueing.contract.ITokenGenerator;
 
 //
-// This module generates tokens into the configured ~TokenBasedServer for each
+// Generates tokens into the configured ~TokenBasedServer for each
 // consumed packet.
 //
 simple PacketBasedTokenGenerator extends TokenGeneratorBase like ITokenGenerator, IPassivePacketSink

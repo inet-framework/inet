@@ -40,7 +40,7 @@ class INET_API PacketGateBase : public PacketFlowBase, public TransparentProtoco
 
     virtual bool canPacketFlowThrough(Packet *packet) const;
 
-    virtual void updateDisplayString() const override;
+    virtual void refreshDisplay() const override;
 
   public:
     virtual bool isOpen() const override { return isOpen_; }

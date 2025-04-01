@@ -17,10 +17,17 @@ import inet.networklayer.common.InterfaceTable;
 
 
 //
-// An example host with one Ethernet port and a traffic generator that
-// generates request-reply traffic directly over Ethernet. This host model
-// does not contain higher layer protocols (IP, TCP). By default, it is
-// configured to use half-duplex MAC (CSMA/CD).
+// A simplified network device that communicates directly over Ethernet without
+// higher layer protocols like IP or TCP. It provides a basic host model for
+// Ethernet-only simulations.
+//
+// This module includes Ethernet application client and server components that generate
+// and respond to traffic at the Ethernet level. The host uses IEEE 802.2 LLC (Logical
+// Link Control) for data link layer functionality and can be configured to use
+// CSMA/CD (Carrier Sense Multiple Access with Collision Detection) for media access
+// control in half-duplex mode.
+//
+// @see ~EthernetSwitch, ~EthernetHub, ~StandardHost
 //
 module EthernetHost
 {

@@ -8,7 +8,7 @@
 package inet.queueing.contract;
 
 //
-// This module interface is implemented by packet queue modules. A packet queue
+// Interface for packet queue modules. A packet queue
 // is a passive module which has one passive input and one passive output.
 // Packets pushed into the passive input are either stored or dropped. Packets
 // pulled from the passive output are provided from the stored packets.

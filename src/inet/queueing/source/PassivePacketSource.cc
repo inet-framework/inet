@@ -80,7 +80,6 @@ Packet *PassivePacketSource::pullPacket(const cGate *gate)
             animatePullPacket(packet, outputGate, collector.getReferencedGate());
         emit(packetPulledSignal, packet);
         scheduleProvidingTimer(providingIntervalParameter->doubleValue());
-        updateDisplayString();
         return packet;
     }
 }
@@ -95,7 +94,6 @@ Packet *PassivePacketSource::providePacket(const cGate *gate)
         nextPacket = nullptr;
     }
     EV_INFO << "Providing packet" << EV_FIELD(packet) << EV_ENDL;
-    updateDisplayString();
     return packet;
 }
 

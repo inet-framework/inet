@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="/inet/showcases/tsn/gatescheduling/eager/results/Eager-*.vec"/>
-        <input pattern="/inet/showcases/tsn/gatescheduling/eager/results/Eager-*.sca"/>
+        <input pattern="results/Eager-*.vec"/>
+        <input pattern="results/Eager-*.sca"/>
     </inputs>
     <charts>
         <chart icon="icons/full/obj/linechart.png" id="1057960291" name="Application End-to-End Delay" template="linechart_native" type="LINE">

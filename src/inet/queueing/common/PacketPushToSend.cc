@@ -18,7 +18,6 @@ void PacketPushToSend::pushPacket(Packet *packet, const cGate *gate)
     take(packet);
     handlePacketProcessed(packet);
     send(packet, "out");
-    updateDisplayString();
 }
 
 } // namespace queueing

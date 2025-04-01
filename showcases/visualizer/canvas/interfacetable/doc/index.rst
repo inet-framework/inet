@@ -24,7 +24,7 @@ About the visualizer
 --------------------
 
 The :ned:`InterfaceTableVisualizer` module (included in the network as part
-of :ned:`IntegratedVisualizer`) displays data about network nodes'
+of :ned:`IntegratedCanvasVisualizer`) displays data about network nodes'
 interfaces. (Interfaces are contained in interface tables, hence the
 name.) By default, the visualization is turned off. When it is enabled
 using the :par:`displayInterfaceTables` parameter, the default is that
@@ -69,7 +69,7 @@ The first example demonstrates the default operation of the visualizer.
 The simulation uses the following network:
 
 .. figure:: media/simplenetwork.png
-   :width: 60%
+   :width: 40%
    :align: center
 
 The network contains two connected :ned:`StandardHost`'s. IP addresses are
@@ -87,7 +87,7 @@ gates where the interfaces are connected. When the simulation is run,
 the network looks like the following:
 
 .. figure:: media/simple.png
-   :width: 60%
+   :width: 40%
    :align: center
 
 More examples
@@ -142,6 +142,40 @@ Further information
 
 For more information, refer to the :ned:`InterfaceTableVisualizer` NED
 documentation.
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/visualizer/canvas/interfacetable`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env run inet-4.0 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-4.0.*/showcases/visualizer/canvas/interfacetable && inet'
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
+showcase directory for interactive simulation.
+
+Alternatively, for a more hands-on experience, you can first set up the
+workspace and then open an interactive shell:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-4.0
+    $ cd inet-workspace
+    $ opp_env shell
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
 
 Discussion
 ----------

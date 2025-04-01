@@ -8,7 +8,8 @@ This showcase demonstrates the use of real applications in a simulated network, 
 of application behavior without having to set up a physical network. This technique is also known as
 software-in-the-loop (SIL).
 
-.. TODO this paragraph is too generic, it barely means anything
+.. TODO this paragraph is too generic, it barely mean anything
+
 The simulation can be easily configured for various topologies and behaviors to test a variety of cases.
 Using INET's emulation feature, the real world (host OS environment) is interfaced with the simulation.
 INET offers various modules that make this interfacing possible, and more information about these modules
@@ -154,6 +155,38 @@ and also packets sent from the router's ``eth1`` (192.168.3.99) interface to ``t
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`VideostreamingShowcaseNetwork.ned <../VideostreamingShowcaseNetwork.ned>`,
 :download:`run.sh <../run.sh>`, :download:`setup.sh <../setup.sh>`, :download:`teardown.sh <../teardown.sh>`
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/emulation/videostreaming`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-latest --options=inet:full
+    $ cd inet-workspace
+    $ opp_env shell
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and opens an interactive shell. (The
+``--options=inet:full`` argument is required to enable the Emulation feature in
+opp_env.)
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
+
+To experiment with the emulation examples, navigate to the
+``inet/showcases/emulation/videostreaming`` directory. From there, you can execute the
+commands outlined in the previous sections.
+
 
 Discussion
 ----------

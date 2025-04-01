@@ -8,7 +8,7 @@
 package inet.networklayer.configurator.contract;
 
 //
-// This module interface is implemented by all layer 3 network configurators.
+// Interface for all layer 3 network configurators.
 //
 moduleinterface IL3NetworkConfigurator extends INetworkConfigurator
 {

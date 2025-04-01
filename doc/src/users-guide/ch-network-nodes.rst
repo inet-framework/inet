@@ -39,7 +39,7 @@ modules can be categorized into the following:
    currently :protocol:`TCP`, :protocol:`UDP`, and :protocol:`SCTP` are
    supported. :protocol:`TCP` has several implementations: :ned:`Tcp` is
    the OMNeT++ native implementation; :ned:`TcpLwip` module wraps the
-   lwIP :protocol:`TCP` stack; and :ned:`TcpNsc` module wraps the
+   lwIP :protocol:`TCP` stack; and ``TcpNsc`` module wraps the
    Network Simulation Cradle library.
 
 -  *Network layer protocols* are connected to transport layer protocols

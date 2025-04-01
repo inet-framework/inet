@@ -8,7 +8,7 @@
 package inet.queueing.contract;
 
 //
-// This module interface is implemented by a packet gate. A packet gate connects
+// Interface for a packet gate. A packet gate connects
 // one input to one output. It can operate in both active and passive mode.
 // Packets can be pushed into its input or packets can be pulled from its
 // output.

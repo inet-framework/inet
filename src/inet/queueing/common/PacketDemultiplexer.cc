@@ -45,7 +45,6 @@ Packet *PacketDemultiplexer::pullPacket(const cGate *gate)
     animatePullPacket(packet, outputGates[gate->getIndex()], findConnectedGate<IActivePacketSink>(gate));
     numProcessedPackets++;
     processedTotalLength += packet->getDataLength();
-    updateDisplayString();
     return packet;
 }
 

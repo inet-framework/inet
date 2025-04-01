@@ -37,7 +37,7 @@ the association is complete, data exchange can begin.
 The example simulation will use the following network:
 
 .. figure:: media/network2.png
-   :width: 80%
+   :width: 70%
    :align: center
 
 The network contains two APs placed 400 meters apart, and a wireless
@@ -62,7 +62,7 @@ The following animation shows what happens when the simulation is run:
 At the beginning of the simulation, the host starts to scan the
 channels, looking for an access point to associate with. This process is
 started by the host's agent module, as it is set to active scanning. (In
-INET, an 802.11 interface consists of a MAC module, a management module
+INET, an 802.11 interface includes a management module
 that deals with management frames, and an agent module that initiates
 scanning, association, and other high-level actions.)
 
@@ -120,18 +120,52 @@ The host's ``mgmt`` module contains a variable that indicates which
 access point the host is associated with.
 
 .. figure:: media/assocap2.png
-   :width: 100%
+   :width: 90%
 
 The ``mgmt`` modules of access points maintain a list of hosts that are
 associated with them.
 
 .. figure:: media/stalist1.png
-   :width: 100%
+   :width: 90%
 
 .. figure:: media/stalist2.png
-   :width: 100%
+   :width: 90%
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`HandoverShowcase.ned <../HandoverShowcase.ned>`
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/wireless/handover`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env run inet-4.0 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-4.0.*/showcases/wireless/handover && inet'
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
+showcase directory for interactive simulation.
+
+Alternatively, for a more hands-on experience, you can first set up the
+workspace and then open an interactive shell:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-4.0
+    $ cd inet-workspace
+    $ opp_env shell
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
 
 Discussion
 ----------

@@ -11,7 +11,7 @@ import inet.queueing.base.PacketPusherBase;
 import inet.queueing.contract.IPacketFlow;
 
 //
-// This module selects the outgoing interface for the packet passing through
+// Selects the outgoing interface for the packet passing through
 // from the MAC address table (forwarding information database) based on the
 // destination MAC address. The selected interface is attached to the packet
 // in an ~InterfaceReq. The packet may be duplicated if multiple interfaces

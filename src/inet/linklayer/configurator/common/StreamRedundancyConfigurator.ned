@@ -10,7 +10,7 @@ package inet.linklayer.configurator.common;
 import inet.networklayer.configurator.contract.INetworkConfigurator;
 
 //
-// This module provides Time-Sensitive Networking (TSN) static stream redundancy
+// Provides Time-Sensitive Networking (TSN) static stream redundancy
 // configuration. The module automatically configures all the necessary modules
 // related to stream splitting, stream merging and stream filtering in all network
 // nodes. The configuration parameter specifies the streams with a set of path

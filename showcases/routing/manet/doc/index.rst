@@ -56,7 +56,7 @@ change in the network topology). Examples of reactive MANET routing
 protocols include DSDV, OLSR, Babel, etc.
 
 Reactive protocols require less overhead than proactive protocols (there
-are no concerning routing when the routes don't change) but also might
+are no messages concerning routing when the routes don't change) but also might
 react more slowly to changes in the network topology. In the case of
 proactive protocols, due to the up-to-date nature of routing
 information, latency is lower than in the case of reactive protocols.
@@ -209,14 +209,15 @@ featuring stationary hosts. The networks are defined in
 :download:`ManetProtocolsShowcase.ned <../ManetProtocolsShowcase.ned>`.
 Both networks contain hosts of the type :ned:`ManetRouter` (an extension of
 :ned:`WirelessHost`), whose routing module type is configurable. Just as
-:ned:`WirelessHost`, it uses :ned:`Ieee80211ScalarRadio` by default. It also
+:ned:`WirelessHost`, it uses :ned:`Ieee80211Radio` with the scalar 
+analog model by default. It also
 has IP forwarding enabled, and its management module is set to
 :ned:`Ieee80211MgmtAdhoc`. In the network, there is a source host named
 ``source``, a destination host named ``destination``, and a number of
 other hosts, which are named ``node1`` up to ``node10`` (their numbers
 vary in the different networks). In addition to mobile nodes, both
-networks contain an :ned:`Ieee80211ScalarRadioMedium`, an
-:ned:`Ipv4NetworkConfigurator`, and an :ned:`IntegratedMultiVisualizer`
+networks contain an :ned:`Ieee80211RadioMedium`, an
+:ned:`Ipv4NetworkConfigurator`, and an :ned:`IntegratedMultiCanvasVisualizer`
 module. The nodes' default PHY model (IEEE 802.11) will suffice because
 we're focusing on the routing protocols.
 
@@ -240,11 +241,11 @@ AODV
 
 The example simulation featuring AODV is defined in the :ned:`Aodv`
 configuration in :download:`omnetpp.ini <../omnetpp.ini>`. This
-configuration uses the ``ManetProtocolShowcaseA`` network. The network
+configuration uses the ``ManetProtocolShowcaseB`` network. The network
 looks like the following:
 
 .. figure:: media/networkA.png
-   :width: 60%
+   :width: 50%
    :align: center
 
 The nodes are scattered on the scene. The source and destination
@@ -304,7 +305,7 @@ However, setting the timeout values too low results in increased routing
 protocol overhead.
 
 .. video:: media/Aodv5_s.mp4
-   :width: 420
+   :width: 60%
    :align: center
 
    <!--internal video recording, release mode (does it matter?), normal run, animation speed none, zoom 2 (or 1.54 if smaller), fadeOutMode = animationTime in datalink and networkroute visualizers-->
@@ -390,7 +391,7 @@ arrows represent routes, and routes from all nodes to all destinations
 are visualized here.
 
 .. video:: media/Dsdv1.mp4
-   :width: 420
+   :width: 60%
    :align: center
 
    <!--internal video recording, animation speed none, data link visualizers fadeOutMode set to animation time, zoom 1.54-->
@@ -398,7 +399,7 @@ are visualized here.
 The following video shows ``source`` pinging ``destination``:
 
 .. video:: media/DsdvPing1.mp4
-   :width: 420
+   :width: 60%
    :align: center
 
    <!--internal video recording, animation speed none, playback speed 0.38 (seems to have an effect), zoom 1.54, fadeOutMode animation time, run until event 3000, run until next sendPing-->
@@ -406,13 +407,13 @@ The following video shows ``source`` pinging ``destination``:
 GPSR
 ~~~~
 
-The example simulation featuring GPSR is defined in the :ned:`Gpsr`
+The example simulation featuring GPSR is defined in the ``Gpsr``
 configuration in :download:`omnetpp.ini <../omnetpp.ini>`. It uses the
-``ManetRoutingProtocolsShowcaseB`` network. The network looks like the
+``ManetRoutingProtocolsShowcaseA`` network. The network looks like the
 following:
 
 .. figure:: media/networkB.png
-   :width: 100%
+   :width: 90%
 
 Just as with the previous two configurations, the nodes are
 :ned:`ManetRouter`\ s. The nodes are laid out along a chain. The
@@ -435,7 +436,7 @@ The hosts' routing protocol type is set to :ned:`Gpsr`:
 The following video shows running the simulation from the beginning:
 
 .. video:: media/Gpsr1.mp4
-   :width: 100%
+   :width: 90%
    :align: center
 
 
@@ -472,7 +473,7 @@ that for routing decisions. Here is ``node12``'s neighbor position
 table:
 
 .. figure:: media/positions.png
-   :width: 100%
+   :width: 80%
 
 The table links node positions with IP addresses (it also contains the
 beacon arrival time).
@@ -491,6 +492,40 @@ in this showcase:
    Networks <http://www.icir.org/bkarp/jobs/gpsr-mobicom2000.pdf>`__
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`ManetProtocolsShowcase.ned <../ManetProtocolsShowcase.ned>`
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/routing/manet`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env run inet-4.0 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-4.0.*/showcases/routing/manet && inet'
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
+showcase directory for interactive simulation.
+
+Alternatively, for a more hands-on experience, you can first set up the
+workspace and then open an interactive shell:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-4.0
+    $ cd inet-workspace
+    $ opp_env shell
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
 
 Discussion
 ----------

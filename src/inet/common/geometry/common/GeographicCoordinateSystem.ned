@@ -8,7 +8,7 @@
 package inet.common.geometry.common;
 
 //
-// This module interface is used by geographic coordinate systems. A geographic
+// Interface for geographic coordinate systems. A geographic
 // coordinate system maps scene coordinates to geographic coordinates, and
 // vice versa.
 //
@@ -19,7 +19,7 @@ moduleinterface IGeographicCoordinateSystem
 }
 
 //
-// This module provides a very simple and less accurate geographic coordinate
+// Provides a very simple and less accurate geographic coordinate
 // system without using OSG. It doesn't support orientation.
 //
 simple SimpleGeographicCoordinateSystem like IGeographicCoordinateSystem
@@ -32,7 +32,7 @@ simple SimpleGeographicCoordinateSystem like IGeographicCoordinateSystem
 }
 
 //
-// This module provides an accurate geographic coordinate system using the
+// Provides an accurate geographic coordinate system using the
 // built-in OSG API.
 //
 simple OsgGeographicCoordinateSystem like IGeographicCoordinateSystem

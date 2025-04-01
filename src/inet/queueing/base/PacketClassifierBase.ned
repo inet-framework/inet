@@ -8,7 +8,7 @@
 package inet.queueing.base;
 
 //
-// This is a base module for various packet classifier modules. Derived modules
+// Base module for various packet classifier modules. Derived modules
 // must implement a single packet classifier function which determines the index
 // of the output gate for the next pushed packet.
 //

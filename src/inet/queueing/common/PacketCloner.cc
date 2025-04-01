@@ -46,7 +46,6 @@ void PacketCloner::pushPacket(Packet *packet, const cGate *gate)
         EV_INFO << "Cloning packet" << EV_FIELD(packet) << EV_ENDL;
         pushOrSendPacket(i == numGates - 1 ? packet : packet->dup(), outputGates[i], consumers[i]);
     }
-    updateDisplayString();
 }
 
 void PacketCloner::handleCanPushPacketChanged(const cGate *gate)

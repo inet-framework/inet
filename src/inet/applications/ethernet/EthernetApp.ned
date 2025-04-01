@@ -13,7 +13,7 @@ import inet.queueing.contract.IPacketFlow;
 import inet.queueing.contract.IPassivePacketSink;
 
 //
-// This module generates traffic as an Ethernet application. The traffic source
+// Generates traffic as an Ethernet application. The traffic source
 // and traffic sink modules can be built from queueing model elements.
 //
 module EthernetApp like IApp

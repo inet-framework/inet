@@ -12,7 +12,7 @@ import inet.applications.contract.IApp;
 //
 // Routing Information Protocol.
 //
-// This module implements distance vector routing as
+// Implements distance vector routing as
 // specified in RFC 2453 (RIPv2) and RFC 2080 (RIPng).
 // The routing protocol uses the Bellman-Ford algorithm to compute
 // the optimal routes. Each router periodically sends its

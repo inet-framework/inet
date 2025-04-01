@@ -8,7 +8,7 @@
 package inet.queueing.base;
 
 //
-// This is a base module for various packet server modules.
+// Base module for various packet server modules.
 //
 // @see ~IPacketServer
 //

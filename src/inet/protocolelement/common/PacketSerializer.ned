@@ -10,7 +10,7 @@ package inet.protocolelement.common;
 import inet.queueing.base.PacketFlowBase;
 
 //
-// This module serializes packets flowing from its input to its output.
+// Serializes packets flowing from its input to its output.
 //
 simple PacketSerializer extends PacketFlowBase
 {

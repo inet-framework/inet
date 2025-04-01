@@ -12,7 +12,16 @@ package inet.node.xmipv6;
 import inet.node.ipv6.StandardHost6;
 
 //
-// An IPv6 host with MIPv6 support and contains a Binding Cache which gets updated with every BU received.
+// An IPv6 host that can communicate directly with
+// mobile nodes in a Mobile IPv6 network. Extends the standard IPv6 host with
+// Mobile IPv6 support for route optimization.
+//
+// In Mobile IPv6, a correspondent node is any node that communicates with mobile
+// nodes. It maintains a binding cache that stores mappings between mobile nodes'
+// home addresses and care-of addresses, allowing for direct communication without
+// going through the home agent (route optimization).
+//
+// @see ~MobileHost6, ~HomeAgent6
 //
 module CorrespondentNode6 extends StandardHost6
 {

@@ -48,7 +48,7 @@ in the module hierarchy; there are four ``edcaf`` (EDCA Function) modules for th
 four access categories:
 
 .. figure:: media/edca.png
-   :width: 80%
+   :width: 60%
    :align: center
 
 The default value for the :par:`txopLimit` parameter is ``-1`` for all ACs,
@@ -103,11 +103,11 @@ Thus, the list of all alternative frame sequences that can repeat during the TXO
 The simulation uses the following network:
 
 .. figure:: media/network.png
-   :width: 80%
+   :width: 60%
    :align: center
 
 It contains two :ned:`AdhocHost` modules, an :ned:`Ipv4NetworkConfigurator`,
-an :ned:`Ieee80211ScalarRadioMedium` and an :ned:`IntegratedVisualizer` module.
+an :ned:`Ieee80211RadioMedium` and an :ned:`IntegratedCanvasVisualizer` module.
 
 The simulation is defined in the ``General`` configuration in :download:`omnetpp.ini <../omnetpp.ini>`.
 There are two UDP applications in ``host1``, sending small (1200B) and large
@@ -171,6 +171,40 @@ a TXOP. Observe the simulation for other combinations.
           within the limit.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`TxopShowcase.ned <../TxopShowcase.ned>`
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/wireless/txop`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env run inet-4.2 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-4.2.*/showcases/wireless/txop && inet'
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
+showcase directory for interactive simulation.
+
+Alternatively, for a more hands-on experience, you can first set up the
+workspace and then open an interactive shell:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-4.2
+    $ cd inet-workspace
+    $ opp_env shell
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
 
 Discussion
 ----------

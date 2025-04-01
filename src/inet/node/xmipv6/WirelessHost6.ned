@@ -12,10 +12,15 @@ package inet.node.xmipv6;
 import inet.node.ipv6.StandardHost6;
 
 //
-// IPv6 compatible node with MIPv6 support.
-// Models a host with one wireless (802.11b) card in infrastructure mode, supports handovers and MIPv6 protocol.
+// A wireless mobile node with IPv6 and Mobile IPv6 support.
+// Combines wireless connectivity with mobility management capabilities, allowing
+// it to maintain network connections while moving between different wireless networks.
 //
-// @see ~AccessPoint, ~WirelessHost, ~AdhocHost
+// This module extends StandardHost6 by adding a wireless interface and Mobile IPv6
+// functionality. It is designed to work in infrastructure mode, connecting to access
+// points and performing handovers when moving between different wireless networks.
+//
+// @see ~MobileHost6
 //
 module WirelessHost6 extends StandardHost6
 {

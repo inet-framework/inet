@@ -8,7 +8,7 @@
 package inet.linklayer.ethernet.modular;
 
 //
-// This module represents an Ethernet network interface with Ethernet cut-through
+// Represents an Ethernet network interface with Ethernet cut-through
 // switching support. In contrast with store-and-forward switching, Ethernet
 // cut-through switching can begin the transmission of the outgoing packet before
 // the reception of the corresponding incoming packet ends. Ethernet cut-through

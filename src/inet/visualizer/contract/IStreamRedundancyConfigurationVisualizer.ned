@@ -8,7 +8,7 @@
 package inet.visualizer.contract;
 
 //
-// This module interface allows configuring different ~IStreamRedundancyConfigurationVisualizer
+// Interface allows configuring different ~IStreamRedundancyConfigurationVisualizer
 // submodules from INI files. Such a visualizer displays the `StreamRedundancy` configuration
 // in a network.
 //

@@ -10,7 +10,7 @@ package inet.visualizer.common;
 import inet.visualizer.contract.IIeee80211Visualizer;
 
 //
-// This module integrates canvas and osg IEEE 802.11 association visualizers into a single module.
+// Integrates canvas and osg IEEE 802.11 association visualizers into a single module.
 //
 // @see ~Ieee80211CanvasVisualizer, ~Ieee80211OsgVisualizer, ~Ieee80211VisualizerBase, ~IIeee80211Visualizer
 //

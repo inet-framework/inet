@@ -46,7 +46,7 @@ representation of their locations:
 The next image displays an internal view of the ingress filter module in the bridging layer of the switch, with the :ned:`EligibilityTimeQueue` and the :ned:`EligibilityTimeFilter`
 modules highlighted:
 
-.. figure:: media/filter2.png
+.. figure:: media/filter_.png
    :align: center
 
 The following image displays an internal view of the queue module in the Ethernet interface's MAC layer, with the :ned:`EligibilityTimeQueue`
@@ -146,6 +146,7 @@ the sinks after the shaping process:
 
 .. figure:: media/datarate.png
    :align: center
+   :width: 90%
 
 The data rate of the sinusoidal source traffic occasionally exceeds the 16Mbps
 per-stream shaper limit. However, the shaper does allow a brief burst before
@@ -160,6 +161,7 @@ filter module to provide a comprehensive overview of the shaping process.
 
 .. figure:: media/drop.png
    :align: center
+   :width: 90%
 
 Despite the presence of a single combined shaper in the network (comprising one
 filter, queue, and gate), each stream is individually limited to 16Mbps due to
@@ -176,6 +178,7 @@ The next chart shows how the queueing time changes:
 
 .. figure:: media/QueueingTime.png
    :align: center
+   :width: 90%
 
 The maximum of the queueing time is 10ms, which is due to the max residence time
 set in the filter. Packets that would wait longer in the queue are dropped by
@@ -189,6 +192,7 @@ The next chart shows the queue length:
 
 .. figure:: media/QueueLength.png
    :align: center
+   :width: 90%
 
 The maximum number of packets that can accumulate in the queue from each stream
 is 20, calculated as follows: `max residence time / average production interval
@@ -199,6 +203,40 @@ individually. The maximum of the queue length is 60, when all streams reach
 their maximum packet count in the queue.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`PeekingUnderTheHoodShowcase.ned <../PeekingUnderTheHoodShowcase.ned>`
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/tsn/trafficshaping/underthehood`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env run inet-4.4 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-4.4.*/showcases/tsn/trafficshaping/underthehood && inet'
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
+showcase directory for interactive simulation.
+
+Alternatively, for a more hands-on experience, you can first set up the
+workspace and then open an interactive shell:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-4.4
+    $ cd inet-workspace
+    $ opp_env shell
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
 
 Discussion
 ----------

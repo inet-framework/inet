@@ -85,7 +85,6 @@ void MacRelayUnit::handleLowerPacket(Packet *incomingPacket)
             broadcastPacket(outgoingPacket, destinationAddress, incomingInterface);
     }
     numProcessedFrames++;
-    updateDisplayString();
     delete incomingPacket;
 }
 

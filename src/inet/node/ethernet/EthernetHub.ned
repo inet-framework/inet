@@ -7,17 +7,19 @@
 package inet.node.ethernet;
 
 //
-// An Ethernet hub model.
+// A simple Ethernet hub device that operates at the physical layer. It connects
+// multiple Ethernet devices together in a star topology while creating a single
+// collision domain.
 //
-// The model simply broadcasts frames (and transmission updates
-// representing aborted frames, etc.) received on one port on all
-// other ports, mimicking the propagation of electrical signals.
+// The hub works by broadcasting all incoming signals to all connected ports except
+// the one they arrived on, effectively simulating the shared medium behavior of
+// early Ethernet networks. This includes not only complete frames but also partial
+// transmissions, collisions, and other electrical signals.
 //
-// Note that no special attention is made to appropriately model
-// frame truncations that occur when the link breaks, or comes
-// back up while a transmission is underway. If you need
-// to precisely model what happens when the link state changes,
-// you cannot use this module.
+// Note that this model has limitations in accurately representing frame truncations
+// that occur when links go down or come up during an ongoing transmission.
+//
+// @see ~EthernetSwitch, ~EthernetHost
 //
 simple EthernetHub
 {

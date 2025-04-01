@@ -11,7 +11,7 @@ import inet.visualizer.base.LinkBreakVisualizerBase;
 import inet.visualizer.contract.ILinkBreakVisualizer;
 
 //
-// This module visualizes link breaks on a 2D canvas. It displays an icon
+// Visualizes link breaks on a 2D canvas. It displays an icon
 // for each link break in the network. See the documentation of the base
 // module for what constitutes a link break. The icon is positioned at the
 // midpoint of the link.

@@ -8,7 +8,7 @@
 package inet.visualizer.base;
 
 //
-// This is a base module for physical layer link visualizer simple modules. It
+// Base module for physical layer link visualizer simple modules. It
 // keeps track of active links in a network. A link between two network nodes is
 // considered active if a packet is sent recently between their physical layers.
 // Active links are not displayed by default, see the module parameters for how

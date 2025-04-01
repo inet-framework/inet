@@ -11,7 +11,7 @@ import inet.queueing.base.PacketSchedulerBase;
 import inet.queueing.contract.IPacketScheduler;
 
 //
-// This module implements weighted round-robin scheduling.
+// Implements weighted round-robin scheduling.
 //
 // There is a weight associated with each input gate.
 // Initially, each input gate gets as many tokens as their

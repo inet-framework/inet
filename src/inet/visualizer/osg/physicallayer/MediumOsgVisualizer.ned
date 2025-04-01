@@ -11,7 +11,7 @@ import inet.visualizer.base.MediumVisualizerBase;
 import inet.visualizer.contract.IMediumVisualizer;
 
 //
-// This module visualizes a medium using a 3D osg scene. It displays
+// Visualizes a medium using a 3D osg scene. It displays
 // communication ranges and interference ranges as circles around network nodes.
 // It displays an image at network nodes which are currently transmitting, and
 // a different image at other network nodes which are currently receiving. It

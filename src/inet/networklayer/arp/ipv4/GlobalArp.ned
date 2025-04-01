@@ -11,7 +11,7 @@ package inet.networklayer.arp.ipv4;
 import inet.networklayer.contract.IArp;
 
 //
-// This module provides global address resolution without exchanging packets.
+// Provides global address resolution without exchanging packets.
 //
 simple GlobalArp like IArp
 {

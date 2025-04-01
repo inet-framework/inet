@@ -5,7 +5,6 @@
 //
 
 #include "inet/clock/base/ClockBase.h"
-
 #include "inet/common/ModuleRefByPar.h"
 
 namespace inet {
@@ -34,7 +33,6 @@ void ClockBase::initialize(int stage)
             this->subscribe(ClockBase::timeChangedSignal, this);
             referenceClock->subscribe(ClockBase::timeChangedSignal, this);
         }
-        updateDisplayString();
         emit(timeChangedSignal, getClockTime().asSimTime());
         emitTimeDifferenceToReference();
     }
@@ -62,6 +60,8 @@ void ClockBase::emitTimeDifferenceToReference()
 
 void ClockBase::receiveSignal(cComponent *source, int signal, const simtime_t& time, cObject *details)
 {
+    auto text = StringFormat::formatString(displayStringTextFormat, this);
+    getDisplayString().setTagArg("t", 0, text.c_str());
     if (signal == ClockBase::timeChangedSignal) {
         emitTimeDifferenceToReference();
     }
@@ -71,9 +71,7 @@ void ClockBase::receiveSignal(cComponent *source, int signal, const simtime_t& t
 
 void ClockBase::finish() { emit(timeChangedSignal, getClockTime().asSimTime()); }
 
-void ClockBase::refreshDisplay() const { updateDisplayString(); }
-
-void ClockBase::updateDisplayString() const
+void ClockBase::refreshDisplay() const
 {
     if (getEnvir()->isGUI()) {
         auto text = StringFormat::formatString(displayStringTextFormat, this);

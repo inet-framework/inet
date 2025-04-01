@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="/inet/examples/wireless/combo/results/*.vec"/>
-        <input pattern="/inet/examples/wireless/combo/results/*.sca"/>
+        <input pattern="results/*.vec"/>
+        <input pattern="results/*.sca"/>
     </inputs>
     <charts>
         <chart createdWith="OMNeT++ 7.0.0.221114-493122b604" icon="icons/full/obj/barchart.png" id="1452830314" name="Summary Linechart" resultTypes="scalar" template="barchart_mpl" type="MATPLOTLIB">

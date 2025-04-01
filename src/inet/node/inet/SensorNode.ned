@@ -10,10 +10,15 @@ package inet.node.inet;
 import inet.node.base.ApplicationLayerNodeBase;
 
 //
-// This module implements a wireless sensor node. It has one 802.15.4 wireless interface
-// and an energy storage module by default.
-//# TODO and energy consumer in the radio
-//# TODO there is no management; the `IdealEnergyStorage` never depletes...
+// A wireless sensor network (WSN) node with low-power communication
+// capabilities. Provides a specialized node type for simulating resource-constrained
+// devices commonly used in environmental monitoring, industrial automation, and IoT
+// applications.
+//
+// The SensorNode is configured with an IEEE 802.15.4 narrowband wireless interface
+// by default, which is designed for low-rate wireless personal area networks (LR-WPANs)
+// with an emphasis on low cost and low power consumption. It also includes an energy
+// storage module to model battery life and power constraints.
 //
 module SensorNode extends ApplicationLayerNodeBase
 {

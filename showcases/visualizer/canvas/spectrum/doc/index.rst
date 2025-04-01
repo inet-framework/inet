@@ -94,10 +94,16 @@ the following network:
    :align: center
 
 The analog model needs to be dimensional to properly represent the spectral components
-of signals, thus the radio medium module is :ned:`Ieee80211DimensionalRadioMedium`.
+of signals, thus :ned:`Ieee80211RadioMedium` and hosts' radios are configured to use the dimensional analog model
+in the ``General`` configuration:
+
+.. literalinclude:: ../omnetpp.ini
+   :start-at: signalAnalogRepresentation
+   :end-at: radioMedium
+   :language: ini
 
 In the ``General`` configuration, the background noise (:ned:`IsotropicDimensionalBackgroundNoise`
-by default due to using the dimensional radio medium) is set up. By default, this module uses
+by default due to using the dimensional analog model) is set up. By default, this module uses
 the power parameter. However, directly specifying power can only be used when all signals have
 the same center frequency and bandwidth; otherwise, the noise power density parameter needs to
 be specified.
@@ -292,7 +298,7 @@ but without a probe module. The network also contains physical objects which rep
 an apartment, and hosts have different positions compared to the previous examples:
 
 .. figure:: media/powerdensitymapnetwork3.png
-   :width: 100%
+   :width: 90%
    :align: center
 
 In :download:`omnetpp.ini <../omnetpp.ini>`, the main and per-node power density map
@@ -319,6 +325,8 @@ Also, the resolution of the heatmap is increased to allow zooming in without too
    :end-at: mainPowerDensityMapPixmapDensity
    :language: ini
 
+.. note:: Decrease the pixmap density if the simulation is running slowly or running without OpenMP
+
 In this simulation, all hosts operate on the same Wifi channel:
 
 .. literalinclude:: ../omnetpp.ini
@@ -344,6 +352,40 @@ characteristics are visible in all power density maps. Also, the walls attenuate
 which is visible in the map as well.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`SpectrumShowcase.ned <../SpectrumShowcase.ned>`
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/visualizer/canvas/spectrum`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env run inet-4.2 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-4.2.*/showcases/visualizer/canvas/spectrum && inet'
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
+showcase directory for interactive simulation.
+
+Alternatively, for a more hands-on experience, you can first set up the
+workspace and then open an interactive shell:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-4.2
+    $ cd inet-workspace
+    $ opp_env shell
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
 
 Discussion
 ----------

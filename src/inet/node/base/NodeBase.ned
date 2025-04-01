@@ -18,10 +18,19 @@ import inet.power.contract.IEnergyManagement;
 import inet.power.contract.IEnergyStorage;
 
 //
-// This module contains the most basic infrastructure for network nodes that are
-// not strictly communication protocol-related.
+// The fundamental infrastructure for all network nodes focusing on non-communication
+// aspects of network nodes.
 //
-// See derived modules: ~StandardHost, ~WirelessHost, ~AdhocHost, ~Router, etc.
+// It provides among others:
+// - Node lifecycle management through NodeStatus
+// - Optional local clock for modeling clock skew
+// - Optional modules for with energy storage, management, and generation
+// - Support for node mobility
+//
+// NodeBase is not intended to be used directly in simulations but rather serves
+// as a base module for more specialized node types that add communication capabilities.
+//
+// @see ~StandardHost, ~WirelessHost, ~AdhocHost, ~Router
 //
 module NodeBase like INetworkNode
 {

@@ -14,7 +14,7 @@ import inet.queueing.contract.IPacketGate;
 import inet.queueing.contract.IPacketMeter;
 
 //
-// This module combines two meters and their corresponding filters per path. This
+// Combines two meters and their corresponding filters per path. This
 // is primarily useful for combining a token bucket based metering with an
 // asynchronous packet shaper. Note that the asynchronous packet shaper also has
 // parts in the network interface queue module.

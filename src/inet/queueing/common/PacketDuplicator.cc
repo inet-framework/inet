@@ -27,7 +27,6 @@ void PacketDuplicator::pushPacket(Packet *packet, const cGate *gate)
     EV_INFO << "Forwarding original packet" << EV_FIELD(packet) << EV_ENDL;
     handlePacketProcessed(packet);
     pushOrSendPacket(packet, outputGate, consumer);
-    updateDisplayString();
 }
 
 void PacketDuplicator::handleCanPushPacketChanged(const cGate *gate)

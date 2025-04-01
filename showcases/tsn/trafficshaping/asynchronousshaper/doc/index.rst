@@ -150,6 +150,7 @@ In the client:
 
 In the switch:
 
+- We disable the forwarding of 802.1Q C-tags. The server doesn't have a :ned:`Ieee8021qProtocol` module, and would otherwise drop all packets due to unknown protocol.
 - We configure the stream decoder to decode the streams by the PCP number.
 
 Here is the relevant configuration:
@@ -325,6 +326,40 @@ Here is the same chart zoomed in:
    :align: center
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/tsn/trafficshaping/asynchronousshaper`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env run inet-4.4 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-4.4.*/showcases/tsn/trafficshaping/asynchronousshaper && inet'
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
+showcase directory for interactive simulation.
+
+Alternatively, for a more hands-on experience, you can first set up the
+workspace and then open an interactive shell:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-4.4
+    $ cd inet-workspace
+    $ opp_env shell
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
 
 Discussion
 ----------

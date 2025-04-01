@@ -11,20 +11,23 @@ import inet.node.inet.AdhocHost;
 import inet.routing.aodv.Aodv;
 
 //
-// It models a ~WirelessHost extended with ~Aodv submodule.
+// A mobile node with the Ad hoc On-Demand Distance Vector (AODV)
+// routing protocol. Extends AdhocHost by adding the AODV routing protocol module.
 //
-// AODV is an on-demand MANET routing protocol. Each node
-// works similar to a 'router': they manage their own routing
-// tables, send requests for routes, and consult the IP layer via
-// Netfilter hooks for data forwarding.
+// AODV is a reactive routing protocol designed for mobile ad hoc networks (MANETs).
+// Each node maintains its own routing table and discovers routes on-demand when
+// communication is needed, rather than proactively maintaining routes to all destinations.
 //
-// Scenarios where AODV routing is desired use this module as a
-// host module.
+// Key features:
+// - On-demand route discovery using Route Request (RREQ) and Route Reply (RREP) messages
+// - Route maintenance through Route Error (RERR) messages when links break
+// - Sequence numbers to ensure loop-free routes and route freshness
+// - Hop-by-hop routing where each node maintains only the next hop information
+// - Inherits wireless capabilities and mobility support from AdhocHost
 //
-// The AODV v.2 (known as Dymo) is also implemented: ~Dymo,
-// ~DymoRouter.
+// The AODV v.2 (known as Dymo) is also implemented in INET as ~Dymo and ~DymoRouter.
 //
-// @see ~Aodv, ~Dymo, ~DymoRouter.
+// @see ~AdhocHost, ~DymoRouter, ~ManetRouter
 //
 module AodvRouter extends AdhocHost
 {

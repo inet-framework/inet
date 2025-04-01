@@ -17,7 +17,7 @@ import inet.queueing.contract.IPassivePacketSource;
 import inet.queueing.tokengenerator.PacketBasedTokenGenerator;
 
 //
-// This module contains a configurable pre-composed telnet traffic source and
+// Contains a configurable pre-composed telnet traffic source and
 // traffic sink as part of a telnet server application.
 //
 // @see ~TelnetClientApp, ~TelnetServerApp

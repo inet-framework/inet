@@ -8,7 +8,7 @@
 package inet.visualizer.contract;
 
 //
-// This module interface allows configuring different ~IQueueVisualizer
+// Interface allows configuring different ~IQueueVisualizer
 // submodules from INI files. Such a visualizer displays queues.
 //
 // @see ~QueueCanvasVisualizer, ~QueueOsgVisualizer, ~QueueVisualizer, ~QueueVisualizerBase

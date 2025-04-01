@@ -11,7 +11,7 @@ import inet.protocolelement.transceiver.base.PacketTransmitterBase;
 import inet.protocolelement.transceiver.contract.IPacketTransmitter;
 
 //
-// This module receives packets from the upper layer as a whole. It also sends
+// Receives packets from the upper layer as a whole. It also sends
 // signals to the transmission medium (wire) as a whole.
 //
 simple PacketTransmitter extends PacketTransmitterBase like IPacketTransmitter

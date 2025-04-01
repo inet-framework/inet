@@ -8,7 +8,7 @@
 package inet.queueing.contract;
 
 //
-// This module interface is implemented by packet meter modules. A packet meter
+// Interface for packet meter modules. A packet meter
 // connects one input to one output. It can operate in both active and passive
 // mode. Packets can be pushed into its input or packets can be pulled from its
 // output. When processing packets, a meter attaches some information (such as

@@ -8,7 +8,7 @@
 package inet.visualizer.base;
 
 //
-// This is a base module for submodule information visualizer simple modules.
+// Base module for submodule information visualizer simple modules.
 // It displays some information on network nodes originating from one of their
 // corresponding submodules. No information is displayed by default, see module
 // parameters for how to enable the visualization. The actual visualization is

@@ -10,6 +10,15 @@ import inet.transportlayer.rtp.Rtcp;
 import inet.transportlayer.rtp.Rtp;
 import ned.IdealChannel;
 
+//
+// A network node with Real-time Transport Protocol (RTP) support.
+// Extends StandardHost by adding RTP-specific components for real-time multimedia
+// streaming applications.
+//
+// RTP provides end-to-end delivery services for data with real-time characteristics,
+// such as interactive audio and video. It works alongside the RTP Control Protocol (RTCP)
+// which monitors transmission statistics and quality of service.
+//
 module RtpHost extends StandardHost
 {
     parameters:

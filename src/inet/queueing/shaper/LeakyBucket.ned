@@ -12,7 +12,7 @@ import inet.queueing.contract.IPacketServer;
 import inet.queueing.contract.ITrafficConditioner;
 
 //
-// This module implements a parameterizable leaky bucket algorithm.
+// Implements a parameterizable leaky bucket algorithm.
 //
 module LeakyBucket like ITrafficConditioner
 {

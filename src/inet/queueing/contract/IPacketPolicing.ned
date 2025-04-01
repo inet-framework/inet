@@ -8,7 +8,7 @@
 package inet.queueing.contract;
 
 //
-// This module interface is implemented by packet policing modules. A packet
+// Interface for packet policing modules. A packet
 // policing connects one input to one output. It operates in passive mode on
 // its input and in active mode on its output. These modules usually meter
 // various traffic properties and drop packets, but they never modify, delay

@@ -8,7 +8,7 @@
 package inet.linklayer.ieee8021q;
 
 //
-// This module implements the IEEE 802.1Q credit-based shaper.
+// Implements the IEEE 802.1Q credit-based shaper.
 //
 module Ieee8021qCreditBasedShaper extends Ieee8021qCreditBasedGate
 {

@@ -8,7 +8,7 @@
 package inet.queueing.contract;
 
 //
-// This module interface must be implemented by passive packet source modules.
+// Interface for passive packet source modules.
 // A passive packet source, also called a provider, has one output that must be
 // connected to an active packet sink module. The connected active packet sink
 // is expected to pull packets from the passive packet source over time.

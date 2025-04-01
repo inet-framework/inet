@@ -10,7 +10,7 @@ package inet.linklayer.bmac;
 import inet.linklayer.common.WirelessInterface;
 
 //
-// This module implements a wireless network interface using the B-MAC protocol.
+// Implements a wireless network interface using the B-MAC protocol.
 //
 module BMacInterface extends WirelessInterface
 {

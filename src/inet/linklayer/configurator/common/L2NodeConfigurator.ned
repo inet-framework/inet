@@ -10,7 +10,7 @@ package inet.linklayer.configurator.common;
 import inet.linklayer.configurator.contract.IL2NodeConfigurator;
 
 //
-// This module has one instance per network node, and it acts like a bridge
+// Has one instance per network node, and it acts like a bridge
 // between the node and the network's global configurator module,
 // ~L2NetworkConfigurator.
 //

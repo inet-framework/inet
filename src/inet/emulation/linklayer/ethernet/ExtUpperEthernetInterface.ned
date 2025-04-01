@@ -14,7 +14,7 @@ import inet.queueing.contract.IPacketQueue;
 
 
 //
-// This module provides an Ethernet network interface suitable for emulation.
+// Provides an Ethernet network interface suitable for emulation.
 // The upper part of the network interface is realized in the real world using
 // a real TAP device of the host computer which is running the simulation.
 //

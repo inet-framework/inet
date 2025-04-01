@@ -5,6 +5,8 @@
 #ifndef __INET_SELFDOCUMENTERFINGERPRINTCALCULATOR_H
 #define __INET_SELFDOCUMENTERFINGERPRINTCALCULATOR_H
 
+#ifdef INET_WITH_SELFDOC
+
 #include "inet/common/INETDefs.h"
 
 namespace inet {
@@ -21,3 +23,4 @@ class INET_API SelfDocumenterFingerprintCalculator : public cSingleFingerprintCa
 
 #endif
 
+#endif

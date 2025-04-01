@@ -11,7 +11,7 @@ import inet.clock.contract.IClock;
 import inet.common.packet.recorder.PcapRecorder;
 
 //
-// This module serves as the base module for all network interfaces.
+// Serves as the base module for all network interfaces.
 //
 // Display string directives:
 // - %i: interface ID

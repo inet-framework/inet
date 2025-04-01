@@ -3,7 +3,14 @@ package inet.node.inet;
 import inet.applications.contract.IApp;
 import inet.routing.contract.IManetRouting;
 
-
+//
+// A mobile node with ad hoc routing capabilities intended for
+// Mobile Ad hoc Networks (MANETs). Extends AdhocHost by adding support for
+// MANET routing protocols.
+//
+// Mobile Ad hoc Networks consist of wireless nodes that can dynamically form a network
+// without relying on pre-existing infrastructure.
+//
 module ManetRouter extends AdhocHost
 {
     submodules:

@@ -12,7 +12,7 @@ import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.IPacketShaper;
 
 //
-// This module combines a packet queue and a packet gate into a packet shaper
+// Combines a packet queue and a packet gate into a packet shaper
 // module. The queue stores the packets sorted according to its ordering and
 // the gate decides when the first packet can be pulled from the queue.
 //

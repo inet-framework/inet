@@ -64,7 +64,6 @@ void CutthroughSource::pushPacketEnd(Packet *packet, const cGate *gate)
     numProcessedPackets++;
     processedTotalLength += packet->getDataLength();
     delete packet;
-    updateDisplayString();
 }
 
 } // namespace inet

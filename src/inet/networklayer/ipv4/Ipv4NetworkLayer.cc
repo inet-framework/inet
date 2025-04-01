@@ -15,15 +15,8 @@ Define_Module(Ipv4NetworkLayer);
 
 void Ipv4NetworkLayer::refreshDisplay() const
 {
-    updateDisplayString();
-}
-
-void Ipv4NetworkLayer::updateDisplayString() const
-{
-    if (getEnvir()->isGUI()) {
-        auto text = StringFormat::formatString(par("displayStringTextFormat"), this);
-        getDisplayString().setTagArg("t", 0, text.c_str());
-    }
+    auto text = StringFormat::formatString(par("displayStringTextFormat"), this);
+    getDisplayString().setTagArg("t", 0, text.c_str());
 }
 
 std::string Ipv4NetworkLayer::resolveDirective(char directive) const

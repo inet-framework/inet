@@ -494,40 +494,52 @@ std::string L3NetworkConfiguratorBase::getWirelessId(NetworkInterface *networkIn
             throw cRuntimeError("Error in XML <wireless> element at %s: %s", wirelessElement->getSourceLocation(), e.what());
         }
     }
+    std::string mediumName = "default";
 #if defined(INET_WITH_IEEE80211) || defined(INET_WITH_PHYSICALLAYERWIRELESSCOMMON)
     cModule *interfaceModule = networkInterface;
-#ifdef INET_WITH_IEEE80211
-    if (auto mibModule = dynamic_cast<ieee80211::Ieee80211Mib *>(interfaceModule->getSubmodule("mib"))) {
-        auto ssid = mibModule->bssData.ssid;
-        if (ssid.length() != 0)
-            return ssid;
-    }
-    cModule *mgmtModule = interfaceModule->getSubmodule("mgmt");
-    if (mgmtModule != nullptr && mgmtModule->hasPar("ssid")) {
-        const char *value = mgmtModule->par("ssid");
-        if (*value)
-            return value;
-    }
-    cModule *agentModule = interfaceModule->getSubmodule("agent");
-    if (agentModule != nullptr && agentModule->hasPar("defaultSsid")) {
-        const char *value = agentModule->par("defaultSsid");
-        if (*value)
-            return value;
-    }
-#endif // INET_WITH_IEEE80211
+#endif // defined(INET_WITH_IEEE80211) || defined(INET_WITH_PHYSICALLAYERWIRELESSCOMMON)
 #ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
     cModule *radioModule = interfaceModule->getSubmodule("radio");
     const IRadio *radio = dynamic_cast<const IRadio *>(radioModule);
     if (radio != nullptr) {
         const cModule *mediumModule = dynamic_cast<const cModule *>(radio->getMedium());
         if (mediumModule != nullptr)
-            return mediumModule->getFullName();
+            mediumName = opp_substringafter(mediumModule->getFullPath(), "."); // remove network name
     }
 #endif // INET_WITH_PHYSICALLAYERWIRELESSCOMMON
-#endif // defined(INET_WITH_IEEE80211) || defined(INET_WITH_PHYSICALLAYERWIRELESSCOMMON)
+#ifdef INET_WITH_IEEE80211
+    if (auto mibModule = dynamic_cast<ieee80211::Ieee80211Mib *>(interfaceModule->getSubmodule("mib"))) {
+        auto ssid = mibModule->bssData.ssid;
+        if (ssid.length() != 0)
+            return mediumName + ":" + ssid;
+    }
+    cModule *mgmtModule = interfaceModule->getSubmodule("mgmt");
+    if (mgmtModule != nullptr && mgmtModule->hasPar("ssid")) {
+        const char *ssid = mgmtModule->par("ssid");
+        return opp_isempty(ssid) ? mediumName : mediumName + ":" + ssid;
+    }
+    cModule *agentModule = interfaceModule->getSubmodule("agent");
+    if (agentModule != nullptr && agentModule->hasPar("defaultSsid")) {
+        const char *defaultSsids = agentModule->par("defaultSsid");
+        std::vector<std::string> ssids = cStringTokenizer(defaultSsids).asVector();
+        if (ssids.size() == 1) {
+            return mediumName + ":" + ssids[0];
+        }
+        else if (ssids.size() > 1) {
+            // we ought to emulate Ieee80211AgentSta and choose the SSID of the AP with the highest signal strength,
+            // but that info is not available here, so just return the first one
+            return mediumName + ":" + ssids[0];
+        }
+        else {
+            // none given; if there is only one AP int the network, we could return its SSID,
+            // but for now, let's return the default SSID string in Ieee80211MgmtAp
+            return mediumName + ":" + "SSID";
+        }
+    }
+#endif // INET_WITH_IEEE80211
 
     // default: put all such wireless interfaces on the same LAN
-    return "SSID";
+    return mediumName;
 }
 
 /**

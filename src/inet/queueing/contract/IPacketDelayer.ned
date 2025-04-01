@@ -8,7 +8,7 @@
 package inet.queueing.contract;
 
 //
-// This module interface is implemented by packet delayers.
+// Interface for packet delayers.
 //
 moduleinterface IPacketDelayer extends IPassivePacketSink, IActivePacketSource
 {

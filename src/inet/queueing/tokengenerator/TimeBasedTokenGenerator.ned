@@ -11,7 +11,7 @@ import inet.queueing.base.TokenGeneratorBase;
 import inet.queueing.contract.ITokenGenerator;
 
 //
-// This module generates tokens for a ~TokenBasedServer repeatedly.
+// Generates tokens for a ~TokenBasedServer repeatedly.
 //
 simple TimeBasedTokenGenerator extends TokenGeneratorBase like ITokenGenerator
 {

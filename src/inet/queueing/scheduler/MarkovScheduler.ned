@@ -11,7 +11,7 @@ import inet.queueing.base.PacketSchedulerBase;
 import inet.queueing.contract.IPacketScheduler;
 
 //
-// This module implements a packet scheduler using a Markov process that has
+// Implements a packet scheduler using a Markov process that has
 // as many states as input gates the scheduler has. The input gate for the next
 // packet is determined by the current state of the Markov process.
 //

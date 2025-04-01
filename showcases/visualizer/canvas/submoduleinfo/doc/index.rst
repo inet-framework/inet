@@ -25,7 +25,7 @@ About the visualizer
 --------------------
 
 The :ned:`InfoVisualizer` module (included in the network as part of
-:ned:`IntegratedVisualizer`) can visualize information provided by
+:ned:`IntegratedCanvasVisualizer`) can visualize information provided by
 submodules one or more levels down in the module hierarchy. This information is
 visualized at the submodule of the containing network node, typically at
 the top level canvas. The following image illustrates this with the
@@ -76,7 +76,7 @@ adjacent hosts in the chain. Hosts' routing tables are set up
 accordingly, thus packets going between ``source`` and ``destination``
 are routed via ``relay``.
 The network also contains an :ned:`Ipv4NetworkConfigurator`, an
-:ned:`Ieee80211ScalarRadioMedium`, and an :ned:`IntegratedVisualizer` module.
+:ned:`Ieee80211ScalarRadioMedium`, and an :ned:`IntegratedCanvasVisualizer` module.
 
 .. figure:: media/infonetwork.png
    :width: 60%
@@ -142,6 +142,40 @@ of the frame reaches ``relay``, ``relay``'s *rx* state changes to ``BUSY``.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`SubmoduleInformationVisualizationShowcase.ned <../SubmoduleInformationVisualizationShowcase.ned>`
 
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/visualizer/canvas/submoduleinfo`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env run inet-4.1 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-4.1.*/showcases/visualizer/canvas/submoduleinfo && inet'
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
+showcase directory for interactive simulation.
+
+Alternatively, for a more hands-on experience, you can first set up the
+workspace and then open an interactive shell:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-4.1
+    $ cd inet-workspace
+    $ opp_env shell
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
 
 Discussion
 ----------

@@ -8,7 +8,7 @@
 package inet.linklayer.contract;
 
 //
-// This module interface provides an abstraction for the upper interface of
+// Interface for the upper interface of
 // different link layers.
 //
 moduleinterface ILinkLayerUpper
@@ -21,7 +21,7 @@ moduleinterface ILinkLayerUpper
 }
 
 //
-// This module interface provides an abstraction for the lower interface of
+// Interface for the lower interface of
 // different link layers.
 //
 moduleinterface ILinkLayerLower
@@ -34,7 +34,7 @@ moduleinterface ILinkLayerLower
 }
 
 //
-// This module interface provides an abstraction for both upper and lower
+// Interface for both upper and lower
 // interfaces of different link layers.
 //
 moduleinterface ILinkLayer extends ILinkLayerUpper, ILinkLayerLower

@@ -14,7 +14,7 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IModulator;
 import inet.physicallayer.wireless.common.contract.bitlevel.IPulseShaper;
 
 //
-// This module implements an IEEE 802.11 OFDM transmitter.
+// Implements an IEEE 802.11 OFDM transmitter.
 // The implementation details are based on the following standard:
 // IEEE Std 802.11-2012 PART 11: WIRELESS LAN MAC AND PHY SPECIFICATIONS.
 

@@ -21,7 +21,7 @@ About the visualizer
 --------------------
 
 The :ned:`MediumVisualizer` module (included in the networks for this
-showcase as part of :ned:`IntegratedVisualizer`) can visualize various
+showcase as part of :ned:`IntegratedCanvasVisualizer`) can visualize various
 aspects of radio communications. :ned:`MediumVisualizer` has the following
 three main features, and boolean parameters for turning them on/off:
 
@@ -56,7 +56,7 @@ configuration from the ini file. The simulation uses the following
 network:
 
 .. figure:: media/simplenetwork.png
-   :width: 100%
+   :width: 70%
 
 The scene size is about 900x600 meters. The network contains two
 :ned:`WirelessHost`'s. ``host1`` is configured to send UDP packets to
@@ -75,14 +75,14 @@ following visualizer settings:
 When the simulation is run the network looks like this:
 
 .. figure:: media/simple.png
-   :width: 100%
+   :width: 90%
 
 Parts of the communication range circles are visible in the image. With
 the current radio settings, the interference ranges are much larger than
 the communication ranges. One has to zoom out for them to be visible:
 
 .. figure:: media/interferencerange.png
-   :width: 100%
+   :width: 90%
 
 The communication and interference ranges are estimated for each node,
 from the node's maximum transmitter power and the lowest receiver
@@ -242,7 +242,7 @@ The configuration
 The example configuration for this section uses the following network:
 
 .. figure:: media/multiplenodesnetwork.png
-   :width: 100%
+   :width: 80%
 
 The scene size is 1000x500 meters. The network contains three
 :ned:`AdhocHost`'s. The ``source`` is configured to ping the
@@ -346,6 +346,40 @@ More information
 
 For further information, refer to the :ned:`MediumVisualizer` NED
 documentation.
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/visualizer/canvas/radiomediumactivity`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env run inet-4.0 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-4.0.*/showcases/visualizer/canvas/radiomediumactivity && inet'
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
+showcase directory for interactive simulation.
+
+Alternatively, for a more hands-on experience, you can first set up the
+workspace and then open an interactive shell:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-4.0
+    $ cd inet-workspace
+    $ opp_env shell
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
 
 Discussion
 ----------

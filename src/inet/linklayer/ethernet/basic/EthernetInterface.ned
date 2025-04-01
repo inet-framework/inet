@@ -15,7 +15,7 @@ import inet.queueing.contract.ITrafficConditioner;
 
 
 //
-// This module represents an Ethernet network interface.
+// Represents an Ethernet network interface.
 //
 module EthernetInterface extends NetworkInterface like IEthernetInterface
 {

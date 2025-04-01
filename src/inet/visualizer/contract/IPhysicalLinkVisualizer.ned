@@ -8,7 +8,7 @@
 package inet.visualizer.contract;
 
 //
-// This module interface allows configuring different ~IPhysicalLinkVisualizer
+// Interface allows configuring different ~IPhysicalLinkVisualizer
 // submodules from INI files. Such a visualizer displays the active physical
 // layer links in a network.
 //

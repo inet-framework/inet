@@ -8,7 +8,7 @@
 package inet.queueing.shaper;
 
 //
-// This module implements an asynchronous shaper. The queue sorts packets based
+// Implements an asynchronous shaper. The queue sorts packets based
 // on the transmission eligibility time (~EligibilityTimeTag) attached to each
 // packet. The gate prevents packets from being transmitted earlier than the attached
 // transmission eligibility time.

@@ -8,7 +8,7 @@
 package inet.queueing.contract;
 
 //
-// This module interface is implemented by packet filter modules. A packet filter
+// Interface for packet filter modules. A packet filter
 // connects one input to one output. It can operate in both active and passive
 // mode. Packets can be pushed into its input or packets can be pulled from its
 // output. Processed packets are either dropped, if they don't match the filter

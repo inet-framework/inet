@@ -8,7 +8,7 @@
 package inet.visualizer.contract;
 
 //
-// This module interface allows configuring different ~IEnergyStorageVisualizer
+// Interface allows configuring different ~IEnergyStorageVisualizer
 // submodules from INI files. Such a visualizer displays energy storages.
 //
 // @see ~EnergyStorageCanvasVisualizer, ~EnergyStorageOsgVisualizer,

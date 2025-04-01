@@ -58,8 +58,6 @@ void CreditBasedGate::initialize(int stage)
         updateCurrentState();
         scheduleChangeTimer();
     }
-    else if (stage == INITSTAGE_LAST)
-        updateDisplayString();
 }
 
 void CreditBasedGate::handleMessage(cMessage *message)
@@ -88,7 +86,6 @@ void CreditBasedGate::refreshDisplay() const
 {
     // NOTE: don't emit current credit and no need to call updateCurrentCreditGainRate
     const_cast<CreditBasedGate *>(this)->updateCurrentCredit();
-    updateDisplayString();
 }
 
 void CreditBasedGate::scheduleChangeTimer()

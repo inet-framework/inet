@@ -8,7 +8,7 @@
 package inet.queueing.base;
 
 //
-// This is a base module for various packet flow modules. A packet flow module
+// Base module for various packet flow modules. A packet flow module
 // passes or streams all pushed or pulled packets after processing them from
 // its input to its output.
 //

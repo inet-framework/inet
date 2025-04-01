@@ -10,7 +10,7 @@ package inet.mobility.single;
 import inet.mobility.base.MobilityBase;
 
 //
-// This module provides orientation towards the target mobility model as seen
+// Provides orientation towards the target mobility model as seen
 // from the source mobility model.
 //
 simple FacingMobility extends MobilityBase

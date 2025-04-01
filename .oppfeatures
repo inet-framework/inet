@@ -1867,21 +1867,6 @@
         linkerFlags = ""
         />
     <feature
-        id = "SelfDoc"
-        name = "Self documenter"
-        description = "For generating documentation based on runtime actions."
-        initiallyEnabled = "false"
-        requires = ""
-        recommended = ""
-        labels = ""
-        nedPackages = "
-                      inet.common.selfdoc
-                      "
-        extraSourceFolders = ""
-        compileFlags = "-DINET_WITH_SELFDOC"
-        linkerFlags = ""
-        />
-    <feature
         id = "Z3GateSchedulingConfigurator"
         name = "Z3 Gate Scheduling Configurator"
         description = "Z3 SAT solver based TSN gate scheduling configurator (requires external libz3-dev or z3-devel installed.)"

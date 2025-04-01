@@ -10,7 +10,7 @@ package inet.physicallayer.wired.ethernet;
 import inet.protocolelement.contract.IProtocolLayer;
 
 //
-// This module implements the Ethernet Phyisical Layer Collision Avoidance (PLCA)
+// Implements the Ethernet Phyisical Layer Collision Avoidance (PLCA)
 // protocol defined in the IEEE 802.3cg-2019 standard. It can be used to build an
 // Ethernet network interface that can be connected to 10BASE-T1S multidrop links.
 //

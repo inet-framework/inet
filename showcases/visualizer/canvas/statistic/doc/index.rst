@@ -23,8 +23,8 @@ of the visualization.
 About the visualizer
 --------------------
 
-The :ned:`StatisticVisualizer` (included in the network as part of
-:ned:`IntegratedVisualizer`) is capable of displaying a statistic for
+The :ned:`StatisticCanvasVisualizer` (included in the network as part of
+:ned:`IntegratedCanvasVisualizer`) is capable of displaying a statistic for
 multiple network nodes. The visualizer keeps track of the last values of
 statistics and displays them next to the icon of the network node.
 
@@ -33,7 +33,8 @@ and displays the statistic selected with the :par:`statisticName`
 parameter. It displays the statistic of modules that match the
 expression of the :par:`sourceFilter` parameter, at the network node that
 contains the modules. By default, the :par:`statisticName` is the same as
-the :par:`signalName`.
+the :par:`signalName`. The :par:`unit` parameter can be used to specify the
+unit (or units) to display the statistic in; by default, it is the statistic's unit.
 
 Alternatively, the :par:`statisticExpression` parameter can be used instead of :par:`statisticName`.
 The :par:`statisticExpression` parameter can specify an expression with OMNeT++'s ``@statistic`` syntax.
@@ -63,7 +64,7 @@ configuration from the ini file. The simulation uses the following
 simple network:
 
 .. figure:: media/rttnetwork.png
-   :width: 50%
+   :width: 40%
    :align: center
 
 The network contains two :ned:`AdhocHost`'s. The hosts are stationary, and
@@ -98,7 +99,7 @@ receiving node. The simulation can be run by choosing
 network:
 
 .. figure:: media/pernetwork.png
-   :width: 100%
+   :width: 80%
 
 The network contains two :ned:`AdhocHost`'s. One of them, the ``source``, is
 stationary, while the ``destination`` is configured to move horizontally
@@ -117,7 +118,7 @@ of destination host's ``radio`` module:
 This animation illustrates what happens when the simulation is run:
 
 .. video:: media/statisticvisualizer5.mp4
-   :width: 100%
+   :width: 80%
 
 After the first packet exchange, the packet error rate statistic is
 displayed above ``destination``. As the simulation progresses,
@@ -141,6 +142,40 @@ Further information
 
 For further information, refer to the :ned:`StatisticVisualizer` NED
 documentation.
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/visualizer/canvas/statistic`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env run inet-4.0 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-4.0.*/showcases/visualizer/canvas/statistic && inet'
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
+showcase directory for interactive simulation.
+
+Alternatively, for a more hands-on experience, you can first set up the
+workspace and then open an interactive shell:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-4.0
+    $ cd inet-workspace
+    $ opp_env shell
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
 
 Discussion
 ----------

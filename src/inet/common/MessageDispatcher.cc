@@ -112,7 +112,6 @@ void MessageDispatcher::arrived(cMessage *message, cGate *inGate, const SendOpti
         outGate = handleMessage(check_and_cast<Message *>(message), inGate);
     outGate->deliver(message, options, time);
 #ifdef INET_WITH_QUEUEING
-    updateDisplayString();
 #endif // #ifdef INET_WITH_QUEUEING
 }
 
@@ -145,7 +144,6 @@ void MessageDispatcher::pushPacket(Packet *packet, const cGate *inGate)
     consumer.reference(outGate, false);
     handlePacketProcessed(packet);
     pushOrSendPacket(packet, outGate, consumer);
-    updateDisplayString();
 }
 
 void MessageDispatcher::pushPacketStart(Packet *packet, const cGate *inGate, bps datarate)
@@ -156,7 +154,6 @@ void MessageDispatcher::pushPacketStart(Packet *packet, const cGate *inGate, bps
     queueing::PassivePacketSinkRef consumer;
     consumer.reference(outGate, false);
     pushOrSendPacketStart(packet, outGate, consumer, datarate, packet->getTransmissionId());
-    updateDisplayString();
 }
 
 void MessageDispatcher::pushPacketEnd(Packet *packet, const cGate *inGate)
@@ -168,7 +165,6 @@ void MessageDispatcher::pushPacketEnd(Packet *packet, const cGate *inGate)
     consumer.reference(outGate, false);
     handlePacketProcessed(packet);
     pushOrSendPacketEnd(packet, outGate, consumer, packet->getTransmissionId());
-    updateDisplayString();
 }
 
 void MessageDispatcher::handleCanPushPacketChanged(const cGate *outGate)

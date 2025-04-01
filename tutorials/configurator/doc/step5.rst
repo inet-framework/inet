@@ -22,7 +22,7 @@ through ``router2`` to reach ``host7`` (as in the previous step.) We
 want them to go through ``router1`` instead.
 
 .. figure:: media/step4network.png
-   :width: 100%
+   :width: 90%
 
 Configuration
 ~~~~~~~~~~~~~
@@ -210,5 +210,5 @@ Discussion
 ----------
 
 Use `this
-page <https://github.com/inet-framework/inet-tutorials/issues/2>`__ in
+page <https://github.com/inet-framework/inet/discussions/999>`__ in
 the GitHub issue tracker for commenting on this tutorial.

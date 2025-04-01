@@ -2,8 +2,7 @@ package inet.showcases.wireless.crosstalk;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
-import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalRadioMedium;
-import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211RadioMedium;
 import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 
 
@@ -31,29 +30,21 @@ network CrosstalkShowcaseBaseNetwork
         }
 }
 
-network CrosstalkShowcaseOneScalarRadioMediumModule extends CrosstalkShowcaseBaseNetwork
+network CrosstalkShowcaseOneRadioMediumModule extends CrosstalkShowcaseBaseNetwork
 {
     submodules:
-        radioMedium: Ieee80211ScalarRadioMedium {
+        radioMedium: Ieee80211RadioMedium {
             @display("p=74,191");
         }
 }
 
-network CrosstalkShowcaseTwoScalarRadioMediumModules extends CrosstalkShowcaseBaseNetwork
+network CrosstalkShowcaseTwoRadioMediumModules extends CrosstalkShowcaseBaseNetwork
 {
     submodules:
-        radioMedium1: Ieee80211ScalarRadioMedium {
+        radioMedium1: Ieee80211RadioMedium {
             @display("p=74,191");
         }
-        radioMedium2: Ieee80211ScalarRadioMedium {
+        radioMedium2: Ieee80211RadioMedium {
             @display("p=74,255");
-        }
-}
-
-network CrosstalkShowcasePartiallyOverlappingFrequencyBands extends CrosstalkShowcaseBaseNetwork
-{
-    submodules:
-        radioMedium: Ieee80211DimensionalRadioMedium {
-            @display("p=74,184");
         }
 }

@@ -10,7 +10,7 @@ package inet.networklayer.diffserv;
 import inet.queueing.base.PacketClassifierBase;
 
 //
-// This module reads the DSCP (lower six bits of ToS/TrafficClass) from the
+// Reads the DSCP (lower six bits of ToS/TrafficClass) from the
 // received datagram, and forwards the datagram to the corresponding output gate.
 //
 // DSCPs are enumerated in the `dscps` parameter, first value is for `out[0]`, second

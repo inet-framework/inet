@@ -63,7 +63,6 @@ void StreamSplitter::pushPacket(Packet *packet, const cGate *gate)
         handlePacketProcessed(packet);
         pushOrSendPacket(packet, outputGate, consumer);
     }
-    updateDisplayString();
 }
 
 int StreamSplitter::getNumPacketDuplicates(Packet *packet)

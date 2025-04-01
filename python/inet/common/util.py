@@ -1,10 +1,12 @@
 import curses.ascii
 import glob
 import hashlib
+import importlib
 import io
 import IPython
 import logging
 import os
+import pandas
 import platform
 import pickle
 import re
@@ -27,10 +29,44 @@ COLOR_RESET = "\033[0;0m"
 STDOUT_LEVEL = 25  # between INFO (20) and WARNING (30)
 STDERR_LEVEL = 35  # between WARNING (30) and ERROR (40)
 
+class StopExecutionException(Exception):
+    def __init__(self, **kwargs):
+        super().__init__()
+        self.value = kwargs.get("value", None)
+        self.value_provided = "value" in kwargs
+
+class TerminalInteractiveShell(IPython.terminal.interactiveshell.TerminalInteractiveShell):
+    def _showtraceback(self, etype, evalue, stb):
+        if isinstance(evalue, StopExecutionException):
+            if evalue.value_provided:
+                _logger.warning("Execution stopped programmatically by calling stop_execution(...) with:")
+                print(evalue.value)
+            else:
+                _logger.warning("Execution stopped programmatically by calling stop_execution()")
+            return None
+        super()._showtraceback(etype, evalue, stb)
+
+def stop_execution(*args):
+    if len(args) == 0:
+        raise StopExecutionException()
+    else:
+        raise StopExecutionException(value=args[0])
+
 def enable_autoreload():
     ipython = IPython.get_ipython()
-    ipython.magic("load_ext autoreload")
-    ipython.magic("autoreload 2")
+    ipython.run_line_magic("load_ext", "autoreload")
+    ipython.run_line_magic("autoreload", "2")
+
+def import_user_module():
+    try:
+        user = os.getlogin()
+        user_module = importlib.import_module(user)
+        main_module = sys.modules['__main__']
+        for attr in dir(user_module):
+            if not attr.startswith('_'):
+                main_module.__dict__[attr] = getattr(user_module, attr)
+    except ImportError as e:
+        pass
 
 _file_handler = None
 
@@ -86,7 +122,8 @@ def initialize_logging(log_level, external_command_log_level, log_file):
     logger.addHandler(handler)
     logging.addLevelName(STDOUT_LEVEL, "STDOUT")
     logging.addLevelName(STDERR_LEVEL, "STDERR")
-    set_logging_levels(log_level, external_command_log_level)
+    set_python_log_level(log_level)
+    set_external_command_log_level(external_command_log_level)
     _logging_initialized = True
 
 def ensure_logging_initialized(log_level, external_command_log_level, log_file):
@@ -100,24 +137,65 @@ def get_logging_formatter():
     logger = logging.getLogger()
     return logger.handlers[0].formatter
 
-def set_logging_levels(log_level, external_command_log_level="WARN"):
+def set_python_log_level(log_level):
     logger = logging.getLogger()
     logger.setLevel(log_level)
-    logging.getLogger("make").setLevel(external_command_log_level)
-    logging.getLogger("opp_charttool").setLevel(external_command_log_level)
-    logging.getLogger("opp_eventlogtool").setLevel(external_command_log_level)
-    logging.getLogger("opp_featuretool").setLevel(external_command_log_level)
-    logging.getLogger("opp_msgtool").setLevel(external_command_log_level)
-    logging.getLogger("opp_nedtool").setLevel(external_command_log_level)
-    logging.getLogger("opp_scavetool").setLevel(external_command_log_level)
-    logging.getLogger("opp_makemake").setLevel(external_command_log_level)
-    logging.getLogger("opp_run").setLevel(external_command_log_level)
-    logging.getLogger("opp_run_dbg").setLevel(external_command_log_level)
-    logging.getLogger("opp_run_release").setLevel(external_command_log_level)
-    logging.getLogger("opp_run_sanitize").setLevel(external_command_log_level)
-    logging.getLogger("opp_run_coverage").setLevel(external_command_log_level)
-    logging.getLogger("opp_run_profile").setLevel(external_command_log_level)
-    logging.getLogger("opp_test").setLevel(external_command_log_level)
+
+def get_python_log_level():
+    logger = logging.getLogger()
+    return logger.getEffectiveLevel()
+
+def set_external_command_log_level(log_level):
+    logging.getLogger("py4j").setLevel(log_level)
+    logging.getLogger("make").setLevel(log_level)
+    logging.getLogger("opp_charttool").setLevel(log_level)
+    logging.getLogger("opp_eventlogtool").setLevel(log_level)
+    logging.getLogger("opp_featuretool").setLevel(log_level)
+    logging.getLogger("opp_msgtool").setLevel(log_level)
+    logging.getLogger("opp_nedtool").setLevel(log_level)
+    logging.getLogger("opp_scavetool").setLevel(log_level)
+    logging.getLogger("opp_makemake").setLevel(log_level)
+    logging.getLogger("opp_run").setLevel(log_level)
+    logging.getLogger("opp_run_dbg").setLevel(log_level)
+    logging.getLogger("opp_run_release").setLevel(log_level)
+    logging.getLogger("opp_run_sanitize").setLevel(log_level)
+    logging.getLogger("opp_run_coverage").setLevel(log_level)
+    logging.getLogger("opp_run_profile").setLevel(log_level)
+    logging.getLogger("opp_test").setLevel(log_level)
+
+def get_external_command_log_level():
+    return logging.getLogger("opp_run").getEffectiveLevel()
+
+def run_with_log_levels(func, *args, log_level=None, python_log_level=None, external_command_log_level=None, **kwargs):
+    if python_log_level is None:
+        python_log_level = python_log_level
+    if external_command_log_level is None:
+        external_command_log_level = python_log_level
+    old_python_log_level = None
+    old_external_command_log_level = None
+    try:
+        if python_log_level is not None:
+            old_python_log_level = get_python_log_level()
+            set_python_log_level(python_log_level)
+        if external_command_log_level is not None:
+            old_external_command_log_level = get_external_command_log_level()
+            set_external_command_log_level(external_command_log_level)
+        return func(*args, **kwargs)
+    finally:
+        if old_python_log_level is not None:
+            set_python_log_level(old_python_log_level)
+        if old_external_command_log_level is not None:
+            set_external_command_log_level(old_external_command_log_level)
+
+_default_build_argument = True
+
+def get_default_build_argument():
+    global _default_build_argument
+    return _default_build_argument
+
+def set_default_build_argument(value):
+    global _default_build_argument
+    _default_build_argument = value
 
 def get_omnetpp_relative_path(path):
     return os.path.abspath(os.path.join(os.environ["__omnetpp_root_dir"], path)) if "__omnetpp_root_dir" in os.environ else None
@@ -341,7 +419,7 @@ class DebugLevel(LoggerLevel):
     def __init__(self, logger):
         super().__init__(self, logger, logging.DEBUG)
 
-def run_command_with_logging(args, error_message=None, nice=10, **kwargs):
+def run_command_with_logging(args, error_message=None, nice=10, wait=True, **kwargs):
     logger = logging.getLogger(os.path.basename(args[0]))
     def log_stream(stream, logger, lines):
         for line in iter(stream.readline, ""):
@@ -356,18 +434,21 @@ def run_command_with_logging(args, error_message=None, nice=10, **kwargs):
     stderr_thread = threading.Thread(target=log_stream, args=(process.stderr, logger.stderr, stderr_lines))
     stdout_thread.start()
     stderr_thread.start()
-    try:
-        stdout_thread.join()
-        stderr_thread.join()
-        process.wait()
-    except KeyboardInterrupt:
-        process.kill()
-        raise
-    if process.returncode == -signal.SIGINT:
-        raise KeyboardInterrupt()
-    if error_message and process.returncode != 0:
-        raise Exception(error_message)
-    return subprocess.CompletedProcess(args, process.returncode, "".join(stdout_lines), ''.join(stderr_lines))
+    if wait:
+        try:
+            stdout_thread.join()
+            stderr_thread.join()
+            process.wait()
+        except KeyboardInterrupt:
+            process.kill()
+            raise
+        if process.returncode == -signal.SIGINT:
+            raise KeyboardInterrupt()
+        if error_message and process.returncode != 0:
+            raise Exception(error_message)
+        return subprocess.CompletedProcess(args, process.returncode, "".join(stdout_lines), "".join(stderr_lines))
+    else:
+        return subprocess.CompletedProcess(args, 0, "", "")
 
 def open_file_with_default_editor(file_path):
     if platform.system() == "Windows":
@@ -466,3 +547,9 @@ def collect_referenced_non_existing_ned_types():
     existing_msg_types = collect_existing_msg_types()
     existing_cpp_types = collect_existing_cpp_types()
     return referenced_ned_types.difference(existing_ned_types).difference(existing_msg_types).difference(existing_cpp_types)
+
+def set_data_frame_print_options_to_print_more_details():
+    pandas.set_option('display.max_rows', None)
+    pandas.set_option('display.max_columns', None)
+    pandas.set_option("display.precision", 19)
+    pandas.set_option('display.width', 1000)

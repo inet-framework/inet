@@ -8,7 +8,7 @@
 package inet.visualizer.contract;
 
 //
-// This module interface allows configuring different ~ITransportConnectionVisualizer
+// Interface allows configuring different ~ITransportConnectionVisualizer
 // submodules from INI files. Such a visualizer displays the active transport
 // connections in a network.
 //
