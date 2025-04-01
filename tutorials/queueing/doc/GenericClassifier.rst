@@ -15,7 +15,6 @@ Thus, packets with data 0 are pushed to ``consumer1``, and those with data 1 are
 
 .. figure:: media/GenericClassifier.png
    :align: center
-   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network GenericClassifierTutorialStep

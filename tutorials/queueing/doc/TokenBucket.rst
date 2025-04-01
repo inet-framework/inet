@@ -14,11 +14,9 @@ generates tokens periodically into the token bucket module.
 
 .. figure:: media/TokenBucket.png
    :align: center
-   :width: 100%
 
 .. figure:: media/TokenBucket_Bucket.png
    :align: center
-   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network TokenBucketTutorialStep

@@ -12,7 +12,6 @@ pushes 1-byte packets into a passive packet sink (:ned:`PassivePacketSink`) and 
 
 .. figure:: media/Filter1.png
    :align: center
-   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network Filter1TutorialStep

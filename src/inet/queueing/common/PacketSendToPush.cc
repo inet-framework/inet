@@ -30,7 +30,6 @@ void PacketSendToPush::handleMessage(cMessage *message)
     auto packet = check_and_cast<Packet *>(message);
     handlePacketProcessed(packet);
     pushOrSendPacket(packet, outputGate, consumer);
-    updateDisplayString();
 }
 
 } // namespace queueing

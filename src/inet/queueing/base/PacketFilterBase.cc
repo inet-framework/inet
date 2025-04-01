@@ -88,7 +88,6 @@ void PacketFilterBase::pushPacket(Packet *packet, const cGate *gate)
         handlePacketProcessed(packet);
         dropPacket(packet);
     }
-    updateDisplayString();
 }
 
 void PacketFilterBase::pushPacketStart(Packet *packet, const cGate *gate, bps datarate)
@@ -106,7 +105,6 @@ void PacketFilterBase::pushPacketStart(Packet *packet, const cGate *gate, bps da
         EV_INFO << "Filtering out packet" << EV_FIELD(packet) << EV_ENDL;
         dropPacket(packet);
     }
-    updateDisplayString();
 }
 
 void PacketFilterBase::pushPacketEnd(Packet *packet, const cGate *gate)
@@ -129,7 +127,6 @@ void PacketFilterBase::pushPacketEnd(Packet *packet, const cGate *gate)
         endPacketStreaming(packet);
         dropPacket(packet);
     }
-    updateDisplayString();
 }
 
 void PacketFilterBase::pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength)
@@ -152,7 +149,6 @@ void PacketFilterBase::pushPacketProgress(Packet *packet, const cGate *gate, bps
         endPacketStreaming(packet);
         dropPacket(packet);
     }
-    updateDisplayString();
 }
 
 void PacketFilterBase::handleCanPushPacketChanged(const cGate *gate)
@@ -193,7 +189,6 @@ Packet *PacketFilterBase::canPullPacket(const cGate *gate) const
             // KLUDGE
             nonConstThisPtr->handlePacketProcessed(packet);
             nonConstThisPtr->dropPacket(packet);
-            updateDisplayString();
         }
     }
 }
@@ -211,7 +206,6 @@ Packet *PacketFilterBase::pullPacket(const cGate *gate)
             EV_INFO << "Passing through packet" << EV_FIELD(packet) << EV_ENDL;
             if (collector != nullptr)
                 animatePullPacket(packet, outputGate, collector.getReferencedGate());
-            updateDisplayString();
             emit(packetPulledOutSignal, packet);
             return packet;
         }

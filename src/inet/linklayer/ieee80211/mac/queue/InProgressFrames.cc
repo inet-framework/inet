@@ -23,11 +23,10 @@ void InProgressFrames::initialize(int stage)
         pendingQueue = check_and_cast<queueing::IPacketQueue *>(getModuleByPath(par("pendingQueueModule")));
         dataService = check_and_cast<IOriginatorMacDataService *>(getModuleByPath(par("originatorMacDataServiceModule")));
         ackHandler = check_and_cast<IAckHandler *>(getModuleByPath(par("ackHandlerModule")));
-        updateDisplayString();
     }
 }
 
-void InProgressFrames::updateDisplayString() const
+void InProgressFrames::refreshDisplay() const
 {
     std::string text = std::to_string(inProgressFrames.size()) + " packets";
     getDisplayString().setTagArg("t", 0, text.c_str());
@@ -74,7 +73,6 @@ void InProgressFrames::ensureHasFrameToTransmit()
                 ackHandler->frameGotInProgress(frame->peekAtFront<Ieee80211DataOrMgmtHeader>());
                 inProgressFrames.push_back(frame);
                 frame->setArrivalTime(simTime());
-                updateDisplayString();
                 emit(packetEnqueuedSignal, frame);
             }
             delete frames;
@@ -110,7 +108,6 @@ Packet *InProgressFrames::getPendingFrameFor(Packet *frame)
                 ackHandler->frameGotInProgress(frame->peekAtFront<Ieee80211DataOrMgmtHeader>());
                 inProgressFrames.push_back(frame);
                 frame->setArrivalTime(simTime());
-                updateDisplayString();
                 emit(packetEnqueuedSignal, frame);
             }
             delete frames;
@@ -128,7 +125,6 @@ void InProgressFrames::dropFrame(Packet *packet)
     EV_DEBUG << "Dropping frame " << packet->getName() << ".\n";
     inProgressFrames.erase(std::remove(inProgressFrames.begin(), inProgressFrames.end(), packet), inProgressFrames.end());
     droppedFrames.push_back(packet);
-    updateDisplayString();
     emit(packetDequeuedSignal, packet);
 }
 
@@ -143,7 +139,6 @@ void InProgressFrames::dropFrames(std::set<std::pair<MacAddress, std::pair<Tid, 
                 EV_DEBUG << "Dropping frame " << frame->getName() << ".\n";
                 it = inProgressFrames.erase(it);
                 droppedFrames.push_back(frame);
-                updateDisplayString();
                 emit(packetDequeuedSignal, frame);
             }
             else

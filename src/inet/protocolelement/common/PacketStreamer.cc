@@ -58,7 +58,6 @@ void PacketStreamer::endStreaming()
     pushOrSendPacketEnd(packet, outputGate, consumer, packet->getId());
     numProcessedPackets++;
     processedTotalLength += packetLength;
-    updateDisplayString();
 }
 
 bool PacketStreamer::canPushSomePacket(const cGate *gate) const
@@ -119,7 +118,6 @@ Packet *PacketStreamer::pullPacketStart(const cGate *gate, bps datarate)
     EV_INFO << "Starting streaming packet" << EV_FIELD(packet) << EV_ENDL;
     if (collector != nullptr)
         animatePullPacketStart(packet, outputGate, collector.getReferencedGate(), streamDatarate, streamedPacket->getId());
-    updateDisplayString();
     return packet;
 }
 
@@ -133,7 +131,6 @@ Packet *PacketStreamer::pullPacketEnd(const cGate *gate)
         animatePullPacketEnd(packet, outputGate, collector.getReferencedGate(), streamedPacket->getId());
     streamDatarate = bps(NaN);
     streamedPacket = nullptr;
-    updateDisplayString();
     return packet;
 }
 
@@ -145,7 +142,6 @@ Packet *PacketStreamer::pullPacketProgress(const cGate *gate, bps datarate, b po
     auto packet = streamedPacket->dup();
     if (collector != nullptr)
         animatePullPacketProgress(packet, outputGate, collector.getReferencedGate(), streamDatarate, position, extraProcessableLength, streamedPacket->getId());
-    updateDisplayString();
     return packet;
 }
 

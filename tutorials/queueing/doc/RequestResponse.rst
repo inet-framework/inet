@@ -21,16 +21,13 @@ The client consumes the response packets by a passive packet sink (:ned:`Passive
 
 .. figure:: media/ResponseProducer.png
    :align: center
-   :width: 100%
 
 .. figure:: media/RequestResponse.png
-   :width: 40%
    :align: center
-   :width: 100%
+   :width: 40%
 
 .. figure:: media/RequestConsumer.png
    :align: center
-   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network RequestResponseTutorialStep

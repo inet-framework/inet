@@ -107,7 +107,6 @@ void MarkovScheduler::pushPacket(Packet *packet, const cGate *gate)
     processedTotalLength += packet->getDataLength();
     pushOrSendPacket(packet, outputGate, consumer);
     numProcessedPackets++;
-    updateDisplayString();
 }
 
 std::string MarkovScheduler::resolveDirective(char directive) const

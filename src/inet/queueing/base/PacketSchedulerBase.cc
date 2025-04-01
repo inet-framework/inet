@@ -173,7 +173,6 @@ Packet *PacketSchedulerBase::pullPacket(const cGate *gate)
     emit(packetPulledSignal, packet);
     if (collector != nullptr)
         animatePullPacket(packet, outputGate, collector.getReferencedGate());
-    updateDisplayString();
     return packet;
 }
 
@@ -188,7 +187,6 @@ Packet *PacketSchedulerBase::pullPacketStart(const cGate *gate, bps datarate)
     inProgressStreamId = packet->getTreeId();
     if (collector != nullptr)
         animatePullPacketStart(packet, outputGate, collector.getReferencedGate(), datarate, packet->getTransmissionId());
-    updateDisplayString();
     return packet;
 }
 
@@ -205,7 +203,6 @@ Packet *PacketSchedulerBase::pullPacketEnd(const cGate *gate)
     endPacketStreaming(packet);
     if (collector != nullptr)
         animatePullPacketEnd(packet, outputGate, collector.getReferencedGate(), packet->getTransmissionId());
-    updateDisplayString();
     return packet;
 }
 
@@ -223,7 +220,6 @@ Packet *PacketSchedulerBase::pullPacketProgress(const cGate *gate, bps datarate,
         endPacketStreaming(packet);
     if (collector != nullptr)
         animatePullPacketProgress(packet, outputGate, collector.getReferencedGate(), datarate, position, extraProcessableLength, packet->getTransmissionId());
-    updateDisplayString();
     return packet;
 }
 

@@ -19,7 +19,6 @@ a HopLimitReq tag. The packets are consumed by a passive packet sink (:ned:`Pass
 
 .. figure:: media/Tagger.png
    :align: center
-   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network TaggerTutorialStep

@@ -1,10 +1,12 @@
 import curses.ascii
 import glob
 import hashlib
+import importlib
 import io
 import IPython
 import logging
 import os
+import pandas
 import platform
 import pickle
 import re
@@ -54,6 +56,17 @@ def enable_autoreload():
     ipython = IPython.get_ipython()
     ipython.run_line_magic("load_ext", "autoreload")
     ipython.run_line_magic("autoreload", "2")
+
+def import_user_module():
+    try:
+        user = os.getlogin()
+        user_module = importlib.import_module(user)
+        main_module = sys.modules['__main__']
+        for attr in dir(user_module):
+            if not attr.startswith('_'):
+                main_module.__dict__[attr] = getattr(user_module, attr)
+    except ImportError as e:
+        pass
 
 _file_handler = None
 
@@ -534,3 +547,9 @@ def collect_referenced_non_existing_ned_types():
     existing_msg_types = collect_existing_msg_types()
     existing_cpp_types = collect_existing_cpp_types()
     return referenced_ned_types.difference(existing_ned_types).difference(existing_msg_types).difference(existing_cpp_types)
+
+def set_data_frame_print_options_to_print_more_details():
+    pandas.set_option('display.max_rows', None)
+    pandas.set_option('display.max_columns', None)
+    pandas.set_option("display.precision", 19)
+    pandas.set_option('display.width', 1000)

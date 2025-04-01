@@ -13,11 +13,9 @@ processing time of 1s, and a packet capacity of 1.
 
 .. figure:: media/LeakyBucket.png
    :align: center
-   :width: 100%
 
 .. figure:: media/LeakyBucket_Bucket.png
    :align: center
-   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network LeakyBucketTutorialStep

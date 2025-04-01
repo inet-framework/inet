@@ -12,7 +12,6 @@ pops packets from one of the queues in a prioritized way, favoring the first que
 
 .. figure:: media/PriorityScheduler.png
    :align: center
-   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network PrioritySchedulerTutorialStep

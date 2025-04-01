@@ -16,11 +16,9 @@ The packets are collected at random intervals by an active packet sink (:ned:`Ac
 
 .. figure:: media/PriorityQueue.png
    :align: center
-   :width: 100%
 
 .. figure:: media/PriorityQueue_Queue.png
    :align: center
-   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network PriorityQueueTutorialStep

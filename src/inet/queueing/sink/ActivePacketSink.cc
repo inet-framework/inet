@@ -75,7 +75,6 @@ void ActivePacketSink::collectPacket()
     EV_INFO << "Collecting packet" << EV_FIELD(packet) << EV_ENDL;
     numProcessedPackets++;
     processedTotalLength += packet->getDataLength();
-    updateDisplayString();
     dropPacket(packet, OTHER_PACKET_DROP);
 }
 

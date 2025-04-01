@@ -36,7 +36,6 @@ void SignalBasedTokenGenerator::generateTokens()
     numTokensGenerated += numTokens;
     emit(tokensCreatedSignal, numTokens);
     storage->addTokens(numTokens);
-    updateDisplayString();
 }
 
 void SignalBasedTokenGenerator::receiveSignal(cComponent *source, simsignal_t signal, intval_t value, cObject *details)

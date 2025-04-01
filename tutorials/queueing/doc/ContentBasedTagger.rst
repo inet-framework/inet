@@ -12,7 +12,6 @@ to attach a hop limit tag to 1-byte packets. Packets are consumed by a passive p
 
 .. figure:: media/ContentBasedTagger.png
    :align: center
-   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network ContentBasedTaggerTutorialStep

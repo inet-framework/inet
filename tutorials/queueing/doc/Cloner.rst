@@ -13,7 +13,6 @@ of the packet into the two passive packet sources (:ned:`PassivePacketSource`) i
 
 .. figure:: media/Cloner.png
    :align: center
-   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network ClonerTutorialStep

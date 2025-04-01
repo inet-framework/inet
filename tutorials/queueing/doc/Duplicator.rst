@@ -20,7 +20,6 @@ sink (:ned:`PassivePacketSink`).
 
 .. figure:: media/Duplicator.png
    :align: center
-   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network DuplicatorTutorialStep

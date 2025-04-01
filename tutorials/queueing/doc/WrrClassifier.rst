@@ -16,7 +16,6 @@ to the three sinks in one round.
 
 .. figure:: media/WrrClassifier.png
    :align: center
-   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network WrrClassifierTutorialStep

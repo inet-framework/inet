@@ -13,19 +13,15 @@ the network level by an interface module (``ExampleInterface``).
 
 .. figure:: media/Network_TestCable.png
    :align: center
-   :width: 100%
 
 .. figure:: media/Network.png
    :align: center
-   :width: 100%
 
 .. figure:: media/Network_TestHost.png
    :align: center
-   :width: 100%
 
 .. figure:: media/NetworkInterface.png
    :align: center
-   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network ExampleNetworkTutorialStep

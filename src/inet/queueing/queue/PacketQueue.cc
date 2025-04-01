@@ -40,8 +40,6 @@ void PacketQueue::initialize(int stage)
         if (producer != nullptr)
             producer.handleCanPushPacketChanged();
     }
-    else if (stage == INITSTAGE_LAST)
-        updateDisplayString();
 }
 
 cGate *PacketQueue::getRegistrationForwardingGate(cGate *gate)
@@ -111,7 +109,6 @@ void PacketQueue::pushPacket(Packet *packet, const cGate *gate)
         collector.handleCanPullPacketChanged();
     cNamedObject packetPushEndedDetails("atomicOperationEnded");
     emit(packetPushEndedSignal, nullptr, &packetPushEndedDetails);
-    updateDisplayString();
 }
 
 Packet *PacketQueue::pullPacket(const cGate *gate)
@@ -132,7 +129,6 @@ Packet *PacketQueue::pullPacket(const cGate *gate)
     emit(packetPulledSignal, packet);
     if (collector != nullptr)
         animatePullPacket(packet, outputGate, collector.getReferencedGate());
-    updateDisplayString();
     return packet;
 }
 
@@ -144,7 +140,6 @@ void PacketQueue::removePacket(Packet *packet)
     if (buffer != nullptr)
         buffer->removePacket(packet);
     emit(packetRemovedSignal, packet);
-    updateDisplayString();
 }
 
 void PacketQueue::removeAllPackets()
@@ -160,7 +155,6 @@ void PacketQueue::removeAllPackets()
         emit(packetRemovedSignal, packet);
         delete packet;
     }
-    updateDisplayString();
 }
 
 bool PacketQueue::canPushSomePacket(const cGate *gate) const
@@ -192,7 +186,6 @@ void PacketQueue::handlePacketRemoved(Packet *packet)
         EV_INFO << "Removing packet" << EV_FIELD(packet) << EV_ENDL;
         queue.remove(packet);
         emit(packetRemovedSignal, packet);
-        updateDisplayString();
     }
 }
 

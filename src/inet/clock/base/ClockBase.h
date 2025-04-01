@@ -44,7 +44,6 @@ class INET_API ClockBase : public cSimpleModule, public IClock, public StringFor
     void emitTimeDifferenceToReference();
     virtual void finish() override;
     virtual void refreshDisplay() const override;
-    virtual void updateDisplayString() const;
 
     cSimpleModule *getTargetModule() const {
         cSimpleModule *target = getSimulation()->getContextSimpleModule();

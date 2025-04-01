@@ -11,7 +11,6 @@ provider (:ned:`PassivePacketSource`), and pushes them into a packet consumer
 (:ned:`PassivePacketSink`).
 
 .. figure:: media/PacketBasedTokenGenerator.png
-   :width: 100%
    :align: center
 
 .. literalinclude:: ../QueueingTutorial.ned

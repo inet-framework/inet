@@ -11,15 +11,12 @@ directly, without any sockets or protocols.
 
 .. figure:: media/TelnetClientTraffic.png
    :align: center
-   :width: 100%
 
 .. figure:: media/Telnet.png
    :align: center
-   :width: 100%
 
 .. figure:: media/TelnetServerTraffic.png
    :align: center
-   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network TelnetTutorialStep

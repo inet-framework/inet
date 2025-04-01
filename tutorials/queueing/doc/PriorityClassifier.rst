@@ -13,7 +13,6 @@ The packets are popped from the queues by two active packet sinks (:ned:`ActiveP
 
 .. figure:: media/PriorityClassifier.png
    :align: center
-   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network PriorityClassifierTutorialStep

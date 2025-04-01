@@ -72,7 +72,6 @@ void ActivePacketSource::producePacket()
     EV_INFO << "Producing packet" << EV_FIELD(packet) << EV_ENDL;
     emit(packetPushedSignal, packet);
     pushOrSendPacket(packet, outputGate, consumer);
-    updateDisplayString();
 }
 
 void ActivePacketSource::handleCanPushPacketChanged(const cGate *gate)

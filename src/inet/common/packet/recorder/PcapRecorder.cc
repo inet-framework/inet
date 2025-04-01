@@ -157,11 +157,6 @@ void PcapRecorder::handleMessage(cMessage *msg)
     throw cRuntimeError("This module does not handle messages");
 }
 
-void PcapRecorder::refreshDisplay() const
-{
-    updateDisplayString();
-}
-
 std::string PcapRecorder::resolveDirective(char directive) const
 {
     switch (directive) {
@@ -172,12 +167,10 @@ std::string PcapRecorder::resolveDirective(char directive) const
     }
 }
 
-void PcapRecorder::updateDisplayString() const
+void PcapRecorder::refreshDisplay() const
 {
-    if (getEnvir()->isGUI()) {
-        auto text = StringFormat::formatString(par("displayStringTextFormat"), this);
-        getDisplayString().setTagArg("t", 0, text.c_str());
-    }
+    auto text = StringFormat::formatString(par("displayStringTextFormat"), this);
+    getDisplayString().setTagArg("t", 0, text.c_str());
 }
 
 void PcapRecorder::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)

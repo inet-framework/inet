@@ -19,7 +19,6 @@ to first match packets containing 1, then those containing 0.
 
 .. figure:: media/ContentBasedScheduler.png
    :align: center
-   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network ContentBasedSchedulerTutorialStep

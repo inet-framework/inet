@@ -18,7 +18,6 @@ the buffer when it gets overloaded.
 
 .. figure:: media/Buffer.png
    :align: center
-   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network BufferTutorialStep

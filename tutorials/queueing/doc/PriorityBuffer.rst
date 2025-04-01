@@ -13,7 +13,6 @@ When the buffer becomes full, it drops packets from the second queue first.
 
 .. figure:: media/PriorityBuffer.png
    :align: center
-   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network PriorityBufferTutorialStep

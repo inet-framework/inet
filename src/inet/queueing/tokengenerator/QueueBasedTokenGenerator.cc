@@ -48,7 +48,6 @@ void QueueBasedTokenGenerator::generateTokens()
     numTokensGenerated += numTokens;
     emit(tokensCreatedSignal, numTokens);
     storage->addTokens(numTokens);
-    updateDisplayString();
 }
 
 } // namespace queueing

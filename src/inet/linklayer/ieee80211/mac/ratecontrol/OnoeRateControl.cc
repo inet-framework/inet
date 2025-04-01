@@ -24,11 +24,10 @@ void OnoeRateControl::initialize(int stage)
         WATCH(numOfSuccTransmissions);
         WATCH(numOfGivenUpTransmissions);
         WATCH(avgRetriesPerFrame);
-        updateDisplayString();
     }
 }
 
-void OnoeRateControl::updateDisplayString() const
+void OnoeRateControl::refreshDisplay() const
 {
     getDisplayString().setTagArg("t", 0, currentMode->getName());
 }
@@ -77,7 +76,6 @@ void OnoeRateControl::computeMode()
         if (numOfFrameTransmitted >= 10 && avgRetriesPerFrame > 1) {
             currentMode = decreaseRateIfPossible(currentMode);
             emitDatarateChangedSignal();
-            updateDisplayString();
             EV_DETAIL << "Decreased rate to " << *currentMode << endl;
             credit = 0;
         }
@@ -89,7 +87,6 @@ void OnoeRateControl::computeMode()
         if (credit >= 10) {
             currentMode = increaseRateIfPossible(currentMode);
             emitDatarateChangedSignal();
-            updateDisplayString();
             EV_DETAIL << "Increased rate to " << *currentMode << endl;
             credit = 0;
         }

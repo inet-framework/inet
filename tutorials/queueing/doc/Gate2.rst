@@ -9,7 +9,6 @@ packet source (:ned:`PassivePacketSource`).
 
 .. figure:: media/Gate2.png
    :align: center
-   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network Gate2TutorialStep

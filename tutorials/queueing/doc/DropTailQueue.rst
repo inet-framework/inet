@@ -11,7 +11,6 @@ The packets are popped from the queue at random intervals by an active packet si
 
 .. figure:: media/DropTailQueue.png
    :align: center
-   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network DropTailQueueTutorialStep

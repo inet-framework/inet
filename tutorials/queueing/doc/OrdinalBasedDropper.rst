@@ -12,7 +12,6 @@ Packets that are not dropped are consumed by a passive packet sink (:ned:`Passiv
 
 .. figure:: media/OrdinalBasedDropper.png
    :align: center
-   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network OrdinalBasedDropperTutorialStep

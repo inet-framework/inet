@@ -37,7 +37,6 @@ void DestreamingReceiver::handleMessageWhenUp(cMessage *message)
     }
     else
         StreamingReceiverBase::handleMessage(message);
-    updateDisplayString();
 }
 
 void DestreamingReceiver::sendToUpperLayer(Packet *packet)

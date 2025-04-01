@@ -23,7 +23,6 @@ if it doesn't, the next packet is popped as soon as one becomes available.
 
 .. figure:: media/GenericScheduler.png
    :align: center
-   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network GenericSchedulerTutorialStep

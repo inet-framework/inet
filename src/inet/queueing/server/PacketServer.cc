@@ -48,7 +48,6 @@ void PacketServer::handleMessage(cMessage *message)
             startProcessingPacket();
             scheduleProcessingTimer();
         }
-        updateDisplayString();
     }
     else
         throw cRuntimeError("Unknown message");

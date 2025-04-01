@@ -81,7 +81,6 @@ void PacketDelayerBase::pushPacket(Packet *packet, const cGate *gate)
             processPacket(packet, simTime());
     }
     handlePacketProcessed(packet);
-    updateDisplayString();
 }
 
 void PacketDelayerBase::handleCanPushPacketChanged(const cGate *gate)

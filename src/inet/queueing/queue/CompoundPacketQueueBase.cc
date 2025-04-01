@@ -32,8 +32,6 @@ void CompoundPacketQueueBase::initialize(int stage)
         checkPacketOperationSupport(inputGate);
         checkPacketOperationSupport(outputGate);
     }
-    else if (stage == INITSTAGE_LAST)
-        updateDisplayString();
 }
 
 IPacketDropperFunction *CompoundPacketQueueBase::createDropperFunction(const char *dropperClass) const
@@ -70,7 +68,6 @@ void CompoundPacketQueueBase::pushPacket(Packet *packet, const cGate *gate)
     ASSERT(!isOverloaded());
     cNamedObject packetPushEndedDetails("atomicOperationEnded");
     emit(packetPushEndedSignal, nullptr, &packetPushEndedDetails);
-    updateDisplayString();
 }
 
 Packet *CompoundPacketQueueBase::pullPacket(const cGate *gate)
@@ -79,7 +76,6 @@ Packet *CompoundPacketQueueBase::pullPacket(const cGate *gate)
     auto packet = provider.pullPacket();
     take(packet);
     emit(packetPulledSignal, packet);
-    updateDisplayString();
     return packet;
 }
 
@@ -88,14 +84,12 @@ void CompoundPacketQueueBase::removePacket(Packet *packet)
     Enter_Method("removePacket");
     collection->removePacket(packet);
     emit(packetRemovedSignal, packet);
-    updateDisplayString();
 }
 
 void CompoundPacketQueueBase::removeAllPackets()
 {
     Enter_Method("removeAllPacket");
     collection->removeAllPackets();
-    updateDisplayString();
 }
 
 bool CompoundPacketQueueBase::canPushSomePacket(const cGate *gate) const
@@ -129,7 +123,6 @@ void CompoundPacketQueueBase::receiveSignal(cComponent *source, simsignal_t sign
         numCreatedPackets++;
     else
         throw cRuntimeError("Unknown signal");
-    updateDisplayString();
 }
 
 } // namespace queueing

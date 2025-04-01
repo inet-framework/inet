@@ -10,11 +10,9 @@ Whenever the queue becomes empty, a queue filler module (:ned:`QueueFiller`) pus
 
 .. figure:: media/QueueFillerNetwork.png
    :align: center
-   :width: 100%
 
 .. figure:: media/QueueFiller.png
    :align: center
-   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network QueueFillerTutorialStep

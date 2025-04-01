@@ -14,7 +14,6 @@ configured via parameters.
 
 .. figure:: media/Gate1.png
    :align: center
-   :width: 100%
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network Gate1TutorialStep

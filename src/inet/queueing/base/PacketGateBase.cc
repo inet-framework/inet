@@ -50,7 +50,6 @@ void PacketGateBase::open()
     if (collector != nullptr)
         collector.handleCanPullPacketChanged();
     emit(gateStateChangedSignal, isOpen_);
-    updateDisplayString();
 }
 
 void PacketGateBase::close()
@@ -70,7 +69,6 @@ void PacketGateBase::close()
     if (collector != nullptr)
         collector.handleCanPullPacketChanged();
     emit(gateStateChangedSignal, isOpen_);
-    updateDisplayString();
 }
 
 int PacketGateBase::getNumPackets() const
@@ -155,9 +153,9 @@ bool PacketGateBase::canPacketFlowThrough(Packet *packet) const
     return true;
 }
 
-void PacketGateBase::updateDisplayString() const
+void PacketGateBase::refreshDisplay() const
 {
-    PacketFlowBase::updateDisplayString();
+    PacketFlowBase::refreshDisplay();
     getDisplayString().setTagArg("i", 1, isOpen_ ? "green" : "red");
     getDisplayString().setTagArg("i", 2, 50);
 }

@@ -41,7 +41,7 @@ def run_repl_main():
             app = IPython.terminal.ipapp.TerminalIPythonApp.instance()
             app.interactive_shell_class = TerminalInteractiveShell
             app.display_banner = False
-            app.exec_lines = ["from inet import *", "enable_autoreload()", "register_key_bindings()"]
+            app.exec_lines = ["from inet import *", "enable_autoreload()", "register_key_bindings()", "import_user_module()"]
             app.initialize(argv=[])
             app.start()
     except KeyboardInterrupt:
