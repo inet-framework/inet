@@ -7,7 +7,7 @@ Tests clock granularity on a settable clock.
 ned-path = .;../../../../src;../../lib
 network = inet.test.unittest.lib.ClockTestNetwork
 cmdenv-express-mode = false
-cmdenv-log-prefix = "C:%C: "
+cmdenv-log-prefix = "%l %C: "
 
 *.host.clock.typename = "SettableClock"
 *.host.clock.initialClockTime = 1s
@@ -15,7 +15,7 @@ cmdenv-log-prefix = "C:%C: "
 *.host.clock.oscillator.driftRate = -0.5e6 ppm
 *.scenarioManager.script = xml("<scenario><set-clock t='2.5s' module='host.clock' time='2.5s' reset-oscillator='false'/></scenario>")
 %#--------------------------------------------------------------------------------------------------------------
-%postrun-command: grep "^C:" test.out > clock.out || true
+%postrun-command: grep INFO test.out > clock.out || true
 %#--------------------------------------------------------------------------------------------------------------
 %contains: clock.out
 C:(ClockTestApp)ClockTestNetwork.host.app: start: simtime: 0, clock: 1, computed simtime: 0

@@ -7,13 +7,14 @@ Tests SettableClock:
 ned-path = .;../../../../src;../../lib
 network = inet.test.unittest.lib.ClockTestNetwork
 cmdenv-express-mode = false
-cmdenv-log-prefix = "C:%C: "
+cmdenv-log-prefix = "%l %C: "
 
 *.host.clock.typename = "SettableClock"
 *.host.clock.initialClockTime = 0.03s
 *.host.clock.oscillator.driftRate = 0 ppm
 %#--------------------------------------------------------------------------------------------------------------
-%postrun-command: grep "^C:" test.out > clock.out || true
+%postrun-command: grep INFO test.out > clock.out || true
+
 %#--------------------------------------------------------------------------------------------------------------
 %contains: clock.out
 C:(ClockTestApp)ClockTestNetwork.host.app: start: simtime: 0, clock: 0.03, computed simtime: 0
