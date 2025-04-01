@@ -100,19 +100,19 @@ void ServoClockBase::processCommand(const cXMLElement &node)
         clocktime_t time = ClockTime::parse(xmlutils::getMandatoryFilledAttribute(node, "time"));
         adjustClockTo(time);
     }
-    if (!strcmp(node.getTagName(), "set-clock")) {
+    else if (!strcmp(node.getTagName(), "set-clock")) {
         clocktime_t time = ClockTime::parse(xmlutils::getMandatoryFilledAttribute(node, "time"));
         bool notifyListeners = xmlutils::getAttributeBoolValue(&node, "notifyListeners", true);
         jumpClockTo(time, notifyListeners);
     }
-    if (!strcmp(node.getTagName(), "set-oscillator-compensation")) {
+    else if (!strcmp(node.getTagName(), "set-oscillator-compensation")) {
         // TODO: Refactor to directly read ppm
         const char *valueStr = xmlutils::getMandatoryFilledAttribute(node, "value");
         double valueDouble = std::atof(valueStr);           // Convert string to double
         ppm oscillatorCompensationValue = ppm(valueDouble); // Create ppm object from double
         setOscillatorCompensation(oscillatorCompensationValue);
     }
-    if (!strcmp(node.getTagName(), "reset-oscillator")) {
+    else if (!strcmp(node.getTagName(), "reset-oscillator")) {
         resetOscillator();
     }
     else
