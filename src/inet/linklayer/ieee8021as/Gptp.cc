@@ -548,7 +548,8 @@ void Gptp::executeBmca()
         }
     }
 
-    auto fullGmPath = clockIdentityToFullPath[std::to_string(bestAnnounceCurr->getPriorityVector().grandmasterIdentity)];
+    auto fullGmPath =
+        clockIdentityToFullPath[std::to_string(bestAnnounceCurr->getPriorityVector().grandmasterIdentity)];
 
     EV_INFO << "############## BMCA ################################" << endl;
     EV_INFO << "Choosing from " << receivedAnnounces.size() << " Announces" << endl;
@@ -1026,6 +1027,12 @@ void Gptp::processPdelayReq(Packet *packet, const GptpPdelayReq *gptp)
 {
     auto resp = new GptpReqAnswerEvent("selfMsgPdelayResp", GPTP_SELF_REQ_ANSWER_KIND);
     resp->setPortId(packet->getTag<InterfaceInd>()->getInterfaceId());
+    auto ingressTimestamp = packet->getTag<GptpIngressTimeInd>()->getArrivalClockTime(); // t1
+    if (ingressTimestamp == CLOCKTIME_ZERO) {
+        throw cRuntimeError("No ingress timestamp available,"
+                            "ensure that your interface emits the transmissionStartedSignal"
+                            "(e.g. use the EthernetStreamingPhyLayer)");
+    }
     resp->setIngressTimestamp(packet->getTag<GptpIngressTimeInd>()->getArrivalClockTime()); // t2
     resp->setSourcePortIdentity(gptp->getSourcePortIdentity());
     resp->setSequenceId(gptp->getSequenceId());

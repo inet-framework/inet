@@ -6,6 +6,8 @@
 
 #include "ServoClockBase.h"
 
+#include <inet/common/XMLUtils.h>
+
 namespace inet {
 
 Register_Abstract_Class(ServoClockBase);
