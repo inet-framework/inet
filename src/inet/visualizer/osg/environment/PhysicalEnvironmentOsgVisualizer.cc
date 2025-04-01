@@ -39,6 +39,7 @@ void PhysicalEnvironmentOsgVisualizer::initialize(int stage)
 
 void PhysicalEnvironmentOsgVisualizer::refreshDisplay() const
 {
+    VisualizerBase::refreshDisplay();
     // only update after initialize
     if (physicalEnvironment != nullptr && getSimulation()->getEventNumber() == 0 && displayObjects) {
         auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizationTargetModule);

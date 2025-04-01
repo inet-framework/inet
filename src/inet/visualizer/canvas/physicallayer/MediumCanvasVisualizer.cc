@@ -171,6 +171,7 @@ void MediumCanvasVisualizer::initialize(int stage)
 
 void MediumCanvasVisualizer::refreshDisplay() const
 {
+    MediumVisualizerBase::refreshDisplay();
     if (invalidDisplay || lastRefreshDisplay != simTime()) {
         if (displaySignals || displayMainPowerDensityMap || displayPowerDensityMaps)
             const_cast<MediumCanvasVisualizer *>(this)->setAnimationSpeed();
