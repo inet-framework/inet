@@ -17,30 +17,30 @@ cmdenv-log-prefix = "C:%C: "
 %postrun-command: grep "^C:" test.out > clock.out || true
 %#--------------------------------------------------------------------------------------------------------------
 %contains: clock.out
-C:(ClockTestApp)ClockTestNetwork.host.app: start: simtime: 0, clock: 0, computed simtime: 0
-C:(ClockTestApp)ClockTestNetwork.host.app: schedule Timer_1.1 to clock: 1.1, scheduled simtime: 2.2, scheduled clock: 1.1
-C:(ClockTestApp)ClockTestNetwork.host.app: schedule Timer_2.11 to clock: 2.11, scheduled simtime: 4.4, scheduled clock: 2.2
-C:(ClockTestApp)ClockTestNetwork.host.app: schedule Timer_2.89 to clock: 2.89, scheduled simtime: 5.8, scheduled clock: 2.9
-C:(ClockTestApp)ClockTestNetwork.host.app: schedule Timer_2.9999999 to clock: 2.9999999, scheduled simtime: 6, scheduled clock: 3
-C:(ClockTestApp)ClockTestNetwork.host.app: schedule Timer_3.11 to clock: 3.11, scheduled simtime: 6.4, scheduled clock: 3.2
-C:(ClockTestApp)ClockTestNetwork.host.app: schedule After_1.2 after clock: 1.2, scheduled simtime: 2.4, scheduled clock: 1.2
-C:(ClockTestApp)ClockTestNetwork.host.app: arrived Timer_1.1: simtime: 2.2, clock: 1.1
-C:(ClockTestApp)ClockTestNetwork.host.app: arrived After_1.2: simtime: 2.4, clock: 1.2
-C:(ClockTestApp)ClockTestNetwork.host.app: schedule After_1.2 after clock: 1.2, scheduled simtime: 4.8, scheduled clock: 2.4
-C:(ClockTestApp)ClockTestNetwork.host.app: arrived Timer_2.11: simtime: 4.4, clock: 2.2
-C:(ClockTestApp)ClockTestNetwork.host.app: arrived After_1.2: simtime: 4.8, clock: 2.4
-C:(ClockTestApp)ClockTestNetwork.host.app: schedule After_1.2 after clock: 1.2, scheduled simtime: 7.2, scheduled clock: 3.6
-C:(ClockTestApp)ClockTestNetwork.host.app: arrived Timer_2.89: simtime: 5.8, clock: 2.9
-C:(ClockTestApp)ClockTestNetwork.host.app: arrived Timer_2.9999999: simtime: 6, clock: 3
-C:(ClockTestApp)ClockTestNetwork.host.app: arrived Timer_3.11: simtime: 6.4, clock: 3.2
-C:(ClockTestApp)ClockTestNetwork.host.app: arrived After_1.2: simtime: 7.2, clock: 3.6
-C:(ClockTestApp)ClockTestNetwork.host.app: schedule After_1.2 after clock: 1.2, scheduled simtime: 9.6, scheduled clock: 4.8
-C:(ClockTestApp)ClockTestNetwork.host.app: arrived After_1.2: simtime: 9.6, clock: 4.8
-C:(ClockTestApp)ClockTestNetwork.host.app: schedule After_1.2 after clock: 1.2, scheduled simtime: 12, scheduled clock: 6
-C:(ClockTestApp)ClockTestNetwork.host.app: arrived After_1.2: simtime: 12, clock: 6
-C:(ClockTestApp)ClockTestNetwork.host.app: schedule After_1.2 after clock: 1.2, scheduled simtime: 14.4, scheduled clock: 7.2
-C:(ClockTestApp)ClockTestNetwork.host.app: arrived After_1.2: simtime: 14.4, clock: 7.2
-C:(ClockTestApp)ClockTestNetwork.host.app: finished: simtime: 14.4, clock: 7.2, computed simtime: 14.4
+INFO (ClockTestApp)ClockTestNetwork.host.app: start: simtime: 0, clock: 0, computed simtime: 0
+INFO (ClockTestApp)ClockTestNetwork.host.app: schedule Timer_1.1 to clock: 1.1, scheduled simtime: 2.2, scheduled clock: 1.1
+INFO (ClockTestApp)ClockTestNetwork.host.app: schedule Timer_2.11 to clock: 2.11, scheduled simtime: 4.4, scheduled clock: 2.2
+INFO (ClockTestApp)ClockTestNetwork.host.app: schedule Timer_2.89 to clock: 2.89, scheduled simtime: 5.8, scheduled clock: 2.9
+INFO (ClockTestApp)ClockTestNetwork.host.app: schedule Timer_2.9999999 to clock: 2.9999999, scheduled simtime: 6, scheduled clock: 3
+INFO (ClockTestApp)ClockTestNetwork.host.app: schedule Timer_3.11 to clock: 3.11, scheduled simtime: 6.4, scheduled clock: 3.2
+INFO (ClockTestApp)ClockTestNetwork.host.app: schedule After_1.2 after clock: 1.2, scheduled simtime: 2.4, scheduled clock: 1.2
+INFO (ClockTestApp)ClockTestNetwork.host.app: arrived Timer_1.1: simtime: 2.2, clock: 1.1
+INFO (ClockTestApp)ClockTestNetwork.host.app: arrived After_1.2: simtime: 2.4, clock: 1.2
+INFO (ClockTestApp)ClockTestNetwork.host.app: schedule After_1.2 after clock: 1.2, scheduled simtime: 4.8, scheduled clock: 2.4
+INFO (ClockTestApp)ClockTestNetwork.host.app: arrived Timer_2.11: simtime: 4.4, clock: 2.2
+INFO (ClockTestApp)ClockTestNetwork.host.app: arrived After_1.2: simtime: 4.8, clock: 2.4
+INFO (ClockTestApp)ClockTestNetwork.host.app: schedule After_1.2 after clock: 1.2, scheduled simtime: 7.2, scheduled clock: 3.6
+INFO (ClockTestApp)ClockTestNetwork.host.app: arrived Timer_2.89: simtime: 5.8, clock: 2.9
+INFO (ClockTestApp)ClockTestNetwork.host.app: arrived Timer_2.9999999: simtime: 6, clock: 3
+INFO (ClockTestApp)ClockTestNetwork.host.app: arrived Timer_3.11: simtime: 6.4, clock: 3.2
+INFO (ClockTestApp)ClockTestNetwork.host.app: arrived After_1.2: simtime: 7.2, clock: 3.6
+INFO (ClockTestApp)ClockTestNetwork.host.app: schedule After_1.2 after clock: 1.2, scheduled simtime: 9.6, scheduled clock: 4.8
+INFO (ClockTestApp)ClockTestNetwork.host.app: arrived After_1.2: simtime: 9.6, clock: 4.8
+INFO (ClockTestApp)ClockTestNetwork.host.app: schedule After_1.2 after clock: 1.2, scheduled simtime: 12, scheduled clock: 6
+INFO (ClockTestApp)ClockTestNetwork.host.app: arrived After_1.2: simtime: 12, clock: 6
+INFO (ClockTestApp)ClockTestNetwork.host.app: schedule After_1.2 after clock: 1.2, scheduled simtime: 14.4, scheduled clock: 7.2
+INFO (ClockTestApp)ClockTestNetwork.host.app: arrived After_1.2: simtime: 14.4, clock: 7.2
+INFO (ClockTestApp)ClockTestNetwork.host.app: finished: simtime: 14.4, clock: 7.2, computed simtime: 14.4
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:
