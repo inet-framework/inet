@@ -8,7 +8,6 @@
 #include "Gptp.h"
 
 #include "GptpPacket_m.h"
-#include "inet/clock/servo/PiServoClock.h"
 #include "inet/clock/servo/ServoClockBase.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/clock/ClockUserModuleBase.h"
@@ -18,9 +17,7 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ethernet/common/Ethernet.h"
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
-#include "inet/linklayer/ieee8021as/GptpPacket_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
-#include "inet/physicallayer/wired/ethernet/EthernetPhyHeader_m.h"
 
 namespace inet {
 

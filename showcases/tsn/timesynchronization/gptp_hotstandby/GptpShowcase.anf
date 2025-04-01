@@ -1268,8 +1268,8 @@ utils.export_data_if_needed(df, props)
                 <property name="ordering_regex_list" value=""/>
                 <property name="Plot.Caching" value="true"/>
                 <property name="legend_manual" value="false"/>
-                <property name="yaxis_title" value=""/>
-                <property name="legend_replacements" value=""/>
+                <property name="yaxis_title" value="Clock time difference to simulation time [s]"/>
+                <property name="legend_replacements" value="/TwoMasterClocksTreeGptpShowcase.//&#10;/.clock//"/>
                 <property name="Legend.Border" value="false"/>
                 <property name="Plot.Title.Font" value="Arial-regular-10"/>
                 <property name="cycle_seed" value="0"/>

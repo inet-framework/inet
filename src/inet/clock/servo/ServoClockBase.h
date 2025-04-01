@@ -9,7 +9,6 @@
 
 #include "inet/clock/model/OscillatorBasedClock.h"
 #include "inet/clock/oscillator/ConstantDriftOscillator.h"
-#include "inet/common/XMLUtils.h"
 #include "inet/common/scenario/IScriptable.h"
 
 namespace inet {

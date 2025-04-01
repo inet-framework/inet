@@ -73,10 +73,8 @@ void ClockBase::finish() { emit(timeChangedSignal, getClockTime().asSimTime()); 
 
 void ClockBase::refreshDisplay() const
 {
-    if (getEnvir()->isGUI()) {
-        auto text = StringFormat::formatString(displayStringTextFormat, this);
-        getDisplayString().setTagArg("t", 0, text.c_str());
-    }
+    auto text = StringFormat::formatString(displayStringTextFormat, this);
+    getDisplayString().setTagArg("t", 0, text.c_str());
 }
 
 clocktime_t ClockBase::getClockTime() const

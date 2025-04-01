@@ -696,7 +696,7 @@ utils.export_data_if_needed(df, props)
             <property name="Plot.Caching" value="true"/>
             <property name="legend_manual" value="false"/>
             <property name="yaxis_title" value="Clock time difference to simulation time [us]"/>
-            <property name="legend_replacements" value=""/>
+            <property name="legend_replacements" value="/BmcaShowcaseSimple.//&#10;/.clock//"/>
             <property name="Legend.Border" value="false"/>
             <property name="Plot.Title.Font" value="Arial-regular-10"/>
             <property name="cycle_seed" value="0"/>
@@ -719,7 +719,7 @@ utils.export_data_if_needed(df, props)
             <property name="vector_end_time" value=""/>
             <property name="linecolor" value=""/>
             <property name="legend_prefer_result_titles" value="true"/>
-            <property name="title" value="Clock time + -1 * t * 1000000"/>
+            <property name="title" value="BMCA"/>
             <property name="legend_automatic" value="true"/>
             <property name="vector_operations" value="apply: lineartrend(-1)&#10;apply: multiply_by(1000000)"/>
             <property name="sorting" value="true"/>
