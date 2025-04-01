@@ -1306,7 +1306,7 @@ utils.export_data_if_needed(df, props)
                 <property name="image_export_filename" value=""/>
                 <property name="linewidth" value="1.5"/>
                 <property name="legend_format" value=""/>
-                <property name="filter" value="* AND module =~ &quot;*.clock&quot; AND name =~ timeChanged:vector"/>
+                <property name="filter" value="* AND module =~ &quot;*.clock&quot; AND name =~ timeChanged:vector AND runattr:experiment =~ PrimaryAndHotStandbyMasterClocks"/>
                 <property name="X.Label.Wrap" value="true"/>
                 <property name="secondary_ordering_regex_list" value=""/>
                 <property name="simplify" value="false"/>
