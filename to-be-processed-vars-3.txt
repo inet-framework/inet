@@ -1,0 +1,1085 @@
+ActivePacketSinkBase [src/inet/queueing/base/ActivePacketSinkBase.h]:
+  No state variables kept
+
+ActivePacketSourceBase [src/inet/queueing/base/ActivePacketSourceBase.h]:
+  No state variables kept
+
+AggregatorBase [src/inet/protocolelement/aggregation/base/AggregatorBase.h]:
+  # aggregatedSubpackets: std::vector< Packet * > - q
+  # aggregatedPacket: Packet * - p
+
+AnsimMobility [src/inet/mobility/single/AnsimMobility.h]:
+  # nodeId: int - i
+  # currentLine: int - c
+
+AttachedMobility [src/inet/mobility/single/AttachedMobility.h]:
+  # lastVelocity: Coord - v
+
+BackPressureBarrier [src/inet/queueing/common/BackPressureBarrier.h]:
+  No state variables kept
+
+BackPressureBasedFilter [src/inet/queueing/filter/BackPressureBasedFilter.h]:
+  No state variables kept
+
+BehaviorAggregateClassifier [src/inet/networklayer/diffserv/BehaviorAggregateClassifier.h]:
+  # dscpToGateIndexMap: std::map< int, int > - m
+  # numRcvd: int - c
+
+BonnMotionMobility [src/inet/mobility/single/BonnMotionMobility.h]:
+  # currentLine: int - c
+
+ChannelCanvasVisualizer [src/inet/visualizer/canvas/physicallayer/ChannelCanvasVisualizer.h]:
+  No state variables kept
+
+ChannelVisualizerBase [src/inet/visualizer/base/ChannelVisualizerBase.h]:
+  No state variables kept
+
+ChiangMobility [src/inet/mobility/single/ChiangMobility.h]:
+  # xState: int - x
+  # yState: int - y
+
+CircleMobility [src/inet/mobility/single/CircleMobility.h]:
+  # angle: rad - a
+
+CompoundPacketQueueBase [src/inet/queueing/queue/CompoundPacketQueueBase.h]:
+  # packetCapacity: int - c
+  # dataCapacity: b - d
+
+ConstantDriftOscillator [src/inet/clock/oscillator/ConstantDriftOscillator.h]:
+  No state variables kept
+
+ContentBasedClassifier [src/inet/queueing/classifier/ContentBasedClassifier.h]:
+  # defaultGateIndex: int - i
+
+ContentBasedFilter [src/inet/queueing/filter/ContentBasedFilter.h]:
+  No state variables kept
+
+ContentBasedLabeler [src/inet/queueing/marker/ContentBasedLabeler.h]:
+  No state variables kept
+
+ContentBasedScheduler [src/inet/queueing/scheduler/ContentBasedScheduler.h]:
+  # defaultGateIndex: int - i
+
+ContentBasedTagger [src/inet/queueing/marker/ContentBasedTagger.h]:
+  No state variables kept
+
+CrcCheckerBase [src/inet/protocolelement/checksum/base/CrcCheckerBase.h]:
+  No state variables kept
+
+CrcHeaderChecker [src/inet/protocolelement/checksum/CrcHeaderChecker.h]:
+  No state variables kept
+
+CrcHeaderInserter [src/inet/protocolelement/checksum/CrcHeaderInserter.h]:
+  No state variables kept
+
+CrcInserterBase [src/inet/protocolelement/checksum/base/CrcInserterBase.h]:
+  # crcMode: CrcMode - m
+
+CutthroughSource [src/inet/protocolelement/cutthrough/CutthroughSource.h]:
+  # cutthroughPosition: b - p
+  # cutthroughBuffer: Ptr< StreamBufferChunk > - b
+
+DataLinkCanvasVisualizer [src/inet/visualizer/canvas/linklayer/DataLinkCanvasVisualizer.h]:
+  No state variables kept
+
+DataLinkOsgVisualizer [src/inet/visualizer/osg/linklayer/DataLinkOsgVisualizer.h]:
+  No state variables kept
+
+DeaggregatorBase [src/inet/protocolelement/aggregation/base/DeaggregatorBase.h]:
+  No state variables kept
+
+DefragmenterBase [src/inet/protocolelement/fragmentation/base/DefragmenterBase.h]:
+  # expectedFragmentNumber: int - e
+  # defragmentedPacket: Packet * - p
+
+DscpMarker [src/inet/networklayer/diffserv/DscpMarker.h]:
+  # dscps: std::vector< int > - v
+  # numRcvd: int - r
+  # numMarked: int - m
+
+DuplicateRemoval [src/inet/protocolelement/ordering/DuplicateRemoval.h]:
+  # lastSequenceNumber: int - s
+
+DynamicClassifier [src/inet/queueing/classifier/DynamicClassifier.h]:
+  # classIndexToGateItMap: std::map< int, int > - m
+
+EcnMarker [src/inet/queueing/marker/EcnMarker.h]:
+  No state variables kept
+
+EmptyPacketSource [src/inet/queueing/source/EmptyPacketSource.h]:
+  No state variables kept
+
+EnergyStorageCanvasVisualizer [src/inet/visualizer/canvas/power/EnergyStorageCanvasVisualizer.h]:
+  No state variables kept
+
+EnergyStorageOsgVisualizer [src/inet/visualizer/osg/power/EnergyStorageOsgVisualizer.h]:
+  No state variables kept
+
+EnergyStorageVisualizerBase [src/inet/visualizer/base/EnergyStorageVisualizerBase.h]:
+  No state variables kept
+
+EthernetAddressChecker [src/inet/linklayer/ethernet/modular/EthernetAddressChecker.h]:
+  # promiscuous: bool - p
+
+EthernetAddressInserter [src/inet/linklayer/ethernet/modular/EthernetAddressInserter.h]:
+  No state variables kept
+
+EthernetCutthroughSource [src/inet/linklayer/ethernet/modular/EthernetCutthroughSource.h]:
+  # cutthroughInProgress: bool - s
+  # cutthroughBuffer: Ptr< StreamBufferChunk > - b
+
+EthernetFcsChecker [src/inet/linklayer/ethernet/modular/EthernetFcsChecker.h]:
+  # popFcs: bool - p
+
+EthernetFcsInserter [src/inet/linklayer/ethernet/modular/EthernetFcsInserter.h]:
+  No state variables kept
+
+EthernetFragmentFcsChecker [src/inet/linklayer/ethernet/modular/EthernetFragmentFcsChecker.h]:
+  # lastFragmentCompleteFcs: uint32_t - l
+  # currentFragmentCompleteFcs: uint32_t - c
+
+EthernetFragmentFcsInserter [src/inet/linklayer/ethernet/modular/EthernetFragmentFcsInserter.h]:
+  # lastFragmentCompleteFcs: uint32_t - l
+  # currentFragmentCompleteFcs: uint32_t - c
+
+EthernetFragmentPhyHeaderChecker [src/inet/physicallayer/wired/ethernet/EthernetFragmentPhyHeaderChecker.h]:
+  # smdNumber: int - s
+  # fragmentNumber: int - f
+
+EthernetFragmentPhyHeaderInserter [src/inet/physicallayer/wired/ethernet/EthernetFragmentPhyHeaderInserter.h]:
+  # smdNumber: uint8_t - s
+  # fragmentNumber: uint8_t - f
+
+EthernetFrameClassifier [src/inet/linklayer/ethernet/common/EthernetFrameClassifier.h]:
+  No state variables kept
+
+EthernetMacHeaderChecker [src/inet/linklayer/ethernet/modular/EthernetMacHeaderChecker.h]:
+  # promiscuous: bool - p
+
+EthernetMacHeaderInserter [src/inet/linklayer/ethernet/modular/EthernetMacHeaderInserter.h]:
+  No state variables kept
+
+EthernetPhyHeaderChecker [src/inet/physicallayer/wired/ethernet/EthernetPhyHeaderChecker.h]:
+  No state variables kept
+
+EthernetPhyHeaderInserter [src/inet/physicallayer/wired/ethernet/EthernetPhyHeaderInserter.h]:
+  No state variables kept
+
+EthernetSocketCommandProcessor [src/inet/linklayer/ethernet/modular/EthernetSocketCommandProcessor.h]:
+  No state variables kept
+
+EthernetSocketPacketProcessor [src/inet/linklayer/ethernet/modular/EthernetSocketPacketProcessor.h]:
+  No state variables kept
+
+EthernetTypeOrLengthChecker [src/inet/linklayer/ethernet/modular/EthernetTypeOrLengthChecker.h]:
+  No state variables kept
+
+EthernetTypeOrLengthInserter [src/inet/linklayer/ethernet/modular/EthernetTypeOrLengthInserter.h]:
+  No state variables kept
+
+ExponentialRateMeter [src/inet/queueing/meter/ExponentialRateMeter.h]:
+  # currentNumPackets: int - n
+  # currentTotalPacketLength: b - l
+  # datarate: bps - d
+  # packetrate: double - p
+
+ExtInterface [src/inet/emulation/common/ExtInterface.h]:
+  No state variables kept
+
+FacingMobility [src/inet/mobility/single/FacingMobility.h]:
+  No state variables kept
+
+FailureProtectionConfigurationCanvasVisualizer [src/inet/visualizer/canvas/configurator/FailureProtectionConfigurationCanvasVisualizer.h]:
+  No state variables kept
+
+FcsCheckerBase [src/inet/protocolelement/checksum/base/FcsCheckerBase.h]:
+  No state variables kept
+
+FcsHeaderChecker [src/inet/protocolelement/checksum/FcsHeaderChecker.h]:
+  No state variables kept
+
+FcsHeaderInserter [src/inet/protocolelement/checksum/FcsHeaderInserter.h]:
+  No state variables kept
+
+FcsInserterBase [src/inet/protocolelement/checksum/base/FcsInserterBase.h]:
+  # fcsMode: FcsMode - m
+
+FlowMeasurementRecorder [src/inet/queueing/flow/FlowMeasurementRecorder.h]:
+  # endMeasurement_: bool - s
+
+FlowMeasurementStarter [src/inet/queueing/flow/FlowMeasurementStarter.h]:
+  No state variables kept
+
+Forwarding [src/inet/protocolelement/forwarding/Forwarding.h]:
+  # address: L3Address - a
+
+FragmenterBase [src/inet/protocolelement/fragmentation/base/FragmenterBase.h]:
+  No state variables kept
+
+FragmentNumberHeaderBasedDefragmenter [src/inet/protocolelement/fragmentation/FragmentNumberHeaderBasedDefragmenter.h]:
+  No state variables kept
+
+FragmentNumberHeaderBasedFragmenter [src/inet/protocolelement/fragmentation/FragmentNumberHeaderBasedFragmenter.h]:
+  No state variables kept
+
+FragmentNumberHeaderChecker [src/inet/protocolelement/fragmentation/FragmentNumberHeaderChecker.h]:
+  No state variables kept
+
+FragmentNumberHeaderInserter [src/inet/protocolelement/fragmentation/FragmentNumberHeaderInserter.h]:
+  No state variables kept
+
+FragmentTagBasedDefragmenter [src/inet/protocolelement/fragmentation/FragmentTagBasedDefragmenter.h]:
+  No state variables kept
+
+FragmentTagBasedFragmenter [src/inet/protocolelement/fragmentation/FragmentTagBasedFragmenter.h]:
+  No state variables kept
+
+FullPacketSink [src/inet/queueing/sink/FullPacketSink.h]:
+  No state variables kept
+
+GateScheduleCanvasVisualizer [src/inet/visualizer/canvas/common/GateScheduleCanvasVisualizer.h]:
+  No state variables kept
+
+GateScheduleOsgVisualizer [src/inet/visualizer/osg/common/GateScheduleOsgVisualizer.h]:
+  No state variables kept
+
+GateScheduleVisualizerBase [src/inet/visualizer/base/GateScheduleVisualizerBase.h]:
+  # currentTimePosition: double - p
+
+GaussMarkovMobility [src/inet/mobility/single/GaussMarkovMobility.h]:
+  # speed: double - s
+  # angle: rad - a
+
+IdealClock [src/inet/clock/model/IdealClock.h]:
+  No state variables kept
+
+IdealOscillator [src/inet/clock/oscillator/IdealOscillator.h]:
+  No state variables kept
+
+Ieee80211CanvasVisualizer [src/inet/visualizer/canvas/linklayer/Ieee80211CanvasVisualizer.h]:
+  No state variables kept
+
+Ieee80211OsgVisualizer [src/inet/visualizer/osg/linklayer/Ieee80211OsgVisualizer.h]:
+  No state variables kept
+
+Ieee80211VisualizerBase [src/inet/visualizer/base/Ieee80211VisualizerBase.h]:
+  No state variables kept
+
+Ieee8021aeTagEpdHeaderChecker [src/inet/linklayer/ieee8021ae/Ieee8021aeTagEpdHeaderChecker.h]:
+  No state variables kept
+
+Ieee8021aeTagEpdHeaderInserter [src/inet/linklayer/ieee8021ae/Ieee8021aeTagEpdHeaderInserter.h]:
+  No state variables kept
+
+Ieee8021qSocketCommandProcessor [src/inet/linklayer/ieee8021q/Ieee8021qSocketCommandProcessor.h]:
+  No state variables kept
+
+Ieee8021qSocketPacketProcessor [src/inet/linklayer/ieee8021q/Ieee8021qSocketPacketProcessor.h]:
+  No state variables kept
+
+Ieee8021qTagEpdHeaderChecker [src/inet/linklayer/ieee8021q/Ieee8021qTagEpdHeaderChecker.h]:
+  No state variables kept
+
+Ieee8021qTagEpdHeaderInserter [src/inet/linklayer/ieee8021q/Ieee8021qTagEpdHeaderInserter.h]:
+  # defaultVlanId: int - v
+  # defaultPcp: int - p
+  # defaultUserPriority: int - u
+  # defaultDropEligible: int - d
+
+Ieee8021qTagTpidHeaderChecker [src/inet/linklayer/ieee8021q/Ieee8021qTagTpidHeaderChecker.h]:
+  # tpid: int - t
+
+Ieee8021qTagTpidHeaderInserter [src/inet/linklayer/ieee8021q/Ieee8021qTagTpidHeaderInserter.h]:
+  # tpid: int - t
+  # defaultVlanId: int - v
+  # defaultPcp: int - p
+  # defaultUserPriority: int - u
+  # defaultDropEligible: int - d
+
+Ieee8021rTagEpdHeaderChecker [src/inet/linklayer/ieee8021r/Ieee8021rTagEpdHeaderChecker.h]:
+  No state variables kept
+
+Ieee8021rTagEpdHeaderInserter [src/inet/linklayer/ieee8021r/Ieee8021rTagEpdHeaderInserter.h]:
+  No state variables kept
+
+Ieee8022LlcChecker [src/inet/linklayer/ieee8022/Ieee8022LlcChecker.h]:
+  No state variables kept
+
+Ieee8022LlcInserter [src/inet/linklayer/ieee8022/Ieee8022LlcInserter.h]:
+  No state variables kept
+
+Ieee8022LlcSocketCommandProcessor [src/inet/linklayer/ieee8022/Ieee8022LlcSocketCommandProcessor.h]:
+  No state variables kept
+
+Ieee8022LlcSocketPacketProcessor [src/inet/linklayer/ieee8022/Ieee8022LlcSocketPacketProcessor.h]:
+  No state variables kept
+
+Ieee8022SnapChecker [src/inet/linklayer/ieee8022/Ieee8022SnapChecker.h]:
+  No state variables kept
+
+Ieee8022SnapInserter [src/inet/linklayer/ieee8022/Ieee8022SnapInserter.h]:
+  No state variables kept
+
+InfoCanvasVisualizer [src/inet/visualizer/canvas/common/InfoCanvasVisualizer.h]:
+  No state variables kept
+
+InfoOsgVisualizer [src/inet/visualizer/osg/common/InfoOsgVisualizer.h]:
+  No state variables kept
+
+InfoVisualizerBase [src/inet/visualizer/base/InfoVisualizerBase.h]:
+  No state variables kept
+
+InProgressQueue [src/inet/queueing/queue/InProgressQueue.h]:
+  No state variables kept
+
+InstantServer [src/inet/queueing/server/InstantServer.h]:
+  # isProcessing: bool - p
+
+InteractiveGate [src/inet/queueing/gate/InteractiveGate.h]:
+  No state variables kept
+
+InterfaceTableCanvasVisualizer [src/inet/visualizer/canvas/linklayer/InterfaceTableCanvasVisualizer.h]:
+  No state variables kept
+
+InterfaceTableOsgVisualizer [src/inet/visualizer/osg/linklayer/InterfaceTableOsgVisualizer.h]:
+  No state variables kept
+
+InterfaceTableVisualizerBase [src/inet/visualizer/base/InterfaceTableVisualizerBase.h]:
+  No state variables kept
+
+LabelClassifier [src/inet/queueing/classifier/LabelClassifier.h]:
+  # defaultGateIndex: int - d
+  # labelsToGateIndexMap: std::map< std::string, int > - m
+
+LabelFilter [src/inet/queueing/filter/LabelFilter.h]:
+  No state variables kept
+
+LabelScheduler [src/inet/queueing/scheduler/LabelScheduler.h]:
+  # defaultGateIndex: int - d
+  # labels: std::vector< std::string > - l
+  No state variables kept
+
+LinearMobility [src/inet/mobility/single/LinearMobility.h]:
+  # speed: double - s
+
+LinearRotatingMobilityBase [src/inet/mobility/base/LinearRotatingMobilityBase.h]:
+  # targetOrientation: Quaternion - o
+
+LineSegmentsMobilityBase [src/inet/mobility/base/LineSegmentsMobilityBase.h]:
+  # targetPosition: Coord - p
+
+LinkBreakCanvasVisualizer [src/inet/visualizer/canvas/linklayer/LinkBreakCanvasVisualizer.h]:
+  No state variables kept
+
+LinkBreakOsgVisualizer [src/inet/visualizer/osg/linklayer/LinkBreakOsgVisualizer.h]:
+  No state variables kept
+
+LinkBreakVisualizerBase [src/inet/visualizer/base/LinkBreakVisualizerBase.h]:
+  No state variables kept
+
+LinkCanvasVisualizerBase [src/inet/visualizer/canvas/base/LinkCanvasVisualizerBase.h]:
+  No state variables kept
+
+LinkOsgVisualizerBase [src/inet/visualizer/osg/base/LinkOsgVisualizerBase.h]:
+  No state variables kept
+
+LinkVisualizerBase [src/inet/visualizer/base/LinkVisualizerBase.h]:
+  No state variables kept
+  # lastModules: std::map< int, int >
+  # linkVisualizations: std::map< std::pair< int, int >, constLinkVisualization* >
+
+LocalDelivery [src/inet/linklayer/ethernet/common/LocalDelivery.h]:
+  # deliveryOutConsumer: PassivePacketSinkRef
+  # forwardingOutConsumer: PassivePacketSinkRef
+  # interfaceTable: ModuleRefByPar< IInterfaceTable >
+
+MassMobility [src/inet/mobility/single/MassMobility.h]:
+  # changeIntervalParameter: cPar *
+  # angleDeltaParameter: cPar *
+  # rotationAxisAngleParameter: cPar *
+  # speedParameter: cPar *
+  # quaternion: Quaternion
+  # previousChange: simtime_t
+  # sourcePosition: Coord
+
+MediumCanvasVisualizer [src/inet/visualizer/canvas/physicallayer/MediumCanvasVisualizer.h]:
+  No state variables kept
+
+MediumOsgVisualizer [src/inet/visualizer/osg/physicallayer/MediumOsgVisualizer.h]:
+  No state variables kept
+
+MediumVisualizerBase [src/inet/visualizer/base/MediumVisualizerBase.h]:
+  No state variables kept
+
+MessageAuthenticationCodeChecker [src/inet/protocolelement/authentication/MessageAuthenticationCodeChecker.h]:
+  # headerLength: b - l
+
+MessageAuthenticationCodeInserter [src/inet/protocolelement/authentication/MessageAuthenticationCodeInserter.h]:
+  # headerLength: b - l
+
+MoBanCoordinator [src/inet/mobility/group/MoBanCoordinator.h]:
+  # speed: double - s
+  # maxSpeed: double - m
+  # numPostures: unsigned int - n
+  # currentPosture: Posture* - c
+  # currentPattern: int - p
+
+MoBanLocal [src/inet/mobility/group/MoBanLocal.h]:
+  # referencePosition: Coord - r
+  # radius: double - d
+  # speed: double - s
+  # maxSpeed: double - m
+  # lastCompositePosition: Coord - p
+  # lastCompositeVelocity: Coord - v
+
+MobilityCanvasVisualizer [src/inet/visualizer/canvas/mobility/MobilityCanvasVisualizer.h]:
+  No state variables kept
+
+MobilityOsgVisualizer [src/inet/visualizer/osg/mobility/MobilityOsgVisualizer.h]:
+  No state variables kept
+
+MobilityVisualizerBase [src/inet/visualizer/base/MobilityVisualizerBase.h]:
+  No state variables kept
+  # velocityLineWidth: double
+  # displayMovementTrails: bool
+  # autoMovementTrailLineColor: bool
+  No state variables kept
+
+MovingMobilityBase [src/inet/mobility/base/MovingMobilityBase.h]:
+  # stationary: bool - s
+  # lastVelocity: Coord - v
+  # lastAngularVelocity: Quaternion - a
+  # lastUpdate: simtime_t - t
+  # nextChange: simtime_t - n
+  # faceForward: bool - f
+
+MultiFieldClassifier [src/inet/networklayer/diffserv/MultiFieldClassifier.h]:
+  # numOutGates: int - g
+  # numRcvd: int - r
+
+NetworkConnectionCanvasVisualizer [src/inet/visualizer/canvas/scene/NetworkConnectionCanvasVisualizer.h]:
+  No state variables kept
+
+NetworkConnectionOsgVisualizer [src/inet/visualizer/osg/scene/NetworkConnectionOsgVisualizer.h]:
+  No state variables kept
+
+NetworkConnectionVisualizerBase [src/inet/visualizer/base/NetworkConnectionVisualizerBase.h]:
+  No state variables kept
+
+NetworkNodeCanvasVisualizer [src/inet/visualizer/canvas/scene/NetworkNodeCanvasVisualizer.h]:
+  # canvasProjection: const CanvasProjection *
+  # zIndex: double
+  # networkNodeVisualizations: std::map< int,NetworkNodeCanvasVisualization* >
+
+NetworkNodeOsgVisualizer [src/inet/visualizer/osg/scene/NetworkNodeOsgVisualizer.h]:
+  # displayModuleName: bool
+  # networkNodeVisualizations: std::map< int, osg::ref_ptr<NetworkNodeOsgVisualization> >
+
+NetworkNodeVisualizerBase [src/inet/visualizer/base/NetworkNodeVisualizerBase.h]:
+  # nodeFilter: NetworkNodeFilter
+  # annotationSpacing: double
+  # placementPenalty: double
+
+NetworkRouteCanvasVisualizer [src/inet/visualizer/canvas/networklayer/NetworkRouteCanvasVisualizer.h]:
+  No state variables kept
+
+NetworkRouteOsgVisualizer [src/inet/visualizer/osg/networklayer/NetworkRouteOsgVisualizer.h]:
+  No state variables kept
+
+Ns2MotionMobility [src/inet/mobility/single/Ns2MotionMobility.h]:
+  # vecpos: unsigned int - p
+  # ns2File: Ns2MotionFile* - f
+  # nodeId: int - i
+  # scrollX: double - x
+  # scrollY: double - y
+  # maxSpeed: double - s
+
+OpenStreetMapSceneCanvasVisualizer [src/inet/visualizer/canvas/scene/OpenStreetMapSceneCanvasVisualizer.h]:
+  No state variables kept
+
+OrdinalBasedDropper [src/inet/queueing/filter/OrdinalBasedDropper.h]:
+  # numPackets: unsigned int - p
+  # numDropped: unsigned int - d
+  # generateFurtherDrops: bool - f
+  # dropsVector: std::vector< unsigned int > - v
+
+OrdinalBasedDuplicator [src/inet/queueing/common/OrdinalBasedDuplicator.h]:
+  # numPackets: unsigned int - p
+  # numDuplicated: unsigned int - d
+  # generateFurtherDuplicates: bool - f
+  # duplicatesVector: std::vector< unsigned int > - v
+
+PacketBuffer [src/inet/queueing/buffer/PacketBuffer.h]:
+  # packetCapacity: int - c
+  # dataCapacity: b - d
+  # packets: std::vector< Packet * > - p
+
+PacketClassifier [src/inet/queueing/classifier/PacketClassifier.h]:
+  # packetClassifierFunction: IPacketClassifierFunction * - f
+
+PacketClassifierBase [src/inet/queueing/base/PacketClassifierBase.h]:
+  # reverseOrder: bool - r
+  # outputGates: std::vector< cGate * > - o
+  # inProgressStreamId: int - s
+  # inProgressGateIndex: int - g
+
+PacketCloner [src/inet/queueing/common/PacketCloner.h]:
+  # outputGates: std::vector< cGate * > - o
+
+PacketDemultiplexer [src/inet/queueing/common/PacketDemultiplexer.h]:
+  # outputGates: std::vector< cGate * > - g
+  # collectors: std::vector<ActivePacketSinkRef> - c
+
+PacketDeserializer [src/inet/protocolelement/common/PacketDeserializer.h]:
+  No state variables kept
+
+PacketDestreamer [src/inet/protocolelement/common/PacketDestreamer.h]:
+  # datarate: bps - r
+  # streamDatarate: bps - s
+  # streamedPacket: Packet * - p
+
+PacketDirectionReverser [src/inet/linklayer/ethernet/common/PacketDirectionReverser.h]:
+  # forwardVlan: bool - v
+  # forwardPcp: bool - p
+  # excludeEncapsulationProtocols: std::vector< const Protocol * > - e
+
+PacketDropCanvasVisualizer [src/inet/visualizer/canvas/common/PacketDropCanvasVisualizer.h]:
+  No state variables kept
+
+PacketDropOsgVisualizer [src/inet/visualizer/osg/common/PacketDropOsgVisualizer.h]:
+  No state variables kept
+
+PacketDropVisualizerBase [src/inet/visualizer/base/PacketDropVisualizerBase.h]:
+  No state variables kept
+
+PacketDuplicator [src/inet/queueing/common/PacketDuplicator.h]:
+  No state variables kept
+
+PacketDuplicatorBase [src/inet/queueing/base/PacketDuplicatorBase.h]:
+  No state variables kept
+
+PacketEmitter [src/inet/protocolelement/common/PacketEmitter.h]:
+  # direction: Direction - d
+  # processedPacket: Packet * - p
+
+PacketFilter [src/inet/queueing/filter/PacketFilter.h]:
+  No state variables kept
+
+PacketFlowBase [src/inet/queueing/base/PacketFlowBase.h]:
+  # inProgressStreamId: int - i
+
+PacketFlowCanvasVisualizer [src/inet/visualizer/canvas/flow/PacketFlowCanvasVisualizer.h]:
+  No state variables kept
+
+PacketFlowOsgVisualizer [src/inet/visualizer/osg/flow/PacketFlowOsgVisualizer.h]:
+  No state variables kept
+
+PacketFlowPcapFileRecorder [src/inet/queueing/flow/PacketFlowPcapFileRecorder.h]:
+  # direction: Direction - d
+  # networkType: PcapLinkType - n
+
+PacketGateBase [src/inet/queueing/base/PacketGateBase.h]:
+  # bitrate: bps - r
+  # extraLength: b - l
+  # extraDuration: simtime_t - d
+  # isOpen_: bool - o
+
+PacketLabeler [src/inet/queueing/common/PacketLabeler.h]:
+  No state variables kept
+
+PacketLabelerBase [src/inet/queueing/base/PacketLabelerBase.h]:
+  No state variables kept
+
+PacketMarkerBase [src/inet/queueing/base/PacketMarkerBase.h]:
+  No state variables kept
+
+PacketMeterBase [src/inet/networklayer/diffserv/PacketMeterBase.h]:
+  No state variables kept
+
+PacketMeterBase [src/inet/queueing/base/PacketMeterBase.h]:
+  No state variables kept
+
+PacketMultiplexer [src/inet/queueing/common/PacketMultiplexer.h]:
+  # inputGates: std::vector< cGate * > - g
+  # producers: std::vector<ActivePacketSourceRef> - p
+  # inProgressStreamId: int - i
+
+PacketPullerBase [src/inet/queueing/base/PacketPullerBase.h]:
+  No state variables kept
+
+PacketPusherBase [src/inet/queueing/base/PacketPusherBase.h]:
+  No state variables kept
+
+PacketPushToSend [src/inet/queueing/common/PacketPushToSend.h]:
+  No state variables kept
+
+PacketQueue [src/inet/queueing/queue/PacketQueue.h]:
+  # packetCapacity: int - c
+  # dataCapacity: b - d
+  # queue: cPacketQueue - q
+
+PacketScheduler [src/inet/queueing/scheduler/PacketScheduler.h]:
+  No state variables kept
+
+PacketSchedulerBase [src/inet/queueing/base/PacketSchedulerBase.h]:
+  # inputGates: std::vector< cGate * > - g
+  # providers: std::vector<PassivePacketSourceRef> - p
+  # producers: std::vector<ActivePacketSourceRef> - r
+  # outputGate: cGate * - o
+  # inProgressStreamId: int - s
+  # inProgressGateIndex: int - i
+
+PacketSendToPush [src/inet/queueing/common/PacketSendToPush.h]:
+  No state variables kept
+
+PacketSerializer [src/inet/protocolelement/common/PacketSerializer.h]:
+  No state variables kept
+
+PacketServerBase [src/inet/queueing/base/PacketServerBase.h]:
+  No state variables kept
+
+PacketSinkBase [src/inet/queueing/base/PacketSinkBase.h]:
+  No state variables kept
+
+PacketSourceBase [src/inet/queueing/base/PacketSourceBase.h]:
+  # packetNameFormat: const char * - n
+  # packetProtocol: const Protocol * - p
+  # packetLengthParameter: cPar * - l
+  # attachCreationTimeTag: bool - c
+  # attachIdentityTag: bool - i
+  # attachDirectionTag: bool - d
+
+PacketTagger [src/inet/queueing/marker/PacketTagger.h]:
+  No state variables kept
+
+PacketTaggerBase [src/inet/queueing/base/PacketTaggerBase.h]:
+  # dscp: int - d
+  # ecn: int - e
+  # tos: int - t
+  # userPriority: int - u
+  # interfaceId: int - i
+  # hopLimit: int - h
+  # vlanId: int - v
+  # pcp: int - p
+  # transmissionPower: W - w
+
+PaddingInserter [src/inet/protocolelement/common/PaddingInserter.h]:
+  # minLength: b - m
+  # roundingLength: b - r
+  # insertionPosition: HeaderPosition - p
+
+PassivePacketSinkBase [src/inet/queueing/base/PassivePacketSinkBase.h]:
+  No state variables kept
+
+PassivePacketSourceBase [src/inet/queueing/base/PassivePacketSourceBase.h]:
+  No state variables kept
+
+PathCanvasVisualizerBase [src/inet/visualizer/canvas/base/PathCanvasVisualizerBase.h]:
+  No state variables kept
+
+PathOsgVisualizerBase [src/inet/visualizer/osg/base/PathOsgVisualizerBase.h]:
+  No state variables kept
+
+PathVisualizerBase [src/inet/visualizer/base/PathVisualizerBase.h]:
+  No state variables kept
+
+PcapFilePacketConsumer [src/inet/queueing/sink/PcapFilePacketConsumer.h]:
+  # direction: Direction - d
+  # networkType: PcapLinkType - n
+
+PcapFilePacketProducer [src/inet/queueing/source/PcapFilePacketProducer.h]:
+  # pcapReader: PcapReader - r
+
+PcpClassifier [src/inet/linklayer/ieee8021q/PcpClassifier.h]:
+  # mode: const char * - m
+  # pcpToGateIndex: cValueArray * - p
+  # defaultGateIndex: int - d
+
+PcpTrafficClassClassifier [src/inet/linklayer/ieee8021q/PcpTrafficClassClassifier.h]:
+  # mode: const char * - m
+  # mapping: cValueArray * - a
+  # defaultGateIndex: int - d
+
+PhysicalEnvironmentCanvasVisualizer [src/inet/visualizer/canvas/environment/PhysicalEnvironmentCanvasVisualizer.h]:
+  No state variables kept
+
+PhysicalEnvironmentOsgVisualizer [src/inet/visualizer/osg/environment/PhysicalEnvironmentOsgVisualizer.h]:
+  No state variables kept
+
+PhysicalEnvironmentVisualizerBase [src/inet/visualizer/base/PhysicalEnvironmentVisualizerBase.h]:
+  No state variables kept
+
+PhysicalLinkCanvasVisualizer [src/inet/visualizer/canvas/physicallayer/PhysicalLinkCanvasVisualizer.h]:
+  No state variables kept
+
+PhysicalLinkOsgVisualizer [src/inet/visualizer/osg/physicallayer/PhysicalLinkOsgVisualizer.h]:
+  No state variables kept
+
+PriorityClassifier [src/inet/queueing/classifier/PriorityClassifier.h]:
+  No state variables kept
+
+PriorityScheduler [src/inet/queueing/scheduler/PriorityScheduler.h]:
+  # collections: std::vector< IPacketCollection * > - c
+
+ProtocolChecker [src/inet/protocolelement/common/ProtocolChecker.h]:
+  # protocols: std::set< const Protocol * > - p
+
+QueueBasedTokenGenerator [src/inet/queueing/tokengenerator/QueueBasedTokenGenerator.h]:
+  # minNumPackets: int - n
+  # minTotalLength: b - l
+  # queue: ModuleRefByPar< IPacketQueue > - q
+  # numTokensParameter: cPar * - t
+
+QueueCanvasVisualizer [src/inet/visualizer/canvas/common/QueueCanvasVisualizer.h]:
+  No state variables kept
+
+QueueOsgVisualizer [src/inet/visualizer/osg/common/QueueOsgVisualizer.h]:
+  No state variables kept
+
+QueueVisualizerBase [src/inet/visualizer/base/QueueVisualizerBase.h]:
+  No state variables kept
+
+RadioCanvasVisualizer [src/inet/visualizer/canvas/physicallayer/RadioCanvasVisualizer.h]:
+  No state variables kept
+
+RadioOsgVisualizer [src/inet/visualizer/osg/physicallayer/RadioOsgVisualizer.h]:
+  No state variables kept
+
+RadioVisualizerBase [src/inet/visualizer/base/RadioVisualizerBase.h]:
+  No state variables kept
+
+RandomDriftOscillator [src/inet/clock/oscillator/RandomDriftOscillator.h]:
+  # initialDriftRate: ppm - i
+  # driftRateChangeTotal: ppm - t
+  # driftRateChangeLowerLimit: ppm - l
+  # driftRateChangeUpperLimit: ppm - u
+
+RandomWaypointMobility [src/inet/mobility/single/RandomWaypointMobility.h]:
+  # nextMoveIsWait: bool - w
+  # speedParameter: cPar * - s
+  # waitTimeParameter: cPar * - t
+  # hasWaitTime: bool - h
+
+ReceiveAtL3Address [src/inet/protocolelement/selectivity/ReceiveAtL3Address.h]:
+  # address: L3Address - a
+
+ReceiveAtMacAddress [src/inet/protocolelement/selectivity/ReceiveAtMacAddress.h]:
+  # address: MacAddress - a
+
+ReceiveAtPort [src/inet/protocolelement/selectivity/ReceiveAtPort.h]:
+  # port: int - p
+
+ReceiveWithAcknowledge [src/inet/protocolelement/acknowledgement/ReceiveWithAcknowledge.h]:
+  No state variables kept
+
+ReceiveWithHopLimit [src/inet/protocolelement/forwarding/ReceiveWithHopLimit.h]:
+  No state variables kept
+
+ReceiveWithProtocol [src/inet/protocolelement/dispatching/ReceiveWithProtocol.h]:
+  No state variables kept
+
+RectangleMobility [src/inet/mobility/single/RectangleMobility.h]:
+  # speed: double - s
+  # d: double - d
+  # corner1: double - c
+  # corner2: double - o
+  # corner3: double - r
+  # corner4: double - n
+
+RedDropper [src/inet/queueing/filter/RedDropper.h]:
+  # wq: double - w
+  # minth: double - m
+  # maxth: double - x
+  # maxp: double - p
+  # pkrate: double - r
+  # count: double - c
+  # avg: double - a
+  # q_time: simtime_t - t
+  # packetCapacity: int - i
+  # useEcn: bool - e
+  # markNext: bool - n
+
+RelayInterfaceLearner [src/inet/linklayer/ethernet/common/RelayInterfaceLearner.h]:
+  No state variables kept
+
+RelayInterfaceSelector [src/inet/linklayer/ethernet/common/RelayInterfaceSelector.h]:
+  # numProcessedFrames: long - p
+  # numDroppedFrames: long - d
+
+Reordering [src/inet/protocolelement/ordering/Reordering.h]:
+  # expectedSequenceNumber: int - e
+  # packets: std::map< int, Packet * > - p
+
+Resending [src/inet/protocolelement/acknowledgement/Resending.h]:
+  # numRetries: int - n
+  # packet: Packet * - p
+  # retry: int - r
+
+RotatingMobilityBase [src/inet/mobility/base/RotatingMobilityBase.h]:
+  # stationary: bool - s
+  # lastAngularVelocity: Quaternion - a
+  # lastUpdate: simtime_t - t
+  # nextChange: simtime_t - n
+
+RoutingTableCanvasVisualizer [src/inet/visualizer/canvas/networklayer/RoutingTableCanvasVisualizer.h]:
+  No state variables kept
+
+RoutingTableOsgVisualizer [src/inet/visualizer/osg/networklayer/RoutingTableOsgVisualizer.h]:
+  No state variables kept
+
+RoutingTableVisualizerBase [src/inet/visualizer/base/RoutingTableVisualizerBase.h]:
+  No state variables kept
+
+SceneCanvasVisualizer [src/inet/visualizer/canvas/scene/SceneCanvasVisualizer.h]:
+  No state variables kept
+
+SceneOsgEarthVisualizer [src/inet/visualizer/osg/scene/SceneOsgEarthVisualizer.h]:
+  No state variables found
+
+SceneOsgVisualizer [src/inet/visualizer/osg/scene/SceneOsgVisualizer.h]:
+  No state variables kept
+
+SceneOsgVisualizerBase [src/inet/visualizer/osg/base/SceneOsgVisualizerBase.h]:
+  No state variables kept
+
+SceneVisualizerBase [src/inet/visualizer/base/SceneVisualizerBase.h]:
+  # sceneMin: Coord - n
+  # sceneMax: Coord - x
+
+SendToL3Address [src/inet/protocolelement/selectivity/SendToL3Address.h]:
+  # address: L3Address - a
+
+SendToMacAddress [src/inet/protocolelement/selectivity/SendToMacAddress.h]:
+  # address: MacAddress - a
+
+SendToPort [src/inet/protocolelement/selectivity/SendToPort.h]:
+  # port: int - p
+
+SendWithAcknowledge [src/inet/protocolelement/acknowledgement/SendWithAcknowledge.h]:
+  # acknowledgeTimeout: simtime_t - t
+  # sequenceNumber: int - s
+  # timers: std::map< int, cMessage * > - m
+
+SendWithHopLimit [src/inet/protocolelement/forwarding/SendWithHopLimit.h]:
+  # hopLimit: int - h
+
+SendWithProtocol [src/inet/protocolelement/dispatching/SendWithProtocol.h]:
+  No state variables kept
+
+SequenceNumbering [src/inet/protocolelement/ordering/SequenceNumbering.h]:
+  # sequenceNumber: int - s
+
+SettableClock [src/inet/clock/model/SettableClock.h]:
+  # oscillatorCompensation: ppm - o
+
+SignalBasedTokenGenerator [src/inet/queueing/tokengenerator/SignalBasedTokenGenerator.h]:
+  # intSignalValue: int - i
+  # doubleSignalValue: double - d
+  # numTokensParameter: cPar * - n
+
+SingleRateThreeColorMeter [src/inet/networklayer/diffserv/SingleRateThreeColorMeter.h]:
+  # CIR: double - c
+  # CBS: long - b
+  # EBS: long - e
+  # colorAwareMode: bool - a
+  # Tc: long - t
+  # Te: long - l
+  # lastUpdateTime: simtime_t - u
+  # numRcvd: int - r
+  # numYellow: int - y
+  # numRed: int - d
+
+SlidingWindowRateMeter [src/inet/queueing/meter/SlidingWindowRateMeter.h]:
+  # timeWindow: simtime_t - t
+  # currentNumPackets: int - n
+  # currentTotalPacketLength: b - l
+  # datarate: bps - d
+  # packetrate: double - p
+  # packetLengths: std::map< simtime_t, b > - m
+
+StaticConcentricMobility [src/inet/mobility/static/StaticConcentricMobility.h]:
+  No state variables kept
+
+StaticGridMobility [src/inet/mobility/static/StaticGridMobility.h]:
+  No state variables kept
+
+StaticLinearMobility [src/inet/mobility/static/StaticLinearMobility.h]:
+  # separation: double - s
+  # initialX: double - x
+  # initialY: double - y
+  # orientation: rad - o
+
+StationaryMobility [src/inet/mobility/static/StationaryMobility.h]:
+  # updateFromDisplayString: bool - u
+
+StationaryMobilityBase [src/inet/mobility/base/StationaryMobilityBase.h]:
+  No state variables kept
+
+StatisticalRateLimiter [src/inet/queueing/filter/StatisticalRateLimiter.h]:
+  # maxDatarate: bps - d
+  # maxPacketrate: double - p
+
+StatisticCanvasVisualizer [src/inet/visualizer/canvas/common/StatisticCanvasVisualizer.h]:
+  No state variables kept
+
+StatisticOsgVisualizer [src/inet/visualizer/osg/common/StatisticOsgVisualizer.h]:
+  No state variables kept
+
+StatisticVisualizerBase [src/inet/visualizer/base/StatisticVisualizerBase.h]:
+  No state variables kept
+
+StreamClassifier [src/inet/protocolelement/redundancy/StreamClassifier.h]:
+  # mode: const char * - m
+  # gateIndexOffset: int - o
+  # defaultGateIndex: int - d
+  # mapping: cValueMap * - v
+
+StreamDecoder [src/inet/protocolelement/redundancy/StreamDecoder.h]:
+  # mappings: std::vector<Mapping> - m
+
+StreamEncoder [src/inet/protocolelement/redundancy/StreamEncoder.h]:
+  # mappings: std::vector<Mapping> - m
+
+StreamFilter [src/inet/protocolelement/redundancy/StreamFilter.h]:
+  # mode: const char * - m
+  # streamNameFilter: cMatchExpression - f
+
+StreamIdentifier [src/inet/protocolelement/redundancy/StreamIdentifier.h]:
+  # hasSequenceNumbering: bool - h
+  # mapping: cValueArray * - m
+  # sequenceNumbers: std::map< std::string, int > - s
+
+StreamMerger [src/inet/protocolelement/redundancy/StreamMerger.h]:
+  # mapping: cValueMap * - m
+  # bufferSize: int - b
+  # sequenceNumbers: std::map< std::string, std::vector< int > > - s
+
+StreamRedundancyConfigurationCanvasVisualizer [src/inet/visualizer/canvas/configurator/StreamRedundancyConfigurationCanvasVisualizer.h]:
+  # streamFilter: cMatchExpression - f
+
+StreamSplitter [src/inet/protocolelement/redundancy/StreamSplitter.h]:
+  # mapping: cValueMap * - m
+
+SubpacketLengthHeaderBasedAggregator [src/inet/protocolelement/aggregation/SubpacketLengthHeaderBasedAggregator.h]:
+  No state variables kept
+
+SubpacketLengthHeaderBasedDeaggregator [src/inet/protocolelement/aggregation/SubpacketLengthHeaderBasedDeaggregator.h]:
+  No state variables kept
+
+SuperpositioningMobility [src/inet/mobility/single/SuperpositioningMobility.h]:
+  # lastVelocity: Coord - v
+  # lastAcceleration: Coord - a
+  # lastAngularVelocity: Quaternion - w
+  # lastAngularAcceleration: Quaternion - q
+  # positionComposition: PositionComposition - p
+  # orientationComposition: OrientationComposition - o
+  # positionElementIndex: int - i
+  # orientationElementIndex: int - e
+  # elements: std::vector< IMobility * > - m
+
+TokenBucketMeter [src/inet/networklayer/diffserv/TokenBucketMeter.h]:
+  # CIR: double - c
+  # CBS: long - b
+  # colorAwareMode: bool - a
+  # Tc: long - t
+  # lastUpdateTime: simtime_t - u
+  # numRcvd: int - r
+  # numRed: int - d
+
+TracingObstacleLossCanvasVisualizer [src/inet/visualizer/canvas/physicallayer/TracingObstacleLossCanvasVisualizer.h]:
+  No state variables kept
+
+TracingObstacleLossOsgVisualizer [src/inet/visualizer/osg/physicallayer/TracingObstacleLossOsgVisualizer.h]:
+  No state variables kept
+
+TracingObstacleLossVisualizerBase [src/inet/visualizer/base/TracingObstacleLossVisualizerBase.h]:
+  No state variables kept
+
+TractorMobility [src/inet/mobility/single/TractorMobility.h]:
+  # speed: double - s
+  # x1: double - a
+  # y1: double - b
+  # x2: double - c
+  # y2: double - d
+  # rowCount: int - r
+  # step: int - t
+
+TransportConnectionCanvasVisualizer [src/inet/visualizer/canvas/transportlayer/TransportConnectionCanvasVisualizer.h]:
+  No state variables kept
+
+TransportConnectionOsgVisualizer [src/inet/visualizer/osg/transportlayer/TransportConnectionOsgVisualizer.h]:
+  No state variables kept
+
+TransportConnectionVisualizerBase [src/inet/visualizer/base/TransportConnectionVisualizerBase.h]:
+  No state variables kept
+
+TransportRouteCanvasVisualizer [src/inet/visualizer/canvas/transportlayer/TransportRouteCanvasVisualizer.h]:
+  No state variables kept
+
+TransportRouteOsgVisualizer [src/inet/visualizer/osg/transportlayer/TransportRouteOsgVisualizer.h]:
+  No state variables kept
+
+TreeCanvasVisualizerBase [src/inet/visualizer/canvas/base/TreeCanvasVisualizerBase.h]:
+  No state variables kept
+
+TreeVisualizerBase [src/inet/visualizer/base/TreeVisualizerBase.h]:
+  No state variables kept
+
+TurtleMobility [src/inet/mobility/single/TurtleMobility.h]:
+  # turtleScript: cXMLElement *
+  # nextStatement: cXMLElement *
+  # speed: double
+  # heading: rad
+  # elevation: rad
+  # borderPolicy: BorderPolicy
+  # loopVars: std::stack< long >
+  # maxSpeed: double
+
+TwoRateThreeColorMeter [src/inet/networklayer/diffserv/TwoRateThreeColorMeter.h]:
+  # PIR: double - p
+  # PBS: long - b
+  # CIR: double - c
+  # CBS: long - s
+  # colorAwareMode: bool - a
+  # Tp: long - t
+  # Tc: long - l
+  # lastUpdateTime: simtime_t - u
+  # numRcvd: int - r
+  # numYellow: int - y
+  # numRed: int - d
+
+VehicleMobility [src/inet/mobility/single/VehicleMobility.h]:
+  # waypoints: std::vector<Waypoint> - w
+  # ground: physicalenvironment::IGround * - g
+  # speed: double - s
+  # heading: double - h
+  # waypointProximity: double - p
+  # angularSpeed: double - a
+  # targetPointIndex: int - t
+
+VirtualTunnel [src/inet/linklayer/virtual/VirtualTunnel.h]:
+  # realNetworkInterface: NetworkInterface * - r
+  # networkInterface: NetworkInterface * - n
+  # protocol: const Protocol * - p
+  # vlanId: int - v
+  # socket: ISocket * - s
+
+VlanIndFilter [src/inet/linklayer/vlan/VlanIndFilter.h]:
+  # acceptedVlanIds: cValueMap * - v
+
+VlanReqFilter [src/inet/linklayer/vlan/VlanReqFilter.h]:
+  # acceptedVlanIds: cValueMap * - v
+
+VlanReqMapper [src/inet/linklayer/vlan/VlanReqMapper.h]:
+  # protocol: const Protocol * - p
+  # mappedVlanIds: cValueMap * - v
+
+WrrClassifier [src/inet/queueing/classifier/WrrClassifier.h]:
+  # weights: int * - w
+  # buckets: int * - b
+  # collections: std::vector< IPacketCollection * > - c
+
+WrrScheduler [src/inet/queueing/scheduler/WrrScheduler.h]:
+  # weights: unsigned int * - w
+  # buckets: unsigned int * - b
+  # collections: std::vector< IPacketCollection * > - c

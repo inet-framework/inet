@@ -61,6 +61,7 @@ python/levy.py
 *.mk
 *.synctex.gz
 .buildlog*
+.doxy
 compile_commands.json
 
 # ignore binary files

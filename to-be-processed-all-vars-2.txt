@@ -1,0 +1,1568 @@
+ActivePacketSinkBase [src/inet/queueing/base/ActivePacketSinkBase.h]:
+  # inputGate: cGate *
+  # provider: PassivePacketSourceRef
+
+ActivePacketSourceBase [src/inet/queueing/base/ActivePacketSourceBase.h]:
+  # outputGate: cGate *
+  # consumer: PassivePacketSinkRef
+
+AggregatorBase [src/inet/protocolelement/aggregation/base/AggregatorBase.h]:
+  # deleteSelf: bool
+  # aggregatorPolicy: IAggregatorPolicy*
+  # aggregatedSubpackets: std::vector< Packet * >
+  # aggregatedPacket: Packet *
+
+AnsimMobility [src/inet/mobility/single/AnsimMobility.h]:
+  # nodeId: int
+  # nextPositionChange: cXMLElement *
+  # maxSpeed: double
+
+AttachedMobility [src/inet/mobility/single/AttachedMobility.h]:
+  # mobility: ModuleRefByPar< IMobility >
+  # positionOffset: Coord
+  # orientationOffset: Quaternion
+  # isZeroOffset: bool
+  # lastVelocity: Coord
+  # lastAngularPosition: Quaternion
+
+BackPressureBarrier [src/inet/queueing/common/BackPressureBarrier.h]:
+  No state variables found
+
+BackPressureBasedFilter [src/inet/queueing/filter/BackPressureBasedFilter.h]:
+  No state variables found
+
+BehaviorAggregateClassifier [src/inet/networklayer/diffserv/BehaviorAggregateClassifier.h]:
+  # numOutGates: int
+  # dscpToGateIndexMap: std::map< int, int >
+  # numRcvd: int
+
+BonnMotionMobility [src/inet/mobility/single/BonnMotionMobility.h]:
+  # cache: BonnMotionFileCache&
+  # is3D: bool
+  # lines: constBonnMotionFile::Line*
+  # currentLine: int
+  # maxSpeed: double
+
+ChannelCanvasVisualizer [src/inet/visualizer/canvas/physicallayer/ChannelCanvasVisualizer.h]:
+  # zIndex: double
+  # canvasProjection: const CanvasProjection *
+  # channelActivityGroup: cGroupFigure *
+
+ChannelVisualizerBase [src/inet/visualizer/base/ChannelVisualizerBase.h]:
+  # displayChannelActivity: bool
+  # nodeFilter: NetworkNodeFilter
+  # packetFilter: PacketFilter
+  # lineColor: cFigure::Color
+  # lineStyle: cFigure::LineStyle
+  # lineWidth: double
+  # lineShift: double
+  # lineShiftMode: const char *
+  # lineContactSpacing: double
+  # lineContactMode: const char *
+  # labelFormat: StringFormat
+  # labelFont: cFigure::Font
+  # labelColor: cFigure::Color
+  # fadeOutMode: const char *
+  # fadeOutTime: double
+  # fadeOutAnimationSpeed: double
+  # holdAnimationTime: double
+  # lineManager: LineManager *
+  # channelVisualizations: std::map< std::pair< int, int >, constChannelVisualization* >
+
+ChiangMobility [src/inet/mobility/single/ChiangMobility.h]:
+  # speed: double
+  # stateTransitionUpdateInterval: double
+  # xState: int
+  # yState: int
+
+CircleMobility [src/inet/mobility/single/CircleMobility.h]:
+  # cx: double
+  # cy: double
+  # cz: double
+  # r: double
+  # startAngle: rad
+  # speed: double
+  # omega: double
+  # angle: rad
+
+CompoundPacketQueueBase [src/inet/queueing/queue/CompoundPacketQueueBase.h]:
+  # packetCapacity: int
+  # dataCapacity: b
+  # consumer: PassivePacketSinkRef
+  # provider: PassivePacketSourceRef
+  # collection: IPacketCollection *
+  # packetDropperFunction: IPacketDropperFunction *
+
+ConstantDriftOscillator [src/inet/clock/oscillator/ConstantDriftOscillator.h]:
+  No state variables found
+
+ContentBasedClassifier [src/inet/queueing/classifier/ContentBasedClassifier.h]:
+  # defaultGateIndex: int
+  # filters: std::vector<PacketFilter* >
+
+ContentBasedFilter [src/inet/queueing/filter/ContentBasedFilter.h]:
+  # filter: PacketFilter
+
+ContentBasedLabeler [src/inet/queueing/marker/ContentBasedLabeler.h]:
+  # filters: std::vector<PacketFilter* >
+
+ContentBasedScheduler [src/inet/queueing/scheduler/ContentBasedScheduler.h]:
+  # defaultGateIndex: int
+  # filters: std::vector<PacketFilter* >
+
+ContentBasedTagger [src/inet/queueing/marker/ContentBasedTagger.h]:
+  # filter: PacketFilter
+
+CrcCheckerBase [src/inet/protocolelement/checksum/base/CrcCheckerBase.h]:
+  No state variables found
+
+CrcHeaderChecker [src/inet/protocolelement/checksum/CrcHeaderChecker.h]:
+  # headerPosition: HeaderPosition
+
+CrcHeaderInserter [src/inet/protocolelement/checksum/CrcHeaderInserter.h]:
+  # headerPosition: HeaderPosition
+
+CrcInserterBase [src/inet/protocolelement/checksum/base/CrcInserterBase.h]:
+  # crcMode: CrcMode
+
+CutthroughSource [src/inet/protocolelement/cutthrough/CutthroughSource.h]:
+  # cutthroughPosition: b
+  # cutthroughTimer: cMessage *
+  # cutthroughBuffer: Ptr< StreamBufferChunk >
+
+DataLinkCanvasVisualizer [src/inet/visualizer/canvas/linklayer/DataLinkCanvasVisualizer.h]:
+  No state variables found
+
+DataLinkOsgVisualizer [src/inet/visualizer/osg/linklayer/DataLinkOsgVisualizer.h]:
+  No state variables found
+
+DeaggregatorBase [src/inet/protocolelement/aggregation/base/DeaggregatorBase.h]:
+  # deleteSelf: bool
+
+DefragmenterBase [src/inet/protocolelement/fragmentation/base/DefragmenterBase.h]:
+  # deleteSelf: bool
+  # expectedFragmentNumber: int
+  # defragmentedPacket: Packet *
+
+DscpMarker [src/inet/networklayer/diffserv/DscpMarker.h]:
+  # outputGate: cGate *
+  # consumer: queueing::PassivePacketSinkRef
+  # dscps: std::vector< int >
+  # numRcvd: int
+  # numMarked: int
+
+DuplicateRemoval [src/inet/protocolelement/ordering/DuplicateRemoval.h]:
+  # lastSequenceNumber: int
+
+DynamicClassifier [src/inet/queueing/classifier/DynamicClassifier.h]:
+  # submoduleName: const char *
+  # moduleType: cModuleType *
+  # classIndexToGateItMap: std::map< int, int >
+
+EcnMarker [src/inet/queueing/marker/EcnMarker.h]:
+  No state variables found
+
+EmptyPacketSource [src/inet/queueing/source/EmptyPacketSource.h]:
+  # outputGate: cGate *
+  # consumer: IPassivePacketSink *
+
+EnergyStorageCanvasVisualizer [src/inet/visualizer/canvas/power/EnergyStorageCanvasVisualizer.h]:
+  # zIndex: double
+  # networkNodeVisualizer: ModuleRefByPar<NetworkNodeCanvasVisualizer>
+
+EnergyStorageOsgVisualizer [src/inet/visualizer/osg/power/EnergyStorageOsgVisualizer.h]:
+  # networkNodeVisualizer: ModuleRefByPar<NetworkNodeOsgVisualizer>
+
+EnergyStorageVisualizerBase [src/inet/visualizer/base/EnergyStorageVisualizerBase.h]:
+  # displayEnergyStorages: bool
+  # energyStorageFilter: ModuleFilter
+  # color: cFigure::Color
+  # width: double
+  # height: double
+  # spacing: double
+  # placementHint: Placement
+  # placementPriority: double
+  # energyStorageVisualizations: std::vector< constEnergyStorageVisualization* >
+
+EthernetAddressChecker [src/inet/linklayer/ethernet/modular/EthernetAddressChecker.h]:
+  # promiscuous: bool
+  # interfaceTable: ModuleRefByPar< IInterfaceTable >
+
+EthernetAddressInserter [src/inet/linklayer/ethernet/modular/EthernetAddressInserter.h]:
+  # interfaceTable: ModuleRefByPar< IInterfaceTable >
+
+EthernetCutthroughSource [src/inet/linklayer/ethernet/modular/EthernetCutthroughSource.h]:
+  # networkInterface: NetworkInterface *
+  # macForwardingTable: ModuleRefByPar< IMacForwardingTable >
+  # cutthroughSwitchingHeaderSize: b
+  # cutthroughInProgress: bool
+  # cutthroughTimer: cMessage *
+  # cutthroughBuffer: Ptr< StreamBufferChunk >
+
+EthernetFcsChecker [src/inet/linklayer/ethernet/modular/EthernetFcsChecker.h]:
+  # popFcs: bool
+
+EthernetFcsInserter [src/inet/linklayer/ethernet/modular/EthernetFcsInserter.h]:
+  No state variables found
+
+EthernetFragmentFcsChecker [src/inet/linklayer/ethernet/modular/EthernetFragmentFcsChecker.h]:
+  # lastFragmentCompleteFcs: uint32_t
+  # currentFragmentCompleteFcs: uint32_t
+
+EthernetFragmentFcsInserter [src/inet/linklayer/ethernet/modular/EthernetFragmentFcsInserter.h]:
+  # lastFragmentCompleteFcs: uint32_t
+  # currentFragmentCompleteFcs: uint32_t
+
+EthernetFragmentPhyHeaderChecker [src/inet/physicallayer/wired/ethernet/EthernetFragmentPhyHeaderChecker.h]:
+  # smdNumber: int
+  # fragmentNumber: int
+
+EthernetFragmentPhyHeaderInserter [src/inet/physicallayer/wired/ethernet/EthernetFragmentPhyHeaderInserter.h]:
+  # smdNumber: uint8_t
+  # fragmentNumber: uint8_t
+
+EthernetFrameClassifier [src/inet/linklayer/ethernet/common/EthernetFrameClassifier.h]:
+  No state variables found
+
+EthernetMacHeaderChecker [src/inet/linklayer/ethernet/modular/EthernetMacHeaderChecker.h]:
+  # promiscuous: bool
+  # interfaceTable: ModuleRefByPar< IInterfaceTable >
+
+EthernetMacHeaderInserter [src/inet/linklayer/ethernet/modular/EthernetMacHeaderInserter.h]:
+  # interfaceTable: ModuleRefByPar< IInterfaceTable >
+
+EthernetPhyHeaderChecker [src/inet/physicallayer/wired/ethernet/EthernetPhyHeaderChecker.h]:
+  No state variables found
+
+EthernetPhyHeaderInserter [src/inet/physicallayer/wired/ethernet/EthernetPhyHeaderInserter.h]:
+  No state variables found
+
+EthernetSocketCommandProcessor [src/inet/linklayer/ethernet/modular/EthernetSocketCommandProcessor.h]:
+  # socketTable: ModuleRefByPar<EthernetSocketTable>
+
+EthernetSocketPacketProcessor [src/inet/linklayer/ethernet/modular/EthernetSocketPacketProcessor.h]:
+  # socketTable: ModuleRefByPar<EthernetSocketTable>
+
+EthernetTypeOrLengthChecker [src/inet/linklayer/ethernet/modular/EthernetTypeOrLengthChecker.h]:
+  No state variables found
+
+EthernetTypeOrLengthInserter [src/inet/linklayer/ethernet/modular/EthernetTypeOrLengthInserter.h]:
+  No state variables found
+
+ExponentialRateMeter [src/inet/queueing/meter/ExponentialRateMeter.h]:
+  # alpha: double
+  # lastUpdate: simtime_t
+  # currentNumPackets: int
+  # currentTotalPacketLength: b
+  # datarate: bps
+  # packetrate: double
+
+ExtInterface [src/inet/emulation/common/ExtInterface.h]:
+  No state variables found
+
+FacingMobility [src/inet/mobility/single/FacingMobility.h]:
+  # sourceMobility: ModuleRefByPar< IMobility >
+  # targetMobility: ModuleRefByPar< IMobility >
+
+FailureProtectionConfigurationCanvasVisualizer [src/inet/visualizer/canvas/configurator/FailureProtectionConfigurationCanvasVisualizer.h]:
+  # streamFilter: cMatchExpression
+
+FcsCheckerBase [src/inet/protocolelement/checksum/base/FcsCheckerBase.h]:
+  No state variables found
+
+FcsHeaderChecker [src/inet/protocolelement/checksum/FcsHeaderChecker.h]:
+  # headerPosition: HeaderPosition
+
+FcsHeaderInserter [src/inet/protocolelement/checksum/FcsHeaderInserter.h]:
+  # headerPosition: HeaderPosition
+
+FcsInserterBase [src/inet/protocolelement/checksum/base/FcsInserterBase.h]:
+  # fcsMode: FcsMode
+
+FlowMeasurementRecorder [src/inet/queueing/flow/FlowMeasurementRecorder.h]:
+  # packetFilter: PacketFilter
+  # offset: b
+  # length: b
+  # endMeasurement_: bool
+  # flowName: const char *
+  # flowNameMatcher: cMatchExpression
+  # measureLifeTime: bool
+  # measureElapsedTime: bool
+  # measureDelayingTime: bool
+  # measureQueueingTime: bool
+  # measureProcessingTime: bool
+  # measureTransmissionTime: bool
+  # measurePropagationTime: bool
+  # measurePacketEvent: bool
+  # packetEventFile: JsonWriter
+
+FlowMeasurementStarter [src/inet/queueing/flow/FlowMeasurementStarter.h]:
+  # packetFilter: PacketFilter
+  # offset: b
+  # length: b
+  # flowName: const char *
+  # measureElapsedTime: bool
+  # measureDelayingTime: bool
+  # measureQueueingTime: bool
+  # measureProcessingTime: bool
+  # measureTransmissionTime: bool
+  # measurePropagationTime: bool
+  # measurePacketEvents: bool
+
+Forwarding [src/inet/protocolelement/forwarding/Forwarding.h]:
+  # address: L3Address
+
+FragmenterBase [src/inet/protocolelement/fragmentation/base/FragmenterBase.h]:
+  # deleteSelf: bool
+  # fragmenterPolicy: IFragmenterPolicy*
+
+FragmentNumberHeaderBasedDefragmenter [src/inet/protocolelement/fragmentation/FragmentNumberHeaderBasedDefragmenter.h]:
+  # headerPosition: HeaderPosition
+
+FragmentNumberHeaderBasedFragmenter [src/inet/protocolelement/fragmentation/FragmentNumberHeaderBasedFragmenter.h]:
+  # headerPosition: HeaderPosition
+
+FragmentNumberHeaderChecker [src/inet/protocolelement/fragmentation/FragmentNumberHeaderChecker.h]:
+  # headerPosition: HeaderPosition
+
+FragmentNumberHeaderInserter [src/inet/protocolelement/fragmentation/FragmentNumberHeaderInserter.h]:
+  # headerPosition: HeaderPosition
+
+FragmentTagBasedDefragmenter [src/inet/protocolelement/fragmentation/FragmentTagBasedDefragmenter.h]:
+  No state variables found
+
+FragmentTagBasedFragmenter [src/inet/protocolelement/fragmentation/FragmentTagBasedFragmenter.h]:
+  No state variables found
+
+FullPacketSink [src/inet/queueing/sink/FullPacketSink.h]:
+  # inputGate: cGate *
+  # provider: IPassivePacketSource *
+
+GateScheduleCanvasVisualizer [src/inet/visualizer/canvas/common/GateScheduleCanvasVisualizer.h]:
+  # zIndex: double
+  # networkNodeVisualizer: ModuleRefByPar<NetworkNodeCanvasVisualizer>
+
+GateScheduleOsgVisualizer [src/inet/visualizer/osg/common/GateScheduleOsgVisualizer.h]:
+  # networkNodeVisualizer: ModuleRefByPar<NetworkNodeOsgVisualizer>
+
+GateScheduleVisualizerBase [src/inet/visualizer/base/GateScheduleVisualizerBase.h]:
+  # displayGateSchedules: bool
+  # stringFormat: StringFormat
+  # gateFilter: GateFilter
+  # width: double
+  # height: double
+  # spacing: double
+  # placementHint: Placement
+  # placementPriority: double
+  # displayDuration: clocktime_t
+  # currentTimePosition: double
+  # lastRefreshTime: simtime_t
+  # gateVisualizations: std::vector< constGateVisualization* >
+
+GaussMarkovMobility [src/inet/mobility/single/GaussMarkovMobility.h]:
+  # speed: double
+  # speedMean: double
+  # speedStdDev: double
+  # angle: rad
+  # angleMean: rad
+  # angleStdDev: rad
+  # alpha: double
+  # margin: double
+
+IdealClock [src/inet/clock/model/IdealClock.h]:
+  No state variables found
+
+IdealOscillator [src/inet/clock/oscillator/IdealOscillator.h]:
+  # origin: simtime_t
+  # tickLength: simtime_t
+
+Ieee80211CanvasVisualizer [src/inet/visualizer/canvas/linklayer/Ieee80211CanvasVisualizer.h]:
+  # zIndex: double
+  # networkNodeVisualizer: ModuleRefByPar<NetworkNodeCanvasVisualizer>
+
+Ieee80211OsgVisualizer [src/inet/visualizer/osg/linklayer/Ieee80211OsgVisualizer.h]:
+  # networkNodeVisualizer: ModuleRefByPar<NetworkNodeOsgVisualizer>
+
+Ieee80211VisualizerBase [src/inet/visualizer/base/Ieee80211VisualizerBase.h]:
+  # displayAssociations: bool
+  # nodeFilter: NetworkNodeFilter
+  # interfaceFilter: InterfaceFilter
+  # minPowerDbm: double
+  # maxPowerDbm: double
+  # icons: std::vector< std::string >
+  # iconColorSet: ColorSet
+  # labelFont: cFigure::Font
+  # labelColor: cFigure::Color
+  # placementHint: Placement
+  # placementPriority: double
+  # ieee80211Visualizations: std::map< std::pair< int, int >, constIeee80211Visualization* >
+
+Ieee8021aeTagEpdHeaderChecker [src/inet/linklayer/ieee8021ae/Ieee8021aeTagEpdHeaderChecker.h]:
+  No state variables found
+
+Ieee8021aeTagEpdHeaderInserter [src/inet/linklayer/ieee8021ae/Ieee8021aeTagEpdHeaderInserter.h]:
+  No state variables found
+
+Ieee8021qSocketCommandProcessor [src/inet/linklayer/ieee8021q/Ieee8021qSocketCommandProcessor.h]:
+  # socketTable: ModuleRefByPar<Ieee8021qSocketTable>
+
+Ieee8021qSocketPacketProcessor [src/inet/linklayer/ieee8021q/Ieee8021qSocketPacketProcessor.h]:
+  # socketTable: ModuleRefByPar<Ieee8021qSocketTable>
+
+Ieee8021qTagEpdHeaderChecker [src/inet/linklayer/ieee8021q/Ieee8021qTagEpdHeaderChecker.h]:
+  # qtagProtocol: const Protocol *
+  # vlanIdFilter: cValueArray *
+
+Ieee8021qTagEpdHeaderInserter [src/inet/linklayer/ieee8021q/Ieee8021qTagEpdHeaderInserter.h]:
+  # qtagProtocol: const Protocol *
+  # nextProtocol: const Protocol *
+  # defaultVlanId: int
+  # defaultPcp: int
+  # defaultUserPriority: int
+  # defaultDropEligible: int
+
+Ieee8021qTagTpidHeaderChecker [src/inet/linklayer/ieee8021q/Ieee8021qTagTpidHeaderChecker.h]:
+  # tpid: int
+  # vlanIdFilter: cValueArray *
+
+Ieee8021qTagTpidHeaderInserter [src/inet/linklayer/ieee8021q/Ieee8021qTagTpidHeaderInserter.h]:
+  # tpid: int
+  # nextProtocol: const Protocol *
+  # defaultVlanId: int
+  # defaultPcp: int
+  # defaultUserPriority: int
+  # defaultDropEligible: int
+
+Ieee8021rTagEpdHeaderChecker [src/inet/linklayer/ieee8021r/Ieee8021rTagEpdHeaderChecker.h]:
+  No state variables found
+
+Ieee8021rTagEpdHeaderInserter [src/inet/linklayer/ieee8021r/Ieee8021rTagEpdHeaderInserter.h]:
+  # nextProtocol: const Protocol *
+
+Ieee8022LlcChecker [src/inet/linklayer/ieee8022/Ieee8022LlcChecker.h]:
+  No state variables found
+
+Ieee8022LlcInserter [src/inet/linklayer/ieee8022/Ieee8022LlcInserter.h]:
+  No state variables found
+
+Ieee8022LlcSocketCommandProcessor [src/inet/linklayer/ieee8022/Ieee8022LlcSocketCommandProcessor.h]:
+  # socketTable: ModuleRefByPar<Ieee8022LlcSocketTable>
+
+Ieee8022LlcSocketPacketProcessor [src/inet/linklayer/ieee8022/Ieee8022LlcSocketPacketProcessor.h]:
+  # socketTable: ModuleRefByPar<Ieee8022LlcSocketTable>
+
+Ieee8022SnapChecker [src/inet/linklayer/ieee8022/Ieee8022SnapChecker.h]:
+  No state variables found
+
+Ieee8022SnapInserter [src/inet/linklayer/ieee8022/Ieee8022SnapInserter.h]:
+  No state variables found
+
+InfoCanvasVisualizer [src/inet/visualizer/canvas/common/InfoCanvasVisualizer.h]:
+  # zIndex: double
+  # networkNodeVisualizer: ModuleRefByPar<NetworkNodeCanvasVisualizer>
+
+InfoOsgVisualizer [src/inet/visualizer/osg/common/InfoOsgVisualizer.h]:
+  # networkNodeVisualizer: ModuleRefByPar<NetworkNodeOsgVisualizer>
+
+InfoVisualizerBase [src/inet/visualizer/base/InfoVisualizerBase.h]:
+  # displayInfos: bool
+  # modules: ModuleFilter
+  # format: StringFormat
+  # font: cFigure::Font
+  # textColor: cFigure::Color
+  # textAlignment: cFigure::Alignment
+  # backgroundColor: cFigure::Color
+  # lineColor: cFigure::Color
+  # filled: bool
+  # outlined: bool
+  # opacity: double
+  # placementHint: Placement
+  # placementPriority: double
+  # infoVisualizations: std::vector< constInfoVisualization* >
+
+InProgressQueue [src/inet/queueing/queue/InProgressQueue.h]:
+  No state variables found
+
+InstantServer [src/inet/queueing/server/InstantServer.h]:
+  # isProcessing: bool
+  # serveTimer: cMessage *
+
+InteractiveGate [src/inet/queueing/gate/InteractiveGate.h]:
+  No state variables found
+
+InterfaceTableCanvasVisualizer [src/inet/visualizer/canvas/linklayer/InterfaceTableCanvasVisualizer.h]:
+  # zIndex: double
+  # anchor: const char *
+  # networkNodeVisualizer: ModuleRefByPar<NetworkNodeCanvasVisualizer>
+
+InterfaceTableOsgVisualizer [src/inet/visualizer/osg/linklayer/InterfaceTableOsgVisualizer.h]:
+  # networkNodeVisualizer: ModuleRefByPar<NetworkNodeOsgVisualizer>
+
+InterfaceTableVisualizerBase [src/inet/visualizer/base/InterfaceTableVisualizerBase.h]:
+  # displayInterfaceTables: bool
+  # displayWiredInterfacesAtConnections: bool
+  # displayBackground: bool
+  # nodeFilter: NetworkNodeFilter
+  # interfaceFilter: InterfaceFilter
+  # format: StringFormat
+  # placementHint: Placement
+  # placementPriority: double
+  # font: cFigure::Font
+  # textColor: cFigure::Color
+  # backgroundColor: cFigure::Color
+  # opacity: double
+  # interfaceVisualizations: std::map< std::pair< int, int >, constInterfaceVisualization* >
+
+LabelClassifier [src/inet/queueing/classifier/LabelClassifier.h]:
+  # defaultGateIndex: int
+  # labelsToGateIndexMap: std::map< std::string, int >
+
+LabelFilter [src/inet/queueing/filter/LabelFilter.h]:
+  # labelFilter: cMatchExpression
+
+LabelScheduler [src/inet/queueing/scheduler/LabelScheduler.h]:
+  # defaultGateIndex: int
+  # labels: std::vector< std::string >
+  # collections: std::vector< IPacketCollection * >
+
+LinearMobility [src/inet/mobility/single/LinearMobility.h]:
+  # speed: double
+
+LinearRotatingMobilityBase [src/inet/mobility/base/LinearRotatingMobilityBase.h]:
+  # targetOrientation: Quaternion
+
+LineSegmentsMobilityBase [src/inet/mobility/base/LineSegmentsMobilityBase.h]:
+  # targetPosition: Coord
+
+LinkBreakCanvasVisualizer [src/inet/visualizer/canvas/linklayer/LinkBreakCanvasVisualizer.h]:
+  # zIndex: double
+  # canvasProjection: const CanvasProjection *
+  # linkBreakGroup: cGroupFigure *
+
+LinkBreakOsgVisualizer [src/inet/visualizer/osg/linklayer/LinkBreakOsgVisualizer.h]:
+  No state variables found
+
+LinkBreakVisualizerBase [src/inet/visualizer/base/LinkBreakVisualizerBase.h]:
+  # displayLinkBreaks: bool
+  # nodeFilter: NetworkNodeFilter
+  # interfaceFilter: InterfaceFilter
+  # packetFilter: PacketFilter
+  # icon: const char *
+  # iconTintAmount: double
+  # iconTintColor: cFigure::Color
+  # fadeOutMode: const char *
+  # fadeOutTime: double
+  # fadeOutAnimationSpeed: double
+  # linkBreakVisualizations: std::map< std::pair< int, int >, constLinkBreakVisualization* >
+
+LinkCanvasVisualizerBase [src/inet/visualizer/canvas/base/LinkCanvasVisualizerBase.h]:
+  # zIndex: double
+  # canvasProjection: const CanvasProjection *
+  # linkGroup: cGroupFigure *
+
+LinkOsgVisualizerBase [src/inet/visualizer/osg/base/LinkOsgVisualizerBase.h]:
+  No state variables found
+
+LinkVisualizerBase [src/inet/visualizer/base/LinkVisualizerBase.h]:
+  # displayLinks: bool
+  # activityLevel: ActivityLevel
+  # nodeFilter: NetworkNodeFilter
+  # interfaceFilter: InterfaceFilter
+  # packetFilter: PacketFilter
+  # lineColor: cFigure::Color
+  # lineStyle: cFigure::LineStyle
+  # lineWidth: double
+  # lineShift: double
+  # lineShiftMode: const char *
+  # lineContactSpacing: double
+  # lineContactMode: const char *
+  # labelFormat: StringFormat
+  # labelFont: cFigure::Font
+  # labelColor: cFigure::Color
+  # fadeOutMode: const char *
+  # fadeOutTime: double
+  # fadeOutAnimationSpeed: double
+  # holdAnimationTime: double
+  # lineManager: LineManager *
+  # lastModules: std::map< int, int >
+  # linkVisualizations: std::map< std::pair< int, int >, constLinkVisualization* >
+
+LocalDelivery [src/inet/linklayer/ethernet/common/LocalDelivery.h]:
+  # deliveryOutConsumer: PassivePacketSinkRef
+  # forwardingOutConsumer: PassivePacketSinkRef
+  # interfaceTable: ModuleRefByPar< IInterfaceTable >
+
+MassMobility [src/inet/mobility/single/MassMobility.h]:
+  # changeIntervalParameter: cPar *
+  # angleDeltaParameter: cPar *
+  # rotationAxisAngleParameter: cPar *
+  # speedParameter: cPar *
+  # quaternion: Quaternion
+  # previousChange: simtime_t
+  # sourcePosition: Coord
+
+MediumCanvasVisualizer [src/inet/visualizer/canvas/physicallayer/MediumCanvasVisualizer.h]:
+  No state variables found
+
+MediumOsgVisualizer [src/inet/visualizer/osg/physicallayer/MediumOsgVisualizer.h]:
+  No state variables found
+
+MediumVisualizerBase [src/inet/visualizer/base/MediumVisualizerBase.h]:
+  No state variables found
+
+MessageAuthenticationCodeChecker [src/inet/protocolelement/authentication/MessageAuthenticationCodeChecker.h]:
+  # headerLength: b
+
+MessageAuthenticationCodeInserter [src/inet/protocolelement/authentication/MessageAuthenticationCodeInserter.h]:
+  # headerLength: b
+
+MoBanCoordinator [src/inet/mobility/group/MoBanCoordinator.h]:
+  # localModules: std::vector<MoBanLocal* >
+  # speed: double
+  # maxSpeed: double
+  # logfile: FILE *
+  # numPostures: unsigned int
+  # postureList: std::vector<Posture* >
+  # currentPosture: Posture*
+  # minDuration: simtime_t
+  # maxDuration: simtime_t
+  # useMobilityPattern: bool
+  # mobilityPattern: Pattern*
+  # patternLength: int
+  # currentPattern: int
+  # markovMatrix: double **
+  # postureSelStrategy: posture_sel_type
+  # transitions: PostureTransition*
+
+MoBanLocal [src/inet/mobility/group/MoBanLocal.h]:
+  # coordinator: MoBanCoordinator*
+  # referencePosition: Coord
+  # radius: double
+  # speed: double
+  # maxSpeed: double
+  # lastCompositePosition: Coord
+  # lastCompositeVelocity: Coord
+
+MobilityCanvasVisualizer [src/inet/visualizer/canvas/mobility/MobilityCanvasVisualizer.h]:
+  # zIndex: double
+  # canvasProjection: const CanvasProjection *
+
+MobilityOsgVisualizer [src/inet/visualizer/osg/mobility/MobilityOsgVisualizer.h]:
+  No state variables found
+
+MobilityVisualizerBase [src/inet/visualizer/base/MobilityVisualizerBase.h]:
+  # displayMobility: bool
+  # animationSpeed: double
+  # moduleFilter: ModuleFilter
+  # displayPositions: bool
+  # positionCircleRadius: double
+  # positionCircleLineWidth: double
+  # positionCircleLineColorSet: ColorSet
+  # positionCircleFillColorSet: ColorSet
+  # displayOrientations: bool
+  # orientationPieRadius: double
+  # orientationPieSize: double
+  # orientationPieOpacity: double
+  # orientationLineColor: cFigure::Color
+  # orientationLineStyle: cFigure::LineStyle
+  # orientationLineWidth: double
+  # orientationFillColor: cFigure::Color
+  # displayVelocities: bool
+  # velocityArrowScale: double
+  # velocityLineColor: cFigure::Color
+  # velocityLineStyle: cFigure::LineStyle
+  # velocityLineWidth: double
+  # displayMovementTrails: bool
+  # autoMovementTrailLineColor: bool
+  # movementTrailLineColorSet: ColorSet
+  # movementTrailLineStyle: cFigure::LineStyle
+  # movementTrailLineWidth: double
+  # trailLength: int
+  # mobilityVisualizations: std::map< int,MobilityVisualization* >
+
+MovingMobilityBase [src/inet/mobility/base/MovingMobilityBase.h]:
+  # moveTimer: cMessage *
+  # updateInterval: simtime_t
+  # stationary: bool
+  # lastVelocity: Coord
+  # lastAngularVelocity: Quaternion
+  # lastUpdate: simtime_t
+  # nextChange: simtime_t
+  # faceForward: bool
+
+MultiFieldClassifier [src/inet/networklayer/diffserv/MultiFieldClassifier.h]:
+  # numOutGates: int
+  # filters: std::vector<PacketDissectorCallback>
+  # numRcvd: int
+
+NetworkConnectionCanvasVisualizer [src/inet/visualizer/canvas/scene/NetworkConnectionCanvasVisualizer.h]:
+  # zIndex: double
+  # canvasProjection: const CanvasProjection *
+
+NetworkConnectionOsgVisualizer [src/inet/visualizer/osg/scene/NetworkConnectionOsgVisualizer.h]:
+  No state variables found
+
+NetworkConnectionVisualizerBase [src/inet/visualizer/base/NetworkConnectionVisualizerBase.h]:
+  # nodeFilter: NetworkNodeFilter
+  # lineColor: cFigure::Color
+  # lineStyle: cFigure::LineStyle
+  # lineWidth: double
+
+NetworkNodeCanvasVisualizer [src/inet/visualizer/canvas/scene/NetworkNodeCanvasVisualizer.h]:
+  # canvasProjection: const CanvasProjection *
+  # zIndex: double
+  # networkNodeVisualizations: std::map< int,NetworkNodeCanvasVisualization* >
+
+NetworkNodeOsgVisualizer [src/inet/visualizer/osg/scene/NetworkNodeOsgVisualizer.h]:
+  # displayModuleName: bool
+  # networkNodeVisualizations: std::map< int, osg::ref_ptr<NetworkNodeOsgVisualization> >
+
+NetworkNodeVisualizerBase [src/inet/visualizer/base/NetworkNodeVisualizerBase.h]:
+  # nodeFilter: NetworkNodeFilter
+  # annotationSpacing: double
+  # placementPenalty: double
+
+NetworkRouteCanvasVisualizer [src/inet/visualizer/canvas/networklayer/NetworkRouteCanvasVisualizer.h]:
+  No state variables found
+
+NetworkRouteOsgVisualizer [src/inet/visualizer/osg/networklayer/NetworkRouteOsgVisualizer.h]:
+  No state variables found
+
+Ns2MotionMobility [src/inet/mobility/single/Ns2MotionMobility.h]:
+  # vecpos: unsigned int
+  # ns2File: Ns2MotionFile*
+  # nodeId: int
+  # scrollX: double
+  # scrollY: double
+  # maxSpeed: double
+
+OpenStreetMapSceneCanvasVisualizer [src/inet/visualizer/canvas/scene/OpenStreetMapSceneCanvasVisualizer.h]:
+  # coordinateSystem: ModuleRefByPar< IGeographicCoordinateSystem >
+  # canvasProjection: CanvasProjection *
+
+OrdinalBasedDropper [src/inet/queueing/filter/OrdinalBasedDropper.h]:
+  # numPackets: unsigned int
+  # numDropped: unsigned int
+  # generateFurtherDrops: bool
+  # dropsVector: std::vector< unsigned int >
+
+OrdinalBasedDuplicator [src/inet/queueing/common/OrdinalBasedDuplicator.h]:
+  # numPackets: unsigned int
+  # numDuplicated: unsigned int
+  # generateFurtherDuplicates: bool
+  # duplicatesVector: std::vector< unsigned int >
+
+PacketBuffer [src/inet/queueing/buffer/PacketBuffer.h]:
+  # packetCapacity: int
+  # dataCapacity: b
+  # packets: std::vector< Packet * >
+  # packetDropperFunction: IPacketDropperFunction *
+
+PacketClassifier [src/inet/queueing/classifier/PacketClassifier.h]:
+  # packetClassifierFunction: IPacketClassifierFunction *
+
+PacketClassifierBase [src/inet/queueing/base/PacketClassifierBase.h]:
+  # reverseOrder: bool
+  # inputGate: cGate *
+  # producer: ActivePacketSourceRef
+  # provider: PassivePacketSourceRef
+  # outputGates: std::vector< cGate * >
+  # consumers: std::vector<PassivePacketSinkRef>
+  # collectors: std::vector<ActivePacketSinkRef>
+  # inProgressStreamId: int
+  # inProgressGateIndex: int
+
+PacketCloner [src/inet/queueing/common/PacketCloner.h]:
+  # inputGate: cGate *
+  # producer: ActivePacketSourceRef
+  # outputGates: std::vector< cGate * >
+  # consumers: std::vector<PassivePacketSinkRef>
+
+PacketDemultiplexer [src/inet/queueing/common/PacketDemultiplexer.h]:
+  # inputGate: cGate *
+  # provider: PassivePacketSourceRef
+  # outputGates: std::vector< cGate * >
+  # collectors: std::vector<ActivePacketSinkRef>
+
+PacketDeserializer [src/inet/protocolelement/common/PacketDeserializer.h]:
+  No state variables found
+
+PacketDestreamer [src/inet/protocolelement/common/PacketDestreamer.h]:
+  # datarate: bps
+  # inputGate: cGate *
+  # producer: ActivePacketSourceRef
+  # provider: PassivePacketSourceRef
+  # outputGate: cGate *
+  # consumer: PassivePacketSinkRef
+  # collector: ActivePacketSinkRef
+  # streamDatarate: bps
+  # streamedPacket: Packet *
+
+PacketDirectionReverser [src/inet/linklayer/ethernet/common/PacketDirectionReverser.h]:
+  # forwardVlan: bool
+  # forwardPcp: bool
+  # excludeEncapsulationProtocols: std::vector< const Protocol * >
+
+PacketDropCanvasVisualizer [src/inet/visualizer/canvas/common/PacketDropCanvasVisualizer.h]:
+  # zIndex: double
+  # canvasProjection: const CanvasProjection *
+  # packetDropGroup: cGroupFigure *
+  # dx: double
+  # dy: double
+
+PacketDropOsgVisualizer [src/inet/visualizer/osg/common/PacketDropOsgVisualizer.h]:
+  No state variables found
+
+PacketDropVisualizerBase [src/inet/visualizer/base/PacketDropVisualizerBase.h]:
+  # displayPacketDrops: bool
+  # nodeFilter: NetworkNodeFilter
+  # interfaceFilter: InterfaceFilter
+  # packetFilter: PacketFilter
+  # detailsFilter: DetailsFilter
+  # icon: const char *
+  # iconTintColorSet: ColorSet
+  # iconTintAmount: double
+  # labelFormat: StringFormat
+  # labelFont: cFigure::Font
+  # labelColor: cFigure::Color
+  # fadeOutMode: const char *
+  # fadeOutTime: double
+  # fadeOutAnimationSpeed: double
+  # packetDropVisualizations: std::vector< constPacketDropVisualization* >
+
+PacketDuplicator [src/inet/queueing/common/PacketDuplicator.h]:
+  No state variables found
+
+PacketDuplicatorBase [src/inet/queueing/base/PacketDuplicatorBase.h]:
+  # inputGate: cGate *
+  # producer: ActivePacketSourceRef
+  # outputGate: cGate *
+  # consumer: PassivePacketSinkRef
+
+PacketEmitter [src/inet/protocolelement/common/PacketEmitter.h]:
+  # signal: simsignal_t
+  # packetFilter: PacketFilter
+  # direction: Direction
+  # processedPacket: Packet *
+
+PacketFilter [src/inet/queueing/filter/PacketFilter.h]:
+  # packetFilterFunction: IPacketFilterFunction *
+
+PacketFlowBase [src/inet/queueing/base/PacketFlowBase.h]:
+  # inputGate: cGate *
+  # producer: ActivePacketSourceRef
+  # provider: PassivePacketSourceRef
+  # collection: ModuleRef< IPacketCollection >
+  # outputGate: cGate *
+  # consumer: PassivePacketSinkRef
+  # collector: ActivePacketSinkRef
+  # inProgressStreamId: int
+
+PacketFlowCanvasVisualizer [src/inet/visualizer/canvas/flow/PacketFlowCanvasVisualizer.h]:
+  No state variables found
+
+PacketFlowOsgVisualizer [src/inet/visualizer/osg/flow/PacketFlowOsgVisualizer.h]:
+  No state variables found
+
+PacketFlowPcapFileRecorder [src/inet/queueing/flow/PacketFlowPcapFileRecorder.h]:
+  # pcapWriter: IPcapWriter *
+  # direction: Direction
+  # networkType: PcapLinkType
+
+PacketGateBase [src/inet/queueing/base/PacketGateBase.h]:
+  # bitrate: bps
+  # extraLength: b
+  # extraDuration: simtime_t
+  # isOpen_: bool
+
+PacketLabeler [src/inet/queueing/marker/PacketLabeler.h]:
+  # filters: std::vector< IPacketFilterFunction * >
+
+PacketLabelerBase [src/inet/queueing/base/PacketLabelerBase.h]:
+  # labels: std::vector< std::string >
+
+PacketMarkerBase [src/inet/queueing/base/PacketMarkerBase.h]:
+  No state variables found
+
+PacketMeterBase [src/inet/networklayer/diffserv/PacketMeterBase.h]:
+  # inputGate: cGate *
+  # producer: ActivePacketSourceRef
+
+PacketMeterBase [src/inet/queueing/base/PacketMeterBase.h]:
+  No state variables found
+
+PacketMultiplexer [src/inet/queueing/common/PacketMultiplexer.h]:
+  # forwardServiceRegistration: bool
+  # forwardProtocolRegistration: bool
+  # inputGates: std::vector< cGate * >
+  # producers: std::vector<ActivePacketSourceRef>
+  # outputGate: cGate *
+  # consumer: PassivePacketSinkRef
+  # inProgressStreamId: int
+
+PacketPullerBase [src/inet/queueing/base/PacketPullerBase.h]:
+  # inputGate: cGate *
+  # provider: PassivePacketSourceRef
+  # outputGate: cGate *
+  # collector: ActivePacketSinkRef
+
+PacketPusherBase [src/inet/queueing/base/PacketPusherBase.h]:
+  # inputGate: cGate *
+  # producer: ActivePacketSourceRef
+  # outputGate: cGate *
+  # consumer: PassivePacketSinkRef
+
+PacketPushToSend [src/inet/queueing/common/PacketPushToSend.h]:
+  No state variables found
+
+PacketQueue [src/inet/queueing/queue/PacketQueue.h]:
+  # packetCapacity: int
+  # dataCapacity: b
+  # producer: ActivePacketSourceRef
+  # collector: ActivePacketSinkRef
+  # queue: cPacketQueue
+  # buffer: IPacketBuffer *
+  # packetDropperFunction: IPacketDropperFunction *
+  # packetComparatorFunction: IPacketComparatorFunction *
+
+PacketScheduler [src/inet/queueing/scheduler/PacketScheduler.h]:
+  # packetSchedulerFunction: IPacketSchedulerFunction *
+
+PacketSchedulerBase [src/inet/queueing/base/PacketSchedulerBase.h]:
+  # reverseOrder: bool
+  # inputGates: std::vector< cGate * >
+  # providers: std::vector<PassivePacketSourceRef>
+  # producers: std::vector<ActivePacketSourceRef>
+  # outputGate: cGate *
+  # collector: ActivePacketSinkRef
+  # consumer: PassivePacketSinkRef
+  # inProgressStreamId: int
+  # inProgressGateIndex: int
+
+PacketSendToPush [src/inet/queueing/common/PacketSendToPush.h]:
+  # outputGate: cGate *
+  # consumer: PassivePacketSinkRef
+
+PacketSerializer [src/inet/protocolelement/common/PacketSerializer.h]:
+  No state variables found
+
+PacketServerBase [src/inet/queueing/base/PacketServerBase.h]:
+  # inputGate: cGate *
+  # provider: PassivePacketSourceRef
+  # outputGate: cGate *
+  # consumer: PassivePacketSinkRef
+
+PacketSinkBase [src/inet/queueing/base/PacketSinkBase.h]:
+  No state variables found
+
+PacketSourceBase [src/inet/queueing/base/PacketSourceBase.h]:
+  # packetNameFormat: const char *
+  # packetRepresentation: const char *
+  # packetProtocol: const Protocol *
+  # packetLengthParameter: cPar *
+  # packetDataParameter: cPar *
+  # attachCreationTimeTag: bool
+  # attachIdentityTag: bool
+  # attachDirectionTag: bool
+
+PacketTagger [src/inet/queueing/marker/PacketTagger.h]:
+  # packetFilterFunction: IPacketFilterFunction *
+
+PacketTaggerBase [src/inet/queueing/base/PacketTaggerBase.h]:
+  # dscp: int
+  # ecn: int
+  # tos: int
+  # userPriority: int
+  # interfaceId: int
+  # hopLimit: int
+  # vlanId: int
+  # pcp: int
+  # transmissionPower: W
+  # encapsulationProtocols: std::vector< const Protocol * >
+
+PaddingInserter [src/inet/protocolelement/common/PaddingInserter.h]:
+  # minLength: b
+  # roundingLength: b
+  # insertionPosition: HeaderPosition
+
+PassivePacketSinkBase [src/inet/queueing/base/PassivePacketSinkBase.h]:
+  # inputGate: cGate *
+  # producer: ActivePacketSourceRef
+
+PassivePacketSourceBase [src/inet/queueing/base/PassivePacketSourceBase.h]:
+  # outputGate: cGate *
+  # collector: ActivePacketSinkRef
+
+PathCanvasVisualizerBase [src/inet/visualizer/canvas/base/PathCanvasVisualizerBase.h]:
+  # zIndex: double
+  # canvasProjection: const CanvasProjection *
+  # pathGroup: cGroupFigure *
+
+PathOsgVisualizerBase [src/inet/visualizer/osg/base/PathOsgVisualizerBase.h]:
+  No state variables found
+
+PathVisualizerBase [src/inet/visualizer/base/PathVisualizerBase.h]:
+  # displayRoutes: bool
+  # nodeFilter: NetworkNodeFilter
+  # packetFilter: PacketFilter
+  # lineColorSet: ColorSet
+  # lineStyle: cFigure::LineStyle
+  # lineWidth: double
+  # lineSmooth: bool
+  # lineShift: double
+  # lineShiftMode: const char *
+  # lineContactSpacing: double
+  # lineContactMode: const char *
+  # labelFormat: StringFormat
+  # labelFont: cFigure::Font
+  # labelColorAsString: const char *
+  # labelColor: cFigure::Color
+  # fadeOutMode: const char *
+  # fadeOutTime: double
+  # fadeOutAnimationSpeed: double
+  # startPathSignal: simsignal_t
+  # extendPathSignal: simsignal_t
+  # endPathSignal: simsignal_t
+  # lineManager: LineManager *
+  # incompletePaths: std::map< std::pair< std::string, int >, std::vector< int > >
+  # numPaths: std::map< int, int >
+  # pathVisualizations: std::multimap< std::pair< int, int >, constPathVisualization* >
+
+PcapFilePacketConsumer [src/inet/queueing/sink/PcapFilePacketConsumer.h]:
+  # pcapWriter: IPcapWriter *
+  # direction: Direction
+  # networkType: PcapLinkType
+
+PcapFilePacketProducer [src/inet/queueing/source/PcapFilePacketProducer.h]:
+  # pcapReader: PcapReader
+
+PcpClassifier [src/inet/linklayer/ieee8021q/PcpClassifier.h]:
+  # mode: const char *
+  # pcpToGateIndex: cValueArray *
+  # defaultGateIndex: int
+
+PcpTrafficClassClassifier [src/inet/linklayer/ieee8021q/PcpTrafficClassClassifier.h]:
+  # mode: const char *
+  # mapping: cValueArray *
+  # defaultGateIndex: int
+
+PhysicalEnvironmentCanvasVisualizer [src/inet/visualizer/canvas/environment/PhysicalEnvironmentCanvasVisualizer.h]:
+  # canvasProjection: const CanvasProjection *
+  # objectsLayer: cGroupFigure *
+  # zIndex: double
+
+PhysicalEnvironmentOsgVisualizer [src/inet/visualizer/osg/environment/PhysicalEnvironmentOsgVisualizer.h]:
+  # enableObjectOpacity: bool
+
+PhysicalEnvironmentVisualizerBase [src/inet/visualizer/base/PhysicalEnvironmentVisualizerBase.h]:
+  # physicalEnvironment: const physicalenvironment::IPhysicalEnvironment *
+  # displayObjects: bool
+
+PhysicalLinkCanvasVisualizer [src/inet/visualizer/canvas/physicallayer/PhysicalLinkCanvasVisualizer.h]:
+  No state variables found
+
+PhysicalLinkOsgVisualizer [src/inet/visualizer/osg/physicallayer/PhysicalLinkOsgVisualizer.h]:
+  No state variables found
+
+PriorityClassifier [src/inet/queueing/classifier/PriorityClassifier.h]:
+  No state variables found
+
+PriorityScheduler [src/inet/queueing/scheduler/PriorityScheduler.h]:
+  # collections: std::vector< IPacketCollection * >
+
+ProtocolChecker [src/inet/protocolelement/common/ProtocolChecker.h]:
+  # protocols: std::set< const Protocol * >
+
+QueueBasedTokenGenerator [src/inet/queueing/tokengenerator/QueueBasedTokenGenerator.h]:
+  # minNumPackets: int
+  # minTotalLength: b
+  # queue: ModuleRefByPar< IPacketQueue >
+  # numTokensParameter: cPar *
+
+QueueCanvasVisualizer [src/inet/visualizer/canvas/common/QueueCanvasVisualizer.h]:
+  # zIndex: double
+  # networkNodeVisualizer: ModuleRefByPar<NetworkNodeCanvasVisualizer>
+
+QueueOsgVisualizer [src/inet/visualizer/osg/common/QueueOsgVisualizer.h]:
+  # networkNodeVisualizer: ModuleRefByPar<NetworkNodeOsgVisualizer>
+
+QueueVisualizerBase [src/inet/visualizer/base/QueueVisualizerBase.h]:
+  # displayQueues: bool
+  # queueFilter: QueueFilter
+  # color: cFigure::Color
+  # width: double
+  # height: double
+  # spacing: double
+  # placementHint: Placement
+  # placementPriority: double
+  # queueVisualizations: std::vector< constQueueVisualization* >
+
+RadioCanvasVisualizer [src/inet/visualizer/canvas/physicallayer/RadioCanvasVisualizer.h]:
+  # zIndex: double
+  # canvasProjection: const CanvasProjection *
+  # networkNodeVisualizer: ModuleRefByPar<NetworkNodeCanvasVisualizer>
+
+RadioOsgVisualizer [src/inet/visualizer/osg/physicallayer/RadioOsgVisualizer.h]:
+  # networkNodeVisualizer: ModuleRefByPar<NetworkNodeOsgVisualizer>
+
+RadioVisualizerBase [src/inet/visualizer/base/RadioVisualizerBase.h]:
+  # displayRadios: bool
+  # displayRadioMode: bool
+  # displayReceptionState: bool
+  # displayTransmissionState: bool
+  # radioModeImages: std::vector< std::string >
+  # receptionStateImages: std::vector< std::string >
+  # transmissionStateImages: std::vector< std::string >
+  # radioFilter: ModuleFilter
+  # width: double
+  # height: double
+  # placementHint: Placement
+  # placementPriority: double
+  # antennaLobeNormalize: bool
+  # antennaLobeRelativeLabels: bool
+  # displayAntennaLobes: bool
+  # antennaLobePlaneGlobal: bool
+  # antennaLobePlane: const char *
+  # antennaLobeMode: const char *
+  # antennaLobeLogarithmicBase: double
+  # antennaLobeLogarithmicScale: double
+  # antennaLobeRadius: double
+  # antennaLobeStep: deg
+  # antennaLobeOpacity: double
+  # antennaLobeLineSmooth: bool
+  # antennaLobeLineColor: cFigure::Color
+  # antennaLobeLineStyle: cFigure::LineStyle
+  # antennaLobeLineWidth: double
+  # antennaLobeFillColor: cFigure::Color
+  # radioVisualizations: std::map< int, constRadioVisualization* >
+
+RandomDriftOscillator [src/inet/clock/oscillator/RandomDriftOscillator.h]:
+  # changeTimer: cMessage *
+  # initialDriftRate: ppm
+  # driftRateChangeParameter: cPar *
+  # changeIntervalParameter: cPar *
+  # driftRateChangeTotal: ppm
+  # driftRateChangeLowerLimit: ppm
+  # driftRateChangeUpperLimit: ppm
+
+RandomWaypointMobility [src/inet/mobility/single/RandomWaypointMobility.h]:
+  # nextMoveIsWait: bool
+  # speedParameter: cPar *
+  # waitTimeParameter: cPar *
+  # hasWaitTime: bool
+
+ReceiveAtL3Address [src/inet/protocolelement/selectivity/ReceiveAtL3Address.h]:
+  # address: L3Address
+
+ReceiveAtMacAddress [src/inet/protocolelement/selectivity/ReceiveAtMacAddress.h]:
+  # address: MacAddress
+
+ReceiveAtPort [src/inet/protocolelement/selectivity/ReceiveAtPort.h]:
+  # port: int
+
+ReceiveWithAcknowledge [src/inet/protocolelement/acknowledgement/ReceiveWithAcknowledge.h]:
+  No state variables found
+
+ReceiveWithHopLimit [src/inet/protocolelement/forwarding/ReceiveWithHopLimit.h]:
+  No state variables found
+
+ReceiveWithProtocol [src/inet/protocolelement/dispatching/ReceiveWithProtocol.h]:
+  No state variables found
+
+RectangleMobility [src/inet/mobility/single/RectangleMobility.h]:
+  # speed: double
+  # d: double
+  # corner1: double
+  # corner2: double
+  # corner3: double
+  # corner4: double
+
+RedDropper [src/inet/queueing/filter/RedDropper.h]:
+  # wq: double
+  # minth: double
+  # maxth: double
+  # maxp: double
+  # pkrate: double
+  # count: double
+  # avg: double
+  # q_time: simtime_t
+  # packetCapacity: int
+  # useEcn: bool
+  # markNext: bool
+  # lastResult: RedResult
+  # collection: ModuleRef< IPacketCollection >
+
+RelayInterfaceLearner [src/inet/linklayer/ethernet/common/RelayInterfaceLearner.h]:
+  # interfaceTable: ModuleRefByPar< IInterfaceTable >
+  # macForwardingTable: ModuleRefByPar< IMacForwardingTable >
+
+RelayInterfaceSelector [src/inet/linklayer/ethernet/common/RelayInterfaceSelector.h]:
+  # interfaceTable: ModuleRefByPar< IInterfaceTable >
+  # macForwardingTable: ModuleRefByPar< IMacForwardingTable >
+  # numProcessedFrames: long
+  # numDroppedFrames: long
+
+Reordering [src/inet/protocolelement/ordering/Reordering.h]:
+  # expectedSequenceNumber: int
+  # packets: std::map< int, Packet * >
+
+Resending [src/inet/protocolelement/acknowledgement/Resending.h]:
+  # numRetries: int
+  # packet: Packet *
+  # retry: int
+
+RotatingMobilityBase [src/inet/mobility/base/RotatingMobilityBase.h]:
+  # rotateTimer: cMessage *
+  # updateInterval: simtime_t
+  # stationary: bool
+  # lastAngularVelocity: Quaternion
+  # lastUpdate: simtime_t
+  # nextChange: simtime_t
+
+RoutingTableCanvasVisualizer [src/inet/visualizer/canvas/networklayer/RoutingTableCanvasVisualizer.h]:
+  # zIndex: double
+  # canvasProjection: const CanvasProjection *
+  # routeGroup: cGroupFigure *
+
+RoutingTableOsgVisualizer [src/inet/visualizer/osg/networklayer/RoutingTableOsgVisualizer.h]:
+  No state variables found
+
+RoutingTableVisualizerBase [src/inet/visualizer/base/RoutingTableVisualizerBase.h]:
+  # displayRoutingTables: bool
+  # displayRoutesIndividually: bool
+  # displayLabels: bool
+  # destinationFilter: NetworkNodeFilter
+  # nodeFilter: NetworkNodeFilter
+  # multicastSourceNodeFilter: NetworkNodeFilter
+  # multicastSourceAddressFilter: cMatchExpression
+  # multicastGroupFilter: cMatchExpression
+  # lineColor: cFigure::Color
+  # lineStyle: cFigure::LineStyle
+  # lineShift: double
+  # lineShiftMode: const char *
+  # lineWidth: double
+  # lineContactSpacing: double
+  # lineContactMode: const char *
+  # labelFormat: StringFormat
+  # labelFont: cFigure::Font
+  # labelColor: cFigure::Color
+  # allRoutingTableVisualizationsAreInvalid: bool
+  # invalidRoutingTableVisualizations: std::set< IIpv4RoutingTable * >
+  # lineManager: LineManager *
+  # routeVisualizations: std::map< std::tuple< Ipv4Address, int, int >, constRouteVisualization* >
+  # multicastRouteVisualizations: std::map< std::tuple< Ipv4Address, int, int >, constMulticastRouteVisualization* >
+
+SceneCanvasVisualizer [src/inet/visualizer/canvas/scene/SceneCanvasVisualizer.h]:
+  # zIndex: double
+  # canvasProjection: CanvasProjection *
+  # axisLayer: cGroupFigure *
+
+SceneOsgEarthVisualizer [src/inet/visualizer/osg/scene/SceneOsgEarthVisualizer.h]:
+  No state variables found
+
+SceneOsgVisualizer [src/inet/visualizer/osg/scene/SceneOsgVisualizer.h]:
+  No state variables found
+
+SceneOsgVisualizerBase [src/inet/visualizer/osg/base/SceneOsgVisualizerBase.h]:
+  No state variables found
+
+SceneVisualizerBase [src/inet/visualizer/base/SceneVisualizerBase.h]:
+  # sceneMin: Coord
+  # sceneMax: Coord
+
+SendToL3Address [src/inet/protocolelement/selectivity/SendToL3Address.h]:
+  # address: L3Address
+
+SendToMacAddress [src/inet/protocolelement/selectivity/SendToMacAddress.h]:
+  # address: MacAddress
+
+SendToPort [src/inet/protocolelement/selectivity/SendToPort.h]:
+  # port: int
+
+SendWithAcknowledge [src/inet/protocolelement/acknowledgement/SendWithAcknowledge.h]:
+  # acknowledgeTimeout: simtime_t
+  # sequenceNumber: int
+  # timers: std::map< int, cMessage * >
+
+SendWithHopLimit [src/inet/protocolelement/forwarding/SendWithHopLimit.h]:
+  # hopLimit: int
+
+SendWithProtocol [src/inet/protocolelement/dispatching/SendWithProtocol.h]:
+  No state variables found
+
+SequenceNumbering [src/inet/protocolelement/ordering/SequenceNumbering.h]:
+  # sequenceNumber: int
+
+SettableClock [src/inet/clock/model/SettableClock.h]:
+  # defaultOverdueClockEventHandlingMode: OverdueClockEventHandlingMode
+  # oscillatorCompensation: ppm
+
+SignalBasedTokenGenerator [src/inet/queueing/tokengenerator/SignalBasedTokenGenerator.h]:
+  # intSignalValue: int
+  # doubleSignalValue: double
+  # numTokensParameter: cPar *
+
+SingleRateThreeColorMeter [src/inet/networklayer/diffserv/SingleRateThreeColorMeter.h]:
+  # CIR: double
+  # CBS: long
+  # EBS: long
+  # colorAwareMode: bool
+  # Tc: long
+  # Te: long
+  # lastUpdateTime: simtime_t
+  # numRcvd: int
+  # numYellow: int
+  # numRed: int
+
+SlidingWindowRateMeter [src/inet/queueing/meter/SlidingWindowRateMeter.h]:
+  # timeWindow: simtime_t
+  # currentNumPackets: int
+  # currentTotalPacketLength: b
+  # datarate: bps
+  # packetrate: double
+  # packetLengths: std::map< simtime_t, b >
+
+StaticConcentricMobility [src/inet/mobility/static/StaticConcentricMobility.h]:
+  No state variables found
+
+StaticGridMobility [src/inet/mobility/static/StaticGridMobility.h]:
+  No state variables found
+
+StaticLinearMobility [src/inet/mobility/static/StaticLinearMobility.h]:
+  # separation: double
+  # initialX: double
+  # initialY: double
+  # orientation: rad
+
+StationaryMobility [src/inet/mobility/static/StationaryMobility.h]:
+  # updateFromDisplayString: bool
+
+StationaryMobilityBase [src/inet/mobility/base/StationaryMobilityBase.h]:
+  No state variables found
+
+StatisticalRateLimiter [src/inet/queueing/filter/StatisticalRateLimiter.h]:
+  # maxDatarate: bps
+  # maxPacketrate: double
+
+StatisticCanvasVisualizer [src/inet/visualizer/canvas/common/StatisticCanvasVisualizer.h]:
+  # zIndex: double
+  # networkNodeVisualizer: ModuleRefByPar<NetworkNodeCanvasVisualizer>
+
+StatisticOsgVisualizer [src/inet/visualizer/osg/common/StatisticOsgVisualizer.h]:
+  # networkNodeVisualizer: ModuleRefByPar<NetworkNodeOsgVisualizer>
+
+StatisticVisualizerBase [src/inet/visualizer/base/StatisticVisualizerBase.h]:
+  # displayStatistics: bool
+  # sourceFilter: ModuleFilter
+  # signalName: const char *
+  # statisticName: const char *
+  # statisticUnit: const char *
+  # statisticExpression: const char *
+  # format: StringFormat
+  # units: std::vector< std::string >
+  # font: cFigure::Font
+  # textColor: cFigure::Color
+  # backgroundColor: cFigure::Color
+  # opacity: double
+  # placementHint: Placement
+  # placementPriority: double
+  # statisticVisualizations: std::map< std::pair< int, simsignal_t >, constStatisticVisualization* >
+
+StreamClassifier [src/inet/protocolelement/redundancy/StreamClassifier.h]:
+  # mode: const char *
+  # gateIndexOffset: int
+  # defaultGateIndex: int
+  # mapping: cValueMap *
+
+StreamDecoder [src/inet/protocolelement/redundancy/StreamDecoder.h]:
+  # interfaceTable: ModuleRefByPar< IInterfaceTable >
+  # mappings: std::vector<Mapping>
+
+StreamEncoder [src/inet/protocolelement/redundancy/StreamEncoder.h]:
+  # mappings: std::vector<Mapping>
+
+StreamFilter [src/inet/protocolelement/redundancy/StreamFilter.h]:
+  # mode: const char *
+  # streamNameFilter: cMatchExpression
+
+StreamIdentifier [src/inet/protocolelement/redundancy/StreamIdentifier.h]:
+  # hasSequenceNumbering: bool
+  # mapping: cValueArray *
+  # sequenceNumbers: std::map< std::string, int >
+
+StreamMerger [src/inet/protocolelement/redundancy/StreamMerger.h]:
+  # mapping: cValueMap *
+  # bufferSize: int
+  # sequenceNumbers: std::map< std::string, std::vector< int > >
+
+StreamRedundancyConfigurationCanvasVisualizer [src/inet/visualizer/canvas/configurator/StreamRedundancyConfigurationCanvasVisualizer.h]:
+  # streamFilter: cMatchExpression
+
+StreamSplitter [src/inet/protocolelement/redundancy/StreamSplitter.h]:
+  # mapping: cValueMap *
+
+SubpacketLengthHeaderBasedAggregator [src/inet/protocolelement/aggregation/SubpacketLengthHeaderBasedAggregator.h]:
+  No state variables found
+
+SubpacketLengthHeaderBasedDeaggregator [src/inet/protocolelement/aggregation/SubpacketLengthHeaderBasedDeaggregator.h]:
+  No state variables found
+
+SuperpositioningMobility [src/inet/mobility/single/SuperpositioningMobility.h]:
+  # lastVelocity: Coord
+  # lastAcceleration: Coord
+  # lastAngularVelocity: Quaternion
+  # lastAngularAcceleration: Quaternion
+  # positionComposition: PositionComposition
+  # orientationComposition: OrientationComposition
+  # positionElementIndex: int
+  # orientationElementIndex: int
+  # elements: std::vector< IMobility * >
+
+TokenBucketMeter [src/inet/networklayer/diffserv/TokenBucketMeter.h]:
+  # CIR: double
+  # CBS: long
+  # colorAwareMode: bool
+  # Tc: long
+  # lastUpdateTime: simtime_t
+  # numRcvd: int
+  # numRed: int
+
+TracingObstacleLossCanvasVisualizer [src/inet/visualizer/canvas/physicallayer/TracingObstacleLossCanvasVisualizer.h]:
+  # zIndex: double
+  # canvasProjection: const CanvasProjection *
+  # obstacleLossLayer: cGroupFigure *
+
+TracingObstacleLossOsgVisualizer [src/inet/visualizer/osg/physicallayer/TracingObstacleLossOsgVisualizer.h]:
+  # obstacleLossNode: osg::Group *
+
+TracingObstacleLossVisualizerBase [src/inet/visualizer/base/TracingObstacleLossVisualizerBase.h]:
+  # displayIntersections: bool
+  # intersectionLineColor: cFigure::Color
+  # intersectionLineStyle: cFigure::LineStyle
+  # intersectionLineWidth: double
+  # displayFaceNormalVectors: bool
+  # faceNormalLineColor: cFigure::Color
+  # faceNormalLineStyle: cFigure::LineStyle
+  # faceNormalLineWidth: double
+  # fadeOutMode: const char *
+  # fadeOutTime: double
+  # fadeOutAnimationSpeed: double
+  # obstacleLossVisualizations: std::vector< constObstacleLossVisualization* >
+
+TractorMobility [src/inet/mobility/single/TractorMobility.h]:
+  # speed: double
+  # x1: double
+  # y1: double
+  # x2: double
+  # y2: double
+  # rowCount: int
+  # step: int
+
+TransportConnectionCanvasVisualizer [src/inet/visualizer/canvas/transportlayer/TransportConnectionCanvasVisualizer.h]:
+  # zIndex: double
+  # canvasProjection: const CanvasProjection *
+  # networkNodeVisualizer: ModuleRefByPar<NetworkNodeCanvasVisualizer>
+
+TransportConnectionOsgVisualizer [src/inet/visualizer/osg/transportlayer/TransportConnectionOsgVisualizer.h]:
+  # networkNodeVisualizer: ModuleRefByPar<NetworkNodeOsgVisualizer>
+
+TransportConnectionVisualizerBase [src/inet/visualizer/base/TransportConnectionVisualizerBase.h]:
+  # displayTransportConnections: bool
+  # sourceNodeFilter: NetworkNodeFilter
+  # sourcePortFilter: PortFilter
+  # destinationNodeFilter: NetworkNodeFilter
+  # destinationPortFilter: PortFilter
+  # icon: const char *
+  # iconColorSet: ColorSet
+  # labelFont: cFigure::Font
+  # labelColor: cFigure::Color
+  # placementHint: Placement
+  # placementPriority: double
+  # connectionVisualizations: std::vector< constTransportConnectionVisualization* >
+
+TransportRouteCanvasVisualizer [src/inet/visualizer/canvas/transportlayer/TransportRouteCanvasVisualizer.h]:
+  No state variables found
+
+TransportRouteOsgVisualizer [src/inet/visualizer/osg/transportlayer/TransportRouteOsgVisualizer.h]:
+  No state variables found
+
+TreeCanvasVisualizerBase [src/inet/visualizer/canvas/base/TreeCanvasVisualizerBase.h]:
+  # zIndex: double
+  # canvasProjection: const CanvasProjection *
+  # treeGroup: cGroupFigure *
+
+TreeVisualizerBase [src/inet/visualizer/base/TreeVisualizerBase.h]:
+  # displayTrees: bool
+  # lineColorSet: ColorSet
+  # lineStyle: cFigure::LineStyle
+  # lineWidth: double
+  # lineSmooth: bool
+  # lineShift: double
+  # lineShiftMode: const char *
+  # lineContactSpacing: double
+  # lineContactMode: const char *
+  # lineManager: LineManager *
+  # numTrees: std::map< int, int >
+  # treeVisualizations: std::multimap< std::pair< int, int >, constTreeVisualization* >
+
+TurtleMobility [src/inet/mobility/single/TurtleMobility.h]:
+  # turtleScript: cXMLElement *
+  # nextStatement: cXMLElement *
+  # speed: double
+  # heading: rad
+  # elevation: rad
+  # borderPolicy: BorderPolicy
+  # loopVars: std::stack< long >
+  # maxSpeed: double
+
+TwoRateThreeColorMeter [src/inet/networklayer/diffserv/TwoRateThreeColorMeter.h]:
+  # PIR: double
+  # PBS: long
+  # CIR: double
+  # CBS: long
+  # colorAwareMode: bool
+  # Tp: long
+  # Tc: long
+  # lastUpdateTime: simtime_t
+  # numRcvd: int
+  # numYellow: int
+  # numRed: int
+
+VehicleMobility [src/inet/mobility/single/VehicleMobility.h]:
+  # waypoints: std::vector<Waypoint>
+  # ground: physicalenvironment::IGround *
+  # speed: double
+  # heading: double
+  # waypointProximity: double
+  # angularSpeed: double
+  # targetPointIndex: int
+
+VirtualTunnel [src/inet/linklayer/virtual/VirtualTunnel.h]:
+  # realNetworkInterface: NetworkInterface *
+  # networkInterface: NetworkInterface *
+  # protocol: const Protocol *
+  # vlanId: int
+  # socket: ISocket *
+
+VlanIndFilter [src/inet/linklayer/vlan/VlanIndFilter.h]:
+  # interfaceTable: ModuleRefByPar< IInterfaceTable >
+  # acceptedVlanIds: cValueMap *
+
+VlanReqFilter [src/inet/linklayer/vlan/VlanReqFilter.h]:
+  # interfaceTable: ModuleRefByPar< IInterfaceTable >
+  # acceptedVlanIds: cValueMap *
+
+VlanReqMapper [src/inet/linklayer/vlan/VlanReqMapper.h]:
+  # protocol: const Protocol *
+  # interfaceTable: ModuleRefByPar< IInterfaceTable >
+  # mappedVlanIds: cValueMap *
+
+WrrClassifier [src/inet/queueing/classifier/WrrClassifier.h]:
+  # weights: int *
+  # buckets: int *
+  # collections: std::vector< IPacketCollection * >
+
+WrrScheduler [src/inet/queueing/scheduler/WrrScheduler.h]:
+  # weights: unsigned int *
+  # buckets: unsigned int *
+  # collections: std::vector< IPacketCollection * >

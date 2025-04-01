@@ -1,0 +1,18 @@
+in @to-be-processed-vars.txtthere is a list of INET module classes along with their state variables. 
+
+REMOVE all variables that:
+- that are configuration
+- that are not changing during the runtime (i.e. they are just initialized at the beginning)
+- that are pointers or references to other modules or classes
+- has type of simsignal_t
+
+KEEP variables that:
+- represent addresses or IDs
+- refer to Queues or data tables
+- represent counters
+- represent states (i.e. enums)
+
+For each remaining variables, update their description in th file
+- For each variable assign a single lower case letter code which is UNIQUE in that class
+- Keep the one letter code consistent across modules if possible
+- format: name: type - assigned code 
