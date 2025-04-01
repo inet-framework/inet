@@ -16,12 +16,14 @@ package inet.clock.servo;
 // 2. Estimate Drift: Computes drift based on the difference between consecutive offsets.
 //
 // 3. Synchronize: Adjusts the clock using proportional and integral terms to minimize offset.
+//
+// Note: The kp and ki parameters need to be adjusted, if the the syncInterval is adjusted from the default value.
 module PiServoClock extends ServoClockBase
 {
     parameters:
         double offsetThreshold @unit(s) = default(0s); // Clock will perform a time jump if the offset is greater than this value, 0.0 disables this feature
-        double kp = default(8);
-        double ki = default(4);
+        double kp = default(8); // The proportional parameter of the PI controller
+        double ki = default(4); // The integral paramater of the PI Controller
         @signal[kp](type=double);
         @statistic[kp](title="kp value"; record=vector; interpolationmode=linear);
         @signal[drift](type=double);

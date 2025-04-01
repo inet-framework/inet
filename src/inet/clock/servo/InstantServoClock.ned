@@ -7,7 +7,7 @@
 
 package inet.clock.servo;
 
-// As simple clock servo, with three different modes:
+// As simple clock servo (previously known as SettableClock in INET), with three different modes:
 //
 // 1. No servo: Calls to adjustTime are ignored. (adjustClock = false; adjustDrift = false)
 //

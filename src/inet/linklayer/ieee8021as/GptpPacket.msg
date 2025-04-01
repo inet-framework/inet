@@ -10,6 +10,10 @@
 //           Peter Danielis
 //           University of Rostock, Germany
 //
+//           Lucas Haug
+//           Lun-Yu Yuan
+//           Chunzhi Guo
+//           University of Stuttgart, Deterministic6G
 
 import inet.clock.common.ClockEvent;
 import inet.clock.contract.ClockTime;

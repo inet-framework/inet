@@ -24,17 +24,27 @@ void HotStandby::initialize(int stage)
 
         for (int i = 0; i < numDomains; i++) {
             auto gptp = check_and_cast<Gptp *>(parent->getSubmodule("domain", i));
+            auto domainNumber = gptp->getDomainNumber();
             gptp->subscribe(Gptp::gptpSyncStateChanged, this);
-            ModuleRefByPar<ClockBase> currentClock;
+            ModuleRefByPar<cComponent> currentClock;
             currentClock.reference(gptp, "clockModule", true);
-            auto clockParent = currentClock->getParentModule();
+            // Check if the currentClock is a ClockBase
+            // (otherwise it could be a link to the multiClock or an external)
+            // In that case we just ignore this clock in the HotStandby context
+            if (dynamic_cast<ClockBase *>(currentClock.get()) == nullptr) {
+                EV_WARN << "Clock module " << currentClock->getFullPath() << " for domain " << domainNumber
+                        << "is not a ClockBase, ignoring" << endl;
+                continue;
+            }
+            auto clockBase = check_and_cast<ClockBase *>(currentClock.get());
+            auto clockParent = clockBase->getParentModule();
             if (clockParent != multiClock) {
                 EV_WARN
                     << "Clock module is not a child of MultiClock, cannot determine clock index and ignoring this clock"
                     << endl;
             }
             else {
-                domainNumberToClockIndex[gptp->getDomainNumber()] = currentClock->getIndex();
+                domainNumberToClockIndex[domainNumber] = clockBase->getIndex();
             }
         }
     }

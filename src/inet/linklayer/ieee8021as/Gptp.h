@@ -4,6 +4,10 @@
 //           Peter Danielis
 //           University of Rostock, Germany
 //
+//           Lucas Haug
+//           Lun-Yu Yuan
+//           Chunzhi Guo
+//           University of Stuttgart, Deterministic6G
 
 #ifndef __INET_GPTP_H
 #define __INET_GPTP_H

@@ -18,7 +18,10 @@ import inet.queueing.contract.IPacketClassifier;
 // configured to use the corresponding subclock of the clock passed into this
 // module.
 //
+// The module also provides a basic implementation of the IEEE 802.1ASdm ~HotStandby amendment
+//
 // @see ~MultiClock
+// @see ~HotStandby
 //
 module MultiDomainGptp like IGptp
 {
@@ -27,7 +30,7 @@ module MultiDomainGptp like IGptp
         string interfaceTableModule; // Relative module path of the interface table
         int numDomains; // Number of time synchronization domains
         string gptpNodeType; // @enum("GptpNodeType"): MASTER_NODE, BRIDGE_NODE, SLAVE_NODE
-        bool hasHotStandby = default(true);
+        bool hasHotStandby = default(true); // Defines if the HotStandby should be used.
         @display("i=block/app");
     gates:
         input socketIn;

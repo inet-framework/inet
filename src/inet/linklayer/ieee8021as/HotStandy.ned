@@ -1,25 +1,26 @@
 //
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-// 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Lesser General Public License for more details.
-// 
-// You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+// @authors: Lucas Haug
+//           Lun-Yu Yuan
+//           Chunzhi Guo
+//           University of Stuttgart, Deterministic6G
 
 package inet.linklayer.ieee8021as;
 
+// This module is a basic implementation of the IEEE 802.1ASdm HotStandby amendment.
+// It is part of the MultiDomainGptp module and keeps track of the synchronization state of contained
+// gPTP modules.
+//
+// In case one gPTP module loses synchronization, it will switch the activeClockIndex of the multiClock
+// to the clock of a gPTP instance still in sync.
+//
+// Note: This module is not a complete implementation of the HotStandby amendment and only provides
+// the basic functionality of switching the active clock if one gPTP instance loses sync.
+// For example, a smooth transition when switching between synchronization instances is not implemented.
 simple HotStandby
 {
     parameters:
         @display("i=block/blackboard");
         @class(HotStandby);
         @selfMessageKinds(inet::GptpSelfMsgKind);
-        string clockModule = default("");
+        string clockModule = default(""); // Path to a multiClock
 }

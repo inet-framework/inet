@@ -4,26 +4,44 @@
 //           Peter Danielis
 //           University of Rostock, Germany
 //
+//           Lucas Haug
+//           Lun-Yu Yuan
+//           Chunzhi Guo
+//           University of Stuttgart, Deterministic6G
 
 package inet.linklayer.ieee8021as;
 
 import inet.linklayer.contract.IGptp;
 
 //
-// Implements the IEEE 802.1as protocol also known as gPTP. It
+// Implements the IEEE 802.1AS protocol also known as gPTP. It
 // measures link delays to neighboring gPTP network nodes periodically. The
 // slave and master ports specify where the connected gPTP network nodes
 // and their roles in the time synchronization domain. The time synchronization
 // is done periodically and the clock module is set.
 //
+// It can either be statically configured, by setting the slavePort and masterPorts parameter.
+// In case of a static configuration the gPTP node type is MASTER_NODE, BRIDGE_NODE or SLAVE_NODE.
+//
+// Alternatively the Best Master Clock Algorithm (BMCA) can be used to dynamically select a GM based on
+// the BMCA parameters.
+// In this case the gPTP node type is set to BMCA_NODE.
+// All ports that should be used for BMCA must be set in the bmcaPorts parameter.
+//
+// The implementation also supports the HotStandby ammendment IEEE 802.1ASdm, see MultiDomainGptp.
 simple Gptp like IGptp
 {
     parameters:
         string clockModule = default(""); // Relative path of a module that implements IClock; optional
         string interfaceTableModule; // Relative path of the interface table module
-        string gptpNodeType; // @enum("GptpNodeType"): MASTER_NODE, BRIDGE_NODE, SLAVE_NODE, BMCA_NODE
+        string gptpNodeType @enum("MASTER_NODE","BRIDGE_NODE","SLAVE_NODE","BMCA_NODE"); // @enum("GptpNodeType"): MASTER_NODE, BRIDGE_NODE, SLAVE_NODE, BMCA_NODE
         bool useNrr = default(false); // Use neighbor rate ratio
-        string gmRateRatioCalculationMethod = default("NONE"); // @enum("GptpRateRatioCalculationMethod"): NONE, NRR, DIRECT
+
+        // How to calculate the gmRateRatio. NRR is the method used by the gPTP standard.
+        // DIRECT is another method previously used by the INET implementation.
+        // It calculates the gmRateRatio directly by using the preciseOriginTimestamp and correctionField
+        string gmRateRatioCalculationMethod @enum("NONE","NRR","DIRECT") = default("NONE");
+
         int domainNumber = default(0); // Specifies the time domain number used in gPTP messages
         string slavePort = default(""); // Port for receiving time (empty for MASTER_NODE and BMCA_NODE)
         object masterPorts = default([]); // Ports for sending out time (empty for SLAVE_NODE and BMCA_NODE)
@@ -50,7 +68,6 @@ simple Gptp like IGptp
         // These numbers must be large enough to prevent creating a queue in the MAC layer.
         // It means they should be larger than the transmission time of the message sent before
         double pDelayReqProcessingTime @unit(s) = default(8us);  // Processing time between the arrival of PDelayReq and the sending of PDelayResp
-        double followUpInterval @unit(s) = default(7us);
 
         @display("i=block/timer");
         @signal[localTime](type=simtime_t);  // As clocktime_t

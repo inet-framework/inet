@@ -25,7 +25,7 @@ module MultiClock like IClock
         @display("i=block/timer");
         @class(MultiClock);
         @signal[timeChanged](type=simtime_t);
-        @signal[timeJumped]();
+        @signal[timeJumped](); // Signal is emitted when the activeClock performs a timeJump or the activeClockIndex updates
         @signal[timeDifferenceToReference](type=simtime_t);
         @signal[activeClockIndexChanged](type=int);
         @statistic[timeChanged](title="Clock time"; source=localSignal(timeChanged); record=vector; interpolationmode=linear);
