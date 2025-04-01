@@ -45,30 +45,31 @@ MobilityBase::MobilityBase() :
 {
 }
 
-std::string MobilityBase::DirectiveResolver::resolveDirective(char directive) const
+std::string MobilityBase::resolveDirective(char directive) const
 {
+    MobilityBase *constthis = const_cast<MobilityBase*>(this);
     switch (directive) {
         case 'p':
-            return mobility->getCurrentPosition().str();
+            return constthis->getCurrentPosition().str();
         case 'v':
-            return mobility->getCurrentVelocity().str();
+            return constthis->getCurrentVelocity().str();
         case 's':
-            return std::to_string(mobility->getCurrentVelocity().length());
+            return std::to_string(constthis->getCurrentVelocity().length());
         case 'a':
-            return mobility->getCurrentAcceleration().str();
+            return constthis->getCurrentAcceleration().str();
         case 'P':
-            return mobility->getCurrentAngularPosition().str();
+            return constthis->getCurrentAngularPosition().str();
         case 'V':
-            return mobility->getCurrentAngularVelocity().str();
+            return constthis->getCurrentAngularVelocity().str();
         case 'S': {
-            auto angularVelocity = mobility->getCurrentAngularVelocity();
+            auto angularVelocity = constthis->getCurrentAngularVelocity();
             Coord axis;
             double angle;
             angularVelocity.getRotationAxisAndAngle(axis, angle);
             return std::to_string(angle);
         }
         case 'A':
-            return mobility->getCurrentAngularAcceleration().str();
+            return constthis->getCurrentAngularAcceleration().str();
         default:
             throw cRuntimeError("Unknown directive: %c", directive);
     }
@@ -177,8 +178,7 @@ void MobilityBase::initializeOrientation()
 
 void MobilityBase::refreshDisplay() const
 {
-    DirectiveResolver directiveResolver(const_cast<MobilityBase *>(this));
-    auto text = format.formatString(&directiveResolver);
+    auto text = format.formatString(this);
     getDisplayString().setTagArg("t", 0, text.c_str());
     if (par("updateDisplayString"))
         updateDisplayStringFromMobilityState();

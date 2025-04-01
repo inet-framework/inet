@@ -28,7 +28,7 @@ class INET_API StringFormat
   public:
     void parseFormat(const char *format);
 
-    std::string formatString(IDirectiveResolver *resolver) const;
+    std::string formatString(const IDirectiveResolver *resolver) const;
     std::string formatString(std::function<std::string(char)>& resolver) const;
 
     static std::string formatString(const char *format, const IDirectiveResolver *resolver);
