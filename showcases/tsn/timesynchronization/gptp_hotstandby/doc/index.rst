@@ -1,60 +1,24 @@
 MultiDomain gPTP and Hot-Standby
-================================
+=================================
 
 Overview
-~~~~~~~~
+--------
 
-In time-sensitive networking (TSN), precise and uninterrupted time synchronization
-is fundamental to ensuring deterministic network behavior. Many real-time applications,
-such as industrial automation, financial trading, and vehicular communication, depend on
-synchronized clocks with minimal jitter and drift. However, conventional network simulations
-often assume a globally shared clock, which does not account for real-world clock
-discrepancies and failures.
+In this showcase we present the multi-domain gPTP feature of INET
+together with a basic implementation of the IEEE 802.1ASdm :ned:`HotStandby` amendment.
+The showcase consists of two networks scenarios:
 
-In practice, hardware clocks are prone to drift, and failures in the primary time source can
-introduce significant disruptions. To mitigate these risks, the concept of a hot-standby master
-clock is introduced. This approach enhances the robustness of time synchronization mechanisms by
-ensuring that a backup master clock seamlessly takes over in the event of a failure, minimizing
-synchronization loss and preventing cascading system failures.
-
-The gPTP Hot-Standby model aims to simulate such a resilient setup within a communication network,
-demonstrating how redundancy in master clocks ensures continued synchronization even under failure
-conditions.
-
-The gPTP Hot-Standby model simulates a redundant time synchronization architecture comprising the
-following components:
-
-- Primary Master Clock: The primary source of time synchronization for all connected slave clocks.
-- Hot-Standby Clock: A backup master clock that takes over in the event of a failure in the
-  primary master clock.
-- Slave Clocks: Devices that synchronize their clocks with the master clock, ensuring a consistent
-  time reference across the network.
-
-.. TODO: Create inet source file location
-
-The Model
----------
-
-In this showcase, we demonstrate the setup and operation of gPTP with HotStandby module:
-
-- **Primary and Hot-Standby Master Clocks**: More complex setup with two time domains for a primary and a hot-standby master clock. If the primary master node goes offline,
+- **Primary and Hot-Standby Master Clocks**: More complex setup with two time domains for a primary and a hot-standby master clock.
+  It implements the :ned:`HotStandby` module, so if the primary master node goes offline,
   the stand-by clock can take over and become the new Master Clock.
-- **Two Master Clocks Exploiting Network Redundancy**: A larger network containing a primary and a hot-standby master node, with two time domains each. Time synchronization is protected against the failure of a master node and any link in the network.
-
-In the ``General`` configuration, we enable :ned:`Gptp` modules in all network nodes, and configure a random clock drift rate for the master clocks, and a constant clock drift rate
-for the clocks in slave and bridge nodes (specified with a random distribution for each one):
-
-.. literalinclude:: ../omnetpp.ini
-   :language: ini
-   :start-at: enable time synchronization
-   :end-at: driftRate
-
-We detail each simulation in the following sections.
+- **Two Master Clocks Exploiting Network Redundancy**: A larger network containing four domains and a primary and a hot-standby master node,
+  with two time domains each. Time synchronization is protected against the failure of a master node and any link in the network.
+  We do not use HotStandby in this scenario.
 
 Primary and Hot-Standby Master Clocks
 -------------------------------------
 
-In this configuration the tree network topology is further extended. The network
+The network of this showcase
 contains one primary master clock node and one hot-standby master clock node.
 Both master clock nodes have their own time synchronization domain. The switch
 and device nodes have two clocks, each synchronizing to one of the master clocks
@@ -63,8 +27,6 @@ hot-standby master clock that is also synchronized to the primary master clock.
 This connection effectively causes the two time domains to be totally
 synchronized and allows seamless failover in the case of the master clock
 failure.
-
-.. note:: This setup only contains the possibility of failover, but it isn't actually demonstrated here. The master clock failure is demonstrated in the :doc:`/showcases/tsn/combiningfeatures/gptpandtas/doc/index` showcase.
 
 The network contains two clock nodes (:ned:`TsnClock`) and four TSN device nodes (:ned:`TsnDevice`), connected by two TSN switches (:ned:`TsnSwitch`):
 
@@ -136,24 +98,32 @@ We also configure some offsets for the pDelay measurement and gPTP sync messages
    :start-at: pdelayInitialOffset
    :end-at: domain[1].syncInitialOffset
 
+Lastly, we enable the :ned:`HotStandby` module on every device besides the
+primary and the hot standby masterclock.
+This is achieved by setting the :par:`hasHotStandby` parameter:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: *.tsnClock2.gptp.hasHotStandby = false
+   :end-at: **.hasHotStandby = true
+
+The :ned:`HotStandby` module is a basic implementation of the IEEE 802.1ASdm
+amendment and keeps track of the synchronization state of contained gPTP modules.
+In case one gPTP module loses synchronization, it will switch the active clock index
+of the :ned:`MultiClock` to the standby clock in case it is still in sync.
+
 The following is a video of the time synchronization process at the beginning of
 the simulation. The clock time in master nodes, and the time difference to this
 clock time in the other nodes are displayed for each clock. Messages for gPTP
 are visualized as arrows. The visualization is color-coded according to domain:
 
-.. **TODO** add video here
-.. video_noloop::
+.. video_noloop:: media/PrimaryAndHotStandbyMasterClocks.mp4
    :align: center
 
 First, the bridge and slave nodes measure link delay by exchanging pDelay
 messages. Then, the master clocks send gPTP sync messages. Note that there is a
 jump in the time difference when the clocks are set to the new time after the
 gPTP follow-up messages are received.
-
-This setup is protected against the failure of the master clock. In that case, a
-scenario manager script could switch the nodes in the network to gPTP domain 1,
-i.e., the active clock in :ned:`MultiClock` could be switched  to the
-``clock[1]`` submodule, without affecting time synchronization.
 
 The spanning tree is visualized as the datalink-layer gPTP message
 transmissions. This outlines the flow of timing information in the network,
@@ -162,8 +132,18 @@ originating from the master clock:
 .. figure:: media/PrimaryAndHotStandbyMasterClocks_tree.png
    :align: center
 
+To simulate the behavior of the :ned:`HotStandby` failover system, we add a
+scenario script whit the following failure cases:
+
+- From 3.1s to 7.1s the primary master clock is disconnected from the network.
+- From 10.1s to 14.1s the link between ``tsnSwitch1`` and ``tsnSwitch2``  is broken,
+  leading to the network splitting in half.
+
+.. literalinclude:: ../link_failure.xml
+   :language: xml
+
 Let's examine some clock drift charts. Instead of plotting clock drift for all
-clocks in one chart, let's use three charts so they are less cluttered. Here is
+clocks in one chart, let's use four charts so they are less cluttered. Here is
 the clock drift (clock time difference to simulation time) of the two `master
 clocks`:
 
@@ -172,49 +152,39 @@ clocks`:
 
 Both master clocks have a random drift rate, but the hot-standby master clock's
 time and clock drift rate are periodically synchronized to the primary.
+However, in the failure cases, there is no synchronization between the primary
+and the hot-standby master clock possible, thus they drift apart.
 
-Here is the clock drift of all clocks in `time domain 0` (primary master):
+Here is the clock drift of all clocks in `time domain 0` (primary master) during the first failure case:
 
-.. figure:: media/PrimaryAndHotStandBy_timedomain0.png
+.. figure:: media/PrimaryAndHotStandBy_timedomain0_zoomed.png
    :align: center
 
-Each slave clock has a distinct but constant drift rate, while the master
-clock's drift rate fluctuates randomly. The slave clocks are periodically
-synchronized with the master clock. After the initial two synchronization events
-(not displayed on the chart), the drift rate of the slave clocks is adjusted to
-align with that of the master clock. However, the oscillator compensation factor
-in each slave clock is determined by the drift rate at the current and previous
-synchronization points, and as the master clock's drift rate continues to
-change, the slave clocks can drift away from the master clock. It is worth
-noting that after the first rate compensation, all the slave clocks have the
-same drift rate.
+Each clock has a distinct drift rate, while the master fluctuating randomly.
+The slave clocks are periodically synchronized with the master clock. before and after
+the first failure case.
+During the first failure case, however, it becomes evident that no time synchronization is possible
+in domain 1 during that time.
 
-Let's see the clock drift for all clocks in `time domain 1` (hot-standby master):
+The following graph shows the same timeframe but plots the
+activeClock instead of domain 0:
 
-.. figure:: media/PrimaryAndHotStandBy_timedomain1.png
+.. figure:: media/PrimaryAndHotStandBy_activeclocks_failure1.png
    :align: center
 
-The clocks have different drift rates, and they are periodically synchronized to
-the hot-standby master clock (displayed with the thick blue line). The
-hot-standby master clock itself drifts from the primary master, and gets
-synchronized periodically. The upper bound of the time difference is apparent on
-the chart.
+It is evident that shortly after the primary master is disconnected
+a sync timeout occurs (typically ``3xsyncInterval=375ms``) and
+the :ned:`HotStandby` module switches the :par:`activeClockIndex`  to 1.
 
-Note that the slave clocks in domain 1 get synchronized just before the time of
-the hot stand-by master clock is updated in domain 0. As in the previous cases,
-the drift rate of slave clocks is compensated to be more aligned with the master
-clock's rate.
+In the second failure case a similar thing happens.
+However here, there are two parts of the network diverging from each other.
+The left parts still synchronizes to the primary master clock,
+while the right part synchronizes to the hot-standby master clock:
 
-.. note:: The magnitude of slave clock divergence from the master clock might appear to be large on these charts, but it is only in the order of microseconds (the scale of the y axis is a millionth of the x axis).
+.. figure:: media/PrimaryAndHotStandBy_activeclocks_failure2.png
+   :align: center
 
-.. warning:: The magnitude of slave clock divergence from the master clock might appear to be large on these charts, but it is only in the order of microseconds (the scale of the y axis is a millionth of the x axis).
-
-In the next section, we make the network more redundant, so that the primary
-master clock `and` any link in the network can fail without breaking time
-synchronization.
-
-.. **TODO** time sync: any given moment moment of time, between any two network nodes, time difference is bounded (has an upper bound); itt lehet demonstralni hogy actually true;
-   pl a charton; ha az upper bound is small enough its good enough;
+.. _sh:tsn:timesync:gptp:redundancy:
 
 Two Master Clocks Exploiting Network Redundancy
 -----------------------------------------------
@@ -235,7 +205,7 @@ Here is the network (it uses the same node types as the previous ones,
 
 The time synchronization redundancy is achieved in the following way:
 
-- The primary master node has one clock and two master gPTP time domains. The domains send timing information in the ring in the clockwise and counterclockwise direction.
+- The primary master node has one clock and two master gPTP time domains. The domains send timing information in the ring in the clockwise and counterclockwise direction. 
 - The hot-standby master node has two slave and two master gPTP domains, and two sub-clocks. Domains 0 and 1 sync the two clocks to the primary master's two domains, and domains 2 and 3 send timing information of the two clocks in both directions in the ring.
 - Switch and device nodes have four domains (and four sub-clocks), with domains 0 and 1 syncing to the primary master node, and domains 2 and 3 to the hot-standby master node.
 - Consequently, gPTP modules in the switches are gPTP bridges, in the devices, gPTP slaves.
@@ -269,7 +239,7 @@ interface.
 sub-clocks, we need to specify that domains 2 and 3 use ``clock[0]`` and
 ``clock[1]`` in the :ned:`MultiClock` module (it is sufficient to set the
 :par:`clockModule` parameter to the :ned:`MultiClock` module, as it assigns the
-sub-clocks to the domains automatically).
+sub-clocks to the domains automatically). 
 
 Thus, in ``tsnClock2``, domains 0 and 1 are gPTP slaves, syncing to the two
 domains of the primary master. Domains 2 and 3 are gPTP masters, and disseminate
@@ -330,22 +300,3 @@ All switches and devices sync to the hot-standby master clock (which itself is
 synced to the primary master periodically).
 
 .. note:: The charts for all domains are available in the .anf file in the showcase's folder.
-
-Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`GptpShowcase.ned <../GptpShowcase.ned>`
-
-Adjusting Clock Failure Scenario in HotStandby
-----------------------------------------------
-
-The :ned:`HotStandby` module is instantiated in network nodes where redundancy is required. The module follows the
-INET time synchronization framework and integrates seamlessly with the gPTP implementation. In the event of a failure,
-the HotStandby module automatically switches to the standby master clock, ensuring uninterrupted synchronization.
-It supports creating a failure scenario with the following command:
-
-.. code-block:: xml
-
-   <set-channel-param t="3.1s" src-module="tsnClock1" dest-module="tsnSwitch1" par="disabled" value="true"/>
-   <set-channel-param t="7.1s" src-module="tsnClock1" dest-module="tsnSwitch1" par="disabled" value="false"/>
-
-The above command disables the channel between the primary master clock and the switch at 3.1 seconds and re-enables
-it at 7.1 seconds, simulating a failure and recovery scenario.
-
