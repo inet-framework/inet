@@ -1,5 +1,5 @@
-gPTP Hotstandby
-===============
+Using gPTP with HotStandby
+==========================
 
 Overview
 ~~~~~~~~

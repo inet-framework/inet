@@ -54,19 +54,25 @@ return values. The interface contains functions such as :fun:`getClockTime()`,
 :fun:`cancelClockEvent()`.
 
 INET contains optional clock modules (not used by default) at the network node
-and the network interface levels. The following clock models are available:
+and the network interface levels. The following simple clock models are available:
 
 -  :ned:`IdealClock`: clock time is identical to the simulation time.
 -  :ned:`OscillatorBasedClock`: clock time is the number of oscillator ticks
    multiplied by the nominal tick length.
--  :ned:`ServoClockBase`: A based servo clock module provides core functionalities 
-   for clock adjustment and overdue event handling.
--  :ned:`PiServoClock`: A PI-based servo clock using proportional (kp) and 
-   integral (ki) gains to synchronize with an external time source and compensate for drift.
--  :ned:`InstantServoClock`: A simple clock servo module that supports three modes 
-   of operation to adjust the clock and drift.
--  :ned:`MultiClock`: Manages multiple subclocks with a programmatically switchable 
-   active clock, useful for multi-domain gPTP synchronization.
+
+Above clock models are not adjustable during runtime.
+To this end, INET provides several clocks with an adjustable time and drift rate.
+These clocks are based on the :ned:`ServoClockBase` extending the :ned:`OscillatorBasedClock`:
+
+-  :ned:`InstantServoClock`: A simple clock servo module supports jumping its clock to another time and optionally
+   adjusting the drift rate. This allows for a simple synchronization with another clock.
+-  :ned:`PiServoClock`: A PI-based servo clock using proportional (kp) and integral (ki) gains
+   to in sync with another time source source while smoothly adjusting the drift rate.
+
+
+If multiple clocks are needed INET provides a :ned:`MultiClock`.
+This clock manages holds multiple subclocks with a programmatically switchable active clock.
+This is for example useful for multi-domain gPTP synchronization.
 
 Clock Time
 ----------
@@ -141,10 +147,9 @@ provides clocks and oscillators that implement the interface required by the
 oscillator states from the :ned:`ScenarioManager` XML script and also to mix
 these operations with many other supported operations.
 
-For example, the :ned:`ServoClockBase` model supports setting the clock time and
-optionally resetting the oscillator at a specific moment of simulation time.
-The :ned:`InstantServoClock` model is the extended version of the :ned:`ServoClockBase`,
-which supports adjusting the clock time, as well as the oscillator drift rate as follows:
+For example, the :ned:`InstantServoClock` model supports setting the clock time and
+optionally resetting the oscillator at a specific moment of simulation time
+as follows:
 
 .. code-block:: xml
 

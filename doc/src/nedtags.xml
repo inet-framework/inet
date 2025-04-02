@@ -349,6 +349,18 @@
     <filename>inet.linklayer.bmac.BMacInterface.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.showcases.tsn.timesynchronization.gptp_bmca.BmcaShowcaseDiamond</name>
+    <filename>inet.showcases.tsn.timesynchronization.gptp_bmca.BmcaShowcaseDiamond.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.showcases.tsn.timesynchronization.gptp_bmca.BmcaShowcaseDiamondAsymmetric</name>
+    <filename>inet.showcases.tsn.timesynchronization.gptp_bmca.BmcaShowcaseDiamondAsymmetric.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.showcases.tsn.timesynchronization.gptp_bmca.BmcaShowcaseSimple</name>
+    <filename>inet.showcases.tsn.timesynchronization.gptp_bmca.BmcaShowcaseSimple.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.mobility.single.BonnMotionMobility</name>
     <filename>inet.mobility.single.BonnMotionMobility.html</filename>
   </compound>
@@ -1869,6 +1881,10 @@
     <filename>inet.linklayer.ieee8021as.GptpBridge.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.linklayer.ieee8021as.GptpDomainClassifier</name>
+    <filename>inet.linklayer.ieee8021as.GptpDomainClassifier.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.linklayer.ieee8021as.GptpEndstation</name>
     <filename>inet.linklayer.ieee8021as.GptpEndstation.html</filename>
   </compound>
@@ -1955,6 +1971,10 @@
   <compound kind="class">
     <name>inet.tests.ethernet.HostsWithSwitch</name>
     <filename>inet.tests.ethernet.HostsWithSwitch.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.linklayer.ieee8021as.HotStandby</name>
+    <filename>inet.linklayer.ieee8021as.HotStandby.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.examples.ethernet.lans.HubLAN</name>
@@ -2933,6 +2953,10 @@
     <filename>inet.queueing.server.InstantServer.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.clock.servo.InstantServoClock</name>
+    <filename>inet.clock.servo.InstantServoClock.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.showcases.visualizer.canvas.instrumentfigures.InstrumentShowcase</name>
     <filename>inet.showcases.visualizer.canvas.instrumentfigures.InstrumentShowcase.html</filename>
   </compound>
@@ -3509,6 +3533,10 @@
     <filename>inet.showcases.measurement.jitter.JitterMeasurementShowcase.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.showcases.tsn.timesynchronization.gptp.JumpingClockGptpShowcase</name>
+    <filename>inet.showcases.tsn.timesynchronization.gptp.JumpingClockGptpShowcase.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.examples.inet.kidsnw1.KIDSNw1</name>
     <filename>inet.examples.inet.kidsnw1.KIDSNw1.html</filename>
   </compound>
@@ -3947,6 +3975,10 @@
   <compound kind="class">
     <name>inet.examples.sctp.cmttest.multihomed</name>
     <filename>inet.examples.sctp.cmttest.multihomed.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.showcases.tsn.timesynchronization.gptp.MultiHopGptpShowcase</name>
+    <filename>inet.showcases.tsn.timesynchronization.gptp.MultiHopGptpShowcase.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.protocolelement.measurement.MultiMeasurementLayer</name>
@@ -4981,6 +5013,10 @@
     <filename>inet.applications.pingapp.PingApp.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.clock.servo.PiServoClock</name>
+    <filename>inet.clock.servo.PiServoClock.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.showcases.wireless.power.PowerConsumptionShowcase</name>
     <filename>inet.showcases.wireless.power.PowerConsumptionShowcase.html</filename>
   </compound>
@@ -5717,8 +5753,8 @@
     <filename>inet.tutorials.queueing.ServerTutorialStep.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.clock.model.SettableClock</name>
-    <filename>inet.clock.model.SettableClock.html</filename>
+    <name>inet.clock.servo.ServoClockBase</name>
+    <filename>inet.clock.servo.ServoClockBase.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.shortcut.ShortcutInterface</name>
@@ -6509,12 +6545,12 @@
     <filename>inet.tests.ethernet.TwoHosts.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.showcases.tsn.timesynchronization.gptp.TwoMasterClocksRingGptpShowcase</name>
-    <filename>inet.showcases.tsn.timesynchronization.gptp.TwoMasterClocksRingGptpShowcase.html</filename>
+    <name>inet.showcases.tsn.timesynchronization.gptp_hotstandby.TwoMasterClocksRingGptpShowcase</name>
+    <filename>inet.showcases.tsn.timesynchronization.gptp_hotstandby.TwoMasterClocksRingGptpShowcase.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.showcases.tsn.timesynchronization.gptp.TwoMasterClocksTreeGptpShowcase</name>
-    <filename>inet.showcases.tsn.timesynchronization.gptp.TwoMasterClocksTreeGptpShowcase.html</filename>
+    <name>inet.showcases.tsn.timesynchronization.gptp_hotstandby.TwoMasterClocksTreeGptpShowcase</name>
+    <filename>inet.showcases.tsn.timesynchronization.gptp_hotstandby.TwoMasterClocksTreeGptpShowcase.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.examples.ospfv2.areas.TwoNetsArea</name>

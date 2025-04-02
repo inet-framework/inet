@@ -1,5 +1,5 @@
-The Best Master Clock Algorithm (BMCA)
-======================================
+Using gPTP with the Best Master Clock Algorithm (BMCA)
+======================================================
 
 Overview
 ~~~~~~~~

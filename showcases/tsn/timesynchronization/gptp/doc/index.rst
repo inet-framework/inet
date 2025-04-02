@@ -1,5 +1,5 @@
-Using gPTP
-==========
+Using gPTP with a static configuration
+======================================
 
 Goals
 -----
