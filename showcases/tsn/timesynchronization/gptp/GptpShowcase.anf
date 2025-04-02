@@ -6648,7 +6648,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Caching" value="true"/>
                 <property name="legend_prefer_result_titles" value="true"/>
                 <property name="legend_manual" value="false"/>
-                <property name="yaxis_title" value=""/>
+                <property name="yaxis_title" value="Clock time difference to simulation time [s]"/>
                 <property name="legend_replacements" value="/JumpingClockGptpShowcase.//&#10;/.clock//"/>
                 <property name="Legend.Border" value="false"/>
                 <property name="title" value="Clock Drift"/>
