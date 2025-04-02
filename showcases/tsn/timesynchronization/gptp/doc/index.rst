@@ -175,8 +175,42 @@ tsnDevice2 (using the :ned:`InstantServoClock`) instead performs jumps to synchr
 
 .. note:: A `clock time difference to simulation time` chart can be easily produced by plotting the ``timeChanged:vector`` statistic, and applying a linear trend operation with -1 as argument.
 
+Jumping Clock
+-------------
+
+The goal of this showcase is to explore how the :ned:`PiServoClock` (and later possible other clock servos) react
+to jumps in the master clock.
+The network topology only consists of one master and one slave clock.
+
+.. figure:: media/JumpingClock_JumpingClockGptpShowcase.png
+   :align: center
+
+We configure the master clock to perform time jumps using the :ned:`ScenarioManager`.
+The :ned:`PiServoClock` supports setting the :par:`offsetThreshold` parameter, which allows to
+specify when the clock assumes to be out of Sync and jumps back to the bootup phase.
+We set this parameter to 2us.
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: scenario-jumping-clock.xml
+   :end-at: 2us
+
+.. literalinclude:: ../scenario-jumping-clock.xml
+   :language: xml
+
+Every 3s the master clock perform a time jump by 1us forward or backward in in the first two iterations.
+In the third iteration, the clock performs a time jump of 5us forward or backward.
+
+The following figure shows, the :ned:`PiServoClock` reacts to the time jumps by adjusting its drift rate but
+overshoots the target time in the first two iterations.
+As the clock offset in the last iteration is greater than the :par:`offsetThreshold`,
+the :ned:`PiServoClock` jumps back to the bootup phase and starts to adjust to the clock by performing a jump
+and estimating the drift rate of the following two Sync messages.
+
+.. figure:: media/ClockDrift.png
+   :align: center
+
 Discussion
 ----------
-
 Use `this <https://github.com/inet-framework/inet/discussions/798>`__ page in the GitHub issue tracker for commenting on this showcase.
 
