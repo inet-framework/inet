@@ -1,5 +1,5 @@
-Using gPTP with a static configuration
-======================================
+gPTP Basics: Static Configuration
+=================================
 
 Goals
 -----
@@ -31,18 +31,17 @@ synchronizing the time between the clocks (i.e., before the time difference gets
 too large). In gPTP, the times kept by a number of slave clocks are synchronized
 to a master clock's time within a gPTP `time domain`. A network can have
 multiple gPTP time domains, i.e., nodes can synchronize multiple clocks to
-multiple master clocks for redundancy (in case one of the master clocks fails or
-goes offline due to link break, for example, nodes can still have synchronized
-time). Each time domain contains one master clock, and any number of slave
-clocks. The protocol synchronizes the slave clocks to the master clock by
+multiple master clocks for redundancy (see the
+:doc:`/showcases/tsn/timesynchronization/gptp_hotstandby/doc/index` showcase for more
+information).
+The protocol synchronizes the slave clocks to the master clock by
 sending `sync messages` from the master clock nodes to the slave clock nodes.
 
 According to the IEEE 802.1 AS standard, the master clock can be automatically
-selected by the Best Master Clock algorithm (BCMA). BMCA also determines the
-clock spanning tree, i.e., the routes on which sync messages are propagated to
-slave clocks in the network. INET currently doesn't support BMCA; the master
-clock and the spanning tree needs to be specified manually for each gPTP time
-domain. 
+selected by the Best Master Clock algorithm (BCMA).
+In this showcase, however, we focus on the static configuration of gPTP.
+The :doc:`/showcases/tsn/timesynchronization/gptp_bmca/doc/index` showcase
+demonstrates the automatic selection of the master clock using BCMA.
 
 The operation of gPTP is summarized as follows:
 
@@ -61,17 +60,19 @@ The optional :ned:`Gptp` modules can be enabled with the
 ``*.tsnHost.hasTimeSynchronization = true``
 
 Nodes can be part of multiple gPTP time domains by having multiple :ned:`Gptp`
-submodules, one for each domain.
+submodules, one for each domain. The following description of this showcase uses a single domain
+with static configuration.
+For a dynamic configuration and multiple domains, take a look at the
+:doc:`/showcases/tsn/timesynchronization/gptp_bmca/doc/index` and
+:doc:`/showcases/tsn/timesynchronization/gptp_hotstandby/doc/index` showcases respectively.
 
 :ned:`Gptp` modules operate in one of three roles, according to their location in the spanning tree: `master`, `bridge` or `slave`. 
 Nodes containing master gPTP modules contain the master clock for the time
 domain, create gPTP sync messages, and broadcast them down-tree to bridge and
 slave nodes. Bridge nodes forward sync messages to bridge and slave nodes as
-well. The module type can be selected by the :ned:`Gptp` module's
-:par:`gptpNodeType` parameter (either ``MASTER_NODE``, ``BRIDGE_NODE`` or
-``SLAVE_NODE``)
-
-.. note:: A network node might have different gPTP roles in different time domains, if there are several.
+well. In case of a static configuration, the module type can be selected by the
+:ned:`Gptp` module's :par:`gptpNodeType` parameter
+(either ``MASTER_NODE``, ``BRIDGE_NODE`` or ``SLAVE_NODE``)
 
 The spanning tree is created by labeling nodes' interfaces (called `ports`) as
 either a master or a slave, with the :par:`slavePort` and :par:`masterPorts`
@@ -93,34 +94,18 @@ offset of sync and peer delay measurement messages can be specified by
 parameters (:par:`syncInterval`, :par:`pDelayInterval`,
 :par:`syncInitialOffset`, :par:`pDelayInitialOffset`).
 
-When nodes have multiple gPTP time domains, each time domain has a corresponding
-:ned:`Gptp` module. The :ned:`MultiDomainGptp` module makes this convenient, as
-it contains multiple :ned:`Gptp` modules. Also, each domain can have a
-corresponding clock module. The :ned:`MultiClock` module can be used for this
-purpose, as it contains multiple clock submodules. 
-
-One of the sub-clocks in the :ned:`MultiClock` module is designated as the
-active clock. Users of the :ned:`MultiClock` module (i.e., other modules that
-get the time from the :ned:`MultiClock` module) use the time of the active
-clock. The active clock can be changed by a scenario manager script to another
-sub-clock in case of failure of time synchronization in one domain, for example.
-
-.. note:: When using :ned:`MultiClock` and :ned:`MultiDomainGptp`, it is enough to specify the :ned:`MultiClock` module to the :ned:`MultiDomainGptp` as the clock module. The corresponding sub-clock for each domain is selected automatically (i.e., :ned:`Gptp` submodules are paired to clock submodules in :ned:`MultiClock` based on index).
-
-For more information on the parameters of :ned:`Gptp`, :ned:`MultiDomainGptp`, and :ned:`MultiClock`, check the NED documentation.
-
 The Model
 ---------
 
-In this showcase, we demonstrate the setup and operation of gPTP in three simulations:
+In this showcase, we demonstrate the setup and operation of gPTP in multiple simulations:
 
 - **One Master Clock**: Simple setup with one time domain and one master clock.
-- **Primary and Hot-Standby Master Clocks**: More complex setup with two time domains for a primary and a hot-standby master clock. If the primary master node goes offline,
-  the stand-by clock can take over and become the new Master Clock.
-- **Two Master Clocks Exploiting Network Redundancy**: A larger network containing a primary and a hot-standby master node, with two time domains each. Time synchronization is protected against the failure of a master node and any link in the network.
+- **Multi Hop**: Setup with multiple hops, useful for testing the peer delay measurement mechanism and the effect of link latency on time synchronization.
+- **Rate Ratio Studies**: Allows to analyze the effect of the neighbor rate ratio (nRR) and grandmaster rate ratio (gmRR) on the time synchronization process.
+- **Parameter Studies**: This usecase can be used to study the effect of the kp and ki parameter of the :ned:`PiServoClock`. For example, when adjusting the sync interval, these parameters need to be adjusted as well.
+- **Jumping Clock**: This usecase can be used to study the effect of what happens when the master clock peforms time jumps into the future or the past.
 
-In the ``General`` configuration, we enable :ned:`Gptp` modules in all network nodes, and configure a random clock drift rate for the master clocks, and a constant clock drift rate
-for the clocks in slave and bridge nodes (specified with a random distribution for each one):
+In the ``General`` configuration, we enable :ned:`Gptp` modules in all network nodes, and configure a random clock drift rate the clocks (specified with a random distribution for each one):
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -139,14 +124,19 @@ stations (:ned:`TsnDevice`), connected via a :ned:`TsnSwitch`:
 .. figure:: media/OneMasterClockNetwork.png
    :align: center
 
-We configure the spanning tree by setting the master ports in ``tsnClock`` and ``tsnSwitch``:
+We configure the spanning tree by setting the master ports in ``tsnClock`` and ``tsnSwitch``.
+The configuration also sets different clock servos on different clocks for comparison.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: TSN clock gPTP master ports
-   :end-at: tsnSwitch
+   :end-at: true
 
 .. note:: The slave ports are set to ``eth0`` by default in :ned:`TsnDevice` and :ned:`TsnSwitch`, so they don't have to be set explicitly.
+
+The tsnSwitch uses the :ned:`InstantServoClock` clock, adjusts its time but not its drift rate.
+the tsnDevice2 also uses the :ned:`InstantServoClock` clock, but it also adjusts its drift rate.
+The tsnDevice1 uses the :ned:`PiServoClock` clock, which only adjusts its drift rate to stay in sync without performing any time jumps.
 
 Here is a video of the synchronization mechanism (the time of the master clock
 and the difference from this time in the other nodes are displayed):
@@ -167,14 +157,21 @@ We examine clock drift of all clocks by plotting the clock time difference again
    :align: center
 
 The master clock drifts according to a random walk process. The times of slave
-clocks is periodically synchronized to the master's. At the second time
-synchronization event at 0.25s, the drift rates of the slave clocks are
-compensated to be more aligned with the master clock's drift rate.
+clocks is periodically synchronized to the master's.
+From the figure it becomes clear, that all clocks need the first two sync intervals as a startup phase
+to stabilize their drift rate.
+The figure also shows, that the tsnSwitch deviates much further from the master, as it is not able
+to adjust its drift rate.
 
-All such charts have these two large sawtooth patterns at the beginning, before
-the drift rate is compensated. From now on, we will generally omit these to
-concentrate on the details of the clock drift after it has been stabilized by
-time synchronization.
+In the following, we omit the startup phase and only concentrate on the synchronization process afterwards.
+
+.. figure:: media/OneMasterClock_zoomed.png
+   :align: center
+
+The figure above provides a zoomed in view and shows how tsnDevice1 and tsnDevice2 synchronize to the master.
+In this figure, the difference between the two clock servos become evident.
+While tsnDevice1 (using the :ned:`PiServoClock`) adjusts its clock smoothly to the master's time,
+tsnDevice2 (using the :ned:`InstantServoClock`) instead performs jumps to synchronize to the master's time.
 
 .. note:: A `clock time difference to simulation time` chart can be easily produced by plotting the ``timeChanged:vector`` statistic, and applying a linear trend operation with -1 as argument.
 

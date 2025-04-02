@@ -1,5 +1,5 @@
-Using gPTP with HotStandby
-==========================
+MultiDomain gPTP and Hot-Standby
+================================
 
 Overview
 ~~~~~~~~
