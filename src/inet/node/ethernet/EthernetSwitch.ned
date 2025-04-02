@@ -91,7 +91,7 @@ module EthernetSwitch like IEthernetNetworkNode
         status: NodeStatus if hasStatus {
             @display("p=100,400;is=s");
         }
-        clock: <default(hasGptp ? "SettableClock" : "")> like IClock if typename != "" {
+        clock: <default(hasGptp ? "PiServoClock" : "")> like IClock if typename != "" {
             @display("p=100,500;is=s");
         }
         pcapRecorder[numPcapRecorders]: PcapRecorder {

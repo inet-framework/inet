@@ -32,7 +32,7 @@ In this showcase, we provide three BMCA network scenarios in the showcase: BmcaS
 
 .. TODO: .. TODO: Consider updating the notation for `gptp_hotstandby` if needed.
 
-In the ``General`` configuration, which has a similar setup to the :doc:`tsn/timesynchronization/gptp/doc/index` showcase,
+In the ``General`` configuration, which has a similar setup to the :doc:`/showcases/tsn/timesynchronization/gptp/doc/index` showcase,
 we enable :ned:`Gptp` modules in all network nodes and configure a random clock drift rate for all clocks.
 
 .. literalinclude:: ../omnetpp.ini
