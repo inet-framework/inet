@@ -166,8 +166,8 @@ Ensure that ``opp_env`` is installed on your system, then execute:
 
 .. code-block:: bash
 
-    $ opp_env run inet-3.6 --init -w inet-workspace --install --chdir \
-       -c 'cd inet-3.6.*/showcases/visualizer/canvas/transportconnection && inet'
+    $ opp_env run inet-4.5 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-4.5.*/showcases/visualizer/canvas/transportconnection && inet'
 
 This command creates an ``inet-workspace`` directory, installs the appropriate
 versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
@@ -178,7 +178,7 @@ workspace and then open an interactive shell:
 
 .. code-block:: bash
 
-    $ opp_env install --init -w inet-workspace inet-3.6
+    $ opp_env install --init -w inet-workspace inet-4.5
     $ cd inet-workspace
     $ opp_env shell
 
