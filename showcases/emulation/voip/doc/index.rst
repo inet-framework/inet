@@ -355,7 +355,7 @@ Ensure that ``opp_env`` is installed on your system, then execute:
 
 .. code-block:: bash
 
-    $ opp_env install --init -w inet-workspace inet-latest --options=inet:full
+    $ opp_env install --init -w inet-workspace --build-modes=release inet-latest --options=inet:full
     $ cd inet-workspace
     $ opp_env shell
 
