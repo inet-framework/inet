@@ -33,7 +33,7 @@ channels into three cases:
 
 Each case is demonstrated with an example simulation.
 
-| INET version: ``4.2``
+| Since INET version: ``4.2``
 | Source files location: `inet/showcases/wireless/crosstalk <https://github.com/inet-framework/inet/tree/master/showcases/wireless/crosstalk>`__
 
 The model

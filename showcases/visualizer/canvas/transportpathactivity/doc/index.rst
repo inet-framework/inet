@@ -14,7 +14,7 @@ This showcase contains two simulation models, each highlighting various aspects
 of the transport path activity visualizer, allowing for a comprehensive
 understanding of its features.
 
-| INET version: ``4.0``
+| Since INET version: ``4.0``
 | Source files location: `inet/showcases/visualizer/transportpathactivity <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/transportpathactivity>`__
 
 About the Visualizer

@@ -12,7 +12,7 @@ interfaces, or dual-band wireless routers.
 This showcase demonstrates how to simulate such devices and how they can be used
 to communicate on multiple wireless networks simultaneously.
 
-| INET version: ``4.0``
+| Since INET version: ``4.0``
 | Source files location: `inet/showcases/wireless/multiradio <https://github.com/inet-framework/inet/tree/master/showcases/wireless/multiradio>`__
 
 The model

@@ -10,7 +10,7 @@ for applications such as Time-Sensitive Networking (TSN). In this showcase, we
 will demonstrate how to configure gPTP master clocks, bridges, and end stations
 to establish reliable time synchronization across the entire network.
 
-| INET version: ``4.5``
+| Since INET version: ``4.5``
 | Source files location: `inet/showcases/tsn/timesynchronization/gptp <https://github.com/inet-framework/inet/tree/master/showcases/tsn/timesynchronization/gptp>`__
 
 About gPTP

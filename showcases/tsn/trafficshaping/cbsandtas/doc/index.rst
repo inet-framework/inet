@@ -10,7 +10,7 @@ are combined.
 
 .. note:: You might be interested in looking at another showcase, in which multiple traffic shapers are used in different traffic streams: :doc:`/showcases/tsn/trafficshaping/cbsandats/doc/index`.
 
-| INET version: ``4.4``
+| Since INET version: ``4.4``
 | Source files location: `inet/showcases/tsn/trafficshaping/cbsandtas <https://github.com/inet-framework/inet/tree/master/showcases/tsn/trafficshaping/cbsandtas>`__
 
 The Model

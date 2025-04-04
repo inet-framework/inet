@@ -13,7 +13,7 @@ various gauges and meters.
 
 This showcase demonstrates the use of multiple instrument figures.
 
-| INET version: ``4.1``
+| Since INET version: ``4.1``
 | Source files location: `inet/showcases/visualizer/instrumentfigures <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/instrumentfigures>`__
 
 About Instrument Figures

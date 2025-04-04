@@ -13,7 +13,7 @@ simulation, particularly when multiple visualizations are enabled.
 This showcase features four examples that illustrate how to customize lines,
 arrows, icons, fonts, and annotations.
 
-| INET version: ``4.0``
+| Since INET version: ``4.0``
 | Source files location: `inet/showcases/visualizer/styling <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/styling>`__
 
 Customizing Lines and Arrows

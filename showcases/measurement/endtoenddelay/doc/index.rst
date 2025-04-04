@@ -6,7 +6,7 @@ Goals
 
 In this example, we explore the end-to-end delay statistics of applications.
 
-| INET version: ``4.4``
+| Since INET version: ``4.4``
 | Source files location: `inet/showcases/measurement/endtoenddelay <https://github.com/inet-framework/inet/tree/master/showcases/measurement/endtoenddelay>`__
 
 The Model

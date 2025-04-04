@@ -13,7 +13,7 @@ ones, resulting in lower delay and jitter for delay-sensitive applications.
 
 This showcase demonstrates the use of QoS in INET's 802.11 MAC model.
 
-| INET version: ``4.1``
+| Since INET version: ``4.1``
 | Source files location: `inet/showcases/wireless/qos <https://github.com/inet-framework/inet/tree/master/showcases/wireless/qos>`__
 
 About 802.11 QoS

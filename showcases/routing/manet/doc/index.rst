@@ -15,7 +15,7 @@ In this showcase, we'll look at three representative MANET routing protocols: a
 reactive protocol (AODV), a proactive protocol (DSDV), and a location-based
 protocol (GPSR). We'll explore each of them through three example simulations.
 
-| INET version: ``4.0``
+| Since INET version: ``4.0``
 | Source files location: `inet/showcases/routing/manet <https://github.com/inet-framework/inet/tree/master/showcases/routing/manet>`__
 
 About MANETs

@@ -7,7 +7,7 @@ Goals
 In this example, we explore the relationships between various measurements that
 are presented in the measurement showcases.
 
-| INET version: ``4.4``
+| Since INET version: ``4.4``
 | Source files location: `inet/showcases/measurement/relationships <https://github.com/inet-framework/inet/tree/master/showcases/measurement/relationships>`__
 
 The Model

@@ -14,7 +14,7 @@ This demonstration includes a sample simulation that generates and records PCAP
 traces of TCP, UDP, and ICMP traffic, using various physical layer protocols
 such as Ethernet and 802.11.
 
-| INET version: ``4.0``
+| Since INET version: ``4.0``
 | Source files location: `inet/showcases/general/pcaprecording <https://github.com/inet-framework/inet/tree/master/showcases/general/pcaprecording>`__
 
 The model

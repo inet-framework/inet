@@ -11,7 +11,7 @@ Specifically, it involves running a Python-based webserver and executing several
 simulated network components, illustrating the capabilities of OMNeT++ in hybrid
 simulations that involve both emulated and simulated network elements.
 
-| INET version: ``4.6``
+| Since INET version: ``4.6``
 | Source files location: `inet/showcases/emulation/webserver <https://github.com/inet-framework/inet/tree/master/showcases/emulation/webserver>`__
 
 

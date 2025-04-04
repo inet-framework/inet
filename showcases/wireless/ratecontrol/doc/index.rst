@@ -15,7 +15,7 @@ allowing users to choose the most appropriate one for their specific needs.
 This showcase demonstrates how rate control mechanisms can improve application-level
 throughput.
 
-| INET version: ``4.0``
+| Since INET version: ``4.0``
 | Source files location: `inet/showcases/wireless/ratecontrol <https://github.com/inet-framework/inet/tree/master/showcases/wireless/ratecontrol>`__
 
 The model

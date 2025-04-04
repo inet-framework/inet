@@ -13,7 +13,7 @@ The visualization can take the form of spectrums, spectrograms, and heatmaps rep
 spatial power density. This showcase demonstrates such visualizations with three example
 simulations.
 
-| INET version: ``4.2``
+| Since INET version: ``4.2``
 | Source files location: `inet/showcases/visualizer/spectrum <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/spectrum>`__
 
 About the Visualizer

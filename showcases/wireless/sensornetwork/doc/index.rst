@@ -9,7 +9,7 @@ networks, in addition to IEEE 802.15.4 models. This showcase demonstrates three
 different such MAC protocols through example simulations. The showcase compares the
 performance of the three protocols using statistical analysis.
 
-| INET version: ``4.0``
+| Since INET version: ``4.0``
 | Source files location: `inet/showcases/wireless/sensornetwork <https://github.com/inet-framework/inet/tree/master/showcases/wireless/sensornetwork>`__
 
 Part 1: Demonstrating the MAC protocols

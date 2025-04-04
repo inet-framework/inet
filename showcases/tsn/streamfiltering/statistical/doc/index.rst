@@ -7,7 +7,7 @@ Goals
 In this example, we combine a sliding window rate meter with a probabilistic packet
 dropper to achieve simple statistical policing.
 
-| INET version: ``4.4``
+| Since INET version: ``4.4``
 | Source files location: `inet/showcases/tsn/streamfiltering/statistical <https://github.com/inet-framework/inet/tree/master/showcases/tsn/streamfiltering/statistical>`__
 
 The Model

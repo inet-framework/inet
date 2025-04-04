@@ -10,7 +10,7 @@ delay in a network that is using time-aware traffic shaping.
 .. note:: This showcase builds upon the :doc:`/showcases/tsn/timesynchronization/clockdrift/doc/index`, 
    :doc:`/showcases/tsn/timesynchronization/gptp/doc/index` and :doc:`/showcases/tsn/trafficshaping/timeawareshaper/doc/index` showcases.
 
-| INET version: ``4.5``
+| Since INET version: ``4.5``
 | Source files location: `inet/showcases/tsn/combiningfeatures/gptpandtas <https://github.com/inet-framework/inet/tree/master/showcases/tsn/combiningfeatures/gptpandtas>`__
 
 The Model

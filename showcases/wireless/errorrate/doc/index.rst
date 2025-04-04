@@ -10,7 +10,7 @@ The packet error rate is measured at various WiFi
 bitrates, providing insights into the impact of different bitrates on the
 quality of communication over different distances. 
 
-| INET version: ``4.0``
+| Since INET version: ``4.0``
 | Source files location: `inet/showcases/wireless/errorrate <https://github.com/inet-framework/inet/tree/master/showcases/wireless/errorrate>`__
 
 The Model

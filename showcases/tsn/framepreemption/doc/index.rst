@@ -19,7 +19,7 @@ latency reduction that it can provide. By the end of this showcase, you will
 understand how frame preemption works and how it can be used to improve the
 performance of time-critical applications in an Ethernet network.
 
-| INET version: ``4.3``
+| Since INET version: ``4.3``
 | Source files location: `inet/showcases/tsn/framepreemption <https://github.com/inet-framework/inet/tree/master/showcases/tsn/framepreemption>`__
 
 The Model

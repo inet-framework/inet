@@ -17,7 +17,7 @@ the floorplan and walls of an apartment.
 
 .. note:: This showcase requires OMNeT++ built with OSG enabled.
 
-| INET version: ``4.0``
+| Since INET version: ``4.0``
 | Source files location: `inet/showcases/visualizer/environment <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/environment>`__
 
 About the visualizer

@@ -7,7 +7,7 @@ Goals
 In this example, we explore the channel propagation time statistics for wired and
 wireless transmission media.
 
-| INET version: ``4.4``
+| Since INET version: ``4.4``
 | Source files location: `inet/showcases/measurement/propagationtime <https://github.com/inet-framework/inet/tree/master/showcases/measurement/propagationtime>`__
 
 The Model

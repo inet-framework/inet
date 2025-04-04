@@ -18,7 +18,7 @@ This showcase features a simple WiFi network model and demonstrates how to
 display (1) the number of packets sent and received by an application, and (2)
 the IEEE 802.11 MAC state information, on the network level.
 
-| INET version: ``4.1``
+| Since INET version: ``4.1``
 | Source files location: `inet/showcases/visualizer/submoduleinfo <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/submoduleinfo>`__
 
 About the visualizer

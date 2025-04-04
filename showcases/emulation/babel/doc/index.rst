@@ -19,7 +19,7 @@ Note that the emulation example only runs on Linux. For a comprehensive
 understanding of emulation in INET, read the :doc:`Emulation section
 </users-guide/ch-emulation>` in the User's Guide.
 
-| INET version: ``4.1``
+| Since INET version: ``4.1``
 | Source files location: `inet/showcases/emulation/babel <https://github.com/inet-framework/inet/tree/master/showcases/emulation/babel>`__
 
 The Model

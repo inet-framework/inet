@@ -13,7 +13,7 @@ arrows that fade as the traffic ceases.
 This showcase consists of three simulation models that demonstrate the different
 capabilities of :ned:`PhysicalLinkCanvasVisualizer`.
 
-| INET version: ``4.0``
+| Since INET version: ``4.0``
 | Source files location: `inet/showcases/visualizer/physicallinkactivity <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/physicallinkactivity>`__
 
 About the Visualizer

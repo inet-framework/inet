@@ -13,7 +13,7 @@ traffic in the form of polyline arrows along the path that fade as the traffic c
 The showcase contains four simulation models, each demonstrating different
 features of the network path activity visualizer.
 
-| INET version: ``4.0``
+| Since INET version: ``4.0``
 | Source files location: `inet/showcases/visualizer/networkpathactivity <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/networkpathactivity>`__
 
 About the Visualizer

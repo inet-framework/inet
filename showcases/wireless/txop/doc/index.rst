@@ -8,7 +8,7 @@ Transmit opportunity (TXOP) is a MAC feature in 802.11, which increases throughp
 for high priority data by providing contention-free channel access for a period of time.
 This showcase demonstrates frame exchanges during a TXOP.
 
-| INET version: ``4.2``
+| Since INET version: ``4.2``
 | Source files location: `inet/showcases/wireless/txop <https://github.com/inet-framework/inet/tree/master/showcases/wireless/txop>`__
 
 About TXOP

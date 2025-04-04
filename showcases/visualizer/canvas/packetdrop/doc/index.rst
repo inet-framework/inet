@@ -12,7 +12,7 @@ debugging and analysis. The simulation models showcase typical scenarios of
 packet drops resulting from issues such as retransmission in wireless networks
 and overflowing queues in bottleneck routers.
 
-| INET version: ``4.0``
+| Since INET version: ``4.0``
 | Source files location: `inet/showcases/visualizer/packetdrop <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/packetdrop>`__
 
 About the visualizer

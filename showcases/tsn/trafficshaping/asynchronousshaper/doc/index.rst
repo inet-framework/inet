@@ -14,7 +14,7 @@ In this showcase, we will demonstrate how to use asynchronous traffic shaping in
 an Ethernet network focusing on the configuration and the operation of the
 model.
 
-| INET version: ``4.4``
+| Since INET version: ``4.4``
 | Source files location: `inet/showcases/tsn/trafficshaping/asynchronousshaper <https://github.com/inet-framework/inet/tree/master/showcases/tsn/trafficshaping/asynchronousshaper>`__
 
 The Model

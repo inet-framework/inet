@@ -9,7 +9,7 @@ outside the context of a network node. Doing so may facilitate assembling and
 validating specific complex filtering and policing behaviors which can be difficult
 to replicate in a complete network.
 
-| INET version: ``4.4``
+| Since INET version: ``4.4``
 | Source files location: `inet/showcases/tsn/streamfiltering/underthehood <https://github.com/inet-framework/inet/tree/master/showcases/tsn/streamfiltering/underthehood>`__
 
 The Model

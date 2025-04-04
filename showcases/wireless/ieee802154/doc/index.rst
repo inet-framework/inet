@@ -10,7 +10,7 @@ This showcase demonstrates the narrowband IEEE 802.15.4 model
 available in INET. It contains an example simulation that features a
 wireless sensor network.
 
-| INET version: ``4.0``
+| Since INET version: ``4.0``
 | Source files location: `inet/showcases/wireless/ieee802154 <https://github.com/inet-framework/inet/tree/master/showcases/wireless/ieee802154>`__
 
 The model

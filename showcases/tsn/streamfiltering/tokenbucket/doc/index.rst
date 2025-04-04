@@ -7,7 +7,7 @@ Goals
 In this example, we demonstrate per-stream policing using chained token buckets
 which allows specifying committed/excess information rates and burst sizes.
 
-| INET version: ``4.4``
+| Since INET version: ``4.4``
 | Source files location: `inet/showcases/tsn/streamfiltering/tokenbucket <https://github.com/inet-framework/inet/tree/master/showcases/tsn/streamfiltering/tokenbucket>`__
 
 The Model

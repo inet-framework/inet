@@ -19,7 +19,7 @@ improve the performance of time-critical applications in an Ethernet network. By
 the end of this showcase, you will understand how time-aware shaping works and
 how it can be used to guarantee bounded latency for time-critical frames.
 
-| INET version: ``4.4``
+| Since INET version: ``4.4``
 | Source files location: `inet/showcases/tsn/trafficshaping/timeawareshaper <https://github.com/inet-framework/inet/tree/master/showcases/tsn/trafficshaping/timeawareshaper>`__
 
 The Model
