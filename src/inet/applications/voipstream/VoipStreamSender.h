@@ -32,12 +32,13 @@ extern "C" {
 };
 
 #include "inet/applications/voipstream/AudioOutFile.h"
+#include "inet/common/SimpleModule.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 namespace inet {
 
-class INET_API VoipStreamSender : public cSimpleModule, public LifecycleUnsupported
+class INET_API VoipStreamSender : public SimpleModule, public LifecycleUnsupported
 {
   public:
     VoipStreamSender();
@@ -128,4 +129,3 @@ class INET_API VoipStreamSender : public cSimpleModule, public LifecycleUnsuppor
 } // namespace inet
 
 #endif
-

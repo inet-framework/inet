@@ -9,23 +9,18 @@
 #define __INET_OSCILLATORBASE_H
 
 #include "inet/clock/contract/IOscillator.h"
-#include "inet/common/StringFormat.h"
+#include "inet/common/SimpleModule.h"
 
 namespace inet {
 
-class INET_API OscillatorBase : public cSimpleModule, public IOscillator, public StringFormat::IDirectiveResolver
+class INET_API OscillatorBase : public SimpleModule, public IOscillator
 {
   public:
     static simsignal_t driftRateChangedSignal;
 
   protected:
-    const char *displayStringTextFormat = nullptr;
-
-  protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void refreshDisplay() const override;
-
   public:
     virtual std::string resolveDirective(char directive) const override;
 };
@@ -33,4 +28,3 @@ class INET_API OscillatorBase : public cSimpleModule, public IOscillator, public
 } // namespace inet
 
 #endif
-

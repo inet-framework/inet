@@ -188,6 +188,7 @@ void SctpClient::close()
 
 void SctpClient::refreshDisplay() const
 {
+    SimpleModule::refreshDisplay();
     getDisplayString().setTagArg("t", 0, SctpSocket::stateName(socket.getState()));
 }
 
@@ -612,4 +613,3 @@ void SctpClient::finish()
 }
 
 } // namespace inet
-
