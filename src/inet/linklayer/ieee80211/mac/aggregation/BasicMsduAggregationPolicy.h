@@ -8,12 +8,13 @@
 #ifndef __INET_BASICMSDUAGGREGATIONPOLICY_H
 #define __INET_BASICMSDUAGGREGATIONPOLICY_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/linklayer/ieee80211/mac/contract/IMsduAggregationPolicy.h"
 
 namespace inet {
 namespace ieee80211 {
 
-class INET_API BasicMsduAggregationPolicy : public IMsduAggregationPolicy, public cSimpleModule
+class INET_API BasicMsduAggregationPolicy : public IMsduAggregationPolicy, public SimpleModule
 {
   protected:
     bool qOsCheck = false;

@@ -8,6 +8,7 @@
 #ifndef __INET_ETHERNETSOCKET_H
 #define __INET_ETHERNETSOCKET_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/socket/SocketBase.h"
@@ -56,7 +57,7 @@ class INET_API EthernetSocket : public SocketBase
      * multiply inherits from ICallback too, that is you
      * declared it as
      * <pre>
-     * class MyAppModule : public cSimpleModule, public EthernetSocket::ICallback
+     * class MyAppModule : public SimpleModule, public EthernetSocket::ICallback
      * </pre>
      * and redefined the necessary virtual functions; or you may use
      * dedicated class (and objects) for this purpose.

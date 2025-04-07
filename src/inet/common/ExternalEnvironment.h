@@ -8,10 +8,11 @@
 #define __INET_EXTERNALENVIRONMENT_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/SimpleModule.h"
 
 namespace inet {
 
-class ExternalEnvironment : public cSimpleModule
+class ExternalEnvironment : public SimpleModule
 {
   protected:
     const char *networkNamespace = nullptr;

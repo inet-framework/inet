@@ -60,7 +60,7 @@ SimpleVoipReceiver::~SimpleVoipReceiver()
 
 void SimpleVoipReceiver::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         emodelIe = par("emodelIe");

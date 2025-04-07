@@ -32,7 +32,7 @@ Define_Module(Rtp);
 
 void Rtp::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         _commonName = "";

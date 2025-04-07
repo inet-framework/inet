@@ -8,13 +8,14 @@
 #ifndef __INET_BASICFRAGMENTATIONPOLICY_H
 #define __INET_BASICFRAGMENTATIONPOLICY_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/mac/contract/IFragmentationPolicy.h"
 
 namespace inet {
 namespace ieee80211 {
 
-class INET_API BasicFragmentationPolicy : public IFragmentationPolicy, public cSimpleModule
+class INET_API BasicFragmentationPolicy : public IFragmentationPolicy, public SimpleModule
 {
   protected:
     int fragmentationThreshold = -1;

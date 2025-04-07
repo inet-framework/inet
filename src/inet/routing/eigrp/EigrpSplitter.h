@@ -14,6 +14,7 @@
 #ifndef __INET_EIGRPSPLITTER_H
 #define __INET_EIGRPSPLITTER_H
 
+#include "inet/common/SimpleModule.h"
 #include <string>
 
 #include "inet/common/ModuleAccess.h"
@@ -29,7 +30,7 @@
 namespace inet {
 namespace eigrp {
 
-class INET_API EigrpSplitter : protected cListener, public cSimpleModule
+class INET_API EigrpSplitter : protected cListener, public SimpleModule
 {
   public:
     EigrpSplitter();

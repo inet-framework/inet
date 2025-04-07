@@ -8,6 +8,7 @@
 #ifndef __INET_CONTENTION_H
 #define __INET_CONTENTION_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/FSMA.h"
 #include "inet/linklayer/ieee80211/mac/contract/IContention.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
@@ -19,7 +20,7 @@ namespace ieee80211 {
 /**
  * The default implementation of IContention.
  */
-class INET_API Contention : public cSimpleModule, public IContention
+class INET_API Contention : public SimpleModule, public IContention
 {
   public:
     enum State { IDLE, DEFER, IFS_AND_BACKOFF };

@@ -16,7 +16,7 @@
 
 namespace inet {
 
-template class OperationalMixin<cSimpleModule>;
+template class OperationalMixin<SimpleModule>;
 
 template class OperationalMixin<PacketProcessorBase>;
 

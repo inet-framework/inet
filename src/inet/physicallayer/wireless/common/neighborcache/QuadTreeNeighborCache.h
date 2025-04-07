@@ -8,6 +8,7 @@
 #ifndef __INET_QUADTREENEIGHBORCACHE_H
 #define __INET_QUADTREENEIGHBORCACHE_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/geometry/container/QuadTree.h"
 #include "inet/physicallayer/wireless/common/medium/RadioMedium.h"
@@ -15,7 +16,7 @@
 namespace inet {
 namespace physicallayer {
 
-class INET_API QuadTreeNeighborCache : public cSimpleModule, public INeighborCache
+class INET_API QuadTreeNeighborCache : public SimpleModule, public INeighborCache
 {
   public:
     typedef std::vector<const IRadio *> Radios;

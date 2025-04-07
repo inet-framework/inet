@@ -19,7 +19,7 @@ Define_Module(StateBasedCcEnergyConsumer);
 
 void StateBasedCcEnergyConsumer::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         minSupplyVoltage = V(par("minSupplyVoltage"));
         maxSupplyVoltage = V(par("maxSupplyVoltage"));

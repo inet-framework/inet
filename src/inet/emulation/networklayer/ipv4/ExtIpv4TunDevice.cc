@@ -38,7 +38,7 @@ ExtIpv4TunDevice::~ExtIpv4TunDevice()
 
 void ExtIpv4TunDevice::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         device = par("device").stdstringValue();
         packetNameFormat = par("packetNameFormat");

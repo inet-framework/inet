@@ -7,6 +7,7 @@
 #ifndef __INET_SCTPNATTABLE_H
 #define __INET_SCTPNATTABLE_H
 
+#include "inet/common/SimpleModule.h"
 #include <vector>
 
 #include "inet/networklayer/common/L3Address.h"
@@ -52,7 +53,7 @@ class INET_API SctpNatEntry : public cObject
     uint32_t getLocalVTag() { return localVtag; };
 };
 
-class INET_API SctpNatTable : public cSimpleModule
+class INET_API SctpNatTable : public SimpleModule
 {
   public:
 

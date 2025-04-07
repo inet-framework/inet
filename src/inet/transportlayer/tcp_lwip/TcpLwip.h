@@ -9,6 +9,7 @@
 #ifndef __INET_TCPLWIP_H
 #define __INET_TCPLWIP_H
 
+#include "inet/common/SimpleModule.h"
 #include <map>
 
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
@@ -30,7 +31,7 @@ namespace tcp {
 /**
  * Module for using the LwIP TCP stack.
  */
-class INET_API TcpLwip : public cSimpleModule, public LwipTcpStackIf, public LifecycleUnsupported
+class INET_API TcpLwip : public SimpleModule, public LwipTcpStackIf, public LifecycleUnsupported
 {
   public:
     TcpLwip();

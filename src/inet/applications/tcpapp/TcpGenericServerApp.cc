@@ -24,7 +24,7 @@ Define_Module(TcpGenericServerApp);
 
 void TcpGenericServerApp::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         delay = par("replyDelay");

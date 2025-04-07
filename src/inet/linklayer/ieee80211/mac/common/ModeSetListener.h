@@ -8,12 +8,13 @@
 #ifndef __INET_MODESETLISTENER_H
 #define __INET_MODESETLISTENER_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 
 namespace inet {
 namespace ieee80211 {
 
-class INET_API ModeSetListener : public cSimpleModule, public cListener
+class INET_API ModeSetListener : public SimpleModule, public cListener
 {
   protected:
     physicallayer::Ieee80211ModeSet *modeSet = nullptr;

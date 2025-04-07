@@ -8,12 +8,13 @@
 #ifndef __INET_EDCACOLLISIONCONTROLLER_H
 #define __INET_EDCACOLLISIONCONTROLLER_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/linklayer/ieee80211/mac/contract/IEdcaCollisionController.h"
 
 namespace inet {
 namespace ieee80211 {
 
-class INET_API EdcaCollisionController : public IEdcaCollisionController, public cSimpleModule
+class INET_API EdcaCollisionController : public IEdcaCollisionController, public SimpleModule
 {
   protected:
     simtime_t txStartTimes[4];

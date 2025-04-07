@@ -7,6 +7,7 @@
 #ifndef __INET_IEEE80211LLCEPD_H
 #define __INET_IEEE80211LLCEPD_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee802/Ieee802EpdHeader_m.h"
 #include "inet/linklayer/ieee80211/llc/IIeee80211Llc.h"
@@ -14,7 +15,7 @@
 namespace inet {
 namespace ieee80211 {
 
-class INET_API Ieee80211LlcEpd : public cSimpleModule, public IIeee80211Llc
+class INET_API Ieee80211LlcEpd : public SimpleModule, public IIeee80211Llc
 {
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

@@ -8,12 +8,13 @@
 #ifndef __INET_EXTETHERNETTAPDEVICE_H
 #define __INET_EXTETHERNETTAPDEVICE_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/scheduler/RealTimeScheduler.h"
 
 namespace inet {
 
-class INET_API ExtEthernetTapDevice : public cSimpleModule, public RealTimeScheduler::ICallback
+class INET_API ExtEthernetTapDevice : public SimpleModule, public RealTimeScheduler::ICallback
 {
   protected:
     // parameters

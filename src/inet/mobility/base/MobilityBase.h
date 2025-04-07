@@ -6,6 +6,7 @@
 #ifndef __INET_MOBILITYBASE_H
 #define __INET_MOBILITYBASE_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/StringFormat.h"
 #include "inet/common/geometry/common/CanvasProjection.h"
@@ -34,7 +35,7 @@ namespace inet {
  * @ingroup mobility
  * @ingroup basicModules
  */
-class INET_API MobilityBase : public cSimpleModule, public IMobility, public StringFormat::IDirectiveResolver
+class INET_API MobilityBase : public SimpleModule, public IMobility
 {
   public:
     /**

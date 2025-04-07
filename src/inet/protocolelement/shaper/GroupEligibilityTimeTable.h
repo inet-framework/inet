@@ -7,11 +7,12 @@
 #ifndef INET_PROTOCOLELEMENT_SHAPER_GROUPELIGIBILITYTIMETABLE_H_
 #define INET_PROTOCOLELEMENT_SHAPER_GROUPELIGIBILITYTIMETABLE_H_
 
+#include "inet/common/SimpleModule.h"
 #include "inet/clock/contract/ClockTime.h"
 
 namespace inet {
 
-class INET_API GroupEligibilityTimeTable : public cSimpleModule
+class INET_API GroupEligibilityTimeTable : public SimpleModule
 {
     protected:
         std::map<std::string, clocktime_t> groupEligibilityTimeTable;

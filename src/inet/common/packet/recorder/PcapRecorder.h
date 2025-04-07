@@ -10,6 +10,7 @@
 #ifndef __INET_PCAPRECORDER_H
 #define __INET_PCAPRECORDER_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/packet/dissector/PacketDissector.h"
 #include "inet/common/packet/PacketFilter.h"
 #include "inet/common/packet/printer/PacketPrinter.h"
@@ -20,7 +21,7 @@ namespace inet {
 /**
  * Dumps every packet using the IPacketWriter and PacketDump classes
  */
-class INET_API PcapRecorder : public cSimpleModule, protected cListener, public StringFormat::IDirectiveResolver, public PacketDissector::ICallback
+class INET_API PcapRecorder : public SimpleModule, protected cListener, public PacketDissector::ICallback
 {
   public:
     class INET_API IHelper {

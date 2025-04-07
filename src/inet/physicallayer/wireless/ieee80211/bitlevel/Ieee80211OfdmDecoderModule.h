@@ -8,6 +8,7 @@
 #ifndef __INET_IEEE80211OFDMDECODERMODULE_H
 #define __INET_IEEE80211OFDMDECODERMODULE_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/IDecoder.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/AdditiveScrambler.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/ConvolutionalCoder.h"
@@ -18,7 +19,7 @@
 namespace inet {
 namespace physicallayer {
 
-class INET_API Ieee80211OfdmDecoderModule : public cSimpleModule, public IDecoder
+class INET_API Ieee80211OfdmDecoderModule : public SimpleModule, public IDecoder
 {
   protected:
     const Ieee80211OfdmDecoder *ofdmDecoder = nullptr;

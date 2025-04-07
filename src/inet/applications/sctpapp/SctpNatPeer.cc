@@ -70,7 +70,7 @@ SctpNatPeer::~SctpNatPeer()
 
 void SctpNatPeer::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
     EV_DEBUG << "initialize SCTP NAT Peer stage " << stage << endl;
     if (stage == INITSTAGE_LOCAL) {
         WATCH(numSessions);

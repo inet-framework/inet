@@ -8,6 +8,7 @@
 #ifndef __INET_SCTPCRCINSERTIONHOOK_H
 #define __INET_SCTPCRCINSERTIONHOOK_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/Protocol.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/transportlayer/common/CrcMode_m.h"
@@ -17,7 +18,7 @@
 namespace inet {
 namespace sctp {
 
-class INET_API SctpCrcInsertion : public cSimpleModule, public NetfilterBase::HookBase
+class INET_API SctpCrcInsertion : public SimpleModule, public NetfilterBase::HookBase
 {
     CrcMode crcMode = CRC_MODE_UNDEFINED;
 

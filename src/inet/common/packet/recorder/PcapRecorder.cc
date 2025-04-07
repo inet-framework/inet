@@ -41,7 +41,7 @@ PcapRecorder::~PcapRecorder()
         delete helper;
 }
 
-PcapRecorder::PcapRecorder() : cSimpleModule()
+PcapRecorder::PcapRecorder() : SimpleModule()
 {
 }
 

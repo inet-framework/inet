@@ -66,7 +66,7 @@ SctpClient::~SctpClient()
 
 void SctpClient::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
 
     EV_DEBUG << "initialize SCTP Client stage " << stage << endl;
     if (stage == INITSTAGE_LOCAL) {

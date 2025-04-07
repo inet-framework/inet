@@ -9,12 +9,13 @@
 #define __INET_TRANSMITTERANALOGMODELBASE_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/SimpleModule.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API TransmitterAnalogModelBase : public cSimpleModule
+class INET_API TransmitterAnalogModelBase : public SimpleModule
 {
 };
 

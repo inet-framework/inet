@@ -9,6 +9,7 @@
 #define __INET_THRUPUTMETER_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/SimpleModule.h"
 
 namespace inet {
 
@@ -17,7 +18,7 @@ namespace inet {
  */
 // FIXME problem: if traffic suddenly stops, it'll show the last reading forever;
 // (output vector will be correct though); would need a timer to handle this situation
-class INET_API ThruputMeter : public cSimpleModule
+class INET_API ThruputMeter : public SimpleModule
 {
   protected:
     // config

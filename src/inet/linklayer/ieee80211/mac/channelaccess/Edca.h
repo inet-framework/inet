@@ -8,6 +8,7 @@
 #ifndef __INET_EDCA_H
 #define __INET_EDCA_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/linklayer/ieee80211/mac/channelaccess/Edcaf.h"
 #include "inet/linklayer/ieee80211/mac/common/Ieee80211Defs.h"
 #include "inet/linklayer/ieee80211/mac/lifetime/EdcaTransmitLifetimeHandler.h"
@@ -19,7 +20,7 @@ namespace ieee80211 {
 /**
  * Implements IEEE 802.11 Enhanced Distributed Channel Access.
  */
-class INET_API Edca : public cSimpleModule
+class INET_API Edca : public SimpleModule
 {
   protected:
     int numEdcafs = -1;

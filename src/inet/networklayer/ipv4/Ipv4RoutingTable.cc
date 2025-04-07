@@ -52,7 +52,7 @@ Ipv4RoutingTable::~Ipv4RoutingTable()
 
 void Ipv4RoutingTable::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         // get a pointer to the host module and IInterfaceTable

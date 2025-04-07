@@ -8,6 +8,7 @@
 #ifndef __INET_ACKHANDLER_H
 #define __INET_ACKHANDLER_H
 
+#include "inet/common/SimpleModule.h"
 #include <map>
 
 #include "inet/linklayer/ieee80211/mac/common/SequenceControlField.h"
@@ -16,7 +17,7 @@
 namespace inet {
 namespace ieee80211 {
 
-class INET_API AckHandler : public cSimpleModule, public IAckHandler
+class INET_API AckHandler : public SimpleModule, public IAckHandler
 {
   public:
     enum class Status {

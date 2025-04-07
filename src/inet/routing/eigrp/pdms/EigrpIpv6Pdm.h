@@ -18,6 +18,7 @@
 #ifndef __INET_EIGRPIPV6PDM_H
 #define __INET_EIGRPIPV6PDM_H
 
+#include "inet/common/SimpleModule.h"
 #include <errno.h>
 #include <omnetpp.h>
 
@@ -42,7 +43,7 @@
 namespace inet {
 namespace eigrp {
 
-class INET_API EigrpIpv6Pdm : public cSimpleModule, public IEigrpModule<Ipv6Address>, public IEigrpPdm<Ipv6Address>, protected cListener
+class INET_API EigrpIpv6Pdm : public SimpleModule, public IEigrpModule<Ipv6Address>, public IEigrpPdm<Ipv6Address>, protected cListener
 {
   protected:
     struct IPv6netPrefix {

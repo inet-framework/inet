@@ -41,7 +41,7 @@ VoipStreamReceiver::~VoipStreamReceiver()
 
 void VoipStreamReceiver::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         // Say Hello to the world

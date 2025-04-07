@@ -8,6 +8,7 @@
 #ifndef __INET_NEXTHOPROUTINGTABLE_H
 #define __INET_NEXTHOPROUTINGTABLE_H
 
+#include "inet/common/SimpleModule.h"
 #include <vector>
 
 #include "inet/common/ModuleRefByPar.h"
@@ -21,7 +22,7 @@ class IInterfaceTable;
 /**
  * A C++ interface to abstract the functionality of a routing table, regardless of address type.
  */
-class INET_API NextHopRoutingTable : public cSimpleModule, public IRoutingTable, public cListener
+class INET_API NextHopRoutingTable : public SimpleModule, public IRoutingTable, public cListener
 {
   private:
     ModuleRefByPar<IInterfaceTable> ift;

@@ -8,6 +8,7 @@
 #ifndef __INET_RTP_H
 #define __INET_RTP_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
@@ -23,7 +24,7 @@ namespace rtp {
  * and forwards messages.
  * It also communicates with the application.
  */
-class INET_API Rtp : public cSimpleModule, public LifecycleUnsupported
+class INET_API Rtp : public SimpleModule, public LifecycleUnsupported
 {
   protected:
     /**

@@ -37,7 +37,7 @@ ExtEthernetSocket::~ExtEthernetSocket()
 
 void ExtEthernetSocket::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         device = par("device");
         packetNameFormat = par("packetNameFormat");

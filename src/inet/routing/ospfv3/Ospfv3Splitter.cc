@@ -23,7 +23,7 @@ Ospfv3Splitter::~Ospfv3Splitter()
 
 void Ospfv3Splitter::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         containingModule = findContainingNode(this);

@@ -18,6 +18,7 @@
 #ifndef __INET_EIGRPIPV4PDM_H
 #define __INET_EIGRPIPV4PDM_H
 
+#include "inet/common/SimpleModule.h"
 #include <omnetpp.h>
 
 #include "inet/common/IProtocolRegistrationListener.h"
@@ -49,7 +50,7 @@
 namespace inet {
 namespace eigrp {
 
-class INET_API EigrpIpv4Pdm : public cSimpleModule, public IEigrpModule<Ipv4Address>, public IEigrpPdm<Ipv4Address>, protected cListener
+class INET_API EigrpIpv4Pdm : public SimpleModule, public IEigrpModule<Ipv4Address>, public IEigrpPdm<Ipv4Address>, protected cListener
 {
   protected:
     typedef std::vector<Ipv4Route *> RouteVector;

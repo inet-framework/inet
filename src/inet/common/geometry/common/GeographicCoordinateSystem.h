@@ -8,6 +8,7 @@
 #ifndef __INET_GEOGRAPHICCOORDINATESYSTEM_H
 #define __INET_GEOGRAPHICCOORDINATESYSTEM_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/geometry/common/Quaternion.h"
 
@@ -44,7 +45,7 @@ class INET_API IGeographicCoordinateSystem
     virtual GeoCoord computeGeographicCoordinate(const Coord& sceneCoordinate) const = 0;
 };
 
-class INET_API SimpleGeographicCoordinateSystem : public cSimpleModule, public IGeographicCoordinateSystem
+class INET_API SimpleGeographicCoordinateSystem : public SimpleModule, public IGeographicCoordinateSystem
 {
   protected:
     double metersPerDegree = 111320;
@@ -65,7 +66,7 @@ class INET_API SimpleGeographicCoordinateSystem : public cSimpleModule, public I
 
 #if defined(WITH_OSGEARTH) && defined(INET_WITH_VISUALIZATIONOSG)
 
-class INET_API OsgGeographicCoordinateSystem : public cSimpleModule, public IGeographicCoordinateSystem
+class INET_API OsgGeographicCoordinateSystem : public SimpleModule, public IGeographicCoordinateSystem
 {
   protected:
     GeoCoord scenePosition = GeoCoord::NIL;

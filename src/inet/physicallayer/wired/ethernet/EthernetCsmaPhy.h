@@ -8,6 +8,7 @@
 #ifndef __INET_ETHERNETCSMAPHY_H
 #define __INET_ETHERNETCSMAPHY_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/FSMA.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ethernet/base/EthernetModes.h"
@@ -20,7 +21,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API EthernetCsmaPhy : public cSimpleModule, public virtual IEthernetCsmaPhy
+class INET_API EthernetCsmaPhy : public SimpleModule, public virtual IEthernetCsmaPhy
 {
   public:
     static simsignal_t stateChangedSignal;

@@ -12,6 +12,7 @@
 #ifndef __INET_XMIPV6_H
 #define __INET_XMIPV6_H
 
+#include "inet/common/SimpleModule.h"
 #include <map>
 #include <vector>
 
@@ -52,7 +53,7 @@ class Ipv6RoutingTable;
 /**
  * Implements RFC 3775 Mobility Support in Ipv6.
  */
-class INET_API xMIPv6 : public cSimpleModule
+class INET_API xMIPv6 : public SimpleModule
 {
   public:
     virtual ~xMIPv6();

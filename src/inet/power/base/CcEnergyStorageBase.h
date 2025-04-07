@@ -8,6 +8,7 @@
 #ifndef __INET_CCENERGYSTORAGEBASE_H
 #define __INET_CCENERGYSTORAGEBASE_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/power/base/CcEnergySinkBase.h"
 #include "inet/power/base/CcEnergySourceBase.h"
 #include "inet/power/contract/ICcEnergyStorage.h"
@@ -16,7 +17,7 @@ namespace inet {
 
 namespace power {
 
-class INET_API CcEnergyStorageBase : public cSimpleModule, public CcEnergySourceBase, public CcEnergySinkBase, public virtual ICcEnergyStorage
+class INET_API CcEnergyStorageBase : public SimpleModule, public CcEnergySourceBase, public CcEnergySinkBase, public virtual ICcEnergyStorage
 {
   protected:
     virtual void initialize(int stage) override;

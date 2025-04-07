@@ -8,7 +8,6 @@
 #ifndef __INET_SIMPLECCBATTERY_H
 #define __INET_SIMPLECCBATTERY_H
 
-#include "inet/common/StringFormat.h"
 #include "inet/common/lifecycle/LifecycleController.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
@@ -18,7 +17,7 @@ namespace inet {
 
 namespace power {
 
-class INET_API SimpleCcBattery : public CcEnergyStorageBase, public StringFormat::IDirectiveResolver, public LifecycleController
+class INET_API SimpleCcBattery : public CcEnergyStorageBase, public LifecycleController
 {
   protected:
     // parameters

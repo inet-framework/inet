@@ -77,7 +77,7 @@ std::string MobilityBase::resolveDirective(char directive) const
 
 void MobilityBase::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
     EV_TRACE << "initializing MobilityBase stage " << stage << endl;
     if (stage == INITSTAGE_LOCAL) {
         constraintAreaMin.x = par("constraintAreaMinX");

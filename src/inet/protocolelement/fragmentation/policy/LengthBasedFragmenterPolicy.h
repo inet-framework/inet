@@ -8,11 +8,12 @@
 #ifndef __INET_LENGTHBASEDFRAGMENTERPOLICY_H
 #define __INET_LENGTHBASEDFRAGMENTERPOLICY_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/protocolelement/fragmentation/contract/IFragmenterPolicy.h"
 
 namespace inet {
 
-class INET_API LengthBasedFragmenterPolicy : public cSimpleModule, public IFragmenterPolicy
+class INET_API LengthBasedFragmenterPolicy : public SimpleModule, public IFragmenterPolicy
 {
   protected:
     b minFragmentLength = b(-1);

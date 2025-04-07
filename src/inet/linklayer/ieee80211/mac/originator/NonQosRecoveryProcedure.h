@@ -8,6 +8,7 @@
 #ifndef __INET_NONQOSRECOVERYPROCEDURE_H
 #define __INET_NONQOSRECOVERYPROCEDURE_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/common/AccessCategory.h"
@@ -23,7 +24,7 @@ namespace ieee80211 {
 // References: 9.19.2.6 Retransmit procedures (IEEE 802.11-2012 STD)
 // 802.11 Reference Design: Recovery Procedures and Retransmit Limits
 // (https://warpproject.org/trac/wiki/802.11/MAC/Lower/Retransmissions)
-class INET_API NonQosRecoveryProcedure : public cSimpleModule, public IRecoveryProcedure
+class INET_API NonQosRecoveryProcedure : public SimpleModule, public IRecoveryProcedure
 {
 
   protected:
