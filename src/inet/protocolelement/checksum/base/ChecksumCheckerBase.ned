@@ -9,9 +9,10 @@ package inet.protocolelement.checksum.base;
 
 import inet.queueing.base.PacketFilterBase;
 
-simple CrcCheckerBase extends PacketFilterBase
+simple ChecksumCheckerBase extends PacketFilterBase
 {
     parameters:
-        @class(CrcCheckerBase);
+        string checksumType @enum("internet","crc32") = default("crc32"); // note: others are not currently supported
+        @class(ChecksumCheckerBase);
         @display("i=block/checker");
 }

@@ -19,11 +19,10 @@ class INET_API AccessoryProtocol
   public:
     static const Protocol acknowledge;
     static const Protocol aggregation;
-    static const Protocol crc;
+    static const Protocol checksum;
     static const Protocol destinationL3Address;
     static const Protocol destinationMacAddress;
     static const Protocol destinationPort;
-    static const Protocol fcs;
     static const Protocol forwarding;
     static const Protocol fragmentation;
     static const Protocol hopLimit;

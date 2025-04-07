@@ -16,29 +16,15 @@ namespace inet {
 
 Define_Module(EthernetFragmentFcsChecker);
 
-bool EthernetFragmentFcsChecker::checkComputedFcs(const Packet *packet, uint32_t receivedFcs) const
+bool EthernetFragmentFcsChecker::checkComputedChecksum(const Packet *packet, ChecksumType checksumType, uint64_t receivedFcs) const
 {
     auto data = packet->peekDataAsBytes();
     auto bytes = data->getBytes();
-    uint32_t fragmentFcs = ethernetCRC(bytes.data(), packet->getByteLength() - 4);
+    uint64_t fragmentFcs = ethernetCRC(bytes.data(), packet->getByteLength() - 4);
     auto& fragmentTag = packet->getTag<FragmentTag>();
     currentFragmentCompleteFcs = ethernetCRC(bytes.data(), packet->getByteLength() - 4, fragmentTag->getFirstFragment() ? 0 : lastFragmentCompleteFcs);
     bool lastFragment = receivedFcs != (fragmentFcs ^ 0xFFFF0000);
     return !lastFragment || receivedFcs == currentFragmentCompleteFcs;
-}
-
-bool EthernetFragmentFcsChecker::checkFcs(const Packet *packet, FcsMode fcsMode, uint32_t fcs) const
-{
-    switch (fcsMode) {
-        case FCS_DECLARED_CORRECT:
-            return checkDeclaredCorrectFcs(packet, fcs);
-        case FCS_DECLARED_INCORRECT:
-            return checkDeclaredIncorrectFcs(packet, fcs);
-        case FCS_COMPUTED:
-            return checkComputedFcs(packet, fcs);
-        default:
-            throw cRuntimeError("Unknown FCS mode");
-    }
 }
 
 void EthernetFragmentFcsChecker::processPacket(Packet *packet)
@@ -56,7 +42,8 @@ bool EthernetFragmentFcsChecker::matchesPacket(const Packet *packet) const
     const auto& trailer = packet->peekAtBack<EthernetFragmentFcs>(B(4));
     auto fcsMode = trailer->getFcsMode();
     auto fcs = trailer->getFcs();
-    return checkFcs(packet, fcsMode, fcs);
+    ASSERT(checksumType == CHECKSUM_CRC32);
+    return checkChecksum(packet, (ChecksumMode)fcsMode, checksumType, fcs);  //TODO KLUDGE cast should not be necessary
 }
 
 void EthernetFragmentFcsChecker::dropPacket(Packet *packet)

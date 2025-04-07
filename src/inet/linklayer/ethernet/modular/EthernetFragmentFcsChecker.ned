@@ -7,12 +7,13 @@
 
 package inet.linklayer.ethernet.modular;
 
-import inet.queueing.base.PacketFilterBase;
+import inet.protocolelement.checksum.base.ChecksumCheckerBase;
 import inet.queueing.contract.IPacketFilter;
 
-simple EthernetFragmentFcsChecker extends PacketFilterBase like IPacketFilter
+simple EthernetFragmentFcsChecker extends ChecksumCheckerBase like IPacketFilter
 {
     parameters:
+        checksumType = "crc32";
         @class(EthernetFragmentFcsChecker);
         @display("i=block/checker");
 }

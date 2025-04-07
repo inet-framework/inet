@@ -8,21 +8,20 @@
 #ifndef __INET_ETHERNETFRAGMENTFCSINSERTER_H
 #define __INET_ETHERNETFRAGMENTFCSINSERTER_H
 
-#include "inet/protocolelement/checksum/base/FcsInserterBase.h"
+#include "inet/protocolelement/checksum/base/ChecksumInserterBase.h"
 
 namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API EthernetFragmentFcsInserter : public FcsInserterBase
+class INET_API EthernetFragmentFcsInserter : public ChecksumInserterBase
 {
   protected:
-    uint32_t lastFragmentCompleteFcs = 0;
-    mutable uint32_t currentFragmentCompleteFcs = 0;
+    uint64_t lastFragmentCompleteFcs = 0;
+    mutable uint64_t currentFragmentCompleteFcs = 0;
 
   protected:
-    virtual uint32_t computeComputedFcs(const Packet *packet) const override;
-    virtual uint32_t computeFcs(const Packet *packet, FcsMode fcsMode) const override;
+    virtual uint64_t computeComputedChecksum(const Packet *packet, ChecksumType checksumType) const override;
     virtual void processPacket(Packet *packet) override;
     virtual void handlePacketProcessed(Packet *packet) override;
 };

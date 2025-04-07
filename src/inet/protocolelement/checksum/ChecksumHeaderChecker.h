@@ -5,24 +5,27 @@
 //
 
 
-#ifndef __INET_CRCHEADERINSERTER_H
-#define __INET_CRCHEADERINSERTER_H
+#ifndef __INET_CHECKSUMHEADERCHECKER_H
+#define __INET_CHECKSUMHEADERCHECKER_H
 
-#include "inet/protocolelement/checksum/base/CrcInserterBase.h"
+#include "inet/protocolelement/checksum/base/ChecksumCheckerBase.h"
 #include "inet/protocolelement/common/HeaderPosition.h"
 
 namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API CrcHeaderInserter : public CrcInserterBase
+class INET_API ChecksumHeaderChecker : public ChecksumCheckerBase
 {
   protected:
-    HeaderPosition headerPosition = HP_UNDEFINED;
+    HeaderPosition headerPosition;
 
   protected:
     virtual void initialize(int stage) override;
     virtual void processPacket(Packet *packet) override;
+
+  public:
+    virtual bool matchesPacket(const Packet *packet) const override;
 };
 
 } // namespace inet
