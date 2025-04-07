@@ -480,6 +480,7 @@ void ScenarioManager::processLifecycleCommand(const cXMLElement *node)
 
 void ScenarioManager::refreshDisplay() const
 {
+    SimpleModule::refreshDisplay();
     auto text = StringFormat::formatString(par("displayStringTextFormat"), this);
     getDisplayString().setTagArg("t", 0, text.c_str());
 }
