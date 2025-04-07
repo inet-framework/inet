@@ -12,6 +12,8 @@ debug/makefile
 .pydevproject
 .pydevproject
 .vscode/*
+.metadata
+.doxy
 src/inet/features.h
 src/inet/opp_defines.h
 precompiled_*.h.*
@@ -43,6 +45,8 @@ python/levy.py
 /tests/*/results*/
 /tests/fingerprint/SelfDoc.xml
 /coverage
+*.orig
+*.rej
 *.log
 *.sim
 *.pyc
