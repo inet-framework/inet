@@ -1993,7 +1993,7 @@ std::string Mrp::resolveDirective(char directive) const
         case 'r': return getMrpRoleName(role, true);
         case 'n': return getNodeStateName(nodeState);
         case 'g': return getRingStateName(ringState);
-        default: throw cRuntimeError("Unknown directive: %c", directive);
+        default: return OperationalBase::resolveDirective(directive);   
     }
 }
 

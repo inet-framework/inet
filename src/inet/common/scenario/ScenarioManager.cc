@@ -498,7 +498,7 @@ std::string ScenarioManager::resolveDirective(char directive) const
         case 'n':
             return scheduledEvents.empty() ? "n/a" : scheduledEvents.front()->getName();
         default:
-            throw cRuntimeError("Unknown directive: %c", directive);
+            return SimpleModule::resolveDirective(directive);   
     }
 }
 

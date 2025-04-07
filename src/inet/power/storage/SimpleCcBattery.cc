@@ -48,7 +48,7 @@ std::string SimpleCcBattery::resolveDirective(char directive) const
         case 'p':
             return std::to_string((int)std::round(100 * (getResidualChargeCapacity() / getNominalChargeCapacity()).get<unit>())) + "%";
         default:
-            throw cRuntimeError("Unknown directive: %c", directive);
+            return CcEnergyStorageBase::resolveDirective(directive);   
     }
 }
 

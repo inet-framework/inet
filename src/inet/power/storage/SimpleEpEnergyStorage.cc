@@ -66,7 +66,7 @@ std::string SimpleEpEnergyStorage::resolveDirective(char directive) const
         case 'p':
             return std::to_string((int)std::round(100 * (getResidualEnergyCapacity() / getNominalEnergyCapacity()).get<unit>())) + "%";
         default:
-            throw cRuntimeError("Unknown directive: %c", directive);
+            return EpEnergyStorageBase::resolveDirective(directive);   
     }
 }
 

@@ -31,7 +31,6 @@ class INET_API VisualizerBase : public SimpleModule
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual std::string resolveDirective(char directive) const override;
     virtual void refreshDisplay() const override;
 
     virtual Coord getPosition(const cModule *networkNode) const;

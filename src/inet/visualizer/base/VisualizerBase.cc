@@ -37,11 +37,6 @@ void VisualizerBase::initialize(int stage)
     }
 }
 
-std::string VisualizerBase::resolveDirective(char directive) const
-{
-    throw cRuntimeError("Unknown directive: %c", directive);
-}
-
 void VisualizerBase::refreshDisplay() const
 {
     auto text = format.formatString(this);

@@ -163,7 +163,7 @@ std::string PcapRecorder::resolveDirective(char directive) const
         case 'n':
             return std::to_string(numRecorded);
         default:
-            throw cRuntimeError("Unknown directive: %c", directive);
+            return SimpleModule::resolveDirective(directive);   
     }
 }
 

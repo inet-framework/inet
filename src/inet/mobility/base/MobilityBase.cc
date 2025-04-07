@@ -71,7 +71,7 @@ std::string MobilityBase::resolveDirective(char directive) const
         case 'A':
             return constthis->getCurrentAngularAcceleration().str();
         default:
-            throw cRuntimeError("Unknown directive: %c", directive);
+            return SimpleModule::resolveDirective(directive);   
     }
 }
 

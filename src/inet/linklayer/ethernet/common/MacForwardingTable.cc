@@ -117,7 +117,7 @@ std::string MacForwardingTable::resolveDirective(char directive) const
         case 'v':
             return "";
         default:
-            throw cRuntimeError("Unknown directive: %c", directive);
+            return SimpleModule::resolveDirective(directive);   
     }
 }
 

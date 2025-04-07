@@ -42,7 +42,7 @@ std::string MacRelayUnitBase::resolveDirective(char directive) const
         case 'd':
             return std::to_string(numDroppedFrames);
         default:
-            throw cRuntimeError("Unknown directive: %c", directive);
+            return SimpleModule::resolveDirective(directive);   
     }
 }
 

@@ -295,7 +295,7 @@ std::string NetworkInterface::resolveDirective(char directive) const
         case 'a':
             return getNetworkAddress().str();
         default:
-            throw cRuntimeError("Unknown directive: %c", directive);
+            return PacketProcessorBase::resolveDirective(directive);   
     }
 }
 
