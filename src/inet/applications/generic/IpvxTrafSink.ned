@@ -15,6 +15,7 @@ simple IpvxTrafSink like IIpvxTrafficGenerator
 {
     parameters:
         int protocol; // Value for IPv4, IPv6 protocol field, accepts only values between 143 and 254
+        displayStringTextFormat @mutable = default("rcvd: {numReceived} pks");
         @lifecycleSupport;
         @display("i=block/sink");
         @signal[packetReceived](type=inet::Packet);
@@ -24,4 +25,3 @@ simple IpvxTrafSink like IIpvxTrafficGenerator
         input ipIn @labels(Ipv4ControlInfo/up,Ipv6ControlInfo/up);
         output ipOut @labels(Ipv4ControlInfo/down,Ipv6ControlInfo/down);
 }
-

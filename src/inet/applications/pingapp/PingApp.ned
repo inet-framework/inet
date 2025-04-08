@@ -60,6 +60,7 @@ simple PingApp like IApp
         bool printPing = default(false); // Log to stdout
         string crcMode @enum("declared", "computed") = default("declared");
         string networkProtocol = default(""); // Uses the specified network protocol for communication; uses the address-specified default network protocol when the parameter is empty
+        string displayStringTextFormat @mutable = default("sent: {sentCount} pks\nrcvd: {numPongs} pks");
         @display("i=block/app");
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after the lifecycle stop operation finished
@@ -79,4 +80,3 @@ simple PingApp like IApp
         input socketIn @labels(ITransportPacket/up);
         output socketOut @labels(ITransportPacket/down);
 }
-

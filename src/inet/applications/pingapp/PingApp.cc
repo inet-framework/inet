@@ -277,15 +277,6 @@ void PingApp::socketClosed(INetworkSocket *socket)
     delete socketMap.removeSocket(socket);
 }
 
-void PingApp::refreshDisplay() const
-{
-    ApplicationBase::refreshDisplay();
-
-    char buf[40];
-    sprintf(buf, "sent: %ld pks\nrcvd: %ld pks", sentCount, numPongs);
-    getDisplayString().setTagArg("t", 0, buf);
-}
-
 void PingApp::handleStartOperation(LifecycleOperation *operation)
 {
     if (isEnabled())
@@ -590,4 +581,3 @@ void PingApp::finish()
 }
 
 } // namespace inet
-
