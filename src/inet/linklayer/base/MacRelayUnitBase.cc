@@ -46,12 +46,6 @@ std::string MacRelayUnitBase::resolveDirective(char directive) const
     }
 }
 
-void MacRelayUnitBase::refreshDisplay() const
-{
-    auto text = StringFormat::formatString(par("displayStringTextFormat"), this);
-    getDisplayString().setTagArg("t", 0, text.c_str());
-}
-
 void MacRelayUnitBase::broadcastPacket(Packet *outgoingPacket, const MacAddress& destinationAddress, NetworkInterface *incomingInterface)
 {
     if (incomingInterface == nullptr)

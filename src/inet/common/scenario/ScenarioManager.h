@@ -85,7 +85,6 @@ class INET_API ScenarioManager : public SimpleModule, public LifecycleController
   protected:
     virtual void initialize() override;
     virtual void handleMessage(cMessage *msg) override;
-    virtual void refreshDisplay() const override;
 };
 
 } // namespace inet

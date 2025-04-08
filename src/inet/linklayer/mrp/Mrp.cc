@@ -1957,6 +1957,7 @@ void Mrp::colorLink(NetworkInterface *ie, bool forwarding) const
 
 void Mrp::refreshDisplay() const
 {
+    SimpleModule::refreshDisplay();
 
     if (visualize) {
         for (unsigned int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
@@ -1983,8 +1984,6 @@ void Mrp::refreshDisplay() const
             }
         }
     }
-    auto text = StringFormat::formatString(par("displayStringTextFormat"), this);
-    getDisplayString().setTagArg("t", 0, text.c_str());
 }
 
 std::string Mrp::resolveDirective(char directive) const

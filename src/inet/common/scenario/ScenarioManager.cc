@@ -478,13 +478,6 @@ void ScenarioManager::processLifecycleCommand(const cXMLElement *node)
     initiateOperation(operation);
 }
 
-void ScenarioManager::refreshDisplay() const
-{
-    SimpleModule::refreshDisplay();
-    auto text = StringFormat::formatString(par("displayStringTextFormat"), this);
-    getDisplayString().setTagArg("t", 0, text.c_str());
-}
-
 std::string ScenarioManager::resolveDirective(char directive) const
 {
     switch (directive) {

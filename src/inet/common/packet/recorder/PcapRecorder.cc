@@ -167,13 +167,6 @@ std::string PcapRecorder::resolveDirective(char directive) const
     }
 }
 
-void PcapRecorder::refreshDisplay() const
-{
-    SimpleModule::refreshDisplay();
-    auto text = StringFormat::formatString(par("displayStringTextFormat"), this);
-    getDisplayString().setTagArg("t", 0, text.c_str());
-}
-
 void PcapRecorder::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(signalID));

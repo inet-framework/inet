@@ -103,12 +103,6 @@ void MacForwardingTable::handleMessageWhenUp(cMessage *)
     throw cRuntimeError("This module doesn't process messages");
 }
 
-void MacForwardingTable::refreshDisplay() const
-{
-    auto text = StringFormat::formatString(par("displayStringTextFormat"), this);
-    getDisplayString().setTagArg("t", 0, text.c_str());
-}
-
 std::string MacForwardingTable::resolveDirective(char directive) const
 {
     switch (directive) {
