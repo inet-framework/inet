@@ -166,7 +166,7 @@ void NextHopForwarding::handlePacketFromNetwork(Packet *packet)
 {
     if (packet->hasBitError()) {
         // TODO emit packetDropped signal
-        EV_WARN << "CRC error found, drop packet\n";
+        EV_WARN << "Checksum error found, drop packet\n";
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);
         emit(packetDroppedSignal, packet, &details);

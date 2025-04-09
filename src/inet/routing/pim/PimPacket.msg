@@ -12,7 +12,7 @@ import inet.common.INETDefs;
 import inet.common.Units;
 import inet.common.packet.chunk.Chunk;
 import inet.networklayer.common.L3Address;
-import inet.transportlayer.common.CrcMode;
+import inet.common.checksum.ChecksumMode;
 
 namespace inet;
 
@@ -118,7 +118,7 @@ class PimPacket extends FieldsChunk
     short          version = 2;
     PimPacketType  type;
     short          reserved = 0;    // 8 bits
-    uint16_t       crc = 0;         // The checksum is a standard IP checksum, i.e., the 16-bit one's
+    uint16_t       checksum = 0;         // The checksum is a standard IP checksum, i.e., the 16-bit one's
                                     // complement of the one's complement sum of the entire PIM
                                     // message, excluding the "Multicast data packet" section of the
                                     // Register message.  For computing the checksum, the checksum
@@ -134,7 +134,7 @@ class PimPacket extends FieldsChunk
                                     // Register messages where it is set to the length of the PIM
                                     // register header (8).  The Next Header value used in the pseudo-
                                     // header is 103.
-    CrcMode        crcMode = CRC_MODE_UNDEFINED;
+    ChecksumMode        checksumMode = CHECKSUM_MODE_UNDEFINED;
 }
 
 // Hello message

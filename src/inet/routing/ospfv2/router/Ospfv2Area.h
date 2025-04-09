@@ -25,7 +25,7 @@ class Router;
 class INET_API Ospfv2Area : public cObject
 {
   private:
-    CrcMode crcMode;
+    ChecksumMode checksumMode;
     IInterfaceTable *ift;
     AreaId areaID;
     std::map<Ipv4AddressRange, bool> advertiseAddressRanges;
@@ -46,7 +46,7 @@ class INET_API Ospfv2Area : public cObject
     Router *parentRouter;
 
   public:
-    Ospfv2Area(CrcMode crcMode, IInterfaceTable *ift, AreaId id = BACKBONE_AREAID);
+    Ospfv2Area(ChecksumMode checksumMode, IInterfaceTable *ift, AreaId id = BACKBONE_AREAID);
     virtual ~Ospfv2Area();
 
     void setAreaID(AreaId areaId) { areaID = areaId; }

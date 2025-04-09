@@ -36,7 +36,7 @@ void IgmpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                 stream.writeByte(igmpv1Query->getUnused());
             else if (auto igmpv2Query = dynamicPtrCast<const Igmpv2Query>(igmpMessage))
                 stream.writeByte(igmpv2Query->getMaxRespTimeCode());
-            stream.writeUint16Be(igmpMessage->getCrc());
+            stream.writeUint16Be(igmpMessage->getChecksum());
             stream.writeIpv4Address(check_and_cast<const IgmpQuery *>(igmpMessage.get())->getGroupAddress());
             if (auto igmpv3Query = dynamicPtrCast<const Igmpv3Query>(igmpMessage)) {
                 ASSERT(igmpv3Query->getRobustnessVariable() <= 7);
@@ -54,28 +54,28 @@ void IgmpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
         case IGMPV1_MEMBERSHIP_REPORT: {
             auto igmpv1Report = dynamicPtrCast<const Igmpv1Report>(igmpMessage);
             stream.writeByte(igmpv1Report->getUnused());
-            stream.writeUint16Be(igmpv1Report->getCrc());
+            stream.writeUint16Be(igmpv1Report->getChecksum());
             stream.writeIpv4Address(igmpv1Report->getGroupAddress());
             break;
         }
         case IGMPV2_MEMBERSHIP_REPORT: {
             auto igmpv2Report = dynamicPtrCast<const Igmpv2Report>(igmpMessage);
             stream.writeByte(igmpv2Report->getMaxRespTime());
-            stream.writeUint16Be(igmpv2Report->getCrc());
+            stream.writeUint16Be(igmpv2Report->getChecksum());
             stream.writeIpv4Address(igmpv2Report->getGroupAddress());
             break;
         }
         case IGMPV2_LEAVE_GROUP: {
             auto igmpv2Leave = dynamicPtrCast<const Igmpv2Leave>(igmpMessage);
             stream.writeByte(igmpv2Leave->getMaxRespTime());
-            stream.writeUint16Be(igmpv2Leave->getCrc());
+            stream.writeUint16Be(igmpv2Leave->getChecksum());
             stream.writeIpv4Address(igmpv2Leave->getGroupAddress());
             break;
         }
         case IGMPV3_MEMBERSHIP_REPORT: {
             const Igmpv3Report *igmpv3Report = check_and_cast<const Igmpv3Report *>(igmpMessage.get());
             stream.writeByte(igmpv3Report->getResv1());
-            stream.writeUint16Be(igmpv3Report->getCrc());
+            stream.writeUint16Be(igmpv3Report->getChecksum());
             stream.writeUint16Be(igmpv3Report->getResv2());
             unsigned int numOfRecords = igmpv3Report->getGroupRecordArraySize();
             stream.writeUint16Be(numOfRecords);
@@ -111,16 +111,16 @@ const Ptr<Chunk> IgmpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                 if (code == 0) {
                     auto igmpv1Query = makeShared<Igmpv1Query>();
                     igmpv1Query->setUnused(code);
-                    igmpv1Query->setCrc(chksum);
-                    igmpv1Query->setCrcMode(CRC_COMPUTED);
+                    igmpv1Query->setChecksum(chksum);
+                    igmpv1Query->setChecksumMode(CHECKSUM_COMPUTED);
                     igmpv1Query->setGroupAddress(stream.readIpv4Address());
                     return igmpv1Query;
                 }
                 else {
                     auto igmpv2Query = makeShared<Igmpv2Query>();
                     igmpv2Query->setMaxRespTimeCode(code);
-                    igmpv2Query->setCrc(chksum);
-                    igmpv2Query->setCrcMode(CRC_COMPUTED);
+                    igmpv2Query->setChecksum(chksum);
+                    igmpv2Query->setChecksumMode(CHECKSUM_COMPUTED);
                     igmpv2Query->setGroupAddress(stream.readIpv4Address());
                     return igmpv2Query;
                 }
@@ -128,8 +128,8 @@ const Ptr<Chunk> IgmpHeaderSerializer::deserialize(MemoryInputStream& stream) co
             else {
                 auto igmpv3Query = makeShared<Igmpv3Query>();
                 igmpv3Query->setMaxRespTimeCode(code);
-                igmpv3Query->setCrc(chksum);
-                igmpv3Query->setCrcMode(CRC_COMPUTED);
+                igmpv3Query->setChecksum(chksum);
+                igmpv3Query->setChecksumMode(CHECKSUM_COMPUTED);
                 igmpv3Query->setGroupAddress(stream.readIpv4Address());
                 igmpv3Query->setResv(stream.readUint4());
                 igmpv3Query->setSuppressRouterProc(stream.readBit());
@@ -145,24 +145,24 @@ const Ptr<Chunk> IgmpHeaderSerializer::deserialize(MemoryInputStream& stream) co
         case IGMPV1_MEMBERSHIP_REPORT:  {
             auto igmpv1Report = makeShared<Igmpv1Report>();
             igmpv1Report->setUnused(code);
-            igmpv1Report->setCrc(chksum);
-            igmpv1Report->setCrcMode(CRC_COMPUTED);
+            igmpv1Report->setChecksum(chksum);
+            igmpv1Report->setChecksumMode(CHECKSUM_COMPUTED);
             igmpv1Report->setGroupAddress(stream.readIpv4Address());
             return igmpv1Report;
         }
         case IGMPV2_MEMBERSHIP_REPORT: {
             auto igmpv2Report = makeShared<Igmpv2Report>();
             igmpv2Report->setMaxRespTime(code);
-            igmpv2Report->setCrc(chksum);
-            igmpv2Report->setCrcMode(CRC_COMPUTED);
+            igmpv2Report->setChecksum(chksum);
+            igmpv2Report->setChecksumMode(CHECKSUM_COMPUTED);
             igmpv2Report->setGroupAddress(stream.readIpv4Address());
             return igmpv2Report;
         }
         case IGMPV2_LEAVE_GROUP: {
             auto igmpv2Leave = makeShared<Igmpv2Leave>();
             igmpv2Leave->setMaxRespTime(code);
-            igmpv2Leave->setCrc(chksum);
-            igmpv2Leave->setCrcMode(CRC_COMPUTED);
+            igmpv2Leave->setChecksum(chksum);
+            igmpv2Leave->setChecksumMode(CHECKSUM_COMPUTED);
             igmpv2Leave->setGroupAddress(stream.readIpv4Address());
             return igmpv2Leave;
         }
@@ -170,8 +170,8 @@ const Ptr<Chunk> IgmpHeaderSerializer::deserialize(MemoryInputStream& stream) co
             auto igmpv3Report = makeShared<Igmpv3Report>();
             igmpv3Report->setResv1(code);
             igmpv3Report->setChunkLength(start);
-            igmpv3Report->setCrc(chksum);
-            igmpv3Report->setCrcMode(CRC_COMPUTED);
+            igmpv3Report->setChecksum(chksum);
+            igmpv3Report->setChecksumMode(CHECKSUM_COMPUTED);
             igmpv3Report->setResv2(stream.readUint16Be());
             uint8_t numOfRecords = stream.readUint16Be();
             igmpv3Report->setGroupRecordArraySize(numOfRecords);

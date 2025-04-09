@@ -15,7 +15,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/ipv4/IcmpHeader.h"
-#include "inet/transportlayer/common/CrcMode_m.h"
+#include "inet/common/checksum/ChecksumMode_m.h"
 
 namespace inet {
 
@@ -28,7 +28,7 @@ class INET_API Icmp : public cSimpleModule, public DefaultProtocolRegistrationLi
 {
   protected:
     std::set<int> transportProtocols; // where to send up packets
-    CrcMode crcMode = CRC_MODE_UNDEFINED;
+    ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
     B quoteLength;
     ModuleRefByPar<IIpv4RoutingTable> rt;
     ModuleRefByPar<IInterfaceTable> ift;
@@ -53,8 +53,8 @@ class INET_API Icmp : public cSimpleModule, public DefaultProtocolRegistrationLi
      */
     virtual void sendErrorMessage(Packet *packet, int inputInterfaceId, IcmpType type, IcmpCode code);
     virtual void sendPtbMessage(Packet *packet, int mtu);
-    static void insertCrc(CrcMode crcMode, const Ptr<IcmpHeader>& icmpHeader, Packet *payload);
-    void insertCrc(const Ptr<IcmpHeader>& icmpHeader, Packet *payload) { insertCrc(crcMode, icmpHeader, payload); }
+    static void insertChecksum(ChecksumMode checksumMode, const Ptr<IcmpHeader>& icmpHeader, Packet *payload);
+    void insertChecksum(const Ptr<IcmpHeader>& icmpHeader, Packet *payload) { insertChecksum(checksumMode, icmpHeader, payload); }
     bool verifyChecksum(const Packet *packet);
 
   protected:

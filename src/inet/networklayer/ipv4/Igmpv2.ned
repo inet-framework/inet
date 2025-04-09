@@ -94,7 +94,7 @@ simple Igmpv2 like IIgmp
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
-        string crcMode @enum("declared","computed") = default("declared");
+        string checksumMode @enum("declared","computed") = default("declared");
         bool enabled = default(true);
         int    robustnessVariable = default(2); // IGMP is robust to (robustnessVariable-1) packet loss
         double queryInterval @unit(s) = default(125s);

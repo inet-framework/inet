@@ -11,12 +11,12 @@
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/routing/pim/PimPacket_m.h"
-#include "inet/transportlayer/common/CrcMode_m.h"
+#include "inet/common/checksum/ChecksumMode_m.h"
 #include "inet/transportlayer/common/TransportPseudoHeader_m.h"
 
 namespace inet {
 
-class INET_API PimCrcInsertionHook : public cSimpleModule, public NetfilterBase::HookBase
+class INET_API PimChecksumInsertionHook : public cSimpleModule, public NetfilterBase::HookBase
 {
   public:
     virtual Result datagramPreRoutingHook(Packet *packet) override { return ACCEPT; }
@@ -33,16 +33,16 @@ class INET_API Pim : public RoutingProtocolBase, protected cListener
 {
   protected:
     // parameters
-    CrcMode crcMode = CRC_MODE_UNDEFINED;
+    ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
 
   public:
     Pim() {}
     virtual ~Pim();
-    CrcMode getCrcMode() { return crcMode; }
-    static void insertCrc(const Ptr<PimPacket>& pimPacket);
-    static void insertCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<PimPacket>& pimPacket);
-    static bool verifyCrc(const Protocol *networkProtocol, const Ptr<const PimPacket>& pimPacket, Packet *packet);
-    static uint16_t computeCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<const PimPacket>& pimPacket);
+    ChecksumMode getChecksumMode() { return checksumMode; }
+    static void insertChecksum(const Ptr<PimPacket>& pimPacket);
+    static void insertChecksum(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<PimPacket>& pimPacket);
+    static bool verifyChecksum(const Protocol *networkProtocol, const Ptr<const PimPacket>& pimPacket, Packet *packet);
+    static uint16_t computeChecksum(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<const PimPacket>& pimPacket);
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

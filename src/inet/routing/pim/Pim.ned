@@ -22,7 +22,7 @@ module Pim like IPim
         @display("i=block/network2");
         string interfaceTableModule;
         string routingTableModule;
-        string crcMode @enum("declared", "computed") = default("declared");
+        string checksumMode @enum("declared", "computed") = default("declared");
         *.interfaceTableModule = default(absPath(this.interfaceTableModule));
         *.routingTableModule = default(absPath(this.routingTableModule));
         *.pimInterfaceTableModule = default("^.pimInterfaceTable");
@@ -73,7 +73,7 @@ module Pim like IPim
         pimSplitter.ipIn <-- { @display("m=s"); } <-- networkLayerIn;
 }
 
-simple PimCrcInsertionHook
+simple PimChecksumInsertionHook
 {
 }
 

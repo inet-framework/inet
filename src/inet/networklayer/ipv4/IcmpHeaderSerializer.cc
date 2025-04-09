@@ -62,14 +62,14 @@ const Ptr<Chunk> IcmpHeaderSerializer::deserialize(MemoryInputStream& stream) co
     icmpHeader->setType(type);
     icmpHeader->setCode(stream.readByte());
     icmpHeader->setChksum(stream.readUint16Be());
-    icmpHeader->setCrcMode(CRC_COMPUTED);
+    icmpHeader->setChecksumMode(CHECKSUM_COMPUTED);
     switch (type) {
         case ICMP_ECHO_REQUEST: {
             auto echoRq = makeShared<IcmpEchoRequest>();
             echoRq->setType(type);
             echoRq->setCode(icmpHeader->getCode());
             echoRq->setChksum(icmpHeader->getChksum());
-            echoRq->setCrcMode(CRC_COMPUTED);
+            echoRq->setChecksumMode(CHECKSUM_COMPUTED);
             echoRq->setIdentifier(stream.readUint16Be());
             echoRq->setSeqNumber(stream.readUint16Be());
             icmpHeader = echoRq;
@@ -80,7 +80,7 @@ const Ptr<Chunk> IcmpHeaderSerializer::deserialize(MemoryInputStream& stream) co
             echoReply->setType(type);
             echoReply->setCode(icmpHeader->getCode());
             echoReply->setChksum(icmpHeader->getChksum());
-            echoReply->setCrcMode(CRC_COMPUTED);
+            echoReply->setChecksumMode(CHECKSUM_COMPUTED);
             echoReply->setIdentifier(stream.readUint16Be());
             echoReply->setSeqNumber(stream.readUint16Be());
             icmpHeader = echoReply;
@@ -92,7 +92,7 @@ const Ptr<Chunk> IcmpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                 icmpPtb->setType(type);
                 icmpPtb->setCode(icmpHeader->getCode());
                 icmpPtb->setChksum(icmpHeader->getChksum());
-                icmpPtb->setCrcMode(CRC_COMPUTED);
+                icmpPtb->setChecksumMode(CHECKSUM_COMPUTED);
                 icmpPtb->setUnused(stream.readUint16Be());
                 icmpPtb->setMtu(stream.readUint16Be());
                 icmpHeader = icmpPtb;

@@ -115,7 +115,7 @@ INetfilter::IHook::Result Ipv4NatTable::processPacket(Packet *packet, INetfilter
 #ifdef INET_WITH_UDP
             if (transportProtocol == &Protocol::udp) {
                 auto& udpHeader = removeTransportProtocolHeader<UdpHeader>(packet);
-                // TODO if (!Udp::verifyCrc(Protocol::ipv4, udpHeader, packet))
+                // TODO if (!Udp::verifyChecksum(Protocol::ipv4, udpHeader, packet))
                 auto udpData = packet->peekData();
                 if (natEntry.getDestPort() != -1)
                     udpHeader->setDestPort(natEntry.getDestPort());
@@ -129,7 +129,7 @@ INetfilter::IHook::Result Ipv4NatTable::processPacket(Packet *packet, INetfilter
 #ifdef INET_WITH_TCP_COMMON
             if (transportProtocol == &Protocol::tcp) {
                 auto& tcpHeader = removeTransportProtocolHeader<tcp::TcpHeader>(packet);
-                // TODO if (!Tcp::verifyCrc(Protocol::ipv4, tcpHeader, packet))
+                // TODO if (!Tcp::verifyChecksum(Protocol::ipv4, tcpHeader, packet))
                 if (natEntry.getDestPort() != -1)
                     tcpHeader->setDestPort(natEntry.getDestPort());
                 if (natEntry.getSrcPort() != -1)

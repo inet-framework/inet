@@ -6,7 +6,7 @@
 
 #include "inet/routing/ospfv2/messagehandler/LinkStateUpdateHandler.h"
 
-#include "inet/routing/ospfv2/Ospfv2Crc.h"
+#include "inet/routing/ospfv2/Ospfv2Checksum.h"
 #include "inet/routing/ospfv2/neighbor/Ospfv2Neighbor.h"
 #include "inet/routing/ospfv2/router/Ospfv2Area.h"
 #include "inet/routing/ospfv2/router/Ospfv2Common.h"
@@ -275,7 +275,7 @@ void LinkStateUpdateHandler::acknowledgeLSA(const Ospfv2LsaHeader& lsaHeader,
             ackPacket->setAuthentication(i, authKey.bytes[i]);
         }
 
-        setOspfCrc(ackPacket, intf->getCrcMode());
+        setOspfChecksum(ackPacket, intf->getChecksumMode());
 
         Packet *pk = new Packet();
         pk->insertAtBack(ackPacket);

@@ -7,7 +7,7 @@
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
 import inet.networklayer.contract.ipv4.Ipv4Address;
-import inet.transportlayer.common.CrcMode;
+import inet.common.checksum.ChecksumMode;
 
 namespace inet::ospf;
 
@@ -33,6 +33,6 @@ class OspfPacketBase extends FieldsChunk
     Ipv4Address routerID;   // 4 bytes
     Ipv4Address areaID;     // 4 bytes
 
-    uint16_t crc = 0;       // 2 bytes
-    CrcMode crcMode = CRC_MODE_UNDEFINED;
+    uint16_t checksum = 0;       // 2 bytes
+    ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
 }

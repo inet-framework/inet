@@ -1466,7 +1466,7 @@ void Ospfv3Interface::sendDelayedAcknowledgements()
                 ackPacket->setType(ospf::LINKSTATE_ACKNOWLEDGEMENT_PACKET);
                 ackPacket->setRouterID(this->getArea()->getInstance()->getProcess()->getRouterID());
                 ackPacket->setAreaID(this->getArea()->getAreaID());
-                ackPacket->setCrc(0);
+                ackPacket->setChecksum(0);
                 ackPacket->setInstanceID(this->getArea()->getInstance()->getInstanceID());
 
                 while (!elem.second.empty()) {

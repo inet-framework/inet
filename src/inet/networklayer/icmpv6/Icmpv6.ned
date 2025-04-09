@@ -17,7 +17,7 @@ simple Icmpv6
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
-        string crcMode @enum("declared", "computed") = default("declared");
+        string checksumMode @enum("declared", "computed") = default("declared");
         @display("i=block/control");
     gates:
         input transportIn;

@@ -106,7 +106,7 @@ void PimPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     stream.writeUint4(pimPacket->getVersion());
     stream.writeUint4(pimPacket->getType());
     stream.writeByte(pimPacket->getReserved());
-    stream.writeUint16Be(pimPacket->getCrc());
+    stream.writeUint16Be(pimPacket->getChecksum());
     switch (pimPacket->getType()) {
         case Hello: {
             const auto& pimHello = staticPtrCast<const PimHello>(chunk);
@@ -222,8 +222,8 @@ const Ptr<Chunk> PimPacketSerializer::deserialize(MemoryInputStream& stream) con
     pimPacket->setVersion(stream.readUint4());
     pimPacket->setType(static_cast<PimPacketType>(stream.readUint4()));
     pimPacket->setReserved(stream.readByte());
-    pimPacket->setCrc(stream.readUint16Be());
-    pimPacket->setCrcMode(CRC_COMPUTED);
+    pimPacket->setChecksum(stream.readUint16Be());
+    pimPacket->setChecksumMode(CHECKSUM_COMPUTED);
     B length = B(4); // header length
     switch (pimPacket->getType()) {
         case Hello: {
@@ -231,8 +231,8 @@ const Ptr<Chunk> PimPacketSerializer::deserialize(MemoryInputStream& stream) con
             pimHello->setType(pimPacket->getType());
             pimHello->setVersion(pimPacket->getVersion());
             pimHello->setReserved(pimPacket->getReserved());
-            pimHello->setCrc(pimPacket->getCrc());
-            pimHello->setCrcMode(pimPacket->getCrcMode());
+            pimHello->setChecksum(pimPacket->getChecksum());
+            pimHello->setChecksumMode(pimPacket->getChecksumMode());
             PimHelloOptionType type;
             size_t i = 0;
             while (stream.getRemainingLength().get<b>() > 0) {
@@ -296,8 +296,8 @@ const Ptr<Chunk> PimPacketSerializer::deserialize(MemoryInputStream& stream) con
             pimRegister->setType(pimPacket->getType());
             pimRegister->setVersion(pimPacket->getVersion());
             pimRegister->setReserved(pimPacket->getReserved());
-            pimRegister->setCrc(pimPacket->getCrc());
-            pimRegister->setCrcMode(pimPacket->getCrcMode());
+            pimRegister->setChecksum(pimPacket->getChecksum());
+            pimRegister->setChecksumMode(pimPacket->getChecksumMode());
             pimRegister->setB(stream.readBit());
             pimRegister->setN(stream.readBit());
             stream.readNBitsToUint64Be(30); // Reserved
@@ -310,8 +310,8 @@ const Ptr<Chunk> PimPacketSerializer::deserialize(MemoryInputStream& stream) con
             pimRegisterStop->setType(pimPacket->getType());
             pimRegisterStop->setVersion(pimPacket->getVersion());
             pimRegisterStop->setReserved(pimPacket->getReserved());
-            pimRegisterStop->setCrc(pimPacket->getCrc());
-            pimRegisterStop->setCrcMode(pimPacket->getCrcMode());
+            pimRegisterStop->setChecksum(pimPacket->getChecksum());
+            pimRegisterStop->setChecksumMode(pimPacket->getChecksumMode());
             deserializeEncodedGroupAddress(stream, pimRegisterStop, pimRegisterStop->getGroupAddressForUpdate());
             length += ENCODED_GROUP_ADDRESS_LENGTH;
             deserializeEncodedUnicastAddress(stream, pimRegisterStop, pimRegisterStop->getSourceAddressForUpdate());
@@ -328,8 +328,8 @@ const Ptr<Chunk> PimPacketSerializer::deserialize(MemoryInputStream& stream) con
             pimJoinPrune->setType(pimPacket->getType());
             pimJoinPrune->setVersion(pimPacket->getVersion());
             pimJoinPrune->setReserved(pimPacket->getReserved());
-            pimJoinPrune->setCrc(pimPacket->getCrc());
-            pimJoinPrune->setCrcMode(pimPacket->getCrcMode());
+            pimJoinPrune->setChecksum(pimPacket->getChecksum());
+            pimJoinPrune->setChecksumMode(pimPacket->getChecksumMode());
             deserializeEncodedUnicastAddress(stream, pimJoinPrune, pimJoinPrune->getUpstreamNeighborAddressForUpdate());
             length += ENCODED_UNICODE_ADDRESS_LENGTH;
             pimJoinPrune->setReserved2(stream.readByte()); // Reserved
@@ -362,8 +362,8 @@ const Ptr<Chunk> PimPacketSerializer::deserialize(MemoryInputStream& stream) con
             pimAssert->setType(pimPacket->getType());
             pimAssert->setVersion(pimPacket->getVersion());
             pimAssert->setReserved(pimPacket->getReserved());
-            pimAssert->setCrc(pimPacket->getCrc());
-            pimAssert->setCrcMode(pimPacket->getCrcMode());
+            pimAssert->setChecksum(pimPacket->getChecksum());
+            pimAssert->setChecksumMode(pimPacket->getChecksumMode());
             deserializeEncodedGroupAddress(stream, pimAssert, pimAssert->getGroupAddressForUpdate());
             length += ENCODED_GROUP_ADDRESS_LENGTH;
             deserializeEncodedUnicastAddress(stream, pimAssert, pimAssert->getSourceAddressForUpdate());
@@ -379,8 +379,8 @@ const Ptr<Chunk> PimPacketSerializer::deserialize(MemoryInputStream& stream) con
             pimStateRefresh->setType(pimPacket->getType());
             pimStateRefresh->setVersion(pimPacket->getVersion());
             pimStateRefresh->setReserved(pimPacket->getReserved());
-            pimStateRefresh->setCrc(pimPacket->getCrc());
-            pimStateRefresh->setCrcMode(pimPacket->getCrcMode());
+            pimStateRefresh->setChecksum(pimPacket->getChecksum());
+            pimStateRefresh->setChecksumMode(pimPacket->getChecksumMode());
             deserializeEncodedGroupAddress(stream, pimStateRefresh, pimStateRefresh->getGroupAddressForUpdate());
             length += ENCODED_GROUP_ADDRESS_LENGTH;
             deserializeEncodedUnicastAddress(stream, pimStateRefresh, pimStateRefresh->getSourceAddressForUpdate());

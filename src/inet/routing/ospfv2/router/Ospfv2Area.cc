@@ -9,15 +9,15 @@
 
 #include <memory.h>
 
-#include "inet/routing/ospfv2/Ospfv2Crc.h"
+#include "inet/routing/ospfv2/Ospfv2Checksum.h"
 #include "inet/routing/ospfv2/router/Ospfv2Router.h"
 
 namespace inet {
 
 namespace ospfv2 {
 
-Ospfv2Area::Ospfv2Area(CrcMode crcMode, IInterfaceTable *ift, AreaId id) :
-    crcMode(crcMode),
+Ospfv2Area::Ospfv2Area(ChecksumMode checksumMode, IInterfaceTable *ift, AreaId id) :
+    checksumMode(checksumMode),
     ift(ift),
     areaID(id),
     transitCapability(false),
@@ -941,7 +941,7 @@ RouterLsa *Ospfv2Area::originateRouterLSA()
 
     routerLSA->setSource(LsaTrackingInfo::ORIGINATED);
 
-    setLsaCrc(*routerLSA, crcMode);
+    setLsaChecksum(*routerLSA, checksumMode);
     return routerLSA;
 }
 
@@ -978,7 +978,7 @@ NetworkLsa *Ospfv2Area::originateNetworkLSA(const Ospfv2Interface *intf)
         // update the length field in the LSA header
         lsaHeader.setLsaLength(calculateLsaSize(*networkLSA).get<B>());
 
-        setLsaCrc(*networkLSA, crcMode);
+        setLsaChecksum(*networkLSA, checksumMode);
         return networkLSA;
     }
     else {
@@ -1102,7 +1102,7 @@ SummaryLsa *Ospfv2Area::originateSummaryLSA(const Ospfv2RoutingTableEntry *entry
             // update the length field in the LSA header
             lsaHeader.setLsaLength(calculateLsaSize(*summaryLSA).get<B>());
 
-            setLsaCrc(*summaryLSA, crcMode);
+            setLsaChecksum(*summaryLSA, checksumMode);
             return summaryLSA;
         }
     }
@@ -1138,7 +1138,7 @@ SummaryLsa *Ospfv2Area::originateSummaryLSA(const Ospfv2RoutingTableEntry *entry
                     // update the length field in the LSA header
                     lsaHeader.setLsaLength(calculateLsaSize(*summaryLSA).get<B>());
 
-                    setLsaCrc(*summaryLSA, crcMode);
+                    setLsaChecksum(*summaryLSA, checksumMode);
                     return summaryLSA;
                 }
             }
@@ -1164,7 +1164,7 @@ SummaryLsa *Ospfv2Area::originateSummaryLSA(const Ospfv2RoutingTableEntry *entry
                 // update the length field in the LSA header
                 lsaHeader.setLsaLength(calculateLsaSize(*summaryLSA).get<B>());
 
-                setLsaCrc(*summaryLSA, crcMode);
+                setLsaChecksum(*summaryLSA, checksumMode);
                 return summaryLSA;
             }
         }
@@ -1205,7 +1205,7 @@ SummaryLsa *Ospfv2Area::originateSummaryLSA(const Ospfv2RoutingTableEntry *entry
                         // update the length field in the LSA header
                         lsaHeader.setLsaLength(calculateLsaSize(*summaryLSA).get<B>());
 
-                        setLsaCrc(*summaryLSA, crcMode);
+                        setLsaChecksum(*summaryLSA, checksumMode);
                         return summaryLSA;
                     }
                 }
@@ -1231,7 +1231,7 @@ SummaryLsa *Ospfv2Area::originateSummaryLSA(const Ospfv2RoutingTableEntry *entry
                     // update the length field in the LSA header
                     lsaHeader.setLsaLength(calculateLsaSize(*summaryLSA).get<B>());
 
-                    setLsaCrc(*summaryLSA, crcMode);
+                    setLsaChecksum(*summaryLSA, checksumMode);
                     return summaryLSA;
                 }
             }
@@ -1283,7 +1283,7 @@ SummaryLsa *Ospfv2Area::originateSummaryLSA(const Ospfv2RoutingTableEntry *entry
                         // update the length field in the LSA header
                         lsaHeader.setLsaLength(calculateLsaSize(*summaryLSA).get<B>());
 
-                        setLsaCrc(*summaryLSA, crcMode);
+                        setLsaChecksum(*summaryLSA, checksumMode);
                         return summaryLSA;
                     }
                     else {
@@ -1317,7 +1317,7 @@ SummaryLsa *Ospfv2Area::originateSummaryLSA(const Ospfv2RoutingTableEntry *entry
                         // update the length field in the LSA header
                         lsaHeader.setLsaLength(calculateLsaSize(*summaryLSA).get<B>());
 
-                        setLsaCrc(*summaryLSA, crcMode);
+                        setLsaChecksum(*summaryLSA, checksumMode);
                         return summaryLSA;
                     }
                 }
@@ -1351,7 +1351,7 @@ SummaryLsa *Ospfv2Area::originateSummaryLSA_Stub()
     // update the length field in the LSA header
     lsaHeader.setLsaLength(calculateLsaSize(*summaryLSA).get<B>());
 
-    setLsaCrc(*summaryLSA, crcMode);
+    setLsaChecksum(*summaryLSA, checksumMode);
     return summaryLSA;
 }
 

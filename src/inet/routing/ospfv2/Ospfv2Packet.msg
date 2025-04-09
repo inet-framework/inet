@@ -8,7 +8,7 @@ import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
 import inet.networklayer.contract.ipv4.Ipv4Address;
 import inet.routing.ospf_common.OspfPacketBase;
-import inet.transportlayer.common.CrcMode;
+import inet.common.checksum.ChecksumMode;
 
 namespace inet::ospfv2;
 
@@ -95,8 +95,8 @@ class Ospfv2LsaHeader extends cObject
     Ipv4Address linkStateID;
     Ipv4Address advertisingRouter;
     int32_t lsSequenceNumber = 0;
-    uint16_t lsCrc = 0;
-    CrcMode lsCrcMode = CRC_MODE_UNDEFINED;
+    uint16_t lsChecksum = 0;
+    ChecksumMode lsChecksumMode = CHECKSUM_MODE_UNDEFINED;
     uint16_t lsaLength = 0;
 }
 

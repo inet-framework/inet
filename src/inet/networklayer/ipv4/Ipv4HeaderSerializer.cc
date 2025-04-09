@@ -40,9 +40,9 @@ void Ipv4HeaderSerializer::serialize(MemoryOutputStream& stream, const Ipv4Heade
     iphdr.ip_src.s_addr = htonl(ipv4Header.getSrcAddress().getInt());
     iphdr.ip_dst.s_addr = htonl(ipv4Header.getDestAddress().getInt());
     iphdr.ip_len = htons(ipv4Header.getTotalLengthField().get<B>());
-    if (ipv4Header.getCrcMode() != CRC_COMPUTED)
-        throw cRuntimeError("Cannot serialize Ipv4 header without a properly computed CRC");
-    iphdr.ip_sum = htons(ipv4Header.getCrc());
+    if (ipv4Header.getChecksumMode() != CHECKSUM_COMPUTED)
+        throw cRuntimeError("Cannot serialize Ipv4 header without a properly computed checksum");
+    iphdr.ip_sum = htons(ipv4Header.getChecksum());
     stream.writeBytes((uint8_t *)&iphdr, IPv4_MIN_HEADER_LENGTH);
 
     if (headerLength > IPv4_MIN_HEADER_LENGTH) {
@@ -196,8 +196,8 @@ const Ptr<Chunk> Ipv4HeaderSerializer::deserialize(MemoryInputStream& stream) co
         ipv4Header->markIncomplete();
     }
 
-    ipv4Header->setCrc(ntohs(iphdr.ip_sum));
-    ipv4Header->setCrcMode(CRC_COMPUTED);
+    ipv4Header->setChecksum(ntohs(iphdr.ip_sum));
+    ipv4Header->setChecksumMode(CHECKSUM_COMPUTED);
     delete [] buffer;
     return ipv4Header;
 }

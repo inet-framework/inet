@@ -79,8 +79,8 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
     cSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        const char *crcModeString = par("crcMode");
-        crcMode = parseCrcMode(crcModeString, false);
+        const char *checksumModeString = par("checksumMode");
+        checksumMode = parseChecksumMode(checksumModeString, false);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {
         cModule *node = findContainingNode(this);
@@ -979,7 +979,7 @@ void Ipv6NeighbourDiscovery::createAndSendRsPacket(NetworkInterface *ie)
 
     // Construct a Router Solicitation message
     auto packet = new Packet("RSpacket");
-    Icmpv6::insertCrc(crcMode, rs, packet);
+    Icmpv6::insertChecksum(checksumMode, rs, packet);
     packet->insertAtFront(rs);
     sendPacketToIpv6Module(packet, destAddr, myIPv6Address, ie->getInterfaceId());
 }
@@ -1284,7 +1284,7 @@ void Ipv6NeighbourDiscovery::createAndSendRaPacket(const Ipv6Address& destAddr, 
         }
 
         auto packet = new Packet("RApacket");
-        Icmpv6::insertCrc(crcMode, ra, packet);
+        Icmpv6::insertChecksum(checksumMode, ra, packet);
         packet->insertAtFront(ra);
         sendPacketToIpv6Module(packet, destAddr, sourceAddr, ie->getInterfaceId());
     }
@@ -1839,7 +1839,7 @@ void Ipv6NeighbourDiscovery::createAndSendNsPacket(const Ipv6Address& nsTargetAd
         ns->addChunkLength(IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH);
     }
     auto packet = new Packet("NSpacket");
-    Icmpv6::insertCrc(crcMode, ns, packet);
+    Icmpv6::insertChecksum(checksumMode, ns, packet);
     packet->insertAtFront(ns);
     sendPacketToIpv6Module(packet, dgDestAddr, dgSrcAddr, ie->getInterfaceId());
 
@@ -2089,7 +2089,7 @@ void Ipv6NeighbourDiscovery::sendSolicitedNa(Packet *packet, const Ipv6Neighbour
     Ipv6Address myIPv6Addr = ie->getProtocolData<Ipv6InterfaceData>()->getPreferredAddress();
 
     auto naPacket = new Packet("NApacket");
-    Icmpv6::insertCrc(crcMode, na, packet);
+    Icmpv6::insertChecksum(checksumMode, na, packet);
     naPacket->insertAtFront(na);
     sendPacketToIpv6Module(naPacket, naDestAddr, myIPv6Addr, ie->getInterfaceId());
 }
@@ -2163,7 +2163,7 @@ void Ipv6NeighbourDiscovery::sendUnsolicitedNa(NetworkInterface *ie)
     // obtain a reachable link-layer address, though the delay may be
     // slightly longer.
     auto packet = new Packet("NApacket");
-    Icmpv6::insertCrc(crcMode, na, packet);
+    Icmpv6::insertChecksum(checksumMode, na, packet);
     packet->insertAtFront(na);
     sendPacketToIpv6Module(packet, Ipv6Address::ALL_NODES_2, myIPv6Addr, ie->getInterfaceId());
 #endif /* INET_WITH_xMIPv6 */

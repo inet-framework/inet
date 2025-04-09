@@ -8,7 +8,7 @@
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
 import inet.networklayer.contract.ipv4.Ipv4Address;
-import inet.transportlayer.common.CrcMode;
+import inet.common.checksum.ChecksumMode;
 
 namespace inet;
 
@@ -32,8 +32,8 @@ enum IgmpType
 class IgmpMessage extends FieldsChunk
 {
     IgmpType type;         // 1 byte
-    uint16_t crc = 0;    // 2 bytes, The checksum is the 16-bit one's complement of the one's complement sum of the whole IGMP message (the entire IP payload).
-    CrcMode crcMode = CRC_MODE_UNDEFINED;  // 0 bytes, inet only
+    uint16_t checksum = 0;    // 2 bytes, The checksum is the 16-bit one's complement of the one's complement sum of the whole IGMP message (the entire IP payload).
+    ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;  // 0 bytes, inet only
 }
 
 class IgmpQuery extends IgmpMessage

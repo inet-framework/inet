@@ -18,7 +18,7 @@
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 #include "inet/networklayer/icmpv6/Ipv6NdMessage_m.h"
 #include "inet/networklayer/icmpv6/Ipv6NeighbourCache.h"
-#include "inet/transportlayer/common/CrcMode_m.h"
+#include "inet/common/checksum/ChecksumMode_m.h"
 
 namespace inet {
 
@@ -89,7 +89,7 @@ class INET_API Ipv6NeighbourDiscovery : public cSimpleModule, public LifecycleUn
     ModuleRefByPar<IInterfaceTable> ift;
     ModuleRefByPar<Ipv6RoutingTable> rt6;
     ModuleRefByPar<Icmpv6> icmpv6;
-    CrcMode crcMode = CRC_MODE_UNDEFINED;
+    ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
 
 #ifdef INET_WITH_xMIPv6
     ModuleRefByPar<xMIPv6> mipv6; // in case the node has MIP support

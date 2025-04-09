@@ -58,7 +58,7 @@ simple PingApp like IApp
         volatile double sleepDuration @unit(s) = default(0s); // Time spent in sleep between switching destinations
         bool continuous = default(false);  // Whether to continuously ping the destinations in a round-robin fashion
         bool printPing = default(false); // Log to stdout
-        string crcMode @enum("declared", "computed") = default("declared");
+        string checksumMode @enum("declared", "computed") = default("declared");
         string networkProtocol = default(""); // Uses the specified network protocol for communication; uses the address-specified default network protocol when the parameter is empty
         @display("i=block/app");
         @lifecycleSupport;
