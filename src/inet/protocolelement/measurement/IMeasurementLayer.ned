@@ -5,7 +5,6 @@
 //
 
 
-//TODO review
 package inet.protocolelement.measurement;
 
 //

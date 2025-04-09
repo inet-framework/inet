@@ -18,6 +18,8 @@ import inet.queueing.base.PacketPusherBase;
 // decision to a policy class or module that determines if a packet can be
 // aggregated with the current set.
 //
+// @see DeaggregatorBase
+//
 module AggregatorBase extends PacketPusherBase
 {
     parameters:

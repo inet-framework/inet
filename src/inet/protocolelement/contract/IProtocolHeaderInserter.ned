@@ -5,7 +5,6 @@
 //
 
 
-//TODO review
 package inet.protocolelement.contract;
 
 import inet.queueing.contract.IPacketFlow;
@@ -15,9 +14,7 @@ import inet.queueing.contract.IPacketFlow;
 // implement this interface add protocol-specific headers to packets before
 // they are transmitted. These components process packets by prepending or
 // appending headers that contain protocol information such as addressing,
-// control data, or authentication codes. They are commonly used in protocol
-// stacks to prepare outgoing packets for transmission to lower layers or
-// across networks.
+// control data, or authentication codes.
 //
 moduleinterface IProtocolHeaderInserter extends IPacketFlow
 {

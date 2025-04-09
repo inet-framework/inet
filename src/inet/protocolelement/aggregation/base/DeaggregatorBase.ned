@@ -5,7 +5,6 @@
 //
 
 
-//TODO review
 package inet.protocolelement.aggregation.base;
 
 import inet.queueing.base.PacketPusherBase;
@@ -16,6 +15,8 @@ import inet.queueing.base.PacketPusherBase;
 // aggregation, extracting individual packets that were previously combined to
 // reduce header overhead. The module receives an aggregated packet, extracts the
 // individual subpackets, and forwards each one separately through its output gate.
+//
+// @see AggregatorBase
 //
 simple DeaggregatorBase extends PacketPusherBase
 {
