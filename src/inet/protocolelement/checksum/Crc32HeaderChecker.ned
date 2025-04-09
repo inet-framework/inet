@@ -10,12 +10,11 @@ package inet.protocolelement.checksum;
 import inet.protocolelement.checksum.ChecksumHeaderChecker;
 
 //
-// Inserts a CRC-32 (Cyclic Redundancy Check) headers into packets to enable data
-// integrity verification. This module extends ChecksumHeaderChecker and adds the
-// ability to specify the position of the CRC header (front or back of the
-// packet). It processes packets by creating a new CRC header, computing the
-// CRC value based on the packet content and CRC mode, setting the CRC value
-// and mode in the header, and inserting the header at the specified position.
+// Checks CRC-32 (Cyclic Redundancy Check) headers in packets to verify data
+// integrity. This module extends ChecksumHeaderChecker and specializes it
+// to use the "crc32" checksum type.
+//
+// @see Crc32HeaderInserter
 //
 simple Crc32HeaderChecker extends ChecksumHeaderChecker
 {
