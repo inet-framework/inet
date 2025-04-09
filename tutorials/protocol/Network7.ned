@@ -8,8 +8,8 @@
 package inet.tutorials.protocol;
 
 import inet.protocolelement.acknowledgement.Resending;
-import inet.protocolelement.checksum.FcsHeaderChecker;
-import inet.protocolelement.checksum.FcsHeaderInserter;
+import inet.protocolelement.checksum.Crc32HeaderChecker;
+import inet.protocolelement.checksum.Crc32HeaderInserter;
 import inet.protocolelement.common.InterpacketGapInserter;
 import inet.protocolelement.ordering.Reordering;
 import inet.protocolelement.ordering.SequenceNumbering;
@@ -42,7 +42,7 @@ module ClientHost7
         resending: Resending {
             @display("p=150,500");
         }
-        fcsInserter: FcsHeaderInserter {
+        fcsInserter: Crc32HeaderInserter {
             @display("p=150,600");
         }
         InterpacketGapInserter: InterpacketGapInserter {
@@ -75,7 +75,7 @@ module ServerHost7
         reordering: Reordering {
             @display("p=150,200");
         }
-        fcsChecker: FcsHeaderChecker {
+        fcsChecker: Crc32HeaderChecker {
             @display("p=150,300");
         }
         receiver: PacketReceiver {

@@ -15,8 +15,8 @@ import inet.protocolelement.acknowledgement.Resending;
 import inet.protocolelement.acknowledgement.SendWithAcknowledge;
 import inet.protocolelement.aggregation.SubpacketLengthHeaderBasedAggregator;
 import inet.protocolelement.aggregation.SubpacketLengthHeaderBasedDeaggregator;
-import inet.protocolelement.checksum.FcsHeaderChecker;
-import inet.protocolelement.checksum.FcsHeaderInserter;
+import inet.protocolelement.checksum.Crc32HeaderChecker;
+import inet.protocolelement.checksum.Crc32HeaderInserter;
 import inet.protocolelement.dispatching.ReceiveWithProtocol;
 import inet.protocolelement.dispatching.SendWithProtocol;
 import inet.protocolelement.forwarding.Forwarding;
@@ -199,7 +199,7 @@ module Interface extends NetworkInterface
         sendWithProtocol: SendWithProtocol {
             @display("p=150,500");
         }
-        fcsInserter: FcsHeaderInserter {
+        fcsInserter: Crc32HeaderInserter {
             @display("p=150,600");
         }
         transmitter: PacketTransmitter {
@@ -217,7 +217,7 @@ module Interface extends NetworkInterface
         receiveWithProtocol: ReceiveWithProtocol {
             @display("p=450,400");
         }
-        fcsChecker: FcsHeaderChecker {
+        fcsChecker: Crc32HeaderChecker {
             @display("p=450,500");
         }
     connections:
