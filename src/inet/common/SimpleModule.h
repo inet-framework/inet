@@ -15,6 +15,13 @@ namespace inet {
 /**
  * A base module for all INET simple modules that implements
  * behavior common to all modules.
+ * 
+ * Derived classes can implement resolveDirective() to support
+ * %c style directives that can be used in displayStringTextFormat.
+ * 
+ * refreshDisplay() implements displaying the displayStringTextFormat
+ * parameter above the module in the t tag.
+ * 
  */
 class INET_API SimpleModule : public cSimpleModule, public StringFormat::IDirectiveResolver
 {

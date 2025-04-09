@@ -19,7 +19,7 @@ simple UdpEchoApp like IApp
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
         int localPort;  // Local port to listen on
-        string displayStringTextFormat @mutable = default("echoed: {numEchoed} pks");
+        displayStringTextFormat = default("echoed: {numEchoed} pks");
         @display("i=block/app");
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finished

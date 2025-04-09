@@ -10,12 +10,10 @@ namespace inet {
 
 void SimpleModule::refreshDisplay() const
 {
-    if (hasPar("displayStringTextFormat")) {
-        auto displayStringTextFormat = par("displayStringTextFormat").stringValue();
-        if (!opp_isempty(displayStringTextFormat)) {
-            auto text = StringFormat::formatString(displayStringTextFormat, this);
-            getDisplayString().setTagArg("t", 0, text.c_str());
-        }
+    auto displayStringTextFormat = par("displayStringTextFormat").stringValue();
+    if (!opp_isempty(displayStringTextFormat)) {
+        auto text = StringFormat::formatString(displayStringTextFormat, this);
+        getDisplayString().setTagArg("t", 0, text.c_str());
     }
 }
 

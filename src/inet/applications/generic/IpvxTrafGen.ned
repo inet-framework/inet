@@ -29,7 +29,7 @@ simple IpvxTrafGen like IIpvxTrafficGenerator
         int protocol; // Value for IPv4, IPv6 protocol field, accepts only between 143 and 254
         volatile int packetLength @unit(B); // Packet length in bytes
         string destAddresses = default(""); // List of destination addresses, separated by spaces
-        string displayStringTextFormat @mutable = default("rcvd: {numReceived} pks\nsent: {numSent} pks");
+        displayStringTextFormat = default("rcvd: {numReceived} pks\nsent: {numSent} pks");
         @lifecycleSupport;
         @display("i=block/source");
         @signal[packetSent](type=inet::Packet);
