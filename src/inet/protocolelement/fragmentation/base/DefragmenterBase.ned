@@ -5,13 +5,12 @@
 //
 
 
-//TODO review
 package inet.protocolelement.fragmentation.base;
 
 import inet.queueing.base.PacketPusherBase;
 
 //
-// Base module for packet defragmenters that reassemble original packets from
+// Base type for packet defragmenters that reassemble original packets from
 // fragments. Collects and stores fragments until all fragments of a packet are
 // received, then reconstructs the original packet.
 //
