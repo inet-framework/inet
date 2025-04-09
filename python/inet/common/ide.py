@@ -55,6 +55,11 @@ def debug_program(name, program, args, working_directory, remove_launch=True, de
     launch_configuration = org.omnetpp.dsp.DSPUtils.createDebugConfiguration(name, program, args, working_directory, debugger_init_commands)
     return org.omnetpp.dsp.DSPUtils.debugConfiguration(launch_configuration, remove_launch)
 
+def create_eventlog(file_path):
+    org = get_org_package()
+    file_reader = org.omnetpp.eventlog.engine.FileReader(file_path)
+    return org.omnetpp.eventlog.EventLog(file_reader)
+
 def register_key_bindings():
     ip = IPython.get_ipython()
     @ip.pt_app.key_bindings.add('c-e')
