@@ -41,18 +41,25 @@ class CompareSimulationsTaskResult(TaskResult):
                 self.statistical_comparison_result = "IDENTICAL"
                 self.statistical_comparison_color = COLOR_GREEN
 
+            self.reason = ""
+            self.result = "IDENTICAL"
+            self.color = COLOR_GREEN
             if self.stdout_trajectory_comparison_result == "DIVERGENT":
-                self.result = "DIVERGENT"
+                if self.result == "DONE":
+                    self.result = "DIVERGENT"
                 self.color = COLOR_YELLOW
-            elif self.fingerprint_trajectory_comparison_result == "DIVERGENT":
-                self.result = "DIVERGENT"
+                self.reason = self.reason + ", different STDOUT trajectories"
+            if self.fingerprint_trajectory_comparison_result == "DIVERGENT":
+                if self.result == "DONE":
+                    self.result = "DIVERGENT"
                 self.color = COLOR_YELLOW
-            elif self.statistical_comparison_result == "DIFFERENT":
-                self.result = "DIFFERENT"
+                self.reason = self.reason + ", different fingerprint trajectories"
+            if self.statistical_comparison_result == "DIFFERENT":
+                if self.result == "DONE":
+                    self.result = "DIFFERENT"
                 self.color = COLOR_YELLOW
-            else:
-                self.result = "IDENTICAL"
-                self.color = COLOR_GREEN
+                self.reason = self.reason + ", different statistics"
+            self.reason = None if self.reason == "" else self.reason[2:]
         else:
             self.fingerprint_trajectory_divergence_position = None
             self.different_statistical_results = pd.DataFrame()
