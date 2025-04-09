@@ -15,9 +15,9 @@
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/transportlayer/common/CrcMode_m.h"
+#include "inet/common/checksum/ChecksumMode_m.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
-#include "inet/transportlayer/tcp_common/TcpCrcInsertionHook.h"
+#include "inet/transportlayer/tcp_common/TcpChecksumInsertionHook.h"
 #include "inet/transportlayer/tcp_common/TcpHeader_m.h"
 #include "inet/transportlayer/tcp_lwip/LwipTcpStackIf.h"
 #include "inet/transportlayer/tcp_lwip/TcpLwipConnection.h"
@@ -118,7 +118,7 @@ class INET_API TcpLwip : public cSimpleModule, public LwipTcpStackIf, public Lif
     LwipTcpLayer *pLwipTcpLayerM = nullptr;
     bool isAliveM = false;
     Packet *pCurTcpSegM = nullptr;
-    CrcMode crcMode = CRC_MODE_UNDEFINED;
+    ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
 };
 
 } // namespace tcp

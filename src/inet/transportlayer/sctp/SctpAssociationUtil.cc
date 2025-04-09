@@ -363,8 +363,8 @@ void SctpAssociation::sendToIP(Packet *pkt, const Ptr<SctpHeader>& sctpmsg,
     // Final touches on the segment before sending
     sctpmsg->setSrcPort(localPort);
     sctpmsg->setDestPort(remotePort);
-    sctpmsg->setCrc(0);
-    sctpmsg->setCrcMode(sctpMain->crcMode);
+    sctpmsg->setChecksum(0);
+    sctpmsg->setChecksumMode(sctpMain->checksumMode);
     sctpmsg->setChecksumOk(true);
     EV_INFO << "SendToIP: localPort=" << localPort << " remotePort=" << remotePort << " dest=" << dest << "\n";
     const SctpChunk *chunk = sctpmsg->peekFirstChunk();
@@ -391,7 +391,7 @@ void SctpAssociation::sendToIP(Packet *pkt, const Ptr<SctpHeader>& sctpmsg,
         udpHeader->setDestinationPort(SCTP_UDP_PORT);
         udpHeader->setTotalLengthField(udpHeader->getChunkLength() + pkt->getDataLength());
         EV_INFO << "Packet: " << pkt << endl;
-        udpHeader->setCrcMode(sctpMain->crcMode);
+        udpHeader->setChecksumMode(sctpMain->checksumMode);
         insertTransportProtocolHeader(pkt, Protocol::udp, udpHeader);
         EV_INFO << "After udp header added " << pkt << endl;
         pkt->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::udp);

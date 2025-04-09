@@ -5,7 +5,7 @@
 //
 
 
-#include "inet/transportlayer/tcp_common/TcpCrcInsertionHook.h"
+#include "inet/transportlayer/tcp_common/TcpChecksumInsertionHook.h"
 
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/checksum/TcpIpChecksum.h"
@@ -20,9 +20,9 @@
 namespace inet {
 namespace tcp {
 
-Define_Module(TcpCrcInsertionHook);
+Define_Module(TcpChecksumInsertionHook);
 
-INetfilter::IHook::Result TcpCrcInsertionHook::datagramPostRoutingHook(Packet *packet)
+INetfilter::IHook::Result TcpChecksumInsertionHook::datagramPostRoutingHook(Packet *packet)
 {
     Enter_Method("datagramPostRoutingHook");
 
@@ -34,43 +34,43 @@ INetfilter::IHook::Result TcpCrcInsertionHook::datagramPostRoutingHook(Packet *p
         ASSERT(!networkHeader->isFragment());
         packet->eraseAtFront(networkHeader->getChunkLength());
         auto tcpHeader = packet->removeAtFront<TcpHeader>();
-        ASSERT(tcpHeader->getCrcMode() == CRC_COMPUTED);
+        ASSERT(tcpHeader->getChecksumMode() == CHECKSUM_COMPUTED);
         const L3Address& srcAddress = networkHeader->getSourceAddress();
         const L3Address& destAddress = networkHeader->getDestinationAddress();
-        insertCrc(networkProtocol, srcAddress, destAddress, tcpHeader, packet);
+        insertChecksum(networkProtocol, srcAddress, destAddress, tcpHeader, packet);
         packet->insertAtFront(tcpHeader);
         packet->insertAtFront(networkHeader);
     }
     return ACCEPT;
 }
 
-void TcpCrcInsertionHook::insertCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<TcpHeader>& tcpHeader, Packet *packet)
+void TcpChecksumInsertionHook::insertChecksum(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<TcpHeader>& tcpHeader, Packet *packet)
 {
-    auto crcMode = tcpHeader->getCrcMode();
-    switch (crcMode) {
-        case CRC_DECLARED_CORRECT:
-            // if the CRC mode is declared to be correct, then set the CRC to an easily recognizable value
-            tcpHeader->setCrc(0xC00D);
+    auto checksumMode = tcpHeader->getChecksumMode();
+    switch (checksumMode) {
+        case CHECKSUM_DECLARED_CORRECT:
+            // if the checksum mode is declared to be correct, then set the checksum to an easily recognizable value
+            tcpHeader->setChecksum(0xC00D);
             break;
-        case CRC_DECLARED_INCORRECT:
-            // if the CRC mode is declared to be incorrect, then set the CRC to an easily recognizable value
-            tcpHeader->setCrc(0xBAAD);
+        case CHECKSUM_DECLARED_INCORRECT:
+            // if the checksum mode is declared to be incorrect, then set the checksum to an easily recognizable value
+            tcpHeader->setChecksum(0xBAAD);
             break;
-        case CRC_COMPUTED: {
-            // if the CRC mode is computed, then compute the CRC and set it
+        case CHECKSUM_COMPUTED: {
+            // if the checksum mode is computed, then compute the checksum and set it
             // this computation is delayed after the routing decision, see INetfilter hook
-            tcpHeader->setCrc(0x0000); // make sure that the CRC is 0 in the TCP header before computing the CRC
+            tcpHeader->setChecksum(0x0000); // make sure that the checksum is 0 in the TCP header before computing the checksum
             auto tcpData = packet->peekData(Chunk::PF_ALLOW_EMPTY);
-            auto crc = computeCrc(networkProtocol, srcAddress, destAddress, tcpHeader, tcpData);
-            tcpHeader->setCrc(crc);
+            auto checksum = computeChecksum(networkProtocol, srcAddress, destAddress, tcpHeader, tcpData);
+            tcpHeader->setChecksum(checksum);
             break;
         }
         default:
-            throw cRuntimeError("Unknown CRC mode");
+            throw cRuntimeError("Unknown checksum mode");
     }
 }
 
-uint16_t TcpCrcInsertionHook::computeCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<const TcpHeader>& tcpHeader, const Ptr<const Chunk>& tcpData)
+uint16_t TcpChecksumInsertionHook::computeChecksum(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<const TcpHeader>& tcpHeader, const Ptr<const Chunk>& tcpData)
 {
     auto pseudoHeader = makeShared<TransportPseudoHeader>();
     pseudoHeader->setSrcAddress(srcAddress);
@@ -89,8 +89,8 @@ uint16_t TcpCrcInsertionHook::computeCrc(const Protocol *networkProtocol, const 
     Chunk::serialize(stream, pseudoHeader);
     Chunk::serialize(stream, tcpHeader);
     Chunk::serialize(stream, tcpData);
-    uint16_t crc = TcpIpChecksum::checksum(stream.getData());
-    return crc;
+    uint16_t checksum = TcpIpChecksum::checksum(stream.getData());
+    return checksum;
 }
 
 } // namespace tcp

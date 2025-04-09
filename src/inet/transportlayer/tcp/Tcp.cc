@@ -51,8 +51,8 @@ void Tcp::initialize(int stage)
     OperationalBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        const char *crcModeString = par("crcMode");
-        crcMode = parseCrcMode(crcModeString, false);
+        const char *checksumModeString = par("checksumMode");
+        checksumMode = parseChecksumMode(checksumModeString, false);
 
         lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
 
@@ -65,21 +65,21 @@ void Tcp::initialize(int stage)
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
         registerService(Protocol::tcp, gate("appIn"), gate("appOut"));
         registerProtocol(Protocol::tcp, gate("ipOut"), gate("ipIn"));
-        if (crcMode == CRC_COMPUTED) {
-            cModuleType *moduleType = cModuleType::get("inet.transportlayer.tcp_common.TcpCrcInsertionHook");
-            auto crcInsertion = check_and_cast<TcpCrcInsertionHook *>(moduleType->create("crcInsertion", this));
-            crcInsertion->finalizeParameters();
-            crcInsertion->callInitialize();
+        if (checksumMode == CHECKSUM_COMPUTED) {
+            cModuleType *moduleType = cModuleType::get("inet.transportlayer.tcp_common.TcpChecksumInsertionHook");
+            auto checksumInsertion = check_and_cast<TcpChecksumInsertionHook *>(moduleType->create("checksumInsertion", this));
+            checksumInsertion->finalizeParameters();
+            checksumInsertion->callInitialize();
 
 #ifdef INET_WITH_IPv4
             auto ipv4 = dynamic_cast<INetfilter *>(findModuleByPath("^.ipv4.ip"));
             if (ipv4 != nullptr)
-                ipv4->registerHook(0, crcInsertion);
+                ipv4->registerHook(0, checksumInsertion);
 #endif
 #ifdef INET_WITH_IPv6
             auto ipv6 = dynamic_cast<INetfilter *>(findModuleByPath("^.ipv6.ipv6"));
             if (ipv6 != nullptr)
-                ipv6->registerHook(0, crcInsertion);
+                ipv6->registerHook(0, checksumInsertion);
 #endif
         }
     }
@@ -136,8 +136,8 @@ void Tcp::handleLowerPacket(Packet *packet)
 {
     auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
     if (protocol == &Protocol::tcp) {
-        if (!checkCrc(packet)) {
-            EV_WARN << "Tcp segment has wrong CRC, dropped\n";
+        if (!checkChecksum(packet)) {
+            EV_WARN << "Tcp segment has wrong checksum, dropped\n";
             PacketDropDetails details;
             details.setReason(INCORRECTLY_RECEIVED);
             emit(packetDroppedSignal, packet, &details);
@@ -393,13 +393,13 @@ void Tcp::reset()
 }
 
 // packet contains the tcpHeader
-bool Tcp::checkCrc(Packet *tcpSegment)
+bool Tcp::checkChecksum(Packet *tcpSegment)
 {
     auto tcpHeader = tcpSegment->peekAtFront<TcpHeader>();
 
-    switch (tcpHeader->getCrcMode()) {
-        case CRC_COMPUTED: {
-            // check CRC:
+    switch (tcpHeader->getChecksumMode()) {
+        case CHECKSUM_COMPUTED: {
+            // check checksum:
             auto networkProtocol = tcpSegment->getTag<NetworkProtocolInd>()->getProtocol();
             const std::vector<uint8_t> tcpBytes = tcpSegment->peekDataAsBytes()->getBytes();
             auto pseudoHeader = makeShared<TransportPseudoHeader>();
@@ -421,17 +421,17 @@ bool Tcp::checkCrc(Packet *tcpSegment)
             MemoryOutputStream stream;
             Chunk::serialize(stream, pseudoHeader);
             Chunk::serialize(stream, tcpSegment->peekData());
-            uint16_t crc = TcpIpChecksum::checksum(stream.getData());
-            return crc == 0;
+            uint16_t checksum = TcpIpChecksum::checksum(stream.getData());
+            return checksum == 0;
         }
-        case CRC_DECLARED_CORRECT:
+        case CHECKSUM_DECLARED_CORRECT:
             return true;
-        case CRC_DECLARED_INCORRECT:
+        case CHECKSUM_DECLARED_INCORRECT:
             return false;
         default:
             break;
     }
-    throw cRuntimeError("unknown CRC mode: %d", tcpHeader->getCrcMode());
+    throw cRuntimeError("unknown checksum mode: %d", tcpHeader->getChecksumMode());
 }
 
 void Tcp::refreshDisplay() const

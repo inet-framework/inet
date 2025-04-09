@@ -8,7 +8,7 @@
 import inet.common.INETDefs;
 import inet.networklayer.common.L3Address;
 import inet.transportlayer.contract.TransportHeaderBase;
-import inet.transportlayer.common.CrcMode;
+import inet.common.checksum.ChecksumMode;
 import inet.common.packet.Message;
 
 namespace inet::sctp;
@@ -23,8 +23,8 @@ class SctpHeader extends TransportHeaderBase
     // Verification Tag
     uint32_t vTag;
     bool checksumOk;
-    uint32_t crc = 0;
-    CrcMode crcMode = CRC_MODE_UNDEFINED;
+    uint32_t checksum = 0;
+    ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
     unsigned short headerLength = 12;
     abstract SctpChunk *sctpChunks[];
 }

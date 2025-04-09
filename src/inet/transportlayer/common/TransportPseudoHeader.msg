@@ -12,7 +12,7 @@ import inet.networklayer.common.L3Address;
 namespace inet;
 
 //
-// Represents a TCP/UDP pseudo header, used for crc calculation.
+// Represents a TCP/UDP pseudo header, used for checksum calculation.
 //
 class TransportPseudoHeader extends FieldsChunk
 {

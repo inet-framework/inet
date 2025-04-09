@@ -70,8 +70,8 @@ void TcpLwip::initialize(int stage)
         if (*q != '\0')
             throw cRuntimeError("Don't use obsolete receiveQueueClass = \"%s\" parameter", q);
 
-        const char *crcModeString = par("crcMode");
-        crcMode = parseCrcMode(crcModeString, false);
+        const char *checksumModeString = par("checksumMode");
+        checksumMode = parseChecksumMode(checksumModeString, false);
 
         WATCH_MAP(tcpAppConnMapM);
 
@@ -88,21 +88,21 @@ void TcpLwip::initialize(int stage)
         registerService(Protocol::tcp, gate("appIn"), gate("appOut"));
         registerProtocol(Protocol::tcp, gate("ipOut"), gate("ipIn"));
 
-        if (crcMode == CRC_COMPUTED) {
-            cModuleType *moduleType = cModuleType::get("inet.transportlayer.tcp_common.TcpCrcInsertionHook");
-            auto *crcInsertion = check_and_cast<TcpCrcInsertionHook *>(moduleType->create("crcInsertion", this));
-            crcInsertion->finalizeParameters();
-            crcInsertion->callInitialize();
+        if (checksumMode == CHECKSUM_COMPUTED) {
+            cModuleType *moduleType = cModuleType::get("inet.transportlayer.tcp_common.TcpChecksumInsertionHook");
+            auto *checksumInsertion = check_and_cast<TcpChecksumInsertionHook *>(moduleType->create("checksumInsertion", this));
+            checksumInsertion->finalizeParameters();
+            checksumInsertion->callInitialize();
 
 #ifdef INET_WITH_IPv4
             auto ipv4 = dynamic_cast<INetfilter *>(findModuleByPath("^.ipv4.ip"));
             if (ipv4 != nullptr)
-                ipv4->registerHook(0, crcInsertion);
+                ipv4->registerHook(0, checksumInsertion);
 #endif
 #ifdef INET_WITH_IPv6
             auto ipv6 = dynamic_cast<INetfilter *>(findModuleByPath("^.ipv6.ipv6"));
             if (ipv6 != nullptr)
-                ipv6->registerHook(0, crcInsertion);
+                ipv6->registerHook(0, checksumInsertion);
 #endif
         }
     }
@@ -138,17 +138,17 @@ void TcpLwip::handleLowerPacket(Packet *packet)
     destAddr = packet->getTag<L3AddressInd>()->getDestAddress();
     interfaceId = (packet->getTag<InterfaceInd>())->getInterfaceId();
 
-    switch (tcpsegP->getCrcMode()) {
-        case CRC_DECLARED_INCORRECT:
-            EV_WARN << "CRC error, packet dropped\n";
+    switch (tcpsegP->getChecksumMode()) {
+        case CHECKSUM_DECLARED_INCORRECT:
+            EV_WARN << "checksum error, packet dropped\n";
             delete packet;
             return;
-        case CRC_DECLARED_CORRECT: {
+        case CHECKSUM_DECLARED_CORRECT: {
             // modify to calculated, for serializing
             packet->trimFront();
             const auto& newTcpsegP = packet->removeAtFront<TcpHeader>();
-            newTcpsegP->setCrcMode(CRC_COMPUTED);
-            newTcpsegP->setCrc(0);
+            newTcpsegP->setChecksumMode(CHECKSUM_COMPUTED);
+            newTcpsegP->setChecksum(0);
             packet->insertAtFront(newTcpsegP);
             tcpsegP = newTcpsegP;
             break;
@@ -604,8 +604,8 @@ void TcpLwip::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP, L3Add
     ASSERT(packet);
 
     auto tcpHdr = packet->removeAtFront<TcpHeader>();
-    tcpHdr->setCrc(0);
-    tcpHdr->setCrcMode(crcMode);
+    tcpHdr->setChecksum(0);
+    tcpHdr->setChecksumMode(checksumMode);
     insertTransportProtocolHeader(packet, Protocol::tcp, tcpHdr);
 
     EV_TRACE << this << ": Sending: conn=" << conn << ", data: " << dataP << " of len " << lenP

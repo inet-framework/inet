@@ -27,9 +27,9 @@ void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     struct tcphdr tcp;
 
     // fill Tcp header structure
-    if (tcpHeader->getCrcMode() != CRC_COMPUTED)
-        throw cRuntimeError("Cannot serialize Tcp header without a properly computed CRC");
-    tcp.th_sum = htons(tcpHeader->getCrc());
+    if (tcpHeader->getChecksumMode() != CHECKSUM_COMPUTED)
+        throw cRuntimeError("Cannot serialize Tcp header without a properly computed checksum");
+    tcp.th_sum = htons(tcpHeader->getChecksum());
     tcp.th_sport = htons(tcpHeader->getSrcPort());
     tcp.th_dport = htons(tcpHeader->getDestPort());
     tcp.th_seq = htonl(tcpHeader->getSequenceNo());
@@ -192,8 +192,8 @@ const Ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) con
         }
     }
     tcpHeader->setHeaderLength(headerLength);
-    tcpHeader->setCrc(ntohs(tcp.th_sum));
-    tcpHeader->setCrcMode(CRC_COMPUTED);
+    tcpHeader->setChecksum(ntohs(tcp.th_sum));
+    tcpHeader->setChecksumMode(CHECKSUM_COMPUTED);
     delete [] buffer;
     return tcpHeader;
 }

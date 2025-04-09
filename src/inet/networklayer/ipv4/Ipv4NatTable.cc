@@ -14,7 +14,7 @@
 #include "inet/transportlayer/common/L4Tools.h"
 
 #ifdef INET_WITH_TCP_COMMON
-#include "inet/transportlayer/tcp_common/TcpCrcInsertionHook.h"
+#include "../../transportlayer/tcp_common/TcpChecksumInsertionHook.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 #endif
 
@@ -121,7 +121,7 @@ INetfilter::IHook::Result Ipv4NatTable::processPacket(Packet *packet, INetfilter
                     udpHeader->setDestPort(natEntry.getDestPort());
                 if (natEntry.getSrcPort() != -1)
                     udpHeader->setSrcPort(natEntry.getSrcPort());
-                Udp::insertCrc(&Protocol::ipv4, ipv4Header->getSrcAddress(), ipv4Header->getDestAddress(), udpHeader, packet);
+                Udp::insertChecksum(&Protocol::ipv4, ipv4Header->getSrcAddress(), ipv4Header->getDestAddress(), udpHeader, packet);
                 insertTransportProtocolHeader(packet, Protocol::udp, udpHeader);
             }
             else
@@ -134,7 +134,7 @@ INetfilter::IHook::Result Ipv4NatTable::processPacket(Packet *packet, INetfilter
                     tcpHeader->setDestPort(natEntry.getDestPort());
                 if (natEntry.getSrcPort() != -1)
                     tcpHeader->setSrcPort(natEntry.getSrcPort());
-                tcp::TcpCrcInsertionHook::insertCrc(&Protocol::ipv4, ipv4Header->getSrcAddress(), ipv4Header->getDestAddress(), tcpHeader, packet);
+                tcp::TcpChecksumInsertionHook::insertChecksum(&Protocol::ipv4, ipv4Header->getSrcAddress(), ipv4Header->getDestAddress(), tcpHeader, packet);
                 insertTransportProtocolHeader(packet, Protocol::tcp, tcpHeader);
             }
             else

@@ -20,10 +20,10 @@ void UdpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     stream.writeUint16Be(udpHeader->getSourcePort());
     stream.writeUint16Be(udpHeader->getDestinationPort());
     stream.writeUint16Be(udpHeader->getTotalLengthField().get<B>());
-    auto crcMode = udpHeader->getCrcMode();
-    if (crcMode != CRC_DISABLED && crcMode != CRC_COMPUTED)
-        throw cRuntimeError("Cannot serialize UDP header without turned off or properly computed CRC, try changing the value of crcMode parameter for Udp");
-    stream.writeUint16Be(udpHeader->getCrc());
+    auto checksumMode = udpHeader->getChecksumMode();
+    if (checksumMode != CHECKSUM_DISABLED && checksumMode != CHECKSUM_COMPUTED)
+        throw cRuntimeError("Cannot serialize UDP header without turned off or properly computed checksum, try changing the value of checksumMode parameter for Udp");
+    stream.writeUint16Be(udpHeader->getChecksum());
 }
 
 const Ptr<Chunk> UdpHeaderSerializer::deserialize(MemoryInputStream& stream) const
@@ -32,9 +32,9 @@ const Ptr<Chunk> UdpHeaderSerializer::deserialize(MemoryInputStream& stream) con
     udpHeader->setSourcePort(stream.readUint16Be());
     udpHeader->setDestinationPort(stream.readUint16Be());
     udpHeader->setTotalLengthField(B(stream.readUint16Be()));
-    auto crc = stream.readUint16Be();
-    udpHeader->setCrc(crc);
-    udpHeader->setCrcMode(crc == 0 ? CRC_DISABLED : CRC_COMPUTED);
+    auto checksum = stream.readUint16Be();
+    udpHeader->setChecksum(checksum);
+    udpHeader->setChecksumMode(checksum == 0 ? CHECKSUM_DISABLED : CHECKSUM_COMPUTED);
     return udpHeader;
 }
 

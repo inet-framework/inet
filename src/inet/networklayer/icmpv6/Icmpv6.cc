@@ -59,7 +59,7 @@ void Icmpv6::handleMessage(cMessage *msg)
 
 void Icmpv6::processICMPv6Message(Packet *packet)
 {
-    if (!verifyCrc(packet)) {
+    if (!verifyChecksum(packet)) {
         // drop packet
         EV_WARN << "incoming ICMP packet has wrong CRC, dropped\n";
         PacketDropDetails details;
@@ -358,7 +358,7 @@ void Icmpv6::insertCrc(CrcMode crcMode, const Ptr<Icmpv6Header>& icmpHeader, Pac
     }
 }
 
-bool Icmpv6::verifyCrc(const Packet *packet)
+bool Icmpv6::verifyChecksum(const Packet *packet)
 {
     const auto& icmpHeader = packet->peekAtFront<Icmpv6Header>(b(-1), Chunk::PF_ALLOW_INCORRECT);
     switch (icmpHeader->getCrcMode()) {

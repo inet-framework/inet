@@ -42,7 +42,7 @@ class INET_API Icmpv6 : public cSimpleModule, public LifecycleUnsupported, publi
      */
     virtual void sendErrorMessage(Packet *datagram, Icmpv6Type type, int code);
 
-    static bool verifyCrc(const Packet *packet);
+    static bool verifyChecksum(const Packet *packet);
 
   protected:
     // internal helper functions

@@ -55,7 +55,7 @@ class INET_API Icmp : public cSimpleModule, public DefaultProtocolRegistrationLi
     virtual void sendPtbMessage(Packet *packet, int mtu);
     static void insertCrc(CrcMode crcMode, const Ptr<IcmpHeader>& icmpHeader, Packet *payload);
     void insertCrc(const Ptr<IcmpHeader>& icmpHeader, Packet *payload) { insertCrc(crcMode, icmpHeader, payload); }
-    bool verifyCrc(const Packet *packet);
+    bool verifyChecksum(const Packet *packet);
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

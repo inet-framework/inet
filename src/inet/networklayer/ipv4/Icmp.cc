@@ -218,7 +218,7 @@ bool Icmp::possiblyLocalBroadcast(const Ipv4Address& addr, int interfaceId)
 
 void Icmp::processIcmpMessage(Packet *packet)
 {
-    if (!verifyCrc(packet)) {
+    if (!verifyChecksum(packet)) {
         EV_WARN << "incoming ICMP packet has wrong CRC, dropped\n";
         // drop packet
         PacketDropDetails details;
@@ -372,7 +372,7 @@ void Icmp::insertCrc(CrcMode crcMode, const Ptr<IcmpHeader>& icmpHeader, Packet 
     }
 }
 
-bool Icmp::verifyCrc(const Packet *packet)
+bool Icmp::verifyChecksum(const Packet *packet)
 {
     const auto& icmpHeader = packet->peekAtFront<IcmpHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT);
     switch (icmpHeader->getCrcMode()) {
