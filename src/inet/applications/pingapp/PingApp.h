@@ -16,7 +16,7 @@
 #include "inet/common/socket/SocketMap.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/contract/INetworkSocket.h"
-#include "inet/transportlayer/common/CrcMode_m.h"
+#include "inet/common/checksum/ChecksumMode_m.h"
 
 namespace inet {
 
@@ -44,7 +44,7 @@ class INET_API PingApp : public ApplicationBase, public INetworkSocket::ICallbac
     int destAddrIdx = -1;
     simtime_t startTime;
     simtime_t stopTime;
-    CrcMode crcMode = CRC_MODE_UNDEFINED;
+    ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
     bool printPing = false;
     bool continuous = false;
 

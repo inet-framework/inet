@@ -5,26 +5,26 @@
 //
 
 
-#ifndef __INET_SCTPCRCINSERTIONHOOK_H
-#define __INET_SCTPCRCINSERTIONHOOK_H
+#ifndef __INET_SCTPCHECKSUMINSERTIONHOOK_H
+#define __INET_SCTPCHECKSUMINSERTIONHOOK_H
 
 #include "inet/common/Protocol.h"
 #include "inet/networklayer/contract/INetfilter.h"
-#include "inet/transportlayer/common/CrcMode_m.h"
-#include "inet/transportlayer/sctp/SctpCrcInsertionHook.h"
+#include "inet/common/checksum/ChecksumMode_m.h"
+#include "inet/transportlayer/sctp/SctpChecksumInsertionHook.h"
 #include "inet/transportlayer/sctp/SctpHeader.h"
 
 namespace inet {
 namespace sctp {
 
-class INET_API SctpCrcInsertion : public cSimpleModule, public NetfilterBase::HookBase
+class INET_API SctpChecksumInsertion : public cSimpleModule, public NetfilterBase::HookBase
 {
-    CrcMode crcMode = CRC_MODE_UNDEFINED;
+    ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
 
   public:
-    SctpCrcInsertion() {}
-    void setCrcMode(CrcMode crcModeP) { crcMode = crcModeP; }
-    void insertCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<SctpHeader>& sctpHeader, Packet *packet);
+    SctpChecksumInsertion() {}
+    void setChecksumMode(ChecksumMode checksumModeP) { checksumMode = checksumModeP; }
+    void insertChecksum(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<SctpHeader>& sctpHeader, Packet *packet);
 //    uint32_t checksum(const std::vector<uint8_t>& buf, uint32_t len);
     uint32_t checksum(unsigned char const *, unsigned int);
 

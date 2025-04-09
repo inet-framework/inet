@@ -68,8 +68,8 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 #**.vector-recording = false
 
-**.sctp.crcMode = "computed"
-**.ipv4.**.crcMode = "computed"
+**.sctp.checksumMode = "computed"
+**.ipv4.**.checksumMode = "computed"
 
 **.sctp_server.numPcapRecorders = 1
 **.sctp_server.pcapRecorder[0].pcapFile = "server1.pcap"

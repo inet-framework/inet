@@ -15,9 +15,9 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/base/TransportProtocolBase.h"
-#include "inet/transportlayer/common/CrcMode_m.h"
+#include "inet/common/checksum/ChecksumMode_m.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
-#include "inet/transportlayer/tcp_common/TcpCrcInsertionHook.h"
+#include "inet/transportlayer/tcp_common/TcpChecksumInsertionHook.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 
 namespace inet {
@@ -174,7 +174,7 @@ class INET_API Tcp : public TransportProtocolBase
     virtual void refreshDisplay() const override;
 
   public:
-    CrcMode crcMode = CRC_MODE_UNDEFINED;
+    ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
     int msl;
 
   public:
@@ -236,7 +236,7 @@ class INET_API Tcp : public TransportProtocolBase
     // called at shutdown/crash
     virtual void reset();
 
-    bool checkCrc(Packet *pk);
+    bool checkChecksum(Packet *pk);
     int getMsl() { return msl; }
 };
 

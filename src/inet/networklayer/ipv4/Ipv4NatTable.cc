@@ -14,7 +14,7 @@
 #include "inet/transportlayer/common/L4Tools.h"
 
 #ifdef INET_WITH_TCP_COMMON
-#include "inet/transportlayer/tcp_common/TcpCrcInsertionHook.h"
+#include "../../transportlayer/tcp_common/TcpChecksumInsertionHook.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 #endif
 
@@ -115,13 +115,13 @@ INetfilter::IHook::Result Ipv4NatTable::processPacket(Packet *packet, INetfilter
 #ifdef INET_WITH_UDP
             if (transportProtocol == &Protocol::udp) {
                 auto& udpHeader = removeTransportProtocolHeader<UdpHeader>(packet);
-                // TODO if (!Udp::verifyCrc(Protocol::ipv4, udpHeader, packet))
+                // TODO if (!Udp::verifyChecksum(Protocol::ipv4, udpHeader, packet))
                 auto udpData = packet->peekData();
                 if (natEntry.getDestPort() != -1)
                     udpHeader->setDestPort(natEntry.getDestPort());
                 if (natEntry.getSrcPort() != -1)
                     udpHeader->setSrcPort(natEntry.getSrcPort());
-                Udp::insertCrc(&Protocol::ipv4, ipv4Header->getSrcAddress(), ipv4Header->getDestAddress(), udpHeader, packet);
+                Udp::insertChecksum(&Protocol::ipv4, ipv4Header->getSrcAddress(), ipv4Header->getDestAddress(), udpHeader, packet);
                 insertTransportProtocolHeader(packet, Protocol::udp, udpHeader);
             }
             else
@@ -129,12 +129,12 @@ INetfilter::IHook::Result Ipv4NatTable::processPacket(Packet *packet, INetfilter
 #ifdef INET_WITH_TCP_COMMON
             if (transportProtocol == &Protocol::tcp) {
                 auto& tcpHeader = removeTransportProtocolHeader<tcp::TcpHeader>(packet);
-                // TODO if (!Tcp::verifyCrc(Protocol::ipv4, tcpHeader, packet))
+                // TODO if (!Tcp::verifyChecksum(Protocol::ipv4, tcpHeader, packet))
                 if (natEntry.getDestPort() != -1)
                     tcpHeader->setDestPort(natEntry.getDestPort());
                 if (natEntry.getSrcPort() != -1)
                     tcpHeader->setSrcPort(natEntry.getSrcPort());
-                tcp::TcpCrcInsertionHook::insertCrc(&Protocol::ipv4, ipv4Header->getSrcAddress(), ipv4Header->getDestAddress(), tcpHeader, packet);
+                tcp::TcpChecksumInsertionHook::insertChecksum(&Protocol::ipv4, ipv4Header->getSrcAddress(), ipv4Header->getDestAddress(), tcpHeader, packet);
                 insertTransportProtocolHeader(packet, Protocol::tcp, tcpHeader);
             }
             else

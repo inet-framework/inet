@@ -14,7 +14,7 @@
 #include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
-#include "inet/routing/ospfv2/Ospfv2Crc.h"
+#include "inet/routing/ospfv2/Ospfv2Checksum.h"
 #include "inet/routing/ospfv2/Ospfv2PacketSerializer.h"
 #include "inet/routing/ospfv2/interface/Ospfv2InterfaceStateDown.h"
 #include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
@@ -30,7 +30,7 @@ using namespace ospf;
 Ospfv2Interface::Ospfv2Interface(Ospfv2Interface::Ospfv2InterfaceType ifType) :
     interfaceType(ifType),
     interfaceMode(ACTIVE),
-    crcMode(CRC_MODE_UNDEFINED),
+    checksumMode(CHECKSUM_MODE_UNDEFINED),
     interfaceName(""),
     ifIndex(0),
     mtu(0),
@@ -215,7 +215,7 @@ void Ospfv2Interface::sendHelloPacket(Ipv4Address destination, short ttl)
         helloPacket->setAuthentication(i, authenticationKey.bytes[i]);
     }
 
-    setOspfCrc(helloPacket, crcMode);
+    setOspfChecksum(helloPacket, checksumMode);
 
     Packet *pk = new Packet();
     pk->insertAtBack(helloPacket);
@@ -243,7 +243,7 @@ void Ospfv2Interface::sendLsAcknowledgement(const Ospfv2LsaHeader *lsaHeader, Ip
         lsAckPacket->setAuthentication(i, authenticationKey.bytes[i]);
     }
 
-    setOspfCrc(lsAckPacket, crcMode);
+    setOspfChecksum(lsAckPacket, checksumMode);
 
     Packet *pk = new Packet();
     pk->insertAtBack(lsAckPacket);
@@ -500,7 +500,7 @@ Packet *Ospfv2Interface::createUpdatePacket(const Ospfv2Lsa *lsa)
             lsaHeader.setLsAge(lsAge);
             auto lsaSize = calculateLSASize(lsa);
             ASSERT(lsaSize == B(lsaHeader.getLsaLength()));
-            setLsaCrc(*lsa, crcMode);
+            setLsaChecksum(*lsa, checksumMode);
             packetLength += lsaSize;
         }
         break;
@@ -516,7 +516,7 @@ Packet *Ospfv2Interface::createUpdatePacket(const Ospfv2Lsa *lsa)
         updatePacket->setAuthentication(j, authenticationKey.bytes[j]);
     }
 
-    setOspfCrc(updatePacket, crcMode);
+    setOspfChecksum(updatePacket, checksumMode);
 
     Packet *pk = new Packet();
     pk->insertAtBack(updatePacket);
@@ -579,7 +579,7 @@ void Ospfv2Interface::sendDelayedAcknowledgements()
                     ackPacket->setAuthentication(i, authenticationKey.bytes[i]);
                 }
 
-                setOspfCrc(ackPacket, crcMode);
+                setOspfChecksum(ackPacket, checksumMode);
 
                 Packet *pk = new Packet();
                 pk->insertAtBack(ackPacket);

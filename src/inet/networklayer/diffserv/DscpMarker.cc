@@ -112,7 +112,7 @@ bool DscpMarker::markPacket(Packet *packet, int dscp)
         packet->removeTagIfPresent<NetworkProtocolInd>();
         auto ipv4Header = packet->removeDataAt<Ipv4Header>(offset);
         ipv4Header->setDscp(dscp);
-        ipv4Header->updateCrc(); // recalculate IP header checksum
+        ipv4Header->updateChecksum(); // recalculate IP header checksum
         auto networkProtocolInd = packet->addTagIfAbsent<NetworkProtocolInd>();
         networkProtocolInd->setProtocol(protocol);
         networkProtocolInd->setNetworkProtocolHeader(ipv4Header);

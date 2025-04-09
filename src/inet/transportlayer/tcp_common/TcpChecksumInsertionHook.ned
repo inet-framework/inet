@@ -5,12 +5,9 @@
 //
 
 
-package inet.transportlayer.sctp;
+package inet.transportlayer.tcp_common;
 
-//
-// Inserts SCTP CRC into packets.
-//
-simple SctpCrcInsertion
+simple TcpChecksumInsertionHook
 {
 }
 

@@ -162,8 +162,8 @@ class INET_API Igmpv2 : public cSimpleModule, public DefaultProtocolRegistration
     int numLeavesSent = 0;
     int numLeavesRecv = 0;
 
-    // crcMode
-    CrcMode crcMode = CRC_MODE_UNDEFINED;
+    // checksumMode
+    ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
 
     typedef std::map<int, HostInterfaceData *> InterfaceToHostDataMap;
     typedef std::map<int, RouterInterfaceData *> InterfaceToRouterDataMap;
@@ -229,9 +229,9 @@ class INET_API Igmpv2 : public cSimpleModule, public DefaultProtocolRegistration
     virtual HostInterfaceData *createHostInterfaceData();
 
   public:
-    static void insertCrc(CrcMode crcMode, const Ptr<IgmpMessage>& igmpMsg, Packet *payload);
-    void insertCrc(const Ptr<IgmpMessage>& igmpMsg, Packet *payload) { insertCrc(crcMode, igmpMsg, payload); }
-    bool verifyCrc(const Packet *packet);
+    static void insertChecksum(ChecksumMode checksumMode, const Ptr<IgmpMessage>& igmpMsg, Packet *payload);
+    void insertChecksum(const Ptr<IgmpMessage>& igmpMsg, Packet *payload) { insertChecksum(checksumMode, igmpMsg, payload); }
+    bool verifyChecksum(const Packet *packet);
 };
 
 } // namespace inet

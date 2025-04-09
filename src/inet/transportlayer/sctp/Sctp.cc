@@ -100,29 +100,29 @@ void Sctp::initialize(int stage)
         if (netw->hasPar("testTimeout")) {
             testTimeout = netw->par("testTimeout");
         }
-        const char *crcModeString = par("crcMode");
-        crcMode = parseCrcMode(crcModeString, false);
+        const char *checksumModeString = par("checksumMode");
+        checksumMode = parseChecksumMode(checksumModeString, false);
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
         registerService(Protocol::sctp, gate("appIn"), gate("appOut"));
         registerProtocol(Protocol::sctp, gate("ipOut"), gate("ipIn"));
-        if (crcMode == CRC_COMPUTED) {
-            cModuleType *moduleType = cModuleType::get("inet.transportlayer.sctp.SctpCrcInsertion");
-            auto crcInsertion = check_and_cast<SctpCrcInsertion *>(moduleType->create("crcInsertion", this));
-            crcInsertion->finalizeParameters();
-            crcInsertion->callInitialize();
-            crcInsertion->setCrcMode(crcMode);
+        if (checksumMode == CHECKSUM_COMPUTED) {
+            cModuleType *moduleType = cModuleType::get("inet.transportlayer.sctp.SctpChecksumInsertion");
+            auto checksumInsertion = check_and_cast<SctpChecksumInsertion *>(moduleType->create("checksumInsertion", this));
+            checksumInsertion->finalizeParameters();
+            checksumInsertion->callInitialize();
+            checksumInsertion->setChecksumMode(checksumMode);
 
 #ifdef INET_WITH_IPv4
             auto ipv4 = dynamic_cast<INetfilter *>(findModuleByPath("^.ipv4.ip"));
             if (ipv4 != nullptr) {
-                ipv4->registerHook(0, crcInsertion);
+                ipv4->registerHook(0, checksumInsertion);
             }
 #endif
 #ifdef INET_WITH_IPv6
             auto ipv6 = dynamic_cast<INetfilter *>(findModuleByPath("^.ipv6.ipv6"));
             if (ipv6 != nullptr)
-                ipv6->registerHook(0, crcInsertion);
+                ipv6->registerHook(0, checksumInsertion);
 #endif
         }
         if (par("udpEncapsEnabled")) {
@@ -382,8 +382,8 @@ void Sctp::sendAbortFromMain(SctpHeader *sctpmsg, L3Address fromAddr, L3Address 
     msg->setSrcPort(sctpmsg->getDestPort());
     msg->setDestPort(sctpmsg->getSrcPort());
     msg->setChunkLength(B(SCTP_COMMON_HEADER));
-    msg->setCrc(0);
-    msg->setCrcMode(crcMode);
+    msg->setChecksum(0);
+    msg->setChecksumMode(checksumMode);
     msg->setChecksumOk(true);
 
     SctpAbortChunk *abortChunk = new SctpAbortChunk();
@@ -419,8 +419,8 @@ void Sctp::sendShutdownCompleteFromMain(SctpHeader *sctpmsg, L3Address fromAddr,
     msg->setSrcPort(sctpmsg->getDestPort());
     msg->setDestPort(sctpmsg->getSrcPort());
     msg->setChunkLength(b(SCTP_COMMON_HEADER));
-    msg->setCrc(0);
-    msg->setCrcMode(crcMode);
+    msg->setChecksum(0);
+    msg->setChecksumMode(checksumMode);
     msg->setChecksumOk(true);
 
     SctpShutdownCompleteChunk *scChunk = new SctpShutdownCompleteChunk();

@@ -9,7 +9,7 @@
 import inet.common.INETDefs;
 import inet.common.Units;
 import inet.common.packet.chunk.Chunk;
-import inet.transportlayer.common.CrcMode;
+import inet.common.checksum.ChecksumMode;
 
 namespace inet;
 
@@ -92,7 +92,7 @@ class Icmpv6Header extends FieldsChunk
     Icmpv6Type type;     // 1 byte
     //int code; // 1 byte //TODO this should be specific to different ICMP types.
     int chksum = 0;     // 2 bytes
-    CrcMode crcMode = CRC_MODE_UNDEFINED;
+    ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
     // 4 bytes 'type' specific values
 }
 

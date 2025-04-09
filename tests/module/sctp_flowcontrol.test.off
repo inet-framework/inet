@@ -53,8 +53,8 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.sctp_server.sctp.swsLimit=3000
 **.sctp_server.app[0].readingInterval =exponential(0.15s)
 
-**.sctp.crcMode = "computed"
-**.ipv4.**.crcMode = "computed"
+**.sctp.checksumMode = "computed"
+**.ipv4.**.checksumMode = "computed"
 
 **.sctp_server.numPcapRecorders = 1
 **.sctp_server.pcapRecorder[0].pcapFile = "server1.pcap"

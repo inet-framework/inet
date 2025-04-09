@@ -18,7 +18,7 @@ simple Sctp like ISctp
     parameters:
         string interfaceTableModule;
         string routingTableModule;
-        string crcMode @enum("declared", "computed") = default("declared");
+        string checksumMode @enum("declared", "computed") = default("declared");
 
         //#====== SCTP Association Parameters =================================
         int numGapReports = default(3);

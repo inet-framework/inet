@@ -152,13 +152,13 @@ void Ospfv2ConfigReader::loadAreaFromXML(const cXMLElement& asConfig, AreaId are
     areaXPath += areaID.str(false);
     areaXPath += "']";
 
-    auto crcMode = parseCrcMode(par("crcMode"), false);
+    auto checksumMode = parseChecksumMode(par("checksumMode"), false);
 
     cXMLElement *areaConfig = asConfig.getElementByPath(areaXPath.c_str());
     if (areaConfig == nullptr) {
         if (areaID != Ipv4Address("0.0.0.0"))
             throw cRuntimeError("No configuration for Area ID: %s at %s", areaID.str(false).c_str(), asConfig.getSourceLocation());
-        Ospfv2Area *area = new Ospfv2Area(crcMode, ift, areaID);
+        Ospfv2Area *area = new Ospfv2Area(checksumMode, ift, areaID);
         area->addWatches();
         ospfRouter->addArea(area);
         return;
@@ -166,7 +166,7 @@ void Ospfv2ConfigReader::loadAreaFromXML(const cXMLElement& asConfig, AreaId are
 
     EV_DEBUG << "    loading info for Area id = " << areaID.str(false) << "\n";
 
-    Ospfv2Area *area = new Ospfv2Area(crcMode, ift, areaID);
+    Ospfv2Area *area = new Ospfv2Area(checksumMode, ift, areaID);
     area->addWatches();
     cXMLElementList areaDetails = areaConfig->getChildren();
     for (auto& areaDetail : areaDetails) {
@@ -238,7 +238,7 @@ void Ospfv2ConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig, Ne
                 interfaceType.c_str(), ifName.c_str(), ifIndex, ifConfig.getSourceLocation());
     }
 
-    intf->setCrcMode(parseCrcMode(par("crcMode"), false));
+    intf->setChecksumMode(parseChecksumMode(par("checksumMode"), false));
 
     Metric cost = getIntAttrOrPar(ifConfig, "interfaceOutputCost");
     if (cost == 0)
@@ -428,8 +428,8 @@ void Ospfv2ConfigReader::loadVirtualLink(const cXMLElement& virtualLinkConfig, c
     intf->setHelloInterval(getIntAttrOrPar(virtualLinkConfig, "helloInterval"));
     intf->setRouterDeadInterval(getIntAttrOrPar(virtualLinkConfig, "routerDeadInterval"));
 
-    const char *ospfCrcMode = par("crcMode");
-    intf->setCrcMode(parseCrcMode(ospfCrcMode, false));
+    const char *ospfChecksumMode = par("checksumMode");
+    intf->setChecksumMode(parseChecksumMode(ospfChecksumMode, false));
 
     loadAuthenticationConfig(intf, virtualLinkConfig);
 

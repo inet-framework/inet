@@ -72,8 +72,8 @@ void Ipv4::initialize(int stage)
         arp.reference(this, "arpModule", true);
         icmp.reference(this, "icmpModule", true);
 
-        const char *crcModeString = par("crcMode");
-        crcMode = parseCrcMode(crcModeString, false);
+        const char *checksumModeString = par("checksumMode");
+        checksumMode = parseChecksumMode(checksumModeString, false);
 
         defaultTimeToLive = par("timeToLive");
         defaultMCTimeToLive = par("multicastTimeToLive");
@@ -237,8 +237,8 @@ void Ipv4::handleIncomingDatagram(Packet *packet)
     packet->addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&Protocol::ipv4);
     packet->addTagIfAbsent<NetworkProtocolInd>()->setNetworkProtocolHeader(ipv4Header);
 
-    if (!ipv4Header->isCorrect() && !ipv4Header->verifyCrc()) {
-        EV_WARN << "CRC error found, drop packet\n";
+    if (!ipv4Header->isCorrect() && !ipv4Header->verifyChecksum()) {
+        EV_WARN << "checksum error found, drop packet\n";
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);
         emit(packetDroppedSignal, packet, &details);
@@ -798,9 +798,9 @@ void Ipv4::reassembleAndDeliver(Packet *packet)
             EV_DETAIL << "No complete datagram yet.\n";
             return;
         }
-        if (packet->peekAtFront<Ipv4Header>()->getCrcMode() == CRC_COMPUTED) {
+        if (packet->peekAtFront<Ipv4Header>()->getChecksumMode() == CHECKSUM_COMPUTED) {
             auto ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(packet);
-            ipv4Header->updateCrc();
+            ipv4Header->updateChecksum();
             insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
         }
         EV_DETAIL << "This fragment completes the datagram.\n";
@@ -921,9 +921,9 @@ void Ipv4::fragmentAndSend(Packet *packet)
 
     // send datagram straight out if it doesn't require fragmentation (note: mtu==0 means infinite mtu)
     if (mtu == 0 || packet->getByteLength() <= mtu) {
-        if (crcMode == CRC_COMPUTED) {
+        if (checksumMode == CHECKSUM_COMPUTED) {
             auto ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(packet);
-            ipv4Header->updateCrc();
+            ipv4Header->updateChecksum();
             insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
         }
         sendDatagramToOutput(packet);
@@ -982,8 +982,8 @@ void Ipv4::fragmentAndSend(Packet *packet)
 
         fraghdr->setFragmentOffset(offsetBase + offset);
         fraghdr->setTotalLengthField(B(headerLength + thisFragmentLength));
-        if (crcMode == CRC_COMPUTED)
-            fraghdr->updateCrc();
+        if (checksumMode == CHECKSUM_COMPUTED)
+            fraghdr->updateChecksum();
 
         fragment->insertAtFront(fraghdr);
         ASSERT(fragment->getByteLength() == headerLength + thisFragmentLength);
@@ -1070,24 +1070,24 @@ void Ipv4::encapsulate(Packet *transportPacket)
     ASSERT(ipv4Header->getChunkLength() <= IPv4_MAX_HEADER_LENGTH);
     ipv4Header->setHeaderLength(ipv4Header->getChunkLength());
     ipv4Header->setTotalLengthField(ipv4Header->getChunkLength() + transportPacket->getDataLength());
-    ipv4Header->setCrcMode(crcMode);
-    ipv4Header->setCrc(0);
-    switch (crcMode) {
-        case CRC_DECLARED_CORRECT:
-            // if the CRC mode is declared to be correct, then set the CRC to an easily recognizable value
-            ipv4Header->setCrc(0xC00D);
+    ipv4Header->setChecksumMode(checksumMode);
+    ipv4Header->setChecksum(0);
+    switch (checksumMode) {
+        case CHECKSUM_DECLARED_CORRECT:
+            // if the checksum mode is declared to be correct, then set the checksum to an easily recognizable value
+            ipv4Header->setChecksum(0xC00D);
             break;
-        case CRC_DECLARED_INCORRECT:
-            // if the CRC mode is declared to be incorrect, then set the CRC to an easily recognizable value
-            ipv4Header->setCrc(0xBAAD);
+        case CHECKSUM_DECLARED_INCORRECT:
+            // if the checksum mode is declared to be incorrect, then set the checksum to an easily recognizable value
+            ipv4Header->setChecksum(0xBAAD);
             break;
-        case CRC_COMPUTED: {
-            ipv4Header->setCrc(0);
-            // crc will be calculated in fragmentAndSend()
+        case CHECKSUM_COMPUTED: {
+            ipv4Header->setChecksum(0);
+            // checksum will be calculated in fragmentAndSend()
             break;
         }
         default:
-            throw cRuntimeError("Unknown CRC mode");
+            throw cRuntimeError("Unknown checksum mode");
     }
 
     if (enableTimestampOption) {

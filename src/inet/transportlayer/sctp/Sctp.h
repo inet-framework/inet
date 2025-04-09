@@ -21,7 +21,7 @@
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/transportlayer/contract/sctp/SctpSocket.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
-#include "inet/transportlayer/sctp/SctpCrcInsertionHook.h"
+#include "inet/transportlayer/sctp/SctpChecksumInsertionHook.h"
 #include "inet/transportlayer/sctp/SctpHeader.h"
 #include "inet/transportlayer/sctp/SctpUdpHook.h"
 
@@ -203,7 +203,7 @@ class INET_API Sctp : public cSimpleModule
     bool sackNow;
     uint64_t numPktDropReports;
     int interfaceId = -1;
-    CrcMode crcMode = CRC_MODE_UNDEFINED;
+    ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
 
   public:
     virtual ~Sctp();

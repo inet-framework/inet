@@ -11,7 +11,7 @@ import inet.common.packet.chunk.Chunk;
 import inet.networklayer.common.IpProtocolId;
 import inet.networklayer.contract.NetworkHeaderBase;
 import inet.networklayer.contract.ipv4.Ipv4Address;
-import inet.transportlayer.common.CrcMode;
+import inet.common.checksum.ChecksumMode;
 
 cplusplus {{
 #include "inet/common/ProtocolGroup.h"
@@ -188,8 +188,8 @@ class Ipv4Header extends NetworkHeaderBase
 
     short timeToLive;    // @byte(1)
     IpProtocolId protocolId = IP_PROT_NONE;    // @byte(1)
-    uint16_t crc = 0;    // @byte(2)
-    CrcMode crcMode = CRC_MODE_UNDEFINED;
+    uint16_t checksum = 0;    // @byte(2)
+    ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
 
     Ipv4Address srcAddress;
 
@@ -245,9 +245,9 @@ cplusplus(Ipv4Header) {{
     virtual void setProtocol(const Protocol *protocol) override { setProtocolId(static_cast<IpProtocolId>(ProtocolGroup::getIpProtocolGroup()->getProtocolNumber(protocol))); }
     virtual bool isFragment() const override { return getMoreFragments() || (getFragmentOffset() != 0); }
 
-    // utility: calculate and set CRC based on crcMode
-    virtual void updateCrc();
+    // utility: calculate and set checksum based on checksumMode
+    virtual void updateChecksum();
 
-    // utility: verify CRC
-    virtual bool verifyCrc() const;
+    // utility: verify checksum
+    virtual bool verifyChecksum() const;
 }}

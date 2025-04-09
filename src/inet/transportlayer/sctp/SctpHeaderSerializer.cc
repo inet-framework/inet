@@ -1099,7 +1099,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
         for (int32_t k = 0; k < SHA_LENGTH; k++)
             auth->hmac[k] = result[k];
     }
-    // finally, set the CRC32 checksum field in the Sctp common header
+    // finally, set the CHECKSUM32 checksum field in the Sctp common header
     ch->checksum = SctpChecksum::checksum((unsigned char *)buffer, writtenbytes);
     // check the serialized packet length
     if (writtenbytes != msg->getChunkLength().get<B>()) {
@@ -1145,8 +1145,8 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
     dest->setDestPort(ntohs(common_header->destination_port));
     dest->setVTag(ntohl(common_header->verification_tag));
     dest->setChunkLength(B(SCTP_COMMON_HEADER));
-    dest->setCrcMode(CRC_COMPUTED);
-    dest->setCrc(common_header->checksum);
+    dest->setChecksumMode(CHECKSUM_COMPUTED);
+    dest->setChecksum(common_header->checksum);
     // chunks
     uint32_t chunkPtr = 0;
 

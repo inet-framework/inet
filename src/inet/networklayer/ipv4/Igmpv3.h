@@ -205,8 +205,8 @@ class INET_API Igmpv3 : public cSimpleModule, protected cListener
     double lastMemberQueryTime;
     double unsolicitedReportInterval;
 
-    // crcMode
-    CrcMode crcMode = CRC_MODE_UNDEFINED;
+    // checksumMode
+    ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
 
     // group counters
     int numGroups = 0;
@@ -283,9 +283,9 @@ class INET_API Igmpv3 : public cSimpleModule, protected cListener
     virtual void multicastSourceListChanged(NetworkInterface *ie, Ipv4Address group, const Ipv4MulticastSourceList& sourceList);
 
   public:
-    static void insertCrc(CrcMode crcMode, const Ptr<IgmpMessage>& igmpMsg, Packet *payload);
-    void insertCrc(const Ptr<IgmpMessage>& igmpMsg, Packet *payload) { insertCrc(crcMode, igmpMsg, payload); }
-    bool verifyCrc(const Packet *packet);
+    static void insertChecksum(ChecksumMode checksumMode, const Ptr<IgmpMessage>& igmpMsg, Packet *payload);
+    void insertChecksum(const Ptr<IgmpMessage>& igmpMsg, Packet *payload) { insertChecksum(checksumMode, igmpMsg, payload); }
+    bool verifyChecksum(const Packet *packet);
 
   public:
     /**

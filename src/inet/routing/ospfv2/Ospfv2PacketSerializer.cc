@@ -187,10 +187,10 @@ void Ospfv2PacketSerializer::serializeOspfHeader(MemoryOutputStream& stream, con
     stream.writeUint16Be(ospfPacket->getPacketLengthField());
     stream.writeIpv4Address(ospfPacket->getRouterID());
     stream.writeIpv4Address(ospfPacket->getAreaID());
-    auto crcMode = ospfPacket->getCrcMode();
-    if (crcMode != CRC_COMPUTED)
-        throw cRuntimeError("Cannot serialize Ospf header without properly computed CRC");
-    stream.writeUint16Be(ospfPacket->getCrc());
+    auto checksumMode = ospfPacket->getChecksumMode();
+    if (checksumMode != CHECKSUM_COMPUTED)
+        throw cRuntimeError("Cannot serialize Ospf header without properly computed CHECKSUM");
+    stream.writeUint16Be(ospfPacket->getChecksum());
     stream.writeUint16Be(ospfPacket->getAuthenticationType());
     for (unsigned int i = 0; i < 8; ++i) {
         stream.writeByte(ospfPacket->getAuthentication(i));
@@ -212,8 +212,8 @@ uint16_t Ospfv2PacketSerializer::deserializeOspfHeader(MemoryInputStream& stream
     ospfPacket->setChunkLength(B(packetLength));
     ospfPacket->setRouterID(stream.readIpv4Address());
     ospfPacket->setAreaID(stream.readIpv4Address());
-    ospfPacket->setCrc(stream.readUint16Be());
-    ospfPacket->setCrcMode(CRC_COMPUTED);
+    ospfPacket->setChecksum(stream.readUint16Be());
+    ospfPacket->setChecksumMode(CHECKSUM_COMPUTED);
     ospfPacket->setAuthenticationType(stream.readUint16Be());
     for (int i = 0; i < 8; ++i) {
         ospfPacket->setAuthentication(i, stream.readUint8());
@@ -229,10 +229,10 @@ void Ospfv2PacketSerializer::serializeLsaHeader(MemoryOutputStream& stream, cons
     stream.writeIpv4Address(lsaHeader.getLinkStateID());
     stream.writeIpv4Address(lsaHeader.getAdvertisingRouter());
     stream.writeUint32Be(lsaHeader.getLsSequenceNumber());
-    auto crcMode = lsaHeader.getLsCrcMode();
-    if (crcMode != CRC_COMPUTED)
-        throw cRuntimeError("Cannot serialize Ospf LSA header without properly computed CRC");
-    stream.writeUint16Be(lsaHeader.getLsCrc());
+    auto checksumMode = lsaHeader.getLsChecksumMode();
+    if (checksumMode != CHECKSUM_COMPUTED)
+        throw cRuntimeError("Cannot serialize Ospf LSA header without properly computed CHECKSUM");
+    stream.writeUint16Be(lsaHeader.getLsChecksum());
     stream.writeUint16Be(lsaHeader.getLsaLength());
 }
 
@@ -244,9 +244,9 @@ void Ospfv2PacketSerializer::deserializeLsaHeader(MemoryInputStream& stream, Osp
     lsaHeader.setLinkStateID(stream.readIpv4Address());
     lsaHeader.setAdvertisingRouter(stream.readIpv4Address());
     lsaHeader.setLsSequenceNumber(stream.readUint32Be());
-    lsaHeader.setLsCrc(stream.readUint16Be());
+    lsaHeader.setLsChecksum(stream.readUint16Be());
     lsaHeader.setLsaLength(stream.readUint16Be());
-    lsaHeader.setLsCrcMode(CRC_COMPUTED);
+    lsaHeader.setLsChecksumMode(CHECKSUM_COMPUTED);
 }
 
 void Ospfv2PacketSerializer::serializeRouterLsa(MemoryOutputStream& stream, const Ospfv2RouterLsa& routerLsa)
@@ -503,8 +503,8 @@ void Ospfv2PacketSerializer::copyHeaderFields(const Ptr<Ospfv2Packet> from, Ptr<
     to->setChunkLength(from->getChunkLength());
     to->setRouterID(from->getRouterID());
     to->setAreaID(from->getAreaID());
-    to->setCrc(from->getCrc());
-    to->setCrcMode(from->getCrcMode());
+    to->setChecksum(from->getChecksum());
+    to->setChecksumMode(from->getChecksumMode());
     to->setAuthenticationType(from->getAuthenticationType());
     for (int i = 0; i < 8; ++i) {
         to->setAuthentication(i, from->getAuthentication(i));

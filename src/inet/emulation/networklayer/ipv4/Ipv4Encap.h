@@ -27,7 +27,7 @@ class INET_API Ipv4Encap : public cSimpleModule
     };
 
   protected:
-    CrcMode crcMode = CRC_MODE_UNDEFINED;
+    ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
     int defaultTimeToLive = -1;
     int defaultMCTimeToLive = -1;
     std::set<const Protocol *> upperProtocols;

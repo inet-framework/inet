@@ -36,21 +36,22 @@ import inet.transportlayer.contract.IUdp;
 // The ~Udp model relies on sending and receiving ~L3AddressReq/~L3AddressInd
 // tags attached to UDP packets.
 //
-// CRC operation modes for outgoing UDP packets (`crcMode` parameter in UDP module):
-//  - "disabled" means the outgoing packet will have its CRC set to 0 (serializable)
-//  - "declared" means the outgoing packet will have the correct CRC declared
+// Checksum operation modes for outgoing UDP packets (`checksumMode` parameter in UDP module):
+//  - "disabled" means the outgoing packet will have its checksum set to 0 (serializable)
+//  - "declared" means the outgoing packet will have the correct checksum declared
 //     without actually computing it; the value is set to `0xC00D` (not serializable)
-//  - "computed" means the outgoing packet will have the correctly computed CRC
+//  - "computed" means the outgoing packet will have the correctly computed checksum
 //     as defined by the RFC (serializable)
-// CRC operation modes for incoming UDP packets (`crcMode` field in ~UdpHeader chunk):
-//  - CRC_DISABLED means the incoming packet must have its CRC set to 0 (serializable)
-//  - CRC_DECLARED_CORRECT means the incoming packet is assumed to have a
-//    correct CRC without the actual value (not serializable)
-//  - CRC_DECLARED_INCORRECT means the incoming packet is assumed to have an
-//    incorrect CRC without the actual value (not serializable)
-//  - CRC_COMPUTED means the incoming packet has a potentially incorrect CRC
+//
+// Checksum operation modes for incoming UDP packets (`checksumMode` field in ~UdpHeader chunk):
+//  - CHECKSUM_DISABLED means the incoming packet must have its checksum set to 0 (serializable)
+//  - CHECKSUM_DECLARED_CORRECT means the incoming packet is assumed to have a
+//    correct checksum without the actual value (not serializable)
+//  - CHECKSUM_DECLARED_INCORRECT means the incoming packet is assumed to have an
+//    incorrect checksum without the actual value (not serializable)
+//  - CHECKSUM_COMPUTED means the incoming packet has a potentially incorrect checksum
 //    that is to be verified as defined by the RFC (serializable)
-// The incoming packet also fails the CRC verification if any relevant chunk is marked incorrect.
+// The incoming packet also fails the checksum verification if any relevant chunk is marked incorrect.
 //
 // @see ~UdpHeader, ~UdpCommand, ~UdpCommandCode
 //
@@ -60,7 +61,7 @@ simple Udp like IUdp
         string interfaceTableModule;   // The path to the InterfaceTable module
         string icmpModule = default("^.ipv4.icmp");
         string icmpv6Module = default("^.ipv6.icmpv6");
-        string crcMode @enum("disabled", "declared", "computed") = default("declared");
+        string checksumMode @enum("disabled", "declared", "computed") = default("declared");
         bool defaultMulticastLoop = default(true);
         @display("i=block/transport");
         @signal[packetSentToUpper](type=cPacket);
@@ -85,7 +86,7 @@ simple Udp like IUdp
         output ipOut @labels(UdpHeader,Ipv4ControlInfo/down,Ipv6ControlInfo/down);
 }
 
-simple UdpCrcInsertionHook
+simple UdpChecksumInsertionHook
 {
 }
 

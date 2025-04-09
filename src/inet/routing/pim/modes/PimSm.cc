@@ -1363,8 +1363,8 @@ void PimSm::sendPIMJoin(Ipv4Address group, Ipv4Address source, Ipv4Address upstr
             + ENCODED_GROUP_ADDRESS_LENGTH
             + B(4)
             + ENCODED_SOURCE_ADDRESS_LENGTH);
-    msg->setCrcMode(pimModule->getCrcMode());
-    Pim::insertCrc(msg);
+    msg->setChecksumMode(pimModule->getChecksumMode());
+    Pim::insertChecksum(msg);
 
     pk->insertAtFront(msg);
 
@@ -1400,8 +1400,8 @@ void PimSm::sendPIMPrune(Ipv4Address group, Ipv4Address source, Ipv4Address upst
             + ENCODED_GROUP_ADDRESS_LENGTH
             + B(4)
             + ENCODED_SOURCE_ADDRESS_LENGTH);
-    msg->setCrcMode(pimModule->getCrcMode());
-    Pim::insertCrc(msg);
+    msg->setChecksumMode(pimModule->getChecksumMode());
+    Pim::insertChecksum(msg);
 
     pk->insertAtFront(msg);
 
@@ -1424,8 +1424,8 @@ void PimSm::sendPIMRegisterNull(Ipv4Address multOrigin, Ipv4Address multGroup)
         msg->setN(true);
         msg->setB(false);
         msg->setChunkLength(PIM_HEADER_LENGTH + B(4));
-        msg->setCrcMode(pimModule->getCrcMode());
-        Pim::insertCrc(msg);
+        msg->setChecksumMode(pimModule->getChecksumMode());
+        Pim::insertChecksum(msg);
         pk->insertAtFront(msg);
 
         // set encapsulated packet (Ipv4 header only)
@@ -1435,8 +1435,8 @@ void PimSm::sendPIMRegisterNull(Ipv4Address multOrigin, Ipv4Address multGroup)
         ipv4Header->setProtocolId(IP_PROT_PIM);
         ipv4Header->setHeaderLength(IPv4_MIN_HEADER_LENGTH);
         ipv4Header->setTotalLengthField(IPv4_MIN_HEADER_LENGTH);
-        ipv4Header->setCrcMode(pimModule->getCrcMode());
-        ipv4Header->updateCrc();
+        ipv4Header->setChecksumMode(pimModule->getChecksumMode());
+        ipv4Header->updateChecksum();
         pk->insertAtBack(ipv4Header);
 
         emit(sentRegisterPkSignal, pk);
@@ -1459,8 +1459,8 @@ void PimSm::sendPIMRegister(Packet *ipv4Packet, Ipv4Address dest, int outInterfa
     msg->setB(false);
 
     msg->setChunkLength(PIM_HEADER_LENGTH + B(4));
-    msg->setCrcMode(pimModule->getCrcMode());
-    Pim::insertCrc(msg);
+    msg->setChecksumMode(pimModule->getChecksumMode());
+    Pim::insertChecksum(msg);
 
     pk->insertAtBack(ipv4Packet->peekDataAt(b(0), ipv4Packet->getDataLength()));
     pk->insertAtFront(msg);
@@ -1484,8 +1484,8 @@ void PimSm::sendPIMRegisterStop(Ipv4Address source, Ipv4Address dest, Ipv4Addres
     msg->getGroupAddressForUpdate().groupAddress = multGroup;
 
     msg->setChunkLength(B(PIM_HEADER_LENGTH + ENCODED_GROUP_ADDRESS_LENGTH + ENCODED_UNICODE_ADDRESS_LENGTH));
-    msg->setCrcMode(pimModule->getCrcMode());
-    Pim::insertCrc(msg);
+    msg->setChecksumMode(pimModule->getChecksumMode());
+    Pim::insertChecksum(msg);
     pk->insertAtFront(msg);
 
     emit(sentRegisterStopPkSignal, pk);
@@ -1512,8 +1512,8 @@ void PimSm::sendPIMAssert(Ipv4Address source, Ipv4Address group, AssertMetric me
             + ENCODED_GROUP_ADDRESS_LENGTH
             + ENCODED_UNICODE_ADDRESS_LENGTH
             + B(8));
-    pkt->setCrcMode(pimModule->getCrcMode());
-    Pim::insertCrc(pkt);
+    pkt->setChecksumMode(pimModule->getChecksumMode());
+    Pim::insertChecksum(pkt);
     pk->insertAtFront(pkt);
 
     emit(sentAssertPkSignal, pk);

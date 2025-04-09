@@ -51,8 +51,8 @@ const Ptr<Chunk> OspfPacketSerializer::deserialize(MemoryInputStream& stream) co
             ospfPacket->setChunkLength(B(packetLength));
             ospfPacket->setRouterID(stream.readIpv4Address());
             ospfPacket->setAreaID(stream.readIpv4Address());
-            ospfPacket->setCrc(stream.readUint16Be());
-            ospfPacket->setCrcMode(CRC_COMPUTED);
+            ospfPacket->setChecksum(stream.readUint16Be());
+            ospfPacket->setChecksumMode(CHECKSUM_COMPUTED);
             uint16_t curLength = (stream.getPosition() - startPos).get<B>();
             if (packetLength > curLength)
                 stream.readByteRepeatedly(0, packetLength - curLength);
