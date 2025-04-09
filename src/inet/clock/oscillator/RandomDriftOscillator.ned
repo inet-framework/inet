@@ -22,6 +22,7 @@ simple RandomDriftOscillator extends DriftingOscillatorBase like IOscillator
         volatile double driftRateChange @unit(ppm) = default(0ppm); // Integrated over time (random walk), no change by default
         double driftRateChangeLowerLimit @unit(ppm) = default(-inf ppm); // Lower limit for random walk, no limit by default
         double driftRateChangeUpperLimit @unit(ppm) = default(inf ppm); // Upper limit for random walk, no limit by default
+        int driftChangeEventSchedulingPriority = default(1000); // Specifies the scheduling priority of the drift change event
         @class(RandomDriftOscillator);
 }
 

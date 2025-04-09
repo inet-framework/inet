@@ -24,6 +24,7 @@ network TestNetwork
 ned-path = .;../../../../src;../../lib
 network = TestNetwork
 
+*.clock.oscillator.computeAsSeparateTicks = false
 *.clock.oscillator.driftRate = 588.5617991094477 ppm
 *.clock.oscillator.nominalTickLength = 1us
 

@@ -11,7 +11,7 @@ namespace inet {
 
 bool clockCoutEnabled = true;
 int clockCoutIndentLevel = 0;
-std::ostringstream devnull;
+NullStream nullStream;
 
 } // namespace inet
 

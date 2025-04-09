@@ -21,6 +21,7 @@ void RandomDriftOscillator::initialize(int stage)
     DriftingOscillatorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         changeTimer = new cMessage("ChangeTimer");
+        changeTimer->setSchedulingPriority(par("driftChangeEventSchedulingPriority"));
         driftRateChangeLowerLimit = ppm(par("driftRateChangeLowerLimit"));
         driftRateChangeUpperLimit = ppm(par("driftRateChangeUpperLimit"));
         scheduleAfter(changeIntervalParameter->doubleValue(), changeTimer);
@@ -33,7 +34,7 @@ void RandomDriftOscillator::handleMessage(cMessage *message)
         driftRateChangeTotal += ppm(driftRateChangeParameter->doubleValue());
         driftRateChangeTotal = std::max(driftRateChangeTotal, driftRateChangeLowerLimit);
         driftRateChangeTotal = std::min(driftRateChangeTotal, driftRateChangeUpperLimit);
-        setDriftRate(initialDriftRate + driftRateChangeTotal);
+        setDriftRate(ppm(std::round((initialDriftRate + driftRateChangeTotal).get<ppm>())));
         scheduleAfter(changeIntervalParameter->doubleValue(), changeTimer);
     }
     else

@@ -1,5 +1,5 @@
 %description:
-Tests clock oscillator compensation factor.
+Tests clock oscillator compensation factor without using tick events.
 
 %includes:
 #include "inet/clock/model/SettableClock.h"
@@ -22,6 +22,7 @@ network TestNetwork
 [General]
 ned-path = .;../../../../src;../../lib
 network = TestNetwork
+
 *.clock.oscillatorCompensation = 1000000ppm
 *.clock.oscillator.nominalTickLength = 1us
 
