@@ -13,6 +13,4 @@ simple Crc32HeaderInserter extends ChecksumHeaderInserter
 {
     parameters:
         checksumType = "crc32";
-        string headerPosition @enum("front","back") = default("front");
-        @class(CrcHeaderInserter);
 }

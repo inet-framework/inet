@@ -13,6 +13,4 @@ simple InternetChecksumHeaderInserter extends ChecksumHeaderInserter
 {
     parameters:
         checksumType = "internet";
-        string headerPosition @enum("front","back") = default("front");
-        @class(CrcHeaderInserter);
 }

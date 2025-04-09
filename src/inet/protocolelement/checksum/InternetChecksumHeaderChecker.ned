@@ -7,12 +7,10 @@
 
 package inet.protocolelement.checksum;
 
-import inet.protocolelement.checksum.ChecksumHeaderInserter;
+import inet.protocolelement.checksum.ChecksumHeaderChecker;
 
-simple InternetChecksumHeaderChecker extends ChecksumHeaderInserter
+simple InternetChecksumHeaderChecker extends ChecksumHeaderChecker
 {
     parameters:
         checksumType = "internet";
-        string headerPosition @enum("front","back") = default("front");
-        @class(CrcHeaderInserter);
 }
