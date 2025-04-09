@@ -278,13 +278,11 @@ def matches_filter(value, positive_filter, negative_filter, full_match):
     return ((re.fullmatch(positive_filter, value) if full_match else re.search(positive_filter, value)) is not None if positive_filter is not None else True) and \
            ((re.fullmatch(negative_filter, value) if full_match else re.search(negative_filter, value)) is None if negative_filter is not None else True)
 
-num_runs_fast_regex = re.compile(r"(?m).*^\s*(include\s+.*\.ini|repeat\s*=\s*[0-9]+|.*\$\{.*\})")
-
-def get_num_runs_fast(ini_path):
-    file = open(ini_path, "r", encoding="utf-8")
+def read_file(path):
+    file = open(path, "r", encoding="utf-8")
     text = file.read()
     file.close()
-    return None if num_runs_fast_regex.search(text) else 1
+    return text
 
 class KeyboardInterruptHandler:
     def __init__(self):
