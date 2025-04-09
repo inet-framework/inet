@@ -43,21 +43,22 @@ bool ChecksumCheckerBase::checkDeclaredIncorrectChecksum(const Packet *packet, u
 
 bool ChecksumCheckerBase::checkComputedChecksum(const Packet *packet, ChecksumType checksumType, uint64_t receivedChecksum) const
 {
-    if (receivedChecksum == 0x0000)
-        return true;
+    if (receivedChecksum == 0)
+        return true; //TODO questionable
     else {
         const auto& data = packet->peekDataAsBytes();
         auto bytes = data->getBytes();
 
+        //TODO a similar switch occurs in ChecksumInserterBase too, could be factored out
         uint64_t computedChecksum;
         switch (checksumType) {
             case CHECKSUM_TYPE_UNDEFINED:
                 throw cRuntimeError("Checksum type is undefined");
             case CHECKSUM_INTERNET:
-                computedChecksum = TcpIpChecksum::checksum(bytes.data(), packet->getByteLength() - 2);
+                computedChecksum = TcpIpChecksum::checksum(bytes.data(), packet->getByteLength() - 2); //TODO assumes checksum is at the end and must be ignored, but e.g. position is configurable in ChecksumInserterBase
                 break;
             case CHECKSUM_CRC32:
-                computedChecksum = ethernetCRC(bytes.data(), packet->getByteLength() - 4);
+                computedChecksum = ethernetCRC(bytes.data(), packet->getByteLength() - 4);  //TODO assumes checksum is at the end and must be ignored, but e.g. position is configurable in ChecksumInserterBase
                 break;
             case CHECKSUM_CRC8:
             case CHECKSUM_CRC16_IBM:
