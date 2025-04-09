@@ -8,6 +8,7 @@
 #ifndef __INET_OSCILLATORBASE_H
 #define __INET_OSCILLATORBASE_H
 
+#include "inet/clock/contract/IClock.h"
 #include "inet/clock/contract/IOscillator.h"
 #include "inet/common/StringFormat.h"
 
@@ -22,7 +23,7 @@ class INET_API OscillatorBase : public cSimpleModule, public IOscillator, public
     const char *displayStringTextFormat = nullptr;
     cMessage *tickTimer = nullptr;
 
-    int64_t numTicks = 0;
+    uint64_t numTicks = -1;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

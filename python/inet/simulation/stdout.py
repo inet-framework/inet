@@ -31,7 +31,7 @@ class StdoutTrajectorySimulationEvent(SimulationEvent):
         simulation_config = self.simulation_result.task.simulation_config
         simulation_project = simulation_config.simulation_project
         eventlog_file_path = simulation_project.get_full_path(os.path.join(simulation_config.working_directory, self.simulation_result.eventlog_file_path))
-        eventlog = create_eventlog(eventlog_file_path)
+        eventlog = None # create_eventlog(eventlog_file_path)
         super().__init__(event_number, eventlog)
         self.trajectory = trajectory
         self.line_number = line_number
