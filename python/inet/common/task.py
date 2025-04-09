@@ -209,7 +209,7 @@ class MultipleTaskResults:
         if len(self.results) == 0:
             return f"Empty {self.multiple_tasks.name} result"
         elif len(self.results) == 1:
-            return f"Single {self.multiple_tasks.name} result: " + self.results[0].get_description()
+            return f"Single {self.multiple_tasks.name} result: " + self.results[0].__repr__()
         else:
             exclude_result_filter = "|".join(filter(lambda possible_result: (self.possible_result_colors[self.possible_results.index(possible_result)] == COLOR_GREEN or
                                                                              self.possible_result_colors[self.possible_results.index(possible_result)] == COLOR_CYAN),
