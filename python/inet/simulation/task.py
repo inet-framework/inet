@@ -137,14 +137,16 @@ class SimulationTaskResult(TaskResult):
         file_path = simulation_project.get_full_path(simulation_config.working_directory + "/" + self.eventlog_file_path)
         eventlog_file = open(file_path)
         fingerprints = []
+        event_numbers = []
         ingredients = None
         for line in eventlog_file:
-            match = re.match(r"E # .* f (.*?)/(.*?)", line)
+            match = re.match(r"E # (\d+) .* f (.*?)/(.*)", line)
             if match:
-                ingredients = match.group(2)
-                fingerprints.append(Fingerprint(match.group(1), match.group(2)))
+                ingredients = match.group(3)
+                fingerprints.append(Fingerprint(match.group(2), match.group(3)))
+                event_numbers.append(int(match.group(1)))
         eventlog_file.close()
-        return FingerprintTrajectory(self, ingredients, fingerprints, range(0, len(fingerprints)))
+        return FingerprintTrajectory(self, ingredients, fingerprints, event_numbers)
 
     def get_stdout_trajectory(self, filter=None, exclude_filter=None, full_match=False):
         simulation_task = self.task
