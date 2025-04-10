@@ -19,7 +19,7 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IScrambler;
 //
 // @see ~ApskDecoder, ~ApskLayeredReceiver.
 //
-module ApskEncoder like IEncoder
+module ApskEncoder extends SimpleModule like IEncoder
 {
     parameters:
         @display("i=block/blackboard");

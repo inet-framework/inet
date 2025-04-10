@@ -9,7 +9,7 @@ package inet.environment.ground;
 
 import inet.environment.contract.IGround;
 
-module OsgEarthGround like IGround
+module OsgEarthGround extends SimpleModule like IGround
 {
     parameters:
         @class(OsgEarthGround);

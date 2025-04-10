@@ -103,7 +103,7 @@ import inet.linklayer.contract.IEtherMac;
 // @see ~EthernetCsmaMacPhy, ~EthernetInterface, ~IPacketQueue, ~EthernetEncapsulation, ~Ieee8022Llc
 // @see ~EthernetMacHeader, ~Ieee8022LlcHeader, ~EthernetFcs
 //
-module EthernetMacPhy like IEtherMac
+module EthernetMacPhy extends SimpleModule like IEtherMac
 {
     parameters:
         string interfaceTableModule;        // The path to the InterfaceTable module

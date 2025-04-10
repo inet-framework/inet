@@ -18,7 +18,7 @@ import inet.linklayer.ieee80211.mac.queue.InProgressFrames;
 // Implements EDCAF (Enhanced Distributed Channel Access Function) for IEEE 802.11.
 // EDCAF represents one access category within EDCA.
 //
-module Edcaf
+module Edcaf extends SimpleModule
 {
     parameters:
         string rxModule;

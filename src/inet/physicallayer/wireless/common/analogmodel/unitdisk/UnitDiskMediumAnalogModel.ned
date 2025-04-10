@@ -16,7 +16,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IMediumAnalogMode
 //
 // @see ~UnitDiskRadioMedium, ~UnitDiskTransmitterAnalogModel, ~UnitDiskReceiverAnalogModel.
 //
-module UnitDiskMediumAnalogModel like IMediumAnalogModel
+module UnitDiskMediumAnalogModel extends SimpleModule like IMediumAnalogModel
 {
     parameters:
         @class(UnitDiskMediumAnalogModel);

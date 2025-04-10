@@ -22,7 +22,7 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IInterleaver;
 //
 // The latter is simply N_{BPSC} multiplied by the number of subcarriers in a symbol.
 //
-module Ieee80211OfdmInterleaver like IInterleaver
+module Ieee80211OfdmInterleaver extends SimpleModule like IInterleaver
 {
     parameters:
         int numberOfCodedBitsPerSymbol;

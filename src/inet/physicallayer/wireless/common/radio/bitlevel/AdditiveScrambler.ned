@@ -27,7 +27,7 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IScrambler;
 // a 0 bit indicates a zero coefficient.
 //
 //
-module AdditiveScrambler like IScrambler
+module AdditiveScrambler extends SimpleModule like IScrambler
 {
     parameters:
         string seed;

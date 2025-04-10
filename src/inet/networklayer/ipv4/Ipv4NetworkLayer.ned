@@ -20,7 +20,7 @@ import inet.networklayer.ipv4.ipsec.IPsec;
 // Network layer of an IPv4 node.
 //
 //
-module Ipv4NetworkLayer like INetworkLayer
+module Ipv4NetworkLayer extends SimpleModule like INetworkLayer
 {
     parameters:
         bool forwarding = default(false);

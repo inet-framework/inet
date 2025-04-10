@@ -13,7 +13,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IMediumAnalogMode
 // This analog model computes with dimensional analog power representation. In
 // other words, the signal power may change over time and/or frequency.
 //
-module DimensionalMediumAnalogModel like IMediumAnalogModel
+module DimensionalMediumAnalogModel extends SimpleModule like IMediumAnalogModel
 {
     parameters:
         bool attenuateWithCenterFrequency = default(true); // True means frequency selectivity will always use the carrier frequency as opposed to using the frequency where the change in power occurs

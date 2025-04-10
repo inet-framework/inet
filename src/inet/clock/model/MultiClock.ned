@@ -17,7 +17,7 @@ import inet.clock.contract.IClock;
 //
 // @see ~MultiDomainGptp
 //
-module MultiClock like IClock
+module MultiClock extends SimpleModule like IClock
 {
     parameters:
         int numClocks; // Number of subclocks

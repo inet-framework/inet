@@ -24,7 +24,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IRadioMedium;
 // and how transmissions and noises arrive at receivers. It also efficiently
 // provides the set of interfering transmissions and noises for the receivers.
 //
-module RadioMedium like IRadioMedium
+module RadioMedium extends SimpleModule like IRadioMedium
 {
     parameters:
         string physicalEnvironmentModule = default("physicalEnvironment"); // Module path of the physical environment model

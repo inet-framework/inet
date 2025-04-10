@@ -25,7 +25,7 @@ import inet.linklayer.ieee80211.mac.recipient.RecipientQosMacDataService;
 //
 // Implements the HCF (Hybrid Coordination Function) for IEEE 802.11.
 //
-module Hcf like IHcf
+module Hcf extends SimpleModule like IHcf
 {
     parameters:
         bool isBlockAckSupported = default(false);

@@ -14,7 +14,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IBackgroundNoise;
 // time, and frequency. It produces scalar noise signals that can be further used
 // in scalar computations.
 //
-module IsotropicScalarBackgroundNoise like IBackgroundNoise
+module IsotropicScalarBackgroundNoise extends SimpleModule like IBackgroundNoise
 {
     parameters:
         double power @unit(dBm); // Noise power

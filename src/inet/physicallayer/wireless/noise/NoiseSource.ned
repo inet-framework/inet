@@ -12,7 +12,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IAntenna;
 import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
 import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitter;
 
-module NoiseSource like IRadio
+module NoiseSource extends SimpleModule like IRadio
 {
     parameters:
         string radioMediumModule = default("radioMedium"); // Module path of the medium module where this radio communicates

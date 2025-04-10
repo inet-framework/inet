@@ -15,7 +15,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.ICommunicationCac
 // primarily useful for simulations with <b>either</b> static <b>or</b> short
 // lived dynamic radios, and with only short transmission durations.
 //
-module VectorCommunicationCache like ICommunicationCache
+module VectorCommunicationCache extends SimpleModule like ICommunicationCache
 {
     parameters:
         @display("i=block/table2");

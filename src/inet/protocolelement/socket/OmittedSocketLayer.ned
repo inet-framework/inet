@@ -11,7 +11,7 @@ package inet.protocolelement.socket;
 // Implements the module given interface and can be used as an omitted
 // optional module that removes itself from the module hierarchy during initialize.
 //
-module OmittedSocketLayer like ISocketLayer
+module OmittedSocketLayer extends SimpleModule like ISocketLayer
 {
     parameters:
         @class(::inet::OmittedModule);

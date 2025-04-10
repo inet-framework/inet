@@ -150,7 +150,7 @@ import inet.environment.contract.IPhysicalEnvironment;
 //       material as a unitless quantity. Relative permeability is used to
 //       compute the refractive index of the material.
 //
-module PhysicalEnvironment like IPhysicalEnvironment
+module PhysicalEnvironment extends SimpleModule like IPhysicalEnvironment
 {
     parameters:
         string coordinateSystemModule = default(""); // Module path of the geographic coordinate system module

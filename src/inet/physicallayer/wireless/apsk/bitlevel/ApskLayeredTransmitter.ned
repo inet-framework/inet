@@ -38,7 +38,7 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IPulseShaper;
 //
 // @see ~ApskEncoder, ~ApskModulator, ~ApskLayeredReceiver.
 //
-module ApskLayeredTransmitter like ITransmitter
+module ApskLayeredTransmitter extends SimpleModule like ITransmitter
 {
     parameters:
         string levelOfDetail @enum("packet", "bit", "symbol", "sample") = default("symbol");

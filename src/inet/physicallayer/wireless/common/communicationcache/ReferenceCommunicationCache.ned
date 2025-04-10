@@ -15,7 +15,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.ICommunicationCac
 // fingerprints, and statistical results that can be compared with the results of
 // other communication cache implementations.
 //
-module ReferenceCommunicationCache like ICommunicationCache
+module ReferenceCommunicationCache extends SimpleModule like ICommunicationCache
 {
     parameters:
         @display("i=block/table2");

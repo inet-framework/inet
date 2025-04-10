@@ -9,7 +9,7 @@ package inet.physicallayer.wireless.common.pathloss;
 
 import inet.physicallayer.wireless.common.contract.packetlevel.IPathLoss;
 
-module SuiPathLoss like IPathLoss
+module SuiPathLoss extends SimpleModule like IPathLoss
 {
     parameters:
         @class(SuiPathLoss);

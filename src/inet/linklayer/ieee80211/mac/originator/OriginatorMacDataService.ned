@@ -9,7 +9,7 @@ package inet.linklayer.ieee80211.mac.originator;
 
 import inet.linklayer.ieee80211.mac.contract.IFragmentationPolicy;
 
-module OriginatorMacDataService
+module OriginatorMacDataService extends SimpleModule
 {
     parameters:
         @class("OriginatorMacDataService");

@@ -13,7 +13,7 @@ import inet.queueing.contract.IPacketFlow;
 // Implements the given module interface and can be used as an optional
 // module that removes itself from the module hierarchy during initialization.
 //
-module OmittedPacketFlow like IPacketFlow
+module OmittedPacketFlow extends SimpleModule like IPacketFlow
 {
     parameters:
         @class(::inet::OmittedModule);

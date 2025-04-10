@@ -14,7 +14,7 @@ import inet.linklayer.ieee80211.mac.queue.InProgressFrames;
 //
 // Implements the DCAF (Distributed Channel Access Function) for IEEE 802.11.
 //
-module Dcaf
+module Dcaf extends SimpleModule
 {
     parameters:
         int difsn = default(-1);

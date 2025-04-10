@@ -14,7 +14,7 @@ import inet.queueing.contract.IPacketFlow;
 import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.IPacketServer;
 
-module EthernetMacLayer like IEthernetMacLayer
+module EthernetMacLayer extends SimpleModule like IEthernetMacLayer
 {
     parameters:
         double bitrate @unit(bps);

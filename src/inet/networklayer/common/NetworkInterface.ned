@@ -19,7 +19,7 @@ import inet.common.packet.recorder.PcapRecorder;
 // - %n: interface name
 // - %a: network address
 //
-module NetworkInterface
+module NetworkInterface extends SimpleModule
 {
     parameters:
         string displayStringTextFormat = default("%a (%i)\n%m");

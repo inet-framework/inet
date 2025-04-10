@@ -22,7 +22,7 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IScrambler;
 // - Additive descrambler (18.3.5.5 PLCP DATA scrambler and descrambler) (see: ~AdditiveScrambler)
 // - Block deinterleaver (18.3.5.7 Data interleaving) (see: ~Ieee80211OfdmInterleaver)
 //
-module Ieee80211OfdmDecoder like IDecoder
+module Ieee80211OfdmDecoder extends SimpleModule like IDecoder
 {
     parameters:
         @display("i=block/blackboard");

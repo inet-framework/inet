@@ -7,7 +7,7 @@
 
 package inet.linklayer.ieee80211.mac.recipient;
 
-module RecipientQosMacDataService
+module RecipientQosMacDataService extends SimpleModule
 {
     parameters:
         @class("RecipientQosMacDataService");

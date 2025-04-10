@@ -16,7 +16,7 @@ import inet.routing.pim.modes.PimSm;
 import inet.routing.pim.tables.PimInterfaceTable;
 import inet.routing.pim.tables.PimNeighborTable;
 
-module Pim like IPim
+module Pim extends SimpleModule like IPim
 {
     parameters:
         @class(Pim);

@@ -15,7 +15,7 @@ import inet.linklayer.ieee80211.mac.originator.NonQosRecoveryProcedure;
 // The implementation allows for a configurable number of access categories,
 // not just four as defined by the standard.
 //
-module Edca
+module Edca extends SimpleModule
 {
     parameters:
         int numEdcafs = default(4);

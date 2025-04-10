@@ -9,7 +9,7 @@ package inet.environment.ground;
 
 import inet.environment.contract.IGround;
 
-module FlatGround like IGround
+module FlatGround extends SimpleModule like IGround
 {
     parameters:
         double elevation @unit(m) = default(0m);

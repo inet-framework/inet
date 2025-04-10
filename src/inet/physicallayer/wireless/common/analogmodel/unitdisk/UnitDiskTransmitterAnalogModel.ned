@@ -15,7 +15,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitterAnalo
 //
 // @see ~UnitDiskRadioMedium, ~UnitDiskMediumAnalogModel, ~UnitDiskReceiverAnalogModel.
 //
-module UnitDiskTransmitterAnalogModel like ITransmitterAnalogModel
+module UnitDiskTransmitterAnalogModel extends SimpleModule like ITransmitterAnalogModel
 {
     parameters:
         double communicationRange @unit(m);                              // The range where the reception of transmissions produced by this transmitter is possible
