@@ -140,6 +140,7 @@ import inet.routing.contract.IOspf;
 simple Ospfv2 extends SimpleModule like IOspf
 {
     parameters:
+        @class(Ospfv2);
         string interfaceTableModule;
         string routingTableModule;
         string crcMode @enum("declared", "computed") = default("declared");

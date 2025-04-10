@@ -58,6 +58,7 @@ import inet.common.SimpleModule;
 simple Rtp extends SimpleModule
 {
     parameters:
+        @class(Rtp);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
         @display("i=block/buffer");

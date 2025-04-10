@@ -27,6 +27,7 @@ import inet.common.SimpleModule;
 simple EthernetCsmaPhy extends SimpleModule
 {
     parameters:
+        @class(EthernetCsmaPhy);
         // emitted when the state of the state machine changes, the value is one of IDLE, TRANSMITTING, RECEIVING, COLLISION, CRS_ON
         @signal[stateChanged](type=int);
         // emitted when the type of the received signal changes, the value is one of NONE, BEACON, COMMIT, DATA, JAM

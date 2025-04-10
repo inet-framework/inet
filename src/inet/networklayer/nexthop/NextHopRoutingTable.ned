@@ -16,6 +16,7 @@ import inet.networklayer.contract.IRoutingTable;
 simple NextHopRoutingTable extends SimpleModule like IRoutingTable
 {
     parameters:
+        @class(NextHopRoutingTable);
         string interfaceTableModule;   // The path to the InterfaceTable module
         @display("i=block/table");
         string addressType @enum("mac","modulepath","moduleid") = default("modulepath");

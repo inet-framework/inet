@@ -26,6 +26,7 @@ import inet.common.SimpleModule;
 simple EthernetHub extends SimpleModule
 {
     parameters:
+        @class(EthernetHub);
         @networkNode();
         @class(::inet::physicallayer::WireJunction);
         @labels(node,ethernet-node);

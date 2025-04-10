@@ -36,6 +36,7 @@ import inet.networklayer.contract.IArp;
 simple Arp extends SimpleModule like IArp
 {
     parameters:
+        @class(Arp);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
         double retryTimeout @unit(s) = default(1s);   // Number of seconds ARP waits between retries to resolve an IPv4 address

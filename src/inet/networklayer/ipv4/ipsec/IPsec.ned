@@ -180,6 +180,7 @@ import inet.common.SimpleModule;
 simple IPsec extends SimpleModule
 {
     parameters:
+        @class(IPsec);
 		@display("i=block/control;is=s");
 
         string networkProtocolModule = default("^.ip");

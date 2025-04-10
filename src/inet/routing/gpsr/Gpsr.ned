@@ -20,6 +20,7 @@ import inet.routing.contract.IManetRouting;
 simple Gpsr extends SimpleModule like IManetRouting
 {
     parameters:
+        @class(Gpsr);
         // properties
         @display("i=block/routing");
 

@@ -15,6 +15,7 @@ import inet.common.SimpleModule;
 simple IpSocketIo extends SimpleModule
 {
     parameters:
+        @class(IpSocketIo);
         string interfaceTableModule;
         string localAddress = default("");
         string destAddress = default("");

@@ -15,6 +15,7 @@ import inet.common.SimpleModule;
 simple EthernetSocketIo extends SimpleModule
 {
     parameters:
+        @class(EthernetSocketIo);
         string interfaceTableModule; // Relative module path of the interface table
         string interface = default(""); // Network interface name
         string protocol = default(""); // Bind the socket to this protocol if specified

@@ -17,6 +17,7 @@ import inet.common.SimpleModule;
 simple RoutingTableRecorder extends SimpleModule
 {
     parameters:
+        @class(RoutingTableRecorder);
         bool enabled = default(true);
         @display("i=block/control");
 }

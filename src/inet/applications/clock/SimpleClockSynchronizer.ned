@@ -19,6 +19,7 @@ import inet.applications.contract.IApp;
 simple SimpleClockSynchronizer extends SimpleModule like IApp
 {
     parameters:
+        @class(SimpleClockSynchronizer);
         string masterClockModule;
         string slaveClockModule;
         volatile double synchronizationInterval @unit(s); // Clock synchronization period

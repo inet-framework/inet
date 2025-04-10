@@ -34,6 +34,7 @@ import inet.common.SimpleModule;
 simple PimInterfaceTable extends SimpleModule
 {
     parameters:
+        @class(PimInterfaceTable);
         @display("i=block/table");
         string interfaceTableModule;
         xml pimConfig = default(xml("<config/>"));

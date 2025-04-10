@@ -12,6 +12,7 @@ import inet.common.SimpleModule;
 simple TxopProcedure extends SimpleModule
 {
     parameters:
+        @class(TxopProcedure);
         double txopLimit @unit(s) = default(-1s);
         @display("i=block/timer");
         @signal[txopStarted](inet::ieee80211::TxopProcedure);

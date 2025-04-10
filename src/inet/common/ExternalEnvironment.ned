@@ -38,6 +38,7 @@ import inet.common.SimpleModule;
 simple ExternalEnvironment extends SimpleModule
 {
     parameters:
+        @class(ExternalEnvironment);
         int initStage = default(0); // Initialization stage for the setup command
         bool globalNamespace = default(false); // Create new network namespaces under /var/run/netns/ (Linux only)
         string namespace = default(""); // Name of the host OS network namespace (optional) (Linux only)

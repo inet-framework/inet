@@ -17,6 +17,7 @@ import inet.linklayer.ieee80211.mac.contract.ICollisionController;
 simple EdcaCollisionController extends SimpleModule like ICollisionController
 {
     parameters:
+        @class(EdcaCollisionController);
         @display("i=block/switch");
 }
 

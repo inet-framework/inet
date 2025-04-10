@@ -22,6 +22,7 @@ import inet.common.SimpleModule;
 simple PimSplitter extends SimpleModule
 {
     parameters:
+        @class(PimSplitter);
         @display("i=block/dispatch");
         string interfaceTableModule;
         string pimInterfaceTableModule;

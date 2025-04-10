@@ -17,6 +17,7 @@ import inet.common.SimpleModule;
 simple Loopback extends SimpleModule
 {
     parameters:
+        @class(Loopback);
         string interfaceTableModule;   // The path to the InterfaceTable module
         int mtu @unit(B) = default(4470B);
         @display("i=block/rxtx");

@@ -20,6 +20,7 @@ import inet.common.SimpleModule;
 simple GroupEligibilityTimeTable extends SimpleModule
 {
     parameters:
+        @class(GroupEligibilityTimeTable);
         @display("i=block/table");
         @class(GroupEligibilityTimeTable);
 }

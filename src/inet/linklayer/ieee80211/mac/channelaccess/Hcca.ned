@@ -19,5 +19,6 @@ import inet.common.SimpleModule;
 simple Hcca extends SimpleModule
 {
     parameters:
+        @class(Hcca);
         @display("i=block/star");
 }

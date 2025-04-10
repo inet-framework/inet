@@ -16,6 +16,7 @@ import inet.networklayer.configurator.contract.IL3NetworkConfigurator;
 simple L3NetworkConfiguratorBase extends SimpleModule like IL3NetworkConfigurator
 {
     parameters:
+        @class(L3NetworkConfiguratorBase);
         double minLinkWeight = default(1E-3);
         bool configureIsolatedNetworksSeparatly = default(false);
 }

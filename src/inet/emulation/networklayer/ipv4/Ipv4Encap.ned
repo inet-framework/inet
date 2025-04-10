@@ -12,6 +12,7 @@ import inet.common.SimpleModule;
 simple Ipv4Encap extends SimpleModule
 {
     parameters:
+        @class(Ipv4Encap);
         @display("i=block/square");
     gates:
         input upperLayerIn;

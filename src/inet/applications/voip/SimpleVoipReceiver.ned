@@ -28,6 +28,7 @@ import inet.applications.contract.IApp;
 simple SimpleVoipReceiver extends SimpleModule like IApp
 {
     parameters:
+        @class(SimpleVoipReceiver);
         int localPort;
         int emodelIe = default(5);        // Equipment impairment factor
         int emodelBpl = default(10);      // Packet-loss robustness factor

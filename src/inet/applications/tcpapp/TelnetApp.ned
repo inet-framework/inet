@@ -28,6 +28,7 @@ import inet.applications.contract.IApp;
 simple TelnetApp extends SimpleModule like IApp
 {
     parameters:
+        @class(TelnetApp);
         string localAddress = default(""); // Local address or empty ("")
         int localPort; // Local port number
         string connectAddress;  // Server address (may be symbolic)

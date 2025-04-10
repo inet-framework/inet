@@ -12,6 +12,7 @@ import inet.common.SimpleModule;
 simple SendWithAcknowledge extends SimpleModule
 {
     parameters:
+        @class(SendWithAcknowledge);
         double acknowledgeTimeout @unit(s);
         @display("i=block/rxtx");
     gates:

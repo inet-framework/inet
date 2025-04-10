@@ -16,6 +16,7 @@ import inet.common.SimpleModule;
 simple GateControlList extends SimpleModule
 {
     parameters:
+        @class(GateControlList);
         object durations @unit(s) = default([]); // List of entry durations, e.g. [4ms, 2ms, 2ms, 2ms]
         object gateStates = default([]); // List of gate states, e.g. ["10000000", "01111111", "10000000", "01111111"]
         int numGates = default(8); // Number of configured PeriodicGate modules

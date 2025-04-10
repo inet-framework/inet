@@ -19,6 +19,7 @@ import inet.power.contract.IEpEnergyConsumer;
 simple EpEnergyConsumerBase extends SimpleModule like IEpEnergyConsumer
 {
     parameters:
+        @class(EpEnergyConsumerBase);
         @display("i=block/plug");
         @signal[powerConsumptionChanged](type=double);
         @statistic[powerConsumption](title="Power consumption"; source=powerConsumptionChanged; record=vector; interpolationmode=sample-hold; unit=W);

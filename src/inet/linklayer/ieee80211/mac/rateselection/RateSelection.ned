@@ -17,6 +17,7 @@ import inet.linklayer.ieee80211.mac.contract.IRateSelection;
 simple RateSelection extends SimpleModule like IRateSelection
 {
     parameters:
+        @class(RateSelection);
         string rateControlModule;
 
         double multicastFrameBitrate @unit(bps) = default(-1bps);

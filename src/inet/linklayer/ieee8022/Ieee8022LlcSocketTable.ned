@@ -12,6 +12,7 @@ import inet.common.SimpleModule;
 simple Ieee8022LlcSocketTable extends SimpleModule
 {
     parameters:
+        @class(Ieee8022LlcSocketTable);
         @display("i=block/table");
 }
 

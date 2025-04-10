@@ -12,6 +12,7 @@ import inet.common.SimpleModule;
 simple MacRelayUnitBase extends SimpleModule
 {
     parameters:
+        @class(MacRelayUnitBase);
         string macTableModule;
         string interfaceTableModule;
         string displayStringTextFormat = default("proc: %p\ndisc: %d");

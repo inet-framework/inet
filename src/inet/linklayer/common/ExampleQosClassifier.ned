@@ -16,6 +16,7 @@ import inet.common.SimpleModule;
 simple ExampleQosClassifier extends SimpleModule like IIeee8021dQosClassifier
 {
     parameters:
+        @class(ExampleQosClassifier);
         @display("i=block/classifier");
     gates:
         input in;

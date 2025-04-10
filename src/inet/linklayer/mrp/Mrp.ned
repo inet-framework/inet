@@ -72,6 +72,7 @@ simple Mrp extends SimpleModule like IMrp
 {
     parameters:
         @class(Mrp);
+        @class(Mrp);
 
         // Switches do not detect a link change immediately. This parameter sets
         // the simulated delay of a "link down" event. Note: the delay for "link

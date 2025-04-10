@@ -32,6 +32,7 @@ import inet.common.SimpleModule;
 simple L2NetworkConfigurator extends SimpleModule
 {
     parameters:
+        @class(L2NetworkConfigurator);
         @display("i=block/cogwheel");
         xml config = default(xml("<config><interface hosts='**' ports='**' cost='19' priority='128' edge='false'/></config>"));
 }

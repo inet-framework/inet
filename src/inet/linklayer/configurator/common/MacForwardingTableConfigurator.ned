@@ -23,6 +23,7 @@ import inet.networklayer.configurator.contract.INetworkConfigurator;
 simple MacForwardingTableConfigurator extends SimpleModule like INetworkConfigurator
 {
     parameters:
+        @class(MacForwardingTableConfigurator);
         @display("i=block/cogwheel");
 }
 

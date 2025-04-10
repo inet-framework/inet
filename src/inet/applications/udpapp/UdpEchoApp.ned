@@ -18,6 +18,7 @@ import inet.applications.contract.IApp;
 simple UdpEchoApp extends SimpleModule like IApp
 {
     parameters:
+        @class(UdpEchoApp);
         string interfaceTableModule;   // The path to the InterfaceTable module
         int localPort;  // Local port to listen on
         displayStringTextFormat = default("echoed: {numEchoed} pks");

@@ -16,6 +16,7 @@ import inet.linklayer.ieee80211.mac.contract.IOriginatorAckPolicy;
 simple OriginatorAckPolicy extends SimpleModule like IOriginatorAckPolicy
 {
     parameters:
+        @class(OriginatorAckPolicy);
         string rateSelectionModule;
         double ackTimeout @unit(s) = default(-1s);
         @display("i=block/control");

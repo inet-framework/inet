@@ -29,6 +29,7 @@ import inet.linklayer.configurator.contract.IL2NodeConfigurator;
 simple L2NodeConfigurator extends SimpleModule like IL2NodeConfigurator
 {
     parameters:
+        @class(L2NodeConfigurator);
         @display("i=block/cogwheel");
         string interfaceTableModule;
         string l2ConfiguratorModule = default("l2NetworkConfigurator"); // The absolute path to the ~L2NetworkConfigurator; use "" if there is no configurator

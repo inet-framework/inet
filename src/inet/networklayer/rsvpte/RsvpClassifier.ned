@@ -21,6 +21,7 @@ import inet.networklayer.mpls.IIngressClassifier;
 simple RsvpClassifier extends SimpleModule like IIngressClassifier
 {
     parameters:
+        @class(RsvpClassifier);
         string routingTableModule;
         string libTableModule;
         string rsvpModule;

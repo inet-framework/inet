@@ -17,6 +17,7 @@ import inet.common.SimpleModule;
 simple EigrpRtp6 extends SimpleModule
 {
     parameters:
+        @class(EigrpRtp6);
 
     gates:
         input pdmIn;

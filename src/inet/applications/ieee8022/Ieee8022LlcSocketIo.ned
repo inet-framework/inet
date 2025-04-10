@@ -15,6 +15,7 @@ import inet.common.SimpleModule;
 simple Ieee8022LlcSocketIo extends SimpleModule
 {
     parameters:
+        @class(Ieee8022LlcSocketIo);
         string interfaceTableModule;
         string interface = default("");
         string localAddress = default("");

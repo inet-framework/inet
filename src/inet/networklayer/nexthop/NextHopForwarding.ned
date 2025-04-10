@@ -16,6 +16,7 @@ import inet.common.SimpleModule;
 simple NextHopForwarding extends SimpleModule
 {
     parameters:
+        @class(NextHopForwarding);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
         string arpModule;

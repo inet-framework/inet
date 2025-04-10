@@ -16,6 +16,7 @@ import inet.common.SimpleModule;
 simple RtpProfile extends SimpleModule
 {
     parameters:
+        @class(RtpProfile);
         bool autoOutputFileNames;
 
     gates:
@@ -34,6 +35,7 @@ simple RtpProfile extends SimpleModule
 simple RtpAvProfile extends SimpleModule
 {
     parameters:
+        @class(RtpAvProfile);
         bool autoOutputFileNames;
 
     gates:

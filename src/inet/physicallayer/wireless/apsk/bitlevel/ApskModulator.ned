@@ -20,6 +20,7 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IModulator;
 simple ApskModulator extends SimpleModule like IModulator
 {
     parameters:
+        @class(ApskModulator);
         string modulation; // BPSK, QPSK, QAM-16, QAM-64, QAM-256, etc. (see ApskModulationBase::findModulation)
         @display("i=block/mac");
 }

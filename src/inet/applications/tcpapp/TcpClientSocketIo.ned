@@ -27,6 +27,7 @@ import inet.common.SimpleModule;
 simple TcpClientSocketIo extends SimpleModule
 {
     parameters:
+        @class(TcpClientSocketIo);
         string localAddress = default("");
         int localPort = default(-1);
         string connectAddress;

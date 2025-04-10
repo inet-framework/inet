@@ -27,6 +27,7 @@ import inet.common.SimpleModule;
 simple Ieee80211MgmtSta extends SimpleModule like IIeee80211Mgmt
 {
     parameters:
+        @class(Ieee80211MgmtSta);
         string interfaceTableModule;   // The path to the InterfaceTable module
         int numChannels = default(1);  // Number of channels to scan
         string mibModule;

@@ -12,6 +12,7 @@ import inet.common.SimpleModule;
 simple AckHandler extends SimpleModule
 {
     parameters:
+        @class(AckHandler);
         @display("i=block/table2");
 }
 

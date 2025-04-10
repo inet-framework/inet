@@ -53,6 +53,7 @@ import inet.common.SimpleModule;
 simple Ipv6 extends SimpleModule
 {
     parameters:
+        @class(Ipv6);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
         string ipv6NeighbourDiscoveryModule;

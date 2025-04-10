@@ -13,6 +13,7 @@ import inet.protocolelement.fragmentation.contract.IFragmenterPolicy;
 simple LengthBasedFragmenterPolicy extends SimpleModule like IFragmenterPolicy
 {
     parameters:
+        @class(LengthBasedFragmenterPolicy);
         int minFragmentLength @unit(b) = default(0b);
         int maxFragmentLength @unit(b);
         int roundingLength @unit(b) = default(1B);

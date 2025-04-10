@@ -12,6 +12,7 @@ import inet.common.SimpleModule;
 simple ReceiveAtMacAddress extends SimpleModule
 {
     parameters:
+        @class(ReceiveAtMacAddress);
         string address;
         @display("i=block/rx");
     gates:

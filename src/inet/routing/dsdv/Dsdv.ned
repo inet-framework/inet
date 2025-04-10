@@ -27,6 +27,7 @@ import inet.routing.contract.IManetRouting;
 simple Dsdv extends SimpleModule like IManetRouting
 {
     parameters:
+        @class(Dsdv);
         @display("i=block/routing");
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;

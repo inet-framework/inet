@@ -30,6 +30,7 @@ import inet.linklayer.contract.ISpanningTree;
 simple Stp extends SimpleModule like ISpanningTree
 {
     parameters:
+        @class(Stp);
 
         // The hello time is the time between each bridge protocol data unit (BPDU) that is sent on a port.
         // This time is equal to 2 seconds (sec) by default, but you can tune the time to be between 1 and 10 sec.

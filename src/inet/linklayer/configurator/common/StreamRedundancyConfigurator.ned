@@ -20,6 +20,7 @@ import inet.networklayer.configurator.contract.INetworkConfigurator;
 simple StreamRedundancyConfigurator extends SimpleModule like INetworkConfigurator
 {
     parameters:
+        @class(StreamRedundancyConfigurator);
         int minVlanId = default(0); // Lowest available VLAN ID
         int maxVlanId = default(4095); // Highest available VLAN ID
         object configuration @mutable = default([]); // A vector of objects (e.g. [{...}, {...}]) where each object has the following fields: name, source, destination, packetFilter, paths

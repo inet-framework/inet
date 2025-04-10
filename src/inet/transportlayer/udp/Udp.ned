@@ -58,6 +58,7 @@ import inet.transportlayer.contract.IUdp;
 simple Udp extends SimpleModule like IUdp
 {
     parameters:
+        @class(Udp);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string icmpModule = default("^.ipv4.icmp");
         string icmpv6Module = default("^.ipv6.icmpv6");

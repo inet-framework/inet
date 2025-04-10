@@ -79,6 +79,7 @@ import inet.applications.contract.IApp;
 simple TcpSessionApp extends SimpleModule like IApp
 {
     parameters:
+        @class(TcpSessionApp);
         string localAddress = default("");
         int localPort = default(-1);  // Local port
         bool active = default(true);

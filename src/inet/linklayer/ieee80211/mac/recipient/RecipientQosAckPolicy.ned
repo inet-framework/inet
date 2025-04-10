@@ -16,6 +16,7 @@ import inet.linklayer.ieee80211.mac.contract.IRecipientQosAckPolicy;
 simple RecipientQosAckPolicy extends SimpleModule like IRecipientQosAckPolicy
 {
     parameters:
+        @class(RecipientQosAckPolicy);
         string rateSelectionModule;
         @display("i=block/control");
 }

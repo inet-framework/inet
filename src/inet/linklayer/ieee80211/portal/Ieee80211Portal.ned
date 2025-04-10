@@ -14,6 +14,7 @@ import inet.linklayer.contract.IIeee8022Llc;
 simple Ieee80211Portal extends SimpleModule like IIeee8022Llc, IIeee80211Llc
 {
     parameters:
+        @class(Ieee80211Portal);
         string fcsMode @enum("declared", "computed") = default("declared");
         @display("i=block/layer");
     gates:

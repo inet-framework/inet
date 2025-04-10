@@ -28,6 +28,7 @@ import inet.networklayer.configurator.contract.IIpv4NodeConfigurator;
 simple Ipv4NodeConfigurator extends SimpleModule like IIpv4NodeConfigurator
 {
     parameters:
+        @class(Ipv4NodeConfigurator);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
         // TODO eventually rename to networkConfigurator

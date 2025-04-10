@@ -16,6 +16,5 @@ package inet.common;
 simple SimpleModule
 {
     parameters:
-        @class(SimpleModule);
         string displayStringTextFormat @mutable = default("");
 }

@@ -12,6 +12,7 @@ import inet.common.SimpleModule;
 simple Igmpv3 extends SimpleModule like IIgmp
 {
     parameters:
+        @class(Igmpv3);
         bool enabled = default(true);
         string interfaceTableModule;
         string routingTableModule;

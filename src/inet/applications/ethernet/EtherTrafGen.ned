@@ -17,6 +17,7 @@ import inet.common.SimpleModule;
 simple EtherTrafGen extends SimpleModule
 {
     parameters:
+        @class(EtherTrafGen);
         string destAddress = default("");  // Destination MAC address, or module path name of destination station; empty means off
         string interface;   // Outgoing interface
         string interfaceTableModule;

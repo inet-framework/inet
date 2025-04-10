@@ -18,6 +18,7 @@ import inet.power.contract.IEpEnergyConsumer;
 simple StateBasedEpEnergyConsumer extends SimpleModule like IEpEnergyConsumer
 {
     parameters:
+        @class(StateBasedEpEnergyConsumer);
         string energySourceModule;
         double offPowerConsumption @unit(W) = default(0mW);
         double sleepPowerConsumption @unit(W) = default(1mW);

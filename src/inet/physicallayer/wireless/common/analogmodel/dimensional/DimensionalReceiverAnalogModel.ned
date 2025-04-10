@@ -13,6 +13,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IReceiverAnalogMo
 simple DimensionalReceiverAnalogModel extends SimpleModule like IReceiverAnalogModel
 {
     parameters:
+        @class(DimensionalReceiverAnalogModel);
         double defaultCenterFrequency @unit(Hz) = default(nan Hz);
         double defaultBandwidth @unit(Hz) = default(nan Hz);
         double defaultSensitivity @unit(dBm) = default(nan dBm);     // Reception is not possible if the signal power is below the sensitivity (idle or busy states).

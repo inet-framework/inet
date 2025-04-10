@@ -15,6 +15,7 @@ import inet.common.SimpleModule;
 simple UdpSocketIo extends SimpleModule
 {
     parameters:
+        @class(UdpSocketIo);
         string interfaceTableModule;
         string localAddress = default("");
         int localPort = default(-1);

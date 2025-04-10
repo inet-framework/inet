@@ -92,6 +92,7 @@ import inet.applications.contract.IApp;
 simple UdpBasicBurst extends SimpleModule like IApp
 {
     parameters:
+        @class(UdpBasicBurst);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string destAddresses; // Space-separated list of destination IP addresses, can be empty;
                               // see module description for possibilities

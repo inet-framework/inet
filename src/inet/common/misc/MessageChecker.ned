@@ -34,6 +34,7 @@ import inet.common.SimpleModule;
 simple MessageChecker extends SimpleModule
 {
     parameters:
+        @class(MessageChecker);
         xml config;   // Configuration file
     gates:
         input in;

@@ -20,6 +20,7 @@ import inet.linklayer.contract.IGptp;
 simple Gptp extends SimpleModule like IGptp
 {
     parameters:
+        @class(Gptp);
         string clockModule = default(""); // Relative path of a module that implements IClock; optional
         string interfaceTableModule; // Relative path of the interface table module
         string gptpNodeType; // @enum("GptpNodeType"): MASTER_NODE, BRIDGE_NODE, SLAVE_NODE

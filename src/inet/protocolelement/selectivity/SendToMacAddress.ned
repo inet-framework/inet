@@ -12,6 +12,7 @@ import inet.common.SimpleModule;
 simple SendToMacAddress extends SimpleModule
 {
     parameters:
+        @class(SendToMacAddress);
         string address = default("");
         @display("i=block/tx");
     gates:

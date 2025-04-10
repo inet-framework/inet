@@ -29,6 +29,7 @@ moduleinterface IRTPPayloadReceiver
 simple RtpPayloadReceiver extends SimpleModule like IRTPPayloadReceiver
 {
     parameters:
+        @class(RtpPayloadReceiver);
         string outputFileName;
         string outputLogFileName = default("outputLogLoss%d.log");
         @signal[rcvdPkRtpTimestamp](type=simtime_t; unit=s);
@@ -42,6 +43,7 @@ simple RtpPayloadReceiver extends SimpleModule like IRTPPayloadReceiver
 simple RTPAVProfilePayload10Receiver extends SimpleModule like IRTPPayloadReceiver
 {
     parameters:
+        @class(RTPAVProfilePayload10Receiver);
         string outputFileName;
         string outputLogFileName = default("outputLogLoss%d.log");
 
@@ -53,6 +55,7 @@ simple RTPAVProfilePayload10Receiver extends SimpleModule like IRTPPayloadReceiv
 simple RtpAvProfilePayload32Receiver extends SimpleModule like IRTPPayloadReceiver
 {
     parameters:
+        @class(RtpAvProfilePayload32Receiver);
         string outputFileName;
         string outputLogFileName = default("outputLogLoss%d.log");
 
@@ -64,6 +67,7 @@ simple RtpAvProfilePayload32Receiver extends SimpleModule like IRTPPayloadReceiv
 simple RTPAVProfileSampleBasedAudioReceiver extends SimpleModule like IRTPPayloadReceiver
 {
     parameters:
+        @class(RTPAVProfileSampleBasedAudioReceiver);
         string outputFileName;
         string outputLogFileName = default("outputLogLoss%d.log");
 

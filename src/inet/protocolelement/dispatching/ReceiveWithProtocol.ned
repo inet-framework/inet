@@ -12,6 +12,7 @@ import inet.common.SimpleModule;
 simple ReceiveWithProtocol extends SimpleModule
 {
     parameters:
+        @class(ReceiveWithProtocol);
         @display("i=block/rx");
     gates:
         input in;

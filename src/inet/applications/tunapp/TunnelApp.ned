@@ -12,6 +12,7 @@ import inet.applications.contract.IApp;
 simple TunnelApp extends SimpleModule like IApp
 {
     parameters:
+        @class(TunnelApp);
         string interfaceTableModule;
         string interface;
         string protocol @enum("udp", "ipv4") = default("udp");

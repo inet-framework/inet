@@ -12,6 +12,7 @@ import inet.common.SimpleModule;
 simple NonQosRecoveryProcedure extends SimpleModule
 {
     parameters:
+        @class(NonQosRecoveryProcedure);
         string cwCalculatorModule;
         string rtsPolicyModule;
         int shortRetryLimit = default(7);

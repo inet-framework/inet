@@ -25,6 +25,7 @@ import inet.applications.contract.IApp;
 simple VoipStreamReceiver extends SimpleModule like IApp
 {
     parameters:
+        @class(VoipStreamReceiver);
         int localPort;
         double playoutDelay @unit(s) = default(20ms);
         string resultFile;

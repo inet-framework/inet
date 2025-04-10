@@ -45,6 +45,7 @@ import inet.common.SimpleModule;
 simple PimSm extends SimpleModule
 {
     parameters:
+        @class(PimSm);
         @display("i=block/network2");
         string interfaceTableModule;
         string routingTableModule;

@@ -18,6 +18,7 @@ import inet.common.SimpleModule;
 simple Ieee80211MgmtApSimplified extends SimpleModule like IIeee80211Mgmt
 {
     parameters:
+        @class(Ieee80211MgmtApSimplified);
         string interfaceTableModule;
         string mibModule;
         string macModule;               // The path to the MAC module

@@ -12,6 +12,7 @@ import inet.common.SimpleModule;
 simple VirtualTunnel extends SimpleModule
 {
     parameters:
+        @class(VirtualTunnel);
         string interfaceTableModule;
         string realInterface;
         string protocol = default(vlanId != -1 ? "ieee8021qctag" : "");

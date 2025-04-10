@@ -20,6 +20,7 @@ import inet.linklayer.ieee80211.mac.contract.IRx;
 simple Rx extends SimpleModule like IRx
 {
     parameters:
+        @class(Rx);
         @display("i=block/rx");
         @signal[navChanged](type=simtime_t);
         @signal[packetDropped](type=inet::Packet);

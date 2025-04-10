@@ -94,6 +94,7 @@ import inet.common.SimpleModule;
 simple Igmpv2 extends SimpleModule like IIgmp
 {
     parameters:
+        @class(Igmpv2);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
         string crcMode @enum("declared","computed") = default("declared");

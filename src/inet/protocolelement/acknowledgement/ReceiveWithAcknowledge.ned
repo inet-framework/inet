@@ -12,6 +12,7 @@ import inet.common.SimpleModule;
 simple ReceiveWithAcknowledge extends SimpleModule
 {
     parameters:
+        @class(ReceiveWithAcknowledge);
         @display("i=block/rxtx");
     gates:
         input in;

@@ -15,6 +15,7 @@ import inet.common.SimpleModule;
 simple SignalSource extends SimpleModule
 {
     parameters:
+        @class(SignalSource);
         @display("i=block/cogwheel");
         @signal[signalSourceOutput];
         double startTime @unit(s) = default(0s);

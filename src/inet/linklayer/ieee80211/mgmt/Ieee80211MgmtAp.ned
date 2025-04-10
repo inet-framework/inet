@@ -23,6 +23,7 @@ import inet.common.SimpleModule;
 simple Ieee80211MgmtAp extends SimpleModule like IIeee80211Mgmt
 {
     parameters:
+        @class(Ieee80211MgmtAp);
         string ssid = default("SSID");
         double beaconInterval @unit(s) = default(100ms);
         int numAuthSteps = default(4); // Use 2 for Open System auth, 4 for WEP

@@ -20,6 +20,7 @@ import inet.transportlayer.contract.ITcp;
 simple TcpSpoof extends SimpleModule like ITcp
 {
     parameters:
+        @class(TcpSpoof);
         string srcAddress = default("");  // Local address; may be left empty ("")
         string destAddress = default(""); // Destination address
         int srcPort; // Local port number

@@ -27,6 +27,7 @@ import inet.applications.contract.IApp;
 simple TcpServerHostApp extends SimpleModule like IApp
 {
     parameters:
+        @class(TcpServerHostApp);
         string localAddress = default(""); // May be left empty ("")
         int localPort = default(1000); // Port number to listen on
         string serverThreadModuleType; // Module type of "thread" module to launch on incoming connections

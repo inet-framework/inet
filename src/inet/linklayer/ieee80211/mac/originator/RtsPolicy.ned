@@ -16,6 +16,7 @@ import inet.linklayer.ieee80211.mac.contract.IRtsPolicy;
 simple RtsPolicy extends SimpleModule like IRtsPolicy
 {
     parameters:
+        @class(RtsPolicy);
         string rateSelectionModule;
         double ctsTimeout @unit(s) = default(-1s);
         int rtsThreshold @unit(B) = default(2346B);

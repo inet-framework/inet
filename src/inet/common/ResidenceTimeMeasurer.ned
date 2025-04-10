@@ -20,6 +20,7 @@ import inet.common.SimpleModule;
 simple ResidenceTimeMeasurer extends SimpleModule like IMeasurer
 {
     parameters:
+        @class(ResidenceTimeMeasurer);
         string subscriptionModule = default("^"); // Relative module path where the subscription happens
         string measurementStartSignal = default("receptionEnded"); // Subscribed signal for the measurement start
         string measurementEndSignal = default("transmissionStarted"); // Subscribed signal for the measurement end

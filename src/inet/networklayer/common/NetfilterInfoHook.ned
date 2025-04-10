@@ -12,6 +12,7 @@ import inet.common.SimpleModule;
 simple NetfilterInfoHook extends SimpleModule
 {
     parameters:
+        @class(NetfilterInfoHook);
         string networkProtocolModule;
 }
 

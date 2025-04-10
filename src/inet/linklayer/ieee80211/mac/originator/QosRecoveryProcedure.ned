@@ -12,6 +12,7 @@ import inet.common.SimpleModule;
 simple QosRecoveryProcedure extends SimpleModule
 {
     parameters:
+        @class(QosRecoveryProcedure);
         string cwCalculatorModule;
         string rtsPolicyModule;
 

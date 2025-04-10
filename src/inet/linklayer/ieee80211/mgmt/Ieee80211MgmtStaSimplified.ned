@@ -19,6 +19,7 @@ import inet.common.SimpleModule;
 simple Ieee80211MgmtStaSimplified extends SimpleModule like IIeee80211Mgmt
 {
     parameters:
+        @class(Ieee80211MgmtStaSimplified);
         string accessPointAddress; // MAC address of associated AP
         string interfaceTableModule;
         string mibModule;

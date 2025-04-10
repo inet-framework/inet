@@ -20,6 +20,7 @@ import inet.transportlayer.contract.ITcp;
 simple TcpLwip extends SimpleModule like ITcp
 {
     parameters:
+        @class(TcpLwip);
         string sendQueueClass = default("");    //# TODO Obsolete!!!
         string receiveQueueClass = default(""); //# TODO Obsolete!!!
         string crcMode @enum("declared", "computed") = default("declared");

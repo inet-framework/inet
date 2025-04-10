@@ -20,6 +20,7 @@ import inet.networklayer.contract.IIpv6Tunneling;
 simple Ipv6Tunneling extends SimpleModule like IIpv6Tunneling
 {
     parameters:
+        @class(Ipv6Tunneling);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;  // The path to the RoutingTable module
         string xmipv6Module;  // The path to the XMipv6 module

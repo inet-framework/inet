@@ -17,6 +17,7 @@ import inet.common.SimpleModule;
 simple RtpApplication extends SimpleModule
 {
     parameters:
+        @class(RtpApplication);
         @display("i=block/app");
         string commonName;  // The common name (CNAME) of this host
         string profileName;  // Which rtp profile is to be used (usually RtpAvProfile)

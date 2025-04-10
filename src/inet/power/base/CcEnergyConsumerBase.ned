@@ -19,6 +19,7 @@ import inet.power.contract.ICcEnergyConsumer;
 simple CcEnergyConsumerBase extends SimpleModule like ICcEnergyConsumer
 {
     parameters:
+        @class(CcEnergyConsumerBase);
         @display("i=block/plug");
         @signal[currentConsumptionChanged](type=double);
         @statistic[currentConsumption](title="Current consumption"; source=currentConsumptionChanged; record=vector; interpolationmode=sample-hold; unit=A);

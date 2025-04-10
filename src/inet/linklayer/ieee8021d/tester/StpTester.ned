@@ -16,6 +16,7 @@ import inet.common.SimpleModule;
 simple StpTester extends SimpleModule
 {
     parameters:
+        @class(StpTester);
         double checkTime @unit(s) = default(500ms);
 
         @display("i=block/cogwheel");

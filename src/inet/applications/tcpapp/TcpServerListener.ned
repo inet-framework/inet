@@ -28,6 +28,7 @@ import inet.applications.contract.IApp;
 simple TcpServerListener extends SimpleModule
 {
     parameters:
+        @class(TcpServerListener);
         string localAddress = default(""); // May be left empty ("")
         int localPort = default(1000); // Port number to listen on
         string serverConnectionModuleType = default("inet.applications.tcpapp.TcpServerConnection"); // Module type of "connection" module to launch on incoming connections

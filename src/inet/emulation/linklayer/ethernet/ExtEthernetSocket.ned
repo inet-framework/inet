@@ -33,6 +33,7 @@ import inet.common.SimpleModule;
 simple ExtEthernetSocket extends SimpleModule
 {
     parameters:
+        @class(ExtEthernetSocket);
         string device; // Name of an existing real Ethernet device
         string namespace = default("");
         string packetNameFormat = default("Ext-%p-%t-%n"); // Name of received packets

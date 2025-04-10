@@ -17,6 +17,7 @@ import inet.transportlayer.contract.ISctp;
 simple Sctp extends SimpleModule like ISctp
 {
     parameters:
+        @class(Sctp);
         string interfaceTableModule;
         string routingTableModule;
         string crcMode @enum("declared", "computed") = default("declared");

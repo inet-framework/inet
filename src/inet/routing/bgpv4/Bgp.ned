@@ -20,6 +20,7 @@ import inet.routing.contract.IBgp;
 simple Bgp extends SimpleModule like IBgp
 {
     parameters:
+        @class(Bgp);
         string interfaceTableModule;
         string routingTableModule;
         string ospfRoutingModule;

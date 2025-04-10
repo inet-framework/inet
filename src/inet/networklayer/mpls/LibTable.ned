@@ -34,6 +34,7 @@ import inet.common.SimpleModule;
 simple LibTable extends SimpleModule
 {
     parameters:
+        @class(LibTable);
         xml config = default(xml("<libtable/>")); // Table contents to be loaded on startup
         @display("i=block/table2");
 }

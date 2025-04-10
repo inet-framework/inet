@@ -19,6 +19,7 @@ import inet.common.SimpleModule;
 simple xMIPv6 extends SimpleModule
 {
     parameters:
+        @class(xMIPv6);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string ipv6TunnelingModule;
         string ipv6NeighbourDiscoveryModule;

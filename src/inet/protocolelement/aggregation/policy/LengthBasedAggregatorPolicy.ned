@@ -16,6 +16,7 @@ import inet.protocolelement.aggregation.contract.IAggregatorPolicy;
 simple LengthBasedAggregatorPolicy extends SimpleModule like IAggregatorPolicy
 {
     parameters:
+        @class(LengthBasedAggregatorPolicy);
         int minNumSubpackets = default(0);
         int maxNumSubpackets;
         int minAggregatedLength @unit(b) = default(0b);

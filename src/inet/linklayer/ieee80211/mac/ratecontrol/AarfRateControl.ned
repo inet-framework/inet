@@ -18,6 +18,7 @@ import inet.linklayer.ieee80211.mac.contract.IRateControl;
 simple AarfRateControl extends SimpleModule like IRateControl
 {
     parameters:
+        @class(AarfRateControl);
         double initialRate @unit(bps) = default(-1bps); // -1 means the fastest mandatory rate
         double interval @unit(s) = default(50ms); // The rate (unconditionally) increases after each time interval.
         int increaseThreshold = default(10); // Number of successful transmissions needed to increase the rate

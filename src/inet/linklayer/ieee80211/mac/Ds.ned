@@ -20,6 +20,7 @@ import inet.linklayer.ieee80211.mac.contract.IDs;
 simple Ds extends SimpleModule like IDs
 {
     parameters:
+        @class(Ds);
         string mibModule;
         @display("i=block/routing");
         @signal[packetDropped];

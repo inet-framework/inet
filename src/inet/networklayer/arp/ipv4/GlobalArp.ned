@@ -17,6 +17,7 @@ import inet.networklayer.contract.IArp;
 simple GlobalArp extends SimpleModule like IArp
 {
     parameters:
+        @class(GlobalArp);
         string interfaceTableModule;   // Path to the InterfaceTable module
         string addressType @enum("ipv4", "ipv6", "mac", "moduleid", "modulepath") = default("ipv4");
         @display("i=block/layer");

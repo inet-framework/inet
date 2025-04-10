@@ -12,6 +12,7 @@ import inet.common.SimpleModule;
 simple LocalDelivery extends SimpleModule
 {
     parameters:
+        @class(LocalDelivery);
         string interfaceTableModule;
     gates:
         input in;

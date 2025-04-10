@@ -17,6 +17,7 @@ import inet.common.SimpleModule;
 simple EtherAppClient extends SimpleModule
 {
     parameters:
+        @class(EtherAppClient);
         string interfaceTableModule;
         string destAddress = default("");  // Destination MAC address, or module path name of destination station; empty means off
         string interface = default("");  // Outgoing interface name; empty accepted only when the destAddress is empty

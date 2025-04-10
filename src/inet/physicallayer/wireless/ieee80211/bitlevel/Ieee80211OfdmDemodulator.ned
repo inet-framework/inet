@@ -16,6 +16,7 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IDemodulator;
 simple Ieee80211OfdmDemodulator extends SimpleModule like IDemodulator
 {
     parameters:
+        @class(Ieee80211OfdmDemodulator);
         int numSubcarriers = default(52);
         string subcarrierModulation;
         @display("i=block/mac");

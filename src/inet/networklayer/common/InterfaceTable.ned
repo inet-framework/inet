@@ -26,6 +26,7 @@ import inet.common.SimpleModule;
 simple InterfaceTable extends SimpleModule
 {
     parameters:
+        @class(InterfaceTable);
         bool displayAddresses = default(false);  // Whether to display IP addresses on links
         @display("i=block/table");
         @signal[interfaceCreated](type=inet::NetworkInterface);

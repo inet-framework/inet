@@ -16,6 +16,7 @@ import inet.common.SimpleModule;
 simple SctpNatHook extends SimpleModule
 {
     parameters:
+        @class(SctpNatHook);
         string interfaceTableModule;
         string networkProtocolModule;
         string routingTableModule;

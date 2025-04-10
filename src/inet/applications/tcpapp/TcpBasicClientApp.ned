@@ -41,6 +41,7 @@ import inet.applications.contract.IApp;
 simple TcpBasicClientApp extends SimpleModule like IApp
 {
     parameters:
+        @class(TcpBasicClientApp);
         string localAddress = default(""); // May be left empty ("")
         int localPort = default(-1); // Port number to listen on
         string connectAddress = default("");  // Server address (may be symbolic)

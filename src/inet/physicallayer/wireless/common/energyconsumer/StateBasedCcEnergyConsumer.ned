@@ -18,6 +18,7 @@ import inet.power.contract.ICcEnergyConsumer;
 simple StateBasedCcEnergyConsumer extends SimpleModule like ICcEnergyConsumer
 {
     parameters:
+        @class(StateBasedCcEnergyConsumer);
         string energySourceModule;
         double minSupplyVoltage @unit(V) = default(0V);
         double maxSupplyVoltage @unit(V) = default(inf V);

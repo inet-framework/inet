@@ -26,6 +26,7 @@ import inet.common.SimpleModule;
 simple WireJunction extends SimpleModule
 {
     parameters:
+        @class(WireJunction);
         @wireJunction;
         @display("i=misc/node_vs");
         @signal[packetReceived](type=cPacket);

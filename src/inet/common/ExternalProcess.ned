@@ -33,6 +33,7 @@ import inet.common.SimpleModule;
 simple ExternalProcess extends SimpleModule
 {
     parameters:
+        @class(ExternalProcess);
         string namespace = default(""); // Name of the OS network namespace (optional)
         string command; // Executable with arguments (e.g. "ping google.com"); not a shell command as it will be passed to execvp
         string onExit @enum("terminateSimulation","relaunch","ignore") = default("ignore"); // Determines what happens when the process exits

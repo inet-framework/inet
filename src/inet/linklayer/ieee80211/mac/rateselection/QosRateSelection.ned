@@ -12,6 +12,7 @@ import inet.common.SimpleModule;
 simple QosRateSelection extends SimpleModule
 {
     parameters:
+        @class(QosRateSelection);
         string rateControlModule;
 
         double multicastFrameBitrate @unit(bps) = default(-1bps);

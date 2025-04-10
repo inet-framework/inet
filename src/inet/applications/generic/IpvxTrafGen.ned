@@ -24,6 +24,7 @@ import inet.common.SimpleModule;
 simple IpvxTrafGen extends SimpleModule like IIpvxTrafficGenerator
 {
     parameters:
+        @class(IpvxTrafGen);
         double startTime @unit(s) = default(1s); // Time of sending the first packet
         double stopTime @unit(s) = default(-1s);  // Time of finishing sending, negative values mean forever
         volatile double sendInterval @unit(s) = default(10ms); // May be a random value, e.g. exponential(1)

@@ -18,6 +18,7 @@ import inet.applications.contract.IApp;
 simple SctpClient extends SimpleModule like IApp
 {
     parameters:
+        @class(SctpClient);
         string localAddress = default(""); // Comma-separated list of addresses
         int localPort = default(0); // Port number to listen on
         string connectAddress;  // Server address (may be symbolic)

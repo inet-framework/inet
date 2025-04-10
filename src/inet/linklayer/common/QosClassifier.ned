@@ -16,6 +16,7 @@ import inet.common.SimpleModule;
 simple QosClassifier extends SimpleModule like IIeee8021dQosClassifier
 {
     parameters:
+        @class(QosClassifier);
         string ipProtocolUpMap = default("1 BE 58 BE");
         string udpPortUpMap = default("21 BK 80 BE 4000 VI 5000 VO");
         string tcpPortUpMap = default("21 BK 80 BE 4000 VI 5000 VO");

@@ -12,6 +12,7 @@ import inet.common.SimpleModule;
 simple EthernetPhy extends SimpleModule
 {
     parameters:
+        @class(EthernetPhy);
         @display("i=block/rxtx");
     gates:
         input upperLayerIn @labels(EtherFrame);

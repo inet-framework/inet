@@ -17,6 +17,7 @@ import inet.common.SimpleModule;
 simple EtherAppServer extends SimpleModule
 {
     parameters:
+        @class(EtherAppServer);
         int localSAP = default(0xf1);
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation is finished

@@ -18,6 +18,7 @@ import inet.common.SimpleModule;
 simple ExtIpv4TunDevice extends SimpleModule
 {
     parameters:
+        @class(ExtIpv4TunDevice);
         string device;
         string namespace = default("");
         string packetNameFormat = default("Ext");

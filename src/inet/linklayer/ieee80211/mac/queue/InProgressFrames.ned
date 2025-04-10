@@ -13,6 +13,7 @@ import inet.common.SimpleModule;
 simple InProgressFrames extends SimpleModule
 {
     parameters:
+        @class(InProgressFrames);
         string pendingQueueModule;
         string originatorMacDataServiceModule;
         string ackHandlerModule;

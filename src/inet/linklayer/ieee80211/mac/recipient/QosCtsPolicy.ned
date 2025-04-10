@@ -16,6 +16,7 @@ import inet.linklayer.ieee80211.mac.contract.ICtsPolicy;
 simple QosCtsPolicy extends SimpleModule like ICtsPolicy
 {
     parameters:
+        @class(QosCtsPolicy);
         string rxModule;
         string rateSelectionModule;
         @display("i=block/control");

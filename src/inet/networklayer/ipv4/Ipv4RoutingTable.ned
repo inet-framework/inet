@@ -40,6 +40,7 @@ import inet.networklayer.contract.IRoutingTable;
 simple Ipv4RoutingTable extends SimpleModule like IRoutingTable
 {
     parameters:
+        @class(Ipv4RoutingTable);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routerId = default("auto"); // For routers, the router id using IPv4 address dotted
                           // notation; specify "auto" to select the highest

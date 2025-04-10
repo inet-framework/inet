@@ -12,6 +12,7 @@ import inet.common.SimpleModule;
 simple EthernetPauseCommandProcessor extends SimpleModule
 {
     parameters:
+        @class(EthernetPauseCommandProcessor);
         //@class(EthernetPauseCommandProcessor);
         @display("i=block/inserter");
         @signal[pauseSent](type=long); // Pause units

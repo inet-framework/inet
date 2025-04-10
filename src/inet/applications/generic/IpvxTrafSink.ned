@@ -16,6 +16,7 @@ import inet.common.SimpleModule;
 simple IpvxTrafSink extends SimpleModule like IIpvxTrafficGenerator
 {
     parameters:
+        @class(IpvxTrafSink);
         int protocol; // Value for IPv4, IPv6 protocol field, accepts only values between 143 and 254
         displayStringTextFormat @mutable = default("rcvd: {numReceived} pks");
         @lifecycleSupport;

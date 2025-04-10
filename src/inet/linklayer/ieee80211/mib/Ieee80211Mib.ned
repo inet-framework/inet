@@ -12,6 +12,7 @@ import inet.common.SimpleModule;
 simple Ieee80211Mib extends SimpleModule
 {
     parameters:
+        @class(Ieee80211Mib);
         @display("i=block/table");
 }
 

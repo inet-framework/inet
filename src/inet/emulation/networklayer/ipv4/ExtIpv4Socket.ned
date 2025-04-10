@@ -18,6 +18,7 @@ import inet.common.SimpleModule;
 simple ExtIpv4Socket extends SimpleModule
 {
     parameters:
+        @class(ExtIpv4Socket);
         string namespace = default("");
         string packetName = default("Ext-%p-%t-%n");
         @display("i=block/rxtx");

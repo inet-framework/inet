@@ -34,6 +34,7 @@ import inet.common.SimpleModule;
 simple PcapRecorder extends SimpleModule
 {
     parameters:
+        @class(PcapRecorder);
         bool verbose = default(true);  // Whether to log packets on the module output
         string pcapFile = default(""); // The PCAP file to be written
         string fileFormat @enum("pcap", "pcapng") = default("pcapng");

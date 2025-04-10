@@ -34,6 +34,7 @@ import inet.applications.contract.IApp;
 simple TcpGenericServerApp extends SimpleModule like IApp
 {
     parameters:
+        @class(TcpGenericServerApp);
         string localAddress = default(""); // Local address; it may be left empty ("")
         int localPort = default(1000);     // LocalPort number to listen on
         bool autoRead = default(true); // Whether to use "autoread" or "explicit-read" mode for TCP connection

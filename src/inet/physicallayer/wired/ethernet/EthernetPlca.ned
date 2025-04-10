@@ -53,6 +53,7 @@ import inet.protocolelement.contract.IProtocolLayer;
 simple EthernetPlca extends SimpleModule like IProtocolLayer
 {
     parameters:
+        @class(EthernetPlca);
         // Maximum number of PLCA nodes on the mixing segment receiving transmit
         // opportunities before the node with local_nodeID = 0 generates a new
         // BEACON.

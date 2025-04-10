@@ -16,6 +16,7 @@ import inet.linklayer.ieee80211.mac.contract.IOriginatorQosAckPolicy;
 simple OriginatorQosAckPolicy extends SimpleModule like IOriginatorQosAckPolicy
 {
     parameters:
+        @class(OriginatorQosAckPolicy);
         string rateSelectionModule;
 
         int blockAckReqThreshold = default(5);

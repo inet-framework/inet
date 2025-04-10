@@ -25,6 +25,7 @@ import inet.applications.contract.IApp;
 simple VoipStreamSender extends SimpleModule like IApp
 {
     parameters:
+        @class(VoipStreamSender);
         int localPort;
         int destPort;
         string destAddress;

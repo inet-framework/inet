@@ -20,6 +20,7 @@ import inet.common.SimpleModule;
 simple Ipv6NeighbourDiscovery extends SimpleModule
 {
     parameters:
+        @class(Ipv6NeighbourDiscovery);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string crcMode @enum("declared", "computed") = default("declared");
         string icmpv6Module;

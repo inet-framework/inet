@@ -20,6 +20,7 @@ import inet.routing.contract.IManetRouting;
 simple Dymo extends SimpleModule like IManetRouting
 {
     parameters:
+        @class(Dymo);
         // properties
         @class("dymo::Dymo");
         @display("i=block/routing");

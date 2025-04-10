@@ -20,6 +20,7 @@ import inet.common.SimpleModule;
 simple LinkStateRouting extends SimpleModule
 {
     parameters:
+        @class(LinkStateRouting);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
         string tedModule;

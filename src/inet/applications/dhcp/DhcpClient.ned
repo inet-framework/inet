@@ -21,6 +21,7 @@ import inet.applications.contract.IApp;
 simple DhcpClient extends SimpleModule like IApp
 {
     parameters:
+        @class(DhcpClient);
         string interfaceTableModule; // Path to the InterfaceTable module
         string routingTableModule; // Path to the Ipv4RoutingTable module
         string interface = default(""); // Which NIC should be configured (i.e. wlan0, eth1 etc.)

@@ -18,6 +18,7 @@ import inet.linklayer.ieee80211.mac.contract.ITx;
 simple Tx extends SimpleModule like ITx
 {
     parameters:
+        @class(Tx);
         string rxModule;
         @display("i=block/tx");
 }

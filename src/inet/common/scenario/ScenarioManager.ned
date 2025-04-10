@@ -114,6 +114,7 @@ import inet.common.SimpleModule;
 simple ScenarioManager extends SimpleModule
 {
     parameters:
+        @class(ScenarioManager);
         xml script = default(xml("<script></script>"));
 
         // Format for the text displayed above the module icon.

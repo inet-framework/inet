@@ -19,6 +19,7 @@ import inet.power.contract.ICcEnergyGenerator;
 simple CcEnergyGeneratorBase extends SimpleModule like ICcEnergyGenerator
 {
     parameters:
+        @class(CcEnergyGeneratorBase);
         @display("i=block/plug");
         @signal[currentGenerationChanged];
         @statistic[currentGeneration](title="Current generation"; source=currentGenerationChanged; record=vector; interpolationmode=sample-hold; unit=A);

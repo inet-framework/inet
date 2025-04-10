@@ -16,6 +16,7 @@ import inet.common.SimpleModule;
 simple EchoProtocol extends SimpleModule
 {
     parameters:
+        @class(EchoProtocol);
         @display("i=block/control");
     gates:
         input ipIn;

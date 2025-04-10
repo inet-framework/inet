@@ -56,6 +56,7 @@ import inet.applications.contract.IApp;
 simple Rip extends SimpleModule like IApp
 {
     parameters:
+        @class(Rip);
         @display("i=block/network2");
 
         string interfaceTableModule;   // The path to the InterfaceTable module

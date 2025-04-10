@@ -39,6 +39,7 @@ module TcpSinkApp extends TcpServerHostApp
 simple TcpSinkAppThread extends SimpleModule
 {
     parameters:
+        @class(TcpSinkAppThread);
         @display("i=block/sink");
         @signal[packetReceived](type=inet::Packet);
         @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

@@ -12,6 +12,7 @@ import inet.common.SimpleModule;
 simple ReceiveWithHopLimit extends SimpleModule
 {
     parameters:
+        @class(ReceiveWithHopLimit);
         @display("i=block/rx");
     gates:
         input in;

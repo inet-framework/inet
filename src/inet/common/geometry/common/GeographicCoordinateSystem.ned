@@ -27,6 +27,7 @@ moduleinterface IGeographicCoordinateSystem
 simple SimpleGeographicCoordinateSystem extends SimpleModule like IGeographicCoordinateSystem
 {
     parameters:
+        @class(SimpleGeographicCoordinateSystem);
         @display("i=block/table2");
         double sceneLatitude @unit(deg); // Latitude coordinate of the scene origin
         double sceneLongitude @unit(deg); // Longitude coordinate of the scene origin
@@ -40,6 +41,7 @@ simple SimpleGeographicCoordinateSystem extends SimpleModule like IGeographicCoo
 simple OsgGeographicCoordinateSystem extends SimpleModule like IGeographicCoordinateSystem
 {
     parameters:
+        @class(OsgGeographicCoordinateSystem);
         @display("i=block/table2");
         double sceneLatitude @unit(deg); // Latitude coordinate of the scene origin
         double sceneLongitude @unit(deg); // Longitude coordinate of the scene origin

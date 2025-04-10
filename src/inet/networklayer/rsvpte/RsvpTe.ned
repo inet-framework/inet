@@ -84,6 +84,7 @@ import inet.common.SimpleModule;
 simple RsvpTe extends SimpleModule
 {
     parameters:
+        @class(RsvpTe);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
         string libTableModule;

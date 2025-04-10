@@ -18,6 +18,7 @@ import inet.transportlayer.contract.IUdp;
 simple ExtLowerUdp extends SimpleModule like IUdp
 {
     parameters:
+        @class(ExtLowerUdp);
         string namespace = default("");
         string packetNameFormat = default("Ext-%p-%t-%n");
         @display("i=block/transport");

@@ -16,6 +16,7 @@ import inet.common.SimpleModule;
 simple Ieee80211LlcEpd extends SimpleModule like IIeee80211Llc
 {
     parameters:
+        @class(Ieee80211LlcEpd);
         @display("i=block/layer");
         @signal[packetDropped](type=Packet);
     gates:

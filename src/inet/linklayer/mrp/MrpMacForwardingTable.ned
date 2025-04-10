@@ -18,6 +18,7 @@ import inet.linklayer.contract.IMacForwardingTable;
 simple MrpMacForwardingTable extends SimpleModule like IMacForwardingTable
 {
     parameters:
+        @class(MrpMacForwardingTable);
         @display("i=block/table2");
         double agingTime @unit(s) = default(120s);
         object forwardingTable @mutable = default([]);

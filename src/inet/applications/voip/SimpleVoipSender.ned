@@ -37,6 +37,7 @@ import inet.applications.contract.IApp;
 simple SimpleVoipSender extends SimpleModule like IApp
 {
     parameters:
+        @class(SimpleVoipSender);
         int localPort = default(-1);
         int destPort;
         string destAddress;

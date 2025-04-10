@@ -17,6 +17,7 @@ import inet.common.SimpleModule;
 simple EigrpIpv6Pdm extends SimpleModule
 {
     parameters:
+        @class(EigrpIpv6Pdm);
         xml configData = default(xmldoc("config.xml"));
         string interfaceTableModule;
         string routingTableModule;

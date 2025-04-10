@@ -16,6 +16,7 @@ import inet.linklayer.ieee80211.mac.contract.IRecipientBlockAckAgreementPolicy;
 simple RecipientBlockAckAgreementPolicy extends SimpleModule like IRecipientBlockAckAgreementPolicy
 {
     parameters:
+        @class(RecipientBlockAckAgreementPolicy);
         bool delayedAckPolicySupported = default(false);
         bool aMsduSupported = default(true);
         int maximumAllowedBufferSize = default(64);

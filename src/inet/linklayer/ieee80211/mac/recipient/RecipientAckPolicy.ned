@@ -16,6 +16,7 @@ import inet.linklayer.ieee80211.mac.contract.IRecipientAckPolicy;
 simple RecipientAckPolicy extends SimpleModule like IRecipientAckPolicy
 {
     parameters:
+        @class(RecipientAckPolicy);
         string rateSelectionModule;
         @display("i=block/control");
 }

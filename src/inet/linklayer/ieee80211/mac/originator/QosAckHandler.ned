@@ -12,6 +12,7 @@ import inet.common.SimpleModule;
 simple QosAckHandler extends SimpleModule
 {
     parameters:
+        @class(QosAckHandler);
         @display("i=block/table2");
 }
 

@@ -17,6 +17,7 @@ import inet.common.SimpleModule;
 simple Ieee80211AgentSta extends SimpleModule like IIeee80211Agent
 {
     parameters:
+        @class(Ieee80211AgentSta);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string mibModule;
         bool activeScan = default(true);  // Selects between active and passive scanning

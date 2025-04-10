@@ -26,6 +26,7 @@ import inet.mobility.contract.IMobility;
 simple MobilityBase extends SimpleModule like IMobility
 {
     parameters:
+        @class(MobilityBase);
         @signal[mobilityStateChanged](type=inet::MobilityBase);     // It works in inet, but not in the extended module in another namespace
         @display("i=block/cogwheel");
         string subjectModule = default("^"); // The module path that determines the subject module, the motion of which this mobility model describes. The default value is the parent module

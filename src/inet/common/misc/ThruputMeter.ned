@@ -16,6 +16,7 @@ import inet.common.IHook;
 simple ThruputMeter extends SimpleModule like IHook
 {
     parameters:
+        @class(ThruputMeter);
         @networkNode();
         double startTime @unit(s) = default(0s);
         int batchSize = default(50);

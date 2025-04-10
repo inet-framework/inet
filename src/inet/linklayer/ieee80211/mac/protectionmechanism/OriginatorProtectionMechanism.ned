@@ -12,6 +12,7 @@ import inet.common.SimpleModule;
 simple OriginatorProtectionMechanism extends SimpleModule
 {
     parameters:
+        @class(OriginatorProtectionMechanism);
         string rateSelectionModule;
         @display("i=block/encrypt");
 }

@@ -25,6 +25,7 @@ import inet.networklayer.configurator.contract.INetworkConfigurator;
 simple FailureProtectionConfigurator extends SimpleModule like INetworkConfigurator
 {
     parameters:
+        @class(FailureProtectionConfigurator);
         string streamRedundancyConfiguratorModule = default("streamRedundancyConfigurator");
         string gateScheduleConfiguratorModule = default("gateScheduleConfigurator");
         object configuration = default([]); // A vector of objects (e.g. [{...}, {...}]) where each object has the following fields: name, type, application, source, destination, PCP, gate index, packetFilter, packetLength, packetInterval, maxLatency, linkFailureProtection, nodeFailureProtection, maxRedundancy

@@ -29,6 +29,7 @@ import inet.applications.contract.IApp;
 simple UdpVideoStreamServer extends SimpleModule like IApp
 {
     parameters:
+        @class(UdpVideoStreamServer);
         int localPort; // Port to listen on
         volatile double sendInterval @unit(s); // Interval between sending video stream packets
         volatile int packetLen @unit(B);  // Length of a video packet in bytes
