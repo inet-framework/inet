@@ -40,7 +40,8 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 **.cli[0].numPcapRecorders = 1
 **.cli[0].pcapRecorder[0].pcapFile = "foo.pcap"
-**.crcMode="computed"
+**.crcMode = "DECOY!"
+**.checksumMode="computed"
 **.fcsMode="computed"
 
 %#--------------------------------------------------------------------------------------------------------------
