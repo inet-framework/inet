@@ -7,6 +7,8 @@
 
 package inet.applications.ethernet;
 
+import inet.common.SimpleModule;
+
 //
 // Provides Ethernet socket handling for generic applications.
 //

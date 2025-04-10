@@ -5,6 +5,8 @@
 
 package inet.protocolelement.shaper;
 
+import inet.common.SimpleModule;
+
 //
 // A table containing the group eligibility times needed
 // for the `GroupEligibilityTimeMeter`.

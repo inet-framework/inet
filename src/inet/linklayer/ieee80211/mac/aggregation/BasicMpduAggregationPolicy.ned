@@ -7,6 +7,7 @@
 
 package inet.linklayer.ieee80211.mac.aggregation;
 
+import inet.common.SimpleModule;
 import inet.linklayer.ieee80211.mac.contract.IMpduAggregationPolicy;
 
 //

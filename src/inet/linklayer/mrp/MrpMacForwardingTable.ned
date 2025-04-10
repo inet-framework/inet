@@ -6,6 +6,7 @@
 
 package inet.linklayer.mrp;
 
+import inet.common.SimpleModule;
 import inet.linklayer.contract.IMacForwardingTable;
 
 //

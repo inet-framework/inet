@@ -7,6 +7,7 @@
 
 package inet.physicallayer.wireless.ieee80211.bitlevel;
 
+import inet.common.SimpleModule;
 import inet.physicallayer.wireless.common.contract.bitlevel.IModulator;
 
 // This is an IEEE 802.11 OFDM modulator module. The

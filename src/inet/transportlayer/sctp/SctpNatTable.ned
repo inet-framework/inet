@@ -6,6 +6,8 @@
 
 package inet.transportlayer.sctp;
 
+import inet.common.SimpleModule;
+
 simple SctpNatTable extends SimpleModule
 {
 }

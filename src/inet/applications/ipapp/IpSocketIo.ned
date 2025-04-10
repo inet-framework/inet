@@ -7,6 +7,8 @@
 
 package inet.applications.ipapp;
 
+import inet.common.SimpleModule;
+
 //
 // Provides IP socket handling for generic applications.
 //

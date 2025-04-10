@@ -7,6 +7,8 @@
 
 package inet.applications.tcpapp;
 
+import inet.common.SimpleModule;
+
 //
 // Accepts any number of incoming TCP connections, and sends back the data that
 // arrives on them. The `echoFactor` parameter controls the amount of data to be

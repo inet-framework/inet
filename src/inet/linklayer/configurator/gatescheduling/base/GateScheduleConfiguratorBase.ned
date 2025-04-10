@@ -7,6 +7,8 @@
 
 package inet.linklayer.configurator.gatescheduling.base;
 
+import inet.common.SimpleModule;
+
 //
 // Serves as a basis for gate scheduling configurator modules. It
 // provides methods for derived modules to easily extract the input parameters

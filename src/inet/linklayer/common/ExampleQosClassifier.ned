@@ -7,6 +7,8 @@
 
 package inet.linklayer.common;
 
+import inet.common.SimpleModule;
+
 //
 // An example QoS classifier that assigns a User Priority based on
 // the transport protocol and port numbers.

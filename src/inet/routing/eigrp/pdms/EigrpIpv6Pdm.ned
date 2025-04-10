@@ -12,6 +12,8 @@
 
 package inet.routing.eigrp.pdms;
 
+import inet.common.SimpleModule;
+
 simple EigrpIpv6Pdm extends SimpleModule
 {
     parameters:

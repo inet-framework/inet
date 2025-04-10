@@ -7,6 +7,8 @@
 
 package inet.emulation.linklayer.ethernet;
 
+import inet.common.SimpleModule;
+
 //
 // Provides a bidirectional connection to an Ethernet socket of the
 // host computer which is running the simulation. It writes the packets that arrive

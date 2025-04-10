@@ -7,6 +7,7 @@
 
 package inet.physicallayer.wireless.common.energyconsumer;
 
+import inet.common.SimpleModule;
 import inet.power.contract.IEpEnergyConsumer;
 
 //

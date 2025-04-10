@@ -6,6 +6,7 @@
 
 package inet.networklayer.rsvpte;
 
+import inet.common.SimpleModule;
 import inet.networklayer.mpls.IIngressClassifier;
 
 //

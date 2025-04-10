@@ -7,8 +7,8 @@
 
 package inet.routing.aodv;
 
+import inet.common.SimpleModule;
 import inet.applications.contract.IApp;
-
 
 //
 // Ad hoc On-Demand Distance Vector Routing Protocol module.

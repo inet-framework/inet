@@ -7,6 +7,8 @@
 
 package inet.queueing.gate;
 
+import inet.common.SimpleModule;
+
 //
 // Configures multiple `PeriodicGate` modules according to a gate control list.
 // The modules are looked for at the `^.transmissionGate[*]` relative module path.

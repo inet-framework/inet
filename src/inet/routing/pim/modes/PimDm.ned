@@ -9,6 +9,8 @@
 
 package inet.routing.pim.modes;
 
+import inet.common.SimpleModule;
+
 //
 // Implementation of PIM-DM protocol (RFC 3973).
 //

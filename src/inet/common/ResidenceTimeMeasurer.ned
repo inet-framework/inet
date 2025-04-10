@@ -7,6 +7,8 @@
 
 package inet.common;
 
+import inet.common.SimpleModule;
+
 //
 // Measures the residence time of packet data in network nodes. The
 // measurement is done by tracking every bit individually using their unique

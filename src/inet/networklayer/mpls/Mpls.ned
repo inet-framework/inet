@@ -7,8 +7,8 @@
 
 package inet.networklayer.mpls;
 
+import inet.common.SimpleModule;
 import inet.protocolelement.contract.IProtocolLayer;
-
 
 //
 // Implements the MPLS protocol.

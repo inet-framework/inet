@@ -6,6 +6,8 @@
 
 package inet.common.misc;
 
+import inet.common.SimpleModule;
+
 //
 // Module that allows checking fields of messages.
 //

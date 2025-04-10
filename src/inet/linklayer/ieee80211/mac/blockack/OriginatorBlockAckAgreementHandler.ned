@@ -7,6 +7,8 @@
 
 package inet.linklayer.ieee80211.mac.blockack;
 
+import inet.common.SimpleModule;
+
 simple OriginatorBlockAckAgreementHandler extends SimpleModule
 {
     parameters:

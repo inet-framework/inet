@@ -7,6 +7,7 @@
 
 package inet.protocolelement.fragmentation.policy;
 
+import inet.common.SimpleModule;
 import inet.protocolelement.fragmentation.contract.IFragmenterPolicy;
 
 simple LengthBasedFragmenterPolicy extends SimpleModule like IFragmenterPolicy

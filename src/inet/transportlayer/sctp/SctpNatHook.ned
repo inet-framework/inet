@@ -8,6 +8,8 @@
 
 package inet.transportlayer.sctp;
 
+import inet.common.SimpleModule;
+
 //
 // SCTP NAT hook module.
 //

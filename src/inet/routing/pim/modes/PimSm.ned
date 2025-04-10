@@ -9,6 +9,8 @@
 
 package inet.routing.pim.modes;
 
+import inet.common.SimpleModule;
+
 //
 // Implementation of PIM-SM protocol (RFC 4601).
 //

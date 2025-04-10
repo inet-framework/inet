@@ -7,6 +7,8 @@
 
 package inet.networklayer.internetcloud;
 
+import inet.common.SimpleModule;
+
 //
 // Delay module for ~InternetCloud. This is essentially equivalent to a full graph
 // with edges being differently configured `DatarateChannel`'s. It delays and/or drops

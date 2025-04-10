@@ -7,6 +7,7 @@
 
 package inet.linklayer.ieee8021d.rstp;
 
+import inet.common.SimpleModule;
 import inet.linklayer.contract.ISpanningTree;
 
 //

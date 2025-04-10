@@ -7,8 +7,8 @@
 
 package inet.linklayer.ieee80211.mac.originator;
 
+import inet.common.SimpleModule;
 import inet.linklayer.ieee80211.mac.contract.IOriginatorAckPolicy;
-
 
 //
 // Implements the default originator ACK policy for non-QoS stations.

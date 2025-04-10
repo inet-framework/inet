@@ -7,6 +7,8 @@
 
 package inet.linklayer.base;
 
+import inet.common.SimpleModule;
+
 simple MacRelayUnitBase extends SimpleModule
 {
     parameters:

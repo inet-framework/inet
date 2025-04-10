@@ -7,6 +7,8 @@
 
 package inet.common.geometry.common;
 
+import inet.common.SimpleModule;
+
 //
 // Interface for geographic coordinate systems. A geographic
 // coordinate system maps scene coordinates to geographic coordinates, and

@@ -7,6 +7,8 @@
 
 package inet.protocolelement.selectivity;
 
+import inet.common.SimpleModule;
+
 simple SendToMacAddress extends SimpleModule
 {
     parameters:

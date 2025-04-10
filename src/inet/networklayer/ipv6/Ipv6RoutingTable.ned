@@ -7,6 +7,7 @@
 
 package inet.networklayer.ipv6;
 
+import inet.common.SimpleModule;
 import inet.networklayer.contract.IRoutingTable;
 
 //

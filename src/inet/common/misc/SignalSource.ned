@@ -6,6 +6,8 @@
 
 package inet.common.misc;
 
+import inet.common.SimpleModule;
+
 //
 // Emits double-valued signals in the specified interval.
 // May be used for testing indicator figures.

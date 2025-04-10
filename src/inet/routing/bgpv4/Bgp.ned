@@ -6,6 +6,7 @@
 
 package inet.routing.bgpv4;
 
+import inet.common.SimpleModule;
 import inet.routing.contract.IBgp;
 
 //

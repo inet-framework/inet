@@ -7,6 +7,8 @@
 
 package inet.networklayer.diffserv;
 
+import inet.common.SimpleModule;
+
 //
 // Simple token bucket meter.
 //

@@ -6,6 +6,8 @@
 
 package inet.common;
 
+import inet.common.SimpleModule;
+
 //
 // Executes a setup command on the host OS during initialization and another teardown
 // command during module destruction. For example, it can be used to configure

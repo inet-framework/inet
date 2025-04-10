@@ -11,6 +11,8 @@
 
 package inet.routing.eigrp.tables;
 
+import inet.common.SimpleModule;
+
 //
 // TODO auto-generated module
 //

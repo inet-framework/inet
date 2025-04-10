@@ -12,6 +12,8 @@
 
 package inet.routing.eigrp;
 
+import inet.common.SimpleModule;
+
 simple EigrpRtp extends SimpleModule
 {
     parameters:

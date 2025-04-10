@@ -7,6 +7,8 @@
 
 package inet.linklayer.ieee80211.mgmt;
 
+import inet.common.SimpleModule;
+
 //
 // Used in 802.11 infrastructure mode in an access point (AP).
 //

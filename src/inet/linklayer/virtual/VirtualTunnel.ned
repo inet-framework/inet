@@ -7,6 +7,8 @@
 
 package inet.linklayer.virtual;
 
+import inet.common.SimpleModule;
+
 simple VirtualTunnel extends SimpleModule
 {
     parameters:

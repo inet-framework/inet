@@ -1,5 +1,7 @@
 package inet.routing.ospfv3.process;
 
+import inet.common.SimpleModule;
+
 simple Ospfv3Process extends SimpleModule
 {
     parameters:

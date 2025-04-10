@@ -7,6 +7,8 @@
 
 package inet.linklayer.ethernet.modular;
 
+import inet.common.SimpleModule;
+
 simple EthernetPauseCommandProcessor extends SimpleModule
 {
     parameters:

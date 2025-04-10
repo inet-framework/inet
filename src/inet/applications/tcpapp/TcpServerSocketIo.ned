@@ -7,6 +7,8 @@
 
 package inet.applications.tcpapp;
 
+import inet.common.SimpleModule;
+
 //
 // Manages an established TCP connection. It handles data transmission to and
 // from a module connected via the `trafficIn` and `trafficOut` gates. When data is

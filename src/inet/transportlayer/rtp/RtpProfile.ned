@@ -7,6 +7,8 @@
 
 package inet.transportlayer.rtp;
 
+import inet.common.SimpleModule;
+
 //
 // Generic RTP Profile. ~RtpProfile is internal to the ~Rtp module;
 // instances are created and connected dynamically by ~Rtp.

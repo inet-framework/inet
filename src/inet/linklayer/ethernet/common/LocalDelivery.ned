@@ -7,6 +7,8 @@
 
 package inet.linklayer.ethernet.common;
 
+import inet.common.SimpleModule;
+
 simple LocalDelivery extends SimpleModule
 {
     parameters:

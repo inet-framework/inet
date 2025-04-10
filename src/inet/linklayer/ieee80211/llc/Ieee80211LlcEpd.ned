@@ -6,6 +6,8 @@
 
 package inet.linklayer.ieee80211.llc;
 
+import inet.common.SimpleModule;
+
 //
 // An LLC implementation that encapsulates packets with the IEEE 802 `EtherType`
 // Protocol Discrimination (EPD) header, as defined in section 9.2 `EtherTypes`

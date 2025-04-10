@@ -7,6 +7,8 @@
 
 package inet.linklayer.tun;
 
+import inet.common.SimpleModule;
+
 simple Tun extends SimpleModule
 {
     parameters:

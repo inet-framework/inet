@@ -7,6 +7,8 @@
 
 package inet.networklayer.ipv4;
 
+import inet.common.SimpleModule;
+
 //
 // Implementation of IGMPv2 protocol. Multicast routers use IGMP
 // to learn which groups have members on each of their attached

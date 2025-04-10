@@ -6,6 +6,8 @@
 
 package inet.networklayer.ted;
 
+import inet.common.SimpleModule;
+
 //
 // Implements a very minimalistic link state routing protocol.
 // Apart from the basic topology information, the current link usage

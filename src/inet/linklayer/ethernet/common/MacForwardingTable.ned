@@ -7,6 +7,7 @@
 
 package inet.linklayer.ethernet.common;
 
+import inet.common.SimpleModule;
 import inet.linklayer.contract.IMacForwardingTable;
 
 //

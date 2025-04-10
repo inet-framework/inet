@@ -9,6 +9,8 @@
 
 package inet.routing.pim.tables;
 
+import inet.common.SimpleModule;
+
 //
 // The `PimInterfaceTable` module contains the PIM specific configuration
 // parameters and state of the interfaces on which PIM is enabled.

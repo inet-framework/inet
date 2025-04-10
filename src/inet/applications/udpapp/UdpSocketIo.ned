@@ -7,6 +7,8 @@
 
 package inet.applications.udpapp;
 
+import inet.common.SimpleModule;
+
 //
 // Provides UDP socket handling for generic applications.
 //

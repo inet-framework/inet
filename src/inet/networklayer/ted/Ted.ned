@@ -6,6 +6,8 @@
 
 package inet.networklayer.ted;
 
+import inet.common.SimpleModule;
+
 //
 // Traffic Engineering Database. Stores network topology with detailed
 // link information, including total and reserved bandwidths.

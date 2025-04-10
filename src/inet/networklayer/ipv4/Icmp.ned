@@ -6,6 +6,8 @@
 
 package inet.networklayer.ipv4;
 
+import inet.common.SimpleModule;
+
 //
 // ICMP implementation.
 //

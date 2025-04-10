@@ -7,6 +7,8 @@
 
 package inet.linklayer.loopback;
 
+import inet.common.SimpleModule;
+
 //
 // Loopback interface module implementation.
 //

@@ -7,6 +7,8 @@
 
 package inet.emulation.networklayer.ipv4;
 
+import inet.common.SimpleModule;
+
 //
 // Provides a bidirectional connection to a real TUN device of the
 // host computer which is running the simulation. It writes the packets arrived

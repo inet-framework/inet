@@ -7,6 +7,8 @@
 
 package inet.networklayer.icmpv6;
 
+import inet.common.SimpleModule;
+
 //
 // Implements IPv6 Neighbor Discovery.
 //

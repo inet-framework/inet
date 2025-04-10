@@ -7,6 +7,8 @@
 
 package inet.queueing.base;
 
+import inet.common.SimpleModule;
+
 //
 // Base module for various packet processing modules which maintains
 // a few statistics.

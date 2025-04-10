@@ -8,6 +8,7 @@
 
 package inet.transportlayer.sctp;
 
+import inet.common.SimpleModule;
 import inet.transportlayer.contract.ISctp;
 
 //

@@ -7,6 +7,8 @@
 
 package inet.protocolelement.selectivity;
 
+import inet.common.SimpleModule;
+
 simple SendToL3Address extends SimpleModule
 {
     parameters:

@@ -6,6 +6,8 @@
 
 package inet.applications.ethernet;
 
+import inet.common.SimpleModule;
+
 //
 // A simple traffic generator for the Ethernet model and the 802.11 model,
 // and generally for any L2 model that accepts ~Ieee802SapReq tags on the

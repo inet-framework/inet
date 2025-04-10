@@ -7,6 +7,7 @@
 
 package inet.transportlayer.tcp_common;
 
+import inet.common.SimpleModule;
 import inet.transportlayer.contract.ITcp;
 
 //

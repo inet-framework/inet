@@ -7,6 +7,7 @@
 
 package inet.linklayer.configurator.common;
 
+import inet.common.SimpleModule;
 import inet.networklayer.configurator.contract.INetworkConfigurator;
 
 //

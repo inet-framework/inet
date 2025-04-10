@@ -7,6 +7,7 @@
 
 package inet.protocolelement.aggregation.policy;
 
+import inet.common.SimpleModule;
 import inet.protocolelement.aggregation.contract.IAggregatorPolicy;
 
 //

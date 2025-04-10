@@ -7,6 +7,7 @@
 
 package inet.routing.dymo;
 
+import inet.common.SimpleModule;
 import inet.routing.contract.IManetRouting;
 
 //

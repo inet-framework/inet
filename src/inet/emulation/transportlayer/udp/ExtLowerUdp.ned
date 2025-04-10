@@ -7,6 +7,7 @@
 
 package inet.emulation.transportlayer.udp;
 
+import inet.common.SimpleModule;
 import inet.transportlayer.contract.IUdp;
 
 //

@@ -7,6 +7,8 @@
 
 package inet.emulation.networklayer.ipv4;
 
+import inet.common.SimpleModule;
+
 simple Ipv4Encap extends SimpleModule
 {
     parameters:

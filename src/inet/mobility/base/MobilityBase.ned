@@ -7,6 +7,7 @@
 
 package inet.mobility.base;
 
+import inet.common.SimpleModule;
 import inet.mobility.contract.IMobility;
 
 //

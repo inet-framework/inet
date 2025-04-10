@@ -7,6 +7,7 @@
 
 package inet.routing.rip;
 
+import inet.common.SimpleModule;
 import inet.applications.contract.IApp;
 
 //

@@ -7,6 +7,8 @@
 
 package inet.networklayer.mpls;
 
+import inet.common.SimpleModule;
+
 //
 // Stores the LIB (Label Information Base), accessed by ~Mpls and its
 // associated control protocols (~RsvpTe, ~Ldp) via direct C++ method calls.

@@ -9,6 +9,8 @@
 
 package inet.common.packet.recorder;
 
+import inet.common.SimpleModule;
+
 //
 // Records PCAP traces of frames sent/received by other modules within
 // the same host. By default, it records frames sent/received by L2 modules

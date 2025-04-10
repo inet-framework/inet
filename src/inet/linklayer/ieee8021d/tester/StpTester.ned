@@ -7,6 +7,8 @@
 
 package inet.linklayer.ieee8021d.tester;
 
+import inet.common.SimpleModule;
+
 //
 // Network tester module.
 // Shows if a network topology is loop-free, all nodes are connected, or it has a tree topology.

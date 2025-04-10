@@ -7,6 +7,8 @@
 
 package inet.linklayer.common;
 
+import inet.common.SimpleModule;
+
 //
 // A QoS classifier that assigns a random User Priority. This is useful
 // for testing purposes.

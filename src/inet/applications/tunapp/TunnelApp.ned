@@ -6,6 +6,7 @@
 
 package inet.applications.tunapp;
 
+import inet.common.SimpleModule;
 import inet.applications.contract.IApp;
 
 simple TunnelApp extends SimpleModule like IApp

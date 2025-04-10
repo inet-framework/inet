@@ -7,6 +7,8 @@
 
 package inet.linklayer.ieee80211.mgmt;
 
+import inet.common.SimpleModule;
+
 //
 // IEEE 802.11 management module used for ad-hoc mode.
 // This implementation never sends control or management frames, and discards

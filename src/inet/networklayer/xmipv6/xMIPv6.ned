@@ -11,6 +11,8 @@
 
 package inet.networklayer.xmipv6;
 
+import inet.common.SimpleModule;
+
 //
 // Implements xMIPv6 (where x = F, H, F-H).
 //

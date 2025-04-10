@@ -8,6 +8,8 @@
 
 package inet.applications.rtpapp;
 
+import inet.common.SimpleModule;
+
 //
 // An application which uses RTP. It acts as a sender if the parameter `fileName` is
 // set, and as a receiver if the parameter is empty.

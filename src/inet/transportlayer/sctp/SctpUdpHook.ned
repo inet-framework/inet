@@ -7,6 +7,8 @@
 
 package inet.transportlayer.sctp;
 
+import inet.common.SimpleModule;
+
 //
 // SCTP UDP hook module.
 //

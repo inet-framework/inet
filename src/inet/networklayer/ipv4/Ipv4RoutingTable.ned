@@ -7,6 +7,7 @@
 
 package inet.networklayer.ipv4;
 
+import inet.common.SimpleModule;
 import inet.networklayer.contract.IRoutingTable;
 
 //

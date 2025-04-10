@@ -7,6 +7,8 @@
 
 package inet.protocolelement.dispatching;
 
+import inet.common.SimpleModule;
+
 simple ReceiveWithProtocol extends SimpleModule
 {
     parameters:

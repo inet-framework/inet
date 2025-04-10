@@ -11,6 +11,8 @@
 
 package inet.routing.eigrp;
 
+import inet.common.SimpleModule;
+
 simple EigrpSplitter extends SimpleModule
 {
     gates:

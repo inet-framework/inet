@@ -7,6 +7,7 @@
 
 package inet.physicallayer.wireless.common.analogmodel.dimensional;
 
+import inet.common.SimpleModule;
 import inet.physicallayer.wireless.common.contract.packetlevel.IReceiverAnalogModel;
 
 simple DimensionalReceiverAnalogModel extends SimpleModule like IReceiverAnalogModel

@@ -7,6 +7,7 @@
 
 package inet.routing.ospfv2;
 
+import inet.common.SimpleModule;
 import inet.routing.contract.IOspf;
 
 //

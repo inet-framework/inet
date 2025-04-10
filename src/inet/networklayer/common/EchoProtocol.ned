@@ -7,6 +7,8 @@
 
 package inet.networklayer.common;
 
+import inet.common.SimpleModule;
+
 //
 // Provides a mechanism to test network layer connectivity
 // using echo request/response messages similar to those of ICMP.

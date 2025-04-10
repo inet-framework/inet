@@ -6,6 +6,8 @@
 
 package inet.common;
 
+import inet.common.SimpleModule;
+
 //
 // Launches an external OS process in the background, using the command line
 // given in the 'command' parameter. The process is terminated when the module

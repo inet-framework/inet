@@ -6,6 +6,8 @@
 
 package inet.applications.ethernet;
 
+import inet.common.SimpleModule;
+
 //
 // Server side of the ~EtherAppClient model -- generates packets containing
 // ~EtherAppResp chunks with the number of bytes requested by the client in

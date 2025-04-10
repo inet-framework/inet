@@ -7,6 +7,8 @@
 
 package inet.physicallayer.wired.ethernet;
 
+import inet.common.SimpleModule;
+
 simple EthernetPhy extends SimpleModule
 {
     parameters:

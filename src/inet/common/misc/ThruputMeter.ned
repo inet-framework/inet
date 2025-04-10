@@ -7,6 +7,7 @@
 
 package inet.common.misc;
 
+import inet.common.SimpleModule;
 import inet.common.IHook;
 
 //

@@ -8,8 +8,8 @@
 
 package inet.linklayer.mrp;
 
+import inet.common.SimpleModule;
 import inet.linklayer.contract.IMrp;
-
 
 //
 // Implements the Media Redundancy Protocol (MRP) as specified in IEC 62439-2.

@@ -7,6 +7,7 @@
 
 package inet.power.base;
 
+import inet.common.SimpleModule;
 import inet.power.contract.ICcEnergyGenerator;
 
 //

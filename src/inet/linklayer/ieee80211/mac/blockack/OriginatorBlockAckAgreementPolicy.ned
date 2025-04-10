@@ -7,8 +7,8 @@
 
 package inet.linklayer.ieee80211.mac.blockack;
 
+import inet.common.SimpleModule;
 import inet.linklayer.ieee80211.mac.contract.IOriginatorBlockAckAgreementPolicy;
-
 
 //
 // Implements the default originator block ACK agreement policy

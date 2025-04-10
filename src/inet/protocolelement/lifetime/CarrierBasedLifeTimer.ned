@@ -7,6 +7,7 @@
 
 package inet.protocolelement.lifetime;
 
+import inet.common.SimpleModule;
 import inet.protocolelement.contract.IPacketLifeTimer;
 
 simple CarrierBasedLifeTimer extends SimpleModule like IPacketLifeTimer

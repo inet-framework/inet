@@ -7,6 +7,8 @@
 
 package inet.linklayer.ieee8022;
 
+import inet.common.SimpleModule;
+
 simple Ieee8022LlcSocketTable extends SimpleModule
 {
     parameters:

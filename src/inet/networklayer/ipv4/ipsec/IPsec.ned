@@ -17,6 +17,8 @@
 
 package inet.networklayer.ipv4.ipsec;
 
+import inet.common.SimpleModule;
+
 //
 // Implements basic IPsec (RFC 4301) functionality. It supports Authentication
 // Header (AH) and Encapsulating Security Payload (ESP), in transport mode,

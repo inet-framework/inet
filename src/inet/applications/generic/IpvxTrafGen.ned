@@ -7,6 +7,8 @@
 
 package inet.applications.generic;
 
+import inet.common.SimpleModule;
+
 //
 // Sends IP or IPv6 datagrams to the given address at the given `sendInterval`.
 // The `sendInterval` can be a constant or a random value (e.g. exponential(1)).

@@ -7,6 +7,8 @@
 
 package inet.linklayer.ieee80211.mac.originator;
 
+import inet.common.SimpleModule;
+
 simple AckHandler extends SimpleModule
 {
     parameters:

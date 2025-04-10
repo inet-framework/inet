@@ -7,6 +7,8 @@
 
 package inet.networklayer.configurator.base;
 
+import inet.common.SimpleModule;
+
 simple NetworkConfiguratorBase extends SimpleModule
 {
     parameters:

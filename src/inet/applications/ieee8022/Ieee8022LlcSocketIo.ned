@@ -7,6 +7,8 @@
 
 package inet.applications.ieee8022;
 
+import inet.common.SimpleModule;
+
 //
 // Provides IEEE 802.2 LLC socket handling for generic applications.
 //

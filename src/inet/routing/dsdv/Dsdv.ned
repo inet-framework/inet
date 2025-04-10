@@ -7,6 +7,7 @@
 
 package inet.routing.dsdv;
 
+import inet.common.SimpleModule;
 import inet.routing.contract.IManetRouting;
 
 //

@@ -7,6 +7,8 @@
 
 package inet.physicallayer.wired.common;
 
+import inet.common.SimpleModule;
+
 //
 // Models a generic wiring hub.
 //

@@ -9,6 +9,8 @@
 
 package inet.routing.pim;
 
+import inet.common.SimpleModule;
+
 //
 // ~PimSplitter module dispatches PIM packets received from the network layer
 // according to the PIM mode of the incoming interface. By using a ~PimSplitter

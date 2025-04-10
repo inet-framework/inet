@@ -7,6 +7,7 @@
 
 package inet.applications.voip;
 
+import inet.common.SimpleModule;
 import inet.applications.contract.IApp;
 
 //

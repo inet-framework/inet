@@ -7,6 +7,8 @@
 
 package inet.networklayer.ipv4;
 
+import inet.common.SimpleModule;
+
 simple Igmpv3 extends SimpleModule like IIgmp
 {
     parameters:

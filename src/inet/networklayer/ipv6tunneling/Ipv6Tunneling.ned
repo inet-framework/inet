@@ -9,6 +9,7 @@
 
 package inet.networklayer.ipv6tunneling;
 
+import inet.common.SimpleModule;
 import inet.networklayer.contract.IIpv6Tunneling;
 
 //

@@ -7,6 +7,8 @@
 
 package inet.visualizer.base;
 
+import inet.common.SimpleModule;
+
 //
 // Base module for visualizer simple modules. It simply provides the
 // visualization target module for derived modules.

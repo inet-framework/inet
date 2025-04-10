@@ -7,6 +7,8 @@
 
 package inet.common.lifecycle;
 
+import inet.common.SimpleModule;
+
 //
 // Keeps track of the status of the network node (up, down, etc.) for other
 // modules, and also displays it as a small overlay icon on this module

@@ -7,6 +7,7 @@
 
 package inet.physicallayer.wireless.apsk.bitlevel;
 
+import inet.common.SimpleModule;
 import inet.physicallayer.wireless.common.contract.bitlevel.IDemodulator;
 
 //

@@ -7,6 +7,7 @@
 
 package inet.networklayer.ldp;
 
+import inet.common.SimpleModule;
 import inet.applications.contract.IApp;
 
 //

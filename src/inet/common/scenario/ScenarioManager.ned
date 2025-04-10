@@ -7,6 +7,8 @@
 
 package inet.common.scenario;
 
+import inet.common.SimpleModule;
+
 //
 // ~ScenarioManager is for setting up and controlling simulation experiments.
 // You can schedule certain events to take place at specified times,

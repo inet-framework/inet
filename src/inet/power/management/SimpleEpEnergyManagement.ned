@@ -7,6 +7,7 @@
 
 package inet.power.management;
 
+import inet.common.SimpleModule;
 import inet.power.contract.IEpEnergyManagement;
 
 //

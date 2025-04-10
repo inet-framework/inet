@@ -7,6 +7,7 @@
 
 package inet.linklayer.ieee8022;
 
+import inet.common.SimpleModule;
 import inet.linklayer.contract.IIeee8022Llc;
 
 simple Ieee8022Llc extends SimpleModule like IIeee8022Llc

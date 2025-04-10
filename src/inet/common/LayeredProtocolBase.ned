@@ -7,6 +7,8 @@
 
 package inet.common;
 
+import inet.common.SimpleModule;
+
 //
 // Module base for different layered protocols.
 //

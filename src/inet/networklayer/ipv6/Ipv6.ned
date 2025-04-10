@@ -7,6 +7,8 @@
 
 package inet.networklayer.ipv6;
 
+import inet.common.SimpleModule;
+
 //
 // Implements the IPv6 protocol.
 //

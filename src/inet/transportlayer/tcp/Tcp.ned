@@ -8,6 +8,7 @@
 
 package inet.transportlayer.tcp;
 
+import inet.common.SimpleModule;
 import inet.transportlayer.contract.ITcp;
 
 //

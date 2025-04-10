@@ -7,6 +7,8 @@
 
 package inet.linklayer.ieee80211.mac.queue;
 
+import inet.common.SimpleModule;
+
 //# TODO rename to `InProgressQueue`?
 simple InProgressFrames extends SimpleModule
 {

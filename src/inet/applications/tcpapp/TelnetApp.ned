@@ -7,6 +7,7 @@
 
 package inet.applications.tcpapp;
 
+import inet.common.SimpleModule;
 import inet.applications.contract.IApp;
 
 //

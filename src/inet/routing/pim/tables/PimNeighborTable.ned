@@ -9,6 +9,8 @@
 
 package inet.routing.pim.tables;
 
+import inet.common.SimpleModule;
+
 //
 // The `PimNeighborTable` module contains information about neighboring PIM routers.
 //

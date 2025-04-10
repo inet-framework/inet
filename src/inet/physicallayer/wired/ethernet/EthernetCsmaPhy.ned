@@ -7,6 +7,8 @@
 
 package inet.physicallayer.wired.ethernet;
 
+import inet.common.SimpleModule;
+
 //
 // Implements the Ethernet CSMA/CD PHY protocol. It supports building
 // both Ethernet CSMA/CD and Ethernet PLCA network interfaces.

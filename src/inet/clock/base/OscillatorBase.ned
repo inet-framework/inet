@@ -7,6 +7,8 @@
 
 package inet.clock.base;
 
+import inet.common.SimpleModule;
+
 //
 // Base module for oscillators.
 //

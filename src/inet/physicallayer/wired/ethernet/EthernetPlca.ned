@@ -7,6 +7,7 @@
 
 package inet.physicallayer.wired.ethernet;
 
+import inet.common.SimpleModule;
 import inet.protocolelement.contract.IProtocolLayer;
 
 //

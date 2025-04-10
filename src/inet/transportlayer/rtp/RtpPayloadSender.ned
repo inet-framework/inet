@@ -7,6 +7,8 @@
 
 package inet.transportlayer.rtp;
 
+import inet.common.SimpleModule;
+
 //
 // Interface for RTP Payload Senders.
 //

@@ -7,6 +7,8 @@
 
 package inet.linklayer.ieee80211.mac.channelaccess;
 
+import inet.common.SimpleModule;
+
 //
 // Implements HCCA (Hybrid Coordination Function Controlled Channel Access)
 // for IEEE 802.11.

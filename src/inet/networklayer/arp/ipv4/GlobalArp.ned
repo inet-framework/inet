@@ -8,6 +8,7 @@
 
 package inet.networklayer.arp.ipv4;
 
+import inet.common.SimpleModule;
 import inet.networklayer.contract.IArp;
 
 //

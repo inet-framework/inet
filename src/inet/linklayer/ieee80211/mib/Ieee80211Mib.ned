@@ -7,6 +7,8 @@
 
 package inet.linklayer.ieee80211.mib;
 
+import inet.common.SimpleModule;
+
 simple Ieee80211Mib extends SimpleModule
 {
     parameters:

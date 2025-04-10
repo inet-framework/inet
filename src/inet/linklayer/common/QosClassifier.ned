@@ -7,6 +7,8 @@
 
 package inet.linklayer.common;
 
+import inet.common.SimpleModule;
+
 //
 // Classifies packets and assigns a User Priority based on the IP
 // protocol or the transport protocol port numbers.

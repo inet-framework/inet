@@ -7,6 +7,8 @@
 
 package inet.linklayer.ppp;
 
+import inet.common.SimpleModule;
+
 //
 // PPP implementation.
 //

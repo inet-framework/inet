@@ -7,6 +7,8 @@
 
 package inet.applications.generic;
 
+import inet.common.SimpleModule;
+
 //
 // Consumes and prints packets received from the IP module.
 // Compatible with both ~Ipv4 and ~Ipv6.

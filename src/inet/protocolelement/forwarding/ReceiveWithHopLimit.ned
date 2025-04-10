@@ -7,6 +7,8 @@
 
 package inet.protocolelement.forwarding;
 
+import inet.common.SimpleModule;
+
 simple ReceiveWithHopLimit extends SimpleModule
 {
     parameters:

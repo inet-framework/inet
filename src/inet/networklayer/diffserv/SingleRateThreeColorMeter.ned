@@ -7,6 +7,8 @@
 
 package inet.networklayer.diffserv;
 
+import inet.common.SimpleModule;
+
 //
 // Implements a Single Rate Three Color Meter (RFC 2697).
 //

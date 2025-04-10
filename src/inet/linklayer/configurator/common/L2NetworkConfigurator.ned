@@ -7,6 +7,8 @@
 
 package inet.linklayer.configurator.common;
 
+import inet.common.SimpleModule;
+
 //
 // Allows configuring network scenarios at layer 2.
 // The ~Stp and ~Rstp related parameters such as link cost, port priority

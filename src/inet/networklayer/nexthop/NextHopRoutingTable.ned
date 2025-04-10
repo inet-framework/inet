@@ -7,6 +7,7 @@
 
 package inet.networklayer.nexthop;
 
+import inet.common.SimpleModule;
 import inet.networklayer.contract.IRoutingTable;
 
 //

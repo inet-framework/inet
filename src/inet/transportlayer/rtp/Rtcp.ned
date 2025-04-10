@@ -7,6 +7,8 @@
 
 package inet.transportlayer.rtp;
 
+import inet.common.SimpleModule;
+
 //
 // RTCP end system.
 //

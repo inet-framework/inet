@@ -7,6 +7,8 @@
 
 package inet.protocolelement.acknowledgement;
 
+import inet.common.SimpleModule;
+
 simple SendWithAcknowledge extends SimpleModule
 {
     parameters:

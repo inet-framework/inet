@@ -8,6 +8,7 @@
 
 package inet.applications.dhcp;
 
+import inet.common.SimpleModule;
 import inet.applications.contract.IApp;
 
 //

@@ -7,6 +7,7 @@
 
 package inet.transportlayer.tcp_lwip;
 
+import inet.common.SimpleModule;
 import inet.transportlayer.contract.ITcp;
 
 //

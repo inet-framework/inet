@@ -7,6 +7,7 @@
 
 package inet.networklayer.configurator.base;
 
+import inet.common.SimpleModule;
 import inet.networklayer.configurator.contract.IL3NetworkConfigurator;
 
 //

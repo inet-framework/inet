@@ -7,6 +7,8 @@
 
 package inet.linklayer.ethernet.modular;
 
+import inet.common.SimpleModule;
+
 simple EthernetSocketTable extends SimpleModule
 {
     parameters:

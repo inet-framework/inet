@@ -7,6 +7,8 @@
 
 package inet.networklayer.common;
 
+import inet.common.SimpleModule;
+
 //
 // Keeps the table of network interfaces.
 //

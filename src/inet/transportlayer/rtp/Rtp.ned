@@ -7,6 +7,8 @@
 
 package inet.transportlayer.rtp;
 
+import inet.common.SimpleModule;
+
 //
 // The Rtp module is the center of the Rtp layer of an endsystem.
 // It communicates with the application, and sends and receives Rtp data
