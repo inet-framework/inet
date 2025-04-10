@@ -31,6 +31,5 @@ simple TracingObstacleLossVisualizerBase extends VisualizerBase
         double fadeOutTime @unit(s) = default(1s); // How quickly link breaks fade away, 1 second by default
         double fadeOutAnimationSpeed = default(0); // Animation speed while there are obstacle losses, value must be in the range (0, +inf)
 
-        @class(TracingObstacleLossVisualizerBase);
 }
 

@@ -52,6 +52,5 @@ simple MobilityVisualizerBase extends VisualizerBase
         double movementTrailLineWidth = default(1); // Movement trail line width
         int trailLength = default(100); // Number of sections in the trail
 
-        @class(MobilityVisualizerBase);
 }
 

@@ -19,5 +19,4 @@ simple PacketMeterBase extends PacketFlowBase
     parameters:
         displayStringTextFormat = default("metered %p pk (%l)");
         @display("i=block/star");
-        @class(PacketMeterBase);
 }

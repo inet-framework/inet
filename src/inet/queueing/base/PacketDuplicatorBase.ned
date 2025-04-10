@@ -10,6 +10,5 @@ package inet.queueing.base;
 simple PacketDuplicatorBase extends PacketProcessorBase
 {
     parameters:
-        @class(PacketDuplicatorBase);
         @display("i=block/star");
 }

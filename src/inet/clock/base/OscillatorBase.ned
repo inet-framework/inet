@@ -15,9 +15,7 @@ import inet.common.SimpleModule;
 simple OscillatorBase extends SimpleModule
 {
     parameters:
-        @class(OscillatorBase);
         displayStringTextFormat = default("%n"); // Determines the text that is written on top of the submodule
-        @class(OscillatorBase);
         @display("i=block/tunnel");
         @signal[driftRateChanged](type=double);
         @statistic[driftRateChanged](title="Oscillator drift rate"; record=vector; interpolationmode=sample-hold; unit=ppm);

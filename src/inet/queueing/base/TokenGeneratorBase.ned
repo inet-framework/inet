@@ -15,7 +15,6 @@ simple TokenGeneratorBase extends PacketProcessorBase
     parameters:
         string storageModule; // Module path of the token storage where the tokens are generated via C++ method call
         displayStringTextFormat = default("generated %t tk\nto %s"); // Determines display string text above the submodule
-        @class(TokenGeneratorBase);
         @display("i=block/control");
         @signal[tokensCreated](type=double);
         // the statistical value is the number of times tokens were created

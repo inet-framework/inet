@@ -35,6 +35,5 @@ simple ChannelVisualizerBase extends VisualizerBase
 
         double holdAnimationTime @unit(s) = default(0s); // Hold simulation (no progress) for the specified amount of animation time when the channel is activated.
 
-        @class(ChannelVisualizerBase);
 }
 

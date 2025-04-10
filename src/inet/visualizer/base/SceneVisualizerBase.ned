@@ -30,5 +30,4 @@ simple SceneVisualizerBase extends VisualizerBase
         double sceneMaxX @unit(m) = default(nan m); // Upper bound of x coordinates in the scene
         double sceneMaxY @unit(m) = default(nan m); // Upper bound of y coordinates in the scene
         double sceneMaxZ @unit(m) = default(nan m); // Upper bound of z coordinates in the scene
-        @class(SceneVisualizerBase);
 }

@@ -21,7 +21,6 @@ module CompoundPacketQueueBase extends PacketQueueBase like IPacketQueue
         int dataCapacity @unit(b) = default(-1b); // Maximum total length of packets in the queue, no limit by default
         string dropperClass = default(""); // Determines which packets are dropped when the queue is overloaded, packets are not dropped by default; the parameter must be the name of a C++ class which implements the IPacketDropperFunction C++ interface and is registered via Register_Class
         displayStringTextFormat = default("contains %p pk (%l) pushed %u created %c\n pulled %o removed %r dropped %d");
-        @class(CompoundPacketQueueBase);
         @defaultStatistic(queueLength);
         @signal[packetPushStarted](type=inet::Packet);
         @signal[packetPushEnded](type=inet::Packet?);

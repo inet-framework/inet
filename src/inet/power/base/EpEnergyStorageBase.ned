@@ -19,9 +19,7 @@ import inet.power.contract.IEpEnergyStorage;
 simple EpEnergyStorageBase extends SimpleModule like IEpEnergyStorage
 {
     parameters:
-        @class(EpEnergyStorageBase);
         @display("i=block/plug");
-        @class(EpEnergyStorageBase);
         @signal[powerConsumptionChanged];
         @signal[powerGenerationChanged];
         @signal[residualEnergyCapacityChanged];

@@ -24,6 +24,5 @@ simple NetworkConnectionVisualizerBase extends VisualizerBase
         string lineStyle = default("solid"); // Connection line style (solid, dashed, dotted).
         double lineWidth = default(1); // Connection line width.
 
-        @class(NetworkConnectionVisualizerBase);
 }
 

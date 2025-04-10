@@ -37,6 +37,5 @@ simple GateScheduleVisualizerBase extends VisualizerBase
         double displayDuration @mutable @unit(s) = default(0s); // Gate operation time duration visualized in the amount of space available, use gate period by default
         double currentTimePosition = default(width / 2); // Position of the current simulation time in the visualization, horizontally centered by default
 
-        @class(GateScheduleVisualizerBase);
 }
 

@@ -49,6 +49,5 @@ simple RadioVisualizerBase extends VisualizerBase
         double antennaLobeLineWidth = default(1); // Antenna lobe line width
         string antennaLobeFillColor = default("white"); // Antenna lobe fill color, white by default
 
-        @class(RadioVisualizerBase);
 }
 

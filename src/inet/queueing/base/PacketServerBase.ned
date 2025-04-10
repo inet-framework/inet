@@ -16,7 +16,6 @@ simple PacketServerBase extends PacketProcessorBase
 {
     parameters:
         displayStringTextFormat = default("served %p pk (%l)");
-        @class(PacketServerBase);
         @display("i=block/server");
         @signal[packetPushed](type=inet::Packet);
         @signal[packetPulled](type=inet::Packet);

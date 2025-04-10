@@ -15,7 +15,6 @@ package inet.queueing.base;
 simple PassivePacketSinkBase extends PacketSinkBase
 {
     parameters:
-        @class(PassivePacketSinkBase);
         @signal[packetPushed](type=inet::Packet);
         // the statistical value is the packet
         @statistic[packets](title="packets"; source=packetPushed; record=count; unit=pk);

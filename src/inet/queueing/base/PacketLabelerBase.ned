@@ -14,6 +14,5 @@ simple PacketLabelerBase extends PacketMarkerBase
 {
     parameters:
         string labels = default(""); // A space-separated list of labels
-        @class(PacketLabelerBase);
         @display("i=block/star");
 }

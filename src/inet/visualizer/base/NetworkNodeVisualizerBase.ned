@@ -21,6 +21,5 @@ simple NetworkNodeVisualizerBase extends VisualizerBase
         double annotationSpacing = default(4);
         double placementPenalty = default(10);
 
-        @class(NetworkNodeVisualizerBase);
 }
 

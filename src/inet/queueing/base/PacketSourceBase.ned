@@ -43,7 +43,6 @@ simple PacketSourceBase extends PacketProcessorBase
         bool attachIdentityTag = default(true);
         bool attachDirectionTag = default(true);
         displayStringTextFormat = default("created %p pk (%l)");
-        @class(PacketSourceBase);
         @display("i=block/source");
         @signal[packetCreated](type=inet::Packet);
 }

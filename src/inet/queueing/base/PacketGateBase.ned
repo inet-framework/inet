@@ -19,7 +19,6 @@ simple PacketGateBase extends PacketFlowBase
         double bitrate @unit(bps) = default(nan bps);
         int extraLength @unit(b) = default(0b);
         double extraDuration @unit(s) = default(0s);
-        @class(PacketGateBase);
         @display("i=block/cogwheel");
         @signal[gateStateChanged](type=bool);
         @statistic[gateState](title="gate state"; type=enum; enum=CLOSED, OPEN; source=gateStateChanged; record=vector; interpolationmode=sample-hold);

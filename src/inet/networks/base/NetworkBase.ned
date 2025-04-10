@@ -17,7 +17,6 @@ network NetworkBase
         bool recordPcap = default(false);
         int numPcapRecorders = default(recordPcap ? 1 : 0);
         pcapRecorder[*].pcapFile = default("results/" + expand("${configname}-") + fullPath() + ".pcap");
-        @class(NetworkBase);
     submodules:
         pcapRecorder[numPcapRecorders]: PcapRecorder {
             parameters:

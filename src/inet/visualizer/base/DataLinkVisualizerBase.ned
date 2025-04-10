@@ -31,6 +31,5 @@ simple DataLinkVisualizerBase extends LinkVisualizerBase
     parameters:
         lineColor = default("darkcyan");
         labelColor = default("darkcyan");
-        @class(DataLinkVisualizerBase);
 }
 

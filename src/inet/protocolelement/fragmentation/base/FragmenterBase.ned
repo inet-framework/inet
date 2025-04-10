@@ -17,7 +17,6 @@ module FragmenterBase extends PacketPusherBase
         string fragmenterPolicyClass = default("");
         string fragmenterPolicyModule = default(".fragmenterPolicy");
         @display("i=block/fork");
-        @class(FragmenterBase);
     submodules:
         fragmenterPolicy: <> like IFragmenterPolicy if typename != "" {
             parameters:

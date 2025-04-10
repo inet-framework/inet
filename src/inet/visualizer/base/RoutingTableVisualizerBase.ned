@@ -55,6 +55,5 @@ simple RoutingTableVisualizerBase extends VisualizerBase
         string labelFont = default("<default>, 8px"); // Label font, automatic by default
         string labelColor = default("black"); // Label color, black by default
 
-        @class(RoutingTableVisualizerBase);
 }
 

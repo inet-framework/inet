@@ -19,7 +19,6 @@ import inet.power.contract.ICcEnergySink;
 simple CcEnergySinkBase extends SimpleModule like ICcEnergySink
 {
     parameters:
-        @class(CcEnergySinkBase);
         @display("i=block/plug");
         @signal[currentGenerationChanged];
         @statistic[currentGeneration](title="Current generation"; source=currentGenerationChanged; record=vector; interpolationmode=sample-hold; unit=A);

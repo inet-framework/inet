@@ -29,6 +29,5 @@ simple QueueVisualizerBase extends VisualizerBase
         string placementHint = default("right"); // Annotation placement hint, space-separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
         double placementPriority = default(0); // Determines the order of annotation positioning
 
-        @class(QueueVisualizerBase);
 }
 

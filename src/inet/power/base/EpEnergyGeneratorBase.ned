@@ -19,7 +19,6 @@ import inet.power.contract.IEpEnergyGenerator;
 simple EpEnergyGeneratorBase extends SimpleModule like IEpEnergyGenerator
 {
     parameters:
-        @class(EpEnergyGeneratorBase);
         @display("i=block/plug");
         @signal[powerGenerationChanged];
         @statistic[powerGeneration](title="Power generation"; source=powerGenerationChanged; record=vector; interpolationmode=sample-hold; unit=W);

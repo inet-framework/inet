@@ -19,7 +19,6 @@ import inet.power.contract.IEpEnergySink;
 simple EpEnergySinkBase extends SimpleModule like IEpEnergySink
 {
     parameters:
-        @class(EpEnergySinkBase);
         @display("i=block/plug");
         @signal[powerGenerationChanged];
         @statistic[powerGeneration](title="Power generation"; source=powerGenerationChanged; record=vector; interpolationmode=sample-hold; unit=W);

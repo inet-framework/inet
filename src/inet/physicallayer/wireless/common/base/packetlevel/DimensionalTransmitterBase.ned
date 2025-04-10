@@ -32,6 +32,5 @@ module DimensionalTransmitterBase extends NarrowbandTransmitterBase
         string frequencyGains = default("left s 0dB either e 0dB right"); // Sequence of interpolation method, frequency, gain tuples; frequency can be an expression, gain is in [dB] or [0..1]; default value is a flat signal
         string frequencyGainsNormalization @enum("","maximum","integral") = default("integral"); // Determines how the frequency gains function is normalized, integral normalization by default
         modulation = default("BPSK");
-        @class(DimensionalTransmitterBase);
 }
 

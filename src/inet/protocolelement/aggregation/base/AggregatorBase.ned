@@ -17,7 +17,6 @@ module AggregatorBase extends PacketPusherBase
         string aggregatorPolicyClass = default("");
         string aggregatorPolicyModule = default(".aggregatorPolicy");
         @display("i=block/join");
-        @class(AggregatorBase);
     submodules:
         aggregatorPolicy: <default("LengthBasedAggregatorPolicy")> like IAggregatorPolicy if typename != "" {
             parameters:

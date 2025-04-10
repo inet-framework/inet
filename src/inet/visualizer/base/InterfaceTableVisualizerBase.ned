@@ -55,6 +55,5 @@ simple InterfaceTableVisualizerBase extends VisualizerBase
         string backgroundColor = default("white"); // Interface text background color
         double opacity = default(1.0); // Opacity of the visualization
 
-        @class(InterfaceTableVisualizerBase);
 }
 

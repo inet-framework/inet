@@ -121,6 +121,5 @@ simple MediumVisualizerBase extends VisualizerBase
         string spectrogramPlacementHint = default("bottomCenter"); // Annotation placement hint, space-separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
         double spectrogramPlacementPriority = default(-1); // Determines the order of annotation positioning
 
-        @class(MediumVisualizerBase);
 }
 

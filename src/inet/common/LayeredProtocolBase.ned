@@ -15,7 +15,6 @@ import inet.common.SimpleModule;
 simple LayeredProtocolBase extends SimpleModule
 {
     parameters:
-        @class(LayeredProtocolBase);
         @signal[packetSentToUpper](type=cPacket);
         @signal[packetReceivedFromUpper](type=cPacket);
         @signal[packetSentToLower](type=cPacket);

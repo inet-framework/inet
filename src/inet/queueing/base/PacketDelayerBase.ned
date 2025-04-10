@@ -13,7 +13,6 @@ simple PacketDelayerBase extends PacketProcessorBase
         string clockModule = default(""); // Relative path of a module that implements IClock; optional
         int schedulingPriority = default(0);
         bool scheduleZeroDelay = default(true);
-        @class(PacketDelayerBase);
         @display("i=block/delay");
     gates:
         input in @labels(push);

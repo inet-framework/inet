@@ -16,7 +16,6 @@ simple PacketSinkBase extends PacketProcessorBase
 {
     parameters:
         displayStringTextFormat = default("received %p pk (%l)");
-        @class(PacketSinkBase);
         @display("i=block/sink");
         @signal[packetDropped](type=inet::Packet);
         // the statistical value is the dropped packet

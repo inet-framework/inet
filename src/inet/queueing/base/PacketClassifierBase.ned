@@ -19,7 +19,6 @@ simple PacketClassifierBase extends PacketProcessorBase
     parameters:
         bool reverseOrder = default(false);
         displayStringTextFormat = default("classified %p pk (%l)");
-        @class(PacketClassifierBase);
         @display("i=block/classifier");
         @signal[packetPushed](type=inet::Packet);
         // the statistical value is the classified packet

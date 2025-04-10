@@ -32,6 +32,5 @@ simple PhysicalLinkVisualizerBase extends LinkVisualizerBase
         lineColor = default("olive");
         lineStyle = default("dotted");
         labelColor = default("olive");
-        @class(PhysicalLinkVisualizerBase);
 }
 

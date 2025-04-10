@@ -17,7 +17,6 @@ package inet.queueing.base;
 simple PacketFlowBase extends PacketProcessorBase
 {
     parameters:
-        @class(PacketFlowBase);
         @display("i=block/rightarrow");
         @signal[packetPushedIn](type=inet::Packet);
         @signal[packetPushedOut](type=inet::Packet);

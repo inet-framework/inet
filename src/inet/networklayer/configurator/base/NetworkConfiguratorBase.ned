@@ -12,7 +12,6 @@ import inet.common.SimpleModule;
 simple NetworkConfiguratorBase extends SimpleModule
 {
     parameters:
-        @class(NetworkConfiguratorBase);
         @display("i=block/cogwheel");
 }
 
