@@ -19,7 +19,6 @@ simple VisualizerBase extends SimpleModule
         string visualizationTargetModule = default("^"); // Module path relative to the visualizer which determines where the visualization should appear in the user interface, parent module by default
         string visualizationSubjectModule = default("^"); // Module path relative to the visualizer which determines what part of the simulation model the visualizer displays in the user interface, parent module by default
         string tags = default(""); // Tag added to each visualization for disambiguation in the runtime environment
-        string displayStringTextFormat = default("");
         @display("i=block/app");
 }
 
