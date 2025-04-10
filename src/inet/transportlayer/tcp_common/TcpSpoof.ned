@@ -16,7 +16,7 @@ import inet.transportlayer.contract.ITcp;
 //
 // Compatible with both IPv4 (~Ipv4) and IPv6 (~Ipv6).
 //
-simple TcpSpoof like ITcp
+simple TcpSpoof extends SimpleModule like ITcp
 {
     parameters:
         string srcAddress = default("");  // Local address; may be left empty ("")

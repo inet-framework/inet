@@ -33,7 +33,7 @@ import inet.applications.contract.IApp;
 //
 // @author: Adriano
 //
-simple SimpleVoipSender like IApp
+simple SimpleVoipSender extends SimpleModule like IApp
 {
     parameters:
         int localPort = default(-1);

@@ -7,7 +7,7 @@
 
 package inet.networklayer.common;
 
-simple NetfilterInfoHook
+simple NetfilterInfoHook extends SimpleModule
 {
     parameters:
         string networkProtocolModule;

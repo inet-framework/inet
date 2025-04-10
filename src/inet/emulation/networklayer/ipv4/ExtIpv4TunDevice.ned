@@ -13,7 +13,7 @@ package inet.emulation.networklayer.ipv4;
 // on `lowerLayerIn` gate to the specified real TUN device, and sends out packets
 // arrived from real TAP device on `lowerLayerOut` gate.
 //
-simple ExtIpv4TunDevice
+simple ExtIpv4TunDevice extends SimpleModule
 {
     parameters:
         string device;

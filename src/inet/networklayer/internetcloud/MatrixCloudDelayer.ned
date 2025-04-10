@@ -40,7 +40,7 @@ package inet.networklayer.internetcloud;
 //
 // @see `InternetCloud`
 //
-simple MatrixCloudDelayer like ICloudDelayer
+simple MatrixCloudDelayer extends SimpleModule like ICloudDelayer
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

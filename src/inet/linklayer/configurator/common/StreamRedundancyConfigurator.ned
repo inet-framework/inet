@@ -16,7 +16,7 @@ import inet.networklayer.configurator.contract.INetworkConfigurator;
 // nodes. The configuration parameter specifies the streams with a set of path
 // fragments.
 //
-simple StreamRedundancyConfigurator like INetworkConfigurator
+simple StreamRedundancyConfigurator extends SimpleModule like INetworkConfigurator
 {
     parameters:
         int minVlanId = default(0); // Lowest available VLAN ID

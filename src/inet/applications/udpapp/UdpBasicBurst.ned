@@ -88,7 +88,7 @@ import inet.applications.contract.IApp;
 //  - `packetReceived`: statistics of not dropped, not out-of-order packets.
 //  - `endToEndDelay`: end to end delay statistics of not dropped, not out-of-order packets.
 //
-simple UdpBasicBurst like IApp
+simple UdpBasicBurst extends SimpleModule like IApp
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

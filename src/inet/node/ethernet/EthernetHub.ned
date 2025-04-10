@@ -21,7 +21,7 @@ package inet.node.ethernet;
 //
 // @see ~EthernetSwitch, ~EthernetHost
 //
-simple EthernetHub
+simple EthernetHub extends SimpleModule
 {
     parameters:
         @networkNode();

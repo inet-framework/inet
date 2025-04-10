@@ -7,7 +7,7 @@
 
 package inet.linklayer.ieee80211.mib;
 
-simple Ieee80211Mib
+simple Ieee80211Mib extends SimpleModule
 {
     parameters:
         @display("i=block/table");

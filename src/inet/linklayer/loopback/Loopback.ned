@@ -12,7 +12,7 @@ package inet.linklayer.loopback;
 //
 // @see ~LoopbackInterface
 //
-simple Loopback
+simple Loopback extends SimpleModule
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

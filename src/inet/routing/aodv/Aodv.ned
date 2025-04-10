@@ -26,7 +26,7 @@ import inet.applications.contract.IApp;
 // This implementation is based on RFC 3561. For more information, you may
 // refer to the following link: https://tools.ietf.org/html/rfc3561.html.
 //
-simple Aodv like IApp
+simple Aodv extends SimpleModule like IApp
 {
     parameters:
         @class("aodv::Aodv");

@@ -7,7 +7,7 @@
 
 package inet.transportlayer.tcp_common;
 
-simple TcpCrcInsertionHook
+simple TcpCrcInsertionHook extends SimpleModule
 {
 }
 

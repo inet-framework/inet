@@ -7,7 +7,7 @@
 
 package inet.linklayer.ieee80211.mac.protectionmechanism;
 
-simple OriginatorProtectionMechanism
+simple OriginatorProtectionMechanism extends SimpleModule
 {
     parameters:
         string rateSelectionModule;

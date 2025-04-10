@@ -9,7 +9,7 @@ package inet.physicallayer.wireless.common.analogmodel.scalar;
 
 import inet.physicallayer.wireless.common.contract.packetlevel.IReceiverAnalogModel;
 
-simple ScalarReceiverAnalogModel like IReceiverAnalogModel
+simple ScalarReceiverAnalogModel extends SimpleModule like IReceiverAnalogModel
 {
     parameters:
         double defaultCenterFrequency @unit(Hz) = default(nan Hz);

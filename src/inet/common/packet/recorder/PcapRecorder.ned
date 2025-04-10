@@ -29,7 +29,7 @@ package inet.common.packet.recorder;
 // `sendingSignalNames` and `receivingSignalNames` parameters. The packets
 // themselves are expected as `cPacket*` signal values.
 //
-simple PcapRecorder
+simple PcapRecorder extends SimpleModule
 {
     parameters:
         bool verbose = default(true);  // Whether to log packets on the module output

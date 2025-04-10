@@ -22,7 +22,7 @@ moduleinterface IGeographicCoordinateSystem
 // Provides a very simple and less accurate geographic coordinate
 // system without using OSG. It doesn't support orientation.
 //
-simple SimpleGeographicCoordinateSystem like IGeographicCoordinateSystem
+simple SimpleGeographicCoordinateSystem extends SimpleModule like IGeographicCoordinateSystem
 {
     parameters:
         @display("i=block/table2");
@@ -35,7 +35,7 @@ simple SimpleGeographicCoordinateSystem like IGeographicCoordinateSystem
 // Provides an accurate geographic coordinate system using the
 // built-in OSG API.
 //
-simple OsgGeographicCoordinateSystem like IGeographicCoordinateSystem
+simple OsgGeographicCoordinateSystem extends SimpleModule like IGeographicCoordinateSystem
 {
     parameters:
         @display("i=block/table2");

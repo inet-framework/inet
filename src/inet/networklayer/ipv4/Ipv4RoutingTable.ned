@@ -36,7 +36,7 @@ import inet.networklayer.contract.IRoutingTable;
 // @see ~InterfaceTable
 // @author: Jochen Reber
 //
-simple Ipv4RoutingTable like IRoutingTable
+simple Ipv4RoutingTable extends SimpleModule like IRoutingTable
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

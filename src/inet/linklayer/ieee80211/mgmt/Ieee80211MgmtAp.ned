@@ -18,7 +18,7 @@ package inet.linklayer.ieee80211.mgmt;
 // This module relies on a connected ~Ieee80211Mac for actual
 // reception and transmission of frames.
 //
-simple Ieee80211MgmtAp like IIeee80211Mgmt
+simple Ieee80211MgmtAp extends SimpleModule like IIeee80211Mgmt
 {
     parameters:
         string ssid = default("SSID");

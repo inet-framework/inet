@@ -1,6 +1,6 @@
 package inet.routing.ospfv3.process;
 
-simple Ospfv3Process
+simple Ospfv3Process extends SimpleModule
 {
     parameters:
         int processID;

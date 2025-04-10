@@ -21,7 +21,7 @@ package inet.applications.tcpapp;
 //
 // @see ~TcpServerConnection, ~TcpServerListener, ~TcpClientSocketIo
 //
-simple TcpServerSocketIo
+simple TcpServerSocketIo extends SimpleModule
 {
     parameters:
         @display("i=block/socket");

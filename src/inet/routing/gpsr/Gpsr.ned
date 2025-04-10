@@ -16,7 +16,7 @@ import inet.routing.contract.IManetRouting;
 // For more information on the routing algorithm, see the GPSR paper
 // http://www.eecs.harvard.edu/~~htk/publication/2000-mobi-karp-kung.pdf
 //
-simple Gpsr like IManetRouting
+simple Gpsr extends SimpleModule like IManetRouting
 {
     parameters:
         // properties

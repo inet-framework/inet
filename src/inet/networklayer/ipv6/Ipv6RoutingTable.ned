@@ -17,7 +17,7 @@ import inet.networklayer.contract.IRoutingTable;
 //
 // @see ~Ipv6, ~Ipv6NeighbourDiscovery, ~Icmpv6
 //
-simple Ipv6RoutingTable like IRoutingTable
+simple Ipv6RoutingTable extends SimpleModule like IRoutingTable
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

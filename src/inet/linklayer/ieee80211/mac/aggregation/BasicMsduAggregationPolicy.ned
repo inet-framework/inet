@@ -15,7 +15,7 @@ import inet.linklayer.ieee80211.mac.contract.IMsduAggregationPolicy;
 // the minimum length for the aggregated payload, the maximum A-MSDU size,
 // etc.
 //
-simple BasicMsduAggregationPolicy like IMsduAggregationPolicy
+simple BasicMsduAggregationPolicy extends SimpleModule like IMsduAggregationPolicy
 {
     int subframeNumThreshold = default(-1); // Minimum number of subframes needed to compose an A-MSDU. (-1 means it won't be checked)
     int aggregationLengthThreshold = default(-1); // The minimum length for an aggregated payload necessary to create an A-MSDU (-1 means it won't be checked).

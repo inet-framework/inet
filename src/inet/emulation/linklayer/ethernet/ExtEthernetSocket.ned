@@ -28,7 +28,7 @@ package inet.emulation.linklayer.ethernet;
 // $> sudo setcap -r /${your-omnetpp-root}/bin/opp_run_release
 // $> sudo setcap -r /${your-omnetpp-root}/bin/opp_run_dbg
 //
-simple ExtEthernetSocket
+simple ExtEthernetSocket extends SimpleModule
 {
     parameters:
         string device; // Name of an existing real Ethernet device

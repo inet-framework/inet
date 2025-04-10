@@ -53,7 +53,7 @@ package inet.transportlayer.rtp;
 //#   - ~RtpCiSessionLeft:
 //#         Notifies the App that the session has ended and deletes the ~RtpProfile.
 //#         params: ---
-simple Rtp
+simple Rtp extends SimpleModule
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

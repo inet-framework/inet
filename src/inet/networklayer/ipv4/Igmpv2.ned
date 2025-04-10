@@ -89,7 +89,7 @@ package inet.networklayer.ipv4;
 // parameter to false. When disabled, no IGMP message
 // is generated, and incoming IGMP messages are ignored.
 //
-simple Igmpv2 like IIgmp
+simple Igmpv2 extends SimpleModule like IIgmp
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

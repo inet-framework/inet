@@ -19,7 +19,7 @@ import inet.power.contract.IEpEnergyManagement;
 //
 // @see ~SimpleEpEnergyStorage
 //
-simple SimpleEpEnergyManagement like IEpEnergyManagement
+simple SimpleEpEnergyManagement extends SimpleModule like IEpEnergyManagement
 {
     parameters:
         double nodeShutdownCapacity @unit(J) = default(nan J); // Initiates node shutdown when the residual energy capacity decreases below this value

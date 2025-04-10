@@ -25,7 +25,7 @@ import inet.applications.contract.IApp;
 //
 // @see ~UdpVideoStreamClient
 //
-simple UdpVideoStreamServer like IApp
+simple UdpVideoStreamServer extends SimpleModule like IApp
 {
     parameters:
         int localPort; // Port to listen on

@@ -15,7 +15,7 @@ import inet.power.contract.ICcEnergySink;
 //
 // @see ~CcEnergyConsumerBase, ~CcEnergySourceBase, ~CcEnergyGeneratorBase, ~CcEnergyStorageBase
 //
-simple CcEnergySinkBase like ICcEnergySink
+simple CcEnergySinkBase extends SimpleModule like ICcEnergySink
 {
     parameters:
         @display("i=block/plug");

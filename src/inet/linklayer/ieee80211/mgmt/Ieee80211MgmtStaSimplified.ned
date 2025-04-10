@@ -14,7 +14,7 @@ package inet.linklayer.ieee80211.mgmt;
 // it send or expect to receive any management frames. It simply treats the
 // station as associated to the configured AP all the time.
 //
-simple Ieee80211MgmtStaSimplified like IIeee80211Mgmt
+simple Ieee80211MgmtStaSimplified extends SimpleModule like IIeee80211Mgmt
 {
     parameters:
         string accessPointAddress; // MAC address of associated AP

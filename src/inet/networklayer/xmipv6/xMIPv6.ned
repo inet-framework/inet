@@ -14,7 +14,7 @@ package inet.networklayer.xmipv6;
 //
 // Implements xMIPv6 (where x = F, H, F-H).
 //
-simple xMIPv6
+simple xMIPv6 extends SimpleModule
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

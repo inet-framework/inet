@@ -28,7 +28,7 @@ import inet.linklayer.contract.ISpanningTree;
 //
 // @see ~L2NetworkConfigurator, ~InterfaceTable
 //
-simple Rstp like ISpanningTree
+simple Rstp extends SimpleModule like ISpanningTree
 {
     parameters:
         // The hello time is the time between each bridge protocol data unit (BPDU) that is sent on a port.

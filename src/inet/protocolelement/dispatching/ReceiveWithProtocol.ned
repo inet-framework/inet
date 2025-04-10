@@ -7,7 +7,7 @@
 
 package inet.protocolelement.dispatching;
 
-simple ReceiveWithProtocol
+simple ReceiveWithProtocol extends SimpleModule
 {
     parameters:
         @display("i=block/rx");

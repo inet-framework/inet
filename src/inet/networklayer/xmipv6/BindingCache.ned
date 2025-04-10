@@ -16,7 +16,7 @@ package inet.networklayer.xmipv6;
 //
 // @see  ~xMIPv6.
 //
-simple BindingCache
+simple BindingCache extends SimpleModule
 {
 }
 

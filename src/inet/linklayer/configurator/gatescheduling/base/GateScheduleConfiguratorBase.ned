@@ -31,7 +31,7 @@ package inet.linklayer.configurator.gatescheduling.base;
 //   - `maxJitter` (optional): the allowed maximum jitter among the packets, 0 by default
 //   - `pathFragments` (optional): array of arrays, where each array contains a list of network node names, supports multicast trees, shortest path is used when omitted
 //
-simple GateScheduleConfiguratorBase
+simple GateScheduleConfiguratorBase extends SimpleModule
 {
     parameters:
         double gateCycleDuration @unit(s); // The globally used gate scheduling period in each PeriodicGate module

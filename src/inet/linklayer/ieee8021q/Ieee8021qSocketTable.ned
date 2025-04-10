@@ -7,7 +7,7 @@
 
 package inet.linklayer.ieee8021q;
 
-simple Ieee8021qSocketTable
+simple Ieee8021qSocketTable extends SimpleModule
 {
     parameters:
         @display("i=block/table");

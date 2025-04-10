@@ -23,7 +23,7 @@ import inet.routing.contract.IManetRouting;
 //
 // WARNING: This is a partial / unfinished implementation.
 //
-simple Dsdv like IManetRouting
+simple Dsdv extends SimpleModule like IManetRouting
 {
     parameters:
         @display("i=block/routing");

@@ -11,7 +11,7 @@ package inet.linklayer.common;
 // Classifies packets and assigns a User Priority based on the IP
 // protocol or the transport protocol port numbers.
 //
-simple QosClassifier like IIeee8021dQosClassifier
+simple QosClassifier extends SimpleModule like IIeee8021dQosClassifier
 {
     parameters:
         string ipProtocolUpMap = default("1 BE 58 BE");

@@ -14,7 +14,7 @@ import inet.power.contract.ICcEnergyConsumer;
 // determined by the radio mode, the transmitter state, and the receiver state
 // using constant parameters.
 //
-simple StateBasedCcEnergyConsumer like ICcEnergyConsumer
+simple StateBasedCcEnergyConsumer extends SimpleModule like ICcEnergyConsumer
 {
     parameters:
         string energySourceModule;

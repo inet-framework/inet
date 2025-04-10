@@ -14,7 +14,7 @@ package inet.routing.eigrp.tables;
 //
 // TODO auto-generated module
 //
-simple EigrpIpv6NeighborTable
+simple EigrpIpv6NeighborTable extends SimpleModule
 {
     @display("i=block/table");
 }

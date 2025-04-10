@@ -14,7 +14,7 @@ import inet.linklayer.contract.IMacForwardingTable;
 //
 // @see ~MrpRelay, ~Mrp, ~MrpInterconnection
 //
-simple MrpMacForwardingTable like IMacForwardingTable
+simple MrpMacForwardingTable extends SimpleModule like IMacForwardingTable
 {
     parameters:
         @display("i=block/table2");

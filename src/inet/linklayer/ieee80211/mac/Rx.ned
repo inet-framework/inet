@@ -16,7 +16,7 @@ import inet.linklayer.ieee80211.mac.contract.IRx;
 //
 // This is the default implementation of thr ~IRx module interface.
 //
-simple Rx like IRx
+simple Rx extends SimpleModule like IRx
 {
     parameters:
         @display("i=block/rx");

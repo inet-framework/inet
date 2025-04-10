@@ -11,7 +11,7 @@ package inet.queueing.gate;
 // Configures multiple `PeriodicGate` modules according to a gate control list.
 // The modules are looked for at the `^.transmissionGate[*]` relative module path.
 //
-simple GateControlList
+simple GateControlList extends SimpleModule
 {
     parameters:
         object durations @unit(s) = default([]); // List of entry durations, e.g. [4ms, 2ms, 2ms, 2ms]

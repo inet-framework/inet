@@ -19,7 +19,7 @@ package inet.applications.generic;
 // The peer can be ~IpvxTrafSink or another ~IpvxTrafGen (it handles received packets
 // exactly like ~IpvxTrafSink).
 //
-simple IpvxTrafGen like IIpvxTrafficGenerator
+simple IpvxTrafGen extends SimpleModule like IIpvxTrafficGenerator
 {
     parameters:
         double startTime @unit(s) = default(1s); // Time of sending the first packet

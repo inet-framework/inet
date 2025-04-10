@@ -9,7 +9,7 @@ package inet.applications.sctpapp;
 
 import inet.applications.contract.IApp;
 
-simple SctpNatPeer like IApp
+simple SctpNatPeer extends SimpleModule like IApp
 {
     parameters:
         string localAddress = default(""); // Comma-separated list of addresses

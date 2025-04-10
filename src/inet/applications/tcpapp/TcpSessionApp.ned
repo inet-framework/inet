@@ -75,7 +75,7 @@ import inet.applications.contract.IApp;
 //
 //   -# Use "bytestream", which transmits real bytes of messages.
 //
-simple TcpSessionApp like IApp
+simple TcpSessionApp extends SimpleModule like IApp
 {
     parameters:
         string localAddress = default("");

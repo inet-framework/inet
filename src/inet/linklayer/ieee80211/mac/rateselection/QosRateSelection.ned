@@ -7,7 +7,7 @@
 
 package inet.linklayer.ieee80211.mac.rateselection;
 
-simple QosRateSelection
+simple QosRateSelection extends SimpleModule
 {
     parameters:
         string rateControlModule;

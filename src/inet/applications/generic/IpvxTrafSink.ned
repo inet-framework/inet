@@ -11,7 +11,7 @@ package inet.applications.generic;
 // Consumes and prints packets received from the IP module.
 // Compatible with both ~Ipv4 and ~Ipv6.
 //
-simple IpvxTrafSink like IIpvxTrafficGenerator
+simple IpvxTrafSink extends SimpleModule like IIpvxTrafficGenerator
 {
     parameters:
         int protocol; // Value for IPv4, IPv6 protocol field, accepts only values between 143 and 254

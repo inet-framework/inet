@@ -22,7 +22,7 @@ package inet.applications.tcpapp;
 //
 // @see ~TcpServerSocketIo
 //
-simple TcpClientSocketIo
+simple TcpClientSocketIo extends SimpleModule
 {
     parameters:
         string localAddress = default("");

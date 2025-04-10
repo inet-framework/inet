@@ -7,7 +7,7 @@
 
 package inet.protocolelement.forwarding;
 
-simple SendWithHopLimit
+simple SendWithHopLimit extends SimpleModule
 {
     parameters:
         int hopLimit;

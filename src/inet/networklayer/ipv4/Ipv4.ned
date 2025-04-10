@@ -78,7 +78,7 @@ moduleinterface IIpv4
 //
 // @see ~Ipv4RoutingTable, ~Arp
 //
-simple Ipv4 like IIpv4
+simple Ipv4 extends SimpleModule like IIpv4
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

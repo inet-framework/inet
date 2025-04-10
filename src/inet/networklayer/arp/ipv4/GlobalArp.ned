@@ -13,7 +13,7 @@ import inet.networklayer.contract.IArp;
 //
 // Provides global address resolution without exchanging packets.
 //
-simple GlobalArp like IArp
+simple GlobalArp extends SimpleModule like IArp
 {
     parameters:
         string interfaceTableModule;   // Path to the InterfaceTable module

@@ -29,7 +29,7 @@ package inet.networklayer.mpls;
 //
 // A DTD is available in inet/etc/.
 //
-simple LibTable
+simple LibTable extends SimpleModule
 {
     parameters:
         xml config = default(xml("<libtable/>")); // Table contents to be loaded on startup

@@ -29,7 +29,7 @@ package inet.common.misc;
 // Optional attributes are surrounded with square brackets.
 // See also validation schema (XSD, DTD)
 //
-simple MessageChecker
+simple MessageChecker extends SimpleModule
 {
     parameters:
         xml config;   // Configuration file

@@ -13,7 +13,7 @@ import inet.linklayer.ieee80211.mac.contract.IFragmentationPolicy;
 // Implements a basic fragmentation policy, which employs a fragmentation
 // frame size threshold.
 //
-simple BasicFragmentationPolicy like IFragmentationPolicy
+simple BasicFragmentationPolicy extends SimpleModule like IFragmentationPolicy
 {
     parameters:
         int fragmentationThreshold @unit(B) = default(1500B);

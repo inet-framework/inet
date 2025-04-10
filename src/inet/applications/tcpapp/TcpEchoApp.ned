@@ -41,7 +41,7 @@ simple TcpEchoApp extends TcpServerHostApp
 }
 
 // Thread for ~TcpEchoApp
-simple TcpEchoAppThread
+simple TcpEchoAppThread extends SimpleModule
 {
         @signal[packetSent](type=inet::Packet);
         @signal[packetReceived](type=inet::Packet);

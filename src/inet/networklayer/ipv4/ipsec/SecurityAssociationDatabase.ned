@@ -21,7 +21,7 @@ package inet.networklayer.ipv4.ipsec;
 // Represents the IPsec Security Association Database (SAD).
 // The database is filled by the IPsec module.
 //
-simple SecurityAssociationDatabase
+simple SecurityAssociationDatabase extends SimpleModule
 {
     @display("i=block/table2;is=s");
 }

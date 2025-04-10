@@ -28,7 +28,7 @@ package inet.common;
 //
 // @see ~ExternalApp, ~ExternalEnvironment
 //
-simple ExternalProcess
+simple ExternalProcess extends SimpleModule
 {
     parameters:
         string namespace = default(""); // Name of the OS network namespace (optional)

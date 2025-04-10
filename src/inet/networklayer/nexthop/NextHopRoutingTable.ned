@@ -12,7 +12,7 @@ import inet.networklayer.contract.IRoutingTable;
 //
 // Stores next hop routes used by the next hop forwarding protocol.
 //
-simple NextHopRoutingTable like IRoutingTable
+simple NextHopRoutingTable extends SimpleModule like IRoutingTable
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

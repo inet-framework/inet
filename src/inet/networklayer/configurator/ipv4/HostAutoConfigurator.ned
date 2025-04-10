@@ -17,7 +17,7 @@ import inet.networklayer.configurator.contract.IIpv4NodeConfigurator;
 // This module is kept only because the ~Ipv4NetworkConfigurator cannot assign IP addresses
 // to modules that are dynamically created/destroyed.
 //
-simple HostAutoConfigurator like IIpv4NodeConfigurator
+simple HostAutoConfigurator extends SimpleModule like IIpv4NodeConfigurator
 {
     parameters:
         string interfaceTableModule;

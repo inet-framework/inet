@@ -10,7 +10,7 @@ package inet.networklayer.ipv4;
 //
 // Stores the network address translation table.
 //
-simple Ipv4NatTable
+simple Ipv4NatTable extends SimpleModule
 {
     parameters:
         string networkProtocolModule = default("^.ip");

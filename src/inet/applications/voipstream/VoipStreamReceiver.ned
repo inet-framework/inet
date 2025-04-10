@@ -21,7 +21,7 @@ import inet.applications.contract.IApp;
 // completes (i.e., in the OMNeT++ finish() function). Only one voice session
 // ("call") may be underway at a time.
 //
-simple VoipStreamReceiver like IApp
+simple VoipStreamReceiver extends SimpleModule like IApp
 {
     parameters:
         int localPort;

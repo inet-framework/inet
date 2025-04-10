@@ -15,7 +15,7 @@ package inet.common;
 // bit, the measurement ends when the outgoing enclosing packet transmission
 // starts (or ends) in the network node.
 //
-simple ResidenceTimeMeasurer like IMeasurer
+simple ResidenceTimeMeasurer extends SimpleModule like IMeasurer
 {
     parameters:
         string subscriptionModule = default("^"); // Relative module path where the subscription happens

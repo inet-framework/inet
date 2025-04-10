@@ -14,7 +14,7 @@ import inet.linklayer.ieee80211.mac.contract.IRateControl;
 // initially described in IEEE 802.11 Rate Adaptation: A Practical Approach,
 // by M. Lacage, M.H. Manshaei, and T. Turletti, 2004.
 //
-simple AarfRateControl like IRateControl
+simple AarfRateControl extends SimpleModule like IRateControl
 {
     parameters:
         double initialRate @unit(bps) = default(-1bps); // -1 means the fastest mandatory rate

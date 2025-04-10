@@ -150,7 +150,7 @@ import inet.transportlayer.contract.ITcp;
 //
 // The above problems should be relatively easy to fix.
 //
-simple Tcp like ITcp
+simple Tcp extends SimpleModule like ITcp
 {
     parameters:
         string crcMode @enum("declared", "computed") = default("declared");

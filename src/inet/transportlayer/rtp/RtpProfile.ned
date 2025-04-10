@@ -11,7 +11,7 @@ package inet.transportlayer.rtp;
 // Generic RTP Profile. ~RtpProfile is internal to the ~Rtp module;
 // instances are created and connected dynamically by ~Rtp.
 //
-simple RtpProfile
+simple RtpProfile extends SimpleModule
 {
     parameters:
         bool autoOutputFileNames;
@@ -29,7 +29,7 @@ simple RtpProfile
 // Audio-Video RTP Profile. ~RtpAvProfile is internal to the ~Rtp module;
 // instances are created and connected dynamically by ~Rtp.
 //
-simple RtpAvProfile
+simple RtpAvProfile extends SimpleModule
 {
     parameters:
         bool autoOutputFileNames;

@@ -18,7 +18,7 @@ import inet.networklayer.configurator.contract.IL3NetworkConfigurator;
 //
 // @see ~Ipv4FlatNetworkConfigurator
 //
-simple Ipv6FlatNetworkConfigurator like IL3NetworkConfigurator
+simple Ipv6FlatNetworkConfigurator extends SimpleModule like IL3NetworkConfigurator
 {
     parameters:
         @display("i=block/cogwheel");

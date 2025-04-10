@@ -15,7 +15,7 @@ import inet.power.contract.IEpEnergySource;
 //
 // @see ~EpEnergyConsumerBase, ~EpEnergyGeneratorBase, ~EpEnergySinkBase, ~EpEnergyStorageBase
 //
-simple EpEnergySourceBase like IEpEnergySource
+simple EpEnergySourceBase extends SimpleModule like IEpEnergySource
 {
     parameters:
         @display("i=block/plug");

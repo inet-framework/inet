@@ -52,7 +52,7 @@ import inet.applications.contract.IApp;
 //     - `SplitHorizon`:   do not send routes whose next hop is the neighbor
 //     - `SplitHorizonPoisonedReverse`: if the next hop is the neighbor, then
 //                         set the metric of the route to infinity.
-simple Rip like IApp
+simple Rip extends SimpleModule like IApp
 {
     parameters:
         @display("i=block/network2");

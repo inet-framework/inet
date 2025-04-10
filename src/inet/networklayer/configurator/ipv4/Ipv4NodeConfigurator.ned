@@ -24,7 +24,7 @@ import inet.networklayer.configurator.contract.IIpv4NodeConfigurator;
 // a restart, because being a global module, it doesn't know about node
 // lifecycle events.
 //
-simple Ipv4NodeConfigurator like IIpv4NodeConfigurator
+simple Ipv4NodeConfigurator extends SimpleModule like IIpv4NodeConfigurator
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

@@ -37,7 +37,7 @@ import inet.applications.contract.IApp;
 // application, the model also makes comparisons of simulation results and
 // real-world measurements easy.
 //
-simple NetPerfMeter like IApp
+simple NetPerfMeter extends SimpleModule like IApp
 {
     parameters:
         bool            activeMode               = default(true);      // Server (false) or client (true)

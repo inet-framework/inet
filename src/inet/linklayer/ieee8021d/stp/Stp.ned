@@ -26,7 +26,7 @@ import inet.linklayer.contract.ISpanningTree;
 //
 // @see ~L2NetworkConfigurator, ~InterfaceTable
 //
-simple Stp like ISpanningTree
+simple Stp extends SimpleModule like ISpanningTree
 {
     parameters:
 

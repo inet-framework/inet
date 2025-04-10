@@ -7,7 +7,7 @@
 
 package inet.linklayer.ieee80211.mac.blockack;
 
-simple RecipientBlockAckAgreementHandler
+simple RecipientBlockAckAgreementHandler extends SimpleModule
 {
     parameters:
         string rateSelectionModule;

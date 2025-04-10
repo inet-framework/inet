@@ -7,7 +7,7 @@
 
 package inet.linklayer.ieee80211.mac.originator;
 
-simple TxopProcedure
+simple TxopProcedure extends SimpleModule
 {
     parameters:
         double txopLimit @unit(s) = default(-1s);

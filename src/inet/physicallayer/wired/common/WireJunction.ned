@@ -21,7 +21,7 @@ package inet.physicallayer.wired.common;
 // to precisely model what happens when the link state changes,
 // you cannot use this module.
 //
-simple WireJunction
+simple WireJunction extends SimpleModule
 {
     parameters:
         @wireJunction;

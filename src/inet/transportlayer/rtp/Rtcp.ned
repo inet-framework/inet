@@ -10,7 +10,7 @@ package inet.transportlayer.rtp;
 //
 // RTCP end system.
 //
-simple Rtcp
+simple Rtcp extends SimpleModule
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

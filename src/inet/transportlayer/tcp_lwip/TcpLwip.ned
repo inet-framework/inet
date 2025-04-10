@@ -16,7 +16,7 @@ import inet.transportlayer.contract.ITcp;
 //
 // See ~ITcp for general TCP layer information.
 //
-simple TcpLwip like ITcp
+simple TcpLwip extends SimpleModule like ITcp
 {
     parameters:
         string sendQueueClass = default("");    //# TODO Obsolete!!!

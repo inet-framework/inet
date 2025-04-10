@@ -79,7 +79,7 @@ package inet.networklayer.rsvpte;
 // RSVP-TE communicates with the following components in the system: ~Ted, ~Mpls, and may receive commands from ~ScenarioManager.
 //
 
-simple RsvpTe
+simple RsvpTe extends SimpleModule
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

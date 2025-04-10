@@ -11,7 +11,7 @@ package inet.linklayer.ieee80211.llc;
 // Protocol Discrimination (EPD) header, as defined in section 9.2 `EtherTypes`
 // of the IEEE Std 802-2014 standard. See ~Ieee802EpdHeader.
 //
-simple Ieee80211LlcEpd like IIeee80211Llc
+simple Ieee80211LlcEpd extends SimpleModule like IIeee80211Llc
 {
     parameters:
         @display("i=block/layer");

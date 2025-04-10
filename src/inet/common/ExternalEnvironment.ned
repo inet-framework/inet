@@ -33,7 +33,7 @@ package inet.common;
 //
 // @see ~ExternalApp, ~ExternalProcess
 //
-simple ExternalEnvironment
+simple ExternalEnvironment extends SimpleModule
 {
     parameters:
         int initStage = default(0); // Initialization stage for the setup command

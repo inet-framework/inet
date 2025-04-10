@@ -9,7 +9,7 @@ package inet.protocolelement.fragmentation.policy;
 
 import inet.protocolelement.fragmentation.contract.IFragmenterPolicy;
 
-simple LengthBasedFragmenterPolicy like IFragmenterPolicy
+simple LengthBasedFragmenterPolicy extends SimpleModule like IFragmenterPolicy
 {
     parameters:
         int minFragmentLength @unit(b) = default(0b);

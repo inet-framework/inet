@@ -7,7 +7,7 @@
 
 package inet.protocolelement.acknowledgement;
 
-simple SendWithAcknowledge
+simple SendWithAcknowledge extends SimpleModule
 {
     parameters:
         double acknowledgeTimeout @unit(s);

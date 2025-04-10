@@ -13,7 +13,7 @@ import inet.linklayer.ieee80211.mac.contract.IRtsPolicy;
 //
 // Implements the default RTS policy.
 //
-simple RtsPolicy like IRtsPolicy
+simple RtsPolicy extends SimpleModule like IRtsPolicy
 {
     parameters:
         string rateSelectionModule;

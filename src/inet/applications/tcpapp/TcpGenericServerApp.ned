@@ -30,7 +30,7 @@ import inet.applications.contract.IApp;
 //
 // @see ~GenericAppMsg, ~TcpBasicClientApp, ~TelnetApp
 //
-simple TcpGenericServerApp like IApp
+simple TcpGenericServerApp extends SimpleModule like IApp
 {
     parameters:
         string localAddress = default(""); // Local address; it may be left empty ("")

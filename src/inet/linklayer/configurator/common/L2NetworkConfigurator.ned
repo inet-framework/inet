@@ -27,7 +27,7 @@ package inet.linklayer.configurator.common;
 //
 // For more information about the usage of the selector attributes see ~Ipv4NetworkConfigurator.
 //
-simple L2NetworkConfigurator
+simple L2NetworkConfigurator extends SimpleModule
 {
     parameters:
         @display("i=block/cogwheel");

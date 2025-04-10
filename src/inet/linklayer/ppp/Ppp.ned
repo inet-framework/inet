@@ -31,7 +31,7 @@ package inet.linklayer.ppp;
 //
 // @see ~PppInterface
 //
-simple Ppp
+simple Ppp extends SimpleModule
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

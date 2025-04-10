@@ -12,7 +12,7 @@ import inet.common.IHook;
 //
 // Thruput measurement utility module.
 //
-simple ThruputMeter like IHook
+simple ThruputMeter extends SimpleModule like IHook
 {
     parameters:
         @networkNode();

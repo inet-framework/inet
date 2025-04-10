@@ -12,7 +12,7 @@ package inet.linklayer.ieee80211.mgmt;
 // controls channel scanning, association and handovers, by sending commands
 // (e.g. ~Ieee80211Prim_ScanRequest) to the management module (~Ieee80211MgmtSta).
 //
-simple Ieee80211AgentSta like IIeee80211Agent
+simple Ieee80211AgentSta extends SimpleModule like IIeee80211Agent
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

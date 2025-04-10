@@ -9,7 +9,7 @@ package inet.applications.sctpapp;
 
 import inet.applications.contract.IApp;
 
-simple SctpNatServer like IApp
+simple SctpNatServer extends SimpleModule like IApp
 {
     parameters:
         string localAddress = default(""); // May be left empty ("")

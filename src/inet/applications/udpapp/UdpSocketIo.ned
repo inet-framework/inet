@@ -10,7 +10,7 @@ package inet.applications.udpapp;
 //
 // Provides UDP socket handling for generic applications.
 //
-simple UdpSocketIo
+simple UdpSocketIo extends SimpleModule
 {
     parameters:
         string interfaceTableModule;

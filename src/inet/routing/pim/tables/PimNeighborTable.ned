@@ -12,7 +12,7 @@ package inet.routing.pim.tables;
 //
 // The `PimNeighborTable` module contains information about neighboring PIM routers.
 //
-simple PimNeighborTable
+simple PimNeighborTable extends SimpleModule
 {
       @display("i=block/table");
       @signal[pimNeighborAdded](type=inet::PimNeighbor);

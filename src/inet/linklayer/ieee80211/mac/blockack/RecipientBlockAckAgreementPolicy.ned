@@ -13,7 +13,7 @@ import inet.linklayer.ieee80211.mac.contract.IRecipientBlockAckAgreementPolicy;
 //
 // Implements the default recipient block ACK agreement policy.
 //
-simple RecipientBlockAckAgreementPolicy like IRecipientBlockAckAgreementPolicy
+simple RecipientBlockAckAgreementPolicy extends SimpleModule like IRecipientBlockAckAgreementPolicy
 {
     parameters:
         bool delayedAckPolicySupported = default(false);

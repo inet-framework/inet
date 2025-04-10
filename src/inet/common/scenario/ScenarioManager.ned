@@ -109,7 +109,7 @@ package inet.common.scenario;
 // - <delete-module>: module
 //       module: path to module (required)
 //
-simple ScenarioManager
+simple ScenarioManager extends SimpleModule
 {
     parameters:
         xml script = default(xml("<script></script>"));

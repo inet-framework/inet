@@ -11,7 +11,7 @@ package inet.visualizer.base;
 // Base module for visualizer simple modules. It simply provides the
 // visualization target module for derived modules.
 //
-simple VisualizerBase
+simple VisualizerBase extends SimpleModule
 {
     parameters:
         string visualizationTargetModule = default("^"); // Module path relative to the visualizer which determines where the visualization should appear in the user interface, parent module by default

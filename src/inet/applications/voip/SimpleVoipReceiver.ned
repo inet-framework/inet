@@ -24,7 +24,7 @@ import inet.applications.contract.IApp;
 // The playout delay, buffer space, the UDP port to listen on, and other input
 // can be specified in module parameters.
 //
-simple SimpleVoipReceiver like IApp
+simple SimpleVoipReceiver extends SimpleModule like IApp
 {
     parameters:
         int localPort;

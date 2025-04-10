@@ -11,7 +11,7 @@
 
 package inet.routing.eigrp.tables;
 
-simple EigrpInterfaceTable
+simple EigrpInterfaceTable extends SimpleModule
 {
     @display("i=block/table");
 }

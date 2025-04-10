@@ -22,7 +22,7 @@ import inet.mobility.contract.IMobility;
 //  - %S angular speed
 //  - %A angular acceleration
 //
-simple MobilityBase like IMobility
+simple MobilityBase extends SimpleModule like IMobility
 {
     parameters:
         @signal[mobilityStateChanged](type=inet::MobilityBase);     // It works in inet, but not in the extended module in another namespace

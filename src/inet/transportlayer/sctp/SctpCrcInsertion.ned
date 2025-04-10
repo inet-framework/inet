@@ -10,7 +10,7 @@ package inet.transportlayer.sctp;
 //
 // Inserts SCTP CRC into packets.
 //
-simple SctpCrcInsertion
+simple SctpCrcInsertion extends SimpleModule
 {
 }
 

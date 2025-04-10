@@ -48,7 +48,7 @@ package inet.networklayer.ipv6;
 //
 // @see ~Ipv6RoutingTable, ~Ipv6NeighbourDiscovery, ~Icmpv6
 //
-simple Ipv6
+simple Ipv6 extends SimpleModule
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

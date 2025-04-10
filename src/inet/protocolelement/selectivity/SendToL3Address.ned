@@ -7,7 +7,7 @@
 
 package inet.protocolelement.selectivity;
 
-simple SendToL3Address
+simple SendToL3Address extends SimpleModule
 {
     parameters:
         string address;

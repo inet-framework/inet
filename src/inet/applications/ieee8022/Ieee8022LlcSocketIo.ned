@@ -10,7 +10,7 @@ package inet.applications.ieee8022;
 //
 // Provides IEEE 802.2 LLC socket handling for generic applications.
 //
-simple Ieee8022LlcSocketIo
+simple Ieee8022LlcSocketIo extends SimpleModule
 {
     parameters:
         string interfaceTableModule;

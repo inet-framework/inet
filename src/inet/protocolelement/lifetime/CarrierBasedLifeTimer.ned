@@ -9,7 +9,7 @@ package inet.protocolelement.lifetime;
 
 import inet.protocolelement.contract.IPacketLifeTimer;
 
-simple CarrierBasedLifeTimer like IPacketLifeTimer
+simple CarrierBasedLifeTimer extends SimpleModule like IPacketLifeTimer
 {
     parameters:
         string collectionModule;

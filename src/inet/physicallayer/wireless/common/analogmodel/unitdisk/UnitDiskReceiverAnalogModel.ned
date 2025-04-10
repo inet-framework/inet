@@ -12,7 +12,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IReceiverAnalogMo
 //
 // @see ~UnitDiskRadioMedium, ~UnitDiskMediumAnalogModel, ~UnitDiskReceiverAnalogModel.
 //
-simple UnitDiskReceiverAnalogModel like IReceiverAnalogModel
+simple UnitDiskReceiverAnalogModel extends SimpleModule like IReceiverAnalogModel
 {
     parameters:
         bool ignoreInterference = default(false); // True means interfering transmissions are ignored when determining whether a reception is successful or not

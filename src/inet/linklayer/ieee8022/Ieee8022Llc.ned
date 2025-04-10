@@ -9,7 +9,7 @@ package inet.linklayer.ieee8022;
 
 import inet.linklayer.contract.IIeee8022Llc;
 
-simple Ieee8022Llc like IIeee8022Llc
+simple Ieee8022Llc extends SimpleModule like IIeee8022Llc
 {
     parameters:
         bool registerProtocol = default(false);     //FIXME //KLUDGE should redesign the placement of EthernetEncapsulation and LLC modules

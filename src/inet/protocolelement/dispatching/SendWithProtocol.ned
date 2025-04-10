@@ -7,7 +7,7 @@
 
 package inet.protocolelement.dispatching;
 
-simple SendWithProtocol
+simple SendWithProtocol extends SimpleModule
 {
     parameters:
         @display("i=block/tx");

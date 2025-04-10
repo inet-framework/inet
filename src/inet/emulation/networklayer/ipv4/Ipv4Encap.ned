@@ -7,7 +7,7 @@
 
 package inet.emulation.networklayer.ipv4;
 
-simple Ipv4Encap
+simple Ipv4Encap extends SimpleModule
 {
     parameters:
         @display("i=block/square");

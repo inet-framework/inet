@@ -14,7 +14,7 @@ import inet.power.contract.IEpEnergyConsumer;
 // determined by the radio mode, the transmitter state, and the receiver state
 // using constant parameters.
 //
-simple StateBasedEpEnergyConsumer like IEpEnergyConsumer
+simple StateBasedEpEnergyConsumer extends SimpleModule like IEpEnergyConsumer
 {
     parameters:
         string energySourceModule;

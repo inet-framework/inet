@@ -8,7 +8,7 @@ package inet.applications.tunapp;
 
 import inet.applications.contract.IApp;
 
-simple TunnelApp like IApp
+simple TunnelApp extends SimpleModule like IApp
 {
     parameters:
         string interfaceTableModule;

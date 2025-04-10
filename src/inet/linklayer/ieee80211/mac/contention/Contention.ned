@@ -12,7 +12,7 @@ import inet.linklayer.ieee80211.mac.contract.IContention;
 //
 // The default implementation of IContention.
 //
-simple Contention like IContention
+simple Contention extends SimpleModule like IContention
 {
     parameters:
         bool initialChannelBusy = default(true); // Assume that the channel was busy before the simulation started

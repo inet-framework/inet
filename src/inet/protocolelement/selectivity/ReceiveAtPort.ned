@@ -7,7 +7,7 @@
 
 package inet.protocolelement.selectivity;
 
-simple ReceiveAtPort
+simple ReceiveAtPort extends SimpleModule
 {
     parameters:
         int port;

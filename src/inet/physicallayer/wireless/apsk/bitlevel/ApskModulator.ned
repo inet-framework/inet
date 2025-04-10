@@ -16,7 +16,7 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IModulator;
 //
 // @see ~ApskDemodulator, ~ApskLayeredTransmitter.
 //
-simple ApskModulator like IModulator
+simple ApskModulator extends SimpleModule like IModulator
 {
     parameters:
         string modulation; // BPSK, QPSK, QAM-16, QAM-64, QAM-256, etc. (see ApskModulationBase::findModulation)

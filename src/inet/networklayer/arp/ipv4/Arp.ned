@@ -32,7 +32,7 @@ import inet.networklayer.contract.IArp;
 // these files don't contain the word `BROADCAST` e.g. for PPP
 // interfaces.
 //
-simple Arp like IArp
+simple Arp extends SimpleModule like IArp
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

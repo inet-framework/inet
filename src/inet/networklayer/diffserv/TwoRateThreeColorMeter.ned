@@ -28,7 +28,7 @@ package inet.networklayer.diffserv;
 // a packet that was colored by a previous marker to a lesser
 // conforming color.
 //
-simple TwoRateThreeColorMeter
+simple TwoRateThreeColorMeter extends SimpleModule
 {
     parameters:
         @display("i=block/timer");

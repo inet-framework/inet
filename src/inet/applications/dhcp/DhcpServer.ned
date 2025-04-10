@@ -17,7 +17,7 @@ import inet.applications.contract.IApp;
 //
 // @see ~DhcpClient, ~DhcpMessage
 //
-simple DhcpServer like IApp
+simple DhcpServer extends SimpleModule like IApp
 {
     parameters:
         string interfaceTableModule; // The path to the InterfaceTable module

@@ -17,7 +17,7 @@ package inet.routing.pim;
 //
 // See ~Pim module for example usage.
 //
-simple PimSplitter
+simple PimSplitter extends SimpleModule
 {
     parameters:
         @display("i=block/dispatch");

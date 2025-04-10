@@ -7,7 +7,7 @@
 
 package inet.protocolelement.selectivity;
 
-simple ReceiveAtMacAddress
+simple ReceiveAtMacAddress extends SimpleModule
 {
     parameters:
         string address;

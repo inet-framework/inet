@@ -12,7 +12,7 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IDemodulator;
 //
 // @see ~Ieee80211OfdmModulator
 //
-simple Ieee80211OfdmDemodulator like IDemodulator
+simple Ieee80211OfdmDemodulator extends SimpleModule like IDemodulator
 {
     parameters:
         int numSubcarriers = default(52);

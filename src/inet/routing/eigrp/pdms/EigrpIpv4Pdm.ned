@@ -12,7 +12,7 @@
 
 package inet.routing.eigrp.pdms;
 
-simple EigrpIpv4Pdm
+simple EigrpIpv4Pdm extends SimpleModule
 {
     parameters:
         xml configData = default(xmldoc("config.xml"));

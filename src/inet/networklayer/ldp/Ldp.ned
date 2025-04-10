@@ -27,7 +27,7 @@ import inet.applications.contract.IApp;
 //
 // @author Vojta Janota
 //
-simple Ldp like IApp
+simple Ldp extends SimpleModule like IApp
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

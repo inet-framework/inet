@@ -17,7 +17,7 @@ import inet.networklayer.mpls.IIngressClassifier;
 // child elements that effectively serve as attributes:
 // <id>, <destination>, <source>, <label>, <tunnel_id>, <lspid>.
 //
-simple RsvpClassifier like IIngressClassifier
+simple RsvpClassifier extends SimpleModule like IIngressClassifier
 {
     parameters:
         string routingTableModule;

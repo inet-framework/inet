@@ -27,7 +27,7 @@ package inet.networklayer.diffserv;
 // When operating in color-aware mode, the meter does not recolor
 // a packet that was colored by a previous marker to a lesser conforming color.
 //
-simple SingleRateThreeColorMeter
+simple SingleRateThreeColorMeter extends SimpleModule
 {
     parameters:
         @display("i=block/timer");

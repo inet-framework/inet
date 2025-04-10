@@ -12,7 +12,7 @@ import inet.applications.contract.IApp;
 //
 // Consumes and prints packets received from the ~Udp module.
 //
-simple UdpSink like IApp
+simple UdpSink extends SimpleModule like IApp
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

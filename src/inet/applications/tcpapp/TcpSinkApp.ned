@@ -34,7 +34,7 @@ module TcpSinkApp extends TcpServerHostApp
 //
 // Handles a single incoming TCP connection for ~TcpSinkApp.
 //
-simple TcpSinkAppThread
+simple TcpSinkAppThread extends SimpleModule
 {
     parameters:
         @display("i=block/sink");

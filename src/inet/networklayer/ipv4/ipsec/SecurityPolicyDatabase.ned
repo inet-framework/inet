@@ -21,7 +21,7 @@ package inet.networklayer.ipv4.ipsec;
 // Represents the IPsec Security Policy Database (SPD).
 // The database is filled by the IPsec module.
 //
-simple SecurityPolicyDatabase
+simple SecurityPolicyDatabase extends SimpleModule
 {
     @display("i=block/table2;is=s");
 }

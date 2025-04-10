@@ -10,7 +10,7 @@ package inet.applications.ipapp;
 //
 // Provides IP socket handling for generic applications.
 //
-simple IpSocketIo
+simple IpSocketIo extends SimpleModule
 {
     parameters:
         string interfaceTableModule;

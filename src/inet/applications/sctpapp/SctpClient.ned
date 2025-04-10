@@ -14,7 +14,7 @@ import inet.applications.contract.IApp;
 // Client app for SCTP-based request-reply protocols.
 // Handles a single session (and SCTP connection) at a time.
 //
-simple SctpClient like IApp
+simple SctpClient extends SimpleModule like IApp
 {
     parameters:
         string localAddress = default(""); // Comma-separated list of addresses

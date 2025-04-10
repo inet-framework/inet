@@ -17,7 +17,7 @@ package inet.networklayer.ted;
 // and allows ~RsvpTe and individual applications to calculate feasible LSPs
 // meeting the chosen bandwidth criteria.
 //
-simple Ted
+simple Ted extends SimpleModule
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

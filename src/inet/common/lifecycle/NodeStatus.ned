@@ -12,7 +12,7 @@ package inet.common.lifecycle;
 // modules, and also displays it as a small overlay icon on this module
 // and on the module of the network node.
 //
-simple NodeStatus
+simple NodeStatus extends SimpleModule
 {
     parameters:
         //TODO @signal, @statistic

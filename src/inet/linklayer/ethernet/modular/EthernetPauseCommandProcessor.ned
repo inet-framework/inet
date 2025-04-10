@@ -7,7 +7,7 @@
 
 package inet.linklayer.ethernet.modular;
 
-simple EthernetPauseCommandProcessor
+simple EthernetPauseCommandProcessor extends SimpleModule
 {
     parameters:
         //@class(EthernetPauseCommandProcessor);

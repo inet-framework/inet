@@ -10,7 +10,7 @@ package inet.clock.base;
 //
 // Base module for oscillators.
 //
-simple OscillatorBase
+simple OscillatorBase extends SimpleModule
 {
     parameters:
         displayStringTextFormat = default("%n"); // Determines the text that is written on top of the submodule

@@ -12,7 +12,7 @@ package inet.linklayer.ieee80211.mgmt;
 // This implementation never sends control or management frames, and discards
 // any such frame received. Distributed beacon generation is not modeled.
 //
-simple Ieee80211MgmtAdhoc like IIeee80211Mgmt
+simple Ieee80211MgmtAdhoc extends SimpleModule like IIeee80211Mgmt
 {
     parameters:
         string mibModule;

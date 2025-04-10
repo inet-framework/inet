@@ -13,7 +13,7 @@ package inet.emulation.networklayer.ipv4;
 // `upperLayerIn` gate to the specified real socket, and sends out packets arrived
 // from the real socket on `upperLayerOut` gate.
 //
-simple ExtIpv4Socket
+simple ExtIpv4Socket extends SimpleModule
 {
     parameters:
         string namespace = default("");

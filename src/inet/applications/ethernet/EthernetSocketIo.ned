@@ -10,7 +10,7 @@ package inet.applications.ethernet;
 //
 // Provides Ethernet socket handling for generic applications.
 //
-simple EthernetSocketIo
+simple EthernetSocketIo extends SimpleModule
 {
     parameters:
         string interfaceTableModule; // Relative module path of the interface table

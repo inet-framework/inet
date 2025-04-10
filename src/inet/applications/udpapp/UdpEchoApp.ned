@@ -14,7 +14,7 @@ import inet.applications.contract.IApp;
 // Note: when used together with ~UdpBasicApp, ~UdpBasicApp's "received packet
 // lifetime" statistic will record round-trip times.
 //
-simple UdpEchoApp like IApp
+simple UdpEchoApp extends SimpleModule like IApp
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

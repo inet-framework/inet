@@ -13,7 +13,7 @@ package inet.networklayer.icmpv6;
 // @see ~Ipv6, ~Ipv6RoutingTable, ~Ipv6NeighbourDiscovery
 //#FIXME gate descriptions needed...
 //
-simple Icmpv6
+simple Icmpv6 extends SimpleModule
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

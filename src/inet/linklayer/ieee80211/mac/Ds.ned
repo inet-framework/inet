@@ -16,7 +16,7 @@ import inet.linklayer.ieee80211.mac.contract.IDs;
 //
 // This is the default implementation of the ~IDs module interface.
 //
-simple Ds like IDs
+simple Ds extends SimpleModule like IDs
 {
     parameters:
         string mibModule;

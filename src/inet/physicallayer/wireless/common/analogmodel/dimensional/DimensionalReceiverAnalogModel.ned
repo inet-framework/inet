@@ -9,7 +9,7 @@ package inet.physicallayer.wireless.common.analogmodel.dimensional;
 
 import inet.physicallayer.wireless.common.contract.packetlevel.IReceiverAnalogModel;
 
-simple DimensionalReceiverAnalogModel like IReceiverAnalogModel
+simple DimensionalReceiverAnalogModel extends SimpleModule like IReceiverAnalogModel
 {
     parameters:
         double defaultCenterFrequency @unit(Hz) = default(nan Hz);

@@ -7,7 +7,7 @@
 
 package inet.linklayer.ieee80211.mac.protectionmechanism;
 
-simple SingleProtectionMechanism
+simple SingleProtectionMechanism extends SimpleModule
 {
     parameters:
         string rateSelectionModule;

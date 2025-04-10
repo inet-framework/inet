@@ -13,7 +13,7 @@ import inet.linklayer.ieee80211.mac.contract.ICtsPolicy;
 //
 // Implements the default CTS policy.
 //
-simple CtsPolicy like ICtsPolicy
+simple CtsPolicy extends SimpleModule like ICtsPolicy
 {
     parameters:
         string rxModule;

@@ -7,7 +7,7 @@
 
 package inet.linklayer.tun;
 
-simple Tun
+simple Tun extends SimpleModule
 {
     parameters:
         string interfaceTableModule;    // The path to the InterfaceTable module

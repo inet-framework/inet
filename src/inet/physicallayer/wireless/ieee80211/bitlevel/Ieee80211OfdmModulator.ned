@@ -24,7 +24,7 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IModulator;
 // However, it can be used with an arbitrary OFDM compatible
 // constellation mapping.
 //
-simple Ieee80211OfdmModulator like IModulator
+simple Ieee80211OfdmModulator extends SimpleModule like IModulator
 {
     parameters:
         int numSubcarriers = default(52);

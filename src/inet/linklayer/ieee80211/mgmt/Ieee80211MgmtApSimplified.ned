@@ -13,7 +13,7 @@ package inet.linklayer.ieee80211.mgmt;
 // This management module variant does not send or expect to receive any
 // management frames -- it simply treats all stations as associated all the time.
 //
-simple Ieee80211MgmtApSimplified like IIeee80211Mgmt
+simple Ieee80211MgmtApSimplified extends SimpleModule like IIeee80211Mgmt
 {
     parameters:
         string interfaceTableModule;

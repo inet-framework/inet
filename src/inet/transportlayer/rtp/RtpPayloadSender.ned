@@ -20,28 +20,28 @@ moduleinterface IRtpPayloadSender
         output profileOut @labels(RtpInnerPacket);
 }
 
-simple RtpPayloadSender like IRtpPayloadSender
+simple RtpPayloadSender extends SimpleModule like IRtpPayloadSender
 {
     gates:
         input profileIn @labels(RtpInnerPacket);
         output profileOut @labels(RtpInnerPacket);
 }
 
-simple RTPAVProfilePayload10Sender like IRtpPayloadSender
+simple RTPAVProfilePayload10Sender extends SimpleModule like IRtpPayloadSender
 {
     gates:
         input profileIn @labels(RtpInnerPacket);
         output profileOut @labels(RtpInnerPacket);
 }
 
-simple RtpAvProfilePayload32Sender like IRtpPayloadSender
+simple RtpAvProfilePayload32Sender extends SimpleModule like IRtpPayloadSender
 {
     gates:
         input profileIn @labels(RtpInnerPacket);
         output profileOut @labels(RtpInnerPacket);
 }
 
-simple RTPAVProfileSampleBasedAudioSender like IRtpPayloadSender
+simple RTPAVProfileSampleBasedAudioSender extends SimpleModule like IRtpPayloadSender
 {
     gates:
         input profileIn @labels(RtpInnerPacket);

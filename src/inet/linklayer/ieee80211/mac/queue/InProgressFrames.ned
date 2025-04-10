@@ -8,7 +8,7 @@
 package inet.linklayer.ieee80211.mac.queue;
 
 //# TODO rename to `InProgressQueue`?
-simple InProgressFrames
+simple InProgressFrames extends SimpleModule
 {
     parameters:
         string pendingQueueModule;

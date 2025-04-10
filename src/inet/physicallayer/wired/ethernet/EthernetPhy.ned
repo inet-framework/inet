@@ -7,7 +7,7 @@
 
 package inet.physicallayer.wired.ethernet;
 
-simple EthernetPhy
+simple EthernetPhy extends SimpleModule
 {
     parameters:
         @display("i=block/rxtx");

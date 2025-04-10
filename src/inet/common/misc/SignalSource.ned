@@ -10,7 +10,7 @@ package inet.common.misc;
 // Emits double-valued signals in the specified interval.
 // May be used for testing indicator figures.
 //
-simple SignalSource
+simple SignalSource extends SimpleModule
 {
     parameters:
         @display("i=block/cogwheel");

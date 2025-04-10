@@ -26,7 +26,7 @@ import inet.applications.contract.IApp;
 // like ~UdpSink), or a ~UdpEchoApp. When used with ~UdpEchoApp, the `rcvdPkLifetime`
 // statistic will contain the round-trip times.
 //
-simple UdpBasicApp like IApp
+simple UdpBasicApp extends SimpleModule like IApp
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

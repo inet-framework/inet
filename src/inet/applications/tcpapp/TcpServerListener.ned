@@ -24,7 +24,7 @@ import inet.applications.contract.IApp;
 //
 // @see ~TcpServerApp, ~TcpServerConnection
 //
-simple TcpServerListener
+simple TcpServerListener extends SimpleModule
 {
     parameters:
         string localAddress = default(""); // May be left empty ("")

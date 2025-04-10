@@ -16,7 +16,7 @@ import inet.routing.contract.IManetRouting;
 // Module parameters are copied from the IETF draft and renamed for consistency with
 // INET naming conventions. Some parameters are not yet implemented.
 //
-simple Dymo like IManetRouting
+simple Dymo extends SimpleModule like IManetRouting
 {
     parameters:
         // properties

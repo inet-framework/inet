@@ -7,7 +7,7 @@
 
 package inet.protocolelement.acknowledgement;
 
-simple ReceiveWithAcknowledge
+simple ReceiveWithAcknowledge extends SimpleModule
 {
     parameters:
         @display("i=block/rxtx");

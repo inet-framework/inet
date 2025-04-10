@@ -7,7 +7,7 @@
 
 package inet.linklayer.ieee80211.mac.originator;
 
-simple AckHandler
+simple AckHandler extends SimpleModule
 {
     parameters:
         @display("i=block/table2");

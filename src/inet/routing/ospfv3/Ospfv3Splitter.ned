@@ -1,7 +1,7 @@
 
 package inet.routing.ospfv3;
 
-simple Ospfv3Splitter
+simple Ospfv3Splitter extends SimpleModule
 {
     parameters:                     // these are parameters which need to be filled in the omnetpp.ini file
         xml ospfv3RoutingConfig;

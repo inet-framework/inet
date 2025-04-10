@@ -15,7 +15,7 @@ package inet.queueing.base;
 // - %p - number of processed packets
 // - %l - total processed packet length
 //
-simple PacketProcessorBase
+simple PacketProcessorBase extends SimpleModule
 {
     parameters:
         displayStringTextFormat = default("processed %p pk (%l)"); // Determines the text that is written on top of the submodule

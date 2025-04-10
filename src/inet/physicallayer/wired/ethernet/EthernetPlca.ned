@@ -49,7 +49,7 @@ import inet.protocolelement.contract.IProtocolLayer;
 //
 // @see ~EthernetCsmaMac, ~EthernetCsmaPhy, ~EthernetPlcaInterface
 //
-simple EthernetPlca like IProtocolLayer
+simple EthernetPlca extends SimpleModule like IProtocolLayer
 {
     parameters:
         // Maximum number of PLCA nodes on the mixing segment receiving transmit

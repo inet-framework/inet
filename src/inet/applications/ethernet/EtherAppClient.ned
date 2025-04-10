@@ -12,7 +12,7 @@ package inet.applications.ethernet;
 // packets. It generates packets containing ~EtherAppReq chunks. It should
 // be connected directly to ~Ieee8022Llc.
 //
-simple EtherAppClient
+simple EtherAppClient extends SimpleModule
 {
     parameters:
         string interfaceTableModule;

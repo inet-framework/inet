@@ -10,7 +10,7 @@ package inet.common;
 //
 // Module base for different layered protocols.
 //
-simple LayeredProtocolBase
+simple LayeredProtocolBase extends SimpleModule
 {
     parameters:
         @signal[packetSentToUpper](type=cPacket);

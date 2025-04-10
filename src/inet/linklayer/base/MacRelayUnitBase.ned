@@ -7,7 +7,7 @@
 
 package inet.linklayer.base;
 
-simple MacRelayUnitBase
+simple MacRelayUnitBase extends SimpleModule
 {
     parameters:
         string macTableModule;

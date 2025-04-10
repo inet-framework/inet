@@ -19,7 +19,7 @@ import inet.networklayer.configurator.contract.INetworkConfigurator;
 //
 // @see ~MacForwardingTable
 //
-simple MacForwardingTableConfigurator like INetworkConfigurator
+simple MacForwardingTableConfigurator extends SimpleModule like INetworkConfigurator
 {
     parameters:
         @display("i=block/cogwheel");

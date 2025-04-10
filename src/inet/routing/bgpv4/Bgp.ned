@@ -16,7 +16,7 @@ import inet.routing.contract.IBgp;
 //
 //# TODO config file!
 //
-simple Bgp like IBgp
+simple Bgp extends SimpleModule like IBgp
 {
     parameters:
         string interfaceTableModule;

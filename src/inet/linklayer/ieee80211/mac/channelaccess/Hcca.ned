@@ -14,7 +14,7 @@ package inet.linklayer.ieee80211.mac.channelaccess;
 // IMPORTANT: This module is currently a placeholder. INET currently does not
 // implement HCCA.
 //
-simple Hcca
+simple Hcca extends SimpleModule
 {
     parameters:
         @display("i=block/star");

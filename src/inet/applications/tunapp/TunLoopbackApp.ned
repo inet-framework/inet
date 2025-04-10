@@ -8,7 +8,7 @@ package inet.applications.tunapp;
 
 import inet.applications.contract.IApp;
 
-simple TunLoopbackApp like IApp
+simple TunLoopbackApp extends SimpleModule like IApp
 {
     parameters:
         string interfaceTableModule;

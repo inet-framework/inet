@@ -11,7 +11,7 @@ package inet.networklayer.nexthop;
 // A simplified next hop forwarding that routes
 // datagrams using different kinds of network addresses.
 //
-simple NextHopForwarding
+simple NextHopForwarding extends SimpleModule
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

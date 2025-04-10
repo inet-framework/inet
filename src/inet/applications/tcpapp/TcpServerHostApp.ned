@@ -23,7 +23,7 @@ import inet.applications.contract.IApp;
 //
 // Compatible with both ~Ipv4 and ~Ipv6.
 //
-simple TcpServerHostApp like IApp
+simple TcpServerHostApp extends SimpleModule like IApp
 {
     parameters:
         string localAddress = default(""); // May be left empty ("")

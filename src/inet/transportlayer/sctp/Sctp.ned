@@ -13,7 +13,7 @@ import inet.transportlayer.contract.ISctp;
 //
 // Implements the SCTP protocol.
 //
-simple Sctp like ISctp
+simple Sctp extends SimpleModule like ISctp
 {
     parameters:
         string interfaceTableModule;

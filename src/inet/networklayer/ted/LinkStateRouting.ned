@@ -15,7 +15,7 @@ package inet.networklayer.ted;
 //
 // The link state database is kept in the ~Ted module.
 //
-simple LinkStateRouting
+simple LinkStateRouting extends SimpleModule
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

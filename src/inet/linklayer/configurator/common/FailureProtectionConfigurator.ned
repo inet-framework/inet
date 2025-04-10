@@ -21,7 +21,7 @@ import inet.networklayer.configurator.contract.INetworkConfigurator;
 // failed links or nodes from the given set against which the stream must be
 // protected.
 //
-simple FailureProtectionConfigurator like INetworkConfigurator
+simple FailureProtectionConfigurator extends SimpleModule like INetworkConfigurator
 {
     parameters:
         string streamRedundancyConfiguratorModule = default("streamRedundancyConfigurator");

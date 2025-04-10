@@ -22,7 +22,7 @@ package inet.linklayer.ieee80211.mgmt;
 //
 // Relies on the MAC layer (~Ieee80211Mac) for reception and transmission of frames.
 //
-simple Ieee80211MgmtSta like IIeee80211Mgmt
+simple Ieee80211MgmtSta extends SimpleModule like IIeee80211Mgmt
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

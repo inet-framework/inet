@@ -11,7 +11,7 @@ package inet.networklayer.ipv4;
 //
 // @author Jochen Reber
 //
-simple Icmp
+simple Icmp extends SimpleModule
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

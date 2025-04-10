@@ -29,7 +29,7 @@ package inet.routing.pim.tables;
 // @hosts, @names, @towards, @among attributes to select the
 // interfaces to which the PIM parameters are applied (see ~Ipv4NetworkConfigurator).
 //
-simple PimInterfaceTable
+simple PimInterfaceTable extends SimpleModule
 {
     parameters:
         @display("i=block/table");

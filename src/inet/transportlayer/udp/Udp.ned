@@ -54,7 +54,7 @@ import inet.transportlayer.contract.IUdp;
 //
 // @see ~UdpHeader, ~UdpCommand, ~UdpCommandCode
 //
-simple Udp like IUdp
+simple Udp extends SimpleModule like IUdp
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
@@ -85,7 +85,7 @@ simple Udp like IUdp
         output ipOut @labels(UdpHeader,Ipv4ControlInfo/down,Ipv6ControlInfo/down);
 }
 
-simple UdpCrcInsertionHook
+simple UdpCrcInsertionHook extends SimpleModule
 {
 }
 

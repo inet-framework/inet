@@ -30,7 +30,7 @@ import inet.linklayer.contract.IEthernetLayer;
 //   higher layers. Accepts ~EthernetMacHeader, ~Ieee8022LlcHeader, and
 //   ~Ieee8022LlcSnapHeader too.
 //
-simple EthernetEncapsulation like IEthernetLayer
+simple EthernetEncapsulation extends SimpleModule like IEthernetLayer
 {
     parameters:
         bool registerProtocol = default(false);     //FIXME //KLUDGE should redesign place of EthernetEncapsulation and LLC modules

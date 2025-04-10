@@ -12,7 +12,7 @@ package inet.applications.rtpapp;
 // An application which uses RTP. It acts as a sender if the parameter `fileName` is
 // set, and as a receiver if the parameter is empty.
 //
-simple RtpApplication
+simple RtpApplication extends SimpleModule
 {
     parameters:
         @display("i=block/app");

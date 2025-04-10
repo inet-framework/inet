@@ -175,7 +175,7 @@ package inet.networklayer.ipv4.ipsec;
 //
 // @see ~SecurityPolicyDatabase, ~SecurityAssociationDatabase
 //
-simple IPsec
+simple IPsec extends SimpleModule
 {
     parameters:
 		@display("i=block/control;is=s");

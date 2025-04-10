@@ -12,7 +12,7 @@ package inet.applications.ethernet;
 // corresponding ~EtherAppReq. It should be connected directly to ~Ieee8022Llc
 // module.
 //
-simple EtherAppServer
+simple EtherAppServer extends SimpleModule
 {
     parameters:
         int localSAP = default(0xf1);

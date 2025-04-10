@@ -44,7 +44,7 @@ import inet.applications.contract.IApp;
 //
 // @see ~Icmp, ~Icmpv6
 //
-simple PingApp like IApp
+simple PingApp extends SimpleModule like IApp
 {
     parameters:
         string destAddr = default(""); // Destination address(es), separated by spaces, "*" means all IPv4/IPv6 interfaces in the entire simulation

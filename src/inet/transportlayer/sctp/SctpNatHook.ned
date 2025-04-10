@@ -11,7 +11,7 @@ package inet.transportlayer.sctp;
 //
 // SCTP NAT hook module.
 //
-simple SctpNatHook
+simple SctpNatHook extends SimpleModule
 {
     parameters:
         string interfaceTableModule;

@@ -15,7 +15,7 @@ package inet.protocolelement.shaper;
 //
 // @see ~ATS8021qFilter, ~GroupEligibilityTimeMeter, ~EligibilityTimeGate, ~EligibilityTimeFilter, ~EligibilityTimeQueue, ~EligibilityTimeTag
 
-simple GroupEligibilityTimeTable
+simple GroupEligibilityTimeTable extends SimpleModule
 {
     parameters:
         @display("i=block/table");

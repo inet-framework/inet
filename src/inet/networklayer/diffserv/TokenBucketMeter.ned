@@ -24,7 +24,7 @@ package inet.networklayer.diffserv;
 // a packet to be green if it was marked with a higher color
 // by a previous meter.
 //
-simple TokenBucketMeter
+simple TokenBucketMeter extends SimpleModule
 {
     parameters:
         @display("i=block/timer");

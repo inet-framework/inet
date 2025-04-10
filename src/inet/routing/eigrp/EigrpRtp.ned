@@ -12,7 +12,7 @@
 
 package inet.routing.eigrp;
 
-simple EigrpRtp
+simple EigrpRtp extends SimpleModule
 {
     parameters:
 

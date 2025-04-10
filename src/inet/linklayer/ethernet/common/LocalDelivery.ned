@@ -7,7 +7,7 @@
 
 package inet.linklayer.ethernet.common;
 
-simple LocalDelivery
+simple LocalDelivery extends SimpleModule
 {
     parameters:
         string interfaceTableModule;

@@ -12,7 +12,7 @@ import inet.protocolelement.aggregation.contract.IAggregatorPolicy;
 //
 // A policy for aggregating subpackets based on their length
 //
-simple LengthBasedAggregatorPolicy like IAggregatorPolicy
+simple LengthBasedAggregatorPolicy extends SimpleModule like IAggregatorPolicy
 {
     parameters:
         int minNumSubpackets = default(0);

@@ -136,7 +136,7 @@ import inet.routing.contract.IOspf;
 //     - `@authenticationType` - Optional OSPF packet authentication protocol (`SimplePasswordType` | `CryptographicType` | `NullType`)
 //     - `@authenticationKey` - Optional 8 byte hexadecimal value e.g. 0x5D8ABDAEDFCB8BEE
 //
-simple Ospfv2 like IOspf
+simple Ospfv2 extends SimpleModule like IOspf
 {
     parameters:
         string interfaceTableModule;

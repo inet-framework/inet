@@ -24,7 +24,7 @@ import inet.linklayer.contract.IMacForwardingTable;
 //     Interface:    interface name, e.g. eth3 (or interface id, e.g. 103)
 //   empty lines and commented out lines starting with '#' are allowed.
 //
-simple MacForwardingTable like IMacForwardingTable
+simple MacForwardingTable extends SimpleModule like IMacForwardingTable
 {
     parameters:
         @display("i=block/table2");

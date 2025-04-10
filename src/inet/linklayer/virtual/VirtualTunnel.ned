@@ -7,7 +7,7 @@
 
 package inet.linklayer.virtual;
 
-simple VirtualTunnel
+simple VirtualTunnel extends SimpleModule
 {
     parameters:
         string interfaceTableModule;

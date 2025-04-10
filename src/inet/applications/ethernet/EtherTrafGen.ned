@@ -12,7 +12,7 @@ package inet.applications.ethernet;
 // generally for any L2 model that accepts ~Ieee802SapReq tag on packets. It
 // should be connected directly to ~Ieee8022Llc module.
 //
-simple EtherTrafGen
+simple EtherTrafGen extends SimpleModule
 {
     parameters:
         string destAddress = default("");  // Destination MAC address, or module path name of destination station; empty means off

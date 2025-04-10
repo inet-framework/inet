@@ -68,7 +68,7 @@ import inet.linklayer.contract.IMrp;
 //
 // @see ~MrpInterconnection, ~MrpRelay, ~MrpMacForwardingTable, ~L2NetworkConfigurator, ~InterfaceTable
 //
-simple Mrp like IMrp
+simple Mrp extends SimpleModule like IMrp
 {
     parameters:
         @class(Mrp);

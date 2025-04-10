@@ -47,7 +47,7 @@ import inet.networklayer.configurator.contract.IL3NetworkConfigurator;
 // interfaces register themselves in the ~InterfaceTable modules, and
 // in stage 1, routing files are read.)
 //
-simple Ipv4FlatNetworkConfigurator like IL3NetworkConfigurator
+simple Ipv4FlatNetworkConfigurator extends SimpleModule like IL3NetworkConfigurator
 {
     parameters:
         string networkAddress = default("192.168.0.0"); // Network part of the address (see netmask parameter)

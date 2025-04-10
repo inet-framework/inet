@@ -22,7 +22,7 @@ package inet.physicallayer.wired.ethernet;
 //
 // @see ~EthernetCsmaPhy, ~EthernetPlca, ~EthernetPlcaInterface
 //
-simple EthernetCsmaPhy
+simple EthernetCsmaPhy extends SimpleModule
 {
     parameters:
         // emitted when the state of the state machine changes, the value is one of IDLE, TRANSMITTING, RECEIVING, COLLISION, CRS_ON

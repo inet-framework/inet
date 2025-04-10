@@ -7,7 +7,7 @@
 
 package inet.linklayer.ieee80211.mac.originator;
 
-simple QosRecoveryProcedure
+simple QosRecoveryProcedure extends SimpleModule
 {
     parameters:
         string cwCalculatorModule;

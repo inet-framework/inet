@@ -12,7 +12,7 @@ package inet.networklayer.ipv4;
 // (~InterfaceTable) of all hosts and routers. The filename has to be specified
 // in the routinglog-file configuration option that this module registers.
 //
-simple RoutingTableRecorder
+simple RoutingTableRecorder extends SimpleModule
 {
     parameters:
         bool enabled = default(true);

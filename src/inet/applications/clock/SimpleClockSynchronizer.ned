@@ -15,7 +15,7 @@ import inet.applications.contract.IApp;
 // calls and without any packet exchange. This is primarily useful when the overhead
 // of the time synchronization protocol messages can be safely ignored.
 //
-simple SimpleClockSynchronizer like IApp
+simple SimpleClockSynchronizer extends SimpleModule like IApp
 {
     parameters:
         string masterClockModule;

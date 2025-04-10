@@ -7,7 +7,7 @@
 
 package inet.protocolelement.forwarding;
 
-simple Forwarding
+simple Forwarding extends SimpleModule
 {
     parameters:
         string address = default("");

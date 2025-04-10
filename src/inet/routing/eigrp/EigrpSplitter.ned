@@ -11,7 +11,7 @@
 
 package inet.routing.eigrp;
 
-simple EigrpSplitter
+simple EigrpSplitter extends SimpleModule
 {
     gates:
         input ipIn @labels(Ipv4ControlInfo/up,Ipv6ControlInfo/up);

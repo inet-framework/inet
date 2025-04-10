@@ -24,7 +24,7 @@ moduleinterface IRTPPayloadReceiver
         output profileOut @labels(RtpInnerPacket);
 }
 
-simple RtpPayloadReceiver like IRTPPayloadReceiver
+simple RtpPayloadReceiver extends SimpleModule like IRTPPayloadReceiver
 {
     parameters:
         string outputFileName;
@@ -37,7 +37,7 @@ simple RtpPayloadReceiver like IRTPPayloadReceiver
         output profileOut @labels(RtpInnerPacket);
 }
 
-simple RTPAVProfilePayload10Receiver like IRTPPayloadReceiver
+simple RTPAVProfilePayload10Receiver extends SimpleModule like IRTPPayloadReceiver
 {
     parameters:
         string outputFileName;
@@ -48,7 +48,7 @@ simple RTPAVProfilePayload10Receiver like IRTPPayloadReceiver
         output profileOut @labels(RtpInnerPacket);
 }
 
-simple RtpAvProfilePayload32Receiver like IRTPPayloadReceiver
+simple RtpAvProfilePayload32Receiver extends SimpleModule like IRTPPayloadReceiver
 {
     parameters:
         string outputFileName;
@@ -59,7 +59,7 @@ simple RtpAvProfilePayload32Receiver like IRTPPayloadReceiver
         output profileOut @labels(RtpInnerPacket);
 }
 
-simple RTPAVProfileSampleBasedAudioReceiver like IRTPPayloadReceiver
+simple RTPAVProfileSampleBasedAudioReceiver extends SimpleModule like IRTPPayloadReceiver
 {
     parameters:
         string outputFileName;

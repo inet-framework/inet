@@ -7,7 +7,7 @@
 
 package inet.networklayer.ipv4;
 
-simple Igmpv3 like IIgmp
+simple Igmpv3 extends SimpleModule like IIgmp
 {
     parameters:
         bool enabled = default(true);

@@ -25,7 +25,7 @@ import inet.linklayer.configurator.contract.IL2NodeConfigurator;
 // a restart, because, being a global module, it doesn't know about node
 // lifecycle events.
 //
-simple L2NodeConfigurator like IL2NodeConfigurator
+simple L2NodeConfigurator extends SimpleModule like IL2NodeConfigurator
 {
     parameters:
         @display("i=block/cogwheel");

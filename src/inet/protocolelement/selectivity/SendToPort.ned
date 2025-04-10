@@ -7,7 +7,7 @@
 
 package inet.protocolelement.selectivity;
 
-simple SendToPort
+simple SendToPort extends SimpleModule
 {
     parameters:
         int port;

@@ -21,7 +21,7 @@ package inet.networklayer.common;
 // functions of the C++ module class. For detailed info, please see the C++
 // documentation of the class (Doxygen).
 //
-simple InterfaceTable
+simple InterfaceTable extends SimpleModule
 {
     parameters:
         bool displayAddresses = default(false);  // Whether to display IP addresses on links
