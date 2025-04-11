@@ -11,5 +11,7 @@ import inet.common.SimpleModule;
 
 simple TcpCrcInsertionHook extends SimpleModule
 {
+    parameters:
+        @class(TcpCrcInsertionHook);
 }
 

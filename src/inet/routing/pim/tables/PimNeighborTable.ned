@@ -16,9 +16,11 @@ import inet.common.SimpleModule;
 //
 simple PimNeighborTable extends SimpleModule
 {
-      @display("i=block/table");
-      @signal[pimNeighborAdded](type=inet::PimNeighbor);
-    @signal[pimNeighborDeleted](type=inet::PimNeighbor);
-    @signal[pimNeighborChanged](type=inet::PimNeighbor);
+    parameters:
+        @class(PimNeighborTable);
+        @display("i=block/table");
+        @signal[pimNeighborAdded](type=inet::PimNeighbor);
+        @signal[pimNeighborDeleted](type=inet::PimNeighbor);
+        @signal[pimNeighborChanged](type=inet::PimNeighbor);
 }
 

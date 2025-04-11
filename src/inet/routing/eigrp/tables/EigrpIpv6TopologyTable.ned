@@ -15,5 +15,7 @@ import inet.common.SimpleModule;
 
 simple EigrpIpv6TopologyTable extends SimpleModule
 {
-    @display("i=block/table");
+    parameters:
+        @class(EigrpIpv6TopologyTable);
+        @display("i=block/table");
 }

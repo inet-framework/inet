@@ -45,6 +45,8 @@ simple TcpEchoApp extends TcpServerHostApp
 // Thread for ~TcpEchoApp
 simple TcpEchoAppThread extends SimpleModule
 {
+    parameters:
+        @class(TcpEchoAppThread);
         @signal[packetSent](type=inet::Packet);
         @signal[packetReceived](type=inet::Packet);
         @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

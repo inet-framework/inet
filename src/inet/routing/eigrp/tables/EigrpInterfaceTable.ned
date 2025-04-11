@@ -15,5 +15,7 @@ import inet.common.SimpleModule;
 
 simple EigrpInterfaceTable extends SimpleModule
 {
-    @display("i=block/table");
+    parameters:
+        @class(EigrpInterfaceTable);
+        @display("i=block/table");
 }

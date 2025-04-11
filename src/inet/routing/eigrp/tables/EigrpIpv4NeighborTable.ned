@@ -18,5 +18,7 @@ import inet.common.SimpleModule;
 //
 simple EigrpIpv4NeighborTable extends SimpleModule
 {
-    @display("i=block/table");
+    parameters:
+        @class(EigrpIpv4NeighborTable);
+        @display("i=block/table");
 }

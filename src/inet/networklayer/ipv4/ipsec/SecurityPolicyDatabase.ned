@@ -25,5 +25,7 @@ import inet.common.SimpleModule;
 //
 simple SecurityPolicyDatabase extends SimpleModule
 {
-    @display("i=block/table2;is=s");
+    parameters:
+        @class(SecurityPolicyDatabase);
+        @display("i=block/table2;is=s");
 }

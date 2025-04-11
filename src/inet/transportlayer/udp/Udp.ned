@@ -89,5 +89,7 @@ simple Udp extends SimpleModule like IUdp
 
 simple UdpCrcInsertionHook extends SimpleModule
 {
+    parameters:
+        @class(UdpCrcInsertionHook);
 }
 

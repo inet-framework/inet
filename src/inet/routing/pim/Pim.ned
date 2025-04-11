@@ -76,5 +76,7 @@ module Pim extends SimpleModule like IPim
 
 simple PimCrcInsertionHook extends SimpleModule
 {
+    parameters:
+        @class(PimCrcInsertionHook);
 }
 

@@ -14,5 +14,7 @@ import inet.common.SimpleModule;
 //
 simple SctpCrcInsertion extends SimpleModule
 {
+    parameters:
+        @class(SctpCrcInsertion);
 }
 

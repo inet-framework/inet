@@ -20,5 +20,7 @@ import inet.common.SimpleModule;
 //
 simple BindingUpdateList extends SimpleModule
 {
+    parameters:
+        @class(BindingUpdateList);
 }
 

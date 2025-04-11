@@ -20,5 +20,7 @@ import inet.common.SimpleModule;
 //
 simple BindingCache extends SimpleModule
 {
+    parameters:
+        @class(BindingCache);
 }
 

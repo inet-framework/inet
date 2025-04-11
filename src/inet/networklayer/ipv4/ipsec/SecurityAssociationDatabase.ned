@@ -25,5 +25,7 @@ import inet.common.SimpleModule;
 //
 simple SecurityAssociationDatabase extends SimpleModule
 {
-    @display("i=block/table2;is=s");
+    parameters:
+        @class(SecurityAssociationDatabase);
+        @display("i=block/table2;is=s");
 }

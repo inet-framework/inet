@@ -28,11 +28,10 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IModulator;
 simple Ieee80211OfdmModulator extends SimpleModule like IModulator
 {
     parameters:
-        @class(Ieee80211OfdmModulator);
+        @class(Ieee80211OfdmModulatorModule);
         int numSubcarriers = default(52);
         string subcarrierModulation;
         int pilotSubcarrierPolarityVectorOffset;
         @display("i=block/mac");
-        @class(Ieee80211OfdmModulatorModule);
 }
 
