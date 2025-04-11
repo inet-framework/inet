@@ -127,7 +127,7 @@ simple Quic like IQuic
         int initialMaxStreamDataBidiRemote @unit("B") = default(6MB); // Stream level flow control credit for bidirectional streams opened by the remote host. Used as own and peer's value.
         
         double maxStreamDataFrameThreshold @unit("B") = default(0.5*initialMaxData); // defines when MaxStreamDataFrame in StreamFlowControl will be send. Now absolte value is used. TODO: Define it as ratio = consumedData/maxReceiveOffset
-        double maxDataFrameThreshold @unit("B") = default(0.5*initialMaxStreamDataUni); // defines when MaxDataFrame in ConnectionFlowControl will be send.Now absolte value is used. TODO: Define it as ratio = consumedData/maxReceiveOffset
+        double maxDataFrameThreshold @unit(B) = default(0.5*initialMaxStreamDataUni); // defines when MaxDataFrame in ConnectionFlowControl will be send.Now absolte value is used. TODO: Define it as ratio = consumedData/maxReceiveOffset
         double maxDataFrameDelay @unit("ms") = default(-1ms); // TODO implement this. -1 =  do not use this parameter. Indicating the maximum amount of time in milliseconds by which the endpoint will delay sending maxDataFrame.
         bool roundConsumedDataValue = default(false); //if true, FlowControlResponder round consumedData in streamRcvBuffer to the next packetSize
         bool sendMaxDataFramesImmediately = default(false); // if true, a MAX_(STREAM)_DATA frame is sent immediately, after generation. Otherwise, sending the frame is delayed until the sending process starts due to another event.

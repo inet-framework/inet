@@ -30,7 +30,7 @@ network bottleneck
         {
             datarate = parent.linkDatarate;
             delay = parent.linkDelay;
-            per = 0;
+            per = default(0);
         }
         channel idealLink extends ned.DatarateChannel
         {
