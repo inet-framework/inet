@@ -28,7 +28,7 @@ module Ipv4NetworkLayer extends SimpleModule like INetworkLayer
         bool multicastForwarding = default(false);
         bool hasIpsec = default(false);
         string interfaceTableModule;
-        string displayStringTextFormat = default("%i");
+        displayStringTextFormat = default("%i");
         *.forwarding = this.forwarding;
         *.multicastForwarding = this.multicastForwarding;
         *.interfaceTableModule = default(absPath(this.interfaceTableModule));

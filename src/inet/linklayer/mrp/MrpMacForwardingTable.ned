@@ -24,6 +24,6 @@ simple MrpMacForwardingTable extends SimpleModule like IMacForwardingTable
         object forwardingTable @mutable = default([]);
         string forwardingTableFile = default("");
         string interfaceTableModule;
-        string displayStringTextFormat = default("addr: %a\nvlan: %v");
+        displayStringTextFormat = default("addr: %a\nvlan: %v");
 }
 

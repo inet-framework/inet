@@ -49,7 +49,7 @@ simple PcapRecorder extends SimpleModule
         string helpers = default("");    // Usable PcapRecorder::IHelper helpers for accept packettype and store/convert packet as specified linktype
                                          // currently available: "inet::AckingMacToEthernetPcapRecorderHelper"
         bool alwaysFlush = default(false); // Flush the pcapFile after each write to ensure that all packets are captured in case of a crash
-        string displayStringTextFormat = default("rec: %n pks");
+        displayStringTextFormat = default("rec: %n pks");
         @display("i=block/blackboard");
         @signal[packetRecorded](type=Packet);
 }

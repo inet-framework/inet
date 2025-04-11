@@ -23,7 +23,7 @@ import inet.common.packet.recorder.PcapRecorder;
 module NetworkInterface extends SimpleModule
 {
     parameters:
-        string displayStringTextFormat = default("%a (%i)\n%m");
+        displayStringTextFormat = default("%a (%i)\n%m");
         bool recordPcap = default(false);
         int numPcapRecorders = default(recordPcap ? 1 : 0);
         pcapRecorder[*].pcapFile = default("results/" + expand("${configname}-") + fullPath() + ".pcap");

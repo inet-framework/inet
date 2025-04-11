@@ -101,7 +101,7 @@ module EthernetCsmaMacPhy extends SimpleModule like IEtherMac
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
-        string displayStringTextFormat = default("rate: %b\nsent: %s, rcvd: %r\nqueue: %q, drop: %d");
+        displayStringTextFormat = default("rate: %b\nsent: %s, rcvd: %r\nqueue: %q, drop: %d");
         bool sendRawBytes = default(false); // When true, packets are serialized into a sequence of bytes before sending out
         bool promiscuous = default(false);  // If true, all packets are received, otherwise only the
                                             // ones with matching destination MAC address
