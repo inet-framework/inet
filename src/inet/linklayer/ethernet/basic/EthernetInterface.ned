@@ -13,7 +13,6 @@ import inet.networklayer.common.NetworkInterface;
 import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.ITrafficConditioner;
 
-
 //
 // Represents an Ethernet network interface.
 //

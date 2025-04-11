@@ -10,7 +10,6 @@ package inet.node.internetcloud;
 import inet.networklayer.internetcloud.ICloudDelayer;
 import inet.node.base.NetworkLayerNodeBase;
 
-
 //
 // InternetCloud models a large network such as part of the Internet or a corporate
 // backbone network with realistic delay, packet loss, and datarate characteristics.

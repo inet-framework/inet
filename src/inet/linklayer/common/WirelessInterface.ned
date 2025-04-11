@@ -13,7 +13,6 @@ import inet.networklayer.common.NetworkInterface;
 import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
 import inet.queueing.contract.IPacketQueue;
 
-
 //
 // Implements a generic wireless network interface.
 //

@@ -12,7 +12,6 @@ import inet.linklayer.contract.IEtherMac;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.queueing.contract.IPacketQueue;
 
-
 //
 // Provides an Ethernet network interface suitable for emulation.
 // The upper part of the network interface is realized in the real world using

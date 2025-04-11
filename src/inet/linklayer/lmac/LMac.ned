@@ -15,7 +15,6 @@ package inet.linklayer.lmac;
 import inet.linklayer.base.MacProtocolBase;
 import inet.linklayer.contract.IMacProtocol;
 
-
 //
 // Implementation of L-MAC (Lightweight Medium Access Protocol for
 // Wireless Sensor Networks).

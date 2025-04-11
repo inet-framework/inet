@@ -22,7 +22,6 @@ import inet.linklayer.ieee80211.mac.protectionmechanism.OriginatorProtectionMech
 import inet.linklayer.ieee80211.mac.rateselection.RateSelection;
 import inet.linklayer.ieee80211.mac.recipient.RecipientMacDataService;
 
-
 //
 // Implements the DCF (Distributed Coordination Function) for IEEE 802.11.
 //

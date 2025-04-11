@@ -12,7 +12,6 @@ import inet.networklayer.common.NetworkInterface;
 import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
 import inet.queueing.contract.IPacketQueue;
 
-
 //
 // Implements an IEEE 802.15.4 narrowband network interface.
 //

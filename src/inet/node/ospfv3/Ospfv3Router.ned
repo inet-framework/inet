@@ -9,7 +9,6 @@ package inet.node.ospfv3;
 
 import inet.node.inet.Router;
 
-
 //
 // A router that uses the Open Shortest Path First version 3 (OSPFv3) routing
 // protocol. It extends the standard Router module with OSPFv3 functionality and

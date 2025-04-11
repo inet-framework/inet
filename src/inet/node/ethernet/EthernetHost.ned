@@ -15,7 +15,6 @@ import inet.linklayer.contract.IEthernetLayer;
 import inet.linklayer.contract.IIeee8022Llc;
 import inet.networklayer.common.InterfaceTable;
 
-
 //
 // A simplified network device that communicates directly over Ethernet without
 // higher layer protocols like IP or TCP. It provides a basic host model for

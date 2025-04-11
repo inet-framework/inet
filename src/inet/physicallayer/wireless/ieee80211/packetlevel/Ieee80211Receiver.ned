@@ -9,7 +9,6 @@ package inet.physicallayer.wireless.ieee80211.packetlevel;
 
 import inet.physicallayer.wireless.common.base.packetlevel.NarrowbandReceiverBase;
 
-
 //
 // This receiver model receives an IEEE 802.11 transmission successfully if the
 // minimum of the signal to noise and interference ratio over the duration of

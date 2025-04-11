@@ -20,7 +20,6 @@ import inet.networklayer.ted.Ted;
 import inet.transportlayer.contract.ITcp;
 import inet.transportlayer.contract.IUdp;
 
-
 //
 // An LDP-capable router.
 //

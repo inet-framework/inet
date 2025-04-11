@@ -16,7 +16,6 @@ import inet.networklayer.ipv4.ipsec.SecurityAssociationDatabase;
 import inet.networklayer.ipv4.ipsec.SecurityPolicyDatabase;
 import inet.networklayer.ipv4.ipsec.IPsec;
 
-
 //
 // Network layer of an IPv4 node.
 //

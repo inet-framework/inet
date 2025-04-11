@@ -11,7 +11,6 @@ package inet.linklayer.bmac;
 import inet.linklayer.base.MacProtocolBase;
 import inet.linklayer.contract.IMacProtocol;
 
-
 //
 // Implementation of B-MAC (also called Berkeley MAC, Low Power Listening, or
 // LPL).

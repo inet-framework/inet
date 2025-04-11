@@ -12,7 +12,6 @@ import inet.queueing.contract.IPacketServer;
 import inet.queueing.contract.IPassivePacketSource;
 import inet.queueing.contract.ITokenGenerator;
 
-
 //
 // Produces packets in order to prevent a queue from becoming empty.
 //

@@ -10,7 +10,6 @@ package inet.linklayer.csmaca;
 import inet.linklayer.base.MacProtocolBase;
 import inet.linklayer.contract.IMacProtocol;
 
-
 //
 // Implements an imaginary CSMA/CA-based MAC protocol with optional
 // acknowledgements and a retry mechanism. With the appropriate settings,

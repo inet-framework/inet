@@ -9,7 +9,6 @@ package inet.queueing.common;
 
 import inet.queueing.base.PacketDuplicatorBase;
 
-
 //
 // Duplicates packets based on the ordinal number of the packet in
 // the received stream of packets.

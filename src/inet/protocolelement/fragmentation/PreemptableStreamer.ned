@@ -10,7 +10,6 @@ package inet.protocolelement.fragmentation;
 import inet.queueing.base.PacketProcessorBase;
 import inet.queueing.contract.IPacketFlow;
 
-
 //
 // Takes packets passed to its input and streams them to its output.
 //

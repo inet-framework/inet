@@ -10,7 +10,6 @@ package inet.linklayer.ieee8021d.relay;
 import inet.linklayer.base.MacRelayUnitBase;
 import inet.linklayer.contract.IMacRelayUnit;
 
-
 //
 // Forwards frames (~EtherFrame) based on their destination MAC addresses to appropriate ports.
 //

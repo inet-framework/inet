@@ -35,7 +35,6 @@ import inet.visualizer.contract.ITracingObstacleLossVisualizer;
 import inet.visualizer.contract.ITransportConnectionVisualizer;
 import inet.visualizer.contract.ITransportRouteVisualizer;
 
-
 //
 // Integrates all canvas visualizers into a single module. It
 // supports disabling any submodule visualizer by providing an empty string as

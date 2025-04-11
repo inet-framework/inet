@@ -22,7 +22,6 @@ import inet.linklayer.ieee80211.mac.protectionmechanism.SingleProtectionMechanis
 import inet.linklayer.ieee80211.mac.rateselection.QosRateSelection;
 import inet.linklayer.ieee80211.mac.recipient.RecipientQosMacDataService;
 
-
 //
 // Implements the HCF (Hybrid Coordination Function) for IEEE 802.11.
 //

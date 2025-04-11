@@ -10,7 +10,6 @@ package inet.linklayer.xmac;
 import inet.linklayer.base.MacProtocolBase;
 import inet.linklayer.contract.IMacProtocol;
 
-
 //
 // Implementation of X-MAC.
 // See C++ documentation for details.

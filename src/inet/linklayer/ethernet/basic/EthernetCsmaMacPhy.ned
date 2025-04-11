@@ -11,7 +11,6 @@ package inet.linklayer.ethernet.basic;
 import inet.common.SimpleModule;
 import inet.linklayer.contract.IEtherMac;
 
-
 //
 // Ethernet MAC layer. MAC performs transmission and reception of frames.
 // See the ~IEtherMac for the Ethernet MAC layer general information.
