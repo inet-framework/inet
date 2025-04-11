@@ -10,7 +10,6 @@
 package inet.routing.pim;
 
 import inet.common.SimpleModule;
-import inet.common.SimpleModule;
 import inet.routing.contract.IPim;
 import inet.routing.pim.modes.PimDm;
 import inet.routing.pim.modes.PimSm;
