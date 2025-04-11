@@ -102,6 +102,31 @@ INET_API void splitFileName(const char *pathname, std::string& dir, std::string&
 INET_API void makePath(const char *pathname);
 INET_API void makePathForFile(const char *filename);
 
+/**
+ * A WATCH for computed expressions
+ */
+template<typename T>
+class ComputedExpressionWatch : public omnetpp::cWatchBase
+{
+  private:
+    std::function<T()> f;
+  public:
+    ComputedExpressionWatch(const char *name, std::function<T()> f) : cWatchBase(name), f(f) {}
+    virtual const char *getClassName() const override {return omnetpp::opp_typename(typeid(T));}
+    virtual bool supportsAssignment() const override {return false;}
+    virtual std::string str() const override { std::stringstream out; out << f(); return out.str(); }
+};
+
+template<typename T>
+inline omnetpp::cWatchBase *createComputedExpressionWatch(const char *name, std::function<T()> f) {
+    return new ComputedExpressionWatch<T>(name, f);
+}
+
+#define WATCH_EXPR(name, expression)  inet::createComputedExpressionWatch(#name,std::function([this]() {return expression;}))
+
+#define WATCH_LAMBDAEXPR(name, f)  inet::createComputedExpressionWatch(#name, std::function(f))
+
+
 } // namespace utils
 
 } // namespace inet
