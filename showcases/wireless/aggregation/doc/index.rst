@@ -17,7 +17,7 @@ the network.
 In this showcase, we will demonstrate frame aggregation in INET's 802.11 model
 and examine its effect on performance when sending a large number of small packets.
 
-| Since INET version: ``4.0``
+| Verified with INET version: ``4.0``
 | Source files location: `inet/showcases/wireless/aggregation <https://github.com/inet-framework/inet/tree/master/showcases/wireless/aggregation>`__
 
 About Aggregation

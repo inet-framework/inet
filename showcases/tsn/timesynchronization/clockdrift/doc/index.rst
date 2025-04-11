@@ -20,7 +20,7 @@ nodes and how to configure clock drift for these clocks. We will also show how
 to use time synchronization mechanisms to reduce time differences between the
 clocks of different devices.
 
-| Since INET version: ``4.5``
+| Verified with INET version: ``4.5``
 | Source files location: `inet/showcases/tsn/timesynchronization/clockdrift <https://github.com/inet-framework/inet/tree/master/showcases/tsn/timesynchronization/clockdrift>`__
 
 Simulating Clock Drift and Time Synchronization

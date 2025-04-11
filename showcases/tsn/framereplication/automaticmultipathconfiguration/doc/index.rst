@@ -7,7 +7,7 @@ Goals
 In this example, we demonstrate the automatic stream redundancy configuration based
 on multiple paths from the source to the destination.
 
-| Since INET version: ``4.4``
+| Verified with INET version: ``4.4``
 | Source files location: `inet/showcases/tsn/framereplication/automaticmultipathconfiguration <https://github.com/inet-framework/inet/tree/master/showcases/tsn/framereplication/automaticmultipathconfiguration>`__
 
 The Model

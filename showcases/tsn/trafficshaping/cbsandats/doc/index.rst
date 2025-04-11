@@ -10,7 +10,7 @@ and an Asynchronous Traffic Shaper (ATS), together in the same switch.
 
 .. note:: You might be interested in looking at another showcase, in which multiple traffic shapers are combined in the same traffic stream: :doc:`/showcases/tsn/trafficshaping/cbsandtas/doc/index`.
 
-| Since INET version: ``4.4``
+| Verified with INET version: ``4.4``
 | Source files location: `inet/showcases/tsn/trafficshaping/cbsandats <https://github.com/inet-framework/inet/tree/master/showcases/tsn/trafficshaping/cbsandats>`__
 
 The Model

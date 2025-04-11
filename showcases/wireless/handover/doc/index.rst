@@ -11,7 +11,7 @@ transmission, active scanning, authentication, and association. The goal of this
 simulation is to illustrate the realism and accuracy of the INET Framework in
 simulating real-world wireless network scenarios.
 
-| Since INET version: ``4.0``
+| Verified with INET version: ``4.0``
 | Source files location: `inet/showcases/wireless/handover <https://github.com/inet-framework/inet/tree/master/showcases/wireless/handover>`__
 
 The Model

@@ -6,7 +6,7 @@ Goals
 
 In this example, we explore the packet residence time statistics of network nodes.
 
-| Since INET version: ``4.4``
+| Verified with INET version: ``4.4``
 | Source files location: `inet/showcases/measurement/residencetime <https://github.com/inet-framework/inet/tree/master/showcases/measurement/residencetime>`__
 
 The Model

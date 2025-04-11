@@ -13,7 +13,7 @@ has enough information to do so. However, cut-through switching also has some po
 rate compared to store-and-forward switching, since it does not check the entire frame for errors before forwarding it. In this 
 showcase, we will demonstrate cut-through switching and compare it to store-and-forward switching in terms of delay.
 
-| Since INET version: ``4.3``
+| Verified with INET version: ``4.3``
 | Source files location: `inet/showcases/tsn/cutthroughswitching <https://github.com/inet-framework/inet/tree/master/showcases/tsn/cutthroughswitching>`__
 
 The Model

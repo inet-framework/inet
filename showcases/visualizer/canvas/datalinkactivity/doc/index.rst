@@ -13,7 +13,7 @@ in the form of arrows that fade as the traffic ceases.
 This showcase features five different simulation models, each designed to
 demonstrate different capabilities of the data link activity visualizer.
 
-| Since INET version: ``4.0``
+| Verified with INET version: ``4.0``
 | Source files location: `inet/showcases/visualizer/datalinkactivity <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/datalinkactivity>`__
 
 About the Visualizer

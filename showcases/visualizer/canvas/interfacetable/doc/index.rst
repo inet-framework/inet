@@ -17,7 +17,7 @@ visualization of IP addresses and other interface information. The first
 simulation shows the display of the information with the default settings of the
 visualizer, while the second one focuses on the advanced features.
 
-| Since INET version: ``4.0``
+| Verified with INET version: ``4.0``
 | Source files location: `inet/showcases/visualizer/interfacetable <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/interfacetable>`__
 
 About the visualizer

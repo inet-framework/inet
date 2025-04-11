@@ -8,7 +8,7 @@ In this example, we demonstrate manual configuration of stream identification,
 stream splitting, stream merging, stream encoding, and stream decoding to achieve
 the desired stream redundancy.
 
-| Since INET version: ``4.4``
+| Verified with INET version: ``4.4``
 | Source files location: `inet/showcases/tsn/framereplication/manualconfiguration <https://github.com/inet-framework/inet/tree/master/showcases/tsn/framereplication/manualconfiguration>`__
 
 The Model

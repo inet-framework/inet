@@ -15,7 +15,7 @@ motion, position, and orientation independently, to generate more sophisticated
 motion patterns. (The use of elementary mobility models is covered in a separate
 showcase, :doc:`../../basic/doc/index`.)
 
-| Since INET version: ``4.0``
+| Verified with INET version: ``4.0``
 | Source files location: `inet/showcases/mobility/combining <https://github.com/inet-framework/inet/tree/master/showcases/mobility/combining>`__
 
 Overview

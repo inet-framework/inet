@@ -16,7 +16,7 @@ typical use cases. By the end of this showcase, you will understand the
 different analog signal representation models and how they can be used to
 simulate the behavior of wireless systems.
 
-| Since INET version: ``4.2``
+| Verified with INET version: ``4.2``
 | Source files location: `inet/showcases/wireless/analogmodel <https://github.com/inet-framework/inet/tree/master/showcases/wireless/analogmodel>`__
 
 About Analog Models

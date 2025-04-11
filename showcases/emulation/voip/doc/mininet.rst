@@ -7,7 +7,7 @@ Goals
 This showcase builds upon the previous one, :doc:`index`, and demonstrates how
 setting up the virtual network can be vastly simplified using Mininet.
 
-| Since INET version: ``4.5``
+| Verified with INET version: ``4.5``
 | Source files location: `inet/showcases/emulation/voip <https://github.com/inet-framework/inet/tree/master/showcases/emulation/voip>`__
 
 

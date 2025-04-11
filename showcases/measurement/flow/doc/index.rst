@@ -10,7 +10,7 @@ This showcase demonstrates how to group packets into flows for the purpose of
 taking measurements on them, such as elapsed time, time spent in queues, or
 transmission time.
 
-| Since INET version: ``4.4``
+| Verified with INET version: ``4.4``
 | Source files location: `inet/showcases/general/flowmeasurement <https://github.com/inet-framework/inet/tree/master/showcases/general/flowmeasurement>`__
 
 The Model

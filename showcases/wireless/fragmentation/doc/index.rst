@@ -10,7 +10,7 @@ between nodes. It does this by dividing larger frames into smaller fragments,
 which increases the probability of successful data transfer. This showcase
 presents an example of how MAC-level fragmentation is used in INET.
 
-| Since INET version: ``4.0``
+| Verified with INET version: ``4.0``
 | Source files location: `inet/showcases/wireless/fragmentation <https://github.com/inet-framework/inet/tree/master/showcases/wireless/fragmentation>`__
 
 About 802.11 Fragmentation

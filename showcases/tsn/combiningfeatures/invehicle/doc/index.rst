@@ -10,7 +10,7 @@ gate scheduling, clock drift, time synchronization, credit-based shaping, per-st
 filtering and policing, stream redundancy, unicast and multicast streams, link
 failure protection, frame preemption, and cut-through switching.
 
-| Since INET version: ``4.4``
+| Verified with INET version: ``4.4``
 | Source files location: `inet/showcases/tsn/combiningfeatures/invehicle <https://github.com/inet-framework/inet/tree/master/showcases/tsn/combiningfeatures/invehicle>`__
 
 The Model

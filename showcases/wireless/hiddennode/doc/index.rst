@@ -14,7 +14,7 @@ to reserve the channel before transmitting.
 In this showcase, we demonstrate the hidden node problem and how the RTS/CTS
 mechanism can be used to solve it in an 802.11 wireless network.
 
-| Since INET version: ``4.0``
+| Verified with INET version: ``4.0``
 | Source files location: `inet/showcases/wireless/hiddennode <https://github.com/inet-framework/inet/tree/master/showcases/wireless/hiddennode>`__
 
 Description of the hidden node problem

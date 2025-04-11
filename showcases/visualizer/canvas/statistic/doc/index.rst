@@ -17,7 +17,7 @@ and early detection of potential problems in simulation models. The showcase
 features two example simulations, demonstrating both basic and advanced features
 of the visualization.
 
-| Since INET version: ``4.0``
+| Verified with INET version: ``4.0``
 | Source files location: `inet/showcases/visualizer/statistic <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/statistic>`__
 
 About the visualizer

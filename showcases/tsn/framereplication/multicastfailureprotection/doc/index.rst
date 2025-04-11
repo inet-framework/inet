@@ -6,7 +6,7 @@ Goals
 
 In this example, we replicate the multicast stream example from the IEEE 802.1 CB standard.
 
-| Since INET version: ``4.4``
+| Verified with INET version: ``4.4``
 | Source files location: `inet/showcases/tsn/framereplication/multicastfailureprotection <https://github.com/inet-framework/inet/tree/master/showcases/tsn/framereplication/multicastfailureprotection>`__
 
 The Model

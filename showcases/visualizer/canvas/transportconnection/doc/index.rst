@@ -12,7 +12,7 @@ different colors to allow differentiating between connections.
 In this showcase, we will present two example simulations that demonstrate the
 visualization of TCP connections.
 
-| Since INET version: ``3.6``
+| Verified with INET version: ``3.6``
 | Source files location: `inet/showcases/visualizer/transportconnection <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/transportconnection>`__
 
 About the visualizer

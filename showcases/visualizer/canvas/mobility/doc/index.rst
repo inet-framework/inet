@@ -11,7 +11,7 @@ follow mobile nodes and displays properties such as speed and direction.
 
 This showcase demonstrates the capabilities of the mobility visualizer.
 
-| Since INET version: ``4.0``
+| Verified with INET version: ``4.0``
 | Source files location: `inet/showcases/visualizer/mobility <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/mobility>`__
 
 About the Visualizer

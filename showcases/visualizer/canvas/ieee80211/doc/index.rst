@@ -11,7 +11,7 @@ In such simulations, the IEEE 802.11 network membership visualizer can be very h
 In this showcase, we demonstrate how to display the SSID of each node, making it
 easier to understand the network membership and how it changes over time.
 
-| Since INET version: ``4.0``
+| Verified with INET version: ``4.0``
 | Source files location: `inet/showcases/visualizer/ieee80211 <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/ieee80211>`__
 
 About the visualizer

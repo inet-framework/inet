@@ -23,7 +23,7 @@ protocols can coexist in the same frequency range and the impact of CTI on their
 operation.
 
 
-| Since INET version: ``4.2``
+| Verified with INET version: ``4.2``
 | Source files location: `inet/showcases/wireless/coexistence <https://github.com/inet-framework/inet/tree/master/showcases/wireless/coexistence>`__
 
 The Model

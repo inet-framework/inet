@@ -15,7 +15,7 @@ This showcase provides a demonstration of some of the elementary mobility models
 available in INET. The topic of combining multiple mobility models is covered in
 a separate showcase, :doc:`../../combining/doc/index`.
 
-| Since INET version: ``4.0``
+| Verified with INET version: ``4.0``
 | Source files location: `inet/showcases/mobility/basic <https://github.com/inet-framework/inet/tree/master/showcases/mobility/basic>`__
 
 Overview

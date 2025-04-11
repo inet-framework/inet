@@ -17,7 +17,7 @@ In this showcase, we will demonstrate the block acknowledgment feature in INET's
 acknowledgment in INET to improve the performance of
 wireless networks that use the 802.11 protocol.
 
-| Since INET version: ``4.1``
+| Verified with INET version: ``4.1``
 | Source files location: `inet/showcases/wireless/blockack <https://github.com/inet-framework/inet/tree/master/showcases/wireless/blockack>`__
 
 About Block Acknowledgment
