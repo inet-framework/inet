@@ -90,9 +90,6 @@ simple Quic like IQuic
         @signal[packetSent](type=cPacket);
         @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
 
-        //@signal[packetLost](type=cPacket);
-        //@statistic[packetLost](title="packets lost"; source=packetLost; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-
 
         @signal[dplpmtudSearchPmtu*];
         @statisticTemplate[dplpmtudSearchPmtu](record=vector);
@@ -139,9 +136,6 @@ simple Quic like IQuic
 
         int numReceivedAckElicitingsBeforeAck = default(2); // number of ack eliciting packets a receiver waits for, before it sends an ACK, immediately
         
-        double sendLossRate = default(0.0); // drops approx. one packet after 1/sendLossRate packets have been sent
-        bool periodicSendLoss = default(false); // when false sendLossRate is a random loss rate; when true one packet is dropped exactly after 1/sendLossRate packets have been sent
-        
         bool useIBit = default(false); // when true, an ACK frame is sent immediately upon an ack-eliciting packet with the I-Bit set.
 
         bool useDplpmtud = default(false); // if true, uses DPLPMTUD (RFC8899) to determine the PMTU
@@ -156,8 +150,6 @@ simple Quic like IQuic
         int pmtuValidatorLostPacketsThreshold = default(2); // specifies the number of lost data packet before assuming a decreased PMTU
         double pmtuValidatorTimeThreshold @unit(s) = default(-1s); // specifies the time threshold between two lost packets (if negative, the number of seconds are used multiplied by SRTT)
         int pmtuValidatorInvalidOnPersistentCongestion = default(1); // if 0, disabled. If 1, the PMTU validator uses persistent congeation as signal for a decreased PMTU. If 2, only two consecutive persisten congestions used as signal. If 3, ...
-        //int reduceTlpSize = default(0); // if 0, disabled. If x>0, sends the x-th consecutive loss probe packet with reduced packet size.
-        //bool reduceTlpSizeOnlyIfPmtuInvalidPossible = default(true); // If true, sends loss probe packet with reduced size only if the loss of all outstanding ack-elicitig packets would result in the detection of a PMTU decrease.
         double reducePacketTimeThreshold @unit(s) = default(0s); // specifies after which time with no ack packets with reduced size are sent (if negative, the number of seconds are used multiplied by PTO)
         bool skipPacketNumberForDplpmtudProbePackets = default(false); // specifies whether to skip a packet number for a DPLPMTUD probe packet in order to avoid ack delay.
 

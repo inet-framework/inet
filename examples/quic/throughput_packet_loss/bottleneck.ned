@@ -18,6 +18,7 @@ package inet.examples.quic.throughput_packet_loss;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
+import inet.common.misc.PeriodicLossChannel;
 
 network bottleneck
 {
@@ -26,7 +27,7 @@ network bottleneck
         double linkDatarate @unit(bps) = default(100Gbps);
 
     types:
-        channel link extends ned.DatarateChannel
+        channel link extends PeriodicLossChannel
         {
             datarate = parent.linkDatarate;
             delay = parent.linkDelay;

@@ -103,27 +103,6 @@ bool UdpSocket::match(L3Address addr, int port)
 
 void UdpSocket::sendto(L3Address remoteAddr, int remotePort, Packet *pkt)
 {
-    static int outgoingPacketCounter = 0;
-    double sendLossRate = quicSimpleMod->par("sendLossRate");
-    if (sendLossRate != 0.0) {
-        if (quicSimpleMod->par("periodicSendLoss")) {
-            outgoingPacketCounter++;
-            if (outgoingPacketCounter > 1/sendLossRate) {
-                // drop packet
-                delete pkt;
-                outgoingPacketCounter = 0;
-                return;
-            }
-        } else {
-            // random send loss
-            if (quicSimpleMod->uniform(0.0, 1.0) < sendLossRate) {
-                // drop packet
-                delete pkt;
-                return;
-            }
-        }
-    }
-
     // send all QUIC packets with Don't Fragment bit set in IP header
     pkt->addTag<FragmentationReq>()->setDontFragment(true);
     socket.sendTo(pkt, remoteAddr, remotePort);
