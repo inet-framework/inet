@@ -8,6 +8,14 @@
 
 namespace inet {
 
+Define_Module(ForbiddenSimpleModule);
+
+void ForbiddenSimpleModule::initialize()
+{
+    throw cRuntimeError("%s is missing @class property - modules that extend SimpleModule must have a @class property to specify the C++ implementation class", getComponentType()->getFullName());
+}
+
+// NOTE: We intentionally NOT registering SimpleModule here to prevent the user from instantiating it by mistake
 void SimpleModule::refreshDisplay() const
 {
     auto displayStringTextFormat = par("displayStringTextFormat").stringValue();
@@ -19,7 +27,7 @@ void SimpleModule::refreshDisplay() const
 
 std::string SimpleModule::resolveDirective(char directive) const
 {
-    throw cRuntimeError("Unknown directive: %c", directive);
+    throw cRuntimeError("Unknown directive in 'displayStringTextFormat' parameter: %c", directive);
 }
 
 std::string SimpleModule::resolveExpression(const char *expression) const
@@ -29,7 +37,7 @@ std::string SimpleModule::resolveExpression(const char *expression) const
     if (obj)
         return obj->str();
     else    
-        throw cRuntimeError("Unknown expression: %s", expression);
+        throw cRuntimeError("Unknown expression in 'displayStringTextFormat' parameter: %s", expression);
 }
 
 } // namespace inet

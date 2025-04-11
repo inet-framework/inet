@@ -16,5 +16,7 @@ package inet.common;
 simple SimpleModule
 {
     parameters:
+        // prevent instantiating this module if a user forgot to add @class() in a derived module
+        @class(ForbiddenSimpleModule); 
         string displayStringTextFormat @mutable = default("");
 }
