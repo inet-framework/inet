@@ -7,6 +7,7 @@
 
 package inet.protocolelement.common;
 
+import inet.common.SimpleModule;
 import inet.protocolelement.contract.IProtocolLayer;
 
 //

@@ -7,6 +7,7 @@
 
 package inet.queueing.queue;
 
+import inet.common.SimpleModule;
 import inet.queueing.contract.IPacketQueue;
 
 //

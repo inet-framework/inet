@@ -7,6 +7,7 @@
 
 package inet.queueing.shaper;
 
+import inet.common.SimpleModule;
 import inet.queueing.contract.ITrafficConditioner;
 
 //

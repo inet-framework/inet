@@ -7,6 +7,7 @@
 
 package inet.queueing.filter;
 
+import inet.common.SimpleModule;
 import inet.queueing.contract.IPacketFilter;
 
 //

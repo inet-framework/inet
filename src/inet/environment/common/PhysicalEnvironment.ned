@@ -7,6 +7,7 @@
 
 package inet.environment.common;
 
+import inet.common.SimpleModule;
 import inet.environment.contract.IGround;
 import inet.environment.contract.IObjectCache;
 import inet.environment.contract.IPhysicalEnvironment;

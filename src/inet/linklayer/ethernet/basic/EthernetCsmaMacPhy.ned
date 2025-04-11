@@ -8,6 +8,7 @@
 
 package inet.linklayer.ethernet.basic;
 
+import inet.common.SimpleModule;
 import inet.linklayer.contract.IEtherMac;
 
 

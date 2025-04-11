@@ -7,6 +7,7 @@
 
 package inet.linklayer.ieee80211.mac.originator;
 
+import inet.common.SimpleModule;
 import inet.linklayer.ieee80211.mac.contract.IFragmentationPolicy;
 import inet.linklayer.ieee80211.mac.contract.IMsduAggregationPolicy;
 import inet.linklayer.ieee80211.mac.contract.IMpduAggregationPolicy;

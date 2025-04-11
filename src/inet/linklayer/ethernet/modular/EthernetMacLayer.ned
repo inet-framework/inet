@@ -7,6 +7,7 @@
 
 package inet.linklayer.ethernet.modular;
 
+import inet.common.SimpleModule;
 import inet.linklayer.ethernet.contract.IEthernetMacLayer;
 import inet.protocolelement.contract.IPacketLifeTimer;
 import inet.queueing.contract.IPacketFilter;

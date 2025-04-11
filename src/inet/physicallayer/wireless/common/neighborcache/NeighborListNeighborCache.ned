@@ -7,6 +7,7 @@
 
 package inet.physicallayer.wireless.common.neighborcache;
 
+import inet.common.SimpleModule;
 import inet.physicallayer.wireless.common.contract.packetlevel.INeighborCache;
 
 //

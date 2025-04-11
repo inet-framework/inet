@@ -7,6 +7,7 @@
 
 package inet.networklayer.common;
 
+import inet.common.SimpleModule;
 import inet.clock.contract.IClock;
 import inet.common.packet.recorder.PcapRecorder;
 

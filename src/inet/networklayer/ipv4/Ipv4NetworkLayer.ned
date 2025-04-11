@@ -7,6 +7,7 @@
 
 package inet.networklayer.ipv4;
 
+import inet.common.SimpleModule;
 import inet.common.MessageDispatcher;
 import inet.networklayer.configurator.contract.IIpv4NodeConfigurator;
 import inet.networklayer.contract.IArp;

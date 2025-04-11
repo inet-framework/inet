@@ -7,6 +7,7 @@
 
 package inet.physicallayer.wireless.noise;
 
+import inet.common.SimpleModule;
 import inet.mobility.contract.IMobility;
 import inet.physicallayer.wireless.common.contract.packetlevel.IAntenna;
 import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;

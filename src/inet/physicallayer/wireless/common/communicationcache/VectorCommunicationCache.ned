@@ -7,6 +7,7 @@
 
 package inet.physicallayer.wireless.common.communicationcache;
 
+import inet.common.SimpleModule;
 import inet.physicallayer.wireless.common.contract.packetlevel.ICommunicationCache;
 
 //

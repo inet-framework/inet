@@ -7,6 +7,7 @@
 
 package inet.clock.model;
 
+import inet.common.SimpleModule;
 import inet.clock.contract.IClock;
 
 //

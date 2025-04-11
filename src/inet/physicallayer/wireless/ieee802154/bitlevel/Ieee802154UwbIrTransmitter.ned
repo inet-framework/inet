@@ -7,6 +7,7 @@
 
 package inet.physicallayer.wireless.ieee802154.bitlevel;
 
+import inet.common.SimpleModule;
 import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitter;
 
 module Ieee802154UwbIrTransmitter extends SimpleModule like ITransmitter

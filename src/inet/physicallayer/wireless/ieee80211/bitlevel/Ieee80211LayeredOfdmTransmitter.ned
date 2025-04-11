@@ -7,6 +7,7 @@
 
 package inet.physicallayer.wireless.ieee80211.bitlevel;
 
+import inet.common.SimpleModule;
 import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitter;
 import inet.physicallayer.wireless.common.contract.bitlevel.IDigitalAnalogConverter;
 import inet.physicallayer.wireless.common.contract.bitlevel.IEncoder;

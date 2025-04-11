@@ -7,6 +7,7 @@
 
 package inet.queueing.gate;
 
+import inet.common.SimpleModule;
 import inet.queueing.contract.IPacketGate;
 
 //

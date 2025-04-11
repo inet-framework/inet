@@ -7,6 +7,7 @@
 
 package inet.environment.ground;
 
+import inet.common.SimpleModule;
 import inet.environment.contract.IGround;
 
 module FlatGround extends SimpleModule like IGround

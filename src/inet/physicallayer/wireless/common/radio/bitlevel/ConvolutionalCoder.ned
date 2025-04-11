@@ -7,6 +7,7 @@
 
 package inet.physicallayer.wireless.common.radio.bitlevel;
 
+import inet.common.SimpleModule;
 import inet.physicallayer.wireless.common.contract.bitlevel.IFecCoder;
 
 // <b>Transfer function (octal) matrix</b>

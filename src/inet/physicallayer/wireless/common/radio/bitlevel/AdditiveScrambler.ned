@@ -7,6 +7,7 @@
 
 package inet.physicallayer.wireless.common.radio.bitlevel;
 
+import inet.common.SimpleModule;
 import inet.physicallayer.wireless.common.contract.bitlevel.IScrambler;
 
 // The Scrambler module converts an input string into a seemingly random

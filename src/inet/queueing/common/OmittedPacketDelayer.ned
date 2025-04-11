@@ -7,6 +7,7 @@
 
 package inet.queueing.common;
 
+import inet.common.SimpleModule;
 import inet.queueing.contract.IPacketDelayer;
 
 //

@@ -7,6 +7,7 @@
 
 package inet.physicallayer.wireless.ieee80211.bitlevel;
 
+import inet.common.SimpleModule;
 import inet.physicallayer.wireless.common.contract.bitlevel.IInterleaver;
 
 // The ~Ieee80211OfdmInterleaver is defined by a two-step permutation.

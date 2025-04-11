@@ -7,6 +7,7 @@
 
 package inet.physicallayer.wireless.common.backgroundnoise;
 
+import inet.common.SimpleModule;
 import inet.physicallayer.wireless.common.contract.packetlevel.IBackgroundNoise;
 
 module DimensionalBackgroundNoise extends SimpleModule like IBackgroundNoise

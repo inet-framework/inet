@@ -7,6 +7,7 @@
 
 package inet.environment.objectcache;
 
+import inet.common.SimpleModule;
 import inet.environment.contract.IObjectCache;
 
 //

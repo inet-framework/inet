@@ -7,6 +7,7 @@
 
 package inet.physicallayer.wireless.common.medium;
 
+import inet.common.SimpleModule;
 import inet.physicallayer.wireless.common.contract.packetlevel.IMediumLimitCache;
 
 module MediumLimitCache extends SimpleModule like IMediumLimitCache
