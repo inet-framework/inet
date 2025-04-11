@@ -27,11 +27,11 @@ in hosts and routers by specifying their :par:`numPcapRecorders` parameter
 :ned:`StandardHost` and derivatives, and router modules.)
 
 The PCAP recorder module records packets sent to and from modules that
-are in the same host as the PCAP recorder module. It writes traces in a 
-PCAP file, which has to be specified by the :par:`pcapFile` parameter. 
-This parameter acts as the main switch for recording, thus specifying 
-this parameter enables packet capture. The PCAP recorder can write traces 
-in the original or the next-generation PCAP file format, selected by the 
+are in the same host as the PCAP recorder module. It writes traces in a
+PCAP file, which has to be specified by the :par:`pcapFile` parameter.
+This parameter acts as the main switch for recording, thus specifying
+this parameter enables packet capture. The PCAP recorder can write traces
+in the original or the next-generation PCAP file format, selected by the
 :par:`fileFormat` parameter (``pcap`` or ``pcapng``).
 
 The :par:`moduleNamePatterns` parameter specifies which modules' traffic
@@ -185,13 +185,13 @@ In ``ethHost2``, we'll record traffic of the ``ipv4`` module. The
    :end-at: dumpProtocols
 
 By default, modules like :ned:`Ipv4` and :ned:`EthernetInterface` don't
-compute CRC and FCS frames, but assumes they are correct ("declared
-correct" mode). To record PCAP traces with correctly calculated CRC and FCS values,
+compute checksum and FCS fields, but assume they are correct ("declared
+correct" mode). To record PCAP traces with correctly calculated checksum and FCS values,
 the L2 and L3 modules need to be set to compute them:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-at: crcMode
+   :start-at: checksumMode
    :end-at: fcsMode
 
 Note that these settings are required, otherwise an error is returned.

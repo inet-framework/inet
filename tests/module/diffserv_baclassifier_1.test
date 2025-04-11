@@ -52,7 +52,7 @@ void TestApp::initialize()
       const auto& header = makeShared<Ipv4Header>();
       header->setDscp(i);
       header->setTotalLengthField(header->getHeaderLength() + packet->getDataLength());
-      header->setCrcMode(CRC_DECLARED_CORRECT);
+      header->setChecksumMode(CHECKSUM_DECLARED_CORRECT);
       packet->insertAtFront(header);
       packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
       send(packet, "out");

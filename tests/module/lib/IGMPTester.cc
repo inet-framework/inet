@@ -28,8 +28,8 @@ class INET_API IGMPTester : public cSimpleModule, public IScriptable
     NetworkInterface *networkInterface;
     map<Ipv4Address, Ipv4MulticastSourceList> socketState;
 
-    //crcMode
-    CrcMode crcMode = CRC_MODE_UNDEFINED;
+    //checksumMode
+    ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
 
   protected:
     typedef Ipv4InterfaceData::Ipv4AddressVector Ipv4AddressVector;
@@ -117,8 +117,8 @@ void IGMPTester::initialize(int stage)
         networkInterface->setMtu(par("mtu"));
         networkInterface->setMulticast(true);
         networkInterface->setBroadcast(true);
-        const char *crcModeString = par("crcMode");
-        crcMode = parseCrcMode(crcModeString, false);
+        const char *checksumModeString = par("checksumMode");
+        checksumMode = parseChecksumMode(checksumModeString, false);
     }
     else if (stage == INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT) {
         networkInterface->getProtocolDataForUpdate<Ipv4InterfaceData>()->setIPAddress(Ipv4Address("192.168.1.1"));
@@ -214,7 +214,7 @@ void IGMPTester::processSendCommand(const cXMLElement &node)
         msg->setMaxRespTimeCode(Igmpv3::codeTime(maxRespCode));
         msg->setSourceList(sources);
         msg->setChunkLength(B(12 + (4 * sources.size())));
-        Igmpv3::insertCrc(crcMode, msg, packet);
+        Igmpv3::insertChecksum(checksumMode, msg, packet);
         packet->insertAtFront(msg);
         sendIGMP(packet, ie, group.isUnspecified() ? Ipv4Address::ALL_HOSTS_MCAST : group);
     }
@@ -252,7 +252,7 @@ void IGMPTester::processSendCommand(const cXMLElement &node)
             byteLength += 8 + record.getSourceList().size() * 4;    // 8 byte header + n * 4 byte (Ipv4Address)
         }
         msg->setChunkLength(B(byteLength));
-        Igmpv3::insertCrc(crcMode, msg, packet);
+        Igmpv3::insertChecksum(checksumMode, msg, packet);
         packet->insertAtFront(msg);
 
         sendIGMP(packet, ie, Ipv4Address::ALL_IGMPV3_ROUTERS_MCAST);

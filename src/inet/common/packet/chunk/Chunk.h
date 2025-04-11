@@ -123,14 +123,14 @@ using namespace units::values;
  * - IpHeader is a FieldsChunk subclass
  * - each Ipv4Option is added as a separate FieldsChunk subclass
  *
- * Communication protocol headers also often contain CRC or checksum fields. In
- * network simulations, most of the time it's unnecessary to compute the correct
- * CRC. One can safely assume the correct CRC is present, unless the packet has
+ * Communication protocol headers also often contain checksum fields. In
+ * network simulations, most of the time it is unnecessary to compute the correct
+ * checksum. One can safely assume the correct checksum is present, unless the packet has
  * to be serialized. As for the representation, a FieldsChunk subclass should
- * contain a CRC field and possibly a CRC mode field. Please note that computing,
- * inserting and verifying the actual CRC is not the task of the chunk serializer
+ * contain a checksum field and possibly a checksum mode field. Please note that computing,
+ * inserting and verifying the actual checksum is not the task of the chunk serializer
  * but rather the task of the communication protocol. You can find a few examples
- * how to implement CRC insertion and verification in the TCP/IP protocol stack.
+ * how to implement checksum insertion and verification in the TCP/IP protocol stack.
  *
  * Implementing lossy communication channels is somewhat more complicated but
  * also more flexible with new chunk API. Whenever a packet passes through a

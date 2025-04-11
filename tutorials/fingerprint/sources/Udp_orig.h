@@ -18,7 +18,7 @@
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/transportlayer/base/TransportProtocolBase.h"
-#include "inet/transportlayer/common/CrcMode_m.h"
+#include "inet/transportlayer/common/ChecksumMode_m.h"
 #include "inet/transportlayer/common/TransportPseudoHeader_m.h"
 #include "inet/transportlayer/contract/udp/UdpCommand_m.h"
 
@@ -41,7 +41,7 @@ const uint16_t UDP_MAX_MESSAGE_SIZE = 65535; // bytes
 class INET_API Udp : public TransportProtocolBase
 {
   public:
-    class CrcInsertion : public NetfilterBase::HookBase {
+    class ChecksumInsertion : public NetfilterBase::HookBase {
       public:
         virtual Result datagramPreRoutingHook(Packet *packet) override { return ACCEPT; }
         virtual Result datagramForwardHook(Packet *packet) override { return ACCEPT; }
@@ -102,8 +102,8 @@ class INET_API Udp : public TransportProtocolBase
     typedef std::map<int, SockDescList> SocketsByPortMap;
 
   protected:
-    CrcMode crcMode = CRC_MODE_UNDEFINED;
-    CrcInsertion crcInsertion;
+    ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
+    ChecksumInsertion checksumInsertion;
 
     // sockets
     SocketsByIdMap socketsByIdMap;
@@ -187,10 +187,10 @@ class INET_API Udp : public TransportProtocolBase
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
   public:
-    // crc
-    static void insertCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<UdpHeader>& udpHeader, Packet *udpPayload);
-    static bool verifyCrc(const Protocol *networkProtocol, const Ptr<const UdpHeader>& udpHeader, Packet *packet);
-    static uint16_t computeCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<const UdpHeader>& udpHeader, const Ptr<const Chunk>& udpData);
+    // checksum
+    static void insertChecksum(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<UdpHeader>& udpHeader, Packet *udpPayload);
+    static bool verifyChecksum(const Protocol *networkProtocol, const Ptr<const UdpHeader>& udpHeader, Packet *packet);
+    static uint16_t computeChecksum(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<const UdpHeader>& udpHeader, const Ptr<const Chunk>& udpData);
 
   public:
     Udp();
