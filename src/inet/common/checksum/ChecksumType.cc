@@ -9,8 +9,8 @@
 
 #include "inet/common/checksum/ChecksumType_m.h"
 
-#include "inet/common/checksum/TcpIpChecksum.h"
-#include "inet/common/checksum/EthernetCRC.h"
+#include "inet/common/checksum/Checksum.h"
+#include "inet/common/checksum/Checksum.h"
 
 namespace inet {
 
@@ -51,7 +51,7 @@ uint64_t computeChecksum(const unsigned char *buf, size_t bufsize, ChecksumType 
         case CHECKSUM_TYPE_UNDEFINED:
             throw cRuntimeError("Checksum type is undefined");
         case CHECKSUM_INTERNET:
-            return TcpIpChecksum::checksum(buf, bufsize);
+            return internetChecksum(buf, bufsize);
         case CHECKSUM_CRC32:
             return ethernetCRC(buf, bufsize);
         case CHECKSUM_CRC8:

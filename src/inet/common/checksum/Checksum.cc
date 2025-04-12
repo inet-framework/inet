@@ -5,10 +5,15 @@
 //
 
 
-#include "inet/common/checksum/EthernetCRC.h"
+#include "inet/common/checksum/Checksum.h"
 
 namespace inet {
 
+// CRC polynomials (big- and little-endian versions).
+#define ETHER_CRC_POLY_LE    0xedb88320
+#define ETHER_CRC_POLY_BE    0x04c11db7
+
+// CRC-32 lookup table
 const uint32_t crc32_tab[] = {
     0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f,
     0xe963a535, 0x9e6495a3, 0x0edb8832, 0x79dcb8a4, 0xe0d5e91e, 0x97d2d988,
@@ -55,18 +60,42 @@ const uint32_t crc32_tab[] = {
     0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d
 };
 
+uint16_t internetChecksum(const void *_addr, unsigned int count, uint32_t sum)
+{
+    const uint8_t *addr = static_cast<const uint8_t *>(_addr);
+
+    while (count > 1) {
+        sum += (addr[0] << 8) | addr[1];
+        addr += 2;
+        if (sum & 0x80000000)
+            sum = (sum & 0xFFFF) + (sum >> 16);
+        count -= 2;
+    }
+
+    if (count)
+        sum += addr[0] << 8;
+
+    while (sum >> 16)
+        sum = (sum & 0xFFFF) + (sum >> 16);
+
+    uint16_t sum16 = (uint16_t)sum;
+    return ~sum16;
+}
+
 uint32_t ethernetCRC(const unsigned char *buf, unsigned int bufsize, uint32_t crc)
 {
-    const uint8_t *p = buf;
+    // swap byte order, complement (undo similar ops for partial CRC)
     crc = (crc >> 24) | ((crc >> 8) & 0x0000FF00) | ((crc << 8) & 0x00FF0000) | (crc << 24);
     crc = crc ^ ~0U;
+
+    // calculate CRC
+    const uint8_t *p = buf;
     while (bufsize--)
         crc = crc32_tab[(crc ^ *p++) & 0xFF] ^ (crc >> 8);
-    crc = crc ^ ~0U;
 
-    // swap byte order:
+    // complement, swap byte order
+    crc = crc ^ ~0U;
     return (crc >> 24) | ((crc >> 8) & 0x0000FF00) | ((crc << 8) & 0x00FF0000) | (crc << 24);
 }
 
 } // namespace inet
-

@@ -5,14 +5,18 @@
 //
 
 
-#ifndef __INET_ETHERNETCRC_H
-#define __INET_ETHERNETCRC_H
+#ifndef __INET_CHECKSUM_H
+#define __INET_CHECKSUM_H
 
 #include "inet/common/INETDefs.h"
 
 namespace inet {
 
-extern const uint32_t crc32_tab[];
+uint16_t internetChecksum(const void *_addr, unsigned int count, uint32_t sum = 0);
+
+inline uint16_t internetChecksum(const std::vector<uint8_t>& vec, uint32_t sum = 0) {
+    return internetChecksum(vec.data(), vec.size(), sum);
+}
 
 uint32_t ethernetCRC(const unsigned char *buf, unsigned int bufsize, uint32_t crc = 0);
 
@@ -22,11 +26,4 @@ inline uint32_t ethernetCRC(const std::vector<uint8_t>& vec, uint32_t crc = 0) {
 
 } // namespace inet
 
-/*
- * Ethernet CRC32 polynomials (big- and little-endian versions).
- */
-#define ETHER_CRC_POLY_LE    0xedb88320
-#define ETHER_CRC_POLY_BE    0x04c11db6
-
 #endif
-
