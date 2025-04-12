@@ -277,7 +277,7 @@ b Ieee80211VhtSignalMode::getLength() const
            getFECCodingLength() +
            getShortGILength() +
            getNumOfExtensionSpatialStreamsLength() +
-           getCRCLength() +
+           getFCSLength() +
            getTailBitsLength();
 }
 

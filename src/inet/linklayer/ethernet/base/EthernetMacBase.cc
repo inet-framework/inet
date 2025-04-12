@@ -292,7 +292,7 @@ void EthernetMacBase::decapsulate(Packet *packet)
 }
 
 // FIXME should use it in EthernetCsmaMacPhy, EthernetMacPhy, etc. modules. But should not use it in EtherBus, EthernetHub.
-bool EthernetMacBase::verifyCrcAndLength(Packet *packet)
+bool EthernetMacBase::verifyFcsAndLength(Packet *packet)
 {
     EV_STATICCONTEXT;
 

@@ -41,7 +41,7 @@ class INET_API ProtocolDissector : public cObject
         virtual void endProtocolDataUnit(const Protocol *protocol) = 0;
 
         /**
-         * Marks the current protocol data unit as incorrect (e.g. bad CRC/FCS, incorrect length field, bit error).
+         * Marks the current protocol data unit as incorrect (e.g. bad FCS, incorrect length field, bit error).
          */
         virtual void markIncorrect() = 0;
 

@@ -42,8 +42,8 @@ void Ieee80211Radio::initialize(int stage)
     FlatRadioBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        const char *crcModeString = par("crcMode");
-        crcMode = parseCrcMode(crcModeString, true);
+        const char *fcsModeString = par("fcsMode");
+        fcsMode = parseFcsMode(fcsModeString, true);
     }
     if (stage == INITSTAGE_PHYSICAL_LAYER) {
         int channelNumber = par("channelNumber");
@@ -135,94 +135,94 @@ void Ieee80211Radio::setChannelNumber(int newChannelNumber)
     emit(listeningChangedSignal, 0);
 }
 
-void Ieee80211Radio::insertCrc(const Ptr<Ieee80211PhyHeader>& phyHeader) const
+void Ieee80211Radio::insertFcs(const Ptr<Ieee80211PhyHeader>& phyHeader) const
 {
     if (auto header = dynamic_cast<Ieee80211FhssPhyHeader *>(phyHeader.get())) {
-        header->setCrcMode(crcMode);
-        switch (crcMode) {
-            case CRC_COMPUTED:
-                header->setCrc(0); // TODO calculate CRC
+        header->setFcsMode(fcsMode);
+        switch (fcsMode) {
+            case FCS_COMPUTED:
+                header->setFcs(0); // TODO calculate FCS
                 break;
-            case CRC_DECLARED_CORRECT:
-                header->setCrc(0xC00D);
+            case FCS_DECLARED_CORRECT:
+                header->setFcs(0xC00D);
                 break;
-            case CRC_DECLARED_INCORRECT:
-                header->setCrc(0xBAAD);
+            case FCS_DECLARED_INCORRECT:
+                header->setFcs(0xBAAD);
                 break;
             default:
-                throw cRuntimeError("Invalid CRC mode: %i", (int)crcMode);
+                throw cRuntimeError("Invalid FCS mode: %i", (int)fcsMode);
         }
     }
     else if (auto header = dynamic_cast<Ieee80211IrPhyHeader *>(phyHeader.get())) {
-        header->setCrcMode(crcMode);
-        switch (crcMode) {
-            case CRC_COMPUTED:
-                header->setCrc(0); // TODO calculate CRC
+        header->setFcsMode(fcsMode);
+        switch (fcsMode) {
+            case FCS_COMPUTED:
+                header->setFcs(0); // TODO calculate FCS
                 break;
-            case CRC_DECLARED_CORRECT:
-                header->setCrc(0xC00D);
+            case FCS_DECLARED_CORRECT:
+                header->setFcs(0xC00D);
                 break;
-            case CRC_DECLARED_INCORRECT:
-                header->setCrc(0xBAAD);
+            case FCS_DECLARED_INCORRECT:
+                header->setFcs(0xBAAD);
                 break;
             default:
-                throw cRuntimeError("Invalid CRC mode: %i", (int)crcMode);
+                throw cRuntimeError("Invalid FCS mode: %i", (int)fcsMode);
         }
     }
     else if (auto header = dynamic_cast<Ieee80211DsssPhyHeader *>(phyHeader.get())) {
-        header->setCrcMode(crcMode);
-        switch (crcMode) {
-            case CRC_COMPUTED:
-                header->setCrc(0); // TODO calculate CRC
+        header->setFcsMode(fcsMode);
+        switch (fcsMode) {
+            case FCS_COMPUTED:
+                header->setFcs(0); // TODO calculate FCS
                 break;
-            case CRC_DECLARED_CORRECT:
-                header->setCrc(0xC00D);
+            case FCS_DECLARED_CORRECT:
+                header->setFcs(0xC00D);
                 break;
-            case CRC_DECLARED_INCORRECT:
-                header->setCrc(0xBAAD);
+            case FCS_DECLARED_INCORRECT:
+                header->setFcs(0xBAAD);
                 break;
             default:
-                throw cRuntimeError("Invalid CRC mode: %i", (int)crcMode);
+                throw cRuntimeError("Invalid FCS mode: %i", (int)fcsMode);
         }
     }
 }
 
-bool Ieee80211Radio::verifyCrc(const Ptr<const Ieee80211PhyHeader>& phyHeader) const
+bool Ieee80211Radio::verifyFcs(const Ptr<const Ieee80211PhyHeader>& phyHeader) const
 {
     if (auto header = dynamicPtrCast<const Ieee80211FhssPhyHeader>(phyHeader)) {
-        switch (header->getCrcMode()) {
-            case CRC_COMPUTED:
-                return true; // TODO calculate and check CRC
-            case CRC_DECLARED_CORRECT:
+        switch (header->getFcsMode()) {
+            case FCS_COMPUTED:
+                return true; // TODO calculate and check FCS
+            case FCS_DECLARED_CORRECT:
                 return true;
-            case CRC_DECLARED_INCORRECT:
+            case FCS_DECLARED_INCORRECT:
                 return false;
             default:
-                throw cRuntimeError("Invalid CRC mode: %i", (int)crcMode);
+                throw cRuntimeError("Invalid FCS mode: %i", (int)fcsMode);
         }
     }
     else if (auto header = dynamicPtrCast<const Ieee80211IrPhyHeader>(phyHeader)) {
-        switch (header->getCrcMode()) {
-            case CRC_COMPUTED:
-                return true; // TODO calculate and check CRC
-            case CRC_DECLARED_CORRECT:
+        switch (header->getFcsMode()) {
+            case FCS_COMPUTED:
+                return true; // TODO calculate and check FCS
+            case FCS_DECLARED_CORRECT:
                 return true;
-            case CRC_DECLARED_INCORRECT:
+            case FCS_DECLARED_INCORRECT:
                 return false;
             default:
-                throw cRuntimeError("Invalid CRC mode: %i", (int)crcMode);
+                throw cRuntimeError("Invalid FCS mode: %i", (int)fcsMode);
         }
     }
     else if (auto header = dynamicPtrCast<const Ieee80211DsssPhyHeader>(phyHeader)) {
-        switch (header->getCrcMode()) {
-            case CRC_COMPUTED:
-                return true; // TODO calculate and check CRC
-            case CRC_DECLARED_CORRECT:
+        switch (header->getFcsMode()) {
+            case FCS_COMPUTED:
+                return true; // TODO calculate and check FCS
+            case FCS_DECLARED_CORRECT:
                 return true;
-            case CRC_DECLARED_INCORRECT:
+            case FCS_DECLARED_INCORRECT:
                 return false;
             default:
-                throw cRuntimeError("Invalid CRC mode: %i", (int)crcMode);
+                throw cRuntimeError("Invalid FCS mode: %i", (int)fcsMode);
         }
     }
     else
@@ -236,7 +236,7 @@ void Ieee80211Radio::encapsulate(Packet *packet) const
     auto phyHeader = mode->getHeaderMode()->createHeader();
     phyHeader->setChunkLength(b(mode->getHeaderMode()->getLength()));
     phyHeader->setLengthField(B(packet->getDataLength()));
-    insertCrc(phyHeader);
+    insertFcs(phyHeader);
     packet->insertAtFront(phyHeader);
 
     auto tailLength = dynamic_cast<const Ieee80211OfdmMode *>(mode) ? b(6) : b(0);
@@ -271,7 +271,7 @@ void Ieee80211Radio::decapsulate(Packet *packet) const
 {
     auto mode = packet->getTag<Ieee80211ModeInd>()->getMode();
     const auto& phyHeader = popIeee80211PhyHeaderAtFront(packet, b(-1), Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
-    if (phyHeader->isIncorrect() || phyHeader->isIncomplete() || phyHeader->isImproperlyRepresented() || !verifyCrc(phyHeader))
+    if (phyHeader->isIncorrect() || phyHeader->isIncomplete() || phyHeader->isImproperlyRepresented() || !verifyFcs(phyHeader))
         packet->setBitError(true);
     auto tailLength = dynamic_cast<const Ieee80211OfdmMode *>(mode) ? b(6) : b(0);
     auto paddingLength = mode->getDataMode()->getPaddingLength(B(phyHeader->getLengthField()));

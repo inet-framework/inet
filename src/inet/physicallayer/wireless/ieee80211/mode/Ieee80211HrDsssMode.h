@@ -54,9 +54,9 @@ class INET_API Ieee80211HrDsssHeaderMode : public IIeee80211HeaderMode
     b getSignalFieldLength() const { return b(8); }
     b getServiceFieldLength() const { return b(8); }
     b getLengthFieldLength() const { return b(16); }
-    b getCrcFieldLength() const { return b(16); }
+    b getFcsFieldLength() const { return b(16); }
 
-    virtual b getLength() const override { return getSignalFieldLength() + getServiceFieldLength() + getLengthFieldLength() + getCrcFieldLength(); }
+    virtual b getLength() const override { return getSignalFieldLength() + getServiceFieldLength() + getLengthFieldLength() + getFcsFieldLength(); }
     virtual bps getNetBitrate() const override { return preambleType == IEEE80211_HRDSSS_PREAMBLE_TYPE_SHORT ? Mbps(2) : Mbps(1); }
     virtual bps getGrossBitrate() const override { return getNetBitrate(); }
     virtual const simtime_t getDuration() const override { return (double)getLength().get<b>() / getNetBitrate().get<bps>(); }

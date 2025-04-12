@@ -29,7 +29,7 @@ class INET_API OriginatorQosMacDataService : public IOriginatorMacDataService, p
     ISequenceNumberAssignment *sequenceNumberAssignment = nullptr;
 //    MsduIntegrityAndProtection *msduIntegrityAndProtection = nullptr;
 //    MpduEncryptionAndIntegrity *mpduEncryptionAndIntegrity = nullptr;
-//    MpduHeaderPlusCrc *mpduHeaderPlusCrc = nullptr;
+//    MpduHeaderPlusFcs *mpduHeaderPlusFcs = nullptr;
     IFragmentationPolicy *fragmentationPolicy = nullptr;
     IFragmentation *fragmentation = nullptr;
     IMsduAggregationPolicy *aMsduAggregationPolicy = nullptr;

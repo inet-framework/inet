@@ -343,7 +343,7 @@ void Ppp::decapsulate(Packet *packet)
     const auto& pppTrailer = packet->popAtBack<PppTrailer>(PPP_TRAILER_LENGTH);
     if (pppHeader == nullptr || pppTrailer == nullptr)
         throw cRuntimeError("Invalid PPP packet: PPP header or Trailer is missing");
-    // TODO check CRC
+    // TODO check FCS
     packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
 
     auto payloadProtocol = ProtocolGroup::getPppProtocolGroup()->getProtocol(pppHeader->getProtocol());

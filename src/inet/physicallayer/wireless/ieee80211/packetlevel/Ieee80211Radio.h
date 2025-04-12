@@ -30,15 +30,15 @@ class INET_API Ieee80211Radio : public FlatRadioBase
     static const Ptr<const Ieee80211PhyHeader> peekIeee80211PhyHeaderAtFront(const Packet *packet, b length = b(-1), int flags = 0);
 
   protected:
-    CrcMode crcMode = CRC_MODE_UNDEFINED;
+    FcsMode fcsMode = FCS_MODE_UNDEFINED;
 
   protected:
     virtual void initialize(int stage) override;
 
     virtual void handleUpperCommand(cMessage *message) override;
 
-    virtual void insertCrc(const Ptr<Ieee80211PhyHeader>& phyHeader) const;
-    virtual bool verifyCrc(const Ptr<const Ieee80211PhyHeader>& phyHeader) const;
+    virtual void insertFcs(const Ptr<Ieee80211PhyHeader>& phyHeader) const;
+    virtual bool verifyFcs(const Ptr<const Ieee80211PhyHeader>& phyHeader) const;
 
     virtual void encapsulate(Packet *packet) const override;
     virtual void decapsulate(Packet *packet) const override;

@@ -44,11 +44,11 @@ class INET_API Ieee80211IrHeaderMode : public IIeee80211HeaderMode
     int getDRSlotLength() const { return 3; }
     int getDCLASlotLength() const { return 32; }
     b getLengthFieldLength() const { return b(16); }
-    b getCrcFieldLength() const { return b(16); }
+    b getFcsFieldLength() const { return b(16); }
     int getSlotLength() const { return getDRSlotLength() + getDCLASlotLength(); }
     const simtime_t getSlotDuration() const { return 250E-9; }
 
-    virtual b getLength() const override { return getLengthFieldLength() + getCrcFieldLength(); }
+    virtual b getLength() const override { return getLengthFieldLength() + getFcsFieldLength(); }
     virtual bps getNetBitrate() const override { return Mbps(1); }
     virtual bps getGrossBitrate() const override { return getNetBitrate(); }
     virtual const simtime_t getDuration() const override { return (double)getLength().get<b>() / getNetBitrate().get<bps>() + getSlotLength() * getSlotDuration(); }

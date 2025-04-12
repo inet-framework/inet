@@ -167,7 +167,7 @@ class INET_API EthernetMacBase : public MacProtocolBase, public queueing::IActiv
     virtual void decapsulate(Packet *packet);
 
     /// Verify ethernet packet: check FCS and payload length
-    bool verifyCrcAndLength(Packet *packet);
+    bool verifyFcsAndLength(Packet *packet);
 
     // MacBase
     virtual void configureNetworkInterface() override;

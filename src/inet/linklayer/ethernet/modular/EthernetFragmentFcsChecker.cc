@@ -31,7 +31,7 @@ void EthernetFragmentFcsChecker::processPacket(Packet *packet)
 {
     const auto& trailer = packet->popAtBack<EthernetFragmentFcs>(B(4));
     auto& fragmentTag = packet->getTagForUpdate<FragmentTag>();
-    fragmentTag->setLastFragment(!trailer->getMCrc());
+    fragmentTag->setLastFragment(!trailer->getMFcs());
     auto packetProtocolTag = packet->getTagForUpdate<PacketProtocolTag>();
     packetProtocolTag->setBackOffset(packetProtocolTag->getBackOffset() + trailer->getChunkLength());
     lastFragmentCompleteFcs = currentFragmentCompleteFcs;

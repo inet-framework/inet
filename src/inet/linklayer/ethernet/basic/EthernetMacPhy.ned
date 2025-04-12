@@ -53,7 +53,7 @@ import inet.linklayer.contract.IEtherMac;
 //
 // Processing of frames incoming from the network:
 // - receive frame from the network
-// - CRC checking (frames with the error bit set are discarded).
+// - FCS checking (frames with the error bit set are discarded).
 // - respond to PAUSE frames
 // - in promiscuous mode, pass up all received frames;
 //   otherwise, only frames with matching MAC addresses and

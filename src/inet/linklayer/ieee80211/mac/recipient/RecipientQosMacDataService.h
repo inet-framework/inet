@@ -28,7 +28,7 @@ class INET_API RecipientQosMacDataService : public IRecipientQosMacDataService, 
     IReassembly *basicReassembly = nullptr;
 
     IMpduDeaggregation *aMpduDeaggregation = nullptr;
-//    MpduHeaderAndCrcValidation *mpduHeaderAndCrcValidation = nullptr;
+//    MpduHeaderAndFcsValidation *mpduHeaderAndFcsValidation = nullptr;
 //    Address1Filtering *address1Filtering = nullptr;
     IDuplicateRemoval *duplicateRemoval = nullptr;
 //    MpduDecryptionAndIntegrity *mpduDecryptionAndIntegrity = nullptr;

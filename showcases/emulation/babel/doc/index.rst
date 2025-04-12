@@ -302,7 +302,7 @@ with ``RealTimeScheduler``:
    :language: ini
 
 For compatibility with the host OS's ``babeld`` and ``ping`` applications, the FCS mode
-in the hosts' MAC module is configured to compute the FCS (as opposed to assuming
+in the hosts' MAC modules is configured to actually compute the FCS (as opposed to assuming
 it to be correct):
 
 .. literalinclude:: ../omnetpp.ini

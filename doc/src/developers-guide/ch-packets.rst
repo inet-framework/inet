@@ -251,7 +251,7 @@ or correct any part based on checksums.
 The physical layer models support the above mentioned different error
 representations via configurable parameters. Higher layer protocols
 detect errors by checking the error bit on packets and chunks, and by
-standard CRC mechanisms.
+standard checksum mechanisms.
 
 .. _dg:sec:packets:packet-tagging:
 

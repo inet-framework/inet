@@ -57,14 +57,14 @@ Additionally, the :par:`packetFilter` parameter can use an expression
 to filter packets. The expression is evaluated for all packets to
 a boolean value indicating a match. The expression can contain the packet's
 fields (such as its name), contained chunks and their fields, protocol
-headers, etc. The default value is ``*`` that matches all packets, 
-thus no packets are filtered.  For more information on the packet filter, 
+headers, etc. The default value is ``*`` that matches all packets,
+thus no packets are filtered.  For more information on the packet filter,
 refer to the :ref:`ug:sec:results:recording-pcap-traces` section in the INET User's Guide.
 
 To summarize: the :par:`moduleNamePatterns` parameter specifies which
 modules' outputs should be captured. The
 :par:`dumpProtocols` parameter can narrow the set of recorded protocols at
-the level of capture. The :par:`packetFilter` parameter can further 
+the level of capture. The :par:`packetFilter` parameter can further
 narrow the set of captured packets.
 
 The configuration
@@ -220,7 +220,7 @@ The following video shows the traffic in the network:
 The following images show the same packets viewed in Qtenv's packet mode
 inspector panel and the PCAP trace opened with Wireshark. Both
 display the same data about the same packet (with the same data,
-sequence number, CRC, etc. Click to zoom.)
+sequence number, FCS, etc. Click to zoom.)
 
 TCP data, in ``ethHost1`` (sent from ``ethHost1`` to ``ethHost2``):
 

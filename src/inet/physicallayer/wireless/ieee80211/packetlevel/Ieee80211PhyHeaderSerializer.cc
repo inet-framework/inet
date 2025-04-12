@@ -31,7 +31,7 @@ void Ieee80211FhssPhyHeaderSerializer::serialize(MemoryOutputStream& stream, con
     auto fhssPhyHeader = dynamicPtrCast<const Ieee80211FhssPhyHeader>(chunk);
     stream.writeNBitsOfUint64Be(fhssPhyHeader->getPlw(), 12);
     stream.writeUint4(fhssPhyHeader->getPsf());
-    stream.writeUint16Be(fhssPhyHeader->getCrc());
+    stream.writeUint16Be(fhssPhyHeader->getFcs());
 }
 
 const Ptr<Chunk> Ieee80211FhssPhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
@@ -39,8 +39,8 @@ const Ptr<Chunk> Ieee80211FhssPhyHeaderSerializer::deserialize(MemoryInputStream
     auto fhssPhyHeader = makeShared<Ieee80211FhssPhyHeader>();
     fhssPhyHeader->setPlw(stream.readNBitsToUint64Be(12));
     fhssPhyHeader->setPsf(stream.readUint4());
-    fhssPhyHeader->setCrc(stream.readUint16Be());
-    fhssPhyHeader->setCrcMode(CRC_COMPUTED);
+    fhssPhyHeader->setFcs(stream.readUint16Be());
+    fhssPhyHeader->setFcsMode(FCS_COMPUTED);
     return fhssPhyHeader;
 }
 
@@ -50,14 +50,14 @@ const Ptr<Chunk> Ieee80211FhssPhyHeaderSerializer::deserialize(MemoryInputStream
 void Ieee80211IrPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     auto irPhyHeader = dynamicPtrCast<const Ieee80211IrPhyHeader>(chunk);
-    stream.writeUint16Be(irPhyHeader->getCrc());
+    stream.writeUint16Be(irPhyHeader->getFcs());
 }
 
 const Ptr<Chunk> Ieee80211IrPhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto irPhyHeader = makeShared<Ieee80211IrPhyHeader>();
-    irPhyHeader->setCrc(stream.readUint16Be());
-    irPhyHeader->setCrcMode(CRC_COMPUTED);
+    irPhyHeader->setFcs(stream.readUint16Be());
+    irPhyHeader->setFcsMode(FCS_COMPUTED);
     return irPhyHeader;
 }
 
@@ -80,7 +80,7 @@ const Ptr<Chunk> Ieee80211DsssPhyHeaderSerializer::deserialize(MemoryInputStream
     dsssPhyHeader->setSignal(stream.readByte());
     dsssPhyHeader->setService(stream.readByte());
     dsssPhyHeader->setLengthField(B(stream.readUint16Be()));
-    dsssPhyHeader->setCrcMode(CRC_COMPUTED);
+    dsssPhyHeader->setFcsMode(FCS_COMPUTED);
     return dsssPhyHeader;
 }
 
@@ -103,7 +103,7 @@ const Ptr<Chunk> Ieee80211HrDsssPhyHeaderSerializer::deserialize(MemoryInputStre
     hrDsssPhyHeader->setSignal(stream.readByte());
     hrDsssPhyHeader->setService(stream.readByte());
     hrDsssPhyHeader->setLengthField(B(stream.readUint16Be()));
-    hrDsssPhyHeader->setCrcMode(CRC_COMPUTED);
+    hrDsssPhyHeader->setFcsMode(FCS_COMPUTED);
     return hrDsssPhyHeader;
 }
 

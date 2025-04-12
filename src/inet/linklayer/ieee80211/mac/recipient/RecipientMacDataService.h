@@ -27,7 +27,7 @@ class INET_API RecipientMacDataService : public cSimpleModule, public IRecipient
   protected:
     IReassembly *basicReassembly = nullptr; // FIXME use Defragmentation
 
-//    MpduHeaderAndCrcValidation *mpduHeaderAndCrcValidation = nullptr;
+//    MpduHeaderAndFcsValidation *mpduHeaderAndFcsValidation = nullptr;
 //    Address1Filtering *address1Filtering = nullptr;
     IDuplicateRemoval *duplicateRemoval = nullptr;
 //    MpduDecryptionAndIntegrity *mpduDecryptionAndIntegrity = nullptr;

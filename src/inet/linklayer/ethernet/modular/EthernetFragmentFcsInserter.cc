@@ -37,7 +37,7 @@ void EthernetFragmentFcsInserter::processPacket(Packet *packet)
     header->setFcs(fcs);
     FcsMode fcsMode = (FcsMode)checksumMode; //TODO KLUDGE: use ChecksumMode everywhere
     header->setFcsMode(fcsMode);
-    header->setMCrc(!fragmentTag->getLastFragment());
+    header->setMFcs(!fragmentTag->getLastFragment());
     packet->trimBack();
     packet->insertAtBack(header);
     auto& packetProtocolTag = packet->findTagForUpdate<PacketProtocolTag>();

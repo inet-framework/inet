@@ -58,7 +58,7 @@ const B ETHER_ADDR_LEN = B(6);
 const B ETHER_TYPE_LEN = B(2);
 
 /*
- * The number of bytes in the trailing CRC field.
+ * The number of bytes in the trailing FCS field.
  */
 const B ETHER_FCS_BYTES                  = B(4);
 const B ETHER_MAC_HEADER_BYTES           = ETHER_ADDR_LEN + ETHER_ADDR_LEN + ETHER_TYPE_LEN; /* src(6)+dest(6)+length/type(2) */

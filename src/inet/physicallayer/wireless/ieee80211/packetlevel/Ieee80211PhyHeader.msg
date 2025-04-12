@@ -6,7 +6,7 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
-import inet.transportlayer.common.CrcMode;
+import inet.linklayer.common.FcsMode;
 
 namespace inet::physicallayer;
 
@@ -33,8 +33,8 @@ class Ieee80211FhssPhyHeader extends Ieee80211PhyHeader
     chunkLength = b(32);
     uint16_t plw;
     uint8_t psf;
-    uint16_t crc;
-    CrcMode crcMode = CRC_MODE_UNDEFINED;
+    uint16_t fcs;
+    FcsMode fcsMode = FCS_MODE_UNDEFINED;
 }
 
 //
@@ -47,8 +47,8 @@ class Ieee80211IrPhyPreamble extends Ieee80211PhyPreamble
 class Ieee80211IrPhyHeader extends Ieee80211PhyHeader
 {
     // TODO B lengthField;
-    uint16_t crc;
-    CrcMode crcMode = CRC_MODE_UNDEFINED;
+    uint16_t fcs;
+    FcsMode fcsMode = FCS_MODE_UNDEFINED;
 }
 
 //
@@ -65,8 +65,8 @@ class Ieee80211DsssPhyHeader extends Ieee80211PhyHeader
     uint8_t signal;
     uint8_t service;
     // TODO B lengthField;
-    uint16_t crc;
-    CrcMode crcMode = CRC_MODE_UNDEFINED;
+    uint16_t fcs;
+    FcsMode fcsMode = FCS_MODE_UNDEFINED;
 }
 
 //

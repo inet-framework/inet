@@ -370,7 +370,7 @@ class SimulationTask(Task):
         file_args = (["--eventlog-file=" + self.eventlog_file_path] if self.eventlog_file_path else []) + \
                     (["--output-scalar-file=" + self.scalar_file_path] if self.scalar_file_path else []) + \
                     (["--output-vector-file=" + self.vector_file_path] if self.vector_file_path else [])
-        record_pcap_args = ["--**.numPcapRecorders=1", "--**.crcMode=\"computed\"", "--**.fcsMode=\"computed\""] if self.record_pcap else []
+        record_pcap_args = ["--**.numPcapRecorders=1", "--**.checksumMode=\"computed\"", "--**.fcsMode=\"computed\""] if self.record_pcap else []
         executable = simulation_project.get_executable(mode=self.mode)
         default_args = simulation_project.get_default_args()
         args = [*prepend_args, executable, *default_args, "-s", "-u", self.user_interface, "-f", ini_file, "-c", config, "-r", str(self.run_number), *inifile_entries_args, *result_folder_args, *sim_time_limit_args, *cpu_time_limit_args, *record_eventlog_args, *file_args, *record_pcap_args, *append_args]
@@ -434,7 +434,7 @@ class SimulationTask(Task):
     #             if os.path.exists(full_file_path):
     #                 dependency = read_dependency_file(full_file_path)
     #                 for key, depends_on_file_names in dependency.items():
-    #                     additional_file_names = [file_name.replace(".h", ".cc") for file_name in depends_on_file_names if file_name.endswith(".h")] 
+    #                     additional_file_names = [file_name.replace(".h", ".cc") for file_name in depends_on_file_names if file_name.endswith(".h")]
     #                     file_names = file_names + depends_on_file_names + additional_file_names
     #         file_names = sorted(list(set(file_names)))
     #         if file_names_copy == file_names:
@@ -541,7 +541,7 @@ def get_simulation_tasks(simulation_project=None, simulation_configs=None, mode=
             Specifies if collecting simulation configurations and simulation tasks is done sequentially or concurrently.
 
         expected_num_tasks (int):
-            The number of tasks that is expected to be returned. If the result doesn't match an exception is raised. 
+            The number of tasks that is expected to be returned. If the result doesn't match an exception is raised.
 
         simulation_task_class (type):
             Determines the Python class of the returned simulation task objects.

@@ -13,7 +13,7 @@
 namespace inet {
 
 /**
- * Converts between ChecksumHeader and binary (network byte order) CRC header.
+ * Converts between ChecksumHeader and binary (network byte order) FCS header.
  */
 class INET_API ChecksumHeaderSerializer : public FieldsChunkSerializer
 {

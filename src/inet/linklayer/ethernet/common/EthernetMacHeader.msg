@@ -138,5 +138,5 @@ class EthernetFcs extends FieldsChunk
 //
 class EthernetFragmentFcs extends EthernetFcs
 {
-    bool mCrc; // meta information, not represented directly in the frame
+    bool mFcs; // meta information, not represented directly in the frame
 }

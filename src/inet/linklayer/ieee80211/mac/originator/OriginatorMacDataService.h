@@ -30,7 +30,7 @@ class INET_API OriginatorMacDataService : public IOriginatorMacDataService, publ
     IFragmentationPolicy *fragmentationPolicy = nullptr;
     IFragmentation *fragmentation = nullptr;
 //    MpduEncryptionAndIntegrity *mpduEncryptionAndIntegrity = nullptr;
-//    MpduHeaderPlusCrc *mpduHeaderPlusCrc = nullptr;
+//    MpduHeaderPlusFcs *mpduHeaderPlusFcs = nullptr;
 
   protected:
     virtual void initialize() override;
