@@ -9,6 +9,9 @@
 
 #include "inet/common/checksum/ChecksumType_m.h"
 
+#include "inet/common/checksum/TcpIpChecksum.h"
+#include "inet/common/checksum/EthernetCRC.h"
+
 namespace inet {
 
 ChecksumType parseChecksumType(const char *checksumTypeString)
@@ -41,5 +44,25 @@ int getChecksumSizeInBytes(ChecksumType type)
         default: throw cRuntimeError("Unknown checksum type: %d", type);
     }
 }
+
+uint64_t computeChecksum(const unsigned char *buf, size_t bufsize, ChecksumType checksumType)
+{
+    switch (checksumType) {
+        case CHECKSUM_TYPE_UNDEFINED:
+            throw cRuntimeError("Checksum type is undefined");
+        case CHECKSUM_INTERNET:
+            return TcpIpChecksum::checksum(buf, bufsize);
+        case CHECKSUM_CRC32:
+            return ethernetCRC(buf, bufsize);
+        case CHECKSUM_CRC8:
+        case CHECKSUM_CRC16_IBM:
+        case CHECKSUM_CRC16_CCITT:
+        case CHECKSUM_CRC64:
+            throw cRuntimeError("Unsupported checksum type: %d", (int)checksumType);
+        default:
+            throw cRuntimeError("Unknown checksum type: %d", (int)checksumType);
+    }
+}
+
 
 } // namespace inet

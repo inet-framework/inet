@@ -7,8 +7,6 @@
 
 #include "inet/protocolelement/checksum/base/ChecksumCheckerBase.h"
 
-#include "inet/common/checksum/TcpIpChecksum.h"
-#include "inet/common/checksum/EthernetCRC.h"
 
 namespace inet {
 
@@ -48,27 +46,8 @@ bool ChecksumCheckerBase::checkComputedChecksum(const Packet *packet, ChecksumTy
     else {
         const auto& data = packet->peekDataAsBytes();
         auto bytes = data->getBytes();
-
-        //TODO a similar switch occurs in ChecksumInserterBase too, could be factored out
-        uint64_t computedChecksum;
-        switch (checksumType) {
-            case CHECKSUM_TYPE_UNDEFINED:
-                throw cRuntimeError("Checksum type is undefined");
-            case CHECKSUM_INTERNET:
-                computedChecksum = TcpIpChecksum::checksum(bytes.data(), packet->getByteLength() - 2); //TODO assumes checksum is at the end and must be ignored, but e.g. position is configurable in ChecksumInserterBase
-                break;
-            case CHECKSUM_CRC32:
-                computedChecksum = ethernetCRC(bytes.data(), packet->getByteLength() - 4);  //TODO assumes checksum is at the end and must be ignored, but e.g. position is configurable in ChecksumInserterBase
-                break;
-            case CHECKSUM_CRC8:
-            case CHECKSUM_CRC16_IBM:
-            case CHECKSUM_CRC16_CCITT:
-            case CHECKSUM_CRC64:
-                throw cRuntimeError("Unsupported checksum type: %d", (int)checksumType);
-            default:
-                throw cRuntimeError("Unknown checksum type: %d", (int)checksumType);
-        }
-
+        size_t checksumSize = getChecksumSizeInBytes(checksumType);
+        uint64_t computedChecksum = inet::computeChecksum(bytes.data(), packet->getByteLength() - checksumSize, checksumType);
         // NOTE: the correct bit must be checked, because the data may not be corrupted precisely depending on the corruption mode
         return receivedChecksum == computedChecksum && data->isCorrect() && !packet->hasBitError();
     }

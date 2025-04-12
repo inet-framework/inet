@@ -26,4 +26,6 @@ enum ChecksumType
 cplusplus {{
 INET_API ChecksumType parseChecksumType(const char *checksumType);
 INET_API int getChecksumSizeInBytes(ChecksumType type);
+INET_API uint64_t computeChecksum(const unsigned char *buf, size_t bufsize, ChecksumType checksumType);
+inline uint64_t computeChecksum(const std::vector<uint8_t>& vec, ChecksumType checksumType) { return computeChecksum(vec.data(), vec.size(), checksumType); }
 }}

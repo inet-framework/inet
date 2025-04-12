@@ -7,8 +7,6 @@
 
 #include "inet/protocolelement/checksum/base/ChecksumInserterBase.h"
 
-#include "inet/common/checksum/TcpIpChecksum.h"
-#include "inet/common/checksum/EthernetCRC.h"
 
 namespace inet {
 
@@ -38,23 +36,7 @@ uint64_t ChecksumInserterBase::computeDeclaredIncorrectChecksum(const Packet *pa
 
 uint64_t ChecksumInserterBase::computeComputedChecksum(const Packet *packet, ChecksumType checksumType) const
 {
-    auto data = packet->peekDataAsBytes();
-    switch (checksumType) {
-        case CHECKSUM_TYPE_UNDEFINED:
-            throw cRuntimeError("Checksum type is undefined");
-        case CHECKSUM_INTERNET:
-            return TcpIpChecksum::checksum(data->getBytes());
-        case CHECKSUM_CRC32:
-            return ethernetCRC(data->getBytes());
-        case CHECKSUM_CRC8:
-        case CHECKSUM_CRC16_IBM:
-        case CHECKSUM_CRC16_CCITT:
-        case CHECKSUM_CRC64:
-            throw cRuntimeError("Unsupported checksum type: %d", (int)checksumType);
-        default:
-            throw cRuntimeError("Unknown checksum type: %d", (int)checksumType);
-    }
-    return TcpIpChecksum::checksum(data->getBytes());
+    return inet::computeChecksum(packet->peekDataAsBytes()->getBytes(), checksumType);
 }
 
 uint64_t ChecksumInserterBase::computeChecksum(const Packet *packet, ChecksumMode checksumMode, ChecksumType checksumType) const
