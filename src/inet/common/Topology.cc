@@ -134,6 +134,12 @@ static bool selectByParameter(cModule *mod, void *data)
     return mod->hasPar(d->name) && (d->value == nullptr || mod->par(d->name).str() == std::string(d->value));
 }
 
+bool Topology::selectTopologyNode(cModule *mod, void *data)
+{
+    auto properties = mod->getProperties();
+    return properties->get("networkNode") || properties->get("wireJunction");
+}
+
 // ---
 
 void Topology::extractByModulePath(const std::vector<std::string>& fullPathPatterns)
