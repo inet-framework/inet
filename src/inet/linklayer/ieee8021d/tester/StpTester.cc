@@ -55,7 +55,7 @@ void StpTester::depthFirstSearch()
 {
     loop = false;
     numOfVisitedNodes = 0;
-    graph.extractByProperty("networkNode");
+    graph.extractFromNetwork(Topology::selectTopologyNode);
     numOfNodes = graph.getNumNodes();
 
     for (int i = 0; i < graph.getNumNodes(); i++) {

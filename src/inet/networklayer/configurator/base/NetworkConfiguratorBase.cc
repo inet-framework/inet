@@ -18,7 +18,7 @@ namespace inet {
 
 void NetworkConfiguratorBase::extractTopology(Topology& topology)
 {
-    topology.extractByProperty("networkNode");
+    topology.extractFromNetwork(Topology::selectTopologyNode);
     EV_DEBUG << "Topology found " << topology.getNumNodes() << " nodes\n";
     if (topology.getNumNodes() == 0)
         throw cRuntimeError("Empty network!");

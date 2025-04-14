@@ -28,7 +28,7 @@ void Ipv6FlatNetworkConfigurator::initialize(int stage)
         Topology topo("topo");
 
         // extract topology
-        topo.extractByProperty("networkNode");
+        topo.extractFromNetwork(Topology::selectTopologyNode);
         EV_DEBUG << "Topology found " << topo.getNumNodes() << " nodes\n";
 
         configureAdvPrefixes(topo);
