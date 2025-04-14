@@ -29,8 +29,7 @@ void TcpClientSocketIo::open()
     const char *connectAddress = par("connectAddress");
     int connectPort = par("connectPort");
     bool autoRead = par("autoRead");
-    L3Address destination;
-    L3AddressResolver().tryResolve(connectAddress, destination);
+    L3Address destination = L3AddressResolver().resolve(connectAddress);
     socket.setAutoRead(autoRead);
     socket.connect(destination, connectPort);
     if (!autoRead)
