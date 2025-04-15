@@ -864,7 +864,7 @@ uint16_t Udp::computeChecksum(const Protocol *networkProtocol, const L3Address& 
     Chunk::serialize(stream, pseudoHeader);
     Chunk::serialize(stream, udpHeader);
     Chunk::serialize(stream, udpData);
-    uint16_t checksum = TcpIpChecksum::checksum(stream.getData());
+    uint16_t checksum = internetChecksum(stream.getData());
 
     // Excerpt from RFC 768:
     // If the computed  checksum  is zero,  it is transmitted  as all ones (the

@@ -8,7 +8,7 @@
 #include "inet/emulation/networklayer/ipv4/Ipv4Encap.h"
 
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/common/checksum/TcpIpChecksum.h"
+#include "inet/common/checksum/Checksum.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/stlutils.h"
@@ -189,7 +189,7 @@ void Ipv4Encap::encapsulate(Packet *transportPacket)
             MemoryOutputStream ipv4HeaderStream;
             Chunk::serialize(ipv4HeaderStream, ipv4Header);
             // compute the CHECKSUM
-            uint16_t checksum = TcpIpChecksum::checksum(ipv4HeaderStream.getData());
+            uint16_t checksum = internetChecksum(ipv4HeaderStream.getData());
             ipv4Header->setChecksum(checksum);
             // checksum will be calculated in fragmentAndSend()
             break;

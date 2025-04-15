@@ -6,7 +6,7 @@
 
 #include "inet/linklayer/ethernet/common/Ethernet.h"
 
-#include "inet/common/checksum/EthernetCRC.h"
+#include "inet/common/checksum/Checksum.h"
 
 namespace inet {
 

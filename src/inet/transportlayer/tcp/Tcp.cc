@@ -8,7 +8,7 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/checksum/TcpIpChecksum.h"
+#include "inet/common/checksum/Checksum.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
@@ -421,7 +421,7 @@ bool Tcp::checkChecksum(Packet *tcpSegment)
             MemoryOutputStream stream;
             Chunk::serialize(stream, pseudoHeader);
             Chunk::serialize(stream, tcpSegment->peekData());
-            uint16_t checksum = TcpIpChecksum::checksum(stream.getData());
+            uint16_t checksum = internetChecksum(stream.getData());
             return checksum == 0;
         }
         case CHECKSUM_DECLARED_CORRECT:

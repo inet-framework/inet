@@ -6,7 +6,7 @@
 
 
 #include "inet/common/INETUtils.h"
-#include "inet/common/checksum/TcpIpChecksum.h"
+#include "inet/common/checksum/Checksum.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4HeaderSerializer.h"
 
@@ -85,7 +85,7 @@ void Ipv4Header::updateChecksum()
             MemoryOutputStream ipv4HeaderStream;
             Ipv4HeaderSerializer::serialize(ipv4HeaderStream, *this);
             // compute the checksum
-            uint16_t checksum = TcpIpChecksum::checksum(ipv4HeaderStream.getData());
+            uint16_t checksum = internetChecksum(ipv4HeaderStream.getData());
             setChecksum(checksum);
             break;
         }
@@ -108,7 +108,7 @@ bool Ipv4Header::verifyChecksum() const
             // compute the checksum, the check passes if the result is 0xFFFF (includes the received checksum) and the chunks are correct
             MemoryOutputStream ipv4HeaderStream;
             Ipv4HeaderSerializer::serialize(ipv4HeaderStream, *this);
-            uint16_t computedChecksum = TcpIpChecksum::checksum(ipv4HeaderStream.getData());
+            uint16_t computedChecksum = internetChecksum(ipv4HeaderStream.getData());
             return computedChecksum == 0;
         }
         default:

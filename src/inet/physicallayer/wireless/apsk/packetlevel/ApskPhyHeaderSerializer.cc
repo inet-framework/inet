@@ -8,7 +8,7 @@
 #include "inet/physicallayer/wireless/apsk/packetlevel/ApskPhyHeaderSerializer.h"
 
 #include "inet/common/ProtocolGroup.h"
-#include "inet/common/checksum/EthernetCRC.h"
+#include "inet/common/checksum/Checksum.h"
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 
 namespace inet {

@@ -13,7 +13,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/checksum/TcpIpChecksum.h"
+#include "inet/common/checksum/Checksum.h"
 #include "inet/common/stlutils.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
@@ -974,7 +974,7 @@ void Igmpv2::insertChecksum(ChecksumMode checksumMode, const Ptr<IgmpMessage>& i
             MemoryOutputStream igmpStream;
             Chunk::serialize(igmpStream, igmpMsg);
             Chunk::serialize(igmpStream, packet->peekData(Chunk::PF_ALLOW_EMPTY));
-            uint16_t checksum = TcpIpChecksum::checksum(igmpStream.getData());
+            uint16_t checksum = internetChecksum(igmpStream.getData());
             igmpMsg->setChecksum(checksum);
             break;
         }
@@ -996,7 +996,7 @@ bool Igmpv2::verifyChecksum(const Packet *packet)
         case CHECKSUM_COMPUTED: {
             // otherwise compute the checksum, the check passes if the result is 0xFFFF (includes the received checksum)
             auto dataBytes = packet->peekDataAsBytes(Chunk::PF_ALLOW_INCORRECT);
-            uint16_t checksum = TcpIpChecksum::checksum(dataBytes->getBytes());
+            uint16_t checksum = internetChecksum(dataBytes->getBytes());
             // TODO delete these isCorrect calls, rely on checksum only
             return checksum == 0 && igmpMsg->isCorrect();
         }

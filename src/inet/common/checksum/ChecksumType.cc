@@ -10,7 +10,6 @@
 #include "inet/common/checksum/ChecksumType_m.h"
 
 #include "inet/common/checksum/Checksum.h"
-#include "inet/common/checksum/Checksum.h"
 
 namespace inet {
 

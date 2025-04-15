@@ -9,7 +9,7 @@
 #include "inet/common/INETUtils.h"
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/stlutils.h"
-#include "inet/common/checksum/EthernetCRC.h"
+#include "inet/common/checksum/Checksum.h"
 #include "inet/linklayer/common/FcsMode_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"

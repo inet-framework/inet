@@ -9,7 +9,7 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/checksum/TcpIpChecksum.h"
+#include "inet/common/checksum/Checksum.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
@@ -175,7 +175,7 @@ uint16_t Pim::computeChecksum(const Protocol *networkProtocol, const L3Address& 
         Chunk::serialize(stream, pseudoHeader);
     }
     Chunk::serialize(stream, pimPacket);
-    uint16_t checksum = TcpIpChecksum::checksum(stream.getData());
+    uint16_t checksum = internetChecksum(stream.getData());
     return checksum;
 }
 

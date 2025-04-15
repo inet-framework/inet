@@ -7,7 +7,7 @@
 
 #include "inet/routing/ospfv2/Ospfv2Checksum.h"
 
-#include "inet/common/checksum/TcpIpChecksum.h"
+#include "inet/common/checksum/Checksum.h"
 #include "inet/routing/ospfv2/Ospfv2PacketSerializer.h"
 #include "inet/routing/ospfv2/router/Ospfv2Common.h"
 
@@ -34,7 +34,7 @@ void setOspfChecksum(const Ptr<Ospfv2Packet>& ospfPacket, ChecksumMode checksumM
             }
             MemoryOutputStream stream;
             Chunk::serialize(stream, ospfPacket);
-            uint16_t checksum = TcpIpChecksum::checksum(stream.getData());
+            uint16_t checksum = internetChecksum(stream.getData());
             for (int i = 0; i < 8; i++) {
                 ospfPacket->setAuthentication(i, authenticationKey.bytes[i]);
             }
@@ -63,7 +63,7 @@ void setLsaChecksum(Ospfv2Lsa& lsa, ChecksumMode checksumMode)
             auto lsAge = lsaHeader.getLsAge();
             lsaHeader.setLsAge(0); // disable lsAge from CHECKSUM
             Ospfv2PacketSerializer::serializeLsa(stream, lsa);
-            uint16_t checksum = TcpIpChecksum::checksum(stream.getData());
+            uint16_t checksum = internetChecksum(stream.getData());
             lsaHeader.setLsAge(lsAge); // restore lsAge
             lsaHeader.setLsChecksum(checksum);
             break;
@@ -89,7 +89,7 @@ void setLsaHeaderChecksum(Ospfv2LsaHeader& lsaHeader, ChecksumMode checksumMode)
             auto lsAge = lsaHeader.getLsAge();
             lsaHeader.setLsAge(0); // disable lsAge from CHECKSUM
             Ospfv2PacketSerializer::serializeLsaHeader(stream, lsaHeader);
-            uint16_t checksum = TcpIpChecksum::checksum(stream.getData());
+            uint16_t checksum = internetChecksum(stream.getData());
             lsaHeader.setLsAge(lsAge); // restore lsAge
             lsaHeader.setLsChecksum(checksum);
             break;

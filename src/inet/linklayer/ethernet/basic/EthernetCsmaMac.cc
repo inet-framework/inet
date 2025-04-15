@@ -7,7 +7,7 @@
 
 #include "inet/linklayer/ethernet/basic/EthernetCsmaMac.h"
 
-#include "inet/common/checksum/EthernetCRC.h"
+#include "inet/common/checksum/Checksum.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"

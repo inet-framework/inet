@@ -8,7 +8,7 @@
 #include "inet/transportlayer/tcp_common/TcpChecksumInsertionHook.h"
 
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/checksum/TcpIpChecksum.h"
+#include "inet/common/checksum/Checksum.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/EmptyChunk.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -89,7 +89,7 @@ uint16_t TcpChecksumInsertionHook::computeChecksum(const Protocol *networkProtoc
     Chunk::serialize(stream, pseudoHeader);
     Chunk::serialize(stream, tcpHeader);
     Chunk::serialize(stream, tcpData);
-    uint16_t checksum = TcpIpChecksum::checksum(stream.getData());
+    uint16_t checksum = internetChecksum(stream.getData());
     return checksum;
 }
 
