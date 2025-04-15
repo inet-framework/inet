@@ -7,6 +7,7 @@ package inet.common.misc;
 //
 channel PeriodicLossChannel extends ned.DatarateChannel
 {
+    ber = 0; // Larger values will be ignored, only PER is used.
     @class(PeriodicLossChannel);
 }
 
