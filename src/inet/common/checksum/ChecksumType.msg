@@ -18,7 +18,7 @@ enum ChecksumType
     CHECKSUM_CRC8 = 2;        // CRC-8
     CHECKSUM_CRC16_IBM = 3;   // CRC-16-IBM, also called CRC-16-ANSI or CRC-16-ISO
     CHECKSUM_CRC16_CCITT = 4; // CRC-16-CCITT
-    CHECKSUM_CRC32 = 5;       // CRC-32
+    CHECKSUM_CRC32_ETH = 5;   // Ethernet and WiFi FCS
     CHECKSUM_CRC64 = 6;       // CRC-64 a.k.a. ECMA-182
 
 }

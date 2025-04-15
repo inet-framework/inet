@@ -15,7 +15,7 @@ simple EthernetFcsInserter extends ChecksumInserterBase like IPacketFlow
     parameters:
         string fcsMode @enum("disabled","declared","computed") = default("declared");
         checksumMode = fcsMode;
-        checksumType = "crc32";
+        checksumType = "crc32-eth";
         @class(EthernetFcsInserter);
         @display("i=block/inserter");
 }

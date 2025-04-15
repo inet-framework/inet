@@ -23,8 +23,8 @@ ChecksumType parseChecksumType(const char *checksumTypeString)
         return CHECKSUM_CRC16_IBM;
     else if (!strcmp(checksumTypeString, "crc16-ccitt"))
         return CHECKSUM_CRC16_CCITT;
-    else if (!strcmp(checksumTypeString, "crc32"))
-        return CHECKSUM_CRC32;
+    else if (!strcmp(checksumTypeString, "crc32-eth"))
+        return CHECKSUM_CRC32_ETH;
     else if (!strcmp(checksumTypeString, "crc64"))
         return CHECKSUM_CRC64;
     else
@@ -38,7 +38,7 @@ int getChecksumSizeInBytes(ChecksumType type)
         case CHECKSUM_CRC8: return 1;
         case CHECKSUM_CRC16_IBM: return 2;
         case CHECKSUM_CRC16_CCITT: return 2;
-        case CHECKSUM_CRC32: return 4;
+        case CHECKSUM_CRC32_ETH: return 4;
         case CHECKSUM_CRC64: return 8;
         default: throw cRuntimeError("Unknown checksum type: %d", type);
     }
@@ -51,7 +51,7 @@ uint64_t computeChecksum(const unsigned char *buf, size_t bufsize, ChecksumType 
             throw cRuntimeError("Checksum type is undefined");
         case CHECKSUM_INTERNET:
             return internetChecksum(buf, bufsize);
-        case CHECKSUM_CRC32:
+        case CHECKSUM_CRC32_ETH:
             return ethernetCRC(buf, bufsize);
         case CHECKSUM_CRC8:
         case CHECKSUM_CRC16_IBM:

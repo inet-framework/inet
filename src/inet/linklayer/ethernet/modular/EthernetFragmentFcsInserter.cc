@@ -32,7 +32,7 @@ void EthernetFragmentFcsInserter::processPacket(Packet *packet)
 {
     const auto& header = makeShared<EthernetFragmentFcs>();
     auto fragmentTag = packet->getTag<FragmentTag>();
-    ASSERT(checksumType == CHECKSUM_CRC32);
+    ASSERT(checksumType == CHECKSUM_CRC32_ETH);
     auto fcs = computeChecksum(packet, checksumMode, checksumType);
     header->setFcs(fcs);
     FcsMode fcsMode = (FcsMode)checksumMode; //TODO KLUDGE: use ChecksumMode everywhere
