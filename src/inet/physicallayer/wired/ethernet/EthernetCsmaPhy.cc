@@ -380,6 +380,7 @@ void EthernetCsmaPhy::handleEndReception()
     if (fsm.getState() == RECEIVING && rxSignals.size() == 1) {
         EthernetSignalBase *signal = rxSignals[0].signal;
         EV_DEBUG << "Handling end reception" << EV_FIELD(signal) << EV_ENDL;
+        emit(receptionEndedSignal, signal);
         auto packet = check_and_cast_nullable<Packet *>(signal->decapsulate());
         auto signalType = static_cast<EthernetSignalType>(signal->getKind());
         if (!signal->hasBitError() && signalType == DATA)
@@ -388,7 +389,6 @@ void EthernetCsmaPhy::handleEndReception()
             packet->setBitError(signal->hasBitError());
         auto esd1 = signal->getEsd1();
         fsm.insertDelayedAction([=] () { mac->handleReceptionEnd(signalType, packet, esd1); });
-        emit(receptionEndedSignal, signal);
         delete signal;
     }
     else {
