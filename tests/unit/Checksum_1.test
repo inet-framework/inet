@@ -1,0 +1,95 @@
+%description:
+Test CRC algorithms in Checksum.h
+
+%includes:
+#include "inet/common/checksum/Checksum.h"
+
+using namespace inet;
+
+%global:
+
+static std::vector<uint8_t> createRandomArray(size_t len, cModule *module)
+{
+    std::vector<uint8_t> array(len);
+    for (size_t i = 0; i < len; ++i)
+        array[i] = module->intuniform(0,255);
+    return array;
+}
+
+static std::vector<uint8_t> arrayFromString(const char *str)
+{
+    return std::vector<uint8_t>(str, str + strlen(str));
+}
+
+#define TEST_CRC(algo, data, len) { \
+    auto crc = algo(data, len); \
+    auto crc_bitwise = algo ## _bitwise(data, len); \
+    EV << #algo << ": " << std::hex << crc << ", bitwise: " << crc_bitwise << std::endl; \
+    ASSERT(crc == crc_bitwise); \
+  }
+
+#define TEST_CRC_ARR(algo)  TEST_CRC(algo, array.data(), array.size())
+
+%activity:
+
+// Testing on predefined inputs. Result should ALSO be checked against 3rd party impls, such as https://crccalc.com/
+EV << "Fixed string input:\n";
+auto array = arrayFromString("Lorem ipsum dolor sit amet");
+TEST_CRC_ARR(crc32_iso_hdlc);
+TEST_CRC_ARR(crc32c);
+TEST_CRC_ARR(crc16_ibm);
+TEST_CRC_ARR(crc16_ccitt);
+
+// Testing on random arrays. Table-based and bitwise computations should give the same result.
+EV << "\nRandom byte array inputs:\n";
+int numPasses = 100;
+for (int i = 0; i < numPasses; ++i) {
+    size_t len = (size_t)exponential(1000);
+    EV << "\nArray len: " << std::dec << len << std::endl;
+    auto array = createRandomArray(len, this);
+    TEST_CRC_ARR(crc32_iso_hdlc);
+    TEST_CRC_ARR(crc32c);
+    TEST_CRC_ARR(crc16_ibm);
+    TEST_CRC_ARR(crc16_ccitt);
+}
+
+EV << ".\n";
+
+%contains: stdout
+Fixed string input:
+crc32_iso_hdlc: 5f29d461, bitwise: 5f29d461
+crc32c: ee0c002b, bitwise: ee0c002b
+crc16_ibm: c14f, bitwise: c14f
+crc16_ccitt: f20b, bitwise: f20b
+
+Random byte array inputs:
+
+Array len: 795
+crc32_iso_hdlc: 9e081274, bitwise: 9e081274
+crc32c: 6625eb5c, bitwise: 6625eb5c
+crc16_ibm: 9bdb, bitwise: 9bdb
+crc16_ccitt: fbd8, bitwise: fbd8
+
+Array len: 16
+crc32_iso_hdlc: 761f0e93, bitwise: 761f0e93
+crc32c: 12b368cf, bitwise: 12b368cf
+crc16_ibm: 8979, bitwise: 8979
+crc16_ccitt: 13f1, bitwise: 13f1
+
+Array len: 90
+crc32_iso_hdlc: 155d9ec9, bitwise: 155d9ec9
+crc32c: 2781d066, bitwise: 2781d066
+crc16_ibm: 4e10, bitwise: 4e10
+crc16_ccitt: a7eb, bitwise: a7eb
+
+Array len: 286
+crc32_iso_hdlc: d8f944eb, bitwise: d8f944eb
+crc32c: c9d315bc, bitwise: c9d315bc
+crc16_ibm: 3367, bitwise: 3367
+crc16_ccitt: 90fe, bitwise: 90fe
+
+Array len: 3
+crc32_iso_hdlc: 6bad947d, bitwise: 6bad947d
+crc32c: bd1043ed, bitwise: bd1043ed
+crc16_ibm: 5efb, bitwise: 5efb
+crc16_ccitt: c688, bitwise: c688

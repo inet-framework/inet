@@ -17,30 +17,30 @@ ChecksumType parseChecksumType(const char *checksumTypeString)
 {
     if (!strcmp(checksumTypeString, "internet"))
         return CHECKSUM_INTERNET;
-    else if (!strcmp(checksumTypeString, "crc8"))
-        return CHECKSUM_CRC8;
+    else if (!strcmp(checksumTypeString, "crc32-eth"))
+        return CHECKSUM_CRC32_ETH;
+    else if (!strcmp(checksumTypeString, "crc32c"))
+        return CHECKSUM_CRC32C;
     else if (!strcmp(checksumTypeString, "crc16-ibm"))
         return CHECKSUM_CRC16_IBM;
     else if (!strcmp(checksumTypeString, "crc16-ccitt"))
         return CHECKSUM_CRC16_CCITT;
-    else if (!strcmp(checksumTypeString, "crc32-eth"))
-        return CHECKSUM_CRC32_ETH;
-    else if (!strcmp(checksumTypeString, "crc64"))
-        return CHECKSUM_CRC64;
     else
-        throw cRuntimeError("Unknown checksum type '%s', allowed ones are: internet, crc8, crc16-ibm, crc16-ccitt, crc32, crc64", checksumTypeString);
+        throw cRuntimeError("Unknown checksum type '%s', allowed ones are: internet, crc16-ibm, crc16-ccitt, crc32-eth, crc32c", checksumTypeString);
 }
 
 int getChecksumSizeInBytes(ChecksumType type)
 {
     switch (type) {
-        case CHECKSUM_INTERNET: return 2;
-        case CHECKSUM_CRC8: return 1;
-        case CHECKSUM_CRC16_IBM: return 2;
-        case CHECKSUM_CRC16_CCITT: return 2;
-        case CHECKSUM_CRC32_ETH: return 4;
-        case CHECKSUM_CRC64: return 8;
-        default: throw cRuntimeError("Unknown checksum type: %d", type);
+        case CHECKSUM_INTERNET:
+        case CHECKSUM_CRC16_IBM:
+        case CHECKSUM_CRC16_CCITT:
+            return 2;
+        case CHECKSUM_CRC32_ETH:
+        case CHECKSUM_CRC32C:
+            return 4;
+        default:
+            throw cRuntimeError("Unknown checksum type: %d", type);
     }
 }
 
@@ -53,11 +53,12 @@ uint64_t computeChecksum(const unsigned char *buf, size_t bufsize, ChecksumType 
             return internetChecksum(buf, bufsize);
         case CHECKSUM_CRC32_ETH:
             return ethernetCRC(buf, bufsize);
-        case CHECKSUM_CRC8:
+        case CHECKSUM_CRC32C:
+            return crc32c(buf, bufsize);
         case CHECKSUM_CRC16_IBM:
+            return crc16_ibm(buf, bufsize);
         case CHECKSUM_CRC16_CCITT:
-        case CHECKSUM_CRC64:
-            throw cRuntimeError("Unsupported checksum type: %d", (int)checksumType);
+            return crc16_ccitt(buf, bufsize);
         default:
             throw cRuntimeError("Unknown checksum type: %d", (int)checksumType);
     }
