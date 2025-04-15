@@ -26,7 +26,7 @@ ChecksumType parseChecksumType(const char *checksumTypeString)
     else if (!strcmp(checksumTypeString, "crc64"))
         return CHECKSUM_CRC64;
     else
-        throw cRuntimeError("Unknown checksum type: '%s'", checksumTypeString);
+        throw cRuntimeError("Unknown checksum type '%s', allowed ones are: internet, crc8, crc16-ibm, crc16-ccitt, crc32, crc64", checksumTypeString);
 }
 
 int getChecksumSizeInBytes(ChecksumType type)

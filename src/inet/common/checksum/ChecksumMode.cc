@@ -17,7 +17,7 @@ ChecksumMode parseChecksumMode(const char *checksumModeString, bool allowDisable
         if (allowDisabled)
             return CHECKSUM_DISABLED;
         else
-            throw cRuntimeError("The 'disabled' Checksum mode not allowed");
+            throw cRuntimeError("The 'disabled' checksum mode is not allowed here");
     }
     else if (!strcmp(checksumModeString, "declared"))
         return CHECKSUM_DECLARED_CORRECT;
@@ -28,7 +28,7 @@ ChecksumMode parseChecksumMode(const char *checksumModeString, bool allowDisable
     else if (!strcmp(checksumModeString, "computed"))
         return CHECKSUM_COMPUTED;
     else
-        throw cRuntimeError("Unknown Checksum mode: '%s'", checksumModeString);
+        throw cRuntimeError("Unknown checksum mode '%s', allowed ones are disabled, declared, declaredCorrect, declaredIncorrect, computed", checksumModeString);
 }
 
 } // namespace inet
