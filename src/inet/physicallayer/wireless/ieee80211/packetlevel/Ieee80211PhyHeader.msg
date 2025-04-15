@@ -6,6 +6,7 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
+import inet.common.checksum.ChecksumMode;
 import inet.linklayer.common.FcsMode;
 
 namespace inet::physicallayer;
@@ -34,7 +35,7 @@ class Ieee80211FhssPhyHeader extends Ieee80211PhyHeader
     uint16_t plw;
     uint8_t psf;
     uint16_t fcs;
-    FcsMode fcsMode = FCS_MODE_UNDEFINED;
+    ChecksumMode fcsMode = FCS_MODE_UNDEFINED;  // should be FcsMode, but OMMeT++ bug #1351 prevents that (fixed in OMNeT++ 6.2)
 }
 
 //
@@ -48,7 +49,7 @@ class Ieee80211IrPhyHeader extends Ieee80211PhyHeader
 {
     // TODO B lengthField;
     uint16_t fcs;
-    FcsMode fcsMode = FCS_MODE_UNDEFINED;
+    ChecksumMode fcsMode = FCS_MODE_UNDEFINED;  // should be FcsMode, but OMMeT++ bug #1351 prevents that (fixed in OMNeT++ 6.2)
 }
 
 //
@@ -66,7 +67,7 @@ class Ieee80211DsssPhyHeader extends Ieee80211PhyHeader
     uint8_t service;
     // TODO B lengthField;
     uint16_t fcs;
-    FcsMode fcsMode = FCS_MODE_UNDEFINED;
+    ChecksumMode fcsMode = FCS_MODE_UNDEFINED;  // should be FcsMode, but OMMeT++ bug #1351 prevents that (fixed in OMNeT++ 6.2)
 }
 
 //
