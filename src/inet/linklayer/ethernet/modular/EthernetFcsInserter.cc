@@ -23,7 +23,7 @@ void EthernetFcsInserter::processPacket(Packet *packet)
     }
     else {
         const auto& header = makeShared<EthernetFcs>();
-        ASSERT(checksumType == CHECKSUM_CRC32_ETH);
+        ASSERT(checksumType == CHECKSUM_ETHERNET_FCS);
         auto fcs = computeChecksum(packet, checksumMode, checksumType);
         header->setFcs(fcs);
         FcsMode fcsMode = (FcsMode)checksumMode; //TODO KLUDGE: use ChecksumMode everywhere

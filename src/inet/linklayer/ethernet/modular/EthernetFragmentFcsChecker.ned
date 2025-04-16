@@ -13,7 +13,7 @@ import inet.queueing.contract.IPacketFilter;
 simple EthernetFragmentFcsChecker extends ChecksumCheckerBase like IPacketFilter
 {
     parameters:
-        checksumType = "crc32-eth";
+        checksumType = "ethernet-fcs";
         @class(EthernetFragmentFcsChecker);
         @display("i=block/checker");
 }

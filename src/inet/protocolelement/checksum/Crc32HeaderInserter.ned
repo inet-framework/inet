@@ -12,5 +12,5 @@ import inet.protocolelement.checksum.ChecksumHeaderInserter;
 simple Crc32HeaderInserter extends ChecksumHeaderInserter
 {
     parameters:
-        checksumType = "crc32-eth";
+        checksumType = "ethernet-fcs";
 }

@@ -42,7 +42,7 @@ bool EthernetFragmentFcsChecker::matchesPacket(const Packet *packet) const
     const auto& trailer = packet->peekAtBack<EthernetFragmentFcs>(B(4));
     auto fcsMode = trailer->getFcsMode();
     auto fcs = trailer->getFcs();
-    ASSERT(checksumType == CHECKSUM_CRC32_ETH);
+    ASSERT(checksumType == CHECKSUM_ETHERNET_FCS);
     return checkChecksum(packet, (ChecksumMode)fcsMode, checksumType, fcs);  //TODO KLUDGE cast should not be necessary
 }
 

@@ -12,7 +12,7 @@ import inet.queueing.base.PacketFilterBase;
 simple ChecksumCheckerBase extends PacketFilterBase
 {
     parameters:
-        string checksumType @enum("internet","crc32-eth") = default("crc32-eth"); // note: others are not currently supported
+        string checksumType @enum("internet","ethernet-fcs","crc32c","crc16-ibm","crc16-ccitt") = default("ethernet-fcs");
         @class(ChecksumCheckerBase);
         @display("i=block/checker");
 }

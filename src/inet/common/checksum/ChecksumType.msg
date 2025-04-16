@@ -17,7 +17,7 @@ enum ChecksumType
     CHECKSUM_INTERNET = 1;    // "Internet checksum" used in TCP/IP
     CHECKSUM_CRC16_IBM = 3;   // CRC-16-IBM, also called CRC-16-ANSI or CRC-16-ISO
     CHECKSUM_CRC16_CCITT = 4; // CRC-16-CCITT
-    CHECKSUM_CRC32_ETH = 5;   // Ethernet and WiFi FCS (byte-swapped version of CRC32 a.k.a. CRC-32/ISO-HDLC)
+    CHECKSUM_ETHERNET_FCS = 5;   // Ethernet and WiFi FCS (byte-swapped version of CRC32 a.k.a. CRC-32/ISO-HDLC)
     CHECKSUM_CRC32C = 6;      // CRC-32C (Castagnoli)
 }
 
