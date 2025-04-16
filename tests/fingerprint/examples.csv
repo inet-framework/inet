@@ -172,7 +172,7 @@
 
 /examples/inet/ipv4hook/,            -f omnetpp.ini -c General -r 0,                100s,            1afb-5eeb/tplx;3df8-bb36/~tNl;2891-5a4e/~tND;eb45-1e68/tyf, PASS, EthernetMac Ipv4
 
-/examples/inet/ipv4largenet/,        -f omnetpp.ini -c IPv4LargeNet -r 0,           20s,             28ec-515c/tplx;3808-b50b/~tNl;99bf-d84b/~tND, PASS, EthernetMac Ipv4
+/examples/inet/ipv4largenet/,        -f omnetpp.ini -c IPv4LargeNet -r 0,           20s,             28ec-515c/tplx;3808-b50b/~tNl;f8c7-68ef/~tND, PASS, EthernetMac Ipv4
 
 /examples/inet/kidsnw1/,             -f omnetpp.ini -c General -r 0,                1000s,           279d-7835/tplx;871e-bb26/~tNl;0344-df45/~tND;180b-7521/tyf, PASS, Ipv4
 
