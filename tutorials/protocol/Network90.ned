@@ -7,8 +7,8 @@
 
 package inet.tutorials.protocol;
 
-import inet.protocolelement.checksum.Crc32HeaderChecker;
-import inet.protocolelement.checksum.Crc32HeaderInserter;
+import inet.protocolelement.checksum.EthernetFcsHeaderChecker;
+import inet.protocolelement.checksum.EthernetFcsHeaderInserter;
 import inet.protocolelement.common.InterpacketGapInserter;
 import inet.protocolelement.fragmentation.FragmentNumberHeaderBasedDefragmenter;
 import inet.protocolelement.ordering.SequenceNumbering;
@@ -75,7 +75,7 @@ module SenderHost
         preemptingServer: PreemptingServer {
             @display("p=250,1000");
         }
-        fcsInserter: Crc32HeaderInserter {
+        fcsInserter: EthernetFcsHeaderInserter {
             @display("p=200,1100");
         }
         InterpacketGapInserter: InterpacketGapInserter {
@@ -155,7 +155,7 @@ module ReceiverHost
         defragmenter: DynamicDefragmenter {
             @display("p=200,300");
         }
-        fcsChecker: Crc32HeaderChecker {
+        fcsChecker: EthernetFcsHeaderChecker {
             @display("p=200,400");
         }
         receiver: PacketReceiver {

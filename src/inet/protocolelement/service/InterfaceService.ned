@@ -12,8 +12,8 @@ import inet.networklayer.common.NetworkInterface;
 import inet.protocolelement.acknowledgement.ReceiveWithAcknowledge;
 import inet.protocolelement.acknowledgement.Resending;
 import inet.protocolelement.acknowledgement.SendWithAcknowledge;
-import inet.protocolelement.checksum.Crc32HeaderChecker;
-import inet.protocolelement.checksum.Crc32HeaderInserter;
+import inet.protocolelement.checksum.EthernetFcsHeaderChecker;
+import inet.protocolelement.checksum.EthernetFcsHeaderInserter;
 import inet.protocolelement.dispatching.ReceiveWithProtocol;
 import inet.protocolelement.dispatching.SendWithProtocol;
 import inet.protocolelement.selectivity.ReceiveAtMacAddress;
@@ -48,7 +48,7 @@ module InterfaceService extends NetworkInterface
         sendWithProtocol: SendWithProtocol {
             @display("p=300,500");
         }
-        crcInserter: Crc32HeaderInserter {
+        crcInserter: EthernetFcsHeaderInserter {
             @display("p=300,600");
         }
         transmitter: PacketTransmitter {
@@ -66,7 +66,7 @@ module InterfaceService extends NetworkInterface
         receiveWithProtocol: ReceiveWithProtocol {
             @display("p=600,400");
         }
-        crcChecker: Crc32HeaderChecker {
+        crcChecker: EthernetFcsHeaderChecker {
             @display("p=600,500");
         }
     connections:
