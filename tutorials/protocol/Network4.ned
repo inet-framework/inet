@@ -7,8 +7,8 @@
 
 package inet.tutorials.protocol;
 
-import inet.protocolelement.checksum.Crc32HeaderChecker;
-import inet.protocolelement.checksum.Crc32HeaderInserter;
+import inet.protocolelement.checksum.EthernetFcsHeaderChecker;
+import inet.protocolelement.checksum.EthernetFcsHeaderInserter;
 import inet.protocolelement.transceiver.PacketReceiver;
 import inet.protocolelement.transceiver.PacketTransmitter;
 import inet.queueing.queue.PacketQueue;
@@ -33,7 +33,7 @@ module ClientHost4
         server: InstantServer {
             @display("p=150,300");
         }
-        fcsInserter: Crc32HeaderInserter {
+        fcsInserter: EthernetFcsHeaderInserter {
             @display("p=150,400");
         }
         transmitter: PacketTransmitter {
@@ -57,7 +57,7 @@ module ServerHost4
         app: PassivePacketSink {
             @display("p=150,100");
         }
-        fcsChecker: Crc32HeaderChecker {
+        fcsChecker: EthernetFcsHeaderChecker {
             @display("p=150,200");
         }
         receiver: PacketReceiver {

@@ -6,8 +6,8 @@ Tests CRC32 checksum.
 
 import inet.queueing.source.ActivePacketSource;
 import inet.queueing.sink.PassivePacketSink;
-import inet.protocolelement.checksum.Crc32HeaderInserter;
-import inet.protocolelement.checksum.Crc32HeaderChecker;
+import inet.protocolelement.checksum.EthernetFcsHeaderInserter;
+import inet.protocolelement.checksum.EthernetFcsHeaderChecker;
 
 network TestFcs
 {
@@ -15,10 +15,10 @@ network TestFcs
         source: ActivePacketSource {
             @display("p=100,100");
         }
-        inserter: Crc32HeaderInserter {
+        inserter: EthernetFcsHeaderInserter {
             @display("p=100,200");
         }
-        checker: Crc32HeaderChecker {
+        checker: EthernetFcsHeaderChecker {
             @display("p=100,300");
         }
         sink: PassivePacketSink {
