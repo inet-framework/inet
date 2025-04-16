@@ -86,6 +86,12 @@ simple Udp like IUdp
         output ipOut @labels(UdpHeader,Ipv4ControlInfo/down,Ipv6ControlInfo/down);
 }
 
+//
+// Computes and inserts Cyclic Redundancy Check (CRC) values into UDP headers
+// during packet processing. Implements a network filter hook that intercepts
+// packets in the post-routing phase and inserts the correct CRC value based on
+// the packet's source and destination addresses.
+//
 simple UdpChecksumInsertionHook
 {
 }

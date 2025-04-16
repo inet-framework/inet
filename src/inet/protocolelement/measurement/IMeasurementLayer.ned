@@ -7,6 +7,11 @@
 
 package inet.protocolelement.measurement;
 
+//
+// Module interface for measurement layers that collect performance metrics
+// on packet flows. Implementations monitor and record various statistics
+// about packets passing through the network stack.
+//
 moduleinterface IMeasurementLayer
 {
     parameters:

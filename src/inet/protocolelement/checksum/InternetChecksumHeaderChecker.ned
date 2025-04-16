@@ -9,6 +9,13 @@ package inet.protocolelement.checksum;
 
 import inet.protocolelement.checksum.ChecksumHeaderChecker;
 
+//
+// Checks Internet checksum headers in packets to verify data
+// integrity. This module extends ChecksumHeaderChecker and
+// specializes it to use the "internet" checksum type.
+//
+// @see InternetChecksumHeaderInserter
+//
 simple InternetChecksumHeaderChecker extends ChecksumHeaderChecker
 {
     parameters:

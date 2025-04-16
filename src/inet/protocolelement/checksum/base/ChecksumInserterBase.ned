@@ -9,6 +9,16 @@ package inet.protocolelement.checksum.base;
 
 import inet.queueing.base.PacketFlowBase;
 
+//
+// Base module for checksum inserters that add checksums to packets for integrity
+// verification. This module supports multiple checksum algorithms such as CRC32
+// and the Internet checksum, and also several checksum modes: disabled,
+// declared correct, declared incorrect, and computed. In computed mode,
+// it calculates the actual checksum based on the packet content using the selected
+// checksum algorithm. The checksumMode parameter determines which mode is used.
+//
+// @see ChecksumInserterBase
+//
 simple ChecksumInserterBase extends PacketFlowBase
 {
     parameters:

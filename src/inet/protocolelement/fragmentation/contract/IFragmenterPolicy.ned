@@ -7,6 +7,11 @@
 
 package inet.protocolelement.fragmentation.contract;
 
+//
+// Module interface for fragmentation policies that determine how packets are
+// split into fragments. Implementations calculate the appropriate fragment
+// sizes based on various constraints such as maximum transmission unit.
+//
 moduleinterface IFragmenterPolicy
 {
     parameters:

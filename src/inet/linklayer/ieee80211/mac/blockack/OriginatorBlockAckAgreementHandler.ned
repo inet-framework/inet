@@ -7,6 +7,14 @@
 
 package inet.linklayer.ieee80211.mac.blockack;
 
+//
+// Manages Block Acknowledgment (Block Ack) agreements for the originator side
+// in IEEE 802.11 networks. Handles the creation, maintenance, and termination
+// of Block Ack agreements with receivers. Processes ADDBA requests/responses
+// and DELBA frames, tracks agreement timeouts, and maintains the state of
+// active agreements. Enables efficient acknowledgment of multiple frames with
+// a single Block Ack frame.
+//
 simple OriginatorBlockAckAgreementHandler
 {
     parameters:

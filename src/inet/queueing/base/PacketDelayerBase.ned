@@ -7,6 +7,12 @@
 
 package inet.queueing.base;
 
+//
+// Base module for packet delayer implementations. Provides common functionality
+// for delaying packets for a specified amount of time before forwarding them.
+// Supports clock synchronization, scheduling priorities, and zero-delay handling.
+// Adds delay-related tags to packets for tracking and analysis.
+//
 simple PacketDelayerBase extends PacketProcessorBase
 {
     parameters:

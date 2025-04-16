@@ -7,6 +7,12 @@
 
 package inet.networklayer.ipv4;
 
+//
+// Module interface for IPv4 protocol implementations. Defines gates and
+// parameters for modules that provide IPv4 protocol functionality. The IPv4
+// protocol provides datagram routing, fragmentation, and addressing between
+// network interfaces and transport layer protocols.
+//
 moduleinterface IIpv4
 {
     parameters:

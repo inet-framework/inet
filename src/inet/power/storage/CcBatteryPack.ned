@@ -9,6 +9,13 @@ package inet.power.storage;
 
 import inet.power.storage.SimpleCcBattery;
 
+//
+// Models a battery pack consisting of multiple identical cells arranged in
+// series or parallel. Calculates the overall capacity, voltage, and internal
+// resistance based on the cell properties and their arrangement. In a serial
+// arrangement, voltages and internal resistances add up. In a parallel
+// arrangement, capacities add up and internal resistance decreases.
+//
 simple CcBatteryPack extends SimpleCcBattery
 {
    parameters:

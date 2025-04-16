@@ -7,6 +7,11 @@
 
 package inet.protocolelement.fragmentation.contract;
 
+//
+// Module interface for packet defragmenters that reassemble original packets
+// from fragments. Implementations collect fragments and reconstruct the
+// complete packet once all fragments have been received.
+//
 moduleinterface IPacketDefragmenter
 {
     parameters:

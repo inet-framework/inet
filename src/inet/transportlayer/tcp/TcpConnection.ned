@@ -8,6 +8,13 @@
 
 package inet.transportlayer.tcp;
 
+//
+// Represents a single TCP connection in the TCP protocol implementation.
+// Implements the TCP state machine and handles connection establishment,
+// data transfer, flow control, congestion control, and connection termination.
+// Provides extensive statistics collection for various TCP metrics including
+// window sizes, sequence numbers, RTT measurements, and congestion parameters.
+//
 simple TcpConnection {
     parameters:
         @signal[state];    // FSM state

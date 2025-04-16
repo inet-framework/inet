@@ -7,6 +7,12 @@
 
 package inet.linklayer.contract;
 
+//
+// Module interface for Ethernet protocol layer implementations. Implementations
+// typically handle the encapsulation of higher layer packets into Ethernet
+// frames for transmission and the decapsulation of received Ethernet frames for
+// delivery to higher layers.
+//
 moduleinterface IEthernetLayer
 {
     parameters:

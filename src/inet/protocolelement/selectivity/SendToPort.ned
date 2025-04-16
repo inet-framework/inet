@@ -7,6 +7,11 @@
 
 package inet.protocolelement.selectivity;
 
+//
+// Adds a destination port header to packets. The header contains the configured
+// destination port and is used by the corresponding ReceiveAtPort module to
+// filter packets.
+//
 simple SendToPort
 {
     parameters:

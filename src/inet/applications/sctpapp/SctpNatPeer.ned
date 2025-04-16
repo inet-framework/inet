@@ -9,6 +9,12 @@ package inet.applications.sctpapp;
 
 import inet.applications.contract.IApp;
 
+//
+// Implements a peer application for SCTP NAT traversal. Supports both standard
+// and rendezvous connection establishment methods to traverse NAT devices.
+// Exchanges NAT traversal information with other peers and handles data transfer
+// with configurable parameters. Supports multi-homing with multiple addresses.
+//
 simple SctpNatPeer like IApp
 {
     parameters:
