@@ -8,6 +8,7 @@
 
 #include "inet/transportlayer/sctp/SctpHeaderSerializer.h"
 
+#include "inet/common/checksum/Checksum.h"
 #include "inet/common/Endian.h"
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
@@ -15,7 +16,6 @@
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
 #include "inet/transportlayer/sctp/SctpAssociation.h"
-#include "inet/transportlayer/sctp/SctpChecksum.h"
 #include "inet/transportlayer/sctp/headers/sctphdr.h"
 
 #if !defined(_WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
@@ -1100,7 +1100,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
             auth->hmac[k] = result[k];
     }
     // finally, set the CHECKSUM32 checksum field in the Sctp common header
-    ch->checksum = SctpChecksum::checksum((unsigned char *)buffer, writtenbytes);
+    ch->checksum = crc32c((unsigned char *)buffer, writtenbytes);
     // check the serialized packet length
     if (writtenbytes != msg->getChunkLength().get<B>()) {
         throw cRuntimeError("Sctp Serializer error: writtenbytes (%lu) != msgLength(%lu) in message (%s)%s",
@@ -1131,7 +1131,7 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
     struct common_header *common_header = (struct common_header *)((void *)buffer);
     int32_t tempChecksum = common_header->checksum;
     common_header->checksum = 0;
-    int32_t chksum = SctpChecksum::checksum((unsigned char *)common_header, bufsize);
+    int32_t chksum = crc32c((unsigned char *)common_header, bufsize);
     common_header->checksum = tempChecksum;
 
     const unsigned char *chunks = (unsigned char *)(buffer + sizeof(struct common_header));

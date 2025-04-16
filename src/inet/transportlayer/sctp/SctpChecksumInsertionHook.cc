@@ -7,13 +7,13 @@
 
 #include "inet/transportlayer/sctp/SctpChecksumInsertionHook.h"
 
+#include "inet/common/checksum/Checksum.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/contract/INetfilter.h"
-#include "inet/transportlayer/sctp/SctpChecksum.h"
 #include "inet/transportlayer/sctp/SctpHeader.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 
@@ -67,7 +67,7 @@ void SctpChecksumInsertion::insertChecksum(const Protocol *networkProtocol, cons
             auto length = sctpPacketBytes.size();
             auto buffer = new uint8_t[length];
             std::copy(sctpPacketBytes.begin(), sctpPacketBytes.end(), (uint8_t *)buffer);
-            auto checksum = SctpChecksum::checksum(buffer, length);
+            auto checksum = crc32c(buffer, length);
             sctpHeader->setChecksum(checksum);
             delete[] buffer;
             break;
