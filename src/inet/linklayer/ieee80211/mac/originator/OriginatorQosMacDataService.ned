@@ -12,6 +12,14 @@ import inet.linklayer.ieee80211.mac.contract.IFragmentationPolicy;
 import inet.linklayer.ieee80211.mac.contract.IMsduAggregationPolicy;
 import inet.linklayer.ieee80211.mac.contract.IMpduAggregationPolicy;
 
+//
+// Implements the MAC data service for the originator (sender) side in IEEE 802.11
+// QoS networks. Extends the basic MAC data service with QoS capabilities including
+// MSDU aggregation (A-MSDU) and MPDU aggregation (A-MPDU). Processes outgoing
+// frames by assigning sequence numbers, performing aggregation, and fragmentation
+// based on configured policies. Follows the MAC data plane architecture described
+// in IEEE 802.11 standard.
+//
 module OriginatorQosMacDataService extends CompoundModule
 {
     parameters:

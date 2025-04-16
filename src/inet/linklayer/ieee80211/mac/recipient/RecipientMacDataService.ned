@@ -8,6 +8,13 @@
 package inet.linklayer.ieee80211.mac.recipient;
 
 import inet.common.CompoundModule;
+
+//
+// Implements the MAC data service for the recipient side in non-QoS IEEE 802.11 networks.
+// Processes received frames by performing defragmentation and duplicate detection.
+//
+// @see RecipientQosMacDataService
+//
 module RecipientMacDataService extends CompoundModule
 {
     parameters:

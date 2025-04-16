@@ -17,6 +17,13 @@ import inet.routing.pim.modes.PimSm;
 import inet.routing.pim.tables.PimInterfaceTable;
 import inet.routing.pim.tables.PimNeighborTable;
 
+//
+// Implements the Protocol Independent Multicast (PIM) routing protocol for
+// IP multicast. This module integrates both PIM-DM (Dense Mode) and PIM-SM
+// (Sparse Mode) implementations, using a splitter to direct packets to the
+// appropriate mode based on interface configuration. PIM builds distribution
+// trees for efficient multicast data delivery across IP networks.
+//
 module Pim extends CompoundModule like IPim
 {
     parameters:
@@ -75,9 +82,13 @@ module Pim extends CompoundModule like IPim
         pimSplitter.ipIn <-- { @display("m=s"); } <-- networkLayerIn;
 }
 
+//
+// Provides CRC (Cyclic Redundancy Check) insertion functionality for PIM packets.
+// This hook ensures data integrity by calculating and inserting CRC values into
+// outgoing PIM protocol messages before they are transmitted over the network.
+//
 simple PimChecksumInsertionHook extends SimpleModule
 {
     parameters:
         @class(PimChecksumInsertionHook);
 }
-

@@ -9,6 +9,15 @@ package inet.linklayer.ieee80211.mac.originator;
 
 import inet.common.SimpleModule;
 
+//
+// Implements frame retransmission and recovery procedures for non-QoS frames in
+// IEEE 802.11 networks. Manages short and long retry counters, adjusts contention
+// window size based on transmission outcomes, and enforces retry limits. Handles
+// different retry procedures for frames below and above the RTS threshold as
+// specified in IEEE 802.11 standard section 9.19.2.6.
+//
+// @see IRtsPolicy, Dcaf
+//
 simple NonQosRecoveryProcedure extends SimpleModule
 {
     parameters:

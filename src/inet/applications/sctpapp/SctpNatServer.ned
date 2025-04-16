@@ -10,6 +10,14 @@ package inet.applications.sctpapp;
 import inet.common.SimpleModule;
 import inet.applications.contract.IApp;
 
+//
+// Implements a rendezvous server for SCTP NAT traversal. Facilitates
+// communication between peers behind NAT devices by maintaining connection
+// information and exchanging address details between peers. Handles multi-homed
+// connections and processes address addition notifications. Enables direct
+// peer-to-peer communication by providing each peer with the necessary
+// connection details of the other peer.
+//
 simple SctpNatServer extends SimpleModule like IApp
 {
     parameters:

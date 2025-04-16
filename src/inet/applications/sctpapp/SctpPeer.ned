@@ -10,6 +10,13 @@ package inet.applications.sctpapp;
 import inet.common.SimpleModule;
 import inet.applications.contract.IApp;
 
+//
+// Implements a versatile SCTP application that can function as both client and
+// server simultaneously. Supports sending and receiving data with configurable
+// parameters including multi-streaming, PR-SCTP, and stream reset capabilities.
+// Provides options for echo functionality, ordered/unordered delivery, and
+// configurable think times between transmissions.
+//
 simple SctpPeer extends SimpleModule like IApp
 {
     parameters:

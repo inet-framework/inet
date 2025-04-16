@@ -10,12 +10,15 @@ package inet.mobility.single;
 import inet.mobility.base.MovingMobilityBase;
 
 //
-// A mobility model that simulates a vehicle turning at defined waypoints.
+// Mobility model for ground vehicles that follow waypoints with realistic
+// turning behavior. Reads waypoints from a file and moves the vehicle along
+// them at a specified speed, calculating appropriate angular velocity for turns.
+// Supports terrain following by projecting positions onto the ground and
+// orienting the vehicle according to the ground normal.
 //
 // Waypoints are defined in a text file as x,y,z with one waypoint per line.
 // When all waypoints have been reached, it loops back to the first one.
 //
-
 simple VehicleMobility extends MovingMobilityBase
 {
     parameters:
