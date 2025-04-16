@@ -52,7 +52,7 @@ uint64_t computeChecksum(const unsigned char *buf, size_t bufsize, ChecksumType 
         case CHECKSUM_INTERNET:
             return internetChecksum(buf, bufsize);
         case CHECKSUM_CRC32_ETH:
-            return ethernetCRC(buf, bufsize);
+            return ethernetFcs(buf, bufsize);
         case CHECKSUM_CRC32C:
             return crc32c(buf, bufsize);
         case CHECKSUM_CRC16_IBM:

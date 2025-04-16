@@ -30,7 +30,7 @@ uint16_t internetChecksum(const uint8_t *addr, size_t count, uint32_t sum = 0);
  * Computes the FCS value used in 802.3 Ethernet and 802.11 Wifi as CRC32,
  * with the order of bytes reversed.
  */
-uint32_t ethernetCRC(const uint8_t *buf, size_t bufsize, uint32_t crc = 0);
+uint32_t ethernetFcs(const uint8_t *buf, size_t bufsize, uint32_t crc = 0);
 
 /**
  * Computes CRC32, a.k.a. CRC-32/ISO-HDLC.
@@ -118,7 +118,7 @@ inline uint16_t crc16_ccitt_bitwise(const uint8_t *buf, size_t bufsize)
 
 // Variants taking byte arrays
 inline uint16_t internetChecksum(const std::vector<uint8_t>& vec, uint32_t sum = 0) { return internetChecksum(vec.data(), vec.size(), sum); }
-inline uint32_t ethernetCRC(const std::vector<uint8_t>& vec, uint32_t crc = 0) { return ethernetCRC(vec.data(), vec.size(), crc); }
+inline uint32_t ethernetFcs(const std::vector<uint8_t>& vec, uint32_t crc = 0) { return ethernetFcs(vec.data(), vec.size(), crc); }
 inline uint32_t crc32_iso_hdlc(const std::vector<uint8_t>& vec, uint32_t crc = 0) { return crc32_iso_hdlc(vec.data(), vec.size(), crc); }
 inline uint32_t crc32c(const std::vector<uint8_t>& vec, uint32_t crc = 0) { return crc32c(vec.data(), vec.size(), crc); }
 inline uint16_t crc16_ibm(const std::vector<uint8_t>& vec, uint16_t crc = 0) { return crc16_ibm(vec.data(), vec.size(), crc); }

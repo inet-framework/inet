@@ -22,7 +22,7 @@ uint32_t computeEthernetFcs(const Packet *packet, FcsMode fcsMode)
         case FCS_COMPUTED: {
             auto data = packet->peekDataAsBytes();
             auto bytes = data->getBytes();
-            return ethernetCRC(bytes.data(), bytes.size());
+            return ethernetFcs(bytes.data(), bytes.size());
         }
         default:
             throw cRuntimeError("Unknown FCS mode: %d", (int)fcsMode);

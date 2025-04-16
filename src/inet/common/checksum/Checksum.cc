@@ -189,7 +189,7 @@ inline uint32_t swapBytes(uint32_t crc)
     return (crc >> 24) | ((crc >> 8) & 0x0000FF00) | ((crc << 8) & 0x00FF0000) | (crc << 24);
 }
 
-uint32_t ethernetCRC(const uint8_t *buf, size_t bufsize, uint32_t crc)
+uint32_t ethernetFcs(const uint8_t *buf, size_t bufsize, uint32_t crc)
 {
     crc = swapBytes(crc);  // undo byte order reversal for previous, partial CRC
     crc = crc32_iso_hdlc(buf, bufsize, crc);

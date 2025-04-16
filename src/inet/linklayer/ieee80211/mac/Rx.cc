@@ -114,7 +114,7 @@ bool Rx::isFcsOk(Packet *packet) const
                 auto bufferLength = fcsBytes->getChunkLength().get<B>();
                 auto buffer = new uint8_t[bufferLength];
                 fcsBytes->copyToBuffer(buffer, bufferLength);
-                auto computedFcs = ethernetCRC(buffer, bufferLength);
+                auto computedFcs = ethernetFcs(buffer, bufferLength);
                 delete[] buffer;
                 return computedFcs == trailer->getFcs();
             }

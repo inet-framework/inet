@@ -21,11 +21,11 @@ uint64_t EthernetFragmentFcsInserter::computeComputedChecksum(const Packet *pack
     auto data = packet->peekDataAsBytes();
     auto bytes = data->getBytes();
     auto fragmentTag = packet->getTag<FragmentTag>();
-    currentFragmentCompleteFcs = ethernetCRC(bytes.data(), bytes.size(), fragmentTag->getFirstFragment() ? 0 : lastFragmentCompleteFcs);
+    currentFragmentCompleteFcs = ethernetFcs(bytes.data(), bytes.size(), fragmentTag->getFirstFragment() ? 0 : lastFragmentCompleteFcs);
     if (fragmentTag->getLastFragment())
         return currentFragmentCompleteFcs;
     else
-        return ethernetCRC(bytes.data(), bytes.size()) ^ 0xFFFF0000;
+        return ethernetFcs(bytes.data(), bytes.size()) ^ 0xFFFF0000;
 }
 
 void EthernetFragmentFcsInserter::processPacket(Packet *packet)

@@ -158,7 +158,7 @@ bool ExtEthernetSocket::notify(int fd)
     if (n < 0)
         throw cRuntimeError("Calling recvfrom failed: %d", n);
     n = std::max(n, ETHER_MIN_LEN - 4);
-    uint32_t checksum = htonl(ethernetCRC(buffer, n));
+    uint32_t checksum = htonl(ethernetFcs(buffer, n));
     memcpy(&buffer[n], &checksum, sizeof(checksum));
     auto data = makeShared<BytesChunk>(static_cast<const uint8_t *>(buffer), n + 4);
     auto packet = new Packet(nullptr, data);

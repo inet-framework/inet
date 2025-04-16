@@ -314,7 +314,7 @@ bool EthernetMacBase::verifyFcsAndLength(Packet *packet)
             // 1. fill in the data
             ethBytes->copyToBuffer(buffer, bufferLength);
             // 2. compute the FCS
-            auto computedFcs = ethernetCRC(buffer, bufferLength);
+            auto computedFcs = ethernetFcs(buffer, bufferLength);
             delete[] buffer;
             isFcsBad = (computedFcs != ethTrailer->getFcs()); // FIXME how to check fcs?
             if (isFcsBad)
