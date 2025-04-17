@@ -8,6 +8,7 @@
 
 package inet.applications.udpapp;
 
+import inet.common.SimpleModule;
 import inet.applications.contract.IApp;
 
 //
@@ -88,9 +89,10 @@ import inet.applications.contract.IApp;
 //  - `packetReceived`: statistics of not dropped, not out-of-order packets.
 //  - `endToEndDelay`: end to end delay statistics of not dropped, not out-of-order packets.
 //
-simple UdpBasicBurst like IApp
+simple UdpBasicBurst extends SimpleModule like IApp
 {
     parameters:
+        @class(UdpBasicBurst);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string destAddresses; // Space-separated list of destination IP addresses, can be empty;
                               // see module description for possibilities

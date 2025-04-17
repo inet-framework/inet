@@ -7,15 +7,17 @@
 
 package inet.linklayer.ieee80211.mac.rateselection;
 
+import inet.common.SimpleModule;
 import inet.linklayer.ieee80211.mac.contract.IRateSelection;
 
 //
 // Implements the default rate selection algorithm. Rate selection decides what bit rate
 // (or MCS) should be used for control frames, management frames and data frames.
 //
-simple RateSelection like IRateSelection
+simple RateSelection extends SimpleModule like IRateSelection
 {
     parameters:
+        @class(RateSelection);
         string rateControlModule;
 
         double multicastFrameBitrate @unit(bps) = default(-1bps);

@@ -13,6 +13,7 @@
 #include <list>
 
 #include "inet/common/INETMath.h"
+#include "inet/common/SimpleModule.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
@@ -24,7 +25,7 @@ class SimpleVoipPacket;
 /**
  * Implements a simple VoIP source. See the NED file for more information.
  */
-class INET_API SimpleVoipReceiver : public cSimpleModule, public LifecycleUnsupported, public UdpSocket::ICallback
+class INET_API SimpleVoipReceiver : public SimpleModule, public LifecycleUnsupported, public UdpSocket::ICallback
 {
   private:
     class VoipPacketInfo {

@@ -39,7 +39,6 @@ void Ppp::initialize(int stage)
 
     // all initialization is done in the first stage
     if (stage == INITSTAGE_LOCAL) {
-        displayStringTextFormat = par("displayStringTextFormat");
         sendRawBytes = par("sendRawBytes");
         endTransmissionEvent = new cMessage("pppEndTxEvent");
         lowerLayerInGateId = findGate("phys$i");
@@ -283,40 +282,6 @@ void Ppp::refreshDisplay() const
 {
     MacProtocolBase::refreshDisplay();
 
-    if (displayStringTextFormat != nullptr) {
-        auto text = StringFormat::formatString(displayStringTextFormat, [&] (char directive) -> std::string {
-            switch (directive) {
-                case 's':
-                    return std::to_string(numSent);
-                case 'r':
-                    return std::to_string(numRcvdOK);
-                case 'd':
-                    return std::to_string(numDroppedIfaceDown + numDroppedBitErr);
-                case 'q':
-                    return std::to_string(txQueue->getNumPackets());
-                case 'b':
-                    if (datarateChannel == nullptr)
-                        return "not connected";
-                    else {
-                        char datarateText[40];
-                        double datarate = datarateChannel->getNominalDatarate();
-                        if (datarate >= 1e9)
-                            sprintf(datarateText, "%gGbps", datarate / 1e9);
-                        else if (datarate >= 1e6)
-                            sprintf(datarateText, "%gMbps", datarate / 1e6);
-                        else if (datarate >= 1e3)
-                            sprintf(datarateText, "%gkbps", datarate / 1e3);
-                        else
-                            sprintf(datarateText, "%gbps", datarate);
-                        return datarateText;
-                    }
-                default:
-                    throw cRuntimeError("Unknown directive: %c", directive);
-            }
-        });
-        getDisplayString().setTagArg("t", 0, text.c_str());
-    }
-
     const char *color = "";
     if (datarateChannel != nullptr) {
         if (endTransmissionEvent->isScheduled())
@@ -325,6 +290,37 @@ void Ppp::refreshDisplay() const
     else
         color = "#707070";
     getDisplayString().setTagArg("i", 1, color);
+}
+
+std::string Ppp::resolveDirective(char directive) const {
+    switch (directive) {
+        case 's':
+            return std::to_string(numSent);
+        case 'r':
+            return std::to_string(numRcvdOK);
+        case 'd':
+            return std::to_string(numDroppedIfaceDown + numDroppedBitErr);
+        case 'q':
+            return std::to_string(txQueue->getNumPackets());
+        case 'b':
+            if (datarateChannel == nullptr)
+                return "not connected";
+            else {
+                char datarateText[40];
+                double datarate = datarateChannel->getNominalDatarate();
+                if (datarate >= 1e9)
+                    sprintf(datarateText, "%gGbps", datarate / 1e9);
+                else if (datarate >= 1e6)
+                    sprintf(datarateText, "%gMbps", datarate / 1e6);
+                else if (datarate >= 1e3)
+                    sprintf(datarateText, "%gkbps", datarate / 1e3);
+                else
+                    sprintf(datarateText, "%gbps", datarate);
+                return datarateText;
+            }
+        default:
+            return MacProtocolBase::resolveDirective(directive);
+    }
 }
 
 void Ppp::encapsulate(Packet *packet)

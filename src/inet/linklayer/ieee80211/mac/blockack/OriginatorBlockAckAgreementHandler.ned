@@ -7,9 +7,12 @@
 
 package inet.linklayer.ieee80211.mac.blockack;
 
-simple OriginatorBlockAckAgreementHandler
+import inet.common.SimpleModule;
+
+simple OriginatorBlockAckAgreementHandler extends SimpleModule
 {
     parameters:
+        @class(OriginatorBlockAckAgreementHandler);
         string rateSelectionModule;
 
         @display("i=block/cogwheel");

@@ -7,6 +7,7 @@
 #ifndef __INET_RSVPCLASSIFIER_H
 #define __INET_RSVPCLASSIFIER_H
 
+#include "inet/common/SimpleModule.h"
 #include <string>
 #include <vector>
 
@@ -26,7 +27,7 @@ class RsvpTe;
 /**
  * TODO documentation
  */
-class INET_API RsvpClassifier : public cSimpleModule, public IScriptable, public IRsvpClassifier
+class INET_API RsvpClassifier : public SimpleModule, public IScriptable, public IRsvpClassifier
 {
   public:
     struct FecEntry {

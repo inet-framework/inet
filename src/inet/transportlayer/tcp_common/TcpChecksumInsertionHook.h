@@ -8,6 +8,7 @@
 #ifndef __INET_TCPCHECKSUMINSERTIONHOOK_H
 #define __INET_TCPCHECKSUMINSERTIONHOOK_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/Protocol.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/common/checksum/ChecksumMode_m.h"
@@ -17,7 +18,7 @@
 namespace inet {
 namespace tcp {
 
-class INET_API TcpChecksumInsertionHook : public cSimpleModule, public NetfilterBase::HookBase
+class INET_API TcpChecksumInsertionHook : public SimpleModule, public NetfilterBase::HookBase
 {
   public:
     static void insertChecksum(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<TcpHeader>& tcpHeader, Packet *tcpPayload);

@@ -7,6 +7,8 @@
 
 package inet.linklayer.configurator.common;
 
+import inet.common.SimpleModule;
+
 //
 // Allows configuring network scenarios at layer 2.
 // The ~Stp and ~Rstp related parameters such as link cost, port priority
@@ -27,9 +29,10 @@ package inet.linklayer.configurator.common;
 //
 // For more information about the usage of the selector attributes see ~Ipv4NetworkConfigurator.
 //
-simple L2NetworkConfigurator
+simple L2NetworkConfigurator extends SimpleModule
 {
     parameters:
+        @class(L2NetworkConfigurator);
         @display("i=block/cogwheel");
         xml config = default(xml("<config><interface hosts='**' ports='**' cost='19' priority='128' edge='false'/></config>"));
 }

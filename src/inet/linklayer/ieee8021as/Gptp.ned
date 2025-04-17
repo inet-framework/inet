@@ -7,6 +7,7 @@
 
 package inet.linklayer.ieee8021as;
 
+import inet.common.SimpleModule;
 import inet.linklayer.contract.IGptp;
 
 //
@@ -16,9 +17,10 @@ import inet.linklayer.contract.IGptp;
 // and their roles in the time synchronization domain. The time synchronization
 // is done periodically and the clock module is set.
 //
-simple Gptp like IGptp
+simple Gptp extends SimpleModule like IGptp
 {
     parameters:
+        @class(Gptp);
         string clockModule = default(""); // Relative path of a module that implements IClock; optional
         string interfaceTableModule; // Relative path of the interface table module
         string gptpNodeType; // @enum("GptpNodeType"): MASTER_NODE, BRIDGE_NODE, SLAVE_NODE

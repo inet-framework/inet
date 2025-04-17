@@ -8,6 +8,7 @@
 #define __INET_WIREJUNCTION_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/SimpleModule.h"
 
 namespace inet {
 namespace physicallayer {
@@ -25,7 +26,7 @@ namespace physicallayer {
  * to precisely model what happens when the link state changes,
  * you cannot use this class.
  */
-class INET_API WireJunction : public cSimpleModule, protected cListener
+class INET_API WireJunction : public SimpleModule, protected cListener
 {
   protected:
     struct TxInfo {

@@ -7,6 +7,8 @@
 
 package inet.applications.tcpapp;
 
+import inet.common.SimpleModule;
+
 //
 // Opens a TCP connection to a given address and port and lets the
 // module connected to its `trafficIn` and `trafficOut` gates send and receive
@@ -22,9 +24,10 @@ package inet.applications.tcpapp;
 //
 // @see ~TcpServerSocketIo
 //
-simple TcpClientSocketIo
+simple TcpClientSocketIo extends SimpleModule
 {
     parameters:
+        @class(TcpClientSocketIo);
         string localAddress = default("");
         int localPort = default(-1);
         string connectAddress;

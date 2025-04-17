@@ -7,6 +7,7 @@
 
 package inet.linklayer.ieee80211.mac.coordinationfunction;
 
+import inet.common.SimpleModule;
 import inet.linklayer.ieee80211.mac.channelaccess.Dcaf;
 import inet.linklayer.ieee80211.mac.contract.ICtsPolicy;
 import inet.linklayer.ieee80211.mac.contract.IDcf;
@@ -21,11 +22,10 @@ import inet.linklayer.ieee80211.mac.protectionmechanism.OriginatorProtectionMech
 import inet.linklayer.ieee80211.mac.rateselection.RateSelection;
 import inet.linklayer.ieee80211.mac.recipient.RecipientMacDataService;
 
-
 //
 // Implements the DCF (Distributed Coordination Function) for IEEE 802.11.
 //
-module Dcf like IDcf
+module Dcf extends SimpleModule like IDcf
 {
     parameters:
         string rxModule;

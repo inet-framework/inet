@@ -8,12 +8,13 @@
 #ifndef __INET_BASICMPDUAGGREGATIONPOLICY_H
 #define __INET_BASICMPDUAGGREGATIONPOLICY_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/linklayer/ieee80211/mac/contract/IMpduAggregationPolicy.h"
 
 namespace inet {
 namespace ieee80211 {
 
-class INET_API BasicMpduAggregationPolicy : public IMpduAggregationPolicy, public cSimpleModule
+class INET_API BasicMpduAggregationPolicy : public IMpduAggregationPolicy, public SimpleModule
 {
   protected:
     virtual void initialize() override;

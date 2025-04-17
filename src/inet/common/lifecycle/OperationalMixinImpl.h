@@ -217,6 +217,7 @@ void OperationalMixin<T>::refreshDisplay() const
         default:
             break;
     }
+    T::refreshDisplay();
 }
 
 } // namespace inet

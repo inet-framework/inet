@@ -10,6 +10,7 @@
 #ifndef __INET_PIMINTERFACETABLE_H
 #define __INET_PIMINTERFACETABLE_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
@@ -55,7 +56,7 @@ class INET_API PimInterface : public cObject
  * When interfaces are added to/deleted from the InterfaceTable, then the corresponding
  * PimInterface entry is added/deleted automatically.
  */
-class INET_API PimInterfaceTable : public cSimpleModule, protected cListener
+class INET_API PimInterfaceTable : public SimpleModule, protected cListener
 {
   protected:
     typedef std::vector<PimInterface *> PimInterfaceVector;

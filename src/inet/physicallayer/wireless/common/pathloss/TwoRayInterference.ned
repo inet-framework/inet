@@ -7,9 +7,10 @@
 
 package inet.physicallayer.wireless.common.pathloss;
 
+import inet.common.SimpleModule;
 import inet.physicallayer.wireless.common.contract.packetlevel.IPathLoss;
 
-module TwoRayInterference like IPathLoss
+module TwoRayInterference extends SimpleModule like IPathLoss
 {
     parameters:
         @class(TwoRayInterference);

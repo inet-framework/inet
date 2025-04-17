@@ -14,6 +14,7 @@
 #ifndef __INET_EIGRPINTERFACETABLE_H
 #define __INET_EIGRPINTERFACETABLE_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/routing/eigrp/EigrpTimer_m.h"
@@ -143,7 +144,7 @@ class INET_API EigrpInterface : public cObject
  * Toida reprezentujici tabulku EIGRP-ENABLED interfacu
  */
 
-class INET_API EigrpInterfaceTable : public cSimpleModule
+class INET_API EigrpInterfaceTable : public SimpleModule
 {
   protected:
     typedef typename std::vector<EigrpInterface *> InterfaceVector;

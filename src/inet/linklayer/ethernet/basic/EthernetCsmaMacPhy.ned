@@ -8,8 +8,8 @@
 
 package inet.linklayer.ethernet.basic;
 
+import inet.common.SimpleModule;
 import inet.linklayer.contract.IEtherMac;
-
 
 //
 // Ethernet MAC layer. MAC performs transmission and reception of frames.
@@ -96,11 +96,11 @@ import inet.linklayer.contract.IEtherMac;
 // @see ~EthernetMacPhy, ~EthernetInterface, ~IPacketQueue, ~EthernetEncapsulation, ~Ieee8022Llc
 // @see ~EthernetMacHeader, ~Ieee8022LlcHeader, ~EthernetFcs
 //
-module EthernetCsmaMacPhy like IEtherMac
+module EthernetCsmaMacPhy extends SimpleModule like IEtherMac
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
-        string displayStringTextFormat = default("rate: %b\nsent: %s, rcvd: %r\nqueue: %q, drop: %d");
+        displayStringTextFormat = default("rate: %b\nsent: %s, rcvd: %r\nqueue: %q, drop: %d");
         bool sendRawBytes = default(false); // When true, packets are serialized into a sequence of bytes before sending out
         bool promiscuous = default(false);  // If true, all packets are received, otherwise only the
                                             // ones with matching destination MAC address

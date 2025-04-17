@@ -7,6 +7,7 @@
 #ifndef __INET_SCTPNATSERVER_H
 #define __INET_SCTPNATSERVER_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
 #include "inet/transportlayer/contract/sctp/SctpSocket.h"
@@ -37,7 +38,7 @@ typedef struct natInfo
 } NatInfo;
 typedef std::vector<NatInfo *> NatVector;
 
-class INET_API SctpNatServer : public cSimpleModule, public LifecycleUnsupported
+class INET_API SctpNatServer : public SimpleModule, public LifecycleUnsupported
 {
   protected:
     int32_t notifications;

@@ -7,6 +7,7 @@
 
 package inet.routing.dymo;
 
+import inet.common.SimpleModule;
 import inet.routing.contract.IManetRouting;
 
 //
@@ -16,11 +17,11 @@ import inet.routing.contract.IManetRouting;
 // Module parameters are copied from the IETF draft and renamed for consistency with
 // INET naming conventions. Some parameters are not yet implemented.
 //
-simple Dymo like IManetRouting
+simple Dymo extends SimpleModule like IManetRouting
 {
     parameters:
         // properties
-        @class("dymo::Dymo");
+        @class(dymo::Dymo);
         @display("i=block/routing");
 
         // context parameters

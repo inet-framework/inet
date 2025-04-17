@@ -7,6 +7,8 @@
 
 package inet.physicallayer.wired.ethernet;
 
+import inet.common.SimpleModule;
+
 //
 // Implements the Ethernet CSMA/CD PHY protocol. It supports building
 // both Ethernet CSMA/CD and Ethernet PLCA network interfaces.
@@ -22,9 +24,10 @@ package inet.physicallayer.wired.ethernet;
 //
 // @see ~EthernetCsmaPhy, ~EthernetPlca, ~EthernetPlcaInterface
 //
-simple EthernetCsmaPhy
+simple EthernetCsmaPhy extends SimpleModule
 {
     parameters:
+        @class(EthernetCsmaPhy);
         // emitted when the state of the state machine changes, the value is one of IDLE, TRANSMITTING, RECEIVING, COLLISION, CRS_ON
         @signal[stateChanged](type=int);
         // emitted when the type of the received signal changes, the value is one of NONE, BEACON, COMMIT, DATA, JAM

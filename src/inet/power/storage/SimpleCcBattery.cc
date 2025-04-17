@@ -34,12 +34,6 @@ void SimpleCcBattery::initialize(int stage)
     }
 }
 
-void SimpleCcBattery::refreshDisplay() const
-{
-    auto text = StringFormat::formatString(par("displayStringTextFormat"), this);
-    getDisplayString().setTagArg("t", 0, text.c_str());
-}
-
 std::string SimpleCcBattery::resolveDirective(char directive) const
 {
     switch (directive) {
@@ -48,7 +42,7 @@ std::string SimpleCcBattery::resolveDirective(char directive) const
         case 'p':
             return std::to_string((int)std::round(100 * (getResidualChargeCapacity() / getNominalChargeCapacity()).get<unit>())) + "%";
         default:
-            throw cRuntimeError("Unknown directive: %c", directive);
+            return CcEnergyStorageBase::resolveDirective(directive);   
     }
 }
 

@@ -7,6 +7,7 @@
 
 package inet.linklayer.configurator.common;
 
+import inet.common.SimpleModule;
 import inet.networklayer.configurator.contract.INetworkConfigurator;
 
 //
@@ -19,9 +20,10 @@ import inet.networklayer.configurator.contract.INetworkConfigurator;
 //
 // @see ~MacForwardingTable
 //
-simple MacForwardingTableConfigurator like INetworkConfigurator
+simple MacForwardingTableConfigurator extends SimpleModule like INetworkConfigurator
 {
     parameters:
+        @class(MacForwardingTableConfigurator);
         @display("i=block/cogwheel");
 }
 

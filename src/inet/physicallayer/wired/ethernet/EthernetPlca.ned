@@ -7,6 +7,7 @@
 
 package inet.physicallayer.wired.ethernet;
 
+import inet.common.SimpleModule;
 import inet.protocolelement.contract.IProtocolLayer;
 
 //
@@ -49,9 +50,10 @@ import inet.protocolelement.contract.IProtocolLayer;
 //
 // @see ~EthernetCsmaMac, ~EthernetCsmaPhy, ~EthernetPlcaInterface
 //
-simple EthernetPlca like IProtocolLayer
+simple EthernetPlca extends SimpleModule like IProtocolLayer
 {
     parameters:
+        @class(EthernetPlca);
         // Maximum number of PLCA nodes on the mixing segment receiving transmit
         // opportunities before the node with local_nodeID = 0 generates a new
         // BEACON.

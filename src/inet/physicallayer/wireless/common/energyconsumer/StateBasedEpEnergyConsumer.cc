@@ -19,7 +19,7 @@ Define_Module(StateBasedEpEnergyConsumer);
 
 void StateBasedEpEnergyConsumer::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         offPowerConsumption = W(par("offPowerConsumption"));
         sleepPowerConsumption = W(par("sleepPowerConsumption"));

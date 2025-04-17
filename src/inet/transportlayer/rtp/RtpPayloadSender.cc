@@ -27,7 +27,7 @@ RtpPayloadSender::~RtpPayloadSender()
 
 void RtpPayloadSender::initialize()
 {
-    cSimpleModule::initialize();
+    SimpleModule::initialize();
     _mtu = 0;
     _ssrc = 0;
     _payloadType = 0;

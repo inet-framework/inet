@@ -7,6 +7,7 @@
 
 package inet.applications.voipstream;
 
+import inet.common.SimpleModule;
 import inet.applications.contract.IApp;
 
 //
@@ -21,9 +22,10 @@ import inet.applications.contract.IApp;
 // does not simulate any particular VoIP protocol (e.g. RTP), but instead
 // accepts a "header size" parameter that can be set accordingly.
 //
-simple VoipStreamSender like IApp
+simple VoipStreamSender extends SimpleModule like IApp
 {
     parameters:
+        @class(VoipStreamSender);
         int localPort;
         int destPort;
         string destAddress;

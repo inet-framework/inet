@@ -9,6 +9,7 @@
 #ifndef __INET_TCPCONNECTION_H
 #define __INET_TCPCONNECTION_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp/TcpConnectionState_m.h"
@@ -86,7 +87,7 @@ class TcpAlgorithm;
  * When the CLOSED state is reached, TCP will delete the TcpConnection object.
  *
  */
-class INET_API TcpConnection : public cSimpleModule
+class INET_API TcpConnection : public SimpleModule
 {
   protected:
     static simsignal_t tcpConnectionAddedSignal;

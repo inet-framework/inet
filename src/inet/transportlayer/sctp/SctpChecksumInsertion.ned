@@ -7,10 +7,14 @@
 
 package inet.transportlayer.sctp;
 
+import inet.common.SimpleModule;
+
 //
 // Inserts SCTP checksum into packets.
 //
-simple SctpChecksumInsertion
+simple SctpChecksumInsertion extends SimpleModule
 {
+    parameters:
+        @class(SctpChecksumInsertion);
 }
 

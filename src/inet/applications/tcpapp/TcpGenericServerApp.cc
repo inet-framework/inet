@@ -24,7 +24,7 @@ Define_Module(TcpGenericServerApp);
 
 void TcpGenericServerApp::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         delay = par("replyDelay");
@@ -163,6 +163,7 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
 
 void TcpGenericServerApp::refreshDisplay() const
 {
+    SimpleModule::refreshDisplay();
     char buf[64];
     sprintf(buf, "rcvd: %ld pks %ld bytes\nsent: %ld pks %ld bytes", msgsRcvd, bytesRcvd, msgsSent, bytesSent);
     getDisplayString().setTagArg("t", 0, buf);

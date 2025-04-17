@@ -9,10 +9,11 @@
 #define __INET_SIGNALSOURCE_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/SimpleModule.h"
 
 namespace inet {
 
-class INET_API SignalSource : public cSimpleModule
+class INET_API SignalSource : public SimpleModule
 {
   protected:
     simtime_t startTime, endTime;

@@ -8,6 +8,7 @@
 #ifndef __INET_CARRIERBASEDLIFETIMER_H
 #define __INET_CARRIERBASEDLIFETIMER_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/queueing/contract/IPacketCollection.h"
 
@@ -15,7 +16,7 @@ namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API CarrierBasedLifeTimer : public cSimpleModule, cListener
+class INET_API CarrierBasedLifeTimer : public SimpleModule, cListener
 {
   protected:
     opp_component_ptr<NetworkInterface> networkInterface;

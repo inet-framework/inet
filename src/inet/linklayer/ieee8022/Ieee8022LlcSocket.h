@@ -8,6 +8,7 @@
 #ifndef __INET_IEEE8022LLCSOCKET_H
 #define __INET_IEEE8022LLCSOCKET_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/socket/SocketBase.h"
 
 namespace inet {
@@ -38,7 +39,7 @@ class INET_API Ieee8022LlcSocket : public SocketBase
      * multiply inherits from ICallback too, that is you
      * declared it as
      * <pre>
-     * class MyAppModule : public cSimpleModule, public LlcSocket::ICallback
+     * class MyAppModule : public SimpleModule, public LlcSocket::ICallback
      * </pre>
      * and redefined the necessary virtual functions; or you may use
      * dedicated class (and objects) for this purpose.

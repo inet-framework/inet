@@ -60,15 +60,6 @@ void UdpEchoApp::socketClosed(UdpSocket *socket)
         startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
 
-void UdpEchoApp::refreshDisplay() const
-{
-    ApplicationBase::refreshDisplay();
-
-    char buf[40];
-    sprintf(buf, "echoed: %d pks", numEchoed);
-    getDisplayString().setTagArg("t", 0, buf);
-}
-
 void UdpEchoApp::finish()
 {
     ApplicationBase::finish();

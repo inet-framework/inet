@@ -39,6 +39,7 @@ void PhysicalEnvironmentCanvasVisualizer::initialize(int stage)
 
 void PhysicalEnvironmentCanvasVisualizer::refreshDisplay() const
 {
+    VisualizerBase::refreshDisplay();
     // only update after initialize
     if (physicalEnvironment != nullptr && getSimulation()->getEventNumber() == 0 && displayObjects) {
         while (objectsLayer->getNumFigures())

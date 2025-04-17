@@ -8,6 +8,7 @@
 #ifndef __INET_SIMPLEEPENERGYMANAGEMENT_H
 #define __INET_SIMPLEEPENERGYMANAGEMENT_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/lifecycle/LifecycleController.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/power/contract/IEpEnergyManagement.h"
@@ -17,7 +18,7 @@ namespace inet {
 
 namespace power {
 
-class INET_API SimpleEpEnergyManagement : public cSimpleModule, public virtual IEpEnergyManagement, public cListener, public LifecycleController
+class INET_API SimpleEpEnergyManagement : public SimpleModule, public virtual IEpEnergyManagement, public cListener, public LifecycleController
 {
   protected:
     // parameters

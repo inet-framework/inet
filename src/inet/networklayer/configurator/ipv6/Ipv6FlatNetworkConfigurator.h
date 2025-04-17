@@ -9,6 +9,7 @@
 #define __INET_IPV6FLATNETWORKCONFIGURATOR_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/SimpleModule.h"
 #include "inet/common/Topology.h"
 
 namespace inet {
@@ -20,7 +21,7 @@ namespace inet {
  *
  * For more info please see the NED file.
  */
-class INET_API Ipv6FlatNetworkConfigurator : public cSimpleModule
+class INET_API Ipv6FlatNetworkConfigurator : public SimpleModule
 {
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

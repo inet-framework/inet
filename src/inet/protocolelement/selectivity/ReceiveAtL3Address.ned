@@ -7,9 +7,12 @@
 
 package inet.protocolelement.selectivity;
 
-simple ReceiveAtL3Address
+import inet.common.SimpleModule;
+
+simple ReceiveAtL3Address extends SimpleModule
 {
     parameters:
+        @class(ReceiveAtL3Address);
         string address;
         @display("i=block/rx");
     gates:

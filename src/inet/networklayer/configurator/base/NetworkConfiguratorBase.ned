@@ -7,9 +7,12 @@
 
 package inet.networklayer.configurator.base;
 
-simple NetworkConfiguratorBase
+import inet.common.SimpleModule;
+
+simple NetworkConfiguratorBase extends SimpleModule
 {
     parameters:
+        @class(NetworkConfiguratorBase);
         @display("i=block/cogwheel");
 }
 

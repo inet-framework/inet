@@ -7,6 +7,8 @@
 
 package inet.transportlayer.rtp;
 
+import inet.common.SimpleModule;
+
 //
 // The Rtp module is the center of the Rtp layer of an endsystem.
 // It communicates with the application, and sends and receives Rtp data
@@ -53,9 +55,10 @@ package inet.transportlayer.rtp;
 //#   - ~RtpCiSessionLeft:
 //#         Notifies the App that the session has ended and deletes the ~RtpProfile.
 //#         params: ---
-simple Rtp
+simple Rtp extends SimpleModule
 {
     parameters:
+        @class(Rtp);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
         @display("i=block/buffer");

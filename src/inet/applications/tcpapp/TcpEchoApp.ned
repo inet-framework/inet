@@ -7,6 +7,8 @@
 
 package inet.applications.tcpapp;
 
+import inet.common.SimpleModule;
+
 //
 // Accepts any number of incoming TCP connections, and sends back the data that
 // arrives on them. The `echoFactor` parameter controls the amount of data to be
@@ -41,8 +43,10 @@ simple TcpEchoApp extends TcpServerHostApp
 }
 
 // Thread for ~TcpEchoApp
-simple TcpEchoAppThread
+simple TcpEchoAppThread extends SimpleModule
 {
+    parameters:
+        @class(TcpEchoAppThread);
         @signal[packetSent](type=inet::Packet);
         @signal[packetReceived](type=inet::Packet);
         @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

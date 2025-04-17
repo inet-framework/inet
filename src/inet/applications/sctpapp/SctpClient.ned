@@ -8,15 +8,17 @@
 
 package inet.applications.sctpapp;
 
+import inet.common.SimpleModule;
 import inet.applications.contract.IApp;
 
 //
 // Client app for SCTP-based request-reply protocols.
 // Handles a single session (and SCTP connection) at a time.
 //
-simple SctpClient like IApp
+simple SctpClient extends SimpleModule like IApp
 {
     parameters:
+        @class(SctpClient);
         string localAddress = default(""); // Comma-separated list of addresses
         int localPort = default(0); // Port number to listen on
         string connectAddress;  // Server address (may be symbolic)

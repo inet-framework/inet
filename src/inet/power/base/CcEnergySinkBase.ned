@@ -7,6 +7,7 @@
 
 package inet.power.base;
 
+import inet.common.SimpleModule;
 import inet.power.contract.ICcEnergySink;
 
 //
@@ -15,9 +16,10 @@ import inet.power.contract.ICcEnergySink;
 //
 // @see ~CcEnergyConsumerBase, ~CcEnergySourceBase, ~CcEnergyGeneratorBase, ~CcEnergyStorageBase
 //
-simple CcEnergySinkBase like ICcEnergySink
+simple CcEnergySinkBase extends SimpleModule like ICcEnergySink
 {
     parameters:
+        @class(CcEnergySinkBase);
         @display("i=block/plug");
         @signal[currentGenerationChanged];
         @statistic[currentGeneration](title="Current generation"; source=currentGenerationChanged; record=vector; interpolationmode=sample-hold; unit=A);

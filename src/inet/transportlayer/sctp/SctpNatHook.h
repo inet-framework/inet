@@ -1,6 +1,7 @@
 #ifndef __INET_SCTPNATHOOK_H
 #define __INET_SCTPNATHOOK_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/transportlayer/sctp/SctpNatTable.h"
 
@@ -10,7 +11,7 @@ class IPv4;
 
 namespace sctp {
 
-class INET_API SctpNatHook : public cSimpleModule, NetfilterBase::HookBase
+class INET_API SctpNatHook : public SimpleModule, NetfilterBase::HookBase
 {
   protected:
     IPv4 *ipLayer; // IPv4 module

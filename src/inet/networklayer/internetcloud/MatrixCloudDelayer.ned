@@ -7,6 +7,8 @@
 
 package inet.networklayer.internetcloud;
 
+import inet.common.SimpleModule;
+
 //
 // Delay module for ~InternetCloud. This is essentially equivalent to a full graph
 // with edges being differently configured `DatarateChannel`'s. It delays and/or drops
@@ -40,9 +42,10 @@ package inet.networklayer.internetcloud;
 //
 // @see `InternetCloud`
 //
-simple MatrixCloudDelayer like ICloudDelayer
+simple MatrixCloudDelayer extends SimpleModule like ICloudDelayer
 {
     parameters:
+        @class(MatrixCloudDelayer);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string networkProtocolModule;
         xml config;

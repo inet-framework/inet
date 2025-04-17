@@ -9,7 +9,6 @@
 
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalBase.h"
-#include "inet/common/StringFormat.h"
 #include "inet/common/Traced.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ethernet/common/MacForwardingTable.h"
@@ -25,7 +24,7 @@ namespace inet {
 /**
  * Implements the base part of the MRP protocol, i.e. roles MRC, MRM and MRA.
  */
-class INET_API Mrp: public OperationalBase, public cListener, public StringFormat::IDirectiveResolver
+class INET_API Mrp: public OperationalBase, public cListener
 {
 public:
     enum FrameType : uint64_t {

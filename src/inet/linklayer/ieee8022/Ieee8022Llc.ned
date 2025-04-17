@@ -7,11 +7,13 @@
 
 package inet.linklayer.ieee8022;
 
+import inet.common.SimpleModule;
 import inet.linklayer.contract.IIeee8022Llc;
 
-simple Ieee8022Llc like IIeee8022Llc
+simple Ieee8022Llc extends SimpleModule like IIeee8022Llc
 {
     parameters:
+        @class(Ieee8022Llc);
         bool registerProtocol = default(false);     //FIXME //KLUDGE should redesign the placement of EthernetEncapsulation and LLC modules
         @display("i=block/layer");
         @signal[packetDropped](type=inet::Packet);

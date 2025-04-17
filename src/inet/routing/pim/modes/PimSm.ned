@@ -9,6 +9,8 @@
 
 package inet.routing.pim.modes;
 
+import inet.common.SimpleModule;
+
 //
 // Implementation of PIM-SM protocol (RFC 4601).
 //
@@ -40,9 +42,10 @@ package inet.routing.pim.modes;
 // - Switchover to the shortest path tree is not supported.
 // - Source specific excludes in the shared tree are not supported.
 //
-simple PimSm
+simple PimSm extends SimpleModule
 {
     parameters:
+        @class(PimSm);
         @display("i=block/network2");
         string interfaceTableModule;
         string routingTableModule;

@@ -7,12 +7,15 @@
 
 package inet.linklayer.base;
 
-simple MacRelayUnitBase
+import inet.common.SimpleModule;
+
+simple MacRelayUnitBase extends SimpleModule
 {
     parameters:
+        @class(MacRelayUnitBase);
         string macTableModule;
         string interfaceTableModule;
-        string displayStringTextFormat = default("proc: %p\ndisc: %d");
+        displayStringTextFormat = default("proc: %p\ndisc: %d");
         @display("i=block/switch");
         @signal[packetSentToLower](type=inet::Packet);
         @signal[packetReceivedFromUpper](type=inet::Packet);

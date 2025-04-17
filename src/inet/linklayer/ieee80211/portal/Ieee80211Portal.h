@@ -8,6 +8,7 @@
 #ifndef __INET_IEEE80211PORTAL_H
 #define __INET_IEEE80211PORTAL_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/FcsMode_m.h"
@@ -17,7 +18,7 @@ namespace inet {
 
 namespace ieee80211 {
 
-class INET_API Ieee80211Portal : public cSimpleModule, public IIeee80211Llc
+class INET_API Ieee80211Portal : public SimpleModule, public IIeee80211Llc
 {
   protected:
     FcsMode fcsMode = FCS_MODE_UNDEFINED;

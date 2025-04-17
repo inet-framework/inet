@@ -7,11 +7,12 @@
 #ifndef __INET_EXTERNALPROCESS_H
 #define __INET_EXTERNALPROCESS_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/scheduler/RealTimeScheduler.h"
 
 namespace inet {
 
-class ExternalProcess : public cSimpleModule, public RealTimeScheduler::ICallback
+class ExternalProcess : public SimpleModule, public RealTimeScheduler::ICallback
 {
   private:
     // parameters

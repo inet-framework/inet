@@ -8,6 +8,7 @@
 #ifndef __INET_CLOUDDELAYERBASE_H
 #define __INET_CLOUDDELAYERBASE_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/INetfilter.h"
 
@@ -15,7 +16,7 @@ namespace inet {
 
 // forward declarations:
 
-class INET_API CloudDelayerBase : public cSimpleModule, public NetfilterBase::HookBase
+class INET_API CloudDelayerBase : public SimpleModule, public NetfilterBase::HookBase
 {
   public:
     CloudDelayerBase();

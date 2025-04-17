@@ -7,6 +7,8 @@
 
 package inet.applications.tcpapp;
 
+import inet.common.SimpleModule;
+
 //
 // Accepts any number of incoming TCP connections, and discards whatever
 // arrives on them. Compatible with both ~Ipv4 and ~Ipv6.
@@ -34,9 +36,10 @@ module TcpSinkApp extends TcpServerHostApp
 //
 // Handles a single incoming TCP connection for ~TcpSinkApp.
 //
-simple TcpSinkAppThread
+simple TcpSinkAppThread extends SimpleModule
 {
     parameters:
+        @class(TcpSinkAppThread);
         @display("i=block/sink");
         @signal[packetReceived](type=inet::Packet);
         @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

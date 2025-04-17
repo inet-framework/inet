@@ -8,6 +8,7 @@
 #ifndef __INET_UDPSOCKET_H
 #define __INET_UDPSOCKET_H
 
+#include "inet/common/SimpleModule.h"
 #include <vector>
 
 #include "inet/common/packet/Message.h"
@@ -278,7 +279,7 @@ class INET_API UdpSocket : public ISocket
      * multiply inherits from ICallback too, that is you
      * declared it as
      * <pre>
-     * class MyAppModule : public cSimpleModule, public UdpSocket::ICallback
+     * class MyAppModule : public SimpleModule, public UdpSocket::ICallback
      * </pre>
      * and redefined the necessary virtual functions; or you may use
      * dedicated class (and objects) for this purpose.

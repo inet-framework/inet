@@ -70,6 +70,7 @@ void LinkBreakVisualizerBase::handleParameterChange(const char *name)
 
 void LinkBreakVisualizerBase::refreshDisplay() const
 {
+    VisualizerBase::refreshDisplay();
     AnimationPosition currentAnimationPosition;
     std::vector<const LinkBreakVisualization *> removedLinkBreakVisualizations;
     for (auto it : linkBreakVisualizations) {

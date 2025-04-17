@@ -21,7 +21,7 @@ Ipv4NodeConfigurator::Ipv4NodeConfigurator()
 
 void Ipv4NodeConfigurator::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         _configureRoutingTable = par("configureRoutingTable");

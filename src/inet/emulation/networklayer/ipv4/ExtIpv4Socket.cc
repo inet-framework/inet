@@ -36,7 +36,7 @@ ExtIpv4Socket::~ExtIpv4Socket()
 
 void ExtIpv4Socket::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         packetNameFormat = par("packetName");
         rtScheduler = check_and_cast<RealTimeScheduler *>(getSimulation()->getScheduler());

@@ -17,8 +17,8 @@
 
 package inet.applications.netperfmeter;
 
+import inet.common.SimpleModule;
 import inet.applications.contract.IApp;
-
 
 //
 // Application model for comparing the performance of various transport
@@ -37,9 +37,10 @@ import inet.applications.contract.IApp;
 // application, the model also makes comparisons of simulation results and
 // real-world measurements easy.
 //
-simple NetPerfMeter like IApp
+simple NetPerfMeter extends SimpleModule like IApp
 {
     parameters:
+        @class(NetPerfMeter);
         bool            activeMode               = default(true);      // Server (false) or client (true)
         string          localAddress             = default("");        // May be left empty ("")
         int             localPort                = default(9000);      // Port number to listen on

@@ -8,14 +8,16 @@
 
 package inet.transportlayer.sctp;
 
+import inet.common.SimpleModule;
 import inet.transportlayer.contract.ISctp;
 
 //
 // Implements the SCTP protocol.
 //
-simple Sctp like ISctp
+simple Sctp extends SimpleModule like ISctp
 {
     parameters:
+        @class(Sctp);
         string interfaceTableModule;
         string routingTableModule;
         string checksumMode @enum("declared", "computed") = default("declared");

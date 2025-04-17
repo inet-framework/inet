@@ -7,6 +7,8 @@
 
 package inet.linklayer.ppp;
 
+import inet.common.SimpleModule;
+
 //
 // PPP implementation.
 //
@@ -31,11 +33,12 @@ package inet.linklayer.ppp;
 //
 // @see ~PppInterface
 //
-simple Ppp
+simple Ppp extends SimpleModule
 {
     parameters:
+        @class(Ppp);
         string interfaceTableModule;   // The path to the InterfaceTable module
-        string displayStringTextFormat = default("rate: %b\nsent: %s, rcvd: %r\nqueue: %q, drop: %d");
+        displayStringTextFormat = default("rate: %b\nsent: %s, rcvd: %r\nqueue: %q, drop: %d");
         bool sendRawBytes = default(false); // When true packets are serialized into a sequence of bytes before sending out
         int mtu @unit(B) = default(4470B);
         @lifecycleSupport;

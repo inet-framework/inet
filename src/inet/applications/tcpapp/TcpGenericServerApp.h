@@ -8,6 +8,7 @@
 #ifndef __INET_TCPGENERICSERVERAPP_H
 #define __INET_TCPGENERICSERVERAPP_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/common/packet/ChunkQueue.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
@@ -20,7 +21,7 @@ namespace inet {
  *
  * @see GenericAppMsg, TcpAppBase
  */
-class INET_API TcpGenericServerApp : public cSimpleModule, public LifecycleUnsupported
+class INET_API TcpGenericServerApp : public SimpleModule, public LifecycleUnsupported
 {
   protected:
     TcpSocket socket;

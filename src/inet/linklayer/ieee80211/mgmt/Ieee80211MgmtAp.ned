@@ -7,6 +7,8 @@
 
 package inet.linklayer.ieee80211.mgmt;
 
+import inet.common.SimpleModule;
+
 //
 // Used in 802.11 infrastructure mode in an access point (AP).
 //
@@ -18,9 +20,10 @@ package inet.linklayer.ieee80211.mgmt;
 // This module relies on a connected ~Ieee80211Mac for actual
 // reception and transmission of frames.
 //
-simple Ieee80211MgmtAp like IIeee80211Mgmt
+simple Ieee80211MgmtAp extends SimpleModule like IIeee80211Mgmt
 {
     parameters:
+        @class(Ieee80211MgmtAp);
         string ssid = default("SSID");
         double beaconInterval @unit(s) = default(100ms);
         int numAuthSteps = default(4); // Use 2 for Open System auth, 4 for WEP

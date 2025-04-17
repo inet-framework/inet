@@ -8,6 +8,7 @@
 #ifndef __INET_L3NETWORKCONFIGURATORBASE_H
 #define __INET_L3NETWORKCONFIGURATORBASE_H
 
+#include "inet/common/SimpleModule.h"
 #include <algorithm>
 
 #include "inet/common/INETMath.h"
@@ -19,7 +20,7 @@
 
 namespace inet {
 
-class INET_API L3NetworkConfiguratorBase : public cSimpleModule, public L3AddressResolver
+class INET_API L3NetworkConfiguratorBase : public SimpleModule, public L3AddressResolver
 {
   public:
     class LinkInfo;

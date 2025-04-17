@@ -8,6 +8,7 @@
 #ifndef __INET_ETHERNETPAUSECOMMANDPROCESSOR_H
 #define __INET_ETHERNETPAUSECOMMANDPROCESSOR_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/Ieee802Ctrl_m.h"
@@ -15,7 +16,7 @@
 
 namespace inet {
 
-class INET_API EthernetPauseCommandProcessor : public cSimpleModule
+class INET_API EthernetPauseCommandProcessor : public SimpleModule
 {
   protected:
     int seqNum = 0;

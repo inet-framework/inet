@@ -8,6 +8,7 @@
 #ifndef __INET_IEEE80211AGENTSTA_H
 #define __INET_IEEE80211AGENTSTA_H
 
+#include "inet/common/SimpleModule.h"
 #include <vector>
 
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211Primitives_m.h"
@@ -25,7 +26,7 @@ namespace ieee80211 {
  * See corresponding NED file for a detailed description.
  *
  */
-class INET_API Ieee80211AgentSta : public cSimpleModule, public cListener // TODO add ILifecycle
+class INET_API Ieee80211AgentSta : public SimpleModule, public cListener // TODO add ILifecycle
 {
   protected:
     NetworkInterface *myIface = nullptr;

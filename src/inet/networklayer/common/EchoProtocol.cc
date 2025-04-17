@@ -20,7 +20,7 @@ Define_Module(EchoProtocol);
 
 void EchoProtocol::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
     if (stage == INITSTAGE_NETWORK_LAYER) {
         registerProtocol(Protocol::echo, gate("ipOut"), gate("ipIn"));
     }

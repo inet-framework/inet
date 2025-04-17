@@ -7,15 +7,18 @@
 
 package inet.emulation.networklayer.ipv4;
 
+import inet.common.SimpleModule;
+
 //
 // Provides a bidirectional connection to an IPv4 socket of the host
 // computer which is running the simulation. It writes the packets arrived on
 // `upperLayerIn` gate to the specified real socket, and sends out packets arrived
 // from the real socket on `upperLayerOut` gate.
 //
-simple ExtIpv4Socket
+simple ExtIpv4Socket extends SimpleModule
 {
     parameters:
+        @class(ExtIpv4Socket);
         string namespace = default("");
         string packetName = default("Ext-%p-%t-%n");
         @display("i=block/rxtx");

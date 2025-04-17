@@ -66,7 +66,7 @@ SctpClient::~SctpClient()
 
 void SctpClient::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
 
     EV_DEBUG << "initialize SCTP Client stage " << stage << endl;
     if (stage == INITSTAGE_LOCAL) {
@@ -188,6 +188,7 @@ void SctpClient::close()
 
 void SctpClient::refreshDisplay() const
 {
+    SimpleModule::refreshDisplay();
     getDisplayString().setTagArg("t", 0, SctpSocket::stateName(socket.getState()));
 }
 

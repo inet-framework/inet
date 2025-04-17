@@ -14,8 +14,8 @@ simsignal_t ClockBase::timeChangedSignal = cComponent::registerSignal("timeChang
 
 void ClockBase::initialize(int stage)
 {
+    SimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        displayStringTextFormat = par("displayStringTextFormat");
         emitClockTimeInterval = par("emitClockTimeInterval");
         if (emitClockTimeInterval != 0) {
             timer = new cMessage();
@@ -43,11 +43,6 @@ void ClockBase::finish()
     emit(timeChangedSignal, getClockTime().asSimTime());
 }
 
-void ClockBase::refreshDisplay() const
-{
-    auto text = StringFormat::formatString(displayStringTextFormat, this);
-    getDisplayString().setTagArg("t", 0, text.c_str());
-}
 
 clocktime_t ClockBase::getClockTime() const
 {
@@ -104,7 +99,7 @@ std::string ClockBase::resolveDirective(char directive) const
         case 'd':
             return (getClockTime() - referenceClockModule->getClockTime()).ustr();
         default:
-            throw cRuntimeError("Unknown directive: %c", directive);
+            return SimpleModule::resolveDirective(directive);
     }
 }
 

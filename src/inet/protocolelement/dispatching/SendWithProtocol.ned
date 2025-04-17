@@ -7,9 +7,12 @@
 
 package inet.protocolelement.dispatching;
 
-simple SendWithProtocol
+import inet.common.SimpleModule;
+
+simple SendWithProtocol extends SimpleModule
 {
     parameters:
+        @class(SendWithProtocol);
         @display("i=block/tx");
     gates:
         input in;

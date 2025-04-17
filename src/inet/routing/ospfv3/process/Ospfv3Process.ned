@@ -1,8 +1,11 @@
 package inet.routing.ospfv3.process;
 
-simple Ospfv3Process
+import inet.common.SimpleModule;
+
+simple Ospfv3Process extends SimpleModule
 {
     parameters:
+        @class(Ospfv3Process);
         int processID;
         string routerID;
         xml interfaceConfig;

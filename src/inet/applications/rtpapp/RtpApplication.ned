@@ -8,13 +8,16 @@
 
 package inet.applications.rtpapp;
 
+import inet.common.SimpleModule;
+
 //
 // An application which uses RTP. It acts as a sender if the parameter `fileName` is
 // set, and as a receiver if the parameter is empty.
 //
-simple RtpApplication
+simple RtpApplication extends SimpleModule
 {
     parameters:
+        @class(RtpApplication);
         @display("i=block/app");
         string commonName;  // The common name (CNAME) of this host
         string profileName;  // Which rtp profile is to be used (usually RtpAvProfile)

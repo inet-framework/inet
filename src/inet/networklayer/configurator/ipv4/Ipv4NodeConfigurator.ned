@@ -7,6 +7,7 @@
 
 package inet.networklayer.configurator.ipv4;
 
+import inet.common.SimpleModule;
 import inet.networklayer.configurator.contract.IIpv4NodeConfigurator;
 
 //
@@ -24,9 +25,10 @@ import inet.networklayer.configurator.contract.IIpv4NodeConfigurator;
 // a restart, because being a global module, it doesn't know about node
 // lifecycle events.
 //
-simple Ipv4NodeConfigurator like IIpv4NodeConfigurator
+simple Ipv4NodeConfigurator extends SimpleModule like IIpv4NodeConfigurator
 {
     parameters:
+        @class(Ipv4NodeConfigurator);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
         // TODO eventually rename to networkConfigurator

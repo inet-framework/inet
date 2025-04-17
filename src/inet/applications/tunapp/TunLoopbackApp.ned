@@ -6,11 +6,13 @@
 
 package inet.applications.tunapp;
 
+import inet.common.SimpleModule;
 import inet.applications.contract.IApp;
 
-simple TunLoopbackApp like IApp
+simple TunLoopbackApp extends SimpleModule like IApp
 {
     parameters:
+        @class(TunLoopbackApp);
         string interfaceTableModule;
         string tunInterface;
         @display("i=block/app");

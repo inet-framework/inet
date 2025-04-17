@@ -7,6 +7,8 @@
 
 package inet.linklayer.ieee80211.mgmt;
 
+import inet.common.SimpleModule;
+
 //
 // Used in 802.11 infrastructure mode: handles management frames for a station (STA).
 //
@@ -22,9 +24,10 @@ package inet.linklayer.ieee80211.mgmt;
 //
 // Relies on the MAC layer (~Ieee80211Mac) for reception and transmission of frames.
 //
-simple Ieee80211MgmtSta like IIeee80211Mgmt
+simple Ieee80211MgmtSta extends SimpleModule like IIeee80211Mgmt
 {
     parameters:
+        @class(Ieee80211MgmtSta);
         string interfaceTableModule;   // The path to the InterfaceTable module
         int numChannels = default(1);  // Number of channels to scan
         string mibModule;

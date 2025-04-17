@@ -19,6 +19,7 @@
 #define __INET_SECURITYPOLICYDATABASE_H_
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/SimpleModule.h"
 #include "inet/networklayer/ipv4/ipsec/IPsecRule.h"
 #include "inet/networklayer/ipv4/ipsec/SecurityAssociationDatabase.h"
 #include "inet/networklayer/ipv4/ipsec/SecurityPolicy.h"
@@ -30,7 +31,7 @@ namespace ipsec {
  * Represents the IPsec Policy Association Database (SPD).
  * The database is filled by the IPsec module.
  */
-class INET_API SecurityPolicyDatabase : public cSimpleModule
+class INET_API SecurityPolicyDatabase : public SimpleModule
 {
   private:
     std::vector<SecurityPolicy *> entries;

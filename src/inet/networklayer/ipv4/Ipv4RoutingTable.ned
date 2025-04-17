@@ -7,6 +7,7 @@
 
 package inet.networklayer.ipv4;
 
+import inet.common.SimpleModule;
 import inet.networklayer.contract.IRoutingTable;
 
 //
@@ -36,9 +37,10 @@ import inet.networklayer.contract.IRoutingTable;
 // @see ~InterfaceTable
 // @author: Jochen Reber
 //
-simple Ipv4RoutingTable like IRoutingTable
+simple Ipv4RoutingTable extends SimpleModule like IRoutingTable
 {
     parameters:
+        @class(Ipv4RoutingTable);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routerId = default("auto"); // For routers, the router id using IPv4 address dotted
                           // notation; specify "auto" to select the highest

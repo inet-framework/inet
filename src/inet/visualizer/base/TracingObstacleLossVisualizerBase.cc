@@ -49,6 +49,7 @@ void TracingObstacleLossVisualizerBase::initialize(int stage)
 
 void TracingObstacleLossVisualizerBase::refreshDisplay() const
 {
+    VisualizerBase::refreshDisplay();
     AnimationPosition currentAnimationPosition;
     std::vector<const ObstacleLossVisualization *> removedObstacleLossVisualizations;
     for (auto obstacleLossVisualization : obstacleLossVisualizations) {

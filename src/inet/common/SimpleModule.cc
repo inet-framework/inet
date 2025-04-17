@@ -22,7 +22,6 @@ void SimpleModule::initialize(int stage)
     cSimpleModule::initialize(stage);
 }
 
-// NOTE: We intentionally NOT registering SimpleModule here to prevent the user from instantiating it by mistake
 void SimpleModule::refreshDisplay() const
 {
     auto displayStringTextFormat = par("displayStringTextFormat").stringValue();

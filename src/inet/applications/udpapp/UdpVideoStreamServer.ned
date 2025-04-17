@@ -7,6 +7,7 @@
 
 package inet.applications.udpapp;
 
+import inet.common.SimpleModule;
 import inet.applications.contract.IApp;
 
 //
@@ -25,9 +26,10 @@ import inet.applications.contract.IApp;
 //
 // @see ~UdpVideoStreamClient
 //
-simple UdpVideoStreamServer like IApp
+simple UdpVideoStreamServer extends SimpleModule like IApp
 {
     parameters:
+        @class(UdpVideoStreamServer);
         int localPort; // Port to listen on
         volatile double sendInterval @unit(s); // Interval between sending video stream packets
         volatile int packetLen @unit(B);  // Length of a video packet in bytes

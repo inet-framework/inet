@@ -8,6 +8,7 @@
 #ifndef __INET_ROUTINGTABLERECORDER_H
 #define __INET_ROUTINGTABLERECORDER_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 
 namespace inet {
@@ -17,7 +18,7 @@ namespace inet {
  *
  * @see Ipv4RoutingTable, Ipv4Route
  */
-class INET_API RoutingTableRecorder : public cSimpleModule, public cListener
+class INET_API RoutingTableRecorder : public SimpleModule, public cListener
 {
   private:
     FILE *routingLogFile;

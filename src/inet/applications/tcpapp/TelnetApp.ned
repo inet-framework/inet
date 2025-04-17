@@ -7,6 +7,7 @@
 
 package inet.applications.tcpapp;
 
+import inet.common.SimpleModule;
 import inet.applications.contract.IApp;
 
 //
@@ -24,9 +25,10 @@ import inet.applications.contract.IApp;
 // limiting, set autoRead=false, and use the `readSize` and `readDelay` parameters
 // to set a rate limit. This will allow TCP flow control to come into effect.
 //
-simple TelnetApp like IApp
+simple TelnetApp extends SimpleModule like IApp
 {
     parameters:
+        @class(TelnetApp);
         string localAddress = default(""); // Local address or empty ("")
         int localPort; // Local port number
         string connectAddress;  // Server address (may be symbolic)

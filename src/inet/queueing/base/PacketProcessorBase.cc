@@ -24,14 +24,6 @@ void PacketProcessorBase::initialize(int stage)
     }
 }
 
-void PacketProcessorBase::refreshDisplay() const
-{
-    if (displayStringTextFormat != nullptr) {
-        auto text = StringFormat::formatString(displayStringTextFormat, this);
-        getDisplayString().setTagArg("t", 0, text.c_str());
-    }
-}
-
 void PacketProcessorBase::handlePacketProcessed(Packet *packet)
 {
     numProcessedPackets++;
@@ -409,8 +401,8 @@ std::string PacketProcessorBase::resolveDirective(char directive) const
             return std::to_string(numProcessedPackets);
         case 'l':
             return processedTotalLength.str();
-        default:
-            throw cRuntimeError("Unknown directive: %c", directive);
+        default:        
+            return SimpleModule::resolveDirective(directive);
     }
 }
 

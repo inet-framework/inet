@@ -62,6 +62,7 @@ void QueueVisualizerBase::handleParameterChange(const char *name)
 
 void QueueVisualizerBase::refreshDisplay() const
 {
+    VisualizerBase::refreshDisplay();
     for (auto queueVisualization : queueVisualizations)
         refreshQueueVisualization(queueVisualization);
 }

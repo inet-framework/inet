@@ -11,12 +11,15 @@
 
 package inet.networklayer.xmipv6;
 
+import inet.common.SimpleModule;
+
 //
 // Implements xMIPv6 (where x = F, H, F-H).
 //
-simple xMIPv6
+simple xMIPv6 extends SimpleModule
 {
     parameters:
+        @class(xMIPv6);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string ipv6TunnelingModule;
         string ipv6NeighbourDiscoveryModule;

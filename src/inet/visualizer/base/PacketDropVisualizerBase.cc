@@ -139,6 +139,7 @@ void PacketDropVisualizerBase::handleParameterChange(const char *name)
 
 void PacketDropVisualizerBase::refreshDisplay() const
 {
+    VisualizerBase::refreshDisplay();
     AnimationPosition currentAnimationPosition;
     std::vector<const PacketDropVisualization *> removedPacketDropVisualizations;
     for (auto packetDropVisualization : packetDropVisualizations) {

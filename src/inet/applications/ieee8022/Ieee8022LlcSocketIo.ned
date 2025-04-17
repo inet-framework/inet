@@ -7,12 +7,15 @@
 
 package inet.applications.ieee8022;
 
+import inet.common.SimpleModule;
+
 //
 // Provides IEEE 802.2 LLC socket handling for generic applications.
 //
-simple Ieee8022LlcSocketIo
+simple Ieee8022LlcSocketIo extends SimpleModule
 {
     parameters:
+        @class(Ieee8022LlcSocketIo);
         string interfaceTableModule;
         string interface = default("");
         string localAddress = default("");

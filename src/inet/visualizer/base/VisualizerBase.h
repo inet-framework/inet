@@ -8,6 +8,7 @@
 #ifndef __INET_VISUALIZERBASE_H
 #define __INET_VISUALIZERBASE_H
 
+#include "inet/common/SimpleModule.h"
 #include <functional>
 
 #include "inet/common/geometry/common/Coord.h"
@@ -19,16 +20,18 @@ namespace inet {
 
 namespace visualizer {
 
-class INET_API VisualizerBase : public cSimpleModule
+class INET_API VisualizerBase : public SimpleModule
 {
   protected:
     cModule *visualizationTargetModule = nullptr;
     cModule *visualizationSubjectModule = nullptr;
     const char *tags = nullptr;
+    StringFormat format;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
+    virtual void refreshDisplay() const override;
 
     virtual Coord getPosition(const cModule *networkNode) const;
     virtual Coord getContactPosition(const cModule *networkNode, const Coord& fromPosition, const char *contactMode, double contactSpacing) const;

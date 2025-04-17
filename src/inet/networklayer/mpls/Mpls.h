@@ -8,6 +8,7 @@
 #ifndef __INET_MPLS_H
 #define __INET_MPLS_H
 
+#include "inet/common/SimpleModule.h"
 #include <vector>
 
 #include "inet/common/IInterfaceRegistrationListener.h"
@@ -26,7 +27,7 @@ namespace inet {
 /**
  * Implements the MPLS protocol; see the NED file for more info.
  */
-class INET_API Mpls : public cSimpleModule, public DefaultProtocolRegistrationListener, public IInterfaceRegistrationListener
+class INET_API Mpls : public SimpleModule, public DefaultProtocolRegistrationListener, public IInterfaceRegistrationListener
 {
   protected:
     simtime_t delay1;

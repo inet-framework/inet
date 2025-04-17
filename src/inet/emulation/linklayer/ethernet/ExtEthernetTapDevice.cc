@@ -37,7 +37,7 @@ ExtEthernetTapDevice::~ExtEthernetTapDevice()
 
 void ExtEthernetTapDevice::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         device = par("device").stdstringValue();
         packetNameFormat = par("packetNameFormat");
@@ -83,6 +83,7 @@ void ExtEthernetTapDevice::handleMessage(cMessage *msg)
 
 void ExtEthernetTapDevice::refreshDisplay() const
 {
+    SimpleModule::refreshDisplay();
     char buf[180];
     sprintf(buf, "TAP device: %s\nrcv:%d snt:%d", device.c_str(), numReceived, numSent);
     getDisplayString().setTagArg("t", 0, buf);

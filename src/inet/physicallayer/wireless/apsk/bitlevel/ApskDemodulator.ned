@@ -7,6 +7,7 @@
 
 package inet.physicallayer.wireless.apsk.bitlevel;
 
+import inet.common.SimpleModule;
 import inet.physicallayer.wireless.common.contract.bitlevel.IDemodulator;
 
 //
@@ -16,9 +17,10 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IDemodulator;
 //
 // @see ~ApskModulator, ~ApskLayeredReceiver.
 //
-simple ApskDemodulator like IDemodulator
+simple ApskDemodulator extends SimpleModule like IDemodulator
 {
     parameters:
+        @class(ApskDemodulator);
         string modulation; // BPSK, QPSK, QAM-16, QAM-64, QAM-256, etc. (see ApskModulationBase::findModulation)
         @display("i=block/mac");
 }

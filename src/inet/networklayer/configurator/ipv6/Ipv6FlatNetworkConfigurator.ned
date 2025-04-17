@@ -7,6 +7,7 @@
 
 package inet.networklayer.configurator.ipv6;
 
+import inet.common.SimpleModule;
 import inet.networklayer.configurator.contract.IL3NetworkConfigurator;
 
 //
@@ -18,9 +19,10 @@ import inet.networklayer.configurator.contract.IL3NetworkConfigurator;
 //
 // @see ~Ipv4FlatNetworkConfigurator
 //
-simple Ipv6FlatNetworkConfigurator like IL3NetworkConfigurator
+simple Ipv6FlatNetworkConfigurator extends SimpleModule like IL3NetworkConfigurator
 {
     parameters:
+        @class(Ipv6FlatNetworkConfigurator);
         @display("i=block/cogwheel");
         @labels(node);
 }

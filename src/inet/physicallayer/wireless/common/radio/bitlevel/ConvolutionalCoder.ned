@@ -7,6 +7,7 @@
 
 package inet.physicallayer.wireless.common.radio.bitlevel;
 
+import inet.common.SimpleModule;
 import inet.physicallayer.wireless.common.contract.bitlevel.IFecCoder;
 
 // <b>Transfer function (octal) matrix</b>
@@ -59,7 +60,7 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IFecCoder;
 // The encoding process works in accordance with the industry standards and starts
 // in the all-zeros state.
 //
-module ConvolutionalCoder like IFecCoder
+module ConvolutionalCoder extends SimpleModule like IFecCoder
 {
     parameters:
         string transferFunctionMatrix = default("133 171");

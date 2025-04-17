@@ -7,6 +7,8 @@
 
 package inet.networklayer.diffserv;
 
+import inet.common.SimpleModule;
+
 //
 // Implements a Single Rate Three Color Meter (RFC 2697).
 //
@@ -27,9 +29,10 @@ package inet.networklayer.diffserv;
 // When operating in color-aware mode, the meter does not recolor
 // a packet that was colored by a previous marker to a lesser conforming color.
 //
-simple SingleRateThreeColorMeter
+simple SingleRateThreeColorMeter extends SimpleModule
 {
     parameters:
+        @class(SingleRateThreeColorMeter);
         @display("i=block/timer");
         string interfaceTableModule;   // The path to the InterfaceTable module
         string cir;       // Committed information rate, either absolute bitrate (e.g. "100kbps") or relative to the link's datarate (e.g. "20%")

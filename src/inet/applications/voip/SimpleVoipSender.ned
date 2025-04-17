@@ -7,6 +7,7 @@
 
 package inet.applications.voip;
 
+import inet.common.SimpleModule;
 import inet.applications.contract.IApp;
 
 //
@@ -33,9 +34,10 @@ import inet.applications.contract.IApp;
 //
 // @author: Adriano
 //
-simple SimpleVoipSender like IApp
+simple SimpleVoipSender extends SimpleModule like IApp
 {
     parameters:
+        @class(SimpleVoipSender);
         int localPort = default(-1);
         int destPort;
         string destAddress;

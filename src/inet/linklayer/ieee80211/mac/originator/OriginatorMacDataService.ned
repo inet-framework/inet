@@ -7,12 +7,13 @@
 
 package inet.linklayer.ieee80211.mac.originator;
 
+import inet.common.SimpleModule;
 import inet.linklayer.ieee80211.mac.contract.IFragmentationPolicy;
 
-module OriginatorMacDataService
+module OriginatorMacDataService extends SimpleModule
 {
     parameters:
-        @class("OriginatorMacDataService");
+        @class(OriginatorMacDataService);
         @display("i=block/fork");
         @signal[packetFragmented](type=inet::Packet);
         @signal[packetAggregated](type=inet::Packet);

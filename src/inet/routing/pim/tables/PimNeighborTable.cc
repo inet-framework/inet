@@ -67,7 +67,7 @@ PimNeighborTable::~PimNeighborTable()
 
 void PimNeighborTable::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         WATCH_MAP(neighbors);

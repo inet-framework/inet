@@ -5,6 +5,7 @@
 //
 
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/Packet.h"
@@ -15,7 +16,7 @@
 
 namespace inet {
 
-class INET_API NetfilterInfoHook : public cSimpleModule, public NetfilterBase::HookBase
+class INET_API NetfilterInfoHook : public SimpleModule, public NetfilterBase::HookBase
 {
   protected:
     ModuleRefByPar<INetfilter> netfilter;
@@ -57,7 +58,7 @@ Define_Module(NetfilterInfoHook);
 
 void NetfilterInfoHook::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_NETWORK_LAYER) {
         netfilter.reference(this, "networkProtocolModule", true);

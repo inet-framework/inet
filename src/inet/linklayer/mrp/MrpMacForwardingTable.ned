@@ -6,6 +6,7 @@
 
 package inet.linklayer.mrp;
 
+import inet.common.SimpleModule;
 import inet.linklayer.contract.IMacForwardingTable;
 
 //
@@ -14,14 +15,15 @@ import inet.linklayer.contract.IMacForwardingTable;
 //
 // @see ~MrpRelay, ~Mrp, ~MrpInterconnection
 //
-simple MrpMacForwardingTable like IMacForwardingTable
+simple MrpMacForwardingTable extends SimpleModule like IMacForwardingTable
 {
     parameters:
+        @class(MrpMacForwardingTable);
         @display("i=block/table2");
         double agingTime @unit(s) = default(120s);
         object forwardingTable @mutable = default([]);
         string forwardingTableFile = default("");
         string interfaceTableModule;
-        string displayStringTextFormat = default("addr: %a\nvlan: %v");
+        displayStringTextFormat = default("addr: %a\nvlan: %v");
 }
 

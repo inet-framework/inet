@@ -9,6 +9,8 @@
 
 package inet.routing.pim.modes;
 
+import inet.common.SimpleModule;
+
 //
 // Implementation of PIM-DM protocol (RFC 3973).
 //
@@ -29,9 +31,10 @@ package inet.routing.pim.modes;
 // Other parameters are timer values from the specification.
 // They should not be modified except for testing purposes.
 //
-simple PimDm
+simple PimDm extends SimpleModule
 {
     parameters:
+        @class(PimDm);
         @display("i=block/network2");
         string interfaceTableModule;
         string routingTableModule;

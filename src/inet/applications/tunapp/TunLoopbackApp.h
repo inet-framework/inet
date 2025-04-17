@@ -7,12 +7,13 @@
 #ifndef __INET_TUNLOOPBACKAPP_H
 #define __INET_TUNLOOPBACKAPP_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/linklayer/tun/TunSocket.h"
 
 namespace inet {
 
-class INET_API TunLoopbackApp : public cSimpleModule, public LifecycleUnsupported
+class INET_API TunLoopbackApp : public SimpleModule, public LifecycleUnsupported
 {
   protected:
     const char *tunInterface = nullptr;

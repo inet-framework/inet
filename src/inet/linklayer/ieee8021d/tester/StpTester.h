@@ -8,6 +8,7 @@
 #ifndef __INET_STPTESTER_H
 #define __INET_STPTESTER_H
 
+#include "inet/common/SimpleModule.h"
 #include <map>
 
 #include "inet/common/Topology.h"
@@ -23,7 +24,7 @@ namespace inet {
  * with cycle detection. The results can be obtained with getter methods.
  */
 // TODO this module should be moved into the test folder somewhere
-class INET_API StpTester : public cSimpleModule
+class INET_API StpTester : public SimpleModule
 {
   public:
     enum Color {

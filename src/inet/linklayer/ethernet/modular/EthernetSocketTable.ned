@@ -7,9 +7,12 @@
 
 package inet.linklayer.ethernet.modular;
 
-simple EthernetSocketTable
+import inet.common.SimpleModule;
+
+simple EthernetSocketTable extends SimpleModule
 {
     parameters:
+        @class(EthernetSocketTable);
         @display("i=block/table");
 }
 

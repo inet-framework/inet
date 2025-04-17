@@ -9,6 +9,7 @@
 #define __INET_RTPPROFILE_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/SimpleModule.h"
 
 namespace inet {
 
@@ -28,7 +29,7 @@ class RtpInnerPacket;
  * Rtp<profileName>Payload<payloadType>Sender
  * Rtp<profileName>Payload<payloadType>Receiver
  */
-class INET_API RtpProfile : public cSimpleModule
+class INET_API RtpProfile : public SimpleModule
 {
   protected:
     // helper class to store the association between an ssrc identifier

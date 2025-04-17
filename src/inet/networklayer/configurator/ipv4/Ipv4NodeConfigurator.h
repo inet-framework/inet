@@ -8,6 +8,7 @@
 #ifndef __INET_IPV4NODECONFIGURATOR_H
 #define __INET_IPV4NODECONFIGURATOR_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"
@@ -23,7 +24,7 @@ namespace inet {
  *
  * For more info please see the NED file.
  */
-class INET_API Ipv4NodeConfigurator : public cSimpleModule, public ILifecycle, protected cListener
+class INET_API Ipv4NodeConfigurator : public SimpleModule, public ILifecycle, protected cListener
 {
   protected:
     bool _configureRoutingTable = false;

@@ -7,9 +7,12 @@
 
 package inet.protocolelement.forwarding;
 
-simple SendWithHopLimit
+import inet.common.SimpleModule;
+
+simple SendWithHopLimit extends SimpleModule
 {
     parameters:
+        @class(SendWithHopLimit);
         int hopLimit;
         @display("i=block/tx");
     gates:

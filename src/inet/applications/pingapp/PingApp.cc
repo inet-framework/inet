@@ -111,6 +111,7 @@ void PingApp::initialize(int stage)
         // statistics
         rttStat.setName("pingRTT");
         sentCount = lossCount = outOfOrderArrivalCount = numPongs = 0;
+        WATCH(sentCount);
         WATCH(lossCount);
         WATCH(outOfOrderArrivalCount);
         WATCH(numPongs);
@@ -275,15 +276,6 @@ void PingApp::socketClosed(INetworkSocket *socket)
     if (socket == currentSocket)
         currentSocket = nullptr;
     delete socketMap.removeSocket(socket);
-}
-
-void PingApp::refreshDisplay() const
-{
-    ApplicationBase::refreshDisplay();
-
-    char buf[40];
-    sprintf(buf, "sent: %ld pks\nrcvd: %ld pks", sentCount, numPongs);
-    getDisplayString().setTagArg("t", 0, buf);
 }
 
 void PingApp::handleStartOperation(LifecycleOperation *operation)

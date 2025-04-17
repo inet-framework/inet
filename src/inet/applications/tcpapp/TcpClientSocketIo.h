@@ -8,11 +8,12 @@
 #ifndef __INET_TCPCLIENTSOCKETIO_H
 #define __INET_TCPCLIENTSOCKETIO_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
 namespace inet {
 
-class INET_API TcpClientSocketIo : public cSimpleModule, public TcpSocket::ICallback
+class INET_API TcpClientSocketIo : public SimpleModule, public TcpSocket::ICallback
 {
   protected:
     TcpSocket socket;

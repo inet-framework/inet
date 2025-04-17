@@ -6,15 +6,18 @@
 
 package inet.applications.ethernet;
 
+import inet.common.SimpleModule;
+
 //
 // A simple traffic generator for the Ethernet model and the 802.11 model,
 // and generally for any L2 model that accepts ~Ieee802SapReq tags on the
 // packets. It generates packets containing ~EtherAppReq chunks. It should
 // be connected directly to ~Ieee8022Llc.
 //
-simple EtherAppClient
+simple EtherAppClient extends SimpleModule
 {
     parameters:
+        @class(EtherAppClient);
         string interfaceTableModule;
         string destAddress = default("");  // Destination MAC address, or module path name of destination station; empty means off
         string interface = default("");  // Outgoing interface name; empty accepted only when the destAddress is empty

@@ -35,7 +35,7 @@ Ipv4NatTable::~Ipv4NatTable()
 
 void Ipv4NatTable::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         config = par("config");
         networkProtocol.reference(this, "networkProtocolModule", true);

@@ -8,8 +8,8 @@
 
 package inet.linklayer.mrp;
 
+import inet.common.SimpleModule;
 import inet.linklayer.contract.IMrp;
-
 
 //
 // Implements the Media Redundancy Protocol (MRP) as specified in IEC 62439-2.
@@ -68,9 +68,10 @@ import inet.linklayer.contract.IMrp;
 //
 // @see ~MrpInterconnection, ~MrpRelay, ~MrpMacForwardingTable, ~L2NetworkConfigurator, ~InterfaceTable
 //
-simple Mrp like IMrp
+simple Mrp extends SimpleModule like IMrp
 {
     parameters:
+        @class(Mrp);
         @class(Mrp);
 
         // Switches do not detect a link change immediately. This parameter sets
@@ -152,7 +153,7 @@ simple Mrp like IMrp
 
         // Format for the text displayed above the module icon.
         // Directives: `%r`: MRP role, `%n`: node state, `%g`: ring state
-        string displayStringTextFormat = default("role: %r\nnode: %n\nring: %g");
+        displayStringTextFormat = default("role: %r\nnode: %n\nring: %g");
 
         @display("i=block/network2");
         @signal[ringStateChanged](type=long);

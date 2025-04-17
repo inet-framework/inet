@@ -42,14 +42,8 @@ std::string MacRelayUnitBase::resolveDirective(char directive) const
         case 'd':
             return std::to_string(numDroppedFrames);
         default:
-            throw cRuntimeError("Unknown directive: %c", directive);
+            return SimpleModule::resolveDirective(directive);   
     }
-}
-
-void MacRelayUnitBase::refreshDisplay() const
-{
-    auto text = StringFormat::formatString(par("displayStringTextFormat"), this);
-    getDisplayString().setTagArg("t", 0, text.c_str());
 }
 
 void MacRelayUnitBase::broadcastPacket(Packet *outgoingPacket, const MacAddress& destinationAddress, NetworkInterface *incomingInterface)

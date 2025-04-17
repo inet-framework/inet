@@ -11,7 +11,11 @@
 
 package inet.routing.eigrp.tables;
 
-simple EigrpIpv6TopologyTable
+import inet.common.SimpleModule;
+
+simple EigrpIpv6TopologyTable extends SimpleModule
 {
-    @display("i=block/table");
+    parameters:
+        @class(EigrpIpv6TopologyTable);
+        @display("i=block/table");
 }

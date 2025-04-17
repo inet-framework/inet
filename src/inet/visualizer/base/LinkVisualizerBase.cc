@@ -92,6 +92,7 @@ void LinkVisualizerBase::handleParameterChange(const char *name)
 
 void LinkVisualizerBase::refreshDisplay() const
 {
+    VisualizerBase::refreshDisplay();
     if (displayLinks) {
         AnimationPosition currentAnimationPosition;
         std::vector<const LinkVisualization *> removedLinkVisualizations;

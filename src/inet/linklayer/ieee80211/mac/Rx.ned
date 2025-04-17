@@ -7,6 +7,7 @@
 
 package inet.linklayer.ieee80211.mac;
 
+import inet.common.SimpleModule;
 import inet.linklayer.ieee80211.mac.contract.IRx;
 
 //
@@ -16,9 +17,10 @@ import inet.linklayer.ieee80211.mac.contract.IRx;
 //
 // This is the default implementation of thr ~IRx module interface.
 //
-simple Rx like IRx
+simple Rx extends SimpleModule like IRx
 {
     parameters:
+        @class(Rx);
         @display("i=block/rx");
         @signal[navChanged](type=simtime_t);
         @signal[packetDropped](type=inet::Packet);

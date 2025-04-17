@@ -7,9 +7,12 @@
 
 package inet.protocolelement.selectivity;
 
-simple SendToPort
+import inet.common.SimpleModule;
+
+simple SendToPort extends SimpleModule
 {
     parameters:
+        @class(SendToPort);
         int port;
         @display("i=block/tx");
     gates:

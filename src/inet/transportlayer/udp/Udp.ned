@@ -7,6 +7,7 @@
 
 package inet.transportlayer.udp;
 
+import inet.common.SimpleModule;
 import inet.transportlayer.contract.IUdp;
 
 //
@@ -55,9 +56,10 @@ import inet.transportlayer.contract.IUdp;
 //
 // @see ~UdpHeader, ~UdpCommand, ~UdpCommandCode
 //
-simple Udp like IUdp
+simple Udp extends SimpleModule like IUdp
 {
     parameters:
+        @class(Udp);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string icmpModule = default("^.ipv4.icmp");
         string icmpv6Module = default("^.ipv6.icmpv6");
@@ -86,7 +88,9 @@ simple Udp like IUdp
         output ipOut @labels(UdpHeader,Ipv4ControlInfo/down,Ipv6ControlInfo/down);
 }
 
-simple UdpChecksumInsertionHook
+simple UdpChecksumInsertionHook extends SimpleModule
 {
+    parameters:
+        @class(UdpChecksumInsertionHook);
 }
 

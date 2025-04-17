@@ -8,6 +8,7 @@
 #ifndef __INET_NEIGHBORLISTNEIGHBORCACHE_H
 #define __INET_NEIGHBORLISTNEIGHBORCACHE_H
 
+#include "inet/common/SimpleModule.h"
 #include <set>
 #include <vector>
 
@@ -17,7 +18,7 @@
 namespace inet {
 namespace physicallayer {
 
-class INET_API NeighborListNeighborCache : public cSimpleModule, public INeighborCache
+class INET_API NeighborListNeighborCache : public SimpleModule, public INeighborCache
 {
   public:
     struct RadioEntry {

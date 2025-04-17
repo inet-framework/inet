@@ -5,6 +5,8 @@
 
 package inet.protocolelement.shaper;
 
+import inet.common.SimpleModule;
+
 //
 // A table containing the group eligibility times needed
 // for the `GroupEligibilityTimeMeter`.
@@ -15,9 +17,10 @@ package inet.protocolelement.shaper;
 //
 // @see ~ATS8021qFilter, ~GroupEligibilityTimeMeter, ~EligibilityTimeGate, ~EligibilityTimeFilter, ~EligibilityTimeQueue, ~EligibilityTimeTag
 
-simple GroupEligibilityTimeTable
+simple GroupEligibilityTimeTable extends SimpleModule
 {
     parameters:
+        @class(GroupEligibilityTimeTable);
         @display("i=block/table");
         @class(GroupEligibilityTimeTable);
 }

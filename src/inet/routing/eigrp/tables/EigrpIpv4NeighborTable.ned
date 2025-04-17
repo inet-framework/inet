@@ -11,10 +11,14 @@
 
 package inet.routing.eigrp.tables;
 
+import inet.common.SimpleModule;
+
 //
 // TODO auto-generated module
 //
-simple EigrpIpv4NeighborTable
+simple EigrpIpv4NeighborTable extends SimpleModule
 {
-    @display("i=block/table");
+    parameters:
+        @class(EigrpIpv4NeighborTable);
+        @display("i=block/table");
 }

@@ -8,6 +8,7 @@
 #ifndef __INET_APSKDECODER_H
 #define __INET_APSKDECODER_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/physicallayer/wireless/apsk/bitlevel/ApskCode.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/IDecoder.h"
 
@@ -15,7 +16,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API ApskDecoder : public cSimpleModule, public IDecoder
+class INET_API ApskDecoder : public SimpleModule, public IDecoder
 {
   protected:
     const ApskCode *code;

@@ -81,7 +81,6 @@ class INET_API PingApp : public ApplicationBase, public INetworkSocket::ICallbac
     virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void handleSelfMessage(cMessage *msg);
     virtual void finish() override;
-    virtual void refreshDisplay() const override;
 
     virtual void parseDestAddressesPar();
     virtual void startSendingPingRequests();

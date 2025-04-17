@@ -7,6 +7,8 @@
 
 package inet.emulation.linklayer.ethernet;
 
+import inet.common.SimpleModule;
+
 //
 // Provides a bidirectional connection to an Ethernet socket of the
 // host computer which is running the simulation. It writes the packets that arrive
@@ -28,9 +30,10 @@ package inet.emulation.linklayer.ethernet;
 // $> sudo setcap -r /${your-omnetpp-root}/bin/opp_run_release
 // $> sudo setcap -r /${your-omnetpp-root}/bin/opp_run_dbg
 //
-simple ExtEthernetSocket
+simple ExtEthernetSocket extends SimpleModule
 {
     parameters:
+        @class(ExtEthernetSocket);
         string device; // Name of an existing real Ethernet device
         string namespace = default("");
         string packetNameFormat = default("Ext-%p-%t-%n"); // Name of received packets

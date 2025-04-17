@@ -7,6 +7,8 @@
 
 package inet.queueing.base;
 
+import inet.common.SimpleModule;
+
 //
 // Base module for various packet processing modules which maintains
 // a few statistics.
@@ -15,9 +17,10 @@ package inet.queueing.base;
 // - %p - number of processed packets
 // - %l - total processed packet length
 //
-simple PacketProcessorBase
+simple PacketProcessorBase extends SimpleModule
 {
     parameters:
-        string displayStringTextFormat = default("processed %p pk (%l)"); // Determines the text that is written on top of the submodule
+        @class(PacketProcessorBase);
+        displayStringTextFormat = default("processed %p pk (%l)"); // Determines the text that is written on top of the submodule
         @display("i=block/star");
 }

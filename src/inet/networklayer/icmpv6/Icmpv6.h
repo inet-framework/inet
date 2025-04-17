@@ -8,6 +8,7 @@
 #ifndef __INET_ICMPV6_H
 #define __INET_ICMPV6_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/common/packet/Packet.h"
@@ -24,7 +25,7 @@ class PingPayload;
 /**
  * ICMPv6 implementation.
  */
-class INET_API Icmpv6 : public cSimpleModule, public LifecycleUnsupported, public DefaultProtocolRegistrationListener
+class INET_API Icmpv6 : public SimpleModule, public LifecycleUnsupported, public DefaultProtocolRegistrationListener
 {
   public:
     /**

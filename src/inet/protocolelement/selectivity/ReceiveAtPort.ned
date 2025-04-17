@@ -7,9 +7,12 @@
 
 package inet.protocolelement.selectivity;
 
-simple ReceiveAtPort
+import inet.common.SimpleModule;
+
+simple ReceiveAtPort extends SimpleModule
 {
     parameters:
+        @class(ReceiveAtPort);
         int port;
         @display("i=block/rx");
     gates:

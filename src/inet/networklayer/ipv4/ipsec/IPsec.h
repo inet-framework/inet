@@ -19,6 +19,7 @@
 #define __INET_IPSEC_H_
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/SimpleModule.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/ipv4/Ipv4.h"
@@ -34,7 +35,7 @@ namespace ipsec {
  * Implements IPsec for IPv4. Supports AH and ESP in transport mode.
  * See the NED documentation for more info.
  */
-class INET_API IPsec : public cSimpleModule, NetfilterBase::HookBase
+class INET_API IPsec : public SimpleModule, NetfilterBase::HookBase
 {
   public:
     typedef IPsecRule::Action Action;

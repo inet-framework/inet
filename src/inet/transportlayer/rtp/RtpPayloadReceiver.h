@@ -7,6 +7,7 @@
 #ifndef __INET_RTPPAYLOADRECEIVER_H
 #define __INET_RTPPAYLOADRECEIVER_H
 
+#include "inet/common/SimpleModule.h"
 #include <fstream>
 
 #include "inet/common/packet/Packet.h"
@@ -22,7 +23,7 @@ namespace rtp {
  * The class RtpPayloadReceiver acts as a base class for modules
  * processing incoming RTP data packets.
  */
-class INET_API RtpPayloadReceiver : public cSimpleModule
+class INET_API RtpPayloadReceiver : public SimpleModule
 {
   public:
     /**

@@ -7,6 +7,7 @@
 
 package inet.applications.tcpapp;
 
+import inet.common.SimpleModule;
 import inet.applications.contract.IApp;
 
 //
@@ -23,9 +24,10 @@ import inet.applications.contract.IApp;
 //
 // Compatible with both ~Ipv4 and ~Ipv6.
 //
-simple TcpServerHostApp like IApp
+simple TcpServerHostApp extends SimpleModule like IApp
 {
     parameters:
+        @class(TcpServerHostApp);
         string localAddress = default(""); // May be left empty ("")
         int localPort = default(1000); // Port number to listen on
         string serverThreadModuleType; // Module type of "thread" module to launch on incoming connections

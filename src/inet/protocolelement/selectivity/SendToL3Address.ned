@@ -7,9 +7,12 @@
 
 package inet.protocolelement.selectivity;
 
-simple SendToL3Address
+import inet.common.SimpleModule;
+
+simple SendToL3Address extends SimpleModule
 {
     parameters:
+        @class(SendToL3Address);
         string address;
         @display("i=block/tx");
     gates:

@@ -7,11 +7,13 @@
 
 package inet.protocolelement.lifetime;
 
+import inet.common.SimpleModule;
 import inet.protocolelement.contract.IPacketLifeTimer;
 
-simple CarrierBasedLifeTimer like IPacketLifeTimer
+simple CarrierBasedLifeTimer extends SimpleModule like IPacketLifeTimer
 {
     parameters:
+        @class(CarrierBasedLifeTimer);
         string collectionModule;
         @display("i=block/timer");
         @class(CarrierBasedLifeTimer);

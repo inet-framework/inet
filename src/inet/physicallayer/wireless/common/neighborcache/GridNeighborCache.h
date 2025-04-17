@@ -8,6 +8,7 @@
 #ifndef __INET_GRIDNEIGHBORCACHE_H
 #define __INET_GRIDNEIGHBORCACHE_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/geometry/container/SpatialGrid.h"
 #include "inet/physicallayer/wireless/common/medium/RadioMedium.h"
@@ -15,7 +16,7 @@
 namespace inet {
 namespace physicallayer {
 
-class INET_API GridNeighborCache : public cSimpleModule, public INeighborCache
+class INET_API GridNeighborCache : public SimpleModule, public INeighborCache
 {
   public:
     typedef std::vector<const IRadio *> Radios;

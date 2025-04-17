@@ -7,9 +7,12 @@
 
 package inet.networklayer.common;
 
-simple NetfilterInfoHook
+import inet.common.SimpleModule;
+
+simple NetfilterInfoHook extends SimpleModule
 {
     parameters:
+        @class(NetfilterInfoHook);
         string networkProtocolModule;
 }
 

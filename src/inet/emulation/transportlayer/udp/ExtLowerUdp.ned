@@ -7,6 +7,7 @@
 
 package inet.emulation.transportlayer.udp;
 
+import inet.common.SimpleModule;
 import inet.transportlayer.contract.IUdp;
 
 //
@@ -14,9 +15,10 @@ import inet.transportlayer.contract.IUdp;
 // The lower part of the UDP protocol is realized in the real world using
 // real UDP sockets of the host computer which is running the simulation.
 //
-simple ExtLowerUdp like IUdp
+simple ExtLowerUdp extends SimpleModule like IUdp
 {
     parameters:
+        @class(ExtLowerUdp);
         string namespace = default("");
         string packetNameFormat = default("Ext-%p-%t-%n");
         @display("i=block/transport");

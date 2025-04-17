@@ -9,6 +9,7 @@
 #ifndef __INET_SCTPSOCKET_H
 #define __INET_SCTPSOCKET_H
 
+#include "inet/common/SimpleModule.h"
 #include <vector>
 
 #include "inet/common/packet/Message.h"
@@ -319,7 +320,7 @@ class INET_API SctpSocket : public ISocket
      * multiply inherits from CallbackInterface too, that is you
      * declared it as
      * <pre>
-     * class MyAppModule : public cSimpleModule, public SctpSocket::CallbackInterface
+     * class MyAppModule : public SimpleModule, public SctpSocket::CallbackInterface
      * </pre>
      * and redefined the necessary virtual functions; or you may use
      * dedicated class (and objects) for this purpose.

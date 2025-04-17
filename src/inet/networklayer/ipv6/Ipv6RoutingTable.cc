@@ -50,7 +50,7 @@ Ipv6Route *Ipv6RoutingTable::createNewRoute(Ipv6Address destPrefix, int prefixLe
 
 void Ipv6RoutingTable::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         WATCH_PTRVECTOR(routeList);

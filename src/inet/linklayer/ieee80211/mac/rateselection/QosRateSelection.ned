@@ -7,9 +7,12 @@
 
 package inet.linklayer.ieee80211.mac.rateselection;
 
-simple QosRateSelection
+import inet.common.SimpleModule;
+
+simple QosRateSelection extends SimpleModule
 {
     parameters:
+        @class(QosRateSelection);
         string rateControlModule;
 
         double multicastFrameBitrate @unit(bps) = default(-1bps);

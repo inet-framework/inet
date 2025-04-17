@@ -8,6 +8,7 @@
 #ifndef __INET_QOSCLASSIFIER_H
 #define __INET_QOSCLASSIFIER_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 
 namespace inet {
@@ -15,7 +16,7 @@ namespace inet {
 /**
  * This module classifies and assigns User Priority to packets.
  */
-class INET_API QosClassifier : public cSimpleModule, public DefaultProtocolRegistrationListener
+class INET_API QosClassifier : public SimpleModule, public DefaultProtocolRegistrationListener
 {
   protected:
     int defaultUp;

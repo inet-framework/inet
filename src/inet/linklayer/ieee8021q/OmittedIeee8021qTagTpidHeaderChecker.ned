@@ -7,11 +7,12 @@
 
 package inet.linklayer.ieee8021q;
 
+import inet.common.SimpleModule;
 //
 // Implements the module given interface and can be used as an omitted
 // optional module that removes itself from the module hierarchy during initialize.
 //
-module OmittedIeee8021qTagTpidHeaderChecker like IIeee8021qTagTpidHeaderChecker
+module OmittedIeee8021qTagTpidHeaderChecker extends SimpleModule like IIeee8021qTagTpidHeaderChecker
 {
     parameters:
         string vlanTagType = default("");

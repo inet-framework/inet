@@ -26,7 +26,7 @@ Define_Module(Icmpv6);
 
 void Icmpv6::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         const char *checksumModeString = par("checksumMode");

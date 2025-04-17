@@ -7,6 +7,8 @@
 
 package inet.linklayer.configurator.gatescheduling.base;
 
+import inet.common.SimpleModule;
+
 //
 // Serves as a basis for gate scheduling configurator modules. It
 // provides methods for derived modules to easily extract the input parameters
@@ -31,9 +33,10 @@ package inet.linklayer.configurator.gatescheduling.base;
 //   - `maxJitter` (optional): the allowed maximum jitter among the packets, 0 by default
 //   - `pathFragments` (optional): array of arrays, where each array contains a list of network node names, supports multicast trees, shortest path is used when omitted
 //
-simple GateScheduleConfiguratorBase
+simple GateScheduleConfiguratorBase extends SimpleModule
 {
     parameters:
+        @class(GateScheduleConfiguratorBase);
         double gateCycleDuration @unit(s); // The globally used gate scheduling period in each PeriodicGate module
         object configuration @mutable = default([]); // Array of objects, see ~GateScheduleConfiguratorBase module documentation for more details
                                                      // example: [{name: "s1", type: "unicast", application: "app[0]", pcp: 0, gateIndex: 0, source: "wheel*", destination: "hud", packetLength: 100B, packetInterval: 5ms, maxLatency: 100us, maxJitter: 10us, pathFragments: [["a", "b", "c"]]}]

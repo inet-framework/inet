@@ -7,6 +7,7 @@
 
 package inet.power.base;
 
+import inet.common.SimpleModule;
 import inet.power.contract.IEpEnergySink;
 
 //
@@ -15,9 +16,10 @@ import inet.power.contract.IEpEnergySink;
 //
 // @see ~EpEnergyConsumerBase, ~EpEnergySourceBase, ~EpEnergyGeneratorBase, ~EpEnergyStorageBase
 //
-simple EpEnergySinkBase like IEpEnergySink
+simple EpEnergySinkBase extends SimpleModule like IEpEnergySink
 {
     parameters:
+        @class(EpEnergySinkBase);
         @display("i=block/plug");
         @signal[powerGenerationChanged];
         @statistic[powerGeneration](title="Power generation"; source=powerGenerationChanged; record=vector; interpolationmode=sample-hold; unit=W);

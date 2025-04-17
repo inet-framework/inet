@@ -7,6 +7,7 @@
 
 package inet.linklayer.configurator.common;
 
+import inet.common.SimpleModule;
 import inet.linklayer.configurator.contract.IL2NodeConfigurator;
 
 //
@@ -25,9 +26,10 @@ import inet.linklayer.configurator.contract.IL2NodeConfigurator;
 // a restart, because, being a global module, it doesn't know about node
 // lifecycle events.
 //
-simple L2NodeConfigurator like IL2NodeConfigurator
+simple L2NodeConfigurator extends SimpleModule like IL2NodeConfigurator
 {
     parameters:
+        @class(L2NodeConfigurator);
         @display("i=block/cogwheel");
         string interfaceTableModule;
         string l2ConfiguratorModule = default("l2NetworkConfigurator"); // The absolute path to the ~L2NetworkConfigurator; use "" if there is no configurator

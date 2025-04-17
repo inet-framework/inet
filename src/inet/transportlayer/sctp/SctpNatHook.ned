@@ -8,12 +8,15 @@
 
 package inet.transportlayer.sctp;
 
+import inet.common.SimpleModule;
+
 //
 // SCTP NAT hook module.
 //
-simple SctpNatHook
+simple SctpNatHook extends SimpleModule
 {
     parameters:
+        @class(SctpNatHook);
         string interfaceTableModule;
         string networkProtocolModule;
         string routingTableModule;

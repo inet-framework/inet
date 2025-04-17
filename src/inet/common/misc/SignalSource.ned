@@ -6,13 +6,16 @@
 
 package inet.common.misc;
 
+import inet.common.SimpleModule;
+
 //
 // Emits double-valued signals in the specified interval.
 // May be used for testing indicator figures.
 //
-simple SignalSource
+simple SignalSource extends SimpleModule
 {
     parameters:
+        @class(SignalSource);
         @display("i=block/cogwheel");
         @signal[signalSourceOutput];
         double startTime @unit(s) = default(0s);

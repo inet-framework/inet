@@ -7,6 +7,8 @@
 
 package inet.common;
 
+import inet.common.SimpleModule;
+
 //
 // Measures the residence time of packet data in network nodes. The
 // measurement is done by tracking every bit individually using their unique
@@ -15,9 +17,10 @@ package inet.common;
 // bit, the measurement ends when the outgoing enclosing packet transmission
 // starts (or ends) in the network node.
 //
-simple ResidenceTimeMeasurer like IMeasurer
+simple ResidenceTimeMeasurer extends SimpleModule like IMeasurer
 {
     parameters:
+        @class(ResidenceTimeMeasurer);
         string subscriptionModule = default("^"); // Relative module path where the subscription happens
         string measurementStartSignal = default("receptionEnded"); // Subscribed signal for the measurement start
         string measurementEndSignal = default("transmissionStarted"); // Subscribed signal for the measurement end

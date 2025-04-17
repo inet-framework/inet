@@ -8,6 +8,7 @@
 #ifndef __INET_IEEE80211OFDMDEMODULATORMODULE_H
 #define __INET_IEEE80211OFDMDEMODULATORMODULE_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/IDemodulator.h"
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmDemodulator.h"
 
@@ -15,7 +16,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211OfdmDemodulatorModule : public IDemodulator, public cSimpleModule
+class INET_API Ieee80211OfdmDemodulatorModule : public IDemodulator, public SimpleModule
 {
   protected:
     const Ieee80211OfdmDemodulator *ofdmDemodulator = nullptr;

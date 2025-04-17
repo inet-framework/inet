@@ -22,6 +22,7 @@
 #include <fstream>
 
 #include "inet/applications/netperfmeter/NetPerfMeter_m.h"
+#include "inet/common/SimpleModule.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
 #include "inet/transportlayer/contract/sctp/SctpSocket.h"
@@ -35,7 +36,7 @@ namespace inet {
 /**
  * Implementation of NetPerfMeter. See NED file for more details.
  */
-class INET_API NetPerfMeter : public cSimpleModule
+class INET_API NetPerfMeter : public SimpleModule
 {
   public:
     NetPerfMeter();

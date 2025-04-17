@@ -7,15 +7,16 @@
 
 package inet.linklayer.ieee80211.mac.blockack;
 
+import inet.common.SimpleModule;
 import inet.linklayer.ieee80211.mac.contract.IOriginatorBlockAckAgreementPolicy;
-
 
 //
 // Implements the default originator block ACK agreement policy
 //
-simple OriginatorBlockAckAgreementPolicy like IOriginatorBlockAckAgreementPolicy
+simple OriginatorBlockAckAgreementPolicy extends SimpleModule like IOriginatorBlockAckAgreementPolicy
 {
     parameters:
+        @class(OriginatorBlockAckAgreementPolicy);
         string originatorAckPolicyModule;
 
         bool delayedAckPolicySupported = default(false);

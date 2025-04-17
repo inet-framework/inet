@@ -8,6 +8,7 @@
 #ifndef __INET_SCTPCHECKSUMINSERTIONHOOK_H
 #define __INET_SCTPCHECKSUMINSERTIONHOOK_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/Protocol.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/common/checksum/ChecksumMode_m.h"
@@ -17,7 +18,7 @@
 namespace inet {
 namespace sctp {
 
-class INET_API SctpChecksumInsertion : public cSimpleModule, public NetfilterBase::HookBase
+class INET_API SctpChecksumInsertion : public SimpleModule, public NetfilterBase::HookBase
 {
     ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
 

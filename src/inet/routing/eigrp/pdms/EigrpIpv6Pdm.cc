@@ -65,7 +65,7 @@ EigrpIpv6Pdm::~EigrpIpv6Pdm()
 
 void EigrpIpv6Pdm::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         host = getContainingNode(this);

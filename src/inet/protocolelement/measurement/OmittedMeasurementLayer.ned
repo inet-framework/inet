@@ -7,11 +7,12 @@
 
 package inet.protocolelement.measurement;
 
+import inet.common.SimpleModule;
 //
 // Implements the module given interface and can be used as an omitted
 // optional module that removes itself from the module hierarchy during initialization.
 //
-module OmittedMeasurementLayer like IMeasurementLayer
+module OmittedMeasurementLayer extends SimpleModule like IMeasurementLayer
 {
     parameters:
         @class(::inet::OmittedModule);

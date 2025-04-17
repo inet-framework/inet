@@ -8,6 +8,7 @@
 #ifndef __INET_NETWORKCONFIGURATORBASE_H
 #define __INET_NETWORKCONFIGURATORBASE_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/Topology.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -15,7 +16,7 @@
 
 namespace inet {
 
-class INET_API NetworkConfiguratorBase : public cSimpleModule
+class INET_API NetworkConfiguratorBase : public SimpleModule
 {
   protected:
     class Interface;

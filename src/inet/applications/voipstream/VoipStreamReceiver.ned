@@ -7,6 +7,7 @@
 
 package inet.applications.voipstream;
 
+import inet.common.SimpleModule;
 import inet.applications.contract.IApp;
 
 //
@@ -21,9 +22,10 @@ import inet.applications.contract.IApp;
 // completes (i.e., in the OMNeT++ finish() function). Only one voice session
 // ("call") may be underway at a time.
 //
-simple VoipStreamReceiver like IApp
+simple VoipStreamReceiver extends SimpleModule like IApp
 {
     parameters:
+        @class(VoipStreamReceiver);
         int localPort;
         double playoutDelay @unit(s) = default(20ms);
         string resultFile;

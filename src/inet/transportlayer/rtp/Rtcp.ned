@@ -7,12 +7,15 @@
 
 package inet.transportlayer.rtp;
 
+import inet.common.SimpleModule;
+
 //
 // RTCP end system.
 //
-simple Rtcp
+simple Rtcp extends SimpleModule
 {
     parameters:
+        @class(Rtcp);
         string interfaceTableModule;   // The path to the InterfaceTable module
         @display("i=block/control");
         @signal[packetReceived](type=cPacket);

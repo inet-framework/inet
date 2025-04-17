@@ -8,13 +8,14 @@
 #ifndef __INET_IEEE8022LLCSOCKETTABLE_H
 #define __INET_IEEE8022LLCSOCKETTABLE_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
 
 namespace inet {
 
-class INET_API Ieee8022LlcSocketTable : public cSimpleModule
+class INET_API Ieee8022LlcSocketTable : public SimpleModule
 {
   public:
     struct Socket {
