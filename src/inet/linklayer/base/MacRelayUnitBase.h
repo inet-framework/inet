@@ -30,7 +30,7 @@ class INET_API MacRelayUnitBase : public LayeredProtocolBase
   protected:
     virtual void initialize(int stage) override;
     virtual void finish() override;
-    virtual std::string resolveDirective(char directive) const override;
+    virtual std::string resolveDisplayStringTextDirective(char directive) const override;
 
     virtual bool isForwardingInterface(NetworkInterface *networkInterface) const { return !networkInterface->isLoopback() && networkInterface->isBroadcast(); }
     virtual void broadcastPacket(Packet *packet, const MacAddress& destinationAddress, NetworkInterface *incomingInterface);

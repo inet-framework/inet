@@ -19,7 +19,7 @@ void Ipv4NetworkLayer::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, text.c_str());
 }
 
-std::string Ipv4NetworkLayer::resolveDirective(char directive) const
+std::string Ipv4NetworkLayer::resolveDisplayStringTextDirective(char directive) const
 {
     switch (directive) {
         case 'i':

@@ -59,7 +59,7 @@ class INET_API MarkovClassifier : public ClockUserModuleMixin<PacketClassifierBa
     virtual void handleCanPullPacketChanged(const cGate *gate) override;
     virtual void handlePullPacketProcessed(Packet *packet, const cGate *gate, bool successful) override;
 
-    virtual std::string resolveDirective(char directive) const override;
+    virtual std::string resolveDisplayStringTextDirective(char directive) const override;
 };
 
 } // namespace queueing

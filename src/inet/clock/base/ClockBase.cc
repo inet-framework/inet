@@ -89,7 +89,7 @@ void ClockBase::handleClockEvent(ClockEvent *msg)
     clockEventTime = -1;
 }
 
-std::string ClockBase::resolveDirective(char directive) const
+std::string ClockBase::resolveDisplayStringTextDirective(char directive) const
 {
     switch (directive) {
         case 't':
@@ -99,7 +99,7 @@ std::string ClockBase::resolveDirective(char directive) const
         case 'd':
             return (getClockTime() - referenceClockModule->getClockTime()).ustr();
         default:
-            return SimpleModule::resolveDirective(directive);
+            return SimpleModule::resolveDisplayStringTextDirective(directive);
     }
 }
 

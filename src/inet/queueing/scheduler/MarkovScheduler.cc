@@ -109,13 +109,13 @@ void MarkovScheduler::pushPacket(Packet *packet, const cGate *gate)
     numProcessedPackets++;
 }
 
-std::string MarkovScheduler::resolveDirective(char directive) const
+std::string MarkovScheduler::resolveDisplayStringTextDirective(char directive) const
 {
     switch (directive) {
         case 's':
             return std::to_string(state);
         default:
-            return PacketProcessorBase::resolveDirective(directive);
+            return PacketProcessorBase::resolveDisplayStringTextDirective(directive);
     }
 }
 

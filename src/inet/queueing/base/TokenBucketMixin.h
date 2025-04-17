@@ -57,13 +57,13 @@ class INET_API TokenBucketMixin : public T, public ITokenStorage
         T::emit(tokensChangedSignal, getNumTokens());
     }
 
-    std::string resolveDirective(char directive) const override
+    std::string resolveDisplayStringTextDirective(char directive) const override
     {
         switch (directive) {
             case 'n':
                 return std::to_string(tokenBucket.getNumTokens());
             default:
-                return T::resolveDirective(directive);
+                return T::resolveDisplayStringTextDirective(directive);
         }
     }
 

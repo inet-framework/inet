@@ -48,7 +48,7 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
         virtual ~StatisticVisualization() {}
     };
 
-    class INET_API DirectiveResolver : public StringFormat::IDirectiveResolver {
+    class INET_API DirectiveResolver : public StringFormat::IDisplayStringTextResolver {
       protected:
         const StatisticVisualizerBase *visualizer = nullptr;
         const StatisticVisualization *visualization = nullptr;
@@ -56,7 +56,7 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
       public:
         DirectiveResolver(const StatisticVisualizerBase *visualizer, const StatisticVisualization *visualization) : visualizer(visualizer), visualization(visualization) {}
 
-        virtual std::string resolveDirective(char directive) const override;
+        virtual std::string resolveDisplayStringTextDirective(char directive) const override;
     };
 
   protected:

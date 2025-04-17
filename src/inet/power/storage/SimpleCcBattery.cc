@@ -34,7 +34,7 @@ void SimpleCcBattery::initialize(int stage)
     }
 }
 
-std::string SimpleCcBattery::resolveDirective(char directive) const
+std::string SimpleCcBattery::resolveDisplayStringTextDirective(char directive) const
 {
     switch (directive) {
         case 'c':
@@ -42,7 +42,7 @@ std::string SimpleCcBattery::resolveDirective(char directive) const
         case 'p':
             return std::to_string((int)std::round(100 * (getResidualChargeCapacity() / getNominalChargeCapacity()).get<unit>())) + "%";
         default:
-            return CcEnergyStorageBase::resolveDirective(directive);   
+            return CcEnergyStorageBase::resolveDisplayStringTextDirective(directive);   
     }
 }
 

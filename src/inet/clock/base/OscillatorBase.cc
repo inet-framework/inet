@@ -16,7 +16,7 @@ void OscillatorBase::initialize(int stage)
     SimpleModule::initialize(stage);
 }
 
-std::string OscillatorBase::resolveDirective(char directive) const
+std::string OscillatorBase::resolveDisplayStringTextDirective(char directive) const
 {
     switch (directive) {
         case 'n':
@@ -24,7 +24,7 @@ std::string OscillatorBase::resolveDirective(char directive) const
         case 'o':
             return getComputationOrigin().str() + " s";
         default:
-            return SimpleModule::resolveDirective(directive);
+            return SimpleModule::resolveDisplayStringTextDirective(directive);
     }
 }
 

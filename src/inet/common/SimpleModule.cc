@@ -31,12 +31,12 @@ void SimpleModule::refreshDisplay() const
     }
 }
 
-std::string SimpleModule::resolveDirective(char directive) const
+std::string SimpleModule::resolveDisplayStringTextDirective(char directive) const
 {
     throw cRuntimeError("Unknown directive in 'displayStringTextFormat' parameter: %c", directive);
 }
 
-std::string SimpleModule::resolveExpression(const char *expression) const
+std::string SimpleModule::resolveDisplayStringTextExpression(const char *expression) const
 {
     cModule *module = const_cast<SimpleModule*>(this);
     cObject *obj = module->findObject(expression, false);

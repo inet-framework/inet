@@ -62,7 +62,7 @@ PacketDropVisualizerBase::DirectiveResolver::DirectiveResolver(const PacketDrop 
 {
 }
 
-std::string PacketDropVisualizerBase::DirectiveResolver::resolveDirective(char directive) const
+std::string PacketDropVisualizerBase::DirectiveResolver::resolveDisplayStringTextDirective(char directive) const
 {
     switch (directive) {
         case 'n':

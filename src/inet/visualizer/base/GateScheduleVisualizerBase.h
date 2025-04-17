@@ -40,14 +40,14 @@ class INET_API GateScheduleVisualizerBase : public VisualizerBase
         virtual ~GateVisualization() {}
     };
 
-    class INET_API DirectiveResolver : public StringFormat::IDirectiveResolver {
+    class INET_API DirectiveResolver : public StringFormat::IDisplayStringTextResolver {
       protected:
         const cModule *module = nullptr;
 
       public:
         DirectiveResolver(const cModule *module) : module(module) {}
 
-        virtual std::string resolveDirective(char directive) const override;
+        virtual std::string resolveDisplayStringTextDirective(char directive) const override;
     };
 
   protected:

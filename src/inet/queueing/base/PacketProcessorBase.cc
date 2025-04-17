@@ -394,7 +394,7 @@ void PacketProcessorBase::dropPacket(Packet *packet, PacketDropReason reason, in
     delete packet;
 }
 
-std::string PacketProcessorBase::resolveDirective(char directive) const
+std::string PacketProcessorBase::resolveDisplayStringTextDirective(char directive) const
 {
     switch (directive) {
         case 'p':
@@ -402,7 +402,7 @@ std::string PacketProcessorBase::resolveDirective(char directive) const
         case 'l':
             return processedTotalLength.str();
         default:        
-            return SimpleModule::resolveDirective(directive);
+            return SimpleModule::resolveDisplayStringTextDirective(directive);
     }
 }
 

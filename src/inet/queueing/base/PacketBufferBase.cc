@@ -38,7 +38,7 @@ void PacketBufferBase::emit(simsignal_t signal, cObject *object, cObject *detail
     SimpleModule::emit(signal, object, details);
 }
 
-std::string PacketBufferBase::resolveDirective(char directive) const
+std::string PacketBufferBase::resolveDisplayStringTextDirective(char directive) const
 {
     switch (directive) {
         case 'p':
@@ -52,7 +52,7 @@ std::string PacketBufferBase::resolveDirective(char directive) const
         case 'd':
             return std::to_string(numDroppedPackets);
         default:
-            return PacketProcessorBase::resolveDirective(directive);
+            return PacketProcessorBase::resolveDisplayStringTextDirective(directive);
     }
 }
 

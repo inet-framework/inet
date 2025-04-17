@@ -50,7 +50,7 @@ class INET_API Ppp : public MacProtocolBase, public queueing::IActivePacketSink
     virtual void decapsulate(Packet *packet);
     virtual void refreshDisplay() const override;
     virtual void refreshOutGateConnection(bool connected);
-    virtual std::string resolveDirective(char directive) const override;
+    virtual std::string resolveDisplayStringTextDirective(char directive) const override;
 
     // cListener function
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;

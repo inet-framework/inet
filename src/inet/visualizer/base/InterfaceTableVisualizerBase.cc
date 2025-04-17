@@ -32,7 +32,7 @@ InterfaceTableVisualizerBase::InterfaceVisualization::InterfaceVisualization(int
 {
 }
 
-std::string InterfaceTableVisualizerBase::DirectiveResolver::resolveDirective(char directive) const
+std::string InterfaceTableVisualizerBase::DirectiveResolver::resolveDisplayStringTextDirective(char directive) const
 {
     switch (directive) {
         case 'N':

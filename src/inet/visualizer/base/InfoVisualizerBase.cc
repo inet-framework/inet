@@ -18,7 +18,7 @@ InfoVisualizerBase::InfoVisualization::InfoVisualization(int moduleId) :
 {
 }
 
-std::string InfoVisualizerBase::DirectiveResolver::resolveDirective(char directive) const
+std::string InfoVisualizerBase::DirectiveResolver::resolveDisplayStringTextDirective(char directive) const
 {
     switch (directive) {
         case 'n':

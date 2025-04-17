@@ -47,7 +47,7 @@ void PacketBasedTokenGenerator::pushPacket(Packet *packet, const cGate *gate)
     delete packet;
 }
 
-std::string PacketBasedTokenGenerator::resolveDirective(char directive) const
+std::string PacketBasedTokenGenerator::resolveDisplayStringTextDirective(char directive) const
 {
     switch (directive) {
         case 's': {
@@ -59,7 +59,7 @@ std::string PacketBasedTokenGenerator::resolveDirective(char directive) const
             return stream.str();
         }
         default:
-            return PassivePacketSinkBase::resolveDirective(directive);
+            return PassivePacketSinkBase::resolveDisplayStringTextDirective(directive);
     }
 }
 

@@ -49,7 +49,7 @@ class INET_API ClockBase : public SimpleModule, public IClock
     virtual ClockEvent *cancelClockEvent(ClockEvent *event) override;
     virtual void handleClockEvent(ClockEvent *event) override;
 
-    virtual std::string resolveDirective(char directive) const override;
+    virtual std::string resolveDisplayStringTextDirective(char directive) const override;
 };
 
 } // namespace inet

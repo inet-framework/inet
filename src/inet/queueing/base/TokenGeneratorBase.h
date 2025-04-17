@@ -31,7 +31,7 @@ class INET_API TokenGeneratorBase : public PacketProcessorBase
   public:
     virtual bool supportsPacketPushing(const cGate *gate) const override { return false; }
     virtual bool supportsPacketPulling(const cGate *gate) const override { return false; }
-    virtual std::string resolveDirective(char directive) const override;
+    virtual std::string resolveDisplayStringTextDirective(char directive) const override;
 };
 
 } // namespace queueing

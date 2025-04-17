@@ -58,7 +58,7 @@ class INET_API MarkovScheduler : public ClockUserModuleMixin<PacketSchedulerBase
     virtual void handleCanPushPacketChanged(const cGate *gate) override;
     virtual void handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful) override;
 
-    virtual std::string resolveDirective(char directive) const override;
+    virtual std::string resolveDisplayStringTextDirective(char directive) const override;
 };
 
 } // namespace queueing

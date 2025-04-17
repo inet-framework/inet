@@ -90,7 +90,7 @@ class INET_API MultiTokenBucketMixin : public T, public ITokenStorage
         }
     }
 
-    std::string resolveDirective(char directive) const override
+    std::string resolveDisplayStringTextDirective(char directive) const override
     {
         switch (directive) {
             case 'n': {
@@ -104,7 +104,7 @@ class INET_API MultiTokenBucketMixin : public T, public ITokenStorage
                 return stream.str();
             }
             default:
-                return T::resolveDirective(directive);
+                return T::resolveDisplayStringTextDirective(directive);
         }
     }
 

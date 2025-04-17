@@ -213,7 +213,7 @@ void InterpacketGapInserter::pushOrSendOrSchedulePacketProgress(Packet *packet, 
     }
 }
 
-std::string InterpacketGapInserter::resolveDirective(char directive) const
+std::string InterpacketGapInserter::resolveDisplayStringTextDirective(char directive) const
 {
     switch (directive) {
         case 'g':
@@ -221,7 +221,7 @@ std::string InterpacketGapInserter::resolveDirective(char directive) const
         case 'd':
             return CLOCKTIME_AS_SIMTIME(packetDelay).ustr().c_str();
         default:
-            return PacketPusherBase::resolveDirective(directive);
+            return PacketPusherBase::resolveDisplayStringTextDirective(directive);
     }
 }
 

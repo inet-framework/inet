@@ -261,7 +261,7 @@ void PacketFilterBase::dropPacket(Packet *packet, PacketDropReason reason, int l
     PacketProcessorBase::dropPacket(packet, reason, limit);
 }
 
-std::string PacketFilterBase::resolveDirective(char directive) const
+std::string PacketFilterBase::resolveDisplayStringTextDirective(char directive) const
 {
     switch (directive) {
         case 'd':
@@ -269,7 +269,7 @@ std::string PacketFilterBase::resolveDirective(char directive) const
         case 'k':
             return droppedTotalLength.str();
         default:
-            return PacketProcessorBase::resolveDirective(directive);
+            return PacketProcessorBase::resolveDisplayStringTextDirective(directive);
     }
 }
 

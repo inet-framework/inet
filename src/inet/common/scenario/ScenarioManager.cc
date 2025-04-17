@@ -478,7 +478,7 @@ void ScenarioManager::processLifecycleCommand(const cXMLElement *node)
     initiateOperation(operation);
 }
 
-std::string ScenarioManager::resolveDirective(char directive) const
+std::string ScenarioManager::resolveDisplayStringTextDirective(char directive) const
 {
     switch (directive) {
         case 'c':
@@ -492,7 +492,7 @@ std::string ScenarioManager::resolveDirective(char directive) const
         case 'n':
             return scheduledEvents.empty() ? "n/a" : scheduledEvents.front()->getName();
         default:
-            return SimpleModule::resolveDirective(directive);   
+            return SimpleModule::resolveDisplayStringTextDirective(directive);   
     }
 }
 

@@ -14,7 +14,7 @@ void StringFormat::parseFormat(const char *format)
     this->format = format;
 }
 
-std::string StringFormat::formatString(const IDirectiveResolver *resolver) const
+std::string StringFormat::formatString(const IDisplayStringTextResolver *resolver) const
 {
     return formatString(format.c_str(), resolver);
 }
@@ -28,11 +28,11 @@ std::string StringFormat::formatString(const char *format, const std::function<s
     return formatString(format, resolver, [] (const char *) { return std::string(); });
 }
 
-std::string StringFormat::formatString(const char *format, const IDirectiveResolver *resolver)
+std::string StringFormat::formatString(const char *format, const IDisplayStringTextResolver *resolver)
 {
     return formatString(format, 
-        [&] (char directive) { return resolver->resolveDirective(directive); },
-        [&] (const char *expression) { return resolver->resolveExpression(expression); });
+        [&] (char directive) { return resolver->resolveDisplayStringTextDirective(directive); },
+        [&] (const char *expression) { return resolver->resolveDisplayStringTextExpression(expression); });
 }
 
 std::string StringFormat::formatString(const char *format, const std::function<std::string(char)> directiveResolver, const std::function<std::string(const char *)> expressionResolver)

@@ -103,7 +103,7 @@ void MacForwardingTable::handleMessageWhenUp(cMessage *)
     throw cRuntimeError("This module doesn't process messages");
 }
 
-std::string MacForwardingTable::resolveDirective(char directive) const
+std::string MacForwardingTable::resolveDisplayStringTextDirective(char directive) const
 {
     switch (directive) {
         case 'a':
@@ -111,7 +111,7 @@ std::string MacForwardingTable::resolveDirective(char directive) const
         case 'v':
             return "";
         default:
-            return SimpleModule::resolveDirective(directive);   
+            return SimpleModule::resolveDisplayStringTextDirective(directive);   
     }
 }
 

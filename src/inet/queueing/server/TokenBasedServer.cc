@@ -83,7 +83,7 @@ void TokenBasedServer::addTokens(double tokens)
     processPackets();
 }
 
-std::string TokenBasedServer::resolveDirective(char directive) const
+std::string TokenBasedServer::resolveDisplayStringTextDirective(char directive) const
 {
     switch (directive) {
         case 'n': {
@@ -92,7 +92,7 @@ std::string TokenBasedServer::resolveDirective(char directive) const
             return stream.str();
         }
         default:
-            return PacketServerBase::resolveDirective(directive);
+            return PacketServerBase::resolveDisplayStringTextDirective(directive);
     }
 }
 

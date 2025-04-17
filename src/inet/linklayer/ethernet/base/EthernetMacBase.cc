@@ -512,7 +512,7 @@ void EthernetMacBase::refreshDisplay() const
         getParentModule()->getDisplayString().setTagArg("i", 1, color);
 }
 
-std::string EthernetMacBase::resolveDirective(char directive) const 
+std::string EthernetMacBase::resolveDisplayStringTextDirective(char directive) const 
 {
     switch (directive) {
         case 's':
@@ -540,7 +540,7 @@ std::string EthernetMacBase::resolveDirective(char directive) const
                 return datarateText;
             }
         default:
-            return MacProtocolBase::resolveDirective(directive);
+            return MacProtocolBase::resolveDisplayStringTextDirective(directive);
     }
 }
 

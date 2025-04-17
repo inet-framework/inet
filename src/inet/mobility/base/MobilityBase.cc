@@ -45,7 +45,7 @@ MobilityBase::MobilityBase() :
 {
 }
 
-std::string MobilityBase::resolveDirective(char directive) const
+std::string MobilityBase::resolveDisplayStringTextDirective(char directive) const
 {
     MobilityBase *constthis = const_cast<MobilityBase*>(this);
     switch (directive) {
@@ -71,7 +71,7 @@ std::string MobilityBase::resolveDirective(char directive) const
         case 'A':
             return constthis->getCurrentAngularAcceleration().str();
         default:
-            return SimpleModule::resolveDirective(directive);   
+            return SimpleModule::resolveDisplayStringTextDirective(directive);   
     }
 }
 

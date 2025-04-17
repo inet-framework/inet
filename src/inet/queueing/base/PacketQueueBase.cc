@@ -63,7 +63,7 @@ void PacketQueueBase::emit(simsignal_t signal, cObject *object, cObject *details
     SimpleModule::emit(signal, object, details);
 }
 
-std::string PacketQueueBase::resolveDirective(char directive) const
+std::string PacketQueueBase::resolveDisplayStringTextDirective(char directive) const
 {
     switch (directive) {
         case 'p':
@@ -83,7 +83,7 @@ std::string PacketQueueBase::resolveDirective(char directive) const
         case 'n':
             return !isEmpty() ? getPacket(0)->getFullName() : "";
         default:
-            return PacketProcessorBase::resolveDirective(directive);
+            return PacketProcessorBase::resolveDisplayStringTextDirective(directive);
     }
 }
 

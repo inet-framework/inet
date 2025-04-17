@@ -1986,13 +1986,13 @@ void Mrp::refreshDisplay() const
     }
 }
 
-std::string Mrp::resolveDirective(char directive) const
+std::string Mrp::resolveDisplayStringTextDirective(char directive) const
 {
     switch (directive) {
         case 'r': return getMrpRoleName(role, true);
         case 'n': return getNodeStateName(nodeState);
         case 'g': return getRingStateName(ringState);
-        default: return OperationalBase::resolveDirective(directive);   
+        default: return OperationalBase::resolveDisplayStringTextDirective(directive);   
     }
 }
 

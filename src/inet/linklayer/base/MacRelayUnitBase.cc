@@ -34,7 +34,7 @@ void MacRelayUnitBase::initialize(int stage)
     }
 }
 
-std::string MacRelayUnitBase::resolveDirective(char directive) const
+std::string MacRelayUnitBase::resolveDisplayStringTextDirective(char directive) const
 {
     switch (directive) {
         case 'p':
@@ -42,7 +42,7 @@ std::string MacRelayUnitBase::resolveDirective(char directive) const
         case 'd':
             return std::to_string(numDroppedFrames);
         default:
-            return SimpleModule::resolveDirective(directive);   
+            return SimpleModule::resolveDisplayStringTextDirective(directive);   
     }
 }
 

@@ -77,7 +77,7 @@ class INET_API ScenarioManager : public SimpleModule, public LifecycleController
     virtual void processModuleSpecificCommand(const cXMLElement *node);
     virtual void processLifecycleCommand(const cXMLElement *node);
 
-    virtual std::string resolveDirective(char directive) const override;
+    virtual std::string resolveDisplayStringTextDirective(char directive) const override;
 
   public:
     ScenarioManager() {}

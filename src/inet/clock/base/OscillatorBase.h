@@ -22,7 +22,7 @@ class INET_API OscillatorBase : public SimpleModule, public IOscillator
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
   public:
-    virtual std::string resolveDirective(char directive) const override;
+    virtual std::string resolveDisplayStringTextDirective(char directive) const override;
 };
 
 } // namespace inet

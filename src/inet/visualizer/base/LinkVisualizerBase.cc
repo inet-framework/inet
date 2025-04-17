@@ -21,7 +21,7 @@ LinkVisualizerBase::LinkVisualization::LinkVisualization(int sourceModuleId, int
 {
 }
 
-std::string LinkVisualizerBase::DirectiveResolver::resolveDirective(char directive) const
+std::string LinkVisualizerBase::DirectiveResolver::resolveDisplayStringTextDirective(char directive) const
 {
     switch (directive) {
         case 'n':

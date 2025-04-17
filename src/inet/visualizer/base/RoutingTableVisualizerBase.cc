@@ -32,7 +32,7 @@ RoutingTableVisualizerBase::MulticastRouteVisualization::MulticastRouteVisualiza
 {
 }
 
-std::string RoutingTableVisualizerBase::DirectiveResolver::resolveDirective(char directive) const
+std::string RoutingTableVisualizerBase::DirectiveResolver::resolveDisplayStringTextDirective(char directive) const
 {
     switch (directive) {
         case 'm':
@@ -54,7 +54,7 @@ std::string RoutingTableVisualizerBase::DirectiveResolver::resolveDirective(char
     }
 }
 
-std::string RoutingTableVisualizerBase::MulticastDirectiveResolver::resolveDirective(char directive) const
+std::string RoutingTableVisualizerBase::MulticastDirectiveResolver::resolveDisplayStringTextDirective(char directive) const
 {
     switch (directive) {
         case 'e':

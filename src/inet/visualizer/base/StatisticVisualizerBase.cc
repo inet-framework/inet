@@ -31,7 +31,7 @@ void StatisticVisualizerBase::preDelete(cComponent *root)
     }
 }
 
-std::string StatisticVisualizerBase::DirectiveResolver::resolveDirective(char directive) const
+std::string StatisticVisualizerBase::DirectiveResolver::resolveDisplayStringTextDirective(char directive) const
 {
     switch (directive) {
         case 's':

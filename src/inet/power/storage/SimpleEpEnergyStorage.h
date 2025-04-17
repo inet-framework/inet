@@ -75,7 +75,7 @@ class INET_API SimpleEpEnergyStorage : public EpEnergyStorageBase, public Lifecy
   protected:
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
-    virtual std::string resolveDirective(char directive) const override;
+    virtual std::string resolveDisplayStringTextDirective(char directive) const override;
 
     virtual void updateTotalPowerConsumption() override;
     virtual void updateTotalPowerGeneration() override;

@@ -260,7 +260,7 @@ void CreditBasedGate::handleCanPullPacketChanged(const cGate *gate)
     PacketGateBase::handleCanPullPacketChanged(gate);
 }
 
-std::string CreditBasedGate::resolveDirective(char directive) const
+std::string CreditBasedGate::resolveDisplayStringTextDirective(char directive) const
 {
     switch (directive) {
         case 'n': {
@@ -269,7 +269,7 @@ std::string CreditBasedGate::resolveDirective(char directive) const
             return stream.str();
         }
         default:
-            return PacketGateBase::resolveDirective(directive);
+            return PacketGateBase::resolveDisplayStringTextDirective(directive);
     }
 }
 

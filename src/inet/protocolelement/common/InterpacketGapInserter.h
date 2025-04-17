@@ -40,7 +40,7 @@ class INET_API InterpacketGapInserter : public ClockUserModuleMixin<PacketPusher
 
     virtual void pushOrSendOrSchedulePacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0));
 
-    virtual std::string resolveDirective(char directive) const override;
+    virtual std::string resolveDisplayStringTextDirective(char directive) const override;
 
   public:
     virtual ~InterpacketGapInserter();

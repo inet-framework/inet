@@ -18,7 +18,7 @@ ChannelVisualizerBase::ChannelVisualization::ChannelVisualization(int sourceModu
 {
 }
 
-std::string ChannelVisualizerBase::DirectiveResolver::resolveDirective(char directive) const
+std::string ChannelVisualizerBase::DirectiveResolver::resolveDisplayStringTextDirective(char directive) const
 {
     switch (directive) {
         case 'n':

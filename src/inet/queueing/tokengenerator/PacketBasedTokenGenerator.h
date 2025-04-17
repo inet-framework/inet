@@ -38,7 +38,7 @@ class INET_API PacketBasedTokenGenerator : public PassivePacketSinkBase, public 
     virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return storage->getNumTokens() == 0; }
     virtual void pushPacket(Packet *packet, const cGate *gate) override;
 
-    virtual std::string resolveDirective(char directive) const override;
+    virtual std::string resolveDisplayStringTextDirective(char directive) const override;
     virtual void receiveSignal(cComponent *source, simsignal_t signal, double value, cObject *details) override;
 };
 

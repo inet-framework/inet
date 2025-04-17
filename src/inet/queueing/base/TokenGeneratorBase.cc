@@ -25,7 +25,7 @@ void TokenGeneratorBase::initialize(int stage)
     }
 }
 
-std::string TokenGeneratorBase::resolveDirective(char directive) const
+std::string TokenGeneratorBase::resolveDisplayStringTextDirective(char directive) const
 {
     switch (directive) {
         case 's': {
@@ -37,7 +37,7 @@ std::string TokenGeneratorBase::resolveDirective(char directive) const
             return stream.str();
         }
         default:
-            return PacketProcessorBase::resolveDirective(directive);
+            return PacketProcessorBase::resolveDisplayStringTextDirective(directive);
     }
 }
 

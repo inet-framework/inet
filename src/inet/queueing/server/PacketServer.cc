@@ -125,13 +125,13 @@ void PacketServer::handleCanPullPacketChanged(const cGate *gate)
     }
 }
 
-std::string PacketServer::resolveDirective(char directive) const
+std::string PacketServer::resolveDisplayStringTextDirective(char directive) const
 {
     switch (directive) {
         case 's':
             return processingTimer->isScheduled() ? "processing" : "";
         default:
-            return PacketServerBase::resolveDirective(directive);
+            return PacketServerBase::resolveDisplayStringTextDirective(directive);
     }
 }
 

@@ -277,7 +277,7 @@ void NetworkInterface::pushPacketEnd(Packet *packet, const cGate *gate)
         throw cRuntimeError("Unknown gate: %s", gate->getName());
 }
 
-std::string NetworkInterface::resolveDirective(char directive) const
+std::string NetworkInterface::resolveDisplayStringTextDirective(char directive) const
 {
     switch (directive) {
         case 'i':
@@ -289,7 +289,7 @@ std::string NetworkInterface::resolveDirective(char directive) const
         case 'a':
             return getNetworkAddress().str();
         default:
-            return PacketProcessorBase::resolveDirective(directive);   
+            return PacketProcessorBase::resolveDisplayStringTextDirective(directive);   
     }
 }
 

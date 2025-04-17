@@ -77,7 +77,7 @@ class INET_API PacketProcessorBase : public SimpleModule, public virtual IPacket
     virtual bool supportsPacketPassing(const cGate *gate) const override { return true; }
     virtual bool supportsPacketStreaming(const cGate *gate) const override { return false; }
 
-    virtual std::string resolveDirective(char directive) const override;
+    virtual std::string resolveDisplayStringTextDirective(char directive) const override;
 };
 
 } // namespace queueing

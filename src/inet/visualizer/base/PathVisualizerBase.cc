@@ -23,7 +23,7 @@ PathVisualizerBase::PathVisualization::PathVisualization(const char *label, cons
 {
 }
 
-std::string PathVisualizerBase::DirectiveResolver::resolveDirective(char directive) const
+std::string PathVisualizerBase::DirectiveResolver::resolveDisplayStringTextDirective(char directive) const
 {
     switch (directive) {
         case 'p':

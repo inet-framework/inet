@@ -1044,13 +1044,13 @@ void MrpInterconnection::mrpForwardReq(TlvHeaderType headerType, int ringport, F
     sendFrameReq(secondaryRingPortId, MacAddress(frameType), sourceAddress, priority, MRP_LT, packet);
 }
 
-std::string MrpInterconnection::resolveDirective(char directive) const
+std::string MrpInterconnection::resolveDisplayStringTextDirective(char directive) const
 {
     switch (directive) {
         case 'R': return getInterconnectionRoleName(inRole, true);
         case 'N': return getInterconnectionNodeStateName(inNodeState);
         case 'I': return getInterconnectionStateName(inTopologyState);
-        default: return Mrp::resolveDirective(directive);
+        default: return Mrp::resolveDisplayStringTextDirective(directive);
     }
 }
 

@@ -113,7 +113,7 @@ protected:
     virtual void interconnLinkChangeInd(uint16_t inId, LinkState linkState, int ringPort, Packet *packet) override;
     virtual void interconnLinkStatusPollInd(uint16_t inId, int ringPort, Packet *packet) override;
     virtual void mauTypeChangeInd(int ringPort, LinkState linkState) override;
-    virtual std::string resolveDirective(char directive) const override;
+    virtual std::string resolveDisplayStringTextDirective(char directive) const override;
     static const char *getInterconnectionRoleName(InterconnectionRole role, bool acronym);
     static const char *getInterconnectionNodeStateName(InterconnectionNodeState state);
     static const char *getInterconnectionStateName(InterconnectionTopologyState state);

@@ -13,11 +13,11 @@
 
 namespace inet {
 
-class INET_API Ipv4NetworkLayer : public cModule, public StringFormat::IDirectiveResolver
+class INET_API Ipv4NetworkLayer : public cModule, public StringFormat::IDisplayStringTextResolver
 {
   protected:
     virtual void refreshDisplay() const override;
-    virtual std::string resolveDirective(char directive) const override;
+    virtual std::string resolveDisplayStringTextDirective(char directive) const override;
 };
 
 } // namespace inet

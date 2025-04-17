@@ -115,7 +115,7 @@ void OscillatorBasedClock::handleClockEvent(ClockEvent *event)
     ClockBase::handleClockEvent(event);
 }
 
-std::string OscillatorBasedClock::resolveDirective(char directive) const
+std::string OscillatorBasedClock::resolveDisplayStringTextDirective(char directive) const
 {
     switch (directive) {
         case 's':
@@ -123,7 +123,7 @@ std::string OscillatorBasedClock::resolveDirective(char directive) const
         case 'c':
             return originClockTime.str();
         default:
-            return ClockBase::resolveDirective(directive);
+            return ClockBase::resolveDisplayStringTextDirective(directive);
     }
 }
 

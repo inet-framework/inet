@@ -39,14 +39,14 @@ class INET_API LinkVisualizerBase : public VisualizerBase, public cListener
         virtual ~LinkVisualization() {}
     };
 
-    class INET_API DirectiveResolver : public StringFormat::IDirectiveResolver {
+    class INET_API DirectiveResolver : public StringFormat::IDisplayStringTextResolver {
       protected:
         const cPacket *packet = nullptr;
 
       public:
         DirectiveResolver(const cPacket *packet) : packet(packet) {}
 
-        virtual std::string resolveDirective(char directive) const override;
+        virtual std::string resolveDisplayStringTextDirective(char directive) const override;
     };
 
   protected:

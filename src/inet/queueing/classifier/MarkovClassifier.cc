@@ -111,13 +111,13 @@ Packet *MarkovClassifier::pullPacket(const cGate *gate)
     return packet;
 }
 
-std::string MarkovClassifier::resolveDirective(char directive) const
+std::string MarkovClassifier::resolveDisplayStringTextDirective(char directive) const
 {
     switch (directive) {
         case 's':
             return std::to_string(state);
         default:
-            return PacketProcessorBase::resolveDirective(directive);
+            return PacketProcessorBase::resolveDisplayStringTextDirective(directive);
     }
 }
 

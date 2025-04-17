@@ -38,7 +38,7 @@ class INET_API TokenBasedServer : public PacketServerBase, public ITokenStorage
     virtual void handleCanPushPacketChanged(const cGate *gate) override;
     virtual void handleCanPullPacketChanged(const cGate *gate) override;
 
-    virtual std::string resolveDirective(char directive) const override;
+    virtual std::string resolveDisplayStringTextDirective(char directive) const override;
 };
 
 } // namespace queueing

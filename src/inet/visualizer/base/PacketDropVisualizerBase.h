@@ -53,14 +53,14 @@ class INET_API PacketDropVisualizerBase : public VisualizerBase, public cListene
         virtual ~PacketDropVisualization();
     };
 
-    class INET_API DirectiveResolver : public StringFormat::IDirectiveResolver {
+    class INET_API DirectiveResolver : public StringFormat::IDisplayStringTextResolver {
       protected:
         const PacketDrop *packetDrop = nullptr;
 
       public:
         DirectiveResolver(const PacketDrop *packetDrop);
 
-        virtual std::string resolveDirective(char directive) const override;
+        virtual std::string resolveDisplayStringTextDirective(char directive) const override;
     };
 
     class INET_API DetailsFilter {

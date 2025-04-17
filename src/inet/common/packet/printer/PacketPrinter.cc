@@ -15,7 +15,7 @@ namespace inet {
 
 Register_MessagePrinter(PacketPrinter);
 
-std::string PacketPrinter::DirectiveResolver::resolveDirective(char directive) const
+std::string PacketPrinter::DirectiveResolver::resolveDisplayStringTextDirective(char directive) const
 {
     switch (directive) {
         case 's':

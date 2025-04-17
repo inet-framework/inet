@@ -113,7 +113,7 @@ void DriftingOscillatorBase::processCommand(const cXMLElement& node)
         throw cRuntimeError("Invalid command: %s", node.getTagName());
 }
 
-std::string DriftingOscillatorBase::resolveDirective(char directive) const
+std::string DriftingOscillatorBase::resolveDisplayStringTextDirective(char directive) const
 {
     switch (directive) {
         case 'c':
@@ -121,7 +121,7 @@ std::string DriftingOscillatorBase::resolveDirective(char directive) const
         case 'd':
             return driftRate.str();
         default:
-            return OscillatorBase::resolveDirective(directive);
+            return OscillatorBase::resolveDisplayStringTextDirective(directive);
     }
 }
 

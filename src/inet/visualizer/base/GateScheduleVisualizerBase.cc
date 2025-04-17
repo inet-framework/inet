@@ -27,7 +27,7 @@ GateScheduleVisualizerBase::GateVisualization::GateVisualization(queueing::IPack
 {
 }
 
-std::string GateScheduleVisualizerBase::DirectiveResolver::resolveDirective(char directive) const
+std::string GateScheduleVisualizerBase::DirectiveResolver::resolveDisplayStringTextDirective(char directive) const
 {
     switch (directive) {
         case 'i': {

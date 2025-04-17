@@ -55,7 +55,7 @@ class INET_API PacketFilterBase : public PacketProcessorBase, public virtual IPa
     virtual void dropPacket(Packet *packet);
     virtual void dropPacket(Packet *packet, PacketDropReason reason, int limit = -1) override;
 
-    virtual std::string resolveDirective(char directive) const override;
+    virtual std::string resolveDisplayStringTextDirective(char directive) const override;
 
   public:
     virtual IPassivePacketSink *getConsumer(const cGate *gate) override { return this; }
