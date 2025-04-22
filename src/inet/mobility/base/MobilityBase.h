@@ -65,8 +65,6 @@ class INET_API MobilityBase : public SimpleModule, public IMobility
     /** @brief The last orientation that was reported. */
     Quaternion lastOrientation;
 
-    StringFormat format;
-
   protected:
     MobilityBase();
 
@@ -94,9 +92,6 @@ class INET_API MobilityBase : public SimpleModule, public IMobility
     virtual void refreshDisplay() const override;
     virtual void updateDisplayStringFromMobilityState() const;
     virtual std::string resolveDirective(char directive) const override;
-
-    /** @brief Allows changing parameters from the GUI. */
-    virtual void handleParameterChange(const char *name) override;
 
     /** @brief This modules should only receive self-messages. */
     virtual void handleMessage(cMessage *msg) override;

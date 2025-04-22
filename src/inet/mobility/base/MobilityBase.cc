@@ -86,7 +86,6 @@ void MobilityBase::initialize(int stage)
         constraintAreaMax.x = par("constraintAreaMaxX");
         constraintAreaMax.y = par("constraintAreaMaxY");
         constraintAreaMax.z = par("constraintAreaMaxZ");
-        format.parseFormat(par("displayStringTextFormat"));
         subjectModule = findSubjectModule();
         if (subjectModule != nullptr) {
             auto visualizationTarget = subjectModule->getParentModule();
@@ -178,8 +177,7 @@ void MobilityBase::initializeOrientation()
 
 void MobilityBase::refreshDisplay() const
 {
-    auto text = format.formatString(this);
-    getDisplayString().setTagArg("t", 0, text.c_str());
+    SimpleModule::refreshDisplay();
     if (par("updateDisplayString"))
         updateDisplayStringFromMobilityState();
 }
@@ -215,12 +213,6 @@ void MobilityBase::updateDisplayStringFromMobilityState() const
         snprintf(buf, sizeof(buf), "%lf", angle);
         displayString.setTagArg("a", 0, buf);
     }
-}
-
-void MobilityBase::handleParameterChange(const char *name)
-{
-    if (!strcmp(name, "displayStringTextFormat"))
-        format.parseFormat(par("displayStringTextFormat"));
 }
 
 void MobilityBase::handleMessage(cMessage *message)

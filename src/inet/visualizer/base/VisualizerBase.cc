@@ -33,14 +33,7 @@ void VisualizerBase::initialize(int stage)
         if (visualizationSubjectModule == nullptr)
             throw cRuntimeError("Module not found on path '%s' defined by par 'visualizationSubjectModule'", path);
         tags = par("tags");
-        format.parseFormat(par("displayStringTextFormat"));
     }
-}
-
-void VisualizerBase::refreshDisplay() const
-{
-    auto text = format.formatString(this);
-    getDisplayString().setTagArg("t", 0, text.c_str());
 }
 
 Coord VisualizerBase::getPosition(const cModule *networkNode) const
