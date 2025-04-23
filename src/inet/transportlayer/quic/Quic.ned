@@ -23,7 +23,7 @@ simple Quic like IQuic
         string congestionControl = default("NewReno");
         bool accurateIncreaseInNewRenoCongestionAvoidance = default(true);
         string routingTableModule; // set by Standard(Quic)Host
-        int sendQueueLimit @unit("B") = default(64MB); // sets the limit of the send queue in bytes
+        int sendQueueLimit @unit(B) = default(64MB); // sets the limit of the send queue in bytes
         double sendQueueLowWaterRatio = default(.4); // defines the send queue low water mark relative to the limit
 
         @display("i=block/transport");
@@ -118,21 +118,21 @@ simple Quic like IQuic
         @signal[packetNumberSent*];
         @statisticTemplate[packetNumberSent](record=vector);
 
-        int initialMaxData @unit("B") = default(15MB); // Connection level flow control credit. Used as own and peer's value.
-        int initialMaxStreamDataUni @unit("B") = default(6MB); // Stream level flow control credit for unidirectional streams. Used as own and peer's value.
-        int initialMaxStreamDataBidiLocal @unit("B") = default(6MB); // Stream level flow control credit for bidirectional streams opened by the local host. Used as own and peer's value.
-        int initialMaxStreamDataBidiRemote @unit("B") = default(6MB); // Stream level flow control credit for bidirectional streams opened by the remote host. Used as own and peer's value.
+        int initialMaxData @unit(B) = default(15MB); // Connection level flow control credit. Used as own and peer's value.
+        int initialMaxStreamDataUni @unit(B) = default(6MB); // Stream level flow control credit for unidirectional streams. Used as own and peer's value.
+        int initialMaxStreamDataBidiLocal @unit(B) = default(6MB); // Stream level flow control credit for bidirectional streams opened by the local host. Used as own and peer's value.
+        int initialMaxStreamDataBidiRemote @unit(B) = default(6MB); // Stream level flow control credit for bidirectional streams opened by the remote host. Used as own and peer's value.
         
-        double maxStreamDataFrameThreshold @unit("B") = default(0.5*initialMaxData); // defines when MaxStreamDataFrame in StreamFlowControl will be send. Now absolte value is used. TODO: Define it as ratio = consumedData/maxReceiveOffset
+        double maxStreamDataFrameThreshold @unit(B) = default(0.5*initialMaxData); // defines when MaxStreamDataFrame in StreamFlowControl will be send. Now absolte value is used. TODO: Define it as ratio = consumedData/maxReceiveOffset
         double maxDataFrameThreshold @unit(B) = default(0.5*initialMaxStreamDataUni); // defines when MaxDataFrame in ConnectionFlowControl will be send.Now absolte value is used. TODO: Define it as ratio = consumedData/maxReceiveOffset
-        double maxDataFrameDelay @unit("ms") = default(-1ms); // TODO implement this. -1 =  do not use this parameter. Indicating the maximum amount of time in milliseconds by which the endpoint will delay sending maxDataFrame.
+        double maxDataFrameDelay @unit(ms) = default(-1ms); // TODO implement this. -1 =  do not use this parameter. Indicating the maximum amount of time in milliseconds by which the endpoint will delay sending maxDataFrame.
         bool roundConsumedDataValue = default(false); //if true, FlowControlResponder round consumedData in streamRcvBuffer to the next packetSize
         bool sendMaxDataFramesImmediately = default(false); // if true, a MAX_(STREAM)_DATA frame is sent immediately, after generation. Otherwise, sending the frame is delayed until the sending process starts due to another event.
 
         bool bundleAckForNonAckElicitingPackets = default(false); // if true, bundles ack for non-ack-eliciting packets in an outgoing packet
         
-        double receiveGoodputStatStartTime @unit("s") = default(-1s); // -1 = do not measure goodput
-        double receiveGoodputStatEndTime @unit("s") = default(-1s); // -1 = until last received packet
+        double receiveGoodputStatStartTime @unit(s) = default(-1s); // -1 = do not measure goodput
+        double receiveGoodputStatEndTime @unit(s) = default(-1s); // -1 = until last received packet
 
         int numReceivedAckElicitingsBeforeAck = default(2); // number of ack eliciting packets a receiver waits for, before it sends an ACK, immediately
         
@@ -144,7 +144,7 @@ simple Quic like IQuic
         string dplpmtudCandidateSequence = default("Up"); // Specifies the sequence of candidates used for the search algorithm of DPLPMTUD (Up, Down, OptUp, Binary, OptBinary, Jump)
         bool dplpmtudUsePmtuValidator = default (true); // if true, activates the PMTU Validator that trys to detect when the current PMTU estimation is larger than the actual PMTU.
         int dplpmtudMaxProbes = default(3); // specifies the number of probe packet sent for one candidate before given up
-        int maxPmtu @unit("B") = default(65535B); // With useDplpmtud, it is used as upper limit for the PMTU search. Without useDplpmtud, the PMTU is set to the minimum of the MTU of the outgoing interface and this value.
+        int maxPmtu @unit(B) = default(65535B); // With useDplpmtud, it is used as upper limit for the PMTU search. Without useDplpmtud, the PMTU is set to the minimum of the MTU of the outgoing interface and this value.
         int useCwndForParallelProbes = default(0); // if 0, no parallel probe packets; if 1, uses the availbale cwnd to send additional probe packets and if 2 prefers to send probe packets over other packets.
         bool sendDataDuringInitalDplpmtudBase = default(true); // if false, waits for DPLPMTUD switching initially to SEARCH before start sending application data.
         int pmtuValidatorLostPacketsThreshold = default(2); // specifies the number of lost data packet before assuming a decreased PMTU
