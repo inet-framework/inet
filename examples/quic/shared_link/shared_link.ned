@@ -56,53 +56,41 @@ network shared_link
 
         sender1: StandardHost {
             parameters:
-                @display("p=57,25");
+                @display("p=57,62");
         }
 
         sender2: StandardHost {
             parameters:
-                @display("p=57,100");
-        }
-
-        sender3: StandardHost {
-            parameters:
-                @display("p=57,175");
+                @display("p=57,137");
         }
 
         trafficGenerator: StandardHost {
             parameters:
-                @display("p=57,250");
+                @display("p=57,212");
         }
 
         receiver1: StandardHost {
             parameters:
-                @display("p=390,25");
+                @display("p=390,62");
         }
 
         receiver2: StandardHost {
             parameters:
-                @display("p=390,100");
-        }
-
-        receiver3: StandardHost {
-            parameters:
-                @display("p=390,175");
+                @display("p=390,137");
         }
 
         trafficConsumer: StandardHost {
             parameters:
-                @display("p=390,250");
+                @display("p=390,212");
         }
 
     connections:
         sender1.pppg++ <--> ideal <--> router1.pppg++;
         sender2.pppg++ <--> ideal <--> router1.pppg++;
-        sender3.pppg++ <--> ideal <--> router1.pppg++;
         trafficGenerator.pppg++ <--> ideal <--> router1.pppg++;
         
         router2.pppg++ <--> ideal <--> receiver1.pppg++;
         router2.pppg++ <--> ideal <--> receiver2.pppg++;
-        router2.pppg++ <--> ideal <--> receiver3.pppg++;
         router2.pppg++ <--> ideal <--> trafficConsumer.pppg++;
 
         router1.pppg++ <--> bottleneck <--> router2.pppg++;
