@@ -221,8 +221,8 @@
         name = "DiffServ examples"
         description = "DiffServ examples."
         initiallyEnabled = "true"
-        requires = "DiffServ Ethernet Ieee8021d Ipv4 Loopback Ppp Queueing TcpInet Udp VoipStream"
-        recommended = ""
+        requires = "DiffServ Ethernet Ieee8021d Ipv4 Loopback Ppp Queueing TcpInet Udp"
+        recommended = "VoipStream"
         labels = ""
         nedPackages = "
                        inet.examples.diffserv
@@ -397,8 +397,8 @@
         description = "Showcases that demonstrate features which are independent of any specific
                        network technology."
         initiallyEnabled = "true"
-        requires = "DiffServ Ethernet Ieee80211 Ieee8021d Ipv4 Loopback Mobility PhysicalLayerWirelessCommon PingApplication Ppp Queueing TcpCommon TcpInet Udp VisualizationCanvas VisualizationCommon VoipStream"
-        recommended = ""
+        requires = "DiffServ Ethernet Ieee80211 Ieee8021d Ipv4 Loopback Mobility PhysicalLayerWirelessCommon PingApplication Ppp Queueing TcpCommon TcpInet Udp VisualizationCanvas VisualizationCommon"
+        recommended = "VoipStream"
         labels = ""
         nedPackages = "
                        inet.showcases.general
@@ -645,8 +645,8 @@
         name = "Internet protocol examples"
         description = "Examples for basic internet protocols (IPv4, TCP, UDP, etc.)."
         initiallyEnabled = "true"
-        requires = "Clock Ethernet Flooding Ieee8021d Ipv4 Ipv6 Loopback Nexthop OtherApplications PhysicalLayerWiredCommon PingApplication Ppp Queueing Sctp TcpCommon TcpInet TcpLwip Tun Udp VisualizationCanvas VisualizationCommon WiseRoute"
-        recommended = ""
+        requires = "Clock Ethernet Flooding Ieee8021d Ipv4 Ipv6 Loopback Nexthop OtherApplications PhysicalLayerWiredCommon PingApplication Ppp Queueing Sctp TcpCommon TcpInet Tun Udp VisualizationCanvas VisualizationCommon WiseRoute"
+        recommended = "TcpLwip"
         labels = "examples protocols"
         nedPackages = "
                        inet.examples.inet
@@ -697,8 +697,8 @@
         name = "IPv6 examples"
         description = "Examples for Basic IPv6 support (IPv6)."
         initiallyEnabled = "true"
-        requires = "Ethernet Ipv6 Loopback Ppp Queueing Sctp TcpCommon TcpInet TcpLwip Udp VisualizationCanvas"
-        recommended = ""
+        requires = "Ethernet Ipv6 Loopback Ppp Queueing Sctp TcpCommon TcpInet Udp VisualizationCanvas"
+        recommended = "TcpLwip"
         labels = "protocols examples"
         nedPackages = "
                        inet.examples.ipv6
@@ -1557,8 +1557,8 @@
         name = "TSN Showcases"
         description = "Showcases that demonstrate Time-Sensitive Networking (TSN)."
         initiallyEnabled = "true"
-        requires = "Clock Ethernet GateScheduling Ieee8021as Ieee8021d Ieee8021q Ieee8021r Ipv4 LinkLayerConfiguratorsCommon Loopback ProtocolElement Queueing TSN TcpCommon TcpInet Udp VisualizationCanvas Z3GateSchedulingConfigurator"
-        recommended = ""
+        requires = "Clock Ethernet GateScheduling Ieee8021as Ieee8021d Ieee8021q Ieee8021r Ipv4 LinkLayerConfiguratorsCommon Loopback ProtocolElement Queueing TSN TcpCommon TcpInet Udp VisualizationCanvas"
+        recommended = "Z3GateSchedulingConfigurator"
         labels = ""
         nedPackages = "
                        inet.showcases.tsn
