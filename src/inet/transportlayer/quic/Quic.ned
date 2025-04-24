@@ -47,14 +47,14 @@ simple Quic like IQuic
         bool useIBit = default(false); // If true, an ACK frame is sent immediately upon an ack-eliciting packet with the I-Bit set.
 
 		// Path MTU Discovery
-        int maxPmtu @unit(B) = default(65535B); // With useDplpmtud, it is used as upper limit for the PMTU search. Without useDplpmtud, the PMTU is set to the minimum of the MTU of the outgoing interface and this value.
         bool useDplpmtud = default(false); // If true, uses DPLPMTUD (RFC8899) to determine the PMTU.
-        bool dplpmtudUsePtb = default(true); // If true, uses ICMP Packet Too Big (PTB) messages for DPLPMTUD.
+        int maxPmtu @unit(B) = default(65535B); // With useDplpmtud, it is used as upper limit for the PMTU search. Without useDplpmtud, the PMTU is set to the minimum of the MTU of the outgoing interface and this value.
         int dplpmtudMinPmtu = default(0); // Specifies the minimum PMTU to use (if 0, it uses 1200 B for IPv4 or 1280 B for IPv6 as minimum PMTU).
-        string dplpmtudCandidateSequence = default("Up"); // Specifies the sequence of candidates used for the search algorithm of DPLPMTUD (Up, Down, OptUp, Binary, OptBinary, Jump).
         int dplpmtudMaxProbes = default(3); // Specifies the number of probe packet sent for one candidate before given up.
-        int useCwndForParallelProbes = default(0); // If 0, no parallel probe packets; if 1, uses the availbale cwnd to send additional probe packets and if 2 prefers to send probe packets over other packets.
+        bool dplpmtudUsePtb = default(true); // If true, uses ICMP Packet Too Big (PTB) messages for DPLPMTUD.
+        string dplpmtudCandidateSequence = default("OptBinary"); // Specifies the sequence of candidates used for the search algorithm of DPLPMTUD (Up, Down, OptUp, Binary, OptBinary, Jump).
         bool skipPacketNumberForDplpmtudProbePackets = default(false); // Specifies whether to skip a packet number for a DPLPMTUD probe packet in order to avoid ack delay.
+        int useCwndForParallelProbes = default(0); // If 0, no parallel probe packets; if 1, uses the availbale cwnd to send additional probe packets and if 2 prefers to send probe packets over other packets.
         bool sendDataDuringInitalDplpmtudBase = default(true); // If false, waits for DPLPMTUD switching initially to SEARCH before start sending application data.
         bool dplpmtudUsePmtuValidator = default (true); // If true, activates the PMTU Validator that trys to detect when the current PMTU estimation is larger than the actual PMTU.
         int pmtuValidatorLostPacketsThreshold = default(2); // Specifies the number of lost data packets before assuming a decreased PMTU.
@@ -63,42 +63,54 @@ simple Quic like IQuic
         double reducePacketTimeThreshold @unit(s) = default(0s); // Specifies after which time with no acks, packets with reduced size are sent (if negative, the number of seconds are used multiplied by PTO).
 
         @display("i=block/transport");
-        @signal[cwnd*];
-        @statisticTemplate[cwnd](record=vector);
-        @signal[bytesInFlight*];
-        @statisticTemplate[bytesInFlight](record=vector);
+
+        // Connection
+        @signal[packetReceived](type=cPacket);
+        @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @signal[packetSent](type=cPacket);
+        @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @signal[packetNumberReceived*];
+        @statisticTemplate[packetNumberReceived](record=vector);
+        @signal[packetNumberSent*];
+        @statisticTemplate[packetNumberSent](record=vector);
         @signal[totalReceivedDataBytes*];
         @statisticTemplate[totalReceivedDataBytes](record=vector);
-        @signal[availableRwnd*];
-        @statisticTemplate[availableRwnd](record=vector);
         @signal[sendBufferUnsentData*];
         @statisticTemplate[sendBufferUnsentData](record=vector);
+
+        // Stream
+        @signal[streamRcvDataBytes*];
+        @statisticTemplate[streamRcvDataBytes](record=vector);
+        @signal[streamTotalRcvDataBytes*];
+        @statisticTemplate[streamTotalRcvDataBytes](record=vector);
+        @signal[rcvStreamFrameStartOffset*];
+        @statisticTemplate[rcvStreamFrameStartOffset](record=vector);
+        @signal[rcvStreamFrameEndOffset*];
+        @statisticTemplate[rcvStreamFrameEndOffset](record=vector);
+
+        // Reliability and Congestion Control
+        @signal[cwnd*];
+        @statisticTemplate[cwnd](record=vector);
         @signal[latestRtt*];
         @statisticTemplate[latestRtt](record=vector);
+        @signal[bytesInFlight*];
+        @statisticTemplate[bytesInFlight](record=vector);
         @signal[partialBytesAcked*];
         @statisticTemplate[partialBytesAcked](record=vector);
         @signal[persistentCongestionPeriod*];
         @statisticTemplate[persistentCongestionPeriod](record=vector);
 
-        // Stream Statistic
-        @signal[streamRcvDataBytes*]; 
-        @statisticTemplate[streamRcvDataBytes](record=vector);  
-        @signal[streamTotalRcvDataBytes*]; 
-        @statisticTemplate[streamTotalRcvDataBytes](record=vector); 
-        
-        // Flow Control Statistic
+        // Flow Control
         @signal[availableRwnd*];
-        @statisticTemplate[availableRwnd](record=vector);  
-        
-        // Statistic of Flow Controller     
+        @statisticTemplate[availableRwnd](record=vector);
         @signal[generatedBlockFrameCount*];
         @statisticTemplate[generatedBlockFrameCount](record=last);   
         @signal[blockFrameOffset*];
         @statisticTemplate[blockFrameOffset](record=vector);     
         @signal[rcvMaxFrameCount*];
         @statisticTemplate[rcvMaxFrameCount](record=last);
-        
-        // Statistic of Flow Control Responder
+
+        // Flow Control Responder
         @signal[rcvBlockFrameCount*];
         @statisticTemplate[rcvBlockFrameCount](record=last);
 		@signal[generatedMaxDataFrameCount*];
@@ -110,17 +122,9 @@ simple Quic like IQuic
         @signal[retransmitFCUpdateCount*];
         @statisticTemplate[retransmitFCUpdateCount](record=last);
 
-        //Statistic of StreamReceivedQueue
-        @signal[rcvStreamFrameStartOffset*];
-        @statisticTemplate[rcvStreamFrameStartOffset](record=vector);
-        @signal[rcvStreamFrameEndOffset*];
-        @statisticTemplate[rcvStreamFrameEndOffset](record=vector);
-        
-        @signal[packetReceived](type=cPacket);
-        @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @signal[packetSent](type=cPacket);
-        @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-
+        // Path MTU Discovery
+        @signal[usedMaxQuicPacketSize*];
+        @statisticTemplate[usedMaxQuicPacketSize](record=vector);
         @signal[dplpmtudSearchPmtu*];
         @statisticTemplate[dplpmtudSearchPmtu](record=vector);
         @signal[dplpmtudSearchNumberOfTests*];
@@ -139,14 +143,6 @@ simple Quic like IQuic
         @statisticTemplate[pmtuValidatorTimeBetweenLostPackets](record=vector);
         @signal[pmtuValidatorPersistentCongestions*];
         @statisticTemplate[pmtuValidatorPersistentCongestions](record=vector);
-        
-        @signal[usedMaxQuicPacketSize*];
-        @statisticTemplate[usedMaxQuicPacketSize](record=vector);
-
-        @signal[packetNumberReceived*];
-        @statisticTemplate[packetNumberReceived](record=vector);
-        @signal[packetNumberSent*];
-        @statisticTemplate[packetNumberSent](record=vector);
 
     gates:
         input appIn @labels(QuicCommand/down) @messageKinds(inet::QuicCommandCode);
