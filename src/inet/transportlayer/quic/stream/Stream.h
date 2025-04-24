@@ -65,7 +65,6 @@ public:
 
     //Statistic
     void measureStreamRcvDataBytes(uint64_t dataLength);
-    void measureStreamGoodput(simtime_t firstReceivedPacketCreatedTime, simtime_t lastReceivedPacketProcessedTime);
 
 protected:
     Connection *connection;
@@ -83,7 +82,6 @@ private:
     simsignal_t sendBufferUnsentDataStat;
     simsignal_t streamRcvDataBytesStat;
     simsignal_t streamTotalRcvDataBytesStat;
-    simsignal_t streamGoodputStat;
     uint64_t totalStreamRcvDataBytes = 0;
     simtime_t streamCreatedTime;
 

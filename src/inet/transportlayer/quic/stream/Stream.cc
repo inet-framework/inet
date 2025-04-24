@@ -30,7 +30,6 @@ Stream::Stream(uint64_t id, Connection *connection, Statistics *connStats) {
     sendBufferUnsentDataStat = stats->createStatisticEntry("sendBufferUnsentData");
     streamRcvDataBytesStat = stats->createStatisticEntry("streamRcvDataBytes");
     streamTotalRcvDataBytesStat = stats->createStatisticEntry("streamTotalRcvDataBytes");
-    streamGoodputStat = stats->createStatisticEntry("streamGoodput");
     stats->getMod()->emit(streamRcvDataBytesStat, (unsigned long)totalStreamRcvDataBytes);
 
     auto tp = connection->getTransportParameters();
@@ -327,16 +326,6 @@ void Stream::measureStreamRcvDataBytes(uint64_t dataLength)
     totalStreamRcvDataBytes +=dataLength;
     stats->getMod()->emit(streamTotalRcvDataBytesStat, (unsigned long)totalStreamRcvDataBytes);
     stats->getMod()->emit(streamRcvDataBytesStat, (unsigned long)dataLength);
-}
-
-void Stream::measureStreamGoodput(simtime_t firstReceivedPacketCreatedTime, simtime_t lastReceivedPacketProcessedTime)
-{
-    if(simTime() == streamCreatedTime){
-        stats->getMod()->emit(streamGoodputStat, (double)totalStreamRcvDataBytes*8);
-    } else {
-//            stats->getMod()->emit(streamGoodputStat, (double)totalStreamRcvDataBytes*8/((simTime() - streamCreatedTime).dbl()));
-        stats->getMod()->emit(streamGoodputStat, (double)totalStreamRcvDataBytes*8/(lastReceivedPacketProcessedTime - firstReceivedPacketCreatedTime).dbl());
-    }
 }
 
 } /* namespace quic */

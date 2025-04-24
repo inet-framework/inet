@@ -199,7 +199,6 @@ class Connection
     void sendPacket(QuicPacket *packet, PacketNumberSpace pnSpace);
     Stream *findOrCreateStream(uint64_t streamid);
     uint64_t getStreamsSendQueueLength();
-    void measureReceiveGoodput(uint64_t receivedDataLength);
 };
 
 } /* namespace quic */

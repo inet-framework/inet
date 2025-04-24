@@ -369,34 +369,6 @@ void Connection::sendPacket(QuicPacket *packet, PacketNumberSpace pnSpace)
     reliabilityManager->onPacketSent(packet, pnSpace);
 }
 
-void Connection::measureReceiveGoodput(uint64_t receivedDataLength)
-{
-    static simsignal_t receiveGoodputStat = stats->createStatisticEntry("receiveGoodput");
-    static SimTime empty = SimTime(-1.0);
-    static SimTime receiveGoodputStatStartTime = SimTime(quicSimpleMod->par("receiveGoodputStatStartTime"));
-    static SimTime receiveGoodputStatEndTime = SimTime(quicSimpleMod->par("receiveGoodputStatEndTime"));
-    static bool receiveGoodputDone = (receiveGoodputStatStartTime == empty);
-    static SimTime firstReceivedDataTime = empty;
-    static double totalReceivedDataLength = 0.0;
-
-    if (!receiveGoodputDone) {
-        SimTime now = simTime();
-        if (receiveGoodputStatStartTime <= now) {
-            if (firstReceivedDataTime == empty) {
-                firstReceivedDataTime = now;
-            } else {
-                totalReceivedDataLength += receivedDataLength;
-                if ((now - firstReceivedDataTime).dbl() > 0) {
-                    stats->getMod()->emit(receiveGoodputStat, totalReceivedDataLength / (now - firstReceivedDataTime).dbl() * 8.0);
-                }
-                if (receiveGoodputStatEndTime <= now && receiveGoodputStatEndTime != empty) {
-                    receiveGoodputDone = true;
-                }
-            }
-        }
-    }
-}
-
 void Connection::processReceivedData(uint64_t streamId, uint64_t offset, Ptr<const Chunk> data)
 {
     Stream *stream = findOrCreateStream(streamId);
@@ -406,7 +378,6 @@ void Connection::processReceivedData(uint64_t streamId, uint64_t offset, Ptr<con
     static unsigned long totalReceivedDataBytes = 0;
     totalReceivedDataBytes += dataLength;
     stats->getMod()->emit(totalReceivedDataBytesStat, totalReceivedDataBytes);
-    measureReceiveGoodput(dataLength);
 
     //check rwnd before process data
     if(stream->isAllowedToReceivedData(dataLength)){
@@ -414,7 +385,6 @@ void Connection::processReceivedData(uint64_t streamId, uint64_t offset, Ptr<con
         stream->bufferReceivedData(data, offset);
         stream->updateHighestRecievedOffset(offset + dataLength);
         stream->measureStreamRcvDataBytes(dataLength);
-        stream->measureStreamGoodput(SimTime(quicSimpleMod->par("receiveGoodputStatStartTime")), simTime());
 
         connectionFlowControlResponder->updateHighestRecievedOffset(dataLength);
     }
