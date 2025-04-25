@@ -27,8 +27,8 @@ moduleinterface IQuic
 
     gates:
         input appIn @labels(QuicCommand/down);
-        input udpIn @labels(UdpControlInfo/up);
+        input udpIn @labels(UdpCommand/up);
         output appOut @labels(QuicCommand/up);
-        output udpOut @labels(UdpControlInfo/down);
+        output udpOut @labels(UdpCommand/down);
 }
 

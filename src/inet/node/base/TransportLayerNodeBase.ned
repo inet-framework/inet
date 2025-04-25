@@ -43,8 +43,7 @@ module TransportLayerNodeBase extends NetworkLayerNodeBase
             @display("p=675,225");
         }
         quic: <default(firstAvailableOrEmpty("Quic"))> like IQuic if hasQuic {
-            parameters:
-                @display("p=825,226");
+            @display("p=825,226");
         }
         tn: MessageDispatcher {
             @display("p=750,300;b=1000,5,,,,1");
