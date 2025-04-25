@@ -95,27 +95,30 @@ Connection::Connection(Quic *quicSimpleMod, UdpSocket *udpSocket, AppSocket *app
 }
 
 Connection::~Connection() {
-    delete reliabilityManager;
-    delete receivedPacketsAccountants[PacketNumberSpace::ApplicationData];
-    delete receivedPacketsAccountants[PacketNumberSpace::Initial];
-    delete receivedPacketsAccountants[PacketNumberSpace::Handshake];
-    delete congestionController;
-    delete connectionFlowController;
-    delete connectionFlowControlResponder;
+    if (!closed) {
+        delete reliabilityManager;
+        delete receivedPacketsAccountants[PacketNumberSpace::ApplicationData];
+        delete receivedPacketsAccountants[PacketNumberSpace::Initial];
+        delete receivedPacketsAccountants[PacketNumberSpace::Handshake];
+        delete congestionController;
+        delete connectionFlowController;
+        delete connectionFlowControlResponder;
+        delete transportParameter;
+        delete scheduler;
+
+        for (QuicFrame *frame : controlQueue) {
+            delete frame;
+        }
+        // delete stream objects
+        for (auto it = streamMap.begin(); it != streamMap.end(); it++) {
+            delete it->second;
+        }
+
+    }
+    delete path;
     delete stats;
     delete connectionState;
-    delete transportParameter;
-    delete scheduler;
     delete packetBuilder;
-    delete path;
-
-    for (QuicFrame *frame : controlQueue) {
-        delete frame;
-    }
-    // delete stream objects
-    for (auto it = streamMap.begin(); it != streamMap.end(); it++) {
-        delete it->second;
-    }
     for (ConnectionId *connectionId : dstConnectionIds) {
         delete connectionId;
     }
@@ -360,13 +363,15 @@ void Connection::sendHandshakePacket() {
     sendPacket(packetBuilder->buildHandshakePacket(maxQuicPacketSize), PacketNumberSpace::Handshake);
 }
 
-void Connection::sendPacket(QuicPacket *packet, PacketNumberSpace pnSpace)
+void Connection::sendPacket(QuicPacket *packet, PacketNumberSpace pnSpace, bool track)
 {
     stats->getMod()->emit(packetNumberSentStat, packet->getPacketNumber());
     Packet *pkt = packet->createOmnetPacket();
     stats->getMod()->emit(packetSentSignal, pkt);
     udpSocket->sendto(path->getRemoteAddr(), path->getRemotePort(), pkt);
-    reliabilityManager->onPacketSent(packet, pnSpace);
+    if (track) {
+        reliabilityManager->onPacketSent(packet, pnSpace);
+    }
 }
 
 void Connection::processReceivedData(uint64_t streamId, uint64_t offset, Ptr<const Chunk> data)
@@ -429,9 +434,9 @@ Timer *Connection::createTimer(cMessage *msg) {
 }
 
 void Connection::onMaxDataFrameReceived(uint64_t maxData){
-        connectionFlowController->onMaxFrameReceived(maxData);
-        // MAX_DATA frame might enable us to send packets, when we were previously blocked by the flow control
-        sendPackets();
+    connectionFlowController->onMaxFrameReceived(maxData);
+    // MAX_DATA frame might enable us to send packets, when we were previously blocked by the flow control
+    sendPackets();
 }
 
 void Connection::onMaxDataFrameLost(){
@@ -526,6 +531,42 @@ void Connection::sendHandshakeDone()
 {
     packetBuilder->addHandshakeDone();
     sendPackets();
+}
+
+void Connection::close(bool sendAck, bool appInitiated)
+{
+    if (closed) {
+        sendConnectionClose(false, appInitiated, 0);
+        return;
+    }
+    sendConnectionClose(sendAck, appInitiated, 0);
+
+    delete reliabilityManager;
+    delete receivedPacketsAccountants[PacketNumberSpace::ApplicationData];
+    delete receivedPacketsAccountants[PacketNumberSpace::Initial];
+    delete receivedPacketsAccountants[PacketNumberSpace::Handshake];
+    delete congestionController;
+    delete connectionFlowController;
+    delete connectionFlowControlResponder;
+    delete transportParameter;
+    delete scheduler;
+
+    for (QuicFrame *frame : controlQueue) {
+        delete frame;
+    }
+    // delete stream objects
+    for (auto it = streamMap.begin(); it != streamMap.end(); it++) {
+        delete it->second;
+    }
+    path->onClose();
+
+    closed = true;
+}
+
+void Connection::sendConnectionClose(bool sendAck, bool appInitiated, int errorCode)
+{
+    EV_DEBUG << "sendConnectionClose" << endl;
+    sendPacket(packetBuilder->buildConnectionClosePacket(path->getSafeQuicPacketSize(), sendAck, appInitiated, errorCode), PacketNumberSpace::ApplicationData, false);
 }
 
 } /* namespace quic */

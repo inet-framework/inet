@@ -32,6 +32,8 @@ enum FrameHeaderType {
     FRAME_HEADER_TYPE_MAX_STREAM_DATA = 0x11;   
     FRAME_HEADER_TYPE_DATA_BLOCKED = 0x14;   
     FRAME_HEADER_TYPE_STREAM_DATA_BLOCKED = 0x15;
+    FRAME_HEADER_TYPE_CONNECTION_CLOSE_QUIC = 0x1c;
+    FRAME_HEADER_TYPE_CONNECTION_CLOSE_APP = 0x1d;
     FRAME_HEADER_TYPE_HANDSHAKE_DONE = 0x1e;
 }
 
@@ -237,4 +239,25 @@ class HandshakeDoneFrameHeader extends FrameHeader
     chunkLength = B(1);
     frameType = FRAME_HEADER_TYPE_HANDSHAKE_DONE;
 }
+
+class ConnectionCloseFrameHeader extends FrameHeader
+{
+    frameType = FRAME_HEADER_TYPE_CONNECTION_CLOSE_QUIC;
+    VariableLengthInteger errorCode;
+}
+cplusplus(ConnectionCloseFrameHeader) {{
+  public:
+    void calcChunkLength() {
+        int64_t len = 1 + getVariableLengthIntegerSize(errorCode);
+        this->setChunkLength(B(len));
+    }
+    std::string str() const override {
+        std::ostringstream os;
+        os << "CONNECTION_CLOSE["
+            << (frameType == FRAME_HEADER_TYPE_CONNECTION_CLOSE_QUIC ? "QUIC" : "APP")
+            << ", errorCode=" << errorCode
+            << "]";
+        return os.str();
+    }
+}}
 

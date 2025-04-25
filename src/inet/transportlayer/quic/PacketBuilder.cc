@@ -152,6 +152,19 @@ QuicFrame *PacketBuilder::createCryptoFrame()
     return new QuicFrame(frameHeader);
 }
 
+QuicFrame *PacketBuilder::createConnectionCloseFrame(bool appInitiated, int errorCode)
+{
+    Ptr<ConnectionCloseFrameHeader> frameHeader = makeShared<ConnectionCloseFrameHeader>();
+    if (appInitiated) {
+        frameHeader->setFrameType(FRAME_HEADER_TYPE_CONNECTION_CLOSE_APP);
+    } else {
+        frameHeader->setFrameType(FRAME_HEADER_TYPE_CONNECTION_CLOSE_QUIC);
+    }
+    frameHeader->setErrorCode(errorCode);
+    frameHeader->calcChunkLength();
+    return new QuicFrame(frameHeader);
+}
+
 QuicFrame *PacketBuilder::createHandshakeDoneFrame()
 {
     Ptr<HandshakeDoneFrameHeader> frameHeader = makeShared<HandshakeDoneFrameHeader>();
@@ -460,6 +473,25 @@ QuicPacket *PacketBuilder::buildHandshakePacket(int maxPacketSize)
 void PacketBuilder::addHandshakeDone()
 {
     controlQueue->push_back(createHandshakeDoneFrame());
+}
+
+QuicPacket *PacketBuilder::buildConnectionClosePacket(int maxPacketSize, bool sendAck, bool appInitiated, int errorCode)
+{
+    PacketNumberSpace pnSpace = PacketNumberSpace::ApplicationData;
+    QuicPacket *packet = createPacket(pnSpace, false);
+
+    // check if we can bundle an ack frame
+    if (sendAck && receivedPacketsAccountant[pnSpace]->hasNewAckInfo()) {
+        QuicFrame *ackFrame = receivedPacketsAccountant[pnSpace]->generateAckFrame(maxPacketSize - getPacketSize(packet));
+        if (ackFrame != nullptr) {
+            packet->addFrame(ackFrame);
+        }
+    }
+
+    packet->addFrame(createConnectionCloseFrame(appInitiated, errorCode));
+
+    return packet;
+
 }
 
 } /* namespace quic */

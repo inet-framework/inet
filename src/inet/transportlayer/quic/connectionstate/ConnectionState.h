@@ -43,6 +43,8 @@ public:
     virtual ConnectionState *processOneRttPacket(const Ptr<const OneRttPacketHeader>& packetHeader, Packet *pkt);
 
     virtual void processFrames(Packet *pkt, PacketNumberSpace pnSpace);
+    virtual bool containsFrame(Packet *pkt, enum FrameHeaderType frameType);
+    virtual void discardFrames(Packet *pkt);
     virtual void processStreamFrame(const Ptr<const StreamFrameHeader>& frameHeader, Packet *pkt);
     virtual void processAckFrame(const Ptr<const AckFrameHeader>& frameHeader, PacketNumberSpace pnSpace);
     virtual void processFrame(Packet *pkt, PacketNumberSpace pnSpace);
@@ -52,6 +54,7 @@ public:
     virtual void processDataBlockedFrame(const Ptr<const DataBlockedFrameHeader>& frameHeader);
     virtual void processCryptoFrame(const Ptr<const CryptoFrameHeader>& frameHeader);
     virtual void processHandshakeDoneFrame();
+    virtual void processConnectionCloseFrame();
 
     virtual ConnectionState *processIcmpPtb(Packet *droppedPacket, int ptbMtu);
     virtual ConnectionState *processIcmpPtb(uint32_t droppedPacketNumber, int ptbMtu);

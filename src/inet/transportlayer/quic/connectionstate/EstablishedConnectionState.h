@@ -21,6 +21,7 @@ public:
 
     virtual void start() override;
     virtual ConnectionState *processSendAppCommand(cMessage *msg) override;
+    virtual ConnectionState *processCloseAppCommand(cMessage *msg) override;
     virtual ConnectionState *processOneRttPacket(const Ptr<const OneRttPacketHeader>& packetHeader, Packet *pkt) override;
     virtual void processStreamFrame(const Ptr<const StreamFrameHeader>& frameHeader, Packet *pkt) override;
     virtual void processAckFrame(const Ptr<const AckFrameHeader>& frameHeader, PacketNumberSpace pnSpace) override;
@@ -30,6 +31,7 @@ public:
     virtual void processDataBlockedFrame(const Ptr<const DataBlockedFrameHeader>& frameHeader) override;
     virtual void processCryptoFrame(const Ptr<const CryptoFrameHeader>& frameHeader) override;
     virtual void processHandshakeDoneFrame() override;
+    virtual void processConnectionCloseFrame() override;
     virtual ConnectionState *processLossDetectionTimeout(cMessage *msg) override;
     virtual ConnectionState *processAckDelayTimeout(cMessage *msg) override;
     virtual ConnectionState *processRecvAppCommand(cMessage *msg) override;
@@ -40,6 +42,7 @@ public:
 
 private:
     bool gotCryptoFin = false;
+    bool gotConnectionClose = false;
 };
 
 } /* namespace quic */

@@ -14,6 +14,8 @@
 // 
 
 #include "EstablishedConnectionState.h"
+#include "CloseConnectionState.h"
+#include "DrainConnectionState.h"
 
 namespace inet {
 namespace quic {
@@ -31,6 +33,13 @@ ConnectionState *EstablishedConnectionState::processSendAppCommand(cMessage *msg
     //delete pkt;
 
     return this;
+}
+
+ConnectionState *EstablishedConnectionState::processCloseAppCommand(cMessage *msg)
+{
+    EV_DEBUG << "processCloseAppCommand in " << name << endl;
+    context->close(true, true);
+    return new CloseConnectionState(context);;
 }
 
 ConnectionState *EstablishedConnectionState::processRecvAppCommand(cMessage *msg)
@@ -51,6 +60,10 @@ ConnectionState *EstablishedConnectionState::processOneRttPacket(const Ptr<const
 
     context->accountReceivedPacket(packetHeader->getPacketNumber(), ackElicitingPacket, PacketNumberSpace::ApplicationData, packetHeader->getIBit());
 
+    if (gotConnectionClose) {
+        context->close(false, false);
+        return new DrainConnectionState(context);
+    }
     return this;
 }
 
@@ -103,6 +116,12 @@ void EstablishedConnectionState::processHandshakeDoneFrame()
 {
     EV_DEBUG << "HandshakeDoneFrameHeader in " << name << endl;
     context->setHandshakeConfirmed(true);
+}
+
+void EstablishedConnectionState::processConnectionCloseFrame()
+{
+    EV_DEBUG << "processConnectionCloseFrame in " << name << endl;
+    gotConnectionClose = true;
 }
 
 ConnectionState *EstablishedConnectionState::processIcmpPtb(uint32_t droppedPacketNumber, int ptbMtu)

@@ -34,6 +34,7 @@ public:
     int getMaxQuicPacketSize();
     int getSafeQuicPacketSize();
     void setPmtuValidator(PmtuValidator *pmtuValidator);
+    void onClose();
 
     L3Address getLocalAddr() {
         return localAddr;

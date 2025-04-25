@@ -68,8 +68,7 @@ ConnectionState *ConnectionState::processRecvAppCommand(cMessage *msg)
 
 ConnectionState *ConnectionState::processCloseAppCommand(cMessage *msg)
 {
-    //throw cRuntimeError("Close app command unexpected in the current state");
-    return this;
+    throw cRuntimeError("Close app command unexpected in the current state");
 }
 
 ConnectionState *ConnectionState::processPacket(Packet *pkt)
@@ -140,6 +139,39 @@ void ConnectionState::processFrames(Packet *pkt, PacketNumberSpace pnSpace)
     } while (frameHeader != nullptr);
 }
 
+bool ConnectionState::containsFrame(Packet *pkt, enum FrameHeaderType frameType)
+{
+    Ptr<const FrameHeader> frameHeader = nullptr;
+    b offset = b(0);
+
+    //EV_DEBUG << "contains " << pkt << " a frame of type " << frameType << "?" << endl;
+    do {
+        if (offset >= pkt->getDataLength()) {
+            //EV_DEBUG << "no, offset is " << offset << " and dataLength only " << pkt->getDataLength() << endl;
+            return false;
+        }
+        frameHeader = staticPtrCast<const FrameHeader>(pkt->peekDataAt<Chunk>(offset));
+        //EV_DEBUG << "frame at offset " << offset << " is " << frameHeader << endl;
+        if (frameHeader == nullptr) {
+            //EV_DEBUG << "no, frameHeader is a nullptr" << endl;
+            return false;
+        }
+        offset += frameHeader->getChunkLength();
+    } while (frameHeader->getFrameType() != frameType);
+
+    //EV_DEBUG << "yes" << endl;
+    return true;
+}
+
+void ConnectionState::discardFrames(Packet *pkt)
+{
+    Ptr<const FrameHeader> frameHeader = nullptr;
+    do {
+        frameHeader = pkt->popAtFront<FrameHeader>();
+        EV_DEBUG << "discard frame " << frameHeader << endl;
+    } while (pkt->getByteLength() > 0 && frameHeader != nullptr);
+}
+
 void ConnectionState::processFrame(Packet *pkt, PacketNumberSpace pnSpace)
 {
     auto frameHeader = pkt->popAtFront<FrameHeader>();
@@ -165,6 +197,9 @@ void ConnectionState::processFrame(Packet *pkt, PacketNumberSpace pnSpace)
             return processCryptoFrame(staticPtrCast<const CryptoFrameHeader>(frameHeader));
         case FRAME_HEADER_TYPE_HANDSHAKE_DONE:
             return processHandshakeDoneFrame();
+        case FRAME_HEADER_TYPE_CONNECTION_CLOSE_APP:
+        case FRAME_HEADER_TYPE_CONNECTION_CLOSE_QUIC:
+            return processConnectionCloseFrame();
         case FRAME_HEADER_TYPE_PADDING:
         case FRAME_HEADER_TYPE_PING:
             return;
@@ -212,6 +247,11 @@ void ConnectionState::processCryptoFrame(const Ptr<const CryptoFrameHeader>& fra
 void ConnectionState::processHandshakeDoneFrame()
 {
     throw cRuntimeError("HANDSHAKE_DONE frame unexpected in the current state");
+}
+
+void ConnectionState::processConnectionCloseFrame()
+{
+    throw cRuntimeError("CONNECTION_CLOSE frame unexpected in the current state");
 }
 
 ConnectionState *ConnectionState::processIcmpPtb(uint32_t droppedPacketNumber, int ptbMtu)

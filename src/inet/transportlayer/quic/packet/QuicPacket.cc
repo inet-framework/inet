@@ -37,8 +37,18 @@ uint64_t QuicPacket::getPacketNumber()
     switch (header->getHeaderForm()) {
         case PACKET_HEADER_FORM_SHORT:
             return staticPtrCast<const ShortPacketHeader>(header)->getPacketNumber();
-        default:
-            cRuntimeError("getPacketNumber not implemented for packet header type other than short packet header.");
+        case PACKET_HEADER_FORM_LONG:
+            Ptr<const LongPacketHeader> longHeader = staticPtrCast<const LongPacketHeader>(header);
+            switch (longHeader->getLongPacketType()) {
+                case LONG_PACKET_HEADER_TYPE_INITIAL:
+                    return staticPtrCast<const InitialPacketHeader>(header)->getPacketNumber();
+                case LONG_PACKET_HEADER_TYPE_0RTT:
+                    return staticPtrCast<const ZeroRttPacketHeader>(header)->getPacketNumber();
+                case LONG_PACKET_HEADER_TYPE_HANDSHAKE:
+                    return staticPtrCast<const HandshakePacketHeader>(header)->getPacketNumber();
+                default:
+                    cRuntimeError("getPacketNumber not implemented for this packet header type.");
+            }
     }
     return 0;
 }

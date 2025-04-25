@@ -96,6 +96,8 @@ class Connection
     void sendAck(PacketNumberSpace pnSpace);
     void established();
     void sendHandshakeDone();
+    void close(bool sendAck, bool appInitiated);
+    void sendConnectionClose(bool sendAck, bool appInitiated, int errorCode);
 
     ReliabilityManager *getReliabilityManager() {
         return this->reliabilityManager;
@@ -171,6 +173,8 @@ class Connection
 
     ICongestionController *congestionController;
 
+    bool closed = false;
+
     bool acceptDataFromApp;
     int sendQueueLimit;
     double sendQueueLowWaterRatio;
@@ -196,7 +200,7 @@ class Connection
     simsignal_t packetNumberSentStat;
 
 
-    void sendPacket(QuicPacket *packet, PacketNumberSpace pnSpace);
+    void sendPacket(QuicPacket *packet, PacketNumberSpace pnSpace, bool track = true);
     Stream *findOrCreateStream(uint64_t streamid);
     uint64_t getStreamsSendQueueLength();
 };

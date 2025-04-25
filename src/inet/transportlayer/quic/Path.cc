@@ -106,5 +106,18 @@ void Path::setPmtuValidator(PmtuValidator *pmtuValidator) {
     this->pmtuValidator = pmtuValidator;
 }
 
+void Path::onClose()
+{
+    if (dplpmtud != nullptr) {
+        delete dplpmtud;
+        dplpmtud = nullptr;
+        useDplpmtud = false;
+    }
+    if (pmtuValidator != nullptr) {
+        delete pmtuValidator;
+        pmtuValidator = nullptr;
+    }
+}
+
 } /* namespace quic */
 } /* namespace inet */
