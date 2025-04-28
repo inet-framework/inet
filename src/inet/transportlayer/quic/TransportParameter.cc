@@ -21,9 +21,7 @@ namespace quic {
 TransportParameter::TransportParameter(Quic *quicSimpleMod) {
 
     initial_max_data = quicSimpleMod->par("initialMaxData");
-    initial_max_stream_data_bidi_local = quicSimpleMod->par("initialMaxStreamDataBidiLocal");
-    initial_max_stream_data_bidi_remote = quicSimpleMod->par("initialMaxStreamDataBidiRemote");
-    initial_max_stream_data_uni = quicSimpleMod->par("initialMaxStreamDataUni");
+    initial_max_stream_data = quicSimpleMod->par("initialMaxStreamData");
 }
 
 TransportParameter::~TransportParameter() {

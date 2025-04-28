@@ -13,6 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
+// Allows to set only one flow control credit limit for all stream types. It has no parameter specfic for unidirectional, bidirectional local or bidrectional remote streams.
+
 package inet.transportlayer.quic;
 
 import inet.transportlayer.contract.IQuic;
@@ -20,7 +22,7 @@ import inet.transportlayer.contract.IQuic;
 simple Quic like IQuic
 {
     parameters:
-        string routingTableModule; // Set by Standard(Quic)Host.
+        string routingTableModule; // Set by StandardHost.
 
         // Congestion Control
         string congestionControl = default("NewReno"); // Sets the congestion control algorithm (NewReno or No).
@@ -32,13 +34,10 @@ simple Quic like IQuic
 
 		// Flow Control
         int initialMaxData @unit(B) = default(15MB); // Connection level flow control credit. Used as own and peer's value.
-        int initialMaxStreamDataUni @unit(B) = default(6MB); // Stream level flow control credit for unidirectional streams. Used as own and peer's value.
-        int initialMaxStreamDataBidiLocal @unit(B) = default(6MB); // Stream level flow control credit for bidirectional streams opened by the local host. Used as own and peer's value.
-        int initialMaxStreamDataBidiRemote @unit(B) = default(6MB); // Stream level flow control credit for bidirectional streams opened by the remote host. Used as own and peer's value.
-        double maxStreamDataFrameThreshold @unit(B) = default(0.5*initialMaxData); // Defines when MaxStreamDataFrame in StreamFlowControl will be send. Now absolte value is used. TODO: Define it as ratio = consumedData/maxReceiveOffset
-        double maxDataFrameThreshold @unit(B) = default(0.5*initialMaxStreamDataUni); // Defines when MaxDataFrame in ConnectionFlowControl will be send.Now absolte value is used. TODO: Define it as ratio = consumedData/maxReceiveOffset
-        double maxDataFrameDelay @unit(ms) = default(-1ms); // TODO implement this. -1 =  do not use this parameter. Indicating the maximum amount of time in milliseconds by which the endpoint will delay sending maxDataFrame.
-        bool roundConsumedDataValue = default(false); // If true, FlowControlResponder round consumedData in streamRcvBuffer to the next packetSize.
+        int initialMaxStreamData @unit(B) = default(6MB); // Stream level flow control credit for any stream (unidirectional, bidirectional local and remote). Used as own and peer's value.
+        double maxDataFrameThreshold @unit(B) = default(0.5*initialMaxData); // Defines when MaxDataFrame in ConnectionFlowControl will be send.
+        double maxStreamDataFrameThreshold @unit(B) = default(0.5*initialMaxStreamData); // Defines when MaxStreamDataFrame in StreamFlowControl will be send.
+        bool roundConsumedDataValue = default(false); // If true, FlowControlResponder rounds consumedData in streamRcvBuffer to the next packetSize.
         bool sendMaxDataFramesImmediately = default(false); // If true, a MAX_(STREAM)_DATA frame is sent immediately, after generation. Otherwise, sending the frame is delayed until the sending process starts due to another event.
 
 		// Acknowledgments

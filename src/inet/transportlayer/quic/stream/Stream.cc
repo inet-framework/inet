@@ -33,8 +33,8 @@ Stream::Stream(uint64_t id, Connection *connection, Statistics *connStats) {
     stats->getMod()->emit(streamRcvDataBytesStat, (unsigned long)totalStreamRcvDataBytes);
 
     auto tp = connection->getTransportParameters();
-    streamFlowController = new StreamFlowController(id, tp->initial_max_stream_data_bidi_remote, stats);
-    streamFlowControlResponder = new StreamFlowControlResponder(this, tp->initial_max_stream_data_bidi_remote, connection->getMaxStreamDataFrameThreshold(), connection->getRoundConsumedDataValue(), stats);
+    streamFlowController = new StreamFlowController(id, tp->initial_max_stream_data, stats);
+    streamFlowControlResponder = new StreamFlowControlResponder(this, tp->initial_max_stream_data, connection->getMaxStreamDataFrameThreshold(), connection->getRoundConsumedDataValue(), stats);
     receiveQueue = new StreamRcvQueue(this, stats);
 
     connectionFlowController = connection->getConnectionFlowController();

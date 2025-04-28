@@ -30,9 +30,7 @@ public:
     int ackDelayExponent = 3;
 
     uint64_t initial_max_data = 0;
-    uint64_t initial_max_stream_data_bidi_local = 0;
-    uint64_t initial_max_stream_data_bidi_remote = 0;
-    uint64_t initial_max_stream_data_uni = 0;
+    uint64_t initial_max_stream_data = 0;
 };
 
 } /* namespace quic */
