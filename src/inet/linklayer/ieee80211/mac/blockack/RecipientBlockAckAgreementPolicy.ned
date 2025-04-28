@@ -7,15 +7,16 @@
 
 package inet.linklayer.ieee80211.mac.blockack;
 
+import inet.common.SimpleModule;
 import inet.linklayer.ieee80211.mac.contract.IRecipientBlockAckAgreementPolicy;
-
 
 //
 // Implements the default recipient block ACK agreement policy.
 //
-simple RecipientBlockAckAgreementPolicy like IRecipientBlockAckAgreementPolicy
+simple RecipientBlockAckAgreementPolicy extends SimpleModule like IRecipientBlockAckAgreementPolicy
 {
     parameters:
+        @class(RecipientBlockAckAgreementPolicy);
         bool delayedAckPolicySupported = default(false);
         bool aMsduSupported = default(true);
         int maximumAllowedBufferSize = default(64);

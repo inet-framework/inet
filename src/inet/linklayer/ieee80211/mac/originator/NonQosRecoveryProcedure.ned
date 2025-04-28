@@ -7,9 +7,12 @@
 
 package inet.linklayer.ieee80211.mac.originator;
 
-simple NonQosRecoveryProcedure
+import inet.common.SimpleModule;
+
+simple NonQosRecoveryProcedure extends SimpleModule
 {
     parameters:
+        @class(NonQosRecoveryProcedure);
         string cwCalculatorModule;
         string rtsPolicyModule;
         int shortRetryLimit = default(7);

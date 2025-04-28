@@ -12,9 +12,12 @@
 
 package inet.routing.eigrp;
 
-simple EigrpRtp
+import inet.common.SimpleModule;
+
+simple EigrpRtp extends SimpleModule
 {
     parameters:
+        @class(EigrpRtp);
 
     gates:
         input pdmIn;

@@ -22,7 +22,7 @@ simsignal_t NodeStatus::nodeStatusChangedSignal = registerSignal("nodeStatusChan
 
 void NodeStatus::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         state = getStateByName(par("initialStatus"));

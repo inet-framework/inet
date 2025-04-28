@@ -7,6 +7,7 @@
 #ifndef __INET_LINKSTATEROUTING_H
 #define __INET_LINKSTATEROUTING_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/rsvpte/IntServ_m.h"
@@ -44,7 +45,7 @@ class NetworkInterface;
  *
  * See NED file for more info.
  */
-class INET_API LinkStateRouting : public cSimpleModule, public cListener
+class INET_API LinkStateRouting : public SimpleModule, public cListener
 {
   protected:
     ModuleRefByPar<Ted> tedmod;

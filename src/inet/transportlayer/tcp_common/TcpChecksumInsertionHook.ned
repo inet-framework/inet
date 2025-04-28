@@ -7,7 +7,11 @@
 
 package inet.transportlayer.tcp_common;
 
-simple TcpChecksumInsertionHook
+import inet.common.SimpleModule;
+
+simple TcpChecksumInsertionHook extends SimpleModule
 {
+    parameters:
+        @class(TcpChecksumInsertionHook);
 }
 

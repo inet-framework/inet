@@ -159,6 +159,7 @@ void TcpServerThreadBase::socketDeleted(TcpSocket *socket)
 
 void TcpServerThreadBase::refreshDisplay() const
 {
+    SimpleModule::refreshDisplay();
     getDisplayString().setTagArg("t", 0, TcpSocket::stateName(sock->getState()));
 }
 

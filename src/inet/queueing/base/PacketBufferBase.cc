@@ -35,7 +35,7 @@ void PacketBufferBase::emit(simsignal_t signal, cObject *object, cObject *detail
         numRemovedPackets++;
     else if (signal == packetDroppedSignal)
         numDroppedPackets++;
-    cSimpleModule::emit(signal, object, details);
+    SimpleModule::emit(signal, object, details);
 }
 
 std::string PacketBufferBase::resolveDirective(char directive) const

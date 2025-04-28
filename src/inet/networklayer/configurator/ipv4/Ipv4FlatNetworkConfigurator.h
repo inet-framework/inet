@@ -8,6 +8,7 @@
 #ifndef __INET_IPV4FLATNETWORKCONFIGURATOR_H
 #define __INET_IPV4FLATNETWORKCONFIGURATOR_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/Topology.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 
@@ -23,7 +24,7 @@ class IIpv4RoutingTable;
  *
  * For more info please see the NED file.
  */
-class INET_API Ipv4FlatNetworkConfigurator : public cSimpleModule
+class INET_API Ipv4FlatNetworkConfigurator : public SimpleModule
 {
   protected:
     class INET_API NodeInfo {

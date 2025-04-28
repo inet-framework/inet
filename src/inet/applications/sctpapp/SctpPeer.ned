@@ -7,11 +7,13 @@
 
 package inet.applications.sctpapp;
 
+import inet.common.SimpleModule;
 import inet.applications.contract.IApp;
 
-simple SctpPeer like IApp
+simple SctpPeer extends SimpleModule like IApp
 {
     parameters:
+        @class(SctpPeer);
         string localAddress = default(""); // Comma-separated list of addresses
         int localPort = default(0); // Port number to listen on
         bool echo = default(false);  // Echoes received packages when true

@@ -124,6 +124,8 @@ void TcpSinkAppThread::dataArrived(Packet *pk, bool urgent)
 
 void TcpSinkAppThread::refreshDisplay() const
 {
+    TcpServerThreadBase::refreshDisplay();
+    
     std::ostringstream os;
     os << (sock ? TcpSocket::stateName(sock->getState()) : "NULL_SOCKET") << "\nrcvd: " << bytesRcvd << " bytes";
     getDisplayString().setTagArg("t", 0, os.str().c_str());

@@ -17,6 +17,7 @@ import inet.queueing.contract.IPacketQueue;
 module CompoundPacketQueueBase extends PacketQueueBase like IPacketQueue
 {
     parameters:
+        @class(CompoundPacketQueueBase);
         int packetCapacity = default(-1); // Maximum number of packets in the queue, no limit by default
         int dataCapacity @unit(b) = default(-1b); // Maximum total length of packets in the queue, no limit by default
         string dropperClass = default(""); // Determines which packets are dropped when the queue is overloaded, packets are not dropped by default; the parameter must be the name of a C++ class which implements the IPacketDropperFunction C++ interface and is registered via Register_Class

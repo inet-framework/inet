@@ -6,6 +6,7 @@
 
 package inet.networklayer.rsvpte;
 
+import inet.common.SimpleModule;
 import inet.networklayer.mpls.IIngressClassifier;
 
 //
@@ -17,9 +18,10 @@ import inet.networklayer.mpls.IIngressClassifier;
 // child elements that effectively serve as attributes:
 // <id>, <destination>, <source>, <label>, <tunnel_id>, <lspid>.
 //
-simple RsvpClassifier like IIngressClassifier
+simple RsvpClassifier extends SimpleModule like IIngressClassifier
 {
     parameters:
+        @class(RsvpClassifier);
         string routingTableModule;
         string libTableModule;
         string rsvpModule;

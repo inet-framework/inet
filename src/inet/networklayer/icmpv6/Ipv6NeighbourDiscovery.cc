@@ -76,7 +76,7 @@ Ipv6NeighbourDiscovery::~Ipv6NeighbourDiscovery()
 
 void Ipv6NeighbourDiscovery::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         const char *checksumModeString = par("checksumMode");

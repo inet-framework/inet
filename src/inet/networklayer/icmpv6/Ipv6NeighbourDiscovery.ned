@@ -7,6 +7,8 @@
 
 package inet.networklayer.icmpv6;
 
+import inet.common.SimpleModule;
+
 //
 // Implements IPv6 Neighbor Discovery.
 //
@@ -15,9 +17,10 @@ package inet.networklayer.icmpv6;
 //
 // @see ~Ipv6, ~Ipv6RoutingTable, ~Icmpv6
 //
-simple Ipv6NeighbourDiscovery
+simple Ipv6NeighbourDiscovery extends SimpleModule
 {
     parameters:
+        @class(Ipv6NeighbourDiscovery);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string checksumMode @enum("declared", "computed") = default("declared");
         string icmpv6Module;

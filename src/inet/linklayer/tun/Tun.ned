@@ -7,9 +7,12 @@
 
 package inet.linklayer.tun;
 
-simple Tun
+import inet.common.SimpleModule;
+
+simple Tun extends SimpleModule
 {
     parameters:
+        @class(Tun);
         string interfaceTableModule;    // The path to the InterfaceTable module
         int mtu @unit(B) = default(1500B);
         @display("i=block/tunnel");

@@ -27,7 +27,7 @@ Define_Module(Ipv4Encap);
 
 void Ipv4Encap::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         defaultTimeToLive = 16; // par("timeToLive");
         defaultMCTimeToLive = 16; // par("multicastTimeToLive");

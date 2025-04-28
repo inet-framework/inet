@@ -7,6 +7,7 @@
 
 package inet.applications.clock;
 
+import inet.common.SimpleModule;
 import inet.applications.contract.IApp;
 
 //
@@ -15,9 +16,10 @@ import inet.applications.contract.IApp;
 // calls and without any packet exchange. This is primarily useful when the overhead
 // of the time synchronization protocol messages can be safely ignored.
 //
-simple SimpleClockSynchronizer like IApp
+simple SimpleClockSynchronizer extends SimpleModule like IApp
 {
     parameters:
+        @class(SimpleClockSynchronizer);
         string masterClockModule;
         string slaveClockModule;
         volatile double synchronizationInterval @unit(s); // Clock synchronization period

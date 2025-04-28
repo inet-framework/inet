@@ -120,6 +120,7 @@ void RoutingTableVisualizerBase::handleParameterChange(const char *name)
 
 void RoutingTableVisualizerBase::refreshDisplay() const
 {
+    VisualizerBase::refreshDisplay();
     if (displayRoutingTables)
         // KLUDGE TODO
         const_cast<RoutingTableVisualizerBase *>(this)->updateRouteVisualizations();

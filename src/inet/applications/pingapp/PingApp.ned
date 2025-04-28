@@ -7,6 +7,7 @@
 
 package inet.applications.pingapp;
 
+import inet.common.SimpleModule;
 import inet.applications.contract.IApp;
 
 //
@@ -44,9 +45,10 @@ import inet.applications.contract.IApp;
 //
 // @see ~Icmp, ~Icmpv6
 //
-simple PingApp like IApp
+simple PingApp extends SimpleModule like IApp
 {
     parameters:
+        @class(PingApp);
         string destAddr = default(""); // Destination address(es), separated by spaces, "*" means all IPv4/IPv6 interfaces in the entire simulation
         string srcAddr = default(""); // Source address (useful with multi-homing)
         int packetSize @unit(B) = default(56B); // Size of ping payload, in bytes
@@ -60,6 +62,7 @@ simple PingApp like IApp
         bool printPing = default(false); // Log to stdout
         string checksumMode @enum("declared", "computed") = default("declared");
         string networkProtocol = default(""); // Uses the specified network protocol for communication; uses the address-specified default network protocol when the parameter is empty
+        displayStringTextFormat = default("sent: {sentCount} pks\nrcvd: {numPongs} pks");
         @display("i=block/app");
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after the lifecycle stop operation finished

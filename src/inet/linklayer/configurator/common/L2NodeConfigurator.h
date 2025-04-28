@@ -8,6 +8,7 @@
 #ifndef __INET_L2NODECONFIGURATOR_H
 #define __INET_L2NODECONFIGURATOR_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/linklayer/configurator/common/L2NetworkConfigurator.h"
@@ -18,7 +19,7 @@ namespace inet {
 /**
  * Configures L2 data of a node. See the NED definition for details.
  */
-class INET_API L2NodeConfigurator : public cSimpleModule, public ILifecycle, public cListener
+class INET_API L2NodeConfigurator : public SimpleModule, public ILifecycle, public cListener
 {
   protected:
     opp_component_ptr<NodeStatus> nodeStatus;

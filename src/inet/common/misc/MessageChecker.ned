@@ -6,6 +6,8 @@
 
 package inet.common.misc;
 
+import inet.common.SimpleModule;
+
 //
 // Module that allows checking fields of messages.
 //
@@ -29,9 +31,10 @@ package inet.common.misc;
 // Optional attributes are surrounded with square brackets.
 // See also validation schema (XSD, DTD)
 //
-simple MessageChecker
+simple MessageChecker extends SimpleModule
 {
     parameters:
+        @class(MessageChecker);
         xml config;   // Configuration file
     gates:
         input in;

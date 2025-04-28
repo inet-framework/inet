@@ -7,14 +7,16 @@
 
 package inet.applications.udpapp;
 
+import inet.common.SimpleModule;
 import inet.applications.contract.IApp;
 
 //
 // Consumes and prints packets received from the ~Udp module.
 //
-simple UdpSink like IApp
+simple UdpSink extends SimpleModule like IApp
 {
     parameters:
+        @class(UdpSink);
         string interfaceTableModule;   // The path to the InterfaceTable module
         double startTime @unit(s) = default(0s); // Application start time
         double stopTime @unit(s) = default(-1s);  // Time of finishing receiving

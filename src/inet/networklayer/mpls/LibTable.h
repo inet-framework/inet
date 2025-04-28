@@ -8,6 +8,7 @@
 #ifndef __INET_LIBTABLE_H
 #define __INET_LIBTABLE_H
 
+#include "inet/common/SimpleModule.h"
 #include <string>
 #include <vector>
 
@@ -34,7 +35,7 @@ typedef std::vector<LabelOp> LabelOpVector;
 /**
  * Represents the Label Information Base (LIB) for MPLS.
  */
-class INET_API LibTable : public cSimpleModule
+class INET_API LibTable : public SimpleModule
 {
   public:
     struct LibEntry {

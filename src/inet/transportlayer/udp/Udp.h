@@ -8,6 +8,7 @@
 #ifndef __INET_UDP_H
 #define __INET_UDP_H
 
+#include "inet/common/SimpleModule.h"
 #include <list>
 #include <map>
 
@@ -37,7 +38,7 @@ namespace inet {
 
 const uint16_t UDP_MAX_MESSAGE_SIZE = 65535; // bytes
 
-class INET_API UdpChecksumInsertionHook : public cSimpleModule, public NetfilterBase::HookBase
+class INET_API UdpChecksumInsertionHook : public SimpleModule, public NetfilterBase::HookBase
 {
   public:
     virtual Result datagramPreRoutingHook(Packet *packet) override { return ACCEPT; }

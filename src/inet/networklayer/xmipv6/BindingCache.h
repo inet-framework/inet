@@ -12,6 +12,7 @@
 #ifndef __INET_BINDINGCACHE_H
 #define __INET_BINDINGCACHE_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 
 namespace inet {
@@ -20,7 +21,7 @@ namespace inet {
 #define HO_TOKEN    1101
 #define CO_TOKEN    2101
 
-class INET_API BindingCache : public cSimpleModule
+class INET_API BindingCache : public SimpleModule
 {
   private:
     //###########################Declaration of BUL and BC added by Zarrar Yousaf @ CNI Uni Dortmund on 04.06.07######

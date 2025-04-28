@@ -8,6 +8,7 @@
 #ifndef __INET_SCENARIOMANAGER_H
 #define __INET_SCENARIOMANAGER_H
 
+#include "inet/common/SimpleModule.h"
 #include <list>
 
 #include "inet/common/lifecycle/LifecycleController.h"
@@ -42,7 +43,7 @@ class INET_API cPostModuleInitNotification : public cModelChangeNotification
  *
  * @see IScriptable
  */
-class INET_API ScenarioManager : public cSimpleModule, public LifecycleController, public StringFormat::IResolver
+class INET_API ScenarioManager : public SimpleModule, public LifecycleController
 {
   protected:
     // total number of changes, and number of changes already done
@@ -84,7 +85,6 @@ class INET_API ScenarioManager : public cSimpleModule, public LifecycleControlle
   protected:
     virtual void initialize() override;
     virtual void handleMessage(cMessage *msg) override;
-    virtual void refreshDisplay() const override;
 };
 
 } // namespace inet

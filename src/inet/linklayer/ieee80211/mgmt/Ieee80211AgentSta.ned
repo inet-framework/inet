@@ -7,14 +7,17 @@
 
 package inet.linklayer.ieee80211.mgmt;
 
+import inet.common.SimpleModule;
+
 //
 // Used in 802.11 infrastructure mode: in a station (STA), this module
 // controls channel scanning, association and handovers, by sending commands
 // (e.g. ~Ieee80211Prim_ScanRequest) to the management module (~Ieee80211MgmtSta).
 //
-simple Ieee80211AgentSta like IIeee80211Agent
+simple Ieee80211AgentSta extends SimpleModule like IIeee80211Agent
 {
     parameters:
+        @class(Ieee80211AgentSta);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string mibModule;
         bool activeScan = default(true);  // Selects between active and passive scanning

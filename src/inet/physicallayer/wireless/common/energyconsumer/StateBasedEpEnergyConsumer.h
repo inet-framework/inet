@@ -8,6 +8,7 @@
 #ifndef __INET_STATEBASEDEPENERGYCONSUMER_H
 #define __INET_STATEBASEDEPENERGYCONSUMER_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "inet/power/contract/IEpEnergyConsumer.h"
@@ -23,7 +24,7 @@ namespace physicallayer {
  * using constant parameters.
  *
  */
-class INET_API StateBasedEpEnergyConsumer : public cSimpleModule, public power::IEpEnergyConsumer, public cListener
+class INET_API StateBasedEpEnergyConsumer : public SimpleModule, public power::IEpEnergyConsumer, public cListener
 {
   protected:
     // parameters

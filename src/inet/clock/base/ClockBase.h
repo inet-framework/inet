@@ -11,19 +11,18 @@
 #include "inet/clock/common/ClockTime.h"
 #include "inet/clock/common/ClockEvent.h"
 #include "inet/clock/contract/IClock.h"
-#include "inet/common/StringFormat.h"
 #include "inet/common/ModuleRefByPar.h"
+#include "inet/common/SimpleModule.h"
 
 namespace inet {
 
-class INET_API ClockBase : public cSimpleModule, public IClock, public StringFormat::IResolver
+class INET_API ClockBase : public SimpleModule, public IClock
 {
   public:
     static simsignal_t timeChangedSignal;
 
   protected:
     clocktime_t clockEventTime = -1;
-    const char *displayStringTextFormat = nullptr;
     ModuleRefByPar<IClock> referenceClockModule;
     simtime_t emitClockTimeInterval;
     cMessage *timer = nullptr;
@@ -34,7 +33,6 @@ class INET_API ClockBase : public cSimpleModule, public IClock, public StringFor
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
-    virtual void refreshDisplay() const override;
 
     cSimpleModule *getTargetModule() const {
         cSimpleModule *target = getSimulation()->getContextSimpleModule();

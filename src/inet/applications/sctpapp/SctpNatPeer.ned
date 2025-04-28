@@ -7,11 +7,13 @@
 
 package inet.applications.sctpapp;
 
+import inet.common.SimpleModule;
 import inet.applications.contract.IApp;
 
-simple SctpNatPeer like IApp
+simple SctpNatPeer extends SimpleModule like IApp
 {
     parameters:
+        @class(SctpNatPeer);
         string localAddress = default(""); // Comma-separated list of addresses
         int localPort = default(0); // Port number to listen on
         string connectAddress;  // Server address (may be symbolic)

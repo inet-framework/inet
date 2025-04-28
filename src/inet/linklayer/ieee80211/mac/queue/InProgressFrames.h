@@ -8,6 +8,7 @@
 #ifndef __INET_INPROGRESSFRAMES_H
 #define __INET_INPROGRESSFRAMES_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/common/SequenceControlField.h"
 #include "inet/linklayer/ieee80211/mac/contract/IAckHandler.h"
@@ -17,7 +18,7 @@
 namespace inet {
 namespace ieee80211 {
 
-class INET_API InProgressFrames : public cSimpleModule
+class INET_API InProgressFrames : public SimpleModule
 {
   public:
     static simsignal_t packetEnqueuedSignal;

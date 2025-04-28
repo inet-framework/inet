@@ -83,7 +83,7 @@ xMIPv6::~xMIPv6()
 
 void xMIPv6::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         EV_TRACE << "Initializing xMIPv6 module" << endl;

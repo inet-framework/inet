@@ -7,6 +7,7 @@
 
 package inet.networklayer.configurator.ipv4;
 
+import inet.common.SimpleModule;
 import inet.networklayer.configurator.contract.IL3NetworkConfigurator;
 
 //
@@ -47,9 +48,10 @@ import inet.networklayer.configurator.contract.IL3NetworkConfigurator;
 // interfaces register themselves in the ~InterfaceTable modules, and
 // in stage 1, routing files are read.)
 //
-simple Ipv4FlatNetworkConfigurator like IL3NetworkConfigurator
+simple Ipv4FlatNetworkConfigurator extends SimpleModule like IL3NetworkConfigurator
 {
     parameters:
+        @class(Ipv4FlatNetworkConfigurator);
         string networkAddress = default("192.168.0.0"); // Network part of the address (see netmask parameter)
         string netmask = default("255.255.0.0"); // Host part of addresses are autoconfigured
         @display("i=block/cogwheel");

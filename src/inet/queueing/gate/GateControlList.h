@@ -8,12 +8,13 @@
 #ifndef __INET_GATECONTROLLIST_H
 #define __INET_GATECONTROLLIST_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/queueing/gate/PeriodicGate.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API GateControlList : public cSimpleModule
+class INET_API GateControlList : public SimpleModule
 {
   protected:
     size_t numGates = 0;

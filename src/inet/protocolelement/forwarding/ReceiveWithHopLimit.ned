@@ -7,9 +7,12 @@
 
 package inet.protocolelement.forwarding;
 
-simple ReceiveWithHopLimit
+import inet.common.SimpleModule;
+
+simple ReceiveWithHopLimit extends SimpleModule
 {
     parameters:
+        @class(ReceiveWithHopLimit);
         @display("i=block/rx");
     gates:
         input in;

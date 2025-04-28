@@ -7,6 +7,8 @@
 
 package inet.networklayer.ipv4;
 
+import inet.common.SimpleModule;
+
 moduleinterface IIpv4
 {
     parameters:
@@ -78,9 +80,10 @@ moduleinterface IIpv4
 //
 // @see ~Ipv4RoutingTable, ~Arp
 //
-simple Ipv4 like IIpv4
+simple Ipv4 extends SimpleModule like IIpv4
 {
     parameters:
+        @class(Ipv4);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
         string arpModule;

@@ -7,6 +7,7 @@
 
 package inet.routing.rip;
 
+import inet.common.SimpleModule;
 import inet.applications.contract.IApp;
 
 //
@@ -52,9 +53,10 @@ import inet.applications.contract.IApp;
 //     - `SplitHorizon`:   do not send routes whose next hop is the neighbor
 //     - `SplitHorizonPoisonedReverse`: if the next hop is the neighbor, then
 //                         set the metric of the route to infinity.
-simple Rip like IApp
+simple Rip extends SimpleModule like IApp
 {
     parameters:
+        @class(Rip);
         @display("i=block/network2");
 
         string interfaceTableModule;   // The path to the InterfaceTable module

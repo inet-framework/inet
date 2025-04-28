@@ -9,12 +9,13 @@
 #define __INET_ETHERNETPHY_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/SimpleModule.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API EthernetPhy : public cSimpleModule
+class INET_API EthernetPhy : public SimpleModule
 {
   protected:
     cGate *physInGate = nullptr;

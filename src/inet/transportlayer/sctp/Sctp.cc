@@ -82,7 +82,7 @@ void Sctp::bindPortForUDP()
 
 void Sctp::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         ift.reference(this, "interfaceTableModule", true);

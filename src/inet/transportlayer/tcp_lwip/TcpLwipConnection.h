@@ -8,6 +8,7 @@
 #ifndef __INET_TCPLWIPCONNECTION_H
 #define __INET_TCPLWIPCONNECTION_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
@@ -24,7 +25,7 @@ class TcpLwip;
 /**
  * Module for representing a connection in TcpLwip stack
  */
-class INET_API TcpLwipConnection : public cSimpleModule
+class INET_API TcpLwipConnection : public SimpleModule
 {
   protected:
     // prevent copy constructor:

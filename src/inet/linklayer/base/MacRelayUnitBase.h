@@ -18,7 +18,7 @@
 
 namespace inet {
 
-class INET_API MacRelayUnitBase : public LayeredProtocolBase, public StringFormat::IResolver
+class INET_API MacRelayUnitBase : public LayeredProtocolBase
 {
   protected:
     ModuleRefByPar<IInterfaceTable> interfaceTable;
@@ -30,7 +30,6 @@ class INET_API MacRelayUnitBase : public LayeredProtocolBase, public StringForma
   protected:
     virtual void initialize(int stage) override;
     virtual void finish() override;
-    virtual void refreshDisplay() const override;
     virtual std::string resolveDirective(char directive) const override;
 
     virtual bool isForwardingInterface(NetworkInterface *networkInterface) const { return !networkInterface->isLoopback() && networkInterface->isBroadcast(); }

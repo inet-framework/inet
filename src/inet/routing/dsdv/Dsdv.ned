@@ -7,6 +7,7 @@
 
 package inet.routing.dsdv;
 
+import inet.common.SimpleModule;
 import inet.routing.contract.IManetRouting;
 
 //
@@ -23,9 +24,10 @@ import inet.routing.contract.IManetRouting;
 //
 // WARNING: This is a partial / unfinished implementation.
 //
-simple Dsdv like IManetRouting
+simple Dsdv extends SimpleModule like IManetRouting
 {
     parameters:
+        @class(Dsdv);
         @display("i=block/routing");
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;

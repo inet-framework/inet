@@ -8,6 +8,7 @@
 #ifndef __INET_PIM_H
 #define __INET_PIM_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/routing/pim/PimPacket_m.h"
@@ -16,7 +17,7 @@
 
 namespace inet {
 
-class INET_API PimChecksumInsertionHook : public cSimpleModule, public NetfilterBase::HookBase
+class INET_API PimChecksumInsertionHook : public SimpleModule, public NetfilterBase::HookBase
 {
   public:
     virtual Result datagramPreRoutingHook(Packet *packet) override { return ACCEPT; }

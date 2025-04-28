@@ -7,14 +7,16 @@
 
 package inet.clock.base;
 
+import inet.common.SimpleModule;
+
 //
 // Base module for oscillators.
 //
-simple OscillatorBase
+simple OscillatorBase extends SimpleModule
 {
     parameters:
-        string displayStringTextFormat = default("%n"); // Determines the text that is written on top of the submodule
         @class(OscillatorBase);
+        displayStringTextFormat = default("%n"); // Determines the text that is written on top of the submodule
         @display("i=block/tunnel");
         @signal[driftRateChanged](type=double);
         @statistic[driftRateChanged](title="Oscillator drift rate"; record=vector; interpolationmode=sample-hold; unit=ppm);

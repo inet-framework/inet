@@ -8,13 +8,14 @@
 #ifndef __INET_ADDITIVESCRAMBLERMODULE_H
 #define __INET_ADDITIVESCRAMBLERMODULE_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/AdditiveScrambler.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/AdditiveScrambling.h"
 
 namespace inet {
 namespace physicallayer {
 
-class INET_API AdditiveScramblerModule : public cSimpleModule, public IScrambler
+class INET_API AdditiveScramblerModule : public SimpleModule, public IScrambler
 {
   protected:
     const AdditiveScrambler *scrambler;

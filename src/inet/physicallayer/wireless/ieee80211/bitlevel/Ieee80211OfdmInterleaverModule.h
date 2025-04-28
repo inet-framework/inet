@@ -8,13 +8,14 @@
 #ifndef __INET_IEEE80211OFDMINTERLEAVERMODULE_H
 #define __INET_IEEE80211OFDMINTERLEAVERMODULE_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmInterleaver.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211OfdmInterleaverModule : public cSimpleModule, public IInterleaver
+class INET_API Ieee80211OfdmInterleaverModule : public SimpleModule, public IInterleaver
 {
   protected:
     const Ieee80211OfdmInterleaver *interleaver = nullptr;

@@ -25,7 +25,7 @@ simple SimpleEpEnergyStorage extends EpEnergyStorageBase
         double nominalCapacity @unit(J); // The maximum amount of energy stored
         double initialCapacity @unit(J) = default(nominalCapacity); // The initially stored amount of energy
         double printCapacityStep @unit(J) = default(0.01 * nominalCapacity); // Displays residual capacity changes in the log
-        string displayStringTextFormat = default("%c (%p)");
+        displayStringTextFormat = default("%c (%p)");
         @class(SimpleEpEnergyStorage);
 }
 

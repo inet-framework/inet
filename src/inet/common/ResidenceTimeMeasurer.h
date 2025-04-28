@@ -8,11 +8,12 @@
 #ifndef __INET_RESIDENCETIMEMEASURER_H
 #define __INET_RESIDENCETIMEMEASURER_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/ProtocolTag_m.h"
 
 namespace inet {
 
-class INET_API ResidenceTimeMeasurer : public cSimpleModule, public cListener
+class INET_API ResidenceTimeMeasurer : public SimpleModule, public cListener
 {
   public:
     static simsignal_t packetStayedSignal;

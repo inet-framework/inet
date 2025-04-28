@@ -29,7 +29,7 @@ EigrpSplitter::~EigrpSplitter() {
 
 void EigrpSplitter::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         registerService(Protocol::eigrp, gate("splitterIn"), gate("splitterOut"));

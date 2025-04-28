@@ -9,6 +9,8 @@
 
 package inet.routing.pim.tables;
 
+import inet.common.SimpleModule;
+
 //
 // The `PimInterfaceTable` module contains the PIM specific configuration
 // parameters and state of the interfaces on which PIM is enabled.
@@ -29,9 +31,10 @@ package inet.routing.pim.tables;
 // @hosts, @names, @towards, @among attributes to select the
 // interfaces to which the PIM parameters are applied (see ~Ipv4NetworkConfigurator).
 //
-simple PimInterfaceTable
+simple PimInterfaceTable extends SimpleModule
 {
     parameters:
+        @class(PimInterfaceTable);
         @display("i=block/table");
         string interfaceTableModule;
         xml pimConfig = default(xml("<config/>"));

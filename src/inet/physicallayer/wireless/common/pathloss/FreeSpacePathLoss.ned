@@ -7,9 +7,10 @@
 
 package inet.physicallayer.wireless.common.pathloss;
 
+import inet.common.SimpleModule;
 import inet.physicallayer.wireless.common.contract.packetlevel.IPathLoss;
 
-module FreeSpacePathLoss like IPathLoss
+module FreeSpacePathLoss extends SimpleModule like IPathLoss
 {
     parameters:
         double alpha = default(2);

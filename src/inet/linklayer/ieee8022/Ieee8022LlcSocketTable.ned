@@ -7,9 +7,12 @@
 
 package inet.linklayer.ieee8022;
 
-simple Ieee8022LlcSocketTable
+import inet.common.SimpleModule;
+
+simple Ieee8022LlcSocketTable extends SimpleModule
 {
     parameters:
+        @class(Ieee8022LlcSocketTable);
         @display("i=block/table");
 }
 

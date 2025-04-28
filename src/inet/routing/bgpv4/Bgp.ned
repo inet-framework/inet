@@ -6,6 +6,7 @@
 
 package inet.routing.bgpv4;
 
+import inet.common.SimpleModule;
 import inet.routing.contract.IBgp;
 
 //
@@ -16,9 +17,10 @@ import inet.routing.contract.IBgp;
 //
 //# TODO config file!
 //
-simple Bgp like IBgp
+simple Bgp extends SimpleModule like IBgp
 {
     parameters:
+        @class(Bgp);
         string interfaceTableModule;
         string routingTableModule;
         string ospfRoutingModule;

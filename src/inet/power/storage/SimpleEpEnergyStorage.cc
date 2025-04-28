@@ -52,12 +52,6 @@ void SimpleEpEnergyStorage::handleMessage(cMessage *message)
         throw cRuntimeError("Unknown message");
 }
 
-void SimpleEpEnergyStorage::refreshDisplay() const
-{
-    auto text = StringFormat::formatString(par("displayStringTextFormat"), this);
-    getDisplayString().setTagArg("t", 0, text.c_str());
-}
-
 std::string SimpleEpEnergyStorage::resolveDirective(char directive) const
 {
     switch (directive) {
@@ -66,7 +60,7 @@ std::string SimpleEpEnergyStorage::resolveDirective(char directive) const
         case 'p':
             return std::to_string((int)std::round(100 * (getResidualEnergyCapacity() / getNominalEnergyCapacity()).get<unit>())) + "%";
         default:
-            throw cRuntimeError("Unknown directive: %c", directive);
+            return EpEnergyStorageBase::resolveDirective(directive);   
     }
 }
 

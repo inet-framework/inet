@@ -9,13 +9,14 @@
 
 package inet.routing.pim;
 
+import inet.common.SimpleModule;
 import inet.routing.contract.IPim;
 import inet.routing.pim.modes.PimDm;
 import inet.routing.pim.modes.PimSm;
 import inet.routing.pim.tables.PimInterfaceTable;
 import inet.routing.pim.tables.PimNeighborTable;
 
-module Pim like IPim
+module Pim extends SimpleModule like IPim
 {
     parameters:
         @class(Pim);
@@ -73,7 +74,9 @@ module Pim like IPim
         pimSplitter.ipIn <-- { @display("m=s"); } <-- networkLayerIn;
 }
 
-simple PimChecksumInsertionHook
+simple PimChecksumInsertionHook extends SimpleModule
 {
+    parameters:
+        @class(PimChecksumInsertionHook);
 }
 

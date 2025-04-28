@@ -6,6 +6,8 @@
 
 package inet.node.ethernet;
 
+import inet.common.SimpleModule;
+
 //
 // A simple Ethernet hub device that operates at the physical layer. It connects
 // multiple Ethernet devices together in a star topology while creating a single
@@ -21,7 +23,7 @@ package inet.node.ethernet;
 //
 // @see ~EthernetSwitch, ~EthernetHost
 //
-simple EthernetHub
+simple EthernetHub extends SimpleModule
 {
     parameters:
         @networkNode();

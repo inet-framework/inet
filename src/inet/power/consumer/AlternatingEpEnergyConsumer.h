@@ -8,6 +8,7 @@
 #ifndef __INET_ALTERNATINGEPENERGYCONSUMER_H
 #define __INET_ALTERNATINGEPENERGYCONSUMER_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/power/contract/IEpEnergyConsumer.h"
 #include "inet/power/contract/IEpEnergySource.h"
 
@@ -21,7 +22,7 @@ namespace power {
  * See the corresponding NED file for more details.
  *
  */
-class INET_API AlternatingEpEnergyConsumer : public cSimpleModule, public IEpEnergyConsumer
+class INET_API AlternatingEpEnergyConsumer : public SimpleModule, public IEpEnergyConsumer
 {
   protected:
     // parameters

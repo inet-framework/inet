@@ -8,6 +8,7 @@
 #ifndef __INET_IPV6ROUTINGTABLE_H
 #define __INET_IPV6ROUTINGTABLE_H
 
+#include "inet/common/SimpleModule.h"
 #include <vector>
 
 #include "inet/common/ModuleRefByPar.h"
@@ -37,7 +38,7 @@ class Ipv6RoutingTable;
  * be read and modified during simulation, typically by routing protocol
  * implementations.
  */
-class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, protected cListener, public ILifecycle
+class INET_API Ipv6RoutingTable : public SimpleModule, public IRoutingTable, protected cListener, public ILifecycle
 {
   protected:
     ModuleRefByPar<IInterfaceTable> ift; // cached pointer

@@ -7,14 +7,16 @@
 
 package inet.common.misc;
 
+import inet.common.SimpleModule;
 import inet.common.IHook;
 
 //
 // Thruput measurement utility module.
 //
-simple ThruputMeter like IHook
+simple ThruputMeter extends SimpleModule like IHook
 {
     parameters:
+        @class(ThruputMeter);
         @networkNode();
         double startTime @unit(s) = default(0s);
         int batchSize = default(50);

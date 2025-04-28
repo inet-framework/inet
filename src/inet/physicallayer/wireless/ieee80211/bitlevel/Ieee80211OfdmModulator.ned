@@ -7,6 +7,7 @@
 
 package inet.physicallayer.wireless.ieee80211.bitlevel;
 
+import inet.common.SimpleModule;
 import inet.physicallayer.wireless.common.contract.bitlevel.IModulator;
 
 // This is an IEEE 802.11 OFDM modulator module. The
@@ -24,13 +25,13 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IModulator;
 // However, it can be used with an arbitrary OFDM compatible
 // constellation mapping.
 //
-simple Ieee80211OfdmModulator like IModulator
+simple Ieee80211OfdmModulator extends SimpleModule like IModulator
 {
     parameters:
+        @class(Ieee80211OfdmModulatorModule);
         int numSubcarriers = default(52);
         string subcarrierModulation;
         int pilotSubcarrierPolarityVectorOffset;
         @display("i=block/mac");
-        @class(Ieee80211OfdmModulatorModule);
 }
 

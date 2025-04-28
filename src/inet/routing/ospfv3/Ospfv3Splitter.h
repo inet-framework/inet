@@ -1,6 +1,7 @@
 #ifndef __INET_OSPFV3SPLITTER_H
 #define __INET_OSPFV3SPLITTER_H
 
+#include "inet/common/SimpleModule.h"
 #include <string>
 
 #include "inet/common/ModuleAccess.h"
@@ -21,7 +22,7 @@ namespace ospfv3 {
 
 int ospfv3InterfaceIndex = 1;
 
-class INET_API Ospfv3Splitter : protected cListener, public cSimpleModule
+class INET_API Ospfv3Splitter : protected cListener, public SimpleModule
 {
   public:
     Ospfv3Splitter();

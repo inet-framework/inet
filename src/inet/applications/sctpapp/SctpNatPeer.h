@@ -7,6 +7,7 @@
 #ifndef __INET_SCTPNATPEER_H
 #define __INET_SCTPNATPEER_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
 #include "inet/transportlayer/contract/sctp/SctpSocket.h"
@@ -34,7 +35,7 @@ struct nat_message
  * arrives on them.
  */
 
-class INET_API SctpNatPeer : public cSimpleModule, public SctpSocket::ICallback, public LifecycleUnsupported
+class INET_API SctpNatPeer : public SimpleModule, public SctpSocket::ICallback, public LifecycleUnsupported
 {
   protected:
 //    SctpAssociation* assoc;

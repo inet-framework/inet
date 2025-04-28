@@ -8,6 +8,7 @@
 #ifndef __INET_RECIPIENTMACDATASERVICE_H
 #define __INET_RECIPIENTMACDATASERVICE_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/linklayer/ieee80211/mac/contract/IDefragmentation.h"
 #include "inet/linklayer/ieee80211/mac/contract/IDuplicateRemoval.h"
 #include "inet/linklayer/ieee80211/mac/contract/IReassembly.h"
@@ -19,7 +20,7 @@ namespace ieee80211 {
 //
 // 5.1.5 MAC data service architecture
 //
-class INET_API RecipientMacDataService : public cSimpleModule, public IRecipientMacDataService
+class INET_API RecipientMacDataService : public SimpleModule, public IRecipientMacDataService
 {
   protected:
     typedef std::vector<Ieee80211DataOrMgmtHeader *> Fragments;

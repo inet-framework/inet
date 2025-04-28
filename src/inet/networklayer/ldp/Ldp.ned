@@ -7,6 +7,7 @@
 
 package inet.networklayer.ldp;
 
+import inet.common.SimpleModule;
 import inet.applications.contract.IApp;
 
 //
@@ -27,9 +28,10 @@ import inet.applications.contract.IApp;
 //
 // @author Vojta Janota
 //
-simple Ldp like IApp
+simple Ldp extends SimpleModule like IApp
 {
     parameters:
+        @class(Ldp);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
         string libTableModule;

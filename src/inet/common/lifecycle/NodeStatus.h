@@ -8,6 +8,7 @@
 #ifndef __INET_NODESTATUS_H
 #define __INET_NODESTATUS_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 
 namespace inet {
@@ -22,7 +23,7 @@ namespace inet {
  *
  * See NED file for more information.
  */
-class INET_API NodeStatus : public cSimpleModule, public ILifecycle
+class INET_API NodeStatus : public SimpleModule, public ILifecycle
 {
   public:
     enum State { UP, DOWN, GOING_UP, GOING_DOWN };

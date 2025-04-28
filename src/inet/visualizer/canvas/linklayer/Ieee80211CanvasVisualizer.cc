@@ -44,6 +44,7 @@ void Ieee80211CanvasVisualizer::initialize(int stage)
 
 void Ieee80211CanvasVisualizer::refreshDisplay() const
 {
+    VisualizerBase::refreshDisplay();
 #ifdef INET_WITH_IEEE80211
     auto simulation = getSimulation();
     for (auto& entry : ieee80211Visualizations) {

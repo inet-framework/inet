@@ -41,7 +41,7 @@ PcapRecorder::~PcapRecorder()
         delete helper;
 }
 
-PcapRecorder::PcapRecorder() : cSimpleModule()
+PcapRecorder::PcapRecorder() : SimpleModule()
 {
 }
 
@@ -165,14 +165,8 @@ std::string PcapRecorder::resolveDirective(char directive) const
         case 'n':
             return std::to_string(numRecorded);
         default:
-            throw cRuntimeError("Unknown directive: %c", directive);
+            return SimpleModule::resolveDirective(directive);   
     }
-}
-
-void PcapRecorder::refreshDisplay() const
-{
-    auto text = StringFormat::formatString(par("displayStringTextFormat"), this);
-    getDisplayString().setTagArg("t", 0, text.c_str());
 }
 
 void PcapRecorder::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)

@@ -77,7 +77,7 @@ class SctpHeader;
  * The concrete SctpAlgorithm class to use can be chosen per association (in OPEN)
  * or in a module parameter.
  */
-class INET_API Sctp : public cSimpleModule
+class INET_API Sctp : public SimpleModule
 {
   public:
     struct AppAssocKey {

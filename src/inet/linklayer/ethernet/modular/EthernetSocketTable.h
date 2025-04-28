@@ -8,12 +8,13 @@
 #ifndef __INET_ETHERNETSOCKETTABLE_H
 #define __INET_ETHERNETSOCKETTABLE_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/Protocol.h"
 #include "inet/linklayer/common/MacAddress.h"
 
 namespace inet {
 
-class INET_API EthernetSocketTable : public cSimpleModule
+class INET_API EthernetSocketTable : public SimpleModule
 {
   public:
     struct Socket {

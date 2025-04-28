@@ -7,14 +7,16 @@
 
 package inet.networklayer.nexthop;
 
+import inet.common.SimpleModule;
 import inet.networklayer.contract.IRoutingTable;
 
 //
 // Stores next hop routes used by the next hop forwarding protocol.
 //
-simple NextHopRoutingTable like IRoutingTable
+simple NextHopRoutingTable extends SimpleModule like IRoutingTable
 {
     parameters:
+        @class(NextHopRoutingTable);
         string interfaceTableModule;   // The path to the InterfaceTable module
         @display("i=block/table");
         string addressType @enum("mac","modulepath","moduleid") = default("modulepath");

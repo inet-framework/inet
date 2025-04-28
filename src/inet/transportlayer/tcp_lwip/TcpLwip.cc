@@ -56,7 +56,7 @@ TcpLwip::TcpLwip()
 
 void TcpLwip::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
 
     EV_TRACE << this << ": initialize stage " << stage << endl;
 

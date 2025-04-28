@@ -7,6 +7,7 @@
 
 package inet.applications.udpapp;
 
+import inet.common.SimpleModule;
 import inet.applications.contract.IApp;
 
 //
@@ -17,9 +18,10 @@ import inet.applications.contract.IApp;
 //
 // @see ~UdpVideoStreamServer
 //
-simple UdpVideoStreamClient like IApp
+simple UdpVideoStreamClient extends SimpleModule like IApp
 {
     parameters:
+        @class(UdpVideoStreamClient);
         int localPort = default(-1);  // Local port (-1: use ephemeral port)
         string serverAddress;  // Server address
         int serverPort;  // Server port

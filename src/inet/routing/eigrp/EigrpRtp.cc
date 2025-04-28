@@ -224,7 +224,7 @@ EigrpRtpT<IPAddress>::~EigrpRtpT()
 template<>
 void EigrpRtpT<Ipv4Address>::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
     if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         seqNumber = 1;
 
@@ -243,7 +243,7 @@ void EigrpRtpT<Ipv4Address>::initialize(int stage)
 template<>
 void EigrpRtpT<Ipv6Address>::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
     if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         seqNumber = 1;
 

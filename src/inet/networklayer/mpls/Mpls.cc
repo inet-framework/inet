@@ -26,7 +26,7 @@ Define_Module(Mpls);
 
 void Mpls::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         // interfaceTable must be initialized

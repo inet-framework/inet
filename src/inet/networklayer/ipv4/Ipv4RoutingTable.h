@@ -17,6 +17,7 @@
 #ifndef __INET_IPV4ROUTINGTABLE_H
 #define __INET_IPV4ROUTINGTABLE_H
 
+#include "inet/common/SimpleModule.h"
 #include <vector>
 
 #include "inet/common/ModuleRefByPar.h"
@@ -60,7 +61,7 @@ class IRoutingTable;
  *
  * @see NetworkInterface, Ipv4InterfaceData, Ipv4Route
  */
-class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable, protected cListener, public ILifecycle
+class INET_API Ipv4RoutingTable : public SimpleModule, public IIpv4RoutingTable, protected cListener, public ILifecycle
 {
   protected:
     ModuleRefByPar<IInterfaceTable> ift;

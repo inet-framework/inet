@@ -82,7 +82,7 @@ SctpPeer::~SctpPeer()
 
 void SctpPeer::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         WATCH(numSessions);

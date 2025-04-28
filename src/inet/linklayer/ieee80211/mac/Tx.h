@@ -8,6 +8,7 @@
 #ifndef __INET_TX_H
 #define __INET_TX_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/linklayer/ieee80211/mac/contract/ITx.h"
 
 namespace inet {
@@ -19,7 +20,7 @@ class IRx;
 /**
  * The default implementation of ITx.
  */
-class INET_API Tx : public cSimpleModule, public ITx
+class INET_API Tx : public SimpleModule, public ITx
 {
   protected:
     ITx::ICallback *txCallback = nullptr;

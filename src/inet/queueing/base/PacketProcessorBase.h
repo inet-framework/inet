@@ -10,14 +10,14 @@
 
 #include "inet/common/packet/Packet.h"
 #include "inet/common/Simsignals.h"
-#include "inet/common/StringFormat.h"
+#include "inet/common/SimpleModule.h"
 #include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/queueing/contract/IPacketProcessor.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketProcessorBase : public cSimpleModule, public virtual IPacketProcessor, public StringFormat::IResolver
+class INET_API PacketProcessorBase : public SimpleModule, public virtual IPacketProcessor
 {
   protected:
     enum Action {
@@ -33,7 +33,6 @@ class INET_API PacketProcessorBase : public cSimpleModule, public virtual IPacke
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void refreshDisplay() const override;
     virtual void handlePacketProcessed(Packet *packet);
 
     virtual void checkPacketOperationSupport(cGate *gate) const;

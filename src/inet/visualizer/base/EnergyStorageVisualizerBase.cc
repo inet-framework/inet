@@ -57,6 +57,7 @@ void EnergyStorageVisualizerBase::handleParameterChange(const char *name)
 
 void EnergyStorageVisualizerBase::refreshDisplay() const
 {
+    VisualizerBase::refreshDisplay();
     for (auto energyStorageVisualization : energyStorageVisualizations)
         refreshEnergyStorageVisualization(energyStorageVisualization);
 }

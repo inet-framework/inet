@@ -24,7 +24,7 @@ class Ipv4Header;
 /**
  * Icmp module.
  */
-class INET_API Icmp : public cSimpleModule, public DefaultProtocolRegistrationListener
+class INET_API Icmp : public SimpleModule, public DefaultProtocolRegistrationListener
 {
   protected:
     std::set<int> transportProtocols; // where to send up packets

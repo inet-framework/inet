@@ -7,13 +7,14 @@
 
 package inet.queueing.meter;
 
+import inet.common.SimpleModule;
 import inet.queueing.contract.IPacketMeter;
 
 //
 // Implements the module given interface and can be used as an optional
 // module that removes itself from the module hierarchy during initialize.
 //
-module OmittedPacketMeter like IPacketMeter
+module OmittedPacketMeter extends SimpleModule like IPacketMeter
 {
     parameters:
         @class(::inet::OmittedModule);

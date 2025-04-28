@@ -8,12 +8,13 @@
 #ifndef __INET_EXTIPV4SOCKET_H
 #define __INET_EXTIPV4SOCKET_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/scheduler/RealTimeScheduler.h"
 
 namespace inet {
 
-class INET_API ExtIpv4Socket : public cSimpleModule, public RealTimeScheduler::ICallback
+class INET_API ExtIpv4Socket : public SimpleModule, public RealTimeScheduler::ICallback
 {
   protected:
     // parameters

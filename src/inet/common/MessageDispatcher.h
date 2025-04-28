@@ -8,6 +8,7 @@
 #ifndef __INET_MESSAGEDISPATCHER_H
 #define __INET_MESSAGEDISPATCHER_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/IInterfaceRegistrationListener.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/packet/Message.h"
@@ -29,7 +30,7 @@ class INET_API MessageDispatcher :
 #ifdef INET_WITH_QUEUEING
     public queueing::PacketProcessorBase, public queueing::IActivePacketSource, public queueing::IPassivePacketSink,
 #else
-    public cSimpleModule,
+    public SimpleModule,
 #endif // #ifdef INET_WITH_QUEUEING
     public DefaultProtocolRegistrationListener, public IInterfaceRegistrationListener
 {

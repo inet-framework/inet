@@ -27,7 +27,7 @@ simsignal_t Ieee80211AgentSta::dropConfirmSignal = registerSignal("dropConfirm")
 
 void Ieee80211AgentSta::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         // read parameters

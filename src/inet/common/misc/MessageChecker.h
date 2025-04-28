@@ -8,12 +8,13 @@
 #define __INET_MESSAGECHECKER_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/SimpleModule.h"
 
 namespace inet {
 
 #define BUFSIZE    4096
 
-class INET_API MessageChecker : public cSimpleModule
+class INET_API MessageChecker : public SimpleModule
 {
   public:
     MessageChecker();

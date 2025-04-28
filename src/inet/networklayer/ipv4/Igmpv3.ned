@@ -7,9 +7,12 @@
 
 package inet.networklayer.ipv4;
 
-simple Igmpv3 like IIgmp
+import inet.common.SimpleModule;
+
+simple Igmpv3 extends SimpleModule like IIgmp
 {
     parameters:
+        @class(Igmpv3);
         bool enabled = default(true);
         string interfaceTableModule;
         string routingTableModule;

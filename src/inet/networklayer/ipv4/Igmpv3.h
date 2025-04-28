@@ -14,6 +14,7 @@
 #ifndef __INET_IGMPV3_H
 #define __INET_IGMPV3_H
 
+#include "inet/common/SimpleModule.h"
 #include <set>
 
 #include "inet/common/ModuleRefByPar.h"
@@ -29,7 +30,7 @@ namespace inet {
 class IInterfaceTable;
 class IRoutingTable;
 
-class INET_API Igmpv3 : public cSimpleModule, protected cListener
+class INET_API Igmpv3 : public SimpleModule, protected cListener
 {
   protected:
     enum RouterState {

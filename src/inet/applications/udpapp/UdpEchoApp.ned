@@ -7,6 +7,7 @@
 
 package inet.applications.udpapp;
 
+import inet.common.SimpleModule;
 import inet.applications.contract.IApp;
 
 //
@@ -14,11 +15,13 @@ import inet.applications.contract.IApp;
 // Note: when used together with ~UdpBasicApp, ~UdpBasicApp's "received packet
 // lifetime" statistic will record round-trip times.
 //
-simple UdpEchoApp like IApp
+simple UdpEchoApp extends SimpleModule like IApp
 {
     parameters:
+        @class(UdpEchoApp);
         string interfaceTableModule;   // The path to the InterfaceTable module
         int localPort;  // Local port to listen on
+        displayStringTextFormat = default("echoed: {numEchoed} pks");
         @display("i=block/app");
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finished

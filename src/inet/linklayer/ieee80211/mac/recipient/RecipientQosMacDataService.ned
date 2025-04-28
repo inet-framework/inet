@@ -7,10 +7,11 @@
 
 package inet.linklayer.ieee80211.mac.recipient;
 
-module RecipientQosMacDataService
+import inet.common.SimpleModule;
+module RecipientQosMacDataService extends SimpleModule
 {
     parameters:
-        @class("RecipientQosMacDataService");
+        @class(RecipientQosMacDataService);
         @display("i=block/join");
         @signal[packetDefragmented](type=inet::Packet);
         @signal[packetDeaggregated](type=inet::Packet);

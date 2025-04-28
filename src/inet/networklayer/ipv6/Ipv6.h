@@ -8,6 +8,7 @@
 #ifndef __INET_IPV6_H
 #define __INET_IPV6_H
 
+#include "inet/common/SimpleModule.h"
 #include <map>
 #include <set>
 
@@ -30,7 +31,7 @@ class Icmpv6Header;
 /**
  * Ipv6 implementation.
  */
-class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public LifecycleUnsupported, public INetworkProtocol, public DefaultProtocolRegistrationListener
+class INET_API Ipv6 : public SimpleModule, public NetfilterBase, public LifecycleUnsupported, public INetworkProtocol, public DefaultProtocolRegistrationListener
 {
   public:
     /**

@@ -20,6 +20,7 @@
 
 #include <vector>
 #include "inet/common/INETDefs.h"
+#include "inet/common/SimpleModule.h"
 #include "inet/networklayer/ipv4/ipsec/IPsecRule.h"
 #include "inet/networklayer/ipv4/ipsec/SecurityAssociation.h"
 
@@ -30,7 +31,7 @@ namespace ipsec {
  * Represents the IPsec Security Association Database (SAD).
  * The database is filled by the IPsec module.
  */
-class INET_API SecurityAssociationDatabase : public cSimpleModule
+class INET_API SecurityAssociationDatabase : public SimpleModule
 {
   private:
     std::vector<SecurityAssociation *> entries; // note: change to std::unordered_map<int,std::vector<>> with SPI as key if performance warrants that

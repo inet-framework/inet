@@ -7,13 +7,14 @@
 
 package inet.queueing.common;
 
+import inet.common.SimpleModule;
 import inet.queueing.contract.IPacketDelayer;
 
 //
 // Implements the given module interface and can be used as an optional
 // module that removes itself from the module hierarchy during initialization.
 //
-module OmittedPacketDelayer like IPacketDelayer
+module OmittedPacketDelayer extends SimpleModule like IPacketDelayer
 {
     parameters:
         @class(::inet::OmittedModule);

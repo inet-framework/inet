@@ -8,6 +8,7 @@
 #ifndef __INET_DS_H
 #define __INET_DS_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/contract/IDs.h"
@@ -19,7 +20,7 @@ namespace ieee80211 {
 /**
  * The default implementation of IDs.
  */
-class INET_API Ds : public cSimpleModule, public IDs
+class INET_API Ds : public SimpleModule, public IDs
 {
   protected:
     Ieee80211Mib *mib = nullptr;

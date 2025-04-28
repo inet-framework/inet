@@ -7,6 +7,7 @@
 
 package inet.linklayer.ethernet.basic;
 
+import inet.common.SimpleModule;
 import inet.linklayer.contract.IEthernetLayer;
 
 //
@@ -30,9 +31,10 @@ import inet.linklayer.contract.IEthernetLayer;
 //   higher layers. Accepts ~EthernetMacHeader, ~Ieee8022LlcHeader, and
 //   ~Ieee8022LlcSnapHeader too.
 //
-simple EthernetEncapsulation like IEthernetLayer
+simple EthernetEncapsulation extends SimpleModule like IEthernetLayer
 {
     parameters:
+        @class(EthernetEncapsulation);
         bool registerProtocol = default(false);     //FIXME //KLUDGE should redesign place of EthernetEncapsulation and LLC modules
         string interfaceTableModule;   // The path to the InterfaceTable module
         string fcsMode @enum("declared","computed") = default("declared");

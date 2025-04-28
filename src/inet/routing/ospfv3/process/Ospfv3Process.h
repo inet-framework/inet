@@ -1,6 +1,7 @@
 #ifndef __INET_OSPFV3PROCESS_H
 #define __INET_OSPFV3PROCESS_H
 
+#include "inet/common/SimpleModule.h"
 #include <string>
 
 #include "inet/common/ModuleAccess.h"
@@ -31,7 +32,7 @@ namespace ospfv3 {
 
 class Ospfv3Instance;
 
-class INET_API Ospfv3Process : protected cListener, public cSimpleModule
+class INET_API Ospfv3Process : protected cListener, public SimpleModule
 {
   public:
     Ospfv3Process();

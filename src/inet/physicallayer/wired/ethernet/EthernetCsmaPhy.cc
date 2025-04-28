@@ -46,7 +46,7 @@ EthernetCsmaPhy::~EthernetCsmaPhy()
 
 void EthernetCsmaPhy::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         physInGate = gate("phys$i");
         physInGate->setDeliverImmediately(true);

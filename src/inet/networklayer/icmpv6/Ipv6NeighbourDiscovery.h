@@ -8,6 +8,7 @@
 #ifndef __INET_IPV6NEIGHBOURDISCOVERY_H
 #define __INET_IPV6NEIGHBOURDISCOVERY_H
 
+#include "inet/common/SimpleModule.h"
 #include <map>
 #include <set>
 #include <vector>
@@ -36,7 +37,7 @@ class xMIPv6;
 /**
  * Implements RFC 2461 Neighbor Discovery for Ipv6.
  */
-class INET_API Ipv6NeighbourDiscovery : public cSimpleModule, public LifecycleUnsupported
+class INET_API Ipv6NeighbourDiscovery : public SimpleModule, public LifecycleUnsupported
 {
   public:
     typedef std::vector<Packet *> MsgPtrVector;

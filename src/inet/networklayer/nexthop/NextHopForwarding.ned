@@ -7,13 +7,16 @@
 
 package inet.networklayer.nexthop;
 
+import inet.common.SimpleModule;
+
 //
 // A simplified next hop forwarding that routes
 // datagrams using different kinds of network addresses.
 //
-simple NextHopForwarding
+simple NextHopForwarding extends SimpleModule
 {
     parameters:
+        @class(NextHopForwarding);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
         string arpModule;

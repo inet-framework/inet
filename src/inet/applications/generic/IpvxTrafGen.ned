@@ -7,6 +7,8 @@
 
 package inet.applications.generic;
 
+import inet.common.SimpleModule;
+
 //
 // Sends IP or IPv6 datagrams to the given address at the given `sendInterval`.
 // The `sendInterval` can be a constant or a random value (e.g. exponential(1)).
@@ -19,9 +21,10 @@ package inet.applications.generic;
 // The peer can be ~IpvxTrafSink or another ~IpvxTrafGen (it handles received packets
 // exactly like ~IpvxTrafSink).
 //
-simple IpvxTrafGen like IIpvxTrafficGenerator
+simple IpvxTrafGen extends SimpleModule like IIpvxTrafficGenerator
 {
     parameters:
+        @class(IpvxTrafGen);
         double startTime @unit(s) = default(1s); // Time of sending the first packet
         double stopTime @unit(s) = default(-1s);  // Time of finishing sending, negative values mean forever
         volatile double sendInterval @unit(s) = default(10ms); // May be a random value, e.g. exponential(1)
@@ -29,6 +32,7 @@ simple IpvxTrafGen like IIpvxTrafficGenerator
         int protocol; // Value for IPv4, IPv6 protocol field, accepts only between 143 and 254
         volatile int packetLength @unit(B); // Packet length in bytes
         string destAddresses = default(""); // List of destination addresses, separated by spaces
+        displayStringTextFormat = default("rcvd: {numReceived} pks\nsent: {numSent} pks");
         @lifecycleSupport;
         @display("i=block/source");
         @signal[packetSent](type=inet::Packet);
@@ -40,4 +44,3 @@ simple IpvxTrafGen like IIpvxTrafficGenerator
         input ipIn @labels(Ipv4ControlInfo/up,Ipv6ControlInfo/up);
         output ipOut @labels(Ipv4ControlInfo/down,Ipv6ControlInfo/down);
 }
-

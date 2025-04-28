@@ -7,6 +7,8 @@
 
 package inet.networklayer.diffserv;
 
+import inet.common.SimpleModule;
+
 //
 // Implements a Two Rate Three Color Meter (RFC 2698).
 //
@@ -28,9 +30,10 @@ package inet.networklayer.diffserv;
 // a packet that was colored by a previous marker to a lesser
 // conforming color.
 //
-simple TwoRateThreeColorMeter
+simple TwoRateThreeColorMeter extends SimpleModule
 {
     parameters:
+        @class(TwoRateThreeColorMeter);
         @display("i=block/timer");
         string interfaceTableModule;   // The path to the InterfaceTable module
         string pir;       // Peak information rate, either absolute bitrate (e.g. "100kbps") or relative to the link's datarate (e.g. "20%")

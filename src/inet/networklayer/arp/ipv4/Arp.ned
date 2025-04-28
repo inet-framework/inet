@@ -8,6 +8,7 @@
 
 package inet.networklayer.arp.ipv4;
 
+import inet.common.SimpleModule;
 import inet.networklayer.contract.IArp;
 
 //
@@ -32,9 +33,10 @@ import inet.networklayer.contract.IArp;
 // these files don't contain the word `BROADCAST` e.g. for PPP
 // interfaces.
 //
-simple Arp like IArp
+simple Arp extends SimpleModule like IArp
 {
     parameters:
+        @class(Arp);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
         double retryTimeout @unit(s) = default(1s);   // Number of seconds ARP waits between retries to resolve an IPv4 address

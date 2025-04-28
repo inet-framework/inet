@@ -8,6 +8,7 @@
 #ifndef __INET_RATESELECTION_H
 #define __INET_RATESELECTION_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateControl.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateSelection.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
@@ -28,7 +29,7 @@ namespace ieee80211 {
  *      9.7.6.4 Rate selection for control frames that are not control response frames
  *      9.7.6.5 Rate selection for control response frames
  */
-class INET_API RateSelection : public IRateSelection, public cSimpleModule, public cListener // FIXME
+class INET_API RateSelection : public IRateSelection, public SimpleModule, public cListener // FIXME
 {
   protected:
     IRateControl *dataOrMgmtRateControl = nullptr;

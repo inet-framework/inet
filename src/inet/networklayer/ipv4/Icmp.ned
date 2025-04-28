@@ -6,14 +6,17 @@
 
 package inet.networklayer.ipv4;
 
+import inet.common.SimpleModule;
+
 //
 // ICMP implementation.
 //
 // @author Jochen Reber
 //
-simple Icmp
+simple Icmp extends SimpleModule
 {
     parameters:
+        @class(Icmp);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
         string checksumMode @mutable @enum("declared", "computed") = default("declared");

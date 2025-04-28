@@ -8,6 +8,7 @@
 #ifndef __INET_NOISESOURCE_H
 #define __INET_NOISESOURCE_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IAntenna.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
@@ -16,7 +17,7 @@
 namespace inet {
 namespace physicallayer {
 
-class INET_API NoiseSource : public cSimpleModule, public virtual IRadio
+class INET_API NoiseSource : public SimpleModule, public virtual IRadio
 {
   protected:
     const int id = nextId++;

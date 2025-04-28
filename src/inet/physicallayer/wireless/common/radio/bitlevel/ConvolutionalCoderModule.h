@@ -8,12 +8,13 @@
 #ifndef __INET_CONVOLUTIONALCODERMODULE_H
 #define __INET_CONVOLUTIONALCODERMODULE_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/ConvolutionalCoder.h"
 
 namespace inet {
 namespace physicallayer {
 
-class INET_API ConvolutionalCoderModule : public cSimpleModule, public IFecCoder
+class INET_API ConvolutionalCoderModule : public SimpleModule, public IFecCoder
 {
   protected:
     ConvolutionalCoder *convolutionalCoder = nullptr;

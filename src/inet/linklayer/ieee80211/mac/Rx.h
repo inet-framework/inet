@@ -8,6 +8,7 @@
 #ifndef __INET_RX_H
 #define __INET_RX_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRx.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
@@ -22,7 +23,7 @@ class IStatistics;
 /**
  * The default implementation of IRx.
  */
-class INET_API Rx : public cSimpleModule, public IRx
+class INET_API Rx : public SimpleModule, public IRx
 {
   public:
     static simsignal_t navChangedSignal;

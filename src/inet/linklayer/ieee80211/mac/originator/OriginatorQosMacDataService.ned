@@ -7,14 +7,15 @@
 
 package inet.linklayer.ieee80211.mac.originator;
 
+import inet.common.SimpleModule;
 import inet.linklayer.ieee80211.mac.contract.IFragmentationPolicy;
 import inet.linklayer.ieee80211.mac.contract.IMsduAggregationPolicy;
 import inet.linklayer.ieee80211.mac.contract.IMpduAggregationPolicy;
 
-module OriginatorQosMacDataService
+module OriginatorQosMacDataService extends SimpleModule
 {
     parameters:
-        @class("OriginatorQosMacDataService");
+        @class(OriginatorQosMacDataService);
         @display("i=block/fork");
         @signal[packetFragmented](type=inet::Packet);
         @signal[packetAggregated](type=inet::Packet);

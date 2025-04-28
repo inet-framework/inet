@@ -7,6 +7,7 @@
 
 package inet.power.base;
 
+import inet.common.SimpleModule;
 import inet.power.contract.ICcEnergyStorage;
 
 //
@@ -15,9 +16,10 @@ import inet.power.contract.ICcEnergyStorage;
 //
 // @see ~CcEnergyConsumerBase, ~CcEnergySourceBase, ~CcEnergyGeneratorBase, ~CcEnergySinkBase
 //
-simple CcEnergyStorageBase like ICcEnergyStorage
+simple CcEnergyStorageBase extends SimpleModule like ICcEnergyStorage
 {
     parameters:
+        @class(CcEnergyStorageBase);
         @display("i=block/plug");
         @signal[currentConsumptionChanged];
         @signal[currentGenerationChanged];

@@ -8,6 +8,7 @@
 #ifndef __INET_IPV4NATTABLE_H
 #define __INET_IPV4NATTABLE_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/PacketFilter.h"
 #include "inet/networklayer/contract/INetfilter.h"
@@ -15,7 +16,7 @@
 
 namespace inet {
 
-class INET_API Ipv4NatTable : public cSimpleModule, public NetfilterBase::HookBase
+class INET_API Ipv4NatTable : public SimpleModule, public NetfilterBase::HookBase
 {
   protected:
     cXMLElement *config = nullptr;

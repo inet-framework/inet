@@ -7,11 +7,12 @@
 
 package inet.linklayer.ieee8022;
 
+import inet.common.SimpleModule;
 //
 // Implements the module given an interface and can be used as an omitted
 // optional module that removes itself from the module hierarchy during initialization.
 //
-module OmittedIeee8022LlcLayer like IIeee8022LlcLayer
+module OmittedIeee8022LlcLayer extends SimpleModule like IIeee8022LlcLayer
 {
     parameters:
         @class(::inet::OmittedModule);

@@ -64,7 +64,7 @@ EigrpIpv4Pdm::~EigrpIpv4Pdm()
 
 void EigrpIpv4Pdm::initialize(int stage) {
 
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         host = getContainingNode(this);
