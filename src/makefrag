@@ -92,6 +92,26 @@ ifeq ($(WITH_Z3), enabled)
   endif
 endif
 
+# TODO add a feature for it, similar to Z3
+WITH_PICOTLS := enabled
+$(info *** WITH PICOTLS: '$(WITH_PICOTLS)')
+ifeq ($(WITH_PICOTLS), enabled)
+  PICOTLS_LIB := $(O)/picotls/$(LIB_PREFIX)picotls$(D)$(A_LIB_SUFFIX)
+
+  LIBS += $(PICOTLS_LIB) -lssl -lcrypto
+
+$(PICOTLS_LIB):
+	$(Q)$(MAKE) -C picotls MODE=$(MODE)
+
+clean: clean-picotls
+
+clean-picotls:
+	$(Q)$(MAKE) -C picotls clean
+
+  $(TARGET) : $(O)/picotls/$(LIB_PREFIX)picotls$(D)$(A_LIB_SUFFIX)
+  CFLAGS += -Ipicotls/include -DHAVE_PICOTLS
+endif
+
 #
 # OpenMP feature allows faster execution of certain visualizations (like transmission power spectral density maps )
 #
