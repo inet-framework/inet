@@ -7,9 +7,10 @@
 
 package inet.physicallayer.wireless.common.base.packetlevel;
 
+import inet.common.CompoundModule;
 import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitterAnalogModel;
 
-module TransmitterBase
+module TransmitterBase extends CompoundModule
 {
     parameters:
         string signalAnalogRepresentation @enum("unitDisk","scalar","dimensional") = default("scalar"); // Determines the analog domain signal representation of transmissions

@@ -7,7 +7,7 @@
 
 package inet.linklayer.ieee80211.mac.channelaccess;
 
-import inet.common.SimpleModule;
+import inet.common.CompoundModule;
 import inet.linklayer.ieee80211.mac.contract.ICollisionController;
 import inet.linklayer.ieee80211.mac.originator.NonQosRecoveryProcedure;
 
@@ -16,7 +16,7 @@ import inet.linklayer.ieee80211.mac.originator.NonQosRecoveryProcedure;
 // The implementation allows for a configurable number of access categories,
 // not just four as defined by the standard.
 //
-module Edca extends SimpleModule
+module Edca extends CompoundModule
 {
     parameters:
         int numEdcafs = default(4);

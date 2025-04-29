@@ -7,7 +7,7 @@
 
 package inet.physicallayer.wireless.common.communicationcache;
 
-import inet.common.SimpleModule;
+import inet.common.CompoundModule;
 import inet.physicallayer.wireless.common.contract.packetlevel.ICommunicationCache;
 
 //
@@ -16,7 +16,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.ICommunicationCac
 // useful for simulations with both static <b>and</b> dynamic radios, and with both
 // short <b>and</b> long transmission durations.
 //
-module MapCommunicationCache extends SimpleModule like ICommunicationCache
+module MapCommunicationCache extends CompoundModule like ICommunicationCache
 {
     parameters:
         @display("i=block/table2");

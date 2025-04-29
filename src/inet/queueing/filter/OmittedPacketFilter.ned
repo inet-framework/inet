@@ -7,14 +7,14 @@
 
 package inet.queueing.filter;
 
-import inet.common.SimpleModule;
+import inet.common.CompoundModule;
 import inet.queueing.contract.IPacketFilter;
 
 //
 // Implements the given module interface and can be used as an omitted
 // optional module that removes itself from the module hierarchy during initialization.
 //
-module OmittedPacketFilter extends SimpleModule like IPacketFilter
+module OmittedPacketFilter extends CompoundModule like IPacketFilter
 {
     parameters:
         @class(::inet::OmittedModule);

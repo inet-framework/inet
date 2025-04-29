@@ -7,7 +7,7 @@
 
 package inet.clock.model;
 
-import inet.common.SimpleModule;
+import inet.common.CompoundModule;
 import inet.clock.contract.IClock;
 
 //
@@ -18,7 +18,7 @@ import inet.clock.contract.IClock;
 //
 // @see ~MultiDomainGptp
 //
-module MultiClock extends SimpleModule like IClock
+module MultiClock extends CompoundModule like IClock
 {
     parameters:
         int numClocks; // Number of subclocks

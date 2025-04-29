@@ -7,14 +7,14 @@
 
 package inet.physicallayer.wireless.common.neighborcache;
 
-import inet.common.SimpleModule;
+import inet.common.CompoundModule;
 import inet.physicallayer.wireless.common.contract.packetlevel.INeighborCache;
 
 //
 // This neighbor cache model organizes radios in a three-dimensional grid with
 // a constant cell size and updates periodically.
 //
-module GridNeighborCache extends SimpleModule like INeighborCache
+module GridNeighborCache extends CompoundModule like INeighborCache
 {
     parameters:
         string radioMediumModule = default("^");

@@ -10,13 +10,14 @@
 package inet.routing.pim;
 
 import inet.common.SimpleModule;
+import inet.common.CompoundModule;
 import inet.routing.contract.IPim;
 import inet.routing.pim.modes.PimDm;
 import inet.routing.pim.modes.PimSm;
 import inet.routing.pim.tables.PimInterfaceTable;
 import inet.routing.pim.tables.PimNeighborTable;
 
-module Pim extends SimpleModule like IPim
+module Pim extends CompoundModule like IPim
 {
     parameters:
         @class(Pim);

@@ -7,14 +7,14 @@
 
 package inet.queueing.server;
 
-import inet.common.SimpleModule;
+import inet.common.CompoundModule;
 import inet.queueing.contract.IPacketServer;
 
 //
 // Implements the given interface and can be used as an optional
 // module that removes itself from the module hierarchy during initialization.
 //
-module OmittedPacketServer extends SimpleModule like IPacketServer
+module OmittedPacketServer extends CompoundModule like IPacketServer
 {
     parameters:
         @class(::inet::OmittedModule);

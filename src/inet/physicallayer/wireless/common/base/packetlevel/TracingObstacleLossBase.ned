@@ -7,12 +7,13 @@
 
 package inet.physicallayer.wireless.common.base.packetlevel;
 
+import inet.common.CompoundModule;
 import inet.physicallayer.wireless.common.contract.packetlevel.IObstacleLoss;
 
 //
 // Serves as a base module for tracing obstacle loss models.
 //
-module TracingObstacleLossBase like IObstacleLoss
+module TracingObstacleLossBase extends CompoundModule like IObstacleLoss
 {
     parameters:
         string physicalEnvironmentModule = default("physicalEnvironment"); // Module path of the physical environment model

@@ -7,7 +7,7 @@
 
 package inet.networklayer.ipv4;
 
-import inet.common.SimpleModule;
+import inet.common.CompoundModule;
 import inet.common.MessageDispatcher;
 import inet.networklayer.configurator.contract.IIpv4NodeConfigurator;
 import inet.networklayer.contract.IArp;
@@ -20,7 +20,7 @@ import inet.networklayer.ipv4.ipsec.IPsec;
 // Network layer of an IPv4 node.
 //
 //
-module Ipv4NetworkLayer extends SimpleModule like INetworkLayer
+module Ipv4NetworkLayer extends CompoundModule like INetworkLayer
 {
     parameters:
         bool forwarding = default(false);

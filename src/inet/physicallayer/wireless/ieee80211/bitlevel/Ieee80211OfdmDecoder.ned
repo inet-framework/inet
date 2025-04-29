@@ -7,7 +7,7 @@
 
 package inet.physicallayer.wireless.ieee80211.bitlevel;
 
-import inet.common.SimpleModule;
+import inet.common.CompoundModule;
 import inet.physicallayer.wireless.common.contract.bitlevel.IDecoder;
 import inet.physicallayer.wireless.common.contract.bitlevel.IFecCoder;
 import inet.physicallayer.wireless.common.contract.bitlevel.IInterleaver;
@@ -23,7 +23,7 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IScrambler;
 // - Additive descrambler (18.3.5.5 PLCP DATA scrambler and descrambler) (see: ~AdditiveScrambler)
 // - Block deinterleaver (18.3.5.7 Data interleaving) (see: ~Ieee80211OfdmInterleaver)
 //
-module Ieee80211OfdmDecoder extends SimpleModule like IDecoder
+module Ieee80211OfdmDecoder extends CompoundModule like IDecoder
 {
     parameters:
         @display("i=block/blackboard");

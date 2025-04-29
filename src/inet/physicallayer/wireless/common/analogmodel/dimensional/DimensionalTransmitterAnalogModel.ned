@@ -7,10 +7,10 @@
 
 package inet.physicallayer.wireless.common.analogmodel.dimensional;
 
-import inet.common.SimpleModule;
+import inet.common.CompoundModule;
 import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitterAnalogModel;
 
-module DimensionalTransmitterAnalogModel extends SimpleModule like ITransmitterAnalogModel
+module DimensionalTransmitterAnalogModel extends CompoundModule like ITransmitterAnalogModel
 {
     parameters:
         double power @unit(W) = default(nan Hz); // Default transmission power

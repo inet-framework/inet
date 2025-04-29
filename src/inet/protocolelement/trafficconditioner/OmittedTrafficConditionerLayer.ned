@@ -7,12 +7,12 @@
 
 package inet.protocolelement.trafficconditioner;
 
-import inet.common.SimpleModule;
+import inet.common.CompoundModule;
 //
 // Implements the module given interface and can be used as an omitted
 // optional module that removes itself from the module hierarchy during initialization.
 //
-module OmittedTrafficConditionerLayer extends SimpleModule like ITrafficConditionerLayer
+module OmittedTrafficConditionerLayer extends CompoundModule like ITrafficConditionerLayer
 {
     parameters:
         @class(::inet::OmittedModule);

@@ -7,8 +7,8 @@
 
 package inet.linklayer.ieee80211.mac.recipient;
 
-import inet.common.SimpleModule;
-module RecipientMacDataService extends SimpleModule
+import inet.common.CompoundModule;
+module RecipientMacDataService extends CompoundModule
 {
     parameters:
         @class(RecipientMacDataService);

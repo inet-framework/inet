@@ -7,7 +7,7 @@
 
 package inet.physicallayer.wireless.common.backgroundnoise;
 
-import inet.common.SimpleModule;
+import inet.common.CompoundModule;
 import inet.physicallayer.wireless.common.contract.packetlevel.IBackgroundNoise;
 
 //
@@ -15,7 +15,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IBackgroundNoise;
 // time and frequency. It produces dimensional noise signals that can be further
 // used in dimensional computations.
 //
-module IsotropicDimensionalBackgroundNoise extends SimpleModule like IBackgroundNoise
+module IsotropicDimensionalBackgroundNoise extends CompoundModule like IBackgroundNoise
 {
     parameters:
         double powerSpectralDensity @unit(dBmWpMHz) = default(nan dBmWpMHz); // When specified, the power and bandwidth parameters are not used

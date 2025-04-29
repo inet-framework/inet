@@ -7,12 +7,13 @@
 
 package inet.physicallayer.wireless.common.base.packetlevel;
 
+import inet.common.CompoundModule;
 import inet.physicallayer.wireless.common.contract.packetlevel.IPropagation;
 
 //
 // Serves as a base module for propagation models.
 //
-module PropagationBase like IPropagation
+module PropagationBase extends CompoundModule like IPropagation
 {
     parameters:
         double propagationSpeed @unit(mps) = default(299792458mps); // The theoretical propagation speed of signals on the medium (used by path loss models)

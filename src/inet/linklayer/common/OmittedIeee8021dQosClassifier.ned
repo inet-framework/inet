@@ -7,13 +7,13 @@
 
 package inet.linklayer.common;
 
-import inet.common.SimpleModule;
+import inet.common.CompoundModule;
 
 //
 // Implements the given module interface and can be used as an omitted
 // optional module that removes itself from the module hierarchy during initialization.
 //
-module OmittedIeee8021dQosClassifier extends SimpleModule like IIeee8021dQosClassifier
+module OmittedIeee8021dQosClassifier extends CompoundModule like IIeee8021dQosClassifier
 {
     parameters:
         @class(::inet::OmittedModule);

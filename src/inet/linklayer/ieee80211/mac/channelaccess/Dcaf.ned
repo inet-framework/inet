@@ -7,7 +7,7 @@
 
 package inet.linklayer.ieee80211.mac.channelaccess;
 
-import inet.common.SimpleModule;
+import inet.common.CompoundModule;
 import inet.queueing.contract.IPacketQueue;
 import inet.linklayer.ieee80211.mac.contract.IContention;
 import inet.linklayer.ieee80211.mac.queue.InProgressFrames;
@@ -15,7 +15,7 @@ import inet.linklayer.ieee80211.mac.queue.InProgressFrames;
 //
 // Implements the DCAF (Distributed Channel Access Function) for IEEE 802.11.
 //
-module Dcaf extends SimpleModule
+module Dcaf extends CompoundModule
 {
     parameters:
         int difsn = default(-1);

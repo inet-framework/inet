@@ -7,9 +7,10 @@
 
 package inet.physicallayer.wireless.common.base.packetlevel;
 
+import inet.common.CompoundModule;
 import inet.physicallayer.wireless.common.contract.packetlevel.IReceiverAnalogModel;
 
-module ReceiverBase
+module ReceiverBase extends CompoundModule
 {
     parameters:
         bool ignoreInterference = default(false); // True means interfering transmissions are ignored when determining whether a reception is successful or not

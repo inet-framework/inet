@@ -7,7 +7,7 @@
 
 package inet.physicallayer.wireless.common.communicationcache;
 
-import inet.common.SimpleModule;
+import inet.common.CompoundModule;
 import inet.physicallayer.wireless.common.contract.packetlevel.ICommunicationCache;
 
 //
@@ -16,7 +16,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.ICommunicationCac
 // fingerprints, and statistical results that can be compared with the results of
 // other communication cache implementations.
 //
-module ReferenceCommunicationCache extends SimpleModule like ICommunicationCache
+module ReferenceCommunicationCache extends CompoundModule like ICommunicationCache
 {
     parameters:
         @display("i=block/table2");

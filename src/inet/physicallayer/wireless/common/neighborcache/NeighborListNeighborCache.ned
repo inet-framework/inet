@@ -7,14 +7,14 @@
 
 package inet.physicallayer.wireless.common.neighborcache;
 
-import inet.common.SimpleModule;
+import inet.common.CompoundModule;
 import inet.physicallayer.wireless.common.contract.packetlevel.INeighborCache;
 
 //
 // This neighbor cache model maintains a separate periodically updated neighbor
 // list for each radio.
 //
-module NeighborListNeighborCache extends SimpleModule like INeighborCache
+module NeighborListNeighborCache extends CompoundModule like INeighborCache
 {
     parameters:
         string radioMediumModule = default("^");
