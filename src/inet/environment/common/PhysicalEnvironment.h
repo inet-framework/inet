@@ -8,6 +8,7 @@
 #ifndef __INET_PHYSICALENVIRONMENT_H
 #define __INET_PHYSICALENVIRONMENT_H
 
+#include "inet/common/CompoundModule.h"
 #include "inet/common/IVisitor.h"
 #include "inet/common/geometry/base/ShapeBase.h"
 #include "inet/common/geometry/common/GeographicCoordinateSystem.h"
@@ -30,7 +31,7 @@ namespace physicalenvironment {
  * The physical environment draws the physical objects on the canvas of its
  * parent module.
  */
-class INET_API PhysicalEnvironment : public cModule, public IPhysicalEnvironment
+class INET_API PhysicalEnvironment : public CompoundModule, public IPhysicalEnvironment
 {
   protected:
     /** @name Parameters */

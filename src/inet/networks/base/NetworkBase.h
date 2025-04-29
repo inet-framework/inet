@@ -9,10 +9,11 @@
 #define __INET_NETWORKBASE_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/CompoundModule.h"
 
 namespace inet {
 
-class INET_API NetworkBase : public cModule
+class INET_API NetworkBase : public CompoundModule
 {
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

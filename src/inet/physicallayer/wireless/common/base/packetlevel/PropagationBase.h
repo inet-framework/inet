@@ -8,13 +8,14 @@
 #ifndef __INET_PROPAGATIONBASE_H
 #define __INET_PROPAGATIONBASE_H
 
+#include "inet/common/CompoundModule.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IPropagation.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API PropagationBase : public cModule, public IPropagation
+class INET_API PropagationBase : public CompoundModule, public IPropagation
 {
   protected:
     mps propagationSpeed;

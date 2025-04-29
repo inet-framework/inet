@@ -9,10 +9,11 @@
 #define __INET_ETHERNETMACLAYER_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/CompoundModule.h"
 
 namespace inet {
 
-class INET_API EthernetMacLayer : public cModule, public cListener
+class INET_API EthernetMacLayer : public CompoundModule, public cListener
 {
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

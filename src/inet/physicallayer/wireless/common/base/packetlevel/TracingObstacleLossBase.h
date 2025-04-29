@@ -8,6 +8,7 @@
 #ifndef __INET_TRACINGOBSTACLELOSSBASE_H
 #define __INET_TRACINGOBSTACLELOSSBASE_H
 
+#include "inet/common/CompoundModule.h"
 #include "inet/environment/contract/IPhysicalObject.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/ITracingObstacleLoss.h"
 
@@ -15,7 +16,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API TracingObstacleLossBase : public cModule, public ITracingObstacleLoss
+class INET_API TracingObstacleLossBase : public CompoundModule, public ITracingObstacleLoss
 {
 };
 
