@@ -1,29 +1,64 @@
-Not necessarily in this order
+protocol element tutorial (not necessarily in this order):
 
-- application talks directly to another
-- add channel delay and transmitter/receiver
-- add lossy channel and FCS inserter/checker
-- add inter packet gap
+- delay channel
+  source -> delay channel -> sink
+
+- transmission channel using transmitter/receiver
+  source -> transmitter -> transmission channel -> receiver -> sink
+
+- transmission channel inter packet gap
+  source -> inter packet gap -> transmitter -> transmission channel -> receiver -> sink
+
+- lossy channel and checksum inserter/checker
+  source -> checksum inserter -> lossy transmission channel -> checksum checker -> sink
+
+- acknowledgement mechanism
+  source -> send with acknowledge -> receive with acknowledge -> sink
+
+- MAC address filtering
+  source -> send with MAC address -> cloner -> (receive with MAC address -> sink) * 2
+
+- sequence numbering and reordering
+  source -> sequence numbering -> classifier -> (delay channel) * 2 -> join -> reordering -> sink
+
+- resending
+  source -> resending -> send with acknowledge -> lossy transmission channel -> receive with acknowledge -> sink
+
+- duplicate removal
+  source -> resending -> send with acknowledge -> lossy transmission channel -> duplicate removal -> receive with acknowledge -> sink
+
+- send to and receive at port
+  source -> send to port -> cloner -> (receive at port -> sink) * 2
+
+- send to and receive at network address
+  source -> send with network address -> cloner -> (receive with network address -> sink) * 2
+
+- hop limit
+  source -> send with hop limit -> cloner -> (receive with hop limit ++ -> sink) * 2
+
+- fragmentation and defragmentation
+  source -> fragmentation -> defragmentation -> sink
+
+- aggregation and deaggregation
+  source -> aggregation -> deaggregation -> sink
+
+network/network node/network interface/data service/quality of service/routing protocol/MAC protocol/network protocol/transport protocol tutorial:
+
+- add network node
+- add network interface module
+- add data service
+- add MAC protocol
+- add network protocol
+- add transport protocol
 - add queue and server
-- add acknowledgement mechanism
-- add resending and duplicate removal
-- add send to and receive at MAC address
-- add sequence numbering and reordering
 - add QoS with multiple queues to form a priority queue
 - add a shared buffer to the queues
 - add preemption support
-- create network interface module
 - add dynamic dispatch for multiple L2 peers
 - add multiple network interfaces and dispatcher
 - add interface table
-- add send to and receive at port
-- add send to and receive at network address
-- add hop limit
 - add forwarding and routing table
 - add address resolution
-- add fragmentation and defragmentation
-- add aggregation and deaggregation
-- create data service
 - add multiple applications with dispatcher
 - add routing protocol
 - add connection oriented transport
