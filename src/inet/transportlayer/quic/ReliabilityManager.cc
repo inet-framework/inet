@@ -23,7 +23,7 @@
 namespace inet {
 namespace quic {
 
-ReliabilityManager::ReliabilityManager(Connection *connection, TransportParameter *transportParameter, ReceivedPacketsAccountant *receivedPacketsAccountant, ICongestionController *congestionController, Statistics *stats) {
+ReliabilityManager::ReliabilityManager(Connection *connection, TransportParameters *transportParameter, ReceivedPacketsAccountant *receivedPacketsAccountant, ICongestionController *congestionController, Statistics *stats) {
     this->connection = connection;
     this->transportParameter = transportParameter;
     this->receivedPacketsAccountant = receivedPacketsAccountant;

@@ -52,7 +52,7 @@ public:
     virtual void processMaxStreamDataFrame(const Ptr<const MaxStreamDataFrameHeader>& frameHeader);
     virtual void processStreamDataBlockedFrame(const Ptr<const StreamDataBlockedFrameHeader>& frameHeader);
     virtual void processDataBlockedFrame(const Ptr<const DataBlockedFrameHeader>& frameHeader);
-    virtual void processCryptoFrame(const Ptr<const CryptoFrameHeader>& frameHeader);
+    virtual void processCryptoFrame(const Ptr<const CryptoFrameHeader>& frameHeader, Packet *pkt);
     virtual void processHandshakeDoneFrame();
     virtual void processConnectionCloseFrame();
 

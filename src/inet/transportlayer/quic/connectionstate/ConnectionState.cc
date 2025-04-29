@@ -194,7 +194,7 @@ void ConnectionState::processFrame(Packet *pkt, PacketNumberSpace pnSpace)
         case FRAME_HEADER_TYPE_STREAM_DATA_BLOCKED:
             return processStreamDataBlockedFrame(staticPtrCast<const StreamDataBlockedFrameHeader>(frameHeader));
         case FRAME_HEADER_TYPE_CRYPTO:
-            return processCryptoFrame(staticPtrCast<const CryptoFrameHeader>(frameHeader));
+            return processCryptoFrame(staticPtrCast<const CryptoFrameHeader>(frameHeader), pkt);
         case FRAME_HEADER_TYPE_HANDSHAKE_DONE:
             return processHandshakeDoneFrame();
         case FRAME_HEADER_TYPE_CONNECTION_CLOSE_APP:
@@ -239,7 +239,7 @@ void ConnectionState::processDataBlockedFrame(const Ptr<const DataBlockedFrameHe
     throw cRuntimeError("Data_Blocked frame unexpected in the current state");
 }
 
-void ConnectionState::processCryptoFrame(const Ptr<const CryptoFrameHeader>& frameHeader)
+void ConnectionState::processCryptoFrame(const Ptr<const CryptoFrameHeader>& frameHeader, Packet *pkt)
 {
     throw cRuntimeError("CRYPTO frame unexpected in the current state");
 }

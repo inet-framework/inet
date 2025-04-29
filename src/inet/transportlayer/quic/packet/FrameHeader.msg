@@ -215,6 +215,7 @@ class CryptoFrameHeader extends FrameHeader
     frameType = FRAME_HEADER_TYPE_CRYPTO;
     VariableLengthInteger offset;
     VariableLengthInteger length;
+    bool containsTransportParameters = false;
 }
 cplusplus(CryptoFrameHeader) {{
   public:
@@ -230,6 +231,29 @@ cplusplus(CryptoFrameHeader) {{
         os << "CRYPTO[offset=" << offset
             << ", length=" << length
             << "]";
+        return os.str();
+    }
+}}
+
+class TransportParametersExtension extends FieldsChunk
+{
+    VariableLengthInteger initialMaxData;
+    VariableLengthInteger initialMaxStreamDataBidiLocal;
+    VariableLengthInteger initialMaxStreamDataBidiRemote;
+    VariableLengthInteger initialMaxStreamDataUni;
+}
+cplusplus(TransportParametersExtension) {{
+  public:
+    void calcChunkLength() {
+        int64_t len = getVariableLengthIntegerSize(initialMaxData) \
+                      + getVariableLengthIntegerSize(initialMaxStreamDataBidiLocal) \
+                      + getVariableLengthIntegerSize(initialMaxStreamDataBidiRemote) \
+                      + getVariableLengthIntegerSize(initialMaxStreamDataUni);
+        this->setChunkLength(B(len));
+    }
+    std::string str() const override {
+        std::ostringstream os;
+        os << "TransportParametersExtension";
         return os.str();
     }
 }}

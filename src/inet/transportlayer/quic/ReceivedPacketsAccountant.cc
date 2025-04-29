@@ -18,7 +18,7 @@
 namespace inet {
 namespace quic {
 
-ReceivedPacketsAccountant::ReceivedPacketsAccountant(Timer *ackDelayTimer, TransportParameter *transportParameter) {
+ReceivedPacketsAccountant::ReceivedPacketsAccountant(Timer *ackDelayTimer, TransportParameters *transportParameter) {
     this->ackDelayTimer = ackDelayTimer;
     this->transportParameter = transportParameter;
     newAckInfo = false;

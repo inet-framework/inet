@@ -18,12 +18,12 @@
 
 #include "packet/FrameHeader_m.h"
 #include "packet/QuicPacket.h"
-#include "TransportParameter.h"
 #include "ReceivedPacketsAccountant.h"
 #include "Connection.h"
 #include "Timer.h"
 #include "congestioncontrol/ICongestionController.h"
 #include "Statistics.h"
+#include "TransportParameters.h"
 
 namespace inet {
 namespace quic {
@@ -34,7 +34,7 @@ class ICongestionController;
 
 class ReliabilityManager {
 public:
-    ReliabilityManager(Connection *connection, TransportParameter *transportParameter, ReceivedPacketsAccountant *receivedPacketsAccountant, ICongestionController *congestionController, Statistics *stats);
+    ReliabilityManager(Connection *connection, TransportParameters *transportParameter, ReceivedPacketsAccountant *receivedPacketsAccountant, ICongestionController *congestionController, Statistics *stats);
     virtual ~ReliabilityManager();
 
     void onAckReceived(const Ptr<const AckFrameHeader>& ackFrame, PacketNumberSpace pnSpace);
@@ -55,7 +55,7 @@ private:
     const simtime_t kOldNonInFlightPacketTimeThreshold = SimTime(5, SimTimeUnit::SIMTIME_S);
 
     Connection *connection;
-    TransportParameter *transportParameter;
+    TransportParameters *transportParameter;
     ReceivedPacketsAccountant *receivedPacketsAccountant;
     ICongestionController *congestionController;
     Timer *lossDetectionTimer;

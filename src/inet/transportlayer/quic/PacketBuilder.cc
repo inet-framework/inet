@@ -143,13 +143,25 @@ QuicFrame *PacketBuilder::createPaddingFrame(int length)
     return new QuicFrame(frameHeader);
 }
 
-QuicFrame *PacketBuilder::createCryptoFrame()
+QuicFrame *PacketBuilder::createCryptoFrame(TransportParameters *tp)
 {
     Ptr<CryptoFrameHeader> frameHeader = makeShared<CryptoFrameHeader>();
     frameHeader->setOffset(0);
     frameHeader->setLength(0);
     frameHeader->calcChunkLength();
-    return new QuicFrame(frameHeader);
+    QuicFrame *frame = new QuicFrame(frameHeader);
+
+    if (tp) {
+        frameHeader->setContainsTransportParameters(true);
+        Ptr<TransportParametersExtension> transportParametersExt = makeShared<TransportParametersExtension>();
+        transportParametersExt->setInitialMaxData(tp->initialMaxData);
+        transportParametersExt->setInitialMaxStreamDataBidiLocal(tp->initialMaxStreamData);
+        transportParametersExt->setInitialMaxStreamDataBidiRemote(tp->initialMaxStreamData);
+        transportParametersExt->setInitialMaxStreamDataUni(tp->initialMaxStreamData);
+        transportParametersExt->calcChunkLength();
+        frame->setData(transportParametersExt);
+    }
+    return frame;
 }
 
 QuicFrame *PacketBuilder::createConnectionCloseFrame(bool appInitiated, int errorCode)
@@ -426,11 +438,11 @@ QuicPacket *PacketBuilder::buildDplpmtudProbePacket(int packetSize, Dplpmtud *dp
     return packet;
 }
 
-QuicPacket *PacketBuilder::buildClientInitialPacket(int maxPacketSize)
+QuicPacket *PacketBuilder::buildClientInitialPacket(int maxPacketSize, TransportParameters *tp)
 {
     QuicPacket *packet = createPacket(PacketNumberSpace::Initial, false);
 
-    packet->addFrame(createCryptoFrame());
+    packet->addFrame(createCryptoFrame(tp));
     packet->addFrame(createPaddingFrame(1200 - packet->getSize()));
 
     return packet;
@@ -453,11 +465,11 @@ QuicPacket *PacketBuilder::buildServerInitialPacket(int maxPacketSize)
     return packet;
 }
 
-QuicPacket *PacketBuilder::buildHandshakePacket(int maxPacketSize)
+QuicPacket *PacketBuilder::buildHandshakePacket(int maxPacketSize, TransportParameters *tp)
 {
     QuicPacket *packet = createPacket(PacketNumberSpace::Handshake, false);
 
-    packet->addFrame(createCryptoFrame());
+    packet->addFrame(createCryptoFrame(tp));
 
     // check if we would like to bundle an ack frame
     if (receivedPacketsAccountant[PacketNumberSpace::Handshake]->hasNewAckInfoAboutAckElicitings() || (receivedPacketsAccountant[PacketNumberSpace::Handshake]->hasNewAckInfo() && bundleAckForNonAckElicitingPackets)) {

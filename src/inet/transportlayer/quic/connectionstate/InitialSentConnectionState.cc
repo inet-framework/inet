@@ -23,6 +23,14 @@ ConnectionState *InitialSentConnectionState::processInitialPacket(const Ptr<cons
     return new HandshakeConnectionState(context);
 }
 
+void InitialSentConnectionState::processCryptoFrame(const Ptr<const CryptoFrameHeader>& frameHeader, Packet *pkt)
+{
+    if (frameHeader->getContainsTransportParameters()) {
+        auto transportParametersExt = staticPtrCast<const TransportParametersExtension>(pkt->popAtFront());
+        EV_DEBUG << "got transport parameters: " << transportParametersExt << endl;
+        context->getRemoteTransportParameters()->readExtension(transportParametersExt);
+    }
+}
 
 void InitialSentConnectionState::processAckFrame(const Ptr<const AckFrameHeader>& frameHeader, PacketNumberSpace pnSpace)
 {

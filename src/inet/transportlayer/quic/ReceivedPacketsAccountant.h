@@ -24,7 +24,7 @@ namespace inet {
 namespace quic {
 
 class Timer;
-class TransportParameter;
+class TransportParameters;
 
 class GapRange {
 public:
@@ -34,7 +34,7 @@ public:
 
 class ReceivedPacketsAccountant {
 public:
-    ReceivedPacketsAccountant(Timer *ackDelayTimer, TransportParameter *transportParameter);
+    ReceivedPacketsAccountant(Timer *ackDelayTimer, TransportParameters *transportParameter);
     virtual ~ReceivedPacketsAccountant();
 
     void readParameters(cModule *module);
@@ -67,7 +67,7 @@ private:
     std::vector<GapRange> gapRanges;
     simtime_t timeLargestAckReceived;
     Timer *ackDelayTimer;
-    TransportParameter *transportParameter;
+    TransportParameters *transportParameter;
     simtime_t timeLastAckElicitingReceivedOutOfOrder;
     bool useIBit = false;
 

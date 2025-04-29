@@ -25,7 +25,6 @@
 #include "PacketBuilder.h"
 #include "ReceivedPacketsAccountant.h"
 #include "ReliabilityManager.h"
-#include "TransportParameter.h"
 #include "Timer.h"
 #include "congestioncontrol/ICongestionController.h"
 #include "flowcontroller/FlowController.h"
@@ -35,6 +34,7 @@
 #include "Path.h"
 #include "stream/Stream.h"
 #include "packet/ConnectionId.h"
+#include "TransportParameters.h"
 
 namespace inet {
 namespace quic {
@@ -85,7 +85,7 @@ class Connection
     void sendProbePacket(uint ptoCount);
     void sendClientInitialPacket();
     void sendServerInitialPacket();
-    void sendHandshakePacket();
+    void sendHandshakePacket(bool includeTransportParamters);
     void sendDataToApp(uint64_t streamId, B expectedDataSize);
     void handleAckFrame(const Ptr<const AckFrameHeader>& frameHeader, PacketNumberSpace pnSpace);
     void processIcmpPtb(Packet *droppedPkt, int ptbMtu);
@@ -106,8 +106,12 @@ class Connection
         return receivedPacketsAccountants[space];
     }
 
-    TransportParameter *getTransportParameters() {
-        return transportParameter;
+    TransportParameters *getLocalTransportParameters() {
+        return localTransportParameters;
+    }
+
+    TransportParameters *getRemoteTransportParameters() {
+        return remoteTransportParameters;
     }
 
     ConnectionFlowController *getConnectionFlowController() {
@@ -164,7 +168,8 @@ class Connection
     PacketBuilder *packetBuilder;
     IScheduler *scheduler;
     std::map<uint64_t, Stream *> streamMap;
-    TransportParameter *transportParameter = nullptr;
+    TransportParameters *localTransportParameters = nullptr;
+    TransportParameters *remoteTransportParameters = nullptr;
     ConnectionFlowController *connectionFlowController = nullptr;
     ConnectionFlowControlResponder *connectionFlowControlResponder = nullptr;
 

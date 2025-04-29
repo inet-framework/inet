@@ -13,20 +13,30 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "TransportParameter.h"
+#ifndef INET_APPLICATIONS_QUIC_TRANSPORTPARAMETER_H_
+#define INET_APPLICATIONS_QUIC_TRANSPORTPARAMETER_H_
+
+#include "Quic.h"
 
 namespace inet {
 namespace quic {
 
-TransportParameter::TransportParameter(Quic *quicSimpleMod) {
+class TransportParameters {
+public:
+    TransportParameters() {}
+    virtual ~TransportParameters() {}
 
-    initial_max_data = quicSimpleMod->par("initialMaxData");
-    initial_max_stream_data = quicSimpleMod->par("initialMaxStreamData");
-}
+    void readParameters(Quic *quicSimpleMod);
+    void readExtension(Ptr<const TransportParametersExtension> transportParametersExt);
 
-TransportParameter::~TransportParameter() {
-    // TODO Auto-generated destructor stub
-}
+    omnetpp::simtime_t maxAckDelay = omnetpp::SimTime(25, omnetpp::SimTimeUnit::SIMTIME_MS); //TODO make it as parameter in ini
+    int ackDelayExponent = 3;
+
+    uint64_t initialMaxData = 0;
+    uint64_t initialMaxStreamData = 0;
+};
 
 } /* namespace quic */
 } /* namespace inet */
+
+#endif /* INET_APPLICATIONS_QUIC_TRANSPORTPARAMETER_H_ */

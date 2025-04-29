@@ -20,7 +20,7 @@ public:
     }
 
     virtual ConnectionState *processHandshakePacket(const Ptr<const HandshakePacketHeader>& packetHeader, Packet *pkt) override;
-    virtual void processCryptoFrame(const Ptr<const CryptoFrameHeader>& frameHeader) override {}
+    virtual void processCryptoFrame(const Ptr<const CryptoFrameHeader>& frameHeader, Packet *pkt) override;
 };
 
 } /* namespace quic */

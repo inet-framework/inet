@@ -54,7 +54,9 @@ Connection::Connection(Quic *quicSimpleMod, UdpSocket *udpSocket, AppSocket *app
 
     this->connectionState = new InitialConnectionState(this);
 
-    transportParameter = new TransportParameter(quicSimpleMod);
+    localTransportParameters = new TransportParameters();
+    localTransportParameters->readParameters(quicSimpleMod);
+    remoteTransportParameters = new TransportParameters();
 
     acceptDataFromApp = true;
     sendQueueLimit = quicSimpleMod->par("sendQueueLimit");
@@ -73,11 +75,11 @@ Connection::Connection(Quic *quicSimpleMod, UdpSocket *udpSocket, AppSocket *app
     //receivedPacketsAccountant = new ReceivedPacketsAccountant(createTimer(TimerType::ACK_DELAY_TIMER, "AckDelayTimer"), transportParameter);
     //receivedPacketsAccountant->readParameters(quicSimpleMod);
 
-    receivedPacketsAccountants[PacketNumberSpace::ApplicationData] = new ReceivedPacketsAccountant(createTimer(TimerType::ACK_DELAY_TIMER, "AckDelayTimer"), transportParameter);
+    receivedPacketsAccountants[PacketNumberSpace::ApplicationData] = new ReceivedPacketsAccountant(createTimer(TimerType::ACK_DELAY_TIMER, "AckDelayTimer"), remoteTransportParameters);
     receivedPacketsAccountants[PacketNumberSpace::ApplicationData]->readParameters(quicSimpleMod);
 
-    receivedPacketsAccountants[PacketNumberSpace::Initial] = new ReceivedPacketsAccountant(nullptr, transportParameter);
-    receivedPacketsAccountants[PacketNumberSpace::Handshake] = new ReceivedPacketsAccountant(nullptr, transportParameter);
+    receivedPacketsAccountants[PacketNumberSpace::Initial] = new ReceivedPacketsAccountant(nullptr, remoteTransportParameters);
+    receivedPacketsAccountants[PacketNumberSpace::Handshake] = new ReceivedPacketsAccountant(nullptr, remoteTransportParameters);
 
     packetBuilder = new PacketBuilder(&controlQueue, scheduler, receivedPacketsAccountants);
     packetBuilder->setSrcConnectionId(srcConnectionIds[0]);
@@ -88,10 +90,7 @@ Connection::Connection(Quic *quicSimpleMod, UdpSocket *udpSocket, AppSocket *app
     congestionController->setStatistics(stats);
     congestionController->setPath(path);
 
-    reliabilityManager = new ReliabilityManager(this, transportParameter, receivedPacketsAccountants[PacketNumberSpace::ApplicationData], congestionController, stats);
-
-    connectionFlowController = new ConnectionFlowController(transportParameter->initial_max_data, stats);
-    connectionFlowControlResponder = new ConnectionFlowControlResponder(this, transportParameter->initial_max_data, maxDataFrameThreshold, roundConsumedDataValue, stats);
+    reliabilityManager = new ReliabilityManager(this, remoteTransportParameters, receivedPacketsAccountants[PacketNumberSpace::ApplicationData], congestionController, stats);
 }
 
 Connection::~Connection() {
@@ -103,7 +102,8 @@ Connection::~Connection() {
         delete congestionController;
         delete connectionFlowController;
         delete connectionFlowControlResponder;
-        delete transportParameter;
+        delete localTransportParameters;
+        delete remoteTransportParameters;
         delete scheduler;
 
         for (QuicFrame *frame : controlQueue) {
@@ -350,7 +350,7 @@ void Connection::sendProbePacket(uint ptoCount)
 
 void Connection::sendClientInitialPacket() {
     int maxQuicPacketSize = path->getMaxQuicPacketSize();
-    sendPacket(packetBuilder->buildClientInitialPacket(maxQuicPacketSize), PacketNumberSpace::Initial);
+    sendPacket(packetBuilder->buildClientInitialPacket(maxQuicPacketSize, localTransportParameters), PacketNumberSpace::Initial);
 }
 
 void Connection::sendServerInitialPacket() {
@@ -358,9 +358,16 @@ void Connection::sendServerInitialPacket() {
     sendPacket(packetBuilder->buildServerInitialPacket(maxQuicPacketSize), PacketNumberSpace::Initial);
 }
 
-void Connection::sendHandshakePacket() {
+void Connection::sendHandshakePacket(bool includeTransportParamters) {
     int maxQuicPacketSize = path->getMaxQuicPacketSize();
-    sendPacket(packetBuilder->buildHandshakePacket(maxQuicPacketSize), PacketNumberSpace::Handshake);
+
+    QuicPacket *packet;
+    if (includeTransportParamters) {
+        packet = packetBuilder->buildHandshakePacket(maxQuicPacketSize, localTransportParameters);
+    } else {
+        packet = packetBuilder->buildHandshakePacket(maxQuicPacketSize, nullptr);
+    }
+    sendPacket(packet, PacketNumberSpace::Handshake);
 }
 
 void Connection::sendPacket(QuicPacket *packet, PacketNumberSpace pnSpace, bool track)
@@ -520,6 +527,10 @@ void Connection::sendAck(PacketNumberSpace pnSpace)
 
 void Connection::established()
 {
+    // we should have gotten the peer's transport parameters by now, which allows to read their values.
+    connectionFlowController = new ConnectionFlowController(remoteTransportParameters->initialMaxData, stats);
+    connectionFlowControlResponder = new ConnectionFlowControlResponder(this, remoteTransportParameters->initialMaxData, maxDataFrameThreshold, roundConsumedDataValue, stats);
+
     appSocket->sendEstablished();
 
     if (path->usesDplpmtud()) {
@@ -548,7 +559,8 @@ void Connection::close(bool sendAck, bool appInitiated)
     delete congestionController;
     delete connectionFlowController;
     delete connectionFlowControlResponder;
-    delete transportParameter;
+    delete localTransportParameters;
+    delete remoteTransportParameters;
     delete scheduler;
 
     for (QuicFrame *frame : controlQueue) {

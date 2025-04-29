@@ -12,6 +12,14 @@
 namespace inet {
 namespace quic {
 
+void HandshakeConnectionState::processCryptoFrame(const Ptr<const CryptoFrameHeader>& frameHeader, Packet *pkt)
+{
+    if (frameHeader->getContainsTransportParameters()) {
+        auto transportParametersExt = staticPtrCast<const TransportParametersExtension>(pkt->popAtFront());
+        EV_DEBUG << "got transport parameters: " << transportParametersExt << endl;
+        context->getRemoteTransportParameters()->readExtension(transportParametersExt);
+    }
+}
 
 ConnectionState *HandshakeConnectionState::processHandshakePacket(const Ptr<const HandshakePacketHeader>& packetHeader, Packet *pkt) {
     EV_DEBUG << "processHandshakePacket in " << name << endl;
@@ -20,7 +28,7 @@ ConnectionState *HandshakeConnectionState::processHandshakePacket(const Ptr<cons
     context->accountReceivedPacket(packetHeader->getPacketNumber(), ackElicitingPacket, PacketNumberSpace::Handshake, false);
 
     // send Finished
-    context->sendHandshakePacket();
+    context->sendHandshakePacket(false);
 
     return new EstablishedConnectionState(context);
 }

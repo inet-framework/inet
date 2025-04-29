@@ -29,7 +29,7 @@ public:
     virtual void processMaxStreamDataFrame(const Ptr<const MaxStreamDataFrameHeader>& frameHeader) override;
     virtual void processStreamDataBlockedFrame(const Ptr<const StreamDataBlockedFrameHeader>& frameHeader) override;
     virtual void processDataBlockedFrame(const Ptr<const DataBlockedFrameHeader>& frameHeader) override;
-    virtual void processCryptoFrame(const Ptr<const CryptoFrameHeader>& frameHeader) override;
+    virtual void processCryptoFrame(const Ptr<const CryptoFrameHeader>& frameHeader, Packet *pkt) override;
     virtual void processHandshakeDoneFrame() override;
     virtual void processConnectionCloseFrame() override;
     virtual ConnectionState *processLossDetectionTimeout(cMessage *msg) override;

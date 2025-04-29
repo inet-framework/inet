@@ -106,7 +106,7 @@ void EstablishedConnectionState::processDataBlockedFrame(const Ptr<const DataBlo
     context->onDataBlockedFrameReceived(frameHeader->getDataLimit());
 }
 
-void EstablishedConnectionState::processCryptoFrame(const Ptr<const CryptoFrameHeader>& frameHeader)
+void EstablishedConnectionState::processCryptoFrame(const Ptr<const CryptoFrameHeader>& frameHeader, Packet *pkt)
 {
     EV_DEBUG << "CryptoFrameHeader in " << name << endl;
     gotCryptoFin = true;

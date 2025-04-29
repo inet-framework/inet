@@ -24,6 +24,7 @@
 #include "packet/DplpmtudProbePacket.h"
 #include "dplpmtud/Dplpmtud.h"
 #include "packet/ConnectionId.h"
+#include "TransportParameters.h"
 
 namespace inet {
 namespace quic {
@@ -43,9 +44,9 @@ public:
     QuicPacket *buildAckElicitingPacket(std::vector<QuicPacket*> *sentPackets, int maxPacketSize, bool skipPacketNumber=false);
     QuicPacket *buildPingPacket();
     QuicPacket *buildDplpmtudProbePacket(int packetSize, Dplpmtud *dplpmtud);
-    QuicPacket *buildClientInitialPacket(int maxPacketSize);
+    QuicPacket *buildClientInitialPacket(int maxPacketSize, TransportParameters *tp);
     QuicPacket *buildServerInitialPacket(int maxPacketSize);
-    QuicPacket *buildHandshakePacket(int maxPacketSize);
+    QuicPacket *buildHandshakePacket(int maxPacketSize, TransportParameters *tp);
     QuicPacket *buildConnectionClosePacket(int maxPacketSize, bool sendAck, bool appInitiated, int errorCode);
     void addHandshakeDone();
     void setSrcConnectionId(ConnectionId *connectionId) {
@@ -76,7 +77,7 @@ private:
     size_t getPacketSize(QuicPacket *packet);
     QuicFrame *createPingFrame();
     QuicFrame *createPaddingFrame(int length = 1);
-    QuicFrame *createCryptoFrame();
+    QuicFrame *createCryptoFrame(TransportParameters *tp = nullptr);
     void fillLongHeader(Ptr<LongPacketHeader> packetHeader);
     QuicFrame *createHandshakeDoneFrame();
     QuicFrame *createConnectionCloseFrame(bool appInitiated, int errorCode);

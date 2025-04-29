@@ -23,6 +23,14 @@ ConnectionState *InitialConnectionState::processConnectAppCommand(cMessage *msg)
     return new InitialSentConnectionState(context);
 }
 
+void InitialConnectionState::processCryptoFrame(const Ptr<const CryptoFrameHeader>& frameHeader, Packet *pkt)
+{
+    if (frameHeader->getContainsTransportParameters()) {
+        auto transportParametersExt = staticPtrCast<const TransportParametersExtension>(pkt->popAtFront());
+        EV_DEBUG << "got transport parameters: " << transportParametersExt << endl;
+        context->getRemoteTransportParameters()->readExtension(transportParametersExt);
+    }
+}
 
 ConnectionState *InitialConnectionState::processInitialPacket(const Ptr<const InitialPacketHeader>& packetHeader, Packet *pkt) {
     EV_DEBUG << "processInitialPacket in " << name << endl;
@@ -36,7 +44,7 @@ ConnectionState *InitialConnectionState::processInitialPacket(const Ptr<const In
     context->sendServerInitialPacket();
 
     // send Encrypted Extensions, Certificate, Certificate Verify, and Finished
-    context->sendHandshakePacket();
+    context->sendHandshakePacket(true);
 
     return new EstablishedConnectionState(context);
 }
