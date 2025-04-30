@@ -62,7 +62,12 @@ class InitialPacketHeader extends LongPacketHeader
 cplusplus(InitialPacketHeader) {{
   public:
     void calcChunkLength() {
-        int64_t len = 1 + 4 + 1 + dstConnectionIdLength + 1 + srcConnectionIdLength + getVariableLengthIntegerSize(length) + packetNumberLength;
+        int64_t len = 1 + 4 + (1 + dstConnectionIdLength) + (1 + srcConnectionIdLength) +
+                getVariableLengthIntegerSize(tokenLength) + tokenLength +
+                + getVariableLengthIntegerSize(length) + packetNumberLength;
+        std::cout << "calcChunkLength(), dst conn id len: " << (int)dstConnectionIdLength << std::endl;
+        std::cout << "calcChunkLength(), src conn id len: " << (int)srcConnectionIdLength << std::endl;
+        std::cout << "InitialPacketHeader::calcChunkLength() len=" << len << std::endl;
         this->setChunkLength(B(len));
     }
        

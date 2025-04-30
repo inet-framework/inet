@@ -238,10 +238,12 @@ class TransportParametersExtension extends FieldsChunk
 cplusplus(TransportParametersExtension) {{
   public:
     void calcChunkLength() {
-        int64_t len = getVariableLengthIntegerSize(initialMaxData) \
-                      + getVariableLengthIntegerSize(initialMaxStreamDataBidiLocal) \
-                      + getVariableLengthIntegerSize(initialMaxStreamDataBidiRemote) \
-                      + getVariableLengthIntegerSize(initialMaxStreamDataUni);
+        int64_t len =
+            2 + 2
+            + 1 + 1 + getVariableLengthIntegerSize(initialMaxData)
+            + 1 + 1 + getVariableLengthIntegerSize(initialMaxStreamDataBidiLocal)
+            + 1 + 1 + getVariableLengthIntegerSize(initialMaxStreamDataBidiRemote)
+            + 1 + 1 + getVariableLengthIntegerSize(initialMaxStreamDataUni);
         this->setChunkLength(B(len));
     }
     std::string str() const override {
