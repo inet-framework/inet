@@ -66,6 +66,7 @@ void PcapRecorder::initialize()
 {
     verbose = par("verbose");
     recordEmptyPackets = par("recordEmptyPackets");
+    enableConvertingPackets = par("enableConvertingPackets");
     snaplen = this->par("snaplen");
     dumpBadFrames = par("dumpBadFrames");
     signalList.clear();
@@ -330,9 +331,11 @@ PcapLinkType PcapRecorder::protocolToLinkType(const Protocol *protocol) const
 
 Packet *PcapRecorder::tryConvertToLinkType(const Packet *packet, b frontOffset, b backOffset, PcapLinkType pcapLinkType, const Protocol *protocol) const
 {
-    for (IHelper *helper : helpers) {
-        if (auto newPacket = helper->tryConvertToLinkType(packet, frontOffset, backOffset, pcapLinkType, protocol))
-            return newPacket;
+    if (enableConvertingPackets) {
+        for (IHelper *helper : helpers) {
+            if (auto newPacket = helper->tryConvertToLinkType(packet, frontOffset, backOffset, pcapLinkType, protocol))
+                return newPacket;
+        }
     }
     return nullptr;
 }
