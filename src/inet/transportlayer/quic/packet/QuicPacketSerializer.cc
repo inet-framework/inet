@@ -159,15 +159,17 @@ void QuicPacketHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr
     }
 }
 
-void QuicPacketHeaderSerializer::serializeLongPacketHeader(MemoryOutputStream& stream, const Ptr<const LongPacketHeader>& header) const
+void QuicPacketHeaderSerializer::serializeLongPacketHeader(MemoryOutputStream& stream, const Ptr<const LongPacketHeader>& header, uint8_t packetNumberLength) const
 {
+    std::cout << "serializeLongPacketHeader begin, stream length: " << stream.getLength() << std::endl;
     // First byte: Header form (1 bit) | Reserved (1 bit) | Packet type (2 bits) | Type-specific bits (4 bits)
-    uint8_t firstByte = (header->getHeaderForm() << 7) | (header->getLongPacketType() << 4);
+    uint8_t firstByte = (header->getHeaderForm() << 7) | (1 << 6) |  (header->getLongPacketType() << 4) | (packetNumberLength-1);
     stream.writeByte(firstByte);
 
     // Version
     stream.writeUint32Be(header->getVersion());
 
+    std::cout << "dst conn id len: " << (int)header->getDstConnectionIdLength() << std::endl;
     // Destination Connection ID Length
     stream.writeByte(header->getDstConnectionIdLength());
 
@@ -176,6 +178,7 @@ void QuicPacketHeaderSerializer::serializeLongPacketHeader(MemoryOutputStream& s
         stream.writeUint64Be(header->getDstConnectionId());
     }
 
+    std::cout << "src conn id len: " << (int)header->getSrcConnectionIdLength() << std::endl;
     // Source Connection ID Length
     stream.writeByte(header->getSrcConnectionIdLength());
 
@@ -183,6 +186,8 @@ void QuicPacketHeaderSerializer::serializeLongPacketHeader(MemoryOutputStream& s
     if (header->getSrcConnectionIdLength() > 0) {
         stream.writeUint64Be(header->getSrcConnectionId());
     }
+
+    std::cout << "serializeLongPacketHeader end, stream length: " << stream.getLength() << std::endl;
 }
 
 void QuicPacketHeaderSerializer::serializeShortPacketHeader(MemoryOutputStream& stream, const Ptr<const ShortPacketHeader>& header) const
@@ -200,8 +205,15 @@ void QuicPacketHeaderSerializer::serializeShortPacketHeader(MemoryOutputStream& 
 
 void QuicPacketHeaderSerializer::serializeInitialPacketHeader(MemoryOutputStream& stream, const Ptr<const InitialPacketHeader>& header) const
 {
+    std::cout << "serializeInitialPacketHeader begin, stream length: " << stream.getLength() << std::endl;
     // Serialize the common long header fields
-    serializeLongPacketHeader(stream, header);
+    std::cout << "dst conn id len: " << (int)header->getDstConnectionIdLength() << std::endl;
+    std::cout << "dst conn id: " << header->getDstConnectionId() << std::endl;
+    std::cout << "src conn id len: " << (int)header->getSrcConnectionIdLength() << std::endl;
+    std::cout << "src conn id: " << header->getSrcConnectionId() << std::endl;
+    std::cout << "packet num len: " << (int)header->getPacketNumberLength() << std::endl;
+    // TODO: assuming this is set to 1 for initial packets
+    serializeLongPacketHeader(stream, header, header->getPacketNumberLength());
 
     // Token Length
     serializeVariableLengthInteger(stream, header->getTokenLength());
@@ -215,13 +227,14 @@ void QuicPacketHeaderSerializer::serializeInitialPacketHeader(MemoryOutputStream
     serializeVariableLengthInteger(stream, header->getLength());
 
     // Packet Number
-    stream.writeUint32Be(header->getPacketNumber());
+    stream.writeByte(0); // initial packet number is 1
+    std::cout << "serializeInitialPacketHeader end, stream length: " << stream.getLength() << std::endl;
 }
 
 void QuicPacketHeaderSerializer::serializeHandshakePacketHeader(MemoryOutputStream& stream, const Ptr<const HandshakePacketHeader>& header) const
 {
     // Serialize the common long header fields
-    serializeLongPacketHeader(stream, header);
+    serializeLongPacketHeader(stream, header, header->getPacketNumberLength());
 
     // Length
     serializeVariableLengthInteger(stream, header->getLength());
@@ -233,7 +246,7 @@ void QuicPacketHeaderSerializer::serializeHandshakePacketHeader(MemoryOutputStre
 void QuicPacketHeaderSerializer::serializeZeroRttPacketHeader(MemoryOutputStream& stream, const Ptr<const ZeroRttPacketHeader>& header) const
 {
     // Serialize the common long header fields
-    serializeLongPacketHeader(stream, header);
+    serializeLongPacketHeader(stream, header, header->getPacketNumberLength());
 
     // Length
     serializeVariableLengthInteger(stream, header->getLength());
@@ -245,7 +258,7 @@ void QuicPacketHeaderSerializer::serializeZeroRttPacketHeader(MemoryOutputStream
 void QuicPacketHeaderSerializer::serializeRetryPacketHeader(MemoryOutputStream& stream, const Ptr<const RetryPacketHeader>& header) const
 {
     // Serialize the common long header fields
-    serializeLongPacketHeader(stream, header);
+    serializeLongPacketHeader(stream, header, 1); // TODO: packet number length?
 
     // Retry Token
     stream.writeUint64Be(header->getRetryToken());
