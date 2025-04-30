@@ -386,10 +386,10 @@ void Connection::processReceivedData(uint64_t streamId, uint64_t offset, Ptr<con
     Stream *stream = findOrCreateStream(streamId);
     uint64_t dataLength = B(data->getChunkLength()).get();
 
-    static simsignal_t totalReceivedDataBytesStat = stats->createStatisticEntry("totalReceivedDataBytes");
+    static simsignal_t totalRcvAppDataStat = stats->createStatisticEntry("totalRcvAppData");
     static unsigned long totalReceivedDataBytes = 0;
     totalReceivedDataBytes += dataLength;
-    stats->getMod()->emit(totalReceivedDataBytesStat, totalReceivedDataBytes);
+    stats->getMod()->emit(totalRcvAppDataStat, totalReceivedDataBytes);
 
     //check rwnd before process data
     if(stream->isAllowedToReceivedData(dataLength)){

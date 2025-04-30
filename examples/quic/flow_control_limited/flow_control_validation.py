@@ -27,7 +27,7 @@ for initialMaxDataSize in initialMaxDataSizes:
 		where vectorId = (
 			select vectorId 
 			from vector 
-			where moduleName = 'bottleneck.receiver.quic' and vectorName = 'streamRcvDataBytes_cid=0_sid=0:vector'
+			where moduleName = 'bottleneck.receiver.quic' and vectorName = 'streamRcvAppData_cid=0_sid=0:vector'
 		) and """ + str(start) + " <= simtimeRaw and simtimeRaw < " + str(stop))
 		receivedBytes = c.fetchone()[0]
 		c.close()

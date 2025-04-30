@@ -53,14 +53,14 @@ protected:
     //Statistic
     uint64_t rcvBlockFrameCount = 0;
     uint64_t generatedMaxDataFrameCount = 0;
-    uint64_t retransmitFCUpdateCount = 0;
+    uint64_t maxDataFrameLostCount = 0;
 
     Statistics *stats;
     simsignal_t rcvBlockFrameCountStat;
     simsignal_t genMaxDataFrameCountStat;
     simsignal_t maxDataFrameOffsetStat;
     simsignal_t consumedDataStat;
-    simsignal_t retransmitFCUpdateStat;
+    simsignal_t maxDataFrameLostCountStat;
 
     bool roundConsumedDataValue = false;
 

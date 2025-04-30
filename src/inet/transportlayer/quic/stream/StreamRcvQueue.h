@@ -38,8 +38,8 @@ protected:
 
     //Statistic
     Statistics *stats;
-    simsignal_t rcvStreamFrameStartOffsetStat;
-    simsignal_t rcvStreamFrameEndOffsetStat;
+    simsignal_t streamRcvFrameStartOffsetStat;
+    simsignal_t streamRcvFrameEndOffsetStat;
 
 public:
     bool hasDataForApp();

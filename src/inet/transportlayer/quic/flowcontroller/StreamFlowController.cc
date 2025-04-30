@@ -39,8 +39,9 @@ QuicFrame *StreamFlowController::generateDataBlockFrame(){
 
     lastDataLimit = highestSendOffset;
 
-    stats->getMod()->emit(genBlockFrameCountStat, (unsigned long)generatedBlockFrameCount++);
-    stats->getMod()->emit(blockFrameOffsetStat, (unsigned long)highestSendOffset);
+    generatedBlockFrameCount++;
+    stats->getMod()->emit(genBlockFrameCountStat, generatedBlockFrameCount);
+    stats->getMod()->emit(blockFrameOffsetStat, highestSendOffset);
 
     return frame;
 }

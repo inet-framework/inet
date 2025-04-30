@@ -27,10 +27,9 @@ Stream::Stream(uint64_t id, Connection *connection, Statistics *connStats) {
     this->streamCreatedTime = simTime();
 
     this->stats = new Statistics(connStats, "_sid=" + std::to_string(id));
-    sendBufferUnsentDataStat = stats->createStatisticEntry("sendBufferUnsentData");
-    streamRcvDataBytesStat = stats->createStatisticEntry("streamRcvDataBytes");
-    streamTotalRcvDataBytesStat = stats->createStatisticEntry("streamTotalRcvDataBytes");
-    stats->getMod()->emit(streamRcvDataBytesStat, (unsigned long)totalStreamRcvDataBytes);
+    sendBufferUnsentAppDataStat = stats->createStatisticEntry("sendBufferUnsentAppData");
+    streamRcvAppDataStat = stats->createStatisticEntry("streamRcvAppData");
+    stats->getMod()->emit(streamRcvAppDataStat, (uint64_t)0);
 
     auto tp = connection->getLocalTransportParameters();
     streamFlowController = new StreamFlowController(id, tp->initialMaxStreamData, stats);
@@ -52,7 +51,7 @@ Stream::~Stream() {
 void Stream::enqueueDataFromApp(Ptr<const Chunk> data)
 {
     sendQueue.addData(data);
-    stats->getMod()->emit(sendBufferUnsentDataStat, (unsigned long)sendQueue.getTotalDataLengthToSend());
+    stats->getMod()->emit(sendBufferUnsentAppDataStat, sendQueue.getTotalDataLengthToSend());
 }
 
 uint64_t Stream::getSendQueueLength()
@@ -132,7 +131,7 @@ QuicFrame *Stream::generateStreamFrame(uint64_t offset, uint64_t length)
     QuicStreamFrame *frame = new QuicStreamFrame(this);
     frame->setHeader(header);
 
-    stats->getMod()->emit(sendBufferUnsentDataStat, (unsigned long)sendQueue.getTotalDataLengthToSend());
+    stats->getMod()->emit(sendBufferUnsentAppDataStat, sendQueue.getTotalDataLengthToSend());
 
     /* TODO: How to count retransmitted data?
     streamFlowController->onStreamFrameSent(B(region.length).get());
@@ -186,7 +185,7 @@ QuicFrame *Stream::generateNextStreamFrame(uint64_t maxFrameSize)
     QuicStreamFrame *frame = new QuicStreamFrame(this);
     frame->setHeader(header);
 
-    stats->getMod()->emit(sendBufferUnsentDataStat, (unsigned long)sendQueue.getTotalDataLengthToSend());
+    stats->getMod()->emit(sendBufferUnsentAppDataStat, sendQueue.getTotalDataLengthToSend());
 
     streamFlowController->onStreamFrameSent(B(region.length).get());
     connectionFlowController->onStreamFrameSent(B(region.length).get());
@@ -215,7 +214,7 @@ void Stream::streamDataLost(uint64_t offset, uint64_t length)
     sendQueue.dataLost(B(offset), B(length));
     streamFlowController->onStreamFrameLost(length);
     connectionFlowController->onStreamFrameLost(length);
-    stats->getMod()->emit(sendBufferUnsentDataStat, (unsigned long)sendQueue.getTotalDataLengthToSend());
+    stats->getMod()->emit(sendBufferUnsentAppDataStat, sendQueue.getTotalDataLengthToSend());
 }
 
 void Stream::streamDataAcked(uint64_t offset, uint64_t length)
@@ -323,9 +322,7 @@ void Stream::onMaxStreamDataFrameLost()
 
 void Stream::measureStreamRcvDataBytes(uint64_t dataLength)
 {
-    totalStreamRcvDataBytes +=dataLength;
-    stats->getMod()->emit(streamTotalRcvDataBytesStat, (unsigned long)totalStreamRcvDataBytes);
-    stats->getMod()->emit(streamRcvDataBytesStat, (unsigned long)dataLength);
+    stats->getMod()->emit(streamRcvAppDataStat, dataLength);
 }
 
 } /* namespace quic */

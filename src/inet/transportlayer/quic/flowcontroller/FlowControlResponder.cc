@@ -24,11 +24,11 @@ FlowControlResponder::FlowControlResponder(Statistics *stats) {
     this->genMaxDataFrameCountStat = stats->createStatisticEntry("generatedMaxDataFrameCount");
     this->maxDataFrameOffsetStat = stats->createStatisticEntry("maxDataFrameOffset");
     this->consumedDataStat = stats->createStatisticEntry("consumedData");
-    this->retransmitFCUpdateStat = stats->createStatisticEntry("retransmitFCUpdateCount");
+    this->maxDataFrameLostCountStat = stats->createStatisticEntry("maxDataFrameLostCount");
 
-    stats->getMod()->emit(rcvBlockFrameCountStat, (unsigned long)rcvBlockFrameCount);
-    stats->getMod()->emit(genMaxDataFrameCountStat, (unsigned long)generatedMaxDataFrameCount);
-    stats->getMod()->emit(retransmitFCUpdateStat, (unsigned long)retransmitFCUpdateCount);
+    stats->getMod()->emit(rcvBlockFrameCountStat, rcvBlockFrameCount);
+    stats->getMod()->emit(genMaxDataFrameCountStat, generatedMaxDataFrameCount);
+    stats->getMod()->emit(maxDataFrameLostCountStat, maxDataFrameLostCount);
 }
 
 FlowControlResponder::~FlowControlResponder() {
@@ -38,7 +38,7 @@ FlowControlResponder::~FlowControlResponder() {
 void FlowControlResponder::updateConsumedData(uint64_t dataSize){
     lastConsumedData = consumedData;
     consumedData += dataSize;
-    stats->getMod()->emit(consumedDataStat, (unsigned long)consumedData);
+    stats->getMod()->emit(consumedDataStat, consumedData);
 }
 
 uint64_t FlowControlResponder::getRcvwnd() {

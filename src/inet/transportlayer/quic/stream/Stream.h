@@ -79,10 +79,8 @@ private:
     ConnectionFlowControlResponder *connectionFlowControlResponder = nullptr;
 
     Statistics *stats;
-    simsignal_t sendBufferUnsentDataStat;
-    simsignal_t streamRcvDataBytesStat;
-    simsignal_t streamTotalRcvDataBytesStat;
-    uint64_t totalStreamRcvDataBytes = 0;
+    simsignal_t sendBufferUnsentAppDataStat;
+    simsignal_t streamRcvAppDataStat;
     simtime_t streamCreatedTime;
 
     Ptr<StreamFrameHeader> createHeader(StreamSndQueue::Region region);

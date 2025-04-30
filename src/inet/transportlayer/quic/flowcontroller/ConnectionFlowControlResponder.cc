@@ -52,22 +52,23 @@ QuicFrame *ConnectionFlowControlResponder::generateMaxDataFrame(){
 
     auto *frame = new QuicMaxDataFrame(connection, maxReceiveOffset);
 
-    stats->getMod()->emit(genMaxDataFrameCountStat, (unsigned long)generatedMaxDataFrameCount);
-    stats->getMod()->emit(maxDataFrameOffsetStat, (unsigned long)maxReceiveOffset);
+    stats->getMod()->emit(genMaxDataFrameCountStat, generatedMaxDataFrameCount);
+    stats->getMod()->emit(maxDataFrameOffsetStat, maxReceiveOffset);
 
     return frame;
 }
 
 void ConnectionFlowControlResponder::onDataBlockedFrameReceived(uint64_t dataLimit){
     EV_DEBUG << "received Data_Blocked frame. Connection-limit = " << dataLimit << endl;
-    stats->getMod()->emit(rcvBlockFrameCountStat, (unsigned long)rcvBlockFrameCount++);
+    rcvBlockFrameCount++;
+    stats->getMod()->emit(rcvBlockFrameCountStat, rcvBlockFrameCount);
 }
 
 
 QuicFrame *ConnectionFlowControlResponder::onMaxDataFrameLost(){
     EV_DEBUG << "retransmit CFC update" << endl;
-    retransmitFCUpdateCount++;
-    stats->getMod()->emit(retransmitFCUpdateStat, (unsigned long)retransmitFCUpdateCount);
+    maxDataFrameLostCount++;
+    stats->getMod()->emit(maxDataFrameLostCountStat, maxDataFrameLostCount);
 
     if(isSendMaxDataFrame()){
         return generateMaxDataFrame();

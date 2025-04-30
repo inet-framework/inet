@@ -24,8 +24,8 @@ StreamRcvQueue::StreamRcvQueue(Stream *stream, Statistics *stats) {
     reorderBuffer.setExpectedOffset(B(startSeq));
 
     this->stats = stats;
-    this->rcvStreamFrameStartOffsetStat = stats->createStatisticEntry("rcvStreamFrameStartOffset");
-    this->rcvStreamFrameEndOffsetStat = stats->createStatisticEntry("rcvStreamFrameEndOffset");
+    this->streamRcvFrameStartOffsetStat = stats->createStatisticEntry("streamRcvFrameStartOffset");
+    this->streamRcvFrameEndOffsetStat = stats->createStatisticEntry("streamRcvFrameEndOffset");
 }
 
 StreamRcvQueue::~StreamRcvQueue() {
@@ -38,8 +38,8 @@ void StreamRcvQueue::push(Ptr<const Chunk> data, uint64_t offset){
     uint64_t dataStartOffset = offset;
     uint64_t dataEndOffset = offset + offsetToSeq(data->getChunkLength());
 
-    stats->getMod()->emit(rcvStreamFrameStartOffsetStat, (unsigned long)dataStartOffset);
-    stats->getMod()->emit(rcvStreamFrameEndOffsetStat, (unsigned long)dataEndOffset);
+    stats->getMod()->emit(streamRcvFrameStartOffsetStat, dataStartOffset);
+    stats->getMod()->emit(streamRcvFrameEndOffsetStat, dataEndOffset);
 
 
     CHUNK_CHECK_USAGE(data != nullptr, "data is nullptr");

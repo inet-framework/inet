@@ -26,8 +26,8 @@ FlowController::FlowController(Statistics *stats) {
     this->rcvMaxFrameCountStat = stats->createStatisticEntry("rcvMaxFrameCount");
     this->blockFrameOffsetStat = stats->createStatisticEntry("blockFrameOffset");
 
-    stats->getMod()->emit(rcvMaxFrameCountStat, (unsigned long)rcvMaxFrameCount);
-    stats->getMod()->emit(genBlockFrameCountStat, (unsigned long)generatedBlockFrameCount);
+    stats->getMod()->emit(rcvMaxFrameCountStat, rcvMaxFrameCount);
+    stats->getMod()->emit(genBlockFrameCountStat, generatedBlockFrameCount);
 }
 
 FlowController::~FlowController() {
@@ -43,15 +43,15 @@ void FlowController::onMaxFrameReceived(uint64_t newMaxDataOffset){
     if(maxDataOffset < newMaxDataOffset){
          maxDataOffset = newMaxDataOffset;
          rcvMaxFrameCount++;
-         stats->getMod()->emit(rcvMaxFrameCountStat, (unsigned long)rcvMaxFrameCount);
+         stats->getMod()->emit(rcvMaxFrameCountStat, rcvMaxFrameCount);
      }
 
-    stats->getMod()->emit(availableRwndStat, (unsigned long)getAvailableRwnd());
+    stats->getMod()->emit(availableRwndStat, getAvailableRwnd());
 }
 
 void FlowController::onStreamFrameSent(uint64_t size){
     highestSendOffset += size;
-    stats->getMod()->emit(availableRwndStat, (unsigned long)getAvailableRwnd());
+    stats->getMod()->emit(availableRwndStat, getAvailableRwnd());
 }
 
 bool FlowController::isDataBlockedFrameWasSend(){

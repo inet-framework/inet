@@ -64,84 +64,82 @@ simple Quic like IQuic
         @display("i=block/transport");
 
         // Connection
-        @signal[packetReceived](type=cPacket);
-        @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @signal[packetSent](type=cPacket);
-        @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @signal[packetReceived](type=cPacket); // should be per connection
+        @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @signal[packetSent](type=cPacket); // should be per connection
+        @statistic[packetSent](title="packets sent"; source=packetSent; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @signal[packetNumberReceived*];
-        @statisticTemplate[packetNumberReceived](record=vector);
+        @statisticTemplate[packetNumberReceived](title="packet number received"; record=vector; interpolationmode=none);
         @signal[packetNumberSent*];
-        @statisticTemplate[packetNumberSent](record=vector);
-        @signal[totalReceivedDataBytes*];
-        @statisticTemplate[totalReceivedDataBytes](record=vector);
-        @signal[sendBufferUnsentData*];
-        @statisticTemplate[sendBufferUnsentData](record=vector);
+        @statisticTemplate[packetNumberSent](title="packet number sent"; record=vector; interpolationmode=none);
+        @signal[totalRcvAppData*];
+        @statisticTemplate[totalRcvAppData](title="total received app data"; record=vector; interpolationmode=sample-hold; unit=B);
+        @signal[sendBufferUnsentAppData*];
+        @statisticTemplate[sendBufferUnsentAppData](title="send buffer unsent app data"; record=vector; interpolationmode=sample-hold; unit=B);
 
         // Stream
-        @signal[streamRcvDataBytes*];
-        @statisticTemplate[streamRcvDataBytes](record=vector);
-        @signal[streamTotalRcvDataBytes*];
-        @statisticTemplate[streamTotalRcvDataBytes](record=vector);
-        @signal[rcvStreamFrameStartOffset*];
-        @statisticTemplate[rcvStreamFrameStartOffset](record=vector);
-        @signal[rcvStreamFrameEndOffset*];
-        @statisticTemplate[rcvStreamFrameEndOffset](record=vector);
+        @signal[streamRcvAppData*];
+        @statisticTemplate[streamRcvAppData](title="stream received app data"; record=vector,vector(sum); interpolationmode=none,sample-hold; unit=B);
+        @signal[streamRcvFrameStartOffset*];
+        @statisticTemplate[streamRcvFrameStartOffset](title="stream received frame start offset"; record=vector; interpolationmode=none; unit=B);
+        @signal[streamRcvFrameEndOffset*];
+        @statisticTemplate[streamRcvFrameEndOffset](title="stream received frame end offset"; record=vector; interpolationmode=none; unit=B);
 
         // Reliability and Congestion Control
         @signal[cwnd*];
-        @statisticTemplate[cwnd](record=vector);
-        @signal[latestRtt*];
-        @statisticTemplate[latestRtt](record=vector);
+        @statisticTemplate[cwnd](title="congestion window"; record=vector; interpolationmode=sample-hold; unit=B);
+        @signal[latestRtt*](type=simtime_t);
+        @statisticTemplate[latestRtt](title="latest RTT"; record=vector; interpolationmode=none);
         @signal[bytesInFlight*];
-        @statisticTemplate[bytesInFlight](record=vector);
+        @statisticTemplate[bytesInFlight](title="bytes in flight"; record=vector; interpolationmode=sample-hold; unit=B);
         @signal[partialBytesAcked*];
-        @statisticTemplate[partialBytesAcked](record=vector);
-        @signal[persistentCongestionPeriod*];
-        @statisticTemplate[persistentCongestionPeriod](record=vector);
+        @statisticTemplate[partialBytesAcked](title="partial bytes acked"; record=vector; interpolationmode=sample-hold; unit=B);
+        @signal[persistentCongestionPeriod*](type=simtime_t);
+        @statisticTemplate[persistentCongestionPeriod](title="persistent congestion period"; record=vector; interpolationmode=none;);
 
         // Flow Control
         @signal[availableRwnd*];
-        @statisticTemplate[availableRwnd](record=vector);
+        @statisticTemplate[availableRwnd](title="available receive window"; record=vector; interpolationmode=sample-hold; unit=B);
         @signal[generatedBlockFrameCount*];
-        @statisticTemplate[generatedBlockFrameCount](record=last);   
+        @statisticTemplate[generatedBlockFrameCount](title="number of generated (STREAM_)DATA_BLOCKED frames"; record=last);
         @signal[blockFrameOffset*];
-        @statisticTemplate[blockFrameOffset](record=vector);     
+        @statisticTemplate[blockFrameOffset](title="offsets in (STREAM_)DATA_BLOCKED frames"; record=vector; interpolationmode=sample-hold; unit=B);
         @signal[rcvMaxFrameCount*];
-        @statisticTemplate[rcvMaxFrameCount](record=last);
+        @statisticTemplate[rcvMaxFrameCount](title="number of received MAX_(STREAM_)DATA frames"; record=last);
 
         // Flow Control Responder
         @signal[rcvBlockFrameCount*];
-        @statisticTemplate[rcvBlockFrameCount](record=last);
+        @statisticTemplate[rcvBlockFrameCount](title="number of received (STREAM_)DATA_BLOCKED frames"; record=last);
 		@signal[generatedMaxDataFrameCount*];
-        @statisticTemplate[generatedMaxDataFrameCount](record=last); 
+        @statisticTemplate[generatedMaxDataFrameCount](title="number of generated MAX_(STREAM_)DATA frames"; record=last);
         @signal[maxDataFrameOffset*];
-        @statisticTemplate[maxDataFrameOffset](record=vector);
+        @statisticTemplate[maxDataFrameOffset](title="offsets in MAX_(STREAM_)DATA frames"; record=vector; interpolationmode=sample-hold; unit=B);
         @signal[consumedData*];
-        @statisticTemplate[consumedData](record=vector);
-        @signal[retransmitFCUpdateCount*];
-        @statisticTemplate[retransmitFCUpdateCount](record=last);
+        @statisticTemplate[consumedData](title="data consumed by app"; record=vector; interpolationmode=sample-hold; unit=B);
+        @signal[maxDataFrameLostCount*];
+        @statisticTemplate[maxDataFrameLostCount](title="number of lost MAX_(STREAM_)DATA frames"; record=last);
 
         // Path MTU Discovery
         @signal[usedMaxQuicPacketSize*];
-        @statisticTemplate[usedMaxQuicPacketSize](record=vector);
+        @statisticTemplate[usedMaxQuicPacketSize](title="QUIC packet size limit"; record=vector; interpolationmode=sample-hold; unit=B);
         @signal[dplpmtudSearchPmtu*];
-        @statisticTemplate[dplpmtudSearchPmtu](record=vector);
+        @statisticTemplate[dplpmtudSearchPmtu](title="PMTU of DPLPMTUD"; record=vector; interpolationmode=sample-hold; unit=B);
         @signal[dplpmtudSearchNumberOfTests*];
-        @statisticTemplate[dplpmtudSearchNumberOfTests](record=last);
-        @signal[dplpmtudSearchTime*];
-        @statisticTemplate[dplpmtudSearchTime](record=last);
+        @statisticTemplate[dplpmtudSearchNumberOfTests](title="number of tested PMTU candidates"; record=last);
+        @signal[dplpmtudSearchTime*](type=simtime_t);
+        @statisticTemplate[dplpmtudSearchTime](title="time required by the last PMTU search"; record=last);
         @signal[dplpmtudSearchNetworkLoad*];
-        @statisticTemplate[dplpmtudSearchNetworkLoad](record=last);
+        @statisticTemplate[dplpmtudSearchNetworkLoad](title="network load caused by the last PMTU search"; record=last; unit=B);
         @signal[dplpmtudInvalidSignals*];
-        @statisticTemplate[dplpmtudInvalidSignals](record=vector);
+        @statisticTemplate[dplpmtudInvalidSignals](title="largest acked packet size at PMTU invalid signal"; record=vector; ; interpolationmode=none; unit=B);
         @signal[dplpmtudNumOfProbesBeforeAck*];
-        @statisticTemplate[dplpmtudNumOfProbesBeforeAck](record=vector);
+        @statisticTemplate[dplpmtudNumOfProbesBeforeAck](title="number of probe packets sent before receiving ack"; record=vector; interpolationmode=none);
         @signal[pmtuValidatorNumberOfLostPackets*];
-        @statisticTemplate[pmtuValidatorNumberOfLostPackets](record=vector);
-        @signal[pmtuValidatorTimeBetweenLostPackets*];
-        @statisticTemplate[pmtuValidatorTimeBetweenLostPackets](record=vector);
+        @statisticTemplate[pmtuValidatorNumberOfLostPackets](title="number of lost packets for PMTU validation"; record=vector; interpolationmode=sample-hold);
+        @signal[pmtuValidatorTimeBetweenLostPackets*](type=simtime_t);
+        @statisticTemplate[pmtuValidatorTimeBetweenLostPackets](title="sent time difference of lost packets for PMTU validation"; record=vector; interpolationmode=sample-hold);
         @signal[pmtuValidatorPersistentCongestions*];
-        @statisticTemplate[pmtuValidatorPersistentCongestions](record=vector);
+        @statisticTemplate[pmtuValidatorPersistentCongestions](title="number of consecutive persistent congestions for PMTU validation"; record=vector; interpolationmode=sample-hold);
 
     gates:
         input appIn @labels(QuicCommand/down) @messageKinds(inet::QuicCommandCode);

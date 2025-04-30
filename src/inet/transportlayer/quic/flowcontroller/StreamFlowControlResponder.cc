@@ -58,16 +58,16 @@ QuicFrame *StreamFlowControlResponder::generateMaxDataFrame(){
     EV_DEBUG << " to " << maxReceiveOffset << endl;
     auto *frame = new QuicMaxStreamDataFrame(stream, maxReceiveOffset);
 
-    stats->getMod()->emit(genMaxDataFrameCountStat, (unsigned long)generatedMaxDataFrameCount);
-    stats->getMod()->emit(maxDataFrameOffsetStat, (unsigned long)maxReceiveOffset);
+    stats->getMod()->emit(genMaxDataFrameCountStat, generatedMaxDataFrameCount);
+    stats->getMod()->emit(maxDataFrameOffsetStat, maxReceiveOffset);
 
     return frame;
 }
 
 QuicFrame *StreamFlowControlResponder::onMaxDataFrameLost(){
     EV_DEBUG << "retransmit FC update" << endl;
-    retransmitFCUpdateCount++;
-    stats->getMod()->emit(retransmitFCUpdateStat, (unsigned long)retransmitFCUpdateCount);
+    maxDataFrameLostCount++;
+    stats->getMod()->emit(maxDataFrameLostCountStat, maxDataFrameLostCount);
 
 
     if(isSendMaxDataFrame()){
@@ -81,7 +81,8 @@ QuicFrame *StreamFlowControlResponder::onMaxDataFrameLost(){
 
 void StreamFlowControlResponder::onDataBlockedFrameReceived(uint64_t dataLimit){
     EV_DEBUG << "received Data_Blocked frame. Blocking offset= " << dataLimit << endl;
-    stats->getMod()->emit(rcvBlockFrameCountStat, (unsigned long)rcvBlockFrameCount++);
+    rcvBlockFrameCount++;
+    stats->getMod()->emit(rcvBlockFrameCountStat, rcvBlockFrameCount);
 }
 
 } /* namespace quic */
