@@ -29,7 +29,7 @@ namespace power {
  * See the corresponding NED file for more details.
  *
  */
-class INET_API SimpleEpEnergyStorage : public EpEnergyStorageBase, public StringFormat::IDirectiveResolver, public LifecycleController
+class INET_API SimpleEpEnergyStorage : public EpEnergyStorageBase, public StringFormat::IResolver, public LifecycleController
 {
   protected:
     /**

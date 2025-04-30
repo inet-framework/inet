@@ -18,7 +18,7 @@
 
 namespace inet {
 
-class INET_API MacRelayUnitBase : public LayeredProtocolBase, public StringFormat::IDirectiveResolver
+class INET_API MacRelayUnitBase : public LayeredProtocolBase, public StringFormat::IResolver
 {
   protected:
     ModuleRefByPar<IInterfaceTable> interfaceTable;

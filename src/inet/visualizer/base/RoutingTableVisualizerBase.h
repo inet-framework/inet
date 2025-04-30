@@ -44,7 +44,7 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
         virtual ~MulticastRouteVisualization() {}
     };
 
-    class INET_API DirectiveResolver : public StringFormat::IDirectiveResolver {
+    class INET_API DirectiveResolver : public StringFormat::IResolver {
       protected:
         const Ipv4Route *route = nullptr;
 
@@ -54,7 +54,7 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
         virtual std::string resolveDirective(char directive) const override;
     };
 
-    class INET_API MulticastDirectiveResolver : public StringFormat::IDirectiveResolver {
+    class INET_API MulticastDirectiveResolver : public StringFormat::IResolver {
       protected:
         const Ipv4MulticastRoute *route = nullptr;
 

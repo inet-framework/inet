@@ -13,7 +13,7 @@
 
 namespace inet {
 
-class INET_API OscillatorBase : public cSimpleModule, public IOscillator, public StringFormat::IDirectiveResolver
+class INET_API OscillatorBase : public cSimpleModule, public IOscillator, public StringFormat::IResolver
 {
   public:
     static simsignal_t driftRateChangedSignal;

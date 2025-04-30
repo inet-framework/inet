@@ -17,7 +17,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API PacketProcessorBase : public cSimpleModule, public virtual IPacketProcessor, public StringFormat::IDirectiveResolver
+class INET_API PacketProcessorBase : public cSimpleModule, public virtual IPacketProcessor, public StringFormat::IResolver
 {
   protected:
     enum Action {

@@ -20,7 +20,7 @@ namespace inet {
 /**
  * Dumps every packet using the IPacketWriter and PacketDump classes
  */
-class INET_API PcapRecorder : public cSimpleModule, protected cListener, public StringFormat::IDirectiveResolver, public PacketDissector::ICallback
+class INET_API PcapRecorder : public cSimpleModule, protected cListener, public StringFormat::IResolver, public PacketDissector::ICallback
 {
   public:
     class INET_API IHelper {

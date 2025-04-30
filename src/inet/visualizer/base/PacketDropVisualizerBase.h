@@ -53,7 +53,7 @@ class INET_API PacketDropVisualizerBase : public VisualizerBase, public cListene
         virtual ~PacketDropVisualization();
     };
 
-    class INET_API DirectiveResolver : public StringFormat::IDirectiveResolver {
+    class INET_API DirectiveResolver : public StringFormat::IResolver {
       protected:
         const PacketDrop *packetDrop = nullptr;
 

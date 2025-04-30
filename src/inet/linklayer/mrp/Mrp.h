@@ -25,7 +25,7 @@ namespace inet {
 /**
  * Implements the base part of the MRP protocol, i.e. roles MRC, MRM and MRA.
  */
-class INET_API Mrp: public OperationalBase, public cListener, public StringFormat::IDirectiveResolver
+class INET_API Mrp: public OperationalBase, public cListener, public StringFormat::IResolver
 {
 public:
     enum FrameType : uint64_t {

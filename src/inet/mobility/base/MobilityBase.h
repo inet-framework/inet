@@ -37,7 +37,7 @@ namespace inet {
 class INET_API MobilityBase : public cSimpleModule, public IMobility
 {
   protected:
-    class INET_API DirectiveResolver : public StringFormat::IDirectiveResolver {
+    class INET_API DirectiveResolver : public StringFormat::IResolver {
       protected:
         IMobility *mobility = nullptr;
 

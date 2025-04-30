@@ -13,7 +13,7 @@
 
 namespace inet {
 
-class INET_API Ipv4NetworkLayer : public cModule, public StringFormat::IDirectiveResolver
+class INET_API Ipv4NetworkLayer : public cModule, public StringFormat::IResolver
 {
   protected:
     virtual void refreshDisplay() const override;

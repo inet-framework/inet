@@ -18,7 +18,7 @@ namespace inet {
 
 namespace power {
 
-class INET_API SimpleCcBattery : public CcEnergyStorageBase, public StringFormat::IDirectiveResolver, public LifecycleController
+class INET_API SimpleCcBattery : public CcEnergyStorageBase, public StringFormat::IResolver, public LifecycleController
 {
   protected:
     // parameters

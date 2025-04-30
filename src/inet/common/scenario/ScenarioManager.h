@@ -42,7 +42,7 @@ class INET_API cPostModuleInitNotification : public cModelChangeNotification
  *
  * @see IScriptable
  */
-class INET_API ScenarioManager : public cSimpleModule, public LifecycleController, public StringFormat::IDirectiveResolver
+class INET_API ScenarioManager : public cSimpleModule, public LifecycleController, public StringFormat::IResolver
 {
   protected:
     // total number of changes, and number of changes already done
