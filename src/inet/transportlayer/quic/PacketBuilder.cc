@@ -121,7 +121,7 @@ QuicPacket *PacketBuilder::createPacket(PacketNumberSpace pnSpace, bool skipPack
             }
             break;
     }
-    QuicPacket *packet = new QuicPacket(packetName.str());;
+    QuicPacket *packet = new QuicPacket(packetName.str());
     packet->setHeader(header);
 
     return packet;
