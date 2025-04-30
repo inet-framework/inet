@@ -123,12 +123,15 @@ void PcapWriter::writePacket(simtime_t stime, const Packet *packet, b frontOffse
         case 9: ph.ts_usec = (uint32_t)(stime.inUnit(SIMTIME_NS) - (uint32_t)1000000000 * stime.inUnit(SIMTIME_S)); break;
         default: throw cRuntimeError("Unsupported time precision (%d) in PcapWriter.", timePrecision);
     }
-    auto data = packet->peekDataAt<BytesChunk>(frontOffset, packet->getDataLength() - frontOffset - backOffset);
-    auto bytes = data->getBytes();
-    for (size_t i = 0; i < bytes.size(); i++) {
-        buf[i] = bytes[i];
+    b capturedLength = packet->getDataLength() - frontOffset - backOffset;
+    if (capturedLength != b(0)) {
+        auto data = packet->peekDataAt<BytesChunk>(frontOffset, capturedLength);
+        auto bytes = data->getBytes();
+        for (size_t i = 0; i < bytes.size(); i++) {
+            buf[i] = bytes[i];
+        }
     }
-    ph.orig_len = data->getChunkLength().get<B>();
+    ph.orig_len = capturedLength.get<B>();
 
     ph.incl_len = ph.orig_len > snaplen ? snaplen : ph.orig_len;
     fwrite(&ph, sizeof(ph), 1, dumpfile);
