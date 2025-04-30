@@ -30,6 +30,7 @@ ReliabilityManager::ReliabilityManager(Connection *connection, TransportParamete
     this->congestionController = congestionController;
     this->stats = stats;
     this->reducePacketTimeThreshold = connection->getModule()->par("reducePacketTimeThreshold");
+    this->reducePacketPtoFactorThreshold = connection->getModule()->par("reducePacketPtoFactorThreshold");
 
     Path *path = connection->getPath();
 
@@ -651,10 +652,8 @@ void ReliabilityManager::onPacketsLost(std::vector<QuicPacket*> *lostPackets)
 SimTime ReliabilityManager::getReducePacketSizeTime() {
     if (reducePacketTimeThreshold < SimTime::ZERO) {
         Path *path = connection->getPath();
-        //EV_DEBUG << "ReliabilityManager: E = " << path->smoothedRtt << " + " << SimTime().setRaw(std::max(4 * path->rttVar.raw(), kGranularity.raw())) << " + " << transportParameter->maxAckDelay << " = " << (path->smoothedRtt + SimTime().setRaw(std::max(4 * path->rttVar.raw(), kGranularity.raw()))) + transportParameter->maxAckDelay << endl;
         SimTime pto = (path->smoothedRtt + SimTime().setRaw(std::max(4 * path->rttVar.raw(), kGranularity.raw()))) + transportParameter->maxAckDelay;
-        //EV_DEBUG << "ReliabilityManager: w = " << simTime() << " - (" << -reducePacketTimeThreshold.inUnit(SimTimeUnit::SIMTIME_S) << " * " << pto << ") = " << simTime() << " - " << (-reducePacketTimeThreshold.inUnit(SimTimeUnit::SIMTIME_S) * pto) << " = " << simTime() - (-reducePacketTimeThreshold.inUnit(SimTimeUnit::SIMTIME_S) * pto) << endl;
-        return simTime() - (-reducePacketTimeThreshold.inUnit(SimTimeUnit::SIMTIME_S) * pto);
+        return simTime() - (reducePacketPtoFactorThreshold * pto);
     } else {
         return simTime() - reducePacketTimeThreshold;
     }

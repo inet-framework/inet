@@ -53,6 +53,7 @@ private:
 
     int lostPacketsThreshold;
     SimTime pmtuInvalidTimeThreshold;
+    int pmtuInvalidSrttFactorThreshold;
     int invalidOnPersistentCongestion;
 
     simsignal_t numberOfLostPacketsStat;

@@ -67,6 +67,7 @@ private:
     simtime_t minRtt;
     simtime_t firstRttSample;
     simtime_t reducePacketTimeThreshold;
+    int reducePacketPtoFactorThreshold;
     uint ptoCount;
     uint persistentCongestionCounter;
 

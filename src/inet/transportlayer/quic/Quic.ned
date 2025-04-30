@@ -55,11 +55,13 @@ simple Quic like IQuic
         bool skipPacketNumberForDplpmtudProbePackets = default(false); // Specifies whether to skip a packet number for a DPLPMTUD probe packet in order to avoid ack delay.
         int useCwndForParallelProbes = default(0); // If 0, no parallel probe packets; if 1, uses the availbale cwnd to send additional probe packets and if 2 prefers to send probe packets over other packets.
         bool sendDataDuringInitalDplpmtudBase = default(true); // If false, waits for DPLPMTUD switching initially to SEARCH before start sending application data.
-        bool dplpmtudUsePmtuValidator = default (true); // If true, activates the PMTU Validator that trys to detect when the current PMTU estimation is larger than the actual PMTU.
+        bool dplpmtudUsePmtuValidator = default(true); // If true, activates the PMTU Validator that trys to detect when the current PMTU estimation is larger than the actual PMTU.
         int pmtuValidatorLostPacketsThreshold = default(2); // Specifies the number of lost data packets before assuming a decreased PMTU.
-        double pmtuValidatorTimeThreshold @unit(s) = default(-1s); // Specifies the time threshold between two lost packets (if negative, the number of seconds are used multiplied by SRTT).
+        double pmtuValidatorTimeThreshold @unit(s) = default(-1s); // Specifies the time threshold between two lost packets. If negative, pmtuValidatorSrttFactorThreshold is used instead.
+        int pmtuValidatorSrttFactorThreshold = default(1); // If pmtuValidatorTimeThreshold is negative, this number multiplied by SRTT is used instead.
         int pmtuValidatorInvalidOnPersistentCongestion = default(1); // If 0, disabled. If 1, the PMTU validator uses persistent congeation as signal for a decreased PMTU. If 2, only two consecutive persisten congestions used as signal. If 3, ...
-        double reducePacketTimeThreshold @unit(s) = default(0s); // Specifies after which time with no acks, packets with reduced size are sent (if negative, the number of seconds are used multiplied by PTO).
+        double reducePacketTimeThreshold @unit(s) = default(0s); // Specifies after which time with no acks, packets with reduced size are sent. If zero, packet size reduction is disabled. If negative, reducePacketPtoFactorThreshold is used instead.
+        int reducePacketPtoFactorThreshold = default(3); // If reducePacketTimeThreshold is negative, this number multiplied by PTO is used instead.
 
         @display("i=block/transport");
 

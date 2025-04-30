@@ -41,6 +41,7 @@ PmtuValidator::PmtuValidator(PmtuValidator *copy) {
 
     this->lostPacketsThreshold = copy->lostPacketsThreshold;
     this->pmtuInvalidTimeThreshold = copy->pmtuInvalidTimeThreshold;
+    this->pmtuInvalidSrttFactorThreshold = copy->pmtuInvalidSrttFactorThreshold;
     this->invalidOnPersistentCongestion = copy->invalidOnPersistentCongestion;
 }
 
@@ -50,6 +51,7 @@ void PmtuValidator::readParameters(cModule *module)
 {
     this->lostPacketsThreshold = module->par("pmtuValidatorLostPacketsThreshold");
     this->pmtuInvalidTimeThreshold = module->par("pmtuValidatorTimeThreshold");
+    this->pmtuInvalidSrttFactorThreshold = module->par("pmtuValidatorSrttFactorThreshold");
     this->invalidOnPersistentCongestion = module->par("pmtuValidatorInvalidOnPersistentCongestion");
 }
 
@@ -230,7 +232,7 @@ void PmtuValidator::onPersistentCongestion(SimTime firstPacketSentTime, uint per
 simtime_t PmtuValidator::getPmtuInvalidTimeThreshold()
 {
     if (pmtuInvalidTimeThreshold < SimTime::ZERO) {
-        return -pmtuInvalidTimeThreshold.inUnit(SimTimeUnit::SIMTIME_S) * path->smoothedRtt;
+        return pmtuInvalidSrttFactorThreshold * path->smoothedRtt;
     } else {
         return pmtuInvalidTimeThreshold;
     }
