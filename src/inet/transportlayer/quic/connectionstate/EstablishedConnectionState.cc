@@ -31,7 +31,7 @@ ConnectionState *EstablishedConnectionState::processCloseAppCommand(cMessage *ms
 {
     EV_DEBUG << "processCloseAppCommand in " << name << endl;
     context->close(true, true);
-    return new CloseConnectionState(context);;
+    return new CloseConnectionState(context);
 }
 
 ConnectionState *EstablishedConnectionState::processRecvAppCommand(cMessage *msg)
