@@ -34,7 +34,7 @@ class INET_API QuicPacketHeaderSerializer : public FieldsChunkSerializer
     virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
     // Helper methods for serializing different types of QUIC packet headers
-    virtual void serializeLongPacketHeader(MemoryOutputStream& stream, const Ptr<const LongPacketHeader>& header) const;
+    virtual void serializeLongPacketHeader(MemoryOutputStream& stream, const Ptr<const LongPacketHeader>& header, uint8_t packetNumberLength) const;
     virtual void serializeShortPacketHeader(MemoryOutputStream& stream, const Ptr<const ShortPacketHeader>& header) const;
     virtual void serializeInitialPacketHeader(MemoryOutputStream& stream, const Ptr<const InitialPacketHeader>& header) const;
     virtual void serializeHandshakePacketHeader(MemoryOutputStream& stream, const Ptr<const HandshakePacketHeader>& header) const;
