@@ -33,7 +33,7 @@ simple PcapRecorder
 {
     parameters:
         bool verbose = default(true);  // Whether to log packets on the module output
-        bool recordEmptyPackets = default(false); // Specifies if zero length packets are recorded or not
+        bool recordEmptyPackets = default(true); // Specifies if zero length packets are recorded or not
         bool enableConvertingPackets = default(true); // Specifies if converting packets to link type is allowed or not
         string pcapFile = default(""); // The PCAP file to be written
         string fileFormat @enum("pcap", "pcapng") = default("pcapng");
