@@ -65,6 +65,7 @@ void PcapRecorder::visitChunk(const Ptr<const Chunk>& chunk, const Protocol *pro
 void PcapRecorder::initialize()
 {
     verbose = par("verbose");
+    recordEmptyPackets = par("recordEmptyPackets");
     snaplen = this->par("snaplen");
     dumpBadFrames = par("dumpBadFrames");
     signalList.clear();
@@ -203,21 +204,22 @@ void PcapRecorder::writePacket(const Protocol *protocol, const Packet *packet, b
     auto pcapLinkType = protocolToLinkType(protocol);
     if (pcapLinkType == LINKTYPE_INVALID)
         throw cRuntimeError("Cannot determine the PCAP link type from protocol '%s'", protocol->getName());
-    if (matchesLinkType(pcapLinkType, protocol)) {
+    bool convertPacket = !matchesLinkType(pcapLinkType, protocol);
+    if (convertPacket) {
+        packet = tryConvertToLinkType(packet, frontOffset, backOffset, pcapLinkType, protocol);
+        if (packet == nullptr)
+            throw cRuntimeError("The protocol '%s' doesn't match PCAP link type %d", protocol->getName(), pcapLinkType);
+        frontOffset = b(0);
+        backOffset = b(0);
+    }
+    b recordedLength = packet->getDataLength() - frontOffset - backOffset;
+    if (recordEmptyPackets || recordedLength != b(0)) {
         pcapWriter->writePacket(simTime(), packet, frontOffset, backOffset, direction, networkInterface, pcapLinkType);
         numRecorded++;
         emit(packetRecordedSignal, packet);
     }
-    else {
-        if (auto convertedPacket = tryConvertToLinkType(packet, frontOffset, backOffset, pcapLinkType, protocol)) {
-            pcapWriter->writePacket(simTime(), convertedPacket, b(0), b(0), direction, networkInterface, pcapLinkType);
-            numRecorded++;
-            emit(packetRecordedSignal, packet);
-            delete convertedPacket;
-        }
-        else
-            throw cRuntimeError("The protocol '%s' doesn't match PCAP link type %d", protocol->getName(), pcapLinkType);
-    }
+    if (convertPacket)
+        delete packet;
 }
 
 void PcapRecorder::recordPacket(const cPacket *cpacket, Direction direction, cComponent *source)

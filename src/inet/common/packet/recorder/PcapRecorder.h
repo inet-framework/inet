@@ -47,6 +47,7 @@ class INET_API PcapRecorder : public cSimpleModule, protected cListener, public 
     PacketFilter packetFilter;
     int numRecorded = 0;
     bool verbose = false;
+    bool recordEmptyPackets = false;
     bool recordPcap = false;
     std::vector<IHelper *> helpers;
     PacketPrinter packetPrinter;

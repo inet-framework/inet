@@ -33,6 +33,7 @@ simple PcapRecorder
 {
     parameters:
         bool verbose = default(true);  // Whether to log packets on the module output
+        bool recordEmptyPackets = default(false); // Specifies if zero length packets are recorded or not
         string pcapFile = default(""); // The PCAP file to be written
         string fileFormat @enum("pcap", "pcapng") = default("pcapng");
         int snaplen = default(65535);  // Maximum number of bytes to record per packet
