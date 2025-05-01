@@ -44,7 +44,7 @@ QuicFrame *ConnectionFlowControlResponder::generateMaxDataFrame(){
         maxReceiveOffset = consumedData + maxRcvwnd;
     } else {
         if((consumedData - lastConsumedData) < maxDataFrameThreshold){
-          maxReceiveOffset += maxRcvwnd - maxDataFrameThreshold;
+            maxReceiveOffset += maxRcvwnd - maxDataFrameThreshold;
         }else{
             maxReceiveOffset = consumedData + maxRcvwnd;
         }
