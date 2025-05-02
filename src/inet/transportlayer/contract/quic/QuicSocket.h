@@ -145,18 +145,10 @@ public:
         gateToQuic = toQuic;
     }
 
-    //void setMaxNumStreams(int maxNumStreams) { this->maxNumStreams = maxNumStreams; };
-
     /**
-     * Bind the socket to a local port number. Use port=0 for ephemeral port.
+     * Bind the socket to a local IP address and port number.
      */
-    void bind(int localPort);
-
-    /**
-     * Bind the socket to a local port number and IP address (useful with
-     * multi-homing or multicast addresses). Use port=0 for an ephemeral port.
-     */
-    void bind(L3Address localAddr, int localPort);
+    void bind(L3Address localAddr, uint16_t localPort);
 
     /**
      * Invokes PASSIVE_OPEN and makes the server listen on the binded port.
@@ -166,34 +158,25 @@ public:
     /**
      * Connects to a remote QUIC socket. This has two effects:
      * (1) this socket will only receive packets from specified address/port,
-     * and (2) you can use send() (as opposed to sendTo()) to send packets.
+     * and (2) you can use send() to send packets.
      */
-    void connect(L3Address remoteAddr, int remotePort);
+    void connect(L3Address remoteAddr, uint16_t remotePort);
 
     /**
-     * Sends a data packet to the address and port specified previously
-     * in a connect() call.
+     * Sends a message over the specified stream.
+     */
+    void send(Packet *msg, uint64_t streamId);
+
+    /**
+     * Calls send(msg, 0)
      */
     void send(Packet *msg) override;
 
     /**
-     * Sends control info command with expectedDataSize of given stream to QUIC.
+     * Requests to receive data with the specified length from the specified
+     * stream from QUIC.
      */
-    void recv(QuicRecvCommand *ctrInfo);
-    void recv(long length, long streamId);
-
-    /**
-     * Sends control info command with priority of given stream to QUIC.
-     * Is only active when priority-based scheduling has been enabled.
-     */
-
-    //void sendRequest(cMessage *msg);
-
-    /**
-     * Send request.
-     */
-
-    //void setStreamPriority(uint64_t streamID, uint32_t priority);
+    void recv(int64_t length, uint64_t streamId);
 
     /**
      * Unbinds the socket. Once closed, a closed socket may be bound to another

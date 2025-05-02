@@ -30,12 +30,10 @@ enum QuicCommandCode
     QUIC_C_CREATE_PCB = 0;
     QUIC_C_OPEN_PASSIVE = 1;
     QUIC_C_OPEN_ACTIVE = 2;
-    QUIC_C_SEND_APP_CLOSE = 3;
+    QUIC_C_CLOSE = 3;
     QUIC_C_SEND = 4;
-    QUIC_C_RECEIVE = 5; //app notify QUIC about amount of data ready to read
-    QUIC_C_SET_STREAM_PRIO = 6;
-    QUIC_C_QUEUE_MSGS_LIMIT = 7; //for trafficgen
-    QUIC_C_ACCEPT = 8;        // accept connection
+    QUIC_C_RECEIVE = 5;
+    QUIC_C_ACCEPT = 8;
 }
 
 
@@ -60,86 +58,57 @@ enum QuicStatusInd
     QUIC_I_MSG_REJECTED = 10;
 }
 
+//
+// Tag that allows to specify the stream.
+//
+class QuicStreamReq extends TagBase
+{
+    uint64_t streamID;
+}
 
 //
-// Base class for QUIC Command class. The most convenient way to handle
-// ~QUIC is the QUICSocket class, which hides commands from you.
+// Base class for QUIC Commands. The most convenient way to handle
+// ~QUIC is the QuicSocket class, which hides commands from you.
 //
-// sockId must uniquely identify the socket in the ~QUIC module; the best way
-// to achieve that is to obtain the value from QUICSocket::generateSocketId().
-//
-// @see ~QUICCommandCode
+// @see ~QuicCommandCode
 //
 class QuicCommand extends cObject
 {
-    //uint64_t connId = -1;
-}
-
-
-//
-// Control info to be used for active or passive QUIC open.
-//
-// localAddr, remoteAddr, localPort, remotePort should be self-explanatory.
-//
-// @see ~QUICCommandCode, ~IQUIC
-//
-class QuicOpenCommand extends QuicCommand
-{
-    L3Address localAddr; // may be left empty
-    L3Address remoteAddr;// required for active open
-    int localPort = -1;       // required for passive open
-    int remotePort = -1;      // required for active open
-    uint64_t maxNumStreams;
 }
 
 //
-// Control info for binding an QUIC socket. To create and bind a socket,
-// send a message to the ~QUIC module with kind=QUIC_C_CREATE_PCB and an
-// ~QUICBindCommand attached.
+// Control info for binding a QUIC socket. To create and bind a socket,
+// send a message to the ~Quic module with kind=QUIC_C_CREATE_PCB and a
+// ~QuicBindCommand attached.
 //
-// Both the address and the port may be left unset. If the port is
-// unset, ~QUIC will assign an ephemeral port.
-//
-// @see ~QUICCommandCode
+// @see ~QuicCommandCode
 //
 class QuicBindCommand extends QuicCommand
 {
     L3Address localAddr;
-    int localPort = -1;
+    uint16_t localPort;
 }
 
 //
-// Control info for sending data via QUIC. To send a packet, send it to
-// the ~QUIC module with kind=QUIC_C_SEND and an ~QUICSendCommand attached.
+// Control info to be used for active QUIC open (connect).
 //
-// QUIC_C_SEND/~QUICSendCommand models both the Unix send() and sendto() calls.
-// If the socket is connected, destAddr/destPort may be left blank (send()),
-// otherwise it must contain the destination for the packet (sendto()).
+// @see ~QuicCommandCode
 //
-// @see ~QUICCommandCode
-//
-class QuicSendCommand extends QuicCommand
+class QuicOpenCommand extends QuicCommand
 {
-    L3Address destAddr; // destination IPv4 or IPv6 address
-    int destPort = -1;     // destination port
-    L3Address srcAddr;       // source address
-    int interfaceId = -1; // interface on which the packet must be sent (see ~InterfaceTable)
-    long streamID = -1;
-    uint32_t streamPriority = 0;
-}
-
-class QuicStreamReq extends TagBase
-{
-    long streamID = -1;
+    L3Address remoteAddr;
+    uint16_t remotePort;
 }
 
 //
-// APP control info to let the QUIC know about expected data size to read
+// App command to let the QUIC know about expected data size to read.
+//
+// @see ~QuicCommandCode
 //
 class QuicRecvCommand extends QuicCommand
 {
-    long streamID = -1;
-    long expectedDataSize = -1; 
+    uint64_t streamID;
+    int64_t expectedDataSize;
 }
 
 //
@@ -187,22 +156,3 @@ class QuicConnectInfo extends QuicCommand
     int localPort;
     int remotePort;
 }
-
-//
-// Control info for closing an QUIC socket. To close a socket, send a message
-// to the ~QUIC module with kind=QUIC_C_CLOSE and an ~QUICCloseCommand attached.
-//
-// @see ~QUICCommandCode
-//
-class QuicCloseCommand extends QuicCommand
-{
-}
-
-//packet QuicSimpleMessage
-//{
-//    uint32 dataLen;
-//    char data[];
-//    simtime_t creationTime = 0;
-//    bool encaps = false;
-//}
-

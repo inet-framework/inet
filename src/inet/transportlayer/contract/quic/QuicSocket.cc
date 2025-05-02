@@ -17,15 +17,12 @@
 //
 
 #include "QuicSocket.h"
-
-#include "inet/common/Protocol.h"
 #include "QuicCommand_m.h"
+#include "inet/common/Protocol.h"
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/ProtocolTag_m.h"
-//#ifdef WITH_IPv4
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/tag/ITaggedObject.h"
-//#endif // ifdef WITH_IPv4
 
 namespace inet {
 
@@ -68,21 +65,12 @@ void QuicSocket::sendToQuic(cMessage *msg)
     check_and_cast<cSimpleModule *>(gateToQuic->getOwnerModule())->send(msg, gateToQuic);
 }
 
-void QuicSocket::bind(int localPort)
+void QuicSocket::bind(L3Address localAddr, uint16_t localPort)
 {
-    bind(L3Address(), localPort);
-}
-
-void QuicSocket::bind(L3Address localAddr, int localPort)
-{
-    if (localPort < -1 || localPort > 65535) // -1: ephemeral port
-        throw cRuntimeError("QuicSocket::bind(): invalid port number %d", localPort);
-
     this->localAddr = localAddr;
     this->localPort = localPort;
 
     QuicBindCommand *ctrl = new QuicBindCommand();
-    //ctrl->setConnId(connectionID);
     ctrl->setLocalAddr(localAddr);
     ctrl->setLocalPort(localPort);
     Request *request = new Request("BIND", QUIC_C_CREATE_PCB);
@@ -93,102 +81,66 @@ void QuicSocket::bind(L3Address localAddr, int localPort)
 
 void QuicSocket::listen()
 {
-    QuicOpenCommand *ctrl = new QuicOpenCommand();
-    //ctrl->setConnId(connectionID);
-    ctrl->setLocalAddr(localAddr);
-    ctrl->setLocalPort(localPort);
-    //ctrl->setMaxNumStreams(maxNumStreams);
     Request *request = new Request("LISTEN", QUIC_C_OPEN_PASSIVE);
-    request->setControlInfo(ctrl);
     sendToQuic(request);
     socketState = LISTENING;
 }
 
-void QuicSocket::connect(L3Address addr, int port)
+void QuicSocket::connect(L3Address addr, uint16_t port)
 {
     if (addr.isUnspecified())
         throw cRuntimeError("QuicSocket::connect(): unspecified remote address");
-    if (port <= 0 || port > 65535)
-        throw cRuntimeError("QuicSocket::connect(): invalid remote port number %d", port);
 
-    QuicOpenCommand *ctrl = new QuicOpenCommand();
-    //ctrl->setConnId(connectionID);
-    ctrl->setRemoteAddr(addr);
-    ctrl->setRemotePort(port);
-    //ctrl->setMaxNumStreams(maxNumStreams);
+    QuicOpenCommand *cmd = new QuicOpenCommand();
+    cmd->setRemoteAddr(addr);
+    cmd->setRemotePort(port);
     Request *request = new Request("CONNECT", QUIC_C_OPEN_ACTIVE);
-    request->setControlInfo(ctrl);
+    request->setControlInfo(cmd);
     sendToQuic(request);
 
     socketState = CONNECTING;
 }
 
-void QuicSocket::send(Packet *msg)
+void QuicSocket::send(Packet *msg, uint64_t streamId)
 {
-    //QuicSendCommand* sendCmd = (QuicSendCommand*)(pk->removeControlInfo());
-
-     msg->setKind(QUIC_C_SEND);
-
-    /*
-    QuicSendCommand *ctrl = new QuicSendCommand();
-    //ctrl->setConnId(connectionID);
-
-    if (sendCmd->getStreamID() == -1) {
-        // No stream id specified - take next available stream
-        lastStream = (lastStream + 1) % maxNumStreams;
-        ctrl->setStreamID(lastStream);
-    }
-    else {
-        ctrl->setStreamID(sendCmd->getStreamID());
+    if (streamId >= ( ((uint64_t)1) << 62)) {
+        throw cRuntimeError("QuicSocket::send(): streamId too large");
     }
 
-    pk->setControlInfo(ctrl);
-    */
+    msg->setKind(QUIC_C_SEND);
+
+    // set stream ID
+    auto& tags = msg->getTags();
+    tags.addTagIfAbsent<QuicStreamReq>()->setStreamID(streamId);
+
     sendToQuic(msg);
 }
 
-void QuicSocket::recv(QuicRecvCommand *ctrlInfo)
+void QuicSocket::send(Packet *msg)
 {
+    send(msg, 0);
+}
+
+void QuicSocket::recv(int64_t length, uint64_t streamId)
+{
+    if (length < 0) {
+        throw cRuntimeError("QuicSocket::recv(): negative length not allowed");
+    }
+    QuicRecvCommand *cmd = new QuicRecvCommand();
+    cmd->setStreamID(streamId);
+    cmd->setExpectedDataSize(length);
     Request *request = new Request("RECV", QUIC_C_RECEIVE);
-    request->setControlInfo(ctrlInfo);
+    request->setControlInfo(cmd);
     sendToQuic(request);
 }
 
-void QuicSocket::recv(long length, long streamId)
-{
-    QuicRecvCommand *ctrlInfo = new QuicRecvCommand();
-    ctrlInfo->setStreamID(streamId);
-    ctrlInfo->setExpectedDataSize(length);
-    this->recv(ctrlInfo);
-}
-
-/*
-void QuicSocket::setStreamPriority(uint64_t streamID, uint32_t priority)
-{
-    cMessage *msg = new cMessage("SET_STREAM_PRIO", QUIC_C_SET_STREAM_PRIO);
-    QUICSendCommand* ctrl = new QUICSendCommand();
-    ctrl->setConnId(connectionID);
-    ctrl->setStreamID(streamID);
-    ctrl->setStreamPriority(priority);
-    msg->setControlInfo(ctrl);
-    sendToQUIC(msg);
-}
-*/
 void QuicSocket::close()
 {
-    Request *msg = new Request("CLOSE", QUIC_C_SEND_APP_CLOSE);
-    QuicCloseCommand *ctrl = new QuicCloseCommand();
-    //ctrl->setConnId(connectionID);
-    msg->setControlInfo(ctrl);
+    Request *msg = new Request("CLOSE", QUIC_C_CLOSE);
     sendToQuic(msg);
     socketState = CLOSED;
 }
-/*
-void QuicSocket::sendRequest(cMessage *msg)
-{
-    sendToQUIC(msg);
-}
-*/
+
 bool QuicSocket::isOpen() const
 {
     switch (socketState) {
@@ -196,9 +148,6 @@ bool QuicSocket::isOpen() const
     case LISTENING:
     case CONNECTING:
     case CONNECTED:
-    //case PEER_CLOSED:
-    //case LOCALLY_CLOSED:
-    //case SOCKERROR: //TODO check SOCKERROR is opened or is closed socket
         return true;
     case NOT_BOUND:
     case CLOSED:
@@ -222,8 +171,8 @@ void QuicSocket::destroy()
 void QuicSocket::accept(int socketId)
 {
     Request *request = new Request("ACCEPT", QUIC_C_ACCEPT);
-    QuicAcceptCommand *acceptCmd = new QuicAcceptCommand();
-    request->setControlInfo(acceptCmd);
+    QuicAcceptCommand *cmd = new QuicAcceptCommand();
+    request->setControlInfo(cmd);
     sendToQuic(request);
 }
 

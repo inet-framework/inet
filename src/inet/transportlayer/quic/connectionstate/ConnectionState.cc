@@ -42,7 +42,7 @@ ConnectionState *ConnectionState::processAppCommand(cMessage *msg)
             return processSendAppCommand(msg);
         case QUIC_C_RECEIVE:
             return processRecvAppCommand(msg);
-        case QUIC_C_SEND_APP_CLOSE: // close
+        case QUIC_C_CLOSE: // close
             return processCloseAppCommand(msg);
         default: // all other commands are handled in UdpSocket
             throw cRuntimeError("Unexpected/unknown app command");
