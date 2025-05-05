@@ -1,25 +1,13 @@
 //
-// Copyright (C) 2018 CaDS HAW Hamburg BCK, Denis Lugowski, Marvin Butkereit
-// based on the Work of Copyright (C) 2005,2011 Andras Varga
+// Copyright (C) 2019-2024 Timo Völker, Ekaterina Volodina
+// Copyright (C) 2025 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
 #ifndef __INET_QUICSOCKET_H
 #define __INET_QUICSOCKET_H
 
-#include <vector>
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/socket/ISocket.h"
@@ -28,46 +16,23 @@
 
 namespace inet {
 
-//class QUICDataIndication;
-
 /**
- * QUICSocket is a convenience class, to make it easier to send and receive
+ * QuicSocket is a convenience class, to make it easier to send and receive
  * QUIC packets from your application models. You'd have one (or more)
- * QUICSocket object(s) in your application simple module class, and call
- * its member functions (bind(), connect(), sendTo(), etc.) to create and
- * configure a socket, and to send datagrams.
+ * QuicSocket object(s) in your application simple module class, and call
+ * its member functions (bind(), connect(), send(), etc.) to create and
+ * configure a socket, and to send messages.
  *
- * QUICSocket chooses and remembers the sockId for you, assembles and sends command
- * packets such as QUIC_C_BIND to QUIC, and can also help you deal with packets and
- * notification messages arriving from QUIC.
- *
- * Here is a code fragment that creates an QUIC socket and sends a 1K packet
- * over it (the code can be placed in your handleMessage() or activity()):
- *
- * <pre>
- *   QUICSocket socket;
- *   socket.setOutputGate(gate("quicOut"));
- *   socket.connect(Address("10.0.0.2"), 2000);
- *
- *   cPacket *pk = new cPacket("dgram");
- *   pk->setByteLength(1024);
- *   socket.send(pk);
- *
- *   socket.close();
- * </pre>
- *
- * Processing messages sent up by the QUIC module is relatively straightforward.
- * You only need to distinguish between data packets and error notifications,
- * by checking the message kind (should be either QUIC_I_DATA or QUIC_I_ERROR),
- * and casting the control info to QUICDataIndication or QUICErrorIndication.
- * USPSocket provides some help for this with the belongsToSocket() and
- * belongsToAnyQUICSocket() methods.
+ * QuicSocket chooses and remembers the socketId for you, assembles and sends
+ * command packets such as QUIC_C_BIND to QUIC, and can also help you deal with
+ * packets and notification messages arriving from QUIC.
  */
 class INET_API QuicSocket : public ISocket
 {
 public:
     /**
-     * Callback interface for QUIC sockets, see setCallback() and processMessage() for more info.
+     * Callback interface for QUIC sockets, see setCallback() and
+     * processMessage() for more info.
      *
      * Note: this class is not subclassed from cObject, because
      * classes may have both this class and cSimpleModule as base class,
@@ -77,68 +42,127 @@ public:
     {
       public:
         virtual ~ICallback() {}
+
         /**
-         * Notifies about data arrival, packet ownership is transferred to the callee.
+         * Notifies that data is available to read from the QUIC module.
+         *
+         * @param socket The involved socket object.
+         * @param dataInfo Information about the data, such as the length of
+         * the data and the ID of the QUIC stream that contains the data.
+         */
+        virtual void socketDataAvailable(QuicSocket* socket, QuicDataInfo *dataInfo) = 0;
+
+        /**
+         * New data arrived at the application. Called after a recv call.
+         *
+         * @param socket The involved socket object.
+         * @param packet The packet with the arrived data.
          */
         virtual void socketDataArrived(QuicSocket* socket, Packet *packet) = 0;
-        virtual void socketAvailable(QuicSocket *socket, QuicAvailableInfo *availableInfo) = 0;
+
+        /**
+         * Notifies that a new connection is available to accept. Called after
+         * a listen call and an incoming connection initiation.
+         *
+         * @param socket The involved socket object.
+         */
+        virtual void socketConnectionAvailable(QuicSocket *socket) = 0;
+
+        /**
+         * Notifies that the QUIC connection is established and ready to
+         * transfer data.
+         *
+         * @param socket The involved socket object.
+         */
         virtual void socketEstablished(QuicSocket *socket) = 0;
+
+        /**
+         * Notifies that the QUIC connection is closed.
+         *
+         * @param socket The involved socket object.
+         */
         virtual void socketClosed(QuicSocket *socket) = 0;
+
+        /**
+         * Notifies that this QUIC socket is deleted.
+         *
+         * @param socket The involved socket object.
+         */
         virtual void socketDeleted(QuicSocket *socket) = 0;
+
+        /**
+         * Notifies that QUIC's send queue is full and that the app should stop
+         * sending data.
+         *
+         * @param socket The involved socket object.
+         */
         virtual void socketSendQueueFull(QuicSocket *socket) = 0;
+
+        /**
+         * Notifies that QUIC's send queue is draining and that the app can
+         * continue to send data.
+         *
+         * @param socket The involved socket object.
+         */
         virtual void socketSendQueueDrain(QuicSocket *socket) = 0;
+
+        /**
+         * Notifies that QUIC had to reject a message. This happens if the app
+         * sends data when QUIC's send queue is full.
+         *
+         * @param socket The involved socket object.
+         */
         virtual void socketMsgRejected(QuicSocket *socket) = 0;
     };
 
-    enum State { NOT_BOUND, BOUND, LISTENING, CONNECTING, CONNECTED, PEER_CLOSED, LOCALLY_CLOSED, CLOSED, SOCKERROR };
+    /**
+     * States of a QUIC socket.
+     */
+    enum State { NOT_BOUND, BOUND, LISTENING, CONNECTING, CONNECTED, CLOSED };
 
-protected:
-
+private:
     int socketId;
-    //uint64_t connectionID;
     cGate *gateToQuic;
 
-    //uint64_t maxNumStreams = 0;
-    //uint64_t lastStream = 0;
     ICallback *cb = nullptr;
     State socketState;
 
     L3Address localAddr;
-    int localPort;
+    uint16_t localPort;
     L3Address remoteAddr;
-    int remotePort;
-
-protected:
-    void sendToQuic(cMessage *msg);
-
-public:
+    uint16_t remotePort;
 
     /**
-     * Constructor. The getSocketId() method returns a valid Id right after
-     * constructor call.
-     */
-    QuicSocket();
-
-    /**
-     * Destructor
-     */
-    ~QuicSocket();
-
-    /**
-     * Generates a new socket id.
+     * Generates a new socket ID.
+     *
+     * @return The generated socket ID.
      */
     static int generateSocketId();
 
     /**
-     * Generates a new connection id.
+     * Sends the given message to the QUIC module.
+     *
+     * @param The message to send.
      */
-    //static int generateSocketId();
+    void sendToQuic(cMessage *msg);
 
-    /** @name Opening and closing connections, sending data */
-    //@{
+public:
+    /**
+     * Creates a QuicSocket object and initiates the socket ID.
+     */
+    QuicSocket();
+
+    /**
+     * Runs before this socket is deleted. Calls the socketDeleted callback
+     * function.
+     */
+    ~QuicSocket();
+
     /**
      * Sets the gate on which to send to QUIC. Must be invoked before socket
      * can be used. Example: <tt>socket.setOutputGate(gate("quicOut"));</tt>
+     *
+     * @param The gate to QUIC.
      */
     void setOutputGate(cGate *toQuic)
     {
@@ -146,7 +170,10 @@ public:
     }
 
     /**
-     * Bind the socket to a local IP address and port number.
+     * Binds the socket to a local IP address and port number.
+     *
+     * @param localAddr The local IP address.
+     * @param localPort The local port number.
      */
     void bind(L3Address localAddr, uint16_t localPort);
 
@@ -156,45 +183,94 @@ public:
     void listen();
 
     /**
-     * Connects to a remote QUIC socket. This has two effects:
-     * (1) this socket will only receive packets from specified address/port,
-     * and (2) you can use send() to send packets.
+     * Accepts a new connection that were initiated on this listening socket
+     * and reported as available.
+     *
+     * @return The newly created socket for the accepted connection.
+     */
+    QuicSocket *accept();
+
+    /**
+     * Connects to a remote QUIC socket. This will initiate the QUIC connection
+     * setup. After the connection reported as established, data can be sent
+     * using the send method.
+     *
+     * @param remoteAddr The IP address of the remote end point.
+     * @param remotePort The UDP port number of the remote end point.
      */
     void connect(L3Address remoteAddr, uint16_t remotePort);
 
     /**
      * Sends a message over the specified stream.
+     *
+     * @param msg The message to send.
+     * @param streamId The ID of the QUIC stream to use for the transfer.
      */
     void send(Packet *msg, uint64_t streamId);
 
     /**
      * Calls send(msg, 0)
+     *
+     * @param msg The message to send.
      */
     void send(Packet *msg) override;
 
     /**
      * Requests to receive data with the specified length from the specified
      * stream from QUIC.
+     *
+     * @param length The length in bytes to receive from QUIC.
+     * @param streamId The ID of the QUIC stream to receive data from.
      */
     void recv(int64_t length, uint64_t streamId);
 
     /**
-     * Unbinds the socket. Once closed, a closed socket may be bound to another
-     * (or the same) port, and reused.
+     * Closes the socket and, if connected, the connection.
      */
     void close() override;
 
+    /**
+     * Checks if the socket is open.
+     *
+     * @return true if the socket is open, false otherwise.
+     */
     virtual bool isOpen() const override;
-    virtual bool belongsToSocket(cMessage *msg) const override;
-    virtual void destroy() override;
-    void processMessage(cMessage *msg) override;
-    int getSocketId() const override { return socketId; }
 
     /**
-     * Accepts a new incoming connection reported as available.
+     * Checks if the given message belongs to this socket.
+     *
+     * @param msg The message to check
+     * @return true if the message belongs to this socket, false otherwise.
      */
-    QuicSocket *accept();
+    virtual bool belongsToSocket(cMessage *msg) const override;
 
+    /**
+     * Destroys the socket. Currently not implemented.
+     */
+    virtual void destroy() override;
+
+    /**
+     * Processes the given messages and, if a callback object is set, calls
+     * the corresponding callback function.
+     *
+     * @param msg The message to process.
+     */
+    void processMessage(cMessage *msg) override;
+
+    /**
+     * @return The ID of this socket.
+     */
+    int getSocketId() const override {
+        return socketId;
+    }
+
+    /**
+     * Sets the callback object that provides the methods defined by ICallback.
+     * If set, this socket calls the corresponding callback method when
+     * processing a message.
+     *
+     * @param cb The object that provides the callback methods.
+     */
     void setCallback(ICallback *cb) {
         this->cb = cb;
     }

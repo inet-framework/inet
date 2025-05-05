@@ -59,8 +59,8 @@ void QuicDiscardServer::handleMessageWhenUp(cMessage *msg)
                 EV_DEBUG << data << " received and discarded" << endl;
                 break;
             }
-            case QUIC_I_DATA_NOTIFICATION: {
-                QuicDataAvailableInfo *ctrInfo = dynamic_cast<QuicDataAvailableInfo *>(msg->getControlInfo());
+            case QUIC_I_DATA_AVAILABLE: {
+                QuicDataInfo *ctrInfo = dynamic_cast<QuicDataInfo *>(msg->getControlInfo());
                 auto streamId = ctrInfo->getStreamID();
                 auto avaliableDataSize = ctrInfo->getAvaliableDataSize();
                 EV_DEBUG << avaliableDataSize << " bytes arrived on stream " << streamId << " - call recv" << endl;
@@ -71,7 +71,7 @@ void QuicDiscardServer::handleMessageWhenUp(cMessage *msg)
                 EV_DEBUG << "connection established" << endl;
                 break;
             }
-            case QUIC_I_AVAILABLE: {
+            case QUIC_I_CONNECTION_AVAILABLE: {
                 EV_DEBUG << "connection available" << endl;
                 clientSocket = listeningSocket.accept();
                 listeningSocket.close();

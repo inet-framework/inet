@@ -1,23 +1,14 @@
 //
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-// 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Lesser General Public License for more details.
-// 
-// You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+// Copyright (C) 2019-2024 Timo Völker, Ekaterina Volodina
+// Copyright (C) 2025 OpenSim Ltd.
+//
+// SPDX-License-Identifier: LGPL-3.0-or-later
+//
 
 import inet.networklayer.common.L3Address;
 import inet.common.TagBase;
 
 namespace inet;
-
 
 //
 // QUIC command codes, sent by the application to ~QUIC. These constants
@@ -27,13 +18,13 @@ namespace inet;
 //
 enum QuicCommandCode
 {
-    QUIC_C_CREATE_PCB = 0;
-    QUIC_C_OPEN_PASSIVE = 1;
-    QUIC_C_OPEN_ACTIVE = 2;
-    QUIC_C_CLOSE = 3;
-    QUIC_C_SEND = 4;
-    QUIC_C_RECEIVE = 5;
-    QUIC_C_ACCEPT = 8;
+    QUIC_C_CREATE_PCB = 1;
+    QUIC_C_OPEN_PASSIVE = 2;
+    QUIC_C_OPEN_ACTIVE = 3;
+    QUIC_C_CLOSE = 4;
+    QUIC_C_SEND = 5;
+    QUIC_C_RECEIVE = 6;
+    QUIC_C_ACCEPT = 7;
 }
 
 
@@ -41,21 +32,19 @@ enum QuicCommandCode
 // QUIC indications, sent by ~QUIC to the application. ~QUIC will set these
 // constants as message kind on messages it sends to the application.
 //
-// @see ~QUICControlInfo, ~QUICCommandCode, ~QUIC
+// @see ~QUICControlInfo, ~QUICCommandCode, ~Quic
 //
 enum QuicStatusInd
 {
-    QUIC_I_DATA = 0;  // Attached to requested data packet
-    QUIC_I_DATA_NOTIFICATION = 1; // Notifiy application when data has arrived
-    QUIC_I_ERROR = 2; // ~QUIC attaches ~QUICIndication to received data packet
-    QUIC_I_ESTABLISHED = 3;
-    QUIC_I_CLOSED = 4;
-    QUIC_I_SEND_MSG = 5; //for trafficgen
-    QUIC_I_QUEUE_LIMIT = 6; //for trafficgen
-    QUIC_I_AVAILABLE = 7;         // conncetion available
-    QUIC_I_SENDQUEUE_FULL = 8;
-    QUIC_I_SENDQUEUE_DRAIN = 9;
-    QUIC_I_MSG_REJECTED = 10;
+    QUIC_I_DATA = 1;
+    QUIC_I_DATA_AVAILABLE = 2;
+    QUIC_I_ERROR = 3;
+    QUIC_I_ESTABLISHED = 4;
+    QUIC_I_CLOSED = 5;
+    QUIC_I_CONNECTION_AVAILABLE = 6;
+    QUIC_I_SENDQUEUE_FULL = 7;
+    QUIC_I_SENDQUEUE_DRAIN = 8;
+    QUIC_I_MSG_REJECTED = 9;
 }
 
 //
@@ -68,7 +57,7 @@ class QuicStreamReq extends TagBase
 
 //
 // Base class for QUIC Commands. The most convenient way to handle
-// ~QUIC is the QuicSocket class, which hides commands from you.
+// ~Quic is the QuicSocket class, which hides commands from you.
 //
 // @see ~QuicCommandCode
 //
@@ -101,7 +90,7 @@ class QuicOpenCommand extends QuicCommand
 }
 
 //
-// App command to let the QUIC know about expected data size to read.
+// App command to let QUIC know about expected data size to read.
 //
 // @see ~QuicCommandCode
 //
@@ -109,16 +98,6 @@ class QuicRecvCommand extends QuicCommand
 {
     uint64_t streamID;
     int64_t expectedDataSize;
-}
-
-//
-//QUIC control info to let the app know about available data size to read.
-//Sent with message kind QUIC_I_DATA_NOTIFICATION
-//
-class QuicDataAvailableInfo extends QuicCommand
-{
-    long streamID = -1;
-    long avaliableDataSize = -1;
 }
 
 //
@@ -130,30 +109,40 @@ class QuicAcceptCommand extends QuicCommand
 }
 
 //
-// Sent with message kind QUIC_I_AVAILABLE, to let the app know
+// Sent with message kind QUIC_I_CONNECTION_AVAILABLE, to let the app know
 // about the local and remote IP address and port.
 //
 // @see ~QuicCommandCode, ~IQuic
 //
-class QuicAvailableInfo extends QuicCommand
+class QuicConnectionAvailableInfo extends QuicCommand
 {
     L3Address localAddr;
     L3Address remoteAddr;
-    int localPort;
-    int remotePort;
+    uint16_t localPort;
+    uint16_t remotePort;
     int newSocketId;
 }
 
 //
-// Sent with message kind QUIC_I_ESTABLISHED, to let the app know
+// QUIC control info to let the app know about available data size to read.
+// Sent with message kind QUIC_I_DATA_AVAILABLE.
+//
+class QuicDataInfo extends QuicCommand
+{
+    uint64_t streamID;
+    uint64_t avaliableDataSize;
+}
+
+//
+// Sent with message kind QUIC_I_ESTABLISHED to let the app know
 // about the local and remote IP address and port.
 //
 // @see ~QuicCommandCode, ~IQuic
 //
-class QuicConnectInfo extends QuicCommand
+class QuicConnectionInfo extends QuicCommand
 {
     L3Address localAddr;
     L3Address remoteAddr;
-    int localPort;
-    int remotePort;
+    uint16_t localPort;
+    uint16_t remotePort;
 }

@@ -34,12 +34,12 @@ void AppSocket::sendEstablished()
 {
     EV_INFO << "Notifying app: quic established" << endl;
     auto indication = new Indication("quic established", QUIC_I_ESTABLISHED);
-    QuicConnectInfo *quicConnectInfo = new QuicConnectInfo();
-    quicConnectInfo->setLocalAddr(connection->getPath()->getLocalAddr());
-    quicConnectInfo->setRemoteAddr(connection->getPath()->getRemoteAddr());
-    quicConnectInfo->setLocalPort(connection->getPath()->getLocalPort());
-    quicConnectInfo->setRemotePort(connection->getPath()->getRemotePort());
-    indication->setControlInfo(quicConnectInfo);
+    QuicConnectionInfo *quicConnectionInfo = new QuicConnectionInfo();
+    quicConnectionInfo->setLocalAddr(connection->getPath()->getLocalAddr());
+    quicConnectionInfo->setRemoteAddr(connection->getPath()->getRemoteAddr());
+    quicConnectionInfo->setLocalPort(connection->getPath()->getLocalPort());
+    quicConnectionInfo->setRemotePort(connection->getPath()->getRemotePort());
+    indication->setControlInfo(quicConnectionInfo);
     sendIndication(indication);
 }
 
@@ -63,7 +63,7 @@ void AppSocket::sendMsgRejected()
 
 void AppSocket::sendConnectionAvailable()
 {
-    auto indication = new Indication("quic connection available", QUIC_I_AVAILABLE);
+    auto indication = new Indication("quic connection available", QUIC_I_CONNECTION_AVAILABLE);
     sendIndication(indication);
 }
 
@@ -78,9 +78,9 @@ void AppSocket::sendData(Ptr<const Chunk> data)
 void AppSocket::sendDataNotification(uint64_t streamId, uint64_t dataSize)
 {
     EV_INFO << "Notifying app: quic has data ready to read" << endl;
-    auto indication = new Indication("stream: data is ready for app", QUIC_I_DATA_NOTIFICATION);
+    auto indication = new Indication("stream: data is ready for app", QUIC_I_DATA_AVAILABLE);
 
-    QuicDataAvailableInfo *ctrInfo = new QuicDataAvailableInfo();
+    QuicDataInfo *ctrInfo = new QuicDataInfo();
     ctrInfo->setStreamID(streamId);
     ctrInfo->setAvaliableDataSize(dataSize);
     indication->setControlInfo(ctrInfo);

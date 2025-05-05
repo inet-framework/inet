@@ -37,7 +37,8 @@ class QuicClient : public ApplicationBase, public QuicSocket::ICallback
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
     virtual void socketDataArrived(QuicSocket* socket, Packet *packet) override;
-    virtual void socketAvailable(QuicSocket *socket, QuicAvailableInfo *availableInfo) override { };
+    virtual void socketConnectionAvailable(QuicSocket *socket) override { };
+    virtual void socketDataAvailable(QuicSocket* socket, QuicDataInfo *dataInfo) override {};
     virtual void socketEstablished(QuicSocket *socket) override;
     virtual void socketClosed(QuicSocket *socket) override;
     virtual void socketDeleted(QuicSocket *socket) override { };

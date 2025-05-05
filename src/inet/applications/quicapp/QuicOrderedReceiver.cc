@@ -57,8 +57,8 @@ void QuicOrderedReceiver::handleMessageWhenUp(cMessage *msg)
                 checkData(data);
                 break;
             }
-            case QUIC_I_DATA_NOTIFICATION: {
-                QuicDataAvailableInfo *ctrInfo = dynamic_cast<QuicDataAvailableInfo *>(msg->getControlInfo());
+            case QUIC_I_DATA_AVAILABLE: {
+                QuicDataInfo *ctrInfo = dynamic_cast<QuicDataInfo *>(msg->getControlInfo());
                 auto streamId = ctrInfo->getStreamID();
                 auto avaliableDataSize = ctrInfo->getAvaliableDataSize();
                 EV_DEBUG << avaliableDataSize << " bytes arrived on stream " << streamId << " - call recv" << endl;

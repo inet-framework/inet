@@ -1,19 +1,8 @@
 //
-// Copyright (C) 2018 CaDS HAW Hamburg BCK, Denis Lugowski, Marvin Butkereit
-// Copyright (C) 2005,2011 Andras Varga
+// Copyright (C) 2019-2024 Timo Völker, Ekaterina Volodina
+// Copyright (C) 2025 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
 #include "QuicSocket.h"
@@ -186,22 +175,16 @@ void QuicSocket::processMessage(cMessage *msg) {
     ASSERT(belongsToSocket(msg));
 
     switch (msg->getKind()) {
-        case QUIC_I_AVAILABLE: {
-            QuicAvailableInfo *availableInfo = check_and_cast<QuicAvailableInfo *>(msg->getControlInfo());
+        case QUIC_I_CONNECTION_AVAILABLE: {
             if (cb) {
-                cb->socketAvailable(this, availableInfo);
+                cb->socketConnectionAvailable(this);
             }
             delete msg;
             break;
         }
         case QUIC_I_ESTABLISHED: {
-            // Note: this code is only for sockets doing active open, and nonforking
-            // listening sockets. For a forking listening sockets, TCP_I_ESTABLISHED
-            // carries a new connId which won't match the connId of this TcpSocket,
-            // so you won't get here. Rather, when you see TCP_I_ESTABLISHED, you'll
-            // want to create a new TcpSocket object via new TcpSocket(msg).
             socketState = CONNECTED;
-            QuicConnectInfo *connectInfo = check_and_cast<QuicConnectInfo *>(msg->getControlInfo());
+            QuicConnectionInfo *connectInfo = check_and_cast<QuicConnectionInfo *>(msg->getControlInfo());
             localAddr = connectInfo->getLocalAddr();
             remoteAddr = connectInfo->getRemoteAddr();
             localPort = connectInfo->getLocalPort();
@@ -212,24 +195,23 @@ void QuicSocket::processMessage(cMessage *msg) {
             delete msg;
             break;
         }
-        case QUIC_I_DATA_NOTIFICATION: {
+        case QUIC_I_DATA_AVAILABLE: {
+            if (cb) {
+                QuicDataInfo *dataInfo = check_and_cast<QuicDataInfo *>(msg->getControlInfo());
+                cb->socketDataAvailable(this, dataInfo);
+            }
             delete msg;
             break;
         }
         case QUIC_I_DATA: {
             if (cb) {
-                cb->socketDataArrived(this, check_and_cast<Packet*>(msg));
+                Packet *packet = check_and_cast<Packet*>(msg);
+                cb->socketDataArrived(this, packet);
             } else {
                 delete msg;
             }
             break;
         }
-        /*
-        case QUIC_I_PEER_CLOSED:
-            sockstate = PEER_CLOSED;
-            delete msg;
-            break;
-        */
         case QUIC_I_CLOSED: {
             socketState = CLOSED;
             if (cb) {
@@ -238,19 +220,6 @@ void QuicSocket::processMessage(cMessage *msg) {
             delete msg;
             break;
         }
-        /*
-        case TCP_I_CONNECTION_REFUSED:
-        case TCP_I_CONNECTION_RESET:
-        case TCP_I_TIMED_OUT:
-            sockstate = SOCKERROR;
-            delete msg;
-            break;
-
-        case TCP_I_STATUS:
-            status = check_and_cast<TcpStatusInfo *>(msg->getControlInfo());
-            delete msg;
-            break;
-         */
         case QUIC_I_SENDQUEUE_FULL: {
             if (cb) {
                 cb->socketSendQueueFull(this);
