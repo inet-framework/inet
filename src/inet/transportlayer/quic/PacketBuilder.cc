@@ -10,6 +10,10 @@
 #include "inet/common/Units.h"
 #include "packet/QuicStreamFrame.h"
 
+extern "C" {
+#include "picotls.h"
+#include "picotls/openssl.h"
+}
 namespace inet {
 namespace quic {
 
@@ -162,15 +166,89 @@ QuicFrame *PacketBuilder::createCryptoFrame(TransportParameters *tp)
     QuicFrame *frame = new QuicFrame(frameHeader);
 
     if (tp) {
+
+
+        ptls_context_t ctx;
+
+        memset(&ctx, 0, sizeof(ctx));
+        ctx.random_bytes = ptls_openssl_random_bytes;
+        ctx.key_exchanges = ptls_openssl_key_exchanges;
+        ctx.cipher_suites = ptls_openssl_cipher_suites;
+        ctx.get_time = &ptls_get_time;
+
+
+        const int EXTENSION_TYPE_TRANSPORT_PARAMETERS_FINAL = 0x39;
+        const int TRANSPORT_PARAMETER_ID_INITIAL_MAX_DATA = 4;
+        const int TRANSPORT_PARAMETER_ID_INITIAL_MAX_STREAM_DATA_BIDI_LOCAL = 5;
+        const int TRANSPORT_PARAMETER_ID_INITIAL_MAX_STREAM_DATA_BIDI_REMOTE = 6;
+        const int TRANSPORT_PARAMETER_ID_INITIAL_MAX_STREAM_DATA_UNI = 7;
+        int ret;
+
+#define PUSH_TP(buf, id, block)                                                                                                    \
+    do {                                                                                                                           \
+        ptls_buffer_push_quicint((buf), (id));                                                                                     \
+        ptls_buffer_push_block((buf), -1, block);                                                                                  \
+    } while (0)
+
+        ptls_buffer_t buf;
+
+        ptls_buffer_init(&buf, (void*)"", 0);
+
+        PUSH_TP(&buf, TRANSPORT_PARAMETER_ID_INITIAL_MAX_DATA, { ptls_buffer_push_quicint(&buf, tp->initialMaxData); });
+        PUSH_TP(&buf, TRANSPORT_PARAMETER_ID_INITIAL_MAX_STREAM_DATA_BIDI_LOCAL,
+                { ptls_buffer_push_quicint(&buf, tp->initialMaxStreamData); });
+        PUSH_TP(&buf, TRANSPORT_PARAMETER_ID_INITIAL_MAX_STREAM_DATA_BIDI_REMOTE,
+                { ptls_buffer_push_quicint(&buf, tp->initialMaxStreamData); });
+        PUSH_TP(&buf, TRANSPORT_PARAMETER_ID_INITIAL_MAX_STREAM_DATA_UNI,
+                { ptls_buffer_push_quicint(&buf, tp->initialMaxStreamData); });
+
+        struct {
+            ptls_raw_extension_t ext[2];
+            ptls_buffer_t buf;
+        } transport_params;
+
+        transport_params.ext[0] =
+            (ptls_raw_extension_t){EXTENSION_TYPE_TRANSPORT_PARAMETERS_FINAL,
+                                   {buf.base, buf.off}};
+        transport_params.ext[1] = (ptls_raw_extension_t){UINT16_MAX};
+
+        ptls_handshake_properties_t handshake_properties;
+
+        memset(&handshake_properties, 0, sizeof(handshake_properties));
+        handshake_properties.additional_extensions = transport_params.ext;
+
+        size_t epoch_offsets[5] = {0};
+
+        ptls_buffer_t buf2;
+        ptls_buffer_init(&buf2, (void*)"", 0);
+
+        ptls_t *tls;
+        tls = ptls_new(&ctx, 0);
+
+        ptls_handle_message(tls, &buf2, epoch_offsets, 0, NULL, 0, &handshake_properties);
+
+        if (buf2.off == 0)
+            return 0;
+
+        for (size_t epoch = 0; epoch < 4; ++epoch) {
+            size_t len = epoch_offsets[epoch + 1] - epoch_offsets[epoch];
+            if (len == 0)
+                continue;
+
+            Ptr<BytesChunk> transportParametersExt = makeShared<BytesChunk>();
+            std::vector<uint8_t> bytes;
+            bytes.resize(len);
+            for (size_t i = 0; i < len; i++) {
+                bytes[i] = *(uint8_t *)(buf2.base + epoch_offsets[epoch] + i);
+            }
+            transportParametersExt->setBytes(bytes);
+            frame->setData(transportParametersExt);
+        }
+
         frameHeader->setContainsTransportParameters(true);
-        Ptr<TransportParametersExtension> transportParametersExt = makeShared<TransportParametersExtension>();
-        transportParametersExt->setInitialMaxData(tp->initialMaxData);
-        transportParametersExt->setInitialMaxStreamDataBidiLocal(tp->initialMaxStreamData);
-        transportParametersExt->setInitialMaxStreamDataBidiRemote(tp->initialMaxStreamData);
-        transportParametersExt->setInitialMaxStreamDataUni(tp->initialMaxStreamData);
-        transportParametersExt->calcChunkLength();
-        frame->setData(transportParametersExt);
+
     }
+    Exit:
     return frame;
 }
 
