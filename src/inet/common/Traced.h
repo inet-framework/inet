@@ -44,7 +44,7 @@ class Traced {
             callback_ = callback;
         else
             // chaining
-            callback_ = [=](T oldValue, T newValue) {
+            callback_ = [=,this](T oldValue, T newValue) {
                 callback_(oldValue, newValue);
                 callback(oldValue, newValue);
             };

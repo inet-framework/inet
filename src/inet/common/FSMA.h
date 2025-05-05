@@ -280,7 +280,7 @@ class FsmContext
     }
 
 #define FSMA_Delay_Action(body) \
-    ___fsm.insertDelayedAction([=] () { body; });
+    ___fsm.insertDelayedAction([=,this] () { body; });
 
 } // namespace inet
 

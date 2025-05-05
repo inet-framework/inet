@@ -371,7 +371,7 @@ void EthernetCsmaPhy::handleStartReception(EthernetSignalBase *signal)
     auto packet = check_and_cast_nullable<Packet *>(signal->getEncapsulatedPacket());
     auto signalType = static_cast<EthernetSignalType>(signal->getKind());
     if (fsm.getState() == IDLE || fsm.getState() == CRS_ON)
-        fsm.insertDelayedAction([=] () { mac->handleReceptionStart(signalType, packet != nullptr ? packet->dup() : nullptr); });
+        fsm.insertDelayedAction([=,this] () { mac->handleReceptionStart(signalType, packet != nullptr ? packet->dup() : nullptr); });
     updateRxSignals(signal);
 }
 
@@ -388,7 +388,7 @@ void EthernetCsmaPhy::handleEndReception()
         if (packet != nullptr)
             packet->setBitError(signal->hasBitError());
         auto esd1 = signal->getEsd1();
-        fsm.insertDelayedAction([=] () { mac->handleReceptionEnd(signalType, packet, esd1); });
+        fsm.insertDelayedAction([=,this] () { mac->handleReceptionEnd(signalType, packet, esd1); });
         delete signal;
     }
     else {
