@@ -7,7 +7,7 @@
 
 package inet.physicallayer.wireless.common.analogmodel.unitdisk;
 
-import inet.common.CompoundModule;
+import inet.common.Module;
 import inet.physicallayer.wireless.common.contract.packetlevel.IMediumAnalogModel;
 
 //
@@ -17,7 +17,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IMediumAnalogMode
 //
 // @see ~UnitDiskRadioMedium, ~UnitDiskTransmitterAnalogModel, ~UnitDiskReceiverAnalogModel.
 //
-module UnitDiskMediumAnalogModel extends CompoundModule like IMediumAnalogModel
+module UnitDiskMediumAnalogModel extends Module like IMediumAnalogModel
 {
     parameters:
         @class(UnitDiskMediumAnalogModel);

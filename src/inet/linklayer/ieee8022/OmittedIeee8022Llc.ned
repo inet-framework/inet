@@ -7,14 +7,14 @@
 
 package inet.linklayer.ieee8022;
 
-import inet.common.CompoundModule;
+import inet.common.Module;
 import inet.linklayer.contract.IIeee8022Llc;
 
 //
 // Implements the given module interface and can be used as an optional
 // module that removes itself from the module hierarchy during initialization.
 //
-module OmittedIeee8022Llc extends CompoundModule like IIeee8022Llc
+module OmittedIeee8022Llc extends Module like IIeee8022Llc
 {
     parameters:
         @class(::inet::OmittedModule);

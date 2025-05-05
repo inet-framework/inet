@@ -7,12 +7,12 @@
 
 package inet.networks.base;
 
-import inet.common.CompoundModule;
+import inet.common.Module;
 import inet.common.packet.recorder.PcapRecorder;
 import inet.networklayer.configurator.contract.IL3NetworkConfigurator;
 import inet.visualizer.contract.IIntegratedVisualizer;
 
-network NetworkBase extends CompoundModule
+network NetworkBase extends Module
 {
     parameters:
         bool recordPcap = default(false);

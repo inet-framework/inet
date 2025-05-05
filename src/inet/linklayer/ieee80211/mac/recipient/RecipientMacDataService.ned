@@ -7,7 +7,7 @@
 
 package inet.linklayer.ieee80211.mac.recipient;
 
-import inet.common.CompoundModule;
+import inet.common.Module;
 
 //
 // Implements the MAC data service for the recipient side in non-QoS IEEE 802.11 networks.
@@ -15,7 +15,7 @@ import inet.common.CompoundModule;
 //
 // @see RecipientQosMacDataService
 //
-module RecipientMacDataService extends CompoundModule
+module RecipientMacDataService extends Module
 {
     parameters:
         @class(RecipientMacDataService);

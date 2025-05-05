@@ -7,12 +7,12 @@
 
 package inet.linklayer.ieee80211.mac.coordinationfunction;
 
-import inet.common.CompoundModule;
+import inet.common.Module;
 
 //
 // IEEE 802.11 Point Coordination Function
 //
-module Pcf extends CompoundModule
+module Pcf extends Module
 {
     parameters:
         @class(Pcf);

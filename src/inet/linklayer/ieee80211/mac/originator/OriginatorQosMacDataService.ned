@@ -7,7 +7,7 @@
 
 package inet.linklayer.ieee80211.mac.originator;
 
-import inet.common.CompoundModule;
+import inet.common.Module;
 import inet.linklayer.ieee80211.mac.contract.IFragmentationPolicy;
 import inet.linklayer.ieee80211.mac.contract.IMsduAggregationPolicy;
 import inet.linklayer.ieee80211.mac.contract.IMpduAggregationPolicy;
@@ -20,7 +20,7 @@ import inet.linklayer.ieee80211.mac.contract.IMpduAggregationPolicy;
 // based on configured policies. Follows the MAC data plane architecture described
 // in IEEE 802.11 standard.
 //
-module OriginatorQosMacDataService extends CompoundModule
+module OriginatorQosMacDataService extends Module
 {
     parameters:
         @class(OriginatorQosMacDataService);

@@ -7,7 +7,7 @@
 
 package inet.physicallayer.wireless.apsk.bitlevel;
 
-import inet.common.CompoundModule;
+import inet.common.Module;
 import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitter;
 import inet.physicallayer.wireless.common.contract.bitlevel.IDigitalAnalogConverter;
 import inet.physicallayer.wireless.common.contract.bitlevel.IEncoder;
@@ -39,7 +39,7 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IPulseShaper;
 //
 // @see ~ApskEncoder, ~ApskModulator, ~ApskLayeredReceiver.
 //
-module ApskLayeredTransmitter extends CompoundModule like ITransmitter
+module ApskLayeredTransmitter extends Module like ITransmitter
 {
     parameters:
         string levelOfDetail @enum("packet", "bit", "symbol", "sample") = default("symbol");

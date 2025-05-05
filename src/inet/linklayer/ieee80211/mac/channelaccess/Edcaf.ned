@@ -7,7 +7,7 @@
 
 package inet.linklayer.ieee80211.mac.channelaccess;
 
-import inet.common.CompoundModule;
+import inet.common.Module;
 import inet.queueing.contract.IPacketQueue;
 import inet.linklayer.ieee80211.mac.contract.IContention;
 import inet.linklayer.ieee80211.mac.originator.QosAckHandler;
@@ -19,7 +19,7 @@ import inet.linklayer.ieee80211.mac.queue.InProgressFrames;
 // Implements EDCAF (Enhanced Distributed Channel Access Function) for IEEE 802.11.
 // EDCAF represents one access category within EDCA.
 //
-module Edcaf extends CompoundModule
+module Edcaf extends Module
 {
     parameters:
         string rxModule;

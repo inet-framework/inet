@@ -7,10 +7,10 @@
 
 package inet.physicallayer.wireless.common.medium;
 
-import inet.common.CompoundModule;
+import inet.common.Module;
 import inet.physicallayer.wireless.common.contract.packetlevel.IMediumLimitCache;
 
-module MediumLimitCache extends CompoundModule like IMediumLimitCache
+module MediumLimitCache extends Module like IMediumLimitCache
 {
     parameters:
         double centerFrequency @unit(Hz) = default(nan Hz);       // TODO rename to maxRangeCenterFrequency?

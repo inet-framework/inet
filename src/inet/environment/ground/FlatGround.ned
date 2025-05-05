@@ -7,7 +7,7 @@
 
 package inet.environment.ground;
 
-import inet.common.CompoundModule;
+import inet.common.Module;
 import inet.environment.contract.IGround;
 
 //
@@ -16,7 +16,7 @@ import inet.environment.contract.IGround;
 // to the elevation value, and to compute the ground normal which is always
 // pointing upward (0,0,1) for a flat surface.
 //
-module FlatGround extends CompoundModule like IGround
+module FlatGround extends Module like IGround
 {
     parameters:
         double elevation @unit(m) = default(0m);

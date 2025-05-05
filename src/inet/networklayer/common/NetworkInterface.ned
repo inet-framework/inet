@@ -7,7 +7,7 @@
 
 package inet.networklayer.common;
 
-import inet.common.CompoundModule;
+import inet.common.Module;
 import inet.clock.contract.IClock;
 import inet.common.packet.recorder.PcapRecorder;
 
@@ -20,7 +20,7 @@ import inet.common.packet.recorder.PcapRecorder;
 // - %n: interface name
 // - %a: network address
 //
-module NetworkInterface extends CompoundModule
+module NetworkInterface extends Module
 {
     parameters:
         displayStringTextFormat = default("%a (%i)\n%m");

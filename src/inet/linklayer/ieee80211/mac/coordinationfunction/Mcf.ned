@@ -7,12 +7,12 @@
 
 package inet.linklayer.ieee80211.mac.coordinationfunction;
 
-import inet.common.CompoundModule;
+import inet.common.Module;
 
 //
 // IEEE 802.11 Mesh Coordination Function
 //
-module Mcf extends CompoundModule
+module Mcf extends Module
 {
     parameters:
         @class(Mcf);

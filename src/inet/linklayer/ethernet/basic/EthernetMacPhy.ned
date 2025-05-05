@@ -7,7 +7,7 @@
 
 package inet.linklayer.ethernet.basic;
 
-import inet.common.CompoundModule;
+import inet.common.Module;
 import inet.linklayer.contract.IEtherMac;
 
 //
@@ -104,7 +104,7 @@ import inet.linklayer.contract.IEtherMac;
 // @see ~EthernetCsmaMacPhy, ~EthernetInterface, ~IPacketQueue, ~EthernetEncapsulation, ~Ieee8022Llc
 // @see ~EthernetMacHeader, ~Ieee8022LlcHeader, ~EthernetFcs
 //
-module EthernetMacPhy extends CompoundModule like IEtherMac
+module EthernetMacPhy extends Module like IEtherMac
 {
     parameters:
         string interfaceTableModule;        // The path to the InterfaceTable module

@@ -7,14 +7,14 @@
 
 package inet.queueing.shaper;
 
-import inet.common.CompoundModule;
+import inet.common.Module;
 import inet.queueing.contract.ITrafficConditioner;
 
 //
 // Implements the given module interface and can be used as an omitted
 // optional module that removes itself from the module hierarchy during initialization.
 //
-module OmittedTrafficConditioner extends CompoundModule like ITrafficConditioner
+module OmittedTrafficConditioner extends Module like ITrafficConditioner
 {
     parameters:
         @class(::inet::OmittedModule);

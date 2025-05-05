@@ -7,7 +7,7 @@
 
 package inet.physicallayer.wireless.ieee80211.bitlevel;
 
-import inet.common.CompoundModule;
+import inet.common.Module;
 import inet.physicallayer.wireless.common.contract.bitlevel.IInterleaver;
 
 // The ~Ieee80211OfdmInterleaver is defined by a two-step permutation.
@@ -23,7 +23,7 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IInterleaver;
 //
 // The latter is simply N_{BPSC} multiplied by the number of subcarriers in a symbol.
 //
-module Ieee80211OfdmInterleaver extends CompoundModule like IInterleaver
+module Ieee80211OfdmInterleaver extends Module like IInterleaver
 {
     parameters:
         int numberOfCodedBitsPerSymbol;

@@ -7,10 +7,10 @@
 
 package inet.physicallayer.wireless.ieee802154.bitlevel;
 
-import inet.common.CompoundModule;
+import inet.common.Module;
 import inet.physicallayer.wireless.common.contract.packetlevel.IReceiver;
 
-module Ieee802154UwbIrReceiver extends CompoundModule like IReceiver
+module Ieee802154UwbIrReceiver extends Module like IReceiver
 {
     parameters:
         @class(Ieee802154UwbIrReceiver);

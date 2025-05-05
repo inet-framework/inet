@@ -7,12 +7,12 @@
 
 package inet.clock.base;
 
-import inet.common.CompoundModule;
+import inet.common.Module;
 
 //
 // Base module for clocks.
 //
-module ClockBase extends CompoundModule
+module ClockBase extends Module
 {
     parameters:
         @class(ClockBase);

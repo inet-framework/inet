@@ -7,7 +7,7 @@
 
 package inet.environment.ground;
 
-import inet.common.CompoundModule;
+import inet.common.Module;
 import inet.environment.contract.IGround;
 
 //
@@ -17,7 +17,7 @@ import inet.environment.contract.IGround;
 // a SceneOsgEarthVisualizer for accessing the map and a coordinate system for
 // geographic conversions.
 //
-module OsgEarthGround extends CompoundModule like IGround
+module OsgEarthGround extends Module like IGround
 {
     parameters:
         @class(OsgEarthGround);

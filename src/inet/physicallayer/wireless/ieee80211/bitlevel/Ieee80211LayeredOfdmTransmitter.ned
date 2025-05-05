@@ -7,7 +7,7 @@
 
 package inet.physicallayer.wireless.ieee80211.bitlevel;
 
-import inet.common.CompoundModule;
+import inet.common.Module;
 import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitter;
 import inet.physicallayer.wireless.common.contract.bitlevel.IDigitalAnalogConverter;
 import inet.physicallayer.wireless.common.contract.bitlevel.IEncoder;
@@ -58,7 +58,7 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IPulseShaper;
 // modulator that can give information about its subcarrier modulation
 // (e.g. BPSK).
 //
-module Ieee80211LayeredOfdmTransmitter extends CompoundModule like ITransmitter
+module Ieee80211LayeredOfdmTransmitter extends Module like ITransmitter
 {
     parameters:
         bool isCompliant = default(true);

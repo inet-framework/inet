@@ -7,10 +7,10 @@
 
 package inet.physicallayer.wireless.common.backgroundnoise;
 
-import inet.common.CompoundModule;
+import inet.common.Module;
 import inet.physicallayer.wireless.common.contract.packetlevel.IBackgroundNoise;
 
-module DimensionalBackgroundNoise extends CompoundModule like IBackgroundNoise
+module DimensionalBackgroundNoise extends Module like IBackgroundNoise
 {
     parameters:
         int gainFunctionCacheLimit = default(0); // Limits the number of gain functions cached for a given duration, centerFrequency and bandwidth

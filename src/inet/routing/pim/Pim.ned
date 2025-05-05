@@ -10,7 +10,7 @@
 package inet.routing.pim;
 
 import inet.common.SimpleModule;
-import inet.common.CompoundModule;
+import inet.common.Module;
 import inet.routing.contract.IPim;
 import inet.routing.pim.modes.PimDm;
 import inet.routing.pim.modes.PimSm;
@@ -24,7 +24,7 @@ import inet.routing.pim.tables.PimNeighborTable;
 // appropriate mode based on interface configuration. PIM builds distribution
 // trees for efficient multicast data delivery across IP networks.
 //
-module Pim extends CompoundModule like IPim
+module Pim extends Module like IPim
 {
     parameters:
         @class(Pim);
