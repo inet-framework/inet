@@ -14,6 +14,7 @@
 // 
 
 #include "AppSocket.h"
+#include "QueueAppSocket.h"
 #include "inet/transportlayer/contract/quic/QuicCommand_m.h"
 #include "inet/common/socket/SocketTag_m.h"
 
@@ -27,9 +28,7 @@ AppSocket::AppSocket(Quic *quicSimpleMod, int socketId) {
     udpSocket = nullptr;
 }
 
-AppSocket::~AppSocket() {
-    // TODO Auto-generated destructor stub
-}
+AppSocket::~AppSocket() { }
 
 void AppSocket::sendEstablished()
 {
@@ -62,6 +61,12 @@ void AppSocket::sendMsgRejected()
     sendIndication(indication);
 }
 
+void AppSocket::sendConnectionAvailable()
+{
+    auto indication = new Indication("quic connection available", QUIC_I_AVAILABLE);
+    sendIndication(indication);
+}
+
 void AppSocket::sendData(Ptr<const Chunk> data)
 {
     Packet *pkt = new Packet("data");
@@ -88,10 +93,84 @@ void AppSocket::sendIndication(Indication *indication)
     this->quicSimpleMod->send(indication, "appOut");
 }
 
+void AppSocket::sendIndications(std::list<Indication *> indications)
+{
+    for (Indication *indication : indications) {
+        sendIndication(indication);
+    }
+}
+
 void AppSocket::sendPacket(Packet *pkt)
 {
     pkt->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
     this->quicSimpleMod->send(pkt, "appOut");
+}
+
+void AppSocket::processAppCommand(cMessage *msg)
+{
+    if (!udpSocket) {
+        // no udpSocket for AppSocket, find udpSocket by src addr/port for a bind
+        if (msg->getKind() == QUIC_C_CREATE_PCB) { // bind
+            QuicBindCommand *quicBind = check_and_cast<QuicBindCommand *>(msg->getControlInfo());
+            L3Address localAddr = quicBind->getLocalAddr();
+            int localPort = quicBind->getLocalPort();
+            udpSocket = quicSimpleMod->findUdpSocket(localAddr, localPort);
+        }
+        // if there is no existing udpSocket, create one
+        if (!udpSocket) {
+            udpSocket = quicSimpleMod->createUdpSocket();
+        }
+    }
+    switch (msg->getKind()) {
+        case QUIC_C_CREATE_PCB: { // bind
+            QuicBindCommand *quicBind = check_and_cast<QuicBindCommand *>(msg->getControlInfo());
+            udpSocket->bind(quicBind->getLocalAddr(), quicBind->getLocalPort());
+            break;
+        }
+        case QUIC_C_OPEN_PASSIVE: { // listen
+            udpSocket->listen(this);
+            break;
+        }
+        case QUIC_C_OPEN_ACTIVE: { // connect
+            QuicOpenCommand *quicOpen = check_and_cast<QuicOpenCommand *>(msg->getControlInfo());
+            L3Address remoteAddr = quicOpen->getRemoteAddr();
+            int remotePort = quicOpen->getRemotePort();
+
+            quicSimpleMod->createConnection(udpSocket, this, remoteAddr, remotePort);
+            connection->processAppCommand(msg);
+            break;
+        }
+        case QUIC_C_ACCEPT: { // accept
+            // get available connection from listening UDP socket
+            Connection *acceptConnection = udpSocket->popConnection();
+            if (acceptConnection == nullptr) {
+                throw cRuntimeError("AppSocket::processAppCommand: No connection to accept available");
+            }
+
+            // get AppSocket from new socket ID within ACCEPT request and set connection
+            QuicAcceptCommand *quicAccept = check_and_cast<QuicAcceptCommand *>(msg->getControlInfo());
+            int newSocketId = quicAccept->getNewSocketId();
+            EV_DEBUG << "AppSocket::processAppCommand: Got accept with new socket id " << newSocketId << endl;
+            AppSocket *newAppSocket = quicSimpleMod->findOrCreateAppSocket(newSocketId);
+            newAppSocket->setConnection(acceptConnection);
+
+            // replace QueueAppSocket with the real AppSocket and send all queued indications over it
+            QueueAppSocket *queueAppSocket = check_and_cast<QueueAppSocket *>(acceptConnection->getAppSocket());
+            acceptConnection->setAppSocket(newAppSocket);
+            newAppSocket->sendIndications(queueAppSocket->getIndications());
+            delete queueAppSocket;
+
+            break;
+        }
+        case QUIC_C_CLOSE: { // close (listening socket)
+            udpSocket->unlisten();
+            break;
+        }
+        default: {
+            throw cRuntimeError("Unexpected/unknown App Command");
+        }
+
+    }
 }
 
 } /* namespace quic */

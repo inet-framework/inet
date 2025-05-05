@@ -33,6 +33,18 @@ public:
     AppSocket(Quic *quicSimpleMod, int socketId);
     virtual ~AppSocket();
 
+    virtual void processAppCommand(cMessage *msg);
+    virtual void sendEstablished();
+    virtual void sendData(Ptr<const Chunk> data);
+    virtual void sendIndication(Indication *indication);
+    virtual void sendIndications(std::list<Indication *> indications);
+    virtual void sendPacket(Packet *pkt);
+    virtual void sendSendQueueFull();
+    virtual void sendSendQueueDrain();
+    virtual void sendMsgRejected();
+    virtual void sendConnectionAvailable();
+    virtual void sendDataNotification(uint64_t streamId, uint64_t dataSize);
+
     Connection *getConnection() {
         return this->connection;
     }
@@ -45,15 +57,6 @@ public:
     void setUdpSocket(UdpSocket *udpSocket) {
         this->udpSocket = udpSocket;
     }
-
-    virtual void sendEstablished();
-    virtual void sendData(Ptr<const Chunk> data);
-    virtual void sendIndication(Indication *indication);
-    virtual void sendPacket(Packet *pkt);
-    virtual void sendSendQueueFull();
-    virtual void sendSendQueueDrain();
-    virtual void sendMsgRejected();
-    virtual void sendDataNotification(uint64_t streamId, uint64_t dataSize);
 
 private:
     int socketId;

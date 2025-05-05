@@ -25,15 +25,19 @@ void QuicDiscardServer::handleStartOperation(LifecycleOperation *operation)
     L3Address localAddress = L3AddressResolver().resolve(par("localAddress"));
     int localPort = par("localPort");
 
-    socket.setOutputGate(gate("socketOut"));
-    socket.bind(localAddress, localPort);
-    socket.listen();
+    listeningSocket.setOutputGate(gate("socketOut"));
+    listeningSocket.bind(localAddress, localPort);
+    listeningSocket.listen();
     EV_INFO << "listen on port " << localPort << endl;
 }
 
 void QuicDiscardServer::handleStopOperation(LifecycleOperation *operation)
 {
-    socket.close();
+    if (clientSocket == nullptr) {
+        listeningSocket.close();
+    } else {
+        clientSocket->close();
+    }
 }
 
 void QuicDiscardServer::handleCrashOperation(LifecycleOperation *operation)
@@ -60,11 +64,17 @@ void QuicDiscardServer::handleMessageWhenUp(cMessage *msg)
                 auto streamId = ctrInfo->getStreamID();
                 auto avaliableDataSize = ctrInfo->getAvaliableDataSize();
                 EV_DEBUG << avaliableDataSize << " bytes arrived on stream " << streamId << " - call recv" << endl;
-                socket.recv(avaliableDataSize, streamId);
+                clientSocket->recv(avaliableDataSize, streamId);
                 break;
             }
             case QUIC_I_ESTABLISHED: {
                 EV_DEBUG << "connection established" << endl;
+                break;
+            }
+            case QUIC_I_AVAILABLE: {
+                EV_DEBUG << "connection available" << endl;
+                clientSocket = listeningSocket.accept();
+                listeningSocket.close();
                 break;
             }
             case QUIC_I_CLOSED: {

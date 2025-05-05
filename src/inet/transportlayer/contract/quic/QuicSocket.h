@@ -188,12 +188,12 @@ public:
     virtual bool belongsToSocket(cMessage *msg) const override;
     virtual void destroy() override;
     void processMessage(cMessage *msg) override;
-    int getSocketId() const override { return -1; }
+    int getSocketId() const override { return socketId; }
 
     /**
      * Accepts a new incoming connection reported as available.
      */
-    void accept(int socketId);
+    QuicSocket *accept();
 
     void setCallback(ICallback *cb) {
         this->cb = cb;

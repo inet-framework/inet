@@ -168,12 +168,18 @@ void QuicSocket::destroy()
     throw cRuntimeError("QuicSocket::destroy not implemented");
 }
 
-void QuicSocket::accept(int socketId)
+QuicSocket *QuicSocket::accept()
 {
+    QuicSocket *newSocket = new QuicSocket();
+    newSocket->setOutputGate(gateToQuic);
+    newSocket->bind(localAddr, localPort);
+    EV_DEBUG << "QuicSocket::accept(): new socket created with socket ID " << newSocket->getSocketId() << endl;
     Request *request = new Request("ACCEPT", QUIC_C_ACCEPT);
     QuicAcceptCommand *cmd = new QuicAcceptCommand();
+    cmd->setNewSocketId(newSocket->getSocketId());
     request->setControlInfo(cmd);
     sendToQuic(request);
+    return newSocket;
 }
 
 void QuicSocket::processMessage(cMessage *msg) {
@@ -184,8 +190,6 @@ void QuicSocket::processMessage(cMessage *msg) {
             QuicAvailableInfo *availableInfo = check_and_cast<QuicAvailableInfo *>(msg->getControlInfo());
             if (cb) {
                 cb->socketAvailable(this, availableInfo);
-            } else {
-                accept(availableInfo->getNewSocketId());
             }
             delete msg;
             break;

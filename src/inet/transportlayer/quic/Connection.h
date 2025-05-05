@@ -154,6 +154,14 @@ class Connection
         return dstConnectionIds;
     }
 
+    AppSocket *getAppSocket() {
+        return appSocket;
+    }
+
+    void setAppSocket(AppSocket *appSocket) {
+        this->appSocket = appSocket;
+    }
+
 
   private:
     Quic *quicSimpleMod;

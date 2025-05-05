@@ -126,6 +126,7 @@ class QuicDataAvailableInfo extends QuicCommand
 //
 class QuicAcceptCommand extends QuicCommand
 {
+    int newSocketId;
 }
 
 //

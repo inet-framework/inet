@@ -32,11 +32,14 @@ class UdpSocket {
   public:
     UdpSocket(Quic *quicSimpleMod);
     virtual ~UdpSocket();
-    virtual void processAppCommand(AppSocket *appSocket, cMessage *msg);
     virtual void processPacket(Packet *pkt);
     virtual int getSocketId();
     virtual bool match(L3Address addr, int port);
     virtual void sendto(L3Address remoteAddr, int remotePort, Packet *pkt);
+    virtual Connection *popConnection();
+    virtual void bind(L3Address addr, int port);
+    virtual void listen(AppSocket *appSocket);
+    virtual void unlisten();
 
     L3Address getLocalAddr() {
         return localAddr;
@@ -48,12 +51,12 @@ class UdpSocket {
   private:
     inet::UdpSocket socket;
     L3Address localAddr;
-    int localPort;
+    uint16_t localPort = 0;
     Quic *quicSimpleMod;
     bool isListening;
     AppSocket *listeningAppSocket;
-
-    Connection *createConnection(AppSocket *appSocket, L3Address remoteAddr, int remotePort);
+    std::queue<AppSocket *> appSocketQueue;
+    std::queue<Connection *> connectionQueue;
 
 };
 

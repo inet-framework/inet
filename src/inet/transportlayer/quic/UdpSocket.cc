@@ -15,6 +15,7 @@
 
 #include "UdpSocket.h"
 #include "AppSocket.h"
+#include "QueueAppSocket.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/transportlayer/common/L4PortTag_m.h"
 
@@ -31,64 +32,29 @@ UdpSocket::UdpSocket(Quic *quicSimpleMod)
     isListening = false;
 }
 
-UdpSocket::~UdpSocket()
-{
-
-}
-
-void UdpSocket::processAppCommand(AppSocket *appSocket, cMessage *msg) {
-    switch (msg->getKind()) {
-        case QUIC_C_CREATE_PCB: { // bind
-            QuicBindCommand *quicBind = check_and_cast<QuicBindCommand *>(msg->getControlInfo());
-            localAddr = quicBind->getLocalAddr();
-            localPort = quicBind->getLocalPort();
-            socket.bind(localAddr, localPort);
-            break;
-        }
-        case QUIC_C_OPEN_PASSIVE: { // listen
-            isListening = true;
-            // currently a server accepts only one connection upon the first incoming packet
-            listeningAppSocket = appSocket;
-            break;
-        }
-        case QUIC_C_OPEN_ACTIVE: { // connect
-            QuicOpenCommand *quicOpen = check_and_cast<QuicOpenCommand *>(msg->getControlInfo());
-            L3Address remoteAddr = quicOpen->getRemoteAddr();
-            int remotePort = quicOpen->getRemotePort();
-            Connection *connection = createConnection(appSocket, remoteAddr, remotePort);
-            connection->processAppCommand(msg);
-            break;
-        }
-        case QUIC_C_ACCEPT: { // accept
-            // currently a server accepts only one connection upon the first incoming packet
-            break;
-        }
-        default: {
-            throw cRuntimeError("Unexpected/unknown App Command");
-        }
-
-    }
-}
-
-Connection *UdpSocket::createConnection(AppSocket *appSocket, L3Address remoteAddr, int remotePort)
-{
-    Connection *connection = new Connection(quicSimpleMod, this, appSocket, remoteAddr, remotePort);
-    appSocket->setConnection(connection);
-    quicSimpleMod->addConnection(connection);
-    return connection;
-}
+UdpSocket::~UdpSocket() { }
 
 void UdpSocket::processPacket(Packet *pkt)
 {
     if (!isListening) {
         throw cRuntimeError("Unexpected packet");
     }
-    // currently a server accepts only one connection upon the first incoming packet
     auto& tags = pkt->getTags();
     L3Address remoteAddr = tags.getTag<L3AddressInd>()->getSrcAddress();
     int remotePort = tags.getTag<L4PortInd>()->getSrcPort();
-    Connection *connection = createConnection(listeningAppSocket, remoteAddr, remotePort);
+
+    // create AppSocket that queues indications for the new connection
+    AppSocket *queueAppSocket = new QueueAppSocket(quicSimpleMod);
+    queueAppSocket->setUdpSocket(this);
+
+    // create new connection and handle the (INIT) packet
+    Connection *connection = quicSimpleMod->createConnection(this, queueAppSocket, remoteAddr, remotePort);
     connection->processPackets(pkt);
+
+    connectionQueue.push(connection);
+
+    // notify the app about the new connection
+    listeningAppSocket->sendConnectionAvailable();
 }
 
 int UdpSocket::getSocketId()
@@ -106,6 +72,53 @@ void UdpSocket::sendto(L3Address remoteAddr, int remotePort, Packet *pkt)
     // send all QUIC packets with Don't Fragment bit set in IP header
     pkt->addTag<FragmentationReq>()->setDontFragment(true);
     socket.sendTo(pkt, remoteAddr, remotePort);
+}
+
+Connection *UdpSocket::popConnection()
+{
+    if (connectionQueue.empty()) {
+        return nullptr;
+    }
+    Connection *connection = connectionQueue.front();
+    connectionQueue.pop();
+    return connection;
+}
+
+void UdpSocket::bind(L3Address addr, int port)
+{
+    if (localPort != 0) {
+        // already bound
+        return;
+    }
+    if (port == 0) {
+        // TODO: ephemeral port
+        port = 5050;
+    }
+    localAddr = addr;
+    localPort = port;
+    socket.bind(addr, port);
+}
+
+void UdpSocket::listen(AppSocket *appSocket)
+{
+    if (appSocket == nullptr) {
+        throw cRuntimeError("UdpSocket::listen: called with appSocket=nullptr, not valid");
+    }
+    if (listeningAppSocket == appSocket) {
+        // already listening for this app socket
+        return;
+    }
+    if (listeningAppSocket != nullptr) {
+        throw cRuntimeError("UdpSocket::listen: Already listening for another app socket");
+    }
+    listeningAppSocket = appSocket;
+    isListening = true;
+}
+
+void UdpSocket::unlisten()
+{
+    isListening = false;
+    listeningAppSocket = nullptr;
 }
 
 } /* namespace quic */

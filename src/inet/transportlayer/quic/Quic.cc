@@ -102,25 +102,8 @@ void Quic::handleMessageFromApp(cMessage *msg)
     if (connection) {
         connection->processAppCommand(msg);
     } else {
-        // no connection for AppSocket, find udpSocket
-        UdpSocket *udpSocket = appSocket->getUdpSocket();
-        if (!udpSocket) {
-            // no udpSocket for AppSocket, find udpSocket by src addr/port for a bind
-            if (msg->getKind() == QUIC_C_CREATE_PCB) { // bind
-                QuicBindCommand *quicBind = check_and_cast<QuicBindCommand *>(msg->getControlInfo());
-                L3Address localAddr = quicBind->getLocalAddr();
-                int localPort = quicBind->getLocalPort();
-                udpSocket = findUdpSocket(localAddr, localPort);
-            }
-            // if there is no existing udpSocket, create one
-            if (!udpSocket) {
-                udpSocket = new UdpSocket(this);
-            }
-            addUdpSocket(udpSocket);
-            appSocket->setUdpSocket(udpSocket);
-        }
-
-        udpSocket->processAppCommand(appSocket, msg);
+        // no connection found, process message in app socket
+        appSocket->processAppCommand(msg);
     }
 }
 
@@ -237,6 +220,15 @@ void Quic::addConnection(Connection *connection)
 
 }
 
+Connection *Quic::createConnection(UdpSocket *udpSocket, AppSocket *appSocket, L3Address remoteAddr, int remotePort)
+{
+    Connection *connection = new Connection(this, udpSocket, appSocket, remoteAddr, remotePort);
+    appSocket->setConnection(connection);
+    addConnection(connection);
+    return connection;
+}
+
+
 uint64_t Quic::extractConnectionId(cMessage *msg)
 {
     return 0;
@@ -248,6 +240,13 @@ void Quic::addUdpSocket(UdpSocket *udpSocket)
     if (!result.second) {
         throw cRuntimeError("Cannot insert udp socket. A udp socket for the socket id already exists.");
     }
+}
+
+UdpSocket *Quic::createUdpSocket()
+{
+    UdpSocket *udpSocket = new UdpSocket(this);
+    addUdpSocket(udpSocket);
+    return udpSocket;
 }
 
 IRoutingTable *Quic::getRoutingTable() {

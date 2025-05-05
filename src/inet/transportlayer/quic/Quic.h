@@ -37,7 +37,10 @@ class Quic : public OperationalBase
 {
   public:
     virtual ~Quic();
-    virtual void addConnection(Connection *connection);
+    virtual Connection *createConnection(UdpSocket *udpSocket, AppSocket *appSocket, L3Address remoteAddr, int remotePort);
+    virtual UdpSocket *createUdpSocket();
+    virtual UdpSocket *findUdpSocket(L3Address addr, int port);
+    virtual AppSocket *findOrCreateAppSocket(int socketId);
     IRoutingTable *getRoutingTable();
 
   protected:
@@ -58,13 +61,12 @@ class Quic : public OperationalBase
     void handleTimeout(cMessage *msg);
     void handleMessageFromApp(cMessage *msg);
     void handleMessageFromUdp(cMessage *msg);
+    void addConnection(Connection *connection);
+    void addUdpSocket(UdpSocket *udpSocket);
     Connection *findConnection(uint64_t srcConnectionId);
     Connection *findConnectionByDstConnectionId(uint64_t connectionId);
     UdpSocket *findUdpSocket(int socketId);
-    UdpSocket *findUdpSocket(L3Address addr, int port);
     uint64_t extractConnectionId(cMessage *msg);
-    AppSocket *findOrCreateAppSocket(int socketId);
-    void addUdpSocket(UdpSocket *udpSocket);
 };
 
 } //namespace quic

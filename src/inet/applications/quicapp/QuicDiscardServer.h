@@ -27,7 +27,8 @@ namespace inet {
 class QuicDiscardServer : public ApplicationBase
 {
   protected:
-    QuicSocket socket;
+    QuicSocket listeningSocket;
+    QuicSocket *clientSocket = nullptr;
 
   protected:
     virtual void handleMessageWhenUp(cMessage *msg) override;
