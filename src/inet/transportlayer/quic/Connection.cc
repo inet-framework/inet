@@ -581,5 +581,33 @@ void Connection::sendConnectionClose(bool sendAck, bool appInitiated, int errorC
     sendPacket(packetBuilder->buildConnectionClosePacket(path->getSafeQuicPacketSize(), sendAck, appInitiated, errorCode), PacketNumberSpace::ApplicationData, false);
 }
 
+bool Connection::belongsPacketTo(Packet *pkt, uint64_t dstConnectionId)
+{
+    // does the list of used destination connection IDs contains the given ID?
+    bool containsConnectionId = false;
+    for (ConnectionId *connectionId: dstConnectionIds) {
+        if (connectionId->getId() == dstConnectionId) {
+            containsConnectionId = true;
+            break;
+        }
+    }
+    if (containsConnectionId == false) {
+        return false;
+    }
+
+    // Does the list of sent packets contains a packet with the same packet number as the given packet?
+    auto shortPacketHeader = pkt->peekAtFront<ShortPacketHeader>();
+    uint64_t packetNumber = shortPacketHeader->getPacketNumber();
+    QuicPacket *quicPacket = reliabilityManager->getSentPacket(PacketNumberSpace::ApplicationData, packetNumber);
+    if (quicPacket == nullptr) {
+        return false;
+    }
+
+    // Does the given packet has the same authentication tag as the sent packet?
+    // TODO: add an authtentication tag at the end of each outgoing packet
+    // and use it here to check if this given packet was sent over this connection
+    return true;
+}
+
 } /* namespace quic */
 } /* namespace inet */

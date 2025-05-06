@@ -64,9 +64,9 @@ class Quic : public OperationalBase
     void addConnection(Connection *connection);
     void addUdpSocket(UdpSocket *udpSocket);
     Connection *findConnection(uint64_t srcConnectionId);
-    Connection *findConnectionByDstConnectionId(uint64_t connectionId);
+    Connection *findConnectionByDstConnectionId(uint64_t connectionId, Packet *pkt);
     UdpSocket *findUdpSocket(int socketId);
-    uint64_t extractConnectionId(Packet *pkt);
+    uint64_t extractConnectionId(Packet *pkt, bool *readSourceConnectionId = nullptr);
 };
 
 } //namespace quic

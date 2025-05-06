@@ -98,6 +98,7 @@ class Connection
     void sendHandshakeDone();
     void close(bool sendAck, bool appInitiated);
     void sendConnectionClose(bool sendAck, bool appInitiated, int errorCode);
+    bool belongsPacketTo(Packet *pkt, uint64_t dstConnectionId);
 
     ReliabilityManager *getReliabilityManager() {
         return this->reliabilityManager;

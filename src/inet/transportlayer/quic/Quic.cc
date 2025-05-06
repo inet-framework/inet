@@ -124,8 +124,17 @@ void Quic::handleMessageFromUdp(cMessage *msg)
                 pkt->popAtFront(); // skip IP header of reflected packet
                 pkt->popAtFront(); // skip UDP header of reflected packet
                 if (pkt->getByteLength() > 0) {
-                    uint64_t dstConnectionId = extractConnectionId(pkt);
-                    Connection *connection = findConnectionByDstConnectionId(dstConnectionId);
+                    bool readSrcConnectionId = true;
+                    uint64_t connectionId = extractConnectionId(pkt, &readSrcConnectionId);
+                    Connection *connection = nullptr;
+                    if (readSrcConnectionId) {
+                        // could read source connection ID, finding connection should be easy
+                        connection = findConnection(connectionId);
+                    } else {
+                        // could only read destination connection ID, try to find connection
+                        connection = findConnectionByDstConnectionId(connectionId, pkt);
+                    }
+
                     if (connection) {
                         connection->processIcmpPtb(pkt, icmpPtb->getMtu());
                     } else {
@@ -183,10 +192,16 @@ Connection *Quic::findConnection(uint64_t srcConnectionId)
     return it->second;
 }
 
-Connection *Quic::findConnectionByDstConnectionId(uint64_t dstConnectionId)
+Connection *Quic::findConnectionByDstConnectionId(uint64_t dstConnectionId, Packet *pkt)
 {
-    EV_DEBUG << "find connection for DST ID " << dstConnectionId << endl;
-    return findConnection(dstConnectionId); // TODO: Implement way to find a connection by dst conn id
+    EV_DEBUG << "find connection for destination connection ID " << dstConnectionId << " and packet " << pkt << endl;
+    for (std::map<uint64_t, Connection *>::iterator it = connectionIdConnectionMap.begin(); it != connectionIdConnectionMap.end(); ++it) {
+        Connection *connection = it->second;
+        if (connection->belongsPacketTo(pkt, dstConnectionId)) {
+            return connection;
+        }
+    }
+    return nullptr;
 }
 
 UdpSocket *Quic::findUdpSocket(int socketId)
@@ -230,7 +245,7 @@ Connection *Quic::createConnection(UdpSocket *udpSocket, AppSocket *appSocket, L
 }
 
 
-uint64_t Quic::extractConnectionId(Packet *pkt)
+uint64_t Quic::extractConnectionId(Packet *pkt, bool *readSourceConnectionId)
 {
     auto packetHeader = pkt->peekAtFront<PacketHeader>();
     EV_DEBUG << "extract connection ID from: " << packetHeader << endl;
@@ -238,18 +253,22 @@ uint64_t Quic::extractConnectionId(Packet *pkt)
     switch (packetHeader->getHeaderForm()) {
         case PACKET_HEADER_FORM_LONG: {
             auto longPacketHeader = staticPtrCast<const LongPacketHeader>(packetHeader);
+            if (readSourceConnectionId != nullptr && *readSourceConnectionId) {
+                return longPacketHeader->getSrcConnectionId();
+            }
             return longPacketHeader->getDstConnectionId();
         }
         case PACKET_HEADER_FORM_SHORT: {
             auto shortPacketHeader = staticPtrCast<const ShortPacketHeader>(packetHeader);
+            if (readSourceConnectionId != nullptr) {
+                *readSourceConnectionId = false;
+            }
             return shortPacketHeader->getDstConnectionId();
         }
         default: {
             throw cRuntimeError("Quic::extractConnectionId: Unknown header form.");
         }
     }
-
-    return 0;
 }
 
 void Quic::addUdpSocket(UdpSocket *udpSocket)
