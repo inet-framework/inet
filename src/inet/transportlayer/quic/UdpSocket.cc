@@ -86,13 +86,12 @@ Connection *UdpSocket::popConnection()
 
 void UdpSocket::bind(L3Address addr, int port)
 {
+    if (port == 0) {
+        throw cRuntimeError("UdpSocket::bind: cannot bind to port 0");
+    }
     if (localPort != 0) {
         // already bound
         return;
-    }
-    if (port == 0) {
-        // TODO: ephemeral port
-        port = 5050;
     }
     localAddr = addr;
     localPort = port;
