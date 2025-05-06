@@ -31,72 +31,6 @@ Register_Serializer(RetryPacketHeader, QuicPacketHeaderSerializer);
 Register_Serializer(OneRttPacketHeader, QuicPacketHeaderSerializer);
 Register_Serializer(VersionNegotiationPacketHeader, QuicPacketHeaderSerializer);
 
-// Helper methods for serializing and deserializing variable length integers
-void serializeVariableLengthInteger(MemoryOutputStream& stream, uint64_t value)
-{
-    if (value < 64) {
-        // 0-6 bit length, 0 bits to identify length
-        stream.writeByte(value);
-    }
-    else if (value < 16384) {
-        // 7-14 bit length, 01 bits to identify length
-        stream.writeByte(0x40 | (value >> 8));
-        stream.writeByte(value & 0xFF);
-    }
-    else if (value < 1073741824) {
-        // 15-30 bit length, 10 bits to identify length
-        stream.writeByte(0x80 | (value >> 24));
-        stream.writeByte((value >> 16) & 0xFF);
-        stream.writeByte((value >> 8) & 0xFF);
-        stream.writeByte(value & 0xFF);
-    }
-    else {
-        // 31-62 bit length, 11 bits to identify length
-        stream.writeByte(0xC0 | (value >> 56));
-        stream.writeByte((value >> 48) & 0xFF);
-        stream.writeByte((value >> 40) & 0xFF);
-        stream.writeByte((value >> 32) & 0xFF);
-        stream.writeByte((value >> 24) & 0xFF);
-        stream.writeByte((value >> 16) & 0xFF);
-        stream.writeByte((value >> 8) & 0xFF);
-        stream.writeByte(value & 0xFF);
-    }
-}
-
-uint64_t deserializeVariableLengthInteger(MemoryInputStream& stream)
-{
-    uint8_t firstByte = stream.readByte();
-    uint8_t prefix = firstByte >> 6;
-    uint64_t value = 0;
-
-    switch (prefix) {
-        case 0: // 0-6 bit length, 0 bits to identify length
-            value = firstByte;
-            break;
-        case 1: // 7-14 bit length, 01 bits to identify length
-            value = ((uint64_t)(firstByte & 0x3F) << 8) | stream.readByte();
-            break;
-        case 2: // 15-30 bit length, 10 bits to identify length
-            value = ((uint64_t)(firstByte & 0x3F) << 24) |
-                   ((uint64_t)stream.readByte() << 16) |
-                   ((uint64_t)stream.readByte() << 8) |
-                   stream.readByte();
-            break;
-        case 3: // 31-62 bit length, 11 bits to identify length
-            value = ((uint64_t)(firstByte & 0x3F) << 56) |
-                   ((uint64_t)stream.readByte() << 48) |
-                   ((uint64_t)stream.readByte() << 40) |
-                   ((uint64_t)stream.readByte() << 32) |
-                   ((uint64_t)stream.readByte() << 24) |
-                   ((uint64_t)stream.readByte() << 16) |
-                   ((uint64_t)stream.readByte() << 8) |
-                   stream.readByte();
-            break;
-    }
-
-    return value;
-}
-
 //
 // QuicPacketHeaderSerializer
 //
@@ -502,16 +436,6 @@ const Ptr<Chunk> QuicPacketHeaderSerializer::deserializeShortPacketHeader(Memory
 
         return header;
     }
-}
-
-void QuicPacketHeaderSerializer::serializeVariableLengthInteger(MemoryOutputStream& stream, uint64_t value) const
-{
-    ::inet::quic::serializeVariableLengthInteger(stream, value);
-}
-
-uint64_t QuicPacketHeaderSerializer::deserializeVariableLengthInteger(MemoryInputStream& stream) const
-{
-    return ::inet::quic::deserializeVariableLengthInteger(stream);
 }
 
 } // namespace quic

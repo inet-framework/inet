@@ -47,10 +47,6 @@ class INET_API QuicPacketHeaderSerializer : public FieldsChunkSerializer
     virtual const Ptr<Chunk> deserializeLongPacketHeader(MemoryInputStream& stream, uint8_t firstByte) const;
     virtual const Ptr<Chunk> deserializeShortPacketHeader(MemoryInputStream& stream, uint8_t firstByte) const;
 
-    // Helper methods for serializing and deserializing variable length integers
-    virtual void serializeVariableLengthInteger(MemoryOutputStream& stream, uint64_t value) const;
-    virtual uint64_t deserializeVariableLengthInteger(MemoryInputStream& stream) const;
-
   public:
     QuicPacketHeaderSerializer() : FieldsChunkSerializer() {}
 };
