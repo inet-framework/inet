@@ -37,7 +37,7 @@ UdpSocket::~UdpSocket() { }
 void UdpSocket::processPacket(Packet *pkt)
 {
     if (!isListening) {
-        throw cRuntimeError("Unexpected packet");
+        throw cRuntimeError("UdpSocket::processPacket: Unexpected packet");
     }
     auto& tags = pkt->getTags();
     L3Address remoteAddr = tags.getTag<L3AddressInd>()->getSrcAddress();

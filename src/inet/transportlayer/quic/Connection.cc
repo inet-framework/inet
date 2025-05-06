@@ -30,14 +30,14 @@
 namespace inet {
 namespace quic {
 
-Connection::Connection(Quic *quicSimpleMod, UdpSocket *udpSocket, AppSocket *appSocket, L3Address remoteAddr, int remotePort) {
+Connection::Connection(Quic *quicSimpleMod, UdpSocket *udpSocket, AppSocket *appSocket, L3Address remoteAddr, int remotePort, uint64_t srcConnectionId) {
     this->quicSimpleMod = quicSimpleMod;
     this->udpSocket = udpSocket;
     this->appSocket = appSocket;
 
     bool useDplpmtud = quicSimpleMod->par("useDplpmtud");
 
-    srcConnectionIds.push_back(new ConnectionId(0, 1));
+    srcConnectionIds.push_back(new ConnectionId(srcConnectionId));
 
     stats = new Statistics(quicSimpleMod, "_cid=" + std::to_string(srcConnectionIds[0]->getId()));
 

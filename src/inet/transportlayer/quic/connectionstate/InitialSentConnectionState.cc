@@ -16,7 +16,7 @@ ConnectionState *InitialSentConnectionState::processInitialPacket(const Ptr<cons
     EV_DEBUG << "processInitialPacket in " << name << endl;
     processFrames(pkt, PacketNumberSpace::Initial);
 
-    context->addDstConnectionId(packetHeader->getDstConnectionId(), packetHeader->getDstConnectionIdLength());
+    context->addDstConnectionId(packetHeader->getSrcConnectionId(), packetHeader->getSrcConnectionIdLength());
     context->accountReceivedPacket(packetHeader->getPacketNumber(), ackElicitingPacket, PacketNumberSpace::Initial, false);
     context->sendAck(PacketNumberSpace::Initial);
 

@@ -66,7 +66,7 @@ class Quic : public OperationalBase
     Connection *findConnection(uint64_t srcConnectionId);
     Connection *findConnectionByDstConnectionId(uint64_t connectionId);
     UdpSocket *findUdpSocket(int socketId);
-    uint64_t extractConnectionId(cMessage *msg);
+    uint64_t extractConnectionId(Packet *pkt);
 };
 
 } //namespace quic

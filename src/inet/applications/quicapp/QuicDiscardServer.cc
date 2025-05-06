@@ -74,7 +74,7 @@ void QuicDiscardServer::handleMessageWhenUp(cMessage *msg)
             case QUIC_I_CONNECTION_AVAILABLE: {
                 EV_DEBUG << "connection available" << endl;
                 clientSocket = listeningSocket.accept();
-                listeningSocket.close();
+                //listeningSocket.close();
                 break;
             }
             case QUIC_I_CLOSED: {

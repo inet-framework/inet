@@ -143,7 +143,7 @@ void Quic::handleMessageFromUdp(cMessage *msg)
     } else if (msg->getKind() == UDP_I_DATA) {
         Packet *pkt = check_and_cast<Packet *>(msg);
 
-        uint64_t connectionId = extractConnectionId(msg);
+        uint64_t connectionId = extractConnectionId(pkt);
         Connection *connection = findConnection(connectionId);
         if (connection) {
             connection->processPackets(pkt);
@@ -222,15 +222,33 @@ void Quic::addConnection(Connection *connection)
 
 Connection *Quic::createConnection(UdpSocket *udpSocket, AppSocket *appSocket, L3Address remoteAddr, int remotePort)
 {
-    Connection *connection = new Connection(this, udpSocket, appSocket, remoteAddr, remotePort);
+    uint64_t connectionId = connectionIdConnectionMap.size();
+    Connection *connection = new Connection(this, udpSocket, appSocket, remoteAddr, remotePort, connectionId);
     appSocket->setConnection(connection);
     addConnection(connection);
     return connection;
 }
 
 
-uint64_t Quic::extractConnectionId(cMessage *msg)
+uint64_t Quic::extractConnectionId(Packet *pkt)
 {
+    auto packetHeader = pkt->peekAtFront<PacketHeader>();
+    EV_DEBUG << "extract connection ID from: " << packetHeader << endl;
+
+    switch (packetHeader->getHeaderForm()) {
+        case PACKET_HEADER_FORM_LONG: {
+            auto longPacketHeader = staticPtrCast<const LongPacketHeader>(packetHeader);
+            return longPacketHeader->getDstConnectionId();
+        }
+        case PACKET_HEADER_FORM_SHORT: {
+            auto shortPacketHeader = staticPtrCast<const ShortPacketHeader>(packetHeader);
+            return shortPacketHeader->getDstConnectionId();
+        }
+        default: {
+            throw cRuntimeError("Quic::extractConnectionId: Unknown header form.");
+        }
+    }
+
     return 0;
 }
 

@@ -16,6 +16,7 @@ namespace quic {
 class ConnectionId {
 public:
     ConnectionId(uint64_t id, uint8_t length);
+    ConnectionId(uint64_t id);
 
     uint64_t getId() {
         return id;

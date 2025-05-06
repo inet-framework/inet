@@ -37,7 +37,7 @@ ConnectionState *InitialConnectionState::processInitialPacket(const Ptr<const In
 
     processFrames(pkt, PacketNumberSpace::Initial);
 
-    context->addDstConnectionId(packetHeader->getDstConnectionId(), packetHeader->getDstConnectionIdLength());
+    context->addDstConnectionId(packetHeader->getSrcConnectionId(), packetHeader->getSrcConnectionIdLength());
     context->accountReceivedPacket(packetHeader->getPacketNumber(), ackElicitingPacket, PacketNumberSpace::Initial, false);
 
     // send server hello
