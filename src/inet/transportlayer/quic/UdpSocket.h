@@ -55,7 +55,6 @@ class UdpSocket {
     Quic *quicSimpleMod;
     bool isListening;
     AppSocket *listeningAppSocket;
-    std::queue<AppSocket *> appSocketQueue;
     std::queue<Connection *> connectionQueue;
 
 };
