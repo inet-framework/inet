@@ -28,9 +28,10 @@ import inet.transportlayer.contract.IQuic;
 // With the send method of the ~QuicSocket class, an app module can provide
 // data to send for QUIC, more specific for a QUIC stream. For all streams,
 // QUIC sends data as fast as possible. That is, as fast as the congestion and
-// flow control permits. As long as it cannot send data, QUIC stores the data
-// to send in its send queue for the stream. The parameter sendQueueLimit
-// defines a limit for the data over all stream send queues.
+// flow control permits. As long as the destination endpoint has not
+// acknowledged their receipt, QUIC stores the data to send in its send queue
+// for the stream. The parameter sendQueueLimit defines a limit for the data
+// over all stream send queues.
 //
 // If the size of the data in the stream send queues reaches the limit, QUIC
 // signals to the app module that it must stop providing data. If the queue
