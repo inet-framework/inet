@@ -21,8 +21,8 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IPathLoss;
 module BreakpointPathLoss extends Module like IPathLoss
 {
     parameters:
-        double l01;  // Initial path loss for the near-distance region in dB
-        double l02;  // Initial path loss for the far-distance region in dB
+        double l01 @unit(dB);  // Initial path loss for the near-distance region
+        double l02 @unit(dB);  // Initial path loss for the far-distance region
         double alpha1;  // Path loss exponent for the near-distance region
         double alpha2;  // Path loss exponent for the far-distance region
         double breakpointDistance @unit(m);

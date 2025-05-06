@@ -20,9 +20,9 @@ module Ieee802154NarrowbandDimensionalRadioMedium extends RadioMedium
         // 802.15.4-2006, page 266
         pathLoss.typename = default("BreakpointPathLoss");
         pathLoss.breakpointDistance = 8 m;
-        pathLoss.l01 = 40.2;
+        pathLoss.l01 = 40.2 dB;
         pathLoss.alpha1 = 2;
-        pathLoss.l02 = 58.5;
+        pathLoss.l02 = 58.5 dB;
         pathLoss.alpha2 = 3.3;
 
         // Reflects the thermal noise for the receiver sensitivity
