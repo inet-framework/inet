@@ -28,14 +28,14 @@ void QuicDiscardServer::handleStartOperation(LifecycleOperation *operation)
     listeningSocket.setOutputGate(gate("socketOut"));
     listeningSocket.bind(localAddress, localPort);
     listeningSocket.listen();
-    EV_INFO << "listen on port " << localPort << endl;
+    EV_INFO << "listen over socket " << listeningSocket.getSocketId() << " on port " << localPort << endl;
+    listeningSocket.setCallback(this);
 }
 
 void QuicDiscardServer::handleStopOperation(LifecycleOperation *operation)
 {
-    if (clientSocket == nullptr) {
-        listeningSocket.close();
-    } else {
+    listeningSocket.close();
+    for (QuicSocket *clientSocket : clientSockets) {
         clientSocket->close();
     }
 }
@@ -47,50 +47,61 @@ void QuicDiscardServer::handleCrashOperation(LifecycleOperation *operation)
 
 void QuicDiscardServer::handleMessageWhenUp(cMessage *msg)
 {
+    EV_DEBUG << "handle message of kind " << msg->getKind() << endl;
     if (msg->isSelfMessage()) {
         EV_DEBUG << "SelfMessage received" << endl;
     } else {
-        switch (msg->getKind()) {
-            case QUIC_I_DATA: {
-                auto pkt = check_and_cast<Packet*>(msg);
-                auto data = pkt->popAtFront();
-                static simsignal_t bytesReceivedSignal = registerSignal("bytesReceived");
-                emit(bytesReceivedSignal, (long)B(data->getChunkLength()).get());
-                EV_DEBUG << data << " received and discarded" << endl;
-                break;
-            }
-            case QUIC_I_DATA_AVAILABLE: {
-                QuicDataInfo *ctrInfo = dynamic_cast<QuicDataInfo *>(msg->getControlInfo());
-                auto streamId = ctrInfo->getStreamID();
-                auto avaliableDataSize = ctrInfo->getAvaliableDataSize();
-                EV_DEBUG << avaliableDataSize << " bytes arrived on stream " << streamId << " - call recv" << endl;
-                clientSocket->recv(avaliableDataSize, streamId);
-                break;
-            }
-            case QUIC_I_ESTABLISHED: {
-                EV_DEBUG << "connection established" << endl;
-                break;
-            }
-            case QUIC_I_CONNECTION_AVAILABLE: {
-                EV_DEBUG << "connection available" << endl;
-                clientSocket = listeningSocket.accept();
-                //listeningSocket.close();
-                break;
-            }
-            case QUIC_I_CLOSED: {
-                EV_DEBUG << "connection closed" << endl;
-                break;
-            }
-            case QUIC_I_ERROR: {
-                EV_DEBUG << "Got QUIC error" << endl;
-                break;
-            }
-            default: {
-                assert(false);
+        if (listeningSocket.belongsToSocket(msg)) {
+            listeningSocket.processMessage(msg);
+        } else {
+            for (QuicSocket *clientSocket : clientSockets) {
+                if (clientSocket->belongsToSocket(msg)) {
+                    clientSocket->processMessage(msg);
+                    break;
+                }
             }
         }
     }
-    delete msg;
+}
+
+void QuicDiscardServer::socketDataArrived(QuicSocket* socket, Packet *packet)
+{
+    auto data = packet->popAtFront();
+    static simsignal_t bytesReceivedSignal = registerSignal("bytesReceived");
+    emit(bytesReceivedSignal, (long)B(data->getChunkLength()).get());
+    EV_DEBUG << data << " received and discarded over socket " << socket->getSocketId() << endl;
+}
+
+void QuicDiscardServer::socketConnectionAvailable(QuicSocket *socket)
+{
+    EV_DEBUG << "connection available on socket " << socket->getSocketId() << " - call accept" << endl;
+    QuicSocket *clientSocket = socket->accept();
+    clientSocket->setCallback(this);
+    EV_DEBUG << "got client socket " << clientSocket->getSocketId() << endl;
+    clientSockets.push_back(clientSocket);
+}
+
+void QuicDiscardServer::socketDataAvailable(QuicSocket* socket, QuicDataInfo *dataInfo)
+{
+    auto streamId = dataInfo->getStreamID();
+    auto avaliableDataSize = dataInfo->getAvaliableDataSize();
+    EV_DEBUG << avaliableDataSize << " bytes arrived over socket " << socket->getSocketId() << " on stream " << streamId << " - call recv" << endl;
+    socket->recv(avaliableDataSize, streamId);
+}
+
+void QuicDiscardServer::socketEstablished(QuicSocket *socket)
+{
+    EV_DEBUG << "connection to " << socket->getRemoteAddr() << ":" << socket->getRemotePort() << " established" << endl;
+}
+
+void QuicDiscardServer::socketClosed(QuicSocket *socket)
+{
+    EV_DEBUG << "connection closed over socket " << socket->getSocketId() << endl;
+}
+
+void QuicDiscardServer::socketDeleted(QuicSocket *socket)
+{
+    EV_DEBUG << "socket " << socket->getSocketId() << " deleted" << endl;
 }
 
 } //namespace

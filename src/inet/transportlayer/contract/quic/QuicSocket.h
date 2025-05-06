@@ -274,6 +274,22 @@ public:
     void setCallback(ICallback *cb) {
         this->cb = cb;
     }
+
+    L3Address getLocalAddr() {
+        return localAddr;
+    }
+
+    uint16_t getLocalPort() {
+        return localPort;
+    }
+
+    L3Address getRemoteAddr() {
+        return remoteAddr;
+    }
+
+    uint16_t getRemotePort() {
+        return remotePort;
+    }
 };
 
 } // namespace inet

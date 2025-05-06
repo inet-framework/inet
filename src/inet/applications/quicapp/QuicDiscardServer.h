@@ -24,11 +24,11 @@ using namespace omnetpp;
 
 namespace inet {
 
-class QuicDiscardServer : public ApplicationBase
+class QuicDiscardServer : public ApplicationBase, public QuicSocket::ICallback
 {
   protected:
     QuicSocket listeningSocket;
-    QuicSocket *clientSocket = nullptr;
+    std::vector<QuicSocket *> clientSockets;
 
   protected:
     virtual void handleMessageWhenUp(cMessage *msg) override;
@@ -36,6 +36,17 @@ class QuicDiscardServer : public ApplicationBase
     virtual void handleStartOperation(LifecycleOperation *operation) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
+
+    virtual void socketDataArrived(QuicSocket* socket, Packet *packet) override;
+    virtual void socketConnectionAvailable(QuicSocket *socket) override;
+    virtual void socketDataAvailable(QuicSocket* socket, QuicDataInfo *dataInfo) override;
+    virtual void socketEstablished(QuicSocket *socket) override;
+    virtual void socketClosed(QuicSocket *socket) override;
+    virtual void socketDeleted(QuicSocket *socket) override;
+
+    virtual void socketSendQueueFull(QuicSocket *socket) override { };
+    virtual void socketSendQueueDrain(QuicSocket *socket) override { };
+    virtual void socketMsgRejected(QuicSocket *socket) override { };
 };
 
 } //namespace

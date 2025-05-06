@@ -148,7 +148,14 @@ bool QuicSocket::isOpen() const
 
 bool QuicSocket::belongsToSocket(cMessage *msg) const
 {
-    auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
+    ITaggedObject *taggedObject = dynamic_cast<ITaggedObject *>(msg);
+    if (taggedObject == nullptr) {
+        return false;
+    }
+    auto& tags = taggedObject->getTags();
+    if (!tags.hasTag<SocketInd>()) {
+        return false;
+    }
     return tags.getTag<SocketInd>()->getSocketId() == socketId;
 }
 
