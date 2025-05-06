@@ -55,37 +55,6 @@ class INET_API QuicPacketHeaderSerializer : public FieldsChunkSerializer
     QuicPacketHeaderSerializer() : FieldsChunkSerializer() {}
 };
 
-/**
- * Converts between QUIC frame headers and binary (network byte order) QUIC frame headers.
- */
-class INET_API QuicFrameHeaderSerializer : public FieldsChunkSerializer
-{
-  protected:
-    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
-
-    // Helper methods for serializing different types of QUIC frame headers
-    virtual void serializeStreamFrameHeader(MemoryOutputStream& stream, const Ptr<const StreamFrameHeader>& header) const;
-    virtual void serializeAckFrameHeader(MemoryOutputStream& stream, const Ptr<const AckFrameHeader>& header) const;
-    virtual void serializeMaxDataFrameHeader(MemoryOutputStream& stream, const Ptr<const MaxDataFrameHeader>& header) const;
-    virtual void serializeMaxStreamDataFrameHeader(MemoryOutputStream& stream, const Ptr<const MaxStreamDataFrameHeader>& header) const;
-    virtual void serializeDataBlockedFrameHeader(MemoryOutputStream& stream, const Ptr<const DataBlockedFrameHeader>& header) const;
-    virtual void serializeStreamDataBlockedFrameHeader(MemoryOutputStream& stream, const Ptr<const StreamDataBlockedFrameHeader>& header) const;
-    virtual void serializePingFrameHeader(MemoryOutputStream& stream, const Ptr<const PingFrameHeader>& header) const;
-    virtual void serializePaddingFrameHeader(MemoryOutputStream& stream, const Ptr<const PaddingFrameHeader>& header) const;
-    virtual void serializeCryptoFrameHeader(MemoryOutputStream& stream, const Ptr<const CryptoFrameHeader>& header) const;
-
-    // Helper methods for deserializing different types of QUIC frame headers
-    virtual const Ptr<Chunk> deserializeFrameHeader(MemoryInputStream& stream, FrameHeaderType frameType) const;
-
-    // Helper methods for serializing and deserializing variable length integers
-    virtual void serializeVariableLengthInteger(MemoryOutputStream& stream, uint64_t value) const;
-    virtual uint64_t deserializeVariableLengthInteger(MemoryInputStream& stream) const;
-
-  public:
-    QuicFrameHeaderSerializer() : FieldsChunkSerializer() {}
-};
-
 } // namespace quic
 } // namespace inet
 
