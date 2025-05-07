@@ -26,6 +26,11 @@ using namespace omnetpp;
 namespace inet {
 namespace quic {
 
+void random_bytes(void *buf, size_t len);
+uint64_t get_simtime(ptls_get_time_t *self);
+
+extern ptls_get_time_t opp_get_time;
+
 // Forward declarations:
 class Connection;
 class UdpSocket;

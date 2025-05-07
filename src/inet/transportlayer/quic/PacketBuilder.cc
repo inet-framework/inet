@@ -10,6 +10,8 @@
 #include "inet/common/Units.h"
 #include "packet/QuicStreamFrame.h"
 
+#include "Quic.h" // for random_bytes and get_simtime
+
 extern "C" {
 #include "picotls.h"
 #include "picotls/openssl.h"
@@ -176,11 +178,10 @@ QuicFrame *PacketBuilder::createCryptoFrame(TransportParameters *tp)
         ptls_context_t ctx;
 
         memset(&ctx, 0, sizeof(ctx));
-        ctx.random_bytes = ptls_openssl_random_bytes;
+        ctx.random_bytes = random_bytes;
         ctx.key_exchanges = ptls_openssl_key_exchanges;
         ctx.cipher_suites = ptls_openssl_cipher_suites;
-        ctx.get_time = &ptls_get_time;
-
+        ctx.get_time = &opp_get_time;
 
         const int EXTENSION_TYPE_TRANSPORT_PARAMETERS_FINAL = 0x39;
         const int TRANSPORT_PARAMETER_ID_INITIAL_MAX_DATA = 4;

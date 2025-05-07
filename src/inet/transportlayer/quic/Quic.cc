@@ -33,7 +33,7 @@ void random_bytes(void *buf, size_t len) {
         bytebuf[i] = contextModule->intrand(256);
 }
 
-static uint64_t get_simtime(ptls_get_time_t *self)
+uint64_t get_simtime(ptls_get_time_t *self)
 {
     return cSimulation::getActiveSimulation()->getSimTime().inUnit(SIMTIME_MS);
 }
