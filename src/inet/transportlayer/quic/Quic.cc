@@ -26,6 +26,15 @@ namespace quic {
 
 Define_Module(Quic);
 
+Quic::Quic() : OperationalBase()
+{
+    memset(&ctx, 0, sizeof(ctx));
+    ctx.random_bytes = ptls_openssl_random_bytes;
+    ctx.key_exchanges = ptls_openssl_key_exchanges;
+    ctx.cipher_suites = ptls_openssl_cipher_suites;
+    ctx.get_time = &ptls_get_time;
+}
+
 Quic::~Quic() {
     std::set<Connection *> connections;
     for (std::map<uint64_t, Connection *>::iterator it = connectionIdConnectionMap.begin(); it != connectionIdConnectionMap.end(); ++it) {
