@@ -16,6 +16,11 @@
 #include "AppSocket.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
 
+extern "C" {
+#include "picotls.h"
+#include "picotls/openssl.h"
+}
+
 using namespace omnetpp;
 
 namespace inet {
@@ -28,6 +33,7 @@ class UdpSocket;
 class Quic : public OperationalBase
 {
   public:
+    Quic();
     virtual ~Quic();
     virtual Connection *createConnection(UdpSocket *udpSocket, AppSocket *appSocket, L3Address remoteAddr, uint16_t remotePort);
     virtual UdpSocket *createUdpSocket();
@@ -36,6 +42,8 @@ class Quic : public OperationalBase
     virtual void addConnection(uint64_t connectionId, Connection *connection);
     virtual void removeConnectionId(uint64_t connectionId);
     IRoutingTable *getRoutingTable();
+
+    ptls_context_t ctx;
 
   protected:
     virtual void handleMessageWhenUp(cMessage *msg) override;
