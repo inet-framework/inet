@@ -85,6 +85,7 @@ void QuicClient::socketEstablished(QuicSocket *socket) {
 
 void QuicClient::socketDataArrived(QuicSocket* socket, Packet *packet) {
     EV_DEBUG << "Data arrived" << endl;
+    delete packet;
 }
 
 void QuicClient::socketClosed(QuicSocket *socket) {
