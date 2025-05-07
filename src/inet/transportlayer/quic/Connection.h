@@ -202,7 +202,7 @@ class Connection
 
     bool dplpmutdInIntialBase;
 
-    bool handshakeConfirmed;
+    bool handshakeConfirmed = false;
 
     Statistics *stats;
 
