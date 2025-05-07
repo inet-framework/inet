@@ -53,9 +53,9 @@ class UdpSocket {
     inet::UdpSocket socket;
     L3Address localAddr;
     uint16_t localPort = 0;
-    Quic *quicSimpleMod;
-    bool isListening;
-    AppSocket *listeningAppSocket;
+    Quic *quicSimpleMod = nullptr;
+    bool isListening = false;
+    AppSocket *listeningAppSocket = nullptr;
     std::queue<Connection *> connectionQueue;
 
 };

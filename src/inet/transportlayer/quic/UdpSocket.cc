@@ -25,11 +25,9 @@
 namespace inet {
 namespace quic {
 
-UdpSocket::UdpSocket(Quic *quicSimpleMod)
+UdpSocket::UdpSocket(Quic *quicSimpleMod): quicSimpleMod(quicSimpleMod)
 {
-    this->quicSimpleMod = quicSimpleMod;
     socket.setOutputGate(quicSimpleMod->gate("udpOut"));
-    isListening = false;
 }
 
 UdpSocket::~UdpSocket() { }
