@@ -167,9 +167,7 @@ QuicFrame *PacketBuilder::createPaddingFrame(int length)
 QuicFrame *PacketBuilder::createCryptoFrame(TransportParameters *tp)
 {
     Ptr<CryptoFrameHeader> frameHeader = makeShared<CryptoFrameHeader>();
-    frameHeader->setOffset(0);
-    frameHeader->setLength(0);
-    frameHeader->calcChunkLength();
+
     QuicFrame *frame = new QuicFrame(frameHeader);
 
     if (tp) {
@@ -255,6 +253,11 @@ QuicFrame *PacketBuilder::createCryptoFrame(TransportParameters *tp)
         frameHeader->setContainsTransportParameters(true);
 
     }
+
+    frameHeader->setOffset(0);
+    frameHeader->setLength(frame->getDataSize());
+    frameHeader->calcChunkLength();
+
     Exit:
     return frame;
 }
