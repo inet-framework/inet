@@ -26,13 +26,28 @@ namespace quic {
 
 Define_Module(Quic);
 
+void random_bytes(void *buf, size_t len) {
+    cModule *contextModule = cSimulation::getActiveSimulation()->getContextModule();
+    uint8_t *bytebuf = (uint8_t *)buf;
+    for (int i = 0; i < len; i++)
+        bytebuf[i] = contextModule->intrand(256);
+}
+
+static uint64_t get_simtime(ptls_get_time_t *self)
+{
+    return cSimulation::getActiveSimulation()->getSimTime().inUnit(SIMTIME_MS);
+}
+
+ptls_get_time_t opp_get_time = {get_simtime};
+
+
 Quic::Quic() : OperationalBase()
 {
     memset(&ctx, 0, sizeof(ctx));
-    ctx.random_bytes = ptls_openssl_random_bytes;
+    ctx.random_bytes = random_bytes;
     ctx.key_exchanges = ptls_openssl_key_exchanges;
     ctx.cipher_suites = ptls_openssl_cipher_suites;
-    ctx.get_time = &ptls_get_time;
+    ctx.get_time = &opp_get_time;
 }
 
 Quic::~Quic() {
