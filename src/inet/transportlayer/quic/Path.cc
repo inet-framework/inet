@@ -18,7 +18,7 @@
 namespace inet {
 namespace quic {
 
-Path::Path(Connection *connection, L3Address localAddr, int localPort, L3Address remoteAddr, int remotePort, bool useDplpmtud, Statistics *connStats) {
+Path::Path(Connection *connection, L3Address localAddr, uint16_t localPort, L3Address remoteAddr, uint16_t remotePort, bool useDplpmtud, Statistics *connStats) {
     this->connection = connection;
     this->localAddr = localAddr;
     this->localPort = localPort;

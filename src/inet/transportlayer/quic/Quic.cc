@@ -213,7 +213,7 @@ UdpSocket *Quic::findUdpSocket(int socketId)
     return it->second;
 }
 
-UdpSocket *Quic::findUdpSocket(L3Address addr, int port)
+UdpSocket *Quic::findUdpSocket(L3Address addr, uint16_t port)
 {
     for (std::map<int, UdpSocket *>::iterator it = udpSocketIdUdpSocketMap.begin(); it != udpSocketIdUdpSocketMap.end(); ++it) {
         if (it->second->match(addr, port)) {
@@ -235,7 +235,7 @@ void Quic::addConnection(Connection *connection)
 
 }
 
-Connection *Quic::createConnection(UdpSocket *udpSocket, AppSocket *appSocket, L3Address remoteAddr, int remotePort)
+Connection *Quic::createConnection(UdpSocket *udpSocket, AppSocket *appSocket, L3Address remoteAddr, uint16_t remotePort)
 {
     uint64_t connectionId = connectionIdConnectionMap.size();
     Connection *connection = new Connection(this, udpSocket, appSocket, remoteAddr, remotePort, connectionId);

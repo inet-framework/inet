@@ -37,9 +37,9 @@ class Quic : public OperationalBase
 {
   public:
     virtual ~Quic();
-    virtual Connection *createConnection(UdpSocket *udpSocket, AppSocket *appSocket, L3Address remoteAddr, int remotePort);
+    virtual Connection *createConnection(UdpSocket *udpSocket, AppSocket *appSocket, L3Address remoteAddr, uint16_t remotePort);
     virtual UdpSocket *createUdpSocket();
-    virtual UdpSocket *findUdpSocket(L3Address addr, int port);
+    virtual UdpSocket *findUdpSocket(L3Address addr, uint16_t port);
     virtual AppSocket *findOrCreateAppSocket(int socketId);
     IRoutingTable *getRoutingTable();
 

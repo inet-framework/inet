@@ -30,7 +30,7 @@
 namespace inet {
 namespace quic {
 
-Connection::Connection(Quic *quicSimpleMod, UdpSocket *udpSocket, AppSocket *appSocket, L3Address remoteAddr, int remotePort, uint64_t srcConnectionId) {
+Connection::Connection(Quic *quicSimpleMod, UdpSocket *udpSocket, AppSocket *appSocket, L3Address remoteAddr, uint16_t remotePort, uint64_t srcConnectionId) {
     this->quicSimpleMod = quicSimpleMod;
     this->udpSocket = udpSocket;
     this->appSocket = appSocket;

@@ -66,7 +66,7 @@ enum TimerType
 class Connection
 {
   public:
-    Connection(Quic *quicSimpleMod, UdpSocket *udpSocket, AppSocket *appSocket, L3Address remoteAddr, int remotePort, uint64_t srcConnectionId);
+    Connection(Quic *quicSimpleMod, UdpSocket *udpSocket, AppSocket *appSocket, L3Address remoteAddr, uint16_t remotePort, uint64_t srcConnectionId);
     virtual ~Connection();
     virtual void processAppCommand(cMessage *msg);
     virtual void processPackets(Packet *pkt);

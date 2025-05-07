@@ -113,7 +113,7 @@ void AppSocket::processAppCommand(cMessage *msg)
         if (msg->getKind() == QUIC_C_CREATE_PCB) { // bind
             QuicBindCommand *quicBind = check_and_cast<QuicBindCommand *>(msg->getControlInfo());
             L3Address localAddr = quicBind->getLocalAddr();
-            int localPort = quicBind->getLocalPort();
+            uint16_t localPort = quicBind->getLocalPort();
             udpSocket = quicSimpleMod->findUdpSocket(localAddr, localPort);
         }
         // if there is no existing udpSocket, create one
@@ -134,7 +134,7 @@ void AppSocket::processAppCommand(cMessage *msg)
         case QUIC_C_OPEN_ACTIVE: { // connect
             QuicOpenCommand *quicOpen = check_and_cast<QuicOpenCommand *>(msg->getControlInfo());
             L3Address remoteAddr = quicOpen->getRemoteAddr();
-            int remotePort = quicOpen->getRemotePort();
+            uint16_t remotePort = quicOpen->getRemotePort();
 
             quicSimpleMod->createConnection(udpSocket, this, remoteAddr, remotePort);
             connection->processAppCommand(msg);

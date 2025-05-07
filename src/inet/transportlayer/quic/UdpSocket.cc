@@ -39,7 +39,7 @@ void UdpSocket::processPacket(Packet *pkt)
     }
     auto& tags = pkt->getTags();
     L3Address remoteAddr = tags.getTag<L3AddressInd>()->getSrcAddress();
-    int remotePort = tags.getTag<L4PortInd>()->getSrcPort();
+    uint16_t remotePort = (uint16_t)tags.getTag<L4PortInd>()->getSrcPort();
 
     // create AppSocket that queues indications for the new connection
     AppSocket *queueAppSocket = new QueueAppSocket(quicSimpleMod);
@@ -60,16 +60,16 @@ int UdpSocket::getSocketId()
     return socket.getSocketId();
 }
 
-bool UdpSocket::match(L3Address addr, int port)
+bool UdpSocket::match(L3Address addr, uint16_t port)
 {
     return (this->localAddr == addr && this->localPort == port);
 }
 
-void UdpSocket::sendto(L3Address remoteAddr, int remotePort, Packet *pkt)
+void UdpSocket::sendto(L3Address remoteAddr, uint16_t remotePort, Packet *pkt)
 {
     // send all QUIC packets with Don't Fragment bit set in IP header
     pkt->addTag<FragmentationReq>()->setDontFragment(true);
-    socket.sendTo(pkt, remoteAddr, remotePort);
+    socket.sendTo(pkt, remoteAddr, (int)remotePort);
 }
 
 Connection *UdpSocket::popConnection()
@@ -82,7 +82,7 @@ Connection *UdpSocket::popConnection()
     return connection;
 }
 
-void UdpSocket::bind(L3Address addr, int port)
+void UdpSocket::bind(L3Address addr, uint16_t port)
 {
     if (port == 0) {
         throw cRuntimeError("UdpSocket::bind: cannot bind to port 0");
@@ -93,7 +93,7 @@ void UdpSocket::bind(L3Address addr, int port)
     }
     localAddr = addr;
     localPort = port;
-    socket.bind(addr, port);
+    socket.bind(addr, (int)port);
 }
 
 void UdpSocket::listen(AppSocket *appSocket)

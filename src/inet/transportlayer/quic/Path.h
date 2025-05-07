@@ -28,7 +28,7 @@ class PmtuValidator;
 
 class Path {
 public:
-    Path(Connection *connection, L3Address localAddr, int localPort, L3Address remoteAddr, int remotePort, bool useDplpmtud, Statistics *connStats);
+    Path(Connection *connection, L3Address localAddr, uint16_t localPort, L3Address remoteAddr, uint16_t remotePort, bool useDplpmtud, Statistics *connStats);
     virtual ~Path();
 
     int getMaxQuicPacketSize();
@@ -42,10 +42,10 @@ public:
     L3Address getRemoteAddr() {
         return remoteAddr;
     }
-    int getLocalPort() {
+    uint16_t getLocalPort() {
         return localPort;
     }
-    int getRemotePort() {
+    uint16_t getRemotePort() {
         return remotePort;
     }
     Connection *getConnection() {
@@ -70,9 +70,9 @@ public:
 private:
     Connection *connection;
     L3Address localAddr;
-    int localPort;
+    uint16_t localPort;
     L3Address remoteAddr;
-    int remotePort;
+    uint16_t remotePort;
 
     int maxQuicPacketSize;
     int safeQuicPacketSize;

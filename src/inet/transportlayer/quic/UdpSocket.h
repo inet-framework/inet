@@ -35,17 +35,17 @@ class UdpSocket {
     virtual ~UdpSocket();
     virtual void processPacket(Packet *pkt);
     virtual int getSocketId();
-    virtual bool match(L3Address addr, int port);
-    virtual void sendto(L3Address remoteAddr, int remotePort, Packet *pkt);
+    virtual bool match(L3Address addr, uint16_t port);
+    virtual void sendto(L3Address remoteAddr, uint16_t remotePort, Packet *pkt);
     virtual Connection *popConnection();
-    virtual void bind(L3Address addr, int port);
+    virtual void bind(L3Address addr, uint16_t port);
     virtual void listen(AppSocket *appSocket);
     virtual void unlisten();
 
     L3Address getLocalAddr() {
         return localAddr;
     }
-    int getLocalPort() {
+    uint16_t getLocalPort() {
         return localPort;
     }
 
