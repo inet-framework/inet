@@ -8,14 +8,14 @@
 #ifndef __INET_FLATGROUND_H
 #define __INET_FLATGROUND_H
 
-#include "inet/common/CompoundModule.h"
+#include "inet/common/Module.h"
 #include "inet/environment/contract/IGround.h"
 
 namespace inet {
 
 namespace physicalenvironment {
 
-class INET_API FlatGround : public IGround, public CompoundModule
+class INET_API FlatGround : public IGround, public Module
 {
   protected:
     double elevation = NaN;

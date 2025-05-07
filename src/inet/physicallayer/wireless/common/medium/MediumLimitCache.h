@@ -8,14 +8,14 @@
 #ifndef __INET_MEDIUMLIMITCACHE_H
 #define __INET_MEDIUMLIMITCACHE_H
 
-#include "inet/common/CompoundModule.h"
+#include "inet/common/Module.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IMediumLimitCache.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 
 namespace inet {
 namespace physicallayer {
 
-class INET_API MediumLimitCache : public CompoundModule, public IMediumLimitCache
+class INET_API MediumLimitCache : public Module, public IMediumLimitCache
 {
   protected:
     /**

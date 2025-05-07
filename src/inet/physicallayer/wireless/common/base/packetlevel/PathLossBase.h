@@ -8,14 +8,14 @@
 #ifndef __INET_PATHLOSSBASE_H
 #define __INET_PATHLOSSBASE_H
 
-#include "inet/common/CompoundModule.h"
+#include "inet/common/Module.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IPathLoss.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API PathLossBase : public CompoundModule, public IPathLoss
+class INET_API PathLossBase : public Module, public IPathLoss
 {
   public:
     virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const override = 0;

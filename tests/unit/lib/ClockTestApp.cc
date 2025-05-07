@@ -1,3 +1,4 @@
+#include "inet/common/SimpleModule.h"
 #include "inet/common/clock/ClockUserModuleMixin.h"
 
 namespace inet {

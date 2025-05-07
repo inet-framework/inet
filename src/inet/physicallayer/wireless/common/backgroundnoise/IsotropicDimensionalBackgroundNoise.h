@@ -8,14 +8,14 @@
 #ifndef __INET_ISOTROPICDIMENSIONALBACKGROUNDNOISE_H
 #define __INET_ISOTROPICDIMENSIONALBACKGROUNDNOISE_H
 
-#include "inet/common/CompoundModule.h"
+#include "inet/common/Module.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IBackgroundNoise.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API IsotropicDimensionalBackgroundNoise : public CompoundModule, public IBackgroundNoise
+class INET_API IsotropicDimensionalBackgroundNoise : public Module, public IBackgroundNoise
 {
   protected:
     WpHz powerSpectralDensity = WpHz(NaN);

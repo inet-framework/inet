@@ -23,7 +23,7 @@ namespace inet {
 
 namespace physicalenvironment {
 
-class INET_API OsgEarthGround : public IGround, public CompoundModule
+class INET_API OsgEarthGround : public IGround, public Module
 {
   protected:
     osgEarth::Map *map = nullptr;

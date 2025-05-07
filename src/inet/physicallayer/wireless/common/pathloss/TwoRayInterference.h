@@ -5,7 +5,7 @@
 #ifndef __INET_TWORAYINTERFERENCE_H
 #define __INET_TWORAYINTERFERENCE_H
 
-#include "inet/common/CompoundModule.h"
+#include "inet/common/Module.h"
 #include <inet/physicallayer/wireless/common/contract/packetlevel/IPathLoss.h>
 
 namespace inet {
@@ -19,7 +19,7 @@ namespace physicallayer {
  * or "On the Applicability of Two-Ray Path Loss Models for Vehicular Network Simulation"
  * by C. Sommer, S. Joerer and F. Dressler (2012)
  */
-class INET_API TwoRayInterference : public CompoundModule, public IPathLoss
+class INET_API TwoRayInterference : public Module, public IPathLoss
 {
   public:
     TwoRayInterference();

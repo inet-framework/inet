@@ -8,7 +8,7 @@
 #ifndef __INET_RECEIVERBASE_H
 #define __INET_RECEIVERBASE_H
 
-#include "inet/common/CompoundModule.h"
+#include "inet/common/Module.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IReceiver.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IReceiverAnalogModel.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IReception.h"
@@ -18,7 +18,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API ReceiverBase : public CompoundModule, public virtual IReceiver
+class INET_API ReceiverBase : public Module, public virtual IReceiver
 {
   protected:
     bool ignoreInterference = false;

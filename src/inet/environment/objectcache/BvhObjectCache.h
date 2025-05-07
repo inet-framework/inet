@@ -8,7 +8,7 @@
 #ifndef __INET_BVHOBJECTCACHE_H
 #define __INET_BVHOBJECTCACHE_H
 
-#include "inet/common/CompoundModule.h"
+#include "inet/common/Module.h"
 #include "inet/common/IVisitor.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/geometry/container/BvhTree.h"
@@ -20,7 +20,7 @@ namespace inet {
 
 namespace physicalenvironment {
 
-class INET_API BvhObjectCache : public IObjectCache, public CompoundModule
+class INET_API BvhObjectCache : public IObjectCache, public Module
 {
   protected:
     /** @name Parameters */

@@ -9,11 +9,11 @@
 #define __INET_OMITTEDMODULE_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/CompoundModule.h"
+#include "inet/common/Module.h"
 
 namespace inet {
 
-class INET_API OmittedModule : public CompoundModule
+class INET_API OmittedModule : public Module
 {
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

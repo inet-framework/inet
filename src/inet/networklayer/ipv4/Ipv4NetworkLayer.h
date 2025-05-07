@@ -9,11 +9,11 @@
 #define __INET_IPV4NETWORKLAYER_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/CompoundModule.h"
+#include "inet/common/Module.h"
 
 namespace inet {
 
-class INET_API Ipv4NetworkLayer : public CompoundModule
+class INET_API Ipv4NetworkLayer : public Module
 {
   protected:
     virtual std::string resolveDirective(char directive) const override;
