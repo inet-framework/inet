@@ -30,7 +30,7 @@ Connection::Connection(Quic *quicSimpleMod, UdpSocket *udpSocket, AppSocket *app
 
     bool useDplpmtud = quicSimpleMod->par("useDplpmtud");
 
-    srcConnectionIds.push_back(new ConnectionId(srcConnectionId));
+    srcConnectionIds.push_back(new ConnectionId(srcConnectionId, 8)); // always use 8 byte long connection ids to make serialization easier
 
     stats = new Statistics(quicSimpleMod, "_cid=" + std::to_string(srcConnectionIds[0]->getId()));
 
