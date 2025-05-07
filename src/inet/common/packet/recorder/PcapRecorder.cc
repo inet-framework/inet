@@ -100,6 +100,24 @@ void PcapRecorder::initialize()
             helpers.push_back(check_and_cast<IHelper *>(createOne(protocolTokenizer.nextToken())));
     }
 
+    recordTlsSecrets = par("recordTlsSecrets");
+    if (recordTlsSecrets) {
+        const char *tlsSignalName = par("tlsSecretsSignalName");
+        if (opp_isempty(tlsSignalName)) {
+            EV_WARN << "recordTlsSecrets is true, but tlsSecretsSignalName is empty. TLS secrets will not be recorded." << EV_ENDL;
+            recordTlsSecrets = false;
+        }
+        else {
+            tlsSecretsSignal = registerSignal(tlsSignalName);
+            // Subscribe to the TLS secrets signal on the parent module (host)
+            // Assumes the signal is emitted by the host or one of its direct submodules.
+            if (getParentModule()) {
+                getParentModule()->subscribe(tlsSecretsSignal, this);
+                EV_INFO << "Subscribing to " << getParentModule()->getFullPath() << ":" << getSignalName(tlsSecretsSignal) << " for TLS secrets" << EV_ENDL;
+            }
+        }
+    }
+
     const char *moduleNames = par("moduleNamePatterns");
     cStringTokenizer moduleTokenizer(moduleNames);
 
@@ -170,6 +188,15 @@ std::string PcapRecorder::resolveDirective(char directive) const
     }
 }
 
+void PcapRecorder::receiveSignal(cComponent *source, simsignal_t signalID, const char *s, cObject *details)
+{
+    Enter_Method("%s", cComponent::getSignalName(signalID));
+
+    if (recordTlsSecrets && signalID == tlsSecretsSignal) {
+        EV_INFO << "Recording TLS Key Log Line from signal " << EV_ENDL;
+        pcapWriter->writeTlsKeyLogEntry(s);
+    }
+}
 void PcapRecorder::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(signalID));

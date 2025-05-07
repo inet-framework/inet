@@ -54,6 +54,10 @@ class INET_API PcapRecorder : public SimpleModule, protected cListener, public P
     std::vector<IHelper *> helpers;
     PacketPrinter packetPrinter;
 
+    // TLS Secrets Recording
+    bool recordTlsSecrets = false;
+    simsignal_t tlsSecretsSignal;
+
     static simsignal_t packetRecordedSignal;
 
     b frontOffset;
@@ -77,6 +81,7 @@ class INET_API PcapRecorder : public SimpleModule, protected cListener, public P
     virtual void initialize() override;
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, const char *s, cObject *details) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
     virtual void recordPacket(const cPacket *msg, Direction direction, cComponent *source);
     virtual bool matchesLinkType(PcapLinkType pcapLinkType, const Protocol *protocol) const;
