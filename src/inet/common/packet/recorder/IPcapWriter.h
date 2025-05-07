@@ -212,6 +212,12 @@ class INET_API IPcapWriter
     virtual void setFlush(bool flush) = 0;
 
     virtual void writePacket(simtime_t time, const Packet *packet, b frontOffset, b backOffset, Direction direction, NetworkInterface *ie, PcapLinkType linkType) = 0;
+
+    /**
+     * Records a TLS key log entry.
+     * The format of logLine is expected to be per NSS Key Log Format.
+     */
+    virtual void writeTlsKeyLogEntry(const char *logLine) = 0;
 };
 
 } // namespace inet

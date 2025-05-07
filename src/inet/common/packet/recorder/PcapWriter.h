@@ -74,6 +74,11 @@ class INET_API PcapWriter : public IPcapWriter
      * Force flushing of pcap dump.
      */
     void setFlush(bool flush) override { this->flush = flush; }
+
+    /**
+     * Records a TLS key log entry. (Not supported in classic pcap format)
+     */
+    void writeTlsKeyLogEntry(const char *logLine) override;
 };
 
 } // namespace inet

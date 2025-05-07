@@ -62,6 +62,11 @@ class INET_API PcapngWriter : public IPcapWriter
     void writePacket(simtime_t time, const Packet *packet, b frontOffset, b backOffset, Direction direction, NetworkInterface *ie, PcapLinkType linkType) override;
 
     /**
+     * Records a TLS key log entry into a Decryption Secrets Block (DSB).
+     */
+    void writeTlsKeyLogEntry(const char *logLine) override;
+
+    /**
      * Closes the output file if it is open.
      */
     void close() override;
