@@ -159,6 +159,7 @@ ConnectionState *EstablishedConnectionState::processDplpmtudRaiseTimeout(cMessag
 ConnectionState *EstablishedConnectionState::processInitialPacket(const Ptr<const InitialPacketHeader>& packetHeader, Packet *pkt) {
     EV_DEBUG << "processInitialPacket in " << name << endl;
 
+    ackElicitingPacket = false;
     processFrames(pkt, PacketNumberSpace::Initial);
 
     context->accountReceivedPacket(packetHeader->getPacketNumber(), ackElicitingPacket, PacketNumberSpace::Initial, false);
@@ -169,6 +170,7 @@ ConnectionState *EstablishedConnectionState::processInitialPacket(const Ptr<cons
 ConnectionState *EstablishedConnectionState::processHandshakePacket(const Ptr<const HandshakePacketHeader>& packetHeader, Packet *pkt) {
     EV_DEBUG << "processHandshakePacket in " << name << endl;
 
+    ackElicitingPacket = false;
     processFrames(pkt, PacketNumberSpace::Handshake);
 
     context->accountReceivedPacket(packetHeader->getPacketNumber(), ackElicitingPacket, PacketNumberSpace::Handshake, false);

@@ -23,6 +23,8 @@ void HandshakeConnectionState::processCryptoFrame(const Ptr<const CryptoFrameHea
 
 ConnectionState *HandshakeConnectionState::processHandshakePacket(const Ptr<const HandshakePacketHeader>& packetHeader, Packet *pkt) {
     EV_DEBUG << "processHandshakePacket in " << name << endl;
+
+    ackElicitingPacket = false;
     processFrames(pkt, PacketNumberSpace::Handshake);
 
     context->accountReceivedPacket(packetHeader->getPacketNumber(), ackElicitingPacket, PacketNumberSpace::Handshake, false);

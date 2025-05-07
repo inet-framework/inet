@@ -14,6 +14,8 @@ namespace quic {
 
 ConnectionState *InitialSentConnectionState::processInitialPacket(const Ptr<const InitialPacketHeader>& packetHeader, Packet *pkt) {
     EV_DEBUG << "processInitialPacket in " << name << endl;
+
+    ackElicitingPacket = false;
     processFrames(pkt, PacketNumberSpace::Initial);
 
     context->addDstConnectionId(packetHeader->getSrcConnectionId(), packetHeader->getSrcConnectionIdLength());
