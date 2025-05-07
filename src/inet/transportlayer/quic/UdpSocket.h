@@ -19,6 +19,7 @@
 #include "Quic.h"
 #include "AppSocket.h"
 #include "Connection.h"
+#include <queue>
 
 namespace inet {
 namespace quic {
