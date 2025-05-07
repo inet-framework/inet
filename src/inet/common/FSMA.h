@@ -279,8 +279,13 @@ class FsmContext
         throw cRuntimeError(&___fsm, "Unhandled event in state %s", ___fsm.getStateName()); \
     }
 
+#if __cplusplus >= 202002L
 #define FSMA_Delay_Action(body) \
-    ___fsm.insertDelayedAction([=,this] () { body; });
+    ___fsm.insertDelayedAction([=, this] () { body; });
+#else
+#define FSMA_Delay_Action(body) \
+    ___fsm.insertDelayedAction([=] () { body; });
+#endif
 
 } // namespace inet
 

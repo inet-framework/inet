@@ -371,7 +371,8 @@ void EthernetCsmaPhy::handleStartReception(EthernetSignalBase *signal)
     auto packet = check_and_cast_nullable<Packet *>(signal->getEncapsulatedPacket());
     auto signalType = static_cast<EthernetSignalType>(signal->getKind());
     if (fsm.getState() == IDLE || fsm.getState() == CRS_ON)
-        fsm.insertDelayedAction([=,this] () { mac->handleReceptionStart(signalType, packet != nullptr ? packet->dup() : nullptr); });
+        // NOTE: mac=mac is needed instead of 'this' to eliminate different warnings on both std=c++17 and std=c++20
+        fsm.insertDelayedAction([=, mac=mac] () { mac->handleReceptionStart(signalType, packet != nullptr ? packet->dup() : nullptr); });
     updateRxSignals(signal);
 }
 
@@ -388,7 +389,8 @@ void EthernetCsmaPhy::handleEndReception()
         if (packet != nullptr)
             packet->setBitError(signal->hasBitError());
         auto esd1 = signal->getEsd1();
-        fsm.insertDelayedAction([=,this] () { mac->handleReceptionEnd(signalType, packet, esd1); });
+        // NOTE: mac=mac is needed instead of 'this' to eliminate different warnings on both std=c++17 and std=c++20
+        fsm.insertDelayedAction([=, mac=mac] () { mac->handleReceptionEnd(signalType, packet, esd1); });
         delete signal;
     }
     else {
