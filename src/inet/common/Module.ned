@@ -12,8 +12,8 @@ import inet.common.ModuleMixin;
 //
 // Base module for all INET compound modules.
 //
-module CompoundModule extends ModuleMixin
+module Module extends ModuleMixin
 {
     parameters:
-        @class(CompoundModule);
+        @class(Module);
 }

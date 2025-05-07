@@ -5,8 +5,8 @@
 //
 
 
-#ifndef __INET_COMPOUNDMODULE_H
-#define __INET_COMPOUNDMODULE_H
+#ifndef __INET_MODULE_H
+#define __INET_MODULE_H
 
 #include <type_traits>
 
@@ -14,7 +14,7 @@
 
 namespace inet {
 
-class INET_API CompoundModule : public ModuleMixin<cModule>
+class INET_API Module : public ModuleMixin<cModule>
 {
 };
 

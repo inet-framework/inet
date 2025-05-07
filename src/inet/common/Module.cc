@@ -4,11 +4,11 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#include "inet/common/CompoundModule.h"
+#include "inet/common/Module.h"
 
 namespace inet {
 
-Define_Module(CompoundModule);
+Define_Module(Module);
 
 } // namespace inet
 
