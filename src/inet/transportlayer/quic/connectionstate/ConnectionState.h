@@ -57,7 +57,7 @@ public:
     virtual void processConnectionCloseFrame();
 
     virtual ConnectionState *processIcmpPtb(Packet *droppedPacket, int ptbMtu);
-    virtual ConnectionState *processIcmpPtb(uint32_t droppedPacketNumber, int ptbMtu);
+    virtual ConnectionState *processIcmpPtb(uint64_t droppedPacketNumber, int ptbMtu);
 
     virtual ConnectionState *processTimeout(cMessage *msg);
     virtual ConnectionState *processLossDetectionTimeout(cMessage *msg);

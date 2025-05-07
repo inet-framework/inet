@@ -484,7 +484,7 @@ void Connection::handleAckFrame(const Ptr<const AckFrameHeader>& frameHeader, Pa
     sendPackets();
 }
 
-void Connection::reportPtb(int droppedPacketNumber, int ptbMtu)
+void Connection::reportPtb(uint64_t droppedPacketNumber, int ptbMtu)
 {
     QuicPacket *packet = reliabilityManager->getSentPacket(PacketNumberSpace::ApplicationData, droppedPacketNumber);
     if (packet == nullptr) {

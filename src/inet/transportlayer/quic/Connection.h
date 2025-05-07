@@ -89,7 +89,7 @@ class Connection
     void sendDataToApp(uint64_t streamId, B expectedDataSize);
     void handleAckFrame(const Ptr<const AckFrameHeader>& frameHeader, PacketNumberSpace pnSpace);
     void processIcmpPtb(Packet *droppedPkt, int ptbMtu);
-    void reportPtb(int droppedPacketNumber, int ptbMtu);
+    void reportPtb(uint64_t droppedPacketNumber, int ptbMtu);
     void setHandshakeConfirmed(bool value);
     bool isHandshakeConfirmed();
     void addDstConnectionId(uint64_t id, uint8_t length);

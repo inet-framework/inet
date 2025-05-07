@@ -35,7 +35,7 @@ public:
     virtual ConnectionState *processLossDetectionTimeout(cMessage *msg) override;
     virtual ConnectionState *processAckDelayTimeout(cMessage *msg) override;
     virtual ConnectionState *processRecvAppCommand(cMessage *msg) override;
-    virtual ConnectionState *processIcmpPtb(uint32_t droppedPacketNumber, int ptbMtu) override;
+    virtual ConnectionState *processIcmpPtb(uint64_t droppedPacketNumber, int ptbMtu) override;
     virtual ConnectionState *processDplpmtudRaiseTimeout(cMessage *msg) override;
     virtual ConnectionState *processInitialPacket(const Ptr<const InitialPacketHeader>& packetHeader, Packet *pkt) override;
     virtual ConnectionState *processHandshakePacket(const Ptr<const HandshakePacketHeader>& packetHeader, Packet *pkt) override;

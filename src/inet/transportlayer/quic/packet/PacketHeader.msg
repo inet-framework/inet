@@ -65,7 +65,7 @@ class InitialPacketHeader extends LongPacketHeader
     VariableLengthInteger tokenLength;
     uint64_t token;
     VariableLengthInteger length;
-    uint32_t packetNumber;
+    uint64_t packetNumber;
     // payload
 }
 cplusplus(InitialPacketHeader) {{
@@ -89,7 +89,7 @@ class ZeroRttPacketHeader extends LongPacketHeader
 	longPacketType = LONG_PACKET_HEADER_TYPE_0RTT;
 	uint8_t packetNumberLength;
     VariableLengthInteger length;
-    uint32_t packetNumber;
+    uint64_t packetNumber;
     // payload
 }
 cplusplus(ZeroRttPacketHeader) {{
@@ -108,7 +108,7 @@ class HandshakePacketHeader extends LongPacketHeader
     longPacketType = LONG_PACKET_HEADER_TYPE_HANDSHAKE;
     uint8_t packetNumberLength;
     VariableLengthInteger length;
-    uint32_t packetNumber;
+    uint64_t packetNumber;
     // payload
 }
 cplusplus(HandshakePacketHeader) {{
@@ -138,7 +138,7 @@ class ShortPacketHeader extends PacketHeader
 {
     headerForm = PACKET_HEADER_FORM_SHORT;
     uint64_t dstConnectionId;
-    uint32_t packetNumber;
+    uint64_t packetNumber;
     // payload
 }
 

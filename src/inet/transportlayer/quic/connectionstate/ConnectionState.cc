@@ -115,7 +115,7 @@ ConnectionState *ConnectionState::processIcmpPtb(Packet *droppedPkt, int ptbMtu)
     auto packetHeader = droppedPkt->popAtFront<PacketHeader>();
     EV_DEBUG << "process ICMP PTB, found chunk: " << packetHeader << endl;
 
-    uint32_t packetNumber = 0;
+    uint64_t packetNumber = 0;
     switch (packetHeader->getHeaderForm()) {
         case PACKET_HEADER_FORM_SHORT: {
             Ptr<const ShortPacketHeader> shortPacketHeader = staticPtrCast<const ShortPacketHeader>(packetHeader);
@@ -257,7 +257,7 @@ void ConnectionState::processConnectionCloseFrame()
     throw cRuntimeError("CONNECTION_CLOSE frame unexpected in the current state");
 }
 
-ConnectionState *ConnectionState::processIcmpPtb(uint32_t droppedPacketNumber, int ptbMtu)
+ConnectionState *ConnectionState::processIcmpPtb(uint64_t droppedPacketNumber, int ptbMtu)
 {
     EV_WARN << "PTB not handled in current state" << this << endl;
     return this;

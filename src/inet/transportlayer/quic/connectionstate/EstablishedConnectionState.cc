@@ -124,7 +124,7 @@ void EstablishedConnectionState::processConnectionCloseFrame()
     gotConnectionClose = true;
 }
 
-ConnectionState *EstablishedConnectionState::processIcmpPtb(uint32_t droppedPacketNumber, int ptbMtu)
+ConnectionState *EstablishedConnectionState::processIcmpPtb(uint64_t droppedPacketNumber, int ptbMtu)
 {
     context->reportPtb(droppedPacketNumber, ptbMtu);
     return this;
