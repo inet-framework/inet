@@ -70,6 +70,7 @@ void QuicDiscardServer::socketDataArrived(QuicSocket* socket, Packet *packet)
     static simsignal_t bytesReceivedSignal = registerSignal("bytesReceived");
     emit(bytesReceivedSignal, (long)B(data->getChunkLength()).get());
     EV_DEBUG << data << " received and discarded over socket " << socket->getSocketId() << endl;
+    delete packet;
 }
 
 void QuicDiscardServer::socketConnectionAvailable(QuicSocket *socket)
