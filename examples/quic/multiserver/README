@@ -1,0 +1,3 @@
+Example to test how a QUIC server handles multiple incoming connections. Either
+from two different clients that each initiate one connection or from one client
+that initiates two connections.
