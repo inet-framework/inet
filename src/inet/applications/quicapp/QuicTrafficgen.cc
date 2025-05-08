@@ -49,10 +49,6 @@ void QuicTrafficgen::handleStartOperation(LifecycleOperation *operation)
     int localPort = par("localPort");
     socket.bind(localAddress, localPort);
 
-    if (!sendingAllowed) {
-        sendGeneratorControl(TRAFFICGEN_STOP_SENDING);
-    }
-
     scheduleAt(simTime(), timerConnect);
 }
 
