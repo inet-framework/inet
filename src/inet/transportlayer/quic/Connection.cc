@@ -578,7 +578,10 @@ void Connection::close(bool sendAck, bool appInitiated)
 void Connection::sendConnectionClose(bool sendAck, bool appInitiated, int errorCode)
 {
     EV_DEBUG << "sendConnectionClose" << endl;
-    sendPacket(packetBuilder->buildConnectionClosePacket(path->getSafeQuicPacketSize(), sendAck, appInitiated, errorCode), PacketNumberSpace::ApplicationData, false);
+    QuicPacket *closePacket = packetBuilder->buildConnectionClosePacket(path->getSafeQuicPacketSize(), sendAck, appInitiated, errorCode);
+    sendPacket(closePacket, PacketNumberSpace::ApplicationData, false);
+    // Since we send and forget this packet, we have to delete it directly.
+    delete closePacket;
 }
 
 bool Connection::belongsPacketTo(Packet *pkt, uint64_t dstConnectionId)
