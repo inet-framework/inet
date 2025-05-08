@@ -51,6 +51,16 @@ class INET_API QuicPacketHeaderSerializer : public FieldsChunkSerializer
     QuicPacketHeaderSerializer() : FieldsChunkSerializer() {}
 };
 
+
+class INET_API EncryptedQuicPacketSerializer : public ChunkSerializer
+{
+  protected:
+
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, b offset, b length) const override;
+    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const override;
+};
+
+
 } // namespace quic
 } // namespace inet
 

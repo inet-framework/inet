@@ -15,6 +15,8 @@
 
 #include "inet/transportlayer/quic/packet/QuicPacketSerializer.h"
 
+#include "inet/transportlayer/quic/packet/EncryptedQuicPacketChunk.h"
+
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/common/Endian.h"
 
@@ -36,6 +38,8 @@ Register_Serializer(ZeroRttPacketHeader, QuicPacketHeaderSerializer);
 Register_Serializer(RetryPacketHeader, QuicPacketHeaderSerializer);
 Register_Serializer(OneRttPacketHeader, QuicPacketHeaderSerializer);
 Register_Serializer(VersionNegotiationPacketHeader, QuicPacketHeaderSerializer);
+
+Register_Serializer(EncryptedQuicPacketChunk, EncryptedQuicPacketSerializer);
 
 //
 // QuicPacketHeaderSerializer
@@ -532,6 +536,17 @@ const Ptr<Chunk> QuicPacketHeaderSerializer::deserializeShortPacketHeader(Memory
         return header;
     }
 }
+
+void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, b offset, b length) const
+{
+
+}
+
+const Ptr<Chunk> EncryptedQuicPacketSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
+{
+
+}
+
 
 } // namespace quic
 } // namespace inet

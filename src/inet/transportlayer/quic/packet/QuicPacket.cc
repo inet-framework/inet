@@ -6,6 +6,7 @@
 //
 
 #include "QuicPacket.h"
+#include "EncryptedQuicPacketChunk.h"
 
 namespace inet {
 namespace quic {
@@ -66,14 +67,23 @@ void QuicPacket::addFrame(QuicFrame *frame)
 
 Packet *QuicPacket::createOmnetPacket()
 {
-    Packet *pkt = new Packet(name.c_str());
-    pkt->insertAtBack(header);
+    Ptr<SequenceChunk> encPayload = makeShared<SequenceChunk>();
+    header->markImmutable(),
+    encPayload->insertAtBack(header);
     for (QuicFrame *frame : frames) {
-        pkt->insertAtBack(frame->getHeader());
+        const_cast<FrameHeader *>(frame->getHeader().get())->markImmutable();
+        encPayload->insertAtBack(frame->getHeader());
         if (frame->hasData()) {
-            pkt->insertAtBack(frame->getData());
+            const_cast<Chunk *>(frame->getData().get())->markImmutable();
+            encPayload->insertAtBack(frame->getData());
         }
     }
+
+    encPayload->markImmutable();
+    Ptr<EncryptedQuicPacketChunk> encPkt = makeShared<EncryptedQuicPacketChunk>(encPayload, encPayload->getChunkLength() + B(16));
+
+    Packet *pkt = new Packet(name.c_str());
+    pkt->insertAtBack(encPkt);
     return pkt;
 }
 
