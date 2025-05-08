@@ -20,6 +20,13 @@ namespace inet {
 
 Define_Module(QuicDiscardServer);
 
+QuicDiscardServer::~QuicDiscardServer()
+{
+    for (QuicSocket *clientSocket : clientSockets) {
+        delete clientSocket;
+    }
+}
+
 void QuicDiscardServer::handleStartOperation(LifecycleOperation *operation)
 {
     L3Address localAddress = L3AddressResolver().resolve(par("localAddress"));

@@ -26,6 +26,9 @@ namespace inet {
 
 class QuicDiscardServer : public ApplicationBase, public QuicSocket::ICallback
 {
+  public:
+    ~QuicDiscardServer();
+
   protected:
     QuicSocket listeningSocket;
     std::vector<QuicSocket *> clientSockets;
