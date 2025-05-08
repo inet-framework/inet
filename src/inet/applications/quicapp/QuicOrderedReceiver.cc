@@ -21,20 +21,31 @@ namespace inet {
 
 Define_Module(QuicOrderedReceiver);
 
+QuicOrderedReceiver::~QuicOrderedReceiver()
+{
+    if (clientSocket != nullptr) {
+        delete clientSocket;
+    }
+}
+
 void QuicOrderedReceiver::handleStartOperation(LifecycleOperation *operation)
 {
     L3Address localAddress = L3AddressResolver().resolve(par("localAddress"));
     int localPort = par("localPort");
 
-    socket.setOutputGate(gate("socketOut"));
-    socket.bind(localAddress, localPort);
-    socket.listen();
+    listeningSocket.setOutputGate(gate("socketOut"));
+    listeningSocket.bind(localAddress, localPort);
+    listeningSocket.listen();
     EV_INFO << "listen on port " << localPort << endl;
+    listeningSocket.setCallback(this);
 }
 
 void QuicOrderedReceiver::handleStopOperation(LifecycleOperation *operation)
 {
-    socket.close();
+    listeningSocket.close();
+    if (clientSocket != nullptr) {
+        clientSocket->close();
+    }
 }
 
 void QuicOrderedReceiver::handleCrashOperation(LifecycleOperation *operation)
@@ -44,45 +55,58 @@ void QuicOrderedReceiver::handleCrashOperation(LifecycleOperation *operation)
 
 void QuicOrderedReceiver::handleMessageWhenUp(cMessage *msg)
 {
+    EV_DEBUG << "handle message of kind " << msg->getKind() << endl;
     if (msg->isSelfMessage()) {
         EV_DEBUG << "SelfMessage received" << endl;
     } else {
-        switch (msg->getKind()) {
-            case QUIC_I_DATA: {
-                auto pkt = check_and_cast<Packet*>(msg);
-                const Ptr<const Chunk> data = pkt->popAtFront();
-                static simsignal_t bytesReceivedSignal = registerSignal("bytesReceived");
-                emit(bytesReceivedSignal, (long)B(data->getChunkLength()).get());
-                EV_DEBUG << data << " received, check..." << endl;
-                checkData(data);
-                break;
-            }
-            case QUIC_I_DATA_AVAILABLE: {
-                QuicDataInfo *ctrInfo = dynamic_cast<QuicDataInfo *>(msg->getControlInfo());
-                auto streamId = ctrInfo->getStreamID();
-                auto avaliableDataSize = ctrInfo->getAvaliableDataSize();
-                EV_DEBUG << avaliableDataSize << " bytes arrived on stream " << streamId << " - call recv" << endl;
-                socket.recv(avaliableDataSize, streamId);
-                break;
-            }
-            case QUIC_I_ESTABLISHED: {
-                EV_DEBUG << "connection established" << endl;
-                break;
-            }
-            case QUIC_I_CLOSED: {
-                EV_DEBUG << "connection closed" << endl;
-                break;
-            }
-            case QUIC_I_ERROR: {
-                EV_DEBUG << "Got QUIC error" << endl;
-                break;
-            }
-            default: {
-                assert(false);
-            }
+        if (listeningSocket.belongsToSocket(msg)) {
+            listeningSocket.processMessage(msg);
+        } else if (clientSocket->belongsToSocket(msg)) {
+            clientSocket->processMessage(msg);
         }
     }
-    delete msg;
+}
+
+void QuicOrderedReceiver::socketDataArrived(QuicSocket* socket, Packet *packet)
+{
+    auto data = packet->popAtFront();
+    static simsignal_t bytesReceivedSignal = registerSignal("bytesReceived");
+    emit(bytesReceivedSignal, (long)B(data->getChunkLength()).get());
+    EV_DEBUG << data << " received, check..." << endl;
+    checkData(data);
+    delete packet;
+}
+
+void QuicOrderedReceiver::socketConnectionAvailable(QuicSocket *socket)
+{
+    assert(socket == &listeningSocket);
+    EV_DEBUG << "connection available on socket - call accept" << endl;
+    clientSocket = listeningSocket.accept();
+    clientSocket->setCallback(this);
+}
+
+void QuicOrderedReceiver::socketDataAvailable(QuicSocket* socket, QuicDataInfo *dataInfo)
+{
+    assert(socket == clientSocket);
+    auto streamId = dataInfo->getStreamID();
+    auto avaliableDataSize = dataInfo->getAvaliableDataSize();
+    EV_DEBUG << avaliableDataSize << " bytes arrived over socket " << socket->getSocketId() << " on stream " << streamId << " - call recv" << endl;
+    clientSocket->recv(avaliableDataSize, streamId);
+}
+
+void QuicOrderedReceiver::socketEstablished(QuicSocket *socket)
+{
+    EV_DEBUG << "connection to " << socket->getRemoteAddr() << ":" << socket->getRemotePort() << " established" << endl;
+}
+
+void QuicOrderedReceiver::socketClosed(QuicSocket *socket)
+{
+    EV_DEBUG << "connection closed over socket " << socket->getSocketId() << endl;
+}
+
+void QuicOrderedReceiver::socketDeleted(QuicSocket *socket)
+{
+    EV_DEBUG << "socket " << socket->getSocketId() << " deleted" << endl;
 }
 
 void QuicOrderedReceiver::checkData(const Ptr<const Chunk> data)

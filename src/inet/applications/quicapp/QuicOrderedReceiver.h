@@ -24,10 +24,14 @@ using namespace omnetpp;
 
 namespace inet {
 
-class QuicOrderedReceiver : public ApplicationBase
+class QuicOrderedReceiver : public ApplicationBase, public QuicSocket::ICallback
 {
+public:
+  ~QuicOrderedReceiver();
+
 protected:
-  QuicSocket socket;
+  QuicSocket listeningSocket;
+  QuicSocket *clientSocket = nullptr;
 
 protected:
   virtual void handleMessageWhenUp(cMessage *msg) override;
@@ -35,6 +39,17 @@ protected:
   virtual void handleStartOperation(LifecycleOperation *operation) override;
   virtual void handleStopOperation(LifecycleOperation *operation) override;
   virtual void handleCrashOperation(LifecycleOperation *operation) override;
+
+  virtual void socketDataArrived(QuicSocket* socket, Packet *packet) override;
+  virtual void socketConnectionAvailable(QuicSocket *socket) override;
+  virtual void socketDataAvailable(QuicSocket* socket, QuicDataInfo *dataInfo) override;
+  virtual void socketEstablished(QuicSocket *socket) override;
+  virtual void socketClosed(QuicSocket *socket) override;
+  virtual void socketDeleted(QuicSocket *socket) override;
+
+  virtual void socketSendQueueFull(QuicSocket *socket) override { };
+  virtual void socketSendQueueDrain(QuicSocket *socket) override { };
+  virtual void socketMsgRejected(QuicSocket *socket) override { };
 
 private:
   uint8_t currentByte = 0;
