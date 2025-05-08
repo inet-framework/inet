@@ -20,6 +20,7 @@
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 #include "exception/ConnectionDiedException.h"
 #include "packet/ConnectionId.h"
+#include "packet/EncryptedQuicPacketChunk.h"
 
 namespace inet {
 namespace quic {
@@ -186,6 +187,12 @@ void Quic::handleMessageFromUdp(cMessage *msg)
         delete quotedPacket;
     } else if (msg->getKind() == UDP_I_DATA) {
         Packet *pkt = check_and_cast<Packet *>(msg);
+        Ptr<const EncryptedQuicPacketChunk> encPkt = pkt->popAtFront<EncryptedQuicPacketChunk>();
+        auto chunks = check_and_cast<SequenceChunk *>(encPkt->getChunk().get())->getChunks();
+
+        for (int i = chunks.size() - 1; i >= 0; i--) {
+            pkt->insertAtFront(chunks[i]);
+        }
 
         uint64_t connectionId = extractConnectionId(pkt);
         Connection *connection = findConnection(connectionId);
