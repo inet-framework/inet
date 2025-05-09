@@ -68,9 +68,12 @@ void QuicPacket::addFrame(QuicFrame *frame)
 Packet *QuicPacket::createOmnetPacket()
 {
     Ptr<SequenceChunk> encPayload = makeShared<SequenceChunk>();
-    header->markImmutable(),
+    header->markImmutable();
     encPayload->insertAtBack(header);
     for (QuicFrame *frame : frames) {
+        if (frame->getType() == FRAME_HEADER_TYPE_PADDING) {
+            continue;
+        }
         const_cast<FrameHeader *>(frame->getHeader().get())->markImmutable();
         encPayload->insertAtBack(frame->getHeader());
         if (frame->hasData()) {
@@ -84,6 +87,16 @@ Packet *QuicPacket::createOmnetPacket()
 
     Packet *pkt = new Packet(name.c_str());
     pkt->insertAtBack(encPkt);
+
+    for (QuicFrame *frame : frames) {
+        if (frame->getType() != FRAME_HEADER_TYPE_PADDING) {
+            continue;
+        }
+        const_cast<FrameHeader *>(frame->getHeader().get())->markImmutable();
+        pkt->insertAtBack(frame->getHeader());
+        ASSERT(!frame->hasData());
+    }
+
     return pkt;
 }
 
