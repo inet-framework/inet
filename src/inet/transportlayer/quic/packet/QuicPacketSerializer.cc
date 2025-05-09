@@ -539,6 +539,26 @@ const Ptr<Chunk> QuicPacketHeaderSerializer::deserializeShortPacketHeader(Memory
 
 void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, b offset, b length) const
 {
+    const auto payload = staticPtrCast<const EncryptedQuicPacketChunk>(chunk)->getChunk();
+    b payloadLength = payload->getChunkLength();
+
+    // whether any part of the payload is asked to be serialized
+    if (offset < payloadLength) {
+        const Chunk *payloadPointer = payload.get();
+        auto serializer = ChunkSerializerRegistry::getInstance().getSerializer(typeid(*payloadPointer));
+        b payloadToSerialize = std::min(length, payloadLength - offset);
+        serializer->serialize(stream, payload, offset, payloadToSerialize);
+    }
+
+    // whether any part of the auth tag is asked to be serialized
+    if (offset + length > payloadLength) {
+        ASSERT(offset + length <= payloadLength + B(16));
+        size_t authTagStartByteIndex = std::max((int64_t)0, B(offset - payloadLength).get());
+        size_t authTagEndByteIndex = B(offset + length - payloadLength).get();
+        for (int i = authTagStartByteIndex; i < authTagEndByteIndex; i++) {
+            stream.writeByte((i << 4) + i);
+        }
+    }
 
 }
 
