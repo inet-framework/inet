@@ -14,7 +14,8 @@ package inet.physicallayer.wireless.common.medium;
 // interference range, and detection range. Whether the reception is successful
 // or not depends on the distance between the transmitter and the receiver.
 //
-// @see ~UnitDiskMediumAnalogModel, ~UnitDiskTransmitterAnalogModel, ~UnitDiskReceiverAnalogModel.
+// @see UnitDiskMediumAnalogModel, UnitDiskTransmitterAnalogModel, UnitDiskReceiverAnalogModel.
+// @see DimensionalRadioMedium, ScalarRadioMedium
 //
 module UnitDiskRadioMedium extends RadioMedium
 {

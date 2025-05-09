@@ -7,6 +7,14 @@
 
 package inet.physicallayer.wireless.apsk.packetlevel;
 
+//
+// Specializes ~ApskRadio to use the simplified signal representation of the
+// unit disk signal propagation model. Suitable for simulations where
+// computational efficiency is more important than detailed physical layer
+// modeling.
+//
+// @see UnitDiskRadioMedium
+//
 module ApskUnitDiskRadio extends ApskRadio
 {
     parameters:

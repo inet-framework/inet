@@ -10,6 +10,13 @@ package inet.physicallayer.wireless.common.backgroundnoise;
 import inet.common.Module;
 import inet.physicallayer.wireless.common.contract.packetlevel.IBackgroundNoise;
 
+//
+// Background noise model for wireless communications that represents ambient
+// noise as a power spectral density function of time and frequency.
+// Supports configurable time-varying and frequency-varying gain patterns
+// with various interpolation methods. Used to model realistic noise
+// conditions in wireless channel simulations.
+//
 module DimensionalBackgroundNoise extends Module like IBackgroundNoise
 {
     parameters:

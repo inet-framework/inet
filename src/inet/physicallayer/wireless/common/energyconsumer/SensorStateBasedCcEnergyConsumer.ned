@@ -8,15 +8,11 @@
 package inet.physicallayer.wireless.common.energyconsumer;
 
 //
-// Provides a radio energy consumer model. The current consumption is
-// determined by the radio mode, the transmitter state, and the receiver state
-// using constant parameters.
+// This current consumption module extends ~StateBasedCcEnergyConsumer and provides
+// default values suitable for use in low-power wireless sensor nodes. Values are
+// roughly based on the datasheet for the CC2500 RF transceiver. Used for accurate
+// battery life simulation in wireless sensor networks.
 //
-// This module extends `StateBasedCcEnergyConsumer` and provides default values
-// suitable for use in low-power wireless sensor nodes. Approximately based on
-// the datasheet for the CC2500 RF transceiver.
-//
-
 simple SensorStateBasedCcEnergyConsumer extends StateBasedCcEnergyConsumer
 {
     parameters:
