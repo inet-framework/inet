@@ -15,6 +15,7 @@
 
 #include "CloseConnectionState.h"
 #include "DrainConnectionState.h"
+#include "../exception/ConnectionClosedException.h"
 
 namespace inet {
 namespace quic {
@@ -40,6 +41,11 @@ ConnectionState *CloseConnectionState::processOneRttPacket(const Ptr<const OneRt
     }
     discardFrames(pkt);
     return this;
+}
+
+ConnectionState *CloseConnectionState::processConnectionCloseTimeout(cMessage *msg)
+{
+    throw ConnectionClosedException("CloseConnectionState: Waited long enough after CONNECTION_CLOSE frame. Destroy connection.");
 }
 
 } /* namespace quic */

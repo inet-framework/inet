@@ -18,7 +18,7 @@
 
 #include "ReliabilityManager.h"
 #include "PmtuValidator.h"
-#include "NoResponseException.h"
+#include "exception/NoResponseException.h"
 
 namespace inet {
 namespace quic {
@@ -338,10 +338,20 @@ simtime_t ReliabilityManager::getLossTimeAndSpace(PacketNumberSpace *retSpace)
     return time;
 }
 
-simtime_t ReliabilityManager::getPtoTimeAndSpace(PacketNumberSpace *retSpace)
+simtime_t ReliabilityManager::getPtoDuration(PacketNumberSpace pnSpace)
 {
     Path *path = connection->getPath();
-    SimTime duration = (path->smoothedRtt + SimTime().setRaw(std::max(4 * path->rttVar.raw(), kGranularity.raw()))) * (1 << ptoCount);
+    SimTime duration = (path->smoothedRtt + SimTime().setRaw(std::max(4 * path->rttVar.raw(), kGranularity.raw())));
+    if (pnSpace == PacketNumberSpace::ApplicationData) {
+        duration += transportParameter->maxAckDelay;
+    }
+    return duration;
+}
+
+simtime_t ReliabilityManager::getPtoTimeAndSpace(PacketNumberSpace *retSpace)
+{
+    SimTime duration = getPtoDuration(PacketNumberSpace::Initial); // pnSpace == ApplicationData handled later
+    duration *= (1 << ptoCount);
 
     /* TODO:
     // Arm PTO from now when there are no inflight packets.
@@ -651,9 +661,8 @@ void ReliabilityManager::onPacketsLost(std::vector<QuicPacket*> *lostPackets)
 
 SimTime ReliabilityManager::getReducePacketSizeTime() {
     if (reducePacketTimeThreshold < SimTime::ZERO) {
-        Path *path = connection->getPath();
-        SimTime pto = (path->smoothedRtt + SimTime().setRaw(std::max(4 * path->rttVar.raw(), kGranularity.raw()))) + transportParameter->maxAckDelay;
-        return simTime() - (reducePacketPtoFactorThreshold * pto);
+        SimTime ptoDuration = getPtoDuration(PacketNumberSpace::ApplicationData);
+        return simTime() - (reducePacketPtoFactorThreshold * ptoDuration);
     } else {
         return simTime() - reducePacketTimeThreshold;
     }

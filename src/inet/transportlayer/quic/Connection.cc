@@ -119,6 +119,9 @@ Connection::~Connection() {
     delete stats;
     delete connectionState;
     delete packetBuilder;
+    if (closeTimer != nullptr) {
+        delete closeTimer;
+    }
     for (ConnectionId *connectionId : dstConnectionIds) {
         delete connectionId;
     }
@@ -551,6 +554,12 @@ void Connection::close(bool sendAck, bool appInitiated)
         return;
     }
     sendConnectionClose(sendAck, appInitiated, 0);
+
+    // start connection close timer and delete connection on timeout
+    assert(closeTimer == nullptr);
+    closeTimer = createTimer(TimerType::CONNECTION_CLOSE_TIMER, "ConnectionCloseTimer");
+    SimTime ptoDuration = reliabilityManager->getPtoDuration(PacketNumberSpace::ApplicationData);
+    closeTimer->scheduleAt(simTime() + 3*ptoDuration);
 
     delete reliabilityManager;
     delete receivedPacketsAccountants[PacketNumberSpace::ApplicationData];

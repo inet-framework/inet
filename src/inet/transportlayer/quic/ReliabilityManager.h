@@ -42,6 +42,7 @@ public:
     void onLossDetectionTimeout();
     std::vector<QuicPacket*> *getAckElicitingSentPackets(PacketNumberSpace pnSpace);
     QuicPacket *getSentPacket(PacketNumberSpace pnSpace, uint64_t droppedPacketNumber);
+    simtime_t getPtoDuration(PacketNumberSpace pnSpace);
 
     bool reducePacketSize(int minSize, int maxSize);
 

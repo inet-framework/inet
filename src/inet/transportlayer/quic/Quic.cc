@@ -23,7 +23,7 @@
 #include "AppSocket.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/ipv4/IcmpHeader_m.h"
-#include "NoResponseException.h"
+#include "exception/ConnectionDiedException.h"
 #include "packet/ConnectionId.h"
 
 namespace inet {
@@ -84,7 +84,7 @@ void Quic::handleTimeout(cMessage *msg)
     Connection *connection = (Connection *)msg->getContextPointer();
     try {
         connection->processTimeout(msg);
-    } catch (NoResponseException& e) {
+    } catch (ConnectionDiedException& e) {
         EV_WARN << e.what() << endl;
         connectionIdConnectionMap.erase(connection->getSrcConnectionIds()[0]->getId());
         delete connection;

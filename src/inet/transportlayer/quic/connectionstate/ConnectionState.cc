@@ -20,18 +20,11 @@
 namespace inet {
 namespace quic {
 
-ConnectionState::ConnectionState(Connection *context) {
-    this->context = context;
-}
+ConnectionState::ConnectionState(Connection *context): context(context) { }
 
-ConnectionState::~ConnectionState() {
+ConnectionState::~ConnectionState() { }
 
-}
-
-void ConnectionState::start()
-{
-
-}
+void ConnectionState::start() { }
 
 ConnectionState *ConnectionState::processAppCommand(cMessage *msg)
 {
@@ -272,6 +265,8 @@ ConnectionState *ConnectionState::processTimeout(cMessage *msg)
             return processAckDelayTimeout(msg);
         case DPLPMTUD_RAISE_TIMER:
             return processDplpmtudRaiseTimeout(msg);
+        case CONNECTION_CLOSE_TIMER:
+            return processConnectionCloseTimeout(msg);
     }
 
     throw cRuntimeError("Unknown Timer Type");
@@ -290,6 +285,11 @@ ConnectionState *ConnectionState::processAckDelayTimeout(cMessage *msg)
 ConnectionState *ConnectionState::processDplpmtudRaiseTimeout(cMessage *msg)
 {
     throw cRuntimeError("DPLPMTUD Raise Timeout unexpected in the current state");
+}
+
+ConnectionState *ConnectionState::processConnectionCloseTimeout(cMessage *msg)
+{
+    throw cRuntimeError("Connection Close Timeout unexpected in the current state");
 }
 
 } /* namespace quic */

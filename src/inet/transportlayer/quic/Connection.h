@@ -57,9 +57,9 @@ enum TimerType
 {
     LOSS_DETECTION_TIMER,
     ACK_DELAY_TIMER,
-    DPLPMTUD_RAISE_TIMER
+    DPLPMTUD_RAISE_TIMER,
+    CONNECTION_CLOSE_TIMER
     //QUIC_T_TIMEOUT_IDLE,
-    //QUIC_T_TIMEOUT_CLOSING,
     //QUIC_T_SEND
 };
 
@@ -212,6 +212,7 @@ class Connection
     simsignal_t usedMaxQuicPacketSizeStat;
     simsignal_t packetNumberReceivedStat;
     simsignal_t packetNumberSentStat;
+    Timer *closeTimer = nullptr;
 
 
     void sendPacket(QuicPacket *packet, PacketNumberSpace pnSpace, bool track = true);

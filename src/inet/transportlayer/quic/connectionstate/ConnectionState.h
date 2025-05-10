@@ -63,11 +63,13 @@ public:
     virtual ConnectionState *processLossDetectionTimeout(cMessage *msg);
     virtual ConnectionState *processAckDelayTimeout(cMessage *msg);
     virtual ConnectionState *processDplpmtudRaiseTimeout(cMessage *msg);
+    virtual ConnectionState *processConnectionCloseTimeout(cMessage *msg);
 
 protected:
     Connection *context;
     std::string name;
     bool ackElicitingPacket;
+
 };
 
 } /* namespace quic */
