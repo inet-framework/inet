@@ -57,6 +57,7 @@ class Quic : public OperationalBase
     std::map<uint64_t, Connection *> connectionIdConnectionMap;
     std::map<int, UdpSocket *> udpSocketIdUdpSocketMap;
     std::map<int, AppSocket *> socketIdAppSocketMap;
+    uint64_t nextConnectionId = 0;
 
     void handleTimeout(cMessage *msg);
     void handleMessageFromApp(cMessage *msg);
