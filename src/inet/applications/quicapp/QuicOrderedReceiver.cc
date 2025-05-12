@@ -104,9 +104,9 @@ void QuicOrderedReceiver::socketClosed(QuicSocket *socket)
     EV_DEBUG << "connection closed over socket " << socket->getSocketId() << endl;
 }
 
-void QuicOrderedReceiver::socketDeleted(QuicSocket *socket)
+void QuicOrderedReceiver::socketDestroyed(QuicSocket *socket)
 {
-    EV_DEBUG << "socket " << socket->getSocketId() << " deleted" << endl;
+    EV_DEBUG << "socket " << socket->getSocketId() << " destroyed" << endl;
 }
 
 void QuicOrderedReceiver::checkData(const Ptr<const Chunk> data)

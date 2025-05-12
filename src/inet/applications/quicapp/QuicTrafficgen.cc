@@ -49,7 +49,7 @@ void QuicTrafficgen::handleStartOperation(LifecycleOperation *operation)
     int localPort = par("localPort");
     socket.bind(localAddress, localPort);
 
-    scheduleAt(simTime(), timerConnect);
+    scheduleAt(par("connectTime"), timerConnect);
 }
 
 void QuicTrafficgen::handleStopOperation(LifecycleOperation *operation)

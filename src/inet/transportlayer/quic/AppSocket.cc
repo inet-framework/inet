@@ -21,12 +21,7 @@
 namespace inet {
 namespace quic {
 
-AppSocket::AppSocket(Quic *quicSimpleMod, int socketId) {
-    this->quicSimpleMod = quicSimpleMod;
-    this->socketId = socketId;
-    connection = nullptr;
-    udpSocket = nullptr;
-}
+AppSocket::AppSocket(Quic *quicSimpleMod, int socketId) : socketId(socketId), quicSimpleMod(quicSimpleMod) { }
 
 AppSocket::~AppSocket() { }
 
@@ -64,6 +59,18 @@ void AppSocket::sendMsgRejected()
 void AppSocket::sendConnectionAvailable()
 {
     auto indication = new Indication("quic connection available", QUIC_I_CONNECTION_AVAILABLE);
+    sendIndication(indication);
+}
+
+void AppSocket::sendClosed()
+{
+    auto indication = new Indication("quic connection closed", QUIC_I_CLOSED);
+    sendIndication(indication);
+}
+
+void AppSocket::sendDestroyed()
+{
+    auto indication = new Indication("socket destroyed", QUIC_I_DESTROYED);
     sendIndication(indication);
 }
 
@@ -164,6 +171,7 @@ void AppSocket::processAppCommand(cMessage *msg)
         }
         case QUIC_C_CLOSE: { // close (listening socket)
             udpSocket->unlisten();
+            sendClosed();
             break;
         }
         default: {

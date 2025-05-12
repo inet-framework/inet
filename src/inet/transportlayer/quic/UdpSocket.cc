@@ -34,7 +34,7 @@ UdpSocket::~UdpSocket() { }
 
 void UdpSocket::processPacket(Packet *pkt)
 {
-    if (!isListening) {
+    if (!isListening()) {
         throw cRuntimeError("UdpSocket::processPacket: Unexpected packet");
     }
     auto& tags = pkt->getTags();
@@ -109,13 +109,21 @@ void UdpSocket::listen(AppSocket *appSocket)
         throw cRuntimeError("UdpSocket::listen: Already listening for another app socket");
     }
     listeningAppSocket = appSocket;
-    isListening = true;
 }
 
 void UdpSocket::unlisten()
 {
-    isListening = false;
     listeningAppSocket = nullptr;
+}
+
+bool UdpSocket::isListening()
+{
+    return (listeningAppSocket != nullptr);
+}
+
+void UdpSocket::destroy()
+{
+    socket.destroy();
 }
 
 } /* namespace quic */

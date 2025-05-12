@@ -86,8 +86,14 @@ void Quic::handleTimeout(cMessage *msg)
         connection->processTimeout(msg);
     } catch (ConnectionDiedException& e) {
         EV_WARN << e.what() << endl;
+
+        AppSocket *appSocket = connection->getAppSocket();
+
+        // delete connection
         connectionIdConnectionMap.erase(connection->getSrcConnectionIds()[0]->getId());
         delete connection;
+
+        destroySockets(appSocket);
     }
 }
 
@@ -104,6 +110,9 @@ void Quic::handleMessageFromApp(cMessage *msg)
     } else {
         // no connection found, process message in app socket
         appSocket->processAppCommand(msg);
+        if (msg->getKind() == QUIC_C_CLOSE) {
+            destroySockets(appSocket);
+        }
     }
 }
 
@@ -245,6 +254,26 @@ Connection *Quic::createConnection(UdpSocket *udpSocket, AppSocket *appSocket, L
     return connection;
 }
 
+void Quic::destroySockets(AppSocket *appSocket)
+{
+    EV_TRACE << "enter Quic::destroySockets" << endl;
+
+    UdpSocket *udpSocket = appSocket->getUdpSocket();
+
+    // send destroy notification and delete AppSocket
+    appSocket->sendDestroyed();
+    socketIdAppSocketMap.erase(appSocket->getSocketId());
+    delete appSocket;
+
+    // destroy and delete UdpSocket if not used by another connection of app socket
+    if (udpSocket != nullptr && !isUdpSocketInUse(udpSocket)) {
+        udpSocket->destroy();
+        udpSocketIdUdpSocketMap.erase(udpSocket->getSocketId());
+        delete udpSocket;
+    }
+
+    EV_TRACE << "leave Quic::destroySockets" << endl;
+}
 
 uint64_t Quic::extractConnectionId(Packet *pkt, bool *readSourceConnectionId)
 {
@@ -285,6 +314,27 @@ UdpSocket *Quic::createUdpSocket()
     UdpSocket *udpSocket = new UdpSocket(this);
     addUdpSocket(udpSocket);
     return udpSocket;
+}
+
+bool Quic::isUdpSocketInUse(UdpSocket *udpSocket)
+{
+    // does a connection exists that uses this udp socket?
+    for (std::map<uint64_t, Connection *>::iterator it = connectionIdConnectionMap.begin(); it != connectionIdConnectionMap.end(); ++it) {
+        Connection *connection = it->second;
+        if (udpSocket == connection->getUdpSocket()) {
+            return true;
+        }
+    }
+
+    // does a app socket exists that uses this udp socket?
+    // we might have an app socket with that udp socket that has not (yet) created a connection
+    for (std::map<int, AppSocket *>::iterator it = socketIdAppSocketMap.begin(); it != socketIdAppSocketMap.end(); ++it) {
+        AppSocket *appSocket = it->second;
+        if (udpSocket == appSocket->getUdpSocket()) {
+            return true;
+        }
+    }
+    return false;
 }
 
 IRoutingTable *Quic::getRoutingTable() {

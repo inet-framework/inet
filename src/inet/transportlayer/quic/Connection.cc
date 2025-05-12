@@ -554,6 +554,7 @@ void Connection::close(bool sendAck, bool appInitiated)
         return;
     }
     sendConnectionClose(sendAck, appInitiated, 0);
+    appSocket->sendClosed();
 
     // start connection close timer and delete connection on timeout
     assert(closeTimer == nullptr);

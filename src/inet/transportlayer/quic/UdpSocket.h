@@ -41,6 +41,8 @@ class UdpSocket {
     virtual void bind(L3Address addr, uint16_t port);
     virtual void listen(AppSocket *appSocket);
     virtual void unlisten();
+    virtual void destroy();
+    virtual bool isListening();
 
     L3Address getLocalAddr() {
         return localAddr;
@@ -54,7 +56,6 @@ class UdpSocket {
     L3Address localAddr;
     uint16_t localPort = 0;
     Quic *quicSimpleMod = nullptr;
-    bool isListening = false;
     AppSocket *listeningAppSocket = nullptr;
     std::queue<Connection *> connectionQueue;
 

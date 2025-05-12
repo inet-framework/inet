@@ -23,13 +23,7 @@ QuicSocket::QuicSocket()
     socketId = generateSocketId();
 }
 
-QuicSocket::~QuicSocket()
-{
-    if (cb) {
-        cb->socketDeleted(this);
-        cb = nullptr;
-    }
-}
+QuicSocket::~QuicSocket() { }
 
 int QuicSocket::generateSocketId()
 {
@@ -223,6 +217,13 @@ void QuicSocket::processMessage(cMessage *msg) {
             socketState = CLOSED;
             if (cb) {
                 cb->socketClosed(this);
+            }
+            delete msg;
+            break;
+        }
+        case QUIC_I_DESTROYED: {
+            if (cb) {
+                cb->socketDestroyed(this);
             }
             delete msg;
             break;

@@ -163,6 +163,10 @@ class Connection
         this->appSocket = appSocket;
     }
 
+    UdpSocket *getUdpSocket() {
+        return udpSocket;
+    }
+
 
   private:
     Quic *quicSimpleMod;

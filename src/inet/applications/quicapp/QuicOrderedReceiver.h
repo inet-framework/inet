@@ -45,7 +45,7 @@ protected:
   virtual void socketDataAvailable(QuicSocket* socket, QuicDataInfo *dataInfo) override;
   virtual void socketEstablished(QuicSocket *socket) override;
   virtual void socketClosed(QuicSocket *socket) override;
-  virtual void socketDeleted(QuicSocket *socket) override;
+  virtual void socketDestroyed(QuicSocket *socket) override;
 
   virtual void socketSendQueueFull(QuicSocket *socket) override { };
   virtual void socketSendQueueDrain(QuicSocket *socket) override { };

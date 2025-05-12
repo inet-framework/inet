@@ -107,9 +107,18 @@ void QuicDiscardServer::socketClosed(QuicSocket *socket)
     EV_DEBUG << "connection closed over socket " << socket->getSocketId() << endl;
 }
 
-void QuicDiscardServer::socketDeleted(QuicSocket *socket)
+void QuicDiscardServer::socketDestroyed(QuicSocket *socket)
 {
-    EV_DEBUG << "socket " << socket->getSocketId() << " deleted" << endl;
+    EV_DEBUG << "socket " << socket->getSocketId() << " destroyed" << endl;
+    if (socket != &listeningSocket) {
+        for (std::vector<QuicSocket *>::iterator it = clientSockets.begin(); it != clientSockets.end(); ++it) {
+            if (*it == socket) {
+                clientSockets.erase(it);
+                break;
+            }
+        }
+        delete socket;
+    }
 }
 
 } //namespace

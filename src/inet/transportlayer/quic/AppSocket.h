@@ -43,6 +43,8 @@ public:
     virtual void sendSendQueueDrain();
     virtual void sendMsgRejected();
     virtual void sendConnectionAvailable();
+    virtual void sendClosed();
+    virtual void sendDestroyed();
     virtual void sendDataNotification(uint64_t streamId, uint64_t dataSize);
 
     Connection *getConnection() {
@@ -57,12 +59,15 @@ public:
     void setUdpSocket(UdpSocket *udpSocket) {
         this->udpSocket = udpSocket;
     }
+    int getSocketId() {
+        return socketId;
+    }
 
 private:
     int socketId;
     Quic *quicSimpleMod;
-    Connection *connection;
-    UdpSocket *udpSocket;
+    Connection *connection = nullptr;
+    UdpSocket *udpSocket = nullptr;
 };
 
 } /* namespace quic */

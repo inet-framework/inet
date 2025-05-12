@@ -84,11 +84,11 @@ public:
         virtual void socketClosed(QuicSocket *socket) = 0;
 
         /**
-         * Notifies that this QUIC socket is deleted.
+         * Notifies that this socket is destroyed.
          *
          * @param socket The involved socket object.
          */
-        virtual void socketDeleted(QuicSocket *socket) = 0;
+        virtual void socketDestroyed(QuicSocket *socket) = 0;
 
         /**
          * Notifies that QUIC's send queue is full and that the app should stop

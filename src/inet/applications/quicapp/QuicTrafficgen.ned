@@ -20,10 +20,11 @@ import inet.applications.trafficgen.ITrafficgenHandler;
 simple QuicTrafficgen like ITrafficgenHandler
 {
     parameters:
-        string localAddress = default(""); // comma separated list of addresses
+        string localAddress = default(""); // Local address or empty ("")
         int localPort = default(0); // port number to listen on
         string connectAddress;  // server address (may be symbolic)
         int connectPort; // port number to connect to
+        double connectTime @unit("s") = default(0s);
         
 	gates:
         input socketIn;
