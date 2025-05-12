@@ -6,6 +6,8 @@
 
 #include "inet/common/ResultRecorders.h"
 
+#include "inet/common/ModuleAccess.h"
+
 #include <sstream>
 
 namespace inet {
@@ -120,6 +122,71 @@ std::string WeightedHistogramRecorder::str() const
     std::stringstream os;
     os << getResultName() << ": " << getStatistic()->str();
     return os.str();
+}
+
+Register_ResultRecorder("channelOwner", ChannelOwnerRecorder);
+
+void ChannelOwnerRecorder::init(Context *ctx)
+{
+    VectorRecorder::init(ctx);
+    std::set<cModule *> visitedModules;
+    collectNetworkNodes(check_and_cast<cModule *>(ctx->component), visitedModules);
+    _enum = new omnetpp::cEnum();
+    _enum->registerNames("UNKNOWN,IDLE,COLLISION");
+    _enum->registerValues<int>({0, 1, 2});
+	int value = 3;
+    for (auto networkNode : networkNodeNames)
+        _enum->insert(value++, networkNode.c_str());
+    omnetpp::internal::enums.getInstance()->add(_enum);
+    event = new SetChannelOwnerEvent("updateChannelOwner", this);
+}
+
+void ChannelOwnerRecorder::collectNetworkNodes(cModule *module, std::set<cModule *>& visitedModules)
+{
+    visitedModules.insert(module);
+    for (cModule::GateIterator it(module); !it.end(); ++it) {
+        cGate *gate = *it;
+        auto endGate = gate->getPathEndGate();
+        if (endGate != nullptr) {
+            auto ownerModule = endGate->getOwnerModule();
+            auto networkNodeModule = findContainingNode(ownerModule);
+            if (networkNodeModule != nullptr)
+                networkNodeNames.insert(networkNodeModule->getFullName());
+            else if (visitedModules.find(ownerModule) == visitedModules.end())
+                collectNetworkNodes(ownerModule, visitedModules);
+        }
+    }
+}
+
+opp_string_map ChannelOwnerRecorder::getStatisticAttributes()
+{
+    auto result = VectorRecorder::getStatisticAttributes();
+    std::string names;
+    for (auto& entry :_enum->getNameValueMap())
+        names += entry.first + ",";
+    names.pop_back();
+    result["enum"] = names.c_str();
+    result["type"] = "enum";
+    result["recordingmode"] = "vector";
+    return result;
+}
+
+void ChannelOwnerRecorder::receiveSignal(cResultFilter *prev, simtime_t_cref time, cObject *object, cObject *details)
+{
+    auto cpacket = check_and_cast<cPacket *>(object);
+    auto networkNodeModule = findContainingNode(cpacket->getSenderModule());
+    if (networkNodeModule == nullptr && cpacket->findPar("originalSender") != -1)
+        networkNodeModule = findContainingNode(static_cast<cModule *>(cpacket->par("originalSender").pointerValue()));
+    if (networkNodeModule != nullptr) {
+        intval_t value = _enum->lookup(networkNodeModule->getFullName(), 0);
+        if (value != lastValue)
+            collect(time, value, details);
+        auto fes = getSimulation()->getFES();
+        if (event->isScheduled())
+            fes->remove(event);
+        event->setArrivalTime(time + cpacket->getRemainingDuration());
+        fes->insert(event);
+    }
 }
 
 } // namespace inet
