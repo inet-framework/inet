@@ -244,6 +244,11 @@ class Connection
 
     bool handshakeConfirmed = false;
 
+    // provided by the TLS handshake, and changing based on the epoch, used to derive all further IVs and keys
+    // TODO: maybe better in ConnectionState?
+    std::string ingressSecret;
+    std::string egressSecret;
+
     Statistics *stats;
 
     Path *path;

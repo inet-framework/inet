@@ -486,12 +486,21 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
     ptls_hkdf_extract(cs->hash,
             master_secret, ptls_iovec_init(quic_v1_salt, sizeof(quic_v1_salt)), ptls_iovec_init(&dcid, sizeof(dcid)));
 
+    std::cout << "digest size: " << cs->hash->digest_size << std::endl;
+    char master_secret_hex[129];
+    ptls_hexdump(master_secret_hex, master_secret, sizeof(master_secret));
+    std::cout << "master secret: " << master_secret_hex << std::endl;
+
     //int ptls_hkdf_expand_label(ptls_hash_algorithm_t *algo, void *output, size_t outlen, ptls_iovec_t secret, const char *label,
     //                           ptls_iovec_t hash_value, const char *label_prefix);
 
     uint8_t client_secret[PTLS_MAX_DIGEST_SIZE];
     ptls_hkdf_expand_label(cs->hash, client_secret, cs->aead->ctr_cipher->key_size, ptls_iovec_init(master_secret, cs->hash->digest_size),
                                           "client in", ptls_iovec_init(NULL, 0), NULL);
+
+    char client_secret_hex[129];
+    ptls_hexdump(client_secret_hex, client_secret, sizeof(client_secret));
+    std::cout << "client secret: " << client_secret_hex << std::endl;
 
 
     uint8_t hpkey[PTLS_MAX_SECRET_SIZE];
@@ -505,54 +514,42 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
     ptls_hkdf_expand_label(cs->hash, hpkey, cs->aead->ctr_cipher->key_size, ptls_iovec_init(client_secret, cs->hash->digest_size),
                                           "quic hp", ptls_iovec_init(NULL, 0), NULL);
 
-    header_protect = ptls_cipher_new(cs->aead->ctr_cipher, 1, hpkey);
+    header_protect = ptls_cipher_new(cs->aead->ctr_cipher, true, hpkey);
 
 
     // generate new AEAD context
-    packet_protect = ptls_aead_new(cs->aead, cs->hash, 1, client_secret, "quic "); // quicly uses a different label prefix for some reason
-
-/*
-
-    engine->encrypt_packet(engine, NULL, header_protect, packet_protect, ptls_iovec_init(buf, packet_size), 0,
-                           pn_off + QUICLY_SEND_PN_SIZE, buf[pn_off] * 256 + buf[pn_off + 1], 0);
-
-
-static void default_finalize_send_packet(quicly_crypto_engine_t *engine, quicly_conn_t *conn,
-                                     ptls_cipher_context_t *header_protect_ctx, ptls_aead_context_t *packet_protect_ctx,
-                                     ptls_iovec_t datagram, size_t first_byte_at, size_t payload_from, uint64_t packet_number,
-                                     int coalesced)
-
-*/
-
-    //uint8_t buf[1500] = {}, secret[PTLS_MAX_DIGEST_SIZE];
-    //size_t inlen, pn_off, packet_size;
+    packet_protect = ptls_aead_new(cs->aead, cs->hash, true, client_secret, "quic "); // quicly uses a different label prefix for some reason
 
     size_t payload_from = B(initialPacketHeader->getChunkLength()).get();
     ptls_aead_supplementary_encryption_t supp = {.ctx = header_protect,
                                                  .input = unencryptedData.data() + payload_from - packetNumberLength + 4};
 
+    std::cout << "packet number length in ser: " << packetNumberLength << std::endl;
 
     std::vector<uint8_t> encryptedPayload; // also contains the auth tag
     encryptedPayload.resize(unencryptedData.size() - payload_from + packet_protect->algo->tag_size);
 
-    size_t packetNumber = 0; // correct for initial packet, TODO otherwise
+    size_t packetNumber = initialPacketHeader->getPacketNumber();
 
-    //  inline void ptls_aead_encrypt_s(ptls_aead_context_t *ctx, void *output, const void *input, size_t inlen, uint64_t seq,
-    //                                const void *aad, size_t aadlen, ptls_aead_supplementary_encryption_t *supp)
     ptls_aead_encrypt_s(packet_protect, encryptedPayload.data(), unencryptedData.data() + payload_from,
                                    unencryptedData.size() - payload_from,
                                    packetNumber,
                                    unencryptedData.data(), payload_from, &supp);
 
-    unencryptedData[0] ^= supp.output[0] & 0xf;
-    for (size_t i = 0; i != packetNumberLength; ++i)
-        unencryptedData[payload_from + i - packetNumberLength] ^= supp.output[i + 1];
+    std::vector<uint8_t> finalContents;
+    finalContents.resize(unencryptedData.size() + packet_protect->algo->tag_size);
+    std::copy(unencryptedData.begin(), unencryptedData.begin() + payload_from, finalContents.begin());
+    std::copy(encryptedPayload.begin(), encryptedPayload.end(), finalContents.begin() + payload_from); // includes auth tag
 
-    // TODO: take offset and length into account
-    // the unencrypted (but obfuscated) header:
-    stream.writeBytes(unencryptedData.data(), B(payload_from));
-    // TODO also write the auth tag after contents
-    stream.writeBytes(encryptedPayload.data(), B(encryptedPayload.size()));
+    std::cout << "first byte before masking: " << std::hex << (int)finalContents[0] << std::endl;
+
+    finalContents[0] ^= supp.output[0] & 0xf;
+    for (size_t i = 0; i != packetNumberLength; ++i)
+        finalContents[payload_from + i - packetNumberLength] ^= supp.output[i + 1];
+    std::cout << "first byte after masking: " << std::hex << (int)finalContents[0] << std::endl;
+
+    // TODO: handle sub-byte offset and length
+    stream.writeBytes(finalContents, offset, length < b(0) ? B(-1) : B(length));
 }
 
 const Ptr<Chunk> EncryptedQuicPacketSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const

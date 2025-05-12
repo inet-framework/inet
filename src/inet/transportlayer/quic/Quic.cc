@@ -32,6 +32,10 @@ void random_bytes(void *buf, size_t len) {
     uint8_t *bytebuf = (uint8_t *)buf;
     for (int i = 0; i < len; i++)
         bytebuf[i] = contextModule->intrand(256);
+    std::cout << "random bytes: ";
+    for (int i = 0; i < len; i++)
+        std::cout << std::hex << (int)bytebuf[i] << " ";
+    std::cout << std::dec << std::endl;
 }
 
 uint64_t get_simtime(ptls_get_time_t *self)
@@ -41,6 +45,14 @@ uint64_t get_simtime(ptls_get_time_t *self)
 
 ptls_get_time_t opp_get_time = {get_simtime};
 
+static int on_update_traffic_key(ptls_update_traffic_key_t *self, ptls_t *tls, int is_enc, size_t epoch, const void *secret)
+{
+    Connection *conn = (Connection *)(*ptls_get_data_ptr(tls));
+
+    std::cout << "updating traffic key for epoch " << epoch << " is_enc " << is_enc << std::endl;
+}
+
+ptls_update_traffic_key_t update_traffic_key = {on_update_traffic_key};
 
 Quic::Quic() : OperationalBase()
 {
@@ -49,6 +61,7 @@ Quic::Quic() : OperationalBase()
     ctx.key_exchanges = ptls_openssl_key_exchanges;
     ctx.cipher_suites = ptls_openssl_cipher_suites;
     ctx.get_time = &opp_get_time;
+    ctx.update_traffic_key = &update_traffic_key;
 
     tlsKeyLogLineSignal = registerSignal("tlsKeyLogLine");
 }
@@ -276,9 +289,6 @@ void Quic::addConnection(uint64_t connectionId, Connection *connection)
 
 void Quic::addConnection(Connection *connection)
 {
-    std::cout << "quic emits secret" << std::endl;
-    emit(tlsKeyLogLineSignal, "CLIENT_HANDSHAKE_TRAFFIC_SECRET a541742fe0603215225adf7aedbdfc366d103c7f9e284b39774605cbae331ea9 c34044b7c2ff52a1a8d4138a16929c3a47f66a242238b9776bf38c5ead8d6ef2febcbbd06ea828b77901fe1efaca8f5e");
-
     for (ConnectionId *srcConnectionId : connection->getSrcConnectionIds()) {
         addConnection(srcConnectionId->getId(), connection);
     }
