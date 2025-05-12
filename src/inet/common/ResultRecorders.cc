@@ -139,6 +139,7 @@ void ChannelOwnerRecorder::init(Context *ctx)
         _enum->insert(value++, networkNode.c_str());
     omnetpp::internal::enums.getInstance()->add(_enum);
     event = new SetChannelOwnerEvent("updateChannelOwner", this);
+    event->setSchedulingPriority(1000);
 }
 
 void ChannelOwnerRecorder::collectNetworkNodes(cModule *module, std::set<cModule *>& visitedModules)
@@ -167,7 +168,6 @@ opp_string_map ChannelOwnerRecorder::getStatisticAttributes()
     names.pop_back();
     result["enum"] = names.c_str();
     result["type"] = "enum";
-    result["recordingmode"] = "vector";
     return result;
 }
 
