@@ -88,6 +88,9 @@ void WireJunction::handleMessage(cMessage *msg)
     numMessages++;
     emit(packetReceivedSignal, signal);
 
+    if (signal->findPar("originalSender") == -1)
+        signal->addPar("originalSender").setPointerValue(signal->getSenderModule());
+
     if (numPorts <= 1) {
         delete signal;
         return;
