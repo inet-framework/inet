@@ -50,6 +50,8 @@ class Quic : public OperationalBase
 
     ptls_context_t ctx;
 
+    simsignal_t tlsKeyLogLineSignal;
+
   protected:
     virtual void handleMessageWhenUp(cMessage *msg) override;
 
@@ -60,7 +62,6 @@ class Quic : public OperationalBase
     virtual bool isModuleStartStage(int stage) const override { return stage == ModuleStartOperation::STAGE_TRANSPORT_LAYER; }
     virtual bool isModuleStopStage(int stage) const override { return stage == ModuleStopOperation::STAGE_TRANSPORT_LAYER; }
 
-    simsignal_t tlsKeyLogLineSignal;
 
   private:
     std::map<uint64_t, Connection *> connectionIdConnectionMap;

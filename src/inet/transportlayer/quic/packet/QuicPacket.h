@@ -31,7 +31,7 @@ public:
 
     void setHeader(Ptr<PacketHeader> header);
     void addFrame(QuicFrame *frame);
-    Packet *createOmnetPacket();
+    Packet *createOmnetPacket(const char *secret);
     virtual void onPacketLost();
     virtual void onPacketAcked();
 
