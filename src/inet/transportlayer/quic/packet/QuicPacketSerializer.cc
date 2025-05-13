@@ -23,7 +23,7 @@
 
 extern "C" {
 #include "picotls.h"
-#include "picotls/openssl.h"
+#include "picotls/openssl_opp.h"
 }
 
 namespace inet {
@@ -93,11 +93,12 @@ void QuicPacketHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr
     }
 }
 
-void QuicPacketHeaderSerializer::serializeLongPacketHeader(MemoryOutputStream& stream, const Ptr<const LongPacketHeader>& header, uint8_t packetNumberLength) const
+void QuicPacketHeaderSerializer::serializeLongPacketHeader(MemoryOutputStream& stream, const Ptr<const LongPacketHeader>& header, uint8_t typeSpecificBits) const
 {
     std::cout << "serializeLongPacketHeader begin, stream length: " << stream.getLength() << std::endl;
+    ASSERT((typeSpecificBits & 0xfc) == 0); // Ensure that the type-specific bits are in the correct range
     // First byte: Header form (1 bit) | Reserved (1 bit) | Packet type (2 bits) | Type-specific bits (4 bits)
-    uint8_t firstByte = (header->getHeaderForm() << 7) | (1 << 6) |  (header->getLongPacketType() << 4) | (packetNumberLength-1);
+    uint8_t firstByte = (header->getHeaderForm() << 7) | (1 << 6) | (header->getLongPacketType() << 4) | typeSpecificBits;
     stream.writeByte(firstByte);
 
     // Version
@@ -147,7 +148,7 @@ void QuicPacketHeaderSerializer::serializeInitialPacketHeader(MemoryOutputStream
     std::cout << "src conn id: " << header->getSrcConnectionId() << std::endl;
     std::cout << "packet num len: " << (int)header->getPacketNumberLength() << std::endl;
     // TODO: assuming this is set to 1 for initial packets
-    serializeLongPacketHeader(stream, header, header->getPacketNumberLength());
+    serializeLongPacketHeader(stream, header, std::log2(header->getPacketNumberLength()));
 
     // Token Length
     serializeVariableLengthInteger(stream, header->getTokenLength());
@@ -168,7 +169,7 @@ void QuicPacketHeaderSerializer::serializeInitialPacketHeader(MemoryOutputStream
 void QuicPacketHeaderSerializer::serializeHandshakePacketHeader(MemoryOutputStream& stream, const Ptr<const HandshakePacketHeader>& header) const
 {
     // Serialize the common long header fields
-    serializeLongPacketHeader(stream, header, header->getPacketNumberLength());
+    serializeLongPacketHeader(stream, header, std::log2(header->getPacketNumberLength()));
 
     // Length
     serializeVariableLengthInteger(stream, header->getLength());
@@ -180,7 +181,7 @@ void QuicPacketHeaderSerializer::serializeHandshakePacketHeader(MemoryOutputStre
 void QuicPacketHeaderSerializer::serializeZeroRttPacketHeader(MemoryOutputStream& stream, const Ptr<const ZeroRttPacketHeader>& header) const
 {
     // Serialize the common long header fields
-    serializeLongPacketHeader(stream, header, header->getPacketNumberLength());
+    serializeLongPacketHeader(stream, header, std::log2(header->getPacketNumberLength()));
 
     // Length
     serializeVariableLengthInteger(stream, header->getLength());
@@ -192,7 +193,7 @@ void QuicPacketHeaderSerializer::serializeZeroRttPacketHeader(MemoryOutputStream
 void QuicPacketHeaderSerializer::serializeRetryPacketHeader(MemoryOutputStream& stream, const Ptr<const RetryPacketHeader>& header) const
 {
     // Serialize the common long header fields
-    serializeLongPacketHeader(stream, header, 1); // TODO: packet number length?
+    serializeLongPacketHeader(stream, header, 0);
 
     // Retry Token
     stream.writeUint64Be(header->getRetryToken());
@@ -469,7 +470,7 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
     payloadStream.clear();
 
 
-    ptls_cipher_suite_t *cs = &ptls_openssl_aes128gcmsha256;
+    ptls_cipher_suite_t *cs = &ptls_openssl_opp_aes128gcmsha256;
 
 
     static const uint8_t quic_v1_salt[] = {
@@ -477,7 +478,7 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
         0x4d, 0x17, 0x9a, 0xe6, 0xa4, 0xc8, 0x0c, 0xad,
         0xcc, 0xbb, 0x7f, 0x0a
     };
-    uint8_t master_secret[PTLS_MAX_DIGEST_SIZE];
+    uint8_t master_secret[32];
 
 
     uint8_t dcid = initialPacketHeader->getDstConnectionId();
@@ -487,18 +488,20 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
             master_secret, ptls_iovec_init(quic_v1_salt, sizeof(quic_v1_salt)), ptls_iovec_init(&dcid, sizeof(dcid)));
 
     std::cout << "digest size: " << cs->hash->digest_size << std::endl;
-    char master_secret_hex[129];
+    char master_secret_hex[65];
     ptls_hexdump(master_secret_hex, master_secret, sizeof(master_secret));
     std::cout << "master secret: " << master_secret_hex << std::endl;
 
     //int ptls_hkdf_expand_label(ptls_hash_algorithm_t *algo, void *output, size_t outlen, ptls_iovec_t secret, const char *label,
     //                           ptls_iovec_t hash_value, const char *label_prefix);
 
-    uint8_t client_secret[PTLS_MAX_DIGEST_SIZE];
+    std::cout << "aead key size: " << cs->aead->ctr_cipher->key_size << std::endl;
+
+    uint8_t client_secret[16];
     ptls_hkdf_expand_label(cs->hash, client_secret, cs->aead->ctr_cipher->key_size, ptls_iovec_init(master_secret, cs->hash->digest_size),
                                           "client in", ptls_iovec_init(NULL, 0), NULL);
 
-    char client_secret_hex[129];
+    char client_secret_hex[33];
     ptls_hexdump(client_secret_hex, client_secret, sizeof(client_secret));
     std::cout << "client secret: " << client_secret_hex << std::endl;
 

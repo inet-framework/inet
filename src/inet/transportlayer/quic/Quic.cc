@@ -58,8 +58,8 @@ Quic::Quic() : OperationalBase()
 {
     memset(&ctx, 0, sizeof(ctx));
     ctx.random_bytes = random_bytes;
-    ctx.key_exchanges = ptls_openssl_key_exchanges;
-    ctx.cipher_suites = ptls_openssl_cipher_suites;
+    ctx.key_exchanges = ptls_openssl_opp_key_exchanges;
+    ctx.cipher_suites = ptls_openssl_opp_cipher_suites;
     ctx.get_time = &opp_get_time;
     ctx.update_traffic_key = &update_traffic_key;
 
