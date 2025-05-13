@@ -17,7 +17,7 @@ PROJECTRELATIVE_PATH = src/picotls
 O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .c files
-OBJS = $O/lib/hpke.o $O/lib/openssl.o $O/lib/picotls.o
+OBJS = $O/lib/hpke.o $O/lib/openssl_opp.o $O/lib/picotls.o
 
 #------------------------------------------------------------------------------
 

@@ -14,7 +14,7 @@
 
 extern "C" {
 #include "picotls.h"
-#include "picotls/openssl.h"
+#include "picotls/openssl_opp.h"
 }
 namespace inet {
 namespace quic {
@@ -179,8 +179,8 @@ QuicFrame *PacketBuilder::createCryptoFrame(TransportParameters *tp)
 
         memset(&ctx, 0, sizeof(ctx));
         ctx.random_bytes = random_bytes;
-        ctx.key_exchanges = ptls_openssl_key_exchanges;
-        ctx.cipher_suites = ptls_openssl_cipher_suites;
+        ctx.key_exchanges = ptls_openssl_opp_key_exchanges;
+        ctx.cipher_suites = ptls_openssl_opp_cipher_suites;
         ctx.get_time = &opp_get_time;
 
 
@@ -211,7 +211,6 @@ QuicFrame *PacketBuilder::createCryptoFrame(TransportParameters *tp)
 
         struct {
             ptls_raw_extension_t ext[2];
-            ptls_buffer_t buf;
         } transport_params;
 
         transport_params.ext[0] =
@@ -219,7 +218,7 @@ QuicFrame *PacketBuilder::createCryptoFrame(TransportParameters *tp)
                                    {buf.base, buf.off}};
         transport_params.ext[1] = (ptls_raw_extension_t){UINT16_MAX};
 
-        ptls_handshake_properties_t handshake_properties;
+        ptls_handshake_properties_t handshake_properties = (ptls_handshake_properties_t){{{{NULL}}}};
 
         memset(&handshake_properties, 0, sizeof(handshake_properties));
         handshake_properties.additional_extensions = transport_params.ext;

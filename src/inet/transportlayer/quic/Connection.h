@@ -30,7 +30,7 @@
 
 extern "C" {
 #include "picotls.h"
-#include "picotls/openssl.h"
+#include "picotls/openssl_opp.h"
 }
 
 namespace inet {
