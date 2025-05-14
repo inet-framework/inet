@@ -50,6 +50,7 @@ static int on_update_traffic_key(ptls_update_traffic_key_t *self, ptls_t *tls, i
     Connection *conn = (Connection *)(*ptls_get_data_ptr(tls));
 
     std::cout << "updating traffic key for epoch " << epoch << " is_enc " << is_enc << std::endl;
+    return 0;
 }
 
 ptls_update_traffic_key_t update_traffic_key = {on_update_traffic_key};
@@ -300,11 +301,11 @@ void Quic::removeConnectionId(uint64_t connectionId)
     connectionIdConnectionMap.erase(connectionId);
 }
 
-Connection *Quic::createConnection(UdpSocket *udpSocket, AppSocket *appSocket, L3Address remoteAddr, uint16_t remotePort)
+Connection *Quic::createConnection(bool is_server, UdpSocket *udpSocket, AppSocket *appSocket, L3Address remoteAddr, uint16_t remotePort)
 {
     uint64_t connectionId = nextConnectionId;
     nextConnectionId++;
-    Connection *connection = new Connection(this, udpSocket, appSocket, remoteAddr, remotePort, connectionId);
+    Connection *connection = new Connection(this, is_server, udpSocket, appSocket, remoteAddr, remotePort, connectionId);
     appSocket->setConnection(connection);
     addConnection(connection);
     return connection;
