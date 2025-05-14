@@ -10,6 +10,11 @@
 #include "../packet/ConnectionId.h"
 #include "../exception/InvalidTokenException.h"
 
+extern "C" {
+#include "picotls.h"
+#include "picotls/openssl_opp.h"
+}
+
 namespace inet {
 namespace quic {
 
@@ -59,9 +64,25 @@ ConnectionState *InitialConnectionState::processConnectAndSendAppCommand(cMessag
 void InitialConnectionState::processCryptoFrame(const Ptr<const CryptoFrameHeader>& frameHeader, Packet *pkt)
 {
     if (frameHeader->getContainsTransportParameters()) {
-        auto transportParametersExt = staticPtrCast<const TransportParametersExtension>(pkt->popAtFront());
-        EV_DEBUG << "got transport parameters: " << transportParametersExt << endl;
-        context->initializeRemoteTransportParameters(transportParametersExt);
+        Ptr<const Chunk> payload = pkt->popAtFront();
+        if (auto transportParametersExt = dynamicPtrCast<const TransportParametersExtension>(payload)) {
+            EV_DEBUG << "got transport parameters: " << transportParametersExt << endl;
+            context->initializeRemoteTransportParameters(transportParametersExt);
+        }
+        if (auto tlsPayload = dynamicPtrCast<const BytesChunk>(payload)) {
+            EV_DEBUG << "got transport parameter bytes" << endl;
+            ptls_buffer_t buffer;
+            ptls_buffer_init(&buffer, (void*)"", 0);
+            size_t epoch_offsets[5] = {0};
+            std::vector<uint8_t> tlsBytes = tlsPayload->getBytes();
+            ptls_handle_message(context->tls, &buffer, epoch_offsets, 0,
+                tlsBytes.data(), tlsBytes.size(), nullptr);
+            for (int i = 0; i < 5; i++) {
+                if (epoch_offsets[i] > 0) {
+                    std::cout << "epoch " << i << " offset: " << epoch_offsets[i] << endl;
+                }
+            }
+        }
     }
 }
 
