@@ -63,12 +63,15 @@ enum TimerType
 class Connection
 {
   public:
-    Connection(Quic *quicSimpleMod, UdpSocket *udpSocket, AppSocket *appSocket, L3Address remoteAddr, uint16_t remotePort, uint64_t srcConnectionId);
+    Connection(Quic *quicSimpleMod, bool is_server, UdpSocket *udpSocket, AppSocket *appSocket, L3Address remoteAddr, uint16_t remotePort, uint64_t srcConnectionId);
     virtual ~Connection();
     virtual void processAppCommand(cMessage *msg);
     virtual void processPackets(Packet *pkt);
     virtual void processTimeout(cMessage *msg);
     void sendPackets();
+
+    bool is_server;
+    ptls_t *tls;
 
     /**
      * Enqueues data in the corresponding stream queue and triggers packet sending.
@@ -253,7 +256,6 @@ class Connection
 
     Path *path;
 
-    ptls_t *tls;
 
     int lastMaxQuicPacketSize;
     simsignal_t usedMaxQuicPacketSizeStat;

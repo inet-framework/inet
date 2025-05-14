@@ -40,7 +40,7 @@ class Quic : public OperationalBase
   public:
     Quic();
     virtual ~Quic();
-    virtual Connection *createConnection(UdpSocket *udpSocket, AppSocket *appSocket, L3Address remoteAddr, uint16_t remotePort);
+    virtual Connection *createConnection(bool is_server, UdpSocket *udpSocket, AppSocket *appSocket, L3Address remoteAddr, uint16_t remotePort);
     virtual UdpSocket *createUdpSocket();
     virtual UdpSocket *findUdpSocket(L3Address addr, uint16_t port);
     virtual AppSocket *findOrCreateAppSocket(int socketId);

@@ -28,8 +28,9 @@ extern "C" {
 namespace inet {
 namespace quic {
 
-Connection::Connection(Quic *quicSimpleMod, UdpSocket *udpSocket, AppSocket *appSocket, L3Address remoteAddr, uint16_t remotePort, uint64_t srcConnectionId) {
+Connection::Connection(Quic *quicSimpleMod, bool is_server, UdpSocket *udpSocket, AppSocket *appSocket, L3Address remoteAddr, uint16_t remotePort, uint64_t srcConnectionId) {
     this->quicSimpleMod = quicSimpleMod;
+    this->is_server = is_server;
     this->udpSocket = udpSocket;
     this->appSocket = appSocket;
 
@@ -93,15 +94,12 @@ Connection::Connection(Quic *quicSimpleMod, UdpSocket *udpSocket, AppSocket *app
     connectionFlowController = new ConnectionFlowController(remoteTransportParameters->initialMaxData, stats);
     connectionFlowControlResponder = new ConnectionFlowControlResponder(this, localTransportParameters->initialMaxData, maxDataFrameThreshold, roundConsumedDataValue, stats);
 
-    tls = ptls_new(&quicSimpleMod->ctx, 0);
+    tls = ptls_new(&quicSimpleMod->ctx, is_server);
     *ptls_get_data_ptr(tls) = this;
-
 
     ptls_iovec_t client_random = ptls_get_client_random(tls);
     char client_random_hex[65];
-
     ptls_hexdump(client_random_hex, client_random.base, client_random.len);
-
     std::cout << "client random: " << client_random_hex << std::endl;
 
     std::cout << "quic emits secret" << std::endl;

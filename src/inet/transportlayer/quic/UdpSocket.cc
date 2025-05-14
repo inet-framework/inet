@@ -42,7 +42,7 @@ void UdpSocket::processPacket(Packet *pkt)
     queueAppSocket->setUdpSocket(this);
 
     // create new connection and handle the (INIT) packet
-    Connection *connection = quicSimpleMod->createConnection(this, queueAppSocket, remoteAddr, remotePort);
+    Connection *connection = quicSimpleMod->createConnection(true, this, queueAppSocket, remoteAddr, remotePort);
     connection->processPackets(pkt);
 
     connectionQueue.push(connection);
