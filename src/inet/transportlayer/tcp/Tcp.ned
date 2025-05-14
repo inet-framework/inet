@@ -186,7 +186,7 @@ simple Tcp like ITcp
         string crcMode @enum("declared", "computed") = default("declared");
         int advertisedWindow = default(14*this.mss); // in bytes, corresponds with the maximal receiver buffer capacity (Note: normally, NIC queues should be at least this size)
         bool delayedAcksEnabled = default(false); // delayed ACK algorithm (RFC 1122) enabled/disabled
-        bool nagleEnabled = default(true); // Nagle's algorithm (RFC 896) enabled/disabled
+        bool nagleEnabled = default(false); // Nagle's algorithm (RFC 896) enabled/disabled
         bool limitedTransmitEnabled = default(false); // Limited Transmit algorithm (RFC 3042) enabled/disabled (can be used for TcpReno/TcpTahoe/TcpNewReno/TcpNoCongestionControl)
         bool increasedIWEnabled = default(false); // Increased Initial Window (RFC 3390) enabled/disabled
         bool sackSupport = default(false); // Selective Acknowledgment (RFC 2018, 2883, 3517) support (header option) (SACK will be enabled for a connection if both endpoints support it)

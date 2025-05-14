@@ -889,6 +889,7 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
     // start sending 'bytesToSend' bytes
     EV_INFO << "May send " << bytesToSend << " bytes (effectiveWindow " << effectiveWin << ", in buffer " << buffered << " bytes)\n";
 
+
     // send whole segments
     while (bytesToSend >= effectiveMss) {
         uint32_t sentBytes = sendSegment(effectiveMss);
@@ -904,8 +905,11 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
         bool containsFin = state->send_fin && (state->snd_nxt + bytesToSend) == state->snd_fin_seq;
         if (state->nagle_enabled && unacknowledgedData && !containsFin)
             EV_WARN << "Cannot send (last) segment due to Nagle, not enough data for a full segment\n";
-        else
-            sendSegment(bytesToSend);
+        else {
+            buffered = sendQueue->getBytesAvailable(state->snd_nxt);
+            if ((bytesToSend == buffered && buffered > 0) || (old_snd_nxt == state->snd_nxt))
+                sendSegment(bytesToSend);
+        }
     }
 
     if (old_snd_nxt == state->snd_nxt)
