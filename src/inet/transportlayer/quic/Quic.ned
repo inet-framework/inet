@@ -7,6 +7,7 @@
 
 package inet.transportlayer.quic;
 
+import inet.common.SimpleModule;
 import inet.transportlayer.contract.IQuic;
 
 //
@@ -190,9 +191,10 @@ import inet.transportlayer.contract.IQuic;
 // https://ieeexplore.ieee.org/document/9142723 or
 // https://www.hb.fh-muenster.de/opus4/frontdoor/index/index/docId/14966
 //
-simple Quic like IQuic
+simple Quic extends SimpleModule like IQuic
 {
     parameters:
+        @class(Quic);
         string routingTableModule; // Set by StandardHost.
 
         // Congestion Control

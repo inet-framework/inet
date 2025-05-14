@@ -15,11 +15,13 @@
 
 package inet.applications.quicapp;
 
+import inet.common.SimpleModule;
 import inet.applications.trafficgen.ITrafficgenHandler;
 
-simple QuicTrafficgen like ITrafficgenHandler
+simple QuicTrafficgen extends SimpleModule like ITrafficgenHandler
 {
     parameters:
+        @class(QuicTrafficgen);
         string localAddress = default(""); // Local address or empty ("")
         int localPort = default(0); // port number to listen on
         string connectAddress;  // server address (may be symbolic)

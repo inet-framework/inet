@@ -15,12 +15,14 @@
 
 package inet.applications.quicapp;
 
+import inet.common.SimpleModule;
 import inet.applications.contract.IApp;
 
 // A QUIC server that reads and discards all received data.
-simple QuicDiscardServer like IApp
+simple QuicDiscardServer extends SimpleModule like IApp
 {
     parameters:
+        @class(QuicDiscardServer);
         @signal[bytesReceived];
         @statistic[bytesReceived](record=vector);
         
