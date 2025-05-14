@@ -55,10 +55,42 @@ public:
     // SendStream
     void enqueueDataFromApp(Ptr<const Chunk> data);
     uint64_t getSendQueueLength();
+
+    /**
+     * Checks the connection and stream flow control. If one is 0, it queues a DATA_BLOCKED or STREAM_DATA_BLOCKED frame.
+     *
+     * @return The minimum of both flow control available receiver windows
+     */
     uint64_t checkAndGetAvailableRwnd();
+
+    /**
+     * Calculates the size in bytes of the next stream frame from this stream.
+     *
+     * @param maxFrameSize Gives the limit for the frame.
+     * @return The size in bytes equal or smaller the given maxFrameSize.
+     * Returns 0 if the stream is unable to generate a stream frame with the given maxFrameSize.
+     */
     uint64_t getNextStreamFrameSize(uint64_t maxFrameSize);
+
     QuicFrame *generateStreamFrame(uint64_t offset, uint64_t length);
+
+    /**
+     * Generates the next stream frame from this stream.
+     *
+     * @param maxFrameSize Gives the limit for the size in bytes of the frame.
+     * @return The generated stream frame.
+     * @exception cRuntimeError If this stream is unable to generate a stream frame.
+     */
     QuicFrame *generateNextStreamFrame(uint64_t maxFrameSize);
+
+    /**
+     * While a QuicStreamFrame stores only offset and length, this function returns the actual data.
+     *
+     * @param offset Offset in bytes.
+     * @param length Length in bytes.
+     * @return data chunk
+     * @exception cRuntimeError If the data are not available.
+     */
     const Ptr<const Chunk> getDataToSend(uint64_t offset, uint64_t length);
     void streamDataLost(uint64_t offset, uint64_t length);
     void streamDataAcked(uint64_t offset, uint64_t length);

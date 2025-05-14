@@ -69,12 +69,6 @@ Ptr<StreamFrameHeader> Stream::createHeader(StreamSndQueue::Region region)
     return header;
 }
 
-/**
- * Calculates the size in bytes of the next stream frame from this stream.
- * \param maxFrameSize Gives the limit for the frame.
- * \return The size in bytes equal or smaller the given maxFrameSize.
- * Returns 0 if the stream is unable to generate a stream frame with the given maxFrameSize.
- */
 uint64_t Stream::getNextStreamFrameSize(uint64_t maxFrameSize)
 {
     StreamSndQueue::Region region = sendQueue.getNextSendRegion();
@@ -140,12 +134,6 @@ QuicFrame *Stream::generateStreamFrame(uint64_t offset, uint64_t length)
     return frame;
 }
 
-/**
- * Generates the next stream frame from this stream.
- * \param maxFrameSize Gives the limit for the frame
- * \return The generated stream frame.
- * throws cRuntimeError if this stream is unable to generate a stream frame.
- */
 QuicFrame *Stream::generateNextStreamFrame(uint64_t maxFrameSize)
 {
     StreamSndQueue::Region region = sendQueue.getNextSendRegion();
@@ -193,13 +181,6 @@ QuicFrame *Stream::generateNextStreamFrame(uint64_t maxFrameSize)
     return frame;
 }
 
-/**
- * While a QuicStreamFrame stores only offset and length, this function returns the actual data.
- * \param offset Offset in bytes.
- * \param length Length in bytes.
- * \return data chunk
- * throws cRuntimeError if the data are not available.
- */
 const Ptr<const Chunk> Stream::getDataToSend(uint64_t offset, uint64_t length)
 {
     auto data = sendQueue.getData(B(offset), B(length));
@@ -268,10 +249,6 @@ Ptr<const Chunk> Stream::getDataForApp(B dataSize)
     return chunk;
 }
 
-/**
- * Checks the connection and stream flow control. If one is 0, it queues a DATA_BLOCKED or STREAM_DATA_BLOCKED frame.
- * \return The minimum of both flow control available receiver windows
- */
 uint64_t Stream::checkAndGetAvailableRwnd()
 {
     //check if connection flow control allowed to send Data

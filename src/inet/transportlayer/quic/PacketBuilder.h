@@ -38,10 +38,41 @@ public:
     virtual ~PacketBuilder();
 
     void readParameters(cModule *module);
+
+    /**
+     * Builds a regular 1-RTT packet, that may contain
+     * (1) an ack frame,
+     * (2) control frames, and/or
+     * (3) stream frames.
+     *
+     * @param maxPacketSize Upper limit for the size of an ack-eliciting packet.
+     * @param safePacketSize Upper limit for the size of a non-ack-eliciting packet.
+     * @return Pointer to the created QuicHeader object.
+     */
     QuicPacket *buildPacket(int maxPacketSize, int safePacketSize);
+
     QuicPacket *buildAckOnlyPacket(int maxPacketSize, PacketNumberSpace pnSpace);
+
+    /**
+     * Builds a packet that is ack eliciting. That means, for now, a packet that include control and/or stream frames.
+     *
+     * @param maxPacketSize Specifies an upper limit for the packet created by this method.
+     * @return A pointer to an ack eliciting packet with new stream data, or nullptr, if no new stream data were available.
+     */
     QuicPacket *buildAckElicitingPacket(int maxPacketSize);
+
+    /**
+     * Builds a packet that is ack eliciting by resending data from STREAM frames of outstanding packets.
+     *
+     * @param sentPackets Outstanding packets that should contain a stream frame for the new packet.
+     * @param maxPacketSize Upper limit for the size of the new packet.
+     * @param skipPacketNumber If true, uses a packet number two larger than the number of the last packet
+     * This triggers the receiver to send an ack immediately.
+     * @return A pointer to an ack elicting packet with stream data from the given outstanding packets,
+     * or nullptr, if there is no retransmitable stream frame in the outstanding packet.
+     */
     QuicPacket *buildAckElicitingPacket(std::vector<QuicPacket*> *sentPackets, int maxPacketSize, bool skipPacketNumber=false);
+
     QuicPacket *buildPingPacket();
     QuicPacket *buildDplpmtudProbePacket(int packetSize, Dplpmtud *dplpmtud);
     QuicPacket *buildClientInitialPacket(int maxPacketSize, TransportParameters *tp);

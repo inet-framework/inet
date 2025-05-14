@@ -150,12 +150,6 @@ uint64_t Connection::getStreamsSendQueueLength()
     return length;
 }
 
-/**
- * Enqueues data in the corresponding stream queue and triggers packet sending.
- * Called upon a send command from app.
- * \param streamId Id of the stream.
- * \param data Data to enqueue.
- */
 void Connection::newStreamData(uint64_t streamId, Ptr<const Chunk> data)
 {
     if (acceptDataFromApp) {
@@ -290,14 +284,6 @@ void Connection::sendPackets()
     }
 }
 
-/**
- * Creates a probe packet (aka tail loss probe) by using
- * (1) new data,
- * (2) retransmit sent but outstanding data, or
- * (3) a ping frame.
- * After that, it sends the probe packet.
- * This method is used by ReliabilityManager when its lossDetectionTimer fires.
- */
 void Connection::sendProbePacket(uint ptoCount)
 {
     EV_DEBUG << "send probe packet, ptoCount=" << ptoCount << endl;
@@ -427,12 +413,6 @@ void Connection::accountReceivedPacket(uint64_t packetNumber, bool ackEliciting,
     }
 }
 
-/**
- * Creates a timer with the given type and name.
- * \param kind Kind of the timer message.
- * \param name Name of the timer message.
- * \return Pointer to the created Timer object.
- */
 Timer *Connection::createTimer(TimerType kind, std::string name) {
     cMessage *msg = new cMessage(name.c_str(), kind);
     return createTimer(msg);

@@ -27,27 +27,16 @@ Timer::~Timer() {
     quicSimpleMod->cancelAndDelete(timerMessage);
 }
 
-/**
- * Schedules this timer to fire at the given time. Does not touch any older schedules of this timer.
- * \param The time when the timer shall fire.
- */
 void Timer::scheduleAt(simtime_t time)
 {
     quicSimpleMod->scheduleAt(time, timerMessage);
 }
 
-/**
- * Returns true if the timer is currently scheduled, false otherwise.
- */
 bool Timer::isScheduled()
 {
     return timerMessage->isScheduled();
 }
 
-/**
- * Updates the schedule of this timer. Cancels and old schedule before, if there is one.
- * \param The new time when the timer shall fire.
- */
 void Timer::update(simtime_t time)
 {
     if (timerMessage->isScheduled()) {
@@ -56,9 +45,6 @@ void Timer::update(simtime_t time)
     scheduleAt(time);
 }
 
-/**
- * Cancel the schedule of this timer.
- */
 void Timer::cancel()
 {
     quicSimpleMod->cancelEvent(timerMessage);

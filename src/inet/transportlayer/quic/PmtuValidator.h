@@ -60,8 +60,21 @@ private:
     simsignal_t timeBetweenLostPacketsStat;
     simsignal_t persistentCongestionsStat;
 
+    /**
+     * Delete all entries in list with an earlier sent time and a smaller packet size.
+     *
+     * @param list The list to delete entries from.
+     * @param packet The reference packet.
+     * @return The iterator to the first entry with a later time sent.
+     */
     std::list<struct timeSize>::iterator deleteEarlierAndSmallerEntries(std::list<struct timeSize> *list, QuicPacket *packet);
+
+    /**
+     * @param since The time from when to look for an acked packet size.
+     * @return The largest packet size acknowledged since the time given.
+     */
     int largestAckedSince(SimTime since);
+
     void pmtuInvalid(int largestAckedSinceLoss);
     simtime_t getPmtuInvalidTimeThreshold();
     void readParameters(cModule *module);

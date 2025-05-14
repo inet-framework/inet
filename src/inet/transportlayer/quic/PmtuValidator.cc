@@ -245,12 +245,6 @@ void PmtuValidator::pmtuInvalid(int largestAckedSinceLoss)
     dplpmtud->onPmtuInvalid(largestAckedSinceLoss);
 }
 
-/**
- * Delete all entries in list with an earlier sent time and a smaller packet size
- * \param list The list to delete entries from
- * \param packet The reference packet
- * \return The iterator to the first entry with a later time sent
- */
 std::list<struct timeSize>::iterator PmtuValidator::deleteEarlierAndSmallerEntries(std::list<struct timeSize> *list, QuicPacket *packet)
 {
     auto it = list->begin();
@@ -264,10 +258,6 @@ std::list<struct timeSize>::iterator PmtuValidator::deleteEarlierAndSmallerEntri
     return it;
 }
 
-/**
- * \param since The time from when to look for an acked packet size.
- * \return The largest packet size acknowledged since the time given.
- */
 int PmtuValidator::largestAckedSince(SimTime since) {
     for (auto it: largestPacketSizeAcked) {
         if (it.at >= since) {

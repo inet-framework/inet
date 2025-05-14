@@ -220,16 +220,6 @@ size_t PacketBuilder::getPacketSize(QuicPacket *packet)
     return packet->getSize();
 }
 
-/**
- * Builds a regular short header packet, that may contain
- * (1) an ack frame,
- * (2) control frames, and/or
- * (3) stream frames.
- *
- * \param maxPacketSize Upper limit for the size of the packet that will be created.
- * \return Pointer to the created QuicHeader object.
- * TODO: ensure that this method do not create a packet without a frame.
- */
 QuicPacket *PacketBuilder::buildPacket(int maxPacketSize, int safePacketSize)
 {
     QuicPacket *packet = nullptr;
@@ -324,11 +314,6 @@ QuicPacket *PacketBuilder::buildAckOnlyPacket(int maxPacketSize, PacketNumberSpa
     return packet;
 }
 
-/**
- * Builds a packet that is ack eliciting. That means, for now, a packet that include control and/or stream frames.
- * \param maxPacketSize Specifies an upper limit for the packet created by this method.
- * \return A pointer to a ack eliciting packet with new stream data, or nullptr, if no new stream data were available.
- */
 QuicPacket *PacketBuilder::buildAckElicitingPacket(int maxPacketSize)
 {
     QuicPacket *packet = nullptr;
@@ -364,13 +349,6 @@ QuicPacket *PacketBuilder::buildAckElicitingPacket(int maxPacketSize)
     return packet;
 }
 
-/**
- * Builds a packet that is ack eliciting by resending data from STREAM frames of outstanding packets.
- * \param sentPackets Outstanding packets that should contain a stream frame for the new packet.
- * \param maxPacketSize Upper limit for the size of the new packet.
- * \return A pointer to an ack elicting packet with stream data from the given outstanding packets,
- * or nullptr, if there is no retransmitable stream frame in the outstanding packet.
- */
 QuicPacket *PacketBuilder::buildAckElicitingPacket(std::vector<QuicPacket*> *sentPackets, int maxPacketSize, bool skipPacketNumber)
 {
     QuicPacket *packet = nullptr;

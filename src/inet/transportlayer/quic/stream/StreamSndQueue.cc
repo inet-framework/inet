@@ -18,17 +18,11 @@
 namespace inet {
 namespace quic {
 
-/**
- * Adds data to this queue.
- */
 void StreamSndQueue::addData(const Ptr<const Chunk> data) {
     sendBuffer.replace(addOffset, data);
     addOffset += data->getChunkLength();
 }
 
-/**
- * Stores a region as outstanding.
- */
 void StreamSndQueue::addOutstandingRegion(Region region)
 {
     std::vector<Region>::iterator it = outstandingRegions.begin();
@@ -47,29 +41,16 @@ bool StreamSndQueue::removeOutstandingRegion(b offset, b length)
     return false;
 }
 
-/**
- * Removes the region as outstanding.
- */
 void StreamSndQueue::dataLost(b offset, b length) {
     removeOutstandingRegion(offset, length);
 }
 
-/**
- * Removes the region as outstanding and deletes the data in the send buffer.
- */
 void StreamSndQueue::dataAcked(b offset, b length) {
     if (removeOutstandingRegion(offset, length)) {
         sendBuffer.clear(offset, length);
     }
 }
 
-/**
- * Finds data in the send buffer for the given region.
- * \param region The region where to find the data in the send buffer. If adjustBounds is true, it modifies the offset and length in the given region.
- * \param bufferIndex Gives the start index for the search. It modifies bufferIndex while searching.
- * \param adjustBounds If true, offset and length in the region are adjusted according to the available data in the send buffer.
- * \return true if data is avaible in the send buffer, otherwise false.
- */
 bool StreamSndQueue::findData(Region &region, int &bufferIndex, bool adjustBounds)
 {
     ASSERT(region.offset >= b(0) && region.length >= b(0) && bufferIndex >= 0);
@@ -128,12 +109,6 @@ StreamSndQueue::Region StreamSndQueue::getSendRegion(b offset, b length)
     return Region(b(-1), b(0));
 }
 
-/**
- * Finds the next region of data to send. For that it uses the available data in the send buffer
- * minus the stored outstanding regions.
- * \param startOffset Gives the offset where to start the search.
- * \return the next region to send. If the returned region contains an offset of b(-1), nothing to send is available.
- */
 StreamSndQueue::Region StreamSndQueue::getNextSendRegion(b startOffset)
 {
     if (sendBuffer.getNumRegions() == 0) {
@@ -171,9 +146,6 @@ StreamSndQueue::Region StreamSndQueue::getNextSendRegion(b startOffset)
     return Region(b(-1), b(0));
 }
 
-/**
- * Returns the data from the send buffer for the given region.
- */
 const Ptr<const Chunk> StreamSndQueue::getData(b offset, b length)
 {
     Region region = Region(offset, length);
@@ -191,24 +163,12 @@ const Ptr<const Chunk> StreamSndQueue::getData(b offset, b length)
     return nullptr;
 }
 
-/**
- * Returns the size in bytes of data ready to send in one chunk (the first).
- * This might be less than getTotalDataLengthToSend(), when we have scattered data.
- * For example, if we store two data chunks ready to send, first chunk of size 500 at offset 1000,
- * second chunk of size 800 at offset 2000; because of the gap, we cannot send both chunks in one
- * stream frame. Thus, this function would return 500.
- */
 uint64_t StreamSndQueue::getNextDataLengthToSend()
 {
     Region sendRegion = getNextSendRegion(b(0));
     return B(sendRegion.length).get();
 }
 
-/**
- * Returns the total size in bytes of data ready to send.
- * For example, if we store two data chunks ready to send, first chunk of size 500 at offset 1000,
- * second chunk of size 800 at offset 2000. This function would return 1300.
- */
 uint64_t StreamSndQueue::getTotalDataLengthToSend()
 {
     uint64_t totalLength = 0;
@@ -221,9 +181,6 @@ uint64_t StreamSndQueue::getTotalDataLengthToSend()
     return totalLength;
 }
 
-/**
- * Returns the total size of data in this queue.
- */
 uint64_t StreamSndQueue::getTotalDataLength()
 {
     uint64_t totalLength = 0;

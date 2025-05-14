@@ -45,14 +45,6 @@ void ReceivedPacketsAccountant::readParameters(cModule *module)
     useIBit = module->par("useIBit");
 }
 
-/**
- * Account the received packet. Generate gap informationen, if the packet
- * received out of order.
- * \param packetNumber The number of the received packet.
- *
- * TODO: consider different packet number spaces (possible with multiple objects of this same class?)
- * TODO: Distinguish between ack-eliciting packets and non ack-eliciting packets
- */
 void ReceivedPacketsAccountant::onPacketReceived(uint64_t packetNumber, bool ackEliciting, bool isIBitSet)
 {
     packetCounter++;
@@ -168,10 +160,6 @@ void ReceivedPacketsAccountant::onPacketReceived(uint64_t packetNumber, bool ack
     throw cRuntimeError("packetNumber %lu received, but is completely unexpected.", packetNumber);
 }
 
-/**
- * Generates an Ack Frame Header.
- * \return QuicFrame containing the generated Ack Frame Header
- */
 QuicFrame *ReceivedPacketsAccountant::generateAckFrame(size_t maxSize)
 {
     if (ackDelayTimer != nullptr) {
@@ -284,13 +272,6 @@ bool ReceivedPacketsAccountant::hasGapsSince(uint64_t packetNumber) {
     return false;
 }
 
-/**
- * Informs that a sent packet was acked. If this packet contained an
- * ack frame, we can stop acking the packets that were acked in the
- * arrived ack frame.
- *
- * \param ackedPacket Packet we sent that were acked by the peer.
- */
 void ReceivedPacketsAccountant::onPacketAcked(QuicPacket *ackedPacket)
 {
     // Set smallestAck to the largestAck of the ack frame that were received by the peer

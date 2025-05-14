@@ -68,9 +68,6 @@ DplpmtudCandidateSequenceJump::DplpmtudCandidateSequenceJump(int minPmtu, int ma
 }
 DplpmtudCandidateSequenceJump::~DplpmtudCandidateSequenceJump() { }
 
-/**
- * Remove all candidates larger than ptbMtu and add ptbMtu.
- */
 void DplpmtudCandidateSequenceJump::ptbReceived(int ptbMtu) {
     DplpmtudCandidateSequence::ptbReceived(ptbMtu);
     std::vector<int>::iterator it;
@@ -80,10 +77,6 @@ void DplpmtudCandidateSequenceJump::ptbReceived(int ptbMtu) {
     candidates.push_back(ptbMtu);
 }
 
-/**
- * \param value Value in candidates to get an iterator for.
- * \return Iterator pointing to the element in candidates with the given value.
- */
 std::vector<int>::iterator DplpmtudCandidateSequenceJump::getIterator(int value) {
     for(std::vector<int>::iterator it = candidates.begin(); it != candidates.end(); ++it) {
         if (*it == value) {
@@ -93,10 +86,6 @@ std::vector<int>::iterator DplpmtudCandidateSequenceJump::getIterator(int value)
     throw cRuntimeError("DplpmtudSearchAlgorithmJump: Could not find iterator for value");
 }
 
-/**
- * Add further candidates after the element the given iterator points to.
- * \param after An iterator pointing to the element in candidates after that new candidates are to be added.
- */
 void DplpmtudCandidateSequenceJump::addCandidates(std::vector<int>::iterator &after) {
     int lower = *after;
     int upper = *(after+1);

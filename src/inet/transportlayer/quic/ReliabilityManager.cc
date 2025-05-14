@@ -99,10 +99,6 @@ void ReliabilityManager::deleteOldNonInFlightPackets()
     }
 }
 
-/**
- * Called by Connection, when a new packet were sent.
- * \param packet The sent packet.
- */
 void ReliabilityManager::onPacketSent(QuicPacket *packet, PacketNumberSpace pnSpace)
 {
     EV_TRACE << "enter ReliabilityManager::onPacketSent" << endl;
@@ -131,11 +127,6 @@ void ReliabilityManager::onPacketSent(QuicPacket *packet, PacketNumberSpace pnSp
     EV_TRACE << "leave ReliabilityManager::onPacketSent" << endl;
 }
 
-/**
- * Called by EstablishedConnectionState, when a ack frame were received.
- * \param ackFrame The received ack frame.
- * TODO: consider different packet number spaces
- */
 void ReliabilityManager::onAckReceived(const Ptr<const AckFrameHeader>& ackFrame, PacketNumberSpace pnSpace)
 {
     EV_TRACE << "enter ReliabilityManager::onAckReceived" << endl;
@@ -201,12 +192,6 @@ void ReliabilityManager::onAckReceived(const Ptr<const AckFrameHeader>& ackFrame
     EV_TRACE << "leave ReliabilityManager::onAckReceived" << endl;
 }
 
-/**
- * Determines which packets were newly acked (not acked in a received ack frame before) by the given ack frame
- * and removes them from the sentPackets map.
- * \param ackFrame The ack frame to analyze.
- * \return Pointer to a vector with all newly acked packets.
- */
 std::vector<QuicPacket*> *ReliabilityManager::detectAndRemoveAckedPackets(const Ptr<const AckFrameHeader>& ackFrame, PacketNumberSpace pnSpace)
 {
     std::vector<QuicPacket*> *newlyAckedPackets = new std::vector<QuicPacket*>();
@@ -230,12 +215,6 @@ std::vector<QuicPacket*> *ReliabilityManager::detectAndRemoveAckedPackets(const 
     return newlyAckedPackets;
 }
 
-/**
- * Moves all packets with packet numbers from largestAck to smallestAck from the sentPackets map to the newlyAckedPackets vector.
- * \param newlyAckedPackets Adds packets to this vector.
- * \param largestAck Packet number of the first packet to add.
- * \param smallestAck Packet number of the last packet to add.
- */
 void ReliabilityManager::moveNewlyAckedPackets(std::vector<QuicPacket*> *newlyAckedPackets, uint64_t largestAck, uint64_t smallestAck, PacketNumberSpace pnSpace)
 {
     for (uint64_t packetNumber=largestAck; packetNumber>=smallestAck; packetNumber--) {
@@ -251,11 +230,6 @@ void ReliabilityManager::moveNewlyAckedPackets(std::vector<QuicPacket*> *newlyAc
     }
 }
 
-/**
- * Checks if one of the given vector of packets is an ack eliciting packet.
- * \param packets Vector of packets to check.
- * \return true if the given vector of packets contains at least one ack eliciting packet, false otherwise.
- */
 bool ReliabilityManager::includesAckEliciting(std::vector<QuicPacket*> *packets)
 {
     for (QuicPacket *packet : *packets) {
@@ -266,10 +240,6 @@ bool ReliabilityManager::includesAckEliciting(std::vector<QuicPacket*> *packets)
     return false;
 }
 
-/**
- * Update the RTT values upon a received ack.
- * \param ackDelay The ack delay value as reported in the received ack.
- */
 void ReliabilityManager::updateRtt(uint64_t ackDelay)
 {
     Path *path = connection->getPath();
@@ -304,10 +274,6 @@ void ReliabilityManager::updateRtt(uint64_t ackDelay)
     EV_DEBUG << "new: minRtt=" << minRtt << ", smoothedRtt=" << path->smoothedRtt << ", rttVar=" << path->rttVar << "; ackDelayTime=" << ackDelayTime << ", adjustedRtt=" << adjustedRtt << endl;
 }
 
-/**
- * Called for each packet that were newly acked in a received ack frame.
- * \param ackedPacket The packet that were acked.
- */
 void ReliabilityManager::onPacketAcked(QuicPacket *ackedPacket)
 {
     EV_DEBUG << "packet " << ackedPacket->getPacketNumber() << " acked" << endl;
@@ -317,11 +283,6 @@ void ReliabilityManager::onPacketAcked(QuicPacket *ackedPacket)
     delete ackedPacket;
 }
 
-/**
- * Determines the loss time that expires next and the corresponding packet number space.
- * \param retSpace Out parameter for the corresponding packet number space.
- * \return The loss time that expires next.
- */
 simtime_t ReliabilityManager::getLossTimeAndSpace(PacketNumberSpace *retSpace)
 {
     simtime_t time = lossTime[PacketNumberSpace::Initial];
@@ -392,9 +353,6 @@ simtime_t ReliabilityManager::getPtoTimeAndSpace(PacketNumberSpace *retSpace)
     return ptoTimeout;
 }
 
-/**
- * Resets the loss detection timer.
- */
 void ReliabilityManager::setLossDetectionTimer()
 {
     simtime_t earliestLossTime = getLossTimeAndSpace(nullptr);
@@ -428,9 +386,6 @@ void ReliabilityManager::setLossDetectionTimer()
     EV_DEBUG << "lossDetectionTimer set to " << timeout << endl;
 }
 
-/**
- * Called from EstablishedConnectionState when the loss detection timer fires.
- */
 void ReliabilityManager::onLossDetectionTimeout()
 {
     PacketNumberSpace pnSpace;
@@ -471,10 +426,6 @@ void ReliabilityManager::onLossDetectionTimeout()
     setLossDetectionTimer();
 }
 
-/**
- * Detects packets as lost, if their sent time is old enough
- * or if enough new packets, sent after them, were already acked.
- */
 std::vector<QuicPacket*> *ReliabilityManager::detectAndRemoveLostPackets(PacketNumberSpace pnSpace)
 {
     ASSERT(largestAckedPacketNumber[pnSpace] != std::numeric_limits<uint64_t>::max());
@@ -529,15 +480,6 @@ std::vector<QuicPacket*> *ReliabilityManager::detectAndRemoveLostPackets(PacketN
     return lostPackets;
 }
 
-/**
- * Detects a persistent congestion situation.
- * \param lostPackets All packets detected as lost in the current round.
- * \return true, if in persistent congestion, false otherwise.
- *
- * ASSUMPTIONS;
- * - lostPackets are sorted by sent times, from oldest to newest.
- * - only one packet number space is used (i.e. a gap in packet number space means some packets in between are not lost)
- */
 bool ReliabilityManager::inPersistentCongestion(std::vector<QuicPacket *> *lostPackets, QuicPacket *&firstAckEliciting)
 {
     Path *path = connection->getPath();
@@ -586,10 +528,6 @@ bool ReliabilityManager::inPersistentCongestion(std::vector<QuicPacket *> *lostP
     return false;
 }
 
-/**
- * Checks if ack eliciting packets are outstanding.
- * \return True if ack eliciting packets are outstanding, false otherwise.
- */
 bool ReliabilityManager::areAckElicitingPacketsInFlight(PacketNumberSpace pnSpace)
 {
     for (auto &mapEntry : sentPackets[pnSpace]) {
@@ -611,10 +549,6 @@ bool ReliabilityManager::areAckElicitingPacketsInFlight()
     return false;
 }
 
-/**
- * Creates a vector of all ack eliciting packets that are outstanding.
- * \return Pointer to a vector of QuicPackets, that are ack eliciting and outstanding. Might be empty.
- */
 std::vector<QuicPacket*> *ReliabilityManager::getAckElicitingSentPackets(PacketNumberSpace pnSpace)
 {
     std::vector<QuicPacket*> *ackElicitingSentPackets = new std::vector<QuicPacket*>();
