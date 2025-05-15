@@ -177,7 +177,7 @@ void QuicPacketHeaderSerializer::serializeHandshakePacketHeader(MemoryOutputStre
     serializeVariableLengthInteger(stream, header->getLength());
 
     // Packet Number
-    stream.writeUint32Be(header->getPacketNumber());
+    serializeVariableLengthInteger(stream, header->getPacketNumber());
 }
 
 void QuicPacketHeaderSerializer::serializeZeroRttPacketHeader(MemoryOutputStream& stream, const Ptr<const ZeroRttPacketHeader>& header) const

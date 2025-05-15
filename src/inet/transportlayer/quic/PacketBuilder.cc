@@ -583,6 +583,10 @@ QuicPacket *PacketBuilder::buildServerInitialPacket(int maxPacketSize)
         }
     }
 
+    Ptr<InitialPacketHeader> initialHeader = staticPtrCast<InitialPacketHeader>(packet->getHeader());
+    initialHeader->setLength(initialHeader->getPacketNumberLength() + packet->getDataSize() + 16);
+    initialHeader->calcChunkLength();
+
     return packet;
 }
 
@@ -599,6 +603,10 @@ QuicPacket *PacketBuilder::buildHandshakePacket(int maxPacketSize, TransportPara
             packet->addFrame(ackFrame);
         }
     }
+
+    Ptr<HandshakePacketHeader> handshakeHeader = staticPtrCast<HandshakePacketHeader>(packet->getHeader());
+    handshakeHeader->setLength(handshakeHeader->getPacketNumberLength() + packet->getDataSize() + 16);
+    handshakeHeader->calcChunkLength();
 
     return packet;
 }
