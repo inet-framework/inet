@@ -7,7 +7,7 @@
         <input pattern="results/CutthroughSwitching-#0.sca"/>
     </inputs>
     <charts>
-        <chart createdWith="OMNeT++ 6.2.0.qualifier" icon="icons/full/obj/linechart.png" id="342575661" name="End-to-end delay comparison" resultTypes="vector" template="linechart_native" type="LINE">
+        <chart createdWith="OMNeT++ 6.2.0.qualifier" icon="icons/full/obj/linechart.png" id="167389235" name="End-to-end delay comparison" resultTypes="vector" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -690,7 +690,7 @@ utils.export_data_if_needed(df, props)
 ]]></dialogPage>
             <property name="legend_prefer_module_display_paths" value="true"/>
             <property name="grid_show" value="true"/>
-            <property name="ordering_regex_list" value=""/>
+            <property name="ordering_regex_list" value="store&#10;cut"/>
             <property name="Plot.Caching" value="true"/>
             <property name="legend_manual" value="true"/>
             <property name="yaxis_title" value="delay [us]"/>
