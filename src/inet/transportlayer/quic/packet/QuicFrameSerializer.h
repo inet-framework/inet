@@ -19,6 +19,7 @@
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
 #include "inet/transportlayer/quic/packet/FrameHeader_m.h"
 #include "inet/transportlayer/quic/packet/VariableLengthInteger_m.h"
+#include "inet/transportlayer/quic/packet/VariableLengthInteger.h"
 
 namespace inet {
 namespace quic {
@@ -60,10 +61,6 @@ class INET_API QuicFrameSerializer : public FieldsChunkSerializer
     virtual const Ptr<Chunk> deserializeHandshakeDoneFrame(MemoryInputStream& stream) const;
     virtual const Ptr<Chunk> deserializeConnectionCloseFrame(MemoryInputStream& stream, uint8_t frameType) const;
     virtual const Ptr<Chunk> deserializeTransportParametersExtension(MemoryInputStream& stream) const;
-
-    // Helper methods for variable length integers
-    virtual void serializeVariableLengthInteger(MemoryOutputStream& stream, uint64_t value) const;
-    virtual uint64_t deserializeVariableLengthInteger(MemoryInputStream& stream) const;
 
   public:
     QuicFrameSerializer() : FieldsChunkSerializer() {}
