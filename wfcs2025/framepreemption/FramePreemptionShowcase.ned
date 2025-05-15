@@ -2,23 +2,25 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 package framepreemption;
 
-import inet.networks.base.WiredNetworkBase;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;
-import inet.node.inet.StandardHost;
+import inet.node.tsn.TsnDevice;
 
-network FramePreemptionShowcase extends WiredNetworkBase
+network FramePreemptionShowcase
 {
     submodules:
-        host1: StandardHost {
+        configurator: Ipv4NetworkConfigurator {
+            @display("p=100,100");
+        }
+        source: TsnDevice {
             @display("p=250,100");
         }
-        host2: StandardHost {
+        destination: TsnDevice {
             @display("p=350,100");
         }
     connections:
-        host1.ethg++ <--> Eth100M <--> host2.ethg++;
+        source.ethg++ <--> Eth100M <--> destination.ethg++;
 }
 

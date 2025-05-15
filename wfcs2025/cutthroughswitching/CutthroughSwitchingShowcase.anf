@@ -7,7 +7,7 @@
         <input pattern="results/CutthroughSwitching-#0.sca"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/linechart.png" id="671267722" name="Mean end-to-end delay" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="385513218" name="End-to-end delay comparison" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -599,8 +599,8 @@ utils.export_data_if_needed(df, props)
             <property name="vector_end_time" value=""/>
             <property name="linecolor" value=""/>
             <property name="matplotlibrc.figure.facecolor" value=""/>
-            <property name="yaxis_title" value="Delay [us]"/>
-            <property name="title" value="End-to-end delay"/>
+            <property name="yaxis_title" value="End-to-end delay [us]"/>
+            <property name="title" value="End-to-end delay comparison between store-and-forward and cut-through switching"/>
             <property name="vector_operations" value="apply: divide_by(0.000001) # Divides every value in each vector by a constant"/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
@@ -608,7 +608,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_log" value="false"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
-            <property name="xaxis_title" value="Time [s]"/>
+            <property name="xaxis_title" value="Simulation time [s]"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value="0"/>
             <property name="image_export_filename" value="delay"/>
@@ -618,20 +618,20 @@ utils.export_data_if_needed(df, props)
             <property name="filter" value="module =~ &quot;*.app[*].sink&quot; AND name =~ meanBitLifeTimePerPacket:vector"/>
             <property name="vector_start_time" value=""/>
             <property name="linestyle" value="solid"/>
-            <property name="markersize" value="2"/>
+            <property name="markersize" value="5"/>
             <property name="drawstyle" value="auto"/>
             <property name="marker" value="s (square)"/>
             <property name="plt.style" value="default"/>
             <property name="legend_show" value="true"/>
             <property name="matplotlibrc.legend.shadow" value="false"/>
             <property name="yaxis_max" value=""/>
-            <property name="xaxis_max" value="1"/>
+            <property name="xaxis_max" value="0.01"/>
             <property name="image_export_width" value="8"/>
             <property name="matplotlibrc" value=""/>
             <property name="legend_prefer_module_display_paths" value="true"/>
             <property name="legend_prefer_result_titles" value="true"/>
             <property name="legend_manual" value="true"/>
-            <property name="legend_replacements" value=""/>
+            <property name="legend_replacements" value="/CutthroughSwitching/cut-through switching/&#10;/StoreAndForward/store-and-forward/"/>
             <property name="legend_automatic" value="false"/>
             <property name="legend_format" value="$configname"/>
             <property name="simplify" value="false"/>
