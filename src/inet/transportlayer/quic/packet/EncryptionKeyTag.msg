@@ -9,7 +9,9 @@ import inet.common.TagBase;
 
 namespace inet::quic;
 
-class EncryptionSecretTag extends TagBase
+class EncryptionKeyTag extends TagBase
 {
-    string secret; // the key, initialization vector, and nonce are derived from this and the packet number
+    string key;
+    string iv;
+    string hpkey;
 }

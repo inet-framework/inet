@@ -7,7 +7,7 @@
 
 #include "QuicPacket.h"
 #include "EncryptedQuicPacketChunk.h"
-#include "EncryptionSecretTag_m.h"
+#include "EncryptionKeyTag_m.h"
 
 namespace inet {
 namespace quic {
@@ -66,7 +66,7 @@ void QuicPacket::addFrame(QuicFrame *frame)
     }
 }
 
-Packet *QuicPacket::createOmnetPacket(const char *secret)
+Packet *QuicPacket::createOmnetPacket(const char *key)
 {
     Ptr<SequenceChunk> encPayload = makeShared<SequenceChunk>();
     header->markImmutable();
@@ -85,7 +85,7 @@ Packet *QuicPacket::createOmnetPacket(const char *secret)
 
     encPayload->markImmutable();
     Ptr<EncryptedQuicPacketChunk> encPkt = makeShared<EncryptedQuicPacketChunk>(encPayload, encPayload->getChunkLength() + B(16));
-    encPkt->addTag<EncryptionSecretTag>()->setSecret(secret);
+    encPkt->addTag<EncryptionKeyTag>()->setKey(key);
 
     Packet *pkt = new Packet(name.c_str());
     pkt->insertAtBack(encPkt);
