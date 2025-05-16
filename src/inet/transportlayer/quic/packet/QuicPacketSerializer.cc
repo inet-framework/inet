@@ -18,6 +18,7 @@
 #include <iomanip>
 
 #include "inet/transportlayer/quic/packet/EncryptedQuicPacketChunk.h"
+#include "inet/transportlayer/quic/packet/EncryptionKeyTag_m.h"
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/common/Endian.h"
@@ -576,6 +577,8 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
 {
     const auto payload = staticPtrCast<const EncryptedQuicPacketChunk>(chunk)->getChunk();
     b payloadLength = payload->getChunkLength();
+
+    Ptr<const EncryptionKeyTag> secret = chunk->getTag<EncryptionKeyTag>();
 
     auto payloadSequence = dynamicPtrCast<SequenceChunk>(payload);
     auto payloadChunks = payloadSequence->getChunks();
