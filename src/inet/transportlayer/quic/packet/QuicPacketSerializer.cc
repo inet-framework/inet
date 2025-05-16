@@ -453,7 +453,7 @@ const Ptr<Chunk> QuicPacketHeaderSerializer::deserializeShortPacketHeader(Memory
     }
 }
 
-std::vector<uint8_t> protectInitialPacket(const std::vector<uint8_t> unencryptedData, size_t packetNumberOffset) {
+std::vector<uint8_t> protectInitialPacket(const std::vector<uint8_t> unencryptedData, size_t packetNumberOffset, ptls_iovec_t dcid_iovec, const char *hkdf_label) {
     size_t packetNumberLength = 1;
 
     std::cout << "unencrypted data size: " << unencryptedData.size() << std::endl;
@@ -472,8 +472,6 @@ std::vector<uint8_t> protectInitialPacket(const std::vector<uint8_t> unencrypted
 
     uint8_t master_secret[32];
 
-    ptls_iovec_t dcid_iovec = ptls_iovec_init(unencryptedData.data() + 6, unencryptedData[5]);
-
     ptls_hkdf_extract(cs->hash,
             master_secret, ptls_iovec_init(quic_v1_salt, sizeof(quic_v1_salt)), dcid_iovec);
 
@@ -489,7 +487,7 @@ std::vector<uint8_t> protectInitialPacket(const std::vector<uint8_t> unencrypted
 
     uint8_t client_secret[32];
     ptls_hkdf_expand_label(cs->hash, client_secret, 32, ptls_iovec_init(master_secret, 32),
-                                          "client in", ptls_iovec_init(NULL, 0), NULL);
+                                          hkdf_label, ptls_iovec_init(NULL, 0), NULL);
 
     char client_secret_hex[65];
     ptls_hexdump(client_secret_hex, client_secret, sizeof(client_secret));
@@ -594,15 +592,25 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
     std::vector<uint8_t> unencryptedData = payloadStream.getData();
     payloadStream.clear();
 
+    uint8_t dcid[8] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
+    ptls_iovec_t dcid_iovec = ptls_iovec_init(dcid, 8);
+
+
     size_t packetNumberOffset = 26;
-    std::vector<uint8_t> finalContents = protectInitialPacket(unencryptedData, packetNumberOffset);
+    std::vector<uint8_t> finalContents = protectInitialPacket(unencryptedData, packetNumberOffset, dcid_iovec, "client in");
 
     // TODO: handle sub-byte offset and length
     stream.writeBytes(finalContents, offset, length < b(0) ? B(-1) : B(length));
 
-    /* self test from https://quic.xargs.org/#client-initial-packet
 
-    std::vector<uint8_t> testUnprotectedData = {
+    uint8_t test_dcid[8] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07};
+    ptls_iovec_t test_dcid_iovec = ptls_iovec_init(test_dcid, 8);
+
+
+
+    // self test from https://quic.xargs.org/#client-initial-packet
+
+    std::vector<uint8_t> testClientUnprotectedData = {
         0xc0, // unprotected header byte
         0x00, 0x00, 0x00, 0x01, // version
         0x08, // dcid len
@@ -626,22 +634,22 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
         0x10, 0x00, 0x00, 0x08, 0x01, 0x0a, 0x09, 0x01, 0x0a, 0x0a, 0x01, 0x03, 0x0b, 0x01, 0x19, 0x0f, 0x05, 0x63, 0x5f, 0x63, 0x69, 0x64
     };
 
-    std::vector<uint8_t> testFinalContents = protectInitialPacket(testUnprotectedData, 23);
+    std::vector<uint8_t> testClientFinalContents = protectInitialPacket(testClientUnprotectedData, 23, test_dcid_iovec, "client in");
 
 
-    std::cout << "test unprotected data size: " << testUnprotectedData.size() << std::endl;
-    for (int i = 0; i < testUnprotectedData.size(); i++) {
-        std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)testUnprotectedData[i] << " ";
+    std::cout << "test client unprotected data size: " << testClientUnprotectedData.size() << std::endl;
+    for (int i = 0; i < testClientUnprotectedData.size(); i++) {
+        std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)testClientUnprotectedData[i] << " ";
     }
     std::cout << std::dec << std::endl;
 
-    std::cout << "test final contents size: " << testFinalContents.size() << std::endl;
-    for (int i = 0; i < testFinalContents.size(); i++) {
-        std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)testFinalContents[i] << " ";
+    std::cout << "test client final contents size: " << testClientFinalContents.size() << std::endl;
+    for (int i = 0; i < testClientFinalContents.size(); i++) {
+        std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)testClientFinalContents[i] << " ";
     }
     std::cout << std::dec << std::endl;
 
-    std::vector <uint8_t> expectedProtectedData = {
+    std::vector <uint8_t> expectedClientProtectedData = {
         0xcd, // protected header byte
         0x00, 0x00, 0x00, 0x01, // version
         0x08, // dcid len
@@ -666,11 +674,81 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
         0xb3, 0xb7, 0x24, 0x1e, 0xf6, 0x64, 0x6a, 0x6c, 0x86, 0xe5, 0xc6, 0x2c, 0xe0, 0x8b, 0xe0, 0x99
     };
 
+    ASSERT(testClientFinalContents.size() == expectedClientProtectedData.size());
+    for (int i = 0; i < expectedClientProtectedData.size(); i++) {
+        ASSERT(expectedClientProtectedData[i] == testClientFinalContents[i]);
+    }
+
+
+
+
+
+    // self test from https://quic.xargs.org/#server-initial-packet
+
+    std::vector<uint8_t> testUnprotectedData = {
+        0xc0, // unprotected header byte
+        0x00, 0x00, 0x00, 0x01, // version
+        0x05, // dcid len
+        0x63, 0x5f, 0x63, 0x69, 0x64, // dcid
+        0x05, // scid len
+        0x73, 0x5f, 0x63, 0x69, 0x64, // scid
+        0x00, // token
+        0x40, 0x75, // packet length
+        0x00, // unprotected packet number
+
+        // ack frame
+        0x02, 0x00, 0x42, 0x40, 0x00, 0x00,
+        // crypto frame
+        0x06, 0x00, 0x40, 0x5a, 0x02, 0x00, 0x00, 0x56, 0x03, 0x03, 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77, 0x78, 0x79, 0x7a, 0x7b, 0x7c, 0x7d, 0x7e, 0x7f, 0x80, 0x81, 0x82,
+        0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x8a, 0x8b, 0x8c, 0x8d, 0x8e, 0x8f, 0x00, 0x13, 0x01, 0x00, 0x00, 0x2e, 0x00, 0x33, 0x00, 0x24, 0x00, 0x1d, 0x00, 0x20, 0x9f, 0xd7,
+        0xad, 0x6d, 0xcf, 0xf4, 0x29, 0x8d, 0xd3, 0xf9, 0x6d, 0x5b, 0x1b, 0x2a, 0xf9, 0x10, 0xa0, 0x53, 0x5b, 0x14, 0x88, 0xd7, 0xf8, 0xfa, 0xbb, 0x34, 0x9a, 0x98, 0x28, 0x80, 0xb6, 0x15,
+        0x00, 0x2b, 0x00, 0x02, 0x03, 0x04
+    };
+
+    std::vector<uint8_t> testFinalContents = protectInitialPacket(testUnprotectedData, 20, test_dcid_iovec, "server in");
+
+
+    std::cout << "test unprotected data size: " << testUnprotectedData.size() << std::endl;
+    for (int i = 0; i < testUnprotectedData.size(); i++) {
+        std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)testUnprotectedData[i] << " ";
+    }
+    std::cout << std::dec << std::endl;
+
+    std::cout << "test final contents size: " << testFinalContents.size() << std::endl;
+    for (int i = 0; i < testFinalContents.size(); i++) {
+        std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)testFinalContents[i] << " ";
+    }
+    std::cout << std::dec << std::endl;
+
+    std::vector <uint8_t> expectedProtectedData = {
+
+        0xcd,  // protected header byte
+        0x00, 0x00, 0x00, 0x01, // version
+        0x05, // dcid len
+        0x63, 0x5f, 0x63, 0x69, 0x64, // dcid
+        0x05, // scid len
+        0x73, 0x5f, 0x63, 0x69, 0x64, // scid
+        0x00, // token
+        0x40, 0x75, // packet length
+        0x3a, // protected packet number
+
+        // encrypted ack and crypto frames
+
+        0x83, 0x68, 0x55, 0xd5, 0xd9, 0xc8, 0x23, 0xd0, 0x7c, 0x61, 0x68, 0x82, 0xca, 0x77, 0x02, 0x79, 0x24, 0x98, 0x64, 0xb5, 0x56,
+        0xe5, 0x16, 0x32, 0x25, 0x7e, 0x2d, 0x8a, 0xb1, 0xfd, 0x0d, 0xc0, 0x4b, 0x18, 0xb9, 0x20, 0x3f, 0xb9, 0x19, 0xd8, 0xef, 0x5a, 0x33,
+        0xf3, 0x78, 0xa6, 0x27, 0xdb, 0x67, 0x4d, 0x3c, 0x7f, 0xce, 0x6c, 0xa5, 0xbb, 0x3e, 0x8c, 0xf9, 0x01, 0x09, 0xcb, 0xb9, 0x55, 0x66,
+        0x5f, 0xc1, 0xa4, 0xb9, 0x3d, 0x05, 0xf6, 0xeb, 0x83, 0x25, 0x2f, 0x66, 0x31, 0xbc, 0xad, 0xc7, 0x40, 0x2c, 0x10, 0xf6, 0x5c, 0x52,
+        0xed, 0x15, 0xb4, 0x42, 0x9c, 0x9f, 0x64, 0xd8, 0x4d, 0x64, 0xfa, 0x40, 0x6c,
+        // auth tag
+        0xf0, 0xb5, 0x17, 0xa9, 0x26, 0xd6, 0x2a, 0x54, 0xa9, 0x29, 0x41, 0x36, 0xb1, 0x43, 0xb0, 0x33
+
+    };
+
     ASSERT(testFinalContents.size() == expectedProtectedData.size());
     for (int i = 0; i < expectedProtectedData.size(); i++) {
         ASSERT(expectedProtectedData[i] == testFinalContents[i]);
     }
-    */
+
 }
 
 const Ptr<Chunk> EncryptedQuicPacketSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
