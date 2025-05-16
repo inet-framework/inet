@@ -6,7 +6,7 @@ Goals
 
 This showcase demonstrates a gate schedule configurator that solves the autoconfiguration problem using a multivariate linear inequality system, directly producing the gate control lists from the variables.
 
-| Verified with INET version: ``4.4``
+| Verified with INET version: ``4.5``
 | Source files location: `inet/showcases/tsn/gatescheduling/sat <https://github.com/inet-framework/inet/tree/master/showcases/tsn/gatescheduling/sat>`__
 
 The Model
@@ -95,4 +95,3 @@ Discussion
 ----------
 
 Use `this <https://github.com/inet-framework/inet/discussions/792>`__ page in the GitHub issue tracker for commenting on this showcase.
-

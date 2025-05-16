@@ -6,7 +6,7 @@ Goals
 
 This showcase demonstrates the TSNsched gate schedule configurator that solves the autoconfiguration problem with an external SAT solver tool.
 
-| Verified with INET version: ``4.4``
+| Verified with INET version: ``4.5``
 | Source files location: `inet/showcases/tsn/gatescheduling/tsnsched <https://github.com/inet-framework/inet/tree/master/showcases/tsn/gatescheduling/tsnsched>`__
 
 The Model
@@ -95,4 +95,3 @@ Discussion
 ----------
 
 Use `this <https://github.com/inet-framework/inet/discussions/793>`__ page in the GitHub issue tracker for commenting on this showcase.
-
