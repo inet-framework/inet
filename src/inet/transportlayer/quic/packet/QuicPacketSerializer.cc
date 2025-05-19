@@ -17,6 +17,7 @@
 
 #include <iomanip>
 
+#include "inet/transportlayer/quic/packet/QuicPacket.h"
 #include "inet/transportlayer/quic/packet/EncryptedQuicPacketChunk.h"
 #include "inet/transportlayer/quic/packet/EncryptionKeyTag_m.h"
 
@@ -453,7 +454,7 @@ const Ptr<Chunk> QuicPacketHeaderSerializer::deserializeShortPacketHeader(Memory
     }
 }
 
-std::vector<uint8_t> protectInitialPacket(const std::vector<uint8_t> unencryptedData, size_t packetNumberOffset, ptls_iovec_t dcid_iovec, const char *hkdf_label) {
+std::vector<uint8_t> protectInitialPacket(const std::vector<uint8_t> unencryptedData, size_t packetNumberOffset, const EncryptionKey& key) {
     size_t packetNumberLength = 1;
 
     std::cout << "unencrypted data size: " << unencryptedData.size() << std::endl;
@@ -464,62 +465,8 @@ std::vector<uint8_t> protectInitialPacket(const std::vector<uint8_t> unencrypted
 
     ptls_cipher_suite_t *cs = &ptls_openssl_opp_aes128gcmsha256;
 
-    static const uint8_t quic_v1_salt[] = {
-        0x38, 0x76, 0x2c, 0xf7, 0xf5, 0x59, 0x34, 0xb3,
-        0x4d, 0x17, 0x9a, 0xe6, 0xa4, 0xc8, 0x0c, 0xad,
-        0xcc, 0xbb, 0x7f, 0x0a
-    };
-
-    uint8_t master_secret[32];
-
-    ptls_hkdf_extract(cs->hash,
-            master_secret, ptls_iovec_init(quic_v1_salt, sizeof(quic_v1_salt)), dcid_iovec);
-
-    std::cout << "digest size: " << cs->hash->digest_size << std::endl;
-    char master_secret_hex[65];
-    ptls_hexdump(master_secret_hex, master_secret, sizeof(master_secret));
-    std::cout << "master secret: " << master_secret_hex << std::endl;
-
-    //int ptls_hkdf_expand_label(ptls_hash_algorithm_t *algo, void *output, size_t outlen, ptls_iovec_t secret, const char *label,
-    //                           ptls_iovec_t hash_value, const char *label_prefix);
-
-    std::cout << "aead key size: " << cs->aead->ctr_cipher->key_size << std::endl;
-
-    uint8_t client_secret[32];
-    ptls_hkdf_expand_label(cs->hash, client_secret, 32, ptls_iovec_init(master_secret, 32),
-                                          hkdf_label, ptls_iovec_init(NULL, 0), NULL);
-
-    char client_secret_hex[65];
-    ptls_hexdump(client_secret_hex, client_secret, sizeof(client_secret));
-    std::cout << "client secret: " << client_secret_hex << std::endl;
-
-    // client_secret is verified good
-    uint8_t hpkey[PTLS_MAX_SECRET_SIZE];
-
-
-    ptls_hkdf_expand_label(cs->hash, hpkey, cs->aead->key_size, ptls_iovec_init(client_secret, cs->hash->digest_size),
-                                          "quic hp", ptls_iovec_init(NULL, 0), NULL);
-
-    // hpkey verified good
-    std::cout << "header protect key size: " << cs->aead->key_size << std::endl;
-    for (int i = 0; i < cs->aead->key_size; i++)
-        std::cout << std::hex << (int)hpkey[i] << " ";
-    std::cout << std::dec << std::endl;
-
-
-
-    /*********
-    uint8_t client_key[16];
-    ptls_hkdf_expand_label(cs->hash, client_key, 16, ptls_iovec_init(client_secret, 32), "quic key", ptls_iovec_init(NULL, 0), NULL);
-
-    std::cout << "client key size: " << cs->aead->key_size << std::endl;
-    for (int i = 0; i < cs->aead->key_size; i++)
-        std::cout << std::hex << (int)client_key[i] << " ";
-    std::cout << std::dec << std::endl;
-    **********/
-
     // generate new AEAD context
-    ptls_aead_context_t *packet_protect = ptls_aead_new(cs->aead, cs->hash, true, client_secret, "tls13 quic "); // the tls13 is needed for some reason
+    ptls_aead_context_t *packet_protect = ptls_aead_new_direct(cs->aead, true, key.key.data(), key.iv.data());
 
     uint8_t client_iv[12] = {0};
     ptls_aead_get_iv(packet_protect, client_iv);
@@ -530,7 +477,7 @@ std::vector<uint8_t> protectInitialPacket(const std::vector<uint8_t> unencrypted
     std::cout << std::dec << std::endl;
     // client_iv verified good, probably client key too
 
-    ptls_cipher_context_t *header_protect = ptls_cipher_new(cs->aead->ctr_cipher, true, hpkey);
+    ptls_cipher_context_t *header_protect = ptls_cipher_new(cs->aead->ctr_cipher, true, key.hpkey.data());
 
     std::cout << "packet number length in ser: " << packetNumberLength << std::endl;
     size_t payload_from = packetNumberOffset + packetNumberLength;
@@ -596,12 +543,15 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
     ptls_iovec_t dcid_iovec = ptls_iovec_init(dcid, 8);
 
 
+    EncryptionKey key = EncryptionKey::newInitial(dcid_iovec, "client in");
     size_t packetNumberOffset = 26;
-    std::vector<uint8_t> finalContents = protectInitialPacket(unencryptedData, packetNumberOffset, dcid_iovec, "client in");
+    std::vector<uint8_t> finalContents = protectInitialPacket(unencryptedData, packetNumberOffset, key);
 
     // TODO: handle sub-byte offset and length
     stream.writeBytes(finalContents, offset, length < b(0) ? B(-1) : B(length));
 
+
+    // ----------------
 
     uint8_t test_dcid[8] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07};
     ptls_iovec_t test_dcid_iovec = ptls_iovec_init(test_dcid, 8);
@@ -634,7 +584,8 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
         0x10, 0x00, 0x00, 0x08, 0x01, 0x0a, 0x09, 0x01, 0x0a, 0x0a, 0x01, 0x03, 0x0b, 0x01, 0x19, 0x0f, 0x05, 0x63, 0x5f, 0x63, 0x69, 0x64
     };
 
-    std::vector<uint8_t> testClientFinalContents = protectInitialPacket(testClientUnprotectedData, 23, test_dcid_iovec, "client in");
+    EncryptionKey testClientKey = EncryptionKey::newInitial(test_dcid_iovec, "client in");
+    std::vector<uint8_t> testClientFinalContents = protectInitialPacket(testClientUnprotectedData, 23, testClientKey);
 
 
     std::cout << "test client unprotected data size: " << testClientUnprotectedData.size() << std::endl;
@@ -705,7 +656,8 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
         0x00, 0x2b, 0x00, 0x02, 0x03, 0x04
     };
 
-    std::vector<uint8_t> testFinalContents = protectInitialPacket(testUnprotectedData, 20, test_dcid_iovec, "server in");
+    EncryptionKey testServerKey = EncryptionKey::newInitial(test_dcid_iovec, "server in");
+    std::vector<uint8_t> testFinalContents = protectInitialPacket(testUnprotectedData, 20, testServerKey);
 
 
     std::cout << "test unprotected data size: " << testUnprotectedData.size() << std::endl;

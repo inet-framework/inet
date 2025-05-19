@@ -8,12 +8,55 @@
 #ifndef INET_APPLICATIONS_QUIC_QUICPACKET_H_
 #define INET_APPLICATIONS_QUIC_QUICPACKET_H_
 
+#include <vector>
+
 #include "PacketHeader_m.h"
 #include "QuicFrame.h"
 #include "inet/common/packet/Packet.h"
 
+extern "C" {
+#include "picotls.h"
+#include "picotls/openssl_opp.h"
+}
+
 namespace inet {
 namespace quic {
+
+struct EncryptionKey {
+    std::vector<uint8_t> key;
+    std::vector<uint8_t> iv;
+    std::vector<uint8_t> hpkey;
+
+    static EncryptionKey newInitial(ptls_iovec_t initial_random, const char *hkdf_label) {
+        ptls_hash_algorithm_t *hash = &ptls_openssl_opp_sha256;
+
+        static const uint8_t quic_v1_salt[] = {
+            0x38, 0x76, 0x2c, 0xf7, 0xf5, 0x59, 0x34, 0xb3,
+            0x4d, 0x17, 0x9a, 0xe6, 0xa4, 0xc8, 0x0c, 0xad,
+            0xcc, 0xbb, 0x7f, 0x0a
+        };
+
+        uint8_t initial_secret[32];
+        ptls_hkdf_extract(hash, initial_secret, ptls_iovec_init(quic_v1_salt, sizeof(quic_v1_salt)), initial_random);
+
+        ptls_iovec_t null_iovec = ptls_iovec_init(NULL, 0);
+
+        uint8_t secret[32]; // "client_secret"/"server_secret"
+        ptls_hkdf_expand_label(hash, secret, 32, ptls_iovec_init(initial_secret, 32), hkdf_label, null_iovec, NULL);
+        ptls_iovec_t secret_iovec = ptls_iovec_init(secret, 32);
+
+        std::vector<uint8_t> key(16);
+        ptls_hkdf_expand_label(hash, key.data(), key.size(), secret_iovec, "quic key", null_iovec, NULL);
+
+        std::vector<uint8_t> iv(12);
+        ptls_hkdf_expand_label(hash, iv.data(), iv.size(), secret_iovec, "quic iv", null_iovec, NULL);
+
+        std::vector<uint8_t> hpkey(16);
+        ptls_hkdf_expand_label(hash, hpkey.data(), hpkey.size(), secret_iovec, "quic hp", null_iovec, NULL);
+
+        return {key, iv, hpkey};
+    }
+};
 
 enum PacketNumberSpace {
     Initial,
