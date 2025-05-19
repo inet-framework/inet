@@ -252,6 +252,44 @@ QuicFrame *PacketBuilder::createCryptoFrame(TransportParameters *tp)
 
         frameHeader->setContainsTransportParameters(true);
 
+    } else {
+
+        ptls_context_t ctx;
+
+        memset(&ctx, 0, sizeof(ctx));
+        ctx.random_bytes = random_bytes;
+        ctx.key_exchanges = ptls_openssl_opp_key_exchanges;
+        ctx.cipher_suites = ptls_openssl_opp_cipher_suites;
+        ctx.get_time = &opp_get_time;
+
+        size_t epoch_offsets[5] = {0};
+
+        ptls_buffer_t buf2;
+        ptls_buffer_init(&buf2, (void*)"", 0);
+
+        ptls_t *tls;
+        tls = ptls_new(&ctx, 0);
+
+        ptls_handle_message(tls, &buf2, epoch_offsets, 0, NULL, 0, NULL);
+
+        if (buf2.off == 0)
+            return 0;
+
+        for (size_t epoch = 0; epoch < 4; ++epoch) {
+            size_t len = epoch_offsets[epoch + 1] - epoch_offsets[epoch];
+            if (len == 0)
+                continue;
+
+            Ptr<BytesChunk> transportParametersExt = makeShared<BytesChunk>();
+            std::vector<uint8_t> bytes;
+            bytes.resize(len);
+            for (size_t i = 0; i < len; i++) {
+                bytes[i] = *(uint8_t *)(buf2.base + epoch_offsets[epoch] + i);
+            }
+            transportParametersExt->setBytes(bytes);
+            frame->setData(transportParametersExt);
+        }
+
     }
 
     frameHeader->setOffset(0);
