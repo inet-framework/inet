@@ -113,6 +113,8 @@ public:
          * @param socket The involved socket object.
          */
         virtual void socketMsgRejected(QuicSocket *socket) = 0;
+
+        virtual void socketNewToken(QuicSocket *socket, const char *token) { };
     };
 
     /**
@@ -223,6 +225,8 @@ public:
      * @param streamId The ID of the QUIC stream to receive data from.
      */
     void recv(int64_t length, uint64_t streamId);
+
+    void connectAndSend(L3Address addr, uint16_t port, const char *token, Packet *msg, uint64_t streamId);
 
     /**
      * Closes the socket and, if connected, the connection.

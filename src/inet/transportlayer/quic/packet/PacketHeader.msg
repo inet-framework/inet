@@ -63,7 +63,7 @@ class InitialPacketHeader extends LongPacketHeader
     longPacketType = LONG_PACKET_HEADER_TYPE_INITIAL;
     uint8_t packetNumberLength;
     VariableLengthInteger tokenLength;
-    uint64_t token;
+    uint32_t token;
     VariableLengthInteger length;
     uint64_t packetNumber;
     // payload
@@ -94,6 +94,11 @@ class ZeroRttPacketHeader extends LongPacketHeader
 }
 cplusplus(ZeroRttPacketHeader) {{
   public:
+    void calcChunkLength() {
+        int64_t len = 1 + 4 + 1 + dstConnectionIdLength + 1 + srcConnectionIdLength + getVariableLengthIntegerSize(length) + packetNumberLength;
+        this->setChunkLength(B(len));
+    }
+    
     std::string str() const override {
         std::ostringstream os;
         os << "0-RTT[dstConnectionId=" << dstConnectionId
@@ -117,7 +122,7 @@ cplusplus(HandshakePacketHeader) {{
         int64_t len = 1 + 4 + 1 + dstConnectionIdLength + 1 + srcConnectionIdLength + getVariableLengthIntegerSize(length) + packetNumberLength;
         this->setChunkLength(B(len));
     }
-    
+
     std::string str() const override {
         std::ostringstream os;
         os << "Handshake[dstConnectionId=" << dstConnectionId

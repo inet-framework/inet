@@ -104,11 +104,8 @@ protected:
 private:
     StreamSndQueue sendQueue;
     StreamRcvQueue *receiveQueue = nullptr;
-    std::vector<QuicFrame*> *controlQueue = nullptr;
     StreamFlowController *streamFlowController = nullptr;
     StreamFlowControlResponder *streamFlowControlResponder = nullptr;
-    ConnectionFlowController *connectionFlowController = nullptr;
-    ConnectionFlowControlResponder *connectionFlowControlResponder = nullptr;
 
     Statistics *stats;
     simsignal_t sendBufferUnsentAppDataStat;

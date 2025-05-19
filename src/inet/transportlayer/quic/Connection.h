@@ -113,7 +113,7 @@ class Connection
      */
     void sendProbePacket(uint ptoCount);
 
-    void sendClientInitialPacket();
+    void sendClientInitialPacket(uint32_t token = 0);
     void sendServerInitialPacket();
     void sendHandshakePacket(bool includeTransportParamters);
     void sendDataToApp(uint64_t streamId, B expectedDataSize);
@@ -126,9 +126,17 @@ class Connection
     void sendAck(PacketNumberSpace pnSpace);
     void established();
     void sendHandshakeDone();
+    void enqueueZeroRttTokenFrame();
+    void buildClientTokenAndSendToApp(uint32_t token);
     void close(bool sendAck, bool appInitiated);
     void sendConnectionClose(bool sendAck, bool appInitiated, int errorCode);
     bool belongsPacketTo(Packet *pkt, uint64_t dstConnectionId);
+    uint32_t processClientTokenExtractToken(const char *clientToken);
+    void addConnectionForInitialConnectionId(uint64_t initialConnectionId);
+    void removeConnectionForInitialConnectionId();
+    void initializeRemoteTransportParameters(uint64_t maxData, uint64_t maxStreamData);
+    void initializeRemoteTransportParameters(Ptr<const TransportParametersExtension> transportParametersExt);
+
 
     ReliabilityManager *getReliabilityManager() {
         return this->reliabilityManager;
@@ -248,6 +256,10 @@ class Connection
     simsignal_t packetNumberSentStat;
     Timer *closeTimer = nullptr;
 
+    bool initialConnectionIdSet = false;
+    uint64_t initialConnectionId = 0;
+
+    bool remoteTransportParametersInitialized = false;
 
     void sendPacket(QuicPacket *packet, PacketNumberSpace pnSpace, bool track = true);
     Stream *findOrCreateStream(uint64_t streamid);

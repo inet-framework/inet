@@ -35,6 +35,8 @@ ConnectionState *ConnectionState::processAppCommand(cMessage *msg)
             return processSendAppCommand(msg);
         case QUIC_C_RECEIVE:
             return processRecvAppCommand(msg);
+        case QUIC_C_CONNECT_AND_SEND: // 0-RTT connection setup
+            return processConnectAndSendAppCommand(msg);
         case QUIC_C_CLOSE: // close
             return processCloseAppCommand(msg);
         case QUIC_C_CREATE_PCB: // bind
@@ -62,6 +64,11 @@ ConnectionState *ConnectionState::processRecvAppCommand(cMessage *msg)
     throw cRuntimeError("Send data to app command unexpected in the current state");
 }
 
+ConnectionState *ConnectionState::processConnectAndSendAppCommand(cMessage *msg)
+{
+    throw cRuntimeError("Connect and send app command unexpected in the current state");
+}
+
 ConnectionState *ConnectionState::processCloseAppCommand(cMessage *msg)
 {
     throw cRuntimeError("Close app command unexpected in the current state");
@@ -79,6 +86,8 @@ ConnectionState *ConnectionState::processPacket(Packet *pkt)
                     return processInitialPacket(staticPtrCast<const InitialPacketHeader>(packetHeader), pkt);
                 case LONG_PACKET_HEADER_TYPE_HANDSHAKE:
                     return processHandshakePacket(staticPtrCast<const HandshakePacketHeader>(packetHeader), pkt);
+                case LONG_PACKET_HEADER_TYPE_0RTT:
+                    return processZeroRttPacket(staticPtrCast<const ZeroRttPacketHeader>(packetHeader), pkt);
             }
             break;
         case PACKET_HEADER_FORM_SHORT:
@@ -96,6 +105,11 @@ ConnectionState *ConnectionState::processInitialPacket(const Ptr<const InitialPa
 ConnectionState *ConnectionState::processHandshakePacket(const Ptr<const HandshakePacketHeader>& packetHeader, Packet *pkt)
 {
     throw cRuntimeError("Handshake packet unexpected in the current state");
+}
+
+ConnectionState *ConnectionState::processZeroRttPacket(const Ptr<const ZeroRttPacketHeader>& packetHeader, Packet *pkt)
+{
+    throw cRuntimeError("0-RTT packet unexpected in the current state");
 }
 
 ConnectionState *ConnectionState::processOneRttPacket(const Ptr<const OneRttPacketHeader>& packetHeader, Packet *pkt)
@@ -193,6 +207,8 @@ void ConnectionState::processFrame(Packet *pkt, PacketNumberSpace pnSpace)
             return processCryptoFrame(staticPtrCast<const CryptoFrameHeader>(frameHeader), pkt);
         case FRAME_HEADER_TYPE_HANDSHAKE_DONE:
             return processHandshakeDoneFrame();
+        case FRAME_HEADER_TYPE_NEW_TOKEN:
+            return processNewTokenFrame(staticPtrCast<const NewTokenFrameHeader>(frameHeader));
         case FRAME_HEADER_TYPE_CONNECTION_CLOSE_APP:
         case FRAME_HEADER_TYPE_CONNECTION_CLOSE_QUIC:
             return processConnectionCloseFrame();
@@ -243,6 +259,11 @@ void ConnectionState::processCryptoFrame(const Ptr<const CryptoFrameHeader>& fra
 void ConnectionState::processHandshakeDoneFrame()
 {
     throw cRuntimeError("HANDSHAKE_DONE frame unexpected in the current state");
+}
+
+void ConnectionState::processNewTokenFrame(const Ptr<const NewTokenFrameHeader>& frameHeader)
+{
+    throw cRuntimeError("NEW_TOKEN frame unexpected in the current state");
 }
 
 void ConnectionState::processConnectionCloseFrame()

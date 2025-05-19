@@ -82,7 +82,7 @@ Ptr<HandshakePacketHeader> PacketBuilder::createHandshakeHeader()
     return packetHeader;
 }
 
-Ptr<ShortPacketHeader> PacketBuilder::createOneRttHeader()
+Ptr<OneRttPacketHeader> PacketBuilder::createOneRttHeader()
 {
     // create short header
     Ptr<OneRttPacketHeader> packetHeader = makeShared<OneRttPacketHeader>();
@@ -95,7 +95,19 @@ Ptr<ShortPacketHeader> PacketBuilder::createOneRttHeader()
     return packetHeader;
 }
 
-QuicPacket *PacketBuilder::createPacket(PacketNumberSpace pnSpace, bool skipPacketNumber)
+Ptr<ZeroRttPacketHeader> PacketBuilder::createZeroRttHeader()
+{
+    Ptr<ZeroRttPacketHeader> packetHeader = makeShared<ZeroRttPacketHeader>();
+    fillLongHeader(packetHeader);
+    packetHeader->setPacketNumberLength(1);
+    packetHeader->setPacketNumber(packetNumber[PacketNumberSpace::ApplicationData]++);
+    packetHeader->setLength(1);
+    packetHeader->calcChunkLength();
+
+    return packetHeader;
+}
+
+QuicPacket *PacketBuilder::createPacket(PacketNumberSpace pnSpace, bool skipPacketNumber, bool zeroRtt)
 {
     if (skipPacketNumber) {
         packetNumber[pnSpace]++;
@@ -112,8 +124,13 @@ QuicPacket *PacketBuilder::createPacket(PacketNumberSpace pnSpace, bool skipPack
             header = createHandshakeHeader();
             break;
         case PacketNumberSpace::ApplicationData:
-            packetName << "1-RTT[" << packetNumber[pnSpace] << "]";
-            header = createOneRttHeader();
+            if (zeroRtt) {
+                packetName << "0-RTT[" << packetNumber[pnSpace] << "]";
+                header = createZeroRttHeader();
+            } else {
+                packetName << "1-RTT[" << packetNumber[pnSpace] << "]";
+                header = createOneRttHeader();
+            }
             break;
     }
     QuicPacket *packet = new QuicPacket(packetName.str());;
@@ -125,6 +142,11 @@ QuicPacket *PacketBuilder::createPacket(PacketNumberSpace pnSpace, bool skipPack
 QuicPacket *PacketBuilder::createOneRttPacket(bool skipPacketNumber)
 {
     return createPacket(PacketNumberSpace::ApplicationData, skipPacketNumber);
+}
+
+QuicPacket *PacketBuilder::createZeroRttPacket()
+{
+    return createPacket(PacketNumberSpace::ApplicationData, false, true);
 }
 
 QuicFrame *PacketBuilder::createPingFrame()
@@ -180,6 +202,14 @@ QuicFrame *PacketBuilder::createConnectionCloseFrame(bool appInitiated, int erro
 QuicFrame *PacketBuilder::createHandshakeDoneFrame()
 {
     Ptr<HandshakeDoneFrameHeader> frameHeader = makeShared<HandshakeDoneFrameHeader>();
+    return new QuicFrame(frameHeader);
+}
+
+QuicFrame *PacketBuilder::createNewTokenFrame(uint32_t token)
+{
+    Ptr<NewTokenFrameHeader> frameHeader = makeShared<NewTokenFrameHeader>();
+    frameHeader->setToken(token);
+    frameHeader->calcChunkLength();
     return new QuicFrame(frameHeader);
 }
 
@@ -382,6 +412,34 @@ QuicPacket *PacketBuilder::buildAckElicitingPacket(std::vector<QuicPacket*> *sen
     return packet;
 }
 
+QuicPacket *PacketBuilder::buildZeroRttPacket(int maxPacketSize)
+{
+    QuicPacket *packet = createZeroRttPacket();
+
+    // select stream for STREAM frame
+    Stream *selectedStream = nullptr;
+    selectedStream = scheduler->selectStream(maxPacketSize - getPacketSize(packet));
+    if (selectedStream == nullptr) {
+        packetNumber[PacketNumberSpace::ApplicationData]--;
+        delete packet;
+        packet = nullptr;
+    }
+    while (selectedStream != nullptr) {
+        // is enough space remaining for a stream frame header with at least one byte of data?
+        //if (remainingPacketSize < selectedStream->getHeaderSize() + streamDataSize) {
+        //    return pkt;
+        //}
+
+        packet = addFrameToPacket(packet, selectedStream->generateNextStreamFrame(maxPacketSize - getPacketSize(packet)));
+
+        selectedStream = scheduler->selectStream(maxPacketSize - getPacketSize(packet));
+    }
+
+    ASSERT(packet == nullptr || packet->getSize() <= maxPacketSize);
+    return packet;
+
+}
+
 QuicPacket *PacketBuilder::buildPingPacket()
 {
     QuicPacket *packet = createOneRttPacket();
@@ -416,9 +474,14 @@ QuicPacket *PacketBuilder::buildDplpmtudProbePacket(int packetSize, Dplpmtud *dp
     return packet;
 }
 
-QuicPacket *PacketBuilder::buildClientInitialPacket(int maxPacketSize, TransportParameters *tp)
+QuicPacket *PacketBuilder::buildClientInitialPacket(int maxPacketSize, TransportParameters *tp, uint32_t token)
 {
     QuicPacket *packet = createPacket(PacketNumberSpace::Initial, false);
+    if (token > 0) {
+        Ptr<InitialPacketHeader> initialPacketHeader = staticPtrCast<InitialPacketHeader>(packet->getHeader());
+        initialPacketHeader->setTokenLength(4);
+        initialPacketHeader->setToken(token);
+    }
 
     packet->addFrame(createCryptoFrame(tp));
     packet->addFrame(createPaddingFrame(1200 - packet->getSize()));
@@ -463,6 +526,11 @@ QuicPacket *PacketBuilder::buildHandshakePacket(int maxPacketSize, TransportPara
 void PacketBuilder::addHandshakeDone()
 {
     controlQueue->push_back(createHandshakeDoneFrame());
+}
+
+void PacketBuilder::addNewTokenFrame(uint32_t token)
+{
+    controlQueue->push_back(createNewTokenFrame(token));
 }
 
 QuicPacket *PacketBuilder::buildConnectionClosePacket(int maxPacketSize, bool sendAck, bool appInitiated, int errorCode)

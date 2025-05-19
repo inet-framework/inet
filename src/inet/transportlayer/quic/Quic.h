@@ -41,6 +41,8 @@ class Quic : public OperationalBase
     virtual UdpSocket *createUdpSocket();
     virtual UdpSocket *findUdpSocket(L3Address addr, uint16_t port);
     virtual AppSocket *findOrCreateAppSocket(int socketId);
+    virtual void addConnection(uint64_t connectionId, Connection *connection);
+    virtual void removeConnectionId(uint64_t connectionId);
     IRoutingTable *getRoutingTable();
 
   protected:

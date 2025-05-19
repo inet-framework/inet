@@ -197,6 +197,8 @@ simple Quic extends SimpleModule like IQuic
         @class(Quic);
         string routingTableModule; // Set by StandardHost.
 
+        bool sendZeroRttTokenAsServer = default(false);
+
         // Congestion Control
         string congestionControl = default("NewReno"); // Sets the congestion control algorithm (NewReno or No).
         bool accurateIncreaseInNewRenoCongestionAvoidance = default(true); // For NewReno in Congestion Avoidance, if true, increases cwnd after cwnd-acked bytes; if false, increases cwnd on every acked packet by acked_bytes/cwnd.

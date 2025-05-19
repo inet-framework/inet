@@ -80,6 +80,10 @@ void EstablishedConnectionState::processStreamFrame(const Ptr<const StreamFrameH
 
 void EstablishedConnectionState::processAckFrame(const Ptr<const AckFrameHeader>& frameHeader, PacketNumberSpace pnSpace)
 {
+    EV_DEBUG << "processAckFrame in " << name << endl;
+    if (processingZeroRttPacket) {
+        throw cRuntimeError("EstablishedConnectionState::processAckFrame: Processing a 0-RTT packet, which must not contain an ACK frame.");
+    }
     context->handleAckFrame(frameHeader, pnSpace);
 }
 
@@ -109,13 +113,28 @@ void EstablishedConnectionState::processDataBlockedFrame(const Ptr<const DataBlo
 void EstablishedConnectionState::processCryptoFrame(const Ptr<const CryptoFrameHeader>& frameHeader, Packet *pkt)
 {
     EV_DEBUG << "CryptoFrameHeader in " << name << endl;
+    if (processingZeroRttPacket) {
+        throw cRuntimeError("EstablishedConnectionState::processCryptoFrame: Processing a 0-RTT packet, which must not contain a CRYPTO frame.");
+    }
     gotCryptoFin = true;
 }
 
 void EstablishedConnectionState::processHandshakeDoneFrame()
 {
     EV_DEBUG << "HandshakeDoneFrameHeader in " << name << endl;
+    if (processingZeroRttPacket) {
+        throw cRuntimeError("EstablishedConnectionState::processHandshakeDoneFrame: Processing a 0-RTT packet, which must not contain a HANDSHAKE_DONE frame.");
+    }
     context->setHandshakeConfirmed(true);
+}
+
+void EstablishedConnectionState::processNewTokenFrame(const Ptr<const NewTokenFrameHeader>& frameHeader)
+{
+    EV_DEBUG << "NewTokenFrameHeader in " << name << endl;
+    if (processingZeroRttPacket) {
+        throw cRuntimeError("EstablishedConnectionState::processNewTokenFrame: Processing a 0-RTT packet, which must not contain a NEW_TOKEN frame.");
+    }
+    context->buildClientTokenAndSendToApp(frameHeader->getToken());
 }
 
 void EstablishedConnectionState::processConnectionCloseFrame()
@@ -177,6 +196,13 @@ ConnectionState *EstablishedConnectionState::processHandshakePacket(const Ptr<co
     context->sendAck(PacketNumberSpace::Handshake);
     if (gotCryptoFin) {
         gotCryptoFin = false;
+
+        // stop accepting early data
+        context->removeConnectionForInitialConnectionId();
+
+        // enqueue a 0-RTT Token Frame for sending if the parameter is true
+        context->enqueueZeroRttTokenFrame();
+
         context->setHandshakeConfirmed(true);
         context->sendHandshakeDone();
     }
@@ -184,6 +210,26 @@ ConnectionState *EstablishedConnectionState::processHandshakePacket(const Ptr<co
     return this;
 }
 
+ConnectionState *EstablishedConnectionState::processZeroRttPacket(const Ptr<const ZeroRttPacketHeader>& packetHeader, Packet *pkt)
+{
+    EV_DEBUG << "processZeroRttPacket in " << name << endl;
+
+    processingZeroRttPacket = true;
+
+    ackElicitingPacket = false;
+    processFrames(pkt, PacketNumberSpace::ApplicationData);
+
+    context->accountReceivedPacket(packetHeader->getPacketNumber(), ackElicitingPacket, PacketNumberSpace::ApplicationData, false);
+
+    if (gotConnectionClose) {
+        context->close(false, false);
+        return new DrainConnectionState(context);
+    }
+
+    processingZeroRttPacket = false;
+
+    return this;
+}
 
 } /* namespace quic */
 } /* namespace inet */

@@ -28,6 +28,7 @@ enum FrameHeaderType {
     FRAME_HEADER_TYPE_STREAM = 0x0e;
     FRAME_HEADER_TYPE_ACK = 0x02;
     FRAME_HEADER_TYPE_CRYPTO = 0x06;
+    FRAME_HEADER_TYPE_NEW_TOKEN = 0x07;
     FRAME_HEADER_TYPE_MAX_DATA = 0x10;
     FRAME_HEADER_TYPE_MAX_STREAM_DATA = 0x11;   
     FRAME_HEADER_TYPE_DATA_BLOCKED = 0x14;   
@@ -285,3 +286,23 @@ cplusplus(ConnectionCloseFrameHeader) {{
     }
 }}
 
+class NewTokenFrameHeader extends FrameHeader
+{
+    frameType = FRAME_HEADER_TYPE_NEW_TOKEN;
+    VariableLengthInteger tokenLength;
+    uint32_t token;
+}
+cplusplus(NewTokenFrameHeader) {{
+  public:
+    void calcChunkLength() {
+        int64_t len = 1 + getVariableLengthIntegerSize(tokenLength) + tokenLength;
+        this->setChunkLength(B(len));
+    }
+    std::string str() const override {
+        std::ostringstream os;
+        os << "NEW_TOKEN["
+            << "token=" << token
+            << "]";
+        return os.str();
+    }
+}}

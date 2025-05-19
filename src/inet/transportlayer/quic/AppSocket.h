@@ -46,6 +46,7 @@ public:
     virtual void sendClosed();
     virtual void sendDestroyed();
     virtual void sendDataNotification(uint64_t streamId, uint64_t dataSize);
+    virtual void sendToken(std::string clientToken);
 
     Connection *getConnection() {
         return this->connection;

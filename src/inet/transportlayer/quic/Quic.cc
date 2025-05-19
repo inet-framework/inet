@@ -32,8 +32,12 @@ namespace quic {
 Define_Module(Quic);
 
 Quic::~Quic() {
+    std::set<Connection *> connections;
     for (std::map<uint64_t, Connection *>::iterator it = connectionIdConnectionMap.begin(); it != connectionIdConnectionMap.end(); ++it) {
-        delete it->second;
+        connections.insert(it->second);
+    }
+    for (Connection *connection : connections) {
+        delete connection;
     }
     for (std::map<int, UdpSocket *>::iterator it = udpSocketIdUdpSocketMap.begin(); it != udpSocketIdUdpSocketMap.end(); ++it) {
         delete it->second;
@@ -232,16 +236,26 @@ UdpSocket *Quic::findUdpSocket(L3Address addr, uint16_t port)
     return nullptr;
 }
 
+void Quic::addConnection(uint64_t connectionId, Connection *connection)
+{
+    EV_DEBUG << "Quic::addConnection: add connection for ID " << connectionId << endl;
+    auto result = connectionIdConnectionMap.insert({ connectionId, connection });
+    if (!result.second) {
+        throw cRuntimeError("Cannot insert connection. A connection for the connection id already exists.");
+    }
+}
+
 void Quic::addConnection(Connection *connection)
 {
     for (ConnectionId *srcConnectionId : connection->getSrcConnectionIds()) {
-        EV_DEBUG << "add connection for ID " << srcConnectionId->getId() << endl;
-        auto result = connectionIdConnectionMap.insert({ srcConnectionId->getId(), connection });
-        if (!result.second) {
-            throw cRuntimeError("Cannot insert connection. A connection for the connection id already exists.");
-        }
+        addConnection(srcConnectionId->getId(), connection);
     }
+}
 
+void Quic::removeConnectionId(uint64_t connectionId)
+{
+    EV_DEBUG << "Quic::removeConnectionId: remove connection ID " << connectionId << endl;
+    connectionIdConnectionMap.erase(connectionId);
 }
 
 Connection *Quic::createConnection(UdpSocket *udpSocket, AppSocket *appSocket, L3Address remoteAddr, uint16_t remotePort)

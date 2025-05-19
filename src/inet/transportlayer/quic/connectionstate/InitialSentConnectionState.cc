@@ -30,7 +30,7 @@ void InitialSentConnectionState::processCryptoFrame(const Ptr<const CryptoFrameH
     if (frameHeader->getContainsTransportParameters()) {
         auto transportParametersExt = staticPtrCast<const TransportParametersExtension>(pkt->popAtFront());
         EV_DEBUG << "got transport parameters: " << transportParametersExt << endl;
-        context->getRemoteTransportParameters()->readExtension(transportParametersExt);
+        context->initializeRemoteTransportParameters(transportParametersExt);
     }
 }
 

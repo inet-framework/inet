@@ -94,6 +94,15 @@ void AppSocket::sendDataNotification(uint64_t streamId, uint64_t dataSize)
     sendIndication(indication);
 }
 
+void AppSocket::sendToken(std::string clientToken)
+{
+    auto indication = new Indication("client token", QUIC_I_NEW_TOKEN);
+    QuicNewToken *quicNewToken = new QuicNewToken();
+    quicNewToken->setToken(clientToken.c_str());
+    indication->setControlInfo(quicNewToken);
+    sendIndication(indication);
+}
+
 void AppSocket::sendIndication(Indication *indication)
 {
     indication->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
@@ -140,6 +149,16 @@ void AppSocket::processAppCommand(cMessage *msg)
         }
         case QUIC_C_OPEN_ACTIVE: { // connect
             QuicOpenCommand *quicOpen = check_and_cast<QuicOpenCommand *>(msg->getControlInfo());
+            L3Address remoteAddr = quicOpen->getRemoteAddr();
+            uint16_t remotePort = quicOpen->getRemotePort();
+
+            quicSimpleMod->createConnection(udpSocket, this, remoteAddr, remotePort);
+            connection->processAppCommand(msg);
+            break;
+        }
+        case QUIC_C_CONNECT_AND_SEND: { // 0-RTT connection setup
+            Packet *pkt = check_and_cast<Packet *>(msg);
+            Ptr<const QuicOpenCommand> quicOpen = pkt->getTag<QuicOpenCommand>();
             L3Address remoteAddr = quicOpen->getRemoteAddr();
             uint16_t remotePort = quicOpen->getRemotePort();
 

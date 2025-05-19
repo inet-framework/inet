@@ -43,6 +43,8 @@ class UdpSocket {
     virtual void unlisten();
     virtual void destroy();
     virtual bool isListening();
+    virtual void saveToken(uint32_t token, L3Address remoteAddr);
+    virtual bool doesTokenExist(uint32_t token, L3Address remoteAddr);
 
     L3Address getLocalAddr() {
         return localAddr;
@@ -50,6 +52,7 @@ class UdpSocket {
     uint16_t getLocalPort() {
         return localPort;
     }
+    std::map<uint32_t, L3Address> tokenRemoteIpMap;
 
   private:
     inet::UdpSocket socket;

@@ -104,6 +104,30 @@ void QuicSocket::send(Packet *msg)
     send(msg, 0);
 }
 
+void QuicSocket::connectAndSend(L3Address addr, uint16_t port, const char *token, Packet *msg, uint64_t streamId)
+{
+    if (streamId >= ( ((uint64_t)1) << 62)) {
+        throw cRuntimeError("QuicSocket::connectAndSend(): streamId too large");
+    }
+
+    msg->setKind(QUIC_C_CONNECT_AND_SEND);
+
+    auto& tags = msg->getTags();
+
+    // set connect info
+    Ptr<QuicOpenCommand> cmd = tags.addTagIfAbsent<QuicOpenCommand>();
+    cmd->setRemoteAddr(addr);
+    cmd->setRemotePort(port);
+
+    // set token
+    tags.addTagIfAbsent<QuicNewToken>()->setToken(token);
+
+    // set stream ID
+    tags.addTagIfAbsent<QuicStreamReq>()->setStreamID(streamId);
+
+    sendToQuic(msg);
+}
+
 void QuicSocket::recv(int64_t length, uint64_t streamId)
 {
     if (length < 0) {
@@ -245,6 +269,14 @@ void QuicSocket::processMessage(cMessage *msg) {
         case QUIC_I_MSG_REJECTED: {
             if (cb) {
                 cb->socketMsgRejected(this);
+            }
+            delete msg;
+            break;
+        }
+        case QUIC_I_NEW_TOKEN: {
+            if (cb) {
+                QuicNewToken *quicNewToken = check_and_cast<QuicNewToken *>(msg->getControlInfo());
+                cb->socketNewToken(this, quicNewToken->getToken());
             }
             delete msg;
             break;

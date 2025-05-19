@@ -26,6 +26,7 @@
 #include "scheduler/RRScheduler.h"
 #include "congestioncontrol/CongestionControlFactory.h"
 #include "PmtuValidator.h"
+#include "exception/InvalidTokenException.h"
 
 namespace inet {
 namespace quic {
@@ -228,6 +229,12 @@ void Connection::processIcmpPtb(Packet *droppedPkt, int ptbMtu)
 
 void Connection::sendPackets()
 {
+    if (remoteTransportParametersInitialized == false) {
+        // cannot send data packets until remote transport parameters have been initialized
+        EV_INFO << "Connection::sendPackets: remote transport parameters not initialized, skip sending data packets." << endl;
+        return;
+    }
+
     // send packets as long as congestion control allows sending a full sized packet
     // TODO: Implement a better way to determine app limitation
     congestionController->setAppLimited(false);
@@ -248,7 +255,13 @@ void Connection::sendPackets()
             packet = packetBuilder->buildDplpmtudProbePacket(dplpmtud->getProbeSize(), dplpmtud);
             dplpmtud->probePacketBuilt();
         } else if(sendDataDuringInitalDplpmtudBase || !dplpmutdInIntialBase) {
-            packet = packetBuilder->buildPacket(maxQuicPacketSize, path->getSafeQuicPacketSize());
+            if (dynamic_cast<EstablishedConnectionState *>(connectionState) != nullptr) {
+                // Connection established, build 1-RTT packet.
+                packet = packetBuilder->buildPacket(maxQuicPacketSize, path->getSafeQuicPacketSize());
+            } else {
+                // Connection not yet established, build 0-RTT packet.
+                packet = packetBuilder->buildZeroRttPacket(maxQuicPacketSize);
+            }
             if (packet != nullptr // packet was created
                     && packet->isAckEliciting() // it is ack eliciting an therefore not bound by safeQuicPacketSize
                     && maxQuicPacketSize != lastMaxQuicPacketSize) {
@@ -337,9 +350,9 @@ void Connection::sendProbePacket(uint ptoCount)
     sendPacket(packet, PacketNumberSpace::ApplicationData);
 }
 
-void Connection::sendClientInitialPacket() {
+void Connection::sendClientInitialPacket(uint32_t token) {
     int maxQuicPacketSize = path->getMaxQuicPacketSize();
-    sendPacket(packetBuilder->buildClientInitialPacket(maxQuicPacketSize, localTransportParameters), PacketNumberSpace::Initial);
+    sendPacket(packetBuilder->buildClientInitialPacket(maxQuicPacketSize, localTransportParameters, token), PacketNumberSpace::Initial);
 }
 
 void Connection::sendServerInitialPacket() {
@@ -510,10 +523,6 @@ void Connection::sendAck(PacketNumberSpace pnSpace)
 
 void Connection::established()
 {
-    // we should have gotten the peer's transport parameters by now, which allows to read their values.
-    connectionFlowController = new ConnectionFlowController(remoteTransportParameters->initialMaxData, stats);
-    connectionFlowControlResponder = new ConnectionFlowControlResponder(this, remoteTransportParameters->initialMaxData, maxDataFrameThreshold, roundConsumedDataValue, stats);
-
     appSocket->sendEstablished();
 
     if (path->usesDplpmtud()) {
@@ -600,6 +609,111 @@ bool Connection::belongsPacketTo(Packet *pkt, uint64_t dstConnectionId)
     // TODO: add an authtentication tag at the end of each outgoing packet
     // and use it here to check if this given packet was sent over this connection
     return true;
+}
+
+void Connection::enqueueZeroRttTokenFrame()
+{
+    if (quicSimpleMod->par("sendZeroRttTokenAsServer")) {
+        // generate token larger than 0. A token == 0 is used as a special value at some places
+        uint32_t token;
+        do {
+            token = quicSimpleMod->intrand(UINT32_MAX);
+        } while (token == 0);
+        packetBuilder->addNewTokenFrame(token);
+        udpSocket->saveToken(token, path->getRemoteAddr());
+    }
+}
+
+void Connection::buildClientTokenAndSendToApp(uint32_t token)
+{
+    std::ostringstream clientToken;
+    clientToken << token
+                << "_"
+                << remoteTransportParameters->initialMaxData
+                << "_"
+                << remoteTransportParameters->initialMaxStreamData;
+
+    appSocket->sendToken(clientToken.str());
+}
+
+uint32_t Connection::processClientTokenExtractToken(const char *clientToken)
+{
+    std::stringstream clientTokenStream;
+    char underscore;
+    uint64_t maxData, maxStreamData;
+    uint32_t token;
+
+    clientTokenStream << clientToken;
+
+    token = 0;
+    clientTokenStream >> token;
+    if (token == 0) {
+        throw InvalidTokenException("Cannot read token out of given clientToken");
+    }
+
+    underscore = ' ';
+    clientTokenStream >> underscore;
+    if (underscore != '_') {
+        throw InvalidTokenException("Invalid format of given clientToken");
+    }
+
+    maxData = 0;
+    clientTokenStream >> maxData;
+    if (maxData == 0) {
+        throw InvalidTokenException("Cannot read initial_max_data out of given clientToken");
+    }
+
+    underscore = ' ';
+    clientTokenStream >> underscore;
+    if (underscore != '_') {
+        throw InvalidTokenException("Invalid format of given clientToken");
+    }
+
+    maxStreamData = 0;
+    clientTokenStream >> maxStreamData;
+    if (maxStreamData == 0) {
+        throw InvalidTokenException("Cannot read initial_max_stream_data out of given clientToken");
+    }
+
+    initializeRemoteTransportParameters(maxData, maxStreamData);
+
+    return token;
+}
+
+void Connection::addConnectionForInitialConnectionId(uint64_t initialConnectionId)
+{
+    this->initialConnectionIdSet = true;
+    this->initialConnectionId = initialConnectionId;
+    quicSimpleMod->addConnection(initialConnectionId, this);
+}
+
+void Connection::removeConnectionForInitialConnectionId()
+{
+    if (this->initialConnectionIdSet) {
+        this->initialConnectionIdSet = false;
+        quicSimpleMod->removeConnectionId(this->initialConnectionId);
+    }
+}
+
+void Connection::initializeRemoteTransportParameters(Ptr<const TransportParametersExtension> transportParametersExt)
+{
+    remoteTransportParameters->readExtension(transportParametersExt);
+
+    connectionFlowController = new ConnectionFlowController(remoteTransportParameters->initialMaxData, stats);
+    connectionFlowControlResponder = new ConnectionFlowControlResponder(this, remoteTransportParameters->initialMaxData, maxDataFrameThreshold, roundConsumedDataValue, stats);
+
+    remoteTransportParametersInitialized = true;
+}
+
+void Connection::initializeRemoteTransportParameters(uint64_t maxData, uint64_t maxStreamData)
+{
+    remoteTransportParameters->initialMaxData = maxData;
+    remoteTransportParameters->initialMaxStreamData = maxStreamData;
+
+    connectionFlowController = new ConnectionFlowController(remoteTransportParameters->initialMaxData, stats);
+    connectionFlowControlResponder = new ConnectionFlowControlResponder(this, remoteTransportParameters->initialMaxData, maxDataFrameThreshold, roundConsumedDataValue, stats);
+
+    remoteTransportParametersInitialized = true;
 }
 
 } /* namespace quic */
