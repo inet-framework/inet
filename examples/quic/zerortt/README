@@ -1,0 +1,14 @@
+Example to test 0-RTT connection setup with QUIC. In the first connection, the
+server sends a token to the client. In a following-up connection, the client
+sends this token in its Initial packet and sends 0-RTT packets with early data
+along. Two configs exist to test the bad case.
+
+invalidClientTokenString
+Client app provides a malformed token string. QUIC on the client side does not
+include a token in its Initial packet and sends the early data together with
+the later data in 1-RTT packets. 
+
+sendInvalidToken
+Client app provides a correctly formatted token string but changes the token
+such that the server will not accept it. Correspondingly, the server discards
+0-RTT packets. The client must retransmit the data.

@@ -1,9 +1,8 @@
-/*
- * InitialSentConnectionState.h
- *
- *  Created on: 18 Feb 2025
- *      Author: msvoelker
- */
+//
+// Copyright (C) 2025 OpenSim Ltd.
+//
+// SPDX-License-Identifier: LGPL-3.0-or-later
+//
 
 #ifndef INET_TRANSPORTLAYER_QUIC_CONNECTIONSTATE_INITIALSENTCONNECTIONSTATE_H_
 #define INET_TRANSPORTLAYER_QUIC_CONNECTIONSTATE_INITIALSENTCONNECTIONSTATE_H_

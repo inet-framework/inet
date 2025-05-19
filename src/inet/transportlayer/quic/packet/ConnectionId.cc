@@ -1,9 +1,8 @@
-/*
- * ConnectionId.cpp
- *
- *  Created on: 18 Feb 2025
- *      Author: msvoelker
- */
+//
+// Copyright (C) 2025 OpenSim Ltd.
+//
+// SPDX-License-Identifier: LGPL-3.0-or-later
+//
 
 #include "ConnectionId.h"
 #include <cmath>

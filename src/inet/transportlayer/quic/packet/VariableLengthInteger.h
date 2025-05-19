@@ -1,9 +1,8 @@
-/*
- * VariableLengthInteger.h
- *
- *  Created on: 17 Mar 2025
- *      Author: msvoelker
- */
+//
+// Copyright (C) 2025 OpenSim Ltd.
+//
+// SPDX-License-Identifier: LGPL-3.0-or-later
+//
 
 #ifndef INET_TRANSPORTLAYER_QUIC_PACKET_VARIABLELENGTHINTEGER_H_
 #define INET_TRANSPORTLAYER_QUIC_PACKET_VARIABLELENGTHINTEGER_H_
