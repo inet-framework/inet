@@ -494,7 +494,7 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
     const auto payload = staticPtrCast<const EncryptedQuicPacketChunk>(chunk)->getChunk();
     b payloadLength = payload->getChunkLength();
 
-    Ptr<const EncryptionKeyTag> secret = chunk->getTag<EncryptionKeyTag>();
+    Ptr<const EncryptionKeyTag> keyTag = chunk->getTag<EncryptionKeyTag>();
 
     auto payloadSequence = dynamicPtrCast<SequenceChunk>(payload);
     auto payloadChunks = payloadSequence->getChunks();
@@ -510,11 +510,7 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
     std::vector<uint8_t> unencryptedData = payloadStream.getData();
     payloadStream.clear();
 
-    uint8_t dcid[8] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
-    ptls_iovec_t dcid_iovec = ptls_iovec_init(dcid, 8);
-
-
-    EncryptionKey key = EncryptionKey::newInitial(dcid_iovec, "client in");
+    EncryptionKey key = EncryptionKey::fromTag(keyTag);
     size_t packetNumberOffset = 26;
     std::vector<uint8_t> finalContents = protectInitialPacket(unencryptedData, packetNumberOffset, key);
 

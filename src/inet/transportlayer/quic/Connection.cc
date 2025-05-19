@@ -111,6 +111,14 @@ Connection::Connection(Quic *quicSimpleMod, bool is_server, UdpSocket *udpSocket
 
     quicSimpleMod->emit(quicSimpleMod->tlsKeyLogLineSignal, tlsClientRandomLine.c_str());
 
+    uint8_t dcid[8] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
+    ptls_iovec_t dcid_iovec = ptls_iovec_init(dcid, 8);
+
+    egressKey = EncryptionKey::newInitial(dcid_iovec, is_server ? "server in" : "client in");
+    ingressKey = EncryptionKey::newInitial(dcid_iovec, is_server ? "client in" : "server in");
+
+    std::cout << "egressKey: " << std::endl;
+    egressKey.dump();
 }
 
 Connection::~Connection() {
@@ -396,7 +404,8 @@ void Connection::sendHandshakePacket(bool includeTransportParamters) {
 void Connection::sendPacket(QuicPacket *packet, PacketNumberSpace pnSpace, bool track)
 {
     stats->getMod()->emit(packetNumberSentStat, packet->getPacketNumber());
-    Packet *pkt = packet->createOmnetPacket("88ad8d3b0986a71965a28d108b0f40ffffe629284a6028c80ddc5dc083b3f5d1"); // TODO: actual secret
+
+    Packet *pkt = packet->createOmnetPacket(egressKey);
     stats->getMod()->emit(packetSentSignal, pkt);
     udpSocket->sendto(path->getRemoteAddr(), path->getRemotePort(), pkt);
     if (track) {
