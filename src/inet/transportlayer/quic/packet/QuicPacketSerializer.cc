@@ -457,36 +457,18 @@ const Ptr<Chunk> QuicPacketHeaderSerializer::deserializeShortPacketHeader(Memory
 std::vector<uint8_t> protectInitialPacket(const std::vector<uint8_t> unencryptedData, size_t packetNumberOffset, const EncryptionKey& key) {
     size_t packetNumberLength = 1;
 
-    std::cout << "unencrypted data size: " << unencryptedData.size() << std::endl;
-    for (int i = 0; i < unencryptedData.size(); i++) {
-        std::cout << std::hex << (int)unencryptedData[i] << " ";
-    }
-    std::cout << std::dec << std::endl;
-
     ptls_cipher_suite_t *cs = &ptls_openssl_opp_aes128gcmsha256;
 
     // generate new AEAD context
     ptls_aead_context_t *packet_protect = ptls_aead_new_direct(cs->aead, true, key.key.data(), key.iv.data());
-
-    uint8_t client_iv[12] = {0};
-    ptls_aead_get_iv(packet_protect, client_iv);
-
-    std::cout << "client iv size: " << cs->aead->iv_size << std::endl;
-    for (int i = 0; i < sizeof(client_iv); i++)
-        std::cout << std::hex << (int)client_iv[i] << " ";
-    std::cout << std::dec << std::endl;
-    // client_iv verified good, probably client key too
-
     ptls_cipher_context_t *header_protect = ptls_cipher_new(cs->aead->ctr_cipher, true, key.hpkey.data());
 
-    std::cout << "packet number length in ser: " << packetNumberLength << std::endl;
     size_t payload_from = packetNumberOffset + packetNumberLength;
     std::vector<uint8_t> encryptedPayload; // also contains the auth tag
     encryptedPayload.resize(unencryptedData.size() - payload_from + packet_protect->algo->tag_size);
 
     ptls_aead_supplementary_encryption_t supp = {.ctx = header_protect,
                                                  .input = encryptedPayload.data() + 4 - packetNumberLength};
-
 
     size_t packetNumber = 0;
 
@@ -500,21 +482,10 @@ std::vector<uint8_t> protectInitialPacket(const std::vector<uint8_t> unencrypted
     std::copy(unencryptedData.begin(), unencryptedData.begin() + payload_from, finalContents.begin());
     std::copy(encryptedPayload.begin(), encryptedPayload.end(), finalContents.begin() + payload_from); // includes auth tag
 
-    std::cout << "not header protected final contents size: " << finalContents.size() << std::endl;
-    for (int i = 0; i < finalContents.size(); i++) {
-        std::cout << std::hex << (int)finalContents[i] << " ";
-    }
-    std::cout << std::dec << std::endl;
-
     finalContents[0] ^= supp.output[0] & 0xf;
     for (size_t i = 0; i != packetNumberLength; ++i)
         finalContents[packetNumberOffset + i] ^= supp.output[i + 1];
 
-    std::cout << "header protected final contents size: " << finalContents.size() << std::endl;
-    for (int i = 0; i < finalContents.size(); i++) {
-        std::cout << std::hex << (int)finalContents[i] << " ";
-    }
-    std::cout << std::dec << std::endl;
     return finalContents;
 }
 

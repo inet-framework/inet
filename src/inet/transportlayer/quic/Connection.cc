@@ -110,26 +110,6 @@ Connection::Connection(Quic *quicSimpleMod, bool is_server, UdpSocket *udpSocket
     tlsClientRandomLine += "\n";
 
     quicSimpleMod->emit(quicSimpleMod->tlsKeyLogLineSignal, tlsClientRandomLine.c_str());
-    std::cout << "quic emitted: " << tlsClientRandomLine.c_str() << std::endl;
-/*
-    uint8_t key[PTLS_MAX_SECRET_SIZE];
-    uint8_t iv[PTLS_MAX_IV_SIZE];
-    uint64_t seq;
-
-    ptls_get_traffic_keys(tls, 1, key, iv, &seq);
-
-    std::cout << "key: ";
-    for (int i = 0; i < sizeof(key); i++)
-        std::cout << std::hex << (int)key[i] << " ";
-
-    std::cout << std::dec << std::endl;
-    std::cout << "iv: ";
-    for (int i = 0; i < sizeof(iv); i++)
-        std::cout << std::hex << (int)iv[i] << " ";
-
-    std::cout << std::dec << std::endl;
-    std::cout << "seq: " << std::hex << seq << std::dec << std::endl;
-*/
 
 }
 
