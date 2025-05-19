@@ -56,6 +56,50 @@ struct EncryptionKey {
 
         return {key, iv, hpkey};
     }
+
+    static std::vector<uint8_t> hex2bytes(const std::string& hex) {
+        std::vector<uint8_t> bytes;
+        bytes.reserve(hex.size() / 2);
+        for (size_t i = 0; i < hex.size(); i += 2) {
+            std::string byteString = hex.substr(i, 2);
+            uint8_t byte = (uint8_t)strtol(byteString.c_str(), nullptr, 16);
+            bytes.push_back(byte);
+        }
+        return bytes;
+    }
+
+    static std::string bytes2hex(const std::vector<uint8_t>& bytes) {
+        std::string hex;
+        hex.reserve(bytes.size() * 2);
+        char buffer[3];
+        for (uint8_t byte : bytes) {
+            snprintf(buffer, sizeof(buffer), "%02x", byte);
+            hex.append(buffer);
+        }
+        return hex;
+    }
+
+    static EncryptionKey fromTag(Ptr<const EncryptionKeyTag> tag) {
+        EncryptionKey key;
+        key.key = hex2bytes(tag->getKey());
+        key.iv = hex2bytes(tag->getIv());
+        key.hpkey = hex2bytes(tag->getHpkey());
+        return key;
+    }
+
+    Ptr<const EncryptionKeyTag> toTag() const {
+        auto tag = makeShared<EncryptionKeyTag>();
+        tag->setKey(bytes2hex(key).c_str());
+        tag->setIv(bytes2hex(iv).c_str());
+        tag->setHpkey(bytes2hex(hpkey).c_str());
+        return tag;
+    }
+
+    void dump() {
+        std::cout << "key: " << bytes2hex(key) << std::endl;
+        std::cout << "iv: " << bytes2hex(iv) << std::endl;
+        std::cout << "hpkey: " << bytes2hex(hpkey) << std::endl;
+    }
 };
 
 enum PacketNumberSpace {
