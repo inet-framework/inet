@@ -698,7 +698,7 @@ void Connection::initializeRemoteTransportParameters(Ptr<const TransportParamete
     connectionFlowController->setMaxDataOffset(remoteTransportParameters->initialMaxData);
     for (auto it = streamMap.begin(); it != streamMap.end(); it++) {
         Stream *stream = it->second;
-        stream->getFlowController()->setMaxDataOffset(remoteTransportParameters->initialMaxData);
+        stream->getFlowController()->setMaxDataOffset(remoteTransportParameters->initialMaxStreamData);
     }
 
     remoteTransportParametersInitialized = true;
@@ -713,7 +713,7 @@ void Connection::initializeRemoteTransportParameters(uint64_t maxData, uint64_t 
     connectionFlowController->setMaxDataOffset(remoteTransportParameters->initialMaxData);
     for (auto it = streamMap.begin(); it != streamMap.end(); it++) {
         Stream *stream = it->second;
-        stream->getFlowController()->setMaxDataOffset(remoteTransportParameters->initialMaxData);
+        stream->getFlowController()->setMaxDataOffset(remoteTransportParameters->initialMaxStreamData);
     }
 
     remoteTransportParametersInitialized = true;
