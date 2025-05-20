@@ -11,17 +11,12 @@ namespace inet {
 namespace quic {
 
 
-StreamFlowController::StreamFlowController(uint64_t streamId, uint64_t kDefaultStreamWindowSize, Statistics *stats) : FlowController(stats) {
-    this->streamId = streamId;
-    this->maxDataOffset = kDefaultStreamWindowSize;
-}
+StreamFlowController::StreamFlowController(uint64_t streamId, uint64_t kDefaultStreamWindowSize, Statistics *stats) : FlowController(kDefaultStreamWindowSize, stats), streamId(streamId) { }
 
-StreamFlowController::~StreamFlowController(){
+StreamFlowController::~StreamFlowController() { }
 
-}
-
-QuicFrame *StreamFlowController::generateDataBlockFrame(){
-
+QuicFrame *StreamFlowController::generateDataBlockFrame()
+{
     QuicFrame *frame = new QuicFrame();
     Ptr<StreamDataBlockedFrameHeader> header = makeShared<StreamDataBlockedFrameHeader>();
     header->setStreamId(streamId);

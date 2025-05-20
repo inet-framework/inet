@@ -90,6 +90,9 @@ public:
     //Statistic
     void measureStreamRcvDataBytes(uint64_t dataLength);
 
+    StreamFlowController *getFlowController() {
+        return streamFlowController;
+    }
 protected:
     Connection *connection;
 

@@ -84,6 +84,9 @@ Connection::Connection(Quic *quicSimpleMod, UdpSocket *udpSocket, AppSocket *app
     congestionController->setPath(path);
 
     reliabilityManager = new ReliabilityManager(this, remoteTransportParameters, receivedPacketsAccountants[PacketNumberSpace::ApplicationData], congestionController, stats);
+
+    connectionFlowController = new ConnectionFlowController(remoteTransportParameters->initialMaxData, stats);
+    connectionFlowControlResponder = new ConnectionFlowControlResponder(this, localTransportParameters->initialMaxData, maxDataFrameThreshold, roundConsumedDataValue, stats);
 }
 
 Connection::~Connection() {
@@ -691,8 +694,12 @@ void Connection::initializeRemoteTransportParameters(Ptr<const TransportParamete
 {
     remoteTransportParameters->readExtension(transportParametersExt);
 
-    connectionFlowController = new ConnectionFlowController(remoteTransportParameters->initialMaxData, stats);
-    connectionFlowControlResponder = new ConnectionFlowControlResponder(this, remoteTransportParameters->initialMaxData, maxDataFrameThreshold, roundConsumedDataValue, stats);
+    // set max data offset for the connection flow control and the flow control of each stream
+    connectionFlowController->setMaxDataOffset(remoteTransportParameters->initialMaxData);
+    for (auto it = streamMap.begin(); it != streamMap.end(); it++) {
+        Stream *stream = it->second;
+        stream->getFlowController()->setMaxDataOffset(remoteTransportParameters->initialMaxData);
+    }
 
     remoteTransportParametersInitialized = true;
 }
@@ -702,8 +709,12 @@ void Connection::initializeRemoteTransportParameters(uint64_t maxData, uint64_t 
     remoteTransportParameters->initialMaxData = maxData;
     remoteTransportParameters->initialMaxStreamData = maxStreamData;
 
-    connectionFlowController = new ConnectionFlowController(remoteTransportParameters->initialMaxData, stats);
-    connectionFlowControlResponder = new ConnectionFlowControlResponder(this, remoteTransportParameters->initialMaxData, maxDataFrameThreshold, roundConsumedDataValue, stats);
+    // set max data offset for the connection flow control and the flow control of each stream
+    connectionFlowController->setMaxDataOffset(remoteTransportParameters->initialMaxData);
+    for (auto it = streamMap.begin(); it != streamMap.end(); it++) {
+        Stream *stream = it->second;
+        stream->getFlowController()->setMaxDataOffset(remoteTransportParameters->initialMaxData);
+    }
 
     remoteTransportParametersInitialized = true;
 }

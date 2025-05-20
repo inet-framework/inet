@@ -23,9 +23,8 @@ Stream::Stream(uint64_t id, Connection *connection, Statistics *connStats) {
     streamRcvAppDataStat = stats->createStatisticEntry("streamRcvAppData");
     stats->getMod()->emit(streamRcvAppDataStat, (uint64_t)0);
 
-    auto tp = connection->getLocalTransportParameters();
-    streamFlowController = new StreamFlowController(id, tp->initialMaxStreamData, stats);
-    streamFlowControlResponder = new StreamFlowControlResponder(this, tp->initialMaxStreamData, connection->getMaxStreamDataFrameThreshold(), connection->getRoundConsumedDataValue(), stats);
+    streamFlowController = new StreamFlowController(id, connection->getRemoteTransportParameters()->initialMaxStreamData, stats);
+    streamFlowControlResponder = new StreamFlowControlResponder(this, connection->getLocalTransportParameters()->initialMaxStreamData, connection->getMaxStreamDataFrameThreshold(), connection->getRoundConsumedDataValue(), stats);
     receiveQueue = new StreamRcvQueue(this, stats);
 }
 

@@ -19,7 +19,7 @@ class Connection;
 
 class FlowControlResponder {
 public:
-    FlowControlResponder(Statistics *stats);
+    FlowControlResponder(uint64_t initialWindowSize, uint64_t maxDataFrameThreshold, bool roundConsumedDataValue, Statistics *stats);
     virtual ~FlowControlResponder();
 
     virtual uint64_t getRcvwnd();
@@ -27,7 +27,6 @@ public:
     virtual bool isSendMaxDataFrame();
 
 protected:
-
     virtual void updateHighestRecievedOffset(uint64_t offset) = 0;
     virtual void onDataBlockedFrameReceived(uint64_t dataLimit) = 0;
     virtual QuicFrame *generateMaxDataFrame() = 0;
@@ -38,7 +37,6 @@ protected:
     uint64_t consumedData = 0;
     uint64_t lastConsumedData = 0;
     uint64_t maxRcvwnd = 0;
-    uint64_t streamId = 0;
     uint64_t lastMaxRcvOffset = 0;
     uint64_t maxDataFrameThreshold;
 
@@ -55,7 +53,6 @@ protected:
     simsignal_t maxDataFrameLostCountStat;
 
     bool roundConsumedDataValue = false;
-
 };
 
 class ConnectionFlowControlResponder: public FlowControlResponder {

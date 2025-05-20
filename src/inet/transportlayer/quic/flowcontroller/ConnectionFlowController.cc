@@ -11,16 +11,12 @@ namespace inet {
 namespace quic {
 
 
-ConnectionFlowController::ConnectionFlowController(uint64_t kDefaultConnectionWindowSize, Statistics *stats) : FlowController(stats) {
-    this->maxDataOffset = kDefaultConnectionWindowSize;
-}
+ConnectionFlowController::ConnectionFlowController(uint64_t kDefaultConnectionWindowSize, Statistics *stats) : FlowController(kDefaultConnectionWindowSize, stats) { }
 
-ConnectionFlowController::~ConnectionFlowController(){
+ConnectionFlowController::~ConnectionFlowController() { }
 
-}
-
-QuicFrame *ConnectionFlowController::generateDataBlockFrame(){
-
+QuicFrame *ConnectionFlowController::generateDataBlockFrame()
+{
     QuicFrame *frame = new QuicFrame();
     Ptr<DataBlockedFrameHeader> header = makeShared<DataBlockedFrameHeader>();
     header->setDataLimit(highestSendOffset);

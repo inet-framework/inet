@@ -10,9 +10,8 @@
 namespace inet {
 namespace quic {
 
-FlowController::FlowController(Statistics *stats) {
-
-    this->stats = stats;
+FlowController::FlowController(uint64_t maxDataOffset, Statistics *stats) : maxDataOffset(maxDataOffset), stats(stats)
+{
     this->availableRwndStat = stats->createStatisticEntry("availableRwnd");
     this->genBlockFrameCountStat = stats->createStatisticEntry("generatedBlockFrameCount");
     this->rcvMaxFrameCountStat = stats->createStatisticEntry("rcvMaxFrameCount");
@@ -22,36 +21,47 @@ FlowController::FlowController(Statistics *stats) {
     stats->getMod()->emit(genBlockFrameCountStat, generatedBlockFrameCount);
 }
 
-FlowController::~FlowController() {
-}
+FlowController::~FlowController() { }
 
-uint64_t FlowController::getAvailableRwnd(){
+uint64_t FlowController::getAvailableRwnd()
+{
     return (maxDataOffset - highestSendOffset);
 }
 
-void FlowController::onMaxFrameReceived(uint64_t newMaxDataOffset){
+void FlowController::onMaxFrameReceived(uint64_t newMaxDataOffset)
+{
     EV_DEBUG << "received MaxStreamFrame or MaxFrame. New Max_receive_offset = " << newMaxDataOffset << endl;
 
     if(maxDataOffset < newMaxDataOffset){
-         maxDataOffset = newMaxDataOffset;
-         rcvMaxFrameCount++;
-         stats->getMod()->emit(rcvMaxFrameCountStat, rcvMaxFrameCount);
-     }
+        maxDataOffset = newMaxDataOffset;
+        rcvMaxFrameCount++;
+        stats->getMod()->emit(rcvMaxFrameCountStat, rcvMaxFrameCount);
+    }
 
     stats->getMod()->emit(availableRwndStat, getAvailableRwnd());
 }
 
-void FlowController::onStreamFrameSent(uint64_t size){
+void FlowController::onStreamFrameSent(uint64_t size)
+{
     highestSendOffset += size;
     stats->getMod()->emit(availableRwndStat, getAvailableRwnd());
 }
 
-bool FlowController::isDataBlockedFrameWasSend(){
+bool FlowController::isDataBlockedFrameWasSend()
+{
     return ((lastDataLimit == highestSendOffset) ? true : false);
 }
 
-void FlowController::onStreamFrameLost(uint64_t size){
+void FlowController::onStreamFrameLost(uint64_t size)
+{
     highestSendOffset -= size;
+}
+
+void FlowController::setMaxDataOffset(uint64_t newMaxDataOffset)
+{
+    if (newMaxDataOffset > maxDataOffset) {
+        maxDataOffset = newMaxDataOffset;
+    }
 }
 
 } /* namespace quic */

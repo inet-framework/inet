@@ -17,7 +17,7 @@ namespace quic {
 
 class FlowController {
 public:
-    FlowController(Statistics *stats);
+    FlowController(uint64_t maxDataOffset, Statistics *stats);
     virtual ~FlowController();
 
     virtual uint64_t getAvailableRwnd();
@@ -25,6 +25,7 @@ public:
     virtual void onStreamFrameSent(uint64_t size);
     virtual bool isDataBlockedFrameWasSend(); //check if DataBlockedFrame was already send for current highestSendOffset
     virtual void onStreamFrameLost(uint64_t size); //take into account size of retransmitted stream frames (the implementation has only the sendQueue and no retransmission Queue)
+    virtual void setMaxDataOffset(uint64_t maxDataOffset);
 
 protected:
     virtual QuicFrame *generateDataBlockFrame() = 0;
@@ -32,7 +33,6 @@ protected:
 protected:
     uint64_t maxDataOffset = 0;
     uint64_t highestSendOffset = 0;
-    uint64_t streamId = 0;
     uint64_t lastDataLimit = 0;
 
     // Statistic
@@ -48,7 +48,7 @@ protected:
 
 class ConnectionFlowController: public FlowController {
 public:
-    ConnectionFlowController(uint64_t kDefaultConnectionWindowSize, Statistics *stats);
+    ConnectionFlowController(uint64_t kDefaultStreamWindowSize, Statistics *stats);
     ~ConnectionFlowController();
 
     virtual QuicFrame *generateDataBlockFrame();
@@ -60,6 +60,9 @@ public:
     ~StreamFlowController();
 
     virtual QuicFrame *generateDataBlockFrame();
+
+private:
+    uint64_t streamId = 0;
 };
 
 } /* namespace quic */

@@ -11,27 +11,19 @@
 namespace inet {
 namespace quic {
 
-StreamFlowControlResponder::StreamFlowControlResponder(Stream *stream, uint64_t kDefaultStreamWindowSize, uint64_t maxDataFrameThreshold, bool roundConsumedDataValue, Statistics *stats):FlowControlResponder(stats){
+StreamFlowControlResponder::StreamFlowControlResponder(Stream *stream, uint64_t kDefaultStreamWindowSize, uint64_t maxDataFrameThreshold, bool roundConsumedDataValue, Statistics *stats):FlowControlResponder(kDefaultStreamWindowSize, maxDataFrameThreshold, roundConsumedDataValue, stats), stream(stream) { }
 
-    this->stream = stream;
-    this->streamId = stream->id;
-    this->maxRcvwnd = kDefaultStreamWindowSize;
-    this->maxReceiveOffset = maxRcvwnd;
-    this->maxDataFrameThreshold = maxDataFrameThreshold;
-    this->roundConsumedDataValue = roundConsumedDataValue;
-}
+StreamFlowControlResponder::~StreamFlowControlResponder() { }
 
-StreamFlowControlResponder::~StreamFlowControlResponder(){
-}
-
-void StreamFlowControlResponder::updateHighestRecievedOffset(uint64_t offset){
+void StreamFlowControlResponder::updateHighestRecievedOffset(uint64_t offset)
+{
     if(highestRecievedOffset < offset){
         highestRecievedOffset = offset;
     }
 }
 
-QuicFrame *StreamFlowControlResponder::generateMaxDataFrame(){
-
+QuicFrame *StreamFlowControlResponder::generateMaxDataFrame()
+{
     generatedMaxDataFrameCount++;
     lastMaxRcvOffset = maxReceiveOffset;
 
@@ -56,7 +48,8 @@ QuicFrame *StreamFlowControlResponder::generateMaxDataFrame(){
     return frame;
 }
 
-QuicFrame *StreamFlowControlResponder::onMaxDataFrameLost(){
+QuicFrame *StreamFlowControlResponder::onMaxDataFrameLost()
+{
     EV_DEBUG << "retransmit FC update" << endl;
     maxDataFrameLostCount++;
     stats->getMod()->emit(maxDataFrameLostCountStat, maxDataFrameLostCount);
@@ -71,7 +64,8 @@ QuicFrame *StreamFlowControlResponder::onMaxDataFrameLost(){
 }
 
 
-void StreamFlowControlResponder::onDataBlockedFrameReceived(uint64_t dataLimit){
+void StreamFlowControlResponder::onDataBlockedFrameReceived(uint64_t dataLimit)
+{
     EV_DEBUG << "received Data_Blocked frame. Blocking offset= " << dataLimit << endl;
     rcvBlockFrameCount++;
     stats->getMod()->emit(rcvBlockFrameCountStat, rcvBlockFrameCount);

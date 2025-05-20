@@ -11,33 +11,26 @@
 namespace inet {
 namespace quic {
 
-ConnectionFlowControlResponder::ConnectionFlowControlResponder(Connection *connection, uint64_t kDefaultConnectionWindowSize, uint64_t maxDataFrameThreshold, bool roundConsumedDataValue, Statistics *stats):FlowControlResponder(stats){
-    this->connection = connection;
-    this->maxRcvwnd = kDefaultConnectionWindowSize;
-    this->maxReceiveOffset = maxRcvwnd;
-    this->maxDataFrameThreshold = maxDataFrameThreshold;
-    this->roundConsumedDataValue = roundConsumedDataValue;
-}
+ConnectionFlowControlResponder::ConnectionFlowControlResponder(Connection *connection, uint64_t kDefaultConnectionWindowSize, uint64_t maxDataFrameThreshold, bool roundConsumedDataValue, Statistics *stats) : FlowControlResponder(kDefaultConnectionWindowSize, maxDataFrameThreshold, roundConsumedDataValue, stats), connection(connection) { }
 
-ConnectionFlowControlResponder::~ConnectionFlowControlResponder(){
+ConnectionFlowControlResponder::~ConnectionFlowControlResponder() { }
 
-}
-
-void ConnectionFlowControlResponder::updateHighestRecievedOffset(uint64_t offset){
+void ConnectionFlowControlResponder::updateHighestRecievedOffset(uint64_t offset)
+{
     highestRecievedOffset += offset;
 }
 
-QuicFrame *ConnectionFlowControlResponder::generateMaxDataFrame(){
-
+QuicFrame *ConnectionFlowControlResponder::generateMaxDataFrame()
+{
     generatedMaxDataFrameCount++;
     lastMaxRcvOffset = maxReceiveOffset;
 
-    if(!roundConsumedDataValue){
+    if (!roundConsumedDataValue) {
         maxReceiveOffset = consumedData + maxRcvwnd;
     } else {
-        if((consumedData - lastConsumedData) < maxDataFrameThreshold){
+        if ((consumedData - lastConsumedData) < maxDataFrameThreshold) {
             maxReceiveOffset += maxRcvwnd - maxDataFrameThreshold;
-        }else{
+        } else {
             maxReceiveOffset = consumedData + maxRcvwnd;
         }
     }
@@ -50,19 +43,21 @@ QuicFrame *ConnectionFlowControlResponder::generateMaxDataFrame(){
     return frame;
 }
 
-void ConnectionFlowControlResponder::onDataBlockedFrameReceived(uint64_t dataLimit){
+void ConnectionFlowControlResponder::onDataBlockedFrameReceived(uint64_t dataLimit)
+{
     EV_DEBUG << "received Data_Blocked frame. Connection-limit = " << dataLimit << endl;
     rcvBlockFrameCount++;
     stats->getMod()->emit(rcvBlockFrameCountStat, rcvBlockFrameCount);
 }
 
 
-QuicFrame *ConnectionFlowControlResponder::onMaxDataFrameLost(){
+QuicFrame *ConnectionFlowControlResponder::onMaxDataFrameLost()
+{
     EV_DEBUG << "retransmit CFC update" << endl;
     maxDataFrameLostCount++;
     stats->getMod()->emit(maxDataFrameLostCountStat, maxDataFrameLostCount);
 
-    if(isSendMaxDataFrame()){
+    if (isSendMaxDataFrame()) {
         return generateMaxDataFrame();
     } else {
         auto *frame = new QuicMaxDataFrame(connection, maxReceiveOffset);
