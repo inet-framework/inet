@@ -10,15 +10,10 @@
 namespace inet {
 namespace quic {
 
-QuicPacket::QuicPacket(std::string name) {
-    ackEliciting = false;
-    countsInFlight = false;
-    size = 0;
-    dataSize = 0;
-    this->name = name;
-}
+QuicPacket::QuicPacket(std::string name) : name(name) { }
 
-QuicPacket::~QuicPacket() {
+QuicPacket::~QuicPacket()
+{
     for (QuicFrame *frame : frames) {
         delete frame;
     }
@@ -50,7 +45,8 @@ bool QuicPacket::isCryptoPacket()
     return false;
 }
 
-void QuicPacket::setHeader(Ptr<PacketHeader> header) {
+void QuicPacket::setHeader(Ptr<PacketHeader> header)
+{
     size += B(header->getChunkLength()).get();
     this->header = header;
 }
@@ -105,7 +101,8 @@ bool QuicPacket::isDplpmtudProbePacket()
     return false;
 }
 
-bool QuicPacket::containsFrame(QuicFrame *otherFrame) {
+bool QuicPacket::containsFrame(QuicFrame *otherFrame)
+{
     for (QuicFrame *frame : frames) {
         if (frame->equals(otherFrame)) {
             return true;
@@ -114,7 +111,8 @@ bool QuicPacket::containsFrame(QuicFrame *otherFrame) {
     return false;
 }
 
-int QuicPacket::getMemorySize() {
+int QuicPacket::getMemorySize()
+{
     int size = sizeof(QuicPacket);
     if (header != nullptr) {
         size += sizeof(*header);

@@ -10,9 +10,7 @@
 namespace inet {
 namespace quic {
 
-QuicFrame::QuicFrame() {
-
-}
+QuicFrame::QuicFrame() { }
 
 QuicFrame::QuicFrame(Ptr<const FrameHeader> header)
 {
@@ -32,7 +30,7 @@ void QuicFrame::setHeader(Ptr<const FrameHeader> header)
     this->header = header;
 
     FrameHeaderType type = getType();
-    if (type == FRAME_HEADER_TYPE_ACK) {
+    if (type == FRAME_HEADER_TYPE_ACK || type == FRAME_HEADER_TYPE_CONNECTION_CLOSE_APP || type == FRAME_HEADER_TYPE_CONNECTION_CLOSE_QUIC) {
         ackEliciting = false;
         countsInFlight = false;
     } else if (type == FRAME_HEADER_TYPE_PADDING) {

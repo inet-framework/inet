@@ -70,13 +70,13 @@ public:
     }
 
 private:
-    bool ackEliciting;
-    bool countsInFlight;
+    bool ackEliciting = false;
+    bool countsInFlight = false;
     omnetpp::simtime_t timeSent;
     Ptr<PacketHeader> header;
     std::vector<QuicFrame*> frames;
-    size_t size;
-    size_t dataSize;
+    size_t size = 0;
+    size_t dataSize = 0;
     std::string name;
 
 };

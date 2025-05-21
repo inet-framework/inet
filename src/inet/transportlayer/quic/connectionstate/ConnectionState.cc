@@ -179,7 +179,10 @@ void ConnectionState::processFrame(Packet *pkt, PacketNumberSpace pnSpace)
     auto frameHeader = pkt->popAtFront<FrameHeader>();
     EV_DEBUG << "process frame, found chunk: " << frameHeader << endl;
 
-    if (frameHeader->getFrameType() != FRAME_HEADER_TYPE_ACK && frameHeader->getFrameType() != FRAME_HEADER_TYPE_PADDING) {
+    if (frameHeader->getFrameType() != FRAME_HEADER_TYPE_ACK
+     && frameHeader->getFrameType() != FRAME_HEADER_TYPE_PADDING
+     && frameHeader->getFrameType() != FRAME_HEADER_TYPE_CONNECTION_CLOSE_APP
+     && frameHeader->getFrameType() != FRAME_HEADER_TYPE_CONNECTION_CLOSE_QUIC) {
         ackElicitingPacket = true;
     }
     switch (frameHeader->getFrameType()) {
