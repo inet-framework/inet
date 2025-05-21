@@ -68,9 +68,9 @@ public:
     QuicPacket *buildZeroRttPacket(int maxPacketSize);
     QuicPacket *buildPingPacket();
     QuicPacket *buildDplpmtudProbePacket(int packetSize, Dplpmtud *dplpmtud);
-    QuicPacket *buildClientInitialPacket(int maxPacketSize, TransportParameters *tp, uint32_t token);
-    QuicPacket *buildServerInitialPacket(int maxPacketSize);
-    QuicPacket *buildHandshakePacket(int maxPacketSize, TransportParameters *tp);
+    QuicPacket *buildClientInitialPacket(int maxPacketSize, const Ptr<const Chunk> cryptoPayload, uint32_t token);
+    QuicPacket *buildServerInitialPacket(int maxPacketSize, const Ptr<const Chunk> cryptoPayload);
+    QuicPacket *buildHandshakePacket(int maxPacketSize, const Ptr<const Chunk> cryptoPayload);
     QuicPacket *buildConnectionClosePacket(int maxPacketSize, bool sendAck, bool appInitiated, int errorCode);
     void addHandshakeDone();
     void addNewTokenFrame(uint32_t token);
@@ -104,7 +104,7 @@ private:
     size_t getPacketSize(QuicPacket *packet);
     QuicFrame *createPingFrame();
     QuicFrame *createPaddingFrame(int length = 1);
-    QuicFrame *createCryptoFrame(TransportParameters *tp = nullptr);
+    QuicFrame *createCryptoFrame(Ptr<const Chunk> cryptoPayload);
     void fillLongHeader(Ptr<LongPacketHeader> packetHeader);
     QuicFrame *createHandshakeDoneFrame();
     QuicFrame *createNewTokenFrame(uint32_t token);

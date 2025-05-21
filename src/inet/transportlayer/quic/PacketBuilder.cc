@@ -165,138 +165,20 @@ QuicFrame *PacketBuilder::createPaddingFrame(int length)
     return new QuicFrame(frameHeader);
 }
 
-QuicFrame *PacketBuilder::createCryptoFrame(TransportParameters *tp)
+QuicFrame *PacketBuilder::createCryptoFrame(Ptr<const Chunk> cryptoPayload)
 {
     Ptr<CryptoFrameHeader> frameHeader = makeShared<CryptoFrameHeader>();
 
     QuicFrame *frame = new QuicFrame(frameHeader);
 
-    if (tp) {
 
-
-        ptls_context_t ctx;
-
-        memset(&ctx, 0, sizeof(ctx));
-        ctx.random_bytes = random_bytes;
-        ctx.key_exchanges = ptls_openssl_opp_key_exchanges;
-        ctx.cipher_suites = ptls_openssl_opp_cipher_suites;
-        ctx.get_time = &opp_get_time;
-
-
-        const int EXTENSION_TYPE_TRANSPORT_PARAMETERS_FINAL = 0x39;
-        const int TRANSPORT_PARAMETER_ID_INITIAL_MAX_DATA = 4;
-        const int TRANSPORT_PARAMETER_ID_INITIAL_MAX_STREAM_DATA_BIDI_LOCAL = 5;
-        const int TRANSPORT_PARAMETER_ID_INITIAL_MAX_STREAM_DATA_BIDI_REMOTE = 6;
-        const int TRANSPORT_PARAMETER_ID_INITIAL_MAX_STREAM_DATA_UNI = 7;
-        int ret;
-
-#define PUSH_TP(buf, id, block)                                                                                                    \
-    do {                                                                                                                           \
-        ptls_buffer_push_quicint((buf), (id));                                                                                     \
-        ptls_buffer_push_block((buf), -1, block);                                                                                  \
-    } while (0)
-
-        ptls_buffer_t buf;
-
-        ptls_buffer_init(&buf, (void*)"", 0);
-
-        PUSH_TP(&buf, TRANSPORT_PARAMETER_ID_INITIAL_MAX_DATA, { ptls_buffer_push_quicint(&buf, tp->initialMaxData); });
-        PUSH_TP(&buf, TRANSPORT_PARAMETER_ID_INITIAL_MAX_STREAM_DATA_BIDI_LOCAL,
-                { ptls_buffer_push_quicint(&buf, tp->initialMaxStreamData); });
-        PUSH_TP(&buf, TRANSPORT_PARAMETER_ID_INITIAL_MAX_STREAM_DATA_BIDI_REMOTE,
-                { ptls_buffer_push_quicint(&buf, tp->initialMaxStreamData); });
-        PUSH_TP(&buf, TRANSPORT_PARAMETER_ID_INITIAL_MAX_STREAM_DATA_UNI,
-                { ptls_buffer_push_quicint(&buf, tp->initialMaxStreamData); });
-
-        struct {
-            ptls_raw_extension_t ext[2];
-        } transport_params;
-
-        transport_params.ext[0] =
-            (ptls_raw_extension_t){EXTENSION_TYPE_TRANSPORT_PARAMETERS_FINAL,
-                                   {buf.base, buf.off}};
-        transport_params.ext[1] = (ptls_raw_extension_t){UINT16_MAX};
-
-        ptls_handshake_properties_t handshake_properties = (ptls_handshake_properties_t){{{{NULL}}}};
-
-        memset(&handshake_properties, 0, sizeof(handshake_properties));
-        handshake_properties.additional_extensions = transport_params.ext;
-
-        size_t epoch_offsets[5] = {0};
-
-        ptls_buffer_t buf2;
-        ptls_buffer_init(&buf2, (void*)"", 0);
-
-        ptls_t *tls;
-        tls = ptls_new(&ctx, 0);
-
-        ptls_handle_message(tls, &buf2, epoch_offsets, 0, NULL, 0, &handshake_properties);
-
-        if (buf2.off == 0)
-            return 0;
-
-        for (size_t epoch = 0; epoch < 4; ++epoch) {
-            size_t len = epoch_offsets[epoch + 1] - epoch_offsets[epoch];
-            if (len == 0)
-                continue;
-
-            Ptr<BytesChunk> transportParametersExt = makeShared<BytesChunk>();
-            std::vector<uint8_t> bytes;
-            bytes.resize(len);
-            for (size_t i = 0; i < len; i++) {
-                bytes[i] = *(uint8_t *)(buf2.base + epoch_offsets[epoch] + i);
-            }
-            transportParametersExt->setBytes(bytes);
-            frame->setData(transportParametersExt);
-        }
-
-        frameHeader->setContainsTransportParameters(true);
-
-    } else {
-
-        ptls_context_t ctx;
-
-        memset(&ctx, 0, sizeof(ctx));
-        ctx.random_bytes = random_bytes;
-        ctx.key_exchanges = ptls_openssl_opp_key_exchanges;
-        ctx.cipher_suites = ptls_openssl_opp_cipher_suites;
-        ctx.get_time = &opp_get_time;
-
-        size_t epoch_offsets[5] = {0};
-
-        ptls_buffer_t buf2;
-        ptls_buffer_init(&buf2, (void*)"", 0);
-
-        ptls_t *tls;
-        tls = ptls_new(&ctx, 0);
-
-        ptls_handle_message(tls, &buf2, epoch_offsets, 0, NULL, 0, NULL);
-
-        if (buf2.off == 0)
-            return 0;
-
-        for (size_t epoch = 0; epoch < 4; ++epoch) {
-            size_t len = epoch_offsets[epoch + 1] - epoch_offsets[epoch];
-            if (len == 0)
-                continue;
-
-            Ptr<BytesChunk> transportParametersExt = makeShared<BytesChunk>();
-            std::vector<uint8_t> bytes;
-            bytes.resize(len);
-            for (size_t i = 0; i < len; i++) {
-                bytes[i] = *(uint8_t *)(buf2.base + epoch_offsets[epoch] + i);
-            }
-            transportParametersExt->setBytes(bytes);
-            frame->setData(transportParametersExt);
-        }
-
-    }
+    frame->setData(cryptoPayload);
+    frameHeader->setContainsTransportParameters(true);
 
     frameHeader->setOffset(0);
     frameHeader->setLength(frame->getDataSize());
     frameHeader->calcChunkLength();
 
-    Exit:
     return frame;
 }
 
@@ -588,7 +470,7 @@ QuicPacket *PacketBuilder::buildDplpmtudProbePacket(int packetSize, Dplpmtud *dp
     return packet;
 }
 
-QuicPacket *PacketBuilder::buildClientInitialPacket(int maxPacketSize, TransportParameters *tp, uint32_t token)
+QuicPacket *PacketBuilder::buildClientInitialPacket(int maxPacketSize, Ptr<const Chunk> cryptoPayload, uint32_t token)
 {
     QuicPacket *packet = createPacket(PacketNumberSpace::Initial, false);
     if (token > 0) {
@@ -597,7 +479,7 @@ QuicPacket *PacketBuilder::buildClientInitialPacket(int maxPacketSize, Transport
         initialPacketHeader->setToken(token);
     }
 
-    packet->addFrame(createCryptoFrame(tp));
+    packet->addFrame(createCryptoFrame(cryptoPayload));
     Ptr<InitialPacketHeader> initialHeader = staticPtrCast<InitialPacketHeader>(packet->getHeader());
     initialHeader->setLength(initialHeader->getPacketNumberLength() + packet->getDataSize() + 16);
     initialHeader->calcChunkLength();
@@ -607,11 +489,11 @@ QuicPacket *PacketBuilder::buildClientInitialPacket(int maxPacketSize, Transport
     return packet;
 }
 
-QuicPacket *PacketBuilder::buildServerInitialPacket(int maxPacketSize)
+QuicPacket *PacketBuilder::buildServerInitialPacket(int maxPacketSize, Ptr<const Chunk> cryptoPayload)
 {
     QuicPacket *packet = createPacket(PacketNumberSpace::Initial, false);
 
-    packet->addFrame(createCryptoFrame());
+    packet->addFrame(createCryptoFrame(cryptoPayload));
 
     // check if we would like to bundle an ack frame
     if (receivedPacketsAccountant[PacketNumberSpace::Initial]->hasNewAckInfoAboutAckElicitings() || (receivedPacketsAccountant[PacketNumberSpace::Initial]->hasNewAckInfo() && bundleAckForNonAckElicitingPackets)) {
@@ -628,11 +510,11 @@ QuicPacket *PacketBuilder::buildServerInitialPacket(int maxPacketSize)
     return packet;
 }
 
-QuicPacket *PacketBuilder::buildHandshakePacket(int maxPacketSize, TransportParameters *tp)
+QuicPacket *PacketBuilder::buildHandshakePacket(int maxPacketSize, Ptr<const Chunk> cryptoPayload)
 {
     QuicPacket *packet = createPacket(PacketNumberSpace::Handshake, false);
 
-    packet->addFrame(createCryptoFrame(tp));
+    packet->addFrame(createCryptoFrame(cryptoPayload));
 
     // check if we would like to bundle an ack frame
     if (receivedPacketsAccountant[PacketNumberSpace::Handshake]->hasNewAckInfoAboutAckElicitings() || (receivedPacketsAccountant[PacketNumberSpace::Handshake]->hasNewAckInfo() && bundleAckForNonAckElicitingPackets)) {

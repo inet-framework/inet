@@ -198,6 +198,12 @@ void Connection::newStreamData(uint64_t streamId, Ptr<const Chunk> data)
     }
 }
 
+void Connection::newCryptoData(PacketNumberSpace epoch, Ptr<const Chunk> data)
+{
+    std::cout << "newCryptoData in epoch " << (int)epoch << " of length " << data->getChunkLength() << std::endl;
+    cryptoQueues[epoch].push(data);
+}
+
 Stream *Connection::findOrCreateStream(uint64_t streamId)
 {
     auto it = streamMap.find(streamId);
@@ -381,22 +387,93 @@ void Connection::sendProbePacket(uint ptoCount)
 
 void Connection::sendClientInitialPacket(uint32_t token) {
     int maxQuicPacketSize = path->getMaxQuicPacketSize();
-    sendPacket(packetBuilder->buildClientInitialPacket(maxQuicPacketSize, localTransportParameters, token), PacketNumberSpace::Initial);
+    const int EXTENSION_TYPE_TRANSPORT_PARAMETERS_FINAL = 0x39;
+    const int TRANSPORT_PARAMETER_ID_INITIAL_MAX_DATA = 4;
+    const int TRANSPORT_PARAMETER_ID_INITIAL_MAX_STREAM_DATA_BIDI_LOCAL = 5;
+    const int TRANSPORT_PARAMETER_ID_INITIAL_MAX_STREAM_DATA_BIDI_REMOTE = 6;
+    const int TRANSPORT_PARAMETER_ID_INITIAL_MAX_STREAM_DATA_UNI = 7;
+    int ret;
+
+#define PUSH_TP(buf, id, block)                                                                                                    \
+do {                                                                                                                           \
+    ptls_buffer_push_quicint((buf), (id));                                                                                     \
+    ptls_buffer_push_block((buf), -1, block);                                                                                  \
+} while (0)
+
+    ptls_buffer_t buf;
+
+    ptls_buffer_init(&buf, (void*)"", 0);
+
+    PUSH_TP(&buf, TRANSPORT_PARAMETER_ID_INITIAL_MAX_DATA,
+            { ptls_buffer_push_quicint(&buf, localTransportParameters->initialMaxData); });
+    PUSH_TP(&buf, TRANSPORT_PARAMETER_ID_INITIAL_MAX_STREAM_DATA_BIDI_LOCAL,
+            { ptls_buffer_push_quicint(&buf, localTransportParameters->initialMaxStreamData); });
+    PUSH_TP(&buf, TRANSPORT_PARAMETER_ID_INITIAL_MAX_STREAM_DATA_BIDI_REMOTE,
+            { ptls_buffer_push_quicint(&buf, localTransportParameters->initialMaxStreamData); });
+    PUSH_TP(&buf, TRANSPORT_PARAMETER_ID_INITIAL_MAX_STREAM_DATA_UNI,
+            { ptls_buffer_push_quicint(&buf, localTransportParameters->initialMaxStreamData); });
+    Exit:
+    struct {
+        ptls_raw_extension_t ext[2];
+    } transport_params;
+
+    transport_params.ext[0] =
+        (ptls_raw_extension_t){EXTENSION_TYPE_TRANSPORT_PARAMETERS_FINAL,
+                               {buf.base, buf.off}};
+    transport_params.ext[1] = (ptls_raw_extension_t){UINT16_MAX};
+
+    ptls_handshake_properties_t handshake_properties = (ptls_handshake_properties_t){{{{NULL}}}};
+
+    memset(&handshake_properties, 0, sizeof(handshake_properties));
+    handshake_properties.additional_extensions = transport_params.ext;
+
+    size_t epoch_offsets[5] = {0};
+
+    ptls_buffer_t buf2;
+    ptls_buffer_init(&buf2, (void*)"", 0);
+
+    ptls_handle_message(tls, &buf2, epoch_offsets, 0, NULL, 0, &handshake_properties);
+
+    if (buf2.off == 0)
+        return;
+
+    std::vector<uint8_t> bytes;
+
+    for (size_t epoch = 0; epoch < 4; ++epoch) {
+        size_t len = epoch_offsets[epoch + 1] - epoch_offsets[epoch];
+        if (len == 0)
+            continue;
+
+        bytes.resize(len);
+        memcpy(bytes.data(), (uint8_t *)(buf2.base + epoch_offsets[epoch]), len);
+    }
+
+    Ptr<BytesChunk> chunk = makeShared<BytesChunk>(bytes);
+
+    sendPacket(packetBuilder->buildClientInitialPacket(maxQuicPacketSize, chunk, token), PacketNumberSpace::Initial);
 }
 
 void Connection::sendServerInitialPacket() {
     int maxQuicPacketSize = path->getMaxQuicPacketSize();
-    sendPacket(packetBuilder->buildServerInitialPacket(maxQuicPacketSize), PacketNumberSpace::Initial);
+
+    ChunkQueue& queue = cryptoQueues[(int)PacketNumberSpace::Initial];
+
+    Ptr<const Chunk> cryptoPayload = queue.pop(queue.peek()->getChunkLength());
+
+    sendPacket(packetBuilder->buildServerInitialPacket(maxQuicPacketSize, cryptoPayload), PacketNumberSpace::Initial);
 }
 
 void Connection::sendHandshakePacket(bool includeTransportParamters) {
     int maxQuicPacketSize = path->getMaxQuicPacketSize();
 
+    ChunkQueue& queue = cryptoQueues[(int)PacketNumberSpace::Handshake];
+    Ptr<const Chunk> cryptoPayload = queue.pop(queue.peek()->getChunkLength());
+
     QuicPacket *packet;
     if (includeTransportParamters) {
-        packet = packetBuilder->buildHandshakePacket(maxQuicPacketSize, localTransportParameters);
+        packet = packetBuilder->buildHandshakePacket(maxQuicPacketSize, cryptoPayload);
     } else {
-        packet = packetBuilder->buildHandshakePacket(maxQuicPacketSize, nullptr);
+        packet = packetBuilder->buildHandshakePacket(maxQuicPacketSize, cryptoPayload);
     }
     sendPacket(packet, PacketNumberSpace::Handshake);
 }
