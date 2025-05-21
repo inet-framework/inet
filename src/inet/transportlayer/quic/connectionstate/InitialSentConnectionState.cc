@@ -16,6 +16,8 @@ ConnectionState *InitialSentConnectionState::processInitialPacket(const Ptr<cons
     ackElicitingPacket = false;
     processFrames(pkt, PacketNumberSpace::Initial);
 
+    // delete temporary destination connection id
+    context->clearDstConnectionIds();
     context->addDstConnectionId(packetHeader->getSrcConnectionId(), packetHeader->getSrcConnectionIdLength());
     context->accountReceivedPacket(packetHeader->getPacketNumber(), ackElicitingPacket, PacketNumberSpace::Initial, false);
     context->sendAck(PacketNumberSpace::Initial);

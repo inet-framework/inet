@@ -508,6 +508,14 @@ void Connection::addDstConnectionId(uint64_t id, uint8_t length)
     }
 }
 
+void Connection::clearDstConnectionIds()
+{
+    for (ConnectionId *connectionId : dstConnectionIds) {
+        delete connectionId;
+    }
+    dstConnectionIds.clear();
+}
+
 void Connection::sendAck(PacketNumberSpace pnSpace)
 {
     if (receivedPacketsAccountants[pnSpace]->hasNewAckInfoAboutAckElicitings()) {

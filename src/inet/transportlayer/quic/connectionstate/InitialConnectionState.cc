@@ -13,9 +13,18 @@
 namespace inet {
 namespace quic {
 
+void InitialConnectionState::generateAndSetTempDstConnectionId()
+{
+    uint64_t tempCid1 = context->getModule()->intrand(UINT32_MAX);
+    uint64_t tempCid2 = context->getModule()->intrand(UINT32_MAX);
+    uint64_t tempCid = tempCid1 * tempCid2;
+    context->addDstConnectionId(tempCid, 8);
+}
 
 ConnectionState *InitialConnectionState::processConnectAppCommand(cMessage *msg)
 {
+    generateAndSetTempDstConnectionId();
+
     // send client hello
     context->sendClientInitialPacket();
 
@@ -35,6 +44,8 @@ ConnectionState *InitialConnectionState::processConnectAndSendAppCommand(cMessag
         // parsing of client token failed, token remains 0
         EV_WARN << e.what() << endl;
     }
+
+    generateAndSetTempDstConnectionId();
 
     // send client Initial Packet with token if it is larger than 0
     context->sendClientInitialPacket(token);

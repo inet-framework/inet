@@ -39,13 +39,9 @@ void PacketBuilder::fillLongHeader(Ptr<LongPacketHeader> packetHeader)
     ASSERT(srcConnectionId != nullptr);
     packetHeader->setSrcConnectionIdLength(srcConnectionId->getLength());
     packetHeader->setSrcConnectionId(srcConnectionId->getId());
-    if (dstConnectionId == nullptr) {
-        packetHeader->setDstConnectionIdLength(8);
-        packetHeader->setDstConnectionId(0x1122334455667788);
-    } else {
-        packetHeader->setDstConnectionIdLength(dstConnectionId->getLength());
-        packetHeader->setDstConnectionId(dstConnectionId->getId());
-    }
+    ASSERT(dstConnectionId != nullptr);
+    packetHeader->setDstConnectionIdLength(dstConnectionId->getLength());
+    packetHeader->setDstConnectionId(dstConnectionId->getId());
 }
 
 Ptr<InitialPacketHeader> PacketBuilder::createInitialHeader()

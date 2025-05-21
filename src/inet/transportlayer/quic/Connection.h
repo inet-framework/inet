@@ -115,6 +115,7 @@ class Connection
     void setHandshakeConfirmed(bool value);
     bool isHandshakeConfirmed();
     void addDstConnectionId(uint64_t id, uint8_t length);
+    void clearDstConnectionIds();
     void sendAck(PacketNumberSpace pnSpace);
     void established();
     void sendHandshakeDone();
