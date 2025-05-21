@@ -15,7 +15,7 @@ module LocalTsnSwitch extends TsnSwitch
     @defaultStatistic("gateStateChanged:vector"; module="eth[0].macLayer.queue.gate[0]");
 }
 
-network AutomaticFailureProtectionShowcase extends TsnNetworkBase
+network FrameReplicationShowcase extends TsnNetworkBase
 {
     submodules:
         source: TsnDevice {

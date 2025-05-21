@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="results/General-#0.sca"/>
-        <input pattern="results/General-#0.vec"/>
+        <input pattern="results/NodeFailure-#0.sca"/>
+        <input pattern="results/NodeFailure-#0.vec"/>
+        <input pattern="results/FrameReplication-#0.sca"/>
+        <input pattern="results/FrameReplication-#0.vec"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/barchart.png" id="1289612090" name="Number of packets sent and received" template="barchart_native" type="BAR">
+        <chart createdWith="" icon="icons/full/obj/barchart.png" id="1289612090" name="Number of packets sent and received" resultTypes="" template="barchart_native" type="BAR">
             <script><![CDATA[from omnetpp.scave import results, chart, utils
 
 # get chart properties
@@ -575,7 +577,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_format" value="$title"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1334919449" name="Number of packets received / number of packets sent" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1334919449" name="Number of packets received / number of packets sent" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import numpy as np

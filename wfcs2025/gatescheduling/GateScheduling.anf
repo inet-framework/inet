@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="results/SAT-#0.vec"/>
-        <input pattern="../eager/results/Eager-#0.vec"/>
+        <input pattern="results/ManualGateScheduling-#0.sca"/>
+        <input pattern="results/ManualGateScheduling-#0.vec"/>
+        <input pattern="results/AutomaticGateScheduling-#0.sca"/>
+        <input pattern="results/AutomaticGateScheduling-#0.vec"/>
     </inputs>
     <charts>
         <chart createdWith="" icon="icons/full/obj/linechart.png" id="1196566184" name="Application End-to-End Delay" resultTypes="" template="linechart_native" type="LINE">

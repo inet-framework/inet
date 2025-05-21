@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="results/OneMasterClock-#0.sca"/>
-        <input pattern="results/OneMasterClock-#0.vec"/>
-        <input pattern="results/PrimaryAndHotStandbyMasterClocks-#0.sca"/>
-        <input pattern="results/PrimaryAndHotStandbyMasterClocks-#0.vec"/>
-        <input pattern="results/TwoMasterClocksExploitingNetworkRedundancy-#0.sca"/>
-        <input pattern="results/TwoMasterClocksExploitingNetworkRedundancy-#0.vec"/>
+        <input pattern="results/ClockDrift-#0.sca"/>
+        <input pattern="results/ClockDrift-#0.vec"/>
+        <input pattern="results/TimeSynchronization-#0.sca"/>
+        <input pattern="results/TimeSynchronization-#0.vec"/>
     </inputs>
     <charts>
         <folder id="622735550" name="One master clock">
