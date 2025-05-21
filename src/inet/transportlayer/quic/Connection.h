@@ -12,6 +12,7 @@
 #include "Quic.h"
 #include "UdpSocket.h"
 #include "AppSocket.h"
+#include "packet/QuicPacket.h"
 #include "connectionstate/ConnectionState.h"
 #include "inet/common/packet/ChunkQueue.h"
 #include "PacketBuilder.h"
@@ -77,6 +78,8 @@ class Connection
     EncryptionKey egressKey;
     EncryptionKey ingressKey;
 
+    ChunkQueue cryptoQueues[3];
+
     /**
      * Enqueues data in the corresponding stream queue and triggers packet sending.
      * Called upon a send command from app.
@@ -85,6 +88,8 @@ class Connection
      * @param data Data to enqueue.
      */
     void newStreamData(uint64_t streamId, Ptr<const Chunk> data);
+
+    void newCryptoData(PacketNumberSpace epoch, Ptr<const Chunk> data);
 
     void processReceivedData(uint64_t streamId, uint64_t offset, Ptr<const Chunk> data);
     void accountReceivedPacket(uint64_t packetNumber, bool ackEliciting, PacketNumberSpace space, bool isIBitSet);
