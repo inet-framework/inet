@@ -9,6 +9,15 @@ package inet.applications.tunapp;
 import inet.common.SimpleModule;
 import inet.applications.contract.IApp;
 
+//
+// Provides loopback functionality for a TUN interface by receiving packets,
+// swapping source and destination addresses and ports, and sending them back
+// through the same interface. Processes both network and transport layer
+// headers to properly reverse packet direction. Useful for testing network
+// configurations and protocols without requiring external connections.
+//
+// @see TunInterface
+//
 simple TunLoopbackApp extends SimpleModule like IApp
 {
     parameters:

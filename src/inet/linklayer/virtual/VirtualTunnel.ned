@@ -9,6 +9,16 @@ package inet.linklayer.virtual;
 
 import inet.common.SimpleModule;
 
+//
+// Creates a virtual network interface that tunnels traffic through an existing
+// real network interface. This is the main component of ~VirtualInterface.
+// Supports tunneling via Ethernet or IEEE 802.1Q protocols, with optional
+// VLAN tagging for traffic separation.
+//
+// It can copy properties from the real interface or generate new ones (e.g., MAC address).
+// Handles packet forwarding between the virtual interface and the underlying
+// real interface, adding appropriate tags for routing and identification.
+//
 simple VirtualTunnel extends SimpleModule
 {
     parameters:

@@ -8,7 +8,7 @@
 package inet.linklayer.contract;
 
 //
-// Interface for MAC address tables
+// Interface for MAC address tables, used by MAC relay units in Ethenet switches.
 //
 moduleinterface IMacForwardingTable
 {

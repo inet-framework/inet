@@ -11,7 +11,7 @@ import inet.linklayer.contract.ITunnelInterface;
 import inet.networklayer.common.NetworkInterface;
 
 //
-// Implements a TUN network interface.
+// Implements a (simulated) TUN network interface.
 //
 module TunInterface extends NetworkInterface like ITunnelInterface
 {

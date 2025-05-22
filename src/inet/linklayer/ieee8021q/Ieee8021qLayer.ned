@@ -10,6 +10,15 @@ package inet.linklayer.ieee8021q;
 import inet.linklayer.contract.IIeee8021qLayer;
 import inet.protocolelement.contract.IProtocolLayer;
 
+//
+// Implements IEEE 802.1Q protocol functionality as a layered architecture with
+// policy and protocol components. The policy submodule handles VLAN filtering
+// and mapping, while the protocol submodule manages tag encapsulation/
+// decapsulation. Supports both C-VLAN (0x8100) and S-VLAN
+// (0x88A8) tag types through configuration. Enables network segmentation and
+// traffic control in Ethernet networks by processing VLAN tags according to
+// configured policies.
+//
 module Ieee8021qLayer like IIeee8021qLayer
 {
     parameters:
