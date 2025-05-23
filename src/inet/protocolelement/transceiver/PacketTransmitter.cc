@@ -22,11 +22,13 @@ void PacketTransmitter::handleMessageWhenUp(cMessage *message)
 void PacketTransmitter::handleStopOperation(LifecycleOperation *operation)
 {
     ASSERT(!isTransmitting());
+    PacketTransmitterBase::handleStopOperation(operation);
 }
 
 void PacketTransmitter::handleCrashOperation(LifecycleOperation *operation)
 {
     ASSERT(!isTransmitting());
+    PacketTransmitterBase::handleCrashOperation(operation);
 }
 
 void PacketTransmitter::pushPacket(Packet *packet, const cGate *gate)

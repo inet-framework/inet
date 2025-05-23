@@ -56,6 +56,19 @@ void PacketTransmitterBase::handleStartOperation(LifecycleOperation *operation)
 {
     if (producer != nullptr)
         producer.handleCanPushPacketChanged();
+    ClockUserModuleMixin::handleStartOperation(operation);
+}
+
+void PacketTransmitterBase::handleStopOperation(LifecycleOperation *operation)
+{
+    cancelClockEvent(txEndTimer);
+    ClockUserModuleMixin::handleStopOperation(operation);
+}
+
+void PacketTransmitterBase::handleCrashOperation(LifecycleOperation *operation)
+{
+    cancelClockEvent(txEndTimer);
+    ClockUserModuleMixin::handleCrashOperation(operation);
 }
 
 Signal *PacketTransmitterBase::encodePacket(Packet *packet)

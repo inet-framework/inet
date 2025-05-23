@@ -1,0 +1,4 @@
+<script>
+    <at t="10ms"><shutdown module="s2a"/></at>
+    <at t="20ms"><startup module="s2a"/></at>
+</script>

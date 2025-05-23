@@ -5,6 +5,7 @@
 
 package framereplication;
 
+import inet.common.scenario.ScenarioManager;
 import inet.networks.base.TsnNetworkBase;
 import inet.node.ethernet.EthernetLink;
 import inet.node.tsn.TsnDevice;
@@ -18,6 +19,9 @@ module LocalTsnSwitch extends TsnSwitch
 network FrameReplicationShowcase extends TsnNetworkBase
 {
     submodules:
+        scenarioManager: ScenarioManager {
+            @display("p=100,200;is=s");
+        }
         source: TsnDevice {
             @display("p=300,200");
         }

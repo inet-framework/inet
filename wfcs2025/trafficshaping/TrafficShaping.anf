@@ -3,8 +3,8 @@
     <inputs>
         <input pattern="results/TrafficContention-#0.sca"/>
         <input pattern="results/TrafficContention-#0.vec"/>
-        <input pattern="results/TrafficShaping-#0.sca"/>
-        <input pattern="results/TrafficShaping-#0.vec"/>
+        <input pattern="results/TimeAwareShaping-#0.sca"/>
+        <input pattern="results/TimeAwareShaping-#0.vec"/>
     </inputs>
     <charts>
         <chart createdWith="" icon="icons/full/obj/linechart.png" id="1834292921" name="Client application traffic and traffic shaper incoming traffic" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
