@@ -139,9 +139,9 @@ import inet.transportlayer.contract.IQuic;
 //  - RFC 9002 - QUIC Loss Detection and Congestion Control
 //
 // Missing bits:
-//  - Encryption: QUIC packets are encrypted (RFC 9001). This module does use
-//    encryption. All packets are sent unencrypted. Overhead by encryption is
-//    not considered.
+//  - Encryption: QUIC packets are encrypted (RFC 9001). This module does not
+//    use encryption. All packets are sent unencrypted. Overhead by encryption
+//    is not considered.
 //  - Pacing: QUIC should pace outgoing packets (RFC 9002). This module bursts
 //    as many packets out at once as possible.
 //  - ECN: QUIC should use Explicit Congestion Notification (ECN). This module
@@ -172,11 +172,6 @@ import inet.transportlayer.contract.IQuic;
 //  - Stream termination: QUIC can end the stream (clean termination) or reset
 //    the stream (abrupt termination). This module does not terminate streams.
 //    They remain open until connection termination.
-//  - 0RTT connection setup: A QUIC server can provide the client a token
-//    which allows the client to initiate a follow-up connection with zero RTT.
-//    This means, the client can send data immediately when adding the token
-//    in a follow-up connection setup. This module does not generate token
-//    and does not support 0RTT connection setup.
 //  - Exchange of Connection IDs: QUIC endpoints can add new connection IDs
 //    retire old connection IDS during a connection. This module always uses
 //    the fixed connection ID 0. It does not allow adding or retiring
