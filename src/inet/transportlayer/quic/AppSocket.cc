@@ -154,7 +154,7 @@ void AppSocket::processAppCommand(cMessage *msg)
             L3Address remoteAddr = quicOpen->getRemoteAddr();
             uint16_t remotePort = quicOpen->getRemotePort();
 
-            quicSimpleMod->createConnection(udpSocket, this, remoteAddr, remotePort);
+            quicSimpleMod->createConnection(false, udpSocket, this, remoteAddr, remotePort);
             connection->processAppCommand(msg);
             break;
         }
