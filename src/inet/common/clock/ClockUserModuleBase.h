@@ -9,6 +9,7 @@
 #define __INET_CLOCKUSERMODULEBASE_H
 
 #include "inet/common/clock/ClockUserModuleMixin.h"
+#include "inet/common/SimpleModule.h"
 
 namespace inet {
 

@@ -61,8 +61,6 @@ void ClockBase::emitTimeDifferenceToReference()
 
 void ClockBase::receiveSignal(cComponent *source, int signal, const simtime_t& time, cObject *details)
 {
-    auto text = StringFormat::formatString(displayStringTextFormat, this);
-    getDisplayString().setTagArg("t", 0, text.c_str());
     if (signal == ClockBase::timeChangedSignal) {
         emitTimeDifferenceToReference();
     }

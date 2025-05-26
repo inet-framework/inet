@@ -16,7 +16,7 @@
 
 namespace inet {
 
-class INET_API ClockBase : public SimpleModule, public IClock
+class INET_API ClockBase : public SimpleModule, public IClock, public cListener
 {
   public:
     struct ClockJumpDetails : public cObject {
@@ -32,7 +32,6 @@ class INET_API ClockBase : public SimpleModule, public IClock
 
   protected:
     clocktime_t clockEventTime = -1;
-    ModuleRefByPar<IClock> referenceClockModule;
     simtime_t emitClockTimeInterval;
     cMessage *timer = nullptr;
 

@@ -1310,9 +1310,6 @@ void Gptp::handleParameterChange(const char *name)
         localPriorityVector.grandmasterPriority2 = par("priority2");
         executeBmca();
     }
-    else {
-        throw cRuntimeError("Parameter %s is not mutable", name);
-    }
 }
 
 } // namespace inet
