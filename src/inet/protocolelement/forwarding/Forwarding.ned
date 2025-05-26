@@ -7,9 +7,12 @@
 
 package inet.protocolelement.forwarding;
 
-simple Forwarding
+import inet.common.SimpleModule;
+
+simple Forwarding extends SimpleModule
 {
     parameters:
+        @class(Forwarding);
         string address = default("");
         @display("i=block/tx");
     gates:

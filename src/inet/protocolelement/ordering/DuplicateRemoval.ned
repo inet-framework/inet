@@ -9,6 +9,12 @@ package inet.protocolelement.ordering;
 
 import inet.queueing.base.PacketPusherBase;
 
+//
+// Filters out duplicate packets based on sequence numbers. Keeps track of the
+// last processed sequence number and discards packets with the same sequence
+// number to prevent duplicate packet processing. Note that in order for this
+// strategy to work, packets must arrive in the correct order.
+//
 simple DuplicateRemoval extends PacketPusherBase
 {
     parameters:

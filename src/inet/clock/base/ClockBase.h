@@ -11,12 +11,12 @@
 #include "inet/clock/common/ClockTime.h"
 #include "inet/clock/common/ClockEvent.h"
 #include "inet/clock/contract/IClock.h"
-#include "inet/common/StringFormat.h"
 #include "inet/common/ModuleRefByPar.h"
+#include "inet/common/SimpleModule.h"
 
 namespace inet {
 
-class INET_API ClockBase : public cSimpleModule, public IClock, public StringFormat::IDirectiveResolver, public cListener
+class INET_API ClockBase : public SimpleModule, public IClock
 {
   public:
     struct ClockJumpDetails : public cObject {
@@ -32,7 +32,7 @@ class INET_API ClockBase : public cSimpleModule, public IClock, public StringFor
 
   protected:
     clocktime_t clockEventTime = -1;
-    const char *displayStringTextFormat = nullptr;
+    ModuleRefByPar<IClock> referenceClockModule;
     simtime_t emitClockTimeInterval;
     cMessage *timer = nullptr;
 
@@ -43,7 +43,6 @@ class INET_API ClockBase : public cSimpleModule, public IClock, public StringFor
     virtual void handleMessage(cMessage *msg) override;
     void emitTimeDifferenceToReference();
     virtual void finish() override;
-    virtual void refreshDisplay() const override;
 
     cSimpleModule *getTargetModule() const {
         cSimpleModule *target = getSimulation()->getContextSimpleModule();

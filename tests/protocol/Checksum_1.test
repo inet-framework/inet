@@ -1,13 +1,13 @@
 %description:
 
-Tests CRC checksum.
+Tests the Internet checksum.
 
 %file: test.ned
 
 import inet.queueing.source.ActivePacketSource;
 import inet.queueing.sink.PassivePacketSink;
-import inet.protocolelement.checksum.CrcHeaderInserter;
-import inet.protocolelement.checksum.CrcHeaderChecker;
+import inet.protocolelement.checksum.InternetChecksumHeaderInserter;
+import inet.protocolelement.checksum.InternetChecksumHeaderChecker;
 
 network TestCrc
 {
@@ -15,10 +15,10 @@ network TestCrc
         source: ActivePacketSource {
             @display("p=100,100");
         }
-        inserter: CrcHeaderInserter {
+        inserter: InternetChecksumHeaderInserter {
             @display("p=100,200");
         }
-        checker: CrcHeaderChecker {
+        checker: InternetChecksumHeaderChecker {
             @display("p=100,300");
         }
         sink: PassivePacketSink {

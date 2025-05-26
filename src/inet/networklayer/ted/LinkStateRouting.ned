@@ -6,6 +6,8 @@
 
 package inet.networklayer.ted;
 
+import inet.common.SimpleModule;
+
 //
 // Implements a very minimalistic link state routing protocol.
 // Apart from the basic topology information, the current link usage
@@ -15,9 +17,10 @@ package inet.networklayer.ted;
 //
 // The link state database is kept in the ~Ted module.
 //
-simple LinkStateRouting
+simple LinkStateRouting extends SimpleModule
 {
     parameters:
+        @class(LinkStateRouting);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
         string tedModule;

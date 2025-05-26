@@ -7,6 +7,8 @@
 
 package inet.common.scenario;
 
+import inet.common.SimpleModule;
+
 //
 // ~ScenarioManager is for setting up and controlling simulation experiments.
 // You can schedule certain events to take place at specified times,
@@ -109,14 +111,15 @@ package inet.common.scenario;
 // - <delete-module>: module
 //       module: path to module (required)
 //
-simple ScenarioManager
+simple ScenarioManager extends SimpleModule
 {
     parameters:
+        @class(ScenarioManager);
         xml script = default(xml("<script></script>"));
 
         // Format for the text displayed above the module icon.
         // Directives: %c: numChanges, %d: numDone, %l: numLeft, %t: nextEventTime, %n: nextEventName
-        string displayStringTextFormat = default("total %c changes, %l left\nnext at: %t");
+        displayStringTextFormat = default("total %c changes, %l left\nnext at: %t");
 
         @display("i=block/control");
         @labels(node,mpls-node);

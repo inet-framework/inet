@@ -7,9 +7,17 @@
 
 package inet.physicallayer.wireless.common.medium;
 
+import inet.common.Module;
 import inet.physicallayer.wireless.common.contract.packetlevel.IMediumLimitCache;
 
-module MediumLimitCache like IMediumLimitCache
+//
+// Caches various limits and constraints of the radio medium to optimize
+// performance. Maintains information about maximum transmission power, minimum
+// interference and reception power, maximum antenna gain, communication and
+// interference ranges, and other parameters. These limits can be specified
+// directly or computed dynamically based on the radios in the network.
+//
+module MediumLimitCache extends Module like IMediumLimitCache
 {
     parameters:
         double centerFrequency @unit(Hz) = default(nan Hz);       // TODO rename to maxRangeCenterFrequency?

@@ -135,8 +135,8 @@ void PimBase::sendHelloPacket(PimInterface *pimInterface)
     }
 
     msg->setChunkLength(byteLength);
-    msg->setCrcMode(pimModule->getCrcMode());
-    Pim::insertCrc(msg);
+    msg->setChecksumMode(pimModule->getChecksumMode());
+    Pim::insertChecksum(msg);
     pk->insertAtFront(msg);
     pk->addTag<PacketProtocolTag>()->setProtocol(&Protocol::pim);
     pk->addTag<InterfaceReq>()->setInterfaceId(pimInterface->getInterfaceId());

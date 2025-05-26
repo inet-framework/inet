@@ -18,23 +18,9 @@ Define_Module(EthernetFcsChecker);
 
 void EthernetFcsChecker::initialize(int stage)
 {
-    FcsCheckerBase::initialize(stage);
+    ChecksumCheckerBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
         popFcs = par("popFcs");
-}
-
-bool EthernetFcsChecker::checkFcs(const Packet *packet, FcsMode fcsMode, uint32_t fcs) const
-{
-    switch (fcsMode) {
-        case FCS_DECLARED_CORRECT:
-            return checkDeclaredCorrectFcs(packet, fcs);
-        case FCS_DECLARED_INCORRECT:
-            return checkDeclaredIncorrectFcs(packet, fcs);
-        case FCS_COMPUTED:
-            return checkComputedFcs(packet, fcs);
-        default:
-            throw cRuntimeError("Unknown FCS mode");
-    }
 }
 
 void EthernetFcsChecker::processPacket(Packet *packet)
@@ -57,7 +43,8 @@ bool EthernetFcsChecker::matchesPacket(const Packet *packet) const
     const auto& trailer = packet->peekAtBack<EthernetFcs>(ETHER_FCS_BYTES);
     auto fcsMode = trailer->getFcsMode();
     auto fcs = trailer->getFcs();
-    return checkFcs(packet, fcsMode, fcs);
+    ASSERT(fcsMode != FCS_DISABLED); //TODO DISABLED is illegal
+    return checkChecksum(packet, (ChecksumMode)fcsMode, checksumType, fcs); //TODO KLUDGE cast should not be necessary
 }
 
 void EthernetFcsChecker::dropPacket(Packet *packet)

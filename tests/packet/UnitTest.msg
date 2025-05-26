@@ -13,11 +13,11 @@ enum Protocol
     Ethernet = 2;
 }
 
-enum CrcMode
+enum ChecksumMode
 {
-    CRC_DECLARED_CORRECT = 0;
-    CRC_DECLARED_INCORRECT  = 1;
-    CRC_COMPUTED = 2;
+    CHECKSUM_DECLARED_CORRECT = 0;
+    CHECKSUM_DECLARED_INCORRECT  = 1;
+    CHECKSUM_COMPUTED = 2;
 }
 
 class ApplicationHeader extends FieldsChunk
@@ -33,8 +33,8 @@ class TcpHeader extends FieldsChunk
     int16_t lengthField = -1;
     int16_t srcPort = -1;
     int16_t destPort = -1;
-    int16_t crc = 0;
-    int crcMode @enum(CrcMode) = -1;
+    int16_t checksum = 0;
+    int checksumMode @enum(ChecksumMode) = -1;
 }
 
 class IpHeader extends FieldsChunk
@@ -55,8 +55,8 @@ class EthernetTrailer extends FieldsChunk
 {
     @str;
     chunkLength = B(2);
-    int16_t crc = 0;
-    int crcMode @enum(CrcMode) = -1;
+    int16_t checksum = 0;
+    int checksumMode @enum(ChecksumMode) = -1;
 }
 
 class CompoundHeader extends SequenceChunk

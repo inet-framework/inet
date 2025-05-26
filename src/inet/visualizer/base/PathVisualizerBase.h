@@ -36,7 +36,7 @@ class INET_API PathVisualizerBase : public VisualizerBase, public cListener
         virtual ~PathVisualization() {}
     };
 
-    class INET_API DirectiveResolver : public StringFormat::IDirectiveResolver {
+    class INET_API DirectiveResolver : public StringFormat::IResolver {
       protected:
         const PathVisualization *pathVisualization = nullptr;
         const cPacket *packet = nullptr;

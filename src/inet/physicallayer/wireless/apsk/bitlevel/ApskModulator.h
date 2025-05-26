@@ -8,6 +8,7 @@
 #ifndef __INET_APSKMODULATOR_H
 #define __INET_APSKMODULATOR_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/physicallayer/wireless/common/modulation/ApskSymbol.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/IModulator.h"
@@ -18,7 +19,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API ApskModulator : public IModulator, public cSimpleModule
+class INET_API ApskModulator : public IModulator, public SimpleModule
 {
   protected:
     const ApskModulationBase *modulation;

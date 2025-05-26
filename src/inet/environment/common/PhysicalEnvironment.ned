@@ -7,6 +7,7 @@
 
 package inet.environment.common;
 
+import inet.common.Module;
 import inet.environment.contract.IGround;
 import inet.environment.contract.IObjectCache;
 import inet.environment.contract.IPhysicalEnvironment;
@@ -150,7 +151,7 @@ import inet.environment.contract.IPhysicalEnvironment;
 //       material as a unitless quantity. Relative permeability is used to
 //       compute the refractive index of the material.
 //
-module PhysicalEnvironment like IPhysicalEnvironment
+module PhysicalEnvironment extends Module like IPhysicalEnvironment
 {
     parameters:
         string coordinateSystemModule = default(""); // Module path of the geographic coordinate system module

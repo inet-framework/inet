@@ -68,7 +68,7 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
     ModuleRefByPar<Icmp> icmp;
 
     // config
-    CrcMode crcMode = CRC_MODE_UNDEFINED;
+    ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
     int defaultTimeToLive = -1;
     int defaultMCTimeToLive = -1;
     simtime_t fragmentTimeoutTime;

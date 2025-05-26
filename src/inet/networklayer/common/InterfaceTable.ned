@@ -7,6 +7,8 @@
 
 package inet.networklayer.common;
 
+import inet.common.SimpleModule;
+
 //
 // Keeps the table of network interfaces.
 //
@@ -21,9 +23,10 @@ package inet.networklayer.common;
 // functions of the C++ module class. For detailed info, please see the C++
 // documentation of the class (Doxygen).
 //
-simple InterfaceTable
+simple InterfaceTable extends SimpleModule
 {
     parameters:
+        @class(InterfaceTable);
         bool displayAddresses = default(false);  // Whether to display IP addresses on links
         @display("i=block/table");
         @signal[interfaceCreated](type=inet::NetworkInterface);

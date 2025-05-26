@@ -7,13 +7,15 @@
 
 package inet.linklayer.ethernet.modular;
 
-import inet.queueing.base.PacketFlowBase;
+import inet.protocolelement.checksum.base.ChecksumInserterBase;
 import inet.queueing.contract.IPacketFlow;
 
-simple EthernetFragmentFcsInserter extends PacketFlowBase like IPacketFlow
+simple EthernetFragmentFcsInserter extends ChecksumInserterBase like IPacketFlow
 {
     parameters:
         string fcsMode @enum("disabled","declared","computed") = default("declared");
+        checksumMode = fcsMode;
+        checksumType = "ethernet-fcs";
         @class(EthernetFragmentFcsInserter);
         @display("i=block/inserter");
 }

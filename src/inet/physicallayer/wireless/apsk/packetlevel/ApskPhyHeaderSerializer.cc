@@ -8,7 +8,7 @@
 #include "inet/physicallayer/wireless/apsk/packetlevel/ApskPhyHeaderSerializer.h"
 
 #include "inet/common/ProtocolGroup.h"
-#include "inet/common/checksum/EthernetCRC.h"
+#include "inet/common/checksum/Checksum.h"
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 
 namespace inet {
@@ -22,10 +22,10 @@ void ApskPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<co
     const auto& phyHeader = staticPtrCast<const ApskPhyHeader>(chunk);
     stream.writeUint16Be(phyHeader->getHeaderLengthField().get<b>());
     stream.writeUint16Be(phyHeader->getPayloadLengthField().get<b>());
-    auto crcMode = phyHeader->getCrcMode();
-    if (crcMode != CRC_DISABLED && crcMode != CRC_COMPUTED)
-        throw cRuntimeError("Cannot serialize Apsk Phy header without turned off or properly computed CRC, try changing the value of crcMode parameter for Udp");
-    stream.writeUint16Be(phyHeader->getCrc());
+    auto fcsMode = phyHeader->getFcsMode();
+    if (fcsMode != FCS_DISABLED && fcsMode != FCS_COMPUTED)
+        throw cRuntimeError("Cannot serialize Apsk Phy header without turned off or properly computed FCS, try changing the value of fcsMode parameter for Udp");
+    stream.writeUint16Be(phyHeader->getFcs());
     stream.writeUint16Be(ProtocolGroup::getInetPhyProtocolGroup()->getProtocolNumber(phyHeader->getPayloadProtocol()));
 
     b remainders = phyHeader->getChunkLength() - (stream.getLength() - startPosition);
@@ -45,9 +45,9 @@ const Ptr<Chunk> ApskPhyHeaderSerializer::deserialize(MemoryInputStream& stream,
     phyHeader->setHeaderLengthField(headerLength);
     phyHeader->setChunkLength(headerLength);
     phyHeader->setPayloadLengthField(b(stream.readUint16Be()));
-    auto crc = stream.readUint16Be();
-    phyHeader->setCrc(crc);
-    phyHeader->setCrcMode(crc == 0 ? CRC_DISABLED : CRC_COMPUTED);
+    auto fcs = stream.readUint16Be();
+    phyHeader->setFcs(fcs);
+    phyHeader->setFcsMode(fcs == 0 ? FCS_DISABLED : FCS_COMPUTED);
     phyHeader->setPayloadProtocol(ProtocolGroup::getInetPhyProtocolGroup()->findProtocol(stream.readUint16Be()));
 
     b curLength = stream.getPosition() - startPosition;

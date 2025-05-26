@@ -7,12 +7,20 @@
 
 package inet.physicallayer.wireless.noise;
 
+import inet.common.Module;
 import inet.mobility.contract.IMobility;
 import inet.physicallayer.wireless.common.contract.packetlevel.IAntenna;
 import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
 import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitter;
 
-module NoiseSource like IRadio
+//
+// A network node that generates periodic noise transmissions that can interfere
+// with wireless communications. Alternates between sleep and transmission states
+// based on configurable intervals. Uses a ~NoiseTransmitter to create noise signals
+// with specified duration, frequency, bandwidth, and power parameters. Useful for
+// testing protocol robustness against interference in wireless networks.
+//
+module NoiseSource extends Module like IRadio
 {
     parameters:
         string radioMediumModule = default("radioMedium"); // Module path of the medium module where this radio communicates

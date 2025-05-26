@@ -19,7 +19,7 @@ Note that the emulation example only runs on Linux. For a comprehensive
 understanding of emulation in INET, read the :doc:`Emulation section
 </users-guide/ch-emulation>` in the User's Guide.
 
-| INET version: ``4.1``
+| Verified with INET version: ``4.1``
 | Source files location: `inet/showcases/emulation/babel <https://github.com/inet-framework/inet/tree/master/showcases/emulation/babel>`__
 
 The Model
@@ -302,7 +302,7 @@ with ``RealTimeScheduler``:
    :language: ini
 
 For compatibility with the host OS's ``babeld`` and ``ping`` applications, the FCS mode
-in the hosts' MAC module is configured to compute the FCS (as opposed to assuming
+in the hosts' MAC modules is configured to actually compute the FCS (as opposed to assuming
 it to be correct):
 
 .. literalinclude:: ../omnetpp.ini

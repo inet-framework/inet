@@ -8,6 +8,7 @@
 #ifndef __INET_LENGTHBASEDAGGREGATORPOLICY_H
 #define __INET_LENGTHBASEDAGGREGATORPOLICY_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/Units.h"
 #include "inet/protocolelement/aggregation/contract/IAggregatorPolicy.h"
 
@@ -15,7 +16,7 @@ namespace inet {
 
 using namespace units::values;
 
-class INET_API LengthBasedAggregatorPolicy : public cSimpleModule, public IAggregatorPolicy
+class INET_API LengthBasedAggregatorPolicy : public SimpleModule, public IAggregatorPolicy
 {
   protected:
     int minNumSubpackets = -1;

@@ -54,7 +54,6 @@ class INET_API IpvxTrafGen : public ApplicationBase
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessageWhenUp(cMessage *msg) override;
-    virtual void refreshDisplay() const override;
     virtual void startApp();
 
     virtual void printPacket(Packet *msg);
@@ -72,4 +71,3 @@ class INET_API IpvxTrafGen : public ApplicationBase
 } // namespace inet
 
 #endif
-

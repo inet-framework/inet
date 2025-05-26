@@ -78,6 +78,7 @@ void InfoVisualizerBase::handleParameterChange(const char *name)
 
 void InfoVisualizerBase::refreshDisplay() const
 {
+    VisualizerBase::refreshDisplay();
     auto simulation = getSimulation();
     for (auto infoVisualization : infoVisualizations) {
         auto module = simulation->getModule(infoVisualization->moduleId);

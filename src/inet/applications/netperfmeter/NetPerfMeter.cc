@@ -265,6 +265,8 @@ void NetPerfMeter::finish()
 // ###### Show I/O status ###################################################
 void NetPerfMeter::refreshDisplay() const
 {
+    SimpleModule::refreshDisplay();
+    
     unsigned long long totalSentBytes = 0;
     for (std::map<unsigned int, SenderStatistics *>::const_iterator iterator = SenderStatisticsMap.begin();
          iterator != SenderStatisticsMap.end(); iterator++)

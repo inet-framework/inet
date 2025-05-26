@@ -10,7 +10,7 @@ between nodes. It does this by dividing larger frames into smaller fragments,
 which increases the probability of successful data transfer. This showcase
 presents an example of how MAC-level fragmentation is used in INET.
 
-| INET version: ``4.0``
+| Verified with INET version: ``4.0``
 | Source files location: `inet/showcases/wireless/fragmentation <https://github.com/inet-framework/inet/tree/master/showcases/wireless/fragmentation>`__
 
 About 802.11 Fragmentation
@@ -295,8 +295,8 @@ Ensure that ``opp_env`` is installed on your system, then execute:
 
 .. code-block:: bash
 
-    $ opp_env run inet-4.0 --init -w inet-workspace --install --chdir \
-       -c 'cd inet-4.0.*/showcases/wireless/fragmentation && inet'
+    $ opp_env run inet-4.5 --init -w inet-workspace --install --build-modes=release --chdir \
+       -c 'cd inet-4.5.*/showcases/wireless/fragmentation && inet'
 
 This command creates an ``inet-workspace`` directory, installs the appropriate
 versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
@@ -307,7 +307,7 @@ workspace and then open an interactive shell:
 
 .. code-block:: bash
 
-    $ opp_env install --init -w inet-workspace inet-4.0
+    $ opp_env install --init -w inet-workspace --build-modes=release inet-4.5
     $ cd inet-workspace
     $ opp_env shell
 

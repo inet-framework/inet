@@ -1,13 +1,13 @@
 %description:
 
-Tests FCS checksum.
+Tests CRC32 checksum.
 
 %file: test.ned
 
 import inet.queueing.source.ActivePacketSource;
 import inet.queueing.sink.PassivePacketSink;
-import inet.protocolelement.checksum.FcsHeaderInserter;
-import inet.protocolelement.checksum.FcsHeaderChecker;
+import inet.protocolelement.checksum.EthernetFcsHeaderInserter;
+import inet.protocolelement.checksum.EthernetFcsHeaderChecker;
 
 network TestFcs
 {
@@ -15,10 +15,10 @@ network TestFcs
         source: ActivePacketSource {
             @display("p=100,100");
         }
-        inserter: FcsHeaderInserter {
+        inserter: EthernetFcsHeaderInserter {
             @display("p=100,200");
         }
-        checker: FcsHeaderChecker {
+        checker: EthernetFcsHeaderChecker {
             @display("p=100,300");
         }
         sink: PassivePacketSink {

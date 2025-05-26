@@ -318,9 +318,12 @@ class SimulationProject:
             return config_dicts["General"].get("sim_time_limit")
         def create_config_dict(config):
             return {"config": config, "abstract_config": False, "emulation": False, "expected_result": "DONE", "user_interface": None, "description": None, "network": None}
+        num_runs_fast_regex = re.compile(r"(?m).*^\s*(include\s+.*\.ini|repeat\s*=\s*[0-9]+|.*\$\{.*\})")
+        configuration_class_regex = re.compile(r"\s*configuration-class\s*=\s*(\w+)")
         simulation_configs = []
         working_directory = os.path.dirname(ini_path)
-        num_runs_fast = get_num_runs_fast(ini_path)
+        inifile_contents = read_file(ini_path)
+        num_runs_fast = None if num_runs_fast_regex.search(inifile_contents) else 1
         ini_file = os.path.basename(ini_path)
         file = open(ini_path, encoding="utf-8")
         config_dicts = {"General": create_config_dict("General")}
@@ -366,11 +369,16 @@ class SimulationProject:
                     inifile_contents = InifileContents(ini_path)
                     num_runs = inifile_contents.getNumRunsInConfig(config)
                 except Exception as e:
-                    executable = self.get_executable(mode="release")
-                    if not os.path.exists(executable):
+                    if configuration_class_regex.search(inifile_contents):
+                        self.build(mode="release")
                         executable = self.get_executable(mode="release")
-                    default_args = self.get_default_args()
-                    args = [executable, *default_args, "-s", "-f", ini_file, "-c", config, "-q", "numruns"]
+                        if not os.path.exists(executable):
+                            executable = self.get_executable(mode="release")
+                        default_args = self.get_default_args()
+                        args = [executable, *default_args, "-s", "-f", ini_file, "-c", config, "-q", "numruns"]
+                    else:
+                        executable = self.get_environment_variable_relative_path("__omnetpp_root_dir", "bin/opp_run")
+                        args = [executable, "-s", "-f", ini_file, "-c", config, "-q", "numruns"]
                     result = run_command_with_logging(args, cwd=working_directory, env=self.get_env())
                     if result.returncode == 0:
                         # KLUDGE: this was added to test source dependency based task result caching
@@ -394,7 +402,6 @@ class SimulationProject:
         def local_collect_ini_file_simulation_configs(ini_path, **kwargs):
             return self.collect_ini_file_simulation_configs(ini_path, **kwargs)
         _logger.info(f"Collecting {self.name} simulation configs started")
-        self.build(mode="release")
         ini_paths = [f for f in itertools.chain.from_iterable(map(lambda g: glob.glob(g, recursive=True), ini_path_globs)) if os.path.isfile(f)]
         if concurrent:
             pool = multiprocessing.pool.ThreadPool(multiprocessing.cpu_count())

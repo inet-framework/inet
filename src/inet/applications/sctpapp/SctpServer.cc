@@ -31,7 +31,7 @@ void SctpServer::initialize(int stage)
 {
     EV_DEBUG << "initialize SCTP Server stage " << stage << endl;
 
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         WATCH(numSessions);

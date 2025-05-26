@@ -9,10 +9,11 @@
 #define __INET_NODEBASE_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/Module.h"
 
 namespace inet {
 
-class INET_API NodeBase : public cModule
+class INET_API NodeBase : public Module
 {
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

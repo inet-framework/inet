@@ -8,13 +8,14 @@
 #ifndef __INET_ERRORMODELBASE_H
 #define __INET_ERRORMODELBASE_H
 
+#include "inet/common/Module.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IErrorModel.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API ErrorModelBase : public cModule, public IErrorModel
+class INET_API ErrorModelBase : public Module, public IErrorModel
 {
   public:
     enum class CorruptionMode {

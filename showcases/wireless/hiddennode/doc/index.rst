@@ -14,7 +14,7 @@ to reserve the channel before transmitting.
 In this showcase, we demonstrate the hidden node problem and how the RTS/CTS
 mechanism can be used to solve it in an 802.11 wireless network.
 
-| INET version: ``4.0``
+| Verified with INET version: ``4.0``
 | Source files location: `inet/showcases/wireless/hiddennode <https://github.com/inet-framework/inet/tree/master/showcases/wireless/hiddennode>`__
 
 Description of the hidden node problem
@@ -186,8 +186,8 @@ Ensure that ``opp_env`` is installed on your system, then execute:
 
 .. code-block:: bash
 
-    $ opp_env run inet-4.0 --init -w inet-workspace --install --chdir \
-       -c 'cd inet-4.0.*/showcases/wireless/hiddennode && inet'
+    $ opp_env run inet-4.5 --init -w inet-workspace --install --build-modes=release --chdir \
+       -c 'cd inet-4.5.*/showcases/wireless/hiddennode && inet'
 
 This command creates an ``inet-workspace`` directory, installs the appropriate
 versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
@@ -198,7 +198,7 @@ workspace and then open an interactive shell:
 
 .. code-block:: bash
 
-    $ opp_env install --init -w inet-workspace inet-4.0
+    $ opp_env install --init -w inet-workspace --build-modes=release inet-4.5
     $ cd inet-workspace
     $ opp_env shell
 

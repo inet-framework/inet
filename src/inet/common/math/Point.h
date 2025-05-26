@@ -252,5 +252,11 @@ inline std::ostream& operator<<(std::ostream& os, const Point<T ...>& p) {
 
 } // namespace inet
 
+// Add specialization for std::tuple_size to make Point work with tuple-like protocol
+namespace std {
+    template<typename... T>
+    struct tuple_size<inet::math::Point<T...>> : public tuple_size<typename inet::math::Point<T...>::type> {};
+}
+
 #endif
 

@@ -13,7 +13,7 @@ has enough information to do so. However, cut-through switching also has some po
 rate compared to store-and-forward switching, since it does not check the entire frame for errors before forwarding it. In this 
 showcase, we will demonstrate cut-through switching and compare it to store-and-forward switching in terms of delay.
 
-| INET version: ``4.3``
+| Verified with INET version: ``4.3``
 | Source files location: `inet/showcases/tsn/cutthroughswitching <https://github.com/inet-framework/inet/tree/master/showcases/tsn/cutthroughswitching>`__
 
 The Model
@@ -106,8 +106,8 @@ Ensure that ``opp_env`` is installed on your system, then execute:
 
 .. code-block:: bash
 
-    $ opp_env run inet-4.3 --init -w inet-workspace --install --chdir \
-       -c 'cd inet-4.3.*/showcases/tsn/cutthroughswitching && inet'
+    $ opp_env run inet-4.5 --init -w inet-workspace --install --build-modes=release --chdir \
+       -c 'cd inet-4.5.*/showcases/tsn/cutthroughswitching && inet'
 
 This command creates an ``inet-workspace`` directory, installs the appropriate
 versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
@@ -118,7 +118,7 @@ workspace and then open an interactive shell:
 
 .. code-block:: bash
 
-    $ opp_env install --init -w inet-workspace inet-4.3
+    $ opp_env install --init -w inet-workspace --build-modes=release inet-4.5
     $ cd inet-workspace
     $ opp_env shell
 

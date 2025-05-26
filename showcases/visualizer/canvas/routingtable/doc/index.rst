@@ -14,7 +14,7 @@ routing in a simulation without having to inspect individual routing tables.
 This showcase includes three simulation models of increasing complexity,
 demonstrating the different features of routing table visualization.
 
-| INET version: ``3.6``
+| Verified with INET version: ``3.6``
 | Source files location: `inet/showcases/visualizer/routingtable <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/routingtable>`__
 
 About the visualizer
@@ -255,8 +255,8 @@ Ensure that ``opp_env`` is installed on your system, then execute:
 
 .. code-block:: bash
 
-    $ opp_env run inet-3.6 --init -w inet-workspace --install --chdir \
-       -c 'cd inet-3.6.*/showcases/visualizer/canvas/routingtable && inet'
+    $ opp_env run inet-4.5 --init -w inet-workspace --install --build-modes=release --chdir \
+       -c 'cd inet-4.5.*/showcases/visualizer/canvas/routingtable && inet'
 
 This command creates an ``inet-workspace`` directory, installs the appropriate
 versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
@@ -267,7 +267,7 @@ workspace and then open an interactive shell:
 
 .. code-block:: bash
 
-    $ opp_env install --init -w inet-workspace inet-3.6
+    $ opp_env install --init -w inet-workspace --build-modes=release inet-4.5
     $ cd inet-workspace
     $ opp_env shell
 

@@ -8,6 +8,7 @@
 #ifndef __INET_PCF_H
 #define __INET_PCF_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/linklayer/ieee80211/mac/contract/IChannelAccess.h"
 #include "inet/linklayer/ieee80211/mac/contract/ICoordinationFunction.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/PcfFs.h"
@@ -18,7 +19,7 @@ namespace ieee80211 {
 /**
  * Implements IEEE 802.11 Point Coordination Function.
  */
-class INET_API Pcf : public ICoordinationFunction, public cSimpleModule
+class INET_API Pcf : public ICoordinationFunction, public SimpleModule
 {
   protected:
     IChannelAccess *pcfChannelAccess = nullptr;

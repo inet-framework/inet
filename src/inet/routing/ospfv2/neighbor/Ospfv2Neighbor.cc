@@ -9,7 +9,7 @@
 #include <memory.h>
 
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
-#include "inet/routing/ospfv2/Ospfv2Crc.h"
+#include "inet/routing/ospfv2/Ospfv2Checksum.h"
 #include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
 #include "inet/routing/ospfv2/neighbor/Ospfv2NeighborState.h"
 #include "inet/routing/ospfv2/neighbor/Ospfv2NeighborStateDown.h"
@@ -163,7 +163,7 @@ const char *Neighbor::getStateString(Neighbor::NeighborStateType stateType)
 void Neighbor::sendDatabaseDescriptionPacket(bool init)
 {
     const auto& ddPacket = makeShared<Ospfv2DatabaseDescriptionPacket>();
-    auto crcMode = parentInterface->getCrcMode();
+    auto checksumMode = parentInterface->getChecksumMode();
 
     ddPacket->setType(DATABASE_DESCRIPTION_PACKET);
     ddPacket->setRouterID(Ipv4Address(parentInterface->getArea()->getRouter()->getRouterID()));
@@ -196,7 +196,7 @@ void Neighbor::sendDatabaseDescriptionPacket(bool init)
         // (they are still in lastTransmittedDDPacket)
         while ((!databaseSummaryList.empty()) && (packetSize <= (maxPacketSize - OSPFv2_LSA_HEADER_LENGTH))) {
             Ospfv2LsaHeader *lsaHeader = *(databaseSummaryList.begin());
-            setLsaHeaderCrc(*lsaHeader, crcMode);
+            setLsaHeaderChecksum(*lsaHeader, checksumMode);
             ddPacket->appendLsaHeaders(*lsaHeader);
             delete lsaHeader;
             databaseSummaryList.pop_front();
@@ -225,7 +225,7 @@ void Neighbor::sendDatabaseDescriptionPacket(bool init)
         ddPacket->setAuthentication(i, authKey.bytes[i]);
     }
 
-    setOspfCrc(ddPacket, crcMode);
+    setOspfChecksum(ddPacket, checksumMode);
 
     Packet *pk = new Packet();
     pk->insertAtBack(ddPacket);
@@ -360,7 +360,7 @@ void Neighbor::sendLinkStateRequestPacket()
         requestPacket->setAuthentication(i, authKey.bytes[i]);
     }
 
-    setOspfCrc(requestPacket, parentInterface->getCrcMode());
+    setOspfChecksum(requestPacket, parentInterface->getChecksumMode());
 
     Packet *pk = new Packet();
     pk->insertAtBack(requestPacket);
@@ -644,7 +644,7 @@ void Neighbor::retransmitUpdatePacket()
         if (includeLSA) {
             packetLength += lsaSize;
             unsigned int ospfLSACount = updatePacket->getOspfLSAsArraySize();
-            setLsaCrc(*ospfLsa, parentInterface->getCrcMode());
+            setLsaChecksum(*ospfLsa, parentInterface->getChecksumMode());
 
             updatePacket->setOspfLSAsArraySize(ospfLSACount + 1);
             updatePacket->setOspfLSAs(ospfLSACount, ospfLsa->dup());
@@ -669,7 +669,7 @@ void Neighbor::retransmitUpdatePacket()
         updatePacket->setAuthentication(i, authKey.bytes[i]);
     }
 
-    setOspfCrc(updatePacket, parentInterface->getCrcMode());
+    setOspfChecksum(updatePacket, parentInterface->getChecksumMode());
 
     Packet *pk = new Packet();
     pk->insertAtBack(updatePacket);

@@ -7,8 +7,14 @@
 
 package inet.physicallayer.wireless.common.radio.bitlevel;
 
+import inet.common.Module;
 import inet.physicallayer.wireless.common.contract.bitlevel.IFecCoder;
 
+//
+// Implements convolutional coding, a type of error-correcting code that
+// generates parity symbols via the sliding application of a boolean polynomial
+// function to a data stream.
+//
 // <b>Transfer function (octal) matrix</b>
 //
 // transferFunctionMatrix = "133 171" means a simple vector with two elements:
@@ -59,7 +65,7 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IFecCoder;
 // The encoding process works in accordance with the industry standards and starts
 // in the all-zeros state.
 //
-module ConvolutionalCoder like IFecCoder
+module ConvolutionalCoder extends Module like IFecCoder
 {
     parameters:
         string transferFunctionMatrix = default("133 171");

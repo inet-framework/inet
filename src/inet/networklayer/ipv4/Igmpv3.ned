@@ -7,13 +7,16 @@
 
 package inet.networklayer.ipv4;
 
-simple Igmpv3 like IIgmp
+import inet.common.SimpleModule;
+
+simple Igmpv3 extends SimpleModule like IIgmp
 {
     parameters:
+        @class(Igmpv3);
         bool enabled = default(true);
         string interfaceTableModule;
         string routingTableModule;
-        string crcMode @enum("declared","computed") = default("declared");
+        string checksumMode @enum("declared","computed") = default("declared");
         int    robustnessVariable = default(2); // IGMP is robust to (robustnessVariable-1) packet loss
         double queryInterval @unit(s) = default(125s);
         double queryResponseInterval @unit(s) = default(10s);

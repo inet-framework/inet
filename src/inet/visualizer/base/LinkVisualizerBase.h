@@ -39,7 +39,7 @@ class INET_API LinkVisualizerBase : public VisualizerBase, public cListener
         virtual ~LinkVisualization() {}
     };
 
-    class INET_API DirectiveResolver : public StringFormat::IDirectiveResolver {
+    class INET_API DirectiveResolver : public StringFormat::IResolver {
       protected:
         const cPacket *packet = nullptr;
 

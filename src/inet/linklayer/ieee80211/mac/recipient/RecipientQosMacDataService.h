@@ -8,6 +8,7 @@
 #ifndef __INET_RECIPIENTQOSMACDATASERVICE_H
 #define __INET_RECIPIENTQOSMACDATASERVICE_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/linklayer/ieee80211/mac/blockackreordering/BlockAckReordering.h"
 #include "inet/linklayer/ieee80211/mac/contract/IDefragmentation.h"
 #include "inet/linklayer/ieee80211/mac/contract/IDuplicateRemoval.h"
@@ -22,13 +23,13 @@ namespace ieee80211 {
 //
 // Figure 5-1—MAC data plane architecture
 //
-class INET_API RecipientQosMacDataService : public IRecipientQosMacDataService, public cSimpleModule
+class INET_API RecipientQosMacDataService : public IRecipientQosMacDataService, public SimpleModule
 {
   protected:
     IReassembly *basicReassembly = nullptr;
 
     IMpduDeaggregation *aMpduDeaggregation = nullptr;
-//    MpduHeaderAndCrcValidation *mpduHeaderAndCrcValidation = nullptr;
+//    MpduHeaderAndFcsValidation *mpduHeaderAndFcsValidation = nullptr;
 //    Address1Filtering *address1Filtering = nullptr;
     IDuplicateRemoval *duplicateRemoval = nullptr;
 //    MpduDecryptionAndIntegrity *mpduDecryptionAndIntegrity = nullptr;

@@ -85,7 +85,7 @@ class INET_API Ieee80211VhtSignalMode : public IIeee80211HeaderMode, public Ieee
     virtual b getFECCodingLength() const { return b(1); }
     virtual b getShortGILength() const { return b(1); }
     virtual b getNumOfExtensionSpatialStreamsLength() const { return b(2); }
-    virtual b getCRCLength() const { return b(8); }
+    virtual b getFCSLength() const { return b(8); }
     virtual b getTailBitsLength() const { return b(6); }
     virtual unsigned int getSTBC() const { return 0; } // Limitation: We assume that STBC is not used
 

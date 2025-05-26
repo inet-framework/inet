@@ -10,7 +10,7 @@ The packet error rate is measured at various WiFi
 bitrates, providing insights into the impact of different bitrates on the
 quality of communication over different distances. 
 
-| INET version: ``4.0``
+| Verified with INET version: ``4.0``
 | Source files location: `inet/showcases/wireless/errorrate <https://github.com/inet-framework/inet/tree/master/showcases/wireless/errorrate>`__
 
 The Model
@@ -151,8 +151,8 @@ Ensure that ``opp_env`` is installed on your system, then execute:
 
 .. code-block:: bash
 
-    $ opp_env run inet-4.0 --init -w inet-workspace --install --chdir \
-       -c 'cd inet-4.0.*/showcases/wireless/errorrate && inet'
+    $ opp_env run inet-4.5 --init -w inet-workspace --install --build-modes=release --chdir \
+       -c 'cd inet-4.5.*/showcases/wireless/errorrate && inet'
 
 This command creates an ``inet-workspace`` directory, installs the appropriate
 versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
@@ -163,7 +163,7 @@ workspace and then open an interactive shell:
 
 .. code-block:: bash
 
-    $ opp_env install --init -w inet-workspace inet-4.0
+    $ opp_env install --init -w inet-workspace --build-modes=release inet-4.5
     $ cd inet-workspace
     $ opp_env shell
 

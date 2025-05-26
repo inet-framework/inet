@@ -8,6 +8,7 @@
 #ifndef __INET_INETWORKSOCKET_H
 #define __INET_INETWORKSOCKET_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/socket/ISocket.h"
@@ -34,7 +35,7 @@ class INET_API INetworkSocket : public ISocket
      * object may be your simple module itself (if it multiply inherits from
      * ICallback too, that is you declared it as
      * <pre>
-     * class MyAppModule : public cSimpleModule, public ICallback
+     * class MyAppModule : public SimpleModule, public ICallback
      * </pre>
      * and redefined the necessary virtual functions; or you may use dedicated
      * class (and objects) for this purpose.

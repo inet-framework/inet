@@ -6,6 +6,7 @@
 
 package inet.linklayer.ieee80211.mac.coordinationfunction;
 
+import inet.common.Module;
 import inet.linklayer.ieee80211.mac.channelaccess.Edca;
 import inet.linklayer.ieee80211.mac.channelaccess.Hcca;
 import inet.linklayer.ieee80211.mac.contract.ICtsPolicy;
@@ -21,11 +22,10 @@ import inet.linklayer.ieee80211.mac.protectionmechanism.SingleProtectionMechanis
 import inet.linklayer.ieee80211.mac.rateselection.QosRateSelection;
 import inet.linklayer.ieee80211.mac.recipient.RecipientQosMacDataService;
 
-
 //
 // Implements the HCF (Hybrid Coordination Function) for IEEE 802.11.
 //
-module Hcf like IHcf
+module Hcf extends Module like IHcf
 {
     parameters:
         bool isBlockAckSupported = default(false);

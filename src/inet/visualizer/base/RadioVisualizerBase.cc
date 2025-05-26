@@ -100,6 +100,7 @@ void RadioVisualizerBase::unsubscribe()
 
 void RadioVisualizerBase::refreshDisplay() const
 {
+    VisualizerBase::refreshDisplay();
     for (auto it : radioVisualizations)
         refreshRadioVisualization(it.second);
 }

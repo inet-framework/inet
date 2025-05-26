@@ -71,7 +71,7 @@ The :ned:`Ipv4` module implements the IPv4 protocol.
 
 Its parameters include:
 
--  :par:`crcMode` TODO: @enum("declared", "computed") =
+-  :par:`checksumMode` TODO: @enum("declared", "computed") =
    default("declared");
 
 -  :par:`procDelay` processing time of each incoming datagram.

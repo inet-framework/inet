@@ -6,6 +6,8 @@
 
 package inet.networklayer.ted;
 
+import inet.common.SimpleModule;
+
 //
 // Traffic Engineering Database. Stores network topology with detailed
 // link information, including total and reserved bandwidths.
@@ -17,9 +19,10 @@ package inet.networklayer.ted;
 // and allows ~RsvpTe and individual applications to calculate feasible LSPs
 // meeting the chosen bandwidth criteria.
 //
-simple Ted
+simple Ted extends SimpleModule
 {
     parameters:
+        @class(Ted);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;  // The path to the RoutingTable module
         @display("i=block/table");

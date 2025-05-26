@@ -7,6 +7,8 @@
 
 package inet.applications.tcpapp;
 
+import inet.common.SimpleModule;
+
 //
 // Manages an established TCP connection. It handles data transmission to and
 // from a module connected via the `trafficIn` and `trafficOut` gates. When data is
@@ -21,9 +23,10 @@ package inet.applications.tcpapp;
 //
 // @see ~TcpServerConnection, ~TcpServerListener, ~TcpClientSocketIo
 //
-simple TcpServerSocketIo
+simple TcpServerSocketIo extends SimpleModule
 {
     parameters:
+        @class(TcpServerSocketIo);
         @display("i=block/socket");
         volatile int readSize @unit(B) = default(-1B);    // Used only with autoRead==false
         volatile double readDelay @unit(s) = default(-1s);    // Used only with autoRead==false; delay for issuing a READ command after previous READ was satisfied; -1 means immediately, 0 means zero delay

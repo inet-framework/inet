@@ -232,15 +232,17 @@ void PcapngWriter::writePacket(simtime_t stime, const Packet *packet, b frontOff
     pbh.originalPacketLength = capturedLength.get<B>();
     fwrite(&pbh, sizeof(pbh), 1, dumpfile);
 
-    // packet data
-    auto data = packet->peekDataAt<BytesChunk>(frontOffset, capturedLength);
-    auto bytes = data->getBytes();
-    fwrite(bytes.data(), bytes.size(), 1, dumpfile);
+    if (capturedLength != b(0)) {
+        // packet data
+        auto data = packet->peekDataAt<BytesChunk>(frontOffset, capturedLength);
+        auto bytes = data->getBytes();
+        fwrite(bytes.data(), bytes.size(), 1, dumpfile);
 
-    // packet padding
-    char padding[] = { 0, 0, 0, 0 };
-    int paddingLength = pad(capturedLength.get<B>());
-    fwrite(padding, paddingLength, 1, dumpfile);
+        // packet padding
+        char padding[] = { 0, 0, 0, 0 };
+        int paddingLength = pad(capturedLength.get<B>());
+        fwrite(padding, paddingLength, 1, dumpfile);
+    }
 
     // direction option
     pcapng_option_header doh;

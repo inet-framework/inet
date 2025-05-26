@@ -8,6 +8,7 @@
 #ifndef __INET_L2NETWORKCONFIGURATOR_H
 #define __INET_L2NETWORKCONFIGURATOR_H
 
+#include "inet/common/SimpleModule.h"
 #include <algorithm>
 #include <vector>
 
@@ -21,7 +22,7 @@ namespace inet {
 /**
  * Computes L2 configuration of the network. See the NED definition for details.
  */
-class INET_API L2NetworkConfigurator : public cSimpleModule
+class INET_API L2NetworkConfigurator : public SimpleModule
 {
   public:
     L2NetworkConfigurator() {}

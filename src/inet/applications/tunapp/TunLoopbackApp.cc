@@ -22,7 +22,7 @@ Define_Module(TunLoopbackApp);
 
 void TunLoopbackApp::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         tunInterface = par("tunInterface");
         packetsSent = 0;

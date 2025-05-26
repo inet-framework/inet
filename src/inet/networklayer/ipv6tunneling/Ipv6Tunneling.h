@@ -19,6 +19,7 @@
 #ifndef __INET_IPV6TUNNELING_H
 #define __INET_IPV6TUNNELING_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/common/packet/Packet.h"
@@ -34,7 +35,7 @@ class Ipv6RoutingTable;
 /**
  * Management of IP tunnels.
  */
-class INET_API Ipv6Tunneling : public cSimpleModule, public LifecycleUnsupported
+class INET_API Ipv6Tunneling : public SimpleModule, public LifecycleUnsupported
 {
   public:
     enum TunnelType {

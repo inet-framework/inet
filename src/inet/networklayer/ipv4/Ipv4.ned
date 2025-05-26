@@ -7,6 +7,14 @@
 
 package inet.networklayer.ipv4;
 
+import inet.common.SimpleModule;
+
+//
+// Module interface for IPv4 protocol implementations. Defines gates and
+// parameters for modules that provide IPv4 protocol functionality. The IPv4
+// protocol provides datagram routing, fragmentation, and addressing between
+// network interfaces and transport layer protocols.
+//
 moduleinterface IIpv4
 {
     parameters:
@@ -78,14 +86,15 @@ moduleinterface IIpv4
 //
 // @see ~Ipv4RoutingTable, ~Arp
 //
-simple Ipv4 like IIpv4
+simple Ipv4 extends SimpleModule like IIpv4
 {
     parameters:
+        @class(Ipv4);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
         string arpModule;
         string icmpModule;
-        string crcMode @enum("declared", "computed") = default("declared");
+        string checksumMode @enum("declared", "computed") = default("declared");
         int timeToLive = default(32);
         int multicastTimeToLive = default(32);
         double fragmentTimeout @unit(s) = default(60s);

@@ -33,7 +33,7 @@ ExtLowerUdp::~ExtLowerUdp()
 
 void ExtLowerUdp::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         packetNameFormat = par("packetNameFormat");
         if (auto scheduler = dynamic_cast<RealTimeScheduler *>(getSimulation()->getScheduler())) {

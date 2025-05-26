@@ -7,6 +7,7 @@
 
 package inet.applications.udpapp;
 
+import inet.common.SimpleModule;
 import inet.applications.contract.IApp;
 
 //
@@ -26,9 +27,10 @@ import inet.applications.contract.IApp;
 // like ~UdpSink), or a ~UdpEchoApp. When used with ~UdpEchoApp, the `rcvdPkLifetime`
 // statistic will contain the round-trip times.
 //
-simple UdpBasicApp like IApp
+simple UdpBasicApp extends SimpleModule like IApp
 {
     parameters:
+        @class(UdpBasicApp);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string clockModule = default(""); // Relative path of a module that implements IClock; optional
         int localPort = default(-1);  // Local port (-1: use ephemeral port)

@@ -70,7 +70,7 @@ Define_Module(EigrpIpv6TopologyTable);
 template<typename IPAddress>
 void EigrpTopologyTable<IPAddress>::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
     if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         // TODO
         WATCH(routerID);

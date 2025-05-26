@@ -179,7 +179,7 @@ const ITransmission *Ieee802154UwbIrTransmitter::createTransmission(const IRadio
         EV_INFO << "Transmitted bit at " << i << " is " << (int)bitValue << endl;
         bits->push_back(bitValue);
     }
-    // KLUDGE add a fake CRC
+    // KLUDGE add a fake FCS
     for (int i = 0; i < 8; i++) {
         bits->push_back(0);
         for (int j = 0; j + i < bitLength; j += 8)

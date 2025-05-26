@@ -8,6 +8,7 @@
 #ifndef __INET_NEWETHERNETPLCA2_H
 #define __INET_NEWETHERNETPLCA2_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/FSMA.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ethernet/base/EthernetModes.h"
@@ -23,7 +24,7 @@ namespace physicallayer {
 /**
  * This class implements Physical Layer Collision Avoidance (PLCA) from IEEE Std 802.3cg-2019.
  */
-class INET_API EthernetPlca : public cSimpleModule, public virtual IEthernetCsmaMac, public virtual IEthernetCsmaPhy
+class INET_API EthernetPlca : public SimpleModule, public virtual IEthernetCsmaMac, public virtual IEthernetCsmaPhy
 {
   public:
     static simsignal_t curIDSignal;

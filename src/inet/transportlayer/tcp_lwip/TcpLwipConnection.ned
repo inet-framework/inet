@@ -8,6 +8,13 @@
 
 package inet.transportlayer.tcp_lwip;
 
+//
+// Represents a single TCP connection in the LwIP (Lightweight IP) TCP stack
+// implementation. Manages connection state, processes application commands,
+// handles data transfer through send and receive queues, and provides
+// statistics about connection parameters such as window sizes and sequence
+// numbers.
+//
 simple TcpLwipConnection {
     parameters:
         @signal[state];    // FSM state

@@ -16,7 +16,6 @@ void FacingMobility::initialize(int stage)
     MobilityBase::initialize(stage);
     EV_TRACE << "initializing FacingMobility stage " << stage << endl;
     if (stage == INITSTAGE_LOCAL) {
-        format.parseFormat(par("displayStringTextFormat"));
         sourceMobility.reference(this, "sourceMobility", true);
         targetMobility.reference(this, "targetMobility", true);
     }
@@ -36,9 +35,7 @@ const Quaternion& FacingMobility::getCurrentAngularPosition()
 
 void FacingMobility::handleParameterChange(const char *name)
 {
-    if (!strcmp(name, "displayStringTextFormat"))
-        format.parseFormat(par("displayStringTextFormat"));
-    else if (!strcmp(name, "targetMobility")) {
+    if (!strcmp(name, "targetMobility")) {
         targetMobility.reference(this, "targetMobility", true);
         emitMobilityStateChangedSignal();
     }

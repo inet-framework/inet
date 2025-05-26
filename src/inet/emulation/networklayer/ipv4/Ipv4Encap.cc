@@ -8,7 +8,7 @@
 #include "inet/emulation/networklayer/ipv4/Ipv4Encap.h"
 
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/common/checksum/TcpIpChecksum.h"
+#include "inet/common/checksum/Checksum.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/stlutils.h"
@@ -27,11 +27,11 @@ Define_Module(Ipv4Encap);
 
 void Ipv4Encap::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         defaultTimeToLive = 16; // par("timeToLive");
         defaultMCTimeToLive = 16; // par("multicastTimeToLive");
-        crcMode = CRC_COMPUTED;
+        checksumMode = CHECKSUM_COMPUTED;
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         registerService(Protocol::ipv4, gate("upperLayerIn"), gate("upperLayerOut"));
@@ -174,28 +174,28 @@ void Ipv4Encap::encapsulate(Packet *transportPacket)
         ttl = defaultTimeToLive;
     ipv4Header->setTimeToLive(ttl);
     ipv4Header->setTotalLengthField(ipv4Header->getChunkLength() + transportPacket->getDataLength());
-    ipv4Header->setCrcMode(crcMode);
-    ipv4Header->setCrc(0);
-    switch (crcMode) {
-        case CRC_DECLARED_CORRECT:
-            // if the CRC mode is declared to be correct, then set the CRC to an easily recognizable value
-            ipv4Header->setCrc(0xC00D);
+    ipv4Header->setChecksumMode(checksumMode);
+    ipv4Header->setChecksum(0);
+    switch (checksumMode) {
+        case CHECKSUM_DECLARED_CORRECT:
+            // if the CHECKSUM mode is declared to be correct, then set the CHECKSUM to an easily recognizable value
+            ipv4Header->setChecksum(0xC00D);
             break;
-        case CRC_DECLARED_INCORRECT:
-            // if the CRC mode is declared to be incorrect, then set the CRC to an easily recognizable value
-            ipv4Header->setCrc(0xBAAD);
+        case CHECKSUM_DECLARED_INCORRECT:
+            // if the CHECKSUM mode is declared to be incorrect, then set the CHECKSUM to an easily recognizable value
+            ipv4Header->setChecksum(0xBAAD);
             break;
-        case CRC_COMPUTED: {
+        case CHECKSUM_COMPUTED: {
             MemoryOutputStream ipv4HeaderStream;
             Chunk::serialize(ipv4HeaderStream, ipv4Header);
-            // compute the CRC
-            uint16_t crc = TcpIpChecksum::checksum(ipv4HeaderStream.getData());
-            ipv4Header->setCrc(crc);
-            // crc will be calculated in fragmentAndSend()
+            // compute the CHECKSUM
+            uint16_t checksum = internetChecksum(ipv4HeaderStream.getData());
+            ipv4Header->setChecksum(checksum);
+            // checksum will be calculated in fragmentAndSend()
             break;
         }
         default:
-            throw cRuntimeError("Unknown CRC mode");
+            throw cRuntimeError("Unknown CHECKSUM mode");
     }
     insertNetworkProtocolHeader(transportPacket, Protocol::ipv4, ipv4Header);
     // setting Ipv4 options is currently not supported

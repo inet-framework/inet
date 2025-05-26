@@ -7,6 +7,10 @@
 
 package inet.queueing.base;
 
+//
+// Base type for packet duplicator implementations. Provides common functionality
+// for creating and forwarding multiple copies of incoming packets.
+//
 simple PacketDuplicatorBase extends PacketProcessorBase
 {
     parameters:

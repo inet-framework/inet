@@ -7,15 +7,16 @@
 
 package inet.linklayer.ieee80211.mac.originator;
 
+import inet.common.SimpleModule;
 import inet.linklayer.ieee80211.mac.contract.IOriginatorAckPolicy;
-
 
 //
 // Implements the default originator ACK policy for non-QoS stations.
 //
-simple OriginatorAckPolicy like IOriginatorAckPolicy
+simple OriginatorAckPolicy extends SimpleModule like IOriginatorAckPolicy
 {
     parameters:
+        @class(OriginatorAckPolicy);
         string rateSelectionModule;
         double ackTimeout @unit(s) = default(-1s);
         @display("i=block/control");

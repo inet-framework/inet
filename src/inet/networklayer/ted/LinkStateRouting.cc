@@ -34,7 +34,7 @@ LinkStateRouting::~LinkStateRouting()
 
 void LinkStateRouting::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
     // TODO INITSTAGE
     if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         tedmod.reference(this, "tedModule", true);

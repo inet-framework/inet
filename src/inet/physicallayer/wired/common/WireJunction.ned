@@ -7,6 +7,8 @@
 
 package inet.physicallayer.wired.common;
 
+import inet.common.SimpleModule;
+
 //
 // Models a generic wiring hub.
 //
@@ -21,13 +23,15 @@ package inet.physicallayer.wired.common;
 // to precisely model what happens when the link state changes,
 // you cannot use this module.
 //
-simple WireJunction
+simple WireJunction extends SimpleModule
 {
     parameters:
+        @class(WireJunction);
         @wireJunction;
         @display("i=misc/node_vs");
         @signal[packetReceived](type=cPacket);
         @statistic[packetReceived](title="packets"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[channelOwner](title="channel owner"; source=packetReceived; record=channelOwner);
     gates:
         inout port[];
 }

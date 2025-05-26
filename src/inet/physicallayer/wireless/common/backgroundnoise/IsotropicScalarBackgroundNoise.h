@@ -8,13 +8,14 @@
 #ifndef __INET_ISOTROPICSCALARBACKGROUNDNOISE_H
 #define __INET_ISOTROPICSCALARBACKGROUNDNOISE_H
 
+#include "inet/common/Module.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IBackgroundNoise.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API IsotropicScalarBackgroundNoise : public cModule, public IBackgroundNoise
+class INET_API IsotropicScalarBackgroundNoise : public Module, public IBackgroundNoise
 {
   protected:
     W power = W(NaN);

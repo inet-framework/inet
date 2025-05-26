@@ -61,7 +61,7 @@ if useColors:
     txtERROR_expected = "\033[2;32m" + "ERROR (expected)" + "\033[0;0m"    # DARK GREEN
 
 fpExtraArgs = {
-    "~tND": { "'--**.crcMode=\"computed\"'",
+    "~tND": { "'--**.checksumMode=\"computed\"'",
               "'--**.fcsMode=\"computed\"'"
             },
     "tyf" : { "--cmdenv-fake-gui=true",

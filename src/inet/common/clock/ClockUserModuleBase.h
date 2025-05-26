@@ -12,9 +12,9 @@
 
 namespace inet {
 
-extern template class ClockUserModuleMixin<cSimpleModule>;
+extern template class ClockUserModuleMixin<SimpleModule>;
 
-class INET_API ClockUserModuleBase : public ClockUserModuleMixin<cSimpleModule>
+class INET_API ClockUserModuleBase : public ClockUserModuleMixin<SimpleModule>
 {
 };
 

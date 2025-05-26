@@ -8,13 +8,14 @@
 #ifndef __INET_COMMUNICATIONCACHEBASE_H
 #define __INET_COMMUNICATIONCACHEBASE_H
 
+#include "inet/common/Module.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/ICommunicationCache.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API CommunicationCacheBase : public cModule, public ICommunicationCache
+class INET_API CommunicationCacheBase : public Module, public ICommunicationCache
 {
   protected:
     /**

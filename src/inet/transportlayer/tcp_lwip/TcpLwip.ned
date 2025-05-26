@@ -7,6 +7,7 @@
 
 package inet.transportlayer.tcp_lwip;
 
+import inet.common.SimpleModule;
 import inet.transportlayer.contract.ITcp;
 
 //
@@ -16,12 +17,13 @@ import inet.transportlayer.contract.ITcp;
 //
 // See ~ITcp for general TCP layer information.
 //
-simple TcpLwip like ITcp
+simple TcpLwip extends SimpleModule like ITcp
 {
     parameters:
+        @class(TcpLwip);
         string sendQueueClass = default("");    //# TODO Obsolete!!!
         string receiveQueueClass = default(""); //# TODO Obsolete!!!
-        string crcMode @enum("declared", "computed") = default("declared");
+        string checksumMode @enum("declared", "computed") = default("declared");
         @display("i=block/wheelbarrow");
 
     gates:

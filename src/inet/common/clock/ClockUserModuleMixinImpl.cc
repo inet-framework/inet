@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
+#include "inet/common/SimpleModule.h"
 #include "inet/common/clock/ClockUserModuleMixinImpl.h"
 
 #include "inet/applications/base/ApplicationBase.h"
@@ -26,7 +26,7 @@
 
 namespace inet {
 
-template class ClockUserModuleMixin<cSimpleModule>;
+template class ClockUserModuleMixin<SimpleModule>;
 template class ClockUserModuleMixin<ApplicationBase>;
 
 template class ClockUserModuleMixin<OperationalMixin<queueing::PacketProcessorBase>>;

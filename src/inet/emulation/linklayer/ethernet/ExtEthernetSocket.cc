@@ -20,7 +20,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/NetworkNamespaceContext.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/checksum/EthernetCRC.h"
+#include "inet/common/checksum/Checksum.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/emulation/linklayer/ethernet/ExtEthernetSocket.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -37,7 +37,7 @@ ExtEthernetSocket::~ExtEthernetSocket()
 
 void ExtEthernetSocket::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         device = par("device");
         packetNameFormat = par("packetNameFormat");
@@ -87,6 +87,7 @@ void ExtEthernetSocket::handleMessage(cMessage *message)
 
 void ExtEthernetSocket::refreshDisplay() const
 {
+    SimpleModule::refreshDisplay();
     char buf[80];
     sprintf(buf, "device: %s\nsnt:%d rcv:%d", device, numSent, numReceived);
     getDisplayString().setTagArg("t", 0, buf);
@@ -158,7 +159,7 @@ bool ExtEthernetSocket::notify(int fd)
     if (n < 0)
         throw cRuntimeError("Calling recvfrom failed: %d", n);
     n = std::max(n, ETHER_MIN_LEN - 4);
-    uint32_t checksum = htonl(ethernetCRC(buffer, n));
+    uint32_t checksum = htonl(ethernetFcs(buffer, n));
     memcpy(&buffer[n], &checksum, sizeof(checksum));
     auto data = makeShared<BytesChunk>(static_cast<const uint8_t *>(buffer), n + 4);
     auto packet = new Packet(nullptr, data);

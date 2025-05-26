@@ -8,11 +8,33 @@
 #ifndef __INET_TUNSOCKET_H
 #define __INET_TUNSOCKET_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/socket/ISocket.h"
 
 namespace inet {
 
+/**
+ * @brief Socket interface for simulated TUN (network tunnel) devices in the INET framework.
+ *
+ * The TunSocket class provides a socket-like interface for applications within the simulation
+ * to interact with simulated TUN devices. TUN devices are virtual network interfaces that
+ * allow user-space programs to receive and send network packets.
+ *
+ * This socket implementation follows the callback-based pattern used throughout INET,
+ * where socket events (data arrival, socket closure) are reported through callback methods.
+ * Applications using TunSocket must:
+ *
+ * 1. Create a TunSocket instance
+ * 2. Set the output gate using setOutputGate()
+ * 3. Register a callback object using setCallback()
+ * 4. Open the socket with a specific interface ID
+ * 5. Send/receive packets through the socket
+ * 6. Close the socket when done
+ *
+ * The socket communicates with the simulated TUN interface using command messages and
+ * handles incoming data packets from the interface within the simulation environment.
+ */
 class INET_API TunSocket : public ISocket
 {
   public:
@@ -50,7 +72,7 @@ class INET_API TunSocket : public ISocket
      * multiply inherits from ICallback too, that is you
      * declared it as
      * <pre>
-     * class MyAppModule : public cSimpleModule, public TunSocket::ICallback
+     * class MyAppModule : public SimpleModule, public TunSocket::ICallback
      * </pre>
      * and redefined the necessary virtual functions; or you may use
      * dedicated class (and objects) for this purpose.
@@ -68,6 +90,9 @@ class INET_API TunSocket : public ISocket
      */
     virtual int getSocketId() const override { return socketId; }
 
+    /**
+     * Opens the socket and associates it with the specified TUN interface.
+     */
     void open(int interfaceId);
     virtual void send(Packet *packet) override;
     virtual void close() override;
@@ -81,4 +106,3 @@ class INET_API TunSocket : public ISocket
 } // namespace inet
 
 #endif
-

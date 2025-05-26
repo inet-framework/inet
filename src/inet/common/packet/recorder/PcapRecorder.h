@@ -10,6 +10,7 @@
 #ifndef __INET_PCAPRECORDER_H
 #define __INET_PCAPRECORDER_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/packet/dissector/PacketDissector.h"
 #include "inet/common/packet/PacketFilter.h"
 #include "inet/common/packet/printer/PacketPrinter.h"
@@ -20,7 +21,7 @@ namespace inet {
 /**
  * Dumps every packet using the IPacketWriter and PacketDump classes
  */
-class INET_API PcapRecorder : public cSimpleModule, protected cListener, public StringFormat::IDirectiveResolver, public PacketDissector::ICallback
+class INET_API PcapRecorder : public SimpleModule, protected cListener, public PacketDissector::ICallback
 {
   public:
     class INET_API IHelper {
@@ -47,6 +48,8 @@ class INET_API PcapRecorder : public cSimpleModule, protected cListener, public 
     PacketFilter packetFilter;
     int numRecorded = 0;
     bool verbose = false;
+    bool recordEmptyPackets = false;
+    bool enableConvertingPackets = true;
     bool recordPcap = false;
     std::vector<IHelper *> helpers;
     PacketPrinter packetPrinter;
@@ -73,7 +76,6 @@ class INET_API PcapRecorder : public cSimpleModule, protected cListener, public 
   protected:
     virtual void initialize() override;
     virtual void handleMessage(cMessage *msg) override;
-    virtual void refreshDisplay() const override;
     virtual void finish() override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
     virtual void recordPacket(const cPacket *msg, Direction direction, cComponent *source);

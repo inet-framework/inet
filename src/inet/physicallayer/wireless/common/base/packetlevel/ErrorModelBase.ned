@@ -7,12 +7,13 @@
 
 package inet.physicallayer.wireless.common.base.packetlevel;
 
+import inet.common.Module;
 import inet.physicallayer.wireless.common.contract.packetlevel.IErrorModel;
 
 //
 // Serves as the base module for error models.
 //
-module ErrorModelBase like IErrorModel
+module ErrorModelBase extends Module like IErrorModel
 {
     parameters:
         string corruptionMode @enum("packet", "chunk", "byte", "bit") = default("packet");

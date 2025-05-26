@@ -6,6 +6,7 @@
 #ifndef __INET_MOBILITYBASE_H
 #define __INET_MOBILITYBASE_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/StringFormat.h"
 #include "inet/common/geometry/common/CanvasProjection.h"
@@ -34,19 +35,8 @@ namespace inet {
  * @ingroup mobility
  * @ingroup basicModules
  */
-class INET_API MobilityBase : public cSimpleModule, public IMobility
+class INET_API MobilityBase : public SimpleModule, public IMobility
 {
-  protected:
-    class INET_API DirectiveResolver : public StringFormat::IDirectiveResolver {
-      protected:
-        IMobility *mobility = nullptr;
-
-      public:
-        DirectiveResolver(IMobility *mobility) : mobility(mobility) {}
-
-        virtual std::string resolveDirective(char directive) const override;
-    };
-
   public:
     /**
      * Selects how a mobility module should behave if it reaches the edge of the constraint area.
@@ -75,8 +65,6 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
     /** @brief The last orientation that was reported. */
     Quaternion lastOrientation;
 
-    StringFormat format;
-
   protected:
     MobilityBase();
 
@@ -103,9 +91,7 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
     /** @brief Moves the visual representation module's icon to the new position on the screen. */
     virtual void refreshDisplay() const override;
     virtual void updateDisplayStringFromMobilityState() const;
-
-    /** @brief Allows changing parameters from the GUI. */
-    virtual void handleParameterChange(const char *name) override;
+    virtual std::string resolveDirective(char directive) const override;
 
     /** @brief This modules should only receive self-messages. */
     virtual void handleMessage(cMessage *msg) override;

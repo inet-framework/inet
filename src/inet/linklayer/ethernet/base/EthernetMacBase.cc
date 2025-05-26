@@ -12,8 +12,7 @@
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/StringFormat.h"
-#include "inet/common/checksum/EthernetCRC.h"
+#include "inet/common/checksum/Checksum.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/linklayer/common/EtherType_m.h"
@@ -106,7 +105,6 @@ void EthernetMacBase::initialize(int stage)
 
 void EthernetMacBase::initializeFlags()
 {
-    displayStringTextFormat = par("displayStringTextFormat");
     sendRawBytes = par("sendRawBytes");
     duplexMode = true;
 
@@ -292,7 +290,7 @@ void EthernetMacBase::decapsulate(Packet *packet)
 }
 
 // FIXME should use it in EthernetCsmaMacPhy, EthernetMacPhy, etc. modules. But should not use it in EtherBus, EthernetHub.
-bool EthernetMacBase::verifyCrcAndLength(Packet *packet)
+bool EthernetMacBase::verifyFcsAndLength(Packet *packet)
 {
     EV_STATICCONTEXT;
 
@@ -314,7 +312,7 @@ bool EthernetMacBase::verifyCrcAndLength(Packet *packet)
             // 1. fill in the data
             ethBytes->copyToBuffer(buffer, bufferLength);
             // 2. compute the FCS
-            auto computedFcs = ethernetCRC(buffer, bufferLength);
+            auto computedFcs = ethernetFcs(buffer, bufferLength);
             delete[] buffer;
             isFcsBad = (computedFcs != ethTrailer->getFcs()); // FIXME how to check fcs?
             if (isFcsBad)
@@ -512,38 +510,38 @@ void EthernetMacBase::refreshDisplay() const
 
     if (!strcmp(getParentModule()->getNedTypeName(), "inet.linklayer.ethernet.EthernetInterface"))
         getParentModule()->getDisplayString().setTagArg("i", 1, color);
+}
 
-    auto text = StringFormat::formatString(displayStringTextFormat, [&] (char directive) -> std::string {
-         switch (directive) {
-            case 's':
-                return std::to_string(numFramesSent);
-            case 'r':
-                return std::to_string(numFramesReceivedOK);
-            case 'd':
-                return std::to_string(numDroppedPkFromHLIfaceDown + numDroppedIfaceDown + numDroppedBitError + numDroppedNotForUs);
-            case 'q':
-                return txQueue != nullptr ? std::to_string(txQueue->getNumPackets()) : "";
-            case 'b':
-                if (transmissionChannel == nullptr)
-                    return "not connected";
-                else {
-                    char datarateText[40];
-                    double datarate = transmissionChannel->getNominalDatarate();
-                    if (datarate >= 1e9)
-                        sprintf(datarateText, "%gGbps", datarate / 1e9);
-                    else if (datarate >= 1e6)
-                        sprintf(datarateText, "%gMbps", datarate / 1e6);
-                    else if (datarate >= 1e3)
-                        sprintf(datarateText, "%gkbps", datarate / 1e3);
-                    else
-                        sprintf(datarateText, "%gbps", datarate);
-                    return datarateText;
-                }
-            default:
-                throw cRuntimeError("Unknown directive: %c", directive);
-        }
-        });
-    getDisplayString().setTagArg("t", 0, text.c_str());
+std::string EthernetMacBase::resolveDirective(char directive) const 
+{
+    switch (directive) {
+        case 's':
+            return std::to_string(numFramesSent);
+        case 'r':
+            return std::to_string(numFramesReceivedOK);
+        case 'd':
+            return std::to_string(numDroppedPkFromHLIfaceDown + numDroppedIfaceDown + numDroppedBitError + numDroppedNotForUs);
+        case 'q':
+            return txQueue != nullptr ? std::to_string(txQueue->getNumPackets()) : "";
+        case 'b':
+            if (transmissionChannel == nullptr)
+                return "not connected";
+            else {
+                char datarateText[40];
+                double datarate = transmissionChannel->getNominalDatarate();
+                if (datarate >= 1e9)
+                    sprintf(datarateText, "%gGbps", datarate / 1e9);
+                else if (datarate >= 1e6)
+                    sprintf(datarateText, "%gMbps", datarate / 1e6);
+                else if (datarate >= 1e3)
+                    sprintf(datarateText, "%gkbps", datarate / 1e3);
+                else
+                    sprintf(datarateText, "%gbps", datarate);
+                return datarateText;
+            }
+        default:
+            return MacProtocolBase::resolveDirective(directive);
+    }
 }
 
 void EthernetMacBase::changeTransmissionState(MacTransmitState newState)

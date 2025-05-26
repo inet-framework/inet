@@ -20,6 +20,7 @@ from inet.simulation.build import *
 from inet.simulation.config import *
 from inet.simulation.fingerprint import *
 from inet.simulation.project import *
+from inet.simulation.stdout import *
 from inet.simulation.subprocess import *
 from inet.simulation.iderunner import *
 
@@ -136,14 +137,34 @@ class SimulationTaskResult(TaskResult):
         file_path = simulation_project.get_full_path(simulation_config.working_directory + "/" + self.eventlog_file_path)
         eventlog_file = open(file_path)
         fingerprints = []
+        event_numbers = []
         ingredients = None
         for line in eventlog_file:
-            match = re.match(r"E # .* f (.*?)/(.*?)", line)
+            match = re.match(r"E # (\d+) .* f (.*?)/(.*)", line)
             if match:
-                ingredients = match.group(2)
-                fingerprints.append(Fingerprint(match.group(1), match.group(2)))
+                ingredients = match.group(3)
+                fingerprints.append(Fingerprint(match.group(2), match.group(3)))
+                event_numbers.append(int(match.group(1)))
         eventlog_file.close()
-        return FingerprintTrajectory(self, ingredients, fingerprints, range(0, len(fingerprints)))
+        return FingerprintTrajectory(self, ingredients, fingerprints, event_numbers)
+
+    def get_stdout_trajectory(self, filter=None, exclude_filter=None, full_match=False):
+        simulation_task = self.task
+        simulation_config = simulation_task.simulation_config
+        simulation_project = simulation_config.simulation_project
+        event_numbers = []
+        lines = []
+        stdout = self.subprocess_result.stdout or ""
+        event_number = None
+        for line in stdout.split("\n"):
+            match = re.match(r"\*\* Event #(\d+) .*", line)
+            if match:
+                event_number = int(match.group(1))
+            else:
+                if matches_filter(line, filter, exclude_filter, full_match):
+                    event_numbers.append(event_number)
+                    lines.append(line)
+        return StdoutTrajectory(self, event_numbers, lines)
 
 class SimulationTask(Task):
     """
@@ -349,7 +370,7 @@ class SimulationTask(Task):
         file_args = (["--eventlog-file=" + self.eventlog_file_path] if self.eventlog_file_path else []) + \
                     (["--output-scalar-file=" + self.scalar_file_path] if self.scalar_file_path else []) + \
                     (["--output-vector-file=" + self.vector_file_path] if self.vector_file_path else [])
-        record_pcap_args = ["--**.numPcapRecorders=1", "--**.crcMode=\"computed\"", "--**.fcsMode=\"computed\""] if self.record_pcap else []
+        record_pcap_args = ["--**.numPcapRecorders=1", "--**.checksumMode=\"computed\"", "--**.fcsMode=\"computed\""] if self.record_pcap else []
         executable = simulation_project.get_executable(mode=self.mode)
         default_args = simulation_project.get_default_args()
         args = [*prepend_args, executable, *default_args, "-s", "-u", self.user_interface, "-f", ini_file, "-c", config, "-r", str(self.run_number), *inifile_entries_args, *result_folder_args, *sim_time_limit_args, *cpu_time_limit_args, *record_eventlog_args, *file_args, *record_pcap_args, *append_args]
@@ -413,7 +434,7 @@ class SimulationTask(Task):
     #             if os.path.exists(full_file_path):
     #                 dependency = read_dependency_file(full_file_path)
     #                 for key, depends_on_file_names in dependency.items():
-    #                     additional_file_names = [file_name.replace(".h", ".cc") for file_name in depends_on_file_names if file_name.endswith(".h")] 
+    #                     additional_file_names = [file_name.replace(".h", ".cc") for file_name in depends_on_file_names if file_name.endswith(".h")]
     #                     file_names = file_names + depends_on_file_names + additional_file_names
     #         file_names = sorted(list(set(file_names)))
     #         if file_names_copy == file_names:
@@ -520,7 +541,7 @@ def get_simulation_tasks(simulation_project=None, simulation_configs=None, mode=
             Specifies if collecting simulation configurations and simulation tasks is done sequentially or concurrently.
 
         expected_num_tasks (int):
-            The number of tasks that is expected to be returned. If the result doesn't match an exception is raised. 
+            The number of tasks that is expected to be returned. If the result doesn't match an exception is raised.
 
         simulation_task_class (type):
             Determines the Python class of the returned simulation task objects.

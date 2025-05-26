@@ -9,6 +9,14 @@ package inet.protocolelement.common;
 
 import inet.queueing.base.PacketProcessorBase;
 
+//
+// Enforces a minimum time gap between consecutive packets, which is important
+// for protocols like Ethernet that require an interpacket gap (IPG) or
+// interframe spacing. This module delays packet transmission to ensure the
+// configured minimum gap duration is maintained between packets. It can
+// optionally use an external clock module for timing, and supports packet
+// streaming.
+//
 simple InterpacketGapInserter extends PacketProcessorBase
 {
     parameters:

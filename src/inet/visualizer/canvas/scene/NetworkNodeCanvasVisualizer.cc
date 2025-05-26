@@ -44,6 +44,7 @@ void NetworkNodeCanvasVisualizer::initialize(int stage)
 
 void NetworkNodeCanvasVisualizer::refreshDisplay() const
 {
+    VisualizerBase::refreshDisplay();
     for (auto it : networkNodeVisualizations) {
         auto networkNode = getSimulation()->getModule(it.first);
         auto visualization = it.second;

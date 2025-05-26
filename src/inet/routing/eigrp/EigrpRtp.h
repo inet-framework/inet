@@ -14,6 +14,7 @@
 #ifndef __INET_EIGRPRTP_H
 #define __INET_EIGRPRTP_H
 
+#include "inet/common/SimpleModule.h"
 #include <omnetpp.h>
 
 #include "inet/common/packet/Packet.h"
@@ -59,7 +60,7 @@ class INET_API EigrpRequestQueue : public cObject
  * Class represents Reliable Transport Protocol for reliable transmission of EIGRP messages.
  */
 template<typename IPAddress>
-class INET_API EigrpRtpT : public cSimpleModule
+class INET_API EigrpRtpT : public SimpleModule
 {
     struct NeighborInfo {
         int neighborId;

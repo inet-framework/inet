@@ -13,7 +13,7 @@ Test serializing frames
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
-#include "inet/common/checksum/EthernetCRC.h"
+#include "inet/common/checksum/Checksum.h"
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
 #include "inet/linklayer/ethernet/common/Ethernet.h"
 #include "inet/linklayer/ieee8022/Ieee8022Llc.h"
@@ -155,7 +155,7 @@ static bool testRecords(const char* filename, bool fcs = true)
             if (! fcs && fileHeader.network == LINKTYPE_ETHERNET) {
                 // add FCS
                 const auto& fcsChunk = makeShared<EthernetFcs>();
-                uint32_t fcs = ethernetCRC(readBuf, recordHeader.incl_len);
+                uint32_t fcs = ethernetFcs(readBuf, recordHeader.incl_len);
                 fcsChunk->setFcs(fcs);
                 fcsChunk->setFcsMode(FCS_COMPUTED);
                 pk->insertAtBack(fcsChunk);

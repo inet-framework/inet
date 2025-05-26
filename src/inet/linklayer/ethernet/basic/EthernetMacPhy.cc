@@ -219,8 +219,8 @@ void EthernetMacPhy::processMsgFromNetwork(Signal *signal)
     decapsulate(packet);
     emit(packetReceivedFromLowerSignal, packet);
 
-    if (hasBitError || !verifyCrcAndLength(packet)) {
-        EV_WARN << "Bit error/CRC error in incoming packet -- dropping packet " << EV_FIELD(packet) << EV_ENDL;
+    if (hasBitError || !verifyFcsAndLength(packet)) {
+        EV_WARN << "Bit error/FCS error in incoming packet -- dropping packet " << EV_FIELD(packet) << EV_ENDL;
         numDroppedBitError++;
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);

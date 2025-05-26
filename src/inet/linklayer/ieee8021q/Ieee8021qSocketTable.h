@@ -8,11 +8,12 @@
 #ifndef __INET_IEEE8021QSOCKETTABLE_H
 #define __INET_IEEE8021QSOCKETTABLE_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/Protocol.h"
 
 namespace inet {
 
-class INET_API Ieee8021qSocketTable : public cSimpleModule
+class INET_API Ieee8021qSocketTable : public SimpleModule
 {
   public:
     struct Socket {

@@ -92,8 +92,8 @@ const ApskModulationBase *ApskRadio::getModulation() const
 void ApskRadio::encapsulate(Packet *packet) const
 {
     auto phyHeader = makeShared<ApskPhyHeader>();
-    phyHeader->setCrc(0);
-    phyHeader->setCrcMode(CRC_DISABLED);
+    phyHeader->setFcs(0);
+    phyHeader->setFcsMode(FCS_DISABLED);
     phyHeader->setPayloadLengthField(packet->getDataLength());
     phyHeader->setPayloadProtocol(packet->getTag<PacketProtocolTag>()->getProtocol());
     b headerLength = phyHeader->getChunkLength();

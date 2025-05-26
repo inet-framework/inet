@@ -7,6 +7,7 @@
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
 import inet.linklayer.common.EtherType;
+import inet.common.checksum.ChecksumMode;
 import inet.linklayer.common.FcsMode;
 import inet.linklayer.common.MacAddress;
 
@@ -121,7 +122,7 @@ class EthernetFcs extends FieldsChunk
     chunkLength = B(4);
     uint32_t fcs; // actual value may be omitted depending on the selected fcsMode
 
-    FcsMode fcsMode = FCS_MODE_UNDEFINED; // meta information, not represented directly in the frame
+    ChecksumMode fcsMode = FCS_MODE_UNDEFINED; // meta information, not represented directly in the frame; NOTE: should be FcsMode, but OMMeT++ bug #1351 prevents that (fixed in OMNeT++ 6.2)
 }
 
 //
@@ -137,5 +138,5 @@ class EthernetFcs extends FieldsChunk
 //
 class EthernetFragmentFcs extends EthernetFcs
 {
-    bool mCrc; // meta information, not represented directly in the frame
+    bool mFcs; // meta information, not represented directly in the frame
 }

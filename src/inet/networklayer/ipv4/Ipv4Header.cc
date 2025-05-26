@@ -6,7 +6,7 @@
 
 
 #include "inet/common/INETUtils.h"
-#include "inet/common/checksum/TcpIpChecksum.h"
+#include "inet/common/checksum/Checksum.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4HeaderSerializer.h"
 
@@ -67,52 +67,52 @@ void Ipv4Header::setEcn(short ecn)
     setTypeOfService((typeOfService & 0xfc) | (ecn & 0x03));
 }
 
-void Ipv4Header::updateCrc()
+void Ipv4Header::updateChecksum()
 {
-    switch (crcMode) {
-        case CRC_DECLARED_CORRECT:
-            // if the CRC mode is declared to be correct, then set the CRC to an easily recognizable value
-            setCrc(0xC00D);
+    switch (checksumMode) {
+        case CHECKSUM_DECLARED_CORRECT:
+            // if the checksum mode is declared to be correct, then set the checksum to an easily recognizable value
+            setChecksum(0xC00D);
             break;
-        case CRC_DECLARED_INCORRECT:
-            // if the CRC mode is declared to be incorrect, then set the CRC to an easily recognizable value
-            setCrc(0xBAAD);
+        case CHECKSUM_DECLARED_INCORRECT:
+            // if the checksum mode is declared to be incorrect, then set the checksum to an easily recognizable value
+            setChecksum(0xBAAD);
             break;
-        case CRC_COMPUTED: {
-            // if the CRC mode is computed, then compute the CRC and set it
+        case CHECKSUM_COMPUTED: {
+            // if the checksum mode is computed, then compute the checksum and set it
             // this computation is delayed after the routing decision, see INetfilter hook
-            setCrc(0);
+            setChecksum(0);
             MemoryOutputStream ipv4HeaderStream;
             Ipv4HeaderSerializer::serialize(ipv4HeaderStream, *this);
-            // compute the CRC
-            uint16_t crc = TcpIpChecksum::checksum(ipv4HeaderStream.getData());
-            setCrc(crc);
+            // compute the checksum
+            uint16_t checksum = internetChecksum(ipv4HeaderStream.getData());
+            setChecksum(checksum);
             break;
         }
         default:
-            throw cRuntimeError("Unknown CRC mode: %d", (int)crcMode);
+            throw cRuntimeError("Unknown checksum mode: %d", (int)checksumMode);
     }
 }
 
-bool Ipv4Header::verifyCrc() const
+bool Ipv4Header::verifyChecksum() const
 {
-    switch (crcMode) {
-        case CRC_DECLARED_CORRECT: {
-            // if the CRC mode is declared to be correct, then the check passes if and only if the chunk is correct
+    switch (checksumMode) {
+        case CHECKSUM_DECLARED_CORRECT: {
+            // if the checksum mode is declared to be correct, then the check passes if and only if the chunk is correct
             return true;
         }
-        case CRC_DECLARED_INCORRECT:
-            // if the CRC mode is declared to be incorrect, then the check fails
+        case CHECKSUM_DECLARED_INCORRECT:
+            // if the checksum mode is declared to be incorrect, then the check fails
             return false;
-        case CRC_COMPUTED: {
-            // compute the CRC, the check passes if the result is 0xFFFF (includes the received CRC) and the chunks are correct
+        case CHECKSUM_COMPUTED: {
+            // compute the checksum, the check passes if the result is 0xFFFF (includes the received checksum) and the chunks are correct
             MemoryOutputStream ipv4HeaderStream;
             Ipv4HeaderSerializer::serialize(ipv4HeaderStream, *this);
-            uint16_t computedCrc = TcpIpChecksum::checksum(ipv4HeaderStream.getData());
-            return computedCrc == 0;
+            uint16_t computedChecksum = internetChecksum(ipv4HeaderStream.getData());
+            return computedChecksum == 0;
         }
         default:
-            throw cRuntimeError("Unknown CRC mode");
+            throw cRuntimeError("Unknown checksum mode");
     }
 }
 

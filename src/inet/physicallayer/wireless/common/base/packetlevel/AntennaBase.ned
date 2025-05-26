@@ -7,13 +7,14 @@
 
 package inet.physicallayer.wireless.common.base.packetlevel;
 
+import inet.common.Module;
 import inet.mobility.contract.IMobility;
 import inet.physicallayer.wireless.common.contract.packetlevel.IAntenna;
 
 //
 // Serves as the base module for antenna models.
 //
-module AntennaBase like IAntenna
+module AntennaBase extends Module like IAntenna
 {
     parameters:
         string mobilityModule; // The path to the mobility module relative to this module, only used if no mobility submodule is present

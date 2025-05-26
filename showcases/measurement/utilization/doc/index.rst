@@ -7,7 +7,7 @@ Goals
 In this example we explore the channel utilization statistics of wired and wireless
 transmission mediums.
 
-| INET version: ``4.4``
+| Verified with INET version: ``4.4``
 | Source files location: `inet/showcases/measurement/utilization <https://github.com/inet-framework/inet/tree/master/showcases/measurement/utilization>`__
 
 The Model
@@ -79,8 +79,8 @@ Ensure that ``opp_env`` is installed on your system, then execute:
 
 .. code-block:: bash
 
-    $ opp_env run inet-4.4 --init -w inet-workspace --install --chdir \
-       -c 'cd inet-4.4.*/showcases/measurement/utilization && inet'
+    $ opp_env run inet-4.5 --init -w inet-workspace --install --build-modes=release --chdir \
+       -c 'cd inet-4.5.*/showcases/measurement/utilization && inet'
 
 This command creates an ``inet-workspace`` directory, installs the appropriate
 versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
@@ -91,7 +91,7 @@ workspace and then open an interactive shell:
 
 .. code-block:: bash
 
-    $ opp_env install --init -w inet-workspace inet-4.4
+    $ opp_env install --init -w inet-workspace --build-modes=release inet-4.5
     $ cd inet-workspace
     $ opp_env shell
 

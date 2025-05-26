@@ -17,7 +17,7 @@ can be found in the :doc:`Emulation section </users-guide/ch-emulation>` of the 
 
 In this showcase, a real video application is used to stream a video file to another real video application. Note that this showcase requires the INET Framework's Emulation feature to be turned on (default is off) and is only supported on Linux.
 
-| INET version: ``4.2``
+| Verified with INET version: ``4.2``
 | Source files location: `inet/showcases/emulation/videostreaming <https://github.com/inet-framework/inet/tree/master/showcases/emulation/videostreaming>`__
 
 The Model
@@ -109,11 +109,11 @@ its address needs to match as the destination address in the script):
    :start-at: configurator
    :end-at: /config
 
-Also, the CRC and FCS need to be set to ``computed`` to be able to properly serialize/deserialize packets.
+Also, the checksum and FCS modes need to be set to ``computed`` to be able to properly serialize/deserialize packets.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-at: crcMode
+   :start-at: checksumMode
    :end-at: fcsMode
 
 Running/Results
@@ -171,7 +171,7 @@ Ensure that ``opp_env`` is installed on your system, then execute:
 
 .. code-block:: bash
 
-    $ opp_env install --init -w inet-workspace inet-latest --options=inet:full
+    $ opp_env install --init -w inet-workspace --build-modes=release inet-latest --options=inet:full
     $ cd inet-workspace
     $ opp_env shell
 

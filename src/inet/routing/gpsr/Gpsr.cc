@@ -1,4 +1,4 @@
-//
+    //
 // Copyright (C) 2013 OpenSim Ltd.
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
@@ -229,7 +229,7 @@ void Gpsr::sendBeacon(const Ptr<GpsrBeacon>& beacon, NetworkInterface *networkIn
     auto udpHeader = makeShared<UdpHeader>();
     udpHeader->setSourcePort(GPSR_UDP_PORT);
     udpHeader->setDestinationPort(GPSR_UDP_PORT);
-    udpHeader->setCrcMode(CRC_DISABLED);
+    udpHeader->setChecksumMode(CHECKSUM_DISABLED);
     udpPacket->insertAtFront(udpHeader);
     auto addresses = udpPacket->addTag<L3AddressReq>();
     addresses->setSrcAddress(getSelfAddress());

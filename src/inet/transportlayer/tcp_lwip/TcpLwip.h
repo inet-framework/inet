@@ -9,15 +9,16 @@
 #ifndef __INET_TCPLWIP_H
 #define __INET_TCPLWIP_H
 
+#include "inet/common/SimpleModule.h"
 #include <map>
 
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/transportlayer/common/CrcMode_m.h"
+#include "inet/common/checksum/ChecksumMode_m.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
-#include "inet/transportlayer/tcp_common/TcpCrcInsertionHook.h"
+#include "inet/transportlayer/tcp_common/TcpChecksumInsertionHook.h"
 #include "inet/transportlayer/tcp_common/TcpHeader_m.h"
 #include "inet/transportlayer/tcp_lwip/LwipTcpStackIf.h"
 #include "inet/transportlayer/tcp_lwip/TcpLwipConnection.h"
@@ -30,7 +31,7 @@ namespace tcp {
 /**
  * Module for using the LwIP TCP stack.
  */
-class INET_API TcpLwip : public cSimpleModule, public LwipTcpStackIf, public LifecycleUnsupported
+class INET_API TcpLwip : public SimpleModule, public LwipTcpStackIf, public LifecycleUnsupported
 {
   public:
     TcpLwip();
@@ -118,7 +119,7 @@ class INET_API TcpLwip : public cSimpleModule, public LwipTcpStackIf, public Lif
     LwipTcpLayer *pLwipTcpLayerM = nullptr;
     bool isAliveM = false;
     Packet *pCurTcpSegM = nullptr;
-    CrcMode crcMode = CRC_MODE_UNDEFINED;
+    ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
 };
 
 } // namespace tcp

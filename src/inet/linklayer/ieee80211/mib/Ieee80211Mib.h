@@ -8,13 +8,14 @@
 #ifndef __INET_IEEE80211MIB_H
 #define __INET_IEEE80211MIB_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/linklayer/common/MacAddress.h"
 
 namespace inet {
 
 namespace ieee80211 {
 
-class INET_API Ieee80211Mib : public cSimpleModule
+class INET_API Ieee80211Mib : public SimpleModule
 {
   public:
     enum Mode {

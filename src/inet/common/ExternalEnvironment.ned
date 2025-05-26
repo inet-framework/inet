@@ -6,6 +6,8 @@
 
 package inet.common;
 
+import inet.common.SimpleModule;
+
 //
 // Executes a setup command on the host OS during initialization and another teardown
 // command during module destruction. For example, it can be used to configure
@@ -33,9 +35,10 @@ package inet.common;
 //
 // @see ~ExternalApp, ~ExternalProcess
 //
-simple ExternalEnvironment
+simple ExternalEnvironment extends SimpleModule
 {
     parameters:
+        @class(ExternalEnvironment);
         int initStage = default(0); // Initialization stage for the setup command
         bool globalNamespace = default(false); // Create new network namespaces under /var/run/netns/ (Linux only)
         string namespace = default(""); // Name of the host OS network namespace (optional) (Linux only)

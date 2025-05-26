@@ -22,12 +22,8 @@ void StationaryMobility::refreshDisplay() const
 {
     if (updateFromDisplayString) {
         const_cast<StationaryMobility *>(this)->updateMobilityStateFromDisplayString();
-        DirectiveResolver directiveResolver(const_cast<StationaryMobility *>(this));
-        auto text = format.formatString(&directiveResolver);
-        getDisplayString().setTagArg("t", 0, text.c_str());
     }
-    else
-        StationaryMobilityBase::refreshDisplay();
+    StationaryMobilityBase::refreshDisplay();
 }
 
 void StationaryMobility::updateMobilityStateFromDisplayString()

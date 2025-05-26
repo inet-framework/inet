@@ -84,6 +84,39 @@ class INET_API WeightedHistogramRecorder : public cNumericResultRecorder
     virtual std::string str() const override;
 };
 
+class INET_API ChannelOwnerRecorder : public VectorRecorder
+{
+  protected:
+    class SetChannelOwnerEvent : public cEvent
+    {
+      protected:
+        ChannelOwnerRecorder *recorder = nullptr;
+
+      public:
+        SetChannelOwnerEvent(const char *name, ChannelOwnerRecorder *recorder) : cEvent(name), recorder(recorder) {}
+        ~SetChannelOwnerEvent() { }
+        virtual cEvent *dup() const override { copyNotSupported(); return nullptr; }
+        virtual cObject *getTargetObject() const override { return nullptr; }
+        virtual void execute() override { recorder->collect(simTime(), 1, nullptr); }
+    };
+
+  protected:
+    std::set<std::string> networkNodeNames;
+    cEnum *_enum = nullptr;
+    cEvent *event = nullptr;
+
+  protected:
+    virtual void init(Context *ctx) override;
+    virtual opp_string_map getStatisticAttributes() override;
+
+    void collectNetworkNodes(cModule *module, std::set<cModule *>& visitedModules);
+
+  public:
+    ChannelOwnerRecorder() {}
+
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref time, cObject *object, cObject *details) override;
+};
+
 } // namespace inet
 
 #endif

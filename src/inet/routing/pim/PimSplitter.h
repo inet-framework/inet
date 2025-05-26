@@ -10,6 +10,7 @@
 #ifndef __INET_PIMSPLITTER_H
 #define __INET_PIMSPLITTER_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -25,7 +26,7 @@ namespace inet {
  * Packets received from the PIM modules are simply forwarded to the
  * network layer.
  */
-class INET_API PimSplitter : public cSimpleModule
+class INET_API PimSplitter : public SimpleModule
 {
   private:
     ModuleRefByPar<IInterfaceTable> ift;

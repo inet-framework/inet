@@ -7,12 +7,26 @@
 
 package inet.linklayer.base;
 
-simple MacRelayUnitBase
+import inet.common.SimpleModule;
+
+//
+// Abstract base module for MAC relay unit implementations (Ethernet switches).
+// Provides core functionality for MAC address learning and frame forwarding in
+// bridged Ethernet networks. Contains functionality for maintaining a MAC
+// address table that maps addresses to ports, learning addresses from incoming
+// frames, and forwarding frames to appropriate interfaces. It is able to handle
+// unicast, multicast, and broadcast traffic according to standard Ethernet
+// switching rules.
+//
+// @see IMacForwardingTable
+//
+simple MacRelayUnitBase extends SimpleModule
 {
     parameters:
+        @class(MacRelayUnitBase);
         string macTableModule;
         string interfaceTableModule;
-        string displayStringTextFormat = default("proc: %p\ndisc: %d");
+        displayStringTextFormat = default("proc: %p\ndisc: %d");
         @display("i=block/switch");
         @signal[packetSentToLower](type=inet::Packet);
         @signal[packetReceivedFromUpper](type=inet::Packet);

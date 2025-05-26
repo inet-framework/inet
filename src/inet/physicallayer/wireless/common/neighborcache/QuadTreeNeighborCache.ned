@@ -7,13 +7,14 @@
 
 package inet.physicallayer.wireless.common.neighborcache;
 
+import inet.common.Module;
 import inet.physicallayer.wireless.common.contract.packetlevel.INeighborCache;
 
 //
 // This neighbor cache model organizes radios in a two-dimensional quad tree
 // (ignoring the Z axis) with a constant node size and updates periodically.
 //
-module QuadTreeNeighborCache like INeighborCache
+module QuadTreeNeighborCache extends Module like INeighborCache
 {
     parameters:
         string radioMediumModule = default("^");

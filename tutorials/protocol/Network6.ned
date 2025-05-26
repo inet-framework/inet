@@ -8,8 +8,8 @@
 package inet.tutorials.protocol;
 
 import inet.protocolelement.acknowledgement.Resending;
-import inet.protocolelement.checksum.FcsHeaderChecker;
-import inet.protocolelement.checksum.FcsHeaderInserter;
+import inet.protocolelement.checksum.EthernetFcsHeaderChecker;
+import inet.protocolelement.checksum.EthernetFcsHeaderInserter;
 import inet.protocolelement.common.InterpacketGapInserter;
 import inet.protocolelement.transceiver.PacketReceiver;
 import inet.protocolelement.transceiver.PacketTransmitter;
@@ -37,7 +37,7 @@ module ClientHost6
         resending: Resending {
             @display("p=150,400");
         }
-        fcsInserter: FcsHeaderInserter {
+        fcsInserter: EthernetFcsHeaderInserter {
             @display("p=150,500");
         }
         InterpacketGapInserter: InterpacketGapInserter {
@@ -66,7 +66,7 @@ module ServerHost6
         app: PassivePacketSink {
             @display("p=150,100");
         }
-        fcsChecker: FcsHeaderChecker {
+        fcsChecker: EthernetFcsHeaderChecker {
             @display("p=150,200");
         }
         receiver: PacketReceiver {

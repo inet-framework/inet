@@ -338,7 +338,7 @@ Register_ResultFilter("utilization", UtilizationFilter);
 void UtilizationFilter::init(Context *ctx)
 {
     cNumericResultFilter::init(ctx);
-    std::string fullPath = ctx->component->getFullPath() + "." + ctx->attrsProperty->getIndex() + ".throughput";
+    std::string fullPath = ctx->component->getFullPath() + "." + ctx->attrsProperty->getIndex() + ".utilization";
     cConfiguration *cfg = getEnvir()->getConfig();
     auto intervalValue = cfg->getPerObjectConfigValue(fullPath.c_str(), "interval");
     interval = cfg->parseDouble(intervalValue, "s", nullptr, 0.1);

@@ -7,6 +7,7 @@
 #ifndef __INET_MULTICLOCK_H
 #define __INET_MULTICLOCK_H
 
+#include "inet/common/Module.h"
 #include "inet/clock/common/ClockEvent.h"
 #include "inet/clock/common/ClockTime.h"
 #include "inet/clock/contract/IClock.h"
@@ -14,7 +15,7 @@
 
 namespace inet {
 
-class INET_API MultiClock : public cModule, public virtual IClock, public cListener
+class INET_API MultiClock : public Module, public virtual IClock, public cListener
 {
   protected:
     IClock *activeClock = nullptr;

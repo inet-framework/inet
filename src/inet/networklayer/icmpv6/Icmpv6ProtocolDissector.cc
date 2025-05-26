@@ -17,7 +17,7 @@ Register_Protocol_Dissector(&Protocol::icmpv6, Icmpv6ProtocolDissector);
 
 void Icmpv6ProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
-    bool isBadPacket = !Icmpv6::verifyCrc(packet);
+    bool isBadPacket = !Icmpv6::verifyChecksum(packet);
     const auto& header = packet->popAtFront<Icmpv6Header>();
     callback.startProtocolDataUnit(&Protocol::icmpv6);
     if (isBadPacket)

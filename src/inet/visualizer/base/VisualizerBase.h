@@ -8,6 +8,7 @@
 #ifndef __INET_VISUALIZERBASE_H
 #define __INET_VISUALIZERBASE_H
 
+#include "inet/common/SimpleModule.h"
 #include <functional>
 
 #include "inet/common/geometry/common/Coord.h"
@@ -19,7 +20,7 @@ namespace inet {
 
 namespace visualizer {
 
-class INET_API VisualizerBase : public cSimpleModule
+class INET_API VisualizerBase : public SimpleModule
 {
   protected:
     cModule *visualizationTargetModule = nullptr;

@@ -13,7 +13,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/checksum/TcpIpChecksum.h"
+#include "inet/common/checksum/Checksum.h"
 #include "inet/common/stlutils.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
@@ -144,7 +144,7 @@ Igmpv2::~Igmpv2()
 
 void Igmpv2::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         ift.reference(this, "interfaceTableModule", true);
@@ -163,8 +163,8 @@ void Igmpv2::initialize(int stage)
         lastMemberQueryCount = par("lastMemberQueryCount");
         unsolicitedReportInterval = par("unsolicitedReportInterval");
 //        version1RouterPresentInterval = par("version1RouterPresentInterval");
-        const char *crcModeString = par("crcMode");
-        crcMode = parseCrcMode(crcModeString, false);
+        const char *checksumModeString = par("checksumMode");
+        checksumMode = parseChecksumMode(checksumModeString, false);
 
         addWatches();
     }
@@ -448,8 +448,8 @@ void Igmpv2::startHostTimer(NetworkInterface *ie, HostGroupData *group, double m
 
 void Igmpv2::processIgmpMessage(Packet *packet)
 {
-    if (!verifyCrc(packet)) {
-        EV_WARN << "incoming IGMP packet has wrong CRC, dropped\n";
+    if (!verifyChecksum(packet)) {
+        EV_WARN << "incoming IGMP packet has wrong checksum, dropped\n";
         // drop packet
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);
@@ -674,7 +674,7 @@ void Igmpv2::sendQuery(NetworkInterface *ie, const Ipv4Address& groupAddr, doubl
         msg->setGroupAddress(groupAddr);
         msg->setMaxRespTimeCode(SimTime(maxRespTime).inUnit((SimTimeUnit) - 1));
         msg->setChunkLength(B(8));
-        insertCrc(msg, packet);
+        insertChecksum(msg, packet);
         packet->insertAtFront(msg);
         sendToIP(packet, ie, groupAddr.isUnspecified() ? Ipv4Address::ALL_HOSTS_MCAST : groupAddr);
 
@@ -695,7 +695,7 @@ void Igmpv2::sendReport(NetworkInterface *ie, HostGroupData *group)
     const auto& msg = makeShared<Igmpv2Report>();
     msg->setGroupAddress(group->groupAddr);
     msg->setChunkLength(B(8));
-    insertCrc(msg, packet);
+    insertChecksum(msg, packet);
     packet->insertAtFront(msg);
     // TODO fill Router Alert option
     auto raOption = new Ipv4OptionRouterAlert();
@@ -713,7 +713,7 @@ void Igmpv2::sendLeave(NetworkInterface *ie, HostGroupData *group)
     const auto& msg = makeShared<Igmpv2Leave>();
     msg->setGroupAddress(group->groupAddr);
     msg->setChunkLength(B(8));
-    insertCrc(msg, packet);
+    insertChecksum(msg, packet);
     packet->insertAtFront(msg);
     // TODO fill Router Alert option
     auto raOption = new Ipv4OptionRouterAlert();
@@ -956,52 +956,52 @@ const std::string Igmpv2::getHostGroupStateString(Igmpv2::HostGroupState hgs)
     return "UNKNOWN";
 }
 
-void Igmpv2::insertCrc(CrcMode crcMode, const Ptr<IgmpMessage>& igmpMsg, Packet *packet)
+void Igmpv2::insertChecksum(ChecksumMode checksumMode, const Ptr<IgmpMessage>& igmpMsg, Packet *packet)
 {
-    igmpMsg->setCrcMode(crcMode);
-    switch (crcMode) {
-        case CRC_DECLARED_CORRECT:
-            // if the CRC mode is declared to be correct, then set the CRC to an easily recognizable value
-            igmpMsg->setCrc(0xC00D);
+    igmpMsg->setChecksumMode(checksumMode);
+    switch (checksumMode) {
+        case CHECKSUM_DECLARED_CORRECT:
+            // if the checksum mode is declared to be correct, then set the checksum to an easily recognizable value
+            igmpMsg->setChecksum(0xC00D);
             break;
-        case CRC_DECLARED_INCORRECT:
-            // if the CRC mode is declared to be incorrect, then set the CRC to an easily recognizable value
-            igmpMsg->setCrc(0xBAAD);
+        case CHECKSUM_DECLARED_INCORRECT:
+            // if the checksum mode is declared to be incorrect, then set the checksum to an easily recognizable value
+            igmpMsg->setChecksum(0xBAAD);
             break;
-        case CRC_COMPUTED: {
-            // if the CRC mode is computed, then compute the CRC and set it
-            igmpMsg->setCrc(0x0000); // make sure that the CRC is 0 in the header before computing the CRC
+        case CHECKSUM_COMPUTED: {
+            // if the checksum mode is computed, then compute the checksum and set it
+            igmpMsg->setChecksum(0x0000); // make sure that the checksum is 0 in the header before computing the checksum
             MemoryOutputStream igmpStream;
             Chunk::serialize(igmpStream, igmpMsg);
             Chunk::serialize(igmpStream, packet->peekData(Chunk::PF_ALLOW_EMPTY));
-            uint16_t crc = TcpIpChecksum::checksum(igmpStream.getData());
-            igmpMsg->setCrc(crc);
+            uint16_t checksum = internetChecksum(igmpStream.getData());
+            igmpMsg->setChecksum(checksum);
             break;
         }
         default:
-            throw cRuntimeError("Unknown CRC mode");
+            throw cRuntimeError("Unknown checksum mode");
     }
 }
 
-bool Igmpv2::verifyCrc(const Packet *packet)
+bool Igmpv2::verifyChecksum(const Packet *packet)
 {
     const auto& igmpMsg = packet->peekAtFront<IgmpMessage>(b(-1), Chunk::PF_ALLOW_INCORRECT);
-    switch (igmpMsg->getCrcMode()) {
-        case CRC_DECLARED_CORRECT:
-            // if the CRC mode is declared to be correct, then the check passes if and only if the chunks are correct
+    switch (igmpMsg->getChecksumMode()) {
+        case CHECKSUM_DECLARED_CORRECT:
+            // if the checksum mode is declared to be correct, then the check passes if and only if the chunks are correct
             return igmpMsg->isCorrect();
-        case CRC_DECLARED_INCORRECT:
-            // if the CRC mode is declared to be incorrect, then the check fails
+        case CHECKSUM_DECLARED_INCORRECT:
+            // if the checksum mode is declared to be incorrect, then the check fails
             return false;
-        case CRC_COMPUTED: {
-            // otherwise compute the CRC, the check passes if the result is 0xFFFF (includes the received CRC)
+        case CHECKSUM_COMPUTED: {
+            // otherwise compute the checksum, the check passes if the result is 0xFFFF (includes the received checksum)
             auto dataBytes = packet->peekDataAsBytes(Chunk::PF_ALLOW_INCORRECT);
-            uint16_t crc = TcpIpChecksum::checksum(dataBytes->getBytes());
-            // TODO delete these isCorrect calls, rely on CRC only
-            return crc == 0 && igmpMsg->isCorrect();
+            uint16_t checksum = internetChecksum(dataBytes->getBytes());
+            // TODO delete these isCorrect calls, rely on checksum only
+            return checksum == 0 && igmpMsg->isCorrect();
         }
         default:
-            throw cRuntimeError("Unknown CRC mode");
+            throw cRuntimeError("Unknown checksum mode");
     }
 }
 

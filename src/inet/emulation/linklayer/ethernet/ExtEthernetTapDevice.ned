@@ -7,15 +7,18 @@
 
 package inet.emulation.linklayer.ethernet;
 
+import inet.common.SimpleModule;
+
 //
 // Provides a bidirectional connection to a real TAP device of the
 // host computer which is running the simulation. It writes the packets arrived
 // on `lowerLayerIn` gate to the specified real TAP device, and sends out packets
 // arrived from the real TAP device on `lowerLayerOut` gate.
 //
-simple ExtEthernetTapDevice
+simple ExtEthernetTapDevice extends SimpleModule
 {
     parameters:
+        @class(ExtEthernetTapDevice);
         string device; // Name of the existing real tap interface
         string namespace = default("");
         string packetNameFormat = default("Ext-%p-%t-%n");

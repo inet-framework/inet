@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
+
 #include "inet/clock/base/ClockBase.h"
 #include "inet/common/ModuleRefByPar.h"
 
@@ -15,8 +16,8 @@ simsignal_t ClockBase::timeJumpedSignal = cComponent::registerSignal("timeJumped
 
 void ClockBase::initialize(int stage)
 {
+    SimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        displayStringTextFormat = par("displayStringTextFormat");
         emitClockTimeInterval = par("emitClockTimeInterval");
         if (emitClockTimeInterval != 0) {
             timer = new cMessage();
@@ -71,11 +72,6 @@ void ClockBase::receiveSignal(cComponent *source, int signal, const simtime_t& t
 
 void ClockBase::finish() { emit(timeChangedSignal, getClockTime().asSimTime()); }
 
-void ClockBase::refreshDisplay() const
-{
-    auto text = StringFormat::formatString(displayStringTextFormat, this);
-    getDisplayString().setTagArg("t", 0, text.c_str());
-}
 
 clocktime_t ClockBase::getClockTime() const
 {
@@ -103,8 +99,7 @@ void ClockBase::scheduleClockEventAfter(clocktime_t clockTimeDelay, ClockEvent *
     clocktime_t nowClock = getClockTime();
     clocktime_t arrivalClockTime = nowClock + clockTimeDelay;
     msg->setArrivalClockTime(arrivalClockTime);
-    simtime_t simTimeDelay =
-        clockTimeDelay.isZero() ? SIMTIME_ZERO : computeSimTimeFromClockTime(arrivalClockTime) - simTime();
+    simtime_t simTimeDelay = clockTimeDelay.isZero() ? SIMTIME_ZERO : computeSimTimeFromClockTime(arrivalClockTime) - simTime();
     targetModule->scheduleAfter(simTimeDelay, msg);
 }
 
@@ -126,15 +121,16 @@ void ClockBase::handleClockEvent(ClockEvent *msg)
 std::string ClockBase::resolveDirective(char directive) const
 {
     switch (directive) {
-    case 't':
-        return getClockTime().str() + " s";
-    case 'T':
-        return getClockTime().ustr();
-    case 'd':
-        return (getClockTime() - referenceClockModule->getClockTime()).ustr();
-    default:
-        throw cRuntimeError("Unknown directive: %c", directive);
+        case 't':
+            return getClockTime().str() + " s";
+        case 'T':
+            return getClockTime().ustr();
+        case 'd':
+            return (getClockTime() - referenceClockModule->getClockTime()).ustr();
+        default:
+            return SimpleModule::resolveDirective(directive);
     }
 }
 
 } // namespace inet
+

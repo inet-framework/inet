@@ -7,6 +7,7 @@
 
 package inet.networklayer.configurator.ipv4;
 
+import inet.common.SimpleModule;
 import inet.networklayer.configurator.contract.IIpv4NodeConfigurator;
 
 //
@@ -17,9 +18,10 @@ import inet.networklayer.configurator.contract.IIpv4NodeConfigurator;
 // This module is kept only because the ~Ipv4NetworkConfigurator cannot assign IP addresses
 // to modules that are dynamically created/destroyed.
 //
-simple HostAutoConfigurator like IIpv4NodeConfigurator
+simple HostAutoConfigurator extends SimpleModule like IIpv4NodeConfigurator
 {
     parameters:
+        @class(HostAutoConfigurator);
         string interfaceTableModule;
         string interfaces = default("wlan");         // List of interfaces to autoassign addresses to, separated by a single space character
         string addressBase = default("10.0.0.0");    // Start of the address range from which to automatically assign an address to the autoassignInterfaces

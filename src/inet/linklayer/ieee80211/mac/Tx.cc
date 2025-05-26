@@ -9,7 +9,7 @@
 
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/checksum/EthernetCRC.h"
+#include "inet/common/checksum/Checksum.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
@@ -64,7 +64,7 @@ void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& head
         auto bufferLength = fcsBytes->getChunkLength().get<B>();
         auto buffer = new uint8_t[bufferLength];
         fcsBytes->copyToBuffer(buffer, bufferLength);
-        auto fcs = ethernetCRC(buffer, bufferLength);
+        auto fcs = ethernetFcs(buffer, bufferLength);
         updatedTrailer->setFcs(fcs);
         delete[] buffer;
     }

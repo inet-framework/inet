@@ -7,13 +7,14 @@
 
 package inet.linklayer.ethernet.basic;
 
+import inet.common.Module;
 import inet.linklayer.contract.IEthernetLayer;
 
 //
 // Implements the given module interface and can be used as an optional
 // module that removes itself from the module hierarchy during initialization.
 //
-module OmittedEthernetEncapsulation like IEthernetLayer
+module OmittedEthernetEncapsulation extends Module like IEthernetLayer
 {
     parameters:
         @class(::inet::OmittedModule);

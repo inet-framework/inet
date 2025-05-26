@@ -7,9 +7,10 @@
 
 package inet.physicallayer.wireless.common.analogmodel.scalar;
 
+import inet.common.Module;
 import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitterAnalogModel;
 
-module ScalarTransmitterAnalogModel like ITransmitterAnalogModel
+module ScalarTransmitterAnalogModel extends Module like ITransmitterAnalogModel
 {
     parameters:
         double power @unit(W) = default(nan W); // Default power

@@ -9,20 +9,29 @@
 
 package inet.routing.pim;
 
+import inet.common.SimpleModule;
+import inet.common.Module;
 import inet.routing.contract.IPim;
 import inet.routing.pim.modes.PimDm;
 import inet.routing.pim.modes.PimSm;
 import inet.routing.pim.tables.PimInterfaceTable;
 import inet.routing.pim.tables.PimNeighborTable;
 
-module Pim like IPim
+//
+// Implements the Protocol Independent Multicast (PIM) routing protocol for
+// IP multicast. This module integrates both PIM-DM (Dense Mode) and PIM-SM
+// (Sparse Mode) implementations, using a splitter to direct packets to the
+// appropriate mode based on interface configuration. PIM builds distribution
+// trees for efficient multicast data delivery across IP networks.
+//
+module Pim extends Module like IPim
 {
     parameters:
         @class(Pim);
         @display("i=block/network2");
         string interfaceTableModule;
         string routingTableModule;
-        string crcMode @enum("declared", "computed") = default("declared");
+        string checksumMode @enum("declared", "computed") = default("declared");
         *.interfaceTableModule = default(absPath(this.interfaceTableModule));
         *.routingTableModule = default(absPath(this.routingTableModule));
         *.pimInterfaceTableModule = default("^.pimInterfaceTable");
@@ -73,7 +82,13 @@ module Pim like IPim
         pimSplitter.ipIn <-- { @display("m=s"); } <-- networkLayerIn;
 }
 
-simple PimCrcInsertionHook
+//
+// Provides CRC (Cyclic Redundancy Check) insertion functionality for PIM packets.
+// This hook ensures data integrity by calculating and inserting CRC values into
+// outgoing PIM protocol messages before they are transmitted over the network.
+//
+simple PimChecksumInsertionHook extends SimpleModule
 {
+    parameters:
+        @class(PimChecksumInsertionHook);
 }
-

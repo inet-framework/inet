@@ -7,17 +7,20 @@
 
 package inet.networklayer.icmpv6;
 
+import inet.common.SimpleModule;
+
 //
 // ICMPv6 implementation.
 //
 // @see ~Ipv6, ~Ipv6RoutingTable, ~Ipv6NeighbourDiscovery
 //#FIXME gate descriptions needed...
 //
-simple Icmpv6
+simple Icmpv6 extends SimpleModule
 {
     parameters:
+        @class(Icmpv6);
         string interfaceTableModule;   // The path to the InterfaceTable module
-        string crcMode @enum("declared", "computed") = default("declared");
+        string checksumMode @enum("declared", "computed") = default("declared");
         @display("i=block/control");
     gates:
         input transportIn;

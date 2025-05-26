@@ -478,12 +478,6 @@ void ScenarioManager::processLifecycleCommand(const cXMLElement *node)
     initiateOperation(operation);
 }
 
-void ScenarioManager::refreshDisplay() const
-{
-    auto text = StringFormat::formatString(par("displayStringTextFormat"), this);
-    getDisplayString().setTagArg("t", 0, text.c_str());
-}
-
 std::string ScenarioManager::resolveDirective(char directive) const
 {
     switch (directive) {
@@ -498,7 +492,7 @@ std::string ScenarioManager::resolveDirective(char directive) const
         case 'n':
             return scheduledEvents.empty() ? "n/a" : scheduledEvents.front()->getName();
         default:
-            throw cRuntimeError("Unknown directive: %c", directive);
+            return SimpleModule::resolveDirective(directive);   
     }
 }
 

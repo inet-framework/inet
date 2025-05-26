@@ -17,7 +17,7 @@ Define_Module(LibTable);
 
 void LibTable::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         maxLabel = 0;

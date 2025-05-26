@@ -7,6 +7,7 @@
 
 package inet.applications.tcpapp;
 
+import inet.common.SimpleModule;
 import inet.applications.contract.IApp;
 
 //
@@ -75,9 +76,10 @@ import inet.applications.contract.IApp;
 //
 //   -# Use "bytestream", which transmits real bytes of messages.
 //
-simple TcpSessionApp like IApp
+simple TcpSessionApp extends SimpleModule like IApp
 {
     parameters:
+        @class(TcpSessionApp);
         string localAddress = default("");
         int localPort = default(-1);  // Local port
         bool active = default(true);

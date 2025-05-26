@@ -7,6 +7,8 @@
 
 package inet.networklayer.ipv6;
 
+import inet.common.SimpleModule;
+
 //
 // Implements the IPv6 protocol.
 //
@@ -48,9 +50,10 @@ package inet.networklayer.ipv6;
 //
 // @see ~Ipv6RoutingTable, ~Ipv6NeighbourDiscovery, ~Icmpv6
 //
-simple Ipv6
+simple Ipv6 extends SimpleModule
 {
     parameters:
+        @class(Ipv6);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
         string ipv6NeighbourDiscoveryModule;

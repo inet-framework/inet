@@ -209,7 +209,7 @@ class MultipleTaskResults:
         if len(self.results) == 0:
             return f"Empty {self.multiple_tasks.name} result"
         elif len(self.results) == 1:
-            return f"Single {self.multiple_tasks.name} result: " + self.results[0].get_description()
+            return f"Single {self.multiple_tasks.name} result: " + self.results[0].__repr__()
         else:
             exclude_result_filter = "|".join(filter(lambda possible_result: (self.possible_result_colors[self.possible_results.index(possible_result)] == COLOR_GREEN or
                                                                              self.possible_result_colors[self.possible_results.index(possible_result)] == COLOR_CYAN),
@@ -365,11 +365,11 @@ class Task:
     def set_cancel(self, cancel):
         self.cancel = cancel
 
-    def get_progress_string(self, index, count):
+    def get_progress_string(self, index, count, prefix):
         count_str = str(count)
         index_str = str(index + 1)
         index_str_padding = "0" * (len(count_str) - len(index_str))
-        return "[" + index_str_padding + index_str + "/" + count_str + "]" if index is not None and count is not None else ""
+        return "[" + prefix + index_str_padding + index_str + "/" + count_str + "]" if index is not None and count is not None else ""
 
     def get_action_string(self, **kwargs):
         return self.action
@@ -377,8 +377,8 @@ class Task:
     def get_parameters_string(self, **kwargs):
         return ""
 
-    def print_run_start(self, index=None, count=None, print_end=" ", output_stream=sys.stdout, **kwargs):
-        progress_string = (self.get_progress_string(index, count) if index is not None and count is not None else "")
+    def print_run_start(self, index=None, count=None, print_end=" ", output_stream=sys.stdout, progress_prefix="", **kwargs):
+        progress_string = (self.get_progress_string(index, count, progress_prefix) if index is not None and count is not None else "")
         action_string = self.get_action_string(**kwargs)
         parameters_string = self.get_parameters_string(**kwargs)
         elements = [e for e in [progress_string, action_string, parameters_string] if e != ""]

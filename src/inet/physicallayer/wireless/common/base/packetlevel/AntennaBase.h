@@ -8,13 +8,14 @@
 #ifndef __INET_ANTENNABASE_H
 #define __INET_ANTENNABASE_H
 
+#include "inet/common/Module.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IAntenna.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API AntennaBase : public IAntenna, public cModule
+class INET_API AntennaBase : public IAntenna, public Module
 {
   protected:
     opp_component_ptr<IMobility> mobility;

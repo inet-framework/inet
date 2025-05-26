@@ -7,14 +7,17 @@
 
 package inet.linklayer.loopback;
 
+import inet.common.SimpleModule;
+
 //
 // Loopback interface module implementation.
 //
 // @see ~LoopbackInterface
 //
-simple Loopback
+simple Loopback extends SimpleModule
 {
     parameters:
+        @class(Loopback);
         string interfaceTableModule;   // The path to the InterfaceTable module
         int mtu @unit(B) = default(4470B);
         @display("i=block/rxtx");

@@ -14,7 +14,7 @@ This demonstration includes a sample simulation that generates and records PCAP
 traces of TCP, UDP, and ICMP traffic, using various physical layer protocols
 such as Ethernet and 802.11.
 
-| INET version: ``4.0``
+| Verified with INET version: ``4.0``
 | Source files location: `inet/showcases/general/pcaprecording <https://github.com/inet-framework/inet/tree/master/showcases/general/pcaprecording>`__
 
 The model
@@ -27,11 +27,11 @@ in hosts and routers by specifying their :par:`numPcapRecorders` parameter
 :ned:`StandardHost` and derivatives, and router modules.)
 
 The PCAP recorder module records packets sent to and from modules that
-are in the same host as the PCAP recorder module. It writes traces in a 
-PCAP file, which has to be specified by the :par:`pcapFile` parameter. 
-This parameter acts as the main switch for recording, thus specifying 
-this parameter enables packet capture. The PCAP recorder can write traces 
-in the original or the next-generation PCAP file format, selected by the 
+are in the same host as the PCAP recorder module. It writes traces in a
+PCAP file, which has to be specified by the :par:`pcapFile` parameter.
+This parameter acts as the main switch for recording, thus specifying
+this parameter enables packet capture. The PCAP recorder can write traces
+in the original or the next-generation PCAP file format, selected by the
 :par:`fileFormat` parameter (``pcap`` or ``pcapng``).
 
 The :par:`moduleNamePatterns` parameter specifies which modules' traffic
@@ -57,14 +57,14 @@ Additionally, the :par:`packetFilter` parameter can use an expression
 to filter packets. The expression is evaluated for all packets to
 a boolean value indicating a match. The expression can contain the packet's
 fields (such as its name), contained chunks and their fields, protocol
-headers, etc. The default value is ``*`` that matches all packets, 
-thus no packets are filtered.  For more information on the packet filter, 
+headers, etc. The default value is ``*`` that matches all packets,
+thus no packets are filtered.  For more information on the packet filter,
 refer to the :ref:`ug:sec:results:recording-pcap-traces` section in the INET User's Guide.
 
 To summarize: the :par:`moduleNamePatterns` parameter specifies which
 modules' outputs should be captured. The
 :par:`dumpProtocols` parameter can narrow the set of recorded protocols at
-the level of capture. The :par:`packetFilter` parameter can further 
+the level of capture. The :par:`packetFilter` parameter can further
 narrow the set of captured packets.
 
 The configuration
@@ -185,13 +185,13 @@ In ``ethHost2``, we'll record traffic of the ``ipv4`` module. The
    :end-at: dumpProtocols
 
 By default, modules like :ned:`Ipv4` and :ned:`EthernetInterface` don't
-compute CRC and FCS frames, but assumes they are correct ("declared
-correct" mode). To record PCAP traces with correctly calculated CRC and FCS values,
+compute checksum and FCS fields, but assume they are correct ("declared
+correct" mode). To record PCAP traces with correctly calculated checksum and FCS values,
 the L2 and L3 modules need to be set to compute them:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-at: crcMode
+   :start-at: checksumMode
    :end-at: fcsMode
 
 Note that these settings are required, otherwise an error is returned.
@@ -220,7 +220,7 @@ The following video shows the traffic in the network:
 The following images show the same packets viewed in Qtenv's packet mode
 inspector panel and the PCAP trace opened with Wireshark. Both
 display the same data about the same packet (with the same data,
-sequence number, CRC, etc. Click to zoom.)
+sequence number, FCS, etc. Click to zoom.)
 
 TCP data, in ``ethHost1`` (sent from ``ethHost1`` to ``ethHost2``):
 
@@ -287,8 +287,8 @@ Ensure that ``opp_env`` is installed on your system, then execute:
 
 .. code-block:: bash
 
-    $ opp_env run inet-4.0 --init -w inet-workspace --install --chdir \
-       -c 'cd inet-4.0.*/showcases/general/pcaprecording && inet'
+    $ opp_env run inet-4.5 --init -w inet-workspace --install --build-modes=release --chdir \
+       -c 'cd inet-4.5.*/showcases/general/pcaprecording && inet'
 
 This command creates an ``inet-workspace`` directory, installs the appropriate
 versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
@@ -299,7 +299,7 @@ workspace and then open an interactive shell:
 
 .. code-block:: bash
 
-    $ opp_env install --init -w inet-workspace inet-4.0
+    $ opp_env install --init -w inet-workspace --build-modes=release inet-4.5
     $ cd inet-workspace
     $ opp_env shell
 

@@ -49,7 +49,7 @@ void TestApp::initialize()
         const auto& ipv4Header = makeShared<Ipv4Header>();
         ipv4Header->setSrcAddress(Ipv4Address("192.168.1.1"));
         ipv4Header->setTotalLengthField(ipv4Header->getHeaderLength() + packet->getDataLength());
-        ipv4Header->setCrcMode(CRC_DECLARED_CORRECT);
+        ipv4Header->setChecksumMode(CHECKSUM_DECLARED_CORRECT);
         packet->insertAtFront(ipv4Header);
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         send(packet, "out");
@@ -70,7 +70,7 @@ void TestApp::initialize()
         const auto& ipv4Header = makeShared<Ipv4Header>();
         ipv4Header->setDestAddress(Ipv4Address("192.168.1.1"));
         ipv4Header->setTotalLengthField(ipv4Header->getHeaderLength() + packet->getDataLength());
-        ipv4Header->setCrcMode(CRC_DECLARED_CORRECT);
+        ipv4Header->setChecksumMode(CHECKSUM_DECLARED_CORRECT);
         packet->insertAtFront(ipv4Header);
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         send(packet, "out");
@@ -92,11 +92,11 @@ void TestApp::initialize()
         const auto& udpPacket = makeShared<UdpHeader>();
         udpPacket->setSourcePort(1000);
         udpPacket->setTotalLengthField(UDP_HEADER_LENGTH + packet->getDataLength());
-        udpPacket->setCrcMode(CRC_DECLARED_CORRECT);
+        udpPacket->setChecksumMode(CHECKSUM_DECLARED_CORRECT);
         packet->insertAtFront(udpPacket);
         ipv4Header->setProtocolId(IP_PROT_UDP);
         ipv4Header->setTotalLengthField(ipv4Header->getHeaderLength() + packet->getDataLength());
-        ipv4Header->setCrcMode(CRC_DECLARED_CORRECT);
+        ipv4Header->setChecksumMode(CHECKSUM_DECLARED_CORRECT);
         packet->insertAtFront(ipv4Header);
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         send(packet, "out");
@@ -108,11 +108,11 @@ void TestApp::initialize()
         const auto& udpPacket = makeShared<UdpHeader>();
         udpPacket->setDestinationPort(1000);
         udpPacket->setTotalLengthField(UDP_HEADER_LENGTH + packet->getDataLength());
-        udpPacket->setCrcMode(CRC_DECLARED_CORRECT);
+        udpPacket->setChecksumMode(CHECKSUM_DECLARED_CORRECT);
         packet->insertAtFront(udpPacket);
         ipv4Header->setProtocolId(IP_PROT_UDP);
         ipv4Header->setTotalLengthField(ipv4Header->getHeaderLength() + packet->getDataLength());
-        ipv4Header->setCrcMode(CRC_DECLARED_CORRECT);
+        ipv4Header->setChecksumMode(CHECKSUM_DECLARED_CORRECT);
         packet->insertAtFront(ipv4Header);
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         send(packet, "out");
@@ -124,11 +124,11 @@ void TestApp::initialize()
         const auto& udpPacket = makeShared<UdpHeader>();
         udpPacket->setDestinationPort(999);
         udpPacket->setTotalLengthField(UDP_HEADER_LENGTH + packet->getDataLength());
-        udpPacket->setCrcMode(CRC_DECLARED_CORRECT);
+        udpPacket->setChecksumMode(CHECKSUM_DECLARED_CORRECT);
         packet->insertAtFront(udpPacket);
         ipv4Header->setProtocolId(IP_PROT_UDP);
         ipv4Header->setTotalLengthField(ipv4Header->getHeaderLength() + packet->getDataLength());
-        ipv4Header->setCrcMode(CRC_DECLARED_CORRECT);
+        ipv4Header->setChecksumMode(CHECKSUM_DECLARED_CORRECT);
         packet->insertAtFront(ipv4Header);
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         send(packet, "out");
@@ -139,7 +139,7 @@ void TestApp::initialize()
         const auto& ipv4Header = makeShared<Ipv4Header>();
         ipv4Header->setTypeOfService(0x2e);
         ipv4Header->setTotalLengthField(ipv4Header->getHeaderLength() + packet->getDataLength());
-        ipv4Header->setCrcMode(CRC_DECLARED_CORRECT);
+        ipv4Header->setChecksumMode(CHECKSUM_DECLARED_CORRECT);
         packet->insertAtFront(ipv4Header);
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         send(packet, "out");
@@ -160,7 +160,7 @@ void TestApp::initialize()
         const auto& ipv4Header = makeShared<Ipv4Header>();
         ipv4Header->setSrcAddress(Ipv4Address("192.168.2.1"));
         ipv4Header->setTotalLengthField(ipv4Header->getHeaderLength() + packet->getDataLength());
-        ipv4Header->setCrcMode(CRC_DECLARED_CORRECT);
+        ipv4Header->setChecksumMode(CHECKSUM_DECLARED_CORRECT);
         packet->insertAtFront(ipv4Header);
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         send(packet, "out");
@@ -181,7 +181,7 @@ void TestApp::initialize()
         const auto& ipv4Header = makeShared<Ipv4Header>();
         ipv4Header->setDestAddress(Ipv4Address("192.168.2.1"));
         ipv4Header->setTotalLengthField(ipv4Header->getHeaderLength() + packet->getDataLength());
-        ipv4Header->setCrcMode(CRC_DECLARED_CORRECT);
+        ipv4Header->setChecksumMode(CHECKSUM_DECLARED_CORRECT);
         packet->insertAtFront(ipv4Header);
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         send(packet, "out");
@@ -203,11 +203,11 @@ void TestApp::initialize()
         const auto& udpPacket = makeShared<UdpHeader>();
         udpPacket->setSourcePort(2100);
         udpPacket->setTotalLengthField(UDP_HEADER_LENGTH + packet->getDataLength());
-        udpPacket->setCrcMode(CRC_DECLARED_CORRECT);
+        udpPacket->setChecksumMode(CHECKSUM_DECLARED_CORRECT);
         packet->insertAtFront(udpPacket);
         ipv4Header->setProtocolId(IP_PROT_UDP);
         ipv4Header->setTotalLengthField(ipv4Header->getHeaderLength() + packet->getDataLength());
-        ipv4Header->setCrcMode(CRC_DECLARED_CORRECT);
+        ipv4Header->setChecksumMode(CHECKSUM_DECLARED_CORRECT);
         packet->insertAtFront(ipv4Header);
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         send(packet, "out");
@@ -219,7 +219,7 @@ void TestApp::initialize()
         const auto& udpPacket = makeShared<UdpHeader>();
         udpPacket->setSourcePort(2200);
         udpPacket->setTotalLengthField(UDP_HEADER_LENGTH + packet->getDataLength());
-        udpPacket->setCrcMode(CRC_DECLARED_CORRECT);
+        udpPacket->setChecksumMode(CHECKSUM_DECLARED_CORRECT);
         packet->insertAtFront(udpPacket);
         ipv6Header->setProtocolId(IP_PROT_UDP);
         ipv6Header->setPayloadLength(packet->getDataLength());
@@ -237,7 +237,7 @@ void TestApp::initialize()
         packet->insertAtFront(udpPacket);
         ipv4Header->setProtocolId(IP_PROT_UDP);
         ipv4Header->setTotalLengthField(ipv4Header->getHeaderLength() + packet->getDataLength());
-        ipv4Header->setCrcMode(CRC_DECLARED_CORRECT);
+        ipv4Header->setChecksumMode(CHECKSUM_DECLARED_CORRECT);
         packet->insertAtFront(ipv4Header);
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         send(packet, "out");
@@ -249,7 +249,7 @@ void TestApp::initialize()
         const auto& udpPacket = makeShared<UdpHeader>();
         udpPacket->setDestinationPort(2400);
         udpPacket->setTotalLengthField(UDP_HEADER_LENGTH + packet->getDataLength());
-        udpPacket->setCrcMode(CRC_DECLARED_CORRECT);
+        udpPacket->setChecksumMode(CHECKSUM_DECLARED_CORRECT);
         packet->insertAtFront(udpPacket);
         ipv6Header->setProtocolId(IP_PROT_UDP);
         ipv6Header->setPayloadLength(packet->getDataLength());
@@ -262,7 +262,7 @@ void TestApp::initialize()
         Packet *packet = new Packet("ipv4-18", makeShared<ByteCountChunk>(B(30)));
         const auto& ipv4Header = makeShared<Ipv4Header>();
         ipv4Header->setTotalLengthField(ipv4Header->getHeaderLength() + packet->getDataLength());
-        ipv4Header->setCrcMode(CRC_DECLARED_CORRECT);
+        ipv4Header->setChecksumMode(CHECKSUM_DECLARED_CORRECT);
         packet->insertAtFront(ipv4Header);
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         send(packet, "out");

@@ -7,10 +7,14 @@
 
 package inet.transportlayer.sctp;
 
+import inet.common.SimpleModule;
+
 //
 // SCTP UDP hook module.
 //
-simple SctpUdpHook
+simple SctpUdpHook extends SimpleModule
 {
+    parameters:
+        @class(SctpUdpHook);
 }
 

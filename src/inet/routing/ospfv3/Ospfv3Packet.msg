@@ -88,7 +88,7 @@ class Ospfv3LsaHeader extends cObject
     Ipv4Address advertisingRouter;  // 32 bits
     uint32_t lsaSequenceNumber;     // 32 bits
     uint16_t lsaChecksum;     // 16 bits
-    CrcMode lsCrcMode = CRC_MODE_UNDEFINED;
+    ChecksumMode lsChecksumMode = CHECKSUM_MODE_UNDEFINED;
     uint16_t lsaLength;
 }
 

@@ -64,7 +64,7 @@ void L3NetworkConfiguratorBase::extractTopology(Topology& topology)
 {
     EV_INFO << "Extracting network topology" << endl;
     // extract topology
-    topology.extractByProperty("networkNode");
+    topology.extractFromNetwork(Topology::selectTopologyNode);
     EV_DEBUG << "Topology contains " << topology.getNumNodes() << " nodes" << endl;
 
     // print isolated networks information

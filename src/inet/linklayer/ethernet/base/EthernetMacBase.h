@@ -63,7 +63,6 @@ class INET_API EthernetMacBase : public MacProtocolBase, public queueing::IActiv
     };
 
     // configuration
-    const char *displayStringTextFormat = nullptr;
     bool sendRawBytes = false;
     bool allowNonstandardBitrate = true;
     FcsMode fcsMode = FCS_MODE_UNDEFINED;
@@ -167,13 +166,15 @@ class INET_API EthernetMacBase : public MacProtocolBase, public queueing::IActiv
     virtual void decapsulate(Packet *packet);
 
     /// Verify ethernet packet: check FCS and payload length
-    bool verifyCrcAndLength(Packet *packet);
+    bool verifyFcsAndLength(Packet *packet);
 
     // MacBase
     virtual void configureNetworkInterface() override;
 
     // display
     virtual void refreshDisplay() const override;
+
+    virtual std::string resolveDirective(char directive) const override;
 
     // model change related functions
     virtual void receiveSignal(cComponent *src, simsignal_t signalId, cObject *obj, cObject *details) override;

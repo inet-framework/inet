@@ -93,7 +93,7 @@ EthernetPlca::~EthernetPlca()
 
 void EthernetPlca::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         plca_node_count = par("plca_node_count");
         local_nodeID = par("local_nodeID");

@@ -7,6 +7,7 @@
 
 package inet.linklayer.configurator.common;
 
+import inet.common.SimpleModule;
 import inet.networklayer.configurator.contract.INetworkConfigurator;
 
 //
@@ -16,9 +17,10 @@ import inet.networklayer.configurator.contract.INetworkConfigurator;
 // nodes. The configuration parameter specifies the streams with a set of path
 // fragments.
 //
-simple StreamRedundancyConfigurator like INetworkConfigurator
+simple StreamRedundancyConfigurator extends SimpleModule like INetworkConfigurator
 {
     parameters:
+        @class(StreamRedundancyConfigurator);
         int minVlanId = default(0); // Lowest available VLAN ID
         int maxVlanId = default(4095); // Highest available VLAN ID
         object configuration @mutable = default([]); // A vector of objects (e.g. [{...}, {...}]) where each object has the following fields: name, source, destination, packetFilter, paths

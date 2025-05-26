@@ -7,12 +7,15 @@
 
 package inet.applications.ipapp;
 
+import inet.common.SimpleModule;
+
 //
 // Provides IP socket handling for generic applications.
 //
-simple IpSocketIo
+simple IpSocketIo extends SimpleModule
 {
     parameters:
+        @class(IpSocketIo);
         string interfaceTableModule;
         string localAddress = default("");
         string destAddress = default("");

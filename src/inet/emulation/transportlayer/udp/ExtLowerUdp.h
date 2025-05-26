@@ -8,6 +8,7 @@
 #ifndef __INET_EXTLOWERUDP_H
 #define __INET_EXTLOWERUDP_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/scheduler/RealTimeScheduler.h"
@@ -15,7 +16,7 @@
 
 namespace inet {
 
-class INET_API ExtLowerUdp : public cSimpleModule, public ILifecycle, public RealTimeScheduler::ICallback
+class INET_API ExtLowerUdp : public SimpleModule, public ILifecycle, public RealTimeScheduler::ICallback
 {
   protected:
     class INET_API Socket {

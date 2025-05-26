@@ -10,6 +10,7 @@
 #ifndef __INET_PIMNEIGHBORTABLE_H
 #define __INET_PIMNEIGHBORTABLE_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
@@ -63,7 +64,7 @@ class INET_API PimNeighbor : public cObject
  *
  * Expired entries are automatically deleted.
  */
-class INET_API PimNeighborTable : public cSimpleModule
+class INET_API PimNeighborTable : public SimpleModule
 {
   public:
     enum TimerKind {

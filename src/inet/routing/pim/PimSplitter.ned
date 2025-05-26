@@ -9,6 +9,8 @@
 
 package inet.routing.pim;
 
+import inet.common.SimpleModule;
+
 //
 // ~PimSplitter module dispatches PIM packets received from the network layer
 // according to the PIM mode of the incoming interface. By using a ~PimSplitter
@@ -17,9 +19,10 @@ package inet.routing.pim;
 //
 // See ~Pim module for example usage.
 //
-simple PimSplitter
+simple PimSplitter extends SimpleModule
 {
     parameters:
+        @class(PimSplitter);
         @display("i=block/dispatch");
         string interfaceTableModule;
         string pimInterfaceTableModule;

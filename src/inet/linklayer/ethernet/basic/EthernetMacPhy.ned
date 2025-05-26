@@ -7,6 +7,7 @@
 
 package inet.linklayer.ethernet.basic;
 
+import inet.common.Module;
 import inet.linklayer.contract.IEtherMac;
 
 //
@@ -53,7 +54,7 @@ import inet.linklayer.contract.IEtherMac;
 //
 // Processing of frames incoming from the network:
 // - receive frame from the network
-// - CRC checking (frames with the error bit set are discarded).
+// - FCS checking (frames with the error bit set are discarded).
 // - respond to PAUSE frames
 // - in promiscuous mode, pass up all received frames;
 //   otherwise, only frames with matching MAC addresses and
@@ -103,11 +104,11 @@ import inet.linklayer.contract.IEtherMac;
 // @see ~EthernetCsmaMacPhy, ~EthernetInterface, ~IPacketQueue, ~EthernetEncapsulation, ~Ieee8022Llc
 // @see ~EthernetMacHeader, ~Ieee8022LlcHeader, ~EthernetFcs
 //
-module EthernetMacPhy like IEtherMac
+module EthernetMacPhy extends Module like IEtherMac
 {
     parameters:
         string interfaceTableModule;        // The path to the InterfaceTable module
-        string displayStringTextFormat = default("rate: %b\nsent: %s, rcvd: %r\nqueue: %q, drop: %d");
+        displayStringTextFormat = default("rate: %b\nsent: %s, rcvd: %r\nqueue: %q, drop: %d");
         bool sendRawBytes = default(false); // When true, packets are serialized into a sequence of bytes before sending out
         bool promiscuous = default(false);  // If true, all packets are received; otherwise, only the
                                             // ones with a matching destination MAC address

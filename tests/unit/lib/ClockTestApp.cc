@@ -1,8 +1,9 @@
+#include "inet/common/SimpleModule.h"
 #include "inet/common/clock/ClockUserModuleMixin.h"
 
 namespace inet {
 
-class ClockTestApp : public ClockUserModuleMixin<cSimpleModule>
+class ClockTestApp : public ClockUserModuleMixin<SimpleModule>
 {
 private:
         size_t idx = 0;

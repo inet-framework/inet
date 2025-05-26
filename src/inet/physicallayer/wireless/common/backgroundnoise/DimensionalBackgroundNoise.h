@@ -8,6 +8,7 @@
 #ifndef __INET_DIMENSIONALBACKGROUNDNOISE_H
 #define __INET_DIMENSIONALBACKGROUNDNOISE_H
 
+#include "inet/common/Module.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/DimensionalTransmitterBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IBackgroundNoise.h"
 
@@ -15,7 +16,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API DimensionalBackgroundNoise : public DimensionalTransmitterBase, public cModule, public IBackgroundNoise
+class INET_API DimensionalBackgroundNoise : public DimensionalTransmitterBase, public Module, public IBackgroundNoise
 {
   protected:
     W power;

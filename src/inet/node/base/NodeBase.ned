@@ -10,6 +10,7 @@ package inet.node.base;
 import inet.clock.contract.IClock;
 import inet.common.ExternalEnvironment;
 import inet.common.IMeasurer;
+import inet.common.Module;
 import inet.common.lifecycle.NodeStatus;
 import inet.mobility.contract.IMobility;
 import inet.node.contract.INetworkNode;
@@ -32,7 +33,7 @@ import inet.power.contract.IEnergyStorage;
 //
 // @see ~StandardHost, ~WirelessHost, ~AdhocHost, ~Router
 //
-module NodeBase like INetworkNode
+module NodeBase extends Module like INetworkNode
 {
     parameters:
         @networkNode;

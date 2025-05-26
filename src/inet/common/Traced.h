@@ -44,7 +44,8 @@ class Traced {
             callback_ = callback;
         else
             // chaining
-            callback_ = [=](T oldValue, T newValue) {
+            // NOTE: callback_=callback_ is needed instead of 'this' to eliminate different warnings on both std=c++17 and std=c++20
+            callback_ = [=, callback_=callback_] (T oldValue, T newValue) {
                 callback_(oldValue, newValue);
                 callback(oldValue, newValue);
             };

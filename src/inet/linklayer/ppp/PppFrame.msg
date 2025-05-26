@@ -25,9 +25,9 @@ const B PPP_TRAILER_LENGTH = B(2);
 // PPP frame.
 //
 // Constant-value header fields are not modelled:
-// Flag (=0x7e), address (=0xff), control (=0x03), CRC (bitError())
+// Flag (=0x7e), address (=0xff), control (=0x03), FCS (bitError())
 //
-// CRC is modelled only via cMessage's bit error attribute.
+// FCS is modelled only via cMessage's bit error attribute.
 class PppHeader extends FieldsChunk
 {
     chunkLength = PPP_HEADER_LENGTH;

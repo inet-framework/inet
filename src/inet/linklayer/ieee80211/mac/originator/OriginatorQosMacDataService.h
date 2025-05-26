@@ -8,6 +8,7 @@
 #ifndef __INET_ORIGINATORQOSMACDATASERVICE_H
 #define __INET_ORIGINATORQOSMACDATASERVICE_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/contract/IFragmentation.h"
 #include "inet/linklayer/ieee80211/mac/contract/IFragmentationPolicy.h"
@@ -21,7 +22,7 @@
 namespace inet {
 namespace ieee80211 {
 
-class INET_API OriginatorQosMacDataService : public IOriginatorMacDataService, public cSimpleModule
+class INET_API OriginatorQosMacDataService : public IOriginatorMacDataService, public SimpleModule
 {
   protected:
     // Figure 5-1—MAC data plane architecture
@@ -29,7 +30,7 @@ class INET_API OriginatorQosMacDataService : public IOriginatorMacDataService, p
     ISequenceNumberAssignment *sequenceNumberAssignment = nullptr;
 //    MsduIntegrityAndProtection *msduIntegrityAndProtection = nullptr;
 //    MpduEncryptionAndIntegrity *mpduEncryptionAndIntegrity = nullptr;
-//    MpduHeaderPlusCrc *mpduHeaderPlusCrc = nullptr;
+//    MpduHeaderPlusFcs *mpduHeaderPlusFcs = nullptr;
     IFragmentationPolicy *fragmentationPolicy = nullptr;
     IFragmentation *fragmentation = nullptr;
     IMsduAggregationPolicy *aMsduAggregationPolicy = nullptr;

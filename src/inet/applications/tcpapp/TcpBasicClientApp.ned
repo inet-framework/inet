@@ -7,6 +7,7 @@
 
 package inet.applications.tcpapp;
 
+import inet.common.SimpleModule;
 import inet.applications.contract.IApp;
 
 //
@@ -37,9 +38,10 @@ import inet.applications.contract.IApp;
 //
 // @see ~TcpGenericServerApp, ~GenericAppMsg, ~TelnetApp
 //
-simple TcpBasicClientApp like IApp
+simple TcpBasicClientApp extends SimpleModule like IApp
 {
     parameters:
+        @class(TcpBasicClientApp);
         string localAddress = default(""); // May be left empty ("")
         int localPort = default(-1); // Port number to listen on
         string connectAddress = default("");  // Server address (may be symbolic)

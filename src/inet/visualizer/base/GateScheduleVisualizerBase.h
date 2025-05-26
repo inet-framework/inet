@@ -40,7 +40,7 @@ class INET_API GateScheduleVisualizerBase : public VisualizerBase
         virtual ~GateVisualization() {}
     };
 
-    class INET_API DirectiveResolver : public StringFormat::IDirectiveResolver {
+    class INET_API DirectiveResolver : public StringFormat::IResolver {
       protected:
         const cModule *module = nullptr;
 

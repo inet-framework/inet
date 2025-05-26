@@ -108,8 +108,8 @@ std::vector<Packet *> *OriginatorQosMacDataService::extractFramesToTransmit(queu
             fragments = new std::vector<Packet *>({ packet });
 //        if (mpduEncryptionAndIntegrity)
 //            fragments = encryptMpduIfNeeded(fragments);
-//        if (mpduHeaderPlusCrc)
-//            fragments = mpduCrcFooBarIfNeeded(fragments);
+//        if (mpduHeaderPlusFcs)
+//            fragments = mpduFcsFooBarIfNeeded(fragments);
 //        const Ptr<const Ieee80211DataOrMgmtHeader>& aMpdu = nullptr;
 //        if (aMpduAggregation)
 //            aMpdu = aMpduAggregateIfNeeded(fragments);

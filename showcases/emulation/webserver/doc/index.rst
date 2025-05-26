@@ -11,7 +11,7 @@ Specifically, it involves running a Python-based webserver and executing several
 simulated network components, illustrating the capabilities of OMNeT++ in hybrid
 simulations that involve both emulated and simulated network elements.
 
-| INET version: ``4.6``
+| Verified with INET version: ``4.6``
 | Source files location: `inet/showcases/emulation/webserver <https://github.com/inet-framework/inet/tree/master/showcases/emulation/webserver>`__
 
 
@@ -82,7 +82,7 @@ Ensure that ``opp_env`` is installed on your system, then execute:
 
 .. code-block:: bash
 
-    $ opp_env install --init -w inet-workspace inet-latest --options=inet:full
+    $ opp_env install --init -w inet-workspace --build-modes=release inet-latest --options=inet:full
     $ cd inet-workspace
     $ opp_env shell
 

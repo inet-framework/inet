@@ -15,20 +15,6 @@ namespace inet {
 
 Define_Module(EthernetFcsInserter);
 
-uint32_t EthernetFcsInserter::computeFcs(const Packet *packet, FcsMode fcsMode) const
-{
-    switch (fcsMode) {
-        case FCS_DECLARED_CORRECT:
-            return computeDeclaredCorrectFcs(packet);
-        case FCS_DECLARED_INCORRECT:
-            return computeDeclaredIncorrectFcs(packet);
-        case FCS_COMPUTED:
-            return computeComputedFcs(packet);
-        default:
-            throw cRuntimeError("Unknown FCS mode: %d", (int)fcsMode);
-    }
-}
-
 void EthernetFcsInserter::processPacket(Packet *packet)
 {
     if (auto cutthroughTag = packet->findTag<CutthroughTag>()) {
@@ -37,8 +23,10 @@ void EthernetFcsInserter::processPacket(Packet *packet)
     }
     else {
         const auto& header = makeShared<EthernetFcs>();
-        auto fcs = computeFcs(packet, fcsMode);
+        ASSERT(checksumType == CHECKSUM_ETHERNET_FCS);
+        auto fcs = computeChecksum(packet, checksumMode, checksumType);
         header->setFcs(fcs);
+        FcsMode fcsMode = (FcsMode)checksumMode; //TODO KLUDGE: use ChecksumMode everywhere
         header->setFcsMode(fcsMode);
         packet->insertAtBack(header);
     }

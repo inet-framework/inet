@@ -8,6 +8,7 @@
 #ifndef __INET_GRIDOBJECTCACHE_H
 #define __INET_GRIDOBJECTCACHE_H
 
+#include "inet/common/Module.h"
 #include "inet/common/IVisitor.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/geometry/container/SpatialGrid.h"
@@ -19,7 +20,7 @@ namespace inet {
 
 namespace physicalenvironment {
 
-class INET_API GridObjectCache : public IObjectCache, public cModule
+class INET_API GridObjectCache : public IObjectCache, public Module
 {
   protected:
     /** @name Parameters */

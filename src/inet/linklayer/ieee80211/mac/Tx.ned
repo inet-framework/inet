@@ -7,6 +7,7 @@
 
 package inet.linklayer.ieee80211.mac;
 
+import inet.common.SimpleModule;
 import inet.linklayer.ieee80211.mac.contract.ITx;
 
 //
@@ -14,9 +15,10 @@ import inet.linklayer.ieee80211.mac.contract.ITx;
 // a specified inter-frame space. This is the default implementation of the
 // ~ITx module interface.
 //
-simple Tx like ITx
+simple Tx extends SimpleModule like ITx
 {
     parameters:
+        @class(Tx);
         string rxModule;
         @display("i=block/tx");
 }

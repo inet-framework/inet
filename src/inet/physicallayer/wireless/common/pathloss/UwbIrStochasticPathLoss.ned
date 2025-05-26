@@ -6,6 +6,7 @@
 
 package inet.physicallayer.wireless.common.pathloss;
 
+import inet.common.Module;
 import inet.physicallayer.wireless.common.contract.packetlevel.IPathLoss;
 
 //
@@ -65,7 +66,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IPathLoss;
 // Second International Omnet++ Workshop,Simu'TOOLS, Rome, 6 Mar 09.
 // http://portal.acm.org/citation.cfm?id=1537714
 //
-module UwbIrStochasticPathLoss like IPathLoss
+module UwbIrStochasticPathLoss extends Module like IPathLoss
 {
     parameters:
         double PL0 @unit(dB); // Path loss at reference distance of 1m [dB]

@@ -7,6 +7,7 @@
 
 package inet.physicallayer.wireless.apsk.bitlevel;
 
+import inet.common.Module;
 import inet.physicallayer.wireless.common.contract.bitlevel.IDecoder;
 import inet.physicallayer.wireless.common.contract.bitlevel.IFecCoder;
 import inet.physicallayer.wireless.common.contract.bitlevel.IInterleaver;
@@ -19,7 +20,7 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IScrambler;
 //
 // @see ~ApskEncoder, ~ApskLayeredTransmitter.
 //
-module ApskDecoder like IDecoder
+module ApskDecoder extends Module like IDecoder
 {
     parameters:
         @display("i=block/blackboard");

@@ -7,6 +7,7 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
+import inet.common.checksum.ChecksumMode;
 import inet.linklayer.common.FcsMode;
 import inet.linklayer.common.MacAddress;
 
@@ -100,7 +101,7 @@ class Ieee80211MacTrailer extends FieldsChunk
 {
     chunkLength = B(4);
     uint32_t fcs = 0;
-    FcsMode fcsMode = FCS_MODE_UNDEFINED;
+    ChecksumMode fcsMode = FCS_MODE_UNDEFINED;  // should be FcsMode, but OMMeT++ bug #1351 prevents that (fixed in OMNeT++ 6.2)
 }
 
 //

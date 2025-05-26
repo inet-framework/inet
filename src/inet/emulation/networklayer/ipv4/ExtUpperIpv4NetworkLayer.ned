@@ -15,6 +15,16 @@ import inet.networklayer.ipv4.IIpv4;
 import inet.networklayer.ipv4.Ipv4RoutingTable;
 
 
+//
+// Provides a network layer that connects the simulation to a real network on the
+// host computer using a TUN device. Allows simulated applications to send and
+// receive packets through the host's networking stack at the IP layer. Contains
+// standard components like routing table and ARP, and uses ~ExtUpperIpv4 with a
+// TUN device for external connectivity.
+//
+// Using this network layer in a host or router implies that layers above IPv4 are
+// provided by the host operating system, while layers below IPv4 are simulated.
+//
 module ExtUpperIpv4NetworkLayer like INetworkLayer
 {
     parameters:

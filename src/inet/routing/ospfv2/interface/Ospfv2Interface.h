@@ -67,7 +67,7 @@ class INET_API Ospfv2Interface
   private:
     Ospfv2InterfaceType interfaceType;
     Ospfv2InterfaceMode interfaceMode;
-    CrcMode crcMode;
+    ChecksumMode checksumMode;
     Ospfv2InterfaceState *state;
     Ospfv2InterfaceState *previousState;
     std::string interfaceName;
@@ -131,8 +131,8 @@ class INET_API Ospfv2Interface
     Ospfv2InterfaceMode getMode() const { return interfaceMode; }
     static const char *getModeString(Ospfv2InterfaceMode intfMode);
     void setMode(Ospfv2InterfaceMode intfMode) { interfaceMode = intfMode; }
-    CrcMode getCrcMode() const { return crcMode; }
-    void setCrcMode(CrcMode crcMode) { this->crcMode = crcMode; }
+    ChecksumMode getChecksumMode() const { return checksumMode; }
+    void setChecksumMode(ChecksumMode checksumMode) { this->checksumMode = checksumMode; }
     void setIfIndex(IInterfaceTable *ift, int index);
     int getIfIndex() const { return ifIndex; }
     void setInterfaceName(std::string ifName) { this->interfaceName = ifName; }

@@ -7,6 +7,12 @@
 
 package inet.linklayer.ethernet.contract;
 
+//
+// Module interface for Ethernet MAC (Media Access Control) layer implementations.
+// Defines an interface for various MAC layer variants in the modular Ethernet
+// architecture. Provides connection points to upper layers (e.g., LLC)
+// and lower layers (e.g., PHY) through standardized gates.
+//
 moduleinterface IEthernetMacLayer
 {
     parameters:

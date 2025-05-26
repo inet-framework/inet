@@ -8,6 +8,7 @@
 #ifndef __INET_ORIGINATORMACDATASERVICE_H
 #define __INET_ORIGINATORMACDATASERVICE_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/contract/IFragmentation.h"
 #include "inet/linklayer/ieee80211/mac/contract/IFragmentationPolicy.h"
@@ -20,7 +21,7 @@ namespace ieee80211 {
 //
 // 5.1.5 MAC data service architecture
 //
-class INET_API OriginatorMacDataService : public IOriginatorMacDataService, public cSimpleModule
+class INET_API OriginatorMacDataService : public IOriginatorMacDataService, public SimpleModule
 {
   protected:
     // Figure 5-1—MAC data plane architecture
@@ -30,7 +31,7 @@ class INET_API OriginatorMacDataService : public IOriginatorMacDataService, publ
     IFragmentationPolicy *fragmentationPolicy = nullptr;
     IFragmentation *fragmentation = nullptr;
 //    MpduEncryptionAndIntegrity *mpduEncryptionAndIntegrity = nullptr;
-//    MpduHeaderPlusCrc *mpduHeaderPlusCrc = nullptr;
+//    MpduHeaderPlusFcs *mpduHeaderPlusFcs = nullptr;
 
   protected:
     virtual void initialize() override;

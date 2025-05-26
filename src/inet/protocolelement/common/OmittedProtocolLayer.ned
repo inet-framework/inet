@@ -7,13 +7,14 @@
 
 package inet.protocolelement.common;
 
+import inet.common.Module;
 import inet.protocolelement.contract.IProtocolLayer;
 
 //
 // Implements the module given interface and can be used as an omitted
 // optional module that removes itself from the module hierarchy during initialization.
 //
-module OmittedProtocolLayer like IProtocolLayer
+module OmittedProtocolLayer extends Module like IProtocolLayer
 {
     parameters:
         @class(::inet::OmittedModule);

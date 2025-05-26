@@ -7,6 +7,7 @@
 
 package inet.linklayer.ieee80211.mac.channelaccess;
 
+import inet.common.Module;
 import inet.linklayer.ieee80211.mac.contract.ICollisionController;
 import inet.linklayer.ieee80211.mac.originator.NonQosRecoveryProcedure;
 
@@ -15,7 +16,7 @@ import inet.linklayer.ieee80211.mac.originator.NonQosRecoveryProcedure;
 // The implementation allows for a configurable number of access categories,
 // not just four as defined by the standard.
 //
-module Edca
+module Edca extends Module
 {
     parameters:
         int numEdcafs = default(4);
@@ -31,7 +32,7 @@ module Edca
         edcaf[2].accessCategory = default("AC_VI");
         edcaf[3].accessCategory = default("AC_VO");
 
-        @class("Edca");
+        @class(Edca);
         @display("i=block/star");
     submodules:
         edcaf[numEdcafs]: Edcaf {

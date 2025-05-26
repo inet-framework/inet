@@ -27,7 +27,6 @@ class INET_API UdpEchoApp : public ApplicationBase, public UdpSocket::ICallback
     virtual void initialize(int stage) override;
     virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void finish() override;
-    virtual void refreshDisplay() const override;
 
     virtual void handleStartOperation(LifecycleOperation *operation) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;

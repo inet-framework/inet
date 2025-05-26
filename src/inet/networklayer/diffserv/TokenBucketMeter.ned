@@ -7,6 +7,8 @@
 
 package inet.networklayer.diffserv;
 
+import inet.common.SimpleModule;
+
 //
 // Simple token bucket meter.
 //
@@ -24,9 +26,10 @@ package inet.networklayer.diffserv;
 // a packet to be green if it was marked with a higher color
 // by a previous meter.
 //
-simple TokenBucketMeter
+simple TokenBucketMeter extends SimpleModule
 {
     parameters:
+        @class(TokenBucketMeter);
         @display("i=block/timer");
         string interfaceTableModule;   // The path to the InterfaceTable module
         string cir;       // Committed information rate, either absolute bitrate (e.g. "100kbps") or relative to the link's datarate (e.g. "20%")

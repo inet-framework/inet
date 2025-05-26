@@ -8,6 +8,7 @@
 #ifndef __INET_LAYEREDERRORMODELBASE_H
 #define __INET_LAYEREDERRORMODELBASE_H
 
+#include "inet/common/Module.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/ILayeredErrorModel.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
 
@@ -15,7 +16,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API LayeredErrorModelBase : public cModule, public ILayeredErrorModel
+class INET_API LayeredErrorModelBase : public Module, public ILayeredErrorModel
 {
   protected:
     const char *symbolCorruptionMode = nullptr;

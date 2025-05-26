@@ -10,7 +10,7 @@ showcase demonstrates how INET can be used to generate and visualize
 three-dimensional mobility. This can be useful for understanding and evaluating
 the behavior of communication systems in such environments.
 
-| INET version: ``4.1``
+| Verified with INET version: ``4.1``
 | Source files location: `inet/showcases/mobility/spatial <https://github.com/inet-framework/inet/tree/master/showcases/mobility/spatial>`__
 
 Overview

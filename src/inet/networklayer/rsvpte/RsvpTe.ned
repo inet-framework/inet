@@ -6,6 +6,8 @@
 
 package inet.networklayer.rsvpte;
 
+import inet.common.SimpleModule;
+
 //
 // Implements RSVP-TE, a signalling protocol for MPLS. The module processes RSVP-TE messages, installs labels and does the reservation along LSP paths.
 //
@@ -79,9 +81,10 @@ package inet.networklayer.rsvpte;
 // RSVP-TE communicates with the following components in the system: ~Ted, ~Mpls, and may receive commands from ~ScenarioManager.
 //
 
-simple RsvpTe
+simple RsvpTe extends SimpleModule
 {
     parameters:
+        @class(RsvpTe);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
         string libTableModule;

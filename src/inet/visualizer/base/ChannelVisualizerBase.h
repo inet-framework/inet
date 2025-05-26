@@ -31,7 +31,7 @@ class INET_API ChannelVisualizerBase : public VisualizerBase, public cListener
         virtual ~ChannelVisualization() {}
     };
 
-    class INET_API DirectiveResolver : public StringFormat::IDirectiveResolver {
+    class INET_API DirectiveResolver : public StringFormat::IResolver {
       protected:
         const cPacket *packet = nullptr;
 

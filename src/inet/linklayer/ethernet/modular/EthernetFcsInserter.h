@@ -8,16 +8,15 @@
 #ifndef __INET_ETHERNETFCSINSERTER_H
 #define __INET_ETHERNETFCSINSERTER_H
 
-#include "inet/protocolelement/checksum/base/FcsInserterBase.h"
+#include "inet/protocolelement/checksum/base/ChecksumInserterBase.h"
 
 namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API EthernetFcsInserter : public FcsInserterBase
+class INET_API EthernetFcsInserter : public ChecksumInserterBase
 {
   protected:
-    virtual uint32_t computeFcs(const Packet *packet, FcsMode fcsMode) const override;
     virtual void processPacket(Packet *packet) override;
 };
 

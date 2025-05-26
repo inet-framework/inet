@@ -20,7 +20,7 @@ Define_Module(EthernetPhy);
 
 void EthernetPhy::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         physInGate = gate("phys$i");
         upperLayerInGate = gate("upperLayerIn");

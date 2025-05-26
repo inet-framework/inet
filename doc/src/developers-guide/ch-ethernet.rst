@@ -213,6 +213,6 @@
    it receives. It is currently not supported to dynamically
    connect/disconnect a MAC.
 
-   CRC checks are modeled by the :var:`bitError` flag of the packets.
+   FCS checks are modeled by the :var:`bitError` flag of the packets.
    Erronous packets are dropped by the MAC.
 

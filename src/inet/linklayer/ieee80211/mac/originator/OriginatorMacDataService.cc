@@ -62,8 +62,8 @@ std::vector<Packet *> *OriginatorMacDataService::extractFramesToTransmit(queuein
             fragments = new std::vector<Packet *>({ packet });
 //        if (mpduEncryptionAndIntegrity)
 //            fragments = encryptMpduIfNeeded(fragments);
-//        if (mpduHeaderPlusCrc)
-//            fragments = mpduCrcFooBarIfNeeded(fragments);
+//        if (mpduHeaderPlusFcs)
+//            fragments = mpduFcsFooBarIfNeeded(fragments);
         return fragments;
     }
 }

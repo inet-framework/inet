@@ -8,13 +8,14 @@
 #ifndef __INET_OPERATIONALBASE_H
 #define __INET_OPERATIONALBASE_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/lifecycle/OperationalMixin.h"
 
 namespace inet {
 
-extern template class OperationalMixin<cSimpleModule>;
+extern template class OperationalMixin<SimpleModule>;
 
-class INET_API OperationalBase : public OperationalMixin<cSimpleModule>
+class INET_API OperationalBase : public OperationalMixin<SimpleModule>
 {
 };
 

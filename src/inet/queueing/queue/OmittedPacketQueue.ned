@@ -7,13 +7,14 @@
 
 package inet.queueing.queue;
 
+import inet.common.Module;
 import inet.queueing.contract.IPacketQueue;
 
 //
 // Implements the given module interface and can be used as an optional
 // module that removes itself from the module hierarchy during initialization.
 //
-module OmittedPacketQueue like IPacketQueue
+module OmittedPacketQueue extends Module like IPacketQueue
 {
     parameters:
         @class(::inet::OmittedModule);

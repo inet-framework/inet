@@ -8,6 +8,7 @@
 #ifndef __INET_ALTERNATINGEPENERGYGENERATOR_H
 #define __INET_ALTERNATINGEPENERGYGENERATOR_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/power/contract/IEpEnergyGenerator.h"
 #include "inet/power/contract/IEpEnergySink.h"
 
@@ -21,7 +22,7 @@ namespace power {
  * See the corresponding NED file for more details.
  *
  */
-class INET_API AlternatingEpEnergyGenerator : public cSimpleModule, public IEpEnergyGenerator
+class INET_API AlternatingEpEnergyGenerator : public SimpleModule, public IEpEnergyGenerator
 {
   protected:
     // parameters

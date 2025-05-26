@@ -7,11 +7,19 @@
 
 package inet.applications.sctpapp;
 
+import inet.common.SimpleModule;
 import inet.applications.contract.IApp;
 
-simple SctpNatPeer like IApp
+//
+// Implements a peer application for SCTP NAT traversal. Supports both standard
+// and rendezvous connection establishment methods to traverse NAT devices.
+// Exchanges NAT traversal information with other peers and handles data transfer
+// with configurable parameters. Supports multi-homing with multiple addresses.
+//
+simple SctpNatPeer extends SimpleModule like IApp
 {
     parameters:
+        @class(SctpNatPeer);
         string localAddress = default(""); // Comma-separated list of addresses
         int localPort = default(0); // Port number to listen on
         string connectAddress;  // Server address (may be symbolic)

@@ -22,13 +22,13 @@ Define_Module(Ipv6FlatNetworkConfigurator);
 
 void Ipv6FlatNetworkConfigurator::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
         Topology topo("topo");
 
         // extract topology
-        topo.extractByProperty("networkNode");
+        topo.extractFromNetwork(Topology::selectTopologyNode);
         EV_DEBUG << "Topology found " << topo.getNumNodes() << " nodes\n";
 
         configureAdvPrefixes(topo);

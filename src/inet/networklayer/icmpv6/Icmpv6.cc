@@ -11,7 +11,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/checksum/TcpIpChecksum.h"
+#include "inet/common/checksum/Checksum.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
@@ -26,11 +26,11 @@ Define_Module(Icmpv6);
 
 void Icmpv6::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        const char *crcModeString = par("crcMode");
-        crcMode = parseCrcMode(crcModeString, false);
+        const char *checksumModeString = par("checksumMode");
+        checksumMode = parseChecksumMode(checksumModeString, false);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {
         bool isOperational;
@@ -59,9 +59,9 @@ void Icmpv6::handleMessage(cMessage *msg)
 
 void Icmpv6::processICMPv6Message(Packet *packet)
 {
-    if (!verifyCrc(packet)) {
+    if (!verifyChecksum(packet)) {
         // drop packet
-        EV_WARN << "incoming ICMP packet has wrong CRC, dropped\n";
+        EV_WARN << "incoming ICMP packet has wrong checksum, dropped\n";
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);
         emit(packetDroppedSignal, packet, &details);
@@ -153,7 +153,7 @@ void Icmpv6::processEchoRequest(Packet *requestPacket, const Ptr<const Icmpv6Ech
     replyHeader->setIdentifier(requestHeader->getIdentifier());
     replyHeader->setSeqNumber(requestHeader->getSeqNumber());
     replyPacket->insertAtBack(requestPacket->peekData());
-    insertCrc(replyHeader, replyPacket);
+    insertChecksum(replyHeader, replyPacket);
     replyPacket->insertAtFront(replyHeader);
 
     auto addressInd = requestPacket->getTag<L3AddressInd>();
@@ -213,7 +213,7 @@ void Icmpv6::sendErrorMessage(Packet *origDatagram, Icmpv6Type type, int code)
     errorMsg->insertAtBack(origDatagram->peekDataAt(b(0), std::min(copyLength, origDatagram->getDataLength())));
 
     auto icmpHeader = errorMsg->removeAtFront<Icmpv6Header>();
-    insertCrc(icmpHeader, errorMsg);
+    insertChecksum(icmpHeader, errorMsg);
     errorMsg->insertAtFront(icmpHeader);
 
     // debugging information
@@ -330,53 +330,53 @@ void Icmpv6::handleRegisterProtocol(const Protocol& protocol, cGate *gate, Servi
     }
 }
 
-void Icmpv6::insertCrc(CrcMode crcMode, const Ptr<Icmpv6Header>& icmpHeader, Packet *packet)
+void Icmpv6::insertChecksum(ChecksumMode checksumMode, const Ptr<Icmpv6Header>& icmpHeader, Packet *packet)
 {
-    icmpHeader->setCrcMode(crcMode);
-    switch (crcMode) {
-        case CRC_DECLARED_CORRECT:
-            // if the CRC mode is declared to be correct, then set the CRC to an easily recognizable value
+    icmpHeader->setChecksumMode(checksumMode);
+    switch (checksumMode) {
+        case CHECKSUM_DECLARED_CORRECT:
+            // if the checksum mode is declared to be correct, then set the checksum to an easily recognizable value
             icmpHeader->setChksum(0xC00D);
             break;
-        case CRC_DECLARED_INCORRECT:
-            // if the CRC mode is declared to be incorrect, then set the CRC to an easily recognizable value
+        case CHECKSUM_DECLARED_INCORRECT:
+            // if the checksum mode is declared to be incorrect, then set the checksum to an easily recognizable value
             icmpHeader->setChksum(0xBAAD);
             break;
-        case CRC_COMPUTED: {
-            // if the CRC mode is computed, then compute the CRC and set it
-            icmpHeader->setChksum(0x0000); // make sure that the CRC is 0 in the header before computing the CRC
+        case CHECKSUM_COMPUTED: {
+            // if the checksum mode is computed, then compute the checksum and set it
+            icmpHeader->setChksum(0x0000); // make sure that the checksum is 0 in the header before computing the checksum
             MemoryOutputStream icmpStream;
             Chunk::serialize(icmpStream, icmpHeader);
             if (packet->getByteLength() > 0)
                 Chunk::serialize(icmpStream, packet->peekDataAsBytes());
-            uint16_t crc = TcpIpChecksum::checksum(icmpStream.getData());
-            icmpHeader->setChksum(crc);
+            uint16_t checksum = internetChecksum(icmpStream.getData());
+            icmpHeader->setChksum(checksum);
             break;
         }
         default:
-            throw cRuntimeError("Unknown CRC mode");
+            throw cRuntimeError("Unknown checksum mode");
     }
 }
 
-bool Icmpv6::verifyCrc(const Packet *packet)
+bool Icmpv6::verifyChecksum(const Packet *packet)
 {
     const auto& icmpHeader = packet->peekAtFront<Icmpv6Header>(b(-1), Chunk::PF_ALLOW_INCORRECT);
-    switch (icmpHeader->getCrcMode()) {
-        case CRC_DECLARED_CORRECT:
-            // if the CRC mode is declared to be correct, then the check passes if and only if the chunks are correct
+    switch (icmpHeader->getChecksumMode()) {
+        case CHECKSUM_DECLARED_CORRECT:
+            // if the checksum mode is declared to be correct, then the check passes if and only if the chunks are correct
             return icmpHeader->isCorrect();
-        case CRC_DECLARED_INCORRECT:
-            // if the CRC mode is declared to be incorrect, then the check fails
+        case CHECKSUM_DECLARED_INCORRECT:
+            // if the checksum mode is declared to be incorrect, then the check fails
             return false;
-        case CRC_COMPUTED: {
-            // otherwise compute the CRC, the check passes if the result is 0xFFFF (includes the received CRC)
+        case CHECKSUM_COMPUTED: {
+            // otherwise compute the checksum, the check passes if the result is 0xFFFF (includes the received checksum)
             auto dataBytes = packet->peekDataAsBytes(Chunk::PF_ALLOW_INCORRECT);
-            uint16_t crc = TcpIpChecksum::checksum(dataBytes->getBytes());
-            // TODO delete these isCorrect calls, rely on CRC only
-            return crc == 0 && icmpHeader->isCorrect();
+            uint16_t checksum = internetChecksum(dataBytes->getBytes());
+            // TODO delete these isCorrect calls, rely on checksum only
+            return checksum == 0 && icmpHeader->isCorrect();
         }
         default:
-            throw cRuntimeError("Unknown CRC mode");
+            throw cRuntimeError("Unknown checksum mode");
     }
 }
 

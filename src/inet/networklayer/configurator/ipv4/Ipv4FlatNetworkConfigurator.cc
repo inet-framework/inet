@@ -21,7 +21,7 @@ Define_Module(Ipv4FlatNetworkConfigurator);
 
 void Ipv4FlatNetworkConfigurator::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
         Topology topo("topo");
@@ -49,7 +49,7 @@ void Ipv4FlatNetworkConfigurator::initialize(int stage)
 void Ipv4FlatNetworkConfigurator::extractTopology(Topology& topo, NodeInfoVector& nodeInfo)
 {
     // extract topology
-    topo.extractByProperty("networkNode");
+    topo.extractFromNetwork(Topology::selectTopologyNode);
     EV_DEBUG << "Topology found " << topo.getNumNodes() << " nodes\n";
 
     // fill in isIPNode, ift and rt members in nodeInfo[]

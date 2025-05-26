@@ -23,11 +23,11 @@ class MacAddressReq extends TagBase
 //!End
 
 //!UdpHeaderDefinitionExample
-enum CrcMode
+enum ChecksumMode
 {
-  CRC_DISABLED = 0; // CRC is not set, serializable
-  CRC_DECLARED = 1; // CRC is correct without the value, not serializable
-  CRC_COMPUTED = 2; // CRC is potentially incorrect, serializable
+  CHECKSUM_DISABLED = 0; // CHECKSUM is not set, serializable
+  CHECKSUM_DECLARED = 1; // CHECKSUM is correct without the value, not serializable
+  CHECKSUM_COMPUTED = 2; // CHECKSUM is potentially incorrect, serializable
 }
 
 class UdpHeader extends FieldsChunk
@@ -36,7 +36,7 @@ class UdpHeader extends FieldsChunk
   int sourcePort = -1; // source port field is undefined by default
   int destinationPort = -1; // destination port field is undefined by default
   B lengthField = B(-1); // length field is undefined by default
-  uint16_t crc = 0; // checksum field is 0 by default
-  CrcMode crcMode = CRC_DISABLED; // checksum mode is disabled by default
+  uint16_t checksum = 0; // checksum field is 0 by default
+  ChecksumMode checksumMode = CHECKSUM_DISABLED; // checksum mode is disabled by default
 }
 //!End

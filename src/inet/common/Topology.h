@@ -335,6 +335,9 @@ class INET_API Topology : public cOwnedObject
     void findNetworks(Node *);
 
   public:
+    static bool selectTopologyNode(cModule *mod, void *data);
+
+  public:
     /** @name Constructors, destructor, assignment */
     //@{
 

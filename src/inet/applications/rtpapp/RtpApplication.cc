@@ -21,7 +21,7 @@ Define_Module(RtpApplication)
 
 void RtpApplication::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
 
     // because of L3AddressResolver, we need to wait until interfaces are registered,
     // address auto-assignment takes place etc.

@@ -77,6 +77,7 @@ void ChannelVisualizerBase::handleParameterChange(const char *name)
 
 void ChannelVisualizerBase::refreshDisplay() const
 {
+    VisualizerBase::refreshDisplay();
     if (displayChannelActivity) {
         AnimationPosition currentAnimationPosition;
         std::vector<const ChannelVisualization *> removedChannelVisualizations;

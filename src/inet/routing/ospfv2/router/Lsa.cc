@@ -304,7 +304,7 @@ std::ostream& operator<<(std::ostream& ostr, const Ospfv2AsExternalLsa& lsa)
 
 std::ostream& operator<<(std::ostream& ostr, const Ospfv2Lsa& lsa)
 {
-    ASSERT(lsa.getHeader().getLsCrcMode() != CrcMode::CRC_MODE_UNDEFINED);
+    ASSERT(lsa.getHeader().getLsChecksumMode() != ChecksumMode::CHECKSUM_MODE_UNDEFINED);
     ASSERT(lsa.getHeader().getLsaLength() != 0);
 
     switch (lsa.getHeader().getLsType()) {

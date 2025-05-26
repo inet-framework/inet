@@ -7,13 +7,16 @@
 
 package inet.linklayer.common;
 
+import inet.common.SimpleModule;
+
 //
 // A QoS classifier that assigns a random User Priority. This is useful
 // for testing purposes.
 //
-simple RandomQosClassifier like IIeee8021dQosClassifier
+simple RandomQosClassifier extends SimpleModule like IIeee8021dQosClassifier
 {
     parameters:
+        @class(RandomQosClassifier);
         @display("i=block/classifier");
     gates:
         input in;

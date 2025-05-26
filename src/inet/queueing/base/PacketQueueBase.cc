@@ -60,7 +60,7 @@ void PacketQueueBase::emit(simsignal_t signal, cObject *object, cObject *details
         numRemovedPackets++;
     else if (signal == packetDroppedSignal)
         numDroppedPackets++;
-    cSimpleModule::emit(signal, object, details);
+    SimpleModule::emit(signal, object, details);
 }
 
 std::string PacketQueueBase::resolveDirective(char directive) const

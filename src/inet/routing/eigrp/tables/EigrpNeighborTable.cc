@@ -72,7 +72,7 @@ EigrpNeighborTable<IPAddress>::~EigrpNeighborTable()
 template<typename IPAddress>
 void EigrpNeighborTable<IPAddress>::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
     if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         WATCH_PTRVECTOR(neighborVec);
     }

@@ -708,7 +708,7 @@ void EthernetCsmaMacPhy::frameReceptionComplete()
     decapsulate(packet);
     emit(packetReceivedFromLowerSignal, packet);
 
-    if (hasBitError || !verifyCrcAndLength(packet)) {
+    if (hasBitError || !verifyFcsAndLength(packet)) {
         numDroppedBitError++;
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);

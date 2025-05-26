@@ -7,6 +7,7 @@
 
 package inet.physicallayer.wireless.common.analogmodel.scalar;
 
+import inet.common.Module;
 import inet.physicallayer.wireless.common.contract.packetlevel.IMediumAnalogModel;
 
 //
@@ -14,7 +15,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IMediumAnalogMode
 // words, the signal power does not change over time or frequency, except for
 // the boundaries of the signal.
 //
-module ScalarMediumAnalogModel like IMediumAnalogModel
+module ScalarMediumAnalogModel extends Module like IMediumAnalogModel
 {
     parameters:
         bool ignorePartialInterference = default(false); // Enabled means interference that only partially overlaps with the signal being received is ignored; otherwise, the simulation stops with an error

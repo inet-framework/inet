@@ -7,6 +7,7 @@
 
 package inet.transportlayer.tcp_common;
 
+import inet.common.SimpleModule;
 import inet.transportlayer.contract.ITcp;
 
 //
@@ -16,9 +17,10 @@ import inet.transportlayer.contract.ITcp;
 //
 // Compatible with both IPv4 (~Ipv4) and IPv6 (~Ipv6).
 //
-simple TcpSpoof like ITcp
+simple TcpSpoof extends SimpleModule like ITcp
 {
     parameters:
+        @class(TcpSpoof);
         string srcAddress = default("");  // Local address; may be left empty ("")
         string destAddress = default(""); // Destination address
         int srcPort; // Local port number

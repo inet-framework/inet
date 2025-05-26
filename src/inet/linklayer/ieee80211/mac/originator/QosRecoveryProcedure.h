@@ -8,6 +8,7 @@
 #ifndef __INET_QOSRECOVERYPROCEDURE_H
 #define __INET_QOSRECOVERYPROCEDURE_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/common/AccessCategory.h"
@@ -25,7 +26,7 @@ namespace ieee80211 {
 /*
  * TODO stationRetryCounter
  */
-class INET_API QosRecoveryProcedure : public cSimpleModule, public IRecoveryProcedure
+class INET_API QosRecoveryProcedure : public SimpleModule, public IRecoveryProcedure
 {
 
   protected:

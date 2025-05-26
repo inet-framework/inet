@@ -15,7 +15,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/checksum/TcpIpChecksum.h"
+#include "inet/common/checksum/Checksum.h"
 #include "inet/common/packet/dissector/ProtocolDissector.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/common/stlutils.h"
@@ -31,8 +31,8 @@ Define_Module(Icmp);
 
 void Icmp::handleParameterChange(const char *name)
 {
-    if (!strcmp(name, "crcMode"))
-        crcMode = parseCrcMode(par("crcMode"), false);
+    if (!strcmp(name, "checksumMode"))
+        checksumMode = parseChecksumMode(par("checksumMode"), false);
     else if (!strcmp(name, "quoteLength"))
         parseQuoteLengthParameter();
 }
@@ -46,12 +46,12 @@ void Icmp::parseQuoteLengthParameter()
 
 void Icmp::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         ift.reference(this, "interfaceTableModule", true);
         rt.reference(this, "routingTableModule", true);
-        crcMode = parseCrcMode(par("crcMode"), false);
+        checksumMode = parseChecksumMode(par("checksumMode"), false);
         parseQuoteLengthParameter();
     }
     if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {
@@ -152,7 +152,7 @@ void Icmp::sendPtbMessage(Packet *packet, int mtu)
         const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
         B curQuoteLength = std::min(B(packet->getDataLength()), ipv4Header->getHeaderLength() + quoteLength);
         errorPacket->insertAtBack(packet->peekDataAt(b(0), curQuoteLength));
-        insertCrc(icmpPtb, errorPacket);
+        insertChecksum(icmpPtb, errorPacket);
         errorPacket->insertAtFront(icmpPtb);
 
         sendOrProcessIcmpPacket(errorPacket, ipv4Header->getSrcAddress());
@@ -181,7 +181,7 @@ void Icmp::sendErrorMessage(Packet *packet, int inputInterfaceId, IcmpType type,
         const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
         B curQuoteLength = std::min(B(packet->getDataLength()), ipv4Header->getHeaderLength() + quoteLength);
         errorPacket->insertAtBack(packet->peekDataAt(B(0), curQuoteLength));
-        insertCrc(icmpHeader, errorPacket);
+        insertChecksum(icmpHeader, errorPacket);
         errorPacket->insertAtFront(icmpHeader);
 
         sendOrProcessIcmpPacket(errorPacket, ipv4Header->getSrcAddress());
@@ -218,8 +218,8 @@ bool Icmp::possiblyLocalBroadcast(const Ipv4Address& addr, int interfaceId)
 
 void Icmp::processIcmpMessage(Packet *packet)
 {
-    if (!verifyCrc(packet)) {
-        EV_WARN << "incoming ICMP packet has wrong CRC, dropped\n";
+    if (!verifyChecksum(packet)) {
+        EV_WARN << "incoming ICMP packet has wrong checksum, dropped\n";
         // drop packet
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);
@@ -301,7 +301,7 @@ void Icmp::processEchoRequest(Packet *request)
     Ipv4Address src = addressInd->getSrcAddress().toIpv4();
     Ipv4Address dest = addressInd->getDestAddress().toIpv4();
     reply->insertAtBack(request->peekData());
-    insertCrc(icmpReply, reply);
+    insertChecksum(icmpReply, reply);
     reply->insertAtFront(icmpReply);
 
     // swap src and dest
@@ -344,53 +344,53 @@ void Icmp::handleRegisterProtocol(const Protocol& protocol, cGate *gate, Service
     }
 }
 
-void Icmp::insertCrc(CrcMode crcMode, const Ptr<IcmpHeader>& icmpHeader, Packet *packet)
+void Icmp::insertChecksum(ChecksumMode checksumMode, const Ptr<IcmpHeader>& icmpHeader, Packet *packet)
 {
-    icmpHeader->setCrcMode(crcMode);
-    switch (crcMode) {
-        case CRC_DECLARED_CORRECT:
-            // if the CRC mode is declared to be correct, then set the CRC to an easily recognizable value
+    icmpHeader->setChecksumMode(checksumMode);
+    switch (checksumMode) {
+        case CHECKSUM_DECLARED_CORRECT:
+            // if the checksum mode is declared to be correct, then set the checksum to an easily recognizable value
             icmpHeader->setChksum(0xC00D);
             break;
-        case CRC_DECLARED_INCORRECT:
-            // if the CRC mode is declared to be incorrect, then set the CRC to an easily recognizable value
+        case CHECKSUM_DECLARED_INCORRECT:
+            // if the checksum mode is declared to be incorrect, then set the checksum to an easily recognizable value
             icmpHeader->setChksum(0xBAAD);
             break;
-        case CRC_COMPUTED: {
-            // if the CRC mode is computed, then compute the CRC and set it
-            icmpHeader->setChksum(0x0000); // make sure that the CRC is 0 in the header before computing the CRC
+        case CHECKSUM_COMPUTED: {
+            // if the checksum mode is computed, then compute the checksum and set it
+            icmpHeader->setChksum(0x0000); // make sure that the checksum is 0 in the header before computing the checksum
             MemoryOutputStream icmpStream;
             Chunk::serialize(icmpStream, icmpHeader);
             if (packet->getByteLength() > 0)
                 Chunk::serialize(icmpStream, packet->peekDataAsBytes());
-            uint16_t crc = TcpIpChecksum::checksum(icmpStream.getData());
-            icmpHeader->setChksum(crc);
+            uint16_t checksum = internetChecksum(icmpStream.getData());
+            icmpHeader->setChksum(checksum);
             break;
         }
         default:
-            throw cRuntimeError("Unknown CRC mode");
+            throw cRuntimeError("Unknown checksum mode");
     }
 }
 
-bool Icmp::verifyCrc(const Packet *packet)
+bool Icmp::verifyChecksum(const Packet *packet)
 {
     const auto& icmpHeader = packet->peekAtFront<IcmpHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT);
-    switch (icmpHeader->getCrcMode()) {
-        case CRC_DECLARED_CORRECT:
-            // if the CRC mode is declared to be correct, then the check passes if and only if the chunks are correct
+    switch (icmpHeader->getChecksumMode()) {
+        case CHECKSUM_DECLARED_CORRECT:
+            // if the checksum mode is declared to be correct, then the check passes if and only if the chunks are correct
             return icmpHeader->isCorrect();
-        case CRC_DECLARED_INCORRECT:
-            // if the CRC mode is declared to be incorrect, then the check fails
+        case CHECKSUM_DECLARED_INCORRECT:
+            // if the checksum mode is declared to be incorrect, then the check fails
             return false;
-        case CRC_COMPUTED: {
-            // otherwise compute the CRC, the check passes if the result is 0xFFFF (includes the received CRC)
+        case CHECKSUM_COMPUTED: {
+            // otherwise compute the checksum, the check passes if the result is 0xFFFF (includes the received checksum)
             auto dataBytes = packet->peekDataAsBytes(Chunk::PF_ALLOW_INCORRECT);
-            uint16_t crc = TcpIpChecksum::checksum(dataBytes->getBytes());
-            // TODO delete these isCorrect calls, rely on CRC only
-            return crc == 0 && icmpHeader->isCorrect();
+            uint16_t checksum = internetChecksum(dataBytes->getBytes());
+            // TODO delete these isCorrect calls, rely on checksum only
+            return checksum == 0 && icmpHeader->isCorrect();
         }
         default:
-            throw cRuntimeError("Unknown CRC mode");
+            throw cRuntimeError("Unknown checksum mode");
     }
 }
 

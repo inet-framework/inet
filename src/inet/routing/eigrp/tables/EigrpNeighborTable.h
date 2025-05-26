@@ -18,6 +18,7 @@
 
 #include <omnetpp.h>
 
+#include "inet/common/SimpleModule.h"
 #include "inet/routing/eigrp/EigrpDualStack.h"
 #include "inet/routing/eigrp/tables/EigrpNeighbor.h"
 namespace inet {
@@ -26,7 +27,7 @@ namespace eigrp {
  * Class represents EIGRP Neighbor Table.
  */
 template<typename IPAddress>
-class INET_API EigrpNeighborTable : public cSimpleModule
+class INET_API EigrpNeighborTable : public SimpleModule
 {
   protected:
     typedef typename std::vector<EigrpNeighbor<IPAddress> *> NeighborVector;

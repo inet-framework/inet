@@ -46,7 +46,7 @@ EthernetCsmaPhy::~EthernetCsmaPhy()
 
 void EthernetCsmaPhy::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         physInGate = gate("phys$i");
         physInGate->setDeliverImmediately(true);
@@ -371,7 +371,8 @@ void EthernetCsmaPhy::handleStartReception(EthernetSignalBase *signal)
     auto packet = check_and_cast_nullable<Packet *>(signal->getEncapsulatedPacket());
     auto signalType = static_cast<EthernetSignalType>(signal->getKind());
     if (fsm.getState() == IDLE || fsm.getState() == CRS_ON)
-        fsm.insertDelayedAction([=] () { mac->handleReceptionStart(signalType, packet != nullptr ? packet->dup() : nullptr); });
+        // NOTE: mac=mac is needed instead of 'this' to eliminate different warnings on both std=c++17 and std=c++20
+        fsm.insertDelayedAction([=, mac=mac] () { mac->handleReceptionStart(signalType, packet != nullptr ? packet->dup() : nullptr); });
     updateRxSignals(signal);
 }
 
@@ -380,6 +381,7 @@ void EthernetCsmaPhy::handleEndReception()
     if (fsm.getState() == RECEIVING && rxSignals.size() == 1) {
         EthernetSignalBase *signal = rxSignals[0].signal;
         EV_DEBUG << "Handling end reception" << EV_FIELD(signal) << EV_ENDL;
+        emit(receptionEndedSignal, signal);
         auto packet = check_and_cast_nullable<Packet *>(signal->decapsulate());
         auto signalType = static_cast<EthernetSignalType>(signal->getKind());
         if (!signal->hasBitError() && signalType == DATA)
@@ -387,8 +389,8 @@ void EthernetCsmaPhy::handleEndReception()
         if (packet != nullptr)
             packet->setBitError(signal->hasBitError());
         auto esd1 = signal->getEsd1();
-        fsm.insertDelayedAction([=] () { mac->handleReceptionEnd(signalType, packet, esd1); });
-        emit(receptionEndedSignal, signal);
+        // NOTE: mac=mac is needed instead of 'this' to eliminate different warnings on both std=c++17 and std=c++20
+        fsm.insertDelayedAction([=, mac=mac] () { mac->handleReceptionEnd(signalType, packet, esd1); });
         delete signal;
     }
     else {

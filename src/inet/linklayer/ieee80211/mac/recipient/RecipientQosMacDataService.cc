@@ -57,7 +57,7 @@ std::vector<Packet *> RecipientQosMacDataService::dataFrameReceived(Packet *data
 {
     Enter_Method("dataFrameReceived");
     take(dataPacket);
-    // TODO A-MPDU Deaggregation, MPDU Header+CRC Validation, Address1 Filtering, Duplicate Removal, MPDU Decryption
+    // TODO A-MPDU Deaggregation, MPDU Header+FCS Validation, Address1 Filtering, Duplicate Removal, MPDU Decryption
     if (duplicateRemoval && duplicateRemoval->isDuplicate(dataHeader)) {
         EV_WARN << "Dropping duplicate packet " << *dataPacket << ".\n";
         PacketDropDetails details;
@@ -116,7 +116,7 @@ std::vector<Packet *> RecipientQosMacDataService::managementFrameReceived(Packet
 {
     Enter_Method("managementFrameReceived");
     take(mgmtPacket);
-    // TODO MPDU Header+CRC Validation, Address1 Filtering, Duplicate Removal, MPDU Decryption
+    // TODO MPDU Header+FCS Validation, Address1 Filtering, Duplicate Removal, MPDU Decryption
     if (duplicateRemoval && duplicateRemoval->isDuplicate(mgmtHeader))
         return std::vector<Packet *>();
     if (basicReassembly) { // FIXME defragmentation

@@ -7,6 +7,7 @@
 
 package inet.linklayer.ethernet.modular;
 
+import inet.common.Module;
 import inet.linklayer.ethernet.contract.IEthernetMacLayer;
 import inet.protocolelement.contract.IPacketLifeTimer;
 import inet.queueing.contract.IPacketFilter;
@@ -14,7 +15,7 @@ import inet.queueing.contract.IPacketFlow;
 import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.IPacketServer;
 
-module EthernetMacLayer like IEthernetMacLayer
+module EthernetMacLayer extends Module like IEthernetMacLayer
 {
     parameters:
         double bitrate @unit(bps);

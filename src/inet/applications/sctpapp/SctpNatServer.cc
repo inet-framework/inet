@@ -32,7 +32,7 @@ void SctpNatServer::initialize(int stage)
     numSessions = packetsSent = packetsRcvd = bytesSent = notifications = 0;
     EV_DEBUG << "initialize SCTP NAT Server stage " << stage << endl;
 
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         WATCH(numSessions);
         WATCH(packetsSent);

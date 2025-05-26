@@ -13,16 +13,7 @@ simsignal_t OscillatorBase::driftRateChangedSignal = cComponent::registerSignal(
 
 void OscillatorBase::initialize(int stage)
 {
-    if (stage == INITSTAGE_LOCAL)
-        displayStringTextFormat = par("displayStringTextFormat");
-}
-
-void OscillatorBase::refreshDisplay() const
-{
-    if (getEnvir()->isGUI()) {
-        auto text = StringFormat::formatString(displayStringTextFormat, this);
-        getDisplayString().setTagArg("t", 0, text.c_str());
-    }
+    SimpleModule::initialize(stage);
 }
 
 std::string OscillatorBase::resolveDirective(char directive) const
@@ -33,7 +24,7 @@ std::string OscillatorBase::resolveDirective(char directive) const
         case 'o':
             return getComputationOrigin().str() + " s";
         default:
-            throw cRuntimeError("Unknown directive: %c", directive);
+            return SimpleModule::resolveDirective(directive);
     }
 }
 

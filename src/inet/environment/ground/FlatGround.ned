@@ -7,12 +7,18 @@
 
 package inet.environment.ground;
 
+import inet.common.Module;
 import inet.environment.contract.IGround;
 
-module FlatGround like IGround
+//
+// Models a flat ground surface with a configurable elevation. Provides methods
+// to compute the ground projection of a 3D position by setting its z-coordinate
+// to the elevation value, and to compute the ground normal which is always
+// pointing upward (0,0,1) for a flat surface.
+//
+module FlatGround extends Module like IGround
 {
     parameters:
         double elevation @unit(m) = default(0m);
         @class(FlatGround);
 }
-

@@ -86,8 +86,8 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.Peer_*.sctp.natFriendly = true
 **.sctp.enableHeartbeats=true
 
-**.sctp.crcMode = "computed"
-**.ipv4.**.crcMode = "computed"
+**.sctp.checksumMode = "computed"
+**.ipv4.**.checksumMode = "computed"
 
 **.Server.numPcapRecorders = 1
 **.Server.pcapRecorder[0].pcapFile = "Server.pcap"

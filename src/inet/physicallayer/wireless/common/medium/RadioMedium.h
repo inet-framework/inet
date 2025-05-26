@@ -8,6 +8,7 @@
 #ifndef __INET_RADIOMEDIUM_H
 #define __INET_RADIOMEDIUM_H
 
+#include "inet/common/SimpleModule.h"
 #include <algorithm>
 
 #include "inet/common/IntervalTree.h"
@@ -28,7 +29,7 @@ namespace physicallayer {
  * The default implementation of the radio medium interface.
  */
 // TODO add tests for various optimization configurations
-class INET_API RadioMedium : public cSimpleModule, public cListener, public IRadioMedium
+class INET_API RadioMedium : public SimpleModule, public cListener, public IRadioMedium
 {
     friend Radio;
 

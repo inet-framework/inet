@@ -8,6 +8,7 @@
 #ifndef __INET_IPV6NEIGHBOURDISCOVERY_H
 #define __INET_IPV6NEIGHBOURDISCOVERY_H
 
+#include "inet/common/SimpleModule.h"
 #include <map>
 #include <set>
 #include <vector>
@@ -18,7 +19,7 @@
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 #include "inet/networklayer/icmpv6/Ipv6NdMessage_m.h"
 #include "inet/networklayer/icmpv6/Ipv6NeighbourCache.h"
-#include "inet/transportlayer/common/CrcMode_m.h"
+#include "inet/common/checksum/ChecksumMode_m.h"
 
 namespace inet {
 
@@ -36,7 +37,7 @@ class xMIPv6;
 /**
  * Implements RFC 2461 Neighbor Discovery for Ipv6.
  */
-class INET_API Ipv6NeighbourDiscovery : public cSimpleModule, public LifecycleUnsupported
+class INET_API Ipv6NeighbourDiscovery : public SimpleModule, public LifecycleUnsupported
 {
   public:
     typedef std::vector<Packet *> MsgPtrVector;
@@ -89,7 +90,7 @@ class INET_API Ipv6NeighbourDiscovery : public cSimpleModule, public LifecycleUn
     ModuleRefByPar<IInterfaceTable> ift;
     ModuleRefByPar<Ipv6RoutingTable> rt6;
     ModuleRefByPar<Icmpv6> icmpv6;
-    CrcMode crcMode = CRC_MODE_UNDEFINED;
+    ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
 
 #ifdef INET_WITH_xMIPv6
     ModuleRefByPar<xMIPv6> mipv6; // in case the node has MIP support

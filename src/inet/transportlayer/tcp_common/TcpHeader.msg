@@ -7,7 +7,7 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
-import inet.transportlayer.common.CrcMode;
+import inet.common.checksum.ChecksumMode;
 import inet.transportlayer.contract.TransportHeaderBase;
 
 namespace inet::tcp;
@@ -217,8 +217,8 @@ class TcpHeader extends TransportHeaderBase
     // the URG control bit set.
     uint16_t urgentPointer;
 
-    uint16_t crc = 0;
-    CrcMode crcMode = CRC_MODE_UNDEFINED;
+    uint16_t checksum = 0;
+    ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
 
     // Header options (optional)
     // Currently only EOL, NOP, MSS, WS, SACK_PERMITTED, SACK and TS are implemented

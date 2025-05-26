@@ -28,7 +28,7 @@ namespace eigrp {
  * Class represents EIGRP Topology Table.
  */
 template<typename IPAddress>
-class INET_API EigrpTopologyTable : public cSimpleModule
+class INET_API EigrpTopologyTable : public SimpleModule
 {
   private:
     typedef typename std::vector<EigrpRouteSource<IPAddress> *> RouteVector;

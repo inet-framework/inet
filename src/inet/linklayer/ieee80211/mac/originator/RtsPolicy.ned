@@ -7,15 +7,16 @@
 
 package inet.linklayer.ieee80211.mac.originator;
 
+import inet.common.SimpleModule;
 import inet.linklayer.ieee80211.mac.contract.IRtsPolicy;
-
 
 //
 // Implements the default RTS policy.
 //
-simple RtsPolicy like IRtsPolicy
+simple RtsPolicy extends SimpleModule like IRtsPolicy
 {
     parameters:
+        @class(RtsPolicy);
         string rateSelectionModule;
         double ctsTimeout @unit(s) = default(-1s);
         int rtsThreshold @unit(B) = default(2346B);

@@ -7,6 +7,8 @@
 
 package inet.networklayer.ipv4;
 
+import inet.common.SimpleModule;
+
 //
 // Implementation of IGMPv2 protocol. Multicast routers use IGMP
 // to learn which groups have members on each of their attached
@@ -89,12 +91,13 @@ package inet.networklayer.ipv4;
 // parameter to false. When disabled, no IGMP message
 // is generated, and incoming IGMP messages are ignored.
 //
-simple Igmpv2 like IIgmp
+simple Igmpv2 extends SimpleModule like IIgmp
 {
     parameters:
+        @class(Igmpv2);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
-        string crcMode @enum("declared","computed") = default("declared");
+        string checksumMode @enum("declared","computed") = default("declared");
         bool enabled = default(true);
         int    robustnessVariable = default(2); // IGMP is robust to (robustnessVariable-1) packet loss
         double queryInterval @unit(s) = default(125s);

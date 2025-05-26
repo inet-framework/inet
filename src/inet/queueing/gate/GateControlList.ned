@@ -7,13 +7,16 @@
 
 package inet.queueing.gate;
 
+import inet.common.SimpleModule;
+
 //
 // Configures multiple `PeriodicGate` modules according to a gate control list.
 // The modules are looked for at the `^.transmissionGate[*]` relative module path.
 //
-simple GateControlList
+simple GateControlList extends SimpleModule
 {
     parameters:
+        @class(GateControlList);
         object durations @unit(s) = default([]); // List of entry durations, e.g. [4ms, 2ms, 2ms, 2ms]
         object gateStates = default([]); // List of gate states, e.g. ["10000000", "01111111", "10000000", "01111111"]
         int numGates = default(8); // Number of configured PeriodicGate modules

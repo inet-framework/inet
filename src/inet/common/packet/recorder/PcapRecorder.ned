@@ -9,6 +9,8 @@
 
 package inet.common.packet.recorder;
 
+import inet.common.SimpleModule;
+
 //
 // Records PCAP traces of frames sent/received by other modules within
 // the same host. By default, it records frames sent/received by L2 modules
@@ -29,10 +31,13 @@ package inet.common.packet.recorder;
 // `sendingSignalNames` and `receivingSignalNames` parameters. The packets
 // themselves are expected as `cPacket*` signal values.
 //
-simple PcapRecorder
+simple PcapRecorder extends SimpleModule
 {
     parameters:
+        @class(PcapRecorder);
         bool verbose = default(true);  // Whether to log packets on the module output
+        bool recordEmptyPackets = default(true); // Specifies if zero length packets are recorded or not
+        bool enableConvertingPackets = default(true); // Specifies if converting packets to link type is allowed or not
         string pcapFile = default(""); // The PCAP file to be written
         string fileFormat @enum("pcap", "pcapng") = default("pcapng");
         int snaplen = default(65535);  // Maximum number of bytes to record per packet
@@ -46,7 +51,7 @@ simple PcapRecorder
         string helpers = default("");    // Usable PcapRecorder::IHelper helpers for accept packettype and store/convert packet as specified linktype
                                          // currently available: "inet::AckingMacToEthernetPcapRecorderHelper"
         bool alwaysFlush = default(false); // Flush the pcapFile after each write to ensure that all packets are captured in case of a crash
-        string displayStringTextFormat = default("rec: %n pks");
+        displayStringTextFormat = default("rec: %n pks");
         @display("i=block/blackboard");
         @signal[packetRecorded](type=Packet);
 }

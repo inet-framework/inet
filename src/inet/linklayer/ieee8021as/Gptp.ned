@@ -11,6 +11,7 @@
 
 package inet.linklayer.ieee8021as;
 
+import inet.common.SimpleModule;
 import inet.linklayer.contract.IGptp;
 
 //
@@ -29,9 +30,10 @@ import inet.linklayer.contract.IGptp;
 // All ports that should be used for BMCA must be set in the bmcaPorts parameter.
 //
 // The implementation also supports the HotStandby ammendment IEEE 802.1ASdm, see MultiDomainGptp.
-simple Gptp like IGptp
+simple Gptp extends SimpleModule like IGptp
 {
     parameters:
+        @class(Gptp);
         string clockModule = default(""); // Relative path of a module that implements IClock; optional
         string interfaceTableModule; // Relative path of the interface table module
         string gptpNodeType @enum("MASTER_NODE","BRIDGE_NODE","SLAVE_NODE","BMCA_NODE"); // @enum("GptpNodeType"): MASTER_NODE, BRIDGE_NODE, SLAVE_NODE, BMCA_NODE

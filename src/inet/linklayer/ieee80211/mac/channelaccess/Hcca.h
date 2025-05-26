@@ -8,6 +8,7 @@
 #ifndef __INET_HCCA_H
 #define __INET_HCCA_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/linklayer/ieee80211/mac/contract/IChannelAccess.h"
 
 namespace inet {
@@ -16,7 +17,7 @@ namespace ieee80211 {
 /**
  * Implements IEEE 802.11 Hybrid coordination function (HCF) Controlled Channel Access.
  */
-class INET_API Hcca : public IChannelAccess, public cSimpleModule
+class INET_API Hcca : public IChannelAccess, public SimpleModule
 {
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

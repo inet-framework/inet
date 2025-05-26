@@ -7,6 +7,8 @@
 
 package inet.common.geometry.common;
 
+import inet.common.SimpleModule;
+
 //
 // Interface for geographic coordinate systems. A geographic
 // coordinate system maps scene coordinates to geographic coordinates, and
@@ -22,9 +24,10 @@ moduleinterface IGeographicCoordinateSystem
 // Provides a very simple and less accurate geographic coordinate
 // system without using OSG. It doesn't support orientation.
 //
-simple SimpleGeographicCoordinateSystem like IGeographicCoordinateSystem
+simple SimpleGeographicCoordinateSystem extends SimpleModule like IGeographicCoordinateSystem
 {
     parameters:
+        @class(SimpleGeographicCoordinateSystem);
         @display("i=block/table2");
         double sceneLatitude @unit(deg); // Latitude coordinate of the scene origin
         double sceneLongitude @unit(deg); // Longitude coordinate of the scene origin
@@ -35,9 +38,10 @@ simple SimpleGeographicCoordinateSystem like IGeographicCoordinateSystem
 // Provides an accurate geographic coordinate system using the
 // built-in OSG API.
 //
-simple OsgGeographicCoordinateSystem like IGeographicCoordinateSystem
+simple OsgGeographicCoordinateSystem extends SimpleModule like IGeographicCoordinateSystem
 {
     parameters:
+        @class(OsgGeographicCoordinateSystem);
         @display("i=block/table2");
         double sceneLatitude @unit(deg); // Latitude coordinate of the scene origin
         double sceneLongitude @unit(deg); // Longitude coordinate of the scene origin

@@ -7,13 +7,14 @@
 
 package inet.environment.objectcache;
 
+import inet.common.Module;
 import inet.environment.contract.IObjectCache;
 
 //
 // This object cache model organizes closely positioned physical objects into a
 // tree data structure.
 //
-module BvhObjectCache like IObjectCache
+module BvhObjectCache extends Module like IObjectCache
 {
     parameters:
         string physicalEnvironmentModule = default("^");

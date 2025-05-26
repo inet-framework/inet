@@ -8,13 +8,14 @@
 #ifndef __INET_IPV4ENCAP_H
 #define __INET_IPV4ENCAP_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 
 namespace inet {
 
-class INET_API Ipv4Encap : public cSimpleModule
+class INET_API Ipv4Encap : public SimpleModule
 {
   protected:
     struct SocketDescriptor {
@@ -27,7 +28,7 @@ class INET_API Ipv4Encap : public cSimpleModule
     };
 
   protected:
-    CrcMode crcMode = CRC_MODE_UNDEFINED;
+    ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
     int defaultTimeToLive = -1;
     int defaultMCTimeToLive = -1;
     std::set<const Protocol *> upperProtocols;

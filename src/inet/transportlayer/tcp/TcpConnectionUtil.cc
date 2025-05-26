@@ -302,8 +302,8 @@ void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader
     // (ECT(0) or ECT(1)) in the IP header for retransmitted data packets
     tcpSegment->addTagIfAbsent<EcnReq>()->setExplicitCongestionNotification((state->ect && !state->sndAck && !state->rexmit) ? IP_ECN_ECT_1 : IP_ECN_NOT_ECT);
 
-    tcpHeader->setCrc(0);
-    tcpHeader->setCrcMode(tcpMain->crcMode);
+    tcpHeader->setChecksum(0);
+    tcpHeader->setChecksumMode(tcpMain->checksumMode);
 
     insertTransportProtocolHeader(tcpSegment, Protocol::tcp, tcpHeader);
 
@@ -662,8 +662,8 @@ void TcpConnection::sendRst(uint32_t seq, L3Address src, L3Address dest, int src
 
     tcpHeader->setRstBit(true);
     tcpHeader->setSequenceNo(seq);
-    tcpHeader->setCrcMode(tcpMain->crcMode);
-    tcpHeader->setCrc(0);
+    tcpHeader->setChecksumMode(tcpMain->checksumMode);
+    tcpHeader->setChecksum(0);
 
     Packet *fp = new Packet("RST");
 
@@ -682,8 +682,8 @@ void TcpConnection::sendRstAck(uint32_t seq, uint32_t ack, L3Address src, L3Addr
     tcpHeader->setAckBit(true);
     tcpHeader->setSequenceNo(seq);
     tcpHeader->setAckNo(ack);
-    tcpHeader->setCrcMode(tcpMain->crcMode);
-    tcpHeader->setCrc(0);
+    tcpHeader->setChecksumMode(tcpMain->checksumMode);
+    tcpHeader->setChecksum(0);
 
     Packet *fp = new Packet("RST+ACK");
 
