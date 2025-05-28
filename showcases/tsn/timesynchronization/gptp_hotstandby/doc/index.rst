@@ -119,6 +119,7 @@ are visualized as arrows. The visualization is color-coded according to domain:
 
 .. video_noloop:: media/PrimaryAndHotStandbyMasterClocks.mp4
    :align: center
+   :width: 100%
 
 First, the bridge and slave nodes measure link delay by exchanging pDelay
 messages. Then, the master clocks send gPTP sync messages. Note that there is a

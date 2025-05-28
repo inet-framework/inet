@@ -237,7 +237,6 @@ void Gptp::scheduleMessageOnTopologyChange()
 
 void Gptp::initBmca()
 {
-    // TODO: harcoded for now
     localPriorityVector.grandmasterPriority1 = par("grandmasterPriority1");
     localPriorityVector.grandmasterClockQuality.clockClass = par("clockClass");
     localPriorityVector.grandmasterClockQuality.clockAccuracy = par("clockAccuracy");
