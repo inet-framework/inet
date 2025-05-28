@@ -49,7 +49,7 @@ static int on_update_traffic_key(ptls_update_traffic_key_t *self, ptls_t *tls, i
 {
     Connection *conn = (Connection *)(*ptls_get_data_ptr(tls));
 
-    std::cout << "updating traffic key for epoch " << epoch << " is_enc " << is_enc << std::endl;
+    std::cout << "updating " << (is_enc ? "egress" : "ingress") << " traffic key for epoch " << epoch << " at " << (conn->is_server ? "server" : "client") << std::endl;
     return 0;
 }
 

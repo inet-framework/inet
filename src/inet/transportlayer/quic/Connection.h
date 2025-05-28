@@ -61,6 +61,14 @@ enum TimerType
     //QUIC_T_SEND
 };
 
+
+enum class EncryptionLevel {
+    Initial = 0,
+    ZeroRtt = 1,
+    Handshake = 2,
+    OneRtt = 3
+};
+
 class Connection
 {
   public:
@@ -78,7 +86,7 @@ class Connection
     EncryptionKey egressKey;
     EncryptionKey ingressKey;
 
-    ChunkQueue cryptoQueues[3];
+    ChunkQueue cryptoQueues[4];
 
     /**
      * Enqueues data in the corresponding stream queue and triggers packet sending.
@@ -89,7 +97,7 @@ class Connection
      */
     void newStreamData(uint64_t streamId, Ptr<const Chunk> data);
 
-    void newCryptoData(PacketNumberSpace epoch, Ptr<const Chunk> data);
+    void newCryptoData(EncryptionLevel epoch, Ptr<const Chunk> data);
 
     void processReceivedData(uint64_t streamId, uint64_t offset, Ptr<const Chunk> data);
     void accountReceivedPacket(uint64_t packetNumber, bool ackEliciting, PacketNumberSpace space, bool isIBitSet);

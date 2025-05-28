@@ -77,18 +77,15 @@ void InitialConnectionState::processCryptoFrame(const Ptr<const CryptoFrameHeade
             std::vector<uint8_t> tlsBytes = tlsPayload->getBytes();
             ptls_handle_message(context->tls, &buffer, epoch_offsets, 0,
                 tlsBytes.data(), tlsBytes.size(), nullptr);
-            // epoch 1 is 0rtt for ptls, let's skip that (TODO)
-            size_t ptls_epochs[3] = {0, 2, 3};
-            for (int epoch = 0; epoch < 3; epoch++) {
-                size_t ptls_epoch = ptls_epochs[epoch];
+            for (int epoch = 0; epoch < 4; epoch++) {
                 Ptr<BytesChunk> data = makeShared<BytesChunk>();
-                size_t len = epoch_offsets[ptls_epoch + 1] - epoch_offsets[ptls_epoch];
+                size_t len = epoch_offsets[epoch + 1] - epoch_offsets[epoch];
                 if (len == 0)
                     continue;
                 std::vector<uint8_t> bytes(len);
-                memcpy(bytes.data(), (uint8_t *)(buffer.base + epoch_offsets[ptls_epoch]), len);
+                memcpy(bytes.data(), (uint8_t *)(buffer.base + epoch_offsets[epoch]), len);
                 data->setBytes(bytes);
-                context->newCryptoData((PacketNumberSpace)epoch, data);
+                context->newCryptoData((EncryptionLevel)epoch, data);
             }
         }
     }
