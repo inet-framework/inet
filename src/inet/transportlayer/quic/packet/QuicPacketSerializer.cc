@@ -454,46 +454,50 @@ const Ptr<Chunk> QuicPacketHeaderSerializer::deserializeShortPacketHeader(Memory
     }
 }
 
-std::vector<uint8_t> protectPacket(const std::vector<uint8_t> unencryptedData, size_t packetNumberOffset, size_t packetNumberLength, const EncryptionKey& key) {
+std::vector<uint8_t> protectPacket(std::vector<uint8_t> datagram, uint32_t packetNumber, size_t packetNumberOffset, size_t packetNumberLength, const EncryptionKey& key) {
     ptls_cipher_suite_t *cs = &ptls_openssl_opp_aes128gcmsha256;
+    size_t originalSize = datagram.size();
 
+    std::cout << "protectPacket: original size: " << originalSize << std::endl;
+    std::cout << "protectPacket: packet number: " << packetNumber << std::endl;
+    std::cout << "protectPacket: packet number offset: " << packetNumberOffset << std::endl;
+    std::cout << "protectPacket: packet number length: " << packetNumberLength << std::endl;
+
+
+    datagram.resize(originalSize + 16); // Ensure enough space for the auth tag
     // generate new AEAD context
     ptls_aead_context_t *packet_protect = ptls_aead_new_direct(cs->aead, true, key.key.data(), key.iv.data());
     ptls_cipher_context_t *header_protect = ptls_cipher_new(cs->aead->ctr_cipher, true, key.hpkey.data());
 
+    /*
+
+    ptls_aead_supplementary_encryption_t supp = {.ctx = header_protect_ctx,
+                                                 .input = datagram.base + payload_from - QUICLY_SEND_PN_SIZE + QUICLY_MAX_PN_SIZE};
+
+    ptls_aead_encrypt_s(packet_protect_ctx, datagram.base + payload_from, datagram.base + payload_from,
+                        datagram.len - payload_from - packet_protect_ctx->algo->tag_size, packet_number,
+                        datagram.base + first_byte_at, payload_from - first_byte_at, &supp);
+
+     */
     size_t payload_from = packetNumberOffset + packetNumberLength;
-    std::vector<uint8_t> encryptedPayload; // also contains the auth tag
-    encryptedPayload.resize(unencryptedData.size() - payload_from + packet_protect->algo->tag_size);
 
     ptls_aead_supplementary_encryption_t supp = {.ctx = header_protect,
-                                                 .input = encryptedPayload.data() + 4 - packetNumberLength};
+                                                 .input = datagram.data() + payload_from + 4 - packetNumberLength};
 
-    size_t packetNumber = 0;
-
-    ptls_aead_encrypt_s(packet_protect, encryptedPayload.data(), unencryptedData.data() + payload_from,
-                                   unencryptedData.size() - payload_from,
+    ptls_aead_encrypt_s(packet_protect, datagram.data() + payload_from, datagram.data() + payload_from,
+                                   originalSize - payload_from,
                                    packetNumber,
-                                   unencryptedData.data(), payload_from, &supp);
-
-    std::vector<uint8_t> finalContents;
-    finalContents.resize(unencryptedData.size() + packet_protect->algo->tag_size);
-    std::copy(unencryptedData.begin(), unencryptedData.begin() + payload_from, finalContents.begin());
-    std::copy(encryptedPayload.begin(), encryptedPayload.end(), finalContents.begin() + payload_from); // includes auth tag
+                                   datagram.data(), payload_from, &supp);
 
     // Apply header protection
-    uint8_t headerForm = (unencryptedData[0] >> 7) & 0x01;
-    if (headerForm == PACKET_HEADER_FORM_LONG) {
-        // Long header: mask is applied to the low 4 bits of first byte and packet number
-        finalContents[0] ^= supp.output[0] & 0xf;
-    } else {
-        // Short header: mask is applied to the low 5 bits of first byte and packet number
-        finalContents[0] ^= supp.output[0] & 0x1f;
-    }
+    uint8_t headerForm = (datagram[0] >> 7) & 0x01;
+    // mask is applied to the low 4 bits in long headers, and low 5 bits in long headers, of the first byte
+    datagram[0] ^= supp.output[0] & ((headerForm == PACKET_HEADER_FORM_LONG) ? 0xf : 0x1f);
 
     for (size_t i = 0; i != packetNumberLength; ++i)
-        finalContents[packetNumberOffset + i] ^= supp.output[i + 1];
+        datagram[packetNumberOffset + i] ^= supp.output[i + 1];
 
-    return finalContents;
+    return datagram;
 }
 
 void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, b offset, b length) const
@@ -510,6 +514,7 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
     auto quicPacketHeader = dynamicPtrCast<const PacketHeader>(payloadChunks[0]);
     ASSERT(quicPacketHeader != nullptr);
     uint8_t packetNumberLength = 0;
+    uint32_t packetNumber = 0;
 
     switch (quicPacketHeader->getHeaderForm()) {
         case PACKET_HEADER_FORM_LONG: {
@@ -519,18 +524,21 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
                     auto initialPacketHeader = dynamicPtrCast<const InitialPacketHeader>(longPacketHeader);
                     ASSERT(initialPacketHeader != nullptr);
                     packetNumberLength = initialPacketHeader->getPacketNumberLength();
+                    packetNumber = initialPacketHeader->getPacketNumber(); // Not used in this context
                 }
                 break;
                 case LONG_PACKET_HEADER_TYPE_0RTT: {
                     auto zeroRttPacketHeader = dynamicPtrCast<const ZeroRttPacketHeader>(longPacketHeader);
                     ASSERT(zeroRttPacketHeader != nullptr);
                     packetNumberLength = zeroRttPacketHeader->getPacketNumberLength();
+                    packetNumber = zeroRttPacketHeader->getPacketNumber();
                 }
                 break;
                 case LONG_PACKET_HEADER_TYPE_HANDSHAKE: {
                     auto handshakePacketHeader = dynamicPtrCast<const HandshakePacketHeader>(longPacketHeader);
                     ASSERT(handshakePacketHeader != nullptr);
                     packetNumberLength = handshakePacketHeader->getPacketNumberLength();
+                    packetNumber = handshakePacketHeader->getPacketNumber();
                 }
             }
             break;
@@ -538,7 +546,8 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
         case PACKET_HEADER_FORM_SHORT: {
             auto shortPacketHeader = dynamicPtrCast<const ShortPacketHeader>(quicPacketHeader);
             ASSERT(shortPacketHeader != nullptr);
-            //packetNumberLength = shortPacketHeader->getPacketNumberLength();
+            //TODO packetNumberLength = shortPacketHeader->getPacketNumberLength();
+            packetNumber = shortPacketHeader->getPacketNumber();
             break;
         }
         default:
@@ -555,7 +564,7 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
     payloadStream.clear();
 
     EncryptionKey key = EncryptionKey::fromTag(keyTag);
-    std::vector<uint8_t> finalContents = protectPacket(unencryptedData, 26, packetNumberLength, key);
+    std::vector<uint8_t> finalContents = protectPacket(unencryptedData, packetNumber, 26, packetNumberLength, key);
 
     // TODO: handle sub-byte offset and length
     stream.writeBytes(finalContents, offset, length < b(0) ? B(-1) : B(length));
@@ -595,7 +604,7 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
     };
 
     EncryptionKey testClientKey = EncryptionKey::newInitial(test_dcid_iovec, "client in");
-    std::vector<uint8_t> testClientFinalContents = protectPacket(testClientUnprotectedData, 23, 1, testClientKey);
+    std::vector<uint8_t> testClientFinalContents = protectPacket(testClientUnprotectedData, 0, 23, 1, testClientKey);
 
 
     std::cout << "test client unprotected data size: " << testClientUnprotectedData.size() << std::endl;
@@ -667,7 +676,7 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
     };
 
     EncryptionKey testServerKey = EncryptionKey::newInitial(test_dcid_iovec, "server in");
-    std::vector<uint8_t> testFinalContents = protectPacket(testUnprotectedData, 20, 1, testServerKey);
+    std::vector<uint8_t> testFinalContents = protectPacket(testUnprotectedData, 0, 20, 1, testServerKey);
 
 
     std::cout << "test unprotected data size: " << testUnprotectedData.size() << std::endl;
