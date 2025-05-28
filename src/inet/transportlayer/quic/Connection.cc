@@ -198,10 +198,10 @@ void Connection::newStreamData(uint64_t streamId, Ptr<const Chunk> data)
     }
 }
 
-void Connection::newCryptoData(PacketNumberSpace epoch, Ptr<const Chunk> data)
+void Connection::newCryptoData(EncryptionLevel epoch, Ptr<const Chunk> data)
 {
     std::cout << "newCryptoData in epoch " << (int)epoch << " of length " << data->getChunkLength() << std::endl;
-    cryptoQueues[epoch].push(data);
+    cryptoQueues[(int)epoch].push(data);
 }
 
 Stream *Connection::findOrCreateStream(uint64_t streamId)
@@ -456,9 +456,9 @@ do {                                                                            
 void Connection::sendServerInitialPacket() {
     int maxQuicPacketSize = path->getMaxQuicPacketSize();
 
-    ChunkQueue& queue = cryptoQueues[(int)PacketNumberSpace::Initial];
+    ChunkQueue& queue = cryptoQueues[(int)EncryptionLevel::Initial];
 
-    Ptr<const Chunk> cryptoPayload = queue.pop(queue.peek()->getChunkLength());
+    Ptr<const Chunk> cryptoPayload = (queue.getLength() == b(0)) ? nullptr : queue.pop(queue.peek()->getChunkLength());
 
     sendPacket(packetBuilder->buildServerInitialPacket(maxQuicPacketSize, cryptoPayload), PacketNumberSpace::Initial);
 }
@@ -466,8 +466,8 @@ void Connection::sendServerInitialPacket() {
 void Connection::sendHandshakePacket(bool includeTransportParamters) {
     int maxQuicPacketSize = path->getMaxQuicPacketSize();
 
-    ChunkQueue& queue = cryptoQueues[(int)PacketNumberSpace::Handshake];
-    Ptr<const Chunk> cryptoPayload = queue.pop(queue.peek()->getChunkLength());
+    ChunkQueue& queue = cryptoQueues[(int)EncryptionLevel::Handshake];
+    Ptr<const Chunk> cryptoPayload = (queue.getLength() == b(0)) ? nullptr : queue.pop(queue.peek()->getChunkLength());
 
     QuicPacket *packet;
     if (includeTransportParamters) {

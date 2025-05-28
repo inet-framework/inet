@@ -493,7 +493,8 @@ QuicPacket *PacketBuilder::buildServerInitialPacket(int maxPacketSize, Ptr<const
 {
     QuicPacket *packet = createPacket(PacketNumberSpace::Initial, false);
 
-    packet->addFrame(createCryptoFrame(cryptoPayload));
+    if (cryptoPayload != nullptr)
+        packet->addFrame(createCryptoFrame(cryptoPayload));
 
     // check if we would like to bundle an ack frame
     if (receivedPacketsAccountant[PacketNumberSpace::Initial]->hasNewAckInfoAboutAckElicitings() || (receivedPacketsAccountant[PacketNumberSpace::Initial]->hasNewAckInfo() && bundleAckForNonAckElicitingPackets)) {
@@ -514,7 +515,8 @@ QuicPacket *PacketBuilder::buildHandshakePacket(int maxPacketSize, Ptr<const Chu
 {
     QuicPacket *packet = createPacket(PacketNumberSpace::Handshake, false);
 
-    packet->addFrame(createCryptoFrame(cryptoPayload));
+    if (cryptoPayload != nullptr)
+        packet->addFrame(createCryptoFrame(cryptoPayload));
 
     // check if we would like to bundle an ack frame
     if (receivedPacketsAccountant[PacketNumberSpace::Handshake]->hasNewAckInfoAboutAckElicitings() || (receivedPacketsAccountant[PacketNumberSpace::Handshake]->hasNewAckInfo() && bundleAckForNonAckElicitingPackets)) {
