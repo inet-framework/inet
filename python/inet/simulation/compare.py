@@ -127,11 +127,11 @@ class CompareSimulationsTaskResult(TaskResult):
             task_1 = copy.copy(self.multiple_tasks.tasks[0])
             task_1.user_interface = "Qtenv"
             task_1.wait = False
-            task_1.run(append_args=append_args + [f"--qtenv-stop-event-number={event_number_1}"], **kwargs)
+            task_1.run(append_args=append_args + [f"-Xev={event_number_1}"], **kwargs)
             task_2 = copy.copy(self.multiple_tasks.tasks[1])
             task_2.user_interface = "Qtenv"
             task_2.wait = False
-            task_2.run(append_args=append_args + [f"--qtenv-stop-event-number={event_number_2}"], **kwargs)
+            task_2.run(append_args=append_args + [f"-Xev={event_number_2}"], **kwargs)
 
     def run_until_fingerprint_divergence_position(self, num_cause_events=0, append_args=[], **kwargs):
         if self.fingerprint_trajectory_divergence_position:
@@ -141,11 +141,11 @@ class CompareSimulationsTaskResult(TaskResult):
             task_1 = copy.copy(self.multiple_tasks.tasks[0])
             task_1.user_interface = "Qtenv"
             task_1.wait = False
-            task_1.run(append_args=append_args + [f"--qtenv-stop-event-number={event_number_1}"], **kwargs)
+            task_1.run(append_args=append_args + [f"-Xev={event_number_1}"], **kwargs)
             task_2 = copy.copy(self.multiple_tasks.tasks[1])
             task_2.user_interface = "Qtenv"
             task_2.wait = False
-            task_2.run(append_args=append_args + [f"--qtenv-stop-event-number={event_number_2}"], **kwargs)
+            task_2.run(append_args=append_args + [f"-Xev={event_number_2}"], **kwargs)
 
     def show_divergence_posisiton_in_sequence_chart(self):
         if self.fingerprint_trajectory_divergence_position:
