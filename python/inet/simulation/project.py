@@ -317,7 +317,7 @@ class SimulationProject:
                             return sim_time_limit
             return config_dicts["General"].get("sim_time_limit")
         def create_config_dict(config):
-            return {"config": config, "abstract_config": False, "emulation": False, "expected_result": "DONE", "user_interface": None, "description": None, "network": None}
+            return {"config": config, "abstract": False, "emulation": False, "expected_result": "DONE", "user_interface": None, "description": None, "network": None}
         num_runs_fast_regex = re.compile(r"(?m).*^\s*(include\s+.*\.ini|repeat\s*=\s*[0-9]+|.*\$\{.*\})")
         configuration_class_regex = re.compile(r"\s*configuration-class\s*=\s*(\w+)")
         simulation_configs = []
@@ -334,9 +334,9 @@ class SimulationProject:
                 config = match.group(2) or match.group(3)
                 config_dict = create_config_dict(config)
                 config_dicts[config] = config_dict
-            match = re.match(r"#? *abstract-config *= *(\w+)", line)
+            match = re.match(r"#? *abstract *= *(\w+)", line)
             if match:
-                config_dict["abstract_config"] = bool(match.group(1))
+                config_dict["abstract"] = bool(match.group(1))
             match = re.match(r"#? *emulation *= *(\w+)", line)
             if match:
                 config_dict["emulation"] = bool(match.group(1))
@@ -390,7 +390,7 @@ class SimulationProject:
             sim_time_limit = get_sim_time_limit(config_dicts, config)
             description = config_dict["description"]
             description_abstract = (re.search(r"\((a|A)bstract\)", description) is not None) if description else False
-            abstract = (config_dict["network"] is None and config_dict["config"] == "General") or config_dict["abstract_config"] or description_abstract
+            abstract = (config_dict["network"] is None and config_dict["config"] == "General") or config_dict["abstract"] or description_abstract
             emulation = config_dict["emulation"]
             expected_result = config_dict["expected_result"]
             user_interface = config_dict["user_interface"] or general_config_dict["user_interface"]
