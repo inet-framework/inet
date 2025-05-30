@@ -3,57 +3,49 @@ import sys
 import re
 
 def computeUniqueFingerprints(fingerprints):
-    i = 0
     uniqueFingerprints = list()
-    while i < len(fingerprints):
-        fingerprint = fingerprints[i]
-        j = i
-        while (j < len(fingerprints)) and (fingerprint == fingerprints[j]):
-            j = j + 1
-        uniqueFingerprints.append([j-1, fingerprint])
-        i = j
+    for i in range(1, len(fingerprints)):
+        fingerprint = fingerprints[i-1]
+        if (fingerprints[i][1] != fingerprint[1]):
+            uniqueFingerprints.append(fingerprint)
+    if fingerprints:
+        uniqueFingerprints.append(fingerprints[-1])
     return uniqueFingerprints
 
 def readFingerprints1(eventlogFile):
     "RegExp version"
-    regExp = re.compile(r"^E # ([0-9]+) t ((?:[0-9]*\.)?[0-9]+) m [0-9]+ ce [0-9]+ msg [0-9]+ f (?:\"([^\"]*)\"|(\S+))$")
+    regExp = re.compile(r"^E # ([0-9]+) t ((?:[0-9]*\.)?[0-9]+) m [0-9]+ ce -?[0-9]+ msg -?[0-9]+ f (?:\"([^\"]*)\"|(\S+))$")
     fingerprints = list()
     for line in eventlogFile:
         match = regExp.match(line)
         if match:
             fingerprint = match.group(3) if match.group(3) else match.group(4)
-            fingerprints.append(fingerprint)
+            fingerprints.append([match.group(1), fingerprint])
     return fingerprints
 
 def isNewEvent(line):
     return len(line) >= 4 and line[0:4] == "E # "
 
-def getFingerprint(line):
-    n = len(line) - 1
-    return line[(n-14):(n-5)]
-
-def readFingerprints2(eventlogFile):
-    fingerprints = list()
-    eventlogFile.readline() # skip the first line
-    for line in eventlogFile:
-        if isNewEvent(line):
-            fingerprint = getFingerprint(line)
-            fingerprints.append(fingerprint)
-    return fingerprints
-
 def diffingerprint(elog1Fingerprints, elog2Fingerprints):
-    minSize = min(len(elog1Fingerprints), len(elog2Fingerprints)) - 1
+    minSize = min(len(elog1Fingerprints), len(elog2Fingerprints))
     for i in range(0,minSize):
         elog1Fingerprint = elog1Fingerprints[i]
         elog2Fingerprint = elog2Fingerprints[i]
         if elog1Fingerprint[1] != elog2Fingerprint[1]:
             return "Diff elog1: " + str(elog1Fingerprint[0]) + " fingerprint = " + elog1Fingerprint[1] + ", elog2: " + str(elog2Fingerprint[0]) + " fingerprint = " + elog2Fingerprint[1]
+    if len(elog1Fingerprints) > minSize:
+        elog1Fingerprint = elog1Fingerprints[i]
+        return "The elog1 fingerprint list longer than elog2, last equals: elog1: " + str(elog1Fingerprint[0]) + " fingerprint = " + elog1Fingerprint[1] + ", elog2: " + str(elog2Fingerprint[0]) + " fingerprint = " + elog2Fingerprint[1]
+    elif len(elog2Fingerprints) > minSize:
+        elog2Fingerprint = elog2Fingerprints[i]
+        return "The elog2 fingerprint list longer than elog1, last equals: elog1: " + str(elog1Fingerprint[0]) + " fingerprint = " + elog1Fingerprint[1] + ", elog2: " + str(elog2Fingerprint[0]) + " fingerprint = " + elog2Fingerprint[1]
     return "No differences"
 
 
 elog1FilePath = sys.argv[1]
 elog2FilePath = sys.argv[2]
 
+print(elog1FilePath)
 elog1File = open(elog1FilePath)
 elog2File = open(elog2FilePath)
 uniqueElog1Fingerprints = computeUniqueFingerprints(readFingerprints1(elog1File))
@@ -62,4 +54,3 @@ print(diffingerprint(uniqueElog1Fingerprints, uniqueElog2Fingerprints))
 
 elog1File.close()
 elog2File.close()
-
