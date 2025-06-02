@@ -14,6 +14,7 @@ debug/makefile
 .vscode/*
 .metadata
 .doxy
+*.ninja
 src/inet/features.h
 src/inet/opp_defines.h
 precompiled_*.h.*
