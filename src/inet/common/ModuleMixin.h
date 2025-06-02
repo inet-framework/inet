@@ -33,11 +33,13 @@ class INET_API ModuleMixin : public T, public StringFormat::IResolver
 
     virtual void refreshDisplay() const override
     {
-      auto displayStringTextFormat = T::par("displayStringTextFormat").stringValue();
-      if (!opp_isempty(displayStringTextFormat)) {
-        auto text = StringFormat::formatString(displayStringTextFormat, this);
-        T::getDisplayString().setTagArg("t", 0, text.c_str());
-      }  
+      if (T::hasPar("displayStringTextFormat")) {
+        auto displayStringTextFormat = T::par("displayStringTextFormat").stringValue();
+        if (!opp_isempty(displayStringTextFormat)) {
+          auto text = StringFormat::formatString(displayStringTextFormat, this);
+          T::getDisplayString().setTagArg("t", 0, text.c_str());
+        }
+      }
       T::refreshDisplay();
     }  
 
