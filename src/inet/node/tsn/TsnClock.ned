@@ -32,5 +32,5 @@ module TsnClock extends GptpMaster
         ethernet.typename = default("EthernetLayer"); // Use the Ethernet protocol layer outside network interfaces
         eth[*].typename = default("LayeredEthernetInterface"); // Switch to modular Ethernet interface
         eth[*].phyLayer.typename = default(hasCutthroughSwitching ? "EthernetStreamingPhyLayer" : "EthernetPhyLayer"); // Use packet streaming when cut-through switching is enabled
-        @display("i=device/card"); // Change icon to emphasize hardware device
+        @display("i=device/clock"); // Change icon to emphasize hardware device
 }
