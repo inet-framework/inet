@@ -58,6 +58,16 @@ void PacketTransmitterBase::handleStartOperation(LifecycleOperation *operation)
         producer.handleCanPushPacketChanged();
 }
 
+void PacketTransmitterBase::handleStopOperation(LifecycleOperation *operation)
+{
+    cancelClockEvent(txEndTimer);
+}
+
+void PacketTransmitterBase::handleCrashOperation(LifecycleOperation *operation)
+{
+    cancelClockEvent(txEndTimer);
+}
+
 Signal *PacketTransmitterBase::encodePacket(Packet *packet)
 {
     txDurationClockTime = calculateClockTimeDuration(packet);
