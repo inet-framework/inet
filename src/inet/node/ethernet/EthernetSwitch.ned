@@ -98,7 +98,7 @@ module EthernetSwitch like IEthernetNetworkNode
             @display("p=100,600;is=s");
         }
         measurer: <default("")> like IMeasurer if typename != "" {
-            @display("p=125,700;is=s");
+            @display("p=100,700;is=s");
         }
         mrp: <default("Mrp")> like IMrp if hasMrp {
             @display("p=500,50");
