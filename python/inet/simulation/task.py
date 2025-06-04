@@ -568,13 +568,13 @@ def get_simulation_tasks(simulation_project=None, simulation_configs=None, mode=
     simulation_tasks = []
     for simulation_config in simulation_configs:
         if run_number is not None:
-            simulation_run_sim_time_limit = sim_time_limit(simulation_config, run_number) if callable(sim_time_limit) else sim_time_limit
+            simulation_run_sim_time_limit = sim_time_limit(simulation_config, run_number) if callable(sim_time_limit) else (sim_time_limit or simulation_config.sim_time_limit)
             simulation_task = simulation_task_class(simulation_config=simulation_config, run_number=run_number, mode=mode, debug=debug, break_at_event_number=break_at_event_number, break_at_matching_event=break_at_matching_event, sim_time_limit=simulation_run_sim_time_limit, cpu_time_limit=cpu_time_limit, **kwargs)
             simulation_tasks.append(simulation_task)
         else:
             for generated_run_number in range(0, simulation_config.num_runs):
                 if matches_filter(str(generated_run_number), run_number_filter, exclude_run_number_filter, True):
-                    simulation_run_sim_time_limit = sim_time_limit(simulation_config, generated_run_number) if callable(sim_time_limit) else sim_time_limit
+                    simulation_run_sim_time_limit = sim_time_limit(simulation_config, generated_run_number) if callable(sim_time_limit) else (sim_time_limit or simulation_config.sim_time_limit)
                     simulation_task = simulation_task_class(simulation_config=simulation_config, run_number=generated_run_number, mode=mode, debug=debug, break_at_event_number=break_at_event_number, break_at_matching_event=break_at_matching_event, sim_time_limit=simulation_run_sim_time_limit, cpu_time_limit=cpu_time_limit, **kwargs)
                     simulation_tasks.append(simulation_task)
     if expected_num_tasks is not None and len(simulation_tasks) != expected_num_tasks:
@@ -628,6 +628,6 @@ def clean_simulation_results(simulation_project=None, simulation_configs=None, *
     if simulation_project is None:
         simulation_project = get_default_simulation_project()
     if simulation_configs is None:
-        simulation_configs = get_simulation_configs(**kwargs)
+        simulation_configs = simulation_project.get_simulation_configs(**kwargs)
     for simulation_config in simulation_configs:
         simulation_config.clean_simulation_results()

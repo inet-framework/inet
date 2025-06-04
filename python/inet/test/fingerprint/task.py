@@ -348,12 +348,13 @@ class FingerprintUpdateTask(SimulationUpdateTask):
             stored_fingerprint_entry = stored_fingerprint_entries[0]
             if sim_time_limit is None:
                 sim_time_limit = stored_fingerprint_entry["sim_time_limit"]
-            correct_fingerprint = Fingerprint(stored_fingerprint_entry["fingerprint"] + "/" + stored_fingerprint_entry["ingredients"])
+            correct_fingerprint = Fingerprint(stored_fingerprint_entry["fingerprint"], stored_fingerprint_entry["ingredients"])
         else:
             correct_fingerprint = None
         fingerprint_arg = "0000-0000/" + ingredients
-        append_args = append_args + ["--fingerprint", fingerprint_arg, "--vector-recording", "false", "--scalar-recording", "false"] + get_ingredients_append_args(ingredients)
-        self.simulation_task.sim_time_limit = sim_time_limit
+        append_args = ["--fingerprint", fingerprint_arg, "--vector-recording", "false", "--scalar-recording", "false"] + get_ingredients_append_args(ingredients)
+        if sim_time_limit is not None:
+            self.simulation_task.sim_time_limit = sim_time_limit
         simulation_task_result = self.simulation_task.run_protected(sim_time_limit=sim_time_limit, output_stream=output_stream, append_args=append_args, **kwargs)
         calculated_fingerprint = get_calculated_fingerprint(simulation_task_result, ingredients)
         return FingerprintUpdateTaskResult(task=self, simulation_task_result=simulation_task_result, correct_fingerprint=correct_fingerprint, calculated_fingerprint=calculated_fingerprint)
