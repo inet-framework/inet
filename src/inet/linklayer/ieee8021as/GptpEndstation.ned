@@ -17,9 +17,10 @@ import inet.node.inet.StandardHost;
 module GptpEndstation extends StandardHost
 {
     parameters:
+        bool hasGptp = default(true);
         clock.typename = default("SettableClock");
     submodules:
-        gptp: <default("Gptp")> like IApp if typename != "" {
+        gptp: <default("Gptp")> like IApp if typename != "" && hasGptp {
             @display("p=700.11755,75.166");
         }
     connections:
