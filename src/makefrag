@@ -168,17 +168,23 @@ clean-defines:
 	$(Q)-rm -f $(DEFINES_FILE)
 
 $(DEFINES_FILE) : $(COPTS_FILE)
-	@echo "// Generated file, do not edit" >$(DEFINES_FILE)
+	@echo "// Generated file, do not edit" > $(DEFINES_FILE).new
 ifeq ($(WITH_OSG),yes)
-	@echo "#ifndef WITH_OSG" >>$(DEFINES_FILE)
-	@echo "#define WITH_OSG" >>$(DEFINES_FILE)
-	@echo "#endif" >>$(DEFINES_FILE)
+	@echo "#ifndef WITH_OSG" >> $(DEFINES_FILE).new
+	@echo "#define WITH_OSG" >> $(DEFINES_FILE).new
+	@echo "#endif" >> $(DEFINES_FILE).new
 endif
 ifeq ($(WITH_OSGEARTH),yes)
-	@echo "#ifndef WITH_OSGEARTH" >>$(DEFINES_FILE)
-	@echo "#define WITH_OSGEARTH" >>$(DEFINES_FILE)
-	@echo "#endif" >>$(DEFINES_FILE)
+	@echo "#ifndef WITH_OSGEARTH" >> $(DEFINES_FILE).new
+	@echo "#define WITH_OSGEARTH" >> $(DEFINES_FILE).new
+	@echo "#endif" >> $(DEFINES_FILE).new
 endif
+	@if ! cmp -s $(DEFINES_FILE) $(DEFINES_FILE).new; then \
+		mv -f $(DEFINES_FILE).new $(DEFINES_FILE); \
+	else \
+		rm -f $(DEFINES_FILE).new; \
+	fi
+  
 
 # dump out the actual compiler and linker command line for easier debugging
 ifneq ($(MAKECMDGOALS),clean)
