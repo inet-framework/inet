@@ -1,0 +1,8 @@
+<scenario>
+    <set-clock t="3s" module="tsnClock.clock" time="3.000001s"/>
+    <set-clock t="6s" module="tsnClock.clock" time="6s"/>
+    <set-clock t="9s" module="tsnClock.clock" time="9.000001s"/>
+    <set-clock t="12s" module="tsnClock.clock" time="12s"/>
+    <set-clock t="15s" module="tsnClock.clock" time="15.000005s"/>
+    <set-clock t="18s" module="tsnClock.clock" time="18"/>
+</scenario>

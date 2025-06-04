@@ -22,6 +22,8 @@ module ClockBase extends Module
         @class(ClockBase);
         @display("i=block/timer");
         @signal[timeChanged](type=simtime_t);
+        @signal[timeDifferenceToReference](type=simtime_t);
+        @signal[timeJumped](); // Signal is emitted, when the clock performs a time jump. This is for example required for the gPTP module to work correctly.
         @statistic[timeChanged](title="Clock time"; record=vector; interpolationmode=linear);
+        @statistic[timeDifferenceToReference](title="Time difference to reference"; record=vector; interpolationmode=linear);
 }
-

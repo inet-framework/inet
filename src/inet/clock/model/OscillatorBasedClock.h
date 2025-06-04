@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 #ifndef __INET_OSCILLATORBASEDCLOCK_H
 #define __INET_OSCILLATORBASEDCLOCK_H
 
@@ -16,7 +15,7 @@ namespace inet {
 
 using namespace units::values;
 
-class INET_API OscillatorBasedClock : public ClockBase, public cListener
+class INET_API OscillatorBasedClock : public ClockBase
 {
   protected:
     IOscillator *oscillator = nullptr;
@@ -29,6 +28,7 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
 
   protected:
     virtual void initialize(int stage) override;
+    void setNewOriginTime(const simtime_t &newOriginSimulationTime, const clocktime_t &newOriginClockTime);
 
   public:
     virtual ~OscillatorBasedClock();
@@ -52,4 +52,3 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
 } // namespace inet
 
 #endif
-

@@ -8,8 +8,9 @@
 package inet.linklayer.ieee8021as;
 
 import inet.linklayer.contract.IGptp;
-import inet.queueing.classifier.PacketClassifier;
 import inet.queueing.common.PacketMultiplexer;
+import inet.queueing.contract.IPacketClassifier;
+
 
 //
 // Combines multiple ~Gptp modules, one per time domain into a multi
@@ -17,7 +18,10 @@ import inet.queueing.common.PacketMultiplexer;
 // configured to use the corresponding subclock of the clock passed into this
 // module.
 //
+// The module also provides a basic implementation of the IEEE 802.1ASdm ~HotStandby amendment
+//
 // @see ~MultiClock
+// @see ~HotStandby
 //
 module MultiDomainGptp like IGptp
 {
@@ -26,6 +30,7 @@ module MultiDomainGptp like IGptp
         string interfaceTableModule; // Relative module path of the interface table
         int numDomains; // Number of time synchronization domains
         string gptpNodeType; // @enum("GptpNodeType"): MASTER_NODE, BRIDGE_NODE, SLAVE_NODE
+        bool hasHotStandby = default(true); // Defines if the HotStandby should be used.
         @display("i=block/app");
     gates:
         input socketIn;
@@ -41,13 +46,16 @@ module MultiDomainGptp like IGptp
         multiplexer: PacketMultiplexer {
             @display("p=150,350");
         }
-        classifier: PacketClassifier {
-            classifierClass = default("inet::GptpDomainNumberClassifier");
+        classifier: <default("GptpDomainClassifier")> like IPacketClassifier {
             @display("p=300,350");
         }
+        hotstandby: HotStandby if hasHotStandby {
+            clockModule = default(absPath(parent.clockModule));
+            @display("p=450,350");
+        }
+
     connections:
-        for i=0..numDomains-1
-        {
+        for i=0..numDomains-1 {
             domain[i].socketOut --> multiplexer.in++;
             classifier.out++ --> domain[i].socketIn;
         }

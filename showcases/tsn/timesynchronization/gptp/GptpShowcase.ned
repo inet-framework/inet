@@ -32,96 +32,44 @@ network OneMasterClockGptpShowcase extends TsnNetworkBase
         tsnSwitch.ethg++ <--> EthernetLink <--> tsnDevice2.ethg++;
 }
 
-network TwoMasterClocksTreeGptpShowcase extends TsnNetworkBase
-{
-    submodules:
-        tsnClock1: TsnClock {
-            @display("p=500,150");
-        }
-        tsnClock2: TsnClock {
-            @display("p=700,150");
-        }
-        tsnSwitch1: TsnSwitch {
-            @display("p=500,300");
-        }
-        tsnSwitch2: TsnSwitch {
-            @display("p=700,300");
-        }
-        tsnDevice1: TsnDevice {
-            @display("p=300,450");
-        }
-        tsnDevice2: TsnDevice {
-            @display("p=500,450");
-        }
-        tsnDevice3: TsnDevice {
-            @display("p=700,450");
-        }
-        tsnDevice4: TsnDevice {
-            @display("p=900,450");
-        }
-    connections:
-        tsnClock1.ethg++ <--> EthernetLink <--> tsnSwitch1.ethg++;
-        tsnClock2.ethg++ <--> EthernetLink <--> tsnSwitch2.ethg++;
-        tsnSwitch1.ethg++ <--> EthernetLink <--> tsnSwitch2.ethg++;
-        tsnSwitch1.ethg++ <--> EthernetLink <--> tsnDevice1.ethg++;
-        tsnSwitch1.ethg++ <--> EthernetLink <--> tsnDevice2.ethg++;
-        tsnSwitch2.ethg++ <--> EthernetLink <--> tsnDevice3.ethg++;
-        tsnSwitch2.ethg++ <--> EthernetLink <--> tsnDevice4.ethg++;
-}
-
-network TwoMasterClocksRingGptpShowcase extends TsnNetworkBase
+network JumpingClockGptpShowcase extends TsnNetworkBase
 {
     submodules:
         scenarioManager: ScenarioManager {
             @display("p=100,500;is=s");
         }
-        tsnClock1: TsnClock {
+        tsnClock: TsnClock {
             @display("p=500,150");
         }
-        tsnClock2: TsnClock {
-            @display("p=900,600");
-        }
-        tsnSwitch1: TsnSwitch {
-            @display("p=700,150");
-        }
-        tsnSwitch2: TsnSwitch {
+        tsnDevice: TsnDevice {
             @display("p=500,300");
         }
-        tsnSwitch3: TsnSwitch {
-            @display("p=500,450");
+
+    connections:
+        tsnClock.ethg++ <--> EthernetLink <--> tsnDevice.ethg++;
+}
+
+network MultiHopGptpShowcase extends TsnNetworkBase
+{
+    parameters:
+        int numSwitches;
+    submodules:
+        scenarioManager: ScenarioManager {
+            @display("p=100,800;is=s");
         }
-        tsnSwitch4: TsnSwitch {
-            @display("p=700,600");
+        tsnClock: TsnClock {
+            @display("p=400,150");
         }
-        tsnSwitch5: TsnSwitch {
-            @display("p=900,450");
+        tsnSwitch[numSwitches]: TsnSwitch {
+            @display("p=400,300,row,100");
         }
-        tsnSwitch6: TsnSwitch {
-            @display("p=900,300");
-        }
-        tsnDevice1: TsnDevice {
-            @display("p=300,300");
-        }
-        tsnDevice2: TsnDevice {
-            @display("p=300,450");
-        }
-        tsnDevice3: TsnDevice {
-            @display("p=1100,450");
-        }
-        tsnDevice4: TsnDevice {
-            @display("p=1100,300");
+        tsnDevice: TsnDevice {
+            @display("p=400,450");
         }
     connections:
-        tsnClock1.ethg++ <--> EthernetLink <--> tsnSwitch1.ethg++;
-        tsnClock2.ethg++ <--> EthernetLink <--> tsnSwitch4.ethg++;
-        tsnSwitch1.ethg++ <--> EthernetLink <--> tsnSwitch2.ethg++;
-        tsnSwitch2.ethg++ <--> EthernetLink <--> tsnSwitch3.ethg++;
-        tsnSwitch3.ethg++ <--> EthernetLink <--> tsnSwitch4.ethg++;
-        tsnSwitch4.ethg++ <--> EthernetLink <--> tsnSwitch5.ethg++;
-        tsnSwitch5.ethg++ <--> EthernetLink <--> tsnSwitch6.ethg++;
-        tsnSwitch6.ethg++ <--> EthernetLink <--> tsnSwitch1.ethg++;
-        tsnSwitch2.ethg++ <--> EthernetLink <--> tsnDevice1.ethg++;
-        tsnSwitch3.ethg++ <--> EthernetLink <--> tsnDevice2.ethg++;
-        tsnSwitch5.ethg++ <--> EthernetLink <--> tsnDevice3.ethg++;
-        tsnSwitch6.ethg++ <--> EthernetLink <--> tsnDevice4.ethg++;
+        tsnClock.ethg++ <--> EthernetLink <--> tsnSwitch[0].ethg++;
+        for i=0..sizeof(tsnSwitch)-2 {
+            tsnSwitch[i].ethg++ <--> EthernetLink <--> tsnSwitch[i+1].ethg++;
+        }
+        tsnSwitch[numSwitches-1].ethg++ <--> EthernetLink <--> tsnDevice.ethg++;
 }

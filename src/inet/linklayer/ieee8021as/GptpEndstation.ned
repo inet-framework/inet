@@ -17,7 +17,7 @@ import inet.node.inet.StandardHost;
 module GptpEndstation extends StandardHost
 {
     parameters:
-        clock.typename = default("SettableClock");
+        clock.typename = default("PiServoClock");
     submodules:
         gptp: <default("Gptp")> like IApp if typename != "" {
             @display("p=700.11755,75.166");
