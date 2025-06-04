@@ -15,5 +15,5 @@ import inet.node.ethernet.EthernetSwitch;
 module GptpBridge extends EthernetSwitch
 {
     parameters:
-        hasGptp = true;
+        hasGptp = default(true);
 }
