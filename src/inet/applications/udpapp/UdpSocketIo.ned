@@ -31,6 +31,7 @@ simple UdpSocketIo extends SimpleModule
         bool joinLocalMulticastGroups = default(false); // If true, make the socket receive packets from all multicast groups set on local interfaces
         double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finishes
         double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation
+        displayStringTextFormat = default("rcvd: {numReceived} pks\nsent: {numSent} pks");
         @lifecycleSupport();
         @display("i=block/socket");
         @signal[packetSent](type=inet::Packet);

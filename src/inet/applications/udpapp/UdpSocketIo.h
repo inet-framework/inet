@@ -26,7 +26,6 @@ class INET_API UdpSocketIo : public ApplicationBase, public UdpSocket::ICallback
     virtual void initialize(int stage) override;
     virtual void handleMessageWhenUp(cMessage *message) override;
     virtual void finish() override;
-    virtual void refreshDisplay() const override;
 
     virtual void setSocketOptions();
 

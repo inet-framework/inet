@@ -49,14 +49,6 @@ void UdpSocketIo::finish()
     ApplicationBase::finish();
 }
 
-void UdpSocketIo::refreshDisplay() const
-{
-    ApplicationBase::refreshDisplay();
-    char buf[100];
-    sprintf(buf, "rcvd: %d pks\nsent: %d pks", numReceived, numSent);
-    getDisplayString().setTagArg("t", 0, buf);
-}
-
 void UdpSocketIo::setSocketOptions()
 {
     int timeToLive = par("timeToLive");
