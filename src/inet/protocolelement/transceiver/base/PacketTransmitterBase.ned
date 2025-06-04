@@ -18,7 +18,7 @@ simple PacketTransmitterBase extends PacketProcessorBase
         @display("i=block/wtx");
         @signal[transmissionStarted](type=inet::physicallayer::Signal);
         @signal[transmissionEnded](type=inet::physicallayer::Signal);
-        @statistic[transmitting](title="transmitting state"; type=int; source=count(transmissionStarted) - count(transmissionEnded); record=vector; interpolationmode=sample-hold);
+        @statistic[transmitting](title="transmitting state"; type=enum; enum=IDLE, TRANSMITTING; source=count(transmissionStarted) - count(transmissionEnded); record=vector; interpolationmode=sample-hold);
         @statistic[throughput](title="throughput"; unit=bps; source=throughput(transmissionEnded); record=vector,histogram; interpolationmode=linear);
         @statistic[utilization](title="utilization"; unit=%; source=100 * utilization(count(transmissionStarted) - count(transmissionEnded)); record=vector,histogram; interpolationmode=linear);
         @statistic[propagationTime](title="propagation time"; unit=s);
