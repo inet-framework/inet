@@ -11,6 +11,8 @@
 namespace inet {
 
 simsignal_t ClockBase::timeChangedSignal = cComponent::registerSignal("timeChanged");
+simsignal_t ClockBase::timeDifferenceToReferenceSignal = cComponent::registerSignal("timeDifferenceToReference");
+simsignal_t ClockBase::timeJumpedSignal = cComponent::registerSignal("timeJumped");
 
 void ClockBase::initialize(int stage)
 {
@@ -24,7 +26,16 @@ void ClockBase::initialize(int stage)
     }
     else if (stage == INITSTAGE_LAST) {
         referenceClockModule.reference(this, "referenceClock", false);
+        // Subscribe
+        if (referenceClockModule != nullptr && dynamic_cast<ClockBase *>(referenceClockModule.get()) != nullptr &&
+            this != referenceClockModule)
+        {
+            auto referenceClock = check_and_cast<ClockBase *>(referenceClockModule.get());
+            this->subscribe(ClockBase::timeChangedSignal, this);
+            referenceClock->subscribe(ClockBase::timeChangedSignal, this);
+        }
         emit(timeChangedSignal, getClockTime().asSimTime());
+        emitTimeDifferenceToReference();
     }
 }
 
@@ -32,16 +43,32 @@ void ClockBase::handleMessage(cMessage *msg)
 {
     if (msg == timer) {
         emit(timeChangedSignal, getClockTime().asSimTime());
+        emitTimeDifferenceToReference();
         scheduleAfter(emitClockTimeInterval, timer);
     }
     else
         throw cRuntimeError("Unknown message");
 }
 
-void ClockBase::finish()
+void ClockBase::emitTimeDifferenceToReference()
 {
-    emit(timeChangedSignal, getClockTime().asSimTime());
+    if (referenceClockModule == nullptr)
+        return;
+    auto referenceTime = referenceClockModule->getClockTime();
+    auto timeDifference = getClockTime() - referenceTime;
+    emit(timeDifferenceToReferenceSignal, timeDifference.asSimTime());
 }
+
+void ClockBase::receiveSignal(cComponent *source, int signal, const simtime_t& time, cObject *details)
+{
+    if (signal == ClockBase::timeChangedSignal) {
+        emitTimeDifferenceToReference();
+    }
+    else
+        throw cRuntimeError("Unknown signal");
+}
+
+void ClockBase::finish() { emit(timeChangedSignal, getClockTime().asSimTime()); }
 
 
 clocktime_t ClockBase::getClockTime() const

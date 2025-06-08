@@ -1,0 +1,8 @@
+<scenario>
+    <set-channel-param t="1.5s" src-module="tsnDevice1" dest-module="tsnSwitchA1" par="disabled" value="true"/>
+    <set-channel-param t="5.5s" src-module="tsnDevice1" dest-module="tsnSwitchA1" par="disabled" value="false"/>
+    <set-channel-param t="7.5s" src-module="tsnDevice1" dest-module="tsnSwitchB1" par="disabled" value="true"/>
+    <set-channel-param t="11.5s" src-module="tsnDevice1" dest-module="tsnSwitchB1" par="disabled" value="false"/>
+    <set-channel-param t="13.5s" src-module="tsnSwitchA1" dest-module="tsnSwitchA2" par="disabled" value="true"/>
+    <set-channel-param t="17.5s" src-module="tsnSwitchA1" dest-module="tsnSwitchA2" par="disabled" value="false"/>
+</scenario>

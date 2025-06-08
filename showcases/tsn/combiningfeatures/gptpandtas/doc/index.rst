@@ -68,7 +68,7 @@ application traffic, we configure ``tsnDevice1`` to send 10B UDP packets to
 Clocks and Clock Drift
 ++++++++++++++++++++++
 
-Clocks use :ned:`MultiClock` and :ned:`SettableClock` modules with constant
+Clocks use :ned:`MultiClock` and :ned:`InstantServoClock` modules with constant
 drift oscillators. We set the initial drift rate and the drift rate change with
 a random uniform distribution, and limit the drift rate change:
 

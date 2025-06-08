@@ -26,9 +26,14 @@ module MultiClock extends Module like IClock
         @display("i=block/timer");
         @class(MultiClock);
         @signal[timeChanged](type=simtime_t);
+        @signal[timeJumped](); // Signal is emitted when the activeClock performs a timeJump or the activeClockIndex updates
+        @signal[timeDifferenceToReference](type=simtime_t);
+        @signal[activeClockIndexChanged](type=int);
         @statistic[timeChanged](title="Clock time"; source=localSignal(timeChanged); record=vector; interpolationmode=linear);
+        @statistic[timeDifferenceToReference](title="Time difference to reference"; source=localSignal(timeDifferenceToReference); record=vector; interpolationmode=linear);
+        @statistic[activeClockIndexChanged](title="Active clock index"; source=activeClockIndexChanged; record=vector; interpolationmode=sample-hold);
     submodules:
-        clock[numClocks]: <default("SettableClock")> like IClock {
+        clock[numClocks]: <default("PiServoClock")> like IClock {
             @display("p=200,200,row,200");
         }
 }

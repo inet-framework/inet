@@ -61,8 +61,12 @@ can still be used to keep track of time in the network nodes.
 
 -  :ned:`OscillatorBasedClock` models a clock that has a potentially drifting
    oscillator
--  :ned:`SettableClock` extends the previous model with the capability of setting
-   the clock time
+-  :ned:`ServoClockBase` extends the previous model with the approach for clock
+   adjustments
+-  :ned:`InstantServoClock` extends :ned:`ServoClockBase` with the capability of
+   adjusting clock by jumping to another time and adjusting the drift rate
+-  :ned:`PiServoClock` extends :ned:`ServoClockBase` for synchronizing the clock
+   with an external time source smoothly by implementing a PI controller
 
 Similarly to the above, the following gPTP time synchronization related protocol
 modules and network nodes can also be used to build time synchronization in a
@@ -74,18 +78,6 @@ network:
 -  :ned:`GptpMaster` models a gPTP time synchronization master network node
 -  :ned:`GptpSlave` models a gPTP time synchronization slave network node
 
-In order to implement node failure (e.g. master clock) and link failure (e.g.
-between gPTP bridges) protection, multiple time synchronization domains are
-required. These time domains operate independently of each other, and it's up to
-the clock user modules of each network node to decide which clock they are using.
-Typically, they use the active clock of the :ned:`MultiClock`, and there has to
-be some means of changing the active clocks when failover happens. The following
-modules can be used to implement multiple time domains:
-
--  :ned:`MultiClock` contains several subclocks for the different time domains
--  :ned:`MultiDomainGptp` contains several gPTP submodules for the different
-   time domains
-
 The following parameters can be used to enable the gPTP time synchronization
 in various predefined network nodes:
 
@@ -93,6 +85,30 @@ in various predefined network nodes:
    specific network nodes
 -  :par:`hasGptp` parameter enables the gPTP time synchronization protocol in
    gPTP specific network nodes
+
+There are two possible ways to define the synchronization topology of a network.
+The first one is by setting up a static the synchronization topology manually.
+The second one is to use the Best Master Clock Algorithm (BMCA) to automatically
+determine the synchronization topology.
+Please refer to their respective showcases:
+:doc:`/showcases/tsn/timesynchronization/gptp/doc/index` and :doc:`/showcases/tsn/timesynchronization/gptp_bmca/doc/index`
+
+The usage of BMCA is one way to protect the synchronization network
+topology against node and link failures, it is not the only one.
+Another option is the usage of multiple gPTP synchronization domains.
+These time domains operate independently of each other, and it's up to
+the clock user modules of each network node to decide which clock they are using.
+Typically, they use the active clock of the :ned:`MultiClock`, and there has to
+be some means of changing the active clocks when failover happens.
+One such a failover mechanism is the :ned:`HotStandby` mechanism, as defined by the IEEE 802.1ASdm amendment.
+For a detailed description please refer to the HotStandby showcase:
+:doc:`/showcases/tsn/timesynchronization/gptp_hotstandby/doc/index`.
+
+The following modules can be used to implement multiple time domains:
+
+-  :ned:`MultiClock` contains several subclocks for the different time domains
+-  :ned:`MultiDomainGptp` contains several gPTP submodules for the different
+   time domains
 
 .. _ug:sec:tsn:streamfiltering:
 

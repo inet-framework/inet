@@ -37,11 +37,8 @@ clock and oscillator models, we can simulate `constant` and `random` clock drift
 rates. To model time synchronization, the time of clocks can be set by
 `synchronizer` modules.
 
-Several clock models are available:
-
-- :ned:`OscillatorBasedClock`: Has an `oscillator` submodule; keeps time by counting the oscillator's ticks. Depending on the oscillator submodule, can model `constant` and `random clock drift rate`
-- :ned:`SettableClock`: Same as the oscillator-based clock but the time can be set from C++ or a scenario manager script
-- :ned:`IdealClock`: The clock's time is the same as the simulation time; for testing purposes
+Several clock models are available. For a detailed description please take a look at this documentation:
+:doc:`/users-guide/ch-clock`
 
 The following oscillator models are available:
 
@@ -50,7 +47,8 @@ The following oscillator models are available:
 - :ned:`RandomDriftOscillator`: the oscillator changes drift rate over time; for modeling `random clock drift`
 
 Synchronizers are implemented as application-layer modules. For clock synchronization, the synchronizer 
-modules need to set the time of clocks, thus only the SettableClock supports synchronization. 
+modules need to set the time of clocks, thus only the clocks based on the
+:ned:`ServoClockBase` module support synchronization.
 The following synchronizer modules are available:
 
 - :ned:`SimpleClockSynchronizer`: Uses an out-of-band mechanism to synchronize clocks, instead of a real clock synchronization protocol. Useful for simulations where the details of time synchronization are not important.
@@ -173,7 +171,7 @@ The out-of-band synchronization settings are defined in a base configuration, ``
    :end-before: ConstantClockDriftOutOfBandSync
 
 Since we want to use clock synchronization, we need to be able to set the
-clocks, so network nodes have :ned:`SettableClock` modules. The
+clocks, so network nodes have :ned:`InstantServoClock` modules. The
 ``defaultOverdueClockEventHandlingMode = "execute"`` setting means that when
 setting the clock forward, events that become overdue are done immediately. We
 use the :ned:`SimpleClockSynchronizer` for out-of-band synchronization.
