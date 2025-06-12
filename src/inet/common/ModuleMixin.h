@@ -19,7 +19,7 @@ namespace inet {
  *
  * Additional features compared to cSimpleModule / cModule:
  * - Support for displayStringTextFormat parameter
- * - Derived classes can implement resolveDirective() to support %c style directives that can 
+ * - Derived classes can implement resolveDirective() to support %c style directives that can
  *   be used in displayStringTextFormat.
  */
 template<typename T>
@@ -33,30 +33,30 @@ class INET_API ModuleMixin : public T, public StringFormat::IResolver
 
     virtual void refreshDisplay() const override
     {
-      if (T::hasPar("displayStringTextFormat")) {
-        auto displayStringTextFormat = T::par("displayStringTextFormat").stringValue();
-        if (!opp_isempty(displayStringTextFormat)) {
-          auto text = StringFormat::formatString(displayStringTextFormat, this);
-          T::getDisplayString().setTagArg("t", 0, text.c_str());
+        if (T::hasPar("displayStringTextFormat")) {
+            auto displayStringTextFormat = T::par("displayStringTextFormat").stringValue();
+            if (!opp_isempty(displayStringTextFormat)) {
+                auto text = StringFormat::formatString(displayStringTextFormat, this);
+                T::getDisplayString().setTagArg("t", 0, text.c_str());
+            }
         }
-      }
-      T::refreshDisplay();
-    }  
+        T::refreshDisplay();
+    }
 
   public:
     // Implementation of StringFormat::IResolver interface
     virtual std::string resolveDirective(char directive) const override
     {
-      throw cRuntimeError("Unknown directive: %c", directive);
+        throw cRuntimeError("Unknown directive: %c", directive);
     }
 
     virtual std::string resolveExpression(const char *expression) const override
     {
-      cObject *obj = const_cast<ModuleMixin<T>*>(this)->findObject(expression, false);
-      if (obj)
-          return obj->str();
-      else
-          throw cRuntimeError("Unknown expression: %s", expression);
+        cObject *obj = const_cast<ModuleMixin<T>*>(this)->findObject(expression, false);
+        if (obj)
+            return obj->str();
+        else
+            throw cRuntimeError("Unknown expression: %s", expression);
     }
 };
 
