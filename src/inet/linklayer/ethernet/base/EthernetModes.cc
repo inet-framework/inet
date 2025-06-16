@@ -120,6 +120,15 @@ const EthernetModes::EthernetMode EthernetModes::ethernetModes[NUM_OF_ETHERNETMO
         B(0),
         0,
         0
+    },
+    {
+        EIGHTHUNDRED_GIGABIT_ETHERNET_TXRATE,
+        0,
+        B(0),
+        B(-1), // half-duplex is not supported
+        B(0),
+        0,
+        0
     }
 };
 

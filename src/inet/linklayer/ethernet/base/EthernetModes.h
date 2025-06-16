@@ -34,7 +34,7 @@ class INET_API EthernetModes
 
   protected:
     enum {
-        NUM_OF_ETHERNETMODES = 11
+        NUM_OF_ETHERNETMODES = 12
     };
 
     // MAC constants for bitrates and modes
