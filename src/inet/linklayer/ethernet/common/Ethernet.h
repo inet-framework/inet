@@ -34,6 +34,7 @@ const b INTERFRAME_GAP_BITS              = b(96);
 #define HUNDRED_GIGABIT_ETHERNET_TXRATE        100000000000.0   /* 100 Gbit/sec (in bit/s) */
 #define TWOHUNDRED_GIGABIT_ETHERNET_TXRATE     200000000000.0   /* 200 Gbit/sec (in bit/s) */
 #define FOURHUNDRED_GIGABIT_ETHERNET_TXRATE    400000000000.0   /* 400 Gbit/sec (in bit/s) */
+#define EIGHTHUNDRED_GIGABIT_ETHERNET_TXRATE   800000000000.0   /* 800 Gbit/sec (in bit/s) */
 
 #define MAX_ATTEMPTS                           16
 #define BACKOFF_RANGE_LIMIT                    10
