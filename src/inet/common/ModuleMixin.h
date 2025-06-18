@@ -8,9 +8,10 @@
 #ifndef __INET_MODULEMIXIN_H
 #define __INET_MODULEMIXIN_H
 
-#include <type_traits>
-
 #include "inet/common/StringFormat.h"
+
+#include <type_traits>
+#include <vector>
 
 namespace inet {
 
@@ -26,6 +27,24 @@ template<typename T>
 class INET_API ModuleMixin : public T, public StringFormat::IResolver
 {
   static_assert(std::is_base_of<cModule, T>::value, "Type parameter of ModuleMixin must be a subclass of cModule");
+
+  protected:
+    class cCollectObjectsVisitor : public cVisitor
+    {
+      public:
+        const char *name;
+        std::vector<cObject*> objects;
+
+      public:
+        cCollectObjectsVisitor(const char *name): name(name) { }
+
+      protected:
+        virtual bool visit(cObject *object) override {
+            if (object->isName(name))
+                objects.push_back(object);
+            return true;
+        }
+    };
 
   protected:
     virtual void initialize() override { T::initialize(); }
@@ -52,9 +71,16 @@ class INET_API ModuleMixin : public T, public StringFormat::IResolver
 
     virtual std::string resolveExpression(const char *expression) const override
     {
-        cObject *obj = const_cast<ModuleMixin<T>*>(this)->findObject(expression, false);
-        if (obj)
-            return obj->str();
+        cCollectObjectsVisitor visitor(expression);
+        visitor.processChildrenOf(const_cast<ModuleMixin<T>*>(this));
+        if (!visitor.objects.empty()) {
+            if (visitor.objects.size() > 1) {
+                std::stable_sort(visitor.objects.begin(), visitor.objects.end(), [] (const cObject *o1, const cObject *o2) {
+                    return dynamic_cast<const cWatchBase *>(o1) != nullptr && dynamic_cast<const cWatchBase *>(o2) == nullptr;
+                });
+            }
+            return visitor.objects[0]->str();
+        }
         else
             throw cRuntimeError("Unknown expression: %s", expression);
     }
