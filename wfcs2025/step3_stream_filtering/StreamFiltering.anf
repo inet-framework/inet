@@ -704,7 +704,7 @@ utils.export_data_if_needed(df, props)
             <property name="Legend.Border" value="false"/>
             <property name="title" value="Client application traffic"/>
             <property name="Plot.Title.Font" value="Arial-regular-18"/>
-            <property name="vector_operations" value="apply: divide_by(1000000)"/>
+            <property name="vector_operations" value=""/>
             <property name="cycle_seed" value="0"/>
             <property name="Axis.Title.Font" value="Arial-regular-18"/>
             <property name="yaxis_log" value="false"/>
@@ -1445,7 +1445,7 @@ utils.export_data_if_needed(df, props)
             <property name="Legend.Border" value="false"/>
             <property name="title" value="Server application traffic without stream filtering"/>
             <property name="Plot.Title.Font" value="Arial-regular-18"/>
-            <property name="vector_operations" value="apply: divide_by(1000000)"/>
+            <property name="vector_operations" value=""/>
             <property name="cycle_seed" value="0"/>
             <property name="Axis.Title.Font" value="Arial-regular-18"/>
             <property name="yaxis_log" value="false"/>
@@ -4409,7 +4409,7 @@ utils.export_data_if_needed(df, props)
             <property name="Legend.Border" value="false"/>
             <property name="title" value="Excess traffic stream filter"/>
             <property name="Plot.Title.Font" value="Arial-regular-18"/>
-            <property name="vector_operations" value="apply: divide_by(1000000)"/>
+            <property name="vector_operations" value=""/>
             <property name="cycle_seed" value="0"/>
             <property name="Axis.Title.Font" value="Arial-regular-18"/>
             <property name="yaxis_log" value="false"/>
@@ -5150,7 +5150,7 @@ utils.export_data_if_needed(df, props)
             <property name="Legend.Border" value="false"/>
             <property name="title" value="Normal traffic stream filter"/>
             <property name="Plot.Title.Font" value="Arial-regular-18"/>
-            <property name="vector_operations" value="apply: divide_by(1000000)"/>
+            <property name="vector_operations" value=""/>
             <property name="cycle_seed" value="0"/>
             <property name="Axis.Title.Font" value="Arial-regular-18"/>
             <property name="yaxis_log" value="false"/>
