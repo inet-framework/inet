@@ -86,6 +86,7 @@ void CreditBasedGate::refreshDisplay() const
 {
     // NOTE: don't emit current credit and no need to call updateCurrentCreditGainRate
     const_cast<CreditBasedGate *>(this)->updateCurrentCredit();
+    PacketGateBase::refreshDisplay();
 }
 
 void CreditBasedGate::scheduleChangeTimer()
@@ -258,19 +259,6 @@ void CreditBasedGate::handleCanPullPacketChanged(const cGate *gate)
     // 2. reschedule change timer when currentCredit reaches transmitCreditLimit
     scheduleChangeTimer();
     PacketGateBase::handleCanPullPacketChanged(gate);
-}
-
-std::string CreditBasedGate::resolveDirective(char directive) const
-{
-    switch (directive) {
-        case 'n': {
-            std::stringstream stream;
-            stream << currentCredit;
-            return stream.str();
-        }
-        default:
-            return PacketGateBase::resolveDirective(directive);
-    }
 }
 
 } // namespace queueing
