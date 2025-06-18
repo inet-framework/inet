@@ -10,6 +10,7 @@
 
 #include "inet/common/StringFormat.h"
 
+#include <algorithm>
 #include <type_traits>
 #include <vector>
 
