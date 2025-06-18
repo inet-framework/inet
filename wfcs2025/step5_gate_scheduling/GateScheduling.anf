@@ -709,7 +709,7 @@ utils.export_data_if_needed(df, props)
             <property name="title" value="Manual gate scheduling end-to-end delay"/>
             <property name="legend_automatic" value="false"/>
             <property name="Plot.Title.Font" value="Arial-regular-18"/>
-            <property name="vector_operations" value="apply: multiply_by(1000000)"/>
+            <property name="vector_operations" value=""/>
             <property name="cycle_seed" value="0"/>
             <property name="Axis.Title.Font" value="Arial-regular-18"/>
             <property name="yaxis_log" value="false"/>
@@ -1450,7 +1450,7 @@ utils.export_data_if_needed(df, props)
             <property name="title" value="Automatic gate scheduling end-to-end delay"/>
             <property name="legend_automatic" value="false"/>
             <property name="Plot.Title.Font" value="Arial-regular-18"/>
-            <property name="vector_operations" value="apply: multiply_by(1000000)"/>
+            <property name="vector_operations" value=""/>
             <property name="cycle_seed" value="0"/>
             <property name="Axis.Title.Font" value="Arial-regular-18"/>
             <property name="yaxis_log" value="false"/>

@@ -727,7 +727,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_prefer_result_titles" value="true"/>
             <property name="title" value="Master clock time difference to simulation time"/>
             <property name="legend_automatic" value="true"/>
-            <property name="vector_operations" value="apply: lineartrend(-1)&#10;apply: multiply_by(1000000)"/>
+            <property name="vector_operations" value="apply: lineartrend(-1)"/>
             <property name="sorting" value="true"/>
             <property name="yaxis_log" value="false"/>
             <property name="image_export_height" value="4"/>
@@ -1463,7 +1463,7 @@ utils.export_data_if_needed(df, props)
             <property name="Legend.Border" value="false"/>
             <property name="title" value="Clock time differences without time synchronization"/>
             <property name="Plot.Title.Font" value="Arial-regular-18"/>
-            <property name="vector_operations" value="apply: multiply_by(1000000)"/>
+            <property name="vector_operations" value=""/>
             <property name="cycle_seed" value="0"/>
             <property name="Axis.Title.Font" value="Arial-regular-18"/>
             <property name="yaxis_log" value="false"/>
@@ -2222,7 +2222,7 @@ utils.export_data_if_needed(df, props)
             <property name="Legend.Border" value="false"/>
             <property name="title" value="Clock time differences with gPTP time synchronization"/>
             <property name="Plot.Title.Font" value="Arial-regular-18"/>
-            <property name="vector_operations" value="apply: multiply_by(1000000)"/>
+            <property name="vector_operations" value=""/>
             <property name="cycle_seed" value="0"/>
             <property name="Axis.Title.Font" value="Arial-regular-18"/>
             <property name="yaxis_log" value="false"/>
