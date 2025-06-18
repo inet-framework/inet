@@ -707,7 +707,7 @@ utils.export_data_if_needed(df, props)
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-18"/>
-            <property name="image_export_filename" value="ClientApplicationTraffic"/>
+            <property name="image_export_filename" value=""/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="3.0"/>
             <property name="filter" value="runattr:experiment =~ NoStreamFiltering AND module =~ &quot;*.client*.app[*].source&quot; AND name =~ dataRate:vector"/>
@@ -1434,7 +1434,7 @@ utils.export_data_if_needed(df, props)
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-18"/>
-            <property name="image_export_filename" value="ServerApplicationTraffic"/>
+            <property name="image_export_filename" value=""/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="3.0"/>
             <property name="filter" value="runattr:experiment =~ NoStreamFiltering AND module =~ &quot;*.server.app[*].sink&quot; AND name =~ dataRate:vector"/>
@@ -4354,7 +4354,7 @@ utils.export_data_if_needed(df, props)
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-18"/>
-            <property name="image_export_filename" value="BestEffortTrafficClass"/>
+            <property name="image_export_filename" value=""/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="3.0"/>
             <property name="filter" value="module =~ &quot;*.switch.bridging.streamFilter.ingress.filter[0]&quot; AND (&#10;    (name =~ incomingDataRate:vector) OR&#10;    (name =~ outgoingDataRate:vector) OR&#10;    (name =~ droppedDataRate:vector)&#10;)"/>
@@ -5082,7 +5082,7 @@ utils.export_data_if_needed(df, props)
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-18"/>
-            <property name="image_export_filename" value="VideoTrafficClass"/>
+            <property name="image_export_filename" value=""/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="3.0"/>
             <property name="filter" value="module =~ &quot;*.switch.bridging.streamFilter.ingress.filter[1]&quot; AND (&#10;    (name =~ incomingDataRate:vector) OR&#10;    (name =~ droppedDataRate:vector) OR&#10;    (name =~ outgoingDataRate:vector)&#10;)"/>
@@ -5809,7 +5809,7 @@ utils.export_data_if_needed(df, props)
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-18"/>
-            <property name="image_export_filename" value="TokenBuckets"/>
+            <property name="image_export_filename" value=""/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="3.0"/>
             <property name="filter" value="name =~ numTokens:vector AND (&#10;    (module =~ &quot;*.switch.bridging.streamFilter.ingress.meter[0]&quot;) OR&#10;    (module =~ &quot;*.switch.bridging.streamFilter.ingress.meter[1]&quot;)&#10;)"/>
