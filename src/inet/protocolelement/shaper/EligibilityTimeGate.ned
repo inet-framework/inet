@@ -24,6 +24,7 @@ simple EligibilityTimeGate extends PacketGateBase like IPacketGate
 {
     parameters:
         string clockModule = default(""); // Relative path of the module that implements IClock; optional
+        displayStringTextFormat = default("eligible in {remainingEligibilityTime}\npassed %p pk (%l)");
         @signal[remainingEligibilityTimeChanged](type=simtime_t);
         @statistic[remainingEligibilityTime](title="remaining eligibility time"; source=remainingEligibilityTimeChanged; record=vector; unit=s; interpolationmode=linear);
         @class(EligibilityTimeGate);

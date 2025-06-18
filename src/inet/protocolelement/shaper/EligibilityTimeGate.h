@@ -37,6 +37,8 @@ class INET_API EligibilityTimeGate : public ClockUserModuleMixin<PacketGateBase>
     virtual void updateOpen();
     virtual void emitEligibilityTimeChangedSignal();
 
+    virtual simtime_t getRemainingEligibilityTime() const;
+
   public:
     virtual ~EligibilityTimeGate() { cancelAndDelete(eligibilityTimer); }
 

@@ -21,6 +21,7 @@ void EligibilityTimeGate::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         eligibilityTimer = new ClockEvent("EligibilityTimer");
         lastRemainingEligibilityTimeSignalTime = simTime();
+        WATCH_EXPR("remainingEligibilityTime", getRemainingEligibilityTime());
     }
     else if (stage == INITSTAGE_QUEUEING) {
         updateOpen();
@@ -93,6 +94,13 @@ void EligibilityTimeGate::handleCanPullPacketChanged(const cGate *gate)
     updateOpen();
     emitEligibilityTimeChangedSignal();
     PacketGateBase::handleCanPullPacketChanged(gate);
+}
+
+simtime_t EligibilityTimeGate::getRemainingEligibilityTime() const
+{
+    auto packet = provider.canPullPacket();
+    auto remainingEligibilityTime = packet == nullptr ? 0 : CLOCKTIME_AS_SIMTIME(packet->getTag<EligibilityTimeTag>()->getEligibilityTime() - getClockTime());
+    return remainingEligibilityTime < 0 ? 0 : remainingEligibilityTime;
 }
 
 } // namespace inet
