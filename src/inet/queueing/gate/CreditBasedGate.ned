@@ -39,7 +39,7 @@ simple CreditBasedGate extends PacketGateBase like IPacketGate
         double minCredit = default(-inf); // Minimum number of credits
         double maxCredit = default(inf); // Maximum number of credits
         bool accumulateCreditInGuardBand = default(false); // Whether credit increases during implicit guard band when no packets can be sent anymore
-        displayStringTextFormat = default("contains %n cr\nserved %p pk (%l)"); // Determines display string text above the submodule
+        displayStringTextFormat = default("contains {currentCredit} cr, rate {currentCreditGainRate} crps\nserved %p pk (%l)"); // Determines display string text above the submodule
         @class(CreditBasedGate);
         @signal[creditsChanged](type=double);
         @statistic[numCredits](title="number of credits"; source=creditsChanged; record=vector; unit=cr; interpolationmode=linear);

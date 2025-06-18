@@ -86,7 +86,6 @@ void CreditBasedGate::refreshDisplay() const
 {
     // NOTE: don't emit current credit and no need to call updateCurrentCreditGainRate
     const_cast<CreditBasedGate *>(this)->updateCurrentCredit();
-    PacketGateBase::refreshDisplay();
 }
 
 void CreditBasedGate::scheduleChangeTimer()
