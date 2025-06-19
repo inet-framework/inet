@@ -9,8 +9,7 @@
     <charts>
         <chart createdWith="" icon="icons/full/obj/linechart.png" id="681132828" name="Client application traffic" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
-import re
-from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
+from omnetpp.scave import results, chart, utils
 
 # get chart properties
 props = chart.get_properties()
@@ -20,11 +19,12 @@ utils.preconfigure_plot(props)
 filter_expression = props["filter"]
 start_time = float(props["vector_start_time"] or -math.inf)
 end_time = float(props["vector_end_time"] or math.inf)
+omit_empty_vectors = props["omit_empty_vectors"] == "true"
 
 # query vector data into a data frame
 try:
-    df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
-except ValueError as e:
+    df = results.get_vectors(filter_expression, include_attrs=True, include_runattrs=True, include_itervars=True, start_time=start_time, end_time=end_time, omit_empty_vectors=omit_empty_vectors)
+except results.ResultQueryError as e:
     raise chart.ChartScriptError("Error while querying results: " + str(e))
 
 if df.empty:
@@ -34,7 +34,9 @@ if df.empty:
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
 # plot
-utils.plot_vectors(df, props)
+utils.add_legend_labels(df, props)
+utils.sort_rows_by_legend(df, props)
+utils.plot_vectors(df, props, sort=False)
 
 utils.postconfigure_plot(props)
 
@@ -747,9 +749,8 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_unit" value=""/>
         </chart>
         <chart createdWith="" icon="icons/full/obj/linechart.png" id="1406696360" name="Server application traffic without stream filtering" resultTypes="" template="linechart_native" type="LINE">
-            <script><![CDATA[import re
-import math
-from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
+            <script><![CDATA[import math
+from omnetpp.scave import results, chart, utils
 
 # get chart properties
 props = chart.get_properties()
@@ -759,11 +760,12 @@ utils.preconfigure_plot(props)
 filter_expression = props["filter"]
 start_time = float(props["vector_start_time"] or -math.inf)
 end_time = float(props["vector_end_time"] or math.inf)
+omit_empty_vectors = props["omit_empty_vectors"] == "true"
 
 # query vector data into a data frame
 try:
-    df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
-except ValueError as e:
+    df = results.get_vectors(filter_expression, include_attrs=True, include_runattrs=True, include_itervars=True, start_time=start_time, end_time=end_time, omit_empty_vectors=omit_empty_vectors)
+except results.ResultQueryError as e:
     raise chart.ChartScriptError("Error while querying results: " + str(e))
 
 if df.empty:
@@ -773,7 +775,9 @@ if df.empty:
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
 # plot
-utils.plot_vectors(df, props)
+utils.add_legend_labels(df, props)
+utils.sort_rows_by_legend(df, props)
+utils.plot_vectors(df, props, sort=False)
 
 utils.postconfigure_plot(props)
 
@@ -3709,9 +3713,8 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_unit" value=""/>
         </chart>
         <chart createdWith="" icon="icons/full/obj/linechart.png" id="1393667978" name="Excess traffic stream filter" resultTypes="" template="linechart_native" type="LINE">
-            <script><![CDATA[import re
-import math
-from omnetpp.scave import results, chart, utils, ideplot
+            <script><![CDATA[import math
+from omnetpp.scave import results, chart, utils
 
 # get chart properties
 props = chart.get_properties()
@@ -3721,11 +3724,12 @@ utils.preconfigure_plot(props)
 filter_expression = props["filter"]
 start_time = float(props["vector_start_time"] or -math.inf)
 end_time = float(props["vector_end_time"] or math.inf)
+omit_empty_vectors = props["omit_empty_vectors"] == "true"
 
 # query vector data into a data frame
 try:
-    df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
-except ValueError as e:
+    df = results.get_vectors(filter_expression, include_attrs=True, include_runattrs=True, include_itervars=True, start_time=start_time, end_time=end_time, omit_empty_vectors=omit_empty_vectors)
+except results.ResultQueryError as e:
     raise chart.ChartScriptError("Error while querying results: " + str(e))
 
 if df.empty:
@@ -3735,7 +3739,9 @@ if df.empty:
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
 # plot
-utils.plot_vectors(df, props)
+utils.add_legend_labels(df, props)
+utils.sort_rows_by_legend(df, props)
+utils.plot_vectors(df, props, sort=False)
 
 utils.postconfigure_plot(props)
 
@@ -4448,9 +4454,8 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_unit" value=""/>
         </chart>
         <chart createdWith="" icon="icons/full/obj/linechart.png" id="1264561584" name="Normal traffic stream filter" resultTypes="" template="linechart_native" type="LINE">
-            <script><![CDATA[import re
-import math
-from omnetpp.scave import results, chart, utils, ideplot
+            <script><![CDATA[import math
+from omnetpp.scave import results, chart, utils
 
 # get chart properties
 props = chart.get_properties()
@@ -4460,11 +4465,12 @@ utils.preconfigure_plot(props)
 filter_expression = props["filter"]
 start_time = float(props["vector_start_time"] or -math.inf)
 end_time = float(props["vector_end_time"] or math.inf)
+omit_empty_vectors = props["omit_empty_vectors"] == "true"
 
 # query vector data into a data frame
 try:
-    df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
-except ValueError as e:
+    df = results.get_vectors(filter_expression, include_attrs=True, include_runattrs=True, include_itervars=True, start_time=start_time, end_time=end_time, omit_empty_vectors=omit_empty_vectors)
+except results.ResultQueryError as e:
     raise chart.ChartScriptError("Error while querying results: " + str(e))
 
 if df.empty:
@@ -4474,7 +4480,9 @@ if df.empty:
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
 # plot
-utils.plot_vectors(df, props)
+utils.add_legend_labels(df, props)
+utils.sort_rows_by_legend(df, props)
+utils.plot_vectors(df, props, sort=False)
 
 utils.postconfigure_plot(props)
 
@@ -5187,9 +5195,8 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_unit" value=""/>
         </chart>
         <chart createdWith="" icon="icons/full/obj/linechart.png" id="993796464" name="Token buckets" resultTypes="" template="linechart_native" type="LINE">
-            <script><![CDATA[import re
-import math
-from omnetpp.scave import results, chart, utils, ideplot
+            <script><![CDATA[import math
+from omnetpp.scave import results, chart, utils
 
 # get chart properties
 props = chart.get_properties()
@@ -5199,11 +5206,12 @@ utils.preconfigure_plot(props)
 filter_expression = props["filter"]
 start_time = float(props["vector_start_time"] or -math.inf)
 end_time = float(props["vector_end_time"] or math.inf)
+omit_empty_vectors = props["omit_empty_vectors"] == "true"
 
 # query vector data into a data frame
 try:
-    df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
-except ValueError as e:
+    df = results.get_vectors(filter_expression, include_attrs=True, include_runattrs=True, include_itervars=True, start_time=start_time, end_time=end_time, omit_empty_vectors=omit_empty_vectors)
+except results.ResultQueryError as e:
     raise chart.ChartScriptError("Error while querying results: " + str(e))
 
 if df.empty:
@@ -5213,7 +5221,9 @@ if df.empty:
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
 # plot
-utils.plot_vectors(df, props)
+utils.add_legend_labels(df, props)
+utils.sort_rows_by_legend(df, props)
+utils.plot_vectors(df, props, sort=False)
 
 utils.postconfigure_plot(props)
 
