@@ -31,8 +31,6 @@ if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
 
 # apply vector operations
-df['vecvalue'] = df['vecvalue'].apply(lambda arr: arr * 1000000)
-df['vectime'] = df['vectime'].apply(lambda arr: arr * 1000)
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
 # plot

@@ -1485,7 +1485,6 @@ if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
 
 # apply vector operations
-df['vecvalue'] = df['vecvalue'].apply(lambda arr: arr * 1000)
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
 # plot
@@ -2216,7 +2215,6 @@ if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
 
 # apply vector operations
-df['vecvalue'] = df['vecvalue'].apply(lambda arr: arr / 1000000)
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
 # plot
@@ -2947,7 +2945,6 @@ if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
 
 # apply vector operations
-df['vecvalue'] = df['vecvalue'].apply(lambda arr: arr * 1000)
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
 # plot
@@ -4406,7 +4403,6 @@ if df.empty:
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
-df['title'] = df['title'].map(lambda title: re.sub("\\, vector.*", "", title))
 
 # plot
 utils.plot_vectors(df, props)
