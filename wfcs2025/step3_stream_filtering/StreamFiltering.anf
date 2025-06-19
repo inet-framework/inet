@@ -260,6 +260,11 @@ utils.export_data_if_needed(df, props)
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
+    <label text="Unit:"/>
+    <text x:id="xaxis_unit" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
     <label text="Min:"/>
     <text x:id="xaxis_min" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
@@ -286,6 +291,11 @@ utils.export_data_if_needed(df, props)
 
     <label text="Label:"/>
     <text x:id="yaxis_title" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <label text="Unit:"/>
+    <text x:id="yaxis_unit" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
@@ -733,6 +743,8 @@ utils.export_data_if_needed(df, props)
             <property name="sorting" value="true"/>
             <property name="legend_format" value=""/>
             <property name="secondary_ordering_regex_list" value=""/>
+            <property name="yaxis_unit" value=""/>
+            <property name="xaxis_unit" value=""/>
         </chart>
         <chart createdWith="" icon="icons/full/obj/linechart.png" id="1406696360" name="Server application traffic without stream filtering" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import re
@@ -987,6 +999,11 @@ utils.export_data_if_needed(df, props)
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
+    <label text="Unit:"/>
+    <text x:id="xaxis_unit" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
     <label text="Min:"/>
     <text x:id="xaxis_min" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
@@ -1013,6 +1030,11 @@ utils.export_data_if_needed(df, props)
 
     <label text="Label:"/>
     <text x:id="yaxis_title" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <label text="Unit:"/>
+    <text x:id="yaxis_unit" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
@@ -1460,6 +1482,8 @@ utils.export_data_if_needed(df, props)
             <property name="sorting" value="true"/>
             <property name="legend_format" value=""/>
             <property name="secondary_ordering_regex_list" value=""/>
+            <property name="yaxis_unit" value=""/>
+            <property name="xaxis_unit" value=""/>
         </chart>
         <chart createdWith="OMNeT++ 6.2.0.qualifier" icon="icons/full/obj/linechart.png" id="2125710369" name="End-to-end delay without stream filtering" resultTypes="vector" template="linechart_native" type="LINE">
             <script><![CDATA[import math
@@ -1716,6 +1740,11 @@ utils.export_data_if_needed(df, props)
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
+    <label text="Unit:"/>
+    <text x:id="xaxis_unit" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
     <label text="Min:"/>
     <text x:id="xaxis_min" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
@@ -1742,6 +1771,11 @@ utils.export_data_if_needed(df, props)
 
     <label text="Label:"/>
     <text x:id="yaxis_title" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <label text="Unit:"/>
+    <text x:id="yaxis_unit" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
@@ -2189,7 +2223,8 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
-            <property name="include_fields" value="false"/>
+            <property name="yaxis_unit" value=""/>
+            <property name="xaxis_unit" value=""/>
         </chart>
         <chart createdWith="OMNeT++ 6.2.0.qualifier" icon="icons/full/obj/linechart.png" id="1819749636" name="Server application traffic comparison" resultTypes="vector" template="linechart_native" type="LINE">
             <script><![CDATA[import math
@@ -2446,6 +2481,11 @@ utils.export_data_if_needed(df, props)
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
+    <label text="Unit:"/>
+    <text x:id="xaxis_unit" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
     <label text="Min:"/>
     <text x:id="xaxis_min" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
@@ -2472,6 +2512,11 @@ utils.export_data_if_needed(df, props)
 
     <label text="Label:"/>
     <text x:id="yaxis_title" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <label text="Unit:"/>
+    <text x:id="yaxis_unit" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
@@ -2919,7 +2964,8 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
-            <property name="include_fields" value="false"/>
+            <property name="yaxis_unit" value=""/>
+            <property name="xaxis_unit" value=""/>
         </chart>
         <chart createdWith="OMNeT++ 6.2.0.qualifier" icon="icons/full/obj/linechart.png" id="1861618748" name="End-to-end delay comparison" resultTypes="vector" template="linechart_native" type="LINE">
             <script><![CDATA[import math
@@ -3176,6 +3222,11 @@ utils.export_data_if_needed(df, props)
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
+    <label text="Unit:"/>
+    <text x:id="xaxis_unit" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
     <label text="Min:"/>
     <text x:id="xaxis_min" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
@@ -3202,6 +3253,11 @@ utils.export_data_if_needed(df, props)
 
     <label text="Label:"/>
     <text x:id="yaxis_title" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <label text="Unit:"/>
+    <text x:id="yaxis_unit" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
@@ -3649,7 +3705,8 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
-            <property name="include_fields" value="false"/>
+            <property name="yaxis_unit" value=""/>
+            <property name="xaxis_unit" value=""/>
         </chart>
         <chart createdWith="" icon="icons/full/obj/linechart.png" id="1393667978" name="Excess traffic stream filter" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import re
@@ -3904,6 +3961,11 @@ utils.export_data_if_needed(df, props)
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
+    <label text="Unit:"/>
+    <text x:id="xaxis_unit" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
     <label text="Min:"/>
     <text x:id="xaxis_min" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
@@ -3930,6 +3992,11 @@ utils.export_data_if_needed(df, props)
 
     <label text="Label:"/>
     <text x:id="yaxis_title" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <label text="Unit:"/>
+    <text x:id="yaxis_unit" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
@@ -4377,6 +4444,8 @@ utils.export_data_if_needed(df, props)
             <property name="omit_empty_vectors" value="false"/>
             <property name="sorting" value="true"/>
             <property name="secondary_ordering_regex_list" value=""/>
+            <property name="yaxis_unit" value=""/>
+            <property name="xaxis_unit" value=""/>
         </chart>
         <chart createdWith="" icon="icons/full/obj/linechart.png" id="1264561584" name="Normal traffic stream filter" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import re
@@ -4631,6 +4700,11 @@ utils.export_data_if_needed(df, props)
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
+    <label text="Unit:"/>
+    <text x:id="xaxis_unit" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
     <label text="Min:"/>
     <text x:id="xaxis_min" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
@@ -4657,6 +4731,11 @@ utils.export_data_if_needed(df, props)
 
     <label text="Label:"/>
     <text x:id="yaxis_title" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <label text="Unit:"/>
+    <text x:id="yaxis_unit" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
@@ -5104,6 +5183,8 @@ utils.export_data_if_needed(df, props)
             <property name="omit_empty_vectors" value="false"/>
             <property name="sorting" value="true"/>
             <property name="secondary_ordering_regex_list" value=""/>
+            <property name="yaxis_unit" value=""/>
+            <property name="xaxis_unit" value=""/>
         </chart>
         <chart createdWith="" icon="icons/full/obj/linechart.png" id="993796464" name="Token buckets" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import re
@@ -5358,6 +5439,11 @@ utils.export_data_if_needed(df, props)
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
+    <label text="Unit:"/>
+    <text x:id="xaxis_unit" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
     <label text="Min:"/>
     <text x:id="xaxis_min" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
@@ -5384,6 +5470,11 @@ utils.export_data_if_needed(df, props)
 
     <label text="Label:"/>
     <text x:id="yaxis_title" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <label text="Unit:"/>
+    <text x:id="yaxis_unit" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
@@ -5831,6 +5922,8 @@ utils.export_data_if_needed(df, props)
             <property name="sorting" value="true"/>
             <property name="legend_format" value=""/>
             <property name="secondary_ordering_regex_list" value=""/>
+            <property name="yaxis_unit" value=""/>
+            <property name="xaxis_unit" value=""/>
         </chart>
     </charts>
 </analysis>

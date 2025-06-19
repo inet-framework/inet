@@ -262,6 +262,11 @@ utils.export_data_if_needed(df, props)
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
+    <label text="Unit:"/>
+    <text x:id="xaxis_unit" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
     <label text="Min:"/>
     <text x:id="xaxis_min" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
@@ -288,6 +293,11 @@ utils.export_data_if_needed(df, props)
 
     <label text="Label:"/>
     <text x:id="yaxis_title" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <label text="Unit:"/>
+    <text x:id="yaxis_unit" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
@@ -735,7 +745,8 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
-            <property name="include_fields" value="false"/>
+            <property name="yaxis_unit" value=""/>
+            <property name="xaxis_unit" value=""/>
         </chart>
         <chart createdWith="OMNeT++ 6.2.0.qualifier" icon="icons/full/obj/linechart.png" id="75243087" name="End-to-end delay with time-aware shaping" resultTypes="vector" template="linechart_native" type="LINE">
             <script><![CDATA[import math
@@ -992,6 +1003,11 @@ utils.export_data_if_needed(df, props)
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
+    <label text="Unit:"/>
+    <text x:id="xaxis_unit" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
     <label text="Min:"/>
     <text x:id="xaxis_min" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
@@ -1018,6 +1034,11 @@ utils.export_data_if_needed(df, props)
 
     <label text="Label:"/>
     <text x:id="yaxis_title" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <label text="Unit:"/>
+    <text x:id="yaxis_unit" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
@@ -1465,7 +1486,8 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
-            <property name="include_fields" value="false"/>
+            <property name="yaxis_unit" value=""/>
+            <property name="xaxis_unit" value=""/>
         </chart>
         <chart createdWith="OMNeT++ 6.2.0.qualifier" icon="icons/full/obj/linechart.png" id="1557358486" name="End-to-end delay comparison" resultTypes="vector" template="linechart_native" type="LINE">
             <script><![CDATA[import math
@@ -1722,6 +1744,11 @@ utils.export_data_if_needed(df, props)
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
+    <label text="Unit:"/>
+    <text x:id="xaxis_unit" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
     <label text="Min:"/>
     <text x:id="xaxis_min" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
@@ -1748,6 +1775,11 @@ utils.export_data_if_needed(df, props)
 
     <label text="Label:"/>
     <text x:id="yaxis_title" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <label text="Unit:"/>
+    <text x:id="yaxis_unit" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
@@ -2195,7 +2227,8 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
-            <property name="include_fields" value="false"/>
+            <property name="yaxis_unit" value=""/>
+            <property name="xaxis_unit" value=""/>
         </chart>
         <chart createdWith="" icon="icons/full/obj/linechart.png" id="1783022087" name="Queue lengths and gate states" resultTypes="" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
@@ -2465,6 +2498,11 @@ utils.export_data_if_needed(df, props)]]></script>
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
+    <label text="Unit:"/>
+    <text x:id="xaxis_unit" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
     <label text="Min:"/>
     <text x:id="xaxis_min" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
@@ -2491,6 +2529,11 @@ utils.export_data_if_needed(df, props)]]></script>
 
     <label text="Label:"/>
     <text x:id="yaxis_title" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <label text="Unit:"/>
+    <text x:id="yaxis_unit" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
@@ -2934,6 +2977,8 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="enum_strip_edges" value="false"/>
             <property name="secondary_ordering_regex_list" value=""/>
             <property name="omit_empty_vectors" value="false"/>
+            <property name="yaxis_unit" value=""/>
+            <property name="xaxis_unit" value=""/>
         </chart>
     </charts>
 </analysis>

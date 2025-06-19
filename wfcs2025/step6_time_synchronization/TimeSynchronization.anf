@@ -262,6 +262,11 @@ utils.export_data_if_needed(df, props)
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
+    <label text="Unit:"/>
+    <text x:id="xaxis_unit" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
     <label text="Min:"/>
     <text x:id="xaxis_min" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
@@ -288,6 +293,11 @@ utils.export_data_if_needed(df, props)
 
     <label text="Label:"/>
     <text x:id="yaxis_title" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <label text="Unit:"/>
+    <text x:id="yaxis_unit" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
@@ -735,7 +745,8 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
-            <property name="include_fields" value="false"/>
+            <property name="yaxis_unit" value=""/>
+            <property name="xaxis_unit" value=""/>
         </chart>
         <chart createdWith="" icon="icons/full/obj/linechart.png" id="1802375600" name="Clock time differences without time synchronization" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
@@ -1010,6 +1021,11 @@ utils.export_data_if_needed(df, props)
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
+    <label text="Unit:"/>
+    <text x:id="xaxis_unit" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
     <label text="Min:"/>
     <text x:id="xaxis_min" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
@@ -1036,6 +1052,11 @@ utils.export_data_if_needed(df, props)
 
     <label text="Label:"/>
     <text x:id="yaxis_title" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <label text="Unit:"/>
+    <text x:id="yaxis_unit" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
@@ -1483,6 +1504,8 @@ utils.export_data_if_needed(df, props)
             <property name="sorting" value="true"/>
             <property name="legend_format" value=""/>
             <property name="secondary_ordering_regex_list" value=""/>
+            <property name="yaxis_unit" value=""/>
+            <property name="xaxis_unit" value=""/>
         </chart>
         <chart createdWith="" icon="icons/full/obj/linechart.png" id="845436649" name="Clock time differences with gPTP time synchronization" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
@@ -1757,6 +1780,11 @@ utils.export_data_if_needed(df, props)
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
+    <label text="Unit:"/>
+    <text x:id="xaxis_unit" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
     <label text="Min:"/>
     <text x:id="xaxis_min" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
@@ -1783,6 +1811,11 @@ utils.export_data_if_needed(df, props)
 
     <label text="Label:"/>
     <text x:id="yaxis_title" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <label text="Unit:"/>
+    <text x:id="yaxis_unit" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
@@ -2230,6 +2263,8 @@ utils.export_data_if_needed(df, props)
             <property name="sorting" value="true"/>
             <property name="legend_format" value=""/>
             <property name="secondary_ordering_regex_list" value=""/>
+            <property name="yaxis_unit" value=""/>
+            <property name="xaxis_unit" value=""/>
         </chart>
     </charts>
 </analysis>
