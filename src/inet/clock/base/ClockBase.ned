@@ -22,6 +22,6 @@ module ClockBase extends Module
         @class(ClockBase);
         @display("i=block/timer");
         @signal[timeChanged](type=simtime_t);
-        @statistic[timeChanged](title="Clock time"; record=vector; interpolationmode=linear);
+        @statistic[timeChanged](title="Clock time"; record=vector; interpolationmode=linear; unit=s);
 }
 
