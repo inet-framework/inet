@@ -31,7 +31,6 @@ if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
 
 # apply vector operations
-df['vectime'] = df['vectime'].apply(lambda arr: arr * 1000)
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
 # plot
@@ -761,7 +760,6 @@ if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
 
 # apply vector operations
-df['vectime'] = df['vectime'].apply(lambda arr: arr * 1000)
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
 # plot
@@ -1489,7 +1487,6 @@ if df.empty:
 
 groups, series = utils.select_groups_series(df, props)
 
-df['value'] = df['value'] * 1000000
 
 utils.add_legend_labels(df, props, groups + series)
 utils.sort_rows_by_legend(df, props)
