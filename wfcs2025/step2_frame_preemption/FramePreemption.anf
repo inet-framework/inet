@@ -32,7 +32,7 @@ if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
 
 def compute_histogram(row):
-    bin_width = 10
+    bin_width = 0.000010
     values = row["vecvalue"]
     edges = np.arange(values.min(), values.max() + bin_width, bin_width)
     row["binvalues"], row["binedges"] = np.histogram(values, bins=edges)
@@ -1489,7 +1489,7 @@ if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
 
 def compute_histogram(row):
-    bin_width = 10
+    bin_width = 0.000010
     values = row["vecvalue"]
     edges = np.arange(values.min(), values.max() + bin_width, bin_width)
     row["binvalues"], row["binedges"] = np.histogram(values, bins=edges)
