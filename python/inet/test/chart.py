@@ -56,7 +56,7 @@ class ChartTestTask(TestTask):
         analysis = omnetpp.scave.analysis.load_anf_file(self.simulation_project.get_full_path(self.analysis_file_name))
         for chart in analysis.collect_charts():
             if chart.id == self.id:
-                image_export_filename = chart.properties["image_export_filename"]
+                image_export_filename = chart.properties["image_export_filename"] or chart.name
                 if image_export_filename is None or image_export_filename == "":
                     return self.task_result_class(self, result="SKIP", expected_result="SKIP", reason="Chart file name is not specified")
                 folder = os.path.dirname(self.simulation_project.get_full_path(self.analysis_file_name))
@@ -165,7 +165,7 @@ class ChartUpdateTask(UpdateTask):
         analysis = omnetpp.scave.analysis.load_anf_file(self.simulation_project.get_full_path(self.analysis_file_name))
         for chart in analysis.collect_charts():
             if chart.id == self.id:
-                image_export_filename = chart.properties["image_export_filename"]
+                image_export_filename = chart.properties["image_export_filename"] or chart.name
                 if image_export_filename is None or image_export_filename == "":
                     return self.task_result_class(self, result="SKIP", expected_result="SKIP", reason="Chart file name is not specified")
                 folder = os.path.dirname(self.simulation_project.get_full_path(self.analysis_file_name))
