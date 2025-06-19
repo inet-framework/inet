@@ -739,7 +739,7 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
-            <property name="xaxis_max" value="10"/>
+            <property name="xaxis_max" value="10 ms"/>
             <property name="image_export_width" value="9"/>
             <property name="ordering_regex_list" value="best-effort&#10;high-priority"/>
             <property name="omit_empty_vectors" value="false"/>
@@ -1480,7 +1480,7 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
-            <property name="xaxis_max" value="10"/>
+            <property name="xaxis_max" value="10 ms"/>
             <property name="image_export_width" value="9"/>
             <property name="ordering_regex_list" value="best-effort&#10;high-priority"/>
             <property name="omit_empty_vectors" value="false"/>
