@@ -719,7 +719,7 @@ utils.export_data_if_needed(df, props)
             <property name="drawstyle" value="auto"/>
             <property name="marker" value=". (dot)"/>
             <property name="legend_show" value="true"/>
-            <property name="xaxis_max" value="10"/>
+            <property name="xaxis_max" value="10 ms"/>
             <property name="image_export_width" value="6"/>
             <property name="omit_empty_vectors" value="false"/>
             <property name="vector_end_time" value=""/>

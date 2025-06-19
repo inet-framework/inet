@@ -2263,7 +2263,7 @@ utils.export_data_if_needed(df, props)
             <property name="sorting" value="true"/>
             <property name="legend_format" value=""/>
             <property name="secondary_ordering_regex_list" value=""/>
-            <property name="yaxis_unit" value=""/>
+            <property name="yaxis_unit" value="us"/>
             <property name="xaxis_unit" value=""/>
         </chart>
     </charts>

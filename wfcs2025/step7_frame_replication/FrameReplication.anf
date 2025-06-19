@@ -719,7 +719,7 @@ utils.export_data_if_needed(df, props)
             <property name="drawstyle" value="auto"/>
             <property name="marker" value=". (dot)"/>
             <property name="legend_show" value="true"/>
-            <property name="xaxis_max" value="100"/>
+            <property name="xaxis_max" value="100 ms"/>
             <property name="image_export_width" value="6"/>
             <property name="omit_empty_vectors" value="false"/>
             <property name="vector_end_time" value=""/>
@@ -1409,6 +1409,7 @@ utils.export_data_if_needed(df, props)
             <property name="ordering_regex_list" value="packetSent&#10;packetReceived"/>
             <property name="sorting" value="true"/>
             <property name="secondary_ordering_regex_list" value="no frame replication"/>
+            <property name="yaxis_unit" value="pk"/>
         </chart>
         <chart createdWith="OMNeT++ 6.2.0.qualifier" icon="icons/full/obj/linechart.png" id="1458813288" name="End-to-end delay comparison" resultTypes="vector" template="linechart_native" type="LINE">
             <script><![CDATA[import math
@@ -2122,7 +2123,7 @@ utils.export_data_if_needed(df, props)
             <property name="drawstyle" value="auto"/>
             <property name="marker" value=". (dot)"/>
             <property name="legend_show" value="true"/>
-            <property name="xaxis_max" value="100"/>
+            <property name="xaxis_max" value="100 ms"/>
             <property name="image_export_width" value="6"/>
             <property name="omit_empty_vectors" value="false"/>
             <property name="vector_end_time" value=""/>

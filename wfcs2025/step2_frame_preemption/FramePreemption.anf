@@ -720,7 +720,7 @@ Show over_underflow cell?
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="6"/>
             <property name="omit_empty_vectors" value="false"/>
-            <property name="yaxis_unit" value=""/>
+            <property name="yaxis_unit" value="pk"/>
             <property name="xaxis_unit" value=""/>
         </chart>
         <chart createdWith="OMNeT++ 6.2.0.qualifier" icon="icons/full/obj/linechart.png" id="1679627012" name="End-to-end delay comparison, line chart" resultTypes="vector" template="linechart_native" type="LINE">
@@ -2172,12 +2172,12 @@ Show over_underflow cell?
             <property name="show_overflows" value="true"/>
             <property name="legend_show" value="true"/>
             <property name="simplify" value="false"/>
-            <property name="yaxis_max" value="20"/>
+            <property name="yaxis_max" value="20 pk"/>
             <property name="Plot.Antialias" value="true"/>
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="6"/>
             <property name="omit_empty_vectors" value="false"/>
-            <property name="yaxis_unit" value=""/>
+            <property name="yaxis_unit" value="pk"/>
             <property name="xaxis_unit" value=""/>
         </chart>
     </charts>
