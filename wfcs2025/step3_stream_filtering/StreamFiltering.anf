@@ -700,7 +700,7 @@ utils.export_data_if_needed(df, props)
             <property name="vector_end_time" value=""/>
             <property name="linecolor" value=""/>
             <property name="Plot.Caching" value="true"/>
-            <property name="yaxis_title" value="data rate [Mbps]"/>
+            <property name="yaxis_title" value="data rate"/>
             <property name="Legend.Border" value="false"/>
             <property name="title" value="Client application traffic"/>
             <property name="Plot.Title.Font" value="Arial-regular-18"/>
@@ -714,7 +714,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_placement" value="upper right"/>
             <property name="plot.properties" value=""/>
             <property name="data_export_filename" value=""/>
-            <property name="xaxis_title" value="time [s]"/>
+            <property name="xaxis_title" value="time"/>
             <property name="Plot.BackgroundColor" value="white"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
@@ -1441,7 +1441,7 @@ utils.export_data_if_needed(df, props)
             <property name="vector_end_time" value=""/>
             <property name="linecolor" value=""/>
             <property name="Plot.Caching" value="true"/>
-            <property name="yaxis_title" value="data rate [Mbps]"/>
+            <property name="yaxis_title" value="data rate"/>
             <property name="Legend.Border" value="false"/>
             <property name="title" value="Server application traffic without stream filtering"/>
             <property name="Plot.Title.Font" value="Arial-regular-18"/>
@@ -1455,7 +1455,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_placement" value="upper right"/>
             <property name="plot.properties" value=""/>
             <property name="data_export_filename" value=""/>
-            <property name="xaxis_title" value="time [s]"/>
+            <property name="xaxis_title" value="time"/>
             <property name="Plot.BackgroundColor" value="white"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
@@ -2183,7 +2183,7 @@ utils.export_data_if_needed(df, props)
             <property name="ordering_regex_list" value=""/>
             <property name="Plot.Caching" value="true"/>
             <property name="legend_manual" value="false"/>
-            <property name="yaxis_title" value="delay [ms]"/>
+            <property name="yaxis_title" value="delay"/>
             <property name="legend_replacements" value="/StreamFilteringShowcase.server.//&#10;/.sink//"/>
             <property name="Legend.Border" value="false"/>
             <property name="Plot.Title.Font" value="Arial-regular-18"/>
@@ -2192,7 +2192,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_log" value="false"/>
             <property name="Axis.Label.Font" value="Arial-regular-18"/>
             <property name="plot.properties" value=""/>
-            <property name="xaxis_title" value="time [s]"/>
+            <property name="xaxis_title" value="time"/>
             <property name="grid_density" value="Major"/>
             <property name="xaxis_min" value=""/>
             <property name="vector_start_time" value=""/>
@@ -2924,7 +2924,7 @@ utils.export_data_if_needed(df, props)
             <property name="ordering_regex_list" value="excess traffic&#10;normal traffic"/>
             <property name="Plot.Caching" value="true"/>
             <property name="legend_manual" value="true"/>
-            <property name="yaxis_title" value="data rate [Mbps]"/>
+            <property name="yaxis_title" value="data rate"/>
             <property name="legend_replacements" value="/NoStreamFiltering/no stream filtering/&#10;/StreamFilteringShowcase.server.//&#10;/StreamFiltering/stream filtering/&#10;/.sink//&#10;/app\[0\]/excess traffic/&#10;/app\[1\]/normal traffic/"/>
             <property name="Legend.Border" value="false"/>
             <property name="Plot.Title.Font" value="Arial-regular-18"/>
@@ -2933,7 +2933,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_log" value="false"/>
             <property name="Axis.Label.Font" value="Arial-regular-18"/>
             <property name="plot.properties" value=""/>
-            <property name="xaxis_title" value="time [s]"/>
+            <property name="xaxis_title" value="time"/>
             <property name="grid_density" value="Major"/>
             <property name="xaxis_min" value=""/>
             <property name="vector_start_time" value=""/>
@@ -3665,7 +3665,7 @@ utils.export_data_if_needed(df, props)
             <property name="ordering_regex_list" value="excess traffic&#10;normal traffic"/>
             <property name="Plot.Caching" value="true"/>
             <property name="legend_manual" value="true"/>
-            <property name="yaxis_title" value="delay [ms]"/>
+            <property name="yaxis_title" value="delay"/>
             <property name="legend_replacements" value="/NoStreamFiltering/no stream filtering/&#10;/StreamFilteringShowcase.server.//&#10;/StreamFiltering/stream filtering/&#10;/.sink//&#10;/app\[0\]/excess traffic/&#10;/app\[1\]/normal traffic/"/>
             <property name="Legend.Border" value="false"/>
             <property name="Plot.Title.Font" value="Arial-regular-18"/>
@@ -3674,7 +3674,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_log" value="false"/>
             <property name="Axis.Label.Font" value="Arial-regular-18"/>
             <property name="plot.properties" value=""/>
-            <property name="xaxis_title" value="time [s]"/>
+            <property name="xaxis_title" value="time"/>
             <property name="grid_density" value="Major"/>
             <property name="xaxis_min" value=""/>
             <property name="vector_start_time" value=""/>
@@ -4405,7 +4405,7 @@ utils.export_data_if_needed(df, props)
             <property name="vector_end_time" value=""/>
             <property name="linecolor" value=""/>
             <property name="Plot.Caching" value="true"/>
-            <property name="yaxis_title" value="data rate [Mbps]"/>
+            <property name="yaxis_title" value="data rate"/>
             <property name="Legend.Border" value="false"/>
             <property name="title" value="Excess traffic stream filter"/>
             <property name="Plot.Title.Font" value="Arial-regular-18"/>
@@ -4419,7 +4419,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_placement" value="upper right"/>
             <property name="plot.properties" value=""/>
             <property name="data_export_filename" value=""/>
-            <property name="xaxis_title" value="time [s]"/>
+            <property name="xaxis_title" value="time"/>
             <property name="Plot.BackgroundColor" value="white"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
@@ -5146,7 +5146,7 @@ utils.export_data_if_needed(df, props)
             <property name="vector_end_time" value=""/>
             <property name="linecolor" value=""/>
             <property name="Plot.Caching" value="true"/>
-            <property name="yaxis_title" value="data rate [Mbps]"/>
+            <property name="yaxis_title" value="data rate"/>
             <property name="Legend.Border" value="false"/>
             <property name="title" value="Normal traffic stream filter"/>
             <property name="Plot.Title.Font" value="Arial-regular-18"/>
@@ -5160,7 +5160,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_placement" value="upper right"/>
             <property name="plot.properties" value=""/>
             <property name="data_export_filename" value=""/>
-            <property name="xaxis_title" value="time [s]"/>
+            <property name="xaxis_title" value="time"/>
             <property name="Plot.BackgroundColor" value="white"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
@@ -5887,7 +5887,7 @@ utils.export_data_if_needed(df, props)
             <property name="vector_end_time" value=""/>
             <property name="linecolor" value=""/>
             <property name="Plot.Caching" value="true"/>
-            <property name="yaxis_title" value="number of tokens [tk]"/>
+            <property name="yaxis_title" value="number of tokens"/>
             <property name="Legend.Border" value="false"/>
             <property name="title" value="Token buckets"/>
             <property name="Plot.Title.Font" value="Arial-regular-18"/>
@@ -5901,7 +5901,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_placement" value="upper right"/>
             <property name="plot.properties" value=""/>
             <property name="data_export_filename" value=""/>
-            <property name="xaxis_title" value="time [s]"/>
+            <property name="xaxis_title" value="time"/>
             <property name="Plot.BackgroundColor" value="white"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>

@@ -703,7 +703,7 @@ utils.export_data_if_needed(df, props)
             <property name="Plot.Caching" value="true"/>
             <property name="legend_prefer_result_titles" value="true"/>
             <property name="legend_manual" value="true"/>
-            <property name="yaxis_title" value="delay [us]"/>
+            <property name="yaxis_title" value="delay"/>
             <property name="legend_replacements" value="/GateSchedulingShowcase.//&#10;/.sink//&#10;/\[//&#10;/\]//&#10;/server1.app0/best-effort, client1/&#10;/server1.app1/best-effort, client2/&#10;/server2.app2/high-priority, client1/&#10;/server2.app3/high-priority, client2/"/>
             <property name="Legend.Border" value="false"/>
             <property name="title" value="Manual gate scheduling end-to-end delay"/>
@@ -719,7 +719,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_placement" value="upper right"/>
             <property name="plot.properties" value=""/>
             <property name="data_export_filename" value=""/>
-            <property name="xaxis_title" value="time [ms]"/>
+            <property name="xaxis_title" value="time"/>
             <property name="Plot.BackgroundColor" value="white"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
@@ -1444,7 +1444,7 @@ utils.export_data_if_needed(df, props)
             <property name="Plot.Caching" value="true"/>
             <property name="legend_prefer_result_titles" value="true"/>
             <property name="legend_manual" value="true"/>
-            <property name="yaxis_title" value="delay [us]"/>
+            <property name="yaxis_title" value="delay"/>
             <property name="legend_replacements" value="/GateSchedulingShowcase.//&#10;/.sink//&#10;/\[//&#10;/\]//&#10;/server1.app0/best-effort, client1/&#10;/server1.app1/best-effort, client2/&#10;/server2.app2/high-priority, client1/&#10;/server2.app3/high-priority, client2/"/>
             <property name="Legend.Border" value="false"/>
             <property name="title" value="Automatic gate scheduling end-to-end delay"/>
@@ -1460,7 +1460,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_placement" value="upper right"/>
             <property name="plot.properties" value=""/>
             <property name="data_export_filename" value=""/>
-            <property name="xaxis_title" value="time [ms]"/>
+            <property name="xaxis_title" value="time"/>
             <property name="Plot.BackgroundColor" value="white"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
@@ -2115,7 +2115,7 @@ utils.export_data_if_needed(df, props)
             <property name="Plot.Caching" value="true"/>
             <property name="legend_prefer_result_titles" value="true"/>
             <property name="legend_manual" value="true"/>
-            <property name="yaxis_title" value="delay [us]"/>
+            <property name="yaxis_title" value="delay"/>
             <property name="legend_replacements" value="/GateSchedulingShowcase.//&#10;/.sink//&#10;/\[//&#10;/\]//&#10;/server1.app0/best-effort, client1/&#10;/server1.app1/best-effort, client2/&#10;/server2.app2/high-priority, client1/&#10;/server2.app3/high-priority, client2/"/>
             <property name="Legend.Border" value="false"/>
             <property name="title" value="End-to-end delay maximum comparison"/>
