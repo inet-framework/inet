@@ -775,10 +775,9 @@ utils.sort_rows_by_legend(df, props)
 del df["legend"]
 
 confidence_level = utils.get_confidence_level(props)
-df, errorsdf, metadf = utils.pivot_for_barchart(df, groups, series, confidence_level, sort=False)
-#
+valuedf, errorsdf, metadf = utils.pivot_for_barchart(df, groups, series, confidence_level, sort=False)
 
-utils.plot_bars(df, errorsdf, metadf, props, sort=False)
+utils.plot_bars(valuedf, errorsdf, metadf, props, sort=False)
 
 utils.postconfigure_plot(props)
 
