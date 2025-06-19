@@ -713,7 +713,7 @@ Show over_underflow cell?
             <property name="omit_empty_vectors" value="false"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 6.2.0.qualifier" icon="icons/full/obj/linechart.png" id="1679627012" name="End-to-end delay comparison" resultTypes="vector" template="linechart_native" type="LINE">
+        <chart createdWith="OMNeT++ 6.2.0.qualifier" icon="icons/full/obj/linechart.png" id="1679627012" name="End-to-end delay comparison, line chart" resultTypes="vector" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -1445,7 +1445,7 @@ utils.export_data_if_needed(df, props)
             <property name="Plot.Antialias" value="true"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 6.2.0.qualifier" icon="icons/full/obj/histogramchart.png" id="1361195337" name="End-to-end delay comparison" resultTypes="vector" template="histogramchart_vectors_native" type="HISTOGRAM">
+        <chart createdWith="OMNeT++ 6.2.0.qualifier" icon="icons/full/obj/histogramchart.png" id="1361195337" name="End-to-end delay comparison, histogram" resultTypes="vector" template="histogramchart_vectors_native" type="HISTOGRAM">
             <script><![CDATA[import math
 import numpy as np
 from omnetpp.scave import results, chart, utils
