@@ -5,3 +5,7 @@ distributed >=2024.10.0
 optimparallel >=0.1.3
 sewar >=0.4.6
 py4j >=0.10.9
+
+
+matplotlib
+pandas
