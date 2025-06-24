@@ -21,7 +21,9 @@ void EligibilityTimeGate::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         eligibilityTimer = new ClockEvent("EligibilityTimer");
         lastRemainingEligibilityTimeSignalTime = simTime();
+#if OMNETPP_VERSION >= 0x0602
         WATCH_EXPR("remainingEligibilityTime", getRemainingEligibilityTime());
+#endif
     }
     else if (stage == INITSTAGE_QUEUEING) {
         updateOpen();
@@ -102,6 +104,16 @@ simtime_t EligibilityTimeGate::getRemainingEligibilityTime() const
     auto remainingEligibilityTime = packet == nullptr ? 0 : CLOCKTIME_AS_SIMTIME(packet->getTag<EligibilityTimeTag>()->getEligibilityTime() - getClockTime());
     return remainingEligibilityTime < 0 ? 0 : remainingEligibilityTime;
 }
+
+#if OMNETPP_VERSION < 0x0602
+std::string EligibilityTimeGate::resolveExpression(const char *expression) const
+{
+    if (!strcmp(expression, "remainingEligibilityTime"))
+        return getRemainingEligibilityTime().ustr();
+    else
+        return ClockUserModuleMixin::resolveExpression(expression);
+}
+#endif
 
 } // namespace inet
 
