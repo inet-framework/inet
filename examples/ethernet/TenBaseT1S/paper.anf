@@ -545,7 +545,7 @@ utils.export_data_if_needed(df, props)
             <property name="cycle_seed" value="0"/>
             <property name="Axis.Title.Font" value="Arial-regular-8"/>
             <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="Axis.Label.Font" value="Arial-regular-8"/>
             <property name="legend_placement" value="upper left"/>
@@ -557,7 +557,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_itervar" value="numNodes"/>
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-8"/>
-            <property name="image_export_filename" value=""/>
+            <property name="image_export_filename" value="delaypaper"/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
             <property name="filter" value="type =~ scalar AND NOT runattr:measurement =~ &quot;*$meanProductionInterval=3&quot; AND name =~ meanBitLifeTimePerPacket:histogram:max"/>
@@ -573,7 +573,7 @@ utils.export_data_if_needed(df, props)
             <property name="yaxis_max" value="90"/>
             <property name="Plot.Antialias" value="true"/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
         </chart>
         <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/scatterchart.png" id="979782786" name="end-to-end delay maximum, part 2" resultTypes="scalar" template="scatterchart_itervars_native" type="LINE">
             <script><![CDATA[from omnetpp.scave import results, chart, utils, ideplot
@@ -1115,7 +1115,7 @@ utils.export_data_if_needed(df, props)
             <property name="cycle_seed" value="0"/>
             <property name="Axis.Title.Font" value="Arial-regular-8"/>
             <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="Axis.Label.Font" value="Arial-regular-8"/>
             <property name="legend_placement" value="upper right"/>
@@ -1127,7 +1127,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_itervar" value="numNodes"/>
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-8"/>
-            <property name="image_export_filename" value=""/>
+            <property name="image_export_filename" value="delay2paper"/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
             <property name="filter" value="type =~ scalar AND runattr:measurement =~ &quot;*$meanProductionInterval=3&quot; AND name =~ meanBitLifeTimePerPacket:histogram:max"/>
@@ -1143,7 +1143,7 @@ utils.export_data_if_needed(df, props)
             <property name="yaxis_max" value="500"/>
             <property name="Plot.Antialias" value="true"/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
         </chart>
         <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/scatterchart.png" id="649603213" name="throughput" resultTypes="scalar" template="scatterchart_itervars_native" type="LINE">
             <script><![CDATA[from omnetpp.scave import results, chart, utils, ideplot
@@ -1685,7 +1685,7 @@ utils.export_data_if_needed(df, props)
             <property name="cycle_seed" value="0"/>
             <property name="Axis.Title.Font" value="Arial-regular-8"/>
             <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="Axis.Label.Font" value="Arial-regular-8"/>
             <property name="legend_placement" value="lower right"/>
@@ -1697,7 +1697,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_itervar" value=""/>
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-8"/>
-            <property name="image_export_filename" value=""/>
+            <property name="image_export_filename" value="throughputpaper"/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
             <property name="filter" value="type =~ scalar AND module =~ &quot;MultidropNetwork.controller.app[0].sink&quot; AND name =~ dataRate:vector:mean"/>
@@ -1713,7 +1713,7 @@ utils.export_data_if_needed(df, props)
             <property name="yaxis_max" value="10"/>
             <property name="Plot.Antialias" value="true"/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
         </chart>
         <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1818182036" name="controller" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
@@ -2375,14 +2375,14 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="vector_operations" value="apply: timedilation(c=1000000)"/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
             <property name="xaxis_title" value="simulation time [us]"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
-            <property name="image_export_filename" value=""/>
+            <property name="image_export_filename" value="controllerpaper"/>
             <property name="xaxis_min" value=""/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="linewidth" value="1.5"/>
@@ -2399,7 +2399,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
             <property name="ordering_regex_list" value="carrier.*mac&#10;mac&#10;carrier.*plca&#10;plca&#10;phy"/>
             <property name="enum_as_strip" value="true"/>
             <property name="sorting" value="false"/>
@@ -3122,14 +3122,14 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="vector_operations" value=""/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
             <property name="xaxis_title" value="simulation time [s]"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
-            <property name="image_export_filename" value=""/>
+            <property name="image_export_filename" value="nodepaper"/>
             <property name="xaxis_min" value=""/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="linewidth" value="1.5"/>
@@ -3146,7 +3146,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
             <property name="matplotlibrc" value=""/>
             <property name="node_index" value="2"/>
             <property name="num_nodes" value="4"/>

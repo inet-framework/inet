@@ -689,7 +689,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="vector_operations" value="apply: timedilation(c=1000)"/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
@@ -713,7 +713,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
             <property name="matplotlibrc" value=""/>
             <property name="ordering_regex_list" value="queue&#10;carrier.*mac&#10;collision.*mac&#10;mac&#10;carrier.*plca&#10;collision.*plca&#10;plca&#10;phy"/>
             <property name="enum_as_strip" value="true"/>
@@ -1442,7 +1442,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="vector_operations" value="apply: timedilation(c=1000)"/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
@@ -1466,7 +1466,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
             <property name="matplotlibrc" value=""/>
             <property name="packet_interval" value="200"/>
             <property name="node_index" value="2"/>
@@ -2014,7 +2014,7 @@ utils.export_data_if_needed(df, props)
             <property name="cycle_seed" value="0"/>
             <property name="Axis.Title.Font" value="Arial-regular-8"/>
             <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="Axis.Label.Font" value="Arial-regular-8"/>
             <property name="legend_placement" value="upper right"/>
@@ -2042,7 +2042,7 @@ utils.export_data_if_needed(df, props)
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
         </chart>
         <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/scatterchart.png" id="624381300" name="end-to-end delay minimum vs. number of nodes" resultTypes="scalar" template="scatterchart_itervars_native" type="LINE">
             <script><![CDATA[from omnetpp.scave import results, chart, utils, ideplot
@@ -2584,7 +2584,7 @@ utils.export_data_if_needed(df, props)
             <property name="cycle_seed" value="0"/>
             <property name="Axis.Title.Font" value="Arial-regular-8"/>
             <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="Axis.Label.Font" value="Arial-regular-8"/>
             <property name="legend_placement" value="upper right"/>
@@ -2612,7 +2612,7 @@ utils.export_data_if_needed(df, props)
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
         </chart>
         <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/scatterchart.png" id="1826664505" name="end-to-end delay maximum vs. number of nodes" resultTypes="scalar" template="scatterchart_itervars_native" type="LINE">
             <script><![CDATA[from omnetpp.scave import results, chart, utils, ideplot
@@ -3154,7 +3154,7 @@ utils.export_data_if_needed(df, props)
             <property name="cycle_seed" value="0"/>
             <property name="Axis.Title.Font" value="Arial-regular-8"/>
             <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="Axis.Label.Font" value="Arial-regular-8"/>
             <property name="legend_placement" value="upper right"/>
@@ -3182,7 +3182,7 @@ utils.export_data_if_needed(df, props)
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
         </chart>
         <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/scatterchart.png" id="1449328071" name="end-to-end delay mean vs. number of nodes" resultTypes="scalar" template="scatterchart_itervars_native" type="LINE">
             <script><![CDATA[from omnetpp.scave import results, chart, utils, ideplot
@@ -3724,7 +3724,7 @@ utils.export_data_if_needed(df, props)
             <property name="cycle_seed" value="0"/>
             <property name="Axis.Title.Font" value="Arial-regular-8"/>
             <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="Axis.Label.Font" value="Arial-regular-8"/>
             <property name="legend_placement" value="upper right"/>
@@ -3752,7 +3752,7 @@ utils.export_data_if_needed(df, props)
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
         </chart>
         <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="653403047" name="PLCA packetReceived:count vs. packet interval and number of nodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
             <script><![CDATA[import numpy as np
@@ -4413,7 +4413,7 @@ utils.export_data_if_needed(df, props)
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
             <property name="colormap" value="viridis"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
@@ -4434,7 +4434,7 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
             <property name="matplotlibrc" value=""/>
         </chart>
         <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="1639057382" name="CSMA/CD packetReceived:count vs. packet interval and number of nodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
@@ -5096,7 +5096,7 @@ utils.export_data_if_needed(df, props)
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
             <property name="colormap" value="viridis"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
@@ -5117,7 +5117,7 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
             <property name="matplotlibrc" value=""/>
         </chart>
         <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="1262699810" name="HalfDuplex packetReceived:count vs. packet interval and number of nodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
@@ -5779,7 +5779,7 @@ utils.export_data_if_needed(df, props)
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
             <property name="colormap" value="viridis"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
@@ -5800,7 +5800,7 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
             <property name="matplotlibrc" value=""/>
         </chart>
         <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="1009805210" name="PLCA end-to-end delay min vs. packet interval and number of nodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
@@ -6462,7 +6462,7 @@ utils.export_data_if_needed(df, props)
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
             <property name="colormap" value="viridis"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
@@ -6483,7 +6483,7 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
             <property name="matplotlibrc" value=""/>
         </chart>
         <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="1492671393" name="PLCA end-to-end delay max vs. packet interval and number of nodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
@@ -7145,7 +7145,7 @@ utils.export_data_if_needed(df, props)
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
             <property name="colormap" value="viridis"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
@@ -7166,7 +7166,7 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
             <property name="matplotlibrc" value=""/>
         </chart>
         <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="1628423478" name="PLCA end-to-end delay mean vs. packet interval and number of nodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
@@ -7828,7 +7828,7 @@ utils.export_data_if_needed(df, props)
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
             <property name="colormap" value="viridis"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
@@ -7849,7 +7849,7 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
             <property name="matplotlibrc" value=""/>
         </chart>
         <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="749071645" name="CSMA/CD end-to-end delay min vs. packet interval and number of nodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
@@ -8511,7 +8511,7 @@ utils.export_data_if_needed(df, props)
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
             <property name="colormap" value="viridis"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
@@ -8532,7 +8532,7 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
             <property name="matplotlibrc" value=""/>
         </chart>
         <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="1338556677" name="CSMA/CD end-to-end delay max vs. packet interval and number of nodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
@@ -9194,7 +9194,7 @@ utils.export_data_if_needed(df, props)
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
             <property name="colormap" value="viridis"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
@@ -9215,7 +9215,7 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
             <property name="matplotlibrc" value=""/>
         </chart>
         <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="2049117074" name="CSMA/CD end-to-end delay mean vs. packet interval and number of nodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
@@ -9877,7 +9877,7 @@ utils.export_data_if_needed(df, props)
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
             <property name="colormap" value="viridis"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
@@ -9898,7 +9898,7 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
             <property name="matplotlibrc" value=""/>
         </chart>
         <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="1728785116" name="HalfDuplex end-to-end delay min vs. packet interval and number of nodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
@@ -10560,7 +10560,7 @@ utils.export_data_if_needed(df, props)
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
             <property name="colormap" value="viridis"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
@@ -10581,7 +10581,7 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
             <property name="matplotlibrc" value=""/>
         </chart>
         <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="1298869175" name="HalfDuplex end-to-end delay max vs. packet interval and number of nodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
@@ -11243,7 +11243,7 @@ utils.export_data_if_needed(df, props)
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
             <property name="colormap" value="viridis"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
@@ -11264,7 +11264,7 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
             <property name="matplotlibrc" value=""/>
         </chart>
         <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="884370642" name="HalfDuplex end-to-end delay mean vs. packet interval and number of nodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
@@ -11926,7 +11926,7 @@ utils.export_data_if_needed(df, props)
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
             <property name="colormap" value="viridis"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
@@ -11947,7 +11947,7 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
             <property name="matplotlibrc" value=""/>
         </chart>
         <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="1215322653" name="PLCA queue length max vs. packet interval and number of nodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
@@ -12609,7 +12609,7 @@ utils.export_data_if_needed(df, props)
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
             <property name="colormap" value="viridis"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
@@ -12630,7 +12630,7 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
             <property name="matplotlibrc" value=""/>
         </chart>
         <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="1486778810" name="CSMACD queue length max vs. packet interval and number of nodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
@@ -13292,7 +13292,7 @@ utils.export_data_if_needed(df, props)
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
             <property name="colormap" value="viridis"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
@@ -13313,7 +13313,7 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
             <property name="matplotlibrc" value=""/>
         </chart>
         <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="1390679167" name="HalfDuplex queue length max vs. packet interval and number of nodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
@@ -13975,7 +13975,7 @@ utils.export_data_if_needed(df, props)
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
             <property name="colormap" value="viridis"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
@@ -13996,7 +13996,7 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
             <property name="matplotlibrc" value=""/>
         </chart>
     </charts>

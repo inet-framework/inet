@@ -5,7 +5,7 @@
         <input pattern="results/Latency-*.sca"/>
     </inputs>
     <charts>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1944502628" name="queue length of node[0]" resultTypes="vector" template="linechart_native" type="LINE">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="371386357" name="queue length of node[0]" resultTypes="vector" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -622,7 +622,7 @@ utils.export_data_if_needed(df, props)
             <property name="linecolor" value=""/>
             <property name="Plot.Caching" value="true"/>
             <property name="legend_prefer_result_titles" value="true"/>
-            <property name="legend_manual" value=""/>
+            <property name="legend_manual" value="false"/>
             <property name="yaxis_title" value=""/>
             <property name="legend_replacements" value=""/>
             <property name="Legend.Border" value="false"/>
@@ -633,7 +633,7 @@ utils.export_data_if_needed(df, props)
             <property name="cycle_seed" value="0"/>
             <property name="Axis.Title.Font" value="Arial-regular-8"/>
             <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="Axis.Label.Font" value="Arial-regular-8"/>
             <property name="legend_placement" value="upper right"/>
@@ -644,7 +644,7 @@ utils.export_data_if_needed(df, props)
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-8"/>
-            <property name="image_export_filename" value=""/>
+            <property name="image_export_filename" value="1latency"/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
             <property name="legend_format" value=""/>
@@ -656,14 +656,14 @@ utils.export_data_if_needed(df, props)
             <property name="drawstyle" value="auto"/>
             <property name="marker" value="none"/>
             <property name="legend_show" value="true"/>
-            <property name="simplify" value=""/>
+            <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="179743105" name="packet interval in node 0 (4 nodes)" resultTypes="vector" template="linechart_native" type="LINE">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1883514476" name="packet interval in node 0 (4 nodes)" resultTypes="vector" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -1291,7 +1291,7 @@ utils.export_data_if_needed(df, props)
             <property name="cycle_seed" value="0"/>
             <property name="Axis.Title.Font" value="Arial-regular-8"/>
             <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="Axis.Label.Font" value="Arial-regular-8"/>
             <property name="legend_placement" value="upper right"/>
@@ -1302,7 +1302,7 @@ utils.export_data_if_needed(df, props)
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-8"/>
-            <property name="image_export_filename" value=""/>
+            <property name="image_export_filename" value="2latency"/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
             <property name="legend_format" value=""/>
@@ -1318,10 +1318,10 @@ utils.export_data_if_needed(df, props)
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1814069421" name="end-to-end delay in node 0 (4 nodes)" resultTypes="vector" template="linechart_native" type="LINE">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="934984843" name="end-to-end delay in node 0 (4 nodes)" resultTypes="vector" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -1949,7 +1949,7 @@ utils.export_data_if_needed(df, props)
             <property name="cycle_seed" value="0"/>
             <property name="Axis.Title.Font" value="Arial-regular-8"/>
             <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="Axis.Label.Font" value="Arial-regular-8"/>
             <property name="legend_placement" value="upper right"/>
@@ -1960,7 +1960,7 @@ utils.export_data_if_needed(df, props)
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-8"/>
-            <property name="image_export_filename" value=""/>
+            <property name="image_export_filename" value="3latency"/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
             <property name="legend_format" value=""/>
@@ -1976,10 +1976,10 @@ utils.export_data_if_needed(df, props)
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1494506346" name="packet pending delay in node 0 (4 nodes)" resultTypes="vector" template="linechart_native" type="LINE">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1538913950" name="packet pending delay in node 0 (4 nodes)" resultTypes="vector" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -2600,14 +2600,14 @@ utils.export_data_if_needed(df, props)
             <property name="yaxis_title" value=""/>
             <property name="legend_replacements" value=""/>
             <property name="Legend.Border" value="false"/>
-            <property name="title" value="packet pending delay "/>
+            <property name="title" value="packet pending delay"/>
             <property name="legend_automatic" value="true"/>
             <property name="Plot.Title.Font" value="Arial-regular-10"/>
             <property name="vector_operations" value=""/>
             <property name="cycle_seed" value="0"/>
             <property name="Axis.Title.Font" value="Arial-regular-8"/>
             <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="Axis.Label.Font" value="Arial-regular-8"/>
             <property name="legend_placement" value="upper right"/>
@@ -2618,7 +2618,7 @@ utils.export_data_if_needed(df, props)
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-8"/>
-            <property name="image_export_filename" value=""/>
+            <property name="image_export_filename" value="4latency"/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
             <property name="legend_format" value=""/>
@@ -2634,10 +2634,10 @@ utils.export_data_if_needed(df, props)
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/scatterchart.png" id="1084438467" name="mean packet interval vs number of nodes" resultTypes="scalar" template="scatterchart_itervars_native" type="LINE">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/scatterchart.png" id="845471326" name="mean packet interval vs number of nodes" resultTypes="scalar" template="scatterchart_itervars_native" type="LINE">
             <script><![CDATA[from omnetpp.scave import results, chart, utils, ideplot
 
 # get chart properties
@@ -3175,7 +3175,7 @@ utils.export_data_if_needed(df, props)
             <property name="cycle_seed" value="0"/>
             <property name="Axis.Title.Font" value="Arial-regular-8"/>
             <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="Axis.Label.Font" value="Arial-regular-8"/>
             <property name="legend_placement" value="upper right"/>
@@ -3187,7 +3187,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_itervar" value="numNodes"/>
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-8"/>
-            <property name="image_export_filename" value=""/>
+            <property name="image_export_filename" value="5latency"/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
             <property name="filter" value="type =~ scalar AND name =~ packetInterval:vector:mean"/>
@@ -3203,9 +3203,9 @@ utils.export_data_if_needed(df, props)
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/scatterchart.png" id="2091734462" name="mean end-to-end delay vs number of nodes" resultTypes="scalar" template="scatterchart_itervars_native" type="LINE">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/scatterchart.png" id="196081844" name="mean end-to-end delay vs number of nodes" resultTypes="scalar" template="scatterchart_itervars_native" type="LINE">
             <script><![CDATA[from omnetpp.scave import results, chart, utils, ideplot
 
 # get chart properties
@@ -3743,7 +3743,7 @@ utils.export_data_if_needed(df, props)
             <property name="cycle_seed" value="0"/>
             <property name="Axis.Title.Font" value="Arial-regular-8"/>
             <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="Axis.Label.Font" value="Arial-regular-8"/>
             <property name="legend_placement" value="upper right"/>
@@ -3755,7 +3755,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_itervar" value="numNodes"/>
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-8"/>
-            <property name="image_export_filename" value=""/>
+            <property name="image_export_filename" value="6latency"/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
             <property name="filter" value="type =~ scalar AND name =~ meanBitLifeTimePerPacket:vector:mean"/>
@@ -3771,9 +3771,9 @@ utils.export_data_if_needed(df, props)
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/scatterchart.png" id="26538286" name="mean packet pending delay vs number of nodes" resultTypes="scalar" template="scatterchart_itervars_native" type="LINE">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/scatterchart.png" id="1580850906" name="mean packet pending delay vs number of nodes" resultTypes="scalar" template="scatterchart_itervars_native" type="LINE">
             <script><![CDATA[from omnetpp.scave import results, chart, utils, ideplot
 
 # get chart properties
@@ -4311,7 +4311,7 @@ utils.export_data_if_needed(df, props)
             <property name="cycle_seed" value="0"/>
             <property name="Axis.Title.Font" value="Arial-regular-8"/>
             <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="Axis.Label.Font" value="Arial-regular-8"/>
             <property name="legend_placement" value="upper right"/>
@@ -4323,7 +4323,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_itervar" value="numNodes"/>
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-8"/>
-            <property name="image_export_filename" value=""/>
+            <property name="image_export_filename" value="7latency"/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
             <property name="filter" value="type =~ scalar AND name =~ packetPendingDelay:vector:mean"/>
@@ -4339,7 +4339,7 @@ utils.export_data_if_needed(df, props)
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
         </chart>
     </charts>
 </analysis>
