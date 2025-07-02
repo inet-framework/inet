@@ -611,7 +611,7 @@ utils.export_data_if_needed(df, props)
             <property name="cycle_seed" value="0"/>
             <property name="Axis.Title.Font" value="Arial-regular-8"/>
             <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="Axis.Label.Font" value="Arial-regular-8"/>
             <property name="legend_placement" value="upper right"/>
@@ -622,7 +622,7 @@ utils.export_data_if_needed(df, props)
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-8"/>
-            <property name="image_export_filename" value=""/>
+            <property name="image_export_filename" value="transmitidnotraffic"/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
             <property name="legend_format" value=""/>
@@ -638,7 +638,7 @@ utils.export_data_if_needed(df, props)
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
             <property name="include_fields" value="false"/>
         </chart>
         <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1407727537" name="controller" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
@@ -1321,14 +1321,14 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="vector_operations" value="apply: timedilation(c=1000000)"/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
             <property name="xaxis_title" value="simulation time [us]"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
-            <property name="image_export_filename" value=""/>
+            <property name="image_export_filename" value="controllernotraffic"/>
             <property name="xaxis_min" value=""/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="linewidth" value="1.5"/>
@@ -1345,7 +1345,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
             <property name="matplotlibrc" value=""/>
             <property name="ordering_regex_list" value="carrier.*mac&#10;mac&#10;carrier.*plca&#10;plca&#10;phy"/>
             <property name="enum_as_strip" value="true"/>
@@ -2032,14 +2032,14 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="vector_operations" value="apply: timedilation(c=1000000)"/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
             <property name="xaxis_title" value="simulation time [us]"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
-            <property name="image_export_filename" value=""/>
+            <property name="image_export_filename" value="1notraffic"/>
             <property name="xaxis_min" value=""/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="linewidth" value="1.5"/>
@@ -2056,7 +2056,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
             <property name="matplotlibrc" value=""/>
             <property name="ordering_regex_list" value="carrier.*mac&#10;mac&#10;carrier.*plca&#10;plca&#10;phy"/>
             <property name="enum_as_strip" value="true"/>
@@ -2743,14 +2743,14 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="vector_operations" value="apply: timedilation(c=1000000)"/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
             <property name="xaxis_title" value="simulation time [us]"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
-            <property name="image_export_filename" value=""/>
+            <property name="image_export_filename" value="2notraffic"/>
             <property name="xaxis_min" value=""/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="linewidth" value="1.5"/>
@@ -2767,7 +2767,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
             <property name="matplotlibrc" value=""/>
             <property name="ordering_regex_list" value="carrier.*mac&#10;mac&#10;carrier.*plca&#10;plca&#10;phy"/>
             <property name="enum_as_strip" value="true"/>
@@ -3454,14 +3454,14 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="vector_operations" value="apply: timedilation(c=1000000)"/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
             <property name="xaxis_title" value="simulation time [us]"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
-            <property name="image_export_filename" value=""/>
+            <property name="image_export_filename" value="3notraffic"/>
             <property name="xaxis_min" value=""/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="linewidth" value="1.5"/>
@@ -3478,7 +3478,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
             <property name="matplotlibrc" value=""/>
             <property name="ordering_regex_list" value="carrier.*mac&#10;mac&#10;carrier.*plca&#10;plca&#10;phy"/>
             <property name="enum_as_strip" value="true"/>
@@ -4165,14 +4165,14 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="vector_operations" value="apply: timedilation(c=1000000)"/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
             <property name="xaxis_title" value="simulation time [us]"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
-            <property name="image_export_filename" value=""/>
+            <property name="image_export_filename" value="4notraffic"/>
             <property name="xaxis_min" value=""/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="linewidth" value="1.5"/>
@@ -4189,7 +4189,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="12"/>
             <property name="matplotlibrc" value=""/>
             <property name="ordering_regex_list" value="carrier.*mac&#10;mac&#10;carrier.*plca&#10;plca&#10;phy"/>
             <property name="enum_as_strip" value="true"/>
