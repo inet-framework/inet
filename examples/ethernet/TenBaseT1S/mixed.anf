@@ -5,7 +5,7 @@
         <input pattern="results/Mixed-*.sca"/>
     </inputs>
     <charts>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="2044253558" name="transmit opportunity ID" resultTypes="vector" template="linechart_native" type="LINE">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="10473504" name="transmit opportunity ID" resultTypes="vector" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -641,7 +641,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="12"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1259699979" name="switch" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1073877193" name="switch" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from omnetpp.scave import results, chart, utils
@@ -1355,7 +1355,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="sorting" value="false"/>
             <property name="secondary_ordering_regex_list" value=""/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1083127093" name="node[n]" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1103457554" name="node[n]" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from omnetpp.scave import results, chart, utils
