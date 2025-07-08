@@ -45,17 +45,17 @@ class CompareSimulationsTaskResult(TaskResult):
             self.result = "IDENTICAL"
             self.color = COLOR_GREEN
             if self.stdout_trajectory_comparison_result == "DIVERGENT":
-                if self.result == "DONE":
+                if self.result == "IDENTICAL":
                     self.result = "DIVERGENT"
                 self.color = COLOR_YELLOW
                 self.reason = self.reason + ", different STDOUT trajectories"
             if self.fingerprint_trajectory_comparison_result == "DIVERGENT":
-                if self.result == "DONE":
+                if self.result == "IDENTICAL":
                     self.result = "DIVERGENT"
                 self.color = COLOR_YELLOW
                 self.reason = self.reason + ", different fingerprint trajectories"
             if self.statistical_comparison_result == "DIFFERENT":
-                if self.result == "DONE":
+                if self.result == "IDENTICAL":
                     self.result = "DIFFERENT"
                 self.color = COLOR_YELLOW
                 self.reason = self.reason + ", different statistics"
