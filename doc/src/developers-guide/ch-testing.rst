@@ -154,3 +154,76 @@ test suite is clearly marked on the pull request with a check mark or a red cros
 In general, contributors are expected to take care of not breaking the fingerprint
 tests. In the case of a necessary fingerprint change, the CSV files should be updated
 in separate patches.
+
+INET Fingerprint Ingredients
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In addition to the standard OMNeT++ fingerprint ingredients (covered in the
+`OMNeT++ manual <https://omnetpp.org/doc/omnetpp/manual/#sec:testing:fingerprint-tests>`__),
+INET provides 5 additional fingerprint ingredients that offer more granular control
+over what aspects of network simulation are considered significant for reproducibility
+testing. The default INET fingerprint ingredients string is ``"~UNID"``, meaning
+all INET-specific ingredients are enabled by default.
+
+These ingredients are handled by the ``inet::FingerprintCalculator`` class. The
+fingerprint test script automatically adds the corresponding ``--fingerprint-calculator-class``
+option to the simulation command lines.
+
+**Filter Ingredients (Exclusion Filters)**
+
+These ingredients act as filters that remove certain events from fingerprint calculation
+entirely, before other ingredients are processed:
+
+``~`` (NETWORK_COMMUNICATION_FILTER)
+   Excludes intra-node communication from fingerprint calculation. When enabled,
+   only includes packet arrival events that cross network node boundaries (where
+   sender node and arrival node are different); all other events are excluded
+   from the fingerprint. This focuses fingerprinting on actual network
+   communication rather than internal node processing. This filter affects all
+   other fingerprint ingredients, including OMNeT++ ones.
+
+``U`` (PACKET_UPDATE_FILTER)
+   Excludes packet update arrival events from fingerprint calculation, all other
+   events are unaffected. When enabled, filters out packets that are marked as
+   "transmission update" packets. This causes packet transmission updates such
+   as truncations to be ignored. Packets will only be taken into account with
+   their originally intended content, regardless of what was actually
+   transmitted. This flag is formally independent of the '~' flag, but in
+   practice it only makes sense together with it.
+
+**Path Information Ingredients**
+
+These ingredients add path information to the fingerprint hash for packet arrival events:
+
+``N`` (NETWORK_NODE_PATH)
+   For packet arrival events, includes the full path of both sender and arrival
+   network nodes in the fingerprint. Ignores non-packet events and all events
+   that happen outside network nodes. Makes the fingerprint sensitive to which
+   specific network nodes are involved in communication. For each packet arrival
+   event, adds the full path of the containing network node for both the sender
+   and arrival modules, even inside the same network node.
+
+``I`` (NETWORK_INTERFACE_PATH)
+   For packet arrival events, includes the full interface path of both sender
+   and arrival network interfaces in the fingerprint. Ignores non-packet events
+   and all events that happen outside network interfaces. Makes the fingerprint
+   sensitive to which specific network interfaces are used for communication.
+   For each packet arrival event, adds the interface full path of the containing
+   NIC modules, even inside the same network interface.
+
+**Content Ingredient**
+
+``D`` (PACKET_DATA)
+   Includes the actual packet payload data in the fingerprint. For packet arrival events
+   with non-zero length, adds the raw packet content to the hash. For byte-aligned
+   packets (length divisible by 8), processes content as bytes; otherwise processes
+   as individual bits. This makes the fingerprint sensitive to actual packet content,
+   not just packet structure or timing. Note that this ingredient requires packet
+   serialization, so it will not work for simulations that contain protocol headers,
+   payload, etc. that have no serializer implemented.
+
+**Usage Notes**
+
+- Filter ingredients (``~`` and ``U``) work as exclusion filters and are processed
+  before other ingredients
+- Path and content ingredients (``N``, ``I``, ``D``) only apply to packet arrival events
