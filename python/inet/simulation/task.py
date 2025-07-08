@@ -160,7 +160,7 @@ class SimulationTaskResult(TaskResult):
             match = re.match(r"\*\* Event #(\d+) .*", line)
             if match:
                 event_number = int(match.group(1))
-            else:
+            elif event_number is not None:
                 if matches_filter(line, filter, exclude_filter, full_match):
                     event_numbers.append(event_number)
                     lines.append(line)
