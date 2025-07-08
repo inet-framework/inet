@@ -712,7 +712,7 @@ utils.export_data_if_needed(df, props)
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-8"/>
-            <property name="image_export_filename" value="1latency"/>
+            <property name="image_export_filename" value=""/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
             <property name="legend_format" value=""/>
@@ -1441,7 +1441,7 @@ utils.export_data_if_needed(df, props)
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-8"/>
-            <property name="image_export_filename" value="2latency"/>
+            <property name="image_export_filename" value=""/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
             <property name="legend_format" value=""/>
@@ -2170,7 +2170,7 @@ utils.export_data_if_needed(df, props)
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-8"/>
-            <property name="image_export_filename" value="3latency"/>
+            <property name="image_export_filename" value=""/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
             <property name="legend_format" value=""/>
@@ -2899,7 +2899,7 @@ utils.export_data_if_needed(df, props)
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-8"/>
-            <property name="image_export_filename" value="4latency"/>
+            <property name="image_export_filename" value=""/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
             <property name="legend_format" value=""/>
@@ -3493,7 +3493,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_itervar" value="numNodes"/>
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-8"/>
-            <property name="image_export_filename" value="5latency"/>
+            <property name="image_export_filename" value=""/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
             <property name="filter" value="type =~ scalar AND name =~ packetInterval:vector:mean"/>
@@ -4083,7 +4083,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_itervar" value="numNodes"/>
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-8"/>
-            <property name="image_export_filename" value="6latency"/>
+            <property name="image_export_filename" value=""/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
             <property name="filter" value="type =~ scalar AND name =~ meanBitLifeTimePerPacket:vector:mean"/>
@@ -4673,7 +4673,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_itervar" value="numNodes"/>
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-8"/>
-            <property name="image_export_filename" value="7latency"/>
+            <property name="image_export_filename" value=""/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
             <property name="filter" value="type =~ scalar AND name =~ packetPendingDelay:vector:mean"/>

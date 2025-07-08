@@ -712,7 +712,7 @@ utils.export_data_if_needed(df, props)
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-8"/>
-            <property name="image_export_filename" value="queuethroughput"/>
+            <property name="image_export_filename" value=""/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
             <property name="legend_format" value=""/>
@@ -1308,7 +1308,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_itervar" value="numNodes"/>
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-8"/>
-            <property name="image_export_filename" value="applicationthroughput"/>
+            <property name="image_export_filename" value=""/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
             <property name="filter" value="type =~ scalar AND module =~ &quot;MultidropNetwork.controller.app[0].sink&quot; AND name =~ dataRate:vector:mean"/>
@@ -1898,7 +1898,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_itervar" value="numNodes"/>
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-8"/>
-            <property name="image_export_filename" value="busthroughput"/>
+            <property name="image_export_filename" value=""/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
             <property name="filter" value="type =~ scalar AND module =~ &quot;MultidropNetwork.controller.eth[0].phy&quot; AND name =~ busUtilization:vector:mean"/>
@@ -2488,7 +2488,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_itervar" value="numNodes"/>
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-8"/>
-            <property name="image_export_filename" value="txthroughput"/>
+            <property name="image_export_filename" value=""/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
             <property name="filter" value="type =~ scalar AND module =~ &quot;*.node[*].*&quot; AND name =~ transmitOpportunityUsed:vector:mean AND module =~ *.node[0].*"/>
