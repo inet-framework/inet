@@ -160,10 +160,9 @@ INET Fingerprint Ingredients
 
 In addition to the standard OMNeT++ fingerprint ingredients (covered in the
 `OMNeT++ manual <https://omnetpp.org/doc/omnetpp/manual/#sec:testing:fingerprint-tests>`__),
-INET provides 5 additional fingerprint ingredients that offer more granular control
+INET provides 5 additional fingerprint ingredients that offer additional control
 over what aspects of network simulation are considered significant for reproducibility
-testing. The default INET fingerprint ingredients string is ``"~UNID"``, meaning
-all INET-specific ingredients are enabled by default.
+testing.
 
 These ingredients are handled by the ``inet::FingerprintCalculator`` class. The
 fingerprint test script automatically adds the corresponding ``--fingerprint-calculator-class``
@@ -179,8 +178,7 @@ entirely, before other ingredients are processed:
    only includes packet arrival events that cross network node boundaries (where
    sender node and arrival node are different); all other events are excluded
    from the fingerprint. This focuses fingerprinting on actual network
-   communication rather than internal node processing. This filter affects all
-   other fingerprint ingredients, including OMNeT++ ones.
+   communication rather than internal node processing.
 
 ``U`` (PACKET_UPDATE_FILTER)
    Excludes packet update arrival events from fingerprint calculation, all other
@@ -201,7 +199,8 @@ These ingredients add path information to the fingerprint hash for packet arriva
    that happen outside network nodes. Makes the fingerprint sensitive to which
    specific network nodes are involved in communication. For each packet arrival
    event, adds the full path of the containing network node for both the sender
-   and arrival modules, even inside the same network node.
+   and arrival modules, even inside the same network node. This is mostly useful when
+   used together with the `~` ingredient.
 
 ``I`` (NETWORK_INTERFACE_PATH)
    For packet arrival events, includes the full interface path of both sender
@@ -209,18 +208,18 @@ These ingredients add path information to the fingerprint hash for packet arriva
    and all events that happen outside network interfaces. Makes the fingerprint
    sensitive to which specific network interfaces are used for communication.
    For each packet arrival event, adds the interface full path of the containing
-   NIC modules, even inside the same network interface.
+   NIC modules, even inside the same network interface. This is mostly useful when
+   used together with the `~` ingredient.
 
 **Content Ingredient**
 
 ``D`` (PACKET_DATA)
-   Includes the actual packet payload data in the fingerprint. For packet arrival events
-   with non-zero length, adds the raw packet content to the hash. For byte-aligned
-   packets (length divisible by 8), processes content as bytes; otherwise processes
-   as individual bits. This makes the fingerprint sensitive to actual packet content,
-   not just packet structure or timing. Note that this ingredient requires packet
-   serialization, so it will not work for simulations that contain protocol headers,
-   payload, etc. that have no serializer implemented.
+   Includes the actual packet data in the fingerprint. For packet arrival events
+   with non-zero length, adds the raw packet content to the hash. This makes the
+   fingerprint sensitive to actual packet content, not just packet structure or
+   timing. Note that this ingredient requires packet serialization, so it will
+   not work for simulations that contain protocol headers, payload, etc. that
+   have no serializer implemented.
 
 **Usage Notes**
 
