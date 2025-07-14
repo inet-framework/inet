@@ -97,7 +97,7 @@ void EthernetSocketIo::setSocketOptions()
         networkInterface = interfaceTable->findInterfaceByName(interface);
         if (networkInterface == nullptr)
             throw cRuntimeError("Cannot find network interface");
-        if (!localAddress.isUnspecified())
+        if (!localAddress.isUnspecified() && localAddress.isMulticast())
             networkInterface->addMulticastMacAddress(localAddress);
         socket.setNetworkInterface(networkInterface);
     }
