@@ -301,7 +301,6 @@ void EthernetCsmaPhy::startFrameTransmission(Packet *packet, EthernetEsdType esd
     ASSERT(!currentTxSignal);
     EV_DEBUG << "Starting frame transmission" << EV_FIELD(packet) << EV_ENDL;
     take(packet);
-    packet->clearTags();
     encapsulate(packet);
     auto signal = new EthernetSignal(packet->getName());
     signal->setKind(DATA);
@@ -335,7 +334,9 @@ void EthernetCsmaPhy::handleStartTransmission(EthernetSignalBase *signal)
     emit(transmissionStartedSignal, currentTxSignal);
     emit(transmittedSignalTypeSignal, currentTxSignal->getKind());
     emit(busUsedSignal, currentTxSignal->getKind() == DATA ? 1 : 0);
-    send(signal->dup(), SendOptions().transmissionId(signal->getId()).duration(duration), physOutGate);
+    auto sentSignal = signal->dup();
+    prepareSignal(sentSignal);
+    send(sentSignal, SendOptions().transmissionId(currentTxSignal->getId()).duration(duration), physOutGate);
     scheduleCrsOffTimer();
 }
 
@@ -349,6 +350,7 @@ void EthernetCsmaPhy::handleEndTransmission()
     if (duration != currentTxSignal->getDuration()) {
         truncateSignal(currentTxSignal, duration); // TODO save and use start tx time
         emit(transmissionEndedSignal, currentTxSignal);
+        prepareSignal(currentTxSignal);
         send(currentTxSignal, SendOptions().finishTx(currentTxSignal->getId()), physOutGate);
     }
     else {
@@ -430,6 +432,19 @@ void EthernetCsmaPhy::decapsulate(Packet *packet)
     auto phyHeader = packet->popAtFront<EthernetPhyHeader>();
     ASSERT(packet->getDataLength() >= MIN_ETHERNET_FRAME_BYTES);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
+}
+
+void EthernetCsmaPhy::prepareSignal(Signal *signal)
+{
+    auto packet = dynamic_cast<Packet *>(signal->getEncapsulatedPacket());
+    if (packet != nullptr) {
+        auto oldPacketProtocolTag = packet->removeTagIfPresent<PacketProtocolTag>();
+        packet->clearTags();
+        if (oldPacketProtocolTag != nullptr) {
+            auto newPacketProtocolTag = packet->addTag<PacketProtocolTag>();
+            *newPacketProtocolTag = *oldPacketProtocolTag;
+        }
+    }
 }
 
 void EthernetCsmaPhy::truncateSignal(EthernetSignalBase *signal, simtime_t duration)

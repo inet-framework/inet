@@ -8,7 +8,6 @@
 #ifndef __INET_ETHERNETCSMAPHY_H
 #define __INET_ETHERNETCSMAPHY_H
 
-#include "inet/common/SimpleModule.h"
 #include "inet/common/FSMA.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ethernet/base/EthernetModes.h"
@@ -16,12 +15,15 @@
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/physicallayer/wired/ethernet/EthernetSignal_m.h"
 #include "inet/physicallayer/wired/ethernet/IEthernetCsmaPhy.h"
+#include "inet/queueing/base/PassivePacketSinkBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API EthernetCsmaPhy : public SimpleModule, public virtual IEthernetCsmaPhy
+using namespace queueing;
+
+class INET_API EthernetCsmaPhy : public PassivePacketSinkBase, public virtual IEthernetCsmaPhy
 {
   public:
     static simsignal_t stateChangedSignal;
@@ -101,6 +103,7 @@ class INET_API EthernetCsmaPhy : public SimpleModule, public virtual IEthernetCs
     virtual void encapsulate(Packet *packet);
     virtual void decapsulate(Packet *packet);
 
+    virtual void prepareSignal(Signal *signal);
     virtual void truncateSignal(EthernetSignalBase *signal, simtime_t duration);
 
     virtual void updateRxSignals(EthernetSignalBase *signal);
@@ -123,6 +126,10 @@ class INET_API EthernetCsmaPhy : public SimpleModule, public virtual IEthernetCs
 
     virtual void startFrameTransmission(Packet *packet, EthernetEsdType esd1) override;
     virtual void endFrameTransmission() override;
+
+    virtual void pushPacket(Packet *packet, const cGate *gate) override {
+        throw cRuntimeError("Invalid operation");
+    }
 };
 
 } // namespace physicallayer
