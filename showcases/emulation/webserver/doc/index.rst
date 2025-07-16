@@ -1,5 +1,5 @@
-Webserver Emulation Showcase
-============================
+Webserver Emulation
+===================
 
 Goals
 -----
