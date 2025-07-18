@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="results/*.vec"/>
-        <input pattern="results/*.sca"/>
+        <input pattern="results/Experiment-*.vec"/>
+        <input pattern="results/Experiment-*.sca"/>
     </inputs>
     <charts>
         <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="189985030" name="received bytes" resultTypes="vector" template="linechart_native" type="LINE">

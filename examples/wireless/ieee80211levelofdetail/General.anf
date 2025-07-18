@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="results/*.vec"/>
-        <input pattern="results/*.sca"/>
+        <input pattern="results/Default*.vec"/>
+        <input pattern="results/Default*.sca"/>
+        <input pattern="results/Layered*.vec"/>
+        <input pattern="results/Layered*.sca"/>
     </inputs>
     <charts>
         <chart createdWith="" icon="icons/full/obj/scatterchart.png" id="1097244912" name="count vs. distance" resultTypes="" template="scatterchart_itervars_mpl" type="MATPLOTLIB">

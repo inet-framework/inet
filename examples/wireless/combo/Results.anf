@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="results/*.vec"/>
-        <input pattern="results/*.sca"/>
+        <input pattern="results/*Radio*.vec"/>
+        <input pattern="results/*Radio*.sca"/>
     </inputs>
     <charts>
         <chart createdWith="OMNeT++ 7.0.0.221114-493122b604" icon="icons/full/obj/barchart.png" id="1278166528" name="Summary Linechart" resultTypes="scalar" template="barchart_mpl" type="MATPLOTLIB">
