@@ -13,7 +13,7 @@
 
 namespace inet {
 
-#define Register_Protocol_Dissector(PROTOCOL, CLASSNAME)    EXECUTE_PRE_NETWORK_SETUP(ProtocolDissectorRegistry::getInstance().registerProtocolDissector(PROTOCOL, new CLASSNAME()));
+#define Register_Protocol_Dissector(PROTOCOL, CLASSNAME)    EXECUTE_PRE_NETWORK_SETUP(::inet::ProtocolDissectorRegistry::getInstance().registerProtocolDissector(PROTOCOL, new CLASSNAME()));
 
 class INET_API ProtocolDissectorRegistry
 {

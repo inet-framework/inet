@@ -15,7 +15,7 @@
 
 namespace inet {
 
-#define Register_Serializer(TYPE, CLASSNAME)    EXECUTE_PRE_NETWORK_SETUP(ChunkSerializerRegistry::getInstance().registerSerializer(typeid(TYPE), new CLASSNAME()));
+#define Register_Serializer(TYPE, CLASSNAME)    EXECUTE_PRE_NETWORK_SETUP(::inet::ChunkSerializerRegistry::getInstance().registerSerializer(typeid(TYPE), new CLASSNAME()));
 
 class INET_API ChunkSerializerRegistry
 {

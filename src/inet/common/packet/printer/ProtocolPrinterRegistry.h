@@ -13,7 +13,7 @@
 
 namespace inet {
 
-#define Register_Protocol_Printer(PROTOCOL, CLASSNAME)    EXECUTE_PRE_NETWORK_SETUP(ProtocolPrinterRegistry::getInstance().registerProtocolPrinter(PROTOCOL, new CLASSNAME()));
+#define Register_Protocol_Printer(PROTOCOL, CLASSNAME)    EXECUTE_PRE_NETWORK_SETUP(::inet::ProtocolPrinterRegistry::getInstance().registerProtocolPrinter(PROTOCOL, new CLASSNAME()));
 
 class INET_API ProtocolPrinterRegistry
 {
