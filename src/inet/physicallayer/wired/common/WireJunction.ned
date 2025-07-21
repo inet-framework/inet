@@ -31,7 +31,7 @@ simple WireJunction extends SimpleModule
         @display("i=misc/node_vs");
         @signal[packetReceived](type=cPacket);
         @statistic[packetReceived](title="packets"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[channelOwner](title="channel owner"; source=packetReceived; record=channelOwner);
+        @statistic[channelOwner](title="channel owner"; source=packetReceived; record=channelOwner; interpolationmode=sample-hold);
     gates:
         inout port[];
 }
