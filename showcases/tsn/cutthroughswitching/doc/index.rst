@@ -4,14 +4,26 @@ Cut-Through Switching
 Goals
 -----
 
-Cut-through switching is a method used in packet switching systems, such as Ethernet switches, to forward frames or 
-packets through the network. It involves starting the forwarding process before the entire frame has been received, 
-typically as soon as the destination address and outgoing interface are determined. This is in contrast to store-and-forward 
-switching, which waits until the entire frame has been received before forwarding it. One advantage of cut-through switching 
-is that it may reduce the switching delay of Ethernet frames, since the switch can begin forwarding the frame as soon as it 
-has enough information to do so. However, cut-through switching also has some potential disadvantages, such as a higher error 
-rate compared to store-and-forward switching, since it does not check the entire frame for errors before forwarding it. In this 
-showcase, we will demonstrate cut-through switching and compare it to store-and-forward switching in terms of delay.
+In conventional store-and-forward switching, each switch must receive and buffer
+the entire frame before forwarding it to the next hop. This store-and-forward
+process adds delay per hop that is proportional to the frame size, as the switch
+cannot begin transmission until the complete frame has been received. When
+packets traverse multiple switches, these delays accumulate, resulting in
+significant end-to-end latency. Cut-through switching addresses this problem by
+starting the forwarding process as soon as the destination MAC address and
+outgoing interface are determined, typically after receiving just the frame
+header. This allows the switch to begin forwarding the frame while it is still
+being received, substantially reducing switching delay, especially in multi-hop
+scenarios.
+
+However, cut-through switching involves trade-offs compared to store-and-forward
+switching. Since forwarding begins before the entire frame is received, the
+frame check sequence (FCS) cannot be verified at each switch, potentially
+leading to a higher error rate as corrupted frames may be forwarded through the
+network. The FCS check is instead performed at the destination host. In this
+showcase, we will demonstrate cut-through switching and compare it to
+store-and-forward switching in terms of delay, highlighting the performance
+benefits of this forwarding method.
 
 | Verified with INET version: ``4.3``
 | Source files location: `inet/showcases/tsn/cutthroughswitching <https://github.com/inet-framework/inet/tree/master/showcases/tsn/cutthroughswitching>`__
@@ -19,12 +31,12 @@ showcase, we will demonstrate cut-through switching and compare it to store-and-
 The Model
 ---------
 
-Cut-through switching reduces the switching delay but skips the FCS check in the switch. The FCS
-is at the end of the Ethernet frame; the FCS check is performed in the destination host.
-(This is because by the time the FCS check could happen, the frame is almost completely transmitted,
-so it makes no sense).
-The delay reduction is more substantial if the packet goes through multiple switches
-(as one packet transmission duration can be saved at each switch).
+.. Cut-through switching reduces the switching delay but skips the FCS check in the switch. The FCS
+.. is at the end of the Ethernet frame; the FCS check is performed in the destination host.
+.. (This is because by the time the FCS check could happen, the frame is almost completely transmitted,
+.. so it makes no sense).
+.. The delay reduction is more substantial if the packet goes through multiple switches
+.. (as one packet transmission duration can be saved at each switch).
 
 Cut-through switching makes use of intranode packet streaming in INET's modular
 Ethernet model. Packet streaming is required because the frame needs to be processed
