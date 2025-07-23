@@ -403,8 +403,6 @@ Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`BabelShowcase.ned 
 Try It Yourself
 ---------------
 
-TODO you need setcap
-
 If you already have INET and OMNeT++ installed, start the IDE by typing
 ``omnetpp``, import the INET project into the IDE, then navigate to the
 ``inet/showcases/emulation/babel`` folder in the `Project Explorer`. There, you can view
