@@ -113,6 +113,7 @@ class INET_API ChannelOwnerRecorder : public VectorRecorder
 
   public:
     ChannelOwnerRecorder() {}
+    virtual ~ChannelOwnerRecorder();
 
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref time, cObject *object, cObject *details) override;
 };

@@ -142,6 +142,15 @@ void ChannelOwnerRecorder::init(Context *ctx)
     event->setSchedulingPriority(1000);
 }
 
+ChannelOwnerRecorder::~ChannelOwnerRecorder()
+{
+    if (!event->isScheduled()) {
+        take(event);
+        drop(event);
+        delete event;
+    }
+}
+
 void ChannelOwnerRecorder::collectNetworkNodes(cModule *module, std::set<cModule *>& visitedModules)
 {
     visitedModules.insert(module);
