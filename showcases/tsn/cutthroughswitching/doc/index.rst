@@ -9,12 +9,18 @@ the entire frame before forwarding it to the next hop. This store-and-forward
 process adds delay per hop that is proportional to the frame size, as the switch
 cannot begin transmission until the complete frame has been received. When
 packets traverse multiple switches, these delays accumulate, resulting in
-significant end-to-end latency. Cut-through switching addresses this problem by
+significant end-to-end latency. 
+
+.. figure:: media/storeandforward.png
+
+Cut-through switching addresses this problem by
 starting the forwarding process as soon as the destination MAC address and
 outgoing interface are determined, typically after receiving just the frame
 header. This allows the switch to begin forwarding the frame while it is still
 being received, substantially reducing switching delay, especially in multi-hop
 scenarios.
+
+.. figure:: media/cutthrough.png
 
 However, cut-through switching involves trade-offs compared to store-and-forward
 switching. Since forwarding begins before the entire frame is received, the

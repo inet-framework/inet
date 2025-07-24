@@ -4,15 +4,33 @@ Frame Preemption
 Goals
 -----
 
-Ethernet frame preemption is a feature specified in the 802.1Qbu standard that
-allows higher priority frames to interrupt the transmission of lower-priority
-frames at the Media Access Control (MAC) layer of an Ethernet network. This can
-be useful for time-critical applications that require low latency for
-high-priority frames. For example, in a Time-Sensitive Networking (TSN)
-application, high-priority frames may contain time-critical data that must be
-delivered with minimal delay. Frame preemption can help ensure that these
-high-priority frames are given priority over lower-priority frames, reducing the
-latency of their transmission.
+In conventional Ethernet networks, when a high-priority frame arrives at a
+network device while a lower-priority frame is already being transmitted, the
+high-priority frame must wait until the entire lower-priority frame transmission
+is completed before it can be sent. This head-of-line blocking can cause
+significant delays for time-critical frames, especially when large
+lower-priority frames are being transmitted. The delay is particularly
+problematic in Time-Sensitive Networking (TSN) applications where high-priority
+frames contain time-critical data that must be delivered with minimal and
+predictable latency.
+
+.. figure:: media/nopreemption2.png
+   :align: center
+   :width: 60%
+
+Ethernet frame preemption, specified in the 802.1Qbu standard, addresses this
+problem by allowing higher priority frames to interrupt the transmission of
+lower-priority frames at the Media Access Control (MAC) layer. When a
+high-priority frame becomes available during the transmission of a
+lower-priority frame, the MAC can immediately stop the lower-priority
+transmission, send the high-priority frame, and then resume the lower-priority
+frame transmission from where it left off. This mechanism ensures that
+high-priority frames experience minimal queueing delay, providing the low and
+predictable latency required for time-critical applications.
+
+.. figure:: media/preemption2.png
+   :align: center
+   :width: 60%
 
 In this showcase, we will demonstrate Ethernet frame preemption and examine the
 latency reduction that it can provide. By the end of this showcase, you will
