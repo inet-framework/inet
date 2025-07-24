@@ -129,6 +129,8 @@ void EthernetPlca::initialize(int stage)
         mode = EthernetModes::getEthernetMode(networkInterface->getDatarate());
     }
     else if (stage == INITSTAGE_PHYSICAL_LAYER) {
+        controlFsm.setName("control");
+        dataFsm.setName("data");
         controlFsm.setStateChangedSignal(controlStateChangedSignal);
         dataFsm.setStateChangedSignal(dataStateChangedSignal);
         controlFsm.setState(CS_RESYNC, "CS_RESYNC");
