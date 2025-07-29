@@ -455,6 +455,7 @@ const Ptr<Chunk> QuicPacketHeaderSerializer::deserializeShortPacketHeader(Memory
 }
 
 std::vector<uint8_t> protectPacket(std::vector<uint8_t> datagram, uint32_t packetNumber, size_t packetNumberOffset, size_t packetNumberLength, const EncryptionKey& key) {
+    ASSERT(datagram.size() >= packetNumberOffset + packetNumberLength);
     ptls_cipher_suite_t *cs = &ptls_openssl_opp_aes128gcmsha256;
     size_t originalSize = datagram.size();
 
@@ -513,11 +514,13 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
 
     auto quicPacketHeader = dynamicPtrCast<const PacketHeader>(payloadChunks[0]);
     ASSERT(quicPacketHeader != nullptr);
+    uint8_t packetNumberOffset = 0;
     uint8_t packetNumberLength = 0;
     uint32_t packetNumber = 0;
 
     switch (quicPacketHeader->getHeaderForm()) {
         case PACKET_HEADER_FORM_LONG: {
+            packetNumberOffset = 26;
             auto longPacketHeader = dynamicPtrCast<const LongPacketHeader>(quicPacketHeader);
             switch (longPacketHeader->getLongPacketType()) {
                 case LONG_PACKET_HEADER_TYPE_INITIAL: {
@@ -564,7 +567,7 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
     payloadStream.clear();
 
     EncryptionKey key = EncryptionKey::fromTag(keyTag);
-    std::vector<uint8_t> finalContents = protectPacket(unencryptedData, packetNumber, 26, packetNumberLength, key);
+    std::vector<uint8_t> finalContents = protectPacket(unencryptedData, packetNumber, packetNumberOffset, packetNumberLength, key);
 
     // TODO: handle sub-byte offset and length
     stream.writeBytes(finalContents, offset, length < b(0) ? B(-1) : B(length));
