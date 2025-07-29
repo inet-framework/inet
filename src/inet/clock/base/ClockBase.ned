@@ -12,6 +12,12 @@ import inet.common.Module;
 //
 // Base module for clocks.
 //
+// Display string format directives:
+//
+//  -t: clock time in seconds
+//  -T: clock time in automatically selected (natural) units
+//  -d: clock time difference to reference clock in automatically selected (natural) units
+//
 module ClockBase extends Module
 {
     parameters:
