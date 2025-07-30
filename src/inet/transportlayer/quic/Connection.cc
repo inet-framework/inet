@@ -102,15 +102,6 @@ Connection::Connection(Quic *quicSimpleMod, bool is_server, UdpSocket *udpSocket
     ptls_hexdump(client_random_hex, client_random.base, client_random.len);
     std::cout << "client random: " << client_random_hex << std::endl;
 
-    std::cout << "quic emits secret" << std::endl;
-    std::string tlsClientRandomLine = "CLIENT_RANDOM ";
-    tlsClientRandomLine += client_random_hex;
-    tlsClientRandomLine += " ";
-    tlsClientRandomLine += client_random_hex;
-    tlsClientRandomLine += "\n";
-
-    quicSimpleMod->emit(quicSimpleMod->tlsKeyLogLineSignal, tlsClientRandomLine.c_str());
-
     uint8_t dcid[8] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
     ptls_iovec_t dcid_iovec = ptls_iovec_init(dcid, 8);
 

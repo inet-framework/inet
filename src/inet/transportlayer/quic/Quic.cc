@@ -50,6 +50,32 @@ static int on_update_traffic_key(ptls_update_traffic_key_t *self, ptls_t *tls, i
     Connection *conn = (Connection *)(*ptls_get_data_ptr(tls));
 
     std::cout << "updating " << (is_enc ? "egress" : "ingress") << " traffic key for epoch " << epoch << " at " << (conn->is_server ? "server" : "client") << std::endl;
+    char secret_hex[65];
+    ptls_hexdump(secret_hex, secret, 32);
+    std::cout << "new secret: " << secret_hex << std::endl;
+
+    ptls_iovec_t client_random = ptls_get_client_random(tls);
+    char client_random_hex[65];
+    ptls_hexdump(client_random_hex, client_random.base, client_random.len);
+    std::cout << "client random: " << client_random_hex << std::endl;
+
+
+    if (epoch == (size_t)EncryptionLevel::Handshake) {
+        bool secret_is_server = (is_enc == conn->is_server);
+
+        Quic *quicSimpleMod = conn->getModule();
+
+        std::string tlsClientRandomLine = secret_is_server ? "SERVER_HANDSHAKE_TRAFFIC_SECRET" : "CLIENT_HANDSHAKE_TRAFFIC_SECRET";
+        tlsClientRandomLine += " ";
+        tlsClientRandomLine += client_random_hex;
+        tlsClientRandomLine += " ";
+        tlsClientRandomLine += secret_hex;
+        tlsClientRandomLine += "\n";
+        std::cout << "tls line: " << tlsClientRandomLine << std::endl;
+        quicSimpleMod->emit(quicSimpleMod->tlsKeyLogLineSignal, tlsClientRandomLine.c_str());
+    }
+
+
     return 0;
 }
 
