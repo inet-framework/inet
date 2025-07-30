@@ -585,6 +585,7 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
             // Its length is known to the endpoints (not explicitly encoded in short headers).
             packetNumberOffset += 8; // shortPacketHeader->getDstConnectionIdLength();
 
+            packetNumberLength = 4;
             //TODO packetNumberLength = shortPacketHeader->getPacketNumberLength();
             packetNumber = shortPacketHeader->getPacketNumber();
             break;
