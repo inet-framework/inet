@@ -646,7 +646,7 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
     EncryptionKey testClientKey = EncryptionKey::newInitial(test_dcid_iovec, "client in");
     std::vector<uint8_t> testClientFinalContents = protectPacket(testClientUnprotectedData, 0, 23, 1, testClientKey);
 
-
+    /*
     std::cout << "test client unprotected data size: " << testClientUnprotectedData.size() << std::endl;
     for (int i = 0; i < testClientUnprotectedData.size(); i++) {
         std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)testClientUnprotectedData[i] << " ";
@@ -658,7 +658,7 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
         std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)testClientFinalContents[i] << " ";
     }
     std::cout << std::dec << std::endl;
-
+*/
     std::vector <uint8_t> expectedClientProtectedData = {
         0xcd, // protected header byte
         0x00, 0x00, 0x00, 0x01, // version
@@ -718,7 +718,7 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
     EncryptionKey testServerKey = EncryptionKey::newInitial(test_dcid_iovec, "server in");
     std::vector<uint8_t> testFinalContents = protectPacket(testUnprotectedData, 0, 20, 1, testServerKey);
 
-
+/*
     std::cout << "test unprotected data size: " << testUnprotectedData.size() << std::endl;
     for (int i = 0; i < testUnprotectedData.size(); i++) {
         std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)testUnprotectedData[i] << " ";
@@ -730,6 +730,7 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
         std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)testFinalContents[i] << " ";
     }
     std::cout << std::dec << std::endl;
+*/
 
     std::vector <uint8_t> expectedProtectedData = {
 
