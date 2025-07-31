@@ -85,6 +85,9 @@ struct EncryptionKey {
         key.key = hex2bytes(tag->getKey());
         key.iv = hex2bytes(tag->getIv());
         key.hpkey = hex2bytes(tag->getHpkey());
+        ASSERT(!key.key.empty());
+        ASSERT(!key.iv.empty());
+        ASSERT(!key.hpkey.empty());
         return key;
     }
 
