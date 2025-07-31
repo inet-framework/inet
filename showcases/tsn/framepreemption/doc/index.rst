@@ -5,7 +5,7 @@ Goals
 -----
 
 In conventional Ethernet networks, when a high-priority frame arrives at a
-network device while a lower-priority frame is already being transmitted, the
+network interface while a lower-priority frame is already being transmitted, the
 high-priority frame must wait until the entire lower-priority frame transmission
 is completed before it can be sent. This head-of-line blocking can cause
 significant delays for time-critical frames, especially when large
@@ -22,7 +22,7 @@ Ethernet frame preemption, specified in the 802.1Qbu standard, addresses this
 problem by allowing higher priority frames to interrupt the transmission of
 lower-priority frames at the Media Access Control (MAC) layer. When a
 high-priority frame becomes available during the transmission of a
-lower-priority frame, the MAC can immediately stop the lower-priority
+lower-priority frame, the MAC can stop the lower-priority
 transmission, send the high-priority frame, and then resume the lower-priority
 frame transmission from where it left off. This mechanism ensures that
 high-priority frames experience minimal queueing delay, providing the low and
@@ -356,6 +356,33 @@ configuration is distinguished using different line styles and the traffic categ
 .. figure:: media/delay.png
    :align: center
    :width: 80%
+
+.. |1| image:: media/fifo_histogram.png
+   :width: 33%
+
+.. |2| image:: media/fifo_histogram.png
+   :width: 33%
+
+.. |3| image:: media/fifo_histogram.png
+   :width: 33%
+
+.. .. table:: My table
+..    :align: center
+
+..    +-----+-----+-----+
+..    | |1| | |2| | |3| |
+..    +-----+-----+-----+
+
+.. |1||2||3|
+
+.. list-table::
+   :width: 100%
+
+   * - .. figure:: media/fifo_histogram_2.png
+
+     - .. figure:: media/priority_histogram_2.png
+
+     - .. figure:: media/preemption_histogram_2.png
 
 The chart shows that in the case of the default configuration, the delay for the 
 two traffic categories is about the same. The use of the priority queue significantly 
