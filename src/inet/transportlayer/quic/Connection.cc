@@ -102,14 +102,6 @@ Connection::Connection(Quic *quicSimpleMod, bool is_server, UdpSocket *udpSocket
     ptls_hexdump(client_random_hex, client_random.base, client_random.len);
     std::cout << "client random: " << client_random_hex << std::endl;
 
-    uint8_t dcid[8] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
-    ptls_iovec_t dcid_iovec = ptls_iovec_init(dcid, 8);
-
-    egressKey = EncryptionKey::newInitial(dcid_iovec, is_server ? "server in" : "client in");
-    ingressKey = EncryptionKey::newInitial(dcid_iovec, is_server ? "client in" : "server in");
-
-    std::cout << "egressKey: " << std::endl;
-    egressKey.dump();
 }
 
 Connection::~Connection() {
@@ -605,6 +597,7 @@ bool Connection::isHandshakeConfirmed()
 void Connection::addDstConnectionId(uint64_t id, uint8_t length)
 {
     ConnectionId *connectionId = new ConnectionId(id, length);
+
     dstConnectionIds.push_back(connectionId);
     if (dstConnectionIds.size() == 1) {
         packetBuilder->setDstConnectionId(connectionId);

@@ -24,6 +24,20 @@ void InitialConnectionState::generateAndSetTempDstConnectionId()
     uint64_t tempCid2 = context->getModule()->intrand(UINT32_MAX);
     uint64_t tempCid = tempCid1 * tempCid2;
     context->addDstConnectionId(tempCid, 8);
+
+
+    uint64_t conn_id = tempCid;
+
+    ptls_iovec_t dcid_iovec = ptls_iovec_init(&conn_id, 8);
+    for (int i = 0; i < 4; ++i) {
+        std::swap(dcid_iovec.base[i], dcid_iovec.base[7 - i]);
+    }
+
+    context->egressKey = EncryptionKey::newInitial(dcid_iovec, context->is_server ? "server in" : "client in");
+    context->ingressKey = EncryptionKey::newInitial(dcid_iovec, context->is_server ? "client in" : "server in");
+
+    std::cout << "egressKey: " << std::endl;
+    context->egressKey.dump();
 }
 
 ConnectionState *InitialConnectionState::processConnectAppCommand(cMessage *msg)
