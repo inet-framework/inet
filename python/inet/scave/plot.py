@@ -509,6 +509,163 @@ def plot_vectors_separate_faded(df, props, legend_func=utils.make_legend_label, 
     
     return ax_list
 
+def plot_histograms(df, props, legend_func=make_legend_label, sort=True, edgecolor='black'):
+    """
+    Creates a histogram plot from the dataframe, with styling and additional input
+    coming from the properties. Each row in the dataframe defines a histogram.
+
+    Colors are assigned automatically. The `cycle_seed` property allows you to
+    select other combinations if the default one is not suitable.
+
+    A function to produce the legend labels can be passed in. By default,
+    `make_legend_label()` is used, which offers many ways to influence the
+    legend via dataframe columns and chart properties. In the absence of
+    more specified settings, the legend is normally computed from columns that best
+    differentiate among the histograms.
+
+    Parameters:
+
+    - `df`: The dataframe.
+    - `props` (dict): The properties.
+    - `legend_func` (function): The function to produce custom legend labels.
+       See `utils.make_legend_label()` for the prototype and semantics.
+    - `sort` (bool): Whether to sort the histograms by the columns used for the legend
+       (before applying `legend_func`, for backward bug-compatibility).
+
+    Columns of the dataframe:
+
+    - `binedges`, `binvalues` (array-like, `len(binedges)==len(binvalues)+1`):
+       The bin edges and the bin values (count or sum of weights) for the histogram.
+    - `min`, `max`, `underflows`, `overflows` (float, optional): The minimum/maximum
+       values, and the bin values for the underflow/overflow bins. These four columns
+       must either be all present or all absent from the dataframe.
+    - `legend` (string, optional): Legend label for the series. If missing,
+       legend labels are derived from other columns.
+    - `name`, `title`, `module`, etc. (optional): Provide input for the legend.
+
+    Notable properties that affect the plot:
+
+    - `normalize` (bool): If true, normalize the sum of the bin values to 1. If
+      `normalize` is true (and `cumulative` is false), the probability density
+       function (PDF) will be displayed.
+    - `cumulative` (bool): If true, show each bin as the sum of the previous bin
+       values plus itself. If both `normalize` and `cumulative` are true, that
+       results in the cumulative density function (CDF) being displayed.
+    - `show_overflows` (bool): If true, show the underflow/overflow bins.
+    - `title`: Plot title (autocomputed if missing).
+    - `drawstyle`: Selects whether to fill the area below the histogram line.
+    - `linestyle`, `linecolor`, `linewidth`: Styling.
+    - `cycle_seed`: Alters the sequence in which colors and markers are assigned to series.
+    - `unit`: If present, it is required to be the same for all series and will be used in the automatic x-axis label.
+    """
+    x_unit = utils._check_same_unit(df)
+    y_unit = props.get("yaxis_unit")
+    p = ideplot if chart.is_native_chart() else plt
+
+    has_overflow_columns = "min" in df and "max" in df and "underflows" in df and "overflows" in df
+
+    if not has_overflow_columns:
+        if "min" in df or "max" in df or "underflows" in df or "overflows" in df:
+            raise ValueError("Either all or none of the following columns must be present: min, max, underflows, overflows")
+
+    def get_prop(k):
+        return props[k] if k in props else None
+
+    title_cols, legend_cols = utils.extract_label_columns(df, props)
+
+    if sort:
+        df.sort_values(by=legend_cols, inplace=True)
+
+    # X unit
+    target_x_unit = get_prop("xaxis_unit")
+    if target_x_unit is None:
+        target_x_unit = x_unit
+    elif target_x_unit == "" and x_unit:
+        target_x_unit = utils._get_best_unit(df.binedges, x_unit)
+    if x_unit != target_x_unit and x_unit:
+        df.binedges = utils._convert_to_unit(df.binedges, x_unit, target_x_unit)
+        x_unit = target_x_unit
+
+    for t in df.itertuples(index=False):
+        style = _make_histline_args(props, t, df)
+
+        # We are branching here, and call the two .hist implementations
+        # differently, because the MPL API does not have support for
+        # underflows/overflows, so we have to "fake" them into the real
+        # data as additional cells. Drawing them separately wouldn't
+        # work, because that would change the histogram when the
+        # "normalized" or "cumulative" transforms are done (by MPL).
+        if chart.is_native_chart():
+            overflow = dict(minvalue=t.min, maxvalue=t.max, underflows=t.underflows, overflows=t.overflows) if has_overflow_columns else dict()
+            p.hist(t.binedges[:-1], t.binedges, weights=t.binvalues, label=legend_func(legend_cols, t, props), **overflow, **style)
+        else:
+            edges = list(t.binedges)
+            values = list(t.binvalues)
+
+            if has_overflow_columns:
+                has_underflow_bin = not np.isnan(t.min) and not np.isnan(t.underflows) and t.min < edges[0]
+                has_overflow_bin = not np.isnan(t.max) and not np.isnan(t.overflows) and t.max >= edges[-1]
+                if has_underflow_bin:
+                    edges = [t.min] + edges
+                    values = [t.underflows] + values
+                if has_overflow_bin:
+                    edges = edges + [t.max]
+                    values = values + [t.overflows]
+
+            p.hist(edges[:-1], edges, weights=values, label=legend_func(legend_cols, t, props), **style)
+
+    show_overflows = get_prop("show_overflows")
+    if show_overflows and chart.is_native_chart():
+        ideplot.set_property("Hist.ShowOverflowCell", str(_parse_optional_bool(show_overflows)).lower())
+
+    title = get_prop("title") or make_chart_title(df, title_cols)
+    utils.set_plot_title(title)
+
+    if "xaxis_unit" in props or "yaxis_unit" in props:
+        utils._set_xlabel(p, props, x_unit, "")
+        utils._set_xlimits(p, props, x_unit)
+        utils._set_ylabel(p, props, y_unit, "")
+        utils._set_ylimits(p, props, y_unit)
+    else:
+        # backward compatibility for old charts that don't have the xaxis_unit property yet
+        if x_unit is not None:
+            p.xlabel(f"[{x_unit}]")
+            
+def _make_histline_args(props, t, df): # ??? is t and df needed at all?
+    style = dict()
+
+    def get_prop(k):
+        return props[k] if k in props else None
+
+    if get_prop("color"):
+        style["color"] = get_prop("color")
+    else:
+        style["color"] = next(utils._color_cycle)
+
+    if get_prop("linewidth"):
+        style["linewidth"] = get_prop("linewidth")
+
+    ds = get_prop("drawstyle")
+    if ds == "Solid":
+        style["histtype"] = "stepfilled"
+    elif ds == "Outline":
+        style["histtype"] = "step"
+    elif ds == "Bar":
+        style["histtype"] = "bar"
+        
+    edges = get_prop("edges")
+    if edges == 'true':
+        style["edgecolor"] = "black"
+        
+    zorder = get_prop("zorder")
+    if zorder:
+        style["zorder"] = int(zorder)
+
+    style["density"] = utils._parse_optional_bool(get_prop("normalize"))
+    style["cumulative"] = utils._parse_optional_bool(get_prop("cumulative"))
+
+    return style
+
 def fix_labels_for_subplots(ax_list, props, layout, columns=0, rows=0, remove_ticks=True):
     
         def get_prop(k):
