@@ -46,6 +46,13 @@ struct EncryptionKey {
         ptls_hkdf_expand_label(hash, secret, 32, ptls_iovec_init(initial_secret, 32), hkdf_label, null_iovec, NULL);
         ptls_iovec_t secret_iovec = ptls_iovec_init(secret, 32);
 
+        return deriveFromSecret(secret_iovec);
+    }
+
+    static EncryptionKey deriveFromSecret(ptls_iovec_t secret_iovec) {
+        ptls_hash_algorithm_t *hash = &ptls_openssl_opp_sha256;
+        ptls_iovec_t null_iovec = ptls_iovec_init(NULL, 0);
+
         std::vector<uint8_t> key(16);
         ptls_hkdf_expand_label(hash, key.data(), key.size(), secret_iovec, "quic key", null_iovec, NULL);
 
