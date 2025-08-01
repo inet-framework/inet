@@ -93,6 +93,9 @@ struct EncryptionKey {
 
     Ptr<const EncryptionKeyTag> toTag() const {
         auto tag = makeShared<EncryptionKeyTag>();
+        ASSERT(!key.empty());
+        ASSERT(!iv.empty());
+        ASSERT(!hpkey.empty());
         tag->setKey(bytes2hex(key).c_str());
         tag->setIv(bytes2hex(iv).c_str());
         tag->setHpkey(bytes2hex(hpkey).c_str());
