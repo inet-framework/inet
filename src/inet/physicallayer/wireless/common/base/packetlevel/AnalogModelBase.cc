@@ -18,9 +18,10 @@ double AnalogModelBase::computeAntennaGain(const IAntennaGain *antennaGain, cons
     if (antennaGain->getMinGain() == antennaGain->getMaxGain())
         return antennaGain->getMinGain();
     else {
-        auto direction = Quaternion::rotationFromTo(Coord::X_AXIS, endPosition - startPosition);
-        auto antennaLocalDirection = Quaternion(startOrientation).inverse() * direction;
-        return antennaGain->computeGain(antennaLocalDirection);
+        Coord direction = endPosition - startPosition;
+        Quaternion r1 = Quaternion::rotationFromTo(Coord::X_AXIS, direction); // rotation from X axis to the reception direction in the global coordinate system
+        Quaternion r2 = Quaternion(startOrientation).inverse() * r1; // rotation from X axis to the reception direction in the antenna's local coordinate system
+        return antennaGain->computeGain(r2);
     }
 }
 
