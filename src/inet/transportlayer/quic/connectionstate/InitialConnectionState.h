@@ -25,6 +25,7 @@ public:
 
 private:
     void generateAndSetTempDstConnectionId();
+    void setConnectionKeysFromInitialRandom(uint64_t dstConnId);
 };
 
 } /* namespace quic */
