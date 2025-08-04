@@ -1,6 +1,7 @@
 examples
 showcases
 src
-tests/validation
 tests/networks
+tests/validation
 tutorials
+wfcs2025
