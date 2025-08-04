@@ -23,7 +23,6 @@ class INET_API ClockBase : public SimpleModule, public IClock
     static simsignal_t timeChangedSignal;
 
   protected:
-    clocktime_t clockEventTime = -1;
     ModuleRefByPar<IClock> referenceClockModule;
     simtime_t emitClockTimeInterval;
     cMessage *timer = nullptr;

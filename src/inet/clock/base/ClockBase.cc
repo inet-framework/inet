@@ -70,7 +70,7 @@ cSimpleModule *ClockBase::getTargetModule() const
 
 clocktime_t ClockBase::getClockTime() const
 {
-    return clockEventTime != -1 ? clockEventTime : computeClockTimeFromSimTime(simTime());
+    return computeClockTimeFromSimTime(simTime());
 }
 
 simtime_t ClockBase::computeScheduleTime(clocktime_t clockTime) const
@@ -147,10 +147,8 @@ ClockEvent *ClockBase::cancelClockEvent(ClockEvent *msg)
 
 void ClockBase::handleClockEvent(ClockEvent *msg)
 {
-    clockEventTime = msg->getArrivalClockTime();
     msg->setClock(nullptr);
     msg->callBaseExecute();
-    clockEventTime = -1;
 }
 
 std::string ClockBase::resolveDirective(char directive) const
