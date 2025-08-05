@@ -27,15 +27,15 @@ network Basic3
                 @display("p=222,32");
         }
 
-        router1: Router {
-            parameters:
-                @display("p=146,137");
-        }
+//        router1: Router {
+//            parameters:
+//                @display("p=146,137");
+//        }
 
-        router2: Router {
-            parameters:
-                @display("p=305,137");
-        }
+//        router2: Router {
+//            parameters:
+//                @display("p=305,137");
+//        }
 
         client: StandardHost {
             parameters:
@@ -48,9 +48,11 @@ network Basic3
         }
 
     connections:
-        client.pppg++ <--> etherline <--> router1.pppg++;
+        client.pppg++ <--> etherline <--> server.pppg++;
 
-        router1.pppg++ <--> etherline <--> router2.pppg++;
+        //client.pppg++ <--> etherline <--> router1.pppg++;
 
-        router2.pppg++ <--> etherline <--> server.pppg++;
+        //router1.pppg++ <--> etherline <--> router2.pppg++;
+
+        //router2.pppg++ <--> etherline <--> server.pppg++;
 }
