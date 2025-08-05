@@ -59,9 +59,9 @@ static int on_update_traffic_key(ptls_update_traffic_key_t *self, ptls_t *tls, i
     EncryptionKey encryptionKey = EncryptionKey::deriveFromSecret(secret_iovec);
 
     if (is_enc)
-        conn->egressKey = encryptionKey;
+        conn->egressKeys[epoch] = encryptionKey;
     else
-        conn->ingressKey = encryptionKey;
+        conn->ingressKeys[epoch] = encryptionKey;
 
     ptls_iovec_t client_random = ptls_get_client_random(tls);
     char client_random_hex[65];

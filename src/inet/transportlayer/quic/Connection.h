@@ -69,6 +69,8 @@ enum class EncryptionLevel {
     OneRtt = 3
 };
 
+EncryptionLevel pns_to_epoch(PacketNumberSpace pnSpace);
+
 class Connection
 {
   public:
@@ -82,9 +84,8 @@ class Connection
     bool is_server;
     ptls_t *tls;
 
-    // TODO: maybe better in ConnectionState?
-    EncryptionKey egressKey;
-    EncryptionKey ingressKey;
+    EncryptionKey egressKeys[4];
+    EncryptionKey ingressKeys[4];
 
     ChunkQueue cryptoQueues[4];
 

@@ -28,6 +28,20 @@ extern "C" {
 namespace inet {
 namespace quic {
 
+EncryptionLevel pns_to_epoch(PacketNumberSpace pnSpace)
+{
+    switch (pnSpace) {
+        case PacketNumberSpace::Initial:
+            return EncryptionLevel::Initial;
+        case PacketNumberSpace::Handshake:
+            return EncryptionLevel::Handshake;
+        case PacketNumberSpace::ApplicationData:
+            return EncryptionLevel::OneRtt;
+        default:
+            throw cRuntimeError("Unknown PacketNumberSpace %d", (int)pnSpace);
+    }
+}
+
 Connection::Connection(Quic *quicSimpleMod, bool is_server, UdpSocket *udpSocket, AppSocket *appSocket, L3Address remoteAddr, uint16_t remotePort, uint64_t srcConnectionId) {
     this->quicSimpleMod = quicSimpleMod;
     this->is_server = is_server;
@@ -464,8 +478,8 @@ void Connection::sendHandshakePacket(bool includeTransportParamters) {
 void Connection::sendPacket(QuicPacket *packet, PacketNumberSpace pnSpace, bool track)
 {
     stats->getMod()->emit(packetNumberSentStat, packet->getPacketNumber());
-
-    Packet *pkt = packet->createOmnetPacket(egressKey);
+    std::cout << "packet sending packet in space " << (int)pnSpace << ", packet number: " << packet->getPacketNumber() << std::endl;
+    Packet *pkt = packet->createOmnetPacket(egressKeys[(int)pns_to_epoch(pnSpace)]);
     stats->getMod()->emit(packetSentSignal, pkt);
     udpSocket->sendto(path->getRemoteAddr(), path->getRemotePort(), pkt);
     if (track) {

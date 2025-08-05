@@ -34,11 +34,11 @@ void InitialConnectionState::setConnectionKeysFromInitialRandom(uint64_t dstConn
         std::swap(dcid_iovec.base[i], dcid_iovec.base[7 - i]);
     }
 
-    context->egressKey = EncryptionKey::newInitial(dcid_iovec, context->is_server ? "server in" : "client in");
-    context->ingressKey = EncryptionKey::newInitial(dcid_iovec, context->is_server ? "client in" : "server in");
+    context->egressKeys[0] = EncryptionKey::newInitial(dcid_iovec, context->is_server ? "server in" : "client in");
+    context->ingressKeys[0] = EncryptionKey::newInitial(dcid_iovec, context->is_server ? "client in" : "server in");
 
-    std::cout << "egressKey: " << std::endl;
-    context->egressKey.dump();
+    std::cout << "initial egressKey of " << (context->is_server ? "server" : "client") << ": " << std::endl;
+    context->egressKeys[0].dump();
 }
 
 ConnectionState *InitialConnectionState::processConnectAppCommand(cMessage *msg)
