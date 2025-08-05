@@ -665,7 +665,8 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
         0x08, // dcid len
         0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, // dcid
         0x05, // scid len
-        0x63, 0x5f, 0x63, 0x69, 0x64, 0x00, // scid
+        0x63, 0x5f, 0x63, 0x69, 0x64, // scid
+        0x00, // token
         0x41, 0x03, // packet length
         0x98, // protected packet number
         // encrypted crypto frame
@@ -760,6 +761,69 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
     for (int i = 0; i < expectedProtectedData.size(); i++) {
         ASSERT(expectedProtectedData[i] == testFinalContents[i]);
     }
+
+
+
+
+
+    // self test from https://quic.xargs.org/#client-initial-packet-2
+
+    std::vector<uint8_t> testClientAckUnprotectedData = {
+        0xc0, // unprotected header byte
+        0x00, 0x00, 0x00, 0x01, // version
+        0x05, // dcid len
+        0x73, 0x5f, 0x63, 0x69, 0x64, // dcid
+        0x05, // scid len
+        0x63, 0x5f, 0x63, 0x69, 0x64, // scid
+        0x00, // token
+        0x40, 0x17, // packet length
+        0x01, // unprotected packet number
+
+        // ack frame
+        0x02, 0x00, 0x40, 0x81, 0x00, 0x00
+    };
+
+    std::vector<uint8_t> testClientAckFinalContents = protectPacket(testClientAckUnprotectedData, 1, 20, 1, testClientKey);
+
+    /*
+    std::cout << "test client ack unprotected data size: " << testClientAckUnprotectedData.size() << std::endl;
+    for (int i = 0; i < testClientAckUnprotectedData.size(); i++) {
+        std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)testClientAckUnprotectedData[i] << " ";
+    }
+    std::cout << std::dec << std::endl;
+
+    std::cout << "test client ack final contents size: " << testClientAckFinalContents.size() << std::endl;
+    for (int i = 0; i < testClientAckFinalContents.size(); i++) {
+        std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)testClientAckFinalContents[i] << " ";
+    }
+    std::cout << std::dec << std::endl;
+    */
+
+    std::vector <uint8_t> expectedClientAckProtectedData = {
+
+        0xcf, // protected header byte
+        0x00, 0x00, 0x00, 0x01, // version
+        0x05, // dcid len
+        0x73, 0x5f, 0x63, 0x69, 0x64, // dcid
+        0x05, // scid len
+        0x63, 0x5f, 0x63, 0x69, 0x64, // scid
+        0x00, // token
+        0x40, 0x17, // packet length
+        0x56, // protected packet number
+
+        // encrypted ack frame
+        0x6e, 0x1f, 0x98, 0xed, 0x1f, 0x7b,
+
+        // auth tag
+        0x05, 0x55, 0xcd, 0xb7, 0x83, 0xfb, 0xdf, 0x5b, 0x52, 0x72, 0x4b, 0x7d, 0x29, 0xf0, 0xaf, 0xe3
+    };
+
+    ASSERT(testClientAckFinalContents.size() == expectedClientAckProtectedData.size());
+    for (int i = 0; i < expectedClientAckProtectedData.size(); i++) {
+        ASSERT(expectedClientAckProtectedData[i] == testClientAckFinalContents[i]);
+    }
+
+
 
 }
 
