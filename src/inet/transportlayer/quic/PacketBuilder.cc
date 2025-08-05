@@ -335,6 +335,10 @@ QuicPacket *PacketBuilder::buildAckOnlyPacket(int maxPacketSize, PacketNumberSpa
         throw cRuntimeError("buildAckOnlyPacket: max packet size too small, not even an Ack frame fits into it.");
     }
     packet->addFrame(ackFrame);
+    Ptr<InitialPacketHeader> initialHeader = dynamicPtrCast<InitialPacketHeader>(packet->getHeader());
+    ASSERT(initialHeader != nullptr);
+    initialHeader->setLength(initialHeader->getPacketNumberLength() + packet->getDataSize() + 16);
+    initialHeader->calcChunkLength();
 
     ASSERT(packet != nullptr && packet->getSize() <= maxPacketSize);
     return packet;
@@ -480,7 +484,8 @@ QuicPacket *PacketBuilder::buildClientInitialPacket(int maxPacketSize, Ptr<const
     }
 
     packet->addFrame(createCryptoFrame(cryptoPayload));
-    Ptr<InitialPacketHeader> initialHeader = staticPtrCast<InitialPacketHeader>(packet->getHeader());
+    Ptr<InitialPacketHeader> initialHeader = dynamicPtrCast<InitialPacketHeader>(packet->getHeader());
+    ASSERT(initialHeader != nullptr);
     initialHeader->setLength(initialHeader->getPacketNumberLength() + packet->getDataSize() + 16);
     initialHeader->calcChunkLength();
 
