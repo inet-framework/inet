@@ -463,7 +463,8 @@ std::vector<uint8_t> protectPacket(std::vector<uint8_t> datagram, uint32_t packe
     std::cout << "protectPacket: packet number: " << packetNumber << std::endl;
     std::cout << "protectPacket: packet number offset: " << packetNumberOffset << std::endl;
     std::cout << "protectPacket: packet number length: " << packetNumberLength << std::endl;
-
+    std::cout << "protectPacket: key: " << std::endl;
+    key.dump();
 
     datagram.resize(originalSize + 16); // Ensure enough space for the auth tag
     // generate new AEAD context
@@ -609,6 +610,7 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
     // TODO: handle sub-byte offset and length
     stream.writeBytes(finalContents, offset, length < b(0) ? B(-1) : B(length));
 
+    return;
 
     // ----------------
 

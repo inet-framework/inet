@@ -109,7 +109,7 @@ struct EncryptionKey {
         return tag;
     }
 
-    void dump() {
+    void dump() const {
         std::cout << "key: " << bytes2hex(key) << std::endl;
         std::cout << "iv: " << bytes2hex(iv) << std::endl;
         std::cout << "hpkey: " << bytes2hex(hpkey) << std::endl;
