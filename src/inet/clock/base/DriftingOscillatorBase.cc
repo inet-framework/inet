@@ -39,11 +39,17 @@ void DriftingOscillatorBase::initialize(int stage)
         if (tickOffset < 0 || tickOffset >= currentTickLength)
             throw cRuntimeError("First tick offset must be in the range [0, currentTickLength)");
         nextTickFromOrigin = currentTickLength - tickOffset;
+        emit(driftRateChangedSignal, driftRate.get<ppm>());
         WATCH(nominalTickLength);
         WATCH(driftRate);
         WATCH(driftFactor);
         WATCH(nextTickFromOrigin);
     }
+}
+
+void DriftingOscillatorBase::finish()
+{
+    emit(driftRateChangedSignal, driftRate.get<ppm>());
 }
 
 void DriftingOscillatorBase::handleTickTimer()
