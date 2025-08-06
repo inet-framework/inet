@@ -15,6 +15,9 @@ namespace inet {
 
 class INET_API SettableClock : public OscillatorBasedClock, public IScriptable
 {
+  public:
+    static simsignal_t oscillatorCompensationChangedSignal;
+
   protected:
     OverdueClockEventHandlingMode defaultOverdueClockEventHandlingMode = UNSPECIFIED;
 
