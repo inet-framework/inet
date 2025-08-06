@@ -2434,7 +2434,7 @@ ptls_cipher_suite_t ptls_openssl_opp_aegis256sha512 = {.id = PTLS_CIPHER_SUITE_A
 #endif
 
 ptls_cipher_suite_t *ptls_openssl_opp_cipher_suites[] = { // ciphers used with sha384 (must be first)
-    &ptls_openssl_opp_aes256gcmsha384,
+    //&ptls_openssl_opp_aes256gcmsha384,
 
     // ciphers used with sha256
     &ptls_openssl_opp_aes128gcmsha256,
@@ -2445,9 +2445,9 @@ ptls_cipher_suite_t *ptls_openssl_opp_cipher_suites[] = { // ciphers used with s
 
 ptls_cipher_suite_t *ptls_openssl_opp_cipher_suites_all[] = { // ciphers used with sha384 (must be first)
 #if PTLS_HAVE_AEGIS
-    &ptls_openssl_opp_aegis256sha512,
+    //&ptls_openssl_opp_aegis256sha512,
 #endif
-    &ptls_openssl_opp_aes256gcmsha384,
+    //&ptls_openssl_opp_aes256gcmsha384,
 
 // ciphers used with sha256
 #if PTLS_HAVE_AEGIS
@@ -2461,8 +2461,8 @@ ptls_cipher_suite_t *ptls_openssl_opp_cipher_suites_all[] = { // ciphers used wi
 
 ptls_cipher_suite_t *ptls_openssl_opp_tls12_cipher_suites[] = {&ptls_openssl_opp_tls12_ecdhe_rsa_aes128gcmsha256,
                                                            &ptls_openssl_opp_tls12_ecdhe_ecdsa_aes128gcmsha256,
-                                                           &ptls_openssl_opp_tls12_ecdhe_rsa_aes256gcmsha384,
-                                                           &ptls_openssl_opp_tls12_ecdhe_ecdsa_aes256gcmsha384,
+                                                           //&ptls_openssl_opp_tls12_ecdhe_rsa_aes256gcmsha384,
+                                                           //&ptls_openssl_opp_tls12_ecdhe_ecdsa_aes256gcmsha384,
 #if PTLS_OPENSSL_HAVE_CHACHA20_POLY1305
                                                            &ptls_openssl_opp_tls12_ecdhe_rsa_chacha20poly1305sha256,
                                                            &ptls_openssl_opp_tls12_ecdhe_ecdsa_chacha20poly1305sha256,
@@ -2508,7 +2508,7 @@ ptls_hpke_cipher_suite_t ptls_openssl_opp_hpke_chacha20poly1305sha256 = {
     .aead = &ptls_openssl_opp_chacha20poly1305};
 #endif
 ptls_hpke_cipher_suite_t *ptls_openssl_opp_hpke_cipher_suites[] = {&ptls_openssl_opp_hpke_aes128gcmsha256,
-                                                               &ptls_openssl_opp_hpke_aes256gcmsha384,
+                                                               //&ptls_openssl_opp_hpke_aes256gcmsha384,
 #if PTLS_OPENSSL_HAVE_CHACHA20_POLY1305
                                                                &ptls_openssl_opp_hpke_chacha20poly1305sha256,
 #endif
