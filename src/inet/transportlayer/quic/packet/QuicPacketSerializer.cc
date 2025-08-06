@@ -166,7 +166,7 @@ void QuicPacketHeaderSerializer::serializeInitialPacketHeader(MemoryOutputStream
     serializeVariableLengthInteger(stream, header->getLength());
 
     // Packet Number
-    stream.writeByte(0); // initial packet number is 1
+    stream.writeByte(header->getPacketNumber());
     std::cout << "serializeInitialPacketHeader end, stream length: " << stream.getLength() << std::endl;
 }
 
