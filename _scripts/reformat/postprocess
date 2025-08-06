@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 # This script fixes newlines around namespace blocks in src folder and subdirectories
 #
 
@@ -22,7 +22,7 @@ filelist = open(sys.argv[1], 'r')
 for line in filelist:
     fullpath = line.rstrip('\n\r')
     if fullpath.endswith(('.h', '.cc')):
-        print "Postprocess", fullpath
+        print("Postprocess", fullpath)
         f = open(fullpath, 'r')
         content = f.read()
         f.close()
@@ -31,5 +31,4 @@ for line in filelist:
             f2 = open(fullpath, 'w')
             f2.write(newContent)
             f2.close()
-            print "---Updated", fullpath
-
+            print("---Updated", fullpath)
