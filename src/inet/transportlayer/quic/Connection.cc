@@ -116,6 +116,22 @@ Connection::Connection(Quic *quicSimpleMod, bool is_server, UdpSocket *udpSocket
     ptls_hexdump(client_random_hex, client_random.base, client_random.len);
     std::cout << "client random: " << client_random_hex << std::endl;
 
+    WATCH_LAMBDA("Initial egress key", [this]{ return EncryptionKey::bytes2hex(egressKeys[0].key); });
+    WATCH_LAMBDA("Initial egress hpkey", [this]{ return EncryptionKey::bytes2hex(egressKeys[0].hpkey); });
+    WATCH_LAMBDA("Initial egress iv", [this]{ return EncryptionKey::bytes2hex(egressKeys[0].iv); });
+
+    WATCH_LAMBDA("Initial ingress key", [this]{ return EncryptionKey::bytes2hex(ingressKeys[0].key); });
+    WATCH_LAMBDA("Initial ingress hpkey", [this]{ return EncryptionKey::bytes2hex(ingressKeys[0].hpkey); });
+    WATCH_LAMBDA("Initial ingress iv", [this]{ return EncryptionKey::bytes2hex(ingressKeys[0].iv); });
+
+
+    WATCH_LAMBDA("Handshake egress key", [this]{ return EncryptionKey::bytes2hex(egressKeys[2].key); });
+    WATCH_LAMBDA("Handshake egress hpkey", [this]{ return EncryptionKey::bytes2hex(egressKeys[2].hpkey); });
+    WATCH_LAMBDA("Handshake egress iv", [this]{ return EncryptionKey::bytes2hex(egressKeys[2].iv); });
+
+    WATCH_LAMBDA("Handshake ingress key", [this]{ return EncryptionKey::bytes2hex(ingressKeys[2].key); });
+    WATCH_LAMBDA("Handshake ingress hpkey", [this]{ return EncryptionKey::bytes2hex(ingressKeys[2].hpkey); });
+    WATCH_LAMBDA("Handshake ingress iv", [this]{ return EncryptionKey::bytes2hex(ingressKeys[2].iv); });
 }
 
 Connection::~Connection() {
