@@ -30,7 +30,9 @@ extern NullStream nullStream;
   #define CLOCK_COUT !stdcoutenabled ? devnull : std::cout << std::setprecision(24) << std::string(stdcoutindent * 3, ' ')
 #endif
 
+#ifndef NDEBUG
 #define CLOCK_CHECK_IMPLEMENTATION
+#endif
 
 #ifdef CLOCK_CHECK_IMPLEMENTATION
 #define ASSERTCMP(cmp, o1, o2) { \
