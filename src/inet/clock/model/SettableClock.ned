@@ -22,6 +22,8 @@ module SettableClock extends OscillatorBasedClock
         double oscillatorCompensation @unit(ppm) = default(0ppm);
         string defaultOverdueClockEventHandlingMode @enum("execute","skip","error") = default("execute");
         @class(SettableClock);
+        @signal[oscillatorCompensationChanged](type=double);
+        @statistic[oscillatorCompensationChanged](title="oscillator compensation changed"; record=vector; interpolationmode=sample-hold; unit=ppm);
     submodules:
         underlyingClock: <default("OscillatorBasedClock")> like IClock if typename != "" {
             parameters:
