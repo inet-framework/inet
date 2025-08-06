@@ -14,11 +14,14 @@ namespace inet {
 
 Define_Module(SettableClock);
 
+simsignal_t SettableClock::oscillatorCompensationChangedSignal = cComponent::registerSignal("oscillatorCompensationChanged");
+
 void SettableClock::initialize(int stage)
 {
     OscillatorBasedClock::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         oscillatorCompensation = ppm(par("oscillatorCompensation"));
+        emit(oscillatorCompensationChangedSignal, oscillatorCompensation.get<ppm>());
         const char *text = par("defaultOverdueClockEventHandlingMode");
         if (!strcmp(text, "execute"))
             defaultOverdueClockEventHandlingMode = EXECUTE;
@@ -115,6 +118,7 @@ void SettableClock::setClockTime(clocktime_t newClockTime, ppm oscillatorCompens
             }
         }
         this->oscillatorCompensation = oscillatorCompensation;
+        emit(oscillatorCompensationChangedSignal, oscillatorCompensation.get<ppm>());
         setOrigin(currentSimTime, newClockTime);
         if (useFutureEventSet) {
             for (auto event : events) {
