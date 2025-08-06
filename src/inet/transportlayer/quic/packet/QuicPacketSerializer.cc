@@ -465,6 +465,8 @@ std::vector<uint8_t> protectPacket(std::vector<uint8_t> datagram, uint32_t packe
     std::cout << "protectPacket: packet number length: " << packetNumberLength << std::endl;
     std::cout << "protectPacket: key: " << std::endl;
     key.dump();
+    std::cout << "protecting datagram" << std::endl;
+    std::cout << EncryptionKey::bytes2hex(datagram) << std::endl;
 
     datagram.resize(originalSize + 16); // Ensure enough space for the auth tag
     // generate new AEAD context
