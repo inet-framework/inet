@@ -231,7 +231,7 @@ void Connection::handleCryptoData(EncryptionLevel epoch, const std::vector<uint8
 
 void Connection::newCryptoData(EncryptionLevel epoch, Ptr<const Chunk> data)
 {
-    std::cout << "newCryptoData in epoch " << (int)epoch << " of length " << data->getChunkLength() << std::endl;
+    std::cout << "newCryptoData in epoch " << (int)epoch << " at " << (is_server ? "server" : "client") << " of length " << data->getChunkLength() << std::endl;
     cryptoQueues[(int)epoch].push(data);
 }
 
