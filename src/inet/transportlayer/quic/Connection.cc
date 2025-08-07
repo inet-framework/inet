@@ -208,6 +208,27 @@ void Connection::newStreamData(uint64_t streamId, Ptr<const Chunk> data)
     }
 }
 
+void Connection::handleCryptoData(EncryptionLevel epoch, const std::vector<uint8_t> &data)
+{
+    std::cout << "handleCryptoData in epoch " << (int)epoch << " at " << (is_server ? "server" : "client") << ", data length: " << data.size() << std::endl;
+    ptls_buffer_t buffer;
+    ptls_buffer_init(&buffer, (void*)"", 0);
+    size_t epoch_offsets[5] = {0};
+    int ret = ptls_handle_message(tls, &buffer, epoch_offsets, (int)epoch,
+        data.data(), data.size(), nullptr);
+    std::cout << "ptls_handle_message returned " << ret << std::endl;
+    for (int e = 0; e < 4; e++) {
+        Ptr<BytesChunk> data = makeShared<BytesChunk>();
+        size_t len = epoch_offsets[e + 1] - epoch_offsets[e];
+        if (len == 0)
+            continue;
+        std::vector<uint8_t> bytes(len);
+        memcpy(bytes.data(), (uint8_t *)(buffer.base + epoch_offsets[e]), len);
+        data->setBytes(bytes);
+        newCryptoData((EncryptionLevel)e, data);
+    }
+}
+
 void Connection::newCryptoData(EncryptionLevel epoch, Ptr<const Chunk> data)
 {
     std::cout << "newCryptoData in epoch " << (int)epoch << " of length " << data->getChunkLength() << std::endl;

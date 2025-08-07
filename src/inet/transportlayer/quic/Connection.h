@@ -98,6 +98,7 @@ class Connection
      */
     void newStreamData(uint64_t streamId, Ptr<const Chunk> data);
 
+    void handleCryptoData(EncryptionLevel epoch, const std::vector<uint8_t> &data);
     void newCryptoData(EncryptionLevel epoch, Ptr<const Chunk> data);
 
     void processReceivedData(uint64_t streamId, uint64_t offset, Ptr<const Chunk> data);
