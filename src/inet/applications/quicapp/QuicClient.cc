@@ -72,7 +72,7 @@ void QuicClient::socketEstablished(QuicSocket *socket) {
     tags2.addTagIfAbsent<QuicStreamReq>()->setStreamID(0);
     socket->send(packet);
 
-    socket->close();
+    //socket->close();
 }
 
 void QuicClient::socketDataArrived(QuicSocket* socket, Packet *packet) {
