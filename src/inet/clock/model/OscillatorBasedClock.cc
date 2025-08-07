@@ -64,8 +64,8 @@ void OscillatorBasedClock::initialize(int stage)
     ClockBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         useFutureEventSet = par("useFutureEventSet");
-        auto oscillatorModule = getSubmodule("oscillator");
-        oscillator = check_and_cast<IOscillator *>(oscillatorModule);
+        oscillator = getModuleFromPar<IOscillator>(par("oscillatorModule"), this);
+        auto oscillatorModule = check_and_cast<cModule *>(oscillator);
         if (!useFutureEventSet) {
             oscillatorModule->subscribe(IOscillator::numTicksChangedSignal, this);
             executeEventsTimer = new cMessage("ExecuteClockEventsTimer");
