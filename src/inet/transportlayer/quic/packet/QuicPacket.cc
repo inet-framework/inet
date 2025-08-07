@@ -68,6 +68,11 @@ void QuicPacket::addFrame(QuicFrame *frame)
 
 Packet *QuicPacket::createOmnetPacket(const EncryptionKey& key)
 {
+    std::cout << "createOmnetPacket for " << name << ", key: " << std::endl;
+    key.dump();
+
+    ASSERT(!key.key.empty());
+
     Ptr<SequenceChunk> encPayload = makeShared<SequenceChunk>();
     header->markImmutable();
     encPayload->insertAtBack(header);
