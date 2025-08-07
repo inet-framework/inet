@@ -7,6 +7,8 @@
 
 package inet.clock.model;
 
+import inet.clock.contract.IClock;
+
 //
 // Models a clock which can be set to a different clock time. The clock time
 // can be set from C++ or using a <set-clock module="..." time="..."/> command
@@ -20,5 +22,13 @@ module SettableClock extends OscillatorBasedClock
         double initialOscillatorCompensation @unit(ppm) = default(0ppm);
         string defaultOverdueClockEventHandlingMode @enum("execute","skip","error") = default("execute");
         @class(SettableClock);
+    submodules:
+        underlyingClock: <default("OscillatorBasedClock")> like IClock if typename != "" {
+            parameters:
+                oscillator.typename = "";
+                oscillatorModule = default("^.oscillator");
+                useFutureEventSet = default(parent.useFutureEventSet);
+                @display("p=100,200");
+        }
 }
 

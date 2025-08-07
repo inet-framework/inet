@@ -30,6 +30,8 @@ class INET_API SettableClock : public OscillatorBasedClock, public IScriptable
     virtual void processCommand(const cXMLElement& node) override;
 
   public:
+    virtual IClock *getUnderlyingClock() { return check_and_cast<IClock *>(getSubmodule("underlyingClock")); }
+
     virtual ppm getOscillatorCompensation() const override { return oscillatorCompensation; }
 
     /**
