@@ -227,18 +227,12 @@ void SctpIncomingSsnResetRequestParameter::copy(const SctpIncomingSsnResetReques
     }
 }
 
-Register_Class(SctpAsconfChunk);
-
-SctpAsconfChunk& SctpAsconfChunk::operator=(const SctpAsconfChunk& other)
+void SctpAsconfChunk::clean()
 {
-    SctpAsconfChunk_Base::operator=(other);
-
-    this->setByteLength(SCTP_ADD_IP_CHUNK_LENGTH + 8);
-    this->setAddressParam(other.getAddressParam());
-    for (const auto& elem : other.parameterList)
-        addAsconfParam((elem)->dup());
-
-    return *this;
+    for (SctpParameter *param : parameterList) {
+        dropAndDelete(param);
+    }
+    parameterList.clear();
 }
 
 void SctpAsconfChunk::setAsconfParamsArraySize(size_t size)

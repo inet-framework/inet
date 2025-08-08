@@ -472,12 +472,66 @@ class SctpAuthenticationChunk extends SctpChunk
 
 class SctpAsconfChunk extends SctpChunk
 {
-    @customize;
     uint32_t serialNumber;
     L3Address addressParam;
     uint32_t peerVTag; //for NAT
-    abstract SctpParameter *asconfParams[];
+    SctpParameter *asconfParams[] @custom;
 }
+
+cplusplus(SctpAsconfChunk) {{
+  protected:
+    std::vector<SctpParameter *> parameterList;
+
+  private:
+    void clean();
+
+  public:
+    virtual void setAsconfParamsArraySize(size_t size);
+    virtual size_t getAsconfParamsArraySize() const;
+
+    /**
+     * Returns the kth parameter in this SCTP Reset Chunk
+     */
+    virtual const SctpParameter *getAsconfParams(size_t k) const;
+
+    /** Generated but unused method, should not be called. */
+    virtual void setAsconfParams(size_t k, SctpParameter *asconfParams);
+
+    virtual void appendAsconfParams(SctpParameter *asconfParams) { throw cRuntimeError("Unimplemented function"); }
+    virtual void insertAsconfParams(size_t k, SctpParameter *asconfParams) { throw cRuntimeError("Unimplemented function"); }
+    virtual void eraseAsconfParams(size_t k) { throw cRuntimeError("Unimplemented function"); }
+
+    /**
+     * Adds a message object to the SCTP packet. The packet length will be adjusted
+     */
+    virtual void addAsconfParam(SctpParameter *msg);
+
+    /**
+     * Removes and returns the first message object in this SCTP packet.
+     */
+    virtual SctpParameter *removeAsconfParam();
+}}
+
+cplusplus(SctpAsconfChunk::copy) {{
+    clean();
+    for (const auto& elem : other.parameterList) {
+        SctpParameter *param = (elem)->dup();
+        take(param);
+        parameterList.push_back(param);
+    }
+}}
+
+cplusplus(SctpAsconfChunk::~SctpAsconfChunk) {{
+    clean();
+}}
+
+cplusplus(SctpAsconfChunk::parsimPack) {{
+    doParsimPacking(b, parameterList);
+}}
+
+cplusplus(SctpAsconfChunk::parsimUnpack) {{
+    doParsimUnpacking(b, parameterList);
+}}
 
 class SctpAsconfAckChunk extends SctpChunk
 {

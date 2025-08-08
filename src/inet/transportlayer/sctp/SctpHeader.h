@@ -18,45 +18,6 @@
 namespace inet {
 namespace sctp {
 
-class INET_API SctpAsconfChunk : public SctpAsconfChunk_Base
-{
-  protected:
-    std::vector<SctpParameter *> parameterList;
-
-  public:
-    SctpAsconfChunk(const char *name = nullptr, int32_t kind = 0) : SctpAsconfChunk_Base() {};
-    SctpAsconfChunk(const SctpAsconfChunk& other) : SctpAsconfChunk_Base(other) { operator=(other); };
-    SctpAsconfChunk& operator=(const SctpAsconfChunk& other);
-
-    virtual SctpAsconfChunk *dup() const override { return new SctpAsconfChunk(*this); }
-
-    virtual void setAsconfParamsArraySize(size_t size) override;
-    virtual size_t getAsconfParamsArraySize() const override;
-
-    /**
-     * Returns the kth parameter in this SCTP Reset Chunk
-     */
-    virtual const SctpParameter *getAsconfParams(size_t k) const override;
-
-    /** Generated but unused method, should not be called. */
-    virtual void setAsconfParams(size_t k, SctpParameter *asconfParams) override;
-
-    virtual void appendAsconfParams(SctpParameter *asconfParams) override { throw cRuntimeError("Unimplemented function"); }
-    using SctpAsconfChunk_Base::insertAsconfParams;
-    virtual void insertAsconfParams(size_t k, SctpParameter *asconfParams) override { throw cRuntimeError("Unimplemented function"); }
-    virtual void eraseAsconfParams(size_t k) override { throw cRuntimeError("Unimplemented function"); }
-
-    /**
-     * Adds a message object to the SCTP packet. The packet length will be adjusted
-     */
-    virtual void addAsconfParam(SctpParameter *msg);
-
-    /**
-     * Removes and returns the first message object in this SCTP packet.
-     */
-    virtual SctpParameter *removeAsconfParam();
-};
-
 class INET_API SctpIncomingSsnResetRequestParameter : public SctpIncomingSsnResetRequestParameter_Base
 {
   private:
