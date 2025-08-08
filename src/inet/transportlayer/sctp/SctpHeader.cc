@@ -27,11 +27,6 @@ SctpHeader& SctpHeader::operator=(const SctpHeader& other)
 
 void SctpHeader::copy(const SctpHeader& other)
 {
-//    handleChange();
-    setVTag(other.getVTag());
-    setSrcPort(other.getSrcPort());
-    setDestPort(other.getDestPort());
-    setChecksumOk(other.getChecksumOk());
     for (const auto& elem : other.sctpChunkList) {
         SctpChunk *chunk = (elem)->dup();
         take(chunk);
