@@ -274,17 +274,12 @@ SctpParameter *SctpAsconfChunk::removeAsconfParam()
     return msg;
 }
 
-Register_Class(SctpAsconfAckChunk);
-
-SctpAsconfAckChunk& SctpAsconfAckChunk::operator=(const SctpAsconfAckChunk& other)
+void SctpAsconfAckChunk::clean()
 {
-    SctpAsconfAckChunk_Base::operator=(other);
-
-    this->setByteLength(SCTP_ADD_IP_CHUNK_LENGTH);
-    for (const auto& elem : other.parameterList)
-        addAsconfResponse((elem)->dup());
-
-    return *this;
+    for (SctpParameter *param : parameterList) {
+        dropAndDelete(param);
+    }
+    parameterList.clear();
 }
 
 void SctpAsconfAckChunk::setAsconfResponseArraySize(size_t size)
