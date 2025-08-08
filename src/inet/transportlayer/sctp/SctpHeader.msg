@@ -15,7 +15,6 @@ namespace inet::sctp;
 
 class SctpHeader extends TransportHeaderBase
 {
-    @customize;
     // Source Port
     uint16_t srcPort;
     // Destination Port
@@ -26,8 +25,75 @@ class SctpHeader extends TransportHeaderBase
     uint32_t checksum = 0;
     ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
     unsigned short headerLength = 12;
-    abstract SctpChunk *sctpChunks[];
+    SctpChunk *sctpChunks[] @custom;
 }
+
+cplusplus(SctpHeader) {{
+  protected:
+    std::vector<SctpChunk *> sctpChunkList;
+
+  private:
+    void clean();
+
+  public:
+    virtual void setSctpChunksArraySize(size_t size);
+
+    virtual void setSctpChunks(size_t k, SctpChunk *sctpChunks);
+
+    /**
+     * Returns the number of chunks in this SCTP packet
+     */
+    virtual size_t getSctpChunksArraySize() const;
+
+    /**
+     * Returns the kth chunk in this SCTP packet
+     */
+//    virtual SctpChunk *getSctpChunks(size_t k) const override;
+
+    virtual const SctpChunk *getSctpChunks(size_t k) const { return sctpChunkList.at(k); }
+
+    /**
+     * Adds a message object to the SCTP packet. The packet length will be adjusted
+     */
+    virtual void appendSctpChunks(SctpChunk *sctpChunks);
+    virtual void insertSctpChunks(size_t k, SctpChunk *sctpChunks);
+    virtual void eraseSctpChunks(size_t k) {}
+    virtual void replaceSctpChunk(SctpChunk *msg, uint32_t k);
+
+    /**
+     * Removes and returns the first message object in this SCTP packet.
+     */
+    virtual SctpChunk *removeFirstChunk();
+    virtual SctpChunk *removeLastChunk();
+    virtual SctpChunk *peekFirstChunk() const;
+    virtual SctpChunk *peekLastChunk() const;
+
+    virtual unsigned int getSourcePort() const override { return getSrcPort(); }
+    virtual void setSourcePort(unsigned int port) override { setSrcPort(port); }
+    virtual unsigned int getDestinationPort() const override { return getDestPort(); }
+    virtual void setDestinationPort(unsigned int port) override { setDestPort(port); }
+}}
+
+cplusplus(SctpHeader::copy) {{
+    for (const auto& elem : other.sctpChunkList) {
+        SctpChunk *chunk = (elem)->dup();
+        take(chunk);
+        sctpChunkList.push_back(chunk);
+    }
+    ASSERT(getChunkLength().get<B>() == other.getChunkLength().get<B>());
+}}
+
+cplusplus(SctpHeader::~SctpHeader) {{
+    clean();
+}}
+
+cplusplus(SctpHeader::parsimPack) {{
+    doParsimPacking(b, sctpChunkList);
+}}
+
+cplusplus(SctpHeader::parsimUnpack) {{
+    doParsimUnpacking(b, sctpChunkList);
+}}
 
 class SctpChunk extends cPacket
 {

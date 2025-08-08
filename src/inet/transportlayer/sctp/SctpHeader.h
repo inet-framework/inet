@@ -18,67 +18,6 @@
 namespace inet {
 namespace sctp {
 
-/**
- * Represents an SCTP Message. More info in the SctpHeader.msg file
- * (and the documentation generated from it).
- */
-class INET_API SctpHeader : public SctpHeader_Base
-{
-  protected:
-    typedef std::vector<SctpChunk *> SctpChunkList;
-    SctpChunkList sctpChunkList;
-
-  private:
-    void copy(const SctpHeader& other);
-    void clean();
-
-  public:
-    SctpHeader() : SctpHeader_Base() {}
-    SctpHeader(const SctpHeader& other) : SctpHeader_Base(other) { copy(other); }
-    ~SctpHeader();
-    SctpHeader& operator=(const SctpHeader& other);
-    virtual SctpHeader *dup() const override { return new SctpHeader(*this); }
-
-    virtual void setSctpChunksArraySize(size_t size) override;
-
-    virtual void setSctpChunks(size_t k, SctpChunk *sctpChunks) override;
-    /**
-     * Returns the number of chunks in this SCTP packet
-     */
-    virtual size_t getSctpChunksArraySize() const override;
-
-    /**
-     * Returns the kth chunk in this SCTP packet
-     */
-//    virtual SctpChunk *getSctpChunks(size_t k) const override;
-
-    virtual const SctpChunk *getSctpChunks(size_t k) const override { return sctpChunkList.at(k); }
-
-    /**
-     * Adds a message object to the SCTP packet. The packet length will be adjusted
-     */
-    virtual void appendSctpChunks(SctpChunk *sctpChunks) override;
-    using SctpHeader_Base::insertSctpChunks;
-    virtual void insertSctpChunks(size_t k, SctpChunk *sctpChunks) override;
-    virtual void eraseSctpChunks(size_t k) override {}
-    virtual void replaceSctpChunk(SctpChunk *msg, uint32_t k);
-
-//    virtual void addChunk(SctpChunk * chunk);
-
-    /**
-     * Removes and returns the first message object in this SCTP packet.
-     */
-    virtual SctpChunk *removeFirstChunk();
-    virtual SctpChunk *removeLastChunk();
-    virtual SctpChunk *peekFirstChunk() const;
-    virtual SctpChunk *peekLastChunk() const;
-
-    virtual unsigned int getSourcePort() const override { return SctpHeader_Base::getSrcPort(); }
-    virtual void setSourcePort(unsigned int port) override { SctpHeader_Base::setSrcPort(port); }
-    virtual unsigned int getDestinationPort() const override { return SctpHeader_Base::getDestPort(); }
-    virtual void setDestinationPort(unsigned int port) override { SctpHeader_Base::setDestPort(port); }
-};
-
 class INET_API SctpErrorChunk : public SctpErrorChunk_Base
 {
   protected:

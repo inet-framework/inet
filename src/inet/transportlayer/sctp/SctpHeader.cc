@@ -13,33 +13,6 @@
 namespace inet {
 namespace sctp {
 
-Register_Class(SctpHeader);
-
-SctpHeader& SctpHeader::operator=(const SctpHeader& other)
-{
-    if (this == &other)
-        return *this;
-    clean();
-    SctpHeader_Base::operator=(other);
-    copy(other);
-    return *this;
-}
-
-void SctpHeader::copy(const SctpHeader& other)
-{
-    for (const auto& elem : other.sctpChunkList) {
-        SctpChunk *chunk = (elem)->dup();
-        take(chunk);
-        sctpChunkList.push_back(chunk);
-    }
-    ASSERT(getChunkLength().get<B>() == other.getChunkLength().get<B>());
-}
-
-SctpHeader::~SctpHeader()
-{
-    clean();
-}
-
 void SctpHeader::clean()
 {
 //    handleChange();
