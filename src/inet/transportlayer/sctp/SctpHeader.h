@@ -18,48 +18,6 @@
 namespace inet {
 namespace sctp {
 
-class INET_API SctpErrorChunk : public SctpErrorChunk_Base
-{
-  protected:
-    std::vector<SctpParameter *> parameterList;
-
-  private:
-    void copy(const SctpErrorChunk& other);
-    void clean();
-
-  public:
-    SctpErrorChunk(const char *name = nullptr, int32_t kind = 0) : SctpErrorChunk_Base() {};
-    SctpErrorChunk(const SctpErrorChunk& other) : SctpErrorChunk_Base(other) { copy(other); };
-    SctpErrorChunk& operator=(const SctpErrorChunk& other);
-    ~SctpErrorChunk();
-
-    virtual SctpErrorChunk *dup() const override { return new SctpErrorChunk(*this); }
-    virtual void setParametersArraySize(size_t size) override;
-    virtual size_t getParametersArraySize() const override;
-    /** Generated but unused method, should not be called. */
-    virtual void setParameters(size_t k, SctpParameter *parameters) override;
-
-    virtual void appendParameters(SctpParameter *parameters) override { throw cRuntimeError("Unimplemented function"); }
-    using SctpErrorChunk_Base::insertParameters;
-    virtual void insertParameters(size_t k, SctpParameter *parameters) override { throw cRuntimeError("Unimplemented function"); }
-    virtual void eraseParameters(size_t k) override { throw cRuntimeError("Unimplemented function"); }
-    /**
-     * Returns the kth parameter in this SCTP Error Chunk
-     */
-    virtual SctpParameter *getParameters(size_t k) const override;
-//    virtual cPacketPtr& getParameters(uint32_t k) override;
-
-    /**
-     * Adds a message object to the SCTP packet. The packet length will be adjusted
-     */
-    virtual void addParameters(SctpParameter *msg);
-
-    /**
-     * Removes and returns the first message object in this SCTP packet.
-     */
-    virtual SctpParameter *removeParameter();
-};
-
 class INET_API SctpStreamResetChunk : public SctpStreamResetChunk_Base
 {
   protected:

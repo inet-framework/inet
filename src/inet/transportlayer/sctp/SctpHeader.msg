@@ -75,6 +75,7 @@ cplusplus(SctpHeader) {{
 }}
 
 cplusplus(SctpHeader::copy) {{
+    clean();
     for (const auto& elem : other.sctpChunkList) {
         SctpChunk *chunk = (elem)->dup();
         take(chunk);
@@ -284,11 +285,63 @@ class SctpShutdownCompleteChunk extends SctpChunk
 
 class SctpErrorChunk extends SctpChunk
 {
-    @customize;
     bool TBit = 0;
     bool MBit = 0;
-    abstract SctpParameter *parameters[];
+    SctpParameter *parameters[] @custom;
 }
+
+cplusplus(SctpErrorChunk) {{
+  protected:
+    std::vector<SctpParameter *> parameterList;
+
+  private:
+    void clean();
+
+  public:
+    virtual void setParametersArraySize(size_t size);
+    virtual size_t getParametersArraySize() const;
+    /** Generated but unused method, should not be called. */
+    virtual void setParameters(size_t k, SctpParameter *parameters);
+
+    virtual void appendParameters(SctpParameter *parameters) { throw cRuntimeError("Unimplemented function"); }
+    virtual void insertParameters(size_t k, SctpParameter *parameters) { throw cRuntimeError("Unimplemented function"); }
+    virtual void eraseParameters(size_t k) { throw cRuntimeError("Unimplemented function"); }
+    /**
+     * Returns the kth parameter in this SCTP Error Chunk
+     */
+    virtual SctpParameter *getParameters(size_t k) const;
+
+    /**
+     * Adds a message object to the SCTP packet. The packet length will be adjusted
+     */
+    virtual void addParameters(SctpParameter *msg);
+
+    /**
+     * Removes and returns the first message object in this SCTP packet.
+     */
+    virtual SctpParameter *removeParameter();
+}}
+
+cplusplus(SctpErrorChunk::copy) {{
+    clean();
+    for (const auto& elem : other.parameterList) {
+        SctpParameter *param = (elem)->dup();
+        take(param);
+        parameterList.push_back(param);
+    }
+}}
+
+cplusplus(SctpErrorChunk::~SctpErrorChunk) {{
+    clean();
+}}
+
+cplusplus(SctpErrorChunk::parsimPack) {{
+    doParsimPacking(b, parameterList);
+}}
+
+cplusplus(SctpErrorChunk::parsimUnpack) {{
+    doParsimUnpacking(b, parameterList);
+}}
 
 class SctpParameter extends cPacket
 {

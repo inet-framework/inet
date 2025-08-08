@@ -15,21 +15,11 @@ namespace sctp {
 
 void SctpHeader::clean()
 {
-//    handleChange();
-
-    if (this->getSctpChunksArraySize() > 0) {
-        auto iterator = sctpChunkList.begin();
-        while (iterator != sctpChunkList.end()) {
-            SctpChunk *chunk = (*iterator);
-            sctpChunkList.erase(iterator);
-            drop(chunk);
-            delete chunk;
-        }
+    for (SctpChunk *chunk : sctpChunkList) {
+        drop(chunk);
+        delete chunk;
     }
-
-    /* sctpChunkList.clear();
-     setHeaderLength(SCTP_COMMON_HEADER);
-     setChunkLength(B(SCTP_COMMON_HEADER));*/
+    sctpChunkList.clear();
 }
 
 void SctpHeader::setSctpChunksArraySize(size_t size)
@@ -125,27 +115,6 @@ SctpChunk *SctpHeader::peekLastChunk() const
     return msg;
 }
 
-Register_Class(SctpErrorChunk);
-
-SctpErrorChunk& SctpErrorChunk::operator=(const SctpErrorChunk& other)
-{
-    if (this == &other)
-        return *this;
-    clean();
-    SctpErrorChunk_Base::operator=(other);
-    copy(other);
-    return *this;
-}
-
-void SctpErrorChunk::copy(const SctpErrorChunk& other)
-{
-    for (const auto& elem : other.parameterList) {
-        SctpParameter *param = (elem)->dup();
-        take(param);
-        parameterList.push_back(param);
-    }
-}
-
 void SctpErrorChunk::setParametersArraySize(size_t size)
 {
     throw cException(this, "setParametersArraySize() not supported, use addParameter()");
@@ -184,11 +153,6 @@ SctpParameter *SctpErrorChunk::removeParameter()
     drop(msg);
     this->setByteLength(this->getByteLength() + ADD_PADDING(msg->getByteLength()));
     return msg;
-}
-
-SctpErrorChunk::~SctpErrorChunk()
-{
-    clean();
 }
 
 void SctpErrorChunk::clean()
