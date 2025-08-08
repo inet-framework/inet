@@ -216,17 +216,6 @@ void SctpStreamResetChunk::clean()
     }
 }
 
-Register_Class(SctpIncomingSsnResetRequestParameter);
-
-void SctpIncomingSsnResetRequestParameter::copy(const SctpIncomingSsnResetRequestParameter& other)
-{
-    setSrReqSn(other.getSrReqSn());
-    setStreamNumbersArraySize(other.getStreamNumbersArraySize());
-    for (uint16_t i = 0; i < other.getStreamNumbersArraySize(); i++) {
-        setStreamNumbers(i, other.getStreamNumbers(i));
-    }
-}
-
 void SctpAsconfChunk::clean()
 {
     for (SctpParameter *param : parameterList) {

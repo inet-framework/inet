@@ -429,7 +429,6 @@ class SctpOutgoingSsnResetRequestParameter extends SctpParameter
 
 class SctpIncomingSsnResetRequestParameter extends SctpParameter
 {
-    @customize;
     uint32_t srReqSn; //Stream Reset Request Sequence Number
     uint16_t streamNumbers[];
 }
