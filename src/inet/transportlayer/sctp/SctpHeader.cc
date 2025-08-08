@@ -164,28 +164,6 @@ void SctpErrorChunk::clean()
     }
 }
 
-Register_Class(SctpStreamResetChunk);
-
-SctpStreamResetChunk& SctpStreamResetChunk::operator=(const SctpStreamResetChunk& other)
-{
-    SctpStreamResetChunk_Base::operator=(other);
-
-    this->setByteLength(SCTP_STREAM_RESET_CHUNK_LENGTH);
-    for (const auto& elem : other.parameterList)
-        addParameter((elem)->dup());
-
-    return *this;
-}
-
-void SctpStreamResetChunk::copy(const SctpStreamResetChunk& other)
-{
-    for (const auto& elem : other.parameterList) {
-        SctpParameter *param = (elem)->dup();
-        take(param);
-        parameterList.push_back(param);
-    }
-}
-
 void SctpStreamResetChunk::setParametersArraySize(size_t size)
 {
     throw cException(this, "setParametersArraySize() not supported, use addParameter()");
@@ -227,11 +205,6 @@ cPacket *SctpStreamResetChunk::removeParameter()
     drop(msg);
     this->setByteLength(this->getByteLength() + ADD_PADDING(msg->getByteLength()));
     return msg;
-}
-
-SctpStreamResetChunk::~SctpStreamResetChunk()
-{
-    clean();
 }
 
 void SctpStreamResetChunk::clean()

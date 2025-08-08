@@ -18,49 +18,6 @@
 namespace inet {
 namespace sctp {
 
-class INET_API SctpStreamResetChunk : public SctpStreamResetChunk_Base
-{
-  protected:
-    std::vector<SctpParameter *> parameterList;
-
-  private:
-    void copy(const SctpStreamResetChunk& other);
-    void clean();
-
-  public:
-    SctpStreamResetChunk(const char *name = nullptr, int32_t kind = 0) : SctpStreamResetChunk_Base() {};
-    SctpStreamResetChunk(const SctpStreamResetChunk& other) : SctpStreamResetChunk_Base(other) { operator=(other); };
-    SctpStreamResetChunk& operator=(const SctpStreamResetChunk& other);
-    ~SctpStreamResetChunk();
-
-    virtual SctpStreamResetChunk *dup() const override { return new SctpStreamResetChunk(*this); }
-
-    virtual void setParametersArraySize(size_t size) override;
-    virtual size_t getParametersArraySize() const override;
-
-    /** Generated but unused method, should not be called. */
-    virtual void setParameters(size_t k, SctpParameter *parameters) override;
-
-    virtual void appendParameters(SctpParameter *parameters) override { throw cRuntimeError("Unimplemented function"); }
-    using SctpStreamResetChunk_Base::insertParameters;
-    virtual void insertParameters(size_t k, SctpParameter *parameters) override { throw cRuntimeError("Unimplemented function"); }
-    virtual void eraseParameters(size_t k) override { throw cRuntimeError("Unimplemented function"); }
-    /**
-     * Returns the kth parameter in this SCTP Reset Chunk
-     */
-    virtual const SctpParameter *getParameters(size_t k) const override;
-
-    /**
-     * Adds a message object to the SCTP packet. The packet length will be adjusted
-     */
-    virtual void addParameter(SctpParameter *msg);
-
-    /**
-     * Removes and returns the first message object in this SCTP packet.
-     */
-    virtual cPacket *removeParameter();
-};
-
 class INET_API SctpAsconfChunk : public SctpAsconfChunk_Base
 {
   protected:
