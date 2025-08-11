@@ -92,7 +92,10 @@ Configuration
 
 The simulation uses the following network:
 
-.. figure:: media/network.png
+.. .. figure:: media/network.png
+..    :align: center
+
+.. figure:: media/network4.png
    :align: center
 
 It contains two :ned:`StandardHost`'s connected with 100Mbps Ethernet and also a :ned:`PcapRecorder` 
@@ -187,7 +190,7 @@ which support preemption.
 There is no priority queue in this configuration. The two MAC submodules both have their own queues.
 We also limit the queue length to 4 and configure the queue type to be :ned:`DropTailQueue`.
 
-.. note:: We could also have just one shared priority queue in the EthernetPreemptableMac module, but this is not covered here.
+.. note:: We could also have just one shared priority queue in the :ned:`EthernetPreemptingMacLayer` module, but this is not covered here.
 
 We use the following traffic for the ``RealisticFifoQueueing``, ``RealisticPriorityQueueing``, 
 and ``RealisticFramePreemption`` configurations:
@@ -257,6 +260,13 @@ a frame called ``background3`` may be followed by ``background3-frag0:progress``
 
 Results
 -------
+
+Without Frame Preemption
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Without frame preemption, the transmissions look like the following:
+
+TODO seqchart
 
 Frame Preemption Behavior
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -357,23 +367,7 @@ configuration is distinguished using different line styles and the traffic categ
    :align: center
    :width: 80%
 
-.. |1| image:: media/fifo_histogram.png
-   :width: 33%
-
-.. |2| image:: media/fifo_histogram.png
-   :width: 33%
-
-.. |3| image:: media/fifo_histogram.png
-   :width: 33%
-
-.. .. table:: My table
-..    :align: center
-
-..    +-----+-----+-----+
-..    | |1| | |2| | |3| |
-..    +-----+-----+-----+
-
-.. |1||2||3|
+TODO
 
 .. list-table::
    :width: 100%

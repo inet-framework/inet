@@ -12,6 +12,8 @@ packets traverse multiple switches, these delays accumulate, resulting in
 significant end-to-end latency. 
 
 .. figure:: media/storeandforward.png
+   :align: center
+   :width: 50%
 
 Cut-through switching addresses this problem by
 starting the forwarding process as soon as the destination MAC address and
@@ -21,6 +23,8 @@ being received, substantially reducing switching delay, especially in multi-hop
 scenarios.
 
 .. figure:: media/cutthrough.png
+   :align: center
+   :width: 50%
 
 However, cut-through switching involves trade-offs compared to store-and-forward
 switching. Since forwarding begins before the entire frame is received, the
@@ -54,7 +58,7 @@ start forwarding it before the whole packet is received.
 The example simulation contains two :ned:`TsnDevice` nodes connected by two
 :ned:`TsnSwitch` nodes (all connections are 1 Gbps):
 
-.. figure:: media/Network.png
+.. figure:: media/Network_.png
    :align: center
 
 In the simulation, ``device1`` sends 1000-Byte UDP packets to ``device2``, with a mean arrival time of 200ms,
