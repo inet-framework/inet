@@ -31,9 +31,6 @@ Overview
 Time-aware shaping (TAS), and its implementation, the Time-aware shaper, utilizes the Time-division multiple access (TDMA) scheme to send different priority traffic streams
 in their own allotted transmission time windows. This makes the delay bounded, as lower-priority frames cannot hold up higher priority ones.
 
-.. note:: Time-aware shaping can be combined with 802.1Qbu Frame Preemption. This can increase bandwidth utilization because frames that otherwise 
-   wouldn't fit in the available time window can be sent in fragments.
-
 The time-aware shaper transmits different traffic streams by opening and closing gates belonging to different queues, according
 to a time schedule. To guarantee low delay, this schedule needs to be coordinated among network bridges. This also means that
 time-aware shaping requires synchronized clocks throughout the network.
