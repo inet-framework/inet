@@ -48,6 +48,9 @@ class Quic : public OperationalBase
     virtual void removeConnectionId(uint64_t connectionId);
     IRoutingTable *getRoutingTable();
 
+    ptls_iovec_t cert = {};
+    ptls_openssl_opp_sign_certificate_t cert_signer;
+    ptls_openssl_opp_verify_certificate_t verifier;
     ptls_context_t ctx;
 
     simsignal_t tlsKeyLogLineSignal;

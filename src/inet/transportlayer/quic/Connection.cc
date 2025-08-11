@@ -218,7 +218,7 @@ void Connection::handleCryptoData(EncryptionLevel epoch, const std::vector<uint8
 
     int ret = ptls_handle_message(tls, &buffer, epoch_offsets, (int)epoch,
         data.data(), data.size(), nullptr);
-    ASSERT(ret == 0 || ret == PTLS_ERROR_IN_PROGRESS);
+    ASSERT(ret == 0 || ret == PTLS_ERROR_IN_PROGRESS || ret == PTLS_ALERT_UNKNOWN_CA);
     std::cout << "ptls_handle_message returned " << ret << std::endl;
     for (int e = 0; e < 4; e++) {
         Ptr<BytesChunk> data = makeShared<BytesChunk>();
