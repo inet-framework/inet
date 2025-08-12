@@ -15,22 +15,22 @@ namespace inet {
 
 Define_Module(OscillatorBasedClock);
 
-static int64_t roundUp(int64_t t, int64_t l)
+static simtime_raw_t roundUp(simtime_raw_t t, simtime_raw_t l)
 {
     return (t + l - 1) / l * l;
 }
 
-static int64_t roundDown(int64_t t, int64_t l)
+static simtime_raw_t roundDown(simtime_raw_t t, simtime_raw_t l)
 {
     return (t / l) * l;
 }
 
-static int64_t roundCloser(int64_t t, int64_t l)
+static simtime_raw_t roundCloser(simtime_raw_t t, simtime_raw_t l)
 {
     return (t + l / 2) / l * l;
 }
 
-static int64_t roundNone(int64_t t, int64_t l)
+static simtime_raw_t roundNone(simtime_raw_t t, simtime_raw_t l)
 {
     if (t % l != 0)
         throw cRuntimeError("Clock time/delay value is not multiple of nominal tick length");
@@ -248,7 +248,7 @@ ClockEvent *OscillatorBasedClock::cancelTargetModuleClockEvent(ClockEvent *event
 void OscillatorBasedClock::scheduleClockEventAt(clocktime_t time, ClockEvent *event)
 {
     ASSERTCMP(>=, time, getClockTime());
-    int64_t roundedTime = roundingFunction(time.raw(), oscillator->getNominalTickLength().raw());
+    simtime_raw_t roundedTime = roundingFunction(time.raw(), oscillator->getNominalTickLength().raw());
     ClockBase::scheduleClockEventAt(ClockTime().setRaw(roundedTime), event);
     events.push_back(event);
     if (!useFutureEventSet)
@@ -259,7 +259,7 @@ void OscillatorBasedClock::scheduleClockEventAt(clocktime_t time, ClockEvent *ev
 void OscillatorBasedClock::scheduleClockEventAfter(clocktime_t delay, ClockEvent *event)
 {
     ASSERTCMP(>=, delay, 0);
-    int64_t roundedDelay = roundingFunction(delay.raw(), oscillator->getNominalTickLength().raw());
+    simtime_raw_t roundedDelay = roundingFunction(delay.raw(), oscillator->getNominalTickLength().raw());
     ClockBase::scheduleClockEventAfter(ClockTime().setRaw(roundedDelay), event);
     events.push_back(event);
     if (!useFutureEventSet)
