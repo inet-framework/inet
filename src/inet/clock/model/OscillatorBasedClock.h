@@ -40,7 +40,7 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
     bool useFutureEventSet = false;
     uint64_t insertionCount = 0;
     IOscillator *oscillator = nullptr;
-    int64_t (*roundingFunction)(int64_t, int64_t) = nullptr;
+    simtime_raw_t (*roundingFunction)(simtime_raw_t, simtime_raw_t) = nullptr;
 
     /**
      * The lower bound of the simulation time where the clock time equals with origin clock time.

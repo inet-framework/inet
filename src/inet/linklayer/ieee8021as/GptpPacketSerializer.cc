@@ -28,7 +28,7 @@ clocktime_t GptpPacketSerializer::readClock8(MemoryInputStream& stream) const
 
 void GptpPacketSerializer::writeClock8(MemoryOutputStream& stream, const clocktime_t& clock) const
 {
-    int64_t outValue;
+    simtime_raw_t outValue;
     simtime_t outRemainder;
     simtime_t t = CLOCKTIME_AS_SIMTIME(clock);
     t.split(SIMTIME_NS, outValue, outRemainder);
@@ -51,7 +51,7 @@ void GptpPacketSerializer::writeTimestamp(MemoryOutputStream& stream, const cloc
 {
     // 10 bytes
     simtime_t t = CLOCKTIME_AS_SIMTIME(clock);
-    int64_t outValue;
+    simtime_raw_t  outValue;
     t.split(SIMTIME_S, outValue, t);
     stream.writeUint48Be(outValue);
     t.split(SIMTIME_NS, outValue, t);
@@ -76,7 +76,7 @@ void GptpPacketSerializer::writeScaledNS(MemoryOutputStream& stream, const clock
     // The ScaledNs type represents signed values of time and time interval in units of 2^–16 ns.
     // 12 bytes
     simtime_t t = CLOCKTIME_AS_SIMTIME(clock);
-    int64_t outValue;
+    simtime_raw_t  outValue;
     simtime_t outRemainder;
     t.split(SIMTIME_NS, outValue, outRemainder);
     outValue <<= 16;
