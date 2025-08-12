@@ -45,7 +45,7 @@ class INET_API ClockTime
      * Initialize simulation time from a double-precision number. This constructor
      * is recommended if the value is the result of some computation done in
      * <tt>double</tt>. For integer-based computations and time constants, the
-     * <tt>ClockTime(int64_t x, int exponent)</tt> constructor is usually a better
+     * <tt>ClockTime(simtime_raw_t x, int exponent)</tt> constructor is usually a better
      * choice, because it does not have rounding errors caused by double-to-integer
      * conversion.
      */
@@ -74,7 +74,7 @@ class INET_API ClockTime
      *   Simtime(-3, SIMTIME_S) -> -1s
      *   Simtime(5, (SimTimeUnit)2) -> 500s;
      */
-    ClockTime(int64_t value, SimTimeUnit unit) : impl(value, unit) {}
+    ClockTime(simtime_raw_t value, SimTimeUnit unit) : impl(value, unit) {}
 
     /**
      * Copy constructor.
@@ -217,7 +217,7 @@ class INET_API ClockTime
      *   -3.8ms in s --> -3;
      *   999ms in s --> 0
      */
-    int64_t inUnit(SimTimeUnit unit) const { return impl.inUnit(unit); }
+    simtime_raw_t inUnit(SimTimeUnit unit) const { return impl.inUnit(unit); }
 
     /**
      * Returns a new simulation time that is truncated (rounded towards zero)
@@ -247,7 +247,7 @@ class INET_API ClockTime
      * outRemainder = t.remainderForUnit(unit);
      * </pre>
      */
-    void split(SimTimeUnit unit, int64_t& outValue, ClockTime& outRemainder) const { impl.split(unit, outValue, outRemainder.impl); }
+    void split(SimTimeUnit unit, simtime_raw_t& outValue, ClockTime& outRemainder) const { impl.split(unit, outValue, outRemainder.impl); }
 
     /**
      * Converts the time to a numeric string. The number expresses the simulation
@@ -284,17 +284,17 @@ class INET_API ClockTime
     /**
      * Returns the underlying 64-bit integer.
      */
-    int64_t raw() const { return impl.raw(); }
+    simtime_raw_t raw() const { return impl.raw(); }
 
     /**
      * Creates a ClockTime by setting its underlying 64-bit integer.
      */
-    static ClockTime fromRaw(int64_t l) { ClockTime tmp; tmp.impl.setRaw(l); return tmp; }
+    static ClockTime fromRaw(simtime_raw_t l) { ClockTime tmp; tmp.impl.setRaw(l); return tmp; }
 
     /**
      * Directly sets the underlying 64-bit integer.
      */
-    const ClockTime& setRaw(int64_t l) { impl.setRaw(l); return *this; }
+    const ClockTime& setRaw(simtime_raw_t l) { impl.setRaw(l); return *this; }
 
     /**
      * Returns the largest simulation time that can be represented using the
@@ -306,7 +306,7 @@ class INET_API ClockTime
      * Returns the time resolution as the number of units per second,
      * e.g. for microsecond resolution it returns 1000000.
      */
-    static int64_t getScale() { return SimTime::getScale(); }
+    static simtime_raw_t getScale() { return SimTime::getScale(); }
 
     /**
      * Returns the scale exponent, which is an integer in the range -18..0.
@@ -341,7 +341,7 @@ class INET_API ClockTime
      * ATTENTION: For performance reasons, the returned pointer will point
      * *somewhere* into the buffer, but NOT necessarily at the beginning.
      */
-    static char *ttoa(char *buf, int64_t impl, int scaleexp, char *& endp) { return SimTime::ttoa(buf, impl, scaleexp, endp); }
+    static char *ttoa(char *buf, simtime_raw_t impl, int scaleexp, char *& endp) { return SimTime::ttoa(buf, impl, scaleexp, endp); }
     //@}
 };
 
