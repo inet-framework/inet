@@ -185,6 +185,7 @@ Quic::Quic() : OperationalBase()
     ptls_openssl_opp_init_verify_certificate(&verifier, NULL);
     verifier.override_callback = &override_verify;
     ctx.verify_certificate = &verifier.super;
+    ctx.sign_certificate = &cert_signer.super;
 
     ctx.certificates = {&cert, 1};
 
