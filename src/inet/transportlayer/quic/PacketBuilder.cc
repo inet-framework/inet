@@ -335,10 +335,29 @@ QuicPacket *PacketBuilder::buildAckOnlyPacket(int maxPacketSize, PacketNumberSpa
         throw cRuntimeError("buildAckOnlyPacket: max packet size too small, not even an Ack frame fits into it.");
     }
     packet->addFrame(ackFrame);
-    Ptr<InitialPacketHeader> initialHeader = dynamicPtrCast<InitialPacketHeader>(packet->getHeader());
-    ASSERT(initialHeader != nullptr);
-    initialHeader->setLength(initialHeader->getPacketNumberLength() + packet->getDataSize() + 16);
-    initialHeader->calcChunkLength();
+
+    switch (pnSpace) {
+        case PacketNumberSpace::Initial:
+            {
+                Ptr<InitialPacketHeader> initialHeader = dynamicPtrCast<InitialPacketHeader>(packet->getHeader());
+                ASSERT(initialHeader != nullptr);
+                initialHeader->setLength(initialHeader->getPacketNumberLength() + packet->getDataSize() + 16);
+                initialHeader->calcChunkLength();
+            }
+            break;
+        case PacketNumberSpace::Handshake:
+            {
+                Ptr<HandshakePacketHeader> handshakeHeader = dynamicPtrCast<HandshakePacketHeader>(packet->getHeader());
+                ASSERT(handshakeHeader != nullptr);
+                handshakeHeader->setLength(handshakeHeader->getPacketNumberLength() + packet->getDataSize() + 16);
+                handshakeHeader->calcChunkLength();
+            }
+            break;
+        case PacketNumberSpace::ApplicationData:
+            ASSERT(!"TODO");
+            break;
+    }
+
 
     ASSERT(packet != nullptr && packet->getSize() <= maxPacketSize);
     return packet;
