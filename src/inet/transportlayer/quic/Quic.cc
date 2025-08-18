@@ -6,6 +6,7 @@
 //
 
 #include <openssl/pem.h>
+#include "picotls/openssl_opp.h"
 
 #include "Quic.h"
 #include "inet/common/Protocol.h"
@@ -93,6 +94,15 @@ static int on_update_traffic_key(ptls_update_traffic_key_t *self, ptls_t *tls, i
 ptls_update_traffic_key_t update_traffic_key = {on_update_traffic_key};
 
 
+static int override_verify_certificate(ptls_openssl_opp_override_verify_certificate_t *self, ptls_t *tls, int ret, int ossl_ret, X509 *cert, STACK_OF(X509) * chain)
+{
+    std::cout << "override_verify_certificate called with ret=" << ret << ", ossl_ret=" << ossl_ret << std::endl;
+    return 0;
+}
+
+ptls_openssl_opp_override_verify_certificate_t override_verify = {override_verify_certificate};
+
+
 #define RSA_PRIVATE_KEY                                                                                                            \
     "-----BEGIN RSA PRIVATE KEY-----\n"                                                                                            \
     "MIIEpAIBAAKCAQEA7zZheZ4ph98JaedBNv9kqsVA9CSmhd69kBc9ZAfVFMA4VQwp\n"                                                           \
@@ -173,6 +183,7 @@ Quic::Quic() : OperationalBase()
     }
 
     ptls_openssl_opp_init_verify_certificate(&verifier, NULL);
+    verifier.override_callback = &override_verify;
     ctx.verify_certificate = &verifier.super;
 
     ctx.certificates = {&cert, 1};
