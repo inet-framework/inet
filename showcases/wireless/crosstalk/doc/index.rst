@@ -117,7 +117,7 @@ At first, the two source nodes, ``host1`` and ``host3``, start
 transmitting at the same time. The transmissions collide, and neither
 destination host is able to receive any of them correctly. The collision
 avoidance mechanism takes effect, and ``host3`` wins channel access.
-Both nodes can transmit their data successfully after one another.
+``host3`` transmit successfuly, followed by ``host4`` and others subsequently.
 
 Independent Frequency Bands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
