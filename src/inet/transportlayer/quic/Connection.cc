@@ -28,6 +28,40 @@ extern "C" {
 namespace inet {
 namespace quic {
 
+const int TLS_EXTENSION_TYPE_TRANSPORT_PARAMETERS_FINAL = 0x39;
+const int TRANSPORT_PARAMETER_ID_INITIAL_MAX_DATA = 4;
+const int TRANSPORT_PARAMETER_ID_INITIAL_MAX_STREAM_DATA_BIDI_LOCAL = 5;
+const int TRANSPORT_PARAMETER_ID_INITIAL_MAX_STREAM_DATA_BIDI_REMOTE = 6;
+const int TRANSPORT_PARAMETER_ID_INITIAL_MAX_STREAM_DATA_UNI = 7;
+
+int collect_extension_cb(ptls_t *tls, struct st_ptls_handshake_properties_t *properties, uint16_t type)
+{
+    return type == TLS_EXTENSION_TYPE_TRANSPORT_PARAMETERS_FINAL;
+}
+
+int collected_extensions_cb(ptls_t *tls, ptls_handshake_properties_t *properties,
+    ptls_raw_extension_t *slots)
+{
+    Connection *conn = (Connection *)(*ptls_get_data_ptr(tls));
+
+    // TODO: actually parse
+    conn->initializeRemoteTransportParameters(5242880, 524288);
+
+
+    for (int i = 0; slots[i].type != 0xFFFF; i++) {
+        if (slots[i].type == TLS_EXTENSION_TYPE_TRANSPORT_PARAMETERS_FINAL) {
+            for (int b = 0; b < slots[i].data.len; b++) {
+                if (b % 16 == 0)
+                    std::cout << std::endl;
+                std::cout << std::hex << (int)(slots[i].data.base[b]) << " ";
+            }
+        }
+    }
+
+    return 0;
+}
+
+
 EncryptionLevel pns_to_epoch(PacketNumberSpace pnSpace)
 {
     switch (pnSpace) {
@@ -210,14 +244,55 @@ void Connection::newStreamData(uint64_t streamId, Ptr<const Chunk> data)
 
 void Connection::handleCryptoData(EncryptionLevel epoch, const std::vector<uint8_t> &data)
 {
+        int ret;
+
+#define PUSH_TP(buf, id, block)                                                                                                    \
+do {                                                                                                                           \
+    ptls_buffer_push_quicint((buf), (id));                                                                                     \
+    ptls_buffer_push_block((buf), -1, block);                                                                                  \
+} while (0)
+
+    ptls_buffer_t buf;
+
+    ptls_buffer_init(&buf, (void*)"", 0);
+
+    PUSH_TP(&buf, TRANSPORT_PARAMETER_ID_INITIAL_MAX_DATA,
+            { ptls_buffer_push_quicint(&buf, localTransportParameters->initialMaxData); });
+    PUSH_TP(&buf, TRANSPORT_PARAMETER_ID_INITIAL_MAX_STREAM_DATA_BIDI_LOCAL,
+            { ptls_buffer_push_quicint(&buf, localTransportParameters->initialMaxStreamData); });
+    PUSH_TP(&buf, TRANSPORT_PARAMETER_ID_INITIAL_MAX_STREAM_DATA_BIDI_REMOTE,
+            { ptls_buffer_push_quicint(&buf, localTransportParameters->initialMaxStreamData); });
+    PUSH_TP(&buf, TRANSPORT_PARAMETER_ID_INITIAL_MAX_STREAM_DATA_UNI,
+            { ptls_buffer_push_quicint(&buf, localTransportParameters->initialMaxStreamData); });
+    Exit:
+    struct {
+        ptls_raw_extension_t ext[2];
+    } transport_params;
+
+    transport_params.ext[0] =
+        (ptls_raw_extension_t){TLS_EXTENSION_TYPE_TRANSPORT_PARAMETERS_FINAL,
+                               {buf.base, buf.off}};
+    transport_params.ext[1] = (ptls_raw_extension_t){UINT16_MAX};
+
+    ptls_handshake_properties_t handshake_properties = (ptls_handshake_properties_t){{{{NULL}}}};
+
+    memset(&handshake_properties, 0, sizeof(handshake_properties));
+    handshake_properties.additional_extensions = transport_params.ext;
+
+    handshake_properties.collect_extension = collect_extension_cb;
+    handshake_properties.collected_extensions = collected_extensions_cb;
+
+
+
+
     std::cout << "handleCryptoData in epoch " << (int)epoch << " at " << (is_server ? "server" : "client") << ", data length: " << data.size() << std::endl;
     ptls_buffer_t buffer;
     ptls_buffer_init(&buffer, (void*)"", 0);
     size_t epoch_offsets[5] = {0};
     ASSERT(ptls_get_read_epoch(tls) == (int)epoch);
 
-    int ret = ptls_handle_message(tls, &buffer, epoch_offsets, (int)epoch,
-        data.data(), data.size(), nullptr);
+    ret = ptls_handle_message(tls, &buffer, epoch_offsets, (int)epoch,
+        data.data(), data.size(), &handshake_properties);
     ASSERT(ret == 0 || ret == PTLS_ERROR_IN_PROGRESS);
     std::cout << "ptls_handle_message returned " << ret << std::endl;
     for (int e = 0; e < 4; e++) {
@@ -421,11 +496,6 @@ void Connection::sendProbePacket(uint ptoCount)
 
 void Connection::sendClientInitialPacket(uint32_t token) {
     int maxQuicPacketSize = path->getMaxQuicPacketSize();
-    const int EXTENSION_TYPE_TRANSPORT_PARAMETERS_FINAL = 0x39;
-    const int TRANSPORT_PARAMETER_ID_INITIAL_MAX_DATA = 4;
-    const int TRANSPORT_PARAMETER_ID_INITIAL_MAX_STREAM_DATA_BIDI_LOCAL = 5;
-    const int TRANSPORT_PARAMETER_ID_INITIAL_MAX_STREAM_DATA_BIDI_REMOTE = 6;
-    const int TRANSPORT_PARAMETER_ID_INITIAL_MAX_STREAM_DATA_UNI = 7;
     int ret;
 
 #define PUSH_TP(buf, id, block)                                                                                                    \
@@ -452,7 +522,7 @@ do {                                                                            
     } transport_params;
 
     transport_params.ext[0] =
-        (ptls_raw_extension_t){EXTENSION_TYPE_TRANSPORT_PARAMETERS_FINAL,
+        (ptls_raw_extension_t){TLS_EXTENSION_TYPE_TRANSPORT_PARAMETERS_FINAL,
                                {buf.base, buf.off}};
     transport_params.ext[1] = (ptls_raw_extension_t){UINT16_MAX};
 
@@ -460,6 +530,9 @@ do {                                                                            
 
     memset(&handshake_properties, 0, sizeof(handshake_properties));
     handshake_properties.additional_extensions = transport_params.ext;
+
+    handshake_properties.collect_extension = collect_extension_cb;
+    handshake_properties.collected_extensions = collected_extensions_cb;
 
     size_t epoch_offsets[5] = {0};
 
