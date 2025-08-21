@@ -456,6 +456,14 @@ const Ptr<Chunk> QuicPacketHeaderSerializer::deserializeShortPacketHeader(Memory
 
 std::vector<uint8_t> protectPacket(std::vector<uint8_t> datagram, uint32_t packetNumber, size_t packetNumberOffset, size_t packetNumberLength, const EncryptionKey& key) {
     ASSERT(datagram.size() >= packetNumberOffset + packetNumberLength);
+
+    // Extract packet number from datagram and verify it matches the parameter
+    uint32_t extractedPacketNumber = 0;
+    for (size_t i = 0; i < packetNumberLength; i++) {
+        extractedPacketNumber = (extractedPacketNumber << 8) | datagram[packetNumberOffset + i];
+    }
+    ASSERT(extractedPacketNumber == packetNumber);
+
     ptls_cipher_suite_t *cs = &ptls_openssl_opp_aes128gcmsha256;
     size_t originalSize = datagram.size();
 
