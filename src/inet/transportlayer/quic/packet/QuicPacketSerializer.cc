@@ -509,6 +509,8 @@ std::vector<uint8_t> protectPacket(std::vector<uint8_t> datagram, uint32_t packe
     for (size_t i = 0; i != packetNumberLength; ++i)
         datagram[packetNumberOffset + i] ^= supp.output[i + 1];
 
+    std::cout << "protected datagram" << std::endl;
+    std::cout << EncryptionKey::bytes2hex(datagram) << std::endl;
     return datagram;
 }
 
