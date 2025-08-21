@@ -547,11 +547,11 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
             packetNumberOffset += longPacketHeader->getDstConnectionIdLength();
             packetNumberOffset += longPacketHeader->getSrcConnectionIdLength();
 
-            // All long header packets (Initial, 0-RTT, Handshake) include a 'Length (i)' field.
+            // Most long header packets (Initial, 0-RTT, Handshake) include a 'Length (i)' field.
             // This 'Length' field is a variable-length integer indicating the length of the remainder of the packet,
             // which includes the Packet Number field itself and the Packet Payload (frames).
             // To find its *encoded size*, we first need to know the total length it will represent.
-            packetNumberOffset += getVariableLengthIntegerSize(B(longPacketHeader->getChunkLength() + payloadLength).get()); // Length of the 'Length' VLI field
+            int encryptedPartLength = -1;
 
             switch (longPacketHeader->getLongPacketType()) {
                 case LONG_PACKET_HEADER_TYPE_INITIAL: {
@@ -565,7 +565,10 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
                     packetNumberOffset += tokenLength; // Length of the actual 'Token' payload
 
                     packetNumberLength = initialPacketHeader->getPacketNumberLength();
-                    packetNumber = initialPacketHeader->getPacketNumber(); // Not used in this context
+                    packetNumber = initialPacketHeader->getPacketNumber();
+
+                    // includes the packet number field and the AES encrypted payload
+                    encryptedPartLength = initialPacketHeader->getLength();
                 }
                 break;
                 case LONG_PACKET_HEADER_TYPE_0RTT: {
@@ -573,6 +576,8 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
                     ASSERT(zeroRttPacketHeader != nullptr);
                     packetNumberLength = zeroRttPacketHeader->getPacketNumberLength();
                     packetNumber = zeroRttPacketHeader->getPacketNumber();
+
+                    encryptedPartLength = zeroRttPacketHeader->getLength();
                 }
                 break;
                 case LONG_PACKET_HEADER_TYPE_HANDSHAKE: {
@@ -580,8 +585,14 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
                     ASSERT(handshakePacketHeader != nullptr);
                     packetNumberLength = handshakePacketHeader->getPacketNumberLength();
                     packetNumber = handshakePacketHeader->getPacketNumber();
+
+                    encryptedPartLength = handshakePacketHeader->getLength();
                 }
             }
+
+            if (encryptedPartLength >= 0)
+                packetNumberOffset += getVariableLengthIntegerSize(encryptedPartLength); // Length of the 'Length' VLI field
+
             break;
         }
         case PACKET_HEADER_FORM_SHORT: {
