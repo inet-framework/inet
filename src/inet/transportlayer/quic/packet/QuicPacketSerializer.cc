@@ -132,7 +132,7 @@ void QuicPacketHeaderSerializer::serializeLongPacketHeader(MemoryOutputStream& s
 void QuicPacketHeaderSerializer::serializeShortPacketHeader(MemoryOutputStream& stream, const Ptr<const ShortPacketHeader>& header) const
 {
     // First byte: Header form (1 bit) | Fixed (1 bit) | Spin bit (1 bit) | Reserved (3 bits) | Key phase (1 bit) | Packet number length (2 bits)
-    uint8_t firstByte = (header->getHeaderForm() << 7) | 0x40; // Fixed bit is always 1
+    uint8_t firstByte = (header->getHeaderForm() << 7) | 0x43; // Fixed bit is always 1
     stream.writeByte(firstByte);
 
     // Destination Connection ID
@@ -209,7 +209,7 @@ void QuicPacketHeaderSerializer::serializeRetryPacketHeader(MemoryOutputStream& 
 void QuicPacketHeaderSerializer::serializeOneRttPacketHeader(MemoryOutputStream& stream, const Ptr<const OneRttPacketHeader>& header) const
 {
     // First byte: Header form (1 bit) | Fixed (1 bit) | Spin bit (1 bit) | Reserved (3 bits) | Key phase (1 bit) | Packet number length (2 bits)
-    uint8_t firstByte = (header->getHeaderForm() << 7) | 0x40; // Fixed bit is always 1
+    uint8_t firstByte = (header->getHeaderForm() << 7) | 0x43; // Fixed bit is always 1
     if (header->getIBit()) {
         firstByte |= 0x20; // Set the I bit
     }
