@@ -104,6 +104,22 @@ void EstablishedConnectionState::processDataBlockedFrame(const Ptr<const DataBlo
 
 void EstablishedConnectionState::processCryptoFrame(const Ptr<const CryptoFrameHeader>& frameHeader, Packet *pkt)
 {
+  Ptr<const Chunk> payload = pkt->popAtFront();
+        std::cout << "EstablishedConnectionState::processCryptoFrame at " << (context->is_server ? "server" : "client") << ", payload: " << payload << std::endl;
+        if (auto tlsPayload = dynamicPtrCast<const BytesChunk>(payload)) {
+            EV_DEBUG << "got transport parameter bytes" << endl;
+            context->handleCryptoData(EncryptionLevel::Handshake, tlsPayload->getBytes());
+        }
+    if (frameHeader->getContainsTransportParameters()) {
+        if (auto transportParametersExt = dynamicPtrCast<const TransportParametersExtension>(payload)) {
+            EV_DEBUG << "got transport parameters: " << transportParametersExt << endl;
+            context->initializeRemoteTransportParameters(transportParametersExt);
+        }
+    }
+    else {
+        EV_DEBUG << "EstablishedConnectionState::processCryptoFrame - no transport parameters" << endl;
+    }
+
     EV_DEBUG << "CryptoFrameHeader in " << name << endl;
     if (processingZeroRttPacket) {
         throw cRuntimeError("EstablishedConnectionState::processCryptoFrame: Processing a 0-RTT packet, which must not contain a CRYPTO frame.");
