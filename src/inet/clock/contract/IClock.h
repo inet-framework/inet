@@ -8,6 +8,10 @@
 #ifndef __INET_ICLOCK_H
 #define __INET_ICLOCK_H
 
+#include <iomanip>
+#include <iostream>
+#include <sstream>
+
 #include "inet/clock/contract/ClockEvent.h"
 #include "inet/clock/contract/ClockTime.h"
 
@@ -22,12 +26,9 @@ struct NullStream {
 extern NullStream nullStream;
 
 #ifndef CLOCK_LOG_IMPLEMENTATION
-  #include <sstream>
   #define CLOCK_COUT nullStream
 #else
-  #include <iostream>
-  #include <iomanip>
-  #define CLOCK_COUT !stdcoutenabled ? devnull : std::cout << std::setprecision(24) << std::string(stdcoutindent * 3, ' ')
+  #define CLOCK_COUT if (!clockCoutEnabled) ; else std::cout << std::setprecision(24) << std::string(clockCoutIndentLevel * 3, ' ')
 #endif
 
 #ifndef NDEBUG
