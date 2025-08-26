@@ -112,6 +112,8 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
     clocktime_t doComputeClockTimeFromSimTime(simtime_t t) const;
     simtime_t doComputeSimTimeFromClockTime(clocktime_t t, bool lowerBound) const;
 
+    clocktime_t getClockGranularity() const { return SIMTIME_AS_CLOCKTIME(oscillator->getNominalTickLength()); }
+
   public:
     virtual ~OscillatorBasedClock();
 

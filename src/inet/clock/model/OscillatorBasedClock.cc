@@ -190,7 +190,7 @@ int64_t OscillatorBasedClock::computeTicksFromCompensatedTicks(int64_t compensat
 
 clocktime_t OscillatorBasedClock::doComputeClockTimeFromSimTime(simtime_t simulationTime) const
 {
-    const clocktime_t nominalTickLength = SIMTIME_AS_CLOCKTIME(oscillator->getNominalTickLength());
+    const clocktime_t nominalTickLength = getClockGranularity();
 
     // Δn(t) = n(t) − n(LB)
     const int64_t n_t_since_origin = oscillator->computeTicksForInterval(simulationTime - oscillator->getComputationOrigin());
@@ -210,7 +210,7 @@ clocktime_t OscillatorBasedClock::doComputeClockTimeFromSimTime(simtime_t simula
 
 simtime_t OscillatorBasedClock::doComputeSimTimeFromClockTime(clocktime_t clockTime, bool lowerBound) const
 {
-    const clocktime_t nominalTickLength = SIMTIME_AS_CLOCKTIME(oscillator->getNominalTickLength());
+    const clocktime_t nominalTickLength = getClockGranularity();
     const clocktime_t dClock = clockTime - originClockTime;
 
     // Compensated ticks requested relative to *originSimulationTime*
@@ -240,6 +240,7 @@ clocktime_t OscillatorBasedClock::computeClockTimeFromSimTime(simtime_t simulati
     ASSERTCMP(>=, simulationTime, simTime());
     ASSERTCMP(>=, originSimulationTime, oscillator->getComputationOrigin());
     clocktime_t result = doComputeClockTimeFromSimTime(simulationTime);
+    ASSERTCMP(==, result.raw(), result.raw() / getClockGranularity().raw() * getClockGranularity().raw());
     ASSERTCMP(>=, result, doComputeClockTimeFromSimTime(simTime()));
     ASSERTCMP(>=, simulationTime, doComputeSimTimeFromClockTime(result, true));
     ASSERTCMP(<, simulationTime, doComputeSimTimeFromClockTime(result, false));
@@ -250,12 +251,13 @@ simtime_t OscillatorBasedClock::computeSimTimeFromClockTime(clocktime_t clockTim
 {
     ASSERTCMP(>=, clockTime, getClockTime());
     ASSERTCMP(>=, originSimulationTime, oscillator->getComputationOrigin());
+    ASSERTCMP(==, clockTime.raw(), clockTime.raw() / getClockGranularity().raw() * getClockGranularity().raw());
     simtime_t result = doComputeSimTimeFromClockTime(clockTime, lowerBound);
     ASSERTCMP(>=, result, originSimulationTimeLowerBound);
     if (lowerBound)
         ASSERTCMP(==, clockTime, doComputeClockTimeFromSimTime(result))
     else
-        ASSERTCMP(==, clockTime + SIMTIME_AS_CLOCKTIME(oscillator->getNominalTickLength()), doComputeClockTimeFromSimTime(result));
+        ASSERTCMP(==, clockTime + getClockGranularity(), doComputeClockTimeFromSimTime(result));
     return result;
 }
 
