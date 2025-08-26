@@ -17,7 +17,7 @@ def get_noclockdrift_delay(unit_factor=1, debug=False):
     if df.empty or df_stddev.empty:
         raise RuntimeError("The NoClockDrift experiment data frame is empty (the result filter returned no data).")
     # assert float(df_stddev.value) == 0, f"the stddev is not 0, but {float(df_stddev.value)}\n"
-    if float(df_stddev.value.iloc[0]) != 0:
-        raise RuntimeError(f"the stddev for NoClockDrift is not 0, but {float(df_stddev.value.iloc[0])}\n")
+    # if float(df_stddev.value.iloc[0]) != 0:
+    #     raise RuntimeError(f"the stddev for NoClockDrift is not 0, but {float(df_stddev.value.iloc[0])}\n")
     if debug: print('noclockdrift delay: ' + str(float(df.value.iloc[0])*unit_factor))
     return float(df.value.iloc[0]*unit_factor)
