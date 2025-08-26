@@ -162,6 +162,8 @@ def set_external_command_log_level(log_level):
     logging.getLogger("opp_run_coverage").setLevel(log_level)
     logging.getLogger("opp_run_profile").setLevel(log_level)
     logging.getLogger("opp_test").setLevel(log_level)
+    logging.getLogger("packet_test").setLevel(log_level)
+    logging.getLogger("packet_test_dbg").setLevel(log_level)
 
 def get_external_command_log_level():
     return logging.getLogger("opp_run").getEffectiveLevel()

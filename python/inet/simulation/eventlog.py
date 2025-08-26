@@ -39,7 +39,7 @@ class SimulationEvent:
         simulation_time = event.getSimulationTime()
         module_description_entry = event.getModuleDescriptionEntry()
         full_path = self.get_module_path()
-        ned_type_name = module_description_entry.getNedTypeName()
+        ned_type_name = module_description_entry.getNedTypeName() if module_description_entry else None
         cause_begin_send_entry = event.getCauseBeginSendEntry()
         message_name = event.getCauseBeginSendEntry().getMessageName() if cause_begin_send_entry else None
         event_description = f"#{COLOR_GREEN}{self.event_number}{COLOR_RESET} at {COLOR_GREEN}{simulation_time}{COLOR_RESET} in {COLOR_CYAN}{full_path}{COLOR_RESET} ({COLOR_GREEN}{ned_type_name}{COLOR_RESET})" + (f" on {COLOR_GREEN}{message_name}{COLOR_RESET}" if message_name else "")
