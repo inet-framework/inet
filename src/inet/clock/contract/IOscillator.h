@@ -62,6 +62,13 @@ class INET_API IOscillator
     virtual simtime_t getNominalTickLength() const = 0;
 
     /**
+     * @brief Returns the total number of ticks at the computation origin.
+     *
+     * @return Number of ticks.
+     */
+    virtual int64_t getNumTicksAtOrigin() const = 0;
+
+    /**
      * @brief Returns the computation origin.
      *
      * The computation origin is the simulation time (less than or equal to the current simulation time)
