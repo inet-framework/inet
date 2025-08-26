@@ -113,6 +113,18 @@ void ClockUserModuleMixin<T>::rescheduleClockEventAfter(clocktime_t t, ClockEven
 }
 
 template<typename T>
+bool ClockUserModuleMixin<T>::isScheduledClockEvent(ClockEvent *msg) const
+{
+#ifndef NDEBUG
+    usedClockApi = true;
+#endif
+    if (clock != nullptr)
+        return clock->isScheduledClockEvent(msg);
+    else
+        return msg->isScheduled();
+}
+
+template<typename T>
 clocktime_t ClockUserModuleMixin<T>::computeClockTimeFromSimTime(simtime_t t) const
 {
 #ifndef NDEBUG
