@@ -22,6 +22,7 @@ void DriftingOscillatorBase::initialize(int stage)
         else if (std::abs(nominalTickLength.dbl() - nominalTickLengthAsDouble) / nominalTickLengthAsDouble > 1E-15)
             throw cRuntimeError("The nominalTickLength parameter value %lg cannot be accurately represented with the current simulation time precision, conversion result: %s", nominalTickLengthAsDouble, nominalTickLength.ustr().c_str());
         setOrigin(simTime());
+        numTicksAtOrigin = 0;
         driftFactor = 1.0L + driftRate.get() / 1E+6L;
         // TODO check the relationship between nominalTickLength and simulation time precision and fail if they are too close (whatever that means) use a parameter for this? minimum
 
@@ -61,6 +62,7 @@ void DriftingOscillatorBase::setOrigin(simtime_t origin)
     EV_DEBUG << "Setting oscillator origin" << EV_FIELD(origin) << EV_ENDL;
     ASSERTCMP(<=, origin, simTime());
     ASSERTCMP(<=, this->origin, origin);
+    numTicksAtOrigin += computeTicksForInterval(origin - this->origin);
     this->origin = origin;
 }
 
