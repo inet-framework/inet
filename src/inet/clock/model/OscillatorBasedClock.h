@@ -44,7 +44,7 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
     simtime_raw_t (*roundingFunction)(simtime_raw_t, simtime_raw_t) = nullptr;
 
     /**
-     * The lower bound of the simulation time where the clock time equals with origin clock time.
+     * The lower bound of the simulation time where the clock time equals with origin clock time (exactly at an oscillator tick).
      */
     simtime_t originSimulationTimeLowerBound;
     /**
