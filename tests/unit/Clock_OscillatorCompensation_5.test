@@ -1,0 +1,60 @@
+%description:
+Tests clock oscillator compensation factor with using tick events.
+The clock is compensated to move faster then the oscillator tick rate.
+
+%includes:
+#include "inet/clock/model/SettableClock.h"
+
+using namespace omnetpp;
+using namespace inet;
+
+%file: TestNetwork.ned
+
+import inet.clock.model.SettableClock;
+
+network TestNetwork
+{
+    submodules:
+        clock: SettableClock;
+}
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+network = TestNetwork
+sim-time-limit = 0.1s
+
+*.clock.initialOscillatorCompensation = 1000000ppm
+*.clock.useFutureEventSet = false
+*.clock.oscillator.nominalTickLength = 1us
+
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
+%contains: stdout
+** Event #1  t=0.000001  on OscillatorTickTimer (omnetpp::cMessage)  in TestNetwork.clock.oscillator (ConstantDriftOscillator, id=3)    0% completed  (0% total)
+Setting oscillator origin, origin = 0.000001.
+Handling oscillator tick event, numTicks = 1.
+Handling tick signal, clockTime = 0.
+Setting clock origin, simulationTime = 0.000001, clockTime = 0.000002.
+
+%contains: stdout
+** Event #2  t=0.000002  on OscillatorTickTimer (omnetpp::cMessage)  in TestNetwork.clock.oscillator (ConstantDriftOscillator, id=3)    0% completed  (0% total)
+Setting oscillator origin, origin = 0.000002.
+Handling oscillator tick event, numTicks = 2.
+Handling tick signal, clockTime = 0.000002.
+Setting clock origin, simulationTime = 0.000002, clockTime = 0.000004.
+
+%contains: stdout
+** Event #99999  t=0.099999  on OscillatorTickTimer (omnetpp::cMessage)  in TestNetwork.clock.oscillator (ConstantDriftOscillator, id=3)    99% completed  (99% total)
+Setting oscillator origin, origin = 0.099999.
+Handling oscillator tick event, numTicks = 99999.
+Handling tick signal, clockTime = 0.199996.
+Setting clock origin, simulationTime = 0.099999, clockTime = 0.199998.
+
+%contains: stdout
+** Event #100000  t=0.1  on OscillatorTickTimer (omnetpp::cMessage)  in TestNetwork.clock.oscillator (ConstantDriftOscillator, id=3)    100% completed  (100% total)
+Setting oscillator origin, origin = 0.1.
+Handling oscillator tick event, numTicks = 100000.
+Handling tick signal, clockTime = 0.199998.
+Setting clock origin, simulationTime = 0.1, clockTime = 0.2.

@@ -1,0 +1,88 @@
+%description:
+Tests clock oscillator compensation factor with using tick events.
+
+%includes:
+#include "inet/clock/model/SettableClock.h"
+#include "inet/clock/oscillator/ConstantDriftOscillator.h"
+
+using namespace omnetpp;
+using namespace inet;
+
+%file: TestNetwork.ned
+
+import inet.clock.model.SettableClock;
+
+network TestNetwork
+{
+    submodules:
+        test: Test;
+        clock: SettableClock;
+}
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+network = TestNetwork
+sim-time-limit = 0.2s
+
+*.clock.useFutureEventSet = false
+*.clock.underlyingClock.typename = ""
+*.clock.oscillator.nominalTickLength = 1us
+*.clock.oscillator.oscillatorTickEventSchedulingPriority = -1
+
+%activity:
+
+auto clock = check_and_cast<SettableClock *>(cSimulation::getActiveSimulation()->getModuleByPath("clock"));
+wait(0.1);
+clock->setClockTime(0.1, ppm(1000000), false); // the clock assumes that the oscillator goes twice as fast as the nominal speed
+
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
+%contains: stdout
+** Event #2  t=0.000001  on OscillatorTickTimer (omnetpp::cMessage)  in TestNetwork.clock.oscillator (ConstantDriftOscillator, id=4)    0% completed  (0% total)
+Setting oscillator origin, origin = 0.000001.
+Handling oscillator tick event, numTicks = 1.
+Handling tick signal, clockTime = 0.
+Setting clock origin, simulationTime = 0.000001, clockTime = 0.000001.
+
+%contains: stdout
+** Event #3  t=0.000002  on OscillatorTickTimer (omnetpp::cMessage)  in TestNetwork.clock.oscillator (ConstantDriftOscillator, id=4)    0% completed  (0% total)
+Setting oscillator origin, origin = 0.000002.
+Handling oscillator tick event, numTicks = 2.
+Handling tick signal, clockTime = 0.000001.
+Setting clock origin, simulationTime = 0.000002, clockTime = 0.000002.
+
+%contains: stdout
+** Event #100000  t=0.099999  on OscillatorTickTimer (omnetpp::cMessage)  in TestNetwork.clock.oscillator (ConstantDriftOscillator, id=4)    49% completed  (49% total)
+Setting oscillator origin, origin = 0.099999.
+Handling oscillator tick event, numTicks = 99999.
+Handling tick signal, clockTime = 0.099998.
+Setting clock origin, simulationTime = 0.099999, clockTime = 0.099999.
+** Event #100001  t=0.1  on OscillatorTickTimer (omnetpp::cMessage)  in TestNetwork.clock.oscillator (ConstantDriftOscillator, id=4)    50% completed  (50% total)
+Setting oscillator origin, origin = 0.1.
+Handling oscillator tick event, numTicks = 100000.
+Handling tick signal, clockTime = 0.099999.
+Setting clock origin, simulationTime = 0.1, clockTime = 0.1.
+** Event #100002  t=0.1  on timeout-2 (omnetpp::cMessage)  in TestNetwork.test (Test, id=2)    50% completed  (50% total)
+Setting clock time from 0.1 to 0.1 at simtime 0.1.
+Setting clock origin, simulationTime = 0.1, clockTime = 0.1.
+** Event #100003  t=0.100001  on OscillatorTickTimer (omnetpp::cMessage)  in TestNetwork.clock.oscillator (ConstantDriftOscillator, id=4)    50% completed  (50% total)
+Setting oscillator origin, origin = 0.100001.
+Handling oscillator tick event, numTicks = 100001.
+Handling tick signal, clockTime = 0.1.
+Setting clock origin, simulationTime = 0.100001, clockTime = 0.100002.
+
+%contains: stdout
+** Event #200001  t=0.199999  on OscillatorTickTimer (omnetpp::cMessage)  in TestNetwork.clock.oscillator (ConstantDriftOscillator, id=4)    99% completed  (99% total)
+Setting oscillator origin, origin = 0.199999.
+Handling oscillator tick event, numTicks = 199999.
+Handling tick signal, clockTime = 0.299996.
+Setting clock origin, simulationTime = 0.199999, clockTime = 0.299998.
+
+%contains: stdout
+** Event #200002  t=0.2  on OscillatorTickTimer (omnetpp::cMessage)  in TestNetwork.clock.oscillator (ConstantDriftOscillator, id=4)    100% completed  (100% total)
+Setting oscillator origin, origin = 0.2.
+Handling oscillator tick event, numTicks = 200000.
+Handling tick signal, clockTime = 0.299998.
+Setting clock origin, simulationTime = 0.2, clockTime = 0.3.

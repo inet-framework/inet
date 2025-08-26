@@ -1,0 +1,55 @@
+%description:
+Tests clock oscillator compensation factor without using tick events.
+The clock is compensated to move faster then the oscillator tick rate.
+
+%includes:
+#include "inet/clock/model/SettableClock.h"
+
+using namespace omnetpp;
+using namespace inet;
+
+%file: TestNetwork.ned
+
+import inet.clock.model.SettableClock;
+
+network TestNetwork
+{
+    submodules:
+        test: Test;
+        clock: SettableClock;
+}
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+network = TestNetwork
+
+*.clock.initialOscillatorCompensation = 100000ppm
+*.clock.oscillator.nominalTickLength = 1us
+
+%activity:
+
+#define CHECK(x) { auto r = clock->x; std::cout << "CHECK: " << #x << " -> "<< r << std::endl; }
+
+auto clock = check_and_cast<SettableClock *>(cSimulation::getActiveSimulation()->getModuleByPath("clock"));
+CHECK(computeSimTimeFromClockTime(0));
+CHECK(computeSimTimeFromClockTime(0.000001)); // no compensation yet
+CHECK(computeSimTimeFromClockTime(0.000011));
+CHECK(computeSimTimeFromClockTime(0.11));
+
+CHECK(computeClockTimeFromSimTime(0));
+CHECK(computeClockTimeFromSimTime(0.000001)); // no compensation yet
+CHECK(computeClockTimeFromSimTime(0.00001));
+CHECK(computeClockTimeFromSimTime(0.1));
+
+%postrun-command: grep CHECK test.out > filtered.out
+
+%contains: filtered.out
+CHECK: computeSimTimeFromClockTime(0) -> 0
+CHECK: computeSimTimeFromClockTime(0.000001) -> 0.000001
+CHECK: computeSimTimeFromClockTime(0.000011) -> 0.00001
+CHECK: computeSimTimeFromClockTime(0.11) -> 0.1
+CHECK: computeClockTimeFromSimTime(0) -> 0
+CHECK: computeClockTimeFromSimTime(0.000001) -> 0.000001
+CHECK: computeClockTimeFromSimTime(0.00001) -> 0.000011
+CHECK: computeClockTimeFromSimTime(0.1) -> 0.11
