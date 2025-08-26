@@ -514,6 +514,93 @@ std::vector<uint8_t> protectPacket(std::vector<uint8_t> datagram, uint32_t packe
     return datagram;
 }
 
+std::vector<uint8_t> unprotectPacket(std::vector<uint8_t> protectedDatagram, const EncryptionKey& key) {
+    // Input validation
+    //ASSERT(protectedDatagram.size() >= packetNumberOffset + packetNumberLength + 16); // Must have at least header + auth tag
+    //ASSERT(packetNumberLength > 0 && packetNumberLength <= 4);
+
+    ptls_cipher_suite_t *cs = &ptls_openssl_opp_aes128gcmsha256;
+    size_t originalSize = protectedDatagram.size() - 16; // Remove auth tag size
+
+    std::cout << "unprotectPacket: protected size: " << protectedDatagram.size() << std::endl;
+    /*
+    std::cout << "unprotectPacket: expected packet number: " << packetNumber << std::endl;
+    std::cout << "unprotectPacket: packet number offset: " << packetNumberOffset << std::endl;
+    std::cout << "unprotectPacket: packet number length: " << packetNumberLength << std::endl;
+    */
+    std::cout << "unprotectPacket: key: " << std::endl;
+    key.dump();
+    std::cout << "unprotecting datagram" << std::endl;
+    std::cout << EncryptionKey::bytes2hex(protectedDatagram) << std::endl;
+
+    // Generate AEAD and cipher contexts for decryption
+    ptls_aead_context_t *packet_protect = ptls_aead_new_direct(cs->aead, false, key.key.data(), key.iv.data()); // false = decrypt
+    ptls_cipher_context_t *header_protect = ptls_cipher_new(cs->aead->ctr_cipher, false, key.hpkey.data()); // false = decrypt
+
+    size_t payload_from = packetNumberOffset + packetNumberLength;
+
+    // Step 1: Remove header protection first (critical order!)
+    ptls_aead_supplementary_encryption_t supp = {.ctx = header_protect,
+                                                 .input = protectedDatagram.data() + payload_from + 4 - packetNumberLength};
+
+    // Generate the supplementary encryption to get the mask
+    ptls_aead_encrypt_s(packet_protect, protectedDatagram.data() + payload_from, protectedDatagram.data() + payload_from,
+                                   originalSize - payload_from,
+                                   packetNumber,
+                                   protectedDatagram.data(), payload_from, &supp);
+
+    // Remove header protection by XORing with the mask
+    uint8_t headerForm = (protectedDatagram[0] >> 7) & 0x01;
+    protectedDatagram[0] ^= supp.output[0] & ((headerForm == PACKET_HEADER_FORM_LONG) ? 0xf : 0x1f);
+
+    int packetNumberLength = (protectedDatagram[0] & 0x3) + 1;
+
+    // Remove packet number protection
+    for (size_t i = 0; i != packetNumberLength; ++i)
+        protectedDatagram[packetNumberOffset + i] ^= supp.output[i + 1];
+
+    // Step 2: Verify the now-unprotected packet number
+    uint32_t extractedPacketNumber = 0;
+    for (size_t i = 0; i < packetNumberLength; i++) {
+        extractedPacketNumber = (extractedPacketNumber << 8) | protectedDatagram[packetNumberOffset + i];
+    }
+    ASSERT(extractedPacketNumber == packetNumber);
+
+    // Step 3: Decrypt the payload and verify authentication tag
+    std::vector<uint8_t> unprotectedDatagram = protectedDatagram;
+    unprotectedDatagram.resize(originalSize); // Remove space for auth tag
+
+    // Recreate contexts for actual decryption
+    ptls_aead_free(packet_protect);
+    ptls_cipher_free(header_protect);
+
+    packet_protect = ptls_aead_new_direct(cs->aead, false, key.key.data(), key.iv.data());
+    header_protect = ptls_cipher_new(cs->aead->ctr_cipher, false, key.hpkey.data());
+
+    ptls_aead_supplementary_encryption_t decrypt_supp = {.ctx = header_protect,
+                                                        .input = unprotectedDatagram.data() + payload_from + 4 - packetNumberLength};
+
+
+// inline size_t ptls_aead_decrypt(ptls_aead_context_t *ctx, void *output, const void *input, size_t inlen, uint64_t seq,
+//                                 const void *aad, size_t aadlen)
+
+
+    // ptls_aead_decrypt(aead, packet->octets.base + aead_off, packet->octets.base + aead_off, packet->octets.len - aead_off,
+    //                         pn, packet->octets.base, aead_off);
+
+    // Cleanup
+    ptls_aead_free(packet_protect);
+    ptls_cipher_free(header_protect);
+
+    if (decrypted_len == SIZE_MAX) {
+        throw cRuntimeError("QUIC packet decryption failed: authentication tag verification failed or corrupted data");
+    }
+
+    std::cout << "unprotected datagram" << std::endl;
+    std::cout << EncryptionKey::bytes2hex(unprotectedDatagram) << std::endl;
+    return unprotectedDatagram;
+}
+
 void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, b offset, b length) const
 {
     const auto payload = staticPtrCast<const EncryptedQuicPacketChunk>(chunk)->getChunk();
@@ -633,7 +720,7 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
     // TODO: handle sub-byte offset and length
     stream.writeBytes(finalContents, offset, length < b(0) ? B(-1) : B(length));
 
-    return;
+    //return;
 
     // ----------------
 
@@ -848,7 +935,28 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
         ASSERT(expectedClientAckProtectedData[i] == testClientAckFinalContents[i]);
     }
 
+    // Test unprotectPacket with the test vectors to verify it correctly reverses protectPacket
 
+    // Test 1: Client Initial Packet
+    std::vector<uint8_t> unprotectedClientData = unprotectPacket(testClientFinalContents, 0, 23, 1, testClientKey);
+    ASSERT(unprotectedClientData.size() == testClientUnprotectedData.size());
+    for (int i = 0; i < testClientUnprotectedData.size(); i++) {
+        ASSERT(testClientUnprotectedData[i] == unprotectedClientData[i]);
+    }
+
+    // Test 2: Server Initial Packet
+    std::vector<uint8_t> unprotectedServerData = unprotectPacket(testFinalContents, 0, 20, 1, testServerKey);
+    ASSERT(unprotectedServerData.size() == testUnprotectedData.size());
+    for (int i = 0; i < testUnprotectedData.size(); i++) {
+        ASSERT(testUnprotectedData[i] == unprotectedServerData[i]);
+    }
+
+    // Test 3: Client ACK Packet
+    std::vector<uint8_t> unprotectedClientAckData = unprotectPacket(testClientAckFinalContents, 1, 20, 1, testClientKey);
+    ASSERT(unprotectedClientAckData.size() == testClientAckUnprotectedData.size());
+    for (int i = 0; i < testClientAckUnprotectedData.size(); i++) {
+        ASSERT(testClientAckUnprotectedData[i] == unprotectedClientAckData[i]);
+    }
 
 }
 
