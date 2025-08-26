@@ -23,6 +23,9 @@ class INET_API ClockEvent : public ClockEvent_Base
   friend SettableClock;
 
   protected:
+    uint64_t insertionOrder = 0;
+
+  protected:
     virtual void execute() override;
 
     void callBaseExecute() { ClockEvent_Base::execute(); }
@@ -37,6 +40,9 @@ class INET_API ClockEvent : public ClockEvent_Base
         return *this;
     }
     virtual ClockEvent *dup() const override { return new ClockEvent(*this); }
+
+    uint64_t getInsertionOrder() const { return insertionOrder; }
+    void setInsertionOrder(uint64_t insertionOrder) { this->insertionOrder = insertionOrder; }
 };
 
 } // namespace inet
