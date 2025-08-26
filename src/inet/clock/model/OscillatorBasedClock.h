@@ -10,6 +10,7 @@
 
 #include "inet/clock/base/ClockBase.h"
 #include "inet/clock/contract/IOscillator.h"
+#include "inet/common/SimTimeScale.h"
 #include "inet/common/Units.h"
 
 namespace inet {
@@ -75,7 +76,7 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
     virtual clocktime_t getClockTime() const override;
 
     virtual const IOscillator *getOscillator() const { return oscillator; }
-    virtual ppm getOscillatorCompensation() const { return ppm(0); }
+    virtual SimTimeScale getOscillatorCompensation() const { return SimTimeScale(); }
 
     virtual clocktime_t computeClockTimeFromSimTime(simtime_t t) const override;
     virtual simtime_t computeSimTimeFromClockTime(clocktime_t t, bool lowerBound = true) const override;
