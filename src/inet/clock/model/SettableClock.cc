@@ -8,7 +8,10 @@
 #include "inet/clock/model/SettableClock.h"
 
 #include "inet/clock/base/DriftingOscillatorBase.h"
+#include "inet/common/IPrintableObject.h"
 #include "inet/common/XMLUtils.h"
+
+#include <algorithm>
 
 namespace inet {
 
@@ -78,7 +81,7 @@ void SettableClock::setClockTime(clocktime_t newClockTime, ppm oscillatorCompens
                 driftingOscillator->setTickOffset(0);
         }
         simtime_t currentSimTime = simTime();
-        EV_DEBUG << "Setting clock time from " << oldClockTime << " to " << newClockTime << " at simtime " << currentSimTime << ".\n";
+        EV_INFO << "Setting clock time from " << oldClockTime << " to " << newClockTime << " at simtime " << currentSimTime << ".\n";
         for (auto event : events)
             if (event->getRelative())
                 event->setArrivalClockTime(event->getArrivalClockTime() + clockDelta);
@@ -87,11 +90,11 @@ void SettableClock::setClockTime(clocktime_t newClockTime, ppm oscillatorCompens
         {
             std::pop_heap(events.begin(), events.end(), compareClockEvents);
             auto event = events.back();
+            events.pop_back();
             ASSERT(!event->getRelative());
-            events.erase(std::remove(events.begin(), events.end(), event), events.end());
             switch (getOverdueClockEventHandlingMode(event)) {
                 case EXECUTE: {
-                    EV_WARN << "Executing overdue clock event " << event->getName() << ".\n";
+                    EV_WARN << "Executing clock event " << event->getName() << ".\n";
                     cSimpleModule *targetModule = check_and_cast<cSimpleModule *>(event->getArrivalModule());
                     cContextSwitcher contextSwitcher(targetModule);
                     setOrigin(currentSimTime, event->getArrivalClockTime());
@@ -117,12 +120,32 @@ void SettableClock::setClockTime(clocktime_t newClockTime, ppm oscillatorCompens
         this->oscillatorCompensation = oscillatorCompensation;
         setOrigin(currentSimTime, newClockTime);
         if (useFutureEventSet) {
+            std::sort(events.begin(), events.end(), cEvent::compareBySchedulingOrder);
             for (auto event : events) {
                 cSimpleModule *targetModule = check_and_cast<cSimpleModule *>(event->getArrivalModule());
                 cContextSwitcher contextSwitcher(targetModule);
-                targetModule->rescheduleAt(computeScheduleTime(event->getArrivalClockTime()), event);
+                clocktime_t arrivalClockTime = event->getArrivalClockTime();
+                simtime_t arrivalSimulationTime = computeScheduleTime(arrivalClockTime);
+                EV_DEBUG << "Rescheduling clock event at" << EV_FIELD(arrivalClockTime) << EV_FIELD(arrivalSimulationTime) << EV_FIELD(event) << EV_ENDL;
+                targetModule->rescheduleAt(arrivalSimulationTime, event);
                 checkClockEvent(event);
             }
+        }
+        else {
+            clocktime_t clockTime = getClockTime();
+            std::make_heap(events.begin(), events.end(), compareClockEvents);
+            while (!events.empty() && events.front()->getArrivalClockTime() <= clockTime)
+            {
+                std::pop_heap(events.begin(), events.end(), compareClockEvents);
+                auto event = events.back();
+                events.pop_back();
+                event->setClock(nullptr);
+                cSimpleModule *targetModule = check_and_cast<cSimpleModule *>(event->getArrivalModule());
+                cContextSwitcher contextSwitcher(targetModule);
+                EV_DEBUG << "Executing clock event" << EV_FIELD(clockTime) << EV_FIELD(event) << EV_ENDL;
+                event->execute();
+            }
+            checkAllClockEvents();
         }
         emit(timeChangedSignal, newClockTime.asSimTime());
     }

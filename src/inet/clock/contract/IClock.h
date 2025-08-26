@@ -13,25 +13,36 @@
 
 namespace inet {
 
-#undef CLOCK_LOG_IMPELEMENTATION
+struct NullStream {
+    template<typename T>
+    NullStream& operator<<(const T&) { return *this; }
+    NullStream& operator<<(std::ostream& (*)(std::ostream&)) { return *this; }
+};
 
-extern std::ostringstream devnull;
+extern NullStream nullStream;
 
-#ifndef CLOCK_LOG_IMPELEMENTATION
+#ifndef CLOCK_LOG_IMPLEMENTATION
   #include <sstream>
-  #define CLOCK_COUT devnull
+  #define CLOCK_COUT nullStream
 #else
   #include <iostream>
   #include <iomanip>
   #define CLOCK_COUT !stdcoutenabled ? devnull : std::cout << std::setprecision(24) << std::string(stdcoutindent * 3, ' ')
 #endif
 
-#undef CLOCK_CHECK_IMPLEMENTATION
+#define CLOCK_CHECK_IMPLEMENTATION
 
 #ifdef CLOCK_CHECK_IMPLEMENTATION
-#define ASSERTCMP(cmp, o1, o2) { ClockCoutDisabledBlock b; auto _o1 = (o1); auto _o2 = (o2); if (!(_o1 cmp _o2)) std::cout << "*** Assertion: " << #o1 << " " << #cmp << " " << #o2 << " as " << _o1 << " " << #cmp << " " << _o2 << " fails." << std::endl; ASSERT(o1 cmp o2); }
+#define ASSERTCMP(cmp, o1, o2) { \
+    ClockCoutDisabledBlock b; auto _o1 = (o1); auto _o2 = (o2); \
+    if (!(_o1 cmp _o2)) { \
+        std::ostringstream oss; \
+        oss << "ASSERT: Condition '" << #o1 << " " << #cmp << " " << #o2 << "' as '" << _o1 << " " << #cmp << " " << _o2 << "' does not hold in function '%s' at %s:%d"; \
+        throw omnetpp::cRuntimeError(oss.str().c_str(), __FUNCTION__, __FILE__, __LINE__); \
+    } \
+}
 #else
-#define ASSERTCMP(cmp, o1, o2) ;
+#define ASSERTCMP(cmp, o1, o2) { (void)(o1); (void)(o2); }
 #endif
 
 extern bool clockCoutEnabled;
@@ -141,6 +152,8 @@ class INET_API IClock
      * internal data structures related to individual clock events.
      */
     virtual void handleClockEvent(ClockEvent *event) = 0;
+
+    virtual bool isScheduledClockEvent(ClockEvent *event) const = 0;
 };
 
 } // namespace inet

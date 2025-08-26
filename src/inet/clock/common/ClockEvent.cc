@@ -8,6 +8,7 @@
 #include "inet/clock/common/ClockEvent.h"
 
 #include "inet/clock/contract/IClock.h"
+#include "inet/common/IPrintableObject.h"
 
 namespace inet {
 
@@ -15,9 +16,13 @@ Register_Class(ClockEvent)
 
 void ClockEvent::execute()
 {
+    cSimpleModule *targetModule = check_and_cast<cSimpleModule *>(getTargetObject());
+    cContextSwitcher contextSwitcher(targetModule);
     if (clock != nullptr) {
+        clocktime_t clockTime = clock->getClockTime();
+        EV_DEBUG << "Executing clock event" << EV_FIELD(clockTime) << EV_FIELD(event, this) << EV_ENDL;
         // NOTE: IClock interface 2. invariant
-        ASSERT(getArrivalClockTime() == clock->getClockTime());
+        ASSERT(getArrivalClockTime() == clockTime);
         clock->handleClockEvent(this);
     }
     else {
