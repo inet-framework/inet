@@ -61,6 +61,7 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
     clocktime_t clockTimeCompensation;
 
     uint64_t lastNumTicks = 0;
+    clocktime_t clockTimeBeforeOscillatorStateChange = -1;
 
     std::vector<ClockEvent *> events;
 
