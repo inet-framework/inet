@@ -22,6 +22,7 @@ all_fingerprint_ingredients = ["tplx", "~tNl", "~tND", "tyf"]
 all_fingerprint_ingredients_append_args = {
     "~tNl": {},
     "~tND": {"--**.checksumMode=\"computed\"",
+             "--**.crcMode=\"computed\"",
              "--**.fcsMode=\"computed\""},
     "tyf" : {"--cmdenv-fake-gui=true",
              "--cmdenv-fake-gui-before-event-probability=0.1",
