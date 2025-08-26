@@ -19,10 +19,10 @@ using namespace units::values;
 static bool compareClockEvents(const ClockEvent *e1, const ClockEvent *e2) {
     return e2->getArrivalClockTime() < e1->getArrivalClockTime() ? true :
            e2->getArrivalClockTime() > e1->getArrivalClockTime() ? false :
-           e2->getSchedulingPriority() == e1->getSchedulingPriority() ? e2->getInsertOrder() < e1->getInsertOrder() :
+           e2->getSchedulingPriority() == e1->getSchedulingPriority() ? e2->getInsertionOrder() < e1->getInsertionOrder() :
            e2->getSchedulingPriority() < e1->getSchedulingPriority() ? true :
            e2->getSchedulingPriority() > e1->getSchedulingPriority() ? false :
-           e2->getInsertOrder() < e1->getInsertOrder();
+           e2->getInsertionOrder() < e1->getInsertionOrder();
 }
 
 /**
@@ -38,9 +38,14 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
 {
   protected:
     bool useFutureEventSet = false;
+    uint64_t insertionCount = 0;
     IOscillator *oscillator = nullptr;
     int64_t (*roundingFunction)(int64_t, int64_t) = nullptr;
 
+    /**
+     * The lower bound of the simulation time where the clock time equals with origin clock time.
+     */
+    simtime_t originSimulationTimeLowerBound;
     /**
      * The simulation time from which the clock computes the mapping between future simulation times and clock times.
      */
@@ -49,11 +54,20 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
      * The clock time from which the clock computes the mapping between future simulation times and clock times.
      */
     clocktime_t originClockTime;
+    /**
+     * The clock time accumulated from the oscillator compensation.
+     */
+    clocktime_t clockTimeCompensation;
+
+    uint64_t lastNumTicks = 0;
 
     std::vector<ClockEvent *> events;
 
+    cMessage *executeEventsTimer = nullptr;
+
   protected:
     virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *message) override;
 
     virtual void scheduleTargetModuleClockEventAt(simtime_t time, ClockEvent *event) override;
     virtual void scheduleTargetModuleClockEventAfter(simtime_t time, ClockEvent *event) override;
@@ -84,10 +98,11 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
     virtual void scheduleClockEventAfter(clocktime_t delay, ClockEvent *event) override;
     virtual ClockEvent *cancelClockEvent(ClockEvent *event) override;
     virtual void handleClockEvent(ClockEvent *event) override;
+    virtual bool isScheduledClockEvent(ClockEvent *event) const override;
 
     virtual std::string resolveDirective(char directive) const override;
 
-    virtual void receiveSignal(cComponent *source, int signal, long value, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, int signal, uintval_t value, cObject *details) override;
     virtual void receiveSignal(cComponent *source, int signal, cObject *obj, cObject *details) override;
 };
 

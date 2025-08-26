@@ -8,6 +8,7 @@
 #ifndef __INET_OSCILLATORBASE_H
 #define __INET_OSCILLATORBASE_H
 
+#include "inet/clock/contract/IClock.h"
 #include "inet/clock/contract/IOscillator.h"
 #include "inet/common/SimpleModule.h"
 
@@ -21,7 +22,7 @@ class INET_API OscillatorBase : public SimpleModule, public IOscillator
   protected:
     cMessage *tickTimer = nullptr;
 
-    int64_t numTicks = 0;
+    uint64_t numTicks = -1;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
