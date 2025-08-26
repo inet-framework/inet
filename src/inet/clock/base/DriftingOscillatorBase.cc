@@ -23,8 +23,8 @@ void DriftingOscillatorBase::initialize(int stage)
         else if (std::abs(nominalTickLength.dbl() - nominalTickLengthAsDouble) / nominalTickLengthAsDouble > 1E-15)
             throw cRuntimeError("The nominalTickLength parameter value %lg cannot be accurately represented with the current simulation time precision, conversion result: %s", nominalTickLengthAsDouble, nominalTickLength.ustr().c_str());
         setOrigin(simTime());
+        driftFactor = SimTimeScale::fromPpm(driftRate.get<ppm>());
         numTicksAtOrigin = 0;
-        driftFactor = 1.0L + driftRate.get() / 1E+6L;
         // TODO check the relationship between nominalTickLength and simulation time precision and fail if they are too close (whatever that means) use a parameter for this? minimum
 
         // TODO check if tick becomes smaller than what can be represented in simtime and error out
@@ -83,7 +83,7 @@ void DriftingOscillatorBase::setDriftRate(ppm newDriftRate)
         simtime_t oldCurrentTickLength = getCurrentTickLength();
         simtime_t baseTickTime = origin + nextTickFromOrigin - oldCurrentTickLength;
         simtime_t elapsedTickTime = fmod(currentSimTime - baseTickTime, oldCurrentTickLength);
-        long double newDriftFactor = 1.0L + newDriftRate.get() / 1E+6L;
+        SimTimeScale newDriftFactor = SimTimeScale::fromPpm(newDriftRate.get<ppm>());
         simtime_t remainingTickTime = oldCurrentTickLength - elapsedTickTime;
         nextTickFromOrigin = SimTime::fromRaw(remainingTickTime.raw() * driftFactor / newDriftFactor);
         driftRate = newDriftRate;
