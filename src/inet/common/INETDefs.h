@@ -29,6 +29,7 @@
 
 namespace inet {
 using namespace omnetpp;
+using omnetpp::operator<<;
 } // namespace inet
 
 #if OMNETPP_VERSION < 0x0600 || OMNETPP_BUILDNUM < 1531
