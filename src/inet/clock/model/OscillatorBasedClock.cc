@@ -339,10 +339,12 @@ void OscillatorBasedClock::receiveSignal(cComponent *source, int signal, cObject
         checkAllClockEvents();
         setOrigin(simTime(), clockTime);
         checkAllClockEvents();
+        clockTimeBeforeOscillatorStateChange = clockTime;
     }
     else if (signal == IOscillator::postOscillatorStateChangedSignal) {
         clocktime_t clockTime = getClockTime();
         EV_DEBUG << "Handling post-oscillator state changed signal" << EV_FIELD(clockTime) << EV_ENDL;
+        ASSERTCMP(==, clockTimeBeforeOscillatorStateChange, clockTime);
         if (useFutureEventSet) {
             simtime_t currentSimTime = simTime();
             std::sort(events.begin(), events.end(), cEvent::compareBySchedulingOrder);
