@@ -52,28 +52,29 @@ clocktime_t ClockBase::getClockTime() const
 {
     clocktime_t currentClockTime = computeClockTimeFromSimTime(simTime());
     // NOTE: IClock interface 1. invariant
-    ASSERTCMP(>=, currentClockTime, lastClockTime);
+    DEBUG_CMP(currentClockTime, >=, lastClockTime);
     lastClockTime = currentClockTime;
     return currentClockTime;
 }
 
 simtime_t ClockBase::computeScheduleTime(clocktime_t clockTime)
 {
-    ClockCoutIndent indent;
-    CLOCK_COUT << "-> computeScheduleTime(" << clockTime << ")\n";
+    DEBUG_ENTER(true, clockTime);
     simtime_t currentSimulationTime = simTime();
     simtime_t lowerSimulationTime = computeSimTimeFromClockTime(clockTime, true);
+    DEBUG_OUT << DEBUG_FIELD(lowerSimulationTime) << std::endl;
     simtime_t result;
     if (lowerSimulationTime >= currentSimulationTime)
         result = lowerSimulationTime;
     else {
         simtime_t upperSimulationTime = computeSimTimeFromClockTime(clockTime, false);
+        DEBUG_OUT << DEBUG_FIELD(upperSimulationTime) << std::endl;
         if (currentSimulationTime < upperSimulationTime)
             result = currentSimulationTime;
         else
             result = lowerSimulationTime; // NOTE: upperSimulationTime is exclusive
     }
-    CLOCK_COUT << "   computeScheduleTime(" << clockTime << ") -> " << result << std::endl;
+    DEBUG_LEAVE(result);
     return result;
 }
 

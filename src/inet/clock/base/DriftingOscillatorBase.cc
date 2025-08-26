@@ -11,6 +11,9 @@
 
 namespace inet {
 
+simsignal_t DriftingOscillatorBase::driftRateChangedSignal = cComponent::registerSignal("driftRateChanged");
+simsignal_t DriftingOscillatorBase::frequencyCompensationRateChangedSignal = cComponent::registerSignal("frequencyCompensationRateChanged");
+
 void DriftingOscillatorBase::initialize(int stage)
 {
     OscillatorBase::initialize(stage);
@@ -22,19 +25,9 @@ void DriftingOscillatorBase::initialize(int stage)
         else if (std::abs(nominalTickLength.dbl() - nominalTickLengthAsDouble) / nominalTickLengthAsDouble > 1E-15)
             throw cRuntimeError("The nominalTickLength parameter value %lg cannot be accurately represented with the current simulation time precision, conversion result: %s", nominalTickLengthAsDouble, nominalTickLength.ustr().c_str());
         setOrigin(simTime());
-        driftFactor = SimTimeScale::fromPpm(driftRate.get<ppm>());
+        setDriftFactor(SimTimeScale::fromPpm(driftRate.get<ppm>()));
         numTicksAtOrigin = 0;
-        // TODO check the relationship between nominalTickLength and simulation time precision and fail if they are too close (whatever that means) use a parameter for this? minimum
-
-        // TODO check if tick becomes smaller than what can be represented in simtime and error out
-        // TODO what if the precision is just not enough to represent the tick properly
-        // TODO should there be some wrap around calculation to check that?
         simtime_t currentTickLength = getCurrentTickLength();
-        if (driftRate != ppm(0)) {
-            simtime_t roundTripNominalTickLength = SimTime::fromRaw(driftFactor.raw() > 0 ? driftFactor.mulCeil(currentTickLength.raw()) : driftFactor.mulFloor(currentTickLength.raw()));
-            ASSERTCMP(!=, nominalTickLength, currentTickLength);
-            ASSERTCMP(==, nominalTickLength, roundTripNominalTickLength);
-        }
         simtime_t tickOffset = par("tickOffset");
         if (tickOffset < 0 || tickOffset >= currentTickLength)
             throw cRuntimeError("First tick offset must be in the range [0, currentTickLength)");
@@ -43,6 +36,9 @@ void DriftingOscillatorBase::initialize(int stage)
         WATCH(nominalTickLength);
         WATCH(driftRate);
         WATCH(driftFactor);
+        WATCH(frequencyCompensationRate);
+        WATCH(frequencyCompensationFactor);
+        WATCH(effectiveTickLengthFactor);
         WATCH(nextTickFromOrigin);
     }
 }
@@ -67,8 +63,8 @@ void DriftingOscillatorBase::scheduleTickTimer()
 void DriftingOscillatorBase::setOrigin(simtime_t origin)
 {
     EV_DEBUG << "Setting oscillator origin" << EV_FIELD(origin) << EV_ENDL;
-    ASSERTCMP(<=, origin, simTime());
-    ASSERTCMP(<=, this->origin, origin);
+    DEBUG_CMP(origin, <=, simTime());
+    DEBUG_CMP(this->origin, <=, origin);
     numTicksAtOrigin += computeTicksForInterval(origin - this->origin);
     this->origin = origin;
 }
@@ -87,18 +83,38 @@ void DriftingOscillatorBase::setDriftRate(ppm newDriftRate)
         simtime_t remainingTickTime = oldCurrentTickLength - elapsedTickTime;
         nextTickFromOrigin = SimTime::fromRaw(remainingTickTime.raw() * driftFactor / newDriftFactor);
         driftRate = newDriftRate;
-        driftFactor = newDriftFactor;
-        if (driftRate != ppm(0)) {
-            simtime_t newCurrentTickLength = getCurrentTickLength();
-            ASSERTCMP(!=, nominalTickLength, newCurrentTickLength);
-            ASSERTCMP(==, nominalTickLength, SimTime::fromRaw(roundl(newCurrentTickLength.raw() * driftFactor)));
-        }
+        setDriftFactor(newDriftFactor);
         setOrigin(currentSimTime);
         if (tickTimer) {
             cancelEvent(tickTimer);
             scheduleTickTimer();
         }
         emit(driftRateChangedSignal, driftRate.get<ppm>());
+        emit(postOscillatorStateChangedSignal, this);
+    }
+}
+
+void DriftingOscillatorBase::setFrequencyCompensationRate(ppm newFrequencyCompensationRate)
+{
+    Enter_Method("setFrequencyCompensation");
+    if (newFrequencyCompensationRate != frequencyCompensationRate) {
+        emit(preOscillatorStateChangedSignal, this);
+        simtime_t currentSimTime = simTime();
+        EV_INFO << "Setting frequency compensation rate from " << frequencyCompensationRate << " to " << newFrequencyCompensationRate << " at simtime " << currentSimTime << ".\n";
+        simtime_t oldCurrentTickLength = getCurrentTickLength();
+        simtime_t baseTickTime = origin + nextTickFromOrigin - oldCurrentTickLength;
+        simtime_t elapsedTickTime = fmod(currentSimTime - baseTickTime, oldCurrentTickLength);
+        SimTimeScale newFrequencyCompensationFactor = SimTimeScale::fromPpm(newFrequencyCompensationRate.get<ppm>());
+        simtime_t remainingTickTime = oldCurrentTickLength - elapsedTickTime;
+        nextTickFromOrigin = SimTime::fromRaw(remainingTickTime.raw() * frequencyCompensationFactor / newFrequencyCompensationFactor);
+        frequencyCompensationRate = newFrequencyCompensationRate;
+        setFrequencyCompensationFactor(newFrequencyCompensationFactor);
+        setOrigin(currentSimTime);
+        if (tickTimer) {
+            cancelEvent(tickTimer);
+            scheduleTickTimer();
+        }
+        emit(frequencyCompensationRateChangedSignal, frequencyCompensationRate.get<ppm>());
         emit(postOscillatorStateChangedSignal, this);
     }
 }
@@ -123,84 +139,91 @@ void DriftingOscillatorBase::setTickOffset(simtime_t newTickOffset)
     }
 }
 
+void DriftingOscillatorBase::setDriftFactor(SimTimeScale driftFactor)
+{
+    this->driftFactor = driftFactor;
+    setEffectiveTickLengthFactor(driftFactor * frequencyCompensationFactor);
+}
+
+void DriftingOscillatorBase::setFrequencyCompensationFactor(SimTimeScale frequencyCompensationFactor)
+{
+    this->frequencyCompensationFactor = frequencyCompensationFactor;
+    setEffectiveTickLengthFactor(driftFactor * frequencyCompensationFactor);
+}
+
+void DriftingOscillatorBase::setEffectiveTickLengthFactor(SimTimeScale effectiveTickLengthFactor)
+{
+    const simtime_t roundTripNominalTickLengthLowerBound = SimTime::fromRaw(effectiveTickLengthFactor.mulCeil(effectiveTickLengthFactor.divFloor(nominalTickLength.raw())));
+    const simtime_t roundTripNominalTickLengthUpperBound = SimTime::fromRaw(effectiveTickLengthFactor.mulFloor(effectiveTickLengthFactor.divCeil(nominalTickLength.raw())));
+    DEBUG_CMP(roundTripNominalTickLengthLowerBound, <=, nominalTickLength);
+    DEBUG_CMP(nominalTickLength, <=, roundTripNominalTickLengthUpperBound);
+    this->effectiveTickLengthFactor = effectiveTickLengthFactor;
+}
+
 simtime_t DriftingOscillatorBase::getCurrentTickLength() const
 {
-    if (driftFactor.raw() > 0)
-        return SimTime::fromRaw(driftFactor.divFloor(nominalTickLength.raw()));
-    else  if (driftFactor.raw() < 0)
-        return SimTime::fromRaw(driftFactor.divCeil(nominalTickLength.raw()));
+    if (effectiveTickLengthFactor.raw() > 0) // effectiveTickLengthFactor > 1
+        return SimTime::fromRaw(effectiveTickLengthFactor.divFloor(nominalTickLength.raw()));
+    else  if (effectiveTickLengthFactor.raw() < 0) // effectiveTickLengthFactor < 1
+        return SimTime::fromRaw(effectiveTickLengthFactor.divCeil(nominalTickLength.raw()));
     else
-        return nominalTickLength;
+        return nominalTickLength; // effectiveTickLengthFactor == 1
 }
 
 int64_t DriftingOscillatorBase::doComputeTicksForInterval(simtime_t timeInterval) const
 {
-    ClockCoutIndent indent;
-    CLOCK_COUT << "-> computeTicksForInterval(" << timeInterval.raw() << ")\n";
-    CLOCK_COUT << "   : " << "driftFactor = " << driftFactor << ", "
-                          << "nextTickFromOrigin = " << nextTickFromOrigin << ", "
-                          << "nominalTickLength = " << nominalTickLength << std::endl;
-    if (timeInterval == 0)
-        return 0;
+    DEBUG_ENTER(false, timeInterval);
+    DEBUG_OUT << DEBUG_FIELD(driftFactor) << DEBUG_FIELD(frequencyCompensationFactor) << DEBUG_FIELD(nextTickFromOrigin) << DEBUG_FIELD(nominalTickLength) << std::endl;
     int64_t result;
-    if (!computeAsSeparateTicks)
-        result = floorl((timeInterval - nextTickFromOrigin).raw() * driftFactor / nominalTickLength.raw()) + 1;
-    else {
-        result = 1;
-        simtime_t t = timeInterval - nextTickFromOrigin;
-        simtime_t currentTickLength = getCurrentTickLength();
-        if (t < 0) {
-            int64_t count = ceil(-t / currentTickLength);
-            result -= count;
-            t += count * currentTickLength;
-        }
-        if (t >= currentTickLength) {
-            int64_t count = floor(t / currentTickLength);
-            result += count;
-            t -= count * currentTickLength;
-        }
-    }
-    if (result < 0)
+    if (timeInterval == 0)
         result = 0;
-    CLOCK_COUT << "   computeTicksForInterval(" << timeInterval.raw() << ") -> " << result << std::endl;
+    else {
+        auto divFloor = [] (simtime_raw_t a, simtime_raw_t b) -> simtime_raw_t {
+            ASSERT(b > 0);
+            simtime_raw_t q = a / b;
+            simtime_raw_t r = a % b; // r has sign of a in C++
+            if (r != 0 && a < 0) --q; // adjust trunc->floor for negative a
+            return q;
+        };
+        result = divFloor(effectiveTickLengthFactor.mulFloor((timeInterval - nextTickFromOrigin).raw()), nominalTickLength.raw()) + 1;
+        if (result < 0)
+        result = 0;
+    }
+    DEBUG_LEAVE(result);
     return result;
 }
 
 simtime_t DriftingOscillatorBase::doComputeIntervalForTicks(int64_t numTicks) const
 {
-    ClockCoutIndent indent;
-    CLOCK_COUT << "-> computeIntervalForTicks(" << numTicks << ")\n";
-    CLOCK_COUT << "   : " << "driftFactor = " << driftFactor << ", "
-                          << "nextTickFromOrigin = " << nextTickFromOrigin << ", "
-                          << "nominalTickLength = " << nominalTickLength << std::endl;
-    if (numTicks == 0)
-        return 0;
+    DEBUG_ENTER(false, numTicks);
+    DEBUG_OUT << DEBUG_FIELD(driftFactor) << DEBUG_FIELD(frequencyCompensationFactor) << DEBUG_FIELD(nextTickFromOrigin) << DEBUG_FIELD(nominalTickLength) << std::endl;
     simtime_t result;
-    if (!computeAsSeparateTicks)
-        result = SimTime::fromRaw(ceill((nominalTickLength.raw() * (numTicks - 1)) / driftFactor)) + nextTickFromOrigin;
-    else
-        result = nextTickFromOrigin + (numTicks - 1) * SimTime::fromRaw(roundl(nominalTickLength.raw() / driftFactor));
-    if (result < 0)
+    if (numTicks == 0)
         result = 0;
-    CLOCK_COUT << "   computeIntervalForTicks(" << numTicks << ") -> " << result.raw() << std::endl;
+    else {
+        result = nextTickFromOrigin + SimTime::fromRaw(effectiveTickLengthFactor.divCeil(nominalTickLength.raw() * (numTicks - 1)));
+        if (result < 0)
+            result = 0;
+    }
+    DEBUG_LEAVE(result);
     return result;
 }
 
 int64_t DriftingOscillatorBase::computeTicksForInterval(simtime_t timeInterval) const
 {
-    ASSERTCMP(>=, timeInterval, 0);
+    DEBUG_CMP(timeInterval, >=, 0);
     int64_t result = doComputeTicksForInterval(timeInterval);
-    ASSERTCMP(>=, result, 0);
-    ASSERTCMP(<=, doComputeIntervalForTicks(result), timeInterval);
+    DEBUG_CMP(result, >=, 0);
+    DEBUG_CMP(doComputeIntervalForTicks(result), <=, timeInterval);
     return result;
 }
 
 simtime_t DriftingOscillatorBase::computeIntervalForTicks(int64_t numTicks) const
 {
-    ASSERTCMP(>=, numTicks, 0);
+    DEBUG_CMP(numTicks, >=, 0);
     simtime_t result = doComputeIntervalForTicks(numTicks);
-    ASSERTCMP(>=, result, 0);
-    ASSERTCMP(==, doComputeTicksForInterval(result), numTicks);
+    DEBUG_CMP(result, >=, 0);
+    DEBUG_CMP(doComputeTicksForInterval(result), ==, numTicks);
     return result;
 }
 
@@ -211,6 +234,10 @@ void DriftingOscillatorBase::processCommand(const cXMLElement& node)
         if (const char *driftRateStr = node.getAttribute("drift-rate")) {
             ppm newDriftRate = ppm(strtod(driftRateStr, nullptr));
             setDriftRate(newDriftRate);
+        }
+        if (const char *frequencyCompensationRateStr = node.getAttribute("frequency-compensation-rate")) {
+            ppm newFrequencyCompensationRate = ppm(strtod(frequencyCompensationRateStr, nullptr));
+            setFrequencyCompensationRate(newFrequencyCompensationRate);
         }
         if (const char *tickOffsetStr = node.getAttribute("tick-offset")) {
             simtime_t newTickOffset = SimTime::parse(tickOffsetStr);
@@ -228,6 +255,8 @@ std::string DriftingOscillatorBase::resolveDirective(char directive) const
             return getCurrentTickLength().str() + " s";
         case 'd':
             return driftRate.str();
+        case 'f':
+            return frequencyCompensationRate.str();
         default:
             return OscillatorBase::resolveDirective(directive);
     }
