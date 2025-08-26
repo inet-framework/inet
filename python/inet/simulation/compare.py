@@ -17,7 +17,7 @@ class CompareSimulationsTaskResult(TaskResult):
         if multiple_task_results and multiple_task_results.result == "DONE":
             self.multiple_tasks = multiple_task_results.multiple_tasks
 
-            self.stdout_trajectory_divergence_position = self._find_stdout_trajectory_divergence_position(multiple_task_results, **self.multiple_tasks.kwargs)
+            self.stdout_trajectory_divergence_position = self._find_stdout_trajectory_divergence_position(**self.multiple_tasks.kwargs)
             if self.stdout_trajectory_divergence_position:
                 self.stdout_trajectory_comparison_result = "DIVERGENT"
                 self.stdout_trajectory_comparison_color = COLOR_YELLOW
@@ -25,7 +25,7 @@ class CompareSimulationsTaskResult(TaskResult):
                 self.stdout_trajectory_comparison_result = "IDENTICAL"
                 self.stdout_trajectory_comparison_color = COLOR_GREEN
 
-            self.fingerprint_trajectory_divergence_position = self._find_fingerprint_trajectory_divergence_position(multiple_task_results, **self.multiple_tasks.kwargs)
+            self.fingerprint_trajectory_divergence_position = self._find_fingerprint_trajectory_divergence_position(**self.multiple_tasks.kwargs)
             if self.fingerprint_trajectory_divergence_position:
                 self.fingerprint_trajectory_comparison_result = "DIVERGENT"
                 self.fingerprint_trajectory_comparison_color = COLOR_YELLOW
@@ -61,21 +61,32 @@ class CompareSimulationsTaskResult(TaskResult):
                 self.reason = self.reason + ", different statistics"
             self.reason = None if self.reason == "" else self.reason[2:]
         else:
+            self.stdout_trajectory_divergence_position = None
+            self.stdout_trajectory_comparison_result = None
+            self.stdout_trajectory_comparison_color = None
             self.fingerprint_trajectory_divergence_position = None
+            self.fingerprint_trajectory_comparison_result = None
+            self.fingerprint_trajectory_comparison_color = None
             self.different_statistical_results = pd.DataFrame()
-            self.result = multiple_task_results.result
-            self.color = multiple_task_results.color
+            self.statistical_comparison_result = None
+            self.statistical_comparison_color = None
+            self.result = multiple_task_results.result if multiple_task_results else None
+            self.color = multiple_task_results.color if multiple_task_results else None
         self.expected = self.result == "IDENTICAL"
 
     def __repr__(self):
         if self.stdout_trajectory_divergence_position:
             stdout_trajectory_divergence_description = f"\nStdout trajectory comparison result: {self.stdout_trajectory_comparison_color}{self.stdout_trajectory_comparison_result}{COLOR_RESET}\n{self.stdout_trajectory_divergence_position.get_description()}"
-        else:
+        elif self.stdout_trajectory_comparison_result:
             stdout_trajectory_divergence_description = f"\nStdout trajectory comparison result: {self.stdout_trajectory_comparison_color}{self.stdout_trajectory_comparison_result}{COLOR_RESET}"
+        else:
+            stdout_trajectory_divergence_description = ""
         if self.fingerprint_trajectory_divergence_position:
             fingerprint_trajectory_divergence_description = f"\nFingerprint trajectory comparison result: {self.fingerprint_trajectory_comparison_color}{self.fingerprint_trajectory_comparison_result}{COLOR_RESET}\n{self.fingerprint_trajectory_divergence_position.get_description()}"
-        else:
+        elif self.fingerprint_trajectory_comparison_result:
             fingerprint_trajectory_divergence_description = f"\nFingerprint trajectory comparison result: {self.fingerprint_trajectory_comparison_color}{self.fingerprint_trajectory_comparison_result}{COLOR_RESET}"
+        else:
+            fingerprint_trajectory_divergence_description = ""
         if not self.different_statistical_results.empty:
             max_num_different_statistics = 3
             different_unique_modules = self.different_statistical_results["module"].unique()
@@ -83,8 +94,10 @@ class CompareSimulationsTaskResult(TaskResult):
             different_modules = ", ".join(map(lambda s: f"{COLOR_CYAN}{s}{COLOR_RESET}", different_unique_modules[0:max_num_different_statistics])) + (", ..." if len(different_unique_modules) > max_num_different_statistics else "")
             different_statistics = ", ".join(map(lambda s: f"{COLOR_GREEN}{s}{COLOR_RESET}", different_unique_statistics[0:max_num_different_statistics])) + (", ..." if len(different_unique_statistics) > max_num_different_statistics else "")
             statistical_desription = f"\nStatistical comparison result: {self.statistical_comparison_color}{self.statistical_comparison_result}{COLOR_RESET}, summary: {str(len(self.df_1))} and {str(len(self.df_2))} TOTAL, {COLOR_GREEN}{str(len(self.identical_statistical_results))} IDENTICAL{COLOR_RESET}, {COLOR_YELLOW}{str(len(self.different_statistical_results))} DIFFERENT{COLOR_RESET}, some differences: {different_statistics} in {different_modules}"
-        else:
+        elif self.statistical_comparison_result:
             statistical_desription = f"\nStatistical comparison result: {self.statistical_comparison_color}{self.statistical_comparison_result}{COLOR_RESET}"
+        else:
+            statistical_desription = ""
         return TaskResult.__repr__(self) + stdout_trajectory_divergence_description + fingerprint_trajectory_divergence_description + statistical_desription
 
     def debug_at_stdout_divergence_position(self, num_cause_events=0, **kwargs):
@@ -178,14 +191,14 @@ class CompareSimulationsTaskResult(TaskResult):
             num_cause_events = num_cause_events - 1
         return event.getEventNumber()
 
-    def _find_stdout_trajectory_divergence_position(self, multiple_task_results, stdout_filter=None, exclude_stdout_filter=None, **kwargs):
-        stdout_trajectory_1 = multiple_task_results.results[0].get_stdout_trajectory(filter=stdout_filter, exclude_filter=exclude_stdout_filter)
-        stdout_trajectory_2 = multiple_task_results.results[1].get_stdout_trajectory(filter=stdout_filter, exclude_filter=exclude_stdout_filter)
+    def _find_stdout_trajectory_divergence_position(self, stdout_filter=None, exclude_stdout_filter=None, **kwargs):
+        stdout_trajectory_1 = self.multiple_task_results.results[0].get_stdout_trajectory(filter=stdout_filter, exclude_filter=exclude_stdout_filter)
+        stdout_trajectory_2 = self.multiple_task_results.results[1].get_stdout_trajectory(filter=stdout_filter, exclude_filter=exclude_stdout_filter)
         return find_stdout_trajectory_divergence_position(stdout_trajectory_1, stdout_trajectory_2)
 
-    def _find_fingerprint_trajectory_divergence_position(self, multiple_task_results, **kwargs):
-        fingerprint_trajectory_1 = multiple_task_results.results[0].get_fingerprint_trajectory().get_unique()
-        fingerprint_trajectory_2 = multiple_task_results.results[1].get_fingerprint_trajectory().get_unique()
+    def _find_fingerprint_trajectory_divergence_position(self, **kwargs):
+        fingerprint_trajectory_1 = self.multiple_task_results.results[0].get_fingerprint_trajectory().get_unique()
+        fingerprint_trajectory_2 = self.multiple_task_results.results[1].get_fingerprint_trajectory().get_unique()
         return find_fingerprint_trajectory_divergence_position(fingerprint_trajectory_1, fingerprint_trajectory_2)
 
     def _compare_statistical_results(self, statistical_result_name_filter=None, exclude_statistic_name_filter=None, statistical_result_module_filter=None, exclude_statistic_module_filter=None, full_match=False, **kwargs):
@@ -226,7 +239,7 @@ class CompareSimulationsTaskResult(TaskResult):
         vector_file_path = simulation_project.get_full_path(os.path.join(working_directory, simulation_task_result.vector_file_path))
         if os.path.exists(vector_file_path):
             run_command_with_logging(["opp_scavetool", "x", "--type", "sth", "-w", vector_file_path, "-o", scalar_file_path])
-            # os.remove(vector_file_path)
+            os.remove(vector_file_path)
         stored_scalar_result_file_name = simulation_project.get_full_path(os.path.join(simulation_project.statistics_folder, working_directory, simulation_task_result.scalar_file_path))
         _logger.debug(f"Reading result file {scalar_file_path}")
         return self._read_scalar_result_file(scalar_file_path)
@@ -242,6 +255,7 @@ class CompareSimulationsTask(Task):
         for task in self.multiple_simulation_tasks.tasks:
             index += 1
             task.record_eventlog = True
+            task.stdout_file_path = f"results/{task.simulation_config.config}-#{str(task.run_number)}-{index}.out"
             task.eventlog_file_path = f"results/{task.simulation_config.config}-#{str(task.run_number)}-{index}.elog"
             task.scalar_file_path = f"results/{task.simulation_config.config}-#{str(task.run_number)}-{index}.sca"
             task.vector_file_path = f"results/{task.simulation_config.config}-#{str(task.run_number)}-{index}.vec"
@@ -255,7 +269,7 @@ class CompareSimulationsTask(Task):
             return "comparing " + task_parameters_string_1
 
     def run_protected(self, ingredients="tplx", index=None, append_args=[], **kwargs):
-        append_args = append_args + ["--cmdenv-express-mode=false", "--cmdenv-log-prefix=%l %C%<: ", "--fingerprint=0000-0000/" + ingredients] + get_ingredients_append_args(ingredients)
+        append_args = append_args + ["--cmdenv-express-mode=false", "--cmdenv-log-prefix=%l %C%<: ", "--cmdenv-redirect-output=true", "--eventlog-snapshot-frequency=100MiB", "--eventlog-index-frequency=10MiB", "--eventlog-options=module", "--fingerprint=0000-0000/" + ingredients] + get_ingredients_append_args(ingredients)
         multiple_task_results = self.multiple_simulation_tasks.run_protected(append_args=append_args, progress_prefix=str(index + 1) + ".", **kwargs)
         return self.task_result_class(multiple_task_results=multiple_task_results, task=self, result=multiple_task_results.result, color=multiple_task_results.color)
 
