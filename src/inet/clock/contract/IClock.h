@@ -119,7 +119,7 @@ class INET_API IClock
      * and upper bounds of the corresponding simulation interval. This method
      * implements a monotonic function with respect to the clock time argument.
      * It's allowed to return a different value for the same argument value if
-     * the clock is set between calls. The time argument must be greater or than
+     * the clock is set between calls. The time argument must be greater than or
      * equal to the current clock time, otherwise an error is raised. See
      * CLOCKTIME_AS_SIMTIME macro for simple type conversion.
      */
