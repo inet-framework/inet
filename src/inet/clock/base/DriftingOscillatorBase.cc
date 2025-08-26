@@ -31,8 +31,9 @@ void DriftingOscillatorBase::initialize(int stage)
         // TODO should there be some wrap around calculation to check that?
         simtime_t currentTickLength = getCurrentTickLength();
         if (driftRate != ppm(0)) {
+            simtime_t roundTripNominalTickLength = SimTime::fromRaw(driftFactor.raw() > 0 ? driftFactor.mulCeil(currentTickLength.raw()) : driftFactor.mulFloor(currentTickLength.raw()));
             ASSERTCMP(!=, nominalTickLength, currentTickLength);
-            ASSERTCMP(==, nominalTickLength, SimTime::fromRaw(roundl(currentTickLength.raw() * driftFactor)));
+            ASSERTCMP(==, nominalTickLength, roundTripNominalTickLength);
         }
         simtime_t tickOffset = par("tickOffset");
         if (tickOffset < 0 || tickOffset >= currentTickLength)
@@ -120,6 +121,16 @@ void DriftingOscillatorBase::setTickOffset(simtime_t newTickOffset)
         }
         emit(postOscillatorStateChangedSignal, this);
     }
+}
+
+simtime_t DriftingOscillatorBase::getCurrentTickLength() const
+{
+    if (driftFactor.raw() > 0)
+        return SimTime::fromRaw(driftFactor.divFloor(nominalTickLength.raw()));
+    else  if (driftFactor.raw() < 0)
+        return SimTime::fromRaw(driftFactor.divCeil(nominalTickLength.raw()));
+    else
+        return nominalTickLength;
 }
 
 int64_t DriftingOscillatorBase::doComputeTicksForInterval(simtime_t timeInterval) const
