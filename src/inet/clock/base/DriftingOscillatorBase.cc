@@ -134,6 +134,14 @@ simtime_t DriftingOscillatorBase::getCurrentTickLength() const
         return nominalTickLength;
 }
 
+static inline simtime_raw_t floor_div_pos_den(simtime_raw_t a, simtime_raw_t b) {
+    // pre: b > 0
+    simtime_raw_t q = a / b;
+    simtime_raw_t r = a % b;          // r has sign of a in C++
+    if (r != 0 && a < 0) --q;   // adjust trunc->floor for negative a
+    return q;
+}
+
 int64_t DriftingOscillatorBase::doComputeTicksForInterval(simtime_t timeInterval) const
 {
     ClockCoutIndent indent;
@@ -143,24 +151,7 @@ int64_t DriftingOscillatorBase::doComputeTicksForInterval(simtime_t timeInterval
                           << "nominalTickLength = " << nominalTickLength << std::endl;
     if (timeInterval == 0)
         return 0;
-    int64_t result;
-    if (!computeAsSeparateTicks)
-        result = floorl((timeInterval - nextTickFromOrigin).raw() * driftFactor / nominalTickLength.raw()) + 1;
-    else {
-        result = 1;
-        simtime_t t = timeInterval - nextTickFromOrigin;
-        simtime_t currentTickLength = getCurrentTickLength();
-        if (t < 0) {
-            int64_t count = ceil(-t / currentTickLength);
-            result -= count;
-            t += count * currentTickLength;
-        }
-        if (t >= currentTickLength) {
-            int64_t count = floor(t / currentTickLength);
-            result += count;
-            t -= count * currentTickLength;
-        }
-    }
+    int64_t result = floor_div_pos_den(driftFactor.mulFloor((timeInterval - nextTickFromOrigin).raw()), nominalTickLength.raw()) + 1;
     if (result < 0)
         result = 0;
     CLOCK_COUT << "   computeTicksForInterval(" << timeInterval.raw() << ") -> " << result << std::endl;
@@ -176,11 +167,7 @@ simtime_t DriftingOscillatorBase::doComputeIntervalForTicks(int64_t numTicks) co
                           << "nominalTickLength = " << nominalTickLength << std::endl;
     if (numTicks == 0)
         return 0;
-    simtime_t result;
-    if (!computeAsSeparateTicks)
-        result = SimTime::fromRaw(ceill((nominalTickLength.raw() * (numTicks - 1)) / driftFactor)) + nextTickFromOrigin;
-    else
-        result = nextTickFromOrigin + (numTicks - 1) * SimTime::fromRaw(roundl(nominalTickLength.raw() / driftFactor));
+    simtime_t result = nextTickFromOrigin + SimTime::fromRaw(driftFactor.divCeil(nominalTickLength.raw() * (numTicks - 1)));
     if (result < 0)
         result = 0;
     CLOCK_COUT << "   computeIntervalForTicks(" << numTicks << ") -> " << result.raw() << std::endl;

@@ -59,6 +59,30 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
      * The clock time accumulated from the oscillator compensation.
      */
     clocktime_t clockTimeCompensation;
+    /**
+     * When the clock origin changes we *lose* the fractional part of the oscillator
+     * compensation accumulated up to that point. To preserve continuity we keep a
+     * phase as an integer tick offset n0 such that:
+     *
+     *     φ = frac( x * n0 ),  where x = oscillatorCompensation
+     *
+     * Using n0, we can express the mappings without explicit φ and using only mulFloor/divCeil:
+     *
+     * Simulation time -> Clock time (Δn oscillator ticks -> compensated ticks):
+     *     C(Δn) = floor( x * (Δn + n0) ) − floor( x * n0 )
+     *
+     * Clock time -> Simulation time (M compensated ticks -> oscillator ticks):
+     *     Δn = ceil( ( M + floor( x * n0 ) ) / x ) − n0
+     *
+     * Implementation notes:
+     * - Store n0 in compensationPhaseBaseTicks.
+     * - On clock-origin move by Δticks (tick-aligned lower bounds), do:
+     *       compensationPhaseBaseTicks += Δticks;
+     * - (Optional) Canonicalize n0 to keep it small while preserving floor(x*n0):
+     *       n0 = divCeil( mulFloor(n0) );
+     */
+    int64_t compensationPhaseBaseTicks = 0;
+    int64_t numTicksAtOriginLowerBound = 0;
 
     uint64_t lastNumTicks = 0;
     clocktime_t clockTimeBeforeOscillatorStateChange = -1;
@@ -81,6 +105,9 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
         for (auto event : events)
             checkClockEvent(event);
     }
+
+    int64_t computeCompensatedTicksFromTicks(int64_t numTicks) const;
+    int64_t computeTicksFromCompensatedTicks(int64_t compensatedTicks) const;
 
     clocktime_t doComputeClockTimeFromSimTime(simtime_t t) const;
     simtime_t doComputeSimTimeFromClockTime(clocktime_t t, bool lowerBound) const;
