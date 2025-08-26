@@ -53,6 +53,7 @@ class INET_API ClockBase : public SimpleModule, public IClock
         if (event->isScheduled()) {
             ASSERTCMP(>=, event->getArrivalTime(), simTime());
             // NOTE: IClock interface 4. invariant
+            std::cout << "event->getArrivalTime() = " << event->getArrivalTime() << ", event->getArrivalClockTime() = " << event->getArrivalClockTime() << ", computeScheduleTime(event->getArrivalClockTime()) = " << computeScheduleTime(event->getArrivalClockTime()) << std::endl;
             ASSERTCMP(==, event->getArrivalTime(), computeScheduleTime(event->getArrivalClockTime()));
             // NOTE: IClock interface 5. invariant
             ASSERTCMP(==, event->getArrivalClockTime(), computeClockTimeFromSimTime(event->getArrivalTime()));

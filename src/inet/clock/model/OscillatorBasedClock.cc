@@ -383,8 +383,10 @@ void OscillatorBasedClock::receiveSignal(cComponent *source, int signal, cObject
     if (signal == IOscillator::preOscillatorStateChangedSignal) {
         clocktime_t clockTime = getClockTime();
         EV_DEBUG << "Handling pre-oscillator state changed signal" << EV_FIELD(clockTime) << EV_ENDL;
+        std::cout << "Before setOrigin() call" << ", originClockTime = " << originClockTime << ", originSimulationTime = " << originSimulationTime << ", originSimulationTimeLowerBound = " << originSimulationTimeLowerBound << ", getOscillatorCompensation() = " << getOscillatorCompensation() << ", oscillator->getComputationOrigin() = " << oscillator->getComputationOrigin() << ", compensationPhaseBaseTicks = " << compensationPhaseBaseTicks << ", numTicksAtOriginLowerBound = " << numTicksAtOriginLowerBound << std::endl;
         checkAllClockEvents();
         setOrigin(simTime(), clockTime);
+        std::cout << "After  setOrigin() call" << ", originClockTime = " << originClockTime << ", originSimulationTime = " << originSimulationTime << ", originSimulationTimeLowerBound = " << originSimulationTimeLowerBound << ", getOscillatorCompensation() = " << getOscillatorCompensation() << ", oscillator->getComputationOrigin() = " << oscillator->getComputationOrigin() << ", compensationPhaseBaseTicks = " << compensationPhaseBaseTicks << ", numTicksAtOriginLowerBound = " << numTicksAtOriginLowerBound << std::endl;
         checkAllClockEvents();
         clockTimeBeforeOscillatorStateChange = clockTime;
     }
