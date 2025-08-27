@@ -15,7 +15,6 @@ void DriftingOscillatorBase::initialize(int stage)
 {
     OscillatorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        computeAsSeparateTicks = par("computeAsSeparateTicks");
         double nominalTickLengthAsDouble = par("nominalTickLength");
         nominalTickLength = nominalTickLengthAsDouble;
         if (nominalTickLength == 0)
