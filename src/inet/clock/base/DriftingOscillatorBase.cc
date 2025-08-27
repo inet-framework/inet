@@ -133,14 +133,6 @@ simtime_t DriftingOscillatorBase::getCurrentTickLength() const
         return nominalTickLength;
 }
 
-static inline simtime_raw_t floor_div_pos_den(simtime_raw_t a, simtime_raw_t b) {
-    // pre: b > 0
-    simtime_raw_t q = a / b;
-    simtime_raw_t r = a % b;          // r has sign of a in C++
-    if (r != 0 && a < 0) --q;   // adjust trunc->floor for negative a
-    return q;
-}
-
 int64_t DriftingOscillatorBase::doComputeTicksForInterval(simtime_t timeInterval) const
 {
     ClockCoutIndent indent;
@@ -150,7 +142,14 @@ int64_t DriftingOscillatorBase::doComputeTicksForInterval(simtime_t timeInterval
                           << "nominalTickLength = " << nominalTickLength << std::endl;
     if (timeInterval == 0)
         return 0;
-    int64_t result = floor_div_pos_den(driftFactor.mulFloor((timeInterval - nextTickFromOrigin).raw()), nominalTickLength.raw()) + 1;
+    auto divFloor = [] (simtime_raw_t a, simtime_raw_t b) -> simtime_raw_t {
+        ASSERT(b > 0);
+        simtime_raw_t q = a / b;
+        simtime_raw_t r = a % b; // r has sign of a in C++
+        if (r != 0 && a < 0) --q; // adjust trunc->floor for negative a
+        return q;
+    };
+    int64_t result = divFloor(driftFactor.mulFloor((timeInterval - nextTickFromOrigin).raw()), nominalTickLength.raw()) + 1;
     if (result < 0)
         result = 0;
     CLOCK_COUT << "   computeTicksForInterval(" << timeInterval.raw() << ") -> " << result << std::endl;
