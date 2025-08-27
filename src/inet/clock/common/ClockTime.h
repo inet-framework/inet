@@ -12,6 +12,8 @@
 
 namespace inet {
 
+typedef simtime_raw_t clocktime_raw_t;
+
 /**
  * This class is a proxy for the SimTime class. The reason behind this design
  * is that the simulation time and the clock time must not be confused. So this
