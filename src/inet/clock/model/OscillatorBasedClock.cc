@@ -257,7 +257,8 @@ simtime_t OscillatorBasedClock::computeSimTimeFromClockTime(clocktime_t clockTim
     if (lowerBound)
         ASSERTCMP(==, clockTime, doComputeClockTimeFromSimTime(result))
     else
-        ASSERTCMP(==, clockTime + getClockGranularity(), doComputeClockTimeFromSimTime(result));
+        // uses inequality because oscillator compensation
+        ASSERTCMP(<=, clockTime + getClockGranularity(), doComputeClockTimeFromSimTime(result));
     return result;
 }
 
