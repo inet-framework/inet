@@ -38,6 +38,7 @@ class INET_API DriftingOscillatorBase : public OscillatorBase, public IScriptabl
     virtual void scheduleTickTimer() override;
 
     virtual void setOrigin(simtime_t origin);
+    virtual void setDriftFactor(SimTimeScale driftFactor);
 
     // IScriptable implementation
     virtual void processCommand(const cXMLElement& node) override;

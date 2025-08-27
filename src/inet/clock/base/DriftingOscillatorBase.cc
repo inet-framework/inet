@@ -23,13 +23,8 @@ void DriftingOscillatorBase::initialize(int stage)
         else if (std::abs(nominalTickLength.dbl() - nominalTickLengthAsDouble) / nominalTickLengthAsDouble > 1E-15)
             throw cRuntimeError("The nominalTickLength parameter value %lg cannot be accurately represented with the current simulation time precision, conversion result: %s", nominalTickLengthAsDouble, nominalTickLength.ustr().c_str());
         setOrigin(simTime());
-        driftFactor = SimTimeScale::fromPpm(driftRate.get<ppm>());
+        setDriftFactor(SimTimeScale::fromPpm(driftRate.get<ppm>()));
         numTicksAtOrigin = 0;
-        // TODO check the relationship between nominalTickLength and simulation time precision and fail if they are too close (whatever that means) use a parameter for this? minimum
-
-        // TODO check if tick becomes smaller than what can be represented in simtime and error out
-        // TODO what if the precision is just not enough to represent the tick properly
-        // TODO should there be some wrap around calculation to check that?
         simtime_t currentTickLength = getCurrentTickLength();
         if (driftRate != ppm(0)) {
             simtime_t roundTripNominalTickLength = SimTime::fromRaw(driftFactor.raw() > 0 ? driftFactor.mulCeil(currentTickLength.raw()) : driftFactor.mulFloor(currentTickLength.raw()));
@@ -88,12 +83,7 @@ void DriftingOscillatorBase::setDriftRate(ppm newDriftRate)
         simtime_t remainingTickTime = oldCurrentTickLength - elapsedTickTime;
         nextTickFromOrigin = SimTime::fromRaw(remainingTickTime.raw() * driftFactor / newDriftFactor);
         driftRate = newDriftRate;
-        driftFactor = newDriftFactor;
-        if (driftRate != ppm(0)) {
-            simtime_t newCurrentTickLength = getCurrentTickLength();
-            ASSERTCMP(!=, nominalTickLength, newCurrentTickLength);
-            ASSERTCMP(==, nominalTickLength, SimTime::fromRaw(roundl(newCurrentTickLength.raw() * driftFactor)));
-        }
+        setDriftFactor(newDriftFactor);
         setOrigin(currentSimTime);
         if (tickTimer) {
             cancelEvent(tickTimer);
@@ -122,6 +112,15 @@ void DriftingOscillatorBase::setTickOffset(simtime_t newTickOffset)
         }
         emit(postOscillatorStateChangedSignal, this);
     }
+}
+
+void DriftingOscillatorBase::setDriftFactor(SimTimeScale driftFactor)
+{
+    const simtime_t roundTripNominalTickLengthLowerBound = SimTime::fromRaw(driftFactor.mulCeil(driftFactor.divFloor(nominalTickLength.raw())));
+    const simtime_t roundTripNominalTickLengthUpperBound = SimTime::fromRaw(driftFactor.mulFloor(driftFactor.divCeil(nominalTickLength.raw())));
+    ASSERTCMP(<=, roundTripNominalTickLengthLowerBound, nominalTickLength);
+    ASSERTCMP(<=, nominalTickLength, roundTripNominalTickLengthUpperBound);
+    this->driftFactor = driftFactor;
 }
 
 simtime_t DriftingOscillatorBase::getCurrentTickLength() const
