@@ -36,7 +36,9 @@ namespace inet {
  * - preOscillatorStateChangedSignal is emitted immediately before the change.
  * - postOscillatorStateChangedSignal is emitted immediately after the change.
  *
- * @note For detailed configuration, see the corresponding NED file.
+ * The following properties always hold:
+ *
+ * 1. The oscillator origin is less than or equal to the current simulation time.
  */
 class INET_API IOscillator
 {

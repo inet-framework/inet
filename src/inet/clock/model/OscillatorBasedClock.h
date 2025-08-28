@@ -33,7 +33,23 @@ static bool compareClockEvents(const ClockEvent *e1, const ClockEvent *e2) {
  *
  * 1. The clock origin simulation time is always less than or equal to the computation origin of the oscillator.
  *
- * @note For detailed configuration, see the corresponding NED file.
+ * Mathematical definitions:
+ *  - b: bound; if true, return the lower/inclusive bound; if false, return the upper/exclusive bound
+ *  - l: nominal tick length [s], l > 0
+ *  - oos: oscillator origin simulation time [s], oos >= 0
+ *  - cos: clock origin simulation time [s], cos >= 0, cos >= oos
+ *  - coc: clock origin clock time [s], coc >= 0
+ *  - x: oscillator compensation factor ~1, x > 0
+ *  - p: oscillator compensation fractional accumulator [-], p >= 0
+ *  - s: simulation time [s], s >= 0, s >= oos
+ *  - c: clock time [s], c >= 0, c >= coc
+ *  - n = numTicks(i): number of ticks from oscillator origin for interval, i >= 0, n >= 0
+ *  - i = interval(n): simulation time interval from oscillator origin, i >= 0, n >= 0
+ *  - A(n) = floor(p + (x - 1) * n): compensation events up to tick index n (relative to oscillator origin, applying past carry-in p)
+ *  - F(n) = n + A(n): effective “output ticks” accumulated up to n
+ *  - p(n) = fractional(p + (x - 1) * n) in [0, 1): residual fractional compensation after n ticks
+ *
+ * The functions numTicks() and interval() are mutually consistent inverses.
  */
 class INET_API OscillatorBasedClock : public ClockBase, public cListener
 {
@@ -85,7 +101,7 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
     int64_t numTicksAtOriginLowerBound = 0;
 
     uint64_t lastNumTicks = 0;
-    clocktime_t clockTimeBeforeOscillatorStateChange = -1;
+    clocktime_t clockTimeBeforeOscillatorStateChange = -1; // used for assertion
 
     std::vector<ClockEvent *> events;
 
@@ -99,6 +115,14 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
     virtual void scheduleTargetModuleClockEventAfter(simtime_t time, ClockEvent *event) override;
     virtual ClockEvent *cancelTargetModuleClockEvent(ClockEvent *event) override;
 
+    /**
+     * Mathematical definition: setOrigin(s, c):
+     *   n0_old = numTicks(cos - oos)
+     *   n      = numTicks(s - oos)
+     *   cos    = s
+     *   coc    = c - (F(n) - F(n0_old)) * l
+     *   p      = fractional(p + (x - 1) * n)
+     */
     virtual void setOrigin(simtime_t simulationTime, clocktime_t clockTime);
 
     void checkAllClockEvents() {
@@ -122,7 +146,23 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
     virtual const IOscillator *getOscillator() const { return oscillator; }
     virtual SimTimeScale getOscillatorCompensation() const { return SimTimeScale(); }
 
+    /**
+     * Mathematical definition: c = computeClockTimeFromSimTime(s):
+     *   n  = numTicks(s - oos)
+     *   n0 = numTicks(cos - oos)
+     *   c  = coc + (F(n) - F(n0)) * l = coc + ((n - n0) + (A(n) - A(n0))) * l
+     */
     virtual clocktime_t computeClockTimeFromSimTime(simtime_t t) const override;
+
+    /**
+     * Mathematical definition: s = computeSimTimeFromClockTime(c, b):
+     *   n0 = numTicks(cos - oos)
+     *   k  = floor((c - coc)/l) + (b ? 0 : 1)
+     *   T  = F(n0) + k
+     *   n1 = min{ m ≥ 0 : F(m) ≥ T }          if b is true
+     *      = min{ m ≥ 0 : F(m) > T }          if b is false
+     *   s  = oos + interval(n1)
+     */
     virtual simtime_t computeSimTimeFromClockTime(clocktime_t t, bool lowerBound = true) const override;
 
     virtual void scheduleClockEventAt(clocktime_t t, ClockEvent *event) override;

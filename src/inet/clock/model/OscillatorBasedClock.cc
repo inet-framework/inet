@@ -131,22 +131,23 @@ void OscillatorBasedClock::setOrigin(simtime_t simulationTime, clocktime_t clock
 
     originSimulationTime = simulationTime;
     originClockTime = clockTime;
-    // Do NOT touch lastClockTime here unless this is a user "set time" op.
+    // TODO: Do NOT touch lastClockTime here unless this is a user "set time" op. only affects assertions
     lastClockTime = clockTime;
 
     // ticks since *current* oscillator origin (>=0)
     const int64_t numTicksFromOscillatorOriginToSimulationTime = oscillator->computeTicksForInterval(simulationTime - oscillator->getComputationOrigin());
 
     // Global index at the new lower bound
-    const int64_t newNumTicksAtOriginLowerBound = oscillator->getNumTicksAtOrigin() + numTicksFromOscillatorOriginToSimulationTime;
+    const int64_t numTicksAtNewOriginLowerBound = oscillator->getNumTicksAtOrigin() + numTicksFromOscillatorOriginToSimulationTime;
 
     // Simtime of that lower bound (tick-aligned)
     const simtime_t newOriginSimulationTimeLowerBound = oscillator->getComputationOrigin() + oscillator->computeIntervalForTicks(numTicksFromOscillatorOriginToSimulationTime);
 
     // Phase carry using ONLY global indices (no backward mapping)
-    const int64_t d = newNumTicksAtOriginLowerBound - numTicksAtOriginLowerBound;
+    const int64_t d = numTicksAtNewOriginLowerBound - numTicksAtOriginLowerBound;
     ASSERTCMP(>=, d, 0);
-    compensationPhaseBaseTicks += d;
+    // TODO: we want to store that how many oscillator ticks were not compensated for
+    compensationPhaseBaseTicks += d; // TODO: why don't we take oscillator compensation into account for this period represented by d?
 
     // Canonicalize n0 without changing floor(x*n0)
     const auto& c = getOscillatorCompensation();
@@ -154,18 +155,18 @@ void OscillatorBasedClock::setOrigin(simtime_t simulationTime, clocktime_t clock
 
     // Commit LB and cache its global index
     originSimulationTimeLowerBound = newOriginSimulationTimeLowerBound;
-    numTicksAtOriginLowerBound = newNumTicksAtOriginLowerBound;
+    numTicksAtOriginLowerBound = numTicksAtNewOriginLowerBound;
 
     CLOCK_COUT << "   : originSimulationTimeLowerBound = " << originSimulationTimeLowerBound << std::endl;
 
     // Your original consistency checks
     ASSERTCMP(<=, originSimulationTimeLowerBound, originSimulationTime);
     ASSERTCMP(<=, originSimulationTimeLowerBound, simTime());
-    ASSERTCMP(>=, originSimulationTimeLowerBound, oscillator->getComputationOrigin());
+    ASSERTCMP(<=, oscillator->getComputationOrigin(), originSimulationTimeLowerBound);
     ASSERTCMP(==, originSimulationTimeLowerBound, computeSimTimeFromClockTime(originClockTime, true));
     ASSERTCMP(<=, originSimulationTime, simTime());
-    ASSERTCMP(>=, originSimulationTime, oscillator->getComputationOrigin());
-    ASSERTCMP(>=, originSimulationTime, computeSimTimeFromClockTime(originClockTime, true));
+    ASSERTCMP(<=, oscillator->getComputationOrigin(), originSimulationTime);
+    ASSERTCMP(<=, originSimulationTimeLowerBound, originSimulationTime);
     ASSERTCMP(<=, originSimulationTime, computeSimTimeFromClockTime(originClockTime, false));
     ASSERTCMP(==, originClockTime, computeClockTimeFromSimTime(originSimulationTime));
 
@@ -240,7 +241,7 @@ clocktime_t OscillatorBasedClock::computeClockTimeFromSimTime(simtime_t simulati
     ASSERTCMP(>=, simulationTime, simTime());
     ASSERTCMP(>=, originSimulationTime, oscillator->getComputationOrigin());
     clocktime_t result = doComputeClockTimeFromSimTime(simulationTime);
-    ASSERTCMP(==, result.raw(), result.raw() / getClockGranularity().raw() * getClockGranularity().raw());
+    ASSERTCMP(==, result.raw() % getClockGranularity().raw(), 0);
     ASSERTCMP(>=, result, doComputeClockTimeFromSimTime(simTime()));
     ASSERTCMP(>=, simulationTime, doComputeSimTimeFromClockTime(result, true));
     ASSERTCMP(<, simulationTime, doComputeSimTimeFromClockTime(result, false));
@@ -251,11 +252,12 @@ simtime_t OscillatorBasedClock::computeSimTimeFromClockTime(clocktime_t clockTim
 {
     ASSERTCMP(>=, clockTime, getClockTime());
     ASSERTCMP(>=, originSimulationTime, oscillator->getComputationOrigin());
-    ASSERTCMP(==, clockTime.raw(), clockTime.raw() / getClockGranularity().raw() * getClockGranularity().raw());
+    ASSERTCMP(==, clockTime.raw() % getClockGranularity().raw(), 0);
     simtime_t result = doComputeSimTimeFromClockTime(clockTime, lowerBound);
-    ASSERTCMP(>=, result, originSimulationTimeLowerBound);
+    ASSERTCMP(>=, result, originSimulationTimeLowerBound); // TODO: more restrictive assert for now?
     if (lowerBound)
-        ASSERTCMP(==, clockTime, doComputeClockTimeFromSimTime(result))
+        ASSERTCMP(==, clockTime, doComputeClockTimeFromSimTime(result)) // TODO: what happens if due to oscillator compensation a specific clock time value was skipped
+//        ASSERTCMP(<=, clockTime, doComputeClockTimeFromSimTime(result)) // maybe this?
     else
         // uses inequality because oscillator compensation
         ASSERTCMP(<=, clockTime + getClockGranularity(), doComputeClockTimeFromSimTime(result));
