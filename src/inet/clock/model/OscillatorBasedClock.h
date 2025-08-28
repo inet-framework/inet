@@ -76,29 +76,9 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
      */
     clocktime_t clockTimeCompensation;
     /**
-     * When the clock origin changes we *lose* the fractional part of the oscillator
-     * compensation accumulated up to that point. To preserve continuity we keep a
-     * phase as an integer tick offset n0 such that:
-     *
-     *     φ = frac( x * n0 ),  where x = oscillatorCompensation
-     *
-     * Using n0, we can express the mappings without explicit φ and using only mulFloor/divCeil:
-     *
-     * Simulation time -> Clock time (Δn oscillator ticks -> compensated ticks):
-     *     C(Δn) = floor( x * (Δn + n0) ) − floor( x * n0 )
-     *
-     * Clock time -> Simulation time (M compensated ticks -> oscillator ticks):
-     *     Δn = ceil( ( M + floor( x * n0 ) ) / x ) − n0
-     *
-     * Implementation notes:
-     * - Store n0 in compensationPhaseBaseTicks.
-     * - On clock-origin move by Δticks (tick-aligned lower bounds), do:
-     *       compensationPhaseBaseTicks += Δticks;
-     * - (Optional) Canonicalize n0 to keep it small while preserving floor(x*n0):
-     *       n0 = divCeil( mulFloor(n0) );
+     * The oscillator compensation fractional accumulator.
      */
-    int64_t compensationPhaseBaseTicks = 0;
-    int64_t numTicksAtOriginLowerBound = 0;
+    double p = 0;
 
     uint64_t lastNumTicks = 0;
     clocktime_t clockTimeBeforeOscillatorStateChange = -1; // used for assertion
@@ -116,7 +96,7 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
     virtual ClockEvent *cancelTargetModuleClockEvent(ClockEvent *event) override;
 
     /**
-     * Mathematical definition: setOrigin(s, c):
+     * Mathematical formula: setOrigin(s, c):
      *   n0_old = numTicks(cos - oos)
      *   n      = numTicks(s - oos)
      *   cos    = s
@@ -130,8 +110,8 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
             checkClockEvent(event);
     }
 
-    int64_t computeCompensatedTicksFromTicks(int64_t numTicks) const;
-    int64_t computeTicksFromCompensatedTicks(int64_t compensatedTicks) const;
+    int64_t A(int64_t n) const;
+    int64_t F(int64_t n) const;
 
     clocktime_t doComputeClockTimeFromSimTime(simtime_t t) const;
     simtime_t doComputeSimTimeFromClockTime(clocktime_t t, bool lowerBound) const;
@@ -147,7 +127,7 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
     virtual SimTimeScale getOscillatorCompensation() const { return SimTimeScale(); }
 
     /**
-     * Mathematical definition: c = computeClockTimeFromSimTime(s):
+     * Mathematical formula: c = computeClockTimeFromSimTime(s):
      *   n  = numTicks(s - oos)
      *   n0 = numTicks(cos - oos)
      *   c  = coc + (F(n) - F(n0)) * l = coc + ((n - n0) + (A(n) - A(n0))) * l
@@ -155,7 +135,7 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
     virtual clocktime_t computeClockTimeFromSimTime(simtime_t t) const override;
 
     /**
-     * Mathematical definition: s = computeSimTimeFromClockTime(c, b):
+     * Mathematical formula: s = computeSimTimeFromClockTime(c, b):
      *   n0 = numTicks(cos - oos)
      *   k  = floor((c - coc)/l) + (b ? 0 : 1)
      *   T  = F(n0) + k
