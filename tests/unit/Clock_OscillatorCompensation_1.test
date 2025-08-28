@@ -34,10 +34,12 @@ network = TestNetwork
 auto clock = check_and_cast<SettableClock *>(cSimulation::getActiveSimulation()->getModuleByPath("clock"));
 CHECK(computeSimTimeFromClockTime(0));
 CHECK(computeSimTimeFromClockTime(0.000001)); // no compensation yet
+CHECK(computeSimTimeFromClockTime(0.000011));
 CHECK(computeSimTimeFromClockTime(0.11));
 
 CHECK(computeClockTimeFromSimTime(0));
 CHECK(computeClockTimeFromSimTime(0.000001)); // no compensation yet
+CHECK(computeClockTimeFromSimTime(0.00001));
 CHECK(computeClockTimeFromSimTime(0.1));
 
 %postrun-command: grep CHECK test.out > filtered.out
@@ -45,7 +47,9 @@ CHECK(computeClockTimeFromSimTime(0.1));
 %contains: filtered.out
 CHECK: computeSimTimeFromClockTime(0) -> 0
 CHECK: computeSimTimeFromClockTime(0.000001) -> 0.000001
+CHECK: computeSimTimeFromClockTime(0.000011) -> 0.00001
 CHECK: computeSimTimeFromClockTime(0.11) -> 0.1
 CHECK: computeClockTimeFromSimTime(0) -> 0
 CHECK: computeClockTimeFromSimTime(0.000001) -> 0.000001
+CHECK: computeClockTimeFromSimTime(0.00001) -> 0.000011
 CHECK: computeClockTimeFromSimTime(0.1) -> 0.11

@@ -17,6 +17,7 @@
 
 namespace inet {
 
+// TODO: move this debugging stuff into a separate file
 struct NullStream {
     template<typename T>
     NullStream& operator<<(const T&) { return *this; }
@@ -35,6 +36,7 @@ extern NullStream nullStream;
 #define CLOCK_CHECK_IMPLEMENTATION
 #endif
 
+// TODO: move the operator into the middle of the macro
 #ifdef CLOCK_CHECK_IMPLEMENTATION
 #define ASSERTCMP(cmp, o1, o2) { \
     ClockCoutDisabledBlock b; auto _o1 = (o1); auto _o2 = (o2); \
@@ -126,6 +128,11 @@ class INET_API IClock
     virtual simtime_t computeSimTimeFromClockTime(clocktime_t time, bool lowerBound = true) const = 0;
 
     /**
+     * Returns true if the clock event is currently scheduled for execution.
+     */
+    virtual bool isScheduledClockEvent(ClockEvent *event) const = 0;
+
+    /**
      * Schedules an event to be delivered to the caller module (i.e. the context
      * module) at the specified clock time. The event is anchored to a specific
      * clock time value, so the actual simulation time when this event is executed
@@ -155,8 +162,6 @@ class INET_API IClock
      * internal data structures related to individual clock events.
      */
     virtual void handleClockEvent(ClockEvent *event) = 0;
-
-    virtual bool isScheduledClockEvent(ClockEvent *event) const = 0;
 };
 
 } // namespace inet

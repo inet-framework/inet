@@ -124,12 +124,12 @@ void DriftingOscillatorBase::setDriftFactor(SimTimeScale driftFactor)
 
 simtime_t DriftingOscillatorBase::getCurrentTickLength() const
 {
-    if (driftFactor.raw() > 0)
+    if (driftFactor.raw() > 0) // driftFactor > 1
         return SimTime::fromRaw(driftFactor.divFloor(nominalTickLength.raw()));
-    else  if (driftFactor.raw() < 0)
+    else  if (driftFactor.raw() < 0) // driftFactor < 1
         return SimTime::fromRaw(driftFactor.divCeil(nominalTickLength.raw()));
     else
-        return nominalTickLength;
+        return nominalTickLength; // driftFactor == 1
 }
 
 int64_t DriftingOscillatorBase::doComputeTicksForInterval(simtime_t timeInterval) const
