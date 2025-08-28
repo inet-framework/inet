@@ -22,6 +22,11 @@ size_t getVariableLengthIntegerSize(VariableLengthInteger i) {
     return 8;
 }
 
+size_t getEncodedVariableLengthIntegerSize(uint8_t firstByte)
+{
+    return (1 << (firstByte >> 6));
+}
+
 void serializeVariableLengthInteger(MemoryOutputStream& stream, VariableLengthInteger value)
 {
     switch (getVariableLengthIntegerSize(value)) {
@@ -90,6 +95,48 @@ VariableLengthInteger deserializeVariableLengthInteger(MemoryInputStream& stream
     return value;
 }
 
+VariableLengthInteger decodeVariableLengthInteger(const uint8_t *src, const uint8_t *src_end, size_t *consumedBytes)
+{
+    if (src >= src_end)
+        throw cRuntimeError("Not enough data to decode VariableLengthInteger");
+
+    uint8_t firstByte = *src;
+    uint8_t prefix = firstByte >> 6;
+    size_t length = (1 << prefix); // 1, 2, 4, or 8 bytes
+    if (src + length > src_end)
+        throw cRuntimeError("Not enough data to decode VariableLengthInteger");
+
+    VariableLengthInteger value = 0;
+    switch (length) {
+        case 1:
+            value = firstByte;
+            break;
+        case 2:
+            value = ((uint64_t)(firstByte & 0x3F) << 8);
+            value |= *(++src);
+            break;
+        case 4:
+            value = ((uint64_t)(firstByte & 0x3F) << 24);
+            value |= ((uint64_t)(*(++src)) << 16);
+            value |= ((uint64_t)(*(++src)) << 8);
+            value |= *(++src);
+            break;
+        case 8:
+            value = ((uint64_t)(firstByte & 0x3F) << 56);
+            value |= ((uint64_t)(*(++src)) << 48);
+            value |= ((uint64_t)(*(++src)) << 40);
+            value |= ((uint64_t)(*(++src)) << 32);
+            value |= ((uint64_t)(*(++src)) << 24);
+            value |= ((uint64_t)(*(++src)) << 16);
+            value |= ((uint64_t)(*(++src)) << 8);
+            value |= *(++src);
+            break;
+    }
+
+    if (consumedBytes)
+        *consumedBytes = length;
+    return value;
+}
 
 }  // namespace quic
 }  // namespace inet

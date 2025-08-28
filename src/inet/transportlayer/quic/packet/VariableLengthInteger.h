@@ -16,11 +16,14 @@ namespace inet {
 namespace quic {
 
 size_t getVariableLengthIntegerSize(VariableLengthInteger i);
+size_t getEncodedVariableLengthIntegerSize(uint8_t firstByte);
 
 // Helper methods for serializing and deserializing variable length integers
 void serializeVariableLengthInteger(MemoryOutputStream& stream, VariableLengthInteger value);
 
 VariableLengthInteger deserializeVariableLengthInteger(MemoryInputStream& stream);
+
+VariableLengthInteger decodeVariableLengthInteger(const uint8_t *src, const uint8_t *src_end, size_t *consumedBytes);
 
 }  // namespace quic
 }  // namespace inet
