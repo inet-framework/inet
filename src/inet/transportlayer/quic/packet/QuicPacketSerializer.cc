@@ -490,6 +490,10 @@ static size_t determine_pn_offset(ptls_iovec_t input)
                 pn_offs += token_len_len;
                 pn_offs += token_len;
             }
+
+            size_t packet_len_len;
+            decodeVariableLengthInteger(input.base + pn_offs, input.base + input.len - pn_offs, &packet_len_len);
+            pn_offs += packet_len_len;
         }
     } else {
         /* short header */
@@ -570,26 +574,29 @@ std::vector<uint8_t> unprotectPacket(std::vector<uint8_t> protectedDatagram, con
     std::cout << "unprotecting datagram" << std::endl;
     std::cout << EncryptionKey::bytes2hex(protectedDatagram) << std::endl;
 
-    ptls_cipher_context_t *header_protect = ptls_cipher_new(cs->aead->ctr_cipher, false, key.hpkey.data()); // false = decrypt
+    ptls_cipher_context_t *header_protect = ptls_cipher_new(cs->aead->ctr_cipher, true, key.hpkey.data()); // false = decrypt
 
-    uint8_t hpmask[16] = {0};
+    uint8_t hpmask[5] = {0};
     uint32_t pnbits = 0;
 
     size_t packetNumberOffset = determine_pn_offset({protectedDatagram.data(), protectedDatagram.size()});
 
-    ptls_cipher_init(header_protect, key.iv.data());
-    ptls_cipher_encrypt(header_protect, hpmask, protectedDatagram.data() + packetNumberOffset + 4, 16);
+    ptls_cipher_init(header_protect, protectedDatagram.data() + packetNumberOffset + 4);
+    ptls_cipher_encrypt(header_protect, hpmask, hpmask, sizeof(hpmask));
     ptls_cipher_free(header_protect);
 
 
     protectedDatagram[0] ^= hpmask[0] & (QUICLY_PACKET_IS_LONG_HEADER(protectedDatagram[0]) ? 0xf : 0x1f);
 
     size_t packetNumberLength = (protectedDatagram[0] & 0x3) + 1;
+    std::cout << "packet number offset: " << packetNumberOffset << std::endl;
+    std::cout << "packet number length: " << packetNumberLength << std::endl;
     for (int i = 0; i != packetNumberLength; ++i) {
         protectedDatagram[packetNumberOffset + i] ^= hpmask[i + 1];
         pnbits = (pnbits << 8) | protectedDatagram[packetNumberOffset + i]; // TODO: undo truncation! (see quicly_determine_packet_number)
     }
 
+    std::cout << "unmasked packet number: " << pnbits << std::endl;
     size_t aead_off = packetNumberOffset + packetNumberLength;
 
 
