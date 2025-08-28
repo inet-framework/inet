@@ -31,10 +31,12 @@ static bool compareClockEvents(const ClockEvent *e1, const ClockEvent *e2) {
  *
  * The following properties always hold for all oscillator based clocks:
  *
- * 1. The clock origin simulation time is always less than or equal to the computation origin of the oscillator.
+ * 1. The clock origin simulation time is always greater than or equal to the computation origin of the oscillator.
+ *
+ * 2. The clock origin simulation time is always less than or equal to the current simulation time.
  *
  * Mathematical definitions:
- *  - b: bound; if true, return the lower/inclusive bound; if false, return the upper/exclusive bound
+ *  - b: bound; true means the lower/inclusive bound; false means the upper/exclusive bound
  *  - l: nominal tick length [s], l > 0
  *  - oos: oscillator origin simulation time [s], oos >= 0
  *  - cos: clock origin simulation time [s], cos >= 0, cos >= oos
