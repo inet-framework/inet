@@ -117,6 +117,15 @@ void OscillatorBasedClock::handleMessage(cMessage *message)
         ClockBase::handleMessage(message);
 }
 
+int64_t OscillatorBasedClock::A(int64_t n) const {
+    double x = getOscillatorCompensation().toDouble();
+    return floor(p + (x - 1) * n);
+}
+
+int64_t OscillatorBasedClock::F(int64_t n) const {
+    return n + A(n);
+}
+
 // TODO: calling this function may or may not affect how the clock estimates future clock time vs simulation time
 // TODO: this method serves two purposes, differentiate the two, just moving the origin, or updating the clock
 void OscillatorBasedClock::setOrigin(simtime_t simulationTime, clocktime_t clockTime)
@@ -129,33 +138,30 @@ void OscillatorBasedClock::setOrigin(simtime_t simulationTime, clocktime_t clock
     ASSERTCMP(>=, simulationTime, originSimulationTime);
     ASSERTCMP(>=, simulationTime, oscillator->getComputationOrigin());
 
-    originSimulationTime = simulationTime;
-    originClockTime = clockTime;
-    // TODO: Do NOT touch lastClockTime here unless this is a user "set time" op. only affects assertions
-    lastClockTime = clockTime;
-
-    // ticks since *current* oscillator origin (>=0)
     const int64_t numTicksFromOscillatorOriginToSimulationTime = oscillator->computeTicksForInterval(simulationTime - oscillator->getComputationOrigin());
-
-    // Global index at the new lower bound
-    const int64_t numTicksAtNewOriginLowerBound = oscillator->getNumTicksAtOrigin() + numTicksFromOscillatorOriginToSimulationTime;
-
-    // Simtime of that lower bound (tick-aligned)
     const simtime_t newOriginSimulationTimeLowerBound = oscillator->getComputationOrigin() + oscillator->computeIntervalForTicks(numTicksFromOscillatorOriginToSimulationTime);
 
-    // Phase carry using ONLY global indices (no backward mapping)
-    const int64_t d = numTicksAtNewOriginLowerBound - numTicksAtOriginLowerBound;
-    ASSERTCMP(>=, d, 0);
-    // TODO: we want to store that how many oscillator ticks were not compensated for
-    compensationPhaseBaseTicks += d; // TODO: why don't we take oscillator compensation into account for this period represented by d?
+    // mathematical definitions
+    int64_t l = getClockGranularity().raw();
+    const simtime_t& oos = oscillator->getComputationOrigin();
+    const simtime_t& cos = originSimulationTime;
+    const simtime_t& s = simulationTime;
+    const clocktime_t& c = clockTime;
+    double x = getOscillatorCompensation().toDouble();
+    auto numTicks = [=] (auto interval) { return oscillator->computeTicksForInterval(interval); };
+    auto frac = [] (double y) { double f = std::floor(y); return y - f; };
+    // mathematical formula
+    int64_t n0_old = numTicks(cos - oos);
+    int64_t n = numTicks(s - oos);
+    simtime_t cos_ = s;
+    int64_t coc_ = c.raw() - (F(n) - F(n0_old)) * l;
+    p = frac(p + (x - 1.0) * (double)n);
 
-    // Canonicalize n0 without changing floor(x*n0)
-    const auto& c = getOscillatorCompensation();
-    compensationPhaseBaseTicks = c.divCeil(c.mulFloor(compensationPhaseBaseTicks));
-
-    // Commit LB and cache its global index
     originSimulationTimeLowerBound = newOriginSimulationTimeLowerBound;
-    numTicksAtOriginLowerBound = numTicksAtNewOriginLowerBound;
+    originSimulationTime = cos_;
+    originClockTime = ClockTime::fromRaw(coc_);
+    // TODO: Do NOT touch lastClockTime here unless this is a user "set time" op. only affects assertions
+    lastClockTime = clockTime;
 
     CLOCK_COUT << "   : originSimulationTimeLowerBound = " << originSimulationTimeLowerBound << std::endl;
 
@@ -173,67 +179,41 @@ void OscillatorBasedClock::setOrigin(simtime_t simulationTime, clocktime_t clock
     CLOCK_COUT << "   setOrigin() -> void\n";
 }
 
-int64_t OscillatorBasedClock::computeCompensatedTicksFromTicks(int64_t numTicks) const
-{
-    // floor(x*(Δn + n0)) - floor(x*n0)
-    const auto& oscillatorCompensation = getOscillatorCompensation();
-    return oscillatorCompensation.mulFloor(numTicks + compensationPhaseBaseTicks) - oscillatorCompensation.mulFloor(compensationPhaseBaseTicks);
-}
-
-int64_t OscillatorBasedClock::computeTicksFromCompensatedTicks(int64_t compensatedTicks) const
-{
-    // min Δn s.t. floor(x*(Δn + n0)) ≥ M + floor(x*n0)
-    const auto& oscillatorCompensation = getOscillatorCompensation();
-    const int64_t base = oscillatorCompensation.mulFloor(compensationPhaseBaseTicks);
-    const int64_t nprime = oscillatorCompensation.divCeil(base + compensatedTicks);
-    return nprime - compensationPhaseBaseTicks;
-}
-
 clocktime_t OscillatorBasedClock::doComputeClockTimeFromSimTime(simtime_t simulationTime) const
 {
-    const clocktime_t nominalTickLength = getClockGranularity();
-
-    // Δn(t) = n(t) − n(LB)
-    const int64_t n_t_since_origin = oscillator->computeTicksForInterval(simulationTime - oscillator->getComputationOrigin());
-    const int64_t n_lb_since_origin = numTicksAtOriginLowerBound - oscillator->getNumTicksAtOrigin();
-    const int64_t delta_n_t = n_t_since_origin - n_lb_since_origin;
-
-    // n0 = n(originSimulationTime) − n(LB)
-    const int64_t n_origin_since_origin = oscillator->computeTicksForInterval(originSimulationTime - oscillator->getComputationOrigin());
-    const int64_t delta_n0 = n_origin_since_origin - n_lb_since_origin;
-
-    // clock(t) = clock(origin) + [ C(Δn(t)) − C(Δn0) ] * tick
-    const int64_t comp_t  = computeCompensatedTicksFromTicks(delta_n_t);
-    const int64_t comp_n0 = computeCompensatedTicksFromTicks(delta_n0);
-
-    return originClockTime + (comp_t - comp_n0) * nominalTickLength;
+    // mathematical definitions
+    const int64_t l = getClockGranularity().raw();
+    const simtime_t& oos = oscillator->getComputationOrigin();
+    const simtime_t& cos = originSimulationTime;
+    const clocktime_t& coc = originClockTime;
+    const simtime_t& s = simulationTime;
+    auto numTicks = [=] (auto i) { return oscillator->computeTicksForInterval(i); };
+    // mathematical formula
+    int64_t n = numTicks(s - oos);
+    int64_t n0 = numTicks(cos - oos);
+    int64_t c = coc.raw() + (F(n) - F(n0)) * l;
+    return ClockTime::fromRaw(c);
 }
 
 simtime_t OscillatorBasedClock::doComputeSimTimeFromClockTime(clocktime_t clockTime, bool lowerBound) const
 {
-    const clocktime_t nominalTickLength = getClockGranularity();
-    const clocktime_t dClock = clockTime - originClockTime;
-
-    // Compensated ticks requested relative to *originSimulationTime*
-    int64_t m = dClock.raw() / nominalTickLength.raw();
-    const bool exactMultiple = (dClock.raw() % nominalTickLength.raw()) == 0;
-    if (!lowerBound && exactMultiple) ++m; // strict upper bound
-
-    // Compute n0 = n(origin) − n(LB) and its compensated version C(n0)
-    const int64_t n_origin_since_origin = oscillator->computeTicksForInterval(originSimulationTime - oscillator->getComputationOrigin());
-    const int64_t n_lb_since_origin     = numTicksAtOriginLowerBound - oscillator->getNumTicksAtOrigin();
-    const int64_t delta_n0              = n_origin_since_origin - n_lb_since_origin;
-    const int64_t comp_n0               = computeCompensatedTicksFromTicks(delta_n0);
-
-    // Convert to LB-relative compensated ticks, invert to LB-relative Δn, then shift back by n0
-    const int64_t m_lb   = m + comp_n0;
-    const int64_t dTicks = computeTicksFromCompensatedTicks(m_lb) - delta_n0; // Δn relative to originSimulationTime
-
-    // n(t) = n(origin) + dTicks, then map to simtime
-    const int64_t n_origin_rel = n_origin_since_origin; // ticks from current osc origin to originSimulationTime
-    const int64_t n_t_rel      = n_origin_rel + dTicks;
-
-    return oscillator->getComputationOrigin() + oscillator->computeIntervalForTicks(n_t_rel);
+    // mathematical definitions
+    bool b = lowerBound;
+    int64_t l = getClockGranularity().raw();
+    const simtime_t& oos = oscillator->getComputationOrigin();
+    const simtime_t& cos = originSimulationTime;
+    const clocktime_t& coc = originClockTime;
+    const clocktime_t& c = clockTime;
+    const double x = getOscillatorCompensation().toDouble();
+    auto numTicks = [=] (auto interval) { return oscillator->computeTicksForInterval(interval); };
+    auto interval = [=] (auto numTicks) { return oscillator->computeIntervalForTicks(numTicks); };
+    // mathematical formula
+    int64_t n0 = numTicks(cos - oos);
+    int64_t k = floor((c - coc).raw() / l) + (b ? 0 : 1);
+    int64_t T = F(n0) + k;
+    int64_t n1 = std::max<int64_t>(0, (int64_t)std::floor(((double)T - p) / x));
+    simtime_t s = oos + interval(n1);
+    return s;
 }
 
 clocktime_t OscillatorBasedClock::computeClockTimeFromSimTime(simtime_t simulationTime) const
