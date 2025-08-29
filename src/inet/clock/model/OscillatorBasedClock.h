@@ -98,14 +98,29 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
     virtual ClockEvent *cancelTargetModuleClockEvent(ClockEvent *event) override;
 
     /**
-     * Mathematical formula: setOrigin(s, c):
-     *   n0_old = numTicks(cos - oos)
-     *   n      = numTicks(s - oos)
-     *   cos    = s
-     *   coc    = c - (F(n) - F(n0_old)) * l
-     *   p      = fractional(p + (x - 1) * n)
+     * Moves the clock origin to the current simulation time such that the simulation time <-> clock time mapping is unaffected.
+     *
+     * Mathematical formula: moveOrigin()
+     *   s  = current simulation time
+     *   n  = numTicks(s − oos)
+     *   n0 = numTicks(cos − oos)
+     *   cos = s
+     *   coc = coc + (F(n) − F(n0)) * l
+     *   p   = fractional(p + (x − 1) * n)
      */
-    virtual void setOrigin(simtime_t simulationTime, clocktime_t clockTime);
+    virtual void moveOrigin();
+
+    /**
+     * Updates the clock origin to the current simulation time and the given clock time.
+     *
+     * Mathematical formula: setOrigin(c)
+     *   s  = current simulation time
+     *   n  = numTicks(s − oos)
+     *   cos = s
+     *   coc = c
+     *   p   = fractional(p + (x − 1) * n)
+     */
+    virtual void setOrigin(clocktime_t clockTime);
 
     void checkAllClockEvents() {
         for (auto event : events)
@@ -129,17 +144,21 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
     virtual SimTimeScale getOscillatorCompensation() const { return SimTimeScale(); }
 
     /**
+     * See comment for IClock interface method.
+     *
      * Mathematical formula: c = computeClockTimeFromSimTime(s):
      *   n  = numTicks(s - oos)
      *   n0 = numTicks(cos - oos)
-     *   c  = coc + (F(n) - F(n0)) * l = coc + ((n - n0) + (A(n) - A(n0))) * l
+     *   c  = coc + (F(n) - F(n0)) * l
      */
     virtual clocktime_t computeClockTimeFromSimTime(simtime_t t) const override;
 
     /**
+     * See comment for IClock interface method.
+     *
      * Mathematical formula: s = computeSimTimeFromClockTime(c, b):
      *   n0 = numTicks(cos - oos)
-     *   k  = floor((c - coc)/l) + (b ? 0 : 1)
+     *   k  = floor((c - coc) / l) + (b ? 0 : 1)
      *   T  = F(n0) + k
      *   n1 = min{ m ≥ 0 : F(m) ≥ T }          if b is true
      *      = min{ m ≥ 0 : F(m) > T }          if b is false

@@ -89,7 +89,7 @@ void OscillatorBasedClock::initialize(int stage)
         WATCH_PTRVECTOR(events);
     }
     else if (stage == INITSTAGE_CLOCK) {
-        setOrigin(simTime(), par("initialClockTime"));
+        setOrigin(par("initialClockTime"));
         if (originClockTime.raw() % oscillator->getNominalTickLength().raw() != 0)
             throw cRuntimeError("Initial clock time must be a multiple of the oscillator nominal tick length");
     }
@@ -126,15 +126,29 @@ int64_t OscillatorBasedClock::F(int64_t n) const {
     return n + A(n);
 }
 
-// TODO: calling this function may or may not affect how the clock estimates future clock time vs simulation time
-// TODO: this method serves two purposes, differentiate the two, just moving the origin, or updating the clock
-void OscillatorBasedClock::setOrigin(simtime_t simulationTime, clocktime_t clockTime)
+void OscillatorBasedClock::moveOrigin()
 {
-    EV_DEBUG << "Setting clock origin" << EV_FIELD(simulationTime) << EV_FIELD(clockTime) << EV_ENDL;
+    int64_t l = getClockGranularity().raw();
+    const simtime_t& oos = oscillator->getComputationOrigin();
+    const simtime_t& cos = originSimulationTime;
+    const simtime_t& s = simTime();
+    const clocktime_t& coc = originClockTime;
+    auto numTicks = [=] (auto interval) { return oscillator->computeTicksForInterval(interval); };
+    // mathematical formula
+    int64_t n = numTicks(s - oos);
+    int64_t n0 = numTicks(cos - oos);
+    int64_t coc_ = coc.raw() + (F(n) - F(n0)) * l;
+    setOrigin(ClockTime::fromRaw(coc_));
+}
+
+void OscillatorBasedClock::setOrigin(clocktime_t clockTime)
+{
+    EV_DEBUG << "Setting clock origin" << EV_FIELD(clockTime) << EV_ENDL;
     ClockCoutIndent indent;
-    CLOCK_COUT << "-> setOrigin(" << simulationTime << ", " << clockTime << ")\n";
+    CLOCK_COUT << "-> setOrigin(" << clockTime << ")\n";
 
     // (optional but recommended)
+    simtime_t simulationTime = simTime();
     ASSERTCMP(>=, simulationTime, originSimulationTime);
     ASSERTCMP(>=, simulationTime, oscillator->getComputationOrigin());
 
@@ -142,25 +156,21 @@ void OscillatorBasedClock::setOrigin(simtime_t simulationTime, clocktime_t clock
     const simtime_t newOriginSimulationTimeLowerBound = oscillator->getComputationOrigin() + oscillator->computeIntervalForTicks(numTicksFromOscillatorOriginToSimulationTime);
 
     // mathematical definitions
-    int64_t l = getClockGranularity().raw();
     const simtime_t& oos = oscillator->getComputationOrigin();
-    const simtime_t& cos = originSimulationTime;
-    const simtime_t& s = simulationTime;
+    const simtime_t& s = simTime();
     const clocktime_t& c = clockTime;
     double x = getOscillatorCompensation().toDouble();
     auto numTicks = [=] (auto interval) { return oscillator->computeTicksForInterval(interval); };
     auto frac = [] (double y) { double f = std::floor(y); return y - f; };
     // mathematical formula
-    int64_t n0_old = numTicks(cos - oos);
     int64_t n = numTicks(s - oos);
-    simtime_t cos_ = s;
-    int64_t coc_ = c.raw() - (F(n) - F(n0_old)) * l;
+    simtime_t cos = s;
+    clocktime_t coc = c;
     p = frac(p + (x - 1.0) * (double)n);
 
     originSimulationTimeLowerBound = newOriginSimulationTimeLowerBound;
-    originSimulationTime = cos_;
-    originClockTime = clockTime; // TODO: ClockTime::fromRaw(coc_);
-    // TODO: Do NOT touch lastClockTime here unless this is a user "set time" op. only affects assertions
+    originSimulationTime = cos;
+    originClockTime = coc;
     lastClockTime = clockTime;
 
     CLOCK_COUT << "   : originSimulationTimeLowerBound = " << originSimulationTimeLowerBound << std::endl;
@@ -339,7 +349,7 @@ void OscillatorBasedClock::receiveSignal(cComponent *source, int signal, uintval
             int64_t numTicks = clockTimeCompensation.raw() / oscillator->getNominalTickLength().raw();
             clocktime_t clockTimeDelta = SIMTIME_AS_CLOCKTIME(numTicks * oscillator->getNominalTickLength());
             clockTimeCompensation -= clockTimeDelta;
-            setOrigin(simTime(), originClockTime + clockTimeDelta);
+            setOrigin(originClockTime + clockTimeDelta);
             lastNumTicks = value;
         }
         clockTime = getClockTime();
@@ -367,7 +377,7 @@ void OscillatorBasedClock::receiveSignal(cComponent *source, int signal, cObject
         EV_DEBUG << "Handling pre-oscillator state changed signal" << EV_FIELD(clockTime) << EV_ENDL;
 //        std::cout << "Before setOrigin() call" << ", originClockTime = " << originClockTime << ", originSimulationTime = " << originSimulationTime << ", originSimulationTimeLowerBound = " << originSimulationTimeLowerBound << ", getOscillatorCompensation() = " << getOscillatorCompensation() << ", oscillator->getComputationOrigin() = " << oscillator->getComputationOrigin() << ", compensationPhaseBaseTicks = " << compensationPhaseBaseTicks << std::endl;
         checkAllClockEvents();
-        setOrigin(simTime(), clockTime);
+        moveOrigin();
 //        std::cout << "After  setOrigin() call" << ", originClockTime = " << originClockTime << ", originSimulationTime = " << originSimulationTime << ", originSimulationTimeLowerBound = " << originSimulationTimeLowerBound << ", getOscillatorCompensation() = " << getOscillatorCompensation() << ", oscillator->getComputationOrigin() = " << oscillator->getComputationOrigin() << ", compensationPhaseBaseTicks = " << compensationPhaseBaseTicks << std::endl;
         checkAllClockEvents();
         clockTimeBeforeOscillatorStateChange = clockTime;
