@@ -620,128 +620,8 @@ std::vector<uint8_t> unprotectPacket(std::vector<uint8_t> protectedDatagram, con
     return unprotectedDatagram;
 }
 
-void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, b offset, b length) const
+static void doPacketProtectionTest()
 {
-    const auto payload = staticPtrCast<const EncryptedQuicPacketChunk>(chunk)->getChunk();
-    b payloadLength = payload->getChunkLength();
-
-    Ptr<const EncryptionKeyTag> keyTag = chunk->getTag<EncryptionKeyTag>();
-
-    auto payloadSequence = dynamicPtrCast<SequenceChunk>(payload);
-    ASSERT(payloadSequence != nullptr);
-    auto payloadChunks = payloadSequence->getChunks();
-
-    auto quicPacketHeader = dynamicPtrCast<const PacketHeader>(payloadChunks[0]);
-    ASSERT(quicPacketHeader != nullptr);
-    uint8_t packetNumberOffset = -1;
-    uint8_t packetNumberLength = -1;
-    uint32_t packetNumber = -1;
-
-    switch (quicPacketHeader->getHeaderForm()) {
-        case PACKET_HEADER_FORM_LONG: {
-
-            auto longPacketHeader = dynamicPtrCast<const LongPacketHeader>(quicPacketHeader);
-
-            // Fixed header parts before connection IDs and variable fields:
-            // Header Form (1 bit) + Fixed Bit (1 bit) + Long Packet Type (2 bits) + Type-Specific Bits (4 bits) = 1 byte
-            // Version (32 bits) = 4 bytes
-            // Destination Connection ID Length (8 bits) = 1 byte
-            // Source Connection ID Length (8 bits) = 1 byte
-            // Total fixed bytes before CIDs: 1 + 4 + 1 + 1 = 7 bytes.
-            // This aligns with the base '7' in the `pn_offset` pseudocode.
-            packetNumberOffset = 7;
-
-            // Add the actual lengths of the Destination and Source Connection ID fields.
-            packetNumberOffset += longPacketHeader->getDstConnectionIdLength();
-            packetNumberOffset += longPacketHeader->getSrcConnectionIdLength();
-
-            // Most long header packets (Initial, 0-RTT, Handshake) include a 'Length (i)' field.
-            // This 'Length' field is a variable-length integer indicating the length of the remainder of the packet,
-            // which includes the Packet Number field itself and the Packet Payload (frames).
-            // To find its *encoded size*, we first need to know the total length it will represent.
-            int encryptedPartLength = -1;
-
-            switch (longPacketHeader->getLongPacketType()) {
-                case LONG_PACKET_HEADER_TYPE_INITIAL: {
-                    auto initialPacketHeader = dynamicPtrCast<const InitialPacketHeader>(longPacketHeader);
-                    ASSERT(initialPacketHeader != nullptr);
-                    // Initial packets contain 'Token Length (i)' and 'Token (..)' fields.
-                    // 'Token Length' is a variable-length integer specifying the length of the 'Token' field.
-                    // We need the *encoded size* of this VLI field.
-                    VariableLengthInteger tokenLength = initialPacketHeader->getTokenLength();
-                    packetNumberOffset += getVariableLengthIntegerSize(tokenLength); // Length of the 'Token Length' VLI field
-                    packetNumberOffset += tokenLength; // Length of the actual 'Token' payload
-
-                    packetNumberLength = initialPacketHeader->getPacketNumberLength();
-                    packetNumber = initialPacketHeader->getPacketNumber();
-
-                    // includes the packet number field and the AES encrypted payload
-                    encryptedPartLength = initialPacketHeader->getLength();
-                }
-                break;
-                case LONG_PACKET_HEADER_TYPE_0RTT: {
-                    auto zeroRttPacketHeader = dynamicPtrCast<const ZeroRttPacketHeader>(longPacketHeader);
-                    ASSERT(zeroRttPacketHeader != nullptr);
-                    packetNumberLength = zeroRttPacketHeader->getPacketNumberLength();
-                    packetNumber = zeroRttPacketHeader->getPacketNumber();
-
-                    encryptedPartLength = zeroRttPacketHeader->getLength();
-                }
-                break;
-                case LONG_PACKET_HEADER_TYPE_HANDSHAKE: {
-                    auto handshakePacketHeader = dynamicPtrCast<const HandshakePacketHeader>(longPacketHeader);
-                    ASSERT(handshakePacketHeader != nullptr);
-                    packetNumberLength = handshakePacketHeader->getPacketNumberLength();
-                    packetNumber = handshakePacketHeader->getPacketNumber();
-
-                    encryptedPartLength = handshakePacketHeader->getLength();
-                }
-            }
-
-            if (encryptedPartLength >= 0)
-                packetNumberOffset += getVariableLengthIntegerSize(encryptedPartLength); // Length of the 'Length' VLI field
-
-            break;
-        }
-        case PACKET_HEADER_FORM_SHORT: {
-            auto shortPacketHeader = dynamicPtrCast<const ShortPacketHeader>(quicPacketHeader);
-            ASSERT(shortPacketHeader != nullptr);
-            // Short header packets have a more compact initial byte.
-            // The Header Form (1 bit), Fixed Bit (1 bit), Spin Bit (1 bit), Reserved Bits (2 bits), Key Phase (1 bit),
-            // and Packet Number Length (2 bits) are all packed into the first byte.
-            packetNumberOffset = 1;
-
-            // The Destination Connection ID follows immediately after the first byte.
-            // Its length is known to the endpoints (not explicitly encoded in short headers).
-            packetNumberOffset += 8; // shortPacketHeader->getDstConnectionIdLength();
-
-            packetNumberLength = 4;
-            //TODO packetNumberLength = shortPacketHeader->getPacketNumberLength();
-            packetNumber = shortPacketHeader->getPacketNumber();
-            break;
-        }
-        default:
-            throw cRuntimeError("Unknown packet header form: %d", quicPacketHeader->getHeaderForm());
-    }
-
-    MemoryOutputStream payloadStream;
-
-    const Chunk *payloadPointer = payload.get();
-    auto serializer = ChunkSerializerRegistry::getInstance().getSerializer(typeid(*payloadPointer));
-    serializer->serialize(payloadStream, payload, B(0), payloadLength);
-
-    std::vector<uint8_t> unencryptedData = payloadStream.getData();
-    payloadStream.clear();
-
-    EncryptionKey key = EncryptionKey::fromTag(keyTag);
-    std::vector<uint8_t> finalContents = protectPacket(unencryptedData, packetNumberOffset, key);
-
-    // TODO: handle sub-byte offset and length
-    stream.writeBytes(finalContents, offset, length < b(0) ? B(-1) : B(length));
-
-    //return;
-
-    // ----------------
 
     uint8_t test_dcid[8] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07};
     ptls_iovec_t test_dcid_iovec = ptls_iovec_init(test_dcid, 8);
@@ -977,6 +857,128 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
         ASSERT(testClientAckUnprotectedData[i] == unprotectedClientAckData[i]);
     }
 
+}
+
+void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, b offset, b length) const
+{
+    const auto payload = staticPtrCast<const EncryptedQuicPacketChunk>(chunk)->getChunk();
+    b payloadLength = payload->getChunkLength();
+
+    Ptr<const EncryptionKeyTag> keyTag = chunk->getTag<EncryptionKeyTag>();
+
+    auto payloadSequence = dynamicPtrCast<SequenceChunk>(payload);
+    ASSERT(payloadSequence != nullptr);
+    auto payloadChunks = payloadSequence->getChunks();
+
+    auto quicPacketHeader = dynamicPtrCast<const PacketHeader>(payloadChunks[0]);
+    ASSERT(quicPacketHeader != nullptr);
+    uint8_t packetNumberOffset = -1;
+    uint8_t packetNumberLength = -1;
+    uint32_t packetNumber = -1;
+
+    switch (quicPacketHeader->getHeaderForm()) {
+        case PACKET_HEADER_FORM_LONG: {
+
+            auto longPacketHeader = dynamicPtrCast<const LongPacketHeader>(quicPacketHeader);
+
+            // Fixed header parts before connection IDs and variable fields:
+            // Header Form (1 bit) + Fixed Bit (1 bit) + Long Packet Type (2 bits) + Type-Specific Bits (4 bits) = 1 byte
+            // Version (32 bits) = 4 bytes
+            // Destination Connection ID Length (8 bits) = 1 byte
+            // Source Connection ID Length (8 bits) = 1 byte
+            // Total fixed bytes before CIDs: 1 + 4 + 1 + 1 = 7 bytes.
+            // This aligns with the base '7' in the `pn_offset` pseudocode.
+            packetNumberOffset = 7;
+
+            // Add the actual lengths of the Destination and Source Connection ID fields.
+            packetNumberOffset += longPacketHeader->getDstConnectionIdLength();
+            packetNumberOffset += longPacketHeader->getSrcConnectionIdLength();
+
+            // Most long header packets (Initial, 0-RTT, Handshake) include a 'Length (i)' field.
+            // This 'Length' field is a variable-length integer indicating the length of the remainder of the packet,
+            // which includes the Packet Number field itself and the Packet Payload (frames).
+            // To find its *encoded size*, we first need to know the total length it will represent.
+            int encryptedPartLength = -1;
+
+            switch (longPacketHeader->getLongPacketType()) {
+                case LONG_PACKET_HEADER_TYPE_INITIAL: {
+                    auto initialPacketHeader = dynamicPtrCast<const InitialPacketHeader>(longPacketHeader);
+                    ASSERT(initialPacketHeader != nullptr);
+                    // Initial packets contain 'Token Length (i)' and 'Token (..)' fields.
+                    // 'Token Length' is a variable-length integer specifying the length of the 'Token' field.
+                    // We need the *encoded size* of this VLI field.
+                    VariableLengthInteger tokenLength = initialPacketHeader->getTokenLength();
+                    packetNumberOffset += getVariableLengthIntegerSize(tokenLength); // Length of the 'Token Length' VLI field
+                    packetNumberOffset += tokenLength; // Length of the actual 'Token' payload
+
+                    packetNumberLength = initialPacketHeader->getPacketNumberLength();
+                    packetNumber = initialPacketHeader->getPacketNumber();
+
+                    // includes the packet number field and the AES encrypted payload
+                    encryptedPartLength = initialPacketHeader->getLength();
+                }
+                break;
+                case LONG_PACKET_HEADER_TYPE_0RTT: {
+                    auto zeroRttPacketHeader = dynamicPtrCast<const ZeroRttPacketHeader>(longPacketHeader);
+                    ASSERT(zeroRttPacketHeader != nullptr);
+                    packetNumberLength = zeroRttPacketHeader->getPacketNumberLength();
+                    packetNumber = zeroRttPacketHeader->getPacketNumber();
+
+                    encryptedPartLength = zeroRttPacketHeader->getLength();
+                }
+                break;
+                case LONG_PACKET_HEADER_TYPE_HANDSHAKE: {
+                    auto handshakePacketHeader = dynamicPtrCast<const HandshakePacketHeader>(longPacketHeader);
+                    ASSERT(handshakePacketHeader != nullptr);
+                    packetNumberLength = handshakePacketHeader->getPacketNumberLength();
+                    packetNumber = handshakePacketHeader->getPacketNumber();
+
+                    encryptedPartLength = handshakePacketHeader->getLength();
+                }
+            }
+
+            if (encryptedPartLength >= 0)
+                packetNumberOffset += getVariableLengthIntegerSize(encryptedPartLength); // Length of the 'Length' VLI field
+
+            break;
+        }
+        case PACKET_HEADER_FORM_SHORT: {
+            auto shortPacketHeader = dynamicPtrCast<const ShortPacketHeader>(quicPacketHeader);
+            ASSERT(shortPacketHeader != nullptr);
+            // Short header packets have a more compact initial byte.
+            // The Header Form (1 bit), Fixed Bit (1 bit), Spin Bit (1 bit), Reserved Bits (2 bits), Key Phase (1 bit),
+            // and Packet Number Length (2 bits) are all packed into the first byte.
+            packetNumberOffset = 1;
+
+            // The Destination Connection ID follows immediately after the first byte.
+            // Its length is known to the endpoints (not explicitly encoded in short headers).
+            packetNumberOffset += 8; // shortPacketHeader->getDstConnectionIdLength();
+
+            packetNumberLength = 4;
+            //TODO packetNumberLength = shortPacketHeader->getPacketNumberLength();
+            packetNumber = shortPacketHeader->getPacketNumber();
+            break;
+        }
+        default:
+            throw cRuntimeError("Unknown packet header form: %d", quicPacketHeader->getHeaderForm());
+    }
+
+    MemoryOutputStream payloadStream;
+
+    const Chunk *payloadPointer = payload.get();
+    auto serializer = ChunkSerializerRegistry::getInstance().getSerializer(typeid(*payloadPointer));
+    serializer->serialize(payloadStream, payload, B(0), payloadLength);
+
+    std::vector<uint8_t> unencryptedData = payloadStream.getData();
+    payloadStream.clear();
+
+    EncryptionKey key = EncryptionKey::fromTag(keyTag);
+    std::vector<uint8_t> finalContents = protectPacket(unencryptedData, packetNumberOffset, key);
+
+    // TODO: handle sub-byte offset and length
+    stream.writeBytes(finalContents, offset, length < b(0) ? B(-1) : B(length));
+
+    doPacketProtectionTest();
 }
 
 const Ptr<Chunk> EncryptedQuicPacketSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
