@@ -163,8 +163,8 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
      *   n1 = min{ m ≥ 0 : F(m) ≥ T }          if b is true
      *      = min{ m ≥ 0 : F(m) > T }          if b is false
      *   Closed-form inverse of F (monotone, x > 0)
-     *     lower bound:  n + floor(p + (x-1)n) >= T   <=>   n >= (T - p) / x
-     *     upper bound:  n + floor(p + (x-1)n) >  T   <=>   n >= (T - p + 1) / x
+     *     lower bound:  n + floor(p + (x - 1) * n) >= T   <=>   n >= (T - p) / x
+     *     upper bound:  n + floor(p + (x - 1) * n) >  T   <=>   n >= (T - p + 1) / x
      *   n1 = b ? ceil((T - p) / x) : ceil((T - p + 1) / x)
      *   n1 = max(0, n1)
      *   s  = oos + interval(n1)
