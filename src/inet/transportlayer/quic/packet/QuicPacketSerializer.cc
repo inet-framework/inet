@@ -486,13 +486,13 @@ static size_t determine_pn_offset(ptls_iovec_t input)
             if ((input.base[0] & QUICLY_PACKET_TYPE_BITMASK) == QUICLY_PACKET_TYPE_INITIAL) {
                 /* initial has a token */
                 size_t token_len_len;
-                size_t token_len = decodeVariableLengthInteger(input.base + pn_offs, input.base + input.len - pn_offs, &token_len_len);
+                size_t token_len = decodeVariableLengthInteger(input.base + pn_offs, input.base + input.len, &token_len_len);
                 pn_offs += token_len_len;
                 pn_offs += token_len;
             }
 
             size_t packet_len_len;
-            decodeVariableLengthInteger(input.base + pn_offs, input.base + input.len - pn_offs, &packet_len_len);
+            decodeVariableLengthInteger(input.base + pn_offs, input.base + input.len, &packet_len_len);
             pn_offs += packet_len_len;
         }
     } else {
