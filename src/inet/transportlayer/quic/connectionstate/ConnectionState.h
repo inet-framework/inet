@@ -60,6 +60,8 @@ public:
     virtual ConnectionState *processDplpmtudRaiseTimeout(cMessage *msg);
     virtual ConnectionState *processConnectionCloseTimeout(cMessage *msg);
 
+    virtual EncryptionLevel getEncryptionLevel() = 0;
+
 protected:
     Connection *context;
     std::string name;

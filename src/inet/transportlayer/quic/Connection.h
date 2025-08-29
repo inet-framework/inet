@@ -13,7 +13,6 @@
 #include "UdpSocket.h"
 #include "AppSocket.h"
 #include "packet/QuicPacket.h"
-#include "connectionstate/ConnectionState.h"
 #include "inet/common/packet/ChunkQueue.h"
 #include "PacketBuilder.h"
 #include "ReceivedPacketsAccountant.h"
@@ -69,6 +68,14 @@ enum class EncryptionLevel {
     OneRtt = 3
 };
 
+}
+}
+
+#include "connectionstate/ConnectionState.h"
+
+namespace inet {
+namespace quic {
+
 EncryptionLevel pns_to_epoch(PacketNumberSpace pnSpace);
 
 class Connection
@@ -88,6 +95,9 @@ class Connection
     EncryptionKey ingressKeys[4];
 
     ChunkQueue cryptoQueues[4];
+
+    EncryptionLevel getEncryptionLevel();
+
 
     /**
      * Enqueues data in the corresponding stream queue and triggers packet sending.

@@ -21,6 +21,8 @@ public:
     virtual ConnectionState *processOneRttPacket(const Ptr<const OneRttPacketHeader>& packetHeader, Packet *pkt) override;
     virtual ConnectionState *processHandshakePacket(const Ptr<const HandshakePacketHeader>& packetHeader, Packet *pkt) override;
     virtual ConnectionState *processConnectionCloseTimeout(cMessage *msg) override;
+
+    EncryptionLevel getEncryptionLevel() override { return EncryptionLevel::OneRtt; }
 };
 
 } /* namespace quic */
