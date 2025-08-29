@@ -78,9 +78,11 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
      */
     clocktime_t clockTimeCompensation;
     /**
-     * The oscillator compensation fractional accumulator.
+     * Q0.63 fractional accumulator for the oscillator compensation.
+     * Stored modulo 2^63 in [0, 2^63); only the lower 63 bits are meaningful.
+     * Represents p = frac(p + (x - 1) * n) scaled by 2^63.
      */
-    double p = 0;
+    uint64_t p = 0;
 
     uint64_t lastNumTicks = 0;
     clocktime_t clockTimeBeforeOscillatorStateChange = -1; // used for assertion
