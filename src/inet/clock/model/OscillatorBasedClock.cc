@@ -143,12 +143,12 @@ void OscillatorBasedClock::moveOrigin()
 
 void OscillatorBasedClock::setOrigin(clocktime_t clockTime)
 {
-    EV_DEBUG << "Setting clock origin" << EV_FIELD(clockTime) << EV_ENDL;
+    simtime_t simulationTime = simTime();
+    EV_DEBUG << "Setting clock origin" << EV_FIELD(simulationTime) << EV_FIELD(clockTime) << EV_ENDL;
     ClockCoutIndent indent;
     CLOCK_COUT << "-> setOrigin(" << clockTime << ")\n";
 
     // (optional but recommended)
-    simtime_t simulationTime = simTime();
     ASSERTCMP(>=, simulationTime, originSimulationTime);
     ASSERTCMP(>=, simulationTime, oscillator->getComputationOrigin());
 
@@ -221,7 +221,9 @@ simtime_t OscillatorBasedClock::doComputeSimTimeFromClockTime(clocktime_t clockT
     int64_t n0 = numTicks(cos - oos);
     int64_t k = floor((c - coc).raw() / l) + (b ? 0 : 1);
     int64_t T = F(n0) + k;
-    int64_t n1 = std::max<int64_t>(0, (int64_t)std::floor(((double)T - p) / x));
+    int64_t n1 = b ? ceil((T - p) / x) : ceil((T - p + 1) / x);
+    if (n1 < 0)
+        n1 = 0;
     simtime_t s = oos + interval(n1);
     return s;
 }

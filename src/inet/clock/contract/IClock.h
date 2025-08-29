@@ -42,8 +42,10 @@ extern NullStream nullStream;
     ClockCoutDisabledBlock b; auto _o1 = (o1); auto _o2 = (o2); \
     if (!(_o1 cmp _o2)) { \
         std::ostringstream oss; \
-        oss << "ASSERT: Condition '" << #o1 << " " << #cmp << " " << #o2 << "' as '" << _o1 << " " << #cmp << " " << _o2 << "' does not hold in function '%s' at %s:%d"; \
-        throw omnetpp::cRuntimeError(oss.str().c_str(), __FUNCTION__, __FILE__, __LINE__); \
+        oss << "ASSERT: Condition '" << #o1 << " " << #cmp << " " << #o2 << "' as '" << _o1 << " " << #cmp << " " << _o2 << "' does not hold"; \
+        omnetpp::cRuntimeError error("in function '%s()' at %s:%d", __FUNCTION__, __FILE__, __LINE__); \
+        error.prependMessage(oss.str().c_str()); \
+        throw error; \
     } \
 }
 #else
