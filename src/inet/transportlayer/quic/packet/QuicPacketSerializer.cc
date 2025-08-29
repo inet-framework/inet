@@ -873,8 +873,6 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
     auto quicPacketHeader = dynamicPtrCast<const PacketHeader>(payloadChunks[0]);
     ASSERT(quicPacketHeader != nullptr);
     uint8_t packetNumberOffset = -1;
-    uint8_t packetNumberLength = -1;
-    uint32_t packetNumber = -1;
 
     switch (quicPacketHeader->getHeaderForm()) {
         case PACKET_HEADER_FORM_LONG: {
@@ -911,9 +909,6 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
                     packetNumberOffset += getVariableLengthIntegerSize(tokenLength); // Length of the 'Token Length' VLI field
                     packetNumberOffset += tokenLength; // Length of the actual 'Token' payload
 
-                    packetNumberLength = initialPacketHeader->getPacketNumberLength();
-                    packetNumber = initialPacketHeader->getPacketNumber();
-
                     // includes the packet number field and the AES encrypted payload
                     encryptedPartLength = initialPacketHeader->getLength();
                 }
@@ -921,8 +916,6 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
                 case LONG_PACKET_HEADER_TYPE_0RTT: {
                     auto zeroRttPacketHeader = dynamicPtrCast<const ZeroRttPacketHeader>(longPacketHeader);
                     ASSERT(zeroRttPacketHeader != nullptr);
-                    packetNumberLength = zeroRttPacketHeader->getPacketNumberLength();
-                    packetNumber = zeroRttPacketHeader->getPacketNumber();
 
                     encryptedPartLength = zeroRttPacketHeader->getLength();
                 }
@@ -930,8 +923,6 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
                 case LONG_PACKET_HEADER_TYPE_HANDSHAKE: {
                     auto handshakePacketHeader = dynamicPtrCast<const HandshakePacketHeader>(longPacketHeader);
                     ASSERT(handshakePacketHeader != nullptr);
-                    packetNumberLength = handshakePacketHeader->getPacketNumberLength();
-                    packetNumber = handshakePacketHeader->getPacketNumber();
 
                     encryptedPartLength = handshakePacketHeader->getLength();
                 }
@@ -954,9 +945,6 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
             // Its length is known to the endpoints (not explicitly encoded in short headers).
             packetNumberOffset += 8; // shortPacketHeader->getDstConnectionIdLength();
 
-            packetNumberLength = 4;
-            //TODO packetNumberLength = shortPacketHeader->getPacketNumberLength();
-            packetNumber = shortPacketHeader->getPacketNumber();
             break;
         }
         default:
