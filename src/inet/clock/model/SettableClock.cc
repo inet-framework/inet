@@ -100,7 +100,7 @@ void SettableClock::setClockTime(clocktime_t newClockTime, ppm oscillatorCompens
                     EV_WARN << "Executing clock event " << event->getName() << ".\n";
                     cSimpleModule *targetModule = check_and_cast<cSimpleModule *>(event->getArrivalModule());
                     cContextSwitcher contextSwitcher(targetModule);
-                    setOrigin(currentSimTime, event->getArrivalClockTime());
+                    setOrigin(event->getArrivalClockTime());
                     targetModule->cancelEvent(event);
                     event->setClock(nullptr);
                     event->execute();
@@ -122,7 +122,7 @@ void SettableClock::setClockTime(clocktime_t newClockTime, ppm oscillatorCompens
         }
         this->oscillatorCompensation = oscillatorCompensation;
         emit(oscillatorCompensationChangedSignal, oscillatorCompensation.get<ppm>());
-        setOrigin(currentSimTime, newClockTime);
+        setOrigin(newClockTime);
         if (useFutureEventSet) {
             std::sort(events.begin(), events.end(), cEvent::compareBySchedulingOrder);
             for (auto event : events) {

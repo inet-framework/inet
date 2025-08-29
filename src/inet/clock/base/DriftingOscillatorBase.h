@@ -69,6 +69,8 @@ class INET_API DriftingOscillatorBase : public OscillatorBase, public IScriptabl
     virtual void setTickOffset(simtime_t tickOffset);
 
     /**
+     * See comment for IOscillator interface method.
+     *
      * Mathematical definition: n = computeTicksForInterval(t)
      *   n = 0                             if t == 0
      *   n = floor(d * (t − x) / l) + 1    otherwise
@@ -76,6 +78,8 @@ class INET_API DriftingOscillatorBase : public OscillatorBase, public IScriptabl
     virtual int64_t computeTicksForInterval(simtime_t timeInterval) const override;
 
     /**
+     * See comment for IOscillator interface method.
+     *
      * Mathematical definition: t = computeIntervalForTicks(n)
      *   t = 0                             if n == 0
      *   t = x + (n − 1) * l / d           otherwise
