@@ -159,7 +159,7 @@ void OscillatorBasedClock::setOrigin(simtime_t simulationTime, clocktime_t clock
 
     originSimulationTimeLowerBound = newOriginSimulationTimeLowerBound;
     originSimulationTime = cos_;
-    originClockTime = ClockTime::fromRaw(coc_);
+    originClockTime = clockTime; // TODO: ClockTime::fromRaw(coc_);
     // TODO: Do NOT touch lastClockTime here unless this is a user "set time" op. only affects assertions
     lastClockTime = clockTime;
 
@@ -365,10 +365,10 @@ void OscillatorBasedClock::receiveSignal(cComponent *source, int signal, cObject
     if (signal == IOscillator::preOscillatorStateChangedSignal) {
         clocktime_t clockTime = getClockTime();
         EV_DEBUG << "Handling pre-oscillator state changed signal" << EV_FIELD(clockTime) << EV_ENDL;
-        std::cout << "Before setOrigin() call" << ", originClockTime = " << originClockTime << ", originSimulationTime = " << originSimulationTime << ", originSimulationTimeLowerBound = " << originSimulationTimeLowerBound << ", getOscillatorCompensation() = " << getOscillatorCompensation() << ", oscillator->getComputationOrigin() = " << oscillator->getComputationOrigin() << ", compensationPhaseBaseTicks = " << compensationPhaseBaseTicks << ", numTicksAtOriginLowerBound = " << numTicksAtOriginLowerBound << std::endl;
+//        std::cout << "Before setOrigin() call" << ", originClockTime = " << originClockTime << ", originSimulationTime = " << originSimulationTime << ", originSimulationTimeLowerBound = " << originSimulationTimeLowerBound << ", getOscillatorCompensation() = " << getOscillatorCompensation() << ", oscillator->getComputationOrigin() = " << oscillator->getComputationOrigin() << ", compensationPhaseBaseTicks = " << compensationPhaseBaseTicks << std::endl;
         checkAllClockEvents();
         setOrigin(simTime(), clockTime);
-        std::cout << "After  setOrigin() call" << ", originClockTime = " << originClockTime << ", originSimulationTime = " << originSimulationTime << ", originSimulationTimeLowerBound = " << originSimulationTimeLowerBound << ", getOscillatorCompensation() = " << getOscillatorCompensation() << ", oscillator->getComputationOrigin() = " << oscillator->getComputationOrigin() << ", compensationPhaseBaseTicks = " << compensationPhaseBaseTicks << ", numTicksAtOriginLowerBound = " << numTicksAtOriginLowerBound << std::endl;
+//        std::cout << "After  setOrigin() call" << ", originClockTime = " << originClockTime << ", originSimulationTime = " << originSimulationTime << ", originSimulationTimeLowerBound = " << originSimulationTimeLowerBound << ", getOscillatorCompensation() = " << getOscillatorCompensation() << ", oscillator->getComputationOrigin() = " << oscillator->getComputationOrigin() << ", compensationPhaseBaseTicks = " << compensationPhaseBaseTicks << std::endl;
         checkAllClockEvents();
         clockTimeBeforeOscillatorStateChange = clockTime;
     }
