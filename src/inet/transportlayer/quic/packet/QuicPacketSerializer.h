@@ -16,6 +16,7 @@
 #ifndef __INET_QUICPACKETSERIALIZER_H
 #define __INET_QUICPACKETSERIALIZER_H
 
+#include "inet/transportlayer/quic/packet/QuicPacket.h"
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
 #include "inet/transportlayer/quic/packet/PacketHeader_m.h"
 #include "inet/transportlayer/quic/packet/FrameHeader_m.h"
@@ -59,6 +60,8 @@ class INET_API EncryptedQuicPacketSerializer : public ChunkSerializer
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, b offset, b length) const override;
     virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const override;
 };
+
+std::vector<uint8_t> unprotectPacket(std::vector<uint8_t> protectedDatagram, const EncryptionKey& key);
 
 
 } // namespace quic

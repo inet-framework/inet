@@ -866,8 +866,6 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
     const auto payload = staticPtrCast<const EncryptedQuicPacketChunk>(chunk)->getChunk();
     b payloadLength = payload->getChunkLength();
 
-    Ptr<const EncryptionKeyTag> keyTag = chunk->getTag<EncryptionKeyTag>();
-
     MemoryOutputStream payloadStream;
 
     const Chunk *payloadPointer = payload.get();
@@ -877,13 +875,14 @@ void EncryptedQuicPacketSerializer::serialize(MemoryOutputStream& stream, const 
     std::vector<uint8_t> unencryptedData = payloadStream.getData();
     payloadStream.clear();
 
+    Ptr<const EncryptionKeyTag> keyTag = chunk->getTag<EncryptionKeyTag>();
     EncryptionKey key = EncryptionKey::fromTag(keyTag);
     std::vector<uint8_t> finalContents = protectPacket(unencryptedData, key);
 
     // TODO: handle sub-byte offset and length
     stream.writeBytes(finalContents, offset, length < b(0) ? B(-1) : B(length));
 
-    doPacketProtectionTest();
+    // doPacketProtectionTest();
 }
 
 const Ptr<Chunk> EncryptedQuicPacketSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const

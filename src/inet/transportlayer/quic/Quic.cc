@@ -24,6 +24,7 @@
 #include "exception/ConnectionDiedException.h"
 #include "packet/ConnectionId.h"
 #include "packet/EncryptedQuicPacketChunk.h"
+#include "packet/QuicPacketSerializer.h"
 
 namespace inet {
 namespace quic {
@@ -326,15 +327,33 @@ void Quic::handleMessageFromUdp(cMessage *msg)
         delete quotedPacket;
     } else if (msg->getKind() == UDP_I_DATA) {
         Packet *pkt = check_and_cast<Packet *>(msg);
-        Ptr<const EncryptedQuicPacketChunk> encPkt = pkt->popAtFront<EncryptedQuicPacketChunk>();
-        auto chunks = check_and_cast<SequenceChunk *>(encPkt->getChunk().get())->getChunks();
-
-        for (int i = chunks.size() - 1; i >= 0; i--) {
-            pkt->insertAtFront(chunks[i]);
-        }
 
         uint64_t connectionId = extractConnectionId(pkt);
         Connection *connection = findConnection(connectionId);
+
+        uint64_t dstConnId = connectionId;
+        ptls_iovec_t dcid_iovec = ptls_iovec_init(&dstConnId, 8);
+        for (int i = 0; i < 4; ++i) {
+            std::swap(dcid_iovec.base[i], dcid_iovec.base[7 - i]);
+        }
+
+
+        Ptr<const Chunk> pktChunk = pkt->peekAtFront();
+        if (Ptr<const EncryptedQuicPacketChunk> encChunk = dynamicPtrCast<const EncryptedQuicPacketChunk>(pktChunk)) {
+            auto chunks = check_and_cast<SequenceChunk *>(encChunk->getChunk().get())->getChunks();
+
+            for (int i = chunks.size() - 1; i >= 0; i--) {
+                pkt->insertAtFront(chunks[i]);
+            }
+        }
+        else if (Ptr<const BytesChunk> bytesChunk = dynamicPtrCast<const BytesChunk>(pktChunk)) {
+            std::vector<uint8_t> protectedDatagram = bytesChunk->getBytes();
+            EncryptionKey key = connection
+                ? connection->ingressKeys[(int)connection->getEncryptionLevel()]
+                : EncryptionKey::newInitial(dcid_iovec, "client in");
+            unprotectPacket(protectedDatagram, key);
+        }
+
         if (connection) {
             connection->processPackets(pkt);
         } else {
