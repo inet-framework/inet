@@ -23,6 +23,8 @@ public:
     virtual ConnectionState *processInitialPacket(const Ptr<const InitialPacketHeader>& packetHeader, Packet *pkt) override;
     virtual void processCryptoFrame(const Ptr<const CryptoFrameHeader>& frameHeader, Packet *pkt) override;
 
+    EncryptionLevel getEncryptionLevel() override { return EncryptionLevel::Initial; }
+
 private:
     void generateAndSetTempDstConnectionId();
     void setConnectionKeysFromInitialRandom(uint64_t dstConnId);

@@ -42,6 +42,8 @@ public:
     virtual ConnectionState *processInitialPacket(const Ptr<const InitialPacketHeader>& packetHeader, Packet *pkt) override;
     virtual ConnectionState *processHandshakePacket(const Ptr<const HandshakePacketHeader>& packetHeader, Packet *pkt) override;
 
+    EncryptionLevel getEncryptionLevel() override { return EncryptionLevel::OneRtt; }
+
 private:
     bool gotCryptoFin = false;
     bool gotConnectionClose = false;

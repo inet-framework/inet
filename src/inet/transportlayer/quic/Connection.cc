@@ -204,6 +204,8 @@ Connection::~Connection() {
     ptls_free(tls);
 }
 
+EncryptionLevel Connection::getEncryptionLevel() { return connectionState->getEncryptionLevel(); }
+
 void Connection::processAppCommand(cMessage *msg)
 {
     ConnectionState *newState = connectionState->processAppCommand(msg);
