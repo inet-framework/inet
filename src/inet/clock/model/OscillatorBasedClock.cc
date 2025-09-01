@@ -126,12 +126,11 @@ void OscillatorBasedClock::handleMessage(cMessage *message)
 }
 
 int64_t OscillatorBasedClock::A(int64_t n) const {
-    const S64 e_q63 = getOscillatorCompensation().raw(); // e = 1-x (Q1.63)
+    const S64 e_q63 = getOscillatorCompensation().raw(); // e = 1 - x (Q1.63)
     const int64_t n0 = oscillator->computeTicksForInterval(originSimulationTime - oscillator->getComputationOrigin());
     const int64_t m  = n - n0;
     const S128 q = (S128)p - (S128)e_q63 * (S128)m; // Q1.63
-    S128 qd = q / S128_ONE_Q63, r = q % S128_ONE_Q63;
-    if (r != 0 && q < 0) --qd; // floor
+    const S128 qd = floor_div(q, S128_ONE_Q63);
     return (int64_t)qd;
 }
 
@@ -144,9 +143,8 @@ static inline uint64_t frac_advance(uint64_t p_q63, int64_t e_q63, int64_t m) {
 
 // floor_q63(p - e * m)
 static inline int64_t A_rel(int64_t m, uint64_t p_q63, int64_t e_q63) {
-    S128 q = (S128)p_q63 - (S128)e_q63 * (S128)m;
-    S128 qd = q / S128_ONE_Q63, r = q % S128_ONE_Q63;
-    if (r != 0 && q < 0) --qd;
+    const S128 q = (S128)p_q63 - (S128)e_q63 * (S128)m;
+    const S128 qd = floor_div(q, S128_ONE_Q63);
     return (int64_t)qd;
 }
 
@@ -155,7 +153,7 @@ static inline S128 floor_div(S128 a, S128 b) {
     S128 q = a / b, r = a % b;
     if (r != 0 && ((a < 0) != (b < 0))) --q;
     return q;
-};
+}
 
 void OscillatorBasedClock::moveOrigin()
 {
@@ -422,10 +420,8 @@ void OscillatorBasedClock::receiveSignal(cComponent *source, int signal, cObject
     if (signal == IOscillator::preOscillatorStateChangedSignal) {
         clocktime_t clockTime = getClockTime();
         EV_DEBUG << "Handling pre-oscillator state changed signal" << EV_FIELD(clockTime) << EV_ENDL;
-//        std::cout << "Before setOrigin() call" << ", originClockTime = " << originClockTime << ", originSimulationTime = " << originSimulationTime << ", originSimulationTimeLowerBound = " << originSimulationTimeLowerBound << ", getOscillatorCompensation() = " << getOscillatorCompensation() << ", oscillator->getComputationOrigin() = " << oscillator->getComputationOrigin() << ", compensationPhaseBaseTicks = " << compensationPhaseBaseTicks << std::endl;
         checkAllClockEvents();
         moveOrigin();
-//        std::cout << "After  setOrigin() call" << ", originClockTime = " << originClockTime << ", originSimulationTime = " << originSimulationTime << ", originSimulationTimeLowerBound = " << originSimulationTimeLowerBound << ", getOscillatorCompensation() = " << getOscillatorCompensation() << ", oscillator->getComputationOrigin() = " << oscillator->getComputationOrigin() << ", compensationPhaseBaseTicks = " << compensationPhaseBaseTicks << std::endl;
         checkAllClockEvents();
         clockTimeBeforeOscillatorStateChange = clockTime;
     }
