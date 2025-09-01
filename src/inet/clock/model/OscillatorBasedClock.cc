@@ -125,13 +125,10 @@ void OscillatorBasedClock::handleMessage(cMessage *message)
         ClockBase::handleMessage(message);
 }
 
-int64_t OscillatorBasedClock::A(int64_t n) const {
-    const S64 e_q63 = getOscillatorCompensation().raw(); // e = 1 - x (Q1.63)
-    const int64_t n0 = oscillator->computeTicksForInterval(originSimulationTime - oscillator->getComputationOrigin());
-    const int64_t m  = n - n0;
-    const S128 q = (S128)p - (S128)e_q63 * (S128)m; // Q1.63
-    const S128 qd = floor_div(q, S128_ONE_Q63);
-    return (int64_t)qd;
+static inline S128 floor_div(S128 a, S128 b) {
+    S128 q = a / b, r = a % b;
+    if (r != 0 && ((a < 0) != (b < 0))) --q;
+    return q;
 }
 
 // frac in Q0.63: keep modulo 2^63
@@ -148,11 +145,13 @@ static inline int64_t A_rel(int64_t m, uint64_t p_q63, int64_t e_q63) {
     return (int64_t)qd;
 }
 
-static inline S128 floor_div(S128 a, S128 b) {
-    ASSERT(b > 0);
-    S128 q = a / b, r = a % b;
-    if (r != 0 && ((a < 0) != (b < 0))) --q;
-    return q;
+int64_t OscillatorBasedClock::A(int64_t n) const {
+    const S64 e_q63 = getOscillatorCompensation().raw(); // e = 1 - x (Q1.63)
+    const int64_t n0 = oscillator->computeTicksForInterval(originSimulationTime - oscillator->getComputationOrigin());
+    const int64_t m  = n - n0;
+    const S128 q = (S128)p - (S128)e_q63 * (S128)m; // Q1.63
+    const S128 qd = floor_div(q, S128_ONE_Q63);
+    return (int64_t)qd;
 }
 
 void OscillatorBasedClock::moveOrigin()
