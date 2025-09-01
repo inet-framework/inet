@@ -172,6 +172,7 @@ void OscillatorBasedClock::moveOrigin()
     const uint64_t p_new = frac_advance(p, e_q63, m);
     // update state
     originSimulationTime = s;
+    originSimulationTimeLowerBound = oos + oscillator->computeIntervalForTicks(n);
     originClockTime = coc_new;
     p = p_new;
 }
