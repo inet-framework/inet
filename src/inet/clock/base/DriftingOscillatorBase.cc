@@ -25,11 +25,6 @@ void DriftingOscillatorBase::initialize(int stage)
         setDriftFactor(SimTimeScale::fromPpm(driftRate.get<ppm>()));
         numTicksAtOrigin = 0;
         simtime_t currentTickLength = getCurrentTickLength();
-        if (driftRate != ppm(0)) {
-            simtime_t roundTripNominalTickLength = SimTime::fromRaw(driftFactor.raw() > 0 ? driftFactor.mulCeil(currentTickLength.raw()) : driftFactor.mulFloor(currentTickLength.raw()));
-            ASSERTCMP(!=, nominalTickLength, currentTickLength);
-            ASSERTCMP(==, nominalTickLength, roundTripNominalTickLength);
-        }
         simtime_t tickOffset = par("tickOffset");
         if (tickOffset < 0 || tickOffset >= currentTickLength)
             throw cRuntimeError("First tick offset must be in the range [0, currentTickLength)");

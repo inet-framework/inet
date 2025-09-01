@@ -230,6 +230,8 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     virtual void sendPacketToNic(Packet *packet, int portId);
 
     virtual const GptpBase *extractGptpMessage(Packet *packet);
+
+    virtual bool isAllSyncSenderProcessesCompleted() const;
 };
 
 }

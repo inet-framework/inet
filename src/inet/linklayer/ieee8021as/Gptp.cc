@@ -138,10 +138,15 @@ void Gptp::handleMessage(cMessage *msg)
                 }
                 case GPTPTYPE_FOLLOW_UP:
                     processFollowUp(packet, check_and_cast<const GptpFollowUp *>(gptpMessage.get()));
-                    if (gptpNodeType == BRIDGE_NODE)
-                        for (auto portId : masterPortIds)
-                            sendFollowUp(portId);
-                    syncReceiverProcess = SyncReceiverProcess();
+                    if (gptpNodeType == SLAVE_NODE)
+                        syncReceiverProcess = SyncReceiverProcess();
+                    else if (gptpNodeType == BRIDGE_NODE) {
+                        for (auto portId : masterPortIds) {
+                            auto& process = syncSenderProcesses[portId];
+                            if (process.state == SyncSenderProcess::State::SYNC_TRANSMISSION_STARTED || process.state == SyncSenderProcess::State::SYNC_TRANSMISSION_ENDED)
+                                sendFollowUp(portId);
+                        }
+                    }
                     break;
                 case GPTPTYPE_PDELAY_RESP:
                     processPdelayResp(packet, check_and_cast<const GptpPdelayResp *>(gptpMessage.get()));
@@ -167,12 +172,14 @@ void Gptp::handleMessage(cMessage *msg)
 
 void Gptp::startSyncProcesses()
 {
+    ASSERT(gptpNodeType == MASTER_NODE);
     for (auto portId : masterPortIds)
         startSyncProcess(portId);
     nextSequenceId++;
 }
 
 void Gptp::startSyncProcess(int portId) {
+    ASSERT(gptpNodeType == MASTER_NODE);
     syncSenderProcesses[portId] = SyncSenderProcess();
     sendSync(portId);
 }
@@ -238,6 +245,7 @@ void Gptp::sendFollowUp(int portId)
     ASSERT(gptpNodeType != SLAVE_NODE);
     auto& process = syncSenderProcesses[portId];
     ASSERT(process.state == SyncSenderProcess::State::SYNC_TRANSMISSION_STARTED || process.state == SyncSenderProcess::State::SYNC_TRANSMISSION_ENDED);
+    ASSERT(gptpNodeType == MASTER_NODE || syncReceiverProcess.state == SyncReceiverProcess::State::COMPLETED);
     auto followUp = makeShared<GptpFollowUp>();
     followUp->setDomainNumber(domainNumber);
     if (gptpNodeType == MASTER_NODE) {
@@ -494,6 +502,16 @@ const GptpBase *Gptp::extractGptpMessage(Packet *packet)
     return chunk != nullptr ? chunk.get() : nullptr;
 }
 
+bool Gptp::isAllSyncSenderProcessesCompleted() const
+{
+    for (auto portId : masterPortIds) {
+        const auto& process = syncSenderProcesses.at(portId);
+        if (process.state != SyncSenderProcess::State::COMPLETED)
+            return false;
+    }
+    return true;
+}
+
 void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *object, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(simSignal));
@@ -604,6 +622,12 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj
                 process.state = SyncSenderProcess::State::SYNC_TRANSMISSION_STARTED;
                 process.syncTransmissionStartUnsychronized = localClock->getClockTime();
                 process.syncTransmissionStartSynchronized = clock->getClockTime();
+                if (gptpNodeType == MASTER_NODE)
+                    sendFollowUp(portId);
+                else if (gptpNodeType == BRIDGE_NODE) {
+                    if (syncReceiverProcess.state == SyncReceiverProcess::State::COMPLETED)
+                        sendFollowUp(portId);
+                }
                 break;
             }
             case GPTPTYPE_FOLLOW_UP: {
@@ -613,10 +637,6 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj
                 break;
             }
             default: throw cRuntimeError("Unknown gPTP message");
-        }
-        if (gptpMessage->getMessageType() == GPTPTYPE_SYNC) {
-            if (gptpNodeType == MASTER_NODE)
-                sendFollowUp(portId);
         }
     }
     else if (simSignal == transmissionEndedSignal) {
@@ -655,6 +675,10 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj
                 process.state = SyncSenderProcess::State::FOLLOW_UP_TRANSMISSION_ENDED;
                 // immediately complete the process
                 process.state = SyncSenderProcess::State::COMPLETED;
+                if (gptpNodeType == BRIDGE_NODE) {
+                    if (isAllSyncSenderProcessesCompleted())
+                        syncReceiverProcess = SyncReceiverProcess();
+                }
                 break;
             }
             default: throw cRuntimeError("Unknown gPTP message");

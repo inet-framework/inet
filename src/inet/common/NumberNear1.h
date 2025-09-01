@@ -53,8 +53,9 @@ struct INET_API NumberNear1 {
     static constexpr NumberNear1 one() noexcept { return NumberNear1(S64(0)); }
     static constexpr NumberNear1 two() noexcept { return NumberNear1(std::numeric_limits<S64>::min()); }
 
-    static NumberNear1 fromDouble(long double x) noexcept {
-        assert(x >= 0.5L && x <= 2.0L);
+    static NumberNear1 fromDouble(long double x) {
+        if (x < 0.5L || x > 2.0L)
+            throw cRuntimeError("Invalid argument: x = %Lg (must be in the range [0.5, 2.0])", x);
         long double e = 1.0L - x;
         long double scaled = e * (long double) (1ULL << 63);
         S64 e_q63 = (S64) std::llround(scaled);
@@ -65,12 +66,12 @@ struct INET_API NumberNear1 {
         return NumberNear1(e_q63);
     }
 
-    static NumberNear1 fromPpm(double ppm) noexcept {
-        assert(std::isfinite(ppm));
-        assert(ppm >= -500000.0 && ppm <= 1000000.0);
+    static NumberNear1 fromPpm(long double ppm) {
+        if (ppm < -500000.0 || ppm > 1000000.0)
+            throw cRuntimeError("Invalid argument: ppm = %Lg (must be in the range [-500000, 1000000] ppm)", ppm);
 
         // e_q63 = round( -(ppm) * 2^63 / 1e6 )
-        const long double scaled = -(long double)ppm * ((long double)(1ULL << 63) / 1'000'000.0L);
+        const long double scaled = -ppm * ((long double)(1ULL << 63) / 1'000'000.0L);
 
         // Clamp to valid raw range: [-2^63, +2^62]
         const long double min_raw = (long double)std::numeric_limits<int64_t>::min();
