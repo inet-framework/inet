@@ -56,11 +56,12 @@ static bool compareClockEvents(const ClockEvent *e1, const ClockEvent *e2) {
 class INET_API OscillatorBasedClock : public ClockBase, public cListener
 {
   protected:
+    // parameters
     bool useFutureEventSet = false;
-    uint64_t insertionCount = 0;
     IOscillator *oscillator = nullptr;
     simtime_raw_t (*roundingFunction)(simtime_raw_t, simtime_raw_t) = nullptr;
 
+    // state variables
     /**
      * The lower bound of the simulation time where the clock time equals with origin clock time (exactly at an oscillator tick).
      */
@@ -74,20 +75,21 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
      */
     clocktime_t originClockTime;
     /**
-     * The clock time accumulated from the oscillator compensation.
-     */
-    clocktime_t clockTimeCompensation;
-    /**
      * Fractional accumulator (Q0.63) for the oscillator compensation at the clock origin.
      * Stored modulo 2^63 in [0, 2^63); represents p = frac(p + (x - 1) * n) scaled by 2^63.
      */
-    uint64_t p = 0;
+    uint64_t oscillatorCompensationAccumulator = 0;
+    /**
+     * The clock time accumulated from the oscillator compensation.
+     */
+    clocktime_t clockTimeCompensation;
 
+    uint64_t insertionCount = 0;
     uint64_t lastNumTicks = 0;
     clocktime_t clockTimeBeforeOscillatorStateChange = -1; // used for assertion
 
+    // events and timers
     std::vector<ClockEvent *> events;
-
     cMessage *executeEventsTimer = nullptr;
 
   protected:
@@ -97,6 +99,8 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
     virtual void scheduleTargetModuleClockEventAt(simtime_t time, ClockEvent *event) override;
     virtual void scheduleTargetModuleClockEventAfter(simtime_t time, ClockEvent *event) override;
     virtual ClockEvent *cancelTargetModuleClockEvent(ClockEvent *event) override;
+
+    virtual void checkState() const;
 
     /**
      * Moves the clock origin to the current simulation time such that the simulation time <-> clock time mapping is unaffected.
