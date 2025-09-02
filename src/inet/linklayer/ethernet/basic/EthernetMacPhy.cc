@@ -30,6 +30,12 @@ EthernetMacPhy::EthernetMacPhy()
 {
 }
 
+EthernetMacPhy::~EthernetMacPhy()
+{
+    cancelAndDelete(endRxTimer);
+    delete currentRxSignal;
+}
+
 void EthernetMacPhy::initialize(int stage)
 {
     EthernetMacBase::initialize(stage);
@@ -55,8 +61,14 @@ void EthernetMacPhy::initializeFlags()
 {
     EthernetMacBase::initializeFlags();
 
+    // read parameters
+    emitReceptionStarted = par("emitReceptionStarted");
+    if (emitReceptionStarted) {
+        endRxTimer = new cMessage("EndReception", ENDRECEPTION);
+        setTxUpdateSupport(true);
+    }
     duplexMode = true;
-    physInGate->setDeliverImmediately(false);
+    physInGate->setDeliverImmediately(emitReceptionStarted);
 }
 
 void EthernetMacPhy::handleMessageWhenUp(cMessage *msg)
@@ -68,8 +80,27 @@ void EthernetMacPhy::handleMessageWhenUp(cMessage *msg)
         handleSelfMessage(msg);
     else if (msg->getArrivalGateId() == upperLayerInGateId)
         handleUpperPacket(check_and_cast<Packet *>(msg));
-    else if (msg->getArrivalGate() == physInGate)
-        processMsgFromNetwork(check_and_cast<Signal *>(msg));
+    else if (msg->getArrivalGate() == physInGate) {
+        Signal *signal = check_and_cast<Signal *>(msg);
+        if (emitReceptionStarted) {
+            if (signal->isUpdate()) {
+                EV_DETAIL << "Rx update: " << signal << endl;
+                ASSERT(endRxTimer->isScheduled() && currentRxSignal != nullptr);
+                rescheduleAfter(signal->getRemainingDuration(), endRxTimer);
+            }
+            else {
+                EV_DETAIL << "Rx start: " << signal << endl;
+                ASSERT(!endRxTimer->isScheduled());
+                simtime_t remainingDuration = signal->getRemainingDuration();
+                scheduleAfter(remainingDuration, endRxTimer);
+                emit(receptionStartedSignal, signal);
+            }
+            currentRxSignal = signal;
+        }
+        else {
+            processMsgFromNetwork(signal);
+        }
+    }
     else
         throw cRuntimeError("Message received from unknown gate!");
     processAtHandleMessageFinished();
@@ -85,6 +116,12 @@ void EthernetMacPhy::handleSelfMessage(cMessage *msg)
         handleEndIFGPeriod();
     else if (msg == endPauseTimer)
         handleEndPausePeriod();
+    else if (msg == endRxTimer) {
+        EV_DETAIL << "Rx end: " << currentRxSignal << endl;
+        processMsgFromNetwork(currentRxSignal);
+        currentRxSignal = nullptr;
+        processAtHandleMessageFinished();
+    }
     else
         throw cRuntimeError("Unknown self message received!");
 }
