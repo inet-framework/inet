@@ -131,8 +131,10 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
     virtual void setOrigin(clocktime_t clockTime);
 
     void checkAllClockEvents() {
+        DEBUG_ENTER(true);
         for (auto event : events)
             checkClockEvent(event);
+        DEBUG_LEAVE();
     }
 
     /**
