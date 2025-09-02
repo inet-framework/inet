@@ -53,9 +53,10 @@ static double getCurrentRelativeTickLength(IClock *clock)
 void SimpleClockSynchronizer::synchronizeSlaveClock()
 {
     auto clockTime = masterClock->getClockTime() + synchronizationClockTimeErrorParameter->doubleValue();
-    ppm oscillatorCompensation = unit(getCurrentRelativeTickLength(slaveClock.get()) / getCurrentRelativeTickLength(masterClock.get())
-            * (1 + ppm(synchronizationOscillatorCompensationErrorParameter->doubleValue()).get<unit>()) - 1);
-    slaveClock->setClockTime(clockTime, oscillatorCompensation, true);
+    ppm idealOscillatorCompensation = unit(getCurrentRelativeTickLength(slaveClock.get()) / getCurrentRelativeTickLength(masterClock.get()) - 1);
+    ppm oscillatorCompensationError = ppm(synchronizationOscillatorCompensationErrorParameter->doubleValue());
+    ppm erroneousOscillatorCompensation = idealOscillatorCompensation + oscillatorCompensationError;
+    slaveClock->setClockTime(clockTime, erroneousOscillatorCompensation, true);
 }
 
 void SimpleClockSynchronizer::scheduleSynchronizationTimer()
