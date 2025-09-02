@@ -22,11 +22,14 @@ class INET_API EthernetMacPhy : public EthernetMacBase
 {
   public:
     EthernetMacPhy();
+    virtual ~EthernetMacPhy();
 
     // IActivePacketSink:
     virtual void handleCanPullPacketChanged(const cGate *gate) override;
 
   protected:
+    enum ReceptionMode {ON_START, AUTO, ON_END, FORCE_ON_END};
+
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void initializeStatistics() override;
@@ -43,6 +46,7 @@ class INET_API EthernetMacPhy : public EthernetMacBase
     virtual void handleSelfMessage(cMessage *msg) override;
 
     // helpers
+    virtual void setReceptionOnStartMode();
     virtual void startFrameTransmission();
     virtual void handleUpperPacket(Packet *pk) override;
     virtual void processMsgFromNetwork(Signal *signal);
@@ -51,6 +55,17 @@ class INET_API EthernetMacPhy : public EthernetMacBase
     virtual void scheduleEndIFGPeriod();
     virtual void scheduleEndPausePeriod(int pauseUnits);
     virtual void beginSendFrames();
+
+    // parameter values
+    ReceptionMode receptionMode = AUTO;
+
+    bool receptionOnStart = false;
+
+    // self messages
+    cMessage *endRxTimer = nullptr;
+
+    // other variables
+    Signal *currentRxSignal = nullptr;
 
     // statistics
     simtime_t totalSuccessfulRxTime; // total duration of successful transmissions on channel
