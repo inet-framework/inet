@@ -115,6 +115,7 @@ module EthernetMacPhy extends Module like IEtherMac
         bool duplexMode;                    // Must be set to "true", as EthernetMacPhy does not support half-duplex operation
                                             // (parameter is present to reduce the risk of accidental misconfiguration)
         bool allowNonstandardBitrate = default(false); // Allows any bitrate and uses the first larger bitrate specified parameters
+        bool emitReceptionStarted = default(false);
         int mtu @unit(B) = default(1500B);
         string fcsMode @enum("declared", "computed");
         @lifecycleSupport;
@@ -137,6 +138,7 @@ module EthernetMacPhy extends Module like IEtherMac
         @signal[receptionStateChanged](type=long); // Enum=MacReceiveState
         @signal[transmissionStarted](type=inet::physicallayer::EthernetSignalBase);
         @signal[transmissionEnded](type=inet::physicallayer::EthernetSignalBase);
+        @signal[receptionStarted](type=inet::physicallayer::Signal);
         @signal[receptionEnded](type=inet::physicallayer::Signal);
 
         @statistic[transmitting](title="transmitting state"; type=int; source=count(transmissionStarted) - count(transmissionEnded); record=vector; interpolationmode=sample-hold);
