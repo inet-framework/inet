@@ -340,18 +340,23 @@ void Quic::handleMessageFromUdp(cMessage *msg)
 
         Ptr<const Chunk> pktChunk = pkt->peekAtFront();
         if (Ptr<const EncryptedQuicPacketChunk> encChunk = dynamicPtrCast<const EncryptedQuicPacketChunk>(pktChunk)) {
-            auto chunks = check_and_cast<SequenceChunk *>(encChunk->getChunk().get())->getChunks();
-
-            for (int i = chunks.size() - 1; i >= 0; i--) {
-                pkt->insertAtFront(chunks[i]);
-            }
+            auto payloadSequence = dynamicPtrCast<const SequenceChunk>(encChunk->getChunk());
+            ASSERT(payloadSequence);
+            Ptr<SequenceChunk> newPayloadSequence = dynamicPtrCast<SequenceChunk>(payloadSequence->dupShared());
+            ASSERT(newPayloadSequence);
+            auto dummyAuthTag = makeShared<ByteCountChunk>(B(16));
+            dummyAuthTag->markImmutable();
+            newPayloadSequence->insertAtBack(dummyAuthTag); // reserve space for authentication tag
+            newPayloadSequence->markImmutable();
+            pkt->replaceData(newPayloadSequence);
         }
         else if (Ptr<const BytesChunk> bytesChunk = dynamicPtrCast<const BytesChunk>(pktChunk)) {
             std::vector<uint8_t> protectedDatagram = bytesChunk->getBytes();
             EncryptionKey key = connection
                 ? connection->ingressKeys[(int)connection->getEncryptionLevel()]
                 : EncryptionKey::newInitial(dcid_iovec, "client in");
-            unprotectPacket(protectedDatagram, key);
+            std::vector<uint8_t> decryptedData = unprotectPacket(protectedDatagram, key);
+            pkt->replaceData(makeShared<BytesChunk>(decryptedData));
         }
 
         if (connection) {
@@ -476,30 +481,45 @@ void Quic::destroySockets(AppSocket *appSocket)
     EV_TRACE << "leave Quic::destroySockets" << endl;
 }
 
-uint64_t Quic::extractConnectionId(Packet *pkt, bool *readSourceConnectionId)
+static uint64_t extractConnectionIdFromChunk(Ptr<const Chunk> chunk, bool *readSourceConnectionId)
 {
-    auto packetHeader = pkt->peekAtFront<PacketHeader>();
-    EV_DEBUG << "extract connection ID from: " << packetHeader << endl;
-
-    switch (packetHeader->getHeaderForm()) {
-        case PACKET_HEADER_FORM_LONG: {
-            auto longPacketHeader = staticPtrCast<const LongPacketHeader>(packetHeader);
-            if (readSourceConnectionId != nullptr && *readSourceConnectionId) {
-                return longPacketHeader->getSrcConnectionId();
+    if (auto packetHeader = dynamicPtrCast<const PacketHeader>(chunk)) {
+        switch (packetHeader->getHeaderForm()) {
+            case PACKET_HEADER_FORM_LONG: {
+                auto longPacketHeader = staticPtrCast<const LongPacketHeader>(packetHeader);
+                if (readSourceConnectionId != nullptr && *readSourceConnectionId) {
+                    return longPacketHeader->getSrcConnectionId();
+                }
+                return longPacketHeader->getDstConnectionId();
             }
-            return longPacketHeader->getDstConnectionId();
-        }
-        case PACKET_HEADER_FORM_SHORT: {
-            auto shortPacketHeader = staticPtrCast<const ShortPacketHeader>(packetHeader);
-            if (readSourceConnectionId != nullptr) {
-                *readSourceConnectionId = false;
+            case PACKET_HEADER_FORM_SHORT: {
+                auto shortPacketHeader = staticPtrCast<const ShortPacketHeader>(packetHeader);
+                if (readSourceConnectionId != nullptr) {
+                    *readSourceConnectionId = false;
+                }
+                return shortPacketHeader->getDstConnectionId();
             }
-            return shortPacketHeader->getDstConnectionId();
-        }
-        default: {
-            throw cRuntimeError("Quic::extractConnectionId: Unknown header form.");
+            default: {
+                throw cRuntimeError("Quic::extractConnectionId: Unknown header form.");
+            }
         }
     }
+    else if (auto encryptedChunk = dynamicPtrCast<const EncryptedQuicPacketChunk>(chunk)) {
+        auto sequenceChunk = dynamicPtrCast<const SequenceChunk>(encryptedChunk->getChunk());
+        ASSERT(sequenceChunk);
+        ASSERT(!sequenceChunk->getChunks().empty());
+        return extractConnectionIdFromChunk(sequenceChunk->getChunks()[0], readSourceConnectionId);
+    }
+
+    throw cRuntimeError("extractConnectionId: Unknown chunk type.");
+}
+
+uint64_t Quic::extractConnectionId(Packet *pkt, bool *readSourceConnectionId)
+{
+    auto header = pkt->peekAtFront();
+    EV_DEBUG << "extract connection ID from: " << pkt << endl;
+    return extractConnectionIdFromChunk(header, readSourceConnectionId);
+
 }
 
 void Quic::addUdpSocket(UdpSocket *udpSocket)
