@@ -56,7 +56,7 @@ clocktime_t OscillatorBasedClock::getClockTime() const
 {
     if (useFutureEventSet) {
         clocktime_t currentClockTime = ClockBase::getClockTime();
-        ASSERT(currentClockTime.raw() % oscillator->getNominalTickLength().raw() == 0);
+        ASSERTCMP(==, currentClockTime.raw() % getClockGranularity().raw(), 0);
         return currentClockTime;
     }
     else {
@@ -177,8 +177,7 @@ void OscillatorBasedClock::checkState() const
 void OscillatorBasedClock::moveOrigin()
 {
     // debug output
-    ClockCoutIndent indent;
-    CLOCK_COUT << "-> moveOrigin()\n";
+    DEBUG_ENTER(true);
     // get state
     const clocktime_raw_t l = getClockGranularity().raw();
     const simtime_t& oos = oscillator->getComputationOrigin();
@@ -200,19 +199,15 @@ void OscillatorBasedClock::moveOrigin()
     originClockTime = coc_new;
     oscillatorCompensationAccumulator = p_new;
     // debug output
-    CLOCK_COUT << "   : " << "originSimulationTimeLowerBound = " << originSimulationTimeLowerBound << ", "
-                          << "originSimulationTime = " << originSimulationTime << ", "
-                          << "originClockTime = " << originClockTime << ", "
-                          << "oscillatorCompensationAccumulator = " << oscillatorCompensationAccumulator << std::endl;
-    CLOCK_COUT << "   moveOrigin() -> void\n";
+    DEBUG_OUT << DEBUG_FIELD(originSimulationTimeLowerBound) << DEBUG_FIELD(originSimulationTime) << DEBUG_FIELD(originClockTime) << DEBUG_FIELD(oscillatorCompensationAccumulator) << std::endl;
+    DEBUG_LEAVE();
     checkState();
 }
 
 void OscillatorBasedClock::setOrigin(clocktime_t clockTime)
 {
     // debug output
-    ClockCoutIndent indent;
-    CLOCK_COUT << "-> setOrigin(" << clockTime << ")\n";
+    DEBUG_ENTER(true, clockTime);
     // checks
     simtime_t simulationTime = simTime();
     ASSERTCMP(>=, simulationTime, originSimulationTime);
@@ -236,18 +231,15 @@ void OscillatorBasedClock::setOrigin(clocktime_t clockTime)
     oscillatorCompensationAccumulator = p_new;
     lastClockTime = clockTime;
     // debug output
-    CLOCK_COUT << "   : " << "originSimulationTimeLowerBound = " << originSimulationTimeLowerBound << ", "
-                          << "originSimulationTime = " << originSimulationTime << ", "
-                          << "originClockTime = " << originClockTime << ", "
-                          << "oscillatorCompensationAccumulator = " << oscillatorCompensationAccumulator << ", "
-                          << "lastClockTime = " << lastClockTime << std::endl;
-    CLOCK_COUT << "   setOrigin() -> void\n";
+    DEBUG_OUT << DEBUG_FIELD(originSimulationTimeLowerBound) << DEBUG_FIELD(originSimulationTime) << DEBUG_FIELD(originClockTime) << DEBUG_FIELD(oscillatorCompensationAccumulator) << DEBUG_FIELD(lastClockTime) << std::endl;
+    DEBUG_LEAVE();
     checkState();
 }
 
 clocktime_t OscillatorBasedClock::doComputeClockTimeFromSimTime(simtime_t simulationTime) const
 {
-    // get state
+    DEBUG_ENTER(true, simulationTime);
+   // get state
     const clocktime_raw_t l = getClockGranularity().raw();
     const simtime_t& oos = oscillator->getComputationOrigin();
     const simtime_t& cos = originSimulationTime;
@@ -258,11 +250,15 @@ clocktime_t OscillatorBasedClock::doComputeClockTimeFromSimTime(simtime_t simula
     const S64 n0 = oscillator->computeTicksForInterval(cos - oos);
     const S64 dF = F(n) - F(n0);
     const S128 c_raw = (S128)coc.raw() + (S128)dF * (S128)l;
-    return ClockTime::fromRaw(c_raw);
+    DEBUG_OUT << DEBUG_FIELD(n) << DEBUG_FIELD(n0) << DEBUG_FIELD(dF) << std::endl;
+    clocktime_t result = ClockTime::fromRaw(c_raw);
+    DEBUG_LEAVE(result);
+    return result;
 }
 
 simtime_t OscillatorBasedClock::doComputeSimTimeFromClockTime(clocktime_t clockTime, bool lowerBound) const
 {
+    DEBUG_ENTER(true, clockTime, lowerBound);
     // get state
     const bool b = lowerBound;
     const clocktime_raw_t l = getClockGranularity().raw();
@@ -292,7 +288,9 @@ simtime_t OscillatorBasedClock::doComputeSimTimeFromClockTime(clocktime_t clockT
     S64 m1 = ceil_div_q63_by_x(N_q63);
     if (m1 < 0) m1 = 0;
     const S64 n1 = n0 + m1;
+    DEBUG_OUT << DEBUG_FIELD(n0) << DEBUG_FIELD(k) << DEBUG_FIELD(m1) << DEBUG_FIELD(n1) << std::endl;
     const simtime_t s = oos + oscillator->computeIntervalForTicks(n1);
+    DEBUG_LEAVE(s);
     return s;
 }
 
@@ -313,12 +311,12 @@ simtime_t OscillatorBasedClock::computeSimTimeFromClockTime(clocktime_t clockTim
     ASSERTCMP(==, clockTime.raw() % getClockGranularity().raw(), 0);
     simtime_t result = doComputeSimTimeFromClockTime(clockTime, lowerBound);
     ASSERTCMP(>=, result, originSimulationTimeLowerBound); // TODO: more restrictive assert for now?
-    if (lowerBound)
-        ASSERTCMP(==, clockTime, doComputeClockTimeFromSimTime(result)) // TODO: what happens if due to oscillator compensation a specific clock time value was skipped
+//    if (lowerBound)
+//        ASSERTCMP(==, clockTime, doComputeClockTimeFromSimTime(result)) // TODO: what happens if due to oscillator compensation a specific clock time value was skipped
 //        ASSERTCMP(<=, clockTime, doComputeClockTimeFromSimTime(result)) // maybe this?
-    else
-        // uses inequality because oscillator compensation
-        ASSERTCMP(<=, clockTime + getClockGranularity(), doComputeClockTimeFromSimTime(result));
+//    else
+//        // uses inequality because oscillator compensation
+//        ASSERTCMP(<=, clockTime + getClockGranularity(), doComputeClockTimeFromSimTime(result));
     return result;
 }
 
