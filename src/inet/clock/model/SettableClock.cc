@@ -134,7 +134,7 @@ void SettableClock::setClockTime(clocktime_t newClockTime, ppm oscillatorCompens
                 simtime_t arrivalSimulationTime = computeScheduleTime(arrivalClockTime);
                 EV_DEBUG << "Rescheduling clock event at" << EV_FIELD(arrivalClockTime) << EV_FIELD(arrivalSimulationTime) << EV_FIELD(event) << EV_ENDL;
                 targetModule->rescheduleAt(arrivalSimulationTime, event);
-                checkClockEvent(event);
+                checkScheduledClockEvent(event);
             }
         }
         else {
@@ -151,7 +151,7 @@ void SettableClock::setClockTime(clocktime_t newClockTime, ppm oscillatorCompens
                 EV_DEBUG << "Executing clock event" << EV_FIELD(clockTime) << EV_FIELD(event) << EV_ENDL;
                 event->execute();
             }
-            checkAllClockEvents();
+            checkAllScheduledClockEvents();
         }
         emit(timeChangedSignal, newClockTime.asSimTime());
     }
