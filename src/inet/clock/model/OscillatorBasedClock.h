@@ -149,7 +149,16 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
      *   n0 = numTicks(cos - oos)
      *   c  = coc + (F(n) - F(n0)) * l
      */
-    clocktime_t doComputeClockTimeFromSimTime(simtime_t t) const;
+    /**
+     * Mathematical formula: c = doComputeClockTimeFromSimTime(s, b):
+     *   n  = numTicks(s - oos)
+     *   n0 = numTicks(cos - oos)
+     *   m  = n - n0
+     *   atBoundary = (s == oos + interval(n))
+     *   m_eff = b ? m : (atBoundary && m > 0 ? m - 1 : m)
+     *   c  = coc + (F(n0 + m_eff) - F(n0)) * l
+     */
+    clocktime_t doComputeClockTimeFromSimTime(simtime_t t, bool lowerBound) const;
 
     /**
      * Mathematical formula: s = doComputeSimTimeFromClockTime(c, b):
@@ -173,7 +182,7 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
     virtual const IOscillator *getOscillator() const { return oscillator; }
     virtual SimTimeScale getOscillatorCompensation() const { return SimTimeScale(); }
 
-    virtual clocktime_t computeClockTimeFromSimTime(simtime_t t) const override;
+    virtual clocktime_t computeClockTimeFromSimTime(simtime_t t, bool lowerBound = true) const override;
     virtual simtime_t computeSimTimeFromClockTime(clocktime_t t, bool lowerBound = true) const override;
 
     virtual void scheduleClockEventAt(clocktime_t t, ClockEvent *event) override;

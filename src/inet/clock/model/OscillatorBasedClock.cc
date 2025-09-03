@@ -236,7 +236,8 @@ void OscillatorBasedClock::setOrigin(clocktime_t clockTime)
     checkState();
 }
 
-clocktime_t OscillatorBasedClock::doComputeClockTimeFromSimTime(simtime_t simulationTime) const
+// TODO: add lowerBound, see https://chatgpt.com/c/68b1993a-5b00-8321-99f8-bfa009722028
+clocktime_t OscillatorBasedClock::doComputeClockTimeFromSimTime(simtime_t simulationTime, bool lowerBound) const
 {
     DEBUG_ENTER(true, simulationTime);
    // get state
@@ -248,7 +249,28 @@ clocktime_t OscillatorBasedClock::doComputeClockTimeFromSimTime(simtime_t simula
     // implement formula
     const S64 n  = oscillator->computeTicksForInterval(s - oos);
     const S64 n0 = oscillator->computeTicksForInterval(cos - oos);
-    const S64 dF = F(n) - F(n0);
+    S64 m  = n - n0;
+    // exact boundary detection
+    const bool atBoundary = (s == (oos + oscillator->computeIntervalForTicks(n)));
+
+    // choose effective m based on bound
+    S64 m_eff = m;
+    if (!lowerBound && atBoundary && m_eff > 0)
+        --m_eff;                               // open interval end maps to previous step
+
+    // A_rel(m) = floor_q63(p - e*m)
+    const S64  e_q63 = getOscillatorCompensation().raw(); // Q1.63 (e = 1 - x)
+    const uint64_t p_q63 = oscillatorCompensationAccumulator;
+    auto A_rel = [&](S64 mm)->S64 {
+        const S128 q  = (S128)p_q63 - (S128)e_q63 * (S128)mm;
+        const S128 qd = q / S128_ONE_Q63;
+        const S128 r  = q % S128_ONE_Q63;
+        return (S64)(qd - ((r != 0 && q < 0) ? 1 : 0));   // floor fix
+    };
+
+    if (m_eff < 0) m_eff = 0;                   // clamp
+
+    const S64 dF = m_eff + A_rel(m_eff);
     const S128 c_raw = (S128)coc.raw() + (S128)dF * (S128)l;
     DEBUG_OUT << DEBUG_FIELD(n) << DEBUG_FIELD(n0) << DEBUG_FIELD(dF) << std::endl;
     clocktime_t result = ClockTime::fromRaw(c_raw);
@@ -294,14 +316,14 @@ simtime_t OscillatorBasedClock::doComputeSimTimeFromClockTime(clocktime_t clockT
     return s;
 }
 
-clocktime_t OscillatorBasedClock::computeClockTimeFromSimTime(simtime_t simulationTime) const
+clocktime_t OscillatorBasedClock::computeClockTimeFromSimTime(simtime_t simulationTime, bool lowerBound) const
 {
     ASSERTCMP(>=, simulationTime, simTime());
-    clocktime_t result = doComputeClockTimeFromSimTime(simulationTime);
+    clocktime_t result = doComputeClockTimeFromSimTime(simulationTime, lowerBound);
     ASSERTCMP(==, result.raw() % getClockGranularity().raw(), 0);
-    ASSERTCMP(>=, result, doComputeClockTimeFromSimTime(simTime()));
+    ASSERTCMP(>=, result, doComputeClockTimeFromSimTime(simTime(), true));
     ASSERTCMP(>=, simulationTime, doComputeSimTimeFromClockTime(result, true));
-    ASSERTCMP(<, simulationTime, doComputeSimTimeFromClockTime(result, false));
+    ASSERTCMP(<=, simulationTime, doComputeSimTimeFromClockTime(result, false));
     return result;
 }
 

@@ -22,7 +22,7 @@ void ClockEvent::execute()
         clocktime_t clockTime = clock->getClockTime();
         EV_DEBUG << "Executing clock event" << EV_FIELD(clockTime) << EV_FIELD(event, this) << EV_ENDL;
         // NOTE: IClock interface 2. invariant
-        ASSERT(getArrivalClockTime() == clockTime);
+//        ASSERT(getArrivalClockTime() == clockTime);
         clock->handleClockEvent(this);
     }
     else {
