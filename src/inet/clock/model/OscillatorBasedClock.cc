@@ -56,12 +56,12 @@ clocktime_t OscillatorBasedClock::getClockTime() const
 {
     if (useFutureEventSet) {
         clocktime_t currentClockTime = ClockBase::getClockTime();
-        ASSERTCMP(==, currentClockTime.raw() % getClockGranularity().raw(), 0);
+        DEBUG_CMP(currentClockTime.raw() % getClockGranularity().raw(), ==, 0);
         return currentClockTime;
     }
     else {
         // NOTE: IClock interface 1. invariant
-        ASSERTCMP(>=, originClockTime, lastClockTime);
+        DEBUG_CMP(originClockTime, >=, lastClockTime);
         lastClockTime = originClockTime;
         return originClockTime;
     }
@@ -162,16 +162,16 @@ S64 OscillatorBasedClock::A(S64 n) const
 
 void OscillatorBasedClock::checkState() const
 {
-    ASSERTCMP(>=, originSimulationTime, oscillator->getComputationOrigin());
-    ASSERTCMP(<=, originSimulationTimeLowerBound, originSimulationTime);
-    ASSERTCMP(<=, originSimulationTimeLowerBound, simTime());
-    ASSERTCMP(<=, oscillator->getComputationOrigin(), originSimulationTimeLowerBound);
-    ASSERTCMP(==, originSimulationTimeLowerBound, computeSimTimeFromClockTime(originClockTime, true));
-    ASSERTCMP(<=, originSimulationTime, simTime());
-    ASSERTCMP(<=, oscillator->getComputationOrigin(), originSimulationTime);
-    ASSERTCMP(<=, originSimulationTimeLowerBound, originSimulationTime);
-    ASSERTCMP(<=, originSimulationTime, computeSimTimeFromClockTime(originClockTime, false));
-    ASSERTCMP(==, originClockTime, computeClockTimeFromSimTime(originSimulationTime));
+    DEBUG_CMP(originSimulationTime, >=, oscillator->getComputationOrigin());
+    DEBUG_CMP(originSimulationTimeLowerBound, <=, originSimulationTime);
+    DEBUG_CMP(originSimulationTimeLowerBound, <=, simTime());
+    DEBUG_CMP(oscillator->getComputationOrigin(), <=, originSimulationTimeLowerBound);
+    DEBUG_CMP(originSimulationTimeLowerBound, ==, computeSimTimeFromClockTime(originClockTime, true));
+    DEBUG_CMP(originSimulationTime, <=, simTime());
+    DEBUG_CMP(oscillator->getComputationOrigin(), <=, originSimulationTime);
+    DEBUG_CMP(originSimulationTimeLowerBound, <=, originSimulationTime);
+    DEBUG_CMP(originSimulationTime, <=, computeSimTimeFromClockTime(originClockTime, false));
+    DEBUG_CMP(originClockTime, ==, computeClockTimeFromSimTime(originSimulationTime));
 }
 
 void OscillatorBasedClock::moveOrigin()
@@ -210,8 +210,8 @@ void OscillatorBasedClock::setOrigin(clocktime_t clockTime)
     DEBUG_ENTER(true, clockTime);
     // checks
     simtime_t simulationTime = simTime();
-    ASSERTCMP(>=, simulationTime, originSimulationTime);
-    ASSERTCMP(>=, simulationTime, oscillator->getComputationOrigin());
+    DEBUG_CMP(simulationTime, >=, originSimulationTime);
+    DEBUG_CMP(simulationTime, >=, oscillator->getComputationOrigin());
     EV_DEBUG << "Setting clock origin" << EV_FIELD(simulationTime) << EV_FIELD(clockTime) << EV_ENDL;
     // get state
     const simtime_t& s = simTime();
@@ -302,27 +302,27 @@ simtime_t OscillatorBasedClock::doComputeSimTimeFromClockTime(clocktime_t clockT
 
 clocktime_t OscillatorBasedClock::computeClockTimeFromSimTime(simtime_t simulationTime, bool lowerBound) const
 {
-    ASSERTCMP(>=, simulationTime, simTime());
+    DEBUG_CMP(simulationTime, >=, simTime());
     clocktime_t result = doComputeClockTimeFromSimTime(simulationTime, lowerBound);
-    ASSERTCMP(==, result.raw() % getClockGranularity().raw(), 0);
-    ASSERTCMP(>=, result, doComputeClockTimeFromSimTime(simTime(), true));
-    ASSERTCMP(>=, simulationTime, doComputeSimTimeFromClockTime(result, true));
-    ASSERTCMP(<=, simulationTime, doComputeSimTimeFromClockTime(result, false));
+    DEBUG_CMP(result.raw() % getClockGranularity().raw(), ==, 0);
+    DEBUG_CMP(result, >=, doComputeClockTimeFromSimTime(simTime(), true));
+    DEBUG_CMP(simulationTime, >=, doComputeSimTimeFromClockTime(result, true));
+    DEBUG_CMP(simulationTime, <=, doComputeSimTimeFromClockTime(result, false));
     return result;
 }
 
 simtime_t OscillatorBasedClock::computeSimTimeFromClockTime(clocktime_t clockTime, bool lowerBound) const
 {
-    ASSERTCMP(>=, clockTime, getClockTime());
-    ASSERTCMP(==, clockTime.raw() % getClockGranularity().raw(), 0);
+    DEBUG_CMP(clockTime, >=, getClockTime());
+    DEBUG_CMP(clockTime.raw() % getClockGranularity().raw(), ==, 0);
     simtime_t result = doComputeSimTimeFromClockTime(clockTime, lowerBound);
-    ASSERTCMP(>=, result, originSimulationTimeLowerBound); // TODO: more restrictive assert for now?
+    DEBUG_CMP(result, >=, originSimulationTimeLowerBound); // TODO: more restrictive assert for now?
 //    if (lowerBound)
-//        ASSERTCMP(==, clockTime, doComputeClockTimeFromSimTime(result)) // TODO: what happens if due to oscillator compensation a specific clock time value was skipped
-//        ASSERTCMP(<=, clockTime, doComputeClockTimeFromSimTime(result)) // maybe this?
+//        DEBUG_CMP(clockTime, ==, doComputeClockTimeFromSimTime(result)) // TODO: what happens if due to oscillator compensation a specific clock time value was skipped
+//        DEBUG_CMP(clockTime, <=, doComputeClockTimeFromSimTime(result)) // maybe this?
 //    else
 //        // uses inequality because oscillator compensation
-//        ASSERTCMP(<=, clockTime + getClockGranularity(), doComputeClockTimeFromSimTime(result));
+//        DEBUG_CMP(clockTime + getClockGranularity(), <=, doComputeClockTimeFromSimTime(result));
     return result;
 }
 
@@ -358,7 +358,7 @@ ClockEvent *OscillatorBasedClock::cancelTargetModuleClockEvent(ClockEvent *event
 
 void OscillatorBasedClock::scheduleClockEventAt(clocktime_t time, ClockEvent *event)
 {
-    ASSERTCMP(>=, time, getClockTime());
+    DEBUG_CMP(time, >=, getClockTime());
     simtime_raw_t roundedTime = roundingFunction(time.raw(), oscillator->getNominalTickLength().raw());
     ClockBase::scheduleClockEventAt(ClockTime().setRaw(roundedTime), event);
     events.push_back(event);
@@ -369,7 +369,7 @@ void OscillatorBasedClock::scheduleClockEventAt(clocktime_t time, ClockEvent *ev
 
 void OscillatorBasedClock::scheduleClockEventAfter(clocktime_t delay, ClockEvent *event)
 {
-    ASSERTCMP(>=, delay, 0);
+    DEBUG_CMP(delay, >=, 0);
     simtime_raw_t roundedDelay = roundingFunction(delay.raw(), oscillator->getNominalTickLength().raw());
     ClockBase::scheduleClockEventAfter(ClockTime().setRaw(roundedDelay), event);
     events.push_back(event);
@@ -455,7 +455,7 @@ void OscillatorBasedClock::receiveSignal(cComponent *source, int signal, cObject
     else if (signal == IOscillator::postOscillatorStateChangedSignal) {
         clocktime_t clockTime = getClockTime();
         EV_DEBUG << "Handling post-oscillator state changed signal" << EV_FIELD(clockTime) << EV_ENDL;
-        ASSERTCMP(==, clockTimeBeforeOscillatorStateChange, clockTime);
+        DEBUG_CMP(clockTimeBeforeOscillatorStateChange, ==, clockTime);
         if (useFutureEventSet) {
             simtime_t currentSimTime = simTime();
             std::sort(events.begin(), events.end(), cEvent::compareBySchedulingOrder);
