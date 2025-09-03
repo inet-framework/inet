@@ -26,6 +26,8 @@ struct INET_API SimTimeScale : public NumberNear1<simtime_raw_t> {
     simtime_t mul(simtime_t t) const { return SimTime::fromRaw(Base::mul(t.raw())); }
     simtime_t div(simtime_t t) const { return SimTime::fromRaw(Base::div(t.raw())); }
 
+    friend SimTimeScale operator*(const SimTimeScale& s1, const SimTimeScale& s2){ return SimTimeScale(s1.Base::operator*(s2).raw()); }
+
     friend simtime_t operator*(const simtime_t t, const SimTimeScale& s){ return s.mul(t); }
     friend simtime_t operator*(const SimTimeScale& s, const simtime_t t){ return s.mul(t); }
 

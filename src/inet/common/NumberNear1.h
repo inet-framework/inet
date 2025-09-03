@@ -74,18 +74,27 @@ struct INET_API NumberNear1 {
         const long double scaled = -ppm * ((long double)(1ULL << 63) / 1'000'000.0L);
 
         // Clamp to valid raw range: [-2^63, +2^62]
-        const long double min_raw = (long double)std::numeric_limits<int64_t>::min();
-        const long double max_raw = (long double)(int64_t(1) << 62);
+        const long double min_raw = (long double)std::numeric_limits<S64>::min();
+        const long double max_raw = (long double)(S64(1) << 62);
 
-        int64_t e_q63;
+        S64 e_q63;
         if (scaled <= min_raw)
-            e_q63 = std::numeric_limits<int64_t>::min();
+            e_q63 = std::numeric_limits<S64>::min();
         else if (scaled >= max_raw)
-            e_q63 = (int64_t(1) << 62);
+            e_q63 = (S64(1) << 62);
         else
-            e_q63 = (int64_t)std::llround(scaled);  // rounds to nearest
+            e_q63 = (S64)std::llround(scaled);  // rounds to nearest
 
         return NumberNear1(e_q63);
+    }
+
+    NumberNear1 operator*(const NumberNear1& rhs) const {
+        // r3 = r1 + r2 − round((r1*r2)/2^63), with r ≡ 1 − x in Q1.63
+        S128 t = (S128)e_q63 * (S128)rhs.e_q63;                 // Q2.126
+        t += (t >= 0) ? ((S128)1 << 62) : -((S128)1 << 62);     // round-to-nearest, ties away from 0
+        S64 cross = (S64)(t / ((S128)1 << 63));                 // back to Q1.63 (portable)
+        S128 sum = (S128)e_q63 + rhs.e_q63 - cross;             // r3 in Q1.63
+        return NumberNear1((S64)sum);
     }
 
     I mul(I t) const { return mulRound(t); }
