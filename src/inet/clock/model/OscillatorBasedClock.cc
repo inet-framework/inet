@@ -162,14 +162,15 @@ S64 OscillatorBasedClock::A(S64 n) const
 
 void OscillatorBasedClock::checkState() const
 {
-    DEBUG_CMP(originSimulationTime, >=, oscillator->getComputationOrigin());
-    DEBUG_CMP(originSimulationTimeLowerBound, <=, originSimulationTime);
-    DEBUG_CMP(originSimulationTimeLowerBound, <=, simTime());
-    DEBUG_CMP(oscillator->getComputationOrigin(), <=, originSimulationTimeLowerBound);
-    DEBUG_CMP(originSimulationTimeLowerBound, ==, computeSimTimeFromClockTime(originClockTime, true));
-    DEBUG_CMP(originSimulationTime, <=, simTime());
+    // originSimulationTime constraints
     DEBUG_CMP(oscillator->getComputationOrigin(), <=, originSimulationTime);
+    DEBUG_CMP(originSimulationTime, <=, simTime());
+    // originSimulationTimeLowerBound constraints
+    DEBUG_CMP(oscillator->getComputationOrigin(), <=, originSimulationTimeLowerBound);
     DEBUG_CMP(originSimulationTimeLowerBound, <=, originSimulationTime);
+    DEBUG_CMP(originSimulationTimeLowerBound, ==, computeSimTimeFromClockTime(originClockTime, true));
+    // simulation time <-> clock time mapping constraints for origin
+    DEBUG_CMP(computeSimTimeFromClockTime(originClockTime, true), <=, originSimulationTime);
     DEBUG_CMP(originSimulationTime, <=, computeSimTimeFromClockTime(originClockTime, false));
     DEBUG_CMP(originClockTime, ==, computeClockTimeFromSimTime(originSimulationTime));
 }
