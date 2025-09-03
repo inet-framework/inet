@@ -19,9 +19,14 @@
 #include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/ipv4/IcmpHeader.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/ipv4/Ipv4Route.h"
 #include "inet/transportlayer/common/L4PortTag_m.h"
 #include "inet/transportlayer/contract/udp/UdpCommand_m.h"
+
+#ifdef INET_WITH_IPv6
+#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
+#endif // ifdef INET_WITH_IPv6
 
 namespace inet {
 namespace aodv {
@@ -66,6 +71,7 @@ void Aodv::initialize(int stage)
         localAddTTL = par("localAddTTL");
         jitterPar = &par("jitter");
         periodicJitter = &par("periodicJitter");
+        hasExternalGateway = !par("gatewayAddress").stdstringValue().empty();
 
         myRouteTimeout = par("myRouteTimeout");
         deletePeriod = par("deletePeriod");
@@ -80,10 +86,15 @@ void Aodv::initialize(int stage)
         if (useHelloMessages)
             helloMsgTimer = new cMessage("HelloMsgTimer");
     }
+    else if (stage == INITSTAGE_ROUTER_ID_ASSIGNMENT) {
+        interface = interfaceTable->findInterfaceByName(par("interface"));
+        if (!interface)
+            throw cRuntimeError("Unknown network interface in parameter 'interface': '%s'", par("interface").stringValue());
+    }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         networkProtocol->registerHook(0, this);
         host->subscribe(linkBrokenSignal, this);
-        usingIpv6 = (routingTable->getRouterIdAsGeneric().getType() == L3Address::IPv6);
+        usingIpv6 = (getSelfIPAddress().getType() == L3Address::IPv6);
     }
 }
 
@@ -189,13 +200,58 @@ INetfilter::IHook::Result Aodv::ensureRouteForDatagram(Packet *datagram)
     const L3Address& destAddr = networkHeader->getDestinationAddress();
     const L3Address& sourceAddr = networkHeader->getSourceAddress();
 
-    if (destAddr.isBroadcast() || routingTable->isLocalAddress(destAddr) || destAddr.isMulticast())
+    if (destAddr.isBroadcast() || destAddr.isMulticast() || routingTable->isLocalAddress(destAddr))
         return ACCEPT;
+
+    // Check if this is an external address
+    if (hasExternalGateway && isExternalAddress(destAddr)) {
+        EV_INFO << "External address detected: " << destAddr << ", routing via gateway" << endl;
+        
+        // Resolve gateway address on first use
+        if (gatewayAddress.isUnspecified()) {
+            gatewayAddress = L3AddressResolver().resolve(par("gatewayAddress"));
+            EV_INFO << "Gateway address resolved: " << gatewayAddress << endl;
+        }
+
+        // if we are the gateway and the address is external, no AODV routing is needed
+        // as the packet is routed to the external interface immediately.
+        if (getSelfIPAddress() == gatewayAddress) {
+            EV_INFO << "Packet routed to the external network" << endl;
+            return ACCEPT;
+        }
+
+        // Lazy initialization of gateway route
+        if (!defaultGatewayRoute)
+            createDefaultGatewayRoute();
+        
+        // Update gateway route status
+        updateGatewayRoute();
+        
+        // Check if default route is active
+        AodvRouteData *defaultRouteData = check_and_cast<AodvRouteData *>(defaultGatewayRoute->getProtocolData());
+        if (defaultRouteData->isActive()) {
+            EV_INFO << "Using active default route for external traffic" << endl;
+            return ACCEPT;
+        }
+        
+        // No active route to gateway, start discovery
+        EV_INFO << "Starting route discovery to gateway: " << gatewayAddress << endl;
+        delayDatagram(datagram);
+        
+        if (!hasOngoingRouteDiscovery(gatewayAddress)) {
+            startRouteDiscovery(gatewayAddress);
+        }
+        
+        return QUEUE;
+    }
+    
+    // Normal AODV logic for internal addresses
     else {
         EV_INFO << "Finding route for source " << sourceAddr << " with destination " << destAddr << endl;
         IRoute *route = routingTable->findBestMatchingRoute(destAddr);
         AodvRouteData *routeData = route ? dynamic_cast<AodvRouteData *>(route->getProtocolData()) : nullptr;
         bool isActive = routeData && routeData->isActive();
+        
         if (isActive && !route->getNextHopAsGeneric().isUnspecified()) {
             EV_INFO << "Active route found: " << route << endl;
 
@@ -257,7 +313,7 @@ void Aodv::startRouteDiscovery(const L3Address& target, unsigned timeToLive)
 
 L3Address Aodv::getSelfIPAddress() const
 {
-    return routingTable->getRouterIdAsGeneric();
+    return interface->getNetworkAddress();
 }
 
 void Aodv::delayDatagram(Packet *datagram)
@@ -702,6 +758,12 @@ void Aodv::handleRREP(const Ptr<Rrep>& rrep, const L3Address& sourceAddr)
             EV_INFO << "The Route Reply has arrived for our Route Request to node " << rrep->getDestAddr() << endl;
             updateRoutingTable(destRoute, sourceAddr, newHopCount, true, destSeqNum, true, simTime() + lifeTime);
             completeRouteDiscovery(rrep->getDestAddr());
+            
+            // Check if this is a route reply for the gateway
+            if (!gatewayAddress.isUnspecified() && rrep->getDestAddr() == gatewayAddress) {
+                EV_INFO << "Route reply received for gateway, updating default route" << endl;
+                updateGatewayRoute();
+            }
         }
     }
 }
@@ -733,7 +795,7 @@ void Aodv::sendAODVPacket(const Ptr<AodvControlPacket>& aodvPacket, const L3Addr
     const char *className = aodvPacket->getClassName();
     Packet *packet = new Packet(!strncmp("inet::", className, 6) ? className + 6 : className, aodvPacket);
 
-    int interfaceId = CHK(interfaceTable->findInterfaceByName(par("interface")))->getInterfaceId(); // TODO Implement: support for multiple interfaces
+    int interfaceId = interface->getInterfaceId(); // TODO Implement: support for multiple interfaces
     packet->addTag<InterfaceReq>()->setInterfaceId(interfaceId);
     packet->addTag<HopLimitReq>()->setHopLimit(timeToLive);
     packet->addTag<L3AddressReq>()->setDestAddress(destAddr);
@@ -984,9 +1046,7 @@ IRoute *Aodv::createRoute(const L3Address& destAddr, const L3Address& nextHop,
     newRoute->setNextHop(nextHop);
     newRoute->setPrefixLength(addressType->getMaxPrefixLength()); // TODO
     newRoute->setMetric(hopCount);
-    NetworkInterface *ifEntry = interfaceTable->findInterfaceByName(par("interface")); // TODO IMPLEMENT: multiple interfaces
-    if (ifEntry)
-        newRoute->setInterface(ifEntry);
+    newRoute->setInterface(interface); // TODO IMPLEMENT: multiple interfaces
     newRoute->setSourceType(IRoute::AODV);
     newRoute->setSource(this);
 
@@ -1694,6 +1754,104 @@ void Aodv::handleBlackListTimer()
         scheduleAt(nextTime, blacklistTimer);
 }
 
+bool Aodv::isExternalAddress(const L3Address& address) const
+{
+    ASSERT(!address.isUnspecified());
+
+    // if no external gateway is configured, we consider every address as non-external
+    if (!hasExternalGateway)
+        return false;
+
+    if (address.isBroadcast() || address.isMulticast())
+        return false;
+
+    switch (address.getType()) {
+#ifdef INET_WITH_IPv4
+        case L3Address::IPv4:
+            if (auto ipv4Data = interface->findProtocolData<Ipv4InterfaceData>()) {
+                Ipv4Address ipv4Addr = ipv4Data->getIPAddress();
+                Ipv4Address netmask = ipv4Data->getNetmask();
+                 return !Ipv4Address::maskedAddrAreEqual(address.toIpv4(), ipv4Addr, netmask);
+            }
+            break;
+#endif // ifdef INET_WITH_IPv4
+
+#ifdef INET_WITH_IPv6
+        case L3Address::IPv6:
+            if (auto ipv6Data = interface->findProtocolData<Ipv6InterfaceData>()) {
+                for (int j = 0; j < ipv6Data->getNumAdvPrefixes(); j++) {
+                    const Ipv6InterfaceData::AdvPrefix& advPrefix = ipv6Data->getAdvPrefix(j);
+                    return !address.toIpv6().matches(advPrefix.prefix, advPrefix.prefixLength);
+                }
+            }
+            break;
+
+#endif // ifdef INET_WITH_IPv6
+        default:
+            throw cRuntimeError("Unsupported address type");
+    }
+    return false;
+}
+
+void Aodv::createDefaultGatewayRoute()
+{
+    ASSERT(defaultGatewayRoute == nullptr);
+
+    // Create inactive default route (0.0.0.0/0)
+    Ipv4Route *route = new Ipv4Route();
+    route->setDestination(Ipv4Address::UNSPECIFIED_ADDRESS);
+    route->setNetmask(Ipv4Address::UNSPECIFIED_ADDRESS);  // /0 netmask
+    route->setGateway(Ipv4Address::UNSPECIFIED_ADDRESS);  // No next hop initially
+    route->setInterface(interfaceTable->findInterfaceByName(par("interface")));
+    route->setSourceType(IRoute::AODV);
+    route->setSource(this);
+    route->setMetric(0);
+
+    // Create AODV route data - inactive initially
+    AodvRouteData *routeData = new AodvRouteData();
+    routeData->setIsActive(false);
+    routeData->setHasValidDestNum(false);
+    routeData->setDestSeqNum(0);
+    routeData->setLifeTime(SimTime::getMaxTime());  // Permanent until gateway found
+    route->setProtocolData(routeData);
+
+    routingTable->addRoute(route);
+    defaultGatewayRoute = route;
+    
+    EV_INFO << "Created inactive default gateway route (0.0.0.0/0)" << endl;
+}
+
+void Aodv::updateGatewayRoute()
+{
+    ASSERT(defaultGatewayRoute != nullptr);
+    ASSERT(!gatewayAddress.isUnspecified());
+
+    AodvRouteData *defaultRouteData = check_and_cast<AodvRouteData *>(defaultGatewayRoute->getProtocolData());
+
+    // Find route to gateway
+    IRoute *gatewayRoute = routingTable->findBestMatchingRoute(gatewayAddress);
+    if (gatewayRoute && gatewayRoute->getSource() == this) {
+        AodvRouteData *gatewayRouteData = check_and_cast<AodvRouteData *>(gatewayRoute->getProtocolData());
+        
+        if (gatewayRouteData->isActive()) {
+            // Activate default route using gateway route info
+            defaultGatewayRoute->setNextHop(gatewayRoute->getNextHopAsGeneric());
+            defaultGatewayRoute->setMetric(gatewayRoute->getMetric() + 1);
+            defaultRouteData->setIsActive(true);
+            defaultRouteData->setLifeTime(gatewayRouteData->getLifeTime());
+            
+            EV_INFO << "Default gateway route activated via " << gatewayRoute->getNextHopAsGeneric() << endl;
+        }
+    } else {
+        // No route to gateway, deactivate default route
+        if (defaultRouteData->isActive()) {
+            defaultRouteData->setIsActive(false);
+            defaultGatewayRoute->setNextHop(L3Address());
+            EV_INFO << "Default gateway route deactivated - no route to gateway" << endl;
+        }
+    }
+}
+
 Aodv::~Aodv()
 {
     clearState();
@@ -1706,4 +1864,3 @@ Aodv::~Aodv()
 
 } // namespace aodv
 } // namespace inet
-
