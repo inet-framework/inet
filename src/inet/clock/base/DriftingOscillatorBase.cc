@@ -63,8 +63,8 @@ void DriftingOscillatorBase::scheduleTickTimer()
 void DriftingOscillatorBase::setOrigin(simtime_t origin)
 {
     EV_DEBUG << "Setting oscillator origin" << EV_FIELD(origin) << EV_ENDL;
-    ASSERTCMP(<=, origin, simTime());
-    ASSERTCMP(<=, this->origin, origin);
+    DEBUG_CMP(origin, <=, simTime());
+    DEBUG_CMP(this->origin, <=, origin);
     numTicksAtOrigin += computeTicksForInterval(origin - this->origin);
     this->origin = origin;
 }
@@ -155,8 +155,8 @@ void DriftingOscillatorBase::setEffectiveTickLengthFactor(SimTimeScale effective
 {
     const simtime_t roundTripNominalTickLengthLowerBound = SimTime::fromRaw(effectiveTickLengthFactor.mulCeil(effectiveTickLengthFactor.divFloor(nominalTickLength.raw())));
     const simtime_t roundTripNominalTickLengthUpperBound = SimTime::fromRaw(effectiveTickLengthFactor.mulFloor(effectiveTickLengthFactor.divCeil(nominalTickLength.raw())));
-    ASSERTCMP(<=, roundTripNominalTickLengthLowerBound, nominalTickLength);
-    ASSERTCMP(<=, nominalTickLength, roundTripNominalTickLengthUpperBound);
+    DEBUG_CMP(roundTripNominalTickLengthLowerBound, <=, nominalTickLength);
+    DEBUG_CMP(nominalTickLength, <=, roundTripNominalTickLengthUpperBound);
     this->effectiveTickLengthFactor = effectiveTickLengthFactor;
 }
 
@@ -211,19 +211,19 @@ simtime_t DriftingOscillatorBase::doComputeIntervalForTicks(int64_t numTicks) co
 
 int64_t DriftingOscillatorBase::computeTicksForInterval(simtime_t timeInterval) const
 {
-    ASSERTCMP(>=, timeInterval, 0);
+    DEBUG_CMP(timeInterval, >=, 0);
     int64_t result = doComputeTicksForInterval(timeInterval);
-    ASSERTCMP(>=, result, 0);
-    ASSERTCMP(<=, doComputeIntervalForTicks(result), timeInterval);
+    DEBUG_CMP(result, >=, 0);
+    DEBUG_CMP(doComputeIntervalForTicks(result), <=, timeInterval);
     return result;
 }
 
 simtime_t DriftingOscillatorBase::computeIntervalForTicks(int64_t numTicks) const
 {
-    ASSERTCMP(>=, numTicks, 0);
+    DEBUG_CMP(numTicks, >=, 0);
     simtime_t result = doComputeIntervalForTicks(numTicks);
-    ASSERTCMP(>=, result, 0);
-    ASSERTCMP(==, doComputeTicksForInterval(result), numTicks);
+    DEBUG_CMP(result, >=, 0);
+    DEBUG_CMP(doComputeTicksForInterval(result), ==, numTicks);
     return result;
 }
 

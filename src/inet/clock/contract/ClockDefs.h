@@ -150,7 +150,7 @@ namespace _dbg_detail {
 
 // TODO: move the operator into the middle of the macro
 #ifdef CLOCK_CHECK_IMPLEMENTATION
-#define ASSERTCMP(cmp, o1, o2) { \
+#define DEBUG_CMP(o1, cmp, o2) { \
     bool _old_dbg_global_enabled = _dbg_global_enabled; _dbg_global_enabled = false; auto _o1 = (o1); auto _o2 = (o2); _dbg_global_enabled = _old_dbg_global_enabled; \
     if (!(_o1 cmp _o2)) { \
         _dbg_global_enabled = true; _o1 = (o1); _o2 = (o2); \
@@ -161,7 +161,7 @@ namespace _dbg_detail {
     } \
 }
 #else
-#define ASSERTCMP(cmp, o1, o2) { (void)(o1); (void)(o2); }
+#define DEBUG_CMP(o1, cmp, o2) { (void)(o1); (void)(o2); }
 #endif
 
 } // namespace inet

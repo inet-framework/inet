@@ -52,7 +52,7 @@ clocktime_t ClockBase::getClockTime() const
 {
     clocktime_t currentClockTime = computeClockTimeFromSimTime(simTime());
     // NOTE: IClock interface 1. invariant
-    ASSERTCMP(>=, currentClockTime, lastClockTime);
+    DEBUG_CMP(currentClockTime, >=, lastClockTime);
     lastClockTime = currentClockTime;
     return currentClockTime;
 }
