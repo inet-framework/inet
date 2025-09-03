@@ -113,6 +113,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     unsigned int rreqCount = 0; // num of originated RREQ in the last second
     simtime_t lastBroadcastTime; // the last time when any control packet was broadcasted
     std::map<L3Address, unsigned int> addressToRreqRetries; // number of re-discovery attempts per address
+    L3Address gatewayAddr; // address of the gateway for external network routing
 
     // self messages
     cMessage *helloMsgTimer = nullptr; // timer to send hello messages (only if the feature is enabled)
@@ -188,7 +189,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     virtual Result datagramPostRoutingHook(Packet *datagram) override { return ACCEPT; }
     virtual Result datagramLocalInHook(Packet *datagram) override { return ACCEPT; }
     virtual Result datagramLocalOutHook(Packet *datagram) override { Enter_Method("datagramLocalOutHook"); return ensureRouteForDatagram(datagram); }
-    void delayDatagram(Packet *datagram);
+    void delayDatagram(Packet *datagram, const L3Address& target);
 
     /* Helper functions */
     L3Address getSelfIPAddress() const;
@@ -196,6 +197,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     void processPacket(Packet *pk);
     void clearState();
     void checkIpVersionAndPacketTypeCompatibility(AodvControlPacketType packetType);
+    void delayDatagram(Packet *datagram, const L3Address& target);
 
     /* UDP callback interface */
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;

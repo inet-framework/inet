@@ -17,6 +17,7 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/L3Tools.h"
+#include "inet/networklayer/common/NextHopAddressTag_m.h"
 #include "inet/networklayer/ipv4/IcmpHeader.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4Route.h"
@@ -73,6 +74,9 @@ void Aodv::initialize(int stage)
         netTraversalTime = par("netTraversalTime");
         nextHopWait = par("nextHopWait");
         pathDiscoveryTime = par("pathDiscoveryTime");
+        std::string gatewayStr = par("gateway").stdstringValue();
+        if (!gatewayStr.empty())
+            gatewayAddr = L3AddressResolver().resolve(gatewayStr.c_str());
         expungeTimer = new cMessage("ExpungeTimer");
         counterTimer = new cMessage("CounterTimer");
         rrepAckTimer = new cMessage("RrepAckTimer");
@@ -211,28 +215,48 @@ INetfilter::IHook::Result Aodv::ensureRouteForDatagram(Packet *datagram)
         }
         else {
             bool isInactive = routeData && !routeData->isActive();
-            // A node disseminates a RREQ when it determines that it needs a route
-            // to a destination and does not have one available.  This can happen if
-            // the destination is previously unknown to the node, or if a previously
-            // valid route to the destination expires or is marked as invalid.
+            if (!route && !routingTable->isLocalAddress(destAddr) && !gatewayAddr.isUnspecified()) {
+                // external address
+                IRoute *gatewayRoute = routingTable->findBestMatchingRoute(gatewayAddr);
+                if (gatewayRoute && gatewayRoute->getSource() == this) {
+                    AodvRouteData *gatewayRouteData = dynamic_cast<AodvRouteData *>(gatewayRoute->getProtocolData());
+                    if (gatewayRouteData && gatewayRouteData->isActive()) {
+                        // attach NextHopAddressReq
+                        datagram->addTag<NextHopAddressReq>()->setNextHopAddress(gatewayRoute->getNextHopAsGeneric());
+                        return ACCEPT;
+                    }
+                }
+                // delay with gateway as target
+                delayDatagram(datagram, gatewayAddr);
+                if (!hasOngoingRouteDiscovery(gatewayAddr)) {
+                    startRouteDiscovery(gatewayAddr);
+                }
+                EV_DETAIL << "Route discovery for gateway in progress" << endl;
+                return QUEUE;
+            } else {
+                // A node disseminates a RREQ when it determines that it needs a route
+                // to a destination and does not have one available.  This can happen if
+                // the destination is previously unknown to the node, or if a previously
+                // valid route to the destination expires or is marked as invalid.
 
-            EV_INFO << (isInactive ? "Inactive" : "Missing") << " route for destination " << destAddr << endl;
+                EV_INFO << (isInactive ? "Inactive" : "Missing") << " route for destination " << destAddr << endl;
 
-            delayDatagram(datagram);
+                delayDatagram(datagram, destAddr);
 
-            if (!hasOngoingRouteDiscovery(destAddr)) {
-                // When a new route to the same destination is required at a later time
-                // (e.g., upon route loss), the TTL in the RREQ IP header is initially
-                // set to the Hop Count plus TTL_INCREMENT.
-                if (isInactive)
-                    startRouteDiscovery(destAddr, route->getMetric() + ttlIncrement);
+                if (!hasOngoingRouteDiscovery(destAddr)) {
+                    // When a new route to the same destination is required at a later time
+                    // (e.g., upon route loss), the TTL in the RREQ IP header is initially
+                    // set to the Hop Count plus TTL_INCREMENT.
+                    if (isInactive && route)
+                        startRouteDiscovery(destAddr, route->getMetric() + ttlIncrement);
+                    else
+                        startRouteDiscovery(destAddr);
+                }
                 else
-                    startRouteDiscovery(destAddr);
-            }
-            else
-                EV_DETAIL << "Route discovery is in progress, originator " << getSelfIPAddress() << " target " << destAddr << endl;
+                    EV_DETAIL << "Route discovery is in progress, originator " << getSelfIPAddress() << " target " << destAddr << endl;
 
-            return QUEUE;
+                return QUEUE;
+            }
         }
     }
 }
@@ -260,11 +284,10 @@ L3Address Aodv::getSelfIPAddress() const
     return routingTable->getRouterIdAsGeneric();
 }
 
-void Aodv::delayDatagram(Packet *datagram)
+void Aodv::delayDatagram(Packet *datagram, const L3Address& target)
 {
     const auto& networkHeader = getNetworkProtocolHeader(datagram);
     EV_DETAIL << "Queuing datagram, source " << networkHeader->getSourceAddress() << ", destination " << networkHeader->getDestinationAddress() << endl;
-    const L3Address& target = networkHeader->getDestinationAddress();
     targetAddressToDelayedPackets.insert(std::pair<L3Address, Packet *>(target, datagram));
 }
 

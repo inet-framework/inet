@@ -74,6 +74,7 @@ simple Aodv extends SimpleModule like IApp
         double netTraversalTime @unit(s) = default(2 * nodeTraversalTime * netDiameter); // An estimation of the traversal time for the complete network
         double nextHopWait @unit(s) = default(nodeTraversalTime + 0.01s); // Timeout for a RREP-ACK
         double pathDiscoveryTime @unit(s) = default(2 * netTraversalTime); // Buffer timeout for each broadcasted RREQ message
+        string gateway = default(""); // Address of the gateway for external network routing
     gates:
         input socketIn;
         output socketOut;
