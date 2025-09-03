@@ -26,7 +26,7 @@ network AODVNetwork
         }
         configurator: Ipv4NetworkConfigurator {
             parameters:
-                config = xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.0.0'/></config>");
+                config = default(xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.0.0'/></config>"));
                 @display("p=100,100;is=s");
         }
         routingTableRecorder: RoutingTableRecorder {
