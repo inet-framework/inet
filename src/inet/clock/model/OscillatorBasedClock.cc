@@ -120,7 +120,7 @@ void OscillatorBasedClock::handleMessage(cMessage *message)
             EV_DEBUG << "Executing clock event" << EV_FIELD(clockTime) << EV_FIELD(event) << EV_ENDL;
             event->execute();
         }
-        checkAllClockEvents();
+        checkAllScheduledClockEvents();
     }
     else
         ClockBase::handleMessage(message);
@@ -365,7 +365,7 @@ void OscillatorBasedClock::scheduleClockEventAt(clocktime_t time, ClockEvent *ev
     events.push_back(event);
     if (!useFutureEventSet)
         event->setInsertionOrder(insertionCount++);
-    checkClockEvent(event);
+    checkScheduledClockEvent(event);
 }
 
 void OscillatorBasedClock::scheduleClockEventAfter(clocktime_t delay, ClockEvent *event)
@@ -376,12 +376,12 @@ void OscillatorBasedClock::scheduleClockEventAfter(clocktime_t delay, ClockEvent
     events.push_back(event);
     if (!useFutureEventSet)
         event->setInsertionOrder(insertionCount++);
-    checkClockEvent(event);
+    checkScheduledClockEvent(event);
 }
 
 ClockEvent *OscillatorBasedClock::cancelClockEvent(ClockEvent *event)
 {
-    checkClockEvent(event);
+    checkScheduledClockEvent(event);
     events.erase(std::remove(events.begin(), events.end(), event), events.end());
     return ClockBase::cancelClockEvent(event);
 }
@@ -438,7 +438,7 @@ void OscillatorBasedClock::receiveSignal(cComponent *source, int signal, uintval
             EV_DEBUG << "Executing clock event" << EV_FIELD(clockTime) << EV_FIELD(event) << EV_ENDL;
             event->execute();
         }
-        checkAllClockEvents();
+        checkAllScheduledClockEvents();
     }
 }
 
@@ -448,9 +448,9 @@ void OscillatorBasedClock::receiveSignal(cComponent *source, int signal, cObject
     if (signal == IOscillator::preOscillatorStateChangedSignal) {
         clocktime_t clockTime = getClockTime();
         EV_DEBUG << "Handling pre-oscillator state changed signal" << EV_FIELD(clockTime) << EV_ENDL;
-        checkAllClockEvents();
+        checkAllScheduledClockEvents();
         moveOrigin();
-        checkAllClockEvents();
+        checkAllScheduledClockEvents();
         clockTimeBeforeOscillatorStateChange = clockTime;
     }
     else if (signal == IOscillator::postOscillatorStateChangedSignal) {
@@ -479,7 +479,7 @@ void OscillatorBasedClock::receiveSignal(cComponent *source, int signal, cObject
                     EV_DEBUG << "Rescheduling clock event at" << EV_FIELD(arrivalClockTime) << EV_FIELD(arrivalSimTime) << EV_FIELD(event) << EV_ENDL;
                     targetModule->rescheduleAt(arrivalSimTime, event);
                 }
-                checkClockEvent(event);
+                checkScheduledClockEvent(event);
             }
         }
         emit(timeChangedSignal, CLOCKTIME_AS_SIMTIME(clockTime));
