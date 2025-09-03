@@ -102,6 +102,13 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
 
     virtual void checkState() const;
 
+    virtual void checkAllScheduledClockEvents() {
+        DEBUG_ENTER(true);
+        for (auto event : events)
+            checkScheduledClockEvent(event);
+        DEBUG_LEAVE();
+    }
+
     /**
      * Moves the clock origin to the current simulation time such that the simulation time <-> clock time mapping is unaffected.
      *
@@ -129,13 +136,6 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
      *   p   = fractional(p + (x − 1) * m)
      */
     virtual void setOrigin(clocktime_t clockTime);
-
-    void checkAllClockEvents() {
-        DEBUG_ENTER(true);
-        for (auto event : events)
-            checkClockEvent(event);
-        DEBUG_LEAVE();
-    }
 
     /**
      * A(n) = floor(p + (x - 1) * (n - n0)) = floor(p - e * (n - n0))
