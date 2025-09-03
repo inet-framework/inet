@@ -62,6 +62,8 @@ const char *inet::Ipv4Route::getSourceTypeAbbreviation() const {
             return "ba";
         case ODR:
             return "o";
+        case AODV:
+            return "a";
         default:
             return "???";
     }

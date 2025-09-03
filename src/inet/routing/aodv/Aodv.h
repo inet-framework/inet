@@ -69,6 +69,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     ModuleRefByPar<IInterfaceTable> interfaceTable;
     ModuleRefByPar<INetfilter> networkProtocol;
     UdpSocket socket;
+    NetworkInterface *interface;
     bool usingIpv6 = false;
 
     // AODV parameters: the following parameters are configurable, see the NED file for more info.
@@ -92,6 +93,8 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     simtime_t nodeTraversalTime;
     cPar *jitterPar = nullptr;
     cPar *periodicJitter = nullptr;
+    L3Address gatewayAddress; // Gateway address for external networks
+    bool hasExternalGateway = false;
 
     // the following parameters are calculated from the parameters defined above
     // see the NED file for more info
@@ -126,6 +129,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
 
     // internal
     std::multimap<L3Address, Packet *> targetAddressToDelayedPackets; // queue for the datagrams we have no route for
+    IRoute *defaultGatewayRoute = nullptr;  // Pointer to default gateway route (0.0.0.0/0)
 
   protected:
     void handleMessageWhenUp(cMessage *msg) override;
@@ -196,6 +200,9 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     void processPacket(Packet *pk);
     void clearState();
     void checkIpVersionAndPacketTypeCompatibility(AodvControlPacketType packetType);
+    bool isExternalAddress(const L3Address& destAddr) const;
+    void createDefaultGatewayRoute();
+    void updateGatewayRoute();
 
     /* UDP callback interface */
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
