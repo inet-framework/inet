@@ -1,0 +1,19 @@
+--- ethernet/modular/EthernetPauseCommandProcessor.cc
++++ ethernet/modular/EthernetPauseCommandProcessor.cc
+@@ -14,6 +14,7 @@
+ {
+     seqNum = 0;
++    WATCH(seqNum);
+ }
+ 
+ void EthernetPauseCommandProcessor::handleMessage(cMessage *msg)
+--- a/ethernet/modular/EthernetPauseCommandProcessor.h
++++ b/ethernet/modular/EthernetPauseCommandProcessor.h
+@@ -7,6 +7,7 @@
+ #define __INET_ETHERNETPAUSECOMMANDPROCESSOR_H
+ 
+ #include "inet/common/packet/Message.h"
++#include "inet/common/Simsignals.h"
+ #include "inet/common/packet/Packet.h"
+ #include "inet/linklayer/common/Ieee802Ctrl_m.h"
+ #include "inet/linklayer/ethernet/common/EthernetControlFrame_m.h"
