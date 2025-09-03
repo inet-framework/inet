@@ -47,6 +47,32 @@ void ClockBase::finish()
     emit(timeChangedSignal, getClockTime().asSimTime());
 }
 
+void ClockBase::checkScheduledClockEvent(const ClockEvent *event) const
+{
+    DEBUG_ENTER();
+    // NOTE: IClock interface 3. invariant
+    DEBUG_CMP(event->getArrivalClockTime(), >=, getClockTime());
+    if (event->isScheduled()) {
+        DEBUG_CMP(event->getArrivalTime(), >=, simTime());
+        // NOTE: IClock interface 4. invariant
+        DEBUG_CMP(event->getArrivalTime(), ==,
+                computeScheduleTime(event->getArrivalClockTime()));
+        // NOTE: IClock interface 5. invariant
+        DEBUG_CMP(event->getArrivalClockTime(), >=,
+                computeClockTimeFromSimTime(event->getArrivalTime(), true));
+        DEBUG_CMP(event->getArrivalClockTime(), <=,
+                computeClockTimeFromSimTime(event->getArrivalTime(), false));
+    }
+    DEBUG_LEAVE();
+}
+
+cSimpleModule *ClockBase::getTargetModule() const
+{
+    cSimpleModule *target = getSimulation()->getContextSimpleModule();
+    if (target == nullptr)
+        throw cRuntimeError("scheduleAt()/cancelEvent() must be called with a simple module in context");
+    return target;
+}
 
 clocktime_t ClockBase::getClockTime() const
 {
@@ -57,9 +83,9 @@ clocktime_t ClockBase::getClockTime() const
     return currentClockTime;
 }
 
-simtime_t ClockBase::computeScheduleTime(clocktime_t clockTime)
+simtime_t ClockBase::computeScheduleTime(clocktime_t clockTime) const
 {
-    DEBUG_ENTER(true, clockTime);
+    DEBUG_ENTER(clockTime);
     simtime_t currentSimulationTime = simTime();
     simtime_t lowerSimulationTime = computeSimTimeFromClockTime(clockTime, true);
     DEBUG_OUT << DEBUG_FIELD(lowerSimulationTime) << std::endl;

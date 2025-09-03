@@ -17,8 +17,8 @@ simple OscillatorBase extends SimpleModule
     parameters:
         bool emitNumTicksSignal = default(false); // Enables emitting a signal at each oscillator tick, can be useful for validating the behavior of the more efficient implementation without events
         int oscillatorTickEventSchedulingPriority = default(0); // Specifies the scheduling priority of the tick event
-        @class(OscillatorBase);
         displayStringTextFormat = default("%n"); // Determines the text that is written on top of the submodule
+        @class(OscillatorBase);
         @display("i=block/tunnel");
         @signal[numTicksChanged](type=unsigned long);
         @signal[driftRateChanged](type=double);
