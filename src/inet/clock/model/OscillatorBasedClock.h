@@ -144,19 +144,13 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
     int64_t F(int64_t n) const { return n + A(n); }
 
     /**
-     * Mathematical formula: c = doComputeClockTimeFromSimTime(s):
-     *   n  = numTicks(s - oos)
-     *   n0 = numTicks(cos - oos)
-     *   c  = coc + (F(n) - F(n0)) * l
-     */
-    /**
      * Mathematical formula: c = doComputeClockTimeFromSimTime(s, b):
      *   n  = numTicks(s - oos)
      *   n0 = numTicks(cos - oos)
-     *   m  = n - n0
      *   atBoundary = (s == oos + interval(n))
-     *   m_eff = b ? m : (atBoundary && m > 0 ? m - 1 : m)
-     *   c  = coc + (F(n0 + m_eff) - F(n0)) * l
+     *   m  = n - n0
+     *   m  = b ? m : (atBoundary && m > 0 ? m - 1 : m)
+     *   c  = coc + (F(n0 + m) - F(n0)) * l
      */
     clocktime_t doComputeClockTimeFromSimTime(simtime_t t, bool lowerBound) const;
 
