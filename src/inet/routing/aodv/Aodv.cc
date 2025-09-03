@@ -17,6 +17,7 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/L3Tools.h"
+#include "inet/networklayer/common/NextHopAddressTag_m.h"
 #include "inet/networklayer/ipv4/IcmpHeader.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4Route.h"
@@ -66,6 +67,13 @@ void Aodv::initialize(int stage)
         localAddTTL = par("localAddTTL");
         jitterPar = &par("jitter");
         periodicJitter = &par("periodicJitter");
+
+        // Gateway configuration for external networks
+        const char *gatewayStr = par("gatewayAddress");
+        if (gatewayStr && strlen(gatewayStr) > 0) {
+            gatewayAddress = L3AddressResolver().resolve(gatewayStr);
+            EV_INFO << "Gateway address configured: " << gatewayAddress << endl;
+        }
 
         myRouteTimeout = par("myRouteTimeout");
         deletePeriod = par("deletePeriod");
@@ -191,7 +199,46 @@ INetfilter::IHook::Result Aodv::ensureRouteForDatagram(Packet *datagram)
 
     if (destAddr.isBroadcast() || routingTable->isLocalAddress(destAddr) || destAddr.isMulticast())
         return ACCEPT;
+
+    // Check if this is an external address that should be routed via gateway
+    if (isExternalAddress(destAddr)) {
+        EV_INFO << "External address detected: " << destAddr << ", routing via gateway: " << gatewayAddress << endl;
+
+        // Find route to gateway
+        IRoute *gatewayRoute = routingTable->findBestMatchingRoute(gatewayAddress);
+        AodvRouteData *gatewayRouteData = gatewayRoute ? dynamic_cast<AodvRouteData *>(gatewayRoute->getProtocolData()) : nullptr;
+
+        if (gatewayRouteData && gatewayRouteData->isActive() && !gatewayRoute->getNextHopAsGeneric().isUnspecified()) {
+            // We have active route to gateway, attach NextHopAddressReq and forward packet
+            EV_INFO << "Active route to gateway found: " << gatewayRoute << endl;
+            datagram->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(gatewayRoute->getNextHopAsGeneric());
+
+            // Update route lifetimes for gateway route
+            updateValidRouteLifeTime(gatewayAddress, simTime() + activeRouteTimeout);
+            updateValidRouteLifeTime(gatewayRoute->getNextHopAsGeneric(), simTime() + activeRouteTimeout);
+
+            return ACCEPT;
+        }
+        else {
+            // Need to discover route to gateway first
+            EV_INFO << "No active route to gateway " << gatewayAddress << ", initiating route discovery" << endl;
+            delayDatagram(datagram);
+
+            if (!hasOngoingRouteDiscovery(gatewayAddress)) {
+                bool isInactive = gatewayRouteData && !gatewayRouteData->isActive();
+                if (isInactive)
+                    startRouteDiscovery(gatewayAddress, gatewayRoute->getMetric() + ttlIncrement);
+                else
+                    startRouteDiscovery(gatewayAddress);
+            }
+            else
+                EV_DETAIL << "Route discovery to gateway is in progress, originator " << getSelfIPAddress() << " target " << gatewayAddress << endl;
+
+            return QUEUE;
+        }
+    }
     else {
+        // Handle internal addresses with standard AODV logic
         EV_INFO << "Finding route for source " << sourceAddr << " with destination " << destAddr << endl;
         IRoute *route = routingTable->findBestMatchingRoute(destAddr);
         AodvRouteData *routeData = route ? dynamic_cast<AodvRouteData *>(route->getProtocolData()) : nullptr;
@@ -1692,6 +1739,29 @@ void Aodv::handleBlackListTimer()
 
     if (nextTime != SimTime::getMaxTime())
         scheduleAt(nextTime, blacklistTimer);
+}
+
+bool Aodv::isExternalAddress(const L3Address& destAddr) const
+{
+    // Skip local, broadcast, multicast addresses
+    if (destAddr.isBroadcast() || routingTable->isLocalAddress(destAddr) || destAddr.isMulticast())
+        return false;
+
+    // If no gateway is configured, all addresses are considered internal
+    if (gatewayAddress.isUnspecified())
+        return false;
+
+    // Check if we have any AODV route to this destination
+    IRoute *route = routingTable->findBestMatchingRoute(destAddr);
+    if (route && route->getSource() == this) {
+        // We have an AODV route, so it's internal to the ad-hoc network
+        return false;
+    }
+
+    // If we reach here, the address is not local, not broadcast/multicast,
+    // we have a gateway configured, and we don't have an AODV route to it.
+    // This suggests it's an external address.
+    return true;
 }
 
 Aodv::~Aodv()

@@ -92,6 +92,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     simtime_t nodeTraversalTime;
     cPar *jitterPar = nullptr;
     cPar *periodicJitter = nullptr;
+    L3Address gatewayAddress; // Gateway address for external networks
 
     // the following parameters are calculated from the parameters defined above
     // see the NED file for more info
@@ -196,6 +197,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     void processPacket(Packet *pk);
     void clearState();
     void checkIpVersionAndPacketTypeCompatibility(AodvControlPacketType packetType);
+    bool isExternalAddress(const L3Address& destAddr) const;
 
     /* UDP callback interface */
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
