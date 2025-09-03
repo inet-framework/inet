@@ -10,6 +10,10 @@ import inet.clock.contract.IClock;
 
 namespace inet;
 
+cplusplus {{
+class ClockBase;
+}}
+
 enum OverdueClockEventHandlingMode {
     UNSPECIFIED = -1;
     EXECUTE = 0;
@@ -19,9 +23,16 @@ enum OverdueClockEventHandlingMode {
 
 message ClockEvent
 {
-    @customize;
     IClock *clock;
     bool relative = false;
     clocktime_t arrivalClockTime = -1;
     OverdueClockEventHandlingMode overdueClockEventHandlingMode = UNSPECIFIED;
 }
+
+cplusplus(ClockEvent) {{
+    friend ClockBase;
+
+  protected:
+    virtual void execute() override;
+    void callBaseExecute() { cMessage::execute(); }
+}}

@@ -10,24 +10,5 @@
  * @author Vladimir Vesely (ivesely@fit.vutbr.cz)
  * @copyright Brno University of Technology (www.fit.vutbr.cz) under GPLv3
  */
-#ifndef __INET_EIGRPMSGREQ_H
-#define __INET_EIGRPMSGREQ_H
 
 #include "inet/routing/eigrp/messages/EigrpMessage_m.h"
-namespace inet {
-class INET_API EigrpMsgReq : public EigrpMsgReq_Base
-{
-  public:
-    EigrpMsgReq(const char *name = nullptr) : EigrpMsgReq_Base(name) {}
-    EigrpMsgReq(const EigrpMsgReq& other) : EigrpMsgReq_Base(other) {}
-    EigrpMsgReq& operator=(const EigrpMsgReq& other)
-    { EigrpMsgReq_Base::operator=(other); return *this; }
-    virtual EigrpMsgReq *dup() const { return new EigrpMsgReq(*this); }
-    bool isMsgReliable() { return getOpcode() != EIGRP_HELLO_MSG; }
-    int findMsgRoute(int routeId) const;
-};
-
-//Register_Class(EigrpMsgReq);
-} // namespace inet
-#endif
-

@@ -260,7 +260,6 @@ struct EigrpMsgRoute
 // Message request
 message EigrpMsgReq
 {
-    @customize(true);
     int8_t opcode;              // Type of message
     bool goodbyeMsg = false;    // Message is Hello goodbye
 
@@ -279,3 +278,9 @@ message EigrpMsgReq
     int numOfAck;               // Number of acknowledges
     EigrpMsgRoute routes[];
 };
+
+cplusplus(EigrpMsgReq) {{
+  public:
+    bool isMsgReliable() { return getOpcode() != EIGRP_HELLO_MSG; }
+    int findMsgRoute(int routeId) const;
+}}

@@ -13,55 +13,13 @@
 namespace inet {
 namespace sctp {
 
-Register_Class(SctpHeader);
-
-SctpHeader& SctpHeader::operator=(const SctpHeader& other)
-{
-    if (this == &other)
-        return *this;
-    clean();
-    SctpHeader_Base::operator=(other);
-    copy(other);
-    return *this;
-}
-
-void SctpHeader::copy(const SctpHeader& other)
-{
-//    handleChange();
-    setVTag(other.getVTag());
-    setSrcPort(other.getSrcPort());
-    setDestPort(other.getDestPort());
-    setChecksumOk(other.getChecksumOk());
-    for (const auto& elem : other.sctpChunkList) {
-        SctpChunk *chunk = (elem)->dup();
-        take(chunk);
-        sctpChunkList.push_back(chunk);
-    }
-    ASSERT(getChunkLength().get<B>() == other.getChunkLength().get<B>());
-}
-
-SctpHeader::~SctpHeader()
-{
-    clean();
-}
-
 void SctpHeader::clean()
 {
-//    handleChange();
-
-    if (this->getSctpChunksArraySize() > 0) {
-        auto iterator = sctpChunkList.begin();
-        while (iterator != sctpChunkList.end()) {
-            SctpChunk *chunk = (*iterator);
-            sctpChunkList.erase(iterator);
-            drop(chunk);
-            delete chunk;
-        }
+    for (SctpChunk *chunk : sctpChunkList) {
+        drop(chunk);
+        delete chunk;
     }
-
-    /* sctpChunkList.clear();
-     setHeaderLength(SCTP_COMMON_HEADER);
-     setChunkLength(B(SCTP_COMMON_HEADER));*/
+    sctpChunkList.clear();
 }
 
 void SctpHeader::setSctpChunksArraySize(size_t size)
@@ -157,27 +115,6 @@ SctpChunk *SctpHeader::peekLastChunk() const
     return msg;
 }
 
-Register_Class(SctpErrorChunk);
-
-SctpErrorChunk& SctpErrorChunk::operator=(const SctpErrorChunk& other)
-{
-    if (this == &other)
-        return *this;
-    clean();
-    SctpErrorChunk_Base::operator=(other);
-    copy(other);
-    return *this;
-}
-
-void SctpErrorChunk::copy(const SctpErrorChunk& other)
-{
-    for (const auto& elem : other.parameterList) {
-        SctpParameter *param = (elem)->dup();
-        take(param);
-        parameterList.push_back(param);
-    }
-}
-
 void SctpErrorChunk::setParametersArraySize(size_t size)
 {
     throw cException(this, "setParametersArraySize() not supported, use addParameter()");
@@ -218,39 +155,12 @@ SctpParameter *SctpErrorChunk::removeParameter()
     return msg;
 }
 
-SctpErrorChunk::~SctpErrorChunk()
-{
-    clean();
-}
-
 void SctpErrorChunk::clean()
 {
     while (!parameterList.empty()) {
         cPacket *msg = parameterList.front();
         parameterList.erase(parameterList.begin());
         dropAndDelete(msg);
-    }
-}
-
-Register_Class(SctpStreamResetChunk);
-
-SctpStreamResetChunk& SctpStreamResetChunk::operator=(const SctpStreamResetChunk& other)
-{
-    SctpStreamResetChunk_Base::operator=(other);
-
-    this->setByteLength(SCTP_STREAM_RESET_CHUNK_LENGTH);
-    for (const auto& elem : other.parameterList)
-        addParameter((elem)->dup());
-
-    return *this;
-}
-
-void SctpStreamResetChunk::copy(const SctpStreamResetChunk& other)
-{
-    for (const auto& elem : other.parameterList) {
-        SctpParameter *param = (elem)->dup();
-        take(param);
-        parameterList.push_back(param);
     }
 }
 
@@ -297,11 +207,6 @@ cPacket *SctpStreamResetChunk::removeParameter()
     return msg;
 }
 
-SctpStreamResetChunk::~SctpStreamResetChunk()
-{
-    clean();
-}
-
 void SctpStreamResetChunk::clean()
 {
     while (!parameterList.empty()) {
@@ -311,29 +216,12 @@ void SctpStreamResetChunk::clean()
     }
 }
 
-Register_Class(SctpIncomingSsnResetRequestParameter);
-
-void SctpIncomingSsnResetRequestParameter::copy(const SctpIncomingSsnResetRequestParameter& other)
+void SctpAsconfChunk::clean()
 {
-    setSrReqSn(other.getSrReqSn());
-    setStreamNumbersArraySize(other.getStreamNumbersArraySize());
-    for (uint16_t i = 0; i < other.getStreamNumbersArraySize(); i++) {
-        setStreamNumbers(i, other.getStreamNumbers(i));
+    for (SctpParameter *param : parameterList) {
+        dropAndDelete(param);
     }
-}
-
-Register_Class(SctpAsconfChunk);
-
-SctpAsconfChunk& SctpAsconfChunk::operator=(const SctpAsconfChunk& other)
-{
-    SctpAsconfChunk_Base::operator=(other);
-
-    this->setByteLength(SCTP_ADD_IP_CHUNK_LENGTH + 8);
-    this->setAddressParam(other.getAddressParam());
-    for (const auto& elem : other.parameterList)
-        addAsconfParam((elem)->dup());
-
-    return *this;
+    parameterList.clear();
 }
 
 void SctpAsconfChunk::setAsconfParamsArraySize(size_t size)
@@ -375,17 +263,12 @@ SctpParameter *SctpAsconfChunk::removeAsconfParam()
     return msg;
 }
 
-Register_Class(SctpAsconfAckChunk);
-
-SctpAsconfAckChunk& SctpAsconfAckChunk::operator=(const SctpAsconfAckChunk& other)
+void SctpAsconfAckChunk::clean()
 {
-    SctpAsconfAckChunk_Base::operator=(other);
-
-    this->setByteLength(SCTP_ADD_IP_CHUNK_LENGTH);
-    for (const auto& elem : other.parameterList)
-        addAsconfResponse((elem)->dup());
-
-    return *this;
+    for (SctpParameter *param : parameterList) {
+        dropAndDelete(param);
+    }
+    parameterList.clear();
 }
 
 void SctpAsconfAckChunk::setAsconfResponseArraySize(size_t size)

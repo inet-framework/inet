@@ -24,18 +24,13 @@ foreach $i ( @the_skiplist )
 #print "-",join("-\n-",keys(%skiplist)),"-\n";
 #die();
 
-$DN = `dirname $0`;
-chomp $DN;
-#print "DN='$DN'\n";
+$PROJECT_ROOT=$ENV{'INET_ROOT'};
+chomp $PROJECT_ROOT;
+#print "INETROOT='$PROJECT_ROOT'\n";
 
-chdir "$DN/../..";
+chdir "$PROJECT_ROOT";
 
-$INETROOT=`pwd`;
-chomp $INETROOT;
-#print "INETROOT='$INETROOT'\n";
-
-
-@inifiles = sort `find examples -name '*.ini'`;
+@inifiles = sort `find examples -name '*.ini' -type f`;
 
 die("Not found ini files\n") if ($#inifiles lt 0);
 

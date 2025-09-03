@@ -15,7 +15,6 @@ namespace inet::sctp;
 
 class SctpHeader extends TransportHeaderBase
 {
-    @customize;
     // Source Port
     uint16_t srcPort;
     // Destination Port
@@ -26,8 +25,76 @@ class SctpHeader extends TransportHeaderBase
     uint32_t checksum = 0;
     ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
     unsigned short headerLength = 12;
-    abstract SctpChunk *sctpChunks[];
+    SctpChunk *sctpChunks[] @custom;
 }
+
+cplusplus(SctpHeader) {{
+  protected:
+    std::vector<SctpChunk *> sctpChunkList;
+
+  private:
+    void clean();
+
+  public:
+    virtual void setSctpChunksArraySize(size_t size);
+
+    virtual void setSctpChunks(size_t k, SctpChunk *sctpChunks);
+
+    /**
+     * Returns the number of chunks in this SCTP packet
+     */
+    virtual size_t getSctpChunksArraySize() const;
+
+    /**
+     * Returns the kth chunk in this SCTP packet
+     */
+//    virtual SctpChunk *getSctpChunks(size_t k) const override;
+
+    virtual const SctpChunk *getSctpChunks(size_t k) const { return sctpChunkList.at(k); }
+
+    /**
+     * Adds a message object to the SCTP packet. The packet length will be adjusted
+     */
+    virtual void appendSctpChunks(SctpChunk *sctpChunks);
+    virtual void insertSctpChunks(size_t k, SctpChunk *sctpChunks);
+    virtual void eraseSctpChunks(size_t k) {}
+    virtual void replaceSctpChunk(SctpChunk *msg, uint32_t k);
+
+    /**
+     * Removes and returns the first message object in this SCTP packet.
+     */
+    virtual SctpChunk *removeFirstChunk();
+    virtual SctpChunk *removeLastChunk();
+    virtual SctpChunk *peekFirstChunk() const;
+    virtual SctpChunk *peekLastChunk() const;
+
+    virtual unsigned int getSourcePort() const override { return getSrcPort(); }
+    virtual void setSourcePort(unsigned int port) override { setSrcPort(port); }
+    virtual unsigned int getDestinationPort() const override { return getDestPort(); }
+    virtual void setDestinationPort(unsigned int port) override { setDestPort(port); }
+}}
+
+cplusplus(SctpHeader::copy) {{
+    clean();
+    for (const auto& elem : other.sctpChunkList) {
+        SctpChunk *chunk = (elem)->dup();
+        take(chunk);
+        sctpChunkList.push_back(chunk);
+    }
+    ASSERT(getChunkLength().get<B>() == other.getChunkLength().get<B>());
+}}
+
+cplusplus(SctpHeader::~SctpHeader) {{
+    clean();
+}}
+
+cplusplus(SctpHeader::parsimPack) {{
+    doParsimPacking(b, sctpChunkList);
+}}
+
+cplusplus(SctpHeader::parsimUnpack) {{
+    doParsimUnpacking(b, sctpChunkList);
+}}
 
 class SctpChunk extends cPacket
 {
@@ -218,11 +285,63 @@ class SctpShutdownCompleteChunk extends SctpChunk
 
 class SctpErrorChunk extends SctpChunk
 {
-    @customize;
     bool TBit = 0;
     bool MBit = 0;
-    abstract SctpParameter *parameters[];
+    SctpParameter *parameters[] @custom;
 }
+
+cplusplus(SctpErrorChunk) {{
+  protected:
+    std::vector<SctpParameter *> parameterList;
+
+  private:
+    void clean();
+
+  public:
+    virtual void setParametersArraySize(size_t size);
+    virtual size_t getParametersArraySize() const;
+    /** Generated but unused method, should not be called. */
+    virtual void setParameters(size_t k, SctpParameter *parameters);
+
+    virtual void appendParameters(SctpParameter *parameters) { throw cRuntimeError("Unimplemented function"); }
+    virtual void insertParameters(size_t k, SctpParameter *parameters) { throw cRuntimeError("Unimplemented function"); }
+    virtual void eraseParameters(size_t k) { throw cRuntimeError("Unimplemented function"); }
+    /**
+     * Returns the kth parameter in this SCTP Error Chunk
+     */
+    virtual SctpParameter *getParameters(size_t k) const;
+
+    /**
+     * Adds a message object to the SCTP packet. The packet length will be adjusted
+     */
+    virtual void addParameters(SctpParameter *msg);
+
+    /**
+     * Removes and returns the first message object in this SCTP packet.
+     */
+    virtual SctpParameter *removeParameter();
+}}
+
+cplusplus(SctpErrorChunk::copy) {{
+    clean();
+    for (const auto& elem : other.parameterList) {
+        SctpParameter *param = (elem)->dup();
+        take(param);
+        parameterList.push_back(param);
+    }
+}}
+
+cplusplus(SctpErrorChunk::~SctpErrorChunk) {{
+    clean();
+}}
+
+cplusplus(SctpErrorChunk::parsimPack) {{
+    doParsimPacking(b, parameterList);
+}}
+
+cplusplus(SctpErrorChunk::parsimUnpack) {{
+    doParsimUnpacking(b, parameterList);
+}}
 
 class SctpParameter extends cPacket
 {
@@ -243,9 +362,62 @@ class SctpPacketDropChunk extends SctpChunk
 
 class SctpStreamResetChunk extends SctpChunk
 {
-    @customize;
-    abstract SctpParameter *parameters[];
+    SctpParameter *parameters[] @custom;
 }
+
+cplusplus(SctpStreamResetChunk) {{
+  protected:
+    std::vector<SctpParameter *> parameterList;
+
+  private:
+    void clean();
+
+  public:
+    virtual void setParametersArraySize(size_t size);
+    virtual size_t getParametersArraySize() const;
+
+    /** Generated but unused method, should not be called. */
+    virtual void setParameters(size_t k, SctpParameter *parameters);
+
+    virtual void appendParameters(SctpParameter *parameters) { throw cRuntimeError("Unimplemented function"); }
+    virtual void insertParameters(size_t k, SctpParameter *parameters) { throw cRuntimeError("Unimplemented function"); }
+    virtual void eraseParameters(size_t k) { throw cRuntimeError("Unimplemented function"); }
+    /**
+     * Returns the kth parameter in this SCTP Reset Chunk
+     */
+    virtual const SctpParameter *getParameters(size_t k) const;
+
+    /**
+     * Adds a message object to the SCTP packet. The packet length will be adjusted
+     */
+    virtual void addParameter(SctpParameter *msg);
+
+    /**
+     * Removes and returns the first message object in this SCTP packet.
+     */
+    virtual cPacket *removeParameter();
+}}
+
+cplusplus(SctpStreamResetChunk::copy) {{
+    clean();
+    for (const auto& elem : other.parameterList) {
+        SctpParameter *param = (elem)->dup();
+        take(param);
+        parameterList.push_back(param);
+    }
+}}
+
+cplusplus(SctpStreamResetChunk::~SctpStreamResetChunk) {{
+    clean();
+}}
+
+cplusplus(SctpStreamResetChunk::parsimPack) {{
+    doParsimPacking(b, parameterList);
+}}
+
+cplusplus(SctpStreamResetChunk::parsimUnpack) {{
+    doParsimUnpacking(b, parameterList);
+}}
 
 class SctpOutgoingSsnResetRequestParameter extends SctpParameter
 {
@@ -257,7 +429,6 @@ class SctpOutgoingSsnResetRequestParameter extends SctpParameter
 
 class SctpIncomingSsnResetRequestParameter extends SctpParameter
 {
-    @customize;
     uint32_t srReqSn; //Stream Reset Request Sequence Number
     uint16_t streamNumbers[];
 }
@@ -300,19 +471,127 @@ class SctpAuthenticationChunk extends SctpChunk
 
 class SctpAsconfChunk extends SctpChunk
 {
-    @customize;
     uint32_t serialNumber;
     L3Address addressParam;
     uint32_t peerVTag; //for NAT
-    abstract SctpParameter *asconfParams[];
+    SctpParameter *asconfParams[] @custom;
 }
+
+cplusplus(SctpAsconfChunk) {{
+  protected:
+    std::vector<SctpParameter *> parameterList;
+
+  private:
+    void clean();
+
+  public:
+    virtual void setAsconfParamsArraySize(size_t size);
+    virtual size_t getAsconfParamsArraySize() const;
+
+    /**
+     * Returns the kth parameter in this SCTP Reset Chunk
+     */
+    virtual const SctpParameter *getAsconfParams(size_t k) const;
+
+    /** Generated but unused method, should not be called. */
+    virtual void setAsconfParams(size_t k, SctpParameter *asconfParams);
+
+    virtual void appendAsconfParams(SctpParameter *asconfParams) { throw cRuntimeError("Unimplemented function"); }
+    virtual void insertAsconfParams(size_t k, SctpParameter *asconfParams) { throw cRuntimeError("Unimplemented function"); }
+    virtual void eraseAsconfParams(size_t k) { throw cRuntimeError("Unimplemented function"); }
+
+    /**
+     * Adds a message object to the SCTP packet. The packet length will be adjusted
+     */
+    virtual void addAsconfParam(SctpParameter *msg);
+
+    /**
+     * Removes and returns the first message object in this SCTP packet.
+     */
+    virtual SctpParameter *removeAsconfParam();
+}}
+
+cplusplus(SctpAsconfChunk::copy) {{
+    clean();
+    for (const auto& elem : other.parameterList) {
+        SctpParameter *param = (elem)->dup();
+        take(param);
+        parameterList.push_back(param);
+    }
+}}
+
+cplusplus(SctpAsconfChunk::~SctpAsconfChunk) {{
+    clean();
+}}
+
+cplusplus(SctpAsconfChunk::parsimPack) {{
+    doParsimPacking(b, parameterList);
+}}
+
+cplusplus(SctpAsconfChunk::parsimUnpack) {{
+    doParsimUnpacking(b, parameterList);
+}}
 
 class SctpAsconfAckChunk extends SctpChunk
 {
-    @customize;
     uint32_t serialNumber;
-    abstract SctpParameter *asconfResponse[];
+    SctpParameter *asconfResponse[] @custom;
 }
+
+cplusplus(SctpAsconfAckChunk) {{
+  protected:
+    std::vector<SctpParameter *> parameterList;
+
+  private:
+    void clean();
+
+  public:
+    virtual void setAsconfResponseArraySize(size_t size);
+    virtual size_t getAsconfResponseArraySize() const;
+
+    /** Generated but unused method, should not be called. */
+    virtual void setAsconfResponse(size_t k, SctpParameter *asconfResponse);
+
+    virtual void appendAsconfResponse(SctpParameter *asconfResponse) { throw cRuntimeError("Unimplemented function"); }
+    virtual void insertAsconfResponse(size_t k, SctpParameter *asconfResponse) { throw cRuntimeError("Unimplemented function"); }
+    virtual void eraseAsconfResponse(size_t k) { throw cRuntimeError("Unimplemented function"); }
+
+    /**
+     * Returns the kth parameter in this SCTP Reset Chunk
+     */
+    virtual SctpParameter *getAsconfResponse(size_t k) const;
+
+    /**
+     * Adds a message object to the SCTP packet. The packet length will be adjusted
+     */
+    virtual void addAsconfResponse(SctpParameter *msg);
+
+    /**
+     * Removes and returns the first message object in this SCTP packet.
+     */
+    virtual SctpParameter *removeAsconfResponse();
+}}
+
+cplusplus(SctpAsconfAckChunk::copy) {{
+    clean();
+    for (const auto& elem : other.parameterList) {
+        SctpParameter *param = (elem)->dup();
+        take(param);
+        parameterList.push_back(param);
+    }
+}}
+
+cplusplus(SctpAsconfAckChunk::~SctpAsconfAckChunk) {{
+    clean();
+}}
+
+cplusplus(SctpAsconfAckChunk::parsimPack) {{
+    doParsimPacking(b, parameterList);
+}}
+
+cplusplus(SctpAsconfAckChunk::parsimUnpack) {{
+    doParsimUnpacking(b, parameterList);
+}}
 
 class SctpAddIPParameter extends SctpParameter
 {
