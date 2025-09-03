@@ -24,7 +24,7 @@ static bool _dbg_global_enabled = true;
 #include <string>
 #include <sstream>
 
-//#define DEBUG_LOG_DISABLED
+#define DEBUG_LOG_DISABLED
 
 // ---------- null sink ----------
 struct NullStream {
@@ -129,12 +129,13 @@ namespace _dbg_detail {
 
 #else  // ---------- compiled out ----------
 
-#define DEBUG_ENTER(...)         auto& DEBUG_OUT = nullStream
+#define DEBUG_ENTER(...)         do { } while (0)
 #define DEBUG_ENABLE()           ((void)0)
 #define DEBUG_DISABLE()          ((void)0)
 #define DEBUG_IS_ENABLED()       (false)
 #define DEBUG_LEAVE(...)         ((void)0)
 #define DEBUG_EXEC_INDEX         (0ull)
+#define DEBUG_OUT                nullStream   // no local var -> no unused warning
 
 #endif
 

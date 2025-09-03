@@ -61,7 +61,7 @@ class INET_API IClock
      * simulation time, otherwise an error is raised. See SIMTIME_AS_CLOCKTIME
      * macro for simple type conversion.
      */
-    virtual clocktime_t computeClockTimeFromSimTime(simtime_t time) const = 0;
+    virtual clocktime_t computeClockTimeFromSimTime(simtime_t time, bool lowerBound = true) const = 0;
 
     /**
      * Returns the simulation time for the specified future clock time according

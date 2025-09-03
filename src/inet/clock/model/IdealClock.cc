@@ -11,9 +11,9 @@ namespace inet {
 
 Define_Module(IdealClock);
 
-clocktime_t IdealClock::computeClockTimeFromSimTime(simtime_t simulationTime) const
+clocktime_t IdealClock::computeClockTimeFromSimTime(simtime_t simulationTime, bool lowerBound) const
 {
-    return SIMTIME_AS_CLOCKTIME(simulationTime);
+    return SIMTIME_AS_CLOCKTIME(lowerBound ? simulationTime : simulationTime + SimTime::fromRaw(1));
 }
 
 simtime_t IdealClock::computeSimTimeFromClockTime(clocktime_t clockTime, bool lowerBound) const
