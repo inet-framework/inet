@@ -25,7 +25,7 @@ import inet.clock.contract.IOscillator;
 //  -s: origin simulation time
 //  -c: origin clock time
 //
-
+// TODO: add separate clock granularity parameter which can be smaller than the nominal oscillator length, when oscillator compensation is non-zero, the clock can actually measure fractional compensation smaller than nominal tick length
 module OscillatorBasedClock extends ClockBase like IClock
 {
     parameters:

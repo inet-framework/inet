@@ -54,8 +54,15 @@ OscillatorBasedClock::~OscillatorBasedClock()
 
 clocktime_t OscillatorBasedClock::getClockTime() const
 {
+    // TODO: make sure that the returned clock time is never larger than the arrival clock time of the first clock event in the events field
+    // TODO: only those events count which are scheduled for the current simulation time
     if (useFutureEventSet) {
         clocktime_t currentClockTime = ClockBase::getClockTime();
+        if (!events.empty()) {
+            auto firstClockEvent = events[0];
+            if (firstClockEvent->getArrivalTime() == simTime() && firstClockEvent->getArrivalClockTime() < currentClockTime)
+                currentClockTime = firstClockEvent->getArrivalClockTime();
+        }
         DEBUG_CMP(currentClockTime.raw() % getClockGranularity().raw(), ==, 0);
         return currentClockTime;
     }
