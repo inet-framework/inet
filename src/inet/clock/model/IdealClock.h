@@ -15,7 +15,7 @@ namespace inet {
 class INET_API IdealClock : public ClockBase
 {
   public:
-    virtual clocktime_t computeClockTimeFromSimTime(simtime_t t, bool lowerBound = true) const override;
+    virtual clocktime_t computeClockTimeFromSimTime(simtime_t t, bool lowerBound = false) const override;
     virtual simtime_t computeSimTimeFromClockTime(clocktime_t t, bool lowerBound = true) const override;
 };
 

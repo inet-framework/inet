@@ -95,7 +95,7 @@ class INET_API IClock
      *
      * See also: SIMTIME_AS_CLOCKTIME for trivial type conversion.
      */
-    virtual clocktime_t computeClockTimeFromSimTime(simtime_t time, bool lowerBound = true) const = 0;
+    virtual clocktime_t computeClockTimeFromSimTime(simtime_t time, bool lowerBound = false) const = 0;
 
     /**
      * Converts a (current or future) clock time to simulation time using the generalized
