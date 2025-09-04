@@ -70,6 +70,15 @@ static bool compareClockEvents(const ClockEvent *e1, const ClockEvent *e2) {
  *  - F(n) = n + A(n)                                           // effective output ticks up to n
  *  - p(n) = frac( p + (x − 1) * n ) in [0,1)                   // residual fractional part
  *
+ * Let n0 = numTicks(cos − oos) at the clock origin, p ∈ [0,1) be the residual at the origin,
+ * and m ≥ 0 the # of oscillator ticks since the origin (m = n − n0).
+ * Compensation step function (relative to origin):
+ *   A_rel(m) = floor(p + (x − 1) * m)
+ *   F_rel(m) = m + A_rel(m)
+ * Residual after m ticks: p(m) = frac(p + (x − 1) * m) ∈ [0,1)
+ * For absolute indices, always take differences:
+ *   F(n0 + m) − F(n0) = F_rel(m).
+ *
  * Notes:
  *  - x > 1 ⇒ A increases stepwise (more output ticks than raw ticks).
  *  - x < 1 ⇒ A decreases stepwise (fewer output ticks than raw ticks).
@@ -90,9 +99,8 @@ static bool compareClockEvents(const ClockEvent *e1, const ClockEvent *e2) {
  *    n0 = numTicks(cos − oos)
  *    k  = floor((c − coc) / l) + (b ? 0 : 1)
  *    Find m1 = min { m ≥ 0 : m + floor( p + (x − 1) * m ) ≥ k }
- *    Closed form for x > 0:
- *      m1 = ceil( (k − p) / x )
- *    n1 = n0 + max(0, m1)
+ *    Closed-form (x > 0): m1 = max(0, ceil((k − p) / x))
+ *    n1 = n0 + m1
  *    s  = oos + interval(n1)
  *
  * Origin moves
@@ -163,6 +171,21 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
     /** Verifies that all scheduled events are consistent with current mapping. */
     virtual void checkAllScheduledClockEvents() const;
 
+    // frac in Q0.63: keep modulo 2^63
+    uint64_t fracAdvance(int64_t m) const;
+
+    // floor_q63(p - e * m)
+    int64_t Arel(int64_t m) const;
+
+    /**
+     * Compensation helper: A(n) = floor( p + (x − 1) * (n − n0) ) = floor( p − e * (n − n0) ).
+     * Uses the accumulator p at origin and the relative tick index.
+     */
+    int64_t A(int64_t n) const;
+
+    /** Effective ticks: F(n) = n + A(n). */
+    int64_t F(int64_t n) const { return n + A(n); }
+
     /**
      * Move the clock origin to the current simulation time without changing the
      * simulation↔clock mapping.
@@ -192,15 +215,6 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
     virtual void setOrigin(clocktime_t clockTime);
 
     /**
-     * Compensation helper: A(n) = floor( p + (x − 1) * (n − n0) ) = floor( p − e * (n − n0) ).
-     * Uses the accumulator p at origin and the relative tick index.
-     */
-    int64_t A(int64_t n) const;
-
-    /** Effective ticks: F(n) = n + A(n). */
-    int64_t F(int64_t n) const { return n + A(n); }
-
-    /**
      * Clock time from simulation time with boundary selection.
      *
      * c = doComputeClockTimeFromSimTime(s, b):
@@ -220,8 +234,8 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
      *   n0 = numTicks(cos − oos)
      *   k  = floor((c − coc) / l) + (b ? 0 : 1)
      *   m1 = min { m ≥ 0 : m + floor( p + (x − 1) * m ) ≥ k }
-     *   Closed form (x > 0): m1 = ceil( (k − p) / x )
-     *   n1 = n0 + max(0, m1)
+     *   Closed-form (x > 0): m1 = max(0, ceil((k − p) / x))
+     *   n1 = n0 + m1
      *   s  = oos + interval(n1)
      */
     simtime_t doComputeSimTimeFromClockTime(clocktime_t t, bool lowerBound) const;

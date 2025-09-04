@@ -190,9 +190,10 @@ class INET_API DriftingOscillatorBase : public OscillatorBase, public IScriptabl
     virtual void setFrequencyCompensationRate(ppm frequencyCompensationRate);
 
     /**
-     * Set tick phase relative to the origin.
-     * Chooses x so that the first tick strictly after origin occurs at o + tickOffset,
-     * enforcing 0 < x <= l_current (i.e., x := ((tickOffset mod l_current) with 0 treated as l_current)).
+     * Set tick phase as a backward shift δ in [0, L_current):
+     *   x := L_current − (δ mod L_current); if result is 0, use L_current.
+     * The first tick strictly after the origin then occurs at o + x.
+     * (δ = 0 ⇒ x = L_current; no tick exactly at the origin.)
      */
     virtual void setTickOffset(simtime_t tickOffset);
 

@@ -57,10 +57,8 @@ import inet.clock.contract.IOscillator;
 //     oscillator advances; this requires the oscillator to emit its tick/state
 //     signals (enabled by default via the submodule parameter below).
 //
-// Display format directives
-// -------------------------
-//  %t : current clock time
-//  %c : current simulation time
+// Display string format directives
+// --------------------------------
 //  -s : origin simulation time (cos)
 //  -c : origin clock time (coc)
 //
