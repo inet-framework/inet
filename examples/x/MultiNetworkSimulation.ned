@@ -45,27 +45,27 @@ network MultiNetworkSimulation
         // Separate radio mediums for each WiFi network (IEEE 802.11)
         wifiRadioMedium1: Ieee80211ScalarRadioMedium {
             parameters:
-                @display("p=100,500;is=s");
+                @display("p=250,250;is=s");
         }
         
         wifiRadioMedium2: Ieee80211ScalarRadioMedium {
             parameters:
-                @display("p=200,500;is=s");
+                @display("p=850,250;is=s");
         }
         
         wifiRadioMedium3: Ieee80211ScalarRadioMedium {
             parameters:
-                @display("p=300,500;is=s");
+                @display("p=1450,250;is=s");
         }
         
         wifiRadioMedium4: Ieee80211ScalarRadioMedium {
             parameters:
-                @display("p=400,500;is=s");
+                @display("p=550,850;is=s");
         }
         
         wifiRadioMedium5: Ieee80211ScalarRadioMedium {
             parameters:
-                @display("p=500,500;is=s");
+                @display("p=1150,850;is=s");
         }
         
         // Radio medium for L-MAC TDMA backbone network
