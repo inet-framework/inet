@@ -54,14 +54,17 @@ OscillatorBasedClock::~OscillatorBasedClock()
 
 clocktime_t OscillatorBasedClock::getClockTime() const
 {
-    // TODO: make sure that the returned clock time is never larger than the arrival clock time of the first clock event in the events field
-    // TODO: only those events count which are scheduled for the current simulation time
     if (useFutureEventSet) {
         clocktime_t currentClockTime = ClockBase::getClockTime();
         if (!events.empty()) {
             auto firstClockEvent = events[0];
-            if (firstClockEvent->getArrivalTime() == simTime() && firstClockEvent->getArrivalClockTime() < currentClockTime)
+            if (firstClockEvent->getArrivalTime() == simTime() && firstClockEvent->getArrivalClockTime() < currentClockTime) {
+                // NOTE: clock time is never larger than the arrival clock time of the first clock event scheduled for the current simulation time
+                //       this is required for the clock to show the clock time of when this event is executed even though the clock jumps over this clock time due to oscillator compensation
                 currentClockTime = firstClockEvent->getArrivalClockTime();
+                DEBUG_CMP(computeClockTimeFromSimTime(simTime(), false), <=, currentClockTime);
+                DEBUG_CMP(currentClockTime, <=, computeClockTimeFromSimTime(simTime(), true));
+            }
         }
         DEBUG_CMP(currentClockTime.raw() % getClockGranularity().raw(), ==, 0);
         return currentClockTime;
@@ -180,6 +183,9 @@ void OscillatorBasedClock::checkState() const
     DEBUG_CMP(computeSimTimeFromClockTime(originClockTime, true), <=, originSimulationTime);
     DEBUG_CMP(originSimulationTime, <=, computeSimTimeFromClockTime(originClockTime, false));
     DEBUG_CMP(originClockTime, ==, computeClockTimeFromSimTime(originSimulationTime));
+    // boundary constraints
+    DEBUG_CMP(computeSimTimeFromClockTime(originClockTime, true), <=, computeSimTimeFromClockTime(originClockTime, false));
+    DEBUG_CMP(computeClockTimeFromSimTime(originSimulationTime, true), <=, computeClockTimeFromSimTime(originSimulationTime, false));
 }
 
 void OscillatorBasedClock::moveOrigin()
@@ -310,10 +316,11 @@ simtime_t OscillatorBasedClock::doComputeSimTimeFromClockTime(clocktime_t clockT
 
 clocktime_t OscillatorBasedClock::computeClockTimeFromSimTime(simtime_t simulationTime, bool lowerBound) const
 {
-    DEBUG_CMP(simulationTime, >=, simTime());
+    if (simulationTime < simTime())
+        throw cRuntimeError("Invalid argument: simulation time '%s' is in the past", simulationTime.str().c_str());
     clocktime_t result = doComputeClockTimeFromSimTime(simulationTime, lowerBound);
+    DEBUG_CMP(result, >=, originClockTime);
     DEBUG_CMP(result.raw() % getClockGranularity().raw(), ==, 0);
-    DEBUG_CMP(result, >=, doComputeClockTimeFromSimTime(simTime(), true));
     DEBUG_CMP(simulationTime, >=, doComputeSimTimeFromClockTime(result, true));
     DEBUG_CMP(simulationTime, <=, doComputeSimTimeFromClockTime(result, false));
     return result;
@@ -321,16 +328,13 @@ clocktime_t OscillatorBasedClock::computeClockTimeFromSimTime(simtime_t simulati
 
 simtime_t OscillatorBasedClock::computeSimTimeFromClockTime(clocktime_t clockTime, bool lowerBound) const
 {
-    DEBUG_CMP(clockTime, >=, getClockTime());
+    if (clockTime < getClockTime())
+        throw cRuntimeError("Invalid argument: clock time '%s' is in the past", clockTime.str().c_str());
     DEBUG_CMP(clockTime.raw() % getClockGranularity().raw(), ==, 0);
     simtime_t result = doComputeSimTimeFromClockTime(clockTime, lowerBound);
-    DEBUG_CMP(result, >=, originSimulationTimeLowerBound); // TODO: more restrictive assert for now?
-//    if (lowerBound)
-//        DEBUG_CMP(clockTime, ==, doComputeClockTimeFromSimTime(result)) // TODO: what happens if due to oscillator compensation a specific clock time value was skipped
-//        DEBUG_CMP(clockTime, <=, doComputeClockTimeFromSimTime(result)) // maybe this?
-//    else
-//        // uses inequality because oscillator compensation
-//        DEBUG_CMP(clockTime + getClockGranularity(), <=, doComputeClockTimeFromSimTime(result));
+    DEBUG_CMP(result, >=, originSimulationTimeLowerBound);
+    DEBUG_CMP(clockTime, >=, doComputeClockTimeFromSimTime(result, false));
+    DEBUG_CMP(clockTime, <=, doComputeClockTimeFromSimTime(result, true));
     return result;
 }
 
