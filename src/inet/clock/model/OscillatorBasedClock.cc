@@ -62,8 +62,8 @@ clocktime_t OscillatorBasedClock::getClockTime() const
                 // NOTE: clock time is never larger than the arrival clock time of the first clock event scheduled for the current simulation time
                 //       this is required for the clock to show the clock time of when this event is executed even though the clock jumps over this clock time due to oscillator compensation
                 currentClockTime = firstClockEvent->getArrivalClockTime();
-                DEBUG_CMP(computeClockTimeFromSimTime(simTime(), false), <=, currentClockTime);
-                DEBUG_CMP(currentClockTime, <=, computeClockTimeFromSimTime(simTime(), true));
+                DEBUG_CMP(computeClockTimeFromSimTime(simTime(), true), <=, currentClockTime);
+                DEBUG_CMP(currentClockTime, <=, computeClockTimeFromSimTime(simTime(), false));
             }
         }
         DEBUG_CMP(currentClockTime.raw() % getClockGranularity().raw(), ==, 0);
@@ -288,7 +288,7 @@ clocktime_t OscillatorBasedClock::doComputeClockTimeFromSimTime(simtime_t simula
     const S64 n0 = oscillator->computeTicksForInterval(cos - oos);
     const bool atBoundary = (s == (oos + oscillator->computeIntervalForTicks(n)));
     S64 m  = n - n0;
-    if (!lowerBound && atBoundary && m > 0) --m;
+    if (lowerBound && atBoundary && m > 0) --m;
     if (m < 0) m = 0;
     const S64 dF = m + A_rel(m, p, e_q63);
     const S128 c_raw = (S128)coc.raw() + (S128)dF * (S128)l;
@@ -355,8 +355,8 @@ simtime_t OscillatorBasedClock::computeSimTimeFromClockTime(clocktime_t clockTim
     DEBUG_CMP(clockTime.raw() % getClockGranularity().raw(), ==, 0);
     simtime_t result = doComputeSimTimeFromClockTime(clockTime, lowerBound);
     DEBUG_CMP(result, >=, originSimulationTimeLowerBound);
-    DEBUG_CMP(clockTime, >=, doComputeClockTimeFromSimTime(result, false));
-    DEBUG_CMP(clockTime, <=, doComputeClockTimeFromSimTime(result, true));
+    DEBUG_CMP(clockTime, >=, doComputeClockTimeFromSimTime(result, true));
+    DEBUG_CMP(clockTime, <=, doComputeClockTimeFromSimTime(result, false));
     return result;
 }
 

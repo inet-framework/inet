@@ -83,7 +83,7 @@ static bool compareClockEvents(const ClockEvent *e1, const ClockEvent *e2) {
  *    n0 = numTicks(cos − oos)
  *    atBoundary = (s == oos + interval(n))
  *    m  = n − n0
- *    m  = (b ? m : (atBoundary && m > 0 ? m − 1 : m))           // choose side at tick
+ *    m  = b ? (atBoundary && m > 0 ? m − 1 : m) : m
  *    c  = coc + ( F(n0 + m) − F(n0) ) * l
  *
  * 2) Simulation time from clock time (generalized inverse):
@@ -208,7 +208,7 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
      *   n0 = numTicks(cos − oos)
      *   atBoundary = (s == oos + interval(n))
      *   m  = n − n0
-     *   m  = b ? m : (atBoundary && m > 0 ? m − 1 : m)
+     *   m  = b ? (atBoundary && m > 0 ? m − 1 : m) : m
      *   c  = coc + ( F(n0 + m) − F(n0) ) * l
      */
     clocktime_t doComputeClockTimeFromSimTime(simtime_t t, bool lowerBound) const;
@@ -245,7 +245,7 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
     virtual SimTimeScale getOscillatorCompensation() const { return SimTimeScale(); }
 
     /** Conversion APIs (see formulas above). */
-    virtual clocktime_t computeClockTimeFromSimTime(simtime_t t, bool lowerBound = true) const override;
+    virtual clocktime_t computeClockTimeFromSimTime(simtime_t t, bool lowerBound = false) const override;
     virtual simtime_t  computeSimTimeFromClockTime(clocktime_t t, bool lowerBound = true) const override;
 
     /** IClock scheduling (absolute “at”, relative “after”). */

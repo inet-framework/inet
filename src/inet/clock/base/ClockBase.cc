@@ -59,9 +59,9 @@ void ClockBase::checkScheduledClockEvent(const ClockEvent *event) const
                 computeScheduleTime(event->getArrivalClockTime()));
         // NOTE: IClock interface 5. invariant
         DEBUG_CMP(event->getArrivalClockTime(), >=,
-                computeClockTimeFromSimTime(event->getArrivalTime(), false));
-        DEBUG_CMP(event->getArrivalClockTime(), <=,
                 computeClockTimeFromSimTime(event->getArrivalTime(), true));
+        DEBUG_CMP(event->getArrivalClockTime(), <=,
+                computeClockTimeFromSimTime(event->getArrivalTime(), false));
     }
     DEBUG_LEAVE();
 }
