@@ -12,107 +12,112 @@
 
 namespace inet {
 
-// TODO the API was designed such that any algorithm can be simulation that could be simulated with individual oscillator events
-
 /**
- * TODO: oscillator computation origin may not have a tick
- *
  * @brief Interface for oscillators.
  *
- * An oscillator produces periodic "ticks". It defines a nominal tick interval that
- * serves as a reference duration between ticks, although the actual intervals may vary.
- * Ticks are measured relative to a defined computation origin, which is the simulation
- * time at which the oscillator starts counting ticks. Although a tick can be scheduled
- * at the computation origin, the mapping functions below count only ticks that occur
- * after the computation origin.
+ * An oscillator produces conceptual “tick” instants. It exposes a nominal tick
+ * interval as a reference, but the actual tick timing may deviate (e.g., due to
+ * drift or phase). For performance, the oscillator does not generate an event
+ * per tick; instead it provides two mapping functions that translate between a
+ * time interval and the number of ticks within that interval, both measured
+ * from a computation origin.
  *
- * To improve simulation performance, the oscillator does not generate individual events
- * for every tick. Instead, it provides two mapping functions:
- * - One that computes the number of ticks that occur within a given time interval measured from the origin.
- * - One that computes the minimal time interval required to include a specified number of ticks measured from the origin.
+ * Computation origin:
+ * - The computation origin `o` is a simulation time (o <= now) from which tick
+ *   counting is defined. The origin need not coincide with a tick; i.e., the
+ *   first tick after the origin may occur strictly later.
  *
- * When the underlying state affecting tick timing changes, the oscillator emits signals
- * to notify interested listeners:
- * - preOscillatorStateChangedSignal is emitted immediately before the change.
- * - postOscillatorStateChangedSignal is emitted immediately after the change.
+ * Mathematical semantics:
+ * - Let {τ_i | i = 1,2,...} be the strictly increasing sequence of tick times
+ *   after the origin (relative to `o`), so each absolute tick time is o + τ_i.
+ * - Define the step function (tick count from origin):
+ *     N(Δt) := |{ i : 0 < τ_i <= Δt }|, for Δt >= 0.
+ *   (Ticks at the origin are not counted; a tick exactly at Δt is counted.)
+ * - Define the generalized inverse (minimal interval for n ticks):
+ *     I(n) := inf { Δt >= 0 : N(Δt) >= n }, for n >= 0.
+ *   (By convention I(0) = 0.)
  *
- * The following properties always hold:
+ * Properties:
+ * - N is non-decreasing and right-continuous, with unit jumps at tick instants.
+ * - I is the right-inverse of N: N(I(n)) >= n and I(N(Δt)) <= Δt.
+ * - Monotonicity:
+ *     Δt1 <= Δt2  ⇒ N(Δt1) <= N(Δt2),
+ *     n1  <= n2   ⇒ I(n1)  <= I(n2).
+ * - Nominal tick length returned by getNominalTickLength() is a fixed reference
+ *   parameter; it does not imply actual tick spacing is constant.
  *
- * 1. The oscillator origin is less than or equal to the current simulation time.
+ * Signals:
+ * - preOscillatorStateChangedSignal: emitted immediately before any change to
+ *   oscillator parameters that affect tick timing or mapping (e.g., drift/rate,
+ *   phase/offset, or origin).
+ * - postOscillatorStateChangedSignal: emitted immediately after such a change.
+ * - numTicksChangedSignal: emitted when the total tick count since origin (as
+ *   observable through the mapping) changes due to a state update. Implementations
+ *   SHOULD NOT emit this per actual tick in real time.
+ *
+ * Invariants:
+ * - getComputationOrigin() <= current simulation time.
  */
 class INET_API IOscillator
 {
   public:
-    /// Signal emitted each time a tick occurs
+    /// Emitted when the observable total tick count since origin changes due to a state update.
     static simsignal_t numTicksChangedSignal;
-    /// Signal emitted before a change in tick computation occurs.
+    /// Emitted immediately before a change that affects tick timing/mapping.
     static simsignal_t preOscillatorStateChangedSignal;
-    /// Signal emitted after a change in tick computation occurs.
+    /// Emitted immediately after a change that affects tick timing/mapping.
     static simsignal_t postOscillatorStateChangedSignal;
 
   public:
     virtual ~IOscillator() {}
 
     /**
-     * @brief Returns the oscillator's nominal tick interval.
+     * @brief Returns the nominal tick interval (a fixed reference quantity).
      *
-     * This is the fixed, reference duration between ticks. Even if the actual tick intervals
-     * vary, this value remains constant over time.
-     *
-     * @return Nominal tick interval.
+     * This value is a configuration/parameter reference and does not by itself
+     * guarantee equal spacing of actual ticks.
      */
     virtual simtime_t getNominalTickLength() const = 0;
 
     /**
      * @brief Returns the total number of ticks at the computation origin.
      *
-     * @return Number of ticks.
+     * This is the count accumulated strictly before the origin (useful if the
+     * oscillator maintains an absolute tick index). It does not affect the
+     * mapping N/I defined from the origin onward.
      */
     virtual int64_t getNumTicksAtOrigin() const = 0;
 
     /**
-     * @brief Returns the computation origin.
+     * @brief Returns the computation origin `o` (o <= now).
      *
-     * The computation origin is the simulation time (less than or equal to the current simulation time)
-     * from which tick counts are measured. Although a tick can be scheduled at the computation origin,
-     * it is not counted by the mapping functions.
-     *
-     * @return Simulation time corresponding to the computation origin.
+     * Tick counting for the mapping functions is measured from this time.
+     * A tick may occur exactly at the origin, but it is not counted by N.
      */
     virtual simtime_t getComputationOrigin() const = 0;
 
     /**
-     * @brief Computes the number of ticks within a specified time interval.
+     * @brief Computes the number of ticks within (0, Δt] from the origin.
      *
-     * This method returns the number of ticks that occur in the time interval (0, timeInterval],
-     * measured relative to the computation origin. That is, the tick at the computation origin
-     * is not counted, while a tick occurring exactly at time = computationOrigin + timeInterval is included.
+     * Implements N(Δt) with Δt = timeInterval >= 0:
+     * - N(0) = 0.
+     * - A tick exactly at Δt is included; a tick at the origin is excluded.
      *
-     * For example, if the first tick occurs T seconds after the computation origin:
-     * - A time interval in the range [0, T) contains 0 ticks.
-     * - A time interval equal to T contains 1 tick.
-     *
-     * @param timeInterval Duration (relative to the computation origin) over which ticks are counted.
-     *                     The value must be non-negative.
-     * @return Number of ticks occurring within the specified interval.
+     * @param timeInterval  Δt >= 0, measured from getComputationOrigin().
+     * @return              N(Δt), the number of ticks in (0, Δt].
      */
     virtual int64_t computeTicksForInterval(simtime_t timeInterval) const = 0;
 
     /**
-     * TODO: mention that computeTicksForInterval and computeIntervalForTicks implement the same step function
+     * @brief Computes the minimal interval length needed to include `n` ticks.
      *
-     * @brief Computes the minimal time interval that contains a specified number of ticks.
+     * Implements I(n) = inf { Δt >= 0 : N(Δt) >= n } with n >= 0:
+     * - I(0) = 0.
+     * - For n > 0, I(n) is the time of the n-th tick after the origin, measured
+     *   from the origin, with a tick exactly at the boundary counted as included.
      *
-     * This method determines the smallest simulation time interval (starting at the computation origin)
-     * that includes the given number of ticks. As before, the tick at the computation origin is not counted,
-     * but a tick occurring exactly at the end of the interval is considered part of the count.
-     *
-     * For example, if the first tick occurs T seconds after the computation origin:
-     * - 0 ticks correspond to a time interval of 0 seconds.
-     * - 1 tick corresponds to an interval of duration T.
-     *
-     * @param numTicks The desired number of ticks (must be non-negative).
-     * @return The minimal time interval required to cover the given number of ticks.
+     * @param numTicks  n >= 0.
+     * @return          I(n), the minimal Δt such that N(Δt) >= n.
      */
     virtual simtime_t computeIntervalForTicks(int64_t numTicks) const = 0;
 };
@@ -120,4 +125,3 @@ class INET_API IOscillator
 } // namespace inet
 
 #endif
-
