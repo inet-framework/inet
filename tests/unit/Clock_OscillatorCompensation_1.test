@@ -24,7 +24,7 @@ network TestNetwork
 ned-path = .;../../../../src;../../lib
 network = TestNetwork
 
-*.clock.oscillatorCompensation = 100000ppm
+*.clock.initialOscillatorCompensation = 100000ppm
 *.clock.oscillator.nominalTickLength = 1us
 
 %activity:
