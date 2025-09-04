@@ -33,6 +33,7 @@ module OscillatorBasedClock extends ClockBase like IClock
         string oscillatorModule = default(".oscillator");
         bool useFutureEventSet = default(true); // Specifies if clock events are scheduled in the FES or the clock maintains the list of future events internally, requires tick signals from the oscillator
         double initialClockTime @unit(s) = default(0s); // Clock time at the simulation time when the module is initialized
+        double clockGranularity @unit(s) = default(0s); // Specifies the smallest unit of time that can be represented by the clock, 0 means the nominal tick length of the oscillator; can be set to a smaller value to be able to more accurately represent oscillator compensation
         string roundingMode @enum("down","up","closer","none") = default("up"); // When scheduling to a clock time or with a clock delay this clock uses rounding with respect to the nominal tick length
         @class(OscillatorBasedClock);
     submodules:

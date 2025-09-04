@@ -58,6 +58,7 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
   protected:
     // parameters
     bool useFutureEventSet = false;
+    clocktime_t clockGranularity;
     IOscillator *oscillator = nullptr;
     simtime_raw_t (*roundingFunction)(simtime_raw_t, simtime_raw_t) = nullptr;
 
@@ -161,7 +162,7 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
      */
     simtime_t doComputeSimTimeFromClockTime(clocktime_t t, bool lowerBound) const;
 
-    clocktime_t getClockGranularity() const { return SIMTIME_AS_CLOCKTIME(oscillator->getNominalTickLength()); }
+    clocktime_t getClockGranularity() const { return clockGranularity; }
 
   public:
     virtual ~OscillatorBasedClock();
