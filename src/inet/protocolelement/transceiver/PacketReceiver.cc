@@ -22,6 +22,12 @@ void PacketReceiver::handleMessageWhenUp(cMessage *message)
 void PacketReceiver::receiveSignal(Signal *signal)
 {
     EV_INFO << "Receiving signal from channel" << EV_FIELD(signal) << EV_ENDL;
+
+    if (signal->getBitLength() == 0) { // KLUDGE: skip zero length signals
+        delete signal;
+        return;
+    }
+
     emit(receptionEndedSignal, signal);
     auto packet = decodePacket(signal);
     handlePacketProcessed(packet);

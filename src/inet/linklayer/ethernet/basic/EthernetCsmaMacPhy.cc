@@ -193,6 +193,11 @@ void EthernetCsmaMacPhy::handleMessageWhenUp(cMessage *msg)
 
 void EthernetCsmaMacPhy::handleSignalFromNetwork(EthernetSignalBase *signal)
 {
+    if (signal->getDuration() == SIMTIME_ZERO) { // KLUDGE: skip zero length signals
+        delete signal;
+        return;
+    }
+
     EV_DETAIL << "Received " << signal << " from network.\n";
 
     if (!connected) {
