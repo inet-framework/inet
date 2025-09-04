@@ -20,6 +20,7 @@
 #include "inet/networklayer/common/NextHopAddressTag_m.h"
 #include "inet/networklayer/ipv4/IcmpHeader.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/ipv4/Ipv4Route.h"
 #include "inet/transportlayer/common/L4PortTag_m.h"
 #include "inet/transportlayer/contract/udp/UdpCommand_m.h"
@@ -1751,16 +1752,39 @@ bool Aodv::isExternalAddress(const L3Address& destAddr) const
     if (gatewayAddress.isUnspecified())
         return false;
 
-    // Check if we have any AODV route to this destination
+    // Check if destination is in any of our local subnets using netmask information
+    for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
+        NetworkInterface *ie = interfaceTable->getInterface(i);
+        if (ie->isLoopback()) continue;
+
+        auto ipv4Data = ie->getProtocolData<Ipv4InterfaceData>();
+        if (ipv4Data) {
+            Ipv4Address addr = ipv4Data->getIPAddress();
+            Ipv4Address mask = ipv4Data->getNetmask();
+            if (!addr.isUnspecified() && !mask.isUnspecified()) {
+                // Check if destination is in the same subnet as this interface
+                if (addr.maskedAddrAreEqual(destAddr.toIpv4(), mask)) {
+                    return false; // Same subnet, not external
+                }
+            }
+        }
+    }
+
+    //Andras: AI left this in there, but I have no idea how can happen. AODV only does
+    // route discovery for addresses where is this function says non-external ;)
+/*
+    // Also check if we have an existing AODV route to this destination
+    // This handles cases where the destination might be reachable through AODV
+    // even if it's not in our direct subnets
     IRoute *route = routingTable->findBestMatchingRoute(destAddr);
     if (route && route->getSource() == this) {
         // We have an AODV route, so it's internal to the ad-hoc network
         return false;
     }
-
+*/
     // If we reach here, the address is not local, not broadcast/multicast,
-    // we have a gateway configured, and we don't have an AODV route to it.
-    // This suggests it's an external address.
+    // not in any of our local subnets, we have a gateway configured,
+    // and we don't have an AODV route to it. This is an external address.
     return true;
 }
 
@@ -1776,4 +1800,3 @@ Aodv::~Aodv()
 
 } // namespace aodv
 } // namespace inet
-
