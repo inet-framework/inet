@@ -30,8 +30,7 @@ typedef ClockTime clocktime_t;
 #define CLOCKTIME_MAX     ClockTime::getMaxTime()
 
 /**
- * Constant for zero simulation time. Using CLOCKTIME_ZERO can be more efficient
- * than using the 0 constant.
+ * Constant for zero simulation time. Using CLOCKTIME_ZERO can be more efficient than using the 0 constant.
  */
 #define CLOCKTIME_ZERO    ClockTime::ZERO
 
