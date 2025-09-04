@@ -5,28 +5,23 @@
 //
 
 
-#ifndef __INET_CLOCKDEFS_H
-#define __INET_CLOCKDEFS_H
+#ifndef __INET_DEBUGDEFS_H
+#define __INET_DEBUGDEFS_H
 
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include <string>
 
 #include "inet/common/INETDefs.h"
 
 namespace inet {
 
-static bool _dbg_global_enabled = true;
-
-#pragma once
-#include <iostream>
-#include <iomanip>
-#include <string>
-#include <sstream>
-
 #ifndef DEBUG_PRINT_LOG
-#define DEBUG_PRINT_LOG 1
+#define DEBUG_PRINT_LOG 0
 #endif
+
+static bool _dbg_global_enabled = true;
 
 struct NullStream {
     template<typename T> NullStream& operator<<(const T&) { return *this; }
