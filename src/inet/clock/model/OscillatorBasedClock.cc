@@ -72,6 +72,7 @@ void OscillatorBasedClock::initialize(int stage)
     ClockBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         useFutureEventSet = par("useFutureEventSet");
+        clockGranularity = par("clockGranularity");
         oscillator = getModuleFromPar<IOscillator>(par("oscillatorModule"), this);
         auto oscillatorModule = check_and_cast<cModule *>(oscillator);
         if (!useFutureEventSet) {
@@ -98,6 +99,14 @@ void OscillatorBasedClock::initialize(int stage)
         WATCH_PTRVECTOR(events);
     }
     else if (stage == INITSTAGE_CLOCK) {
+        clocktime_t l = SIMTIME_AS_CLOCKTIME(oscillator->getNominalTickLength());
+        if (clockGranularity == 0)
+            clockGranularity = l;
+        else if (clockGranularity >= l)
+            throw cRuntimeError("Clock granularity must be smaller than the oscillator nominal tick length");
+        else
+            // TODO: implement support for clock granularity smaller than oscillator nominal tick length, useful to avoid clock time jumps due to oscillator compensation
+            throw cRuntimeError("Not yet implemented");
         setOrigin(par("initialClockTime"));
         if (originClockTime.raw() % oscillator->getNominalTickLength().raw() != 0)
             throw cRuntimeError("Initial clock time must be a multiple of the oscillator nominal tick length");
