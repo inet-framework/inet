@@ -8,9 +8,10 @@
 #ifndef __INET_CLOCKBASE_H
 #define __INET_CLOCKBASE_H
 
-#include "inet/clock/common/ClockTime.h"
 #include "inet/clock/common/ClockEvent.h"
+#include "inet/clock/common/ClockTime.h"
 #include "inet/clock/contract/IClock.h"
+#include "inet/common/DebugDefs.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/SimpleModule.h"
 
