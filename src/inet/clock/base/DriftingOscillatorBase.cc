@@ -7,6 +7,7 @@
 
 #include "inet/clock/base/DriftingOscillatorBase.h"
 
+#include "inet/common/DebugDefs.h"
 #include "inet/common/IPrintableObject.h"
 
 namespace inet {
