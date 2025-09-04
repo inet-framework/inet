@@ -98,7 +98,7 @@ void FingerprintCalculator::addEvent(cEvent *event)
         }
 
         if (networkCommunicationFilter) {
-            if (cpacket == nullptr)
+            if (cpacket == nullptr || cpacket->getBitLength() == 0)
                 return;
             auto senderNode = findContainingNode(cpacket->getSenderModule());
             auto arrivalNode = findContainingNode(cpacket->getArrivalModule());
