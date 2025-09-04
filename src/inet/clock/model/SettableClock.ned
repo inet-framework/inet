@@ -19,7 +19,7 @@ import inet.clock.contract.IClock;
 module SettableClock extends OscillatorBasedClock
 {
     parameters:
-        double oscillatorCompensation @unit(ppm) = default(0ppm); // TODO: rename initial...
+        double initialOscillatorCompensation @unit(ppm) = default(0ppm);
         string defaultOverdueClockEventHandlingMode @enum("execute","skip","error") = default("execute");
         @class(SettableClock);
         @signal[oscillatorCompensationChanged](type=double);
