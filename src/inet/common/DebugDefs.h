@@ -24,22 +24,23 @@ static bool _dbg_global_enabled = true;
 #include <string>
 #include <sstream>
 
-#define DEBUG_LOG_DISABLED
+#ifndef DEBUG_PRINT_LOG
+#define DEBUG_PRINT_LOG 1
+#endif
 
-// ---------- null sink ----------
 struct NullStream {
     template<typename T> NullStream& operator<<(const T&) { return *this; }
     NullStream& operator<<(std::ostream& (*)(std::ostream&)) { return *this; }
 };
 inline NullStream nullStream;
 
-// ---------- indentation (non-thread-safe) ----------
+#if DEBUG_PRINT_LOG
+
 inline unsigned _dbg_indent = 0;
 
-// ---------- stream wrapper with once-per-line indentation ----------
 struct _DbgStream {
     bool on;
-    unsigned indent;     // level already incremented for this scope
+    unsigned indent;
     bool needIndent{true};
 
     explicit _DbgStream(bool enabled, unsigned level) : on(enabled), indent(level) {}
@@ -63,26 +64,21 @@ struct _DbgStream {
             prefix_if_needed();
             std::cout << manip;
             if (manip == static_cast<std::ostream& (*)(std::ostream&)>(std::endl))
-                needIndent = true; // new line -> indent next time
+                needIndent = true;
         }
         return *this;
     }
 };
 
-// ---------- helpers ----------
-namespace _dbg_detail {
-    inline void print_args(std::ostream&) {}
-    template <typename T, typename... Ts>
-    inline void print_args(std::ostream& os, const T& t, const Ts&... ts) {
-        os << t;
-        (void)std::initializer_list<int>{ ( (void)(os << ", " << ts), 0 )... };
-    }
-    inline void print_ret_or_void(std::ostream& os) { os << "void"; }          // no retval
-    template <typename T>
-    inline void print_ret_or_void(std::ostream& os, const T& v) { os << v; }   // with retval
+inline void print_args(std::ostream&) {}
+template <typename T, typename... Ts>
+inline void print_args(std::ostream& os, const T& t, const Ts&... ts) {
+    os << t;
+    (void)std::initializer_list<int>{ ( (void)(os << ", " << ts), 0 )... };
 }
-
-#ifndef DEBUG_LOG_DISABLED
+inline void print_ret_or_void(std::ostream& os) { os << "void"; }          // no retval
+template <typename T>
+inline void print_ret_or_void(std::ostream& os, const T& v) { os << v; }   // with retval
 
 // 1-based index of the current call (valid after DEBUG_ENTER)
 #define DEBUG_EXEC_INDEX   (_dbg_this_exec)
@@ -96,7 +92,7 @@ namespace _dbg_detail {
     std::string _dbg_argstr;                                                       \
     {                                                                              \
         std::ostringstream _dbg_os;                                                \
-        __VA_OPT__(_dbg_detail::print_args(_dbg_os, __VA_ARGS__);)                 \
+        __VA_OPT__(print_args(_dbg_os, __VA_ARGS__);)                              \
         _dbg_argstr = _dbg_os.str();                                               \
     }                                                                              \
     const bool _dbg_on = _dbg_enabled && _dbg_global_enabled;                      \
@@ -121,13 +117,13 @@ namespace _dbg_detail {
                       << std::string((_dbg_indent - 1) * 3, ' ')                   \
                       << "[" << _dbg_this_exec << "] " << __func__ << "("          \
                       << _dbg_argstr << ") = ";                                    \
-            _dbg_detail::print_ret_or_void(std::cout __VA_OPT__(, __VA_ARGS__));   \
+            print_ret_or_void(std::cout __VA_OPT__(, __VA_ARGS__));                \
             std::cout << std::endl;                                                \
         }                                                                          \
         --_dbg_indent;                                                             \
     } while (0)
 
-#else  // ---------- compiled out ----------
+#else
 
 #define DEBUG_ENTER(...)         do { } while (0)
 #define DEBUG_ENABLE()           ((void)0)
@@ -135,7 +131,7 @@ namespace _dbg_detail {
 #define DEBUG_IS_ENABLED()       (false)
 #define DEBUG_LEAVE(...)         ((void)0)
 #define DEBUG_EXEC_INDEX         (0ull)
-#define DEBUG_OUT                nullStream   // no local var -> no unused warning
+#define DEBUG_OUT                nullStream
 
 #endif
 
@@ -144,12 +140,13 @@ namespace _dbg_detail {
 #define DEBUG_FIELD_CHOOSER(...)                 GET_3TH_ARG(__VA_ARGS__, DEBUG_FIELD_2, DEBUG_FIELD_1, )
 #define DEBUG_FIELD(...)                         DEBUG_FIELD_CHOOSER(__VA_ARGS__)(__VA_ARGS__)
 
+#ifndef DEBUG_CHECK_IMPLEMENTATION
 #ifndef NDEBUG
-#define CLOCK_CHECK_IMPLEMENTATION
+#define DEBUG_CHECK_IMPLEMENTATION 1
+#endif
 #endif
 
-// TODO: move the operator into the middle of the macro
-#ifdef CLOCK_CHECK_IMPLEMENTATION
+#if DEBUG_CHECK_IMPLEMENTATION
 #define DEBUG_CMP(o1, cmp, o2) { \
     bool _old_dbg_global_enabled = _dbg_global_enabled; _dbg_global_enabled = false; auto _o1 = (o1); auto _o2 = (o2); _dbg_global_enabled = _old_dbg_global_enabled; \
     if (!(_o1 cmp _o2)) { \
