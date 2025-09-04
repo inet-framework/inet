@@ -1,0 +1,24 @@
+<environment>
+    <!-- East–west brick walls across the center of each WiFi network -->
+    <!-- Dimensions: length=100m (X), thickness=0.1m (Y), height=3m (Z); centered at Z=1.5m -->
+
+    <!-- WiFi Network 1 center: (250, 250) -->
+    <object name="wifi1_center_wall" position="center 250 250 1.5" orientation="0 0 0"
+            shape="cuboid 400 0.5 3" material="brick" fill-color="203 65 84" opacity="0.8"/>
+
+    <!-- WiFi Network 2 center: (850, 250) -->
+    <object name="wifi2_center_wall" position="center 850 250 1.5" orientation="0 0 0"
+            shape="cuboid 400 0.5 3" material="brick" fill-color="203 65 84" opacity="0.8"/>
+
+    <!-- WiFi Network 3 center: (1450, 250) -->
+    <object name="wifi3_center_wall" position="center 1450 250 1.5" orientation="0 0 0"
+            shape="cuboid 400 0.5 3" material="brick" fill-color="203 65 84" opacity="0.8"/>
+
+    <!-- WiFi Network 4 center: (550, 850) -->
+    <object name="wifi4_center_wall" position="center 550 850 1.5" orientation="0 0 0"
+            shape="cuboid 400 0.5 3" material="brick" fill-color="203 65 84" opacity="0.8"/>
+
+    <!-- WiFi Network 5 center: (1150, 850) -->
+    <object name="wifi5_center_wall" position="center 1150 850 1.5" orientation="0 0 0"
+            shape="cuboid 400 0.5 3" material="brick" fill-color="203 65 84" opacity="0.8"/>
+</environment>

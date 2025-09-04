@@ -77,7 +77,6 @@ network MultiNetworkSimulation
         // Physical environment for two-ray ground reflection model
         physicalEnvironment: PhysicalEnvironment {
             parameters:
-                config = xml("<environment><ground elevation='0'/></environment>");
                 @display("p=100,700;is=s");
         }
         
