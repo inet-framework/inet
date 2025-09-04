@@ -136,6 +136,37 @@ void OscillatorBasedClock::handleMessage(cMessage *message)
         ClockBase::handleMessage(message);
 }
 
+void OscillatorBasedClock::checkState() const
+{
+    // originSimulationTime constraints
+    DEBUG_CMP(oscillator->getComputationOrigin(), <=, originSimulationTime);
+    DEBUG_CMP(originSimulationTime, <=, simTime());
+    // originSimulationTimeLowerBound constraints
+    DEBUG_CMP(oscillator->getComputationOrigin(), <=, originSimulationTimeLowerBound);
+    DEBUG_CMP(originSimulationTimeLowerBound, <=, originSimulationTime);
+    DEBUG_CMP(originSimulationTimeLowerBound, ==, computeSimTimeFromClockTime(originClockTime, true));
+    // simulation time <-> clock time mapping constraints for origin
+    DEBUG_CMP(computeSimTimeFromClockTime(originClockTime, true), <=, originSimulationTime);
+    DEBUG_CMP(originSimulationTime, <=, computeSimTimeFromClockTime(originClockTime, false));
+    DEBUG_CMP(originClockTime, ==, computeClockTimeFromSimTime(originSimulationTime));
+    // boundary constraints
+    DEBUG_CMP(computeSimTimeFromClockTime(originClockTime, true), <=, computeSimTimeFromClockTime(originClockTime, false));
+    DEBUG_CMP(computeClockTimeFromSimTime(originSimulationTime, true), <=, computeClockTimeFromSimTime(originSimulationTime, false));
+}
+
+void OscillatorBasedClock::checkAllScheduledClockEvents() const
+{
+    DEBUG_ENTER(true);
+    ClockEvent *previousEvent = nullptr;
+    for (auto event : events) {
+        checkScheduledClockEvent(event);
+        if (previousEvent != nullptr)
+            DEBUG_CMP(previousEvent->shouldPrecede(event), ==, true);
+        previousEvent = event;
+    }
+    DEBUG_LEAVE();
+}
+
 static inline S128 floor_div(S128 a, S128 b)
 {
     S128 q = a / b, r = a % b;
@@ -168,24 +199,6 @@ S64 OscillatorBasedClock::A(S64 n) const
     const S128 q = (S128)p - (S128)e_q63 * (S128)m; // Q1.63
     const S128 qd = floor_div(q, S128_ONE_Q63);
     return (S64)qd;
-}
-
-void OscillatorBasedClock::checkState() const
-{
-    // originSimulationTime constraints
-    DEBUG_CMP(oscillator->getComputationOrigin(), <=, originSimulationTime);
-    DEBUG_CMP(originSimulationTime, <=, simTime());
-    // originSimulationTimeLowerBound constraints
-    DEBUG_CMP(oscillator->getComputationOrigin(), <=, originSimulationTimeLowerBound);
-    DEBUG_CMP(originSimulationTimeLowerBound, <=, originSimulationTime);
-    DEBUG_CMP(originSimulationTimeLowerBound, ==, computeSimTimeFromClockTime(originClockTime, true));
-    // simulation time <-> clock time mapping constraints for origin
-    DEBUG_CMP(computeSimTimeFromClockTime(originClockTime, true), <=, originSimulationTime);
-    DEBUG_CMP(originSimulationTime, <=, computeSimTimeFromClockTime(originClockTime, false));
-    DEBUG_CMP(originClockTime, ==, computeClockTimeFromSimTime(originSimulationTime));
-    // boundary constraints
-    DEBUG_CMP(computeSimTimeFromClockTime(originClockTime, true), <=, computeSimTimeFromClockTime(originClockTime, false));
-    DEBUG_CMP(computeClockTimeFromSimTime(originSimulationTime, true), <=, computeClockTimeFromSimTime(originSimulationTime, false));
 }
 
 void OscillatorBasedClock::moveOrigin()
