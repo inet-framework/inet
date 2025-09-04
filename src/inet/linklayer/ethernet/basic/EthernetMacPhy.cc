@@ -120,6 +120,13 @@ void EthernetMacPhy::startFrameTransmission()
     auto newPacketProtocolTag = frame->addTag<PacketProtocolTag>();
     *newPacketProtocolTag = *oldPacketProtocolTag;
     EV_INFO << "Transmission of " << frame << " started.\n";
+    {
+        auto signal = new EthernetSignal(frame->getName());
+        signal->setSrcMacFullDuplex(duplexMode);
+        signal->setBitrate(curEtherDescr.bitrate);
+        signal->setDuration(SIMTIME_ZERO);
+        send(signal, SendOptions().transmissionId(signal->getId()).duration(SIMTIME_ZERO), physOutGate);
+    }
     auto signal = new EthernetSignal(frame->getName());
     signal->setSrcMacFullDuplex(duplexMode);
     signal->setBitrate(curEtherDescr.bitrate);
@@ -179,6 +186,10 @@ void EthernetMacPhy::handleUpperPacket(Packet *packet)
 
 void EthernetMacPhy::processMsgFromNetwork(Signal *signal)
 {
+    if (signal->getDuration() == SIMTIME_ZERO) { // signal start
+        delete signal;
+        return;
+    }
     EV_INFO << signal << " received." << endl;
 
     if (!connected) {
