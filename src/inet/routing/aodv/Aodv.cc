@@ -215,7 +215,7 @@ INetfilter::IHook::Result Aodv::ensureRouteForDatagram(Packet *datagram)
         }
         else {
             bool isInactive = routeData && !routeData->isActive();
-            if (!route && !routingTable->isLocalAddress(destAddr) && !gatewayAddr.isUnspecified()) {
+            if (!route && !routingTable->isLocalAddress(destAddr) && !gatewayAddr.isUnspecified()) { // <--- ez a check TUTI rossz! isLocalAddress(): az egyik interfészem címe-e, NEM hogy a subnetemben benne van-e
                 // external address
                 IRoute *gatewayRoute = routingTable->findBestMatchingRoute(gatewayAddr);
                 if (gatewayRoute && gatewayRoute->getSource() == this) {
