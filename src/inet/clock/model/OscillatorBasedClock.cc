@@ -167,9 +167,14 @@ void OscillatorBasedClock::checkAllScheduledClockEvents() const
 {
     DEBUG_ENTER(true);
     ClockEvent *previousEvent = nullptr;
-    for (auto event : events) {
+    std::vector eventsCopy(events);
+    // copy events to avoid having side effects
+    std::stable_sort(eventsCopy.begin(), eventsCopy.end(), compareClockEvents);
+    std::reverse(eventsCopy.begin(), eventsCopy.end());
+    for (auto event : eventsCopy) {
         checkScheduledClockEvent(event);
-        if (previousEvent != nullptr)
+        // check proper ordering in future event set
+        if (useFutureEventSet && previousEvent != nullptr)
             DEBUG_CMP(previousEvent->shouldPrecede(event), ==, true);
         previousEvent = event;
     }
