@@ -29,6 +29,10 @@ void TwoRayGroundReflection::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         physicalEnvironment = getModuleFromPar<IPhysicalEnvironment>(par("physicalEnvironmentModule"), this);
+        if (physicalEnvironment == nullptr)
+            throw cRuntimeError("Physical environment module '%s' not found.", par("physicalEnvironmentModule").stringValue());
+        if (physicalEnvironment->getGround() == nullptr)
+            throw cRuntimeError("Ground is missing in the physical environment. Add <ground .../> to the XML file describing the physical environment.");
     }
 }
 
