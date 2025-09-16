@@ -22,6 +22,9 @@ Register_Protocol_Dissector(&Protocol::ieee80211Mac, Ieee80211MacProtocolDissect
 
 const Protocol *Ieee80211MacProtocolDissector::computeLlcProtocol(Packet *packet) const
 {
+    // TODO What???? Miért nem az adatból dolgozik? Nem tudjuk, hogy llc vagy epd van? Mi van, ha serialized data van?
+    // honnan tudja a vevő, hogy llc vagy epd van a mac header után? Az 5.9GHz esetén kötelező az EPD, nem azzal kellene kezdeni?
+
     if (const auto& llcTag = packet->findTag<ieee80211::LlcProtocolTag>())
         return llcTag->getProtocol();
     else if (const auto& channelTag = packet->findTag<physicallayer::Ieee80211ChannelInd>()) {
