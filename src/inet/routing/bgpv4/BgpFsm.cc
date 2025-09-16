@@ -76,6 +76,7 @@ void Connect::HoldTimer_Expires()
     ++session._connectRetryCounter;
     // - performs peer oscillation damping if the DampPeerOscillations attribute is set to True, and
     // - changes its state to Idle.
+    session._info.sessionEstablished = false;
     setState<Idle>();
 }
 
@@ -153,6 +154,7 @@ void Active::HoldTimer_Expires()
     // - increments the ConnectRetryCounter by one,
     ++session._connectRetryCounter;
     // - changes its state to Idle.
+    session._info.sessionEstablished = false;
     setState<Idle>();
 }
 
@@ -180,6 +182,8 @@ void Active::TcpConnectionConfirmed()
 
 void Active::TcpConnectionFails()
 {
+    BgpSession& session = TopState::box().getModule();
+    session._info.sessionEstablished = false;
     setState<Idle>();
 }
 
@@ -223,6 +227,7 @@ void OpenSent::ConnectRetryTimer_Expires()
     ++session._connectRetryCounter;
     // - (optionally) performs peer oscillation damping if the DampPeerOscillations attribute is set to TRUE, and
     // - changes its state to Idle.
+    session._info.sessionEstablished = false;
     setState<Idle>();
 }
 
@@ -240,6 +245,7 @@ void OpenSent::HoldTimer_Expires()
     ++session._connectRetryCounter;
     // - (optionally) performs peer oscillation damping if the DampPeerOscillations attribute is set to TRUE, and
     // - changes its state to Idle.
+    session._info.sessionEstablished = false;
     setState<Idle>();
 }
 
@@ -314,6 +320,7 @@ void OpenConfirm::ConnectRetryTimer_Expires()
     // - increments the ConnectRetryCounter by 1,
     ++session._connectRetryCounter;
     // - changes its state to Idle.
+    session._info.sessionEstablished = false;
     setState<Idle>();
 }
 
@@ -330,6 +337,7 @@ void OpenConfirm::HoldTimer_Expires()
     // - increments the ConnectRetryCounter by 1,
     ++session._connectRetryCounter;
     // - changes its state to Idle.
+    session._info.sessionEstablished = false;
     setState<Idle>();
 }
 
@@ -348,6 +356,8 @@ void OpenConfirm::KeepaliveTimer_Expires()
 void OpenConfirm::TcpConnectionFails()
 {
     EV_TRACE << "OpenConfirm::TcpConnectionFails" << std::endl;
+    BgpSession& session = TopState::box().getModule();
+    session._info.sessionEstablished = false;
     setState<Idle>();
 }
 
@@ -432,6 +442,7 @@ void Established::ConnectRetryTimer_Expires()
     // - increments the ConnectRetryCounter by 1,
     ++session._connectRetryCounter;
     // - changes its state to Idle.
+    session._info.sessionEstablished = false;
     setState<Idle>();
 }
 
@@ -448,6 +459,7 @@ void Established::HoldTimer_Expires()
     // - increments the ConnectRetryCounter by 1,
     ++session._connectRetryCounter;
     // - changes its state to Idle.
+    session._info.sessionEstablished = false;
     setState<Idle>();
 }
 
@@ -504,4 +516,3 @@ void Established::UpdateMsgEvent()
 } // namespace bgp
 
 } // namespace inet
-
