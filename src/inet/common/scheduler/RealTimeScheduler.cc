@@ -154,40 +154,51 @@ cEvent *RealTimeScheduler::guessNextEvent()
 
 cEvent *RealTimeScheduler::takeNextEvent()
 {
-    int64_t targetTime;
+    // Loop to handle stale events
+    while (true) {
+        int64_t targetTime;
 
-    // calculate target time
-    cEvent *event = sim->getFES()->peekFirst();
-    if (!event)
-        // as far into the future as reasonable (hoping we will never overflow - it is unlikely)
-        targetTime = INT64_MAX;
-    else {
-        // use time of next event
-        simtime_t eventSimtime = event->getArrivalTime();
-        targetTime = baseTime + eventSimtime.inUnit(SIMTIME_NS);
-    }
-
-    // if needed, wait until that time arrives
-    int64_t curTime = opp_get_monotonic_clock_nsecs();
-
-    if (targetTime > curTime) {
-        switch (receiveUntil(targetTime)) {
-            case -1: return nullptr; // interrupted by user
-            case 0:  break; // nothing to do
-            case 1:  event = sim->getFES()->peekFirst(); break; // received something
-            default: ASSERT(false); break;
+        // calculate target time
+        cEvent *event = sim->getFES()->peekFirst();
+        if (!event)
+            // as far into the future as reasonable (hoping we will never overflow - it is unlikely)
+            targetTime = INT64_MAX;
+        else {
+            // use time of next event
+            simtime_t eventSimtime = event->getArrivalTime();
+            targetTime = baseTime + eventSimtime.inUnit(SIMTIME_NS);
         }
+
+        // if needed, wait until that time arrives
+        int64_t curTime = opp_get_monotonic_clock_nsecs();
+
+        if (targetTime > curTime) {
+            switch (receiveUntil(targetTime)) {
+                case -1: return nullptr; // interrupted by user
+                case 0:  break; // nothing to do
+                case 1:  event = sim->getFES()->peekFirst(); break; // received something
+                default: ASSERT(false); break;
+            }
+        }
+        else {
+            // we're behind -- customized versions of this class may
+            // alert if we're too much behind, whatever that means
+            // NOTE: this is commented out because it generates too much noise by default
+//            int64_t diffTime = curTime - targetTime;
+//            EV_TRACE << "We are behind: " << diffTime * 1e-9 << " seconds\n";
+        }
+
+        cEvent *tmp = sim->getFES()->removeFirst();
+        ASSERT(tmp == event);
+
+        // Check if event is stale
+        if (tmp->isStale()) {
+            delete tmp;
+            continue; // try next event
+        }
+
+        return event;
     }
-    else {
-        // we're behind -- customized versions of this class may
-        // alert if we're too much behind, whatever that means
-        // NOTE: this is commented out because it generates too much noise by default
-//        int64_t diffTime = curTime - targetTime;
-//        EV_TRACE << "We are behind: " << diffTime * 1e-9 << " seconds\n";
-    }
-    cEvent *tmp = sim->getFES()->removeFirst();
-    ASSERT(tmp == event);
-    return event;
 }
 
 void RealTimeScheduler::putBackEvent(cEvent *event)
@@ -196,4 +207,3 @@ void RealTimeScheduler::putBackEvent(cEvent *event)
 }
 
 } // namespace inet
-
