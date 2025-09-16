@@ -596,6 +596,47 @@ void Ipv4NetworkConfigurator::assignAddresses(std::vector<LinkInfo *> links)
                         continue;
                     EV_TRACE << "Matching interface count: " << interfaceCount << endl;
 
+                    // NEW: Check if all specified addresses would be valid host addresses with this netmask
+                    // and belong to the same network (only for fully specified addresses, not wildcards)
+                    bool allAddressesValid = true;
+                    uint32_t expectedNetworkAddr = 0;
+                    bool firstAddressProcessed = false;
+
+                    for (auto& compatibleInterface : compatibleInterfaces) {
+                        // Only check fully specified addresses (all 32 bits specified)
+                        if (compatibleInterface->addressSpecifiedBits == 0xFFFFFFFF) {
+                            uint32_t specifiedAddress = compatibleInterface->address;
+                            uint32_t testNetworkAddr = specifiedAddress & networkNetmask;
+                            uint32_t testBroadcastAddr = testNetworkAddr | ~networkNetmask;
+
+                            // Check if the specified address would be network or broadcast address
+                            if (specifiedAddress == testNetworkAddr || specifiedAddress == testBroadcastAddr) {
+                                allAddressesValid = false;
+                                EV_TRACE << "Address " << Ipv4Address(specifiedAddress)
+                                        << " would be network/broadcast with /" << netmaskLength
+                                        << " netmask, trying shorter netmask" << endl;
+                                break;
+                            }
+
+                            // Check if all specified addresses belong to the same network
+                            if (!firstAddressProcessed) {
+                                expectedNetworkAddr = testNetworkAddr;
+                                firstAddressProcessed = true;
+                            } else if (testNetworkAddr != expectedNetworkAddr) {
+                                allAddressesValid = false;
+                                EV_TRACE << "Address " << Ipv4Address(specifiedAddress)
+                                        << " belongs to different network (" << Ipv4Address(testNetworkAddr)
+                                        << ") than expected (" << Ipv4Address(expectedNetworkAddr)
+                                        << ") with /" << netmaskLength << " netmask, trying shorter netmask" << endl;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!allAddressesValid) {
+                        continue; // Try the next (shorter) netmask
+                    }
+
                     // check if there's enough room for the interface addresses
                     if ((1 << (bitSize - netmaskLength)) >= interfaceCount + compatibleInterfaceCount)
                         goto found;
@@ -2008,4 +2049,3 @@ bool Ipv4NetworkConfigurator::getInterfaceIpv4Address(L3Address& ret, NetworkInt
 }
 
 } // namespace inet
-
