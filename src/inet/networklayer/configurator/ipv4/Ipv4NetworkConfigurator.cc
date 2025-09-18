@@ -505,6 +505,25 @@ void Ipv4NetworkConfigurator::assignAddresses(Topology& topology)
         assignAddresses(topology.linkInfos);
 }
 
+uint32_t Ipv4NetworkConfigurator::generateUniqueHostAddress(InterfaceInfo *compatibleInterface, uint32_t networkAddress, uint32_t networkNetmask, std::vector<uint32_t> &assignedInterfaceAddresses)
+{
+    uint32_t interfaceAddress = compatibleInterface->address & ~networkNetmask;
+    uint32_t interfaceAddressSpecifiedBits = compatibleInterface->addressSpecifiedBits;
+    uint32_t interfaceAddressUnspecifiedBits = ~interfaceAddressSpecifiedBits & ~networkNetmask; // 1 means the interface address is unspecified
+    uint32_t interfaceAddressUnspecifiedPartMaximum = 0;
+    for (auto& assignedInterfaceAddress : assignedInterfaceAddresses) {
+        uint32_t otherInterfaceAddress = assignedInterfaceAddress;
+        if ((otherInterfaceAddress & ~interfaceAddressUnspecifiedBits) == ((networkAddress | interfaceAddress) & ~interfaceAddressUnspecifiedBits)) {
+            uint32_t otherInterfaceAddressUnspecifiedPart = getPackedBits(otherInterfaceAddress, interfaceAddressUnspecifiedBits);
+            if (otherInterfaceAddressUnspecifiedPart > interfaceAddressUnspecifiedPartMaximum)
+                interfaceAddressUnspecifiedPartMaximum = otherInterfaceAddressUnspecifiedPart;
+        }
+    }
+    interfaceAddressUnspecifiedPartMaximum++;
+    interfaceAddress = setPackedBits(interfaceAddress, interfaceAddressUnspecifiedBits, interfaceAddressUnspecifiedPartMaximum);
+    return interfaceAddress;
+}
+
 void Ipv4NetworkConfigurator::assignAddresses(std::vector<LinkInfo *> links)
 {
     EV_INFO << "Assigning network interface addresses to " << links.size() << " links" << endl;
@@ -606,20 +625,7 @@ void Ipv4NetworkConfigurator::assignAddresses(std::vector<LinkInfo *> links)
                         // determine the complete IP address for all compatible interfaces
                         for (auto& compatibleInterface : compatibleInterfaces) {
                             NetworkInterface *networkInterface = compatibleInterface->networkInterface;
-                            uint32_t interfaceAddress = compatibleInterface->address & ~networkNetmask;
-                            uint32_t interfaceAddressSpecifiedBits = compatibleInterface->addressSpecifiedBits;
-                            uint32_t interfaceAddressUnspecifiedBits = ~interfaceAddressSpecifiedBits & ~networkNetmask; // 1 means the interface address is unspecified
-                            uint32_t interfaceAddressUnspecifiedPartMaximum = 0;
-                            for (auto& assignedInterfaceAddress : assignedInterfaceAddresses) {
-                                uint32_t otherInterfaceAddress = assignedInterfaceAddress;
-                                if ((otherInterfaceAddress & ~interfaceAddressUnspecifiedBits) == ((networkAddress | interfaceAddress) & ~interfaceAddressUnspecifiedBits)) {
-                                    uint32_t otherInterfaceAddressUnspecifiedPart = getPackedBits(otherInterfaceAddress, interfaceAddressUnspecifiedBits);
-                                    if (otherInterfaceAddressUnspecifiedPart > interfaceAddressUnspecifiedPartMaximum)
-                                        interfaceAddressUnspecifiedPartMaximum = otherInterfaceAddressUnspecifiedPart;
-                                }
-                            }
-                            interfaceAddressUnspecifiedPartMaximum++;
-                            interfaceAddress = setPackedBits(interfaceAddress, interfaceAddressUnspecifiedBits, interfaceAddressUnspecifiedPartMaximum);
+                            uint32_t interfaceAddress = generateUniqueHostAddress(compatibleInterface, networkAddress, networkNetmask, assignedNetworkAddresses);
 
                             if (interfaceAddress == 0) {
                                 EV_DEBUG << "Failed to configure, all interface address bits are 0 for " << networkInterface->getInterfaceFullPath() << EV_ENDL;
