@@ -187,6 +187,11 @@ static const ProtocolGroup::Protocols inetPhyProtocols {
     { 1015, &Protocol::ieee802154 },
 };
 
+static const ProtocolGroup::Protocols ieee80211LlcProtocols {
+    { 0, &Protocol::ieee8022llc },
+    { 1, &Protocol::ieee802epd }
+};
+
 ProtocolGroup *ProtocolGroup::getEthertypeProtocolGroup()
 {
     static int handle = cSimulationOrSharedDataManager::registerSharedVariableName("inet::ProtocolGroup::ethertype");
@@ -233,6 +238,12 @@ ProtocolGroup *ProtocolGroup::getUdpProtocolGroup()
 {
     static int handle = cSimulationOrSharedDataManager::registerSharedVariableName("inet::ProtocolGroup::udp");
     return &getSimulationOrSharedDataManager()->getSharedVariable<ProtocolGroup>(handle, "udp", udpProtocols);
+}
+
+ProtocolGroup *ProtocolGroup::getIeee80211LlcProtocolGroup()
+{
+    static int handle = cSimulationOrSharedDataManager::registerSharedVariableName("inet::ProtocolGroup::ieee80211Llc");
+    return &getSimulationOrSharedDataManager()->getSharedVariable<ProtocolGroup>(handle, "ieee80211Llc", ieee80211LlcProtocols);
 }
 
 } // namespace inet

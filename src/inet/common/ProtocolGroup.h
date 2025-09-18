@@ -47,6 +47,7 @@ class INET_API ProtocolGroup
     static ProtocolGroup *getSnapOuiProtocolGroup();
     static ProtocolGroup *getTcpProtocolGroup();
     static ProtocolGroup *getUdpProtocolGroup();
+    static ProtocolGroup *getIeee80211LlcProtocolGroup();
 };
 
 inline std::ostream& operator<<(std::ostream& o, const ProtocolGroup& t) { o << t.str(); return o; }
@@ -54,4 +55,3 @@ inline std::ostream& operator<<(std::ostream& o, const ProtocolGroup& t) { o << 
 } // namespace inet
 
 #endif
-
