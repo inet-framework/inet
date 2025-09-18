@@ -628,6 +628,11 @@ void Ipv4NetworkConfigurator::assignAddresses(std::vector<LinkInfo *> links)
                 interfaceAddressUnspecifiedPartMaximum++;
                 interfaceAddress = setPackedBits(interfaceAddress, interfaceAddressUnspecifiedBits, interfaceAddressUnspecifiedPartMaximum);
 
+                if (interfaceAddress == 0)
+                    throw cRuntimeError("Failed to configure, all interface address bits are 0 for %s. Please refine your parameters and try again!", networkInterface->getInterfaceFullPath().c_str());
+                if ((interfaceAddress ^ ~networkNetmask) == 0)
+                    throw cRuntimeError("Failed to configure, all interface address bits are 1 for %s. Please refine your parameters and try again!", networkInterface->getInterfaceFullPath().c_str());
+
                 // determine the complete address and netmask for interface
                 uint32_t completeAddress = networkAddress | interfaceAddress;
                 uint32_t completeNetmask = networkNetmask;
