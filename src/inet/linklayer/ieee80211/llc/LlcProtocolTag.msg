@@ -21,10 +21,10 @@ enum LlcProtocolId
 //
 class LlcProtocolTag extends TagBase
 {
-    int protocolId @enum(LlcProtocolId);
+    int protocolNumber @enum(LlcProtocolId);
 }
 
 cplusplus(LlcProtocolTag) {{
-    virtual const Protocol *getProtocol() const { return ProtocolGroup::getIeee80211LlcProtocolGroup()->findProtocol(getProtocolId()); }
-    virtual void setProtocol(const Protocol *protocol) { setProtocolId(ProtocolGroup::getIeee80211LlcProtocolGroup()->getProtocolNumber(protocol)); }
+    virtual const Protocol *getProtocol() const { return ProtocolGroup::getIeee80211LlcProtocolGroup()->findProtocol(getProtocolNumber()); }
+    virtual void setProtocol(const Protocol *protocol) { setProtocolNumber(ProtocolGroup::getIeee80211LlcProtocolGroup()->getProtocolNumber(protocol)); }
 }}
