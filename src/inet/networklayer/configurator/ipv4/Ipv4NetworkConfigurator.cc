@@ -597,66 +597,67 @@ void Ipv4NetworkConfigurator::assignAddresses(std::vector<LinkInfo *> links)
                     EV_TRACE << "Matching interface count: " << interfaceCount << endl;
 
                     // check if there's enough room for the interface addresses
-                    if ((1 << (bitSize - netmaskLength)) >= interfaceCount + compatibleInterfaceCount)
-                        goto found;
-                }
-            }
-          found: if (netmaskLength < minimumNetmaskLength || netmaskLength > maximumNetmaskLength)
-                throw cRuntimeError("Failed to find address prefix (using %s with specified bits %s) and netmask (length from %d bits to %d bits) for interface %s and %u other interface(s). Please refine your parameters and try again!",
-                        Ipv4Address(mergedAddress).str().c_str(), Ipv4Address(mergedAddressSpecifiedBits).str().c_str(), minimumNetmaskLength, maximumNetmaskLength,
-                        compatibleInterfaces[0]->networkInterface->getInterfaceFullPath().c_str(), (unsigned int)compatibleInterfaces.size() - 1);
-            EV_TRACE << "Selected netmask length: " << netmaskLength << endl;
-            EV_TRACE << "Selected network address: " << Ipv4Address(networkAddress) << endl;
-            EV_TRACE << "Selected network netmask: " << Ipv4Address(networkNetmask) << endl;
+                    if ((1 << (bitSize - netmaskLength)) >= interfaceCount + compatibleInterfaceCount) {
+                        EV_TRACE << "Selected netmask length: " << netmaskLength << endl;
+                        EV_TRACE << "Selected network address: " << Ipv4Address(networkAddress) << endl;
+                        EV_TRACE << "Selected network netmask: " << Ipv4Address(networkNetmask) << endl;
 
-            // STEP 4.
-            // determine the complete IP address for all compatible interfaces
-            for (auto& compatibleInterface : compatibleInterfaces) {
-                NetworkInterface *networkInterface = compatibleInterface->networkInterface;
-                uint32_t interfaceAddress = compatibleInterface->address & ~networkNetmask;
-                uint32_t interfaceAddressSpecifiedBits = compatibleInterface->addressSpecifiedBits;
-                uint32_t interfaceAddressUnspecifiedBits = ~interfaceAddressSpecifiedBits & ~networkNetmask; // 1 means the interface address is unspecified
-                uint32_t interfaceAddressUnspecifiedPartMaximum = 0;
-                for (auto& assignedInterfaceAddress : assignedInterfaceAddresses) {
-                    uint32_t otherInterfaceAddress = assignedInterfaceAddress;
-                    if ((otherInterfaceAddress & ~interfaceAddressUnspecifiedBits) == ((networkAddress | interfaceAddress) & ~interfaceAddressUnspecifiedBits)) {
-                        uint32_t otherInterfaceAddressUnspecifiedPart = getPackedBits(otherInterfaceAddress, interfaceAddressUnspecifiedBits);
-                        if (otherInterfaceAddressUnspecifiedPart > interfaceAddressUnspecifiedPartMaximum)
-                            interfaceAddressUnspecifiedPartMaximum = otherInterfaceAddressUnspecifiedPart;
+                        // STEP 4.
+                        // determine the complete IP address for all compatible interfaces
+                        for (auto& compatibleInterface : compatibleInterfaces) {
+                            NetworkInterface *networkInterface = compatibleInterface->networkInterface;
+                            uint32_t interfaceAddress = compatibleInterface->address & ~networkNetmask;
+                            uint32_t interfaceAddressSpecifiedBits = compatibleInterface->addressSpecifiedBits;
+                            uint32_t interfaceAddressUnspecifiedBits = ~interfaceAddressSpecifiedBits & ~networkNetmask; // 1 means the interface address is unspecified
+                            uint32_t interfaceAddressUnspecifiedPartMaximum = 0;
+                            for (auto& assignedInterfaceAddress : assignedInterfaceAddresses) {
+                                uint32_t otherInterfaceAddress = assignedInterfaceAddress;
+                                if ((otherInterfaceAddress & ~interfaceAddressUnspecifiedBits) == ((networkAddress | interfaceAddress) & ~interfaceAddressUnspecifiedBits)) {
+                                    uint32_t otherInterfaceAddressUnspecifiedPart = getPackedBits(otherInterfaceAddress, interfaceAddressUnspecifiedBits);
+                                    if (otherInterfaceAddressUnspecifiedPart > interfaceAddressUnspecifiedPartMaximum)
+                                        interfaceAddressUnspecifiedPartMaximum = otherInterfaceAddressUnspecifiedPart;
+                                }
+                            }
+                            interfaceAddressUnspecifiedPartMaximum++;
+                            interfaceAddress = setPackedBits(interfaceAddress, interfaceAddressUnspecifiedBits, interfaceAddressUnspecifiedPartMaximum);
+
+                            if (interfaceAddress == 0)
+                                throw cRuntimeError("Failed to configure, all interface address bits are 0 for %s. Please refine your parameters and try again!", networkInterface->getInterfaceFullPath().c_str());
+                            if ((interfaceAddress ^ ~networkNetmask) == 0)
+                                throw cRuntimeError("Failed to configure, all interface address bits are 1 for %s. Please refine your parameters and try again!", networkInterface->getInterfaceFullPath().c_str());
+
+                            // determine the complete address and netmask for interface
+                            uint32_t completeAddress = networkAddress | interfaceAddress;
+                            uint32_t completeNetmask = networkNetmask;
+
+                            // check if we could really find a unique IP address
+                            if (assignUniqueAddresses && containsKey(assignedAddressToNetworkInterfaceMap, completeAddress))
+                                throw cRuntimeError("Failed to configure unique address for %s. Please refine your parameters and try again!", networkInterface->getInterfaceFullPath().c_str());
+                            assignedAddressToNetworkInterfaceMap[completeAddress] = compatibleInterface->networkInterface;
+                            assignedInterfaceAddresses.push_back(completeAddress);
+
+                            // configure interface with the selected address and netmask
+                            EV_DEBUG << "Setting interface address, interface = " << compatibleInterface->getFullPath() << ", address = " << Ipv4Address(completeAddress) << ", netmask = " << Ipv4Address(completeNetmask) << endl;
+                            compatibleInterface->address = completeAddress;
+                            compatibleInterface->addressSpecifiedBits = 0xFFFFFFFF;
+                            compatibleInterface->netmask = completeNetmask;
+                            compatibleInterface->netmaskSpecifiedBits = 0xFFFFFFFF;
+
+                            // remove configured interface
+                            unconfiguredInterfaces.erase(find(unconfiguredInterfaces, compatibleInterface));
+                        }
+
+                        // register the network address and netmask as being used
+                        assignedNetworkAddresses.push_back(networkAddress);
+                        assignedNetworkNetmasks.push_back(networkNetmask);
+                        goto found;
                     }
                 }
-                interfaceAddressUnspecifiedPartMaximum++;
-                interfaceAddress = setPackedBits(interfaceAddress, interfaceAddressUnspecifiedBits, interfaceAddressUnspecifiedPartMaximum);
-
-                if (interfaceAddress == 0)
-                    throw cRuntimeError("Failed to configure, all interface address bits are 0 for %s. Please refine your parameters and try again!", networkInterface->getInterfaceFullPath().c_str());
-                if ((interfaceAddress ^ ~networkNetmask) == 0)
-                    throw cRuntimeError("Failed to configure, all interface address bits are 1 for %s. Please refine your parameters and try again!", networkInterface->getInterfaceFullPath().c_str());
-
-                // determine the complete address and netmask for interface
-                uint32_t completeAddress = networkAddress | interfaceAddress;
-                uint32_t completeNetmask = networkNetmask;
-
-                // check if we could really find a unique IP address
-                if (assignUniqueAddresses && containsKey(assignedAddressToNetworkInterfaceMap, completeAddress))
-                    throw cRuntimeError("Failed to configure unique address for %s. Please refine your parameters and try again!", networkInterface->getInterfaceFullPath().c_str());
-                assignedAddressToNetworkInterfaceMap[completeAddress] = compatibleInterface->networkInterface;
-                assignedInterfaceAddresses.push_back(completeAddress);
-
-                // configure interface with the selected address and netmask
-                EV_DEBUG << "Setting interface address, interface = " << compatibleInterface->getFullPath() << ", address = " << Ipv4Address(completeAddress) << ", netmask = " << Ipv4Address(completeNetmask) << endl;
-                compatibleInterface->address = completeAddress;
-                compatibleInterface->addressSpecifiedBits = 0xFFFFFFFF;
-                compatibleInterface->netmask = completeNetmask;
-                compatibleInterface->netmaskSpecifiedBits = 0xFFFFFFFF;
-
-                // remove configured interface
-                unconfiguredInterfaces.erase(find(unconfiguredInterfaces, compatibleInterface));
             }
-
-            // register the network address and netmask as being used
-            assignedNetworkAddresses.push_back(networkAddress);
-            assignedNetworkNetmasks.push_back(networkNetmask);
+            throw cRuntimeError("Failed to find address prefix (using %s with specified bits %s) and netmask (length from %d bits to %d bits) for interface %s and %u other interface(s). Please refine your parameters and try again!",
+                                Ipv4Address(mergedAddress).str().c_str(), Ipv4Address(mergedAddressSpecifiedBits).str().c_str(), minimumNetmaskLength, maximumNetmaskLength,
+                                compatibleInterfaces[0]->networkInterface->getInterfaceFullPath().c_str(), (unsigned int)compatibleInterfaces.size() - 1);
+            found:;
         }
     }
 }
