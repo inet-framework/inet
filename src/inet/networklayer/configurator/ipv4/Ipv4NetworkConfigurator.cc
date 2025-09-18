@@ -628,7 +628,9 @@ void Ipv4NetworkConfigurator::assignAddresses(std::vector<LinkInfo *> links)
                         for (auto& compatibleInterface : compatibleInterfaces) {
                             NetworkInterface *networkInterface = compatibleInterface->networkInterface;
                             uint32_t interfaceAddress = generateUniqueHostAddress(compatibleInterface, networkAddress, networkNetmask, localAssignedInterfaceAddresses);
-
+                            uint32_t completeAddress = networkAddress | interfaceAddress;
+                            uint32_t completeNetmask = networkNetmask;
+                            EV_DEBUG << "Checking interface address, interface = " << compatibleInterface->getFullPath() << ", address = " << Ipv4Address(completeAddress) << ", netmask = " << Ipv4Address(completeNetmask) << endl;
                             if (interfaceAddress == 0) {
                                 EV_DEBUG << "Failed to configure, all interface address bits are 0 for " << networkInterface->getInterfaceFullPath() << EV_ENDL;
                                 goto next;
@@ -637,11 +639,6 @@ void Ipv4NetworkConfigurator::assignAddresses(std::vector<LinkInfo *> links)
                                 EV_DEBUG << "Failed to configure, all interface address bits are 1 for " << networkInterface->getInterfaceFullPath() << EV_ENDL;
                                 goto next;
                             }
-
-                            // determine the complete address and netmask for interface
-                            uint32_t completeAddress = networkAddress | interfaceAddress;
-
-                            // check if we could really find a unique IP address
                             if (assignUniqueAddresses && containsKey(localAssignedAddressToNetworkInterfaceMap, completeAddress)) {
                                 EV_DEBUG << "Failed to configure unique address for " << networkInterface->getInterfaceFullPath() << EV_ENDL;
                                 goto next;
