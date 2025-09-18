@@ -623,9 +623,11 @@ void Ipv4NetworkConfigurator::assignAddresses(std::vector<LinkInfo *> links)
 
                         // STEP 4.
                         // determine the complete IP address for all compatible interfaces
+                        std::vector<uint32_t> localAssignedInterfaceAddresses = assignedInterfaceAddresses;
+                        std::map<uint32_t, NetworkInterface *> localAssignedAddressToNetworkInterfaceMap = assignedAddressToNetworkInterfaceMap;
                         for (auto& compatibleInterface : compatibleInterfaces) {
                             NetworkInterface *networkInterface = compatibleInterface->networkInterface;
-                            uint32_t interfaceAddress = generateUniqueHostAddress(compatibleInterface, networkAddress, networkNetmask, assignedNetworkAddresses);
+                            uint32_t interfaceAddress = generateUniqueHostAddress(compatibleInterface, networkAddress, networkNetmask, localAssignedInterfaceAddresses);
 
                             if (interfaceAddress == 0) {
                                 EV_DEBUG << "Failed to configure, all interface address bits are 0 for " << networkInterface->getInterfaceFullPath() << EV_ENDL;
@@ -638,13 +640,21 @@ void Ipv4NetworkConfigurator::assignAddresses(std::vector<LinkInfo *> links)
 
                             // determine the complete address and netmask for interface
                             uint32_t completeAddress = networkAddress | interfaceAddress;
-                            uint32_t completeNetmask = networkNetmask;
 
                             // check if we could really find a unique IP address
-                            if (assignUniqueAddresses && containsKey(assignedAddressToNetworkInterfaceMap, completeAddress)) {
+                            if (assignUniqueAddresses && containsKey(localAssignedAddressToNetworkInterfaceMap, completeAddress)) {
                                 EV_DEBUG << "Failed to configure unique address for " << networkInterface->getInterfaceFullPath() << EV_ENDL;
                                 goto next;
                             }
+                            localAssignedAddressToNetworkInterfaceMap[completeAddress] = compatibleInterface->networkInterface;
+                            localAssignedInterfaceAddresses.push_back(completeAddress);
+                        }
+                        for (auto& compatibleInterface : compatibleInterfaces) {
+                            uint32_t interfaceAddress = generateUniqueHostAddress(compatibleInterface, networkAddress, networkNetmask, assignedNetworkAddresses);
+
+                            // determine the complete address and netmask for interface
+                            uint32_t completeAddress = networkAddress | interfaceAddress;
+                            uint32_t completeNetmask = networkNetmask;
                             assignedAddressToNetworkInterfaceMap[completeAddress] = compatibleInterface->networkInterface;
                             assignedInterfaceAddresses.push_back(completeAddress);
 
