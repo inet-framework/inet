@@ -627,7 +627,7 @@ void Ipv4NetworkConfigurator::assignAddresses(std::vector<LinkInfo *> links)
                         std::map<uint32_t, NetworkInterface *> localAssignedAddressToNetworkInterfaceMap = assignedAddressToNetworkInterfaceMap;
                         for (auto& compatibleInterface : compatibleInterfaces) {
                             NetworkInterface *networkInterface = compatibleInterface->networkInterface;
-                            uint32_t interfaceAddress = fuckyou(compatibleInterface, networkAddress, networkNetmask, localAssignedInterfaceAddresses);
+                            uint32_t interfaceAddress = fuckyou(compatibleInterface, networkNetmask, networkAddress, localAssignedInterfaceAddresses);
 
                             if (interfaceAddress == 0) {
                                 EV_DEBUG << "Failed to configure, all interface address bits are 0 for " << networkInterface->getInterfaceFullPath() << EV_ENDL;
@@ -650,7 +650,7 @@ void Ipv4NetworkConfigurator::assignAddresses(std::vector<LinkInfo *> links)
                             localAssignedInterfaceAddresses.push_back(completeAddress);
                         }
                         for (auto& compatibleInterface : compatibleInterfaces) {
-                            uint32_t interfaceAddress = fuckyou(compatibleInterface, networkAddress, networkNetmask, assignedNetworkAddresses);
+                            uint32_t interfaceAddress = fuckyou(compatibleInterface, networkNetmask, networkAddress, assignedNetworkAddresses);
 
                             // determine the complete address and netmask for interface
                             uint32_t completeAddress = networkAddress | interfaceAddress;
