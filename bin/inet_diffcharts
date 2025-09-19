@@ -1,0 +1,493 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+#
+# Usage:
+#   inet_diffcharts /path/to/folder
+#
+# Requirements:
+#   pip install PyQt6
+#
+from __future__ import annotations
+
+import argparse
+import os
+import sys
+from dataclasses import dataclass
+from typing import List, Tuple
+
+from PyQt6 import QtCore, QtGui, QtWidgets
+
+
+@dataclass(frozen=True)
+class DiffEntry:
+    base: str          # absolute path without suffixes (directory + basename without "-new"/"-diff")
+    dirpath: str       # directory containing the images
+    name: str          # relative display name (directory basename + base file)
+    old_path: str
+    new_path: str
+    diff_path: str
+
+
+def find_diff_entries(root: str) -> List[DiffEntry]:
+    """
+    Scan 'root' recursively and find triplets: <foo>.png, <foo>-new.png, <foo>-diff.png
+    (all in the same directory).
+    """
+    entries: List[DiffEntry] = []
+    for dirpath, _dirs, files in os.walk(root):
+        pngs = {f for f in files if f.lower().endswith(".png")}
+        # Strategy: detect by -diff.png
+        for f in pngs:
+            if f.lower().endswith("-diff.png"):
+                stem = f[:-len("-diff.png")]
+                old_name = f"{stem}.png"
+                new_name = f"{stem}-new.png"
+                if old_name in pngs and new_name in pngs:
+                    old_path = os.path.join(dirpath, old_name)
+                    new_path = os.path.join(dirpath, new_name)
+                    diff_path = os.path.join(dirpath, f)
+                    # Display name: relative to root or folder+stem
+                    rel_dir = os.path.relpath(dirpath, root)
+                    display = os.path.join(rel_dir, stem) if rel_dir != "." else stem
+                    entries.append(
+                        DiffEntry(
+                            base=os.path.join(dirpath, stem),
+                            dirpath=dirpath,
+                            name=display,
+                            old_path=old_path,
+                            new_path=new_path,
+                            diff_path=diff_path,
+                        )
+                    )
+    # Sort consistently (by relative display name, then by dir)
+    entries.sort(key=lambda e: (e.name.lower(), e.dirpath.lower()))
+    return entries
+
+
+class ImageCache:
+    """Tiny pixmap cache to avoid reloading on every resize."""
+    def __init__(self) -> None:
+        self._cache: dict[str, QtGui.QPixmap] = {}
+
+    def get(self, path: str) -> QtGui.QPixmap:
+        pm = self._cache.get(path)
+        if pm is None or pm.isNull():
+            pm = QtGui.QPixmap(path)
+            self._cache[path] = pm
+        return pm
+
+    def clear(self) -> None:
+        self._cache.clear()
+
+
+class ThumbLabel(QtWidgets.QLabel):
+    """QLabel that keeps aspect ratio on resize."""
+    def __init__(self, path: str, cache: ImageCache, parent=None) -> None:
+        super().__init__(parent)
+        self.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.setMinimumSize(4, 4)
+        self._path = path
+        self._cache = cache
+        self._last_scaled_for: Tuple[int, int] | None = None
+        self._orig = None  # QPixmap
+        self.updatePixmap()
+
+    def setPath(self, path: str) -> None:
+        self._path = path
+        self._orig = None
+        self._last_scaled_for = None
+        self.updatePixmap()
+
+    def updatePixmap(self) -> None:
+        if not self._orig:
+            self._orig = self._cache.get(self._path)
+        self._applyScale()
+
+    def resizeEvent(self, ev: QtGui.QResizeEvent) -> None:
+        super().resizeEvent(ev)
+        self._applyScale()
+
+    def _applyScale(self) -> None:
+        if not self._orig:
+            return
+        size = self.size()
+        key = (size.width(), size.height())
+        if self._last_scaled_for == key:
+            return
+        scaled = self._orig.scaled(
+            size,
+            QtCore.Qt.AspectRatioMode.KeepAspectRatio,
+            QtCore.Qt.TransformationMode.SmoothTransformation,
+        )
+        self.setPixmap(scaled)
+        self._last_scaled_for = key
+
+
+class DiffTable(QtWidgets.QTableWidget):
+    """Table showing Diff | Old | New thumbnails, supports Ctrl+Wheel scaling."""
+    scaleChanged = QtCore.pyqtSignal(float)  # emits new scale
+
+    def __init__(self, parent=None) -> None:
+        super().__init__(parent)
+        self.setColumnCount(5)
+        self.setHorizontalHeaderLabels(["Index", "Diff", "Old", "New", "Path"])
+        self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectionBehavior.SelectRows)
+        self.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.verticalHeader().setVisible(False)
+        self.setShowGrid(False)
+        self.setIconSize(QtCore.QSize(64, 64))
+        # Smooth scrolling looks nicer for images
+        self.setVerticalScrollMode(QtWidgets.QAbstractItemView.ScrollMode.ScrollPerPixel)
+        self.setHorizontalScrollMode(QtWidgets.QAbstractItemView.ScrollMode.ScrollPerPixel)
+        # Avoid stretching columns unevenly; we'll set fixed widths per row-height
+        self.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.Fixed)
+        
+        # Add minimal spacing between rows using stylesheet
+        self.setStyleSheet("""
+            QTableWidget::item {
+                border-bottom: 2px solid transparent;
+                margin-bottom: 2px;
+            }
+        """)
+
+        # Thumbnail scaling state
+        self._scale = 1.0  # multiplicative factor (10% steps)
+        self._base_side = 200  # will be computed by window based on screen height
+
+    def setBaseThumbSide(self, side_px: int) -> None:
+        self._base_side = max(40, side_px)
+        self._applySizes()
+
+    def currentScale(self) -> float:
+        return self._scale
+
+    def setScale(self, scale: float) -> None:
+        scale = max(0.1, min(5.0, scale))
+        if abs(scale - self._scale) > 1e-6:
+            self._scale = scale
+            self._applySizes()
+            self.scaleChanged.emit(self._scale)
+
+    def wheelEvent(self, e: QtGui.QWheelEvent) -> None:
+        if e.modifiers() & QtCore.Qt.KeyboardModifier.ControlModifier:
+            angle = e.angleDelta().y()
+            if angle != 0:
+                step = 0.10  # 10% per notch
+                new_scale = self._scale * (1.0 + step) if angle > 0 else self._scale * (1.0 - step)
+                self.setScale(new_scale)
+            e.accept()
+            return
+        super().wheelEvent(e)
+
+    def _applySizes(self) -> None:
+        side = int(self._base_side * self._scale)
+        # Row height: image size + minimum padding + vertical spacing between rows
+        row_h = max(40, int(side * 0.6) + 12)  # Images typically use ~60% due to aspect ratio + 12px for padding and spacing
+        for r in range(self.rowCount()):
+            self.setRowHeight(r, row_h)
+
+        # Calculate maximum path width needed based on relative paths
+        max_path_width = 200  # minimum width
+        if hasattr(self, '_entries') and self._entries:
+            # Create a font metrics object to measure text width
+            font = QtGui.QFont()
+            font.setPointSize(12)  # Match the path label font size
+            fm = QtGui.QFontMetrics(font)
+
+            # Find the longest relative path text
+            for entry in self._entries:
+                relative_path = os.path.relpath(entry.old_path, os.getcwd())
+                text_width = fm.horizontalAdvance(relative_path) + 16  # Reduced padding since paths are shorter
+                max_path_width = max(max_path_width, text_width)
+
+        # Column width: add minimum padding between columns
+        for c in range(self.columnCount()):
+            if c == 0:  # Index column
+                self.setColumnWidth(c, max(60, int(side * 0.3) + 8))  # Add padding
+            elif c == 4:  # Path column
+                self.setColumnWidth(c, max_path_width + 8)  # Add padding
+            else:  # Image columns (Diff, Old, New)
+                self.setColumnWidth(c, side + 8)  # Add padding between columns
+
+    def setRowWidgets(self, row: int, widgets: Tuple[QtWidgets.QWidget, QtWidgets.QWidget, QtWidgets.QWidget, QtWidgets.QWidget, QtWidgets.QWidget]) -> None:
+        for col, w in enumerate(widgets):
+            self.setCellWidget(row, col, w)
+
+    def setEntries(self, entries: List[DiffEntry]) -> None:
+        """Set the entries data for path width calculations."""
+        self._entries = entries
+
+
+class ImageView(QtWidgets.QLabel):
+    """Single-image view that scales to fit the window."""
+    # Signal emitted when mouse wheel is used for navigation
+    wheelNavigation = QtCore.pyqtSignal(int)  # emits +1 for down/forward, -1 for up/backward
+
+    def __init__(self, cache: ImageCache, parent=None) -> None:
+        super().__init__(parent)
+        self.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self._cache = cache
+        self._path = ""
+        self._orig = None
+
+    def setImagePath(self, path: str) -> None:
+        self._path = path
+        self._orig = self._cache.get(path)
+        self._rescale()
+
+    def clearImage(self) -> None:
+        self._path = ""
+        self._orig = None
+        self.clear()
+
+    def resizeEvent(self, ev: QtGui.QResizeEvent) -> None:
+        super().resizeEvent(ev)
+        self._rescale()
+
+    def _rescale(self) -> None:
+        if not self._orig:
+            return
+        target = self.size()
+        pm = self._orig.scaled(
+            target,
+            QtCore.Qt.AspectRatioMode.KeepAspectRatio,
+            QtCore.Qt.TransformationMode.SmoothTransformation,
+        )
+        self.setPixmap(pm)
+
+    def wheelEvent(self, e: QtGui.QWheelEvent) -> None:
+        """Handle mouse wheel events for diff navigation."""
+        angle = e.angleDelta().y()
+        if angle != 0:
+            if e.modifiers() & QtCore.Qt.KeyboardModifier.ShiftModifier:
+                # Shift + wheel: cycle between diff/old/new (like left/right arrows)
+                # Use different signal values to distinguish from regular navigation
+                direction = +100 if angle < 0 else -100  # +/-100 indicates image type cycling
+            else:
+                # Regular wheel: navigate between entries (like up/down arrows)
+                direction = +1 if angle < 0 else -1  # +/-1 indicates entry navigation
+
+            self.wheelNavigation.emit(direction)
+            e.accept()
+            return
+        super().wheelEvent(e)
+
+
+class MainWindow(QtWidgets.QMainWindow):
+    def __init__(self, root_dir: str) -> None:
+        super().__init__()
+        self.setWindowTitle("Image Diff Browser")
+        self._root_dir = os.path.abspath(root_dir)
+        self._cache = ImageCache()
+        self._entries: List[DiffEntry] = []
+        self._current_index = -1   # index in self._entries for viewer
+        self._current_kind = 0     # 0=diff,1=old,2=new
+        self._kinds = ("diff", "old", "new")
+
+        # Central stacked layout: [0]=table page, [1]=viewer page
+        self._stack = QtWidgets.QStackedWidget(self)
+        self.setCentralWidget(self._stack)
+
+        # Table page
+        self._table = DiffTable(self)
+        self._table.doubleClicked.connect(self._on_table_double_clicked)
+        self._stack.addWidget(self._table)
+
+        # Viewer page
+        self._viewer = ImageView(self._cache, self)
+        self._viewer.wheelNavigation.connect(self._on_viewer_wheel_navigation)
+        self._stack.addWidget(self._viewer)
+
+        # Actions
+        refresh = QtGui.QAction(self)
+        refresh.setShortcut(QtGui.QKeySequence.StandardKey.Refresh)  # F5
+        refresh.triggered.connect(self.refresh)
+        self.addAction(refresh)
+
+        # Initial data
+        self.refresh(initial=True)
+
+        # Start maximized
+        self.showMaximized()
+        # After show, set initial thumbs to fit ~3 rows on the current screen
+        QtCore.QTimer.singleShot(0, self._init_base_thumb_side)
+
+    # ----- Data scanning & table population -----
+
+    def refresh(self, *, initial: bool = False) -> None:
+        """(Re)scan directory and rebuild table."""
+        root = self._root_dir
+        self._entries = find_diff_entries(root)
+        # Reset cache so removed images don't linger
+        self._cache.clear()
+
+        self._table.setRowCount(0)
+        self._table.setRowCount(len(self._entries))
+        self._table.setEntries(self._entries)  # Pass entries data for width calculation
+
+        for row, ent in enumerate(self._entries):
+            # Row header text: show a short label so user knows which diff this is.
+            item = QtWidgets.QTableWidgetItem(ent.name)
+            item.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable | QtCore.Qt.ItemFlag.ItemIsEnabled)
+            self._table.setVerticalHeaderItem(row, item)
+
+            # Create index label (starting from 1)
+            index_w = QtWidgets.QLabel(str(row + 1), self._table)
+            index_w.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            index_w.setStyleSheet("font-weight: bold; font-size: 14px;")
+
+            diff_w = ThumbLabel(ent.diff_path, self._cache, self._table)
+            old_w  = ThumbLabel(ent.old_path,  self._cache, self._table)
+            new_w  = ThumbLabel(ent.new_path,  self._cache, self._table)
+
+            # Create path label - show path relative to current working directory
+            relative_path = os.path.relpath(ent.old_path, os.getcwd())
+            path_w = QtWidgets.QLabel(relative_path, self._table)
+            path_w.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignVCenter)
+            path_w.setStyleSheet("font-size: 14px; padding: 2px;")
+            path_w.setToolTip(ent.old_path)  # Show full absolute path on hover
+
+            self._table.setRowWidgets(row, (index_w, diff_w, old_w, new_w, path_w))
+
+        # If we were in viewer mode, try to keep position (clamped)
+        if not initial and self._stack.currentIndex() == 1 and self._entries:
+            self._current_index = max(0, min(self._current_index, len(self._entries) - 1))
+            self._current_kind = 0  # switch to diff on refresh
+            self._show_current_in_viewer()
+        elif self._stack.currentIndex() == 1 and not self._entries:
+            self._viewer.clearImage()
+
+        # Apply current size policy
+        self._apply_sizes_from_window()
+
+    # ----- Sizing logic -----
+
+    def _init_base_thumb_side(self) -> None:
+        # Choose base thumbnail side so ~3 rows fit on the current (maximized) window
+        # Account for horizontal header + some padding.
+        h = self.height()
+        header_h = self._table.horizontalHeader().height()
+        effective = max(100, h - header_h - 60)
+        per_row = int(effective / 3)
+        base_side = max(60, per_row - 2)  # leave minimal margin inside the row
+        self._table.setBaseThumbSide(base_side)
+
+    def resizeEvent(self, ev: QtGui.QResizeEvent) -> None:
+        super().resizeEvent(ev)
+        # Recompute base so that ~3 rows fit whenever the window size changes (table mode)
+        if self._stack.currentIndex() == 0:  # table page
+            self._apply_sizes_from_window()
+
+    def _apply_sizes_from_window(self) -> None:
+        header_h = self._table.horizontalHeader().height()
+        h = self.height()
+        effective = max(100, h - header_h - 60)
+        per_row = int(effective / 3)
+        base_side = max(60, per_row - 2)  # minimal margin inside the row
+        self._table.setBaseThumbSide(base_side)
+
+    # ----- Table interactions -----
+
+    def _on_table_double_clicked(self, idx: QtCore.QModelIndex) -> None:
+        row = idx.row()
+        if 0 <= row < len(self._entries):
+            self._current_index = row
+            self._current_kind = 0  # diff first
+            self._show_viewer()
+
+    # ----- Viewer mode -----
+
+    def _show_viewer(self) -> None:
+        self._show_current_in_viewer()
+        self._stack.setCurrentIndex(1)
+
+    def _back_to_table(self) -> None:
+        self._stack.setCurrentIndex(0)
+        # Ensure selected row is visible
+        if 0 <= self._current_index < self._table.rowCount():
+            self._table.selectRow(self._current_index)
+            self._table.scrollToItem(self._table.verticalHeaderItem(self._current_index),
+                                     QtWidgets.QAbstractItemView.ScrollHint.PositionAtCenter)
+
+    def _show_current_in_viewer(self) -> None:
+        if not (0 <= self._current_index < len(self._entries)):
+            self._viewer.clearImage()
+            return
+        ent = self._entries[self._current_index]
+        path = ent.diff_path if self._current_kind == 0 else (ent.old_path if self._current_kind == 1 else ent.new_path)
+        self._viewer.setImagePath(path)
+        # Also update window title for context
+        self.setWindowTitle(f"Image Diff Browser — [{ent.name}]  ({self._kinds[self._current_kind].upper()})")
+
+    def _on_viewer_wheel_navigation(self, direction: int) -> None:
+        """Handle mouse wheel navigation in viewer mode."""
+        if not self._entries:
+            return
+
+        if abs(direction) >= 100:
+            # Shift + wheel: cycle between diff/old/new image types (like left/right arrows)
+            delta = +1 if direction > 0 else -1
+            self._current_kind = (self._current_kind + delta) % 3
+            self._show_current_in_viewer()
+        else:
+            # Regular wheel: navigate between entries (like up/down arrows)
+            self._current_index = (self._current_index + direction) % len(self._entries)
+            self._current_kind = 0  # switch to diff immediately (like arrow keys)
+            self._show_current_in_viewer()
+
+    # ----- Key handling -----
+
+    def keyPressEvent(self, e: QtGui.QKeyEvent) -> None:
+        # Global shortcuts that depend on the page
+        if self._stack.currentIndex() == 1:
+            # Viewer page
+            if e.key() == QtCore.Qt.Key.Key_Escape:
+                self._back_to_table()
+                return
+            if e.key() in (QtCore.Qt.Key.Key_Left, QtCore.Qt.Key.Key_Right):
+                delta = -1 if e.key() == QtCore.Qt.Key.Key_Left else +1
+                self._current_kind = (self._current_kind + delta) % 3
+                self._show_current_in_viewer()
+                return
+            if e.key() in (QtCore.Qt.Key.Key_Down, QtCore.Qt.Key.Key_Up):
+                if not self._entries:
+                    return
+                delta = +1 if e.key() == QtCore.Qt.Key.Key_Down else -1
+                self._current_index = (self._current_index + delta) % len(self._entries)
+                self._current_kind = 0  # switch to diff immediately
+                self._show_current_in_viewer()
+                return
+        else:
+            # Table page
+            if e.key() == QtCore.Qt.Key.Key_Escape:
+                self.close()
+                return
+            if e.key() == QtCore.Qt.Key.Key_F5:
+                self.refresh()
+                return
+        super().keyPressEvent(e)
+
+
+def parse_args(argv: List[str]) -> argparse.Namespace:
+    p = argparse.ArgumentParser(description="Browse image differences for (<foo>.png, <foo>-new.png, <foo>-diff.png) triplets.")
+    p.add_argument("folder", help="Root folder to scan recursively")
+    return p.parse_args(argv)
+
+
+def main() -> int:
+    args = parse_args(sys.argv[1:])
+    root = os.path.abspath(args.folder)
+    if not os.path.isdir(root):
+        print(f"Error: '{root}' is not a directory.", file=sys.stderr)
+        return 2
+
+    app = QtWidgets.QApplication(sys.argv)
+    app.setApplicationName("Image Diff Browser")
+
+    win = MainWindow(root)
+    win.showMaximized()
+    return app.exec()
+
+
+if __name__ == "__main__":
+    sys.exit(main())
