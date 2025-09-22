@@ -633,11 +633,11 @@ void Ipv4NetworkConfigurator::assignAddresses(std::vector<LinkInfo *> links)
                             uint32_t completeAddress = networkAddress | interfaceAddress;
                             uint32_t completeNetmask = networkNetmask;
                             EV_DEBUG << "Checking interface address, interface = " << compatibleInterface->getFullPath() << ", address = " << Ipv4Address(completeAddress) << ", netmask = " << Ipv4Address(completeNetmask) << endl;
-                            if (interfaceAddress == 0) {
+                            if (interfaceAddress == 0 && !networkInterface->isPointToPoint()) {
                                 EV_DEBUG << "Failed to configure, all interface address bits are 0 for " << networkInterface->getInterfaceFullPath() << EV_ENDL;
                                 goto next;
                             }
-                            if ((interfaceAddress ^ ~networkNetmask) == 0) {
+                            if ((interfaceAddress ^ ~networkNetmask) == 0 && networkInterface->isBroadcast()) {
                                 EV_DEBUG << "Failed to configure, all interface address bits are 1 for " << networkInterface->getInterfaceFullPath() << EV_ENDL;
                                 goto next;
                             }
