@@ -588,6 +588,22 @@ void ResidenceTimePerRegionFilter::receiveSignal(cResultFilter *prev, simtime_t_
     });
 }
 
+
+Register_ResultFilter("packetLifeTime", PacketLifeTimeFilter);
+
+void PacketLifeTimeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+    int count = 0;
+    simtime_t lifeTime = -1;
+    auto packet = check_and_cast<Packet *>(object);
+    for (auto& region : packet->peekData()->getAllTags<CreationTimeTag>()) {
+        lifeTime = simTime() - region.getTag()->getCreationTime();
+        count++;
+    }
+    fire(this, t, count == 1 ? lifeTime.dbl() : NaN, details != nullptr ? details : object);
+}
+
+
 Register_ResultFilter("lifeTimePerRegion", LifeTimePerRegionFilter);
 
 void LifeTimePerRegionFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)

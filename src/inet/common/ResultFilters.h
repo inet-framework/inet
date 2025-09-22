@@ -312,6 +312,12 @@ class INET_API ResidenceTimePerRegionFilter : public cObjectResultFilter
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
 };
 
+class INET_API PacketLifeTimeFilter : public cObjectResultFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
 class INET_API LifeTimePerRegionFilter : public cObjectResultFilter
 {
   public:
