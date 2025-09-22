@@ -86,6 +86,8 @@ simple FlowMeasurementRecorder extends PacketFlowBase like IPacketFlow
         @statistic[meanTotalBitTransmissionTimePerPacket](title="mean total bit transmission time per packet"; source=weightedMeanPerGroup(groupRegionsPerPacket(transmissionTimePerRegion(demuxFlow(packetFlowMeasured)))); record=vector,histogram; unit=s; interpolationmode=none);
         // the statistical value is the sum of the transmission duration of the complete packets for all transmitters where the particular bit of the region was transmitted
         @statistic[meanTotalPacketTransmissionTime](title="mean total packet transmission time"; source=weightedMeanPerGroup(groupRegionsPerPacket(packetTransmissionTimePerRegion(demuxFlow(packetFlowMeasured)))); record=vector,histogram; unit=s; interpolationmode=none);
+        // the statistical value is the time difference of the current simulation time and the creation time of the whole packet data, nan if not all bits have the same value
+        @statistic[packetLifeTime](title="packet life time"; source=packetLifeTime(demuxFlow(packetFlowMeasured)); record=vector,histogram; unit=s; interpolationmode=none);
         // the statistical value is the difference of subsequent values of the mean bit elapsed time per packet
         @statistic[packetJitter](title="packet jitter"; source=jitter(weightedMeanPerGroup(groupRegionsPerPacket(elapsedTimePerRegion(demuxFlow(packetFlowMeasured))))); record=vector,histogram; unit=s; interpolationmode=none);
         // the statistical value is the difference of the current and the mean bit elapsed time per packet

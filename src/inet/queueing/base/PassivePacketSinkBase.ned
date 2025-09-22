@@ -37,6 +37,8 @@ simple PassivePacketSinkBase extends PacketSinkBase
         @statistic[bitLifeTime](title="bit life time"; source=weightTimes(lengthWeightedValuePerRegion(lifeTimePerRegion(packetPushed))); record=histogram?; unit=s; interpolationmode=none);
         // the statistical value is the time difference of the current simulation time and the creation time of any bit in the region
         @statistic[meanBitLifeTimePerPacket](title="mean bit life time per packet"; source=weightedMeanPerGroup(groupRegionsPerPacket(lifeTimePerRegion(packetPushed))); record=vector,histogram; unit=s; interpolationmode=none);
+        // the statistical value is the time difference of the current simulation time and the creation time of the whole packet data, nan if not all bits have the same value
+        @statistic[packetLifeTime](title="packet life time"; source=packetLifeTime(packetPushed); record=vector,histogram; unit=s; interpolationmode=none);
         // the statistical value is the difference of subsequent values of the mean bit elapsed time per packet
         @statistic[packetJitter](title="packet jitter"; source=jitter(weightedMeanPerGroup(groupRegionsPerPacket(lifeTimePerRegion(packetPushed)))); record=vector,histogram; unit=s; interpolationmode=none);
         // the statistical value is the difference of the current and the mean bit elapsed time per packet
