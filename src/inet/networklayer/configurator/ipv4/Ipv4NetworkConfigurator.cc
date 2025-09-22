@@ -625,9 +625,11 @@ void Ipv4NetworkConfigurator::assignAddresses(std::vector<LinkInfo *> links)
                         // determine the complete IP address for all compatible interfaces
                         std::vector<uint32_t> localAssignedInterfaceAddresses = assignedInterfaceAddresses;
                         std::map<uint32_t, NetworkInterface *> localAssignedAddressToNetworkInterfaceMap = assignedAddressToNetworkInterfaceMap;
+                        std::map<NetworkInterface *, uint32_t> storedUniqueHostAddress;
                         for (auto& compatibleInterface : compatibleInterfaces) {
                             NetworkInterface *networkInterface = compatibleInterface->networkInterface;
                             uint32_t interfaceAddress = generateUniqueHostAddress(compatibleInterface, networkAddress, networkNetmask, localAssignedInterfaceAddresses);
+                            storedUniqueHostAddress[networkInterface] = interfaceAddress;
                             uint32_t completeAddress = networkAddress | interfaceAddress;
                             uint32_t completeNetmask = networkNetmask;
                             EV_DEBUG << "Checking interface address, interface = " << compatibleInterface->getFullPath() << ", address = " << Ipv4Address(completeAddress) << ", netmask = " << Ipv4Address(completeNetmask) << endl;
@@ -647,7 +649,7 @@ void Ipv4NetworkConfigurator::assignAddresses(std::vector<LinkInfo *> links)
                             localAssignedInterfaceAddresses.push_back(completeAddress);
                         }
                         for (auto& compatibleInterface : compatibleInterfaces) {
-                            uint32_t interfaceAddress = generateUniqueHostAddress(compatibleInterface, networkAddress, networkNetmask, assignedNetworkAddresses);
+                            uint32_t interfaceAddress = storedUniqueHostAddress[compatibleInterface->networkInterface];
 
                             // determine the complete address and netmask for interface
                             uint32_t completeAddress = networkAddress | interfaceAddress;
