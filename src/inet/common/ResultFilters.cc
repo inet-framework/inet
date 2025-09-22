@@ -568,6 +568,73 @@ void DemuxFlowFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObje
     });
 }
 
+Register_ResultFilter("demuxRegex", DemuxRegexFilter);
+
+void DemuxRegexFilter::init(Context *ctx)
+{
+    DemuxFilter::init(ctx);
+    std::string fullPath = ctx->component->getFullPath() + "." + ctx->attrsProperty->getIndex() + ".demuxRegex";
+    auto config = getEnvir()->getConfig();
+    search = cConfiguration::parseString(config->getPerObjectConfigValue(fullPath.c_str(), "search"), getDefaultSearch());
+    replace = cConfiguration::parseString(config->getPerObjectConfigValue(fullPath.c_str(), "replace"), getDefaultReplace());
+}
+
+const char *DemuxRegexFilter::CategoryFinder::getFullName() const
+{
+    if (object == nullptr)
+        return "";
+    else {
+        if (!std::regex_search(object->getFullName(), filter->search))
+            return "";
+        else {
+            result = std::regex_replace(object->getFullName(), filter->search, filter->replace);
+            return result.c_str();
+        }
+    }
+}
+
+void DemuxRegexFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, bool b, cObject *details)
+{
+    CategoryFinder c(this, details);
+    DemuxFilter::receiveSignal(prev, t, b, &c);
+}
+
+void DemuxRegexFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, intval_t l, cObject *details)
+{
+    CategoryFinder c(this, details);
+    DemuxFilter::receiveSignal(prev, t, l, &c);
+}
+
+void DemuxRegexFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, uintval_t l, cObject *details)
+{
+    CategoryFinder c(this, details);
+    DemuxFilter::receiveSignal(prev, t, l, &c);
+}
+
+void DemuxRegexFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, double d, cObject *details)
+{
+    CategoryFinder c(this, details);
+    DemuxFilter::receiveSignal(prev, t, d, &c);
+}
+
+void DemuxRegexFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, const SimTime& v, cObject *details)
+{
+    CategoryFinder c(this, details);
+    DemuxFilter::receiveSignal(prev, t, v, &c);
+}
+
+void DemuxRegexFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, const char *s, cObject *details)
+{
+    CategoryFinder c(this, details);
+    DemuxFilter::receiveSignal(prev, t, s, &c);
+}
+
+void DemuxRegexFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+    CategoryFinder c(this, details != nullptr ? details : object);
+    DemuxFilter::receiveSignal(prev, t, object, &c);
+}
+
 Register_ResultFilter("residenceTimePerRegion", ResidenceTimePerRegionFilter);
 
 void ResidenceTimePerRegionFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)

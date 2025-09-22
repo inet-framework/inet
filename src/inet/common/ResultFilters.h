@@ -10,6 +10,8 @@
 
 #include "inet/common/INETMath.h"
 
+#include <regex>
+
 namespace inet {
 
 namespace utils {
@@ -303,6 +305,41 @@ class INET_API DemuxFlowFilter : public DemuxFilter
     virtual void init(Context *ctx) override;
 
   public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+class INET_API DemuxRegexFilter : public DemuxFilter
+{
+  protected:
+    class CategoryFinder : public cNamedObject
+    {
+      protected:
+        DemuxRegexFilter *filter = nullptr;
+        cObject *object = nullptr;
+        mutable std::string result;
+
+      public:
+        CategoryFinder(DemuxRegexFilter *filter, cObject *object) : filter(filter), object(object) {}
+
+        virtual const char *getFullName() const override;
+    };
+
+  protected:
+    std::regex search;
+    std::string replace;
+
+  protected:
+    virtual void init(Context *ctx) override;
+    virtual const char *getDefaultSearch() const { return ".*"; }
+    virtual const char *getDefaultReplace() const { return "$0"; }
+
+    // NOTE: these are overridden because getFullName() called from getDelegateStartIndexByLabel() cannot be overridden
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, bool b, cObject *details) override;
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, intval_t, cObject *details) override;
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, uintval_t, cObject *details) override;
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, double d, cObject *details) override;
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, const SimTime& v, cObject *details) override;
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, const char *s, cObject *details) override;
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
 };
 
