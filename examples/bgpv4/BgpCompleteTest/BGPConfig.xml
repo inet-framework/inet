@@ -21,7 +21,7 @@
     </AS>
 
     <AS id="60222">
-        <Router interAddr="172.10.4.255"/> <!--Router B-->
+        <Router interAddr="172.10.4.254"/> <!--Router B-->
     </AS>
 
     <AS id="60333">
@@ -34,11 +34,11 @@
     </AS>
 
     <AS id="60444">
-        <Router interAddr="172.10.8.255"/> <!--Router D-->
+        <Router interAddr="172.10.8.254"/> <!--Router D-->
     </AS>
 
     <AS id="60555">
-        <Router interAddr="172.15.0.255"/> <!--Router E-->
+        <Router interAddr="172.15.0.254"/> <!--Router E-->
         <DenyASIN> 60222 </DenyASIN>
     </AS>
 
