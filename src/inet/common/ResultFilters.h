@@ -343,6 +343,13 @@ class INET_API DemuxRegexFilter : public DemuxFilter
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
 };
 
+class INET_API DemuxAppFilter : public DemuxRegexFilter
+{
+  protected:
+    virtual const char *getDefaultSearch() const override { return "(.*)-[0-9]+"; }
+    virtual const char *getDefaultReplace() const override { return "$1"; }
+};
+
 class INET_API ResidenceTimePerRegionFilter : public cObjectResultFilter
 {
   public:

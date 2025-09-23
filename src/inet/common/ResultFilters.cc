@@ -635,6 +635,8 @@ void DemuxRegexFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObj
     DemuxFilter::receiveSignal(prev, t, object, &c);
 }
 
+Register_ResultFilter("demuxApp", DemuxAppFilter);
+
 Register_ResultFilter("residenceTimePerRegion", ResidenceTimePerRegionFilter);
 
 void ResidenceTimePerRegionFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
