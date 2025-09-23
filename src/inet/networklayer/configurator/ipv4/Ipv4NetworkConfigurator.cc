@@ -505,7 +505,7 @@ void Ipv4NetworkConfigurator::assignAddresses(Topology& topology)
         assignAddresses(topology.linkInfos);
 }
 
-uint32_t Ipv4NetworkConfigurator::generateUniqueHostAddress(InterfaceInfo *compatibleInterface, uint32_t networkAddress, uint32_t networkNetmask, std::vector<uint32_t> &assignedInterfaceAddresses)
+uint32_t Ipv4NetworkConfigurator::generateUniqueHostAddress(const InterfaceInfo *compatibleInterface, uint32_t networkAddress, uint32_t networkNetmask, const std::vector<uint32_t> &assignedInterfaceAddresses) const
 {
     uint32_t interfaceAddress = compatibleInterface->address & ~networkNetmask;
     uint32_t interfaceAddressSpecifiedBits = compatibleInterface->addressSpecifiedBits;

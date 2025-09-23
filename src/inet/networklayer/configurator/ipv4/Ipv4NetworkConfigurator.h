@@ -236,7 +236,7 @@ class INET_API Ipv4NetworkConfigurator : public L3NetworkConfiguratorBase, publi
 
     // helpers for address assignment
     static bool compareInterfaceInfos(InterfaceInfo *i, InterfaceInfo *j);
-    uint32_t generateUniqueHostAddress(InterfaceInfo *compatibleInterface, uint32_t networkAddress, uint32_t networkNetmask, std::vector<uint32_t> &assignedInterfaceAddresses);
+    uint32_t generateUniqueHostAddress(const InterfaceInfo *compatibleInterface, uint32_t networkAddress, uint32_t networkNetmask, const std::vector<uint32_t> &assignedInterfaceAddresses) const;
     void collectCompatibleInterfaces(const std::vector<InterfaceInfo *>& interfaces, /*in*/
             std::vector<InterfaceInfo *>& compatibleInterfaces, /*out, and the rest too*/
             uint32_t& mergedAddress, uint32_t& mergedAddressSpecifiedBits, uint32_t& mergedAddressIncompatibleBits,
