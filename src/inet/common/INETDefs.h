@@ -49,6 +49,14 @@ using omnetpp::operator<<;
 
 #include "inet/common/InitStages.h"
 
+#ifndef SIMTIME_RAW_T_DEFINED
+#define SIMTIME_RAW_T_DEFINED
+
+#include <cstdint>
+using simtime_raw_t = int64_t;
+
+#endif
+
 // main namespace of INET framework
 namespace inet {
 
