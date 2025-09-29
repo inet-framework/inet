@@ -78,12 +78,17 @@ inline void print_ret_or_void(std::ostream& os, const T& v) { os << v; }   // wi
 // 1-based index of the current call (valid after DEBUG_ENTER)
 #define DEBUG_EXEC_INDEX   (_dbg_this_exec)
 
+static inline bool _dbg_function_enabled(const char *function)
+{
+    return false;
+}
+
 // Unified ENTER. Use: DEBUG_ENTER()  or  DEBUG_ENTER(a, b, c)
-#define DEBUG_ENTER(enabled, ...)                                                  \
-    static bool _dbg_enabled = enabled;                                            \
+#define DEBUG_ENTER(...)                                                           \
+    static bool _dbg_enabled = false;                                              \
+    _dbg_enabled = _dbg_function_enabled(__func__);                                \
     static unsigned long long _dbg_exec_count = 0;                                 \
-    const unsigned long long _dbg_this_exec = ++_dbg_exec_count;                   \
-    ++_dbg_indent;                                                                 \
+    unsigned long long _dbg_this_exec = 0;                                         \
     std::string _dbg_argstr;                                                       \
     {                                                                              \
         std::ostringstream _dbg_os;                                                \
@@ -91,8 +96,10 @@ inline void print_ret_or_void(std::ostream& os, const T& v) { os << v; }   // wi
         _dbg_argstr = _dbg_os.str();                                               \
     }                                                                              \
     const bool _dbg_on = _dbg_enabled && _dbg_global_enabled;                      \
-    _DbgStream DEBUG_OUT(_dbg_on, _dbg_indent);                                    \
+    _DbgStream DEBUG_OUT(_dbg_on, _dbg_indent + 1);                                \
     if (_dbg_on) {                                                                 \
+        ++_dbg_indent;                                                             \
+        _dbg_this_exec = ++_dbg_exec_count;                                        \
         std::cout << std::setprecision(24)                                         \
                   << std::string((_dbg_indent - 1) * 3, ' ')                       \
                   << "[" << _dbg_this_exec << "] " << __func__ << "("              \
@@ -107,15 +114,15 @@ inline void print_ret_or_void(std::ostream& os, const T& v) { os << v; }   // wi
 // Unified LEAVE. Use: DEBUG_LEAVE()  or  DEBUG_LEAVE(result)
 #define DEBUG_LEAVE(...)                                                           \
     do {                                                                           \
-        if (_dbg_enabled && _dbg_global_enabled) {                                 \
+        if (_dbg_on) {                                                             \
             std::cout << std::setprecision(24)                                     \
                       << std::string((_dbg_indent - 1) * 3, ' ')                   \
                       << "[" << _dbg_this_exec << "] " << __func__ << "("          \
                       << _dbg_argstr << ") = ";                                    \
             print_ret_or_void(std::cout __VA_OPT__(, __VA_ARGS__));                \
             std::cout << std::endl;                                                \
+            --_dbg_indent;                                                         \
         }                                                                          \
-        --_dbg_indent;                                                             \
     } while (0)
 
 #else
