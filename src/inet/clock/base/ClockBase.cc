@@ -49,7 +49,7 @@ void ClockBase::finish()
 
 void ClockBase::checkScheduledClockEvent(const ClockEvent *event) const
 {
-    DEBUG_ENTER(true);
+    DEBUG_ENTER();
     // NOTE: IClock interface 3. invariant
     DEBUG_CMP(event->getArrivalClockTime(), >=, getClockTime());
     if (event->isScheduled()) {
@@ -85,7 +85,7 @@ clocktime_t ClockBase::getClockTime() const
 
 simtime_t ClockBase::computeScheduleTime(clocktime_t clockTime) const
 {
-    DEBUG_ENTER(true, clockTime);
+    DEBUG_ENTER(clockTime);
     simtime_t currentSimulationTime = simTime();
     simtime_t lowerSimulationTime = computeSimTimeFromClockTime(clockTime, true);
     DEBUG_OUT << DEBUG_FIELD(lowerSimulationTime) << std::endl;

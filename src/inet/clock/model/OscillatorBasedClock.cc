@@ -165,7 +165,7 @@ void OscillatorBasedClock::checkState() const
 
 void OscillatorBasedClock::checkAllScheduledClockEvents() const
 {
-    DEBUG_ENTER(true);
+    DEBUG_ENTER();
     ClockEvent *previousEvent = nullptr;
     std::vector eventsCopy(events);
     // copy events to avoid having side effects
@@ -220,7 +220,7 @@ S64 OscillatorBasedClock::A(S64 n) const
 void OscillatorBasedClock::moveOrigin()
 {
     // debug output
-    DEBUG_ENTER(true);
+    DEBUG_ENTER();
     // get state
     const clocktime_raw_t l = getClockGranularity().raw();
     const simtime_t& oos = oscillator->getComputationOrigin();
@@ -248,7 +248,7 @@ void OscillatorBasedClock::moveOrigin()
 void OscillatorBasedClock::setOrigin(clocktime_t clockTime)
 {
     // debug output
-    DEBUG_ENTER(true, clockTime);
+    DEBUG_ENTER(clockTime);
     // checks
     simtime_t simulationTime = simTime();
     DEBUG_CMP(simulationTime, >=, originSimulationTime);
@@ -277,7 +277,7 @@ void OscillatorBasedClock::setOrigin(clocktime_t clockTime)
 
 clocktime_t OscillatorBasedClock::doComputeClockTimeFromSimTime(simtime_t simulationTime, bool lowerBound) const
 {
-    DEBUG_ENTER(true, simulationTime);
+    DEBUG_ENTER(simulationTime);
    // get state
     const clocktime_raw_t l = getClockGranularity().raw();
     const simtime_t& oos = oscillator->getComputationOrigin();
@@ -301,7 +301,7 @@ clocktime_t OscillatorBasedClock::doComputeClockTimeFromSimTime(simtime_t simula
 
 simtime_t OscillatorBasedClock::doComputeSimTimeFromClockTime(clocktime_t clockTime, bool lowerBound) const
 {
-    DEBUG_ENTER(true, clockTime, lowerBound);
+    DEBUG_ENTER(clockTime, lowerBound);
     // get state
     const bool b = lowerBound;
     const clocktime_raw_t l = getClockGranularity().raw();

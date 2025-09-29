@@ -174,7 +174,7 @@ simtime_t DriftingOscillatorBase::getCurrentTickLength() const
 
 int64_t DriftingOscillatorBase::doComputeTicksForInterval(simtime_t timeInterval) const
 {
-    DEBUG_ENTER(false, timeInterval);
+    DEBUG_ENTER(timeInterval);
     DEBUG_OUT << DEBUG_FIELD(driftFactor) << DEBUG_FIELD(frequencyCompensationFactor) << DEBUG_FIELD(nextTickFromOrigin) << DEBUG_FIELD(nominalTickLength) << std::endl;
     int64_t result;
     if (timeInterval == 0)
@@ -197,7 +197,7 @@ int64_t DriftingOscillatorBase::doComputeTicksForInterval(simtime_t timeInterval
 
 simtime_t DriftingOscillatorBase::doComputeIntervalForTicks(int64_t numTicks) const
 {
-    DEBUG_ENTER(false, numTicks);
+    DEBUG_ENTER(numTicks);
     DEBUG_OUT << DEBUG_FIELD(driftFactor) << DEBUG_FIELD(frequencyCompensationFactor) << DEBUG_FIELD(nextTickFromOrigin) << DEBUG_FIELD(nominalTickLength) << std::endl;
     simtime_t result;
     if (numTicks == 0)
