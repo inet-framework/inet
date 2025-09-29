@@ -40,7 +40,7 @@ class SimulationProject:
     Please note that undocumented features are not supposed to be called by the user.
     """
 
-    def __init__(self, name, version, git_hash=None, git_diff_hash=None, folder_environment_variable=None, folder=".",
+    def __init__(self, name, version, git_hash=None, git_diff_hash=None, folder_environment_variable=None, folder=".", omnetpp_environment_variable="__omnetpp_root_dir",
                  bin_folder=".", library_folder=".", executables=None, dynamic_libraries=None, static_libraries=None, build_types=["dynamic library"],
                  ned_folders=["."], ned_exclusions=[], ini_file_folders=["."], python_folders=["python"], image_folders=["."],
                  include_folders=["."], cpp_folders=["."], cpp_defines=[], msg_folders=["."],
@@ -65,6 +65,9 @@ class SimulationProject:
 
             folder_environment_variable (string):
                 The operating system environment variable.
+
+            omnetpp_environment_variable (string):
+                The operating system environment variable specifying the root folder of the omnetpp installation.
 
             folder (string):
                 The directory of the simulation project relative to the value of the folder_environment_variable attribute.
@@ -151,6 +154,7 @@ class SimulationProject:
         self.version = version
         self.folder_environment_variable = folder_environment_variable
         self.folder = folder
+        self.omnetpp_environment_variable = omnetpp_environment_variable
         # TODO this is commented out because it runs subprocesses, and it even does this from the IDE when some completely unrelated modules are loaded, sigh!
         # self.git_hash = git_hash or run_command_with_logging(["git", "rev-parse", "HEAD"], cwd=self.get_full_path(".")).stdout.strip()
         # if git_diff_hash:
@@ -215,7 +219,7 @@ class SimulationProject:
 
     def get_executable(self, mode="release"):
         dynamic_loading = self.build_types[0] == "dynamic library"
-        executable_environment_variable = "__omnetpp_root_dir" if dynamic_loading else self.folder_environment_variable
+        executable_environment_variable = self.omnetpp_environment_variable if dynamic_loading else self.folder_environment_variable
         executable = "bin/opp_run" if dynamic_loading else os.path.join(self.folder, self.executables[0])
         suffix = self.get_library_suffix(mode=mode) if dynamic_loading else ""
         return self.get_environment_variable_relative_path(executable_environment_variable, executable + suffix)
@@ -377,7 +381,7 @@ class SimulationProject:
                         default_args = self.get_default_args()
                         args = [executable, *default_args, "-s", "-f", ini_file, "-c", config, "-q", "numruns"]
                     else:
-                        executable = self.get_environment_variable_relative_path("__omnetpp_root_dir", "bin/opp_run")
+                        executable = self.get_environment_variable_relative_path(self.omnetpp_environment_variable, "bin/opp_run")
                         args = [executable, "-s", "-f", ini_file, "-c", config, "-q", "numruns"]
                     result = run_command_with_logging(args, cwd=working_directory, env=self.get_env())
                     if result.returncode == 0:
