@@ -15,6 +15,10 @@ namespace inet {
 
 class INET_API ResidenceTimeMeasurer : public SimpleModule, public cListener
 {
+  private:
+    simsignal_t measurementStartSignal = -1;
+    simsignal_t measurementEndSignal = -1;
+
   public:
     static simsignal_t packetStayedSignal;
 
