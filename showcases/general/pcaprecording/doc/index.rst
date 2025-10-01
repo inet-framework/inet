@@ -125,7 +125,7 @@ In ``host1``, we'll record 802.11 traffic on the ``wlan0`` interface:
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: host1.numPcapRecorders
-   :end-at: /host1.pcap
+   :end-at: /host1.80211.pcap
 
 In ``host2``, we'll record only the ARP packets from the 802.11 traffic
 on ``wlan0``. The
@@ -151,7 +151,7 @@ interface:
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: ethHost1.numPcapRecorders
-   :end-at: /ethHost1.pcap
+   :end-at: /ethHost1.eth.pcap
 
 There are two PCAP recorder modules in ``router1``, with one of them
 recording Ethernet traffic on ``eth0`` and the other PPP traffic on
@@ -161,21 +161,32 @@ PCAP recorder modules, because ``router1`` has two interfaces.
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: router1.numPcapRecorders
-   :end-before: router2.numPcapRecorders
+   :end-before: moduleNamePatterns = "eth[*]
 
-In ``router2``, we'll record only packets carrying TCP data on the
-``eth0`` interface. ``router2`` has two interfaces, so the
-:par:`moduleNamePatters` parameter needs to be set. The packet data filter is set to match
-packets containing an ``Ipv4Header``, and where the ``totalLengthField``
-field's value is 576 (the size of TCP data packets with IP
-encapsulation):
+In ``router2``, we'll record only packets carrying TCP data on the ``eth0``
+interface. ``router2`` has two interfaces, so the :par:`moduleNamePatters`
+parameter needs to be set. The packet data filter is set to match packets
+containing a ``TcpHeader`` and an ``Ipv4Header``, and where the TCP payload
+length is greater than 0 (so that ACKs and handshake packets are not recorded).
+TCP packets don't have a payload length field, so need to calculate the payload length as follows:
+
+``IPv4 total length field - IPv4 header length field - TCP header header length field``
+
+Here is the ini configuration:
+
+.. TODO
+.. improvements:
+.. 2 PCAP recorders; one recording all TCP traffic, the other only the TCP data packets:
+.. *.router2.pcapRecorder[0].moduleNamePatterns = "eth[*]"
+.. *.router2.pcapRecorder[0].pcapFile = "results/router2.tcp.pcap"
+.. *.router2.pcapRecorder[0].packetFilter = expr(has(TcpHeader) && has(Ipv4Header))
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: router2.numPcapRecorders
    :end-at: totalLengthField
 
-In ``ethHost2``, we'll record traffic of the ``ipv4`` module. The
+In ``ethHost2``, we'll only record IPv4 frames, without network layer protocol information. The
 :par:`dumpProtocols` parameter's default is
 ``ethernetmac ppp ieee80211mac``, so it has to be set to ``ipv4``.
 
@@ -183,6 +194,32 @@ In ``ethHost2``, we'll record traffic of the ``ipv4`` module. The
    :language: ini
    :start-at: ethHost2.numPcapRecorders
    :end-at: dumpProtocols
+
+.. TODO
+.. improvements:
+.. 2 types of ipv4 pcap:
+
+.. 1. traffic of the ipv4 module: need moduleNamePatterns="ipv4" and dumpProtocols="ipv4" and receivingSignalNames and sendingSignalNames (they are different for network interfaces than for the IP module)
+.. 2. ipv4 traffic on interfaces: need just dumpProtocols="ipv4"
+
+.. time recorded in PCAP:
+.. 1. when ipv4 packet left the ipv4 module for the network interface; not network sending time! when receiving, the time of arrival to the ipv4 module (doesn't contain queue time in network interface)
+.. 2. when the packet containing the ipv4 packet gets sent by the network interface or received by the network interface (contains queue time in network interface)
+
+.. fragmentation:
+.. 1. packet is recorded when all fragments have arrived and reassemled by the network interface
+.. 2. only first fragment is recorded as only that has a IPv4 header
+
+.. case 1.
+.. *.ethHost2.pcapRecorder[0].pcapFile = "results/ethHost2.ip.pcap"
+.. *.ethHost2.pcapRecorder[0].moduleNamePatterns = "ipv4"
+.. *.ethHost2.pcapRecorder[0].dumpProtocols = "ipv4"
+.. *.ethHost2.pcapRecorder[0].receivingSignalNames = "packetReceivedFromLower"
+.. *.ethHost2.pcapRecorder[0].sendingSignalNames = "packetSentToLower"
+
+.. case 2.
+.. *.ethHost2.pcapRecorder[0].pcapFile = "results/ethHost2.ip.pcap"
+.. *.ethHost2.pcapRecorder[0].dumpProtocols = "ipv4"
 
 By default, modules like :ned:`Ipv4` and :ned:`EthernetInterface` don't
 compute checksum and FCS fields, but assume they are correct ("declared
