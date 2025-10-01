@@ -47,6 +47,10 @@ void EthernetMacPhy::initialize(int stage)
     else if (stage == INITSTAGE_LINK_LAYER) {
         beginSendFrames(); // FIXME choose an another stage for it
     }
+    else if (stage == INITSTAGE_LAST) {
+        if (hasListeners(receptionStartedSignal) && !emitReceptionStarted)
+            throw cRuntimeError("Signal 'receptionStartedSignal' has active listeners subscribed, but the signal's release is disabled via parameter 'emitReceptionStarted' = false. Remove the listeners or set the parameter to true.");
+    }
 }
 
 void EthernetMacPhy::initializeStatistics()
