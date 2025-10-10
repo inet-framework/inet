@@ -311,6 +311,25 @@ Define_NED_Function2(nedf_getId,
     "ned",
     "Returns the id of the module or channel in context.")
 
+cNEDValue nedf_seq(cComponent *context, cNEDValue argv[], int argc)
+{
+    static int handle = cSimulationOrSharedDataManager::registerSharedVariableName("inet::NedFunctions::seq");
+    auto& seqs = getSimulationOrSharedDataManager()->getSharedVariable<std::map<std::string, int>>(handle);
+    auto key = argv[0].stringValue();
+    auto it = seqs.find(key);
+    if (it == seqs.end())
+        seqs[key] = 0;
+    else
+        seqs[key]++;
+    return cNEDValue(seqs[key]);
+}
+
+Define_NED_Function2(nedf_seq,
+        "int seq(string id)",
+        "misc",
+        "Returns the next integer (starting from 0) associated to the first argument which must be a string."
+        );
+
 } // namespace utils
 
 } // namespace inet
