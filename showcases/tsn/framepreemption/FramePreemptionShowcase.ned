@@ -16,7 +16,7 @@ network FramePreemptionShowcase extends WiredNetworkBase
             @display("p=250,100");
         }
         host2: StandardHost {
-            @display("p=350,100");
+            @display("p=600,100");
         }
     connections:
         host1.ethg++ <--> Eth100M <--> host2.ethg++;
