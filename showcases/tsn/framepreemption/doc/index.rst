@@ -196,7 +196,7 @@ We use the following traffic for the ``RealisticFifoQueueing``, ``RealisticPrior
 and ``RealisticFramePreemption`` configurations:
 
 .. literalinclude:: ../omnetpp.ini
-   :start-after: Config RealisticBase
+   :start-at: background traffic
    :end-before: Config RealisticFifoQueueing
    :language: ini
 
