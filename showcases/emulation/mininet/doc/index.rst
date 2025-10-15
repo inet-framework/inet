@@ -4,7 +4,7 @@ Using Mininet to Set Up the Virtual Network
 Goals
 -----
 
-This showcase builds upon the previous one, :doc:`index`, and demonstrates how
+This showcase builds upon the previous one, :doc:`../../voip/doc/index`, and demonstrates how
 setting up the virtual network can be vastly simplified using Mininet.
 
 | Verified with INET version: ``4.5``
@@ -122,7 +122,7 @@ listen to the original audio file by clicking the play button below:
 
 .. raw:: html
 
-   <p><audio controls> <source src="media/Beatify_Dabei_cut.mp3" type="audio/mpeg">Your browser does not support the audio tag.</audio></p>
+   <p><audio controls> <source src="media/Stereotype_News.mp3" type="audio/mpeg">Your browser does not support the audio tag.</audio></p>
 
 Here is the received audio file:
 

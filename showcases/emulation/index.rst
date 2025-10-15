@@ -9,5 +9,5 @@ The following showcases demonstrate INET's emulation support:
    webserver/doc/index
    babel/doc/index
    voip/doc/index
-   voip/doc/mininet
+   mininet/doc/index
    videostreaming/doc/index
