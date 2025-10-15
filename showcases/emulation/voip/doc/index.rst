@@ -306,7 +306,7 @@ clicking the play button below:
 
 .. raw:: html
 
-   <p><audio controls> <source src="media/Beatify_Dabei_cut.mp3" type="audio/mpeg">Your browser does not support the audio tag.</audio></p>
+   <p><audio controls> <source src="media/Stereotype_News.mp3" type="audio/mpeg">Your browser does not support the audio tag.</audio></p>
 
 Here is the received audio file:
 
