@@ -2,8 +2,11 @@ InterfaceTableVisualizer:
 - jobb paraméternév lenne a displayInterfaceData (displayInterfaceTables azt sugallja, hogy táblázatot rajzol ki)
 
 MobilityVisualizer:
+- nyilván kéne tartania a visualizernek hogy van-e már olyan szín a movementTrail-ek között, amit használni akar --> ne húzzon két node ugyanolyan színű movementTrail-t
+- the commit a674546 ("Visualizer: Fixed crash caused by dynamically deleted mobility modules.", 2018-06-14) breaks visualization
+Lots of figures are added to the canvas
 
-MediumVisualizer
+MediumVisualizer:
 - X távolsággal menjen tovább a signal rajzolása, mint az utolsó receiver
 - A signal eleje és vége felgyorsulva távozzon az utolsó node-tól
 - A signal vége lelassulva lépjen be a transmittáló node-nál (még a vége előtt lassuljon le) 
@@ -17,41 +20,34 @@ MediumVisualizer
   ezeket lehessen állítani paraméterekkel
 - format stringel lehessen állítani hogy mit ír ki a reception/transmission ikon
 
-TransportConnectionVisualizer
-
+TransportConnectionVisualizer:
 ?- Lehessen enforce-olni, hogy megjelenjen a betű
 ?- A betűkód legyen unique, ne csak színnel együtt (A, B, ..., AA, AB, ... AAA AAB ...)
 - Lehetne format string (ports, átvitt byte-ok száma, stb.)
 
-Propagation
-
-Általános
+Általános:
 - Mindenhova: ned doc link -> a visualizerekre
 - Kéne egy label formatter minden nyilas visualizerre
 
-Indicator
-
-Ieee80211
+Ieee80211Visualizer:
 - a jelerősség függvényében változzon az icon, ez legyen kikapcsolható
 - lehessen ki/be kapcsolni az icont meg a labelt
 ?- az SSID legyen az icon mellett jobbra -> könnyebben olvasható, és legyen kisebb ikon
+- doesn't work with simplified mgmt
+- should indicate channel number
 
-InfoVisualizer
-+ Amikor a statistic value-ja 0, akkor '-' van kiírva
+InfoVisualizer:
 - InfoVisualizerShowcase: ha format = "%d" akkor nem csak a contention state van kiírva hanem exp. access is, de ez lehet hogy feature
 			  nagyon gyorsan eltűnik a kiírás amikor nem IDLE, nem lehet elolvasni
 - A placement default-ból top, de egymás mellé rakja őket. Zavaró lehet, hogy az "IDLE" átvált "DEFER+exp access"-re, és megváltozik a doboz helye + mérete
-+ when content = "str" some strange symbols appear
+- InfoVisualizer (and probably other visualizers): when DisplayHint = "bottom", the figure is on top of the module's name
 
-StatisticVisualizer
-+ Amikor a statistic value-ja 0, akkor '-' van kiírva
-+ crashes because of %u in the format string
-+ A statistic visualization és a transport connection visualization overlap-el, nem egymás felett van. Pl advanced showcase
+StatisticVisualizer:
 
-ObstacleLossVisualizer
+ObstacleLossVisualizer:
 - loss label-t lehessen kikapcsolni
 
-SceneVisualizer
+SceneVisualizer:
 - Az animation speed-et lehessen kontrollálni a szimulációs idő függvényében
 
 DatalinkVisualizer & PhysicallinkVisualizer:
@@ -61,64 +57,34 @@ NetworkPathVisualizer:
     Pl. NetworkPathActivity showcase --> Config StaticNetworkPaths --> packetFilter=ping-et ki kell kommentezni --> Run
 
 PacketDropVisualizer:
-
 - lehessen szűrni reason szerint
 
 PathVisualizer-ek:
-
-
-IPv4NetworkConfigurator:
-
-?- a netmaskRoutes miatt olyan szabály is hozzáadódik a routing táblához, ami hibás. Pont a korrekt szabály felett van, és a csomagok nem találnak oda
+- arrowlabel nem fade-el, csak a nyíl
 
 PhysicalLink:
 - Hibásan vett csomagokra ne húzzon be nyilat / vagy máshogyan
 
-IPv4
-?- A broadcast UDP-s csomagok elnyelődnek / nem mennek ki / ForceBroadcast paraméter az IPv4-ben WTF?
-
-TCP
-?- EndToEndDelay statistic always 0 (e.g. advanced showcase), it uses messageAge filter, which relies on creation timestamp, and that is 0 due to the packet being allocated in TCP, there's no easy solution
-
-TransportRoute:
+TransportRouteVisualizer:
 - TCP-vel nem működik, csak UDP-vel
 - TransportRouteVisualizer-nek lehetne portFilter-e, hogy csak bizonyos portokon folyó kommunikációk transport route-jait láthassuk
 - VideoStrmPk bug: ha olyan packet-ek mennek egyszerre, amiknek ugyanaz a nevük, akkor a nyíl következő töréspontja mindig a packetek következő időbeli felbukkanásához vezet.
     Pl. TransportPathActivity --> Config Filtering --> packetFilter-t és nodeFilter-t ki kell kommentezni --> Run
 
-NetworkNode:
+NetworkNodeVisualizer:
 - Boxman model-nek nem tudom változtatni a színét *.pedestrian.osgModelColor = "red" paraméterrel (pedestrian a node neve a példámban)
 - Boxman ahogy fel-le mozog, a modell belelóg a saját nevébe és ettől nem látsik a node neve
-- *.visualizer.*.networkNodeVisualizer.nodeFilter = "*" --> Ha a nodeFilterben a default érték helyett bármi más van, akkor a szimuláció hibára fut és el sem indul már
+?- *.visualizer.*.networkNodeVisualizer.nodeFilter = "*"
+    Ha a nodeFilterben a csillag helyett bármi más van, akkor a szimuláció hibára fut és el sem indul már
 - Megváltoztatom az icon-t az i tag-gel: @display("p=113,156;i=device/cellphone2,#ff0000");
     - az icont megváltoztatja, de az icon színét csak 2d-ben változtatja meg, 3dben nem
 
-SceneOsgEarthVisualizer
+SceneOsgEarthVisualizer:
 ?- lehessen beállítani a kezdeti kamera pozíciót
 - akkor is működnie kéne, ha nincs megadva a playgroundLongitude/playgroundLatitude, mert ez csak kényelmi funkció, ami arra való hogy "jók legyenek" a descartes koordináták (a jók alatt azt értjük hogy szépek)
 
 RoutingTableVisualizer:
 - Feature: parameter for max number of routes shown from a certain node to another
-
-Általános
-
-Configurator tutorial:
-?- interfaceTableVisualizer doesn't show the netmask (shows 10.0.0.1 instead of 10.0.0.1/29)
-+ step9: no routes shown at start, they're displayed later when the simulation is run
-!- step11A-B: no routes shown (actually, missing routes)
-+ step8a: no route shown from area3lan3host1 to area3lan3host3 -> used to be
-- step12: too many routes shown (it is also slow)
-
-Wireless showcases:
-+ LevelOfDetail:		crash. something wrong with the mac.
-+ HiddenNode:		exactly the same amount of packets in configs 1 and 3
-			check_and_cast(): Cannot cast 'inet::physicallayer::INoise*' to type 'const 						inet::physicallayer::NarrowbandNoiseBase *' -- in module (inet::physicallayer::Ieee80211Radio) 						HiddenNodeExample.hostA.wlan[0].radio (id=36), during network initialization
-+ RateControl:		the charts are not the same as before.
-- RateControl:		rate adaptation instead of rate control?
-+ Power:			error
-
-Wireless tutorial:
-- Step 8: energyBalance is nan J
 
 DONE:
 
@@ -131,30 +97,44 @@ InterfaceTableVisualizer:
 RoutingTableVisualizer:
 + nem fordul el a label a nyillal
 
-MediumVisualizer
+MediumVisualizer:
 + associated object for transmissions
 + canvasVisualizerben nincs unit a méter típusú paramétereknél
 
-Általános
+Általános:
 + A video recording az első frame-et kihagyja
 
-Ieee80211
+Ieee80211Visualizer:
 + amikor icon = "", elcrash-el
 
-InfoVisualizer
+InfoVisualizer:
 + when content = "str" some strange symbols appear
++ Amikor a statistic value-ja 0, akkor '-' van kiírva
 
-StatisticVisualizer
+StatisticVisualizer:
 + crashes because of %u in the format string
 - crash in advanced (a4e6d13 ("power xxx", 2017-06-01)), in StatisticVisualizerBase when trying to print unit, when the format string contains %u
++ Amikor a statistic value-ja 0, akkor '-' van kiírva
++ A statistic visualization és a transport connection visualization overlap-el, nem egymás felett van. Pl advanced showcase
 
-SceneVisualizer
+SceneVisualizer:
 + viewScale parameter
 
-Configurator tutorial
-+ step10A: crash
-+ step12: crash
+MobilityVisualizer:
++ moduleFilter nem mukodik
 
-Throughput
-+ in g mode the application-level throughput is less than in a-mode.
+DatalinkVisualizer & PhysicallinkVisualizer:
++ Csak akkor legyen nyíl 2 node között, ha a csomag közvetlenül megy át közöttük és nincs más node ahol megjelenik:
+    nodeFilter-ben a source és a destination volt megadva, köztük voltak switchek, a visualizer pedig behúzott egy nyilat a source és a destination közé KÖZVETLENÜL
 
+NetworkPathVisualizer:
++ showcases/visualizer/networkpathvisualizer-ben
+    Config StaticNetworkPaths-ban
+        CreateArrowheadGeometry, inet/common/OSGUtils.cc line 106
+        at t=1.001055s event #512
++ Ha éles a szög akkor a metszéspont messzire kerül és nagyon messze rajzolja a node-tól a nyílnak a töréspontját
+
+TransportRouteVisualizer:
++ Nem jeleníti meg végig a route-ot: utolsó switch és a destination node közötti rész kimarad
+  Sometimes the arrow tip is missing. For example, the route would go through an AP and end at a wirelesshost, but the polyline stops at the AP without an arrow tip.
+  (filtering showcase, ec97684 ("filtering xxx", 2017-05-09)) there are NaN values in the list of points of the polyline
