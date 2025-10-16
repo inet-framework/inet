@@ -1,0 +1,5 @@
+#!/bin/bash
+
+#echo "generating r file"
+
+cat omnetpp.ini | grep "\[Config" | sed 's/\[Config //g' | sed 's/\]//g'
