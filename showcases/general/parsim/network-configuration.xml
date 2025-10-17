@@ -1,0 +1,262 @@
+<config>
+   <interface hosts="ParsimNetwork.routerA" names="ppp0" address="10.0.0.1" netmask="255.255.255.252" metric="2"/>
+   <interface hosts="ParsimNetwork.routerD" names="ppp0" address="10.0.0.2" netmask="255.255.255.252" metric="2"/>
+   <interface hosts="ParsimNetwork.routerA" names="ppp1" address="10.0.0.5" netmask="255.255.255.252" metric="2"/>
+   <interface hosts="ParsimNetwork.routerB" names="ppp1" address="10.0.0.6" netmask="255.255.255.252" metric="2"/>
+   <interface hosts="ParsimNetwork.routerA" names="eth0" address="10.0.0.17" netmask="255.255.255.240" metric="20"/>
+   <interface hosts="ParsimNetwork.subnetworkA.wiredHost1" names="eth0" address="10.0.0.18" netmask="255.255.255.240" metric="20"/>
+   <interface hosts="ParsimNetwork.subnetworkA.wiredHost2" names="eth0" address="10.0.0.19" netmask="255.255.255.240" metric="20"/>
+   <interface hosts="ParsimNetwork.subnetworkA.wiredHost3" names="eth0" address="10.0.0.20" netmask="255.255.255.240" metric="20"/>
+   <interface hosts="ParsimNetwork.subnetworkA.wiredHost4" names="eth0" address="10.0.0.21" netmask="255.255.255.240" metric="20"/>
+   <interface hosts="ParsimNetwork.subnetworkA.wirelessHost1" names="wlan0" address="10.0.0.22" netmask="255.255.255.240" metric="1"/>
+   <interface hosts="ParsimNetwork.subnetworkA.wirelessHost2" names="wlan0" address="10.0.0.23" netmask="255.255.255.240" metric="1"/>
+   <interface hosts="ParsimNetwork.subnetworkA.wirelessHost3" names="wlan0" address="10.0.0.24" netmask="255.255.255.240" metric="1"/>
+   <interface hosts="ParsimNetwork.subnetworkA.wirelessHost4" names="wlan0" address="10.0.0.25" netmask="255.255.255.240" metric="1"/>
+   <interface hosts="ParsimNetwork.routerB" names="ppp0" address="10.0.0.9" netmask="255.255.255.252" metric="2"/>
+   <interface hosts="ParsimNetwork.routerC" names="ppp1" address="10.0.0.10" netmask="255.255.255.252" metric="2"/>
+   <interface hosts="ParsimNetwork.routerB" names="eth0" address="10.0.0.33" netmask="255.255.255.240" metric="20"/>
+   <interface hosts="ParsimNetwork.subnetworkB.wiredHost1" names="eth0" address="10.0.0.34" netmask="255.255.255.240" metric="20"/>
+   <interface hosts="ParsimNetwork.subnetworkB.wiredHost2" names="eth0" address="10.0.0.35" netmask="255.255.255.240" metric="20"/>
+   <interface hosts="ParsimNetwork.subnetworkB.wiredHost3" names="eth0" address="10.0.0.36" netmask="255.255.255.240" metric="20"/>
+   <interface hosts="ParsimNetwork.subnetworkB.wiredHost4" names="eth0" address="10.0.0.37" netmask="255.255.255.240" metric="20"/>
+   <interface hosts="ParsimNetwork.subnetworkB.wirelessHost1" names="wlan0" address="10.0.0.38" netmask="255.255.255.240" metric="1"/>
+   <interface hosts="ParsimNetwork.subnetworkB.wirelessHost2" names="wlan0" address="10.0.0.39" netmask="255.255.255.240" metric="1"/>
+   <interface hosts="ParsimNetwork.subnetworkB.wirelessHost3" names="wlan0" address="10.0.0.40" netmask="255.255.255.240" metric="1"/>
+   <interface hosts="ParsimNetwork.subnetworkB.wirelessHost4" names="wlan0" address="10.0.0.41" netmask="255.255.255.240" metric="1"/>
+   <interface hosts="ParsimNetwork.routerC" names="ppp0" address="10.0.0.13" netmask="255.255.255.252" metric="2"/>
+   <interface hosts="ParsimNetwork.routerD" names="ppp1" address="10.0.0.14" netmask="255.255.255.252" metric="2"/>
+   <interface hosts="ParsimNetwork.routerC" names="eth0" address="10.0.0.49" netmask="255.255.255.240" metric="20"/>
+   <interface hosts="ParsimNetwork.subnetworkC.wiredHost1" names="eth0" address="10.0.0.50" netmask="255.255.255.240" metric="20"/>
+   <interface hosts="ParsimNetwork.subnetworkC.wiredHost2" names="eth0" address="10.0.0.51" netmask="255.255.255.240" metric="20"/>
+   <interface hosts="ParsimNetwork.subnetworkC.wiredHost3" names="eth0" address="10.0.0.52" netmask="255.255.255.240" metric="20"/>
+   <interface hosts="ParsimNetwork.subnetworkC.wiredHost4" names="eth0" address="10.0.0.53" netmask="255.255.255.240" metric="20"/>
+   <interface hosts="ParsimNetwork.subnetworkC.wirelessHost1" names="wlan0" address="10.0.0.54" netmask="255.255.255.240" metric="1"/>
+   <interface hosts="ParsimNetwork.subnetworkC.wirelessHost2" names="wlan0" address="10.0.0.55" netmask="255.255.255.240" metric="1"/>
+   <interface hosts="ParsimNetwork.subnetworkC.wirelessHost3" names="wlan0" address="10.0.0.56" netmask="255.255.255.240" metric="1"/>
+   <interface hosts="ParsimNetwork.subnetworkC.wirelessHost4" names="wlan0" address="10.0.0.57" netmask="255.255.255.240" metric="1"/>
+   <interface hosts="ParsimNetwork.routerD" names="eth0" address="10.0.0.65" netmask="255.255.255.240" metric="20"/>
+   <interface hosts="ParsimNetwork.subnetworkD.wiredHost1" names="eth0" address="10.0.0.66" netmask="255.255.255.240" metric="20"/>
+   <interface hosts="ParsimNetwork.subnetworkD.wiredHost2" names="eth0" address="10.0.0.67" netmask="255.255.255.240" metric="20"/>
+   <interface hosts="ParsimNetwork.subnetworkD.wiredHost3" names="eth0" address="10.0.0.68" netmask="255.255.255.240" metric="20"/>
+   <interface hosts="ParsimNetwork.subnetworkD.wiredHost4" names="eth0" address="10.0.0.69" netmask="255.255.255.240" metric="20"/>
+   <interface hosts="ParsimNetwork.subnetworkD.wirelessHost1" names="wlan0" address="10.0.0.70" netmask="255.255.255.240" metric="1"/>
+   <interface hosts="ParsimNetwork.subnetworkD.wirelessHost2" names="wlan0" address="10.0.0.71" netmask="255.255.255.240" metric="1"/>
+   <interface hosts="ParsimNetwork.subnetworkD.wirelessHost3" names="wlan0" address="10.0.0.72" netmask="255.255.255.240" metric="1"/>
+   <interface hosts="ParsimNetwork.subnetworkD.wirelessHost4" names="wlan0" address="10.0.0.73" netmask="255.255.255.240" metric="1"/>
+   <multicast-group hosts="ParsimNetwork.routerA" interfaces="ppp0" address="224.0.0.1 224.0.0.2"/>
+   <multicast-group hosts="ParsimNetwork.routerD" interfaces="ppp0" address="224.0.0.1 224.0.0.2"/>
+   <multicast-group hosts="ParsimNetwork.routerA" interfaces="ppp1" address="224.0.0.1 224.0.0.2"/>
+   <multicast-group hosts="ParsimNetwork.routerB" interfaces="ppp1" address="224.0.0.1 224.0.0.2"/>
+   <multicast-group hosts="ParsimNetwork.routerA" interfaces="eth0" address="224.0.0.1 224.0.0.2"/>
+   <multicast-group hosts="ParsimNetwork.subnetworkA.wiredHost1" interfaces="eth0" address="224.0.0.1"/>
+   <multicast-group hosts="ParsimNetwork.subnetworkA.wiredHost2" interfaces="eth0" address="224.0.0.1"/>
+   <multicast-group hosts="ParsimNetwork.subnetworkA.wiredHost3" interfaces="eth0" address="224.0.0.1"/>
+   <multicast-group hosts="ParsimNetwork.subnetworkA.wiredHost4" interfaces="eth0" address="224.0.0.1"/>
+   <multicast-group hosts="ParsimNetwork.subnetworkA.wirelessHost1" interfaces="wlan0" address="224.0.0.1"/>
+   <multicast-group hosts="ParsimNetwork.subnetworkA.wirelessHost2" interfaces="wlan0" address="224.0.0.1"/>
+   <multicast-group hosts="ParsimNetwork.subnetworkA.wirelessHost3" interfaces="wlan0" address="224.0.0.1"/>
+   <multicast-group hosts="ParsimNetwork.subnetworkA.wirelessHost4" interfaces="wlan0" address="224.0.0.1"/>
+   <multicast-group hosts="ParsimNetwork.routerB" interfaces="ppp0" address="224.0.0.1 224.0.0.2"/>
+   <multicast-group hosts="ParsimNetwork.routerC" interfaces="ppp1" address="224.0.0.1 224.0.0.2"/>
+   <multicast-group hosts="ParsimNetwork.routerB" interfaces="eth0" address="224.0.0.1 224.0.0.2"/>
+   <multicast-group hosts="ParsimNetwork.subnetworkB.wiredHost1" interfaces="eth0" address="224.0.0.1"/>
+   <multicast-group hosts="ParsimNetwork.subnetworkB.wiredHost2" interfaces="eth0" address="224.0.0.1"/>
+   <multicast-group hosts="ParsimNetwork.subnetworkB.wiredHost3" interfaces="eth0" address="224.0.0.1"/>
+   <multicast-group hosts="ParsimNetwork.subnetworkB.wiredHost4" interfaces="eth0" address="224.0.0.1"/>
+   <multicast-group hosts="ParsimNetwork.subnetworkB.wirelessHost1" interfaces="wlan0" address="224.0.0.1"/>
+   <multicast-group hosts="ParsimNetwork.subnetworkB.wirelessHost2" interfaces="wlan0" address="224.0.0.1"/>
+   <multicast-group hosts="ParsimNetwork.subnetworkB.wirelessHost3" interfaces="wlan0" address="224.0.0.1"/>
+   <multicast-group hosts="ParsimNetwork.subnetworkB.wirelessHost4" interfaces="wlan0" address="224.0.0.1"/>
+   <multicast-group hosts="ParsimNetwork.routerC" interfaces="ppp0" address="224.0.0.1 224.0.0.2"/>
+   <multicast-group hosts="ParsimNetwork.routerD" interfaces="ppp1" address="224.0.0.1 224.0.0.2"/>
+   <multicast-group hosts="ParsimNetwork.routerC" interfaces="eth0" address="224.0.0.1 224.0.0.2"/>
+   <multicast-group hosts="ParsimNetwork.subnetworkC.wiredHost1" interfaces="eth0" address="224.0.0.1"/>
+   <multicast-group hosts="ParsimNetwork.subnetworkC.wiredHost2" interfaces="eth0" address="224.0.0.1"/>
+   <multicast-group hosts="ParsimNetwork.subnetworkC.wiredHost3" interfaces="eth0" address="224.0.0.1"/>
+   <multicast-group hosts="ParsimNetwork.subnetworkC.wiredHost4" interfaces="eth0" address="224.0.0.1"/>
+   <multicast-group hosts="ParsimNetwork.subnetworkC.wirelessHost1" interfaces="wlan0" address="224.0.0.1"/>
+   <multicast-group hosts="ParsimNetwork.subnetworkC.wirelessHost2" interfaces="wlan0" address="224.0.0.1"/>
+   <multicast-group hosts="ParsimNetwork.subnetworkC.wirelessHost3" interfaces="wlan0" address="224.0.0.1"/>
+   <multicast-group hosts="ParsimNetwork.subnetworkC.wirelessHost4" interfaces="wlan0" address="224.0.0.1"/>
+   <multicast-group hosts="ParsimNetwork.routerD" interfaces="eth0" address="224.0.0.1 224.0.0.2"/>
+   <multicast-group hosts="ParsimNetwork.subnetworkD.wiredHost1" interfaces="eth0" address="224.0.0.1"/>
+   <multicast-group hosts="ParsimNetwork.subnetworkD.wiredHost2" interfaces="eth0" address="224.0.0.1"/>
+   <multicast-group hosts="ParsimNetwork.subnetworkD.wiredHost3" interfaces="eth0" address="224.0.0.1"/>
+   <multicast-group hosts="ParsimNetwork.subnetworkD.wiredHost4" interfaces="eth0" address="224.0.0.1"/>
+   <multicast-group hosts="ParsimNetwork.subnetworkD.wirelessHost1" interfaces="wlan0" address="224.0.0.1"/>
+   <multicast-group hosts="ParsimNetwork.subnetworkD.wirelessHost2" interfaces="wlan0" address="224.0.0.1"/>
+   <multicast-group hosts="ParsimNetwork.subnetworkD.wirelessHost3" interfaces="wlan0" address="224.0.0.1"/>
+   <multicast-group hosts="ParsimNetwork.subnetworkD.wirelessHost4" interfaces="wlan0" address="224.0.0.1"/>
+   <wireless interfaces="ParsimNetwork.subnetworkA.wirelessHost1%wlan0 ParsimNetwork.subnetworkA.wirelessHost2%wlan0 ParsimNetwork.subnetworkA.wirelessHost3%wlan0 ParsimNetwork.subnetworkA.wirelessHost4%wlan0"/>
+   <wireless interfaces="ParsimNetwork.subnetworkB.wirelessHost1%wlan0 ParsimNetwork.subnetworkB.wirelessHost2%wlan0 ParsimNetwork.subnetworkB.wirelessHost3%wlan0 ParsimNetwork.subnetworkB.wirelessHost4%wlan0"/>
+   <wireless interfaces="ParsimNetwork.subnetworkC.wirelessHost1%wlan0 ParsimNetwork.subnetworkC.wirelessHost2%wlan0 ParsimNetwork.subnetworkC.wirelessHost3%wlan0 ParsimNetwork.subnetworkC.wirelessHost4%wlan0"/>
+   <wireless interfaces="ParsimNetwork.subnetworkD.wirelessHost1%wlan0 ParsimNetwork.subnetworkD.wirelessHost2%wlan0 ParsimNetwork.subnetworkD.wirelessHost3%wlan0 ParsimNetwork.subnetworkD.wirelessHost4%wlan0"/>
+   <route hosts="ParsimNetwork.routerA" destination="10.0.0.2" netmask="255.255.255.255" gateway="*" interface="ppp0" metric="0"/>
+   <route hosts="ParsimNetwork.routerA" destination="10.0.0.6" netmask="255.255.255.255" gateway="*" interface="ppp1" metric="0"/>
+   <route hosts="ParsimNetwork.routerA" destination="10.0.0.14" netmask="255.255.255.255" gateway="10.0.0.2" interface="ppp0" metric="0"/>
+   <route hosts="ParsimNetwork.routerA" destination="10.0.0.0" netmask="255.255.255.252" gateway="*" interface="ppp0" metric="2"/>
+   <route hosts="ParsimNetwork.routerA" destination="10.0.0.4" netmask="255.255.255.252" gateway="*" interface="ppp1" metric="2"/>
+   <route hosts="ParsimNetwork.routerA" destination="10.0.0.16" netmask="255.255.255.240" gateway="*" interface="eth0" metric="0"/>
+   <route hosts="ParsimNetwork.routerA" destination="10.0.0.16" netmask="255.255.255.240" gateway="*" interface="eth0" metric="20"/>
+   <route hosts="ParsimNetwork.routerA" destination="10.0.0.64" netmask="255.255.255.240" gateway="10.0.0.2" interface="ppp0" metric="0"/>
+   <route hosts="ParsimNetwork.routerA" destination="10.0.0.0" netmask="255.255.255.192" gateway="10.0.0.6" interface="ppp1" metric="0"/>
+   <route hosts="ParsimNetwork.routerA" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="ParsimNetwork.routerB" destination="10.0.0.5" netmask="255.255.255.255" gateway="*" interface="ppp1" metric="0"/>
+   <route hosts="ParsimNetwork.routerB" destination="10.0.0.10" netmask="255.255.255.255" gateway="*" interface="ppp0" metric="0"/>
+   <route hosts="ParsimNetwork.routerB" destination="10.0.0.13" netmask="255.255.255.255" gateway="10.0.0.10" interface="ppp0" metric="0"/>
+   <route hosts="ParsimNetwork.routerB" destination="10.0.0.4" netmask="255.255.255.252" gateway="*" interface="ppp1" metric="2"/>
+   <route hosts="ParsimNetwork.routerB" destination="10.0.0.8" netmask="255.255.255.252" gateway="*" interface="ppp0" metric="2"/>
+   <route hosts="ParsimNetwork.routerB" destination="10.0.0.32" netmask="255.255.255.240" gateway="*" interface="eth0" metric="0"/>
+   <route hosts="ParsimNetwork.routerB" destination="10.0.0.32" netmask="255.255.255.240" gateway="*" interface="eth0" metric="20"/>
+   <route hosts="ParsimNetwork.routerB" destination="10.0.0.48" netmask="255.255.255.240" gateway="10.0.0.10" interface="ppp0" metric="0"/>
+   <route hosts="ParsimNetwork.routerB" destination="10.0.0.0" netmask="255.255.255.128" gateway="10.0.0.5" interface="ppp1" metric="0"/>
+   <route hosts="ParsimNetwork.routerB" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="ParsimNetwork.routerC" destination="10.0.0.2" netmask="255.255.255.255" gateway="10.0.0.14" interface="ppp0" metric="0"/>
+   <route hosts="ParsimNetwork.routerC" destination="10.0.0.9" netmask="255.255.255.255" gateway="*" interface="ppp1" metric="0"/>
+   <route hosts="ParsimNetwork.routerC" destination="10.0.0.14" netmask="255.255.255.255" gateway="*" interface="ppp0" metric="0"/>
+   <route hosts="ParsimNetwork.routerC" destination="10.0.0.8" netmask="255.255.255.252" gateway="*" interface="ppp1" metric="2"/>
+   <route hosts="ParsimNetwork.routerC" destination="10.0.0.12" netmask="255.255.255.252" gateway="*" interface="ppp0" metric="2"/>
+   <route hosts="ParsimNetwork.routerC" destination="10.0.0.48" netmask="255.255.255.240" gateway="*" interface="eth0" metric="0"/>
+   <route hosts="ParsimNetwork.routerC" destination="10.0.0.48" netmask="255.255.255.240" gateway="*" interface="eth0" metric="20"/>
+   <route hosts="ParsimNetwork.routerC" destination="10.0.0.64" netmask="255.255.255.240" gateway="10.0.0.14" interface="ppp0" metric="0"/>
+   <route hosts="ParsimNetwork.routerC" destination="10.0.0.0" netmask="255.255.255.192" gateway="10.0.0.9" interface="ppp1" metric="0"/>
+   <route hosts="ParsimNetwork.routerC" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="ParsimNetwork.routerD" destination="10.0.0.1" netmask="255.255.255.255" gateway="*" interface="ppp0" metric="0"/>
+   <route hosts="ParsimNetwork.routerD" destination="10.0.0.10" netmask="255.255.255.255" gateway="10.0.0.13" interface="ppp1" metric="0"/>
+   <route hosts="ParsimNetwork.routerD" destination="10.0.0.13" netmask="255.255.255.255" gateway="*" interface="ppp1" metric="0"/>
+   <route hosts="ParsimNetwork.routerD" destination="10.0.0.0" netmask="255.255.255.252" gateway="*" interface="ppp0" metric="2"/>
+   <route hosts="ParsimNetwork.routerD" destination="10.0.0.12" netmask="255.255.255.252" gateway="*" interface="ppp1" metric="2"/>
+   <route hosts="ParsimNetwork.routerD" destination="10.0.0.48" netmask="255.255.255.240" gateway="10.0.0.13" interface="ppp1" metric="0"/>
+   <route hosts="ParsimNetwork.routerD" destination="10.0.0.64" netmask="255.255.255.240" gateway="*" interface="eth0" metric="0"/>
+   <route hosts="ParsimNetwork.routerD" destination="10.0.0.64" netmask="255.255.255.240" gateway="*" interface="eth0" metric="20"/>
+   <route hosts="ParsimNetwork.routerD" destination="10.0.0.0" netmask="255.255.255.192" gateway="10.0.0.1" interface="ppp0" metric="0"/>
+   <route hosts="ParsimNetwork.routerD" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkA.wiredHost1" destination="10.0.0.16" netmask="255.255.255.240" gateway="*" interface="eth0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkA.wiredHost1" destination="10.0.0.16" netmask="255.255.255.240" gateway="*" interface="eth0" metric="20"/>
+   <route hosts="ParsimNetwork.subnetworkA.wiredHost1" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkA.wiredHost1" destination="*" netmask="*" gateway="10.0.0.17" interface="eth0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkA.wiredHost2" destination="10.0.0.16" netmask="255.255.255.240" gateway="*" interface="eth0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkA.wiredHost2" destination="10.0.0.16" netmask="255.255.255.240" gateway="*" interface="eth0" metric="20"/>
+   <route hosts="ParsimNetwork.subnetworkA.wiredHost2" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkA.wiredHost2" destination="*" netmask="*" gateway="10.0.0.17" interface="eth0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkA.wiredHost3" destination="10.0.0.16" netmask="255.255.255.240" gateway="*" interface="eth0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkA.wiredHost3" destination="10.0.0.16" netmask="255.255.255.240" gateway="*" interface="eth0" metric="20"/>
+   <route hosts="ParsimNetwork.subnetworkA.wiredHost3" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkA.wiredHost3" destination="*" netmask="*" gateway="10.0.0.17" interface="eth0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkA.wiredHost4" destination="10.0.0.16" netmask="255.255.255.240" gateway="*" interface="eth0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkA.wiredHost4" destination="10.0.0.16" netmask="255.255.255.240" gateway="*" interface="eth0" metric="20"/>
+   <route hosts="ParsimNetwork.subnetworkA.wiredHost4" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkA.wiredHost4" destination="*" netmask="*" gateway="10.0.0.17" interface="eth0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkA.wirelessHost1" destination="10.0.0.16" netmask="255.255.255.240" gateway="*" interface="wlan0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkA.wirelessHost1" destination="10.0.0.16" netmask="255.255.255.240" gateway="*" interface="wlan0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkA.wirelessHost1" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkA.wirelessHost1" destination="*" netmask="*" gateway="10.0.0.17" interface="wlan0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkA.wirelessHost2" destination="10.0.0.16" netmask="255.255.255.240" gateway="*" interface="wlan0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkA.wirelessHost2" destination="10.0.0.16" netmask="255.255.255.240" gateway="*" interface="wlan0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkA.wirelessHost2" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkA.wirelessHost2" destination="*" netmask="*" gateway="10.0.0.17" interface="wlan0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkA.wirelessHost3" destination="10.0.0.16" netmask="255.255.255.240" gateway="*" interface="wlan0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkA.wirelessHost3" destination="10.0.0.16" netmask="255.255.255.240" gateway="*" interface="wlan0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkA.wirelessHost3" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkA.wirelessHost3" destination="*" netmask="*" gateway="10.0.0.17" interface="wlan0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkA.wirelessHost4" destination="10.0.0.16" netmask="255.255.255.240" gateway="*" interface="wlan0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkA.wirelessHost4" destination="10.0.0.16" netmask="255.255.255.240" gateway="*" interface="wlan0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkA.wirelessHost4" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkA.wirelessHost4" destination="*" netmask="*" gateway="10.0.0.17" interface="wlan0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkB.wiredHost1" destination="10.0.0.32" netmask="255.255.255.240" gateway="*" interface="eth0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkB.wiredHost1" destination="10.0.0.32" netmask="255.255.255.240" gateway="*" interface="eth0" metric="20"/>
+   <route hosts="ParsimNetwork.subnetworkB.wiredHost1" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkB.wiredHost1" destination="*" netmask="*" gateway="10.0.0.33" interface="eth0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkB.wiredHost2" destination="10.0.0.32" netmask="255.255.255.240" gateway="*" interface="eth0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkB.wiredHost2" destination="10.0.0.32" netmask="255.255.255.240" gateway="*" interface="eth0" metric="20"/>
+   <route hosts="ParsimNetwork.subnetworkB.wiredHost2" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkB.wiredHost2" destination="*" netmask="*" gateway="10.0.0.33" interface="eth0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkB.wiredHost3" destination="10.0.0.32" netmask="255.255.255.240" gateway="*" interface="eth0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkB.wiredHost3" destination="10.0.0.32" netmask="255.255.255.240" gateway="*" interface="eth0" metric="20"/>
+   <route hosts="ParsimNetwork.subnetworkB.wiredHost3" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkB.wiredHost3" destination="*" netmask="*" gateway="10.0.0.33" interface="eth0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkB.wiredHost4" destination="10.0.0.32" netmask="255.255.255.240" gateway="*" interface="eth0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkB.wiredHost4" destination="10.0.0.32" netmask="255.255.255.240" gateway="*" interface="eth0" metric="20"/>
+   <route hosts="ParsimNetwork.subnetworkB.wiredHost4" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkB.wiredHost4" destination="*" netmask="*" gateway="10.0.0.33" interface="eth0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkB.wirelessHost1" destination="10.0.0.32" netmask="255.255.255.240" gateway="*" interface="wlan0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkB.wirelessHost1" destination="10.0.0.32" netmask="255.255.255.240" gateway="*" interface="wlan0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkB.wirelessHost1" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkB.wirelessHost1" destination="*" netmask="*" gateway="10.0.0.33" interface="wlan0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkB.wirelessHost2" destination="10.0.0.32" netmask="255.255.255.240" gateway="*" interface="wlan0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkB.wirelessHost2" destination="10.0.0.32" netmask="255.255.255.240" gateway="*" interface="wlan0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkB.wirelessHost2" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkB.wirelessHost2" destination="*" netmask="*" gateway="10.0.0.33" interface="wlan0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkB.wirelessHost3" destination="10.0.0.32" netmask="255.255.255.240" gateway="*" interface="wlan0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkB.wirelessHost3" destination="10.0.0.32" netmask="255.255.255.240" gateway="*" interface="wlan0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkB.wirelessHost3" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkB.wirelessHost3" destination="*" netmask="*" gateway="10.0.0.33" interface="wlan0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkB.wirelessHost4" destination="10.0.0.32" netmask="255.255.255.240" gateway="*" interface="wlan0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkB.wirelessHost4" destination="10.0.0.32" netmask="255.255.255.240" gateway="*" interface="wlan0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkB.wirelessHost4" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkB.wirelessHost4" destination="*" netmask="*" gateway="10.0.0.33" interface="wlan0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkD.wiredHost1" destination="10.0.0.64" netmask="255.255.255.240" gateway="*" interface="eth0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkD.wiredHost1" destination="10.0.0.64" netmask="255.255.255.240" gateway="*" interface="eth0" metric="20"/>
+   <route hosts="ParsimNetwork.subnetworkD.wiredHost1" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkD.wiredHost1" destination="*" netmask="*" gateway="10.0.0.65" interface="eth0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkD.wiredHost2" destination="10.0.0.64" netmask="255.255.255.240" gateway="*" interface="eth0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkD.wiredHost2" destination="10.0.0.64" netmask="255.255.255.240" gateway="*" interface="eth0" metric="20"/>
+   <route hosts="ParsimNetwork.subnetworkD.wiredHost2" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkD.wiredHost2" destination="*" netmask="*" gateway="10.0.0.65" interface="eth0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkD.wiredHost3" destination="10.0.0.64" netmask="255.255.255.240" gateway="*" interface="eth0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkD.wiredHost3" destination="10.0.0.64" netmask="255.255.255.240" gateway="*" interface="eth0" metric="20"/>
+   <route hosts="ParsimNetwork.subnetworkD.wiredHost3" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkD.wiredHost3" destination="*" netmask="*" gateway="10.0.0.65" interface="eth0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkD.wiredHost4" destination="10.0.0.64" netmask="255.255.255.240" gateway="*" interface="eth0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkD.wiredHost4" destination="10.0.0.64" netmask="255.255.255.240" gateway="*" interface="eth0" metric="20"/>
+   <route hosts="ParsimNetwork.subnetworkD.wiredHost4" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkD.wiredHost4" destination="*" netmask="*" gateway="10.0.0.65" interface="eth0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkD.wirelessHost1" destination="10.0.0.64" netmask="255.255.255.240" gateway="*" interface="wlan0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkD.wirelessHost1" destination="10.0.0.64" netmask="255.255.255.240" gateway="*" interface="wlan0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkD.wirelessHost1" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkD.wirelessHost1" destination="*" netmask="*" gateway="10.0.0.65" interface="wlan0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkD.wirelessHost2" destination="10.0.0.64" netmask="255.255.255.240" gateway="*" interface="wlan0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkD.wirelessHost2" destination="10.0.0.64" netmask="255.255.255.240" gateway="*" interface="wlan0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkD.wirelessHost2" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkD.wirelessHost2" destination="*" netmask="*" gateway="10.0.0.65" interface="wlan0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkD.wirelessHost3" destination="10.0.0.64" netmask="255.255.255.240" gateway="*" interface="wlan0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkD.wirelessHost3" destination="10.0.0.64" netmask="255.255.255.240" gateway="*" interface="wlan0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkD.wirelessHost3" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkD.wirelessHost3" destination="*" netmask="*" gateway="10.0.0.65" interface="wlan0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkD.wirelessHost4" destination="10.0.0.64" netmask="255.255.255.240" gateway="*" interface="wlan0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkD.wirelessHost4" destination="10.0.0.64" netmask="255.255.255.240" gateway="*" interface="wlan0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkD.wirelessHost4" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkD.wirelessHost4" destination="*" netmask="*" gateway="10.0.0.65" interface="wlan0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkC.wiredHost1" destination="10.0.0.48" netmask="255.255.255.240" gateway="*" interface="eth0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkC.wiredHost1" destination="10.0.0.48" netmask="255.255.255.240" gateway="*" interface="eth0" metric="20"/>
+   <route hosts="ParsimNetwork.subnetworkC.wiredHost1" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkC.wiredHost1" destination="*" netmask="*" gateway="10.0.0.49" interface="eth0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkC.wiredHost2" destination="10.0.0.48" netmask="255.255.255.240" gateway="*" interface="eth0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkC.wiredHost2" destination="10.0.0.48" netmask="255.255.255.240" gateway="*" interface="eth0" metric="20"/>
+   <route hosts="ParsimNetwork.subnetworkC.wiredHost2" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkC.wiredHost2" destination="*" netmask="*" gateway="10.0.0.49" interface="eth0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkC.wiredHost3" destination="10.0.0.48" netmask="255.255.255.240" gateway="*" interface="eth0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkC.wiredHost3" destination="10.0.0.48" netmask="255.255.255.240" gateway="*" interface="eth0" metric="20"/>
+   <route hosts="ParsimNetwork.subnetworkC.wiredHost3" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkC.wiredHost3" destination="*" netmask="*" gateway="10.0.0.49" interface="eth0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkC.wiredHost4" destination="10.0.0.48" netmask="255.255.255.240" gateway="*" interface="eth0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkC.wiredHost4" destination="10.0.0.48" netmask="255.255.255.240" gateway="*" interface="eth0" metric="20"/>
+   <route hosts="ParsimNetwork.subnetworkC.wiredHost4" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkC.wiredHost4" destination="*" netmask="*" gateway="10.0.0.49" interface="eth0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkC.wirelessHost1" destination="10.0.0.48" netmask="255.255.255.240" gateway="*" interface="wlan0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkC.wirelessHost1" destination="10.0.0.48" netmask="255.255.255.240" gateway="*" interface="wlan0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkC.wirelessHost1" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkC.wirelessHost1" destination="*" netmask="*" gateway="10.0.0.49" interface="wlan0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkC.wirelessHost2" destination="10.0.0.48" netmask="255.255.255.240" gateway="*" interface="wlan0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkC.wirelessHost2" destination="10.0.0.48" netmask="255.255.255.240" gateway="*" interface="wlan0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkC.wirelessHost2" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkC.wirelessHost2" destination="*" netmask="*" gateway="10.0.0.49" interface="wlan0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkC.wirelessHost3" destination="10.0.0.48" netmask="255.255.255.240" gateway="*" interface="wlan0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkC.wirelessHost3" destination="10.0.0.48" netmask="255.255.255.240" gateway="*" interface="wlan0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkC.wirelessHost3" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkC.wirelessHost3" destination="*" netmask="*" gateway="10.0.0.49" interface="wlan0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkC.wirelessHost4" destination="10.0.0.48" netmask="255.255.255.240" gateway="*" interface="wlan0" metric="0"/>
+   <route hosts="ParsimNetwork.subnetworkC.wirelessHost4" destination="10.0.0.48" netmask="255.255.255.240" gateway="*" interface="wlan0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkC.wirelessHost4" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="ParsimNetwork.subnetworkC.wirelessHost4" destination="*" netmask="*" gateway="10.0.0.49" interface="wlan0" metric="0"/>
+</config>

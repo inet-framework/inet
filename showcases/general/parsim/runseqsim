@@ -1,0 +1,3 @@
+#! /bin/sh
+
+inet -u Cmdenv -c General --parallel-simulation=false

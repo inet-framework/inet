@@ -1,0 +1,89 @@
+SEQUENTIAL
+==========
+
+DEBUG:
+
+** Event #2252288   t=1.41808182249   Elapsed: 128.452s (2m 08s)  28% completed  (28% total)
+     Speed:     ev/sec=16450   simsec/sec=0.00188428   ev/simsec=8.73011e+06
+     Messages:  created: 974079   present: 2821   in FES: 174
+
+real	7m6,814s
+user	7m5,127s
+sys	0m0,391s
+
+RELEASE:
+
+** Event #834816   t=1.256313170263   Elapsed: 8.00633s (0m 08s)  62% completed  (62% total)
+     Speed:     ev/sec=109367   simsec/sec=0.0124782   ev/simsec=8.7647e+06
+     Messages:  created: 377760   present: 2755   in FES: 181
+
+real	1m10,564s
+user	1m9,992s
+sys	0m0,288s
+
+PARALLEL (named pipe)
+=====================
+
+DEBUG:
+
+** Event #878080   t=1.550485530438   Elapsed: 287.771s (4m 47s)  77% completed  (77% total)
+     Speed:     ev/sec=3411.76   simsec/sec=0.00156078   ev/simsec=2.18594e+06
+     Messages:  created: 375035   present: 742   in FES: 51
+
+  18738 levy      20   0  307212 128536  86356 R  42,7   0,4   0:31.63 opp_run_dbg                                                          
+  18739 levy      20   0  307344 128616  86444 S  41,3   0,4   0:32.77 opp_run_dbg                                                          
+  18740 levy      20   0  307212 127824  85616 S  40,0   0,4   0:29.73 opp_run_dbg                                                          
+  18737 levy      20   0  307212 128044  85872 S  32,0   0,4   0:29.28 opp_run_dbg                                                          
+
+real	10m2,950s
+user	13m5,583s
+sys	2m9,444s
+
+RELEASE:
+
+** Event #270080   t=1.273017330438   Elapsed: 40.4161s (0m 40s)  63% completed  (63% total)
+     Speed:     ev/sec=20499.9   simsec/sec=0.0093477   ev/simsec=2.19304e+06
+     Messages:  created: 119080   present: 682   in FES: 47
+
+  43044 levy      20   0  273756  99924  59260 R  78,0   0,3   0:13.16 opp_run_release                                                      
+  43045 levy      20   0  273756 100060  59660 R  78,0   0,3   0:12.80 opp_run_release                                                      
+  43046 levy      20   0  273756 101344  60784 R  78,0   0,3   0:13.23 opp_run_release                                                      
+  43043 levy      20   0  273756 101332  60916 S  74,0   0,3   0:12.73 opp_run_release                                                      
+
+real	2m12,037s
+user	2m24,649s
+sys	1m41,170s
+
+PARALLEL (mpi)
+==============
+
+DEBUG:
+
+** Event #205568   t=1.243525470438   Elapsed: 40.5473s (0m 40s)  62% completed  (62% total)
+     Speed:     ev/sec=6874.56   simsec/sec=0.0031267   ev/simsec=2.19866e+06
+     Messages:  created: 92018   present: 690   in FES: 49
+
+  20221 levy      20   0  487116 136476  91832 R 100,7   0,4   1:13.90 opp_run_dbg                                                          
+  20206 levy      20   0  487244 136644  91756 R 100,0   0,4   1:13.93 opp_run_dbg                                                          
+  20216 levy      20   0  487240 136356  91472 R 100,0   0,4   1:13.73 opp_run_dbg                                                          
+  20222 levy      20   0  487240 135752  90860 R 100,0   0,4   1:13.81 opp_run_dbg                                                          
+
+real	5m7,183s
+user	20m17,183s
+sys	0m1,751s
+
+RELEASE:
+
+** Event #907776   t=1.582103510263   Elapsed: 28.2142s (0m 28s)  79% completed  (79% total)
+     Speed:     ev/sec=39856.4   simsec/sec=0.0182185   ev/simsec=2.18769e+06
+     Messages:  created: 387977   present: 711   in FES: 48
+
+  42887 levy      20   0  454052 109264  65616 R 101,5   0,3   0:06.78 opp_run_release                                                      
+  42894 levy      20   0  454084 108540  65156 R 100,0   0,3   0:06.78 opp_run_release                                                      
+  42898 levy      20   0  454056 109080  65448 R 100,0   0,3   0:06.79 opp_run_release                                                      
+  42899 levy      20   0  454184 109068  65424 R 100,0   0,3   0:06.78 opp_run_release                                                      
+
+real	0m54,826s
+user	3m32,212s
+sys	0m0,982s
+
