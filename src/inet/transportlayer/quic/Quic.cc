@@ -348,7 +348,8 @@ void Quic::handleMessageFromUdp(cMessage *msg)
             dummyAuthTag->markImmutable();
             newPayloadSequence->insertAtBack(dummyAuthTag); // reserve space for authentication tag
             newPayloadSequence->markImmutable();
-            pkt->replaceData(newPayloadSequence);
+            pkt->eraseAll();
+            pkt->insertData(newPayloadSequence);
         }
         else if (Ptr<const BytesChunk> bytesChunk = dynamicPtrCast<const BytesChunk>(pktChunk)) {
             std::vector<uint8_t> protectedDatagram = bytesChunk->getBytes();

@@ -176,7 +176,7 @@ void ConnectionState::discardFrames(Packet *pkt)
 
 void ConnectionState::processFrame(Packet *pkt, PacketNumberSpace pnSpace)
 {
-    auto frameHeader = pkt->popAtFront<FrameHeader>();
+    auto frameHeader = pkt->popAtFront<FrameHeader>(b(-1), Chunk::PF_ALLOW_REINTERPRETATION);
     EV_DEBUG << "process frame, found chunk: " << frameHeader << endl;
 
     if (frameHeader->getFrameType() != FRAME_HEADER_TYPE_ACK

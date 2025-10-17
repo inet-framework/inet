@@ -958,13 +958,14 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
         constPtrCast<Chunk>(chunk)->markImmutable();
         const auto& oldChunk = peekAt<T>(offset, length, flags);
         b chunkLength = oldChunk->getChunkLength();
+        b newChunkLength = chunk->getChunkLength();
         b frontLength = offset;
         const auto& frontPart = frontLength > b(0) ? peekAt(b(0), frontLength) : nullptr;
         b backLength = totalLength - offset - chunkLength;
         const auto& backPart = backLength > b(0) ? peekAt(totalLength - backLength, backLength) : nullptr;
         content = makeShared<EmptyChunk>();
         const auto& result = makeExclusivelyOwnedMutableChunk(oldChunk);
-        CHUNK_CHECK_USAGE(chunkLength == chunk->getChunkLength(), "length is different");
+        CHUNK_CHECK_USAGE(chunkLength == newChunkLength, "length is different");
         if (frontLength == b(0) && backLength == b(0))
             content = chunk;
         else {
