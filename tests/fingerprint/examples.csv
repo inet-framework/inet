@@ -66,9 +66,9 @@
 # /examples/diffserv/simple_/,         -f omnetpp.ini -c WithoutQoS -r 0   # abstract-config
 # /examples/diffserv/simple_/,         -f omnetpp.ini -c WithPolicing -r 0   # abstract-config
 # /examples/diffserv/simple_/,         -f omnetpp.ini -c WithQueueing -r 0   # abstract-config
-/examples/diffserv/simple_/,         -f omnetpp.ini -c VoIP_WithoutQoS -r 0,               10s,             3ede-d2c9/tplx;d9b9-91a7/~tNl;7f42-64e4/~tND;0261-438e/tyf, PASS, EthernetMac Ipv4
-/examples/diffserv/simple_/,         -f omnetpp.ini -c VoIP_WithPolicing -r 0,             10s,             cdef-134c/tplx;9fdd-df8f/~tNl;9d47-b0e6/~tND;22df-449c/tyf, PASS, EthernetMac Ipv4
-/examples/diffserv/simple_/,         -f omnetpp.ini -c VoIP_WithPolicingAndQueueing -r 0,  10s,             385e-ae88/tplx;bd81-b731/~tNl;a789-a6d5/~tND;4e79-c9e3/tyf, PASS, EthernetMac Ipv4
+/examples/diffserv/simple_/,         -f omnetpp.ini -c VoIP_WithoutQoS -r 0,               10s,             389b-d02a/tplx;d530-cd41/~tNl;49ed-5831/~tND;77f2-c1a1/tyf, PASS, EthernetMac Ipv4
+/examples/diffserv/simple_/,         -f omnetpp.ini -c VoIP_WithPolicing -r 0,             10s,             ed2e-2daf/tplx;ae02-d842/~tNl;96ee-a224/~tND;dab9-56fa/tyf, PASS, EthernetMac Ipv4
+/examples/diffserv/simple_/,         -f omnetpp.ini -c VoIP_WithPolicingAndQueueing -r 0,  10s,             073c-83cb/tplx;38f0-e21a/~tNl;62cc-f459/~tND;9b48-3e0b/tyf, PASS, EthernetMac Ipv4
 
 # /examples/emulation/extclient/,      -f omnetpp.ini -c General -r 0,                100s,         0, ERROR,    # pcap devices not supported
 # /examples/emulation/extserver/,      -f omnetpp.ini -c Uplink_Traffic -r 0,         100s,         0, ERROR,    # pcap devices not supported
