@@ -23,19 +23,15 @@ void ActivePacketSource::initialize(int stage)
     }
     else if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(outputGate);
-        if (!productionTimer->isScheduled())
+        if (productionTimer != nullptr && !productionTimer->isScheduled())
             scheduleProductionTimerAndProducePacket();
     }
 }
 
 void ActivePacketSource::handleMessage(cMessage *message)
 {
-    if (message == productionTimer) {
-        if (consumer == nullptr || consumer.canPushSomePacket()) {
-            scheduleProductionTimer(productionIntervalParameter->doubleValue());
-            producePacket();
-        }
-    }
+    if (message == productionTimer)
+        scheduleProductionTimerAndProducePacket();
     else
         throw cRuntimeError("Unknown message");
 }
@@ -56,12 +52,19 @@ void ActivePacketSource::scheduleProductionTimer(clocktime_t delay)
 
 void ActivePacketSource::scheduleProductionTimerAndProducePacket()
 {
-    if (!initialProductionOffsetScheduled && initialProductionOffset >= CLOCKTIME_ZERO) {
-        scheduleProductionTimer(initialProductionOffset);
+    if (!initialProductionOffsetScheduled && initialProductionOffset >= 0) {
+        if (std::isfinite(initialProductionOffset))
+            scheduleProductionTimer(initialProductionOffset);
         initialProductionOffsetScheduled = true;
     }
     else if (consumer == nullptr || consumer.canPushSomePacket()) {
-        scheduleProductionTimer(productionIntervalParameter->doubleValue());
+        double interval = productionIntervalParameter->doubleValue();
+        if (std::isfinite(interval))
+            scheduleProductionTimer(interval);
+        else {
+            cancelAndDelete(productionTimer);
+            productionTimer = nullptr;
+        }
         producePacket();
     }
 }
@@ -77,7 +80,7 @@ void ActivePacketSource::producePacket()
 void ActivePacketSource::handleCanPushPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
-    if (!productionTimer->isScheduled())
+    if (productionTimer != nullptr && !productionTimer->isScheduled())
         scheduleProductionTimerAndProducePacket();
 }
 

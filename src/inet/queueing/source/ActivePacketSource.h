@@ -21,7 +21,7 @@ class INET_API ActivePacketSource : public ClockUserModuleMixin<ActivePacketSour
 {
   protected:
     bool initialProductionOffsetScheduled = false;
-    clocktime_t initialProductionOffset;
+    double initialProductionOffset = NaN;
     cPar *productionIntervalParameter = nullptr;
     ClockEvent *productionTimer = nullptr;
     bool scheduleForAbsoluteTime = false;
