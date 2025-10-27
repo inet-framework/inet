@@ -1,5 +1,5 @@
 import math
-from omnetpp.scave import results, chart, utils, ideplot
+from omnetpp.scave import results, chart, utils, ideplot, vectorops, delta_measurement
 import matplotlib.pyplot as plt
 import pandas as pd
 import ast
@@ -128,6 +128,9 @@ def plot_vectors(df, props, legend_func=utils.make_legend_label, global_style=No
         - `cycle_seed`: Alters the sequence in which colors and markers are assigned to series.
     """
     log_chart_name(logger, props)
+    
+    x_unit = "s" # vectime is always simtime
+    y_unit = utils._check_same_unit(df)
     p = ideplot if chart.is_native_chart() else plt
     
     props['plot_function'] = inspect.currentframe().f_code.co_name
@@ -141,6 +144,28 @@ def plot_vectors(df, props, legend_func=utils.make_legend_label, global_style=No
         df.sort_values(by='order', inplace=True)
     else:
         df.sort_values(by=legend_cols, inplace=True)
+        
+    # X unit
+    target_x_unit = get_prop("xaxis_unit")
+    if target_x_unit is None:
+        target_x_unit = x_unit
+    elif target_x_unit == "" and x_unit:
+        target_x_unit = utils._get_best_unit(df.vectime, x_unit)
+    if x_unit != target_x_unit and x_unit:
+        df.vectime = utils._convert_to_unit(df.vectime, x_unit, target_x_unit)
+        x_unit = target_x_unit
+
+    # Y unit
+    target_y_unit = get_prop("yaxis_unit")
+    if target_y_unit is None:
+        target_y_unit = y_unit
+    elif target_y_unit == "" and y_unit:
+        target_y_unit = utils._get_best_unit(df.vecvalue, y_unit)
+    if y_unit != target_y_unit and y_unit:
+        df.vecvalue = utils._convert_to_unit(df.vecvalue, y_unit, target_y_unit)
+        y_unit = target_y_unit
+        df["unit"] = target_y_unit
+    
     for t in df.itertuples(index=False):
         style = utils._make_line_args(props, t, df)
         logger.debug(f"orig style: {style}")
@@ -161,7 +186,21 @@ def plot_vectors(df, props, legend_func=utils.make_legend_label, global_style=No
     title = get_prop("title") or utils.make_chart_title(df, title_cols)
     utils.set_plot_title(title)
 
-    p.ylabel(utils.make_chart_title(df, ["title"]))
+    ylabel = utils.make_chart_title(df, ["title"])
+    if "xaxis_unit" in props or "yaxis_unit" in props:
+        utils._set_xlabel(p, props, x_unit, "Simulation Time")
+        utils._set_xlimits(p, props, x_unit)
+        utils._set_ylabel(p, props, y_unit, ylabel)
+        utils._set_ylimits(p, props, y_unit)
+    else:
+        # backward compatibility for old charts that don't have the xaxis_unit and yaxis_unit properties yet
+        p.xlabel("Simulation Time [s]")
+        if y_unit is not None:
+            ylabel += f" [{y_unit}]"
+        p.ylabel(ylabel)
+
+    if not ideplot.is_native_plot():
+        plt.gca().delta_measurement = delta_measurement.DeltaMeasurement(plt.gcf(), plt.gca())
     
 def plot_vectors_separate(df, props, legend_func=utils.make_legend_label, global_style=None, share_axes='x'):
     """
