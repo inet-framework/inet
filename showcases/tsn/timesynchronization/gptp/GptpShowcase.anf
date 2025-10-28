@@ -8142,6 +8142,9 @@ df = utils.perform_vector_ops(df, props["vector_operations"])
 inet.scave.plot.add_to_dataframe(df, [('module', 'TwoMasterClocksRingGptpShowcase.tsnClock2.clock', {'linewidth': 3}), 
                                    ('module', 'TwoMasterClocksRingGptpShowcase.tsnClock1.clock', {'linestyle': '--'})])
 
+# kludge so that chart tests don't fail
+df = df.drop(columns=['unit'])
+
 # plot
 inet.scave.plot.plot_vectors(df, props)
 
@@ -8880,6 +8883,9 @@ df = utils.perform_vector_ops(df, props["vector_operations"])
 inet.scave.plot.add_to_dataframe(df, [('module', 'TwoMasterClocksRingGptpShowcase.tsnClock2.clock', {'linewidth': 3}), 
                                    ('module', 'TwoMasterClocksRingGptpShowcase.tsnClock1.clock', {'linestyle': '--'})])
 
+# kludge so that chart tests don't fail
+df = df.drop(columns=['unit'])
+
 # plot
 inet.scave.plot.plot_vectors(df, props)
 
@@ -9612,6 +9618,9 @@ df = utils.perform_vector_ops(df, props["vector_operations"])
 inet.scave.plot.add_to_dataframe(df, [('module', 'TwoMasterClocksRingGptpShowcase.tsnClock2.clock', {'linewidth': 3}), 
                                    ('module', 'TwoMasterClocksRingGptpShowcase.tsnClock1.clock', {'linestyle': '--'})])
 
+# kludge so that chart tests don't fail
+df = df.drop(columns=['unit'])
+
 # plot
 inet.scave.plot.plot_vectors(df, props)
 
@@ -10337,6 +10346,9 @@ except results.ResultQueryError as e:
 
 if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
+
+# kludge so that chart tests don't fail
+df = df.drop(columns=['unit'])
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
