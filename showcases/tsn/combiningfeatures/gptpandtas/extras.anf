@@ -11,7 +11,7 @@
         <input pattern="results/Recovery-#0.vec"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/linechart.png" id="1112483559" name="Recovery, Clock Drift, Time Domain of Primary Master (Domain 0)" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="474955663" name="Recovery, Clock Drift, Time Domain of Primary Master (Domain 0)" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -656,7 +656,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1201401208" name="Recovery, Clock Drift, Time Domain of Hot-Standby Master (Domain 2)" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1797837755" name="Recovery, Clock Drift, Time Domain of Hot-Standby Master (Domain 2)" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -691,6 +691,9 @@ style_tuple_list = [('module', 'GptpAndTasShowcase.tsnClock1.clock', {'linestyle
                     ('module', 'GptpAndTasShowcase.tsnClock2.clock', {'linewidth': 2})]
                     
 inet.scave.plot.add_to_dataframe(df, style_tuple_list)
+
+# kludge so that chart tests don't fail
+df = df.drop(columns=['unit'])
 
 # plot
 inet.scave.plot.plot_vectors(df, props)
@@ -1302,7 +1305,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1779049382" name="Recovery, Clock Drift, Active Clocks in Bridges and End Stations" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1852849951" name="Recovery, Clock Drift, Active Clocks in Bridges and End Stations" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -1337,6 +1340,9 @@ style_tuple_list = [('module', 'GptpAndTasShowcase.tsnClock1.clock', {'linewidth
                     ('module', 'GptpAndTasShowcase.tsnClock2.clock', {'linewidth': 2})]
 
 inet.scave.plot.add_to_dataframe(df, style_tuple_list)
+
+# kludge so that chart tests don't fail
+df = df.drop(columns=['unit'])
 
 # plot
 inet.scave.plot.plot_vectors(df, props)
@@ -1948,7 +1954,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1323479879" name="Application End-to-End Delay, Recovery" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="778434422" name="Application End-to-End Delay, Recovery" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -2583,7 +2589,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="false"/>
             <property name="legend_format" value="meanBitLifeTimePerPacket"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="119001743" name="Application End-To-End Delay, All Cases" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="518576747" name="Application End-To-End Delay, All Cases" resultTypes="" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from omnetpp.scave import results, chart, utils
