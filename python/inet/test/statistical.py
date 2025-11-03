@@ -82,6 +82,9 @@ class StatisticalTestTask(SimulationTestTask):
         if os.path.exists(current_vector_result_file_name):
             run_command_with_logging(["opp_scavetool", "x", "--type", "sth", "-w", current_scalar_result_file_name, current_vector_result_file_name, "-o", current_scalar_result_file_name])
             os.remove(current_vector_result_file_name)
+        current_index_result_file_name = simulation_project.get_full_path(os.path.join(working_directory, "results", self.get_result_file_name("vci")))
+        if os.path.exists(current_index_result_file_name):
+            os.remove(current_index_result_file_name)
         _remove_attr_lines(current_scalar_result_file_name)
         stored_scalar_result_file_name = simulation_project.get_full_path(os.path.join(simulation_project.statistics_folder, working_directory, self.get_result_file_name("sca")))
         _logger.debug(f"Reading result file {current_scalar_result_file_name}")
@@ -95,9 +98,9 @@ class StatisticalTestTask(SimulationTestTask):
             if not current_df.equals(stored_df):
                 _write_diff_file(stored_scalar_result_file_name, current_scalar_result_file_name, scalar_result_diff_file_name)
                 if current_df.empty:
-                    return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result="FAIL", reason="Current statistical results are empty")
+                    task_result = self.task_result_class(task=self, simulation_task_result=simulation_task_result, result="FAIL", reason="Current statistical results are empty")
                 elif stored_df.empty:
-                    return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result="FAIL", reason="Stored statistical results are empty")
+                    task_result = self.task_result_class(task=self, simulation_task_result=simulation_task_result, result="FAIL", reason="Stored statistical results are empty")
                 else:
                     merged = stored_df.merge(current_df, on=['experiment', 'measurement', 'replication', 'module', 'name'], how='outer', suffixes=('_stored', '_current'))
                     df = merged[
@@ -117,11 +120,14 @@ class StatisticalTestTask(SimulationTestTask):
                     reason = df.loc[id].to_string()
                     reason = re.sub(r" +", " = ", reason)
                     reason = re.sub(r"\n", ", ", reason)
-                    return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result="FAIL", reason=reason)
+                    task_result = self.task_result_class(task=self, simulation_task_result=simulation_task_result, result="FAIL", reason=reason)
             else:
-                return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result="PASS")
+                task_result = self.task_result_class(task=self, simulation_task_result=simulation_task_result, result="PASS")
         else:
-            return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result="ERROR", reason="Stored statistical results are not found")
+            task_result = self.task_result_class(task=self, simulation_task_result=simulation_task_result, result="ERROR", reason="Stored statistical results are not found")
+        if os.path.exists(current_scalar_result_file_name):
+            os.remove(current_scalar_result_file_name)
+        return task_result
 
 def get_statistical_test_sim_time_limit(simulation_config, run_number=0):
     return simulation_config.sim_time_limit
@@ -173,9 +179,11 @@ class StatisticalResultsUpdateTask(SimulationUpdateTask):
         target_results_directory = simulation_project.get_full_path(os.path.join(simulation_project.statistics_folder, working_directory))
         os.makedirs(target_results_directory, exist_ok=True)
         update_result = super().run_protected(**kwargs)
+        stored_scalar_result_file_name = simulation_project.get_full_path(os.path.join(working_directory, "results", self.get_result_file_name("sca")))
         if update_result.result == "INSERT" or update_result.result == "UPDATE":
-            stored_scalar_result_file_name = simulation_project.get_full_path(os.path.join(working_directory, "results", self.get_result_file_name("sca")))
             shutil.copy(stored_scalar_result_file_name, target_results_directory)
+        if os.path.exists(stored_scalar_result_file_name):
+            os.remove(stored_scalar_result_file_name)
         return update_result
 
     def check_simulation_task_result(self, simulation_task_result, result_name_filter=None, exclude_result_name_filter=None, result_module_filter=None, exclude_result_module_filter=None, full_match=False, **kwargs):
@@ -187,6 +195,9 @@ class StatisticalResultsUpdateTask(SimulationUpdateTask):
         if os.path.exists(current_vector_result_file_name):
             run_command_with_logging(["opp_scavetool", "x", "--type", "sth", "-w", current_scalar_result_file_name, current_vector_result_file_name, "-o", current_scalar_result_file_name])
             os.remove(current_vector_result_file_name)
+        current_index_result_file_name = simulation_project.get_full_path(os.path.join(working_directory, "results", self.get_result_file_name("vci")))
+        if os.path.exists(current_index_result_file_name):
+            os.remove(current_index_result_file_name)
         _remove_attr_lines(current_scalar_result_file_name)
         stored_scalar_result_file_name = simulation_project.get_full_path(os.path.join(simulation_project.statistics_folder, working_directory, self.get_result_file_name("sca")))
         _logger.debug(f"Reading result file {current_scalar_result_file_name}")
