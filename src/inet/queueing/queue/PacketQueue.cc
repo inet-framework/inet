@@ -94,8 +94,11 @@ void PacketQueue::pushPacket(Packet *packet, const cGate *gate)
     emit(packetPushStartedSignal, packet, &packetPushStartedDetails);
     EV_INFO << "Pushing packet" << EV_FIELD(packet) << EV_ENDL;
     queue.insert(packet);
-    if (buffer != nullptr)
+    if (buffer != nullptr) {
         buffer->addPacket(packet);
+        if (isOverloaded())
+            throw cRuntimeError("Queue is overloaded while using a packet buffer");
+    }
     else if (packetDropperFunction != nullptr) {
         while (isOverloaded()) {
             auto packet = packetDropperFunction->selectPacket(this);
@@ -104,7 +107,8 @@ void PacketQueue::pushPacket(Packet *packet, const cGate *gate)
             dropPacket(packet, QUEUE_OVERFLOW);
         }
     }
-    ASSERT(!isOverloaded());
+    else if (isOverloaded())
+        throw cRuntimeError("Queue is overloaded without a packet dropper");
     if (collector != nullptr && getNumPackets() != 0)
         collector.handleCanPullPacketChanged();
     cNamedObject packetPushEndedDetails("atomicOperationEnded");
