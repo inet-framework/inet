@@ -22,4 +22,8 @@ simple ExponentialRateMeter extends PacketMeterBase like IPacketMeter
     parameters:
         double alpha; // Parameter in the range of (0, 1) for the exponential weight decrease
         @class(ExponentialRateMeter);
+        @signal[packetRate](type=double);
+        @statistic[packetRate](title="packet rate"; record=vector; unit=pps; interpolationmode=linear);
+        @signal[dataRate](type=double);
+        @statistic[dataRate](title="data rate"; record=vector; unit=bps; interpolationmode=linear);
 }

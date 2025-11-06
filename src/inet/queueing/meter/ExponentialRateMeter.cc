@@ -15,6 +15,9 @@ namespace queueing {
 
 Define_Module(ExponentialRateMeter);
 
+simsignal_t ExponentialRateMeter::packetRateSignal = registerSignal("packetRate");
+simsignal_t ExponentialRateMeter::dataRateSignal = registerSignal("dataRate");
+
 void ExponentialRateMeter::initialize(int stage)
 {
     PacketMeterBase::initialize(stage);
@@ -37,6 +40,8 @@ void ExponentialRateMeter::meterPacket(Packet *packet)
         currentNumPackets = 0;
         currentTotalPacketLength = b(0);
         lastUpdate = now;
+        emit(packetRateSignal, packetrate);
+        emit(dataRateSignal, datarate.get());
     }
     currentNumPackets++;
     currentTotalPacketLength += packet->getDataLength();

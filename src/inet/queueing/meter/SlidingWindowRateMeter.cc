@@ -15,6 +15,9 @@ namespace queueing {
 
 Define_Module(SlidingWindowRateMeter);
 
+simsignal_t SlidingWindowRateMeter::packetRateSignal = registerSignal("packetRate");
+simsignal_t SlidingWindowRateMeter::dataRateSignal = registerSignal("dataRate");
+
 void SlidingWindowRateMeter::initialize(int stage)
 {
     PacketMeterBase::initialize(stage);
@@ -42,6 +45,8 @@ void SlidingWindowRateMeter::meterPacket(Packet *packet)
     }
     datarate = currentTotalPacketLength / s(timeWindow.dbl());
     packetrate = currentNumPackets /timeWindow.dbl();
+    emit(packetRateSignal, packetrate);
+    emit(dataRateSignal, datarate.get());
     auto rateTag = packet->addTagIfAbsent<RateTag>();
     rateTag->setDatarate(datarate);
     rateTag->setPacketrate(packetrate);

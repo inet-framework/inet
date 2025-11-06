@@ -23,6 +23,9 @@ class INET_API ExponentialRateMeter : public PacketMeterBase
     bps datarate = bps(0);
     double packetrate = 0;
 
+    static simsignal_t packetRateSignal;
+    static simsignal_t dataRateSignal;
+
   protected:
     virtual void initialize(int stage) override;
     virtual void meterPacket(Packet *packet) override;

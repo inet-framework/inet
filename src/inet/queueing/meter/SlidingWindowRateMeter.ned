@@ -20,4 +20,8 @@ simple SlidingWindowRateMeter extends PacketMeterBase like IPacketMeter
     parameters:
         double timeWindow @unit(s); // Amount of time to look back from the current simulation time
         @class(SlidingWindowRateMeter);
+        @signal[packetRate](type=double);
+        @statistic[packetRate](title="packet rate"; record=vector; unit=pps; interpolationmode=linear);
+        @signal[dataRate](type=double);
+        @statistic[dataRate](title="data rate"; record=vector; unit=bps; interpolationmode=linear);
 }

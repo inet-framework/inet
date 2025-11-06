@@ -24,6 +24,9 @@ class INET_API SlidingWindowRateMeter : public PacketMeterBase
 
     std::map<simtime_t, b> packetLengths;
 
+    static simsignal_t packetRateSignal;
+    static simsignal_t dataRateSignal;
+
   protected:
     virtual void initialize(int stage) override;
     virtual void meterPacket(Packet *packet) override;
