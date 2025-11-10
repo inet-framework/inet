@@ -616,7 +616,7 @@ void Hcf::originatorProcessReceivedDataFrame(const Ptr<const Ieee80211DataHeader
 
 bool Hcf::hasFrameToTransmit(AccessCategory ac)
 {
-    auto edcaf = edca->getChannelOwner();
+    auto edcaf = edca->getEdcaf(ac);
     if (edcaf)
         return !edcaf->getPendingQueue()->isEmpty() || edcaf->getInProgressFrames()->hasInProgressFrames();
     else
