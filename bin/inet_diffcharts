@@ -20,32 +20,53 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 
 @dataclass(frozen=True)
 class DiffEntry:
-    base: str          # absolute path without suffixes (directory + basename without "-new"/"-diff")
+    base: str          # absolute path without suffixes (directory + basename without "-new"/"-old"/"-diff")
     dirpath: str       # directory containing the images
     name: str          # relative display name (directory basename + base file)
-    old_path: str
-    new_path: str
-    diff_path: str
+    diff_path: str     # {stem}-diff.png (may be None if missing)
+    current_path: str  # {stem}.png (may be None if missing)
+    old_path: str      # {stem}-old.png (may be None if missing)
+    new_path: str      # {stem}-new.png (may be None if missing)
 
 
 def find_diff_entries(root: str) -> List[DiffEntry]:
     """
-    Scan 'root' recursively and find triplets: <foo>.png, <foo>-new.png, <foo>-diff.png
-    (all in the same directory).
+    Scan 'root' recursively and find entries with any of: <foo>.png, <foo>-new.png, <foo>-old.png
+    (at least one must exist in the same directory).
     """
     entries: List[DiffEntry] = []
+    stems_seen = set()  # Track (dirpath, stem) to avoid duplicates
+
     for dirpath, _dirs, files in os.walk(root):
         pngs = {f for f in files if f.lower().endswith(".png")}
-        # Strategy: detect by -diff.png
+
+        # Find all potential stems by checking for any of the three suffixes
         for f in pngs:
-            if f.lower().endswith("-diff.png"):
-                stem = f[:-len("-diff.png")]
-                old_name = f"{stem}.png"
+            stem = None
+            if f.lower().endswith("-new.png"):
+                stem = f[:-len("-new.png")]
+            elif f.lower().endswith("-old.png"):
+                stem = f[:-len("-old.png")]
+            elif not f.lower().endswith("-new.png") and not f.lower().endswith("-old.png"):
+                # This is a base .png file (not ending in -new or -old)
+                stem = f[:-len(".png")]
+
+            if stem and (dirpath, stem) not in stems_seen:
+                stems_seen.add((dirpath, stem))
+
+                # Check which files exist
+                diff_name = f"{stem}-diff.png"
+                current_name = f"{stem}.png"
+                old_name = f"{stem}-old.png"
                 new_name = f"{stem}-new.png"
-                if old_name in pngs and new_name in pngs:
-                    old_path = os.path.join(dirpath, old_name)
-                    new_path = os.path.join(dirpath, new_name)
-                    diff_path = os.path.join(dirpath, f)
+
+                diff_path = os.path.join(dirpath, diff_name) if diff_name in pngs else None
+                current_path = os.path.join(dirpath, current_name) if current_name in pngs else None
+                old_path = os.path.join(dirpath, old_name) if old_name in pngs else None
+                new_path = os.path.join(dirpath, new_name) if new_name in pngs else None
+
+                # Only add if at least one of NEW or OLD exists
+                if new_path or old_path:
                     # Display name: relative to root or folder+stem
                     rel_dir = os.path.relpath(dirpath, root)
                     display = os.path.join(rel_dir, stem) if rel_dir != "." else stem
@@ -54,11 +75,13 @@ def find_diff_entries(root: str) -> List[DiffEntry]:
                             base=os.path.join(dirpath, stem),
                             dirpath=dirpath,
                             name=display,
+                            diff_path=diff_path,
+                            current_path=current_path,
                             old_path=old_path,
                             new_path=new_path,
-                            diff_path=diff_path,
                         )
                     )
+
     # Sort consistently (by relative display name, then by dir)
     entries.sort(key=lambda e: (e.name.lower(), e.dirpath.lower()))
     return entries
@@ -124,13 +147,13 @@ class ThumbLabel(QtWidgets.QLabel):
 
 
 class DiffTable(QtWidgets.QTableWidget):
-    """Table showing Diff | Old | New thumbnails, supports Ctrl+Wheel scaling."""
+    """Table showing {stem}.png | {stem}-new.png | {stem}-old.png thumbnails, supports Ctrl+Wheel scaling."""
     scaleChanged = QtCore.pyqtSignal(float)  # emits new scale
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
-        self.setColumnCount(5)
-        self.setHorizontalHeaderLabels(["Index", "Diff", "Old", "New", "Path"])
+        self.setColumnCount(6)
+        self.setHorizontalHeaderLabels(["Index", "DIFF", "CURRENT", "OLD", "NEW", "Path"])
         self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectionBehavior.SelectRows)
         self.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers)
         self.verticalHeader().setVisible(False)
@@ -141,7 +164,7 @@ class DiffTable(QtWidgets.QTableWidget):
         self.setHorizontalScrollMode(QtWidgets.QAbstractItemView.ScrollMode.ScrollPerPixel)
         # Avoid stretching columns unevenly; we'll set fixed widths per row-height
         self.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.Fixed)
-        
+
         # Add minimal spacing between rows using stylesheet
         self.setStyleSheet("""
             QTableWidget::item {
@@ -196,7 +219,8 @@ class DiffTable(QtWidgets.QTableWidget):
 
             # Find the longest relative path text
             for entry in self._entries:
-                relative_path = os.path.relpath(entry.old_path, os.getcwd())
+                base_path = entry.diff_path or entry.current_path or entry.old_path or entry.new_path
+                relative_path = os.path.relpath(base_path, os.getcwd())
                 text_width = fm.horizontalAdvance(relative_path) + 16  # Reduced padding since paths are shorter
                 max_path_width = max(max_path_width, text_width)
 
@@ -204,14 +228,15 @@ class DiffTable(QtWidgets.QTableWidget):
         for c in range(self.columnCount()):
             if c == 0:  # Index column
                 self.setColumnWidth(c, max(60, int(side * 0.3) + 8))  # Add padding
-            elif c == 4:  # Path column
+            elif c == 5:  # Path column
                 self.setColumnWidth(c, max_path_width + 8)  # Add padding
-            else:  # Image columns (Diff, Old, New)
+            else:  # Image columns (DIFF, CURRENT, OLD, NEW)
                 self.setColumnWidth(c, side + 8)  # Add padding between columns
 
-    def setRowWidgets(self, row: int, widgets: Tuple[QtWidgets.QWidget, QtWidgets.QWidget, QtWidgets.QWidget, QtWidgets.QWidget, QtWidgets.QWidget]) -> None:
+    def setRowWidgets(self, row: int, widgets: Tuple[QtWidgets.QWidget, ...]) -> None:
         for col, w in enumerate(widgets):
-            self.setCellWidget(row, col, w)
+            if w is not None:
+                self.setCellWidget(row, col, w)
 
     def setEntries(self, entries: List[DiffEntry]) -> None:
         """Set the entries data for path width calculations."""
@@ -281,8 +306,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self._cache = ImageCache()
         self._entries: List[DiffEntry] = []
         self._current_index = -1   # index in self._entries for viewer
-        self._current_kind = 0     # 0=diff,1=old,2=new
-        self._kinds = ("diff", "old", "new")
+        self._current_kind = 0     # 0=diff,1=current,2=old,3=new
+        self._kinds = ("diff", "current", "old", "new")
 
         # Central stacked layout: [0]=table page, [1]=viewer page
         self._stack = QtWidgets.QStackedWidget(self)
@@ -307,8 +332,6 @@ class MainWindow(QtWidgets.QMainWindow):
         # Initial data
         self.refresh(initial=True)
 
-        # Start maximized
-        self.showMaximized()
         # After show, set initial thumbs to fit ~3 rows on the current screen
         QtCore.QTimer.singleShot(0, self._init_base_thumb_side)
 
@@ -336,18 +359,26 @@ class MainWindow(QtWidgets.QMainWindow):
             index_w.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
             index_w.setStyleSheet("font-weight: bold; font-size: 14px;")
 
-            diff_w = ThumbLabel(ent.diff_path, self._cache, self._table)
-            old_w  = ThumbLabel(ent.old_path,  self._cache, self._table)
-            new_w  = ThumbLabel(ent.new_path,  self._cache, self._table)
+            # Create widgets only for existing files
+            diff_w = ThumbLabel(ent.diff_path, self._cache, self._table) if ent.diff_path else None
+            current_w = ThumbLabel(ent.current_path, self._cache, self._table) if ent.current_path else None
+            old_w = ThumbLabel(ent.old_path, self._cache, self._table) if ent.old_path else None
+            new_w = ThumbLabel(ent.new_path, self._cache, self._table) if ent.new_path else None
 
-            # Create path label - show path relative to current working directory
-            relative_path = os.path.relpath(ent.old_path, os.getcwd())
-            path_w = QtWidgets.QLabel(relative_path, self._table)
-            path_w.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignVCenter)
-            path_w.setStyleSheet("font-size: 14px; padding: 2px;")
-            path_w.setToolTip(ent.old_path)  # Show full absolute path on hover
+            # Create path label - show current path relative to current working directory
+            if ent.current_path:
+                relative_path = os.path.relpath(ent.current_path, os.getcwd())
+                path_w = QtWidgets.QLabel(relative_path, self._table)
+                path_w.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignVCenter)
+                path_w.setStyleSheet("font-size: 14px; padding: 2px;")
+                path_w.setToolTip(ent.current_path)  # Show full absolute path on hover
+            else:
+                # If current_path doesn't exist, show a placeholder or empty
+                path_w = QtWidgets.QLabel("", self._table)
+                path_w.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignVCenter)
+                path_w.setStyleSheet("font-size: 14px; padding: 2px;")
 
-            self._table.setRowWidgets(row, (index_w, diff_w, old_w, new_w, path_w))
+            self._table.setRowWidgets(row, (index_w, diff_w, current_w, old_w, new_w, path_w))
 
         # If we were in viewer mode, try to keep position (clamped)
         if not initial and self._stack.currentIndex() == 1 and self._entries:
@@ -392,7 +423,16 @@ class MainWindow(QtWidgets.QMainWindow):
         row = idx.row()
         if 0 <= row < len(self._entries):
             self._current_index = row
-            self._current_kind = 0  # diff first
+            # Find first available image type for this entry
+            ent = self._entries[row]
+            if ent.diff_path:
+                self._current_kind = 0
+            elif ent.current_path:
+                self._current_kind = 1
+            elif ent.old_path:
+                self._current_kind = 2
+            elif ent.new_path:
+                self._current_kind = 3
             self._show_viewer()
 
     # ----- Viewer mode -----
@@ -414,10 +454,24 @@ class MainWindow(QtWidgets.QMainWindow):
             self._viewer.clearImage()
             return
         ent = self._entries[self._current_index]
-        path = ent.diff_path if self._current_kind == 0 else (ent.old_path if self._current_kind == 1 else ent.new_path)
-        self._viewer.setImagePath(path)
-        # Also update window title for context
-        self.setWindowTitle(f"Image Diff Browser — [{ent.name}]  ({self._kinds[self._current_kind].upper()})")
+
+        # Get the path for the current kind
+        if self._current_kind == 0:
+            path = ent.diff_path
+        elif self._current_kind == 1:
+            path = ent.current_path
+        elif self._current_kind == 2:
+            path = ent.old_path
+        else:
+            path = ent.new_path
+
+        if path:
+            self._viewer.setImagePath(path)
+            # Also update window title for context
+            self.setWindowTitle(f"Image Diff Browser — [{ent.name}]  ({self._kinds[self._current_kind].upper()})")
+        else:
+            self._viewer.clearImage()
+            self.setWindowTitle(f"Image Diff Browser — [{ent.name}]  (NO IMAGE)")
 
     def _on_viewer_wheel_navigation(self, direction: int) -> None:
         """Handle mouse wheel navigation in viewer mode."""
@@ -425,14 +479,43 @@ class MainWindow(QtWidgets.QMainWindow):
             return
 
         if abs(direction) >= 100:
-            # Shift + wheel: cycle between diff/old/new image types (like left/right arrows)
+            # Shift + wheel: cycle between stem/new/old image types (like left/right arrows)
+            ent = self._entries[self._current_index]
             delta = +1 if direction > 0 else -1
-            self._current_kind = (self._current_kind + delta) % 3
+
+            # Skip missing files when navigating
+            attempts = 0
+            while attempts < 4:  # Maximum 4 attempts to avoid infinite loop
+                self._current_kind = (self._current_kind + delta) % 4
+
+                # Check if current kind has a file
+                if self._current_kind == 0 and ent.diff_path:
+                    break
+                elif self._current_kind == 1 and ent.current_path:
+                    break
+                elif self._current_kind == 2 and ent.old_path:
+                    break
+                elif self._current_kind == 3 and ent.new_path:
+                    break
+
+                attempts += 1
+
             self._show_current_in_viewer()
         else:
             # Regular wheel: navigate between entries (like up/down arrows)
             self._current_index = (self._current_index + direction) % len(self._entries)
-            self._current_kind = 0  # switch to diff immediately (like arrow keys)
+
+            # Find the first available image type for the new entry
+            ent = self._entries[self._current_index]
+            if ent.diff_path:
+                self._current_kind = 0
+            elif ent.current_path:
+                self._current_kind = 1
+            elif ent.old_path:
+                self._current_kind = 2
+            elif ent.new_path:
+                self._current_kind = 3
+
             self._show_current_in_viewer()
 
     # ----- Key handling -----
@@ -445,8 +528,28 @@ class MainWindow(QtWidgets.QMainWindow):
                 self._back_to_table()
                 return
             if e.key() in (QtCore.Qt.Key.Key_Left, QtCore.Qt.Key.Key_Right):
+                if not self._entries:
+                    return
+                ent = self._entries[self._current_index]
                 delta = -1 if e.key() == QtCore.Qt.Key.Key_Left else +1
-                self._current_kind = (self._current_kind + delta) % 3
+
+                # Skip missing files when navigating
+                attempts = 0
+                while attempts < 4:  # Maximum 4 attempts to avoid infinite loop
+                    self._current_kind = (self._current_kind + delta) % 4
+
+                    # Check if current kind has a file
+                    if self._current_kind == 0 and ent.diff_path:
+                        break
+                    elif self._current_kind == 1 and ent.current_path:
+                        break
+                    elif self._current_kind == 2 and ent.old_path:
+                        break
+                    elif self._current_kind == 3 and ent.new_path:
+                        break
+
+                    attempts += 1
+
                 self._show_current_in_viewer()
                 return
             if e.key() in (QtCore.Qt.Key.Key_Down, QtCore.Qt.Key.Key_Up):
@@ -454,7 +557,18 @@ class MainWindow(QtWidgets.QMainWindow):
                     return
                 delta = +1 if e.key() == QtCore.Qt.Key.Key_Down else -1
                 self._current_index = (self._current_index + delta) % len(self._entries)
-                self._current_kind = 0  # switch to diff immediately
+
+                # Find the first available image type for the new entry
+                ent = self._entries[self._current_index]
+                if ent.diff_path:
+                    self._current_kind = 0
+                elif ent.current_path:
+                    self._current_kind = 1
+                elif ent.old_path:
+                    self._current_kind = 2
+                elif ent.new_path:
+                    self._current_kind = 3
+
                 self._show_current_in_viewer()
                 return
         else:
@@ -464,6 +578,63 @@ class MainWindow(QtWidgets.QMainWindow):
                 return
             if e.key() == QtCore.Qt.Key.Key_F5:
                 self.refresh()
+                return
+            if e.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+                # Enter key should act like double-click on selected row
+                current_row = self._table.currentRow()
+                if 0 <= current_row < len(self._entries):
+                    self._current_index = current_row
+                    # Find first available image type for this entry
+                    ent = self._entries[current_row]
+                    if ent.diff_path:
+                        self._current_kind = 0
+                    elif ent.current_path:
+                        self._current_kind = 1
+                    elif ent.old_path:
+                        self._current_kind = 2
+                    elif ent.new_path:
+                        self._current_kind = 3
+                    self._show_viewer()
+                return
+            if e.key() == QtCore.Qt.Key.Key_Delete:
+                # Delete key should remove OLD/NEW/DIFF files and remove the line
+                current_row = self._table.currentRow()
+                if 0 <= current_row < len(self._entries):
+                    ent = self._entries[current_row]
+
+                    # Delete the files (OLD, NEW, DIFF - not CURRENT)
+                    files_deleted = []
+                    if ent.old_path and os.path.exists(ent.old_path):
+                        try:
+                            os.remove(ent.old_path)
+                            files_deleted.append("OLD")
+                        except Exception as ex:
+                            print(f"Error deleting {ent.old_path}: {ex}", file=sys.stderr)
+
+                    if ent.new_path and os.path.exists(ent.new_path):
+                        try:
+                            os.remove(ent.new_path)
+                            files_deleted.append("NEW")
+                        except Exception as ex:
+                            print(f"Error deleting {ent.new_path}: {ex}", file=sys.stderr)
+
+                    if ent.diff_path and os.path.exists(ent.diff_path):
+                        try:
+                            os.remove(ent.diff_path)
+                            files_deleted.append("DIFF")
+                        except Exception as ex:
+                            print(f"Error deleting {ent.diff_path}: {ex}", file=sys.stderr)
+
+                    # Remove entry from list and table
+                    if files_deleted:
+                        self._entries.pop(current_row)
+                        self._table.removeRow(current_row)
+
+                        # Select next row if available, or previous if at end
+                        if self._entries:
+                            new_row = min(current_row, len(self._entries) - 1)
+                            self._table.selectRow(new_row)
+
                 return
         super().keyPressEvent(e)
 
