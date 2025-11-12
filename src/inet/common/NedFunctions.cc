@@ -330,6 +330,26 @@ Define_NED_Function2(nedf_seq,
         "Returns the next integer (starting from 0) associated to the first argument which must be a string."
         );
 
+cNEDValue nedf_iterate(cComponent *context, cNEDValue argv[], int argc)
+{
+    static int handle = cSimulationOrSharedDataManager::registerSharedVariableName("inet::NedFunctions::iterate");
+    auto& seqs = getSimulationOrSharedDataManager()->getSharedVariable<std::map<std::string, int>>(handle);
+    auto key = context->getFullPath();
+    auto it = seqs.find(key);
+    if (it == seqs.end())
+        seqs[key] = 0;
+    else
+        seqs[key]++;
+    auto array = check_and_cast<cValueArray *>(argv[0].objectValue());
+    return array->get(seqs[key]);
+}
+
+Define_NED_Function2(nedf_iterate,
+        "any iterate(any array)",
+        "misc",
+        "Returns the next number (starting from the front of the array) each time the expression is evaluated. The index is stored as associated to the full path of the context component."
+        );
+
 } // namespace utils
 
 } // namespace inet
