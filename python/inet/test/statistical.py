@@ -86,7 +86,7 @@ class StatisticalTestTask(SimulationTestTask):
         current_vector_result_file_name = simulation_project.get_full_path(os.path.join(working_directory, "results", self.get_result_file_name("vec")))
         current_index_result_file_name = simulation_project.get_full_path(os.path.join(working_directory, "results", self.get_result_file_name("vci")))
         if os.path.exists(current_vector_result_file_name):
-            run_command_with_logging(["opp_scavetool", "x", "--type", "sth", "-w", current_scalar_result_file_name, current_vector_result_file_name, "-o", current_scalar_result_file_name])
+            run_command_with_logging(["opp_scavetool", "x", "--precision=17", "--type", "sth", "-w", current_scalar_result_file_name, current_vector_result_file_name, "-o", current_scalar_result_file_name])
             os.remove(current_vector_result_file_name)
         if os.path.exists(current_index_result_file_name):
             os.remove(current_index_result_file_name)
@@ -120,7 +120,7 @@ class StatisticalTestTask(SimulationTestTask):
                         return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result="PASS", reason="All differences filtered out")
                     sorted_df = df.sort_values(by="relative_error", ascending=False)
                     scalar_result_csv_file_name = re.sub(r".sca$", ".csv", stored_scalar_result_file_name)
-                    sorted_df.to_csv(scalar_result_csv_file_name, float_format="%.15g")
+                    sorted_df.to_csv(scalar_result_csv_file_name, float_format="%.17g")
                     id = df["relative_error"].idxmax()
                     if math.isnan(id):
                         id = next(iter(df.index), None)
@@ -201,7 +201,7 @@ class StatisticalResultsUpdateTask(SimulationUpdateTask):
         current_vector_result_file_name = simulation_project.get_full_path(os.path.join(working_directory, "results", self.get_result_file_name("vec")))
         current_index_result_file_name = simulation_project.get_full_path(os.path.join(working_directory, "results", self.get_result_file_name("vci")))
         if os.path.exists(current_vector_result_file_name):
-            run_command_with_logging(["opp_scavetool", "x", "--type", "sth", "-w", current_scalar_result_file_name, current_vector_result_file_name, "-o", current_scalar_result_file_name])
+            run_command_with_logging(["opp_scavetool", "x", "--precision=17", "--type", "sth", "-w", current_scalar_result_file_name, current_vector_result_file_name, "-o", current_scalar_result_file_name])
             os.remove(current_vector_result_file_name)
         if os.path.exists(current_index_result_file_name):
             os.remove(current_index_result_file_name)
