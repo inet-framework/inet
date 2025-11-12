@@ -25,6 +25,8 @@ from inet.test.simulation import *
 _logger = logging.getLogger(__name__)
 _append_args = [
     "--record-eventlog=false",
+    "--output-scalar-precision=17",
+    "--output-vector-precision=17",
     "--**.param-recording=false",
     "--output-scalar-file=${resultdir}/${inifile}-${configname}-#${repetition}.sca",
     "--output-vector-file=${resultdir}/${inifile}-${configname}-#${repetition}.vec"
