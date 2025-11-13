@@ -3025,7 +3025,7 @@ inet.scave.plot.plot_vectors(df, props)
 
 legend_style = [('without policing', {'linestyle': 'dashed', 'color': 'black'}),
                 ('with policing', {'linestyle': '-', 'color': 'black'}),
-                ('excess traffic', {'color': default_colors[0], 'marker': 's', 'markersize': 4, 'linestyle': ''}),
+                ('misbehaving traffic', {'color': default_colors[0], 'marker': 's', 'markersize': 4, 'linestyle': ''}),
                 ('normal traffic', {'color': default_colors[1], 'marker': 's', 'markersize': 4, 'linestyle': ''})]
 
 handles, labels = inet.scave.plot.create_custom_legend(props, style_tuple_list=legend_style)
@@ -5195,7 +5195,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_manual" value="true"/>
             <property name="yaxis_title" value="Data rate"/>
             <property name="legend_replacements" value="/DataRate:vector//&#10;/dataRate:vector/meter data rate/&#10;/incoming/incoming data rate/&#10;/outgoing/outgoing data rate/&#10;/dropped/dropped data rate/"/>
-            <property name="title" value="Excess traffic filter data rates"/>
+            <property name="title" value="Misbehaving traffic filter data rates"/>
             <property name="legend_automatic" value="false"/>
             <property name="vector_operations" value=""/>
             <property name="cycle_seed" value="0"/>
