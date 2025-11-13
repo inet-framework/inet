@@ -37,7 +37,7 @@ Stream Filtering and Policing
 
 Per-stream filtering and policing in TSN limits excessive traffic to prevent
 network disruption. This functionality is implemented in the bridging layer of
-TSN switches. See the `token bucket policing showcase <../tokenbucket/doc/index.html>`_
+TSN switches. See the :doc:`/showcases/tsn/streamfiltering/tokenbucket/doc/index`
 for detailed background on the filtering architecture and the role of meters and
 filters within the StreamFilterLayer.
 
@@ -202,30 +202,121 @@ the server without policing:
 .. figure:: media/server_nopolicing.png
    :align: center
 
-When the combined traffic exceeds the link capacity, packets must queue at the
-switch, leading to delays. The misbehaving traffic competes with normal traffic
+The misbehaving traffic competes with normal traffic
 for bandwidth, slowing down the normal stream.
 
-Here is the delay of the normal stream:
+Here is the end-to-end delay of the normal stream:
 
 .. figure:: media/delay_nopolicing.png
    :align: center
 
+When the combined traffic exceeds the link capacity, packets must queue at the
+switch, leading to delays. Without policing, the normal traffic experiences
+significant delay spikes reaching up to almost 40 ms during periods when
+the misbehaving traffic is high. This clearly demonstrates the problem:
+well-behaved traffic is disrupted by excessive traffic sources sharing the same
+network infrastructure.
+
+The Solution
+~~~~~~~~~~~~
+
+The next charts show how statistical policing solves this problem by limiting
+excessive, misbehaving traffic while protecting normal traffic.
+
+Here is the application-level traffic at the server, comparing scenarios with and without policing:
+
 .. figure:: media/server.png
    :align: center
+
+With statistical policing enabled in the switch's ingress filter, the
+misbehaving traffic is now limited to approximately its configured maximum
+network-level data rate of 40 Mbps. Due to the small packets and large overhead,
+the application-level data rate in the server is lower, about 20Mbps. The
+statistical rate limiter probabilistically drops excess packets, enforcing the
+rate limit. The normal traffic continues to flow at its expected rate of 20
+Mbps (network-level), unaffected by the excess traffic. The total traffic to the server stays
+well within the link capacity.
+
+Note that the policed misbehaving traffic still shows fluctuation around the limit, rather than being strictly capped. This is characteristic of
+statistical policing: the sliding window rate meter measures traffic over a time
+window (15ms in this configuration), and the statistical rate limiter
+probabilistically drops packets based on the measured rate. This creates a
+gradual, probabilistic enforcement that allows some variation while maintaining
+the average rate at the configured limit. This is in contrast to token bucket
+policing, which creates sharper cutoffs when tokens are depleted.
+
+The next chart shows the end-to-end delay of normal traffic, comparing scenarios
+with and without policing:
 
 .. figure:: media/delay_normal.png
    :align: center
 
+With policing enabled, the normal traffic experiences consistently low delays,
+typically under 1 ms, with no significant spikes. The statistical policing
+mechanism has successfully protected the normal traffic from being disrupted by
+the misbehaving traffic stream. This demonstrates a key benefit of per-stream
+policing in TSN environments: ensuring predictable performance for well-behaved
+streams even when sharing network infrastructure with excessive traffic sources.
+
+Additional Details
+~~~~~~~~~~~~~~~~~~
+
+The remaining charts provide insight into how the statistical policing mechanism
+operates internally.
+
+Let's see the incoming, outgoing, and dropped data rates in the misbehaving traffic's filter.
+Additionally, the data rate measured by the meter is also displayed:
+
 .. figure:: media/excess_filter.png
    :align: center
+
+The two short, high-frequency bursts pass through the filter
+largely intact because they are comparable in duration to the 15ms time window—the
+sliding window meter doesn't have enough time to register them as exceeding the
+limit. However, the later low-frequency burst (sustained high traffic) is cut by
+the limiter. Once the incoming traffic remains persistently high, the meter's
+measurement stabilizes around the configured 40 Mbps limit, and the limiter
+enforces this rate by dropping excess packets.
+
+The measured data rate line (from the sliding window meter) shows a
+lag behind the incoming traffic. This delay occurs because the meter must
+accumulate 15ms worth of packet data before it can produce a measurement. A
+shorter time window would reduce this measurement lag but would also make the
+meter more reactive to short bursts.
+This time window parameter therefore represents a trade-off: longer windows
+provide more stable, averaged measurements suitable for detecting sustained
+excessive traffic, while shorter windows react faster but may be more sensitive
+to short bursts.
+
+.. ? The time window parameter is important: with a shorter time window, the meter
+.. would filter out both small and large bursts more aggressively. The 15ms window
+.. used here allows short, high-frequency bursts to pass through (as we see in the
+.. beginning of the chart) while still catching sustained rate violations (the
+.. low-frequency burst later in the chart).
+
+.. TODO: capped at 40Mbps in the filter
+
+.. TODO: why the first two spikes in the outgoing traffic -> the bursts are small, around the size of the time window, so the bursts are allowed. later the incoming traffic is constantly high, so the sliding window metering caps it at 40Mbps
+
+.. TODO: why the delay in the measured -> this is because of the time window. first, the meter needs to measure the incoming packets for 15ms, then can produce a measured data rate. a smaller time window would result in less delay in measurement.
+
+.. TODO: whats the significance of the time window?
+
+.. The misbehaving traffic filter shows packet drops when the incoming traffic rate
+.. exceeds the configured maximum data rate of 40 Mbps.
+
+Now let's see the same for the normal traffic's filter:
 
 .. figure:: media/normal_filter.png
    :align: center
 
-.. figure:: media/StreamFiltering_SimpleIeee8021qFilter2.png
-   :align: center
-   :width: 100%
+The normal traffic filter shows that all packets pass through with no drops,
+since the traffic operates well within its configured 20 Mbps limit.
+
+.. The normal traffic filter shows that all packets pass through with no drops.
+.. Since the traffic stays within its configured 20 Mbps limit, it doesn't
+.. need policing—the statistical rate limiter has no reason to drop
+.. packets.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`
 
