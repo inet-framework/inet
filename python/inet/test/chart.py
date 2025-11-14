@@ -37,6 +37,28 @@ def sewar_rmse(a, b):
     b = b.astype(numpy.float64)
     return numpy.sqrt(numpy.mean((a.astype(numpy.float64)-b.astype(numpy.float64))**2))
 
+def pad_to_size_centered(img, height, width):
+    """Pad image to (height, width) centered."""
+    h, w = img.shape[:2]
+
+    dh = height - h
+    dw = width - w
+    if dh < 0 or dw < 0:
+        raise ValueError("Target size must be >= image size")
+
+    top = dh // 2
+    bottom = dh - top
+    left = dw // 2
+    right = dw - left
+
+    pad_width = (
+        (top, bottom),
+        (left, right),
+        (0, 0),
+    )
+
+    return np.pad(img, pad_width, mode="constant", constant_values=0)
+
 class ChartTestTask(TestTask):
     def __init__(self, analysis_file_name, id, chart_name, simulation_project=None, name="chart test", **kwargs):
         super().__init__(name=name, **kwargs)
@@ -69,6 +91,10 @@ class ChartTestTask(TestTask):
                 if os.path.exists(old_file_name):
                     new_image = matplotlib.image.imread(new_file_name)
                     old_image = matplotlib.image.imread(old_file_name)
+                    target_h = max(old_image.shape[0], new_image.shape[0])
+                    target_w = max(old_image.shape[1], new_image.shape[1])
+                    old_image = pad_to_size_centered(old_image, target_h, target_w)
+                    new_image = pad_to_size_centered(new_image, target_h, target_w)
                     if old_image.shape != new_image.shape:
                         return self.task_result_class(self, result="FAIL", reason="Supplied images have different sizes" + str(old_image.shape) + " and " + str(new_image.shape))
                     metric = sewar_rmse(old_image, new_image)
@@ -178,6 +204,10 @@ class ChartUpdateTask(UpdateTask):
                 if os.path.exists(old_file_name):
                     new_image = matplotlib.image.imread(new_file_name)
                     old_image = matplotlib.image.imread(old_file_name)
+                    target_h = max(old_image.shape[0], new_image.shape[0])
+                    target_w = max(old_image.shape[1], new_image.shape[1])
+                    old_image = pad_to_size_centered(old_image, target_h, target_w)
+                    new_image = pad_to_size_centered(new_image, target_h, target_w)
                     if old_image.shape != new_image.shape:
                         metric = 1
                     else:
