@@ -637,7 +637,7 @@ void EthernetPlca::handleWithDataFSM(int event, cMessage *message)
                 currentTx = nullptr;
             );
             FSMA_Event_Transition(RX_START,
-                                  event == RECEPTION_START,
+                                  event == RECEPTION_START && receiving,
                                   DS_COLLIDE,
                 delete currentTx;
                 currentTx = nullptr;
@@ -649,6 +649,7 @@ void EthernetPlca::handleWithDataFSM(int event, cMessage *message)
                 cancelEvent(hold_timer);
             );
             FSMA_Ignore_Event(event == CARRIER_SENSE_START || event == CARRIER_SENSE_END);
+            FSMA_Ignore_Event(event == RECEPTION_START && !receiving); // beacon
             FSMA_Ignore_Event(event == RECEPTION_END); // beacon
             FSMA_Fail_On_Unhandled_Event();
         }
