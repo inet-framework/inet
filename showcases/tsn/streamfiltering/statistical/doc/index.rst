@@ -153,6 +153,8 @@ Key parameters:
 - :par:`timeWindow`: The duration over which traffic is measured (15ms for both streams)
 - :par:`maxDatarate`: The target rate limit (40 Mbps for misbehaving traffic, 20 Mbps for normal traffic)
 
+TODO timeWIndow contzrols burstiness
+
 Unlike token bucket policing with its deterministic pass/fail decisions, the statistical approach 
 gradually increases drop probability as traffic exceeds limits, providing more graceful rate enforcement.
 .. not sure this should be here
@@ -193,7 +195,11 @@ The following chart shows the outgoing network-level traffic at client1
 .. figure:: media/networkdatarate.png
    :align: center
 
-The misbehaving traffic stream is at times saturating the channel between client1 and the switch.
+The misbehaving traffic stream is at times saturating the channel between client1 and the switch,
+which causes the visible clipping of the sinusoid traffic pattern at around 86 Mbps. This clipping
+occurs below the 100 Mbps channel capacity due to the large overhead from interframe gaps—with
+small 25-byte packets, a significant portion of the channel is consumed by the mandatory 12-byte
+interframe gap between packets.
 The combined network traffic frequently exceeds the 100 Mbps channel capacity
 between the switch and the server. The next chart shows the traffic received at
 the server without policing:
@@ -201,9 +207,10 @@ the server without policing:
 .. figure:: media/server_nopolicing.png
    :align: center
 
-The misbehaving traffic competes with normal traffic
-for bandwidth, slowing down the normal stream.
-TODO fel is gyorsitja
+The misbehaving traffic competes with normal traffic for bandwidth, both slowing it down during
+congestion and occasionally speeding it up when the misbehaving traffic has lower rates.
+
+.. TODO fel is gyorsitja
 
 Here is the end-to-end delay of the normal stream:
 
@@ -261,6 +268,21 @@ streams even when sharing network infrastructure with excessive traffic sources.
 Additional Details
 ~~~~~~~~~~~~~~~~~~
 
+The following chart shows a zoomed view of the end-to-end delay of the normal stream,
+focusing on the time period when delays are low in both scenarios (with and without policing):
+
+.. figure:: media/delay_normal_zoomed.png
+   :align: center
+
+The delay variation occurs because both traffic streams are mixed in the switch's output
+queue. When packets from both streams are queued simultaneously, a packet from one stream
+may need to wait for a packet from the other stream to complete transmission, introducing
+variable delays depending on the queue state and packet sizes.
+
+Note the consistent offset between the two delay values: the scenario without policing shows
+slightly lower delays than the scenario with policing. This difference is due to the absence
+of VLAN tags (IEEE 802.1Q headers) in the non-policing configuration.
+
 The remaining charts provide insight into how the statistical policing mechanism
 operates internally.
 
@@ -270,29 +292,41 @@ Additionally, the data rate measured by the meter is also displayed:
 .. figure:: media/excess_filter.png
    :align: center
 
-Some short, high-frequency bursts pass through the filter
-largely intact because they are comparable in duration to the 15ms time window—the
-sliding window meter doesn't have enough time to register them as exceeding the
-limit. However, the later low-frequency burst (sustained high traffic) is cut by
-the limiter. Once the incoming traffic remains persistently high, the filter's
-output stabilizes around the configured 40 Mbps limit by dropping excess packets.
 
-The measured data rate line (from the sliding window meter) shows a
+.. Some short, high-frequency bursts pass through the filter
+.. largely intact because they are comparable in duration to the 15ms time window—the
+.. sliding window meter doesn't have enough time to register them as exceeding the
+.. limit. However, the later low-frequency burst (sustained high traffic) is cut by
+.. the limiter. Once the incoming traffic remains persistently high, the filter's
+.. output stabilizes around the configured 40 Mbps limit by dropping excess packets.
+
+The traffic filter starts dropping packets when the measured data rate line (from the sliding window meter) exceeds 40 Mbps.
+The measured data rate shows a
 lag behind the incoming traffic. This delay occurs because the meter must
 accumulate 15ms worth of packet data before it can produce a measurement. A
 shorter time window would reduce this measurement lag but would also make the
 meter more reactive to short bursts.
-This time window parameter therefore represents a trade-off: longer windows
-provide more stable, averaged measurements suitable for detecting sustained
-excessive traffic, while shorter windows react faster but may filter out short bursts more.
 
-The time window parameter is important: with a shorter time window, the meter
-would filter out both small and large bursts more aggressively. The 15ms window
-used here allows short, high-frequency bursts to pass through (as we see in the
-beginning of the chart) while still catching sustained rate violations (the
-longer burst later in the chart).
+This time window parameter represents a trade-off between two factors: a longer window
+allows bursts with shorter intervals to pass through but introduces more measurement lag,
+while a shorter window reduces the lag but filters out even brief bursts more aggressively.
 
-TODO milyen intervallumu burstot enged at es mekkora lag-et vezet be
+In this chart, we can observe both effects: the 15ms window allows the initial short,
+high-frequency bursts to pass through largely intact (visible at the start of the chart),
+while the later sustained high traffic is limited by the filter, with the outgoing rate
+stabilizing around the configured 40 Mbps limit.
+
+
+.. note:: Generally in policing, we want to allow some short bursts, and penalize sustained misbehaving traffic, while always staying below link capacity.
+
+
+.. The time window parameter is important: with a shorter time window, the meter
+.. would filter out both small and large bursts more aggressively. The 15ms window
+.. used here allows short, high-frequency bursts to pass through (as we see in the
+.. beginning of the chart) while still catching sustained rate violations (the
+.. longer burst later in the chart).
+
+.. TODO milyen intervallumu burstot enged at es mekkora lag-et vezet be
 
 .. TODO: capped at 40Mbps in the filter
 
