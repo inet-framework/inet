@@ -23,7 +23,11 @@ from inet.test.fingerprint import *
 from inet.test.simulation import *
 
 _logger = logging.getLogger(__name__)
-_append_args = ["--**.param-recording=false", "--output-scalar-file=${resultdir}/${inifile}-${configname}-#${repetition}.sca", "--output-vector-file=${resultdir}/${inifile}-${configname}-#${repetition}.vec"]
+_append_args = [
+    "--**.param-recording=false",
+    "--output-scalar-file=${resultdir}/${inifile}-${configname}-#${repetition}.sca",
+    "--output-vector-file=${resultdir}/${inifile}-${configname}-#${repetition}.vec"
+]
 
 def _read_scalar_result_file(file_name):
     df = read_result_files(file_name, include_fields_as_scalars=True)
