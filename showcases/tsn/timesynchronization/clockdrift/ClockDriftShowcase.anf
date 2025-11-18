@@ -5909,7 +5909,7 @@ utils.export_data_if_needed(df, props)
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-8"/>
             <property name="image_export_filename" value="OutOfBandSyncRandom_m_zoomed"/>
-            <property name="xaxis_min" value=""/>
+            <property name="xaxis_min" value="0.04"/>
             <property name="linewidth" value="1.5"/>
             <property name="filter" value="type =~ vector AND runattr:experiment =~ RandomClockDriftOutOfBandSync AND name =~ timeChanged:vector AND module =~ &quot;**.clock&quot;"/>
             <property name="X.Label.Wrap" value="true"/>
@@ -5922,7 +5922,7 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
-            <property name="xaxis_max" value="0.1"/>
+            <property name="xaxis_max" value="0.05"/>
             <property name="image_export_width" value="9"/>
             <property name="legend_prefer_module_display_paths" value="true"/>
             <property name="ordering_regex_list" value=""/>
@@ -8112,7 +8112,7 @@ utils.export_data_if_needed(df, props)
             <property name="vector_end_time" value=""/>
             <property name="linecolor" value=""/>
             <property name="Plot.Caching" value="true"/>
-            <property name="yaxis_title" value="Clock time to simulation time difference [us]"/>
+            <property name="yaxis_title" value="Clock time difference to master clock [us]"/>
             <property name="Legend.Border" value="false"/>
             <property name="title" value="Clock drift - Gptp synchronization - Compared to master clock"/>
             <property name="Plot.Title.Font" value="Arial-regular-10"/>
@@ -8865,7 +8865,7 @@ utils.export_data_if_needed(df, props)
             <property name="vector_end_time" value=""/>
             <property name="linecolor" value=""/>
             <property name="Plot.Caching" value="true"/>
-            <property name="yaxis_title" value="Clock time to simulation time difference [us]"/>
+            <property name="yaxis_title" value="Clock time difference to master clock [us]"/>
             <property name="Legend.Border" value="false"/>
             <property name="title" value="Clock drift - Gptp synchronization - Compared to master clock - zoomed"/>
             <property name="Plot.Title.Font" value="Arial-regular-10"/>
