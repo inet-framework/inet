@@ -84,10 +84,10 @@ class StatisticalTestTask(SimulationTestTask):
         working_directory = simulation_config.working_directory
         current_scalar_result_file_name = simulation_project.get_full_path(os.path.join(working_directory, "results", self.get_result_file_name("sca")))
         current_vector_result_file_name = simulation_project.get_full_path(os.path.join(working_directory, "results", self.get_result_file_name("vec")))
+        current_index_result_file_name = simulation_project.get_full_path(os.path.join(working_directory, "results", self.get_result_file_name("vci")))
         if os.path.exists(current_vector_result_file_name):
             run_command_with_logging(["opp_scavetool", "x", "--type", "sth", "-w", current_scalar_result_file_name, current_vector_result_file_name, "-o", current_scalar_result_file_name])
             os.remove(current_vector_result_file_name)
-        current_index_result_file_name = simulation_project.get_full_path(os.path.join(working_directory, "results", self.get_result_file_name("vci")))
         if os.path.exists(current_index_result_file_name):
             os.remove(current_index_result_file_name)
         _remove_attr_lines(current_scalar_result_file_name)
@@ -197,10 +197,10 @@ class StatisticalResultsUpdateTask(SimulationUpdateTask):
         working_directory = simulation_config.working_directory
         current_scalar_result_file_name = simulation_project.get_full_path(os.path.join(working_directory, "results", self.get_result_file_name("sca")))
         current_vector_result_file_name = simulation_project.get_full_path(os.path.join(working_directory, "results", self.get_result_file_name("vec")))
+        current_index_result_file_name = simulation_project.get_full_path(os.path.join(working_directory, "results", self.get_result_file_name("vci")))
         if os.path.exists(current_vector_result_file_name):
             run_command_with_logging(["opp_scavetool", "x", "--type", "sth", "-w", current_scalar_result_file_name, current_vector_result_file_name, "-o", current_scalar_result_file_name])
             os.remove(current_vector_result_file_name)
-        current_index_result_file_name = simulation_project.get_full_path(os.path.join(working_directory, "results", self.get_result_file_name("vci")))
         if os.path.exists(current_index_result_file_name):
             os.remove(current_index_result_file_name)
         _remove_attr_lines(current_scalar_result_file_name)
