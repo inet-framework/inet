@@ -19,11 +19,9 @@
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
-#workaround start
-#transparency workaround for omnetpp-6.0
+#transparency workaround
 import matplotlib as mpl
 mpl.rcParams['savefig.transparent'] = True
-#workaround end
 
 # get chart properties
 props = chart.get_properties()
@@ -276,6 +274,11 @@ utils.export_data_if_needed(df, props)
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
+    <label text="Unit:"/>
+    <text x:id="xaxis_unit" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
     <label text="Min:"/>
     <text x:id="xaxis_min" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
@@ -302,6 +305,11 @@ utils.export_data_if_needed(df, props)
 
     <label text="Label:"/>
     <text x:id="yaxis_title" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <label text="Unit:"/>
+    <text x:id="yaxis_unit" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
@@ -364,7 +372,6 @@ utils.export_data_if_needed(df, props)
       <add x:p0="upper left"/>
       <add x:p0="lower left"/>
       <add x:p0="lower right"/>
-      <add x:p0="right"/>
       <add x:p0="center left"/>
       <add x:p0="center right"/>
       <add x:p0="lower center"/>
@@ -704,7 +711,7 @@ utils.export_data_if_needed(df, props)
             <property name="vector_end_time" value=""/>
             <property name="linecolor" value=""/>
             <property name="Plot.Caching" value="true"/>
-            <property name="yaxis_title" value="Clock time difference to simulation time [us]"/>
+            <property name="yaxis_title" value="Clock time difference to simulation time"/>
             <property name="Legend.Border" value="false"/>
             <property name="title" value="Clock drift - Constant drift rate"/>
             <property name="Plot.Title.Font" value="Arial-regular-10"/>
@@ -718,7 +725,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_placement" value="upper right"/>
             <property name="plot.properties" value=""/>
             <property name="data_export_filename" value=""/>
-            <property name="xaxis_title" value="Simulation time [s]"/>
+            <property name="xaxis_title" value="Simulation time"/>
             <property name="Plot.BackgroundColor" value="white"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value="-70"/>
@@ -749,6 +756,8 @@ utils.export_data_if_needed(df, props)
             <property name="sorting" value="true"/>
             <property name="legend_format" value=""/>
             <property name="secondary_ordering_regex_list" value=""/>
+            <property name="yaxis_unit" value=""/>
+            <property name="xaxis_unit" value=""/>
         </chart>
         <chart createdWith="" icon="icons/full/obj/linechart.png" id="1149526308" name="Constant drift rate, out-of-band time synchronization" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
@@ -1011,6 +1020,11 @@ utils.export_data_if_needed(df, props)
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
+    <label text="Unit:"/>
+    <text x:id="xaxis_unit" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
     <label text="Min:"/>
     <text x:id="xaxis_min" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
@@ -1037,6 +1051,11 @@ utils.export_data_if_needed(df, props)
 
     <label text="Label:"/>
     <text x:id="yaxis_title" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <label text="Unit:"/>
+    <text x:id="yaxis_unit" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
@@ -1099,7 +1118,6 @@ utils.export_data_if_needed(df, props)
       <add x:p0="upper left"/>
       <add x:p0="lower left"/>
       <add x:p0="lower right"/>
-      <add x:p0="right"/>
       <add x:p0="center left"/>
       <add x:p0="center right"/>
       <add x:p0="lower center"/>
@@ -1439,7 +1457,7 @@ utils.export_data_if_needed(df, props)
             <property name="vector_end_time" value=""/>
             <property name="linecolor" value=""/>
             <property name="Plot.Caching" value="true"/>
-            <property name="yaxis_title" value="Clock time to simulation time difference [us]"/>
+            <property name="yaxis_title" value="Clock time to simulation time difference"/>
             <property name="Legend.Border" value="false"/>
             <property name="title" value="Clock drift - Out-of-band synchronization - Constant drift rate"/>
             <property name="Plot.Title.Font" value="Arial-regular-10"/>
@@ -1453,7 +1471,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_placement" value="upper right"/>
             <property name="plot.properties" value=""/>
             <property name="data_export_filename" value=""/>
-            <property name="xaxis_title" value="Simulation time [s]"/>
+            <property name="xaxis_title" value="Simulation time"/>
             <property name="Plot.BackgroundColor" value="white"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
@@ -1484,6 +1502,8 @@ utils.export_data_if_needed(df, props)
             <property name="sorting" value="true"/>
             <property name="legend_format" value=""/>
             <property name="secondary_ordering_regex_list" value=""/>
+            <property name="yaxis_unit" value=""/>
+            <property name="xaxis_unit" value=""/>
         </chart>
         <chart createdWith="" icon="icons/full/obj/linechart.png" id="1283553497" name="Constant drift rate, out-of-band time synchronization -  zoomed" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
@@ -1746,6 +1766,11 @@ utils.export_data_if_needed(df, props)
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
+    <label text="Unit:"/>
+    <text x:id="xaxis_unit" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
     <label text="Min:"/>
     <text x:id="xaxis_min" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
@@ -1772,6 +1797,11 @@ utils.export_data_if_needed(df, props)
 
     <label text="Label:"/>
     <text x:id="yaxis_title" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <label text="Unit:"/>
+    <text x:id="yaxis_unit" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
@@ -1834,7 +1864,6 @@ utils.export_data_if_needed(df, props)
       <add x:p0="upper left"/>
       <add x:p0="lower left"/>
       <add x:p0="lower right"/>
-      <add x:p0="right"/>
       <add x:p0="center left"/>
       <add x:p0="center right"/>
       <add x:p0="lower center"/>
@@ -2174,7 +2203,7 @@ utils.export_data_if_needed(df, props)
             <property name="vector_end_time" value=""/>
             <property name="linecolor" value=""/>
             <property name="Plot.Caching" value="true"/>
-            <property name="yaxis_title" value="Clock time to simulation time difference [us]"/>
+            <property name="yaxis_title" value="Clock time to simulation time difference"/>
             <property name="Legend.Border" value="false"/>
             <property name="title" value="Clock drift - Out-of-band synchronization - Constant drift rate"/>
             <property name="Plot.Title.Font" value="Arial-regular-10"/>
@@ -2188,7 +2217,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_placement" value="upper right"/>
             <property name="plot.properties" value=""/>
             <property name="data_export_filename" value=""/>
-            <property name="xaxis_title" value="Simulation time [s]"/>
+            <property name="xaxis_title" value="Simulation time"/>
             <property name="Plot.BackgroundColor" value="white"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value="-0.3"/>
@@ -2219,6 +2248,8 @@ utils.export_data_if_needed(df, props)
             <property name="sorting" value="true"/>
             <property name="legend_format" value=""/>
             <property name="secondary_ordering_regex_list" value=""/>
+            <property name="yaxis_unit" value="ms"/>
+            <property name="xaxis_unit" value=""/>
         </chart>
         <chart createdWith="" icon="icons/full/obj/linechart.png" id="1104366888" name="Random drift rate" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
@@ -2481,6 +2512,11 @@ utils.export_data_if_needed(df, props)
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
+    <label text="Unit:"/>
+    <text x:id="xaxis_unit" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
     <label text="Min:"/>
     <text x:id="xaxis_min" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
@@ -2507,6 +2543,11 @@ utils.export_data_if_needed(df, props)
 
     <label text="Label:"/>
     <text x:id="yaxis_title" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <label text="Unit:"/>
+    <text x:id="yaxis_unit" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
@@ -2569,7 +2610,6 @@ utils.export_data_if_needed(df, props)
       <add x:p0="upper left"/>
       <add x:p0="lower left"/>
       <add x:p0="lower right"/>
-      <add x:p0="right"/>
       <add x:p0="center left"/>
       <add x:p0="center right"/>
       <add x:p0="lower center"/>
@@ -2909,7 +2949,7 @@ utils.export_data_if_needed(df, props)
             <property name="vector_end_time" value=""/>
             <property name="linecolor" value=""/>
             <property name="Plot.Caching" value="true"/>
-            <property name="yaxis_title" value="Clock time difference to simulation time [us]"/>
+            <property name="yaxis_title" value="Clock time difference to simulation time"/>
             <property name="Legend.Border" value="false"/>
             <property name="title" value="Clock drift - Random drift rate"/>
             <property name="Plot.Title.Font" value="Arial-regular-10"/>
@@ -2923,7 +2963,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_placement" value="upper right"/>
             <property name="plot.properties" value=""/>
             <property name="data_export_filename" value=""/>
-            <property name="xaxis_title" value="Simulation time [s]"/>
+            <property name="xaxis_title" value="Simulation time"/>
             <property name="Plot.BackgroundColor" value="white"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
@@ -2954,6 +2994,8 @@ utils.export_data_if_needed(df, props)
             <property name="sorting" value="true"/>
             <property name="legend_format" value=""/>
             <property name="secondary_ordering_regex_list" value=""/>
+            <property name="yaxis_unit" value=""/>
+            <property name="xaxis_unit" value=""/>
         </chart>
         <chart createdWith="" icon="icons/full/obj/linechart.png" id="147321604" name="Random drift rate, out-of-band time synchronization" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
@@ -3216,6 +3258,11 @@ utils.export_data_if_needed(df, props)
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
+    <label text="Unit:"/>
+    <text x:id="xaxis_unit" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
     <label text="Min:"/>
     <text x:id="xaxis_min" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
@@ -3242,6 +3289,11 @@ utils.export_data_if_needed(df, props)
 
     <label text="Label:"/>
     <text x:id="yaxis_title" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <label text="Unit:"/>
+    <text x:id="yaxis_unit" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
@@ -3304,7 +3356,6 @@ utils.export_data_if_needed(df, props)
       <add x:p0="upper left"/>
       <add x:p0="lower left"/>
       <add x:p0="lower right"/>
-      <add x:p0="right"/>
       <add x:p0="center left"/>
       <add x:p0="center right"/>
       <add x:p0="lower center"/>
@@ -3644,7 +3695,7 @@ utils.export_data_if_needed(df, props)
             <property name="vector_end_time" value=""/>
             <property name="linecolor" value=""/>
             <property name="Plot.Caching" value="true"/>
-            <property name="yaxis_title" value="Clock time to simulation time difference [us]"/>
+            <property name="yaxis_title" value="Clock time to simulation time difference"/>
             <property name="Legend.Border" value="false"/>
             <property name="title" value="Clock drift - Out-of-band synchronization - Random drift rate"/>
             <property name="Plot.Title.Font" value="Arial-regular-10"/>
@@ -3658,7 +3709,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_placement" value="upper right"/>
             <property name="plot.properties" value=""/>
             <property name="data_export_filename" value=""/>
-            <property name="xaxis_title" value="Simulation time [s]"/>
+            <property name="xaxis_title" value="Simulation time"/>
             <property name="Plot.BackgroundColor" value="white"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
@@ -3689,6 +3740,8 @@ utils.export_data_if_needed(df, props)
             <property name="sorting" value="true"/>
             <property name="legend_format" value=""/>
             <property name="secondary_ordering_regex_list" value=""/>
+            <property name="yaxis_unit" value=""/>
+            <property name="xaxis_unit" value=""/>
         </chart>
         <chart createdWith="" icon="icons/full/obj/linechart.png" id="460679477" name="Random drift rate, out-of-band time synchronization - zoomed" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
@@ -3951,6 +4004,11 @@ utils.export_data_if_needed(df, props)
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
+    <label text="Unit:"/>
+    <text x:id="xaxis_unit" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
     <label text="Min:"/>
     <text x:id="xaxis_min" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
@@ -3977,6 +4035,11 @@ utils.export_data_if_needed(df, props)
 
     <label text="Label:"/>
     <text x:id="yaxis_title" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <label text="Unit:"/>
+    <text x:id="yaxis_unit" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
@@ -4039,7 +4102,6 @@ utils.export_data_if_needed(df, props)
       <add x:p0="upper left"/>
       <add x:p0="lower left"/>
       <add x:p0="lower right"/>
-      <add x:p0="right"/>
       <add x:p0="center left"/>
       <add x:p0="center right"/>
       <add x:p0="lower center"/>
@@ -4379,7 +4441,7 @@ utils.export_data_if_needed(df, props)
             <property name="vector_end_time" value=""/>
             <property name="linecolor" value=""/>
             <property name="Plot.Caching" value="true"/>
-            <property name="yaxis_title" value="Clock time to simulation time difference [us]"/>
+            <property name="yaxis_title" value="Clock time to simulation time difference"/>
             <property name="Legend.Border" value="false"/>
             <property name="title" value="Clock drift - Out-of-band synchronization - Random drift rate"/>
             <property name="Plot.Title.Font" value="Arial-regular-10"/>
@@ -4393,7 +4455,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_placement" value="upper right"/>
             <property name="plot.properties" value=""/>
             <property name="data_export_filename" value=""/>
-            <property name="xaxis_title" value="Simulation time [s]"/>
+            <property name="xaxis_title" value="Simulation time"/>
             <property name="Plot.BackgroundColor" value="white"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value="6.6"/>
@@ -4424,6 +4486,8 @@ utils.export_data_if_needed(df, props)
             <property name="sorting" value="true"/>
             <property name="legend_format" value=""/>
             <property name="secondary_ordering_regex_list" value=""/>
+            <property name="yaxis_unit" value=""/>
+            <property name="xaxis_unit" value=""/>
         </chart>
         <chart createdWith="" icon="icons/full/obj/linechart.png" id="1733723124" name="Random drift rate, out-of-band time synchronization, compared to master clock" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
@@ -4706,6 +4770,11 @@ utils.export_data_if_needed(df, props)
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
+    <label text="Unit:"/>
+    <text x:id="xaxis_unit" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
     <label text="Min:"/>
     <text x:id="xaxis_min" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
@@ -4732,6 +4801,11 @@ utils.export_data_if_needed(df, props)
 
     <label text="Label:"/>
     <text x:id="yaxis_title" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <label text="Unit:"/>
+    <text x:id="yaxis_unit" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
@@ -4794,7 +4868,6 @@ utils.export_data_if_needed(df, props)
       <add x:p0="upper left"/>
       <add x:p0="lower left"/>
       <add x:p0="lower right"/>
-      <add x:p0="right"/>
       <add x:p0="center left"/>
       <add x:p0="center right"/>
       <add x:p0="lower center"/>
@@ -5134,7 +5207,7 @@ utils.export_data_if_needed(df, props)
             <property name="vector_end_time" value=""/>
             <property name="linecolor" value=""/>
             <property name="Plot.Caching" value="true"/>
-            <property name="yaxis_title" value="Clock time to simulation time difference [us]"/>
+            <property name="yaxis_title" value="Clock time to simulation time difference"/>
             <property name="Legend.Border" value="false"/>
             <property name="title" value="Clock drift - Out-of-band synchronization - Random drift rate - Compared to master clock"/>
             <property name="Plot.Title.Font" value="Arial-regular-10"/>
@@ -5148,7 +5221,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_placement" value="upper right"/>
             <property name="plot.properties" value=""/>
             <property name="data_export_filename" value=""/>
-            <property name="xaxis_title" value="Simulation time [s]"/>
+            <property name="xaxis_title" value="Simulation time"/>
             <property name="Plot.BackgroundColor" value="white"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
@@ -5179,6 +5252,8 @@ utils.export_data_if_needed(df, props)
             <property name="sorting" value="true"/>
             <property name="legend_format" value=""/>
             <property name="secondary_ordering_regex_list" value=""/>
+            <property name="yaxis_unit" value=""/>
+            <property name="xaxis_unit" value=""/>
         </chart>
         <chart createdWith="" icon="icons/full/obj/linechart.png" id="1719575244" name="Random drift rate, out-of-band time synchronization, compared to master clock, zoomed" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
@@ -5461,6 +5536,11 @@ utils.export_data_if_needed(df, props)
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
+    <label text="Unit:"/>
+    <text x:id="xaxis_unit" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
     <label text="Min:"/>
     <text x:id="xaxis_min" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
@@ -5487,6 +5567,11 @@ utils.export_data_if_needed(df, props)
 
     <label text="Label:"/>
     <text x:id="yaxis_title" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <label text="Unit:"/>
+    <text x:id="yaxis_unit" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
@@ -5549,7 +5634,6 @@ utils.export_data_if_needed(df, props)
       <add x:p0="upper left"/>
       <add x:p0="lower left"/>
       <add x:p0="lower right"/>
-      <add x:p0="right"/>
       <add x:p0="center left"/>
       <add x:p0="center right"/>
       <add x:p0="lower center"/>
@@ -5889,7 +5973,7 @@ utils.export_data_if_needed(df, props)
             <property name="vector_end_time" value=""/>
             <property name="linecolor" value=""/>
             <property name="Plot.Caching" value="true"/>
-            <property name="yaxis_title" value="Clock time to simulation time difference [us]"/>
+            <property name="yaxis_title" value="Clock time to simulation time difference"/>
             <property name="Legend.Border" value="false"/>
             <property name="title" value="Clock drift - Out-of-band synchronization - Random drift rate - Compared to master clock"/>
             <property name="Plot.Title.Font" value="Arial-regular-10"/>
@@ -5903,7 +5987,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_placement" value="upper right"/>
             <property name="plot.properties" value=""/>
             <property name="data_export_filename" value=""/>
-            <property name="xaxis_title" value="Simulation time [s]"/>
+            <property name="xaxis_title" value="Simulation time"/>
             <property name="Plot.BackgroundColor" value="white"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
@@ -5934,6 +6018,8 @@ utils.export_data_if_needed(df, props)
             <property name="sorting" value="true"/>
             <property name="legend_format" value=""/>
             <property name="secondary_ordering_regex_list" value=""/>
+            <property name="yaxis_unit" value=""/>
+            <property name="xaxis_unit" value=""/>
         </chart>
         <chart createdWith="" icon="icons/full/obj/linechart.png" id="1324302864" name="Random drift rate, gPTP time synchronization" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
