@@ -60,7 +60,7 @@ EV << ".\n";
 
 %contains: stdout
 Running simulation...
-** Event #1  t=0   Test (Test, id=1)
+** Event #1  t=0  on starter-1 (omnetpp::cMessage)  in Test (Test, id=1)
 [1000..1000)(inet::EmptyChunk)
 rcv_nxt=1000
 SQ:enqueue("msg1", 100): --> [1000..1100)(inet::ByteCountChunk) length = 100 B, data = 63

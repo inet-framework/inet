@@ -103,7 +103,7 @@ extractBytesUpTo(q, 1004);
 EV << ".\n";
 
 %contains: stdout
-** Event #1  t=0   Test (Test, id=1)
+** Event #1  t=0  on starter-1 (omnetpp::cMessage)  in Test (Test, id=1)
 rcv_nxt=1000
 RQ:insertSeg [1000..1100) --> rcv_nxt=1100 [1000..1100)
 RQ:insertSeg [1000..1100) --> rcv_nxt=1100 [1000..1100)
