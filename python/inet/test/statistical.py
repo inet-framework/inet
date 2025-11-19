@@ -43,6 +43,20 @@ def _write_diff_file(a_file_name, b_file_name, diff_file_name):
     with open(diff_file_name, "w") as file:
         subprocess.call(diff_command, stdout=file)
 
+def _symmetric_relative_error(old, new):
+    denom = abs(old) + abs(new)
+    if denom == 0:
+        return 0.0
+    return 2 * (new - old) / denom
+
+def _unbounded_relative_error(old, new):
+    e = _symmetric_relative_error(old, new)
+    if e >= 2:
+        return float("inf")
+    if e <= -2:
+        return float("-inf")
+    return 2.0 * math.atanh(e / 2.0)
+
 def _remove_attr_lines(file_path):
     with open(file_path, 'r') as file:
         lines = file.readlines()
@@ -114,8 +128,7 @@ class StatisticalTestTask(SimulationTestTask):
                         (merged['value_stored'].isna() & merged['value_current'].notna()) |
                         (merged['value_stored'].notna() & merged['value_current'].isna()) |
                         (merged['value_stored'] != merged['value_current'])].dropna(subset=['value_stored', 'value_current'], how='all').copy()
-                    df["absolute_error"] = df.apply(lambda row: abs(row["value_current"] - row["value_stored"]), axis=1)
-                    df["relative_error"] = df.apply(lambda row: row["absolute_error"] / abs(row["value_stored"]) if row["value_stored"] != 0 else (float("inf") if row["value_current"] != 0 else 0), axis=1)
+                    df["relative_error"] = df.apply(lambda row: _unbounded_relative_error(row["value_current"], row["value_stored"]), axis=1)
                     df = df[df.apply(lambda row: matches_filter(row["name"], result_name_filter, exclude_result_name_filter, full_match) and \
                                                  matches_filter(row["module"], result_module_filter, exclude_result_module_filter, full_match), axis=1)]
                     if df.empty:
