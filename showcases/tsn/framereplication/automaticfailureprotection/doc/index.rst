@@ -75,6 +75,118 @@ In the **FrameReplication** configuration:
 - The StreamRedundancyConfigurator configures the replication points and elimination points
 - All destination interfaces share the same MAC address to accept packets from all streams
 
+Understanding the Failure Protection Configuration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The automatic frame replication configuration relies on two key configurators
+working together:
+
+**Configurator Roles**
+
+1. **FailureProtectionConfigurator**: Analyzes the network topology and failure
+   protection requirements to compute redundant paths that survive specified
+   failures
+
+2. **StreamRedundancyConfigurator**: Based on the computed paths, configures the
+   actual replication and elimination points throughout the network
+
+**Stream Definition**
+
+The configuration defines a stream named "S1" for traffic flowing from the source node to the destination node, specifically targeting packets from application instance app[0]. Each frame totals 1264B, consisting of 1200B application data plus 64B of protocol overhead (UDP, IP, IEEE 802.1CB frame replication, IEEE 802.1Q VLAN, Ethernet MAC/FCS, and PHY preamble). The stream operates with priority class 0, sends packets every 1ms, and requires delivery within 100us maximum latency.
+
+The packet length overhead breakdown:
+
+- **Application data**: 1200B (configured in source application)
+- **UDP header**: 8B
+- **IP header**: 20B
+- **IEEE 802.1CB (Frame Replication)**: 4B
+- **IEEE 802.1Q (VLAN)**: 6B
+- **Ethernet MAC**: 14B (header) + 4B (FCS)
+- **Ethernet PHY**: 8B (preamble)
+- **Total overhead**: 64B
+- **Total frame length**: 1200B + 64B = 1264B
+
+**Node Failure Protection**
+
+.. code-block:: ini
+
+   nodeFailureProtection: [{any: 1, of: "s2a or s2b or s3a or s3b"}]
+
+This rule specifies that the stream must survive the failure of **any single
+node** from the set {s2a, s2b, s3a, s3b}. The configurator will compute paths
+such that if any one of these switches fails, at least one complete path from
+source to destination remains operational.
+
+**Link Failure Protection**
+
+.. code-block:: ini
+
+   linkFailureProtection: [
+       {any: 1, of: "*->* and not source->s1"},
+       {any: 2, of: "s1->s2a or s2a->s2b or s2b->s3b"},
+       {any: 2, of: "s1->s2b or s2b->s2a or s2a->s3a"}
+   ]
+
+These three rules define link failure protection:
+
+1. **Rule 1**: ``{any: 1, of: "*->* and not source->s1"}`` 
+   
+   Protects against failure of any single link except the source->s1 link (which
+   is unavoidable as the only connection from source)
+
+2. **Rule 2**: ``{any: 2, of: "s1->s2a or s2a->s2b or s2b->s3b"}``
+   
+   Protects against simultaneous failure of any 2 links from the set {s1->s2a,
+   s2a->s2b, s2b->s3b}, ensuring the upper path through s2a remains viable even
+   if two of these links fail
+
+3. **Rule 3**: ``{any: 2, of: "s1->s2b or s2b->s2a or s2a->s3a"}``
+   
+   Protects against simultaneous failure of any 2 links from the set {s1->s2b,
+   s2b->s2a, s2a->s3a}, ensuring the lower path through s2b remains viable even
+   if two of these links fail
+
+The link failure protection rules are somewhat redundant for demonstration
+purposes, but they illustrate how to specify complex failure scenarios.
+
+**Special Configuration Requirements**
+
+For frame replication to work properly, two special settings are required:
+
+1. **Disable MAC Forwarding Table Configurator**:
+
+   .. code-block:: ini
+   
+      *.macForwardingTableConfigurator.typename = ""
+
+   The automatic MAC forwarding table configurator must be disabled because
+   frame replication uses custom forwarding rules (based on IEEE 802.1CB) rather
+   than standard MAC learning.
+
+2. **Unified MAC Address at Destination**:
+
+   .. code-block:: ini
+   
+      *.destination.eth[*].address = "0A-AA-12-34-56-78"
+
+   All destination interfaces must share the same MAC address so that frames
+   arriving on any path (via different interfaces) are accepted and can be
+   properly eliminated as duplicates.
+
+**Path Computation Result**
+
+Based on these failure protection rules, the configurators automatically:
+
+- Identify that frames must be replicated at switch s1 (the first divergence point)
+- Route copies along two disjoint paths: s1→s2a→s3a→destination and s1→s2b→s3b→destination
+- Configure elimination at the destination to remove duplicates
+- Set up appropriate forwarding rules at each switch along both paths
+
+This automatic configuration ensures that even if s2a fails (as in our
+scenario), frames continue to flow via the s2b path without interruption.
+
+TODO redundant paths screenshot(s)
+
 Results
 -------
 
