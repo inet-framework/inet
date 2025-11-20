@@ -8,6 +8,7 @@ network GptpMasterSlave
 {
     parameters:
         double delayTime @unit(s) = default(10ms);
+        *.eth[*].bitrate = default(100Mbps);
         @display("bgb=600,400");
     submodules:
         gptpMaster: GptpMaster {
