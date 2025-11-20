@@ -26,8 +26,8 @@ class INET_API MultiClock : public Module, public virtual IClock, public cListen
 
   public:
     virtual clocktime_t getClockTime() const override { return activeClock->getClockTime(); }
-    virtual clocktime_t computeClockTimeFromSimTime(simtime_t time) const override { return activeClock->computeClockTimeFromSimTime(time); }
-    virtual simtime_t computeSimTimeFromClockTime(clocktime_t time) const override { return activeClock->computeSimTimeFromClockTime(time); }
+    virtual clocktime_t computeClockTimeFromSimTime(simtime_t time, bool lowerBound = false) const override { return activeClock->computeClockTimeFromSimTime(time, lowerBound); }
+    virtual simtime_t computeSimTimeFromClockTime(clocktime_t time, bool lowerBound = true) const override { return activeClock->computeSimTimeFromClockTime(time, lowerBound); }
     virtual void scheduleClockEventAt(clocktime_t time, ClockEvent *event) override { activeClock->scheduleClockEventAt(time, event); }
     virtual void scheduleClockEventAfter(clocktime_t delay, ClockEvent *event) override { activeClock->scheduleClockEventAfter(delay, event); }
     virtual ClockEvent *cancelClockEvent(ClockEvent *event) override { return activeClock->cancelClockEvent(event); }
