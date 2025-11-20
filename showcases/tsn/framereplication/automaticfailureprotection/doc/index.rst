@@ -5,7 +5,9 @@ Goals
 -----
 
 In this example, we demonstrate the automatic stream redundancy configuration based
-on the link and node failure protection requirements.
+on the link and node failure protection requirements. We compare the behavior with
+and without frame replication when a node fails during the simulation, showing how
+frame replication provides resilience against single points of failure.
 
 | Verified with INET version: ``4.4``
 | Source files location: `inet/showcases/tsn/framereplication/automaticfailureprotection <https://github.com/inet-framework/inet/tree/master/showcases/tsn/framereplication/automaticfailureprotection>`__
@@ -13,11 +15,21 @@ on the link and node failure protection requirements.
 The Model
 ---------
 
-In this case, we use a different automatic stream redundancy configurator that
+In this case, we use an automatic stream redundancy configurator that
 takes the link and node failure protection requirements for each redundant stream
 as an argument. The automatic configurator computes the different paths that each
 stream must take in order to be protected against any of the listed failures so
 that at least one working path remains.
+
+The simulation demonstrates a controlled failure scenario:
+
+- At ``t=20ms``, switch ``s2a`` crashes and becomes unavailable
+- At ``t=80ms``, switch ``s2a`` recovers and becomes operational again
+
+We run two configurations to compare the behavior:
+
+1. **NoFrameReplication**: Standard operation without frame replication, demonstrating single point of failure
+2. **FrameReplication**: Frame replication enabled with automatic configuration for failure protection
 
 Here is the network:
 
@@ -29,8 +41,41 @@ Here is the configuration:
 .. literalinclude:: ../omnetpp.ini
    :language: ini
 
+Configuration Details
+~~~~~~~~~~~~~~~~~~~~~
+
+The key configuration parameters include:
+
+- **Traffic Pattern**: UDP packets sent at 1ms intervals (100 packets total in 100ms simulation)
+- **Packet Size**: 1200B application data + protocol overhead
+- **Node Status**: Enabled to support the ScenarioManager crash/startup events
+- **Failure Protection**: Configured to protect against failure of any single node (s2a, s2b, s3a, or s3b)
+
+In the **FrameReplication** configuration:
+
+- Frame replication and elimination is enabled on all devices
+- The FailureProtectionConfigurator automatically determines redundant paths
+- The StreamRedundancyConfigurator configures the replication points and elimination points
+- All destination interfaces share the same MAC address to accept packets from all streams
+
 Results
 -------
+
+NoFrameReplication Configuration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Without frame replication, the network has a single point of failure. When switch ``s2a`` 
+crashes at 20ms, all packets following that path are lost. After the switch recovers 
+at 80ms, packet delivery resumes, but packets sent during the outage period (20-80ms) 
+are permanently lost.
+
+FrameReplication Configuration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+With frame replication enabled, the source replicates packets and sends them along 
+multiple redundant paths. When ``s2a`` crashes, packets continue to be delivered via 
+the alternative path through ``s2b`` and ``s3b``. The destination eliminates duplicate 
+packets, ensuring continuous delivery throughout the simulation even during the failure period.
 
 Here is the number of received and sent packets:
 
@@ -43,8 +88,10 @@ Here is the ratio of received and sent packets:
 .. figure:: media/packetratio.png
    :align: center
 
-The expected number of successfully received packets relative to the number of
-sent packets is verified by the python script (``compute_frame_replication_success_rate_analytically2()`` function in ``inet/python/inet/tests/validation.py``). The expected result is around 0.657.
+The comparison clearly shows the advantage of frame replication:
+
+- **NoFrameReplication**: Significant packet loss during the failure period (20-80ms)
+- **FrameReplication**: All packets successfully delivered despite the node failure
 
 .. The following video shows the behavior in Qtenv:
 
@@ -99,4 +146,3 @@ Discussion
 ----------
 
 Use `this <https://github.com/inet-framework/inet/discussions/787>`__ page in the GitHub issue tracker for commenting on this showcase.
-
