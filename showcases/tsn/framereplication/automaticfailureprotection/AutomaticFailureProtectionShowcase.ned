@@ -5,6 +5,7 @@
 
 package inet.showcases.tsn.framereplication.automaticfailureprotection;
 
+import inet.common.scenario.ScenarioManager;
 import inet.networks.base.TsnNetworkBase;
 import inet.node.ethernet.EthernetLink;
 import inet.node.tsn.TsnDevice;
@@ -18,6 +19,9 @@ module LocalTsnSwitch extends TsnSwitch
 network AutomaticFailureProtectionShowcase extends TsnNetworkBase
 {
     submodules:
+        scenarioManager: ScenarioManager {
+            @display("p=100,300;is=s");
+        }
         source: TsnDevice {
             @display("p=300,200");
         }
@@ -49,4 +53,3 @@ network AutomaticFailureProtectionShowcase extends TsnNetworkBase
         s1.ethg++ <--> EthernetLink <--> s2b.ethg++;
         source.ethg++ <--> EthernetLink <--> s1.ethg++;
 }
-
