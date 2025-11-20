@@ -53,27 +53,109 @@ Here is the network:
 .. figure:: media/Network.png
    :align: center
 
-Here is the configuration:
+Configuration
+~~~~~~~~~~~~~
 
-.. literalinclude:: ../omnetpp.ini
-   :language: ini
+The configuration is structured in two parts: a common [General] section that applies to both scenarios, and two derived configurations that enable or disable frame replication.
 
-Configuration Details
-~~~~~~~~~~~~~~~~~~~~~
+**Application Configuration**
 
-The key configuration parameters include:
+The source generates UDP traffic at a constant rate:
 
-- **Traffic Pattern**: UDP packets sent at 1ms intervals (100 packets total in 100ms simulation)
-- **Packet Size**: 1200B application data + protocol overhead
-- **Node Status**: Enabled to support the ScenarioManager crash/startup events
-- **Failure Protection**: Configured to protect against failure of any single node (s2a, s2b, s3a, or s3b)
+.. code-block:: ini
 
-In the **FrameReplication** configuration:
+   *.source.numApps = 1
+   *.source.app[0].typename = "UdpSourceApp"
+   *.source.app[0].io.destAddress = "destination"
+   *.source.app[0].io.destPort = 1000
+   *.source.app[0].source.packetLength = 1200B
+   *.source.app[0].source.productionInterval = 1ms
 
-- Frame replication and elimination is enabled on all devices
-- The FailureProtectionConfigurator automatically determines redundant paths
-- The StreamRedundancyConfigurator configures the replication points and elimination points
-- All destination interfaces share the same MAC address to accept packets from all streams
+The source sends 1200-byte UDP packets every 1ms (100 packets during the 100ms simulation). The destination simply receives and counts the packets:
+
+.. code-block:: ini
+
+   *.destination.numApps = 1
+   *.destination.app[0].typename = "UdpSinkApp"
+   *.destination.app[0].io.localPort = 1000
+
+**Failure Scenario**
+
+The ScenarioManager creates a deterministic node failure:
+
+.. code-block:: ini
+
+   *.scenarioManager.script = xml("<script>\
+                                     <at t='20ms'><crash module='s2a'/></at> \
+                                     <at t='80ms'><startup module='s2a'/></at> \
+                                   </script>")
+
+Switch s2a crashes at 20ms and recovers at 80ms, creating a 60ms outage window to test frame replication effectiveness.
+
+**Frame Replication Configuration** (FrameReplication configuration only)
+
+Enabling frame replication and elimination on all network devices:
+
+.. code-block:: ini
+
+   *.*.hasStreamRedundancy = true
+
+This enables IEEE 802.1CB frame replication and elimination functionality at all nodes.
+
+**Automatic Configurators** (FrameReplication configuration only)
+
+Two configurators work together to set up the redundant paths:
+
+.. code-block:: ini
+
+   *.streamRedundancyConfigurator.typename = "StreamRedundancyConfigurator"
+   *.failureProtectionConfigurator.typename = "FailureProtectionConfigurator"
+
+The FailureProtectionConfigurator analyzes network topology and failure
+requirements to compute redundant paths. The StreamRedundancyConfigurator then
+configures the replication and elimination points based on these computed paths.
+
+**MAC Configuration Requirements** (FrameReplication configuration only)
+
+Two special MAC-related settings are required:
+
+.. code-block:: ini
+
+   *.macForwardingTableConfigurator.typename = ""
+   *.destination.eth[*].address = "0A-AA-12-34-56-78"
+
+The MAC forwarding table configurator must be disabled because frame replication
+uses IEEE 802.1CB custom forwarding rules rather than standard MAC learning. All
+destination interfaces share the same MAC address so frames arriving on any path
+can be accepted and properly eliminated as duplicates.
+
+**Failure Protection Rules** (FrameReplication configuration only)
+
+The core of the configuration is the failure protection specification:
+
+.. code-block:: ini
+
+   *.failureProtectionConfigurator.configuration = [{
+       name: "S1",
+       application: "app[0]",
+       source: "source",
+       destination: "destination",
+       pcp: 0,
+       packetFilter: "*",
+       packetLength: 1200B + 64B,
+       packetInterval: 1ms,
+       maxLatency: 100us,
+       nodeFailureProtection: [{any: 1, of: "s2a or s2b or s3a or s3b"}],
+       linkFailureProtection: [{any: 1, of: "*->* and not source->s1"},
+                               {any: 2, of: "s1->s2a or s2a->s2b or s2b->s3b"},
+                               {any: 2, of: "s1->s2b or s2b->s2a or s2a->s3a"}]
+   }]
+
+This defines stream "S1" with traffic characteristics (1264B frames at 1ms
+intervals, 100us max latency) and protection requirements: survive any single
+node failure from {s2a, s2b, s3a, s3b}, and survive various link failure
+combinations. The configurator uses these requirements to automatically compute
+redundant paths.
 
 Understanding the Failure Protection Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
