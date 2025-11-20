@@ -9,8 +9,14 @@ network = inet.test.unittest.lib.ClockTestNetwork
 cmdenv-express-mode = false
 cmdenv-log-prefix = "%l %C: "
 
+**.cmdenv-log-level = INFO
+
 *.host.clock.typename = "OscillatorBasedClock"
 *.host.clock.oscillator.driftRate = -0.5e6 ppm
+
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep INFO test.out > clock.out || true
 %#--------------------------------------------------------------------------------------------------------------
