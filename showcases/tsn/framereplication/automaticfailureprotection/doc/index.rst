@@ -12,6 +12,23 @@ frame replication provides resilience against single points of failure.
 | Verified with INET version: ``4.4``
 | Source files location: `inet/showcases/tsn/framereplication/automaticfailureprotection <https://github.com/inet-framework/inet/tree/master/showcases/tsn/framereplication/automaticfailureprotection>`__
 
+Frame Replication and Elimination
+----------------------------------
+
+Frame replication (IEEE 802.1CB) is a TSN mechanism that provides fault tolerance by creating and transmitting multiple copies of critical frames along diverse paths through the network. This ensures that even if one path fails due to link or node failures, at least one copy reaches the destination, enabling seamless network redundancy without packet loss.
+
+**Key Principles:**
+
+1. **Replication**: At designated replication points (typically near the source), each frame is duplicated and sent along multiple disjoint network paths
+
+2. **Diverse Paths**: Frame copies travel through different network nodes and links to ensure path independence - if one path experiences a failure, other paths remain operational
+
+3. **Sequence Numbering**: Each frame receives a unique sequence number (added via the IEEE 802.1CB header) to enable duplicate detection at the destination
+
+4. **Elimination**: At elimination points (typically near the destination), duplicate frames are identified using their sequence numbers. Only the first arriving copy is forwarded to the application layer, while subsequent duplicates are discarded
+
+5. **Transparent Operation**: From the application's perspective, frame replication is completely transparent - packet delivery continues uninterrupted even during network failures, with the application receiving each packet exactly once
+
 The Model
 ---------
 
