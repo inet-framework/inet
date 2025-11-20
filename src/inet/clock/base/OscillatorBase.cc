@@ -16,10 +16,17 @@ simsignal_t OscillatorBase::driftRateChangedSignal = cComponent::registerSignal(
 void OscillatorBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        displayStringTextFormat = par("displayStringTextFormat");
         if (par("emitNumTicksSignal")) {
-            tickTimer = new cMessage("TickTimer");
-            scheduleAfter(0, tickTimer);
+            tickTimer = new cMessage("OscillatorTickTimer");
+            tickTimer->setSchedulingPriority(par("oscillatorTickEventSchedulingPriority"));
+        }
+    }
+    else if (stage == INITSTAGE_CLOCK) {
+        if (tickTimer != nullptr) {
+            numTicks = 0;
+            EV_DEBUG << "Initialized oscillator" << EV_FIELD(numTicks) << EV_ENDL;
+            emit(numTicksChangedSignal, numTicks);
+            scheduleTickTimer();
         }
     }
 }
@@ -34,10 +41,10 @@ void OscillatorBase::handleMessage(cMessage *msg)
 
 void OscillatorBase::handleTickTimer()
 {
-    EV_INFO << "Handling tick" << EV_FIELD(numTicks) << EV_ENDL;
+    numTicks++;
+    EV_DEBUG << "Handling oscillator tick event" << EV_FIELD(numTicks) << EV_ENDL;
     emit(numTicksChangedSignal, numTicks);
     scheduleTickTimer();
-    numTicks++;
 }
 
 std::string OscillatorBase::resolveDirective(char directive) const
