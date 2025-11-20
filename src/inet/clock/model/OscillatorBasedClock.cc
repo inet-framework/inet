@@ -56,6 +56,16 @@ clocktime_t OscillatorBasedClock::getClockTime() const
 {
     if (useFutureEventSet) {
         clocktime_t currentClockTime = ClockBase::getClockTime();
+        if (!events.empty()) {
+            auto firstClockEvent = events[0];
+            if (firstClockEvent->getArrivalTime() == simTime() && firstClockEvent->getArrivalClockTime() < currentClockTime) {
+                // NOTE: clock time is never larger than the arrival clock time of the first clock event scheduled for the current simulation time
+                //       this is required for the clock to show the clock time of when this event is executed even though the clock jumps over this clock time due to oscillator compensation
+                currentClockTime = firstClockEvent->getArrivalClockTime();
+                DEBUG_CMP(computeClockTimeFromSimTime(simTime(), true), <=, currentClockTime);
+                DEBUG_CMP(currentClockTime, <=, computeClockTimeFromSimTime(simTime(), false));
+            }
+        }
         DEBUG_CMP(currentClockTime.raw() % getClockGranularity().raw(), ==, 0);
         return currentClockTime;
     }
@@ -135,40 +145,6 @@ void OscillatorBasedClock::handleMessage(cMessage *message)
         ClockBase::handleMessage(message);
 }
 
-static inline S128 floor_div(S128 a, S128 b)
-{
-    S128 q = a / b, r = a % b;
-    if (r != 0 && ((a < 0) != (b < 0))) --q;
-    return q;
-}
-
-// frac in Q0.63: keep modulo 2^63
-static inline uint64_t frac_advance(uint64_t p_q63, int64_t e_q63, int64_t m)
-{
-    const U128 MOD = U128(1) << 63;
-    S128 sum_q63 = (S128)p_q63 - (S128)e_q63 * (S128)m; // Q1.63
-    return (uint64_t)((U128)sum_q63 % MOD);
-}
-
-// floor_q63(p - e * m)
-static inline int64_t A_rel(int64_t m, uint64_t p_q63, int64_t e_q63)
-{
-    const S128 q = (S128)p_q63 - (S128)e_q63 * (S128)m;
-    const S128 qd = floor_div(q, S128_ONE_Q63);
-    return (int64_t)qd;
-}
-
-int64_t OscillatorBasedClock::A(int64_t n) const
-{
-    const uint64_t p = oscillatorCompensationAccumulator;
-    const S64 e_q63 = getOscillatorCompensation().raw(); // e = 1 - x (Q1.63)
-    const int64_t n0 = oscillator->computeTicksForInterval(originSimulationTime - oscillator->getComputationOrigin());
-    const int64_t m  = n - n0;
-    const S128 q = (S128)p - (S128)e_q63 * (S128)m; // Q1.63
-    const S128 qd = floor_div(q, S128_ONE_Q63);
-    return (int64_t)qd;
-}
-
 void OscillatorBasedClock::checkState() const
 {
     // originSimulationTime constraints
@@ -182,27 +158,82 @@ void OscillatorBasedClock::checkState() const
     DEBUG_CMP(computeSimTimeFromClockTime(originClockTime, true), <=, originSimulationTime);
     DEBUG_CMP(originSimulationTime, <=, computeSimTimeFromClockTime(originClockTime, false));
     DEBUG_CMP(originClockTime, ==, computeClockTimeFromSimTime(originSimulationTime));
+    // boundary constraints
+    DEBUG_CMP(computeSimTimeFromClockTime(originClockTime, true), <=, computeSimTimeFromClockTime(originClockTime, false));
+    DEBUG_CMP(computeClockTimeFromSimTime(originSimulationTime, true), <=, computeClockTimeFromSimTime(originSimulationTime, false));
+}
+
+void OscillatorBasedClock::checkAllScheduledClockEvents() const
+{
+    DEBUG_ENTER();
+    ClockEvent *previousEvent = nullptr;
+    std::vector eventsCopy(events);
+    // copy events to avoid having side effects
+    std::stable_sort(eventsCopy.begin(), eventsCopy.end(), compareClockEvents);
+    std::reverse(eventsCopy.begin(), eventsCopy.end());
+    for (auto event : eventsCopy) {
+        checkScheduledClockEvent(event);
+        // check proper ordering in future event set
+        if (useFutureEventSet && previousEvent != nullptr)
+            DEBUG_CMP(previousEvent->shouldPrecede(event), ==, true);
+        previousEvent = event;
+    }
+    DEBUG_LEAVE();
+}
+
+static inline S128 floor_div_128(S128 a, S128 b)
+{
+    S128 q = a / b, r = a % b;
+    if (r != 0 && ((a < 0) != (b < 0))) --q;
+    return q;
+}
+
+U64 OscillatorBasedClock::fracAdvance(S64 m) const
+{
+    const U64 p_q63 = oscillatorCompensationAccumulator;
+    const S64 e_q63 = getOscillatorCompensation().raw();
+    const U128 mod = U128(1) << 63;
+    S128 sum_q63 = (S128)p_q63 - (S128)e_q63 * (S128)m; // Q1.63
+    return (U64)((U128)sum_q63 % mod);
+}
+
+S64 OscillatorBasedClock::Arel(S64 m) const
+{
+    const U64 p_q63 = oscillatorCompensationAccumulator;
+    const S64 e_q63 = getOscillatorCompensation().raw();
+    const S128 q = (S128)p_q63 - (S128)e_q63 * (S128)m;
+    const S128 qd = floor_div_128(q, S128_ONE_Q63);
+    return (S64)qd;
+}
+
+S64 OscillatorBasedClock::A(S64 n) const
+{
+    const U64 p = oscillatorCompensationAccumulator;
+    const S64 e_q63 = getOscillatorCompensation().raw();
+    const S64 n0 = oscillator->computeTicksForInterval(originSimulationTime - oscillator->getComputationOrigin());
+    const S64 m  = n - n0;
+    const S128 q_q63 = (S128)p - (S128)e_q63 * (S128)m; // Q1.63
+    const S128 qd = floor_div_128(q_q63, S128_ONE_Q63);
+    return (S64)qd;
 }
 
 void OscillatorBasedClock::moveOrigin()
 {
     // debug output
-    DEBUG_ENTER(true);
+    DEBUG_ENTER();
     // get state
     const clocktime_raw_t l = getClockGranularity().raw();
     const simtime_t& oos = oscillator->getComputationOrigin();
     const simtime_t& cos = originSimulationTime;
     const clocktime_t& coc_old = originClockTime;
     const simtime_t& s = simTime();
-    const uint64_t p = oscillatorCompensationAccumulator;
     // implement formula
-    const int64_t n = oscillator->computeTicksForInterval(s - oos);
-    const int64_t n0 = oscillator->computeTicksForInterval(cos - oos);
-    const int64_t m = n - n0;
-    const int64_t e_q63 = getOscillatorCompensation().raw();
-    const int64_t dF_rel = m + A_rel(m, p, e_q63);
+    const S64 n = oscillator->computeTicksForInterval(s - oos);
+    const S64 n0 = oscillator->computeTicksForInterval(cos - oos);
+    const S64 m = n - n0;
+    const S64 dF_rel = m + Arel(m);
     const clocktime_t coc_new = ClockTime::fromRaw((S128)coc_old.raw() + (S128)dF_rel * (S128)l);
-    const uint64_t p_new = frac_advance(p, e_q63, m);
+    const U64 p_new = fracAdvance(m);
     // update state
     originSimulationTimeLowerBound = oos + oscillator->computeIntervalForTicks(n);
     originSimulationTime = s;
@@ -217,7 +248,7 @@ void OscillatorBasedClock::moveOrigin()
 void OscillatorBasedClock::setOrigin(clocktime_t clockTime)
 {
     // debug output
-    DEBUG_ENTER(true, clockTime);
+    DEBUG_ENTER(clockTime);
     // checks
     simtime_t simulationTime = simTime();
     DEBUG_CMP(simulationTime, >=, originSimulationTime);
@@ -227,13 +258,11 @@ void OscillatorBasedClock::setOrigin(clocktime_t clockTime)
     const simtime_t& s = simTime();
     const simtime_t& oos = oscillator->getComputationOrigin();
     const simtime_t& cos = originSimulationTime;
-    const uint64_t p = oscillatorCompensationAccumulator;
     // implement formula
-    const int64_t n = oscillator->computeTicksForInterval(s - oos);
-    const int64_t n0 = oscillator->computeTicksForInterval(cos - oos);
-    const int64_t m = n - n0;
-    const int64_t e_q63 = getOscillatorCompensation().raw();
-    const uint64_t p_new = frac_advance(p, e_q63, m);
+    const S64 n = oscillator->computeTicksForInterval(s - oos);
+    const S64 n0 = oscillator->computeTicksForInterval(cos - oos);
+    const S64 m = n - n0;
+    const U64 p_new = fracAdvance(m);
     // update state
     originSimulationTimeLowerBound = oscillator->getComputationOrigin() + oscillator->computeIntervalForTicks(n);
     originSimulationTime = s;
@@ -246,10 +275,9 @@ void OscillatorBasedClock::setOrigin(clocktime_t clockTime)
     checkState();
 }
 
-// TODO: add lowerBound, see https://chatgpt.com/c/68b1993a-5b00-8321-99f8-bfa009722028
 clocktime_t OscillatorBasedClock::doComputeClockTimeFromSimTime(simtime_t simulationTime, bool lowerBound) const
 {
-    DEBUG_ENTER(true, simulationTime);
+    DEBUG_ENTER(simulationTime);
    // get state
     const clocktime_raw_t l = getClockGranularity().raw();
     const simtime_t& oos = oscillator->getComputationOrigin();
@@ -259,30 +287,13 @@ clocktime_t OscillatorBasedClock::doComputeClockTimeFromSimTime(simtime_t simula
     // implement formula
     const S64 n  = oscillator->computeTicksForInterval(s - oos);
     const S64 n0 = oscillator->computeTicksForInterval(cos - oos);
-    S64 m  = n - n0;
-    // exact boundary detection
     const bool atBoundary = (s == (oos + oscillator->computeIntervalForTicks(n)));
-
-    // choose effective m based on bound
-    S64 m_eff = m;
-    if (!lowerBound && atBoundary && m_eff > 0)
-        --m_eff;                               // open interval end maps to previous step
-
-    // A_rel(m) = floor_q63(p - e*m)
-    const S64  e_q63 = getOscillatorCompensation().raw(); // Q1.63 (e = 1 - x)
-    const uint64_t p_q63 = oscillatorCompensationAccumulator;
-    auto A_rel = [&](S64 mm)->S64 {
-        const S128 q  = (S128)p_q63 - (S128)e_q63 * (S128)mm;
-        const S128 qd = q / S128_ONE_Q63;
-        const S128 r  = q % S128_ONE_Q63;
-        return (S64)(qd - ((r != 0 && q < 0) ? 1 : 0));   // floor fix
-    };
-
-    if (m_eff < 0) m_eff = 0;                   // clamp
-
-    const S64 dF = m_eff + A_rel(m_eff);
+    S64 m  = n - n0;
+    if (lowerBound && atBoundary && m > 0) --m;
+    if (m < 0) m = 0;
+    const S64 dF = m + Arel(m);
     const S128 c_raw = (S128)coc.raw() + (S128)dF * (S128)l;
-    DEBUG_OUT << DEBUG_FIELD(n) << DEBUG_FIELD(n0) << DEBUG_FIELD(dF) << std::endl;
+    DEBUG_OUT << DEBUG_FIELD(n) << DEBUG_FIELD(n0) << DEBUG_FIELD(m) << DEBUG_FIELD(dF) << std::endl;
     clocktime_t result = ClockTime::fromRaw(c_raw);
     DEBUG_LEAVE(result);
     return result;
@@ -290,7 +301,7 @@ clocktime_t OscillatorBasedClock::doComputeClockTimeFromSimTime(simtime_t simula
 
 simtime_t OscillatorBasedClock::doComputeSimTimeFromClockTime(clocktime_t clockTime, bool lowerBound) const
 {
-    DEBUG_ENTER(true, clockTime, lowerBound);
+    DEBUG_ENTER(clockTime, lowerBound);
     // get state
     const bool b = lowerBound;
     const clocktime_raw_t l = getClockGranularity().raw();
@@ -298,12 +309,12 @@ simtime_t OscillatorBasedClock::doComputeSimTimeFromClockTime(clocktime_t clockT
     const simtime_t& cos = originSimulationTime;
     const clocktime_t& coc = originClockTime;
     const clocktime_t& c = clockTime;
-    const uint64_t p = oscillatorCompensationAccumulator;
+    const U64 p = oscillatorCompensationAccumulator;
     const S64 e_q63 = getOscillatorCompensation().raw(); // Q1.63
     const U128 p_q63 = (U128)p % U128_ONE_Q63; // Q0.63
     // implement formula
     const S64 n0 = oscillator->computeTicksForInterval(cos - oos);
-    const S128 k = floor_div((S128)(c - coc).raw(), (S128)l) + (b ? 0 : 1); // integer
+    const S128 k = floor_div_128((S128)(c - coc).raw(), (S128)l) + (b ? 0 : 1); // integer
     // solve m = ceil((k - p) / x), x = 1 - e.
     auto ceil_div_q63_by_x = [&] (S128 N_q63)->S64 {
         U128 D = U128(U128_ONE_Q63) - U128((S128)e_q63); // D = x * 2^63 in (0, 2^64]
@@ -328,10 +339,11 @@ simtime_t OscillatorBasedClock::doComputeSimTimeFromClockTime(clocktime_t clockT
 
 clocktime_t OscillatorBasedClock::computeClockTimeFromSimTime(simtime_t simulationTime, bool lowerBound) const
 {
-    DEBUG_CMP(simulationTime, >=, simTime());
+    if (simulationTime < simTime())
+        throw cRuntimeError("Invalid argument: simulation time '%s' is in the past", simulationTime.str().c_str());
     clocktime_t result = doComputeClockTimeFromSimTime(simulationTime, lowerBound);
+    DEBUG_CMP(result, >=, originClockTime);
     DEBUG_CMP(result.raw() % getClockGranularity().raw(), ==, 0);
-    DEBUG_CMP(result, >=, doComputeClockTimeFromSimTime(simTime(), true));
     DEBUG_CMP(simulationTime, >=, doComputeSimTimeFromClockTime(result, true));
     DEBUG_CMP(simulationTime, <=, doComputeSimTimeFromClockTime(result, false));
     return result;
@@ -339,16 +351,13 @@ clocktime_t OscillatorBasedClock::computeClockTimeFromSimTime(simtime_t simulati
 
 simtime_t OscillatorBasedClock::computeSimTimeFromClockTime(clocktime_t clockTime, bool lowerBound) const
 {
-    DEBUG_CMP(clockTime, >=, getClockTime());
+    if (clockTime < getClockTime())
+        throw cRuntimeError("Invalid argument: clock time '%s' is in the past", clockTime.str().c_str());
     DEBUG_CMP(clockTime.raw() % getClockGranularity().raw(), ==, 0);
     simtime_t result = doComputeSimTimeFromClockTime(clockTime, lowerBound);
-    DEBUG_CMP(result, >=, originSimulationTimeLowerBound); // TODO: more restrictive assert for now?
-//    if (lowerBound)
-//        DEBUG_CMP(clockTime, ==, doComputeClockTimeFromSimTime(result)) // TODO: what happens if due to oscillator compensation a specific clock time value was skipped
-//        DEBUG_CMP(clockTime, <=, doComputeClockTimeFromSimTime(result)) // maybe this?
-//    else
-//        // uses inequality because oscillator compensation
-//        DEBUG_CMP(clockTime + getClockGranularity(), <=, doComputeClockTimeFromSimTime(result));
+    DEBUG_CMP(result, >=, originSimulationTimeLowerBound);
+    DEBUG_CMP(clockTime, >=, doComputeClockTimeFromSimTime(result, true));
+    DEBUG_CMP(clockTime, <=, doComputeClockTimeFromSimTime(result, false));
     return result;
 }
 
@@ -444,7 +453,7 @@ void OscillatorBasedClock::receiveSignal(cComponent *source, int signal, uintval
         if (value != lastNumTicks) {
             ASSERT(value - lastNumTicks == 1);
             clockTimeCompensation += SIMTIME_AS_CLOCKTIME(oscillator->getNominalTickLength() * getOscillatorCompensation());
-            int64_t numTicks = clockTimeCompensation.raw() / oscillator->getNominalTickLength().raw();
+            S64 numTicks = clockTimeCompensation.raw() / oscillator->getNominalTickLength().raw();
             clocktime_t clockTimeDelta = SIMTIME_AS_CLOCKTIME(numTicks * oscillator->getNominalTickLength());
             clockTimeCompensation -= clockTimeDelta;
             setOrigin(originClockTime + clockTimeDelta);

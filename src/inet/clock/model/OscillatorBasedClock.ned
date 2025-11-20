@@ -12,34 +12,71 @@ import inet.clock.contract.IClock;
 import inet.clock.contract.IOscillator;
 
 //
-// Models a clock that uses an oscillator to produce ticks periodically. The
-// oscillator is allowed to drift and produce ticks with different lengths over
-// time. The clock simply counts the number of oscillator ticks. The mapping
-// between clock ticks and clock time uses the nominal tick length.
+// Oscillator-driven clock.
 //
-// When scheduling to a clock time or with a clock delay, this clock rounds the
-// argument value using the specified rounding method first.
+// Summary
+// -------
+// A clock that derives its time from an underlying ~IOscillator. The oscillator
+// may drift, i.e., its actual tick spacing can vary over simulation time. The
+// clock maps simulation time to clock time by counting oscillator ticks and
+// using the *nominal* tick length as the tick-to-time conversion. No per-tick
+// events are generated.
 //
-// Additional display string format directives:
+// Semantics
+// ---------
+// - Let the oscillator expose:
+//     N(Δt): ticks in (0, Δt] from its computation origin,
+//     I(n) : minimal Δt ≥ 0 with N(Δt) ≥ n.
+// - The clock maintains a (cos, coc) origin pair (simulation/clock time). From
+//   there, simulation→clock and clock→simulation conversions are computed using
+//   N/I and the nominal tick length. (See C++ OscillatorBasedClock for details,
+//   including lower/upper-bound handling at tick boundaries.)
+// - Absolute (“at clock time”) vs. relative (“after clock duration”) scheduling
+//   behave as specified by ~IClock. Oscillator rate/origin changes affect the
+//   arrival time accordingly; absolute steps shift “at” events, relative delays
+//   remain anchored but follow the new rate going forward.
 //
-//  -s: origin simulation time
-//  -c: origin clock time
+// Granularity & rounding
+// ----------------------
+// - The clock quantizes requested targets to a grid G before scheduling, where
+//     G := (clockGranularity != 0s) ? clockGranularity : nominalTickLength(osc).
+// - roundingMode applies to both absolute targets and relative delays:
+//     * "down"   → floor to grid G
+//     * "up"     → ceil  to grid G
+//     * "closer" → nearest grid point (tie-breaking as implemented; typically half-up)
+//     * "none"   → no rounding (requested value used as is)
+// - Use a smaller clockGranularity than the nominal tick length if you need to
+//   represent fine compensation steps more accurately.
 //
-
+// Event management
+// ----------------
+// - useFutureEventSet = true:
+//     Events are scheduled directly into the OMNeT++ FES.
+// - useFutureEventSet = false:
+//     The clock maintains its own pending list and re-issues events when the
+//     oscillator advances; this requires the oscillator to emit its tick/state
+//     signals (enabled by default via the submodule parameter below).
+//
+// Display string format directives
+// --------------------------------
+//  -s : origin simulation time (cos)
+//  -c : origin clock time (coc)
+//
+// @see ~IClock, ~IOscillator, ~inet.clock.contract.IClock, C++ OscillatorBasedClock
+//
 module OscillatorBasedClock extends ClockBase like IClock
 {
     parameters:
-        displayStringTextFormat = default("%t (%c)"); // Determines the text that is written on top of the submodule
+        displayStringTextFormat = default("%t (%c)");  // Text above the submodule
         string oscillatorModule = default(".oscillator");
-        bool useFutureEventSet = default(true); // Specifies if clock events are scheduled in the FES or the clock maintains the list of future events internally, requires tick signals from the oscillator
-        double initialClockTime @unit(s) = default(0s); // Clock time at the simulation time when the module is initialized
-        double clockGranularity @unit(s) = default(0s); // Specifies the smallest unit of time that can be represented by the clock, 0 means the nominal tick length of the oscillator; can be set to a smaller value to be able to more accurately represent oscillator compensation
-        string roundingMode @enum("down","up","closer","none") = default("up"); // When scheduling to a clock time or with a clock delay this clock uses rounding with respect to the nominal tick length
+        bool useFutureEventSet = default(true);        // true: schedule in FES; false: internal list (requires oscillator signals)
+        double initialClockTime @unit(s) = default(0s);// Clock time at module initialization
+        double clockGranularity @unit(s) = default(0s);// Scheduling grid G; 0s ⇒ use oscillator nominal tick length
+        string roundingMode @enum("down","up","closer","none") = default("up"); // Rounding to grid G for “at/after” requests
         @class(OscillatorBasedClock);
     submodules:
         oscillator: <default("ConstantDriftOscillator")> like IOscillator if typename != "" {
             @display("p=100,100");
-            emitNumTicksSignal = default(!parent.useFutureEventSet);
+            emitNumTicksSignal = default(!parent.useFutureEventSet); // needed when not using FES
         }
 }
-
