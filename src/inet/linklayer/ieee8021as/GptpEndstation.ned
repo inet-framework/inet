@@ -18,6 +18,7 @@ module GptpEndstation extends StandardHost
 {
     parameters:
         clock.typename = default("SettableClock");
+        eth[*].typename = default("LayeredEthernetInterface");
     submodules:
         gptp: <default("Gptp")> like IApp if typename != "" {
             @display("p=700.11755,75.166");
