@@ -64,13 +64,6 @@ enum GptpMessageType
     GPTPTYPE_PDELAY_RESP_FOLLOW_UP = 0xA;
 }
 
-enum GptpSelfMsgKind {
-    GPTP_SELF_REQ_ANSWER_KIND = 101;
-    GPTP_SELF_MSG_SYNC = 103;
-    GPTP_REQUEST_TO_SEND_SYNC = 104;
-    GPTP_SELF_MSG_PDELAY_REQ = 105;
-}
-
 // ieee802.1AS-2020 10.6.2.2.8: flags (Octet2)
 // Table 10-9—Values of flag bits
 enum GptpFlags {
@@ -114,14 +107,6 @@ struct PortIdentity
 //    Enumeration8 clockAccuracy;
 //    UInteger16 offsetScaledLogVariance;
 //};
-
-message GptpReqAnswerEvent extends ClockEvent
-{
-    int portId;
-    clocktime_t ingressTimestamp;
-    PortIdentity sourcePortIdentity;
-    uint16_t sequenceId;
-}
 
 // ieee802.1AS-2020 10.6.2.1, 11.4.2
 class GptpBase extends FieldsChunk
@@ -244,7 +229,3 @@ class GptpPdelayRespFollowUp extends GptpBase
     PortIdentity requestingPortIdentity;
 }
 
-class GptpIngressTimeInd extends TagBase
-{
-    clocktime_t arrivalClockTime;
-}
