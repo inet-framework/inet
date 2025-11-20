@@ -11,18 +11,27 @@ import inet.clock.base.DriftingOscillatorBase;
 import inet.clock.contract.IOscillator;
 
 //
-// Generates ticks periodically using a constant drift in the clock
-// speed. The first tick is at the simulation time of the module initialization
-// optionally shifted with an offset. The constant drift can be set from C++ or
-// using a <set-oscillator module="..." drift-rate="..." tick-offset=".."/>
-// command in a `ScenarioManager` script.
+// Oscillator with constant fractional frequency offset (drift).
 //
-// @see ~ScenarioManager
+// Summary
+// -------
+// Produces a strictly periodic tick sequence whose rate is a constant factor
+// faster or slower than the nominal tick length. No per-tick events are
+// scheduled; mappings follow ~IOscillator semantics via the base.
+//
+// Semantics
+// ---------
+// - Let L be the nominal tick length and r be `driftRate` in ppm.
+// - Effective factor d = 1 + r·1e−6.
+// - Current tick length: L_current = L / d.
+//   * r > 0  → faster oscillator (shorter ticks)
+//   * r = 0  → nominal rate
+//   * r < 0  → slower oscillator (longer ticks)
+//
 //
 simple ConstantDriftOscillator extends DriftingOscillatorBase like IOscillator
 {
     parameters:
-        double driftRate @unit(ppm) = default(0ppm); // Expressed as a ratio in parts per million
+        double driftRate @unit(ppm) = default(0ppm); // Constant fractional frequency offset
         @class(ConstantDriftOscillator);
 }
-
