@@ -9,6 +9,7 @@
 
 namespace inet {
 
+simsignal_t IOscillator::numTicksChangedSignal = cComponent::registerSignal("numTicksChanged");
 simsignal_t IOscillator::preOscillatorStateChangedSignal = cComponent::registerSignal("preOscillatorStateChanged");
 simsignal_t IOscillator::postOscillatorStateChangedSignal = cComponent::registerSignal("postOscillatorStateChanged");
 
