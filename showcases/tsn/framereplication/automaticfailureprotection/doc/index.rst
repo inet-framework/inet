@@ -4,16 +4,32 @@ Automatic Stream Configuration with Failure Protection
 Goals
 -----
 
-In this example, we demonstrate the automatic stream redundancy configuration based
-on the link and node failure protection requirements. We compare the behavior with
-and without frame replication when a node fails during the simulation, showing how
-frame replication provides resilience against single points of failure.
+In this showcase, we demonstrate INET's automatic FRER configuration
+capabilities. Using automatic configurators that compute redundant paths based
+on specified failure protection requirements, we compare network behavior with
+and without frame replication during a controlled node failure, showing how FRER
+maintains 100% packet delivery even during equipment outages.
 
 | Verified with INET version: ``4.4``
 | Source files location: `inet/showcases/tsn/framereplication/automaticfailureprotection <https://github.com/inet-framework/inet/tree/master/showcases/tsn/framereplication/automaticfailureprotection>`__
 
 Frame Replication and Elimination
 ----------------------------------
+
+In critical industrial and automotive networks, equipment failures are
+inevitable - switches can crash, links can be severed, and components can
+malfunction. Traditional network architectures are vulnerable to such failures:
+when a component fails, traffic is lost until the failure is detected and
+alternative routes are established, resulting in unacceptable service
+interruption.
+
+Frame Replication and Elimination for Reliability (FRER), defined in IEEE
+802.1CB, solves this problem by providing seamless redundancy at the frame
+level. By transmitting duplicate copies of critical frames along multiple
+physically diverse paths and eliminating duplicates at the destination, FRER
+ensures that communication continues uninterrupted even when network components
+fail. The level of protection depends on the number of redundant paths
+configured - FRER can protect against single or multiple simultaneous failures.
 
 Frame replication (IEEE 802.1CB) is a TSN mechanism that provides fault tolerance by creating and transmitting multiple copies of critical frames along diverse paths through the network. This ensures that even if one path fails due to link or node failures, at least one copy reaches the destination, enabling seamless network redundancy without packet loss.
 
