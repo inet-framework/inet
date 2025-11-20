@@ -31,11 +31,11 @@ scheduler-class = "inet::RealTimeScheduler"
 
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event #1  t=0   TestNetwork.externalProcess\[0\] \(ExternalProcess, id=2\)
+\*\* Event #1  t=0  on startTimer \(omnetpp::cMessage\)  in TestNetwork.externalProcess\[0\] \(ExternalProcess, id=2\)
 Starting process: ping localhost
 PING localhost.*?
 64 bytes .*? icmp_seq=1 ttl=64 time=.*? ms
-\*\* Event #2  t=1   TestNetwork.externalProcess\[1\] \(ExternalProcess, id=3\)
+\*\* Event #2  t=1  on startTimer \(omnetpp::cMessage\)  in TestNetwork.externalProcess\[1\] \(ExternalProcess, id=3\)
 Starting process: killall ping
 (.*\n)*
 <!> External process finished -- in module \(inet::ExternalProcess\) TestNetwork.externalProcess\[0\] \(id=2\), at t=.*?, event #2
