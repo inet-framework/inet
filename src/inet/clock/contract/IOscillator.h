@@ -58,6 +58,8 @@ namespace inet {
 class INET_API IOscillator
 {
   public:
+    /// Emitted when the observable total tick count since origin changes due to a state update.
+    static simsignal_t numTicksChangedSignal;
     /// Emitted immediately before a change that affects tick timing/mapping.
     static simsignal_t preOscillatorStateChangedSignal;
     /// Emitted immediately after a change that affects tick timing/mapping.
