@@ -21,7 +21,6 @@ class INET_API IdealOscillator : public OscillatorBase
 
   protected:
     virtual void initialize(int stage) override;
-    virtual void finish() override;
     virtual void scheduleTickTimer() override;
 
   public:
