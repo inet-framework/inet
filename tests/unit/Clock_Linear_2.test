@@ -11,6 +11,7 @@ cmdenv-log-prefix = "%l %C: "
 
 *.host.clock.typename = "OscillatorBasedClock"
 *.host.clock.oscillator.driftRate = 1e6 ppm
+*.host.clock.oscillator.nominalTickLength = 2ps
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep INFO test.out > clock.out || true
 
