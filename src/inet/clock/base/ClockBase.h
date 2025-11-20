@@ -48,6 +48,7 @@ class INET_API ClockBase : public SimpleModule, public IClock
     virtual void scheduleClockEventAfter(clocktime_t time, ClockEvent *event) override;
     virtual ClockEvent *cancelClockEvent(ClockEvent *event) override;
     virtual void handleClockEvent(ClockEvent *event) override;
+    virtual bool isScheduledClockEvent(ClockEvent *event) const override { return event->isScheduled(); }
 
     virtual std::string resolveDirective(char directive) const override;
 };

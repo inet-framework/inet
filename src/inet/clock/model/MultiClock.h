@@ -32,6 +32,7 @@ class INET_API MultiClock : public Module, public virtual IClock, public cListen
     virtual void scheduleClockEventAfter(clocktime_t delay, ClockEvent *event) override { activeClock->scheduleClockEventAfter(delay, event); }
     virtual ClockEvent *cancelClockEvent(ClockEvent *event) override { return activeClock->cancelClockEvent(event); }
     virtual void handleClockEvent(ClockEvent *event) override { activeClock->handleClockEvent(event); }
+    virtual bool isScheduledClockEvent(ClockEvent *event) const override { return activeClock->isScheduledClockEvent(event); }
 
     virtual void receiveSignal(cComponent *source, int signal, const simtime_t& time, cObject *details) override;
 };

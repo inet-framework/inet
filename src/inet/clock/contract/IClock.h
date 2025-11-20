@@ -64,6 +64,8 @@ class INET_API IClock
      */
     virtual simtime_t computeSimTimeFromClockTime(clocktime_t time) const = 0;
 
+    virtual bool isScheduledClockEvent(ClockEvent *event) const = 0;
+
     /**
      * Schedules an event to be delivered to the caller module (i.e. the context
      * module) at the specified clock time. The event is anchored to a specific

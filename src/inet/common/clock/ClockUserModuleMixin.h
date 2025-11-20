@@ -45,6 +45,7 @@ class INET_API ClockUserModuleMixin : public T
     virtual void cancelAndDeleteClockEvent(ClockEvent *msg);
     virtual void rescheduleClockEventAt(clocktime_t time, ClockEvent* msg);
     virtual void rescheduleClockEventAfter(clocktime_t time, ClockEvent* msg);
+    virtual bool isScheduledClockEvent(ClockEvent *msg) const;
 
     virtual clocktime_t computeClockTimeFromSimTime(simtime_t time) const;
     virtual simtime_t computeSimTimeFromClockTime(clocktime_t time) const;
