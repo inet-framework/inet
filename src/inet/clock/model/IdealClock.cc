@@ -11,14 +11,14 @@ namespace inet {
 
 Define_Module(IdealClock);
 
-clocktime_t IdealClock::computeClockTimeFromSimTime(simtime_t t) const
+clocktime_t IdealClock::computeClockTimeFromSimTime(simtime_t simulationTime, bool lowerBound) const
 {
-    return ClockTime::from(t);
+    return SIMTIME_AS_CLOCKTIME(lowerBound ? simulationTime : simulationTime + SimTime::fromRaw(1));
 }
 
-simtime_t IdealClock::computeSimTimeFromClockTime(clocktime_t clock) const
+simtime_t IdealClock::computeSimTimeFromClockTime(clocktime_t clockTime, bool lowerBound) const
 {
-    return clock.asSimTime();
+    return CLOCKTIME_AS_SIMTIME(lowerBound ? clockTime : clockTime + ClockTime::fromRaw(1));
 }
 
 } // namespace inet
