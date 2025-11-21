@@ -78,33 +78,26 @@ The configuration is structured in two parts: a common [General] section that ap
 
 The source generates UDP traffic at a constant rate:
 
-.. code-block:: ini
-
-   *.source.numApps = 1
-   *.source.app[0].typename = "UdpSourceApp"
-   *.source.app[0].io.destAddress = "destination"
-   *.source.app[0].io.destPort = 1000
-   *.source.app[0].source.packetLength = 1200B
-   *.source.app[0].source.productionInterval = 1ms
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-after: # source application
+   :end-before: # destination application
 
 The source sends 1200-byte UDP packets every 1ms (100 packets during the 100ms simulation). The destination simply receives and counts the packets:
 
-.. code-block:: ini
-
-   *.destination.numApps = 1
-   *.destination.app[0].typename = "UdpSinkApp"
-   *.destination.app[0].io.localPort = 1000
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-after: # destination application
+   :end-before: # configure node shutdown/startup scenario
 
 **Failure Scenario**
 
 The ScenarioManager creates a deterministic node failure:
 
-.. code-block:: ini
-
-   *.scenarioManager.script = xml("<script>\
-                                     <at t='20ms'><crash module='s2a'/></at> \
-                                     <at t='80ms'><startup module='s2a'/></at> \
-                                   </script>")
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-after: # configure node shutdown/startup scenario
+   :end-before: # visualizer
 
 Switch s2a crashes at 20ms and recovers at 80ms, creating a 60ms outage window to test frame replication effectiveness.
 
@@ -112,9 +105,10 @@ Switch s2a crashes at 20ms and recovers at 80ms, creating a 60ms outage window t
 
 Enabling frame replication and elimination on all network devices:
 
-.. code-block:: ini
-
-   *.*.hasStreamRedundancy = true
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: # enable frame replication and elimination
+   :end-at: *.*.hasStreamRedundancy = true
 
 This enables IEEE 802.1CB frame replication and elimination functionality at all nodes.
 
@@ -122,10 +116,10 @@ This enables IEEE 802.1CB frame replication and elimination functionality at all
 
 Two configurators work together to set up the redundant paths:
 
-.. code-block:: ini
-
-   *.streamRedundancyConfigurator.typename = "StreamRedundancyConfigurator"
-   *.failureProtectionConfigurator.typename = "FailureProtectionConfigurator"
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: # enable all automatic configurators
+   :end-at: *.failureProtectionConfigurator.typename = "FailureProtectionConfigurator"
 
 The FailureProtectionConfigurator analyzes network topology and failure
 requirements to compute redundant paths. The StreamRedundancyConfigurator then
@@ -135,10 +129,10 @@ configures the replication and elimination points based on these computed paths.
 
 Two special MAC-related settings are required:
 
-.. code-block:: ini
-
-   *.macForwardingTableConfigurator.typename = ""
-   *.destination.eth[*].address = "0A-AA-12-34-56-78"
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: # disable automatic MAC forwarding table configuration
+   :end-before: # enable frame replication and elimination
 
 The MAC forwarding table configurator must be disabled because frame replication
 uses IEEE 802.1CB custom forwarding rules rather than standard MAC learning. All
@@ -149,23 +143,10 @@ can be accepted and properly eliminated as duplicates.
 
 The core of the configuration is the failure protection specification:
 
-.. code-block:: ini
-
-   *.failureProtectionConfigurator.configuration = [{
-       name: "S1",
-       application: "app[0]",
-       source: "source",
-       destination: "destination",
-       pcp: 0,
-       packetFilter: "*",
-       packetLength: 1200B + 64B,
-       packetInterval: 1ms,
-       maxLatency: 100us,
-       nodeFailureProtection: [{any: 1, of: "s2a or s2b or s3a or s3b"}],
-       linkFailureProtection: [{any: 1, of: "*->* and not source->s1"},
-                               {any: 2, of: "s1->s2a or s2a->s2b or s2b->s3b"},
-                               {any: 2, of: "s1->s2b or s2b->s2a or s2a->s3a"}]
-   }]
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: # TSN configuration
+   :end-before: # visualizer
 
 This defines stream "S1" with traffic characteristics (1264B frames at 1ms
 intervals, 100us max latency) and protection requirements: survive any single
@@ -206,7 +187,7 @@ The packet length overhead breakdown:
 
 **Node Failure Protection**
 
-.. code-block:: ini
+.. code-block::
 
    nodeFailureProtection: [{any: 1, of: "s2a or s2b or s3a or s3b"}]
 
@@ -217,7 +198,7 @@ source to destination remains operational.
 
 **Link Failure Protection**
 
-.. code-block:: ini
+.. code-block::
 
    linkFailureProtection: [
        {any: 1, of: "*->* and not source->s1"},
@@ -253,7 +234,7 @@ For frame replication to work properly, two special settings are required:
 
 1. **Disable MAC Forwarding Table Configurator**:
 
-   .. code-block:: ini
+   .. code-block::
    
       *.macForwardingTableConfigurator.typename = ""
 
@@ -263,7 +244,7 @@ For frame replication to work properly, two special settings are required:
 
 2. **Unified MAC Address at Destination**:
 
-   .. code-block:: ini
+   .. code-block::
    
       *.destination.eth[*].address = "0A-AA-12-34-56-78"
 
