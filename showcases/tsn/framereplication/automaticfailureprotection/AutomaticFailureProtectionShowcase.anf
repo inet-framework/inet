@@ -705,7 +705,7 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="image_export_width" value="8"/>
-            <property name="matplotlibrc" value=""/>
+            <property name="matplotlibrc" value="savefig.transparent : True"/>
         </chart>
         <chart createdWith="" icon="icons/full/obj/linechart.png" id="1334919449" name="Number of packets received / number of packets sent" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math

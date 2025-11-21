@@ -26,29 +26,43 @@ interruption.
 Frame Replication and Elimination for Reliability (FRER), defined in IEEE
 802.1CB, solves this problem by providing seamless redundancy at the frame
 level. By transmitting duplicate copies of critical frames along multiple
-physically diverse paths and eliminating duplicates at the destination, FRER
+physically diverse paths and eliminating duplicates, FRER
 ensures that communication continues uninterrupted even when network components
 fail. The level of protection depends on the number of redundant paths
 configured - FRER can protect against single or multiple simultaneous failures.
 
-Frame replication (IEEE 802.1CB) is a TSN mechanism that provides fault tolerance by creating and transmitting multiple copies of critical frames along diverse paths through the network. This ensures that even if one path fails due to link or node failures, at least one copy reaches the destination, enabling seamless network redundancy without packet loss.
+Frame replication (IEEE 802.1CB) is a TSN mechanism that provides fault
+tolerance by creating and transmitting multiple copies of critical frames along
+diverse paths through the network. This ensures that even if one path fails due
+to link or node failures, at least one copy reaches the destination, enabling
+seamless network operation without packet loss.
 
 **Key Principles:**
 
-1. **Replication**: At designated replication points (typically near the source), each frame is duplicated and sent along multiple disjoint network paths
+1. **Replication**: At designated replication points, each frame is duplicated
+   and sent out on multiple network interfaces.
 
-2. **Diverse Paths**: Frame copies travel through different network nodes and links to ensure path independence - if one path experiences a failure, other paths remain operational
+2. **Diverse Paths**: Frame copies travel through different network nodes and
+   links to ensure partial path independence - if one path experiences a failure, other
+   paths remain operational
 
-3. **Sequence Numbering**: Each frame receives a unique sequence number (added via the IEEE 802.1CB header) to enable duplicate detection at the destination
+3. **Sequence Numbering**: Each frame receives a unique sequence number (added
+   via the IEEE 802.1CB R-Tag) to enable duplicate detection
 
-4. **Elimination**: At elimination points (typically near the destination), duplicate frames are identified using their sequence numbers. Only the first arriving copy is forwarded to the application layer, while subsequent duplicates are discarded
+4. **Merging**: At merging points,
+   duplicate frames are identified using their sequence numbers. Only the first
+   arriving copy is forwarded to the application layer, while subsequent
+   duplicates are discarded
 
-5. **Transparent Operation**: From the application's perspective, frame replication is completely transparent - packet delivery continues uninterrupted even during network failures, with the application receiving each packet exactly once
+5. **Transparent Operation**: From the application's perspective, frame
+   replication is completely transparent - packet delivery continues
+   uninterrupted even during network failures, with the application receiving
+   each packet exactly once (maybe in incorrect order)
 
 The Model
 ---------
 
-In this case, we use an automatic stream redundancy configurator that
+In this case, we use an automatic failure protection configurator that
 takes the link and node failure protection requirements for each redundant stream
 as an argument. The automatic configurator computes the different paths that each
 stream must take in order to be protected against any of the listed failures so
@@ -69,10 +83,18 @@ Here is the network:
 .. figure:: media/Network.png
    :align: center
 
+The network topology provides four distinct paths from source to destination:
+
+1. **Upper path**: source → s1 → s2a → s3a → destination
+2. **Lower path**: source → s1 → s2b → s3b → destination  
+3. **Downward zig-zag path**: source → s1 → s2a → s2b → s3b → destination
+4. **Upward zig-zag path**: source → s1 → s2b → s2a → s3a → destination
+
+The zig-zag paths utilize the cross-connection between s2a and s2b, allowing
+frames to switch between the upper and lower branches.
+
 Configuration
 ~~~~~~~~~~~~~
-
-The configuration is structured in two parts: a common [General] section that applies to both scenarios, and two derived configurations that enable or disable frame replication.
 
 **Application Configuration**
 
@@ -103,11 +125,9 @@ Switch s2a crashes at 20ms and recovers at 80ms, creating a 60ms outage window t
 
 **Frame Replication Configuration** (FrameReplication configuration only)
 
-Enabling frame replication and elimination on all network devices:
-
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-at: # enable frame replication and elimination
+   :start-at: *.*.hasStreamRedundancy = true
    :end-at: *.*.hasStreamRedundancy = true
 
 This enables IEEE 802.1CB frame replication and elimination functionality at all nodes.
@@ -118,7 +138,7 @@ Two configurators work together to set up the redundant paths:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-at: # enable all automatic configurators
+   :start-at: *.streamRedundancyConfigurator.typename = "StreamRedundancyConfigurator"
    :end-at: *.failureProtectionConfigurator.typename = "FailureProtectionConfigurator"
 
 The FailureProtectionConfigurator analyzes network topology and failure
@@ -135,7 +155,7 @@ Two special MAC-related settings are required:
    :end-before: # enable frame replication and elimination
 
 The MAC forwarding table configurator must be disabled because frame replication
-uses IEEE 802.1CB custom forwarding rules rather than standard MAC learning. All
+uses IEEE 802.1CB custom forwarding rules rather than shortest path forwarding. All
 destination interfaces share the same MAC address so frames arriving on any path
 can be accepted and properly eliminated as duplicates.
 
@@ -145,12 +165,12 @@ The core of the configuration is the failure protection specification:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-at: # TSN configuration
+   :start-at: *.failureProtectionConfigurator.configuration
    :end-before: # visualizer
 
 This defines stream "S1" with traffic characteristics (1264B frames at 1ms
-intervals, 100us max latency) and protection requirements: survive any single
-node failure from {s2a, s2b, s3a, s3b}, and survive various link failure
+intervals) and protection requirements: protect against any single
+node failure from {s2a, s2b, s3a, s3b}, and protect against various link failure
 combinations. The configurator uses these requirements to automatically compute
 redundant paths.
 
@@ -163,27 +183,20 @@ working together:
 **Configurator Roles**
 
 1. **FailureProtectionConfigurator**: Analyzes the network topology and failure
-   protection requirements to compute redundant paths that survive specified
-   failures
+   protection requirements to compute redundant paths that protect against
+   specified failures. The configurator finds the smallest subset of all
+   possible source-to-destination paths such that this subset protects against
+   all specified failure cases, minimizing the total number of links used
 
 2. **StreamRedundancyConfigurator**: Based on the computed paths, configures the
    actual replication and elimination points throughout the network
 
 **Stream Definition**
 
-The configuration defines a stream named "S1" for traffic flowing from the source node to the destination node, specifically targeting packets from application instance app[0]. Each frame totals 1264B, consisting of 1200B application data plus 64B of protocol overhead (UDP, IP, IEEE 802.1CB frame replication, IEEE 802.1Q VLAN, Ethernet MAC/FCS, and PHY preamble). The stream operates with priority class 0, sends packets every 1ms, and requires delivery within 100us maximum latency.
-
-The packet length overhead breakdown:
-
-- **Application data**: 1200B (configured in source application)
-- **UDP header**: 8B
-- **IP header**: 20B
-- **IEEE 802.1CB (Frame Replication)**: 4B
-- **IEEE 802.1Q (VLAN)**: 6B
-- **Ethernet MAC**: 14B (header) + 4B (FCS)
-- **Ethernet PHY**: 8B (preamble)
-- **Total overhead**: 64B
-- **Total frame length**: 1200B + 64B = 1264B
+The configuration defines a stream named "S1" for traffic flowing from the
+source node to the destination node, specifically targeting packets from
+application instance app[0]. The stream
+operates with priority class 0.
 
 **Node Failure Protection**
 
@@ -191,10 +204,11 @@ The packet length overhead breakdown:
 
    nodeFailureProtection: [{any: 1, of: "s2a or s2b or s3a or s3b"}]
 
-This rule specifies that the stream must survive the failure of **any single
+This rule specifies that the stream must protect against the failure of **any single
 node** from the set {s2a, s2b, s3a, s3b}. The configurator will compute paths
 such that if any one of these switches fails, at least one complete path from
-source to destination remains operational.
+source to destination remains operational. The minimal set of paths for this rule contains
+the lower path and the upper path.
 
 **Link Failure Protection**
 
@@ -216,21 +230,19 @@ These three rules define link failure protection:
 2. **Rule 2**: ``{any: 2, of: "s1->s2a or s2a->s2b or s2b->s3b"}``
    
    Protects against simultaneous failure of any 2 links from the set {s1->s2a,
-   s2a->s2b, s2b->s3b}, ensuring the upper path through s2a remains viable even
-   if two of these links fail
+   s2a->s2b, s2b->s3b}, using the upper path, the lower path, and `one` of the zig-zag paths
 
 3. **Rule 3**: ``{any: 2, of: "s1->s2b or s2b->s2a or s2a->s3a"}``
    
    Protects against simultaneous failure of any 2 links from the set {s1->s2b,
-   s2b->s2a, s2a->s3a}, ensuring the lower path through s2b remains viable even
-   if two of these links fail
+   s2b->s2a, s2a->s3a}, using the upper path, the lower path, and the `other one` of the zig-zag paths
 
 The link failure protection rules are somewhat redundant for demonstration
-purposes, but they illustrate how to specify complex failure scenarios.
+purposes (rules 2 and 3 in themselves would give the same results).
 
 **Special Configuration Requirements**
 
-For frame replication to work properly, two special settings are required:
+For automatic frame replication configuration to work properly, two special settings are required:
 
 1. **Disable MAC Forwarding Table Configurator**:
 
