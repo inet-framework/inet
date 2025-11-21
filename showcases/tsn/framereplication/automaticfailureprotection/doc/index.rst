@@ -264,7 +264,26 @@ Based on these failure protection rules, the configurators automatically:
 This automatic configuration ensures that even if s2a fails (as in our
 scenario), frames continue to flow via the s2b path without interruption.
 
-TODO redundant paths screenshot(s)
+**Redundant Path Visualization**
+
+The following figures illustrate how the automatic configurators set up redundant paths in
+the network.
+
+The first figure shows where redundant streams are sent at each node in the network - the routing configuration that enables frames to traverse both the upper and lower redundant paths.
+
+.. figure:: media/redundancy.png
+   :align: center
+   :width: 100%
+
+The second figure shows the computed redundant paths through the network. Frames
+are replicated at s1 and sent along two disjoint paths (highlighted): the upper
+path through s2a→s3a and the lower path through s2b→s3b. At the destination,
+duplicate frames are eliminated, ensuring the application receives each packet
+exactly once.
+
+.. figure:: media/redundantpaths.png
+   :align: center
+   :width: 100%
 
 Results
 -------
