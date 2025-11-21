@@ -80,8 +80,8 @@ void VectorCommunicationCache::removeRadio(const IRadio *radio)
 {
     auto radioCacheEntry = getRadioCacheEntry(radio);
     radioCacheEntry->radio = nullptr;
-    int radioCount = 0;
-    while (radioCache[radioCount].radio == nullptr && radioCount < (int)radioCache.size())
+    size_t radioCount = 0;
+    while (radioCount < radioCache.size() && radioCache[radioCount].radio == nullptr)
         radioCount++;
     if (radioCount != 0) {
         ASSERT(baseRadioId != -1);
