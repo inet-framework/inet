@@ -252,7 +252,7 @@ For automatic frame replication configuration to work properly, two special sett
 
    The automatic MAC forwarding table configurator must be disabled because
    frame replication uses custom forwarding rules (based on IEEE 802.1CB) rather
-   than standard MAC learning.
+   than shortest path forwarding.
 
 2. **Unified MAC Address at Destination**:
 
@@ -261,8 +261,7 @@ For automatic frame replication configuration to work properly, two special sett
       *.destination.eth[*].address = "0A-AA-12-34-56-78"
 
    All destination interfaces must share the same MAC address so that frames
-   arriving on any path (via different interfaces) are accepted and can be
-   properly eliminated as duplicates.
+   arriving on any path (via different interfaces) are accepted.
 
 **Path Computation Result**
 
@@ -281,19 +280,19 @@ scenario), frames continue to flow via the s2b path without interruption.
 The following figures illustrate how the automatic configurators set up redundant paths in
 the network.
 
-The first figure shows where redundant streams are sent at each node in the network - the routing configuration that enables frames to traverse both the upper and lower redundant paths.
+The first figure shows the computed 4 redundant paths through the network.
 
-.. figure:: media/redundancy.png
+.. figure:: media/redundantpaths.png
    :align: center
    :width: 100%
 
-The second figure shows the computed redundant paths through the network. Frames
-are replicated at s1 and sent along two disjoint paths (highlighted): the upper
-path through s2a→s3a and the lower path through s2b→s3b. At the destination,
-duplicate frames are eliminated, ensuring the application receives each packet
-exactly once.
+The second figure shows how the redundant paths translated into replication and merge points.
+Nodes replicate packets where multiple arrows point `outwards`: s1, s2a, s2b.
+Nodes eliminate duplicates where multiple arrows point `inwards`: s2a, s2b, destination.
 
-.. figure:: media/redundantpaths.png
+.. note:: When a node is doing both, it first eliminates and then replicates packets.
+
+.. figure:: media/redundancy.png
    :align: center
    :width: 100%
 
@@ -308,13 +307,17 @@ crashes at 20ms, all packets following that path are lost. After the switch reco
 at 80ms, packet delivery resumes, but packets sent during the outage period (20-80ms) 
 are permanently lost.
 
+TODO: video
+
 FrameReplication Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-With frame replication enabled, the source replicates packets and sends them along 
-multiple redundant paths. When ``s2a`` crashes, packets continue to be delivered via 
-the alternative path through ``s2b`` and ``s3b``. The destination eliminates duplicate 
-packets, ensuring continuous delivery throughout the simulation even during the failure period.
+With frame replication enabled, the source replicates packets and sends them
+along multiple redundant paths. When ``s2a`` crashes, packets continue to be
+delivered via the alternative path through ``s2b`` and ``s3b``. This ensures
+continuous packet delivery throughout the simulation even during the failure period.
+
+TODO: video (no arrows)
 
 Here is the number of received and sent packets:
 
@@ -322,15 +325,8 @@ Here is the number of received and sent packets:
    :align: center
    :width: 100%
 
-Here is the ratio of received and sent packets:
-
-.. figure:: media/packetratio.png
-   :align: center
-
-The comparison clearly shows the advantage of frame replication:
-
-- **NoFrameReplication**: Significant packet loss during the failure period (20-80ms)
-- **FrameReplication**: All packets successfully delivered despite the node failure
+TODO end-to-end delay; 
+TODO there is no recovery period (no distrubance); packet headers; 
 
 .. The following video shows the behavior in Qtenv:
 
