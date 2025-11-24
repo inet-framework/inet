@@ -228,6 +228,8 @@ constant. Here is the configuration:
    :start-at: RandomClockDrift
    :end-before: OutOfBandSyncBase
 
+.. note:: In reality, the typical drift rate change is very small, 1 PPM/s. We use higher values so that the changes are more visible.
+
 The following chart displays how the clocks diverge over time:
 
 .. figure:: media/RandomClockDrift.png
@@ -266,6 +268,19 @@ are tangential to ``switch1``'s at the synchronization points. However, the
 clocks drift between synchronization events, so the divergence increases until
 synchronized again.
 
+The following chart shows the clock time difference to the master clock (``switch1``). This is the
+most important statistic of time synchronization in TSN.
+
+.. figure:: media/OutOfBandSyncRandom_m.png
+   :align: center
+   :width: 90%
+
+Here is the same chart zoomed in:
+
+.. figure:: media/OutOfBandSyncRandom_m_zoomed.png
+   :align: center
+   :width: 90%
+
 Example: Synchronizing Clocks Using gPTP
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -298,6 +313,18 @@ Here is the above chart zoomed in:
 
 The drift rate difference, calculated from the previous two synchronization
 events, is used to set the oscillator compensation.
+
+The following chart shows the clock time difference to the master clock (``switch1``):
+
+.. figure:: media/GptpSync_m.png
+   :align: center
+   :width: 90%
+
+Here is the same chart zoomed in:
+
+.. figure:: media/GptpSync_m_zoomed.png
+   :align: center
+   :width: 90%
 
 Accuracy of Synchronization
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
