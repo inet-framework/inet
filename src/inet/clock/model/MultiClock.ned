@@ -26,7 +26,7 @@ module MultiClock extends Module like IClock
         @display("i=block/timer");
         @class(MultiClock);
         @signal[timeChanged](type=simtime_t);
-        @statistic[timeChanged](title="Clock time"; source=localSignal(timeChanged); record=vector; interpolationmode=linear);
+        @statistic[timeChanged](title="Clock time"; source=localSignal(timeChanged); record=vector; interpolationmode=linear; unit=s);
     submodules:
         clock[numClocks]: <default("SettableClock")> like IClock {
             @display("p=200,200,row,200");
