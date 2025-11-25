@@ -101,21 +101,25 @@ links between them use 100 Mbps :ned:`EthernetLink` channels:
 .. figure:: media/Network.png
    :align: center
 
-We configure the two clients to send different types of traffic to the server, and enable time-aware traffic shaping in the switch.
+We configure the two clients to send different types of traffic to the server,
+and enable time-aware traffic shaping in the switch.
 
-In this simulation, we want to focus on demonstrating the delay benefits of time-aware shaping for latency-critical traffic. The simulation uses two different traffic patterns to show how time-aware shaping can provide bounded delay for high-priority frames while still allowing best-effort traffic to use the remaining bandwidth.
+In this simulation, we want to focus on demonstrating the delay benefits of
+time-aware shaping for latency-critical traffic. The simulation uses **two
+different traffic categories** to show how time-aware shaping can provide
+bounded delay for high-priority frames while still allowing best-effort traffic
+to use the remaining bandwidth.
 
-The two clients generate different types of traffic representing distinct application requirements:
+The two clients generate traffic representing distinct application requirements:
 
-- **Client1 (best-effort)**: Generates large packets (1500B) with exponential intervals, averaging ~60 Mbps. This represents bulk data transfer applications that prioritize throughput over latency.
-- **Client2 (high-priority)**: Generates small packets (64B) with regular intervals, averaging ~512 kbps. This represents latency-sensitive applications (e.g., control traffic, real-time commands) that require bounded delay.
-
-The time-aware shaper configuration allocates transmission windows to ensure the high-priority traffic gets predictable, bounded delay:
+- **Client1 (best-effort traffic category)**: Generates large packets (1500B) with exponential intervals, averaging ~60 Mbps. This represents bulk data transfer applications that prioritize throughput over latency.
+- **Client2 (high-priority traffic category)**: Generates small packets (64B) with constant data rate (CDR) at 1ms intervals, averaging ~512 kbps. This represents latency-sensitive applications (e.g., control traffic, real-time commands) that require bounded delay.
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: client applications
-   :end-before: outgoing streams
+   :end-before: server applications
    :language: ini
+   :lines: 2-
 
 .. note:: We set different destination ports for the two UDP applications, so that packets can be assigned to streams by destination port later.
 
@@ -129,6 +133,7 @@ The stream identification and stream encoding features can be enabled in :ned:`T
    :start-at: outgoing streams
    :end-before: stream identification
    :language: ini
+   :lines: 2-
 
 This setting adds a :ned:`StreamIdentifierLayer` and a :ned:`StreamCoderLayer` submodule to the bridging layer in the client:
 
@@ -145,6 +150,7 @@ destination UDP port:
    :start-at: stream identification
    :end-before: stream encoding
    :language: ini
+   :lines: 2-
 
 The stream encoder attaches 802.1q-tag requests to packets. Here, we can configure how to encode the various streams in the 802.1q header,
 such as with VLAN ID, or PCP number. We assign the best-effort stream to PCP 0, and the high-priority stream to PCP 4:
@@ -153,16 +159,18 @@ such as with VLAN ID, or PCP number. We assign the best-effort stream to PCP 0, 
    :start-at: stream encoding
    :end-at: high-priority
    :language: ini
+   :lines: 2-
 
 The :ned:`Ieee8021qProtocol` module in the link layer adds 802.1q headers to packets and sets the PCP field according to the request tags.
 
 The traffic shaping takes place in the outgoing network interface of the switch
-where both streams pass through. We enable egress traffic shaping in the switch:
+where both traffic categories pass through. We enable egress traffic shaping in the switch:
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: egress traffic shaping
    :end-at: hasEgressTrafficShaping
    :language: ini
+   :lines: 2-
 
 This setting replaces the default queue with an :ned:`Ieee8021qTimeAwareShaper` module in the MAC layer of all interfaces in the switch.
 
@@ -174,18 +182,24 @@ eight traffic classes, but we only use two. The key insight is that high-priorit
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: time-aware traffic shaping
+   :end-before: configure gate schedule visualization
    :language: ini
+   :lines: 2-
 
-This configuration ensures that high-priority packets experience bounded delay regardless of best-effort traffic load. Even if best-effort traffic is continuously sending large packets, high-priority packets will never wait more than 1ms (one cycle) for transmission.
-
-.. note:: The gate schedule provides delay guarantees rather than strict throughput limits. High-priority traffic gets immediate access to its window, while best-effort traffic uses the much larger remaining window efficiently.
-
-The shaper stores excess traffic in the MAC layer sub-queues, with high-priority packets getting predictable, bounded queueing delay.
+This configuration creates a "green wave" effect for the high-priority traffic.
+Since client2 sends packets at 1ms intervals (with zero start offset), and the gate
+cycle is also 1ms, high-priority packets arrive precisely when their
+transmission gate opens. This synchronization between application send times and
+gate schedules eliminates queueing delays for high-priority packets, providing
+deterministic latency.
 
 Results
 -------
 
-The primary benefit of time-aware shaping is providing bounded, predictable delay for high-priority traffic. We demonstrate this by comparing two scenarios: one without time-aware shaping (``NoTrafficShaping``) and one with time-aware shaping enabled (``TimeAwareShaping``).
+The primary benefit of time-aware shaping is providing bounded, predictable
+delay for high-priority traffic. We demonstrate this by comparing two scenarios:
+one without time-aware shaping (``NoTrafficShaping``) and one with time-aware
+shaping enabled (``TimeAwareShaping``).
 
 Delay Benefits of Time-Aware Shaping
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
