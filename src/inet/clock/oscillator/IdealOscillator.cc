@@ -30,6 +30,11 @@ void IdealOscillator::finish()
     emit(driftRateChangedSignal, 0.0);
 }
 
+void IdealOscillator::scheduleTickTimer()
+{
+    scheduleAfter(tickLength, tickTimer);
+}
+
 int64_t IdealOscillator::computeTicksForInterval(simtime_t timeInterval) const
 {
     return timeInterval.raw() / tickLength.raw();
