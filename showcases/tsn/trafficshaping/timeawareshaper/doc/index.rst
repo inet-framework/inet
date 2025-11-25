@@ -121,7 +121,7 @@ The two clients generate traffic representing distinct application requirements:
    :language: ini
    :lines: 2-
 
-.. note:: We set different destination ports for the two UDP applications, so that packets can be assigned to streams by destination port later.
+TODO rephrase -v
 
 In the clients, we want packets from the two applications to be classified into two different traffic classes: best-effort and high-priority.
 To this end, we use `stream identification` in the clients to assign packets to named streams (``"best-effort"`` and ``"high-priority"``), based on destination port. Based on the stream name,
@@ -174,11 +174,23 @@ where both traffic categories pass through. We enable egress traffic shaping in 
 
 This setting replaces the default queue with an :ned:`Ieee8021qTimeAwareShaper` module in the MAC layer of all interfaces in the switch.
 
-Let's configure the schedules. By default, the :ned:`Ieee8021qTimeAwareShaper` has
-eight traffic classes, but we only use two. The key insight is that high-priority traffic gets a guaranteed, bounded transmission window while best-effort traffic gets the remaining time. We configure a 1ms cycle where:
+Let's configure the schedules. By default, the :ned:`Ieee8021qTimeAwareShaper`
+has eight traffic classes, but we only use two. We configure a 1ms cycle where:
 
-- **High-priority traffic**: Gets the first 20μs of each cycle - enough time to transmit several small packets with bounded delay
-- **Best-effort traffic**: Gets the remaining 980μs - plenty of time for large packet transmission
+.. TODO: The key insight is that high-priority traffic gets a guaranteed, bounded transmission window while best-effort traffic gets the remaining time. ->
+.. the high priority traffic actually has a higher priority (higher index category is prioritized)(implemented by the priority scheduler in the shaper)
+.. -> the high priority traffic actually has a higher priority in the shaper
+
+TODO felvaltva vannak nyitva (open in a mutually exclusive way)
+
+TODO*:
+20us more than enough
+5.7us tx time
++ propagation (50ns)
+~5.7us
+
+- **High-priority traffic**: Gets the first 20μs of each cycle - enough time to transmit several small packets with bounded delay TODO? 5.7us
+- **Best-effort traffic**: Gets the remaining 980μs - enough time to transmit up to 8 large packets
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: time-aware traffic shaping
@@ -188,8 +200,8 @@ eight traffic classes, but we only use two. The key insight is that high-priorit
 
 This configuration creates a "green wave" effect for the high-priority traffic.
 Since client2 sends packets at 1ms intervals (with zero start offset), and the gate
-cycle is also 1ms, high-priority packets arrive precisely when their
-transmission gate opens. This synchronization between application send times and
+cycle is also 1ms, high-priority packets arrive when their
+transmission gate is open. TODO* This synchronization between application send times and
 gate schedules eliminates queueing delays for high-priority packets, providing
 deterministic latency.
 
@@ -201,101 +213,52 @@ delay for high-priority traffic. We demonstrate this by comparing two scenarios:
 one without time-aware shaping (``NoTrafficShaping``) and one with time-aware
 shaping enabled (``TimeAwareShaping``).
 
-Delay Benefits of Time-Aware Shaping
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Delay Without Traffic Shaping
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The following video shows the precise timing control achieved by time-aware shaping. The gate schedules are visualized above the switch, showing how high-priority traffic gets immediate access to its dedicated 20μs transmission window every millisecond:
+The following chart shows the end-to-end delay for high-priority traffic without 
+time-aware shaping:
 
-.. video_noloop:: media/tas3.mp4
+.. figure:: media/delay_noshaping.png
    :align: center
 
-Notice how high-priority packets (small, red) are transmitted immediately when their gate opens, while best-effort packets (large, blue) wait for their turn. This scheduling prevents the common scenario where a large best-effort packet blocks a latency-critical small packet.
+Without time-aware shaping, high-priority packets experience significant and 
+unpredictable delays. When a high-priority packet arrives at the switch, it must 
+wait for any best-effort frame that is already being transmitted to complete transmission. 
+Since best-effort packets are large (1500B), they take approximately 120μs to 
+transmit at 100 Mbps. This means that high-priority packets 
+cannot be transmitted immediately, resulting in variable delays that violate 
+real-time requirements.
 
-**Without Time-Aware Shaping**: High-priority packets can be delayed by large best-effort packets already being transmitted. Since a 1500-byte packet takes ~120μs to transmit at 100Mbps, high-priority packets can experience significant and unpredictable delays.
+Delay With Traffic Shaping
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**With Time-Aware Shaping**: High-priority packets are guaranteed transmission within their 20μs window every 1ms cycle, providing bounded delay regardless of best-effort traffic patterns.
+The following chart shows the end-to-end delay for high-priority traffic with 
+time-aware shaping enabled:
 
-End-to-End Delay Analysis
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The simulation demonstrates the dramatic delay improvements achieved with time-aware shaping. The key metrics show:
-
-**High-Priority Traffic Delay Benefits:**
-
-- **Maximum end-to-end delay**: Bounded to approximately 1ms (one gate cycle) with time-aware shaping
-- **Delay variance (jitter)**: Significantly reduced, providing predictable latency
-- **Delay distribution**: Tight, consistent delays vs. wide distribution without shaping
-
-**Impact on Best-Effort Traffic:**
-
-- **Average delay**: Slightly increased due to yielding transmission time to high-priority traffic
-- **Throughput**: Maintained at high levels using the 980μs window per cycle
-- **Overall performance**: Minimal impact while enabling delay guarantees for critical traffic
-
-Gate Schedule Operation
-~~~~~~~~~~~~~~~~~~~~~~
-
-The following sequence chart shows two complete gate cycles (2ms total), demonstrating the precise timing control:
-
-.. figure:: media/elog.png
+.. figure:: media/delay_tas.png
    :align: center
 
-The timing shows:
-- **0-20μs**: High-priority gate open (red packets transmitted)
-- **20μs-1ms**: Best-effort gate open (blue packets transmitted)
-- **1ms-1.02ms**: High-priority gate open again
-- **1.02ms-2ms**: Best-effort gate open again
+With time-aware shaping, high-priority packets experience bounded, predictable
+delays. The gate schedule ensures that high-priority packets always have access
+to their dedicated 20μs transmission window every 1ms cycle. Combined with the
+green wave effect (where packets arrive when their gate is open), high-priority
+packets are transmitted immediately without waiting for an ongoing best-effort
+frame transmission to be completed. This provides the optimal deterministic
+latency of X us (``2*transmission time + 2*propagation time = 5.76*2 + 0.05*2 =
+11.62us``) regardless of best-effort traffic load.
 
-This cycle repeats continuously, ensuring high-priority packets never wait more than 1ms for transmission, even under heavy best-effort traffic load.
+Additional Details
+~~~~~~~~~~~~~~~~~~
 
-Traffic Shaping Effectiveness
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The following sequence chart shows the detailed timing of packet transmissions and 
+gate operations:
 
-The gate schedule visualization shows the coordination between different traffic classes:
+.. figure:: media/seqchart.png
+   :align: center
 
 .. figure:: media/TransmittingStateAndGateStates.png
    :align: center
-
-Key observations:
-- **Green periods**: High-priority gate open - immediate packet transmission
-- **Blue periods**: Best-effort gate open - bulk data transmission
-- **Coordination**: No overlap ensures conflict-free transmission scheduling
-- **Efficiency**: High link utilization while maintaining delay bounds
-
-The detailed view of traffic shaping behavior shows how the scheduler manages both traffic types:
-
-.. figure:: media/TrafficShaping.png
-   :align: center
-
-This demonstrates:
-- **Queue management**: High-priority packets get priority scheduling
-- **Resource allocation**: Best-effort traffic uses remaining bandwidth efficiently
-- **Delay control**: Bounded queueing delay for latency-sensitive traffic
-
-Delay Guarantee Verification
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The traffic shaper queue lengths show the buffering behavior:
-
-.. figure:: media/TrafficShaperQueueLengths.png
-   :align: center
-
-Important aspects:
-- **High-priority queue**: Remains small due to immediate transmission opportunities
-- **Best-effort queue**: Can grow larger but doesn't affect high-priority delay
-- **Bounded delay**: Queue sizes reflect the delay guarantee mechanism
-
-Summary
-~~~~~~~
-
-Time-aware shaping transforms network behavior from unpredictable, contention-based transmission to deterministic, scheduled transmission. The key benefits demonstrated include:
-
-1. **Bounded Delay**: High-priority packets experience maximum 1ms delay regardless of network load
-2. **Predictable Latency**: Consistent timing for time-sensitive applications
-3. **Efficient Resource Use**: Best-effort traffic maintains high throughput
-4. **Quality of Service**: Different traffic classes receive appropriate treatment
-
-This makes time-aware shaping essential for Time-Sensitive Networking applications requiring deterministic latency, such as industrial control systems, automotive networks, and real-time communications.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`
 
