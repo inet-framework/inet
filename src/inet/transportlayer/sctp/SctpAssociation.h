@@ -1193,6 +1193,11 @@ class INET_API SctpAssociation : public cObject
         return sctpMain->cancelEvent(msg);
     }
 
+    void cancelAndDelete(cMessage *msg)
+    {
+        sctpMain->cancelAndDelete(msg);
+    }
+
     /** Utility: sends packet to application */
     void sendToApp(cMessage *msg);
 
