@@ -15,6 +15,9 @@ namespace inet {
 
 using namespace units::values;
 
+/**
+ * @brief Oscillator whose drift rate follows a (bounded) random walk.
+ */
 class INET_API RandomDriftOscillator : public DriftingOscillatorBase
 {
   protected:
