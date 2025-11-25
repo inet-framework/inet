@@ -38,7 +38,7 @@ clocks. The protocol synchronizes the slave clocks to the master clock by
 sending `sync messages` from the master clock nodes to the slave clock nodes.
 
 According to the IEEE 802.1 AS standard, the master clock can be automatically
-selected by the Best Master Clock algorithm (BCMA). BMCA also determines the
+selected by the Best Master Clock algorithm (BMCA). BMCA also determines the
 clock spanning tree, i.e., the routes on which sync messages are propagated to
 slave clocks in the network. INET currently doesn't support BMCA; the master
 clock and the spanning tree needs to be specified manually for each gPTP time
@@ -164,6 +164,11 @@ Here is the spanning tree indicated by the direction of gPTP sync messages:
 We examine clock drift of all clocks by plotting the clock time difference against simulation time:
 
 .. figure:: media/OneMasterClock.png
+   :align: center
+
+Here is the same chart, but showing clock drift compared to the master clock:
+
+.. figure:: media/OneMasterClock_m.png
    :align: center
 
 The master clock drifts according to a random walk process. The times of slave
