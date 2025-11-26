@@ -121,13 +121,15 @@ The two clients generate traffic representing distinct application requirements:
    :language: ini
    :lines: 2-
 
-TODO rephrase -v
+We need to classify packets from the two applications into best-effort and
+high-priority traffic classes. This is accomplished in two steps: `stream
+identification` assigns packets to named streams (``"best-effort"`` and
+``"high-priority"``) based on destination port, then `stream encoding` maps
+these streams to traffic classes by setting the appropriate PCP numbers.
 
-In the clients, we want packets from the two applications to be classified into two different traffic classes: best-effort and high-priority.
-To this end, we use `stream identification` in the clients to assign packets to named streams (``"best-effort"`` and ``"high-priority"``), based on destination port. Based on the stream name,
-we use `stream encoding` to assign the streams to traffic classes using PCP numbers.
-
-The stream identification and stream encoding features can be enabled in :ned:`TsnDevice` by setting its :par:`hasOutgoingStreams` parameter to ``true``. We do this in both clients:
+The stream identification and stream encoding features can be enabled in
+:ned:`TsnDevice` by setting its :par:`hasOutgoingStreams` parameter to ``true``.
+We do this in both clients:
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: outgoing streams
@@ -181,16 +183,21 @@ has eight traffic classes, but we only use two. We configure a 1ms cycle where:
 .. the high priority traffic actually has a higher priority (higher index category is prioritized)(implemented by the priority scheduler in the shaper)
 .. -> the high priority traffic actually has a higher priority in the shaper
 
-TODO felvaltva vannak nyitva (open in a mutually exclusive way)
+.. TODO felvaltva vannak nyitva (open in a mutually exclusive way)
 
-TODO*:
-20us more than enough
-5.7us tx time
-+ propagation (50ns)
-~5.7us
+.. TODO*:
+.. 20us more than enough
+.. 5.7us tx time
+.. + propagation (50ns)
+.. ~5.7us
 
-- **High-priority traffic**: Gets the first 20μs of each cycle - enough time to transmit several small packets with bounded delay TODO? 5.7us
+- **High-priority traffic**: Gets the first 20μs of each cycle - enough time to transmit several small packets with bounded delay
 - **Best-effort traffic**: Gets the remaining 980μs - enough time to transmit up to 8 large packets
+
+The gates operate in a mutually exclusive manner: when the high-priority gate is
+open, the best-effort gate is closed, and vice versa. This ensures complete
+traffic separation and prevents any interference between the two traffic
+categories.
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: time-aware traffic shaping
@@ -201,7 +208,9 @@ TODO*:
 This configuration creates a "green wave" effect for the high-priority traffic.
 Since client2 sends packets at 1ms intervals (with zero start offset), and the gate
 cycle is also 1ms, high-priority packets arrive when their
-transmission gate is open. TODO* This synchronization between application send times and
+transmission gate is open. The 20μs window allocated for high-priority traffic
+is more than sufficient, as each high-priority packet takes approximately 5.7μs to
+transmit (including propagation time). This synchronization between application send times and
 gate schedules eliminates queueing delays for high-priority packets, providing
 deterministic latency.
 
