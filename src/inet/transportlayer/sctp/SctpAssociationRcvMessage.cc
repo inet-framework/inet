@@ -3667,7 +3667,7 @@ void SctpAssociation::stopTimer(cMessage *timer)
 
     EV_INFO << "stopTimer " << timer->getName() << endl;
     if (timer->isScheduled()) {
-        cancelEvent2(timer);
+        cancelEvent(timer);
     }
 }
 
