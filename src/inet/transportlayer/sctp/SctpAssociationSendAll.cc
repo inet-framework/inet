@@ -21,7 +21,7 @@ void SctpAssociation::increaseOutstandingBytes(SctpDataVariables *chunk,
         SctpPathVariables *path)
 {
     path->outstandingBytes += chunk->booksize;
-    path->statisticsPathOutstandingBytes->record(path->outstandingBytes);
+    emit(pathOutstandingBytesSignal, (unsigned long)path->outstandingBytes, path);
     state->outstandingBytes += chunk->booksize;
     SctpSendStream *stream = nullptr;
     auto associter = sendStreams.find(chunk->sid);
@@ -32,7 +32,7 @@ void SctpAssociation::increaseOutstandingBytes(SctpDataVariables *chunk,
         throw cRuntimeError("Stream with id %d not found", chunk->sid);
     }
     stream->setBytesInFlight(stream->getBytesInFlight() + chunk->booksize);
-    statisticsOutstandingBytes->record(state->outstandingBytes);
+    emit(outstandingBytesSignal, (unsigned long)state->outstandingBytes);
 
     auto iterator = qCounter.roomRetransQ.find(path->remoteAddress);
     state->outstandingMessages++;
@@ -384,8 +384,8 @@ void SctpAssociation::chunkReschedulingControl(SctpPathVariables *path)
        << "\trblocking=" << 100.0 * receiverBlockingFraction << " %"
        << endl;
 
-    path->statisticsPathSenderBlockingFraction->record(senderBlockingFraction);
-    path->statisticsPathReceiverBlockingFraction->record(receiverBlockingFraction);
+    emit(pathSenderBlockingFractionSignal, senderBlockingFraction, path);
+    emit(pathReceiverBlockingFractionSignal, receiverBlockingFraction, path);
 
     // ====== Chunk Rescheduling =============================================
     if ((state->cmtChunkReschedulingVariant == SctpStateVariables::CCRV_SenderOnly) ||
@@ -422,7 +422,7 @@ void SctpAssociation::chunkReschedulingControl(SctpPathVariables *path)
                            << path->remoteAddress << endl;
 
                         // ====== Move chunk ======================================
-                        lastPath->vectorPathBlockingTsnsMoved->record(chunk->tsn);
+                        emit(pathBlockingTsnsMovedSignal, (unsigned long)chunk->tsn, lastPath);
                         moveChunkToOtherPath(chunk, path);
 
                         // This chunk is important, since it is blocking others ...
@@ -1229,14 +1229,14 @@ void SctpAssociation::sendOnPath(SctpPathVariables *pathId, bool firstPass)
                         EV_DETAIL << "sendAll: set TSN=" << datVar->tsn
                                   << " sid=" << datVar->sid << ", ssn=" << datVar->ssn << "\n";
                         state->nextTsn++;
-                        path->vectorPathSentTsn->record(datVar->tsn);
+                        emit(pathTsnSentSignal, (unsigned long)datVar->tsn, path);
                     }
                     else {
                         if (datVar->hasBeenFastRetransmitted) {
-                            path->vectorPathTsnFastRTX->record(datVar->tsn);
+                            emit(pathTsnFastRTXSignal, (unsigned long)datVar->tsn, path);
                         }
                         else {
-                            path->vectorPathTsnTimerBased->record(datVar->tsn);
+                            emit(pathTsnTimerBasedRTXSignal, (unsigned long)datVar->tsn, path);
                         }
                     }
 
@@ -1271,10 +1271,10 @@ void SctpAssociation::sendOnPath(SctpPathVariables *pathId, bool firstPass)
                             increaseOutstandingBytes(datVar, path);
                             datVar->queuedOnPath = path;
                             datVar->queuedOnPath->queuedBytes += datVar->booksize;
-                            datVar->queuedOnPath->statisticsPathQueuedSentBytes->record(path->queuedBytes);
+                            emit(pathQueuedSentBytesSignal, (unsigned long)path->queuedBytes, path);
 
                             state->queuedSentBytes += datVar->booksize;
-                            statisticsQueuedSentBytes->record(state->queuedSentBytes);
+                            emit(queuedSentBytesSignal, (unsigned long)state->queuedSentBytes);
                         }
                     }
 
@@ -1478,4 +1478,3 @@ uint32_t SctpAssociation::getAllTransQ()
 
 } // namespace sctp
 } // namespace inet
-

@@ -275,7 +275,8 @@ void SctpAssociation::process_SEND(SctpEventCode& event, SctpCommandReq *sctpCom
         datMsg->setOrdered(true);
         stream->getStreamQ()->insert(datMsg);
 
-        sendQueue->record(stream->getStreamQ()->getLength());
+        SctpStreamStatistic streamDetail(streamId);
+        emit(sendQueueSignal, (unsigned long)stream->getStreamQ()->getLength(), &streamDetail);
     }
     EV_INFO << "Size of send queue " << stream->getStreamQ()->getLength() << endl;
     // ------ Send buffer full? -------------------------------------------
@@ -450,4 +451,3 @@ void SctpAssociation::process_STATUS(SctpEventCode& event, SctpCommandReq *sctpC
 
 } // namespace sctp
 } // namespace inet
-

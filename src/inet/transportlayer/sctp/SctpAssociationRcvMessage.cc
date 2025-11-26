@@ -38,7 +38,7 @@ void SctpAssociation::decreaseOutstandingBytes(SctpDataVariables *chunk)
     if (chunk->countsAsOutstanding) {
         ASSERT(lastPath->outstandingBytes >= chunk->booksize);
         lastPath->outstandingBytes -= chunk->booksize;
-        lastPath->statisticsPathOutstandingBytes->record(lastPath->outstandingBytes);
+        emit(pathOutstandingBytesSignal, (unsigned long)lastPath->outstandingBytes, lastPath);
         state->outstandingBytes -= chunk->booksize;
         SctpSendStream *stream = nullptr;
         auto associter = sendStreams.find(chunk->sid);
@@ -50,7 +50,7 @@ void SctpAssociation::decreaseOutstandingBytes(SctpDataVariables *chunk)
         }
         stream->setBytesInFlight(stream->getBytesInFlight() - chunk->booksize);
         ASSERT((int64_t)state->outstandingBytes >= 0);
-        statisticsOutstandingBytes->record(state->outstandingBytes);
+        emit(outstandingBytesSignal, (unsigned long)state->outstandingBytes);
 
         chunk->countsAsOutstanding = false;
 
@@ -89,9 +89,9 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
         fsm->getState() != SCTP_S_COOKIE_ECHOED &&
         fsm->getState() != SCTP_S_SHUTDOWN_ACK_SENT &&
         simTime() > state->lastAssocThroughputTime + state->throughputInterval &&
-        assocThroughputVector != nullptr)
+        true)
     {
-        assocThroughputVector->record(state->assocThroughput / (simTime() - state->lastAssocThroughputTime) / 1000);
+        emit(assocThroughputSignal, state->assocThroughput / (simTime() - state->lastAssocThroughputTime) / 1000);
         state->lastAssocThroughputTime = simTime();
         state->assocThroughput = 0;
     }
@@ -324,7 +324,7 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
                 delete heartbeatChunk;
                 if (path) {
                     path->numberOfHeartbeatsRcvd++;
-                    path->vectorPathRcvdHb->record(path->numberOfHeartbeatsRcvd);
+                    emit(pathHeartbeatReceivedSignal, (unsigned long)path->numberOfHeartbeatsRcvd, path);
                 }
                 break;
             }
@@ -584,7 +584,7 @@ bool SctpAssociation::processInitArrived(SctpInitChunk *initchunk, int32_t srcPo
             }
             state->expectedStreamResetSequenceNumber = initPeerTsn;
             state->peerRwnd = state->initialPeerRwnd;
-            statisticsPeerRwnd->record(state->peerRwnd);
+            emit(peerRwndSignal, (unsigned long)state->peerRwnd);
             localVTag = initchunk->getInitTag();
             numberOfRemoteAddresses = initchunk->getAddressesArraySize();
             state->localAddresses.clear();
@@ -744,7 +744,7 @@ bool SctpAssociation::processInitAckArrived(SctpInitAckChunk *initAckChunk)
             state->gapList.setInitialCumAckTsn(initPeerTsn - 1);
             state->initialPeerRwnd = initAckChunk->getA_rwnd();
             state->peerRwnd = state->initialPeerRwnd;
-            statisticsPeerRwnd->record(state->peerRwnd);
+            emit(peerRwndSignal, (unsigned long)state->peerRwnd);
             if (initAckChunk->getMsg_rwnd() > 0) {
                 state->peerAllowsChunks = true;
                 state->initialPeerMsgRwnd = initAckChunk->getMsg_rwnd();
@@ -1073,11 +1073,11 @@ SctpEventCode SctpAssociation::processSackArrived(SctpSackChunk *sackChunk)
     state->incomingSackSeqNum = sackChunk->getSackSeqNum();
 
     // ====== Record statistics ==============================================
-    numGapBlocks->record(numGaps);
-    statisticsRevokableGapBlocksInLastSACK->record(sackGapList.getNumGaps(SctpGapList::GT_Revokable));
-    statisticsNonRevokableGapBlocksInLastSACK->record(sackGapList.getNumGaps(SctpGapList::GT_NonRevokable));
+    emit(numGapBlocksSignal, (unsigned long)numGaps);
+    emit(revokableGapBlocksInLastSACKSignal, (unsigned long)sackGapList.getNumGaps(SctpGapList::GT_Revokable));
+    emit(nonRevokableGapBlocksInLastSACKSignal, (unsigned long)sackGapList.getNumGaps(SctpGapList::GT_NonRevokable));
 
-    path->vectorPathAckedTsnCumAck->record(tsna);
+    emit(pathTsnAckedCumAckSignal, (unsigned long)tsna, path);
     if (assocStat) {
         assocStat->numDups += numDups;
     }
@@ -1365,7 +1365,7 @@ SctpEventCode SctpAssociation::processSackArrived(SctpSackChunk *sackChunk)
         }
 
         // ====== Validity checks =============================================
-        path->vectorPathAckedTsnGapAck->record(state->highestTsnAcked);
+        emit(pathTsnAckedGapAckSignal, (unsigned long)state->highestTsnAcked, path);
     }
 
     // ====== Buffer space may have been gained => tell application ==========
@@ -1386,9 +1386,9 @@ SctpEventCode SctpAssociation::processSackArrived(SctpSackChunk *sackChunk)
     // ====== Record statistics ==============================================
     for (auto& elem : sctpPathMap) {
         SctpPathVariables *myPath = elem.second;
-        myPath->statisticsPathGapAckedChunksInLastSACK->record(myPath->gapAckedChunksInLastSACK);
-        myPath->statisticsPathGapNRAckedChunksInLastSACK->record(myPath->gapNRAckedChunksInLastSACK);
-        myPath->statisticsPathGapUnackedChunksInLastSACK->record(myPath->gapUnackedChunksInLastSACK);
+        emit(pathGapAckedChunksInLastSACKSignal, (unsigned long)myPath->gapAckedChunksInLastSACK, myPath);
+        emit(pathGapNRAckedChunksInLastSACKSignal, (unsigned long)myPath->gapNRAckedChunksInLastSACK, myPath);
+        emit(pathGapUnackedChunksInLastSACKSignal, (unsigned long)myPath->gapUnackedChunksInLastSACK, myPath);
     }
 
     // #######################################################################
@@ -1436,8 +1436,8 @@ SctpEventCode SctpAssociation::processSackArrived(SctpSackChunk *sackChunk)
         state->zeroWindowProbing = false;
     }
     advancePeerTsn();
-    statisticsArwndInLastSACK->record(arwnd);
-    statisticsPeerRwnd->record(state->peerRwnd);
+    emit(arwndInLastSACKSignal, (unsigned long)arwnd);
+    emit(peerRwndSignal, (unsigned long)state->peerRwnd);
 
     // ====== Need for zero-window probing? ==================================
     if (osb == 0) {
@@ -1456,10 +1456,10 @@ SctpEventCode SctpAssociation::processSackArrived(SctpSackChunk *sackChunk)
         const L3Address& myPathId = myPath->remoteAddress;
 
         if (myPath->newPseudoCumAck) {
-            myPath->vectorPathPseudoCumAck->record(myPath->pseudoCumAck);
+            emit(pathPseudoCumAckSignal, (unsigned long)myPath->pseudoCumAck, myPath);
         }
         if (myPath->newRTXPseudoCumAck) {
-            myPath->vectorPathRTXPseudoCumAck->record(myPath->rtxPseudoCumAck);
+            emit(pathRTXPseudoCumAckSignal, (unsigned long)myPath->rtxPseudoCumAck, myPath);
         }
         if (myPath->newlyAckedBytes > 0) {
             // Only call ccUpdateBytesAcked() when there are
@@ -1887,12 +1887,12 @@ void SctpAssociation::nonRenegablyAckChunk(SctpDataVariables *chunk,
 
     ASSERT(chunk->queuedOnPath->queuedBytes >= chunk->booksize);
     chunk->queuedOnPath->queuedBytes -= chunk->booksize;
-    chunk->queuedOnPath->statisticsPathQueuedSentBytes->record(chunk->queuedOnPath->queuedBytes);
+    emit(pathQueuedSentBytesSignal, (unsigned long)chunk->queuedOnPath->queuedBytes, chunk->queuedOnPath);
     chunk->queuedOnPath = nullptr;
 
     ASSERT(state->queuedSentBytes >= chunk->booksize);
     state->queuedSentBytes -= chunk->booksize;
-    statisticsQueuedSentBytes->record(state->queuedSentBytes);
+    emit(queuedSentBytesSignal, (unsigned long)state->queuedSentBytes);
     if (assocStat) {
         assocStat->ackedBytes += chunk->len / 8;
     }
@@ -2127,7 +2127,7 @@ SctpEventCode SctpAssociation::processDataArrived(SctpDataChunk *dataChunk)
     state->lastDataSourcePath = path;
 
     EV_INFO << simTime() << " SctpAssociation::processDataArrived TSN=" << tsn << endl;
-    path->vectorPathReceivedTsn->record(tsn);
+    emit(pathTsnReceivedSignal, (unsigned long)tsn, path);
     if (dataChunk->getIBit()) {
         state->ackState = sackFrequency;
     }
@@ -2246,14 +2246,9 @@ SctpEventCode SctpAssociation::processDataArrived(SctpDataChunk *dataChunk)
                 putInDeliveryQ(dataChunk->getSid());
                 if (simTime() > state->lastThroughputTime + 1) {
                     for (uint16_t i = 0; i < inboundStreams; i++) {
-                        if (!containsKey(streamThroughputVectors, i)) {
-                            char vectorName[128];
-                            snprintf(vectorName, sizeof(vectorName), "Stream %d Throughput", i);
-                            streamThroughputVectors[i] = new cOutVector(vectorName);
-                        }
 
-                        streamThroughputVectors[i]->record(state->streamThroughput[i]
-                                / (simTime() - state->lastThroughputTime) / 1024);
+                        SctpStreamStatistic streamDetail(i); emit(streamThroughputSignal, state->streamThroughput[i]
+                                / (simTime() - state->lastThroughputTime) / 1024, &streamDetail);
                         state->streamThroughput[i] = 0;
                     }
                     state->lastThroughputTime = simTime();
@@ -2272,7 +2267,7 @@ SctpEventCode SctpAssociation::processHeartbeatAckArrived(SctpHeartbeatAckChunk 
         SctpPathVariables *path)
 {
     path->numberOfHeartbeatAcksRcvd++;
-    path->vectorPathRcvdHbAck->record(path->numberOfHeartbeatAcksRcvd);
+    emit(pathHeartbeatAckReceivedSignal, (unsigned long)path->numberOfHeartbeatAcksRcvd, path);
     /* hb-ack goes to pathmanagement, reset error counters, stop timeout timer */
     const L3Address addr = hback->getRemoteAddr();
     const simtime_t hbTimeField = hback->getTimeField();
@@ -3215,7 +3210,7 @@ SctpEventCode SctpAssociation::processAsconfArrived(SctpAsconfChunk *asconfChunk
                     if (sctpMain->getEnableHeartbeats()) {
                         stopTimer(path->HeartbeatTimer);
                         stopTimer(path->HeartbeatIntervalTimer);
-                        path->statisticsPathRTO->record(path->pathRto);
+                        emit(pathRtoSignal, path->pathRto, path);
                         startTimer(path->HeartbeatIntervalTimer, path->pathRto);
                         path->forceHb = true;
                     }
@@ -3508,7 +3503,7 @@ bool SctpAssociation::processPacketDropArrived(SctpPacketDropChunk *packetDropCh
         state->peerRwnd = packetDropChunk->getMaxRwnd()
             - packetDropChunk->getQueuedData()
             - getOutstandingBytes();
-        statisticsPeerRwnd->record(state->peerRwnd);
+        emit(peerRwndSignal, (unsigned long)state->peerRwnd);
         return dataReceived;
     }
 #endif
@@ -3624,7 +3619,7 @@ void SctpAssociation::process_TIMEOUT_HEARTBEAT(SctpPathVariables *path)
 
     /* RTO must be doubled for this path ! */
     path->pathRto = (simtime_t)min(2 * path->pathRto.dbl(), sctpMain->getRtoMax());
-    path->statisticsPathRTO->record(path->pathRto);
+    emit(pathRtoSignal, path->pathRto, path);
     /* check if any thresholds are exceeded, and if so, check if ULP must be notified */
     if (state->errorCount > (uint32_t)sctpMain->getAssocMaxRtx()) {
         sendIndicationToApp(SCTP_I_CONN_LOST);
@@ -3696,7 +3691,7 @@ void SctpAssociation::process_TIMEOUT_RESET(SctpPathVariables *path)
 
         /* increase the RTO (by doubling it) */
         path->pathRto = min(2 * path->pathRto.dbl(), sctpMain->getRtoMax());
-        path->statisticsPathRTO->record(path->pathRto);
+        emit(pathRtoSignal, path->pathRto, path);
         startTimer(path->ResetTimer, path->pathRto);
     }
 }
@@ -3748,7 +3743,7 @@ void SctpAssociation::process_TIMEOUT_ASCONF(SctpPathVariables *path)
 
         /* increase the RTO (by doubling it) */
         path->pathRto = min(2 * path->pathRto.dbl(), sctpMain->getRtoMax());
-        path->statisticsPathRTO->record(path->pathRto);
+        emit(pathRtoSignal, path->pathRto, path);
 
         startTimer(path->AsconfTimer, path->pathRto);
     }
@@ -3766,7 +3761,7 @@ void SctpAssociation::process_TIMEOUT_RTX(SctpPathVariables *path)
 
     // ====== Increase the RTO (by doubling it) ==============================
     path->pathRto = min(2 * path->pathRto.dbl(), sctpMain->getRtoMax());
-    path->statisticsPathRTO->record(path->pathRto);
+    emit(pathRtoSignal, path->pathRto, path);
     EV_DETAIL << "Schedule T3 based retransmission for path " << path->remoteAddress
               << " oldest chunk sent " << simTime() - path->oldestChunkSendTime << " ago"
               << " (TSN " << path->oldestChunkTsn << ")" << endl;
@@ -3908,11 +3903,11 @@ void SctpAssociation::moveChunkToOtherPath(SctpDataVariables *chunk,
     // ====== Rebook chunk on new path =======================================
     ASSERT(chunk->queuedOnPath->queuedBytes >= chunk->booksize);
     chunk->queuedOnPath->queuedBytes -= chunk->booksize;
-    chunk->queuedOnPath->statisticsPathQueuedSentBytes->record(chunk->queuedOnPath->queuedBytes);
+    emit(pathQueuedSentBytesSignal, (unsigned long)chunk->queuedOnPath->queuedBytes, chunk->queuedOnPath);
 
     chunk->queuedOnPath = chunk->getNextDestinationPath();
     chunk->queuedOnPath->queuedBytes += chunk->booksize;
-    chunk->queuedOnPath->statisticsPathQueuedSentBytes->record(chunk->queuedOnPath->queuedBytes);
+    emit(pathQueuedSentBytesSignal, (unsigned long)chunk->queuedOnPath->queuedBytes, chunk->queuedOnPath);
 
     // ====== Perform bookkeeping ============================================
     // Check, if chunk_ptr->tsn is already in transmission queue.
@@ -3945,9 +3940,8 @@ void SctpAssociation::moveChunkToOtherPath(SctpDataVariables *chunk,
         state->peerWindowFull = false;
     }
 
-    statisticsPeerRwnd->record(state->peerRwnd);
+    emit(peerRwndSignal, (unsigned long)state->peerRwnd);
 }
 
 } // namespace sctp
 } // namespace inet
-
