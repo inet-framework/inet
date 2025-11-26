@@ -2177,7 +2177,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="legend_prefer_result_titles" value="true"/>
             <property name="legend_manual" value="false"/>
             <property name="yaxis_title" value=""/>
-            <property name="legend_replacements" value="/ in Traffic.*queue./, /&#10;/ in Traffic.*phyLayer.transmitter//"/>
+            <property name="legend_replacements" value="/ in Time.*queue./, /&#10;/ in Time.*phyLayer.transmitter//"/>
             <property name="title" value="Queue lengths and gate states"/>
             <property name="legend_automatic" value="true"/>
             <property name="vector_operations" value=""/>

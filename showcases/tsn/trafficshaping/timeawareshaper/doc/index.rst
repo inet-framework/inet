@@ -260,14 +260,40 @@ latency of X us (``2*transmission time + 2*propagation time = 5.76*2 + 0.05*2 =
 Additional Details
 ~~~~~~~~~~~~~~~~~~
 
-The following sequence chart shows the detailed timing of packet transmissions and 
-gate operations:
+The following sequence chart illustrates how the shaper protects high-priority
+traffic. The gate state of the high-priority traffic category is displayed at ``switch1``:
 
 .. figure:: media/seqchart.png
    :align: center
 
+The packet ``best-effort-13`` arrives when its gate is open, but is not
+transmitted because it wouldn't fit in the remaining gate window. When
+``high-priority-3`` arrives, its gate is open and the packet is sent
+immediately, and ``best-effort-13`` is transmitted in the next gate window. This
+demonstrates how the shaper ensures high-priority traffic always has access to
+its dedicated transmission window.
+
+The following chart shows queue lengths, gate states and transmitting state in ``switch1``:
+
 .. figure:: media/TransmittingStateAndGateStates.png
    :align: center
+
+.. The chart demonstrates that the gates operate in a mutually exclusive manner:
+.. when one gate is open, the other is closed. The transmission patterns clearly
+.. show the difference between the two traffic categories - small high-priority
+.. packets versus large best-effort packets. High-priority packets experience no
+.. queueing delay and are transmitted immediately when their gate opens, while
+.. best-effort packets sometimes experience queueing delay when multiple packets
+.. arrive during the same cycle.
+
+The chart illustrates several aspects:
+
+- **Mutually exclusive gate operation**: When the high-priority gate is open,
+  the best-effort gate is closed, and vice versa
+- **Packet size differences**: The transmitter row shows as the short
+  high-priority packets and long best-effort packets are transmitted
+- **Queue behavior**: The queue length charts show that high-priority packets
+  experience no queueing delay, while best-effort packets sometimes queue
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`
 
