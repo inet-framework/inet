@@ -420,7 +420,7 @@ void SctpAssociation::sendToIP(Packet *pkt, const Ptr<SctpHeader>& sctpmsg,
     addresses->setDestAddress(dest);
     pkt->addTagIfAbsent<SocketReq>()->setSocketId(assocId);
     EV_INFO << "send packet " << pkt << " to ipOut\n";
-    sctpMain->send(pkt, "ipOut");
+    sctpMain->sendToIp(pkt);
 
     if (chunkType == HEARTBEAT) {
         SctpPathVariables *path = getPath(dest);
@@ -455,7 +455,7 @@ void SctpAssociation::sendIndicationToApp(int32_t code, int32_t value)
     indication->setRemoteAddr(remoteAddr);
     indication->setRemotePort(remotePort);
     msg->addTag<SocketInd>()->setSocketId(assocId);
-    sctpMain->send(msg, "appOut");
+    sctpMain->sendToApp(msg);
 }
 
 void SctpAssociation::sendAvailableIndicationToApp()
@@ -475,7 +475,7 @@ void SctpAssociation::sendAvailableIndicationToApp()
     availableIndication->setNewSocketId(assocId);
     msg->addTag<SocketInd>()->setSocketId(listeningAssocId);
 //    msg->setControlInfo(availableIndication);
-    sctpMain->send(msg, "appOut");
+    sctpMain->sendToApp(msg);
 }
 
 void SctpAssociation::sendEstabIndicationToApp()
@@ -498,18 +498,20 @@ void SctpAssociation::sendEstabIndicationToApp()
     establishIndication->setNumMsgs(state->sendQueueLimit);
     msg->addTag<SocketInd>()->setSocketId(assocId);
 //    msg->setControlInfo(establishIndication);
-    sctpMain->send(msg, "appOut");
+    sctpMain->sendToApp(msg);
 }
 
 void SctpAssociation::sendToApp(cMessage *msg)
 {
     auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
     tags.addTagIfAbsent<SocketInd>()->setSocketId(assocId);
-    sctpMain->send(msg, "appOut");
+    sctpMain->sendToApp(msg);
 }
 
 void SctpAssociation::initAssociation(SctpOpenReq *openCmd)
 {
+    Enter_Method_Silent();
+
     EV_INFO << "SctpAssociationUtil:initAssociation\n";
     // create send/receive queues
     const char *queueClass = openCmd->getQueueClass();
@@ -2982,6 +2984,17 @@ void SctpAssociation::putInTransmissionQ(const uint32_t tsn, SctpDataVariables *
                       << q->second << " bytes" << endl;
         }
     }
+}
+
+void SctpAssociation::deleteQueues()
+{
+    Enter_Method_Silent();
+
+    // Now, both queues can be safely deleted.
+    delete retransmissionQ;
+    retransmissionQ = nullptr;
+    delete transmissionQ;
+    transmissionQ = nullptr;
 }
 
 } // namespace sctp

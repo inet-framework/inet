@@ -574,6 +574,8 @@ SctpAssociation::SctpAssociation()
 
 void SctpAssociation::initAssociation(Sctp *_module, int32_t _appGateIndex, int32_t _assocId, IRoutingTable *_rt, IInterfaceTable *_ift)
 {
+    Enter_Method_Silent();
+
     // ====== Initialize variables ===========================================
     rt = _rt;
     ift = _ift;
@@ -744,8 +746,24 @@ void SctpAssociation::initialize()
 
 void SctpAssociation::handleMessage(cMessage *msg)
 {
-    // Currently not used - timers are still handled by Sctp module
-    throw cRuntimeError("SctpAssociation::handleMessage() should not be called - timers are in Sctp module");
+    EV_INFO << "\n\nSctpAssociation handleMessage at " << getFullPath() << "\n";
+
+    if (msg->isSelfMessage()) {
+        EV_DEBUG << "selfMessage\n";
+
+        SctpAssociation *assoc = (SctpAssociation *)msg->getContextPointer();
+        ASSERT(assoc == this);
+        if (assoc) {
+            bool ret = assoc->processTimer(msg);
+
+            if (!ret)
+                sctpMain->removeAssociation(assoc);
+        }
+    }
+    else {
+        // This should not happen - only self messages (timers) should arrive here
+        throw cRuntimeError("SctpAssociation::handleMessage() received non-self message");
+    }
 }
 
 SctpAssociation::~SctpAssociation()
@@ -869,6 +887,8 @@ bool SctpAssociation::processSctpMessage(SctpHeader *sctpmsg,
         const L3Address& msgSrcAddr,
         const L3Address& msgDestAddr)
 {
+    Enter_Method_Silent();
+
     printAssocBrief();
     localAddr = msgDestAddr;
     localPort = sctpmsg->getDestPort();
@@ -966,6 +986,9 @@ SctpEventCode SctpAssociation::preanalyseAppCommandEvent(int32_t commandCode)
 
 bool SctpAssociation::processAppCommand(cMessage *msg, SctpCommandReq *sctpCommand)
 {
+    Enter_Method_Silent();
+    take(msg);
+
     printAssocBrief();
 
     SctpEventCode event = preanalyseAppCommandEvent(msg->getKind());
@@ -1693,6 +1716,8 @@ void SctpAssociation::stateEntered(int32_t status)
 
 void SctpAssociation::removePath()
 {
+    Enter_Method_Silent();
+
     while (!sctpPathMap.empty()) {
         auto pathIterator = sctpPathMap.begin();
         SctpPathVariables *path = pathIterator->second;
