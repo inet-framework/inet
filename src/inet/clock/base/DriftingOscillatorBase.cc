@@ -39,6 +39,18 @@ void DriftingOscillatorBase::initialize(int stage)
     }
 }
 
+void DriftingOscillatorBase::handleTickTimer()
+{
+    setOrigin(simTime());
+    nextTickFromOrigin = getCurrentTickLength();
+    OscillatorBase::handleTickTimer();
+}
+
+void DriftingOscillatorBase::scheduleTickTimer()
+{
+    scheduleAfter(nextTickFromOrigin, tickTimer);
+}
+
 void DriftingOscillatorBase::setOrigin(simtime_t origin)
 {
     EV_DEBUG << "Setting oscillator origin" << EV_FIELD(origin) << EV_ENDL;
