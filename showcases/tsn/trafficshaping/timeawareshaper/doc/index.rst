@@ -101,8 +101,8 @@ links between them use 100 Mbps :ned:`EthernetLink` channels:
 .. figure:: media/Network.png
    :align: center
 
-We configure the two clients to send different types of traffic to the server,
-and enable time-aware traffic shaping in the switch.
+We configure the two clients to generate two different traffic categories and
+enable time-aware traffic shaping in the switch.
 
 In this simulation, we want to focus on demonstrating the delay benefits of
 time-aware shaping for latency-critical traffic. The simulation uses **two
@@ -191,8 +191,8 @@ has eight traffic classes, but we only use two. We configure a 1ms cycle where:
 .. + propagation (50ns)
 .. ~5.7us
 
-- **High-priority traffic**: Gets the first 20μs of each cycle - enough time to transmit several small packets with bounded delay
-- **Best-effort traffic**: Gets the remaining 980μs - enough time to transmit up to 8 large packets
+- **High-priority traffic**: Gets the first 20us of each cycle - enough time to transmit several small packets with bounded delay
+- **Best-effort traffic**: Gets the remaining 980us - enough time to transmit up to 8 large packets
 
 The gates operate in a mutually exclusive manner: when the high-priority gate is
 open, the best-effort gate is closed, and vice versa. This ensures complete
@@ -206,10 +206,10 @@ categories.
    :lines: 2-
 
 This configuration creates a "green wave" effect for the high-priority traffic.
-Since client2 sends packets at 1ms intervals (with zero start offset), and the gate
+Since ``client2`` sends packets at 1ms intervals (with zero start offset), and the gate
 cycle is also 1ms, high-priority packets arrive when their
-transmission gate is open. The 20μs window allocated for high-priority traffic
-is more than sufficient, as each high-priority packet takes approximately 5.7μs to
+transmission gate is open. The 20us window allocated for high-priority traffic
+is more than sufficient, as each high-priority packet takes approximately 5.7us to
 transmit (including propagation time). This synchronization between application send times and
 gate schedules eliminates queueing delays for high-priority packets, providing
 deterministic latency.
@@ -233,9 +233,9 @@ time-aware shaping:
 
 Without time-aware shaping, high-priority packets experience significant and 
 unpredictable delays. When a high-priority packet arrives at the switch, it must 
-wait for any best-effort frame that is already being transmitted to complete transmission. 
-Since best-effort packets are large (1500B), they take approximately 120μs to 
-transmit at 100 Mbps. This means that high-priority packets 
+wait for any best-effort frame that is already being transmitted to complete. 
+Since best-effort packets are large (1500B), they take approximately 120us to 
+transmit at 100 Mbps. This means high-priority packets 
 cannot be transmitted immediately, resulting in variable delays that violate 
 real-time requirements.
 
@@ -250,30 +250,33 @@ time-aware shaping enabled:
 
 With time-aware shaping, high-priority packets experience bounded, predictable
 delays. The gate schedule ensures that high-priority packets always have access
-to their dedicated 20μs transmission window every 1ms cycle. Combined with the
+to their dedicated 20us transmission window every 1ms cycle. Combined with the
 green wave effect (where packets arrive when their gate is open), high-priority
 packets are transmitted immediately without waiting for an ongoing best-effort
 frame transmission to be completed. This provides the optimal deterministic
-latency of X us (``2*transmission time + 2*propagation time = 5.76*2 + 0.05*2 =
+latency of 11.62us (``2*transmission time + 2*propagation time = 5.76*2 + 0.05*2 =
 11.62us``) regardless of best-effort traffic load.
 
 Additional Details
 ~~~~~~~~~~~~~~~~~~
 
 The following sequence chart illustrates how the shaper protects high-priority
-traffic. The gate state of the high-priority traffic category is displayed at ``switch1``:
+traffic. The gate state of the high-priority traffic category is displayed at switch:
 
 .. figure:: media/seqchart.png
    :align: center
 
 The packet ``best-effort-13`` arrives when its gate is open, but is not
-transmitted because it wouldn't fit in the remaining gate window. When
-``high-priority-3`` arrives, its gate is open and the packet is sent
-immediately, and ``best-effort-13`` is transmitted in the next gate window. This
-demonstrates how the shaper ensures high-priority traffic always has access to
-its dedicated transmission window.
+transmitted because it would not fit in the remaining gate window. When
+``high-priority-3`` arrives, its gate is already open (the high-priority gate is
+closed) and the packet is sent immediately. The ``best-effort-13`` frame is only
+transmitted in the next open gate window (when the high-priority gate is closed
+again). This demonstrates how the shaper ensures high-priority traffic always
+has undisturbed access to the output interface in its dedicated transmission
+window.
 
-The following chart shows queue lengths, gate states and transmitting state in ``switch1``:
+The following chart shows queue lengths, gate states, and transmitting state in
+the switch:
 
 .. figure:: media/TransmittingStateAndGateStates.png
    :align: center
@@ -290,8 +293,8 @@ The chart illustrates several aspects:
 
 - **Mutually exclusive gate operation**: When the high-priority gate is open,
   the best-effort gate is closed, and vice versa
-- **Packet size differences**: The transmitter row shows as the short
-  high-priority packets and long best-effort packets are transmitted
+- **Packet size differences**: In the transmitter state chart, the short
+  high-priority packets and long best-effort packets can be distinguished
 - **Queue behavior**: The queue length charts show that high-priority packets
   experience no queueing delay, while best-effort packets sometimes queue
 
