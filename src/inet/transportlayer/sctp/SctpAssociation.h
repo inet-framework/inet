@@ -1188,12 +1188,12 @@ class INET_API SctpAssociation : public cObject
     }
 
     /** Utility: cancel a timer */
-    cMessage *cancelEvent(cMessage *msg)
+    cMessage *cancelEvent2(cMessage *msg)
     {
         return sctpMain->cancelEvent(msg);
     }
 
-    void cancelAndDelete(cMessage *msg)
+    void cancelAndDelete2(cMessage *msg)
     {
         sctpMain->cancelAndDelete(msg);
     }

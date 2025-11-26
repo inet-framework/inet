@@ -818,10 +818,10 @@ SctpAssociation::~SctpAssociation()
 {
     EV_TRACE << "Destructor SctpAssociation " << assocId << endl;
 
-    cancelAndDelete(T1_InitTimer);
-    cancelAndDelete(T2_ShutdownTimer);
-    cancelAndDelete(T5_ShutdownGuardTimer);
-    cancelAndDelete(SackTimer);
+    cancelAndDelete2(T1_InitTimer);
+    cancelAndDelete2(T2_ShutdownTimer);
+    cancelAndDelete2(T5_ShutdownGuardTimer);
+    cancelAndDelete2(SackTimer);
 
     delete advRwnd;
     delete cumTsnAck;
@@ -849,7 +849,7 @@ SctpAssociation::~SctpAssociation()
     delete statisticsArwndInLastSACK;
     delete statisticsPeerRwnd;
 
-    cancelAndDelete(StartAddIP);
+    cancelAndDelete2(StartAddIP);
     delete advMsgRwnd;
     delete EndToEndDelay;
 
@@ -859,8 +859,8 @@ SctpAssociation::~SctpAssociation()
     }
     if (assocThroughputVector != nullptr)
         delete assocThroughputVector;
-    cancelAndDelete(FairStartTimer);
-    cancelAndDelete(FairStopTimer);
+    cancelAndDelete2(FairStartTimer);
+    cancelAndDelete2(FairStopTimer);
 
     if (state->asconfOutstanding && state->asconfChunk)
         delete state->asconfChunk;
