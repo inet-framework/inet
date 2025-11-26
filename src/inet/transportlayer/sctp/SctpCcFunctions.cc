@@ -363,14 +363,14 @@ void SctpAssociation::recordCwndUpdate(SctpPathVariables *path)
             totalCwnd += path->cwnd;
             totalBandwidth += path->cwnd / GET_SRTT(path->srtt.dbl());
         }
-        statisticsTotalSSthresh->record(totalSsthresh);
-        statisticsTotalCwnd->record(totalCwnd);
-        statisticsTotalBandwidth->record(totalBandwidth);
+        emit(totalSsthreshSignal, (unsigned long)totalSsthresh);
+        emit(totalCwndSignal, (unsigned long)totalCwnd);
+        emit(totalBandwidthSignal, totalBandwidth);
     }
     else {
-        path->statisticsPathSSthresh->record(path->ssthresh);
-        path->statisticsPathCwnd->record(path->cwnd);
-        path->statisticsPathBandwidth->record(path->cwnd / GET_SRTT(path->srtt.dbl()));
+        emit(pathSsthreshSignal, (unsigned long)path->ssthresh, path);
+        emit(pathCwndSignal, (unsigned long)path->cwnd, path);
+        emit(pathBandwidthSignal, path->cwnd / GET_SRTT(path->srtt.dbl()), path);
     }
 }
 
@@ -521,7 +521,7 @@ void SctpAssociation::cwndUpdateAfterSack()
                 EV_INFO << "\t=>\tsst=" << path->ssthresh << " cwnd=" << path->cwnd << endl;
                 recordCwndUpdate(path);
                 path->partialBytesAcked = 0;
-                path->vectorPathPbAcked->record(path->partialBytesAcked);
+                emit(pathPartialBytesAckedSignal, (unsigned long)path->partialBytesAcked, path);
                 if (state->highSpeedCC == true) {
                     updateHighSpeedCCThresholdIdx(path);
                 }
@@ -552,7 +552,7 @@ void SctpAssociation::cwndUpdateAfterSack()
                     path->fastRecoveryActive = true;
                     path->fastRecoveryExitPoint = highestOutstanding;
                     path->fastRecoveryEnteringTime = simTime();
-                    path->vectorPathFastRecoveryState->record(path->cwnd);
+                    emit(pathFastRecoveryStateSignal, (unsigned long)path->cwnd, path);
 
                     EV_INFO << simTime() << ":\tCC [cwndUpdateAfterSack] Entering Fast Recovery on path "
                             << path->remoteAddress
@@ -687,7 +687,7 @@ void SctpAssociation::cwndUpdateBytesAcked(SctpPathVariables *path,
                         throw cRuntimeError("Implementation for this cmtCCVariant is missing!");
                     }
                 }
-                path->vectorPathPbAcked->record(path->partialBytesAcked);
+                emit(pathPartialBytesAckedSignal, (unsigned long)path->partialBytesAcked, path);
                 EV << "\t=>\tsst=" << path->ssthresh
                    << "\tcwnd=" << path->cwnd << endl;
 
@@ -818,7 +818,7 @@ void SctpAssociation::cwndUpdateBytesAcked(SctpPathVariables *path,
         if (path->outstandingBytes == 0) {
             path->partialBytesAcked = 0;
         }
-        path->vectorPathPbAcked->record(path->partialBytesAcked);
+        emit(pathPartialBytesAckedSignal, (unsigned long)path->partialBytesAcked, path);
     }
     else {
         EV_INFO << assocId << ": " << simTime() << ":\tCC "
@@ -906,7 +906,7 @@ void SctpAssociation::cwndUpdateAfterRtxTimeout(SctpPathVariables *path)
     }
     path->highSpeedCCThresholdIdx = 0;
     path->partialBytesAcked = 0;
-    path->vectorPathPbAcked->record(path->partialBytesAcked);
+    emit(pathPartialBytesAckedSignal, (unsigned long)path->partialBytesAcked, path);
     EV_INFO << "\t=>\tsst=" << path->ssthresh
             << "\tcwnd=" << path->cwnd << endl;
     recordCwndUpdate(path);
@@ -915,7 +915,7 @@ void SctpAssociation::cwndUpdateAfterRtxTimeout(SctpPathVariables *path)
     if (path->fastRecoveryActive == true) {
         path->fastRecoveryActive = false;
         path->fastRecoveryExitPoint = 0;
-        path->vectorPathFastRecoveryState->record(0);
+        emit(pathFastRecoveryStateSignal, (unsigned long)0, path);
     }
 }
 
@@ -992,4 +992,3 @@ void SctpAssociation::cwndUpdateAfterCwndTimeout(SctpPathVariables *path)
 } // namespace sctp
 
 } // namespace inet
-
