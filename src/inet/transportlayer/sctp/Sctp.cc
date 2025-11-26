@@ -327,13 +327,19 @@ void Sctp::handleMessage(cMessage *msg)
                         }
                     }
                     if (assocList.size() == 0 || assoc == nullptr) {
-                        assoc = new SctpAssociation(this, appGateIndex, assocId, rt, ift);
+                        // Create SctpAssociation as a submodule
+                        auto moduleType = cModuleType::get("inet.transportlayer.sctp.SctpAssociation");
+                        char submoduleName[24];
+                        sprintf(submoduleName, "assoc-%d", assocId);
+                        auto module = check_and_cast<SctpAssociation *>(moduleType->createScheduleInit(submoduleName, this));
+                        module->initAssociation(this, appGateIndex, assocId, rt, ift);
+                        assoc = module;
 
                         AppAssocKey key;
                         key.appGateIndex = appGateIndex;
                         key.assocId = assocId;
                         sctpAppAssocMap[key] = assoc;
-                        EV_INFO << "SCTP association created for appGateIndex " << appGateIndex << " and assoc " << assocId << "\n";
+                        EV_INFO << "SCTP association created as submodule for appGateIndex " << appGateIndex << " and assoc " << assocId << "\n";
                         bool ret = assoc->processAppCommand(msg, const_cast<SctpCommandReq *>(controlInfo.get()));
                         if (!ret) {
                             removeAssociation(assoc);
@@ -966,7 +972,7 @@ void Sctp::removeAssociation(SctpAssociation *assoc)
     key.assocId = assoc->assocId;
     sctpAppAssocMap.erase(key);
     assocList.remove(assoc);
-    delete assoc;
+    assoc->deleteModule();
 }
 
 SctpAssociation *Sctp::getAssoc(int32_t assocId)
@@ -1058,4 +1064,3 @@ void Sctp::finish()
 } // namespace sctp
 
 } // namespace inet
-

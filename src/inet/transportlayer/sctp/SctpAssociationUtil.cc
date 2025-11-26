@@ -44,6 +44,8 @@ namespace inet {
 
 namespace sctp {
 
+Define_Module(SctpAssociation);
+
 void SctpAssociation::calculateRcvBuffer()
 {
     uint32_t sumDelivery = 0;
@@ -303,7 +305,14 @@ void SctpAssociation::printSegmentBrief(SctpHeader *sctpmsg)
 
 SctpAssociation *SctpAssociation::cloneAssociation()
 {
-    SctpAssociation *assoc = new SctpAssociation(sctpMain, appGateIndex, assocId, rt, ift);
+    // Create SctpAssociation as a submodule
+    auto moduleType = cModuleType::get("inet.transportlayer.sctp.SctpAssociation");
+    char submoduleName[24];
+    sprintf(submoduleName, "assoc-clone-%d", assocId);
+    auto module = check_and_cast<SctpAssociation *>(moduleType->createScheduleInit(submoduleName, sctpMain));
+    module->initAssociation(sctpMain, appGateIndex, assocId, rt, ift);
+    SctpAssociation *assoc = module;
+
     const char *queueClass = transmissionQ->getClassName();
     assoc->transmissionQ = check_and_cast<SctpQueue *>(inet::utils::createOne(queueClass));
     assoc->retransmissionQ = check_and_cast<SctpQueue *>(inet::utils::createOne(queueClass));
@@ -2980,4 +2989,3 @@ void SctpAssociation::putInTransmissionQ(const uint32_t tsn, SctpDataVariables *
 } // namespace sctp
 
 } // namespace inet
-

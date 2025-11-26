@@ -552,14 +552,13 @@ uint16_t SctpStateVariables::getNumRequestsNotPerformed()
 // FSM framework, SCTP FSM
 //
 
-SctpAssociation::SctpAssociation(Sctp *_module, int32_t _appGateIndex, int32_t _assocId, IRoutingTable *_rt, IInterfaceTable *_ift)
+SctpAssociation::SctpAssociation()
 {
-    // ====== Initialize variables ===========================================
-    rt = _rt;
-    ift = _ift;
-    sctpMain = _module;
-    appGateIndex = _appGateIndex;
-    assocId = _assocId;
+    rt = nullptr;
+    ift = nullptr;
+    sctpMain = nullptr;
+    appGateIndex = -1;
+    assocId = -1;
     listeningAssocId = -1;
     fd = -1;
     listening = false;
@@ -607,7 +606,20 @@ SctpAssociation::SctpAssociation(Sctp *_module, int32_t _appGateIndex, int32_t _
     ssFunctions.ssAddOutStreams = nullptr;
     ssFunctions.ssGetNextSid = nullptr;
     ssFunctions.ssUsableStreams = nullptr;
+}
 
+void SctpAssociation::initAssociation(Sctp *_module, int32_t _appGateIndex, int32_t _assocId, IRoutingTable *_rt, IInterfaceTable *_ift)
+{
+    // ====== Initialize variables ===========================================
+    rt = _rt;
+    ift = _ift;
+    sctpMain = _module;
+    appGateIndex = _appGateIndex;
+    assocId = _assocId;
+
+    EV_INFO << "SctpAssociation::initAssociation(): assocId=" << assocId << endl;
+
+    // Empty constructor for SimpleModule
     EV_INFO << "SctpAssociationBase::SctpAssociation(): new assocId="
             << assocId << endl;
 
@@ -812,6 +824,17 @@ SctpAssociation::SctpAssociation(Sctp *_module, int32_t _appGateIndex, int32_t _
             EV_DETAIL << "Setting Stream Scheduler: PATH_MAP_TO_PATH" << endl;
             break;
     }
+}
+
+void SctpAssociation::initialize()
+{
+    // Module initialization - currently empty as timers remain in Sctp module
+}
+
+void SctpAssociation::handleMessage(cMessage *msg)
+{
+    // Currently not used - timers are still handled by Sctp module
+    throw cRuntimeError("SctpAssociation::handleMessage() should not be called - timers are in Sctp module");
 }
 
 SctpAssociation::~SctpAssociation()
@@ -1829,4 +1852,3 @@ void SctpAssociation::removePath()
 
 } // namespace sctp
 } // namespace inet
-
