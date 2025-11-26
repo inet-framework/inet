@@ -271,6 +271,9 @@ class INET_API Sctp : public SimpleModule
     void setRtoMax(double rtoMax) { socketOptions->rtoMax = rtoMax; }
     void setInterfaceId(int id) { interfaceId = id; }
     int getInterfaceId() { return interfaceId; };
+
+    void sendToIp(cMessage *msg);
+    void sendToApp(cMessage *msg);
 };
 
 } // namespace sctp
