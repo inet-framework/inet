@@ -107,7 +107,7 @@ void ClockBase::scheduleClockEventAt(clocktime_t clockTime, ClockEvent *msg)
     simtime_t simulationTime = computeScheduleTime(clockTime);
     EV_DEBUG << "Scheduling clock event at" << EV_FIELD(clockTime) << EV_FIELD(simulationTime) << EV_FIELD(msg) << EV_ENDL;
     scheduleTargetModuleClockEventAt(simulationTime, msg);
-    checkClockEvent(msg);
+    checkScheduledClockEvent(msg);
 }
 
 void ClockBase::scheduleClockEventAfter(clocktime_t clockTimeDelay, ClockEvent *msg)
@@ -122,7 +122,7 @@ void ClockBase::scheduleClockEventAfter(clocktime_t clockTimeDelay, ClockEvent *
     simtime_t simulationTimeDelay = clockTimeDelay.isZero() ? SIMTIME_ZERO : computeScheduleTime(arrivalClockTime) - simTime();
     EV_DEBUG << "Scheduling clock event after" << EV_FIELD(clockTimeDelay) << EV_FIELD(simulationTimeDelay) << EV_FIELD(msg) << EV_ENDL;
     scheduleTargetModuleClockEventAfter(simulationTimeDelay, msg);
-    checkClockEvent(msg);
+    checkScheduledClockEvent(msg);
 }
 
 ClockEvent *ClockBase::cancelClockEvent(ClockEvent *msg)
