@@ -98,7 +98,7 @@ void ClockBase::scheduleClockEventAt(clocktime_t t, ClockEvent *msg)
     msg->setRelative(false);
     msg->setArrivalClockTime(t);
     scheduleTargetModuleClockEventAt(computeScheduleTime(t), msg);
-    checkClockEvent(msg);
+    checkScheduledClockEvent(msg);
 }
 
 void ClockBase::scheduleClockEventAfter(clocktime_t clockTimeDelay, ClockEvent *msg)
@@ -112,7 +112,7 @@ void ClockBase::scheduleClockEventAfter(clocktime_t clockTimeDelay, ClockEvent *
     msg->setArrivalClockTime(arrivalClockTime);
     simtime_t simTimeDelay = clockTimeDelay.isZero() ? SIMTIME_ZERO : computeScheduleTime(arrivalClockTime) - simTime();
     scheduleTargetModuleClockEventAfter(simTimeDelay, msg);
-    checkClockEvent(msg);
+    checkScheduledClockEvent(msg);
 }
 
 ClockEvent *ClockBase::cancelClockEvent(ClockEvent *msg)
