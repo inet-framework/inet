@@ -47,7 +47,7 @@ class INET_API ClockBase : public SimpleModule, public IClock
 
     simtime_t computeScheduleTime(clocktime_t time);
 
-    void checkClockEvent(const ClockEvent *event) {
+    virtual void checkScheduledClockEvent(const ClockEvent *event) {
         DEBUG_ENTER(true);
         // NOTE: IClock interface 3. invariant
         DEBUG_CMP(event->getArrivalClockTime(), >=, getClockTime());
