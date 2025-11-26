@@ -1226,17 +1226,6 @@ class INET_API SctpAssociation : public SimpleModule
         scheduleAfter(timeout, msg);
     }
 
-    /** Utility: cancel a timer */
-    cMessage *cancelEvent2(cMessage *msg)
-    {
-        return cancelEvent(msg);
-    }
-
-    void cancelAndDelete2(cMessage *msg)
-    {
-        cancelAndDelete(msg);
-    }
-
     /** Utility: sends packet to application */
     void sendToApp(cMessage *msg);
 

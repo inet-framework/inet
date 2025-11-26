@@ -770,14 +770,14 @@ SctpAssociation::~SctpAssociation()
 {
     EV_TRACE << "Destructor SctpAssociation " << assocId << endl;
 
-    cancelAndDelete2(T1_InitTimer);
-    cancelAndDelete2(T2_ShutdownTimer);
-    cancelAndDelete2(T5_ShutdownGuardTimer);
-    cancelAndDelete2(SackTimer);
+    cancelAndDelete(T1_InitTimer);
+    cancelAndDelete(T2_ShutdownTimer);
+    cancelAndDelete(T5_ShutdownGuardTimer);
+    cancelAndDelete(SackTimer);
 
-    cancelAndDelete2(StartAddIP);
-    cancelAndDelete2(FairStartTimer);
-    cancelAndDelete2(FairStopTimer);
+    cancelAndDelete(StartAddIP);
+    cancelAndDelete(FairStartTimer);
+    cancelAndDelete(FairStopTimer);
 
     if (state->asconfOutstanding && state->asconfChunk)
         delete state->asconfChunk;
