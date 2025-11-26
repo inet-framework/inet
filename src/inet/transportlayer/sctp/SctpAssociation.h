@@ -16,6 +16,7 @@
 #include <iostream>
 #include <list>
 
+#include "inet/common/SimpleModule.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
@@ -850,7 +851,7 @@ class INET_API SctpStateVariables : public cObject
     SctpPathVariables *primaryPath;
 };
 
-class INET_API SctpAssociation : public cObject
+class INET_API SctpAssociation : public SimpleModule
 {
     friend class Sctp;
     friend class SctpPathVariables;
@@ -986,11 +987,27 @@ class INET_API SctpAssociation : public cObject
     /**
      * Constructor.
      */
-    SctpAssociation(Sctp *mod, int32_t appGateIndex, int32_t assocId, IRoutingTable *rt, IInterfaceTable *ift);
+    SctpAssociation();
+
     /**
      * Destructor.
      */
     ~SctpAssociation();
+
+    /**
+     * Initialize the association (called after module creation).
+     */
+    void initAssociation(Sctp *mod, int32_t appGateIndex, int32_t assocId, IRoutingTable *rt, IInterfaceTable *ift);
+
+    /**
+     * Module initialization.
+     */
+    virtual void initialize() override;
+
+    /**
+     * Handle self messages (timers) - for future use when timers move to association.
+     */
+    virtual void handleMessage(cMessage *msg) override;
     /**
      * Utility: Send data from sendQueue.
      */
@@ -1504,4 +1521,3 @@ class INET_API SctpAssociation : public cObject
 } // namespace inet
 
 #endif
-
