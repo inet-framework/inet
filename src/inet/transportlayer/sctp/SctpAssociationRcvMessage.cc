@@ -2019,7 +2019,7 @@ void SctpAssociation::generateSendQueueAbatedIndication(const uint64_t bytes)
         sendQueueAbatedIndication->setBytesQueued(state->sendBuffer);
         sendQueueAbatedIndication->setBytesLimit(state->sendQueueLimit);
 
-        sctpMain->send(msg, "appOut");
+        sctpMain->sendToApp(msg);
 
         state->lastSendQueueAbated = simTime();
     }
@@ -3653,6 +3653,8 @@ void SctpAssociation::process_TIMEOUT_HEARTBEAT(SctpPathVariables *path)
 
 void SctpAssociation::stopTimers()
 {
+    Enter_Method_Silent();
+
     for (auto& elem : sctpPathMap) {
         stopTimer(elem.second->HeartbeatTimer);
         stopTimer(elem.second->HeartbeatIntervalTimer);
@@ -3661,6 +3663,8 @@ void SctpAssociation::stopTimers()
 
 void SctpAssociation::stopTimer(cMessage *timer)
 {
+    Enter_Method_Silent();
+
     EV_INFO << "stopTimer " << timer->getName() << endl;
     if (timer->isScheduled()) {
         cancelEvent2(timer);
@@ -3669,6 +3673,8 @@ void SctpAssociation::stopTimer(cMessage *timer)
 
 void SctpAssociation::startTimer(cMessage *timer, const simtime_t& timeout)
 {
+    Enter_Method_Silent();
+
     EV_DETAIL << "startTimer " << timer->getName() << " with timeout "
               << timeout << " to expire at " << simTime() + timeout << endl;
     scheduleTimeout(timer, timeout);

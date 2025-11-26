@@ -1080,6 +1080,7 @@ class INET_API SctpAssociation : public SimpleModule
     void removePath();
     void removePath(const L3Address& addr);
     void deleteStreams();
+    void deleteQueues();
     void stopTimer(cMessage *timer);
     void stopTimers();
     SctpPathVariables *getPath(const L3Address& pathId) const
@@ -1222,18 +1223,18 @@ class INET_API SctpAssociation : public SimpleModule
     /** Utility: start a timer */
     void scheduleTimeout(cMessage *msg, const simtime_t& timeout)
     {
-        sctpMain->scheduleAfter(timeout, msg);
+        scheduleAfter(timeout, msg);
     }
 
     /** Utility: cancel a timer */
     cMessage *cancelEvent2(cMessage *msg)
     {
-        return sctpMain->cancelEvent(msg);
+        return cancelEvent(msg);
     }
 
     void cancelAndDelete2(cMessage *msg)
     {
-        sctpMain->cancelAndDelete(msg);
+        cancelAndDelete(msg);
     }
 
     /** Utility: sends packet to application */

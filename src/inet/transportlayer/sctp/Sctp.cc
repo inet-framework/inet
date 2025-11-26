@@ -172,15 +172,9 @@ void Sctp::handleMessage(cMessage *msg)
     EV_INFO << "\n\nSctpMain handleMessage at " << getFullPath() << "\n";
 
     if (msg->isSelfMessage()) {
-        EV_DEBUG << "selfMessage\n";
-
-        SctpAssociation *assoc = (SctpAssociation *)msg->getContextPointer();
-        if (assoc) {
-            bool ret = assoc->processTimer(msg);
-
-            if (!ret)
-                removeAssociation(assoc);
-        }
+        // Timers are now handled directly by SctpAssociation submodules
+        // This should not happen anymore
+        throw cRuntimeError("Sctp::handleMessage() received unexpected self message: %s", msg->getName());
     }
     else if (msg->arrivedOn("ipIn")) {
         EV_INFO << "Message from IP\n";
@@ -341,6 +335,7 @@ void Sctp::handleMessage(cMessage *msg)
                         sctpAppAssocMap[key] = assoc;
                         EV_INFO << "SCTP association created as submodule for appGateIndex " << appGateIndex << " and assoc " << assocId << "\n";
                         bool ret = assoc->processAppCommand(msg, const_cast<SctpCommandReq *>(controlInfo.get()));
+                        take(msg);
                         if (!ret) {
                             removeAssociation(assoc);
                         }
@@ -350,6 +345,7 @@ void Sctp::handleMessage(cMessage *msg)
             else {
                 EV_INFO << "assoc found\n";
                 bool ret = assoc->processAppCommand(msg, const_cast<SctpCommandReq *>(controlInfo.get()));
+                take(msg);
                 if (!ret) {
                     removeAssociation(assoc);
                 }
@@ -964,8 +960,7 @@ void Sctp::removeAssociation(SctpAssociation *assoc)
         }
     }
     // Now, both queues can be safely deleted.
-    delete assoc->getRetransmissionQueue();
-    delete assoc->getTransmissionQueue();
+    assoc->deleteQueues();
 
     AppAssocKey key;
     key.appGateIndex = assoc->appGateIndex;
@@ -1059,6 +1054,20 @@ void Sctp::finish()
 
     recordScalar("RTXMethod", par("RTXMethod").intValue());
     recordScalar("Number of PacketDrop Reports", numPktDropReports);
+}
+
+void Sctp::sendToIp(cMessage *msg)
+{
+    Enter_Method_Silent();
+    take(msg);
+    send(msg, "ipOut");
+}
+
+void Sctp::sendToApp(cMessage *msg)
+{
+    Enter_Method_Silent();
+    take(msg);
+    send(msg, "appOut");
 }
 
 } // namespace sctp
