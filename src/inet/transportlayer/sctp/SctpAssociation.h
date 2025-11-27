@@ -1009,22 +1009,22 @@ class INET_API SctpAssociation : public SimpleModule
      * Constructor.
      */
     SctpAssociation();
-    
+
     /**
      * Destructor.
      */
     ~SctpAssociation();
-    
+
     /**
      * Initialize the association (called after module creation).
      */
     void initAssociation(Sctp *mod, int32_t appGateIndex, int32_t assocId, IRoutingTable *rt, IInterfaceTable *ift);
-    
+
     /**
      * Module initialization.
      */
     virtual void initialize() override;
-    
+
     /**
      * Handle self messages (timers) - for future use when timers move to association.
      */
