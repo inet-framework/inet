@@ -367,7 +367,7 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
                 if (fsm->getState() != SCTP_S_ESTABLISHED) {
                     auto shutdownAckChunk = check_and_cast<SctpShutdownAckChunk *>(header);
                     sendShutdownComplete();
-                    stopTimers();
+                    stopPathTimers();
                     stopTimer(T2_ShutdownTimer);
                     stopTimer(T5_ShutdownGuardTimer);
                     EV_DETAIL << "state=" << stateName(fsm->getState()) << endl;
@@ -394,7 +394,7 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
                 trans = performStateTransition(SCTP_E_RCV_SHUTDOWN_COMPLETE);
                 sendIndicationToApp(SCTP_I_PEER_CLOSED); // necessary for NAT-Rendezvous
                 if (trans == true) {
-                    stopTimers();
+                    stopPathTimers();
                 }
                 stopTimer(T2_ShutdownTimer);
                 stopTimer(T5_ShutdownGuardTimer);
@@ -3651,7 +3651,7 @@ void SctpAssociation::process_TIMEOUT_HEARTBEAT(SctpPathVariables *path)
     }
 }
 
-void SctpAssociation::stopTimers()
+void SctpAssociation::stopPathTimers()
 {
     Enter_Method_Silent();
 
