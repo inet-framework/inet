@@ -875,21 +875,8 @@ void Sctp::removeAssociation(SctpAssociation *assoc)
                     if (sctpAssocMapIterator->second != nullptr) {
                         SctpAssociation *myAssoc = sctpAssocMapIterator->second;
                         if (myAssoc->assocId == assoc->assocId) {
-                            if (myAssoc->T1_InitTimer) {
-                                myAssoc->stopTimer(myAssoc->T1_InitTimer);
-                            }
-                            if (myAssoc->T2_ShutdownTimer) {
-                                myAssoc->stopTimer(myAssoc->T2_ShutdownTimer);
-                            }
-                            if (myAssoc->T5_ShutdownGuardTimer) {
-                                myAssoc->stopTimer(myAssoc->T5_ShutdownGuardTimer);
-                            }
-                            if (myAssoc->SackTimer) {
-                                myAssoc->stopTimer(myAssoc->SackTimer);
-                            }
-                            if (myAssoc->StartAddIP) {
-                                myAssoc->stopTimer(myAssoc->StartAddIP);
-                            }
+                            ASSERT(myAssoc == assoc);
+                            myAssoc->stopAssocTimers();
                             sctpAssocMap.erase(sctpAssocMapIterator);
                             sizeAssocMap--;
                             find = true;
