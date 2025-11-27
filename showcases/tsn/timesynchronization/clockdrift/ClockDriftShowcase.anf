@@ -5207,7 +5207,7 @@ utils.export_data_if_needed(df, props)
             <property name="vector_end_time" value=""/>
             <property name="linecolor" value=""/>
             <property name="Plot.Caching" value="true"/>
-            <property name="yaxis_title" value="Clock time to simulation time difference"/>
+            <property name="yaxis_title" value="Clock time difference to master clock"/>
             <property name="Legend.Border" value="false"/>
             <property name="title" value="Clock drift - Out-of-band synchronization - Random drift rate - Compared to master clock"/>
             <property name="Plot.Title.Font" value="Arial-regular-10"/>
@@ -5973,7 +5973,7 @@ utils.export_data_if_needed(df, props)
             <property name="vector_end_time" value=""/>
             <property name="linecolor" value=""/>
             <property name="Plot.Caching" value="true"/>
-            <property name="yaxis_title" value="Clock time to simulation time difference"/>
+            <property name="yaxis_title" value="Clock time difference to master clock"/>
             <property name="Legend.Border" value="false"/>
             <property name="title" value="Clock drift - Out-of-band synchronization - Random drift rate - Compared to master clock"/>
             <property name="Plot.Title.Font" value="Arial-regular-10"/>
