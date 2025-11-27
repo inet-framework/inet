@@ -3653,8 +3653,6 @@ void SctpAssociation::process_TIMEOUT_HEARTBEAT(SctpPathVariables *path)
 
 void SctpAssociation::stopPathTimers()
 {
-    Enter_Method_Silent();
-
     for (auto& elem : sctpPathMap) {
         stopTimer(elem.second->HeartbeatTimer);
         stopTimer(elem.second->HeartbeatIntervalTimer);
@@ -3663,8 +3661,6 @@ void SctpAssociation::stopPathTimers()
 
 void SctpAssociation::stopTimer(cMessage *timer)
 {
-    Enter_Method_Silent();
-
     EV_INFO << "stopTimer " << timer->getName() << endl;
     if (timer->isScheduled()) {
         cancelEvent(timer);
