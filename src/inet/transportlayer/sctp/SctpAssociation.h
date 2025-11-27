@@ -1082,7 +1082,7 @@ class INET_API SctpAssociation : public SimpleModule
     void deleteStreams();
     void deleteQueues();
     void stopTimer(cMessage *timer);
-    void stopTimers();
+    void stopPathTimers();
     SctpPathVariables *getPath(const L3Address& pathId) const
     {
         SctpPathMap::const_iterator iterator = sctpPathMap.find(pathId);
