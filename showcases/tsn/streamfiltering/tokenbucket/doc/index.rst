@@ -76,7 +76,7 @@ operates using the following principles:
   Committed Information Rate (CIR)
 - The bucket has a maximum capacity equal to the Committed Burst Size (CBS)
 - When the bucket reaches full capacity, newly generated tokens overflow and are discarded
-- Each incoming packet consumes tokens equal to its size in bytes from the bucket
+- Each incoming packet consumes tokens proportional to its size from the bucket
 - Packets are forwarded only when sufficient tokens are available; consumed tokens are removed from the bucket
 - When insufficient tokens are available, packets are either dropped (policing) or marked as non-conforming
 
@@ -112,7 +112,7 @@ The network consists of two client devices that send traffic streams to a server
 - **server**: Receives traffic from both clients
 
 The combined traffic from both clients occasionally exceeds the link capacity between
-the switch and server, creating congestion. This scenario allows us to compare network
+the switch and the server, creating congestion. This scenario allows us to compare network
 behavior with and without token bucket policing enabled in the switch.
 
 Traffic Configuration
@@ -127,7 +127,7 @@ connected through a :ned:`TsnSwitch` via 100 Mbps :ned:`EthernetLink` channels.
   packet intervals, creating variable, bursty traffic patterns that periodically exceed the committed rate
 - ``client2``: Generates **well-behaved traffic** at a steady 20 Mbps with consistent packet intervals
 
-**Traffic Classification:** Both streams belong to the same traffic class, which is crucial for this
+**Traffic Classification:** Both streams belong to the same traffic class, which is important for this
 demonstration. If they belonged to different traffic classes, TSN traffic shaping could resolve
 the issue by prioritizing traffic. Since both streams share the same class, they compete equally
 for bandwidth, making per-stream policing necessary to protect the well-behaved stream.
@@ -166,7 +166,7 @@ Token Bucket Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Each stream uses a :ned:`SingleRateTwoColorMeter` configured with stream-specific parameters
-to implement token bucket policing. The meter operates with two critical parameters:
+to implement token bucket policing. The meter operates with two key parameters:
 
 **Parameter Configuration:**
 
