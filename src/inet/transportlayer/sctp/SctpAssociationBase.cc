@@ -1747,5 +1747,26 @@ void SctpAssociation::removePath()
     }
 }
 
+void SctpAssociation::stopAssocTimers()
+{
+    Enter_Method_Silent();
+
+    if (T1_InitTimer) {
+        stopTimer(T1_InitTimer);
+    }
+    if (T2_ShutdownTimer) {
+        stopTimer(T2_ShutdownTimer);
+    }
+    if (T5_ShutdownGuardTimer) {
+        stopTimer(T5_ShutdownGuardTimer);
+    }
+    if (SackTimer) {
+        stopTimer(SackTimer);
+    }
+    if (StartAddIP) {
+        stopTimer(StartAddIP);
+    }
+}
+
 } // namespace sctp
 } // namespace inet
