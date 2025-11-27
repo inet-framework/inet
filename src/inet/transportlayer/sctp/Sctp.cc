@@ -899,18 +899,6 @@ void Sctp::removeAssociation(SctpAssociation *assoc)
 
     assoc->removePath();
     assoc->deleteStreams();
-
-    // Chunks may be in the transmission and retransmission queues simultaneously.
-    // Remove entry from transmission queue if it is already in the retransmission queue.
-    for (auto i = assoc->getRetransmissionQueue()->payloadQueue.begin();
-         i != assoc->getRetransmissionQueue()->payloadQueue.end(); i++)
-    {
-        auto j = assoc->getTransmissionQueue()->payloadQueue.find(i->second->tsn);
-        if (j != assoc->getTransmissionQueue()->payloadQueue.end()) {
-            assoc->getTransmissionQueue()->payloadQueue.erase(j);
-        }
-    }
-    // Now, both queues can be safely deleted.
     assoc->deleteQueues();
 
     AppAssocKey key;
