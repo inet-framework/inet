@@ -2990,6 +2990,16 @@ void SctpAssociation::deleteQueues()
 {
     Enter_Method_Silent();
 
+    // Chunks may be in the transmission and retransmission queues simultaneously.
+    // Remove entry from transmission queue if it is already in the retransmission queue.
+    for (auto i = retransmissionQ->payloadQueue.begin();
+         i != retransmissionQ->payloadQueue.end(); i++)
+    {
+        auto j = transmissionQ->payloadQueue.find(i->second->tsn);
+        if (j != transmissionQ->payloadQueue.end()) {
+            transmissionQ->payloadQueue.erase(j);
+        }
+    }
     // Now, both queues can be safely deleted.
     delete retransmissionQ;
     retransmissionQ = nullptr;
