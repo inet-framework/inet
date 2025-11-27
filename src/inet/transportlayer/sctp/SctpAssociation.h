@@ -1084,6 +1084,7 @@ class INET_API SctpAssociation : public SimpleModule
     void stopTimer(cMessage *timer);
     void stopPathTimers();
     void stopAssocTimers();
+    void recordScalars();
 
     SctpPathVariables *getPath(const L3Address& pathId) const
     {
