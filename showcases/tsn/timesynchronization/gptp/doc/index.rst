@@ -166,6 +166,11 @@ We examine clock drift of all clocks by plotting the clock time difference again
 .. figure:: media/OneMasterClock.png
    :align: center
 
+Here is the same chart, but showing clock drift compared to the master clock:
+
+.. figure:: media/OneMasterClock_m.png
+   :align: center
+
 The master clock drifts according to a random walk process. The times of slave
 clocks is periodically synchronized to the master's. At the second time
 synchronization event at 0.25s, the drift rates of the slave clocks are
