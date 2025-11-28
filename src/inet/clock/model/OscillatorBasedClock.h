@@ -39,7 +39,7 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
   protected:
     bool useFutureEventSet = false;
     IOscillator *oscillator = nullptr;
-    int64_t (*roundingFunction)(int64_t, int64_t) = nullptr;
+    simtime_raw_t (*roundingFunction)(simtime_raw_t, simtime_raw_t) = nullptr;
 
     /**
      * The simulation time from which the clock computes the mapping between future simulation times and clock times.
