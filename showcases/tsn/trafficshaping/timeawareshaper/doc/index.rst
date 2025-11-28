@@ -38,7 +38,7 @@ time-aware shaping requires synchronized clocks throughout the network.
 .. note:: Gate scheduling can be a complex problem, especially in a larger network. In INET, various gate scheduling configurators can automate
           this task, see the TSN :doc:`/showcases/tsn/gatescheduling/index` showcases. In this example simulation, we use a simple schedule that we can configure by hand.
 
-In INET, the Time-aware shaping is implemented by the :ned:`Ieee8021qTimeAwareShaper` module. This is a queue module that can be configured to replace the default simple queue 
+In INET, the Time-aware shaping is implemented by the :ned:`Ieee8021qTimeAwareShaper` module. This is a queue module that can be configured to replace the default simple queue
 in the MAC submodule of modular Ethernet interfaces (such as :ned:`LayeredEthernetInterface`). The shaper has multiple sub-queues and corresponding gate submodules, one for each
 traffic priority class. This number can be configured with the :par:`numTrafficClasses` parameter of the shaper. By default, it has eight traffic classes, as per the IEEE 802.1Q
 standard.
@@ -64,9 +64,9 @@ The gates are :ned:`PeriodicGate` modules. Gate scheduling is configured by sett
 The complete period of the gate is the sum of the intervals specified with the :par:`durations` parameter.
 
 Time-aware shaping functionality can be added to a :ned:`TsnSwitch` by setting the :par:`hasEgressTrafficShaping` parameter to ``true``. This setting replaces the default queue with
-an :ned:`Ieee8021qTimeAwareShaper` in all Ethernet interfaces in the switch. 
+an :ned:`Ieee8021qTimeAwareShaper` in all Ethernet interfaces in the switch.
 
-.. note:: Setting this parameter only adds the option of Time-aware shaping to the switch. To use it, gate schedules need to be configured. 
+.. note:: Setting this parameter only adds the option of Time-aware shaping to the switch. To use it, gate schedules need to be configured.
           This is because, by default, the gates are always open; thus, without any configuration, the shaper works as a priority queue, where frames are prioritized by PCP.
 
 Visualizing Gate Schedules
@@ -94,37 +94,48 @@ For more information, check out the :doc:`/showcases/tsn/trafficshaping/creditba
 The Configuration
 ~~~~~~~~~~~~~~~~~
 
-There are three network nodes in the network. The client and the server are
-:ned:`TsnDevice` modules, and the switch is a :ned:`TsnSwitch` module. The
+The network consists of four nodes: two clients, a switch, and a server.
+The clients and server are :ned:`TsnDevice` modules, and the switch is a :ned:`TsnSwitch` module. The
 links between them use 100 Mbps :ned:`EthernetLink` channels:
 
 .. figure:: media/Network.png
    :align: center
 
-We configure the client to send traffic to the server, and enable time-aware traffic shaping in the switch.
+We configure the two clients to generate two different traffic categories and
+enable time-aware traffic shaping in the switch.
 
-In this simulation, we want to focus on how the Time-aware shaper works, and avoid any unintended traffic shaping effects by other parts of the network (such as traffic being limited
-by the bandwidth of a link). Our goal is for the traffic to be only altered in the shaper, but be relatively unchanged everywhere else from the source to the destination application.
+In this simulation, we want to focus on demonstrating the delay benefits of
+time-aware shaping for latency-critical traffic. The simulation uses **two
+different traffic categories** to show how time-aware shaping can provide
+bounded delay for high-priority frames while still allowing best-effort traffic
+to use the remaining bandwidth.
 
-Two applications in the client create two different priority data streams: video and best effort. The data rates of the two categories fluctuate around an average nominal value, 40Mbps and 20Mbps, respectively. Note that this traffic doesn't saturate the link. Also, sometimes the data rate of the streams can be higher during a given time period, because it is specified by a distribution with the average values mentioned above. This excess traffic is held up in the shaper to limit traffic to the nominal value:
+The two clients generate traffic representing distinct application requirements:
+
+- **Client1 (best-effort traffic category)**: Generates large packets (1500B) with exponential intervals, averaging ~60 Mbps. This represents bulk data transfer applications that prioritize throughput over latency.
+- **Client2 (high-priority traffic category)**: Generates small packets (64B) with constant data rate (CDR) at 1ms intervals, averaging ~512 kbps. This represents latency-sensitive applications (e.g., control traffic, real-time commands) that require bounded delay.
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: client applications
-   :end-before: outgoing streams
+   :end-before: server applications
    :language: ini
+   :lines: 2-
 
-.. note:: We set different destination ports for the two UDP applications, so that packets can be assigned to streams by destination port later.
+We need to classify packets from the two applications into best-effort and
+high-priority traffic classes. This is accomplished in two steps: `stream
+identification` assigns packets to named streams (``"best-effort"`` and
+``"high-priority"``) based on destination port, then `stream encoding` maps
+these streams to traffic classes by setting the appropriate PCP numbers.
 
-In the client, we want packets from the two applications to be classified into two different traffic classes: best effort and video.
-To this end, we use `stream identification` in the client to assign packets to named streams (``"best effort"`` and ``"video"``), based on destination port. Based on the stream name,
-we use `stream encoding` to assign the streams to traffic classes using PCP numbers.
-
-The stream identification and stream encoding features can be enabled in :ned:`TsnDevice` by setting its :par:`hasOutgoingStreams` parameter to ``true``. We do this in the client:
+The stream identification and stream encoding features can be enabled in
+:ned:`TsnDevice` by setting its :par:`hasOutgoingStreams` parameter to ``true``.
+We do this in both clients:
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: outgoing streams
    :end-before: stream identification
    :language: ini
+   :lines: 2-
 
 This setting adds a :ned:`StreamIdentifierLayer` and a :ned:`StreamCoderLayer` submodule to the bridging layer in the client:
 
@@ -141,127 +152,151 @@ destination UDP port:
    :start-at: stream identification
    :end-before: stream encoding
    :language: ini
+   :lines: 2-
 
 The stream encoder attaches 802.1q-tag requests to packets. Here, we can configure how to encode the various streams in the 802.1q header,
-such as with VLAN ID, or PCP number. We assign the best effort stream to PCP 0, and the video stream to PCP 4:
+such as with VLAN ID, or PCP number. We assign the best-effort stream to PCP 0, and the high-priority stream to PCP 4:
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: stream encoding
-   :end-at: video
+   :end-at: high-priority
    :language: ini
+   :lines: 2-
 
 The :ned:`Ieee8021qProtocol` module in the link layer adds 802.1q headers to packets and sets the PCP field according to the request tags.
 
 The traffic shaping takes place in the outgoing network interface of the switch
-where both streams pass through. We enable egress traffic shaping in the switch:
+where both traffic categories pass through. We enable egress traffic shaping in the switch:
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: egress traffic shaping
    :end-at: hasEgressTrafficShaping
    :language: ini
+   :lines: 2-
 
 This setting replaces the default queue with an :ned:`Ieee8021qTimeAwareShaper` module in the MAC layer of all interfaces in the switch.
 
-Let's configure the schedules. By default, the :ned:`Ieee8021qTimeAwareShaper` has
-eight traffic classes, but we only use two. To limit the data rates in the shaper
-to 40Mbps and 20Mbps, we configure the schedules so that the best effort traffic class
-can transmit 40% of the time, and video traffic class 20% of the time:
+Let's configure the schedules. By default, the :ned:`Ieee8021qTimeAwareShaper`
+has eight traffic classes, but we only use two. We configure a 1ms cycle where:
+
+.. TODO: The key insight is that high-priority traffic gets a guaranteed, bounded transmission window while best-effort traffic gets the remaining time. ->
+.. the high priority traffic actually has a higher priority (higher index category is prioritized)(implemented by the priority scheduler in the shaper)
+.. -> the high priority traffic actually has a higher priority in the shaper
+
+.. TODO felvaltva vannak nyitva (open in a mutually exclusive way)
+
+.. TODO*:
+.. 20us more than enough
+.. 5.7us tx time
+.. + propagation (50ns)
+.. ~5.7us
+
+- **High-priority traffic**: Gets the first 20us of each cycle - enough time to transmit several small packets with bounded delay
+- **Best-effort traffic**: Gets the remaining 980us - enough time to transmit up to 8 large packets
+
+The gates operate in a mutually exclusive manner: when the high-priority gate is
+open, the best-effort gate is closed, and vice versa. This ensures complete
+traffic separation and prevents any interference between the two traffic
+categories.
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: time-aware traffic shaping
+   :end-before: configure gate schedule visualization
    :language: ini
+   :lines: 2-
 
-.. note:: We specify average data rates in the applications (by setting the packet size and send interval) and in the shaper (by setting the schedules). 
-          The packets are still transmitted with 100Mbps from the client's interface, and from the shaper when the corresponding gate is open.
-   
-The shaper limits traffic to the nominal values. The excess traffic is temporarily stored in the MAC layer sub-queues of the
-corresponding traffic class.
+This configuration creates a "green wave" effect for the high-priority traffic.
+Since ``client2`` sends packets at 1ms intervals (with zero start offset), and the gate
+cycle is also 1ms, high-priority packets arrive when their
+transmission gate is open. The 20us window allocated for high-priority traffic
+is more than sufficient, as each high-priority packet takes approximately 5.7us to
+transmit (including propagation time). This synchronization between application send times and
+gate schedules eliminates queueing delays for high-priority packets, providing
+deterministic latency.
 
 Results
 -------
 
-The following video shows the time when one of the gates closes and the other one opens. The schedules are visualized above the switch. Notice how they move just by a few pixels:
+The primary benefit of time-aware shaping is providing bounded, predictable
+delay for high-priority traffic. We demonstrate this by comparing two scenarios:
+one without time-aware shaping (``NoTrafficShaping``) and one with time-aware
+shaping enabled (``TimeAwareShaping``).
 
-.. so:
+Delay Without Traffic Shaping
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  - the gates switch
-  - they switch which one is open
+The following chart shows the end-to-end delay for high-priority traffic without 
+time-aware shaping:
 
-  TODO explain this! 1 pixellel arrebb mozdul
-
-.. video_noloop:: media/tas3.mp4
+.. figure:: media/delay_noshaping.png
    :align: center
 
-At the beginning of the video, the gate for the best effort traffic class is open, and the switch sends two best effort packets to the server. Then the gate for the video traffic class opens, 
-and the switch sends two video packets. Note that during this time, both best effort and video packets are sent from the client to the switch. 
+Without time-aware shaping, high-priority packets experience significant and 
+unpredictable delays. When a high-priority packet arrives at the switch, it must 
+wait for any best-effort frame that is already being transmitted to complete. 
+Since best-effort packets are large (1500B), they take approximately 120us to 
+transmit at 100 Mbps. This means high-priority packets 
+cannot be transmitted immediately, resulting in variable delays that violate 
+real-time requirements.
 
-The following diagram shows the data rate of the video and best effort streams, measured at client application and as the incoming traffic in the traffic shaper:
+Delay With Traffic Shaping
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. figure:: media/ClientTrafficShaperIncoming.png
+The following chart shows the end-to-end delay for high-priority traffic with 
+time-aware shaping enabled:
+
+.. figure:: media/delay_tas.png
    :align: center
 
-The data rate of both traffic classes varies randomly, but they are very similar at the two measurement points. They aren't exactly the same for a few reasons, for example:
+With time-aware shaping, high-priority packets experience bounded, predictable
+delays. The gate schedule ensures that high-priority packets always have access
+to their dedicated 20us transmission window every 1ms cycle. Combined with the
+green wave effect (where packets arrive when their gate is open), high-priority
+packets are transmitted immediately without waiting for an ongoing best-effort
+frame transmission to be completed. This provides the optimal deterministic
+latency of 11.62us (``2*transmission time + 2*propagation time = 5.76*2 + 0.05*2 =
+11.62us``) regardless of best-effort traffic load.
 
-- The data rate of the same stream is higher in the traffic shaper because the measurement includes protocol headers as well as application data.
-- The two traffic classes are sent from the client to the switch mixed together, so they affect each other (e.g. a best effort frame might have to wait for a video frame to finish transmitting).
+Additional Details
+~~~~~~~~~~~~~~~~~~
 
-Thus the traffic is mostly unchanged when it arrives at the shaper, so we can observe the shaper's effect on the traffic.
-The next diagram shows the data rate of the incoming and outgoing traffic in the shaper:
+The following sequence chart illustrates how the shaper protects high-priority
+traffic. The gate state of the high-priority traffic category is displayed at switch:
 
-.. figure:: media/ShaperBoth.png
+.. figure:: media/seqchart.png
    :align: center
 
-The shaper limits the data rate to the specified values.
+The packet ``best-effort-13`` arrives when its gate is open, but is not
+transmitted because it would not fit in the remaining gate window. When
+``high-priority-3`` arrives, its gate is already open (the high-priority gate is
+closed) and the packet is sent immediately. The ``best-effort-13`` frame is only
+transmitted in the next open gate window (when the high-priority gate is closed
+again). This demonstrates how the shaper ensures high-priority traffic always
+has undisturbed access to the output interface in its dedicated transmission
+window.
 
-The following sequence chart displays a duration of two gate cycles (20ms). Blue packets are best effort, red ones are video:
-
-.. figure:: media/elog.png
-   :align: center
-
-The packets are sent by the client in random intervals. However, they are forwarded by the switch according to the configured gate schedule (in the first cycle, 0-4ms: best effort, 4-6ms: video, 6-10ms: closed).
-Note that there are less packets in the queues in the first cycle than in the second, thus traffic sent by the switch doesn't fill the send windows entirely in the first cycle.
-
-The next diagram shows the queue lengths of the traffic classes in the outgoing
-network interface of the switch. The queue lengths increase over time, because
-packets are not dropped, and the incoming data rate of the shaper is on average
-more than 40Mbps and 20Mbps. This is due to protocol overhead.
-
-.. figure:: media/TrafficShaperQueueLengths.png
-   :align: center
-
-The next diagram shows the transmitting state and the gate states of the time-aware
-shaper. The open periods of the two gates are back-to-back, and the transmitter is active
-for 60% of the time, for a total traffic of 60Mbps. Note that the transmitting state
-diagram appears solid orange, but the state actually fluctuates rapidly between transmitting
-and not transmitting.
+The following chart shows queue lengths, gate states, and transmitting state in
+the switch:
 
 .. figure:: media/TransmittingStateAndGateStates.png
    :align: center
 
-The next diagram shows the relationships (for both traffic classes) between
-the gate state of the transmission gates, the transmitting state of the
-outgoing network interface, and the queue lengths. This view is zoomed in to the
-start of the simulation, and the rapid fluctuation of the transmitter states is visible.
-the transmission state fluctuates less frequently at
-the beginning because the queues are not yet full.
-Also, the transmitter is not active during the entire time the gates are open, because the
-queues run out of packets.
+.. The chart demonstrates that the gates operate in a mutually exclusive manner:
+.. when one gate is open, the other is closed. The transmission patterns clearly
+.. show the difference between the two traffic categories - small high-priority
+.. packets versus large best-effort packets. High-priority packets experience no
+.. queueing delay and are transmitted immediately when their gate opens, while
+.. best-effort packets sometimes experience queueing delay when multiple packets
+.. arrive during the same cycle.
 
-.. figure:: media/TrafficShaping.png
-   :align: center
+The chart illustrates several aspects:
 
-The next diagram shows the already shaped traffic, measured as the outgoing data rate of the traffic shaper,
-and the incoming data rate of the applications in the server, for both traffic classes. The data rate is more stable
-after the shaping, as the shaper limits the rate, and smooths the traffic by sending excess traffic later. The data rate
-dips when the unshaped traffic is lower. Also, the data rate is very similar in the two measurement points.
-
-.. figure:: media/TrafficShaperOutgoingServer.png
-   :align: center
-
-To sum it up, in this scenario, the traffic originating from the sender application
-stays more or less identical up until the shaper. The shaper forwards packets according to the configured gate
-schedules, and this limits the average data rate of the two streams to the specified values. After shaping, the traffic stays identical up to the receiver application.
-It only changes significantly in the shaper.
+- **Mutually exclusive gate operation**: When the high-priority gate is open,
+  the best-effort gate is closed, and vice versa
+- **Packet size differences**: In the transmitter state chart, the short
+  high-priority packets and long best-effort packets can be distinguished
+- **Queue behavior**: The queue length charts show that high-priority packets
+  experience no queueing delay, while best-effort packets sometimes queue
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`
 
@@ -303,4 +338,3 @@ Discussion
 ----------
 
 Use `this <https://github.com/inet-framework/inet/discussions/802>`__ page in the GitHub issue tracker for commenting on this showcase.
-
