@@ -25,6 +25,7 @@ class INET_API ClockBase : public SimpleModule, public IClock
     ModuleRefByPar<IClock> referenceClockModule;
     simtime_t emitClockTimeInterval;
     cMessage *timer = nullptr;
+    mutable clocktime_t lastClockTime;
 
   protected:
     virtual ~ClockBase() { cancelAndDelete(timer); }
@@ -41,6 +42,17 @@ class INET_API ClockBase : public SimpleModule, public IClock
     }
 
     simtime_t computeScheduleTime(clocktime_t time);
+
+    void checkClockEvent(const ClockEvent *event) {
+        ASSERT(event->isScheduled());
+        ASSERTCMP(>=, event->getArrivalTime(), simTime());
+        // NOTE: IClock interface 3. invariant
+        ASSERTCMP(>=, event->getArrivalClockTime(), getClockTime());
+        // NOTE: IClock interface 4. invariant
+        ASSERTCMP(==, event->getArrivalTime(), computeScheduleTime(event->getArrivalClockTime()));
+        // NOTE: IClock interface 5. invariant
+        ASSERTCMP(==, event->getArrivalClockTime(), computeClockTimeFromSimTime(event->getArrivalTime()));
+    }
 
   public:
     virtual clocktime_t getClockTime() const override;
