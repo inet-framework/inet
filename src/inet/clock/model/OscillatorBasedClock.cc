@@ -121,6 +121,7 @@ void OscillatorBasedClock::scheduleClockEventAt(clocktime_t time, ClockEvent *ev
     int64_t roundedTime = roundingFunction(time.raw(), oscillator->getNominalTickLength().raw());
     ClockBase::scheduleClockEventAt(ClockTime().setRaw(roundedTime), event);
     events.push_back(event);
+    checkClockEvent(event);
 }
 
 void OscillatorBasedClock::scheduleClockEventAfter(clocktime_t delay, ClockEvent *event)
@@ -129,10 +130,12 @@ void OscillatorBasedClock::scheduleClockEventAfter(clocktime_t delay, ClockEvent
     int64_t roundedDelay = roundingFunction(delay.raw(), oscillator->getNominalTickLength().raw());
     ClockBase::scheduleClockEventAfter(ClockTime().setRaw(roundedDelay), event);
     events.push_back(event);
+    checkClockEvent(event);
 }
 
 ClockEvent *OscillatorBasedClock::cancelClockEvent(ClockEvent *event)
 {
+    checkClockEvent(event);
     events.erase(std::remove(events.begin(), events.end(), event), events.end());
     return ClockBase::cancelClockEvent(event);
 }
@@ -160,7 +163,9 @@ void OscillatorBasedClock::receiveSignal(cComponent *source, int signal, cObject
     Enter_Method("%s", cComponent::getSignalName(signal));
 
     if (signal == IOscillator::preOscillatorStateChangedSignal) {
+        checkAllClockEvents();
         setOrigin(simTime(), getClockTime());
+        checkAllClockEvents();
     }
     else if (signal == IOscillator::postOscillatorStateChangedSignal) {
         simtime_t currentSimTime = simTime();
@@ -180,6 +185,7 @@ void OscillatorBasedClock::receiveSignal(cComponent *source, int signal, cObject
                 cContextSwitcher contextSwitcher(targetModule);
                 targetModule->rescheduleAt(arrivalSimTime, event);
             }
+            checkClockEvent(event);
         }
         emit(timeChangedSignal, CLOCKTIME_AS_SIMTIME(getClockTime()));
     }
