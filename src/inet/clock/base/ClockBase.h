@@ -41,26 +41,13 @@ class INET_API ClockBase : public SimpleModule, public IClock
             throw cRuntimeError("scheduleAt()/cancelEvent() must be called with a simple module in context");
         return target;
     }
+    virtual void checkScheduledClockEvent(const ClockEvent *event) const;
+
 
     virtual void scheduleTargetModuleClockEventAt(simtime_t time, ClockEvent *event);
     virtual void scheduleTargetModuleClockEventAfter(simtime_t time, ClockEvent *event);
     virtual ClockEvent *cancelTargetModuleClockEvent(ClockEvent *event);
 
-
-    virtual void checkScheduledClockEvent(const ClockEvent *event) {
-        DEBUG_ENTER(true);
-        // NOTE: IClock interface 3. invariant
-        DEBUG_CMP(event->getArrivalClockTime(), >=, getClockTime());
-        if (event->isScheduled()) {
-            DEBUG_CMP(event->getArrivalTime(), >=, simTime());
-            // NOTE: IClock interface 4. invariant
-            DEBUG_CMP(event->getArrivalTime(), ==, computeScheduleTime(event->getArrivalClockTime()));
-            // NOTE: IClock interface 5. invariant
-            DEBUG_CMP(event->getArrivalClockTime(), >=, computeClockTimeFromSimTime(event->getArrivalTime(), false));
-            DEBUG_CMP(event->getArrivalClockTime(), <=, computeClockTimeFromSimTime(event->getArrivalTime(), true));
-        }
-        DEBUG_LEAVE();
-    }
     virtual simtime_t computeScheduleTime(clocktime_t time) const;
 
   public:
