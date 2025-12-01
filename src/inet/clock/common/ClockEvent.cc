@@ -16,6 +16,8 @@ Register_Class(ClockEvent)
 
 void ClockEvent::execute()
 {
+    cSimpleModule *targetModule = check_and_cast<cSimpleModule *>(getTargetObject());
+    cContextSwitcher contextSwitcher(targetModule);
     if (clock != nullptr) {
         clocktime_t clockTime = clock->getClockTime();
         EV_DEBUG << "Executing clock event" << EV_FIELD(clockTime) << EV_FIELD(event, this) << EV_ENDL;
