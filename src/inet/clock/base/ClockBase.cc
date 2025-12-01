@@ -50,7 +50,7 @@ clocktime_t ClockBase::getClockTime() const
     return clockEventTime != -1 ? clockEventTime : computeClockTimeFromSimTime(simTime());
 }
 
-simtime_t ClockBase::computeScheduleTime(clocktime_t clockTime)
+simtime_t ClockBase::computeScheduleTime(clocktime_t clockTime) const
 {
     DEBUG_ENTER(clockTime);
     simtime_t currentSimulationTime = simTime();

@@ -46,7 +46,6 @@ class INET_API ClockBase : public SimpleModule, public IClock
     virtual void scheduleTargetModuleClockEventAfter(simtime_t time, ClockEvent *event);
     virtual ClockEvent *cancelTargetModuleClockEvent(ClockEvent *event);
 
-    simtime_t computeScheduleTime(clocktime_t time);
 
     void checkClockEvent(const ClockEvent *event) {
         DEBUG_ENTER(true);
@@ -62,6 +61,7 @@ class INET_API ClockBase : public SimpleModule, public IClock
         }
         DEBUG_LEAVE();
     }
+    virtual simtime_t computeScheduleTime(clocktime_t time) const;
 
   public:
     virtual clocktime_t getClockTime() const override;
