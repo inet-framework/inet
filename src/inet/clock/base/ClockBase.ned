@@ -17,6 +17,7 @@ module ClockBase extends Module
     parameters:
         displayStringTextFormat = default("%t"); // Determines the text that is written on top of the submodule
         string referenceClock = default("");            // Full path of the reference clock
+        int clockTimeChangeEventSchedulingPriority = default(0); // Specifies the scheduling priority of the clock time changed event
         double emitClockTimeInterval @unit(s) = default(0s); // A non-zero value means the clock time will be emitted periodically
         @class(ClockBase);
         @display("i=block/timer");
