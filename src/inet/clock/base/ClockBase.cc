@@ -18,7 +18,8 @@ void ClockBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         emitClockTimeInterval = par("emitClockTimeInterval");
         if (emitClockTimeInterval != 0) {
-            timer = new cMessage();
+            timer = new cMessage("ClockTimeChangedTimer");
+            timer->setSchedulingPriority(par("clockTimeChangeEventSchedulingPriority"));
             scheduleAt(simTime(), timer);
         }
     }
