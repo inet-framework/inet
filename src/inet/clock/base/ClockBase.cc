@@ -66,6 +66,14 @@ void ClockBase::checkScheduledClockEvent(const ClockEvent *event) const
     DEBUG_LEAVE();
 }
 
+cSimpleModule *ClockBase::getTargetModule() const
+{
+    cSimpleModule *target = getSimulation()->getContextSimpleModule();
+    if (target == nullptr)
+        throw cRuntimeError("scheduleAt()/cancelEvent() must be called with a simple module in context");
+    return target;
+}
+
 clocktime_t ClockBase::getClockTime() const
 {
     clocktime_t currentClockTime = computeClockTimeFromSimTime(simTime());

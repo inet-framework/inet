@@ -35,14 +35,9 @@ class INET_API ClockBase : public SimpleModule, public IClock
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
 
-    cSimpleModule *getTargetModule() const {
-        cSimpleModule *target = getSimulation()->getContextSimpleModule();
-        if (target == nullptr)
-            throw cRuntimeError("scheduleAt()/cancelEvent() must be called with a simple module in context");
-        return target;
-    }
     virtual void checkScheduledClockEvent(const ClockEvent *event) const;
 
+    cSimpleModule* getTargetModule() const;
 
     virtual void scheduleTargetModuleClockEventAt(simtime_t time, ClockEvent *event);
     virtual void scheduleTargetModuleClockEventAfter(simtime_t time, ClockEvent *event);
