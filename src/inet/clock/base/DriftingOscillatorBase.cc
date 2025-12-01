@@ -11,6 +11,8 @@
 
 namespace inet {
 
+simsignal_t DriftingOscillatorBase::driftRateChangedSignal = cComponent::registerSignal("driftRateChanged");
+
 void DriftingOscillatorBase::initialize(int stage)
 {
     OscillatorBase::initialize(stage);

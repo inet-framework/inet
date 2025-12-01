@@ -16,8 +16,6 @@ namespace inet {
 
 class INET_API OscillatorBase : public SimpleModule, public IOscillator
 {
-  public:
-    static simsignal_t driftRateChangedSignal;
   protected:
     cMessage *tickTimer = nullptr;
 

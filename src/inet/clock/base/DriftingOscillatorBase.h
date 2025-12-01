@@ -19,6 +19,9 @@ using namespace units::values;
 
 class INET_API DriftingOscillatorBase : public OscillatorBase, public IScriptable
 {
+  public:
+    static simsignal_t driftRateChangedSignal;
+
   protected:
     simtime_t nominalTickLength;
     ppm driftRate = ppm(NaN); // 0 means nominal, higher value means faster oscillator, e.g. 100 ppm means the oscillator gains 100 microseconds for every second in simulation time
