@@ -11,6 +11,7 @@
 #include "inet/clock/common/ClockTime.h"
 #include "inet/clock/common/ClockEvent.h"
 #include "inet/clock/contract/IClock.h"
+#include "inet/common/DebugDefs.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/SimpleModule.h"
 
@@ -42,6 +43,21 @@ class INET_API ClockBase : public SimpleModule, public IClock
     }
 
     simtime_t computeScheduleTime(clocktime_t time);
+
+    void checkClockEvent(const ClockEvent *event) {
+        DEBUG_ENTER(true);
+        // NOTE: IClock interface 3. invariant
+        DEBUG_CMP(event->getArrivalClockTime(), >=, getClockTime());
+        if (event->isScheduled()) {
+            DEBUG_CMP(event->getArrivalTime(), >=, simTime());
+            // NOTE: IClock interface 4. invariant
+            DEBUG_CMP(event->getArrivalTime(), ==, computeScheduleTime(event->getArrivalClockTime()));
+            // NOTE: IClock interface 5. invariant
+            DEBUG_CMP(event->getArrivalClockTime(), >=, computeClockTimeFromSimTime(event->getArrivalTime(), false));
+            DEBUG_CMP(event->getArrivalClockTime(), <=, computeClockTimeFromSimTime(event->getArrivalTime(), true));
+        }
+        DEBUG_LEAVE();
+    }
 
   public:
     virtual clocktime_t getClockTime() const override;
