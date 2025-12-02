@@ -23,6 +23,7 @@ void DriftingOscillatorBase::initialize(int stage)
             throw cRuntimeError("The nominalTickLength parameter value %lg cannot be accurately represented with the current simulation time precision, conversion result: %s", nominalTickLengthAsDouble, nominalTickLength.ustr().c_str());
         inverseDriftRate = invertDriftRate(driftRate);
         setOrigin(simTime());
+        numTicksAtOrigin = 0;
         simtime_t currentTickLength = getCurrentTickLength();
         simtime_t tickOffset = par("tickOffset");
         if (tickOffset < 0 || tickOffset >= currentTickLength)
@@ -43,6 +44,7 @@ void DriftingOscillatorBase::setOrigin(simtime_t origin)
     EV_DEBUG << "Setting oscillator origin" << EV_FIELD(origin) << EV_ENDL;
     DEBUG_CMP(origin, <=, simTime());
     DEBUG_CMP(this->origin, <=, origin);
+    numTicksAtOrigin += computeTicksForInterval(origin - this->origin);
     this->origin = origin;
 }
 

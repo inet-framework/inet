@@ -28,6 +28,9 @@ class INET_API DriftingOscillatorBase : public OscillatorBase, public IScriptabl
     simtime_t origin; // simulation time from which the computeClockTicksForInterval and computeIntervalForClockTicks is measured
     simtime_t nextTickFromOrigin; // simulation time interval from the computation origin to the next tick
 
+    /** Total number of ticks strictly before the origin (absolute tick index at o). */
+    int64_t numTicksAtOrigin;
+
   protected:
     virtual void initialize(int stage) override;
 
@@ -49,6 +52,9 @@ class INET_API DriftingOscillatorBase : public OscillatorBase, public IScriptabl
     virtual simtime_t getNominalTickLength() const override { return nominalTickLength; }
     virtual double getCurrentTickLength() const { return nominalTickLength.dbl() + nominalTickLength.dbl() * inverseDriftRate.get<unit>(); }
 
+
+    /** Returns the absolute tick count at the origin (ticks strictly before o). */
+    virtual int64_t getNumTicksAtOrigin() const override { return numTicksAtOrigin; }
     virtual ppm getDriftRate() const { return driftRate; }
     virtual void setDriftRate(ppm driftRate);
     virtual void setTickOffset(simtime_t tickOffset);
@@ -62,4 +68,3 @@ class INET_API DriftingOscillatorBase : public OscillatorBase, public IScriptabl
 } // namespace inet
 
 #endif
-
