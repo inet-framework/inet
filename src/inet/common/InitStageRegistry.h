@@ -64,11 +64,11 @@ class INET_API InitStage
     operator int() const { return InitStageRegistry::getInstance().getNumber(this); }
 };
 
-#define Define_InitStage(name) const InitStage INITSTAGE_##name(#name); EXECUTE_PRE_NETWORK_SETUP(InitStageRegistry::getInstance().addInitStage(&INITSTAGE_##name))
+#define Define_InitStage(name) const inet::InitStage INITSTAGE_##name(#name); EXECUTE_PRE_NETWORK_SETUP(inet::InitStageRegistry::getInstance().addInitStage(&INITSTAGE_##name))
 
-#define Define_InitStage_Dependency(source, target) EXECUTE_PRE_NETWORK_SETUP(InitStageRegistry::getInstance().addInitStageDependency(#source, #target))
+#define Define_InitStage_Dependency(source, target) EXECUTE_PRE_NETWORK_SETUP(inet::InitStageRegistry::getInstance().addInitStageDependency(#source, #target))
 
-#define NUM_INIT_STAGES InitStageRegistry::getInstance().getNumInitStages()
+#define NUM_INIT_STAGES inet::InitStageRegistry::getInstance().getNumInitStages()
 
 } // namespace inet
 
