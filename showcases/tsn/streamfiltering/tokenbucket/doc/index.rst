@@ -168,8 +168,6 @@ Token Bucket Configuration
 Each stream uses a :ned:`SingleRateTwoColorMeter` configured with stream-specific parameters
 to implement token bucket policing. The meter operates with two key parameters:
 
-**Parameter Configuration:**
-
 - :par:`committedInformationRate` (CIR): Token replenishment rate
   - Misbehaving stream: 40 Mbps (matches average traffic rate)
   - Normal stream: 20 Mbps (matches steady traffic rate)
@@ -181,13 +179,14 @@ to implement token bucket policing. The meter operates with two key parameters:
    :language: ini
    :start-at: SingleRateTwoColorMeter
 
-**Operation:** The meter continuously replenishes tokens at the CIR rate. When packets arrive:
+The meter continuously replenishes tokens at the CIR rate. When packets arrive:
+
 - **Green packets**: Sufficient tokens available - packet forwarded, tokens consumed
 - **Red packets**: Insufficient tokens - packet marked for dropping by the :ned:`LabelFilter`
 
-**Traffic Control:** This configuration ensures long-term traffic rates do not exceed the CIR,
-while the CBS allows temporary bursts that consume accumulated tokens. The different CBS values
-reflect the distinct burst characteristics of each stream type.
+This configuration ensures long-term traffic rates do not exceed the CIR, while
+the CBS allows temporary bursts that consume accumulated tokens. The different
+CBS values reflect the distinct burst characteristics of each stream type.
 
 The following figure illustrates the per-stream filtering architecture, showing
 how traffic is classified, metered, and filtered inside the bridging layer of the switch:
