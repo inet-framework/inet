@@ -35,6 +35,15 @@ static int64_t roundNone(int64_t t, int64_t l)
     return t;
 }
 
+bool compareClockEvents(const ClockEvent *e1, const ClockEvent *e2) {
+    return e2->getArrivalClockTime() < e1->getArrivalClockTime() ? true :
+           e2->getArrivalClockTime() > e1->getArrivalClockTime() ? false :
+           e2->getSchedulingPriority() == e1->getSchedulingPriority() ? e2->getInsertOrder() < e1->getInsertOrder() :
+           e2->getSchedulingPriority() < e1->getSchedulingPriority() ? true :
+           e2->getSchedulingPriority() > e1->getSchedulingPriority() ? false :
+           e2->getInsertOrder() < e1->getInsertOrder();
+}
+
 OscillatorBasedClock::~OscillatorBasedClock()
 {
     for (auto event : events)

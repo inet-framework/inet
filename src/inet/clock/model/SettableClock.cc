@@ -14,14 +14,6 @@ namespace inet {
 
 Define_Module(SettableClock);
 
-static bool compareClockEvents(const ClockEvent *e1, const ClockEvent *e2) {
-    return e2->getArrivalClockTime() < e1->getArrivalClockTime() ? true :
-           e2->getArrivalClockTime() > e1->getArrivalClockTime() ? false :
-           e2->getSchedulingPriority() == e1->getSchedulingPriority() ? e2->getInsertOrder() < e1->getInsertOrder() :
-           e2->getSchedulingPriority() < e1->getSchedulingPriority() ? true :
-           e2->getSchedulingPriority() > e1->getSchedulingPriority() ? false :
-           e2->getInsertOrder() < e1->getInsertOrder();
-}
 
 void SettableClock::initialize(int stage)
 {

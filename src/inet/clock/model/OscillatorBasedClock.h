@@ -16,6 +16,14 @@ namespace inet {
 
 using namespace units::values;
 
+/**
+ * Strict total order for ClockEvent scheduling.
+ *
+ * Order by increasing arrival clock time; on ties, by decreasing scheduling
+ * priority (higher first); on ties, by insertion order (FIFO).
+ */
+bool compareClockEvents(const ClockEvent *e1, const ClockEvent *e2);
+
 class INET_API OscillatorBasedClock : public ClockBase, public cListener
 {
   protected:
