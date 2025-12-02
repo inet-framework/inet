@@ -11,8 +11,6 @@ cmdenv-event-banners = false
 cmdenv-log-prefix = "%l %C: "
 **.cmdenv-log-level = INFO
 
-**.cmdenv-log-level = INFO
-
 *.host.clock.typename = "OscillatorBasedClock"
 *.host.clock.oscillator.nominalTickLength = 1ps
 *.host.clock.oscillator.driftRate = -0.5e6 ppm
