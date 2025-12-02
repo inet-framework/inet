@@ -125,6 +125,11 @@ void OscillatorBasedClock::handleClockEvent(ClockEvent *event)
     ClockBase::handleClockEvent(event);
 }
 
+bool OscillatorBasedClock::isScheduledClockEvent(ClockEvent *event) const
+{
+    return useFutureEventSet ? ClockBase::isScheduledClockEvent(event) : std::find(events.begin(), events.end(), event) != events.end();
+}
+
 std::string OscillatorBasedClock::resolveDirective(char directive) const
 {
     switch (directive) {
