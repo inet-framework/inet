@@ -35,7 +35,6 @@ INFO (ClockTestApp)ClockTestNetwork.host.app: arrived After_1.2: simtime: 2.4, c
 INFO (ClockTestApp)ClockTestNetwork.host.app: schedule After_1.2 after clock: 1.2, scheduled simtime: 4.8, scheduled clock: 3.4
 INFO (ScenarioManager)ClockTestNetwork.scenarioManager: processing <set-clock> command...
 INFO (SettableClock)ClockTestNetwork.host.clock: Setting clock time from 2.2 to 2.9 at simtime 2.5.
-WARN (SettableClock)ClockTestNetwork.host.clock: Scheduling overdue clock event Timer_2.89 to current simulation time.
 INFO (ClockTestApp)ClockTestNetwork.host.app: arrived Timer_2.89: simtime: 2.5, clock: 2.9
 INFO (ClockTestApp)ClockTestNetwork.host.app: arrived Timer_2.9999999: simtime: 2.6, clock: 3
 INFO (ClockTestApp)ClockTestNetwork.host.app: arrived Timer_3.11: simtime: 3, clock: 3.2
