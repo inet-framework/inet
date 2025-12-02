@@ -9,8 +9,9 @@
 
 #include "inet/common/IPrintableObject.h"
 
-simsignal_t OscillatorBase::driftRateChangedSignal = cComponent::registerSignal("driftRateChanged");
 namespace inet {
+
+simsignal_t OscillatorBase::driftRateChangedSignal = cComponent::registerSignal("driftRateChanged");
 
 void OscillatorBase::initialize(int stage)
 {
