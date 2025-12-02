@@ -24,7 +24,7 @@ ned-path = .;../../../../src;../../lib
 network = TestNetwork
 sim-time-limit = 0.1s
 
-*.clock.oscillatorCompensation = 1000000ppm
+*.clock.initialOscillatorCompensation = 1000000ppm
 *.clock.useFutureEventSet = false
 *.clock.oscillator.nominalTickLength = 1us
 

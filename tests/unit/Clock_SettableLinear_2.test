@@ -15,6 +15,7 @@ cmdenv-log-prefix = "%l %C: "
 *.host.clock.typename = "SettableClock"
 *.host.clock.oscillator.nominalTickLength = 1ps
 *.host.clock.oscillator.driftRate = 1e6 ppm
+*.host.clock.oscillator.nominalTickLength = 2ps
 %#--------------------------------------------------------------------------------------------------------------
 %extraargs: -s
 %subst: /\n<!> No more events, simulation completed.*?\n//
