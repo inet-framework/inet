@@ -1,0 +1,66 @@
+%description:
+Tests a specific use case of SettableClock with ConstantDriftOscillator which used to fail.
+
+%includes:
+#include "inet/clock/model/SettableClock.h"
+#include "inet/clock/oscillator/ConstantDriftOscillator.h"
+
+using namespace omnetpp;
+using namespace inet;
+
+%file: TestNetwork.ned
+
+import inet.clock.model.SettableClock;
+
+network TestNetwork
+{
+    submodules:
+        test: Test;
+        clock: SettableClock;
+}
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+network = TestNetwork
+
+*.clock.oscillator.driftRate = 588.5617991094477 ppm
+*.clock.oscillator.nominalTickLength = 1us
+
+%activity:
+
+#define CHECK(x) { auto r = x; std::cout << #x << " -> "<< r << std::endl; }
+
+auto clock = check_and_cast<SettableClock *>(cSimulation::getActiveSimulation()->getModuleByPath("clock"));
+auto oscillator = check_and_cast<ConstantDriftOscillator *>(cSimulation::getActiveSimulation()->getModuleByPath("clock.oscillator"));
+
+wait(0.0287);
+oscillator->setTickOffset(oscillator->getCurrentTickLength() - 5.17378E-7);
+clock->setClockTime(0.028717, ppm(0), false);
+wait(0.000099459145);
+clocktime_t clockTime = clock->getClockTime();
+std::cout << "simulationTime = " << simTime() << std::endl;
+std::cout << "clock->clockTime = " << clockTime << std::endl;
+std::cout << "oscillator->computationOrigin = " << oscillator->getComputationOrigin() << std::endl;
+std::cout << "#####################################################################################\n";
+CHECK(oscillator->computeIntervalForTicks(110))
+std::cout << "#####################################################################################\n";
+CHECK(oscillator->computeTicksForInterval(0.000109453263))
+std::cout << "#####################################################################################\n";
+CHECK(clock->computeSimTimeFromClockTime(0.028827))
+std::cout << "#####################################################################################\n";
+CHECK(clock->computeClockTimeFromSimTime(0.028809453263))
+std::cout << "#####################################################################################\n";
+
+%contains-regex: stdout
+simulationTime = 0.028799459145
+clock->clockTime = 0.028817
+oscillator->computationOrigin = 0.0287
+.*?
+oscillator->computeIntervalForTicks\(110\) -> 0.000109453263
+.*?
+oscillator->computeTicksForInterval\(0.000109453263\) -> 110
+.*?
+clock->computeSimTimeFromClockTime\(0.028827\) -> 0.028809453263
+.*?
+clock->computeClockTimeFromSimTime\(0.028809453263\) -> 0.028827
