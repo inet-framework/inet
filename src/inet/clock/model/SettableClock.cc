@@ -67,7 +67,7 @@ void SettableClock::setClockTime(clocktime_t newClockTime, ppm oscillatorCompens
                 constantDriftOscillator->setTickOffset(0);
         }
         simtime_t currentSimTime = simTime();
-        EV_DEBUG << "Setting clock time from " << oldClockTime << " to " << newClockTime << " at simtime " << currentSimTime << ".\n";
+        EV_INFO << "Setting clock time from " << oldClockTime << " to " << newClockTime << " at simtime " << currentSimTime << ".\n";
         originSimulationTime = simTime();
         originClockTime = newClockTime;
         this->oscillatorCompensation = oscillatorCompensation;

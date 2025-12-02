@@ -54,7 +54,7 @@ void DriftingOscillatorBase::setDriftRate(ppm newDriftRate)
     if (newDriftRate != driftRate) {
         emit(preOscillatorStateChangedSignal, this);
         simtime_t currentSimTime = simTime();
-        EV_DEBUG << "Setting oscillator drift rate from " << driftRate << " to " << newDriftRate << " at simtime " << currentSimTime << ".\n";
+        EV_INFO << "Setting oscillator drift rate from " << driftRate << " to " << newDriftRate << " at simtime " << currentSimTime << ".\n";
         simtime_t currentTickLength = getCurrentTickLength();
         simtime_t baseTickTime = origin + nextTickFromOrigin - currentTickLength;
         simtime_t elapsedTickTime = fmod(currentSimTime - baseTickTime, currentTickLength);
@@ -82,7 +82,7 @@ void DriftingOscillatorBase::setTickOffset(simtime_t newTickOffset)
     simtime_t oldTickOffset = fmod(currentSimTime - baseTickTime, currentTickLength);
     if (newTickOffset != oldTickOffset) {
         emit(preOscillatorStateChangedSignal, this);
-        EV_DEBUG << "Setting oscillator tick offset from " << oldTickOffset << " to " << newTickOffset << " at simtime " << currentSimTime << ".\n";
+        EV_INFO << "Setting oscillator tick offset from " << oldTickOffset << " to " << newTickOffset << " at simtime " << currentSimTime << ".\n";
         setOrigin(currentSimTime);
         if (newTickOffset == 0)
             nextTickFromOrigin = 0;
