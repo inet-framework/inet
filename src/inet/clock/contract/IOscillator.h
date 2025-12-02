@@ -75,6 +75,15 @@ class INET_API IOscillator
     virtual simtime_t getNominalTickLength() const = 0;
 
     /**
+     * @brief Returns the total number of ticks at the computation origin.
+     *
+     * This is the count accumulated strictly before the origin (useful if the
+     * oscillator maintains an absolute tick index). It does not affect the
+     * mapping N/I defined from the origin onward.
+     */
+    virtual int64_t getNumTicksAtOrigin() const = 0;
+
+    /**
      * @brief Returns the computation origin o (o <= now).
      *
      * Tick counting for the mapping functions is measured from this time.
