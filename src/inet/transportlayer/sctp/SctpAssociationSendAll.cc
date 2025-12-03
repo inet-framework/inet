@@ -1240,8 +1240,7 @@ void SctpAssociation::sendOnPath(SctpPathVariables *pathId, bool firstPass)
                         }
                     }
 
-                    auto iterator = sctpMain->assocStatMap.find(assocId);
-                    iterator->second.transmittedBytes += datVar->len / 8;
+                    assocStat.transmittedBytes += datVar->len / 8;
 
                     datVar->setLastDestination(path);
                     datVar->countsAsOutstanding = true;

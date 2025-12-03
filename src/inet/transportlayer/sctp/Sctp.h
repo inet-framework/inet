@@ -119,45 +119,6 @@ class INET_API Sctp : public SimpleModule
         uint16_t remotePort;
     };
 
-    struct AssocStat {
-        int32_t assocId;
-        simtime_t start;
-        simtime_t stop;
-        uint64_t rcvdBytes;
-        uint64_t sentBytes;
-        uint64_t transmittedBytes;
-        uint64_t ackedBytes;
-        uint32_t numFastRtx;
-        uint32_t numDups;
-        uint32_t numT3Rtx;
-        uint32_t numPathFailures;
-        uint32_t numForwardTsn;
-        double throughput;
-        simtime_t lifeTime;
-        uint32_t numOverfullSACKs;
-        uint64_t sumRGapRanges; // Total sum of RGap ranges (Last RGapStop - CumAck)
-        uint64_t sumNRGapRanges; // Total sum of NRGap ranges (Last NRGapStop - CumAck)
-        uint32_t numDropsBecauseNewTsnGreaterThanHighestTsn;
-        uint32_t numDropsBecauseNoRoomInBuffer;
-        uint32_t numChunksReneged;
-        uint32_t numAuthChunksSent;
-        uint32_t numAuthChunksAccepted;
-        uint32_t numAuthChunksRejected;
-        uint32_t numResetRequestsSent;
-        uint32_t numResetRequestsPerformed;
-        simtime_t fairStart;
-        simtime_t fairStop;
-        uint64_t fairAckedBytes;
-        double fairThroughput;
-        simtime_t fairLifeTime;
-        uint64_t numEndToEndMessages;
-        SimTime cumEndToEndDelay;
-        uint64_t startEndToEndDelay;
-        uint64_t stopEndToEndDelay;
-    };
-
-    typedef std::map<int32_t, AssocStat> AssocStatMap;
-    AssocStatMap assocStatMap;
     typedef std::map<int32_t, VTagPair> SctpVTagMap;
     SctpVTagMap sctpVTagMap;
 
@@ -212,12 +173,6 @@ class INET_API Sctp : public SimpleModule
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
     virtual void send_to_ip(Packet *msg);
-
-    AssocStat *getAssocStat(uint32_t assocId)
-    {
-        auto found = assocStatMap.find(assocId);
-        return (found != assocStatMap.end()) ? &found->second : nullptr;
-    }
 
     /**
      * To be called from SctpAssociation when socket pair    changes

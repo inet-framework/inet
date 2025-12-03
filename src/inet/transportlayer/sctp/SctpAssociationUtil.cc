@@ -995,8 +995,7 @@ void SctpAssociation::sendCookieEcho(SctpInitAckChunk *initAckChunk)
     if (state->auth && state->peerAuth && typeInChunkList(COOKIE_ECHO)) {
         authChunk = createAuthChunk();
         sctpcookieecho->appendSctpChunks(authChunk);
-        auto it = sctpMain->assocStatMap.find(assocId);
-        it->second.numAuthChunksSent++;
+        assocStat.numAuthChunksSent++;
     }
 
     sctpcookieecho->appendSctpChunks(cookieEchoChunk);
@@ -1016,8 +1015,7 @@ void SctpAssociation::retransmitCookieEcho()
     if (state->auth && state->peerAuth && typeInChunkList(COOKIE_ECHO)) {
         authChunk = createAuthChunk();
         sctpmsg->appendSctpChunks(authChunk);
-        auto it = sctpMain->assocStatMap.find(assocId);
-        it->second.numAuthChunksSent++;
+        assocStat.numAuthChunksSent++;
     }
     sctpmsg->appendSctpChunks(cookieEchoChunk);
 
@@ -1042,8 +1040,7 @@ void SctpAssociation::sendHeartbeat(const SctpPathVariables *path)
     if (state->auth && state->peerAuth && typeInChunkList(HEARTBEAT)) {
         authChunk = createAuthChunk();
         sctpHeartbeatbeat->appendSctpChunks(authChunk);
-        auto it = sctpMain->assocStatMap.find(assocId);
-        it->second.numAuthChunksSent++;
+        assocStat.numAuthChunksSent++;
     }
     sctpHeartbeatbeat->appendSctpChunks(heartbeatChunk);
     EV_INFO << "sendHeartbeat: sendToIP to " << path->remoteAddress << endl;
@@ -1075,8 +1072,7 @@ void SctpAssociation::sendHeartbeatAck(const SctpHeartbeatChunk *heartbeatChunk,
     if (state->auth && state->peerAuth && typeInChunkList(HEARTBEAT_ACK)) {
         authChunk = createAuthChunk();
         sctpHeartbeatAck->appendSctpChunks(authChunk);
-        auto it = sctpMain->assocStatMap.find(assocId);
-        it->second.numAuthChunksSent++;
+        assocStat.numAuthChunksSent++;
     }
     sctpHeartbeatAck->appendSctpChunks(heartbeatAckChunk);
 
@@ -1101,8 +1097,7 @@ void SctpAssociation::sendCookieAck(const L3Address& dest)
     if (state->auth && state->peerAuth && typeInChunkList(COOKIE_ACK)) {
         authChunk = createAuthChunk();
         sctpcookieack->appendSctpChunks(authChunk);
-        auto it = sctpMain->assocStatMap.find(assocId);
-        it->second.numAuthChunksSent++;
+        assocStat.numAuthChunksSent++;
     }
     sctpcookieack->appendSctpChunks(cookieAckChunk);
     Packet *fp = new Packet("COOKIE-ACK");
@@ -1172,8 +1167,7 @@ void SctpAssociation::sendAbort(uint16_t tBit)
     if (state->auth && state->peerAuth && typeInChunkList(ABORT)) {
         authChunk = createAuthChunk();
         msg->appendSctpChunks(authChunk);
-        auto it = sctpMain->assocStatMap.find(assocId);
-        it->second.numAuthChunksSent++;
+        assocStat.numAuthChunksSent++;
     }
     msg->appendSctpChunks(abortChunk);
     if (state->resetChunk != nullptr) {
@@ -1201,8 +1195,7 @@ void SctpAssociation::sendShutdown()
     if (state->auth && state->peerAuth && typeInChunkList(SHUTDOWN)) {
         authChunk = createAuthChunk();
         msg->appendSctpChunks(authChunk);
-        auto it = sctpMain->assocStatMap.find(assocId);
-        it->second.numAuthChunksSent++;
+        assocStat.numAuthChunksSent++;
     }
     state->initRexmitTimeout = SCTP_TIMEOUT_INIT_REXMIT;
     state->initRetransCounter = 0;
@@ -1403,8 +1396,7 @@ SctpForwardTsnChunk *SctpAssociation::createForwardTsnChunk(const L3Address& pid
         i++;
     }
     forwChunk->setByteLength(chunkLength);
-    auto iter = sctpMain->assocStatMap.find(assocId);
-    iter->second.numForwardTsn++;
+    assocStat.numForwardTsn++;
     return forwChunk;
 }
 
@@ -1726,8 +1718,7 @@ SctpSackChunk *SctpAssociation::createSack()
             // Unfortunately, dropping the duplicates has not solved the problem.
             //    => Now, the gap lists have to be shortened!
 
-            auto iter = sctpMain->assocStatMap.find(assocId);
-            iter->second.numOverfullSACKs++;
+            assocStat.numOverfullSACKs++;
             // ====== Undo NR optimization ====================================
             if (sackChunk->getNrSubtractRGaps() == true) {
                 sackChunk->setNrSubtractRGaps(false); // Unset SubtractRGaps!
@@ -1851,8 +1842,7 @@ void SctpAssociation::sendSack()
     if (state->auth && state->peerAuth && typeInChunkList(SACK)) {
         authChunk = createAuthChunk();
         sctpmsg->appendSctpChunks(authChunk);
-        auto it = sctpMain->assocStatMap.find(assocId);
-        it->second.numAuthChunksSent++;
+        assocStat.numAuthChunksSent++;
     }
     sctpmsg->appendSctpChunks(sackChunk);
 
@@ -1894,8 +1884,7 @@ void SctpAssociation::sendInvalidStreamError(uint16_t sid)
     if (state->auth && state->peerAuth && typeInChunkList(SACK)) {
         SctpAuthenticationChunk *authChunk = createAuthChunk();
         sctpmsg->appendSctpChunks(authChunk);
-        auto it = sctpMain->assocStatMap.find(assocId);
-        it->second.numAuthChunksSent++;
+        assocStat.numAuthChunksSent++;
     }
     sctpmsg->appendSctpChunks(sackChunk);
     sendSACKviaSelectedPath(sctpmsg);
@@ -2057,13 +2046,12 @@ void SctpAssociation::pushUlp()
             applicationPacket->insertAtBack(applicationData);
             state->numMsgsReq[count]--;
             emit(endToEndDelaySignal, simTime() - chunk->firstSendTime);
-            auto iter = sctpMain->assocStatMap.find(assocId);
-            if (iter->second.numEndToEndMessages >= iter->second.startEndToEndDelay &&
-                (iter->second.numEndToEndMessages < iter->second.stopEndToEndDelay || !iter->second.stopEndToEndDelay))
+            if (assocStat.numEndToEndMessages >= assocStat.startEndToEndDelay &&
+                (assocStat.numEndToEndMessages < assocStat.stopEndToEndDelay || !assocStat.stopEndToEndDelay))
             {
-                iter->second.cumEndToEndDelay += (simTime() - chunk->firstSendTime);
+                assocStat.cumEndToEndDelay += (simTime() - chunk->firstSendTime);
             }
-            iter->second.numEndToEndMessages++;
+            assocStat.numEndToEndMessages++;
 
             // set timestamp to sending time
             chunk->userData->setTimestamp(chunk->firstSendTime);
@@ -2216,8 +2204,7 @@ bool SctpAssociation::makeRoomForTsn(const uint32_t tsn, const uint32_t length, 
                         receiveStream->setExpectedStreamSeqNum(chunk->ssn);
                     }
 
-                    auto iter = sctpMain->assocStatMap.find(assocId);
-                    iter->second.numChunksReneged++;
+                    assocStat.numChunksReneged++;
                 }
                 qCounter.roomSumRcvStreams -= ADD_PADDING(chunk->len / 8 + SCTP_DATA_CHUNK_LENGTH);
                 state->gapList.removeFromGapList(tryTsn);
@@ -2836,8 +2823,7 @@ void SctpAssociation::pathStatusIndication(const SctpPathVariables *path,
     cmd->setSocketId(assocId);
     cmd->setActive(status);
     if (!status) {
-        auto iter = sctpMain->assocStatMap.find(assocId);
-        iter->second.numPathFailures++;
+        assocStat.numPathFailures++;
     }
     sendToApp(msg);
 }
@@ -3011,6 +2997,46 @@ void SctpAssociation::recordScalars()
 {
     Enter_Method_Silent();
 
+    // Record association-level statistics
+    recordScalar("Association Lifetime", assocStat.lifeTime);
+    recordScalar("Acked Bytes", assocStat.ackedBytes);
+    recordScalar("Throughput [bit/s]", assocStat.throughput);
+    recordScalar("Transmitted Bytes", assocStat.transmittedBytes);
+    recordScalar("Fast RTX", assocStat.numFastRtx);
+    recordScalar("Timer-Based RTX", assocStat.numT3Rtx);
+    recordScalar("Duplicate Acks", assocStat.numDups);
+    recordScalar("Sum of R Gap Ranges", assocStat.sumRGapRanges);
+    recordScalar("Sum of NR Gap Ranges", assocStat.sumNRGapRanges);
+    recordScalar("Overfull SACKs", assocStat.numOverfullSACKs);
+    recordScalar("Drops Because New TSN Greater Than Highest TSN", assocStat.numDropsBecauseNewTsnGreaterThanHighestTsn);
+    recordScalar("Drops Because No Room In Buffer", assocStat.numDropsBecauseNoRoomInBuffer);
+    recordScalar("Chunks Reneged", assocStat.numChunksReneged);
+    recordScalar("Number of AUTH chunks sent", assocStat.numAuthChunksSent);
+    recordScalar("Number of AUTH chunks accepted", assocStat.numAuthChunksAccepted);
+    recordScalar("Number of AUTH chunks rejected", assocStat.numAuthChunksRejected);
+    recordScalar("Number of StreamReset requests sent", assocStat.numResetRequestsSent);
+    recordScalar("Number of StreamReset requests performed", assocStat.numResetRequestsPerformed);
+
+    // Record fair bandwidth statistics if applicable
+    if (sctpMain->par("fairStart").doubleValue() > 0.0) {
+        recordScalar("fair acked bytes", assocStat.fairAckedBytes);
+        recordScalar("fair start time", assocStat.fairStart);
+        recordScalar("fair stop time", assocStat.fairStop);
+        recordScalar("fair lifetime", assocStat.fairLifeTime);
+        recordScalar("fair throughput", assocStat.fairThroughput);
+    }
+
+    // Record end-to-end delay statistics
+    if (assocStat.numEndToEndMessages > 0 && (assocStat.cumEndToEndDelay / assocStat.numEndToEndMessages) > SIMTIME_ZERO) {
+        uint64_t msgnum = assocStat.numEndToEndMessages;
+        if (assocStat.startEndToEndDelay > 0)
+            msgnum -= assocStat.startEndToEndDelay;
+        if (assocStat.stopEndToEndDelay > 0)
+            msgnum -= (assocStat.numEndToEndMessages - assocStat.stopEndToEndDelay);
+        recordScalar("Average End to End Delay", assocStat.cumEndToEndDelay / msgnum);
+    }
+
+    // Record path-specific statistics
     char str[128];
     for (auto pathMapIterator = sctpPathMap.begin();
          pathMapIterator != sctpPathMap.end(); pathMapIterator++)
