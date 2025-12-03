@@ -133,7 +133,7 @@ class StatisticalTestTask(SimulationTestTask):
                                                  matches_filter(row["module"], result_module_filter, exclude_result_module_filter, full_match), axis=1)]
                     if df.empty:
                         return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result="PASS", reason="All differences filtered out")
-                    sorted_df = df.sort_values(by="relative_error", ascending=False)
+                    sorted_df = df.loc[df["relative_error"].abs().sort_values(ascending=False).index]
                     scalar_result_csv_file_name = re.sub(r".sca$", ".csv", stored_scalar_result_file_name)
                     sorted_df.to_csv(scalar_result_csv_file_name, float_format="%.17g")
                     id = df["relative_error"].idxmax()
