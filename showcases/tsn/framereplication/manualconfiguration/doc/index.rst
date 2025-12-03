@@ -170,7 +170,6 @@ forwarding rules.
 
 .. code-block:: ini
 
-   # disable automatic MAC forwarding table configuration
    *.macForwardingTableConfigurator.typename = ""
 
 Configure the link failure scenario: break the s1-s2a link at 0.1s and the
@@ -179,7 +178,6 @@ through the remaining redundant paths.
 
 .. code-block:: ini
 
-   # link breaks between switches
    *.scenarioManager.script = xml("<scenario> \
                                      <at t='0.1'> \
                                        <disconnect src-module='s1' dest-module='s2a'/> \
@@ -194,7 +192,6 @@ splitting, merging, encoding, and decoding operations.
 
 .. code-block:: ini
 
-   # enable frame replication and elimination
    *.*.hasStreamRedundancy = true
 
 Configure the source application to generate UDP packets with 1200-byte payloads
@@ -203,7 +200,6 @@ The packets are sent to the destination node on port 1000.
 
 .. code-block:: ini
 
-   # source application
    *.source.numApps = 1
    *.source.app[0].typename = "UdpSourceApp"
    *.source.app[0].io.destAddress = "destination"
@@ -218,7 +214,6 @@ packets from either path (s3a or s3b).
 
 .. code-block:: ini
 
-   # destination application
    *.destination.numApps = 1
    *.destination.app[0].typename = "UdpSinkApp"
    *.destination.app[0].io.localPort = 1000
@@ -236,9 +231,7 @@ This allows the network to route the stream using standard VLAN-based forwarding
 
 .. code-block:: ini
 
-   # configure all egress traffic as part of stream s1, start sequence numbering
    *.source.bridging.streamIdentifier.identifier.mapping = [{packetFilter: "*", stream: "s1", sequenceNumbering: true}]
-   # encode egress stream s1 to VLAN 1
    *.source.bridging.streamCoder.encoder.mapping = [{stream: "s1", vlan: 1}]
 
 Switch s1 Configuration
