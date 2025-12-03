@@ -159,25 +159,11 @@ The Model
 Configuration Details
 ~~~~~~~~~~~~~~~~~~~~~
 
-Here is the complete configuration:
-
-.. literalinclude:: ../omnetpp.ini
-   :language: ini
-
 Let's examine each section of the configuration and explain how it implements
 the FRER strategy described above.
 
-General Configuration
-^^^^^^^^^^^^^^^^^^^^^
-
-.. code-block:: ini
-
-   [General]
-   network = ManualConfigurationShowcase
-   sim-time-limit = 0.1s
-   description = "Manual static stream redundancy configuration"
-
-Sets up the basic simulation parameters.
+Basic Configuration
+^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: ini
 
@@ -186,23 +172,6 @@ Sets up the basic simulation parameters.
 
 Disables automatic MAC table configuration so we can manually configure stream
 forwarding rules.
-
-.. code-block:: ini
-
-   # all Ethernet interfaces have 100 Mbps speed
-   *.*.eth[*].bitrate = 100Mbps
-
-Configures all Ethernet links to operate at 100 Mbps.
-
-.. code-block:: ini
-
-   # decrease throughput measurement interval
-   **.throughput.interval = 10ms
-
-Sets a shorter measurement interval for throughput statistics.
-
-Link Failure Scenario
-^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: ini
 
@@ -220,9 +189,6 @@ Configures the link failure scenario: breaks the s1-s2a link at 0.1s and the
 s2b-s3b link at 0.2s. This tests the network's ability to maintain connectivity
 through the remaining redundant paths.
 
-FRER Feature Enablement
-^^^^^^^^^^^^^^^^^^^^^^^^
-
 .. code-block:: ini
 
    # enable frame replication and elimination
@@ -230,9 +196,6 @@ FRER Feature Enablement
 
 Enables FRER functionality in all network nodes, allowing them to perform stream
 splitting, merging, encoding, and decoding operations.
-
-Source Node Application
-^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: ini
 
@@ -249,9 +212,6 @@ Configures the source application to generate UDP packets with 1200-byte payload
 at intervals following a truncated normal distribution (mean 100μs, std dev 50μs).
 The packets are sent to the destination node on port 1000.
 
-Destination Node Application
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 .. code-block:: ini
 
    # destination application
@@ -265,9 +225,6 @@ Destination Node Application
 Configures the destination to receive UDP packets on port 1000. Importantly, both
 Ethernet interfaces are configured with the same MAC address so they can accept
 packets from either path (s3a or s3b).
-
-Source Node FRER Configuration
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: ini
 
