@@ -89,6 +89,8 @@ class INET_API DriftingOscillatorBase : public OscillatorBase, public IScriptabl
 
   protected:
     virtual void initialize(int stage) override;
+    virtual void finish() override;
+
     virtual void handleTickTimer() override;
     virtual void scheduleTickTimer() override;
 

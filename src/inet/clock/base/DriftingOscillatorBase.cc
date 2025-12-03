@@ -34,11 +34,17 @@ void DriftingOscillatorBase::initialize(int stage)
             nextTickFromOrigin = 0;
         else
             nextTickFromOrigin = currentTickLength - tickOffset;
+        emit(driftRateChangedSignal, driftRate.get<ppm>());
         WATCH(nominalTickLength);
         WATCH(driftRate);
         WATCH(inverseDriftRate);
         WATCH(nextTickFromOrigin);
     }
+}
+
+void DriftingOscillatorBase::finish()
+{
+    emit(driftRateChangedSignal, driftRate.get<ppm>());
 }
 
 void DriftingOscillatorBase::handleTickTimer()
