@@ -30,10 +30,7 @@ void DriftingOscillatorBase::initialize(int stage)
         simtime_t tickOffset = par("tickOffset");
         if (tickOffset < 0 || tickOffset >= currentTickLength)
             throw cRuntimeError("First tick offset must be in the range [0, currentTickLength)");
-        if (tickOffset == 0)
-            nextTickFromOrigin = 0;
-        else
-            nextTickFromOrigin = currentTickLength - tickOffset;
+        nextTickFromOrigin = currentTickLength - tickOffset;
         emit(driftRateChangedSignal, driftRate.get<ppm>());
         WATCH(nominalTickLength);
         WATCH_EXPR("currentTickLength", getCurrentTickLength());
@@ -140,10 +137,7 @@ void DriftingOscillatorBase::setTickOffset(simtime_t newTickOffset)
         emit(preOscillatorStateChangedSignal, this);
         EV_INFO << "Setting oscillator tick offset from " << oldTickOffset << " to " << newTickOffset << " at simtime " << currentSimTime << ".\n";
         setOrigin(currentSimTime);
-        if (newTickOffset == 0)
-            nextTickFromOrigin = 0;
-        else
-            nextTickFromOrigin = currentTickLength - newTickOffset;
+        nextTickFromOrigin = currentTickLength - newTickOffset;
         if (tickTimer) {
             cancelEvent(tickTimer);
             scheduleTickTimer();
