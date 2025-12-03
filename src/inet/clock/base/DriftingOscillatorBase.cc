@@ -166,7 +166,7 @@ std::string DriftingOscillatorBase::resolveDirective(char directive) const
 {
     switch (directive) {
         case 'c':
-            return std::to_string(getCurrentTickLength()) + " s";
+            return getCurrentTickLength().str() + " s";
         case 'd':
             return driftRate.str();
         default:
