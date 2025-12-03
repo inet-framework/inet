@@ -75,16 +75,12 @@ void DriftingOscillatorBase::setDriftRate(ppm newDriftRate)
         emit(preOscillatorStateChangedSignal, this);
         simtime_t currentSimTime = simTime();
         EV_INFO << "Setting oscillator drift rate from " << driftRate << " to " << newDriftRate << " at simtime " << currentSimTime << ".\n";
-        if (elapsedTickTime == SIMTIME_ZERO)
-            nextTickFromOrigin = 0;
-        else {
-            int64_t v = increaseWithDriftRate(currentTickLength.raw() - elapsedTickTime.raw());
-            nextTickFromOrigin = SimTime::fromRaw(decreaseWithDriftRate(v, newInverseDriftRate));
-        }
         simtime_t oldCurrentTickLength = getCurrentTickLength();
         simtime_t baseTickTime = origin + nextTickFromOrigin - oldCurrentTickLength;
         simtime_t elapsedTickTime = fmod(currentSimTime - baseTickTime, oldCurrentTickLength);
         SimTimeScale newDriftFactor = SimTimeScale::fromPpm(newDriftRate.get<ppm>());
+        simtime_t remainingTickTime = oldCurrentTickLength - elapsedTickTime;
+        nextTickFromOrigin = SimTime::fromRaw(remainingTickTime.raw() * driftFactor / newDriftFactor);
         driftRate = newDriftRate;
         setDriftFactor(newDriftFactor);
         setOrigin(currentSimTime);
