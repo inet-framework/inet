@@ -495,8 +495,7 @@ void SctpAssociation::sendOutgoingRequestAndResponse(SctpIncomingSsnResetRequest
         delete state->resetChunk;
         state->resetChunk = nullptr;
     }
-    auto it = sctpMain->assocStatMap.find(assocId);
-    it->second.numResetRequestsSent++;
+    assocStat.numResetRequestsSent++;
     state->resetChunk = check_and_cast<SctpStreamResetChunk *>(resChunk->dup());
 //    state->resetChunk->setName("stateRstChunk");
     msg->appendSctpChunks(resChunk);
@@ -523,7 +522,6 @@ void SctpAssociation::sendStreamResetRequest(SctpResetReq *rinfo)
     resetChunk->setByteLength(SCTP_STREAM_RESET_CHUNK_LENGTH);
     uint32_t srsn = state->streamResetSequenceNumber;
     SctpResetTimer *rt = new SctpResetTimer();
-    auto it = sctpMain->assocStatMap.find(assocId);
     if (rinfo)
         type = rinfo->getRequestType();
     else
@@ -540,7 +538,7 @@ void SctpAssociation::sendStreamResetRequest(SctpResetReq *rinfo)
             rt->setInAcked(true);
             rt->setOutSN(srsn);
             rt->setOutAcked(false);
-            it->second.numResetRequestsSent++;
+            assocStat.numResetRequestsSent++;
             state->numResetRequests++;
 
             state->waitForResponse = true;
@@ -558,7 +556,7 @@ void SctpAssociation::sendStreamResetRequest(SctpResetReq *rinfo)
             rt->setInAcked(false);
             rt->setOutSN(0);
             rt->setOutAcked(true);
-            it->second.numResetRequestsSent++;
+            assocStat.numResetRequestsSent++;
             state->numResetRequests++;
             state->waitForResponse = true;
             break;
@@ -581,7 +579,7 @@ void SctpAssociation::sendStreamResetRequest(SctpResetReq *rinfo)
             resetChunk->addParameter(inParam);
             rt->setInSN(srsn);
             rt->setInAcked(false);
-            it->second.numResetRequestsSent += 2;
+            assocStat.numResetRequestsSent += 2;
             state->numResetRequests += 2;
             state->waitForResponse = true;
             break;
@@ -595,7 +593,7 @@ void SctpAssociation::sendStreamResetRequest(SctpResetReq *rinfo)
             rt->setOutAcked(false);
             state->requests[srsn].result = 100;
             state->requests[srsn].type = SSN_TSN_RESET_REQUEST_PARAMETER;
-            it->second.numResetRequestsSent++;
+            assocStat.numResetRequestsSent++;
             state->numResetRequests++;
             break;
 
@@ -609,7 +607,7 @@ void SctpAssociation::sendStreamResetRequest(SctpResetReq *rinfo)
             rt->setInAcked(false);
             rt->setOutSN(0);
             rt->setOutAcked(true);
-            it->second.numResetRequestsSent++;
+            assocStat.numResetRequestsSent++;
             state->numResetRequests++;
             break;
         default: EV_INFO << "Request type %d not known\n";
@@ -662,8 +660,7 @@ void SctpAssociation::sendAddOutgoingStreamsRequest(uint16_t numStreams)
         state->requests[srsn].result = 100;
         state->requests[srsn].type = ADD_OUTGOING_STREAMS_REQUEST_PARAMETER;
         state->requests[srsn].sn = srsn;
-        auto it = sctpMain->assocStatMap.find(assocId);
-        it->second.numResetRequestsSent++;
+        assocStat.numResetRequestsSent++;
     }
     SctpAddStreamsRequestParameter *addStreams = new SctpAddStreamsRequestParameter();
     addStreams->setParameterType(ADD_OUTGOING_STREAMS_REQUEST_PARAMETER);
