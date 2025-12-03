@@ -60,6 +60,7 @@ class INET_API DriftingOscillatorBase : public OscillatorBase, public IScriptabl
 {
   public:
     static simsignal_t driftRateChangedSignal;
+    static simsignal_t frequencyCompensationRateChangedSignal;
 
   protected:
     simtime_t nominalTickLength;
@@ -79,6 +80,15 @@ class INET_API DriftingOscillatorBase : public OscillatorBase, public IScriptabl
      * Relation (approx.): driftFactor ≈ 1 + driftRate * 1e-6.
      */
     SimTimeScale driftFactor;
+
+    /** Software/servo-applied frequency correction in ppm (0 ⇒ no compensation). */
+    ppm frequencyCompensationRate = ppm(0);
+
+    /**
+     * Dimensionless factor near 1 modeling the fine-tuning compensation only (f).
+     * Relation (approx.): frequencyCompensationFactor ≈ 1 + frequencyCompensationRate * 1e-6.
+     */
+    SimTimeScale frequencyCompensationFactor;
 
     /**
      * Effective tick-length factor g = d * f (dimensionless, near 1).
@@ -122,6 +132,8 @@ class INET_API DriftingOscillatorBase : public OscillatorBase, public IScriptabl
     ppm invertDriftRate(ppm driftRate) const { return unit(1 / (1 + driftRate.get<unit>()) - 1); }
     virtual void setDriftFactor(SimTimeScale driftFactor);
 
+    virtual void setFrequencyCompensationFactor(SimTimeScale frequencyCompensationFactor);
+
     virtual void setEffectiveTickLengthFactor(SimTimeScale effectiveTickLengthFactor);
     int64_t increaseWithDriftRate(int64_t value) const { return increaseWithDriftRate(value, driftRate); }
     int64_t increaseWithDriftRate(int64_t value, ppm driftRate) const { return value + (int64_t)(value * driftRate.get<unit>()); }
@@ -139,6 +151,10 @@ class INET_API DriftingOscillatorBase : public OscillatorBase, public IScriptabl
     virtual int64_t getNumTicksAtOrigin() const override { return numTicksAtOrigin; }
     virtual ppm getDriftRate() const { return driftRate; }
     virtual void setDriftRate(ppm driftRate);
+
+    virtual ppm getFrequencyCompensationRate() const { return frequencyCompensationRate; }
+    virtual void setFrequencyCompensationRate(ppm frequencyCompensationRate);
+
     /**
      * Set tick phase as a backward shift δ in [0, L_current):
      *   x := L_current − (δ mod L_current); if result is 0, use L_current.

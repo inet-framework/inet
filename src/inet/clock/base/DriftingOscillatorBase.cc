@@ -12,6 +12,7 @@
 namespace inet {
 
 simsignal_t DriftingOscillatorBase::driftRateChangedSignal = cComponent::registerSignal("driftRateChanged");
+simsignal_t DriftingOscillatorBase::frequencyCompensationRateChangedSignal = cComponent::registerSignal("frequencyCompensationRateChanged");
 
 void DriftingOscillatorBase::initialize(int stage)
 {
@@ -38,6 +39,8 @@ void DriftingOscillatorBase::initialize(int stage)
         WATCH(driftRate);
         WATCH(inverseDriftRate);
         WATCH(driftFactor);
+        WATCH(frequencyCompensationRate);
+        WATCH(frequencyCompensationFactor);
         WATCH(nextTickFromOrigin);
     }
 }
@@ -95,6 +98,31 @@ void DriftingOscillatorBase::setDriftRate(ppm newDriftRate)
     }
 }
 
+void DriftingOscillatorBase::setFrequencyCompensationRate(ppm newFrequencyCompensationRate)
+{
+    Enter_Method("setFrequencyCompensation");
+    if (newFrequencyCompensationRate != frequencyCompensationRate) {
+        emit(preOscillatorStateChangedSignal, this);
+        simtime_t currentSimTime = simTime();
+        EV_INFO << "Setting frequency compensation rate from " << frequencyCompensationRate << " to " << newFrequencyCompensationRate << " at simtime " << currentSimTime << ".\n";
+        simtime_t oldCurrentTickLength = getCurrentTickLength();
+        simtime_t baseTickTime = origin + nextTickFromOrigin - oldCurrentTickLength;
+        simtime_t elapsedTickTime = fmod(currentSimTime - baseTickTime, oldCurrentTickLength);
+        SimTimeScale newFrequencyCompensationFactor = SimTimeScale::fromPpm(newFrequencyCompensationRate.get<ppm>());
+        simtime_t remainingTickTime = oldCurrentTickLength - elapsedTickTime;
+        nextTickFromOrigin = SimTime::fromRaw(remainingTickTime.raw() * frequencyCompensationFactor / newFrequencyCompensationFactor);
+        frequencyCompensationRate = newFrequencyCompensationRate;
+        setFrequencyCompensationFactor(newFrequencyCompensationFactor);
+        setOrigin(currentSimTime);
+        if (tickTimer) {
+            cancelEvent(tickTimer);
+            scheduleTickTimer();
+        }
+        emit(frequencyCompensationRateChangedSignal, frequencyCompensationRate.get<ppm>());
+        emit(postOscillatorStateChangedSignal, this);
+    }
+}
+
 void DriftingOscillatorBase::setTickOffset(simtime_t newTickOffset)
 {
     Enter_Method("setTickOffset");
@@ -117,6 +145,12 @@ void DriftingOscillatorBase::setTickOffset(simtime_t newTickOffset)
 void DriftingOscillatorBase::setDriftFactor(SimTimeScale driftFactor)
 {
     this->driftFactor = driftFactor;
+    setEffectiveTickLengthFactor(driftFactor * frequencyCompensationFactor);
+}
+
+void DriftingOscillatorBase::setFrequencyCompensationFactor(SimTimeScale frequencyCompensationFactor)
+{
+    this->frequencyCompensationFactor = frequencyCompensationFactor;
     setEffectiveTickLengthFactor(driftFactor * frequencyCompensationFactor);
 }
 
@@ -163,6 +197,10 @@ void DriftingOscillatorBase::processCommand(const cXMLElement& node)
             ppm newDriftRate = ppm(strtod(driftRateStr, nullptr));
             setDriftRate(newDriftRate);
         }
+        if (const char *frequencyCompensationRateStr = node.getAttribute("frequency-compensation-rate")) {
+            ppm newFrequencyCompensationRate = ppm(strtod(frequencyCompensationRateStr, nullptr));
+            setFrequencyCompensationRate(newFrequencyCompensationRate);
+        }
         if (const char *tickOffsetStr = node.getAttribute("tick-offset")) {
             simtime_t newTickOffset = SimTime::parse(tickOffsetStr);
             setTickOffset(newTickOffset);
@@ -179,6 +217,8 @@ std::string DriftingOscillatorBase::resolveDirective(char directive) const
             return getCurrentTickLength().str() + " s";
         case 'd':
             return driftRate.str();
+        case 'f':
+            return frequencyCompensationRate.str();
         default:
             return OscillatorBase::resolveDirective(directive);
     }
