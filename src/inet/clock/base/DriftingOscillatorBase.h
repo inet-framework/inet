@@ -11,6 +11,7 @@
 #include "inet/clock/base/OscillatorBase.h"
 #include "inet/common/INETMath.h"
 #include "inet/common/scenario/IScriptable.h"
+#include "inet/common/SimTimeScale.h"
 #include "inet/common/Units.h"
 
 namespace inet {
@@ -73,6 +74,12 @@ class INET_API DriftingOscillatorBase : public OscillatorBase, public IScriptabl
     ppm driftRate = ppm(NaN);
 
     /**
+     * Effective tick-length factor g = d * f (dimensionless, near 1).
+     * Current tick length is l_current = l / g.
+     */
+    SimTimeScale effectiveTickLengthFactor;
+
+    /**
      * Computation origin o. All mapping functions are measured from this time.
      * Invariant: origin <= current simulation time; origin need not coincide with a tick.
      */
@@ -107,6 +114,7 @@ class INET_API DriftingOscillatorBase : public OscillatorBase, public IScriptabl
 
     ppm invertDriftRate(ppm driftRate) const { return unit(1 / (1 + driftRate.get<unit>()) - 1); }
 
+    virtual void setEffectiveTickLengthFactor(SimTimeScale effectiveTickLengthFactor);
     int64_t increaseWithDriftRate(int64_t value) const { return increaseWithDriftRate(value, driftRate); }
     int64_t increaseWithDriftRate(int64_t value, ppm driftRate) const { return value + (int64_t)(value * driftRate.get<unit>()); }
 

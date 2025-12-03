@@ -112,6 +112,15 @@ void DriftingOscillatorBase::setTickOffset(simtime_t newTickOffset)
     }
 }
 
+void DriftingOscillatorBase::setEffectiveTickLengthFactor(SimTimeScale effectiveTickLengthFactor)
+{
+    const simtime_t roundTripNominalTickLengthLowerBound = SimTime::fromRaw(effectiveTickLengthFactor.mulCeil(effectiveTickLengthFactor.divFloor(nominalTickLength.raw())));
+    const simtime_t roundTripNominalTickLengthUpperBound = SimTime::fromRaw(effectiveTickLengthFactor.mulFloor(effectiveTickLengthFactor.divCeil(nominalTickLength.raw())));
+    DEBUG_CMP(roundTripNominalTickLengthLowerBound, <=, nominalTickLength);
+    DEBUG_CMP(nominalTickLength, <=, roundTripNominalTickLengthUpperBound);
+    this->effectiveTickLengthFactor = effectiveTickLengthFactor;
+}
+
 int64_t DriftingOscillatorBase::computeTicksForInterval(simtime_t timeInterval) const
 {
     ASSERT(timeInterval >= 0);
