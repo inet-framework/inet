@@ -95,6 +95,10 @@ void DriftingOscillatorBase::setDriftRate(ppm newDriftRate)
         inverseDriftRate = newInverseDriftRate;
         setDriftFactor(newDriftFactor);
         setOrigin(currentSimTime);
+        if (tickTimer) {
+            cancelEvent(tickTimer);
+            scheduleTickTimer();
+        }
         emit(driftRateChangedSignal, driftRate.get<ppm>());
         emit(postOscillatorStateChangedSignal, this);
     }
@@ -140,6 +144,10 @@ void DriftingOscillatorBase::setTickOffset(simtime_t newTickOffset)
             nextTickFromOrigin = 0;
         else
             nextTickFromOrigin = currentTickLength - newTickOffset;
+        if (tickTimer) {
+            cancelEvent(tickTimer);
+            scheduleTickTimer();
+        }
         emit(postOscillatorStateChangedSignal, this);
     }
 }
