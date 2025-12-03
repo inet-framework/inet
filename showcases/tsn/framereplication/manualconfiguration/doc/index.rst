@@ -165,13 +165,17 @@ the FRER strategy described above.
 Basic Configuration
 ^^^^^^^^^^^^^^^^^^^
 
+Disable automatic MAC table configuration so we can manually configure stream
+forwarding rules.
+
 .. code-block:: ini
 
    # disable automatic MAC forwarding table configuration
    *.macForwardingTableConfigurator.typename = ""
 
-Disables automatic MAC table configuration so we can manually configure stream
-forwarding rules.
+Configure the link failure scenario: break the s1-s2a link at 0.1s and the
+s2b-s3b link at 0.2s. This tests the network's ability to maintain connectivity
+through the remaining redundant paths.
 
 .. code-block:: ini
 
@@ -185,17 +189,17 @@ forwarding rules.
                                      </at> \
                                    </scenario>")
 
-Configures the link failure scenario: breaks the s1-s2a link at 0.1s and the
-s2b-s3b link at 0.2s. This tests the network's ability to maintain connectivity
-through the remaining redundant paths.
+Enable FRER functionality in all network nodes, allowing them to perform stream
+splitting, merging, encoding, and decoding operations.
 
 .. code-block:: ini
 
    # enable frame replication and elimination
    *.*.hasStreamRedundancy = true
 
-Enables FRER functionality in all network nodes, allowing them to perform stream
-splitting, merging, encoding, and decoding operations.
+Configure the source application to generate UDP packets with 1200-byte payloads
+at intervals following a truncated normal distribution (mean 100μs, std dev 50μs).
+The packets are sent to the destination node on port 1000.
 
 .. code-block:: ini
 
@@ -208,9 +212,9 @@ splitting, merging, encoding, and decoding operations.
    *.source.app[0].source.packetLength = 1200B
    *.source.app[0].source.productionInterval = truncnormal(100us,50us)
 
-Configures the source application to generate UDP packets with 1200-byte payloads
-at intervals following a truncated normal distribution (mean 100μs, std dev 50μs).
-The packets are sent to the destination node on port 1000.
+Configure the destination to receive UDP packets on port 1000. Importantly, configure both
+Ethernet interfaces with the same MAC address so they can accept
+packets from either path (s3a or s3b).
 
 .. code-block:: ini
 
@@ -222,9 +226,13 @@ The packets are sent to the destination node on port 1000.
    # all interfaces must have the same address to accept packets from all streams
    *.destination.eth[*].address = "0A-AA-12-34-56-78"
 
-Configures the destination to receive UDP packets on port 1000. Importantly, both
-Ethernet interfaces are configured with the same MAC address so they can accept
-packets from either path (s3a or s3b).
+**Stream Identification**: Identify all outgoing traffic as stream "s1" and
+enable sequence numbering. This is the entry point for FRER - each packet
+gets assigned a unique sequence number that will be used for duplicate detection
+throughout the network.
+
+**Stream Encoding**: Encode stream s1 with VLAN tag 1 before being sent to s1.
+This allows the network to route the stream using standard VLAN-based forwarding.
 
 .. code-block:: ini
 
@@ -233,16 +241,11 @@ packets from either path (s3a or s3b).
    # encode egress stream s1 to VLAN 1
    *.source.bridging.streamCoder.encoder.mapping = [{stream: "s1", vlan: 1}]
 
-**Stream Identification**: All outgoing traffic is identified as stream "s1" and
-sequence numbering is enabled. This is the entry point for FRER - each packet
-gets assigned a unique sequence number that will be used for duplicate detection
-throughout the network.
-
-**Stream Encoding**: Stream s1 is encoded with VLAN tag 1 before being sent to s1.
-This allows the network to route the stream using standard VLAN-based forwarding.
-
 Switch s1 Configuration
 ^^^^^^^^^^^^^^^^^^^^^^^
+
+Set up MAC forwarding: packets with destination MAC and VLAN 1 go to eth0 (s2a),
+packets with VLAN 2 go to eth1 (s2b). Only accept VLAN 1 traffic from the source.
 
 .. code-block:: ini
 
@@ -252,8 +255,7 @@ Switch s1 Configuration
    # allow ingress traffic from VLAN 1
    *.s1.ieee8021q.qTagHeaderChecker.vlanIdFilter = [1]
 
-Sets up MAC forwarding: packets with destination MAC and VLAN 1 go to eth0 (s2a),
-packets with VLAN 2 go to eth1 (s2b). Only VLAN 1 traffic is accepted from the source.
+Enable FRER functionality and decode incoming VLAN 1 traffic on eth2 as stream s1.
 
 .. code-block:: ini
 
@@ -263,16 +265,19 @@ packets with VLAN 2 go to eth1 (s2b). Only VLAN 1 traffic is accepted from the s
    # map eth2 VLAN 1 to stream s1
    *.s1.bridging.streamCoder.decoder.mapping = [{interface: "eth2", vlan: 1, stream: "s1"}]
 
-Enables FRER functionality and decodes incoming VLAN 1 traffic on eth2 as stream s1.
+Configure the merger to eliminate duplicates in stream s1. Since this is the
+first switch, there shouldn't be duplicates yet, but this prepares for any
+potential loops or retransmissions.
 
 .. code-block:: ini
 
    # eliminate duplicates from stream s1
    *.s1.bridging.streamRelay.merger.mapping = {s1: "s1"}
 
-Configures the merger to eliminate duplicates in stream s1. Since this is the
-first switch, there shouldn't be duplicates yet, but this prepares for any
-potential loops or retransmissions.
+**Critical Replication Point**: This is where the initial split occurs. Duplicate stream s1
+into two separate streams (s2a and s2b), creating the first level
+of redundancy. Encode stream s2a with VLAN 1 and forward to s2a, while
+encode stream s2b with VLAN 2 and forward to s2b.
 
 .. code-block:: ini
 
@@ -282,13 +287,11 @@ potential loops or retransmissions.
    *.s1.bridging.streamCoder.encoder.mapping = [{stream: "s2a", vlan: 1},
                                                 {stream: "s2b", vlan: 2}]
 
-**Critical Replication Point**: This is where the initial split occurs. Stream s1
-is duplicated into two separate streams (s2a and s2b), creating the first level
-of redundancy. Stream s2a is encoded with VLAN 1 and forwarded to s2a, while
-stream s2b is encoded with VLAN 2 and forwarded to s2b.
-
 Switch s2a Configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^
+
+Set up MAC forwarding for s2a: VLAN 1 traffic goes to eth0 (s3a), VLAN 2 goes to eth1
+(s2b for the cross-path). Accept both VLAN 1 and 2 traffic.
 
 .. code-block:: ini
 
@@ -298,8 +301,8 @@ Switch s2a Configuration
    # allow ingress traffic from VLAN 1 and 2
    *.s2a.ieee8021q.qTagHeaderChecker.vlanIdFilter = [1, 2]
 
-MAC forwarding for s2a: VLAN 1 traffic goes to eth0 (s3a), VLAN 2 goes to eth1
-(s2b for the cross-path). Accepts both VLAN 1 and 2 traffic.
+Decode incoming traffic: eth2 VLAN 1 → stream s2a (from s1), eth1 VLAN 2 →
+stream s2b-s2a (cross-path from s2b).
 
 .. code-block:: ini
 
@@ -310,17 +313,21 @@ MAC forwarding for s2a: VLAN 1 traffic goes to eth0 (s3a), VLAN 2 goes to eth1
    *.s2a.bridging.streamCoder.decoder.mapping = [{interface: "eth2", vlan: 1, stream: "s2a"},
                                                  {interface: "eth1", vlan: 2, stream: "s2b-s2a"}]
 
-Decodes incoming traffic: eth2 VLAN 1 → stream s2a (from s1), eth1 VLAN 2 →
-stream s2b-s2a (cross-path from s2b).
+**Merge Point**: Combine streams s2a (from s1) and s2b-s2a (cross-path from s2b)
+into a single stream s3a. The merger eliminates duplicates using sequence numbers,
+ensuring each frame is forwarded only once even if it arrives on both paths.
 
 .. code-block:: ini
 
    # merge streams s2a and s2b-s2a in into s3a
    *.s2a.bridging.streamRelay.merger.mapping = {s2a: "s3a", "s2b-s2a": "s3a"}
 
-**Merge Point**: Combines streams s2a (from s1) and s2b-s2a (cross-path from s2b)
-into a single stream s3a. The merger eliminates duplicates using sequence numbers,
-ensuring each frame is forwarded only once even if it arrives on both paths.
+**Second-Level Split**: Create mesh redundancy by splitting the merged stream s3a
+into:
+- Stream s3a (VLAN 1) → forwarded to s3a toward destination
+- Stream s2b (VLAN 2) → cross-path forwarded to s2b for additional redundancy
+
+This creates Paths 1 and 4 from the source.
 
 .. code-block:: ini
 
@@ -330,15 +337,10 @@ ensuring each frame is forwarded only once even if it arrives on both paths.
    *.s2a.bridging.streamCoder.encoder.mapping = [{stream: "s3a", vlan: 1},
                                                  {stream: "s2b", vlan: 2}]
 
-**Second-Level Split**: Creates mesh redundancy by splitting the merged stream s3a
-into:
-- Stream s3a (VLAN 1) → forwarded to s3a toward destination
-- Stream s2b (VLAN 2) → cross-path forwarded to s2b for additional redundancy
-
-This creates Paths 1 and 4 from the source.
-
 Switch s2b Configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^
+
+Set up MAC forwarding for s2b (similar to s2a): VLAN 1 to eth0 (s3b), VLAN 2 to eth1 (s2a cross-path).
 
 .. code-block:: ini
 
@@ -348,7 +350,8 @@ Switch s2b Configuration
    # allow ingress traffic from VLAN 1 and 2
    *.s2b.ieee8021q.qTagHeaderChecker.vlanIdFilter = [1, 2]
 
-Similar to s2a: VLAN 1 to eth0 (s3b), VLAN 2 to eth1 (s2a cross-path).
+Decode incoming traffic: eth2 VLAN 2 → stream s2b (from s1), eth1 VLAN 2 → stream s2a-s2b
+(cross-path from s2a).
 
 .. code-block:: ini
 
@@ -359,16 +362,19 @@ Similar to s2a: VLAN 1 to eth0 (s3b), VLAN 2 to eth1 (s2a cross-path).
    *.s2b.bridging.streamCoder.decoder.mapping = [{interface: "eth2", vlan: 2, stream: "s2b"},
                                                  {interface: "eth1", vlan: 2, stream: "s2a-s2b"}]
 
-Decodes: eth2 VLAN 2 → stream s2b (from s1), eth1 VLAN 2 → stream s2a-s2b
-(cross-path from s2a).
+**Merge Point**: Combine streams s2b (from s1) and s2a-s2b (cross-path from s2a)
+into stream s3b, eliminate duplicates.
 
 .. code-block:: ini
 
    # merge streams s2b and s2a-s2b in into s3b
    *.s2b.bridging.streamRelay.merger.mapping = {s2b: "s3b", "s2a-s2b": "s3b"}
 
-**Merge Point**: Combines streams s2b (from s1) and s2a-s2b (cross-path from s2a)
-into stream s3b, eliminating duplicates.
+**Second-Level Split**: Create the complementary mesh by splitting s3b into:
+- Stream s3b (VLAN 1) → forwarded to s3b toward destination
+- Stream s2a (VLAN 2) → cross-path forwarded to s2a for additional redundancy
+
+This creates Paths 2 and 3 from the source.
 
 .. code-block:: ini
 
@@ -378,14 +384,13 @@ into stream s3b, eliminating duplicates.
    *.s2b.bridging.streamCoder.encoder.mapping = [{stream: "s3b", vlan: 1},
                                                  {stream: "s2a", vlan: 2}]
 
-**Second-Level Split**: Creates the complementary mesh by splitting s3b into:
-- Stream s3b (VLAN 1) → forwarded to s3b toward destination
-- Stream s2a (VLAN 2) → cross-path forwarded to s2a for additional redundancy
-
-This creates Paths 2 and 3 from the source.
-
 Switches s3a and s3b Configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Configure both s3a and s3b as simple forwarding switches with no splitting or merging.
+Decode their respective streams (s3a or s3b) from VLAN 1, and forward them
+to the destination with VLAN 1 encoding. These switches simply relay the streams
+toward the final destination.
 
 .. code-block:: ini
 
@@ -401,13 +406,14 @@ Switches s3a and s3b Configuration
    *.s3b.bridging.streamCoder.encoder.mapping = [{stream: "s3b", vlan: 1}]
    *.s3b.ieee8021q.qTagHeaderChecker.vlanIdFilter = [1]
 
-Both s3a and s3b are simple forwarding switches with no splitting or merging.
-They decode their respective streams (s3a or s3b) from VLAN 1, and forward them
-to the destination with VLAN 1 encoding. These switches simply relay the streams
-toward the final destination.
-
 Destination Node FRER Configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Final Elimination Point**: Decode streams s3a and s3b from both
+interfaces and merge them into a null stream (empty string). This performs the
+final duplicate elimination - only forward the first copy of each frame (identified by
+sequence number) to the application, while discard later duplicates. This ensures the application receives exactly one copy of each frame,
+regardless of which path(s) it arrived on.
 
 .. code-block:: ini
 
@@ -418,13 +424,6 @@ Destination Node FRER Configuration
                                                          {interface: "eth1", vlan: 1, stream: "s3b"}]
    # merge streams s3a and s3b into null stream
    *.destination.bridging.streamRelay.merger.mapping = {s3a: "", s3b: ""}
-
-**Final Elimination Point**: The destination decodes streams s3a and s3b from both
-interfaces and merges them into a null stream (empty string). This performs the
-final duplicate elimination - only the first copy of each frame (identified by
-sequence number) is delivered to the application, while later duplicates are
-discarded. This ensures the application receives exactly one copy of each frame,
-regardless of which path(s) it arrived on.
 
 Results
 -------
