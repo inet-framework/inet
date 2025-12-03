@@ -177,20 +177,61 @@ simtime_t DriftingOscillatorBase::getCurrentTickLength() const
         return nominalTickLength; // effectiveTickLengthFactor == 1
 }
 
+int64_t DriftingOscillatorBase::doComputeTicksForInterval(simtime_t timeInterval) const
+{
+    DEBUG_ENTER(timeInterval);
+    DEBUG_OUT << DEBUG_FIELD(driftFactor) << DEBUG_FIELD(frequencyCompensationFactor) << DEBUG_FIELD(nextTickFromOrigin) << DEBUG_FIELD(nominalTickLength) << std::endl;
+    int64_t result;
+    if (timeInterval == 0)
+        result = 0;
+    else {
+        auto divFloor = [] (simtime_raw_t a, simtime_raw_t b) -> simtime_raw_t {
+            ASSERT(b > 0);
+            simtime_raw_t q = a / b;
+            simtime_raw_t r = a % b; // r has sign of a in C++
+            if (r != 0 && a < 0) --q; // adjust trunc->floor for negative a
+            return q;
+        };
+        result = divFloor(effectiveTickLengthFactor.mulFloor((timeInterval - nextTickFromOrigin).raw()), nominalTickLength.raw()) + 1;
+        if (result < 0)
+        result = 0;
+    }
+    DEBUG_LEAVE(result);
+    return result;
+}
+
+simtime_t DriftingOscillatorBase::doComputeIntervalForTicks(int64_t numTicks) const
+{
+    DEBUG_ENTER(numTicks);
+    DEBUG_OUT << DEBUG_FIELD(driftFactor) << DEBUG_FIELD(frequencyCompensationFactor) << DEBUG_FIELD(nextTickFromOrigin) << DEBUG_FIELD(nominalTickLength) << std::endl;
+    simtime_t result;
+    if (numTicks == 0)
+        result = 0;
+    else {
+        result = nextTickFromOrigin + SimTime::fromRaw(effectiveTickLengthFactor.divCeil(nominalTickLength.raw() * (numTicks - 1)));
+        if (result < 0)
+            result = 0;
+    }
+    DEBUG_LEAVE(result);
+    return result;
+}
+
 int64_t DriftingOscillatorBase::computeTicksForInterval(simtime_t timeInterval) const
 {
-    ASSERT(timeInterval >= 0);
-    return increaseWithDriftRate(timeInterval.raw() + nextTickFromOrigin.raw()) / nominalTickLength.raw();
+    DEBUG_CMP(timeInterval, >=, 0);
+    int64_t result = doComputeTicksForInterval(timeInterval);
+    DEBUG_CMP(result, >=, 0);
+    DEBUG_CMP(doComputeIntervalForTicks(result), <=, timeInterval);
+    return result;
 }
 
 simtime_t DriftingOscillatorBase::computeIntervalForTicks(int64_t numTicks) const
 {
-    if (numTicks == 0)
-        return 0;
-    else if (nextTickFromOrigin == 0)
-        return SimTime::fromRaw(decreaseWithDriftRate(nominalTickLength.raw() * numTicks));
-    else
-        return SimTime::fromRaw(decreaseWithDriftRate(nominalTickLength.raw() * (numTicks - 1))) + nextTickFromOrigin;
+    DEBUG_CMP(numTicks, >=, 0);
+    simtime_t result = doComputeIntervalForTicks(numTicks);
+    DEBUG_CMP(result, >=, 0);
+    DEBUG_CMP(doComputeTicksForInterval(result), ==, numTicks);
+    return result;
 }
 
 void DriftingOscillatorBase::processCommand(const cXMLElement& node)

@@ -140,6 +140,8 @@ class INET_API DriftingOscillatorBase : public OscillatorBase, public IScriptabl
 
     int64_t decreaseWithDriftRate(int64_t value) const { return decreaseWithDriftRate(value, inverseDriftRate); }
     int64_t decreaseWithDriftRate(int64_t value, ppm inverseDriftRate) const { return value + (int64_t)(value * inverseDriftRate.get<unit>()); }
+    int64_t doComputeTicksForInterval(simtime_t timeInterval) const;
+    simtime_t doComputeIntervalForTicks(int64_t numTicks) const;
 
   public:
     virtual simtime_t getComputationOrigin() const override { return origin; }
