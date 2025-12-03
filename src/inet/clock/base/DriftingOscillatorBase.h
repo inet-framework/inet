@@ -74,6 +74,13 @@ class INET_API DriftingOscillatorBase : public OscillatorBase, public IScriptabl
     ppm driftRate = ppm(NaN);
 
     /**
+     * Dimensionless factor near 1 representing the ratio nominal/current tick length
+     * due to physical drift only (d). For positive driftRate, driftFactor > 1.
+     * Relation (approx.): driftFactor ≈ 1 + driftRate * 1e-6.
+     */
+    SimTimeScale driftFactor;
+
+    /**
      * Effective tick-length factor g = d * f (dimensionless, near 1).
      * Current tick length is l_current = l / g.
      */
@@ -113,6 +120,7 @@ class INET_API DriftingOscillatorBase : public OscillatorBase, public IScriptabl
     virtual void processCommand(const cXMLElement& node) override;
 
     ppm invertDriftRate(ppm driftRate) const { return unit(1 / (1 + driftRate.get<unit>()) - 1); }
+    virtual void setDriftFactor(SimTimeScale driftFactor);
 
     virtual void setEffectiveTickLengthFactor(SimTimeScale effectiveTickLengthFactor);
     int64_t increaseWithDriftRate(int64_t value) const { return increaseWithDriftRate(value, driftRate); }

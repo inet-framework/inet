@@ -23,6 +23,7 @@ void DriftingOscillatorBase::initialize(int stage)
             throw cRuntimeError("The nominalTickLength parameter value %lg cannot be accurately represented with the current simulation time precision, conversion result: %s", nominalTickLengthAsDouble, nominalTickLength.ustr().c_str());
         inverseDriftRate = invertDriftRate(driftRate);
         setOrigin(simTime());
+        setDriftFactor(SimTimeScale::fromPpm(driftRate.get<ppm>()));
         numTicksAtOrigin = 0;
         simtime_t currentTickLength = getCurrentTickLength();
         simtime_t tickOffset = par("tickOffset");
@@ -36,6 +37,7 @@ void DriftingOscillatorBase::initialize(int stage)
         WATCH(nominalTickLength);
         WATCH(driftRate);
         WATCH(inverseDriftRate);
+        WATCH(driftFactor);
         WATCH(nextTickFromOrigin);
     }
 }
@@ -83,8 +85,10 @@ void DriftingOscillatorBase::setDriftRate(ppm newDriftRate)
             int64_t v = increaseWithDriftRate(currentTickLength.raw() - elapsedTickTime.raw());
             nextTickFromOrigin = SimTime::fromRaw(decreaseWithDriftRate(v, newInverseDriftRate));
         }
+        SimTimeScale newDriftFactor = SimTimeScale::fromPpm(newDriftRate.get<ppm>());
         driftRate = newDriftRate;
         inverseDriftRate = newInverseDriftRate;
+        setDriftFactor(newDriftFactor);
         setOrigin(currentSimTime);
         emit(driftRateChangedSignal, driftRate.get<ppm>());
         emit(postOscillatorStateChangedSignal, this);
@@ -108,6 +112,12 @@ void DriftingOscillatorBase::setTickOffset(simtime_t newTickOffset)
             nextTickFromOrigin = currentTickLength - newTickOffset;
         emit(postOscillatorStateChangedSignal, this);
     }
+}
+
+void DriftingOscillatorBase::setDriftFactor(SimTimeScale driftFactor)
+{
+    this->driftFactor = driftFactor;
+    setEffectiveTickLengthFactor(driftFactor * frequencyCompensationFactor);
 }
 
 void DriftingOscillatorBase::setEffectiveTickLengthFactor(SimTimeScale effectiveTickLengthFactor)
