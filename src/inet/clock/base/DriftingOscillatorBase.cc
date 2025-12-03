@@ -119,6 +119,16 @@ void DriftingOscillatorBase::setEffectiveTickLengthFactor(SimTimeScale effective
     this->effectiveTickLengthFactor = effectiveTickLengthFactor;
 }
 
+simtime_t DriftingOscillatorBase::getCurrentTickLength() const
+{
+    if (effectiveTickLengthFactor.raw() > 0) // effectiveTickLengthFactor > 1
+        return SimTime::fromRaw(effectiveTickLengthFactor.divFloor(nominalTickLength.raw()));
+    else  if (effectiveTickLengthFactor.raw() < 0) // effectiveTickLengthFactor < 1
+        return SimTime::fromRaw(effectiveTickLengthFactor.divCeil(nominalTickLength.raw()));
+    else
+        return nominalTickLength; // effectiveTickLengthFactor == 1
+}
+
 int64_t DriftingOscillatorBase::computeTicksForInterval(simtime_t timeInterval) const
 {
     ASSERT(timeInterval >= 0);

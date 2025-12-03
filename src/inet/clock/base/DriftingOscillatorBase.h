@@ -124,8 +124,8 @@ class INET_API DriftingOscillatorBase : public OscillatorBase, public IScriptabl
   public:
     virtual simtime_t getComputationOrigin() const override { return origin; }
     virtual simtime_t getNominalTickLength() const override { return nominalTickLength; }
-    virtual double getCurrentTickLength() const { return nominalTickLength.dbl() + nominalTickLength.dbl() * inverseDriftRate.get<unit>(); }
 
+    virtual simtime_t getCurrentTickLength() const;
 
     /** Returns the absolute tick count at the origin (ticks strictly before o). */
     virtual int64_t getNumTicksAtOrigin() const override { return numTicksAtOrigin; }
