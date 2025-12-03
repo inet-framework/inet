@@ -4,27 +4,26 @@ Statistical Policing
 Goals
 -----
 
-In shared network environments, misbehaving or excessive traffic sources can
-disrupt other applications. For example, a client generates excessive traffic
-that exceeds the available bandwidth, potentially disrupting traffic from other
-clients sharing the same network infrastructure.
+In shared network environments, excessive traffic from misbehaving sources can
+disrupt other applications by consuming bandwidth meant for well-behaved traffic.
+When multiple clients share the same network infrastructure, a single client
+generating traffic beyond its allocated rate can degrade service quality for all
+other clients.
 
-This is particularly problematic in Time-Sensitive Networking (TSN) environments
-where predictable and reliable communication is essential. One solution to this
-problem is per-stream filtering and policing. This approach allows us to limit
-excessive traffic and protect well-behaved streams from disruption, ensuring
-fair resource allocation across different streams.
+This problem is particularly critical in Time-Sensitive Networking (TSN)
+environments, where predictable and reliable communication is essential.
+Per-stream filtering and policing provides a solution by enforcing rate limits
+on individual traffic streams. This approach protects well-behaved streams from
+disruption while ensuring fair resource allocation across all streams sharing
+the network.
 
-Building on the token bucket policing showcase, this showcase demonstrates an
-alternative approach to per-stream policing using statistical methods. While
-token bucket policing provides deterministic rate limiting through token
-management, this approach uses a sliding window rate meter to continuously
-measure traffic rates combined with a statistical rate limiter that
-probabilistically drops packets when rates exceed configured limits. This is a simpler method
-that gradually increases drop probability as traffic exceeds limits. We implement the
-same scenario where one client generates excessive traffic while another
-generates normal traffic, and show how statistical policing can effectively
-limit the excessive traffic while allowing the normal traffic to flow unimpeded.
+This showcase demonstrates statistical policing as an alternative to token bucket
+policing. Unlike token bucket policing's deterministic rate limiting, statistical
+policing uses a sliding window rate meter and statistical rate limiter to
+gradually increase packet drop probability as traffic exceeds configured limits.
+We demonstrate this with a scenario where one client generates excessive traffic
+while another maintains normal traffic, showing how statistical policing
+effectively protects well-behaved streams.
 
 | Verified with INET version: ``4.4``
 | Source files location: `inet/showcases/tsn/streamfiltering/statistical <https://github.com/inet-framework/inet/tree/master/showcases/tsn/streamfiltering/statistical>`__
@@ -91,11 +90,11 @@ The clients and the server are :ned:`TsnDevice` modules, and the switch is a
 channels.
 
 Two distinct traffic patterns are generated. ``client1`` produces misbehaving
-traffic at an average rate around 40 Mbps using small 25-byte packets with a
-dual-frequency sinusoidal pattern for packet intervals. This creates
-highly variable, bursty traffic that oscillates between different rates.
-Meanwhile, ``client2`` generates steady normal traffic at 20 Mbps using 500-byte
-packets at regular intervals.
+traffic averaging 40 Mbps using small 25-byte packets. The packet intervals
+follow a dual-frequency sinusoidal pattern—two overlapping sine waves of
+different frequencies—creating highly variable, bursty traffic. ``client2``
+generates steady normal traffic at 20 Mbps using 500-byte packets at regular
+intervals.
 
 The misbehaving traffic uses small packets with high packet rates to provide
 finer temporal resolution in the data rate plots. However, this also means that
@@ -171,8 +170,8 @@ how traffic is classified, metered, and filtered inside the bridging layer of th
 Results
 -------
 
-The Problem
-~~~~~~~~~~~
+Without Policing
+~~~~~~~~~~~~~~~~
 
 The first chart shows that one of the traffic streams is generating excessive,
 misbehaving traffic.
@@ -220,8 +219,8 @@ the misbehaving traffic is high. This demonstrates the problem:
 well-behaved traffic is disrupted by excessive traffic sources sharing the same
 network infrastructure.
 
-The Solution
-~~~~~~~~~~~~
+With Policing
+~~~~~~~~~~~~~
 
 The next charts show how statistical policing solves this problem by limiting
 excessive, misbehaving traffic while protecting normal traffic.
@@ -388,4 +387,3 @@ Discussion
 ----------
 
 Use `this <https://github.com/inet-framework/inet/discussions/794>`__ page in the GitHub issue tracker for commenting on this showcase.
-
