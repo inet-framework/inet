@@ -156,14 +156,11 @@ even with multiple link failures, as long as at least one complete path exists.
 The Model
 ---------
 
-Configuration Details
-~~~~~~~~~~~~~~~~~~~~~
-
 Let's examine each section of the configuration and explain how it implements
 the FRER strategy described above.
 
 Basic Configuration
-^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~
 
 Disable automatic MAC table configuration so we can manually configure stream
 forwarding rules.
@@ -235,7 +232,7 @@ This allows the network to route the stream using standard VLAN-based forwarding
    *.source.bridging.streamCoder.encoder.mapping = [{stream: "s1", vlan: 1}]
 
 Switch s1 Configuration
-^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~
 
 Set up MAC forwarding: packets with destination MAC and VLAN 1 go to eth0 (s2a),
 packets with VLAN 2 go to eth1 (s2b). Only accept VLAN 1 traffic from the source.
@@ -281,7 +278,7 @@ encode stream s2b with VLAN 2 and forward to s2b.
                                                 {stream: "s2b", vlan: 2}]
 
 Switch s2a Configuration
-^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 Set up MAC forwarding for s2a: VLAN 1 traffic goes to eth0 (s3a), VLAN 2 goes to eth1
 (s2b for the cross-path). Accept both VLAN 1 and 2 traffic.
@@ -331,7 +328,7 @@ This creates Paths 1 and 4 from the source.
                                                  {stream: "s2b", vlan: 2}]
 
 Switch s2b Configuration
-^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 Set up MAC forwarding for s2b (similar to s2a): VLAN 1 to eth0 (s3b), VLAN 2 to eth1 (s2a cross-path).
 
@@ -378,7 +375,7 @@ This creates Paths 2 and 3 from the source.
                                                  {stream: "s2a", vlan: 2}]
 
 Switches s3a and s3b Configuration
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Configure both s3a and s3b as simple forwarding switches with no splitting or merging.
 Decode their respective streams (s3a or s3b) from VLAN 1, and forward them
@@ -400,7 +397,7 @@ toward the final destination.
    *.s3b.ieee8021q.qTagHeaderChecker.vlanIdFilter = [1]
 
 Destination Node FRER Configuration
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Final Elimination Point**: Decode streams s3a and s3b from both
 interfaces and merge them into a null stream (empty string). This performs the
