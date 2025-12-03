@@ -141,8 +141,7 @@ void SctpAssociation::sendAsconf(const char *type, const bool remote)
         if (state->auth && state->peerAuth) {
             authChunk = createAuthChunk();
             sctpAsconf->appendSctpChunks(authChunk);
-            auto it = sctpMain->assocStatMap.find(assocId);
-            it->second.numAuthChunksSent++;
+            assocStat.numAuthChunksSent++;
         }
         sctpAsconf->appendSctpChunks(asconfChunk);
 
@@ -168,8 +167,7 @@ void SctpAssociation::retransmitAsconf()
     if (state->auth && state->peerAuth) {
         SctpAuthenticationChunk *authChunk = createAuthChunk();
         sctpmsg->appendSctpChunks(authChunk);
-        auto it = sctpMain->assocStatMap.find(assocId);
-        it->second.numAuthChunksSent++;
+        assocStat.numAuthChunksSent++;
     }
     sctpmsg->appendSctpChunks(sctpasconf);
     Packet *pkt = new Packet("ASCONF");
@@ -190,8 +188,7 @@ void SctpAssociation::sendAsconfAck(const uint32_t serialNumber)
     if (state->auth && state->peerAuth) {
         SctpAuthenticationChunk *authChunk = createAuthChunk();
         sctpAsconfAck->appendSctpChunks(authChunk);
-        auto it = sctpMain->assocStatMap.find(assocId);
-        it->second.numAuthChunksSent++;
+        assocStat.numAuthChunksSent++;
     }
     sctpAsconfAck->appendSctpChunks(asconfAckChunk);
     Packet *pkt = new Packet("ASCONF");

@@ -152,10 +152,6 @@ Sctp::~Sctp()
         EV_DEBUG << "clear appConnMap ptr=" << &sctpAppAssocMap << "\n";
         sctpAppAssocMap.clear();
     }
-    if (!(assocStatMap.empty())) {
-        EV_DEBUG << "clear assocStatMap ptr=" << &assocStatMap << "\n";
-        assocStatMap.clear();
-    }
     if (!(sctpVTagMap.empty())) {
         sctpVTagMap.clear();
     }
@@ -857,13 +853,11 @@ void Sctp::removeAssociation(SctpAssociation *assoc)
     EV_INFO << "Deleting SCTP connection " << assoc << " id= " << id << endl;
 
     printInfoAssocMap();
+
+    // Finalize statistics before removing association
+    assoc->finalizeStatistics();
+
     if (sizeAssocMap > 0) {
-        auto assocStatMapIterator = assocStatMap.find(assoc->assocId);
-        if (assocStatMapIterator != assocStatMap.end()) {
-            assocStatMapIterator->second.stop = simTime();
-            assocStatMapIterator->second.lifeTime = assocStatMapIterator->second.stop - assocStatMapIterator->second.start;
-            assocStatMapIterator->second.throughput = assocStatMapIterator->second.ackedBytes * 8 / assocStatMapIterator->second.lifeTime.dbl();
-        }
         while (!ok) {
             if (sizeAssocMap == 0) {
                 ok = true;
@@ -928,61 +922,19 @@ void Sctp::finish()
     EV_INFO << getFullPath() << ": finishing SCTP with "
             << sctpAssocMap.size() << " connections open." << endl;
 
-    for (AssocStatMap::const_iterator iterator = assocStatMap.begin();
-         iterator != assocStatMap.end(); iterator++)
-    {
-        const Sctp::AssocStat& assoc = iterator->second;
+    // Record global SCTP statistics
+    recordScalar("Packets Received", numPacketsReceived);
+    recordScalar("Packets Dropped", numPacketsDropped);
+    recordScalar("Number of PacketDrop Reports", numPktDropReports);
 
-        EV_DETAIL << "Association " << assoc.assocId << ": started at " << assoc.start
-                  << " and finished at " << assoc.stop << " --> lifetime: " << assoc.lifeTime << endl;
-        EV_DETAIL << "Association " << assoc.assocId << ": sent bytes=" << assoc.sentBytes
-                  << ", acked bytes=" << assoc.ackedBytes << ", throughput=" << assoc.throughput << " bit/s" << endl;
-        EV_DETAIL << "Association " << assoc.assocId << ": transmitted Bytes="
-                  << assoc.transmittedBytes << ", retransmitted Bytes=" << assoc.transmittedBytes - assoc.ackedBytes << endl;
-        EV_DETAIL << "Association " << assoc.assocId << ": number of Fast RTX="
-                  << assoc.numFastRtx << ", number of Timer-Based RTX=" << assoc.numT3Rtx
-                  << ", path failures=" << assoc.numPathFailures << ", ForwardTsns=" << assoc.numForwardTsn << endl;
-        EV_DETAIL << "AllMessages=" << numPacketsReceived << " BadMessages=" << numPacketsDropped << endl;
-
-        recordScalar("Association Lifetime", assoc.lifeTime);
-        recordScalar("Acked Bytes", assoc.ackedBytes);
-        recordScalar("Throughput [bit/s]", assoc.throughput);
-        recordScalar("Transmitted Bytes", assoc.transmittedBytes);
-        recordScalar("Fast RTX", assoc.numFastRtx);
-        recordScalar("Timer-Based RTX", assoc.numT3Rtx);
-        recordScalar("Duplicate Acks", assoc.numDups);
-        recordScalar("Packets Received", numPacketsReceived);
-        recordScalar("Packets Dropped", numPacketsDropped);
-        recordScalar("Sum of R Gap Ranges", assoc.sumRGapRanges);
-        recordScalar("Sum of NR Gap Ranges", assoc.sumNRGapRanges);
-        recordScalar("Overfull SACKs", assoc.numOverfullSACKs);
-        recordScalar("Drops Because New TSN Greater Than Highest TSN", assoc.numDropsBecauseNewTsnGreaterThanHighestTsn);
-        recordScalar("Drops Because No Room In Buffer", assoc.numDropsBecauseNoRoomInBuffer);
-        recordScalar("Chunks Reneged", assoc.numChunksReneged);
+    if (socketOptions) {
         recordScalar("sackPeriod", (simtime_t)socketOptions->sackPeriod);
-        recordScalar("Number of AUTH chunks sent", assoc.numAuthChunksSent);
-        recordScalar("Number of AUTH chunks accepted", assoc.numAuthChunksAccepted);
-        recordScalar("Number of AUTH chunks rejected", assoc.numAuthChunksRejected);
-        recordScalar("Number of StreamReset requests sent", assoc.numResetRequestsSent);
-        recordScalar("Number of StreamReset requests performed", assoc.numResetRequestsPerformed);
-        if (par("fairStart").doubleValue() > 0.0) {
-            recordScalar("fair acked bytes", assoc.fairAckedBytes);
-            recordScalar("fair start time", assoc.fairStart);
-            recordScalar("fair stop time", assoc.fairStop);
-            recordScalar("fair lifetime", assoc.fairLifeTime);
-            recordScalar("fair throughput", assoc.fairThroughput);
-        }
-        recordScalar("Number of PacketDrop Reports", numPktDropReports);
-
-        if (assoc.numEndToEndMessages > 0 && (assoc.cumEndToEndDelay / assoc.numEndToEndMessages) > 0) {
-            uint32_t msgnum = assoc.numEndToEndMessages - assoc.startEndToEndDelay;
-            if (assoc.stopEndToEndDelay > 0)
-                msgnum -= (assoc.numEndToEndMessages - assoc.stopEndToEndDelay);
-            recordScalar("Average End to End Delay", assoc.cumEndToEndDelay / msgnum);
-        }
-
-        recordScalar("RTXMethod", par("RTXMethod").intValue());
     }
+    recordScalar("RTXMethod", par("RTXMethod").intValue());
+
+    EV_DETAIL << "SCTP Module Statistics:" << endl;
+    EV_DETAIL << "  Total packets received: " << numPacketsReceived << endl;
+    EV_DETAIL << "  Total packets dropped: " << numPacketsDropped << endl;
 }
 
 void Sctp::sendToIp(cMessage *msg)

@@ -126,20 +126,17 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
                 auto authChunk = check_and_cast<SctpAuthenticationChunk *>(header);
                 if (authChunk->getHMacIdentifier() != 1) {
                     sendHMacError(authChunk->getHMacIdentifier());
-                    auto it = sctpMain->assocStatMap.find(assocId);
-                    it->second.numAuthChunksRejected++;
+                    assocStat.numAuthChunksRejected++;
                     delete authChunk;
                     return true;
                 }
                 if (authChunk->getHMacOk() == false) {
                     delete authChunk;
-                    auto it = sctpMain->assocStatMap.find(assocId);
-                    it->second.numAuthChunksRejected++;
+                    assocStat.numAuthChunksRejected++;
                     return true;
                 }
                 authenticationNecessary = false;
-                auto it = sctpMain->assocStatMap.find(assocId);
-                it->second.numAuthChunksAccepted++;
+                assocStat.numAuthChunksAccepted++;
                 delete authChunk;
                 continue;
             }
@@ -980,7 +977,6 @@ SctpEventCode SctpAssociation::processSackArrived(SctpSackChunk *sackChunk)
     const uint32_t tsna = sackChunk->getCumTsnAck();
     uint32_t highestNewAck = tsna; // Highest newly acked TSN
     const uint16_t numDups = sackChunk->getNumDupTsns();
-    Sctp::AssocStat *assocStat = sctpMain->getAssocStat(assocId);
     bool dropFilledGap = false;
     const uint32_t msgRwnd = sackChunk->getMsg_rwnd();
 
@@ -999,11 +995,11 @@ SctpEventCode SctpAssociation::processSackArrived(SctpSackChunk *sackChunk)
         }
         lastTsn = sackChunk->getGapStop(i);
     }
-    if (assocStat) {
-        assocStat->sumRGapRanges += ((sackChunk->getCumTsnAck() <= lastTsn) ?
-                                     (uint64_t)(lastTsn - sackChunk->getCumTsnAck()) :
-                                     (uint64_t)(sackChunk->getCumTsnAck() - lastTsn));
-    }
+
+    assocStat.sumRGapRanges += ((sackChunk->getCumTsnAck() <= lastTsn) ?
+            (uint64_t)(lastTsn - sackChunk->getCumTsnAck()) :
+            (uint64_t)(sackChunk->getCumTsnAck() - lastTsn));
+
     if (sackChunk->getNrSubtractRGaps() == false) {
         lastTsn = sackChunk->getCumTsnAck();
         for (uint32_t i = 0; i < sackChunk->getNumNrGaps(); i++) {
@@ -1034,11 +1030,11 @@ SctpEventCode SctpAssociation::processSackArrived(SctpSackChunk *sackChunk)
             lastTsn = sackChunk->getNrGapStop(i);
         }
     }
-    if (assocStat) {
-        assocStat->sumNRGapRanges += (sackChunk->getCumTsnAck() <= lastTsn) ?
+
+    assocStat.sumNRGapRanges += (sackChunk->getCumTsnAck() <= lastTsn) ?
             (uint64_t)(lastTsn - sackChunk->getCumTsnAck()) :
             (uint64_t)(sackChunk->getCumTsnAck() - lastTsn);
-    }
+
     const uint16_t numGaps = sackGapList.getNumGaps(SctpGapList::GT_Any);
 
     // ====== Print some information =========================================
@@ -1078,9 +1074,8 @@ SctpEventCode SctpAssociation::processSackArrived(SctpSackChunk *sackChunk)
     emit(nonRevokableGapBlocksInLastSACKSignal, (unsigned long)sackGapList.getNumGaps(SctpGapList::GT_NonRevokable));
 
     emit(pathTsnAckedCumAckSignal, (unsigned long)tsna, path);
-    if (assocStat) {
-        assocStat->numDups += numDups;
-    }
+
+    assocStat.numDups += numDups;
 
     // ====== Initialize some variables ======================================
     for (auto& elem : sctpPathMap) {
@@ -1676,8 +1671,7 @@ void SctpAssociation::handleChunkReportedAsAcked(uint32_t& highestNewAck,
     if (sackIsNonRevokable == true) {
         // NOTE: nonRenegablyAckChunk() will only work with ChunkMap,
         //       since the actual chunk object will be gone ...
-        nonRenegablyAckChunk(myChunk, sackPath, rttEstimation,
-                sctpMain->getAssocStat(assocId));
+        nonRenegablyAckChunk(myChunk, sackPath, rttEstimation);
     }
     // ====== Renegable SACK =================================================
     else {
@@ -1800,10 +1794,7 @@ void SctpAssociation::handleChunkReportedAsMissing(const SctpSackChunk *sackChun
                     // ====== Add chunk to transmission queue ========
                     if (transmissionQ->getChunk(myChunk->tsn) == nullptr) {
                         if (!chunkMustBeAbandoned(myChunk, sackPath)) {
-                            Sctp::AssocStat *assocStat = sctpMain->getAssocStat(assocId);
-                            if (assocStat) {
-                                assocStat->numFastRtx++;
-                            }
+                            assocStat.numFastRtx++;
                         }
                         myChunk->hasBeenFastRetransmitted = true;
                         myChunk->sendForwardIfAbandoned = true;
@@ -1850,8 +1841,7 @@ void SctpAssociation::handleChunkReportedAsMissing(const SctpSackChunk *sackChun
 
 void SctpAssociation::nonRenegablyAckChunk(SctpDataVariables *chunk,
         SctpPathVariables *sackPath,
-        simtime_t& rttEstimation,
-        Sctp::AssocStat *assocStat)
+        simtime_t& rttEstimation)
 {
     SctpPathVariables *lastPath = chunk->getLastDestinationPath();
     ASSERT(lastPath != nullptr);
@@ -1893,11 +1883,10 @@ void SctpAssociation::nonRenegablyAckChunk(SctpDataVariables *chunk,
     ASSERT(state->queuedSentBytes >= chunk->booksize);
     state->queuedSentBytes -= chunk->booksize;
     emit(queuedSentBytesSignal, (unsigned long)state->queuedSentBytes);
-    if (assocStat) {
-        assocStat->ackedBytes += chunk->len / 8;
-    }
-    if ((assocStat) && (fairTimer)) {
-        assocStat->fairAckedBytes += chunk->len / 8;
+
+    assocStat.ackedBytes += chunk->len / 8;
+    if (fairTimer) {
+        assocStat.fairAckedBytes += chunk->len / 8;
     }
 
     if ((state->allowCMT == true) &&
@@ -2029,7 +2018,6 @@ void SctpAssociation::dequeueAckedChunks(const uint32_t tsna,
         SctpPathVariables *sackPath,
         simtime_t& rttEstimation)
 {
-    Sctp::AssocStat *assocStat = sctpMain->getAssocStat(assocId);
 
     // Set it ridiculously high
     rttEstimation = SIMTIME_MAX;
@@ -2054,7 +2042,7 @@ void SctpAssociation::dequeueAckedChunks(const uint32_t tsna,
                 lastPath->newRTXPseudoCumAck = true;
             }
 
-            nonRenegablyAckChunk(chunk, sackPath, rttEstimation, assocStat);
+            nonRenegablyAckChunk(chunk, sackPath, rttEstimation);
         }
         else {
             break;
@@ -2143,8 +2131,7 @@ SctpEventCode SctpAssociation::processDataArrived(SctpDataChunk *dataChunk)
     state->bytesRcvd += payloadLength;
     EV_DETAIL << "state->bytesRcvd now=" << state->bytesRcvd << endl;
     path->numberOfBytesReceived += payloadLength;
-    auto iter = sctpMain->assocStatMap.find(assocId);
-    iter->second.rcvdBytes += payloadLength;
+    assocStat.rcvdBytes += payloadLength;
 
     if (state->stopReceiving) {
         return SCTP_E_SEND;
@@ -2195,7 +2182,7 @@ SctpEventCode SctpAssociation::processDataArrived(SctpDataChunk *dataChunk)
                 EV_DETAIL << "Receive buffer full (case 1): sendPacketDrop" << endl;
                 sendPacketDrop(false);
             }
-            iter->second.numDropsBecauseNewTsnGreaterThanHighestTsn++;
+            assocStat.numDropsBecauseNewTsnGreaterThanHighestTsn++;
             return SCTP_E_SEND;
             //          }  ????
         }
@@ -2207,7 +2194,7 @@ SctpEventCode SctpAssociation::processDataArrived(SctpDataChunk *dataChunk)
                 EV_DETAIL << "Receive buffer full (case 2): sendPacketDrop" << endl;
                 sendPacketDrop(false);
             }
-            iter->second.numDropsBecauseNoRoomInBuffer++;
+            assocStat.numDropsBecauseNoRoomInBuffer++;
             return SCTP_E_SEND;
         }
     }
@@ -2604,8 +2591,7 @@ void SctpAssociation::processResetResponseArrived(SctpStreamResetResponseParamet
                 state->numAddedOutStreams = 0;
             }
             sendIndicationToApp(SCTP_I_SEND_STREAMS_RESETTED);
-            auto it = sctpMain->assocStatMap.find(assocId);
-            it->second.numResetRequestsPerformed++;
+            assocStat.numResetRequestsPerformed++;
         }
         else {
             EV_INFO << "Reset Request failed. Send indication to app.\n";
@@ -2697,7 +2683,6 @@ void SctpAssociation::processAddInAndOutResetRequestArrived(const SctpAddStreams
     resetChunk->setByteLength(SCTP_STREAM_RESET_CHUNK_LENGTH);
     uint32_t srsn = state->streamResetSequenceNumber;
     SctpResetTimer *rt = new SctpResetTimer();
-    auto it = sctpMain->assocStatMap.find(assocId);
     SctpAddStreamsRequestParameter *addStreams = new SctpAddStreamsRequestParameter("Add_Streams");
     /*  SctpAddStreamsRequestParameter *addStreams = new SctpAddStreamsRequestParameter();*/
     addStreams->setParameterType(ADD_OUTGOING_STREAMS_REQUEST_PARAMETER);
@@ -2735,7 +2720,7 @@ void SctpAssociation::processAddInAndOutResetRequestArrived(const SctpAddStreams
     rt->setInAcked(true);
     rt->setOutSN(srsn);
     rt->setOutAcked(false);
-    it->second.numResetRequestsSent++;
+    assocStat.numResetRequestsSent++;
     state->streamResetSequenceNumber = ++srsn;
     if (state->resetChunk != nullptr) {
         delete state->resetChunk;
@@ -2790,8 +2775,7 @@ SctpEventCode SctpAssociation::processOutAndResponseArrived(SctpOutgoingSsnReset
 //            resetExpectedSsns();
             state->resetPending = false;
             sendIndicationToApp(SCTP_I_SEND_STREAMS_RESETTED);
-            auto it = sctpMain->assocStatMap.find(assocId);
-            it->second.numResetRequestsPerformed++;
+            assocStat.numResetRequestsPerformed++;
         }
     }
     else {
@@ -3178,8 +3162,7 @@ SctpEventCode SctpAssociation::processAsconfArrived(SctpAsconfChunk *asconfChunk
     if (state->auth && state->peerAuth) {
         authChunk = createAuthChunk();
         sctpAsconfAck->appendSctpChunks(authChunk);
-        auto it = sctpMain->assocStatMap.find(assocId);
-        it->second.numAuthChunksSent++;
+        assocStat.numAuthChunksSent++;
     }
     if (state->numberAsconfReceived > 0 || (state->numberAsconfReceived == 0 && asconfChunk->getSerialNumber() == initPeerTsn + state->numberAsconfReceived)) {
         SctpAsconfAckChunk *asconfAckChunk = createAsconfAckChunk(asconfChunk->getSerialNumber());
@@ -3867,8 +3850,7 @@ void SctpAssociation::process_TIMEOUT_RTX(SctpPathVariables *path)
                 chunk->numberOfTransmissions++;
 
                 if (!chunk->hasBeenAbandoned) {
-                    auto iter = sctpMain->assocStatMap.find(assocId);
-                    iter->second.numT3Rtx++;
+                    assocStat.numT3Rtx++;
                 }
 
                 moveChunkToOtherPath(chunk, nextPath);
