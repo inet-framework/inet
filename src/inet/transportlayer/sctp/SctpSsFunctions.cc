@@ -77,8 +77,6 @@ void SctpAssociation::addOutStreams(uint32_t outStreams)
 
 void SctpAssociation::deleteStreams()
 {
-    Enter_Method_Silent();
-
     for (auto& elem : sendStreams) {
         delete elem.second;
     }

@@ -2974,8 +2974,6 @@ void SctpAssociation::putInTransmissionQ(const uint32_t tsn, SctpDataVariables *
 
 void SctpAssociation::deleteQueues()
 {
-    Enter_Method_Silent();
-
     // Chunks may be in the transmission and retransmission queues simultaneously.
     // Remove entry from transmission queue if it is already in the retransmission queue.
     for (auto i = retransmissionQ->payloadQueue.begin();
@@ -3061,10 +3059,13 @@ void SctpAssociation::recordScalars()
         snprintf(str, sizeof(str), "Number of Bytes received from %s", pathAddr.c_str());
         recordScalar(str, path->numberOfBytesReceived);
     }
+
+    // Record stream-specific statistics
     for (uint16_t i = 0; i < inboundStreams; i++) {
         snprintf(str, sizeof(str), "Bytes received on stream %d", i);
         recordScalar(str, getState()->streamThroughput[i]);
     }
+
     recordScalar("Blocking TSNs Moved", state->blockingTsnsMoved);
 }
 

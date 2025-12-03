@@ -1057,6 +1057,11 @@ class INET_API SctpAssociation : public SimpleModule
     void finalizeStatistics();
 
     /**
+     * Called at the end of simulation to record statistics
+     */
+    virtual void finish() override;
+
+    /**
      * Constructor.
      */
     SctpAssociation();
@@ -1128,6 +1133,8 @@ class INET_API SctpAssociation : public SimpleModule
      * connection structure must be deleted by the caller (SCTP).
      */
     bool processAppCommand(cMessage *msg, SctpCommandReq *sctpCommand);
+
+    // utility functions:
     void removePath();
     void removePath(const L3Address& addr);
     void deleteStreams();
