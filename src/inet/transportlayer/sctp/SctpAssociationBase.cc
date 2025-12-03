@@ -1768,14 +1768,19 @@ void SctpAssociation::finalizeStatistics()
     // Calculate final statistics
     assocStat.stop = simTime();
     assocStat.lifeTime = assocStat.stop - assocStat.start;
-    
+
     if (assocStat.lifeTime > SIMTIME_ZERO) {
         assocStat.throughput = assocStat.ackedBytes * 8 / assocStat.lifeTime.dbl();
     }
-    
+
     if (fairTimer && assocStat.fairLifeTime > SIMTIME_ZERO) {
         assocStat.fairThroughput = assocStat.fairAckedBytes / assocStat.fairLifeTime.dbl();
     }
+}
+
+void SctpAssociation::finish()
+{
+    finalizeStatistics();
 }
 
 } // namespace sctp

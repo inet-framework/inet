@@ -853,10 +853,9 @@ void Sctp::removeAssociation(SctpAssociation *assoc)
     EV_INFO << "Deleting SCTP connection " << assoc << " id= " << id << endl;
 
     printInfoAssocMap();
-    
-    // Finalize statistics before removing association
-    assoc->finalizeStatistics();
-    
+
+    assoc->callFinish();
+
     if (sizeAssocMap > 0) {
         while (!ok) {
             if (sizeAssocMap == 0) {

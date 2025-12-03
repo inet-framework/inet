@@ -1057,6 +1057,11 @@ class INET_API SctpAssociation : public SimpleModule
     void finalizeStatistics();
 
     /**
+     * Called at the end of simulation to record statistics
+     */
+    virtual void finish() override;
+
+    /**
      * Constructor.
      */
     SctpAssociation();
