@@ -156,8 +156,92 @@ even with multiple link failures, as long as at least one complete path exists.
 The Model
 ---------
 
-Let's examine each section of the configuration and explain how it implements
-the FRER strategy described above.
+FRER Configuration Overview
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Before examining the specific configuration, let's understand where and how FRER
+is configured in INET nodes.
+
+Module Architecture
+^^^^^^^^^^^^^^^^^^^
+
+FRER functionality is implemented in the bridging layer of network nodes through
+several key submodules:
+
+**Stream Identifier** (``bridging.streamIdentifier``)
+  Identifies incoming packets and assigns them to named streams based on packet
+  filters (matching MAC addresses, VLAN tags, or other header fields). At the
+  source, this module also enables sequence numbering for duplicate detection.
+
+**Stream Coder** (``bridging.streamCoder``)
+  Contains encoder and decoder components that map between stream names and VLAN
+  tags. The decoder extracts stream identity from incoming VLAN-tagged frames,
+  while the encoder applies VLAN tags to outgoing frames based on their stream
+  identity.
+
+**Stream Relay** (``bridging.streamRelay``)
+  The core FRER processing module containing:
+  
+  - **Merger**: Combines multiple input streams into a single output stream,
+    eliminating duplicate frames using sequence numbers
+  - **Splitter**: Replicates a single input stream into multiple output streams,
+    creating redundant copies
+
+Configuration Locations
+^^^^^^^^^^^^^^^^^^^^^^^
+
+FRER configuration varies by node role in the network:
+
+**Source Nodes**
+  - Enable stream identification to assign traffic to named streams
+  - Enable sequence numbering to add unique identifiers to each frame
+  - Configure stream encoding to map streams to VLAN tags for transmission
+
+**Switches (Intermediate Nodes)**
+  - Configure MAC forwarding tables to route packets based on VLAN tags
+  - Set VLAN filters to accept specific VLAN traffic on each interface
+  - Enable stream relay layer for FRER processing
+  - Configure stream decoders to extract stream identity from incoming frames
+  - Configure mergers to eliminate duplicates from converging paths
+  - Configure splitters to replicate streams onto diverging paths
+  - Configure stream encoders to apply VLAN tags to outgoing frames
+
+**Destination Nodes**
+  - Configure VLAN filters to accept traffic from all redundant paths
+  - Configure stream decoders to identify streams from different interfaces
+  - Configure merger to perform final duplicate elimination (merge into null stream)
+
+Key Configuration Steps
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The configuration process follows these steps:
+
+1. **Enable FRER globally**: Set ``hasStreamRedundancy = true`` on all nodes
+   to activate the stream redundancy mechanisms
+
+2. **Configure the source**: Set up stream identification with sequence numbering
+   and stream encoding to initiate the redundant transmission
+
+3. **Configure each switch**: For each intermediate node, set up the complete
+   processing chain - decode incoming streams, merge converging paths, split
+   onto diverging paths, and encode outgoing streams
+
+4. **Configure the destination**: Set up stream decoding and final elimination
+   to ensure only one copy of each frame reaches the application
+
+Packet Processing Flow
+^^^^^^^^^^^^^^^^^^^^^^^
+
+At each node, packets follow this processing sequence:
+
+1. **Ingress**: Packets arrive with VLAN tags from the physical interface
+2. **Decoding**: Stream coder decoder maps VLAN tag → stream name
+3. **Merging**: Stream relay merger eliminates duplicates (if multiple paths converge)
+4. **Splitting**: Stream relay splitter replicates stream (if multiple paths diverge)
+5. **Encoding**: Stream coder encoder maps stream name → VLAN tag
+6. **Egress**: Packets transmitted with appropriate VLAN tags to next hop
+
+Now let's examine the detailed configuration for each node in our network.
 
 Basic Configuration
 ~~~~~~~~~~~~~~~~~~~
