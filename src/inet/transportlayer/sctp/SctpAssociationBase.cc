@@ -770,6 +770,7 @@ SctpAssociation::~SctpAssociation()
 {
     EV_TRACE << "Destructor SctpAssociation " << assocId << endl;
 
+    // Cancel and delete association-level timers
     cancelAndDelete(T1_InitTimer);
     cancelAndDelete(T2_ShutdownTimer);
     cancelAndDelete(T5_ShutdownGuardTimer);
@@ -781,6 +782,13 @@ SctpAssociation::~SctpAssociation()
 
     if (state->asconfOutstanding && state->asconfChunk)
         delete state->asconfChunk;
+
+    // Clean up paths (including path timers)
+    removePath();
+
+    // Clean up streams and queues
+    deleteStreams();
+    deleteQueues();
 
     delete fsm;
     delete state;
@@ -1778,10 +1786,9 @@ void SctpAssociation::finish()
     finalizeStatistics();
     recordScalars();
 
-    // Cleanup association resources
-    removePath();
-    deleteStreams();
-    deleteQueues();
+    // Note: Cleanup (removePath, deleteStreams, deleteQueues) is done in the destructor
+    // to avoid double-deletion, since both finish() and the destructor are called
+    // during normal shutdown.
 }
 
 } // namespace sctp
