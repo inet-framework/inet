@@ -854,8 +854,6 @@ void Sctp::removeAssociation(SctpAssociation *assoc)
 
     printInfoAssocMap();
 
-    assoc->callFinish();
-
     if (sizeAssocMap > 0) {
         while (!ok) {
             if (sizeAssocMap == 0) {
@@ -887,12 +885,8 @@ void Sctp::removeAssociation(SctpAssociation *assoc)
             }
         }
     }
-    // Write statistics
-    assoc->recordScalars();
-
-    assoc->removePath();
-    assoc->deleteStreams();
-    assoc->deleteQueues();
+    // Call finish() to finalize and record statistics before removing association
+    assoc->callFinish();
 
     AppAssocKey key;
     key.appGateIndex = assoc->appGateIndex;
@@ -913,11 +907,6 @@ SctpAssociation *Sctp::getAssoc(int32_t assocId)
 
 void Sctp::finish()
 {
-    auto assocMapIterator = sctpAssocMap.begin();
-    while (assocMapIterator != sctpAssocMap.end()) {
-        removeAssociation(assocMapIterator->second);
-        assocMapIterator = sctpAssocMap.begin();
-    }
     EV_INFO << getFullPath() << ": finishing SCTP with "
             << sctpAssocMap.size() << " connections open." << endl;
 

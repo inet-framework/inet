@@ -2974,8 +2974,6 @@ void SctpAssociation::putInTransmissionQ(const uint32_t tsn, SctpDataVariables *
 
 void SctpAssociation::deleteQueues()
 {
-    Enter_Method_Silent();
-
     // Chunks may be in the transmission and retransmission queues simultaneously.
     // Remove entry from transmission queue if it is already in the retransmission queue.
     for (auto i = retransmissionQ->payloadQueue.begin();
@@ -2997,6 +2995,46 @@ void SctpAssociation::recordScalars()
 {
     Enter_Method_Silent();
 
+    // Record association-level statistics
+    recordScalar("Association Lifetime", assocStat.lifeTime);
+    recordScalar("Acked Bytes", assocStat.ackedBytes);
+    recordScalar("Throughput [bit/s]", assocStat.throughput);
+    recordScalar("Transmitted Bytes", assocStat.transmittedBytes);
+    recordScalar("Fast RTX", assocStat.numFastRtx);
+    recordScalar("Timer-Based RTX", assocStat.numT3Rtx);
+    recordScalar("Duplicate Acks", assocStat.numDups);
+    recordScalar("Sum of R Gap Ranges", assocStat.sumRGapRanges);
+    recordScalar("Sum of NR Gap Ranges", assocStat.sumNRGapRanges);
+    recordScalar("Overfull SACKs", assocStat.numOverfullSACKs);
+    recordScalar("Drops Because New TSN Greater Than Highest TSN", assocStat.numDropsBecauseNewTsnGreaterThanHighestTsn);
+    recordScalar("Drops Because No Room In Buffer", assocStat.numDropsBecauseNoRoomInBuffer);
+    recordScalar("Chunks Reneged", assocStat.numChunksReneged);
+    recordScalar("Number of AUTH chunks sent", assocStat.numAuthChunksSent);
+    recordScalar("Number of AUTH chunks accepted", assocStat.numAuthChunksAccepted);
+    recordScalar("Number of AUTH chunks rejected", assocStat.numAuthChunksRejected);
+    recordScalar("Number of StreamReset requests sent", assocStat.numResetRequestsSent);
+    recordScalar("Number of StreamReset requests performed", assocStat.numResetRequestsPerformed);
+
+    // Record fair bandwidth statistics if applicable
+    if (sctpMain->par("fairStart").doubleValue() > 0.0) {
+        recordScalar("fair acked bytes", assocStat.fairAckedBytes);
+        recordScalar("fair start time", assocStat.fairStart);
+        recordScalar("fair stop time", assocStat.fairStop);
+        recordScalar("fair lifetime", assocStat.fairLifeTime);
+        recordScalar("fair throughput", assocStat.fairThroughput);
+    }
+
+    // Record end-to-end delay statistics
+    if (assocStat.numEndToEndMessages > 0 && (assocStat.cumEndToEndDelay / assocStat.numEndToEndMessages) > SIMTIME_ZERO) {
+        uint64_t msgnum = assocStat.numEndToEndMessages;
+        if (assocStat.startEndToEndDelay > 0)
+            msgnum -= assocStat.startEndToEndDelay;
+        if (assocStat.stopEndToEndDelay > 0)
+            msgnum -= (assocStat.numEndToEndMessages - assocStat.stopEndToEndDelay);
+        recordScalar("Average End to End Delay", assocStat.cumEndToEndDelay / msgnum);
+    }
+
+    // Record path-specific statistics
     char str[128];
     for (auto pathMapIterator = sctpPathMap.begin();
          pathMapIterator != sctpPathMap.end(); pathMapIterator++)
@@ -3021,10 +3059,13 @@ void SctpAssociation::recordScalars()
         snprintf(str, sizeof(str), "Number of Bytes received from %s", pathAddr.c_str());
         recordScalar(str, path->numberOfBytesReceived);
     }
+
+    // Record stream-specific statistics
     for (uint16_t i = 0; i < inboundStreams; i++) {
         snprintf(str, sizeof(str), "Bytes received on stream %d", i);
         recordScalar(str, getState()->streamThroughput[i]);
     }
+
     recordScalar("Blocking TSNs Moved", state->blockingTsnsMoved);
 }
 

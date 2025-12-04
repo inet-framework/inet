@@ -1711,8 +1711,6 @@ void SctpAssociation::stateEntered(int32_t status)
 
 void SctpAssociation::removePath()
 {
-    Enter_Method_Silent();
-
     while (!sctpPathMap.empty()) {
         auto pathIterator = sctpPathMap.begin();
         SctpPathVariables *path = pathIterator->second;
@@ -1781,6 +1779,12 @@ void SctpAssociation::finalizeStatistics()
 void SctpAssociation::finish()
 {
     finalizeStatistics();
+
+    recordScalars();
+
+    removePath();
+    deleteStreams();
+    deleteQueues();
 }
 
 } // namespace sctp
