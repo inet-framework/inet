@@ -165,10 +165,6 @@ Basic Configuration
 Disable automatic MAC table configuration so we can manually configure stream
 forwarding rules.
 
-.. code-block:: ini
-
-   *.macForwardingTableConfigurator.typename = ""
-
 .. literalinclude:: ../omnetpp.ini
    :start-at: *.macForwardingTableConfigurator.typename = ""
    :end-at: *.macForwardingTableConfigurator.typename = ""
@@ -177,27 +173,12 @@ Configure the link failure scenario: break the s1-s2a link at 0.1s and the
 s2b-s3b link at 0.2s. This tests the network's ability to maintain connectivity
 through the remaining redundant paths.
 
-.. code-block:: ini
-
-   *.scenarioManager.script = xml("<scenario> \
-                                     <at t='0.1'> \
-                                       <disconnect src-module='s1' dest-module='s2a'/> \
-                                     </at> \
-                                     <at t='0.2'> \
-                                       <disconnect src-module='s2b' dest-module='s3b'/> \
-                                     </at> \
-                                   </scenario>")
-
 .. literalinclude:: ../omnetpp.ini
    :start-at: *.scenarioManager.script
    :end-at: </scenario>
 
 Enable FRER functionality in all network nodes, allowing them to perform stream
 splitting, merging, encoding, and decoding operations.
-
-.. code-block:: ini
-
-   *.*.hasStreamRedundancy = true
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: *.*.hasStreamRedundancy
@@ -207,16 +188,6 @@ Configure the source application to generate UDP packets with 1200-byte payloads
 at intervals following a truncated normal distribution (mean 100μs, std dev 50μs).
 The packets are sent to the destination node on port 1000.
 
-.. code-block:: ini
-
-   *.source.numApps = 1
-   *.source.app[0].typename = "UdpSourceApp"
-   *.source.app[0].io.destAddress = "destination"
-   *.source.app[0].io.destPort = 1000
-   *.source.app[0].source.displayStringTextFormat = "sent %p pk (%l)"
-   *.source.app[0].source.packetLength = 1200B
-   *.source.app[0].source.productionInterval = truncnormal(100us,50us)
-
 .. literalinclude:: ../omnetpp.ini
    :start-at: *.source.numApps
    :end-at: *.source.app[0].source.productionInterval
@@ -224,15 +195,6 @@ The packets are sent to the destination node on port 1000.
 Configure the destination to receive UDP packets on port 1000. Importantly, configure both
 Ethernet interfaces with the same MAC address so they can accept
 packets from either path (s3a or s3b).
-
-.. code-block:: ini
-
-   *.destination.numApps = 1
-   *.destination.app[0].typename = "UdpSinkApp"
-   *.destination.app[0].io.localPort = 1000
-
-   # all interfaces must have the same address to accept packets from all streams
-   *.destination.eth[*].address = "0A-AA-12-34-56-78"
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: *.destination.numApps
@@ -246,11 +208,6 @@ throughout the network.
 **Stream Encoding**: Encode stream s1 with VLAN tag 1 before being sent to s1.
 This allows the network to route the stream using standard VLAN-based forwarding.
 
-.. code-block:: ini
-
-   *.source.bridging.streamIdentifier.identifier.mapping = [{packetFilter: "*", stream: "s1", sequenceNumbering: true}]
-   *.source.bridging.streamCoder.encoder.mapping = [{stream: "s1", vlan: 1}]
-
 .. literalinclude:: ../omnetpp.ini
    :start-at: *.source.bridging.streamIdentifier.identifier.mapping
    :end-at: *.source.bridging.streamCoder.encoder.mapping
@@ -261,27 +218,11 @@ Switch s1 Configuration
 Set up MAC forwarding: packets with destination MAC and VLAN 1 go to eth0 (s2a),
 packets with VLAN 2 go to eth1 (s2b). Only accept VLAN 1 traffic from the source.
 
-.. code-block:: ini
-
-   # map destination MAC address and VLAN pairs to network interfaces
-   *.s1.macTable.forwardingTable = [{address: "destination", vlan: 1, interface: "eth0"},
-                                    {address: "destination", vlan: 2, interface: "eth1"}]
-   # allow ingress traffic from VLAN 1
-   *.s1.ieee8021q.qTagHeaderChecker.vlanIdFilter = [1]
-
 .. literalinclude:: ../omnetpp.ini
    :start-at: # map destination MAC address and VLAN pairs to network interfaces
    :end-at: *.s1.ieee8021q.qTagHeaderChecker.vlanIdFilter
 
 Enable FRER functionality and decode incoming VLAN 1 traffic on eth2 as stream s1.
-
-.. code-block:: ini
-
-   # enable stream policing in layer 2 bridging
-   *.s1.bridging.streamRelay.typename = "StreamRelayLayer"
-   *.s1.bridging.streamCoder.typename = "StreamCoderLayer"
-   # map eth2 VLAN 1 to stream s1
-   *.s1.bridging.streamCoder.decoder.mapping = [{interface: "eth2", vlan: 1, stream: "s1"}]
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: # enable stream policing in layer 2 bridging
@@ -291,11 +232,6 @@ Configure the merger to eliminate duplicates in stream s1. Since this is the
 first switch, there shouldn't be duplicates yet, but this prepares for any
 potential loops or retransmissions.
 
-.. code-block:: ini
-
-   # eliminate duplicates from stream s1
-   *.s1.bridging.streamRelay.merger.mapping = {s1: "s1"}
-
 .. literalinclude:: ../omnetpp.ini
    :start-at: # eliminate duplicates from stream s1
    :end-at: *.s1.bridging.streamRelay.merger.mapping
@@ -304,14 +240,6 @@ potential loops or retransmissions.
 into two separate streams (s2a and s2b), creating the first level
 of redundancy. Encode stream s2a with VLAN 1 and forward to s2a, while
 encode stream s2b with VLAN 2 and forward to s2b.
-
-.. code-block:: ini
-
-   # split stream s1 into s2a and s2b
-   *.s1.bridging.streamRelay.splitter.mapping = {s1: ["s2a", "s2b"]}
-   # map stream s2a to VLAN 1 and s2b to VLAN 2
-   *.s1.bridging.streamCoder.encoder.mapping = [{stream: "s2a", vlan: 1},
-                                                {stream: "s2b", vlan: 2}]
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: # split stream s1 into s2a and s2b
@@ -323,29 +251,12 @@ Switch s2a Configuration
 Set up MAC forwarding for s2a: VLAN 1 traffic goes to eth0 (s3a), VLAN 2 goes to eth1
 (s2b for the cross-path). Accept both VLAN 1 and 2 traffic.
 
-.. code-block:: ini
-
-   # map destination MAC address and VLAN pairs to network interfaces
-   *.s2a.macTable.forwardingTable = [{address: "destination", vlan: 1, interface: "eth0"},
-                                     {address: "destination", vlan: 2, interface: "eth1"}]
-   # allow ingress traffic from VLAN 1 and 2
-   *.s2a.ieee8021q.qTagHeaderChecker.vlanIdFilter = [1, 2]
-
 .. literalinclude:: ../omnetpp.ini
    :start-at: # map destination MAC address and VLAN pairs to network interfaces in s2a
    :end-at: *.s2a.ieee8021q.qTagHeaderChecker.vlanIdFilter = [1, 2]
 
 Decode incoming traffic: eth2 VLAN 1 → stream s2a (from s1), eth1 VLAN 2 →
 stream s2b-s2a (cross-path from s2b).
-
-.. code-block:: ini
-
-   # enable stream policing in layer 2 bridging
-   *.s2a.bridging.streamRelay.typename = "StreamRelayLayer"
-   *.s2a.bridging.streamCoder.typename = "StreamCoderLayer"
-   # map eth2 VLAN 1 to stream s2a and eth1 VLAN 2 to stream s2b-s2a
-   *.s2a.bridging.streamCoder.decoder.mapping = [{interface: "eth2", vlan: 1, stream: "s2a"},
-                                                 {interface: "eth1", vlan: 2, stream: "s2b-s2a"}]
 
 .. literalinclude:: ../omnetpp.ini
    :start-after: *.s2a.ieee8021q.qTagHeaderChecker.vlanIdFilter = [1, 2]
@@ -354,11 +265,6 @@ stream s2b-s2a (cross-path from s2b).
 **Merge Point**: Combine streams s2a (from s1) and s2b-s2a (cross-path from s2b)
 into a single stream s3a. The merger eliminates duplicates using sequence numbers,
 ensuring each frame is forwarded only once even if it arrives on both paths.
-
-.. code-block:: ini
-
-   # merge streams s2a and s2b-s2a in into s3a
-   *.s2a.bridging.streamRelay.merger.mapping = {s2a: "s3a", "s2b-s2a": "s3a"}
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: # merge streams s2a and s2b-s2a in into s3a
@@ -371,14 +277,6 @@ into:
 
 This creates Paths 1 and 4 from the source.
 
-.. code-block:: ini
-
-   # split stream s2a into s3a and s2b
-   *.s2a.bridging.streamRelay.splitter.mapping = {s3a: ["s3a", "s2b"]}
-   # map stream s3a to VLAN 1 and s2b to VLAN 2
-   *.s2a.bridging.streamCoder.encoder.mapping = [{stream: "s3a", vlan: 1},
-                                                 {stream: "s2b", vlan: 2}]
-
 .. literalinclude:: ../omnetpp.ini
    :start-at: # split stream s2a into s3a and s2b
    :end-at: {stream: "s2b", vlan: 2}]
@@ -388,14 +286,6 @@ Switch s2b Configuration
 
 Set up MAC forwarding for s2b (similar to s2a): VLAN 1 to eth0 (s3b), VLAN 2 to eth1 (s2a cross-path).
 
-.. code-block:: ini
-
-   # map destination MAC address and VLAN pairs to network interfaces
-   *.s2b.macTable.forwardingTable = [{address: "destination", vlan: 1, interface: "eth0"},
-                                     {address: "destination", vlan: 2, interface: "eth1"}]
-   # allow ingress traffic from VLAN 1 and 2
-   *.s2b.ieee8021q.qTagHeaderChecker.vlanIdFilter = [1, 2]
-
 .. literalinclude:: ../omnetpp.ini
    :start-at: # map destination MAC address and VLAN pairs to network interfaces in s2b
    :end-at: *.s2b.ieee8021q.qTagHeaderChecker.vlanIdFilter = [1, 2]
@@ -403,26 +293,12 @@ Set up MAC forwarding for s2b (similar to s2a): VLAN 1 to eth0 (s3b), VLAN 2 to 
 Decode incoming traffic: eth2 VLAN 2 → stream s2b (from s1), eth1 VLAN 2 → stream s2a-s2b
 (cross-path from s2a).
 
-.. code-block:: ini
-
-   # enable stream policing in layer 2 bridging
-   *.s2b.bridging.streamRelay.typename = "StreamRelayLayer"
-   *.s2b.bridging.streamCoder.typename = "StreamCoderLayer"
-   # map eth2 VLAN 2 to stream s2b and eth1 VLAN 2 to stream s2a-s2b
-   *.s2b.bridging.streamCoder.decoder.mapping = [{interface: "eth2", vlan: 2, stream: "s2b"},
-                                                 {interface: "eth1", vlan: 2, stream: "s2a-s2b"}]
-
 .. literalinclude:: ../omnetpp.ini
    :start-after: *.s2b.ieee8021q.qTagHeaderChecker.vlanIdFilter = [1, 2]
    :end-at: {interface: "eth1", vlan: 2, stream: "s2a-s2b"}]
 
 **Merge Point**: Combine streams s2b (from s1) and s2a-s2b (cross-path from s2a)
 into stream s3b, eliminate duplicates.
-
-.. code-block:: ini
-
-   # merge streams s2b and s2a-s2b in into s3b
-   *.s2b.bridging.streamRelay.merger.mapping = {s2b: "s3b", "s2a-s2b": "s3b"}
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: # merge streams s2b and s2a-s2b in into s3b
@@ -433,14 +309,6 @@ into stream s3b, eliminate duplicates.
 - Stream s2a (VLAN 2) → cross-path forwarded to s2a for additional redundancy
 
 This creates Paths 2 and 3 from the source.
-
-.. code-block:: ini
-
-   # split stream s2b into s3b and s2a
-   *.s2b.bridging.streamRelay.splitter.mapping = {s3b: ["s3b", "s2a"]}
-   # stream s3a maps to VLAN 1 and s2a to VLAN 2
-   *.s2b.bridging.streamCoder.encoder.mapping = [{stream: "s3b", vlan: 1},
-                                                 {stream: "s2a", vlan: 2}]
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: # split stream s2b into s3b and s2a
@@ -454,20 +322,6 @@ Decode their respective streams (s3a or s3b) from VLAN 1, and forward them
 to the destination with VLAN 1 encoding. These switches simply relay the streams
 toward the final destination.
 
-.. code-block:: ini
-
-   # s3a configuration
-   *.s3a.macTable.forwardingTable = [{address: "destination", vlan: 1, interface: "eth0"}]
-   *.s3a.bridging.streamCoder.decoder.mapping = [{interface: "eth1", vlan: 1, stream: "s3a"}]
-   *.s3a.bridging.streamCoder.encoder.mapping = [{stream: "s3a", vlan: 1}]
-   *.s3a.ieee8021q.qTagHeaderChecker.vlanIdFilter = [1]
-
-   # s3b configuration
-   *.s3b.macTable.forwardingTable = [{address: "destination", vlan: 1, interface: "eth0"}]
-   *.s3b.bridging.streamCoder.decoder.mapping = [{interface: "eth1", vlan: 1, stream: "s3b"}]
-   *.s3b.bridging.streamCoder.encoder.mapping = [{stream: "s3b", vlan: 1}]
-   *.s3b.ieee8021q.qTagHeaderChecker.vlanIdFilter = [1]
-
 .. literalinclude:: ../omnetpp.ini
    :start-at: # map destination MAC address and VLAN pairs to network interfaces in s3a
    :end-at: *.s3b.ieee8021q.qTagHeaderChecker.vlanIdFilter = [1]
@@ -480,16 +334,6 @@ interfaces and merge them into a null stream (empty string). This performs the
 final duplicate elimination - only forward the first copy of each frame (identified by
 sequence number) to the application, while discard later duplicates. This ensures the application receives exactly one copy of each frame,
 regardless of which path(s) it arrived on.
-
-.. code-block:: ini
-
-   # allow ingress traffic from VLAN 1
-   *.destination.ieee8021q.qTagHeaderChecker.vlanIdFilter = [1]
-   # map eth0 VLAN 1 to stream s3a and eth1 VLAN 1 to stream s3b
-   *.destination.bridging.streamCoder.decoder.mapping = [{interface: "eth0", vlan: 1, stream: "s3a"},
-                                                         {interface: "eth1", vlan: 1, stream: "s3b"}]
-   # merge streams s3a and s3b into null stream
-   *.destination.bridging.streamRelay.merger.mapping = {s3a: "", s3b: ""}
 
 .. literalinclude:: ../omnetpp.ini
    :start-after: *.s3b.ieee8021q.qTagHeaderChecker.vlanIdFilter
