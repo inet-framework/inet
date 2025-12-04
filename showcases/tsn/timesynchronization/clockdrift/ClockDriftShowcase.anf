@@ -4519,8 +4519,6 @@ except results.ResultQueryError as e:
 if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
 
-print(df)
-
 master_clock_row = df[df['module'] == 'ClockDriftShowcase.switch1.clock']
 master_clock_vectime = master_clock_row['vectime'].iloc[0]
 master_clock_vecvalue = master_clock_row['vecvalue'].iloc[0]
@@ -5284,8 +5282,6 @@ except results.ResultQueryError as e:
 
 if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
-
-print(df)
 
 master_clock_row = df[df['module'] == 'ClockDriftShowcase.switch1.clock']
 master_clock_vectime = master_clock_row['vectime'].iloc[0]
