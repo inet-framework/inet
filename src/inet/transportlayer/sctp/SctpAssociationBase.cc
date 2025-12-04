@@ -1778,10 +1778,14 @@ void SctpAssociation::finalizeStatistics()
 
 void SctpAssociation::finish()
 {
-    finalizeStatistics();
+    // Stop all association timers
+    stopAssocTimers();
 
+    // Finalize and record statistics
+    finalizeStatistics();
     recordScalars();
 
+    // Cleanup association resources
     removePath();
     deleteStreams();
     deleteQueues();
