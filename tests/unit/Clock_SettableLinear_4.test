@@ -13,6 +13,7 @@ cmdenv-log-prefix = "%l %C: "
 
 *.host.clock.typename = "SettableClock"
 *.host.clock.initialClockTime = 1s
+*.host.clock.oscillator.nominalTickLength = 1ps
 *.host.clock.oscillator.driftRate = -0.5e6 ppm
 %#--------------------------------------------------------------------------------------------------------------
 %extraargs: -s

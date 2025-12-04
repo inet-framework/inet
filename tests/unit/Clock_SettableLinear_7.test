@@ -13,6 +13,7 @@ cmdenv-log-prefix = "%l %C: "
 
 *.host.clock.typename = "OscillatorBasedClock"
 *.host.clock.initialClockTime = 1s
+*.host.clock.oscillator.nominalTickLength = 1ps
 *.host.clock.oscillator.driftRate = -0.5e6 ppm
 *.scenarioManager.script = xml("<scenario><set-oscillator t='2.5s' module='host.clock.oscillator' drift-rate='0 ppm'/></scenario>")
 %#--------------------------------------------------------------------------------------------------------------
