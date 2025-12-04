@@ -64,7 +64,6 @@ class INET_API DriftingOscillatorBase : public OscillatorBase, public IScriptabl
 
   protected:
     simtime_t nominalTickLength;
-    ppm inverseDriftRate = ppm(NaN); // stored for faster computation, calculated as (1 / (1 + driftRate / 1E+6) - 1) * 1E-6
 
     /**
      * Physical frequency error in ppm.
@@ -129,17 +128,12 @@ class INET_API DriftingOscillatorBase : public OscillatorBase, public IScriptabl
     // IScriptable implementation
     virtual void processCommand(const cXMLElement& node) override;
 
-    ppm invertDriftRate(ppm driftRate) const { return unit(1 / (1 + driftRate.get<unit>()) - 1); }
     virtual void setDriftFactor(SimTimeScale driftFactor);
 
     virtual void setFrequencyCompensationFactor(SimTimeScale frequencyCompensationFactor);
 
     virtual void setEffectiveTickLengthFactor(SimTimeScale effectiveTickLengthFactor);
-    int64_t increaseWithDriftRate(int64_t value) const { return increaseWithDriftRate(value, driftRate); }
-    int64_t increaseWithDriftRate(int64_t value, ppm driftRate) const { return value + (int64_t)(value * driftRate.get<unit>()); }
 
-    int64_t decreaseWithDriftRate(int64_t value) const { return decreaseWithDriftRate(value, inverseDriftRate); }
-    int64_t decreaseWithDriftRate(int64_t value, ppm inverseDriftRate) const { return value + (int64_t)(value * inverseDriftRate.get<unit>()); }
     int64_t doComputeTicksForInterval(simtime_t timeInterval) const;
     simtime_t doComputeIntervalForTicks(int64_t numTicks) const;
 

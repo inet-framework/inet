@@ -22,7 +22,6 @@ void DriftingOscillatorBase::initialize(int stage)
         nominalTickLength = nominalTickLengthAsDouble;
         if (std::abs(nominalTickLength.dbl() - nominalTickLengthAsDouble) / nominalTickLengthAsDouble > 1E-15)
             throw cRuntimeError("The nominalTickLength parameter value %lg cannot be accurately represented with the current simulation time precision, conversion result: %s", nominalTickLengthAsDouble, nominalTickLength.ustr().c_str());
-        inverseDriftRate = invertDriftRate(driftRate);
         setOrigin(simTime());
         setDriftFactor(SimTimeScale::fromPpm(driftRate.get<ppm>()));
         numTicksAtOrigin = 0;
@@ -35,7 +34,6 @@ void DriftingOscillatorBase::initialize(int stage)
         WATCH(nominalTickLength);
         WATCH_EXPR("currentTickLength", getCurrentTickLength());
         WATCH(driftRate);
-        WATCH(inverseDriftRate);
         WATCH(driftFactor);
         WATCH(frequencyCompensationRate);
         WATCH(frequencyCompensationFactor);
@@ -80,7 +78,6 @@ void DriftingOscillatorBase::setDriftRate(ppm newDriftRate)
         simtime_t currentTickLength = getCurrentTickLength();
         simtime_t baseTickTime = origin + nextTickFromOrigin - currentTickLength;
         simtime_t elapsedTickTime = fmod(currentSimTime - baseTickTime, currentTickLength);
-        ppm newInverseDriftRate = invertDriftRate(newDriftRate);
         if (elapsedTickTime == SIMTIME_ZERO)
             nextTickFromOrigin = 0;
         else {
@@ -89,7 +86,6 @@ void DriftingOscillatorBase::setDriftRate(ppm newDriftRate)
         }
         SimTimeScale newDriftFactor = SimTimeScale::fromPpm(newDriftRate.get<ppm>());
         driftRate = newDriftRate;
-        inverseDriftRate = newInverseDriftRate;
         setDriftFactor(newDriftFactor);
         setOrigin(currentSimTime);
         if (tickTimer) {
