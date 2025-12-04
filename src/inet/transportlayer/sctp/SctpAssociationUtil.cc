@@ -2129,19 +2129,14 @@ void SctpAssociation::removePath(const L3Address& addr)
         path->ssthresh = 0;
         recordCwndUpdate(path);
 
-        stopTimer(path->HeartbeatTimer);
-        delete path->HeartbeatTimer;
-        stopTimer(path->HeartbeatIntervalTimer);
-        delete path->HeartbeatIntervalTimer;
-        stopTimer(path->T3_RtxTimer);
-        delete path->T3_RtxTimer;
-        stopTimer(path->CwndTimer);
-        delete path->CwndTimer;
         sctpPathMap.erase(pathIterator);
-        stopTimer(path->ResetTimer);
-        delete path->ResetTimer;
-        stopTimer(path->AsconfTimer);
-        delete path->AsconfTimer;
+
+        cancelAndDelete(path->HeartbeatTimer);
+        cancelAndDelete(path->HeartbeatIntervalTimer);
+        cancelAndDelete(path->T3_RtxTimer);
+        cancelAndDelete(path->CwndTimer);
+        cancelAndDelete(path->ResetTimer);
+        cancelAndDelete(path->AsconfTimer);
         delete path;
     }
 }
