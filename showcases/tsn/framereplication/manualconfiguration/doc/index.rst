@@ -166,6 +166,7 @@ Disable automatic MAC table configuration so we can manually configure stream
 forwarding rules.
 
 .. literalinclude:: ../omnetpp.ini
+   :language: ini
    :start-at: *.macForwardingTableConfigurator.typename = ""
    :end-at: *.macForwardingTableConfigurator.typename = ""
 
@@ -174,6 +175,7 @@ s2b-s3b link at 0.2s. This tests the network's ability to maintain connectivity
 through the remaining redundant paths.
 
 .. literalinclude:: ../omnetpp.ini
+   :language: ini
    :start-at: *.scenarioManager.script
    :end-at: </scenario>
 
@@ -181,6 +183,7 @@ Enable FRER functionality in all network nodes, allowing them to perform stream
 splitting, merging, encoding, and decoding operations.
 
 .. literalinclude:: ../omnetpp.ini
+   :language: ini
    :start-at: *.*.hasStreamRedundancy
    :end-at: *.*.hasStreamRedundancy
 
@@ -189,6 +192,7 @@ at intervals following a truncated normal distribution (mean 100μs, std dev 50�
 The packets are sent to the destination node on port 1000.
 
 .. literalinclude:: ../omnetpp.ini
+   :language: ini
    :start-at: *.source.numApps
    :end-at: *.source.app[0].source.productionInterval
 
@@ -197,6 +201,7 @@ Ethernet interfaces with the same MAC address so they can accept
 packets from either path (s3a or s3b).
 
 .. literalinclude:: ../omnetpp.ini
+   :language: ini
    :start-at: *.destination.numApps
    :end-at: *.destination.eth[*].address
 
@@ -209,6 +214,7 @@ throughout the network.
 This allows the network to route the stream using standard VLAN-based forwarding.
 
 .. literalinclude:: ../omnetpp.ini
+   :language: ini
    :start-at: *.source.bridging.streamIdentifier.identifier.mapping
    :end-at: *.source.bridging.streamCoder.encoder.mapping
 
@@ -219,12 +225,14 @@ Set up MAC forwarding: packets with destination MAC and VLAN 1 go to eth0 (s2a),
 packets with VLAN 2 go to eth1 (s2b). Only accept VLAN 1 traffic from the source.
 
 .. literalinclude:: ../omnetpp.ini
+   :language: ini
    :start-at: # map destination MAC address and VLAN pairs to network interfaces
    :end-at: *.s1.ieee8021q.qTagHeaderChecker.vlanIdFilter
 
 Enable FRER functionality and decode incoming VLAN 1 traffic on eth2 as stream s1.
 
 .. literalinclude:: ../omnetpp.ini
+   :language: ini
    :start-at: # enable stream policing in layer 2 bridging
    :end-at: *.s1.bridging.streamCoder.decoder.mapping
 
@@ -233,6 +241,7 @@ first switch, there shouldn't be duplicates yet, but this prepares for any
 potential loops or retransmissions.
 
 .. literalinclude:: ../omnetpp.ini
+   :language: ini
    :start-at: # eliminate duplicates from stream s1
    :end-at: *.s1.bridging.streamRelay.merger.mapping
 
@@ -242,6 +251,7 @@ of redundancy. Encode stream s2a with VLAN 1 and forward to s2a, while
 encode stream s2b with VLAN 2 and forward to s2b.
 
 .. literalinclude:: ../omnetpp.ini
+   :language: ini
    :start-at: # split stream s1 into s2a and s2b
    :end-at: {stream: "s2b", vlan: 2}]
 
@@ -252,6 +262,7 @@ Set up MAC forwarding for s2a: VLAN 1 traffic goes to eth0 (s3a), VLAN 2 goes to
 (s2b for the cross-path). Accept both VLAN 1 and 2 traffic.
 
 .. literalinclude:: ../omnetpp.ini
+   :language: ini
    :start-at: # map destination MAC address and VLAN pairs to network interfaces in s2a
    :end-at: *.s2a.ieee8021q.qTagHeaderChecker.vlanIdFilter = [1, 2]
 
@@ -259,6 +270,7 @@ Decode incoming traffic: eth2 VLAN 1 → stream s2a (from s1), eth1 VLAN 2 →
 stream s2b-s2a (cross-path from s2b).
 
 .. literalinclude:: ../omnetpp.ini
+   :language: ini
    :start-after: *.s2a.ieee8021q.qTagHeaderChecker.vlanIdFilter = [1, 2]
    :end-at: {interface: "eth1", vlan: 2, stream: "s2b-s2a"}]
 
@@ -267,6 +279,7 @@ into a single stream s3a. The merger eliminates duplicates using sequence number
 ensuring each frame is forwarded only once even if it arrives on both paths.
 
 .. literalinclude:: ../omnetpp.ini
+   :language: ini
    :start-at: # merge streams s2a and s2b-s2a in into s3a
    :end-at: *.s2a.bridging.streamRelay.merger.mapping = {s2a: "s3a", "s2b-s2a": "s3a"}
 
@@ -278,6 +291,7 @@ into:
 This creates Paths 1 and 4 from the source.
 
 .. literalinclude:: ../omnetpp.ini
+   :language: ini
    :start-at: # split stream s2a into s3a and s2b
    :end-at: {stream: "s2b", vlan: 2}]
 
@@ -287,6 +301,7 @@ Switch s2b Configuration
 Set up MAC forwarding for s2b (similar to s2a): VLAN 1 to eth0 (s3b), VLAN 2 to eth1 (s2a cross-path).
 
 .. literalinclude:: ../omnetpp.ini
+   :language: ini
    :start-at: # map destination MAC address and VLAN pairs to network interfaces in s2b
    :end-at: *.s2b.ieee8021q.qTagHeaderChecker.vlanIdFilter = [1, 2]
 
@@ -294,6 +309,7 @@ Decode incoming traffic: eth2 VLAN 2 → stream s2b (from s1), eth1 VLAN 2 → s
 (cross-path from s2a).
 
 .. literalinclude:: ../omnetpp.ini
+   :language: ini
    :start-after: *.s2b.ieee8021q.qTagHeaderChecker.vlanIdFilter = [1, 2]
    :end-at: {interface: "eth1", vlan: 2, stream: "s2a-s2b"}]
 
@@ -301,6 +317,7 @@ Decode incoming traffic: eth2 VLAN 2 → stream s2b (from s1), eth1 VLAN 2 → s
 into stream s3b, eliminate duplicates.
 
 .. literalinclude:: ../omnetpp.ini
+   :language: ini
    :start-at: # merge streams s2b and s2a-s2b in into s3b
    :end-at: *.s2b.bridging.streamRelay.merger.mapping = {s2b: "s3b", "s2a-s2b": "s3b"}
 
@@ -311,6 +328,7 @@ into stream s3b, eliminate duplicates.
 This creates Paths 2 and 3 from the source.
 
 .. literalinclude:: ../omnetpp.ini
+   :language: ini
    :start-at: # split stream s2b into s3b and s2a
    :end-at: {stream: "s2a", vlan: 2}]
 
@@ -323,6 +341,7 @@ to the destination with VLAN 1 encoding. These switches simply relay the streams
 toward the final destination.
 
 .. literalinclude:: ../omnetpp.ini
+   :language: ini
    :start-at: # map destination MAC address and VLAN pairs to network interfaces in s3a
    :end-at: *.s3b.ieee8021q.qTagHeaderChecker.vlanIdFilter = [1]
 
@@ -336,6 +355,7 @@ sequence number) to the application, while discard later duplicates. This ensure
 regardless of which path(s) it arrived on.
 
 .. literalinclude:: ../omnetpp.ini
+   :language: ini
    :start-after: *.s3b.ieee8021q.qTagHeaderChecker.vlanIdFilter
    :end-at: *.destination.bridging.streamRelay.merger.mapping
 
@@ -344,7 +364,7 @@ Results
 
 Here are the number of received and sent packets:
 
-.. figure:: media/packetsreceivedsent.png
+.. figure:: media/packets.png
    :align: center
    :width: 100%
 
@@ -388,9 +408,7 @@ and edit the showcase files, run simulations, and analyze results.
 
 Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
 <https://omnetpp.org/opp_env>`__, and run the simulation interactively.
-Ensure that ``opp_env`` is installed on your system, then execute:
-
-.. code-block:: bash
+Ensure that ``opp_env`` is installed on your system, then execute::
 
     $ opp_env run inet-4.5 --init -w inet-workspace --install --build-modes=release --chdir \
        -c 'cd inet-4.5.*/showcases/tsn/framereplication/manualconfiguration && inet'
@@ -400,9 +418,7 @@ versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
 showcase directory for interactive simulation.
 
 Alternatively, for a more hands-on experience, you can first set up the
-workspace and then open an interactive shell:
-
-.. code-block:: bash
+workspace and then open an interactive shell::
 
     $ opp_env install --init -w inet-workspace --build-modes=release inet-4.5
     $ cd inet-workspace
