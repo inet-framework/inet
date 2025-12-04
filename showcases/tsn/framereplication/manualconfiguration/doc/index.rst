@@ -156,92 +156,52 @@ even with multiple link failures, as long as at least one complete path exists.
 The Model
 ---------
 
+
 FRER Configuration Overview
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   
+FRER is configured in the bridging layer using three key submodules:
+**streamIdentifier** assigns packets to named streams and assigns sequence
+numbering; **streamCoder** maps between stream names and VLAN tags back and
+forth; and **StreamRelayLayer** contains merger (eliminates duplicates) and splitter
+(replicates streams) submodules.
 
-Before examining the specific configuration, let's understand where and how FRER
-is configured in INET nodes.
+TODO amelyik iranyba megy a csomag
 
-Module Architecture
-^^^^^^^^^^^^^^^^^^^
+For example, to identify traffic and map it to VLANs:
 
-FRER functionality is implemented in the bridging layer of network nodes through
-several key submodules:
+.. code-block:: ini
 
-**Stream Identifier** (``bridging.streamIdentifier``)
-  Identifies incoming packets and assigns them to named streams based on packet
-  filters (matching MAC addresses, VLAN tags, or other header fields). At the
-  source, this module also enables sequence numbering for duplicate detection.
+   # Identify traffic as "myStream" and enable sequence numbering
+   *.sourceNode.bridging.streamIdentifier.identifier.mapping = [{stream: "path1", sequenceNumbering: true}]
+   
+   # Encode stream to VLAN at source, decode at next hop
+   *.sourceNode.bridging.streamCoder.encoder.mapping = [{stream: "path1", vlan: 1}]
+   *.switch.bridging.streamCoder.decoder.mapping = [{interface: "eth0", vlan: 1, stream: "path1"}]
 
-**Stream Coder** (``bridging.streamCoder``)
-  Contains encoder and decoder components that map between stream names and VLAN
-  tags. The decoder extracts stream identity from incoming VLAN-tagged frames,
-  while the encoder applies VLAN tags to outgoing frames based on their stream
-  identity.
+At the **source**, configure stream identification with sequence numbering and
+stream encoding. At each **switch**, configure MAC forwarding, VLAN filtering,
+stream decoding, merging (for converging paths), splitting (for diverging
+paths), and encoding. At the **destination**, configure stream decoding and
+final duplicate elimination by merging into a null stream.
 
-**Stream Relay** (``bridging.streamRelay``)
-  The core FRER processing module containing:
-  
-  - **Merger**: Combines multiple input streams into a single output stream,
-    eliminating duplicate frames using sequence numbers
-  - **Splitter**: Replicates a single input stream into multiple output streams,
-    creating redundant copies
+For example, to merge and split streams:
 
-Configuration Locations
-^^^^^^^^^^^^^^^^^^^^^^^
+.. code-block:: ini
 
-FRER configuration varies by node role in the network:
+   # Merge two redundant paths into one, eliminating duplicates
+   *.switch.bridging.streamRelay.merger.mapping = {path1: "path3", path2: "path3"}
+   
+   # Split one stream into two redundant paths
+   *.switch.bridging.streamRelay.splitter.mapping = {pathA: ["pathB", "pathC"]}
+   
+   # Final elimination at destination (merge into null stream)
+   *.destinationNode.bridging.streamRelay.merger.mapping = {pathB: "", pathC: ""}
 
-**Source Nodes**
-  - Enable stream identification to assign traffic to named streams
-  - Enable sequence numbering to add unique identifiers to each frame
-  - Configure stream encoding to map streams to VLAN tags for transmission
+Enable FRER in each node with ``hasStreamRedundancy = true``, then configure these
+components at each node based on its role in the redundancy topology. 
 
-**Switches (Intermediate Nodes)**
-  - Configure MAC forwarding tables to route packets based on VLAN tags
-  - Set VLAN filters to accept specific VLAN traffic on each interface
-  - Enable stream relay layer for FRER processing
-  - Configure stream decoders to extract stream identity from incoming frames
-  - Configure mergers to eliminate duplicates from converging paths
-  - Configure splitters to replicate streams onto diverging paths
-  - Configure stream encoders to apply VLAN tags to outgoing frames
-
-**Destination Nodes**
-  - Configure VLAN filters to accept traffic from all redundant paths
-  - Configure stream decoders to identify streams from different interfaces
-  - Configure merger to perform final duplicate elimination (merge into null stream)
-
-Key Configuration Steps
-^^^^^^^^^^^^^^^^^^^^^^^
-
-The configuration process follows these steps:
-
-1. **Enable FRER globally**: Set ``hasStreamRedundancy = true`` on all nodes
-   to activate the stream redundancy mechanisms
-
-2. **Configure the source**: Set up stream identification with sequence numbering
-   and stream encoding to initiate the redundant transmission
-
-3. **Configure each switch**: For each intermediate node, set up the complete
-   processing chain - decode incoming streams, merge converging paths, split
-   onto diverging paths, and encode outgoing streams
-
-4. **Configure the destination**: Set up stream decoding and final elimination
-   to ensure only one copy of each frame reaches the application
-
-Packet Processing Flow
-^^^^^^^^^^^^^^^^^^^^^^^
-
-At each node, packets follow this processing sequence:
-
-1. **Ingress**: Packets arrive with VLAN tags from the physical interface
-2. **Decoding**: Stream coder decoder maps VLAN tag → stream name
-3. **Merging**: Stream relay merger eliminates duplicates (if multiple paths converge)
-4. **Splitting**: Stream relay splitter replicates stream (if multiple paths diverge)
-5. **Encoding**: Stream coder encoder maps stream name → VLAN tag
-6. **Egress**: Packets transmitted with appropriate VLAN tags to next hop
-
-Now let's examine the detailed configuration for each node in our network.
+The detailed configuration for each node follows below.
 
 Basic Configuration
 ~~~~~~~~~~~~~~~~~~~
@@ -452,18 +412,7 @@ Here are the number of received and sent packets:
    :align: center
    :width: 100%
 
-Here is the ratio of received and sent packets:
-
-.. figure:: media/packetratio.png
-   :align: center
-
-The expected number of successfully received packets relative to the number of
-sent packets is verified by the Python script (``compute_frame_replication_success_rate_analytically2()`` function in ``inet/python/inet/tests/validation.py``). The expected result is around 0.657.
-
-This ratio reflects the packet loss that occurs due to the two link failures.
-Despite both failures, approximately 65.7% of packets successfully reach the
-destination through the remaining redundant Path 4 (source → s1 → s2b → s2a →
-s3a → destination). This demonstrates the effectiveness of the FRER mechanism
+This demonstrates the effectiveness of the FRER mechanism
 in maintaining network connectivity even under multiple failure conditions.
 
 .. The following video shows the behavior in Qtenv:
