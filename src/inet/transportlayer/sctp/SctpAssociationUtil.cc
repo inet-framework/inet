@@ -2785,7 +2785,7 @@ void SctpAssociation::pmStartPathManagement()
             startTimer(path->HeartbeatTimer, path->heartbeatTimeout);
             startTimer(path->HeartbeatIntervalTimer, path->heartbeatIntervalTimeout);
         }
-        
+
         // Emit path RTO statistic with detail object for demux
         emit(pathRtoSignal, path->pathRto, path);
         i++;
@@ -2850,7 +2850,7 @@ void SctpAssociation::pmRttMeasurement(SctpPathVariables *path,
             // RFC 2960, sect. 6.3.1: new RTT measurements SHOULD be made no more
             // than once per round-trip.
             path->rttUpdateTime = simTime() + path->srtt;
-            
+
             // Emit path statistics with detail object for demux
             emit(pathRtoSignal, path->pathRto, path);
             emit(pathRttSignal, rttEstimation, path);

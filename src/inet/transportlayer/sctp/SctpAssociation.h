@@ -275,15 +275,15 @@ class INET_API SctpStreamStatistic : public cNamedObject
 {
   public:
     uint16_t streamId;
-    
+
     SctpStreamStatistic(uint16_t sid) : streamId(sid) {
         char buf[32];
         sprintf(buf, "stream-%u", sid);
         setName(buf);  // IMPORTANT: demux filter uses this name!
     }
-    
-    virtual std::string str() const override { 
-        return std::to_string(streamId); 
+
+    virtual std::string str() const override {
+        return std::to_string(streamId);
     }
 };
 
@@ -915,10 +915,10 @@ class INET_API SctpAssociation : public SimpleModule
     static simsignal_t pathPseudoCumAckSignal;
     static simsignal_t pathRTXPseudoCumAckSignal;
     static simsignal_t pathBlockingTsnsMovedSignal;
-    
+
     // Stream-specific signals (use SctpStreamStatistic detail object)
     static simsignal_t streamThroughputSignal;
-    
+
     // Association-level signals (no detail object)
     static simsignal_t advRwndSignal;
     static simsignal_t cumTsnAckSignal;

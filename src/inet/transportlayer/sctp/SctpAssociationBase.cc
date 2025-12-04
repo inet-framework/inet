@@ -214,7 +214,7 @@ SctpPathVariables::SctpPathVariables(const L3Address& addr, SctpAssociation *ass
     ResetTimer->setControlInfo(pinfo->dup());
     AsconfTimer->setControlInfo(pinfo->dup());
     BlockingTimer->setControlInfo(pinfo->dup());
-    
+
     // Note: Statistics now use signal-based recording (emit) instead of cOutVector
 }
 
@@ -630,7 +630,7 @@ void SctpAssociation::initAssociation(Sctp *_module, int32_t _appGateIndex, int3
     T5_ShutdownGuardTimer->setControlInfo(pinfo->dup());
 
     // Note: Statistics now use signal-based recording (emit) instead of cOutVector
-    
+
     // ====== Extensions =====================================================
     StartAddIP = new cMessage("addIP");
     StartAddIP->setContextPointer(this);
@@ -1671,7 +1671,7 @@ void SctpAssociation::stateEntered(int32_t status)
                 sctpMain->scheduleAt(sctpMain->par("fairStop"), FairStopTimer);
                 sctpMain->recordScalar("rtoMin", sctpMain->par("rtoMin").doubleValue());
             }
-            
+
             state->sendQueueLimit = sctpMain->par("sendQueueLimit");
             Sctp::VTagPair vtagPair;
             vtagPair.peerVTag = peerVTag;

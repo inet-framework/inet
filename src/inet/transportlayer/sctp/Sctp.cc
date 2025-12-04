@@ -919,12 +919,12 @@ void Sctp::finish()
     recordScalar("Packets Received", numPacketsReceived);
     recordScalar("Packets Dropped", numPacketsDropped);
     recordScalar("Number of PacketDrop Reports", numPktDropReports);
-    
+
     if (socketOptions) {
         recordScalar("sackPeriod", (simtime_t)socketOptions->sackPeriod);
     }
     recordScalar("RTXMethod", par("RTXMethod").intValue());
-    
+
     EV_DETAIL << "SCTP Module Statistics:" << endl;
     EV_DETAIL << "  Total packets received: " << numPacketsReceived << endl;
     EV_DETAIL << "  Total packets dropped: " << numPacketsDropped << endl;
