@@ -6,6 +6,7 @@ Tests SettableClock:
 [General]
 ned-path = .;../../../../src;../../lib
 network = inet.test.unittest.lib.ClockTestNetwork
+simtime-resolution = 1fs
 cmdenv-express-mode = false
 cmdenv-event-banners = false
 cmdenv-log-prefix = "%l %C: "
