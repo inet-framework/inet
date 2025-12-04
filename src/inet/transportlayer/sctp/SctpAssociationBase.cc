@@ -1721,20 +1721,13 @@ void SctpAssociation::removePath()
             }
         }
         EV_INFO << getFullPath() << " remove path " << path->remoteAddress << endl;
-        stopTimer(path->HeartbeatTimer);
-        delete path->HeartbeatTimer;
-        stopTimer(path->HeartbeatIntervalTimer);
-        delete path->HeartbeatIntervalTimer;
-        stopTimer(path->T3_RtxTimer);
-        delete path->T3_RtxTimer;
-        stopTimer(path->CwndTimer);
-        delete path->CwndTimer;
-        stopTimer(path->ResetTimer);
-        delete path->ResetTimer;
-        stopTimer(path->AsconfTimer);
-        delete path->AsconfTimer;
-        stopTimer(path->BlockingTimer);
-        delete path->BlockingTimer;
+        cancelAndDelete(path->HeartbeatTimer);
+        cancelAndDelete(path->HeartbeatIntervalTimer);
+        cancelAndDelete(path->T3_RtxTimer);
+        cancelAndDelete(path->CwndTimer);
+        cancelAndDelete(path->ResetTimer);
+        cancelAndDelete(path->AsconfTimer);
+        cancelAndDelete(path->BlockingTimer);
         delete path;
         sctpPathMap.erase(pathIterator);
     }
