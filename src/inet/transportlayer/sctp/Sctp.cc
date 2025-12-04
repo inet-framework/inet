@@ -854,6 +854,7 @@ void Sctp::removeAssociation(SctpAssociation *assoc)
 
     printInfoAssocMap();
 
+    // Remove association from sctpAssocMap
     if (sizeAssocMap > 0) {
         while (!ok) {
             if (sizeAssocMap == 0) {
@@ -867,7 +868,6 @@ void Sctp::removeAssociation(SctpAssociation *assoc)
                         SctpAssociation *myAssoc = sctpAssocMapIterator->second;
                         if (myAssoc->assocId == assoc->assocId) {
                             ASSERT(myAssoc == assoc);
-                            myAssoc->stopAssocTimers();
                             sctpAssocMap.erase(sctpAssocMapIterator);
                             sizeAssocMap--;
                             find = true;
@@ -885,14 +885,19 @@ void Sctp::removeAssociation(SctpAssociation *assoc)
             }
         }
     }
+
     // Call finish() to finalize and record statistics before removing association
+    // The finish() method handles stopping timers and cleanup of association-internal state
     assoc->callFinish();
 
+    // Remove from application association map and list
     AppAssocKey key;
     key.appGateIndex = assoc->appGateIndex;
     key.assocId = assoc->assocId;
     sctpAppAssocMap.erase(key);
     assocList.remove(assoc);
+
+    // Delete the association module
     assoc->deleteModule();
 }
 
