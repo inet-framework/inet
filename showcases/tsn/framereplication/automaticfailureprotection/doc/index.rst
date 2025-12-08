@@ -28,7 +28,7 @@ and packet loss by:
    frames are identified (using sequence numbers) and eliminated, ensuring that
    only one copy of each frame is delivered to the application.
 
-TODO read more about this in the manual (link)
+For more information about FRER, read the :ref:`corresponding section <ug:sec:tsn:framereplication>` in the INET User's Guide.
 
 The Model
 ---------
