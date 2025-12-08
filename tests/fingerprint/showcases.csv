@@ -43,6 +43,8 @@
 /showcases/routing/manet/,           -f omnetpp.ini -c Dsdv -r 0,                   100s,         84f0-9aea/tplx;bdad-9a28/~tNl;cdce-1d3c/~tND;7c3e-c477/tyf, PASS,    wireless Ipv4
 /showcases/routing/manet/,           -f omnetpp.ini -c Gpsr -r 0,                   100s,         53c9-5456/tplx;5452-5da6/~tNl;5442-11b1/tyf, PASS,    wireless Ipv4
 
+/showcases/routing/aodvexternal/,           -f omnetpp.ini -c General -r 0,                   50s,         08c0-2d99/tplx;1242-e596/~tNl, PASS,    wireless Ipv4
+
 /showcases/tsn/combiningfeatures/fpandtas/, -f omnetpp.ini -c General -r 0,         10ms,       ba97-42a3/tplx;9c73-6822/~tNl;063b-8262/~tND;eb43-0836/tyf, PASS,
 
 /showcases/tsn/combiningfeatures/frerandtas/, -f omnetpp.ini -c General -r 0,       1s,         2c89-c055/tplx;8826-e8e2/~tNl;3705-5741/~tND;b2dc-4234/tyf, PASS,
