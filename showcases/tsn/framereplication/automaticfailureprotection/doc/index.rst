@@ -16,48 +16,19 @@ maintains 100% packet delivery even during equipment outages.
 Frame Replication and Elimination
 ----------------------------------
 
-In critical industrial and automotive networks, equipment failures are
-inevitable - switches can crash, links can be severed, and components can
-malfunction. Traditional network architectures are vulnerable to such failures:
-when a component fails, traffic is lost until the failure is detected and
-alternative routes are established, resulting in unacceptable service
-interruption.
+Frame Replication and Elimination for Reliability (FRER) is a mechanism standardized
+in IEEE 802.1CB that provides seamless redundancy for time-sensitive networking
+applications. The core idea is to protect critical data streams against link failures
+and packet loss by:
 
-Frame Replication and Elimination for Reliability (FRER), defined in IEEE
-802.1CB, solves this problem by providing seamless redundancy at the frame
-level. By transmitting duplicate copies of critical frames along multiple
-physically diverse paths and eliminating duplicates, FRER
-ensures that communication continues uninterrupted even when network components
-fail. The level of protection depends on the number of redundant paths
-configured - FRER can protect against single or multiple simultaneous failures.
+1. **Replicating frames**: At strategic points in the network, frames from a stream
+   are duplicated and sent along multiple disjoint paths toward the destination.
 
-Frame replication (IEEE 802.1CB) is a TSN mechanism that provides fault
-tolerance by creating and transmitting multiple copies of critical frames along
-diverse paths through the network. This ensures that even if one path fails due
-to link or node failures, at least one copy reaches the destination, enabling
-seamless network operation without packet loss.
+2. **Eliminating duplicates**: At merge points and at the destination, duplicate
+   frames are identified (using sequence numbers) and eliminated, ensuring that
+   only one copy of each frame is delivered to the application.
 
-**Key Principles:**
-
-1. **Replication**: At designated replication points, each frame is duplicated
-   and sent out on multiple network interfaces.
-
-2. **Diverse Paths**: Frame copies travel through different network nodes and
-   links to ensure partial path independence - if one path experiences a failure, other
-   paths remain operational
-
-3. **Sequence Numbering**: Each frame receives a unique sequence number (added
-   via the IEEE 802.1 R-Tag) to enable duplicate detection
-
-4. **Merging**: At merging points,
-   duplicate frames are identified using their sequence numbers. Only the first
-   arriving copy is forwarded to the application layer, while subsequent
-   duplicates are discarded
-
-5. **Transparent Operation**: From the application's perspective, frame
-   replication is completely transparent - packet delivery continues
-   uninterrupted even during network failures, with the application receiving
-   each packet exactly once (maybe in incorrect order)
+TODO read more about this in the manual (link)
 
 The Model
 ---------
