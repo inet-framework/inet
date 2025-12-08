@@ -198,8 +198,8 @@ how traffic is classified, metered, and filtered inside the bridging layer of th
 Results
 -------
 
-The Problem
-~~~~~~~~~~~
+Without Policing
+~~~~~~~~~~~~~~~~
 
 The first three charts demonstrate the problem we are addressing: excessive,
 misbehaving traffic disrupting normal traffic in a shared network
@@ -234,8 +234,8 @@ up to ~25 ms during the period when the misbehaving traffic is high. This clearl
 demonstrates the problem: well-behaved traffic is disrupted by misbehaving or
 excessive traffic sources sharing the same network infrastructure.
 
-The Solution
-~~~~~~~~~~~~
+With Policing
+~~~~~~~~~~~~~
 
 The next two charts show how token bucket policing solves this problem by
 limiting excessive traffic while protecting normal traffic. Here is the traffic at the server, with and without policing:
