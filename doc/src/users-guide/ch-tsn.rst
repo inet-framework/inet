@@ -266,6 +266,76 @@ This section describes the modules that implement a subset of the functionality
 of the IEEE 802.1CB standard titled "Frame Replication and Elimination for
 Reliability" (IEEE 802.1CB-2017).
 
+Frame Replication and Elimination for Reliability (FRER) is a mechanism that
+provides seamless redundancy for time-sensitive networking applications. The core
+idea is to protect critical data streams against link failures and packet loss by
+replicating frames at strategic points in the network and sending them along
+multiple disjoint paths toward the destination. At merge points and at the
+destination, duplicate frames are identified using sequence numbers and eliminated.
+
+FRER provides seamless redundancy with zero packet loss during link or node
+failures, making it ideal for critical industrial control systems, automotive
+networks, and other time-sensitive applications. From the application's perspective,
+frame replication is completely transparent - packet delivery continues
+uninterrupted even during network failures, with the application receiving
+each packet exactly once.
+
+Key FRER Concepts
+~~~~~~~~~~~~~~~~~
+
+**Stream Identification**
+
+Each packet flow is assigned to a named stream. Stream identification uses packet
+filters (typically matching MAC addresses, VLAN IDs, or other header fields) to
+determine which stream a packet belongs to. This allows the network to apply
+specific replication and elimination policies to different traffic flows.
+
+**Sequence Numbering**
+
+To enable duplicate detection and elimination, each frame in a stream is assigned
+a unique sequence number at the source. This sequence number is typically carried
+in the IEEE 802.1 R-Tag header. The sequence numbers allow downstream merge points
+and the destination to identify and discard duplicate frames, ensuring each frame
+is forwarded to the application only once.
+
+**Stream Encoding and Decoding**
+
+Streams are encoded into VLAN tags as they traverse the network. This allows
+switches to forward frames based on standard VLAN forwarding tables while
+maintaining stream identity. At each hop, incoming frames are decoded to
+determine their stream identity, processed by the FRER mechanisms, and then
+encoded again for the next hop. The encoding/decoding process maps between
+stream names (internal identifiers) and VLAN IDs (wire format).
+
+**Stream Splitting (Replication)**
+
+At replication points in the network, a single input stream is duplicated into
+multiple output streams, each sent on a different path. This creates redundancy -
+if one path fails, other copies can still reach the destination. Replication
+typically occurs at strategic points such as the first switch after the source
+or at network nodes where multiple disjoint paths diverge. Each replicated stream
+may be encoded with different VLAN IDs for path separation.
+
+**Stream Merging (Elimination)**
+
+At merge points in the network, multiple input streams are combined into a single
+output stream. The merger uses sequence numbers to detect and eliminate duplicate
+frames, forwarding only the first copy of each frame that arrives. Subsequent
+duplicates are discarded. Merging occurs wherever redundant paths converge, as
+well as at the final destination where all remaining copies are eliminated before
+delivery to the application.
+
+**Transparent Operation**
+
+From the application's perspective, FRER is completely transparent. The application
+sends packets normally, and the bridging layer handles all stream identification,
+replication, encoding, and elimination automatically. The application receives
+each packet exactly once, regardless of how many copies were transmitted through
+the network or which paths they took.
+
+FRER Modules
+~~~~~~~~~~~~
+
 The relevant modules are all part of the :ned:`BridgingLayer` compound module
 that resides between the network layer and link layer protocols. This compound
 module also contains other functionality such as frame forwarding. There are
