@@ -34,7 +34,7 @@ version = re.sub('^v', '', os.popen('git describe --tags --abbrev=4 --match=v[0-
 
 # If your documentation needs a minimal Sphinx version, state it here.
 #
-needs_sphinx = '3.0'
+needs_sphinx = '8.0'
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -53,7 +53,8 @@ extensions = [
     'sphinx.ext.autosummary',
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
-    #'sphinxcontrib.images',
+    'sphinxcontrib.jquery',
+    'sphinxcontrib.images',
     'tools.doxylink',
 ]
 
@@ -63,9 +64,9 @@ templates_path = ['_templates']
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
-source_suffix = [ '.rst',
-# '.md',
-]
+source_suffix = { '.rst': 'restructuredtext',
+# '.md': 'markdowntext',
+}
 
 # Source parsers
 source_parsers = {
@@ -400,8 +401,8 @@ class NedLexer(RegexLexer):
             (words(("volatile", "allowunconnected", "extends", "for", "if", "import", "like", "package", "property"), suffix=r'\b'), Keyword),
             (words(("sizeof", "const", "default", "ask", "this", "index", "typename", "xmldoc"), suffix=r'\b'), Keyword),
             (words(("acos", "asin", "atan", "atan2", "bernoulli","beta", "binomial", "cauchy", "ceil", "chi_square", "cos", "erlang_k", "exp","exponential", "fabs", "floor", "fmod", "gamma_d", "genk_exponential","genk_intuniform", "genk_normal", "genk_truncnormal", "genk_uniform", "geometric","hypergeometric", "hypot", "intuniform", "log", "log10", "lognormal", "max", "min","negbinomial", "normal", "pareto_shifted", "poisson", "pow", "simTime", "sin", "sqrt","student_t", "tan", "triang", "truncnormal", "uniform", "weibull", "xml", "xmldoc"), suffix=r'\b'), Name.Builtin),
-            ('@[a-zA-Z_]\w*', Name.Builtin),
-            ('[a-zA-Z_]\w*', Name),
+            (r'@[a-zA-Z_]\w*', Name.Builtin),
+            (r'[a-zA-Z_]\w*', Name),
         ],
         'root': [
             include('whitespace'),
@@ -497,9 +498,9 @@ from pygments.token import Keyword, Name, Comment, String, Error, \
      Number, Operator, Generic, Whitespace
 
 class FpStyle(Style):
-	default_style = "default"
-	style = {
-		Text:	'#ffffff'
+        default_style = "default"
+        style = {
+                Text: '#ffffff'
 }
 
 class FingerprintLexer(RegexLexer):
@@ -513,9 +514,9 @@ class FingerprintLexer(RegexLexer):
             #(r'.*: ', Text),
             #(r'PASS', Keyword),
             #(r'FAILED', String),
-	    (r'(.* : )(PASS)?(FAILED)?(ERROR)?',
+            (r'(.* : )(PASS)?(FAILED)?(ERROR)?',
              bygroups(Name.Entity, Name.Builtin, String, String)),
-	    (r'.*?\n', Name.Entity),
+            (r'.*?\n', Name.Entity),
         ],
     }
 

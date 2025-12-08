@@ -1,5 +1,5 @@
 # You can set these variables from the command line.
-SPHINXOPTS    = -j8
+SPHINXOPTS    = -j16
 SPHINXBUILD   = sphinx-build
 SPHINXPROJ    = INETFramework
 SOURCEDIR     = .
@@ -18,19 +18,19 @@ help:
 include tools/sphinx_deployment.mk
 
 server: Makefile copy-media
-	ln -sf ../../showcases showcases; ln -sf ../../tutorials
+	@ln -sf ../../showcases; ln -sf ../../tutorials
 	@sphinx-autobuild --host 0.0.0.0 --port 8000 "$(SOURCEDIR)" "$(BUILDDIR)/html" $(SPHINXOPTS) $(O) -r .git
-	unlink showcases; unlink tutorials
+	@unlink showcases; unlink tutorials
 
 pdf: Makefile
-	ln -sf ../../showcases showcases; ln -sf ../../tutorials
+	@ln -sf ../../showcases; ln -sf ../../tutorials
 	@$(SPHINXBUILD) -M latexpdf "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
-	unlink showcases; unlink tutorials
+	@unlink showcases; unlink tutorials
 
 html: Makefile copy-media
-	ln -sf ../../showcases showcases; ln -sf ../../tutorials
+	@ln -sf ../../showcases; ln -sf ../../tutorials
 	@$(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
-	unlink showcases; unlink tutorials
+	@unlink showcases; unlink tutorials
 
 copy-media: ../../media
 	@mkdir -p _build/html
