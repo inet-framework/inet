@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#include "inet/common/ClockTimeScale.h"
+#include "inet/clock/common/ClockTimeScale.h"
 
 namespace inet {
 
