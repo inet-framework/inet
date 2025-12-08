@@ -10,6 +10,23 @@ on multiple paths from the source to the destination.
 | Verified with INET version: ``4.4``
 | Source files location: `inet/showcases/tsn/framereplication/automaticmultipathconfiguration <https://github.com/inet-framework/inet/tree/master/showcases/tsn/framereplication/automaticmultipathconfiguration>`__
 
+Frame Replication and Elimination
+----------------------------------
+
+Frame Replication and Elimination for Reliability (FRER) is a mechanism standardized
+in IEEE 802.1CB that provides seamless redundancy for time-sensitive networking
+applications. The core idea is to protect critical data streams against link failures
+and packet loss by:
+
+1. **Replicating frames**: At strategic points in the network, frames from a stream
+   are duplicated and sent along multiple disjoint paths toward the destination.
+
+2. **Eliminating duplicates**: At merge points and at the destination, duplicate
+   frames are identified (using sequence numbers) and eliminated, ensuring that
+   only one copy of each frame is delivered to the application.
+
+TODO read more about this in the manual (link)
+
 The Model
 ---------
 

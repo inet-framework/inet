@@ -15,8 +15,8 @@ Reliability (FRER) mechanism defined in IEEE 802.1CB.
 Overview
 --------
 
-FRER (Frame Replication and Elimination for Reliability)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Frame Replication and Elimination
+----------------------------------
 
 Frame Replication and Elimination for Reliability (FRER) is a mechanism standardized
 in IEEE 802.1CB that provides seamless redundancy for time-sensitive networking
@@ -30,40 +30,7 @@ and packet loss by:
    frames are identified (using sequence numbers) and eliminated, ensuring that
    only one copy of each frame is delivered to the application.
 
-Key FRER Concepts
-^^^^^^^^^^^^^^^^^
-
-**Stream Identification**
-  Each packet flow is assigned to a named stream. Stream identification uses packet
-  filters (typically matching MAC addresses, VLAN IDs, or other header fields) to
-  determine which stream a packet belongs to.
-
-**Sequence Numbering**
-  To enable duplicate detection and elimination, each frame in a stream is assigned
-  a sequence number at the source. This allows downstream merge points to identify
-  and discard duplicate frames.
-
-**Stream Encoding/Decoding**
-  Streams are encoded into VLAN tags as they traverse the network. This allows
-  switches to forward frames based on standard VLAN forwarding tables while
-  maintaining stream identity. At each hop, incoming frames are decoded to
-  determine their stream identity, processed, and then encoded again for the
-  next hop.
-
-**Stream Splitting (Replication)**
-  At replication points, a single input stream is duplicated into multiple output
-  streams, each sent on a different path. This creates redundancy - if one path
-  fails, the other copies can still reach the destination.
-
-**Stream Merging (Elimination)**
-  At merge points, multiple input streams are combined into a single output stream.
-  The merger uses sequence numbers to detect and eliminate duplicate frames,
-  forwarding only the first copy of each frame that arrives.
-
-**Benefits**
-  FRER provides seamless redundancy with zero packet loss during link or node
-  failures, making it ideal for critical industrial control systems, automotive
-  networks, and other time-sensitive applications.
+TODO read more about this in the manual (link)
 
 Network Implementation Strategy
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
