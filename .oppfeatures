@@ -120,6 +120,7 @@
                        inet.clock.common
                        inet.clock.model
                        inet.clock.oscillator
+                       inet.clock.servo
                       "
         extraSourceFolders = ""
         compileFlags = "-DINET_WITH_CLOCK"
