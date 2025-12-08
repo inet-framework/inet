@@ -127,13 +127,26 @@ The Model
 FRER Configuration Overview
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    
-FRER is configured in the bridging layer using three key submodules:
-**streamIdentifier** assigns packets to named streams and assigns sequence
-numbering; **streamCoder** maps between stream names and VLAN tags back and
-forth; and **StreamRelayLayer** contains merger (eliminates duplicates) and splitter
-(replicates streams) submodules.
+FRER is configured in the bridging layer of :ned:`TsnSwitch` modules,
+which has the following submodule layers:
 
-TODO amelyik iranyba megy a csomag
+.. figure:: media/BridgingLayer.png
+   :align: center
+
+FRER is configured using three key submodules:
+
+- :ned:`StreamIdentifierLayer`: assigns packets to named streams and assigns sequence numbering
+- :ned:`StreamCoderLayer`: maps between stream names and VLAN tags back and forth
+- :ned:`StreamRelayLayer`: contains :ned:`StreamMerger` (eliminates duplicates) and :ned:`StreamSplitter` (replicates streams) submodules.
+
+Here is the inside of a :ned:`StreamRelayLayer` module:
+
+.. figure:: media/StreamRelayLayer.png
+   :align: center
+
+The merging and splitting takes place according to the direction a packet is travelling in the bridging layer.
+Incoming packets are first undergo merge in the :ned:`StreamRelayLayer`, get turned around by the :ned:`DirectionReverserLayer`, 
+and then undergo splitting in the :ned:`StreamRelayLayer`.
 
 For example, to identify traffic and map it to VLANs:
 
@@ -373,12 +386,13 @@ regardless of which path(s) it arrived on.
 Results
 -------
 
-Here are the number of received and sent packets:
+Here are the number of received and sent packets at the application layer:
 
 .. figure:: media/packets.png
    :align: center
-   :width: 100%
+   :width: 80%
 
+The number of received packets is slightly lower, because some packets are still en-route when the simulation ends. 
 This demonstrates the effectiveness of the FRER mechanism
 in maintaining network connectivity even under multiple failure conditions.
 
