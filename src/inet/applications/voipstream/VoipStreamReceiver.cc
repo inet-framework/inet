@@ -227,7 +227,11 @@ void VoipStreamReceiver::closeConnection()
 {
     if (!curConn.offline) {
         curConn.offline = true;
+#if LIBAVCODEC_VERSION_MAJOR < 58
+        // avcodec_close() is needed for FFmpeg < 3.1 (libavcodec < 58)
         avcodec_close(curConn.decCtx);
+#endif
+        // Note: For FFmpeg >= 3.1, avcodec_free_context() automatically closes the codec
         avcodec_free_context(&curConn.decCtx);
         curConn.outFile.close();
         emit(connStateSignal, -1L); // so that sum() yields the number of active sessions
@@ -284,4 +288,3 @@ void VoipStreamReceiver::finish()
 }
 
 } // namespace inet
-
