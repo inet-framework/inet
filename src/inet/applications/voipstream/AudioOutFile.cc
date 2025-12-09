@@ -203,8 +203,12 @@ bool AudioOutFile::close()
     av_write_trailer(oc);
 
     // close each codec
+#if LIBAVCODEC_VERSION_MAJOR < 58
+    // avcodec_close() is needed for FFmpeg < 3.1 (libavcodec < 58)
     if (audio_st)
         avcodec_close(codecCtx);
+#endif
+    // Note: For FFmpeg >= 3.1, avcodec_free_context() automatically closes the codec
 
     if (!(oc->oformat->flags & AVFMT_NOFILE)) {
         // close the output file
@@ -225,4 +229,3 @@ AudioOutFile::~AudioOutFile()
 }
 
 } // namespace inet
-
