@@ -98,27 +98,27 @@ The network uses two VLANs to maintain stream separation:
 Each switch maps streams to VLANs for forwarding, then the next hop decodes the
 VLAN back to stream identity for processing.
 
-Link Failure Scenario
+Node Failure Scenario
 ^^^^^^^^^^^^^^^^^^^^^
 
-The configuration includes a scenario that simulates two link failures to
+The configuration includes a scenario that simulates a switch failure to
 demonstrate the network's resilience:
 
-**At t=0.1s**: Link s1-s2a breaks
-  - ❌ Path 1 fails (uses s1→s2a)
-  - ❌ Path 2 fails (uses s1→s2a)
-  - ✅ Path 3 survives (uses s1→s2b)
-  - ✅ Path 4 survives (uses s1→s2b)
+**At t=20ms**: Switch s2a crashes
+  - ❌ Path 1 fails (uses s2a)
+  - ❌ Path 2 fails (uses s2a)
+  - ❌ Path 4 fails (uses s2a)
+  - ✅ **Path 3 survives** (uses s1 → s2b → s3b → destination)
 
-**At t=0.2s**: Link s2b-s3b breaks
-  - ❌ Paths 1, 2 remain failed
-  - ❌ Path 3 fails (uses s2b→s3b)
-  - ✅ **Path 4 survives** (uses s2a→s3a)
+**At t=80ms**: Switch s2a recovers
+  - ✅ All four paths become operational again
 
-After both failures, Path 4 remains operational: source → s1 → s2b → s2a → s3a → destination
+During the failure period (20-80ms), Path 3 remains operational, ensuring continuous 
+packet delivery. After recovery, the network returns to full redundancy with all four 
+paths available.
 
 This demonstrates that the mesh topology with FRER can maintain connectivity
-even with multiple link failures, as long as at least one complete path exists.
+even during equipment failures, as long as at least one complete path remains operational.
 
 The Model
 ---------
@@ -194,14 +194,14 @@ forwarding rules.
    :start-at: *.macForwardingTableConfigurator.typename = ""
    :end-at: *.macForwardingTableConfigurator.typename = ""
 
-Configure the link failure scenario: break the s1-s2a link at 0.1s and the
-s2b-s3b link at 0.2s. This tests the network's ability to maintain connectivity
-through the remaining redundant paths.
+Configure the node failure scenario: switch s2a crashes at 20ms and recovers at 80ms. 
+This tests the network's ability to maintain connectivity through redundant paths
+during equipment failure.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: *.scenarioManager.script
-   :end-at: </scenario>
+   :end-at: </script>
 
 Enable FRER functionality in all network nodes, allowing them to perform stream
 splitting, merging, encoding, and decoding operations.
@@ -212,8 +212,7 @@ splitting, merging, encoding, and decoding operations.
    :end-at: *.*.hasStreamRedundancy
 
 Configure the source application to generate UDP packets with 1200-byte payloads
-at intervals following a truncated normal distribution (mean 100μs, std dev 50μs).
-The packets are sent to the destination node on port 1000.
+at 1ms intervals. The packets are sent to the destination node on port 1000.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -386,28 +385,27 @@ regardless of which path(s) it arrived on.
 Results
 -------
 
+The following video shows traffic in the network during the node failure:
+
+.. video:: media/traffic.mp4
+   :align: center
+
 Here are the number of received and sent packets at the application layer:
 
 .. figure:: media/packets.png
    :align: center
    :width: 80%
 
-The number of received packets is slightly lower, because some packets are still en-route when the simulation ends. 
+The number of received packets is slightly lower, because some packets are still en-route when the simulation ends.
+The following chart displays the end-to-end delay:
+
+.. figure:: media/delay.png
+   :align: center
+   :width: 80%
+
+The chart shows that there is no service interruption during the node failure.
 This demonstrates the effectiveness of the FRER mechanism
 in maintaining network connectivity even under multiple failure conditions.
-
-.. The following video shows the behavior in Qtenv:
-
-   .. video:: media/behavior.mp4
-      :align: center
-      :width: 90%
-
-   Here are the simulation results:
-
-   .. .. figure:: media/results.png
-      :align: center
-      :width: 100%
-
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`ManualConfigurationShowcase.ned <../ManualConfigurationShowcase.ned>`
 
