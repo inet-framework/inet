@@ -4,14 +4,27 @@ Automatic Multipath Stream Configuration
 Goals
 -----
 
-In this example, we demonstrate the automatic stream redundancy configuration based
-on multiple paths from the source to the destination.
+Configuring Frame Replication and Elimination for Reliability (FRER) manually
+is complex and tedious. As demonstrated in the manualconfiguration showcase,
+it requires explicitly configuring stream identification, stream encoding/decoding,
+stream splitting, and stream merging at each network node. For networks with multiple
+redundant paths, this manual configuration becomes error-prone and difficult to maintain.
+
+This showcase demonstrates how INET's **StreamRedundancyConfigurator** simplifies
+FRER setup through automatic configuration. By simply specifying the desired redundant
+paths from source to destination using the "trees" parameter, the configurator
+automatically determines all replication and elimination points and configures the
+necessary FRER components throughout the network. This approach significantly reduces
+configuration complexity while maintaining full control over the redundancy topology.
 
 | Verified with INET version: ``4.4``
 | Source files location: `inet/showcases/tsn/framereplication/automaticmultipathconfiguration <https://github.com/inet-framework/inet/tree/master/showcases/tsn/framereplication/automaticmultipathconfiguration>`__
 
+Overview
+--------
+
 Frame Replication and Elimination
-----------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Frame Replication and Elimination for Reliability (FRER) is a mechanism standardized
 in IEEE 802.1CB that provides seamless redundancy for time-sensitive networking
@@ -27,23 +40,254 @@ and packet loss by:
 
 For more information about FRER, read the :ref:`corresponding section <ug:sec:tsn:framereplication>` in the INET User's Guide.
 
-The Model
----------
-
-In this case, we use an automatic stream redundancy configurator that takes the
-different paths for each redundant stream as an argument. The automatic configurator
-sets the parameters of all stream identification, stream merging, stream splitting,
-string encoding, and stream decoding components of all network nodes.
+Network Topology
+~~~~~~~~~~~~~~~~
 
 Here is the network:
 
 .. figure:: media/Network.png
    :align: center
 
-Here is the configuration:
+The network consists of:
+
+- **source**: Generates a UDP data stream
+- **s1**: First-level switch that performs the initial stream split
+- **s2a, s2b**: Second-level switches that provide cross-path redundancy
+- **s3a, s3b**: Third-level switches that forward streams to the destination
+- **destination**: Receives the stream and performs final duplicate elimination
+
+Redundant Path Structure
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The network topology provides **four redundant paths** from source to destination
+that are explicitly configured in this showcase:
+
+1. **Path 1 (Upper Direct)**: source → s1 → s2a → s3a → destination
+2. **Path 2 (Lower Direct)**: source → s1 → s2b → s3b → destination
+3. **Path 3 (Upper-to-Lower Zig-Zag)**: source → s1 → s2a → s2b → s3b → destination
+4. **Path 4 (Lower-to-Upper Zig-Zag)**: source → s1 → s2b → s2a → s3a → destination
+
+The key to this redundancy is the connection between s2a and s2b, which
+creates the zig-zag paths (Paths 3 and 4). This mesh topology allows the network
+to tolerate multiple simultaneous link or node failures, as long as at least one
+complete path remains operational.
+
+Failure Scenario
+~~~~~~~~~~~~~~~~
+
+The configuration includes a controlled failure scenario to demonstrate the
+network's resilience:
+
+**At t=20ms**: Switch s2a crashes
+  - ❌ Path 1 fails (uses s2a)
+  - ❌ Path 3 fails (uses s2a)
+  - ❌ Path 4 fails (uses s2a)
+  - ✅ **Path 2 survives** (source → s1 → s2b → s3b → destination)
+
+**At t=80ms**: Switch s2a recovers
+  - ✅ All four paths become operational again
+
+During the failure period (20-80ms), Path 2 remains operational, ensuring continuous
+packet delivery. After recovery, the network returns to full redundancy with all four
+paths available.
+
+This demonstrates that the mesh topology with FRER can maintain connectivity
+even during equipment failures, as long as at least one complete path remains operational.
+
+The Model
+---------
+
+Configuration Overview
+~~~~~~~~~~~~~~~~~~~~~~
+
+In this showcase, we use the **StreamRedundancyConfigurator** with explicit path
+specification through the "trees" parameter. Unlike automatic path computation
+based on failure protection rules, this approach allows direct specification of
+all redundant paths the network should use.
+
+The configurator automatically:
+
+- Determines where streams must be replicated (split points)
+- Determines where duplicates must be eliminated (merge points)
+- Configures stream identification, encoding, and decoding at each node
+- Sets up MAC forwarding rules for the specified paths
+
+Application Configuration
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The source generates UDP traffic at a constant rate:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
+   :start-after: # source application
+   :end-before: # destination application
+
+The source sends 1200-byte UDP packets every 1ms (100 packets during the 100ms
+simulation) to the destination node on port 1000.
+
+The destination receives and counts the packets:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-after: # destination application
+   :end-before: # configure node shutdown/startup scenario
+
+Failure Scenario Configuration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The ScenarioManager creates a deterministic node failure to test frame replication:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-after: # configure node shutdown/startup scenario
+   :end-before: # all interfaces must have the same address
+
+Switch s2a crashes at 20ms and recovers at 80ms, creating a 60ms outage window
+to demonstrate that frame replication maintains continuous packet delivery through
+the surviving path.
+
+Enable FRER Functionality
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Enable IEEE 802.1CB frame replication and elimination functionality at all nodes:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: # enable frame replication and elimination
+   :end-at: *.*.hasStreamRedundancy = true
+
+This activates stream identification, stream encoding/decoding, stream splitting
+(replication), and stream merging (duplicate elimination) capabilities in the
+bridging layer of all network nodes.
+
+Disable MAC Forwarding Configurator
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Disable the automatic MAC forwarding table configurator:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: # disable automatic MAC forwarding table configuration
+   :end-at: *.macForwardingTableConfigurator.typename = ""
+
+The automatic MAC forwarding table configurator must be disabled because frame
+replication uses IEEE 802.1CB custom forwarding rules (based on VLAN-tagged streams
+and explicit paths) rather than standard shortest path forwarding.
+
+Enable Automatic Stream Redundancy Configurator
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Configure the StreamRedundancyConfigurator to automatically set up frame replication
+and elimination:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: # enable automatic stream redundancy configurator
+   :end-at: *.streamRedundancyConfigurator.typename = "StreamRedundancyConfigurator"
+
+Enable the stream relay and coder layers in the bridging sublayer:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: # enable stream policing in layer 2
+   :end-before: # enable automatic stream redundancy configurator
+
+Configure Redundant Paths
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The core of this showcase is the explicit path specification through the "trees"
+parameter:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: # seamless stream redundancy configuration
+   :end-before: # visualizer
+
+This configuration defines:
+
+- **Stream name**: "S1"
+- **Packet filter**: "*" (all packets from the source application)
+- **Source and destination**: Explicit endpoint specification
+- **Trees**: Four redundant paths explicitly listed as node sequences
+
+Understanding the Trees Configuration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The "trees" parameter specifies all redundant paths that should be used for the stream.
+Each path is defined as a sequence of network nodes from source to destination:
+
+**Path 1 - Upper Direct Path**
+
+.. code-block::
+
+   [["source", "s1", "s2a", "s3a", "destination"]]
+
+Frames follow the upper branch: source → s1 → s2a → s3a → destination
+
+**Path 2 - Lower Direct Path**
+
+.. code-block::
+
+   [["source", "s1", "s2b", "s3b", "destination"]]
+
+Frames follow the lower branch: source → s1 → s2b → s3b → destination
+
+**Path 3 - Upper-to-Lower Zig-Zag**
+
+.. code-block::
+
+   [["source", "s1", "s2a", "s2b", "s3b", "destination"]]
+
+Frames start on the upper branch but cross to the lower branch via the s2a-s2b link
+
+**Path 4 - Lower-to-Upper Zig-Zag**
+
+.. code-block::
+
+   [["source", "s1", "s2b", "s2a", "s3a", "destination"]]
+
+Frames start on the lower branch but cross to the upper branch via the s2b-s2a link
+
+**How the Configurator Uses These Paths**
+
+Based on these four paths, the StreamRedundancyConfigurator automatically:
+
+1. **Determines split points**: Identifies that frames must be replicated at:
+   - **s1**: All four paths diverge here (initial 2-way split into upper/lower)
+   - **s2a**: Paths 1 and 3 diverge (split between direct and zig-zag)
+   - **s2b**: Paths 2 and 4 diverge (split between direct and zig-zag)
+
+2. **Determines merge points**: Identifies where duplicates must be eliminated at:
+   - **s2a**: Paths 1 and 4 converge (merge from direct and zig-zag)
+   - **s2b**: Paths 2 and 3 converge (merge from direct and zig-zag)
+   - **destination**: All paths converge (final elimination)
+
+3. **Configures forwarding**: Sets up VLAN-based stream encoding/decoding and MAC
+   forwarding rules at each switch to route frames along the specified paths
+
+4. **Assigns sequence numbers**: Enables sequence numbering at the source for
+   duplicate detection throughout the network
+
+This explicit path specification approach gives complete control over the redundancy
+topology, which is useful when:
+
+- Specific paths are required for performance or policy reasons
+- The network topology is well-understood and optimized paths are known
+- You want to demonstrate or test specific redundancy configurations
+
+Unified MAC Address at Destination
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Configure all destination interfaces to share the same MAC address:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: # all interfaces must have the same address
+   :end-before: # visualizer
+
+This setting is required so that frames arriving on any path (via eth[0] or eth[1])
+can be accepted by the destination. Without this, frames would be rejected if they
+arrived on an interface not matching the destination MAC address.
 
 Results
 -------
@@ -115,4 +359,3 @@ Discussion
 ----------
 
 Use `this <https://github.com/inet-framework/inet/discussions/788>`__ page in the GitHub issue tracker for commenting on this showcase.
-
