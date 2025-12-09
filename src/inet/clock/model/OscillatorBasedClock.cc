@@ -72,7 +72,7 @@ void OscillatorBasedClock::initialize(int stage)
     }
 }
 
-clocktime_t OscillatorBasedClock::computeClockTimeFromSimTime(simtime_t t) const
+clocktime_t OscillatorBasedClock::computeClockTimeFromSimTime(simtime_t t, bool lowerBound) const
 {
     ASSERT(t >= simTime());
     return originClockTime +
