@@ -97,9 +97,6 @@ even during equipment failures, as long as at least one complete path remains op
 The Model
 ---------
 
-Configuration Overview
-~~~~~~~~~~~~~~~~~~~~~~
-
 In this showcase, we use the **StreamRedundancyConfigurator** with explicit path
 specification through the "trees" parameter. Unlike automatic path computation
 based on failure protection rules, this approach allows direct specification of
@@ -112,8 +109,8 @@ The configurator automatically:
 - Configures stream identification, encoding, and decoding at each node
 - Sets up MAC forwarding rules for the specified paths
 
-Application Configuration
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Configuration
+~~~~~~~~~~~~~
 
 The source generates UDP traffic at a constant rate:
 
@@ -132,9 +129,6 @@ The destination receives and counts the packets:
    :start-after: # destination application
    :end-before: # configure node shutdown/startup scenario
 
-Failure Scenario Configuration
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 The ScenarioManager creates a deterministic node failure to test frame replication:
 
 .. literalinclude:: ../omnetpp.ini
@@ -146,22 +140,16 @@ Switch s2a crashes at 20ms and recovers at 80ms, creating a 60ms outage window
 to demonstrate that frame replication maintains continuous packet delivery through
 the surviving path.
 
-Enable FRER Functionality
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Enable IEEE 802.1CB frame replication and elimination functionality at all nodes:
+Configure all destination interfaces to share the same MAC address:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-at: # enable frame replication and elimination
-   :end-at: *.*.hasStreamRedundancy = true
+   :start-at: # all interfaces must have the same address
+   :end-before: # visualizer
 
-This activates stream identification, stream encoding/decoding, stream splitting
-(replication), and stream merging (duplicate elimination) capabilities in the
-bridging layer of all network nodes.
-
-Disable MAC Forwarding Configurator
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+This setting is required so that frames arriving on any path (via eth[0] or eth[1])
+can be accepted by the destination. Without this, frames would be rejected if they
+arrived on an interface not matching the destination MAC address.
 
 Disable the automatic MAC forwarding table configurator:
 
@@ -174,8 +162,19 @@ The automatic MAC forwarding table configurator must be disabled because frame
 replication uses IEEE 802.1CB custom forwarding rules (based on VLAN-tagged streams
 and explicit paths) rather than standard shortest path forwarding.
 
-Enable Automatic Stream Redundancy Configurator
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Configuring Redundant Paths
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Enable IEEE 802.1CB frame replication and elimination functionality at all nodes:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: # enable frame replication and elimination
+   :end-at: *.*.hasStreamRedundancy = true
+
+This activates stream identification, stream encoding/decoding, stream splitting
+(replication), and stream merging (duplicate elimination) capabilities in the
+bridging layer of all network nodes.
 
 Configure the StreamRedundancyConfigurator to automatically set up frame replication
 and elimination:
@@ -191,9 +190,6 @@ Enable the stream relay and coder layers in the bridging sublayer:
    :language: ini
    :start-at: # enable stream policing in layer 2
    :end-before: # enable automatic stream redundancy configurator
-
-Configure Redundant Paths
-~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The core of this showcase is the explicit path specification through the "trees"
 parameter:
@@ -274,20 +270,6 @@ topology, which is useful when:
 - Specific paths are required for performance or policy reasons
 - The network topology is well-understood and optimized paths are known
 - You want to demonstrate or test specific redundancy configurations
-
-Unified MAC Address at Destination
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Configure all destination interfaces to share the same MAC address:
-
-.. literalinclude:: ../omnetpp.ini
-   :language: ini
-   :start-at: # all interfaces must have the same address
-   :end-before: # visualizer
-
-This setting is required so that frames arriving on any path (via eth[0] or eth[1])
-can be accepted by the destination. Without this, frames would be rejected if they
-arrived on an interface not matching the destination MAC address.
 
 Results
 -------
