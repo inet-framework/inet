@@ -1,9 +1,0 @@
-#!/bin/bash
-
-# USAGE: docker-make target where target can be 'html', 'pdf', 'server', 'deploy'
-# when 'server' is used, the live website is available at http://localhost:8000
-# NOTE: internally the docker container is mounting the whole 'inet' repo on the /doc directory
-# so relative symbolic links are working correctly inside the repo
-
-GUEST_COMMAND="cd doc/src && make $*"
-docker run --rm -i -t -p 8000:8000 -v "${PWD}/../..:/docs" -e GUEST_COMMAND='${GUEST_COMMAND}' ghcr.io/omnetpp/docker-sphinx:251210 /bin/bash -c "${GUEST_COMMAND}"

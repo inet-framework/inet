@@ -13,9 +13,9 @@ Table of Contents
    tutorials/index
    users-guide/index
    developers-guide/index
-   python-api/index
-   migration-guide/index
    NED Reference <https://omnetpp.org/doc/inet/api-current/neddoc/>
+   Python Reference <python-api/index>
+   migration-guide/index
    ← Back to the INET Site <https://inet.omnetpp.org>
 
 .. raw:: html

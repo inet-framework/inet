@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# USAGE: doc-build target where target can be 'html', 'pdf', 'server', 'deploy'
+# when 'server' is used, the live website is available at http://localhost:8000
+# To reduce build time specify targets to be built in 
+# DOC_BUILD_TARGET environment variable (default: build everything).
+# e.g. DOC_BUILD_TARGET="python,showcases" builds python API and the showcases.
+# possible values: ned,python,users-guide,developers-guide,showcases,tutorials
+
+GUEST_COMMAND="make $*"
+podman run --rm -i -t -p 8000:8000 -v "$HOME:$HOME" -w "$PWD" \
+ --userns=keep-id --security-opt label=disable \
+ -e PYTHONPATH="$PYTHONPATH" \
+ -e DOC_BUILD_TARGET="$DOC_BUILD_TARGET" \
+ -e GUEST_COMMAND='${GUEST_COMMAND}' \
+ ghcr.io/omnetpp/docker-sphinx:251211 \
+ /bin/bash -c "${GUEST_COMMAND}"

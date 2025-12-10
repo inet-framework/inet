@@ -6,8 +6,6 @@
 # full list see the documentation:
 # http://www.sphinx-doc.org/en/master/config
 
-# -- Path setup --------------------------------------------------------------
-
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -18,19 +16,26 @@ import re
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('_themes'))
 
-
 # -- Project information -----------------------------------------------------
-
 project = 'INET'
 copyright = 'INET community'
 author = 'INET community'
+
+# what to build? (environment variable DOC_BUILD_TARGET determines the targets. Empty means everything)
+# valid targets are: ned, python, showcases, tutorials, users-guide, developers-guide
+# example: DOC_BUILD_TARGET="python,showcases" to build only the Python API and showcases
+#
+# build_python, build_showcases, build_tutorials, build_users_guide, build_developers_guide, build_ned
+# are available in the conf.py file
+target = os.environ.get('DOC_BUILD_TARGET') or 'ned,python,showcases,tutorials,users-guide,developers-guide'
+print(f"Building targets: {target}")
+for label in ['ned', 'python', 'showcases', 'tutorials', 'users-guide', 'developers-guide']:
+    globals()[f'build_{label.replace("-", "_")}'] = label in target
 
 # The short X.Y version this doc refers to (last tagged release)
 release = re.sub('^v', '', os.popen('git describe --tags --abbrev=0 --match=v[0-9].*').read().strip())
 # Git version this documentation built from (including last release tag, number of commints since then and git hash)
 version = re.sub('^v', '', os.popen('git describe --tags --abbrev=4 --match=v[0-9].*').read().strip())
-
-# -- General configuration ---------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
 #
@@ -40,8 +45,6 @@ needs_sphinx = '8.0'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-#    'IPython.sphinxext.ipython_console_highlighting',
-#    'IPython.sphinxext.ipython_directive',
     'sphinx.ext.mathjax',
     'sphinx.ext.extlinks',
     'sphinx.ext.ifconfig',
@@ -49,13 +52,12 @@ extensions = [
     'sphinx.ext.githubpages',
     'sphinx.ext.graphviz',
     'sphinx.ext.imgconverter',
-    'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
     'sphinxcontrib.jquery',
     'sphinxcontrib.images',
     'tools.doxylink',
+    'IPython.sphinxext.ipython_console_highlighting',
+    'IPython.sphinxext.ipython_directive',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -86,56 +88,55 @@ language = "en"
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path .
-exclude_patterns = ['_build', '_deploy', 'Thumbs.db', '.DS_Store', '**/_docs', 'global.rst',
-#  'users-guide/**',
-#  'developers-guide/**',
-#  'showcases/**',
-#  'tutorials/**',
-]
+exclude_patterns = ['_build', '_deploy', 'Thumbs.db', '.DS_Store', '**/_docs', 'global.rst']
+
+latex_documents = []
+
+# optional parts of the documentation determined by the DOC_BUILD_TARGET environment variable
+if build_showcases:
+    latex_documents.append(('showcases/index', 'inet-showcases.tex', "INET Framework Showcases", '', 'manual', False))
+else:
+    exclude_patterns.append('showcases/**')
+
+if build_tutorials:
+    latex_documents.append(('tutorials/index', 'inet-tutorials.tex', "INET Framework Tutorials", '', 'manual', False))
+else:
+    exclude_patterns.append('tutorials/**')
+
+if build_users_guide:
+    latex_documents.append(('users-guide/index', 'inet-users-guide.tex', "INET Framework User's Guide", '', 'manual', False))
+else:
+    exclude_patterns.append('users-guide/**')
+
+if build_developers_guide:
+    latex_documents.append(('developers-guide/index', 'inet-developers-guide.tex', "INET Framework Developer's Guide", '', 'manual', False))
+else:
+    exclude_patterns.append('developers-guide/**')
+
 
 # graphviz options
 graphviz_output_format = 'svg'
 
-# -- python auto doc generator configuration ----------------------------------
-autosummary_generate = True  # Turn on sphinx.ext.autosummary
-autoclass_content = "both"  # Add __init__ doc (ie. params) to class summaries
-autosummary_imported_members = False
-autosummary_ignore_module_all = True
-html_show_sourcelink = False  # Remove 'view source code' from top of page (for html, not python)
-autodoc_inherit_docstrings = True  # If no docstring, inherit from base class
-set_type_checking_flag = True  # Enable 'expensive' imports for sphinx_autodoc_typehints
-#autodoc_typehints = "description" # Sphinx-native method. Not as good as sphinx_autodoc_typehints
-add_module_names = False # Remove namespaces from class/method signatures
+# disable autosummary, we use autoapi instead
+autosummary_generate = False
 
-# Exclusions
-# To exclude a module, use autodoc_mock_imports. Note this may increase build time, a lot.
-# (Also, when installing on readthedocs.org, we omit installing Tensorflow and
-# Tensorflow Probability so mock them here instead.)
-autodoc_mock_imports = [
-#    'inet.sphinx',
-#    'inet.repl',
-#    'inet.documentation',
-#    'inet.project',
-#    'inet.scave'
-]
-
-# To exclude a class, function, method or attribute, use autodoc-skip-member. (Note this can also
-# be used in reverse, ie. to re-include a particular member that has been excluded.)
-# 'Private' and 'special' members (_ and __) are excluded using the Jinja2 templates; from the main
-# doc by the absence of specific autoclass directives (ie. :private-members:), and from summary
-# tables by explicit 'if-not' statements. Re-inclusion is effective for the main doc though not for
-# the summary tables.
-def autodoc_skip_member_callback(app, what, name, obj, skip, options):
-    exclusions = ('')
-    inclusions = ('')
-    if name in exclusions:
-        return True
-    elif name in inclusions:
-        return False
-    elif obj.__doc__ == None: # skip everything that does not have an explicit docstring
-        return True
-    else:
-        return skip
+# -- python auto-api doc generator configuration ----------------------------------
+if build_python:
+    extensions.append('autoapi.extension')
+    if 'suppress_warnings' not in globals():
+        suppress_warnings = []
+    suppress_warnings.append('autoapi.python_import_resolution')
+    autoapi_generate_api_docs = True
+    autoapi_add_toctree_entry = True
+    autoapi_python_use_implicit_namespaces = True
+    autoapi_root = 'python-api'
+    autoapi_dirs = ['../../python/inet']
+    autoapi_python_class_content = "both"
+    autoapi_options = [ "members", "show-inheritance", "show-module-summary" , "inherited-members" ]
+    autoapi_member_order = "groupwise"
+    autoapi_own_page_level = "class"
+else:
+    exclude_patterns.append('python-api/**')
 
 # Napoleon settings
 napoleon_google_docstring = True
@@ -234,7 +235,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'INETFrameworkdoc'
+htmlhelp_basename = 'INETFrameworkDoc'
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -256,27 +257,6 @@ latex_elements = {
     #
     # 'figure_align': 'htbp',
 }
-
-# Grouping the document tree into LaTeX files. List of tuples
-# (source start file, target name, title,
-#  author, documentclass [howto, manual, or own class]).
-latex_documents = [
-    ('users-guide/index', 'inet-users-guide.tex', "INET Framework User's Guide", '', 'manual', False),
-    ('developers-guide/index', 'inet-developers-guide.tex', "INET Framework Developer's Guide", '', 'manual', False),
-    ('showcases/index', 'inet-showcases.tex', "INET Framework Showcases", '', 'manual', False),
-    ('tutorials/index', 'inet-tutorials.tex', "INET Framework Tutorials", '', 'manual', False),
-]
-
-
-# -- Options for manual page output ------------------------------------------
-
-# One entry per manual page. List of tuples
-# (source start file, name, description, authors, manual section).
-man_pages = [
-    (master_doc, 'inetframework', 'INET Framework Documentation',
-     [author], 1)
-]
-
 
 # -- Options for Texinfo output ----------------------------------------------
 
@@ -542,4 +522,3 @@ def setup(app):
     app.add_directive('video_noloop', tools.video.Video_noloop)
     app.add_directive('audio', tools.audio.Audio)
     app.add_directive('card', opptheme.CardDirective)
-    app.connect("autodoc-skip-member", autodoc_skip_member_callback) # Entry point to autodoc-skip-member
