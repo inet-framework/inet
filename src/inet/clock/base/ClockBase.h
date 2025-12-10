@@ -26,6 +26,7 @@ class INET_API ClockBase : public SimpleModule, public IClock
     ModuleRefByPar<IClock> referenceClockModule;
     simtime_t emitClockTimeInterval;
     cMessage *timer = nullptr;
+    mutable clocktime_t lastClockTime;
 
   protected:
     virtual ~ClockBase() { cancelAndDelete(timer); }
