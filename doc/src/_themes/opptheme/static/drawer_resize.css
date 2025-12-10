@@ -1,0 +1,106 @@
+/* Drawer Resize Functionality Styles - Desktop Only */
+
+/* CSS custom property for drawer width - defaults to MDL's 240px */
+:root {
+    --drawer-width: 240px;
+}
+
+/* ========================================
+   DISABLE RESPONSIVE LAYOUT - DESKTOP ONLY
+   ======================================== */
+
+/* Hide the hamburger menu button */
+.mdl-layout__drawer-button {
+    display: none !important;
+}
+
+/* Hide the obfuscator overlay */
+.mdl-layout__obfuscator {
+    display: none !important;
+}
+
+/* Prevent MDL from hiding drawer on small screens */
+.mdl-layout.is-small-screen > .mdl-layout__drawer {
+    transform: translateX(0) !important;
+}
+
+/* ========================================
+   DRAWER WIDTH OVERRIDE
+   ======================================== */
+
+/* Override MDL drawer width with CSS variable */
+.mdl-layout__drawer {
+    width: var(--drawer-width) !important;
+}
+
+/* ========================================
+   HEADER AND CONTENT POSITIONING
+   
+   MDL uses padding-left on mdl-layout__content when fixed-drawer is set.
+   We need to override this to use our CSS variable.
+   ======================================== */
+
+/* Override content padding to match drawer width */
+.mdl-layout--fixed-drawer > .mdl-layout__content {
+    padding-left: var(--drawer-width) !important;
+    margin-left: 0 !important;
+}
+
+/* Override header padding to match drawer width */
+.mdl-layout--fixed-drawer > .mdl-layout__header {
+    padding-left: var(--drawer-width) !important;
+    margin-left: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* ========================================
+   RESIZE HANDLE
+   ======================================== */
+
+.drawer-resize-handle {
+    position: fixed;
+    top: 0;
+    left: calc(var(--drawer-width) - 6px);
+    width: 6px;
+    height: 100vh;
+    cursor: col-resize;
+    background: transparent;
+    z-index: 10000;
+    transition: background-color 0.2s ease;
+}
+
+.drawer-resize-handle:hover,
+.drawer-resize-handle.dragging {
+    background-color: rgba(33, 150, 243, 0.3);
+}
+
+.drawer-resize-handle::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 2px;
+    width: 2px;
+    height: 100%;
+    background-color: transparent;
+    transition: background-color 0.2s ease;
+}
+
+.drawer-resize-handle:hover::after,
+.drawer-resize-handle.dragging::after {
+    background-color: #2196F3;
+}
+
+/* ========================================
+   DRAG STATE
+   ======================================== */
+
+body.drawer-resizing {
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: col-resize !important;
+}
+
+body.drawer-resizing * {
+    cursor: col-resize !important;
+}
