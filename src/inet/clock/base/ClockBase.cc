@@ -70,7 +70,11 @@ cSimpleModule *ClockBase::getTargetModule() const
 
 clocktime_t ClockBase::getClockTime() const
 {
-    return computeClockTimeFromSimTime(simTime());
+    clocktime_t currentClockTime = computeClockTimeFromSimTime(simTime());
+    // NOTE: IClock interface 1. invariant
+    DEBUG_CMP(currentClockTime, >=, lastClockTime);
+    lastClockTime = currentClockTime;
+    return currentClockTime;
 }
 
 simtime_t ClockBase::computeScheduleTime(clocktime_t clockTime) const
