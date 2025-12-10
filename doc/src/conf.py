@@ -50,7 +50,7 @@ extensions = [
     'sphinx.ext.graphviz',
     'sphinx.ext.imgconverter',
     'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
+    # 'sphinx.ext.autosummary',
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
     'sphinxcontrib.jquery',
