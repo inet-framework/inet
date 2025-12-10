@@ -13,7 +13,7 @@ def generate_html_documentation(docker=False, clean_build=False):
     if clean_build:
         run_command_with_logging(["rm", "-r", "_build"], cwd = inet_project.get_full_path("doc/src/"))
     if docker:
-        make_cmd = "./docker-make"
+        make_cmd = "./doc-build"
     else:
         make_cmd = "make"
     # run_command_with_logging doesn't work in docker, it adds lots of extra spaces
