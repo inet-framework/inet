@@ -199,52 +199,10 @@ parameter:
    :start-at: # seamless stream redundancy configuration
    :end-before: # visualizer
 
-This configuration defines:
-
-- **Stream name**: "S1"
-- **Packet filter**: "*" (all packets from the source application)
-- **Source and destination**: Explicit endpoint specification
-- **Trees**: Four redundant paths explicitly listed as node sequences
-
-Understanding the Trees Configuration
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The "trees" parameter specifies all redundant paths that should be used for the stream.
-Each path is defined as a sequence of network nodes from source to destination:
-
-**Path 1 - Upper Direct Path**
-
-.. code-block::
-
-   [["source", "s1", "s2a", "s3a", "destination"]]
-
-Frames follow the upper branch: source → s1 → s2a → s3a → destination
-
-**Path 2 - Lower Direct Path**
-
-.. code-block::
-
-   [["source", "s1", "s2b", "s3b", "destination"]]
-
-Frames follow the lower branch: source → s1 → s2b → s3b → destination
-
-**Path 3 - Upper-to-Lower Zig-Zag**
-
-.. code-block::
-
-   [["source", "s1", "s2a", "s2b", "s3b", "destination"]]
-
-Frames start on the upper branch but cross to the lower branch via the s2a-s2b link
-
-**Path 4 - Lower-to-Upper Zig-Zag**
-
-.. code-block::
-
-   [["source", "s1", "s2b", "s2a", "s3a", "destination"]]
-
-Frames start on the lower branch but cross to the upper branch via the s2b-s2a link
-
-**How the Configurator Uses These Paths**
+This configuration defines a stream named "S1" that applies to all packets from the 
+source application (using the wildcard packet filter "*"). The configuration explicitly 
+specifies the source and destination endpoints, and most importantly, lists four 
+redundant paths as node sequences in the "trees" parameter.
 
 Based on these four paths, the StreamRedundancyConfigurator automatically:
 
