@@ -10,9 +10,9 @@ it requires explicitly configuring stream identification, stream encoding/decodi
 stream splitting, and stream merging at each network node. For networks with multiple
 redundant paths, this manual configuration becomes error-prone and difficult to maintain.
 
-This showcase demonstrates how INET's **StreamRedundancyConfigurator** simplifies
+This showcase demonstrates how INET's :ned:`StreamRedundancyConfigurator` simplifies
 FRER setup through automatic configuration. By simply specifying the desired redundant
-paths from source to destination using the "trees" parameter, the configurator
+paths from source to destination using the :par:`trees` parameter, the configurator
 automatically determines all replication and elimination points and configures the
 necessary FRER components throughout the network. This approach significantly reduces
 configuration complexity while maintaining full control over the redundancy topology.
@@ -26,7 +26,7 @@ Overview
 Frame Replication and Elimination
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Frame Replication and Elimination for Reliability (FRER) is a mechanism standardized
+FRER is a mechanism standardized
 in IEEE 802.1CB that provides seamless redundancy for time-sensitive networking
 applications. The core idea is to protect critical data streams against link failures
 and packet loss by:
@@ -97,8 +97,8 @@ even during equipment failures, as long as at least one complete path remains op
 The Model
 ---------
 
-In this showcase, we use the **StreamRedundancyConfigurator** with explicit path
-specification through the "trees" parameter. Unlike automatic path computation
+In this showcase, we use the :ned:`StreamRedundancyConfigurator` with explicit path
+specification through the :par:`trees` parameter. Unlike automatic path computation
 based on failure protection rules, this approach allows direct specification of
 all redundant paths the network should use.
 
@@ -109,8 +109,8 @@ The configurator automatically:
 - Configures stream identification, encoding, and decoding at each node
 - Sets up MAC forwarding rules for the specified paths
 
-Configuration
-~~~~~~~~~~~~~
+The Configuration
+~~~~~~~~~~~~~~~~~
 
 The source generates UDP traffic at a constant rate:
 
@@ -176,7 +176,7 @@ This activates stream identification, stream encoding/decoding, stream splitting
 (replication), and stream merging (duplicate elimination) capabilities in the
 bridging layer of all network nodes.
 
-Configure the StreamRedundancyConfigurator to automatically set up frame replication
+Configure the :ned:`StreamRedundancyConfigurator` to automatically set up frame replication
 and elimination:
 
 .. literalinclude:: ../omnetpp.ini
@@ -191,7 +191,7 @@ Enable the stream relay and coder layers in the bridging sublayer:
    :start-at: # enable stream policing in layer 2
    :end-before: # enable automatic stream redundancy configurator
 
-The core of this showcase is the explicit path specification through the "trees"
+The core of this showcase is the explicit path specification through the :par:`trees`
 parameter:
 
 .. literalinclude:: ../omnetpp.ini
@@ -202,9 +202,9 @@ parameter:
 This configuration defines a stream named "S1" that applies to all packets from the 
 source application (using the wildcard packet filter "*"). The configuration explicitly 
 specifies the source and destination endpoints, and most importantly, lists four 
-redundant paths as node sequences in the "trees" parameter.
+redundant paths as node sequences in the :par:`trees` parameter.
 
-Based on these four paths, the StreamRedundancyConfigurator automatically:
+Based on these four paths, the :ned:`StreamRedundancyConfigurator` automatically:
 
 1. **Determines split points**: Identifies that frames must be replicated at:
    - **s1**: All four paths diverge here (initial 2-way split into upper/lower)
@@ -232,31 +232,42 @@ topology, which is useful when:
 Results
 -------
 
+The following image shows the output of the configurator, i.e. where streams are
+split and merged to create redundant paths:
+
+.. figure:: media/frer.png
+   :align: center
+
+The following video shows the streams in the network before and after the failure of ``s2a``:
+
+.. video:: media/frer.mp4
+   :align: center
+
+Despite the failure, **Path 2** (the lower direct path) continues to operate, maintaining 
+packet delivery throughout the failure period.
+
 Here are the number of received and sent packets:
 
 .. figure:: media/packetsreceivedsent.png
    :align: center
    :width: 100%
 
-Here is the ratio of received and sent packets:
+The number of sent packets is slightly more because some packets are still
+en-route in the network when the simulation ends.
 
-.. figure:: media/packetratio.png
+The following chart shows the end-to-end delay:
+
+.. figure:: media/delay.png
    :align: center
 
-The expected number of successfully received packets relative to the number of
-sent packets is verified by the python script (``compute_frame_replication_success_rate_analytically2()`` function in ``inet/python/inet/tests/validation.py``). The expected result is around 0.657.
+The delay chart demonstrates continuous packet delivery throughout the simulation. During 
+normal operation (0-20ms and 80-100ms), packets are delivered via multiple paths. During 
+the failure period (20-80ms), packets continue to be delivered exclusively via Path 2 
+without interruption, as evidenced by the absence of any gap in the delay measurements.
 
-.. The following video shows the behavior in Qtenv:
-
-   .. video:: media/behavior.mp4
-      :align: center
-      :width: 90%
-
-   Here are the simulation results:
-
-   .. .. figure:: media/results.png
-      :align: center
-      :width: 100%
+These results validate the effectiveness of the automatic FRER configuration with explicit 
+path specification, demonstrating seamless failover and continuous packet delivery even 
+during network equipment failures.
 
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`AutomaticMultipathConfigurationShowcase.ned <../AutomaticMultipathConfigurationShowcase.ned>`
