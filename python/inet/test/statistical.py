@@ -169,7 +169,7 @@ def get_statistical_test_tasks(sim_time_limit=get_statistical_test_sim_time_limi
     """
     return get_simulation_tasks(name="statistical test", run_number=run_number, sim_time_limit=sim_time_limit, simulation_task_class=StatisticalTestTask, multiple_simulation_tasks_class=MultipleSimulationTestTasks, **kwargs)
 
-def run_statistical_tests(**kwargs):
+def run_statistical_tests(append_args=[], **kwargs):
     """
     Runs one or more statistical tests that match the provided filter criteria.
 
@@ -181,7 +181,7 @@ def run_statistical_tests(**kwargs):
         an object that contains a list of :py:class:`SimulationTestTaskResult` objects. Each object describes the result of running one test task.
     """
     multiple_statistical_test_tasks = get_statistical_test_tasks(**kwargs)
-    return multiple_statistical_test_tasks.run(append_args=_append_args, **kwargs)
+    return multiple_statistical_test_tasks.run(append_args=append_args + _append_args, **kwargs)
 
 class StatisticalResultsUpdateTask(SimulationUpdateTask):
     def __init__(self, simulation_config=None, run_number=0, name="statistical results update", **kwargs):
@@ -253,7 +253,7 @@ def get_update_statistical_result_tasks(run_number=0, **kwargs):
     """
     return get_simulation_tasks(run_number=run_number, multiple_simulation_tasks_class=MultipleSimulationUpdateTasks, simulation_task_class=StatisticalResultsUpdateTask, **kwargs)
 
-def update_statistical_results(sim_time_limit=get_statistical_test_sim_time_limit, **kwargs):
+def update_statistical_results(sim_time_limit=get_statistical_test_sim_time_limit, append_args=[], **kwargs):
     """
     Updates the stored statistical results for one or more chart tests that match the provided filter criteria.
 
@@ -265,4 +265,4 @@ def update_statistical_results(sim_time_limit=get_statistical_test_sim_time_limi
         an object that contains a list of :py:class:`UpdateTaskResult` objects. Each object describes the result of running one update task.
     """
     multiple_update_statistical_result_tasks = get_update_statistical_result_tasks(sim_time_limit=sim_time_limit, **kwargs)
-    return multiple_update_statistical_result_tasks.run(sim_time_limit=sim_time_limit, append_args=_append_args, **kwargs)
+    return multiple_update_statistical_result_tasks.run(sim_time_limit=sim_time_limit, append_args=append_args + _append_args, **kwargs)
