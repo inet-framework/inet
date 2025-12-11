@@ -32,6 +32,11 @@ class INET_API SettableClock : public OscillatorBasedClock, public IScriptable
   public:
     virtual IClock *getUnderlyingClock() { return check_and_cast<IClock *>(getSubmodule("underlyingClock")); }
 
+    virtual void scheduleClockEventAt(clocktime_t t, ClockEvent *event) override;
+    virtual void scheduleClockEventAfter(clocktime_t delay, ClockEvent *event) override;
+    virtual ClockEvent *cancelClockEvent(ClockEvent *event) override;
+    virtual void handleClockEvent(ClockEvent *event) override;
+
     virtual ppm getOscillatorCompensation() const override { return oscillatorCompensation; }
 
     /**

@@ -14,6 +14,15 @@ namespace inet {
 
 Define_Module(SettableClock);
 
+static bool compareClockEvents(const ClockEvent *e1, const ClockEvent *e2) {
+    return e2->getArrivalClockTime() < e1->getArrivalClockTime() ? true :
+           e2->getArrivalClockTime() > e1->getArrivalClockTime() ? false :
+           e2->getSchedulingPriority() == e1->getSchedulingPriority() ? e2->getInsertOrder() < e1->getInsertOrder() :
+           e2->getSchedulingPriority() < e1->getSchedulingPriority() ? true :
+           e2->getSchedulingPriority() > e1->getSchedulingPriority() ? false :
+           e2->getInsertOrder() < e1->getInsertOrder();
+}
+
 void SettableClock::initialize(int stage)
 {
     OscillatorBasedClock::initialize(stage);
@@ -29,6 +38,31 @@ void SettableClock::initialize(int stage)
         else
             throw cRuntimeError("Unknown defaultOverdueClockEventHandlingMode parameter value");
     }
+}
+
+void SettableClock::scheduleClockEventAt(clocktime_t time, ClockEvent *event)
+{
+    OscillatorBasedClock::scheduleClockEventAt(time, event);
+    std::make_heap(events.begin(), events.end(), compareClockEvents);
+}
+
+void SettableClock::scheduleClockEventAfter(clocktime_t delay, ClockEvent *event)
+{
+    OscillatorBasedClock::scheduleClockEventAfter(delay, event);
+    std::make_heap(events.begin(), events.end(), compareClockEvents);
+}
+
+ClockEvent *SettableClock::cancelClockEvent(ClockEvent *event)
+{
+    OscillatorBasedClock::cancelClockEvent(event);
+    std::make_heap(events.begin(), events.end(), compareClockEvents);
+    return event;
+}
+
+void SettableClock::handleClockEvent(ClockEvent *event)
+{
+    std::make_heap(events.begin(), events.end(), compareClockEvents);
+    OscillatorBasedClock::handleClockEvent(event);
 }
 
 OverdueClockEventHandlingMode SettableClock::getOverdueClockEventHandlingMode(ClockEvent *event) const
