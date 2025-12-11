@@ -5,10 +5,12 @@
 
 package inet.showcases.tsn.framereplication.automaticmultipathconfiguration;
 
+import inet.common.scenario.ScenarioManager;
 import inet.networks.base.TsnNetworkBase;
 import inet.node.ethernet.EthernetLink;
 import inet.node.tsn.TsnDevice;
 import inet.node.tsn.TsnSwitch;
+
 
 module LocalTsnSwitch extends TsnSwitch
 {
@@ -18,6 +20,9 @@ module LocalTsnSwitch extends TsnSwitch
 network AutomaticMultipathConfigurationShowcase extends TsnNetworkBase
 {
     submodules:
+        scenarioManager: ScenarioManager {
+            @display("p=100,300;is=s");
+        }
         source: TsnDevice {
             @display("p=300,200");
         }
