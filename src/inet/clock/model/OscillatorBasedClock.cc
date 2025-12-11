@@ -45,8 +45,8 @@ void OscillatorBasedClock::initialize(int stage)
 {
     ClockBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        auto oscillatorModule = getSubmodule("oscillator");
-        oscillator = check_and_cast<IOscillator *>(oscillatorModule);
+        oscillator = getModuleFromPar<IOscillator>(par("oscillatorModule"), this);
+        auto oscillatorModule = check_and_cast<cModule *>(oscillator);
         oscillatorModule->subscribe(IOscillator::preOscillatorStateChangedSignal, this);
         oscillatorModule->subscribe(IOscillator::postOscillatorStateChangedSignal, this);
         const char *roundingMode = par("roundingMode");

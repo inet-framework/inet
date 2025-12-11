@@ -30,11 +30,12 @@ module OscillatorBasedClock extends ClockBase like IClock
 {
     parameters:
         displayStringTextFormat = default("%t (%c)"); // Determines the text that is written on top of the submodule
+        string oscillatorModule = default(".oscillator");
         double initialClockTime @unit(s) = default(0s); // Clock time at the simulation time when the module is initialized
         string roundingMode @enum("down","up","closer","none") = default("up"); // When scheduling to a clock time or with a clock delay this clock uses rounding with respect to the nominal tick length
         @class(OscillatorBasedClock);
     submodules:
-        oscillator: <default("ConstantDriftOscillator")> like IOscillator {
+        oscillator: <default("ConstantDriftOscillator")> like IOscillator if typename != "" {
             @display("p=100,100");
         }
 }
