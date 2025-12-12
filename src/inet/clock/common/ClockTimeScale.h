@@ -22,6 +22,10 @@ struct INET_API ClockTimeScale : public NumberNear1<clocktime_raw_t> {
     using Base::mul;
     using Base::div;
 
+    static ClockTimeScale fromRatio(clocktime_t numerator, clocktime_t denominator) { return ClockTimeScale(Base::fromIntegerRatio(numerator.raw(), denominator.raw()).raw()); }
+    static ClockTimeScale fromDoubleRatio(double numerator, double denominator) { return ClockTimeScale(Base::fromRatio(numerator, denominator).raw()); }
+    static ClockTimeScale fromDifferenceTo1(double d) { return ClockTimeScale(Base::fromDifferenceTo1(d).raw()); }
+    static ClockTimeScale fromDouble(double value) { return ClockTimeScale(Base::fromDouble(value).raw()); }
     static ClockTimeScale fromPpm(double ppm) { return ClockTimeScale(Base::fromPpm(ppm).raw()); }
 
     clocktime_t mul(clocktime_t t) const { return ClockTime::fromRaw(Base::mul(t.raw())); }
