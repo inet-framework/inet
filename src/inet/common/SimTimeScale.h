@@ -21,6 +21,10 @@ struct INET_API SimTimeScale : public NumberNear1<simtime_raw_t> {
     using Base::mul;
     using Base::div;
 
+    static SimTimeScale fromRatio(simtime_t numerator, simtime_t denominator) { return SimTimeScale(Base::fromIntegerRatio(numerator.raw(), denominator.raw()).raw()); }
+    static SimTimeScale fromDoubleRatio(double numerator, double denominator) { return SimTimeScale(Base::fromRatio(numerator, denominator).raw()); }
+    static SimTimeScale fromDifferenceTo1(double d) { return SimTimeScale(Base::fromDifferenceTo1(d).raw()); }
+    static SimTimeScale fromDouble(double value) { return SimTimeScale(Base::fromDouble(value).raw()); }
     static SimTimeScale fromPpm(double ppm) { return SimTimeScale(Base::fromPpm(ppm).raw()); }
 
     simtime_t mul(simtime_t t) const { return SimTime::fromRaw(Base::mul(t.raw())); }
