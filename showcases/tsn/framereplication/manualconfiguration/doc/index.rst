@@ -127,59 +127,30 @@ The Model
 FRER Configuration Overview
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    
-FRER is configured in the bridging layer of :ned:`TsnSwitch` modules,
-which has the following submodule layers:
+The following operations must be configured at each network node in the
+order that packets traverse the system:
+
+- At the **source**: Configure stream identification with sequence numbering, followed by stream encoding
+- At each **switch**: Configure VLAN filtering, stream decoding, stream merging (for converging paths), stream splitting (for diverging paths), stream encoding, and MAC forwarding
+- At the **destination**: Configure stream decoding and final stream merging into a null stream
+
+To enable FRER, set ``hasStreamRedundancy = true`` in the :ned:`TsnSwitch` and :ned:`TsnDevice` modules. FRER is then configured within the bridging layer, which contains the following submodule structure:
 
 .. figure:: media/BridgingLayer.png
    :align: center
 
-FRER is configured using three key submodules:
+FRER configuration relies on three key submodules:
 
-- :ned:`StreamIdentifierLayer`: assigns packets to named streams and assigns sequence numbering
-- :ned:`StreamCoderLayer`: maps between stream names and VLAN tags back and forth
-- :ned:`StreamRelayLayer`: contains :ned:`StreamMerger` (eliminates duplicates) and :ned:`StreamSplitter` (replicates streams) submodules.
+- :ned:`StreamIdentifierLayer`: Assigns packets to named streams and provides sequence numbering
+- :ned:`StreamCoderLayer`: Translates between stream names and VLAN tags bidirectionally
+- :ned:`StreamRelayLayer`: Contains :ned:`StreamMerger` (eliminates duplicates) and :ned:`StreamSplitter` (replicates streams) submodules
 
-Here is the inside of a :ned:`StreamRelayLayer` module:
+The internal structure of a :ned:`StreamRelayLayer` module is shown below:
 
 .. figure:: media/StreamRelayLayer.png
    :align: center
 
-The merging and splitting takes place according to the direction a packet is travelling in the bridging layer.
-Incoming packets are first undergo merge in the :ned:`StreamRelayLayer`, get turned around by the :ned:`DirectionReverserLayer`, 
-and then undergo splitting in the :ned:`StreamRelayLayer`.
-
-For example, to identify traffic and map it to VLANs:
-
-.. code-block:: ini
-
-   # Identify traffic as "myStream" and enable sequence numbering
-   *.sourceNode.bridging.streamIdentifier.identifier.mapping = [{stream: "path1", sequenceNumbering: true}]
-   
-   # Encode stream to VLAN at source, decode at next hop
-   *.sourceNode.bridging.streamCoder.encoder.mapping = [{stream: "path1", vlan: 1}]
-   *.switch.bridging.streamCoder.decoder.mapping = [{interface: "eth0", vlan: 1, stream: "path1"}]
-
-At the **source**, configure stream identification with sequence numbering and
-stream encoding. At each **switch**, configure MAC forwarding, VLAN filtering,
-stream decoding, merging (for converging paths), splitting (for diverging
-paths), and encoding. At the **destination**, configure stream decoding and
-final duplicate elimination by merging into a null stream.
-
-For example, to merge and split streams:
-
-.. code-block:: ini
-
-   # Merge two redundant paths into one, eliminating duplicates
-   *.switch.bridging.streamRelay.merger.mapping = {path1: "path3", path2: "path3"}
-   
-   # Split one stream into two redundant paths
-   *.switch.bridging.streamRelay.splitter.mapping = {pathA: ["pathB", "pathC"]}
-   
-   # Final elimination at destination (merge into null stream)
-   *.destinationNode.bridging.streamRelay.merger.mapping = {pathB: "", pathC: ""}
-
-Enable FRER in each node with ``hasStreamRedundancy = true``, then configure these
-components at each node based on its role in the redundancy topology. 
+Stream merging and splitting occur based on the packet flow direction within the bridging layer. Incoming streams first pass through the merger in the :ned:`StreamRelayLayer`, are redirected by the :ned:`DirectionReverserLayer`, and then pass through the splitter in the :ned:`StreamRelayLayer`.
 
 The detailed configuration for each node follows below.
 
