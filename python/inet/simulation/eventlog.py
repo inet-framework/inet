@@ -1,6 +1,4 @@
-"""
-This module provides abstractions for eventlog.
-"""
+# This module provides abstractions for eventlog.
 
 import logging
 import os

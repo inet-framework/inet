@@ -1,6 +1,4 @@
-"""
-This module provides abstractions for fingerprints.
-"""
+# This module provides abstractions for fingerprints.
 
 import logging
 import os

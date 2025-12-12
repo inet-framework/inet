@@ -1,6 +1,4 @@
-"""
-This module provides abstractions for stdout processing.
-"""
+# This module provides abstractions for stdout processing.
 
 import logging
 import os
