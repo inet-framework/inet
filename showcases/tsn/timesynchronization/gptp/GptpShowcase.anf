@@ -5909,7 +5909,7 @@ utils.export_data_if_needed(df, props)
                 <property name="xaxis_min" value="0"/>
                 <property name="linewidth" value="1.5"/>
                 <property name="legend_format" value=""/>
-                <property name="filter" value="type =~ vector AND runattr:experiment =~ TwoMasterClocksExploitingNetworkRedundancy AND module =~ &quot;*.tsnClock*.clock*&quot; AND name =~ timeChanged:vector&#10;AND NOT (type =~ vector AND runattr:experiment =~ TwoMasterClocksExploitingNetworkRedundancy AND runattr:replication =~ &quot;#0&quot; AND module =~ &quot;TwoMasterClocksRingGptpShowcase.tsnClock2.clock&quot; AND name =~ timeChanged:vector)"/>
+                <property name="filter" value="type =~ vector AND runattr:experiment =~ TwoMasterClocksExploitingNetworkRedundancy AND (module =~ &quot;*.tsnClock*.clock&quot; OR module =~ &quot;*.tsnClock*.clock[*]&quot;) AND name =~ timeChanged:vector&#10;AND NOT (type =~ vector AND runattr:experiment =~ TwoMasterClocksExploitingNetworkRedundancy AND runattr:replication =~ &quot;#0&quot; AND module =~ &quot;TwoMasterClocksRingGptpShowcase.tsnClock2.clock&quot; AND name =~ timeChanged:vector)"/>
                 <property name="X.Label.Wrap" value="true"/>
                 <property name="vector_start_time" value=""/>
                 <property name="linestyle" value="solid"/>
@@ -6644,7 +6644,7 @@ utils.export_data_if_needed(df, props)
                 <property name="xaxis_min" value="0.2"/>
                 <property name="linewidth" value="1.5"/>
                 <property name="legend_format" value=""/>
-                <property name="filter" value="type =~ vector AND runattr:experiment =~ TwoMasterClocksExploitingNetworkRedundancy AND module =~ &quot;*.tsnClock*.clock*&quot; AND name =~ timeChanged:vector&#10;AND NOT (type =~ vector AND runattr:experiment =~ TwoMasterClocksExploitingNetworkRedundancy AND runattr:replication =~ &quot;#0&quot; AND module =~ &quot;TwoMasterClocksRingGptpShowcase.tsnClock2.clock&quot; AND name =~ timeChanged:vector)"/>
+                <property name="filter" value="type =~ vector AND runattr:experiment =~ TwoMasterClocksExploitingNetworkRedundancy AND (module =~ &quot;*.tsnClock*.clock&quot; OR module =~ &quot;*.tsnClock*.clock[*]&quot;) AND name =~ timeChanged:vector&#10;AND NOT (type =~ vector AND runattr:experiment =~ TwoMasterClocksExploitingNetworkRedundancy AND runattr:replication =~ &quot;#0&quot; AND module =~ &quot;TwoMasterClocksRingGptpShowcase.tsnClock2.clock&quot; AND name =~ timeChanged:vector)"/>
                 <property name="X.Label.Wrap" value="true"/>
                 <property name="vector_start_time" value=""/>
                 <property name="linestyle" value="solid"/>
