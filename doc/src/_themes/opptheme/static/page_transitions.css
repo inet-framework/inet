@@ -1,0 +1,35 @@
+/* Page Transitions Styles
+ * Hybrid approach: CSS fade-in baseline + View Transitions API enhancement
+ */
+
+/* ========================================
+   BASELINE: CSS Fade-In (All Browsers)
+   Prevents white flash by hiding page until ready
+   ======================================== */
+
+html {
+    opacity: 0;
+    transition: opacity 0.15s ease-in;
+}
+
+html.page-ready {
+    opacity: 1;
+}
+
+/* ========================================
+   PROGRESSIVE ENHANCEMENT: View Transitions API
+   Cross-document transitions for modern browsers
+   (Chrome 126+, Edge 126+, Safari 18.2+)
+   ======================================== */
+
+/* Opt-in to cross-document view transitions */
+@view-transition {
+    navigation: auto;
+}
+
+/* Configure the crossfade animation */
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: 0.1s;
+    animation-timing-function: ease-in-out;
+}

@@ -18,6 +18,10 @@
                 document.documentElement.style.setProperty('--drawer-width', w + 'px');
             }
         } catch(e) {}
+        // Mark page as ready for fade-in transition
+        document.addEventListener('DOMContentLoaded', function() {
+            document.documentElement.classList.add('page-ready');
+        });
     })();
     </script>
 {% endblock %}
@@ -29,7 +33,8 @@
     '_static/fontawesome/all.css',
     '_static/fonts.css',
     '_static/custom.css',
-    '_static/drawer_resize.css'
+    '_static/drawer_resize.css',
+    '_static/page_transitions.css'
 ] %}
 
     {%- block header %}
