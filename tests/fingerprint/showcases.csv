@@ -84,9 +84,9 @@
 /showcases/tsn/streamfiltering/underthehood/, -f omnetpp.ini -c General -r 0,       1s,         8225-8839/tplx;0000-0000/~tNl;0000-0000/~tND;43d2-d36c/tyf, PASS,
 
 /showcases/tsn/timesynchronization/clockdrift/, -f omnetpp.ini -c NoClockDrift -r 0, 0.1s,        c1df-54f2/tplx;2fac-03ed/~tNl;9f9a-efaa/~tND;85a1-66e8/tyf, PASS,
-/showcases/tsn/timesynchronization/clockdrift/, -f omnetpp.ini -c ConstantClockDrift -r 0, 0.1s, 4569-ea55/tplx;ce04-c5e6/~tNl;8399-9ba4/~tND;cafc-7239/tyf, PASS,
+/showcases/tsn/timesynchronization/clockdrift/, -f omnetpp.ini -c ConstantClockDrift -r 0, 0.1s, ea84-34de/tplx;c99d-45e6/~tNl;fb98-1a24/~tND;cafc-7239/tyf, PASS,
 /showcases/tsn/timesynchronization/clockdrift/, -f omnetpp.ini -c RandomClockDrift -r 0, 0.1s, 2aab-0210/tplx;dd84-a3ea/~tNl;e62f-6137/~tND;751b-ab1e/tyf, PASS,
-/showcases/tsn/timesynchronization/clockdrift/, -f omnetpp.ini -c ConstantClockDriftOutOfBandSync -r 0, 0.1s, 8f1a-4f0e/tplx;ba9c-1dae/~tNl;971a-4270/~tND;688e-3c31/tyf, PASS,
+/showcases/tsn/timesynchronization/clockdrift/, -f omnetpp.ini -c ConstantClockDriftOutOfBandSync -r 0, 0.1s, 7e3b-bba7/tplx;a285-85ae/~tNl;8f03-c268/~tND;688e-3c31/tyf, PASS,
 /showcases/tsn/timesynchronization/clockdrift/, -f omnetpp.ini -c RandomClockDriftOutOfBandSync -r 0, 0.1s, 5588-415a/tplx;6143-68e9/~tNl;4831-8de1/~tND;0644-1dd2/tyf, PASS,
 /showcases/tsn/timesynchronization/clockdrift/, -f omnetpp.ini -c RandomClockDriftGptpSync -r 0, 0.1s, 2928-a78a/tplx;ab2b-f483/~tNl;cc2d-5b29/~tND;7a67-df10/tyf, PASS,
 /showcases/tsn/timesynchronization/gptp/, -f omnetpp.ini -c OneMasterClock -r 0,    1s,         c3fc-1351/tplx;1e0f-c40b/~tNl;19b6-d6f7/~tND;852f-43d5/tyf, PASS,
