@@ -47,10 +47,10 @@
 
 /showcases/tsn/combiningfeatures/frerandtas/, -f omnetpp.ini -c General -r 0,       1s,         2c89-c055/tplx;8826-e8e2/~tNl;3705-5741/~tND;b2dc-4234/tyf, PASS,
 
-/showcases/tsn/combiningfeatures/gptpandtas/, -f extras.ini -c Recovery -r 0,       1s,         5d4d-76dd/tplx;3899-293e/~tNl;7b0e-04e2/~tND;de72-acda/tyf, PASS,
-/showcases/tsn/combiningfeatures/gptpandtas/, -f omnetpp.ini -c NormalOperation -r 0, 1s,       5d4d-76dd/tplx;3899-293e/~tNl;7b0e-04e2/~tND;4f84-3023/tyf, PASS,
-/showcases/tsn/combiningfeatures/gptpandtas/, -f omnetpp.ini -c LinkFailure -r 0,   1s,         5d4d-76dd/tplx;3899-293e/~tNl;7b0e-04e2/~tND;8520-6a4f/tyf, PASS,
-/showcases/tsn/combiningfeatures/gptpandtas/, -f omnetpp.ini -c Failover -r 0,      1s,         5d4d-76dd/tplx;3899-293e/~tNl;7b0e-04e2/~tND;b3ee-283c/tyf, PASS,
+/showcases/tsn/combiningfeatures/gptpandtas/, -f extras.ini -c Recovery -r 0,       4s,         f5e6-1e12/tplx;36ae-d20d/~tNl;e715-3676/~tND;de72-acda/tyf, PASS,
+/showcases/tsn/combiningfeatures/gptpandtas/, -f omnetpp.ini -c NormalOperation -r 0, 4s,       4ff9-a5a7/tplx;662e-8319/~tNl;ab8b-5803/~tND;4f84-3023/tyf, PASS,
+/showcases/tsn/combiningfeatures/gptpandtas/, -f omnetpp.ini -c LinkFailure -r 0,   4s,         5742-50b2/tplx;09b4-dcb1/~tNl;5a78-4e4a/~tND;8520-6a4f/tyf, PASS,
+/showcases/tsn/combiningfeatures/gptpandtas/, -f omnetpp.ini -c Failover -r 0,      4s,         e87c-862f/tplx;b2f1-0948/~tNl;b604-9fe0/~tND;b3ee-283c/tyf, PASS,
 
 /showcases/tsn/combiningfeatures/invehicle/, -f omnetpp.ini -c StandardEthernet -r 0, 10ms,       10a1-b73d/tplx;31de-2a01/~tNl;8a66-81b5/~tND;3171-5458/tyf, PASS,
 #/showcases/tsn/combiningfeatures/invehicle/, -f omnetpp.ini -c TimeSensitiveNetworkingBase -r 0, 10ms, 1416-6c5a/tplx;4536-5dd1/~tNl;9161-3b40/~tND;2d00-f300/tyf, PASS,
