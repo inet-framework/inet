@@ -803,15 +803,17 @@ bool Sctp::addRemoteAddress(SctpAssociation *assoc, L3Address localAddress, L3Ad
     return true;
 }
 
-void Sctp::addForkedAssociation(SctpAssociation *assoc, SctpAssociation *newAssoc, L3Address localAddr, L3Address remoteAddr, int32_t localPort, int32_t remotePort)
+void Sctp::addForkedAssociation(SctpAssociation *workingAssoc, SctpAssociation *listenerAssoc, L3Address localAddr, L3Address remoteAddr, int32_t localPort, int32_t remotePort)
 {
     SockPair keyAssoc;
     bool found = false;
 
-    EV_INFO << "addForkedConnection assocId=" << assoc->assocId << "    newId=" << newAssoc->assocId << "\n";
+    EV_INFO << "addForkedConnection: workingAssocId=" << workingAssoc->assocId 
+            << " listenerAssocId=" << listenerAssoc->assocId << "\n";
 
+    // Find the listener's original socket pair
     for (auto& elem : sctpAssocMap) {
-        if (assoc->assocId == elem.second->assocId) {
+        if (listenerAssoc->assocId == elem.second->assocId) {
             keyAssoc = elem.first;
             found = true;
             break;
@@ -820,26 +822,32 @@ void Sctp::addForkedAssociation(SctpAssociation *assoc, SctpAssociation *newAsso
 
     ASSERT(found == true);
 
-    // update assoc's socket pair, and register newAssoc (which'll keep LISTENing)
-    updateSockPair(assoc, localAddr, remoteAddr, localPort, remotePort);
-    updateSockPair(newAssoc, keyAssoc.localAddr, keyAssoc.remoteAddr, keyAssoc.localPort, keyAssoc.remotePort);
+    // Update socket pairs:
+    // - workingAssoc gets new socket pair (specific remote addr/port)
+    // - listenerAssoc keeps the old socket pair (wildcard remote)
+    updateSockPair(workingAssoc, localAddr, remoteAddr, localPort, remotePort);
+    updateSockPair(listenerAssoc, keyAssoc.localAddr, keyAssoc.remoteAddr, keyAssoc.localPort, keyAssoc.remotePort);
 
-    // assoc will get a new assocId...
+    // workingAssoc will get a new assocId
     AppAssocKey key;
-    key.appGateIndex = assoc->appGateIndex;
-    key.assocId = assoc->assocId;
-    sctpAppAssocMap.erase(key);
-    assoc->listeningAssocId = assoc->assocId;
-    int id = SctpSocket::getNewAssocId();
-    EV_INFO << "id = " << id << endl;
-    key.assocId = assoc->assocId = id;
-    EV_INFO << "listeningAssocId set to " << assoc->listeningAssocId << " new assocId = " << assoc->assocId << endl;
-    sctpAppAssocMap[key] = assoc;
+    key.appGateIndex = workingAssoc->appGateIndex;
+    key.assocId = workingAssoc->assocId;
+    sctpAppAssocMap.erase(key);  // Remove old mapping
 
-    // ...and newAssoc will live on with the old assocId
-    key.appGateIndex = newAssoc->appGateIndex;
-    key.assocId = newAssoc->assocId;
-    sctpAppAssocMap[key] = newAssoc;
+    workingAssoc->listeningAssocId = listenerAssoc->assocId;  // Reference to listener
+    int id = SctpSocket::getNewAssocId();
+    EV_INFO << "New assocId = " << id << " for working connection\n";
+
+    key.assocId = workingAssoc->assocId = id;
+    EV_INFO << "Working connection: listeningAssocId=" << workingAssoc->listeningAssocId 
+            << " new assocId=" << workingAssoc->assocId << endl;
+    sctpAppAssocMap[key] = workingAssoc;
+
+    // listenerAssoc keeps the old assocId
+    key.appGateIndex = listenerAssoc->appGateIndex;
+    key.assocId = listenerAssoc->assocId;
+    sctpAppAssocMap[key] = listenerAssoc;
+
     sizeAssocMap = sctpAssocMap.size();
     printInfoAssocMap();
 }

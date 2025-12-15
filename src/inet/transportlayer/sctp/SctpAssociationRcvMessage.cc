@@ -528,6 +528,8 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
 
 bool SctpAssociation::processInitArrived(SctpInitChunk *initchunk, int32_t srcPort, int32_t destPort)
 {
+    Enter_Method_Silent();
+
     SctpAssociation *assoc;
     char timerName[64];
     bool trans = false;
@@ -539,22 +541,34 @@ bool SctpAssociation::processInitArrived(SctpInitChunk *initchunk, int32_t srcPo
         EV_INFO << "fork=" << state->fork << " initReceived=" << state->initReceived << "\n";
         if (state->fork && !state->initReceived) {
             EV_TRACE << "cloneAssociation\n";
-            assoc = cloneAssociation();
+            SctpAssociation *workingAssoc = cloneAssociation();
             EV_TRACE << "addForkedAssociation\n";
-            sctpMain->addForkedAssociation(this, assoc, localAddr, remoteAddr, srcPort, destPort);
-            assoc->listening = true;
-            this->listening = false;
+            // workingAssoc = new working connection (gets new assocId)
+            // this = listener (keeps original assocId)
+            sctpMain->addForkedAssociation(workingAssoc, this, localAddr, remoteAddr, srcPort, destPort);
 
-            EV_INFO << "Connection forked: this connection got new assocId=" << assocId << ", "
-                                                                                           "spinoff keeps LISTENing with assocId=" << assoc->assocId << "\n";
-            snprintf(timerName, sizeof(timerName), "T2_SHUTDOWN of assoc %d", assocId);
-            T2_ShutdownTimer->setName(timerName);
-            snprintf(timerName, sizeof(timerName), "T5_SHUTDOWN_GUARD of assoc %d", assocId);
-            T5_ShutdownGuardTimer->setName(timerName);
-            snprintf(timerName, sizeof(timerName), "SACK_TIMER of assoc %d", assocId);
-            SackTimer->setName(timerName);
-            snprintf(timerName, sizeof(timerName), "T1_INIT of assoc %d", assocId);
-            T1_InitTimer->setName(timerName);
+            this->listening = true;              // THIS remains listener
+            workingAssoc->listening = false;     // Clone becomes working connection
+
+            EV_INFO << "Connection forked: working connection got new assocId=" << workingAssoc->assocId << ", "
+                    << "listener keeps LISTENing with assocId=" << this->assocId << "\n";
+
+            // Update timer names on the working connection
+            snprintf(timerName, sizeof(timerName), "T2_SHUTDOWN of assoc %d", workingAssoc->assocId);
+            workingAssoc->T2_ShutdownTimer->setName(timerName);
+            snprintf(timerName, sizeof(timerName), "T5_SHUTDOWN_GUARD of assoc %d", workingAssoc->assocId);
+            workingAssoc->T5_ShutdownGuardTimer->setName(timerName);
+            snprintf(timerName, sizeof(timerName), "SACK_TIMER of assoc %d", workingAssoc->assocId);
+            workingAssoc->SackTimer->setName(timerName);
+            snprintf(timerName, sizeof(timerName), "T1_INIT of assoc %d", workingAssoc->assocId);
+            workingAssoc->T1_InitTimer->setName(timerName);
+
+            // Prevent workingAssoc from forking again in the recursive call
+            workingAssoc->state->fork = false;
+
+            // The working connection continues processing recursively
+            // It will execute the INIT processing (lines 570-691) and send INIT-ACK
+            return workingAssoc->processInitArrived(initchunk, srcPort, destPort);
         }
         else {
             sctpMain->updateSockPair(this, localAddr, remoteAddr, srcPort, destPort);
