@@ -2997,6 +2997,41 @@ void SctpAssociation::deleteQueues()
     transmissionQ = nullptr;
 }
 
+void SctpAssociation::recordScalars()
+{
+    Enter_Method_Silent();
+
+    char str[128];
+    for (auto pathMapIterator = sctpPathMap.begin();
+         pathMapIterator != sctpPathMap.end(); pathMapIterator++)
+    {
+        const SctpPathVariables *path = pathMapIterator->second;
+        std::string pathAddr = path->remoteAddress.str();
+
+        snprintf(str, sizeof(str), "Number of Fast Retransmissions %s", pathAddr.c_str());
+        recordScalar(str, path->numberOfFastRetransmissions);
+        snprintf(str, sizeof(str), "Number of Timer-Based Retransmissions %s", pathAddr.c_str());
+        recordScalar(str, path->numberOfTimerBasedRetransmissions);
+        snprintf(str, sizeof(str), "Number of Heartbeats Sent %s", pathAddr.c_str());
+        recordScalar(str, path->numberOfHeartbeatsSent);
+        snprintf(str, sizeof(str), "Number of Heartbeats Received %s", pathAddr.c_str());
+        recordScalar(str, path->numberOfHeartbeatsRcvd);
+        snprintf(str, sizeof(str), "Number of Heartbeat ACKs Sent %s", pathAddr.c_str());
+        recordScalar(str, path->numberOfHeartbeatAcksSent);
+        snprintf(str, sizeof(str), "Number of Heartbeat ACKs Received %s", pathAddr.c_str());
+        recordScalar(str, path->numberOfHeartbeatAcksRcvd);
+        snprintf(str, sizeof(str), "Number of Duplicates %s", pathAddr.c_str());
+        recordScalar(str, path->numberOfDuplicates);
+        snprintf(str, sizeof(str), "Number of Bytes received from %s", pathAddr.c_str());
+        recordScalar(str, path->numberOfBytesReceived);
+    }
+    for (uint16_t i = 0; i < inboundStreams; i++) {
+        snprintf(str, sizeof(str), "Bytes received on stream %d", i);
+        recordScalar(str, getState()->streamThroughput[i]);
+    }
+    recordScalar("Blocking TSNs Moved", state->blockingTsnsMoved);
+}
+
 } // namespace sctp
 
 } // namespace inet

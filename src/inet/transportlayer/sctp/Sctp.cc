@@ -895,43 +895,7 @@ void Sctp::removeAssociation(SctpAssociation *assoc)
         }
     }
     // Write statistics
-    char str[128];
-    for (auto pathMapIterator = assoc->sctpPathMap.begin();
-         pathMapIterator != assoc->sctpPathMap.end(); pathMapIterator++)
-    {
-        const SctpPathVariables *path = pathMapIterator->second;
-        snprintf(str, sizeof(str), "Number of Fast Retransmissions of assoc %d: %s",
-                assoc->assocId, path->remoteAddress.str().c_str());
-        recordScalar(str, path->numberOfFastRetransmissions);
-        snprintf(str, sizeof(str), "Number of Timer-Based Retransmissions of assoc %d: %s",
-                assoc->assocId, path->remoteAddress.str().c_str());
-        recordScalar(str, path->numberOfTimerBasedRetransmissions);
-        snprintf(str, sizeof(str), "Number of Heartbeats Sent of assoc %d: %s",
-                assoc->assocId, path->remoteAddress.str().c_str());
-        recordScalar(str, path->numberOfHeartbeatsSent);
-        snprintf(str, sizeof(str), "Number of Heartbeats Received of assoc %d: %s",
-                assoc->assocId, path->remoteAddress.str().c_str());
-        recordScalar(str, path->numberOfHeartbeatsRcvd);
-        snprintf(str, sizeof(str), "Number of Heartbeat ACKs Sent of assoc %d: %s",
-                assoc->assocId, path->remoteAddress.str().c_str());
-        recordScalar(str, path->numberOfHeartbeatAcksSent);
-        snprintf(str, sizeof(str), "Number of Heartbeat ACKs Received of assoc %d: %s",
-                assoc->assocId, path->remoteAddress.str().c_str());
-        recordScalar(str, path->numberOfHeartbeatAcksRcvd);
-        snprintf(str, sizeof(str), "Number of Duplicates of assoc %d: %s",
-                assoc->assocId, path->remoteAddress.str().c_str());
-        recordScalar(str, path->numberOfDuplicates);
-        snprintf(str, sizeof(str), "Number of Bytes received of assoc %d from %s",
-                assoc->assocId, path->remoteAddress.str().c_str());
-        recordScalar(str, path->numberOfBytesReceived);
-    }
-    for (uint16_t i = 0; i < assoc->inboundStreams; i++) {
-        snprintf(str, sizeof(str), "Bytes received on stream %d of assoc %d",
-                i, assoc->assocId);
-        recordScalar(str, assoc->getState()->streamThroughput[i]);
-    }
-    snprintf(str, sizeof(str), "Blocking TSNs Moved of assoc %d", assoc->assocId);
-    recordScalar(str, assoc->state->blockingTsnsMoved);
+    assoc->recordScalars();
 
     assoc->removePath();
     assoc->deleteStreams();
