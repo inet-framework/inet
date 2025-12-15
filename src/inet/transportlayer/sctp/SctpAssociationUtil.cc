@@ -308,10 +308,10 @@ SctpAssociation *SctpAssociation::cloneAssociation()
     // Create SctpAssociation as a submodule
     auto moduleType = cModuleType::get("inet.transportlayer.sctp.SctpAssociation");
     char submoduleName[24];
-    sprintf(submoduleName, "assoc-clone-%d", assocId);
-    auto module = check_and_cast<SctpAssociation *>(moduleType->createScheduleInit(submoduleName, sctpMain));
-    module->initAssociation(sctpMain, appGateIndex, assocId, rt, ift);
-    SctpAssociation *assoc = module;
+    int cloneId = SctpSocket::getNewAssocId();
+    sprintf(submoduleName, "assoc-%d", cloneId);
+    SctpAssociation *assoc = check_and_cast<SctpAssociation *>(moduleType->createScheduleInit(submoduleName, sctpMain));
+    assoc->initAssociation(sctpMain, appGateIndex, cloneId, rt, ift);
 
     const char *queueClass = transmissionQ->getClassName();
     assoc->transmissionQ = check_and_cast<SctpQueue *>(inet::utils::createOne(queueClass));

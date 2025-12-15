@@ -835,10 +835,7 @@ void Sctp::addForkedAssociation(SctpAssociation *workingAssoc, SctpAssociation *
     sctpAppAssocMap.erase(key);  // Remove old mapping
 
     workingAssoc->listeningAssocId = listenerAssoc->assocId;  // Reference to listener
-    int id = SctpSocket::getNewAssocId();
-    EV_INFO << "New assocId = " << id << " for working connection\n";
-
-    key.assocId = workingAssoc->assocId = id;
+    key.assocId = workingAssoc->assocId;
     EV_INFO << "Working connection: listeningAssocId=" << workingAssoc->listeningAssocId 
             << " new assocId=" << workingAssoc->assocId << endl;
     sctpAppAssocMap[key] = workingAssoc;
