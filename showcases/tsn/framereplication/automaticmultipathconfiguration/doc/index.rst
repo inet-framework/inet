@@ -62,6 +62,8 @@ Redundant Path Structure
 The network topology provides **four redundant paths** from source to destination
 that are explicitly configured in this showcase:
 
+TODO follow order of manual
+
 1. **Path 1 (Upper Direct)**: source → s1 → s2a → s3a → destination
 2. **Path 2 (Lower Direct)**: source → s1 → s2b → s3b → destination
 3. **Path 3 (Upper-to-Lower Zig-Zag)**: source → s1 → s2a → s2b → s3b → destination
@@ -98,8 +100,7 @@ The Model
 ---------
 
 In this showcase, we use the :ned:`StreamRedundancyConfigurator` with explicit path
-specification through the :par:`trees` parameter. Unlike automatic path computation
-based on failure protection rules, this approach allows direct specification of
+specification through the :par:`trees` parameter. This approach allows direct specification of
 all redundant paths the network should use.
 
 The configurator automatically:
@@ -144,8 +145,8 @@ Configure all destination interfaces to share the same MAC address:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-at: # all interfaces must have the same address
-   :end-before: # visualizer
+   :start-at: *.destination.eth[*].address = "0A-AA-12-34-56-78"
+   :end-at: *.destination.eth[*].address = "0A-AA-12-34-56-78"
 
 This setting is required so that frames arriving on any path (via eth[0] or eth[1])
 can be accepted by the destination. Without this, frames would be rejected if they
@@ -155,7 +156,7 @@ Disable the automatic MAC forwarding table configurator:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-at: # disable automatic MAC forwarding table configuration
+   :start-at: *.macForwardingTableConfigurator.typename = ""
    :end-at: *.macForwardingTableConfigurator.typename = ""
 
 The automatic MAC forwarding table configurator must be disabled because frame
@@ -184,13 +185,6 @@ and elimination:
    :start-at: # enable automatic stream redundancy configurator
    :end-at: *.streamRedundancyConfigurator.typename = "StreamRedundancyConfigurator"
 
-Enable the stream relay and coder layers in the bridging sublayer:
-
-.. literalinclude:: ../omnetpp.ini
-   :language: ini
-   :start-at: # enable stream policing in layer 2
-   :end-before: # enable automatic stream redundancy configurator
-
 The core of this showcase is the explicit path specification through the :par:`trees`
 parameter:
 
@@ -204,14 +198,19 @@ source application (using the wildcard packet filter "*"). The configuration exp
 specifies the source and destination endpoints, and most importantly, lists four 
 redundant paths as node sequences in the :par:`trees` parameter.
 
+In general, the :par:`trees` parameter accepts a list of multicast trees, where a tree
+is given by a list of paths. In this example, we have a unicast stream, so each tree contains a single path.
+
 Based on these four paths, the :ned:`StreamRedundancyConfigurator` automatically:
 
 1. **Determines split points**: Identifies that frames must be replicated at:
+
    - **s1**: All four paths diverge here (initial 2-way split into upper/lower)
    - **s2a**: Paths 1 and 3 diverge (split between direct and zig-zag)
    - **s2b**: Paths 2 and 4 diverge (split between direct and zig-zag)
 
 2. **Determines merge points**: Identifies where duplicates must be eliminated at:
+
    - **s2a**: Paths 1 and 4 converge (merge from direct and zig-zag)
    - **s2b**: Paths 2 and 3 converge (merge from direct and zig-zag)
    - **destination**: All paths converge (final elimination)
@@ -268,6 +267,8 @@ without interruption, as evidenced by the absence of any gap in the delay measur
 These results validate the effectiveness of the automatic FRER configuration with explicit 
 path specification, demonstrating seamless failover and continuous packet delivery even 
 during network equipment failures.
+
+.. note:: For more details about what the configurator automates, see the TODO (manual) showcase.
 
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`AutomaticMultipathConfigurationShowcase.ned <../AutomaticMultipathConfigurationShowcase.ned>`
