@@ -314,11 +314,11 @@ Set up MAC forwarding for s2a: VLAN 1 traffic goes to eth0 (s3a), VLAN 2 goes to
 Switch s2b Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Set up MAC forwarding for s2b (similar to s2a): VLAN 1 to eth0 (s3b), VLAN 2 to eth1 (s2a cross-path).
+TODO
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-at: # map destination MAC address and VLAN pairs to network interfaces in s2b
+   :start-at: *.s2b.ieee8021q.qTagHeaderChecker.vlanIdFilter = [1, 2]
    :end-at: *.s2b.ieee8021q.qTagHeaderChecker.vlanIdFilter = [1, 2]
 
 Decode incoming traffic: eth2 VLAN 2 → stream s2b (from s1), eth1 VLAN 2 → stream s2a-s2b
@@ -326,7 +326,7 @@ Decode incoming traffic: eth2 VLAN 2 → stream s2b (from s1), eth1 VLAN 2 → s
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-after: *.s2b.ieee8021q.qTagHeaderChecker.vlanIdFilter = [1, 2]
+   :start-at: *.s2b.bridging.streamCoder.decoder.mapping
    :end-at: {interface: "eth1", vlan: 2, stream: "s2a-s2b"}]
 
 **Merge Point**: Combine streams s2b (from s1) and s2a-s2b (cross-path from s2a)
@@ -334,10 +334,11 @@ into stream s3b, eliminate duplicates.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-at: # merge streams s2b and s2a-s2b in into s3b
+   :start-at: *.s2b.bridging.streamRelay.merger.mapping = {s2b: "s3b", "s2a-s2b": "s3b"}
    :end-at: *.s2b.bridging.streamRelay.merger.mapping = {s2b: "s3b", "s2a-s2b": "s3b"}
 
 **Second-Level Split**: Create the complementary mesh by splitting s3b into:
+
 - Stream s3b (VLAN 1) → forwarded to s3b toward destination
 - Stream s2a (VLAN 2) → cross-path forwarded to s2a for additional redundancy
 
@@ -345,8 +346,22 @@ This creates Paths 2 and 3 from the source.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-at: # split stream s2b into s3b and s2a
-   :end-at: {stream: "s2a", vlan: 2}]
+   :start-at: *.s2b.bridging.streamRelay.splitter.mapping
+   :end-at: *.s2b.bridging.streamRelay.splitter.mapping
+
+TODO
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: *.s2b.bridging.streamCoder.encoder.mapping
+   :end-at:  {stream: "s2a", vlan: 2}]
+
+Set up MAC forwarding for s2b (similar to s2a): VLAN 1 to eth0 (s3b), VLAN 2 to eth1 (s2a cross-path).
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: *.s2b.macTable.forwardingTable
+   :end-at: {address: "destination", vlan: 2, interface: "eth1"}]
 
 Switches s3a and s3b Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
