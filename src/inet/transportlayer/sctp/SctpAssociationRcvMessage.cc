@@ -528,13 +528,7 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
 
 bool SctpAssociation::processInitArrived(SctpInitChunk *initchunk, int32_t srcPort, int32_t destPort)
 {
-    Enter_Method_Silent();
-
-    SctpAssociation *assoc;
-    char timerName[64];
     bool trans = false;
-    uint16_t type;
-    AddressVector adv;
 
     EV_TRACE << "processInitArrived\n";
     if (fsm->getState() == SCTP_S_CLOSED) {
@@ -563,137 +557,13 @@ bool SctpAssociation::processInitArrived(SctpInitChunk *initchunk, int32_t srcPo
             snprintf(timerName, sizeof(timerName), "T1_INIT of assoc %d", workingAssoc->assocId);
             workingAssoc->T1_InitTimer->setName(timerName);
 
-            // Prevent workingAssoc from forking again in the recursive call
-            workingAssoc->state->fork = false;
-
             // The working connection continues processing recursively
             // It will execute the INIT processing (lines 570-691) and send INIT-ACK
-            return workingAssoc->processInitArrived(initchunk, srcPort, destPort);
+            trans = workingAssoc->processInitChunk(initchunk);
         }
         else {
             sctpMain->updateSockPair(this, localAddr, remoteAddr, srcPort, destPort);
-        }
-        if (!state->initReceived) {
-            state->initReceived = true;
-            state->initialPrimaryPath = remoteAddr;
-            state->setPrimaryPath(getPath(remoteAddr));
-            if (initchunk->getAddressesArraySize() == 0) {
-                EV_INFO << " get new path for " << remoteAddr << "\n";
-                SctpPathVariables *rPath = new SctpPathVariables(remoteAddr, this, rt);
-                sctpPathMap[rPath->remoteAddress] = rPath;
-                qCounter.roomTransQ[rPath->remoteAddress] = 0;
-                qCounter.bookedTransQ[rPath->remoteAddress] = 0;
-                qCounter.roomRetransQ[rPath->remoteAddress] = 0;
-            }
-            initPeerTsn = initchunk->getInitTsn();
-            state->gapList.setInitialCumAckTsn(initPeerTsn - 1);
-            state->initialPeerRwnd = initchunk->getA_rwnd();
-            if (initchunk->getMsg_rwnd() > 0) {
-                state->peerAllowsChunks = true;
-                state->initialPeerMsgRwnd = initchunk->getMsg_rwnd();
-                state->peerMsgRwnd = state->initialPeerMsgRwnd;
-            }
-            state->expectedStreamResetSequenceNumber = initPeerTsn;
-            state->peerRwnd = state->initialPeerRwnd;
-            emit(peerRwndSignal, (unsigned long)state->peerRwnd);
-            localVTag = initchunk->getInitTag();
-            numberOfRemoteAddresses = initchunk->getAddressesArraySize();
-            state->localAddresses.clear();
-            if (localAddressList.front().isUnspecified()) {
-                for (int32_t i = 0; i < ift->getNumInterfaces(); ++i) {
-#ifdef INET_WITH_IPv4
-                    if (auto ipv4Data = ift->getInterface(i)->findProtocolData<Ipv4InterfaceData>()) {
-                        adv.push_back(ipv4Data->getIPAddress());
-                    }
-                    else
-#endif // ifdef INET_WITH_IPv4
-#ifdef INET_WITH_IPv6
-                    if (auto ipv6Data = ift->getInterface(i)->findProtocolData<Ipv6InterfaceData>()) {
-                        adv.push_back(ipv6Data->getAddress(0));
-                    }
-                    else
-#endif // ifdef INET_WITH_IPv6
-                        throw cRuntimeError("INET was compiled without IPv4/IPv6 support");
-                }
-            }
-            else {
-                adv = localAddressList;
-            }
-            int rlevel = getAddressLevel(remoteAddr);
-            if (adv.size() == 1) {
-                state->localAddresses.push_back((*adv.begin()));
-            }
-            else if (rlevel > 0) {
-                for (auto& elem : adv) {
-                    if (getAddressLevel((elem)) >= rlevel) {
-                        sctpMain->addLocalAddress(this, (elem));
-                        state->localAddresses.push_back((elem));
-                    }
-                }
-            }
-            for (uint32_t j = 0; j < initchunk->getAddressesArraySize(); j++) {
-                // skip IPv6 because we can't send to them yet
-                if (initchunk->getAddresses(j).getType() == L3Address::IPv6)
-                    continue;
-                // set path variables for this pathlocalAddresses
-                if (!getPath(initchunk->getAddresses(j))) {
-                    SctpPathVariables *path = new SctpPathVariables(initchunk->getAddresses(j), this, rt);
-                    EV_INFO << " get new path for " << initchunk->getAddresses(j) << "\n";
-                    for (auto& elem : state->localAddresses) {
-                        if (sctpMain->addRemoteAddress(this, (elem), initchunk->getAddresses(j))) {
-                            this->remoteAddressList.push_back(initchunk->getAddresses(j));
-                        }
-                    }
-                    sctpPathMap[path->remoteAddress] = path;
-                    qCounter.roomTransQ[path->remoteAddress] = 0;
-                    qCounter.bookedTransQ[path->remoteAddress] = 0;
-                    qCounter.roomRetransQ[path->remoteAddress] = 0;
-                }
-            }
-            if (!containsKey(sctpPathMap, remoteAddr)) {
-                SctpPathVariables *path = new SctpPathVariables(remoteAddr, this, rt);
-                EV_INFO << "Get new path for " << remoteAddr << "\n";
-                sctpPathMap[remoteAddr] = path;
-                qCounter.roomTransQ[remoteAddr] = 0;
-                qCounter.bookedTransQ[remoteAddr] = 0;
-                qCounter.roomRetransQ[remoteAddr] = 0;
-            }
-            if (initchunk->getHmacTypesArraySize() != 0) {
-                state->peerAuth = true;
-                for (uint32_t j = 0; j < initchunk->getSctpChunkTypesArraySize(); j++) {
-                    type = initchunk->getSctpChunkTypes(j);
-                    if (type != INIT && type != INIT_ACK && type != AUTH && type != SHUTDOWN_COMPLETE) {
-                        state->peerChunkList.push_back(type);
-                    }
-                }
-            }
-            EV_DETAIL << "number supported extensions:" << initchunk->getSepChunksArraySize() << "\n";
-            if (initchunk->getSepChunksArraySize() > 0) {
-                for (uint32_t i = 0; i < initchunk->getSepChunksArraySize(); i++) {
-                    if (initchunk->getSepChunks(i) == RE_CONFIG) {
-                        state->peerStreamReset = true;
-                        continue;
-                    }
-                    if (initchunk->getSepChunks(i) == PKTDROP) {
-                        state->peerPktDrop = true;
-                        EV_DEBUG << "set peerPktDrop to true\n";
-                        continue;
-                    }
-                }
-            }
-            trans = performStateTransition(SCTP_E_RCV_INIT);
-            if (trans) {
-                sendInitAck(initchunk);
-            }
-        }
-        else if (fsm->getState() == SCTP_S_CLOSED) {
-            trans = performStateTransition(SCTP_E_RCV_INIT);
-            if (trans) {
-                sendInitAck(initchunk);
-            }
-        }
-        else {
-            trans = true;
+            trans = processInitChunk(initchunk);
         }
     }
     else if (fsm->getState() == SCTP_S_COOKIE_WAIT) { // INIT-Collision
@@ -702,7 +572,7 @@ bool SctpAssociation::processInitArrived(SctpInitChunk *initchunk, int32_t srcPo
             state->peerAuth = true;
             if (state->peerChunkList.size() == 0) {
                 for (uint32_t j = 0; j < initchunk->getSctpChunkTypesArraySize(); j++) {
-                    type = initchunk->getSctpChunkTypes(j);
+                    uint16_t type = initchunk->getSctpChunkTypes(j);
                     if (type != INIT && type != INIT_ACK && type != AUTH && type != SHUTDOWN_COMPLETE) {
                         state->peerChunkList.push_back(type);
                     }
@@ -735,6 +605,138 @@ bool SctpAssociation::processInitArrived(SctpInitChunk *initchunk, int32_t srcPo
     else if (fsm->getState() == SCTP_S_SHUTDOWN_ACK_SENT)
         trans = true;
     printSctpPathMap();
+    return trans;
+}
+
+bool SctpAssociation::processInitChunk(SctpInitChunk *initchunk)
+{
+    Enter_Method_Silent();
+
+    bool trans = false;
+
+    if (!state->initReceived) {
+        AddressVector adv;
+        state->initReceived = true;
+        state->initialPrimaryPath = remoteAddr;
+        state->setPrimaryPath(getPath(remoteAddr));
+        if (initchunk->getAddressesArraySize() == 0) {
+            EV_INFO << " get new path for " << remoteAddr << "\n";
+            SctpPathVariables *rPath = new SctpPathVariables(remoteAddr, this, rt);
+            sctpPathMap[rPath->remoteAddress] = rPath;
+            qCounter.roomTransQ[rPath->remoteAddress] = 0;
+            qCounter.bookedTransQ[rPath->remoteAddress] = 0;
+            qCounter.roomRetransQ[rPath->remoteAddress] = 0;
+        }
+        initPeerTsn = initchunk->getInitTsn();
+        state->gapList.setInitialCumAckTsn(initPeerTsn - 1);
+        state->initialPeerRwnd = initchunk->getA_rwnd();
+        if (initchunk->getMsg_rwnd() > 0) {
+            state->peerAllowsChunks = true;
+            state->initialPeerMsgRwnd = initchunk->getMsg_rwnd();
+            state->peerMsgRwnd = state->initialPeerMsgRwnd;
+        }
+        state->expectedStreamResetSequenceNumber = initPeerTsn;
+        state->peerRwnd = state->initialPeerRwnd;
+        emit(peerRwndSignal, (unsigned long)state->peerRwnd);
+        localVTag = initchunk->getInitTag();
+        numberOfRemoteAddresses = initchunk->getAddressesArraySize();
+        state->localAddresses.clear();
+        if (localAddressList.front().isUnspecified()) {
+            for (int32_t i = 0; i < ift->getNumInterfaces(); ++i) {
+#ifdef INET_WITH_IPv4
+                if (auto ipv4Data = ift->getInterface(i)->findProtocolData<Ipv4InterfaceData>()) {
+                    adv.push_back(ipv4Data->getIPAddress());
+                }
+                else
+#endif // ifdef INET_WITH_IPv4
+#ifdef INET_WITH_IPv6
+                if (auto ipv6Data = ift->getInterface(i)->findProtocolData<Ipv6InterfaceData>()) {
+                    adv.push_back(ipv6Data->getAddress(0));
+                }
+                else
+#endif // ifdef INET_WITH_IPv6
+                    throw cRuntimeError("INET was compiled without IPv4/IPv6 support");
+            }
+        }
+        else {
+            adv = localAddressList;
+        }
+        int rlevel = getAddressLevel(remoteAddr);
+        if (adv.size() == 1) {
+            state->localAddresses.push_back((*adv.begin()));
+        }
+        else if (rlevel > 0) {
+            for (auto& elem : adv) {
+                if (getAddressLevel((elem)) >= rlevel) {
+                    sctpMain->addLocalAddress(this, (elem));
+                    state->localAddresses.push_back((elem));
+                }
+            }
+        }
+        for (uint32_t j = 0; j < initchunk->getAddressesArraySize(); j++) {
+            // skip IPv6 because we can't send to them yet
+            if (initchunk->getAddresses(j).getType() == L3Address::IPv6)
+                continue;
+            // set path variables for this pathlocalAddresses
+            if (!getPath(initchunk->getAddresses(j))) {
+                SctpPathVariables *path = new SctpPathVariables(initchunk->getAddresses(j), this, rt);
+                EV_INFO << " get new path for " << initchunk->getAddresses(j) << "\n";
+                for (auto& elem : state->localAddresses) {
+                    if (sctpMain->addRemoteAddress(this, (elem), initchunk->getAddresses(j))) {
+                        this->remoteAddressList.push_back(initchunk->getAddresses(j));
+                    }
+                }
+                sctpPathMap[path->remoteAddress] = path;
+                qCounter.roomTransQ[path->remoteAddress] = 0;
+                qCounter.bookedTransQ[path->remoteAddress] = 0;
+                qCounter.roomRetransQ[path->remoteAddress] = 0;
+            }
+        }
+        if (!containsKey(sctpPathMap, remoteAddr)) {
+            SctpPathVariables *path = new SctpPathVariables(remoteAddr, this, rt);
+            EV_INFO << "Get new path for " << remoteAddr << "\n";
+            sctpPathMap[remoteAddr] = path;
+            qCounter.roomTransQ[remoteAddr] = 0;
+            qCounter.bookedTransQ[remoteAddr] = 0;
+            qCounter.roomRetransQ[remoteAddr] = 0;
+        }
+        if (initchunk->getHmacTypesArraySize() != 0) {
+            state->peerAuth = true;
+            for (uint32_t j = 0; j < initchunk->getSctpChunkTypesArraySize(); j++) {
+                uint16_t type = initchunk->getSctpChunkTypes(j);
+                if (type != INIT && type != INIT_ACK && type != AUTH && type != SHUTDOWN_COMPLETE) {
+                    state->peerChunkList.push_back(type);
+                }
+            }
+        }
+        EV_DETAIL << "number supported extensions:" << initchunk->getSepChunksArraySize() << "\n";
+        if (initchunk->getSepChunksArraySize() > 0) {
+            for (uint32_t i = 0; i < initchunk->getSepChunksArraySize(); i++) {
+                if (initchunk->getSepChunks(i) == RE_CONFIG) {
+                    state->peerStreamReset = true;
+                    continue;
+                }
+                if (initchunk->getSepChunks(i) == PKTDROP) {
+                    state->peerPktDrop = true;
+                    EV_DEBUG << "set peerPktDrop to true\n";
+                    continue;
+                }
+            }
+        }
+        trans = performStateTransition(SCTP_E_RCV_INIT);
+        if (trans) {
+            sendInitAck(initchunk);
+        }
+    }
+    else if (fsm->getState() == SCTP_S_CLOSED) {
+        trans = performStateTransition(SCTP_E_RCV_INIT);
+        if (trans) {
+            sendInitAck(initchunk);
+        }
+    }
+    else {
+        trans = true;
+    }
     return trans;
 }
 

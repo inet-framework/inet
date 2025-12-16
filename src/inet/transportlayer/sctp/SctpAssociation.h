@@ -1210,6 +1210,7 @@ class INET_API SctpAssociation : public SimpleModule
      * Process incoming SCTP packets. Invoked from process_RCV_Message
      */
     bool processInitArrived(SctpInitChunk *initChunk, int32_t sport, int32_t dport);
+    bool processInitChunk(SctpInitChunk *initChunk);
     bool processInitAckArrived(SctpInitAckChunk *initAckChunk);
     bool processCookieEchoArrived(SctpCookieEchoChunk *cookieEcho, L3Address addr);
     bool processCookieAckArrived();
