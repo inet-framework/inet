@@ -547,16 +547,6 @@ bool SctpAssociation::processInitArrived(SctpInitChunk *initchunk, int32_t srcPo
             EV_INFO << "Connection forked: working connection got new assocId=" << workingAssoc->assocId << ", "
                     << "listener keeps LISTENing with assocId=" << this->assocId << "\n";
 
-            // Update timer names on the working connection
-            snprintf(timerName, sizeof(timerName), "T2_SHUTDOWN of assoc %d", workingAssoc->assocId);
-            workingAssoc->T2_ShutdownTimer->setName(timerName);
-            snprintf(timerName, sizeof(timerName), "T5_SHUTDOWN_GUARD of assoc %d", workingAssoc->assocId);
-            workingAssoc->T5_ShutdownGuardTimer->setName(timerName);
-            snprintf(timerName, sizeof(timerName), "SACK_TIMER of assoc %d", workingAssoc->assocId);
-            workingAssoc->SackTimer->setName(timerName);
-            snprintf(timerName, sizeof(timerName), "T1_INIT of assoc %d", workingAssoc->assocId);
-            workingAssoc->T1_InitTimer->setName(timerName);
-
             // The working connection continues processing recursively
             // It will execute the INIT processing (lines 570-691) and send INIT-ACK
             trans = workingAssoc->processInitChunk(initchunk);

@@ -602,13 +602,13 @@ void SctpAssociation::initAssociation(Sctp *_module, int32_t _appGateIndex, int3
 
     // ====== Timers =========================================================
     char timerName[128];
-    snprintf(timerName, sizeof(timerName), "T1_INIT of Association %d", assocId);
+    snprintf(timerName, sizeof(timerName), "T1_INIT of assoc %d", assocId);
     T1_InitTimer = new cMessage(timerName);
-    snprintf(timerName, sizeof(timerName), "T2_SHUTDOWN of Association %d", assocId);
+    snprintf(timerName, sizeof(timerName), "T2_SHUTDOWN of assoc %d", assocId);
     T2_ShutdownTimer = new cMessage(timerName);
-    snprintf(timerName, sizeof(timerName), "T5_SHUTDOWN_GUARD of Association %d", assocId);
+    snprintf(timerName, sizeof(timerName), "T5_SHUTDOWN_GUARD of assoc %d", assocId);
     T5_ShutdownGuardTimer = new cMessage(timerName);
-    snprintf(timerName, sizeof(timerName), "SACK_TIMER of Association %d", assocId);
+    snprintf(timerName, sizeof(timerName), "SACK_TIMER of assoc %d", assocId);
     SackTimer = new cMessage(timerName);
 
     StartTesting = nullptr;
