@@ -199,12 +199,12 @@ packets from either path (s3a or s3b).
    :start-at: *.destination.numApps
    :end-at: *.destination.eth[*].address
 
-**Stream Identification**: Identify all outgoing traffic as stream "s1" and
+**Stream Identification**: Mark all outgoing packets as stream "s1" and
 enable sequence numbering. This is the entry point for FRER - each packet
 gets assigned a unique sequence number that will be used for duplicate detection
 throughout the network.
 
-**Stream Encoding**: Encode stream s1 with VLAN tag 1 before being sent to s1.
+**Stream Encoding**: Encode stream s1 with VLAN tag 1 before being sent to switch s1.
 This allows the network to route the stream using standard VLAN-based forwarding.
 
 .. literalinclude:: ../omnetpp.ini
@@ -215,39 +215,46 @@ This allows the network to route the stream using standard VLAN-based forwarding
 Switch s1 Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Set up MAC forwarding: packets with destination MAC and VLAN 1 go to eth0 (s2a),
-packets with VLAN 2 go to eth1 (s2b). Only accept VLAN 1 traffic from the source.
+Only accept VLAN 1 traffic from the source.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-at: # map destination MAC address and VLAN pairs to network interfaces
+   :start-at: *.s1.ieee8021q.qTagHeaderChecker.vlanIdFilter
    :end-at: *.s1.ieee8021q.qTagHeaderChecker.vlanIdFilter
 
-Enable FRER functionality and decode incoming VLAN 1 traffic on eth2 as stream s1.
+Decode incoming VLAN 1 traffic on eth2 as stream s1.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-at: # enable stream policing in layer 2 bridging
+   :start-at: *.s1.bridging.streamCoder.decoder.mapping
    :end-at: *.s1.bridging.streamCoder.decoder.mapping
 
-Configure the merger to eliminate duplicates in stream s1. Since this is the
-first switch, there shouldn't be duplicates yet, but this prepares for any
-potential loops or retransmissions.
+**Replication Point**: This is where the initial split occurs. Duplicate stream s1
+into two separate streams (s2a and s2b), creating the first level
+of redundancy.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-at: # eliminate duplicates from stream s1
-   :end-at: *.s1.bridging.streamRelay.merger.mapping
+   :start-at: *.s1.bridging.streamRelay.splitter.mapping
+   :end-at: *.s1.bridging.streamRelay.splitter.mapping
 
-**Critical Replication Point**: This is where the initial split occurs. Duplicate stream s1
-into two separate streams (s2a and s2b), creating the first level
-of redundancy. Encode stream s2a with VLAN 1 and forward to s2a, while
+Encode stream s2a with VLAN 1 and forward to s2a, while
 encode stream s2b with VLAN 2 and forward to s2b.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-at: # split stream s1 into s2a and s2b
+   :start-at: *.s1.bridging.streamCoder.encoder.mapping
    :end-at: {stream: "s2b", vlan: 2}]
+
+Set up MAC forwarding: packets with destination MAC and VLAN 1 go to eth0 (s2a),
+packets with VLAN 2 go to eth1 (s2b).
+
+TODO why weird
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: {address: "destination", vlan: 2, interface: "eth1"}
+   :end-at: {address: "destination", vlan: 2, interface: "eth1"}
 
 Switch s2a Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~
