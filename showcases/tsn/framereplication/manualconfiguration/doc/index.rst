@@ -373,8 +373,8 @@ toward the final destination.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-at: # map destination MAC address and VLAN pairs to network interfaces in s3a
-   :end-at: *.s3b.ieee8021q.qTagHeaderChecker.vlanIdFilter = [1]
+   :start-at: # map eth1 VLAN 1 to stream s3a
+   :end-at: *.s3b.macTable.forwardingTable
 
 Destination Node FRER Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -387,7 +387,7 @@ regardless of which path(s) it arrived on.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-after: *.s3b.ieee8021q.qTagHeaderChecker.vlanIdFilter
+   :start-after: *.s3b.macTable.forwardingTable
    :end-at: *.destination.bridging.streamRelay.merger.mapping
 
 Results
