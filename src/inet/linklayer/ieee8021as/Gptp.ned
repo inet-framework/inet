@@ -20,8 +20,12 @@ import inet.linklayer.contract.IGptp;
 // Time synchronization is also performed periodically by exchanging Sync and Follow_Up messages, and the local clock
 // module is adjusted accordingly.
 //
-// This module requires an associated clock module to operate. The default simulation time precision is 1 ps which is
-// not accurate enough for peer delay measurements, it must be set to 1 fs or less instead.
+// This module requires an associated clock module to operate. Also note that the default simulation time resolution is
+// 1 ps, which is not accurate enough for peer delay measurements, so it must be set to 1 fs or less in the INI file
+// using simtime-resolution = fs.
+//
+// This module subscribes to the transmissionStarted, transmissionEnded, receptionStarted, and receptionEnded signals
+// on the network interface, so it must be supported by the physical layer transmitter and receiver modules.
 //
 // Typical system parameters:
 //  - Simulation time precision: 1 fs (instead of default 1 ps)
