@@ -238,35 +238,33 @@ of redundancy.
    :start-at: *.s1.bridging.streamRelay.splitter.mapping
    :end-at: *.s1.bridging.streamRelay.splitter.mapping
 
-Encode stream s2a with VLAN 1 and forward to s2a, while
-encode stream s2b with VLAN 2 and forward to s2b.
+Encode stream s2a with VLAN 1, while
+encode stream s2b with VLAN 2.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: *.s1.bridging.streamCoder.encoder.mapping
    :end-at: {stream: "s2b", vlan: 2}]
 
-Set up MAC forwarding: packets with destination MAC and VLAN 1 go to eth0 (s2a),
-packets with VLAN 2 go to eth1 (s2b).
-
-TODO why weird
+Forward packets with VLAN 1 to eth0 (towards s2a),
+packets with VLAN 2 to eth1 (towards s2b).
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-at: {address: "destination", vlan: 2, interface: "eth1"}
+   :start-at: *.s1.macTable.forwardingTable
    :end-at: {address: "destination", vlan: 2, interface: "eth1"}
 
 Switch s2a Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Accept both VLAN 1 and 2 traffic.
+Accept traffic with both VLAN 1 and 2.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: *.s2a.ieee8021q.qTagHeaderChecker.vlanIdFilter = [1, 2]
    :end-at: *.s2a.ieee8021q.qTagHeaderChecker.vlanIdFilter = [1, 2]
 
-Decode incoming traffic: eth2 VLAN 1 → stream s2a (from s1), eth1 VLAN 2 →
+Decode incoming traffic: eth2 VLAN 1 as stream s2a (from s1), eth1 VLAN 2 as
 stream s2b-s2a (cross-path from s2b).
 
 .. literalinclude:: ../omnetpp.ini
@@ -286,25 +284,25 @@ ensuring each frame is forwarded only once even if it arrives on both paths.
 **Second-Level Split**: Create mesh redundancy by splitting the merged stream s3a
 into:
 
-- Stream s3a (VLAN 1) → forwarded to s3a toward destination
-- Stream s2b (VLAN 2) → cross-path forwarded to s2b for additional redundancy
+- Stream s3a is forwarded to s3a
+- Stream s2b is cross-path forwarded to s2b for additional redundancy
 
-This creates Paths 1 and 4 from the source.
+This creates Paths 1 and 2.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: *.s2a.bridging.streamRelay.splitter.mapping = {s3a: ["s3a", "s2b"]}
    :end-at: *.s2a.bridging.streamRelay.splitter.mapping = {s3a: ["s3a", "s2b"]}
 
-TODO
+Map stream s3a to VLAN 1 and s2b to VLAN 2.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: *.s2a.bridging.streamCoder.encoder.mapping
    :end-at:  {stream: "s2b", vlan: 2}]
 
-Set up MAC forwarding for s2a: VLAN 1 traffic goes to eth0 (s3a), VLAN 2 goes to eth1
-(s2b for the cross-path).
+Forward packets with VLAN 1 to eth0 (towards s3a), VLAN 2 to eth1
+(towards s2b for the cross-path).
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -314,7 +312,7 @@ Set up MAC forwarding for s2a: VLAN 1 traffic goes to eth0 (s3a), VLAN 2 goes to
 Switch s2b Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-TODO
+Allow ingress traffic from VLAN 1 and 2.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -349,7 +347,7 @@ This creates Paths 2 and 3 from the source.
    :start-at: *.s2b.bridging.streamRelay.splitter.mapping
    :end-at: *.s2b.bridging.streamRelay.splitter.mapping
 
-TODO
+Stream s3a maps to VLAN 1 and s2a to VLAN 2.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -376,11 +374,10 @@ toward the final destination.
    :start-at: # map eth1 VLAN 1 to stream s3a
    :end-at: *.s3b.macTable.forwardingTable
 
-Destination Node FRER Configuration
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Destination Node Configuration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Final Elimination Point**: Decode streams s3a and s3b from both
-interfaces and merge them into a null stream (empty string). This performs the
+**Final Elimination Point**: Decode streams s3a and s3b and merge them into a null stream (empty string). This performs the
 final duplicate elimination - only forward the first copy of each frame (identified by
 sequence number) to the application, while discard later duplicates. This ensures the application receives exactly one copy of each frame,
 regardless of which path(s) it arrived on.
@@ -413,7 +410,7 @@ The following chart displays the end-to-end delay:
 
 The chart shows that there is no service interruption during the node failure.
 This demonstrates the effectiveness of the FRER mechanism
-in maintaining network connectivity even under multiple failure conditions.
+in maintaining network connectivity even under certain failure conditions.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`ManualConfigurationShowcase.ned <../ManualConfigurationShowcase.ned>`
 
