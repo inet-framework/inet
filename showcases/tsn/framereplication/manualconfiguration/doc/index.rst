@@ -312,7 +312,7 @@ Forward packets with VLAN 1 to eth0 (towards s3a), VLAN 2 to eth1
 Switch s2b Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Allow ingress traffic from VLAN 1 and 2.
+Accept traffic with both VLAN 1 and 2.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -354,7 +354,7 @@ Stream s3a maps to VLAN 1 and s2a to VLAN 2.
    :start-at: *.s2b.bridging.streamCoder.encoder.mapping
    :end-at:  {stream: "s2a", vlan: 2}]
 
-Set up MAC forwarding for s2b (similar to s2a): VLAN 1 to eth0 (s3b), VLAN 2 to eth1 (s2a cross-path).
+Forward packets with VLAN 1 to eth0 (towards s3b), and VLAN 2 to eth1 (towards s2a cross-path).
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
