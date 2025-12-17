@@ -1,10 +1,10 @@
-Token Bucket based Policing
+Token-Bucket-Based Policing
 ===========================
 
 Goals
 -----
 
-In shared network environments, misbehaving or excessive traffic sources can
+In shared network environments, misbehaving traffic sources can
 disrupt other applications. For example, when a client generates excessive
 traffic that exceeds available bandwidth, it can disrupt traffic from other
 clients sharing the same network infrastructure.
@@ -50,15 +50,15 @@ For example, a :ned:`SimpleIeee8021qFilter` with 2 streams looks like the follow
 .. figure:: media/SimpleIeee8021qFilter3.png
    :align: center
 
-The :ned:`SimpleIeee8021qFilter` contains three key submodules:
+The :ned:`SimpleIeee8021qFilter` contains the following key submodules:
 
 - **classifier**: A :ned:`StreamClassifier` module by default that identifies incoming packets and
-  dispatches them to the appropriate stream-specific processing path
+  dispatches them to the appropriate stream-specific processing path.
 - **meter**: A traffic meter for each stream that measures traffic rates and
   labels packets as either "green" (conforming) or "red" (non-conforming)
-  based on predefined traffic parameters. A :ned:`DualRateThreeColorMeter` module by default.
-- **filter**: A :ned:`LabelFilter` module by default for each stream that drops red packets while
-  allowing green packets to pass through
+  based on predefined traffic parameters. They are :ned:`DualRateThreeColorMeter` by default.
+- **filter**:  A traffic filter for each stream that drops red packets while
+  allowing green packets to pass through. They are :ned:`LabelFilter` by default.
 
 The type and configuration of the **meter** and **filter** modules implement the
 specific filtering mechanism (e.g. token-bucket-based, statistical). This
@@ -73,8 +73,8 @@ The token bucket algorithm is a deterministic traffic policing mechanism that
 operates using the following principles:
 
 - A virtual "bucket" stores tokens that are replenished at a constant rate called the
-  Committed Information Rate (CIR)
-- The bucket has a maximum capacity equal to the Committed Burst Size (CBS)
+  `Committed Information Rate` (CIR)
+- The bucket has a maximum capacity equal to the `Committed Burst Size` (CBS)
 - When the bucket reaches full capacity, newly generated tokens overflow and are discarded
 - Each incoming packet consumes tokens proportional to its size from the bucket
 - Packets are forwarded only when sufficient tokens are available; consumed tokens are removed from the bucket
@@ -92,7 +92,7 @@ Single Rate Two Color Metering
 The single rate two color meter is a specific implementation of the token bucket
 algorithm that works as follows:
 
-- Uses a single token bucket with parameters `Committed Information Rate` and `Committed Burst Size`
+- Uses a single token bucket with the `Committed Information Rate` and `Committed Burst Size` parameters
 - Labels packets as either "green" (conforming) or "red" (non-conforming)
 - Green packets are forwarded, while red packets are typically dropped
 
@@ -127,15 +127,6 @@ connected through a :ned:`TsnSwitch` via 100 Mbps :ned:`EthernetLink` channels.
   packet intervals, creating variable, bursty traffic patterns that periodically exceed the committed rate
 - ``client2``: Generates **well-behaved traffic** at a steady 20 Mbps with consistent packet intervals
 
-**Traffic Classification:** Both streams belong to the same traffic class, which is important for this
-demonstration. If they belonged to different traffic classes, TSN traffic shaping could resolve
-the issue by prioritizing traffic. Since both streams share the same class, they compete equally
-for bandwidth, making per-stream policing necessary to protect the well-behaved stream.
-
-**Stream Identification:** The system uses a two-stage identification process:
-- Clients identify outgoing packets by UDP destination port and encode them with VLAN IDs
-- The switch decodes VLAN IDs to classify incoming packets and apply appropriate policing policies
-
 .. literalinclude:: ../omnetpp.ini
    :start-at: client applications
    :end-before: server applications
@@ -144,8 +135,16 @@ for bandwidth, making per-stream policing necessary to protect the well-behaved 
 Stream Identification and Classification
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The clients identify and mark outgoing packets with VLAN IDs, while the switch decodes these
-markings to apply the appropriate policies:
+**Traffic Classification:** Both streams belong to the same traffic class, which is important for this
+demonstration. If they belonged to different traffic classes, TSN traffic shaping could resolve
+the issue by prioritizing traffic. Since both streams share the same class, they compete equally
+for bandwidth, making per-stream policing necessary to protect the well-behaved stream.
+This requires no explicit configuration.
+
+**Stream Identification:** The system uses a two-stage identification process:
+
+- Clients identify outgoing packets by UDP destination port and encode them with VLAN IDs
+- The switch decodes VLAN IDs to classify incoming packets and apply appropriate policing policies
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: outgoing streams
@@ -155,7 +154,7 @@ markings to apply the appropriate policies:
 Per-Stream Filtering
 ~~~~~~~~~~~~~~~~~~~~
 
-The per-stream ingress filtering dispatches the different traffic classes to separate metering and filter paths:
+The per-stream ingress filtering dispatches the different streams to separate metering and filter paths:
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: streamFilter.ingress.numStreams
@@ -169,9 +168,12 @@ Each stream uses a :ned:`SingleRateTwoColorMeter` configured with stream-specifi
 to implement token bucket policing. The meter operates with two key parameters:
 
 - :par:`committedInformationRate` (CIR): Token replenishment rate
+
   - Misbehaving stream: 40 Mbps (matches average traffic rate)
   - Normal stream: 20 Mbps (matches steady traffic rate)
+
 - :par:`committedBurstSize` (CBS): Maximum token bucket capacity
+
   - Misbehaving stream: 10 kB (allows moderate bursts)
   - Normal stream: 5 kB (smaller burst allowance for steady traffic)
 
@@ -237,14 +239,13 @@ excessive traffic sources sharing the same network infrastructure.
 With Policing
 ~~~~~~~~~~~~~
 
-The next two charts show how token bucket policing solves this problem by
-limiting excessive traffic while protecting normal traffic. Here is the traffic at the server, with and without policing:
+The following chart compares traffic at the server with and without policing, showing how token bucket policing solves this problem:
 
 .. figure:: media/server.png
    :align: center
 
 With token bucket policing enabled in the switch's ingress filter, the misbehaving traffic is now limited to
-approximately its configured committed information rate of 40 Mbps - the peaks
+approximately its configured committed information rate of 40 Mbps -- the peaks
 that previously exceeded the limit are clipped by the token bucket mechanism.
 The normal traffic continues to flow at its expected rate of 20 Mbps, unaffected
 by the excess traffic. The total traffic to the server stays well within the
@@ -272,8 +273,8 @@ operates internally. Here are the incoming, outgoing, and dropped data rates in 
 
 The misbehaving traffic filter shows substantial packet drops when the
 incoming traffic rate exceeds what the token bucket can accommodate. During
-traffic bursts, packets are dropped when tokens are insufficient. The
-solid line shows the packets that passed through - these correspond to periods
+traffic bursts, packets are dropped when tokens are insufficient. The green
+solid line shows the packets that passed through -- these correspond to periods
 when the token bucket had sufficient tokens. The committed burst size of 10 kB
 allows some short-term bursts to pass, but sustained excess traffic is dropped
 to enforce the 40 Mbps committed information rate. Now let's see the same for the normal traffic's filter:
