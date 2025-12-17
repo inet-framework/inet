@@ -315,7 +315,7 @@ transition during the failure is seamless with no disturbance to packet
 delivery. The FRER configuration shows slightly higher delay values due to the
 additional IEEE 802.1 R-Tag header overhead, which increases frame size.
 
-.. note:: For more details about what the configurator automates, see the TODO (automaticmultipath) showcase.
+.. note:: For more details about what the configurator automates, see the :doc:`/showcases/tsn/framereplication/automaticmultipathconfiguration/doc/index` showcase.
 
 .. The following video shows the behavior in Qtenv:
 
