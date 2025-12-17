@@ -859,20 +859,16 @@ bool SctpAssociation::processTimer(cMessage *msg)
         sendAsconf(type);
     }
     else if (msg == FairStartTimer) {
-        auto it = sctpMain->assocStatMap.find(assocId);
-        if (it != sctpMain->assocStatMap.end()) {
-            it->second.fairStart = simTime();
-            fairTimer = true;
-        }
+        assocStat.fairStart = simTime();
+        fairTimer = true;
     }
     else if (msg == FairStopTimer) {
-        auto it = sctpMain->assocStatMap.find(assocId);
-        if (it != sctpMain->assocStatMap.end()) {
-            it->second.fairStop = simTime();
-            it->second.fairLifeTime = it->second.fairStop - it->second.fairStart;
-            it->second.fairThroughput = it->second.fairAckedBytes / it->second.fairLifeTime.dbl();
-            fairTimer = false;
+        assocStat.fairStop = simTime();
+        assocStat.fairLifeTime = assocStat.fairStop - assocStat.fairStart;
+        if (assocStat.fairLifeTime > SIMTIME_ZERO) {
+            assocStat.fairThroughput = assocStat.fairAckedBytes / assocStat.fairLifeTime.dbl();
         }
+        fairTimer = false;
     }
     else {
         sctpAlgorithm->processTimer(msg, event);
@@ -1599,43 +1595,42 @@ void SctpAssociation::stateEntered(int32_t status)
             state->throughputInterval = sctpMain->par("throughputInterval");
             sackPeriod = sctpMain->getSackPeriod();
             sackFrequency = sctpMain->getSackFrequency();
-            Sctp::AssocStat stat;
-            stat.assocId = assocId;
-            stat.start = simTime();
-            stat.stop = 0;
-            stat.rcvdBytes = 0;
-            stat.ackedBytes = 0;
-            stat.sentBytes = 0;
-            stat.transmittedBytes = 0;
-            stat.numFastRtx = 0;
-            stat.numT3Rtx = 0;
-            stat.numDups = 0;
-            stat.numPathFailures = 0;
-            stat.numForwardTsn = 0;
-            stat.sumRGapRanges = 0;
-            stat.sumNRGapRanges = 0;
-            stat.numOverfullSACKs = 0;
-            stat.lifeTime = 0;
-            stat.throughput = 0;
-            stat.numDropsBecauseNewTsnGreaterThanHighestTsn = 0;
-            stat.numDropsBecauseNoRoomInBuffer = 0;
-            stat.numChunksReneged = 0;
-            stat.numAuthChunksSent = 0;
-            stat.numAuthChunksAccepted = 0;
-            stat.numAuthChunksRejected = 0;
-            stat.numResetRequestsSent = 0;
-            stat.numResetRequestsPerformed = 0;
+            // Initialize association statistics
+            assocStat.assocId = assocId;
+            assocStat.start = simTime();
+            assocStat.stop = SIMTIME_ZERO;
+            assocStat.rcvdBytes = 0;
+            assocStat.ackedBytes = 0;
+            assocStat.sentBytes = 0;
+            assocStat.transmittedBytes = 0;
+            assocStat.numFastRtx = 0;
+            assocStat.numT3Rtx = 0;
+            assocStat.numDups = 0;
+            assocStat.numPathFailures = 0;
+            assocStat.numForwardTsn = 0;
+            assocStat.sumRGapRanges = 0;
+            assocStat.sumNRGapRanges = 0;
+            assocStat.numOverfullSACKs = 0;
+            assocStat.lifeTime = SIMTIME_ZERO;
+            assocStat.throughput = 0.0;
+            assocStat.numDropsBecauseNewTsnGreaterThanHighestTsn = 0;
+            assocStat.numDropsBecauseNoRoomInBuffer = 0;
+            assocStat.numChunksReneged = 0;
+            assocStat.numAuthChunksSent = 0;
+            assocStat.numAuthChunksAccepted = 0;
+            assocStat.numAuthChunksRejected = 0;
+            assocStat.numResetRequestsSent = 0;
+            assocStat.numResetRequestsPerformed = 0;
             fairTimer = false;
-            stat.fairStart = 0;
-            stat.fairStop = 0;
-            stat.fairLifeTime = 0;
-            stat.fairThroughput = 0;
-            stat.fairAckedBytes = 0;
-            stat.numEndToEndMessages = 0;
-            stat.cumEndToEndDelay = 0;
-            stat.startEndToEndDelay = sctpMain->par("startEndToEndDelay");
-            stat.stopEndToEndDelay = sctpMain->par("stopEndToEndDelay");
-            sctpMain->assocStatMap[stat.assocId] = stat;
+            assocStat.fairStart = SIMTIME_ZERO;
+            assocStat.fairStop = SIMTIME_ZERO;
+            assocStat.fairLifeTime = SIMTIME_ZERO;
+            assocStat.fairThroughput = 0.0;
+            assocStat.fairAckedBytes = 0;
+            assocStat.numEndToEndMessages = 0;
+            assocStat.cumEndToEndDelay = SIMTIME_ZERO;
+            assocStat.startEndToEndDelay = sctpMain->par("startEndToEndDelay");
+            assocStat.stopEndToEndDelay = sctpMain->par("stopEndToEndDelay");
             ccModule = sctpMain->par("ccModule");
 
             switch (ccModule) {
@@ -1765,6 +1760,21 @@ void SctpAssociation::stopAssocTimers()
     }
     if (StartAddIP) {
         stopTimer(StartAddIP);
+    }
+}
+
+void SctpAssociation::finalizeStatistics()
+{
+    // Calculate final statistics
+    assocStat.stop = simTime();
+    assocStat.lifeTime = assocStat.stop - assocStat.start;
+
+    if (assocStat.lifeTime > SIMTIME_ZERO) {
+        assocStat.throughput = assocStat.ackedBytes * 8 / assocStat.lifeTime.dbl();
+    }
+
+    if (fairTimer && assocStat.fairLifeTime > SIMTIME_ZERO) {
+        assocStat.fairThroughput = assocStat.fairAckedBytes / assocStat.fairLifeTime.dbl();
     }
 }
 

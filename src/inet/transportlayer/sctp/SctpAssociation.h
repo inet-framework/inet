@@ -848,6 +848,44 @@ class INET_API SctpAssociation : public SimpleModule
     friend class Sctp;
     friend class SctpPathVariables;
 
+    // ====== Association Statistics =========================================
+    struct AssociationStatistics {
+        int32_t assocId = -1;
+        simtime_t start = SIMTIME_ZERO;
+        simtime_t stop = SIMTIME_ZERO;
+        uint64_t rcvdBytes = 0;
+        uint64_t sentBytes = 0;
+        uint64_t transmittedBytes = 0;
+        uint64_t ackedBytes = 0;
+        uint32_t numFastRtx = 0;
+        uint32_t numDups = 0;
+        uint32_t numT3Rtx = 0;
+        uint32_t numPathFailures = 0;
+        uint32_t numForwardTsn = 0;
+        double throughput = 0.0;
+        simtime_t lifeTime = SIMTIME_ZERO;
+        uint32_t numOverfullSACKs = 0;
+        uint64_t sumRGapRanges = 0;
+        uint64_t sumNRGapRanges = 0;
+        uint32_t numDropsBecauseNewTsnGreaterThanHighestTsn = 0;
+        uint32_t numDropsBecauseNoRoomInBuffer = 0;
+        uint32_t numChunksReneged = 0;
+        uint32_t numAuthChunksSent = 0;
+        uint32_t numAuthChunksAccepted = 0;
+        uint32_t numAuthChunksRejected = 0;
+        uint32_t numResetRequestsSent = 0;
+        uint32_t numResetRequestsPerformed = 0;
+        simtime_t fairStart = SIMTIME_ZERO;
+        simtime_t fairStop = SIMTIME_ZERO;
+        uint64_t fairAckedBytes = 0;
+        double fairThroughput = 0.0;
+        simtime_t fairLifeTime = SIMTIME_ZERO;
+        uint64_t numEndToEndMessages = 0;
+        SimTime cumEndToEndDelay = SIMTIME_ZERO;
+        uint64_t startEndToEndDelay = 0;
+        uint64_t stopEndToEndDelay = 0;
+    };
+
     // ====== Signal IDs for statistics (using signal-based recording) =====
     // Path-specific signals (use SctpPathStatistic detail object)
     static simsignal_t pathRtoSignal;
@@ -1004,7 +1042,20 @@ class INET_API SctpAssociation : public SimpleModule
     SctpReceiveStreamMap receiveStreams;
     SctpAlgorithm *sctpAlgorithm;
 
+    // ====== Association Statistics =====================================
+    AssociationStatistics assocStat;
+
   public:
+    /**
+     * Get association statistics
+     */
+    const AssociationStatistics& getStatistics() const { return assocStat; }
+
+    /**
+     * Finalize and record statistics (called before association removal)
+     */
+    void finalizeStatistics();
+
     /**
      * Constructor.
      */
@@ -1444,8 +1495,7 @@ class INET_API SctpAssociation : public SimpleModule
             SctpPathVariables *sackPath);
     void nonRenegablyAckChunk(SctpDataVariables *chunk,
             SctpPathVariables *sackPath,
-            simtime_t& rttEstimation,
-            Sctp::AssocStat *assocStat);
+            simtime_t& rttEstimation);
     void handleChunkReportedAsAcked(uint32_t& highestNewAck,
             simtime_t& rttEstimation,
             SctpDataVariables *myChunk,
@@ -1523,8 +1573,7 @@ class INET_API SctpAssociation : public SimpleModule
         if ((state->auth) && (state->peerAuth) && (typeInChunkList(chunkType)) && (authAdded == false)) {
             SctpAuthenticationChunk *authChunk = createAuthChunk();
             sctpMsg->appendSctpChunks(authChunk);
-            auto it = sctpMain->assocStatMap.find(assocId);
-            it->second.numAuthChunksSent++;
+            assocStat.numAuthChunksSent++;
             return true;
         }
         return false;

@@ -148,8 +148,7 @@ void SctpAssociation::process_SEND(SctpEventCode& event, SctpCommandReq *sctpCom
     int sendBytes = applicationData->getChunkLength().get<B>();
     EV_INFO << "got msg of length " << applicationData->getChunkLength() << " sendBytes=" << sendBytes << endl;
 
-    auto iter = sctpMain->assocStatMap.find(assocId);
-    iter->second.sentBytes += sendBytes;
+    assocStat.sentBytes += sendBytes;
 
     // ------ Prepare SctpDataMsg -----------------------------------------
     const uint32_t streamId = sendCommand->getSid();
