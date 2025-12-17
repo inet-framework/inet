@@ -17,13 +17,14 @@ on individual traffic streams. This approach protects well-behaved streams from
 disruption while ensuring fair resource allocation across all streams sharing
 the network.
 
-This showcase demonstrates statistical policing as an alternative to token bucket
-policing. Unlike token bucket policing's deterministic rate limiting, statistical
-policing uses a sliding window rate meter and statistical rate limiter to
-gradually increase packet drop probability as traffic exceeds configured limits.
-We demonstrate this with a scenario where one client generates excessive traffic
-while another maintains normal traffic, showing how statistical policing
-effectively protects well-behaved streams.
+This showcase demonstrates the statistical policing approach as an alternative
+to token bucket policing. Unlike token bucket policing's deterministic rate
+limiting, the statistical policing implementation in this showcase uses a
+sliding window rate meter and statistical rate limiter to gradually increase
+packet drop probability as traffic exceeds configured limits. We demonstrate
+this with a scenario where one client generates excessive traffic while another
+maintains normal traffic, showing how statistical policing effectively protects
+well-behaved streams.
 
 | Verified with INET version: ``4.4``
 | Source files location: `inet/showcases/tsn/streamfiltering/statistical <https://github.com/inet-framework/inet/tree/master/showcases/tsn/streamfiltering/statistical>`__
