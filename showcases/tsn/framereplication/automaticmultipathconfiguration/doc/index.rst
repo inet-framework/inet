@@ -5,7 +5,7 @@ Goals
 -----
 
 Configuring Frame Replication and Elimination for Reliability (FRER) manually
-is complex and tedious. As demonstrated in the TODO link manualconfiguration showcase,
+is complex and tedious. As demonstrated in the :doc:`/showcases/tsn/framereplication/manualconfiguration/doc/index` showcase,
 it requires explicitly configuring stream identification, stream encoding/decoding,
 stream splitting, and stream merging at each network node. For networks with multiple
 redundant paths, this manual configuration becomes error-prone and difficult to maintain.
@@ -39,8 +39,6 @@ and packet loss by:
    only one copy of each frame is delivered to the application.
 
 For more information about FRER, read the :ref:`corresponding section <ug:sec:tsn:framereplication>` in the INET User's Guide.
-
-TODO link not working?
 
 Network Topology
 ~~~~~~~~~~~~~~~~
@@ -166,13 +164,11 @@ and explicit paths) rather than standard shortest path forwarding.
 Configuring Redundant Paths
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-TODO remove comments
-
 Enable IEEE 802.1CB frame replication and elimination functionality at all nodes:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-at: # enable frame replication and elimination
+   :start-at: *.*.hasStreamRedundancy = true
    :end-at: *.*.hasStreamRedundancy = true
 
 This activates stream identification, stream encoding/decoding, stream splitting
@@ -184,7 +180,7 @@ and elimination:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-at: # enable automatic stream redundancy configurator
+   :start-at: *.streamRedundancyConfigurator.typename = "StreamRedundancyConfigurator"
    :end-at: *.streamRedundancyConfigurator.typename = "StreamRedundancyConfigurator"
 
 The core of this showcase is the explicit path specification through the :par:`trees`
@@ -192,7 +188,7 @@ parameter:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-at: # seamless stream redundancy configuration
+   :start-at: *.streamRedundancyConfigurator.configuration
    :end-before: # visualizer
 
 This configuration defines a stream named "S1" that applies to all packets from the 
