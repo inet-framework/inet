@@ -5,7 +5,7 @@ Goals
 -----
 
 Configuring Frame Replication and Elimination for Reliability (FRER) manually
-is complex and tedious. As demonstrated in the manualconfiguration showcase,
+is complex and tedious. As demonstrated in the TODO link manualconfiguration showcase,
 it requires explicitly configuring stream identification, stream encoding/decoding,
 stream splitting, and stream merging at each network node. For networks with multiple
 redundant paths, this manual configuration becomes error-prone and difficult to maintain.
@@ -39,6 +39,8 @@ and packet loss by:
    only one copy of each frame is delivered to the application.
 
 For more information about FRER, read the :ref:`corresponding section <ug:sec:tsn:framereplication>` in the INET User's Guide.
+
+TODO link not working?
 
 Network Topology
 ~~~~~~~~~~~~~~~~
@@ -163,6 +165,8 @@ and explicit paths) rather than standard shortest path forwarding.
 
 Configuring Redundant Paths
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+TODO remove comments
 
 Enable IEEE 802.1CB frame replication and elimination functionality at all nodes:
 
