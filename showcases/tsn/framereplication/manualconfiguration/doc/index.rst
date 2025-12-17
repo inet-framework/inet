@@ -390,7 +390,7 @@ regardless of which path(s) it arrived on.
 Results
 -------
 
-The following video shows traffic in the network during the node failure:
+The following video shows traffic in the network just before and after node s2a fails:
 
 .. video:: media/traffic.mp4
    :align: center
@@ -408,7 +408,7 @@ The following chart displays the end-to-end delay:
    :align: center
    :width: 80%
 
-The chart shows that there is no service interruption during the node failure.
+The chart shows that there is no service interruption during the node failure interval (20ms-80ms).
 This demonstrates the effectiveness of the FRER mechanism
 in maintaining network connectivity even under certain failure conditions.
 
