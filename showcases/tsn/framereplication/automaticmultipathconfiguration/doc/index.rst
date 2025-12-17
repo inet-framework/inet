@@ -62,15 +62,13 @@ Redundant Path Structure
 The network topology provides **four redundant paths** from source to destination
 that are explicitly configured in this showcase:
 
-TODO follow order of manual
-
 1. **Path 1 (Upper Direct)**: source → s1 → s2a → s3a → destination
-2. **Path 2 (Lower Direct)**: source → s1 → s2b → s3b → destination
-3. **Path 3 (Upper-to-Lower Zig-Zag)**: source → s1 → s2a → s2b → s3b → destination
+2. **Path 2 (Upper-to-Lower Zig-Zag)**: source → s1 → s2a → s2b → s3b → destination
+3. **Path 3 (Lower Direct)**: source → s1 → s2b → s3b → destination
 4. **Path 4 (Lower-to-Upper Zig-Zag)**: source → s1 → s2b → s2a → s3a → destination
 
 The key to this redundancy is the connection between s2a and s2b, which
-creates the zig-zag paths (Paths 3 and 4). This mesh topology allows the network
+creates the zig-zag paths (Paths 2 and 4). This mesh topology allows the network
 to tolerate multiple simultaneous link or node failures, as long as at least one
 complete path remains operational.
 
@@ -82,14 +80,14 @@ network's resilience:
 
 **At t=20ms**: Switch s2a crashes
   - ❌ Path 1 fails (uses s2a)
-  - ❌ Path 3 fails (uses s2a)
+  - ❌ Path 2 fails (uses s2a)
   - ❌ Path 4 fails (uses s2a)
-  - ✅ **Path 2 survives** (source → s1 → s2b → s3b → destination)
+  - ✅ **Path 3 survives** (source → s1 → s2b → s3b → destination)
 
 **At t=80ms**: Switch s2a recovers
   - ✅ All four paths become operational again
 
-During the failure period (20-80ms), Path 2 remains operational, ensuring continuous
+During the failure period (20-80ms), Path 3 remains operational, ensuring continuous
 packet delivery. After recovery, the network returns to full redundancy with all four
 paths available.
 
@@ -206,8 +204,8 @@ Based on these four paths, the :ned:`StreamRedundancyConfigurator` automatically
 1. **Determines split points**: Identifies that frames must be replicated at:
 
    - **s1**: All four paths diverge here (initial 2-way split into upper/lower)
-   - **s2a**: Paths 1 and 3 diverge (split between direct and zig-zag)
-   - **s2b**: Paths 2 and 4 diverge (split between direct and zig-zag)
+   - **s2a**: Paths 1 and 2 diverge (split between direct and zig-zag)
+   - **s2b**: Paths 3 and 4 diverge (split between direct and zig-zag)
 
 2. **Determines merge points**: Identifies where duplicates must be eliminated at:
 
@@ -242,7 +240,7 @@ The following video shows the streams in the network before and after the failur
 .. video:: media/frer.mp4
    :align: center
 
-Despite the failure, **Path 2** (the lower direct path) continues to operate, maintaining 
+Despite the failure, **Path 3** (the lower direct path) continues to operate, maintaining 
 packet delivery throughout the failure period.
 
 Here are the number of received and sent packets:
@@ -261,14 +259,14 @@ The following chart shows the end-to-end delay:
 
 The delay chart demonstrates continuous packet delivery throughout the simulation. During 
 normal operation (0-20ms and 80-100ms), packets are delivered via multiple paths. During 
-the failure period (20-80ms), packets continue to be delivered exclusively via Path 2 
+the failure period (20-80ms), packets continue to be delivered exclusively via Path 3 
 without interruption, as evidenced by the absence of any gap in the delay measurements.
 
 These results validate the effectiveness of the automatic FRER configuration with explicit 
 path specification, demonstrating seamless failover and continuous packet delivery even 
 during network equipment failures.
 
-.. note:: For more details about what the configurator automates, see the TODO (manual) showcase.
+.. note:: For more details about what the configurator automates, see the :doc:`/showcases/tsn/framereplication/manualconfiguration/doc/index` showcase.
 
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`AutomaticMultipathConfigurationShowcase.ned <../AutomaticMultipathConfigurationShowcase.ned>`
