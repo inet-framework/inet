@@ -47,10 +47,10 @@
 
 /showcases/tsn/combiningfeatures/frerandtas/, -f omnetpp.ini -c General -r 0,       1s,         2c89-c055/tplx;8826-e8e2/~tNl;3705-5741/~tND;b2dc-4234/tyf, PASS,
 
-/showcases/tsn/combiningfeatures/gptpandtas/, -f extras.ini -c Recovery -r 0,       4s,         b715-7f1b/tplx;6c7d-5b45/~tNl;dbdd-dd48/~tND;de72-acda/tyf, PASS,
-/showcases/tsn/combiningfeatures/gptpandtas/, -f omnetpp.ini -c NormalOperation -r 0, 4s,       0d1f-731d/tplx;ea13-89e9/~tNl;aed8-1959/~tND;4f84-3023/tyf, PASS,
-/showcases/tsn/combiningfeatures/gptpandtas/, -f omnetpp.ini -c LinkFailure -r 0,   4s,         81ac-b1ea/tplx;90e3-1468/~tNl;4298-c966/~tND;8520-6a4f/tyf, PASS,
-/showcases/tsn/combiningfeatures/gptpandtas/, -f omnetpp.ini -c Failover -r 0,      4s,         8eec-1540/tplx;d17d-cad0/~tNl;3f21-36cb/~tND;b3ee-283c/tyf, PASS,
+/showcases/tsn/combiningfeatures/gptpandtas/, -f extras.ini -c Recovery -r 0,       4s,         458b-6280/tplx;0c08-587f/~tNl;b7c8-3b4a/~tND;de72-acda/tyf, PASS,
+/showcases/tsn/combiningfeatures/gptpandtas/, -f omnetpp.ini -c NormalOperation -r 0, 4s,       511b-743a/tplx;ad27-db3d/~tNl;fc19-ae6c/~tND;4f84-3023/tyf, PASS,
+/showcases/tsn/combiningfeatures/gptpandtas/, -f omnetpp.ini -c LinkFailure -r 0,   4s,         2268-2ee2/tplx;6da6-9526/~tNl;0199-8c6b/~tND;8520-6a4f/tyf, PASS,
+/showcases/tsn/combiningfeatures/gptpandtas/, -f omnetpp.ini -c Failover -r 0,      4s,         b914-1460/tplx;1ef6-3462/~tNl;c055-af09/~tND;b3ee-283c/tyf, PASS,
 
 /showcases/tsn/combiningfeatures/invehicle/, -f omnetpp.ini -c StandardEthernet -r 0, 10ms,       10a1-b73d/tplx;31de-2a01/~tNl;8a66-81b5/~tND;3171-5458/tyf, PASS,
 #/showcases/tsn/combiningfeatures/invehicle/, -f omnetpp.ini -c TimeSensitiveNetworkingBase -r 0, 10ms, 1416-6c5a/tplx;4536-5dd1/~tNl;9161-3b40/~tND;2d00-f300/tyf, PASS,
@@ -90,10 +90,10 @@
 /showcases/tsn/timesynchronization/clockdrift/, -f omnetpp.ini -c RandomClockDrift -r 0, 0.1s, 3055-fa5c/tplx;4afc-1dcc/~tNl;df23-6ecd/~tND;751b-ab1e/tyf, PASS,
 /showcases/tsn/timesynchronization/clockdrift/, -f omnetpp.ini -c ConstantClockDriftOutOfBandSync -r 0, 0.1s, 1be7-d1db/tplx;4d4a-0005/~tNl;2d8e-1294/~tND;688e-3c31/tyf, PASS,
 /showcases/tsn/timesynchronization/clockdrift/, -f omnetpp.ini -c RandomClockDriftOutOfBandSync -r 0, 0.1s, 26a4-d3d3/tplx;914d-9ed4/~tNl;29a5-36ed/~tND;0644-1dd2/tyf, PASS,
-/showcases/tsn/timesynchronization/clockdrift/, -f omnetpp.ini -c RandomClockDriftGptpSync -r 0, 0.1s, 7898-ab79/tplx;a97e-65c1/~tNl;8712-d21b/~tND;7a67-df10/tyf, PASS,
-/showcases/tsn/timesynchronization/gptp/, -f omnetpp.ini -c OneMasterClock -r 0,    1s,         99b5-edcb/tplx;6972-a73b/~tNl;92c2-0c63/~tND;852f-43d5/tyf, PASS,
+/showcases/tsn/timesynchronization/clockdrift/, -f omnetpp.ini -c RandomClockDriftGptpSync -r 0, 0.1s, 0400-72c2/tplx;6ee9-9afe/~tNl;3a00-e79c/~tND;7a67-df10/tyf, PASS,
+/showcases/tsn/timesynchronization/gptp/, -f omnetpp.ini -c OneMasterClock -r 0,    1s,         55c9-5c03/tplx;e05f-c096/~tNl;ad25-eea8/~tND;852f-43d5/tyf, PASS,
 /showcases/tsn/timesynchronization/gptp/, -f omnetpp.ini -c PrimaryAndHotStandbyMasterClocks -r 0, 1s, e421-f805/tplx;513b-e798/~tNl;e833-f622/~tND;7587-d17e/tyf, PASS,
-/showcases/tsn/timesynchronization/gptp/, -f omnetpp.ini -c TwoMasterClocksExploitingNetworkRedundancy -r 0, 1s, b5d1-543e/tplx;71fa-3bd7/~tNl;f958-d096/~tND;c173-f724/tyf, PASS,
+/showcases/tsn/timesynchronization/gptp/, -f omnetpp.ini -c TwoMasterClocksExploitingNetworkRedundancy -r 0, 1s, 9f88-c241/tplx;15c4-21d1/~tNl;d93c-2d0f/~tND;c173-f724/tyf, PASS,
 
 /showcases/tsn/trafficshaping/asynchronousshaper/, -f omnetpp.ini -c General -r 0,  1s,         6ddc-b3ca/tplx;4495-4133/~tNl;ca73-9f0d/~tND;9851-e7b2/tyf, PASS,
 /showcases/tsn/trafficshaping/creditbasedshaper/, -f omnetpp.ini -c General -r 0,   1s,         78c6-1385/tplx;fbd9-ab64/~tNl;731b-0ed0/~tND;a73f-67ff/tyf, PASS,
