@@ -247,7 +247,7 @@ Here are the number of received and sent packets:
 
 .. figure:: media/packetsreceivedsent.png
    :align: center
-   :width: 100%
+   :width: 80%
 
 The number of sent packets is slightly more because some packets are still
 en-route in the network when the simulation ends.
@@ -256,6 +256,7 @@ The following chart shows the end-to-end delay:
 
 .. figure:: media/delay.png
    :align: center
+   :width: 80%
 
 The delay chart demonstrates continuous packet delivery throughout the simulation. During 
 normal operation (0-20ms and 80-100ms), packets are delivered via multiple paths. During 
