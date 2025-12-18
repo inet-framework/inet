@@ -80,7 +80,8 @@
 #/showcases/tsn/gatescheduling/tsnsched/, -f omnetpp.ini -c General -r 0,            0.2s,         0000-0000/tplx;c268-fae7/~tNl;0d5b-c7a9/~tND;e74e-6ba9/tyf, PASS, # TSNsched externel tool required
 
 /showcases/tsn/streamfiltering/statistical/, -f omnetpp.ini -c General -r 0,        1s,         bc9a-33db/tplx;4794-0e45/~tNl;8a22-dfe5/~tND;4ff7-0c47/tyf, PASS,
-/showcases/tsn/streamfiltering/tokenbucket/, -f omnetpp.ini -c General -r 0,        1s,         536f-670b/tplx;7eed-f91c/~tNl;9b64-d771/~tND;3689-6797/tyf, PASS,
+/showcases/tsn/streamfiltering/tokenbucket/, -f omnetpp.ini -c NoStreamFiltering -r 0,        1s,         7f25-0e2b/tplx;b959-85bf/~tNl;5d79-c71d/~tND;3689-6797/tyf, PASS,
+/showcases/tsn/streamfiltering/tokenbucket/, -f omnetpp.ini -c StreamFiltering -r 0,        1s,         6b1d-e40e/tplx;1655-5bb5/~tNl;d3d6-51c1/~tND;3689-6797/tyf, PASS,
 /showcases/tsn/streamfiltering/underthehood/, -f omnetpp.ini -c General -r 0,       1s,         8225-8839/tplx;0000-0000/~tNl;0000-0000/~tND;43d2-d36c/tyf, PASS,
 
 /showcases/tsn/timesynchronization/clockdrift/, -f omnetpp.ini -c NoClockDrift -r 0, 0.1s,        1fb9-4b8c/tplx;d030-e9d8/~tNl;9547-3ed4/~tND;85a1-66e8/tyf, PASS,
