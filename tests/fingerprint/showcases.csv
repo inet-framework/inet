@@ -71,7 +71,7 @@
 
 /showcases/tsn/framereplication/automaticfailureprotection/, -f omnetpp.ini -c NoFrameReplication -r 0, 0.1s, 9347-e1c6/tplx;af38-8d88/~tNl;4813-fd70/~tND;fcc4-be5c/tyf, PASS,
 /showcases/tsn/framereplication/automaticfailureprotection/, -f omnetpp.ini -c FrameReplication -r 0, 0.1s, a106-77b8/tplx;d07e-b2bf/~tNl;fe33-32ed/~tND;fcc4-be5c/tyf, PASS,
-/showcases/tsn/framereplication/automaticmultipathconfiguration/, -f omnetpp.ini -c General -r 0, 0.1s, f13d-494b/tplx;2a99-604c/~tNl;b482-a229/~tND;e73f-c8cc/tyf, PASS,
+/showcases/tsn/framereplication/automaticmultipathconfiguration/, -f omnetpp.ini -c General -r 0, 0.1s, d620-8f0c/tplx;62e3-c17f/~tNl;ebc2-b5a9/~tND;e73f-c8cc/tyf, PASS,
 /showcases/tsn/framereplication/manualconfiguration/, -f omnetpp.ini -c General -r 0, 0.1s,       c824-5732/tplx;e4ca-e25c/~tNl;2ee6-8e01/~tND;1307-839e/tyf, PASS,
 /showcases/tsn/framereplication/multicastfailureprotection/, -f omnetpp.ini -c General -r 0, 0.1s, c1d1-d561/tplx;53a4-dd47/~tNl;7c41-1acd/~tND;0a42-9926/tyf, PASS,
 
