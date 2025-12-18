@@ -67,8 +67,8 @@ In this simulation, the ``pathVisualizer's`` type is
 :par:`displayRoutes` parameter to true.
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: pathVisualizer.*.displayRoutes
-   :end-at: pathVisualizer.*.displayRoutes
+   :start-at: pathVisualizer.displayRoutes
+   :end-at: pathVisualizer.displayRoutes
    :language: ini
 
 The following video shows what happens when the simulation is run.
@@ -146,8 +146,8 @@ does not fade out completely before the next ``UDPBasicAppData`` packet
 arrives.
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: TransportRouteCanvasVisualizer.displayRoutes
-   :end-at: TransportRouteCanvasVisualizer.packetFilter
+   :start-at: transportRouteVisualizer.displayRoutes
+   :end-at: transportRouteVisualizer.packetFilter
    :language: ini
 
 The following video has been captured from the simulation and shows

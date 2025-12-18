@@ -161,7 +161,7 @@ PCAP recorder modules, because ``router1`` has two interfaces.
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: router1.numPcapRecorders
-   :end-before: moduleNamePatterns = "eth[*]
+   :end-at: moduleNamePatterns = "eth[0]
 
 In ``router2``, we'll record only packets carrying TCP data on the ``eth0``
 interface. ``router2`` has two interfaces, so the :par:`moduleNamePatters`

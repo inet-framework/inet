@@ -387,7 +387,7 @@ this can be zero (zero is not allowed for :par:`sendInterval`). The zero
 :par:`burstDuration` is interpreted as infinity.
 
 Operation as a sink
-^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^
 
 When the :par:`destAddresses` parameter is empty, the module receives
 packets and makes statistics only.

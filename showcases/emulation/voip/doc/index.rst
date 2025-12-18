@@ -154,7 +154,7 @@ This section presents various configurations for running the VoIP simulation.
 It includes a setup for running the experiment over a real network, and
 various configurations for running it in a virtual network on the local computer.
 
-.. note:: A different showcase (:doc:`mininet`) is dedicated to showing the use of
+.. note:: A different showcase (:doc:`/showcases/emulation/mininet/doc/index`) is dedicated to showing the use of
    Mininet for setting up the virtual network.
 
 Over a Real Network

@@ -175,7 +175,7 @@ This can be worked around with ``nsenter``, as will be shown later. Here is the 
    :end-at: unshare-
 
 The :ned:`ExternalEnvironment` module deals with preparing the host OS environment
-for running the emulation, then cleaning up afterwards. Specifically, the module's :par:`setupCommand` is executed at module creation, and :ned:`teardownCommand` at module destruction.
+for running the emulation, then cleaning up afterwards. Specifically, the module's :par:`setupCommand` is executed at module creation, and :par:`teardownCommand` at module destruction.
 We use these parameters to create and destroy network namespaces and virtual network interfaces in the host OS for each network node.
 We include an :ned:`ExternalEnvironment` module in hosts by setting the :par:`hasEnvironment` parameter to ``true``:
 

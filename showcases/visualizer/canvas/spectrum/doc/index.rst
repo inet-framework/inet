@@ -121,8 +121,8 @@ shape in frequency (the spectral mask in the 802.11 standard):
    :align: center
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: radio.typename
-   :end-at: transmitter.frequencyGains
+   :start-at: radio.signalAnalogRepresentation
+   :end-at: transmitter.analogModel.frequencyGains
    :language: ini
 
 .. note:: We're using linear interpolation instead of log-linear when defining the signal

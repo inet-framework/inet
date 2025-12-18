@@ -33,7 +33,7 @@ component has to prevent the node from exiting. It can call the
 torus, random placement, and error.
 
 MovingMobilityBase class
-~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 The abstract :cpp:`MovingMobilityBase` class can be used to model mobilities
 when the node moves on a continuous trajectory and updates its position

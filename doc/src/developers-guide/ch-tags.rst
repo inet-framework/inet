@@ -76,7 +76,7 @@ enqueued/dequeued, encapsulated/decapsulated, cloned, buffered, or stored for la
 the tags remain unchanged.
 
 Specifying the Protocol of a Packet
-----------------------------------
+-----------------------------------
 
 The most important packet tag is the :cpp:`PacketProtocolTag`. It specifies the
 outermost protocol of the packet. This tag should always be present because the
@@ -101,7 +101,7 @@ the packet protocol tag can only specify the inner protocol that is being encaps
 into an Ethernet MAC frame.
 
 Dispatching Packets to Protocol Modules
---------------------------------------
+---------------------------------------
 
 Inside a network node, protocol modules interact with one another by sending
 :cpp:`Packet` or :cpp:`Message` objects. INET provides great flexibility in terms
