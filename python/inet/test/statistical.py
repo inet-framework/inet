@@ -33,7 +33,7 @@ _append_args = [
 ]
 
 def _read_scalar_result_file(file_name):
-    df = read_result_files(file_name, include_fields_as_scalars=True)
+    df = read_result_files(file_name)
     df = get_scalars(df, include_runattrs=True)
     df = df if df.empty else df[["experiment", "measurement", "replication", "module", "name", "value"]]
     return df
@@ -104,6 +104,8 @@ class StatisticalTestTask(SimulationTestTask):
         if os.path.exists(current_vector_result_file_name):
             run_command_with_logging(["opp_scavetool", "x", "--precision=17", "--type", "sth", "-w", current_scalar_result_file_name, current_vector_result_file_name, "-o", current_scalar_result_file_name])
             os.remove(current_vector_result_file_name)
+        else:
+            run_command_with_logging(["opp_scavetool", "x", "--precision=17", "--type", "sth", "-w", current_scalar_result_file_name, "-o", current_scalar_result_file_name])
         if os.path.exists(current_index_result_file_name):
             os.remove(current_index_result_file_name)
         _remove_attr_lines(current_scalar_result_file_name)
@@ -218,6 +220,8 @@ class StatisticalResultsUpdateTask(SimulationUpdateTask):
         if os.path.exists(current_vector_result_file_name):
             run_command_with_logging(["opp_scavetool", "x", "--precision=17", "--type", "sth", "-w", current_scalar_result_file_name, current_vector_result_file_name, "-o", current_scalar_result_file_name])
             os.remove(current_vector_result_file_name)
+        else:
+            run_command_with_logging(["opp_scavetool", "x", "--precision=17", "--type", "sth", "-w", current_scalar_result_file_name, "-o", current_scalar_result_file_name])
         if os.path.exists(current_index_result_file_name):
             os.remove(current_index_result_file_name)
         _remove_attr_lines(current_scalar_result_file_name)
