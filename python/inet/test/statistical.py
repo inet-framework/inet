@@ -128,7 +128,7 @@ class StatisticalTestTask(SimulationTestTask):
                         (merged['value_stored'].isna() & merged['value_current'].notna()) |
                         (merged['value_stored'].notna() & merged['value_current'].isna()) |
                         (merged['value_stored'] != merged['value_current'])].dropna(subset=['value_stored', 'value_current'], how='all').copy()
-                    df["relative_error"] = df.apply(lambda row: _unbounded_relative_error(row["value_current"], row["value_stored"]), axis=1)
+                    df["relative_error"] = df.apply(lambda row: _unbounded_relative_error(row["value_stored"], row["value_current"]), axis=1)
                     df = df[df.apply(lambda row: matches_filter(row["name"], result_name_filter, exclude_result_name_filter, full_match) and \
                                                  matches_filter(row["module"], result_module_filter, exclude_result_module_filter, full_match), axis=1)]
                     if df.empty:
