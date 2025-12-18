@@ -108,6 +108,7 @@ void SettableClock::setClockTime(clocktime_t newClockTime, ppm oscillatorCompens
         this->oscillatorCompensation = oscillatorCompensation;
         ASSERT(newClockTime == getClockTime());
         clocktime_t clockDelta = newClockTime - oldClockTime;
+        std::sort(events.begin(), events.end(), [] (auto &a, auto &b) { return compareClockEvents(b, a); });
         for (auto event : events) {
             if (event->getRelative())
                 // NOTE: the simulation time of event execution is not affected
