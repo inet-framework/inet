@@ -10,7 +10,8 @@ reset requests performed.
 
 [General]
 network = inet.test.moduletest.lib.SctpFeatureTest
-cmdenv-express-mode = true
+cmdenv-express-mode = false
+cmdenv-log-prefix = "[%m]:  "
 cmdenv-log-finalization = true
 ned-path = .;../../../../src;../../lib
 
