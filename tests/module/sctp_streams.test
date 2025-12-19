@@ -63,8 +63,8 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: results/General-0.sca
-scalar SctpFeatureTest.sctp_server.sctp "Bytes received on stream 0 of assoc [1-9][0-9]*" [1-9][0-9]*
-scalar SctpFeatureTest.sctp_server.sctp "Bytes received on stream 1 of assoc [1-9][0-9]*" [1-9][0-9]*
-scalar SctpFeatureTest.sctp_server.sctp "Bytes received on stream 2 of assoc [1-9][0-9]*" [1-9][0-9]*
-scalar SctpFeatureTest.sctp_server.sctp "Bytes received on stream 3 of assoc [1-9][0-9]*" [1-9][0-9]*
+scalar SctpFeatureTest.sctp_server.sctp.assoc-[1-9][0-9]* "Bytes received on stream 0" [1-9][0-9]*
+scalar SctpFeatureTest.sctp_server.sctp.assoc-[1-9][0-9]* "Bytes received on stream 1" [1-9][0-9]*
+scalar SctpFeatureTest.sctp_server.sctp.assoc-[1-9][0-9]* "Bytes received on stream 2" [1-9][0-9]*
+scalar SctpFeatureTest.sctp_server.sctp.assoc-[1-9][0-9]* "Bytes received on stream 3" [1-9][0-9]*
 %#--------------------------------------------------------------------------------------------------------------

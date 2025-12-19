@@ -55,11 +55,12 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.hasSctp = true
 **.sctp.sctpAlgorithmClass = "SctpAlg"
 %#--------------------------------------------------------------------------------------------------------------
-%postrun-command: grep "Association 1:" test.out > test_assoc.out || true
+%contains: results/General-0.sca
+scalar failover.sctp_client.sctp.assoc-1 "Fast RTX" 0
 %#--------------------------------------------------------------------------------------------------------------
-%contains-regex: test_assoc.out
-Association 1: number of Fast RTX=0, number of Timer-Based RTX=[1-9][0-9]*
+%contains-regex: results/General-0.sca
+scalar failover\.sctp_client\.sctp\.assoc-1 "Timer-Based RTX" [1-9][0-9]*
 %#--------------------------------------------------------------------------------------------------------------
-%contains: test_assoc.out
-Association 1: sent bytes=72600, acked bytes=72600
+%contains: results/General-0.sca
+scalar failover.sctp_client.sctp.assoc-1 "Acked Bytes" 72600
 %#--------------------------------------------------------------------------------------------------------------

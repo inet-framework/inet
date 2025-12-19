@@ -56,12 +56,12 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.sctp.chunks = "SACK,DATA"
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: results/General-0.sca
-scalar SctpFeatureTest.sctp_client.sctp "Number of AUTH chunks sent" [1-9][0-9]*
-scalar SctpFeatureTest.sctp_client.sctp "Number of AUTH chunks accepted" [1-9][0-9]*
-scalar SctpFeatureTest.sctp_client.sctp "Number of AUTH chunks rejected" 0
+scalar SctpFeatureTest\.sctp_client\.sctp\.assoc-\d+ "Number of AUTH chunks sent" [1-9][0-9]*
+scalar SctpFeatureTest\.sctp_client\.sctp\.assoc-\d+ "Number of AUTH chunks accepted" [1-9][0-9]*
+scalar SctpFeatureTest\.sctp_client\.sctp\.assoc-\d+ "Number of AUTH chunks rejected" 0
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: results/General-0.sca
-scalar SctpFeatureTest.sctp_server.sctp "Number of AUTH chunks sent" [1-9][0-9]*
-scalar SctpFeatureTest.sctp_server.sctp "Number of AUTH chunks accepted" [1-9][0-9]*
-scalar SctpFeatureTest.sctp_server.sctp "Number of AUTH chunks rejected" 0
+scalar SctpFeatureTest\.sctp_server\.sctp\.assoc-\d+ "Number of AUTH chunks sent" [1-9][0-9]*
+scalar SctpFeatureTest\.sctp_server\.sctp\.assoc-\d+ "Number of AUTH chunks accepted" [1-9][0-9]*
+scalar SctpFeatureTest\.sctp_server\.sctp\.assoc-\d+ "Number of AUTH chunks rejected" 0
 %#--------------------------------------------------------------------------------------------------------------
