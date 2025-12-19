@@ -531,7 +531,7 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
 
 bool SctpAssociation::processInitArrived(SctpInitChunk *initchunk, int32_t srcPort, int32_t destPort)
 {
-    SctpAssociation *assoc;
+    SctpAssociation *assoc = this;
     char timerName[64];
     bool trans = false;
     uint16_t type;
@@ -558,6 +558,7 @@ bool SctpAssociation::processInitArrived(SctpInitChunk *initchunk, int32_t srcPo
             SackTimer->setName(timerName);
             snprintf(timerName, sizeof(timerName), "T1_INIT of assoc %d", assocId);
             T1_InitTimer->setName(timerName);
+            assoc->printSctpPathMap();
         }
         else {
             sctpMain->updateSockPair(this, localAddr, remoteAddr, srcPort, destPort);
@@ -684,6 +685,8 @@ bool SctpAssociation::processInitArrived(SctpInitChunk *initchunk, int32_t srcPo
         else {
             trans = true;
         }
+        printSctpAssociation();
+        assoc->printSctpAssociation();
     }
     else if (fsm->getState() == SCTP_S_COOKIE_WAIT) { // INIT-Collision
         EV_INFO << "INIT collision: send Init-Ack\n";

@@ -533,6 +533,7 @@ class INET_API SctpStateVariables : public cObject
     ~SctpStateVariables();
 
   public:
+    void printSctpStateVariables() const;
     void setPrimaryPath(SctpPathVariables *path)
     {
         primaryPath = path;
@@ -1051,6 +1052,7 @@ class INET_API SctpAssociation : public cObject
     }
 
     void printSctpPathMap() const;
+    void printSctpAssociation() const;
 
     /**
      * Compare TSNs

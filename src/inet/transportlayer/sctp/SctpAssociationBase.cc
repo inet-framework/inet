@@ -548,6 +548,243 @@ uint16_t SctpStateVariables::getNumRequestsNotPerformed()
     return count;
 }
 
+void SctpStateVariables::printSctpStateVariables() const
+{
+#define PRTF(x)  EV_DEBUG << "-BZ-   " #x ": " << x << endl;
+#define PRTFX(x) EV_DEBUG << "-BZ-   " #x ":" << endl; for (const auto& elem : x) { EV_DEBUG << "-BZ-     " << elem << endl; }
+#define PRTFM(x) EV_DEBUG << "-BZ-   " #x ":" << endl; for (const auto& elem : x) { EV_DEBUG << "-BZ-     " << elem.first << ", " << elem.second << endl; }
+
+    EV_DEBUG << "-BZ- SctpStateVariables: {" << endl;
+    PRTF(active);
+    PRTF(fork);
+    PRTF(ackPointAdvanced);
+    PRTF(dataChunkReceived);
+    PRTF(initReceived);
+    PRTF(cookieEchoReceived);
+    PRTF(newChunkReceived);
+    PRTF(firstChunkReceived);
+    PRTF(swsAvoidanceInvoked);
+    PRTF(probingIsAllowed);
+    PRTF(zeroWindowProbing);
+    PRTF(alwaysBundleSack);
+    PRTF(fastRecoverySupported);
+    PRTF(nagleEnabled);
+    PRTF(sackAllowed);
+    PRTF(sackAlreadySent);
+    PRTF(reactivatePrimaryPath);
+    PRTF(resetPending);
+    PRTF(resetRequested);
+    PRTF(stopReceiving); // incoming data will be discarded
+    PRTF(stopOldData); // data with TSN<peerTsnAfterReset will be discarded
+    PRTF(queueUpdate);
+    PRTF(firstDataSent);
+    PRTF(peerWindowFull);
+    PRTF(zeroWindow);
+    PRTF(stopSending); // will be called when SCTP_E_SHUTDOWN arrived
+    PRTF(stopReading); // will be called when CLOSE was called and no data will be accepted
+    PRTF(inOut);
+    PRTF(noMoreOutstanding);
+    PRTF(fragInProgress);
+    PRTF(incomingRequestSet);
+    PRTF(numGapReports);
+    PRTF(initialPrimaryPath);
+    // std::list<SctpPathVariables *> lastDataSourceList; // DATA chunk sources for new SACK
+    // SctpPathVariables *lastDataSourcePath;
+    PRTFX(localAddresses);
+    PRTFX(dupList); // Duplicates list for incoming DATA chunks
+    PRTF(errorCount); // overall error counter
+    PRTF(peerRwnd);
+    PRTF(initialPeerRwnd);
+    PRTF(localRwnd);
+    PRTF(nextTsn); // TSN to be sent
+    PRTF(lastTsnAck); // stored at the sender side; cumTSNAck announced in a SACK
+    PRTF(highestTsnAcked);
+    PRTF(lastTsnReceived); // SACK
+    PRTF(lastTsn); // my very last TSN to be sent
+    PRTF(ackState); // number of packets to be acknowledged
+    PRTF(gapList); // GapAck list for incoming DATA chunks
+    PRTF(packetsInTotalBurst);
+    PRTF(lastTransmission);
+    PRTF(outstandingBytes); // Number of bytes outstanding
+    PRTF(queuedSentBytes); // Number of bytes in sender queue
+    PRTF(queuedDroppableBytes); // Bytes in send queue droppable by PR-SCTP
+    PRTF(queuedReceivedBytes); // Number of bytes in receiver queue
+    PRTF(lastStreamScheduled);
+    PRTF(assocPmtu); // smallest overall path mtu
+    PRTF(fragPoint); // maximum size of a fragment
+    PRTF(msgNum); // indicates the sequence number of the message
+    PRTF(bytesRcvd);
+    PRTF(numRequests);
+    PRTF(bytesToRetransmit);
+    PRTF(messagesToPush);
+    PRTF(pushMessagesLeft);
+    PRTF(count);
+    // uint8_t localTieTag[32];
+    // uint8_t peerTieTag[32];
+    PRTF(queuedMessages); // Messages buffered at the sender side
+    PRTF(messageAcceptLimit);
+    PRTF(queueLimit);
+    PRTF(header);
+    PRTF(sendResponse);
+    PRTF(responseSn);
+    PRTF(numResetRequests);
+    PRTF(probingTimeout);
+    // std::vector<int32_t> numMsgsReq;
+    PRTF(cookieLifeTime);
+    /** Counter for init and cookie retransmissions */
+    PRTF(initRetransCounter);
+    PRTF(initRexmitTimeout);
+    /** pointer to the init chunk data structure (for retransmissions) */
+    // SctpInitChunk *initChunk;
+    /** pointer to the cookie chunk data structure (for retransmissions) */
+    // SctpCookieEchoChunk *cookieChunk;
+    /** pointer to the resetChunk (for retransmission) */
+    // SctpShutdownChunk *shutdownChunk;
+    // SctpShutdownAckChunk *shutdownAckChunk;
+    PRTF(sendQueueLimit);
+    PRTF(sendBuffer);
+    PRTF(appSendAllowed);
+    PRTF(lastSendQueueAbated);
+    PRTF(nextRSid);
+    PRTF(swsLimit);
+    PRTF(lastMsgWasFragment);
+    PRTF(enableHeartbeats);
+    PRTF(sendHeartbeatsOnActivePaths);
+    // Ptr<SctpHeader> sctpMsg;
+    PRTF(chunksAdded);
+    PRTF(dataChunksAdded);
+    PRTF(packetBytes);
+    PRTF(numAddedOutStreams);
+    PRTF(numAddedInStreams);
+    PRTF(authAdded);
+
+    // ====== NR-SACK =====================================================
+    PRTF(nrSack);
+    PRTF(gapReportLimit);
+    PRTF(gapListOptimizationVariant);
+    PRTF(smartOverfullSACKHandling);
+    PRTF(disableReneging);
+
+    // ====== Retransmission Method =======================================
+    PRTF(rtxMethod);
+    // ====== Max Burst ===================================================
+    PRTF(maxBurst);
+    PRTF(maxBurstVariant);
+    PRTF(initialWindow);
+    // ====== CMT-SCTP ====================================================
+    PRTF(allowCMT);
+    //PRTF(cmtRetransmissionVariant);
+    PRTF(cmtCUCVariant); // Cwnd Update for CMT (CUC)
+    PRTF(cmtBufferSplitVariant); // Buffer Splitting for CMT
+    PRTF(cmtBufferSplittingUsesOSB); // Use outstanding instead of queued bytes for Buffer Splitting
+    PRTF(cmtChunkReschedulingVariant); // Chunk Rescheduling
+    PRTF(cmtChunkReschedulingThreshold); // Blocking Threshold for Chunk Rescheduling
+
+    PRTF(cmtSmartT3Reset); // Smart T3 Reset for CMT
+    PRTF(cmtSmartFastRTX); // Smart Fast RTX for CMT
+    PRTF(cmtSmartReneging); // Smart Reneging for CMT
+    PRTF(cmtSlowPathRTTUpdate); // Slow Path RTT Update for CMT
+    PRTF(cmtUseSFR); // Split Fast Retransmission (SFR) for CMT
+    PRTF(cmtUseDAC); // Delayed Ack for CMT (DAC)
+    PRTF(cmtUseFRC); // Fast Recovery for CMT (FRC)
+    PRTF(cmtMovedChunksReduceCwnd); // Subtract moved chunk from cwnd of old path
+    PRTF(movedChunkFastRTXFactor);
+    PRTF(blockingTsnsMoved);
+    PRTF(strictCwndBooking); // Strict overbooking handling
+    PRTF(cmtSackPath); // SACK path selection variant for CMT
+    // ====== High-Speed SCTP =============================================
+    PRTF(highSpeedCC); // HighSpeed CC (RFC 3649)
+    PRTF(cmtCCVariant);
+    PRTF(rpPathBlocking); // T.D. 10.08.2011: CMT/RP path blocking
+    PRTF(rpScaleBlockingTimeout); // T.D. 15.08.2011: Scale blocking timeout by number of paths
+    PRTF(rpMinCwnd); // T.D. 15.08.2011: Minimum cwnd in MTUs
+
+    // ====== SACK Sequence Number Checker ================================
+    PRTF(checkSackSeqNumber); // Ensure handling SACKs in original sequence
+    PRTF(outgoingSackSeqNum);
+    PRTF(incomingSackSeqNum);
+
+    // ====== Partial Reliability SCTP ====================================
+    PRTF(asconfSn); // own AddIP serial number
+    PRTF(numberAsconfReceived);
+    PRTF(corrIdNum);
+    PRTF(asconfOutstanding);
+    //SctpAsconfChunk *asconfChunk;
+
+    // ====== Stream Reset ================================================
+    PRTF(streamReset);
+    PRTF(peerStreamReset);
+    PRTF(resetDeferred);
+    PRTF(bundleReset);
+    PRTF(waitForResponse);
+    PRTF(firstPeerRequest);
+    PRTF(appLimited);
+    PRTF(requestsOverlap);
+    PRTF(streamResetSequenceNumber);
+    PRTF(expectedStreamResetSequenceNumber);
+    PRTF(peerRequestSn);
+    PRTF(inRequestSn);
+    PRTF(peerTsnAfterReset);
+    PRTF(lastTsnBeforeReset); // lastTsn announced in OutgoingStreamResetParameter
+    // SctpStreamResetChunk *resetChunk; // pointer to the resetChunk (for retransmission)
+    // SctpParameter *incomingRequest;
+    PRTFX(resetOutStreams);
+    PRTFX(resetInStreams);
+    PRTFX(streamsPending);
+    PRTFX(streamsToReset);
+    PRTFX(peerStreamsToReset);
+    // std::map<uint32_t, RequestData> requests;
+    // std::map<uint32_t, RequestData> peerRequests;
+    // SctpResetReq *resetInfo;
+    PRTF(peerRequestType);
+    PRTF(localRequestType);
+
+    // ====== SCTP Authentication =========================================
+    PRTF(hmacType);
+    PRTF(peerAuth);
+    PRTF(auth);
+    PRTFX(chunkList);
+    PRTFX(peerChunkList);
+    // uint8_t keyVector[512];
+    PRTF(sizeKeyVector);
+    // uint8_t peerKeyVector[512];
+    PRTF(sizePeerKeyVector);
+    // uint8_t sharedKey[512];
+
+    // ====== Further features ============================================
+    PRTF(osbWithHeader);
+    PRTF(padding);
+    PRTF(pktDropSent);
+    PRTF(peerPktDrop);
+    PRTF(advancedPeerAckPoint);
+    PRTF(prMethod);
+    PRTF(peerAllowsChunks); // Flowcontrol: indicates whether the peer adjusts the window according to a number of messages
+    PRTF(initialPeerMsgRwnd);
+    PRTF(localMsgRwnd);
+    PRTF(peerMsgRwnd); // Flowcontrol: corresponds to peerRwnd
+    PRTF(bufferedMessages); // Messages buffered at the receiver side
+    PRTF(outstandingMessages); // Outstanding messages on the sender side; used for flowControl; including retransmitted messages
+    PRTF(bytesToAddPerRcvdChunk);
+    PRTF(bytesToAddPerPeerChunk);
+    PRTF(tellArwnd);
+    PRTF(swsMsgInvoked); // Flowcontrol: corresponds to swsAvoidanceInvoked
+    PRTF(lastThroughputTime);
+    // std::map<uint16_t, uint32_t> streamThroughput;
+    PRTF(lastAssocThroughputTime);
+    PRTF(assocThroughput);
+    PRTF(throughputInterval);
+    PRTF(ssNextStream);
+    PRTF(ssLastDataChunkSizeSet);
+    PRTF(ssOneStreamLeft);
+    // std::map<uint16_t, uint32_t> ssPriorityMap;
+    PRTFM(ssFairBandwidthMap);
+    PRTFM(ssStreamToPathMap);
+
+    // SctpPathVariables *primaryPath;
+    EV_DEBUG << "-BZ-}" << endl;
+#undef PRTF
+}
+
 //
 // FSM framework, SCTP FSM
 //
