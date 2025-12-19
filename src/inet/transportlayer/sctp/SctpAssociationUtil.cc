@@ -2996,7 +2996,9 @@ void SctpAssociation::recordScalars()
     recordScalar("Throughput [bit/s]", assocStat.throughput);
     recordScalar("Transmitted Bytes", assocStat.transmittedBytes);
     recordScalar("Fast RTX", assocStat.numFastRtx);
+    recordScalar("Path failures", assocStat.numPathFailures);
     recordScalar("Timer-Based RTX", assocStat.numT3Rtx);
+    recordScalar("Forward TSN", assocStat.numForwardTsn);
     recordScalar("Duplicate Acks", assocStat.numDups);
     recordScalar("Sum of R Gap Ranges", assocStat.sumRGapRanges);
     recordScalar("Sum of NR Gap Ranges", assocStat.sumNRGapRanges);
