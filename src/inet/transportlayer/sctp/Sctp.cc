@@ -44,7 +44,7 @@ void Sctp::printInfoAssocMap()
             assoc = elem.second;
             key = elem.first;
 
-            EV_DETAIL << "assocId: " << assoc->assocId << " src: " << key.localAddr << " dst: " << key.remoteAddr << " lPort: " << key.localPort << " rPort: " << key.remotePort << " fd: " << assoc->fd << "\n";
+            EV_DETAIL << " - assocId: " << assoc->assocId << " src: " << key.localAddr << " dst: " << key.remoteAddr << " lPort: " << key.localPort << " rPort: " << key.remotePort << " fd: " << assoc->fd << "\n";
         }
 
         EV_DETAIL << "\n";
@@ -55,13 +55,13 @@ void Sctp::printVTagMap()
 {
     int32_t assocId;
     VTagPair key;
-    EV_DETAIL << "Number of Assocs: " << sctpVTagMap.size() << "\n";
+    EV_DETAIL << "Number of Assoc VTags: " << sctpVTagMap.size() << "\n";
     if (sctpVTagMap.size() > 0) {
         for (auto& elem : sctpVTagMap) {
             assocId = elem.first;
             key = elem.second;
 
-            EV_DETAIL << "assocId: " << assocId << " peerVTag: " << key.peerVTag
+            EV_DETAIL << " - assocId: " << assocId << " peerVTag: " << key.peerVTag
                       << " localVTag: " << key.localVTag
                       << " localPort: " << key.localPort << " rPort: " << key.remotePort << "\n";
         }

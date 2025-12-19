@@ -528,6 +528,7 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
 
 bool SctpAssociation::processInitArrived(SctpInitChunk *initchunk, int32_t srcPort, int32_t destPort)
 {
+    SctpAssociation *workingAssoc = this;
     bool trans = false;
 
     EV_TRACE << "processInitArrived\n";
@@ -535,7 +536,7 @@ bool SctpAssociation::processInitArrived(SctpInitChunk *initchunk, int32_t srcPo
         EV_INFO << "fork=" << state->fork << " initReceived=" << state->initReceived << "\n";
         if (state->fork && !state->initReceived) {
             EV_TRACE << "cloneAssociation\n";
-            SctpAssociation *workingAssoc = cloneAssociation();
+            workingAssoc = cloneAssociation();
             EV_TRACE << "addForkedAssociation\n";
             // workingAssoc = new working connection (gets new assocId)
             // this = listener (keeps original assocId)
@@ -550,11 +551,14 @@ bool SctpAssociation::processInitArrived(SctpInitChunk *initchunk, int32_t srcPo
             // The working connection continues processing recursively
             // It will execute the INIT processing (lines 570-691) and send INIT-ACK
             trans = workingAssoc->processInitChunk(initchunk);
+            workingAssoc->printSctpPathMap();
         }
         else {
             sctpMain->updateSockPair(this, localAddr, remoteAddr, srcPort, destPort);
             trans = processInitChunk(initchunk);
         }
+        workingAssoc->printSctpAssociation();
+        printSctpAssociation();
     }
     else if (fsm->getState() == SCTP_S_COOKIE_WAIT) { // INIT-Collision
         EV_INFO << "INIT collision: send Init-Ack\n";

@@ -130,12 +130,61 @@ void SctpAssociation::checkPseudoCumAck(const SctpPathVariables *path)
 
 void SctpAssociation::printSctpPathMap() const
 {
-    EV_DEBUG << "Sctp PathMap:" << endl;
+    EV_DEBUG << "Sctp PathMap of assoc " << assocId << ":" << (sctpPathMap.empty() ? " <empty>" : "") << endl;
     for (const auto& elem : sctpPathMap) {
         const SctpPathVariables *path = elem.second;
         EV_DEBUG << " - " << path->remoteAddress << ":  osb=" << path->outstandingBytes
                  << " cwnd=" << path->cwnd << endl;
     }
+}
+
+void SctpAssociation::printSctpAssociation() const
+{
+#define PRTF(x)  EV_DEBUG << "-BZ-   " #x ": " << x << endl;
+#define PRTFX(x) EV_DEBUG << "-BZ-   " #x ":" << endl; for (const auto& elem : x) { EV_DEBUG << "-BZ-     " << elem << endl; }
+#define PRTFM(x) EV_DEBUG << "-BZ-   " #x ":" << endl; for (const auto& elem : x) { EV_DEBUG << "-BZ-     " << elem.first << ", " << elem.second << endl; }
+
+    EV_DEBUG << "-BZ- SctpAssociation: {" << endl;
+    PRTF(appGateIndex);
+    PRTF(assocId);
+    PRTF(listeningAssocId);
+    PRTF(fd);
+    PRTF(listening);
+    PRTF(remoteAddr);
+    PRTF(localAddr);
+    PRTF(localPort);
+    PRTF(remotePort);
+    PRTF(localVTag);
+    PRTF(peerVTag); // Remote verification tag
+
+    PRTF(fairTimer);
+    PRTF((uint16_t)dacPacketsRcvd);
+
+    PRTFX(localAddressList);
+    PRTFX(remoteAddressList);
+    PRTF(numberOfRemoteAddresses);
+    PRTF(inboundStreams);
+    PRTF(outboundStreams);
+    PRTF(initInboundStreams);
+
+    PRTF(status);
+    PRTF(initTsn);
+    PRTF(initPeerTsn);
+    PRTF(sackFrequency);
+    PRTF(sackPeriod);
+    // CCFunctions ccFunctions;
+    PRTF(ccModule);
+
+    state->printSctpStateVariables();
+    // BytesToBeSent bytes;
+    PRTF(fsm->str()); // SCTP state machine
+    printSctpPathMap();
+    // QueueCounter qCounter;
+    // SctpSendStreamMap sendStreams;
+    // SctpReceiveStreamMap receiveStreams;
+    // SctpAlgorithm *sctpAlgorithm;
+    EV_DEBUG << "-BZ-}" << endl;
+#undef PRTF
 }
 
 const char *SctpAssociation::stateName(int32_t state)
@@ -869,9 +918,11 @@ void SctpAssociation::sendInitAck(SctpInitChunk *initChunk)
 #else
     initAckChunk->setIpv6Supported(false);
 #endif
+    EV_DEBUG << "In sendInitAck() 1: length = " << length << endl;
     if (initAckChunk->getIpv4Supported() || initAckChunk->getIpv6Supported()) {
         length += 8;
     }
+    EV_DEBUG << "In sendInitAck() 2: length = " << length << endl;
     uint32_t addrNum = 0;
     bool friendly = false;
     if (sctpMain->hasPar("natFriendly")) {
@@ -881,6 +932,7 @@ void SctpAssociation::sendInitAck(SctpInitChunk *initChunk)
         for (auto& elem : state->localAddresses) {
             initAckChunk->setAddressesArraySize(addrNum + 1);
             initAckChunk->setAddresses(addrNum++, (elem));
+            EV_DETAIL << "  - add address: " << (elem) << endl;
             if ((elem).getType() == L3Address::IPv4) {
                 length += 8;
             }
@@ -888,6 +940,8 @@ void SctpAssociation::sendInitAck(SctpInitChunk *initChunk)
                 length += 20;
             }
         }
+    EV_DETAIL << "  - number of addresses: " << initAckChunk->getAddressesArraySize() << endl;
+    EV_DEBUG << "In sendInitAck() 3: length = " << length << endl;
 
     uint16_t count = 0;
     if (sctpMain->auth == true) {
@@ -907,6 +961,7 @@ void SctpAssociation::sendInitAck(SctpInitChunk *initChunk)
         initAckChunk->setHmacTypes(0, 1);
         length += ADD_PADDING(initAckChunk->getSctpChunkTypesArraySize() + 48);
     }
+    EV_DEBUG << "In sendInitAck() 4: length = " << length << endl;
     uint32_t unknownLen = initChunk->getUnrecognizedParametersArraySize();
     if (unknownLen > 0) {
         EV_INFO << "Found unrecognized Parameters in INIT chunk with a length of " << unknownLen << " bytes.\n";
@@ -917,6 +972,8 @@ void SctpAssociation::sendInitAck(SctpInitChunk *initChunk)
     }
     else
         initAckChunk->setUnrecognizedParametersArraySize(0);
+
+    EV_DEBUG << "In sendInitAck() 5: length = " << length << endl;
 
     if (sctpMain->pktdrop) {
         initAckChunk->setSepChunksArraySize(++count);
@@ -936,11 +993,14 @@ void SctpAssociation::sendInitAck(SctpInitChunk *initChunk)
     if (count > 0) {
         length += ADD_PADDING(SCTP_SUPPORTED_EXTENSIONS_PARAMETER_LENGTH + count);
     }
+    EV_DEBUG << "In sendInitAck() 6: length = " << length << endl;
     if (state->prMethod != 0) {
         initAckChunk->setForwardTsn(true);
         length += 4;
     }
+    EV_DEBUG << "In sendInitAck() 7: length = " << length << endl;
     initAckChunk->setByteLength(length + initAckChunk->getCookieArraySize() + cookie->getLength());
+    EV_DEBUG << "In sendInitAck() 8: length = " << length << endl;
     inboundStreams = ((initChunk->getNoOutStreams() < initAckChunk->getNoInStreams()) ? initChunk->getNoOutStreams() : initAckChunk->getNoInStreams());
     outboundStreams = ((initChunk->getNoInStreams() < initAckChunk->getNoOutStreams()) ? initChunk->getNoInStreams() : initAckChunk->getNoOutStreams());
     (this->*ssFunctions.ssInitStreams)(inboundStreams, outboundStreams);
