@@ -22,6 +22,10 @@ namespace inet {
  */
 class INET_API SettableClock : public OscillatorBasedClock, public IScriptable
 {
+  public:
+    /** Emitted after the oscillator compensation (x) is changed. */
+    static simsignal_t oscillatorCompensationChangedSignal;
+
   protected:
     OverdueClockEventHandlingMode defaultOverdueClockEventHandlingMode = UNSPECIFIED;
     ppm oscillatorCompensation = ppm(0); // 0 means no compensation, higher value means faster clock, e.g. 100 ppm value means the clock compensates 100 microseconds for every second in clock time
@@ -43,7 +47,9 @@ class INET_API SettableClock : public OscillatorBasedClock, public IScriptable
     virtual ClockEvent *cancelClockEvent(ClockEvent *event) override;
     virtual void handleClockEvent(ClockEvent *event) override;
 
-    virtual ppm getOscillatorCompensation() const override { return oscillatorCompensation; }
+    virtual SimTimeScale getOscillatorCompensation() const override {
+        return SimTimeScale::fromPpm(oscillatorCompensation.get<ppm>());
+    }
 
     /**
      * @brief Step the clock to a new time and (optionally) update oscillator compensation.
