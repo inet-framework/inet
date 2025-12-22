@@ -3012,8 +3012,6 @@ if df.empty:
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
-print(df)
-
 style_tuple_list = [('configname','NoStreamFiltering', {'color': default_colors[3]}),
                     ('configname','StreamFiltering', {'color': default_colors[2]})]
 
@@ -3758,8 +3756,6 @@ if df.empty:
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
-print(df)
-
 style_tuple_list = [('configname','NoStreamFiltering', {'color': default_colors[3]}),
                     ('configname','StreamFiltering', {'color': default_colors[2]})]
 
@@ -3767,8 +3763,6 @@ inet.scave.plot.add_to_dataframe(df, style_tuple_list)
 
 # plot
 inet.scave.plot.plot_vectors(df, props)
-
-print(props)
 
 utils.postconfigure_plot(props)
 
@@ -5252,7 +5246,6 @@ if df.empty:
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
-print(df)
 
 style_tuple_list = [('configname','NoStreamFiltering', {'color': default_colors[3]}),
                     ('configname','StreamFiltering', {'color': default_colors[2]})]

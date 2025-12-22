@@ -2284,8 +2284,6 @@ if df.empty:
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
-print(df)
-
 style_tuple_list = [('module','TokenBucketPolicingShowcaseNetwork.server.app\[0\].sink', {'color': default_colors[0]}),
                     ('module','TokenBucketPolicingShowcaseNetwork.server.app\[1\].sink', {'color': default_colors[1]}),
                     ('configname','NoStreamFiltering', {'linestyle': 'dashed'})]
