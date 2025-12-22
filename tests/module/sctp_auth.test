@@ -10,8 +10,9 @@ The number of rejected AUTH chunks should be equal to 0.
 
 [General]
 network = inet.test.moduletest.lib.SctpFeatureTest
-cmdenv-event-banners=false
+#cmdenv-event-banners=false
 cmdenv-express-mode = false
+cmdenv-log-prefix = "[%m]:  "
 ned-path = .;../../../../src;../../lib
 
 #omnetpp 5.0 - 5.1 compatibility:
