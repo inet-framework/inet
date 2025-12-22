@@ -323,6 +323,8 @@ SctpAssociation *SctpAssociation::cloneAssociation()
     assoc->sctpAlgorithm->initialize();
     assoc->state = assoc->sctpAlgorithm->createStateVariables();
 
+    assoc->state->streamReset = state->streamReset;
+
     if (sctpMain->par("auth").boolValue()) {
         const char *chunks = sctpMain->par("chunks");
         bool asc = false;
@@ -336,16 +338,16 @@ SctpAssociation *SctpAssociation::cloneAssociation()
                 asc = true;
             if (chunkToInt(token) == ASCONF_ACK)
                 asca = true;
-            if (!typeInOwnChunkList(chunkToInt(token))) {
-                this->state->chunkList.push_back(chunkToInt(token));
+            if (!assoc->typeInOwnChunkList(chunkToInt(token))) {
+                assoc->state->chunkList.push_back(chunkToInt(token));
             }
             token = strtok(nullptr, ",");
         }
         if (sctpMain->par("addIP").boolValue()) {
-            if (!asc && !typeInOwnChunkList(ASCONF))
-                state->chunkList.push_back(ASCONF);
-            if (!asca && !typeInOwnChunkList(ASCONF_ACK))
-                state->chunkList.push_back(ASCONF_ACK);
+            if (!asc && !assoc->typeInOwnChunkList(ASCONF))
+                assoc->state->chunkList.push_back(ASCONF);
+            if (!asca && !assoc->typeInOwnChunkList(ASCONF_ACK))
+                assoc->state->chunkList.push_back(ASCONF_ACK);
         }
         free(chunkscopy);
     }
