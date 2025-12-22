@@ -13,6 +13,13 @@
 
 namespace inet {
 
+/**
+ * @brief Clock that can be stepped (set) and whose effective oscillator compensation can be changed at runtime.
+ *
+ * Stepping creates a discontinuity in C(t) (the simulation time to clock time mapping). Conversions at the step instant
+ * follow the lower/upper-bound conventions documented by ~IClock. When stepping forward, previously scheduled events
+ * might become overdue; the behavior is controlled by a module parameter.
+ */
 class INET_API SettableClock : public OscillatorBasedClock, public IScriptable
 {
   protected:
@@ -39,8 +46,15 @@ class INET_API SettableClock : public OscillatorBasedClock, public IScriptable
     virtual ppm getOscillatorCompensation() const override { return oscillatorCompensation; }
 
     /**
-     * Sets the clock time immediately to the given value. Greater than 1 oscillator
-     * compensation factor means the clock measures time faster.
+     * @brief Step the clock to a new time and (optionally) update oscillator compensation.
+     *
+     * Effects (executed atomically at the current simulation time s = now):
+     *  - The clock origin is moved to s, and the new origin clock time is set to the given time.
+     *  - The oscillator compensation factor is updated to the provided ppm value.
+     *  - If resetOscillator is true, the phase/origin of the driving oscillator is also reset.
+     *  - Pending events affected by the step are handled according to defaultOverdueClockEventHandlingMode.
+     *
+     *  Backward steps are allowed and may affect modules assuming monotone clock progression.
      */
     virtual void setClockTime(clocktime_t time, ppm oscillatorCompensation, bool resetOscillator);
 };
