@@ -1368,6 +1368,20 @@
         linkerFlags = ""
         />
     <feature
+        id = "RipTutorial"
+        name = "RIP routing tutorial"
+        description = "A step-by-step tutorial starting from the basics, and introducing new features and concepts related to RIP routing."
+        initiallyEnabled = "true"
+        requires = "VisualizationCanvas Ethernet Rip"
+        labels = "tutorial rip routing"
+        nedPackages = "
+		       inet.tutorials.rip
+		      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id = "RoutingShowcases"
         name = "Routing showcases"
         description = "Showcases that demonstrate routing protocols."

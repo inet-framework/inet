@@ -1,0 +1,10 @@
+<!-- scenario7.xml -->
+<scenario>
+    <at t="50">
+        <disconnect src-module="router2" dest-module="switch1" />
+    </at>
+    <at t="602">
+        <connect src-module="router2" src-gate="ethg$o[0]" dest-module="switch1" dest-gate="ethg$i[3]" channel-type="inet.node.ethernet.Eth10M" />
+        <connect src-module="switch1" src-gate="ethg$o[3]" dest-module="router2" dest-gate="ethg$i[0]" channel-type="inet.node.ethernet.Eth10M" />
+    </at>
+</scenario>
