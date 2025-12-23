@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<BGPConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="BGP.xsd">
+
+    <TimerParams>
+        <connectRetryTime> 120 </connectRetryTime>
+        <holdTime>         180 </holdTime>
+        <keepAliveTime>    60  </keepAliveTime>
+        <startDelay>       60   </startDelay>
+    </TimerParams>
+
+    <AS id="64500">
+    	<!--router RA4-->
+        <Router interAddr="10.0.0.1" />
+    </AS>
+    
+    <AS id="64600">
+    	<!--router RB1-->
+        <Router interAddr="20.0.0.6" />
+    </AS>
+    
+    <AS id="64700">
+    	<!--router RC2-->
+        <Router interAddr="30.0.0.2" />
+    </AS>
+    
+    <AS id="64800">
+    	<!--router RD3-->
+        <Router interAddr="40.0.0.13" />
+    </AS>
+
+    <!--bi-directional E-BGP session between RA4 and RB1-->
+    <Session id="1">
+        <Router exterAddr="192.168.0.2"/>
+        <Router exterAddr="192.168.0.1"/>
+    </Session>
+    
+    <!--bi-directional E-BGP session between RA4 and RC2-->
+    <Session id="2">
+        <Router exterAddr="192.168.0.13"/>
+        <Router exterAddr="192.168.0.14"/>
+    </Session>
+    
+    <!--bi-directional E-BGP session between RA4 and RD3-->
+    <Session id="3">
+        <Router exterAddr="192.168.0.17"/>
+        <Router exterAddr="192.168.0.18"/>
+    </Session>
+    
+    <!--bi-directional E-BGP session between RB1 and RC2-->
+    <Session id="4">
+        <Router exterAddr="192.168.0.5"/>
+        <Router exterAddr="192.168.0.6"/>
+    </Session>
+    
+    <!--bi-directional E-BGP session between RB1 and RD3-->
+    <Session id="5">
+        <Router exterAddr="192.168.0.9"/>
+        <Router exterAddr="192.168.0.10"/>
+    </Session>
+
+</BGPConfig>
+
