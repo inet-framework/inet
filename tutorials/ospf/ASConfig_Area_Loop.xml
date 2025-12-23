@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<OSPFASConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="OSPF.xsd">
+
+  <!-- Areas -->
+  <Area id="0.0.0.0">
+    <AddressRange address="R1>R2" mask="R1>R2" />
+    <AddressRange address="R2>R1" mask="R2>R1" />
+  </Area>
+
+  <Area id="0.0.0.1">
+    <AddressRange address="R1>R5" mask="R1>R5" />
+    <AddressRange address="R1>switch1" mask="R1>switch1" />      
+    
+    <AddressRange address="R5>R1" mask="R5>R1" />
+    <AddressRange address="R5>R3" mask="R5>R3" />        
+    <AddressRange address="R5>switch5" mask="R5>switch5" />
+    
+    <AddressRange address="R3>R5" mask="R3>R5" />
+    <AddressRange address="R3>switch3" mask="R3>switch3" />
+  </Area>
+
+  <Area id="0.0.0.2">
+    <AddressRange address="R2>switch2" mask="R2>switch2" />
+    <AddressRange address="R2>R4" mask="R2>R4" />        
+    <AddressRange address="R2>R3" mask="R2>R3" />
+    
+    <AddressRange address="R4>switch4" mask="R4>switch4" />
+    <AddressRange address="R4>R2" mask="R4>R2" />        
+    <AddressRange address="R4>R3" mask="R4>R3" />    
+        
+    <AddressRange address="R3>R2" mask="R3>R2" />
+    <AddressRange address="R3>R4" mask="R3>R4" />
+    <AddressRange address="R3>switch6" mask="R3>switch6" />
+  </Area>
+
+  <!-- Routers -->
+  <Router name="R1" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.1" interfaceMode="Passive" />
+    <BroadcastInterface ifName="eth1" areaID="0.0.0.1" />
+    <BroadcastInterface ifName="eth2" areaID="0.0.0.0" />
+  </Router>
+
+  <Router name="R2" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth1" areaID="0.0.0.2" interfaceMode="Passive" />
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.2" />
+    <BroadcastInterface ifName="eth2" areaID="0.0.0.2" />
+    <BroadcastInterface ifName="eth3" areaID="0.0.0.0" />
+  </Router>
+
+  <Router name="R3" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.2" />
+    <BroadcastInterface ifName="eth1" areaID="0.0.0.2" />
+    <BroadcastInterface ifName="eth2" areaID="0.0.0.1" />
+    <BroadcastInterface ifName="eth3" areaID="0.0.0.1" interfaceMode="Passive" />
+    <BroadcastInterface ifName="eth4" areaID="0.0.0.2" interfaceMode="Passive" />
+  </Router>
+
+  <Router name="R4" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.2" />
+    <BroadcastInterface ifName="eth1" areaID="0.0.0.2" />
+    <BroadcastInterface ifName="eth2" areaID="0.0.0.2" interfaceMode="Passive" />
+  </Router>
+
+  <Router name="R5" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.1" interfaceMode="Passive" />
+    <BroadcastInterface ifName="eth1" areaID="0.0.0.1" />
+    <BroadcastInterface ifName="eth2" areaID="0.0.0.1" />
+  </Router>
+
+</OSPFASConfig>

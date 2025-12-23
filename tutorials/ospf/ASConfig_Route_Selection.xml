@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<OSPFASConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="OSPF.xsd">
+  
+  <!-- Areas -->  
+  <Area id="0.0.0.1">
+    <AddressRange address="R3>R6" mask="R3>R6" />
+    <AddressRange address="R6>R3" mask="R6>R3" />
+  </Area>
+  
+  <!-- Routers -->
+  <Router name="R1" RFC1583Compatible="true">
+    <PointToPointInterface ifName="ppp0" />
+    <PointToPointInterface ifName="ppp1" />
+    <PointToPointInterface ifName="ppp2" />
+    <PointToPointInterface ifName="ppp3" />
+  </Router>
+  
+  <Router name="R2" RFC1583Compatible="true">
+    <PointToPointInterface ifName="ppp0" />
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.0" />
+  </Router>
+  
+  <Router name="R3" RFC1583Compatible="true">
+    <PointToPointInterface ifName="ppp0" />
+    <PointToPointInterface ifName="ppp1" areaID="0.0.0.1" />
+  </Router>
+  
+  <Router name="R4" RFC1583Compatible="true">
+    <PointToPointInterface ifName="ppp0" />
+    <ExternalInterface ifName="eth0" advertisedExternalNetworkAddress="1.1.1.1" advertisedExternalNetworkMask="255.255.255.0" externalInterfaceOutputCost="10" externalInterfaceOutputType="Type1" />
+  </Router>
+  
+  <Router name="R5" RFC1583Compatible="true">
+    <PointToPointInterface ifName="ppp0" />
+    <ExternalInterface ifName="eth0" advertisedExternalNetworkAddress="1.1.1.1" advertisedExternalNetworkMask="255.255.255.0" externalInterfaceOutputCost="2" externalInterfaceOutputType="Type2" />
+  </Router>
+  
+  <Router name="R6" RFC1583Compatible="true">
+    <PointToPointInterface ifName="ppp0" areaID="0.0.0.1" />
+  </Router>
+
+</OSPFASConfig>
