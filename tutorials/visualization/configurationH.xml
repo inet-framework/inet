@@ -1,0 +1,14 @@
+<config>
+<!-- routers dhcp interfaces -->
+<interface hosts="router0" names="eth0" address="192.168.0.1" netmask="255.255.255.0"/>
+<interface hosts="router1" names="eth0" address="192.168.1.1" netmask="255.255.255.0"/>
+<interface hosts="router2" names="eth0" address="192.168.2.1" netmask="255.255.255.0"/>
+<interface hosts="router3" names="eth0" address="192.168.3.1" netmask="255.255.255.0"/>
+<!-- non dhcp interfaces -->
+<interface hosts="router0" names="eth1" address="192.168.5.1" netmask="255.255.255.0"/>
+<interface hosts="videoStreamServer" names="eth0" address="192.168.5.x" netmask="255.255.255.0"/>
+<interface hosts='router*' names='ppp*' address='10.x.x.x' netmask='255.x.x.x'/>
+<interface hosts="tcpHost[*]" names="eth0" address="192.168.x.x" netmask="255.255.255.x"/>
+<interface hosts="router1" names="eth1" address="192.168.11.1" netmask="255.255.255.x"/>
+
+</config>

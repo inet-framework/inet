@@ -1,0 +1,337 @@
+1. Showing Boston downtown
+	- Goals:
+		- Showing a map of a real city
+	- Model:
+		- network:
+			- IMG: VisualizationNetworkA
+			- VisualizationNetworkA
+				- adding coordinateSystem
+				- adding visualizer
+		- parameters:
+			- IMG: [Config Visualization01]
+			- coordinate system:
+				- setting the longitude, latitude and altitude coordinate of the playground origin
+				- setting the orientation of the playground
+			- scene visualizer:
+				- setting our mapfile
+				- setting the playground shading, color and opacity
+				- setting the axis length
+	- Results:
+		- showing the map and the axis in 3d
+		- IMG: contains the axis' neighborhood, and the park
+		- can zoom in/out, rotate, move
+		- change camera mode, that means you can change the mouse buttons' and mouse wheel's camera action
+		- in 2d you can see only the coordinateSystem and the visualizer submodule
+
+
+2. Adding static 3D objects to the scene	(under construction, dependency!!!)
+	- Goals:
+		- adding kml file because it's looking good
+	- Model:
+		- network:
+			- 
+	- Results:
+		- 
+
+
+3. Displaying communiation/interference range
+	- Goals:
+		- Showing communication range of the peds and ap &
+		- Showing interference range of the pads and ap, becausewe want to know that in what areas they can communicate
+	- Model:
+		- network:
+			- VisualizationNetworkB
+			- adding pedestrians and one ap to the appropriate position
+			- adding networkConfigurator to configurate network nodes
+			- adding radioMedium that's simulating the media
+		- parameters:
+			- set wlan transmitter power, that define the communication range
+			- set displayCommunicationRange true, to display communication range
+			- set displayInterferenceRange true, to display interference range
+	- Results:
+		- each node has two circles:
+			- we can see communication range (small one)
+			- we can see interference range (big one). Must zoom out to see
+			- we can see these in 2d mode too
+			- IMG: ranges
+
+
+4. Using 3D models for network nodes
+	- Goals:
+		- changing nodes to 3d models because it's swag, we have really good boxman model to change the pedestrians' cellphone
+	- Model:
+		- parameters:
+			- we use the osgModel parameter to change the pedestrians' displaying
+			- after the equal sign we have to set our model.
+			- with the ".(0.1).scale" we can change the model size. Smaller number means smaller model 
+	- Results:
+		- GIF: the walking boxmen
+		- we can see walking boxmen in the park
+		- no change in 2d
+
+
+5. Displaying recent movement
+	- Goals:
+		- Displaying the pedestrians' movement, because they're walking in the park during the call
+	- Model:
+		- parameters:
+			- adding mobility parameters:
+				- mobilityType sets the movement of the network nodes. The access point's type is StationaryMobility, the pedestrians' type is MassMobility
+				- the or initialX, initialY and initialZ show the pedestrians' starting position
+				- with the constraintArea parameters we can set borders for the pedestrians. They can move only within these boundaries
+				- setting their movement direction with the changeAngleBy, and how often they change that with the changeInterval parameter
+				- we can set their speed
+			- adding visualizer parameters
+				- we can visualize the nodes velocity and their movement trail with these settings
+	- Results:
+		- The ap is on its place
+		- In 3d the peds are moving in random directon, leaving a movement trail behind
+		- In 2d happens the same + we can see a velocity vector at each pedestrian
+################################################################################################################################################
+Review 1
+
+
+6. Showing IP addresses
+	- Goals:
+		- Showing the nodes' IP address because of a troubleshooting reason for example
+	- Model:
+		- parameters:
+			- set which node's which interface is considered
+			- adding interface table visualizer parameters:
+				- the nodeFilter parameter shows which nodes are considered. By default it's "no nodes"
+				- the interfaceFilter parameter shows which interfaces are considered for each nodes. By default "all interfaces" are considered.
+				- we can change the background and the font color if we want
+	- Results:
+		- on a yellow background we can see the pedestrians' IP addresses
+		- IMG: a pedestrian with its IP address
+		- GIF: the access point and the moving pedestrians with their IP addresses
+
+
+7. Showing wifi association
+	- Goals:
+		- Displaying the pedestrians to which access point connect. We want to see a signal and a label with the wireless network's ssid
+	- Model:
+		- parameters:
+			- turn off the interfaceTableVisualizer, because of looking reasons
+			- we set the 802.11 visualizer parameter. Show at all devices
+	- Results:
+		- Above the nodes we can see the appropriate information
+		- IMG: include the nodes
+		- GIF: the association process
+
+
+8. Displaying transmissions & receptions
+	- Goals:
+		- The network works properly, the peds associated to access point, so we create some communication between the peds through the access point
+		- Showing to know who transmits and who receives the signal at any moment
+	- Model:
+		- parameters:
+			- setting the application's parameters. They're necessary to keep the simulation realistic:
+				- simulate a voice stream --> basic udp app
+				- set the destination addresses to the other pedestrian, and set the source and destination port at each pedestrian
+				- we can set the message length. If we don't set it int the ini file, then we have to set it at the beginning of the simulation
+				- set the interval of the message sending
+				- add a name to the packets, that identifies the packets
+			- setting the visualization's parameters:
+				- these belong to the medium, so we use mediumVisualizer parameters
+				- displayTransmissions/displayReceptions to display who transmits and receives the signals
+				- we assign images to the transmission/reception roles
+	- Results:
+		- we can see the assigned images above the network nodes at appropriate moment
+		- GIF: include the nodes for a few seconds
+		- in 2d we can't see transmissions & receptions
+
+
+9. Showing propagating signals
+	- Goals:
+		- We can see the transmitter&receiver, but we want to see the propagated signals too
+	- Model:
+		- parameters:
+			- setting medium visualizer parameters:
+				- enable signal displaying
+				- we can set the signal propagation interval (by default it doesn't update, so we can't see anything)
+				- set the signal shape both. There are three modes: ring, sphere, both. ring is a 2d ring on the ground, sphere is a 3d propagation mode, both means displaying both of them (by default it's ring)
+				-3 GIF: include the three signal shapes?
+	- Results:
+		- at every propagation interval the signal is spreading on the ground as a ring and in the air as a sphere
+		- the signal has a beginning and an ending point (not a point exatly.. a ring maybe)
+		- we can see the signal's type on the ground, and it's going with the signals end
+		- between the signal beginning and ending we can see the transmissions and receptions mark above the nodes
+		- in 2D mode we can see ring only
+		- GIF: include the lines above this
+		- GIF: 2D mode
+
+
+10. Showing active physical links
+	- Goals:
+		- Displaying the active physical links between the network nodes
+	- Model:
+		- with the physical link visualizer packet name filter parameter we can filtering which packets are considered to determine active pyhisical links
+		- by the way we can change the line width, line color, line style and fading mode too
+	- Results:
+		- it displays an arrow for each active link in the network
+		- the arrow points from the source towards the destination. If a link is used in both directions then there are arrowheads on both ends of the arrow
+		- each arrow fades out over time until the link becomes inactive unless it is reinforced by another packet.
+		- the arrow automatically follows the movement of mobile nodes.
+		- in 2D mode the physical links marked by dotted arrow. Its every property is the same as in 3d view mode
+		- GIF: for the appearing and fading links, both in 2d and 3d view
+
+
+11. Showing active data links
+	- Goals:
+		- Showing the active data links between the pedestrians and the access point
+	- Model:
+		- parameter:
+			- turn off the physical link visualizer, so we can follow the data links without any disturbing factors
+			- with the data link visualizer packet name filter parameter we can filtering which packets are considered to determine active links
+	- Results:
+		- similar the results of showing active physical links
+		- different is the data link not equal physical link, so it's displaying rarely
+		- it's the same arrow type in 2d mode
+		GIF: for the appearing and fading links, both in 2d and 3d view mode
+
+
+12. Displaying statistics
+	- Goals:
+		- Displaying some statistics about the network, playout delay statistic in this case
+	- Model:
+		- parameter:
+			- we have some statistic about the SimpleVoIPReceiver
+			- subscribing to a signal 
+			- using one of the built-in statistics
+			- we can add a prefix text, should be expressive
+			- determining the source path of the statistic
+			- we can add the measurement
+			- we can add max and min value of the statistic
+	- Results:
+		- above the name of pedestrians appears the playout delay statistic at each device
+		- GIF: include pedestrians and their throughput for a few seconds, showing some value changing
+		- in 2d mode this do the same. In a bubble looks the throughput at each device
+		- GIF: 2d mode including all devices for a few seconds
+################################################################################################################################################
+Review 2
+
+
+13. Showing configured routing tables
+	- Goals:
+		- we want to show the active network routes between the nodes
+	- Model:
+		- network:
+			- add a new network: VisualizationC
+			- add 1 wireless adhoc node (pedestrian with notebook)
+			- add router, switch, server triplet
+			- add connections between these
+		- parameter:
+			- add video stream application
+				- server udp: UDPVideoStreamSvr
+				- host udp: UDPVideoStreamCli
+			- turn off data links
+			- turn on routing table visualizer, that shows routes towards appropriate destination(s)
+				- we can set which destinations are considered
+	- Results:
+		- routing table elements represented with black arrows
+		- they're not follows the packets' real route
+		- they're pointing from sources, which have entry in its routing table towards pedestrianVideo
+		- it's also true in 2d mode
+		- IMG: the lines above
+		- ?GIF: simulation
+
+
+14. Displaying 802.11 channel access state
+	- Goals:
+		- we want to display the wireless nodes' channel access state
+	- Model:
+		- parameters:
+			- turn off the statistics, because it's overlapping
+			- set info visualizer
+				- .modules specifies the submodules of network nodes
+				- .content determines what is displayed on network nodes
+	- Results:
+		- we can see the wireless devices channel access state, also in 2d view mode
+		- GIF: simulation for a few seconds
+
+
+15. Showing active network routes
+	- Goals:
+		- we want to show the active network routes
+	- Model:
+		- parameters:
+			- optional: show voip data links 
+			- turn off data links
+			- turn on voip network routes
+	- Results:
+		- we can see an arrow through the route when the voip packet arrive to the destination
+		- GIF: from the line above this
+
+
+16. Displaying physical environment		(under construction)
+	- Goals:
+		- we want to show physical environment, for example obstacles
+	- Model:
+		- network:
+			- VisualizationE
+				- add physical environment
+		- parameters:
+			- assign the physical environment to the coordinate system
+			- we can add and xml file, that describes the obstacles
+			- there are some other parameters
+	- Results:
+		- we can see the buildings in red, and "forrest" in green color
+		- they have some effect to the signal propagation, like in real world
+		- IMG: from the obstacles
+
+
+17. Displaying obstacle loss		# under construction, can't see the trails
+	- Goals:
+		- we want to display where the signal encounters an obstacle
+	- Model:
+		- parameters:
+			- set some obstacle loss visualizer parameter:
+				- the displayIntersectionTrail parameter enables displaying intersections between physical objects and primary propagation path
+				- the displayFaceNormalVectorTrail parameter enables displaying face normal vectors for physical objects at intersections
+	- Results:
+		- The long black lines across the obstacles display intersections between physical objects and primary propagation path
+		- The short red lines at the border of the obstacles displays face normal vectors for physical objects at intersections
+
+
+18. Showing packet drops
+	- Goals:
+		- we want to see, when packets dropped
+	- Model:
+		- parameters:
+			- set the packetDropVisualizer.packetNameFilter to that value, what packets we want to see
+	- Results:
+		- when a packet dropped we can see a gray cube that fall off the map (at about 10.4)
+
+
+19. Displaying transport connections
+	- Goals:
+		- we want to display the transport connections between hosts
+	- Model:
+		- network:
+			- we use Visualization F
+				- add tcpHosts, 2 APs, switch, router, 2 cars
+		- parameters:
+			- set devices mobility parameters
+			- set cars waypoints
+			- add video stream client app to cars
+	- Results:
+		- we can see colorful markers above the hosts, that communicating via tcp
+
+
+20. Showing link breaks
+	- Goals:
+		- we want to see, when a communication link breaks
+	- Model:
+		- parameters:
+			- turn on link break visualizer, we can filter to nodes
+	- Results:
+		- 3D: we can see a white x on a red circle at the axis when a link breaks
+			- when the cars go in to the ap2's communication range
+			- when the cars go out from the ap2's communication range
+		- 2D: we can see the same at the network node, what drops too many packets
+
+
+21. Visualizing handovers
+	- Results
+		- About at 17-18s
