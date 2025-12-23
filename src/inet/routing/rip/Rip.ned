@@ -66,7 +66,7 @@ simple Rip extends SimpleModule like IApp
         string mode @enum("RIPv2", "RIPng") = default("RIPv2");
         int udpPort = (mode == "RIPng" ? 521 : 520);
 
-        volatile double startupTime @unit(s) = default(uniform(0s,5s)); // Delay before starting RIP
+        double startupTime @unit(s) = default(uniform(0s,updateInterval)); // Delay before starting RIP
         double shutdownTime @unit(s) = default(1s); // Delay before shutting down RIP
 
         // RIP timers
