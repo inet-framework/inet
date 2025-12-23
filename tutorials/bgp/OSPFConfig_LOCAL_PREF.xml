@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<OSPFASConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="OSPF.xsd">
+
+  <!-- Routers -->
+  <Router name="RB1" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" />
+    <BroadcastInterface ifName="eth1" interfaceMode="NoOSPF" />
+  </Router>
+  
+  <Router name="RB2" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" />
+    <BroadcastInterface ifName="eth1" interfaceMode="NoOSPF" />
+    <BroadcastInterface ifName="eth2" interfaceMode="NoOSPF" />
+  </Router>
+  
+  <Router name="RB3" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" />
+    <BroadcastInterface ifName="eth1" />
+  </Router>
+
+</OSPFASConfig>

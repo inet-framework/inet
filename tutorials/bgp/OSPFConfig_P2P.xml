@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<OSPFASConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="OSPF.xsd">
+
+  <!-- Routers -->
+  <Router name="RA1" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" interfaceMode="Passive" />
+    <PointToPointInterface ifName="ppp0" />
+    <PointToPointInterface ifName="ppp1" />
+  </Router>
+  
+  <Router name="RA2" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" interfaceMode="Passive" />
+    <PointToPointInterface ifName="ppp0" />
+    <PointToPointInterface ifName="ppp1" />
+  </Router>
+  
+  <Router name="RA3" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" interfaceMode="Passive" />
+    <PointToPointInterface ifName="ppp0" />
+    <PointToPointInterface ifName="ppp1" />
+  </Router>
+  
+  <Router name="RA4" RFC1583Compatible="true" DistributeDefaultRoute="true">
+    <PointToPointInterface ifName="ppp2" />
+    <PointToPointInterface ifName="ppp0" interfaceMode="NoOSPF" />
+    <PointToPointInterface ifName="ppp1" />
+  </Router> 
+  
+  
+  <Router name="RB1" RFC1583Compatible="true">
+    <PointToPointInterface ifName="ppp2" interfaceMode="NoOSPF" />
+    <PointToPointInterface ifName="ppp1" />
+    <PointToPointInterface ifName="ppp0" />
+  </Router>
+  
+  <Router name="RB2" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" interfaceMode="Passive" />
+    <PointToPointInterface ifName="ppp0" />
+    <PointToPointInterface ifName="ppp1" />
+  </Router>
+  
+  <Router name="RB3" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" interfaceMode="Passive" />
+    <PointToPointInterface ifName="ppp0" />
+    <PointToPointInterface ifName="ppp1" />
+  </Router>
+  
+  <Router name="RB4" RFC1583Compatible="true">
+    <PointToPointInterface ifName="ppp2" interfaceMode="NoOSPF" />
+    <PointToPointInterface ifName="ppp1" />
+    <PointToPointInterface ifName="ppp0" />
+  </Router>
+  
+  
+  <Router name="RC1" RFC1583Compatible="true" DistributeDefaultRoute="true">
+    <PointToPointInterface ifName="ppp2" interfaceMode="NoOSPF" />
+    <PointToPointInterface ifName="ppp1" />
+    <PointToPointInterface ifName="ppp0" />
+  </Router>
+  
+  <Router name="RC2" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" interfaceMode="Passive" />
+    <PointToPointInterface ifName="ppp0" />
+    <PointToPointInterface ifName="ppp1" />
+  </Router>
+  
+  <Router name="RC3" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" interfaceMode="Passive" />
+    <PointToPointInterface ifName="ppp0" />
+    <PointToPointInterface ifName="ppp1" />
+  </Router>
+  
+  <Router name="RC4" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" interfaceMode="Passive" />
+    <PointToPointInterface ifName="ppp0" />
+    <PointToPointInterface ifName="ppp1" />
+  </Router>
+
+</OSPFASConfig>
