@@ -1787,6 +1787,20 @@
         linkerFlags = ""
         />
     <feature
+        id = "VisualizationTutorial"
+        name = "Visualization tutorial"
+        description = "A step-by-step tutorial starting from the basics, and introducing new features and concepts related to visualizing state and behavior of communication networks."
+        initiallyEnabled = "true"
+        requires = "VisualizationCanvas PhysicalEnvironment Ieee80211 Ipv4 Aodv"
+        labels = "tutorial visualization"
+        nedPackages = "
+		       inet.tutorials.visualization
+		      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id = "VoipStream"
         name = "Voice over IP stream applications"
         description = "Voice over IP applications.

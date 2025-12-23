@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scave:Analysis xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:scave="http://www.omnetpp.org/omnetpp/scave">
+  <inputs>
+    <inputs name="/inet/examples/boston/results/General-*.vec"/>
+    <inputs name="/inet/examples/boston/results/General-*.sca"/>
+  </inputs>
+  <datasets>
+    <datasets name="throughput">
+      <items xsi:type="scave:Add" filterPattern="module(*udpApp*) AND &quot;rcvdPk:vector(packetBytes)&quot;" type="VECTOR"/>
+      <items xsi:type="scave:Apply" operation="sum"/>
+      <items xsi:type="scave:Apply" operation="diffquot"/>
+      <items xsi:type="scave:Apply" operation="slidingwinavg">
+        <params name="windowSize" value="1000"/>
+      </items>
+      <items xsi:type="scave:LineChart" name="throughput" lineNameFormat="">
+        <properties name="Line.Type" value="Linear"/>
+      </items>
+    </datasets>
+  </datasets>
+  <chartSheets>
+    <chartSheets name="default" charts="//@datasets/@datasets.0/@items.4"/>
+  </chartSheets>
+</scave:Analysis>

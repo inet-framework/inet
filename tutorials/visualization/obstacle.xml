@@ -1,0 +1,11 @@
+<environment>
+    <object position="min 42.35706 -71.07021 0.1" orientation="0 0 0" shape="prism 10 42.35775 -71.07021 42.35706 -71.06984 42.35719 -71.06918 42.35786 -71.06951" material="brick" fill-color="203 65 84" opacity="0.3"/>
+    <object position="min 42.35721 -71.06941 0.1" orientation="0 0 0" shape="prism 10 42.35786 -71.06941 42.35721 -71.06907 42.35738 -71.06831 42.35797 -71.06855" material="brick" fill-color="203 65 84" opacity="0.3"/>
+    <object position="min 42.35740 -71.06845 0.1" orientation="0 0 0" shape="prism 10 42.35798 -71.06845 42.35740 -71.06820 42.35786 -71.06617 42.35826 -71.06632" material="brick" fill-color="203 65 84" opacity="0.3"/>
+    <object position="min 42.35705 -71.06622 0.1" orientation="0 0 0" shape="prism 10 42.35827 -71.06622 42.35705 -71.06575 42.35719 -71.06514 42.35830 -71.06513" material="brick" fill-color="203 65 84" opacity="0.3"/>
+    <object position="min 42.35674 -71.06979 0.1" orientation="0 0 0" shape="prism 10 42.35699 -71.06979 42.35674 -71.06967 42.35713 -71.06788 42.35737 -71.06798" material="brick" fill-color="203 65 84" opacity="0.3"/>
+    <object position="min 42.35664 -71.06788 0.1" orientation="0 0 0" shape="prism 10 42.35739 -71.06788 42.35664 -71.06758 42.35703 -71.06586 42.35778 -71.06614" material="brick" fill-color="203 65 84" opacity="0.3"/>
+    <object position="min 42.35627 -71.06962 0.1" orientation="0 0 0" shape="prism 10 42.35667 -71.06962 42.35627 -71.06941 42.35663 -71.06770 42.35705 -71.06785" material="brick" fill-color="203 65 84" opacity="0.3"/>
+    <object position="min 42.35572 -71.06903 0.1" orientation="0 0 0" shape="prism 10 42.35609 -71.06903 42.35572 -71.06883 42.35667 -71.06478 42.35696 -71.06496" material="forest" fill-color="160 228 160" opacity="0.3"/>
+    <object position="min 42.35257 -71.06675 0.1" orientation="0 0 0" shape="prism 10 42.35257 -71.06555 42.35322 -71.06533 42.35322 -71.06603 42.35265 -71.06675" material="forest" fill-color="160 228 160" opacity="0.3"/>
+</environment>
