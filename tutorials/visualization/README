@@ -1,0 +1,139 @@
+INET Visualization Tutorial
+
+1) without visualizer
+2) add integrated visualizer
+3) add map
+4) add obstacles
+5) add cars
+6) add movement trail
+7) add ranges
+8) add transmissions/receptions
+9) add links
+10) add routes
+11) add statistic
+12) add signal
+13) add obstacle loss
+
+networks	visualizationTutorialA
+--------
+A.
+ a) no network nodes
+ b) add 2 wireless adhoc nodes (pedestrians with mobiles) and 1 access point
+ c) add movement
+ d) add void application
+ e) add 1 wireless adhoc node (pedestrian with notebook) and add router, switch, server triplet and video stream application
+ f) add another access point, router and separate pedestrians with mobiles, connect routers
+ g) add houses and forest
+ h) add 2 cars and extra access points and routers
+
+steps
+-----
+a)
+ 1. Showing Boston downtown
+ 2. Adding static 3D objects to the scene
+ 		kml file beolv
+b)
+ 3. Displaying communiation/interference range
+ 4. Using 3D models for network nodes
+c)
+ 5. Displaying recent movement and orientation
+ 6. Showing IP addresses
+ 7. Showing wifi association
+d)
+ 8. Displaying transmissions & receptions
+ 9. Showing propagating signals
+ 10. Showing active physical links
+ 11. Showing active data links
+ 12. Displaying throughput statistic
+e)
+ 13. Showing configured routing tables
+ 14. Displaying 802.11 channel access state
+f)
+ 15. Showing active network routes
+g)
+ 16. Displaying physical environment
+ 17. Displaying obstacle loss
+ 18. Showing packet drops
+h)
+ 19. Displaying transport connections
+ 20. Showing link breaks
+ 21. Visualizing handovers
+ 22. Displaying changing routes
+ ...
+ 32. Styling visualizations
+ 33. Recording a deterministic video of the simulation
+ 34. Moving camera through a path during the simulation
+ 35. Controlling animation speed from ns to real time
+
+todo
+----
+add AODV to all nodes
+minden host kulon subnet: 255.255.255.255
+add switches between servers and routers
+move server1 to router2
+add extra unused servers to switches
+increase communication range
+add access point3 near origin
+pedestrians don't handover
+2d,3d paralell
+simple-->complicated, mindig annyi kell, amin a visualizationt el lehet magyarázni es nem tul zajos
+
+example
+-------
+non-trivial network topology for routing
+wifi
+obstacle
+movement
+earth
+
+visualization features
+----------------------
+no visuaization
+simple vs. integrated
+multiple different visualization (canvases)
+packet transmission on datarate channel
+2d, 3d
+sub-visualizations
+filtering
+styling
+animation speed
+controlling 3d camera
+video recording
+
+visualizable phenomenon
+-----------------------
+-handover
+-movement trail
+-orientation
+-transmissions/receptions
+-communication/interference ranges
+-propagation
+interference?
+-3D model
+-3D map
+-physical objects
+collision?
+multipath?
+tunneling?
+
+visualizers
+-----------
+-data links
+-ieee 802.11 association
+-info
+-interface table
+-link break
+-medium
+-mobility
+-network node
+-network route
+-packet drop
+-physical environment
+-physical links
+-routing table
+-scene
+-earth
+-statistic
+-obstacle loss
+-transport connection
+transport route?
