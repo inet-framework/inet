@@ -352,13 +352,13 @@ existing route as long as possible, even when a shorter route becomes
 available as a result of node movement. AODV is only activated when the
 existing route breaks.
 
-Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`DatalinkVisualizerShowcase.ned <../DatalinkVisualizerShowcase.ned>`
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`DataLinkVisualizerShowcase.ned <../DataLinkVisualizerShowcase.ned>`
 
 More Information
 ----------------
 
 This example only demonstrates the key features of data link activity
-visualization. For more information, refer to the :ned:`DatalinkCanvasVisualizer`
+visualization. For more information, refer to the :ned:`DataLinkCanvasVisualizer`
 NED documentation.
 
 
