@@ -6,8 +6,6 @@ EthernetCsmaMacPhy module: tests framebursting in half duplex mode on gigabit et
 ned-path = .;../../../../src;../../lib
 network = inet.test.moduletest.lib.EthTestNetwork
 
-record-eventlog = true
-
 #omnetpp 5.0 - 5.1 compatibility:
 eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
 output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"

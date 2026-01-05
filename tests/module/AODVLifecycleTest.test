@@ -62,7 +62,6 @@ network AODVTest
 %inifile: omnetpp.ini
 [General]
 network = AODVTest
-record-eventlog = true
 sim-time-limit = 100s
 num-rngs = 3
 ned-path = .;../../../../src;../../lib

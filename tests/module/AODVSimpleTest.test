@@ -54,7 +54,6 @@ network AODVTest
 %inifile: omnetpp.ini
 [General]
 network = AODVTest
-record-eventlog = true
 ned-path = .;../../../../src;../../lib
 
 #omnetpp 5.0 - 5.1 compatibility:

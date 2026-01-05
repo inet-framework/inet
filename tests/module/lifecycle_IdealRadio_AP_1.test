@@ -8,7 +8,6 @@ Test shutdown and startup operations on AccessPoint.
 network = Test
 ned-path = .;../../../../src;../../lib
 cmdenv-express-mode = false
-record-eventlog = true
 sim-time-limit = 3s
 
 #omnetpp 5.0 - 5.1 compatibility:

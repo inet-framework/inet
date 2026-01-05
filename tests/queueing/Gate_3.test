@@ -40,7 +40,6 @@ network TestProducerConsumer
 [General]
 network = TestProducerConsumer
 sim-time-limit = 10s
-record-eventlog = true
 cmdenv-event-banners = false
 cmdenv-log-prefix = "At %ts %N: "
 *.producer.packetLength = 1B

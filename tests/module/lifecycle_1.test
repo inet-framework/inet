@@ -8,7 +8,6 @@ Test shutdown and startup operations on StandardHost.
 network = Test
 ned-path = .;../../../../src;../../lib
 cmdenv-express-mode = false
-record-eventlog = true
 
 #omnetpp 5.0 - 5.1 compatibility:
 eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"

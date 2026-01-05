@@ -9,7 +9,6 @@ network = Test
 ned-path = .;../../../../src;../../lib
 cmdenv-express-mode = false
 sim-time-limit = 1000s
-record-eventlog = true
 
 #omnetpp 5.0 - 5.1 compatibility:
 eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"

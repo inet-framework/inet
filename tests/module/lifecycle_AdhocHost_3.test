@@ -9,7 +9,6 @@ Test startup operation on AdhocHost that is initially down.
 network = Test
 ned-path = .;../../../../src;../../lib
 cmdenv-express-mode = false
-record-eventlog = true
 #debugger-attach-on-error = true
 
 #omnetpp 5.0 - 5.1 compatibility:

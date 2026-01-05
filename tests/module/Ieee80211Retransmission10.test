@@ -37,7 +37,6 @@ network RetransmissionTest
 [General]
 
 network = RetransmissionTest
-record-eventlog = true
 ned-path = .;../../../../src;../../lib
 
 **.constraintAreaMinX = 0m
