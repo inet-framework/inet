@@ -68,7 +68,7 @@ class INET_API InitStage
 
 #define Define_InitStage_Dependency(source, target) EXECUTE_PRE_NETWORK_SETUP(inet::InitStageRegistry::getInstance().addInitStageDependency(#source, #target))
 
-#define NUM_INIT_STAGES inet::InitStageRegistry::getInstance().getNumInitStages()
+#define NUM_INIT_STAGES InitStageRegistry::getInstance().getNumInitStages()
 
 } // namespace inet
 
