@@ -117,7 +117,7 @@ separate simulations.
 The :ned:`ExtLowerUdp` module behaves just like the :ned:`Udp` module from the point of view
 of the modules above them. In this showcase (aside from assigning the :ned:`ExtLowerUdp`
 modules to network namespaces) only the VoIP modules need to be configured.
-The simulations are defined in separate configurations of :download:`omnetpp.ini <../omnetpp.ini>`.
+The simulations are defined in separate configurations of :download:`voipsender.ini <../voipsender.ini>` and :download:`voipreceiver.ini <../voipreceiver.ini>`.
 
 - The :ned:`VoipStreamSender` module transmits the contents of an audio file
   as VoIP traffic. The module resamples the audio, encodes it with a codec,
