@@ -144,7 +144,7 @@
 /showcases/visualizer/canvas/networkpathactivity/, -f omnetpp.ini -c EnablingVisualization -r 0,                       500s,            456d-1982/tplx;bd58-e496/~tNl;1b76-9a17/~tND;a1d5-b1ad/tyf, PASS, EthernetMac Ipv4
 /showcases/visualizer/canvas/networkpathactivity/, -f omnetpp.ini -c StaticNetworkPaths -r 0,                          500s,            5995-953f/tplx;cfc6-5083/~tNl;aa2b-919c/~tND;7309-5f3a/tyf, PASS, EthernetMac Ipv4
 /showcases/visualizer/canvas/networkpathactivity/, -f omnetpp.ini -c Mobile -r 0,                                      500s,            8323-4f51/tplx;b1d5-07b0/~tNl;7b93-259f/~tND, PASS, wireless Ipv4
-/showcases/visualizer/canvas/networkpathactivity/, -f omnetpp.ini -c ChangingPaths -r 0,                               250s,            4f8d-b26b/tplx;b0bc-17be/~tNl;2f66-d511/~tND;4093-735d/tyf, PASS, EthernetMac Ipv4
+/showcases/visualizer/canvas/networkpathactivity/, -f omnetpp.ini -c ChangingPaths -r 0,                               250s,            cdd5-ba18/tplx;5fcc-8ab3/~tNl;b19d-7a62/~tND;4093-735d/tyf, PASS, EthernetMac Ipv4
 
 # /showcases/visualizer/canvas/obstacleloss/, -f omnetpp.ini -c EnablingVisualization -r 0,                              250s,            2410-572d/tplx;0000-0000/~tNl;0000-0000/~tND, PASS,    wireless
 # /showcases/visualizer/canvas/obstacleloss/, -f omnetpp.ini -c MultipleObstacles -r 0,                                  500s,            89ca-0f0a/tplx;0000-0000/~tNl;0000-0000/~tND, PASS,    wireless
