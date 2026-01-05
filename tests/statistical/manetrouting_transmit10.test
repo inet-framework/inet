@@ -62,7 +62,6 @@ network Net80211_aodv_test
 
 [General]
 #debug-on-errors = true
-record-eventlog = false
 sim-time-limit = 101s
 seed-0-mt = 5
 network = Net80211_aodv_test
