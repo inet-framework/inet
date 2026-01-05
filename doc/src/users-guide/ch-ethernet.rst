@@ -169,7 +169,7 @@ The following components are present in the model:
 .. _ug:sec:ethernet:ethermacfullduplex:
 
 EthernetMacPhy
-~~~~~~~~~~~
+~~~~~~~~~~~~~~
 
 From the two MAC implementations, :ned:`EthernetMacPhy` is the simpler
 one, it operates only in full-duplex mode (its :par:`duplexEnabled`
@@ -181,7 +181,7 @@ bursting.
 .. _ug:sec:ethernet:ethermac:
 
 EthernetCsmaMacPhy
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 Ethernet MAC layer implementing CSMA/CD. It supports both half-duplex
 and full-duplex operations; in full-duplex mode, it behaves as

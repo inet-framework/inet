@@ -31,7 +31,7 @@ Understanding Triggered Updates
 In standard RIP operation, routers exchange routing updates on a fixed schedule
 
 - typically every 30 seconds. This means that when a topology change occurs,
-there can be a significant delay before other routers learn about it:
+  there can be a significant delay before other routers learn about it:
 
 1. On average, neighbors will wait 15 seconds (half the update interval) before receiving the next scheduled update
 2. Each subsequent "hop" of routers will add another update interval to the convergence time

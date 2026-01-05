@@ -13,8 +13,8 @@ There are several ways to install the INET Framework:
 - Allow the OMNeT++ IDE download and install it for you. This is the
   easiest way. Just accept the offer to install INET in the dialog that
   comes up when the IDE is started for the first time. Alternatively,
-it can be installed by choosing :menuselection:`Help --> Install Simulation Models`
-at any later time.
+  it can be installed by choosing :menuselection:`Help --> Install Simulation Models`
+  at any later time.
 
 - The latest stable version of the INET Framework compatible with your
   version of OMNeT++ can be installed from the INET Framework website
@@ -25,7 +25,7 @@ at any later time.
 - The INET Framework can be cloned from the GitHub repository. If you
   are familiar with *git*, clone the INET Framework project repository
   (``inet-framework/inet``) and check out the chosen revision. Then
-follow the ``INSTALL`` file in the project root.
+  follow the ``INSTALL`` file in the project root.
 
 .. _ug:sec:usage:installing-inet-extensions:
 

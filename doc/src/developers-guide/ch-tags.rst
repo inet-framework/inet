@@ -1,6 +1,6 @@
 :orphan:
 
-.. _dg:cha:tags
+.. _dg:cha:tags:
 
 Communicating with Tags
 =======================

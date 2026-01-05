@@ -180,7 +180,7 @@ Here we demonstrate one configuration example where the network nodes contain
 a :ned:`ExtLowerEthernetInterface`.
 
 INET nodes such as :ned:`StandardHost` and :ned:`Router` can be
-configured to have :ned:`ExtLowerEthernetInterface`s. The simulation
+configured to have :ned:`ExtLowerEthernetInterface` modules. The simulation
 may contain several nodes with external interfaces, and one node may
 also have several external interfaces.
 
