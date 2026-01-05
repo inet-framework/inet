@@ -106,7 +106,7 @@ file (via Ethernet). Additionally, ``ethHost1`` is configured to ping
    .. literalinclude:: ../omnetpp.ini
       :language: ini
       :start-at: host1.numPcapRecorders
-      :end-before: verbose
+      :end-at: *.ethHost2.pcapRecorder[0].dumpProtocols = "ipv4"
 
    We configure `host1`'s PCAP recorder to use the 802.11 link-layer headers,
    and `ethHost1`'s PCAP recorder to use Ethernet link-layer headers.
