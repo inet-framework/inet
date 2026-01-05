@@ -239,7 +239,6 @@ can be both pushed into the input and pulled from the output of packet markers.
 -  :ned:`PacketTagger`: attaches tags such as outgoing interface, hopLimit, VLAN, user priority to matching packets;
    it can be parameterized with an :cpp:`IPacketFilterFunction`
 -  :ned:`ContentBasedTagger`: attaches tags to packets based on the data they contain
--  :ned:`RedMarker`: random early detection marker
 
 Meters
 ------
