@@ -111,6 +111,7 @@ output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 **.rip.ripConfig = xmldoc("RIPConfig.xml")
+**.rip.startupTime = uniform(0s,5s)
 
 **.H*.numApps = 2
 **.H*.app[0].typename = "UdpBasicApp"
