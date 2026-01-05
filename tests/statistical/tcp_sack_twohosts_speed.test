@@ -88,7 +88,6 @@ network TcpSpeedTest
 network = TcpSpeedTest
 total-stack = 7MiB
 #debug-on-errors = true
-#record-eventlog = true
 **.vector-recording = false
 
 #sim-time-limit = 2s+20s

@@ -96,7 +96,6 @@ network Test1
 description = "Dynamic test"
 network = Test1
 ned-path = .;../../../../src;../../lib
-# record-eventlog = true
 # cmdenv-express-mode = false
 # debug-on-errors = true
 sim-time-limit = 600s

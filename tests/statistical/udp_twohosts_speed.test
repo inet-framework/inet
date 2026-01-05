@@ -54,7 +54,6 @@ network UdpClientServer
 network = UdpClientServer
 total-stack = 7MiB
 #debug-on-errors = true
-#record-eventlog = true
 #**.vector-recording = false
 
 sim-time-limit = 20s

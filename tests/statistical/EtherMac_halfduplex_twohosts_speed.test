@@ -83,7 +83,6 @@ network SpeedTest
 [General]
 sim-time-limit = 10s
 
-#record-eventlog = true
 **.vector-recording = false
 
 network = SpeedTest
