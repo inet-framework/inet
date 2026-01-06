@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # Run the ethernet test simulations, and grep the scenario line, errors and fingerprints
 #
