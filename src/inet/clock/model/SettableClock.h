@@ -46,7 +46,9 @@ class INET_API SettableClock : public OscillatorBasedClock, public IScriptable
     virtual ClockEvent *cancelClockEvent(ClockEvent *event) override;
     virtual void handleClockEvent(ClockEvent *event) override;
 
-    virtual ppm getOscillatorCompensation() const override { return oscillatorCompensation; }
+    virtual SimTimeScale getOscillatorCompensation() const override {
+        return SimTimeScale::fromPpm(oscillatorCompensation.get<ppm>());
+    }
 
     /**
      * @brief Step the clock to a new time and (optionally) update oscillator compensation.
