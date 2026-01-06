@@ -1,0 +1,64 @@
+%description:
+Tests rescheduling an event when the drift rate is changed in the middle of an oscillator tick interval.
+
+%includes:
+#include "inet/clock/model/SettableClock.h"
+#include "inet/clock/oscillator/ConstantDriftOscillator.h"
+
+using namespace omnetpp;
+using namespace inet;
+
+%file: TestNetwork.ned
+
+import inet.common.Sink;
+import inet.clock.model.SettableClock;
+
+network TestNetwork
+{
+    submodules:
+        test: Test;
+        sink: Sink;
+        clock: SettableClock;
+}
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+network = TestNetwork
+sim-time-limit = 2us
+cmdenv-log-prefix = "%t: "
+
+*.clock.oscillator.driftRate = 1000000ppm
+*.clock.oscillator.nominalTickLength = 1us
+
+%activity:
+
+auto sink = cSimulation::getActiveSimulation()->getModuleByPath("sink");
+auto clock = check_and_cast<SettableClock *>(cSimulation::getActiveSimulation()->getModuleByPath("clock"));
+auto oscillator = check_and_cast<ConstantDriftOscillator *>(cSimulation::getActiveSimulation()->getModuleByPath("clock.oscillator"));
+
+{
+    cContextSwitcher contextSwitcher(sink);
+    ClockEvent *event1 = new ClockEvent();
+    clock->scheduleClockEventAt(1E-6, event1);
+    ClockEvent *event2 = new ClockEvent();
+    clock->scheduleClockEventAt(2E-6, event2);
+}
+
+wait(2E-7);
+oscillator->setDriftRate(ppm(0));
+
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
+%contains-regex: stdout
+0: Scheduling clock event at, clockTime = 0.000001, simulationTime = 0.0000005, msg = .*?
+
+%contains-regex: stdout
+0.0000002: Rescheduling clock event at, arrivalClockTime = 0.000001, arrivalSimTime = 0.0000008, event = .*?
+
+%contains-regex: stdout
+0.0000008: Handling clock event, clockTime = 0.000001, msg = .*?
+
+%contains-regex: stdout
+0.0000018: Handling clock event, clockTime = 0.000002, msg = .*?
