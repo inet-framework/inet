@@ -71,6 +71,8 @@ OverdueClockEventHandlingMode SettableClock::getOverdueClockEventHandlingMode(Cl
 void SettableClock::setClockTime(clocktime_t newClockTime, ppm oscillatorCompensation, bool resetOscillator)
 {
     Enter_Method("setClockTime");
+    if (oscillatorCompensation < -ppm(500000) || oscillatorCompensation > ppm(1000000))
+        throw cRuntimeError("Invalid argument: oscillatorCompensation = %s (must be in the range [-500000, 1000000] ppm)", oscillatorCompensation.str().c_str());
     clocktime_t oldClockTime = getClockTime();
     newClockTime.setRaw(roundingFunction(newClockTime.raw(), oscillator->getNominalTickLength().raw()));
     if (newClockTime != oldClockTime) {
