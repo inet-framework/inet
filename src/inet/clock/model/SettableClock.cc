@@ -75,7 +75,7 @@ void SettableClock::setClockTime(clocktime_t newClockTime, ppm oscillatorCompens
         throw cRuntimeError("Invalid argument: oscillatorCompensation = %s (must be in the range [-500000, 1000000] ppm)", oscillatorCompensation.str().c_str());
     clocktime_t oldClockTime = getClockTime();
     newClockTime.setRaw(roundingFunction(newClockTime.raw(), oscillator->getNominalTickLength().raw()));
-    if (newClockTime != oldClockTime) {
+    if (newClockTime != oldClockTime || oscillatorCompensation != this->oscillatorCompensation || resetOscillator) {
         clocktime_t clockDelta = newClockTime - oldClockTime;
         emit(timeChangedSignal, oldClockTime.asSimTime());
         if (resetOscillator) {
