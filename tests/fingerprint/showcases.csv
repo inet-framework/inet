@@ -337,9 +337,9 @@
 /showcases/wireless/sensornetwork/,  -f omnetpp.ini -c StatisticXMac -r 100,          25s,         9271-1704/tplx;1890-24d8/~tNl;086f-40ff/tyf, PASS,    wireless Ipv4
 /showcases/wireless/sensornetwork/,  -f omnetpp.ini -c StatisticLMac -r 100,          25s,         60e4-3fd6/tplx;6f72-dc77/~tNl;60d2-eb52/tyf, PASS,    wireless EthernetMac Ipv4
 
-/showcases/wireless/sensornetwork/,  -f extras.ini -c BMacAodv -r 0,                   25s,         2146-c8a6/tplx;4743-8c64/~tNl;3bd4-bfb2/tyf, PASS,    wireless Ipv4
-/showcases/wireless/sensornetwork/,  -f extras.ini -c XMacAodv -r 0,                   25s,         36af-cc52/tplx;2c98-6715/~tNl;7403-5ac3/tyf, PASS,    wireless Ipv4
-/showcases/wireless/sensornetwork/,  -f extras.ini -c LMacAodv -r 0,                   25s,         e066-a2b0/tplx;dbd5-db1d/~tNl;8c32-1424/tyf, PASS,    wireless Ipv4
+/showcases/wireless/sensornetwork/,  -f extras.ini -c BMacAodv -r 0,                   25s,         c156-9f6b/tplx;4743-8c64/~tNl;3bd4-bfb2/tyf, PASS,    wireless Ipv4
+/showcases/wireless/sensornetwork/,  -f extras.ini -c XMacAodv -r 0,                   25s,         237c-5230/tplx;2c98-6715/~tNl;7403-5ac3/tyf, PASS,    wireless Ipv4
+/showcases/wireless/sensornetwork/,  -f extras.ini -c LMacAodv -r 0,                   25s,         14e9-8a62/tplx;dbd5-db1d/~tNl;8c32-1424/tyf, PASS,    wireless Ipv4
 /showcases/wireless/sensornetwork/,  -f extras.ini -c BMacDsdv -r 0,                   25s,         d1c8-2b77/tplx;4a0e-5dca/~tNl;74fc-07a6/tyf, ERROR,    wireless EthernetMac
 /showcases/wireless/sensornetwork/,  -f extras.ini -c XMacDsdv -r 0,                   25s,         0917-1bb4/tplx;c64f-34ee/~tNl;db64-5b3e/tyf, ERROR,    wireless EthernetMac
 /showcases/wireless/sensornetwork/,  -f extras.ini -c LMacDsdv -r 0,                   25s,         0e67-f6b3/tplx;af60-efea/~tNl;e260-4a14/tyf, ERROR,    wireless EthernetMac
