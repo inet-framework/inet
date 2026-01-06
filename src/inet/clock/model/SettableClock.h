@@ -22,6 +22,9 @@ namespace inet {
  */
 class INET_API SettableClock : public OscillatorBasedClock, public IScriptable
 {
+  public:
+    static simsignal_t oscillatorCompensationChangedSignal;
+
   protected:
     OverdueClockEventHandlingMode defaultOverdueClockEventHandlingMode = UNSPECIFIED;
     ppm oscillatorCompensation = ppm(0); // 0 means no compensation, higher value means faster clock, e.g. 100 ppm value means the clock compensates 100 microseconds for every second in clock time
