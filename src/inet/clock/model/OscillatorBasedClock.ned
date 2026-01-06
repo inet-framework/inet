@@ -62,10 +62,12 @@ module OscillatorBasedClock extends ClockBase like IClock
         string oscillatorModule = default(".oscillator");
         double initialClockTime @unit(s) = default(0s); // Clock time at the simulation time when the module is initialized
         string roundingMode @enum("down","up","closer","none") = default("up"); // When scheduling to a clock time or with a clock delay this clock uses rounding with respect to the nominal tick length
+        bool useFutureEventSet = default(true);        // true: schedule in FES; false: internal list (requires oscillator signals)
+        double clockGranularity @unit(s) = default(0s);// Scheduling grid G; 0s ⇒ use oscillator nominal tick length
         @class(OscillatorBasedClock);
     submodules:
         oscillator: <default("ConstantDriftOscillator")> like IOscillator if typename != "" {
             @display("p=100,100");
+            emitNumTicksSignal = default(!parent.useFutureEventSet); // needed when not using FES
         }
 }
-
