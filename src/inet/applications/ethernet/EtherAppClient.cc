@@ -31,9 +31,6 @@ EtherAppClient::~EtherAppClient()
 
 void EtherAppClient::initialize(int stage)
 {
-    if (stage == INITSTAGE_APPLICATION_LAYER && isGenerator())
-        timerMsg = new cMessage("generateNextPacket");
-
     ApplicationBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
@@ -84,8 +81,11 @@ void EtherAppClient::handleMessageWhenUp(cMessage *msg)
 
 void EtherAppClient::handleStartOperation(LifecycleOperation *operation)
 {
-    if (isGenerator())
+    if (isGenerator()) {
+        if (!timerMsg)
+            timerMsg = new cMessage("generateNextPacket");
         scheduleNextPacket(true);
+    }
 }
 
 void EtherAppClient::handleStopOperation(LifecycleOperation *operation)
