@@ -24,8 +24,9 @@ import inet.linklayer.contract.IGptp;
 // 1 ps, which is not accurate enough for peer delay measurements, so it must be set to 1 fs or less in the INI file
 // using simtime-resolution = fs.
 //
-// This module subscribes to the transmissionStarted, transmissionEnded, receptionStarted, and receptionEnded signals
-// on the network interface, so it must be supported by the physical layer transmitter and receiver modules.
+// This module listens to the transmissionStarted, transmissionEnded, receptionStarted, and receptionEnded signals
+// emitted from the network interface. Therefore, it requires support from the physical-layer transmitter and receiver
+// modules, such as the ~StreamingTransmitter and ~DestreamingReceiver used by the ~LayeredEthernetInterface.
 //
 // Typical system parameters:
 //  - Simulation time precision: 1 fs (instead of default 1 ps)
