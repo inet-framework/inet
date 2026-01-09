@@ -257,7 +257,7 @@ void Aodv::startRouteDiscovery(const L3Address& target, unsigned timeToLive)
 
 L3Address Aodv::getSelfIPAddress() const
 {
-    return routingTable->getRouterIdAsGeneric();
+    return CHK(interfaceTable->findInterfaceByName(par("interface")))->getNetworkAddress();
 }
 
 void Aodv::delayDatagram(Packet *datagram)
