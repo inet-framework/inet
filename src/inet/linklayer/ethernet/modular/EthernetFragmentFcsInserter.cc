@@ -25,7 +25,7 @@ uint64_t EthernetFragmentFcsInserter::computeComputedChecksum(const Packet *pack
     if (fragmentTag->getLastFragment())
         return currentFragmentCompleteFcs;
     else
-        return ethernetFcs(bytes.data(), bytes.size()) ^ 0xFFFF0000;
+        return currentFragmentCompleteFcs ^ 0xFFFF0000;
 }
 
 void EthernetFragmentFcsInserter::processPacket(Packet *packet)

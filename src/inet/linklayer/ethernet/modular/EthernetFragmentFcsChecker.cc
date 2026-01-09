@@ -20,11 +20,9 @@ bool EthernetFragmentFcsChecker::checkComputedChecksum(const Packet *packet, Che
 {
     auto data = packet->peekDataAsBytes();
     auto bytes = data->getBytes();
-    uint64_t fragmentFcs = ethernetFcs(bytes.data(), packet->getByteLength() - 4);
     auto& fragmentTag = packet->getTag<FragmentTag>();
     currentFragmentCompleteFcs = ethernetFcs(bytes.data(), packet->getByteLength() - 4, fragmentTag->getFirstFragment() ? 0 : lastFragmentCompleteFcs);
-    bool lastFragment = receivedFcs != (fragmentFcs ^ 0xFFFF0000);
-    return !lastFragment || receivedFcs == currentFragmentCompleteFcs;
+    return receivedFcs == currentFragmentCompleteFcs || receivedFcs == (currentFragmentCompleteFcs ^ 0xFFFF0000);
 }
 
 void EthernetFragmentFcsChecker::processPacket(Packet *packet)
