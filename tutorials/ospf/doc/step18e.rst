@@ -4,20 +4,20 @@ Step 18e. Address Forwarding
 Goals
 -----
 
-[explanation]
+The goal of this step is to demonstrate the use of the Forwarding Address field in AS-External
+LSAs.
+
+By default, when an ASBR advertises an external route, the Forwarding Address is set to 0.0.0.0,
+meaning traffic should be sent to the ASBR itself. However, if the external network is reachable
+through another router on a shared network, the ASBR can set the Forwarding Address to that
+router's IP, allowing packets to be forwarded directly to the actual next-hop router, saving
+a hop.
 
 Configuration
 ~~~~~~~~~~~~~
 
-This step uses the following network:
-
-.. figure:: media/step18e.png
-   :width: 100%
-   :align: center
-
-.. literalinclude:: ../OSPF_Area_External_Forwarding.ned
-   :start-at: network OSPF_Area_External_Forwarding
-   :language: ned
+This step demonstrates a scenario where R6 (not running OSPF) is the actual gateway to an
+external network, and R5 (an ASBR) sets the Forwarding Address to R6's IP.
 
 The configuration in ``omnetpp.ini`` is the following:
 
@@ -34,7 +34,21 @@ The OSPF configuration:
 Results
 ~~~~~~~
 
-[explanation]
+With the Forwarding Address configured:
+
+1.  R5 (ASBR) advertises an external route with Forwarding Address set to R6's IP (192.168.22.3).
+
+2.  Other OSPF routers learn this external route.
+
+3.  When sending packets to the external destination, routers forward them directly to R6
+    (via OSPF routing to 192.168.22.3), not to R5.
+
+4.  This saves one hop compared to routing through R5 first.
+
+5.  The ping from host1 to host3 demonstrates the direct forwarding path.
+
+The Forwarding Address field allows OSPF to optimize forwarding when the ASBR is not the actual
+next-hop to the external destination.
 
 Sources:
 :download:`omnetpp.ini <../omnetpp.ini>`,

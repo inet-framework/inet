@@ -1,29 +1,26 @@
 Step 21. Virtual link - connect two separate parts of a discontinuous backbone
-==============================================================================
+============================================================================
 
 Goals
 -----
 
-[explanation]
+The goal of this step is to demonstrate using virtual links to connect a partitioned backbone.
+
+If the backbone area (Area 0) becomes partitioned (split into disconnected parts), OSPF
+inter-area routing fails because Summary LSAs can only be exchanged through a contiguous
+backbone. Virtual links can reconnect the backbone partitions through a transit area,
+restoring full connectivity.
 
 Configuration
 ~~~~~~~~~~~~~
 
-This step uses the following network:
-
-.. figure:: media/step21.png
-   :width: 100%
-   :align: center
-
-.. literalinclude:: ../VirtualLink.ned
-   :start-at: network VirtualLink
-   :language: ned
+This step simulates a partitioned backbone and uses a virtual link to reconnect it.
 
 The configuration in ``omnetpp.ini`` is the following:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-at: Step21
+    :start-at: Step21
    :end-before: ------
 
 The OSPF configuration:
@@ -34,7 +31,20 @@ The OSPF configuration:
 Results
 ~~~~~~~
 
-[explanation]
+With a partitioned backbone:
+
+1.  Without virtual links, the two parts of Area 0 cannot exchange Summary LSAs.
+2.  Inter-area routing between the partitioned sections fails.
+3.  A virtual link is configured between two ABRs, one in each partition, through a transit area.
+4.  The virtual link acts as a logical Area 0 connection.
+5.  Summary LSAs can now be exchanged between the partitions.
+6.  Full inter-area routing is restored.
+
+The routing tables show that routes are successfully computed across the previously partitioned
+backbone using the virtual link as a bridge.
+
+Virtual links are a temporary solution; proper network design should maintain a contiguous
+backbone.
 
 Sources:
 :download:`omnetpp.ini <../omnetpp.ini>`,

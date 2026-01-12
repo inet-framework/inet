@@ -1,23 +1,23 @@
 Step 24. OSPF Path Selection - Suboptimal routes
-================================================
+=================================================
 
 Goals
 -----
 
-[explanation]
+The goal of this step is to demonstrate scenarios where OSPF's route selection hierarchy can
+lead to suboptimal routing.
+
+Because OSPF always prefers intra-area routes over inter-area routes (regardless of cost), there
+are situations where the protocol selects a longer path within an area instead of a shorter
+path that crosses area boundaries.
+
+This is an intentional design trade-off: OSPF prioritizes routing stability and hierarchical
+structure over always finding the absolute shortest path.
 
 Configuration
 ~~~~~~~~~~~~~
 
-This step uses the following network:
-
-.. figure:: media/step24.png
-   :width: 100%
-   :align: center
-
-.. literalinclude:: ../OSPF_Suboptimal.ned
-   :start-at: network OSPF_Suboptimal
-   :language: ned
+This step uses a topology where an intra-area path is longer than an available inter-area path.
 
 The configuration in ``omnetpp.ini`` is the following:
 
@@ -34,7 +34,22 @@ The OSPF configuration:
 Results
 ~~~~~~~
 
-[explanation]
+The simulation demonstrates suboptimal routing:
+
+1.  host0 pings host6.
+
+2.  An inter-area path R1 → R7 exists with low cost.
+
+3.  However, an intra-area path R1 → R2 → R4 → R5 → R3 → R7 also exists.
+
+4.  OSPF selects the longer intra-area path because intra-area routes are always preferred
+    over inter-area routes.
+
+5.  The traffic follows the suboptimal path: R1 → R2 → R4 → R5 → R3 → R7 → 10.0.0.52
+
+This demonstrates that OSPF's route preference hierarchy can lead to suboptimal paths in
+certain topologies, which is an acceptable trade-off for the benefits of hierarchical routing
+(scalability, stability, summarization).
 
 Sources:
 :download:`omnetpp.ini <../omnetpp.ini>`,

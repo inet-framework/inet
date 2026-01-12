@@ -4,22 +4,17 @@ Step 10c. Router R5 (BDR) goes down
 Goals
 -----
 
-[explanation]
+The goal of this step is to demonstrate what happens when the Backup Designated Router (BDR)
+fails on a multi-access network.
+
+When the BDR fails, a new BDR must be elected to ensure continued backup functionality. The
+DR remains unchanged, and the network continues operating with minimal disruption.
 
 Configuration
 ~~~~~~~~~~~~~
 
-This configuration is based on step 10.
-
-This step uses the following network:
-
-.. figure:: media/step10.png
-   :width: 100%
-   :align: center
-
-.. literalinclude:: ../TopologyChange.ned
-   :start-at: network TopologyChange
-   :language: ned
+This configuration is based on Step 10. The simulation script shuts down router **R5**
+(the BDR) at t=60s.
 
 The configuration in ``omnetpp.ini`` is the following:
 
@@ -31,7 +26,24 @@ The configuration in ``omnetpp.ini`` is the following:
 Results
 ~~~~~~~
 
-[explanation]
+When R5 (the BDR) is shutdown at t=60s:
+
+1.  The DR and other routers on Switch2 detect that R5 has failed.
+
+2.  **A BDR election is triggered** among the remaining routers on the multi-access network.
+
+3.  One of the DROthers (likely the one with the next-highest priority/Router ID) is promoted
+    to become the new BDR.
+
+4.  The DR continues its role unchanged - there is no DR election.
+
+5.  The DR generates a new Network LSA reflecting the changed router attachments.
+
+6.  All routers that had adjacencies with R5 on other interfaces detect the failure and update
+    accordingly.
+
+This demonstrates OSPF's resilience even when the backup router fails. The BDR role is quickly
+reassigned, maintaining redundancy on the multi-access network.
 
 Sources:
 :download:`omnetpp.ini <../omnetpp.ini>`,

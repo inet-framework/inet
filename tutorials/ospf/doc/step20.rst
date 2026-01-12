@@ -4,20 +4,22 @@ Step 20. Stub area
 Goals
 -----
 
-[explanation]
+The goal of this step is to demonstrate OSPF stub areas.
+
+A stub area is an area that does not receive AS-External LSAs (Type-5). Instead, the ABR
+injects a default route into the stub area, reducing the LSDB size and memory requirements
+for routers in that area.
+
+Stub areas are useful for:
+*   Reducing memory and CPU usage in routers with limited resources
+*   Simplifying routing in areas with limited external connectivity (single exit point)
+
+All routers in a stub area must be configured as stub; otherwise, adjacencies will not form.
 
 Configuration
 ~~~~~~~~~~~~~
 
-This step uses the following network:
-
-.. figure:: media/step20.png
-   :width: 100%
-   :align: center
-
-.. literalinclude:: ../OSPF_Stub.ned
-   :start-at: network OSPF_Stub
-   :language: ned
+This step configures an area as a stub area.
 
 The configuration in ``omnetpp.ini`` is the following:
 
@@ -34,7 +36,23 @@ The OSPF configuration:
 Results
 ~~~~~~~
 
-[explanation]
+In a stub area configuration:
+
+1.  The ABR does NOT flood AS-External LSAs (Type-5) into the stub area.
+
+2.  Instead, the ABR generates a default route Summary LSA (0.0.0.0/0) into the stub area.
+
+3.  Routers in the stub area have smaller LSDBs (no external LSAs).
+
+4.  Traffic destined for external networks uses the default route to the ABR.
+
+5.  Intra-area and inter-area routing works normally.
+
+The stub area flag is negotiated in Hello packets. If there's a mismatch, routers will not
+form adjacencies, as seen in the OSPF module logs.
+
+Stub areas provide significant scalability benefits for areas that don't need detailed external
+routing information.
 
 Sources:
 :download:`omnetpp.ini <../omnetpp.ini>`,

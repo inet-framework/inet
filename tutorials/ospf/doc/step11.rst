@@ -4,21 +4,22 @@ Step 11. Configure an interface as NoOSPF
 Goals
 -----
 
-[explanation]
+The goal of this step is to demonstrate the effect of excluding an interface from OSPF using
+the ``NoOSPF`` interface mode.
+
+Setting an interface to ``NoOSPF`` mode effectively removes it from OSPF processing. The
+interface will not:
+*   Send or receive OSPF packets
+*   Form adjacencies
+*   Be advertised in OSPF LSAs
+
+This is equivalent to not including the interface in the OSPF configuration at all.
 
 Configuration
 ~~~~~~~~~~~~~
 
-This configuration is based on step 3.
-
-.. figure:: media/step1-2-11-12.png
-   :width: 100%
-   :align: center
-
-The OSPF configuration:
-
-.. literalinclude:: ../ASConfig_NoOspf.xml
-   :language: xml
+This configuration is based on Step 3. One of the router's interfaces is configured with
+``interfaceMode="NoOSPF"``.
 
 The configuration in ``omnetpp.ini`` is the following:
 
@@ -27,10 +28,24 @@ The configuration in ``omnetpp.ini`` is the following:
    :start-at: Step11
    :end-before: ------
 
+The OSPF configuration:
+
+.. literalinclude:: ../ASConfig_NoOspf.xml
+   :language: xml
+
 Results
 ~~~~~~~
 
-[explanation]
+With the interface configured as NoOSPF:
+
+1.  The interface does not participate in OSPF at all.
+2.  No Hello packets are sent on the interface.
+3.  The network connected to this interface is not advertised in Router LSAs.
+4.  Other routers are unaware of this network and cannot route to it via OSPF.
+
+This mode is useful when you want OSPF running on a router but need to exclude specific
+interfaces from OSPF processing, perhaps because they connect to non-OSPF networks or for
+security reasons.
 
 Sources:
 :download:`omnetpp.ini <../omnetpp.ini>`,

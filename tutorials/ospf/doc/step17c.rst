@@ -4,20 +4,21 @@ Step 17c. Summary LSA
 Goals
 -----
 
-[explanation]
+The goal of this step is to examine Summary LSA behavior and demonstrate when ABRs accept
+Summary LSAs from different areas.
+
+OSPF ABRs have strict rules about accepting Summary LSAs:
+*   Summary LSAs are normally only accepted from the backbone area (Area 0)
+*   If an ABR has no Full adjacency in Area 0, it may temporarily accept Summary LSAs from
+    non-backbone areas
+
+This prevents loops but can lead to interesting behavior when the backbone connectivity changes.
 
 Configuration
 ~~~~~~~~~~~~~
 
-This step uses the following network:
-
-.. figure:: media/step17c.png
-   :width: 100%
-   :align: center
-
-.. literalinclude:: ../OSPF_Summary_LSA.ned
-   :start-at: network OSPF_Summary_LSA
-   :language: ned
+This step simulates a scenario where backbone connectivity is lost and then observes Summary
+LSA behavior.
 
 The configuration in ``omnetpp.ini`` is the following:
 
@@ -34,7 +35,24 @@ The OSPF configuration:
 Results
 ~~~~~~~
 
-[explanation]
+The simulation demonstrates Summary LSA acceptance rules:
+
+1.  Initially, R2 has a Full adjacency in Area 0 and follows normal OSPF rules (only accepting
+    Summary LSAs from Area 0).
+
+2.  At t=60s, the link between R1 and R2 breaks, disconnecting R2 from the backbone.
+
+3.  R2 no longer has any Full adjacencies in Area 0.
+
+4.  In this state, R2 begins accepting Summary LSAs from non-backbone areas.
+
+5.  This allows R2 to maintain some level of connectivity even when isolated from the backbone.
+
+6.  The routing table changes show how R2's routes change when it loses backbone connectivity
+    and begins accepting Summary LSAs from other areas.
+
+This demonstrates OSPF's flexibility in handling partial connectivity failures while still
+maintaining loop-prevention mechanisms.
 
 Sources:
 :download:`omnetpp.ini <../omnetpp.ini>`,

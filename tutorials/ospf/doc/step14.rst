@@ -58,13 +58,14 @@ After OSPF convergence, the network exhibits the following behavior:
 2.  **Summary LSA generation**: 
     
     *   **R3** (ABR between Area 0.0.0.1 and Area 0.0.0.0) generates Summary
-    *   LSAs to advertise
-        networks from Area 0.0.0.1 into Area 0.0.0.0, and vice versa. For example, R3 advertises
-        the 192.168.11.x/30 networks into the backbone.
+        LSAs to advertise networks from Area 0.0.0.1 into Area 0.0.0.0, and vice
+        versa. For example, R3 advertises the 192.168.11.x/30 networks into the
+        backbone.
     *   **R4** (ABR between Area 0.0.0.2 and Area 0.0.0.0) generates Summary
         LSAs to advertise the 192.168.22.x/30 networks from Area 0.0.0.2 into
         Area 0.0.0.0.
-    *   Both ABRs then propagate Summary LSAs from the backbone into their respective non-backbone areas.
+    *   Both ABRs then propagate Summary LSAs from the backbone into their
+        respective non-backbone areas.
 
 3.  **Inter-area routing**: Routers use Summary LSAs to install inter-area
     routes in their routing tables. For example:
