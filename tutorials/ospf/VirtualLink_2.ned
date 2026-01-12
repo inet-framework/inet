@@ -1,7 +1,9 @@
 package inet.tutorials.ospf;
 
+import inet.common.packet.recorder.PcapRecorder;
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.networklayer.ipv4.RoutingTableRecorder;
 import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.Router;
@@ -26,6 +28,12 @@ network VirtualLink_2
         }
         visualizer: IntegratedCanvasVisualizer {
             @display("p=136.05376,208.87126");
+        }
+        routingTableRecorder: RoutingTableRecorder {
+            @display("p=426,43");
+        }
+        pcapRecorder: PcapRecorder {
+            @display("p=636,42");
         }
         scenarioManager: ScenarioManager {
             @display("p=136.05376,360.255");
