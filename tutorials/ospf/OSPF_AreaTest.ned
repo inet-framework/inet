@@ -1,14 +1,13 @@
 package inet.tutorials.ospf;
 
-import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 import inet.common.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;
-import inet.node.ethernet.Eth10M;
-import ned.DatarateChannel;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
+import ned.DatarateChannel;
 
 
 network OSPF_AreaTest
@@ -47,10 +46,10 @@ network OSPF_AreaTest
         R3: Router {
             @display("p=542.1,245.7");
         }
-        switch1: EtherSwitch {
+        switch1: EthernetSwitch {
             @display("p=243.09999,66.299995");
         }
-        switch2: EtherSwitch {
+        switch2: EthernetSwitch {
             @display("p=243.09999,445.9");
         }
         host3: StandardHost {
@@ -62,7 +61,7 @@ network OSPF_AreaTest
         R5: Router {
             @display("p=821.6,245.7");
         }
-        switch3: EtherSwitch {
+        switch3: EthernetSwitch {
             @display("p=955.5,244.4");
         }
 

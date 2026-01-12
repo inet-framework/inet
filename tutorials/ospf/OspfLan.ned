@@ -1,9 +1,10 @@
 package inet.tutorials.ospf;
 
-import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 import inet.node.ethernet.Eth100M;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.StandardHost;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
+
 
 module OspfLan
 {
@@ -13,7 +14,7 @@ module OspfLan
     gates:
         inout ethg[];
     submodules:
-        switch: EtherSwitch;
+        switch: EthernetSwitch;
         host[h]: StandardHost {
             @display("p=199,159");
         }

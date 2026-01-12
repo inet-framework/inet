@@ -1,14 +1,13 @@
 package inet.tutorials.ospf;
 
-import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 import inet.common.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;
-import inet.node.ethernet.Eth10M;
-import ned.DatarateChannel;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
+
 
 network Network2
 {
@@ -48,13 +47,13 @@ network Network2
         host5: StandardHost {
             @display("p=1765.32,933.42");
         }
-        switch1: EtherSwitch {
+        switch1: EthernetSwitch {
             @display("p=518.88,831.89996");
         }
-        switch3: EtherSwitch {
+        switch3: EthernetSwitch {
             @display("p=1514.34,769.86");
         }
-        switch2: EtherSwitch {
+        switch2: EthernetSwitch {
             @display("p=1001.1,798.06");
         }
         R3: Router {
@@ -78,7 +77,7 @@ network Network2
         host8: StandardHost {
             @display("p=659.88,507.59998");
         }
-        switch4: EtherSwitch {
+        switch4: EthernetSwitch {
             @display("p=882.66,344.03998");
         }
         host9: StandardHost {
@@ -90,7 +89,7 @@ network Network2
         host11: StandardHost {
             @display("p=1446.6599,510.41998");
         }
-        switch5: EtherSwitch {
+        switch5: EthernetSwitch {
             @display("p=1243.62,344.03998");
         }
         host12: StandardHost {
@@ -102,7 +101,7 @@ network Network2
         host14: StandardHost {
             @display("p=521.7,1418.46");
         }
-        switch6: EtherSwitch {
+        switch6: EthernetSwitch {
             @display("p=744.48,1257.72");
         }
         host15: StandardHost {
@@ -114,7 +113,7 @@ network Network2
         host17: StandardHost {
             @display("p=1393.08,1418.46");
         }
-        switch7: EtherSwitch {
+        switch7: EthernetSwitch {
             @display("p=1187.22,1257.72");
         }
     connections:

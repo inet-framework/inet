@@ -1,14 +1,12 @@
 package inet.tutorials.ospf;
 
-import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 import inet.common.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;
-import inet.node.ethernet.Eth10M;
-import ned.DatarateChannel;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 
 
 network OSPF_Suboptimal
@@ -40,10 +38,10 @@ network OSPF_Suboptimal
         R5: Router {
             @display("p=474.948,242.484");
         }
-        switch4: EtherSwitch {
+        switch4: EthernetSwitch {
             @display("p=64.128,386.772");
         }
-        switch3: EtherSwitch {
+        switch3: EthernetSwitch {
             @display("p=474.948,330.66");
         }
         R6: Router {
@@ -52,10 +50,10 @@ network OSPF_Suboptimal
         R7: Router {
             @display("p=559.11597,387.774");
         }
-        switch1: EtherSwitch {
+        switch1: EthernetSwitch {
             @display("p=708,138");
         }
-        switch2: EtherSwitch {
+        switch2: EthernetSwitch {
             @display("p=323.646,330.66");
         }
         host0: StandardHost {

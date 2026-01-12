@@ -1,14 +1,13 @@
 package inet.tutorials.ospf;
 
-import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 import inet.common.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;
-import inet.node.ethernet.Eth10M;
-import ned.DatarateChannel;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.Router;
-import inet.node.inet.StandardHost;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
+import ned.DatarateChannel;
+
 
 network Freshness
 {
@@ -46,10 +45,10 @@ network Freshness
         R6: Router {
             @display("p=998.57605,760.60803");
         }
-        switch4: EtherSwitch {
+        switch4: EthernetSwitch {
             @display("p=449.24802,342.496");
         }
-        switch5: EtherSwitch {
+        switch5: EthernetSwitch {
             @display("p=449.24802,962.992");
         }
         R3: Router {
@@ -62,22 +61,22 @@ network Freshness
         R4: Router {
             @display("p=449.24802,760.60803");
         }
-        switch6: EtherSwitch {
+        switch6: EthernetSwitch {
             @display("p=749.48804,962.992");
         }
-        switch7: EtherSwitch {
+        switch7: EthernetSwitch {
             @display("p=998.57605,962.992");
         }
-        switch3: EtherSwitch {
+        switch3: EthernetSwitch {
             @display("p=749.48804,342.496");
         }
-        switch2: EtherSwitch {
+        switch2: EthernetSwitch {
             @display("p=998.57605,342.496");
         }
         R7: Router {
             @display("p=171.248,760.60803");
         }
-        switch1: EtherSwitch {
+        switch1: EthernetSwitch {
             @display("p=171.248,962.992");
         }
     connections:

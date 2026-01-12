@@ -1,14 +1,6 @@
 package inet.tutorials.ospf;
 
-import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.visualizer.integrated.IntegratedCanvasVisualizer;
-import inet.common.scenario.ScenarioManager;
 import inet.node.ethernet.Eth100M;
-import inet.node.ethernet.Eth10M;
-import ned.DatarateChannel;
-import inet.node.ethernet.EtherSwitch;
-import inet.node.inet.Router;
-import inet.node.inet.StandardHost;
 
 
 network OSPF_Stub extends OSPF_AreaTest

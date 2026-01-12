@@ -1,14 +1,12 @@
 package inet.tutorials.ospf;
 
-import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 import inet.common.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;
-import inet.node.ethernet.Eth10M;
-import ned.DatarateChannel;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.Router;
-import inet.node.inet.StandardHost;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
+import ned.DatarateChannel;
 
 
 network VirtualLink_2
@@ -38,16 +36,16 @@ network VirtualLink_2
         R1: Router {
             @display("p=904.47003,260.61002");
         }
-        switch3: EtherSwitch {
+        switch3: EthernetSwitch {
             @display("p=448.40253,463.7325");
         }
-        switch1: EtherSwitch {
+        switch1: EthernetSwitch {
             @display("p=904.47003,47.906254");
         }
         R2: Router {
             @display("p=1052.0212,465.64877");
         }
-        switch2: EtherSwitch {
+        switch2: EthernetSwitch {
             @display("p=1306.8826,463.7325");
         }
     connections:

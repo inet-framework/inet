@@ -1,14 +1,12 @@
 package inet.tutorials.ospf;
 
-import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 import inet.common.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;
-import inet.node.ethernet.Eth10M;
-import ned.DatarateChannel;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.Router;
-import inet.node.inet.StandardHost;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
+import ned.DatarateChannel;
 
 
 network TopologyChange
@@ -41,7 +39,7 @@ network TopologyChange
         R2: Router {
             @display("p=959.4937,573.0675");
         }
-        switch3: EtherSwitch {
+        switch3: EthernetSwitch {
             @display("p=160.35374,570.4387");
         }
         R4: Router {
@@ -51,19 +49,19 @@ network TopologyChange
             @display("p=709.7625,573.0675");
         }
 
-        switch2: EtherSwitch {
+        switch2: EthernetSwitch {
             @display("p=1264.4287,570.4387");
         }
-        switch5: EtherSwitch {
+        switch5: EthernetSwitch {
             @display("p=709.7625,378.54");
         }
         R1: Router {
             @display("p=1519.4175,573.0675");
         }
-        switch4: EtherSwitch {
+        switch4: EthernetSwitch {
             @display("p=959.4937,378.54");
         }
-        switch1: EtherSwitch {
+        switch1: EthernetSwitch {
             @display("p=1782.2925,567.81");
         }
         R5: Router {
@@ -72,10 +70,10 @@ network TopologyChange
         R6: Router {
             @display("p=1264.1412,801.1825");
         }
-        switch6: EtherSwitch {
+        switch6: EthernetSwitch {
             @display("p=1517.6176,376.4075");
         }
-        switch7: EtherSwitch {
+        switch7: EthernetSwitch {
             @display("p=1517.6176,798.3675");
         }
     connections:
