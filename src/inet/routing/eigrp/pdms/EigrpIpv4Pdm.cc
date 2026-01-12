@@ -1348,30 +1348,25 @@ bool EigrpIpv4Pdm::applyStubToUpdate(EigrpRouteSource<Ipv4Address> *src)
 
 void EigrpIpv4Pdm::flushMsgRequests()
 {
-    RequestVector::iterator it;
-    Ipv4Address destAddress;
-
-    // Send Query
-    for (it = reqQueue.begin(); it != reqQueue.end(); it++) {
-        if ((*it)->getOpcode() == EIGRP_QUERY_MSG) {
+    // Send Query if found interface
+    for (auto& item : reqQueue) {
+        if (item->getOpcode() == EIGRP_QUERY_MSG) {
             // Check if interface exists
-            if (eigrpIft->findInterfaceById((*it)->getDestInterface()) == nullptr)
-                continue;
-            else
-                send(*it, RTP_OUTGW);
+            if (eigrpIft->findInterfaceById(item->getDestInterface()) != nullptr) {
+                send(item, RTP_OUTGW);
+            }
         }
     }
 
-    // Send other messages
-    for (it = reqQueue.begin(); it != reqQueue.end(); it++) {
+    // Send or delete other messages
+    for (auto& item : reqQueue) {
         // Check if interface exists
-        if (eigrpIft->findInterfaceById((*it)->getDestInterface()) == nullptr) {
-            delete *it; // Discard request
-            continue;
+        if (eigrpIft->findInterfaceById(item->getDestInterface()) == nullptr) {
+            delete item; // Discard request
         }
-
-        if ((*it)->getOpcode() != EIGRP_QUERY_MSG)
-            send(*it, RTP_OUTGW);
+        else if (item->getOpcode() != EIGRP_QUERY_MSG) {
+            send(item, RTP_OUTGW);
+        }
     }
 
     reqQueue.clear();

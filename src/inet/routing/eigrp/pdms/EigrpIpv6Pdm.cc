@@ -1342,30 +1342,27 @@ bool EigrpIpv6Pdm::applyStubToUpdate(EigrpRouteSource<Ipv6Address> *src)
 
 void EigrpIpv6Pdm::flushMsgRequests()
 {
-    RequestVector::iterator it;
-    Ipv6Address destAddress;
-
     // Send Query
-    for (it = reqQueue.begin(); it != reqQueue.end(); it++) {
-        if ((*it)->getOpcode() == EIGRP_QUERY_MSG) {
+    for (auto& item : reqQueue) {
+        if (item->getOpcode() == EIGRP_QUERY_MSG) {
             // Check if interface exists
-            if (eigrpIft->findInterfaceById((*it)->getDestInterface()) == nullptr)
+            if (eigrpIft->findInterfaceById(item->getDestInterface()) == nullptr)
                 continue;
             else
-                send(*it, RTP_OUTGW);
+                send(item, RTP_OUTGW);
         }
     }
 
     // Send other messages
-    for (it = reqQueue.begin(); it != reqQueue.end(); it++) {
+    for (auto& item : reqQueue) {
         // Check if interface exists
-        if (eigrpIft->findInterfaceById((*it)->getDestInterface()) == nullptr) {
-            delete *it; // Discard request
+        if (eigrpIft->findInterfaceById(item->getDestInterface()) == nullptr) {
+            delete item; // Discard request
             continue;
         }
 
-        if ((*it)->getOpcode() != EIGRP_QUERY_MSG)
-            send(*it, RTP_OUTGW);
+        if (item->getOpcode() != EIGRP_QUERY_MSG)
+            send(item, RTP_OUTGW);
     }
 
     reqQueue.clear();
