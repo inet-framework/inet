@@ -58,7 +58,8 @@ bool EthernetMacHeaderChecker::matchesPacket(const Packet *packet) const
     const auto& header = packet->peekAtFront<EthernetMacHeader>();
     auto interfaceInd = packet->getTag<InterfaceInd>();
     auto networkInterface = interfaceTable->getInterfaceById(interfaceInd->getInterfaceId());
-    if (!promiscuous && !networkInterface->matchesMacAddress(header->getDest()))
+    auto dest = header->getDest();
+    if (!promiscuous && !dest.isBroadcast() && !dest.isMulticast() && !networkInterface->matchesMacAddress(dest))
         return false;
     else {
         auto typeOrLength = header->getTypeOrLength();
