@@ -1354,18 +1354,23 @@ void EigrpIpv4Pdm::flushMsgRequests()
             // Check if interface exists
             if (eigrpIft->findInterfaceById(item->getDestInterface()) != nullptr) {
                 send(item, RTP_OUTGW);
+                item = nullptr;
             }
         }
     }
 
     // Send or delete other messages
     for (auto& item : reqQueue) {
-        // Check if interface exists
-        if (eigrpIft->findInterfaceById(item->getDestInterface()) == nullptr) {
-            delete item; // Discard request
-        }
-        else if (item->getOpcode() != EIGRP_QUERY_MSG) {
-            send(item, RTP_OUTGW);
+        if (item != nullptr) {
+            // Check if interface exists
+            if (eigrpIft->findInterfaceById(item->getDestInterface()) == nullptr) {
+                delete item; // Discard request
+                item = nullptr;
+            }
+            else if (item->getOpcode() != EIGRP_QUERY_MSG) {
+                send(item, RTP_OUTGW);
+                item = nullptr;
+            }
         }
     }
 

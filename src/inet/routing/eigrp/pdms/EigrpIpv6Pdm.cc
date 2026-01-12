@@ -1346,23 +1346,26 @@ void EigrpIpv6Pdm::flushMsgRequests()
     for (auto& item : reqQueue) {
         if (item->getOpcode() == EIGRP_QUERY_MSG) {
             // Check if interface exists
-            if (eigrpIft->findInterfaceById(item->getDestInterface()) == nullptr)
-                continue;
-            else
+            if (eigrpIft->findInterfaceById(item->getDestInterface()) != nullptr) {
                 send(item, RTP_OUTGW);
+                item = nullptr;
+            }
         }
     }
 
     // Send other messages
     for (auto& item : reqQueue) {
-        // Check if interface exists
-        if (eigrpIft->findInterfaceById(item->getDestInterface()) == nullptr) {
-            delete item; // Discard request
-            continue;
+        if (item != nullptr) {
+            // Check if interface exists
+            if (eigrpIft->findInterfaceById(item->getDestInterface()) == nullptr) {
+                delete item; // Discard request
+                item = nullptr;
+            }
+            else if (item->getOpcode() != EIGRP_QUERY_MSG) {
+                send(item, RTP_OUTGW);
+                item = nullptr;
+            }
         }
-
-        if (item->getOpcode() != EIGRP_QUERY_MSG)
-            send(item, RTP_OUTGW);
     }
 
     reqQueue.clear();
