@@ -49,6 +49,41 @@ uint64_t get_simtime(ptls_get_time_t *self)
 
 ptls_get_time_t opp_get_time = {get_simtime};
 
+// Determine the encryption level from raw packet bytes
+// This is needed because we must decrypt packets with the correct key based on packet type,
+// not based on connection state (which may have already advanced to a later state).
+static EncryptionLevel determineEncryptionLevelFromPacketBytes(const std::vector<uint8_t>& packetBytes)
+{
+    if (packetBytes.empty()) {
+        throw cRuntimeError("Cannot determine encryption level from empty packet");
+    }
+
+    uint8_t firstByte = packetBytes[0];
+
+    // Check header form (bit 7): 1 = long header, 0 = short header
+    if ((firstByte & 0x80) == 0) {
+        // Short header -> 1-RTT packet
+        return EncryptionLevel::OneRtt;
+    }
+
+    // Long header: packet type is in bits 4-5 (these bits are NOT header-protected)
+    // Note: The lower 4 bits are header-protected, but bits 4-5 contain the packet type
+    uint8_t packetType = (firstByte & 0x30) >> 4;
+
+    switch (packetType) {
+        case 0: // Initial
+            return EncryptionLevel::Initial;
+        case 1: // 0-RTT
+            return EncryptionLevel::ZeroRtt;
+        case 2: // Handshake
+            return EncryptionLevel::Handshake;
+        case 3: // Retry (no encryption)
+            return EncryptionLevel::Initial; // Retry packets use Initial keys for validation
+        default:
+            throw cRuntimeError("Unknown long header packet type: %d", packetType);
+    }
+}
+
 static int on_update_traffic_key(ptls_update_traffic_key_t *self, ptls_t *tls, int is_enc, size_t epoch, const void *secret)
 {
     Connection *conn = (Connection *)(*ptls_get_data_ptr(tls));
@@ -340,21 +375,25 @@ void Quic::handleMessageFromUdp(cMessage *msg)
 
         Ptr<const Chunk> pktChunk = pkt->peekAtFront();
         if (Ptr<const EncryptedQuicPacketChunk> encChunk = dynamicPtrCast<const EncryptedQuicPacketChunk>(pktChunk)) {
-            auto payloadSequence = dynamicPtrCast<const SequenceChunk>(encChunk->getChunk());
-            ASSERT(payloadSequence);
-            Ptr<SequenceChunk> newPayloadSequence = dynamicPtrCast<SequenceChunk>(payloadSequence->dupShared());
-            ASSERT(newPayloadSequence);
-            auto dummyAuthTag = makeShared<ByteCountChunk>(B(16));
-            dummyAuthTag->markImmutable();
-            newPayloadSequence->insertAtBack(dummyAuthTag); // reserve space for authentication tag
-            newPayloadSequence->markImmutable();
+            // For non-serialized packets, extract the plaintext payload from the EncryptedQuicPacketChunk.
+            // The inner chunk contains the header and frames (plaintext), NOT the auth tag.
+            // Do NOT add a dummy auth tag here - the frame processing expects only valid frame data.
+            auto payloadChunk = encChunk->getChunk();
+            ASSERT(payloadChunk);
+            Ptr<Chunk> newPayloadChunk = payloadChunk->dupShared();
+            ASSERT(newPayloadChunk);
+            newPayloadChunk->markImmutable();
             pkt->eraseAll();
-            pkt->insertData(newPayloadSequence);
+            pkt->insertData(newPayloadChunk);
         }
         else if (Ptr<const BytesChunk> bytesChunk = dynamicPtrCast<const BytesChunk>(pktChunk)) {
             std::vector<uint8_t> protectedDatagram = bytesChunk->getBytes();
+            // Determine encryption level from the packet itself, not from connection state.
+            // This is important because a UDP datagram may contain packets of different types
+            // (e.g., Initial + Handshake), and the connection state may have already advanced.
+            EncryptionLevel packetEncryptionLevel = determineEncryptionLevelFromPacketBytes(protectedDatagram);
             EncryptionKey key = connection
-                ? connection->ingressKeys[(int)connection->getEncryptionLevel()]
+                ? connection->ingressKeys[(int)packetEncryptionLevel]
                 : EncryptionKey::newInitial(dcid_iovec, "client in");
             std::vector<uint8_t> decryptedData = unprotectPacket(protectedDatagram, key);
             pkt->replaceData(makeShared<BytesChunk>(decryptedData));
