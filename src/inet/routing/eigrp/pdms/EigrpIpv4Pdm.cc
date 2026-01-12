@@ -1425,7 +1425,6 @@ void EigrpIpv4Pdm::disableInterface(NetworkInterface *iface, EigrpInterface *eig
     EigrpTimer *hellot = nullptr;
     EigrpNeighbor<Ipv4Address> *neigh = nullptr;
     EigrpRouteSource<Ipv4Address> *source = nullptr;
-    int neighCount;
     int ifaceId = eigrpIface->getInterfaceId();
 
     EV_DEBUG << "EIGRP disabled on interface " << eigrpIface->getName() << "(" << ifaceId << ")" << endl;
@@ -1455,8 +1454,7 @@ void EigrpIpv4Pdm::disableInterface(NetworkInterface *iface, EigrpInterface *eig
     }
 
     // Delete all neighbors on the interface
-    neighCount = eigrpNt->getNumNeighbors();
-    for (int i = 0; i < neighCount; i++) {
+    for (int i = 0; i < eigrpNt->getNumNeighbors(); i++) {
         neigh = eigrpNt->getNeighbor(i);
         if (neigh->getIfaceId() == ifaceId) {
             removeNeighbor(neigh);
