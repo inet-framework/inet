@@ -63,7 +63,7 @@
 
 /showcases/tsn/framepreemption/,     -f omnetpp.ini -c FifoQueueing -r 0,           1s,         5ef8-0e2f/tplx;5254-8176/~tNl;734d-28bc/~tND;7663-121b/tyf, PASS,
 /showcases/tsn/framepreemption/,     -f omnetpp.ini -c PriorityQueueing -r 0,       1s,         3171-cda0/tplx;48c5-41c7/~tNl;f7ae-7530/~tND;412b-bf95/tyf, PASS,
-/showcases/tsn/framepreemption/,     -f omnetpp.ini -c FramePreemption -r 0,        1s,         61e7-818c/tplx;1f71-5042/~tNl;282a-bbdf/~tND;3fe6-7965/tyf, PASS,
+/showcases/tsn/framepreemption/,     -f omnetpp.ini -c FramePreemption -r 0,        1s,         61e7-818c/tplx;1f71-5042/~tNl;9b9c-485e/~tND;3fe6-7965/tyf, PASS,
 #/showcases/tsn/framepreemption/,     -f omnetpp.ini -c RealisticBase -r 0,          1s,         617e-c61d/tplx;5c4b-7a44/~tNl;f091-822c/~tND;65ea-caf1/tyf, PASS,
 /showcases/tsn/framepreemption/,     -f omnetpp.ini -c RealisticFifoQueueing -r 0,  1s,         de97-e390/tplx;1186-b23d/~tNl;dc5f-01ec/~tND;f3f1-7ed7/tyf, PASS,
 /showcases/tsn/framepreemption/,     -f omnetpp.ini -c RealisticPriorityQueueing -r 0, 1s,      716e-e1aa/tplx;e9b6-4788/~tNl;c8f5-2204/~tND;b7b0-177b/tyf, PASS,
