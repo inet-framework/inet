@@ -87,11 +87,8 @@ void EigrpNeighborTable<IPAddress>::handleMessage(cMessage *msg)
 template<typename IPAddress>
 EigrpNeighbor<IPAddress> *EigrpNeighborTable<IPAddress>::findNeighbor(const IPAddress& ipAddress)
 {
-    typename NeighborVector::iterator it;
-    EigrpNeighbor<IPAddress> *neigh;
 
-    for (it = neighborVec.begin(); it != neighborVec.end(); it++) {
-        neigh = *it;
+    for (auto neigh : neighborVec) {
         if (neigh->getIPAddress() == ipAddress) {
             return neigh;
         }
@@ -103,11 +100,9 @@ EigrpNeighbor<IPAddress> *EigrpNeighborTable<IPAddress>::findNeighbor(const IPAd
 template<typename IPAddress>
 EigrpNeighbor<IPAddress> *EigrpNeighborTable<IPAddress>::findNeighborById(int id)
 {
-    typename NeighborVector::iterator it;
-
-    for (it = neighborVec.begin(); it != neighborVec.end(); it++) {
-        if ((*it)->getNeighborId() == id) {
-            return *it;
+    for (auto item : neighborVec) {
+        if (item->getNeighborId() == id) {
+            return item;
         }
     }
 
@@ -143,11 +138,9 @@ EigrpNeighbor<IPAddress> *EigrpNeighborTable<IPAddress>::removeNeighbor(EigrpNei
 template<typename IPAddress>
 EigrpNeighbor<IPAddress> *EigrpNeighborTable<IPAddress>::getFirstNeighborOnIf(int ifaceId)
 {
-    typename NeighborVector::iterator it;
-
-    for (it = neighborVec.begin(); it != neighborVec.end(); ++it) {
-        if ((*it)->getIfaceId() == ifaceId)
-            return *it;
+    for (auto item : neighborVec) {
+        if (item->getIfaceId() == ifaceId)
+            return item;
     }
 
     return nullptr;
@@ -156,13 +149,12 @@ EigrpNeighbor<IPAddress> *EigrpNeighborTable<IPAddress>::getFirstNeighborOnIf(in
 template<typename IPAddress>
 int EigrpNeighborTable<IPAddress>::setAckOnIface(int ifaceId, uint32_t ackNum)
 {
-    typename NeighborVector::iterator it;
     int neighCnt = 0;
 
-    for (it = neighborVec.begin(); it != neighborVec.end(); ++it) {
-        if ((*it)->getIfaceId() == ifaceId) {
+    for (auto item : neighborVec) {
+        if (item->getIfaceId() == ifaceId) {
             neighCnt++;
-            (*it)->setAck(ackNum);
+            item->setAck(ackNum);
         }
     }
 

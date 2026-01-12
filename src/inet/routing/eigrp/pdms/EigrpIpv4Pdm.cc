@@ -1287,12 +1287,11 @@ void EigrpIpv4Pdm::msgToIface(HeaderOpcode msgType, EigrpRouteSource<Ipv4Address
 EigrpMsgReq *EigrpIpv4Pdm::pushMsgRouteToQueue(HeaderOpcode msgType, int ifaceId, int neighId, const EigrpMsgRoute& msgRt)
 {
     EigrpMsgReq *request = nullptr;
-    RequestVector::iterator it;
 
     // Find or create message
-    for (it = reqQueue.begin(); it != reqQueue.end(); it++) {
-        if ((*it)->getDestInterface() == ifaceId && (*it)->getOpcode() == msgType) {
-            request = *it;
+    for (auto item : reqQueue) {
+        if (item->getDestInterface() == ifaceId && item->getOpcode() == msgType) {
+            request = item;
             break;
         }
     }
