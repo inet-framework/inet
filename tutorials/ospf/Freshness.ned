@@ -1,7 +1,9 @@
 package inet.tutorials.ospf;
 
+import inet.common.packet.recorder.PcapRecorder;
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.networklayer.ipv4.RoutingTableRecorder;
 import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.Router;
@@ -32,6 +34,12 @@ network Freshness
         }
         visualizer: IntegratedCanvasVisualizer {
             @display("p=464.816,135.664");
+        }
+        routingTableRecorder: RoutingTableRecorder {
+            @display("p=426,43");
+        }
+        pcapRecorder: PcapRecorder {
+            @display("p=636,42");
         }
         scenarioManager: ScenarioManager {
             @display("p=749.48804,135.664");
