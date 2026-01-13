@@ -9,6 +9,7 @@ an area to the backbone.
 
 A virtual link is a logical connection through a transit area that allows two ABRs to appear
 directly connected in Area 0. Virtual links are used when:
+
 *   An area cannot be physically connected to the backbone
 *   The backbone itself is partitioned and needs to be reconnected
 
@@ -19,7 +20,6 @@ This configuration is based on Step 17. A virtual Link is configured between R1 
 through a transit area.
 
 .. figure:: media/OSPF_LoopAvoidance.png
-   :width: 100%
    :align: center
 
 The configuration in ``omnetpp.ini`` is the following:

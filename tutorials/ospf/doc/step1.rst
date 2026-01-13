@@ -19,8 +19,8 @@ hosts can ping each other across the network using the OSPF-computed routes.
 Configuration
 ~~~~~~~~~~~~~
 
-This step uses the `OspfNetwork` topology with five routers (R1-R5) and nine hosts (host0-host8)
-connected via switches and point-to-point links.
+This step uses the `OspfNetwork` topology with five routers (R1-R5) and nine
+hosts (host0-host8) connected via switches and point-to-point links.
 
 .. figure:: media/OspfNetwork.png
    :width: 100%
@@ -44,19 +44,21 @@ When the simulation starts:
 
 1.  All OSPF routers discover their neighbors and establish adjacencies.
 
-2.  Routers exchange Hello packets, then Database Description packets, Link State Request/Update packets
-    to synchronize their LSDBs.
+2.  Routers exchange Hello packets, then Database Description packets, Link
+    State Request/Update packets to synchronize their LSDBs.
 
-3.  Each router runs the SPF algorithm to compute shortest paths to all networks in the area.
+3.  Each router runs the SPF algorithm to compute shortest paths to all networks
+    in the area.
 
-4.  The routing tables are populated with OSPF-learned routes. For example, R1 learns routes to the
-    10.0.0.24/29 network (behind R3) via the path through R2 or R5->R4.
+4.  The routing tables are populated with OSPF-learned routes. For example, R1
+    learns routes to the 10.0.0.24/29 network (behind R3) via the path through
+    R2 or R5->R4.
 
-5.  At t=60s, **host0** begins pinging **host6**. The ping succeeds because OSPF has computed valid
-    routes between all networks.
+5.  At t=60s, **host0** begins pinging **host6**. The ping succeeds because OSPF
+    has computed valid routes between all networks.
 
-The routing table visualizer shows that all routers have complete routing information for reaching
-all networks in the OSPF area.
+The routing table visualizer shows that all routers have complete routing
+information for reaching all networks in the OSPF area.
 
 Sources:
 :download:`omnetpp.ini <../omnetpp.ini>`,

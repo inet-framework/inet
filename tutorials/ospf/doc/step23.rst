@@ -8,6 +8,7 @@ The goal of this step is to demonstrate OSPF's route selection hierarchy when mu
 to the same destination exist with different route types.
 
 OSPF prioritizes routes in the following order:
+
 1.  **Intra-area routes** (routes within the same area)
 2.  **Inter-area routes** (routes learned via Summary LSAs from other areas)
 3.  **External Type-1 routes** (E1)

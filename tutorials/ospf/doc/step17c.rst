@@ -8,6 +8,7 @@ The goal of this step is to examine Summary LSA behavior and demonstrate when AB
 Summary LSAs from different areas.
 
 OSPF ABRs have strict rules about accepting Summary LSAs:
+
 *   Summary LSAs are normally only accepted from the backbone area (Area 0)
 *   If an ABR has no Full adjacency in Area 0, it may temporarily accept Summary LSAs from
     non-backbone areas
@@ -19,6 +20,10 @@ Configuration
 
 This step simulates a scenario where backbone connectivity is lost and then observes Summary
 LSA behavior.
+
+.. figure:: media/OSPF_Summary_LSA.png
+   :width: 100%
+   :align: center
 
 The configuration in ``omnetpp.ini`` is the following:
 

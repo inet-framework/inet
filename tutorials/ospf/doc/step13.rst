@@ -20,7 +20,6 @@ Configuration
 This step uses the ``Freshness`` network. The simulation script disconnects  a link at t=60s.
 
 .. figure:: media/Freshness.png
-   :width: 100%
    :align: center
 
 The configuration in ``omnetpp.ini`` is the following:

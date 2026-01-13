@@ -19,6 +19,10 @@ Configuration
 This step demonstrates a scenario where R6 (not running OSPF) is the actual gateway to an
 external network, and R5 (an ASBR) sets the Forwarding Address to R6's IP.
 
+.. figure:: media/OSPF_Area_External_Forwarding.png
+   :width: 100%
+   :align: center
+
 The configuration in ``omnetpp.ini`` is the following:
 
 .. literalinclude:: ../omnetpp.ini

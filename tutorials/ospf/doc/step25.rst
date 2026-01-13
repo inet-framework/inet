@@ -39,11 +39,13 @@ With PCAP recording enabled:
 1.  PCAP recorder modules capture all traffic on the specified interfaces.
 
 2.  Separate PCAP files are created for each configured interface:
+
     *   `R1.ppp0.pcap` - Traffic on R1's ppp0 interface
     *   `R5.ppp1.pcap` - Traffic on R5's ppp1 interface
     *   `R4.eth0.pcap` - Traffic on R4's eth0 interface
 
 3.  These PCAP files can be opened in Wireshark to examine:
+
     *   OSPF Hello packets
     *   Database Description (DBD) packets
     *   Link State Request/Update/Acknowledgment packets

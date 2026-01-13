@@ -7,6 +7,7 @@ Goals
 The goal of this step is to demonstrate the Passive interface mode in OSPF.
 
 A passive interface in OSPF is one that:
+
 *   **Does NOT** send or receive Hello packets (no adjacencies are formed)
 *   **IS** advertised in Router LSAs (the network is visible to OSPF)
 

@@ -9,6 +9,7 @@ the ``NoOSPF`` interface mode.
 
 Setting an interface to ``NoOSPF`` mode effectively removes it from OSPF processing. The
 interface will not:
+
 *   Send or receive OSPF packets
 *   Form adjacencies
 *   Be advertised in OSPF LSAs

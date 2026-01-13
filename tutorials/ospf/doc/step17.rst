@@ -22,7 +22,6 @@ This step uses the ``OSPF_LoopAvoidance`` network with a topology that could
 create loops if not properly configured.
 
 .. figure:: media/OSPF_LoopAvoidance.png
-   :width: 100%
    :align: center
 
 The configuration in ``omnetpp.ini`` is the following:

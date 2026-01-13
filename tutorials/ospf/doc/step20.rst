@@ -11,6 +11,7 @@ injects a default route into the stub area, reducing the LSDB size and memory re
 for routers in that area.
 
 Stub areas are useful for:
+
 *   Reducing memory and CPU usage in routers with limited resources
 *   Simplifying routing in areas with limited external connectivity (single exit point)
 

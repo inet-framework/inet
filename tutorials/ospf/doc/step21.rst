@@ -1,5 +1,5 @@
 Step 21. Virtual link - connect two separate parts of a discontinuous backbone
-============================================================================
+==============================================================================
 
 Goals
 -----
@@ -24,7 +24,7 @@ The configuration in ``omnetpp.ini`` is the following:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-    :start-at: Step21
+   :start-at: Step21
    :end-before: ------
 
 The OSPF configuration:

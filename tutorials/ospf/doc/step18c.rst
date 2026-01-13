@@ -1,5 +1,5 @@
 Step 18c. AS-External LSAs of 'type 2 metric' with the same advertised destination
-=================================================================================
+==================================================================================
 
 Goals
 -----
@@ -9,6 +9,7 @@ the same external destination with Type-2 metrics.
 
 When multiple ASBRs advertise the same destination with Type-2 metrics, the selection process
 is:
+
 1.  **Primary**: Compare external costs - lowest wins
 2.  **Tiebreaker** (if external costs are equal): Use internal cost to ASBR - lowest wins
 
