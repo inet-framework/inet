@@ -250,7 +250,8 @@ void StreamRedundancyConfigurator::computeStreamPolicyConfigurations(cValueMap *
                 auto outputStreamName = streamName + streamNameSuffix;
                 streamSplitting.outputStreams.push_back(outputStreamName);
             }
-            node->streamSplittings.push_back(streamSplitting);
+            if (!streamSplitting.outputStreams.empty())
+                node->streamSplittings.push_back(streamSplitting);
         }
     }
 }
