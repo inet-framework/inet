@@ -17,6 +17,7 @@
 #define __INET_QUICPACKETSERIALIZER_H
 
 #include "inet/transportlayer/quic/packet/QuicPacket.h"
+#include "inet/transportlayer/quic/tls/IQuicTls.h"
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
 #include "inet/transportlayer/quic/packet/PacketHeader_m.h"
 #include "inet/transportlayer/quic/packet/FrameHeader_m.h"

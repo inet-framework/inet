@@ -20,6 +20,7 @@
 #include "inet/transportlayer/quic/packet/QuicPacket.h"
 #include "inet/transportlayer/quic/packet/EncryptedQuicPacketChunk.h"
 #include "inet/transportlayer/quic/packet/EncryptionKeyTag_m.h"
+#include "inet/transportlayer/quic/tls/PtlsQuicTls.h"
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/common/Endian.h"
@@ -512,15 +513,12 @@ std::vector<uint8_t> protectPacket(std::vector<uint8_t> datagram, const Encrypti
     int packetNumberLength = (datagram[0] & 0x3) + 1;
     ASSERT(datagram.size() >= packetNumberOffset + packetNumberLength);
 
-    // Extract packet number from datagram and verify it matches the parameter
+    // Extract packet number from datagram
     uint32_t packetNumber = 0;
     for (size_t i = 0; i < packetNumberLength; i++)
         packetNumber = (packetNumber << 8) | datagram[packetNumberOffset + i];
 
-    ptls_cipher_suite_t *cs = &ptls_openssl_opp_aes128gcmsha256;
-    size_t originalSize = datagram.size();
-
-    std::cout << "protectPacket: original size: " << originalSize << std::endl;
+    std::cout << "protectPacket: original size: " << datagram.size() << std::endl;
     std::cout << "protectPacket: packet number: " << packetNumber << std::endl;
     std::cout << "protectPacket: packet number offset: " << packetNumberOffset << std::endl;
     std::cout << "protectPacket: packet number length: " << packetNumberLength << std::endl;
@@ -529,28 +527,11 @@ std::vector<uint8_t> protectPacket(std::vector<uint8_t> datagram, const Encrypti
     std::cout << "protecting datagram" << std::endl;
     std::cout << EncryptionKey::bytes2hex(datagram) << std::endl;
 
-    datagram.resize(originalSize + 16); // Ensure enough space for the auth tag
-    // generate new AEAD context
-    ptls_aead_context_t *packet_protect = ptls_aead_new_direct(cs->aead, true, key.key.data(), key.iv.data());
-    ptls_cipher_context_t *header_protect = ptls_cipher_new(cs->aead->ctr_cipher, true, key.hpkey.data());
-
-    size_t payload_from = packetNumberOffset + packetNumberLength;
-
-    ptls_aead_supplementary_encryption_t supp = {.ctx = header_protect,
-                                                 .input = datagram.data() + packetNumberOffset + 4 };
-
-    ptls_aead_encrypt_s(packet_protect, datagram.data() + payload_from, datagram.data() + payload_from,
-                                   originalSize - payload_from,
-                                   packetNumber,
-                                   datagram.data(), payload_from, &supp);
-
-    // Apply header protection
-    uint8_t headerForm = (datagram[0] >> 7) & 0x01;
-    // mask is applied to the low 4 bits in long headers, and low 5 bits in long headers, of the first byte
-    datagram[0] ^= supp.output[0] & ((headerForm == PACKET_HEADER_FORM_LONG) ? 0xf : 0x1f);
-
-    for (size_t i = 0; i != packetNumberLength; ++i)
-        datagram[packetNumberOffset + i] ^= supp.output[i + 1];
+    // Use PtlsQuicTls for protection
+    PtlsQuicTls tls(key);
+    if (!tls.protect(datagram, packetNumberOffset, packetNumber)) {
+        throw cRuntimeError("protectPacket: packet protection failed");
+    }
 
     std::cout << "protected datagram" << std::endl;
     std::cout << EncryptionKey::bytes2hex(datagram) << std::endl;
@@ -558,68 +539,40 @@ std::vector<uint8_t> protectPacket(std::vector<uint8_t> datagram, const Encrypti
 }
 
 std::vector<uint8_t> unprotectPacket(std::vector<uint8_t> protectedDatagram, const EncryptionKey& key) {
-    // Input validation
-    //ASSERT(protectedDatagram.size() >= packetNumberOffset + packetNumberLength + 16); // Must have at least header + auth tag
-    //ASSERT(packetNumberLength > 0 && packetNumberLength <= 4);
-
-    ptls_cipher_suite_t *cs = &ptls_openssl_opp_aes128gcmsha256;
-    size_t originalSize = protectedDatagram.size() - 16; // Remove auth tag size
-
     std::cout << "unprotectPacket: protected size: " << protectedDatagram.size() << std::endl;
-    /*
-    std::cout << "unprotectPacket: expected packet number: " << packetNumber << std::endl;
-    std::cout << "unprotectPacket: packet number offset: " << packetNumberOffset << std::endl;
-    std::cout << "unprotectPacket: packet number length: " << packetNumberLength << std::endl;
-    */
     std::cout << "unprotectPacket: key: " << std::endl;
     key.dump();
     std::cout << "unprotecting datagram" << std::endl;
     std::cout << EncryptionKey::bytes2hex(protectedDatagram) << std::endl;
 
-    ptls_cipher_context_t *header_protect = ptls_cipher_new(cs->aead->ctr_cipher, true, key.hpkey.data()); // false = decrypt
-
-    uint8_t hpmask[5] = {0};
-    uint32_t pnbits = 0;
-
     size_t packetNumberOffset = determine_pn_offset({protectedDatagram.data(), protectedDatagram.size()});
 
-    ptls_cipher_init(header_protect, protectedDatagram.data() + packetNumberOffset + 4);
-    ptls_cipher_encrypt(header_protect, hpmask, hpmask, sizeof(hpmask));
-    ptls_cipher_free(header_protect);
+    // Use PtlsQuicTls for unprotection
+    PtlsQuicTls tls(key);
 
+    // First, unprotect the header to reveal the packet number
+    tls.unprotectHeader(protectedDatagram, packetNumberOffset);
 
-    protectedDatagram[0] ^= hpmask[0] & (QUICLY_PACKET_IS_LONG_HEADER(protectedDatagram[0]) ? 0xf : 0x1f);
-
+    // Extract the packet number after header unprotection
     size_t packetNumberLength = (protectedDatagram[0] & 0x3) + 1;
-    std::cout << "packet number offset: " << packetNumberOffset << std::endl;
-    std::cout << "packet number length: " << packetNumberLength << std::endl;
-    for (int i = 0; i != packetNumberLength; ++i) {
-        protectedDatagram[packetNumberOffset + i] ^= hpmask[i + 1];
-        pnbits = (pnbits << 8) | protectedDatagram[packetNumberOffset + i]; // TODO: undo truncation! (see quicly_determine_packet_number)
+    uint32_t pnbits = 0;
+    for (size_t i = 0; i < packetNumberLength; ++i) {
+        pnbits = (pnbits << 8) | protectedDatagram[packetNumberOffset + i];
     }
 
+    std::cout << "packet number offset: " << packetNumberOffset << std::endl;
+    std::cout << "packet number length: " << packetNumberLength << std::endl;
     std::cout << "unmasked packet number: " << pnbits << std::endl;
-    size_t aead_off = packetNumberOffset + packetNumberLength;
 
-
-    ptls_aead_context_t *packet_protect = ptls_aead_new_direct(cs->aead, false, key.key.data(), key.iv.data()); // false = decrypt
-
-
-    // Step 3: Decrypt the payload and verify authentication tag
-    std::vector<uint8_t> unprotectedDatagram = protectedDatagram;
-    unprotectedDatagram.resize(originalSize); // Remove space for auth tag
-
-
-    ptls_aead_decrypt(packet_protect, unprotectedDatagram.data() + aead_off, protectedDatagram.data() + aead_off, protectedDatagram.size() - aead_off, pnbits,
-                                 unprotectedDatagram.data(), aead_off);
-
-    // Cleanup
-    ptls_aead_free(packet_protect);
-
+    // Now unprotect the packet payload
+    // TODO: undo truncation! (see quicly_determine_packet_number)
+    if (!tls.unprotectPacket(protectedDatagram, packetNumberOffset, pnbits)) {
+        throw cRuntimeError("unprotectPacket: packet unprotection failed");
+    }
 
     std::cout << "unprotected datagram" << std::endl;
-    std::cout << EncryptionKey::bytes2hex(unprotectedDatagram) << std::endl;
-    return unprotectedDatagram;
+    std::cout << EncryptionKey::bytes2hex(protectedDatagram) << std::endl;
+    return protectedDatagram;
 }
 
 static void doPacketProtectionTest()
