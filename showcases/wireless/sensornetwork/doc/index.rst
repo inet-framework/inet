@@ -603,8 +603,7 @@ efficient MAC protocol.
 
 .. .. note:: XMac might perform better with another slot duration value for the sensors, for example. However, this is out of scope for this showcase.
 
-| Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`SensorNetworkShowcase.ned <../SensorNetworkShowcase.ned>`, :download:`config.xml <../config.xml>`
-| Extra configurations: :download:`extras.ini <../extras.ini>`, :download:`ExtrasSensorNetworkShowcase.ned <../ExtrasSensorNetworkShowcase.ned>` 
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`SensorNetworkShowcase.ned <../SensorNetworkShowcase.ned>`, :download:`config.xml <../config.xml>`
 
 Further information
 -------------------
