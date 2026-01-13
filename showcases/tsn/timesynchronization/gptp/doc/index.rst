@@ -315,10 +315,11 @@ synchronized with the master clock. After the initial two synchronization events
 (not displayed on the chart), the drift rate of the slave clocks is adjusted to
 align with that of the master clock. However, the oscillator compensation factor
 in each slave clock is determined by the drift rate at the current and previous
-synchronization points, and as the master clock's drift rate continues to
-change, the slave clocks can drift away from the master clock. It is worth
-noting that after the first rate compensation, all the slave clocks have the
-same drift rate.
+synchronization points. But since the master clock's drift rate continues to
+change, the slave clocks can still drift away from the master clock. It is worth
+noting that after the first rate compensation, all the slave clocks have almost
+equal compensated drift rate. The differences are due to the inherently inaccurate
+synchronization process.
 
 Let's see the clock drift for all clocks in `time domain 1` (hot-standby master):
 
