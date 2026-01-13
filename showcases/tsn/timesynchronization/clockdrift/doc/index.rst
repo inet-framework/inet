@@ -145,6 +145,9 @@ simulation time. Also, we need to explicitly tell the relevant modules (here,
 the UDP apps and ``switch1``'s queue) to use the clock module in the host,
 otherwise, they would use the global simulation time by default.
 
+We set the :par:`nominalTickLenght` parameter of all oscillators to 10ns, which is a typical value for
+real-world clocks. To be able to represent 1 PPM clock drift, we set fs simulation time accuracy (10ns / 10^6 = 10fs).
+
 Here are the drifts (time differences) over time:
 
 .. figure:: media/ConstantClockDrift.png
@@ -295,6 +298,8 @@ Here is the configuration:
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: RandomClockDriftGptpSync
+
+.. note:: :ned:`Gptp` requires transmission start and reception start timestamps, which are not provided by the default physical layer. Thus, we use :ned:`StreamingTransmitter` and :ned:`DestreamingReceiver`.
 
 Here are the time differences:
 
