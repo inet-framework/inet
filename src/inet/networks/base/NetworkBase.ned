@@ -8,6 +8,7 @@
 package inet.networks.base;
 
 import inet.common.Module;
+import inet.common.misc.ModuleDump;
 import inet.common.packet.recorder.PcapRecorder;
 import inet.networklayer.configurator.contract.IL3NetworkConfigurator;
 import inet.visualizer.contract.IIntegratedVisualizer;
@@ -17,6 +18,7 @@ network NetworkBase extends Module
     parameters:
         bool recordPcap = default(false);
         int numPcapRecorders = default(recordPcap ? 1 : 0);
+        int numModuleDumps = default(0);
         pcapRecorder[*].pcapFile = default("results/" + expand("${configname}-") + fullPath() + ".pcap");
         @class(NetworkBase);
     submodules:
@@ -32,5 +34,9 @@ network NetworkBase extends Module
         configurator: <default("Ipv4NetworkConfigurator")> like IL3NetworkConfigurator if typename != "" {
             parameters:
                 @display("p=100,300;is=s");
+        }
+        moduleDump[numModuleDumps]: ModuleDump {
+            parameters:
+                @display("p=100,400;is=s");
         }
 }
