@@ -4,21 +4,22 @@ Step 17. Loop avoidance in multi-area OSPF topology
 Goals
 -----
 
-The goal of this step is to demonstrate how OSPF prevents routing loops in multi-area topologies.
+The goal of this step is to demonstrate how OSPF prevents routing loops in
+multi-area topologies.
 
-In multi-area OSPF, there is a risk of routing loops if areas are not properly connected to
-the backbone (Area 0). OSPF has a rule that inter-area routes (learned via Summary LSAs)
-are only accepted from the backbone area. This ensures a hierarchical topology and prevents
-loops.
+In multi-area OSPF, there is a risk of routing loops if areas are not properly
+connected to the backbone (Area 0). OSPF has a rule that inter-area routes
+(learned via Summary LSAs) are only accepted from the backbone area. This
+ensures a hierarchical topology and prevents loops.
 
-If an area is not directly connected to the backbone, it must use a virtual link to logically
-connect to Area 0.
+If an area is not directly connected to the backbone, it must use a virtual link
+to logically connect to Area 0.
 
 Configuration
 ~~~~~~~~~~~~~
 
-This step uses the ``OSPF_LoopAvoidance`` network with a topology that could create loops
-if not properly configured.
+This step uses the ``OSPF_LoopAvoidance`` network with a topology that could
+create loops if not properly configured.
 
 The configuration in ``omnetpp.ini`` is the following:
 
@@ -40,16 +41,19 @@ The configuration demonstrates potential loop scenarios:
 1.  Areas are configured in a way that could create routing loops.
 
 2.  OSPF's loop prevention mechanisms ensure that:
+
     *   Summary LSAs from non-backbone areas are ignored by ABRs
     *   Only Summary LSAs received via the backbone are accepted for inter-area routing
 
-3.  If the topology violates OSPF's hierarchical requirements (non-backbone area not connected
-    to Area 0), routing may be suboptimal or certain networks may be unreachable.
+3.  If the topology violates OSPF's hierarchical requirements (non-backbone area
+    not connected to Area 0), routing may be suboptimal or certain networks may
+    be unreachable.
 
-4.  The routing tables show how OSPF enforces the hierarchical structure to prevent loops.
+4.  The routing tables show how OSPF enforces the hierarchical structure to
+    prevent loops.
 
-This demonstrates the importance of proper area design and the backbone's central role in
-OSPF multi-area networks.
+This demonstrates the importance of proper area design and the backbone's
+central role in OSPF multi-area networks.
 
 Sources:
 :download:`omnetpp.ini <../omnetpp.ini>`,
