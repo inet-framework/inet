@@ -32,19 +32,19 @@ network OspfNetwork
 
     submodules:
         configurator: Ipv4NetworkConfigurator {
-            @display("p=757.8,76.30625");
+            @display("p=804,105");
         }
         visualizer: IntegratedMultiCanvasVisualizer {
-            @display("p=1023.5563,76.30625");
+            @display("p=1017,103");
         }
         routingTableRecorder: RoutingTableRecorder {
-            @display("p=426,43");
+            @display("p=421,108");
         }
         pcapRecorder: PcapRecorder {
-            @display("p=636,42");
+            @display("p=628,105");
         }
         scenarioManager: ScenarioManager {
-            @display("p=1310.3625,76.30625");
+            @display("p=1193,103");
         }
         host0: StandardHost {
             @display("p=97.81249,375.59998");

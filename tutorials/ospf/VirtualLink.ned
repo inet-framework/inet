@@ -30,10 +30,10 @@ network VirtualLink
             @display("p=136.23125,197.63124");
         }
         routingTableRecorder: RoutingTableRecorder {
-            @display("p=426,43");
+            @display("p=379,211");
         }
         pcapRecorder: PcapRecorder {
-            @display("p=636,42");
+            @display("p=607,61");
         }
         scenarioManager: ScenarioManager {
             @display("p=379.9125,61.399998");

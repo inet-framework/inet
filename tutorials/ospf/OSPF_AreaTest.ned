@@ -31,10 +31,10 @@ network OSPF_AreaTest
             @display("p=893.1,65");
         }
         routingTableRecorder: RoutingTableRecorder {
-            @display("p=426,43");
+            @display("p=464,64");
         }
         pcapRecorder: PcapRecorder {
-            @display("p=636,42");
+            @display("p=616,64");
         }
         scenarioManager: ScenarioManager {
             @display("p=1055.6,65");

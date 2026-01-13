@@ -36,10 +36,10 @@ network TopologyChange
             @display("p=918.72125,105.545");
         }
         routingTableRecorder: RoutingTableRecorder {
-            @display("p=426,43");
+            @display("p=199,105");
         }
         pcapRecorder: PcapRecorder {
-            @display("p=636,42");
+            @display("p=410,105");
         }
         scenarioManager: ScenarioManager {
             @display("p=1204.1725,105.545");

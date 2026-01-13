@@ -23,10 +23,10 @@ network Network2
             @display("p=186.12,250.98");
         }
         routingTableRecorder: RoutingTableRecorder {
-            @display("p=426,43");
+            @display("p=416,52");
         }
         pcapRecorder: PcapRecorder {
-            @display("p=636,42");
+            @display("p=416,249");
         }
         scenarioManager: ScenarioManager {
             @display("p=186.12,451.19998");

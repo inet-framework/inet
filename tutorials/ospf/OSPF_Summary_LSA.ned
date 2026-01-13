@@ -35,10 +35,10 @@ network OSPF_Summary_LSA
             @display("p=473.845,102.585");
         }
         routingTableRecorder: RoutingTableRecorder {
-            @display("p=426,43");
+            @display("p=979,101");
         }
         pcapRecorder: PcapRecorder {
-            @display("p=636,42");
+            @display("p=1189,101");
         }
         scenarioManager: ScenarioManager {
             @display("p=744.96246,102.585");

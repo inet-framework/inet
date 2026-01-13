@@ -37,10 +37,10 @@ network RouterLSA
             @display("p=1461.585,86.74875");
         }
         routingTableRecorder: RoutingTableRecorder {
-            @display("p=426,43");
+            @display("p=808,85");
         }
         pcapRecorder: PcapRecorder {
-            @display("p=636,42");
+            @display("p=1019,85");
         }
         scenarioManager: ScenarioManager {
             @display("p=1748.1188,86.74875");

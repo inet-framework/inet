@@ -24,19 +24,19 @@ network OSPF_Route_Selection
 
     submodules:
         configurator: Ipv4NetworkConfigurator {
-            @display("p=65,38");
+            @display("p=64,50");
         }
         visualizer: IntegratedCanvasVisualizer {
-            @display("p=187,38");
+            @display("p=186,50");
         }
         routingTableRecorder: RoutingTableRecorder {
-            @display("p=426,43");
+            @display("p=447,49");
         }
         pcapRecorder: PcapRecorder {
-            @display("p=636,42");
+            @display("p=447,127");
         }
         scenarioManager: ScenarioManager {
-            @display("p=324,38");
+            @display("p=324,50");
         }
         R1: Router {
             @display("p=447.784,290.156");

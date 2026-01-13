@@ -28,16 +28,16 @@ network Network
             @display("p=491.625,81.225");
         }
         visualizer: IntegratedMultiCanvasVisualizer {
-            @display("p=756.675,81.225");
+            @display("p=770,80");
         }
         routingTableRecorder: RoutingTableRecorder {
-            @display("p=426,43");
+            @display("p=383,80");
         }
         pcapRecorder: PcapRecorder {
-            @display("p=636,42");
+            @display("p=631,80");
         }
         scenarioManager: ScenarioManager {
-            @display("p=1045.2375,81.225");
+            @display("p=903,80");
         }
         host0: StandardHost {
             @display("p=98.325,200.925");

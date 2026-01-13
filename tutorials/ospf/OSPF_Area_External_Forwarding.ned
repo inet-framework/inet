@@ -30,10 +30,10 @@ network OSPF_Area_External_Forwarding
             @display("p=750.1,49.399998");
         }
         routingTableRecorder: RoutingTableRecorder {
-            @display("p=426,43");
+            @display("p=330,49");
         }
         pcapRecorder: PcapRecorder {
-            @display("p=636,42");
+            @display("p=479,49");
         }
         scenarioManager: ScenarioManager {
             @display("p=913.89996,49.399998");

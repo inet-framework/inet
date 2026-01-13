@@ -36,10 +36,10 @@ network Freshness
             @display("p=464.816,135.664");
         }
         routingTableRecorder: RoutingTableRecorder {
-            @display("p=426,43");
+            @display("p=198,344");
         }
         pcapRecorder: PcapRecorder {
-            @display("p=636,42");
+            @display("p=198,536");
         }
         scenarioManager: ScenarioManager {
             @display("p=749.48804,135.664");

@@ -17,19 +17,19 @@ network OSPF_Suboptimal
 
     submodules:
         configurator: Ipv4NetworkConfigurator {
-            @display("p=65,38");
+            @display("p=65,57");
         }
         visualizer: IntegratedCanvasVisualizer {
-            @display("p=187,38");
+            @display("p=187,57");
         }
         routingTableRecorder: RoutingTableRecorder {
-            @display("p=426,43");
+            @display("p=445,57");
         }
         pcapRecorder: PcapRecorder {
-            @display("p=636,42");
+            @display("p=567,57");
         }
         scenarioManager: ScenarioManager {
-            @display("p=324,38");
+            @display("p=324,57");
         }
         R1: Router {
             @display("p=64.128,139.278");

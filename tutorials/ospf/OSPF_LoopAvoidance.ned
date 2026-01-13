@@ -22,10 +22,10 @@ network OSPF_LoopAvoidance
             @display("p=195.24374,63.635002");
         }
         routingTableRecorder: RoutingTableRecorder {
-            @display("p=426,43");
+            @display("p=483,63");
         }
         pcapRecorder: PcapRecorder {
-            @display("p=636,42");
+            @display("p=628,63");
         }
         scenarioManager: ScenarioManager {
             @display("p=357.22375,63.635002");

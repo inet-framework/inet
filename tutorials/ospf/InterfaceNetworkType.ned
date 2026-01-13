@@ -25,19 +25,19 @@ network InterfaceNetworkType
 
     submodules:
         configurator: Ipv4NetworkConfigurator {
-            @display("p=867.888,89.376");
+            @display("p=867,146");
         }
         visualizer: IntegratedCanvasVisualizer {
-            @display("p=1131.312,89.376");
+            @display("p=1130,146");
         }
         routingTableRecorder: RoutingTableRecorder {
-            @display("p=426,43");
+            @display("p=432,146");
         }
         pcapRecorder: PcapRecorder {
-            @display("p=636,42");
+            @display("p=639,146");
         }
         scenarioManager: ScenarioManager {
-            @display("p=1420.608,89.376");
+            @display("p=1419,146");
         }
         host0: StandardHost {
             @display("p=96.31875,198.475");
