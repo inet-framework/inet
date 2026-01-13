@@ -18,6 +18,10 @@ Configuration
 
 This step uses a simple two-router topology to clearly observe the adjacency process.
 
+.. figure:: media/Network.png
+   :width: 100%
+   :align: center
+
 The configuration in ``omnetpp.ini`` is the following:
 
 .. literalinclude:: ../omnetpp.ini

@@ -23,6 +23,10 @@ Configuration
 
 This step uses the ``InterfaceNetworkType`` network to demonstrate different network types.
 
+.. figure:: media/InterfaceNetworkType.png
+   :width: 100%
+   :align: center
+
 The configuration in ``omnetpp.ini`` is the following:
 
 .. literalinclude:: ../omnetpp.ini

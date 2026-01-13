@@ -28,6 +28,10 @@ mismatches:
 *   **R1 and R2**: Mismatched Hello intervals
 *   **R4 and R5**: Mismatched network types
 
+.. figure:: media/InterfaceNetworkType.png
+   :width: 100%
+   :align: center
+
 The configuration in ``omnetpp.ini`` is the following:
 
 .. literalinclude:: ../omnetpp.ini

@@ -18,6 +18,10 @@ Configuration
 This configuration is based on Step 17. Router R3 is made an ABR by advertising its loopback
 interface in Area 0.
 
+.. figure:: media/OSPF_LoopAvoidance.png
+   :width: 100%
+   :align: center
+
 The configuration in ``omnetpp.ini`` is the following:
 
 .. literalinclude:: ../omnetpp.ini

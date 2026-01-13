@@ -22,7 +22,7 @@ Configuration
 This step uses the `OspfNetwork` topology with five routers (R1-R5) and nine hosts (host0-host8)
 connected via switches and point-to-point links.
 
-.. figure:: media/step1-2-11-12.png
+.. figure:: media/OspfNetwork.png
    :width: 100%
    :align: center
 

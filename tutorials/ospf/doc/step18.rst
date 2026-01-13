@@ -22,6 +22,10 @@ Configuration
 
 This step uses the ``OSPF_Area_External`` network with ASBRs advertising external routes.
 
+.. figure:: media/OSPF_Area_External.png
+   :width: 100%
+   :align: center
+
 The configuration in ``omnetpp.ini`` is the following:
 
 .. literalinclude:: ../omnetpp.ini

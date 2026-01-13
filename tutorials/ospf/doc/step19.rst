@@ -18,6 +18,10 @@ Configuration
 
 This step configures an ASBR to advertise a default route into the OSPF domain.
 
+.. figure:: media/OSPF_Default_Route_Distribution.png
+   :width: 100%
+   :align: center
+
 The configuration in ``omnetpp.ini`` is the following:
 
 .. literalinclude:: ../omnetpp.ini

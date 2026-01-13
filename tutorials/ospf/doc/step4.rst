@@ -17,7 +17,7 @@ Configuration
 
 This step uses the ``RouterLSA`` network topology.
 
-.. figure:: media/step4-4a.png
+.. figure:: media/RouterLSA.png
    :width: 100%
    :align: center
 

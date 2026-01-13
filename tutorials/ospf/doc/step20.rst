@@ -21,6 +21,10 @@ Configuration
 
 This step configures an area as a stub area.
 
+.. figure:: media/OSPF_Stub.png
+   :width: 100%
+   :align: center
+
 The configuration in ``omnetpp.ini`` is the following:
 
 .. literalinclude:: ../omnetpp.ini

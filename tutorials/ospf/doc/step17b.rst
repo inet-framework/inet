@@ -18,6 +18,10 @@ Configuration
 This configuration is based on Step 17. A virtual Link is configured between R1 and R3
 through a transit area.
 
+.. figure:: media/OSPF_LoopAvoidance.png
+   :width: 100%
+   :align: center
+
 The configuration in ``omnetpp.ini`` is the following:
 
 .. literalinclude:: ../omnetpp.ini

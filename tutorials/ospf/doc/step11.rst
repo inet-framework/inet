@@ -21,6 +21,10 @@ Configuration
 This configuration is based on Step 3. One of the router's interfaces is configured with
 ``interfaceMode="NoOSPF"``.
 
+.. figure:: media/Network.png
+   :width: 100%
+   :align: center
+
 The configuration in ``omnetpp.ini`` is the following:
 
 .. literalinclude:: ../omnetpp.ini

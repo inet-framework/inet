@@ -18,6 +18,10 @@ Configuration
 This configuration is based on Step 4. R1 is configured with a second loopback interface (lo1),
 and the OSPF configuration includes this interface.
 
+.. figure:: media/RouterLSA.png
+   :width: 100%
+   :align: center
+
 The configuration in ``omnetpp.ini`` is the following:
 
 .. literalinclude:: ../omnetpp.ini

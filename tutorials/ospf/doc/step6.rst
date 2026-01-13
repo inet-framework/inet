@@ -23,6 +23,10 @@ Configuration
 
 This step uses the ``Network2`` topology with multiple routers connected to an Ethernet switch.
 
+.. figure:: media/Network2.png
+   :width: 100%
+   :align: center
+
 The configuration in ``omnetpp.ini`` is the following:
 
 .. literalinclude:: ../omnetpp.ini

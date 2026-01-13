@@ -21,6 +21,10 @@ This configuration is based on step 14. The only change is in the OSPF configura
 file, where the network connected to **R5**'s eth0 interface (192.168.22.0/30, which
 includes **host3**) is configured with ``advertise="false"``.
 
+.. figure:: media/OSPF_AreaTest.png
+   :width: 100%
+   :align: center
+
 The configuration in ``omnetpp.ini`` is the following:
 
 .. literalinclude:: ../omnetpp.ini

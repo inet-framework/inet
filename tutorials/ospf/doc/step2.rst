@@ -18,6 +18,10 @@ Configuration
 This configuration is based on Step 1. The OSPF configuration manually overrides the output
 cost of R1's ppp1 interface using ``ASConfig_cost.xml``.
 
+.. figure:: media/OspfNetwork.png
+   :width: 100%
+   :align: center
+
 The configuration in ``omnetpp.ini`` is the following:
 
 .. literalinclude:: ../omnetpp.ini

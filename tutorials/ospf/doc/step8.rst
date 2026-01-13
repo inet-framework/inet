@@ -22,6 +22,10 @@ Configuration
 This configuration is based on Step 6. All routers have their priorities set to 0 for
 the multi-access interface.
 
+.. figure:: media/Network2.png
+   :width: 100%
+   :align: center
+
 The configuration in ``omnetpp.ini`` is the following:
 
 .. literalinclude:: ../omnetpp.ini

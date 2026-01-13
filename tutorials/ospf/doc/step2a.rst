@@ -18,6 +18,10 @@ Configuration
 This configuration is based on Step 1. The scenario manager script disconnects the link
 between **R5** and **R4** at t=60s.
 
+.. figure:: media/OspfNetwork.png
+   :width: 100%
+   :align: center
+
 The configuration in ``omnetpp.ini`` is the following:
 
 .. literalinclude:: ../omnetpp.ini

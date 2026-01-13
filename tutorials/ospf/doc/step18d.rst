@@ -17,6 +17,10 @@ Configuration
 This configuration is based on Step 18. Some ASBRs use Type-1 metrics while others use
 Type-2 metrics for the same destination.
 
+.. figure:: media/OSPF_Area_External.png
+   :width: 100%
+   :align: center
+
 The configuration in ``omnetpp.ini`` is the following:
 
 .. literalinclude:: ../omnetpp.ini

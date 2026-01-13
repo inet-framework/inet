@@ -21,6 +21,10 @@ Configuration
 
 This step uses a topology where the same destination can be reached via different route types.
 
+.. figure:: media/OSPF_Route_Selection.png
+   :width: 100%
+   :align: center
+
 The configuration in ``omnetpp.ini`` is the following:
 
 .. literalinclude:: ../omnetpp.ini

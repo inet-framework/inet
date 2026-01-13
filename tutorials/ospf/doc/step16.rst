@@ -20,6 +20,10 @@ This configuration is based on step 14. The simulation script disconnects the li
 between **R1** and **switch1** at t=60s, which isolates **host1** from the rest of
 the network.
 
+.. figure:: media/OSPF_AreaTest.png
+   :width: 100%
+   :align: center
+
 The configuration in ``omnetpp.ini`` is the following:
 
 .. literalinclude:: ../omnetpp.ini

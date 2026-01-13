@@ -23,7 +23,7 @@ the central switch (Switch2) to deterministically select the DR and BDR.
 
 The simulation script disconnects the link between **R4** and **Switch3** at t=60s.
 
-.. figure:: media/step10.png
+.. figure:: media/TopologyChange.png
    :width: 100%
    :align: center
 

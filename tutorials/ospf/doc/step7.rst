@@ -18,6 +18,10 @@ Configuration
 This configuration is based on Step 6. The OSPF configuration assigns different priorities
 to R3, making it more likely to become the DR.
 
+.. figure:: media/Network2.png
+   :width: 100%
+   :align: center
+
 The configuration in ``omnetpp.ini`` is the following:
 
 .. literalinclude:: ../omnetpp.ini

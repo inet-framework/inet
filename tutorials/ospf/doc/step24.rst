@@ -19,6 +19,10 @@ Configuration
 
 This step uses a topology where an intra-area path is longer than an available inter-area path.
 
+.. figure:: media/OSPF_Suboptimal.png
+   :width: 100%
+   :align: center
+
 The configuration in ``omnetpp.ini`` is the following:
 
 .. literalinclude:: ../omnetpp.ini

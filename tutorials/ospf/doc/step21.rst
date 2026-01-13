@@ -16,6 +16,10 @@ Configuration
 
 This step simulates a partitioned backbone and uses a virtual link to reconnect it.
 
+.. figure:: media/VirtualLink.png
+   :width: 100%
+   :align: center
+
 The configuration in ``omnetpp.ini`` is the following:
 
 .. literalinclude:: ../omnetpp.ini

@@ -20,6 +20,10 @@ Configuration
 
 This configuration is based on Step 18, using Type-2 metrics instead of Type-1.
 
+.. figure:: media/OSPF_Area_External.png
+   :width: 100%
+   :align: center
+
 The configuration in ``omnetpp.ini`` is the following:
 
 .. literalinclude:: ../omnetpp.ini

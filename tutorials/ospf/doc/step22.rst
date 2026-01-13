@@ -17,6 +17,10 @@ Configuration
 This step demonstrates an area that is not direct ly connected to Area 0, and a virtual link
 is used to connect it.
 
+.. figure:: media/VirtualLink_2.png
+   :width: 100%
+   :align: center
+
 The configuration in ``omnetpp.ini`` is the following:
 
 .. literalinclude:: ../omnetpp.ini

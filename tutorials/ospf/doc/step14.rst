@@ -26,7 +26,7 @@ This step uses the ``OSPF_AreaTest`` network with three OSPF areas:
 
 **R3** and **R4** are ABRs because they have interfaces in multiple areas.
 
-.. figure:: media/step141516.png
+.. figure:: media/OSPF_AreaTest.png
    :width: 100%
    :align: center
 

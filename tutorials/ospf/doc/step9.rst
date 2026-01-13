@@ -21,6 +21,10 @@ This configuration is based on Step 6. Router R6 has a higher priority than the 
 routers but is configured to start OSPF later (at t=60s), after the other routers have
 already completed their DR/BDR election.
 
+.. figure:: media/Network2.png
+   :width: 100%
+   :align: center
+
 The configuration in ``omnetpp.ini`` is the following:
 
 .. literalinclude:: ../omnetpp.ini
