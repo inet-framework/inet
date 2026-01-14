@@ -14,7 +14,10 @@
 #include "UdpSocket.h"
 #include "AppSocket.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/common/IcmpErrorTag_m.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/IcmpHeader_m.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
 #include "exception/ConnectionDiedException.h"
 #include "packet/ConnectionId.h"
 
@@ -118,30 +121,30 @@ void Quic::handleMessageFromUdp(cMessage *msg)
         EV_WARN << "Socket closed message received from UDP" << endl;
     } else if (msg->getKind() == UDP_I_ERROR) {
         EV_WARN << "Error message received from UDP" << endl;
-        Packet *pkt = check_and_cast<Packet *>(msg->getControlInfo());
-        auto header = pkt->popAtFront();
-        Ptr<const IcmpHeader> icmpHeader = dynamicPtrCast<const IcmpHeader>(header);
+        Indication *ind = check_and_cast<Indication *>(msg);
+        auto quotedPacket = ind->getTag<IcmpErrorInd>()->getQuotedPacket()->dup();
+        auto icmpHeader = quotedPacket->popAtFront<IcmpHeader>();
         if (icmpHeader != nullptr) {
             if (icmpHeader->getType() == ICMP_DESTINATION_UNREACHABLE && icmpHeader->getCode() == ICMP_DU_FRAGMENTATION_NEEDED) {
                 // Packet Too Big (PTB) message received
                 Ptr<const IcmpPtb> icmpPtb = dynamicPtrCast<const IcmpPtb>(icmpHeader);
 
-                pkt->popAtFront(); // skip IP header of reflected packet
-                pkt->popAtFront(); // skip UDP header of reflected packet
-                if (pkt->getByteLength() > 0) {
+                quotedPacket->popAtFront<Ipv4Header>(); // skip IP header of reflected packet
+                quotedPacket->popAtFront<UdpHeader>(); // skip UDP header of reflected packet
+                if (quotedPacket->getByteLength() > 0) {
                     bool readSrcConnectionId = true;
-                    uint64_t connectionId = extractConnectionId(pkt, &readSrcConnectionId);
+                    uint64_t connectionId = extractConnectionId(quotedPacket, &readSrcConnectionId);
                     Connection *connection = nullptr;
                     if (readSrcConnectionId) {
                         // could read source connection ID, finding connection should be easy
                         connection = findConnection(connectionId);
                     } else {
                         // could only read destination connection ID, try to find connection
-                        connection = findConnectionByDstConnectionId(connectionId, pkt);
+                        connection = findConnectionByDstConnectionId(connectionId, quotedPacket);
                     }
 
                     if (connection) {
-                        connection->processIcmpPtb(pkt, icmpPtb->getMtu());
+                        connection->processIcmpPtb(quotedPacket, icmpPtb->getMtu());
                     } else {
                         EV_WARN << "Could not find connection for a ICMP PTB" << endl;
                     }
@@ -154,6 +157,7 @@ void Quic::handleMessageFromUdp(cMessage *msg)
         } else {
             EV_WARN << "ICMPv6 not handled" << endl;
         }
+        delete quotedPacket;
     } else if (msg->getKind() == UDP_I_DATA) {
         Packet *pkt = check_and_cast<Packet *>(msg);
 

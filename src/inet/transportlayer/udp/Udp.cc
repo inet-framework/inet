@@ -21,6 +21,7 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
+#include "inet/networklayer/common/IcmpErrorTag_m.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/L3Tools.h"
@@ -1190,8 +1191,9 @@ void Udp::processICMPv4Error(Packet *packet)
         if (sd) {
             // send UDP_I_ERROR to socket
             EV_DETAIL << "Source socket is sockId=" << sd->sockId << ", notifying.\n";
-            packet->setFrontOffset(packet->getFrontOffset() - ipv4Header->getChunkLength() - icmpHeader->getChunkLength());
-            sendUpErrorIndication(sd, localAddr, localPort, remoteAddr, remotePort, packet);
+            Packet *packetQuote = packet->dup();
+            packetQuote->setFrontOffset(packetQuote->getFrontOffset() - ipv4Header->getChunkLength() - icmpHeader->getChunkLength());
+            sendUpErrorIndication(sd, localAddr, localPort, remoteAddr, remotePort, packetQuote);
         }
         else {
             EV_WARN << "No socket on that local port, ignoring ICMP error\n";
@@ -1252,7 +1254,9 @@ void Udp::processICMPv6Error(Packet *packet)
         if (sd) {
             // send UDP_I_ERROR to socket
             EV_DETAIL << "Source socket is sockId=" << sd->sockId << ", notifying.\n";
-            sendUpErrorIndication(sd, localAddr, localPort, remoteAddr, remotePort, packet);
+            Packet *packetQuote = packet->dup();
+            packetQuote->setFrontOffset(packetQuote->getFrontOffset() - ipv6Header->getChunkLength() - icmpHeader->getChunkLength());
+            sendUpErrorIndication(sd, localAddr, localPort, remoteAddr, remotePort, packetQuote);
         }
         else {
             EV_WARN << "No socket on that local port, ignoring ICMPv6 error\n";
@@ -1266,10 +1270,11 @@ void Udp::processICMPv6Error(Packet *packet)
     delete packet;
 }
 
-void Udp::sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort localPort, const L3Address& remoteAddr, ushort remotePort, Packet *icmpPacket)
+void Udp::sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort localPort, const L3Address& remoteAddr, ushort remotePort, Packet *quotedPacket)
 {
     auto indication = new Indication("ERROR", UDP_I_ERROR);
-    indication->setControlInfo(icmpPacket->dup());
+    UdpErrorIndication *udpCtrl = new UdpErrorIndication();
+    indication->setControlInfo(udpCtrl);
     // FIXME notifyMsg->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceId);
     indication->addTag<SocketInd>()->setSocketId(sd->sockId);
     auto addresses = indication->addTag<L3AddressInd>();
@@ -1278,6 +1283,7 @@ void Udp::sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort
     auto ports = indication->addTag<L4PortInd>();
     ports->setSrcPort(sd->localPort);
     ports->setDestPort(remotePort);
+    indication->addTag<IcmpErrorInd>()->setQuotedPacket(quotedPacket);
 
     send(indication, "appOut");
 }
