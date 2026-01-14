@@ -106,7 +106,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.wlan[*].mac.headerLength = 20B
 
 %#--------------------------------------------------------------------------------------------------------------
-%contains-regex: results/General-0.rt
+%contains-regex: results/General-#0.rt
 .*
 \+R #\d+  3\.1965\d+s  AODVTest\.intermediateNodeA  145\.236\.0\.2  145\.236\.0\.1/32  145\.236\.0\.1  wlan0 .*
 \+R #\d+  3\.1965\d+s  AODVTest\.intermediateNodeB  145\.236\.0\.3  145\.236\.0\.1/32  145\.236\.0\.1  wlan0 .*

@@ -101,7 +101,7 @@ sim-time-limit = 100s
 **.wlan[*].radio.receiver.snirThreshold = 4dB
 
 %#--------------------------------------------------------------------------------------------------------------
-%contains-regex: results/General-0.rt
+%contains-regex: results/General-#0.rt
 \+R #\d+  3\.1987\d+s  AODVTest\.intermediateNode  145\.236\.0\.2  145\.236\.0\.1/32  145\.236\.0\.1  wlan0 .*
 \+R #\d+  3\.2035\d+s  AODVTest\.sender  145\.236\.0\.1  145\.236\.0\.2/32  145\.236\.0\.2  wlan0 .*
 \+R #\d+  3\.2035\d+s  AODVTest\.receiver  145\.236\.0\.3  145\.236\.0\.2/32  145\.236\.0\.2  wlan0 .*
