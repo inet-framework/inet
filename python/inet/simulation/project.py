@@ -382,7 +382,8 @@ class SimulationProject:
                         args = [executable, *default_args, "-s", "-f", ini_file, "-c", config, "-q", "numruns"]
                     else:
                         executable = self.get_environment_variable_relative_path(self.omnetpp_environment_variable, "bin/opp_run")
-                        args = [executable, "-s", "-f", ini_file, "-c", config, "-q", "numruns"]
+                        default_args = self.get_default_args()
+                        args = [executable, "-s", "-f", ini_file, "-c", config, "-q", "numruns", *default_args]
                     result = run_command_with_logging(args, cwd=working_directory, env=self.get_env())
                     if result.returncode == 0:
                         # KLUDGE: this was added to test source dependency based task result caching
