@@ -1,6 +1,511 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-4.6 (January 2026) - Stable
+--------------------------------
+
+This is a new minor stable release in the INET 4.x branch. Highlights include
+new protocol implementations for QUIC, Ethernet 10BASE-T1S, IPsec, and MRP;
+major refinements to the clock model; a reimplementation of IEEE 802.1AS (gPTP);
+and an important refactoring of the wireless physical layer's analog domain. The
+release continues to focus on improving correctness, accuracy, modularity, and
+long-term maintainability while addressing several long-standing limitations.
+OMNeT++ 6.2 or later is required.
+
+For a complete list of added, removed, and changed folders, NED modules, packet
+chunks, packet tags, statistics, C++ classes, and signals, see the ChangeLog
+file in the src folder.
+
+Notable backward-incompatible changes include the following:
+
+1. Clock model refinement
+
+   The clock and oscillator models were substantially reworked to improve
+   accuracy, correctness, and robustness. Clock time to simulation time mapping
+   and clock time interval to number of oscillator ticks conversions were
+   rewritten for mathematical correctness, with stricter consistency checks.
+   Accuracy was improved through precise arithmetic and new scaling utilities
+   such as the NumberNear1 and SimTimeScale classes. The design is prepared for
+   future 128-bit simulation time support.
+
+   The updated model now accumulates fractional oscillator compensation for more
+   accurate timing. The clock's nominal tick interval must be explicitly
+   configured, as it no longer defaults to the simulation time resolution. The
+   drifting oscillator model was extended with a configurable frequency
+   compensation factor, distinct from the clock's step-based compensation
+   mechanism.
+
+   The architecture was modularized to allow multiple clocks to share a single
+   physical oscillator via the clock's oscillatorModule parameter. SettableClock
+   now includes an underlying free-running clock submodule to support
+   simulations that mix synchronized and unsynchronized time. A new clock servo
+   framework was introduced, including the IClockServo module interface and the
+   StepClockServo module for implementation.
+
+   Clock event handling was also refined: overdue events are now processed
+   immediately in clock-time order, and newly scheduled events are inserted at
+   the lower bound of the corresponding simulation-time interval while
+   preserving stable ordering. Clock time to simulation time conversion methods
+   now accept explicit lower-bound arguments to ensure robust tie-breaking
+   between adjacent ticks.
+
+   Clock and oscillator documentation was significantly expanded and formalized
+   to reflect the stricter semantics of the new implementation.
+
+   This change is backward incompatible in that clock-based simulations may
+   produce slightly different statistical results due to the improved
+   correctness and accuracy of the model.
+
+2. IEEE 802.1AS (gPTP) protocol reimplementation
+
+   Large parts of the protocol were reimplemented using formal state machines
+   for both peer delay measurement and time synchronization. Standards
+   conformance was improved, including correct handling of grandmaster and
+   neighbor rate ratios. The peer delay and time synchronization processes now
+   maintain separate state for requester/responder and sender/receiver roles.
+
+   The new model introduces a dedicated clock servo submodule for updating local
+   time. Peer delay measurements now use an exponential moving average for
+   improved stability and are performed using the unsynchronized local clock to
+   avoid interference during active time synchronization.
+
+   For improved standards compliance, message timestamping now occurs at
+   transmission start and reception start rather than at completion. As a
+   result, simulations must use physical layer modules that provide explicit
+   start-of-transmission and start-of-reception signals, such as the
+   StreamingTransmitter and DestreamingReceiver modules.
+
+   Due to the high precision required for time synchronization, accurately
+   modeling a 1 ppm clock drift with a nominal 10 ns tick interval requires very
+   fine time granularity. gPTP simulations therefore typically require
+   femtosecond (fs) simulation time resolution, which can be enabled using the
+   simtime-resolution configuration option.
+
+   This change is backward incompatible in that simulations using gPTP may
+   produce slightly different statistical results due to the improved
+   correctness and accuracy of the model.
+
+3. Ethernet module renames
+
+   Existing Ethernet MAC modules were renamed to use the MacPhy suffix (e.g.
+   EthernetMacPhy, EthernetCsmaMacPhy) to reflect that they implement both MAC
+   and PHY functionality in a single module. This resolves naming conflicts
+   introduced by the new dedicated EthernetCsmaMac and EthernetCsmaPhy modules,
+   which provide a modern, state-machine-based implementation of the individual
+   layers and are primarily used by the new Ethernet 10BASE-T1S model.
+
+   These changes are backward incompatible for simulations that directly
+   reference the old module names.
+
+4. Wireless physical layer refactoring
+
+   The wireless physical layer was significantly refactored to simplify how the
+   analog representation of radio signals is selected. Instead of using separate
+   module types, radio and medium modules now use a signalAnalogRepresentation
+   parameter (with values unitDisk, scalar, or dimensional) to control their
+   behavior.
+
+   Responsibility for computing reception success was partially moved from
+   receiver modules to their analog model submodules. To reflect broader
+   applicability, much of the former UnitDisk-specific implementation was
+   replaced by generic components, resulting in modules such as GenericRadio,
+   GenericTransmitter, and GenericReceiver, while UnitDisk remains available as
+   an analog domain representation.
+
+   Specific wireless technologies, including IEEE 802.11, IEEE 802.15.4, and
+   APSK, were refactored to align with the new architecture and can now be used
+   with the unit disk signal analog representation.
+
+5. CRC, FCS, and Checksum
+
+   Frame Check Sequence (FCS) is now used consistently for link-layer protocols
+   (e.g. Ethernet, IEEE 802.11), replacing the generic CRC terminology.
+   Accordingly, crcMode parameters in MAC and radio modules were renamed to
+   fcsMode. In the TCP/IP stack, the term checksum is now used explicitly for
+   16-bit one’s-complement sums, and crcMode was renamed to checksumMode.
+
+   The underlying implementations were modernized as well. New algorithms
+   (CRC32C, CRC16-IBM, CRC16-CCITT) were added, generic and configurable CRC
+   utilities were introduced, and protocol-specific handling was improved—most
+   notably, SCTP now uses a dedicated CRC32C implementation. These changes
+   improve standards compliance, verification reliability, and flexibility while
+   preserving existing behavior by default.
+
+   Note that these changes are backward incompatible for simulations that
+   explicitly configure crcMode or fcsMode parameters.
+
+Notable backward compatible changes are the following:
+
+1. 10BASE-T1S Ethernet physical layer
+
+   A new 10BASE-T1S Ethernet model was added, implementing Physical Layer
+   Collision Avoidance (PLCA) in accordance with IEEE 802.3cg. The PLCA
+   Reconciliation Sublayer provides deterministic access to the shared medium by
+   assigning transmit opportunities (TOs) to nodes in a round-robin manner,
+   effectively eliminating the collisions typical of CSMA/CD and enabling
+   efficient half-duplex communication.
+
+   Unlike traditional point-to-point Ethernet topologies, 10BASE-T1S supports a
+   multidrop bus (mixing segment) in which multiple nodes can be daisy-chained
+   on a single twisted pair without a switch. The model introduces new modules
+   such as EthernetCsmaMac, EthernetPlca, and EthernetCsmaPhy; users should use
+   EthernetPlcaNode for hosts, EthernetPlcaInterface for network interfaces, and
+   EthernetMultidropLink for connectivity.
+
+   Several example simulations were added to demonstrate the new functionality.
+
+2. QUIC transport protocol
+
+   A new implementation of the QUIC transport protocol was added, designed to be
+   structurally modular, and suitable for performance and protocol-level
+   experimentation. It models connection-oriented QUIC over UDP with explicit
+   connection and socket management, supports the full handshake including 0-RTT
+   connection establishment, and provides stream-based data transfer with
+   configurable per-stream and connection-level flow control.
+
+   The model includes congestion control with selectable algorithms (e.g.
+   NewReno), loss detection and retransmission with correct handling of
+   ACK-eliciting and non-ACK-eliciting frames, and Path MTU Discovery with
+   optional DPLPMTUD and ICMP Packet Too Big processing. It ensures correct byte
+   ordering and in-order delivery, uses randomized initial destination
+   connection IDs with robust lifecycle management, and supports clean
+   connection teardown with explicit close handling and delayed destruction
+   after CONNECTION_CLOSE.
+
+   Validation simulations are integrated into the fingerprint and validation
+   test framework. Overall, the QUIC model provides a solid and extensible
+   foundation for simulating modern UDP-based transport protocols and for
+   comparing their behavior against TCP under controlled conditions.
+
+3. IPsec protocol
+
+   The IPv4 model was extended with a comprehensive IPsec implementation to
+   support secure network communication. The model supports both Authentication
+   Header (AH) and Encapsulating Security Payload (ESP), with an emphasis on
+   standards compliance, including correct AH header lengths and proper
+   placement of ESP trailers within encrypted payloads.
+
+   The implementation supports UDP traffic and multicast communication, enabling
+   a wide range of secured network scenarios. It also includes protocol-specific
+   packet dissectors and packet printers to allow inspection and analysis of
+   protected traffic.
+
+4. Media Redundancy Protocol (MRP)
+
+   Media Redundancy Protocol (MRP) was added to provide high-availability
+   Ethernet ring redundancy. It improves network reliability by managing
+   redundant paths in ring topologies, preventing loops, and enabling fast
+   recovery after link failures.
+
+   The EthernetSwitch module now includes MRP components such as the core
+   protocol logic, redundancy-aware forwarding, a specialized MAC forwarding
+   table, and support for interconnecting multiple rings or redundant segments.
+   The implementation follows the relevant standards, using a specific multicast
+   MAC address for protocol communication and supporting all major MRP message
+   types for topology monitoring and change detection.
+
+   Additional signals and statistics were added to improve observability, and
+   the implementation was validated under extreme conditions (e.g. very high
+   packet error rates) to ensure robust recovery behavior.
+
+5. TCP auto-read mode
+
+   The TCP modules were extended with an explicit read mode to support proper
+   TCP flow control. Previously, all TCP sockets operated in auto-read mode,
+   where received data was immediately delivered to the application, effectively
+   disabling flow control.
+
+   When explicit read mode is enabled by setting autoRead to false in
+   TcpOpenCommand, applications must issue read requests, similar to real socket
+   read() calls. TCP then delivers buffered or newly arrived data up to a
+   specified byte limit, reducing the advertised window as data arrives and
+   increasing it again only when buffer space is freed by read requests.
+   Auto-read mode remains the default for backward compatibility and continues
+   to advertise the full configured window.
+
+   Read requests are represented by TcpReadCommand, and a new request may be
+   issued only after the previous one has been satisfied. In addition, delivery
+   of the TCP_I_PEER_CLOSED indication after a FIN is now delayed until all
+   buffered data has been read by the application.
+
+6. AODV gateway
+
+   AODV has been extended to support routing toward external IP networks via a
+   statically configured gateway. By defining the new gatewayAddress parameter,
+   nodes can now handle traffic destined for external addresses by automatically
+   initiating route discovery for the specified gateway. Once the route to the
+   gateway is discovered, external packets are queued and forwarded accordingly.
+
+   A new showcase was added demonstrating AODV support for routing traffic to
+   external networks via a statically configured gateway, featuring a wireless
+   ad hoc network communicating with a wired Ethernet host through a gateway
+   router.
+
+7. GPSR multipe network interfaces
+
+   The GPSR (Greedy Perimeter Stateless Routing) protocol was updated to support
+   simultaneous use of multiple network interfaces, with refactored logic and
+   data structures to track neighbors on a per-interface basis. Beacons are now
+   sent on all configured interfaces, neighbor information stores both position
+   and interface ID, and packet forwarding correctly uses the interface
+   associated with the selected neighbor for greedy or perimeter routing.
+
+   The internal tables were reorganized by renaming PositionTable to
+   GpsrPositionTable, removing unused functionality, and introducing a new
+   GpsrNeighborTable. These changes are demonstrated in an updated
+   ManetProtocolsShowcase using the unified radio architecture.
+
+8. Extended host OS support
+
+   The new ExternalEnvironment, ExternalProcess, and ExternalApp modules provide
+   a framework for integrating host OS applications into simulations by managing
+   their execution and setup. ExternalEnvironment handles host configuration via
+   shell commands and is integrated as an optional submodule within NodeBase,
+   while ExternalApp offers a high-level interface to run programs like web
+   servers or routing daemons automatically along with the simulation.
+
+   To facilitate host OS isolated emulation, the framework introduces an
+   UnsharedNamespaceInitializer class for creating separate host OS user and
+   network namespaces. A dedicated INITSTAGE_EXTERNAL ensures external devices
+   like TAP interfaces are opened only after the environment is fully prepared.
+
+9. Queueing model
+
+   New utility classes have been introduced to replace raw interface pointers
+   with managed references for packet sources and sinks. These classes are
+   PassivePacketSinkRef, ActivePacketSinkRef, PassivePacketSourceRef, and
+   ActivePacketSourceRef, they manage references to components for both push-
+   and pull-based interfaces. Most modules now treat connected sources and sinks
+   as optional, enabling these modules to also connect to non-queueing elements.
+
+   Classifiers and schedulers have been extended to enable pulling from and
+   pushing to packets, respectively. Typically, however, they are used the other
+   way around, with packets being pushed into classifiers and pulled from
+   schedulers.
+
+   Several new modules and module interfaces have also been added. For example,
+   the QueueBasedTokenGenerator allows the QueueFiller module to generate
+   traffic that prevents a queue from ever becoming empty.
+
+   Statistics collection has been improved across multiple modules. For example,
+   many modules now provide a packetLifeTime statistic; previously, only the
+   bit-based average lifetime (meanBitLifeTimePerPacket) was tracked. The
+   packetLifeTime statistic measures how long a packet stays in the system, from
+   entry to exit. Unlike the older meanBitLifeTimePerPacket, it is a simple
+   per-packet time delta rather than a bit-weighted average, making it easier to
+   interpret, analyze (e.g. histograms, min/max), and align with standard
+   metrics such as end-to-end delay.
+
+   In addition, passive packet sinks have been extended with optional statistics
+   to detect duplicate, out-of-order, and missing packets based on packet name
+   index suffixes. To name a few additonal statistical changes, the
+   MultiTokenBucketMeter and MultiTokenBucketClassifier modules now record
+   separate statistics for each individual token bucket they contain, and the
+   SlidingWindowRateMeter and ExponentialRateMeter modules now provide
+   packetRate and dataRate statistics.
+
+10. Protocol support
+
+   Several smaller modules have been added to support various protocol features.
+
+   For example, the GroupEligibilityTimeMeter and GroupEligibilityTimeTable
+   modules were added to support asynchronous traffic shaping with scheduler
+   groups in TSN simulations. The GroupEligibilityTimeMeter provides shared
+   eligibility times for streams within the same group, while
+   GroupEligibilityTimeTable maintains group state and mappings; they are
+   typically connected via Ieee8021qFilter to enforce shared eligibility
+   behavior.
+
+   New specialized modules were added to handle Ethernet Frame Check Sequence
+   (FCS) separately, including EthernetFcsHeaderInserter, which inserts Ethernet
+   FCS headers, and EthernetFcsHeaderChecker, which checks and strips Ethernet
+   FCS headers.
+
+   Added modules for the EtherType Protocol Discrimination (EPD) header
+   support IEEE 802 LLC implementations.
+
+11. Visualizers
+
+   The RoutingTableCanvasVisualizer has been extended with a lazy update
+   mechanism that refreshes visualizations only when needed, grealy improving
+   performance. Support for multicast routing tables has been added, along with
+   new filtering parameters to control multicast group, source address, and
+   source node visualization.
+
+   The ChannelCanvasVisualizer is a new module for displaying channel activity.
+
+12. Packet serializers
+
+   A new Ieee802154MacHeaderSerializer has been added to support the binary
+   representation of the IEEE 802.15.4 protocol. In addition, new serializers
+   were introduced for non-standard INET specific protocols or technologies:
+   GenericPhyHeaderSerializer, ShortcutPhyHeaderSerializer, and
+   ShortcutMacHeaderSerializer.
+
+   The ApskPhyHeaderSerializer was updated to serialize and deserialize the
+   protocol field using InetPhyProtocolGroup. This change eliminates fingerprint
+   instability caused by serializing internal protocol IDs into the binary
+   representation.
+
+   A new StreamBufferChunkSerializer was added to enable serialization of frames
+   transmitted using Ethernet cut-through switching.
+
+13. RIP routing tutorial
+
+   A new multi-step tutorial has been added to introduce the fundamentals of the
+   Routing Information Protocol (RIP). It guides users through RIP operation and
+   convergence, illustrating split horizon, triggered updates, and the impact of
+   protocol timing on stability. The tutorial also explores route management
+   scenarios, such as operating without netmask routes, and improves simulation
+   realism with randomized router startup times. It progresses from basic
+   connectivity in the early steps to dynamic topologies and failure recovery
+   scenarios.
+
+14. OSPF tutorial
+
+   The new OSPF tutorial is !!!TODO!!!
+
+15. BGP routing tutorial
+
+   This new tutorial offers a concise, multi-step guide to configuring the
+   Border Gateway Protocol (BGP). It begins with simple topologies and
+   introduces both External (E-BGP) and Internal (I-BGP) sessions, then
+   progresses to more advanced topics. These include configuring path attributes
+   such as LOCAL_PREF and network advertisements, redistributing routes between
+   BGP, RIP, and OSPF, and setting up loopback interfaces, nextHopSelf, and
+   multi-hop E-BGP connections. Each step integrates RoutingTableRecorder and
+   PcapRecorder to support detailed analysis of routing updates and traffic
+   flows.
+
+16. New showcases
+
+   The new tsn/combiningfeatures/fpandtas showcase presents a combined-feature
+   TSN scenario that demonstrates the simultaneous use of Frame Preemption and
+   Time-Aware Shaping (TAS).
+
+   The emulation/voip showcase models real-time VoIP communication using the
+   VoipStreamSender and VoipStreamReceiver applications. It includes detailed
+   configurations and scripts for running simulations over loopback interfaces
+   and virtual Ethernet (veth) pairs.
+
+   The emulation/mininet showcase, extracted from the original VoIP example, is
+   now a standalone demonstration of running INET applications within a Mininet
+   environment. It uses an AppContainer-based network structure to connect
+   simulated traffic with external Mininet components.
+
+   The emulation/webserver showcase demonstrates the ExternalApp and
+   ExternalEnvironment framework by running a Python-based HTTP server and a
+   wget client as real host OS processes. Network namespaces are used to isolate
+   these external applications while enabling communication through the
+   simulated network.
+
+17. Documentation refinements
+
+   NED documentation received extensive improvements in consistency, coverage,
+   and technical accuracy. Brief descriptions were standardized for better
+   presentation in IDE tooltips, terminology and formatting were unified.
+   Documentation was added for many previously undocumented modules. Protocol
+   documentation was expanded and corrected, notably for TCP and gPTP. New or
+   refined material was added for Ethernet (including 10BASE-T1S) and wireless
+   physical layer components.
+
+   The User's Guide was revised to use more neutral, professional language. It
+   now includes new documentation on TCP flow control and the effects of the new
+   autoRead parameter. The Developer's Guide was expanded with additional
+   technical diagrams, including a new clock and oscillator model diagram.
+
+   Across the documentation, showcases and tutorials were enhanced with “Try It
+   Yourself” sections that provide concrete opp_env commands for interactive
+   experimentation.
+
+18. Notable bug fixes and other changes
+
+   Introduced new SimpleModule, CompoundModule, and ModuleMixin as standard
+   bases to derive all modules from. They have a displayStringTextFormat
+   parameter that supports the old style format directives and also WATCH
+   variable references. Deriving new or existing modules from these bases is
+   optional.
+
+   Obsolete '#abstract-config = true' configuration options in INI files have
+   been systematically replaced with the now standard 'abstract = true'.
+
+   Improved robustness and timing accuracy of the RealTimeScheduler. Reduced
+   spurious overruns and improved behavior under host load.
+
+   Added a new ModuleDump module that can print a module's hierarchy and
+   parameters for debugging and comparison across simulations. Optional
+   ModuleDump submodules were also added to NetworkBase, enabling partial or
+   full network dumps via command line or INI file configuration.
+
+   Added ChannelOwnerRecorder, a new result recorder that records which module
+   currently owns a communication channel. Useful for debugging resource
+   contention and validating channel access behavior. Added a channelOwner
+   statistic to WireJunction module to record the owning network node in the
+   collision domain.
+
+   Added a new SimulationCpuUsageMeasurer module that measures the CPU time used
+   by a simulation and records it as a scalar statistic. It can be used for
+   performance analysis and benchmarking simulations.
+
+   Added parameters to the MessageDispatcher module to allow directly
+   controlling the message dispatching mechanism, in contrast with the automatic
+   learning of protocol and interface registrations.
+
+   Improved EIGROP on stability, cleanup, and modernization. Several bugs were
+   fixed to prevent dangling pointers, handle dynamic neighbor changes
+   correctly, and align IPv4 route removal with IPv6 behavior. Core code paths
+   were refactored to use modern C++ constructs, missing interface parameters
+   were added to improve configurability, and message definitions were
+   simplified, resulting in a more robust and consistent implementation.
+
+   Added a few new NED functions. seq() returns the next integer (starting from
+   0) associated with a given string key, enabling deterministic sequences
+   across evaluations. iterate() returns the next value from an array on each
+   evaluation, with the index tracked per context component path. The par()
+   function allows dynamic access to module parameters inside expressions.
+
+   All filename module parameters now support substitution, allowing config
+   name, experiment, iteration, run numbers, etc. to be included in filenames.
+
+   Added the DemuxAppFilter, a result filter that de-multiplexes signals by
+   their originating application module, making it easy to record
+   per-application statistics even when applications share a common path or
+   interface.
+
+   Added the DemuxRegexFilter, a result filter that uses regular expression
+   matching on signal metadata or packet names to route incoming data into
+   separate output streams, enabling flexible result categorization based on
+   naming conventions.
+
+   Added the InterarrivalTime result filter, which computes the time between
+   consecutive signals or packet arrivals for analyzing jitter, traffic
+   burstiness, and event timing.
+
+   Removed the default value "SSID" for the defaultSsid parameter in
+   Ieee80211AgentSta, requiring users to explicitly configure the SSID for
+   station associations.
+
+   The FlowMeasurementRecorder has been extended to support recording a
+   packetEvent JSON log file, which captures detailed packet-level events during
+   the simulation.
+
+   The SctpAssociation class is converted into a simple module.
+
+   Fixed Ethernet multicast delivery in TSN.
+
+   Fixed mCRC calculation for multi-fragment Ethernet frames.
+
+   The Python support libraries were extended with automatic simulation
+   comparison that identifies the divergence point.
+
+   Converted self-documentation feature into a compile-time option.
+
+   Removed all per-folder ChangeLog files that summarized local changes, since
+   they are no longer useful with current AI tools.
+
+   Several additional issues documented on GitHub have also been fixed.
+
+
 INET-4.5 (April 2023) - Stable
 ------------------------------
 
