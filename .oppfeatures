@@ -61,6 +61,20 @@
         linkerFlags = ""
         />
     <feature
+        id = "BgpTutorial"
+        name = "BGP routing tutorial"
+        description = "A step-by-step tutorial starting from the basics, and introducing new features and concepts related to BGP routing."
+        initiallyEnabled = "true"
+        requires = "VisualizationCanvas Ethernet Bgpv4"
+        labels = "tutorial bgp routing"
+        nedPackages = "
+		       inet.tutorials.bgp
+		      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id = "Bgpv4"
         name = "BGPv4 routing"
         description = "BGP support."
