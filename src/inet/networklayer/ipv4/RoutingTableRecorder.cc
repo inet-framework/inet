@@ -21,8 +21,6 @@ namespace inet {
 
 Define_Module(RoutingTableRecorder);
 
-Register_PerRunConfigOption(CFGID_ROUTINGLOG_FILE, "routinglog-file", CFG_FILENAME, "${resultdir}/${configname}-${runnumber}.rt", "Name of the routing log file to generate.");
-
 RoutingTableRecorder::RoutingTableRecorder()
 {
     routingLogFile = nullptr;
@@ -73,7 +71,7 @@ void RoutingTableRecorder::hookListeners()
 void RoutingTableRecorder::ensureRoutingLogFileOpen()
 {
     if (routingLogFile == nullptr) {
-        std::string fname = getEnvir()->getConfig()->getAsFilename(CFGID_ROUTINGLOG_FILE);
+        std::string fname = getEnvir()->getConfig()->substituteVariables(par("logfile"));
         inet::utils::makePathForFile(fname.c_str());
         routingLogFile = fopen(fname.c_str(), "w");
         if (!routingLogFile)

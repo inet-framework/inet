@@ -19,6 +19,7 @@ simple RoutingTableRecorder extends SimpleModule
     parameters:
         @class(RoutingTableRecorder);
         bool enabled = default(true);
+        string logfile = default("${resultdir}/${configname}-#${runnumber}.rt");
         @display("i=block/control");
 }
 
