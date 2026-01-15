@@ -24,9 +24,9 @@ cmdenv-express-mode=true
 network = inet.test.moduletest.lib.ClientServer
 total-stack = 7MiB
 #**.server.numPcapRecorders = 1
-#**.server.pcapRecorder[0].pcapFile = "results/server.pcap"
+#**.server.pcapRecorder[0].pcapFile = "${resultdir}/server.pcap"
 #**.client.numPcapRecorders = 1
-#**.client.pcapRecorder[0].pcapFile = "results/client.pcap"
+#**.client.pcapRecorder[0].pcapFile = "${resultdir}/client.pcap"
 
 
 
