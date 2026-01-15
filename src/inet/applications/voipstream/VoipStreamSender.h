@@ -94,10 +94,10 @@ class INET_API VoipStreamSender : public SimpleModule, public LifecycleUnsupport
     const char *codec = nullptr;
     int compressedBitRate = 0;
     simtime_t packetTimeLength;
-    const char *soundFile = nullptr; // input audio file name
+    std::string soundFile; // input audio file name
     int repeatCount = 0;
 
-    const char *traceFileName = nullptr; // name of the output trace file, nullptr or empty to turn off recording
+    std::string traceFileName; // name of the output trace file, empty to turn off recording
     AudioOutFile outFile;
 
     // AVCodec parameters

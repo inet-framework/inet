@@ -28,7 +28,7 @@ void PcapFilePacketConsumer::initialize(int stage)
         else
             throw cRuntimeError("Unknown fileFormat parameter");
         pcapWriter->setFlush(par("alwaysFlush"));
-        pcapWriter->open(par("filename"), par("snaplen"), par("timePrecision"));
+        pcapWriter->open(getEnvir()->getConfig()->substituteVariables(par("filename")), par("snaplen"), par("timePrecision"));
         networkType = static_cast<PcapLinkType>(par("networkType").intValue());
         const char *dirString = par("direction");
         if (*dirString == 0)

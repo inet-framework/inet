@@ -49,7 +49,7 @@ void VoipStreamReceiver::initialize(int stage)
 
         // read parameters
         localPort = par("localPort");
-        resultFile = par("resultFile");
+        resultFile = getEnvir()->getConfig()->substituteVariables(par("resultFile"));
         playoutDelay = par("playoutDelay");
 
         // initialize avcodec library
@@ -193,7 +193,7 @@ void VoipStreamReceiver::createConnection(Packet *pk)
     if (err < 0)
         throw cRuntimeError("could not open decoding codec %d (%s): error (%d) %s", curConn.codec, curConn.pCodecDec->name, err, av_err2str(err));
 
-    curConn.openAudio(resultFile);
+    curConn.openAudio(resultFile.c_str());
     curConn.offline = false;
     emit(connStateSignal, 1);
 }

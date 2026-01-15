@@ -128,9 +128,9 @@ void Ns2MotionMobility::initialize(int stage)
         nodeId = par("nodeId");
         if (nodeId == -1)
             nodeId = getContainingNode(this)->getIndex();
-        const char *fname = par("traceFile");
+        std::string fname = getEnvir()->getConfig()->substituteVariables(par("traceFile"));
         ns2File = new Ns2MotionFile;
-        parseFile(fname);
+        parseFile(fname.c_str());
         vecpos = 0;
         WATCH(nodeId);
     }

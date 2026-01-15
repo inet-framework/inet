@@ -18,8 +18,10 @@ Define_Module(PcapFilePacketProducer);
 void PcapFilePacketProducer::initialize(int stage)
 {
     ActivePacketSourceBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
-        pcapReader.openPcap(par("filename"), par("packetNameFormat"));
+    if (stage == INITSTAGE_LOCAL) {
+        std::string filename = getEnvir()->getConfig()->substituteVariables(par("filename"));
+        pcapReader.openPcap(filename.c_str(), par("packetNameFormat"));
+    }
     else if (stage == INITSTAGE_QUEUEING)
         schedulePacket();
 }

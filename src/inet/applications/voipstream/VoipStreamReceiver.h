@@ -91,7 +91,7 @@ class INET_API VoipStreamReceiver : public SimpleModule, public LifecycleUnsuppo
   protected:
     int localPort = -1;
     simtime_t playoutDelay;
-    const char *resultFile = nullptr;
+    std::string resultFile;
 
     UdpSocket socket;
 

@@ -44,11 +44,11 @@ void BonnMotionMobility::initialize(int stage)
         int nodeId = par("nodeId");
         if (nodeId == -1)
             nodeId = getContainingNode(this)->getIndex();
-        const char *fname = par("traceFile");
-        const BonnMotionFile *bmFile = cache.getFile(fname);
+        std::string fname = getEnvir()->getConfig()->substituteVariables(par("traceFile"));
+        const BonnMotionFile *bmFile = cache.getFile(fname.c_str());
         lines = bmFile->getLine(nodeId);
         if (!lines)
-            throw cRuntimeError("Invalid nodeId %d -- no such line in file '%s'", nodeId, fname);
+            throw cRuntimeError("Invalid nodeId %d -- no such line in file '%s'", nodeId, fname.c_str());
         currentLine = 0;
         computeMaxSpeed();
     }

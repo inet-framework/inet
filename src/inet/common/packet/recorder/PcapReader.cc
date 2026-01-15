@@ -29,7 +29,6 @@ void PcapReader::openPcap(const char *filename, const char *packetNameFormat)
     if (opp_isempty(filename))
         throw cRuntimeError("Cannot open pcap file: file name is empty");
     this->packetNameFormat = packetNameFormat;
-    inet::utils::makePathForFile(filename);
     file = fopen(filename, "rb");
     if (file == nullptr)
         throw cRuntimeError("Cannot open pcap file [%s] for reading: %s", filename, strerror(errno));

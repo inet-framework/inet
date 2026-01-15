@@ -56,10 +56,10 @@ void SceneOsgEarthVisualizer::initialize(int stage)
 void SceneOsgEarthVisualizer::initializeScene()
 {
     SceneOsgVisualizerBase::initializeScene();
-    const char *mapFileString = par("mapFile");
-    auto mapScene = osgDB::readNodeFile(mapFileString);
+    std::string mapFileString = getEnvir()->getConfig()->substituteVariables(par("mapFile"));
+    auto mapScene = osgDB::readNodeFile(mapFileString.c_str());
     if (mapScene == nullptr)
-        throw cRuntimeError("Could not read earth map file '%s'", mapFileString);
+        throw cRuntimeError("Could not read earth map file '%s'", mapFileString.c_str());
     auto osgCanvas = visualizationTargetModule->getOsgCanvas();
     osgCanvas->setViewerStyle(cOsgCanvas::STYLE_EARTH);
     auto topLevelScene = check_and_cast<inet::osg::TopLevelScene *>(osgCanvas->getScene());

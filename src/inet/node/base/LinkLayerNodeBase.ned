@@ -45,7 +45,7 @@ module LinkLayerNodeBase extends NodeBase like IEthernetNetworkNode
         int numTunInterfaces = default(0);
         int numVirtInterfaces = default(0);
         string fcsMode @enum("declared","computed") = default("declared");
-        pcapRecorder[*].pcapFile = default("results/" + expand("${configname}-") + fullPath() + ".pcap");
+        pcapRecorder[*].pcapFile = default("${resultdir}/${configname}-#${runnumber}" + fullPath() + ".pcap");
         mobility.typename = default(numWlanInterfaces > 0 ? "StationaryMobility" : "");
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.fcsMode = this.fcsMode;

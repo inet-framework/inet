@@ -25,13 +25,13 @@ RtpPayloadReceiver::~RtpPayloadReceiver()
 
 void RtpPayloadReceiver::initialize()
 {
-    const char *fileName = par("outputFileName");
-    const char *logFileName = par("outputLogFileName");
-    if (strcmp(fileName, ""))
-        openOutputFile(fileName);
-    if (strcmp(logFileName, "")) {
+    std::string fileName = getEnvir()->getConfig()->substituteVariables(par("outputFileName"));
+    std::string logFileName = getEnvir()->getConfig()->substituteVariables(par("outputLogFileName"));
+    if (!fileName.empty())
+        openOutputFile(fileName.c_str());
+    if (!logFileName.empty()) {
         char logName[200];
-        sprintf(logName, logFileName, getId());
+        sprintf(logName, logFileName.c_str(), getId());
         _outputLogLoss.open(logName);
     }
 }

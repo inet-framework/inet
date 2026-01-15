@@ -30,8 +30,8 @@ Ieee80211BerTableErrorModel::~Ieee80211BerTableErrorModel()
 void Ieee80211BerTableErrorModel::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        const char *fname = par("berTableFile");
-        if (fname == nullptr)
+        std::string fname = getEnvir()->getConfig()->substituteVariables(par("berTableFile"));
+        if (fname.empty())
             throw cRuntimeError("BER file parameter is mandatory");
         // TODO remove and cleanup opMode from here and also from BerParseFile, this should depend on the received signal
         char opMode;
@@ -47,9 +47,9 @@ void Ieee80211BerTableErrorModel::initialize(int stage)
         else if (!strcmp("p", opModeString))
             opMode = 'p';
         else
-            throw cRuntimeError("Unknown opMode");
+            throw cRuntimeError("Unknown opMode: '%s'", opModeString);
         berTableFile = new BerParseFile(opMode);
-        berTableFile->parseFile(fname);
+        berTableFile->parseFile(fname.c_str());
     }
 }
 

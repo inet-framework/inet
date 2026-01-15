@@ -89,9 +89,9 @@ void VoipStreamSender::initialize(int stage)
         packetTimeLength = ((double)samplesPerPacket) / sampleRate;
         EV_INFO << "adjusted to " << packetTimeLength * 1000.0 << "ms" << endl;
 
-        soundFile = par("soundFile");
+        soundFile = getEnvir()->getConfig()->substituteVariables(par("soundFile"));
         repeatCount = par("repeatCount");
-        traceFileName = par("traceFileName");
+        traceFileName = getEnvir()->getConfig()->substituteVariables(par("traceFileName"));
 
         pReSampleCtx = nullptr;
         localPort = par("localPort");
@@ -135,7 +135,7 @@ void VoipStreamSender::initialize(int stage)
         // initialize avcodec library
         av_log_set_callback(&inet_av_log);
 
-        openSoundFile(soundFile);
+        openSoundFile(soundFile.c_str());
 
         timer = new cMessage("sendVoIP");
         scheduleAt(startTime, timer);
@@ -338,9 +338,9 @@ void VoipStreamSender::openSoundFile(const char *name)
             throw cRuntimeError("Error opening context, swr_init() returns (%d) %s", err, av_err2str(err));
     }
 
-    if (traceFileName && *traceFileName) {
-        inet::utils::makePathForFile(traceFileName);
-        outFile.open(traceFileName, sampleRate, 8 * av_get_bytes_per_sample(pEncoderCtx->sample_fmt));
+    if (!traceFileName.empty()) {
+        inet::utils::makePathForFile(traceFileName.c_str());
+        outFile.open(traceFileName.c_str(), sampleRate, 8 * av_get_bytes_per_sample(pEncoderCtx->sample_fmt));
     }
 
     sampleBuffer.clear(samplesPerPacket * av_get_bytes_per_sample(pEncoderCtx->sample_fmt));

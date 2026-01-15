@@ -88,10 +88,10 @@ void Ipv4RoutingTable::initialize(int stage)
             if (strcmp(routerIdStr, "") && strcmp(routerIdStr, "auto"))
                 routerId = Ipv4Address(routerIdStr);
             // read routing table file (and interface configuration)
-            const char *filename = par("routingFile");
+            std::string filename = getEnvir()->getConfig()->substituteVariables(par("routingFile"));
             RoutingTableParser parser(ift, this);
-            if (*filename && parser.readRoutingTableFromFile(filename) == -1)
-                throw cRuntimeError("Error reading routing table file %s", filename);
+            if (!filename.empty() && parser.readRoutingTableFromFile(filename.c_str()) == -1)
+                throw cRuntimeError("Error reading routing table file %s", filename.c_str());
             // routerID selection must be after network autoconfiguration assigned interface addresses
             configureRouterId();
         }
@@ -712,10 +712,10 @@ bool Ipv4RoutingTable::handleOperationStage(LifecycleOperation *operation, IDone
     if (dynamic_cast<ModuleStartOperation *>(operation)) {
         if (static_cast<ModuleStartOperation::Stage>(stage) == ModuleStartOperation::STAGE_NETWORK_LAYER) {
             // read routing table file (and interface configuration)
-            const char *filename = par("routingFile");
+            std::string filename = getEnvir()->getConfig()->substituteVariables(par("routingFile"));
             RoutingTableParser parser(ift, this);
-            if (*filename && parser.readRoutingTableFromFile(filename) == -1)
-                throw cRuntimeError("Error reading routing table file %s", filename);
+            if (!filename.empty() && parser.readRoutingTableFromFile(filename.c_str()) == -1)
+                throw cRuntimeError("Error reading routing table file %s", filename.c_str());
         }
         else if (static_cast<ModuleStartOperation::Stage>(stage) == ModuleStartOperation::STAGE_TRANSPORT_LAYER) {
             configureRouterId();

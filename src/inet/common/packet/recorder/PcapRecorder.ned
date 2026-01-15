@@ -38,7 +38,7 @@ simple PcapRecorder extends SimpleModule
         bool verbose = default(true);  // Whether to log packets on the module output
         bool recordEmptyPackets = default(true); // Specifies if zero length packets are recorded or not
         bool enableConvertingPackets = default(true); // Specifies if converting packets to link type is allowed or not
-        string pcapFile = default(""); // The PCAP file to be written
+        string pcapFile = default(""); // The PCAP file to be written, suggested value: pcapFile = "${resultdir}/${configname}-#${runnumber}" + fullpath() + ".pcap"
         string fileFormat @enum("pcap", "pcapng") = default("pcapng");
         int snaplen = default(65535);  // Maximum number of bytes to record per packet
         int timePrecision = default(6); // Time precision in recorded file. pcap supports only 6 (usec) or 9 (nanosec), pcapng supports more values (see 'if_tsresol' option in pcapng file format).

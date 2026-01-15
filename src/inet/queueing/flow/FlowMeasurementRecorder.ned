@@ -31,7 +31,7 @@ simple FlowMeasurementRecorder extends PacketFlowBase like IPacketFlow
         string flowName = default(""); // Use packet flow to separate measurement from other measurements
         string measure = default("not packetEvent"); // Match expression for a combination of: packetEvent, elapsedTime, delayingTime, queueingTime, processingTime, transmissionTime, propagationTime
         bool endMeasurement = default(true);
-        string packetEventFileName = default("results/" + expand("${configname}-") + fullPath() + "-packetEvent.json");
+        string packetEventFileName = default("${resultdir}/${configname}-" + fullPath() + "-packetEvent.json");
         @class(FlowMeasurementRecorder);
         @display("i=block/timer");
         @signal[packetFlowMeasured](type=inet::Packet);

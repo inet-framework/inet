@@ -63,9 +63,9 @@ void FlowMeasurementRecorder::initialize(int stage)
         measurePropagationTime = matchesString(measureMatcher, "propagationTime");
         measurePacketEvent = matchesString(measureMatcher, "packetEvent");
         if (measurePacketEvent) {
-            const char *fileName = par("packetEventFileName");
-            inet::utils::makePathForFile(fileName);
-            packetEventFile.open(fileName, std::ios::out);
+            std::string fileName = getEnvir()->getConfig()->substituteVariables(par("packetEventFileName"));
+            inet::utils::makePathForFile(fileName.c_str());
+            packetEventFile.open(fileName.c_str(), std::ios::out);
             packetEventFile.openArray();
         }
     }

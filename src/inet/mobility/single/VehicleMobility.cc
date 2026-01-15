@@ -29,7 +29,7 @@ void VehicleMobility::initialize(int stage)
         targetPointIndex = 0;
         heading = 0;
         angularSpeed = 0;
-        readWaypointsFromFile(par("waypointFile"));
+        readWaypointsFromFile(getEnvir()->getConfig()->substituteVariables(par("waypointFile")));
         ground = findModuleFromPar<IGround>(par("groundModule"), this);
     }
 }

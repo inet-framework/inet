@@ -26,7 +26,7 @@ module NetworkInterface extends Module
         displayStringTextFormat = default("%a (%i)\n%m");
         bool recordPcap = default(false);
         int numPcapRecorders = default(recordPcap ? 1 : 0);
-        pcapRecorder[*].pcapFile = default("results/" + expand("${configname}-") + fullPath() + ".pcap");
+        pcapRecorder[*].pcapFile = default("${resultdir}/${configname}-#${runnumber}" + fullPath() + ".pcap");
         **.clockModule = default(exists(clock) ? absPath(".clock") : "");
         @networkInterface;
         @lifecycleSupport;

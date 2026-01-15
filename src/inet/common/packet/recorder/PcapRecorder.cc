@@ -136,7 +136,7 @@ void PcapRecorder::initialize()
             EV_INFO << "The module " << mname << (isAllIndex ? "[*]" : "") << " not found" << EV_ENDL;
     }
 
-    const char *file = par("pcapFile");
+    std::string fileName = getEnvir()->getConfig()->substituteVariables(par("pcapFile"));
     const char *fileFormat = par("fileFormat");
     int timePrecision = par("timePrecision");
     if (!strcmp(fileFormat, "pcap"))
@@ -144,10 +144,11 @@ void PcapRecorder::initialize()
     else if (!strcmp(fileFormat, "pcapng"))
         pcapWriter = new PcapngWriter();
     else
-        throw cRuntimeError("Unknown fileFormat parameter");
-    recordPcap = *file != '\0';
+        throw cRuntimeError("Unknown fileFormat parameter: '%s'", fileFormat);
+
+    recordPcap = !fileName.empty();
     if (recordPcap) {
-        pcapWriter->open(file, snaplen, timePrecision);
+        pcapWriter->open(fileName.c_str(), snaplen, timePrecision);
         pcapWriter->setFlush(par("alwaysFlush"));
     }
 

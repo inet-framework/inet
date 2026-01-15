@@ -19,7 +19,7 @@ network NetworkBase extends Module
         bool recordPcap = default(false);
         int numPcapRecorders = default(recordPcap ? 1 : 0);
         int numModuleDumps = default(0);
-        pcapRecorder[*].pcapFile = default("results/" + expand("${configname}-") + fullPath() + ".pcap");
+        pcapRecorder[*].pcapFile = default("${resultdir}/${configname}-#${runnumber}" + fullPath() + ".pcap");
         @class(NetworkBase);
     submodules:
         pcapRecorder[numPcapRecorders]: PcapRecorder {

@@ -297,11 +297,10 @@ bool MoBanCoordinator::readMobilityPatternFile()
     patternLength = 0;
     double x, y, z, s;
     int id;
-    char file_name[70];
     char posture_name[50];
 
-    sprintf(file_name, "%s", par("mobilityPatternFile").stringValue());
-    FILE *fp = fopen(file_name, "r");
+    std::string file_name = getEnvir()->getConfig()->substituteVariables(par("mobilityPatternFile"));
+    FILE *fp = fopen(file_name.c_str(), "r");
     if (fp == nullptr)
         return false;
 
@@ -317,7 +316,7 @@ bool MoBanCoordinator::readMobilityPatternFile()
 
     mobilityPattern = new Pattern[patternLength];
 
-    fp = fopen(file_name, "r");
+    fp = fopen(file_name.c_str(), "r");
 
     int i = 0;
     while (fscanf(fp, "%49s %d", posture_name, &id) != -1) {

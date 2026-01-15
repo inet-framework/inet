@@ -897,11 +897,11 @@ void Ipv4NetworkConfigurator::dumpRoutes(Topology& topology)
 void Ipv4NetworkConfigurator::dumpConfig(Topology& topology)
 {
     FILE *f;
-    const char *filename = par("dumpConfig");
-    inet::utils::makePathForFile(filename);
-    f = fopen(filename, "w");
+    std::string filename = getEnvir()->getConfig()->substituteVariables(par("dumpConfig"));
+    inet::utils::makePathForFile(filename.c_str());
+    f = fopen(filename.c_str(), "w");
     if (!f)
-        throw cRuntimeError("Cannot write configurator output file");
+        throw cRuntimeError("Cannot write configurator output file: '%s'", filename.c_str());
     fprintf(f, "<config>\n");
 
     // interfaces

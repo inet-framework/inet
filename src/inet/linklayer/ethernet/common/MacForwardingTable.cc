@@ -372,9 +372,9 @@ void MacForwardingTable::initializeTable()
     parseForwardingTableParameter();
 
     // Option to pre-read in Address Table. To turn it off, set forwardingTableFile to empty string
-    const char *forwardingTableFile = par("forwardingTableFile");
-    if (forwardingTableFile && *forwardingTableFile)
-        readForwardingTable(forwardingTableFile);
+    std::string forwardingTableFile = getEnvir()->getConfig()->substituteVariables(par("forwardingTableFile"));
+    if (!forwardingTableFile.empty())
+        readForwardingTable(forwardingTableFile.c_str());
 }
 
 void MacForwardingTable::clearTable()
