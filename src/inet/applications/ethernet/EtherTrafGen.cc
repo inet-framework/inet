@@ -148,11 +148,8 @@ void EtherTrafGen::sendBurstPackets()
     int n = *numPacketsPerBurst;
     for (int i = 0; i < n; i++) {
         seqNum++;
-
-        char msgname[40];
-        sprintf(msgname, "pk-%d-%ld", getId(), seqNum);
-
-        Packet *datapacket = new Packet(msgname, SOCKET_C_DATA);
+        std::string msgname = "pk-" + std::to_string(getId()) + "-" + std::to_string(seqNum);
+        Packet *datapacket = new Packet(msgname.c_str(), SOCKET_C_DATA);
         long len = *packetLength;
         const auto& payload = makeShared<ByteCountChunk>(B(len));
         payload->addTag<CreationTimeTag>()->setCreationTime(simTime());

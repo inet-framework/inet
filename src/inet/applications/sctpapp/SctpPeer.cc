@@ -428,10 +428,9 @@ void SctpPeer::handleMessage(cMessage *msg)
     }
 
     if (hasGUI()) {
-        char buf[32];
         auto l = rcvdBytesPerAssoc.find(id);
-        sprintf(buf, "rcvd: %ld bytes\nsent: %ld bytes", l->second, bytesSent);
-        getDisplayString().setTagArg("t", 0, buf);
+        std::string buf = "rcvd: " + std::to_string(l->second) + " bytes\nsent: " + std::to_string(bytesSent) + " bytes";
+        getDisplayString().setTagArg("t", 0, buf.c_str());
     }
 }
 

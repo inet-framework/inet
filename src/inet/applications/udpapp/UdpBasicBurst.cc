@@ -87,10 +87,9 @@ L3Address UdpBasicBurst::chooseDestAddr()
 
 Packet *UdpBasicBurst::createPacket()
 {
-    char msgName[32];
-    sprintf(msgName, "UDPBasicAppData-%lu", (unsigned long)counter++);
+    std::string msgName = "UDPBasicAppData-" + std::to_string((unsigned long)counter++);
     long msgByteLength = *messageLengthPar;
-    Packet *pk = new Packet(msgName);
+    Packet *pk = new Packet(msgName.c_str());
     const auto& payload = makeShared<ApplicationPacket>();
     payload->setChunkLength(B(msgByteLength));
     payload->setSequenceNumber(numSent);
@@ -216,9 +215,8 @@ void UdpBasicBurst::refreshDisplay() const
 {
     ApplicationBase::refreshDisplay();
 
-    char buf[100];
-    sprintf(buf, "rcvd: %d pks\nsent: %d pks", numReceived, numSent);
-    getDisplayString().setTagArg("t", 0, buf);
+    std::string buf = "rcvd: " + std::to_string(numReceived) + " pks\nsent: " + std::to_string(numSent) + " pks";
+    getDisplayString().setTagArg("t", 0, buf.c_str());
 }
 
 void UdpBasicBurst::processPacket(Packet *pk)

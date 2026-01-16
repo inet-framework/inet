@@ -150,11 +150,10 @@ void EtherAppClient::sendPacket()
 {
     seqNum++;
 
-    char msgname[30];
-    sprintf(msgname, "req-%d-%ld", getId(), seqNum);
+    std::string msgname = "req-" + std::to_string(getId()) + "-" + std::to_string(seqNum);
     EV_INFO << "Generating packet `" << msgname << "'\n";
 
-    Packet *datapacket = new Packet(msgname);
+    Packet *datapacket = new Packet(msgname.c_str());
     const auto& data = makeShared<EtherAppReq>();
 
     long len = *reqLength;

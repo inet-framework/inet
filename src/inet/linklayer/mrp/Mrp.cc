@@ -1969,9 +1969,8 @@ void Mrp::refreshDisplay() const
                 colorLink(ie, isUp() && (port->getState() == MrpInterfaceData::FORWARDING));
                 // label ethernet interface with port status and role
                 if (nicModule != nullptr) {
-                    char buf[32];
-                    sprintf(buf, "%s\n%s", port->getRoleName(), port->getStateName());
-                    nicModule->getDisplayString().setTagArg("t", 0, buf);
+                    std::string buf = std::string(port->getRoleName()) + "\n" + port->getStateName();
+                    nicModule->getDisplayString().setTagArg("t", 0, buf.c_str());
                 }
             }
             else {

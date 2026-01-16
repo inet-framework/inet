@@ -164,9 +164,8 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
 void TcpGenericServerApp::refreshDisplay() const
 {
     SimpleModule::refreshDisplay();
-    char buf[64];
-    sprintf(buf, "rcvd: %ld pks %ld bytes\nsent: %ld pks %ld bytes", msgsRcvd, bytesRcvd, msgsSent, bytesSent);
-    getDisplayString().setTagArg("t", 0, buf);
+    std::string buf = "rcvd: " + std::to_string(msgsRcvd) + " pks " + std::to_string(bytesRcvd) + " bytes\nsent: " + std::to_string(msgsSent) + " pks " + std::to_string(bytesSent) + " bytes";
+    getDisplayString().setTagArg("t", 0, buf.c_str());
 }
 
 void TcpGenericServerApp::finish()

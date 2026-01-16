@@ -42,9 +42,8 @@ void EthernetPauseCommandProcessor::handleSendPause(Request *msg, Ieee802PauseCo
     EV_DETAIL << "Creating and sending PAUSE frame, with duration = " << pauseUnits << " units\n";
 
     // create Ethernet frame
-    char framename[40];
-    sprintf(framename, "pause-%d-%d", getId(), seqNum++);
-    auto packet = new Packet(framename);
+    std::string framename = "pause-" + std::to_string(getId()) + "-" + std::to_string(seqNum++);
+    auto packet = new Packet(framename.c_str());
     const auto& frame = makeShared<EthernetPauseFrame>();
     frame->setPauseTime(pauseUnits);
     packet->insertAtFront(frame);

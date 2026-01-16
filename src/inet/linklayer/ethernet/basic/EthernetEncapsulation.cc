@@ -148,9 +148,8 @@ void EthernetEncapsulation::processCommandFromHigherLayer(Request *msg)
 void EthernetEncapsulation::refreshDisplay() const
 {
     OperationalBase::refreshDisplay();
-    char buf[80];
-    sprintf(buf, "passed up: %ld\nsent: %ld", totalFromMAC, totalFromHigherLayer);
-    getDisplayString().setTagArg("t", 0, buf);
+    std::string buf = "passed up: " + std::to_string(totalFromMAC) + "\nsent: " + std::to_string(totalFromHigherLayer);
+    getDisplayString().setTagArg("t", 0, buf.c_str());
 }
 
 void EthernetEncapsulation::processPacketFromHigherLayer(Packet *packet)
@@ -277,9 +276,8 @@ void EthernetEncapsulation::handleSendPause(cMessage *msg)
     EV_DETAIL << "Creating and sending PAUSE frame, with duration = " << pauseUnits << " units\n";
 
     // create Ethernet frame
-    char framename[40];
-    sprintf(framename, "pause-%d-%d", getId(), seqNum++);
-    auto packet = new Packet(framename);
+    std::string framename = "pause-" + std::to_string(getId()) + "-" + std::to_string(seqNum++);
+    auto packet = new Packet(framename.c_str());
     const auto& frame = makeShared<EthernetPauseFrame>();
     const auto& hdr = makeShared<EthernetMacHeader>();
     frame->setPauseTime(pauseUnits);

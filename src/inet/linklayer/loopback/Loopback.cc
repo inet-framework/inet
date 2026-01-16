@@ -75,10 +75,8 @@ void Loopback::refreshDisplay() const
             Ipv4Address addr = networkInterface->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
             sprintf(buf, "%s / %s\nrcv:%ld snt:%ld", addr.isUnspecified()?"-":addr.str().c_str(), datarateText, numRcvdOK, numSent);
      */
-    char buf[80];
-    sprintf(buf, "rcv:%ld snt:%ld", numRcvdOK, numSent);
-
-    getDisplayString().setTagArg("t", 0, buf);
+    std::string buf = "rcv:" + std::to_string(numRcvdOK) + " snt:" + std::to_string(numSent);
+    getDisplayString().setTagArg("t", 0, buf.c_str());
 }
 
 } // namespace inet

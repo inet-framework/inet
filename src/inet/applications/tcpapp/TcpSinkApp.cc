@@ -41,9 +41,8 @@ void TcpSinkApp::refreshDisplay() const
 {
     ApplicationBase::refreshDisplay();
 
-    char buf[160];
-    sprintf(buf, "threads: %d\nrcvd: %ld bytes", socketMap.size(), bytesRcvd);
-    getDisplayString().setTagArg("t", 0, buf);
+    std::string buf = "threads: " + std::to_string(socketMap.size()) + "\nrcvd: " + std::to_string(bytesRcvd) + " bytes";
+    getDisplayString().setTagArg("t", 0, buf.c_str());
 }
 
 void TcpSinkApp::finish()
