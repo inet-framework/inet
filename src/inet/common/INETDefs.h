@@ -32,8 +32,8 @@ using namespace omnetpp;
 using omnetpp::operator<<;
 } // namespace inet
 
-#if OMNETPP_VERSION < 0x0600 || OMNETPP_BUILDNUM < 1531
-#  error At least OMNeT++/OMNEST version 6.0 required
+#if OMNETPP_VERSION < 0x0602
+#  error At least OMNeT++/OMNEST version 6.2 required
 #endif
 
 #define INET_VERSION        0x0406
