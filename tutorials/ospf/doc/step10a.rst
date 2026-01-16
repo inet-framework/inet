@@ -44,8 +44,8 @@ When R4 is shutdown at t=60s:
 
 5.  All routers update their LSDBs, removing R4's Router LSA and any links to R4.
 
-6.  Routes that used R4 as a next-hop or transit router are recomputed, using alternative paths
-    if available.
+In General, routes that used a failed router as a next-hop or transit router are recomputed, using alternative paths
+if available.
 
 This demonstrates OSPF's resilience to complete router failures, automatically routing around
 failed devices.

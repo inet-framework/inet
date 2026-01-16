@@ -13,6 +13,7 @@ every other router (N×(N-1)/2 adjacencies), all routers form adjacencies only w
 and BDR, reducing complexity to 2N adjacencies.
 
 The DR is responsible for:
+
 *   Generating Network LSAs (Type-2) for the multi-access network
 *   Coordinating LSA flooding on the segment
 
@@ -45,6 +46,9 @@ When the simulation starts:
 
 3.  The router with the highest priority becomes the DR. The router with the second-highest
     priority becomes the BDR. (If priorities are equal, the highest Router ID wins.)
+
+    In this simulation, all routers have the default priority of 1. R6 has the highest Router ID,
+    so it becomes the DR. R5 has the second-highest Router ID, so it becomes the BDR.
 
 4.  Routers with priority 0 cannot become DR or BDR.
 

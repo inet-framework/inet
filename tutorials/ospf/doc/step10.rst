@@ -17,8 +17,8 @@ This step uses the ``TopologyChange`` network. The OSPF configuration in
 ``ASConfig_tp_priority.xml`` assigns different priorities to the routers connected to
 the central switch (Switch2) to deterministically select the DR and BDR.
 
-*   **R1**: Priority 10 (likely DR)
-*   **R5**: Priority 9 (likely BDR)
+*   **R1**: Priority 10 (DR)
+*   **R5**: Priority 9 (BDR)
 *   **R2, R6**: Priority 1 (DROthers)
 
 The simulation script disconnects the link between **R4** and **Switch3** at t=60s.

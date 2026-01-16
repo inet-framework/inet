@@ -46,6 +46,9 @@ With the modified priorities:
 3.  Comparing with Step 6 (where all routers had default priorities), the DR/BDR assignment
     changes to reflect the priority configuration.
 
+    In this simulation, R3 becomes the DR because it has the highest priority (10). Among the
+    remaining routers (which all have priority 1), R6 has the highest Router ID, so it becomes the BDR.
+
 This demonstrates that network administrators have control over the DR/BDR election and can
 engineer the network to ensure specific routers take on these roles.
 

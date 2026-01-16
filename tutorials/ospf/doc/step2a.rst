@@ -32,7 +32,7 @@ The configuration in ``omnetpp.ini`` is the following:
 Results
 ~~~~~~~
 
-When the link between R5 and R4 breaks at t=60s:
+When the link between R5 and R4 breaks at t=70s:
 
 1.  Both **R5** and **R4** detect the link down event on their respective interfaces.
 
@@ -46,9 +46,9 @@ When the link between R5 and R4 breaks at t=60s:
     paths. For example, traffic from R1 to networks behind R4 now routes through R2 instead
     of through R5.
 
-6.  The ping application from host0 to host6 (starting at t=60s) may experience brief packet
-    loss during the reconvergence period, but connectivity is restored once OSPF converges
-    on the new topology.
+6.  Applications may experience brief packet loss during the reconvergence
+    period, but connectivity is restored once OSPF converges on the new
+    topology. In this example, no ping packet is lost.
 
 The routing table changes demonstrate OSPF's resilience: when a link fails, the protocol
 automatically discovers and uses alternative paths, ensuring continued net work connectivity.

@@ -47,18 +47,20 @@ When the simulation starts:
 2.  Routers exchange Hello packets, then Database Description packets, Link
     State Request/Update packets to synchronize their LSDBs.
 
-3.  Each router runs the SPF algorithm to compute shortest paths to all networks
+3.  Each router runs the SPF algorithm to compute lowest cost paths (running Dijkstra's weighted shortest path algorithm) to all subnetworks
     in the area.
 
 4.  The routing tables are populated with OSPF-learned routes. For example, R1
     learns routes to the 10.0.0.24/29 network (behind R3) via the path through
-    R2 or R5->R4.
+    R2 and R5->R4.
 
-5.  At t=60s, **host0** begins pinging **host6**. The ping succeeds because OSPF
-    has computed valid routes between all networks.
+5.  The R5->R4 path turns out to be higher hop-count but lower cost than the R2 path due to cost associated with link datarates.
 
-The routing table visualizer shows that all routers have complete routing
-information for reaching all networks in the OSPF area.
+6.  At t=60s, **host0** begins pinging **host6**. The ping succeeds because OSPF
+    has computed valid routes between all subnetworks.
+
+.. The routing table visualizer shows that all routers have complete routing
+.. information for reaching all networks in the OSPF area.
 
 Sources:
 :download:`omnetpp.ini <../omnetpp.ini>`,

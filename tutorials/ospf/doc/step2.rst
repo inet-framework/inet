@@ -43,8 +43,8 @@ The modified cost on R1's ppp1 interface affects routing decisions:
 
 2.  This influences the path selection for traffic originating from hosts behind R1.
 
-3.  In Step 1, traffic from host0 to host6 may have used the path through R5->R4.
-    With the increased cost on R1's ppp1, OSPF may now prefer the alternative path
+3.  In Step 1, traffic from host0 to host6 used the path through R5->R4.
+    With the increased cost on R1's ppp1, OSPF now prefers the alternative path
     through R2.
 
 4.  Note that OSPF costs are directional. The modified cost affects routes computed by R1

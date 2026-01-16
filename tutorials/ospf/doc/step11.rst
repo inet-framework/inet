@@ -19,7 +19,7 @@ This is equivalent to not including the interface in the OSPF configuration at a
 Configuration
 ~~~~~~~~~~~~~
 
-This configuration is based on Step 3. One of the router's interfaces is configured with
+This configuration is based on Step 3. Each router's eth0 interface (the one facing the switch) is configured with
 ``interfaceMode="NoOSPF"``.
 
 .. figure:: media/Network.png
@@ -47,6 +47,8 @@ With the interface configured as NoOSPF:
 2.  No Hello packets are sent on the interface.
 3.  The network connected to this interface is not advertised in Router LSAs.
 4.  Other routers are unaware of this network and cannot route to it via OSPF.
+
+TODO merge these to 2 points
 
 This mode is useful when you want OSPF running on a router but need to exclude specific
 interfaces from OSPF processing, perhaps because they connect to non-OSPF networks or for

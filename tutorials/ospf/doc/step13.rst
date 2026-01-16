@@ -45,11 +45,11 @@ The simulation demonstrates LSA aging:
 
 3.  The OSPF module logs show LSA age values incrementing over time.
 
-4.  If a router were to fail completely (unable to refresh its LSAs), its LSAs would eventually
-    age to MaxAge (3600s) and be flushed from all routers' LSDBs.
+If a router were to fail completely (unable to refresh its LSAs), its LSAs would eventually
+age to MaxAge (3600s) and be flushed from all routers' LSDBs.
 
-5.  By flooding an LSA with age=MaxAge, a router can rapidly remove obsolete information from
-    the network rather than waiting for natural aging.
+By flooding an LSA with age=MaxAge, a router can rapidly remove obsolete information from
+the network rather than waiting for natural aging.
 
 This mechanism ensures that the OSPF database remains current and that stale information is
 eventually removed even if routers fail silently.
