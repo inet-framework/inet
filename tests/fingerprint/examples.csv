@@ -461,6 +461,49 @@
 
 /examples/seaport/,                  -f omnetpp.ini -c General -r 0,                1000s,           32cb-156a/tplx;fcf4-00cd/~tNl;a949-483a/tyf, PASS, igmp EthernetMac Ipv4
 
+/examples/quic/basic3/,                 -f omnetpp.ini -c General -r 0,                  0.2s,            bc45-9531/tplx;e47e-ec5f/~tNl, PASS, quic Ipv4
+/examples/quic/byte_order/,             -f omnetpp.ini -c General -r 0,                  250s,            8a06-75cc/tplx;3780-832d/~tNl, PASS, quic Ipv4
+/examples/quic/dplpmtud/,               -f omnetpp.ini -c General -r 0,                    2s,            96ce-6fd8/tplx;5636-5537/~tNl, PASS, quic Ipv4
+/examples/quic/dplpmtud/,               -f omnetpp.ini -c MaxEqualsPmtu -r 0,              2s,            8d96-57c6/tplx;e6c9-d230/~tNl, PASS, quic Ipv4
+/examples/quic/dplpmtud/,               -f omnetpp.ini -c MaxLargerPmtu -r 0,              2s,            a459-5a8c/tplx;0bd0-ac7f/~tNl, PASS, quic Ipv4
+/examples/quic/dplpmtud/,               -f omnetpp.ini -c MaxLargerPmtuWithoutPtb -r 0,    2s,            9a73-c262/tplx;0ae3-3836/~tNl, PASS, quic Ipv4
+/examples/quic/dplpmtud/,               -f omnetpp.ini -c IncreasingPmtu -r 0,           750s,            ffec-1639/tplx;64f7-0320/~tNl, PASS, quic Ipv4
+/examples/quic/dplpmtud/,               -f omnetpp.ini -c IncreasingPmtuWithoutPtb -r 0, 750s,            40ad-e8e6/tplx;71fb-6d3d/~tNl, PASS, quic Ipv4
+/examples/quic/dplpmtud/,               -f omnetpp.ini -c DecreasingPmtu -r 0,            10s,            b06d-36bb/tplx;480f-ad8f/~tNl, PASS, quic Ipv4
+/examples/quic/dplpmtud/,               -f omnetpp.ini -c DecreasingPmtuWithoutPtb -r 0,  10s,            b1f7-e58f/tplx;76f5-aea1/~tNl, PASS, quic Ipv4
+/examples/quic/flow_control_limited/,   -f omnetpp.ini -c General -r 0,                    5s,            37c2-34fe/tplx;58d1-befb/~tNl, PASS, quic Ipv4
+/examples/quic/flow_control_limited/,   -f omnetpp.ini -c General -r 1,                    5s,            cd46-87fb/tplx;aef3-c3f7/~tNl, PASS, quic Ipv4
+/examples/quic/flow_control_limited/,   -f omnetpp.ini -c General -r 2,                    5s,            e87e-307a/tplx;9b73-f16f/~tNl, PASS, quic Ipv4
+/examples/quic/flow_control_limited/,   -f omnetpp.ini -c General -r 3,                    5s,            2476-2ab9/tplx;4377-8c3a/~tNl, PASS, quic Ipv4
+/examples/quic/flow_control_limited/,   -f omnetpp.ini -c General -r 4,                    5s,            991a-ec90/tplx;6145-2076/~tNl, PASS, quic Ipv4
+/examples/quic/flow_control_limited/,   -f omnetpp.ini -c General -r 5,                    5s,            ee76-eb56/tplx;4da1-6ca1/~tNl, PASS, quic Ipv4
+/examples/quic/link_utilization/,       -f omnetpp.ini -c General -r 0,                    6s,            42a7-09bc/tplx;13ac-3568/~tNl, PASS, quic Ipv4
+/examples/quic/link_utilization/,       -f omnetpp.ini -c General -r 1,                    6s,            0798-8da9/tplx;e388-d38f/~tNl, PASS, quic Ipv4
+/examples/quic/link_utilization/,       -f omnetpp.ini -c General -r 2,                    6s,            ce4b-561c/tplx;8d8a-e2df/~tNl, PASS, quic Ipv4
+/examples/quic/link_utilization/,       -f omnetpp.ini -c General -r 3,                    6s,            271c-9f08/tplx;8c96-3d05/~tNl, PASS, quic Ipv4
+/examples/quic/multiserver/,            -f omnetpp.ini -c oneclienthost -r 0,            0.2s,            53cb-9c7b/tplx;ead2-dbca/~tNl, PASS, quic Ipv4
+/examples/quic/multiserver/,            -f omnetpp.ini -c twoclienthosts -r 0,           0.2s,            632d-8a7d/tplx;652a-cb00/~tNl, PASS, quic Ipv4
+/examples/quic/multiserver/,            -f omnetpp.ini -c oneclienthost_reconnect -r 0,    7s,            abfa-c97c/tplx;dc9f-e117/~tNl, PASS, quic Ipv4
+/examples/quic/persistent_congestion/,  -f omnetpp.ini -c General -r 0,                   10s,            67d9-29ac/tplx;4930-e059/~tNl, PASS, quic Ipv4
+/examples/quic/persistent_congestion/,  -f omnetpp.ini -c WithDPLPMTUD -r 0,              10s,            9b8c-b763/tplx;54ee-402a/~tNl, PASS, quic Ipv4
+/examples/quic/shared_link/,            -f omnetpp.ini -c General -r 0,                   15s,            d1de-f8e1/tplx;7279-5075/~tNl, PASS, quic Ipv4
+/examples/quic/shared_link/,            -f omnetpp.ini -c General -r 1,                   15s,            f294-6c19/tplx;6a1a-9fa7/~tNl, PASS, quic Ipv4
+/examples/quic/shared_link/,            -f omnetpp.ini -c General -r 2,                   15s,            d5c5-14f1/tplx;ded9-bccf/~tNl, PASS, quic Ipv4
+/examples/quic/shared_link/,            -f omnetpp.ini -c General -r 3,                   15s,            1469-7e2e/tplx;1a0a-714c/~tNl, PASS, quic Ipv4
+/examples/quic/throughput_packet_loss/, -f omnetpp.ini -c General -r 0,                   15s,            6d85-1776/tplx;a00c-aa1c/~tNl, PASS, quic Ipv4
+/examples/quic/throughput_packet_loss/, -f omnetpp.ini -c General -r 1,                   15s,            8127-46d3/tplx;14f9-5f5e/~tNl, PASS, quic Ipv4
+/examples/quic/throughput_packet_loss/, -f omnetpp.ini -c General -r 2,                   15s,            4e6b-3076/tplx;e97a-326d/~tNl, PASS, quic Ipv4
+/examples/quic/throughput_packet_loss/, -f omnetpp.ini -c General -r 3,                   15s,            d27a-6021/tplx;922b-6b3f/~tNl, PASS, quic Ipv4
+/examples/quic/throughput_packet_loss/, -f omnetpp.ini -c General -r 4,                   15s,            4920-28ad/tplx;319b-e27f/~tNl, PASS, quic Ipv4
+/examples/quic/throughput_packet_loss/, -f omnetpp.ini -c General -r 5,                   15s,            cd4a-19b8/tplx;0deb-0f91/~tNl, PASS, quic Ipv4
+/examples/quic/throughput_packet_loss/, -f omnetpp.ini -c General -r 6,                   15s,            3efa-062b/tplx;c428-6dea/~tNl, PASS, quic Ipv4
+/examples/quic/throughput_packet_loss/, -f omnetpp.ini -c General -r 7,                   15s,            0467-18d1/tplx;f014-2ecb/~tNl, PASS, quic Ipv4
+/examples/quic/throughput_packet_loss/, -f omnetpp.ini -c General -r 8,                   15s,            b1c2-146b/tplx;13c6-beb0/~tNl, PASS, quic Ipv4
+/examples/quic/trafficgen/,             -f omnetpp.ini -c General -r 0,                   11s,            fc48-a096/tplx;9af7-9a47/~tNl, PASS, quic Ipv4
+/examples/quic/zerortt/,                -f omnetpp.ini -c General -r 0,                  0.2s,            96d8-375b/tplx;5bde-329c/~tNl, PASS, quic Ipv4
+/examples/quic/zerortt/,                -f omnetpp.ini -c invalidClientTokenString -r 0, 0.2s,            7c10-a66c/tplx;c396-2a57/~tNl, PASS, quic Ipv4
+/examples/quic/zerortt/,                -f omnetpp.ini -c sendInvalidToken -r 0,         0.2s,            e0b9-bfb4/tplx;5610-3986/~tNl, PASS, quic Ipv4
+
 /examples/rip/dynamictest/,          -f omnetpp.ini -c stable -r 0,                 100s,            98ee-282c/tplx;52f0-1d63/~tNl;b879-96e0/~tND;e362-f911/tyf, PASS, EthernetMac Ipv4
 /examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic1 -r 0,               500s,            86a6-dcee/tplx;75e3-d75f/~tNl;10bd-b953/~tND;9823-6780/tyf, PASS, EthernetMac Ipv4
 /examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic2 -r 0,               500s,            1d71-fb93/tplx;aa3f-de9b/~tNl;1034-dbc2/~tND;347c-3bac/tyf, PASS, EthernetMac Ipv4
