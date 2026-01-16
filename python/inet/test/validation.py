@@ -8,8 +8,11 @@ often cited in research papers, or simulation results of models created for othe
 
 import itertools
 import logging
+import math
 import numpy
+import pandas as pd
 import random
+from statistics import fmean
 
 from omnetpp.scave.results import *
 
@@ -276,6 +279,238 @@ def get_tsn_trafficshaping_creditbasedshaper_validation_test_task(**kwargs):
 def run_tsn_trafficshaping_creditbasedshaper_validation_test(**kwargs):
     return get_tsn_trafficshaping_creditbasedshaper_validation_test_task(**kwargs).run(**kwargs)
 
+##############################
+# QUIC link utilization test
+
+def _quic_get_throughput_from_vec_file(file, module_name, start, end):
+    """Helper function to compute throughput from a vector file using omnetpp.scave.results."""
+    filter_expression = f"type =~ vector AND module =~ \"{module_name}\" AND name =~ \"packetReceived:vector(packetBytes)\""
+    df = read_result_files(file, filter_expression=filter_expression)
+    df = get_vectors(df)
+
+    if df.empty:
+        return 0
+
+    # Get the vector data
+    vector_data = df.iloc[0]
+    times = vector_data['vectime']
+    values = vector_data['vecvalue']
+
+    # Filter by time range
+    mask = (times >= start) & (times <= end)
+    filtered_times = times[mask]
+    filtered_values = values[mask]
+
+    if len(filtered_times) == 0:
+        return 0
+
+    first = filtered_times[0]
+    last = filtered_times[-1]
+    data = sum(filtered_values[1:])  # Skip first value as in original code
+
+    tp = data * 8 / 1000000 / (last - first) if last > first else 0
+
+    return tp
+
+def compute_quic_link_utilization_from_simulation_results(**kwargs):
+    results_path = inet_project.get_full_path("examples/quic/link_utilization/results/")
+    bandwidth = 10  # Mb/s
+    mtus = ['1280', '1452', '1500', '9000']  # B
+    start = 4
+    end = 5
+    results = []
+    for mtu in mtus:
+        tp = _quic_get_throughput_from_vec_file(
+            results_path + "/link_utilization_mtu=" + mtu + ".vec",
+            'bottleneck.receiver.quic', start, end)
+        results.append({'mtu': int(mtu), 'throughput': tp})
+    return results
+
+def compute_quic_link_utilization_analytically():
+    bandwidth = 10  # Mb/s
+    mtus = [1280, 1452, 1500, 9000]
+    results = []
+    for mtu in mtus:
+        # QUIC packet is 28B smaller than MTU (IP packet minus IP header and minus UDP header)
+        # Packet on the wire is 7B larger than MTU (link layer overhead)
+        tp_should = (mtu - 28) / (mtu + 7) * bandwidth
+        results.append({'mtu': mtu, 'throughput': tp_should})
+    return results
+
+def compute_quic_link_utilization_validation_test_results(test_accuracy=0.02, **kwargs):
+    sim_results = compute_quic_link_utilization_from_simulation_results(**kwargs)
+    analytical_results = compute_quic_link_utilization_analytically()
+    all_pass = True
+    for sim, ana in zip(sim_results, analytical_results):
+        if not compare_test_results(ana['throughput'], sim['throughput'], test_accuracy):
+            all_pass = False
+            break
+    return TestTaskResult(task=TestTask(), bool_result=all_pass)
+
+def get_quic_link_utilization_validation_test_task(**kwargs):
+    simulation_task = get_simulation_tasks(working_directory_filter="examples/quic/link_utilization", **kwargs).tasks[0]
+    return ValidationTestTask(simulation_task, compute_quic_link_utilization_validation_test_results, **kwargs)
+
+def run_quic_link_utilization_validation_test(test_accuracy=0.02, **kwargs):
+    return get_quic_link_utilization_validation_test_task(**kwargs).run(test_accuracy=test_accuracy, **kwargs)
+
+####################################
+# QUIC throughput packet loss test
+
+def compute_quic_throughput_packet_loss_from_simulation_results(**kwargs):
+    results_path = inet_project.get_full_path("examples/quic/throughput_packet_loss/results/throughput_validation_")
+    ps = [".008", ".01", ".02"]
+    rtts_measured = [20, 40, 60]
+    start = 4
+    end = 14
+    results = []
+    for p_str in ps:
+        for rtt in rtts_measured:
+            file = results_path + "p=" + p_str + "_delay=" + str(int(rtt / 2)) + ".vec"
+            tp = _quic_get_throughput_from_vec_file(file, 'bottleneck.receiver.quic', start, end)
+            results.append({'p': float(p_str), 'rtt': rtt, 'throughput': tp})
+    return results
+
+def compute_quic_throughput_packet_loss_analytically():
+    # Mathis formula: throughput = (MSS * 8) / (RTT * sqrt(2*p/3))
+    S = 1252  # segment size
+    ps = [0.008, 0.01, 0.02]
+    rtts = [20, 40, 60]
+    results = []
+    for p in ps:
+        for rtt in rtts:
+            tp_should = (S * 8) / (1000 * rtt) * 1 / math.sqrt(2 * p / 3)
+            results.append({'p': p, 'rtt': rtt, 'throughput': tp_should})
+    return results
+
+def compute_quic_throughput_packet_loss_validation_test_results(test_accuracy=0.15, **kwargs):
+    sim_results = compute_quic_throughput_packet_loss_from_simulation_results(**kwargs)
+    analytical_results = compute_quic_throughput_packet_loss_analytically()
+    all_pass = True
+    for sim, ana in zip(sim_results, analytical_results):
+        if not compare_test_results(ana['throughput'], sim['throughput'], test_accuracy):
+            all_pass = False
+            break
+    return TestTaskResult(task=TestTask(), bool_result=all_pass)
+
+def get_quic_throughput_packet_loss_validation_test_task(**kwargs):
+    simulation_task = get_simulation_tasks(working_directory_filter="examples/quic/throughput_packet_loss", **kwargs).tasks[0]
+    return ValidationTestTask(simulation_task, compute_quic_throughput_packet_loss_validation_test_results, **kwargs)
+
+def run_quic_throughput_packet_loss_validation_test(test_accuracy=0.15, **kwargs):
+    return get_quic_throughput_packet_loss_validation_test_task(**kwargs).run(test_accuracy=test_accuracy, **kwargs)
+
+############################
+# QUIC shared link test
+
+def compute_quic_shared_link_from_simulation_results(**kwargs):
+    results_path = inet_project.get_full_path("examples/quic/shared_link/results/")
+    t0 = 3
+    t1 = 13
+    senders = 2
+    runs = 4
+    diffs = []
+    for run in range(runs):
+        file = results_path + "/" + str(run) + ".vec"
+        tps = []
+        for sender in range(senders):
+            module_name = 'shared_link.receiver' + str(sender + 1) + '.quic'
+            filter_expression = f"type =~ vector AND module =~ \"{module_name}\" AND name =~ \"packetReceived:vector(packetBytes)\""
+            df = read_result_files(file, filter_expression=filter_expression)
+            df = get_vectors(df)
+
+            if not df.empty:
+                vector_data = df.iloc[0]
+                times = vector_data['vectime']
+                values = vector_data['vecvalue']
+
+                # Filter by time range
+                mask = (times >= t0) & (times <= t1)
+                filtered_values = values[mask]
+
+                received_data = int(sum(filtered_values))
+                tps.append(received_data * 8 / ((t1 - t0) * 1000))
+            else:
+                tps.append(0)
+
+        larger_tp = max(tps)
+        mean_tp = (tps[0] + tps[1]) / 2
+        relative_diff_to_mean = larger_tp / mean_tp - 1
+        diffs.append(relative_diff_to_mean)
+    return fmean(diffs)
+
+def compute_quic_shared_link_validation_test_results(test_accuracy=0.05, **kwargs):
+    diffs_mean = compute_quic_shared_link_from_simulation_results(**kwargs)
+    test_result = diffs_mean <= test_accuracy
+    return TestTaskResult(task=TestTask(), bool_result=test_result)
+
+def get_quic_shared_link_validation_test_task(**kwargs):
+    simulation_task = get_simulation_tasks(working_directory_filter="examples/quic/shared_link", **kwargs).tasks[0]
+    return ValidationTestTask(simulation_task, compute_quic_shared_link_validation_test_results, **kwargs)
+
+def run_quic_shared_link_validation_test(test_accuracy=0.05, **kwargs):
+    return get_quic_shared_link_validation_test_task(**kwargs).run(test_accuracy=test_accuracy, **kwargs)
+
+#################################
+# QUIC flow control limited test
+
+def compute_quic_flow_control_from_simulation_results(**kwargs):
+    results_path = inet_project.get_full_path("examples/quic/flow_control_limited/results/flow_control_validation_")
+    rtts = [10, 20]
+    initial_max_data_sizes = [65, 100, 140]
+    start = 3
+    stop = 4
+    results = []
+    for initial_max_data_size in initial_max_data_sizes:
+        for rtt in rtts:
+            file = results_path + "initialMaxData=" + str(initial_max_data_size) + "kB_delay=" + str(int(rtt / 2)) + ".vec"
+            filter_expression = "type =~ vector AND module =~ \"bottleneck.receiver.quic\" AND name =~ \"streamRcvAppData_cid=0_sid=0:vector\""
+            df = read_result_files(file, filter_expression=filter_expression)
+            df = get_vectors(df)
+
+            if not df.empty:
+                vector_data = df.iloc[0]
+                times = vector_data['vectime']
+                values = vector_data['vecvalue']
+
+                # Filter by time range
+                mask = (times >= start) & (times < stop)
+                filtered_values = values[mask]
+
+                received_bits = sum(filtered_values)
+                gp = (received_bits / 1000000 / (stop - start))
+                results.append({'initial_max_data': initial_max_data_size, 'rtt': rtt, 'goodput': gp})
+            else:
+                results.append({'initial_max_data': initial_max_data_size, 'rtt': rtt, 'goodput': 0})
+    return results
+
+def compute_quic_flow_control_analytically():
+    rtts = [10, 20]
+    initial_max_data_sizes = [65, 100, 140]
+    results = []
+    for initial_max_data_size in initial_max_data_sizes:
+        for rtt in rtts:
+            gp_should = (initial_max_data_size * 8) / rtt
+            results.append({'initial_max_data': initial_max_data_size, 'rtt': rtt, 'goodput': gp_should})
+    return results
+
+def compute_quic_flow_control_validation_test_results(test_accuracy=0.02, **kwargs):
+    sim_results = compute_quic_flow_control_from_simulation_results(**kwargs)
+    analytical_results = compute_quic_flow_control_analytically()
+    all_pass = True
+    for sim, ana in zip(sim_results, analytical_results):
+        if not compare_test_results(ana['goodput'], sim['goodput'], test_accuracy):
+            all_pass = False
+            break
+    return TestTaskResult(task=TestTask(), bool_result=all_pass)
+
+def get_quic_flow_control_validation_test_task(**kwargs):
+    simulation_task = get_simulation_tasks(working_directory_filter="examples/quic/flow_control_limited", **kwargs).tasks[0]
+    return ValidationTestTask(simulation_task, compute_quic_flow_control_validation_test_results, **kwargs)
+
+def run_quic_flow_control_validation_test(test_accuracy=0.02, **kwargs):
+    return get_quic_flow_control_validation_test_task(**kwargs).run(test_accuracy=test_accuracy, **kwargs)
+
 ###########################
 # Multiple validation tests
 
@@ -295,7 +530,11 @@ def get_validation_test_tasks(**kwargs):
     validation_test_task_functions = [get_tsn_framereplication_simulation_test_task,
                                       get_tsn_trafficshaping_creditbasedshaper_validation_test_task,
                                       get_tsn_trafficshaping_asynchronousshaper_core4inet_validation_test_task,
-                                      get_tsn_trafficshaping_asynchronousshaper_icct_simulation_test_task]
+                                      get_tsn_trafficshaping_asynchronousshaper_icct_simulation_test_task,
+                                      get_quic_link_utilization_validation_test_task,
+                                      get_quic_throughput_packet_loss_validation_test_task,
+                                      get_quic_shared_link_validation_test_task,
+                                      get_quic_flow_control_validation_test_task]
     validation_test_tasks = []
     for validation_test_task_function in validation_test_task_functions:
         validation_test_task_function_kwargs = kwargs.copy()
