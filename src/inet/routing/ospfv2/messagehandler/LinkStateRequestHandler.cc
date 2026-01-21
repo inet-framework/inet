@@ -63,12 +63,11 @@ void LinkStateRequestHandler::processPacket(Packet *packet, Ospfv2Interface *int
         }
 
         if (!error) {
-            int updatesCount = lsas.size();
             int ttl = (intf->getType() == Ospfv2Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
             MessageHandler *messageHandler = router->getMessageHandler();
 
-            for (int j = 0; j < updatesCount; j++) {
-                Packet *updatePacket = intf->createUpdatePacket(lsas[j]);
+            for (auto lsa : lsas) {
+                Packet *updatePacket = intf->createUpdatePacket(lsa);
                 if (updatePacket != nullptr) {
                     if (intf->getType() == Ospfv2Interface::BROADCAST) {
                         if ((intf->getState() == Ospfv2Interface::DESIGNATED_ROUTER_STATE) ||
