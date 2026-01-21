@@ -59,6 +59,7 @@ void Ospfv2Area::addInterface(Ospfv2Interface *intf)
 {
     intf->setArea(this);
     associatedInterfaces.push_back(intf);
+    WATCH_OBJ(*intf);   // kludge because watched vectors cant be opened currently in omnetpp 6.3.0
 }
 
 void Ospfv2Area::addAddressRange(Ipv4AddressRange addressRange, bool advertise)
