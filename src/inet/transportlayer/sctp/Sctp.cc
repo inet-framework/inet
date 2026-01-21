@@ -320,7 +320,7 @@ void Sctp::handleMessage(cMessage *msg)
                         // Create SctpAssociation as a submodule
                         auto moduleType = cModuleType::get("inet.transportlayer.sctp.SctpAssociation");
                         char submoduleName[24];
-                        sprintf(submoduleName, "assoc-%d", assocId);
+                        snprintf(submoduleName, sizeof(submoduleName), "assoc-%d", assocId);
                         auto module = check_and_cast<SctpAssociation *>(moduleType->createScheduleInit(submoduleName, this));
                         module->initAssociation(this, appGateIndex, assocId, rt, ift);
                         assoc = module;
@@ -456,7 +456,7 @@ void Sctp::refreshDisplay() const
     }
 
 //    char buf[40];
-//    sprintf(buf,"%d conns", sctpAppConnMap.size());
+//    snprintf(buf, sizeof(buf), "%d conns", sctpAppConnMap.size());
 //    displayString().setTagArg("t",0,buf);
 
     int32_t numCLOSED = 0, numLISTEN = 0, numSYN_SENT = 0, numSYN_RCVD = 0,
@@ -500,31 +500,32 @@ void Sctp::refreshDisplay() const
                 break;
         }
     }
-    char buf2[300];
-    buf2[0] = '\0';
+
+    std::ostringstream buf2;
     if (numCLOSED > 0)
-        sprintf(buf2 + strlen(buf2), "closed:%d ", numCLOSED);
+        buf2 << "closed:" << numCLOSED << " ";
     if (numLISTEN > 0)
-        sprintf(buf2 + strlen(buf2), "listen:%d ", numLISTEN);
+        buf2 << "listen:" << numLISTEN << " ";
     if (numSYN_SENT > 0)
-        sprintf(buf2 + strlen(buf2), "syn_sent:%d ", numSYN_SENT);
+        buf2 << "syn_sent:" << numSYN_SENT << " ";
     if (numSYN_RCVD > 0)
-        sprintf(buf2 + strlen(buf2), "syn_rcvd:%d ", numSYN_RCVD);
+        buf2 << "syn_rcvd:" << numSYN_RCVD << " ";
     if (numESTABLISHED > 0)
-        sprintf(buf2 + strlen(buf2), "estab:%d ", numESTABLISHED);
+        buf2 << "estab:" << numESTABLISHED << " ";
     if (numCLOSE_WAIT > 0)
-        sprintf(buf2 + strlen(buf2), "close_wait:%d ", numCLOSE_WAIT);
+        buf2 << "close_wait:" << numCLOSE_WAIT << " ";
     if (numLAST_ACK > 0)
-        sprintf(buf2 + strlen(buf2), "last_ack:%d ", numLAST_ACK);
+        buf2 << "last_ack:" << numLAST_ACK << " ";
     if (numFIN_WAIT_1 > 0)
-        sprintf(buf2 + strlen(buf2), "fin_wait_1:%d ", numFIN_WAIT_1);
+        buf2 << "fin_wait_1:" << numFIN_WAIT_1 << " ";
     if (numFIN_WAIT_2 > 0)
-        sprintf(buf2 + strlen(buf2), "fin_wait_2:%d ", numFIN_WAIT_2);
+        buf2 << "fin_wait_2:" << numFIN_WAIT_2 << " ";
     if (numCLOSING > 0)
-        sprintf(buf2 + strlen(buf2), "closing:%d ", numCLOSING);
+        buf2 << "closing:" << numCLOSING << " ";
     if (numTIME_WAIT > 0)
-        sprintf(buf2 + strlen(buf2), "time_wait:%d ", numTIME_WAIT);
-    getDisplayString().setTagArg("t", 0, buf2);
+        buf2 << "time_wait:" << numTIME_WAIT << " ";
+
+    getDisplayString().setTagArg("t", 0, buf2.str().c_str());
 #endif // if 0
 }
 

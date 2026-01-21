@@ -199,11 +199,9 @@ std::string PatternMatcher::debugStrFrom(int from)
                 result = result + "NEGSET(" + e.setchars + ")";
                 break;
 
-            case NUMRANGE: {
-                char buf[100];
-                sprintf(buf, "%ld..%ld", e.fromnum, e.tonum);
-                result += buf;
-            } break;
+            case NUMRANGE:
+                result += std::to_string(e.fromnum) + ".." + std::to_string(e.tonum);
+                break;
 
             case ANYSEQ:
                 result += "**";

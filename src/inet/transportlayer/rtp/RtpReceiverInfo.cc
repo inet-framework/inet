@@ -88,7 +88,7 @@ void RtpReceiverInfo::processRTPPacket(Packet *packet, int id, simtime_t arrival
                 packetSequenceLostLogFile = fopen ("PacketLossLog.log","+w");
                 if (packetSequenceLostLogFile != nullptr)
                 {
-//                    sprintf (line, "id = %d SequeceNumber loss = %f ", id,i);
+//                    snprintf (line, sizeof(line), "id = %d SequeceNumber loss = %f ", id,i);
                     fputs (i, packetSequenceLostLogFile);
                     fclose (packetSequenceLostLogFile);
                 }

@@ -304,7 +304,7 @@ void ProgressMeterFigure::refresh()
     else {
         char buf[32];
         double percent = (value - min) / (max - min) * 100;
-        sprintf(buf, getText(), value, percent);
+        snprintf(buf, sizeof(buf) - 1, getText(), value, percent);
         if (value < min || value > max)
             strcat(buf, "*");
         valueFigure->setText(buf);

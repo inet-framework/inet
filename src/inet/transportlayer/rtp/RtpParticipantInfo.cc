@@ -137,7 +137,7 @@ void RtpParticipantInfo::addSDESItem(SdesItem::SdesItemType type, const char *co
 std::string RtpParticipantInfo::ssrcToName(uint32_t ssrc)
 {
     char name[9];
-    sprintf(name, "%08x", ssrc);
+    snprintf(name, sizeof(name), "%08x", ssrc);
     return name;
 }
 

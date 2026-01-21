@@ -86,7 +86,7 @@ void MoBanCoordinator::initialize(int stage)
 
         // preparing output mobility pattern log file
         char log_file_name[70];
-        sprintf(log_file_name, "MoBAN_Pattern_out%d.txt", getIndex());
+        snprintf(log_file_name, sizeof(log_file_name), "MoBAN_Pattern_out%d.txt", getIndex());
         inet::utils::makePathForFile(log_file_name);
         logfile = fopen(log_file_name, "w");
 

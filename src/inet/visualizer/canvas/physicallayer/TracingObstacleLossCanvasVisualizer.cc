@@ -78,7 +78,7 @@ const TracingObstacleLossVisualizerBase::ObstacleLossVisualization *TracingObsta
         lineFigure->setZoomLineWidth(false);
         auto labelFigure = intersectionLine->getLabelFigure();
         char tmp[32];
-        sprintf(tmp, "%.4g dB", inet::math::fraction2dB(loss));
+        snprintf(tmp, sizeof(tmp), "%.4g dB", inet::math::fraction2dB(loss));
         labelFigure->setText(tmp);
     }
     cLineFigure *faceNormal1Line = nullptr;

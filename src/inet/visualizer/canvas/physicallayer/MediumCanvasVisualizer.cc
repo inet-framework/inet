@@ -1052,7 +1052,7 @@ void MediumCanvasVisualizer::handleSignalDepartureStarted(const ITransmission *t
             auto labelFigure = check_and_cast<LabeledIconFigure *>(figure)->getLabelFigure();
             if (auto scalarTransmission = dynamic_cast<const ScalarSignalAnalogModel *>(transmission->getAnalogModel())) {
                 char tmp[32];
-                sprintf(tmp, "%.4g dBW", fraction2dB(scalarTransmission->getPower().get<W>()));
+                snprintf(tmp, sizeof(tmp), "%.4g dBW", fraction2dB(scalarTransmission->getPower().get<W>()));
                 labelFigure->setText(tmp);
             }
             else
@@ -1097,7 +1097,7 @@ void MediumCanvasVisualizer::handleSignalArrivalStarted(const IReception *recept
                 auto labelFigure = check_and_cast<LabeledIconFigure *>(figure)->getLabelFigure();
                 if (auto scalarReception = dynamic_cast<const ScalarReceptionAnalogModel *>(reception->getAnalogModel())) {
                     char tmp[32];
-                    sprintf(tmp, "%.4g dBW", fraction2dB(scalarReception->getPower().get<W>()));
+                    snprintf(tmp, sizeof(tmp), "%.4g dBW", fraction2dB(scalarReception->getPower().get<W>()));
                     labelFigure->setText(tmp);
                 }
                 else

@@ -861,9 +861,13 @@ INetfilter::IHook::Result IPsec::datagramLocalOutHook(Packet *packet)
 
 void IPsec::refreshDisplay() const
 {
-    char buf[80];
-    sprintf(buf, "IN: ACCEPT: %d DROP: %d BYPASS: %d\n OUT: PROTECT: %d DROP: %d BYPASS: %d", inAccept, inDrop, inBypass, outProtect, outDrop, outBypass);
-    getDisplayString().setTagArg("t", 0, buf);
+    std::string buf = "IN: ACCEPT: " + std::to_string(inAccept) +
+            " DROP: " + std::to_string(inDrop) +
+            " BYPASS: " + std::to_string(inBypass) +
+            "\n OUT: PROTECT: " + std::to_string(outProtect) +
+            " DROP: " + std::to_string(outDrop) +
+            " BYPASS: " + std::to_string(outBypass);
+    getDisplayString().setTagArg("t", 0, buf.c_str());
 }
 
 }    // namespace ipsec

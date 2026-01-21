@@ -63,7 +63,7 @@ void RtpAvProfilePayload32Receiver::processRtpPacket(Packet *rtpPacket)
     else if (_outputLogLoss.is_open()) {
         for (int i = _highestSequenceNumber + 1; i < rtpHeader->getSequenceNumber(); i++) {
 //            char line[100];
-//            sprintf(line, "%i", i);
+//            snprintf(line, sizeof(line), "%i", i);
             _outputLogLoss << i << endl;
         }
     }
@@ -122,7 +122,6 @@ void RtpAvProfilePayload32Receiver::processRtpPacket(Packet *rtpPacket)
 
             // we have calculated a frame
             if (frameSize > 0 && _outputFileStream.is_open()) {
-                char line[100];
                 // what picture type is it
                 char picture;
                 switch (pictureType) {
@@ -147,10 +146,8 @@ void RtpAvProfilePayload32Receiver::processRtpPacket(Packet *rtpPacket)
                         break;
                 }
 
-                // create sim line
-                sprintf(line, "%f %i %c-Frame", simTime().dbl(), frameSize * 8, picture);
                 // and write it to the file
-                _outputFileStream << line << endl;
+                _outputFileStream << simTime() << " " << frameSize * 8 << " " << picture << "-Frame" << endl;
             }
         }
         else {

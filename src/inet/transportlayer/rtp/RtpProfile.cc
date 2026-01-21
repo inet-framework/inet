@@ -212,7 +212,7 @@ void RtpProfile::dataIn(RtpInnerPacket *rinp)
                 check_and_cast<RtpPayloadReceiver *>(moduleType->create(payloadReceiverName.c_str(), this));
             if (_autoOutputFileNames) {
                 char outputFileName[100];
-                sprintf(outputFileName, "id%i.sim", receiverModule->getId());
+                snprintf(outputFileName, sizeof(outputFileName), "id%i.sim", receiverModule->getId());
                 receiverModule->par("outputFileName") = outputFileName;
             }
             receiverModule->finalizeParameters();

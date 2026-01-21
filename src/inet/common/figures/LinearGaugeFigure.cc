@@ -357,7 +357,7 @@ void LinearGaugeFigure::redrawTicks()
             number = 0;
 
         char buf[32];
-        sprintf(buf, "%g", number);
+        snprintf(buf, sizeof(buf), "%g", number);
         numberFigures[i]->setText(buf);
         setNumberGeometry(numberFigures[i], i);
     }

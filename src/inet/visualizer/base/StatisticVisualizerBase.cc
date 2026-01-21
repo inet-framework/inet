@@ -43,7 +43,7 @@ std::string StatisticVisualizerBase::DirectiveResolver::resolveDirective(char di
                 return "-";
             else {
                 char temp[32];
-                sprintf(temp, "%.4g", visualization->printValue);
+                snprintf(temp, sizeof(temp), "%.4g", visualization->printValue);
                 return temp;
             }
             break;

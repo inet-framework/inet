@@ -423,7 +423,7 @@ void GaugeFigure::redrawTicks()
         if (std::abs(number) < tickSize / 2)
             number = 0;
 
-        sprintf(buf, "%g", number);
+        snprintf(buf, sizeof(buf), "%g", number);
         numberFigures[i]->setText(buf);
         setNumberGeometry(numberFigures[i], i);
     }
@@ -512,7 +512,7 @@ void GaugeFigure::refresh()
         valueFigure->setText("");
     else {
         char buf[32];
-        sprintf(buf, "%g", value);
+        snprintf(buf, sizeof(buf), "%g", value);
         valueFigure->setText(buf);
     }
 }

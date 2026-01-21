@@ -277,12 +277,12 @@ double TurtleMobility::getValue(const char *s)
     if (strchr(s, '$')) {
         char strMinX[32], strMinY[32], strMinZ[32];
         char strMaxX[32], strMaxY[32], strMaxZ[32];
-        sprintf(strMinX, "%g", constraintAreaMin.x);
-        sprintf(strMinY, "%g", constraintAreaMin.y);
-        sprintf(strMinZ, "%g", constraintAreaMin.z);
-        sprintf(strMaxX, "%g", constraintAreaMax.x);
-        sprintf(strMaxY, "%g", constraintAreaMax.y);
-        sprintf(strMaxZ, "%g", constraintAreaMax.z);
+        snprintf(strMinX, sizeof(strMinX), "%g", constraintAreaMin.x);
+        snprintf(strMinY, sizeof(strMinY), "%g", constraintAreaMin.y);
+        snprintf(strMinZ, sizeof(strMinZ), "%g", constraintAreaMin.z);
+        snprintf(strMaxX, sizeof(strMaxX), "%g", constraintAreaMax.x);
+        snprintf(strMaxY, sizeof(strMaxY), "%g", constraintAreaMax.y);
+        snprintf(strMaxZ, sizeof(strMaxZ), "%g", constraintAreaMax.z);
 
         str = s;
         std::string::size_type pos;

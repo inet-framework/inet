@@ -73,7 +73,7 @@ void Loopback::refreshDisplay() const
 
     /* TODO find solution for displaying IPv4 address without dependence on IPv4 or IPv6
             Ipv4Address addr = networkInterface->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
-            sprintf(buf, "%s / %s\nrcv:%ld snt:%ld", addr.isUnspecified()?"-":addr.str().c_str(), datarateText, numRcvdOK, numSent);
+            // snprintf(buf, sizeof(buf), "%s / %s\nrcv:%ld snt:%ld", addr.isUnspecified()?"-":addr.str().c_str(), datarateText, numRcvdOK, numSent);
      */
     std::string buf = "rcv:" + std::to_string(numRcvdOK) + " snt:" + std::to_string(numSent);
     getDisplayString().setTagArg("t", 0, buf.c_str());
