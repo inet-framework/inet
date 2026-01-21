@@ -51,8 +51,8 @@ void Ospfv2RoutingTableEntry::addNextHop(NextHop hop)
         setGateway(hop.hopAddress);
     }
     else {
-        for (size_t i = 0; i < nextHops.size(); i++) {
-            if (hop.ifIndex == nextHops.at(i).ifIndex && hop.hopAddress == nextHops.at(i).hopAddress)
+        for (auto& nextHop : nextHops) {
+            if (hop.ifIndex == nextHop.ifIndex && hop.hopAddress == nextHop.hopAddress)
                 return;
         }
     }
