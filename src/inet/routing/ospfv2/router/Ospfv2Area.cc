@@ -2611,6 +2611,18 @@ bool Ospfv2Area::isAllZero(Ipv4AddressRange entry) const
     return false;
 }
 
+std::string Ospfv2Area::getInterfaceInfo() const
+{
+    std::string info;
+    const char *sep = "  ";
+    for (auto item : associatedInterfaces)
+    {
+        info += sep + item->getInterfaceName() + ": " + item->getTypeString() + "|" + item->getStateString() + "|" + item->getModeString() + "|" + item->getNeighbors();
+        sep = "\n  ";
+    }
+    return info;
+}
+
 } // namespace ospfv2
 
 } // namespace inet

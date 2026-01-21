@@ -655,6 +655,21 @@ std::ostream& operator<<(std::ostream& stream, const Ospfv2Interface& intf)
                   << "backupDesignatedRouterInterface: " << intf.backupDesignatedRouter.ipInterfaceAddress;
 }
 
+const char *Ospfv2Interface::getStateString()
+{
+    return getStateString(state->getState());
+}
+
+std::string Ospfv2Interface::getNeighbors()
+{
+    std::string neighbors = "";
+    for (auto& neighbor : neighboringRoutersByID) {
+        std::string neighborState = Neighbor::getStateString((neighbor.second)->getState());
+        neighbors = neighbors + (neighbor.first).str() + " (" + neighborState + ")  ";
+    }
+    return neighbors;
+}
+
 } // namespace ospfv2
 
 } // namespace inet

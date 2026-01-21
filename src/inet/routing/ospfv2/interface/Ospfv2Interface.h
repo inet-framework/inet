@@ -24,7 +24,7 @@ namespace ospfv2 {
 class Ospfv2Area;
 class Ospfv2InterfaceState;
 
-class INET_API Ospfv2Interface
+class INET_API Ospfv2Interface : public cObject
 {
   public:
     enum Ospfv2InterfaceType {
@@ -115,6 +115,7 @@ class INET_API Ospfv2Interface
     void addNeighbor(Neighbor *neighbor);
     Ospfv2InterfaceStateType getState() const;
     static const char *getStateString(Ospfv2InterfaceStateType stateType);
+    const char *getStateString();
     bool hasAnyNeighborInStates(int states) const;
     void removeFromAllRetransmissionLists(LsaKeyType lsaKey);
     bool isOnAnyRetransmissionList(LsaKeyType lsaKey) const;
@@ -128,8 +129,10 @@ class INET_API Ospfv2Interface
     void setType(Ospfv2InterfaceType ifType) { interfaceType = ifType; }
     Ospfv2InterfaceType getType() const { return interfaceType; }
     static const char *getTypeString(Ospfv2InterfaceType intfType);
+    const char *getTypeString() { return getTypeString(interfaceType); }
     Ospfv2InterfaceMode getMode() const { return interfaceMode; }
     static const char *getModeString(Ospfv2InterfaceMode intfMode);
+    const char *getModeString() { return getModeString(interfaceMode); }
     void setMode(Ospfv2InterfaceMode intfMode) { interfaceMode = intfMode; }
     ChecksumMode getChecksumMode() const { return checksumMode; }
     void setChecksumMode(ChecksumMode checksumMode) { this->checksumMode = checksumMode; }
@@ -140,9 +143,9 @@ class INET_API Ospfv2Interface
     void setMtu(unsigned short ifMTU) { mtu = ifMTU; }
     unsigned short getMtu() const { return mtu; }
     void setAreaId(AreaId areaId) { areaID = areaId; }
-    AreaId getAreaId() const { return areaID; }
+    const AreaId& getAreaId() const { return areaID; }
     void setTransitAreaId(AreaId areaId) { transitAreaID = areaId; }
-    AreaId getTransitAreaId() const { return transitAreaID; }
+    const AreaId& getTransitAreaId() const { return transitAreaID; }
     void setOutputCost(Metric cost) { interfaceOutputCost = cost; }
     Metric getOutputCost() const { return interfaceOutputCost; }
     void setRetransmissionInterval(short interval) { retransmissionInterval = interval; }
@@ -164,13 +167,13 @@ class INET_API Ospfv2Interface
     void setAuthenticationKey(AuthenticationKeyType key) { authenticationKey = key; }
     AuthenticationKeyType getAuthenticationKey() const { return authenticationKey; }
     void setAddressRange(Ipv4AddressRange range) { interfaceAddressRange = range; }
-    Ipv4AddressRange getAddressRange() const { return interfaceAddressRange; }
+    const Ipv4AddressRange& getAddressRange() const { return interfaceAddressRange; }
 
     cMessage *getHelloTimer() { return helloTimer; }
     cMessage *getWaitTimer() { return waitTimer; }
     cMessage *getAcknowledgementTimer() { return acknowledgementTimer; }
-    DesignatedRouterId getDesignatedRouter() const { return designatedRouter; }
-    DesignatedRouterId getBackupDesignatedRouter() const { return backupDesignatedRouter; }
+    const DesignatedRouterId& getDesignatedRouter() const { return designatedRouter; }
+    const DesignatedRouterId& getBackupDesignatedRouter() const { return backupDesignatedRouter; }
     unsigned long getNeighborCount() const { return neighboringRouters.size(); }
     Neighbor *getNeighbor(unsigned long i) { return neighboringRouters[i]; }
     const Neighbor *getNeighbor(unsigned long i) const { return neighboringRouters[i]; }
@@ -180,6 +183,10 @@ class INET_API Ospfv2Interface
     const Ospfv2Area *getArea() const { return parentArea; }
 
     friend std::ostream& operator<<(std::ostream& stream, const Ospfv2Interface& intf);
+    std::string getNeighbors();
+
+    size_t getNeighboringRoutersArraySize() const { return neighboringRouters.size(); }
+    Neighbor *getNeighboringRouters(int i) const { return neighboringRouters.at(i); }
 };
 
 } // namespace ospfv2

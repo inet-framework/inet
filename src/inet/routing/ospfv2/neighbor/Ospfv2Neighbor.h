@@ -21,7 +21,7 @@ namespace ospfv2 {
 class NeighborState;
 class Ospfv2Interface;
 
-class INET_API Neighbor
+class INET_API Neighbor : public cObject
 {
     friend class NeighborState;
 
@@ -119,6 +119,7 @@ class INET_API Neighbor
     void initFirstAdjacency();
     NeighborStateType getState() const;
     static const char *getStateString(NeighborStateType stateType);
+    const char *getStateString() const { return getStateString(getState()); }
     void sendDatabaseDescriptionPacket(bool init = false);
     bool retransmitDatabaseDescriptionPacket();
     void createDatabaseSummary();
@@ -144,15 +145,15 @@ class INET_API Neighbor
     void deleteLastSentDDPacket();
 
     void setNeighborID(RouterId id) { neighborID = id; }
-    RouterId getNeighborID() const { return neighborID; }
+    const RouterId& getNeighborID() const { return neighborID; }
     void setPriority(unsigned char priority) { neighborPriority = priority; }
     unsigned char getPriority() const { return neighborPriority; }
     void setAddress(Ipv4Address address) { neighborIPAddress = address; }
-    Ipv4Address getAddress() const { return neighborIPAddress; }
+    const Ipv4Address& getAddress() const { return neighborIPAddress; }
     void setDesignatedRouter(DesignatedRouterId routerID) { neighborsDesignatedRouter = routerID; }
-    DesignatedRouterId getDesignatedRouter() const { return neighborsDesignatedRouter; }
+    const DesignatedRouterId& getDesignatedRouter() const { return neighborsDesignatedRouter; }
     void setBackupDesignatedRouter(DesignatedRouterId routerID) { neighborsBackupDesignatedRouter = routerID; }
-    DesignatedRouterId getBackupDesignatedRouter() const { return neighborsBackupDesignatedRouter; }
+    const DesignatedRouterId& getBackupDesignatedRouter() const { return neighborsBackupDesignatedRouter; }
     void setRouterDeadInterval(short interval) { neighborsRouterDeadInterval = interval; }
     short getRouterDeadInterval() const { return neighborsRouterDeadInterval; }
     void setDDSequenceNumber(unsigned long sequenceNumber) { ddSequenceNumber = sequenceNumber; }

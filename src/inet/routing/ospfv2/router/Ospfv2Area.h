@@ -50,11 +50,13 @@ class INET_API Ospfv2Area : public cObject
     virtual ~Ospfv2Area();
 
     void setAreaID(AreaId areaId) { areaID = areaId; }
-    AreaId getAreaID() const { return areaID; }
+    const AreaId& getAreaID() const { return areaID; }
     void addAddressRange(Ipv4AddressRange addressRange, bool advertise);
     unsigned int getAddressRangeCount() const { return areaAddressRanges.size(); }
-    Ipv4AddressRange getAddressRange(unsigned int index) const { return areaAddressRanges[index]; }
+    const Ipv4AddressRange& getAddressRange(unsigned int index) const { return areaAddressRanges[index]; }
     void addHostRoute(HostRouteParameters& hostRouteParameters) { hostRoutes.push_back(hostRouteParameters); }
+    size_t getHostRoutesArraySize() const { return hostRoutes.size(); }
+    const HostRouteParameters& getHostRoutes(size_t i) const { return hostRoutes.at(i); }
     void setTransitCapability(bool transit) { transitCapability = transit; }
     bool getTransitCapability() const { return transitCapability; }
     void setExternalRoutingCapability(bool flooded) { externalRoutingCapability = flooded; }
@@ -87,7 +89,9 @@ class INET_API Ospfv2Area : public cObject
     int getInterfaceCount() const { return associatedInterfaces.size(); }
     Ospfv2Interface *getInterface(unsigned char ifIndex);
     Ospfv2Interface *getInterface(Ipv4Address address);
+    Ospfv2Interface *_getInterface(size_t i) { return associatedInterfaces.at(i); }
     std::vector<int> getInterfaceIndices();
+    std::string getInterfaceInfo() const;
     bool hasVirtualLink(AreaId withTransitArea) const;
     Ospfv2Interface *findVirtualLink(RouterId routerID);
 

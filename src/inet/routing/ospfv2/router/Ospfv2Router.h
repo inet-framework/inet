@@ -84,6 +84,9 @@ class INET_API Router
      * Adds a new Area to the Area list.
      * @param area [in] The Area to add.
      */
+
+    std::string getInterfaceInfo() const;
+
     void addArea(Ospfv2Area *area);
 
     /**
