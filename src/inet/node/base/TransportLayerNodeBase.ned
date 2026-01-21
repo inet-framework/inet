@@ -29,7 +29,7 @@ module TransportLayerNodeBase extends NetworkLayerNodeBase
         bool hasUdp = default(firstAvailableOrEmpty("Udp") != "");
         bool hasTcp = default(firstAvailableOrEmpty("Tcp", "TcpLwip", "TcpNsc") != "");
         bool hasSctp = default(false);
-        bool hasQuic = default(firstAvailableOrEmpty("Quic") != "");
+        bool hasQuic = default(false);
         @figure[transportLayer](type=rectangle; pos=250,158; size=1000,134; fillColor=#ff0000; lineColor=#808080; cornerRadius=5; fillOpacity=0.1);
         @figure[transportLayer.title](type=text; pos=1245,163; anchor=ne; text="transport layer");
     submodules:
