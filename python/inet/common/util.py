@@ -1,4 +1,5 @@
 import curses.ascii
+import datetime
 import glob
 import hashlib
 import importlib
@@ -18,7 +19,8 @@ import time
 
 __sphinx_mock__ = True # ignore this module in documentation
 
-COLOR_GRAY = "\033[38;20m"
+COLOR_GRAY = "\033[90m"
+COLOR_LIGHT_GRAY = "\033[38;2;200;200;200m"
 COLOR_RED = "\033[1;31m"
 COLOR_YELLOW = "\033[1;33m"
 COLOR_CYAN = "\033[0;36m"
@@ -551,3 +553,60 @@ def set_data_frame_print_options_to_print_more_details():
     pandas.set_option('display.max_columns', None)
     pandas.set_option("display.precision", 19)
     pandas.set_option('display.width', 1000)
+
+def format_timedelta(td, *, precision = 3):
+    """
+    Format a timedelta without leading zero hours/minutes.
+
+    Output style:
+      - H:MM:SS(.fff...) if hours > 0
+      - M:SS(.fff...)    if minutes > 0
+      - S(.fff...)       otherwise
+    Fractional seconds are rounded to `precision` decimal places and trailing
+    zeros are removed. Uses exact integer microseconds (no float drift).
+
+    Examples:
+      0.12s   -> "0.12"
+      45s     -> "45"
+      65.1s   -> "1:05.1"
+      3661s   -> "1:01:01"
+    """
+    if not isinstance(td, datetime.timedelta):
+        raise TypeError("td must be a datetime.timedelta")
+
+    if precision < 0 or precision > 6:
+        raise ValueError("precision must be between 0 and 6")
+
+    # Exact total microseconds (timedelta stores days/seconds/microseconds as ints)
+    total_us = ((td.days * 86400 + td.seconds) * 1_000_000) + td.microseconds
+
+    sign = "-" if total_us < 0 else ""
+    total_us = abs(total_us)
+
+    # Round to requested precision
+    if precision < 6:
+        factor = 10 ** (6 - precision)  # e.g. precision=3 -> 1000us (ms)
+        total_us = (total_us + factor // 2) // factor * factor
+
+    # Break down
+    total_seconds, us = divmod(total_us, 1_000_000)
+    h, rem = divmod(total_seconds, 3600)
+    m, s = divmod(rem, 60)
+
+    # Build base time string without leading units
+    if h:
+        base = f"{h}:{m:02d}:{s:02d}"
+    elif m:
+        base = f"{m}:{s:02d}"
+    else:
+        base = f"{s}"
+
+    # Fractional part
+    frac = ""
+    if precision and us:
+        frac_digits = f"{us:06d}"[:precision]  # take leading digits after rounding
+        frac_digits = frac_digits.rstrip("0")
+        if frac_digits:
+            frac = "." + frac_digits
+
+    return sign + base + frac
