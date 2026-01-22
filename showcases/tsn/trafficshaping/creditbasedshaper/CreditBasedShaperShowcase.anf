@@ -2992,7 +2992,7 @@ if df.empty:
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
-df["moduledisplaypath"].fillna(df["module"], inplace=True)
+df["moduledisplaypath"] = df["moduledisplaypath"].fillna(df["module"])
 df["legend"] = df["moduledisplaypath"] + ", " + df["title"]
 df["legend"] = df["legend"].apply(lambda legend: re.sub(".*\\.(.*) dilated.*", "\\1", str(legend)))
 df["title"] = df["legend"]
@@ -3637,7 +3637,7 @@ if df.empty:
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
-df["moduledisplaypath"].fillna(df["module"], inplace=True)
+df["moduledisplaypath"] = df["moduledisplaypath"].fillna(df["module"])
 df["legend"] = df["moduledisplaypath"] + ", " + df["title"]
 df["legend"] = df["legend"].apply(lambda legend: re.sub(".*\\.(.*) dilated.*", "\\1", str(legend)))
 df["title"] = df["legend"]
