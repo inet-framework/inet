@@ -313,6 +313,8 @@ simple Quic extends SimpleModule like IQuic
         @signal[pmtuValidatorPersistentCongestions*];
         @statisticTemplate[pmtuValidatorPersistentCongestions](title="number of consecutive persistent congestions for PMTU validation"; record=vector; interpolationmode=sample-hold);
 
+        @signal[tlsKeyLogLine](type=string);
+
     gates:
         input appIn @labels(QuicCommand/down) @messageKinds(inet::QuicCommandCode);
         input udpIn @labels(QuicHeader,Ipv4ControlInfo/up,Ipv6ControlInfo/up);
