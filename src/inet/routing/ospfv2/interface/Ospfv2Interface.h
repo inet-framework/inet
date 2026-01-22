@@ -167,7 +167,7 @@ class INET_API Ospfv2Interface : public cObject
     void setAuthenticationKey(AuthenticationKeyType key) { authenticationKey = key; }
     AuthenticationKeyType getAuthenticationKey() const { return authenticationKey; }
     void setAddressRange(Ipv4AddressRange range) { interfaceAddressRange = range; }
-    Ipv4AddressRange getAddressRange() const { return interfaceAddressRange; }
+    const Ipv4AddressRange& getAddressRange() const { return interfaceAddressRange; }
 
     cMessage *getHelloTimer() { return helloTimer; }
     cMessage *getWaitTimer() { return waitTimer; }
@@ -184,6 +184,9 @@ class INET_API Ospfv2Interface : public cObject
 
     friend std::ostream& operator<<(std::ostream& stream, const Ospfv2Interface& intf);
     std::string getNeighbors();
+
+    size_t getNeighboringRoutersArraySize() { return neighboringRouters.size(); }
+    Neighbor *getNeighboringRouters(int i) { return neighboringRouters.at(i); }
 };
 
 } // namespace ospfv2
