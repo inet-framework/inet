@@ -3,6 +3,8 @@ This module provides abstractions for generic test tasks and their results.
 """
 
 import logging
+import sys
+import time
 
 from inet.common import *
 
@@ -72,6 +74,52 @@ class MultipleTestTasks(MultipleTasks):
         self.locals = locals()
         self.locals.pop("self")
         self.kwargs = kwargs
+
+class TaskTestTask(TestTask):
+    def __init__(self, tested_task=None, **kwargs):
+        super().__init__(**kwargs)
+        assert(tested_task is not None)
+        self.tested_task = tested_task
+
+    def count_tasks(self):
+        return self.tested_task.count_tasks() + 1
+
+    def get_description(self):
+        return self.name
+
+    def run(self, context=None, progress=None, index=0, count=1, output_stream=sys.stdout, **kwargs):
+        context = extend_task_context(context, self.name, index, count)
+        progress = progress or TaskProgress(self.count_tasks())
+        elements = [e for e in [progress.get_string(**kwargs), context.get_string(**kwargs), "▶", self.get_description()] if e != ""]
+        print(" ".join(elements), file=output_stream)
+        if self.cancel:
+            task_results = list(map(lambda task: task.task_result_class(task=task, result="CANCEL", reason="Cancel by user"), self.tasks))
+            task_result = self.multiple_task_results_class(multiple_tasks=self, results=task_results)
+        else:
+            try:
+                start_time = time.time()
+                task_result = self.run_protected(context=context, progress=progress, output_stream=output_stream, **kwargs)
+                end_time = time.time()
+                task_result.elapsed_wall_time = end_time - start_time
+            except KeyboardInterrupt:
+                task_result = task.task_result_class(task=task, result="CANCEL", reason="Cancel by user")
+        progress = progress.increment_num_finished()
+        elements = [e for e in [progress.get_string(**kwargs), context.get_string(**kwargs), "◉", self.get_description(), task_result.get_description()] if e != ""]
+        print(" ".join(elements), file=output_stream)
+        return task_result
+
+    def run_protected(self, **kwargs):
+        start_time = time.time()
+        tested_task_result = self.tested_task.run(**kwargs)
+        end_time = time.time()
+        tested_task_result.elapsed_wall_time = end_time - start_time
+        if tested_task_result.result == "DONE":
+            return self.check_task_result(tested_task_result=tested_task_result, **kwargs)
+        else:
+            return self.task_result_class(task=self, tested_task_result=tested_task_result, result=tested_task_result.result, expected_result=tested_task_result.expected_result, expected=tested_task_result.expected, reason=tested_task_result.reason, error_message="simulation exited with error")
+
+    def check_task_result(self, **kwargs):
+        return self.task_result_class(task=self, result="PASS")
 
 class UpdateTaskResult(TaskResult):
     def __init__(self, task=None, result="KEEP", expected_result="KEEP", possible_results=["KEEP", "SKIP", "CANCEL", "INSERT", "UPDATE", "ERROR"], possible_result_colors=[COLOR_GREEN, COLOR_CYAN, COLOR_CYAN, COLOR_YELLOW, COLOR_YELLOW, COLOR_RED], **kwargs):
