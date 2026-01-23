@@ -665,7 +665,7 @@ std::string Ospfv2Interface::getNeighbors()
     std::string neighbors = "";
     for (auto& neighbor : neighboringRoutersByID) {
         std::string neighborState = Neighbor::getStateString((neighbor.second)->getState());
-        neighbors = neighbors + (neighbor.first).str() + "(" + neighborState + ") ";
+        neighbors = neighbors + (neighbor.first).str() + " (" + neighborState + ")  ";
     }
     return neighbors;
 }

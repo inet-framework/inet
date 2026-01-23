@@ -88,6 +88,7 @@ class INET_API Ospfv2Area : public cObject
     Ospfv2Interface *getInterface(unsigned char ifIndex);
     Ospfv2Interface *getInterface(Ipv4Address address);
     std::vector<int> getInterfaceIndices();
+    std::string getInterfaceInfo();
     bool hasVirtualLink(AreaId withTransitArea) const;
     Ospfv2Interface *findVirtualLink(RouterId routerID);
 

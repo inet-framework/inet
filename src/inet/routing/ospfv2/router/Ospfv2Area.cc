@@ -53,6 +53,7 @@ void Ospfv2Area::addWatches()
     WATCH_PTRVECTOR(networkLSAs);
     WATCH_PTRVECTOR(summaryLSAs);
     WATCH_PTRVECTOR(associatedInterfaces);
+    WATCH_EXPR("interfaces", getInterfaceInfo());
 }
 
 void Ospfv2Area::addInterface(Ospfv2Interface *intf)
@@ -276,6 +277,7 @@ bool Ospfv2Area::installRouterLSA(const Ospfv2RouterLsa *lsa)
         RouterLsa *lsaCopy = new RouterLsa(*lsa);
         routerLSAsByID[linkStateID] = lsaCopy;
         routerLSAs.push_back(lsaCopy);
+        WATCH_OBJ(*lsaCopy);
         return true;
     }
 }
@@ -297,6 +299,7 @@ bool Ospfv2Area::installNetworkLSA(const Ospfv2NetworkLsa *lsa)
         NetworkLsa *lsaCopy = new NetworkLsa(*lsa);
         networkLSAsByID[linkStateID] = lsaCopy;
         networkLSAs.push_back(lsaCopy);
+        WATCH_OBJ(*lsaCopy);
         return true;
     }
 }
@@ -322,6 +325,7 @@ bool Ospfv2Area::installSummaryLSA(const Ospfv2SummaryLsa *lsa)
         SummaryLsa *lsaCopy = new SummaryLsa(*lsa);
         summaryLSAsByID[lsaKey] = lsaCopy;
         summaryLSAs.push_back(lsaCopy);
+        WATCH_OBJ(*lsaCopy);
         return true;
     }
 }
@@ -2610,6 +2614,18 @@ bool Ospfv2Area::isAllZero(Ipv4AddressRange entry) const
     if (entry.address.getInt() == 0 && entry.mask.getInt() == 0)
         return true;
     return false;
+}
+
+std::string Ospfv2Area::getInterfaceInfo()
+{
+    std::string info;
+    const char *sep = "";
+    for (auto item : associatedInterfaces)
+    {
+        info += sep + item->getInterfaceName() + ": " + item->getStateString();
+        sep = "\n";
+    }
+    return info;
 }
 
 } // namespace ospfv2
