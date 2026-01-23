@@ -29,12 +29,62 @@ import multiprocessing
 import multiprocessing.pool
 import socket
 import sys
+import threading
 import time
 import traceback
 
 from inet.common.util import *
 
 _logger = logging.getLogger(__name__)
+
+class TaskProgress:
+    def __init__(self, num_tasks, num_finished=0):
+        self.num_tasks = num_tasks
+        self.num_finished = num_finished
+        self._lock = threading.Lock()
+        self._width = len(str(self.num_tasks))
+
+    def get_progress(self):
+        return f"[{self.num_finished:0{self._width}d}/{self.num_tasks}]"
+
+    def get_string(self, include_progress=True, **kwargs):
+        if include_progress:
+            return COLOR_LIGHT_GRAY + self.get_progress() + COLOR_RESET
+        else:
+            return ""
+
+    def increment_num_finished(self):
+        with self._lock:
+            self.num_finished += 1
+            return TaskProgress(self.num_tasks, self.num_finished)
+
+class TaskContext:
+    def __init__(self, elements=[], indices=[]):
+        self.elements = elements
+        self.indices = indices
+
+    def get_indentation(self):
+        return "  " * (len(self.indices) - 1)
+
+    def get_path(self):
+        return "/".join(self.elements)
+
+    def get_position(self):
+        return "(" + "·".join(self.indices[1:]) + ")"
+
+    def get_string(self, include_context_indentation=True, include_context_position=False, include_context_path=False, **kwargs):
+        indentation = self.get_indentation()[:-1]
+        indentation_string = (COLOR_LIGHT_GRAY + indentation + COLOR_RESET) if include_context_indentation and indentation != "" else ""
+        position_string = (COLOR_GRAY + self.get_position() + COLOR_RESET) if include_context_position else ""
+        path_string = (COLOR_GRAY + self.get_path()) if include_context_path else ""
+        elements = [e for e in [position_string, path_string, indentation_string] if e != ""]
+        return " ".join(elements)
+
+    def extend(self, element, index):
+        return TaskContext([*self.elements, element], [*self.indices, index])
+
+def extend_task_context(context, name, index, count):
+    return context.extend(name, f"{index + 1}/{count}") if context else TaskContext([name], [f"{index + 1}/{count}"])
 
 class TaskResult:
     """
@@ -121,7 +171,8 @@ class TaskResult:
                 ((COLOR_YELLOW + " (unexpected)" + COLOR_RESET) if not self.expected and self.color != COLOR_GREEN else "") + \
                 ((COLOR_GREEN + " (expected)" + COLOR_RESET) if self.expected and self.color != COLOR_GREEN else "") + \
                (" (" + self.reason + ")" if self.reason else "") + \
-               (" " + self.get_error_message(complete_error_message=complete_error_message) if self.result == "ERROR" else "")
+               (" " + self.get_error_message(complete_error_message=complete_error_message) if self.result == "ERROR" else "") + \
+               (" in " + format_timedelta(datetime.timedelta(seconds=self.elapsed_wall_time)) if self.elapsed_wall_time else "")
 
     def get_error_message(self, **kwargs):
         return self.error_message or self.stderr or (self.exception and str(self.exception)) or "<No error message>"
@@ -260,7 +311,9 @@ class MultipleTaskResults:
                                                                          self.possible_result_colors[self.possible_results.index(possible_result)] == COLOR_CYAN),
                                                 self.possible_results))
         details = self.get_details(level=level + 1, exclude_result_filter=exclude_result_filter, expected=False, include_parameters=True)
-        return f"Multiple {self.multiple_tasks.name}s: " + self.get_summary() + "\n" + details
+        if not details.isspace():
+            details = "\n" + details
+        return f"Multiple {self.multiple_tasks.name}s: " + self.get_summary() + details
 
     def get_summary(self):
         if len(self.results) == 1:
@@ -271,7 +324,7 @@ class MultipleTaskResults:
                 texts.append(str(len(self.results)) + " TOTAL")
             for possible_result in self.possible_results:
                 texts += self.get_result_class_texts(possible_result, self.possible_result_colors[self.possible_results.index(possible_result)], self.num_expected[possible_result], self.num_unexpected[possible_result])
-            return ", ".join(texts) + (" in " + str(datetime.timedelta(seconds=self.elapsed_wall_time)) if self.elapsed_wall_time else "")
+            return ", ".join(texts) + (" in " + format_timedelta(datetime.timedelta(seconds=self.elapsed_wall_time)) if self.elapsed_wall_time else "")
 
     def get_details(self, separator="\n  ", level=1, result_filter=None, exclude_result_filter=None, expected=None, **kwargs):
         texts = []
@@ -327,7 +380,7 @@ class Task:
     Represents a self-contained operation that captures all necessary information in order to be run.
     """
 
-    def __init__(self, name="task", action="", pass_keyboard_interrupt=False, print_run_start_separately=True, task_result_class=TaskResult, **kwargs):
+    def __init__(self, name="task", action="", pass_keyboard_interrupt=False, task_result_class=TaskResult, **kwargs):
         """
         Initializes a new task object.
 
@@ -338,9 +391,6 @@ class Task:
             action (string):
                 A human readable short description of the operation the task is carrying out, usually a verb.
 
-            print_run_start_separately (bool):
-                Specifies if the start and end of the task's execution is printed separately wrapping around the execution.
-
             task_result_class (string):
                 The Python class name of the produced task result object.
         """
@@ -350,12 +400,14 @@ class Task:
         self.name = name
         self.action = action
         self.pass_keyboard_interrupt = pass_keyboard_interrupt
-        self.print_run_start_separately = print_run_start_separately
         self.task_result_class = task_result_class
         self.cancel = False
 
     def __repr__(self):
         return repr(self)
+
+    def count_tasks(self):
+        return 1
 
     def get_hash(self, **kwargs):
         hasher = hashlib.sha256()
@@ -365,30 +417,22 @@ class Task:
     def set_cancel(self, cancel):
         self.cancel = cancel
 
-    def get_progress_string(self, index, count, prefix):
-        count_str = str(count)
-        index_str = str(index + 1)
-        index_str_padding = "0" * (len(count_str) - len(index_str))
-        return "[" + prefix + index_str_padding + index_str + "/" + count_str + "]" if index is not None and count is not None else ""
-
     def get_action_string(self, **kwargs):
         return self.action
 
     def get_parameters_string(self, **kwargs):
         return ""
 
-    def print_run_start(self, index=None, count=None, print_end=" ", output_stream=sys.stdout, progress_prefix="", **kwargs):
-        progress_string = (self.get_progress_string(index, count, progress_prefix) if index is not None and count is not None else "")
+    def print_run_start(self, context=None, progress=None, print_end=" ", output_stream=sys.stdout, **kwargs):
         action_string = self.get_action_string(**kwargs)
         parameters_string = self.get_parameters_string(**kwargs)
-        elements = [e for e in [progress_string, action_string, parameters_string] if e != ""]
-        print(" ".join(elements), end=print_end, file=output_stream)
-        output_stream.flush()
+        elements = [e for e in [progress.get_string(**kwargs), context.get_string(**kwargs), "⏺", action_string, parameters_string] if e != ""]
+        print(" ".join(elements), end=print_end, file=output_stream, flush=True)
 
     def print_run_end(self, task_result, output_stream=sys.stdout, **kwargs):
         task_result.print_result(complete_error_message=False, output_stream=output_stream)
 
-    def run(self, dry_run=False, keyboard_interrupt_handler=None, handle_exception=True, **kwargs):
+    def run(self, context=None, progress=None, index=0, count=1, print_run_start_separately=False, dry_run=False, keyboard_interrupt_handler=None, handle_exception=True, **kwargs):
         """
         Runs the task.
 
@@ -410,14 +454,17 @@ class Task:
             return self.task_result_class(task=self, result="CANCEL", reason="Cancel by user")
         else:
             try:
-                if self.print_run_start_separately:
-                    self.print_run_start(**kwargs)
+                if not progress:
+                    progress = TaskProgress(self.count_tasks())
+                context = extend_task_context(context, self.name, index, count)
+                if print_run_start_separately:
+                    self.print_run_start(context=context, progress=progress, **kwargs)
                 with EnabledKeyboardInterrupts(keyboard_interrupt_handler):
                     if dry_run:
                         task_result = self.task_result_class(task=self, result="DONE", reason="Dry run")
                     else:
                         start_time = time.time()
-                        task_result = self.run_protected(**kwargs)
+                        task_result = self.run_protected(progress=progress, **kwargs)
                         end_time = time.time()
                         task_result.elapsed_wall_time = end_time - start_time
             except KeyboardInterrupt:
@@ -429,9 +476,10 @@ class Task:
                     task_result = self.task_result_class(task=self, result="ERROR", reason="Exception during task execution", error_message=e.__repr__(), exception=e)
                 else:
                     raise e
-            if not self.print_run_start_separately:
-                self.print_run_start(**kwargs)
-            self.print_run_end(task_result, **kwargs)
+            progress = progress.increment_num_finished()
+            if not print_run_start_separately:
+                self.print_run_start(context=context, progress=progress, **kwargs)
+            self.print_run_end(task_result, context=context, progress=progress, **kwargs)
             return task_result
 
     def run_protected(self, **kwargs):
@@ -446,7 +494,7 @@ class Task:
         Returns (:py:class:`TaskResult`):
             The task result.
         """
-        return self.task_result_class(task=self, result="DONE", reason="Task completed")
+        return self.task_result_class(task=self, result="DONE")
 
     def recreate(self, **kwargs):
         return self.__class__(**dict(dict(self.locals, **self.kwargs), **kwargs))
@@ -527,6 +575,9 @@ class MultipleTasks:
     def __repr__(self):
         return repr(self)
 
+    def count_tasks(self):
+        return sum(task.count_tasks() for task in self.tasks) + 1
+
     def set_cancel(self, cancel):
         self.cancel = cancel
         for task in self.tasks:
@@ -534,9 +585,9 @@ class MultipleTasks:
 
     def get_description(self):
         concurrency_description = "concurrently" if self.concurrent else "sequentially"
-        return f"{self.name}s {concurrency_description}"
+        return f"{self.name}s ({concurrency_description})"
 
-    def run(self, **kwargs):
+    def run(self, context=None, progress=None, index=0, count=1, **kwargs):
         """
         Runs all tasks sequentially or concurrently.
 
@@ -546,23 +597,26 @@ class MultipleTasks:
         Returns (:py:class:`MultipleTaskResults`):
             The task results.
         """
-        def run_internal(**kwargs):
-            _logger.info(f"Running {len(self.tasks)} {self.get_description()} started")
+        def run_internal(context=None, progress=None, output_stream=sys.stdout, **kwargs):
+            elements = [e for e in [progress.get_string(**kwargs), context.get_string(**kwargs), "▶", str(len(self.tasks)), self.get_description()] if e != ""]
+            print(" ".join(elements), file=output_stream)
             if self.cancel:
                 task_results = list(map(lambda task: task.task_result_class(task=task, result="CANCEL", reason="Cancel by user"), self.tasks))
                 multiple_task_results = self.multiple_task_results_class(multiple_tasks=self, results=task_results)
             else:
                 try:
                     start_time = time.time()
-                    multiple_task_results = self.run_protected(**kwargs)
+                    multiple_task_results = self.run_protected(context=context, progress=progress, output_stream=output_stream, **kwargs)
                     end_time = time.time()
                     multiple_task_results.elapsed_wall_time = end_time - start_time
                 except KeyboardInterrupt:
                     task_results = list(map(lambda task: task.task_result_class(task=task, result="CANCEL", reason="Cancel by user"), self.tasks))
                     multiple_task_results = self.multiple_task_results_class(multiple_tasks=self, results=task_results)
-            _logger.info(f"Running {len(self.tasks)} {self.get_description()} ended")
+            progress = progress.increment_num_finished()
+            elements = [e for e in [progress.get_string(**kwargs), context.get_string(**kwargs), "◉", str(len(self.tasks)), self.get_description(), multiple_task_results.get_description()] if e != ""]
+            print(" ".join(elements), file=output_stream)
             return multiple_task_results
-        return run_with_log_levels(run_internal, **kwargs)
+        return run_with_log_levels(run_internal, **dict(kwargs, context=extend_task_context(context, self.name, index, count), progress=progress or TaskProgress(self.count_tasks())))
 
     def run_protected(self, **kwargs):
         if self.scheduler == "cluster":
@@ -586,6 +640,8 @@ class MultipleTasks:
                     partially_applied_function = functools.partial(run_task_with_capturing_output, tasks=tasks, task_count=task_count, **dict(kwargs, keyboard_interrupt_handler=None))
                     map_results = pool.map_async(partially_applied_function, tasks, chunksize=self.chunksize)
                     task_results = map_results.get(0xFFFF)
+                    pool.close()
+                    pool.join()
                 except KeyboardInterrupt:
                     for task in tasks:
                         task.set_cancel(True)
@@ -599,7 +655,7 @@ class MultipleTasks:
                 try:
                     for task in tasks:
                         task.set_cancel(cancel)
-                        result = task.run(**dict(kwargs, index=task_index, count=task_count))
+                        result = task.run(**dict(kwargs, index=task_index, count=task_count, print_run_start_separately=True))
                         if result.result == "CANCEL":
                             cancel = True
                         task_results.append(result)
@@ -630,8 +686,8 @@ def run_task_with_capturing_output(task, tasks=None, task_count=None, output_str
     try:
         task_output_stream = io.StringIO()
         task_index = tasks.index(task)
-        task_result = task.run(output_stream=task_output_stream, **dict(kwargs, index=task_index, count=task_count))
-        print(task_output_stream.getvalue(), end="", file=output_stream)
+        task_result = task.run(**dict(kwargs, output_stream=task_output_stream, index=task_index, count=task_count))
+        print(task_output_stream.getvalue(), end="", file=output_stream, flush=True)
         return task_result
     except KeyboardInterrupt:
         return task.task_result_class(task=task, result="CANCEL", reason="Cancel by user")
