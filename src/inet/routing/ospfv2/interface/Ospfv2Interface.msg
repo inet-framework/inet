@@ -27,7 +27,7 @@ class Ospfv2Interface extends cObject
     int mtu;
     string stateString;
     string modeString;
-    unsigned long outputCost;
+    Metric outputCost;
     Ipv4Address areaId;
     Ipv4Address transitAreaId;
     short helloInterval;

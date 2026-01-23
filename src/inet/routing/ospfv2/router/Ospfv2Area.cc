@@ -2613,7 +2613,7 @@ bool Ospfv2Area::isAllZero(Ipv4AddressRange entry) const
     return false;
 }
 
-std::string Ospfv2Area::getInterfaceInfo()
+std::string Ospfv2Area::getInterfaceInfo() const
 {
     std::string info;
     const char *sep = "";

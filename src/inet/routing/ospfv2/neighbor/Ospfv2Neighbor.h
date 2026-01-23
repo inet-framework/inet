@@ -119,7 +119,7 @@ class INET_API Neighbor : public cObject
     void initFirstAdjacency();
     NeighborStateType getState() const;
     static const char *getStateString(NeighborStateType stateType);
-    const char *getStateString() { return getStateString(getState()); }
+    const char *getStateString() const { return getStateString(getState()); }
     void sendDatabaseDescriptionPacket(bool init = false);
     bool retransmitDatabaseDescriptionPacket();
     void createDatabaseSummary();

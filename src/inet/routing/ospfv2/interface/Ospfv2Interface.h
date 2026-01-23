@@ -185,8 +185,8 @@ class INET_API Ospfv2Interface : public cObject
     friend std::ostream& operator<<(std::ostream& stream, const Ospfv2Interface& intf);
     std::string getNeighbors();
 
-    size_t getNeighboringRoutersArraySize() { return neighboringRouters.size(); }
-    Neighbor *getNeighboringRouters(int i) { return neighboringRouters.at(i); }
+    size_t getNeighboringRoutersArraySize() const { return neighboringRouters.size(); }
+    Neighbor *getNeighboringRouters(int i) const { return neighboringRouters.at(i); }
 };
 
 } // namespace ospfv2
