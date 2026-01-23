@@ -498,6 +498,9 @@ class MultipleSimulationTasks(MultipleTasks):
             self.build_before_run(**kwargs)
         return super().run_protected(**kwargs)
 
+    def get_parameters_string(self, **kwargs):
+        return ""
+
 def get_simulation_tasks(simulation_project=None, simulation_configs=None, mode=None, debug=None, break_at_event_number=None, break_at_matching_event=None, run_number=None, run_number_filter=None, exclude_run_number_filter=None, sim_time_limit=None, cpu_time_limit=None, concurrent=True, expected_num_tasks=None, simulation_task_class=SimulationTask, multiple_simulation_tasks_class=MultipleSimulationTasks, **kwargs):
     """
     Returns multiple simulation tasks matching the filter criteria. The returned tasks can be run by calling the

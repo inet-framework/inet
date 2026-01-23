@@ -246,7 +246,7 @@ class CompareSimulationsTaskResult(TaskResult):
 
 class CompareSimulationsTask(Task):
     def __init__(self, multiple_simulation_tasks=None, task_result_class=CompareSimulationsTaskResult, **kwargs):
-        super().__init__(print_run_start_separately=False, task_result_class=task_result_class, **kwargs)
+        super().__init__(task_result_class=task_result_class, **kwargs)
         self.multiple_simulation_tasks = multiple_simulation_tasks
         num_tasks = len(multiple_simulation_tasks.tasks)
         if num_tasks != 2:
@@ -270,7 +270,7 @@ class CompareSimulationsTask(Task):
 
     def run_protected(self, ingredients="tplx", index=None, append_args=[], **kwargs):
         append_args = append_args + ["--cmdenv-express-mode=false", "--cmdenv-log-prefix=%l %C%<: ", "--cmdenv-redirect-output=true", "--eventlog-snapshot-frequency=100MiB", "--eventlog-index-frequency=10MiB", "--eventlog-options=module", "--fingerprint=0000-0000/" + ingredients] + get_ingredients_append_args(ingredients)
-        multiple_task_results = self.multiple_simulation_tasks.run_protected(append_args=append_args, progress_prefix=str(index + 1) + ".", **kwargs)
+        multiple_task_results = self.multiple_simulation_tasks.run_protected(append_args=append_args, **kwargs)
         return self.task_result_class(multiple_task_results=multiple_task_results, task=self, result=multiple_task_results.result, color=multiple_task_results.color)
 
 class MultipleCompareSimulationsTaskResults(MultipleTaskResults):
