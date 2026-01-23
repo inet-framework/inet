@@ -277,7 +277,6 @@ bool Ospfv2Area::installRouterLSA(const Ospfv2RouterLsa *lsa)
         RouterLsa *lsaCopy = new RouterLsa(*lsa);
         routerLSAsByID[linkStateID] = lsaCopy;
         routerLSAs.push_back(lsaCopy);
-        WATCH_OBJ(*lsaCopy);
         return true;
     }
 }
@@ -299,7 +298,6 @@ bool Ospfv2Area::installNetworkLSA(const Ospfv2NetworkLsa *lsa)
         NetworkLsa *lsaCopy = new NetworkLsa(*lsa);
         networkLSAsByID[linkStateID] = lsaCopy;
         networkLSAs.push_back(lsaCopy);
-        WATCH_OBJ(*lsaCopy);
         return true;
     }
 }
@@ -325,7 +323,6 @@ bool Ospfv2Area::installSummaryLSA(const Ospfv2SummaryLsa *lsa)
         SummaryLsa *lsaCopy = new SummaryLsa(*lsa);
         summaryLSAsByID[lsaKey] = lsaCopy;
         summaryLSAs.push_back(lsaCopy);
-        WATCH_OBJ(*lsaCopy);
         return true;
     }
 }
