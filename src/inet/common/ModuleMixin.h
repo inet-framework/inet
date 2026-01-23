@@ -72,8 +72,24 @@ class INET_API ModuleMixin : public T, public StringFormat::IResolver
 
     virtual std::string resolveExpression(const char *expression) const override
     {
-        cCollectObjectsVisitor visitor(expression);
-        visitor.processChildrenOf(const_cast<ModuleMixin<T>*>(this));
+        const char *lastDot = strrchr(expression, '.');
+        
+        cModule *targetModule = const_cast<ModuleMixin<T>*>(this);
+        const char *fieldName = expression;
+        
+        if (lastDot != nullptr) {
+            // Extract submodule path (everything before the last dot)
+            std::string submodulePath(expression, lastDot - expression);
+            
+            targetModule = const_cast<ModuleMixin<T>*>(this)->getModuleByPath(submodulePath.c_str());
+            
+            
+            fieldName = lastDot + 1;
+        }
+        
+        cCollectObjectsVisitor visitor(fieldName);
+        visitor.processChildrenOf(targetModule);
+        
         if (!visitor.objects.empty()) {
             if (visitor.objects.size() > 1) {
                 std::stable_sort(visitor.objects.begin(), visitor.objects.end(), [] (const cObject *o1, const cObject *o2) {
