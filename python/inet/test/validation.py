@@ -22,12 +22,12 @@ from inet.test.simulation import *
 
 _logger = logging.getLogger(__name__)
 
-class ValidationTestTask(SimulationTestTask):
-    def __init__(self, simulation_task, check_function, name="validation test", **kwargs):
-        super().__init__(simulation_task, name=name, **kwargs)
+class ValidationTestTask(TaskTestTask):
+    def __init__(self, check_function=None, name="validation test", **kwargs):
+        super().__init__(name=name, **kwargs)
         self.check_function = check_function
 
-    def check_simulation_task_result(self, simulation_task_result, **kwargs):
+    def check_task_result(self, **kwargs):
         return self.check_function(**kwargs)
 
 def compare_test_results(result1, result2, accuracy=0.01):
@@ -89,7 +89,7 @@ def compute_tsn_framereplication_validation_test_results(test_accuracy=0.01, **k
 
 def get_tsn_framereplication_simulation_test_task(**kwargs):
     simulation_task = get_simulation_tasks(working_directory_filter="tests/validation/tsn/framereplication", sim_time_limit="0.2s", **kwargs).tasks[0]
-    return ValidationTestTask(simulation_task, compute_tsn_framereplication_validation_test_results, **kwargs)
+    return ValidationTestTask(tested_task=simulation_task, check_function=compute_tsn_framereplication_validation_test_results, **kwargs)
 
 def run_tsn_framereplication_validation_test(test_accuracy=0.01, **kwargs):
     return get_tsn_framereplication_simulation_test_task(**kwargs).run(test_accuracy=test_accuracy, **kwargs)
@@ -140,7 +140,7 @@ def compute_tsn_trafficshaping_asynchronousshaper_icct_validation_test_results(*
 
 def get_tsn_trafficshaping_asynchronousshaper_icct_simulation_test_task(**kwargs):
     simulation_task = get_simulation_tasks(working_directory_filter="tests/validation/tsn/trafficshaping/asynchronousshaper/icct", sim_time_limit="0.1s", **kwargs).tasks[0]
-    return ValidationTestTask(simulation_task, compute_tsn_trafficshaping_asynchronousshaper_icct_validation_test_results, **kwargs)
+    return ValidationTestTask(tested_task=simulation_task, check_function=compute_tsn_trafficshaping_asynchronousshaper_icct_validation_test_results, **kwargs)
 
 def run_tsn_trafficshaping_asynchronousshaper_icct_validation_test(**kwargs):
     return get_tsn_trafficshaping_asynchronousshaper_icct_simulation_test_task(**kwargs).run(test_accuracy=test_accuracy, **kwargs)
@@ -207,7 +207,7 @@ def compute_tsn_trafficshaping_asynchronousshaper_core4inet_validation_test_resu
 
 def get_tsn_trafficshaping_asynchronousshaper_core4inet_validation_test_task(**kwargs):
     simulation_task = get_simulation_tasks(working_directory_filter="tests/validation/tsn/trafficshaping/asynchronousshaper/core4inet", sim_time_limit="1s", **kwargs).tasks[0]
-    return ValidationTestTask(simulation_task, compute_tsn_trafficshaping_asynchronousshaper_core4inet_validation_test_results, **kwargs)
+    return ValidationTestTask(tested_task=simulation_task, check_function=compute_tsn_trafficshaping_asynchronousshaper_core4inet_validation_test_results, **kwargs)
 
 def run_tsn_trafficshaping_asynchronousshaper_core4inet_validation_test(test_accuracy=0.01, **kwargs):
     return get_tsn_trafficshaping_asynchronousshaper_core4inet_validation_test_task(**kwargs).run(test_accuracy=test_accuracy, **kwargs)
@@ -274,7 +274,7 @@ def compute_tsn_trafficshaping_creditbasedshaper_validation_test_results(test_ac
 
 def get_tsn_trafficshaping_creditbasedshaper_validation_test_task(**kwargs):
     simulation_task = get_simulation_tasks(working_directory_filter="tests/validation/tsn/trafficshaping/creditbasedshaper", sim_time_limit="1s", **kwargs).tasks[0]
-    return ValidationTestTask(simulation_task, compute_tsn_trafficshaping_creditbasedshaper_validation_test_results, **kwargs)
+    return ValidationTestTask(tested_task=simulation_task, check_function=compute_tsn_trafficshaping_creditbasedshaper_validation_test_results, **kwargs)
 
 def run_tsn_trafficshaping_creditbasedshaper_validation_test(**kwargs):
     return get_tsn_trafficshaping_creditbasedshaper_validation_test_task(**kwargs).run(**kwargs)
@@ -348,8 +348,10 @@ def compute_quic_link_utilization_validation_test_results(test_accuracy=0.02, **
     return TestTaskResult(task=TestTask(), bool_result=all_pass)
 
 def get_quic_link_utilization_validation_test_task(**kwargs):
-    simulation_task = get_simulation_tasks(working_directory_filter="examples/quic/link_utilization", **kwargs).tasks[0]
-    return ValidationTestTask(simulation_task, compute_quic_link_utilization_validation_test_results, **kwargs)
+    simulation_task = get_simulation_tasks(working_directory_filter="examples/quic/link_utilization", **kwargs)
+    simulation_task.build = False
+    simulation_task.simulation_config = simulation_task.tasks[0].simulation_config
+    return ValidationTestTask(name="QUIC link utilization validation test", tested_task=simulation_task, check_function=compute_quic_link_utilization_validation_test_results, **kwargs)
 
 def run_quic_link_utilization_validation_test(test_accuracy=0.02, **kwargs):
     return get_quic_link_utilization_validation_test_task(**kwargs).run(test_accuracy=test_accuracy, **kwargs)
@@ -394,8 +396,10 @@ def compute_quic_throughput_packet_loss_validation_test_results(test_accuracy=0.
     return TestTaskResult(task=TestTask(), bool_result=all_pass)
 
 def get_quic_throughput_packet_loss_validation_test_task(**kwargs):
-    simulation_task = get_simulation_tasks(working_directory_filter="examples/quic/throughput_packet_loss", **kwargs).tasks[0]
-    return ValidationTestTask(simulation_task, compute_quic_throughput_packet_loss_validation_test_results, **kwargs)
+    simulation_task = get_simulation_tasks(working_directory_filter="examples/quic/throughput_packet_loss", **kwargs)
+    simulation_task.build = False
+    simulation_task.simulation_config = simulation_task.tasks[0].simulation_config
+    return ValidationTestTask(name="QUIC throughput validation test", tested_task=simulation_task, check_function=compute_quic_throughput_packet_loss_validation_test_results, **kwargs)
 
 def run_quic_throughput_packet_loss_validation_test(test_accuracy=0.15, **kwargs):
     return get_quic_throughput_packet_loss_validation_test_task(**kwargs).run(test_accuracy=test_accuracy, **kwargs)
@@ -445,8 +449,10 @@ def compute_quic_shared_link_validation_test_results(test_accuracy=0.05, **kwarg
     return TestTaskResult(task=TestTask(), bool_result=test_result)
 
 def get_quic_shared_link_validation_test_task(**kwargs):
-    simulation_task = get_simulation_tasks(working_directory_filter="examples/quic/shared_link", **kwargs).tasks[0]
-    return ValidationTestTask(simulation_task, compute_quic_shared_link_validation_test_results, **kwargs)
+    multiple_simulation_tasks = get_simulation_tasks(working_directory_filter="examples/quic/shared_link", **kwargs)
+    multiple_simulation_tasks.build = False
+    multiple_simulation_tasks.simulation_config = multiple_simulation_tasks.tasks[0].simulation_config
+    return ValidationTestTask(name="QUIC shared link validation test", tested_task=multiple_simulation_tasks, check_function=compute_quic_shared_link_validation_test_results, **kwargs)
 
 def run_quic_shared_link_validation_test(test_accuracy=0.05, **kwargs):
     return get_quic_shared_link_validation_test_task(**kwargs).run(test_accuracy=test_accuracy, **kwargs)
@@ -505,8 +511,10 @@ def compute_quic_flow_control_validation_test_results(test_accuracy=0.02, **kwar
     return TestTaskResult(task=TestTask(), bool_result=all_pass)
 
 def get_quic_flow_control_validation_test_task(**kwargs):
-    simulation_task = get_simulation_tasks(working_directory_filter="examples/quic/flow_control_limited", **kwargs).tasks[0]
-    return ValidationTestTask(simulation_task, compute_quic_flow_control_validation_test_results, **kwargs)
+    simulation_task = get_simulation_tasks(working_directory_filter="examples/quic/flow_control_limited", **kwargs)
+    simulation_task.build = False
+    simulation_task.simulation_config = simulation_task.tasks[0].simulation_config
+    return ValidationTestTask(name="QUIC flow control validation test", tested_task=simulation_task, check_function=compute_quic_flow_control_validation_test_results, **kwargs)
 
 def run_quic_flow_control_validation_test(test_accuracy=0.02, **kwargs):
     return get_quic_flow_control_validation_test_task(**kwargs).run(test_accuracy=test_accuracy, **kwargs)
@@ -541,7 +549,7 @@ def get_validation_test_tasks(**kwargs):
         for key in ["filter", "working_directory_filter", "ini_file_filter", "config_filter", "run_filter"]:
             validation_test_task_function_kwargs.pop(key, None)
         validation_test_task = validation_test_task_function(**validation_test_task_function_kwargs)
-        simulation_config = validation_test_task.simulation_task.simulation_config
+        simulation_config = validation_test_task.tested_task.simulation_config
         if simulation_config.matches_filter(**kwargs):
             validation_test_tasks.append(validation_test_task)
     return MultipleTestTasks(tasks=validation_test_tasks, name="validation test", **kwargs)
