@@ -44,7 +44,7 @@ command installs all such required and optional libraries:
 
 .. code-block:: console
 
-    levy@valardohaeris:~/workspace/inet$ pip install cppyy dask distributed IPython matplotlib numpy pandas scipy
+    levy@valardohaeris:~/workspace/inet$ python3 -m pip install -r python/requirements.txt cppyy seaborn
     Collecting cppyy
     ...
 
