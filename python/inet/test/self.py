@@ -144,3 +144,23 @@ def run_self_tests_main():
     self_test_task_results = MultipleSelfTestTasks(**kwargs).run(**kwargs)
     print(self_test_task_results)
     sys.exit(0 if (self_test_task_results is None or self_test_task_results.is_all_results_expected()) else 1)
+
+class TaskSelfTestTask(Task):
+    def run_protected(self, **kwargs):
+        time.sleep(0)
+        return super().run_protected(**kwargs)
+
+def test_tasks(**kwargs):
+    TaskSelfTestTask(name="T", action="simulation").run(**kwargs)
+    tasks = [TaskSelfTestTask(name="A", action="simulation", **kwargs), TaskSelfTestTask(name="B", action="simulation", **kwargs)]
+    multiple_tasks = MultipleTasks(tasks=tasks, name="main task", **kwargs)
+    multiple_tasks.run(**kwargs)
+    tasks1 = [TaskSelfTestTask(name="A", action="compile", **kwargs), TaskSelfTestTask(name="B", action="compile", **kwargs), TaskSelfTestTask(name="C", action="compile", **kwargs), TaskSelfTestTask(name="D", action="compile", **kwargs)]
+    tasks2 = [TaskSelfTestTask(name="X", action="link", **kwargs), TaskSelfTestTask(name="Y", action="link", **kwargs), TaskSelfTestTask(name="Z", action="link", **kwargs)]
+    multiple_tasks1 = MultipleTasks(tasks=tasks1, name="compile task", **kwargs)
+    multiple_tasks2 = MultipleTasks(tasks=tasks2, name="link task", **kwargs)
+    multiple_tasks = MultipleTasks(tasks=[multiple_tasks1, multiple_tasks2], name="main task", **kwargs)
+    multiple_tasks.run(**kwargs)
+    tested_task = TaskSelfTestTask(name="X", action="simulate", **kwargs)
+    task_test_task = TaskTestTask(name="test", tested_task=tested_task, **kwargs)
+    task_test_task.run(**kwargs)
