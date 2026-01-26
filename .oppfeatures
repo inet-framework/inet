@@ -1351,6 +1351,37 @@
         linkerFlags = ""
         />
     <feature
+        id = "Quic"
+        name = "QUIC protocol"
+        description = "QUIC transport layer protocol."
+        initiallyEnabled = "true"
+        requires = "Udp"
+        recommended = "Ipv4"
+        labels = "protocols transport"
+        nedPackages = "
+                       inet.applications.quicapp
+                       inet.transportlayer.quic
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DINET_WITH_QUIC"
+        linkerFlags = ""
+        />
+    <feature
+        id = "QuicExamples"
+        name = "QUIC examples"
+        description = "Examples for the QUIC protocol."
+        initiallyEnabled = "true"
+        requires = "Ethernet Ieee8021d Ipv4 Loopback Quic Queueing TcpInet Udp"
+        recommended = ""
+        labels = ""
+        nedPackages = "
+                       inet.examples.quic
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id = "Rip"
         name = "RIP routing"
         description = "Routing Information Protocol."
