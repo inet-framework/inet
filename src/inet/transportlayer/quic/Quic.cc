@@ -15,11 +15,14 @@
 #include "AppSocket.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/IcmpErrorTag_m.h"
-#include "inet/networklayer/ipv4/Ipv4Header_m.h"
-#include "inet/networklayer/ipv4/IcmpHeader_m.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 #include "exception/ConnectionDiedException.h"
 #include "packet/ConnectionId.h"
+
+#ifdef INET_WITH_IPv4
+#include "inet/networklayer/ipv4/IcmpHeader.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#endif // ifdef INET_WITH_IPv4
 
 namespace inet {
 namespace quic {
@@ -122,7 +125,9 @@ void Quic::handleMessageFromUdp(cMessage *msg)
     } else if (msg->getKind() == UDP_I_ERROR) {
         EV_WARN << "Error message received from UDP" << endl;
         Indication *ind = check_and_cast<Indication *>(msg);
-        auto quotedPacket = ind->getTag<IcmpErrorInd>()->getQuotedPacket()->dup();
+        auto icmpErrorInd = ind->getTag<IcmpErrorInd>();
+#ifdef INET_WITH_IPv4
+        auto quotedPacket = icmpErrorInd->getQuotedPacket()->dup();
         auto icmpHeader = quotedPacket->popAtFront<IcmpHeader>();
         if (icmpHeader != nullptr) {
             if (icmpHeader->getType() == ICMP_DESTINATION_UNREACHABLE && icmpHeader->getCode() == ICMP_DU_FRAGMENTATION_NEEDED) {
@@ -158,6 +163,9 @@ void Quic::handleMessageFromUdp(cMessage *msg)
             EV_WARN << "ICMPv6 not handled" << endl;
         }
         delete quotedPacket;
+#else
+        EV_WARN << "INET compiled without Ipv4" << endl;
+#endif // ifdef INET_WITH_IPv4
     } else if (msg->getKind() == UDP_I_DATA) {
         Packet *pkt = check_and_cast<Packet *>(msg);
 
