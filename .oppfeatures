@@ -1382,6 +1382,21 @@
         linkerFlags = ""
         />
     <feature
+        id = "QuicShowcases"
+        name = "QUIC showcases"
+        description = "Showcases for the QUIC protocol."
+        initiallyEnabled = "true"
+        requires = "Ethernet Ieee8021d Ipv4 Loopback Quic Queueing TcpInet Udp"
+        recommended = ""
+        labels = ""
+        nedPackages = "
+                       inet.showcases.quic
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id = "Rip"
         name = "RIP routing"
         description = "Routing Information Protocol."
