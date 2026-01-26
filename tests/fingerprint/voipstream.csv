@@ -6,39 +6,39 @@
 #    libavresample: 4.0.0
 #
 # working directory, command line arguments, simulation time limit, fingerprint, expected result, tags
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 0,        60s,     7b44-70ac/tplx;419d-9ece/tpl;1e3f-14ea/~tNl;3305-5d8b/~tND;3d56-0778/tyf, PASS, udp EthernetMac Ipv4
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 1,        60s,     8374-9950/tplx;7d4a-2b25/tpl;1a4d-6c45/~tNl;b284-d4de/~tND;d75c-e452/tyf, PASS, udp EthernetMac Ipv4
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 2,        60s,     10b5-103f/tplx;77e9-43ef/tpl;67ea-61ab/~tNl;63b7-2b0d/~tND;7eb0-5342/tyf, PASS, udp EthernetMac Ipv4
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 3,        60s,     98ee-2c1d/tplx;1a45-a975/tpl;1c64-ab72/~tNl;e5a8-7a1b/~tND;ffd2-2569/tyf, PASS, udp EthernetMac Ipv4
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 4,        60s,     91cf-7f21/tplx;0751-9f79/tpl;e327-e9af/~tNl;5ae8-4160/~tND;fdce-f396/tyf, PASS, udp EthernetMac Ipv4
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 5,        60s,     7d79-ae91/tplx;9977-9e45/tpl;525a-c723/~tNl;29ea-c296/~tND;1c48-b817/tyf, PASS, udp EthernetMac Ipv4
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 6,        60s,     904e-9209/tplx;4b46-f514/tpl;7515-a54d/~tNl;480b-3903/~tND;561d-de8f/tyf, PASS, udp EthernetMac Ipv4
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 7,        60s,     2e89-3023/tplx;2669-6beb/tpl;532e-d5a2/~tNl;b4e7-0316/~tND;4546-c44d/tyf, PASS, udp EthernetMac Ipv4
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 0,   60s,     aba2-6063/tplx;77d4-c130/tpl;43c4-be1f/~tNl;e013-7f45/~tND;87a9-b963/tyf, PASS, udp EthernetMac Ipv4
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 1,   60s,     823c-beba/tplx;30b7-3317/tpl;cc62-b6e8/~tNl;1f37-4ea2/~tND;c2e9-0d0e/tyf, PASS, udp EthernetMac Ipv4
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 2,   60s,     6b45-c7e8/tplx;08c1-b63b/tpl;0703-e717/~tNl;39ec-55db/~tND;4c37-06f2/tyf, PASS, udp EthernetMac Ipv4
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 3,   60s,     9da3-d846/tplx;78ff-45be/tpl;ec62-26cd/~tNl;2454-82d2/~tND;5174-e813/tyf, PASS, udp EthernetMac Ipv4
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 4,   60s,     4cff-7751/tplx;b10d-ab01/tpl;82dc-f6f5/~tNl;cf1e-cd34/~tND;4d7e-7e11/tyf, PASS, udp EthernetMac Ipv4
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 5,   60s,     e28e-e2e8/tplx;4e5e-bf15/tpl;6984-1884/~tNl;bebb-38c6/~tND;b9a9-a9d2/tyf, PASS, udp EthernetMac Ipv4
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 6,   60s,     2240-d3b3/tplx;5d0a-965b/tpl;5190-2f15/~tNl;bfc8-b89a/~tND;f72d-6217/tyf, PASS, udp EthernetMac Ipv4
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 7,   60s,     fd8d-d75c/tplx;1a67-a21e/tpl;e16d-d25e/~tNl;cac5-7b46/~tND;1d10-7199/tyf, PASS, udp EthernetMac Ipv4
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 0,  60s,     720c-f646/tplx;77d4-c130/tpl;43c4-be1f/~tNl;555a-c6bb/~tND;87a9-b963/tyf, PASS, udp EthernetMac Ipv4
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 1,  60s,     fdf1-d972/tplx;30b7-3317/tpl;cc62-b6e8/~tNl;0a64-2bbb/~tND;c2e9-0d0e/tyf, PASS, udp EthernetMac Ipv4
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 2,  60s,     f8c4-4b3f/tplx;08c1-b63b/tpl;0703-e717/~tNl;c185-a436/~tND;4c37-06f2/tyf, PASS, udp EthernetMac Ipv4
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 3,  60s,     8405-53c1/tplx;78ff-45be/tpl;ec62-26cd/~tNl;9d79-5ec0/~tND;5174-e813/tyf, PASS, udp EthernetMac Ipv4
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 4,  60s,     8610-402a/tplx;b10d-ab01/tpl;82dc-f6f5/~tNl;5723-0aa0/~tND;4d7e-7e11/tyf, PASS, udp EthernetMac Ipv4
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 5,  60s,     7d49-d8c0/tplx;4e5e-bf15/tpl;6984-1884/~tNl;4bc7-59f6/~tND;b9a9-a9d2/tyf, PASS, udp EthernetMac Ipv4
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 6,  60s,     6423-f944/tplx;5d0a-965b/tpl;5190-2f15/~tNl;d030-a615/~tND;f72d-6217/tyf, PASS, udp EthernetMac Ipv4
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 7,  60s,     126a-dcfa/tplx;1a67-a21e/tpl;e16d-d25e/~tNl;161b-7242/~tND;1d10-7199/tyf, PASS, udp EthernetMac Ipv4
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 0,   60s,     635d-7590/tplx;66c2-b7de/tpl;4ae0-0eed/~tNl;a407-2379/~tND;26ac-aa4b/tyf, PASS, udp EthernetMac Ipv4
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 1,   60s,     f959-22d9/tplx;da3c-57bc/tpl;5527-5543/~tNl;7f25-5d6e/~tND;370b-ea39/tyf, PASS, udp EthernetMac Ipv4
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 2,   60s,     c581-5b3f/tplx;6d63-a995/tpl;66f5-ae02/~tNl;3a37-c5ac/~tND;9001-ab7b/tyf, PASS, udp EthernetMac Ipv4
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 3,   60s,     e466-2316/tplx;ecf6-9114/tpl;151b-09f7/~tNl;3eeb-d86d/~tND;aa2e-7ae1/tyf, PASS, udp EthernetMac Ipv4
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 4,   60s,     f398-3524/tplx;d365-6185/tpl;0ecc-47c9/~tNl;ad34-4bf2/~tND;466b-2fb6/tyf, PASS, udp EthernetMac Ipv4
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 5,   60s,     1ab8-9e7b/tplx;2937-4260/tpl;39ed-1515/~tNl;a140-151f/~tND;7435-41af/tyf, PASS, udp EthernetMac Ipv4
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 6,   60s,     26af-af8c/tplx;de83-bc2f/tpl;caa8-c0eb/~tNl;329c-dd4e/~tND;19d9-52de/tyf, PASS, udp EthernetMac Ipv4
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 7,   60s,     c54f-4a48/tplx;7c5b-5548/tpl;f543-0b38/~tNl;348a-f8c3/~tND;5ef2-573f/tyf, PASS, udp EthernetMac Ipv4
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 0,        60s,     7b44-70ac/tplx;419d-9ece/tpl;1e3f-14ea/~tNl;3305-5d8b/~tND;f158-8f19/tyf, PASS, udp EthernetMac Ipv4
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 1,        60s,     8374-9950/tplx;7d4a-2b25/tpl;1a4d-6c45/~tNl;b284-d4de/~tND;84d7-71cd/tyf, PASS, udp EthernetMac Ipv4
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 2,        60s,     10b5-103f/tplx;77e9-43ef/tpl;67ea-61ab/~tNl;63b7-2b0d/~tND;68e5-1d64/tyf, PASS, udp EthernetMac Ipv4
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 3,        60s,     98ee-2c1d/tplx;1a45-a975/tpl;1c64-ab72/~tNl;e5a8-7a1b/~tND;de1d-9ecb/tyf, PASS, udp EthernetMac Ipv4
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 4,        60s,     91cf-7f21/tplx;0751-9f79/tpl;e327-e9af/~tNl;5ae8-4160/~tND;a7cb-eceb/tyf, PASS, udp EthernetMac Ipv4
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 5,        60s,     7d79-ae91/tplx;9977-9e45/tpl;525a-c723/~tNl;29ea-c296/~tND;82b3-523f/tyf, PASS, udp EthernetMac Ipv4
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 6,        60s,     904e-9209/tplx;4b46-f514/tpl;7515-a54d/~tNl;480b-3903/~tND;3798-cafb/tyf, PASS, udp EthernetMac Ipv4
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 7,        60s,     2e89-3023/tplx;2669-6beb/tpl;532e-d5a2/~tNl;b4e7-0316/~tND;b920-1741/tyf, PASS, udp EthernetMac Ipv4
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 0,   60s,     aba2-6063/tplx;77d4-c130/tpl;43c4-be1f/~tNl;e013-7f45/~tND;6364-11a4/tyf, PASS, udp EthernetMac Ipv4
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 1,   60s,     823c-beba/tplx;30b7-3317/tpl;cc62-b6e8/~tNl;1f37-4ea2/~tND;726a-2dd5/tyf, PASS, udp EthernetMac Ipv4
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 2,   60s,     6b45-c7e8/tplx;08c1-b63b/tpl;0703-e717/~tNl;39ec-55db/~tND;9a32-158d/tyf, PASS, udp EthernetMac Ipv4
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 3,   60s,     9da3-d846/tplx;78ff-45be/tpl;ec62-26cd/~tNl;2454-82d2/~tND;2f3c-a32b/tyf, PASS, udp EthernetMac Ipv4
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 4,   60s,     4cff-7751/tplx;b10d-ab01/tpl;82dc-f6f5/~tNl;cf1e-cd34/~tND;62e7-ef3b/tyf, PASS, udp EthernetMac Ipv4
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 5,   60s,     e28e-e2e8/tplx;4e5e-bf15/tpl;6984-1884/~tNl;bebb-38c6/~tND;2278-3f0d/tyf, PASS, udp EthernetMac Ipv4
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 6,   60s,     2240-d3b3/tplx;5d0a-965b/tpl;5190-2f15/~tNl;bfc8-b89a/~tND;d3e6-5c6f/tyf, PASS, udp EthernetMac Ipv4
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 7,   60s,     fd8d-d75c/tplx;1a67-a21e/tpl;e16d-d25e/~tNl;cac5-7b46/~tND;127d-a546/tyf, PASS, udp EthernetMac Ipv4
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 0,  60s,     720c-f646/tplx;77d4-c130/tpl;43c4-be1f/~tNl;555a-c6bb/~tND;6364-11a4/tyf, PASS, udp EthernetMac Ipv4
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 1,  60s,     fdf1-d972/tplx;30b7-3317/tpl;cc62-b6e8/~tNl;0a64-2bbb/~tND;726a-2dd5/tyf, PASS, udp EthernetMac Ipv4
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 2,  60s,     f8c4-4b3f/tplx;08c1-b63b/tpl;0703-e717/~tNl;c185-a436/~tND;9a32-158d/tyf, PASS, udp EthernetMac Ipv4
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 3,  60s,     8405-53c1/tplx;78ff-45be/tpl;ec62-26cd/~tNl;9d79-5ec0/~tND;2f3c-a32b/tyf, PASS, udp EthernetMac Ipv4
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 4,  60s,     8610-402a/tplx;b10d-ab01/tpl;82dc-f6f5/~tNl;5723-0aa0/~tND;62e7-ef3b/tyf, PASS, udp EthernetMac Ipv4
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 5,  60s,     7d49-d8c0/tplx;4e5e-bf15/tpl;6984-1884/~tNl;4bc7-59f6/~tND;2278-3f0d/tyf, PASS, udp EthernetMac Ipv4
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 6,  60s,     6423-f944/tplx;5d0a-965b/tpl;5190-2f15/~tNl;d030-a615/~tND;d3e6-5c6f/tyf, PASS, udp EthernetMac Ipv4
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 7,  60s,     126a-dcfa/tplx;1a67-a21e/tpl;e16d-d25e/~tNl;161b-7242/~tND;127d-a546/tyf, PASS, udp EthernetMac Ipv4
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 0,   60s,     635d-7590/tplx;66c2-b7de/tpl;4ae0-0eed/~tNl;a407-2379/~tND;8589-d332/tyf, PASS, udp EthernetMac Ipv4
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 1,   60s,     f959-22d9/tplx;da3c-57bc/tpl;5527-5543/~tNl;7f25-5d6e/~tND;bea0-8dd7/tyf, PASS, udp EthernetMac Ipv4
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 2,   60s,     c581-5b3f/tplx;6d63-a995/tpl;66f5-ae02/~tNl;3a37-c5ac/~tND;3be4-dd87/tyf, PASS, udp EthernetMac Ipv4
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 3,   60s,     e466-2316/tplx;ecf6-9114/tpl;151b-09f7/~tNl;3eeb-d86d/~tND;cf22-9c43/tyf, PASS, udp EthernetMac Ipv4
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 4,   60s,     f398-3524/tplx;d365-6185/tpl;0ecc-47c9/~tNl;ad34-4bf2/~tND;ffb3-e189/tyf, PASS, udp EthernetMac Ipv4
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 5,   60s,     1ab8-9e7b/tplx;2937-4260/tpl;39ed-1515/~tNl;a140-151f/~tND;fdac-1d5a/tyf, PASS, udp EthernetMac Ipv4
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 6,   60s,     26af-af8c/tplx;de83-bc2f/tpl;caa8-c0eb/~tNl;329c-dd4e/~tND;3e12-d657/tyf, PASS, udp EthernetMac Ipv4
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 7,   60s,     c54f-4a48/tplx;7c5b-5548/tpl;f543-0b38/~tNl;348a-f8c3/~tND;edb1-0915/tyf, PASS, udp EthernetMac Ipv4
 
-/examples/voipstream/VoIPStreamLargeNet/,    -f omnetpp.ini -c General -r 0,      5s,     6846-bb46/tplx;3bc9-bf14/tpl;f93d-006b/~tNl;330b-7425/tyf, PASS, udp EthernetMac EthernetCsmaMac Ipv4
+/examples/voipstream/VoIPStreamLargeNet/,    -f omnetpp.ini -c General -r 0,      5s,     6846-bb46/tplx;3bc9-bf14/tpl;f93d-006b/~tNl;b942-1c11/tyf, PASS, udp EthernetMac EthernetCsmaMac Ipv4
 
-/examples/voipstream/VoIPStreamTrafficTest/, -f omnetpp.ini -c General -r 0,      2s,     2035-6024/tplx;8510-8b61/tpl;a2c4-fe86/~tNl;b492-b86a/~tND;3212-1630/tyf, PASS, udp EthernetMac Ipv4
+/examples/voipstream/VoIPStreamTrafficTest/, -f omnetpp.ini -c General -r 0,      2s,     2035-6024/tplx;8510-8b61/tpl;a2c4-fe86/~tNl;b492-b86a/~tND;bb64-619d/tyf, PASS, udp EthernetMac Ipv4
