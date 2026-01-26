@@ -66,11 +66,11 @@ fpExtraArgs = {
               "'--**.fcsMode=\"computed\"'"
             },
     "tyf" : { "--cmdenv-fake-gui=true",
-              "--cmdenv-fake-gui-before-event-probability=0.1",
-              "--cmdenv-fake-gui-after-event-probability=0.1",
-              "--cmdenv-fake-gui-on-hold-probability=0.1",
+              "--cmdenv-fake-gui-before-event-probability=0.001",
+              "--cmdenv-fake-gui-after-event-probability=0.001",
+              "--cmdenv-fake-gui-on-hold-probability=0.001",
               "--cmdenv-fake-gui-on-hold-numsteps=3",
-              "--cmdenv-fake-gui-on-simtime-probability=0.1",
+              "--cmdenv-fake-gui-on-simtime-probability=0.001",
               "--cmdenv-fake-gui-on-simtime-numsteps=3",
               "'--**.fadeOutMode=\"animationTime\"'",
               "'--**.signalAnimationSpeedChangeTimeMode=\"animationTime\"'"
