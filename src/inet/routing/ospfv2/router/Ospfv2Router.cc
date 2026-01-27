@@ -53,6 +53,17 @@ void Router::addWatches()
     WATCH_PTRVECTOR(ospfRoutingTable);
 }
 
+std::string Router::getInterfaceInfo() const
+{
+   std::string str;
+   const char *sep = "area ";
+   for (auto area : areas) {
+       str += sep + area->getAreaID().str(false) + "\n" + area->getInterfaceInfo();
+       sep = "\narea ";
+   }
+   return str;
+}
+
 void Router::addArea(Ospfv2Area *area)
 {
     area->setRouter(this);

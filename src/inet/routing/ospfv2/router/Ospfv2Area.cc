@@ -53,7 +53,6 @@ void Ospfv2Area::addWatches()
     WATCH_PTRVECTOR(networkLSAs);
     WATCH_PTRVECTOR(summaryLSAs);
     WATCH_PTRVECTOR(associatedInterfaces);
-    WATCH_EXPR("interfaces", getInterfaceInfo());
 }
 
 void Ospfv2Area::addInterface(Ospfv2Interface *intf)
@@ -2616,11 +2615,11 @@ bool Ospfv2Area::isAllZero(Ipv4AddressRange entry) const
 std::string Ospfv2Area::getInterfaceInfo() const
 {
     std::string info;
-    const char *sep = "";
+    const char *sep = "  ";
     for (auto item : associatedInterfaces)
     {
-        info += sep + item->getInterfaceName() + ": " + item->getStateString();
-        sep = "\n";
+        info += sep + item->getInterfaceName() + ": " + item->getTypeString() + "|" + item->getStateString() + "|" + item->getModeString();
+        sep = "\n  ";
     }
     return info;
 }

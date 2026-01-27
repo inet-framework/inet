@@ -58,6 +58,7 @@ class INET_API Ospfv2 : public RoutingProtocolBase, protected cListener
     virtual void subscribe();
     virtual void unsubscribe();
     virtual void createOspfRouter();
+    std::string getInterfaceInfo() const;
 
     // lifecycle
     virtual void handleStartOperation(LifecycleOperation *operation) override;

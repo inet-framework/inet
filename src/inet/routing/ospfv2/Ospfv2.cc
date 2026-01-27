@@ -44,10 +44,16 @@ void Ospfv2::initialize(int stage)
         ift.reference(this, "interfaceTableModule", true);
         rt.reference(this, "routingTableModule", true);
         startupTimer = new cMessage("OSPF-startup");
+        WATCH_EXPR("interfaces", getInterfaceInfo());
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) { // interfaces and static routes are already initialized
         registerProtocol(Protocol::ospf, gate("ipOut"), gate("ipIn"));
     }
+}
+
+std::string Ospfv2::getInterfaceInfo() const
+{
+    return ospfRouter ? ospfRouter->getInterfaceInfo() : std::string();
 }
 
 void Ospfv2::handleMessageWhenUp(cMessage *msg)
