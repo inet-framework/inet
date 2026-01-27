@@ -47,7 +47,6 @@ Router::~Router()
 
 void Router::addWatches()
 {
-    WATCH(routerID);
     WATCH_PTRVECTOR(areas);
     WATCH_PTRVECTOR(asExternalLSAs);
     WATCH_PTRVECTOR(ospfRoutingTable);
