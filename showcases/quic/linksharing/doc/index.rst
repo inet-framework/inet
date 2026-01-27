@@ -1,5 +1,5 @@
 QUIC Bandwidth Sharing on a Bottleneck Link
-============================================
+===========================================
 
 Goals
 -----
@@ -29,7 +29,7 @@ simulation to model realistic network conditions and test the robustness of the
 congestion control under variable network loads.
 
 | Verified with INET version: ``4.6.0``
-| Source files location: `inet/showcases/quic/shared_link <https://github.com/inet-framework/inet/tree/master/showcases/quic/shared_link>`__
+| Source files location: `inet/showcases/quic/linksharing <https://github.com/inet-framework/inet/tree/master/showcases/quic/linksharing>`__
 
 The Model
 ---------
@@ -37,12 +37,11 @@ The Model
 The Network
 ~~~~~~~~~~~
 
-The network consists of three QUIC senders (``sender1``, ``sender2``, ``sender3``)
-and their corresponding receivers (``receiver1``, ``receiver2``, ``receiver3``),
-connected through two routers. The link between ``router1`` and ``router2`` serves
-as the bottleneck, with limited bandwidth and a configured delay. Additionally, a
-traffic generator and consumer pair produce random UDP traffic to add realistic
-variability to the network conditions.
+The network consists of three QUIC senders and their corresponding receivers,
+connected through two routers. The link between the two routers serves as the
+bottleneck, with limited bandwidth and a configured delay. Additionally, a
+plain (non-QUIC) UDP traffic generator and consumer pair produces background
+traffic to add some variability to the network conditions.
 
 .. figure:: media/network.png
    :width: 70%
@@ -53,30 +52,30 @@ The bottleneck link has the following characteristics:
 - **Bandwidth**: 10 Mbps
 - **Delay**: 10 ms
 - **MTU**: 1280 bytes
-- **Queue capacity**: Sized according to the Bandwidth-Delay Product (BDP)
+- **Queue capacity**: 200 kb, which equals the Bandwidth-Delay Product (BDP)
 
 All other links are configured as high-speed channels with 1 Gbps datarate to
 ensure the bottleneck is the only limiting factor in the network.
 
 Configuration and Behavior
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The three QUIC senders transmit data with a staggered timing pattern:
 
 .. code-block:: text
 
-   Seconds 0   2    4    6    8    10   12   14
-           |   |    |    |    |    |    |    |
-   Sender1     xxxxxxxxxxxxxxx
-   Sender2          xxxxxxxxxxxxxxx
-   Sender3               xxxxxxxxxxxxxxx
+   Seconds 0   10   20   30   40   50   60   70   80   90   100
+           |   |    |    |    |    |    |    |    |    |    |
+   Sender1     xxxxxxxxxxxxxxxxxxxxxxxxx
+   Sender2          xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   Sender3                    xxxxxxxxxxxxxxxxxxxxxxxxxx
 
-- **Sender1** starts at 1s, stops at 13s (12 seconds active)
-- **Sender2** starts at 2s, stops at 13s (11 seconds active)
-- **Sender3** starts at 4s, stops at 13s (9 seconds active)
+- **Sender1** starts at 10s, stops at 60s (50 seconds active)
+- **Sender2** starts at 20s, stops at 80s (60 seconds active)
+- **Sender3** starts at 40s, stops at 90s (50 seconds active)
 
 Each sender uses the ``TrafficgenCompound`` application with ``TrafficgenSimple``
-generator configured to send 15 KB packets continuously (0 ms interval between
+generator configured to send 150 KB packets continuously (0 ms interval between
 packets). The traffic is transmitted over QUIC connections to dedicated receivers
 using the ``QuicTrafficgen`` handler.
 
@@ -88,8 +87,8 @@ Key QUIC configuration parameters:
 - **ACK policy**: Bundle ACKs for non-ACK-eliciting packets
 
 The random UDP traffic generator sends packets of varying sizes (100-1000 bytes)
-at random intervals (25-100 ms) throughout the simulation to add realistic
-background noise.
+at random intervals (25-100 ms) throughout the simulation to add some variability
+to the network conditions.
 
 Results
 -------
@@ -105,10 +104,12 @@ simulation duration, measured every 100 ms:
 
 The plot clearly demonstrates fair bandwidth sharing:
 
-- **0-1s**: No QUIC traffic yet
-- **1-2s**: Only ``sender1`` is active, utilizing the full bottleneck capacity (~10 Mbps)
-- **2-4s**: ``sender1`` and ``sender2`` are active, each achieving approximately 5 Mbps (fair share)
-- **4-13s**: All three senders are active, each achieving approximately 3.3 Mbps (fair share)
+- **0-10s**: No QUIC traffic yet
+- **10-20s**: Only ``sender1`` is active, utilizing the full bottleneck capacity (~10 Mbps)
+- **20-40s**: ``sender1`` and ``sender2`` are active, each achieving approximately 5 Mbps (fair share)
+- **40-60s**: All three senders are active, each achieving approximately 3.3 Mbps (fair share)
+- **60-80s**: ``sender1`` has stopped, ``sender2`` and ``sender3`` share bandwidth (~5 Mbps each)
+- **80-90s**: Only ``sender3`` remains, utilizing the full capacity
 
 The congestion control algorithms successfully detect the available bandwidth
 and adjust transmission rates so that each active sender receives an equal share.
