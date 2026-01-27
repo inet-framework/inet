@@ -1,0 +1,9 @@
+QUIC 0-RTT Connection Resumption
+=================================
+
+This showcase demonstrates QUIC's 0-RTT (Zero Round-Trip Time) connection resumption
+feature, which allows clients to send application data in the first flight of packets
+when reconnecting to a server, significantly reducing connection establishment latency
+for repeated connections.
+
+Documentation: doc/index.rst
