@@ -1,0 +1,8 @@
+QUIC Path MTU Discovery (DPLPMTUD)
+===================================
+
+This showcase demonstrates QUIC's Datagram Packetization Layer Path MTU Discovery
+(DPLPMTUD) mechanism, which allows QUIC connections to dynamically discover and adapt
+to the maximum transmission unit (MTU) along the network path.
+
+Documentation: doc/index.rst

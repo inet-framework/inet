@@ -7,3 +7,5 @@ These showcases demonstrate the QUIC implementation in INET.
    :maxdepth: 1
 
    linksharing/doc/index
+.. dplpmtud/doc/index
+.. zerortt/doc/index
