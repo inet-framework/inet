@@ -26,6 +26,7 @@ import functools
 import hashlib
 import logging
 import multiprocessing
+import multiprocessing.managers
 import multiprocessing.pool
 import socket
 import sys
@@ -38,25 +39,85 @@ from inet.common.util import *
 _logger = logging.getLogger(__name__)
 
 class TaskProgress:
-    def __init__(self, num_tasks, num_finished=0):
+    """
+    scheduler:
+      - "thread": local int + threading.Lock
+      - "process": multiprocessing.Manager() proxies (pickleable, safe to pass to workers)
+    """
+
+    def __init__(self, num_tasks, num_finished=0, scheduler="thread", *, manager=None, _shared_value=None, _shared_lock=None):
+        if scheduler not in ("thread", "process"):
+            raise ValueError('scheduler must be "thread" or "process"')
+        self.scheduler = scheduler
         self.num_tasks = num_tasks
-        self.num_finished = num_finished
-        self._lock = threading.Lock()
         self._width = len(str(self.num_tasks))
+        if scheduler == "thread":
+            self._lock = threading.Lock()
+            self._finished = num_finished
+            self._shared_value = None
+            self._shared_lock = None
+            self._manager_local = None
+        elif scheduler == "process":
+            if _shared_value is not None and _shared_lock is not None:
+                self._shared_value = _shared_value
+                self._shared_lock = _shared_lock
+                self._lock = None
+                self._finished = None
+                self._manager_local = None
+                return
+            if manager is None:
+                manager = multiprocessing.Manager()
+                self._manager_local = manager
+            else:
+                self._manager_local = None
+            self._shared_value = manager.Value("i", num_finished)
+            self._shared_lock = manager.Lock()
+            self._lock = None
+            self._finished = None
+
+    # --- critical: don't pickle the Manager itself ---
+    def __getstate__(self):
+        d = self.__dict__.copy()
+        d.pop("_manager_local", None)   # Manager contains AuthenticationString -> not pickleable
+        d.pop("_lock", None)            # thread lock not pickleable (and irrelevant in process mode)
+        return d
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        if self.scheduler == "thread":
+            self._lock = threading.Lock()
+        elif self.scheduler == "process":
+            self._lock = None
+        else:
+            raise Exception("Unknown scheduler")
+        self._manager_local = None
+
+    @property
+    def num_finished(self):
+        if self.scheduler == "thread":
+            return self._finished
+        elif self.scheduler == "process":
+            return self._shared_value.value
+        else:
+            raise Exception("Unknown scheduler")
 
     def get_progress(self):
         return f"[{self.num_finished:0{self._width}d}/{self.num_tasks}]"
 
     def get_string(self, include_progress=True, **kwargs):
-        if include_progress:
-            return COLOR_LIGHT_GRAY + self.get_progress() + COLOR_RESET
-        else:
-            return ""
+        return (COLOR_LIGHT_GRAY + self.get_progress() + COLOR_RESET) if include_progress else ""
 
     def increment_num_finished(self):
-        with self._lock:
-            self.num_finished += 1
-            return TaskProgress(self.num_tasks, self.num_finished)
+        if self.scheduler == "thread":
+            with self._lock:
+                self._finished += 1
+                return TaskProgress(self.num_tasks, self._finished, scheduler="thread")
+        elif self.scheduler == "process":
+            with self._shared_lock:
+                self._shared_value.value += 1
+            return TaskProgress(self.num_tasks, scheduler="process", _shared_value=self._shared_value, _shared_lock=self._shared_lock)
+        else:
+            raise Exception("Unknown scheduler")
 
 class TaskContext:
     def __init__(self, elements=[], indices=[]):
@@ -616,7 +677,7 @@ class MultipleTasks:
             elements = [e for e in [progress.get_string(**kwargs), context.get_string(**kwargs), "◉", str(len(self.tasks)), self.get_description(), multiple_task_results.get_description()] if e != ""]
             print(" ".join(elements), file=output_stream)
             return multiple_task_results
-        return run_with_log_levels(run_internal, **dict(kwargs, context=extend_task_context(context, self.name, index, count), progress=progress or TaskProgress(self.count_tasks())))
+        return run_with_log_levels(run_internal, **dict(kwargs, context=extend_task_context(context, self.name, index, count), progress=progress or TaskProgress(self.count_tasks(), scheduler=self.scheduler)))
 
     def run_protected(self, output_stream=None, **kwargs):
         if self.scheduler == "cluster":
