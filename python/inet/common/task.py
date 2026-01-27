@@ -618,7 +618,7 @@ class MultipleTasks:
             return multiple_task_results
         return run_with_log_levels(run_internal, **dict(kwargs, context=extend_task_context(context, self.name, index, count), progress=progress or TaskProgress(self.count_tasks())))
 
-    def run_protected(self, **kwargs):
+    def run_protected(self, output_stream=None, **kwargs):
         if self.scheduler == "cluster":
             delayed_results = list(map(lambda task: dask.delayed(_run_task)(task), self.tasks))
             return self.multiple_task_results_class(multiple_tasks=self, results=dask.compute(*delayed_results))
@@ -637,7 +637,7 @@ class MultipleTasks:
                         pool = multiprocessing.Pool(multiprocessing.cpu_count(), **{k: v for k, v in kwargs.items() if k == "maxtasksperchild"})
                     else:
                         raise Exception("Unknown scheduler")
-                    partially_applied_function = functools.partial(run_task_with_capturing_output, tasks=tasks, task_count=task_count, **dict(kwargs, keyboard_interrupt_handler=None))
+                    partially_applied_function = functools.partial(run_task_with_capturing_output, tasks=tasks, task_count=task_count, **dict(kwargs, output_stream=None if output_stream == sys.stdout else output_stream, keyboard_interrupt_handler=None))
                     map_results = pool.map_async(partially_applied_function, tasks, chunksize=self.chunksize)
                     task_results = map_results.get(0xFFFF)
                     pool.close()
