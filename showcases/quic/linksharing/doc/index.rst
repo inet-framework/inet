@@ -10,6 +10,12 @@ Congestion control is a critical component of transport protocols, responsible
 for detecting available network capacity and adjusting transmission rates to
 avoid overwhelming the network while maximizing throughput.
 
+| Verified with INET version: ``4.6``
+| Source files location: `inet/showcases/quic/linksharing <https://github.com/inet-framework/inet/tree/master/showcases/quic/linksharing>`__
+
+The Model
+---------
+
 In this simulation, three QUIC senders transmit data to their respective receivers
 through a shared bottleneck link. The senders start and stop at different times,
 creating a dynamic scenario where the number of active flows changes during the
@@ -28,20 +34,12 @@ Additionally, random (non-QUIC) background UDP traffic is present throughout the
 simulation to model realistic network conditions and test the robustness of the
 congestion control under variable network loads.
 
-| Verified with INET version: ``4.6.0``
-| Source files location: `inet/showcases/quic/linksharing <https://github.com/inet-framework/inet/tree/master/showcases/quic/linksharing>`__
-
-The Model
----------
-
 The Network
 ~~~~~~~~~~~
 
 The network consists of three QUIC senders and their corresponding receivers,
 connected through two routers. The link between the two routers serves as the
-bottleneck, with limited bandwidth and a configured delay. Additionally, a
-plain (non-QUIC) UDP traffic generator and consumer pair produces background
-traffic to add some variability to the network conditions.
+bottleneck, with limited bandwidth and a configured delay.
 
 .. figure:: media/network.png
    :width: 70%
@@ -52,7 +50,7 @@ The bottleneck link has the following characteristics:
 - **Bandwidth**: 10 Mbps
 - **Delay**: 10 ms
 - **MTU**: 1280 bytes
-- **Queue capacity**: 200 kb, which equals the Bandwidth-Delay Product (BDP)
+- **Queue capacity**: 200 kilobit, which equals the Bandwidth-Delay Product (BDP)
 
 All other links are configured as high-speed channels with 1 Gbps datarate to
 ensure the bottleneck is the only limiting factor in the network.
@@ -66,7 +64,7 @@ The three QUIC senders transmit data with a staggered timing pattern:
 
    Seconds 0   10   20   30   40   50   60   70   80   90   100
            |   |    |    |    |    |    |    |    |    |    |
-   Sender1     xxxxxxxxxxxxxxxxxxxxxxxxx
+   Sender1     xxxxxxxxxxxxxxxxxxxxxxxxxx
    Sender2          xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
    Sender3                    xxxxxxxxxxxxxxxxxxxxxxxxxx
 
@@ -75,13 +73,11 @@ The three QUIC senders transmit data with a staggered timing pattern:
 - **Sender3** starts at 40s, stops at 90s (50 seconds active)
 
 Each sender uses the ``TrafficgenCompound`` application with ``TrafficgenSimple``
-generator configured to send 150 KB packets continuously (0 ms interval between
-packets). The traffic is transmitted over QUIC connections to dedicated receivers
-using the ``QuicTrafficgen`` handler.
+generator configured to keep feeding the connections with data to send.
 
 Key QUIC configuration parameters:
 
-- **Congestion control**: NewReno with accurate increase in congestion avoidance
+- **Congestion control**: NewReno
 - **Flow control**: Effectively disabled with large window sizes (4 GB)
 - **Send queue limit**: 100 KB per sender
 - **ACK policy**: Bundle ACKs for non-ACK-eliciting packets
