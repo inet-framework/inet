@@ -78,8 +78,10 @@ void MassMobility::move()
         double alpha = (now - previousChange) / (nextChange - previousChange);
         lastPosition = sourcePosition * (1 - alpha) + targetPosition * alpha;
         lastVelocity = (targetPosition - sourcePosition) / (nextChange - previousChange).dbl();
+        EV_TRACE << "Current values: sourcePosition: " << sourcePosition << ", targetPosition: " << targetPosition << ", position: " << lastPosition << ", velocity: " << lastVelocity << endl;
         Coord dummyCoord;
         handleIfOutside(REFLECT, dummyCoord, lastVelocity);
+        EV_TRACE << " after REFLECT: sourcePosition: " << sourcePosition << ", targetPosition: " << targetPosition << ", position: " << lastPosition << ", velocity: " << lastVelocity << endl;
     }
 }
 
