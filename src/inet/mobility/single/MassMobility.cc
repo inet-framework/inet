@@ -63,21 +63,23 @@ void MassMobility::setTargetPosition()
 void MassMobility::move()
 {
     simtime_t now = simTime();
-    rad dummyAngle;
+
     if (now == nextChange) {
+        rad dummyAngle;
         lastPosition = targetPosition;
         handleIfOutside(REFLECT, targetPosition, lastVelocity, dummyAngle, dummyAngle, quaternion);
         EV_INFO << "reached current target position = " << lastPosition << endl;
         setTargetPosition();
         EV_INFO << "new target position = " << targetPosition << ", next change = " << nextChange << endl;
-        lastVelocity = (targetPosition - lastPosition) / (nextChange - simTime()).dbl();
-        handleIfOutside(REFLECT, targetPosition, lastVelocity, dummyAngle, dummyAngle, quaternion);
+        lastVelocity = (targetPosition - sourcePosition) / (nextChange - previousChange).dbl();
     }
     else if (now > lastUpdate) {
         ASSERT(nextChange == -1 || now < nextChange);
         double alpha = (now - previousChange) / (nextChange - previousChange);
         lastPosition = sourcePosition * (1 - alpha) + targetPosition * alpha;
-        handleIfOutside(REFLECT, targetPosition, lastVelocity, dummyAngle, dummyAngle, quaternion);
+        lastVelocity = (targetPosition - sourcePosition) / (nextChange - previousChange).dbl();
+        Coord dummyCoord;
+        handleIfOutside(REFLECT, dummyCoord, lastVelocity);
     }
 }
 
