@@ -187,7 +187,7 @@ void MobilityBase::updateDisplayStringFromMobilityState() const
     if (subjectModule != nullptr) {
         // position
         auto position = const_cast<MobilityBase *>(this)->getCurrentPosition();
-        EV_TRACE << "current position = " << position << endl;
+        EV_TRACE << "current position = " << position << " at " << simTime() << endl;
         auto subjectModulePosition = canvasProjection->computeCanvasPoint(position);
         char buf[32];
         snprintf(buf, sizeof(buf), "%lf", subjectModulePosition.x);
@@ -260,6 +260,7 @@ void MobilityBase::reflectIfOutside(Coord& targetPosition, Coord& velocity, rad&
     int sign;
     double dummy = NaN;
     if (lastPosition.x < constraintAreaMin.x || constraintAreaMax.x < lastPosition.x) {
+        EV_TRACE << "Reflect x from : lastPosition " << lastPosition << ", targetPosition " << targetPosition << ", velocity " << velocity << ", heading " << heading << ", elevation " << elevation << ", quaternion " << quaternion << endl;
         sign = reflect(constraintAreaMin.x, constraintAreaMax.x, lastPosition.x, velocity.x);
         reflect(constraintAreaMin.x, constraintAreaMax.x, targetPosition.x, dummy);
         heading = deg(90) + (heading - deg(90)) * sign;
@@ -269,8 +270,10 @@ void MobilityBase::reflectIfOutside(Coord& targetPosition, Coord& velocity, rad&
             quaternion.v.x *= -1;
             quaternion.v.y *= -1;
         }
+        EV_TRACE << "            to : lastPosition " << lastPosition << ", targetPosition " << targetPosition << ", velocity " << velocity << ", heading " << heading << ", elevation " << elevation << ", quaternion " << quaternion << endl;
     }
     if (lastPosition.y < constraintAreaMin.y || constraintAreaMax.y < lastPosition.y) {
+        EV_TRACE << "Reflect y from : lastPosition " << lastPosition << ", targetPosition " << targetPosition << ", velocity " << velocity << ", heading " << heading << ", elevation " << elevation << ", quaternion " << quaternion << endl;
         sign = reflect(constraintAreaMin.y, constraintAreaMax.y, lastPosition.y, velocity.y);
         reflect(constraintAreaMin.y, constraintAreaMax.y, targetPosition.y, dummy);
         heading = heading * sign;
@@ -278,8 +281,10 @@ void MobilityBase::reflectIfOutside(Coord& targetPosition, Coord& velocity, rad&
             quaternion.v.x *= -1;
             quaternion.v.z *= -1;
         }
+        EV_TRACE << "            to : lastPosition " << lastPosition << ", targetPosition " << targetPosition << ", velocity " << velocity << ", heading " << heading << ", elevation " << elevation << ", quaternion " << quaternion << endl;
     }
     if (lastPosition.z < constraintAreaMin.z || constraintAreaMax.z < lastPosition.z) {
+        EV_TRACE << "Reflect z from : lastPosition " << lastPosition << ", targetPosition " << targetPosition << ", velocity " << velocity << ", heading " << heading << ", elevation " << elevation << ", quaternion " << quaternion << endl;
         sign = reflect(constraintAreaMin.z, constraintAreaMax.z, lastPosition.z, velocity.z);
         reflect(constraintAreaMin.z, constraintAreaMax.z, targetPosition.z, dummy);
         elevation = elevation * sign;
@@ -287,6 +292,7 @@ void MobilityBase::reflectIfOutside(Coord& targetPosition, Coord& velocity, rad&
             quaternion.v.x *= -1;
             quaternion.v.y *= -1;
         }
+        EV_TRACE << "            to : lastPosition " << lastPosition << ", targetPosition " << targetPosition << ", velocity " << velocity << ", heading " << heading << ", elevation " << elevation << ", quaternion " << quaternion << endl;
     }
 }
 
