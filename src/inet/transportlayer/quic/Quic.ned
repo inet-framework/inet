@@ -240,6 +240,7 @@ simple Quic extends SimpleModule like IQuic
         @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @signal[packetSent](type=cPacket); // should be per connection
         @statistic[packetSent](title="packets sent"; source=packetSent; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[outgoingDataRate](title="outgoing datarate"; source=throughput(packetSent); record=vector; unit=bps; interpolationmode=linear);
         @signal[packetNumberReceived*];
         @statisticTemplate[packetNumberReceived](title="packet number received"; record=vector; interpolationmode=none);
         @signal[packetNumberSent*];
