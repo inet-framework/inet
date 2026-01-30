@@ -74,6 +74,7 @@ simple Udp extends SimpleModule like IUdp
         @signal[packetSent](type=cPacket);
         @signal[packetReceived](type=cPacket);
         @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[outgoingDataRate](title="outgoing datarate"; source=throughput(packetSent); record=vector; unit=bps; interpolationmode=linear);
         @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[passedUpPk](title="packets passed up"; source=packetSentToUpper; record=count,"vector(count)"; interpolationmode=none);
         @statistic[droppedPkWrongPort](title="packets dropped (wrong port)"; source=packetDropReasonIsNoPortFound(packetDropped); record=count,"vector(count)"; interpolationmode=none);
