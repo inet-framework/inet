@@ -1,5 +1,1168 @@
 ====== inet-4.x ======
 
+2026-01-01  ------ inet-4.6.0 released ------
+
+    Added features
+    ==============
+    BGP routing tutorial
+    Ethernet tests
+    Fingerprint tutorial
+    Generic radio
+    IEEE 802
+    IEEE 802.1as examples
+    Link layer configurators common
+    Loopback
+    MRP (Media Redundancy Protocol)
+    MRP examples
+    Measurement showcases
+    OSPF common
+    OSPF routing tutorial
+    Other applications
+    Other examples
+    Ping application
+    QUIC examples
+    QUIC protocol
+    RIP routing tutorial
+    TSN Tests
+
+    Removed features
+    ================
+    Self documenter
+    Unit disk radio
+
+    Added folders
+    =============
+    inet/applications/external
+    inet/applications/quicapp
+    inet/applications/trafficgen
+    inet/clock/servo
+    inet/linklayer/configurator/common
+    inet/linklayer/configurator/contract
+    inet/linklayer/mrp
+    inet/networklayer/ipv4/ipsec
+    inet/networks/ppp
+    inet/networks/wifi
+    inet/node/mrp
+    inet/physicallayer/wireless/common/analogmodel/common
+    inet/physicallayer/wireless/common/analogmodel/dimensional
+    inet/physicallayer/wireless/common/analogmodel/scalar
+    inet/physicallayer/wireless/common/analogmodel/unitdisk
+    inet/physicallayer/wireless/generic
+    inet/physicallayer/wireless/ieee802154/packetlevel/errormodel
+    inet/transportlayer/contract/quic
+    inet/transportlayer/quic
+    inet/transportlayer/quic/congestioncontrol
+    inet/transportlayer/quic/connectionstate
+    inet/transportlayer/quic/dplpmtud
+    inet/transportlayer/quic/exception
+    inet/transportlayer/quic/flowcontroller
+    inet/transportlayer/quic/packet
+    inet/transportlayer/quic/scheduler
+    inet/transportlayer/quic/stream
+
+    Removed folders
+    ===============
+    inet/physicallayer/wireless/common/analogmodel/bitlevel
+    inet/physicallayer/wireless/common/analogmodel/packetlevel
+    inet/physicallayer/wireless/unitdisk
+
+    Added modules
+    =============
+    applications.external.ExternalApp
+    applications.quicapp.QuicClient
+    applications.quicapp.QuicDiscardServer
+    applications.quicapp.QuicOrderedReceiver
+    applications.quicapp.QuicOrderedTrafficgen
+    applications.quicapp.QuicTrafficgen
+    applications.quicapp.QuicZeroRttClient
+    applications.trafficgen.TrafficgenCompound
+    applications.trafficgen.TrafficgenSimple
+    clock.base.ClockServoBase
+    clock.servo.NoClockServo
+    clock.servo.StepClockServo
+    common.ExternalEnvironment
+    common.ExternalProcess
+    common.Module
+    common.ModuleMixin
+    common.SimpleModule
+    common.Sink
+    common.misc.ModuleDump
+    linklayer.ethernet.EthernetPlcaInterface
+    linklayer.ethernet.basic.EthernetCsmaMacPhy
+    linklayer.ethernet.common.LocalDelivery
+    linklayer.ieee8021q.ATSIeee8021qFilter
+    linklayer.mrp.Mrp
+    linklayer.mrp.MrpInterconnection
+    linklayer.mrp.MrpMacForwardingTable
+    linklayer.mrp.MrpRelay
+    networklayer.ipv4.ipsec.IPsec
+    networklayer.ipv4.ipsec.SecurityAssociationDatabase
+    networklayer.ipv4.ipsec.SecurityPolicyDatabase
+    networks.ppp.LinearNetwork
+    networks.wifi.LinearNetwork
+    node.ethernet.EthernetPlcaHost
+    node.mrp.MrpSwitch
+    physicallayer.wired.ethernet.EthernetCsmaPhy
+    physicallayer.wired.ethernet.EthernetPlca
+    physicallayer.wireless.apsk.bitlevel.ApskLayeredRadio
+    physicallayer.wireless.apsk.packetlevel.ApskReceiver
+    physicallayer.wireless.apsk.packetlevel.ApskTransmitter
+    physicallayer.wireless.apsk.packetlevel.ApskUnitDiskRadio
+    physicallayer.wireless.common.analogmodel.dimensional.DimensionalMediumAnalogModel
+    physicallayer.wireless.common.analogmodel.dimensional.DimensionalReceiverAnalogModel
+    physicallayer.wireless.common.analogmodel.dimensional.DimensionalTransmitterAnalogModel
+    physicallayer.wireless.common.analogmodel.scalar.ScalarMediumAnalogModel
+    physicallayer.wireless.common.analogmodel.scalar.ScalarReceiverAnalogModel
+    physicallayer.wireless.common.analogmodel.scalar.ScalarTransmitterAnalogModel
+    physicallayer.wireless.common.analogmodel.unitdisk.UnitDiskMediumAnalogModel
+    physicallayer.wireless.common.analogmodel.unitdisk.UnitDiskReceiverAnalogModel
+    physicallayer.wireless.common.analogmodel.unitdisk.UnitDiskTransmitterAnalogModel
+    physicallayer.wireless.common.base.packetlevel.ReceiverBase
+    physicallayer.wireless.common.base.packetlevel.TransmitterBase
+    physicallayer.wireless.common.medium.DimensionalRadioMedium
+    physicallayer.wireless.common.medium.ScalarRadioMedium
+    physicallayer.wireless.common.medium.UnitDiskRadioMedium
+    physicallayer.wireless.generic.GenericDimensionalRadio
+    physicallayer.wireless.generic.GenericRadio
+    physicallayer.wireless.generic.GenericReceiver
+    physicallayer.wireless.generic.GenericScalarRadio
+    physicallayer.wireless.generic.GenericTransmitter
+    physicallayer.wireless.generic.GenericUnitDiskRadio
+    physicallayer.wireless.ieee80211.packetlevel.Ieee80211Receiver
+    physicallayer.wireless.ieee80211.packetlevel.Ieee80211Transmitter
+    physicallayer.wireless.ieee802154.packetlevel.Ieee802154NarrowbandReceiver
+    physicallayer.wireless.ieee802154.packetlevel.Ieee802154NarrowbandTransmitter
+    physicallayer.wireless.ieee802154.packetlevel.Ieee802154NarrowbandUnitDiskRadio
+    physicallayer.wireless.ieee802154.packetlevel.errormodel.Ieee802154ErrorModel
+    physicallayer.wireless.noise.NoiseTransmitter
+    protocolelement.checksum.ChecksumHeaderChecker
+    protocolelement.checksum.ChecksumHeaderInserter
+    protocolelement.checksum.EthernetFcsHeaderChecker
+    protocolelement.checksum.EthernetFcsHeaderInserter
+    protocolelement.checksum.InternetChecksumHeaderChecker
+    protocolelement.checksum.InternetChecksumHeaderInserter
+    protocolelement.checksum.base.ChecksumCheckerBase
+    protocolelement.checksum.base.ChecksumInserterBase
+    protocolelement.shaper.GroupEligibilityTimeMeter
+    protocolelement.shaper.GroupEligibilityTimeTable
+    queueing.filter.BackPressureBasedFilter
+    queueing.flow.PacketFlowPcapFileRecorder
+    queueing.queue.GatingQueue
+    transportlayer.quic.Quic
+    transportlayer.sctp.SctpAssociation
+    visualizer.base.ChannelVisualizerBase
+    visualizer.canvas.physicallayer.ChannelCanvasVisualizer
+
+    Removed modules
+    ===============
+    physicallayer.wireless.apsk.bitlevel.ApskLayeredDimensionalRadio
+    physicallayer.wireless.apsk.bitlevel.ApskLayeredDimensionalRadioMedium
+    physicallayer.wireless.apsk.bitlevel.ApskLayeredScalarRadio
+    physicallayer.wireless.apsk.bitlevel.ApskLayeredScalarRadioMedium
+    physicallayer.wireless.apsk.packetlevel.ApskDimensionalRadioMedium
+    physicallayer.wireless.apsk.packetlevel.ApskDimensionalReceiver
+    physicallayer.wireless.apsk.packetlevel.ApskDimensionalTransmitter
+    physicallayer.wireless.apsk.packetlevel.ApskScalarRadioMedium
+    physicallayer.wireless.apsk.packetlevel.ApskScalarReceiver
+    physicallayer.wireless.apsk.packetlevel.ApskScalarTransmitter
+    physicallayer.wireless.common.analogmodel.bitlevel.LayeredDimensionalAnalogModel
+    physicallayer.wireless.common.analogmodel.bitlevel.LayeredScalarAnalogModel
+    physicallayer.wireless.common.analogmodel.packetlevel.DimensionalAnalogModel
+    physicallayer.wireless.common.analogmodel.packetlevel.ScalarAnalogModel
+    physicallayer.wireless.ieee80211.bitlevel.Ieee80211LayeredDimensionalRadioMedium
+    physicallayer.wireless.ieee80211.bitlevel.Ieee80211LayeredScalarRadioMedium
+    physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalReceiver
+    physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalTransmitter
+    physicallayer.wireless.ieee80211.packetlevel.Ieee80211ReceiverBase
+    physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarReceiver
+    physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarTransmitter
+    physicallayer.wireless.ieee80211.packetlevel.Ieee80211TransmitterBase
+    physicallayer.wireless.ieee80211.packetlevel.Ieee80211UnitDiskReceiver
+    physicallayer.wireless.ieee80211.packetlevel.Ieee80211UnitDiskTransmitter
+    physicallayer.wireless.ieee802154.packetlevel.Ieee802154NarrowbandDimensionalReceiver
+    physicallayer.wireless.ieee802154.packetlevel.Ieee802154NarrowbandDimensionalTransmitter
+    physicallayer.wireless.ieee802154.packetlevel.Ieee802154NarrowbandScalarReceiver
+    physicallayer.wireless.ieee802154.packetlevel.Ieee802154NarrowbandScalarTransmitter
+    physicallayer.wireless.noise.NoiseDimensionalTransmitter
+    physicallayer.wireless.noise.NoiseScalarTransmitter
+    physicallayer.wireless.unitdisk.UnitDiskAnalogModel
+    physicallayer.wireless.unitdisk.UnitDiskRadio
+    physicallayer.wireless.unitdisk.UnitDiskRadioMedium
+    physicallayer.wireless.unitdisk.UnitDiskReceiver
+    physicallayer.wireless.unitdisk.UnitDiskTransmitter
+    protocolelement.checksum.CrcHeaderChecker
+    protocolelement.checksum.CrcHeaderInserter
+    protocolelement.checksum.FcsHeaderChecker
+    protocolelement.checksum.FcsHeaderInserter
+    protocolelement.checksum.base.CrcCheckerBase
+    protocolelement.checksum.base.CrcInserterBase
+    protocolelement.checksum.base.FcsCheckerBase
+    protocolelement.checksum.base.FcsInserterBase
+
+    Renamed modules
+    ===============
+    linklayer.configurator.FailureProtectionConfigurator -> linklayer.configurator.common.FailureProtectionConfigurator
+    linklayer.configurator.L2NetworkConfigurator -> linklayer.configurator.common.L2NetworkConfigurator
+    linklayer.configurator.L2NodeConfigurator -> linklayer.configurator.common.L2NodeConfigurator
+    linklayer.configurator.MacForwardingTableConfigurator -> linklayer.configurator.common.MacForwardingTableConfigurator
+    linklayer.configurator.StreamRedundancyConfigurator -> linklayer.configurator.common.StreamRedundancyConfigurator
+    linklayer.ethernet.basic.EthernetMac -> linklayer.ethernet.basic.EthernetMacPhy
+    linklayer.ethernet.EthernetInterface -> linklayer.ethernet.basic.EthernetInterface
+    linklayer.ethernet.LayeredEthernetInterface -> linklayer.ethernet.modular.LayeredEthernetInterface
+    protocolelement.common.PreemptableStreamer -> protocolelement.fragmentation.PreemptableStreamer
+    routing.pim.PimCrcInsertionHook -> routing.pim.PimChecksumInsertionHook
+    transportlayer.sctp.SctpCrcInsertion -> transportlayer.sctp.SctpChecksumInsertion
+    transportlayer.tcp_common.TcpCrcInsertionHook -> transportlayer.tcp_common.TcpChecksumInsertionHook
+    transportlayer.udp.UdpCrcInsertionHook -> transportlayer.udp.UdpChecksumInsertionHook
+
+    Added parameters
+    ================
+    Aodv:gatewayAddress
+    ApskLayeredTransmitter:preambleDuration
+    Cable:disabledIcon
+    Cable:disabledLineStyle
+    Cable:enabledLineStyle
+    ChannelCanvasVisualizer:zIndex
+    ChannelVisualizerBase:displayChannelActivity
+    ChannelVisualizerBase:fadeOutAnimationSpeed
+    ChannelVisualizerBase:fadeOutMode
+    ChannelVisualizerBase:fadeOutTime
+    ChannelVisualizerBase:holdAnimationTime
+    ChannelVisualizerBase:labelColor
+    ChannelVisualizerBase:labelFont
+    ChannelVisualizerBase:labelFormat
+    ChannelVisualizerBase:lineColor
+    ChannelVisualizerBase:lineContactMode
+    ChannelVisualizerBase:lineContactSpacing
+    ChannelVisualizerBase:lineShift
+    ChannelVisualizerBase:lineShiftMode
+    ChannelVisualizerBase:lineStyle
+    ChannelVisualizerBase:lineWidth
+    ChannelVisualizerBase:nodeFilter
+    ChannelVisualizerBase:packetFilter
+    ChecksumCheckerBase:checksumType
+    ChecksumInserterBase:checksumType
+    ClockBase:clockTimeChangeEventSchedulingPriority
+    ClockServoBase:clockModule
+    DataLinkVisualizer:visualizationSubjectModule
+    DataLinkVisualizer:visualizationTargetModule
+    DimensionalReceiverAnalogModel:defaultBandwidth
+    DimensionalReceiverAnalogModel:defaultCenterFrequency
+    DimensionalReceiverAnalogModel:defaultSensitivity
+    DirectionReverserLayer:interfaceTableModule
+    EnergyStorageVisualizer:visualizationSubjectModule
+    EnergyStorageVisualizer:visualizationTargetModule
+    EthernetCsmaMacPhy:allowNonstandardBitrate
+    EthernetCsmaMacPhy:mtu
+    EthernetCsmaMacPhy:promiscuous
+    EthernetMacPhy:allowNonstandardBitrate
+    EthernetMacPhy:receptionMode
+    EthernetMultidropLink:length
+    EthernetPlca:beacon_det_timer_length
+    EthernetPlca:beacon_timer_length
+    EthernetPlca:burst_timer_length
+    EthernetPlca:commit_timer_length
+    EthernetPlca:delay_line_length
+    EthernetPlca:local_nodeID
+    EthernetPlca:max_bc
+    EthernetPlca:pending_timer_length
+    EthernetPlca:plca_node_count
+    EthernetPlca:to_timer_length
+    EthernetPlcaInterface:address
+    EthernetPlcaInterface:bitrate
+    EthernetPlcaInterface:fcsMode
+    EthernetPlcaInterface:interfaceTableModule
+    EthernetPlcaInterface:protocol
+    EthernetSocketIo:protocol
+    EthernetSocketIo:steal
+    EthernetSwitch:hasMrp
+    ExternalApp:namespace
+    ExternalEnvironment:globalNamespace
+    ExternalEnvironment:initStage
+    ExternalEnvironment:namespace
+    ExternalEnvironment:setupCommand
+    ExternalEnvironment:teardownCommand
+    ExternalProcess:command
+    ExternalProcess:namespace
+    ExternalProcess:onExit
+    ExternalProcess:printStderr
+    ExternalProcess:printStdout
+    ExternalProcess:relaunchDelay
+    ExternalProcess:startTime
+    FlowMeasurementRecorder:packetEventFileName
+    GateControlList:mapping
+    GateScheduleVisualizer:visualizationSubjectModule
+    GateScheduleVisualizer:visualizationTargetModule
+    GatingQueue:bitrate
+    GenericReceiver:energyDetection
+    Gptp:clockServoModule
+    Gptp:pdelaySmoothingFactor
+    GroupEligibilityTimeMeter:groupEligibilityTimeTableModule
+    IEigrp:enableIPv4
+    IEigrp:enableIPv6
+    IGptp:gptpNodeType
+    IMrp:ccmInterval
+    IMrp:interconnectionLinkCheckAware
+    IMrp:interconnectionRingCheckAware
+    IMrp:mrpRole
+    IMrp:nonblockingMrcSupported
+    IMrp:reactOnLinkChange
+    IMrp:ringPort1
+    IMrp:ringPort2
+    IMrp:timingProfile
+    IMrp:uuid0
+    IMrp:uuid1
+    IMrp:visualize
+    IPsec:ahProtectInDelay
+    IPsec:ahProtectOutDelay
+    IPsec:defaultAuthenticationAlg
+    IPsec:defaultEncryptionAlg
+    IPsec:defaultEspMode
+    IPsec:defaultMaxTfcPadLength
+    IPsec:defaultProtection
+    IPsec:espProtectInDelay
+    IPsec:espProtectOutDelay
+    IPsec:interfaceTableModule
+    IPsec:networkProtocolModule
+    IPsec:sadModule
+    IPsec:spdConfig
+    IPsec:spdModule
+    ITrafficgen:id
+    ITrafficgen:name
+    IVisualizer:visualizationSubjectModule
+    IVisualizer:visualizationTargetModule
+    Ieee80211Visualizer:visualizationSubjectModule
+    Ieee80211Visualizer:visualizationTargetModule
+    InfoVisualizer:visualizationSubjectModule
+    InfoVisualizer:visualizationTargetModule
+    InfoVisualizerBase:lineColor
+    InfoVisualizerBase:textAlignment
+    IntegratedMultiCanvasVisualizer:numChannelVisualizers
+    IntegratedMultiVisualizer:visualizationSubjectModule
+    IntegratedMultiVisualizer:visualizationTargetModule
+    IntegratedVisualizer:visualizationSubjectModule
+    IntegratedVisualizer:visualizationTargetModule
+    InterfaceTableCanvasVisualizer:anchor
+    InterfaceTableVisualizer:visualizationSubjectModule
+    InterfaceTableVisualizer:visualizationTargetModule
+    Ipv4:enableLocalOutMulticastRouting
+    Ipv4:enableTimestampOption
+    Ipv4:maxLifetime
+    Ipv4NetworkConfigurator:updateRoutes
+    Ipv4NetworkLayer:hasIpsec
+    LinkBreakVisualizer:visualizationSubjectModule
+    LinkBreakVisualizer:visualizationTargetModule
+    LocalDelivery:interfaceTableModule
+    MediumVisualizer:visualizationSubjectModule
+    MediumVisualizer:visualizationTargetModule
+    MessageDispatcher:interfaceMapping
+    MessageDispatcher:interfaceTableModule
+    MessageDispatcher:protocolMapping
+    MessageDispatcher:serviceMapping
+    MobilityVisualizer:visualizationSubjectModule
+    MobilityVisualizer:visualizationTargetModule
+    ModuleDump:fileName
+    ModuleDump:modulePath
+    ModuleDump:printClassNames
+    ModuleDump:printParamAssignmentLocations
+    ModuleDump:printProperties
+    ModuleDump:time
+    ModuleMixin:displayStringTextFormat
+    Mrp:ccmInterval
+    Mrp:enableLinkCheckOnRing
+    Mrp:interconnectionLinkCheckAware
+    Mrp:interconnectionRingCheckAware
+    Mrp:interfaceTableModule
+    Mrp:linkDetectionDelay
+    Mrp:macTableModule
+    Mrp:mrpPriority
+    Mrp:mrpRelayModule
+    Mrp:mrpRole
+    Mrp:nonblockingMrcSupported
+    Mrp:processingDelay
+    Mrp:reactOnLinkChange
+    Mrp:ringPort1
+    Mrp:ringPort2
+    Mrp:timingProfile
+    Mrp:uuid0
+    Mrp:uuid1
+    Mrp:visualize
+    MrpInterconnection:interconnectionCheckMode
+    MrpInterconnection:interconnectionID
+    MrpInterconnection:interconnectionPort
+    MrpInterconnection:interconnectionRole
+    MrpMacForwardingTable:agingTime
+    MrpMacForwardingTable:forwardingTable
+    MrpMacForwardingTable:forwardingTableFile
+    MrpMacForwardingTable:interfaceTableModule
+    MrpRelay:switchingDelay
+    NetworkBase:numModuleDumps
+    NetworkConnectionVisualizer:visualizationSubjectModule
+    NetworkConnectionVisualizer:visualizationTargetModule
+    NetworkNodeVisualizer:visualizationSubjectModule
+    NetworkNodeVisualizer:visualizationTargetModule
+    NetworkRouteVisualizer:visualizationSubjectModule
+    NetworkRouteVisualizer:visualizationTargetModule
+    NodeBase:hasEnvironment
+    OscillatorBase:emitNumTicksSignal
+    OscillatorBase:oscillatorTickEventSchedulingPriority
+    OscillatorBasedClock:clockGranularity
+    OscillatorBasedClock:oscillatorModule
+    OscillatorBasedClock:useFutureEventSet
+    PacketDropVisualizer:visualizationSubjectModule
+    PacketDropVisualizer:visualizationTargetModule
+    PacketFlowPcapFileRecorder:alwaysFlush
+    PacketFlowPcapFileRecorder:direction
+    PacketFlowPcapFileRecorder:fileFormat
+    PacketFlowPcapFileRecorder:filename
+    PacketFlowPcapFileRecorder:networkType
+    PacketFlowPcapFileRecorder:snaplen
+    PacketFlowPcapFileRecorder:timePrecision
+    PacketFlowVisualizer:visualizationSubjectModule
+    PacketFlowVisualizer:visualizationTargetModule
+    PcapFilePacketConsumer:fileFormat
+    PcapFilePacketConsumer:timePrecision
+    PcapRecorder:enableConvertingPackets
+    PcapRecorder:recordEmptyPackets
+    PcapRecorder:timePrecision
+    PhysicalEnvironmentVisualizer:visualizationSubjectModule
+    PhysicalEnvironmentVisualizer:visualizationTargetModule
+    PhysicalLinkVisualizer:visualizationSubjectModule
+    PhysicalLinkVisualizer:visualizationTargetModule
+    QueueVisualizer:visualizationSubjectModule
+    QueueVisualizer:visualizationTargetModule
+    Quic:accurateIncreaseInNewRenoCongestionAvoidance
+    Quic:bundleAckForNonAckElicitingPackets
+    Quic:congestionControl
+    Quic:dplpmtudCandidateSequence
+    Quic:dplpmtudMaxProbes
+    Quic:dplpmtudMinPmtu
+    Quic:dplpmtudUsePmtuValidator
+    Quic:dplpmtudUsePtb
+    Quic:initialMaxData
+    Quic:initialMaxStreamData
+    Quic:maxDataFrameThreshold
+    Quic:maxPmtu
+    Quic:maxStreamDataFrameThreshold
+    Quic:numReceivedAckElicitingsBeforeAck
+    Quic:pmtuValidatorInvalidOnPersistentCongestion
+    Quic:pmtuValidatorLostPacketsThreshold
+    Quic:pmtuValidatorSrttFactorThreshold
+    Quic:pmtuValidatorTimeThreshold
+    Quic:reducePacketPtoFactorThreshold
+    Quic:reducePacketTimeThreshold
+    Quic:roundConsumedDataValue
+    Quic:routingTableModule
+    Quic:sendDataDuringInitalDplpmtudBase
+    Quic:sendMaxDataFramesImmediately
+    Quic:sendQueueLimit
+    Quic:sendQueueLowWaterRatio
+    Quic:sendZeroRttTokenAsServer
+    Quic:skipPacketNumberForDplpmtudProbePackets
+    Quic:useCwndForParallelProbes
+    Quic:useDplpmtud
+    Quic:useIBit
+    QuicClient:connectAddress
+    QuicClient:connectPort
+    QuicClient:localAddress
+    QuicClient:localPort
+    QuicDiscardServer:localAddress
+    QuicDiscardServer:localPort
+    QuicOrderedReceiver:localAddress
+    QuicOrderedReceiver:localPort
+    QuicOrderedTrafficgen:connectAddress
+    QuicOrderedTrafficgen:connectPort
+    QuicOrderedTrafficgen:connectTime
+    QuicOrderedTrafficgen:localAddress
+    QuicOrderedTrafficgen:localPort
+    QuicTrafficgen:connectAddress
+    QuicTrafficgen:connectPort
+    QuicTrafficgen:connectTime
+    QuicTrafficgen:localAddress
+    QuicTrafficgen:localPort
+    QuicZeroRttClient:connectAddress
+    QuicZeroRttClient:connectPort
+    QuicZeroRttClient:invalidClientTokenString
+    QuicZeroRttClient:localAddress
+    QuicZeroRttClient:localPort
+    QuicZeroRttClient:sendInvalidToken
+    Radio:signalAnalogRepresentation
+    RadioMedium:sameTransmissionStartTimeCheck
+    RadioVisualizer:visualizationSubjectModule
+    RadioVisualizer:visualizationTargetModule
+    RandomDriftOscillator:driftChangeEventSchedulingPriority
+    ReceiverBase:signalAnalogRepresentation
+    RoutingTableRecorder:logfile
+    RoutingTableVisualizer:visualizationSubjectModule
+    RoutingTableVisualizer:visualizationTargetModule
+    RoutingTableVisualizerBase:multicastGroupFilter
+    RoutingTableVisualizerBase:multicastSourceAddressFilter
+    RoutingTableVisualizerBase:multicastSourceNodeFilter
+    ScalarReceiverAnalogModel:defaultBandwidth
+    ScalarReceiverAnalogModel:defaultCenterFrequency
+    ScalarReceiverAnalogModel:defaultSensitivity
+    SceneVisualizer:visualizationSubjectModule
+    SceneVisualizer:visualizationTargetModule
+    SettableClock:initialOscillatorCompensation
+    SignalBasedTokenGenerator:doubleSignalValue
+    SignalBasedTokenGenerator:intSignalValue
+    StatisticVisualizer:visualizationSubjectModule
+    StatisticVisualizer:visualizationTargetModule
+    SuiPathLoss:terrain
+    TcpBasicClientApp:autoRead
+    TcpBasicClientApp:readDelay
+    TcpBasicClientApp:readSize
+    TcpClientSocketIo:autoRead
+    TcpClientSocketIo:readDelay
+    TcpClientSocketIo:readSize
+    TcpEchoApp:autoRead
+    TcpEchoApp:readDelay
+    TcpEchoApp:readSize
+    TcpGenericServerApp:autoRead
+    TcpGenericServerApp:readDelay
+    TcpGenericServerApp:readSize
+    TcpServerApp:interfaceTableModule
+    TcpServerListener:autoRead
+    TcpServerSocketIo:readDelay
+    TcpServerSocketIo:readSize
+    TcpSessionApp:autoRead
+    TcpSessionApp:readDelay
+    TcpSessionApp:readSize
+    TcpSinkApp:autoRead
+    TcpSinkApp:readDelay
+    TcpSinkApp:readSize
+    TelnetApp:autoRead
+    TelnetApp:readDelay
+    TelnetApp:readSize
+    TracingObstacleLossVisualizer:visualizationSubjectModule
+    TracingObstacleLossVisualizer:visualizationTargetModule
+    TrafficgenCompound:numGenerators
+    TrafficgenSimple:id
+    TrafficgenSimple:name
+    TrafficgenSimple:ordered
+    TrafficgenSimple:packetBurstSize
+    TrafficgenSimple:packetCount
+    TrafficgenSimple:packetInterval
+    TrafficgenSimple:packetSize
+    TrafficgenSimple:priority
+    TrafficgenSimple:reliable
+    TrafficgenSimple:startTime
+    TrafficgenSimple:stopTime
+    TransmitterBase:signalAnalogRepresentation
+    TransportConnectionVisualizer:visualizationSubjectModule
+    TransportConnectionVisualizer:visualizationTargetModule
+    TransportLayerNodeBase:hasQuic
+    TransportRouteVisualizer:visualizationSubjectModule
+    TransportRouteVisualizer:visualizationTargetModule
+    TsnDevice:hasBridging
+
+    Removed parameters
+    ==================
+    ApskRadio:signalAnalogRepresentation
+    ClockBase:displayStringTextFormat
+    GateControlList:offset
+    Gpsr:outputInterface
+    Gptp:correctionField
+    Gptp:followUpInterval
+    Gptp:pDelayReqProcessingTime
+    Ieee80211Radio:signalAnalogRepresentation
+    Ieee802154NarrowbandRadio:signalAnalogRepresentation
+    Ipv4NetworkLayer:displayStringTextFormat
+    MacForwardingTable:displayStringTextFormat
+    MacRelayUnitBase:displayStringTextFormat
+    MobilityBase:displayStringTextFormat
+    NetworkInterface:displayStringTextFormat
+    NoiseScalarTransmitter:duration
+    OscillatorBase:displayStringTextFormat
+    PacketProcessorBase:displayStringTextFormat
+    PcapRecorder:displayStringTextFormat
+    Ppp:displayStringTextFormat
+    SimpleCcBattery:displayStringTextFormat
+    SimpleEpEnergyStorage:displayStringTextFormat
+    Tcp:useDataNotification
+
+    Renamed parameters
+    ==================
+    CrcInserterBase:crcMode -> ChecksumInserterBase:checksumMode
+    Icmp:crcMode -> Icmp:checksumMode
+    Icmpv6:crcMode -> Icmpv6:checksumMode
+    Ieee80211Radio:fcsMode -> Ieee80211Radio:crcMode
+    Igmpv2:crcMode -> Igmpv2:checksumMode
+    Igmpv3:crcMode -> Igmpv3:checksumMode
+    Ipv4:crcMode -> Ipv4:checksumMode
+    Ipv6NeighbourDiscovery:crcMode -> Ipv6NeighbourDiscovery:checksumMode
+    Ospfv2:crcMode -> Ospfv2:checksumMode
+    Pim:crcMode -> Pim:checksumMode
+    PingApp:crcMode -> PingApp:checksumMode
+    Sctp:crcMode -> Sctp:checksumMode
+    Tcp:crcMode -> Tcp:checksumMode
+    TcpLwip:crcMode -> TcpLwip:checksumMode
+    Udp:crcMode -> Udp:checksumMode
+
+    Added signals
+    =============
+    advMsgRwnd
+    advRwnd
+    arwndInLastSACK
+    assocThroughput
+    busUsed
+    carrierSenseChanged
+    collisionChanged
+    controlStateChanged
+    cumTsnAck
+    curID
+    cycleLength
+    dataRate
+    dataStateChanged
+    dplpmtudInvalidSignals
+    dplpmtudNumOfProbesBeforeAck
+    dplpmtudSearchNetworkLoad
+    dplpmtudSearchNumberOfTests
+    dplpmtudSearchPmtu
+    dplpmtudSearchTime
+    endToEndDelay
+    fdbCleared
+    generatedBlockFrameCount
+    generatedMaxDataFrameCount
+    gmRateRatioChanged
+    inLinkChangeDetected
+    inNodeStateChanged
+    inPortStateChanged
+    inProcessDelay
+    inProtectedAccept
+    inProtectedDrop
+    inRoleChanged
+    inStatusPollSent
+    inTestFrameLatency
+    inTopologyChangeAnnounced
+    inTopologyStateChanged
+    inUnprotectedBypass
+    inUnprotectedDrop
+    latestRtt
+    maxDataFrameLostCount
+    maxDataFrameOffset
+    linkChangeDetected
+    neighborRateRatioChanged
+    networkConfigurationChanged
+    nodeStateChanged
+    nonRevokableGapBlocksInLastSACK
+    numDuplicatesSent
+    numDuplicatesStored
+    numGapBlocks
+    numNonRevokableGapBlocksSent
+    numNonRevokableGapBlocksStored
+    numPacketsPerCycle
+    numPacketsPerOwnTo
+    numPacketsPerTo
+    numRevokableGapBlocksSent
+    numRevokableGapBlocksStored
+    numTicksChanged
+    numTotalGapBlocksStored
+    oscillatorCompensationChanged
+    outBypass
+    outDrop
+    outProcessDelay
+    outProtect
+    outstandingBytes
+    ownToLength
+    packetInterval
+    packetNumberReceived*
+    packetNumberSent
+    packetPendingDelay
+    packetRate
+    partialBytesAcked
+    pathBandwidth
+    pathBlockingTsnsMoved
+    pathCwnd
+    pathFastRecoveryState
+    pathGapAckedChunksInLastSACK
+    pathGapNRAckedChunksInLastSACK
+    pathGapUnackedChunksInLastSACK
+    pathHeartbeatAckReceived
+    pathHeartbeatAckSent
+    pathHeartbeatReceived
+    pathHeartbeatSent
+    pathOutstandingBytes
+    pathPartialBytesAcked
+    pathPseudoCumAck
+    pathQueuedSentBytes
+    pathRTXPseudoCumAck
+    pathReceiverBlockingFraction
+    pathRto
+    pathRtt
+    pathSenderBlockingFraction
+    pathSsthresh
+    pathTsnAckedCumAck
+    pathTsnAckedGapAck
+    pathTsnFastRTX
+    pathTsnReceived
+    pathTsnSent
+    pathTsnTimerBasedRTX
+    peerRwnd
+    persistentCongestionPeriod
+    pmtuValidatorNumberOfLostPackets
+    pmtuValidatorPersistentCongestions
+    pmtuValidatorTimeBetweenLostPackets
+    queuedReceivedBytes
+    queuedSentBytes
+    rcvBlockFrameCount
+    rcvMaxFrameCount
+    receivedSignalType
+    revokableGapBlocksInLastSACK
+    ringPort1StateChanged
+    ringPort2StateChanged
+    ringStateChanged
+    rxCmd
+    sackLengthSent
+    sendBufferUnsentAppData
+    sendQueue
+    sentPkt
+    streamRcvAppData
+    streamRcvFrameEndOffset
+    streamRcvFrameStartOffset
+    streamThroughput
+    testFrameLatency
+    toLength
+    topologyChangeAnnounced
+    totalBandwidth
+    totalCwnd
+    totalRcvAppData
+    totalSsthresh
+    transmitOpportunityUsed
+    transmittedSignalType
+    txCmd
+    usedMaxQuicPacketSize
+
+    Removed signals
+    ===============
+    localTime
+    timeDifference
+
+    Renamed signals
+    ===============
+    peerDelay -> pdelayChanged
+    rateRatio -> gmRateRatioChanged
+
+    Added statistics
+    ================
+    advMsgRwnd
+    advRwnd
+    arwndInLastSACK
+    assocThroughput
+    busUsed
+    busUtilization
+    bytesReceived
+    carrierSense
+    channelOwner
+    controlState
+    cumTsnAck
+    curID
+    cycleLength
+    dataState
+    duplicatePacketLengths
+    duplicatePackets
+    fdbClearedEvents
+    inLinkChangeDetections
+    inNodeState
+    inPortState
+    inProcessDelay
+    inProtectedAccept
+    inProtectedDrop
+    inRole
+    inStatusPollSent
+    inTestFrameLatency
+    inTopologyChangeAnnouncements
+    inTopologyState
+    inUnprotectedBypass
+    inUnprotectedDrop
+    linkChangeDetections
+    missingPacketIndices
+    neighborRateRatio
+    nodeState
+    nonRevokableGapBlocksInLastSACK
+    numDuplicatesSent
+    numDuplicatesStored
+    numGapBlocks
+    numNonRevokableGapBlocksSent
+    numNonRevokableGapBlocksStored
+    numPacketsPerCycle
+    numPacketsPerOwnTo
+    numPacketsPerTo
+    numRevokableGapBlocksSent
+    numRevokableGapBlocksStored
+    numTicksChanged
+    numTotalGapBlocksStored
+    oscillatorCompensationChanged
+    outBypass
+    outDrop
+    outOfOrderPacketLengths
+    outOfOrderPackets
+    outProcessDelay
+    outProtect
+    outstandingBytes
+    ownToLength
+    packetDropLifetimeExpired
+    packetInterval
+    packetLifeTime
+    packetPendingDelay
+    packetRate
+    pathBandwidth
+    pathBlockingTsnsMoved
+    pathCwnd
+    pathFastRecoveryState
+    pathGapAckedChunksInLastSACK
+    pathGapNRAckedChunksInLastSACK
+    pathGapUnackedChunksInLastSACK
+    pathHeartbeatAckReceived
+    pathHeartbeatAckSent
+    pathHeartbeatReceived
+    pathHeartbeatSent
+    pathOutstandingBytes
+    pathPartialBytesAcked
+    pathPseudoCumAck
+    pathQueuedSentBytes
+    pathRTXPseudoCumAck
+    pathReceiverBlockingFraction
+    pathRto
+    pathRtt
+    pathSenderBlockingFraction
+    pathSsthresh
+    pathTsnAckedCumAck
+    pathTsnAckedGapAck
+    pathTsnFastRTX
+    pathTsnReceived
+    pathTsnSent
+    pathTsnTimerBasedRTX
+    peerRwnd
+    queuedReceivedBytes
+    queuedSentBytes
+    receivedSignalType
+    revokableGapBlocksInLastSACK
+    ringPort1State
+    ringPort2State
+    ringState
+    rxCmd
+    sackLengthSent
+    sendQueue
+    sentPkt
+    streamThroughput
+    testFrameLatency
+    toLength
+    topologyChangeAnnouncements
+    totalBandwidth
+    totalCwnd
+    totalSsthresh
+    transmitOpportunityUsed
+    transmittedSignalType
+    txCmd
+
+    Removed statistics
+    ==================
+    localTime
+    timeDifference
+
+    Renamed statistics
+    ==================
+    peerDelay -> pdelay
+    rateRatio -> gmRateRatio
+
+    Added chunks
+    ============
+    AckFrameHeader
+    CfmMessage
+    ChecksumHeader
+    ConnectionCloseFrameHeader
+    CryptoFrameHeader
+    DataBlockedFrameHeader
+    FrameHeader
+    GenericPhyHeader
+    HandshakeDoneFrameHeader
+    HandshakePacketHeader
+    IPsecAuthenticationHeader
+    IPsecEspHeader
+    IPsecEspTrailer
+    InitialPacketHeader
+    LongPacketHeader
+    MaxDataFrameHeader
+    MaxStreamDataFrameHeader
+    MrpSubTlvHeader
+    MrpTlvHeader
+    MrpVersion
+    NewTokenFrameHeader
+    OneRttPacketHeader
+    PacketHeader
+    PaddingFrameHeader
+    PingFrameHeader
+    RetryPacketHeader
+    ShortPacketHeader
+    StreamDataBlockedFrameHeader
+    StreamFrameHeader
+    TransportParametersExtension
+    VersionNegotiationPacketHeader
+    ZeroRttPacketHeader
+
+    Removed chunks
+    ==============
+    CrcHeader
+    FcsHeader
+    UnitDiskPhyHeader
+
+    Removed tags
+    ============
+    GptpIngressTimeInd
+
+    Added C++ classes
+    =================
+    clock/base/ClockServoBase
+    clock/contract/IClockServo
+    clock/servo/NoClockServo
+    clock/servo/StepClockServo
+    common/Cable
+    common/CallTrace
+    common/ChannelOwnerRecorder
+    common/DemuxAppFilter
+    common/DemuxRegexFilter
+    common/DuplicatePacketFilter
+    common/Fsm
+    common/InterarrivalTimeFilter
+    common/JsonWriter
+    common/MissingPacketIndexFilter
+    common/Module
+    common/ModuleMixin
+    common/OutOfOrderPacketFilter
+    common/PacketLifeTimeFilter
+    common/SimpleModule
+    common/Sink
+    linklayer/ethernet/base/EthernetModes
+    linklayer/ethernet/basic/EthernetCsmaMacPhy
+    linklayer/ethernet/basic/IEthernetCsmaMac
+    linklayer/ethernet/common/LocalDelivery
+    linklayer/ieee802154/Ieee802154MacHeaderSerializer
+    linklayer/mrp/CfmContinuityCheckMessageSerializer
+    linklayer/mrp/Mrp
+    linklayer/mrp/MrpInterconnection
+    linklayer/mrp/MrpInterfaceData
+    linklayer/mrp/MrpMacForwardingTable
+    linklayer/mrp/MrpProtocolDissector
+    linklayer/mrp/MrpRelay
+    linklayer/mrp/MrpSubTlvSerializer
+    linklayer/mrp/MrpTlvSerializer
+    linklayer/mrp/MrpVersionFieldSerializer
+    linklayer/shortcut/ShortcutMacHeaderSerializer
+    networklayer/ipv4/ipsec/IPsec
+    networklayer/ipv4/ipsec/IPsecRule
+    networklayer/ipv4/ipsec/IpSecAhProtocolDissector
+    networklayer/ipv4/ipsec/IpSecAhProtocolPrinter
+    networklayer/ipv4/ipsec/IpSecEspProtocolDissector
+    networklayer/ipv4/ipsec/IpSecEspProtocolPrinter
+    networklayer/ipv4/ipsec/PacketInfo
+    networklayer/ipv4/ipsec/PacketSelector
+    networklayer/ipv4/ipsec/SecurityAssociation
+    networklayer/ipv4/ipsec/SecurityAssociationDatabase
+    networklayer/ipv4/ipsec/SecurityPolicy
+    networklayer/ipv4/ipsec/SecurityPolicyDatabase
+    physicallayer/wired/ethernet/EthernetCsmaPhy
+    physicallayer/wired/ethernet/EthernetPlca
+    physicallayer/wired/ethernet/IEthernetCsmaPhy
+    physicallayer/wireless/apsk/packetlevel/ApskReceiver
+    physicallayer/wireless/apsk/packetlevel/ApskTransmission
+    physicallayer/wireless/apsk/packetlevel/ApskTransmitter
+    physicallayer/wireless/common/analogmodel/common/NarrowbandSignalAnalogModel
+    physicallayer/wireless/common/analogmodel/common/SignalAnalogModel
+    physicallayer/wireless/common/analogmodel/dimensional/DimensionalMediumAnalogModel
+    physicallayer/wireless/common/analogmodel/dimensional/DimensionalNoise
+    physicallayer/wireless/common/analogmodel/dimensional/DimensionalReceiverAnalogModel
+    physicallayer/wireless/common/analogmodel/dimensional/DimensionalReceptionAnalogModel
+    physicallayer/wireless/common/analogmodel/dimensional/DimensionalSignalAnalogModel
+    physicallayer/wireless/common/analogmodel/dimensional/DimensionalSnir
+    physicallayer/wireless/common/analogmodel/dimensional/DimensionalTransmissionAnalogModel
+    physicallayer/wireless/common/analogmodel/dimensional/DimensionalTransmitterAnalogModel
+    physicallayer/wireless/common/analogmodel/scalar/ScalarMediumAnalogModel
+    physicallayer/wireless/common/analogmodel/scalar/ScalarReceiverAnalogModel
+    physicallayer/wireless/common/analogmodel/scalar/ScalarReceptionAnalogModel
+    physicallayer/wireless/common/analogmodel/scalar/ScalarSignalAnalogModel
+    physicallayer/wireless/common/analogmodel/scalar/ScalarTransmissionAnalogModel
+    physicallayer/wireless/common/analogmodel/scalar/ScalarTransmitterAnalogModel
+    physicallayer/wireless/common/analogmodel/unitdisk/UnitDiskMediumAnalogModel
+    physicallayer/wireless/common/analogmodel/unitdisk/UnitDiskReceiverAnalogModel
+    physicallayer/wireless/common/analogmodel/unitdisk/UnitDiskReceptionAnalogModel
+    physicallayer/wireless/common/analogmodel/unitdisk/UnitDiskTransmissionAnalogModel
+    physicallayer/wireless/common/analogmodel/unitdisk/UnitDiskTransmitterAnalogModel
+    physicallayer/wireless/common/base/packetlevel/ReceiverAnalogModelBase
+    physicallayer/wireless/common/base/packetlevel/TransmitterAnalogModelBase
+    physicallayer/wireless/common/contract/packetlevel/IDimensionalSignalAnalogModel
+    physicallayer/wireless/common/contract/packetlevel/INarrowbandSignalAnalogModel
+    physicallayer/wireless/common/contract/packetlevel/IReceiverAnalogModel
+    physicallayer/wireless/common/contract/packetlevel/IScalarSignalAnalogModel
+    physicallayer/wireless/common/contract/packetlevel/ITransmitterAnalogModel
+    physicallayer/wireless/common/radio/packetlevel/Reception
+    physicallayer/wireless/generic/GenericPhyHeaderSerializer
+    physicallayer/wireless/generic/GenericProtocolDissector
+    physicallayer/wireless/generic/GenericRadio
+    physicallayer/wireless/generic/GenericReceiver
+    physicallayer/wireless/generic/GenericTransmission
+    physicallayer/wireless/generic/GenericTransmitter
+    physicallayer/wireless/ieee80211/packetlevel/Ieee80211Receiver
+    physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmission
+    physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmitter
+    physicallayer/wireless/ieee802154/packetlevel/Ieee802154NarrowbandReceiver
+    physicallayer/wireless/ieee802154/packetlevel/Ieee802154NarrowbandTransmitter
+    physicallayer/wireless/ieee802154/packetlevel/Ieee802154Transmission
+    physicallayer/wireless/ieee802154/packetlevel/errormodel/Ieee802154ErrorModel
+    physicallayer/wireless/noise/NoiseTransmission
+    physicallayer/wireless/noise/NoiseTransmitter
+    physicallayer/wireless/shortcut/ShortcutPhyHeaderSerializer
+    protocolelement/checksum/ChecksumHeaderChecker
+    protocolelement/checksum/ChecksumHeaderInserter
+    protocolelement/checksum/base/ChecksumCheckerBase
+    protocolelement/checksum/base/ChecksumInserterBase
+    protocolelement/checksum/serializer/ChecksumHeaderSerializer
+    protocolelement/shaper/GroupEligibilityTimeMeter
+    protocolelement/shaper/GroupEligibilityTimeTable
+    queueing/common/ActivePacketSinkRef
+    queueing/common/ActivePacketSourceRef
+    queueing/common/PassivePacketSinkRef
+    queueing/common/PassivePacketSourceRef
+    queueing/flow/PacketFlowPcapFileRecorder
+    routing/gpsr/GpsrNeighborTable
+    transportlayer/quic/dplpmtud/ProbeTimerMessage
+    transportlayer/quic/packet/AckFrameHeader
+    transportlayer/quic/packet/ConnectionCloseFrameHeader
+    transportlayer/quic/packet/CryptoFrameHeader
+    transportlayer/quic/packet/DataBlockedFrameHeader
+    transportlayer/quic/packet/FrameHeader
+    transportlayer/quic/packet/HandshakeDoneFrameHeader
+    transportlayer/quic/packet/HandshakePacketHeader
+    transportlayer/quic/packet/InitialPacketHeader
+    transportlayer/quic/packet/LongPacketHeader
+    transportlayer/quic/packet/MaxDataFrameHeader
+    transportlayer/quic/packet/MaxStreamDataFrameHeader
+    transportlayer/quic/packet/NewTokenFrameHeader
+    transportlayer/quic/packet/OneRttPacketHeader
+    transportlayer/quic/packet/PacketHeader
+    transportlayer/quic/packet/PaddingFrameHeader
+    transportlayer/quic/packet/PingFrameHeader
+    transportlayer/quic/packet/RetryPacketHeader
+    transportlayer/quic/packet/ShortPacketHeader
+    transportlayer/quic/packet/StreamDataBlockedFrameHeader
+    transportlayer/quic/packet/StreamFrameHeader
+    transportlayer/quic/packet/TransportParametersExtension
+    transportlayer/quic/packet/VersionNegotiationPacketHeader
+    transportlayer/quic/packet/ZeroRttPacketHeader
+    transportlayer/sctp/SctpStreamStatistic
+    visualizer/base/ChannelVisualizerBase
+    visualizer/canvas/physicallayer/ChannelCanvasVisualizer
+
+    Removed C++ classes
+    ===================
+    common/checksum/TcpIpChecksum
+    physicallayer/wireless/apsk/packetlevel/ApskDimensionalReceiver
+    physicallayer/wireless/apsk/packetlevel/ApskDimensionalTransmission
+    physicallayer/wireless/apsk/packetlevel/ApskDimensionalTransmitter
+    physicallayer/wireless/apsk/packetlevel/ApskScalarReceiver
+    physicallayer/wireless/apsk/packetlevel/ApskScalarTransmission
+    physicallayer/wireless/apsk/packetlevel/ApskScalarTransmitter
+    physicallayer/wireless/common/analogmodel/bitlevel/DimensionalReceptionSignalAnalogModel
+    physicallayer/wireless/common/analogmodel/bitlevel/DimensionalSignalAnalogModel
+    physicallayer/wireless/common/analogmodel/bitlevel/DimensionalTransmissionSignalAnalogModel
+    physicallayer/wireless/common/analogmodel/bitlevel/LayeredDimensionalAnalogModel
+    physicallayer/wireless/common/analogmodel/bitlevel/LayeredReception
+    physicallayer/wireless/common/analogmodel/bitlevel/LayeredScalarAnalogModel
+    physicallayer/wireless/common/analogmodel/bitlevel/LayeredSnir
+    physicallayer/wireless/common/analogmodel/bitlevel/LayeredTransmission
+    physicallayer/wireless/common/analogmodel/bitlevel/NarrowbandSignalAnalogModel
+    physicallayer/wireless/common/analogmodel/bitlevel/ScalarReceptionSignalAnalogModel
+    physicallayer/wireless/common/analogmodel/bitlevel/ScalarSignalAnalogModel
+    physicallayer/wireless/common/analogmodel/bitlevel/ScalarTransmissionSignalAnalogModel
+    physicallayer/wireless/common/analogmodel/bitlevel/SignalAnalogModel
+    physicallayer/wireless/common/analogmodel/packetlevel/DimensionalAnalogModel
+    physicallayer/wireless/common/analogmodel/packetlevel/DimensionalNoise
+    physicallayer/wireless/common/analogmodel/packetlevel/DimensionalReception
+    physicallayer/wireless/common/analogmodel/packetlevel/DimensionalSnir
+    physicallayer/wireless/common/analogmodel/packetlevel/DimensionalTransmission
+    physicallayer/wireless/common/analogmodel/packetlevel/ScalarAnalogModel
+    physicallayer/wireless/common/analogmodel/packetlevel/ScalarReception
+    physicallayer/wireless/common/analogmodel/packetlevel/ScalarTransmission
+    physicallayer/wireless/common/base/packetlevel/DimensionalAnalogModelBase
+    physicallayer/wireless/common/base/packetlevel/FlatReceptionBase
+    physicallayer/wireless/common/base/packetlevel/FlatTransmissionBase
+    physicallayer/wireless/common/base/packetlevel/NarrowbandReceptionBase
+    physicallayer/wireless/common/base/packetlevel/NarrowbandTransmissionBase
+    physicallayer/wireless/common/base/packetlevel/ScalarAnalogModelBase
+    physicallayer/wireless/common/contract/packetlevel/IDimensionalSignal
+    physicallayer/wireless/common/contract/packetlevel/INarrowbandSignal
+    physicallayer/wireless/common/contract/packetlevel/IScalarSignal
+    physicallayer/wireless/ieee80211/bitlevel/Ieee80211LayeredTransmission
+    physicallayer/wireless/ieee80211/packetlevel/Ieee80211DimensionalReceiver
+    physicallayer/wireless/ieee80211/packetlevel/Ieee80211DimensionalTransmission
+    physicallayer/wireless/ieee80211/packetlevel/Ieee80211DimensionalTransmitter
+    physicallayer/wireless/ieee80211/packetlevel/Ieee80211ReceiverBase
+    physicallayer/wireless/ieee80211/packetlevel/Ieee80211ScalarReceiver
+    physicallayer/wireless/ieee80211/packetlevel/Ieee80211ScalarTransmission
+    physicallayer/wireless/ieee80211/packetlevel/Ieee80211ScalarTransmitter
+    physicallayer/wireless/ieee80211/packetlevel/Ieee80211TransmissionBase
+    physicallayer/wireless/ieee80211/packetlevel/Ieee80211TransmitterBase
+    physicallayer/wireless/ieee80211/packetlevel/Ieee80211UnitDiskReceiver
+    physicallayer/wireless/ieee80211/packetlevel/Ieee80211UnitDiskTransmission
+    physicallayer/wireless/ieee80211/packetlevel/Ieee80211UnitDiskTransmitter
+    physicallayer/wireless/ieee802154/packetlevel/Ieee802154NarrowbandDimensionalReceiver
+    physicallayer/wireless/ieee802154/packetlevel/Ieee802154NarrowbandDimensionalTransmitter
+    physicallayer/wireless/ieee802154/packetlevel/Ieee802154NarrowbandScalarReceiver
+    physicallayer/wireless/ieee802154/packetlevel/Ieee802154NarrowbandScalarTransmitter
+    physicallayer/wireless/noise/NoiseDimensionalTransmitter
+    physicallayer/wireless/noise/NoiseScalarTransmitter
+    physicallayer/wireless/unitdisk/UnitDiskAnalogModel
+    physicallayer/wireless/unitdisk/UnitDiskPhyHeaderSerializer
+    physicallayer/wireless/unitdisk/UnitDiskProtocolDissector
+    physicallayer/wireless/unitdisk/UnitDiskRadio
+    physicallayer/wireless/unitdisk/UnitDiskReceiver
+    physicallayer/wireless/unitdisk/UnitDiskReception
+    physicallayer/wireless/unitdisk/UnitDiskTransmission
+    physicallayer/wireless/unitdisk/UnitDiskTransmitter
+    protocolelement/checksum/CrcHeaderChecker
+    protocolelement/checksum/CrcHeaderInserter
+    protocolelement/checksum/FcsHeaderChecker
+    protocolelement/checksum/FcsHeaderInserter
+    protocolelement/checksum/base/CrcCheckerBase
+    protocolelement/checksum/base/CrcInserterBase
+    protocolelement/checksum/base/FcsCheckerBase
+    protocolelement/checksum/base/FcsInserterBase
+    protocolelement/checksum/serializer/CrcHeaderSerializer
+    protocolelement/checksum/serializer/FcsHeaderSerializer
+    routing/eigrp/messages/EigrpMsgReq
+    transportlayer/sctp/SctpAsconfAckChunk
+    transportlayer/sctp/SctpAsconfChunk
+    transportlayer/sctp/SctpChecksum
+    transportlayer/sctp/SctpErrorChunk
+    transportlayer/sctp/SctpHeader
+    transportlayer/sctp/SctpIncomingSsnResetRequestParameter
+    transportlayer/sctp/SctpStreamResetChunk
+
+    Renamed C++ classes
+    ===================
+
+    linklayer/configurator/FailureProtectionConfigurator -> linklayer/configurator/common/FailureProtectionConfigurator
+    linklayer/configurator/Ieee8021dInterfaceData -> linklayer/ieee8021d/common/Ieee8021dInterfaceData
+    linklayer/configurator/L2NetworkConfigurator -> linklayer/configurator/common/L2NetworkConfigurator
+    linklayer/configurator/L2NodeConfigurator -> linklayer/configurator/common/L2NodeConfigurator
+    linklayer/configurator/MacForwardingTableConfigurator -> linklayer/configurator/common/MacForwardingTableConfigurator
+    linklayer/configurator/StreamRedundancyConfigurator -> linklayer/configurator/common/StreamRedundancyConfigurator
+    linklayer/ethernet/basic/EthernetMac -> linklayer/ethernet/basic/EthernetMacPhy
+    physicallayer/wireless/apsk/bitlevel/ApskSymbol -> physicallayer/wireless/common/modulation/ApskSymbol
+    physicallayer/wireless/apsk/bitlevel/ApskPhyHeaderSerializer -> physicallayer/wireless/apsk/packetlevel/ApskPhyHeaderSerializer
+    physicallayer/wireless/common/analogmodel/packetlevel/ScalarNoise -> physicallayer/wireless/common/analogmodel/scalar/ScalarNoise
+    physicallayer/wireless/common/analogmodel/packetlevel/ScalarSnir -> physicallayer/wireless/common/analogmodel/scalar/ScalarSnir
+    physicallayer/wireless/common/contract/packetlevel/IAnalogModel -> physicallayer/wireless/common/contract/packetlevel/IMediumAnalogModel
+    physicallayer/wireless/unitdisk/UnitDiskListening -> physicallayer/wireless/common/analogmodel/unitdisk/UnitDiskListening
+    physicallayer/wireless/unitdisk/UnitDiskNoise -> physicallayer/wireless/common/analogmodel/unitdisk/UnitDiskNoise
+    physicallayer/wireless/unitdisk/UnitDiskSnir -> physicallayer/wireless/common/analogmodel/unitdisk/UnitDiskSnir
+    protocolelement/common/PreemptableStreamer -> protocolelement/fragmentation/PreemptableStreamer
+    routing/gpsr/PositionTable -> routing/gpsr/GpsrPositionTable
+    routing/pim/PimCrcInsertionHook -> routing/pim/PimChecksumInsertionHook
+    transportlayer/sctp/SctpCrcInsertion -> transportlayer/sctp/SctpChecksumInsertion
+    transportlayer/tcp_common/TcpCrcInsertionHook -> transportlayer/tcp_common/TcpChecksumInsertionHook
+    transportlayer/udp/UdpCrcInsertionHook -> transportlayer/udp/UdpChecksumInsertionHook
+
 2023-04-04  ------ inet-4.5.0 released ------
 
 2023-03-16
