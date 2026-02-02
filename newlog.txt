@@ -1,0 +1,699 @@
+commit 1e21d2cf0866a3cab7d8aeeda61e7d545611efd0
+Author: Levente Meszaros <levy@omnetpp.org>
+Date:   Wed Jan 14 11:43:26 2026 +0100
+
+    TODO: WHATSNEW & ChangeLog
+
+commit fa5d6dc720486899da76aa80d928ba59811eac6e
+Author: Levente Meszaros <levy@omnetpp.org>
+Date:   Tue Jan 27 14:40:45 2026 +0100
+
+    python: Switched to properly execute the simulations without jumping directly to run_protected().
+    
+    Now that the logging works correctly for nested tasks, we can safely do this
+    without confusing the user with the mixed up output.
+
+commit 99199cadbea1c5d5cd930078a7e22a5e6856fb91
+Author: Levente Meszaros <levy@omnetpp.org>
+Date:   Tue Jan 27 14:39:11 2026 +0100
+
+    python: Extended TaskProgress to also work with a process scheduler.
+    
+    With a process scheduler it's not possible to use a lock and update a global counter.
+
+commit 246715619ce992b1641bd7fadcc7c93cc7abe647
+Author: Levente Meszaros <levy@omnetpp.org>
+Date:   Tue Jan 27 14:32:23 2026 +0100
+
+    python: Removed output_stream argument from concurrently running the tasks.
+    
+    When using a process scheduler, the sys.stdout cannot be pickled to the child.
+    The output stream is by default sys.out in the callee and it is overridden to capture the output anyway.
+
+commit 4f357abf19fe11d8ef05af112a52c73fdca5331d
+Author: Levente Meszaros <levy@omnetpp.org>
+Date:   Tue Jan 27 12:22:28 2026 +0100
+
+    python: Fixed calculating the total number of tasks in chart tests.
+
+commit 68c199e968adfe2e339dfacaf11ea4416ac2f0c3
+Author: Zoltan Bojthe <zbojthe@omnetpp.org>
+Date:   Mon Jan 26 21:32:18 2026 +0100
+
+    tests: refresh /tyf fingerprint values
+
+commit dcdd4cf628ecd02ec65849eda2e5d2bccd248c48
+Author: Zoltan Bojthe <zbojthe@omnetpp.org>
+Date:   Mon Jan 26 21:31:47 2026 +0100
+
+    bin: fingerprinttest: Reduced fake GUI probability argument values to speed up /tyf fingerprint calculation.
+
+commit 926b5225db3b2dde5c04a7f5c12b3d6ffd8c05d2
+Author: TÖRÖK Attila <torokati44@gmail.com>
+Date:   Mon Jan 26 16:14:06 2026 +0100
+
+    quic: Fix build with IPv4 feature disabled
+    
+    ICMP is used for PMTUD, which is optional.
+    It can be optionally used for DPLPMTUD too, which itself is also optional.
+
+commit 9686247158949e0112d0b0871387dc45a76cd4dc
+Author: TÖRÖK Attila <torokati44@gmail.com>
+Date:   Mon Jan 26 11:42:45 2026 +0100
+
+    build: Put QUIC behind the new Quic (and QuicExamples) feature flag(s)
+
+commit ae90ac20a66d1e060b3ac878e44d74626eee893b
+Author: TÖRÖK Attila <torokati44@gmail.com>
+Date:   Fri Jan 23 18:15:40 2026 +0100
+
+    python: Change package installation instructions to mention requirements.txt
+
+commit e48477a30d5d3674c32a61cab6970e97c319c7b4
+Author: TÖRÖK Attila <torokati44@gmail.com>
+Date:   Fri Jan 23 18:12:38 2026 +0100
+
+    ci: Install Python packages based on requirements.txt files
+    
+    Instead of hardcoding a list, without version constraints.
+
+commit c83e0bdb93e1e8a80051e55401843596f5a05ca1
+Author: Levente Meszaros <levy@omnetpp.org>
+Date:   Fri Jan 23 17:18:47 2026 +0100
+
+    python: Fixed validation tests for QUIC.
+
+commit eeb351ef951f24896424c60e067b6c206d365c05
+Author: Levente Meszaros <levy@omnetpp.org>
+Date:   Fri Jan 23 17:18:32 2026 +0100
+
+    python: Followed recent changes.
+
+commit a4777181929d563da8ab2da8d6aa6ff5094fa3ae
+Author: Levente Meszaros <levy@omnetpp.org>
+Date:   Fri Jan 23 17:18:17 2026 +0100
+
+    python: Added a task self test.
+
+commit afa3b1ad458c0601d05bb04f839b83e2a27240a1
+Author: Levente Meszaros <levy@omnetpp.org>
+Date:   Fri Jan 23 17:17:51 2026 +0100
+
+    python: Added TaskTestTask, which is a basic class for testing the result of other tasks.
+
+commit 0f12b4667d68b8c65e4dc7ceaae545e85e5f4516
+Author: Levente Meszaros <levy@omnetpp.org>
+Date:   Fri Jan 23 17:15:53 2026 +0100
+
+    python: Added TaskContext and TaskProcess to be able to print progress on deep task trees.
+
+commit 92f65d45dcc92b1e28c30de8de467efcfbf6abf2
+Author: Levente Meszaros <levy@omnetpp.org>
+Date:   Thu Jan 22 16:10:37 2026 +0100
+
+    python: Added format_timedelta() function.
+
+commit 069a9e3564e3688845e9a3ca73560e3e0d334cea
+Author: TÖRÖK Attila <torokati44@gmail.com>
+Date:   Thu Jan 22 12:36:35 2026 +0100
+
+    showcases: Fix some TSN charts with Pandas 3.0, avoiding inplace=True
+    
+    See: https://pandas.pydata.org/pandas-docs/stable/user_guide/copy_on_write.html
+
+commit 3eda4ae3f46ccbb0d1cc05b563a7acd5dc1f1a46
+Author: TÖRÖK Attila <torokati44@gmail.com>
+Date:   Wed Jan 21 15:10:25 2026 +0100
+
+    quic: Don't enable the Quic module in nodes by default
+
+commit fe11e97ae58cafb3235fcd04fd086042f4f85f6b
+Author: TÖRÖK Attila <torokati44@gmail.com>
+Date:   Fri Jan 16 18:02:48 2026 +0100
+
+    tests: Move QUIC validation scripts from examples to validation.py
+    
+    And port them from SQLite to omnetpp result files.
+
+commit 6c61ac611623f1b211dc3c619cc2e08b84a7d073
+Author: TÖRÖK Attila <torokati44@gmail.com>
+Date:   Wed Jan 14 17:07:42 2026 +0100
+
+    udp: Add quoted packet data to ICMP error indication as a tag instead of controlinfo
+
+commit 393679ac2cb3feb4827f2927c4d87a9b0220193d
+Author: TÖRÖK Attila <torokati44@gmail.com>
+Date:   Fri Jan 16 16:42:18 2026 +0100
+
+    tests: Add QUIC example simulations as fingerprint tests
+
+commit ef37c16d0bbb021979f1fd8e36eb9929b76b76a6
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Fri May 23 09:01:12 2025 +0200
+
+    QUIC: update documentation about the QUIC module
+
+commit f04ad1f3e73614a0056592ecb4374739b192b6ed
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Wed May 21 14:39:07 2025 +0200
+
+    QUIC: use random initial destination connection ID
+
+commit d5241ead344326d2ef001c6e2fb44cd1a46597a9
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Wed May 21 13:57:27 2025 +0200
+
+    QUIC: change DPLPMTUD example to run at least until increase check happens
+
+commit 908e014c2c9f884c69634cd5b0091f0314aecfe1
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Wed May 21 13:56:25 2025 +0200
+
+    QUIC: treat CONNECTION_CLOSE as non-ack-eliciting, reformat QuicPacket and QuicFrame
+
+commit 135661c146ec50dda1b2e40880c9c4dbe2350f31
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Tue May 20 17:57:43 2025 +0200
+
+    QUIC: fix set max_data value for streams
+
+commit 6e43c1b6fe3e48a51ee92a33c97e8d5d8c3f3fc4
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Tue May 20 17:51:39 2025 +0200
+
+    QUIC: enable to set max_(stream_)data, update format of flow control code
+
+commit 3d415ce723c7f3816e127d7797b263c732012774
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Mon May 19 14:05:42 2025 +0200
+
+    QUIC: Replace comment at the beginning of each file
+
+commit d6628d74c109cee918020a313983cd329d09e078
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Mon May 19 12:21:44 2025 +0200
+
+    QUIC: Add 0-RTT connection setup
+
+commit e83ebb35f12d0be460231bc7498cc274e40cf5f5
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Wed May 14 15:40:16 2025 +0200
+
+    QUIC: use the new SimpleModule as a base for QUIC simple modules
+
+commit 829afc57de03a95272fed33e8b729833f98c129d
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Wed May 14 09:56:34 2025 +0200
+
+    QUIC: move method comments to the header files and reformat them
+
+commit 2a9ce2b77e7cf799ac31b45de97bc8f4c694a3f0
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Mon May 12 17:38:45 2025 +0200
+
+    QUIC: delete connection and sockets after close
+
+commit a5c2bb3820dd801ee795ce08458914ca551a0b52
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Sat May 10 17:51:00 2025 +0200
+
+    QUIC: Start timer after CONNECTION_CLOSE to destroy connection
+
+commit 7936a1aefbece96feb967547e2f0fb64e7286b7d
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Sat May 10 16:12:11 2025 +0200
+
+    QUIC: Use a counter for the next connection ID instead of the size of the list of current connections to not reassign the same connection ID to different connections after an earlier connection was deleted.
+
+commit 006a3a8037b617d4a0358bce035fea2b7fcb05f2
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Thu May 8 17:00:44 2025 +0200
+
+    QUIC: add example to test a server with multiple connections
+
+commit e42862690862280075ea8aad9cee6a8d0c558269
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Thu May 8 16:30:13 2025 +0200
+
+    QUIC: QuicOrderedReceiver now uses the callback API
+
+commit 3173c33dfdea3559ca9c2d28b09ec5801b966e25
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Thu May 8 15:11:37 2025 +0200
+
+    QUIC: remove unnecessary send generator control from QuicTrafficgen
+
+commit c0b2019632d3e13c24989dd20f0580a6e6eb84e2
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Thu May 8 14:28:49 2025 +0200
+
+    QUIC: delete client sockets in QuicDiscardServer
+
+commit 76c1199f2ce4f61618011ea657971cb320309575
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Thu May 8 14:24:26 2025 +0200
+
+    QUIC: delete close packets directly
+
+commit 12f8741156fff9bb2b63ae3b13d5032b7c529ff3
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Thu May 8 10:11:39 2025 +0200
+
+    QUIC: free memory of received data packet in QuicDiscardServer
+
+commit 1c7045bc0b5f1749170cc374d46a102bb8c21646
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Wed May 7 18:22:52 2025 +0200
+
+    QUIC: free memory of received data packet in QuicClient
+
+commit b3a4ea88a914b32732bba339e8ca8d643acc25d6
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Wed May 7 18:16:01 2025 +0200
+
+    QUIC: fixed uninitialized variable
+
+commit 81c6a3c29b0b61cb1311372e0384e03d72a06ff7
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Wed May 7 18:02:51 2025 +0200
+
+    QUIC: fixed uninitialized variable
+
+commit c0ccb457b0dbae77564fdc1496fde32b7aa31fc8
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Wed May 7 17:52:03 2025 +0200
+
+    QUIC: unify port type to uint16_t
+
+commit 195460791e17826b9f2e6ed2dbab6db232c327f8
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Wed May 7 16:57:34 2025 +0200
+
+    QUIC: initialize members in UdpSocket
+
+commit 62e7b8e01863a7705717db5e9fc5af2471f15a5b
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Wed May 7 15:52:10 2025 +0200
+
+    QUIC: unify type of packet number to uint64_t
+
+commit e05bedefea799301145f7abd64dddbbae167f846
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Wed May 7 10:26:58 2025 +0200
+
+    QUIC: Add missing include in UdpSocket.h
+
+commit 433feaced35322e4a818c4f675281490c6e9c42c
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Tue May 6 17:41:31 2025 +0200
+
+    QUIC: remove unused variable in UdpSocket
+
+commit 6a68b0a0214baec821bf0e93d046145f702970aa
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Tue May 6 17:07:20 2025 +0200
+
+    QUIC: a better way to find the connection for a PTB message
+
+commit 417121b55db0c61e9e91d455e16eb0e91cc0d8bd
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Tue May 6 15:16:08 2025 +0200
+
+    QUIC: prohibit using port 0
+
+commit 33d4f04f9dc655c8e3f3853c28b27f1e14c2afb5
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Tue May 6 14:32:26 2025 +0200
+
+    QUIC: QuicDiscardServer can handle multiple connections and uses the callback API
+
+commit 720692e656add284017f7024b961fdc40a51fb46
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Tue May 6 12:06:31 2025 +0200
+
+    QUIC: use of unique connection ID
+
+commit d6ab2dc76ef8af7be17865833db9d2297301d8c6
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Tue May 6 08:35:07 2025 +0200
+
+    QUIC: fix QUIC module documentation
+
+commit 46d206500e4b26521f3db81da411c4b8181120ae
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Mon May 5 20:36:19 2025 +0200
+
+    QUIC: add documentation and clean up QuicSocket
+
+commit 86a85f278329fa920d9420b5d06668166f72e339
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Mon May 5 17:14:45 2025 +0200
+
+    QUIC: enable a QUIC server to initiate multiple connections
+
+commit 5f8c69ffdbeb215e1176d60c7e40a5833ba78616
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Fri May 2 15:10:44 2025 +0200
+
+    QUIC: clean up QUIC socket
+
+commit be975b38b8bcb5f4752c116450a785a02825a210
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Thu May 1 14:25:54 2025 +0200
+
+    QUIC: add documentation to the QUIC module
+
+commit cf23e9fd1662f5dbd244b3cdf6e18f82ad091bd4
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Thu May 1 14:25:26 2025 +0200
+
+    QUIC: fix indention
+
+commit 36f748da2ebf0a3f915983744f83a78008e2cab0
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Wed Apr 30 21:11:24 2025 +0200
+
+    QUIC: deleted useless FrameHeader class
+
+commit 3bf041f6940f436a788847bb2b99569b26fd263d
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Wed Apr 30 14:14:28 2025 +0200
+
+    QUIC: add additional parameters to avoid using one parameter depending on its value in different ways
+
+commit e51ae7cf38c149f0aa962ef72f9f1321f4fc519f
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Wed Apr 30 12:46:16 2025 +0200
+
+    QUIC: clean up QUIC statistic properties
+
+commit 5fe2caf26a93a77bf4dd5b9629c10362402b2904
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Tue Apr 29 16:06:12 2025 +0200
+
+    QUIC: exchange transport parameters during connection setup
+
+commit 7714c85ab0ce5b3cd1df25a9cf0a2a9ca4b8f4d2
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Mon Apr 28 16:13:46 2025 +0200
+
+    QUIC: clean up flow control parameters
+
+commit 41159d7931cd72cb85c5438adb3ca16903210bd3
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Fri Apr 25 14:15:15 2025 +0200
+
+    QUIC: update code style
+
+commit 7cb9bdeb4da8786e27e4de268b4ca2228e307396
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Fri Apr 25 10:56:01 2025 +0200
+
+    QUIC: add connection close
+
+commit 419e29ffb434a47f69f1af1fc0eb6bccab588abc
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Thu Apr 24 09:57:59 2025 +0200
+
+    QUIC: remove old module
+
+commit 0e78fcf8c6b5c6378c8c52595213d64d4dbea4ae
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Thu Apr 24 09:25:00 2025 +0200
+
+    QUIC: clean up QUIC parameters and statistics
+
+commit d129ffebc0ad0dc215bc8d86a257fa2dd10f6ff5
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Thu Apr 24 09:08:03 2025 +0200
+
+    QUIC: clean up QUIC parameters
+
+commit 8f14673b9d787f907895efb62f1c578c29a93224
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Wed Apr 23 17:31:11 2025 +0200
+
+    QUIC: cleanup Quic.ned - remove quotation marks
+
+commit fa1505633237b8863eeeab87d5230d502e15322d
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Wed Apr 23 17:25:30 2025 +0200
+
+    QUIC: simplify shared_link example
+
+commit 8ec46c458b8a31c593000e31f26813d1315cb38a
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Wed Apr 23 16:52:01 2025 +0200
+
+    QUIC: simplify shared_link example
+
+commit c77eb7d91e656ecb95da01a98c5ddfdd1a0b01a1
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Tue Apr 15 10:39:41 2025 +0200
+
+    QUIC: add PeriodicPacketLoss Channel
+
+commit fdec21fa1f1c150f8c8316adef162db125f9f575
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Mon Apr 14 10:46:07 2025 +0200
+
+    QUIC: add PeriodicPacketLoss Channel
+
+commit d45f3df371a0b70abf2a5e9c10106889f93a6862
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Fri Apr 11 20:45:59 2025 +0200
+
+    QUIC: remove QUIC's packet loss mechanism, add PeriodicPacketLoss Channel and use it for throughput_packet_loss example
+
+commit 9ccf6877e53a398f2bf7f82c46a5986062073ba3
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Fri Apr 11 14:11:56 2025 +0200
+
+    QUIC: throughput_packet_loss without QUIC's packet loss mechnism
+
+commit 3f4e503b2bbf3b1e73e04c9c525cdfd02c856176
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Tue Mar 18 20:33:18 2025 +0100
+
+    QUIC: send HANDSHAKE_DONE and set handshakeConfirmed
+
+commit 6f1e44203f3ea9aa60d929bd4fa008a2c6f809ed
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Tue Mar 18 16:59:50 2025 +0100
+
+    QUIC: inflate client's first QUIC packet to 1200 B as specified
+
+commit 79292a9a1b18dde325e89541f9cedd992077f2ae
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Tue Mar 18 15:23:25 2025 +0100
+
+    QUIC: remove the exception to send an ack on the first packet immediately, which was helpful without a connection setup
+
+commit 404acf470d671079076a9d4f697a44711ab84bfb
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Tue Mar 18 15:21:19 2025 +0100
+
+    QUIC: add README files to simple examples
+
+commit 0bd3b751ac15fe123520252009d1bb582f8b7cce
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Tue Mar 18 13:17:06 2025 +0100
+
+    QUIC: remove DPLPMTUD examples that are too specific
+
+commit 7eef06553150bdbcfe3615053dd03c34a9e954ee
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Tue Mar 18 13:14:45 2025 +0100
+
+    QUIC: simplify dplpmtud example
+
+commit b4377f7bdece30510e6963d89a1d2386ea221a3e
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Tue Mar 18 12:48:49 2025 +0100
+
+    QUIC: QuicTrafficgen starts sending not before receiving established signal
+
+commit c5feebc1de74b3bbea0d9f1ca64c48a96ab5e32c
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Tue Mar 18 12:22:54 2025 +0100
+
+    QUIC: Fix simple examples
+
+commit c75dc7491ea45bf40e47b91b35fa0d06073f7bc0
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Tue Mar 18 10:53:16 2025 +0100
+
+    QUIC: remove old examples
+
+commit 4d9d02d1cd311ca80f309d6cc2e1e21029833d82
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Tue Mar 18 10:25:02 2025 +0100
+
+    QUIC: change calculation in throughput_packet_loss example
+
+commit f8bab155e1ae9dc25fef034bb31883658cbe1d1d
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Tue Mar 18 10:10:31 2025 +0100
+
+    QUIC: rename congestion example in throughput_packet_loss
+
+commit d9fc2077dd24cb65790bb96aef2cc15cd4b36fd9
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Tue Mar 18 09:58:15 2025 +0100
+
+    QUIC: add README to flow_control_limited example
+
+commit 31b7ae9a1c59b1908d4bb4b46c525c0fe29c2adf
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Mon Mar 17 17:46:38 2025 +0100
+
+    QUIC: Add flow control limited example
+
+commit 64c39aff8b59637eac759a82b1c6da5f2099ead8
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Mon Mar 17 15:43:34 2025 +0100
+
+    QUIC: Add descriptions to the flow control parameter
+
+commit cbd63870ff31bdf7da9f9e9972c4e13d03e2862f
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Mon Mar 17 15:42:53 2025 +0100
+
+    QUIC: Add link_utilization example
+
+commit c6257a48a83d3be1d64ef5344eb86369ee3f811f
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Mon Mar 17 10:50:22 2025 +0100
+
+    QUIC: move C-Code from VariableLengthInteger.msg to VariableLengthInteger.cc and add VariableLengthInteger.h
+
+commit 31d2ef3b43dadfae16fea634d7526413b47cae9d
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Fri Mar 14 16:21:59 2025 +0100
+
+    QUIC: add README to shared_link example
+
+commit 411e5c888a686431a87119f3b0e3f4dae68ea501
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Fri Mar 14 15:59:15 2025 +0100
+
+    QUIC: add README to congestion example
+
+commit 2f53950d907feea7a3d63965bdf08e49b74f4af1
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Fri Mar 14 15:53:57 2025 +0100
+
+    QUIC: Change type of VariableLengthInteger
+
+commit 1fc0ac093e23c37b10c3dfb39be4bf36312a9920
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Fri Mar 14 10:26:46 2025 +0100
+
+    QUIC: add shared link example to test congestion control
+
+commit 6cf5aaa910ac6fec5c5f8d0c7571dfdde9ed08c1
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Thu Mar 13 15:21:40 2025 +0100
+
+    QUIC: add congestion example for testing
+
+commit 60f0eefc8b9b2b490f05cd6c3397b9206ef2cfe7
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Wed Mar 5 09:57:34 2025 +0100
+
+    Update QUIC connection setup
+
+commit 5c9cde094b5b05e1e91a324dc725a3408ac16098
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Tue Feb 18 20:12:20 2025 +0100
+
+    QUIC connection setup - new ConnectionStates, new packet/frame formats, ReliabilityManager handles different packet number spaces
+
+commit ee326765a4bcc949c0d85e3c91d5db393edc858c
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Fri Feb 14 13:42:17 2025 +0100
+
+    QUIC connection setup
+
+commit 357bd4cbc1b603add16b74f6072bd7c5fe96b3f1
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Fri Feb 14 12:02:17 2025 +0100
+
+    udp: let UDP forward the ICMP message to the upper layer
+
+commit 58f2b3192969c6962469ae8f11784d61df8ba9d7
+Author: Timo Völker <timo.voelker@fh-muenster.de>
+Date:   Fri Feb 14 11:52:50 2025 +0100
+
+    add QUIC src and examples
+
+commit f4f18f1d6ec4ff923a55e1b6fde649f093c178c5
+Author: Zoltan Bojthe <zbojthe@omnetpp.org>
+Date:   Thu Jan 15 16:10:25 2026 +0100
+
+    examples, showcases, tests: use ${resultdir}/ instead of results/ in NED parameters
+
+commit 61ca58c82d6944d000ff23faab4425b698089c1b
+Author: Zoltan Bojthe <zbojthe@omnetpp.org>
+Date:   Thu Jan 15 16:07:05 2026 +0100
+
+    all: use getEnvir()->getConfig()->substituteVariables(par("x")) for filename parameters.
+
+commit f401304c2f3d94bd912ae0785b5fb035291ff838
+Author: Zoltan Bojthe <zbojthe@omnetpp.org>
+Date:   Wed Jan 14 16:52:53 2026 +0100
+
+    tests: module: follow the modified output filename in RoutingTableRecorder module
+
+commit 3cbd5913cd4a77acfc1aa89012e3c6d374087837
+Author: Zoltan Bojthe <zbojthe@omnetpp.org>
+Date:   Thu Jan 15 16:12:02 2026 +0100
+
+    tutorials: bgp: follow RoutingTableRecorder changes
+    
+    Removed the routinglog-file config argument, added logfile NED parameter for RoutingTableRecorder.
+
+commit 7385a435142af26596b0b9a23131a6768d1c08a3
+Author: Zoltan Bojthe <zbojthe@omnetpp.org>
+Date:   Wed Jan 14 16:51:28 2026 +0100
+
+    RoutingTableRecorder: use 'logfile' ned parameter instead of 'routinglog-file' config option
+    
+    Also updated the default value of filename for consistency with other parts of the project.
+
+commit 0bef06b787d0d17e873298b86598c5c1a4749475
+Author: Zoltan Bojthe <zbojthe@omnetpp.org>
+Date:   Fri Jan 16 17:09:47 2026 +0100
+
+    Cleanup: Remove legacy code blocks for OMNeT++ versions older than 6.2
+    
+    Removed #ifdef guards and code segments in inet that were kept for
+    compatibility with versions of OMNeT++ that are no longer supported.
+
+commit 1fd2bdb02456fb0dbd8c314da219c0c818dfaaa4
+Author: Zoltan Bojthe <zbojthe@omnetpp.org>
+Date:   Fri Jan 16 17:04:42 2026 +0100
+
+    INETDefs: update required omnetpp version to 6.2
+
+commit bea7c487b0a602cabc0f0e48c0759acd1d6d9145
+Author: Zoltan Bojthe <zbojthe@omnetpp.org>
+Date:   Fri Jan 9 13:04:21 2026 +0100
+
+    Hcf: fix issue 1026: Runtime error due to false Frame Sequence Handling in 802.11 HCF With QoS multiple Access Category
+    
+    This fix suggested by albert-simohartono in the issue(May 13, 2025)
+
+commit 0273ed8a64d55216c56c68d2b6d23ebc402fa642
+Author: Zoltan Bojthe <zbojthe@omnetpp.org>
+Date:   Mon Nov 10 10:23:52 2025 +0100
+
+    Hcf: fixed issue 1031: 802.11 HCF bug in checking hasFrameToTransmit(AccessCategory ac)
+    
+    This fix suggested by albert-simohartono
+
+commit 8a7867b2f7126a41e70a4ff0a741bca0954ea34a
+Author: Zoltan Bojthe <zbojthe@omnetpp.org>
+Date:   Mon Jan 12 17:24:34 2026 +0100
+
+    eigrp: Refactor: Use range-based for loop instead of iterators for vector traversal.
