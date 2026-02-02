@@ -61,9 +61,8 @@ void TcpServerHostApp::refreshDisplay() const
 {
     ApplicationBase::refreshDisplay();
 
-    char buf[32];
-    sprintf(buf, "%d threads", socketMap.size());
-    getDisplayString().setTagArg("t", 0, buf);
+    std::string buf = std::to_string(socketMap.size()) + " threads";
+    getDisplayString().setTagArg("t", 0, buf.c_str());
 }
 
 void TcpServerHostApp::handleMessageWhenUp(cMessage *msg)
@@ -103,9 +102,8 @@ void TcpServerHostApp::socketAvailable(TcpSocket *socket, TcpAvailableInfo *avai
 
     const char *serverThreadModuleType = par("serverThreadModuleType");
     cModuleType *moduleType = cModuleType::get(serverThreadModuleType);
-    char name[80];
-    sprintf(name, "thread_%i", newSocket->getSocketId());
-    TcpServerThreadBase *proc = check_and_cast<TcpServerThreadBase *>(moduleType->create(name, this));
+    std::string name = "thread_" + std::to_string(newSocket->getSocketId());
+    TcpServerThreadBase *proc = check_and_cast<TcpServerThreadBase *>(moduleType->create(name.c_str(), this));
     proc->finalizeParameters();
     proc->callInitialize();
 

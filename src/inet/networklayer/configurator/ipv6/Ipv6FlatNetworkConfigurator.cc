@@ -46,9 +46,8 @@ void Ipv6FlatNetworkConfigurator::handleMessage(cMessage *)
 void Ipv6FlatNetworkConfigurator::setDisplayString(int numIPNodes, int numNonIPNodes)
 {
     // update display string
-    char buf[80];
-    sprintf(buf, "%d Ipv6 nodes\n%d non-IP nodes", numIPNodes, numNonIPNodes);
-    getDisplayString().setTagArg("t", 0, buf);
+    std::string buf = std::to_string(numIPNodes) + " Ipv6 nodes\n" + std::to_string(numNonIPNodes) + " non-IP nodes";
+    getDisplayString().setTagArg("t", 0, buf.c_str());
 }
 
 bool Ipv6FlatNetworkConfigurator::isIPNode(Topology::Node *node)

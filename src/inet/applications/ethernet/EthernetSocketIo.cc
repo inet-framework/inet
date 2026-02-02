@@ -83,9 +83,8 @@ void EthernetSocketIo::finish()
 void EthernetSocketIo::refreshDisplay() const
 {
     ApplicationBase::refreshDisplay();
-    char buf[100];
-    sprintf(buf, "rcvd: %d pks\nsent: %d pks", numReceived, numSent);
-    getDisplayString().setTagArg("t", 0, buf);
+    std::string buf = "rcvd: " + std::to_string(numReceived) + " pks\nsent: " + std::to_string(numSent) + " pks";
+    getDisplayString().setTagArg("t", 0, buf.c_str());
 }
 
 void EthernetSocketIo::setSocketOptions()

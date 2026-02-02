@@ -205,9 +205,8 @@ void Ipv4FlatNetworkConfigurator::setDisplayString(Topology& topo, NodeInfoVecto
             numIPNodes++;
 
     // update display string
-    char buf[80];
-    sprintf(buf, "%d Ipv4 nodes\n%d non-Ipv4 nodes", numIPNodes, topo.getNumNodes() - numIPNodes);
-    getDisplayString().setTagArg("t", 0, buf);
+    std::string buf = std::to_string(numIPNodes) + " Ipv4 nodes\n" + std::to_string(topo.getNumNodes() - numIPNodes) + " non-Ipv4 nodes";
+    getDisplayString().setTagArg("t", 0, buf.c_str());
 }
 
 } // namespace inet

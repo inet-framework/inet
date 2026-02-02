@@ -1343,13 +1343,12 @@ void Udp::refreshDisplay() const
 {
     OperationalBase::refreshDisplay();
 
-    char buf[80];
-    sprintf(buf, "passed up: %d pks\nsent: %d pks", numPassedUp, numSent);
+    std::string buf = "passed up: " + std::to_string(numPassedUp) + " pks\nsent: " + std::to_string(numSent) + " pks";
     if (numDroppedWrongPort > 0) {
-        sprintf(buf + strlen(buf), "\ndropped (no app): %d pks", numDroppedWrongPort);
+        buf += "\ndropped (no app): " + std::to_string(numDroppedWrongPort) + " pks";
         getDisplayString().setTagArg("i", 1, "red");
     }
-    getDisplayString().setTagArg("t", 0, buf);
+    getDisplayString().setTagArg("t", 0, buf.c_str());
 }
 
 // used in UdpProtocolDissector

@@ -278,7 +278,7 @@ class INET_API SctpStreamStatistic : public cNamedObject
 
     SctpStreamStatistic(uint16_t sid) : streamId(sid) {
         char buf[32];
-        sprintf(buf, "stream-%u", sid);
+        snprintf(buf, sizeof(buf), "stream-%u", sid);
         setName(buf);  // IMPORTANT: demux filter uses this name!
     }
 

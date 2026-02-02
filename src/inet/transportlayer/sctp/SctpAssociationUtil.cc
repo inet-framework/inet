@@ -309,7 +309,7 @@ SctpAssociation *SctpAssociation::cloneAssociation()
     auto moduleType = cModuleType::get("inet.transportlayer.sctp.SctpAssociation");
     char submoduleName[24];
     int cloneId = SctpSocket::getNewAssocId();
-    sprintf(submoduleName, "assoc-%d", cloneId);
+    snprintf(submoduleName, sizeof(submoduleName), "assoc-%d", cloneId);
     SctpAssociation *assoc = check_and_cast<SctpAssociation *>(moduleType->createScheduleInit(submoduleName, sctpMain));
     assoc->initAssociation(sctpMain, appGateIndex, cloneId, rt, ift);
 

@@ -243,12 +243,12 @@ void SctpPeer::handleMessage(cMessage *msg)
                 rcvdPacketsPerAssoc[serverAssocId] = par("numPacketsToReceivePerClient");
                 sentPacketsPerAssoc[serverAssocId] = par("numPacketsToSendPerClient");
                 char text[50];
-                sprintf(text, "App: Received Bytes of assoc %d", serverAssocId);
+                snprintf(text, sizeof(text), "App: Received Bytes of assoc %d", serverAssocId);
                 bytesPerAssoc[serverAssocId] = new cOutVector(text);
                 rcvdBytesPerAssoc[serverAssocId] = 0;
-                sprintf(text, "App: EndToEndDelay of assoc %d", serverAssocId);
+                snprintf(text, sizeof(text), "App: EndToEndDelay of assoc %d", serverAssocId);
                 endToEndDelay[serverAssocId] = new cOutVector(text);
-                sprintf(text, "Hist: EndToEndDelay of assoc %d", serverAssocId);
+                snprintf(text, sizeof(text), "Hist: EndToEndDelay of assoc %d", serverAssocId);
                 histEndToEndDelay[serverAssocId] = new cHistogram(text);
 
 //                delete connectInfo;
@@ -291,8 +291,8 @@ void SctpPeer::handleMessage(cMessage *msg)
 
                         auto j = rcvdPacketsPerAssoc.find(serverAssocId);
                         if (j->second == 0 && par("waitToClose").doubleValue() > 0) {
-                            char as[5];
-                            sprintf(as, "%d", serverAssocId);
+                            char as[16];
+                            snprintf(as, sizeof(as), "%d", serverAssocId);
                             cMessage *abortMsg = new cMessage(as, SCTP_I_ABORT);
                             scheduleAfter(par("waitToClose"), abortMsg);
                         }
@@ -428,10 +428,9 @@ void SctpPeer::handleMessage(cMessage *msg)
     }
 
     if (hasGUI()) {
-        char buf[32];
         auto l = rcvdBytesPerAssoc.find(id);
-        sprintf(buf, "rcvd: %ld bytes\nsent: %ld bytes", l->second, bytesSent);
-        getDisplayString().setTagArg("t", 0, buf);
+        std::string buf = "rcvd: " + std::to_string(l->second) + " bytes\nsent: " + std::to_string(bytesSent) + " bytes";
+        getDisplayString().setTagArg("t", 0, buf.c_str());
     }
 }
 

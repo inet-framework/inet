@@ -44,7 +44,7 @@ void BgpConfigReader::loadConfigFromXML(cXMLElement *bgpConfig, BgpRouter *bgpRo
 
     // load AS information
     char ASXPath[32];
-    sprintf(ASXPath, "AS[@id='%d']", myAsId);
+    snprintf(ASXPath, sizeof(ASXPath), "AS[@id='%d']", myAsId);
     cXMLElement *ASNode = bgpConfig->getElementByPath(ASXPath);
     if (ASNode == nullptr)
         throw cRuntimeError("BGP Error:  No configuration for AS ID: %d", myAsId);

@@ -241,7 +241,7 @@ TcpConnection *TcpConnection::cloneListeningConnection()
     auto moduleType = cModuleType::get("inet.transportlayer.tcp.TcpConnection");
     int newSocketId = getActiveSimulationOrEnvir()->getUniqueNumber();
     char submoduleName[24];
-    sprintf(submoduleName, "conn-%d", newSocketId);
+    snprintf(submoduleName, sizeof(submoduleName), "conn-%d", newSocketId);
     auto conn = check_and_cast<TcpConnection *>(moduleType->createScheduleInit(submoduleName, tcpMain));
     conn->initConnection(tcpMain, newSocketId);
     conn->initClonedConnection(this);

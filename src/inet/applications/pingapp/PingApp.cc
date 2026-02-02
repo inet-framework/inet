@@ -359,12 +359,11 @@ bool PingApp::isEnabled()
 
 void PingApp::sendPingRequest()
 {
-    char name[32];
-    sprintf(name, "ping%ld", sendSeqNo);
+    std::string name = "ping" + std::to_string(sendSeqNo);
 
     ASSERT(pid != -1);
 
-    Packet *outPacket = new Packet(name);
+    Packet *outPacket = new Packet(name.c_str());
     auto payload = makeShared<ByteCountChunk>(B(packetSize));
 
     switch (destAddr.getType()) {

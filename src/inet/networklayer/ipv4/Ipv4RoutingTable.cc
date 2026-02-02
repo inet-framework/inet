@@ -133,12 +133,12 @@ void Ipv4RoutingTable::configureRouterId()
 
 void Ipv4RoutingTable::refreshDisplay() const
 {
-    char buf[80];
+    std::string buf;
     if (routerId.isUnspecified())
-        sprintf(buf, "%d+%d routes", (int)routes.size(), (int)multicastRoutes.size());
+        buf = std::to_string(routes.size()) + "+" + std::to_string(multicastRoutes.size()) + " routes";
     else
-        sprintf(buf, "routerId: %s\n%d+%d routes", routerId.str().c_str(), (int)routes.size(), (int)multicastRoutes.size());
-    getDisplayString().setTagArg("t", 0, buf);
+        buf = std::string("routerId: ") + routerId.str() + "\n" + std::to_string(routes.size()) + "+" + std::to_string(multicastRoutes.size()) + " routes";
+    getDisplayString().setTagArg("t", 0, buf.c_str());
 }
 
 void Ipv4RoutingTable::handleMessage(cMessage *msg)

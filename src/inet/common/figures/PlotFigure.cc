@@ -404,7 +404,7 @@ void PlotFigure::redrawYTicks()
         }
 
         char buf[32];
-        sprintf(buf, yValueFormat, minY + i * yTickSize);
+        snprintf(buf, sizeof(buf), yValueFormat, minY + i * yTickSize);
         yTicks[i].number->setText(buf);
         yTicks[i].number->setPosition(Point(x + 5, y + valueTickYposAdjust[i % 2]));
     }
@@ -472,7 +472,7 @@ void PlotFigure::redrawXTicks()
         char buf[32];
         double number = minX + i * xTickSize + shifting;
 
-        sprintf(buf, xValueFormat, number);
+        snprintf(buf, sizeof(buf), xValueFormat, number);
         xTicks[i].number->setText(buf);
         xTicks[i].number->setPosition(Point(x, y + 5));
     }

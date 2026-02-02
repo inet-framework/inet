@@ -188,7 +188,7 @@ TcpConnection *Tcp::createConnection(int socketId)
 {
     auto moduleType = cModuleType::get("inet.transportlayer.tcp.TcpConnection");
     char submoduleName[24];
-    sprintf(submoduleName, "conn-%d", socketId);
+    snprintf(submoduleName, sizeof(submoduleName), "conn-%d", socketId);
     auto module = check_and_cast<TcpConnection *>(moduleType->createScheduleInit(submoduleName, this));
     module->initConnection(this, socketId);
     return module;
@@ -503,35 +503,33 @@ void Tcp::refreshDisplay() const
         }
     }
 
-    char buf2[200];
-    buf2[0] = '\0';
-
+    std::ostringstream buf2;
     if (numINIT > 0)
-        sprintf(buf2 + strlen(buf2), "init:%d ", numINIT);
+        buf2 << "init:" << numINIT << " ";
     if (numCLOSED > 0)
-        sprintf(buf2 + strlen(buf2), "closed:%d ", numCLOSED);
+        buf2 << "closed:" << numCLOSED << " ";
     if (numLISTEN > 0)
-        sprintf(buf2 + strlen(buf2), "listen:%d ", numLISTEN);
+        buf2 << "listen:" << numLISTEN << " ";
     if (numSYN_SENT > 0)
-        sprintf(buf2 + strlen(buf2), "syn_sent:%d ", numSYN_SENT);
+        buf2 << "syn_sent:" << numSYN_SENT << " ";
     if (numSYN_RCVD > 0)
-        sprintf(buf2 + strlen(buf2), "syn_rcvd:%d ", numSYN_RCVD);
+        buf2 << "syn_rcvd:" << numSYN_RCVD << " ";
     if (numESTABLISHED > 0)
-        sprintf(buf2 + strlen(buf2), "estab:%d ", numESTABLISHED);
+        buf2 << "estab:" << numESTABLISHED << " ";
     if (numCLOSE_WAIT > 0)
-        sprintf(buf2 + strlen(buf2), "close_wait:%d ", numCLOSE_WAIT);
+        buf2 << "close_wait:" << numCLOSE_WAIT << " ";
     if (numLAST_ACK > 0)
-        sprintf(buf2 + strlen(buf2), "last_ack:%d ", numLAST_ACK);
+        buf2 << "last_ack:" << numLAST_ACK << " ";
     if (numFIN_WAIT_1 > 0)
-        sprintf(buf2 + strlen(buf2), "fin_wait_1:%d ", numFIN_WAIT_1);
+        buf2 << "fin_wait_1:" << numFIN_WAIT_1 << " ";
     if (numFIN_WAIT_2 > 0)
-        sprintf(buf2 + strlen(buf2), "fin_wait_2:%d ", numFIN_WAIT_2);
+        buf2 << "fin_wait_2:" << numFIN_WAIT_2 << " ";
     if (numCLOSING > 0)
-        sprintf(buf2 + strlen(buf2), "closing:%d ", numCLOSING);
+        buf2 << "closing:" << numCLOSING << " ";
     if (numTIME_WAIT > 0)
-        sprintf(buf2 + strlen(buf2), "time_wait:%d ", numTIME_WAIT);
+        buf2 << "time_wait:" << numTIME_WAIT << " ";
 
-    getDisplayString().setTagArg("t", 0, buf2);
+    getDisplayString().setTagArg("t", 0, buf2.str().c_str());
 }
 
 std::ostream& operator<<(std::ostream& os, const Tcp::SockPair& sp)

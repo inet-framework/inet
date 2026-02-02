@@ -88,9 +88,8 @@ void ExtEthernetSocket::handleMessage(cMessage *message)
 void ExtEthernetSocket::refreshDisplay() const
 {
     SimpleModule::refreshDisplay();
-    char buf[80];
-    sprintf(buf, "device: %s\nsnt:%d rcv:%d", device, numSent, numReceived);
-    getDisplayString().setTagArg("t", 0, buf);
+    std::string buf = std::string("device: ") + device + "\nsnt:" + std::to_string(numSent) + " rcv:" + std::to_string(numReceived);
+    getDisplayString().setTagArg("t", 0, buf.c_str());
 }
 
 void ExtEthernetSocket::finish()

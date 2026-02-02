@@ -480,7 +480,7 @@ void HeatMapPlotFigure::redrawYTicks()
 
         char buf[32];
         double number = invertedYAxis ? maxY - i * yTickSize : minY + i * yTickSize;
-        sprintf(buf, yValueFormat, number);
+        snprintf(buf, sizeof(buf), yValueFormat, number);
         yTicks[i].number->setText(buf);
         yTicks[i].number->setPosition(Point(x + 5, y + valueTickYposAdjust[i % 2]));
     }
@@ -537,7 +537,7 @@ void HeatMapPlotFigure::redrawXTicks()
 
         char buf[32];
         double number = invertedXAxis ? maxX - i * xTickSize : minX + i * xTickSize;
-        sprintf(buf, xValueFormat, number);
+        snprintf(buf, sizeof(buf), xValueFormat, number);
         xTicks[i].number->setText(buf);
         xTicks[i].number->setPosition(Point(x, y + 5));
     }

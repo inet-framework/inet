@@ -31,7 +31,7 @@ void RtpPayloadReceiver::initialize()
         openOutputFile(fileName.c_str());
     if (!logFileName.empty()) {
         char logName[200];
-        sprintf(logName, logFileName.c_str(), getId());
+        snprintf(logName, sizeof(logName), logFileName.c_str(), getId());
         _outputLogLoss.open(logName);
     }
 }

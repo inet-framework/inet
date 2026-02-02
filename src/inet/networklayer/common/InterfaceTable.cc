@@ -70,9 +70,8 @@ void InterfaceTable::refreshDisplay() const
 {
     OperationalBase::refreshDisplay();
 
-    char buf[80];
-    sprintf(buf, "%d interfaces", getNumInterfaces());
-    getDisplayString().setTagArg("t", 0, buf);
+    std::string buf = std::to_string(getNumInterfaces()) + " interfaces";
+    getDisplayString().setTagArg("t", 0, buf.c_str());
 
     if (par("displayAddresses")) {
         for (auto& elem : idToInterface) {

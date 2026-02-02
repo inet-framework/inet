@@ -434,11 +434,9 @@ void CounterFigure::refresh()
     else {
         int pow = 1;
         for (int i = digits.size() - 1; i >= 0; --i) {
-            char buf[32];
             pow *= 10;
             int actValue = ((int)value % pow) / (pow / 10);
-            sprintf(buf, "%d", actValue);
-            digits[i].text->setText(buf);
+            digits[i].text->setText(std::to_string(actValue).c_str());
         }
     }
 }

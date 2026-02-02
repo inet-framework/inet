@@ -138,10 +138,9 @@ L3Address IpvxTrafGen::chooseDestAddr()
 
 void IpvxTrafGen::sendPacket()
 {
-    char msgName[32];
-    sprintf(msgName, "appData-%d", numSent);
+    std::string msgName = "appData-" + std::to_string(numSent);
 
-    Packet *packet = new Packet(msgName);
+    Packet *packet = new Packet(msgName.c_str());
     const auto& payload = makeShared<ByteCountChunk>(B(*packetLengthPar));
     payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
     packet->insertAtBack(payload);

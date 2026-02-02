@@ -58,9 +58,8 @@ void TcpEchoApp::refreshDisplay() const
 {
     ApplicationBase::refreshDisplay();
 
-    char buf[160];
-    sprintf(buf, "threads: %d\nrcvd: %ld bytes\nsent: %ld bytes", socketMap.size(), bytesRcvd, bytesSent);
-    getDisplayString().setTagArg("t", 0, buf);
+    std::string buf = "threads: " + std::to_string(socketMap.size()) + "\nrcvd: " + std::to_string(bytesRcvd) + " bytes\nsent: " + std::to_string(bytesSent) + " bytes";
+    getDisplayString().setTagArg("t", 0, buf.c_str());
 }
 
 void TcpEchoApp::finish()

@@ -80,7 +80,7 @@ Packet *TcpLwipSendQueue::createSegmentWithBytes(const void *tcpDataP, unsigned 
 //    payload->removeFromBeginning(tcpHdr->getChunkLength());
 
     char msgname[80];
-    sprintf(msgname, "%.10s%s%s%s(l=%lu bytes)",
+    snprintf(msgname, sizeof(msgname), "%.10s%s%s%s(l=%lu bytes)",
             "tcpHdr",
             tcpHdr->getSynBit() ? " SYN" : "",
             tcpHdr->getFinBit() ? " FIN" : "",

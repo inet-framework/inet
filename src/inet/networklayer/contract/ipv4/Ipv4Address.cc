@@ -101,7 +101,7 @@ std::string Ipv4Address::str(bool printUnspec /* = true */) const
         return std::string("<unspec>");
 
     char buf[IPADDRESS_STRING_SIZE];
-    sprintf(buf, "%u.%u.%u.%u", (addr >> 24) & 255, (addr >> 16) & 255, (addr >> 8) & 255, addr & 255);
+    snprintf(buf, sizeof(buf), "%u.%u.%u.%u", (addr >> 24) & 255, (addr >> 16) & 255, (addr >> 8) & 255, addr & 255);
     return std::string(buf);
 }
 

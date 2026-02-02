@@ -74,12 +74,12 @@ void DscpMarker::pushPacket(Packet *packet, const cGate *inputGate)
 
 void DscpMarker::refreshDisplay() const
 {
-    char buf[50] = "";
+    std::string buf;
     if (numRcvd > 0)
-        sprintf(buf + strlen(buf), "rcvd: %d ", numRcvd);
+        buf += "rcvd: " + std::to_string(numRcvd) + " ";
     if (numMarked > 0)
-        sprintf(buf + strlen(buf), "mark:%d ", numMarked);
-    getDisplayString().setTagArg("t", 0, buf);
+        buf += "mark:" + std::to_string(numMarked) + " ";
+    getDisplayString().setTagArg("t", 0, buf.c_str());
 }
 
 bool DscpMarker::markPacket(Packet *packet, int dscp)

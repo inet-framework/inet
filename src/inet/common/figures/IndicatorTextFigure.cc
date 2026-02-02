@@ -54,7 +54,7 @@ void IndicatorTextFigure::refresh()
     }
     else {
         char buf[64];
-        sprintf(buf, textFormat.c_str(), value);
+        snprintf(buf, sizeof(buf), textFormat.c_str(), value);
         setText(buf);
     }
 }

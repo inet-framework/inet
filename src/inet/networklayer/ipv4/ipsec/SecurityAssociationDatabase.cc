@@ -48,9 +48,8 @@ SecurityAssociation *SecurityAssociationDatabase::findEntry(IPsecRule::Direction
 
 void SecurityAssociationDatabase::refreshDisplay() const
 {
-    char buf[80];
-    sprintf(buf, "entries: %ld", entries.size());
-    getDisplayString().setTagArg("t", 0, buf);
+    std::string buf = "entries: " + std::to_string(entries.size());
+    getDisplayString().setTagArg("t", 0, buf.c_str());
 }
 
 }    //ipsec namespace
