@@ -47,7 +47,7 @@ perl -i -pe $REGEXPREPLACE s/##BUILDID##/$BUILDID/g doc/neddoc/overview.html
 perl -i -pe $REGEXPREPLACE s/##BUILDID##/$BUILDID/g src/inet-index.ned
 
 # cleanup
-rm -rf _scripts doc/src doc/misc releng .github .gitattributes .gitignore .gitmodules .circleci .travis.yml .clang-format .oppfeaturestate .nedexclusions
+rm -rf _scripts doc/src doc/misc releng .agent .windsurf .github .settings .gitattributes .gitignore .gitmodules .circleci .travis.yml .clang-format .oppfeaturestate .nedexclusions
 mv .oppfeaturestate.default .oppfeaturestate
 mv .nedexclusions.default .nedexclusions
 
