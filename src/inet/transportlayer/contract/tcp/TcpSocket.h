@@ -41,8 +41,8 @@ class TcpStatusInfo;
  *
  *   Packet *packet = new Packet("data", makeShared<ByteCountChunk>(B(16*1024)));
  *   socket.send(packet);
- *
- *   socket.close();
+ *   // NOTE: close() must be called on established connection otherwise buffered data is dropped
+ *   socket.close(); 
  * </pre>
  *
  * Dealing with packets and notification messages coming from TCP is somewhat
