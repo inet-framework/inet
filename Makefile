@@ -37,7 +37,7 @@ doc:
 	@doxygen doxy.cfg
 
 ddoc:
-	@cd doc/src && ./docker-make html && echo "===> file:$$(pwd)/_build/html/index.html"
+	@cd doc/src && ./doc-build html && echo "===> file:$$(pwd)/_build/html/index.html"
 
 $(SELFDOC).xml: $(SELFDOC).json
 	@inet_selfdoc_json2xml <$< >$@
