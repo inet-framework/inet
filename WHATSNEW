@@ -1,20 +1,20 @@
 Recent changes in the INET Framework
 ====================================
 
-INET-4.6 (January 2026) - Stable
---------------------------------
+INET-4.6 (February 2026) - Stable
+---------------------------------
 
-This is a new minor stable release in the INET 4.x branch. Highlights include
-new protocol implementations for QUIC, Ethernet 10BASE-T1S, IPsec, and MRP;
-major refinements to the clock model; a reimplementation of IEEE 802.1AS (gPTP);
-and an important refactoring of the wireless physical layer's analog domain. The
+This is a new feature release in the INET 4.x branch. Highlights include new
+protocol implementations for QUIC, Ethernet 10BASE-T1S, IPsec, and MRP; major
+refinements to the clock model; a reimplementation of IEEE 802.1AS (gPTP); and
+an important refactoring of the wireless physical layer's analog domain. The
 release continues to focus on improving correctness, accuracy, modularity, and
 long-term maintainability while addressing several long-standing limitations.
 OMNeT++ 6.2 or later is required.
 
-For a complete list of added, removed, and changed folders, NED modules, packet
-chunks, packet tags, statistics, C++ classes, and signals, see the ChangeLog
-file in the src folder.
+For a complete list of added, removed, and changed features, folders, modules,
+packet chunks, packet tags, signals, statistics, and C++ classes, see the
+ChangeLog file in the src folder.
 
 Notable backward-incompatible changes include the following:
 
@@ -38,8 +38,8 @@ Notable backward-incompatible changes include the following:
    The architecture was modularized to allow multiple clocks to share a single
    physical oscillator via the clock's oscillatorModule parameter. SettableClock
    now includes an underlying free-running clock submodule to support
-   simulations that mix synchronized and unsynchronized time. A new clock servo
-   framework was introduced, including the IClockServo module interface and the
+   simulations that mix synchronized and unsynchronized time. A clock servo
+   model was added, including the IClockServo module interface and the
    StepClockServo module for implementation.
 
    Clock event handling was also refined: overdue events are now processed
@@ -138,12 +138,12 @@ Notable backward compatible changes are the following:
 
 1. 10BASE-T1S Ethernet physical layer
 
-   A new 10BASE-T1S Ethernet model was added, implementing Physical Layer
-   Collision Avoidance (PLCA) in accordance with IEEE 802.3cg. The PLCA
-   Reconciliation Sublayer provides deterministic access to the shared medium by
-   assigning transmit opportunities (TOs) to nodes in a round-robin manner,
-   effectively eliminating the collisions typical of CSMA/CD and enabling
-   efficient half-duplex communication.
+   A 10BASE-T1S Ethernet model was added, implementing Physical Layer Collision
+   Avoidance (PLCA) in accordance with IEEE 802.3cg. The PLCA Reconciliation
+   Sublayer provides deterministic access to the shared medium by assigning
+   transmit opportunities (TOs) to nodes in a round-robin manner, effectively
+   eliminating the collisions typical of CSMA/CD and enabling efficient
+   half-duplex communication.
 
    Unlike traditional point-to-point Ethernet topologies, 10BASE-T1S supports a
    multidrop bus (mixing segment) in which multiple nodes can be daisy-chained
@@ -156,7 +156,7 @@ Notable backward compatible changes are the following:
 
 2. QUIC transport protocol
 
-   A new implementation of the QUIC transport protocol was added, designed to be
+   An implementation of the QUIC transport protocol was added, designed to be
    structurally modular, and suitable for performance and protocol-level
    experimentation. It models connection-oriented QUIC over UDP with explicit
    connection and socket management, supports the full handshake including 0-RTT
@@ -236,7 +236,7 @@ Notable backward compatible changes are the following:
    initiating route discovery for the specified gateway. Once the route to the
    gateway is discovered, external packets are queued and forwarded accordingly.
 
-   A new showcase was added demonstrating AODV support for routing traffic to
+   A showcase was added demonstrating AODV support for routing traffic to
    external networks via a statically configured gateway, featuring a wireless
    ad hoc network communicating with a wired Ethernet host through a gateway
    router.
@@ -248,12 +248,9 @@ Notable backward compatible changes are the following:
    data structures to track neighbors on a per-interface basis. Beacons are now
    sent on all configured interfaces, neighbor information stores both position
    and interface ID, and packet forwarding correctly uses the interface
-   associated with the selected neighbor for greedy or perimeter routing.
-
-   The internal tables were reorganized by renaming PositionTable to
-   GpsrPositionTable, removing unused functionality, and introducing a new
-   GpsrNeighborTable. These changes are demonstrated in an updated
-   ManetProtocolsShowcase using the unified radio architecture.
+   associated with the selected neighbor for greedy or perimeter routing. The
+   internal tables were reorganized by removing unused functionality, renaming
+   PositionTable to GpsrPositionTable, and introducing GpsrNeighborTable.
 
 8. Extended host OS support
 
@@ -336,7 +333,7 @@ Notable backward compatible changes are the following:
 
 12. Packet serializers
 
-   A new Ieee802154MacHeaderSerializer has been added to support the binary
+   An Ieee802154MacHeaderSerializer has been added to support the binary
    representation of the IEEE 802.15.4 protocol. In addition, new serializers
    were introduced for non-standard INET specific protocols or technologies:
    GenericPhyHeaderSerializer, ShortcutPhyHeaderSerializer, and
@@ -347,12 +344,12 @@ Notable backward compatible changes are the following:
    instability caused by serializing internal protocol IDs into the binary
    representation.
 
-   A new StreamBufferChunkSerializer was added to enable serialization of frames
+   A StreamBufferChunkSerializer was added to enable serialization of frames
    transmitted using Ethernet cut-through switching.
 
 13. RIP routing tutorial
 
-   A new multi-step tutorial has been added to introduce the fundamentals of the
+   A multi-step tutorial has been added to introduce the fundamentals of the
    Routing Information Protocol (RIP). It guides users through RIP operation and
    convergence, illustrating split horizon, triggered updates, and the impact of
    protocol timing on stability. The tutorial also explores route management
@@ -383,12 +380,7 @@ Notable backward compatible changes are the following:
    TSN scenario that demonstrates the simultaneous use of Frame Preemption and
    Time-Aware Shaping (TAS).
 
-   The emulation/voip showcase models real-time VoIP communication using the
-   VoipStreamSender and VoipStreamReceiver applications. It includes detailed
-   configurations and scripts for running simulations over loopback interfaces
-   and virtual Ethernet (veth) pairs.
-
-   The emulation/mininet showcase, extracted from the original VoIP example, is
+   The emulation/mininet showcase, extracted from the original VoIP showcase, is
    now a standalone demonstration of running INET applications within a Mininet
    environment. It uses an AppContainer-based network structure to connect
    simulated traffic with external Mininet components.
@@ -432,19 +424,19 @@ Notable backward compatible changes are the following:
    Improved robustness and timing accuracy of the RealTimeScheduler. Reduced
    spurious overruns and improved behavior under host load.
 
-   Added a new ModuleDump module that can print a module's hierarchy and
-   parameters for debugging and comparison across simulations. Optional
-   ModuleDump submodules were also added to NetworkBase, enabling partial or
-   full network dumps via command line or INI file configuration.
+   Added a ModuleDump module that can print a module's hierarchy and parameters
+   for debugging and comparison across simulations. Optional ModuleDump
+   submodules were also added to NetworkBase, enabling partial or full network
+   dumps via command line or INI file configuration.
 
-   Added ChannelOwnerRecorder, a new result recorder that records which module
+   Added ChannelOwnerRecorder, a result recorder that records which module
    currently owns a communication channel. Useful for debugging resource
    contention and validating channel access behavior. Added a channelOwner
    statistic to WireJunction module to record the owning network node in the
    collision domain.
 
-   Added a new SimulationCpuUsageMeasurer module that measures the CPU time used
-   by a simulation and records it as a scalar statistic. It can be used for
+   Added a SimulationCpuUsageMeasurer module that measures the CPU time used by
+   a simulation and records it as a scalar statistic. It can be used for
    performance analysis and benchmarking simulations.
 
    Added parameters to the MessageDispatcher module to allow directly
