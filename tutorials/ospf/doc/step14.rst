@@ -74,8 +74,7 @@ After OSPF convergence, the network exhibits the following behavior:
     *   **R5** learns about the 192.168.11.x networks via Summary LSAs from **R4**
 
 The routing table shows inter-area routes (learned via Summary LSAs) alongside
-intra-area routes. The routing table visualizer output confirms that all routers
-can reach all networks through the hierarchical OSPF structure.
+intra-area routes.
 
 Sources:
 :download:`omnetpp.ini <../omnetpp.ini>`,
