@@ -2618,7 +2618,7 @@ std::string Ospfv2Area::getInterfaceInfo() const
     const char *sep = "  ";
     for (auto item : associatedInterfaces)
     {
-        info += sep + item->getInterfaceName() + ": " + item->getTypeString() + "|" + item->getStateString() + "|" + item->getModeString();
+        info += sep + item->getInterfaceName() + ": " + item->getTypeString() + "|" + item->getStateString() + "|" + item->getModeString() + "|" + item->getNeighbors();
         sep = "\n  ";
     }
     return info;
