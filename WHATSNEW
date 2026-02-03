@@ -1,8 +1,8 @@
 Recent changes in the INET Framework
 ====================================
 
-INET-4.6 (February 2026) - Stable
----------------------------------
+INET-4.6 (February 2026) — feature release
+------------------------------------------
 
 This is a new feature release in the INET 4.x branch. Highlights include new
 protocol implementations for QUIC, Ethernet 10BASE-T1S, IPsec, and MRP; major
@@ -10,11 +10,15 @@ refinements to the clock model; a reimplementation of IEEE 802.1AS (gPTP); and
 an important refactoring of the wireless physical layer's analog domain. The
 release continues to focus on improving correctness, accuracy, modularity, and
 long-term maintainability while addressing several long-standing limitations.
-OMNeT++ 6.2 or later is required.
+Requires OMNeT++ 6.2 or later.
 
-For a complete list of added, removed, and changed features, folders, modules,
-packet chunks, packet tags, signals, statistics, and C++ classes, see the
-ChangeLog file in the src folder.
+For the full list of additions, removals, and changes (features, modules, packet
+chunks/tags, signals, statistics, and C++ classes), see ChangeLog in the src
+folder.
+
+For further questions, detailed explanations, and guided exploration of INET
+concepts and features, a dedicated AI-powered wiki is now available at
+https://deepwiki.com/inet-framework/inet
 
 Notable backward-incompatible changes include the following:
 
@@ -22,11 +26,11 @@ Notable backward-incompatible changes include the following:
 
    The clock and oscillator models were substantially reworked to improve
    accuracy, correctness, and robustness. Clock time to simulation time mapping
-   and clock time interval to number of oscillator ticks conversions were
-   rewritten for mathematical correctness, with stricter consistency checks.
-   Accuracy was improved through precise arithmetic and new scaling utilities
-   such as the NumberNear1 and SimTimeScale classes. The design is prepared for
-   future 128-bit simulation time support.
+   and clock-interval to oscillator-tick conversions were rewritten for
+   mathematical correctness, with stricter consistency checks. Accuracy was
+   improved using precise arithmetic and new scaling utilities (e.g.,
+   NumberNear1 and SimTimeScale). The design anticipates future 128-bit
+   simulation time support.
 
    The updated model now accumulates fractional oscillator compensation for more
    accurate timing. The clock's nominal tick interval must be explicitly
@@ -43,11 +47,11 @@ Notable backward-incompatible changes include the following:
    StepClockServo module for implementation.
 
    Clock event handling was also refined: overdue events are now processed
-   immediately in clock-time order, and newly scheduled events are inserted at
-   the lower bound of the corresponding simulation-time interval while
-   preserving stable ordering. Clock time to simulation time conversion methods
-   now accept explicit lower-bound arguments to ensure robust tie-breaking
-   between adjacent ticks.
+   immediately, in clock-time order, and newly scheduled events are inserted at
+   the lower bound of the corresponding simulation-time interval, preserving
+   stable ordering. Clock time to simulation time conversion methods now accept
+   explicit lower-bound arguments to ensure robust tie-breaking between adjacent
+   ticks.
 
    Clock and oscillator documentation was significantly expanded and formalized
    to reflect the stricter semantics of the new implementation.
@@ -71,14 +75,14 @@ Notable backward-incompatible changes include the following:
 
    For improved standards compliance, message timestamping now occurs at
    transmission start and reception start rather than at completion. As a
-   result, simulations must use physical layer modules that provide explicit
+   result, simulations must use physical layer modules that emit explicit
    start-of-transmission and start-of-reception signals, such as the
    StreamingTransmitter and DestreamingReceiver modules.
 
    Due to the high precision required for time synchronization, accurately
    modeling a 1 ppm clock drift with a nominal 10 ns tick interval requires very
    fine time granularity. gPTP simulations therefore typically require
-   femtosecond (fs) simulation time resolution, which can be enabled using the
+   femtosecond (fs) simulation time resolution, which can be enabled via the
    simtime-resolution configuration option.
 
    This change is backward incompatible in that simulations using gPTP may
@@ -88,11 +92,11 @@ Notable backward-incompatible changes include the following:
 3. Ethernet module renames
 
    Existing Ethernet MAC modules were renamed to use the MacPhy suffix (e.g.
-   EthernetMacPhy, EthernetCsmaMacPhy) to reflect that they implement both MAC
-   and PHY functionality in a single module. This resolves naming conflicts
-   introduced by the new dedicated EthernetCsmaMac and EthernetCsmaPhy modules,
-   which provide a modern, state-machine-based implementation of the individual
-   layers and are primarily used by the new Ethernet 10BASE-T1S model.
+   EthernetMacPhy, EthernetCsmaMacPhy) to reflect that they combine MAC and PHY
+   functionality in a single module. This resolves naming conflicts introduced
+   by the new dedicated EthernetCsmaMac and EthernetCsmaPhy modules, which
+   provide a modern, state-machine-based implementation of the individual layers
+   and are primarily used by the new Ethernet 10BASE-T1S model.
 
    These changes are backward incompatible for simulations that directly
    reference the old module names.
@@ -102,8 +106,7 @@ Notable backward-incompatible changes include the following:
    The wireless physical layer was significantly refactored to simplify how the
    analog representation of radio signals is selected. Instead of using separate
    module types, radio and medium modules now use a signalAnalogRepresentation
-   parameter (with values unitDisk, scalar, or dimensional) to control their
-   behavior.
+   parameter (unitDisk, scalar, or dimensional) to control their behavior.
 
    Responsibility for computing reception success was partially moved from
    receiver modules to their analog model submodules. To reflect broader
@@ -114,7 +117,7 @@ Notable backward-incompatible changes include the following:
 
    Specific wireless technologies, including IEEE 802.11, IEEE 802.15.4, and
    APSK, were refactored to align with the new architecture and can now be used
-   with the unit disk signal analog representation.
+   with the unitDisk signal analog representation.
 
 5. CRC, FCS, and Checksum
 
@@ -132,7 +135,7 @@ Notable backward-incompatible changes include the following:
    preserving existing behavior by default.
 
    Note that these changes are backward incompatible for simulations that
-   explicitly configure crcMode or fcsMode parameters.
+   explicitly configure the old crcMode or fcsMode parameters.
 
 Notable backward compatible changes are the following:
 
@@ -241,7 +244,7 @@ Notable backward compatible changes are the following:
    ad hoc network communicating with a wired Ethernet host through a gateway
    router.
 
-7. GPSR multipe network interfaces
+7. GPSR multiple network interfaces
 
    The GPSR (Greedy Perimeter Stateless Routing) protocol was updated to support
    simultaneous use of multiple network interfaces, with refactored logic and
@@ -275,10 +278,10 @@ Notable backward compatible changes are the following:
    and pull-based interfaces. Most modules now treat connected sources and sinks
    as optional, enabling these modules to also connect to non-queueing elements.
 
-   Classifiers and schedulers have been extended to enable pulling from and
-   pushing to packets, respectively. Typically, however, they are used the other
-   way around, with packets being pushed into classifiers and pulled from
-   schedulers.
+   Classifiers and schedulers have been extended to enable pulling packets from
+   them and pushing packets to them, respectively. Typically, however, they are
+   used the other way around, with packets being pushed into classifiers and
+   pulled from schedulers.
 
    Several new modules and module interfaces have also been added. For example,
    the QueueBasedTokenGenerator allows the QueueFiller module to generate
@@ -295,7 +298,7 @@ Notable backward compatible changes are the following:
 
    In addition, passive packet sinks have been extended with optional statistics
    to detect duplicate, out-of-order, and missing packets based on packet name
-   index suffixes. To name a few additonal statistical changes, the
+   index suffixes. To name a few additional statistical changes, the
    MultiTokenBucketMeter and MultiTokenBucketClassifier modules now record
    separate statistics for each individual token bucket they contain, and the
    SlidingWindowRateMeter and ExponentialRateMeter modules now provide
@@ -318,13 +321,13 @@ Notable backward compatible changes are the following:
    FCS headers, and EthernetFcsHeaderChecker, which checks and strips Ethernet
    FCS headers.
 
-   Added modules for the EtherType Protocol Discrimination (EPD) header
-   support IEEE 802 LLC implementations.
+   Added modules to support the EtherType Protocol Discrimination (EPD) header
+   used by IEEE 802 LLC implementations.
 
 11. Visualizers
 
    The RoutingTableCanvasVisualizer has been extended with a lazy update
-   mechanism that refreshes visualizations only when needed, grealy improving
+   mechanism that refreshes visualizations only when needed, greatly improving
    performance. Support for multicast routing tables has been added, along with
    new filtering parameters to control multicast group, source address, and
    source node visualization.
@@ -412,7 +415,7 @@ Notable backward compatible changes are the following:
 
 18. Notable bug fixes and other changes
 
-   Introduced new SimpleModule, CompoundModule, and ModuleMixin as standard
+   Added INET-specific SimpleModule, CompoundModule, and ModuleMixin as standard
    bases to derive all modules from. They have a displayStringTextFormat
    parameter that supports the old style format directives and also WATCH
    variable references. Deriving new or existing modules from these bases is
@@ -443,7 +446,7 @@ Notable backward compatible changes are the following:
    controlling the message dispatching mechanism, in contrast with the automatic
    learning of protocol and interface registrations.
 
-   Improved EIGROP on stability, cleanup, and modernization. Several bugs were
+   Improved EIGROP stability, cleanup, and modernization. Several bugs were
    fixed to prevent dangling pointers, handle dynamic neighbor changes
    correctly, and align IPv4 route removal with IPv6 behavior. Core code paths
    were refactored to use modern C++ constructs, missing interface parameters
@@ -456,8 +459,9 @@ Notable backward compatible changes are the following:
    evaluation, with the index tracked per context component path. The par()
    function allows dynamic access to module parameters inside expressions.
 
-   All filename module parameters now support substitution, allowing config
-   name, experiment, iteration, run numbers, etc. to be included in filenames.
+   All module parameters specifying filenames now support substitution, allowing
+   config name, experiment, iteration, run number, etc. to be referenced in the
+   values.
 
    Added the DemuxAppFilter, a result filter that de-multiplexes signals by
    their originating application module, making it easy to record
@@ -495,7 +499,7 @@ Notable backward compatible changes are the following:
    Removed all per-folder ChangeLog files that summarized local changes, since
    they are no longer useful with current AI tools.
 
-   Several additional issues documented on GitHub have also been fixed.
+   Several additional issues reported on GitHub have also been fixed.
 
 
 INET-4.5 (April 2023) - Stable
