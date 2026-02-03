@@ -14,7 +14,9 @@ module OspfLan
     gates:
         inout ethg[];
     submodules:
-        switch: EthernetSwitch;
+        switch: EthernetSwitch {
+            @display("p=100,100");
+        }
         host[h]: StandardHost {
             @display("p=199,159");
         }

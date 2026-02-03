@@ -43,7 +43,7 @@ With the virtual link configured:
 
 2.  The virtual link is treated as part of Area 0 (the backbone).
 
-3.  LSAs can now be exchanged between the previously disconnected parts of the topology.
+3.  LSAs can now be exchanged between the previously disconnected parts of the topology. TODO not sure
 
 4.  Inter-area routing works correctly as if the areas were physically connected to the backbone.
 

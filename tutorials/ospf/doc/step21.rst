@@ -48,7 +48,7 @@ The routing tables show that routes are successfully computed across the previou
 backbone using the virtual link as a bridge.
 
 Virtual links are a temporary solution; proper network design should maintain a contiguous
-backbone.
+backbone. TODO are we sure?
 
 Sources:
 :download:`omnetpp.ini <../omnetpp.ini>`,

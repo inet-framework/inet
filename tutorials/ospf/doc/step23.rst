@@ -43,7 +43,12 @@ Results
 
 The simulation demonstrates route selection hierarchy:
 
-1.  Multiple routers advertise the same destination (1.1.1.0/24) using different methods.
+1.  Multiple routers advertise the same destination (1.1.1.0/24) using different methods:
+
+    - R2: Intra-area (RouterLsa), cost 1
+    - R3: Inter-area (SummaryLsa), cost 2
+    - R4: External Type-1 (NetworkLsa), cost 10
+    - R5: External Type-2 (NetworkLsa), cost 1
 
 2.  At t=60s, the link between R1 and R2 breaks, changing available paths.
 

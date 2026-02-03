@@ -49,12 +49,12 @@ The simulation demonstrates Summary LSA acceptance rules:
 
 3.  R2 no longer has any Full adjacencies in Area 0.
 
-4.  In this state, R2 begins accepting Summary LSAs from non-backbone areas.
+4.  In this state, R2 begins accepting Summary LSAs from non-backbone areas. TODO it doesnt
 
-5.  This allows R2 to maintain some level of connectivity even when isolated from the backbone.
+5.  This allows R2 to maintain some level of connectivity even when isolated from the backbone. TODO it is connected to R2A only, but its NetworkLSA
 
 6.  The routing table changes show how R2's routes change when it loses backbone connectivity
-    and begins accepting Summary LSAs from other areas.
+    and begins accepting Summary LSAs from other areas. TODO it doesnt
 
 This demonstrates OSPF's flexibility in handling partial connectivity failures while still
 maintaining loop-prevention mechanisms.

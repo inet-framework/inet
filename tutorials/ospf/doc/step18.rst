@@ -50,8 +50,9 @@ With Type-1 external routes:
 3.  When routers calculate routes to these external destinations, they use:
     **Total Cost = External Cost + Internal Cost to ASBR**
 
-4.  This means routers prefer the ASBR that is closest to them (lowest internal cost),
-    even if that ASBR advertises a slightly higher external cost.
+4.  Routers select the ASBR with the lowest total cost. This may result in
+    choosing a closer ASBR even if it advertises a higher external cost, as long
+    as the total cost remains lower.
 
 5.  Different routers may choose different ASBRs for the same destination based on their
     location in the topology.

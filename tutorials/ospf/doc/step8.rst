@@ -45,10 +45,7 @@ When all routers have priority 0:
 
 1.  The DR/BDR election completes, but no router is elected as DR or BDR.
 
-2.  Routers on the multi-access network detect each other but only reach the 2-Way state
-    (they do not form Full adjacencies).
-
-3.  No Network LSA is generated for the Ethernet segment.
+3.  No Network LSA is generated for the Ethernet segment. TODO the whole thing is ethernet
 
 4.  The OSPF topology is incomplete - the multi-access network is not visible to the routing
     protocol.

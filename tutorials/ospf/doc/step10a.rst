@@ -48,7 +48,7 @@ In General, routes that used a failed router as a next-hop or transit router are
 if available.
 
 This demonstrates OSPF's resilience to complete router failures, automatically routing around
-failed devices.
+failed devices. TODO it doesnt
 
 Sources:
 :download:`omnetpp.ini <../omnetpp.ini>`,

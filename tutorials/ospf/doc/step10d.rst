@@ -37,7 +37,7 @@ When R1 (the DR) is shutdown at t=60s:
 2.  **The BDR (R5) immediately becomes the new DR.** This is a critical OSPF feature - the
     BDR is pre-synchronized and ready to take over.
 
-3.  **A new BDR is elected** from the remaining DROthers. Since all remaining DROthers have priority 1, the new DBR is R4.
+3.  **A new BDR is elected** from the remaining DROthers (R6). Since all remaining DROthers have priority 1, the new DBR is R4.
 
 4.  The new DR (formerly the BDR) begins generating Network LSAs for the multi-access network.
 

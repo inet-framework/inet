@@ -55,7 +55,7 @@ The simulation demonstrates adjacency formation failures:
 
 2.  **R4 and R5**: With mismatched network types, they have incompatible views of how
     the link should operate (e.g., one expecting DR election, the other not), preventing
-    proper adjacency formation.
+    proper adjacency formation. TODO they have full adjacency
 
 The OSPF module logs show the routers detecting neighbors but failing to reach the Full
 state. The routing tables reflect the missing adjacencies - routes that would normally
