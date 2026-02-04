@@ -1,6 +1,10 @@
 <?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
 <tagfile>
   <compound kind="class">
+    <name>AckFrameHeader</name>
+    <filename>inet-quic-AckFrameHeader.html</filename>
+  </compound>
+  <compound kind="class">
     <name>AckingMacHeader</name>
     <filename>inet-AckingMacHeader.html</filename>
   </compound>
@@ -11,6 +15,10 @@
   <compound kind="class">
     <name>AckPolicy</name>
     <filename>inet-ieee80211-AckPolicy.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>AckRange</name>
+    <filename>inet-quic-AckRange.html</filename>
   </compound>
   <compound kind="class">
     <name>AddressBlock</name>
@@ -253,6 +261,26 @@
     <filename>inet-CareOfTestInit.html</filename>
   </compound>
   <compound kind="class">
+    <name>CfmContinuityCheckMessage</name>
+    <filename>inet-CfmContinuityCheckMessage.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>CfmMessage</name>
+    <filename>inet-CfmMessage.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>ChecksumHeader</name>
+    <filename>inet-ChecksumHeader.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>ChecksumMode</name>
+    <filename>inet-ChecksumMode.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>ChecksumType</name>
+    <filename>inet-ChecksumType.html</filename>
+  </compound>
+  <compound kind="class">
     <name>Chunk</name>
     <filename>inet-Chunk.html</filename>
   </compound>
@@ -293,6 +321,14 @@
     <filename>inet-physicallayer-ConfigureRadioCommand.html</filename>
   </compound>
   <compound kind="class">
+    <name>ConnectionCloseFrameHeader</name>
+    <filename>inet-quic-ConnectionCloseFrameHeader.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>ContinuityCheckTimer</name>
+    <filename>inet-ContinuityCheckTimer.html</filename>
+  </compound>
+  <compound kind="class">
     <name>Coord</name>
     <filename>inet-Coord.html</filename>
   </compound>
@@ -301,20 +337,16 @@
     <filename>inet-cPacketChunk.html</filename>
   </compound>
   <compound kind="class">
-    <name>CrcHeader</name>
-    <filename>inet-CrcHeader.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>CrcMode</name>
-    <filename>inet-CrcMode.html</filename>
-  </compound>
-  <compound kind="class">
     <name>CreationTimeTag</name>
     <filename>inet-CreationTimeTag.html</filename>
   </compound>
   <compound kind="class">
     <name>CreditGateTag</name>
     <filename>inet-CreditGateTag.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>CryptoFrameHeader</name>
+    <filename>inet-quic-CryptoFrameHeader.html</filename>
   </compound>
   <compound kind="class">
     <name>CsmaCaMacAckHeader</name>
@@ -339,6 +371,10 @@
   <compound kind="class">
     <name>CutthroughTag</name>
     <filename>inet-CutthroughTag.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>DataBlockedFrameHeader</name>
+    <filename>inet-quic-DataBlockedFrameHeader.html</filename>
   </compound>
   <compound kind="class">
     <name>DcTcpFamilyStateVariables</name>
@@ -471,6 +507,10 @@
   <compound kind="class">
     <name>EcnTagBase</name>
     <filename>inet-EcnTagBase.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>Ed1DataLength</name>
+    <filename>inet-Ed1DataLength.html</filename>
   </compound>
   <compound kind="class">
     <name>EigrpIpv4Ack</name>
@@ -721,14 +761,6 @@
     <filename>inet-EulerAngles.html</filename>
   </compound>
   <compound kind="class">
-    <name>FcsHeader</name>
-    <filename>inet-FcsHeader.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>FcsMode</name>
-    <filename>inet-FcsMode.html</filename>
-  </compound>
-  <compound kind="class">
     <name>FecTlv</name>
     <filename>inet-FecTlv.html</filename>
   </compound>
@@ -771,6 +803,14 @@
   <compound kind="class">
     <name>FragmentTag</name>
     <filename>inet-FragmentTag.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>FrameHeader</name>
+    <filename>inet-quic-FrameHeader.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>FrameHeaderType</name>
+    <filename>inet-quic-FrameHeaderType.html</filename>
   </compound>
   <compound kind="class">
     <name>FrameSequenceContext</name>
@@ -821,10 +861,6 @@
     <filename>inet-GptpFollowUpInformationTlv.html</filename>
   </compound>
   <compound kind="class">
-    <name>GptpIngressTimeInd</name>
-    <filename>inet-GptpIngressTimeInd.html</filename>
-  </compound>
-  <compound kind="class">
     <name>GptpMessageType</name>
     <filename>inet-GptpMessageType.html</filename>
   </compound>
@@ -849,14 +885,6 @@
     <filename>inet-GptpPortType.html</filename>
   </compound>
   <compound kind="class">
-    <name>GptpReqAnswerEvent</name>
-    <filename>inet-GptpReqAnswerEvent.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>GptpSelfMsgKind</name>
-    <filename>inet-GptpSelfMsgKind.html</filename>
-  </compound>
-  <compound kind="class">
     <name>GptpSync</name>
     <filename>inet-GptpSync.html</filename>
   </compound>
@@ -875,6 +903,14 @@
   <compound kind="class">
     <name>GroupRecordType</name>
     <filename>inet-GroupRecordType.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>HandshakeDoneFrameHeader</name>
+    <filename>inet-quic-HandshakeDoneFrameHeader.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>HandshakePacketHeader</name>
+    <filename>inet-quic-HandshakePacketHeader.html</filename>
   </compound>
   <compound kind="class">
     <name>HeaderOpcode</name>
@@ -951,6 +987,10 @@
   <compound kind="class">
     <name>IcmpEchoRequest</name>
     <filename>inet-IcmpEchoRequest.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>IcmpErrorInd</name>
+    <filename>inet-IcmpErrorInd.html</filename>
   </compound>
   <compound kind="class">
     <name>IcmpHeader</name>
@@ -1549,6 +1589,10 @@
     <filename>inet-Indication.html</filename>
   </compound>
   <compound kind="class">
+    <name>InitialPacketHeader</name>
+    <filename>inet-quic-InitialPacketHeader.html</filename>
+  </compound>
+  <compound kind="class">
     <name>InProgressFrames</name>
     <filename>inet-ieee80211-InProgressFrames.html</filename>
   </compound>
@@ -1985,6 +2029,14 @@
     <filename>inet-LMacType.html</filename>
   </compound>
   <compound kind="class">
+    <name>LongPacketHeader</name>
+    <filename>inet-quic-LongPacketHeader.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>LongPacketHeaderType</name>
+    <filename>inet-quic-LongPacketHeaderType.html</filename>
+  </compound>
+  <compound kind="class">
     <name>m</name>
     <filename>inet-m.html</filename>
   </compound>
@@ -2017,6 +2069,14 @@
     <filename>inet-physicalenvironment-Material.html</filename>
   </compound>
   <compound kind="class">
+    <name>MaxDataFrameHeader</name>
+    <filename>inet-quic-MaxDataFrameHeader.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>MaxStreamDataFrameHeader</name>
+    <filename>inet-quic-MaxStreamDataFrameHeader.html</filename>
+  </compound>
+  <compound kind="class">
     <name>Message</name>
     <filename>inet-Message.html</filename>
   </compound>
@@ -2039,6 +2099,70 @@
   <compound kind="class">
     <name>MplsHeader</name>
     <filename>inet-MplsHeader.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>MrpCommon</name>
+    <filename>inet-MrpCommon.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>MrpEnd</name>
+    <filename>inet-MrpEnd.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>MrpInLinkChange</name>
+    <filename>inet-MrpInLinkChange.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>MrpInLinkStatusPoll</name>
+    <filename>inet-MrpInLinkStatusPoll.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>MrpInTest</name>
+    <filename>inet-MrpInTest.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>MrpInTopologyChange</name>
+    <filename>inet-MrpInTopologyChange.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>MrpLinkChange</name>
+    <filename>inet-MrpLinkChange.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>MrpManufacturerFkt</name>
+    <filename>inet-MrpManufacturerFkt.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>MrpOption</name>
+    <filename>inet-MrpOption.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>MrpOuiType</name>
+    <filename>inet-MrpOuiType.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>MrpSubTlvHeader</name>
+    <filename>inet-MrpSubTlvHeader.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>MrpSubTlvTest</name>
+    <filename>inet-MrpSubTlvTest.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>MrpTest</name>
+    <filename>inet-MrpTest.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>MrpTlvHeader</name>
+    <filename>inet-MrpTlvHeader.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>MrpTopologyChange</name>
+    <filename>inet-MrpTopologyChange.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>MrpVersion</name>
+    <filename>inet-MrpVersion.html</filename>
   </compound>
   <compound kind="class">
     <name>MulticastReq</name>
@@ -2073,6 +2197,10 @@
     <filename>inet-NetworkProtocolReq.html</filename>
   </compound>
   <compound kind="class">
+    <name>NewTokenFrameHeader</name>
+    <filename>inet-quic-NewTokenFrameHeader.html</filename>
+  </compound>
+  <compound kind="class">
     <name>NextHopAddressReq</name>
     <filename>inet-NextHopAddressReq.html</filename>
   </compound>
@@ -2087,6 +2215,10 @@
   <compound kind="class">
     <name>Ohmm</name>
     <filename>inet-Ohmm.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>OneRttPacketHeader</name>
+    <filename>inet-quic-OneRttPacketHeader.html</filename>
   </compound>
   <compound kind="class">
     <name>OspfPacketBase</name>
@@ -2309,6 +2441,14 @@
     <filename>inet-PacketEventTag.html</filename>
   </compound>
   <compound kind="class">
+    <name>PacketHeader</name>
+    <filename>inet-quic-PacketHeader.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>PacketHeaderForm</name>
+    <filename>inet-quic-PacketHeaderForm.html</filename>
+  </compound>
+  <compound kind="class">
     <name>PacketHolderMessage</name>
     <filename>inet-aodv-PacketHolderMessage.html</filename>
   </compound>
@@ -2323,6 +2463,10 @@
   <compound kind="class">
     <name>PacketTransmittedEvent</name>
     <filename>inet-PacketTransmittedEvent.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>PaddingFrameHeader</name>
+    <filename>inet-quic-PaddingFrameHeader.html</filename>
   </compound>
   <compound kind="class">
     <name>PathNotifyMsg</name>
@@ -2385,6 +2529,10 @@
     <filename>inet-PimStateRefresh.html</filename>
   </compound>
   <compound kind="class">
+    <name>PingFrameHeader</name>
+    <filename>inet-quic-PingFrameHeader.html</filename>
+  </compound>
+  <compound kind="class">
     <name>PingSelfKinds</name>
     <filename>inet-PingSelfKinds.html</filename>
   </compound>
@@ -2403,6 +2551,14 @@
   <compound kind="class">
     <name>ProbabilisticBroadcastHeader</name>
     <filename>inet-ProbabilisticBroadcastHeader.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>ProbeTimerMessage</name>
+    <filename>inet-quic-ProbeTimerMessage.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>ProcessDelayTimer</name>
+    <filename>inet-ProcessDelayTimer.html</filename>
   </compound>
   <compound kind="class">
     <name>ProcessingTimeTag</name>
@@ -2447,6 +2603,54 @@
   <compound kind="class">
     <name>QueueingTimeTag</name>
     <filename>inet-QueueingTimeTag.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>QuicAcceptCommand</name>
+    <filename>inet-QuicAcceptCommand.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>QuicBindCommand</name>
+    <filename>inet-QuicBindCommand.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>QuicCommand</name>
+    <filename>inet-QuicCommand.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>QuicCommandCode</name>
+    <filename>inet-QuicCommandCode.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>QuicConnectionAvailableInfo</name>
+    <filename>inet-QuicConnectionAvailableInfo.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>QuicConnectionInfo</name>
+    <filename>inet-QuicConnectionInfo.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>QuicDataInfo</name>
+    <filename>inet-QuicDataInfo.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>QuicNewToken</name>
+    <filename>inet-QuicNewToken.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>QuicOpenCommand</name>
+    <filename>inet-QuicOpenCommand.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>QuicRecvCommand</name>
+    <filename>inet-QuicRecvCommand.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>QuicStatusInd</name>
+    <filename>inet-QuicStatusInd.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>QuicStreamReq</name>
+    <filename>inet-QuicStreamReq.html</filename>
   </compound>
   <compound kind="class">
     <name>rad</name>
@@ -2495,6 +2699,10 @@
   <compound kind="class">
     <name>ResidenceTimeTag</name>
     <filename>inet-ResidenceTimeTag.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>RetryPacketHeader</name>
+    <filename>inet-quic-RetryPacketHeader.html</filename>
   </compound>
   <compound kind="class">
     <name>RipAf</name>
@@ -3033,6 +3241,10 @@
     <filename>inet-ShortcutPhyHeader.html</filename>
   </compound>
   <compound kind="class">
+    <name>ShortPacketHeader</name>
+    <filename>inet-quic-ShortPacketHeader.html</filename>
+  </compound>
+  <compound kind="class">
     <name>Signal</name>
     <filename>inet-physicallayer-Signal.html</filename>
   </compound>
@@ -3145,6 +3357,14 @@
     <filename>inet-StreamBufferChunk.html</filename>
   </compound>
   <compound kind="class">
+    <name>StreamDataBlockedFrameHeader</name>
+    <filename>inet-quic-StreamDataBlockedFrameHeader.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>StreamFrameHeader</name>
+    <filename>inet-quic-StreamFrameHeader.html</filename>
+  </compound>
+  <compound kind="class">
     <name>StreamInd</name>
     <filename>inet-StreamInd.html</filename>
   </compound>
@@ -3159,6 +3379,10 @@
   <compound kind="class">
     <name>SubpacketLengthHeader</name>
     <filename>inet-SubpacketLengthHeader.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>SubTlvHeaderType</name>
+    <filename>inet-SubTlvHeaderType.html</filename>
   </compound>
   <compound kind="class">
     <name>TagBase</name>
@@ -3341,6 +3565,10 @@
     <filename>inet-TimeTagBase.html</filename>
   </compound>
   <compound kind="class">
+    <name>TlvHeaderType</name>
+    <filename>inet-TlvHeaderType.html</filename>
+  </compound>
+  <compound kind="class">
     <name>TlvOptionBase</name>
     <filename>inet-TlvOptionBase.html</filename>
   </compound>
@@ -3365,6 +3593,34 @@
     <filename>inet-TosTagBase.html</filename>
   </compound>
   <compound kind="class">
+    <name>Trafficgen</name>
+    <filename>inet-Trafficgen.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>TrafficgenControl</name>
+    <filename>inet-TrafficgenControl.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>TrafficGenControlType</name>
+    <filename>inet-TrafficGenControlType.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>TrafficgenData</name>
+    <filename>inet-TrafficgenData.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>TrafficgenInfo</name>
+    <filename>inet-TrafficgenInfo.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>TrafficgenInfotype</name>
+    <filename>inet-TrafficgenInfotype.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>TrafficgenMessagetype</name>
+    <filename>inet-TrafficgenMessagetype.html</filename>
+  </compound>
+  <compound kind="class">
     <name>TransmissionBase</name>
     <filename>inet-physicallayer-TransmissionBase.html</filename>
   </compound>
@@ -3379,6 +3635,10 @@
   <compound kind="class">
     <name>TransportHeaderBase</name>
     <filename>inet-TransportHeaderBase.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>TransportParametersExtension</name>
+    <filename>inet-quic-TransportParametersExtension.html</filename>
   </compound>
   <compound kind="class">
     <name>TransportProtocolInd</name>
@@ -3433,16 +3693,16 @@
     <filename>inet-UdpCloseCommand.html</filename>
   </compound>
   <compound kind="class">
+    <name>UdpCommandBase</name>
+    <filename>inet-UdpCommandBase.html</filename>
+  </compound>
+  <compound kind="class">
     <name>UdpCommandCode</name>
     <filename>inet-UdpCommandCode.html</filename>
   </compound>
   <compound kind="class">
     <name>UdpConnectCommand</name>
     <filename>inet-UdpConnectCommand.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>UdpControlInfo</name>
-    <filename>inet-UdpControlInfo.html</filename>
   </compound>
   <compound kind="class">
     <name>UdpDestroyCommand</name>
@@ -3553,6 +3813,14 @@
     <filename>inet-UserPriorityTagBase.html</filename>
   </compound>
   <compound kind="class">
+    <name>VariableLengthInteger</name>
+    <filename>inet-quic-VariableLengthInteger.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>VersionNegotiationPacketHeader</name>
+    <filename>inet-quic-VersionNegotiationPacketHeader.html</filename>
+  </compound>
+  <compound kind="class">
     <name>VlanInd</name>
     <filename>inet-VlanInd.html</filename>
   </compound>
@@ -3607,5 +3875,9 @@
   <compound kind="class">
     <name>XMacTypes</name>
     <filename>inet-XMacTypes.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>ZeroRttPacketHeader</name>
+    <filename>inet-quic-ZeroRttPacketHeader.html</filename>
   </compound>
 </tagfile>

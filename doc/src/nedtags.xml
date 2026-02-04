@@ -81,10 +81,6 @@
     <filename>inet.showcases.wireless.analogmodel.AnalogModelShowcaseDistanceNetwork.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.showcases.wireless.analogmodel.AnalogModelShowcaseDistanceNetwork_</name>
-    <filename>inet.showcases.wireless.analogmodel.AnalogModelShowcaseDistanceNetwork_.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.showcases.wireless.analogmodel.AnalogModelShowcaseNoiseNetwork</name>
     <filename>inet.showcases.wireless.analogmodel.AnalogModelShowcaseNoiseNetwork.html</filename>
   </compound>
@@ -121,8 +117,20 @@
     <filename>inet.examples.aodv.AODVNetwork.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.showcases.routing.aodvexternal.AODVNetwork</name>
+    <filename>inet.showcases.routing.aodvexternal.AODVNetwork.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.examples.aodv.AODVNetworkWithEthernet</name>
+    <filename>inet.examples.aodv.AODVNetworkWithEthernet.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.node.aodv.AodvRouter</name>
     <filename>inet.node.aodv.AodvRouter.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.showcases.emulation.mininet.AppContainer</name>
+    <filename>inet.showcases.emulation.mininet.AppContainer.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.showcases.emulation.voip.AppContainer</name>
@@ -261,6 +269,10 @@
     <filename>inet.queueing.filter.BackPressureBasedFilter.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.examples.quic.basic3.Basic3</name>
+    <filename>inet.examples.quic.basic3.Basic3.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.linklayer.ieee80211.mac.fragmentation.BasicFragmentationPolicy</name>
     <filename>inet.linklayer.ieee80211.mac.fragmentation.BasicFragmentationPolicy.html</filename>
   </compound>
@@ -287,6 +299,34 @@
   <compound kind="class">
     <name>inet.routing.bgpv4.Bgp</name>
     <filename>inet.routing.bgpv4.Bgp.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.tutorials.bgp.BGP_Basic_Topology</name>
+    <filename>inet.tutorials.bgp.BGP_Basic_Topology.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.tutorials.bgp.BGP_LOCAL_PREF</name>
+    <filename>inet.tutorials.bgp.BGP_LOCAL_PREF.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.tutorials.bgp.BGP_Topology_1</name>
+    <filename>inet.tutorials.bgp.BGP_Topology_1.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.tutorials.bgp.BGP_Topology_1a</name>
+    <filename>inet.tutorials.bgp.BGP_Topology_1a.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.tutorials.bgp.BGP_Topology_2</name>
+    <filename>inet.tutorials.bgp.BGP_Topology_2.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.tutorials.bgp.BGP_Topology_3</name>
+    <filename>inet.tutorials.bgp.BGP_Topology_3.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.tutorials.bgp.BGP_Topology_4</name>
+    <filename>inet.tutorials.bgp.BGP_Topology_4.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.examples.bgpv4.Bgp2RoutersInAS.BgpNetwork</name>
@@ -353,6 +393,18 @@
     <filename>inet.mobility.single.BonnMotionMobility.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.examples.quic.flow_control_limited.bottleneck</name>
+    <filename>inet.examples.quic.flow_control_limited.bottleneck.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.examples.quic.link_utilization.bottleneck</name>
+    <filename>inet.examples.quic.link_utilization.bottleneck.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.examples.quic.throughput_packet_loss.bottleneck</name>
+    <filename>inet.examples.quic.throughput_packet_loss.bottleneck.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.examples.sctp.cmttest.BottlePath</name>
     <filename>inet.examples.sctp.cmttest.BottlePath.html</filename>
   </compound>
@@ -391,6 +443,10 @@
   <compound kind="class">
     <name>inet.environment.objectcache.BvhObjectCache</name>
     <filename>inet.environment.objectcache.BvhObjectCache.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.examples.quic.byte_order.Byte_order</name>
+    <filename>inet.examples.quic.byte_order.Byte_order.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.examples.ospfv2.fulltest.C</name>
@@ -455,6 +511,22 @@
   <compound kind="class">
     <name>inet.visualizer.base.ChannelVisualizerBase</name>
     <filename>inet.visualizer.base.ChannelVisualizerBase.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.protocolelement.checksum.base.ChecksumCheckerBase</name>
+    <filename>inet.protocolelement.checksum.base.ChecksumCheckerBase.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.protocolelement.checksum.ChecksumHeaderChecker</name>
+    <filename>inet.protocolelement.checksum.ChecksumHeaderChecker.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.protocolelement.checksum.ChecksumHeaderInserter</name>
+    <filename>inet.protocolelement.checksum.ChecksumHeaderInserter.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.protocolelement.checksum.base.ChecksumInserterBase</name>
+    <filename>inet.protocolelement.checksum.base.ChecksumInserterBase.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.mobility.single.ChiangMobility</name>
@@ -529,6 +601,10 @@
     <filename>inet.examples.clock.ClockExample.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.clock.base.ClockServoBase</name>
+    <filename>inet.clock.base.ClockServoBase.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.tutorials.queueing.ClonerTutorialStep</name>
     <filename>inet.tutorials.queueing.ClonerTutorialStep.html</filename>
   </compound>
@@ -563,10 +639,6 @@
   <compound kind="class">
     <name>inet.examples.wireless.configurator.ComplexConfiguratorNetwork</name>
     <filename>inet.examples.wireless.configurator.ComplexConfiguratorNetwork.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.canvas.transportconnection.Complexer</name>
-    <filename>inet.showcases.visualizer.canvas.transportconnection.Complexer.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.queueing.queue.CompoundPacketQueueBase</name>
@@ -673,22 +745,6 @@
     <filename>inet.physicallayer.wireless.common.antenna.CosineAntenna.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.protocolelement.checksum.base.CrcCheckerBase</name>
-    <filename>inet.protocolelement.checksum.base.CrcCheckerBase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.protocolelement.checksum.CrcHeaderChecker</name>
-    <filename>inet.protocolelement.checksum.CrcHeaderChecker.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.protocolelement.checksum.CrcHeaderInserter</name>
-    <filename>inet.protocolelement.checksum.CrcHeaderInserter.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.protocolelement.checksum.base.CrcInserterBase</name>
-    <filename>inet.protocolelement.checksum.base.CrcInserterBase.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.queueing.gate.CreditBasedGate</name>
     <filename>inet.queueing.gate.CreditBasedGate.html</filename>
   </compound>
@@ -709,16 +765,12 @@
     <filename>inet.showcases.wireless.crosstalk.CrosstalkShowcaseBaseNetwork.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.showcases.wireless.crosstalk.CrosstalkShowcaseOneScalarRadioMediumModule</name>
-    <filename>inet.showcases.wireless.crosstalk.CrosstalkShowcaseOneScalarRadioMediumModule.html</filename>
+    <name>inet.showcases.wireless.crosstalk.CrosstalkShowcaseOneRadioMediumModule</name>
+    <filename>inet.showcases.wireless.crosstalk.CrosstalkShowcaseOneRadioMediumModule.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.showcases.wireless.crosstalk.CrosstalkShowcasePartiallyOverlappingFrequencyBands</name>
-    <filename>inet.showcases.wireless.crosstalk.CrosstalkShowcasePartiallyOverlappingFrequencyBands.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.wireless.crosstalk.CrosstalkShowcaseTwoScalarRadioMediumModules</name>
-    <filename>inet.showcases.wireless.crosstalk.CrosstalkShowcaseTwoScalarRadioMediumModules.html</filename>
+    <name>inet.showcases.wireless.crosstalk.CrosstalkShowcaseTwoRadioMediumModules</name>
+    <filename>inet.showcases.wireless.crosstalk.CrosstalkShowcaseTwoRadioMediumModules.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.csmaca.CsmaCaInterface</name>
@@ -907,6 +959,10 @@
   <compound kind="class">
     <name>inet.linklayer.ethernet.common.DirectionReverserLayer</name>
     <filename>inet.linklayer.ethernet.common.DirectionReverserLayer.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.examples.quic.dplpmtud.Dplpmtud</name>
+    <filename>inet.examples.quic.dplpmtud.Dplpmtud.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.clock.base.DriftingOscillatorBase</name>
@@ -1305,6 +1361,14 @@
     <filename>inet.linklayer.ethernet.modular.EthernetFcsChecker.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.protocolelement.checksum.EthernetFcsHeaderChecker</name>
+    <filename>inet.protocolelement.checksum.EthernetFcsHeaderChecker.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.protocolelement.checksum.EthernetFcsHeaderInserter</name>
+    <filename>inet.protocolelement.checksum.EthernetFcsHeaderInserter.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.linklayer.ethernet.modular.EthernetFcsInserter</name>
     <filename>inet.linklayer.ethernet.modular.EthernetFcsInserter.html</filename>
   </compound>
@@ -1497,10 +1561,6 @@
     <filename>inet.applications.ethernet.EtherTrafGen.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.showcases.general.tcp2.example2</name>
-    <filename>inet.showcases.general.tcp2.example2.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.tutorials.queueing.ExampleCable</name>
     <filename>inet.tutorials.queueing.ExampleCable.html</filename>
   </compound>
@@ -1619,22 +1679,6 @@
   <compound kind="class">
     <name>inet.examples.inet.redmarker.FastP</name>
     <filename>inet.examples.inet.redmarker.FastP.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.protocolelement.checksum.base.FcsCheckerBase</name>
-    <filename>inet.protocolelement.checksum.base.FcsCheckerBase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.protocolelement.checksum.FcsHeaderChecker</name>
-    <filename>inet.protocolelement.checksum.FcsHeaderChecker.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.protocolelement.checksum.FcsHeaderInserter</name>
-    <filename>inet.protocolelement.checksum.FcsHeaderInserter.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.protocolelement.checksum.base.FcsInserterBase</name>
-    <filename>inet.protocolelement.checksum.base.FcsInserterBase.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.examples.mobileipv6.fiberline</name>
@@ -1819,10 +1863,6 @@
   <compound kind="class">
     <name>inet.physicallayer.wireless.generic.GenericUnitDiskRadio</name>
     <filename>inet.physicallayer.wireless.generic.GenericUnitDiskRadio.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.mobility.geographic.GeographicMobilityShowcase</name>
-    <filename>inet.showcases.mobility.geographic.GeographicMobilityShowcase.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.networklayer.arp.ipv4.GlobalArp</name>
@@ -2035,6 +2075,10 @@
   <compound kind="class">
     <name>inet.clock.contract.IClock</name>
     <filename>inet.clock.contract.IClock.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.clock.contract.IClockServo</name>
+    <filename>inet.clock.contract.IClockServo.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.networklayer.internetcloud.ICloudDelayer</name>
@@ -2853,6 +2897,10 @@
     <filename>inet.linklayer.ieee80211.mac.contract.IMpduAggregationPolicy.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.linklayer.contract.IMrp</name>
+    <filename>inet.linklayer.contract.IMrp.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.linklayer.ieee80211.mac.contract.IMsduAggregationPolicy</name>
     <filename>inet.linklayer.ieee80211.mac.contract.IMsduAggregationPolicy.html</filename>
   </compound>
@@ -3003,6 +3051,14 @@
   <compound kind="class">
     <name>inet.visualizer.base.InterfaceTableVisualizerBase</name>
     <filename>inet.visualizer.base.InterfaceTableVisualizerBase.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.protocolelement.checksum.InternetChecksumHeaderChecker</name>
+    <filename>inet.protocolelement.checksum.InternetChecksumHeaderChecker.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.protocolelement.checksum.InternetChecksumHeaderInserter</name>
+    <filename>inet.protocolelement.checksum.InternetChecksumHeaderInserter.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.node.internetcloud.InternetCloud</name>
@@ -3325,6 +3381,10 @@
     <filename>inet.visualizer.contract.IQueueVisualizer.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.transportlayer.contract.IQuic</name>
+    <filename>inet.transportlayer.contract.IQuic.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.physicallayer.wireless.common.contract.packetlevel.IRadio</name>
     <filename>inet.physicallayer.wireless.common.contract.packetlevel.IRadio.html</filename>
   </compound>
@@ -3421,10 +3481,6 @@
     <filename>inet.linklayer.contract.ISpanningTree.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.wired.ethernet.ISpi</name>
-    <filename>inet.physicallayer.wired.ethernet.ISpi.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.visualizer.contract.IStatisticVisualizer</name>
     <filename>inet.visualizer.contract.IStatisticVisualizer.html</filename>
   </compound>
@@ -3451,6 +3507,14 @@
   <compound kind="class">
     <name>inet.protocolelement.trafficconditioner.ITrafficConditionerLayer</name>
     <filename>inet.protocolelement.trafficconditioner.ITrafficConditionerLayer.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.applications.trafficgen.ITrafficgen</name>
+    <filename>inet.applications.trafficgen.ITrafficgen.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.applications.trafficgen.ITrafficgenHandler</name>
+    <filename>inet.applications.trafficgen.ITrafficgenHandler.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.physicallayer.wireless.common.contract.packetlevel.ITransmitter</name>
@@ -3619,6 +3683,14 @@
   <compound kind="class">
     <name>inet.networks.ethernet.LinearNetwork</name>
     <filename>inet.networks.ethernet.LinearNetwork.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.networks.ppp.LinearNetwork</name>
+    <filename>inet.networks.ppp.LinearNetwork.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.networks.wifi.LinearNetwork</name>
+    <filename>inet.networks.wifi.LinearNetwork.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.visualizer.canvas.linklayer.LinkBreakCanvasVisualizer</name>
@@ -3821,14 +3893,6 @@
     <filename>inet.visualizer.base.MediumVisualizerBase.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.protocolelement.authentication.MessageAuthenticationCodeChecker</name>
-    <filename>inet.protocolelement.authentication.MessageAuthenticationCodeChecker.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.protocolelement.authentication.MessageAuthenticationCodeInserter</name>
-    <filename>inet.protocolelement.authentication.MessageAuthenticationCodeInserter.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.common.misc.MessageChecker</name>
     <filename>inet.common.misc.MessageChecker.html</filename>
   </compound>
@@ -3905,12 +3969,60 @@
     <filename>inet.showcases.visualizer.canvas.mobility.MobilityVisualizerShowcase.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.common.Module</name>
+    <filename>inet.common.Module.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.common.misc.ModuleDump</name>
+    <filename>inet.common.misc.ModuleDump.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.common.ModuleMixin</name>
+    <filename>inet.common.ModuleMixin.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.mobility.base.MovingMobilityBase</name>
     <filename>inet.mobility.base.MovingMobilityBase.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.networklayer.mpls.Mpls</name>
     <filename>inet.networklayer.mpls.Mpls.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.linklayer.mrp.Mrp</name>
+    <filename>inet.linklayer.mrp.Mrp.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.examples.mrp.Mrp4</name>
+    <filename>inet.examples.mrp.Mrp4.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.examples.mrp.Mrp4withHosts</name>
+    <filename>inet.examples.mrp.Mrp4withHosts.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.examples.mrp.Mrp8</name>
+    <filename>inet.examples.mrp.Mrp8.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.linklayer.mrp.MrpInterconnection</name>
+    <filename>inet.linklayer.mrp.MrpInterconnection.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.linklayer.mrp.MrpMacForwardingTable</name>
+    <filename>inet.linklayer.mrp.MrpMacForwardingTable.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.linklayer.mrp.MrpRelay</name>
+    <filename>inet.linklayer.mrp.MrpRelay.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.examples.mrp.MrpRing</name>
+    <filename>inet.examples.mrp.MrpRing.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.node.mrp.MrpSwitch</name>
+    <filename>inet.node.mrp.MrpSwitch.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.examples.sctp.multihomed.multi</name>
@@ -3947,6 +4059,10 @@
   <compound kind="class">
     <name>inet.examples.sctp.cmttest.multihomed</name>
     <filename>inet.examples.sctp.cmttest.multihomed.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.tutorials.bgp.Multihop_EBGP</name>
+    <filename>inet.tutorials.bgp.Multihop_EBGP.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.protocolelement.measurement.MultiMeasurementLayer</name>
@@ -4237,6 +4353,10 @@
     <filename>inet.networklayer.nexthop.NextHopRoutingTable.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.clock.servo.NoClockServo</name>
+    <filename>inet.clock.servo.NoClockServo.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.examples.wireless.hiddennode.Node</name>
     <filename>inet.examples.wireless.hiddennode.Node.html</filename>
   </compound>
@@ -4391,6 +4511,10 @@
   <compound kind="class">
     <name>inet.protocolelement.trafficconditioner.OmittedTrafficConditionerLayer</name>
     <filename>inet.protocolelement.trafficconditioner.OmittedTrafficConditionerLayer.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.examples.quic.multiserver.oneclienthost</name>
+    <filename>inet.examples.quic.multiserver.oneclienthost.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.showcases.tsn.timesynchronization.gptp.OneMasterClockGptpShowcase</name>
@@ -4885,6 +5009,14 @@
     <filename>inet.queueing.gate.PeriodicGate.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.common.misc.PeriodicLossChannel</name>
+    <filename>inet.common.misc.PeriodicLossChannel.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.examples.quic.persistent_congestion.Persistent_congestion</name>
+    <filename>inet.examples.quic.persistent_congestion.Persistent_congestion.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.environment.common.PhysicalEnvironment</name>
     <filename>inet.environment.common.PhysicalEnvironment.html</filename>
   </compound>
@@ -4949,8 +5081,8 @@
     <filename>inet.examples.pim.sm.basic.PIM_SM_Network.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.routing.pim.PimCrcInsertionHook</name>
-    <filename>inet.routing.pim.PimCrcInsertionHook.html</filename>
+    <name>inet.routing.pim.PimChecksumInsertionHook</name>
+    <filename>inet.routing.pim.PimChecksumInsertionHook.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.routing.pim.modes.PimDm</name>
@@ -5153,6 +5285,34 @@
     <filename>inet.visualizer.base.QueueVisualizerBase.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.transportlayer.quic.Quic</name>
+    <filename>inet.transportlayer.quic.Quic.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.applications.quicapp.QuicClient</name>
+    <filename>inet.applications.quicapp.QuicClient.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.applications.quicapp.QuicDiscardServer</name>
+    <filename>inet.applications.quicapp.QuicDiscardServer.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.applications.quicapp.QuicOrderedReceiver</name>
+    <filename>inet.applications.quicapp.QuicOrderedReceiver.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.applications.quicapp.QuicOrderedTrafficgen</name>
+    <filename>inet.applications.quicapp.QuicOrderedTrafficgen.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.applications.quicapp.QuicTrafficgen</name>
+    <filename>inet.applications.quicapp.QuicTrafficgen.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.applications.quicapp.QuicZeroRttClient</name>
+    <filename>inet.applications.quicapp.QuicZeroRttClient.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.examples.mpls.net37.R37</name>
     <filename>inet.examples.mpls.net37.R37.html</filename>
   </compound>
@@ -5351,6 +5511,18 @@
   <compound kind="class">
     <name>inet.examples.rip.infinitycount.RIPInfinityCountTest</name>
     <filename>inet.examples.rip.infinitycount.RIPInfinityCountTest.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.tutorials.rip.RipNetworkA</name>
+    <filename>inet.tutorials.rip.RipNetworkA.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.tutorials.rip.RipNetworkB</name>
+    <filename>inet.tutorials.rip.RipNetworkB.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.tutorials.rip.RipNetworkC</name>
+    <filename>inet.tutorials.rip.RipNetworkC.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.node.rip.RipRouter</name>
@@ -5573,12 +5745,16 @@
     <filename>inet.transportlayer.sctp.Sctp.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.applications.sctpapp.SctpClient</name>
-    <filename>inet.applications.sctpapp.SctpClient.html</filename>
+    <name>inet.transportlayer.sctp.SctpAssociation</name>
+    <filename>inet.transportlayer.sctp.SctpAssociation.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.transportlayer.sctp.SctpCrcInsertion</name>
-    <filename>inet.transportlayer.sctp.SctpCrcInsertion.html</filename>
+    <name>inet.transportlayer.sctp.SctpChecksumInsertion</name>
+    <filename>inet.transportlayer.sctp.SctpChecksumInsertion.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.applications.sctpapp.SctpClient</name>
+    <filename>inet.applications.sctpapp.SctpClient.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.transportlayer.sctp.SctpNatHook</name>
@@ -5721,6 +5897,10 @@
     <filename>inet.clock.model.SettableClock.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.examples.quic.shared_link.shared_link</name>
+    <filename>inet.examples.quic.shared_link.shared_link.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.linklayer.shortcut.ShortcutInterface</name>
     <filename>inet.linklayer.shortcut.ShortcutInterface.html</filename>
   </compound>
@@ -5789,6 +5969,10 @@
     <filename>inet.linklayer.ieee8021q.SimpleIeee8021qFilter.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.common.SimpleModule</name>
+    <filename>inet.common.SimpleModule.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.networklayer.common.SimpleNetworkLayer</name>
     <filename>inet.networklayer.common.SimpleNetworkLayer.html</filename>
   </compound>
@@ -5841,6 +6025,10 @@
     <filename>inet.queueing.meter.SingleRateTwoColorMeter.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.common.Sink</name>
+    <filename>inet.common.Sink.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.applications.common.SinkApp</name>
     <filename>inet.applications.common.SinkApp.html</filename>
   </compound>
@@ -5885,14 +6073,6 @@
     <filename>inet.showcases.visualizer.canvas.spectrum.SpectrumShowcaseSpectrumFigureSpectrogramNetwork.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.wired.ethernet.SpiDelayer</name>
-    <filename>inet.physicallayer.wired.ethernet.SpiDelayer.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.physicallayer.wired.ethernet.SpiShaper</name>
-    <filename>inet.physicallayer.wired.ethernet.SpiShaper.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.node.inet.StandardHost</name>
     <filename>inet.node.inet.StandardHost.html</filename>
   </compound>
@@ -5925,6 +6105,10 @@
     <filename>inet.mobility.static.StationaryMobility.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.showcases.tsn.streamfiltering.statistical.StatisticalPolicingShowcaseNetwork</name>
+    <filename>inet.showcases.tsn.streamfiltering.statistical.StatisticalPolicingShowcaseNetwork.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.queueing.filter.StatisticalRateLimiter</name>
     <filename>inet.queueing.filter.StatisticalRateLimiter.html</filename>
   </compound>
@@ -5951,6 +6135,10 @@
   <compound kind="class">
     <name>inet.visualizer.base.StatisticVisualizerBase</name>
     <filename>inet.visualizer.base.StatisticVisualizerBase.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.clock.servo.StepClockServo</name>
+    <filename>inet.clock.servo.StepClockServo.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.physicallayer.wireless.common.errormodel.packetlevel.StochasticErrorModel</name>
@@ -6113,6 +6301,10 @@
     <filename>inet.applications.tcpapp.TcpBasicClientApp.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.transportlayer.tcp_common.TcpChecksumInsertionHook</name>
+    <filename>inet.transportlayer.tcp_common.TcpChecksumInsertionHook.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.applications.tcpapp.TcpClientApp</name>
     <filename>inet.applications.tcpapp.TcpClientApp.html</filename>
   </compound>
@@ -6123,10 +6315,6 @@
   <compound kind="class">
     <name>inet.transportlayer.tcp.TcpConnection</name>
     <filename>inet.transportlayer.tcp.TcpConnection.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.transportlayer.tcp_common.TcpCrcInsertionHook</name>
-    <filename>inet.transportlayer.tcp_common.TcpCrcInsertionHook.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.applications.tcpapp.TcpEchoApp</name>
@@ -6289,6 +6477,10 @@
     <filename>inet.queueing.shaper.TimeAwareShaper.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.showcases.tsn.trafficshaping.timeawareshaper.TimeAwareShapingShowcaseNetwork</name>
+    <filename>inet.showcases.tsn.trafficshaping.timeawareshaper.TimeAwareShapingShowcaseNetwork.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.queueing.tokengenerator.TimeBasedTokenGenerator</name>
     <filename>inet.queueing.tokengenerator.TimeBasedTokenGenerator.html</filename>
   </compound>
@@ -6323,6 +6515,10 @@
   <compound kind="class">
     <name>inet.queueing.meter.TokenBucketMeter</name>
     <filename>inet.queueing.meter.TokenBucketMeter.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.showcases.tsn.streamfiltering.tokenbucket.TokenBucketPolicingShowcaseNetwork</name>
+    <filename>inet.showcases.tsn.streamfiltering.tokenbucket.TokenBucketPolicingShowcaseNetwork.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.tutorials.queueing.TokenBucketTutorialStep</name>
@@ -6367,6 +6563,18 @@
   <compound kind="class">
     <name>inet.protocolelement.trafficconditioner.TrafficConditionerLayer</name>
     <filename>inet.protocolelement.trafficconditioner.TrafficConditionerLayer.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.examples.quic.trafficgen.Trafficgen</name>
+    <filename>inet.examples.quic.trafficgen.Trafficgen.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.applications.trafficgen.TrafficgenCompound</name>
+    <filename>inet.applications.trafficgen.TrafficgenCompound.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.applications.trafficgen.TrafficgenSimple</name>
+    <filename>inet.applications.trafficgen.TrafficgenSimple.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.showcases.measurement.transmissiontime.TransmissionTimeMeasurementShowcase</name>
@@ -6497,6 +6705,10 @@
     <filename>inet.mobility.single.TurtleMobility.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.examples.quic.multiserver.twoclienthosts</name>
+    <filename>inet.examples.quic.multiserver.twoclienthosts.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.examples.ethernet.lans.TwoHosts</name>
     <filename>inet.examples.ethernet.lans.TwoHosts.html</filename>
   </compound>
@@ -6573,12 +6785,12 @@
     <filename>inet.examples.inet.udpburst.UDPBurst.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.inet.udpclientserver.UdpClientServer</name>
-    <filename>inet.examples.inet.udpclientserver.UdpClientServer.html</filename>
+    <name>inet.transportlayer.udp.UdpChecksumInsertionHook</name>
+    <filename>inet.transportlayer.udp.UdpChecksumInsertionHook.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.transportlayer.udp.UdpCrcInsertionHook</name>
-    <filename>inet.transportlayer.udp.UdpCrcInsertionHook.html</filename>
+    <name>inet.examples.inet.udpclientserver.UdpClientServer</name>
+    <filename>inet.examples.inet.udpclientserver.UdpClientServer.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.applications.udpapp.UdpEchoApp</name>
@@ -6839,5 +7051,9 @@
   <compound kind="class">
     <name>inet.linklayer.configurator.gatescheduling.z3.Z3GateScheduleConfigurator</name>
     <filename>inet.linklayer.configurator.gatescheduling.z3.Z3GateScheduleConfigurator.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.examples.quic.zerortt.zerortt</name>
+    <filename>inet.examples.quic.zerortt.zerortt.html</filename>
   </compound>
 </tagfile>
