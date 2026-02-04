@@ -383,8 +383,8 @@ Notable backward compatible changes are the following:
    TSN scenario that demonstrates the simultaneous use of Frame Preemption and
    Time-Aware Shaping (TAS).
 
-   The emulation/mininet showcase, extracted from the original VoIP showcase, is
-   now a standalone demonstration of running INET applications within a Mininet
+   The emulation/mininet showcase, based on the VoIP showcase, is
+   a standalone demonstration of running INET applications within a Mininet
    environment. It uses an AppContainer-based network structure to connect
    simulated traffic with external Mininet components.
 
