@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+echo "This tool runs fingerprint tests with self-documentation turned on, to generate"
+echo "documentation fragments about module dynamic behavior. These fragments are used by "
+echo "the neddoc generator when building documentation."
+echo
+echo "NOTE: Make sure that INET was built with:"
+echo "NOTE: make EXTRA_MAKEMAKE_OPTIONS=-DINET_WITH_SELFDOC"
+echo
+
 rm -f /tmp/SelfDoc.txt
 ./fingerprinttest -d -f tplx "$@" \
     -a --generate-selfdoc=true --fingerprintcalculator-class='inet::SelfDocumenterFingerprintCalculator' \
