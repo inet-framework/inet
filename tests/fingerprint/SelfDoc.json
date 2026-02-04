@@ -2371,6 +2371,906 @@
     }
    ]
   },
+  "inet.applications.quicapp.QuicClient": {
+   "CALL": [
+    {
+     "call to": "inet.common.MessageDispatcher",
+     "function": "inet::MessageDispatcher::arrived",
+     "info": "arrived"
+    }
+   ],
+   "INPUT": [
+    {
+     "gate": "socketIn",
+     "msg": "inet::Indication",
+     "kind": "4 (inet::QuicStatusInd::QUIC_I_ESTABLISHED)",
+     "ctrl": "inet::QuicConnectionInfo",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "srcModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketIn",
+     "msg": "inet::Indication",
+     "kind": "6 (inet::QuicStatusInd::QUIC_I_CLOSED)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "srcModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketIn",
+     "msg": "inet::Indication",
+     "kind": "7 (inet::QuicStatusInd::QUIC_I_DESTROYED)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "srcModule": "inet.transportlayer.quic.Quic"
+    }
+   ],
+   "OUTPUT": [
+    {
+     "gate": "socketOut",
+     "msg": "inet::Packet",
+     "kind": "5 (inet::QuicCommandCode::QUIC_C_SEND)",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::QuicStreamReq",
+      "inet::SocketReq"
+     ],
+     "destModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketOut",
+     "msg": "inet::Request",
+     "kind": "1 (inet::QuicCommandCode::QUIC_C_CREATE_PCB)",
+     "ctrl": "inet::QuicBindCommand",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "destModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketOut",
+     "msg": "inet::Request",
+     "kind": "3 (inet::QuicCommandCode::QUIC_C_OPEN_ACTIVE)",
+     "ctrl": "inet::QuicOpenCommand",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "destModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketOut",
+     "msg": "inet::Request",
+     "kind": "4 (inet::QuicCommandCode::QUIC_C_CLOSE)",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "destModule": "inet.transportlayer.quic.Quic"
+    }
+   ],
+   "PACKET": [
+    {
+     "packetAction": "insertAtBack",
+     "chunkType": "inet::ByteCountChunk"
+    }
+   ],
+   "STAG": [
+    {
+     "tagAction": "addTagIfAbsent",
+     "tagType": "inet::DispatchProtocolReq"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
+     "tagType": "inet::QuicStreamReq"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
+     "tagType": "inet::SocketReq"
+    },
+    {
+     "tagAction": "getTag",
+     "tagType": "inet::SocketInd"
+    },
+    {
+     "tagAction": "hasTag",
+     "tagType": "inet::SocketInd"
+    }
+   ],
+   "TAG": [
+    {
+     "tagAction": "findTag",
+     "tagType": "inet::Ipv4InterfaceData"
+    }
+   ]
+  },
+  "inet.applications.quicapp.QuicDiscardServer": {
+   "CALL": [
+    {
+     "call to": "inet.common.MessageDispatcher",
+     "function": "inet::MessageDispatcher::arrived",
+     "info": "arrived"
+    }
+   ],
+   "INPUT": [
+    {
+     "gate": "socketIn",
+     "msg": "inet::Indication",
+     "kind": "2 (inet::QuicStatusInd::QUIC_I_DATA_AVAILABLE)",
+     "ctrl": "inet::QuicDataInfo",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "srcModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketIn",
+     "msg": "inet::Indication",
+     "kind": "4 (inet::QuicStatusInd::QUIC_I_ESTABLISHED)",
+     "ctrl": "inet::QuicConnectionInfo",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "srcModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketIn",
+     "msg": "inet::Indication",
+     "kind": "5 (inet::QuicStatusInd::QUIC_I_CONNECTION_AVAILABLE)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "srcModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketIn",
+     "msg": "inet::Indication",
+     "kind": "6 (inet::QuicStatusInd::QUIC_I_CLOSED)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "srcModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketIn",
+     "msg": "inet::Indication",
+     "kind": "7 (inet::QuicStatusInd::QUIC_I_DESTROYED)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "srcModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketIn",
+     "msg": "inet::Packet",
+     "kind": "1 (inet::QuicStatusInd::QUIC_I_DATA)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "srcModule": "inet.transportlayer.quic.Quic"
+    }
+   ],
+   "OUTPUT": [
+    {
+     "gate": "socketOut",
+     "msg": "inet::Request",
+     "kind": "1 (inet::QuicCommandCode::QUIC_C_CREATE_PCB)",
+     "ctrl": "inet::QuicBindCommand",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "destModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketOut",
+     "msg": "inet::Request",
+     "kind": "2 (inet::QuicCommandCode::QUIC_C_OPEN_PASSIVE)",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "destModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketOut",
+     "msg": "inet::Request",
+     "kind": "6 (inet::QuicCommandCode::QUIC_C_RECEIVE)",
+     "ctrl": "inet::QuicRecvCommand",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "destModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketOut",
+     "msg": "inet::Request",
+     "kind": "7 (inet::QuicCommandCode::QUIC_C_ACCEPT)",
+     "ctrl": "inet::QuicAcceptCommand",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "destModule": "inet.transportlayer.quic.Quic"
+    }
+   ],
+   "PACKET": [
+    {
+     "packetAction": "popAtFront",
+     "chunkType": "inet::Chunk"
+    }
+   ],
+   "STAG": [
+    {
+     "tagAction": "addTagIfAbsent",
+     "tagType": "inet::DispatchProtocolReq"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
+     "tagType": "inet::SocketReq"
+    },
+    {
+     "tagAction": "getTag",
+     "tagType": "inet::SocketInd"
+    },
+    {
+     "tagAction": "hasTag",
+     "tagType": "inet::SocketInd"
+    }
+   ]
+  },
+  "inet.applications.quicapp.QuicOrderedReceiver": {
+   "CALL": [
+    {
+     "call to": "inet.common.MessageDispatcher",
+     "function": "inet::MessageDispatcher::arrived",
+     "info": "arrived"
+    }
+   ],
+   "INPUT": [
+    {
+     "gate": "socketIn",
+     "msg": "inet::Indication",
+     "kind": "2 (inet::QuicStatusInd::QUIC_I_DATA_AVAILABLE)",
+     "ctrl": "inet::QuicDataInfo",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "srcModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketIn",
+     "msg": "inet::Indication",
+     "kind": "4 (inet::QuicStatusInd::QUIC_I_ESTABLISHED)",
+     "ctrl": "inet::QuicConnectionInfo",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "srcModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketIn",
+     "msg": "inet::Indication",
+     "kind": "5 (inet::QuicStatusInd::QUIC_I_CONNECTION_AVAILABLE)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "srcModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketIn",
+     "msg": "inet::Indication",
+     "kind": "6 (inet::QuicStatusInd::QUIC_I_CLOSED)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "srcModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketIn",
+     "msg": "inet::Indication",
+     "kind": "7 (inet::QuicStatusInd::QUIC_I_DESTROYED)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "srcModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketIn",
+     "msg": "inet::Packet",
+     "kind": "1 (inet::QuicStatusInd::QUIC_I_DATA)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "srcModule": "inet.transportlayer.quic.Quic"
+    }
+   ],
+   "OUTPUT": [
+    {
+     "gate": "socketOut",
+     "msg": "inet::Request",
+     "kind": "1 (inet::QuicCommandCode::QUIC_C_CREATE_PCB)",
+     "ctrl": "inet::QuicBindCommand",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "destModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketOut",
+     "msg": "inet::Request",
+     "kind": "2 (inet::QuicCommandCode::QUIC_C_OPEN_PASSIVE)",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "destModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketOut",
+     "msg": "inet::Request",
+     "kind": "6 (inet::QuicCommandCode::QUIC_C_RECEIVE)",
+     "ctrl": "inet::QuicRecvCommand",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "destModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketOut",
+     "msg": "inet::Request",
+     "kind": "7 (inet::QuicCommandCode::QUIC_C_ACCEPT)",
+     "ctrl": "inet::QuicAcceptCommand",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "destModule": "inet.transportlayer.quic.Quic"
+    }
+   ],
+   "PACKET": [
+    {
+     "packetAction": "popAtFront",
+     "chunkType": "inet::Chunk"
+    }
+   ],
+   "STAG": [
+    {
+     "tagAction": "addTagIfAbsent",
+     "tagType": "inet::DispatchProtocolReq"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
+     "tagType": "inet::SocketReq"
+    },
+    {
+     "tagAction": "getTag",
+     "tagType": "inet::SocketInd"
+    },
+    {
+     "tagAction": "hasTag",
+     "tagType": "inet::SocketInd"
+    }
+   ]
+  },
+  "inet.applications.quicapp.QuicOrderedTrafficgen": {
+   "CALL": [
+    {
+     "call to": "inet.common.MessageDispatcher",
+     "function": "inet::MessageDispatcher::arrived",
+     "info": "arrived"
+    }
+   ],
+   "INPUT": [
+    {
+     "gate": "generatorIn[]",
+     "msg": "inet::TrafficgenData",
+     "kind": "2",
+     "ctrl": "",
+     "tags": [],
+     "srcModule": "inet.applications.trafficgen.TrafficgenSimple"
+    },
+    {
+     "gate": "generatorIn[]",
+     "msg": "inet::TrafficgenInfo",
+     "kind": "1",
+     "ctrl": "",
+     "tags": [],
+     "srcModule": "inet.applications.trafficgen.TrafficgenSimple"
+    },
+    {
+     "gate": "socketIn",
+     "msg": "inet::Indication",
+     "kind": "4 (inet::QuicStatusInd::QUIC_I_ESTABLISHED)",
+     "ctrl": "inet::QuicConnectionInfo",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "srcModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketIn",
+     "msg": "inet::Indication",
+     "kind": "6 (inet::QuicStatusInd::QUIC_I_CLOSED)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "srcModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketIn",
+     "msg": "inet::Indication",
+     "kind": "7 (inet::QuicStatusInd::QUIC_I_DESTROYED)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "srcModule": "inet.transportlayer.quic.Quic"
+    }
+   ],
+   "OUTPUT": [
+    {
+     "gate": "generatorOut[]",
+     "msg": "inet::TrafficgenControl",
+     "kind": "3",
+     "ctrl": "",
+     "tags": [],
+     "destModule": "inet.applications.trafficgen.TrafficgenSimple"
+    },
+    {
+     "gate": "socketOut",
+     "msg": "inet::Packet",
+     "kind": "5 (inet::QuicCommandCode::QUIC_C_SEND)",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::QuicStreamReq",
+      "inet::SocketReq"
+     ],
+     "destModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketOut",
+     "msg": "inet::Request",
+     "kind": "1 (inet::QuicCommandCode::QUIC_C_CREATE_PCB)",
+     "ctrl": "inet::QuicBindCommand",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "destModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketOut",
+     "msg": "inet::Request",
+     "kind": "3 (inet::QuicCommandCode::QUIC_C_OPEN_ACTIVE)",
+     "ctrl": "inet::QuicOpenCommand",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "destModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketOut",
+     "msg": "inet::Request",
+     "kind": "4 (inet::QuicCommandCode::QUIC_C_CLOSE)",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "destModule": "inet.transportlayer.quic.Quic"
+    }
+   ],
+   "PACKET": [
+    {
+     "packetAction": "insertAtBack",
+     "chunkType": "inet::BytesChunk"
+    }
+   ],
+   "SCHEDULE": [
+    {
+     "msg": "omnetpp::cMessage",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [],
+     "msgname": "QuicTrafficgen Timer - Connect",
+     "context": ""
+    }
+   ],
+   "STAG": [
+    {
+     "tagAction": "addTagIfAbsent",
+     "tagType": "inet::DispatchProtocolReq"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
+     "tagType": "inet::QuicStreamReq"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
+     "tagType": "inet::SocketReq"
+    },
+    {
+     "tagAction": "getTag",
+     "tagType": "inet::SocketInd"
+    },
+    {
+     "tagAction": "hasTag",
+     "tagType": "inet::SocketInd"
+    }
+   ],
+   "TAG": [
+    {
+     "tagAction": "findTag",
+     "tagType": "inet::Ipv4InterfaceData"
+    }
+   ]
+  },
+  "inet.applications.quicapp.QuicTrafficgen": {
+   "CALL": [
+    {
+     "call to": "inet.common.MessageDispatcher",
+     "function": "inet::MessageDispatcher::arrived",
+     "info": "arrived"
+    }
+   ],
+   "INPUT": [
+    {
+     "gate": "generatorIn[]",
+     "msg": "inet::TrafficgenData",
+     "kind": "2",
+     "ctrl": "",
+     "tags": [],
+     "srcModule": "inet.applications.trafficgen.TrafficgenSimple"
+    },
+    {
+     "gate": "generatorIn[]",
+     "msg": "inet::TrafficgenInfo",
+     "kind": "1",
+     "ctrl": "",
+     "tags": [],
+     "srcModule": "inet.applications.trafficgen.TrafficgenSimple"
+    },
+    {
+     "gate": "socketIn",
+     "msg": "inet::Indication",
+     "kind": "10 (inet::QuicStatusInd::QUIC_I_MSG_REJECTED)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "srcModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketIn",
+     "msg": "inet::Indication",
+     "kind": "4 (inet::QuicStatusInd::QUIC_I_ESTABLISHED)",
+     "ctrl": "inet::QuicConnectionInfo",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "srcModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketIn",
+     "msg": "inet::Indication",
+     "kind": "6 (inet::QuicStatusInd::QUIC_I_CLOSED)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "srcModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketIn",
+     "msg": "inet::Indication",
+     "kind": "7 (inet::QuicStatusInd::QUIC_I_DESTROYED)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "srcModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketIn",
+     "msg": "inet::Indication",
+     "kind": "8 (inet::QuicStatusInd::QUIC_I_SENDQUEUE_FULL)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "srcModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketIn",
+     "msg": "inet::Indication",
+     "kind": "9 (inet::QuicStatusInd::QUIC_I_SENDQUEUE_DRAIN)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "srcModule": "inet.transportlayer.quic.Quic"
+    }
+   ],
+   "OUTPUT": [
+    {
+     "gate": "generatorOut[]",
+     "msg": "inet::TrafficgenControl",
+     "kind": "3",
+     "ctrl": "",
+     "tags": [],
+     "destModule": "inet.applications.trafficgen.TrafficgenSimple"
+    },
+    {
+     "gate": "socketOut",
+     "msg": "inet::Packet",
+     "kind": "5 (inet::QuicCommandCode::QUIC_C_SEND)",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::QuicStreamReq",
+      "inet::SocketReq"
+     ],
+     "destModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketOut",
+     "msg": "inet::Request",
+     "kind": "1 (inet::QuicCommandCode::QUIC_C_CREATE_PCB)",
+     "ctrl": "inet::QuicBindCommand",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "destModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketOut",
+     "msg": "inet::Request",
+     "kind": "3 (inet::QuicCommandCode::QUIC_C_OPEN_ACTIVE)",
+     "ctrl": "inet::QuicOpenCommand",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "destModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketOut",
+     "msg": "inet::Request",
+     "kind": "4 (inet::QuicCommandCode::QUIC_C_CLOSE)",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "destModule": "inet.transportlayer.quic.Quic"
+    }
+   ],
+   "PACKET": [
+    {
+     "packetAction": "insertAtBack",
+     "chunkType": "inet::ByteCountChunk"
+    }
+   ],
+   "SCHEDULE": [
+    {
+     "msg": "omnetpp::cMessage",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [],
+     "msgname": "QuicTrafficgen Timer - Connect",
+     "context": ""
+    }
+   ],
+   "STAG": [
+    {
+     "tagAction": "addTagIfAbsent",
+     "tagType": "inet::DispatchProtocolReq"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
+     "tagType": "inet::QuicStreamReq"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
+     "tagType": "inet::SocketReq"
+    },
+    {
+     "tagAction": "getTag",
+     "tagType": "inet::SocketInd"
+    },
+    {
+     "tagAction": "hasTag",
+     "tagType": "inet::SocketInd"
+    }
+   ],
+   "TAG": [
+    {
+     "tagAction": "findTag",
+     "tagType": "inet::Ipv4InterfaceData"
+    }
+   ]
+  },
+  "inet.applications.quicapp.QuicZeroRttClient": {
+   "CALL": [
+    {
+     "call to": "inet.common.MessageDispatcher",
+     "function": "inet::MessageDispatcher::arrived",
+     "info": "arrived"
+    }
+   ],
+   "INPUT": [
+    {
+     "gate": "socketIn",
+     "msg": "inet::Indication",
+     "kind": "11 (inet::QuicStatusInd::QUIC_I_NEW_TOKEN)",
+     "ctrl": "inet::QuicNewToken",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "srcModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketIn",
+     "msg": "inet::Indication",
+     "kind": "4 (inet::QuicStatusInd::QUIC_I_ESTABLISHED)",
+     "ctrl": "inet::QuicConnectionInfo",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "srcModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketIn",
+     "msg": "inet::Indication",
+     "kind": "6 (inet::QuicStatusInd::QUIC_I_CLOSED)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "srcModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketIn",
+     "msg": "inet::Indication",
+     "kind": "7 (inet::QuicStatusInd::QUIC_I_DESTROYED)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "srcModule": "inet.transportlayer.quic.Quic"
+    }
+   ],
+   "OUTPUT": [
+    {
+     "gate": "socketOut",
+     "msg": "inet::Packet",
+     "kind": "5 (inet::QuicCommandCode::QUIC_C_SEND)",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::QuicStreamReq",
+      "inet::SocketReq"
+     ],
+     "destModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketOut",
+     "msg": "inet::Packet",
+     "kind": "8 (inet::QuicCommandCode::QUIC_C_CONNECT_AND_SEND)",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::QuicNewToken",
+      "inet::QuicOpenCommand",
+      "inet::QuicStreamReq",
+      "inet::SocketReq"
+     ],
+     "destModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketOut",
+     "msg": "inet::Request",
+     "kind": "1 (inet::QuicCommandCode::QUIC_C_CREATE_PCB)",
+     "ctrl": "inet::QuicBindCommand",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "destModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketOut",
+     "msg": "inet::Request",
+     "kind": "3 (inet::QuicCommandCode::QUIC_C_OPEN_ACTIVE)",
+     "ctrl": "inet::QuicOpenCommand",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "destModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "socketOut",
+     "msg": "inet::Request",
+     "kind": "4 (inet::QuicCommandCode::QUIC_C_CLOSE)",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "destModule": "inet.transportlayer.quic.Quic"
+    }
+   ],
+   "PACKET": [
+    {
+     "packetAction": "insertAtBack",
+     "chunkType": "inet::ByteCountChunk"
+    }
+   ],
+   "STAG": [
+    {
+     "tagAction": "addTagIfAbsent",
+     "tagType": "inet::DispatchProtocolReq"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
+     "tagType": "inet::QuicNewToken"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
+     "tagType": "inet::QuicOpenCommand"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
+     "tagType": "inet::QuicStreamReq"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
+     "tagType": "inet::SocketReq"
+    },
+    {
+     "tagAction": "getTag",
+     "tagType": "inet::SocketInd"
+    },
+    {
+     "tagAction": "hasTag",
+     "tagType": "inet::SocketInd"
+    }
+   ],
+   "TAG": [
+    {
+     "tagAction": "findTag",
+     "tagType": "inet::Ipv4InterfaceData"
+    }
+   ]
+  },
   "inet.applications.rtpapp.RtpApplication": {
    "INPUT": [
     {
@@ -4510,6 +5410,86 @@
     }
    ]
   },
+  "inet.applications.trafficgen.TrafficgenSimple": {
+   "INPUT": [
+    {
+     "gate": "generatorIn",
+     "msg": "inet::TrafficgenControl",
+     "kind": "3",
+     "ctrl": "",
+     "tags": [],
+     "srcModule": "inet.applications.quicapp.QuicOrderedTrafficgen"
+    },
+    {
+     "gate": "generatorIn",
+     "msg": "inet::TrafficgenControl",
+     "kind": "3",
+     "ctrl": "",
+     "tags": [],
+     "srcModule": "inet.applications.quicapp.QuicTrafficgen"
+    }
+   ],
+   "OUTPUT": [
+    {
+     "gate": "generatorOut",
+     "msg": "inet::TrafficgenData",
+     "kind": "2",
+     "ctrl": "",
+     "tags": [],
+     "destModule": "inet.applications.quicapp.QuicOrderedTrafficgen"
+    },
+    {
+     "gate": "generatorOut",
+     "msg": "inet::TrafficgenData",
+     "kind": "2",
+     "ctrl": "",
+     "tags": [],
+     "destModule": "inet.applications.quicapp.QuicTrafficgen"
+    },
+    {
+     "gate": "generatorOut",
+     "msg": "inet::TrafficgenInfo",
+     "kind": "1",
+     "ctrl": "",
+     "tags": [],
+     "destModule": "inet.applications.quicapp.QuicOrderedTrafficgen"
+    },
+    {
+     "gate": "generatorOut",
+     "msg": "inet::TrafficgenInfo",
+     "kind": "1",
+     "ctrl": "",
+     "tags": [],
+     "destModule": "inet.applications.quicapp.QuicTrafficgen"
+    }
+   ],
+   "SCHEDULE": [
+    {
+     "msg": "omnetpp::cMessage",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [],
+     "msgname": "timer start",
+     "context": ""
+    },
+    {
+     "msg": "omnetpp::cMessage",
+     "kind": "1",
+     "ctrl": "",
+     "tags": [],
+     "msgname": "timer stop",
+     "context": ""
+    },
+    {
+     "msg": "omnetpp::cMessage",
+     "kind": "2",
+     "ctrl": "",
+     "tags": [],
+     "msgname": "timer send",
+     "context": ""
+    }
+   ]
+  },
   "inet.applications.tunapp.TunnelApp": {
    "CALL": [
     {
@@ -4678,6 +5658,7 @@
      "kind": "1 (inet::UdpStatusInd::UDP_I_ERROR)",
      "ctrl": "inet::UdpErrorIndication",
      "tags": [
+      "inet::IcmpErrorInd",
       "inet::L3AddressInd",
       "inet::L4PortInd",
       "inet::SocketInd"
@@ -4964,6 +5945,7 @@
      "kind": "1 (inet::UdpStatusInd::UDP_I_ERROR)",
      "ctrl": "inet::UdpErrorIndication",
      "tags": [
+      "inet::IcmpErrorInd",
       "inet::L3AddressInd",
       "inet::L4PortInd",
       "inet::SocketInd"
@@ -5151,6 +6133,7 @@
      "kind": "1 (inet::UdpStatusInd::UDP_I_ERROR)",
      "ctrl": "inet::UdpErrorIndication",
      "tags": [
+      "inet::IcmpErrorInd",
       "inet::L3AddressInd",
       "inet::L4PortInd",
       "inet::SocketInd"
@@ -6508,6 +7491,7 @@
      "kind": "1 (inet::UdpStatusInd::UDP_I_ERROR)",
      "ctrl": "inet::UdpErrorIndication",
      "tags": [
+      "inet::IcmpErrorInd",
       "inet::L3AddressInd",
       "inet::L4PortInd",
       "inet::SocketInd"
@@ -7013,6 +7997,16 @@
   "inet.clock.model.OscillatorBasedClock": {
    "CALLED": [
     {
+     "call from": "inet.clock.oscillator.ConstantDriftOscillator",
+     "function": "inet::OscillatorBasedClock::receiveSignal",
+     "info": "postOscillatorStateChanged"
+    },
+    {
+     "call from": "inet.clock.oscillator.ConstantDriftOscillator",
+     "function": "inet::OscillatorBasedClock::receiveSignal",
+     "info": "preOscillatorStateChanged"
+    },
+    {
      "call from": "inet.clock.oscillator.RandomDriftOscillator",
      "function": "inet::OscillatorBasedClock::receiveSignal",
      "info": "postOscillatorStateChanged"
@@ -7035,6 +8029,11 @@
      "call to": "inet.clock.oscillator.ConstantDriftOscillator",
      "function": "inet::ConstantDriftOscillator::setTickOffset",
      "info": "setTickOffset"
+    },
+    {
+     "call to": "inet.clock.oscillator.RandomDriftOscillator",
+     "function": "inet::RandomDriftOscillator::setTickOffset",
+     "info": "setTickOffset"
     }
    ],
    "CALLED": [
@@ -7049,6 +8048,16 @@
      "info": "setClockTime"
     },
     {
+     "call from": "inet.clock.oscillator.ConstantDriftOscillator",
+     "function": "inet::SettableClock::receiveSignal",
+     "info": "postOscillatorStateChanged"
+    },
+    {
+     "call from": "inet.clock.oscillator.ConstantDriftOscillator",
+     "function": "inet::SettableClock::receiveSignal",
+     "info": "preOscillatorStateChanged"
+    },
+    {
      "call from": "inet.clock.oscillator.RandomDriftOscillator",
      "function": "inet::SettableClock::receiveSignal",
      "info": "postOscillatorStateChanged"
@@ -7059,18 +8068,40 @@
      "info": "preOscillatorStateChanged"
     },
     {
+     "call from": "inet.clock.servo.StepClockServo",
+     "function": "inet::SettableClock::setClockTime",
+     "info": "setClockTime"
+    },
+    {
      "call from": "inet.common.scenario.ScenarioManager",
      "function": "inet::SettableClock::processCommand",
      "info": "processCommand"
-    },
-    {
-     "call from": "inet.linklayer.ieee8021as.Gptp",
-     "function": "inet::SettableClock::setClockTime",
-     "info": "setClockTime"
     }
    ]
   },
   "inet.clock.oscillator.ConstantDriftOscillator": {
+   "CALL": [
+    {
+     "call to": "inet.clock.model.OscillatorBasedClock",
+     "function": "inet::OscillatorBasedClock::receiveSignal",
+     "info": "postOscillatorStateChanged"
+    },
+    {
+     "call to": "inet.clock.model.OscillatorBasedClock",
+     "function": "inet::OscillatorBasedClock::receiveSignal",
+     "info": "preOscillatorStateChanged"
+    },
+    {
+     "call to": "inet.clock.model.SettableClock",
+     "function": "inet::SettableClock::receiveSignal",
+     "info": "postOscillatorStateChanged"
+    },
+    {
+     "call to": "inet.clock.model.SettableClock",
+     "function": "inet::SettableClock::receiveSignal",
+     "info": "preOscillatorStateChanged"
+    }
+   ],
    "CALLED": [
     {
      "call from": "inet.clock.model.SettableClock",
@@ -7109,6 +8140,11 @@
    ],
    "CALLED": [
     {
+     "call from": "inet.clock.model.SettableClock",
+     "function": "inet::RandomDriftOscillator::setTickOffset",
+     "info": "setTickOffset"
+    },
+    {
      "call from": "inet.clock.oscillator.RandomDriftOscillator",
      "function": "inet::RandomDriftOscillator::setDriftRate",
      "info": "setDriftRate"
@@ -7122,6 +8158,22 @@
      "tags": [],
      "msgname": "ChangeTimer",
      "context": ""
+    }
+   ]
+  },
+  "inet.clock.servo.StepClockServo": {
+   "CALL": [
+    {
+     "call to": "inet.clock.model.SettableClock",
+     "function": "inet::SettableClock::setClockTime",
+     "info": "setClockTime"
+    }
+   ],
+   "CALLED": [
+    {
+     "call from": "inet.linklayer.ieee8021as.Gptp",
+     "function": "inet::StepClockServo::adjustClockForDifference",
+     "info": "adjustClockForDifference"
     }
    ]
   },
@@ -7470,6 +8522,36 @@
     },
     {
      "call from": "inet.applications.pingapp.PingApp",
+     "function": "inet::MessageDispatcher::arrived",
+     "info": "arrived"
+    },
+    {
+     "call from": "inet.applications.quicapp.QuicClient",
+     "function": "inet::MessageDispatcher::arrived",
+     "info": "arrived"
+    },
+    {
+     "call from": "inet.applications.quicapp.QuicDiscardServer",
+     "function": "inet::MessageDispatcher::arrived",
+     "info": "arrived"
+    },
+    {
+     "call from": "inet.applications.quicapp.QuicOrderedReceiver",
+     "function": "inet::MessageDispatcher::arrived",
+     "info": "arrived"
+    },
+    {
+     "call from": "inet.applications.quicapp.QuicOrderedTrafficgen",
+     "function": "inet::MessageDispatcher::arrived",
+     "info": "arrived"
+    },
+    {
+     "call from": "inet.applications.quicapp.QuicTrafficgen",
+     "function": "inet::MessageDispatcher::arrived",
+     "info": "arrived"
+    },
+    {
+     "call from": "inet.applications.quicapp.QuicZeroRttClient",
      "function": "inet::MessageDispatcher::arrived",
      "info": "arrived"
     },
@@ -8474,6 +9556,21 @@
      "info": "arrived"
     },
     {
+     "call from": "inet.transportlayer.quic.Quic",
+     "function": "inet::MessageDispatcher::arrived",
+     "info": "arrived"
+    },
+    {
+     "call from": "inet.transportlayer.quic.Quic",
+     "function": "inet::MessageDispatcher::handleRegisterProtocol",
+     "info": "handleRegisterProtocol"
+    },
+    {
+     "call from": "inet.transportlayer.quic.Quic",
+     "function": "inet::MessageDispatcher::handleRegisterService",
+     "info": "handleRegisterService"
+    },
+    {
      "call from": "inet.transportlayer.rtp.Rtcp",
      "function": "inet::MessageDispatcher::arrived",
      "info": "arrived"
@@ -8649,28 +9746,11 @@
       "inet::DirectionTag",
       "inet::DispatchProtocolReq",
       "inet::EncapsulationProtocolInd",
-      "inet::GptpIngressTimeInd",
       "inet::InterfaceInd",
       "inet::MacAddressInd",
       "inet::PacketProtocolTag"
      ],
      "destModule": "inet.linklayer.ieee8021as.Gptp"
-    },
-    {
-     "gate": "out[]",
-     "msg": "inet::Packet",
-     "kind": "0",
-     "ctrl": "",
-     "tags": [
-      "inet::DirectionTag",
-      "inet::DispatchProtocolReq",
-      "inet::EncapsulationProtocolInd",
-      "inet::GptpIngressTimeInd",
-      "inet::InterfaceInd",
-      "inet::MacAddressInd",
-      "inet::PacketProtocolTag"
-     ],
-     "destModule": "inet.linklayer.ieee8021d.relay.Ieee8021dRelay"
     },
     {
      "gate": "out[]",
@@ -9139,6 +10219,69 @@
       "inet::EncapsulationProtocolReq",
       "inet::InterfaceReq",
       "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
+      "inet::StreamReq",
+      "inet::TransportProtocolInd",
+      "inet::VlanInd"
+     ],
+     "srcModule": "inet.common.MessageDispatcher"
+    },
+    {
+     "gate": "in[]",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::DispatchProtocolReq",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
+      "inet::StreamReq",
+      "inet::TransportProtocolInd",
+      "inet::VlanInd"
+     ],
+     "srcModule": "inet.linklayer.ieee8021q.Ieee8021qTagEpdHeaderInserter"
+    },
+    {
+     "gate": "in[]",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::DispatchProtocolReq",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
+      "inet::StreamReq",
+      "inet::TransportProtocolInd",
+      "inet::VlanReq"
+     ],
+     "srcModule": "inet.protocolelement.redundancy.StreamEncoder"
+    },
+    {
+     "gate": "in[]",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::DispatchProtocolReq",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
       "inet::PacketProtocolTag"
      ],
      "srcModule": "inet.linklayer.ethernet.common.RelayInterfaceSelector"
@@ -9200,6 +10343,26 @@
       "inet::NetworkProtocolInd",
       "inet::PacketProtocolTag",
       "inet::SequenceNumberInd",
+      "inet::StreamReq",
+      "inet::TransportProtocolInd",
+      "inet::VlanInd"
+     ],
+     "srcModule": "inet.linklayer.ethernet.modular.EthernetFcsInserter"
+    },
+    {
+     "gate": "in[]",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
       "inet::StreamReq",
       "inet::TransportProtocolInd",
       "inet::VlanInd"
@@ -10042,54 +11205,6 @@
       "inet::DirectionTag",
       "inet::DispatchProtocolReq",
       "inet::EncapsulationProtocolInd",
-      "inet::GptpIngressTimeInd",
-      "inet::InterfaceInd",
-      "inet::MacAddressInd",
-      "inet::PacketProtocolTag"
-     ],
-     "srcModule": "inet.common.MessageDispatcher"
-    },
-    {
-     "gate": "in[]",
-     "msg": "inet::Packet",
-     "kind": "0",
-     "ctrl": "",
-     "tags": [
-      "inet::DirectionTag",
-      "inet::DispatchProtocolReq",
-      "inet::EncapsulationProtocolInd",
-      "inet::GptpIngressTimeInd",
-      "inet::InterfaceInd",
-      "inet::MacAddressInd",
-      "inet::PacketProtocolTag"
-     ],
-     "srcModule": "inet.linklayer.ethernet.common.RelayInterfaceLearner"
-    },
-    {
-     "gate": "in[]",
-     "msg": "inet::Packet",
-     "kind": "0",
-     "ctrl": "",
-     "tags": [
-      "inet::DirectionTag",
-      "inet::DispatchProtocolReq",
-      "inet::EncapsulationProtocolInd",
-      "inet::GptpIngressTimeInd",
-      "inet::InterfaceInd",
-      "inet::MacAddressInd",
-      "inet::PacketProtocolTag"
-     ],
-     "srcModule": "inet.linklayer.ethernet.modular.EthernetMacHeaderChecker"
-    },
-    {
-     "gate": "in[]",
-     "msg": "inet::Packet",
-     "kind": "0",
-     "ctrl": "",
-     "tags": [
-      "inet::DirectionTag",
-      "inet::DispatchProtocolReq",
-      "inet::EncapsulationProtocolInd",
       "inet::InterfaceInd",
       "inet::MacAddressInd",
       "inet::PacketProtocolTag",
@@ -10349,20 +11464,6 @@
       "inet::DirectionTag",
       "inet::DispatchProtocolReq",
       "inet::FragmentTag",
-      "inet::InterfaceInd",
-      "inet::PacketProtocolTag"
-     ],
-     "srcModule": "inet.linklayer.ethernet.modular.LayeredEthernetInterface"
-    },
-    {
-     "gate": "in[]",
-     "msg": "inet::Packet",
-     "kind": "0",
-     "ctrl": "",
-     "tags": [
-      "inet::DirectionTag",
-      "inet::DispatchProtocolReq",
-      "inet::GptpIngressTimeInd",
       "inet::InterfaceInd",
       "inet::PacketProtocolTag"
      ],
@@ -11367,6 +12468,69 @@
       "inet::EncapsulationProtocolReq",
       "inet::InterfaceReq",
       "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
+      "inet::StreamReq",
+      "inet::TransportProtocolInd",
+      "inet::VlanInd"
+     ],
+     "destModule": "inet.common.MessageDispatcher"
+    },
+    {
+     "gate": "out[]",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::DispatchProtocolReq",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
+      "inet::StreamReq",
+      "inet::TransportProtocolInd",
+      "inet::VlanInd"
+     ],
+     "destModule": "inet.linklayer.ethernet.modular.EthernetMacHeaderInserter"
+    },
+    {
+     "gate": "out[]",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::DispatchProtocolReq",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
+      "inet::StreamReq",
+      "inet::TransportProtocolInd",
+      "inet::VlanReq"
+     ],
+     "destModule": "inet.linklayer.ieee8021q.Ieee8021qTagEpdHeaderInserter"
+    },
+    {
+     "gate": "out[]",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::DispatchProtocolReq",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
       "inet::PacketProtocolTag"
      ],
      "destModule": "inet.linklayer.ethernet.modular.EthernetMacHeaderInserter"
@@ -11428,6 +12592,26 @@
       "inet::NetworkProtocolInd",
       "inet::PacketProtocolTag",
       "inet::SequenceNumberInd",
+      "inet::StreamReq",
+      "inet::TransportProtocolInd",
+      "inet::VlanInd"
+     ],
+     "destModule": "inet.linklayer.ethernet.modular.LayeredEthernetInterface"
+    },
+    {
+     "gate": "out[]",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
       "inet::StreamReq",
       "inet::TransportProtocolInd",
       "inet::VlanInd"
@@ -12292,54 +13476,6 @@
       "inet::DirectionTag",
       "inet::DispatchProtocolReq",
       "inet::EncapsulationProtocolInd",
-      "inet::GptpIngressTimeInd",
-      "inet::InterfaceInd",
-      "inet::MacAddressInd",
-      "inet::PacketProtocolTag"
-     ],
-     "destModule": "inet.common.MessageDispatcher"
-    },
-    {
-     "gate": "out[]",
-     "msg": "inet::Packet",
-     "kind": "0",
-     "ctrl": "",
-     "tags": [
-      "inet::DirectionTag",
-      "inet::DispatchProtocolReq",
-      "inet::EncapsulationProtocolInd",
-      "inet::GptpIngressTimeInd",
-      "inet::InterfaceInd",
-      "inet::MacAddressInd",
-      "inet::PacketProtocolTag"
-     ],
-     "destModule": "inet.linklayer.ethernet.common.RelayInterfaceLearner"
-    },
-    {
-     "gate": "out[]",
-     "msg": "inet::Packet",
-     "kind": "0",
-     "ctrl": "",
-     "tags": [
-      "inet::DirectionTag",
-      "inet::DispatchProtocolReq",
-      "inet::EncapsulationProtocolInd",
-      "inet::GptpIngressTimeInd",
-      "inet::InterfaceInd",
-      "inet::MacAddressInd",
-      "inet::PacketProtocolTag"
-     ],
-     "destModule": "inet.queueing.classifier.PacketClassifier"
-    },
-    {
-     "gate": "out[]",
-     "msg": "inet::Packet",
-     "kind": "0",
-     "ctrl": "",
-     "tags": [
-      "inet::DirectionTag",
-      "inet::DispatchProtocolReq",
-      "inet::EncapsulationProtocolInd",
       "inet::InterfaceInd",
       "inet::MacAddressInd",
       "inet::PacketProtocolTag"
@@ -12420,6 +13556,21 @@
       "inet::PacketProtocolTag"
      ],
      "destModule": "inet.linklayer.vlan.VlanIndFilter"
+    },
+    {
+     "gate": "out[]",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolReq",
+      "inet::EncapsulationProtocolInd",
+      "inet::InterfaceInd",
+      "inet::MacAddressInd",
+      "inet::PacketProtocolTag"
+     ],
+     "destModule": "inet.queueing.classifier.PacketClassifier"
     },
     {
      "gate": "out[]",
@@ -12629,20 +13780,6 @@
       "inet::DirectionTag",
       "inet::DispatchProtocolReq",
       "inet::FragmentTag",
-      "inet::InterfaceInd",
-      "inet::PacketProtocolTag"
-     ],
-     "destModule": "inet.linklayer.ethernet.modular.EthernetFcsChecker"
-    },
-    {
-     "gate": "out[]",
-     "msg": "inet::Packet",
-     "kind": "0",
-     "ctrl": "",
-     "tags": [
-      "inet::DirectionTag",
-      "inet::DispatchProtocolReq",
-      "inet::GptpIngressTimeInd",
       "inet::InterfaceInd",
       "inet::PacketProtocolTag"
      ],
@@ -13607,7 +14744,15 @@
    "PACKET": [
     {
      "packetAction": "insertAtFront",
+     "chunkType": "inet::ApskPhyHeader"
+    },
+    {
+     "packetAction": "insertAtFront",
      "chunkType": "inet::EthernetMacHeader"
+    },
+    {
+     "packetAction": "insertAtFront",
+     "chunkType": "inet::GenericPhyHeader"
     },
     {
      "packetAction": "peekAtFront",
@@ -13627,11 +14772,19 @@
     },
     {
      "packetAction": "popAtBack",
+     "chunkType": "inet::EthernetFcs"
+    },
+    {
+     "packetAction": "popAtBack",
      "chunkType": "inet::ieee80211::Ieee80211MacTrailer"
     },
     {
      "packetAction": "popAtFront",
      "chunkType": "inet::AckingMacHeader"
+    },
+    {
+     "packetAction": "popAtFront",
+     "chunkType": "inet::ApskPhyHeader"
     },
     {
      "packetAction": "popAtFront",
@@ -13648,6 +14801,14 @@
     {
      "packetAction": "popAtFront",
      "chunkType": "inet::CsmaCaMacHeader"
+    },
+    {
+     "packetAction": "popAtFront",
+     "chunkType": "inet::EthernetMacHeader"
+    },
+    {
+     "packetAction": "popAtFront",
+     "chunkType": "inet::GenericPhyHeader"
     },
     {
      "packetAction": "popAtFront",
@@ -13679,11 +14840,31 @@
     },
     {
      "packetAction": "popAtFront",
+     "chunkType": "inet::physicallayer::EthernetPhyHeaderBase"
+    },
+    {
+     "packetAction": "popAtFront",
+     "chunkType": "inet::physicallayer::Ieee80211DsssPhyHeader"
+    },
+    {
+     "packetAction": "popAtFront",
      "chunkType": "inet::physicallayer::Ieee80211OfdmPhyHeader"
     },
     {
      "packetAction": "popAtFront",
+     "chunkType": "inet::tcp::TcpHeader"
+    },
+    {
+     "packetAction": "popAtFront",
+     "chunkType": "inet::UdpHeader"
+    },
+    {
+     "packetAction": "popAtFront",
      "chunkType": "inet::XMacHeaderBase"
+    },
+    {
+     "packetAction": "removeAtFront",
+     "chunkType": "inet::Chunk"
     },
     {
      "packetAction": "setBackOffset",
@@ -13706,6 +14887,14 @@
     {
      "tagAction": "findTag",
      "tagType": "inet::ieee80211::LlcProtocolTag"
+    },
+    {
+     "tagAction": "findTag",
+     "tagType": "inet::L3AddressInd"
+    },
+    {
+     "tagAction": "findTag",
+     "tagType": "inet::NetworkProtocolInd"
     },
     {
      "tagAction": "findTag",
@@ -14046,6 +15235,16 @@
      "info": "handleOperationStage"
     },
     {
+     "call to": "inet.protocolelement.transceiver.DestreamingReceiver",
+     "function": "inet::DestreamingReceiver::receiveSignal",
+     "info": "POST_MODEL_CHANGE"
+    },
+    {
+     "call to": "inet.protocolelement.transceiver.DestreamingReceiver",
+     "function": "inet::DestreamingReceiver::receiveSignal",
+     "info": "PRE_MODEL_CHANGE"
+    },
+    {
      "call to": "inet.protocolelement.transceiver.PacketReceiver",
      "function": "inet::PacketReceiver::handleOperationStage",
      "info": "handleOperationStage"
@@ -14054,6 +15253,16 @@
      "call to": "inet.protocolelement.transceiver.PacketTransmitter",
      "function": "inet::PacketTransmitter::handleOperationStage",
      "info": "handleOperationStage"
+    },
+    {
+     "call to": "inet.protocolelement.transceiver.StreamingTransmitter",
+     "function": "inet::StreamingTransmitter::receiveSignal",
+     "info": "POST_MODEL_CHANGE"
+    },
+    {
+     "call to": "inet.protocolelement.transceiver.StreamingTransmitter",
+     "function": "inet::StreamingTransmitter::receiveSignal",
+     "info": "PRE_MODEL_CHANGE"
     },
     {
      "call to": "inet.routing.aodv.Aodv",
@@ -14450,6 +15659,22 @@
      "ctrl": "",
      "tags": [
       "inet::DispatchProtocolInd",
+      "inet::InterfaceInd",
+      "inet::InterfaceReq",
+      "inet::MacAddressInd",
+      "inet::MacAddressReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag"
+     ],
+     "destModule": "inet.physicallayer.wireless.generic.GenericRadio"
+    },
+    {
+     "gate": "lowerLayerOut",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolInd",
       "inet::InterfaceReq",
       "inet::MacAddressInd",
       "inet::MacAddressReq",
@@ -14775,6 +16000,22 @@
       "inet::SignalPowerInd",
       "inet::SignalTimeInd",
       "inet::SnirInd"
+     ],
+     "srcModule": "inet.queueing.queue.DropTailQueue"
+    },
+    {
+     "gate": "upperLayerIn",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolInd",
+      "inet::InterfaceInd",
+      "inet::InterfaceReq",
+      "inet::MacAddressInd",
+      "inet::MacAddressReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag"
      ],
      "srcModule": "inet.queueing.queue.DropTailQueue"
     },
@@ -18190,6 +19431,21 @@
       "inet::NetworkProtocolInd",
       "inet::PacketProtocolTag"
      ],
+     "destModule": "inet.linklayer.ethernet.common.EthernetFrameClassifier"
+    },
+    {
+     "gate": "lowerLayerOut",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag"
+     ],
      "destModule": "inet.linklayer.ethernet.common.EthernetQueue"
     },
     {
@@ -18206,7 +19462,39 @@
       "inet::PacketProtocolTag",
       "inet::SocketReq"
      ],
+     "destModule": "inet.linklayer.ethernet.common.EthernetFrameClassifier"
+    },
+    {
+     "gate": "lowerLayerOut",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
+      "inet::SocketReq"
+     ],
      "destModule": "inet.linklayer.ethernet.common.EthernetQueue"
+    },
+    {
+     "gate": "lowerLayerOut",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
+      "inet::TransportProtocolInd"
+     ],
+     "destModule": "inet.linklayer.ethernet.common.EthernetFrameClassifier"
     },
     {
      "gate": "lowerLayerOut",
@@ -19570,7 +20858,54 @@
       "inet::MacAddressReq",
       "inet::NetworkProtocolInd",
       "inet::PacketProtocolTag",
+      "inet::SocketReq"
+     ],
+     "srcModule": "inet.queueing.scheduler.PriorityScheduler"
+    },
+    {
+     "gate": "upperLayerIn",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
       "inet::TransportProtocolInd"
+     ],
+     "srcModule": "inet.linklayer.ethernet.common.EthernetQueue"
+    },
+    {
+     "gate": "upperLayerIn",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
+      "inet::TransportProtocolInd"
+     ],
+     "srcModule": "inet.queueing.scheduler.PriorityScheduler"
+    },
+    {
+     "gate": "upperLayerIn",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag"
      ],
      "srcModule": "inet.linklayer.ethernet.common.EthernetQueue"
     },
@@ -19587,7 +20922,7 @@
       "inet::NetworkProtocolInd",
       "inet::PacketProtocolTag"
      ],
-     "srcModule": "inet.linklayer.ethernet.common.EthernetQueue"
+     "srcModule": "inet.queueing.scheduler.PriorityScheduler"
     },
     {
      "gate": "upperLayerIn",
@@ -20037,6 +21372,53 @@
      "ctrl": "",
      "tags": [
       "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
+      "inet::SocketReq"
+     ],
+     "srcModule": "inet.linklayer.ethernet.basic.EthernetEncapsulation"
+    },
+    {
+     "gate": "in",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
+      "inet::TransportProtocolInd"
+     ],
+     "srcModule": "inet.linklayer.ethernet.basic.EthernetEncapsulation"
+    },
+    {
+     "gate": "in",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag"
+     ],
+     "srcModule": "inet.linklayer.ethernet.basic.EthernetEncapsulation"
+    },
+    {
+     "gate": "in",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolInd",
       "inet::InterfaceInd",
       "inet::InterfaceReq",
       "inet::MacAddressInd",
@@ -20197,6 +21579,53 @@
       "inet::InterfaceReq",
       "inet::MacAddressReq",
       "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
+      "inet::TransportProtocolInd"
+     ],
+     "destModule": "inet.queueing.queue.DropTailQueue"
+    },
+    {
+     "gate": "out[]",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag"
+     ],
+     "destModule": "inet.queueing.queue.DropTailQueue"
+    },
+    {
+     "gate": "out[]",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
+      "inet::SocketReq"
+     ],
+     "destModule": "inet.queueing.queue.DropTailQueue"
+    },
+    {
+     "gate": "out[]",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
       "inet::NetworkProtocolInd",
       "inet::PacketProtocolTag",
       "inet::TransportProtocolInd"
@@ -22100,22 +23529,6 @@
       "inet::DirectionTag",
       "inet::DispatchProtocolReq",
       "inet::EncapsulationProtocolInd",
-      "inet::GptpIngressTimeInd",
-      "inet::InterfaceInd",
-      "inet::MacAddressInd",
-      "inet::PacketProtocolTag"
-     ],
-     "srcModule": "inet.common.MessageDispatcher"
-    },
-    {
-     "gate": "in",
-     "msg": "inet::Packet",
-     "kind": "0",
-     "ctrl": "",
-     "tags": [
-      "inet::DirectionTag",
-      "inet::DispatchProtocolReq",
-      "inet::EncapsulationProtocolInd",
       "inet::InterfaceInd",
       "inet::MacAddressInd",
       "inet::PacketProtocolTag"
@@ -22232,22 +23645,6 @@
       "inet::VlanInd"
      ],
      "destModule": "inet.protocolelement.redundancy.StreamDecoder"
-    },
-    {
-     "gate": "out",
-     "msg": "inet::Packet",
-     "kind": "0",
-     "ctrl": "",
-     "tags": [
-      "inet::DirectionTag",
-      "inet::DispatchProtocolReq",
-      "inet::EncapsulationProtocolInd",
-      "inet::GptpIngressTimeInd",
-      "inet::InterfaceInd",
-      "inet::MacAddressInd",
-      "inet::PacketProtocolTag"
-     ],
-     "destModule": "inet.common.MessageDispatcher"
     },
     {
      "gate": "out",
@@ -22710,6 +24107,10 @@
     },
     {
      "tagAction": "findTagForUpdate",
+     "tagType": "inet::EncapsulationProtocolReq"
+    },
+    {
+     "tagAction": "findTag",
      "tagType": "inet::EncapsulationProtocolReq"
     },
     {
@@ -23463,34 +24864,6 @@
      "tags": [
       "inet::DirectionTag",
       "inet::DispatchProtocolReq",
-      "inet::GptpIngressTimeInd",
-      "inet::InterfaceInd",
-      "inet::PacketProtocolTag"
-     ],
-     "srcModule": "inet.common.MessageDispatcher"
-    },
-    {
-     "gate": "in",
-     "msg": "inet::Packet",
-     "kind": "0",
-     "ctrl": "",
-     "tags": [
-      "inet::DirectionTag",
-      "inet::DispatchProtocolReq",
-      "inet::GptpIngressTimeInd",
-      "inet::InterfaceInd",
-      "inet::PacketProtocolTag"
-     ],
-     "srcModule": "inet.protocolelement.common.PacketEmitter"
-    },
-    {
-     "gate": "in",
-     "msg": "inet::Packet",
-     "kind": "0",
-     "ctrl": "",
-     "tags": [
-      "inet::DirectionTag",
-      "inet::DispatchProtocolReq",
       "inet::InterfaceInd",
       "inet::PacketProtocolTag"
      ],
@@ -23552,34 +24925,6 @@
       "inet::PacketProtocolTag"
      ],
      "destModule": "inet.linklayer.ethernet.modular.EthernetMacHeaderChecker"
-    },
-    {
-     "gate": "out",
-     "msg": "inet::Packet",
-     "kind": "0",
-     "ctrl": "",
-     "tags": [
-      "inet::DirectionTag",
-      "inet::DispatchProtocolReq",
-      "inet::GptpIngressTimeInd",
-      "inet::InterfaceInd",
-      "inet::PacketProtocolTag"
-     ],
-     "destModule": "inet.linklayer.ethernet.modular.EthernetMacHeaderChecker"
-    },
-    {
-     "gate": "out",
-     "msg": "inet::Packet",
-     "kind": "0",
-     "ctrl": "",
-     "tags": [
-      "inet::DirectionTag",
-      "inet::DispatchProtocolReq",
-      "inet::GptpIngressTimeInd",
-      "inet::InterfaceInd",
-      "inet::PacketProtocolTag"
-     ],
-     "destModule": "inet.linklayer.ethernet.modular.LayeredEthernetInterface"
     },
     {
      "gate": "out",
@@ -23764,6 +25109,26 @@
       "inet::NetworkProtocolInd",
       "inet::PacketProtocolTag",
       "inet::SequenceNumberInd",
+      "inet::StreamReq",
+      "inet::TransportProtocolInd",
+      "inet::VlanInd"
+     ],
+     "srcModule": "inet.protocolelement.common.PaddingInserter"
+    },
+    {
+     "gate": "in",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
       "inet::StreamReq",
       "inet::TransportProtocolInd",
       "inet::VlanInd"
@@ -24279,6 +25644,26 @@
       "inet::NetworkProtocolInd",
       "inet::PacketProtocolTag",
       "inet::SequenceNumberInd",
+      "inet::StreamReq",
+      "inet::TransportProtocolInd",
+      "inet::VlanInd"
+     ],
+     "destModule": "inet.common.MessageDispatcher"
+    },
+    {
+     "gate": "out",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
       "inet::StreamReq",
       "inet::TransportProtocolInd",
       "inet::VlanInd"
@@ -25219,20 +26604,6 @@
      "tags": [
       "inet::DirectionTag",
       "inet::DispatchProtocolReq",
-      "inet::GptpIngressTimeInd",
-      "inet::InterfaceInd",
-      "inet::PacketProtocolTag"
-     ],
-     "srcModule": "inet.linklayer.ethernet.modular.EthernetFcsChecker"
-    },
-    {
-     "gate": "in",
-     "msg": "inet::Packet",
-     "kind": "0",
-     "ctrl": "",
-     "tags": [
-      "inet::DirectionTag",
-      "inet::DispatchProtocolReq",
       "inet::InterfaceInd",
       "inet::PacketProtocolTag"
      ],
@@ -25266,22 +26637,6 @@
       "inet::DispatchProtocolReq",
       "inet::EncapsulationProtocolInd",
       "inet::FragmentTag",
-      "inet::InterfaceInd",
-      "inet::MacAddressInd",
-      "inet::PacketProtocolTag"
-     ],
-     "destModule": "inet.common.MessageDispatcher"
-    },
-    {
-     "gate": "out",
-     "msg": "inet::Packet",
-     "kind": "0",
-     "ctrl": "",
-     "tags": [
-      "inet::DirectionTag",
-      "inet::DispatchProtocolReq",
-      "inet::EncapsulationProtocolInd",
-      "inet::GptpIngressTimeInd",
       "inet::InterfaceInd",
       "inet::MacAddressInd",
       "inet::PacketProtocolTag"
@@ -25600,6 +26955,27 @@
       "inet::NetworkProtocolInd",
       "inet::PacketProtocolTag",
       "inet::SequenceNumberInd",
+      "inet::StreamReq",
+      "inet::TransportProtocolInd",
+      "inet::VlanInd"
+     ],
+     "srcModule": "inet.common.MessageDispatcher"
+    },
+    {
+     "gate": "in",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::DispatchProtocolReq",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
       "inet::StreamReq",
       "inet::TransportProtocolInd",
       "inet::VlanInd"
@@ -25994,6 +27370,26 @@
       "inet::NetworkProtocolInd",
       "inet::PacketProtocolTag",
       "inet::SequenceNumberInd",
+      "inet::StreamReq",
+      "inet::TransportProtocolInd",
+      "inet::VlanInd"
+     ],
+     "destModule": "inet.protocolelement.common.PaddingInserter"
+    },
+    {
+     "gate": "out",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
       "inet::StreamReq",
       "inet::TransportProtocolInd",
       "inet::VlanInd"
@@ -26449,6 +27845,11 @@
   "inet.linklayer.ethernet.modular.EthernetMacLayer": {
    "CALL": [
     {
+     "call to": "inet.linklayer.ieee8021q.Ieee8021qTimeAwareShaper",
+     "function": "inet::queueing::CompoundPacketQueueBase::removeAllPackets",
+     "info": "removeAllPacket"
+    },
+    {
      "call to": "inet.queueing.queue.PacketQueue",
      "function": "inet::queueing::PacketQueue::removeAllPackets",
      "info": "removeAllPackets"
@@ -26572,27 +27973,12 @@
      "info": "POST_MODEL_CHANGE"
     },
     {
-     "call from": "inet.linklayer.ieee8021q.Ieee8021qAsynchronousShaper",
-     "function": "inet::NetworkInterface::receiveSignal",
-     "info": "POST_MODEL_CHANGE"
-    },
-    {
-     "call from": "inet.linklayer.ieee8021q.Ieee8021qCreditBasedShaper",
-     "function": "inet::NetworkInterface::receiveSignal",
-     "info": "POST_MODEL_CHANGE"
-    },
-    {
      "call from": "inet.protocolelement.measurement.OmittedMeasurementLayer",
      "function": "inet::NetworkInterface::receiveSignal",
      "info": "POST_MODEL_CHANGE"
     },
     {
      "call from": "inet.protocolelement.processing.OmittedProcessingDelayLayer",
-     "function": "inet::NetworkInterface::receiveSignal",
-     "info": "POST_MODEL_CHANGE"
-    },
-    {
-     "call from": "inet.protocolelement.shaper.EligibilityTimeGate",
      "function": "inet::NetworkInterface::receiveSignal",
      "info": "POST_MODEL_CHANGE"
     },
@@ -26618,11 +28004,6 @@
     },
     {
      "call from": "inet.queueing.gate.OmittedPacketGate",
-     "function": "inet::NetworkInterface::receiveSignal",
-     "info": "POST_MODEL_CHANGE"
-    },
-    {
-     "call from": "inet.queueing.gate.PeriodicGate",
      "function": "inet::NetworkInterface::receiveSignal",
      "info": "POST_MODEL_CHANGE"
     },
@@ -26695,6 +28076,26 @@
       "inet::NetworkProtocolInd",
       "inet::PacketProtocolTag",
       "inet::SequenceNumberInd",
+      "inet::StreamReq",
+      "inet::TransportProtocolInd",
+      "inet::VlanInd"
+     ],
+     "srcModule": "inet.common.MessageDispatcher"
+    },
+    {
+     "gate": "upperLayerIn",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
       "inet::StreamReq",
       "inet::TransportProtocolInd",
       "inet::VlanInd"
@@ -27143,20 +28544,6 @@
      "tags": [
       "inet::DirectionTag",
       "inet::DispatchProtocolReq",
-      "inet::GptpIngressTimeInd",
-      "inet::InterfaceInd",
-      "inet::PacketProtocolTag"
-     ],
-     "srcModule": "inet.linklayer.ethernet.modular.EthernetFcsChecker"
-    },
-    {
-     "gate": "upperLayerOut",
-     "msg": "inet::Packet",
-     "kind": "0",
-     "ctrl": "",
-     "tags": [
-      "inet::DirectionTag",
-      "inet::DispatchProtocolReq",
       "inet::InterfaceInd",
       "inet::PacketProtocolTag"
      ],
@@ -27294,6 +28681,64 @@
       "inet::VlanInd"
      ],
      "destModule": "inet.queueing.queue.PacketQueue"
+    },
+    {
+     "gate": "upperLayerIn",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
+      "inet::StreamReq",
+      "inet::TransportProtocolInd",
+      "inet::VlanInd"
+     ],
+     "destModule": "inet.queueing.queue.DropTailQueue"
+    },
+    {
+     "gate": "upperLayerIn",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
+      "inet::StreamReq",
+      "inet::TransportProtocolInd",
+      "inet::VlanInd"
+     ],
+     "destModule": "inet.queueing.queue.PacketQueue"
+    },
+    {
+     "gate": "upperLayerIn",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
+      "inet::TransportProtocolInd"
+     ],
+     "destModule": "inet.queueing.queue.DropTailQueue"
     },
     {
      "gate": "upperLayerIn",
@@ -27905,20 +29350,6 @@
      "tags": [
       "inet::DirectionTag",
       "inet::DispatchProtocolReq",
-      "inet::GptpIngressTimeInd",
-      "inet::InterfaceInd",
-      "inet::PacketProtocolTag"
-     ],
-     "destModule": "inet.common.MessageDispatcher"
-    },
-    {
-     "gate": "upperLayerOut",
-     "msg": "inet::Packet",
-     "kind": "0",
-     "ctrl": "",
-     "tags": [
-      "inet::DirectionTag",
-      "inet::DispatchProtocolReq",
       "inet::InterfaceInd",
       "inet::PacketProtocolTag"
      ],
@@ -27994,26 +29425,6 @@
     },
     {
      "call from": "inet.linklayer.ieee80211.mac.contention.Contention",
-     "function": "inet::NetworkInterface::receiveSignal",
-     "info": "POST_MODEL_CHANGE"
-    },
-    {
-     "call from": "inet.linklayer.ieee80211.mac.coordinationfunction.Dcf",
-     "function": "inet::NetworkInterface::receiveSignal",
-     "info": "POST_MODEL_CHANGE"
-    },
-    {
-     "call from": "inet.linklayer.ieee80211.mac.coordinationfunction.Hcf",
-     "function": "inet::NetworkInterface::receiveSignal",
-     "info": "POST_MODEL_CHANGE"
-    },
-    {
-     "call from": "inet.linklayer.ieee80211.mac.queue.InProgressFrames",
-     "function": "inet::NetworkInterface::receiveSignal",
-     "info": "POST_MODEL_CHANGE"
-    },
-    {
-     "call from": "inet.linklayer.ieee80211.mac.ratecontrol.AarfRateControl",
      "function": "inet::NetworkInterface::receiveSignal",
      "info": "POST_MODEL_CHANGE"
     },
@@ -29558,11 +30969,6 @@
   "inet.linklayer.ieee80211.mac.coordinationfunction.Dcf": {
    "CALL": [
     {
-     "call to": "inet.linklayer.ieee80211.Ieee80211Interface",
-     "function": "inet::NetworkInterface::receiveSignal",
-     "info": "POST_MODEL_CHANGE"
-    },
-    {
      "call to": "inet.linklayer.ieee80211.mac.channelaccess.Dcaf",
      "function": "inet::ieee80211::Dcaf::incrementCw",
      "info": "incrementCw"
@@ -29832,11 +31238,6 @@
   },
   "inet.linklayer.ieee80211.mac.coordinationfunction.Hcf": {
    "CALL": [
-    {
-     "call to": "inet.linklayer.ieee80211.Ieee80211Interface",
-     "function": "inet::NetworkInterface::receiveSignal",
-     "info": "POST_MODEL_CHANGE"
-    },
     {
      "call to": "inet.linklayer.ieee80211.mac.channelaccess.Edcaf",
      "function": "inet::ieee80211::Edcaf::incrementCw",
@@ -32144,13 +33545,6 @@
    ]
   },
   "inet.linklayer.ieee80211.mac.queue.InProgressFrames": {
-   "CALL": [
-    {
-     "call to": "inet.linklayer.ieee80211.Ieee80211Interface",
-     "function": "inet::NetworkInterface::receiveSignal",
-     "info": "POST_MODEL_CHANGE"
-    }
-   ],
    "CALLED": [
     {
      "call from": "inet.linklayer.ieee80211.mac.coordinationfunction.Dcf",
@@ -32214,13 +33608,6 @@
    ]
   },
   "inet.linklayer.ieee80211.mac.ratecontrol.AarfRateControl": {
-   "CALL": [
-    {
-     "call to": "inet.linklayer.ieee80211.Ieee80211Interface",
-     "function": "inet::NetworkInterface::receiveSignal",
-     "info": "POST_MODEL_CHANGE"
-    }
-   ],
    "CALLED": [
     {
      "call from": "inet.linklayer.ieee80211.mac.coordinationfunction.Dcf",
@@ -33732,9 +35119,9 @@
   "inet.linklayer.ieee8021as.Gptp": {
    "CALL": [
     {
-     "call to": "inet.clock.model.SettableClock",
-     "function": "inet::SettableClock::setClockTime",
-     "info": "setClockTime"
+     "call to": "inet.clock.servo.StepClockServo",
+     "function": "inet::StepClockServo::adjustClockForDifference",
+     "info": "adjustClockForDifference"
     },
     {
      "call to": "inet.common.MessageDispatcher",
@@ -33754,14 +35141,24 @@
    ],
    "CALLED": [
     {
-     "call from": "inet.protocolelement.transceiver.PacketReceiver",
+     "call from": "inet.protocolelement.transceiver.DestreamingReceiver",
      "function": "inet::Gptp::receiveSignal",
      "info": "receptionEnded"
     },
     {
-     "call from": "inet.protocolelement.transceiver.PacketTransmitter",
+     "call from": "inet.protocolelement.transceiver.DestreamingReceiver",
+     "function": "inet::Gptp::receiveSignal",
+     "info": "receptionStarted"
+    },
+    {
+     "call from": "inet.protocolelement.transceiver.StreamingTransmitter",
      "function": "inet::Gptp::receiveSignal",
      "info": "transmissionEnded"
+    },
+    {
+     "call from": "inet.protocolelement.transceiver.StreamingTransmitter",
+     "function": "inet::Gptp::receiveSignal",
+     "info": "transmissionStarted"
     }
    ],
    "INPUT": [
@@ -33774,7 +35171,6 @@
       "inet::DirectionTag",
       "inet::DispatchProtocolReq",
       "inet::EncapsulationProtocolInd",
-      "inet::GptpIngressTimeInd",
       "inet::InterfaceInd",
       "inet::MacAddressInd",
       "inet::PacketProtocolTag"
@@ -33790,7 +35186,6 @@
       "inet::DirectionTag",
       "inet::DispatchProtocolReq",
       "inet::EncapsulationProtocolInd",
-      "inet::GptpIngressTimeInd",
       "inet::InterfaceInd",
       "inet::MacAddressInd",
       "inet::PacketProtocolTag"
@@ -33806,7 +35201,6 @@
       "inet::DirectionTag",
       "inet::DispatchProtocolReq",
       "inet::EncapsulationProtocolInd",
-      "inet::GptpIngressTimeInd",
       "inet::InterfaceInd",
       "inet::MacAddressInd",
       "inet::PacketProtocolTag"
@@ -33931,26 +35325,18 @@
    "SCHEDULE": [
     {
      "msg": "inet::ClockEvent",
-     "kind": "103 (inet::GptpSelfMsgKind::GPTP_SELF_MSG_SYNC)",
+     "kind": "0",
      "ctrl": "",
      "tags": [],
-     "msgname": "selfMsgSync",
+     "msgname": "PdelayTimer",
      "context": ""
     },
     {
      "msg": "inet::ClockEvent",
-     "kind": "105 (inet::GptpSelfMsgKind::GPTP_SELF_MSG_PDELAY_REQ)",
+     "kind": "0",
      "ctrl": "",
      "tags": [],
-     "msgname": "selfMsgPdelay",
-     "context": ""
-    },
-    {
-     "msg": "inet::GptpReqAnswerEvent",
-     "kind": "101 (inet::GptpSelfMsgKind::GPTP_SELF_REQ_ANSWER_KIND)",
-     "ctrl": "",
-     "tags": [],
-     "msgname": "selfMsgPdelayResp",
+     "msgname": "SyncTimer",
      "context": ""
     }
    ],
@@ -33958,10 +35344,6 @@
     {
      "tagAction": "addTagIfAbsent",
      "tagType": "inet::DispatchProtocolReq"
-    },
-    {
-     "tagAction": "addTagIfAbsent",
-     "tagType": "inet::GptpIngressTimeInd"
     },
     {
      "tagAction": "addTag",
@@ -33990,10 +35372,6 @@
     {
      "tagAction": "findTag",
      "tagType": "inet::PacketProtocolTag"
-    },
-    {
-     "tagAction": "getTag",
-     "tagType": "inet::GptpIngressTimeInd"
     },
     {
      "tagAction": "getTag",
@@ -34047,22 +35425,6 @@
     }
    ],
    "INPUT": [
-    {
-     "gate": "lowerLayerIn",
-     "msg": "inet::Packet",
-     "kind": "0",
-     "ctrl": "",
-     "tags": [
-      "inet::DirectionTag",
-      "inet::DispatchProtocolReq",
-      "inet::EncapsulationProtocolInd",
-      "inet::GptpIngressTimeInd",
-      "inet::InterfaceInd",
-      "inet::MacAddressInd",
-      "inet::PacketProtocolTag"
-     ],
-     "srcModule": "inet.common.MessageDispatcher"
-    },
     {
      "gate": "lowerLayerIn",
      "msg": "inet::Packet",
@@ -34191,7 +35553,6 @@
       "inet::DirectionTag",
       "inet::DispatchProtocolReq",
       "inet::EncapsulationProtocolInd",
-      "inet::GptpIngressTimeInd",
       "inet::InterfaceInd",
       "inet::MacAddressInd",
       "inet::PacketProtocolTag"
@@ -34556,11 +35917,6 @@
   "inet.linklayer.ieee8021q.Ieee8021qAsynchronousShaper": {
    "CALL": [
     {
-     "call to": "inet.linklayer.ethernet.modular.LayeredEthernetInterface",
-     "function": "inet::NetworkInterface::receiveSignal",
-     "info": "POST_MODEL_CHANGE"
-    },
-    {
      "call to": "inet.linklayer.ieee8021q.Ieee8021qAsynchronousShaper",
      "function": "inet::EligibilityTimeGate::handleCanPullPacketChanged",
      "info": "handleCanPullPacketChanged"
@@ -34664,11 +36020,6 @@
   },
   "inet.linklayer.ieee8021q.Ieee8021qCreditBasedShaper": {
    "CALL": [
-    {
-     "call to": "inet.linklayer.ethernet.modular.LayeredEthernetInterface",
-     "function": "inet::NetworkInterface::receiveSignal",
-     "info": "POST_MODEL_CHANGE"
-    },
     {
      "call to": "inet.linklayer.ieee8021q.Ieee8021qCreditBasedShaper",
      "function": "inet::queueing::CreditBasedGate::handleCanPullPacketChanged",
@@ -35403,6 +36754,27 @@
      "ctrl": "",
      "tags": [
       "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::DispatchProtocolReq",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
+      "inet::StreamReq",
+      "inet::TransportProtocolInd",
+      "inet::VlanReq"
+     ],
+     "srcModule": "inet.common.MessageDispatcher"
+    },
+    {
+     "gate": "in",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
       "inet::DispatchProtocolReq",
       "inet::DropEligibleReq",
       "inet::EncapsulationProtocolReq",
@@ -35645,6 +37017,27 @@
       "inet::NetworkProtocolInd",
       "inet::PacketProtocolTag",
       "inet::SequenceNumberReq",
+      "inet::StreamReq",
+      "inet::TransportProtocolInd",
+      "inet::VlanInd"
+     ],
+     "destModule": "inet.common.MessageDispatcher"
+    },
+    {
+     "gate": "out",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::DispatchProtocolReq",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
       "inet::StreamReq",
       "inet::TransportProtocolInd",
       "inet::VlanInd"
@@ -35923,9 +37316,19 @@
      "call to": "inet.queueing.scheduler.PriorityScheduler",
      "function": "inet::queueing::PriorityScheduler::pullPacket",
      "info": "pullPacket"
+    },
+    {
+     "call to": "inet.queueing.scheduler.PriorityScheduler",
+     "function": "inet::queueing::PriorityScheduler::removeAllPackets",
+     "info": "removeAllPackets"
     }
    ],
    "CALLED": [
+    {
+     "call from": "inet.linklayer.ethernet.modular.EthernetMacLayer",
+     "function": "inet::queueing::CompoundPacketQueueBase::removeAllPackets",
+     "info": "removeAllPacket"
+    },
     {
      "call from": "inet.linklayer.ethernet.modular.LayeredEthernetInterface",
      "function": "inet::queueing::CompoundPacketQueueBase::pushPacket",
@@ -40928,6 +42331,10 @@
     },
     {
      "tagAction": "findTag",
+     "tagType": "inet::EncapsulationProtocolReq"
+    },
+    {
+     "tagAction": "findTag",
      "tagType": "inet::InterfaceReq"
     },
     {
@@ -41362,14 +42769,6 @@
      "ctrl": "",
      "tags": [],
      "msgname": "data_tx_over",
-     "context": ""
-    },
-    {
-     "msg": "omnetpp::cMessage",
-     "kind": "204 (inet::XMacTypes::XMAC_DATA_TIMEOUT)",
-     "ctrl": "",
-     "tags": [],
-     "msgname": "data_timeout",
      "context": ""
     },
     {
@@ -45423,6 +46822,11 @@
      "info": "sendErrorMessage(datagram, type=%d, code=%d)"
     },
     {
+     "call from": "inet.networklayer.ipv4.Ipv4",
+     "function": "inet::Icmp::sendPtbMessage",
+     "info": "sendPtbMessage(datagram, mtu=%d)"
+    },
+    {
      "call from": "inet.transportlayer.udp.Udp",
      "function": "inet::Icmp::sendErrorMessage",
      "info": "sendErrorMessage(datagram, type=%d, code=%d)"
@@ -45840,6 +47244,10 @@
     {
      "packetAction": "insertAtFront",
      "chunkType": "inet::IcmpHeader"
+    },
+    {
+     "packetAction": "insertAtFront",
+     "chunkType": "inet::IcmpPtb"
     },
     {
      "packetAction": "peekAtFront",
@@ -46573,6 +47981,11 @@
      "info": "sendErrorMessage(datagram, type=%d, code=%d)"
     },
     {
+     "call to": "inet.networklayer.ipv4.Icmp",
+     "function": "inet::Icmp::sendPtbMessage",
+     "info": "sendPtbMessage(datagram, mtu=%d)"
+    },
+    {
      "call to": "inet.networklayer.ipv4.ipsec.IPsec",
      "function": "inet::ipsec::IPsec::processIngressPacket",
      "info": ""
@@ -46683,18 +48096,18 @@
      "info": "ipv4NewMulticast"
     },
     {
-     "call to": "inet.transportlayer.sctp.SctpCrcInsertion",
-     "function": "inet::sctp::SctpCrcInsertion::datagramPostRoutingHook",
+     "call to": "inet.transportlayer.sctp.SctpChecksumInsertion",
+     "function": "inet::sctp::SctpChecksumInsertion::datagramPostRoutingHook",
      "info": "datagramPostRoutingHook"
     },
     {
-     "call to": "inet.transportlayer.tcp_common.TcpCrcInsertionHook",
-     "function": "inet::tcp::TcpCrcInsertionHook::datagramPostRoutingHook",
+     "call to": "inet.transportlayer.tcp_common.TcpChecksumInsertionHook",
+     "function": "inet::tcp::TcpChecksumInsertionHook::datagramPostRoutingHook",
      "info": "datagramPostRoutingHook"
     },
     {
-     "call to": "inet.transportlayer.udp.UdpCrcInsertionHook",
-     "function": "inet::UdpCrcInsertionHook::datagramPostRoutingHook",
+     "call to": "inet.transportlayer.udp.UdpChecksumInsertionHook",
+     "function": "inet::UdpChecksumInsertionHook::datagramPostRoutingHook",
      "info": "datagramPostRoutingHook"
     }
    ],
@@ -47605,6 +49018,21 @@
      "ctrl": "",
      "tags": [
       "inet::DispatchProtocolReq",
+      "inet::FragmentationReq",
+      "inet::L3AddressReq",
+      "inet::MulticastReq",
+      "inet::PacketProtocolTag",
+      "inet::TransportProtocolInd"
+     ],
+     "srcModule": "inet.transportlayer.udp.Udp"
+    },
+    {
+     "gate": "transportIn",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolReq",
       "inet::HopLimitReq",
       "inet::InterfaceReq",
       "inet::L3AddressReq",
@@ -48384,6 +49812,22 @@
       "inet::PacketProtocolTag"
      ],
      "destModule": "inet.linklayer.ieee80211.llc.Ieee80211LlcLpd"
+    },
+    {
+     "gate": "queueOut",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolInd",
+      "inet::InterfaceInd",
+      "inet::InterfaceReq",
+      "inet::MacAddressInd",
+      "inet::MacAddressReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag"
+     ],
+     "destModule": "inet.queueing.queue.DropTailQueue"
     },
     {
      "gate": "queueOut",
@@ -50385,6 +51829,10 @@
     },
     {
      "tagAction": "findTag",
+     "tagType": "inet::EncapsulationProtocolReq"
+    },
+    {
+     "tagAction": "findTag",
      "tagType": "inet::ErrorRateInd"
     },
     {
@@ -50903,12 +52351,17 @@
      "info": "isLocalAddress(%u.%u.%u.%u)"
     },
     {
+     "call from": "inet.transportlayer.quic.Quic",
+     "function": "inet::Ipv4RoutingTable::getInterfaceForDestAddr",
+     "info": "getInterfaceForDestAddr(%u.%u.%u.%u)"
+    },
+    {
      "call from": "inet.transportlayer.rtp.Rtp",
      "function": "inet::Ipv4RoutingTable::getInterfaceForDestAddr",
      "info": "getInterfaceForDestAddr(%u.%u.%u.%u)"
     },
     {
-     "call from": "inet.transportlayer.sctp.Sctp",
+     "call from": "inet.transportlayer.sctp.SctpAssociation",
      "function": "inet::Ipv4RoutingTable::getInterfaceForDestAddr",
      "info": "getInterfaceForDestAddr(%u.%u.%u.%u)"
     }
@@ -50995,13 +52448,13 @@
      "info": "datagramPreRoutingHook"
     },
     {
-     "call to": "inet.transportlayer.tcp_common.TcpCrcInsertionHook",
-     "function": "inet::tcp::TcpCrcInsertionHook::datagramPostRoutingHook",
+     "call to": "inet.transportlayer.tcp_common.TcpChecksumInsertionHook",
+     "function": "inet::tcp::TcpChecksumInsertionHook::datagramPostRoutingHook",
      "info": "datagramPostRoutingHook"
     },
     {
-     "call to": "inet.transportlayer.udp.UdpCrcInsertionHook",
-     "function": "inet::UdpCrcInsertionHook::datagramPostRoutingHook",
+     "call to": "inet.transportlayer.udp.UdpChecksumInsertionHook",
+     "function": "inet::UdpChecksumInsertionHook::datagramPostRoutingHook",
      "info": "datagramPostRoutingHook"
     }
    ],
@@ -52088,7 +53541,7 @@
      "info": "isLocalAddress(%s)"
     },
     {
-     "call from": "inet.transportlayer.sctp.Sctp",
+     "call from": "inet.transportlayer.sctp.SctpAssociation",
      "function": "inet::Ipv6RoutingTable::doLongestPrefixMatch",
      "info": "doLongestPrefixMatch(%s)"
     }
@@ -55029,8 +56482,16 @@
      "tagType": "inet::PacketProtocolTag"
     },
     {
+     "tagAction": "addTag",
+     "tagType": "inet::PacketProtocolTag"
+    },
+    {
      "tagAction": "clearTags",
      "tagType": ""
+    },
+    {
+     "tagAction": "removeTagIfPresent",
+     "tagType": "inet::PacketProtocolTag"
     }
    ]
   },
@@ -55394,19 +56855,6 @@
      "ctrl": "",
      "tags": [
       "inet::DirectionTag",
-      "inet::GptpIngressTimeInd",
-      "inet::InterfaceInd",
-      "inet::PacketProtocolTag"
-     ],
-     "srcModule": "inet.protocolelement.common.PacketEmitter"
-    },
-    {
-     "gate": "in",
-     "msg": "inet::Packet",
-     "kind": "0",
-     "ctrl": "",
-     "tags": [
-      "inet::DirectionTag",
       "inet::InterfaceInd",
       "inet::PacketProtocolTag"
      ],
@@ -55447,20 +56895,6 @@
       "inet::CutthroughTag",
       "inet::DirectionTag",
       "inet::DispatchProtocolReq",
-      "inet::InterfaceInd",
-      "inet::PacketProtocolTag"
-     ],
-     "destModule": "inet.protocolelement.common.PacketEmitter"
-    },
-    {
-     "gate": "out",
-     "msg": "inet::Packet",
-     "kind": "0",
-     "ctrl": "",
-     "tags": [
-      "inet::DirectionTag",
-      "inet::DispatchProtocolReq",
-      "inet::GptpIngressTimeInd",
       "inet::InterfaceInd",
       "inet::PacketProtocolTag"
      ],
@@ -55801,6 +57235,26 @@
       "inet::NetworkProtocolInd",
       "inet::PacketProtocolTag",
       "inet::SequenceNumberInd",
+      "inet::StreamReq",
+      "inet::TransportProtocolInd",
+      "inet::VlanInd"
+     ],
+     "srcModule": "inet.protocolelement.common.PacketEmitter"
+    },
+    {
+     "gate": "in",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
       "inet::StreamReq",
       "inet::TransportProtocolInd",
       "inet::VlanInd"
@@ -56366,6 +57820,26 @@
       "inet::NetworkProtocolInd",
       "inet::PacketProtocolTag",
       "inet::SequenceNumberInd",
+      "inet::StreamReq",
+      "inet::TransportProtocolInd",
+      "inet::VlanInd"
+     ],
+     "destModule": "inet.protocolelement.common.InterpacketGapInserter"
+    },
+    {
+     "gate": "out",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
       "inet::StreamReq",
       "inet::TransportProtocolInd",
       "inet::VlanInd"
@@ -58630,6 +60104,22 @@
      "ctrl": "",
      "tags": [
       "inet::DispatchProtocolInd",
+      "inet::InterfaceInd",
+      "inet::InterfaceReq",
+      "inet::MacAddressInd",
+      "inet::MacAddressReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag"
+     ],
+     "srcModule": "inet.linklayer.acking.AckingMac"
+    },
+    {
+     "gate": "upperLayerIn",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolInd",
       "inet::InterfaceReq",
       "inet::MacAddressInd",
       "inet::MacAddressReq",
@@ -59551,16 +61041,6 @@
     },
     {
      "call from": "inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211Radio",
-     "function": "inet::physicallayer::RadioMedium::transmitPacket",
-     "info": "transmitPacket"
-    },
-    {
-     "call from": "inet.physicallayer.wireless.noise.NoiseSource",
-     "function": "inet::physicallayer::RadioMedium::addRadio",
-     "info": "addRadio"
-    },
-    {
-     "call from": "inet.physicallayer.wireless.noise.NoiseSource",
      "function": "inet::physicallayer::RadioMedium::transmitPacket",
      "info": "transmitPacket"
     }
@@ -60586,9 +62066,27 @@
      "call from": "inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211RadioMedium",
      "function": "inet::physicallayer::RadioMedium::addTransmission",
      "info": "addTransmission"
+    },
+    {
+     "call from": "inet.physicallayer.wireless.noise.NoiseSource",
+     "function": "inet::physicallayer::RadioMedium::addRadio",
+     "info": "addRadio"
+    },
+    {
+     "call from": "inet.physicallayer.wireless.noise.NoiseSource",
+     "function": "inet::physicallayer::RadioMedium::transmitPacket",
+     "info": "transmitPacket"
     }
    ],
    "PACKET": [
+    {
+     "packetAction": "peekAtFront",
+     "chunkType": "inet::physicallayer::Ieee80211DsssPhyHeader"
+    },
+    {
+     "packetAction": "peekAtFront",
+     "chunkType": "inet::physicallayer::Ieee80211HtPhyHeader"
+    },
     {
      "packetAction": "peekAtFront",
      "chunkType": "inet::physicallayer::Ieee80211OfdmPhyHeader"
@@ -61197,12 +62695,12 @@
   "inet.physicallayer.wireless.noise.NoiseSource": {
    "CALL": [
     {
-     "call to": "inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalRadioMedium",
+     "call to": "inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211RadioMedium",
      "function": "inet::physicallayer::RadioMedium::addRadio",
      "info": "addRadio"
     },
     {
-     "call to": "inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalRadioMedium",
+     "call to": "inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211RadioMedium",
      "function": "inet::physicallayer::RadioMedium::transmitPacket",
      "info": "transmitPacket"
     }
@@ -62075,6 +63573,26 @@
       "inet::MulticastReq",
       "inet::NetworkProtocolInd",
       "inet::PacketProtocolTag",
+      "inet::StreamReq",
+      "inet::TransportProtocolInd",
+      "inet::VlanInd"
+     ],
+     "srcModule": "inet.physicallayer.wired.ethernet.EthernetPhyHeaderInserter"
+    },
+    {
+     "gate": "in",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
       "inet::TransportProtocolInd",
       "inet::VlanReq"
      ],
@@ -62661,6 +64179,26 @@
       "inet::NetworkProtocolInd",
       "inet::PacketProtocolTag",
       "inet::SequenceNumberInd",
+      "inet::StreamReq",
+      "inet::TransportProtocolInd",
+      "inet::VlanInd"
+     ],
+     "destModule": "inet.protocolelement.common.PacketEmitter"
+    },
+    {
+     "gate": "out",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
       "inet::StreamReq",
       "inet::TransportProtocolInd",
       "inet::VlanInd"
@@ -64047,6 +65585,46 @@
       "inet::MulticastReq",
       "inet::NetworkProtocolInd",
       "inet::PacketProtocolTag",
+      "inet::StreamReq",
+      "inet::TransportProtocolInd",
+      "inet::VlanInd"
+     ],
+     "srcModule": "inet.protocolelement.common.InterpacketGapInserter"
+    },
+    {
+     "gate": "in",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
+      "inet::StreamReq",
+      "inet::TransportProtocolInd",
+      "inet::VlanInd"
+     ],
+     "srcModule": "inet.queueing.server.InstantServer"
+    },
+    {
+     "gate": "in",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
       "inet::TransportProtocolInd",
       "inet::VlanReq"
      ],
@@ -64178,20 +65756,6 @@
       "inet::PacketProtocolTag"
      ],
      "srcModule": "inet.queueing.classifier.PacketClassifier"
-    },
-    {
-     "gate": "in",
-     "msg": "inet::Packet",
-     "kind": "0",
-     "ctrl": "",
-     "tags": [
-      "inet::DirectionTag",
-      "inet::DispatchProtocolReq",
-      "inet::GptpIngressTimeInd",
-      "inet::InterfaceInd",
-      "inet::PacketProtocolTag"
-     ],
-     "srcModule": "inet.physicallayer.wired.ethernet.EthernetPhyHeaderChecker"
     },
     {
      "gate": "in",
@@ -64629,19 +66193,6 @@
       "inet::VlanInd"
      ],
      "srcModule": "inet.queueing.server.InstantServer"
-    },
-    {
-     "gate": "in",
-     "msg": "inet::Packet",
-     "kind": "0",
-     "ctrl": "",
-     "tags": [
-      "inet::DirectionTag",
-      "inet::GptpIngressTimeInd",
-      "inet::InterfaceInd",
-      "inet::PacketProtocolTag"
-     ],
-     "srcModule": "inet.protocolelement.transceiver.PacketReceiver"
     },
     {
      "gate": "in",
@@ -65389,6 +66940,46 @@
       "inet::MulticastReq",
       "inet::NetworkProtocolInd",
       "inet::PacketProtocolTag",
+      "inet::StreamReq",
+      "inet::TransportProtocolInd",
+      "inet::VlanInd"
+     ],
+     "destModule": "inet.physicallayer.wired.ethernet.EthernetPhyHeaderInserter"
+    },
+    {
+     "gate": "out",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
+      "inet::StreamReq",
+      "inet::TransportProtocolInd",
+      "inet::VlanInd"
+     ],
+     "destModule": "inet.protocolelement.transceiver.PacketTransmitter"
+    },
+    {
+     "gate": "out",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
       "inet::TransportProtocolInd"
      ],
      "destModule": "inet.physicallayer.wired.ethernet.EthernetPhyHeaderInserter"
@@ -65514,7 +67105,7 @@
       "inet::MacAddressReq",
       "inet::PacketProtocolTag"
      ],
-     "destModule": "inet.protocolelement.transceiver.PacketTransmitter"
+     "destModule": "inet.protocolelement.transceiver.StreamingTransmitter"
     },
     {
      "gate": "out",
@@ -65542,7 +67133,7 @@
       "inet::MacAddressReq",
       "inet::PacketProtocolTag"
      ],
-     "destModule": "inet.protocolelement.transceiver.PacketTransmitter"
+     "destModule": "inet.protocolelement.transceiver.StreamingTransmitter"
     },
     {
      "gate": "out",
@@ -65566,20 +67157,6 @@
      "tags": [
       "inet::DirectionTag",
       "inet::DispatchProtocolReq",
-      "inet::GptpIngressTimeInd",
-      "inet::InterfaceInd",
-      "inet::PacketProtocolTag"
-     ],
-     "destModule": "inet.linklayer.ethernet.modular.EthernetFcsChecker"
-    },
-    {
-     "gate": "out",
-     "msg": "inet::Packet",
-     "kind": "0",
-     "ctrl": "",
-     "tags": [
-      "inet::DirectionTag",
-      "inet::DispatchProtocolReq",
       "inet::InterfaceInd",
       "inet::PacketProtocolTag"
      ],
@@ -65937,77 +67514,79 @@
       "inet::InterfaceInd",
       "inet::InterfaceReq",
       "inet::MacAddressReq",
-      "inet::PacketProtocolTag",
-      "inet::VlanInd"
-     ],
-     "destModule": "inet.physicallayer.wired.ethernet.EthernetPhyHeaderInserter"
-    },
-    {
-     "gate": "out",
-     "msg": "inet::Packet",
-     "kind": "0",
-     "ctrl": "",
-     "tags": [
-      "inet::DirectionTag",
-      "inet::EncapsulationProtocolReq",
-      "inet::InterfaceInd",
-      "inet::InterfaceReq",
-      "inet::MacAddressReq",
-      "inet::PacketProtocolTag",
-      "inet::VlanInd"
-     ],
-     "destModule": "inet.protocolelement.transceiver.PacketTransmitter"
-    },
-    {
-     "gate": "out",
-     "msg": "inet::Packet",
-     "kind": "0",
-     "ctrl": "",
-     "tags": [
-      "inet::DirectionTag",
-      "inet::EncapsulationProtocolReq",
-      "inet::InterfaceReq",
-      "inet::MacAddressReq",
-      "inet::PacketProtocolTag",
-      "inet::PcpInd",
-      "inet::SequenceNumberInd",
-      "inet::SocketReq",
-      "inet::StreamReq",
-      "inet::VlanInd"
-     ],
-     "destModule": "inet.physicallayer.wired.ethernet.EthernetPhyHeaderInserter"
-    },
-    {
-     "gate": "out",
-     "msg": "inet::Packet",
-     "kind": "0",
-     "ctrl": "",
-     "tags": [
-      "inet::DirectionTag",
-      "inet::EncapsulationProtocolReq",
-      "inet::InterfaceReq",
-      "inet::MacAddressReq",
-      "inet::PacketProtocolTag",
-      "inet::PcpInd",
-      "inet::SequenceNumberInd",
-      "inet::SocketReq",
-      "inet::StreamReq",
-      "inet::VlanInd"
-     ],
-     "destModule": "inet.protocolelement.transceiver.PacketTransmitter"
-    },
-    {
-     "gate": "out",
-     "msg": "inet::Packet",
-     "kind": "0",
-     "ctrl": "",
-     "tags": [
-      "inet::DirectionTag",
-      "inet::GptpIngressTimeInd",
-      "inet::InterfaceInd",
       "inet::PacketProtocolTag"
      ],
-     "destModule": "inet.physicallayer.wired.ethernet.EthernetPhyHeaderChecker"
+     "destModule": "inet.protocolelement.transceiver.StreamingTransmitter"
+    },
+    {
+     "gate": "out",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceInd",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::PacketProtocolTag",
+      "inet::VlanInd"
+     ],
+     "destModule": "inet.physicallayer.wired.ethernet.EthernetPhyHeaderInserter"
+    },
+    {
+     "gate": "out",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceInd",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::PacketProtocolTag",
+      "inet::VlanInd"
+     ],
+     "destModule": "inet.protocolelement.transceiver.PacketTransmitter"
+    },
+    {
+     "gate": "out",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::PacketProtocolTag",
+      "inet::PcpInd",
+      "inet::SequenceNumberInd",
+      "inet::SocketReq",
+      "inet::StreamReq",
+      "inet::VlanInd"
+     ],
+     "destModule": "inet.physicallayer.wired.ethernet.EthernetPhyHeaderInserter"
+    },
+    {
+     "gate": "out",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::PacketProtocolTag",
+      "inet::PcpInd",
+      "inet::SequenceNumberInd",
+      "inet::SocketReq",
+      "inet::StreamReq",
+      "inet::VlanInd"
+     ],
+     "destModule": "inet.protocolelement.transceiver.PacketTransmitter"
     },
     {
      "gate": "out",
@@ -66088,6 +67667,19 @@
       "inet::PacketProtocolTag"
      ],
      "destModule": "inet.protocolelement.transceiver.PacketTransmitter"
+    },
+    {
+     "gate": "out",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::PacketProtocolTag"
+     ],
+     "destModule": "inet.protocolelement.transceiver.StreamingTransmitter"
     },
     {
      "gate": "out",
@@ -66417,6 +68009,26 @@
       "inet::NetworkProtocolInd",
       "inet::PacketProtocolTag",
       "inet::SequenceNumberInd",
+      "inet::StreamReq",
+      "inet::TransportProtocolInd",
+      "inet::VlanInd"
+     ],
+     "srcModule": "inet.linklayer.ethernet.modular.EthernetMacHeaderInserter"
+    },
+    {
+     "gate": "in",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
       "inet::StreamReq",
       "inet::TransportProtocolInd",
       "inet::VlanInd"
@@ -66918,6 +68530,26 @@
       "inet::NetworkProtocolInd",
       "inet::PacketProtocolTag",
       "inet::SequenceNumberInd",
+      "inet::StreamReq",
+      "inet::TransportProtocolInd",
+      "inet::VlanInd"
+     ],
+     "destModule": "inet.linklayer.ethernet.modular.EthernetFcsInserter"
+    },
+    {
+     "gate": "out",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
       "inet::StreamReq",
       "inet::TransportProtocolInd",
       "inet::VlanInd"
@@ -68356,6 +69988,27 @@
      "ctrl": "",
      "tags": [
       "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::DispatchProtocolReq",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
+      "inet::StreamReq",
+      "inet::TransportProtocolInd",
+      "inet::VlanReq"
+     ],
+     "destModule": "inet.common.MessageDispatcher"
+    },
+    {
+     "gate": "out",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
       "inet::DispatchProtocolReq",
       "inet::DropEligibleReq",
       "inet::EncapsulationProtocolReq",
@@ -68474,6 +70127,10 @@
     },
     {
      "tagAction": "findTagForUpdate",
+     "tagType": "inet::EncapsulationProtocolReq"
+    },
+    {
+     "tagAction": "findTag",
      "tagType": "inet::EncapsulationProtocolReq"
     },
     {
@@ -69185,11 +70842,6 @@
   "inet.protocolelement.shaper.EligibilityTimeGate": {
    "CALL": [
     {
-     "call to": "inet.linklayer.ethernet.modular.LayeredEthernetInterface",
-     "function": "inet::NetworkInterface::receiveSignal",
-     "info": "POST_MODEL_CHANGE"
-    },
-    {
      "call to": "inet.protocolelement.shaper.EligibilityTimeGate",
      "function": "inet::EligibilityTimeGate::handleCanPullPacketChanged",
      "info": "handleCanPullPacketChanged"
@@ -69661,12 +71313,32 @@
      "info": "receptionEnded"
     },
     {
+     "call to": "inet.linklayer.ieee8021as.Gptp",
+     "function": "inet::Gptp::receiveSignal",
+     "info": "receptionEnded"
+    },
+    {
+     "call to": "inet.linklayer.ieee8021as.Gptp",
+     "function": "inet::Gptp::receiveSignal",
+     "info": "receptionStarted"
+    },
+    {
      "call to": "inet.protocolelement.common.PacketEmitter",
      "function": "inet::PacketEmitter::pushPacket",
      "info": "pushPacket"
     }
    ],
    "CALLED": [
+    {
+     "call from": "inet.common.scenario.ScenarioManager",
+     "function": "inet::DestreamingReceiver::receiveSignal",
+     "info": "POST_MODEL_CHANGE"
+    },
+    {
+     "call from": "inet.common.scenario.ScenarioManager",
+     "function": "inet::DestreamingReceiver::receiveSignal",
+     "info": "PRE_MODEL_CHANGE"
+    },
     {
      "call from": "-=Network=-",
      "function": "inet::DestreamingReceiver::receiveSignal",
@@ -69679,6 +71351,14 @@
     }
    ],
    "INPUT": [
+    {
+     "gate": "in",
+     "msg": "inet::physicallayer::Signal",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [],
+     "srcModule": "inet.protocolelement.transceiver.StreamingTransmitter"
+    },
     {
      "gate": "in",
      "msg": "inet::physicallayer::Signal",
@@ -69727,11 +71407,6 @@
      "info": "receptionEnded"
     },
     {
-     "call to": "inet.linklayer.ieee8021as.Gptp",
-     "function": "inet::Gptp::receiveSignal",
-     "info": "receptionEnded"
-    },
-    {
      "call to": "inet.physicallayer.wired.ethernet.EthernetPhyHeaderChecker",
      "function": "inet::physicallayer::EthernetPhyHeaderChecker::pushPacket",
      "info": "pushPacket"
@@ -69768,19 +71443,6 @@
     }
    ],
    "PUSH_OUT": [
-    {
-     "gate": "out",
-     "msg": "inet::Packet",
-     "kind": "0",
-     "ctrl": "",
-     "tags": [
-      "inet::DirectionTag",
-      "inet::GptpIngressTimeInd",
-      "inet::InterfaceInd",
-      "inet::PacketProtocolTag"
-     ],
-     "destModule": "inet.protocolelement.common.PacketEmitter"
-    },
     {
      "gate": "out",
      "msg": "inet::Packet",
@@ -69828,11 +71490,6 @@
     {
      "call to": "inet.common.packet.recorder.PcapRecorder",
      "function": "inet::PcapRecorder::receiveSignal",
-     "info": "transmissionEnded"
-    },
-    {
-     "call to": "inet.linklayer.ieee8021as.Gptp",
-     "function": "inet::Gptp::receiveSignal",
      "info": "transmissionEnded"
     },
     {
@@ -70096,6 +71753,26 @@
       "inet::MulticastReq",
       "inet::NetworkProtocolInd",
       "inet::PacketProtocolTag",
+      "inet::StreamReq",
+      "inet::TransportProtocolInd",
+      "inet::VlanInd"
+     ],
+     "srcModule": "inet.protocolelement.common.PacketEmitter"
+    },
+    {
+     "gate": "in",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
       "inet::TransportProtocolInd",
       "inet::VlanReq"
      ],
@@ -70134,35 +71811,6 @@
       "inet::NetworkProtocolInd",
       "inet::PacketProtocolTag",
       "inet::TransportProtocolInd"
-     ],
-     "srcModule": "inet.protocolelement.common.PacketEmitter"
-    },
-    {
-     "gate": "in",
-     "msg": "inet::Packet",
-     "kind": "0",
-     "ctrl": "",
-     "tags": [
-      "inet::DirectionTag",
-      "inet::DispatchProtocolInd",
-      "inet::EncapsulationProtocolReq",
-      "inet::InterfaceReq",
-      "inet::MacAddressReq",
-      "inet::PacketProtocolTag"
-     ],
-     "srcModule": "inet.protocolelement.common.PacketEmitter"
-    },
-    {
-     "gate": "in",
-     "msg": "inet::Packet",
-     "kind": "0",
-     "ctrl": "",
-     "tags": [
-      "inet::DirectionTag",
-      "inet::DispatchProtocolInd",
-      "inet::InterfaceReq",
-      "inet::MacAddressReq",
-      "inet::PacketProtocolTag"
      ],
      "srcModule": "inet.protocolelement.common.PacketEmitter"
     },
@@ -70469,6 +72117,16 @@
   "inet.protocolelement.transceiver.StreamingTransmitter": {
    "CALL": [
     {
+     "call to": "inet.linklayer.ieee8021as.Gptp",
+     "function": "inet::Gptp::receiveSignal",
+     "info": "transmissionEnded"
+    },
+    {
+     "call to": "inet.linklayer.ieee8021as.Gptp",
+     "function": "inet::Gptp::receiveSignal",
+     "info": "transmissionStarted"
+    },
+    {
      "call to": "inet.protocolelement.common.PacketEmitter",
      "function": "inet::PacketEmitter::handleCanPushPacketChanged",
      "info": "handleCanPushPacketChanged"
@@ -70480,6 +72138,16 @@
     }
    ],
    "CALLED": [
+    {
+     "call from": "inet.common.scenario.ScenarioManager",
+     "function": "inet::StreamingTransmitter::receiveSignal",
+     "info": "POST_MODEL_CHANGE"
+    },
+    {
+     "call from": "inet.common.scenario.ScenarioManager",
+     "function": "inet::StreamingTransmitter::receiveSignal",
+     "info": "PRE_MODEL_CHANGE"
+    },
     {
      "call from": "inet.protocolelement.common.PacketEmitter",
      "function": "inet::StreamingTransmitter::pushPacket",
@@ -70497,6 +72165,14 @@
     }
    ],
    "OUTPUT": [
+    {
+     "gate": "out",
+     "msg": "inet::physicallayer::Signal",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [],
+     "destModule": "inet.protocolelement.transceiver.DestreamingReceiver"
+    },
     {
      "gate": "out",
      "msg": "inet::physicallayer::Signal",
@@ -70522,6 +72198,63 @@
       "inet::NetworkProtocolInd",
       "inet::PacketProtocolTag",
       "inet::TransportProtocolInd"
+     ],
+     "srcModule": "inet.protocolelement.common.PacketEmitter"
+    },
+    {
+     "gate": "in",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::PacketProtocolTag"
+     ],
+     "srcModule": "inet.protocolelement.common.PacketEmitter"
+    },
+    {
+     "gate": "in",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::PacketProtocolTag"
+     ],
+     "srcModule": "inet.protocolelement.common.PacketEmitter"
+    },
+    {
+     "gate": "in",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceInd",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::PacketProtocolTag"
+     ],
+     "srcModule": "inet.protocolelement.common.PacketEmitter"
+    },
+    {
+     "gate": "in",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::PacketProtocolTag"
      ],
      "srcModule": "inet.protocolelement.common.PacketEmitter"
     }
@@ -71644,7 +73377,6 @@
       "inet::DirectionTag",
       "inet::DispatchProtocolReq",
       "inet::EncapsulationProtocolInd",
-      "inet::GptpIngressTimeInd",
       "inet::InterfaceInd",
       "inet::MacAddressInd",
       "inet::PacketProtocolTag"
@@ -71833,7 +73565,6 @@
       "inet::DirectionTag",
       "inet::DispatchProtocolReq",
       "inet::EncapsulationProtocolInd",
-      "inet::GptpIngressTimeInd",
       "inet::InterfaceInd",
       "inet::MacAddressInd",
       "inet::PacketProtocolTag"
@@ -76182,11 +77913,6 @@
      "info": "pushPacketEnd"
     },
     {
-     "call to": "inet.linklayer.ethernet.modular.LayeredEthernetInterface",
-     "function": "inet::NetworkInterface::receiveSignal",
-     "info": "POST_MODEL_CHANGE"
-    },
-    {
      "call to": "inet.linklayer.ieee8021q.Ieee8021qAsynchronousShaper",
      "function": "inet::EligibilityTimeGate::pullPacket",
      "info": "pullPacket"
@@ -77764,6 +79490,11 @@
      "info": "pullPacket"
     },
     {
+     "call from": "inet.queueing.scheduler.PriorityScheduler",
+     "function": "inet::queueing::PacketQueue::removeAllPackets",
+     "info": "removeAllPackets"
+    },
+    {
      "call from": "inet.queueing.scheduler.WrrScheduler",
      "function": "inet::queueing::PacketQueue::pullPacket",
      "info": "pullPacket"
@@ -77896,6 +79627,22 @@
       "inet::SignalPowerInd",
       "inet::SignalTimeInd",
       "inet::SnirInd"
+     ],
+     "srcModule": "inet.networklayer.ipv4.Ipv4"
+    },
+    {
+     "gate": "in",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolInd",
+      "inet::InterfaceInd",
+      "inet::InterfaceReq",
+      "inet::MacAddressInd",
+      "inet::MacAddressReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag"
      ],
      "srcModule": "inet.networklayer.ipv4.Ipv4"
     },
@@ -78253,6 +80000,44 @@
       "inet::MulticastReq",
       "inet::NetworkProtocolInd",
       "inet::PacketProtocolTag",
+      "inet::StreamReq",
+      "inet::TransportProtocolInd",
+      "inet::VlanInd"
+     ],
+     "destModule": "inet.queueing.server.InstantServer"
+    },
+    {
+     "gate": "out",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
+      "inet::TransportProtocolInd"
+     ],
+     "destModule": "inet.queueing.server.InstantServer"
+    },
+    {
+     "gate": "out",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
       "inet::TransportProtocolInd",
       "inet::VlanReq"
      ],
@@ -78589,6 +80374,53 @@
      "ctrl": "",
      "tags": [
       "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag"
+     ],
+     "destModule": "inet.queueing.scheduler.PriorityScheduler"
+    },
+    {
+     "gate": "out",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
+      "inet::SocketReq"
+     ],
+     "destModule": "inet.queueing.scheduler.PriorityScheduler"
+    },
+    {
+     "gate": "out",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
+      "inet::TransportProtocolInd"
+     ],
+     "destModule": "inet.queueing.scheduler.PriorityScheduler"
+    },
+    {
+     "gate": "out",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolInd",
       "inet::ErrorRateInd",
       "inet::InterfaceInd",
       "inet::InterfaceReq",
@@ -78622,6 +80454,22 @@
       "inet::UserPriorityInd"
      ],
      "destModule": "inet.linklayer.csmaca.CsmaCaMac"
+    },
+    {
+     "gate": "out",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolInd",
+      "inet::InterfaceInd",
+      "inet::InterfaceReq",
+      "inet::MacAddressInd",
+      "inet::MacAddressReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag"
+     ],
+     "destModule": "inet.linklayer.acking.AckingMac"
     },
     {
      "gate": "out",
@@ -79376,6 +81224,26 @@
       "inet::MulticastReq",
       "inet::NetworkProtocolInd",
       "inet::PacketProtocolTag",
+      "inet::StreamReq",
+      "inet::TransportProtocolInd",
+      "inet::VlanInd"
+     ],
+     "srcModule": "inet.linklayer.ethernet.modular.LayeredEthernetInterface"
+    },
+    {
+     "gate": "in",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
       "inet::TransportProtocolInd",
       "inet::VlanReq"
      ],
@@ -79399,6 +81267,24 @@
       "inet::VlanReq"
      ],
      "srcModule": "inet.queueing.classifier.PacketClassifier"
+    },
+    {
+     "gate": "in",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
+      "inet::TransportProtocolInd"
+     ],
+     "srcModule": "inet.linklayer.ethernet.modular.LayeredEthernetInterface"
     },
     {
      "gate": "in",
@@ -79566,6 +81452,53 @@
       "inet::NetworkProtocolInd",
       "inet::PacketProtocolTag",
       "inet::TransportProtocolInd"
+     ],
+     "srcModule": "inet.linklayer.ethernet.common.EthernetFrameClassifier"
+    },
+    {
+     "gate": "in",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
+      "inet::SocketReq"
+     ],
+     "srcModule": "inet.linklayer.ethernet.common.EthernetFrameClassifier"
+    },
+    {
+     "gate": "in",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
+      "inet::TransportProtocolInd"
+     ],
+     "srcModule": "inet.linklayer.ethernet.common.EthernetFrameClassifier"
+    },
+    {
+     "gate": "in",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag"
      ],
      "srcModule": "inet.linklayer.ethernet.common.EthernetFrameClassifier"
     },
@@ -80471,6 +82404,26 @@
       "inet::MulticastReq",
       "inet::NetworkProtocolInd",
       "inet::PacketProtocolTag",
+      "inet::StreamReq",
+      "inet::TransportProtocolInd",
+      "inet::VlanInd"
+     ],
+     "destModule": "inet.queueing.server.InstantServer"
+    },
+    {
+     "gate": "out",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
       "inet::TransportProtocolInd"
      ],
      "destModule": "inet.queueing.server.InstantServer"
@@ -81159,6 +83112,26 @@
       "inet::NetworkProtocolInd",
       "inet::PacketProtocolTag",
       "inet::SequenceNumberInd",
+      "inet::StreamReq",
+      "inet::TransportProtocolInd",
+      "inet::VlanInd"
+     ],
+     "srcModule": "inet.linklayer.ethernet.modular.LayeredEthernetInterface"
+    },
+    {
+     "gate": "in",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
       "inet::StreamReq",
       "inet::TransportProtocolInd",
       "inet::VlanInd"
@@ -82196,6 +84169,11 @@
      "info": "pullPacket"
     },
     {
+     "call to": "inet.queueing.queue.DropTailQueue",
+     "function": "inet::queueing::PacketQueue::removeAllPackets",
+     "info": "removeAllPackets"
+    },
+    {
      "call to": "inet.queueing.queue.PacketQueue",
      "function": "inet::queueing::PacketQueue::pullPacket",
      "info": "pullPacket"
@@ -82246,6 +84224,11 @@
      "call from": "inet.linklayer.ieee8021q.Ieee8021qTimeAwareShaper",
      "function": "inet::queueing::PriorityScheduler::pullPacket",
      "info": "pullPacket"
+    },
+    {
+     "call from": "inet.linklayer.ieee8021q.Ieee8021qTimeAwareShaper",
+     "function": "inet::queueing::PriorityScheduler::removeAllPackets",
+     "info": "removeAllPackets"
     },
     {
      "call from": "inet.networklayer.diffserv.DiffservQueue",
@@ -82832,6 +84815,53 @@
       "inet::InterfaceReq",
       "inet::MacAddressReq",
       "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
+      "inet::TransportProtocolInd"
+     ],
+     "destModule": "inet.linklayer.ethernet.basic.EthernetMacPhy"
+    },
+    {
+     "gate": "out",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag"
+     ],
+     "destModule": "inet.linklayer.ethernet.basic.EthernetMacPhy"
+    },
+    {
+     "gate": "out",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
+      "inet::SocketReq"
+     ],
+     "destModule": "inet.linklayer.ethernet.basic.EthernetMacPhy"
+    },
+    {
+     "gate": "out",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
       "inet::NetworkProtocolInd",
       "inet::PacketProtocolTag",
       "inet::TransportProtocolInd"
@@ -83465,6 +85495,53 @@
       "inet::NetworkProtocolInd",
       "inet::PacketProtocolTag",
       "inet::TransportProtocolInd"
+     ],
+     "srcModule": "inet.queueing.queue.DropTailQueue"
+    },
+    {
+     "gate": "in[]",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
+      "inet::SocketReq"
+     ],
+     "srcModule": "inet.queueing.queue.DropTailQueue"
+    },
+    {
+     "gate": "in[]",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
+      "inet::TransportProtocolInd"
+     ],
+     "srcModule": "inet.queueing.queue.DropTailQueue"
+    },
+    {
+     "gate": "in[]",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag"
      ],
      "srcModule": "inet.queueing.queue.DropTailQueue"
     },
@@ -84080,6 +86157,46 @@
       "inet::MulticastReq",
       "inet::NetworkProtocolInd",
       "inet::PacketProtocolTag",
+      "inet::StreamReq",
+      "inet::TransportProtocolInd",
+      "inet::VlanInd"
+     ],
+     "srcModule": "inet.queueing.queue.DropTailQueue"
+    },
+    {
+     "gate": "in",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
+      "inet::StreamReq",
+      "inet::TransportProtocolInd",
+      "inet::VlanInd"
+     ],
+     "srcModule": "inet.queueing.queue.PacketQueue"
+    },
+    {
+     "gate": "in",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
       "inet::TransportProtocolInd",
       "inet::VlanReq"
      ],
@@ -84103,6 +86220,24 @@
       "inet::VlanReq"
      ],
      "srcModule": "inet.queueing.scheduler.PriorityScheduler"
+    },
+    {
+     "gate": "in",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
+      "inet::TransportProtocolInd"
+     ],
+     "srcModule": "inet.queueing.queue.DropTailQueue"
     },
     {
      "gate": "in",
@@ -84700,6 +86835,26 @@
       "inet::NetworkProtocolInd",
       "inet::PacketProtocolTag",
       "inet::SequenceNumberInd",
+      "inet::StreamReq",
+      "inet::TransportProtocolInd",
+      "inet::VlanInd"
+     ],
+     "destModule": "inet.protocolelement.common.PacketEmitter"
+    },
+    {
+     "gate": "out",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DirectionTag",
+      "inet::DispatchProtocolInd",
+      "inet::EncapsulationProtocolReq",
+      "inet::InterfaceReq",
+      "inet::MacAddressReq",
+      "inet::MulticastReq",
+      "inet::NetworkProtocolInd",
+      "inet::PacketProtocolTag",
       "inet::StreamReq",
       "inet::TransportProtocolInd",
       "inet::VlanInd"
@@ -88475,6 +90630,12 @@
      "tagAction": "getTag",
      "tagType": "inet::L3AddressInd"
     }
+   ],
+   "TAG": [
+    {
+     "tagAction": "findTag",
+     "tagType": "inet::Ipv4InterfaceData"
+    }
    ]
   },
   "inet.routing.bgpv4.Bgp": {
@@ -91949,6 +94110,7 @@
      "kind": "1 (inet::UdpStatusInd::UDP_I_ERROR)",
      "ctrl": "inet::UdpErrorIndication",
      "tags": [
+      "inet::IcmpErrorInd",
       "inet::L3AddressInd",
       "inet::L4PortInd",
       "inet::SocketInd"
@@ -92204,6 +94366,878 @@
     {
      "tagAction": "findTag",
      "tagType": "inet::Ipv6InterfaceData"
+    }
+   ]
+  },
+  "inet.transportlayer.quic.Quic": {
+   "CALL": [
+    {
+     "call to": "inet.common.MessageDispatcher",
+     "function": "inet::MessageDispatcher::arrived",
+     "info": "arrived"
+    },
+    {
+     "call to": "inet.common.MessageDispatcher",
+     "function": "inet::MessageDispatcher::handleRegisterProtocol",
+     "info": "handleRegisterProtocol"
+    },
+    {
+     "call to": "inet.common.MessageDispatcher",
+     "function": "inet::MessageDispatcher::handleRegisterService",
+     "info": "handleRegisterService"
+    },
+    {
+     "call to": "inet.networklayer.ipv4.Ipv4RoutingTable",
+     "function": "inet::Ipv4RoutingTable::getInterfaceForDestAddr",
+     "info": "getInterfaceForDestAddr(%u.%u.%u.%u)"
+    }
+   ],
+   "INPUT": [
+    {
+     "gate": "appIn",
+     "msg": "inet::Packet",
+     "kind": "5 (inet::QuicCommandCode::QUIC_C_SEND)",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::QuicStreamReq",
+      "inet::SocketReq"
+     ],
+     "srcModule": "inet.applications.quicapp.QuicClient"
+    },
+    {
+     "gate": "appIn",
+     "msg": "inet::Packet",
+     "kind": "5 (inet::QuicCommandCode::QUIC_C_SEND)",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::QuicStreamReq",
+      "inet::SocketReq"
+     ],
+     "srcModule": "inet.applications.quicapp.QuicOrderedTrafficgen"
+    },
+    {
+     "gate": "appIn",
+     "msg": "inet::Packet",
+     "kind": "5 (inet::QuicCommandCode::QUIC_C_SEND)",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::QuicStreamReq",
+      "inet::SocketReq"
+     ],
+     "srcModule": "inet.applications.quicapp.QuicTrafficgen"
+    },
+    {
+     "gate": "appIn",
+     "msg": "inet::Packet",
+     "kind": "5 (inet::QuicCommandCode::QUIC_C_SEND)",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::QuicStreamReq",
+      "inet::SocketReq"
+     ],
+     "srcModule": "inet.applications.quicapp.QuicZeroRttClient"
+    },
+    {
+     "gate": "appIn",
+     "msg": "inet::Packet",
+     "kind": "8 (inet::QuicCommandCode::QUIC_C_CONNECT_AND_SEND)",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::QuicNewToken",
+      "inet::QuicOpenCommand",
+      "inet::QuicStreamReq",
+      "inet::SocketReq"
+     ],
+     "srcModule": "inet.applications.quicapp.QuicZeroRttClient"
+    },
+    {
+     "gate": "appIn",
+     "msg": "inet::Request",
+     "kind": "1 (inet::QuicCommandCode::QUIC_C_CREATE_PCB)",
+     "ctrl": "inet::QuicBindCommand",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "srcModule": "inet.applications.quicapp.QuicClient"
+    },
+    {
+     "gate": "appIn",
+     "msg": "inet::Request",
+     "kind": "1 (inet::QuicCommandCode::QUIC_C_CREATE_PCB)",
+     "ctrl": "inet::QuicBindCommand",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "srcModule": "inet.applications.quicapp.QuicDiscardServer"
+    },
+    {
+     "gate": "appIn",
+     "msg": "inet::Request",
+     "kind": "1 (inet::QuicCommandCode::QUIC_C_CREATE_PCB)",
+     "ctrl": "inet::QuicBindCommand",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "srcModule": "inet.applications.quicapp.QuicOrderedReceiver"
+    },
+    {
+     "gate": "appIn",
+     "msg": "inet::Request",
+     "kind": "1 (inet::QuicCommandCode::QUIC_C_CREATE_PCB)",
+     "ctrl": "inet::QuicBindCommand",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "srcModule": "inet.applications.quicapp.QuicOrderedTrafficgen"
+    },
+    {
+     "gate": "appIn",
+     "msg": "inet::Request",
+     "kind": "1 (inet::QuicCommandCode::QUIC_C_CREATE_PCB)",
+     "ctrl": "inet::QuicBindCommand",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "srcModule": "inet.applications.quicapp.QuicTrafficgen"
+    },
+    {
+     "gate": "appIn",
+     "msg": "inet::Request",
+     "kind": "1 (inet::QuicCommandCode::QUIC_C_CREATE_PCB)",
+     "ctrl": "inet::QuicBindCommand",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "srcModule": "inet.applications.quicapp.QuicZeroRttClient"
+    },
+    {
+     "gate": "appIn",
+     "msg": "inet::Request",
+     "kind": "2 (inet::QuicCommandCode::QUIC_C_OPEN_PASSIVE)",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "srcModule": "inet.applications.quicapp.QuicDiscardServer"
+    },
+    {
+     "gate": "appIn",
+     "msg": "inet::Request",
+     "kind": "2 (inet::QuicCommandCode::QUIC_C_OPEN_PASSIVE)",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "srcModule": "inet.applications.quicapp.QuicOrderedReceiver"
+    },
+    {
+     "gate": "appIn",
+     "msg": "inet::Request",
+     "kind": "3 (inet::QuicCommandCode::QUIC_C_OPEN_ACTIVE)",
+     "ctrl": "inet::QuicOpenCommand",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "srcModule": "inet.applications.quicapp.QuicClient"
+    },
+    {
+     "gate": "appIn",
+     "msg": "inet::Request",
+     "kind": "3 (inet::QuicCommandCode::QUIC_C_OPEN_ACTIVE)",
+     "ctrl": "inet::QuicOpenCommand",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "srcModule": "inet.applications.quicapp.QuicOrderedTrafficgen"
+    },
+    {
+     "gate": "appIn",
+     "msg": "inet::Request",
+     "kind": "3 (inet::QuicCommandCode::QUIC_C_OPEN_ACTIVE)",
+     "ctrl": "inet::QuicOpenCommand",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "srcModule": "inet.applications.quicapp.QuicTrafficgen"
+    },
+    {
+     "gate": "appIn",
+     "msg": "inet::Request",
+     "kind": "3 (inet::QuicCommandCode::QUIC_C_OPEN_ACTIVE)",
+     "ctrl": "inet::QuicOpenCommand",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "srcModule": "inet.applications.quicapp.QuicZeroRttClient"
+    },
+    {
+     "gate": "appIn",
+     "msg": "inet::Request",
+     "kind": "4 (inet::QuicCommandCode::QUIC_C_CLOSE)",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "srcModule": "inet.applications.quicapp.QuicClient"
+    },
+    {
+     "gate": "appIn",
+     "msg": "inet::Request",
+     "kind": "4 (inet::QuicCommandCode::QUIC_C_CLOSE)",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "srcModule": "inet.applications.quicapp.QuicOrderedTrafficgen"
+    },
+    {
+     "gate": "appIn",
+     "msg": "inet::Request",
+     "kind": "4 (inet::QuicCommandCode::QUIC_C_CLOSE)",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "srcModule": "inet.applications.quicapp.QuicTrafficgen"
+    },
+    {
+     "gate": "appIn",
+     "msg": "inet::Request",
+     "kind": "4 (inet::QuicCommandCode::QUIC_C_CLOSE)",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "srcModule": "inet.applications.quicapp.QuicZeroRttClient"
+    },
+    {
+     "gate": "appIn",
+     "msg": "inet::Request",
+     "kind": "6 (inet::QuicCommandCode::QUIC_C_RECEIVE)",
+     "ctrl": "inet::QuicRecvCommand",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "srcModule": "inet.applications.quicapp.QuicDiscardServer"
+    },
+    {
+     "gate": "appIn",
+     "msg": "inet::Request",
+     "kind": "6 (inet::QuicCommandCode::QUIC_C_RECEIVE)",
+     "ctrl": "inet::QuicRecvCommand",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "srcModule": "inet.applications.quicapp.QuicOrderedReceiver"
+    },
+    {
+     "gate": "appIn",
+     "msg": "inet::Request",
+     "kind": "7 (inet::QuicCommandCode::QUIC_C_ACCEPT)",
+     "ctrl": "inet::QuicAcceptCommand",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "srcModule": "inet.applications.quicapp.QuicDiscardServer"
+    },
+    {
+     "gate": "appIn",
+     "msg": "inet::Request",
+     "kind": "7 (inet::QuicCommandCode::QUIC_C_ACCEPT)",
+     "ctrl": "inet::QuicAcceptCommand",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "srcModule": "inet.applications.quicapp.QuicOrderedReceiver"
+    },
+    {
+     "gate": "udpIn",
+     "msg": "inet::Indication",
+     "kind": "1 (inet::UdpStatusInd::UDP_I_ERROR)",
+     "ctrl": "inet::UdpErrorIndication",
+     "tags": [
+      "inet::IcmpErrorInd",
+      "inet::L3AddressInd",
+      "inet::L4PortInd",
+      "inet::SocketInd"
+     ],
+     "srcModule": "inet.transportlayer.udp.Udp"
+    },
+    {
+     "gate": "udpIn",
+     "msg": "inet::Packet",
+     "kind": "0 (inet::UdpStatusInd::UDP_I_DATA)",
+     "ctrl": "",
+     "tags": [
+      "inet::DscpInd",
+      "inet::EcnInd",
+      "inet::HopLimitInd",
+      "inet::InterfaceInd",
+      "inet::L3AddressInd",
+      "inet::L4PortInd",
+      "inet::NetworkProtocolInd",
+      "inet::SocketInd",
+      "inet::TosInd",
+      "inet::TransportProtocolInd"
+     ],
+     "srcModule": "inet.transportlayer.udp.Udp"
+    }
+   ],
+   "OUTPUT": [
+    {
+     "gate": "appOut",
+     "msg": "inet::Indication",
+     "kind": "10 (inet::QuicStatusInd::QUIC_I_MSG_REJECTED)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "destModule": "inet.applications.quicapp.QuicTrafficgen"
+    },
+    {
+     "gate": "appOut",
+     "msg": "inet::Indication",
+     "kind": "11 (inet::QuicStatusInd::QUIC_I_NEW_TOKEN)",
+     "ctrl": "inet::QuicNewToken",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "destModule": "inet.applications.quicapp.QuicZeroRttClient"
+    },
+    {
+     "gate": "appOut",
+     "msg": "inet::Indication",
+     "kind": "2 (inet::QuicStatusInd::QUIC_I_DATA_AVAILABLE)",
+     "ctrl": "inet::QuicDataInfo",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "destModule": "inet.applications.quicapp.QuicDiscardServer"
+    },
+    {
+     "gate": "appOut",
+     "msg": "inet::Indication",
+     "kind": "2 (inet::QuicStatusInd::QUIC_I_DATA_AVAILABLE)",
+     "ctrl": "inet::QuicDataInfo",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "destModule": "inet.applications.quicapp.QuicOrderedReceiver"
+    },
+    {
+     "gate": "appOut",
+     "msg": "inet::Indication",
+     "kind": "4 (inet::QuicStatusInd::QUIC_I_ESTABLISHED)",
+     "ctrl": "inet::QuicConnectionInfo",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "destModule": "inet.applications.quicapp.QuicClient"
+    },
+    {
+     "gate": "appOut",
+     "msg": "inet::Indication",
+     "kind": "4 (inet::QuicStatusInd::QUIC_I_ESTABLISHED)",
+     "ctrl": "inet::QuicConnectionInfo",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "destModule": "inet.applications.quicapp.QuicDiscardServer"
+    },
+    {
+     "gate": "appOut",
+     "msg": "inet::Indication",
+     "kind": "4 (inet::QuicStatusInd::QUIC_I_ESTABLISHED)",
+     "ctrl": "inet::QuicConnectionInfo",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "destModule": "inet.applications.quicapp.QuicOrderedReceiver"
+    },
+    {
+     "gate": "appOut",
+     "msg": "inet::Indication",
+     "kind": "4 (inet::QuicStatusInd::QUIC_I_ESTABLISHED)",
+     "ctrl": "inet::QuicConnectionInfo",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "destModule": "inet.applications.quicapp.QuicOrderedTrafficgen"
+    },
+    {
+     "gate": "appOut",
+     "msg": "inet::Indication",
+     "kind": "4 (inet::QuicStatusInd::QUIC_I_ESTABLISHED)",
+     "ctrl": "inet::QuicConnectionInfo",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "destModule": "inet.applications.quicapp.QuicTrafficgen"
+    },
+    {
+     "gate": "appOut",
+     "msg": "inet::Indication",
+     "kind": "4 (inet::QuicStatusInd::QUIC_I_ESTABLISHED)",
+     "ctrl": "inet::QuicConnectionInfo",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "destModule": "inet.applications.quicapp.QuicZeroRttClient"
+    },
+    {
+     "gate": "appOut",
+     "msg": "inet::Indication",
+     "kind": "5 (inet::QuicStatusInd::QUIC_I_CONNECTION_AVAILABLE)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "destModule": "inet.applications.quicapp.QuicDiscardServer"
+    },
+    {
+     "gate": "appOut",
+     "msg": "inet::Indication",
+     "kind": "5 (inet::QuicStatusInd::QUIC_I_CONNECTION_AVAILABLE)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "destModule": "inet.applications.quicapp.QuicOrderedReceiver"
+    },
+    {
+     "gate": "appOut",
+     "msg": "inet::Indication",
+     "kind": "6 (inet::QuicStatusInd::QUIC_I_CLOSED)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "destModule": "inet.applications.quicapp.QuicClient"
+    },
+    {
+     "gate": "appOut",
+     "msg": "inet::Indication",
+     "kind": "6 (inet::QuicStatusInd::QUIC_I_CLOSED)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "destModule": "inet.applications.quicapp.QuicDiscardServer"
+    },
+    {
+     "gate": "appOut",
+     "msg": "inet::Indication",
+     "kind": "6 (inet::QuicStatusInd::QUIC_I_CLOSED)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "destModule": "inet.applications.quicapp.QuicOrderedReceiver"
+    },
+    {
+     "gate": "appOut",
+     "msg": "inet::Indication",
+     "kind": "6 (inet::QuicStatusInd::QUIC_I_CLOSED)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "destModule": "inet.applications.quicapp.QuicOrderedTrafficgen"
+    },
+    {
+     "gate": "appOut",
+     "msg": "inet::Indication",
+     "kind": "6 (inet::QuicStatusInd::QUIC_I_CLOSED)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "destModule": "inet.applications.quicapp.QuicTrafficgen"
+    },
+    {
+     "gate": "appOut",
+     "msg": "inet::Indication",
+     "kind": "6 (inet::QuicStatusInd::QUIC_I_CLOSED)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "destModule": "inet.applications.quicapp.QuicZeroRttClient"
+    },
+    {
+     "gate": "appOut",
+     "msg": "inet::Indication",
+     "kind": "7 (inet::QuicStatusInd::QUIC_I_DESTROYED)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "destModule": "inet.applications.quicapp.QuicClient"
+    },
+    {
+     "gate": "appOut",
+     "msg": "inet::Indication",
+     "kind": "7 (inet::QuicStatusInd::QUIC_I_DESTROYED)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "destModule": "inet.applications.quicapp.QuicDiscardServer"
+    },
+    {
+     "gate": "appOut",
+     "msg": "inet::Indication",
+     "kind": "7 (inet::QuicStatusInd::QUIC_I_DESTROYED)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "destModule": "inet.applications.quicapp.QuicOrderedReceiver"
+    },
+    {
+     "gate": "appOut",
+     "msg": "inet::Indication",
+     "kind": "7 (inet::QuicStatusInd::QUIC_I_DESTROYED)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "destModule": "inet.applications.quicapp.QuicOrderedTrafficgen"
+    },
+    {
+     "gate": "appOut",
+     "msg": "inet::Indication",
+     "kind": "7 (inet::QuicStatusInd::QUIC_I_DESTROYED)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "destModule": "inet.applications.quicapp.QuicTrafficgen"
+    },
+    {
+     "gate": "appOut",
+     "msg": "inet::Indication",
+     "kind": "7 (inet::QuicStatusInd::QUIC_I_DESTROYED)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "destModule": "inet.applications.quicapp.QuicZeroRttClient"
+    },
+    {
+     "gate": "appOut",
+     "msg": "inet::Indication",
+     "kind": "8 (inet::QuicStatusInd::QUIC_I_SENDQUEUE_FULL)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "destModule": "inet.applications.quicapp.QuicTrafficgen"
+    },
+    {
+     "gate": "appOut",
+     "msg": "inet::Indication",
+     "kind": "9 (inet::QuicStatusInd::QUIC_I_SENDQUEUE_DRAIN)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "destModule": "inet.applications.quicapp.QuicTrafficgen"
+    },
+    {
+     "gate": "appOut",
+     "msg": "inet::Packet",
+     "kind": "1 (inet::QuicStatusInd::QUIC_I_DATA)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "destModule": "inet.applications.quicapp.QuicDiscardServer"
+    },
+    {
+     "gate": "appOut",
+     "msg": "inet::Packet",
+     "kind": "1 (inet::QuicStatusInd::QUIC_I_DATA)",
+     "ctrl": "",
+     "tags": [
+      "inet::SocketInd"
+     ],
+     "destModule": "inet.applications.quicapp.QuicOrderedReceiver"
+    },
+    {
+     "gate": "udpOut",
+     "msg": "inet::Packet",
+     "kind": "0 (inet::UdpCommandCode::UDP_C_DATA)",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::FragmentationReq",
+      "inet::L3AddressReq",
+      "inet::L4PortReq",
+      "inet::SocketReq"
+     ],
+     "destModule": "inet.transportlayer.udp.Udp"
+    },
+    {
+     "gate": "udpOut",
+     "msg": "inet::Request",
+     "kind": "1 (inet::UdpCommandCode::UDP_C_BIND)",
+     "ctrl": "inet::UdpBindCommand",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "destModule": "inet.transportlayer.udp.Udp"
+    },
+    {
+     "gate": "udpOut",
+     "msg": "inet::Request",
+     "kind": "5 (inet::UdpCommandCode::UDP_C_DESTROY)",
+     "ctrl": "inet::UdpDestroyCommand",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "destModule": "inet.transportlayer.udp.Udp"
+    }
+   ],
+   "PACKET": [
+    {
+     "packetAction": "insertAtBack",
+     "chunkType": "inet::ByteCountChunk"
+    },
+    {
+     "packetAction": "insertAtBack",
+     "chunkType": "inet::BytesChunk"
+    },
+    {
+     "packetAction": "insertAtBack",
+     "chunkType": "inet::quic::AckFrameHeader"
+    },
+    {
+     "packetAction": "insertAtBack",
+     "chunkType": "inet::quic::ConnectionCloseFrameHeader"
+    },
+    {
+     "packetAction": "insertAtBack",
+     "chunkType": "inet::quic::CryptoFrameHeader"
+    },
+    {
+     "packetAction": "insertAtBack",
+     "chunkType": "inet::quic::HandshakeDoneFrameHeader"
+    },
+    {
+     "packetAction": "insertAtBack",
+     "chunkType": "inet::quic::HandshakePacketHeader"
+    },
+    {
+     "packetAction": "insertAtBack",
+     "chunkType": "inet::quic::InitialPacketHeader"
+    },
+    {
+     "packetAction": "insertAtBack",
+     "chunkType": "inet::quic::MaxDataFrameHeader"
+    },
+    {
+     "packetAction": "insertAtBack",
+     "chunkType": "inet::quic::MaxStreamDataFrameHeader"
+    },
+    {
+     "packetAction": "insertAtBack",
+     "chunkType": "inet::quic::NewTokenFrameHeader"
+    },
+    {
+     "packetAction": "insertAtBack",
+     "chunkType": "inet::quic::OneRttPacketHeader"
+    },
+    {
+     "packetAction": "insertAtBack",
+     "chunkType": "inet::quic::PaddingFrameHeader"
+    },
+    {
+     "packetAction": "insertAtBack",
+     "chunkType": "inet::quic::PingFrameHeader"
+    },
+    {
+     "packetAction": "insertAtBack",
+     "chunkType": "inet::quic::StreamDataBlockedFrameHeader"
+    },
+    {
+     "packetAction": "insertAtBack",
+     "chunkType": "inet::quic::StreamFrameHeader"
+    },
+    {
+     "packetAction": "insertAtBack",
+     "chunkType": "inet::quic::TransportParametersExtension"
+    },
+    {
+     "packetAction": "insertAtBack",
+     "chunkType": "inet::quic::ZeroRttPacketHeader"
+    },
+    {
+     "packetAction": "insertAtBack",
+     "chunkType": "inet::SequenceChunk"
+    },
+    {
+     "packetAction": "peekAtFront",
+     "chunkType": "inet::Chunk"
+    },
+    {
+     "packetAction": "peekAtFront",
+     "chunkType": "inet::quic::PacketHeader"
+    },
+    {
+     "packetAction": "peekAtFront",
+     "chunkType": "inet::quic::ShortPacketHeader"
+    },
+    {
+     "packetAction": "peekDataAt",
+     "chunkType": "inet::Chunk"
+    },
+    {
+     "packetAction": "peekData",
+     "chunkType": ""
+    },
+    {
+     "packetAction": "popAtFront",
+     "chunkType": "inet::Chunk"
+    },
+    {
+     "packetAction": "popAtFront",
+     "chunkType": "inet::IcmpHeader"
+    },
+    {
+     "packetAction": "popAtFront",
+     "chunkType": "inet::Ipv4Header"
+    },
+    {
+     "packetAction": "popAtFront",
+     "chunkType": "inet::quic::FrameHeader"
+    },
+    {
+     "packetAction": "popAtFront",
+     "chunkType": "inet::quic::PacketHeader"
+    },
+    {
+     "packetAction": "popAtFront",
+     "chunkType": "inet::UdpHeader"
+    }
+   ],
+   "SCHEDULE": [
+    {
+     "msg": "omnetpp::cMessage",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [],
+     "msgname": "lossDetectionTimer",
+     "context": "filled"
+    },
+    {
+     "msg": "omnetpp::cMessage",
+     "kind": "1",
+     "ctrl": "",
+     "tags": [],
+     "msgname": "AckDelayTimer",
+     "context": "filled"
+    },
+    {
+     "msg": "omnetpp::cMessage",
+     "kind": "2",
+     "ctrl": "",
+     "tags": [],
+     "msgname": "RaiseTimer",
+     "context": "filled"
+    },
+    {
+     "msg": "omnetpp::cMessage",
+     "kind": "3",
+     "ctrl": "",
+     "tags": [],
+     "msgname": "ConnectionCloseTimer",
+     "context": "filled"
+    }
+   ],
+   "STAG": [
+    {
+     "tagAction": "addTagIfAbsent",
+     "tagType": "inet::DispatchProtocolReq"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
+     "tagType": "inet::L3AddressReq"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
+     "tagType": "inet::L4PortReq"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
+     "tagType": "inet::SocketInd"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
+     "tagType": "inet::SocketReq"
+    },
+    {
+     "tagAction": "addTag",
+     "tagType": "inet::FragmentationReq"
+    },
+    {
+     "tagAction": "getTag",
+     "tagType": "inet::IcmpErrorInd"
+    },
+    {
+     "tagAction": "getTag",
+     "tagType": "inet::L3AddressInd"
+    },
+    {
+     "tagAction": "getTag",
+     "tagType": "inet::L4PortInd"
+    },
+    {
+     "tagAction": "getTag",
+     "tagType": "inet::QuicNewToken"
+    },
+    {
+     "tagAction": "getTag",
+     "tagType": "inet::QuicOpenCommand"
+    },
+    {
+     "tagAction": "getTag",
+     "tagType": "inet::QuicStreamReq"
+    },
+    {
+     "tagAction": "getTag",
+     "tagType": "inet::SocketInd"
+    },
+    {
+     "tagAction": "getTag",
+     "tagType": "inet::SocketReq"
     }
    ]
   },
@@ -92715,14 +95749,31 @@
      "info": "registerHook()"
     },
     {
-     "call to": "inet.networklayer.ipv4.Ipv4RoutingTable",
-     "function": "inet::Ipv4RoutingTable::getInterfaceForDestAddr",
-     "info": "getInterfaceForDestAddr(%u.%u.%u.%u)"
+     "call to": "inet.transportlayer.sctp.SctpAssociation",
+     "function": "inet::sctp::SctpAssociation::initAssociation",
+     "info": ""
     },
     {
-     "call to": "inet.networklayer.ipv6.Ipv6RoutingTable",
-     "function": "inet::Ipv6RoutingTable::doLongestPrefixMatch",
-     "info": "doLongestPrefixMatch(%s)"
+     "call to": "inet.transportlayer.sctp.SctpAssociation",
+     "function": "inet::sctp::SctpAssociation::processAppCommand",
+     "info": ""
+    },
+    {
+     "call to": "inet.transportlayer.sctp.SctpAssociation",
+     "function": "inet::sctp::SctpAssociation::processSctpMessage",
+     "info": ""
+    }
+   ],
+   "CALLED": [
+    {
+     "call from": "inet.transportlayer.sctp.SctpAssociation",
+     "function": "inet::sctp::Sctp::sendToApp",
+     "info": ""
+    },
+    {
+     "call from": "inet.transportlayer.sctp.SctpAssociation",
+     "function": "inet::sctp::Sctp::sendToIp",
+     "info": ""
     }
    ],
    "INPUT": [
@@ -93269,15 +96320,178 @@
    ],
    "PACKET": [
     {
-     "packetAction": "insertAtBack",
-     "chunkType": "inet::BytesChunk"
-    },
-    {
      "packetAction": "insertAtFront",
      "chunkType": "inet::sctp::SctpHeader"
     },
     {
      "packetAction": "peekAtFront",
+     "chunkType": "inet::sctp::SctpHeader"
+    }
+   ],
+   "STAG": [
+    {
+     "tagAction": "addTagIfAbsent",
+     "tagType": "inet::PacketProtocolTag"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
+     "tagType": "inet::TransportProtocolInd"
+    },
+    {
+     "tagAction": "addTag",
+     "tagType": "inet::DispatchProtocolReq"
+    },
+    {
+     "tagAction": "addTag",
+     "tagType": "inet::L3AddressReq"
+    },
+    {
+     "tagAction": "addTag",
+     "tagType": "inet::SctpCommandReq"
+    },
+    {
+     "tagAction": "addTag",
+     "tagType": "inet::SocketInd"
+    },
+    {
+     "tagAction": "findTag",
+     "tagType": "inet::SctpAvailableReq"
+    },
+    {
+     "tagAction": "findTag",
+     "tagType": "inet::SctpCommandReq"
+    },
+    {
+     "tagAction": "findTag",
+     "tagType": "inet::SctpInfoReq"
+    },
+    {
+     "tagAction": "findTag",
+     "tagType": "inet::SctpOpenReq"
+    },
+    {
+     "tagAction": "findTag",
+     "tagType": "inet::SctpResetReq"
+    },
+    {
+     "tagAction": "findTag",
+     "tagType": "inet::SctpSendReq"
+    },
+    {
+     "tagAction": "getTag",
+     "tagType": "inet::L3AddressInd"
+    },
+    {
+     "tagAction": "getTag",
+     "tagType": "inet::PacketProtocolTag"
+    },
+    {
+     "tagAction": "getTag",
+     "tagType": "inet::SctpSendReq"
+    },
+    {
+     "tagAction": "getTag",
+     "tagType": "inet::SocketReq"
+    }
+   ]
+  },
+  "inet.transportlayer.sctp.SctpAssociation": {
+   "CALL": [
+    {
+     "call to": "inet.networklayer.ipv4.Ipv4RoutingTable",
+     "function": "inet::Ipv4RoutingTable::getInterfaceForDestAddr",
+     "info": "getInterfaceForDestAddr(%u.%u.%u.%u)"
+    },
+    {
+     "call to": "inet.networklayer.ipv6.Ipv6RoutingTable",
+     "function": "inet::Ipv6RoutingTable::doLongestPrefixMatch",
+     "info": "doLongestPrefixMatch(%s)"
+    },
+    {
+     "call to": "inet.transportlayer.sctp.SctpAssociation",
+     "function": "inet::sctp::SctpAssociation::initAssociation",
+     "info": ""
+    },
+    {
+     "call to": "inet.transportlayer.sctp.SctpAssociation",
+     "function": "inet::sctp::SctpAssociation::processInitChunk",
+     "info": ""
+    },
+    {
+     "call to": "inet.transportlayer.sctp.SctpAssociation",
+     "function": "inet::sctp::SctpAssociation::recordScalars",
+     "info": ""
+    },
+    {
+     "call to": "inet.transportlayer.sctp.SctpAssociation",
+     "function": "inet::sctp::SctpAssociation::startTimer",
+     "info": ""
+    },
+    {
+     "call to": "inet.transportlayer.sctp.SctpAssociation",
+     "function": "inet::sctp::SctpAssociation::stopAssocTimers",
+     "info": ""
+    },
+    {
+     "call to": "inet.transportlayer.sctp.Sctp",
+     "function": "inet::sctp::Sctp::sendToApp",
+     "info": ""
+    },
+    {
+     "call to": "inet.transportlayer.sctp.Sctp",
+     "function": "inet::sctp::Sctp::sendToIp",
+     "info": ""
+    }
+   ],
+   "CALLED": [
+    {
+     "call from": "inet.transportlayer.sctp.SctpAssociation",
+     "function": "inet::sctp::SctpAssociation::initAssociation",
+     "info": ""
+    },
+    {
+     "call from": "inet.transportlayer.sctp.SctpAssociation",
+     "function": "inet::sctp::SctpAssociation::processInitChunk",
+     "info": ""
+    },
+    {
+     "call from": "inet.transportlayer.sctp.SctpAssociation",
+     "function": "inet::sctp::SctpAssociation::recordScalars",
+     "info": ""
+    },
+    {
+     "call from": "inet.transportlayer.sctp.SctpAssociation",
+     "function": "inet::sctp::SctpAssociation::startTimer",
+     "info": ""
+    },
+    {
+     "call from": "inet.transportlayer.sctp.SctpAssociation",
+     "function": "inet::sctp::SctpAssociation::stopAssocTimers",
+     "info": ""
+    },
+    {
+     "call from": "inet.transportlayer.sctp.Sctp",
+     "function": "inet::sctp::SctpAssociation::initAssociation",
+     "info": ""
+    },
+    {
+     "call from": "inet.transportlayer.sctp.Sctp",
+     "function": "inet::sctp::SctpAssociation::processAppCommand",
+     "info": ""
+    },
+    {
+     "call from": "inet.transportlayer.sctp.Sctp",
+     "function": "inet::sctp::SctpAssociation::processSctpMessage",
+     "info": ""
+    }
+   ],
+   "PACKET": [
+    {
+     "packetAction": "insertAtBack",
+     "chunkType": "inet::BytesChunk"
+    },
+    {
+     "packetAction": "insertAtFront",
      "chunkType": "inet::sctp::SctpHeader"
     },
     {
@@ -93384,14 +96598,6 @@
     },
     {
      "tagAction": "addTag",
-     "tagType": "inet::DispatchProtocolReq"
-    },
-    {
-     "tagAction": "addTag",
-     "tagType": "inet::L3AddressReq"
-    },
-    {
-     "tagAction": "addTag",
      "tagType": "inet::SctpAvailableReq"
     },
     {
@@ -93417,46 +96623,6 @@
     {
      "tagAction": "findTag",
      "tagType": "inet::InterfaceReq"
-    },
-    {
-     "tagAction": "findTag",
-     "tagType": "inet::SctpAvailableReq"
-    },
-    {
-     "tagAction": "findTag",
-     "tagType": "inet::SctpCommandReq"
-    },
-    {
-     "tagAction": "findTag",
-     "tagType": "inet::SctpInfoReq"
-    },
-    {
-     "tagAction": "findTag",
-     "tagType": "inet::SctpOpenReq"
-    },
-    {
-     "tagAction": "findTag",
-     "tagType": "inet::SctpResetReq"
-    },
-    {
-     "tagAction": "findTag",
-     "tagType": "inet::SctpSendReq"
-    },
-    {
-     "tagAction": "getTag",
-     "tagType": "inet::L3AddressInd"
-    },
-    {
-     "tagAction": "getTag",
-     "tagType": "inet::PacketProtocolTag"
-    },
-    {
-     "tagAction": "getTag",
-     "tagType": "inet::SctpSendReq"
-    },
-    {
-     "tagAction": "getTag",
-     "tagType": "inet::SocketReq"
     }
    ],
    "TAG": [
@@ -93470,11 +96636,11 @@
     }
    ]
   },
-  "inet.transportlayer.sctp.SctpCrcInsertion": {
+  "inet.transportlayer.sctp.SctpChecksumInsertion": {
    "CALLED": [
     {
      "call from": "inet.networklayer.ipv4.Ipv4",
-     "function": "inet::sctp::SctpCrcInsertion::datagramPostRoutingHook",
+     "function": "inet::sctp::SctpChecksumInsertion::datagramPostRoutingHook",
      "info": "datagramPostRoutingHook"
     }
    ],
@@ -93515,16 +96681,16 @@
     }
    ]
   },
-  "inet.transportlayer.tcp_common.TcpCrcInsertionHook": {
+  "inet.transportlayer.tcp_common.TcpChecksumInsertionHook": {
    "CALLED": [
     {
      "call from": "inet.networklayer.ipv4.Ipv4",
-     "function": "inet::tcp::TcpCrcInsertionHook::datagramPostRoutingHook",
+     "function": "inet::tcp::TcpChecksumInsertionHook::datagramPostRoutingHook",
      "info": "datagramPostRoutingHook"
     },
     {
      "call from": "inet.networklayer.ipv6.Ipv6",
-     "function": "inet::tcp::TcpCrcInsertionHook::datagramPostRoutingHook",
+     "function": "inet::tcp::TcpChecksumInsertionHook::datagramPostRoutingHook",
      "info": "datagramPostRoutingHook"
     }
    ],
@@ -95606,6 +98772,20 @@
      "ctrl": "",
      "tags": [
       "inet::DispatchProtocolReq",
+      "inet::FragmentationReq",
+      "inet::L3AddressReq",
+      "inet::L4PortReq",
+      "inet::SocketReq"
+     ],
+     "srcModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "appIn",
+     "msg": "inet::Packet",
+     "kind": "0 (inet::UdpCommandCode::UDP_C_DATA)",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolReq",
       "inet::HopLimitReq",
       "inet::InterfaceReq",
       "inet::L3AddressReq",
@@ -96028,6 +99208,17 @@
       "inet::DispatchProtocolReq",
       "inet::SocketReq"
      ],
+     "srcModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "appIn",
+     "msg": "inet::Request",
+     "kind": "1 (inet::UdpCommandCode::UDP_C_BIND)",
+     "ctrl": "inet::UdpBindCommand",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
      "srcModule": "inet.transportlayer.rtp.Rtcp"
     },
     {
@@ -96348,6 +99539,17 @@
       "inet::SocketReq"
      ],
      "srcModule": "inet.routing.rip.Rip"
+    },
+    {
+     "gate": "appIn",
+     "msg": "inet::Request",
+     "kind": "5 (inet::UdpCommandCode::UDP_C_DESTROY)",
+     "ctrl": "inet::UdpDestroyCommand",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::SocketReq"
+     ],
+     "srcModule": "inet.transportlayer.quic.Quic"
     },
     {
      "gate": "ipIn",
@@ -96839,6 +100041,7 @@
      "kind": "1 (inet::UdpStatusInd::UDP_I_ERROR)",
      "ctrl": "inet::UdpErrorIndication",
      "tags": [
+      "inet::IcmpErrorInd",
       "inet::L3AddressInd",
       "inet::L4PortInd",
       "inet::SocketInd"
@@ -96851,6 +100054,7 @@
      "kind": "1 (inet::UdpStatusInd::UDP_I_ERROR)",
      "ctrl": "inet::UdpErrorIndication",
      "tags": [
+      "inet::IcmpErrorInd",
       "inet::L3AddressInd",
       "inet::L4PortInd",
       "inet::SocketInd"
@@ -96863,6 +100067,7 @@
      "kind": "1 (inet::UdpStatusInd::UDP_I_ERROR)",
      "ctrl": "inet::UdpErrorIndication",
      "tags": [
+      "inet::IcmpErrorInd",
       "inet::L3AddressInd",
       "inet::L4PortInd",
       "inet::SocketInd"
@@ -96875,6 +100080,7 @@
      "kind": "1 (inet::UdpStatusInd::UDP_I_ERROR)",
      "ctrl": "inet::UdpErrorIndication",
      "tags": [
+      "inet::IcmpErrorInd",
       "inet::L3AddressInd",
       "inet::L4PortInd",
       "inet::SocketInd"
@@ -96887,11 +100093,25 @@
      "kind": "1 (inet::UdpStatusInd::UDP_I_ERROR)",
      "ctrl": "inet::UdpErrorIndication",
      "tags": [
+      "inet::IcmpErrorInd",
       "inet::L3AddressInd",
       "inet::L4PortInd",
       "inet::SocketInd"
      ],
      "destModule": "inet.routing.rip.Rip"
+    },
+    {
+     "gate": "appOut",
+     "msg": "inet::Indication",
+     "kind": "1 (inet::UdpStatusInd::UDP_I_ERROR)",
+     "ctrl": "inet::UdpErrorIndication",
+     "tags": [
+      "inet::IcmpErrorInd",
+      "inet::L3AddressInd",
+      "inet::L4PortInd",
+      "inet::SocketInd"
+     ],
+     "destModule": "inet.transportlayer.quic.Quic"
     },
     {
      "gate": "appOut",
@@ -98120,6 +101340,25 @@
       "inet::TosInd",
       "inet::TransportProtocolInd"
      ],
+     "destModule": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "gate": "appOut",
+     "msg": "inet::Packet",
+     "kind": "0 (inet::UdpStatusInd::UDP_I_DATA)",
+     "ctrl": "",
+     "tags": [
+      "inet::DscpInd",
+      "inet::EcnInd",
+      "inet::HopLimitInd",
+      "inet::InterfaceInd",
+      "inet::L3AddressInd",
+      "inet::L4PortInd",
+      "inet::NetworkProtocolInd",
+      "inet::SocketInd",
+      "inet::TosInd",
+      "inet::TransportProtocolInd"
+     ],
      "destModule": "inet.transportlayer.rtp.Rtcp"
     },
     {
@@ -98169,6 +101408,21 @@
       "inet::PacketProtocolTag",
       "inet::TransportProtocolInd",
       "inet::VlanReq"
+     ],
+     "destModule": "inet.networklayer.ipv4.Ipv4"
+    },
+    {
+     "gate": "ipOut",
+     "msg": "inet::Packet",
+     "kind": "0",
+     "ctrl": "",
+     "tags": [
+      "inet::DispatchProtocolReq",
+      "inet::FragmentationReq",
+      "inet::L3AddressReq",
+      "inet::MulticastReq",
+      "inet::PacketProtocolTag",
+      "inet::TransportProtocolInd"
      ],
      "destModule": "inet.networklayer.ipv4.Ipv4"
     },
@@ -98392,6 +101646,10 @@
     },
     {
      "tagAction": "addTag",
+     "tagType": "inet::IcmpErrorInd"
+    },
+    {
+     "tagAction": "addTag",
      "tagType": "inet::L3AddressInd"
     },
     {
@@ -98474,16 +101732,16 @@
     }
    ]
   },
-  "inet.transportlayer.udp.UdpCrcInsertionHook": {
+  "inet.transportlayer.udp.UdpChecksumInsertionHook": {
    "CALLED": [
     {
      "call from": "inet.networklayer.ipv4.Ipv4",
-     "function": "inet::UdpCrcInsertionHook::datagramPostRoutingHook",
+     "function": "inet::UdpChecksumInsertionHook::datagramPostRoutingHook",
      "info": "datagramPostRoutingHook"
     },
     {
      "call from": "inet.networklayer.ipv6.Ipv6",
-     "function": "inet::UdpCrcInsertionHook::datagramPostRoutingHook",
+     "function": "inet::UdpChecksumInsertionHook::datagramPostRoutingHook",
      "info": "datagramPostRoutingHook"
     }
    ],
@@ -98755,15 +102013,15 @@
     },
     {
      "action": "eraseAtFront",
-     "module": "inet.transportlayer.sctp.SctpCrcInsertion"
+     "module": "inet.transportlayer.sctp.SctpChecksumInsertion"
     },
     {
      "action": "eraseAtFront",
-     "module": "inet.transportlayer.tcp_common.TcpCrcInsertionHook"
+     "module": "inet.transportlayer.tcp_common.TcpChecksumInsertionHook"
     },
     {
      "action": "eraseAtFront",
-     "module": "inet.transportlayer.udp.UdpCrcInsertionHook"
+     "module": "inet.transportlayer.udp.UdpChecksumInsertionHook"
     },
     {
      "action": "peekAllAsBits",
@@ -98839,7 +102097,7 @@
     },
     {
      "action": "peekDataAsBytes",
-     "module": "inet.transportlayer.sctp.Sctp"
+     "module": "inet.transportlayer.sctp.SctpAssociation"
     },
     {
      "action": "peekDataAsBytes",
@@ -98907,7 +102165,7 @@
     },
     {
      "action": "peekDataAt",
-     "module": "inet.transportlayer.udp.UdpCrcInsertionHook"
+     "module": "inet.transportlayer.udp.UdpChecksumInsertionHook"
     },
     {
      "action": "peekData",
@@ -99095,6 +102353,10 @@
     },
     {
      "action": "peekData",
+     "module": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "action": "peekData",
      "module": "inet.transportlayer.rtp.Rtcp"
     },
     {
@@ -99103,11 +102365,11 @@
     },
     {
      "action": "peekData",
-     "module": "inet.transportlayer.sctp.SctpCrcInsertion"
+     "module": "inet.transportlayer.sctp.SctpChecksumInsertion"
     },
     {
      "action": "peekData",
-     "module": "inet.transportlayer.tcp_common.TcpCrcInsertionHook"
+     "module": "inet.transportlayer.tcp_common.TcpChecksumInsertionHook"
     },
     {
      "action": "peekData",
@@ -99675,11 +102937,19 @@
     },
     {
      "action": "insertAtFront",
+     "module": "inet.common.packet.recorder.PcapRecorder"
+    },
+    {
+     "action": "insertAtFront",
      "module": "inet.physicallayer.wireless.apsk.packetlevel.ApskRadio"
     },
     {
      "action": "peekAtFront",
      "module": "inet.physicallayer.wireless.common.medium.RadioMedium"
+    },
+    {
+     "action": "popAtFront",
+     "module": "inet.common.packet.recorder.PcapRecorder"
     },
     {
      "action": "popAtFront",
@@ -99867,6 +103137,18 @@
     },
     {
      "action": "insertAtBack",
+     "module": "inet.applications.quicapp.QuicClient"
+    },
+    {
+     "action": "insertAtBack",
+     "module": "inet.applications.quicapp.QuicTrafficgen"
+    },
+    {
+     "action": "insertAtBack",
+     "module": "inet.applications.quicapp.QuicZeroRttClient"
+    },
+    {
+     "action": "insertAtBack",
      "module": "inet.applications.tcpapp.TcpEchoAppThread"
     },
     {
@@ -99927,6 +103209,10 @@
     },
     {
      "action": "insertAtBack",
+     "module": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "action": "insertAtBack",
      "module": "inet.transportlayer.rtp.RtpAvProfilePayload32Sender"
     },
     {
@@ -99955,6 +103241,10 @@
     },
     {
      "action": "insertAtBack",
+     "module": "inet.applications.quicapp.QuicOrderedTrafficgen"
+    },
+    {
+     "action": "insertAtBack",
      "module": "inet.applications.sctpapp.SctpClient"
     },
     {
@@ -99971,7 +103261,11 @@
     },
     {
      "action": "insertAtBack",
-     "module": "inet.transportlayer.sctp.Sctp"
+     "module": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "action": "insertAtBack",
+     "module": "inet.transportlayer.sctp.SctpAssociation"
     },
     {
      "action": "insertAtBack",
@@ -100070,6 +103364,14 @@
      "module": "inet.common.packet.recorder.PcapRecorder"
     },
     {
+     "action": "peekAtFront",
+     "module": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "action": "peekDataAt",
+     "module": "inet.transportlayer.quic.Quic"
+    },
+    {
      "action": "popAtBack",
      "module": "inet.linklayer.csmaca.CsmaCaMac"
     },
@@ -100087,6 +103389,14 @@
     },
     {
      "action": "popAtFront",
+     "module": "inet.applications.quicapp.QuicDiscardServer"
+    },
+    {
+     "action": "popAtFront",
+     "module": "inet.applications.quicapp.QuicOrderedReceiver"
+    },
+    {
+     "action": "popAtFront",
      "module": "inet.common.packet.recorder.PcapRecorder"
     },
     {
@@ -100096,6 +103406,10 @@
     {
      "action": "popAtFront",
      "module": "inet.networklayer.diffserv.MultiFieldClassifier"
+    },
+    {
+     "action": "popAtFront",
+     "module": "inet.transportlayer.quic.Quic"
     },
     {
      "action": "removeAll",
@@ -100108,6 +103422,10 @@
     {
      "action": "removeAtBack",
      "module": "inet.protocolelement.fragmentation.PreemptableStreamer"
+    },
+    {
+     "action": "removeAtFront",
+     "module": "inet.common.packet.recorder.PcapRecorder"
     },
     {
      "action": "removeAt",
@@ -100187,7 +103505,7 @@
     },
     {
      "tagAction": "addTag",
-     "module": "inet.transportlayer.sctp.Sctp"
+     "module": "inet.transportlayer.sctp.SctpAssociation"
     },
     {
      "tagAction": "getAllTags",
@@ -100571,6 +103889,30 @@
     },
     {
      "tagAction": "addTagIfAbsent",
+     "module": "inet.applications.quicapp.QuicClient"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
+     "module": "inet.applications.quicapp.QuicDiscardServer"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
+     "module": "inet.applications.quicapp.QuicOrderedReceiver"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
+     "module": "inet.applications.quicapp.QuicOrderedTrafficgen"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
+     "module": "inet.applications.quicapp.QuicTrafficgen"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
+     "module": "inet.applications.quicapp.QuicZeroRttClient"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
      "module": "inet.applications.sctpapp.SctpClient"
     },
     {
@@ -100879,6 +104221,10 @@
     },
     {
      "tagAction": "addTagIfAbsent",
+     "module": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
      "module": "inet.transportlayer.rtp.Rtcp"
     },
     {
@@ -100887,7 +104233,7 @@
     },
     {
      "tagAction": "addTagIfAbsent",
-     "module": "inet.transportlayer.sctp.Sctp"
+     "module": "inet.transportlayer.sctp.SctpAssociation"
     },
     {
      "tagAction": "addTagIfAbsent",
@@ -101499,11 +104845,27 @@
     },
     {
      "tagAction": "findTag",
+     "module": "inet.linklayer.ethernet.common.RelayInterfaceSelector"
+    },
+    {
+     "tagAction": "findTag",
      "module": "inet.linklayer.ieee8021q.Ieee8021qTagEpdHeaderInserter"
     },
     {
      "tagAction": "findTag",
      "module": "inet.linklayer.ieee8021r.Ieee8021rTagEpdHeaderInserter"
+    },
+    {
+     "tagAction": "findTag",
+     "module": "inet.linklayer.vlan.VlanReqMapper"
+    },
+    {
+     "tagAction": "findTag",
+     "module": "inet.networklayer.ipv4.Ipv4"
+    },
+    {
+     "tagAction": "findTag",
+     "module": "inet.protocolelement.redundancy.StreamEncoder"
     },
     {
      "tagAction": "removeTag",
@@ -101655,6 +105017,10 @@
     },
     {
      "action": "popAtBack",
+     "module": "inet.common.packet.recorder.PcapRecorder"
+    },
+    {
+     "action": "popAtBack",
      "module": "inet.linklayer.ethernet.basic.EthernetEncapsulation"
     },
     {
@@ -101760,6 +105126,10 @@
     {
      "action": "peekDataAt",
      "module": "inet.queueing.filter.RedDropper"
+    },
+    {
+     "action": "popAtFront",
+     "module": "inet.common.packet.recorder.PcapRecorder"
     },
     {
      "action": "popAtFront",
@@ -102122,6 +105492,10 @@
   "inet::FragmentationReq": {
    "STAG_USAGE": [
     {
+     "tagAction": "addTag",
+     "module": "inet.transportlayer.quic.Quic"
+    },
+    {
      "tagAction": "removeTagIfPresent",
      "module": "inet.networklayer.ipv4.Ipv4"
     }
@@ -102195,6 +105569,10 @@
    "CHUNK_USAGE": [
     {
      "action": "insertAtFront",
+     "module": "inet.common.packet.recorder.PcapRecorder"
+    },
+    {
+     "action": "insertAtFront",
      "module": "inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator"
     },
     {
@@ -102212,6 +105590,10 @@
     {
      "action": "peekAtFront",
      "module": "inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium"
+    },
+    {
+     "action": "popAtFront",
+     "module": "inet.common.packet.recorder.PcapRecorder"
     },
     {
      "action": "popAtFront",
@@ -102251,18 +105633,6 @@
    "CHUNK_USAGE": [
     {
      "action": "insertAtFront",
-     "module": "inet.linklayer.ieee8021as.Gptp"
-    }
-   ]
-  },
-  "inet::GptpIngressTimeInd": {
-   "STAG_USAGE": [
-    {
-     "tagAction": "addTagIfAbsent",
-     "module": "inet.linklayer.ieee8021as.Gptp"
-    },
-    {
-     "tagAction": "getTag",
      "module": "inet.linklayer.ieee8021as.Gptp"
     }
    ]
@@ -102467,6 +105837,18 @@
     }
    ]
   },
+  "inet::IcmpErrorInd": {
+   "STAG_USAGE": [
+    {
+     "tagAction": "addTag",
+     "module": "inet.transportlayer.udp.Udp"
+    },
+    {
+     "tagAction": "getTag",
+     "module": "inet.transportlayer.quic.Quic"
+    }
+   ]
+  },
   "inet::IcmpHeader": {
    "CHUNK_USAGE": [
     {
@@ -102495,7 +105877,19 @@
     },
     {
      "action": "popAtFront",
+     "module": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "action": "popAtFront",
      "module": "inet.transportlayer.udp.Udp"
+    }
+   ]
+  },
+  "inet::IcmpPtb": {
+   "CHUNK_USAGE": [
+    {
+     "action": "insertAtFront",
+     "module": "inet.networklayer.ipv4.Icmp"
     }
    ]
   },
@@ -103559,15 +106953,15 @@
     },
     {
      "tagAction": "findTag",
-     "module": "inet.transportlayer.sctp.SctpCrcInsertion"
+     "module": "inet.transportlayer.sctp.SctpChecksumInsertion"
     },
     {
      "tagAction": "findTag",
-     "module": "inet.transportlayer.tcp_common.TcpCrcInsertionHook"
+     "module": "inet.transportlayer.tcp_common.TcpChecksumInsertionHook"
     },
     {
      "tagAction": "findTag",
-     "module": "inet.transportlayer.udp.UdpCrcInsertionHook"
+     "module": "inet.transportlayer.udp.UdpChecksumInsertionHook"
     },
     {
      "tagAction": "getTagForUpdate",
@@ -103939,7 +107333,7 @@
     },
     {
      "tagAction": "findTag",
-     "module": "inet.transportlayer.sctp.Sctp"
+     "module": "inet.transportlayer.sctp.SctpAssociation"
     },
     {
      "tagAction": "findTag",
@@ -104011,11 +107405,11 @@
     },
     {
      "action": "insertAtFront",
-     "module": "inet.transportlayer.sctp.SctpCrcInsertion"
+     "module": "inet.transportlayer.sctp.SctpChecksumInsertion"
     },
     {
      "action": "insertAtFront",
-     "module": "inet.transportlayer.tcp_common.TcpCrcInsertionHook"
+     "module": "inet.transportlayer.tcp_common.TcpChecksumInsertionHook"
     },
     {
      "action": "insertAtFront",
@@ -104023,7 +107417,7 @@
     },
     {
      "action": "insertAtFront",
-     "module": "inet.transportlayer.udp.UdpCrcInsertionHook"
+     "module": "inet.transportlayer.udp.UdpChecksumInsertionHook"
     },
     {
      "action": "insertDataAt",
@@ -104107,6 +107501,10 @@
     },
     {
      "action": "popAtFront",
+     "module": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "action": "popAtFront",
      "module": "inet.transportlayer.udp.Udp"
     },
     {
@@ -104160,6 +107558,22 @@
     {
      "tagAction": "findTag",
      "module": "inet.applications.pingapp.PingApp"
+    },
+    {
+     "tagAction": "findTag",
+     "module": "inet.applications.quicapp.QuicClient"
+    },
+    {
+     "tagAction": "findTag",
+     "module": "inet.applications.quicapp.QuicOrderedTrafficgen"
+    },
+    {
+     "tagAction": "findTag",
+     "module": "inet.applications.quicapp.QuicTrafficgen"
+    },
+    {
+     "tagAction": "findTag",
+     "module": "inet.applications.quicapp.QuicZeroRttClient"
     },
     {
      "tagAction": "findTag",
@@ -104291,6 +107705,10 @@
     },
     {
      "tagAction": "findTag",
+     "module": "inet.routing.aodv.Aodv"
+    },
+    {
+     "tagAction": "findTag",
      "module": "inet.routing.eigrp.pdms.EigrpIpv4Pdm"
     },
     {
@@ -104315,7 +107733,7 @@
     },
     {
      "tagAction": "findTag",
-     "module": "inet.transportlayer.sctp.Sctp"
+     "module": "inet.transportlayer.sctp.SctpAssociation"
     },
     {
      "tagAction": "getTagForUpdate",
@@ -104495,7 +107913,7 @@
     },
     {
      "action": "insertAtFront",
-     "module": "inet.transportlayer.udp.UdpCrcInsertionHook"
+     "module": "inet.transportlayer.udp.UdpChecksumInsertionHook"
     },
     {
      "action": "peekAtFront",
@@ -104603,7 +108021,7 @@
     },
     {
      "tagAction": "findTag",
-     "module": "inet.transportlayer.sctp.Sctp"
+     "module": "inet.transportlayer.sctp.SctpAssociation"
     },
     {
      "tagAction": "getTagForUpdate",
@@ -104747,6 +108165,10 @@
     },
     {
      "tagAction": "findTag",
+     "module": "inet.common.packet.recorder.PcapRecorder"
+    },
+    {
+     "tagAction": "findTag",
      "module": "inet.linklayer.ieee8021as.Gptp"
     },
     {
@@ -104871,6 +108293,10 @@
     },
     {
      "tagAction": "getTag",
+     "module": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "tagAction": "getTag",
      "module": "inet.transportlayer.sctp.Sctp"
     },
     {
@@ -104987,6 +108413,10 @@
     },
     {
      "tagAction": "addTagIfAbsent",
+     "module": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
      "module": "inet.transportlayer.rtp.Rtcp"
     },
     {
@@ -104995,7 +108425,7 @@
     },
     {
      "tagAction": "addTagIfAbsent",
-     "module": "inet.transportlayer.sctp.Sctp"
+     "module": "inet.transportlayer.sctp.SctpAssociation"
     },
     {
      "tagAction": "addTagIfAbsent",
@@ -105120,6 +108550,10 @@
     {
      "tagAction": "getTag",
      "module": "inet.routing.rip.Rip"
+    },
+    {
+     "tagAction": "getTag",
+     "module": "inet.transportlayer.quic.Quic"
     }
    ]
   },
@@ -105168,6 +108602,10 @@
     {
      "tagAction": "addTagIfAbsent",
      "module": "inet.routing.rip.Rip"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
+     "module": "inet.transportlayer.quic.Quic"
     },
     {
      "tagAction": "addTagIfAbsent",
@@ -105843,6 +109281,10 @@
     },
     {
      "tagAction": "findTag",
+     "module": "inet.common.packet.recorder.PcapRecorder"
+    },
+    {
+     "tagAction": "findTag",
      "module": "inet.linklayer.ieee8021as.Gptp"
     },
     {
@@ -105871,15 +109313,15 @@
     },
     {
      "tagAction": "findTag",
-     "module": "inet.transportlayer.sctp.SctpCrcInsertion"
+     "module": "inet.transportlayer.sctp.SctpChecksumInsertion"
     },
     {
      "tagAction": "findTag",
-     "module": "inet.transportlayer.tcp_common.TcpCrcInsertionHook"
+     "module": "inet.transportlayer.tcp_common.TcpChecksumInsertionHook"
     },
     {
      "tagAction": "findTag",
-     "module": "inet.transportlayer.udp.UdpCrcInsertionHook"
+     "module": "inet.transportlayer.udp.UdpChecksumInsertionHook"
     },
     {
      "tagAction": "getTag",
@@ -106483,6 +109925,10 @@
     },
     {
      "tagAction": "addTagIfAbsent",
+     "module": "inet.transportlayer.sctp.SctpAssociation"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
      "module": "inet.transportlayer.tcp_lwip.TcpLwip"
     },
     {
@@ -106604,6 +110050,10 @@
     {
      "tagAction": "addTag",
      "module": "inet.networklayer.ipv4.Icmp"
+    },
+    {
+     "tagAction": "addTag",
+     "module": "inet.physicallayer.wired.ethernet.EthernetCsmaPhy"
     },
     {
      "tagAction": "addTag",
@@ -107039,11 +110489,11 @@
     },
     {
      "tagAction": "getTag",
-     "module": "inet.transportlayer.sctp.SctpCrcInsertion"
+     "module": "inet.transportlayer.sctp.SctpChecksumInsertion"
     },
     {
      "tagAction": "getTag",
-     "module": "inet.transportlayer.tcp_common.TcpCrcInsertionHook"
+     "module": "inet.transportlayer.tcp_common.TcpChecksumInsertionHook"
     },
     {
      "tagAction": "getTag",
@@ -107059,7 +110509,7 @@
     },
     {
      "tagAction": "getTag",
-     "module": "inet.transportlayer.udp.UdpCrcInsertionHook"
+     "module": "inet.transportlayer.udp.UdpChecksumInsertionHook"
     },
     {
      "tagAction": "removeTagIfPresent",
@@ -107080,6 +110530,10 @@
     {
      "tagAction": "removeTagIfPresent",
      "module": "inet.networklayer.nexthop.NextHopForwarding"
+    },
+    {
+     "tagAction": "removeTagIfPresent",
+     "module": "inet.physicallayer.wired.ethernet.EthernetCsmaPhy"
     },
     {
      "tagAction": "removeTagIfPresent",
@@ -107235,6 +110689,10 @@
     },
     {
      "action": "popAtFront",
+     "module": "inet.common.packet.recorder.PcapRecorder"
+    },
+    {
+     "action": "popAtFront",
      "module": "inet.linklayer.ethernet.modular.EthernetCutthroughSource"
     },
     {
@@ -107323,7 +110781,15 @@
     },
     {
      "action": "peekAtFront",
+     "module": "inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211RadioMedium"
+    },
+    {
+     "action": "peekAtFront",
      "module": "inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium"
+    },
+    {
+     "action": "popAtFront",
+     "module": "inet.common.packet.recorder.PcapRecorder"
     },
     {
      "action": "popAtFront",
@@ -107348,6 +110814,10 @@
     {
      "action": "peekAtFront",
      "module": "inet.physicallayer.wireless.ieee80211.packetlevel.errormodel.Ieee80211NistErrorModel"
+    },
+    {
+     "action": "peekAtFront",
+     "module": "inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211RadioMedium"
     },
     {
      "action": "peekAtFront",
@@ -107771,6 +111241,210 @@
     }
    ]
   },
+  "inet::quic::AckFrameHeader": {
+   "CHUNK_USAGE": [
+    {
+     "action": "insertAtBack",
+     "module": "inet.transportlayer.quic.Quic"
+    }
+   ]
+  },
+  "inet::quic::ConnectionCloseFrameHeader": {
+   "CHUNK_USAGE": [
+    {
+     "action": "insertAtBack",
+     "module": "inet.transportlayer.quic.Quic"
+    }
+   ]
+  },
+  "inet::quic::CryptoFrameHeader": {
+   "CHUNK_USAGE": [
+    {
+     "action": "insertAtBack",
+     "module": "inet.transportlayer.quic.Quic"
+    }
+   ]
+  },
+  "inet::quic::FrameHeader": {
+   "CHUNK_USAGE": [
+    {
+     "action": "popAtFront",
+     "module": "inet.transportlayer.quic.Quic"
+    }
+   ]
+  },
+  "inet::quic::HandshakeDoneFrameHeader": {
+   "CHUNK_USAGE": [
+    {
+     "action": "insertAtBack",
+     "module": "inet.transportlayer.quic.Quic"
+    }
+   ]
+  },
+  "inet::quic::HandshakePacketHeader": {
+   "CHUNK_USAGE": [
+    {
+     "action": "insertAtBack",
+     "module": "inet.transportlayer.quic.Quic"
+    }
+   ]
+  },
+  "inet::quic::InitialPacketHeader": {
+   "CHUNK_USAGE": [
+    {
+     "action": "insertAtBack",
+     "module": "inet.transportlayer.quic.Quic"
+    }
+   ]
+  },
+  "inet::quic::MaxDataFrameHeader": {
+   "CHUNK_USAGE": [
+    {
+     "action": "insertAtBack",
+     "module": "inet.transportlayer.quic.Quic"
+    }
+   ]
+  },
+  "inet::quic::MaxStreamDataFrameHeader": {
+   "CHUNK_USAGE": [
+    {
+     "action": "insertAtBack",
+     "module": "inet.transportlayer.quic.Quic"
+    }
+   ]
+  },
+  "inet::QuicNewToken": {
+   "STAG_USAGE": [
+    {
+     "tagAction": "addTagIfAbsent",
+     "module": "inet.applications.quicapp.QuicZeroRttClient"
+    },
+    {
+     "tagAction": "getTag",
+     "module": "inet.transportlayer.quic.Quic"
+    }
+   ]
+  },
+  "inet::quic::NewTokenFrameHeader": {
+   "CHUNK_USAGE": [
+    {
+     "action": "insertAtBack",
+     "module": "inet.transportlayer.quic.Quic"
+    }
+   ]
+  },
+  "inet::quic::OneRttPacketHeader": {
+   "CHUNK_USAGE": [
+    {
+     "action": "insertAtBack",
+     "module": "inet.transportlayer.quic.Quic"
+    }
+   ]
+  },
+  "inet::QuicOpenCommand": {
+   "STAG_USAGE": [
+    {
+     "tagAction": "addTagIfAbsent",
+     "module": "inet.applications.quicapp.QuicZeroRttClient"
+    },
+    {
+     "tagAction": "getTag",
+     "module": "inet.transportlayer.quic.Quic"
+    }
+   ]
+  },
+  "inet::quic::PacketHeader": {
+   "CHUNK_USAGE": [
+    {
+     "action": "peekAtFront",
+     "module": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "action": "popAtFront",
+     "module": "inet.transportlayer.quic.Quic"
+    }
+   ]
+  },
+  "inet::quic::PaddingFrameHeader": {
+   "CHUNK_USAGE": [
+    {
+     "action": "insertAtBack",
+     "module": "inet.transportlayer.quic.Quic"
+    }
+   ]
+  },
+  "inet::quic::PingFrameHeader": {
+   "CHUNK_USAGE": [
+    {
+     "action": "insertAtBack",
+     "module": "inet.transportlayer.quic.Quic"
+    }
+   ]
+  },
+  "inet::quic::ShortPacketHeader": {
+   "CHUNK_USAGE": [
+    {
+     "action": "peekAtFront",
+     "module": "inet.transportlayer.quic.Quic"
+    }
+   ]
+  },
+  "inet::quic::StreamDataBlockedFrameHeader": {
+   "CHUNK_USAGE": [
+    {
+     "action": "insertAtBack",
+     "module": "inet.transportlayer.quic.Quic"
+    }
+   ]
+  },
+  "inet::quic::StreamFrameHeader": {
+   "CHUNK_USAGE": [
+    {
+     "action": "insertAtBack",
+     "module": "inet.transportlayer.quic.Quic"
+    }
+   ]
+  },
+  "inet::QuicStreamReq": {
+   "STAG_USAGE": [
+    {
+     "tagAction": "addTagIfAbsent",
+     "module": "inet.applications.quicapp.QuicClient"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
+     "module": "inet.applications.quicapp.QuicOrderedTrafficgen"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
+     "module": "inet.applications.quicapp.QuicTrafficgen"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
+     "module": "inet.applications.quicapp.QuicZeroRttClient"
+    },
+    {
+     "tagAction": "getTag",
+     "module": "inet.transportlayer.quic.Quic"
+    }
+   ]
+  },
+  "inet::quic::TransportParametersExtension": {
+   "CHUNK_USAGE": [
+    {
+     "action": "insertAtBack",
+     "module": "inet.transportlayer.quic.Quic"
+    }
+   ]
+  },
+  "inet::quic::ZeroRttPacketHeader": {
+   "CHUNK_USAGE": [
+    {
+     "action": "insertAtBack",
+     "module": "inet.transportlayer.quic.Quic"
+    }
+   ]
+  },
   "inet::RateTag": {
    "STAG_USAGE": [
     {
@@ -107979,7 +111653,7 @@
     },
     {
      "tagAction": "addTag",
-     "module": "inet.transportlayer.sctp.Sctp"
+     "module": "inet.transportlayer.sctp.SctpAssociation"
     },
     {
      "tagAction": "findTag",
@@ -108010,6 +111684,10 @@
      "module": "inet.transportlayer.sctp.Sctp"
     },
     {
+     "tagAction": "addTag",
+     "module": "inet.transportlayer.sctp.SctpAssociation"
+    },
+    {
      "tagAction": "findTag",
      "module": "inet.applications.sctpapp.SctpServer"
     },
@@ -108027,7 +111705,7 @@
    "STAG_USAGE": [
     {
      "tagAction": "addTag",
-     "module": "inet.transportlayer.sctp.Sctp"
+     "module": "inet.transportlayer.sctp.SctpAssociation"
     },
     {
      "tagAction": "findTag",
@@ -108087,7 +111765,7 @@
    "STAG_USAGE": [
     {
      "tagAction": "addTag",
-     "module": "inet.transportlayer.sctp.Sctp"
+     "module": "inet.transportlayer.sctp.SctpAssociation"
     },
     {
      "tagAction": "findTag",
@@ -108115,7 +111793,11 @@
     },
     {
      "action": "insertAtFront",
-     "module": "inet.transportlayer.sctp.SctpCrcInsertion"
+     "module": "inet.transportlayer.sctp.SctpAssociation"
+    },
+    {
+     "action": "insertAtFront",
+     "module": "inet.transportlayer.sctp.SctpChecksumInsertion"
     },
     {
      "action": "peekAtFront",
@@ -108123,7 +111805,7 @@
     },
     {
      "action": "removeAtFront",
-     "module": "inet.transportlayer.sctp.SctpCrcInsertion"
+     "module": "inet.transportlayer.sctp.SctpChecksumInsertion"
     }
    ]
   },
@@ -108131,7 +111813,7 @@
    "STAG_USAGE": [
     {
      "tagAction": "addTag",
-     "module": "inet.transportlayer.sctp.Sctp"
+     "module": "inet.transportlayer.sctp.SctpAssociation"
     },
     {
      "tagAction": "getTag",
@@ -108208,6 +111890,10 @@
     {
      "action": "insertAtBack",
      "module": "inet.routing.pim.modes.PimSm"
+    },
+    {
+     "action": "insertAtBack",
+     "module": "inet.transportlayer.quic.Quic"
     },
     {
      "action": "insertAtBack",
@@ -108587,7 +112273,11 @@
     },
     {
      "tagAction": "addTagIfAbsent",
-     "module": "inet.transportlayer.sctp.Sctp"
+     "module": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
+     "module": "inet.transportlayer.sctp.SctpAssociation"
     },
     {
      "tagAction": "addTagIfAbsent",
@@ -108604,6 +112294,10 @@
     {
      "tagAction": "addTag",
      "module": "inet.transportlayer.sctp.Sctp"
+    },
+    {
+     "tagAction": "addTag",
+     "module": "inet.transportlayer.sctp.SctpAssociation"
     },
     {
      "tagAction": "addTag",
@@ -108747,6 +112441,30 @@
     },
     {
      "tagAction": "getTag",
+     "module": "inet.applications.quicapp.QuicClient"
+    },
+    {
+     "tagAction": "getTag",
+     "module": "inet.applications.quicapp.QuicDiscardServer"
+    },
+    {
+     "tagAction": "getTag",
+     "module": "inet.applications.quicapp.QuicOrderedReceiver"
+    },
+    {
+     "tagAction": "getTag",
+     "module": "inet.applications.quicapp.QuicOrderedTrafficgen"
+    },
+    {
+     "tagAction": "getTag",
+     "module": "inet.applications.quicapp.QuicTrafficgen"
+    },
+    {
+     "tagAction": "getTag",
+     "module": "inet.applications.quicapp.QuicZeroRttClient"
+    },
+    {
+     "tagAction": "getTag",
      "module": "inet.applications.sctpapp.SctpClient"
     },
     {
@@ -108780,6 +112498,34 @@
     {
      "tagAction": "getTag",
      "module": "inet.routing.bgpv4.Bgp"
+    },
+    {
+     "tagAction": "getTag",
+     "module": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "tagAction": "hasTag",
+     "module": "inet.applications.quicapp.QuicClient"
+    },
+    {
+     "tagAction": "hasTag",
+     "module": "inet.applications.quicapp.QuicDiscardServer"
+    },
+    {
+     "tagAction": "hasTag",
+     "module": "inet.applications.quicapp.QuicOrderedReceiver"
+    },
+    {
+     "tagAction": "hasTag",
+     "module": "inet.applications.quicapp.QuicOrderedTrafficgen"
+    },
+    {
+     "tagAction": "hasTag",
+     "module": "inet.applications.quicapp.QuicTrafficgen"
+    },
+    {
+     "tagAction": "hasTag",
+     "module": "inet.applications.quicapp.QuicZeroRttClient"
     },
     {
      "tagAction": "removeTag",
@@ -108836,6 +112582,30 @@
     {
      "tagAction": "addTagIfAbsent",
      "module": "inet.applications.pingapp.PingApp"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
+     "module": "inet.applications.quicapp.QuicClient"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
+     "module": "inet.applications.quicapp.QuicDiscardServer"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
+     "module": "inet.applications.quicapp.QuicOrderedReceiver"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
+     "module": "inet.applications.quicapp.QuicOrderedTrafficgen"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
+     "module": "inet.applications.quicapp.QuicTrafficgen"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
+     "module": "inet.applications.quicapp.QuicZeroRttClient"
     },
     {
      "tagAction": "addTagIfAbsent",
@@ -108951,6 +112721,10 @@
     },
     {
      "tagAction": "addTagIfAbsent",
+     "module": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
      "module": "inet.transportlayer.rtp.Rtcp"
     },
     {
@@ -108959,7 +112733,7 @@
     },
     {
      "tagAction": "addTagIfAbsent",
-     "module": "inet.transportlayer.sctp.Sctp"
+     "module": "inet.transportlayer.sctp.SctpAssociation"
     },
     {
      "tagAction": "addTag",
@@ -109040,6 +112814,10 @@
     {
      "tagAction": "getTag",
      "module": "inet.networklayer.wiseroute.WiseRoute"
+    },
+    {
+     "tagAction": "getTag",
+     "module": "inet.transportlayer.quic.Quic"
     },
     {
      "tagAction": "getTag",
@@ -109139,7 +112917,7 @@
    "CHUNK_USAGE": [
     {
      "action": "insertAtFront",
-     "module": "inet.transportlayer.tcp_common.TcpCrcInsertionHook"
+     "module": "inet.transportlayer.tcp_common.TcpChecksumInsertionHook"
     },
     {
      "action": "insertAtFront",
@@ -109170,8 +112948,12 @@
      "module": "inet.networklayer.ipv4.Ipv4"
     },
     {
+     "action": "popAtFront",
+     "module": "inet.common.packet.recorder.PcapRecorder"
+    },
+    {
      "action": "removeAtFront",
-     "module": "inet.transportlayer.tcp_common.TcpCrcInsertionHook"
+     "module": "inet.transportlayer.tcp_common.TcpChecksumInsertionHook"
     },
     {
      "action": "removeAtFront",
@@ -109239,6 +113021,10 @@
     },
     {
      "tagAction": "addTagIfAbsent",
+     "module": "inet.transportlayer.sctp.SctpAssociation"
+    },
+    {
+     "tagAction": "addTagIfAbsent",
      "module": "inet.transportlayer.tcp_lwip.TcpLwip"
     },
     {
@@ -109279,7 +113065,7 @@
     },
     {
      "action": "insertAtFront",
-     "module": "inet.transportlayer.udp.UdpCrcInsertionHook"
+     "module": "inet.transportlayer.udp.UdpChecksumInsertionHook"
     },
     {
      "action": "peekAtFront",
@@ -109307,6 +113093,10 @@
     },
     {
      "action": "popAtFront",
+     "module": "inet.common.packet.recorder.PcapRecorder"
+    },
+    {
+     "action": "popAtFront",
      "module": "inet.linklayer.ieee8021as.Gptp"
     },
     {
@@ -109331,11 +113121,15 @@
     },
     {
      "action": "popAtFront",
+     "module": "inet.transportlayer.quic.Quic"
+    },
+    {
+     "action": "popAtFront",
      "module": "inet.transportlayer.udp.Udp"
     },
     {
      "action": "removeAtFront",
-     "module": "inet.transportlayer.udp.UdpCrcInsertionHook"
+     "module": "inet.transportlayer.udp.UdpChecksumInsertionHook"
     }
    ]
   },
