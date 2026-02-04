@@ -3,12 +3,23 @@ INSTALLATION INSTRUCTIONS
 
 The INET Framework can be compiled on any platform supported by OMNeT++.
 
-PREREQUISITES
+Recommended Installation
+------------------------
 
-You should have a working OMNeT++ installation.
+The recommended way to install INET is to use the [opp_env](https://oppenv.omnetpp.org/)
+tool to automatically install both INET and OMNeT++. It will handle the installation
+of all dependencies and configure the environment variables and guaranties a reproducible
+installation. With `opp_env`, you will be able to install various other models as well.
+
+
+Manual Installation
+-------------------
+
+If you opt to install INET manually, you will need to install OMNeT++ first.
 
 General
 -------
+
 1. Make sure your OMNeT++ installation works OK (e.g. try running the samples)
    and it is in the path (to test, try the command "which omnetpp", it should print
    the path of the executable). On Windows, open a console with the `mingwenv.cmd`
@@ -30,12 +41,10 @@ If you are building from command line:
 4. Make sure that any required Python modules are properly installed by executing
   `pip install -r python/requirements.txt`
 
-5. Type `make makefiles`. This should generate the makefiles for you automatically.
-
-6. Type `make` to build the inet executable (release version). Use `make MODE=debug`
+5. Type `make` to build the inet executable (release version). Use `make MODE=debug`
    to build debug version.
 
-7. You can run specific examples by changing into the example's directory and executing `inet`
+6. You can run specific examples by changing into the example's directory and executing `inet`
 
 If you are using the IDE:
 -------------------------
@@ -59,9 +68,6 @@ Note:
 - by default INET is creating a shared library (libINET.dll, libINET.so etc.)
   in the `src` directory. To use the shared library you can use the `inet`
   command to load it dynamically.
-- If you add/remove files/directories later in the src directory, you MUST
-  re-create your makefile. Run `make makefiles` again if you are building
-  from the command line. (The IDE does it for you automatically)
 
 Note to GIT users:
 ------------------
@@ -82,20 +88,18 @@ GIT version, you may need to enable the 'ours' merge driver for the project:
 
     $ git config merge.ours.driver true
 
-VoIPTool feature
-================
+VoipStream feature
+==================
 
-VoIPTool has only been tested on Linux. This does not mean it won't work on other
+VoipStream has only been tested on Linux. This does not mean it won't work on other
 systems, but your mileage may vary on getting it up and running.
-
 
 PREREQUISITES.
 
-VoIPTool requires a "devel" package of the avcodec library (part of FFmpeg) 
+VoipStream requires a "devel" package of the avcodec library (part of FFmpeg) 
 to be installed on your system. On Ubuntu, this package can be installed with the 
 following command:
 
-    $ sudo apt-get install libavcodec-dev
-    $ sudo apt-get install libavformat-dev
+    $ sudo apt-get install libavcodec-dev libavformat-dev libavresample-dev libavutil-dev
 
 The package name and installation command may vary for other Linux systems.
