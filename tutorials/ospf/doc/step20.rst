@@ -51,7 +51,9 @@ In a stub area configuration:
 
 4.  Traffic destined for external networks uses the default route to the ABR (R5 forwards external traffic to R4, which then routes it appropriately to the external networks, N1, N2, or N3.)
 
-5.  Intra-area and inter-area routing works normally. TODO R2 doesnt have routes to the stub area
+5.  Intra-area and inter-area routing works normally.
+
+.. TODO R2 doesnt have routes to the stub area
 
 .. analysis:
 

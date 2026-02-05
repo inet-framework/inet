@@ -18,7 +18,8 @@
   
   <Router name="R5" RFC1583Compatible="true">
     <BroadcastInterface ifName="eth0" interfaceOutputCost='0' />
-    <PointToPointInterface ifName="eth1" interfaceOutputCost='0' />
+<!--     <PointToPointInterface ifName="eth1" interfaceOutputCost='0' /> TODO: this should prevent full adjacency, but it doesn't-->
+    <BroadcastInterface ifName="eth1" interfaceOutputCost='0' />
   </Router>
   
   <Router name="**" RFC1583Compatible="true">

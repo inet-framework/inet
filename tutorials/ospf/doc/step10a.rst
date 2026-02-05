@@ -47,9 +47,6 @@ When R4 is shutdown at t=60s:
 In General, routes that used a failed router as a next-hop or transit router are recomputed, using alternative paths
 if available.
 
-This demonstrates OSPF's resilience to complete router failures, automatically routing around
-failed devices. TODO it doesnt
-
 Sources:
 :download:`omnetpp.ini <../omnetpp.ini>`,
 :download:`TopologyChange.ned <../TopologyChange.ned>`,

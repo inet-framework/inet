@@ -43,11 +43,9 @@ With the virtual link configured:
 
 2.  The virtual link is treated as part of Area 0 (the backbone).
 
-3.  LSAs can now be exchanged between the previously disconnected parts of the topology. TODO not sure
+3.  Inter-area routing works correctly as if the areas were physically connected to the backbone.
 
-4.  Inter-area routing works correctly as if the areas were physically connected to the backbone.
-
-5.  The routing tables show improved connectivity compared to Step 17.
+4.  The routing tables show improved connectivity compared to Step 17.
 
 Virtual links provide flexibility in network design but should be used sparingly as they add
 complexity and can make troubleshooting more difficult.

@@ -24,9 +24,9 @@
     <Stub defaultCost="1" />
     
     <!-- area 2 is a normal area -->
-    <!-- <AddressRange address="R4>R5" mask="R4>R5" /> -->
-    <!-- <AddressRange address="R5>R4" mask="R5>R4" /> -->
-    <!-- <AddressRange address="R5>switch3" mask="R5>switch3" /> -->
+	<AddressRange address="R4>R5" mask="R4>R5" />
+    <AddressRange address="R5>R4" mask="R5>R4" />
+    <AddressRange address="R5>switch3" mask="R5>switch3" />
   </Area>
 
   <!-- Routers -->

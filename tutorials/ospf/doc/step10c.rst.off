@@ -1,6 +1,8 @@
 Step 10c. Router R5 (BDR) goes down
 ===================================
 
+TODO: BDR re-election doesn't happen.
+
 Goals
 -----
 

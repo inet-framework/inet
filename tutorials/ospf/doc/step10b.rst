@@ -45,7 +45,7 @@ When R2 (a DROther) is shutdown at t=60s:
 5.  Importantly, **no DR/BDR re-election occurs** on Switch2. The existing DR and BDR continue
     their roles.
 
-6.  Routing around the failed R2 is recomputed using alternative paths.
+In general, Routing around the failed router is recomputed using alternative paths, if available.
 
 This demonstrates that DROther failures have minimal impact on the OSPF protocol operation
 on multi-access networks.

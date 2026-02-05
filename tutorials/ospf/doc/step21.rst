@@ -47,9 +47,6 @@ With a partitioned backbone:
 The routing tables show that routes are successfully computed across the previously partitioned
 backbone using the virtual link as a bridge.
 
-Virtual links are a temporary solution; proper network design should maintain a contiguous
-backbone. TODO are we sure?
-
 Sources:
 :download:`omnetpp.ini <../omnetpp.ini>`,
 :download:`VirtualLink.ned <../VirtualLink.ned>`,

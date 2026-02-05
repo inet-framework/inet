@@ -11,7 +11,6 @@ A router with OSPF interface priority 0 cannot become DR or BDR. If all routers 
 multi-access network have priority 0, no DR or BDR will be elected, and:
 
 *   No Network LSA will be generated for that network.
-*   Routers will not form Full adjacencies (they remain in 2-Way state).
 *   The network will not be properly recognized in the OSPF topology.
 
 This effectively disables OSPF routing for that network segment.
@@ -45,12 +44,12 @@ When all routers have priority 0:
 
 1.  The DR/BDR election completes, but no router is elected as DR or BDR.
 
-3.  No Network LSA is generated for the Ethernet segment. TODO the whole thing is ethernet
+2.  No Network LSA is generated for the Ethernet LAN between the routers.
 
-4.  The OSPF topology is incomplete - the multi-access network is not visible to the routing
+3.  The OSPF topology is incomplete - the multi-access network is not visible to the routing
     protocol.
 
-5.  Routing between networks may fail or use suboptimal paths since the multi-access segment
+4.  Routing between networks may fail or use suboptimal paths since the multi-access segment
     is not properly integrated into the OSPF topology.
 
 This demonstrates the critical role of the DR in multi-access networks and shows what happens

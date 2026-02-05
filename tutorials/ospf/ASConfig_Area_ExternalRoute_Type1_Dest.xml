@@ -55,7 +55,7 @@
   <Router name="R5" RFC1583Compatible="true">
     <BroadcastInterface ifName="eth0" areaID="0.0.0.2" interfaceMode="Passive" />
     <PointToPointInterface ifName="ppp0" areaID="0.0.0.2" />
-    <ExternalInterface toward="N2" advertisedExternalNetworkAddress="120.100.90.0" advertisedExternalNetworkMask="255.255.255.0" externalInterfaceOutputCost="5" externalInterfaceOutputType="Type1" />
+    <ExternalInterface toward="N1" advertisedExternalNetworkAddress="120.100.90.0" advertisedExternalNetworkMask="255.255.255.0" externalInterfaceOutputCost="5" externalInterfaceOutputType="Type1" />
   </Router>
 
 </OSPFASConfig>

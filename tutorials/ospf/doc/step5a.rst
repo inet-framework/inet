@@ -22,11 +22,10 @@ to reach the Full state.
 Configuration
 ~~~~~~~~~~~~~
 
-This configuration is based on Step 5. The OSPF configuration file introduces parameter
-mismatches:
+This configuration is based on Step 5. The OSPF configuration file introduces a parameter
+mismatch:
 
 *   **R1 and R2**: Mismatched Hello intervals
-*   **R4 and R5**: Mismatched network types
 
 .. figure:: media/InterfaceNetworkType.png
    :width: 100%
@@ -53,9 +52,9 @@ The simulation demonstrates adjacency formation failures:
     synchronize their neighbor discovery. They may detect each other but fail to maintain
     a stable adjacency or have timing issues.
 
-2.  **R4 and R5**: With mismatched network types, they have incompatible views of how
-    the link should operate (e.g., one expecting DR election, the other not), preventing
-    proper adjacency formation. TODO they have full adjacency
+.. 2.  **R4 and R5**: With mismatched network types, they have incompatible views of how
+..     the link should operate (e.g., one expecting DR election, the other not), preventing
+..     proper adjacency formation. TODO they have full adjacency, but they shouldn't
 
 The OSPF module logs show the routers detecting neighbors but failing to reach the Full
 state. The routing tables reflect the missing adjacencies - routes that would normally

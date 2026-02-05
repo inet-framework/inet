@@ -44,7 +44,7 @@
     <PointToPointInterface ifName="ppp0" areaID="0.0.0.1" />
     <PointToPointInterface ifName="ppp1" areaID="0.0.0.1" />
     <PointToPointInterface ifName="ppp2" areaID="0.0.0.0" />
-    <ExternalInterface toward="N1" advertisedExternalNetworkAddress="120.100.90.20" advertisedExternalNetworkMask="255.255.255.0" externalInterfaceOutputCost="10" externalInterfaceOutputType="Type2" />
+    <ExternalInterface toward="N1" advertisedExternalNetworkAddress="R3>N1" advertisedExternalNetworkMask="255.255.255.0" externalInterfaceOutputCost="10" externalInterfaceOutputType="Type2" />
   </Router>
 
   <Router name="R4" RFC1583Compatible="true">
@@ -55,7 +55,7 @@
   <Router name="R5" RFC1583Compatible="true">
     <BroadcastInterface ifName="eth0" areaID="0.0.0.2" interfaceMode="Passive" />
     <PointToPointInterface ifName="ppp0" areaID="0.0.0.2" />
-    <ExternalInterface toward="N2" advertisedExternalNetworkAddress="120.100.90.20" advertisedExternalNetworkMask="255.255.255.0" externalInterfaceOutputCost="5" externalInterfaceOutputType="Type2" />
+    <ExternalInterface toward="N1" advertisedExternalNetworkAddress="R5>N1" advertisedExternalNetworkMask="255.255.255.0" externalInterfaceOutputCost="5" externalInterfaceOutputType="Type2" />
   </Router>
 
 </OSPFASConfig>

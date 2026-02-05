@@ -48,7 +48,7 @@ With the interface configured as NoOSPF:
 3.  The network connected to this interface is not advertised in Router LSAs.
 4.  Other routers are unaware of this network and cannot route to it via OSPF.
 
-TODO merge these to 2 points
+.. TODO merge these to 2 points
 
 This mode is useful when you want OSPF running on a router but need to exclude specific
 interfaces from OSPF processing, perhaps because they connect to non-OSPF networks or for

@@ -13,8 +13,6 @@ OSPF ABRs have strict rules about accepting Summary LSAs:
 *   If an ABR has no Full adjacency in Area 0, it may temporarily accept Summary LSAs from
     non-backbone areas
 
-This prevents loops but can lead to interesting behavior when the backbone connectivity changes.
-
 Configuration
 ~~~~~~~~~~~~~
 
