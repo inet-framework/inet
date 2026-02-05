@@ -157,6 +157,9 @@ Notable backward compatible changes are the following:
 
    Several example simulations were added to demonstrate the new functionality.
 
+   The 10BASE-T1S protocol implementation was contributed by a generous industry
+   partner.
+
 2. QUIC transport protocol
 
    An implementation of the QUIC transport protocol was added, designed to be
@@ -180,6 +183,8 @@ Notable backward compatible changes are the following:
    foundation for simulating modern UDP-based transport protocols and for
    comparing their behavior against TCP under controlled conditions.
 
+   The QUIC protocol implementation was contributed by Timo Völker.
+
 3. IPsec protocol
 
    The IPv4 model was extended with a comprehensive IPsec implementation to
@@ -192,6 +197,8 @@ Notable backward compatible changes are the following:
    a wide range of secured network scenarios. It also includes protocol-specific
    packet dissectors and packet printers to allow inspection and analysis of
    protected traffic.
+
+   The IPsec protocol implementation was contributed by Marcel Marek.
 
 4. Media Redundancy Protocol (MRP)
 
@@ -210,6 +217,8 @@ Notable backward compatible changes are the following:
    Additional signals and statistics were added to improve observability, and
    the implementation was validated under extreme conditions (e.g. very high
    packet error rates) to ensure robust recovery behavior.
+
+   The MRP protocol implementation was contributed by Daniel Zeitler
 
 5. TCP auto-read mode
 
@@ -383,8 +392,8 @@ Notable backward compatible changes are the following:
    TSN scenario that demonstrates the simultaneous use of Frame Preemption and
    Time-Aware Shaping (TAS).
 
-   The emulation/mininet showcase, extracted from the original VoIP showcase, is
-   now a standalone demonstration of running INET applications within a Mininet
+   The emulation/mininet showcase, based on the VoIP showcase, is now a
+   standalone demonstration of running INET applications within a Mininet
    environment. It uses an AppContainer-based network structure to connect
    simulated traffic with external Mininet components.
 
