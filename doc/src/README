@@ -6,9 +6,9 @@ Building the documentation website
 
 The INET documentation is built with the Sphinx tool (sphinx-doc.org).
 
-- Use './docker-make server' to run a local web server to preview the documentation.
-- Use './docker-make html' or 'docker-make pdf' to build the documentation.
-- Use './docker-make clean all' to build both the html and pdf version from scratch.
+- Use './doc-build server' to run a local web server to preview the documentation.
+- Use './doc-build html' or 'docker-make pdf' to build the documentation.
+- Use './doc-build clean all' to build both the html and pdf version from scratch.
 - Use 'make deploy' to create a new commit with the new version in the _deploy folder
   and then you can 'git push' it manually.
 
