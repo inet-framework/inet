@@ -25,3 +25,4 @@ The following tutorials are available:
    Regression Testing and Fingerprints <fingerprint/doc/index>
    RIP Routing <rip/doc/index>
    BGP Routing <bgp/doc/index>
+   OSPF Routing <ospf/doc/index>

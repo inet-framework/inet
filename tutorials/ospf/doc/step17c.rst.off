@@ -1,0 +1,69 @@
+Step 17c. Summary LSA
+=====================
+
+Goals
+-----
+
+The goal of this step is to examine Summary LSA behavior and demonstrate when ABRs accept
+Summary LSAs from different areas.
+
+OSPF ABRs have strict rules about accepting Summary LSAs:
+
+*   Summary LSAs are normally only accepted from the backbone area (Area 0)
+*   If an ABR has no Full adjacency in Area 0, it may temporarily accept Summary LSAs from
+    non-backbone areas
+
+Configuration
+~~~~~~~~~~~~~
+
+This step simulates a scenario where backbone connectivity is lost and then observes Summary
+LSA behavior.
+
+.. figure:: media/OSPF_Summary_LSA.png
+   :width: 100%
+   :align: center
+
+The configuration in ``omnetpp.ini`` is the following:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: Step17c
+   :end-before: ------
+
+The OSPF configuration:
+
+.. literalinclude:: ../ASConfig_Summary.xml
+   :language: xml
+
+Results
+~~~~~~~
+
+The simulation demonstrates Summary LSA acceptance rules:
+
+1.  Initially, R2 has a Full adjacency in Area 0 and follows normal OSPF rules (only accepting
+    Summary LSAs from Area 0).
+
+2.  At t=60s, the link between R1 and R2 breaks, disconnecting R2 from the backbone.
+
+3.  R2 no longer has any Full adjacencies in Area 0.
+
+4.  In this state, R2 begins accepting Summary LSAs from non-backbone areas. TODO it doesnt
+
+5.  This allows R2 to maintain some level of connectivity even when isolated from the backbone. TODO it is connected to R2A only, but its NetworkLSA
+
+6.  The routing table changes show how R2's routes change when it loses backbone connectivity
+    and begins accepting Summary LSAs from other areas. TODO it doesnt
+
+This demonstrates OSPF's flexibility in handling partial connectivity failures while still
+maintaining loop-prevention mechanisms.
+
+Sources:
+:download:`omnetpp.ini <../omnetpp.ini>`,
+:download:`OSPF_Summary_LSA.ned <../OSPF_Summary_LSA.ned>`,
+:download:`ASConfig_Summary.xml <../ASConfig_Summary.xml>`
+
+Discussion
+----------
+
+Use `this page <https://github.com/inet-framework/inet-tutorials/issues/TODO>`__ in
+the GitHub issue tracker for commenting on this tutorial.
