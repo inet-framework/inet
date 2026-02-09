@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # USAGE: doc-build target where target can be 'html', 'pdf', 'server', 'deploy'
 # when 'server' is used, the live website is available at http://localhost:8000
@@ -9,7 +9,7 @@
 
 GUEST_COMMAND="make $*"
 podman run --rm -i -t -p 8000:8000 -v "$HOME:$HOME" -w "$PWD" \
- --userns=keep-id --security-opt label=disable \
+ --security-opt label=disable \
  -e PYTHONPATH="$PYTHONPATH" \
  -e DOC_BUILD_TARGET="$DOC_BUILD_TARGET" \
  -e GUEST_COMMAND='${GUEST_COMMAND}' \

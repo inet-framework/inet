@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # before running this script:
 # 1. build the INET documentation from the IDE:
