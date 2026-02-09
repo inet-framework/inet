@@ -88,7 +88,7 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
     //@}
 
     bool allRoutingTableVisualizationsAreInvalid = true;
-    std::set<IIpv4RoutingTable *> invalidRoutingTableVisualizations;
+    std::vector<IIpv4RoutingTable *> invalidRoutingTableVisualizations;
     LineManager *lineManager = nullptr;
 
     // key is router ID, source module ID, destination module ID

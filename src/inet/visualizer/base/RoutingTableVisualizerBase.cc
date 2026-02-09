@@ -133,8 +133,9 @@ void RoutingTableVisualizerBase::updateRouteVisualizations()
         allRoutingTableVisualizationsAreInvalid = false;
     }
     else
-        for (auto routingTable : invalidRoutingTableVisualizations)
+        for (auto routingTable : invalidRoutingTableVisualizations) {
             updateRouteVisualizations(routingTable);
+        }
     invalidRoutingTableVisualizations.clear();
 }
 
@@ -174,8 +175,13 @@ void RoutingTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t s
         auto routingTable = check_and_cast<IIpv4RoutingTable *>(source);
         auto networkNode = getContainingNode(check_and_cast<cModule *>(source));
         if (nodeFilter.matches(networkNode)) {
-            removeRouteVisualizations(routingTable);
-            invalidRoutingTableVisualizations.insert(routingTable);
+            // Check if the item is already present in the list
+            auto it = std::find(invalidRoutingTableVisualizations.begin(), invalidRoutingTableVisualizations.end(), routingTable);
+            if (it == invalidRoutingTableVisualizations.end())
+                removeRouteVisualizations(routingTable);    // remove visualizaton
+            else
+                invalidRoutingTableVisualizations.erase(it);    // remove the existing item, the visualization already removed
+            invalidRoutingTableVisualizations.push_back(routingTable);
         }
     }
     else if (signal == interfaceIpv4ConfigChangedSignal)
