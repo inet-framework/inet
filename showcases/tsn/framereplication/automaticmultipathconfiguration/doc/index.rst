@@ -79,13 +79,13 @@ The configuration includes a controlled failure scenario to demonstrate the
 network's resilience:
 
 **At t=20ms**: Switch s2a crashes
-  - ❌ Path 1 fails (uses s2a)
-  - ❌ Path 2 fails (uses s2a)
-  - ❌ Path 4 fails (uses s2a)
-  - ✅ **Path 3 survives** (source → s1 → s2b → s3b → destination)
+  - x Path 1 fails (uses s2a)
+  - x Path 2 fails (uses s2a)
+  - x Path 4 fails (uses s2a)
+  - ✓ **Path 3 survives** (source → s1 → s2b → s3b → destination)
 
 **At t=80ms**: Switch s2a recovers
-  - ✅ All four paths become operational again
+  - ✓ All four paths become operational again
 
 During the failure period (20-80ms), Path 3 remains operational, ensuring continuous
 packet delivery. After recovery, the network returns to full redundancy with all four
