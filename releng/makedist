@@ -37,7 +37,7 @@ echo "inet-$BUILDID" > $INET_ROOT/out/$DIRNAME/Version
 #cp -r doc/doxy $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
 #cp -r doc/neddoc $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
 #cp -r doc/index.html $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
-(cd doc/src && ./doc-build)
+(cd doc/src && DOC_BUILD_TARGET="users-guide,developers-guide" ./doc-build pdf)
 cp -r doc/src/_build/latex/*.pdf $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
 
 # switch to the destination dir
