@@ -55,7 +55,7 @@ if [ "$1" != "-q" ]; then
   if [ ! -f $INET_ROOT/src/Makefile ]; then
   cat <<__END__
 
-Type "make makefiles" and then "make" to build INET.
+Type "make" to build INET.
 __END__
   fi
 fi
