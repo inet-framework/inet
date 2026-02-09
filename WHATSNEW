@@ -361,30 +361,34 @@ Notable backward compatible changes are the following:
 
 13. RIP routing tutorial
 
-   A multi-step tutorial has been added to introduce the fundamentals of the
-   Routing Information Protocol (RIP). It guides users through RIP operation and
-   convergence, illustrating split horizon, triggered updates, and the impact of
-   protocol timing on stability. The tutorial also explores route management
-   scenarios, such as operating without netmask routes, and improves simulation
-   realism with randomized router startup times. It progresses from basic
-   connectivity in the early steps to dynamic topologies and failure recovery
-   scenarios.
+   This tutorial introduces the fundamentals of the Routing Information Protocol
+   (RIP) through a series of progressively complex examples. Starting from
+   static routing baselines, the tutorial demonstrates basic RIP operation with
+   route discovery and convergence, then advances to dynamic scenarios including
+   network failures, recovery mechanisms, and loop prevention techniques. Key
+   distance-vector concepts such as split horizon, triggered updates, route
+   poisoning, and the count-to-infinity problem are explored through hands-on
+   examples.
 
 14. OSPF tutorial
 
-   The new OSPF tutorial is !!!TODO!!!
+   A new multi-step tutorial covers the OSPF (Open Shortest Path First) routing
+   protocol in detail. Beginning with basic single-area configurations featuring
+   adjacency establishment and SPF-based route computation, it progresses
+   through DR/BDR election, link costs, and interface types, then advances to
+   hierarchical multi-area topologies with ABRs, summary LSAs, and external
+   route advertisements. Advanced topics including stub areas, virtual links,
+   and loopback interfaces are also demonstrated.
 
 15. BGP routing tutorial
 
-   This new tutorial offers a concise, multi-step guide to configuring the
-   Border Gateway Protocol (BGP). It begins with simple topologies and
-   introduces both External (E-BGP) and Internal (I-BGP) sessions, then
-   progresses to more advanced topics. These include configuring path attributes
-   such as LOCAL_PREF and network advertisements, redistributing routes between
-   BGP, RIP, and OSPF, and setting up loopback interfaces, nextHopSelf, and
-   multi-hop E-BGP connections. Each step integrates RoutingTableRecorder and
-   PcapRecorder to support detailed analysis of routing updates and traffic
-   flows.
+   A comprehensive tutorial guides users through Border Gateway Protocol (BGP)
+   configuration and operation. The tutorial begins with basic E-BGP sessions
+   between autonomous systems with automatic next-hop resolution, then
+   progresses through I-BGP for distributing external routes within an AS, path
+   attributes (AS_PATH, NEXT_HOP, LOCAL_PREF), and multi-hop E-BGP with loopback
+   interfaces. Route redistribution with IGPs (RIP and OSPF), AS configuration,
+   route aggregation, and policy-based filtering are also covered.
 
 16. New showcases
 
