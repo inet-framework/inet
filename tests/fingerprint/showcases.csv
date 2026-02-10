@@ -39,8 +39,8 @@
 /showcases/mobility/spatial/,        -f omnetpp.ini -c Drone -r 0,                  100s,         9475-d04c/tplx;0000-0000/~tNl;0000-0000/~tND;1ec0-fec3/tyf, PASS,
 
 # /showcases/routing/manet/,           -f omnetpp.ini -c MobileNodesBase -r 0,        100s,         0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND, PASS,   # MobileNodesBase extended
-/showcases/routing/manet/,           -f omnetpp.ini -c Aodv -r 0,                   100s,         d4f1-1c35/tplx;c268-fae7/~tNl;0d5b-c7a9/~tND;1242-05cd/tyf, PASS,    wireless Ipv4
-/showcases/routing/manet/,           -f omnetpp.ini -c Dsdv -r 0,                   100s,         84f0-9aea/tplx;bdad-9a28/~tNl;cdce-1d3c/~tND;762d-50fe/tyf, PASS,    wireless Ipv4
+/showcases/routing/manet/,           -f omnetpp.ini -c Aodv -r 0,                   100s,         d4f1-1c35/tplx;c268-fae7/~tNl;0d5b-c7a9/~tND;6d74-e7e8/tyf, PASS,    wireless Ipv4
+/showcases/routing/manet/,           -f omnetpp.ini -c Dsdv -r 0,                   100s,         84f0-9aea/tplx;bdad-9a28/~tNl;cdce-1d3c/~tND;29d3-4d93/tyf, PASS,    wireless Ipv4
 /showcases/routing/manet/,           -f omnetpp.ini -c Gpsr -r 0,                   100s,         53c9-5456/tplx;5452-5da6/~tNl;8b3f-ba4d/tyf, PASS,    wireless Ipv4
 
 /showcases/routing/aodvexternal/,           -f omnetpp.ini -c General -r 0,                   50s,         b20b-1539/tplx;a764-edc8/~tNl, PASS,    wireless Ipv4
@@ -170,7 +170,7 @@
 /showcases/visualizer/canvas/routingtable/, -f omnetpp.ini -c DisplayingAll -r 0,                            500s,            0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND;0000-0000/tyf, PASS,
 /showcases/visualizer/canvas/routingtable/, -f omnetpp.ini -c Unfiltered -r 0,                               500s,            0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND;0000-0000/tyf, PASS,
 /showcases/visualizer/canvas/routingtable/, -f omnetpp.ini -c Filtered -r 0,                                 500s,            0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND;0000-0000/tyf, PASS,
-/showcases/visualizer/canvas/routingtable/, -f omnetpp.ini -c Dynamic -r 0,                                  500s,            308c-2c32/tplx;6788-888c/~tNl;3ea9-babb/~tND;1c4d-5af8/tyf, PASS,    wireless Ipv4
+/showcases/visualizer/canvas/routingtable/, -f omnetpp.ini -c Dynamic -r 0,                                  500s,            308c-2c32/tplx;6788-888c/~tNl;3ea9-babb/~tND;3d4c-d21d/tyf, PASS,    wireless Ipv4
 
 /showcases/visualizer/canvas/spectrum/, -f omnetpp.ini -c SpectrumFigure -r 0,                       1s,            23cb-bc0c/tplx;5ba5-b602/~tNl;519e-eaf9/~tND;e04a-6341/tyf, PASS,	wireless Ipv4
 /showcases/visualizer/canvas/spectrum/, -f omnetpp.ini -c Spectrogram -r 0,                       1s,            23cb-bc0c/tplx;5ba5-b602/~tNl;519e-eaf9/~tND;b7dd-7952/tyf, PASS,	wireless Ipv4
@@ -195,7 +195,7 @@
 /showcases/wireless/aggregation/,     -f omnetpp.ini -c Aggregation -r 0,                                        1s,            671b-274c/tplx;6d84-9720/~tNl;7159-a7f9/~tND;3fd2-ba31/tyf, PASS,    wireless Ipv4
 /showcases/wireless/aggregation/,     -f omnetpp.ini -c VoicePriorityAggregation -r 0,                           1s,            1dbe-6672/tplx;a253-dbe3/~tNl;c82e-eeca/~tND;cee2-1ea5/tyf, PASS,    wireless Ipv4
 
-/showcases/wireless/analogmodel/,     -f omnetpp.ini -c Routing -r 0,                5s,         56b0-3510/tplx;baeb-0d2c/~tNl;7ae8-89ba/~tND;7272-3357/tyf, PASS,    wireless Ipv4
+/showcases/wireless/analogmodel/,     -f omnetpp.ini -c Routing -r 0,                5s,         56b0-3510/tplx;baeb-0d2c/~tNl;7ae8-89ba/~tND;00a2-e4ee/tyf, PASS,    wireless Ipv4
 /showcases/wireless/analogmodel/,     -f omnetpp.ini -c Distance -r 0,                2.5s,         1e75-270e/tplx;6d7a-d84c/~tNl;9ccb-a57b/~tND;3a76-9e5d/tyf, PASS,    wireless Ipv4
 /showcases/wireless/analogmodel/,     -f omnetpp.ini -c Noise -r 0,                0.1s,         dd08-a63c/tplx;9a96-9c6f/~tNl;5bac-e267/~tND;f0b9-4d0e/tyf, PASS,    wireless Ipv4
 

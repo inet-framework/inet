@@ -21,7 +21,7 @@
 /examples/aodv/,                     -f omnetpp.ini -c SimpleRREQ2 -r 0,              100s,          bbe1-7a30/tplx;a64f-8746/~tNl;db72-577b/~tND;aa07-6704/tyf, PASS, wireless adhoc Ipv4
 /examples/aodv/,                     -f omnetpp.ini -c SimpleLifecycle -r 0,          100s,          2169-1021/tplx;a20d-c44b/~tNl;5d65-ddbc/~tND;cc7e-bc54/tyf, PASS, wireless adhoc Ipv4
 /examples/aodv/,                     -f omnetpp.ini -c ShortestPath -r 0,             100s,          5d58-230f/tplx;3a72-db39/~tNl;6ee6-e8f0/~tND;1950-0f81/tyf, PASS, wireless adhoc Ipv4
-/examples/aodv/,                     -f omnetpp.ini -c StaticExternal -r 0,           100s,          42b7-89e4/tplx;5708-ba01/~tNl;f8fd-9e0f/~tND;ac04-0c8b/tyf, PASS, wireless adhoc Ipv4
+/examples/aodv/,                     -f omnetpp.ini -c StaticExternal -r 0,           100s,          42b7-89e4/tplx;5708-ba01/~tNl;f8fd-9e0f/~tND;4b41-ac19/tyf, PASS, wireless adhoc Ipv4
 
 /examples/bgpv4/Bgp2RoutersInAS/,    -f omnetpp.ini -c General -r 0,                1000s,           40df-b616/tplx;c504-7297/~tNl;c40f-3bef/~tND;574c-3348/tyf, PASS, ospf EthernetMac Ipv4
 /examples/bgpv4/Bgp3Routers/,        -f omnetpp.ini -c General -r 0,                1000s,           a4fe-e9a6/tplx;2c93-b913/~tNl;abc7-4ccf/~tND;935e-496e/tyf, PASS, ospf EthernetMac Ipv4
@@ -548,7 +548,7 @@
 
 /examples/wireless/crosstalk/,       -f omnetpp.ini -c General -r 0,                2s,           0a4f-e755/tplx;7ef5-c624/~tNl;105a-8a94/~tND;9c67-8ccc/tyf, PASS, wireless Ipv4
 
-/examples/wireless/dynamic/,         -f omnetpp.ini -c General -r 0,                100s,         4b91-925c/tplx;2b55-3ab9/~tNl;1ab2-bb7c/~tND;475f-d30d/tyf, PASS, wireless Ipv4
+/examples/wireless/dynamic/,         -f omnetpp.ini -c General -r 0,                100s,         4b91-925c/tplx;2b55-3ab9/~tNl;1ab2-bb7c/~tND;ee3e-a3da/tyf, PASS, wireless Ipv4
 
 /examples/wireless/errorrate/,       -f omnetpp.ini -c General -r 0,                100s,         0bb3-adca/tplx;b0b7-4a84/~tNl;1c49-63dd/~tND;63dc-edcc/tyf, PASS, wireless Ipv4
 
