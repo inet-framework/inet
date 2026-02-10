@@ -24,7 +24,6 @@ Contents:
    step10
    step10a
    step10b
-   step10c
    step10d
    step11
    step12
@@ -35,7 +34,6 @@ Contents:
    step17
    step17a
    step17b
-   step17c
    step18
    step18a
    step18b
