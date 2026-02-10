@@ -211,7 +211,7 @@ This can be seen in the following zoomed-in plot:
    :align: center
    :width: 70%
 
-Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`linksharing.ned <../linksharing.ned>`
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`QuicLinkSharingShowcase.ned <../QuicLinkSharingShowcase.ned>`
 
 Conclusions
 -----------
