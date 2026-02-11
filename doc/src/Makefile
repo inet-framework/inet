@@ -19,7 +19,7 @@ include tools/sphinx_deployment.mk
 
 server: Makefile copy-media
 	@ln -sf ../../showcases; ln -sf ../../tutorials
-	@sphinx-autobuild --host 0.0.0.0 --port 8000 "$(SOURCEDIR)" "$(BUILDDIR)/html" $(SPHINXOPTS) $(O) -r .git
+	@sphinx-autobuild --host 0.0.0.0 --port 8000 "$(SOURCEDIR)" "$(BUILDDIR)/html" $(SPHINXOPTS) $(O) --ignore .git
 	@unlink showcases; unlink tutorials
 
 pdf: Makefile
