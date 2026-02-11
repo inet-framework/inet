@@ -188,7 +188,7 @@ service primitives; the other two are only present for completeness. The request
 service primitive is used when a higher layer protocol module (e.g., :ned:`Tcp`)
 wants to deliver a packet to a lower layer protocol module (e.g., :ned:`Ipv4`).
 Similarly, the :cpp:`SP_INDICATION` service primitive is used when a lower layer
-protocol module (e.g., :ned:`Ethernet`) wants to deliver a packet to a higher layer
+protocol module (e.g., Ethernet) wants to deliver a packet to a higher layer
 protocol module (e.g., :ned:`Ipv4`).
 
 Determining the Next Protocol

@@ -177,8 +177,7 @@ messages they communicate with. Sometimes it is enough to simulate the
 amount of data transmitted (“200 MB”), and contents do not matter. In
 other scenarios, contents matter a lot. The messages can be represented
 as a stream of bytes, but sometimes it is easier for the applications to
-pass message objects to each other (e.g. HTTP request represented by a
-:msg:`HTTPRequest` message class).
+pass message objects to each other.
 
 The TCP modules in the INET framework support 3 data transfer modes:
 

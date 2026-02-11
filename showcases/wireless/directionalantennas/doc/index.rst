@@ -86,8 +86,6 @@ By default, the cross-section plane is perpendicular to the current
 viewing angle (however, one can specify other
 planes in the antenna's local coordinate system).
 
-For a more in-depth overview of antenna lobe visualization, read the :ref:`corresponding section <ug:sec:visualization:radio-state>`
-in the INET User's Guide.
 For the description of all parameters of the visualizer, check the NED documentation
 of :ned:`RadioVisualizerBase`.
 

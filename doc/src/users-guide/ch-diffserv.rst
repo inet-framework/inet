@@ -221,7 +221,7 @@ packet. It can be used to discard excess traffic, i.e. packets whose
 arrival rate exceeds the allowed maximum. In INET, the :ned:`Sink` module
 can be used as an absolute dropper.
 
-The algorithmic droppers in INET are :ned:`ThresholdDropper` and
+The algorithmic droppers in INET are :ned:`OrdinalBasedDropper` and
 :ned:`RedDropper`. These modules have multiple input and multiple output
 gates. Packets that arrive on gate :gate:`in[i]` are forwarded to gate
 :gate:`out[i]` (unless they are dropped). However, the queues attached to
@@ -230,23 +230,7 @@ of the dropping algorithm is the sum of the individual queue lengths.
 This way, we can emulate shared buffers of the queues. Note that it is
 also possible to connect each output to the same queue module.
 
-.. _ug:sec:diffserv:threshold-dropper:
-
-Threshold Dropper
-^^^^^^^^^^^^^^^^^
-
-The :ned:`ThresholdDropper` module selectively drops packets based on
-the available buffer space of the queues attached to its output. The
-buffer space can be specified as the count of packets or as the size in
-bytes.
-
-The module sums the buffer lengths of its outputs, and if enqueuing a
-packet would exceed the configured capacities, then the packet will be
-dropped instead.
-
-By attaching a :ned:`ThresholdDropper` to the input of a FIFO queue, you
-can compose a drop tail queue. Shared buffer space can be modeled by
-attaching more FIFO queues to the output.
+.. _ug:sec:diffserv:red-dropper:
 
 RED Dropper
 ^^^^^^^^^^^

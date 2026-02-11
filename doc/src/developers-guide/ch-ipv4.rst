@@ -198,8 +198,8 @@ a multicast address or not.
 When the datagram is decided to be sent up, it is processed as described
 in the previous subsection (Receiving packets). If it is decided to be
 sent out through some interface, it is actually sent to the :ned:`Arp`
-module through the ``queueOut`` gate. An :msg:`IPv4RoutingDecision`
-control info is attached to the outgoing packet, containing the outgoing
+module through the ``queueOut`` gate. An :msg:`NextHopAddressReq` and a :msg:`InterfaceReq`
+tag is attached to the outgoing packet, containing the outgoing
 interface id and the IP address of the next hop. The :ned:`Arp` module
 resolves the IP address to a hardware address if needed and forwards the
 datagram to the next hop.
@@ -418,8 +418,7 @@ calling :fun:`ICMPAccess::get()`.
 When an incoming ICMP error message is received, the :ned:`Icmp` module
 sends it out on the ``errorOut`` gate unchanged. It is assumed that
 an external module is connected to ``errOut`` that can process the
-error packet. There is a simple module (:ned:`ErrorHandling`) that
-simply logs the error and drops the message. Note that the :ned:`Ipv4`
+error packet.  Note that the :ned:`Ipv4`
 module does not send REDIRECT, DESTINATION_UNREACHABLE, TIME_EXCEEDED,
 and PARAMETER_PROBLEM messages to the :ned:`Icmp` module; it will send
 them to the transport layer module that sent the bogus packet
