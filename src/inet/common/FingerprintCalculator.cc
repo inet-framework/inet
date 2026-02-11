@@ -100,6 +100,13 @@ void FingerprintCalculator::addEvent(cEvent *event)
         if (networkCommunicationFilter) {
             if (cpacket == nullptr)
                 return;
+
+            auto packet = dynamic_cast<Packet *>(cpacket);
+            if (packet == nullptr)
+                packet = dynamic_cast<Packet *>(cpacket->getEncapsulatedPacket());
+            if (packet == nullptr)
+                return;
+
             auto senderNode = findContainingNode(cpacket->getSenderModule());
             auto arrivalNode = findContainingNode(cpacket->getArrivalModule());
             if (senderNode == arrivalNode)
