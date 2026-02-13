@@ -23,7 +23,7 @@ namespace visualizer {
 
 class INET_API PathVisualizerBase : public VisualizerBase, public cListener
 {
-  protected:
+  public:
     class INET_API PathVisualization : public LineManager::ModulePath {
       public:
         std::string label;

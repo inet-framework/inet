@@ -133,7 +133,7 @@ void ChannelOwnerRecorder::init(Context *ctx)
     collectNetworkNodes(check_and_cast<cModule *>(ctx->component), visitedModules);
     _enum = new omnetpp::cEnum();
     _enum->registerNames("UNKNOWN,IDLE,COLLISION");
-    _enum->registerValues<int>({0, 1, 2});
+//    _enum->registerValues<int>({0, 1, 2});
 	int value = 3;
     for (auto networkNode : networkNodeNames)
         _enum->insert(value++, networkNode.c_str());

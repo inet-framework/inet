@@ -20,8 +20,8 @@ namespace inet {
 Register_GlobalConfigOption(CFGID_MEASURE_CPU_USAGE, "measure-cpu-usage", CFG_BOOL, "false", "Enable or disable simulation CPU usage measurements during simulation.");
 
 EXECUTE_ON_STARTUP(
-    SimulationCpuUsageMeasurer *listener = new SimulationCpuUsageMeasurer();
-    cSimulation::getActiveEnvir()->addLifecycleListener(listener);
+//    SimulationCpuUsageMeasurer *listener = new SimulationCpuUsageMeasurer();
+//    cSimulation::getActiveEnvir()->addLifecycleListener(listener);
 );
 
 static long perf_event_open(struct perf_event_attr *hw_event, pid_t pid, int cpu, int group_fd, unsigned long flags)

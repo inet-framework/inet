@@ -22,7 +22,7 @@ void EligibilityTimeGate::initialize(int stage)
         eligibilityTimer = new ClockEvent("EligibilityTimer");
         lastRemainingEligibilityTimeSignalTime = simTime();
 #if OMNETPP_VERSION >= 0x0602
-        WATCH_EXPR("remainingEligibilityTime", getRemainingEligibilityTime());
+//        WATCH_EXPR("remainingEligibilityTime", getRemainingEligibilityTime());
 #endif
     }
     else if (stage == INITSTAGE_QUEUEING) {
