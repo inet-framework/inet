@@ -155,7 +155,7 @@ interface:
 
 There are two PCAP recorder modules in ``router1``, with one of them
 recording Ethernet traffic on ``eth0`` and the other PPP traffic on
-``ppp0``. The :par:`moduleNamePatters` parameter needs to be set for both
+``ppp0``. The :par:`moduleNamePatterns` parameter needs to be set for both
 PCAP recorder modules, because ``router1`` has two interfaces.
 
 .. literalinclude:: ../omnetpp.ini
@@ -164,7 +164,7 @@ PCAP recorder modules, because ``router1`` has two interfaces.
    :end-at: moduleNamePatterns = "eth[0]
 
 In ``router2``, we'll record only packets carrying TCP data on the ``eth0``
-interface. ``router2`` has two interfaces, so the :par:`moduleNamePatters`
+interface. ``router2`` has two interfaces, so the :par:`moduleNamePatterns`
 parameter needs to be set. The packet data filter is set to match packets
 containing a ``TcpHeader`` and an ``Ipv4Header``, and where the TCP payload
 length is greater than 0 (so that ACKs and handshake packets are not recorded).
