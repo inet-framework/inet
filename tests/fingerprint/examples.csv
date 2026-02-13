@@ -1,6 +1,6 @@
 # working directory, command line arguments, simulation time limit, fingerprint, expected result, tags
 # /examples/adhoc/idealwireless/,      -f .qtenv.ini -c General -r 0
-/examples/adhoc/hostautoconf/,       -f omnetpp.ini -c General -r 0,                100s,            7b7d-7775/tplx;e181-fce3/~tNl;ba71-5011/~tND;10e0-12c8/tyf, PASS, wireless adhoc Ipv4
+/examples/adhoc/hostautoconf/,       -f omnetpp.ini -c General -r 0,                100s,            7b7d-7775/tplx;e181-fce3/~tNl;5515-8a29/~tND;9fae-554e/tyf, PASS, wireless adhoc Ipv4
 /examples/adhoc/idealwireless/,      -f omnetpp.ini -c Ping1 -r 0,                  100s,            b364-e54a/tplx;026f-a7b7/~tNl;25a3-3820/~tND;4f73-b60f/tyf, PASS, wireless adhoc Ipv4
 # /examples/adhoc/idealwireless/,      -f omnetpp.ini -c Ping2 -r 0,                   100s,           0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND, ERROR, wireless adhoc # interactive config, needed a *.numHosts parameter
 /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping1 -r 0,                  1000s,           8668-d4e7/tplx;e2b1-205b/~tNl;7da0-5dcb/~tND;6419-6f26/tyf, PASS, wireless adhoc Ipv4
@@ -548,7 +548,7 @@
 
 /examples/wireless/crosstalk/,       -f omnetpp.ini -c General -r 0,                2s,           0a4f-e755/tplx;7ef5-c624/~tNl;105a-8a94/~tND;9c67-8ccc/tyf, PASS, wireless Ipv4
 
-/examples/wireless/dynamic/,         -f omnetpp.ini -c General -r 0,                100s,         4b91-925c/tplx;2b55-3ab9/~tNl;1ab2-bb7c/~tND;ee3e-a3da/tyf, PASS, wireless Ipv4
+/examples/wireless/dynamic/,         -f omnetpp.ini -c General -r 0,                100s,         4b91-925c/tplx;2b55-3ab9/~tNl;f317-1adf/~tND;da9d-4ba6/tyf, PASS, wireless Ipv4
 
 /examples/wireless/errorrate/,       -f omnetpp.ini -c General -r 0,                100s,         0bb3-adca/tplx;b0b7-4a84/~tNl;1c49-63dd/~tND;63dc-edcc/tyf, PASS, wireless Ipv4
 
