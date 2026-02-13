@@ -166,7 +166,7 @@ In INET, it is also possible to filter traffic based on network nodes.
 In our second experiment, we want to display traffic only between
 ``source1`` and ``destination1``. For this reason, we set the
 visualizer's :par:`nodeFilter` parameter to display only the part of the
-traffic between ``source1`` and ``destination1``. :par:`PacketFilter` is
+traffic between ``source1`` and ``destination1``. :par:`packetFilter` is
 still enabled in this simulation so that the video stream will not be
 visualized.
 

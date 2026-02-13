@@ -145,7 +145,7 @@ simulation time. Also, we need to explicitly tell the relevant modules (here,
 the UDP apps and ``switch1``'s queue) to use the clock module in the host,
 otherwise, they would use the global simulation time by default.
 
-We set the :par:`nominalTickLenght` parameter of all oscillators to 10ns, which is a typical value for
+We set the :par:`nominalTickLength` parameter of all oscillators to 10ns, which is a typical value for
 real-world clocks. To be able to represent 1 PPM clock drift, we set fs simulation time accuracy (10ns / 10^6 = 10fs).
 
 Here are the drifts (time differences) over time:

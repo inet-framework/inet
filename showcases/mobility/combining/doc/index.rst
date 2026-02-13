@@ -159,8 +159,8 @@ You can take a look at the ``Superpositioning1`` configuration in omnetpp.ini:
 
 The :par:`numElements` parameter defines the number of mobility submodules,
 which are contained in a submodule vector named :par:`element`.
-Therefore, instead of :par:`mobility.typeName = XY`, the mobility
-submodules can be referenced with :par:`mobility.element[0].typeName = XY`.
+Therefore, instead of :par:`mobility.typename = XY`, the mobility
+submodules can be referenced with :par:`mobility.element[0].typename = XY`.
 This is also visible if we take a look at the inside of ``host[0]``'s
 mobility submodule:
 

@@ -203,8 +203,8 @@ Configuration and Results
 This section contains the configuration and results for the three
 simulations, which demonstrate the MANET routing protocols ``AODV``,
 ``DSDV`` and ``GPSR``. The AODV and DSDV simulations use the
-``ManetRoutingProtocolsShowcaseA`` network, which features moving hosts.
-The GPSR simulation uses the ``ManetRoutingProtocolsShowcaseB`` network,
+``ManetprotocolsShowcaseB`` network, which features moving hosts.
+The GPSR simulation uses the ``ManetprotocolsShowcaseA`` network,
 featuring stationary hosts. The networks are defined in
 :download:`ManetProtocolsShowcase.ned <../ManetProtocolsShowcase.ned>`.
 Both networks contain hosts of the type :ned:`ManetRouter` (an extension of
@@ -241,7 +241,7 @@ AODV
 
 The example simulation featuring AODV is defined in the :ned:`Aodv`
 configuration in :download:`omnetpp.ini <../omnetpp.ini>`. This
-configuration uses the ``ManetProtocolShowcaseB`` network. The network
+configuration uses the ``ManetprotocolsShowcaseB`` network. The network
 looks like the following:
 
 .. figure:: media/networkA.png
@@ -329,12 +329,12 @@ leading to ``destination``. When the route is established in ``source``,
 it sends the ping request packet, which gets to the destination. The
 ping reply packet gets back to ``source`` on the reverse path.
 
-When source sends the next ping request packet, ``host6`` has already
+When source sends the next ping request packet, ``node6`` has already
 moved out of range of ``destination``. The ping packet gets to
-``host6``, but can't get to ``destination`` (``host6`` tries to transmit
-the packet a few times, but it doesn't get an ACK). So ``host6``
+``node6``, but can't get to ``destination`` (``node6`` tries to transmit
+the packet a few times, but it doesn't get an ACK). So ``node6``
 broadcasts an ``AodvRerr`` message, indicating that the link no longer
-works. When the RERR gets back to ``host1``, it initiates route discovery
+works. When the RERR gets back to ``node1``, it initiates route discovery
 by broadcasting an RREQ message. When a new route is discovered
 (``source``->``node1``->``destination``), the ping traffic can continue.
 
@@ -350,7 +350,7 @@ DSDV
 The example simulation featuring DSDV is defined in the :ned:`Dsdv`
 configuration in :download:`omnetpp.ini <../omnetpp.ini>`. Just like
 the AODV configuration, this one uses the
-``ManetRoutingProtocolsShowcaseB`` network. The mobility settings are
+``ManetprotocolsShowcaseB`` network. The mobility settings are
 also the same as in the AODV simulation. The ping app in ``source`` will
 send a ping request every second.
 

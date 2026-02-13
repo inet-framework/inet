@@ -62,8 +62,8 @@ Visualization on a 3D scene
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 :ned:`NetworkNodeOsgVisualizer` is responsible for displaying nodes on a 3D
-scene. (Note that :ned:`IntegratedVisualizer`'s :par:`osgVisualizerType`
-parameter must be set to ``"IntegratedOsgVisualizer"`` to visualize nodes in 3D.)
+scene. (Note that :ned:`IntegratedVisualizer`'s ``osgVisualizer`` submodule
+type must be set to ``"IntegratedOsgVisualizer"`` to visualize nodes in 3D.)
 OMNeT++'s 3D visualization is based on the open-source OpenSceneGraph (OSG) and osgEarth
 libraries. These libraries offer high-level functionality, such as the
 ability of using 3D model files directly, accessing and rendering online
