@@ -37,6 +37,15 @@ void HostAutoConfigurator::handleMessageWhenUp(cMessage *apMsg)
 {
 }
 
+Ipv4Address HostAutoConfigurator::getUniqeAddressFor(Ipv4Address networkAddress)
+{
+    static int uniquePerNetworkHandle = cSimulationOrSharedDataManager::registerSharedVariableName("inet::HostAutoConfigurator::uniquePerNetwork");
+    auto& uniquePerNetwork = getSimulationOrSharedDataManager()->getSharedVariable<std::map<Ipv4Address, uint32_t>>(uniquePerNetworkHandle);
+    auto [it, inserted] = uniquePerNetwork.try_emplace(networkAddress, 1); // insert if addressBase not exist
+    Ipv4Address myAddress = Ipv4Address(networkAddress.getInt() + it->second++);
+    return myAddress;
+}
+
 void HostAutoConfigurator::setupNetworkLayer()
 {
     EV_INFO << "host auto configuration started" << std::endl;
@@ -49,7 +58,7 @@ void HostAutoConfigurator::setupNetworkLayer()
     // get our host module
     cModule *host = getContainingNode(this);
 
-    Ipv4Address myAddress = Ipv4Address(addressBase.getInt() + uint32_t(host->getId()));
+    Ipv4Address myAddress = getUniqeAddressFor(addressBase);
 
     // address test
     if (!Ipv4Address::maskedAddrAreEqual(myAddress, addressBase, netmask))

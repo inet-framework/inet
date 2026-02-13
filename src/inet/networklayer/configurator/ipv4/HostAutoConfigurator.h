@@ -45,6 +45,7 @@ class INET_API HostAutoConfigurator : public OperationalBase
     virtual bool isModuleStopStage(int stage) const override { return stage == ModuleStopOperation::STAGE_NETWORK_LAYER; }
 
     virtual void setupNetworkLayer();
+    Ipv4Address getUniqeAddressFor(Ipv4Address networkAddress);
 };
 
 } // namespace inet
