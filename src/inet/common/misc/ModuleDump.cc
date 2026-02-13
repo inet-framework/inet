@@ -26,7 +26,7 @@ void ModuleDump::handleMessage(cMessage *msg)
 {
     delete msg;
     auto module = findModuleFromPar<cModule>(par("modulePath"), this);
-    const char *fileName = getEnvir()->getConfigEx()->substituteVariables(par("fileName").stringValue());
+    const char *fileName = nullptr; // getEnvir()->getConfigEx()->substituteVariables(par("fileName").stringValue());
     std::ofstream fout;
     std::ostream *out = &std::cout;
     if (fileName && fileName[0] != '\0') {

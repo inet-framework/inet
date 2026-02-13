@@ -21,6 +21,7 @@ class INET_API NetworkRouteCanvasVisualizer : public PathCanvasVisualizerBase
     virtual bool isPathEnd(cModule *module) const override;
     virtual bool isPathElement(cModule *module) const override;
 
+  public:
     virtual const PathVisualization *createPathVisualization(const char *label, const std::vector<int>& path, cPacket *packet) const override;
 };
 

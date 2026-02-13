@@ -14,6 +14,7 @@ import inet.common.misc.ThruputMeteringChannel;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 
 
 network NClients
@@ -37,6 +38,10 @@ network NClients
         configurator: Ipv4NetworkConfigurator {
             parameters:
                 @display("p=100,100;is=s");
+        }
+        visualizer: IntegratedCanvasVisualizer {
+            parameters:
+                @display("p=100,200;is=s");
         }
         r1: Router {
             @display("p=400,250");

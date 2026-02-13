@@ -18,7 +18,7 @@ namespace visualizer {
 
 class INET_API PathCanvasVisualizerBase : public PathVisualizerBase
 {
-  protected:
+  public:
     class INET_API PathCanvasVisualization : public PathVisualization {
       public:
         LabeledPolylineFigure *figure = nullptr;
@@ -37,6 +37,7 @@ class INET_API PathCanvasVisualizerBase : public PathVisualizerBase
     virtual void initialize(int stage) override;
     virtual void refreshDisplay() const override;
 
+  public:
     virtual const PathVisualization *createPathVisualization(const char *label, const std::vector<int>& path, cPacket *packet) const override;
     virtual void addPathVisualization(const PathVisualization *pathVisualization) override;
     virtual void removePathVisualization(const PathVisualization *pathVisualization) override;

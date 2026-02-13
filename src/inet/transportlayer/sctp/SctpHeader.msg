@@ -407,9 +407,9 @@ cplusplus(SctpStreamResetChunk::copy) {{
     }
 }}
 
-cplusplus(SctpStreamResetChunk::~SctpStreamResetChunk) {{
-    clean();
-}}
+//cplusplus(SctpStreamResetChunk::~SctpStreamResetChunk) {{
+//    clean();
+//}}
 
 cplusplus(SctpStreamResetChunk::parsimPack) {{
     doParsimPacking(b, parameterList);

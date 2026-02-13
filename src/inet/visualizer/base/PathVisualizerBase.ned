@@ -46,7 +46,7 @@ simple PathVisualizerBase extends VisualizerBase
         string nodeFilter @mutable = default("*"); // Which nodes are considered, matches all nodes by default
         object packetFilter @mutable = default("*"); // Which packets are considered, matches all packets by default
 
-        string lineColor = default("dark"); // Route color is a list of colors or a color group name (e.g. dark, light), a set of dark colors by default
+        string lineColor = default("red"); // Route color is a list of colors or a color group name (e.g. dark, light), a set of dark colors by default
         string lineStyle = default("solid"); // Route line style (solid, dashed, dotted)
         double lineWidth = default(3); // Route line width
         bool lineSmooth = default(false); // When true polylines are displayed as curves
@@ -62,7 +62,7 @@ simple PathVisualizerBase extends VisualizerBase
         string labelColor = default(""); // Label color, same as line by default
 
         string fadeOutMode @enum("realTime", "animationTime", "simulationTime") = default("realTime"); // Specifies how inactive routes fade out
-        double fadeOutTime @unit(s) = default(1s); // How quickly inactive routes fade away, 1 second by default
+        double fadeOutTime @unit(s) = default(60s); // How quickly inactive routes fade away, 1 second by default
         double fadeOutAnimationSpeed = default(0); // Animation speed while there are active routes, value must be in the range (0, +inf)
 
         @class(PathVisualizerBase);

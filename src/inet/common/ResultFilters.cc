@@ -575,8 +575,8 @@ void DemuxRegexFilter::init(Context *ctx)
     DemuxFilter::init(ctx);
     std::string fullPath = ctx->component->getFullPath() + "." + ctx->attrsProperty->getIndex() + ".demuxRegex";
     auto config = getEnvir()->getConfig();
-    search = cConfiguration::parseString(config->getPerObjectConfigValue(fullPath.c_str(), "search"), getDefaultSearch());
-    replace = cConfiguration::parseString(config->getPerObjectConfigValue(fullPath.c_str(), "replace"), getDefaultReplace());
+//    search = cConfiguration::parseString(config->getPerObjectConfigValue(fullPath.c_str(), "search"), getDefaultSearch());
+//    replace = cConfiguration::parseString(config->getPerObjectConfigValue(fullPath.c_str(), "replace"), getDefaultReplace());
 }
 
 const char *DemuxRegexFilter::CategoryFinder::getFullName() const
