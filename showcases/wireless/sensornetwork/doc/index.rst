@@ -365,7 +365,7 @@ studies for the individual MACs are detailed in the following sections.
 Optimizing B-MAC
 ~~~~~~~~~~~~~~~~
 
-The goal is to optimize :ned:`BMac`'s :par:`slotTime` parameter for the number
+The goal is to optimize :ned:`BMac`'s :par:`slotDuration` parameter for the number
 of packets received by the server. The configuration in
 :download:`omnetpp.ini <../omnetpp.ini>` for this is
 ``StatisticBMac``. Here is the configuration.
@@ -392,9 +392,9 @@ smooth curve. The best performing value for
 Optimizing X-MAC
 ~~~~~~~~~~~~~~~~
 
-Again, we optimize the :par:`slotTime` parameter for the number of packets
+Again, we optimize the :par:`slotDuration` parameter for the number of packets
 received by the server. As in the :ned:`XMac` configuration, the
-``slotTime`` for the gateway will be shorter than for the sensors. The
+``slotDuration`` for the gateway will be shorter than for the sensors. The
 configuration in :download:`omnetpp.ini <../omnetpp.ini>` for this is
 ``StatisticXMac``. Here is the configuration.
 

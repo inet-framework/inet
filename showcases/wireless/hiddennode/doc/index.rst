@@ -71,7 +71,7 @@ which is able to receive the transmissions of both hosts.
    :align: center
 
 The RTS/CTS mechanism can be enabled or disabled by setting the
-:par:`rtsThresholdBytes` parameter in the ``mac`` submodule of hosts. The
+:par:`rtsThreshold` parameter in the ``mac`` submodule of hosts. The
 RTS/CTS mechanism is used for transmitting frames whose size exceeds the
 threshold.
 

@@ -74,7 +74,7 @@ Visualizing Gate Schedules
 
 The configured gate schedules can be visualized with the :ned:`GateScheduleVisualizer` module. It displays a gate schedule in time, as a colored bar near the network node containing the gate, on the top-level canvas (by default, to the right). The horizontal axis of the bar is time, and the current time is indicated by a dashed vertical line in the center. The gate schedule is displayed as color-coded blocks on the bar. Green blocks signify the open, and red blocks the closed gate state. The blocks move to the right with simulation time, so that the current time is in the center, the past is to the left, and the future is to the right. Thus, the visualization shows if the gate is currently open or closed, and when it will change state in the future.
 
-The visualization can be enabled by setting the visualizer's :par:`displayGates` parameter to ``true``. By default, it displays all gates in the network, but this can be narrowed down with the
+The visualization can be enabled by setting the visualizer's :par:`displayGateSchedules` parameter to ``true``. By default, it displays all gates in the network, but this can be narrowed down with the
 :par:`gateFilter` parameter.
 
 For example, two gates in the same interface are visualized on the image below:

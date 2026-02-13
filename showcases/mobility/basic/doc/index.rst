@@ -95,8 +95,8 @@ Some of these mobility models are introduced by the following example simulation
 LinearMobility
 ~~~~~~~~~~~~~~
 
-The :ned:`LinearMobility` module describes linear motion with a constant speed or
-constant acceleration. As such, it has parameters for speed and starting angle.
+The :ned:`LinearMobility` module describes linear motion with a constant speed.
+As such, it has parameters for speed and starting heading.
 The model also has parameters for initial positioning (:par:`initialX`,
 :par:`initialY`, :par:`initialZ`), which, by default, are random
 values inside the constraint area.
@@ -108,8 +108,8 @@ The configuration in omnetpp.ini is the following:
    :start-at: *.host[*].mobility.typename = "LinearMobility"
    :end-at: speed
 
-We leave the angle parameter on its default value, which is
-a random value.
+We leave the :par:`initialMovementHeading` parameter on its default value,
+which is a random value.
 
 The following video shows the motion of the nodes:
 

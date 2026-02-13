@@ -31,7 +31,7 @@ are visualized. This selection can be narrowed with the :par:`nodeFilter`,
 (The :par:`packetFilter` can filter for packet properties, such as name, fields, chunks, protocol headers, etc.)
 Additionally, use the :par:`detailsFilter` parameter to filter for packet drop reasons.
 
-The :par:`packetFormat` parameter is a format string and specifies the text displayed with the packet drop animation.
+The :par:`labelFormat` parameter is a format string and specifies the text displayed with the packet drop animation.
 By default, the dropped packet's name is displayed.
 The format string can contain the following directives:
 
