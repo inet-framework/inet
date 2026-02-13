@@ -49,7 +49,7 @@ We configure the hosts to use the layered Ethernet model, and the source host to
 Results
 -------
 
-We measure the channel utilization in the source host (the ``source.eth[0].phy.transmitter.utilization`` statistic). Here are the results:
+We measure the channel utilization in the source host (the ``source.eth[0].phyLayer.transmitter.utilization`` statistic). Here are the results:
 
 .. figure:: media/ChannelUtilizationHistogram.png
    :align: center

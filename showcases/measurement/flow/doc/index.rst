@@ -89,7 +89,7 @@ have the same set of parameters that specify the flow name (:par:`flowName`
 parameter), the set of packets that enter or exit the flow (:par:`packetFilter`
 parameter), and the required measurements (:par:`measure` parameter).
 
-By default, the filters match all packets (``packetFilter = 'true'``). The
+By default, the filters match all packets (``packetFilter = '*'``). The
 :par:`measure` parameter is a list containing elements from the following set,
 separated by spaces:
 
@@ -156,8 +156,8 @@ The module type :ned:`PacketFlowVisualizer` (also included in
 :ned:`IntegratedCanvasVisualizer`) can display packet flows in the network as dashed
 arrows annotated by the flow name. The arrows are color-coded so that flows can
 be differentiated by color. The visualization can be enabled with the
-:par:`displayPacketFlows` parameter, e.g.
-``*.visualizer.packetFlowVisualizer.displayPacketFlows = true`` in the .INI
+:par:`displayRoutes` parameter, e.g.
+``*.visualizer.packetFlowVisualizer.displayRoutes = true`` in the .INI
 file.
 
 Example Simulations
@@ -251,7 +251,7 @@ Similarly, we enable the measurement recorder module in the server UDP apps (by 
    :end-at: *.server*.app[*].measurementRecorder.typename = "FlowMeasurementRecorder"
    :language: ini
 
-For the packet flow between the two switches, we can enable the built-in ``measurementLayer`` submodule of :ned:`EthernetInterface`:
+For the packet flow between the two switches, we can enable the built-in ``measurementLayer`` submodule of :ned:`LayeredEthernetInterface`:
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: *.switch*.eth[2].measurementLayer.typename = "MeasurementLayer"
