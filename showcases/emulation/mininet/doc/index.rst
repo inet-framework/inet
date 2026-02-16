@@ -172,5 +172,5 @@ Discussion
 ----------
 
 Use `this
-page <https://github.com/inet-framework/inet-showcases/issues/TODO>`__ in
+page <https://github.com/inet-framework/inet-showcases/issues/1087>`__ in
 the GitHub issue tracker for commenting on this showcase.

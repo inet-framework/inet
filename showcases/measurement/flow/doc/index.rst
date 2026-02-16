@@ -494,4 +494,4 @@ then start exploring.
 Discussion
 ----------
 
-Use `this <https://github.com/inet-framework/inet-showcases/discussions/TODO>`__ page in the GitHub issue tracker for commenting on this showcase.
+Use `this <https://github.com/inet-framework/inet/discussions/1076>`__ page in the GitHub issue tracker for commenting on this showcase.
