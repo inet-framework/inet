@@ -335,6 +335,10 @@
 /examples/manetrouting/dsdv/,        -f omnetpp.ini -c MultiIPv4 -r 0,              10s,             4d24-d5b6/tplx;e9e8-7d0b/~tNl;e9f0-b256/~tND;204c-2860/tyf, PASS,  wireless adhoc Ipv4
 /examples/manetrouting/dsdv/,        -f omnetpp.ini -c DynamicIPv4 -r 0,            22s,             b5fe-a1b2/tplx;3e2c-1eee/~tNl;eecc-7593/~tND;44cf-54b3/tyf, PASS,  wireless adhoc Ipv4
 
+/examples/manetrouting/leach/,-f omnetpp.ini -r 0, 100s, d028-7203/tplx,PASS,wireless adhoc Ipv4
+/examples/manetrouting/leach/,-f omnetpp.ini -c LeachPower -r 0, 100s, d028-7203/tplx, PASS,wireless adhoc Ipv4
+/examples/manetrouting/leach/,-f omnetpp.ini -c LeachPathLoss -r 0, 100s, 76ca-cca8/tplx, PASS,wireless adhoc Ipv4
+
 # /examples/manetrouting/dymo/,        -f omnetpp.ini -c _IPv4 -r 0      # abstract-config
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv4 -r 0,                   10s,             1a85-cb5d/tplx;dfe8-11b9/~tNl;e40a-d760/tyf, PASS,  wireless adhoc Ipv4
 # /examples/manetrouting/dymo/,        -f omnetpp.ini -c _IPv6 -r 0      # abstract-config
