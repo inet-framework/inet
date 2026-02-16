@@ -55,5 +55,5 @@ Sources:
 Discussion
 ----------
 
-Use `this page <https://github.com/inet-framework/inet-tutorials/issues/TODO>`__ in
+Use `this page <https://github.com/inet-framework/inet/discussions/1086>`__ in
 the GitHub issue tracker for commenting on this tutorial.

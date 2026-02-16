@@ -78,5 +78,5 @@ Sources: :download:`BGP_Topology_1.ned <../BGP_Topology_1.ned>`,
 Discussion
 ----------
 
-Use `this page <https://github.com/inet-framework/inet-tutorials/issues/??>`__ in
+Use `this page <https://github.com/inet-framework/inet/discussions/1085>`__ in
 the GitHub issue tracker for commenting on this tutorial.

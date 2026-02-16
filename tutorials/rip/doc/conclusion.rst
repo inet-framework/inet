@@ -8,5 +8,5 @@ you'd like to help us improve this tutorial.
 Discussion
 ----------
 
-Use `this page <https://github.com/inet-framework/inet-tutorials/issues/??>`__ in
+Use `this page <https://github.com/inet-framework/inet/discussions/1084>`__ in
 the GitHub issue tracker for commenting on this tutorial.

@@ -156,3 +156,9 @@ Sources:
 :download:`RipNetworkC.ned <../RipNetworkC.ned>`,
 :download:`scenario3.xml <../scenario3.xml>`,
 :download:`scenario7.xml <../scenario7.xml>`
+
+Discussion
+----------
+
+Use `this page <https://github.com/inet-framework/inet/discussions/1084>`__ in
+the GitHub issue tracker for commenting on this tutorial.

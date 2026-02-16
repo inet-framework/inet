@@ -247,3 +247,9 @@ not completely effective.
 Sources:
 :download:`omnetpp.ini <../omnetpp.ini>`,
 :download:`RipNetworkB.ned <../RipNetworkB.ned>`
+
+Discussion
+----------
+
+Use `this page <https://github.com/inet-framework/inet/discussions/1084>`__ in
+the GitHub issue tracker for commenting on this tutorial.
