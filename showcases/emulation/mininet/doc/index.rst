@@ -142,7 +142,7 @@ Try It Yourself
 
 If you already have INET and OMNeT++ installed, start the IDE by typing
 ``omnetpp``, import the INET project into the IDE, then navigate to the
-``inet/showcases/emulation/voip`` folder in the `Project Explorer`. There, you can view
+``inet/showcases/emulation/mininet`` folder in the `Project Explorer`. There, you can view
 and edit the showcase files, run simulations, and analyze results.
 
 Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
@@ -151,7 +151,7 @@ Ensure that ``opp_env`` is installed on your system, then execute:
 
 .. code-block:: bash
 
-    $ opp_env install --init -w inet-workspace inet-latest --build-modes=release --options=inet:full
+    $ opp_env install --init -w inet-workspace inet-4.6 --build-modes=release --options=inet:full
     $ cd inet-workspace
     $ sudo setcap cap_sys_admin+ep omnetpp-*/bin/opp_run_release
     $ opp_env shell --options=inet:full
@@ -165,7 +165,7 @@ Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
 then start exploring.
 
 To experiment with the emulation examples, navigate to the
-``inet/showcases/emulation/voip`` directory. From there, you can execute the
+``inet/showcases/emulation/mininet`` directory. From there, you can execute the
 commands outlined in the previous sections.
 
 Discussion

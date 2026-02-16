@@ -427,8 +427,8 @@ Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
 <https://omnetpp.org/opp_env>`__, and run the simulation interactively.
 Ensure that ``opp_env`` is installed on your system, then execute::
 
-    $ opp_env run inet-4.5 --init -w inet-workspace --install --build-modes=release --chdir \
-       -c 'cd inet-4.5.*/showcases/tsn/framereplication/manualconfiguration && inet'
+    $ opp_env run inet-4.6 --init -w inet-workspace --install --build-modes=release --chdir \
+       -c 'cd inet-4.6.*/showcases/tsn/framereplication/manualconfiguration && inet'
 
 This command creates an ``inet-workspace`` directory, installs the appropriate
 versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
@@ -437,7 +437,7 @@ showcase directory for interactive simulation.
 Alternatively, for a more hands-on experience, you can first set up the
 workspace and then open an interactive shell::
 
-    $ opp_env install --init -w inet-workspace --build-modes=release inet-4.5
+    $ opp_env install --init -w inet-workspace --build-modes=release inet-4.6
     $ cd inet-workspace
     $ opp_env shell
 
