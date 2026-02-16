@@ -17,7 +17,7 @@ ATS to traffic sources and traffic sinks. The key highlight is the observation
 of traffic shaping within the network, achieved by plotting the generated
 traffic both before and after the shaping process.
 
-| Verified with INET version: ``4.4``
+| Verified with INET version: ``4.6``
 | Source files location: `inet/showcases/tsn/trafficshaping/underthehood <https://github.com/inet-framework/inet/tree/master/showcases/tsn/trafficshaping/underthehood>`__
 
 Asynchronous Traffic Shaping in INET

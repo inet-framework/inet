@@ -6,7 +6,7 @@ Goals
 
 In this example, we explore the channel throughput statistics of wired and wireless transmission mediums.
 
-| Verified with INET version: ``4.4``
+| Verified with INET version: ``4.6``
 | Source files location: `inet/showcases/measurement/throughput <https://github.com/inet-framework/inet/tree/master/showcases/measurement/throughput>`__
 
 The Model

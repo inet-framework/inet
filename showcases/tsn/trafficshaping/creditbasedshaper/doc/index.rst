@@ -13,7 +13,7 @@ with an example simulation.
 
 .. **TODO** some interesting stuff to show? -> shaping in general increases delay even for high priority frames. but can overall decrease delay (as it decreases delay for lower priority frames)
 
-| Verified with INET version: ``4.4``
+| Verified with INET version: ``4.6``
 | Source files location: `inet/showcases/tsn/trafficshaping/creditbasedshaper <https://github.com/inet-framework/inet/tree/master/showcases/tsn/trafficshaping/creditbasedshaper>`__
 
 Credit-Based Shaping Overview

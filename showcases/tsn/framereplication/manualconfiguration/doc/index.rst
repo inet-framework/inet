@@ -9,7 +9,7 @@ stream splitting, stream merging, stream encoding, and stream decoding to achiev
 the desired stream redundancy using the Frame Replication and Elimination for
 Reliability (FRER) mechanism defined in IEEE 802.1CB.
 
-| Verified with INET version: ``4.4``
+| Verified with INET version: ``4.6``
 | Source files location: `inet/showcases/tsn/framereplication/manualconfiguration <https://github.com/inet-framework/inet/tree/master/showcases/tsn/framereplication/manualconfiguration>`__
 
 Overview

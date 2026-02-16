@@ -17,7 +17,7 @@ automatically determines all replication and elimination points and configures t
 necessary FRER components throughout the network. This approach significantly reduces
 configuration complexity while maintaining full control over the redundancy topology.
 
-| Verified with INET version: ``4.4``
+| Verified with INET version: ``4.6``
 | Source files location: `inet/showcases/tsn/framereplication/automaticmultipathconfiguration <https://github.com/inet-framework/inet/tree/master/showcases/tsn/framereplication/automaticmultipathconfiguration>`__
 
 Overview

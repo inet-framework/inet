@@ -26,7 +26,7 @@ Please note that the ``VoipStream`` and ``NetworkEmulationSupport`` features of 
 Framework must be enabled for this demonstration (they are disabled by default),
 and it is only compatible with Linux systems.
 
-| Verified with INET version: ``4.0``
+| Verified with INET version: ``4.6``
 | Source files location: `inet/showcases/emulation/voip <https://github.com/inet-framework/inet/tree/master/showcases/emulation/voip>`__
 
 

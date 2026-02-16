@@ -10,7 +10,7 @@ on specified failure protection requirements, we compare network behavior with
 and without frame replication during a controlled node failure, showing how FRER
 maintains 100% packet delivery even during equipment outages.
 
-| Verified with INET version: ``4.4``
+| Verified with INET version: ``4.6``
 | Source files location: `inet/showcases/tsn/framereplication/automaticfailureprotection <https://github.com/inet-framework/inet/tree/master/showcases/tsn/framereplication/automaticfailureprotection>`__
 
 Frame Replication and Elimination

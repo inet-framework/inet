@@ -14,7 +14,7 @@ transfer.
 This showcase presents an example network that employs DiffServ to
 provide preferential service to voice over other types of traffic.
 
-| Verified with INET version: ``4.0``
+| Verified with INET version: ``4.6``
 | Source files location: `inet/showcases/general/diffserv <https://github.com/inet-framework/inet/tree/master/showcases/general/diffserv>`__
 
 About Differentiated Services

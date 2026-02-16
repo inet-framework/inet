@@ -35,7 +35,7 @@ showcase, we will demonstrate cut-through switching and compare it to
 store-and-forward switching in terms of delay, highlighting the performance
 benefits of this forwarding method.
 
-| Verified with INET version: ``4.3``
+| Verified with INET version: ``4.6``
 | Source files location: `inet/showcases/tsn/cutthroughswitching <https://github.com/inet-framework/inet/tree/master/showcases/tsn/cutthroughswitching>`__
 
 The Model

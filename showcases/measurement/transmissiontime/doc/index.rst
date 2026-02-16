@@ -7,7 +7,7 @@ Goals
 In this example, we explore the packet transmission time statistics of network
 interfaces for wired and wireless transmission mediums.
 
-| Verified with INET version: ``4.4``
+| Verified with INET version: ``4.6``
 | Source files location: `inet/showcases/measurement/transmissiontime <https://github.com/inet-framework/inet/tree/master/showcases/measurement/transmissiontime>`__
 
 The Model

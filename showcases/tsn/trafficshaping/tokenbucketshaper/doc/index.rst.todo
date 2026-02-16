@@ -6,7 +6,7 @@ Goals
 
 TODO
 
-| Verified with INET version: ``4.4``
+| Verified with INET version: ``4.6``
 | Source files location: `inet/showcases/tsn/trafficshaping/tokenbucketshaper <https://github.com/inet-framework/inet/tree/master/showcases/tsn/trafficshaping/tokenbucketshaper>`__
 
 The Model

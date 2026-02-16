@@ -14,7 +14,7 @@ main focus being on the energy consumed by the radio. The modeled devices
 also have energy storage units (batteries) and energy generation units
 (modeling solar cells) built into them.
 
-| Verified with INET version: ``4.0``
+| Verified with INET version: ``4.6``
 | Source files location: `inet/showcases/wireless/power <https://github.com/inet-framework/inet/tree/master/showcases/wireless/power>`__
 
 The model

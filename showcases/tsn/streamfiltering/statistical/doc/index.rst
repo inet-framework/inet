@@ -26,7 +26,7 @@ this with a scenario where one client generates excessive traffic while another
 maintains normal traffic, showing how statistical policing effectively protects
 well-behaved streams.
 
-| Verified with INET version: ``4.4``
+| Verified with INET version: ``4.6``
 | Source files location: `inet/showcases/tsn/streamfiltering/statistical <https://github.com/inet-framework/inet/tree/master/showcases/tsn/streamfiltering/statistical>`__
 
 Background
