@@ -42,8 +42,20 @@ void FlowMeasurementRecorder::initialize(int stage)
         endMeasurement_ = par("endMeasurement");
         flowName = par("flowName");
         flowNameMatcher.setPattern(flowName, false, true, true);
+        
+        // Handle parameter naming: prefer 'endMeasurementTypes', fall back to deprecated 'measure' for backward compatibility
+        const char *measurementTypesPattern = nullptr;
+        if (hasPar("endMeasurementTypes"))
+            measurementTypesPattern = par("endMeasurementTypes");
+        else if (hasPar("measure")) {
+            measurementTypesPattern = par("measure");
+            EV_WARN << "The 'measure' parameter is deprecated, use 'endMeasurementTypes' instead." << EV_ENDL;
+        }
+        else
+            measurementTypesPattern = "*"; // default
+        
         cMatchExpression measureMatcher;
-        measureMatcher.setPattern(par("measure"), false, true, true);
+        measureMatcher.setPattern(measurementTypesPattern, false, true, true);
         measureLifeTime = matchesString(measureMatcher, "lifeTime");
         measureElapsedTime = matchesString(measureMatcher, "elapsedTime");
         measureDelayingTime = matchesString(measureMatcher, "delayingTime");

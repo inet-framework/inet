@@ -20,6 +20,25 @@ import inet.queueing.contract.IPacketFlow;
 // be recorded multiple times during this time. The flow measurement tracks
 // bits individually using their unique identity.
 //
+// The module has two distinct sets of parameters that control its behavior:
+//
+// Flow Termination Parameters:
+//   - flowName: Specifies which flows to terminate using a match expression.
+//               Only flows matching this pattern will have their measurements ended.
+//   - endMeasurement: Boolean flag to enable/disable flow termination entirely.
+//                     When false, no measurements are terminated (only recorded).
+//
+// Measurement Type Parameters:
+//   - endMeasurementTypes: Specifies which measurement types to end for the matched flows.
+//                          This is a match expression for: packetEvent, elapsedTime,
+//                          delayingTime, queueingTime, processingTime, transmissionTime,
+//                          propagationTime, lifeTime. Note that all measurements are always
+//                          recorded (emitted as signals), but only the selected types are
+//                          actually ended (removed from the packet tags) when the flow
+//                          terminates. The default "*" ends all measurement types.
+//
+// Note: The 'measure' parameter is deprecated, use 'endMeasurementTypes' instead.
+//
 // @see ~FlowMeasurementStarter
 //
 simple FlowMeasurementRecorder extends PacketFlowBase like IPacketFlow
@@ -28,9 +47,9 @@ simple FlowMeasurementRecorder extends PacketFlowBase like IPacketFlow
         object packetFilter = default("*"); // which packets are considered, matches all packets by default
         int offset @unit(b) = default(0b); // designates the packet part to be measured
         int length @unit(b) = default(-1b); // designates the packet part to be measured
-        string flowName = default(""); // use packet flow to separate measurement from other measurements
-        string measure = default("*"); // match expression for a combination of: packetEvent, elapsedTime, delayingTime, queueingTime, processingTime, transmissionTime, propagationTime
-        bool endMeasurement = default(true);
+        string flowName = default(""); // match expression to select which flows to terminate; empty string matches all flows
+        string endMeasurementTypes = default("*"); // match expression for measurement types to end when the flow terminates: packetEvent, elapsedTime, delayingTime, queueingTime, processingTime, transmissionTime, propagationTime, lifeTime; "*" means all types
+        bool endMeasurement = default(true); // if true, the measurements for the matching flows are ended (removed from packet tags); if false, measurements are only recorded but not ended
         @class(FlowMeasurementRecorder);
         @display("i=block/timer");
         @signal[packetFlowMeasured](type=inet::Packet);
