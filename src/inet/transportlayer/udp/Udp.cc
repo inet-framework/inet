@@ -971,7 +971,7 @@ void Udp::processUDPPacket(Packet *udpPacket)
 
     // remove lower layer paddings:
     // (for UDPLite, totalLength == actual packet size, so this is naturally a no-op)
-    if (totalLength < udpPacket->getDataLength()) {
+    if (udpHeaderPopPosition + totalLength < udpPacket->getBackOffset()) {
         udpPacket->setBackOffset(udpHeaderPopPosition + totalLength);
     }
 
