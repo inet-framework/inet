@@ -948,9 +948,11 @@ void Udp::processUDPPacket(Packet *udpPacket)
     auto totalLength = B(udpHeader->getTotalLengthField());
     bool hasIncorrectLength;
     if (isUdplite) {
-        auto coverage = udpHeader->getTotalLengthField();
-        auto packetLength = udpHeader->getChunkLength() + udpPacket->getDataLength();
-        hasIncorrectLength = (coverage != B(0) && coverage < B(8)) || coverage > packetLength;
+        // For UDPLite, totalLengthField is checksum coverage, not total length.
+        // Validate coverage, then set totalLength to the actual packet length.
+        auto coverage = totalLength;
+        totalLength = udpHeader->getChunkLength() + udpPacket->getDataLength();
+        hasIncorrectLength = (coverage != B(0) && coverage < B(8)) || coverage > totalLength;
     }
     else {
         hasIncorrectLength = totalLength < udpHeader->getChunkLength() || totalLength > udpHeader->getChunkLength() + udpPacket->getDataLength();
@@ -968,7 +970,8 @@ void Udp::processUDPPacket(Packet *udpPacket)
     }
 
     // remove lower layer paddings:
-    if (!isUdplite && totalLength < udpPacket->getDataLength()) {
+    // (for UDPLite, totalLength == actual packet size, so this is naturally a no-op)
+    if (totalLength < udpPacket->getDataLength()) {
         udpPacket->setBackOffset(udpHeaderPopPosition + totalLength);
     }
 
