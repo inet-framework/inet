@@ -804,7 +804,7 @@ void Udp::handleUpperPacket(Packet *packet)
         throw cRuntimeError("send: total UDP message size exceeds %u", UDP_MAX_MESSAGE_SIZE);
 
     if (isUdplite) {
-        int coverage = sd->sendCoverage != 0 ? sd->sendCoverage : udpliteDefaultCoverage;
+        int coverage = sd->sendCoverage >= 0 ? sd->sendCoverage : udpliteDefaultCoverage;
         if (coverage != 0 && B(coverage) > totalLength)
             coverage = totalLength.get();
         udpHeader->setTotalLengthField(B(coverage));

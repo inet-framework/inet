@@ -92,8 +92,8 @@ class INET_API Udp : public TransportProtocolBase
         int ttl = -1;
         short dscp = -1;
         short tos = -1;
-        int sendCoverage = 0;  // UDPLite: 0 = full, >=8 = partial (UDPLITE_SEND_CSCOV)
-        int recvCoverage = 0;  // UDPLite: 0 = accept any, >=8 = minimum required (UDPLITE_RECV_CSCOV)
+        int sendCoverage = -1;  // UDPLite: -1 = use module default, 0 = full, >=8 = partial (UDPLITE_SEND_CSCOV)
+        int recvCoverage = -1;  // UDPLite: -1 = accept any, 0 = accept any, >=8 = minimum required (UDPLITE_RECV_CSCOV)
         MulticastMembershipTable multicastMembershipTable;
 
         MulticastMembershipTable::iterator findFirstMulticastMembership(const L3Address& multicastAddress);
