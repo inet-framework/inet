@@ -29,6 +29,7 @@ UdpSocket::UdpSocket()
     // don't allow user-specified socketIds because they may conflict with
     // automatically assigned ones.
     socketId = getActiveSimulationOrEnvir()->getUniqueNumber();
+    protocol = &Protocol::udp;
 }
 
 void UdpSocket::bind(int localPort)
@@ -172,6 +173,29 @@ void UdpSocket::setReuseAddress(bool value)
     sendToUDP(request);
 }
 
+void UdpSocket::setProtocol(const Protocol *protocol)
+{
+    this->protocol = protocol;
+}
+
+void UdpSocket::setSendCoverage(int coverage)
+{
+    auto request = new Request("setSendCoverage", UDP_C_SETOPTION);
+    auto *ctrl = new UdpLiteSetSendCoverageCommand();
+    ctrl->setCoverage(coverage);
+    request->setControlInfo(ctrl);
+    sendToUDP(request);
+}
+
+void UdpSocket::setRecvCoverage(int coverage)
+{
+    auto request = new Request("setRecvCoverage", UDP_C_SETOPTION);
+    auto *ctrl = new UdpLiteSetRecvCoverageCommand();
+    ctrl->setCoverage(coverage);
+    request->setControlInfo(ctrl);
+    sendToUDP(request);
+}
+
 void UdpSocket::joinMulticastGroup(const L3Address& multicastAddr, int interfaceId)
 {
     auto request = new Request("joinMulticastGroups", UDP_C_SETOPTION);
@@ -307,7 +331,7 @@ void UdpSocket::sendToUDP(cMessage *msg)
         throw cRuntimeError("UdpSocket: setOutputGate() must be invoked before socket can be used");
     EV_DEBUG << "Sending to UDP protocol" << EV_FIELD(msg) << EV_ENDL;
     auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
-    tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::udp);
+    tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
     tags.addTagIfAbsent<SocketReq>()->setSocketId(socketId);
     check_and_cast<cSimpleModule *>(gateToUdp->getOwnerModule())->send(msg, gateToUdp);
 }
