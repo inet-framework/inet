@@ -11,6 +11,7 @@
 
 #include "inet/applications/base/ApplicationPacket_m.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/Protocol.h"
 #include "inet/common/TimeTag_m.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/FragmentationTag_m.h"
@@ -105,7 +106,23 @@ void UdpBasicBurst::processStart()
 {
     socket.setOutputGate(gate("socketOut"));
     socket.setCallback(this);
+
+    const char *proto = par("protocol");
+    if (!strcmp(proto, "udplite"))
+        socket.setProtocol(&Protocol::udplite);
+    else if (strcmp(proto, "udp"))
+        throw cRuntimeError("Unknown protocol: %s", proto);
+
     socket.bind(localPort);
+
+    if (!strcmp(proto, "udplite")) {
+        int sendCov = par("sendCoverage");
+        if (sendCov >= 0)
+            socket.setSendCoverage(sendCov);
+        int recvCov = par("recvCoverage");
+        if (recvCov >= 0)
+            socket.setRecvCoverage(recvCov);
+    }
 
     int timeToLive = par("timeToLive");
     if (timeToLive != -1)

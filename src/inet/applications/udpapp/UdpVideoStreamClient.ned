@@ -25,6 +25,9 @@ simple UdpVideoStreamClient extends SimpleModule like IApp
         int localPort = default(-1);  // Local port (-1: use ephemeral port)
         string serverAddress;  // Server address
         int serverPort;  // Server port
+        string protocol = default("udp"); // Transport protocol: "udp" or "udplite"
+        int sendCoverage = default(-1); // UDPLite send checksum coverage: -1=module default, 0=full, >=8=partial bytes
+        int recvCoverage = default(-1); // UDPLite minimum acceptable recv coverage: -1=accept any, 0=accept any, >=8=minimum bytes
         double startTime @unit(s) = default(1s);
         @display("i=block/app");
         @lifecycleSupport;

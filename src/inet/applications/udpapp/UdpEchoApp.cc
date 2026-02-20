@@ -8,6 +8,7 @@
 #include "inet/applications/udpapp/UdpEchoApp.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/Protocol.h"
 #include "inet/common/Simsignals.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/transportlayer/common/L4PortTag_m.h"
@@ -68,8 +69,26 @@ void UdpEchoApp::finish()
 void UdpEchoApp::handleStartOperation(LifecycleOperation *operation)
 {
     socket.setOutputGate(gate("socketOut"));
+
+    const char *proto = par("protocol");
+    if (!strcmp(proto, "udplite")) {
+        socket.setProtocol(&Protocol::udplite);
+    }
+    else if (strcmp(proto, "udp"))
+        throw cRuntimeError("Unknown protocol: %s", proto);
+
     int localPort = par("localPort");
     socket.bind(localPort);
+
+    if (!strcmp(proto, "udplite")) {
+        int sendCov = par("sendCoverage");
+        if (sendCov >= 0)
+            socket.setSendCoverage(sendCov);
+        int recvCov = par("recvCoverage");
+        if (recvCov >= 0)
+            socket.setRecvCoverage(recvCov);
+    }
+
     MulticastGroupList mgl = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this)->collectMulticastGroups();
     socket.joinLocalMulticastGroups(mgl);
     socket.setCallback(this);

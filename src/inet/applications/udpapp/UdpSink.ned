@@ -24,6 +24,9 @@ simple UdpSink extends SimpleModule like IApp
         bool receiveBroadcast = default(false); // If true, makes the socket receive broadcast packets
         string multicastGroup = default(""); // If non-empty, makes the socket receive multicast packets sent to that group
         string multicastSources = default(""); // If non-empty, then the socket receives multicast packets from those sources only
+        string protocol = default("udp"); // Transport protocol: "udp" or "udplite"
+        int sendCoverage = default(-1); // UDPLite send checksum coverage: -1=module default, 0=full, >=8=partial bytes
+        int recvCoverage = default(-1); // UDPLite minimum acceptable recv coverage: -1=accept any, 0=accept any, >=8=minimum bytes
 
         @display("i=block/sink");
         @lifecycleSupport;

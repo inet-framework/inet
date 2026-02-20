@@ -8,6 +8,7 @@
 #include "inet/applications/udpapp/UdpSocketIo.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/Protocol.h"
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/networklayer/common/FragmentationTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
@@ -51,6 +52,19 @@ void UdpSocketIo::finish()
 
 void UdpSocketIo::setSocketOptions()
 {
+    const char *proto = par("protocol");
+    if (!strcmp(proto, "udplite")) {
+        socket.setProtocol(&Protocol::udplite);
+        int sendCov = par("sendCoverage");
+        if (sendCov >= 0)
+            socket.setSendCoverage(sendCov);
+        int recvCov = par("recvCoverage");
+        if (recvCov >= 0)
+            socket.setRecvCoverage(recvCov);
+    }
+    else if (strcmp(proto, "udp"))
+        throw cRuntimeError("Unknown protocol: %s", proto);
+
     int timeToLive = par("timeToLive");
     if (timeToLive != -1)
         socket.setTimeToLive(timeToLive);
