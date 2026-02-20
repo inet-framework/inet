@@ -10,6 +10,7 @@
 
 #include "inet/applications/base/ApplicationPacket_m.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/Protocol.h"
 #include "inet/common/TagBase_m.h"
 #include "inet/common/TimeTag_m.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
@@ -58,6 +59,19 @@ void UdpBasicApp::finish()
 
 void UdpBasicApp::setSocketOptions()
 {
+    const char *proto = par("protocol");
+    if (!strcmp(proto, "udplite")) {
+        socket.setProtocol(&Protocol::udplite);
+        int sendCov = par("sendCoverage");
+        if (sendCov >= 0)
+            socket.setSendCoverage(sendCov);
+        int recvCov = par("recvCoverage");
+        if (recvCov >= 0)
+            socket.setRecvCoverage(recvCov);
+    }
+    else if (strcmp(proto, "udp"))
+        throw cRuntimeError("Unknown protocol: %s", proto);
+
     int timeToLive = par("timeToLive");
     if (timeToLive != -1)
         socket.setTimeToLive(timeToLive);

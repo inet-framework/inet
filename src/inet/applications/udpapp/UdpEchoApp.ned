@@ -21,6 +21,9 @@ simple UdpEchoApp extends SimpleModule like IApp
         @class(UdpEchoApp);
         string interfaceTableModule;   // The path to the InterfaceTable module
         int localPort;  // Local port to listen on
+        string protocol = default("udp"); // Transport protocol: "udp" or "udplite"
+        int sendCoverage = default(-1); // UDPLite send checksum coverage: -1=module default, 0=full, >=8=partial bytes
+        int recvCoverage = default(-1); // UDPLite minimum acceptable recv coverage: -1=accept any, 0=accept any, >=8=minimum bytes
         displayStringTextFormat = default("echoed: {numEchoed} pks");
         @display("i=block/app");
         @lifecycleSupport;

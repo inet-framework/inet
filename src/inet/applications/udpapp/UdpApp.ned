@@ -21,6 +21,9 @@ module UdpApp like IApp
     parameters:
         string interfaceTableModule;
         *.interfaceTableModule = default(absPath(".interfaceTable"));
+        string protocol = default("udp"); // Transport protocol: "udp" or "udplite"
+        int sendCoverage = default(-1); // UDPLite send checksum coverage: -1=module default, 0=full, >=8=partial bytes
+        int recvCoverage = default(-1); // UDPLite minimum acceptable recv coverage: -1=accept any, 0=accept any, >=8=minimum bytes
         @application;
         @display("i=block/app");
     gates:
@@ -49,6 +52,9 @@ module UdpApp like IApp
         }
         io: UdpSocketIo {
             parameters:
+                protocol = default(parent.protocol);
+                sendCoverage = default(parent.sendCoverage);
+                recvCoverage = default(parent.recvCoverage);
                 @display("p=350,600");
         }
     connections allowunconnected:

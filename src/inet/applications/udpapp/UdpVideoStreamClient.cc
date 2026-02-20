@@ -10,6 +10,7 @@
 #include "inet/applications/udpapp/UdpVideoStreamClient.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/Protocol.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/contract/udp/UdpCommand_m.h"
@@ -74,7 +75,24 @@ void UdpVideoStreamClient::requestStream()
     EV_INFO << "Requesting video stream from " << svrAddr << ":" << svrPort << "\n";
 
     socket.setOutputGate(gate("socketOut"));
+
+    const char *proto = par("protocol");
+    if (!strcmp(proto, "udplite"))
+        socket.setProtocol(&Protocol::udplite);
+    else if (strcmp(proto, "udp"))
+        throw cRuntimeError("Unknown protocol: %s", proto);
+
     socket.bind(localPort);
+
+    if (!strcmp(proto, "udplite")) {
+        int sendCov = par("sendCoverage");
+        if (sendCov >= 0)
+            socket.setSendCoverage(sendCov);
+        int recvCov = par("recvCoverage");
+        if (recvCov >= 0)
+            socket.setRecvCoverage(recvCov);
+    }
+
     socket.setCallback(this);
 
     Packet *pk = new Packet("VideoStrmReq");

@@ -7,6 +7,7 @@
 #include "inet/applications/udpapp/UdpSink.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/Protocol.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/contract/udp/UdpCommand_m.h"
@@ -94,6 +95,19 @@ void UdpSink::finish()
 
 void UdpSink::setSocketOptions()
 {
+    const char *proto = par("protocol");
+    if (!strcmp(proto, "udplite")) {
+        socket.setProtocol(&Protocol::udplite);
+        int sendCov = par("sendCoverage");
+        if (sendCov >= 0)
+            socket.setSendCoverage(sendCov);
+        int recvCov = par("recvCoverage");
+        if (recvCov >= 0)
+            socket.setRecvCoverage(recvCov);
+    }
+    else if (strcmp(proto, "udp"))
+        throw cRuntimeError("Unknown protocol: %s", proto);
+
     bool receiveBroadcast = par("receiveBroadcast");
     if (receiveBroadcast)
         socket.setBroadcast(true);
