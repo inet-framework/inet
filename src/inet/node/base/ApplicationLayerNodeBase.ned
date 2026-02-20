@@ -44,6 +44,9 @@ module ApplicationLayerNodeBase extends TransportLayerNodeBase
         at.out++ --> udp.appIn if hasUdp;
         at.in++ <-- udp.appOut if hasUdp;
 
+        at.out++ --> udpLite.appIn if hasUdpLite;
+        at.in++ <-- udpLite.appOut if hasUdpLite;
+
         at.out++ --> tcp.appIn if hasTcp;
         at.in++ <-- tcp.appOut if hasTcp;
 
