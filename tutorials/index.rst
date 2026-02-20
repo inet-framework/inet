@@ -26,3 +26,4 @@ The following tutorials are available:
    RIP Routing <rip/doc/index>
    BGP Routing <bgp/doc/index>
    OSPF Routing <ospf/doc/index>
+   STP/RSTP <stp/doc/index>
