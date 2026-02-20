@@ -66,6 +66,10 @@ void Udp::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         const char *checksumModeString = par("checksumMode");
         checksumMode = parseChecksumMode(checksumModeString, true);
+        isUdplite = par("isUdplite");
+        if (isUdplite)
+            udpliteDefaultCoverage = par("udpliteDefaultCoverage");
+        protocol = isUdplite ? &Protocol::udplite : &Protocol::udp;
 
         lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
         ift.reference(this, "interfaceTableModule", true);
@@ -116,8 +120,8 @@ void Udp::initialize(int stage)
                 ipv6->registerHook(0, checksumInsertion);
 #endif
         }
-        registerService(Protocol::udp, gate("appIn"), gate("appOut"));
-        registerProtocol(Protocol::udp, gate("ipOut"), gate("ipIn"));
+        registerService(*protocol, gate("appIn"), gate("appOut"));
+        registerProtocol(*protocol, gate("ipOut"), gate("ipIn"));
     }
 }
 
@@ -125,18 +129,18 @@ void Udp::handleLowerPacket(Packet *packet)
 {
     // received from IP layer
     ASSERT(packet->getControlInfo() == nullptr);
-    auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
-    if (protocol == &Protocol::udp) {
+    auto packetProtocol = packet->getTag<PacketProtocolTag>()->getProtocol();
+    if (packetProtocol == protocol) {
         processUDPPacket(packet);
     }
-    else if (protocol == &Protocol::icmpv4) {
+    else if (packetProtocol == &Protocol::icmpv4) {
         processICMPv4Error(packet); // assume it's an ICMP error
     }
-    else if (protocol == &Protocol::icmpv6) {
+    else if (packetProtocol == &Protocol::icmpv6) {
         processICMPv6Error(packet); // assume it's an ICMP error
     }
     else
-        throw cRuntimeError("Unknown protocol: %s(%d)", protocol->getName(), protocol->getId());
+        throw cRuntimeError("Unknown protocol: %s(%d)", packetProtocol->getName(), packetProtocol->getId());
 }
 
 void Udp::handleUpperCommand(cMessage *msg)
@@ -261,6 +265,21 @@ void Udp::handleUpperCommand(cMessage *msg)
                     setMulticastSourceFilter(sd, ie, cmd->getMulticastAddr(), cmd->getFilterMode(), sourceList);
                     break;
                 }
+                case UDPLITE_C_SETOPTION_SEND_COVERAGE: {
+                    if (!isUdplite)
+                        throw cRuntimeError("UDPLITE_SEND_COVERAGE option is only valid for UDPLite sockets");
+                    auto cmd = check_and_cast<UdpLiteSetSendCoverageCommand *>(ctrl);
+                    setSendCoverage(sd, cmd->getCoverage());
+                    break;
+                }
+                case UDPLITE_C_SETOPTION_RECV_COVERAGE: {
+                    if (!isUdplite)
+                        throw cRuntimeError("UDPLITE_RECV_COVERAGE option is only valid for UDPLite sockets");
+                    auto cmd = check_and_cast<UdpLiteSetRecvCoverageCommand *>(ctrl);
+                    setRecvCoverage(sd, cmd->getCoverage());
+                    break;
+                }
+                default:
                     throw cRuntimeError("Unknown subclass of UdpSetOptionCommand received from app: code=%d, name=%s", ctrl->getOptionCode(), ctrl->getClassName());
             }
             break;
@@ -698,6 +717,16 @@ void Udp::setMulticastSourceFilter(SockDesc *sd, NetworkInterface *ie, L3Address
     }
 }
 
+void Udp::setSendCoverage(SockDesc *sd, int coverage)
+{
+    sd->sendCoverage = coverage;
+}
+
+void Udp::setRecvCoverage(SockDesc *sd, int coverage)
+{
+    sd->recvCoverage = coverage;
+}
+
 // ###############################################################
 // ####################### set options end #######################
 // ###############################################################
@@ -779,17 +808,25 @@ void Udp::handleUpperPacket(Packet *packet)
     if (totalLength.get() > UDP_MAX_MESSAGE_SIZE)
         throw cRuntimeError("send: total UDP message size exceeds %u", UDP_MAX_MESSAGE_SIZE);
 
-    udpHeader->setTotalLengthField(totalLength);
+    if (isUdplite) {
+        int coverage = sd->sendCoverage >= 0 ? sd->sendCoverage : udpliteDefaultCoverage;
+        if (coverage != 0 && B(coverage) > totalLength)
+            coverage = totalLength.get();
+        udpHeader->setTotalLengthField(B(coverage));
+    }
+    else {
+        udpHeader->setTotalLengthField(totalLength);
+    }
     if (checksumMode == CHECKSUM_COMPUTED) {
         udpHeader->setChecksumMode(CHECKSUM_COMPUTED);
         udpHeader->setChecksum(0x0000); // checksumMode == CHECKSUM_COMPUTED is done in an INetfilter hook
     }
     else {
         udpHeader->setChecksumMode(checksumMode);
-        insertChecksum(l3Protocol, srcAddr, destAddr, udpHeader, packet);
+        insertChecksum(l3Protocol, srcAddr, destAddr, udpHeader, packet, protocol);
     }
 
-    insertTransportProtocolHeader(packet, Protocol::udp, udpHeader);
+    insertTransportProtocolHeader(packet, *protocol, udpHeader);
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(l3Protocol);
     packet->setKind(0);
 
@@ -800,7 +837,7 @@ void Udp::handleUpperPacket(Packet *packet)
     numSent++;
 }
 
-void Udp::insertChecksum(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<UdpHeader>& udpHeader, Packet *packet)
+void Udp::insertChecksum(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<UdpHeader>& udpHeader, Packet *packet, const Protocol *transportProtocol)
 {
     ChecksumMode checksumMode = udpHeader->getChecksumMode();
     switch (checksumMode) {
@@ -817,13 +854,23 @@ void Udp::insertChecksum(const Protocol *networkProtocol, const L3Address& srcAd
             udpHeader->setChecksum(0xBAAD);
             break;
         case CHECKSUM_COMPUTED: {
-            auto length = udpHeader->getTotalLengthField();
+            auto coverageField = udpHeader->getTotalLengthField();
             // if the checksum mode is computed, then compute the checksum and set it
             // this computation is delayed after the routing decision, see INetfilter hook
             udpHeader->setChecksum(0x0000); // make sure that the checksum is 0 in the Udp header before computing the checksum
             udpHeader->setChecksumMode(CHECKSUM_DISABLED); // for serializer/deserializer checks only: deserializer sets the checksumMode to disabled when checksum is 0
-            auto udpData = packet->peekDataAt(b(0), length - udpHeader->getChunkLength(), Chunk::PF_ALLOW_EMPTY);
-            auto checksum = computeChecksum(networkProtocol, srcAddress, destAddress, udpHeader, udpData);
+            b dataLength;
+            if (transportProtocol == &Protocol::udplite) {
+                if (coverageField == B(0))
+                    dataLength = packet->getDataLength();
+                else
+                    dataLength = coverageField - udpHeader->getChunkLength();
+            }
+            else {
+                dataLength = coverageField - udpHeader->getChunkLength();
+            }
+            auto udpData = packet->peekDataAt(b(0), dataLength, Chunk::PF_ALLOW_EMPTY);
+            auto checksum = computeChecksum(networkProtocol, srcAddress, destAddress, udpHeader, udpData, transportProtocol);
             udpHeader->setChecksum(checksum);
             udpHeader->setChecksumMode(CHECKSUM_COMPUTED);
             break;
@@ -833,13 +880,13 @@ void Udp::insertChecksum(const Protocol *networkProtocol, const L3Address& srcAd
     }
 }
 
-uint16_t Udp::computeChecksum(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<const UdpHeader>& udpHeader, const Ptr<const Chunk>& udpData)
+uint16_t Udp::computeChecksum(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<const UdpHeader>& udpHeader, const Ptr<const Chunk>& udpData, const Protocol *transportProtocol)
 {
     auto pseudoHeader = makeShared<TransportPseudoHeader>();
     pseudoHeader->setSrcAddress(srcAddress);
     pseudoHeader->setDestAddress(destAddress);
     pseudoHeader->setNetworkProtocolId(networkProtocol->getId());
-    pseudoHeader->setProtocolId(IP_PROT_UDP);
+    pseudoHeader->setProtocolId(transportProtocol == &Protocol::udplite ? IP_PROT_UDPLITE : IP_PROT_UDP);
     pseudoHeader->setPacketLength(udpHeader->getChunkLength() + udpData->getChunkLength());
     // pseudoHeader length: ipv4: 12 bytes, ipv6: 40 bytes, other: ???
     if (networkProtocol == &Protocol::ipv4)
@@ -928,10 +975,20 @@ void Udp::processUDPPacket(Packet *udpPacket)
     auto srcAddr = l3AddressInd->getSrcAddress();
     auto destAddr = l3AddressInd->getDestAddress();
     auto totalLength = B(udpHeader->getTotalLengthField());
-    auto hasIncorrectLength = totalLength<udpHeader->getChunkLength() || totalLength> udpHeader->getChunkLength() + udpPacket->getDataLength();
+    bool hasIncorrectLength;
+    if (isUdplite) {
+        // For UDPLite, totalLengthField is checksum coverage, not total length.
+        // Validate coverage, then set totalLength to the actual packet length.
+        auto coverage = totalLength;
+        totalLength = udpHeader->getChunkLength() + udpPacket->getDataLength();
+        hasIncorrectLength = (coverage != B(0) && coverage < B(8)) || coverage > totalLength;
+    }
+    else {
+        hasIncorrectLength = totalLength < udpHeader->getChunkLength() || totalLength > udpHeader->getChunkLength() + udpPacket->getDataLength();
+    }
     auto networkProtocol = udpPacket->getTag<NetworkProtocolInd>()->getProtocol();
 
-    if (hasIncorrectLength || !verifyChecksum(networkProtocol, udpHeader, udpPacket)) {
+    if (hasIncorrectLength || !verifyChecksum(networkProtocol, udpHeader, udpPacket, protocol)) {
         EV_WARN << "Packet has bit error, discarding\n";
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);
@@ -942,7 +999,8 @@ void Udp::processUDPPacket(Packet *udpPacket)
     }
 
     // remove lower layer paddings:
-    if (totalLength < udpPacket->getDataLength()) {
+    // (for UDPLite, totalLength == actual packet size, so this is naturally a no-op)
+    if (udpHeaderPopPosition + totalLength < udpPacket->getBackOffset()) {
         udpPacket->setBackOffset(udpHeaderPopPosition + totalLength);
     }
 
@@ -979,7 +1037,7 @@ void Udp::processUDPPacket(Packet *udpPacket)
     }
 }
 
-bool Udp::verifyChecksum(const Protocol *networkProtocol, const Ptr<const UdpHeader>& udpHeader, Packet *packet)
+bool Udp::verifyChecksum(const Protocol *networkProtocol, const Ptr<const UdpHeader>& udpHeader, Packet *packet, const Protocol *transportProtocol)
 {
     switch (udpHeader->getChecksumMode()) {
         case CHECKSUM_DISABLED:
@@ -987,8 +1045,18 @@ bool Udp::verifyChecksum(const Protocol *networkProtocol, const Ptr<const UdpHea
             return udpHeader->getChecksum() == 0x0000;
         case CHECKSUM_DECLARED_CORRECT: {
             // if the checksum mode is declared to be correct, then the check passes if and only if the chunks are correct
-            auto totalLength = udpHeader->getTotalLengthField();
-            auto udpDataBytes = packet->peekDataAt(B(0), totalLength - udpHeader->getChunkLength(), Chunk::PF_ALLOW_EMPTY | Chunk::PF_ALLOW_INCORRECT);
+            b coverageLength;
+            if (transportProtocol == &Protocol::udplite) {
+                auto coverage = udpHeader->getTotalLengthField();
+                if (coverage == B(0))
+                    coverageLength = packet->getDataLength();
+                else
+                    coverageLength = coverage - udpHeader->getChunkLength();
+            }
+            else {
+                coverageLength = udpHeader->getTotalLengthField() - udpHeader->getChunkLength();
+            }
+            auto udpDataBytes = packet->peekDataAt(B(0), coverageLength, Chunk::PF_ALLOW_EMPTY | Chunk::PF_ALLOW_INCORRECT);
             return udpHeader->isCorrect() && udpDataBytes->isCorrect();
         }
         case CHECKSUM_DECLARED_INCORRECT:
@@ -996,6 +1064,8 @@ bool Udp::verifyChecksum(const Protocol *networkProtocol, const Ptr<const UdpHea
             return false;
         case CHECKSUM_COMPUTED: {
             if (udpHeader->getChecksum() == 0x0000) {
+                if (transportProtocol == &Protocol::udplite)
+                    return false; // UDP-Lite checksum is mandatory (RFC 3828)
                 // on udp under Ipv6, the checksum 0000 is invalid
                 if (networkProtocol == &Protocol::ipv6)
                     return false;
@@ -1007,9 +1077,19 @@ bool Udp::verifyChecksum(const Protocol *networkProtocol, const Ptr<const UdpHea
                 auto l3AddressInd = packet->getTag<L3AddressInd>();
                 auto srcAddress = l3AddressInd->getSrcAddress();
                 auto destAddress = l3AddressInd->getDestAddress();
-                auto totalLength = udpHeader->getTotalLengthField();
-                auto udpData = packet->peekDataAt(B(0), totalLength - udpHeader->getChunkLength(), Chunk::PF_ALLOW_EMPTY | Chunk::PF_ALLOW_INCORRECT);
-                auto computedChecksum = computeChecksum(networkProtocol, srcAddress, destAddress, udpHeader, udpData);
+                b checksumDataLength;
+                if (transportProtocol == &Protocol::udplite) {
+                    auto coverage = udpHeader->getTotalLengthField();
+                    if (coverage == B(0))
+                        checksumDataLength = packet->getDataLength();
+                    else
+                        checksumDataLength = coverage - udpHeader->getChunkLength();
+                }
+                else {
+                    checksumDataLength = udpHeader->getTotalLengthField() - udpHeader->getChunkLength();
+                }
+                auto udpData = packet->peekDataAt(B(0), checksumDataLength, Chunk::PF_ALLOW_EMPTY | Chunk::PF_ALLOW_INCORRECT);
+                auto computedChecksum = computeChecksum(networkProtocol, srcAddress, destAddress, udpHeader, udpData, transportProtocol);
                 // TODO delete these isCorrect calls, rely on checksum only
                 return computedChecksum == 0xFFFF && udpHeader->isCorrect() && udpData->isCorrect();
             }
@@ -1130,6 +1210,19 @@ void Udp::processUndeliverablePacket(Packet *udpPacket)
 
 void Udp::sendUp(Ptr<const UdpHeader>& header, Packet *payload, SockDesc *sd, ushort srcPort, ushort destPort)
 {
+    // UDPLite: check receive coverage requirement (like Linux UDPLITE_RECV_CSCOV)
+    if (isUdplite && sd->recvCoverage > 0) {
+        auto coverage = header->getTotalLengthField();
+        if (coverage != B(0) && coverage < B(sd->recvCoverage)) {
+            EV_WARN << "Packet coverage " << coverage << " < socket recvCoverage " << sd->recvCoverage << ", dropping\n";
+            PacketDropDetails details;
+            details.setReason(INCORRECTLY_RECEIVED);
+            emit(packetDroppedSignal, payload, &details);
+            delete payload;
+            return;
+        }
+    }
+
     EV_INFO << "Sending payload up to socket sockId=" << sd->sockId << "\n";
 
     // send payload up to the application
@@ -1137,7 +1230,7 @@ void Udp::sendUp(Ptr<const UdpHeader>& header, Packet *payload, SockDesc *sd, us
     payload->removeTagIfPresent<PacketProtocolTag>();
     payload->removeTagIfPresent<DispatchProtocolReq>();
     payload->addTagIfAbsent<SocketInd>()->setSocketId(sd->sockId);
-    payload->addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::udp);
+    payload->addTagIfAbsent<TransportProtocolInd>()->setProtocol(protocol);
     payload->addTagIfAbsent<TransportProtocolInd>()->setTransportProtocolHeader(header);
     payload->addTagIfAbsent<L4PortInd>()->setSrcPort(srcPort);
     payload->addTagIfAbsent<L4PortInd>()->setDestPort(destPort);
@@ -1352,22 +1445,28 @@ void Udp::refreshDisplay() const
 }
 
 // used in UdpProtocolDissector
-bool Udp::isCorrectPacket(Packet *packet, const Ptr<const UdpHeader>& udpHeader)
+bool Udp::isCorrectPacket(Packet *packet, const Ptr<const UdpHeader>& udpHeader, const Protocol *transportProtocol)
 {
     auto trailerPopOffset = packet->getBackOffset();
     auto udpHeaderOffset = packet->getFrontOffset() - udpHeader->getChunkLength();
-    if (udpHeader->getTotalLengthField() < UDP_HEADER_LENGTH)
-        return false;
-    else if (B(udpHeader->getTotalLengthField()) > trailerPopOffset - udpHeaderOffset)
-        return false;
-    else {
-        const auto& l3AddressInd = packet->findTag<L3AddressInd>();
-        const auto& networkProtocolInd = packet->findTag<NetworkProtocolInd>();
-        if (l3AddressInd != nullptr && networkProtocolInd != nullptr)
-            return verifyChecksum(networkProtocolInd->getProtocol(), udpHeader, packet);
-        else
-            return udpHeader->getChecksumMode() != ChecksumMode::CHECKSUM_DECLARED_INCORRECT;
+    if (transportProtocol == &Protocol::udplite) {
+        auto coverage = udpHeader->getTotalLengthField();
+        auto packetLength = trailerPopOffset - udpHeaderOffset;
+        if ((coverage != B(0) && coverage < UDP_HEADER_LENGTH) || coverage > packetLength)
+            return false;
     }
+    else {
+        if (udpHeader->getTotalLengthField() < UDP_HEADER_LENGTH)
+            return false;
+        else if (B(udpHeader->getTotalLengthField()) > trailerPopOffset - udpHeaderOffset)
+            return false;
+    }
+    const auto& l3AddressInd = packet->findTag<L3AddressInd>();
+    const auto& networkProtocolInd = packet->findTag<NetworkProtocolInd>();
+    if (l3AddressInd != nullptr && networkProtocolInd != nullptr)
+        return verifyChecksum(networkProtocolInd->getProtocol(), udpHeader, packet, transportProtocol);
+    else
+        return udpHeader->getChecksumMode() != ChecksumMode::CHECKSUM_DECLARED_INCORRECT;
 }
 
 // #######################
@@ -1477,14 +1576,15 @@ INetfilter::IHook::Result UdpChecksumInsertionHook::datagramPostRoutingHook(Pack
 
     auto networkProtocol = packet->getTag<PacketProtocolTag>()->getProtocol();
     const auto& networkHeader = getNetworkProtocolHeader(packet);
-    if (networkHeader->getProtocol() == &Protocol::udp) {
+    if (networkHeader->getProtocol() == &Protocol::udp || networkHeader->getProtocol() == &Protocol::udplite) {
         ASSERT(!networkHeader->isFragment());
+        auto transportProtocol = networkHeader->getProtocol();
         packet->eraseAtFront(networkHeader->getChunkLength());
         auto udpHeader = packet->removeAtFront<UdpHeader>();
         ASSERT(udpHeader->getChecksumMode() == CHECKSUM_COMPUTED);
         const L3Address& srcAddress = networkHeader->getSourceAddress();
         const L3Address& destAddress = networkHeader->getDestinationAddress();
-        Udp::insertChecksum(networkProtocol, srcAddress, destAddress, udpHeader, packet);
+        Udp::insertChecksum(networkProtocol, srcAddress, destAddress, udpHeader, packet, transportProtocol);
         packet->insertAtFront(udpHeader);
         packet->insertAtFront(networkHeader);
     }

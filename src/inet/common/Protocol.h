@@ -120,6 +120,7 @@ class INET_API Protocol
     static const Protocol tsn; // ieee1722, AVB, TSN
     static const Protocol tteth; // SAE AS6802, TTEthernet
     static const Protocol udp;
+    static const Protocol udplite;
     static const Protocol xmac;
     static const Protocol xtp;
 

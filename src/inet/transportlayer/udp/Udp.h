@@ -92,6 +92,8 @@ class INET_API Udp : public TransportProtocolBase
         int ttl = -1;
         short dscp = -1;
         short tos = -1;
+        int sendCoverage = -1;  // UDPLite: -1 = use module default, 0 = full, >=8 = partial (UDPLITE_SEND_CSCOV)
+        int recvCoverage = -1;  // UDPLite: -1 = accept any, 0 = accept any, >=8 = minimum required (UDPLITE_RECV_CSCOV)
         MulticastMembershipTable multicastMembershipTable;
 
         MulticastMembershipTable::iterator findFirstMulticastMembership(const L3Address& multicastAddress);
@@ -108,6 +110,9 @@ class INET_API Udp : public TransportProtocolBase
 
   protected:
     ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
+    bool isUdplite = false;
+    int udpliteDefaultCoverage = 0;
+    const Protocol *protocol = nullptr;
 
     // sockets
     SocketsByIdMap socketsByIdMap;
@@ -150,6 +155,8 @@ class INET_API Udp : public TransportProtocolBase
     virtual void setMulticastOutputInterface(SockDesc *sd, int interfaceId);
     virtual void setMulticastLoop(SockDesc *sd, bool loop);
     virtual void setReuseAddress(SockDesc *sd, bool reuseAddr);
+    virtual void setSendCoverage(SockDesc *sd, int coverage);
+    virtual void setRecvCoverage(SockDesc *sd, int coverage);
     virtual void joinMulticastGroups(SockDesc *sd, const std::vector<L3Address>& multicastAddresses, const std::vector<int> interfaceIds);
     virtual void leaveMulticastGroups(SockDesc *sd, const std::vector<L3Address>& multicastAddresses);
     virtual void blockMulticastSources(SockDesc *sd, NetworkInterface *ie, L3Address multicastAddress, const std::vector<L3Address>& sourceList);
@@ -196,15 +203,15 @@ class INET_API Udp : public TransportProtocolBase
 
   public:
     // checksum
-    static void insertChecksum(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<UdpHeader>& udpHeader, Packet *udpPayload);
-    static bool verifyChecksum(const Protocol *networkProtocol, const Ptr<const UdpHeader>& udpHeader, Packet *packet);
-    static uint16_t computeChecksum(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<const UdpHeader>& udpHeader, const Ptr<const Chunk>& udpData);
+    static void insertChecksum(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<UdpHeader>& udpHeader, Packet *udpPayload, const Protocol *transportProtocol = &Protocol::udp);
+    static bool verifyChecksum(const Protocol *networkProtocol, const Ptr<const UdpHeader>& udpHeader, Packet *packet, const Protocol *transportProtocol = &Protocol::udp);
+    static uint16_t computeChecksum(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<const UdpHeader>& udpHeader, const Ptr<const Chunk>& udpData, const Protocol *transportProtocol = &Protocol::udp);
 
   public:
     Udp();
     virtual ~Udp();
 
-    static bool isCorrectPacket(Packet *packet, const Ptr<const UdpHeader>& udpHeader);
+    static bool isCorrectPacket(Packet *packet, const Ptr<const UdpHeader>& udpHeader, const Protocol *transportProtocol = &Protocol::udp);
 
   protected:
     virtual void initialize(int stage) override;
