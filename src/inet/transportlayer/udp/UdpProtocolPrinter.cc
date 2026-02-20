@@ -21,10 +21,16 @@ void UdpProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *pr
     if (auto header = dynamicPtrCast<const UdpHeader>(chunk)) {
         context.sourceColumn << header->getSrcPort();
         context.destinationColumn << header->getDestPort();
-        context.infoColumn << header->getSrcPort() << "->" << header->getDestPort() << ", payload:" << (B(header->getTotalLengthField()) - header->getChunkLength());
+        context.infoColumn << header->getSrcPort() << "->" << header->getDestPort();
+        if (protocol == &Protocol::udplite) {
+            context.infoColumn << ", coverage:" << B(header->getTotalLengthField());
+            // payload size is not available from the header alone for UDPLite
+        }
+        else
+            context.infoColumn << ", payload:" << (B(header->getTotalLengthField()) - header->getChunkLength());
     }
     else
-        context.infoColumn << "(UDP) " << chunk;
+        context.infoColumn << (protocol == &Protocol::udplite ? "(UDP-Lite) " : "(UDP) ") << chunk;
 }
 
 } // namespace inet
