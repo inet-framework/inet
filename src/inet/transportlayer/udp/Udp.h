@@ -108,6 +108,9 @@ class INET_API Udp : public TransportProtocolBase
 
   protected:
     ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
+    bool isUdplite = false;
+    int udpliteDefaultCoverage = 0;
+    const Protocol *protocol = nullptr;
 
     // sockets
     SocketsByIdMap socketsByIdMap;
@@ -196,15 +199,15 @@ class INET_API Udp : public TransportProtocolBase
 
   public:
     // checksum
-    static void insertChecksum(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<UdpHeader>& udpHeader, Packet *udpPayload);
-    static bool verifyChecksum(const Protocol *networkProtocol, const Ptr<const UdpHeader>& udpHeader, Packet *packet);
-    static uint16_t computeChecksum(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<const UdpHeader>& udpHeader, const Ptr<const Chunk>& udpData);
+    static void insertChecksum(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<UdpHeader>& udpHeader, Packet *udpPayload, const Protocol *transportProtocol = &Protocol::udp);
+    static bool verifyChecksum(const Protocol *networkProtocol, const Ptr<const UdpHeader>& udpHeader, Packet *packet, const Protocol *transportProtocol = &Protocol::udp);
+    static uint16_t computeChecksum(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<const UdpHeader>& udpHeader, const Ptr<const Chunk>& udpData, const Protocol *transportProtocol = &Protocol::udp);
 
   public:
     Udp();
     virtual ~Udp();
 
-    static bool isCorrectPacket(Packet *packet, const Ptr<const UdpHeader>& udpHeader);
+    static bool isCorrectPacket(Packet *packet, const Ptr<const UdpHeader>& udpHeader, const Protocol *transportProtocol = &Protocol::udp);
 
   protected:
     virtual void initialize(int stage) override;

@@ -64,6 +64,8 @@ simple Udp extends SimpleModule like IUdp
         string icmpModule = default("^.ipv4.icmp");
         string icmpv6Module = default("^.ipv6.icmpv6");
         string checksumMode @enum("disabled", "declared", "computed") = default("declared");
+        bool isUdplite = default(false);
+        int udpliteDefaultCoverage = default(0);  // 0 = full coverage
         bool defaultMulticastLoop = default(true);
         @display("i=block/transport");
         @signal[packetSentToUpper](type=cPacket);

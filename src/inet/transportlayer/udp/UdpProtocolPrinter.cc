@@ -14,6 +14,7 @@
 namespace inet {
 
 Register_Protocol_Printer(&Protocol::udp, UdpProtocolPrinter);
+Register_Protocol_Printer(&Protocol::udplite, UdpProtocolPrinter);
 
 void UdpProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, Context& context) const
 {

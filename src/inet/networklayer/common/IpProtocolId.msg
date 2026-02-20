@@ -37,6 +37,7 @@ enum IpProtocolId
     IP_PROT_PIM = 103;
     IP_PROT_VRRP = 112;
     IP_PROT_SCTP = 132;
+    IP_PROT_UDPLITE = 136;
     IP_PROT_DSR  = 48;
     IP_PROT_MANET = 138;
 

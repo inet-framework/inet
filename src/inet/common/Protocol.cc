@@ -155,6 +155,7 @@ const Protocol Protocol::trill("trill", "TRILL");
 const Protocol Protocol::tsn("tsn", "TSN");
 const Protocol Protocol::tteth("tteth", "TT-ETH");
 const Protocol Protocol::udp("udp", "UDP", Protocol::TransportLayer);
+const Protocol Protocol::udplite("udplite", "UDP-Lite", Protocol::TransportLayer);
 const Protocol Protocol::xmac("xmac", "X-MAC", Protocol::LinkLayer);
 const Protocol Protocol::xtp("xtp", "XTP");
 
