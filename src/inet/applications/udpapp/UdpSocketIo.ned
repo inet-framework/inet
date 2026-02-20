@@ -29,6 +29,9 @@ simple UdpSocketIo extends SimpleModule
         object multicastAddresses = default([]); // List of multicast addresses that the application socket joins
         bool receiveBroadcast = default(false); // If true, make the socket receive broadcast packets
         bool joinLocalMulticastGroups = default(false); // If true, make the socket receive packets from all multicast groups set on local interfaces
+        string protocol = default("udp"); // Transport protocol: "udp" or "udplite"
+        int sendCoverage = default(-1); // UDPLite send checksum coverage: -1=module default, 0=full, >=8=partial bytes
+        int recvCoverage = default(-1); // UDPLite minimum acceptable recv coverage: -1=accept any, 0=accept any, >=8=minimum bytes
         double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finishes
         double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation
         displayStringTextFormat = default("rcvd: {numReceived} pks\nsent: {numSent} pks");

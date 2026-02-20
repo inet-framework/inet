@@ -11,6 +11,7 @@
 #include "inet/common/SimpleModule.h"
 #include <vector>
 
+#include "inet/common/Protocol.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/socket/ISocket.h"
