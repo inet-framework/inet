@@ -1042,8 +1042,6 @@ bool Udp::verifyChecksum(const Protocol *networkProtocol, const Ptr<const UdpHea
     switch (udpHeader->getChecksumMode()) {
         case CHECKSUM_DISABLED:
             // if the checksum mode is disabled, then the check passes if the checksum is 0
-            if (transportProtocol == &Protocol::udplite)
-                return false; // UDP-Lite checksum is mandatory (RFC 3828)
             return udpHeader->getChecksum() == 0x0000;
         case CHECKSUM_DECLARED_CORRECT: {
             // if the checksum mode is declared to be correct, then the check passes if and only if the chunks are correct
