@@ -67,7 +67,8 @@ void Udp::initialize(int stage)
         const char *checksumModeString = par("checksumMode");
         checksumMode = parseChecksumMode(checksumModeString, true);
         isUdplite = par("isUdplite");
-        udpliteDefaultCoverage = par("udpliteDefaultCoverage");
+        if (isUdplite)
+            udpliteDefaultCoverage = par("udpliteDefaultCoverage");
         protocol = isUdplite ? &Protocol::udplite : &Protocol::udp;
 
         lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
