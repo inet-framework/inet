@@ -27,6 +27,7 @@ module TransportLayerNodeBase extends NetworkLayerNodeBase
 {
     parameters:
         bool hasUdp = default(firstAvailableOrEmpty("Udp") != "");
+        bool hasUdpLite = default(false);
         bool hasTcp = default(firstAvailableOrEmpty("Tcp", "TcpLwip", "TcpNsc") != "");
         bool hasSctp = default(false);
         bool hasQuic = default(false);
@@ -35,6 +36,9 @@ module TransportLayerNodeBase extends NetworkLayerNodeBase
     submodules:
         udp: <default(firstAvailableOrEmpty("Udp"))> like IUdp if hasUdp {
             @display("p=375,225");
+        }
+        udpLite: <default(firstAvailableOrEmpty("UdpLite"))> like IUdp if hasUdpLite {
+            @display("p=450,225");
         }
         tcp: <default(firstAvailableOrEmpty("Tcp", "TcpLwip", "TcpNsc"))> like ITcp if hasTcp {
             @display("p=525,225");
@@ -51,6 +55,9 @@ module TransportLayerNodeBase extends NetworkLayerNodeBase
     connections allowunconnected:
         udp.ipOut --> tn.in++ if hasUdp;
         udp.ipIn <-- tn.out++ if hasUdp;
+
+        udpLite.ipOut --> tn.in++ if hasUdpLite;
+        udpLite.ipIn <-- tn.out++ if hasUdpLite;
 
         tcp.ipOut --> tn.in++ if hasTcp;
         tcp.ipIn <-- tn.out++ if hasTcp;
