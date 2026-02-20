@@ -265,11 +265,15 @@ void Udp::handleUpperCommand(cMessage *msg)
                     break;
                 }
                 case UDPLITE_C_SETOPTION_SEND_COVERAGE: {
+                    if (!isUdplite)
+                        throw cRuntimeError("UDPLITE_SEND_COVERAGE option is only valid for UDPLite sockets");
                     auto cmd = check_and_cast<UdpLiteSetSendCoverageCommand *>(ctrl);
                     setSendCoverage(sd, cmd->getCoverage());
                     break;
                 }
                 case UDPLITE_C_SETOPTION_RECV_COVERAGE: {
+                    if (!isUdplite)
+                        throw cRuntimeError("UDPLITE_RECV_COVERAGE option is only valid for UDPLite sockets");
                     auto cmd = check_and_cast<UdpLiteSetRecvCoverageCommand *>(ctrl);
                     setRecvCoverage(sd, cmd->getCoverage());
                     break;
