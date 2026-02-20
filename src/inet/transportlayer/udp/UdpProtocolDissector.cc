@@ -29,11 +29,7 @@ void UdpProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICa
     callback.visitChunk(header, protocol);
     b udpPayloadEndOffset;
     if (protocol == &Protocol::udplite) {
-        auto coverage = header->getTotalLengthField();
-        if (coverage == B(0))
-            udpPayloadEndOffset = packet->getBackOffset();
-        else
-            udpPayloadEndOffset = udpHeaderOffset + coverage;
+        udpPayloadEndOffset = packet->getBackOffset();
     }
     else {
         udpPayloadEndOffset = udpHeaderOffset + header->getTotalLengthField();
