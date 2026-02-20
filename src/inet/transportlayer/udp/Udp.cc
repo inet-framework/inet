@@ -264,13 +264,13 @@ void Udp::handleUpperCommand(cMessage *msg)
                     setMulticastSourceFilter(sd, ie, cmd->getMulticastAddr(), cmd->getFilterMode(), sourceList);
                     break;
                 }
-                case UDP_C_SETOPTION_SEND_COVERAGE: {
-                    auto cmd = check_and_cast<UdpSetSendCoverageCommand *>(ctrl);
+                case UDPLITE_C_SETOPTION_SEND_COVERAGE: {
+                    auto cmd = check_and_cast<UdpLiteSetSendCoverageCommand *>(ctrl);
                     setSendCoverage(sd, cmd->getCoverage());
                     break;
                 }
-                case UDP_C_SETOPTION_RECV_COVERAGE: {
-                    auto cmd = check_and_cast<UdpSetRecvCoverageCommand *>(ctrl);
+                case UDPLITE_C_SETOPTION_RECV_COVERAGE: {
+                    auto cmd = check_and_cast<UdpLiteSetRecvCoverageCommand *>(ctrl);
                     setRecvCoverage(sd, cmd->getCoverage());
                     break;
                 }

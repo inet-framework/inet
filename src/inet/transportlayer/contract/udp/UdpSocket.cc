@@ -181,7 +181,7 @@ void UdpSocket::setProtocol(const Protocol *protocol)
 void UdpSocket::setSendCoverage(int coverage)
 {
     auto request = new Request("setSendCoverage", UDP_C_SETOPTION);
-    auto *ctrl = new UdpSetSendCoverageCommand();
+    auto *ctrl = new UdpLiteSetSendCoverageCommand();
     ctrl->setCoverage(coverage);
     request->setControlInfo(ctrl);
     sendToUDP(request);
@@ -190,7 +190,7 @@ void UdpSocket::setSendCoverage(int coverage)
 void UdpSocket::setRecvCoverage(int coverage)
 {
     auto request = new Request("setRecvCoverage", UDP_C_SETOPTION);
-    auto *ctrl = new UdpSetRecvCoverageCommand();
+    auto *ctrl = new UdpLiteSetRecvCoverageCommand();
     ctrl->setCoverage(coverage);
     request->setControlInfo(ctrl);
     sendToUDP(request);

@@ -42,8 +42,8 @@ enum UdpSetOptionSubcode
     UDP_C_SETOPTION_UNBLOCK_MCAST_SRC = 12;
     UDP_C_SETOPTION_LEAVE_MCAST_SRC = 13;
     UDP_C_SETOPTION_SET_MCAST_SRC_FILTER = 14;
-    UDP_C_SETOPTION_SEND_COVERAGE = 15;
-    UDP_C_SETOPTION_RECV_COVERAGE = 16;
+    UDPLITE_C_SETOPTION_SEND_COVERAGE = 15;
+    UDPLITE_C_SETOPTION_RECV_COVERAGE = 16;
 }
 
 //
@@ -361,9 +361,9 @@ enum UdpSourceFilterMode { UDP_INCLUDE_MCAST_SOURCES = 1; UDP_EXCLUDE_MCAST_SOUR
 //
 // @see ~UdpCommandCode
 //
-class UdpSetSendCoverageCommand extends UdpSetOptionCommand
+class UdpLiteSetSendCoverageCommand extends UdpSetOptionCommand
 {
-    optionCode = UDP_C_SETOPTION_SEND_COVERAGE;
+    optionCode = UDPLITE_C_SETOPTION_SEND_COVERAGE;
     int coverage;
 }
 
@@ -375,9 +375,9 @@ class UdpSetSendCoverageCommand extends UdpSetOptionCommand
 //
 // @see ~UdpCommandCode
 //
-class UdpSetRecvCoverageCommand extends UdpSetOptionCommand
+class UdpLiteSetRecvCoverageCommand extends UdpSetOptionCommand
 {
-    optionCode = UDP_C_SETOPTION_RECV_COVERAGE;
+    optionCode = UDPLITE_C_SETOPTION_RECV_COVERAGE;
     int coverage;
 }
 
