@@ -11,6 +11,7 @@
 #include "inet/common/SimpleModule.h"
 #include <vector>
 
+#include "inet/common/Protocol.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/socket/ISocket.h"
@@ -82,6 +83,7 @@ class INET_API UdpSocket : public ISocket
     ICallback *cb = nullptr;
     void *userData = nullptr;
     cGate *gateToUdp = nullptr;
+    const Protocol *protocol = nullptr;
     State sockState = CLOSED;
 
   protected:
@@ -181,6 +183,24 @@ class INET_API UdpSocket : public ISocket
      * socket option in Linux.
      */
     void setReuseAddress(bool value);
+
+    /**
+     * Set the transport protocol for dispatch (default: Protocol::udp).
+     * Use Protocol::udplite when connecting to a UDPLite module.
+     */
+    void setProtocol(const Protocol *protocol);
+
+    /**
+     * Set UDPLite send checksum coverage (UDPLITE_SEND_CSCOV).
+     * 0 = full coverage, >= 8 = partial coverage in bytes.
+     */
+    void setSendCoverage(int coverage);
+
+    /**
+     * Set UDPLite minimum acceptable receive checksum coverage (UDPLITE_RECV_CSCOV).
+     * 0 = accept any, >= 8 = minimum coverage required.
+     */
+    void setRecvCoverage(int coverage);
 
     /**
      * Adds the socket to the given multicast group, that is, UDP packets
