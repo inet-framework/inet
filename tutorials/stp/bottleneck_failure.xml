@@ -1,0 +1,4 @@
+<script>
+    <at t="60s"><shutdown module="switch11"/></at>
+    <at t="60s"><shutdown module="switch12"/></at>
+</script>
