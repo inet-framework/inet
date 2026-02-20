@@ -10,6 +10,7 @@
 
 #include "inet/applications/base/ApplicationPacket_m.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/Protocol.h"
 #include "inet/common/TagBase_m.h"
 #include "inet/common/TimeTag_m.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
@@ -58,6 +59,14 @@ void UdpBasicApp::finish()
 
 void UdpBasicApp::setSocketOptions()
 {
+    if (socket.getProtocol() == &Protocol::udplite) {
+        int sendCov = par("sendCoverage");
+        if (sendCov >= 0)
+            socket.setSendCoverage(sendCov);
+        int recvCov = par("recvCoverage");
+        if (recvCov >= 0)
+            socket.setRecvCoverage(recvCov);
+    }
     int timeToLive = par("timeToLive");
     if (timeToLive != -1)
         socket.setTimeToLive(timeToLive);
@@ -120,6 +129,14 @@ void UdpBasicApp::sendPacket()
 
 void UdpBasicApp::processStart()
 {
+    const char *proto = par("udpVariant");
+    if (!strcmp(proto, "udp"))
+        socket.setProtocol(&Protocol::udp);
+    else if (!strcmp(proto, "udplite"))
+        socket.setProtocol(&Protocol::udplite);
+    else
+        throw cRuntimeError("Unknown udpVariant: %s", proto);
+
     socket.setOutputGate(gate("socketOut"));
     const char *localAddress = par("localAddress");
     socket.bind(*localAddress ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);

@@ -10,6 +10,7 @@
 #include "inet/applications/udpapp/UdpVideoStreamServer.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/Protocol.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/TimeTag_m.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
@@ -154,7 +155,25 @@ void UdpVideoStreamServer::handleStartOperation(LifecycleOperation *operation)
 {
     socket.setOutputGate(gate("socketOut"));
     socket.setCallback(this);
+
+    const char *proto = par("udpVariant");
+    if (!strcmp(proto, "udp"))
+        socket.setProtocol(&Protocol::udp);
+    else if (!strcmp(proto, "udplite"))
+        socket.setProtocol(&Protocol::udplite);
+    else
+        throw cRuntimeError("Unknown udpVariant: %s", proto);
+
     socket.bind(localPort);
+
+    if (socket.getProtocol() == &Protocol::udplite) {
+        int sendCov = par("sendCoverage");
+        if (sendCov >= 0)
+            socket.setSendCoverage(sendCov);
+        int recvCov = par("recvCoverage");
+        if (recvCov >= 0)
+            socket.setRecvCoverage(recvCov);
+    }
 
     int timeToLive = par("timeToLive");
     if (timeToLive != -1)
