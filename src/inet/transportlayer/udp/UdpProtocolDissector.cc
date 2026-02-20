@@ -42,6 +42,11 @@ void UdpProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICa
     ASSERT(packet->getDataLength() == B(0));
     packet->setFrontOffset(udpPayloadEndOffset);
     packet->setBackOffset(originalTrailerPopOffset);
+    auto paddingLength = packet->getDataLength();
+    if (paddingLength > b(0)) {
+        const auto& padding = packet->popAtFront(paddingLength);
+        callback.visitChunk(padding, protocol);
+    }
     callback.endProtocolDataUnit(protocol);
 }
 
