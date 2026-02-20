@@ -949,7 +949,8 @@ void Udp::processUDPPacket(Packet *udpPacket)
     bool hasIncorrectLength;
     if (isUdplite) {
         auto coverage = udpHeader->getTotalLengthField();
-        hasIncorrectLength = coverage != B(0) && coverage < B(8);
+        auto packetLength = udpHeader->getChunkLength() + udpPacket->getDataLength();
+        hasIncorrectLength = (coverage != B(0) && coverage < B(8)) || coverage > packetLength;
     }
     else {
         hasIncorrectLength = totalLength < udpHeader->getChunkLength() || totalLength > udpHeader->getChunkLength() + udpPacket->getDataLength();
@@ -1407,7 +1408,8 @@ bool Udp::isCorrectPacket(Packet *packet, const Ptr<const UdpHeader>& udpHeader,
     auto udpHeaderOffset = packet->getFrontOffset() - udpHeader->getChunkLength();
     if (transportProtocol == &Protocol::udplite) {
         auto coverage = udpHeader->getTotalLengthField();
-        if (coverage != B(0) && coverage < UDP_HEADER_LENGTH)
+        auto packetLength = trailerPopOffset - udpHeaderOffset;
+        if ((coverage != B(0) && coverage < UDP_HEADER_LENGTH) || coverage > packetLength)
             return false;
     }
     else {
