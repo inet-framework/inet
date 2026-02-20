@@ -42,6 +42,8 @@ enum UdpSetOptionSubcode
     UDP_C_SETOPTION_UNBLOCK_MCAST_SRC = 12;
     UDP_C_SETOPTION_LEAVE_MCAST_SRC = 13;
     UDP_C_SETOPTION_SET_MCAST_SRC_FILTER = 14;
+    UDP_C_SETOPTION_SEND_COVERAGE = 15;
+    UDP_C_SETOPTION_RECV_COVERAGE = 16;
 }
 
 //
@@ -351,6 +353,33 @@ class UdpLeaveMulticastSourcesCommand extends UdpSetOptionCommand
 }
 
 enum UdpSourceFilterMode { UDP_INCLUDE_MCAST_SOURCES = 1; UDP_EXCLUDE_MCAST_SOURCES = 2; }
+
+//
+// Control info for setting the UDPLite send checksum coverage on a socket.
+// Coverage 0 means full coverage, >= 8 means partial.
+// Corresponds to Linux UDPLITE_SEND_CSCOV.
+//
+// @see ~UdpCommandCode
+//
+class UdpSetSendCoverageCommand extends UdpSetOptionCommand
+{
+    optionCode = UDP_C_SETOPTION_SEND_COVERAGE;
+    int coverage;
+}
+
+//
+// Control info for setting the minimum acceptable UDPLite checksum coverage
+// on incoming packets. Packets with coverage less than this value are dropped.
+// Coverage 0 means accept any coverage.
+// Corresponds to Linux UDPLITE_RECV_CSCOV.
+//
+// @see ~UdpCommandCode
+//
+class UdpSetRecvCoverageCommand extends UdpSetOptionCommand
+{
+    optionCode = UDP_C_SETOPTION_RECV_COVERAGE;
+    int coverage;
+}
 
 //
 // Control info for letting an UDP socket to specify the excluded/included

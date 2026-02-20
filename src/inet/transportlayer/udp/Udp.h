@@ -92,6 +92,8 @@ class INET_API Udp : public TransportProtocolBase
         int ttl = -1;
         short dscp = -1;
         short tos = -1;
+        int sendCoverage = 0;  // UDPLite: 0 = full, >=8 = partial (UDPLITE_SEND_CSCOV)
+        int recvCoverage = 0;  // UDPLite: 0 = accept any, >=8 = minimum required (UDPLITE_RECV_CSCOV)
         MulticastMembershipTable multicastMembershipTable;
 
         MulticastMembershipTable::iterator findFirstMulticastMembership(const L3Address& multicastAddress);
@@ -153,6 +155,8 @@ class INET_API Udp : public TransportProtocolBase
     virtual void setMulticastOutputInterface(SockDesc *sd, int interfaceId);
     virtual void setMulticastLoop(SockDesc *sd, bool loop);
     virtual void setReuseAddress(SockDesc *sd, bool reuseAddr);
+    virtual void setSendCoverage(SockDesc *sd, int coverage);
+    virtual void setRecvCoverage(SockDesc *sd, int coverage);
     virtual void joinMulticastGroups(SockDesc *sd, const std::vector<L3Address>& multicastAddresses, const std::vector<int> interfaceIds);
     virtual void leaveMulticastGroups(SockDesc *sd, const std::vector<L3Address>& multicastAddresses);
     virtual void blockMulticastSources(SockDesc *sd, NetworkInterface *ie, L3Address multicastAddress, const std::vector<L3Address>& sourceList);

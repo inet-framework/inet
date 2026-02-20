@@ -264,6 +264,17 @@ void Udp::handleUpperCommand(cMessage *msg)
                     setMulticastSourceFilter(sd, ie, cmd->getMulticastAddr(), cmd->getFilterMode(), sourceList);
                     break;
                 }
+                case UDP_C_SETOPTION_SEND_COVERAGE: {
+                    auto cmd = check_and_cast<UdpSetSendCoverageCommand *>(ctrl);
+                    setSendCoverage(sd, cmd->getCoverage());
+                    break;
+                }
+                case UDP_C_SETOPTION_RECV_COVERAGE: {
+                    auto cmd = check_and_cast<UdpSetRecvCoverageCommand *>(ctrl);
+                    setRecvCoverage(sd, cmd->getCoverage());
+                    break;
+                }
+                default:
                     throw cRuntimeError("Unknown subclass of UdpSetOptionCommand received from app: code=%d, name=%s", ctrl->getOptionCode(), ctrl->getClassName());
             }
             break;
@@ -701,6 +712,16 @@ void Udp::setMulticastSourceFilter(SockDesc *sd, NetworkInterface *ie, L3Address
     }
 }
 
+void Udp::setSendCoverage(SockDesc *sd, int coverage)
+{
+    sd->sendCoverage = coverage;
+}
+
+void Udp::setRecvCoverage(SockDesc *sd, int coverage)
+{
+    sd->recvCoverage = coverage;
+}
+
 // ###############################################################
 // ####################### set options end #######################
 // ###############################################################
@@ -783,7 +804,8 @@ void Udp::handleUpperPacket(Packet *packet)
         throw cRuntimeError("send: total UDP message size exceeds %u", UDP_MAX_MESSAGE_SIZE);
 
     if (isUdplite) {
-        udpHeader->setTotalLengthField(B(udpliteDefaultCoverage));
+        int coverage = sd->sendCoverage != 0 ? sd->sendCoverage : udpliteDefaultCoverage;
+        udpHeader->setTotalLengthField(B(coverage));
     }
     else {
         udpHeader->setTotalLengthField(totalLength);
@@ -1183,6 +1205,19 @@ void Udp::processUndeliverablePacket(Packet *udpPacket)
 
 void Udp::sendUp(Ptr<const UdpHeader>& header, Packet *payload, SockDesc *sd, ushort srcPort, ushort destPort)
 {
+    // UDPLite: check receive coverage requirement (like Linux UDPLITE_RECV_CSCOV)
+    if (isUdplite && sd->recvCoverage > 0) {
+        auto coverage = header->getTotalLengthField();
+        if (coverage != B(0) && coverage < B(sd->recvCoverage)) {
+            EV_WARN << "Packet coverage " << coverage << " < socket recvCoverage " << sd->recvCoverage << ", dropping\n";
+            PacketDropDetails details;
+            details.setReason(INCORRECTLY_RECEIVED);
+            emit(packetDroppedSignal, payload, &details);
+            delete payload;
+            return;
+        }
+    }
+
     EV_INFO << "Sending payload up to socket sockId=" << sd->sockId << "\n";
 
     // send payload up to the application
