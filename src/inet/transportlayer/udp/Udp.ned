@@ -11,7 +11,8 @@ import inet.common.SimpleModule;
 import inet.transportlayer.contract.IUdp;
 
 //
-// UDP protocol implementation, for IPv4 (~Ipv4) and IPv6 (~Ipv6).
+// Base module for UDP and UDP-Lite protocol implementations,
+// for IPv4 (~Ipv4) and IPv6 (~Ipv6).
 //
 // The UDP protocol header is represented by the class ~UdpHeader.
 //
@@ -56,7 +57,7 @@ import inet.transportlayer.contract.IUdp;
 //
 // @see ~UdpHeader, ~UdpCommand, ~UdpCommandCode
 //
-simple Udp extends SimpleModule like IUdp
+simple UdpBase extends SimpleModule like IUdp
 {
     parameters:
         @class(Udp);
@@ -64,8 +65,7 @@ simple Udp extends SimpleModule like IUdp
         string icmpModule = default("^.ipv4.icmp");
         string icmpv6Module = default("^.ipv6.icmpv6");
         string checksumMode @enum("disabled", "declared", "computed") = default("declared");
-        bool isUdplite = default(false);
-        int udpliteDefaultCoverage = default(0);  // 0 = full coverage
+        bool isUdplite;
         bool defaultMulticastLoop = default(true);
         @display("i=block/transport");
         @signal[packetSentToUpper](type=cPacket);
@@ -89,6 +89,35 @@ simple Udp extends SimpleModule like IUdp
         input ipIn @labels(UdpHeader,Ipv4ControlInfo/up,Ipv6ControlInfo/up);
         output appOut @labels(UdpCommand/up) @messageKinds(inet::UdpStatusInd);
         output ipOut @labels(UdpHeader,Ipv4ControlInfo/down,Ipv6ControlInfo/down);
+}
+
+//
+// Standard UDP protocol implementation (RFC 768).
+//
+simple Udp extends UdpBase
+{
+    parameters:
+        isUdplite = false;
+}
+
+//
+// UDP-Lite protocol implementation (RFC 3828).
+//
+// UDP-Lite allows partial checksum coverage, where only a portion of the
+// payload is protected by the checksum. This is useful for applications
+// that can tolerate some bit errors in the payload (e.g. multimedia streaming).
+//
+// The `udpliteDefaultCoverage` parameter sets the module-level default checksum
+// coverage. Per-socket coverage can be configured via the ~UdpSocket API using
+// `setSendCoverage()` and `setRecvCoverage()`.
+//
+// @see ~UdpSocket, ~UdpLiteSetSendCoverageCommand, ~UdpLiteSetRecvCoverageCommand
+//
+simple UdpLite extends UdpBase
+{
+    parameters:
+        isUdplite = true;
+        int udpliteDefaultCoverage = default(0);  // 0 = full coverage, >=8 = partial coverage in bytes
 }
 
 //
