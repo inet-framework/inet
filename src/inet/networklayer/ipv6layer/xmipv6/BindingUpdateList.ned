@@ -9,7 +9,7 @@
 //
 //
 
-package inet.networklayer.xmipv6;
+package inet.networklayer.ipv6layer.xmipv6;
 
 import inet.common.SimpleModule;
 
@@ -22,5 +22,6 @@ simple BindingUpdateList extends SimpleModule
 {
     parameters:
         @class(BindingUpdateList);
+        @formerly(inet.networklayer.xmipv6.BindingUpdateList);
 }
 

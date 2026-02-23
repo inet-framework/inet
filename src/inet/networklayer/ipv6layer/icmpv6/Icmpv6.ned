@@ -5,7 +5,7 @@
 //
 
 
-package inet.networklayer.icmpv6;
+package inet.networklayer.ipv6layer.icmpv6;
 
 import inet.common.SimpleModule;
 
@@ -18,7 +18,7 @@ import inet.common.SimpleModule;
 simple Icmpv6 extends SimpleModule
 {
     parameters:
-        @class(Icmpv6);
+        @class(Icmpv6); @formerly(inet.networklayer.icmpv6.Icmpv6);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string checksumMode @enum("declared", "computed") = default("declared");
         @display("i=block/control");
@@ -28,4 +28,3 @@ simple Icmpv6 extends SimpleModule
         input ipv6In;
         output ipv6Out;
 }
-
