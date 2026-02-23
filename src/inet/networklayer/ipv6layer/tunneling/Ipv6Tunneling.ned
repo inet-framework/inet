@@ -7,7 +7,7 @@
 //
 //
 
-package inet.networklayer.ipv6tunneling;
+package inet.networklayer.ipv6layer.tunneling;
 
 import inet.common.SimpleModule;
 import inet.networklayer.contract.IIpv6Tunneling;
@@ -25,6 +25,7 @@ simple Ipv6Tunneling extends SimpleModule like IIpv6Tunneling
         string routingTableModule;  // The path to the RoutingTable module
         string xmipv6Module;  // The path to the XMipv6 module
         @display("i=block/tunnel");
+        @formerly(inet.networklayer.ipv6tunneling.IpvTunneling);
     gates:
         input upperLayerIn;
         output upperLayerOut;

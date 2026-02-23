@@ -5,7 +5,7 @@
 //
 
 
-package inet.networklayer.ipv6;
+package inet.networklayer.ipv6layer.routingtable;
 
 import inet.common.SimpleModule;
 import inet.networklayer.contract.IRoutingTable;
@@ -36,5 +36,6 @@ simple Ipv6RoutingTable extends SimpleModule like IRoutingTable
         @signal[mrouteAdded](type=inet::IPv6MulticastRoute);
         @signal[mrouteDeleted](type=inet::IPv6MulticastRoute);
         @signal[mrouteChanged](type=inet::IPv6MulticastRoute);
+        @formerly(inet.networklayer.ipv6.Ipv6RoutingTable);
 }
 

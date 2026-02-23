@@ -5,7 +5,7 @@
 //
 
 
-package inet.networklayer.icmpv6;
+package inet.networklayer.ipv6layer.neighbourdiscovery;
 
 import inet.common.SimpleModule;
 
@@ -31,6 +31,7 @@ simple Ipv6NeighbourDiscovery extends SimpleModule
         @display("i=block/network");
         @signal[startDad](type=long); // Emits value=1
         @statistic[startDad](title="DAD started";record=count,vector);
+        @formerly(inet.networklayer.icmpv6.Ipv6NeighbourDiscovery);
     gates:
         input ipv6In;
         output ipv6Out;
