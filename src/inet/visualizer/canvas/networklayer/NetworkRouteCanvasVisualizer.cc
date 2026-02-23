@@ -24,7 +24,7 @@
 #endif
 
 #ifdef INET_WITH_IPv6
-#include "inet/networklayer/ipv6/Ipv6.h"
+#include "inet/networklayer/ipv6layer/ipv6/Ipv6.h"
 #endif
 
 namespace inet {

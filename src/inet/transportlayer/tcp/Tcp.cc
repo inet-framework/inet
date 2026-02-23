@@ -23,7 +23,7 @@
 #endif // ifdef INET_WITH_IPv4
 
 #ifdef INET_WITH_IPv6
-#include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
+#include "inet/networklayer/ipv6layer/icmpv6/Icmpv6Header_m.h"
 #endif // ifdef INET_WITH_IPv6
 
 #include "inet/transportlayer/common/TransportPseudoHeader_m.h"

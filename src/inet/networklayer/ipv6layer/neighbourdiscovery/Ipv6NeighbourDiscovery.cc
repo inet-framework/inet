@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#include "inet/networklayer/icmpv6/Ipv6NeighbourDiscovery.h"
+#include "inet/networklayer/ipv6layer/neighbourdiscovery/Ipv6NeighbourDiscovery.h"
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -14,13 +14,13 @@
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/icmpv6/Icmpv6.h"
-#include "inet/networklayer/ipv6/Ipv6Header.h"
-#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
-#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
+#include "inet/networklayer/ipv6layer/icmpv6/Icmpv6.h"
+#include "inet/networklayer/ipv6layer/common/Ipv6Header.h"
+#include "inet/networklayer/ipv6layer/common/Ipv6InterfaceData.h"
+#include "inet/networklayer/ipv6layer/routingtable/Ipv6RoutingTable.h"
 
 #ifdef INET_WITH_xMIPv6
-#include "inet/networklayer/xmipv6/xMIPv6.h"
+#include "inet/networklayer/ipv6layer/xmipv6/xMIPv6.h"
 #endif /* INET_WITH_xMIPv6 */
 
 namespace inet {

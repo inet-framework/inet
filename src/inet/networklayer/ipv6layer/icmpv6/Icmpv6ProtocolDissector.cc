@@ -5,11 +5,11 @@
 //
 
 
-#include "inet/networklayer/icmpv6/Icmpv6ProtocolDissector.h"
+#include "inet/networklayer/ipv6layer/icmpv6/Icmpv6ProtocolDissector.h"
 
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
-#include "inet/networklayer/icmpv6/Icmpv6.h"
-#include "inet/networklayer/ipv6/Ipv6Header.h"
+#include "inet/networklayer/ipv6layer/icmpv6/Icmpv6.h"
+#include "inet/networklayer/ipv6layer/common/Ipv6Header.h"
 
 namespace inet {
 
