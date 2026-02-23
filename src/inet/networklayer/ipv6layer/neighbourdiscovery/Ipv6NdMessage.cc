@@ -5,7 +5,7 @@
 //
 
 
-#include "inet/networklayer/icmpv6/Ipv6NdMessage_m.h"
+#include "inet/networklayer/ipv6layer/neighbourdiscovery/Ipv6NdMessage_m.h"
 
 namespace inet {
 

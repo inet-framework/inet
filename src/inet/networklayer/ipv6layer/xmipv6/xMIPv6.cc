@@ -9,7 +9,7 @@
 //
 //
 
-#include "inet/networklayer/xmipv6/xMIPv6.h"
+#include "inet/networklayer/ipv6layer/xmipv6/xMIPv6.h"
 
 #include <algorithm>
 
@@ -23,12 +23,12 @@
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/icmpv6/Ipv6NeighbourDiscovery.h"
-#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
-#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
-#include "inet/networklayer/ipv6tunneling/Ipv6Tunneling.h"
-#include "inet/networklayer/xmipv6/BindingCache.h"
-#include "inet/networklayer/xmipv6/BindingUpdateList.h"
+#include "inet/networklayer/ipv6layer/neighbourdiscovery/Ipv6NeighbourDiscovery.h"
+#include "inet/networklayer/ipv6layer/common/Ipv6InterfaceData.h"
+#include "inet/networklayer/ipv6layer/routingtable/Ipv6RoutingTable.h"
+#include "inet/networklayer/ipv6layer/tunneling/Ipv6Tunneling.h"
+#include "inet/networklayer/ipv6layer/xmipv6/BindingCache.h"
+#include "inet/networklayer/ipv6layer/xmipv6/BindingUpdateList.h"
 
 namespace inet {
 

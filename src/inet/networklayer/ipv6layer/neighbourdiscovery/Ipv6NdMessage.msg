@@ -7,7 +7,7 @@
 
 import inet.common.INETDefs;
 import inet.linklayer.common.MacAddress;
-import inet.networklayer.icmpv6.Icmpv6Header;
+import inet.networklayer.ipv6layer.icmpv6.Icmpv6Header;
 import inet.networklayer.contract.ipv6.Ipv6Address;
 
 namespace inet;

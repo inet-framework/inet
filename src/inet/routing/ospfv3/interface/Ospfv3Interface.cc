@@ -1,7 +1,7 @@
 #include "inet/routing/ospfv3/interface/Ospfv3Interface.h"
 
 #include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/networklayer/ipv6/Ipv6Header_m.h"
+#include "inet/networklayer/ipv6layer/common/Ipv6Header_m.h"
 #include "inet/routing/ospfv3/interface/Ospfv3InterfaceState.h"
 #include "inet/routing/ospfv3/interface/Ospfv3InterfaceStateDown.h"
 

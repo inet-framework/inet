@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#include "inet/networklayer/icmpv6/Ipv6NeighbourCache.h"
+#include "inet/networklayer/ipv6layer/neighbourdiscovery/Ipv6NeighbourCache.h"
 
 #include "inet/common/stlutils.h"
 

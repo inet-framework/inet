@@ -5,11 +5,11 @@
 //
 
 
-#include "inet/networklayer/icmpv6/Icmpv6ProtocolPrinter.h"
+#include "inet/networklayer/ipv6layer/icmpv6/Icmpv6ProtocolPrinter.h"
 
 #include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/packet/printer/ProtocolPrinterRegistry.h"
-#include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
+#include "inet/networklayer/ipv6layer/icmpv6/Icmpv6Header_m.h"
 
 namespace inet {
 
