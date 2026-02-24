@@ -73,7 +73,6 @@ module Ieee80211Interface extends NetworkInterface like IWirelessInterface
         **.bitrate = this.bitrate;
         mac.modeSet = default(this.opMode);
         mac.*.rateSelection.dataFrameBitrate = default(this.bitrate);
-        radio.signalAnalogRepresentation = default("scalar");
         *.macModule = default(absPath(".mac"));
         *.mibModule = default(absPath(".mib"));
         *.interfaceTableModule = default(absPath(this.interfaceTableModule));
