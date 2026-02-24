@@ -27,7 +27,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 # udp apps
 **.cli[*].numApps = 1
 **.cli[*].app[*].typename = "UdpBasicApp"
-**.cli[*].app[0].destAddresses = "aaaa:2:2::8aa:ff:fe00:8" # "srv" does not work
+**.cli[*].app[0].destAddresses = ["aaaa:2:2::8aa:ff:fe00:8"] # "srv" does not work
 **.cli[*].app[0].destPort = 1000
 **.cli[*].app[0].messageLength = 100B
 

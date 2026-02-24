@@ -69,7 +69,7 @@ cmdenv-log-prefix = "At %ts %N: "
 *.producer.packetLength = intuniform(1B, 2B)
 *.producer.productionInterval = 1s
 *.marker.filterClasses = "TestSmall TestLarge"
-*.marker.labels = "small large"
+*.marker.labels = ["small", "large"]
 *.classifier.labelsToGateIndices = "small 0 large 1"
 
 %# remove formatting

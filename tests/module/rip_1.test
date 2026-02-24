@@ -120,8 +120,8 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.H*.app[0].sendInterval = 1s
 **.H*.app[0].startTime = 11s+5*${n}s
 **.H*.app[0].stopTime = this.startTime + 99.9s
-**.H2.app[0].destAddresses = "H1"
-**.H1.app[0].destAddresses = "H2"
+**.H2.app[0].destAddresses = ["H1"]
+**.H1.app[0].destAddresses = ["H2"]
 **.H*.app[1].typename = "UdpEchoApp"
 **.H*.app[1].localPort = 1234
 
