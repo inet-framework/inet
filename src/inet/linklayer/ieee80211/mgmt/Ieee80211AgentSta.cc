@@ -43,7 +43,7 @@ void Ieee80211AgentSta::initialize(int stage)
         host->subscribe(l2BeaconLostSignal, this);
 
         // JcM add: get the default ssid, if there is one.
-        defaultSsid = par("defaultSsid").stdstringValue();
+        defaultSsids = check_and_cast<cValueArray *>(par("defaultSsid").objectValue())->asStringVector();
 
         // start up: send scan request
         simtime_t startingTime = par("startingTime");
@@ -236,11 +236,9 @@ const Ieee80211Prim_BssDescription *Ieee80211AgentSta::chooseBSS(const std::vect
     if (bssList.empty())
         return nullptr;
 
-    std::vector<std::string> acceptedSsids = cStringTokenizer(defaultSsid.c_str()).asVector();
-
     std::vector<const Ieee80211Prim_BssDescription*> filteredBssList;
     for (const auto& bss : bssList)
-        if (acceptedSsids.empty() || contains(acceptedSsids, bss->getSSID()))
+        if (defaultSsids.empty() || contains(defaultSsids, bss->getSSID()))
             filteredBssList.push_back(bss);
 
     // here, just choose the one with the greatest receive power

@@ -64,8 +64,8 @@ simple NetPerfMeter extends SimpleModule like IApp
 
         volatile double frameRate      @unit(Hz) = default(1 Hz);      // Outgoing frame rate
         volatile int    frameSize      @unit(B)  = default(1452 B);    // Outgoing frame size
-        string          frameRateString          = default("");        // Outgoing frame rate per stream, separated by ";"
-        string          frameSizeString          = default("");        // Outgoing frame size per stream, separated by ";"
+        object          frameRateString          = default([]);        // Outgoing frame rate per stream
+        object          frameSizeString          = default([]);        // Outgoing frame size per stream
         string          traceFile                = default("");        // Use trace file instead of frame rate/frame size
         int             maxMsgSize     @unit(B)  = default(1000 B);    // Maximum message size
         double          unordered                = default(0.0);       // Fraction of unordered messages (SCTP only)

@@ -12,7 +12,7 @@
 namespace inet {
 
 namespace sctp {
-void SctpAssociation::sendAsconf(const char *type, const bool remote)
+void SctpAssociation::sendAsconf(const std::vector<intval_t>& types, const bool remote)
 {
     SctpAuthenticationChunk *authChunk = nullptr;
     bool nat = false;
@@ -50,10 +50,8 @@ void SctpAssociation::sendAsconf(const char *type, const bool remote)
 
         asconfChunk->setByteLength(chunkLength);
 
-        cStringTokenizer tokenizer(type);
-        while (tokenizer.hasMoreTokens()) {
-            const char *token = tokenizer.nextToken();
-            switch (atoi(token)) {
+        for (auto typeCode : types) {
+            switch (typeCode) {
                 case ADD_IP_ADDRESS: {
                     SctpAddIPParameter *ipParam;
                     ipParam = new SctpAddIPParameter();
@@ -132,7 +130,7 @@ void SctpAssociation::sendAsconf(const char *type, const bool remote)
                 }
 
                 default:
-                    EV_INFO << "type " << atoi(token) << "not known\n";
+                    EV_INFO << "type " << typeCode << " not known\n";
                     break;
             }
         }
