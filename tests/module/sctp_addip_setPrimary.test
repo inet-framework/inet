@@ -42,7 +42,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.sctp_client.app[0].outboundStreams = 1
 **.sctp_client.sctp.chunks = "ASCONF,ASCONF_ACK"
 **.sctp_client.sctp.addAddress = ""
-**.sctp_client.sctp.addIpType = "0"
+**.sctp_client.sctp.addIpType = [0]
 **.sctp_client.sctp.addTime = 0s
 
 **.sctp_server.numApps = 1
@@ -55,7 +55,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.sctp_server.app[*].outboundStreams = 1
 **.sctp_server.sctp.chunks = "ASCONF,ASCONF_ACK"
 **.sctp_server.sctp.addAddress = "10.2.3.1"
-**.sctp_server.sctp.addIpType = "49156"
+**.sctp_server.sctp.addIpType = [49156]
 #NONE = 0, SET_PRIMARY_ADDRESS= 49156, ADAPTATION_LAYER_INDICATION= 49158, SUPPORTED_EXTENSIONS= 32776,
 #ADD_IP_ADDRESS = 49153, DELETE_IP_ADDRESS= 49154, ERROR_CAUSE_INDICATION= 49155, SUCCESS_INDICATION= 49157
 **.sctp_server.sctp.addTime = 10s

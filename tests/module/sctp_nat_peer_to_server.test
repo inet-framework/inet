@@ -61,9 +61,9 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.Peer_1.sctp.addTime = 0.01s
 **.Server.sctp.addTime = 0.1s
 **.Peer_1.sctp.addAddress = "10.2.1.1"
-**.Peer_1.sctp.addIpType = "49153"  #separate the type by ',' SET_PRIMARY_ADDRESS= 49156,ADD_IP_ADDRESS=49153,DELETE_IP_ADDRESS=49154
+**.Peer_1.sctp.addIpType = [49153]  #separate the type by ',' SET_PRIMARY_ADDRESS= 49156,ADD_IP_ADDRESS=49153,DELETE_IP_ADDRESS=49154
 **.Server.sctp.addAddress = "100.2.3.1"
-**.Server.sctp.addIpType = "49156"
+**.Server.sctp.addIpType = [49156]
 **.sctp.chunks=""
 **.sctp.packetDrop = false
 **.Peer_1.sctp.natFriendly = true
