@@ -124,7 +124,7 @@ void PingApp::initialize(int stage)
 void PingApp::parseDestAddressesPar()
 {
     srcAddr = L3AddressResolver().resolve(par("srcAddr"));
-    auto destAddrs = check_and_cast<cValueArray *>(par("destAddr").objectValue())->asStringVector();
+    auto destAddrs = check_and_cast<cValueArray *>(par("destAddresses").objectValue())->asStringVector();
     if (destAddrs.size() == 1 && destAddrs[0] == "*") {
         destAddresses = getAllAddresses();
     }
@@ -351,7 +351,7 @@ void PingApp::cancelNextPingRequest()
 
 bool PingApp::isEnabled()
 {
-    return check_and_cast<cValueArray *>(par("destAddr").objectValue())->size() > 0
+    return check_and_cast<cValueArray *>(par("destAddresses").objectValue())->size() > 0
             && (count == -1 || sentCount < count);
 }
 

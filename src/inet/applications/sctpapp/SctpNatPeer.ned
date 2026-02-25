@@ -20,7 +20,7 @@ simple SctpNatPeer extends SimpleModule like IApp
 {
     parameters:
         @class(SctpNatPeer);
-        object localAddress = default([]); // List of addresses
+        object localAddresses = default([]); // List of addresses
         int localPort = default(0); // Port number to listen on
         string connectAddress;  // Server address (may be symbolic)
         int connectPort; // Port number to connect to

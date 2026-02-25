@@ -21,7 +21,7 @@ simple SctpPeer extends SimpleModule like IApp
 {
     parameters:
         @class(SctpPeer);
-        object localAddress = default([]); // List of addresses
+        object localAddresses = default([]); // List of addresses
         int localPort = default(0); // Port number to listen on
         bool echo = default(false);  // Echoes received packages when true
         double echoDelay @unit(s) = default(0s);

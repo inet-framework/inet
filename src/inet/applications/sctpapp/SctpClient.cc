@@ -98,7 +98,7 @@ void SctpClient::initialize(int stage)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
 
         // parameters
-        AddressVector addresses = L3AddressResolver().resolve(check_and_cast<cValueArray *>(par("localAddress").objectValue())->asStringVector());
+        AddressVector addresses = L3AddressResolver().resolve(check_and_cast<cValueArray *>(par("localAddresses").objectValue())->asStringVector());
         int port = par("localPort");
         socket.setOutputGate(gate("socketOut"));
         socket.setCallback(this);

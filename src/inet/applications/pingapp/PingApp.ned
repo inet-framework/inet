@@ -32,7 +32,7 @@ import inet.applications.contract.IApp;
 // and starts pinging again. The application stops pinging once all destination
 // addresses were tested or the simulation time reaches `stopTime`.
 //
-// To disable send, specify empty `destAddr`.
+// To disable send, specify empty `destAddresses`.
 //
 // Every ping request is sent out with a sequence number, and replies are
 // expected to arrive in the same order. Whenever there's a jump in the
@@ -49,12 +49,12 @@ simple PingApp extends SimpleModule like IApp
 {
     parameters:
         @class(PingApp);
-        object destAddr = default([]); // Destination address(es), "*" means all IPv4/IPv6 interfaces in the entire simulation
+        object destAddresses = default([]); // Destination address(es), "*" means all IPv4/IPv6 interfaces in the entire simulation
         string srcAddr = default(""); // Source address (useful with multi-homing)
         int packetSize @unit(B) = default(56B); // Size of ping payload, in bytes
         volatile double sendInterval @unit(s) = default(1s); // Time to wait between pings (can be random)
         int hopLimit = default(-1); // TTL or hopLimit for IP packets
-        int count = default(-1); // Number of ping requests sent to a single destination address, -1 means continuously (only first address will be used from destAddr)
+        int count = default(-1); // Number of ping requests sent to a single destination address, -1 means continuously (only first address will be used from destAddresses)
         double startTime @unit(s) = default(uniform(0s, this.sleepDuration + this.sendInterval)); // Send the first ping at startTime
         double stopTime @unit(s) = default(-1s); // Time to finish sending, negative values mean forever
         volatile double sleepDuration @unit(s) = default(0s); // Time spent in sleep between switching destinations
