@@ -62,7 +62,7 @@ void SctpServer::initialize(int stage)
             readInt = true;
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
-        AddressVector addresses = L3AddressResolver().resolve(check_and_cast<cValueArray *>(par("localAddress").objectValue())->asStringVector());
+        AddressVector addresses = L3AddressResolver().resolve(check_and_cast<cValueArray *>(par("localAddresses").objectValue())->asStringVector());
         int port = par("localPort");
         int messagesToPush = par("messagesToPush");
 

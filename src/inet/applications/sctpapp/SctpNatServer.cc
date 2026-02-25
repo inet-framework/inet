@@ -44,7 +44,7 @@ void SctpNatServer::initialize(int stage)
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         // parameters
-        AddressVector addresses = L3AddressResolver().resolve(check_and_cast<cValueArray *>(par("localAddress").objectValue())->asStringVector());
+        AddressVector addresses = L3AddressResolver().resolve(check_and_cast<cValueArray *>(par("localAddresses").objectValue())->asStringVector());
         int32_t port = par("localPort");
 
         ordered = par("ordered");

@@ -83,7 +83,7 @@ void SctpNatPeer::initialize(int stage)
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         // parameters
-        AddressVector addresses = L3AddressResolver().resolve(check_and_cast<cValueArray *>(par("localAddress").objectValue())->asStringVector());
+        AddressVector addresses = L3AddressResolver().resolve(check_and_cast<cValueArray *>(par("localAddresses").objectValue())->asStringVector());
         int32_t port = par("localPort");
         echo = par("echo");
         delay = par("echoDelay");
@@ -541,7 +541,7 @@ void SctpNatPeer::socketPeerClosed(SctpSocket *socket)
         setStatusString("closed");
         clientSocket.close();
         if (rendezvous) {
-            AddressVector addresses = L3AddressResolver().resolve(check_and_cast<cValueArray *>(par("localAddress").objectValue())->asStringVector());
+            AddressVector addresses = L3AddressResolver().resolve(check_and_cast<cValueArray *>(par("localAddresses").objectValue())->asStringVector());
             int32_t port = par("localPort");
             rendezvousSocket.setOutputGate(gate("socketOut"));
             rendezvousSocket.setOutboundStreams(outboundStreams);
@@ -572,7 +572,7 @@ void SctpNatPeer::socketClosed(SctpSocket *socket)
     setStatusString("closed");
     clientSocket.close();
     if (rendezvous) {
-        AddressVector addresses = L3AddressResolver().resolve(check_and_cast<cValueArray *>(par("localAddress").objectValue())->asStringVector());
+        AddressVector addresses = L3AddressResolver().resolve(check_and_cast<cValueArray *>(par("localAddresses").objectValue())->asStringVector());
         int32_t port = par("localPort");
         rendezvousSocket.setOutputGate(gate("socketOut"));
         rendezvousSocket.setOutboundStreams(outboundStreams);
