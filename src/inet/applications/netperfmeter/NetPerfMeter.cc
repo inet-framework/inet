@@ -110,17 +110,15 @@ NetPerfMeter::~NetPerfMeter()
     }
 }
 
-// ###### Parse vector of cDynamicExpression from string ####################
+// ###### Parse vector of cDynamicExpression from object parameter ###########
 void NetPerfMeter::parseExpressionVector(std::vector<cDynamicExpression>& expressionVector,
-                                         const char*                      string,
-                                         const char*                      delimiters)
+                                         cPar&                            parameter)
 {
     expressionVector.clear();
-    cStringTokenizer tokenizer(string, delimiters);
-    while (tokenizer.hasMoreTokens()) {
-        const char *token = tokenizer.nextToken();
+    auto strings = check_and_cast<cValueArray *>(parameter.objectValue())->asStringVector();
+    for (auto& s : strings) {
         cDynamicExpression expression;
-        expression.parse(token);
+        expression.parse(s.c_str());
         expressionVector.push_back(expression);
     }
 }
@@ -169,8 +167,8 @@ void NetPerfMeter::initialize(int stage)
         if ((UnreliableMode < 0.0) || (UnreliableMode > 1.0)) {
             throw cRuntimeError("Bad value for unreliable probability; use range from [0.0, 1.0]");
         }
-        parseExpressionVector(FrameRateExpressionVector, par("frameRateString"), ";");
-        parseExpressionVector(FrameSizeExpressionVector, par("frameSizeString"), ";");
+        parseExpressionVector(FrameRateExpressionVector, par("frameRateString"));
+        parseExpressionVector(FrameSizeExpressionVector, par("frameSizeString"));
 
         TraceIndex = ~0;
         if (strcmp(par("traceFile").stringValue(), "") != 0) {

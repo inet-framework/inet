@@ -39,7 +39,7 @@ class INET_API Ieee80211AgentSta : public SimpleModule, public cListener // TODO
     simtime_t authenticationTimeout;
     simtime_t associationTimeout;
 
-    std::string defaultSsid;
+    std::vector<std::string> defaultSsids;
 
     // Statistics:
     static simsignal_t sentRequestSignal;

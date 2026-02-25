@@ -1455,7 +1455,7 @@ class INET_API SctpAssociation : public SimpleModule
     bool unorderedQueueEmptyOfStream(uint16_t sid);
 
     /** Methods for Add-IP and AUTH **/
-    void sendAsconf(const char *type, bool remote = false);
+    void sendAsconf(const std::vector<intval_t>& types, bool remote = false);
     void sendAsconfAck(uint32_t serialNumber);
     SctpEventCode processAsconfArrived(SctpAsconfChunk *asconfChunk);
     SctpEventCode processAsconfAckArrived(SctpAsconfAckChunk *asconfAckChunk);

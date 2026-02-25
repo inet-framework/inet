@@ -3278,8 +3278,8 @@ SctpEventCode SctpAssociation::processAsconfArrived(SctpAsconfChunk *asconfChunk
         if (StartAddIP->isScheduled()) {
             stopTimer(StartAddIP);
             state->corrIdNum = state->asconfSn;
-            const char *type = sctpMain->par("addIpType").stringValue();
-            sendAsconf(type, false);
+            auto types = check_and_cast<cValueArray *>(sctpMain->par("addIpType").objectValue())->asIntVector();
+            sendAsconf(types, false);
         }
     }
     return SCTP_E_IGNORE;
@@ -3511,8 +3511,8 @@ void SctpAssociation::processErrorArrived(SctpErrorChunk *errorChunk)
                     if (StartAddIP->isScheduled())
                         stopTimer(StartAddIP);
                     state->corrIdNum = state->asconfSn;
-                    const char *type = sctpMain->par("addIpType").stringValue();
-                    sendAsconf(type, true);
+                    auto types = check_and_cast<cValueArray *>(sctpMain->par("addIpType").objectValue())->asIntVector();
+                    sendAsconf(types, true);
                 }
                 break;
             }

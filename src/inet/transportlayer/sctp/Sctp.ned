@@ -88,7 +88,7 @@ simple Sctp extends SimpleModule like ISctp
         bool addIP = default(false);
         double addTime @unit(s) = default(0s);
         string addAddress = default("");
-        string addIpType = default("0");      // SET_PRIMARY_ADDRESS=49156,ADD_IP_ADDRESS=49153,DELETE_IP_ADDRESS=49154
+        object addIpType = default([0]);      // SET_PRIMARY_ADDRESS=49156,ADD_IP_ADDRESS=49153,DELETE_IP_ADDRESS=49154
 
         //#====== Packet Drop =================================================
         bool packetDrop = default(false);

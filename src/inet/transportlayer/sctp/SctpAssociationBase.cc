@@ -863,8 +863,8 @@ bool SctpAssociation::processTimer(cMessage *msg)
     }
     else if (msg == StartAddIP) {
         state->corrIdNum = state->asconfSn;
-        const char *type = sctpMain->par("addIpType").stringValue();
-        sendAsconf(type);
+        auto types = check_and_cast<cValueArray *>(sctpMain->par("addIpType").objectValue())->asIntVector();
+        sendAsconf(types);
     }
     else if (msg == FairStartTimer) {
         assocStat.fairStart = simTime();
@@ -1033,9 +1033,11 @@ bool SctpAssociation::processAppCommand(cMessage *msg, SctpCommandReq *sctpComma
             event = SCTP_E_IGNORE;
             break;
 
-        case SCTP_E_SEND_ASCONF:
-            sendAsconf(sctpMain->par("addIpType"));
+        case SCTP_E_SEND_ASCONF: {
+            auto types = check_and_cast<cValueArray *>(sctpMain->par("addIpType").objectValue())->asIntVector();
+            sendAsconf(types);
             break;
+        }
 
         case SCTP_E_SET_STREAM_PRIO: {
             auto sctpSendReq = check_and_cast<SctpSendReq *>(sctpCommand);

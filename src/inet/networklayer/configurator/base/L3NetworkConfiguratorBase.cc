@@ -520,8 +520,7 @@ std::string L3NetworkConfiguratorBase::getWirelessId(NetworkInterface *networkIn
     }
     cModule *agentModule = interfaceModule->getSubmodule("agent");
     if (agentModule != nullptr && agentModule->hasPar("defaultSsid")) {
-        const char *defaultSsids = agentModule->par("defaultSsid");
-        std::vector<std::string> ssids = cStringTokenizer(defaultSsids).asVector();
+        auto ssids = check_and_cast<cValueArray *>(agentModule->par("defaultSsid").objectValue())->asStringVector();
         if (ssids.size() == 1) {
             return mediumName + ":" + ssids[0];
         }
