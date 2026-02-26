@@ -155,9 +155,10 @@ class INET_API NetworkInterface : public queueing::PacketProcessorBase, public q
         F_IPV4_DATA, F_IPV6_DATA, F_NEXTHOP_DATA, F_ISIS_DATA, F_TRILL_DATA, F_IEEE8021D_DATA, F_CLNS_DATA, F_MRP_DATA
     };
 
-  protected:
-    // change notifications
+  public:
     virtual void configChanged(int fieldId) { changed(interfaceConfigChangedSignal, fieldId); }
+
+  protected:
     virtual void stateChanged(int fieldId) { changed(interfaceStateChangedSignal, fieldId); }
     virtual void changed(simsignal_t signalID, int fieldId);
 

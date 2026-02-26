@@ -27,6 +27,7 @@ package inet.visualizer.base;
 //  - %g generic address
 //  - %n network address
 //  - %t up or down state
+//  - %d the `t` tag of the interface display string
 //  - %i the result of the `NetworkInterface::info()` call
 //  - %s the result of the `NetworkInterface::str()` call
 //  - %\ conditional newline for wired interfaces
