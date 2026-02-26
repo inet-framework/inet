@@ -48,6 +48,7 @@ class INET_API StpTester : public SimpleModule
     ~StpTester();
     virtual void initialize() override;
     virtual void handleMessage(cMessage *msg) override;
+    void add_watches();
 
   protected:
     void dfsVisit(Topology::Node *node);
