@@ -28,12 +28,21 @@ void StpTester::initialize()
     checkTimer = new cMessage("checktime");
     checkTime = par("checkTime");
     scheduleAfter(checkTime, checkTimer);
+    add_watches();
+}
+
+void StpTester::add_watches()
+{
+    WATCH_EXPR("loopfree", std::string(isLoopFreeGraph() ? "true" : "false"));
+    WATCH_EXPR("connected", std::string(isConnectedGraph() ? "true" : "false"));
+    WATCH_EXPR("tree", std::string(isTreeGraph() ? "true" : "false"));
 }
 
 void StpTester::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
         depthFirstSearch();
+        refreshDisplay();
         if (isLoopFreeGraph())
             EV_DEBUG << "The network is loop-free" << endl;
         else
