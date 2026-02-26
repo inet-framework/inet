@@ -10,6 +10,8 @@ import inet.linklayer.ieee8021d.tester.StpTester;
 import inet.node.ethernet.Eth1G;
 import inet.node.ethernet.EthernetHost;
 import inet.node.ethernet.EthernetSwitch;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
+
 
 //
 // Three Ethernet switches connected in a ring with two hosts.
@@ -18,6 +20,9 @@ import inet.node.ethernet.EthernetSwitch;
 network LoopNetwork
 {
     submodules:
+        visualizer: IntegratedCanvasVisualizer {
+            @display("p=100,351;is=s");
+        }
         switch1: EthernetSwitch {
             @display("p=300,200");
         }
@@ -37,8 +42,8 @@ network LoopNetwork
         switch1.ethg++ <--> Eth1G <--> switch2.ethg++;
         switch2.ethg++ <--> Eth1G <--> switch3.ethg++;
         switch3.ethg++ <--> Eth1G <--> switch1.ethg++;
-        host1.ethg    <--> Eth1G <--> switch1.ethg++;
-        host2.ethg    <--> Eth1G <--> switch3.ethg++;
+        host1.ethg <--> Eth1G <--> switch1.ethg++;
+        host2.ethg <--> Eth1G <--> switch3.ethg++;
 }
 
 //
@@ -56,6 +61,9 @@ network SwitchNetwork
         }
         l2NetworkConfigurator: L2NetworkConfigurator {
             @display("p=100,300;is=s");
+        }
+        visualizer: IntegratedCanvasVisualizer {
+            @display("p=213,101;is=s");
         }
         switch1: EthernetSwitch {
             @display("p=400,100");
@@ -94,8 +102,8 @@ network SwitchNetwork
         switch4.ethg++ <--> Eth1G <--> switch6.ethg++;
         switch4.ethg++ <--> Eth1G <--> switch7.ethg++;
         switch5.ethg++ <--> Eth1G <--> switch7.ethg++;
-        host1.ethg     <--> Eth1G <--> switch6.ethg++;
-        host2.ethg     <--> Eth1G <--> switch5.ethg++;
+        host1.ethg <--> Eth1G <--> switch6.ethg++;
+        host2.ethg <--> Eth1G <--> switch5.ethg++;
 }
 
 //
@@ -133,13 +141,13 @@ network LargeNet extends SwitchNetwork
         switch11.ethg++ <--> Eth1G <--> switch9.ethg++;
         switch11.ethg++ <--> Eth1G <--> switch10.ethg++;
         switch11.ethg++ <--> Eth1G <--> switch5.ethg++;
-        switch9.ethg++  <--> Eth1G <--> switch10.ethg++;
-        switch8.ethg++  <--> Eth1G <--> switch9.ethg++;
-        switch8.ethg++  <--> Eth1G <--> switch11.ethg++;
-        switch8.ethg++  <--> Eth1G <--> switch5.ethg++;
-        switch8.ethg++  <--> Eth1G <--> switch2.ethg++;
-        switch3.ethg++  <--> Eth1G <--> host3.ethg;
-        host4.ethg      <--> Eth1G <--> switch10.ethg++;
-        host5.ethg      <--> Eth1G <--> switch9.ethg++;
-        host6.ethg      <--> Eth1G <--> switch8.ethg++;
+        switch9.ethg++ <--> Eth1G <--> switch10.ethg++;
+        switch8.ethg++ <--> Eth1G <--> switch9.ethg++;
+        switch8.ethg++ <--> Eth1G <--> switch11.ethg++;
+        switch8.ethg++ <--> Eth1G <--> switch5.ethg++;
+        switch8.ethg++ <--> Eth1G <--> switch2.ethg++;
+        switch3.ethg++ <--> Eth1G <--> host3.ethg;
+        host4.ethg <--> Eth1G <--> switch10.ethg++;
+        host5.ethg <--> Eth1G <--> switch9.ethg++;
+        host6.ethg <--> Eth1G <--> switch8.ethg++;
 }
