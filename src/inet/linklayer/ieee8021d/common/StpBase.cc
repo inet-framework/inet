@@ -124,6 +124,7 @@ void StpBase::refreshDisplay() const
                 if (nicModule != nullptr) {
                     std::string buf = std::string(port->getRoleName()) + "\n" + port->getStateName();
                     nicModule->getDisplayString().setTagArg("t", 0, buf.c_str());
+                    ie->configChanged(NetworkInterface::F_IEEE8021D_DATA);
                 }
             }
             else {
@@ -133,13 +134,17 @@ void StpBase::refreshDisplay() const
                 // label ethernet interface with port status and role
                 if (nicModule != nullptr) {
                     nicModule->getDisplayString().setTagArg("t", 0, "");
+                    ie->configChanged(NetworkInterface::F_IEEE8021D_DATA);
                 }
             }
         }
 
         // mark root switch
         if (isUp() && getRootInterfaceId() == -1)
+        {
             switchModule->getDisplayString().setTagArg("i", 1, ROOT_SWITCH_COLOR);
+            switchModule->getDisplayString().setTagArg("i", 2, 40);
+        }
         else
             switchModule->getDisplayString().setTagArg("i", 1, "");
     }

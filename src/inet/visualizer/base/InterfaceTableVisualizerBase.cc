@@ -89,6 +89,8 @@ std::string InterfaceTableVisualizerBase::DirectiveResolver::resolveDirective(ch
                 default: throw cRuntimeError("Unknown interface state");
             }
             break;
+        case 'd':
+            return networkInterface->getDisplayString().getTagArg("t", 0);
         case 'i':
             return networkInterface->str();
         case 's':
@@ -296,7 +298,7 @@ void InterfaceTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t
             auto networkInterfaceDetails = static_cast<NetworkInterfaceChangeDetails *>(object);
             auto networkInterface = networkInterfaceDetails->getNetworkInterface();
             auto fieldId = networkInterfaceDetails->getFieldId();
-            if ((signal == interfaceConfigChangedSignal && fieldId == NetworkInterface::F_IPV4_DATA)
+            if ((signal == interfaceConfigChangedSignal && (fieldId == NetworkInterface::F_IPV4_DATA || fieldId == NetworkInterface::F_IEEE8021D_DATA))
 #ifdef INET_WITH_IPv4
                     || (signal == interfaceIpv4ConfigChangedSignal && (fieldId == Ipv4InterfaceData::F_IP_ADDRESS || fieldId == Ipv4InterfaceData::F_NETMASK))
 #endif // INET_WITH_IPv4
