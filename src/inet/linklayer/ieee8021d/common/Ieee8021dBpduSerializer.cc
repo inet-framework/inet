@@ -25,7 +25,6 @@ void Ieee8021dBpduSerializer::serialize(MemoryOutputStream& stream, const Ptr<co
     switch (bpduBase->getBpduType()) {
         case BPDU_CFG: {
             const auto& bpdu = CHK(dynamicPtrCast<const BpduCfg>(chunk));
-            break;
             stream.writeBit(bpdu->getTcaFlag());
             stream.writeNBitsOfUint64Be(bpdu->getReserved(), 6);
             stream.writeBit(bpdu->getTcFlag());
@@ -40,6 +39,7 @@ void Ieee8021dBpduSerializer::serialize(MemoryOutputStream& stream, const Ptr<co
             stream.writeUint16Be(bpdu->getMaxAge().dbl() * 256);
             stream.writeUint16Be(bpdu->getHelloTime().dbl() * 256);
             stream.writeUint16Be(bpdu->getForwardDelay().dbl() * 256);
+            break;
         }
         case BPDU_TCN: {
             const auto& bpdu = CHK(dynamicPtrCast<const BpduTcn>(chunk));
