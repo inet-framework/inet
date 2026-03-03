@@ -1124,7 +1124,7 @@ void Udp::processUndeliverablePacket(Packet *udpPacket)
     else {
         throw cRuntimeError("(%s)%s arrived from lower layer with unrecognized NetworkProtocolInd %s",
                 udpPacket->getClassName(), udpPacket->getName(), protocol->getName());
-        delete udpPacket;
+        // delete udpPacket;
     }
 }
 
