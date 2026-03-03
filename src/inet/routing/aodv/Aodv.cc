@@ -1776,7 +1776,7 @@ bool Aodv::isExternalAddress(const L3Address& address) const
             if (auto ipv4Data = interface->findProtocolData<Ipv4InterfaceData>()) {
                 Ipv4Address ipv4Addr = ipv4Data->getIPAddress();
                 Ipv4Address netmask = ipv4Data->getNetmask();
-                 return !Ipv4Address::maskedAddrAreEqual(address.toIpv4(), ipv4Addr, netmask);
+                return !Ipv4Address::maskedAddrAreEqual(address.toIpv4(), ipv4Addr, netmask);
             }
             break;
 #endif // ifdef INET_WITH_IPv4
