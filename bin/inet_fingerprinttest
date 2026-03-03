@@ -41,6 +41,7 @@ debug=False
 release=False
 exitCode = 0
 writeOutfile = True
+showPassedFingerprints = False
 useColors = sys.stdout.isatty()
 
 defaultFingerprintCalculator = 'inet::FingerprintCalculator'
@@ -528,7 +529,13 @@ class FingerprintTestCase(SimulationTestCase):
         if anyFingerprintBad:
             self.storeFingerprintCallback(computedFingerprints)
             (afp, efp) = diffFpGroups(computedFingerprints, self.fingerprint)
-            assert False, "some fingerprint mismatch: actual '" + formatFingerprintGroupForCsv(afp) + "', expected: '" + formatFingerprintGroupForCsv(efp) + "'"
+            msg = "some fingerprint mismatch: actual '" + formatFingerprintGroupForCsv(afp) + "', expected: '" + formatFingerprintGroupForCsv(efp) + "'"
+            if showPassedFingerprints:
+                # Calculate passed fingerprints (those that match between actual and expected)
+                passedFp = [fp for fp in self.fingerprint if fp not in efp]
+                passedStr = formatFingerprintGroupForCsv(passedFp) if passedFp else "none"
+                msg += ", passed: '" + passedStr + "'"
+            assert False, msg
 
     def __str__(self):
         return self.title
@@ -809,6 +816,7 @@ if __name__ == "__main__":
     parser.add_argument('-n', type=int, default=1, help='Split the selected test cases into n sets, and only run one of these sets')
     parser.add_argument('-i', type=int, default=0, help='Which set of test cases to run [0..n-1]')
     parser.add_argument('-l', '--logfile', default = "fingerprinttest.out", metavar='filename', help='name of the logfile')
+    parser.add_argument('--show-passed', action='store_true', help='show passed fingerprints in mismatch error messages')
     args = parser.parse_args()
 
     logFile = args.logfile
@@ -837,6 +845,7 @@ if __name__ == "__main__":
     debug = args.debug
     release = args.release
     writeOutfile = args.writeOutfile
+    showPassedFingerprints = args.show_passed
 
     generator = FingerprintTestCaseGenerator()
     testcases = generator.generateFromCSV(args.testspecfiles, args.fpfilter, args.excludefpfilter, args.match, args.exclude, args.repeat)
