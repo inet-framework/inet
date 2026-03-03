@@ -255,8 +255,8 @@ void Gptp::sendFollowUp(int portId)
     }
     else if (gptpNodeType == BRIDGE_NODE) {
         followUp->setSequenceId(syncReceiverProcess.sync->getSequenceId());
-        clocktime_t upstreamTxTime = syncReceiverProcess.syncReceptionStartUnsychronized - pdelay / neighborRateRatio;
-        clocktime_t residenceTime = process.syncTransmissionStartUnsychronized - upstreamTxTime;
+        clocktime_t upstreamTxTime = syncReceiverProcess.syncReceptionStartUnsynchronized - pdelay / neighborRateRatio;
+        clocktime_t residenceTime = process.syncTransmissionStartUnsynchronized - upstreamTxTime;
         ASSERT(residenceTime >= 0);
         ASSERT(pdelay >= 0);
         followUp->setCorrectionField(syncReceiverProcess.followUp->getCorrectionField() + gmRateRatio * residenceTime);
@@ -299,7 +299,7 @@ void Gptp::sendPdelayResp(int portId)
     pdelayResp->setDomainNumber(domainNumber);
     pdelayResp->setRequestingPortIdentity(process.pdelayReq->getSourcePortIdentity());
     pdelayResp->setSequenceId(process.pdelayReq->getSequenceId());
-    pdelayResp->setRequestReceiptTimestamp(process.pdelayReqReceptionStartUnsychronized);
+    pdelayResp->setRequestReceiptTimestamp(process.pdelayReqReceptionStartUnsynchronized);
     process.pdelayResp = pdelayResp->dup();
     auto packet = new Packet("GptpPdelayResp");
     packet->addTag<MacAddressReq>()->setDestAddress(GPTP_MULTICAST_ADDRESS);
@@ -315,7 +315,7 @@ void Gptp::sendPdelayRespFollowUp(int portId, const GptpPdelayResp *resp)
     ASSERT(process.state == PdelayMeasurementResponderProcess::State::PDELAY_RESP_TRANSMISSION_ENDED);
     auto pdelayRespFollowUp = makeShared<GptpPdelayRespFollowUp>();
     pdelayRespFollowUp->setDomainNumber(domainNumber);
-    pdelayRespFollowUp->setResponseOriginTimestamp(process.pdelayRespTransmissionStartUnsychronized);
+    pdelayRespFollowUp->setResponseOriginTimestamp(process.pdelayRespTransmissionStartUnsynchronized);
     pdelayRespFollowUp->setRequestingPortIdentity(resp->getRequestingPortIdentity());
     pdelayRespFollowUp->setSequenceId(resp->getSequenceId());
     process.pdelayRespFollowUp = pdelayRespFollowUp->dup();
@@ -419,7 +419,7 @@ void Gptp::computeGmRateRatio()
     ASSERT(syncReceiverProcess.state == SyncReceiverProcess::State::FOLLOW_UP_RECEPTION_ENDED);
     ASSERT(pdelay >= 0);
     clocktime_t sourceTime = syncReceiverProcess.followUp->getPreciseOriginTimestamp() + syncReceiverProcess.followUp->getCorrectionField() + pdelay;
-    clocktime_t localTime = syncReceiverProcess.syncReceptionStartUnsychronized;
+    clocktime_t localTime = syncReceiverProcess.syncReceptionStartUnsynchronized;
     if (previousSourceTime != -1 && previousLocalTime != -1) {
         // IEEE 802.1AS-2020 Section 10.2.11.2.1, index N is previous, 0 is last
         clocktime_t sourceTimeDifference = sourceTime - previousSourceTime;
@@ -441,7 +441,7 @@ void Gptp::computeNeighborRateRatio()
     // NOTE: the standard defines the usage of the correction field for the following two timestamps
     // however, these contain fractional nanoseconds, which we do not use in INET
     clocktime_t correctedResponderEventTimestamp = process.pdelayRespFollowUp->getResponseOriginTimestamp();
-    clocktime_t pdelayRespEventIngressTimestamp = process.pdelayRespReceptionStartUnsychronized;
+    clocktime_t pdelayRespEventIngressTimestamp = process.pdelayRespReceptionStartUnsynchronized;
     if (previousCorrectedResponderEventTimestamp != -1 && previousPdelayRespEventIngressTimestamp != -1) {
         // IEEE 802.1AS-2020 Section 11.2.19.3.3, index N is previous, 0 is last
         clocktime_t correctedResponderEventTimestampDifference = correctedResponderEventTimestamp - previousCorrectedResponderEventTimestamp;
@@ -460,10 +460,10 @@ void Gptp::computePropTime()
 {
     auto& process = pdelayMeasurementRequesterProcesses[slavePortId];
     ASSERT(process.state == PdelayMeasurementRequesterProcess::State::PDELAY_RESP_FOLLOW_UP_RECEPTION_ENDED);
-    clocktime_t t1 = process.pdelayReqTransmissionStartUnsychronized;
+    clocktime_t t1 = process.pdelayReqTransmissionStartUnsynchronized;
     clocktime_t t2 = process.pdelayResp->getRequestReceiptTimestamp();
     clocktime_t t3 = process.pdelayRespFollowUp->getResponseOriginTimestamp();
-    clocktime_t t4 = process.pdelayRespReceptionStartUnsychronized;
+    clocktime_t t4 = process.pdelayRespReceptionStartUnsynchronized;
     ASSERT(t1 >= 0);
     ASSERT(t2 >= 0);
     ASSERT(t3 >= 0);
@@ -533,14 +533,14 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj
                 process = PdelayMeasurementResponderProcess();
                 ASSERT(process.state == PdelayMeasurementResponderProcess::State::INITIALIZED);
                 process.state = PdelayMeasurementResponderProcess::State::PDELAY_REQ_RECEPTION_STARTED;
-                process.pdelayReqReceptionStartUnsychronized = localClock->getClockTime();
+                process.pdelayReqReceptionStartUnsynchronized = localClock->getClockTime();
                 break;
             }
             case GPTPTYPE_PDELAY_RESP: {
                 auto& process = pdelayMeasurementRequesterProcesses[portId];
                 ASSERT(process.state == PdelayMeasurementRequesterProcess::State::PDELAY_REQ_TRANSMISSION_ENDED);
                 process.state = PdelayMeasurementRequesterProcess::State::PDELAY_RESP_RECEPTION_STARTED;
-                process.pdelayRespReceptionStartUnsychronized = localClock->getClockTime();
+                process.pdelayRespReceptionStartUnsynchronized = localClock->getClockTime();
                 break;
             }
             case GPTPTYPE_PDELAY_RESP_FOLLOW_UP: {
@@ -553,7 +553,7 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj
                 ASSERT(syncReceiverProcess.state == SyncReceiverProcess::State::INITIALIZED);
                 syncReceiverProcess.state = SyncReceiverProcess::State::SYNC_RECEPTION_STARTED;
                 syncReceiverProcess.syncReceptionStartSynchronized = clock->getClockTime();
-                syncReceiverProcess.syncReceptionStartUnsychronized = localClock->getClockTime();
+                syncReceiverProcess.syncReceptionStartUnsynchronized = localClock->getClockTime();
                 break;
             }
             case GPTPTYPE_FOLLOW_UP: {
@@ -608,14 +608,14 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj
                 auto& process = pdelayMeasurementRequesterProcesses[portId];
                 ASSERT(process.state == PdelayMeasurementRequesterProcess::State::INITIALIZED);
                 process.state = PdelayMeasurementRequesterProcess::State::PDELAY_REQ_TRANSMISSION_STARTED;
-                process.pdelayReqTransmissionStartUnsychronized = localClock->getClockTime();
+                process.pdelayReqTransmissionStartUnsynchronized = localClock->getClockTime();
                 break;
             }
             case GPTPTYPE_PDELAY_RESP: {
                 auto& process = pdelayMeasurementResponderProcesses[portId];
                 ASSERT(process.state == PdelayMeasurementResponderProcess::State::PDELAY_REQ_RECEPTION_ENDED);
                 process.state = PdelayMeasurementResponderProcess::State::PDELAY_RESP_TRANSMISSION_STARTED;
-                process.pdelayRespTransmissionStartUnsychronized = localClock->getClockTime();
+                process.pdelayRespTransmissionStartUnsynchronized = localClock->getClockTime();
                 break;
             }
             case GPTPTYPE_PDELAY_RESP_FOLLOW_UP: {
@@ -628,7 +628,7 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj
                 auto& process = syncSenderProcesses[portId];
                 ASSERT(process.state == SyncSenderProcess::State::INITIALIZED);
                 process.state = SyncSenderProcess::State::SYNC_TRANSMISSION_STARTED;
-                process.syncTransmissionStartUnsychronized = localClock->getClockTime();
+                process.syncTransmissionStartUnsynchronized = localClock->getClockTime();
                 process.syncTransmissionStartSynchronized = clock->getClockTime();
                 if (gptpNodeType == MASTER_NODE)
                     sendFollowUp(portId);

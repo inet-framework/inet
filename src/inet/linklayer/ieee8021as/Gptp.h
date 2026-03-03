@@ -41,8 +41,8 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
         State state = State::INITIALIZED;
 
         // measured by reading the unsynchronized local clock on notification from the physical layer
-        clocktime_t pdelayReqTransmissionStartUnsychronized = -1;
-        clocktime_t pdelayRespReceptionStartUnsychronized = -1;
+        clocktime_t pdelayReqTransmissionStartUnsynchronized = -1;
+        clocktime_t pdelayRespReceptionStartUnsynchronized = -1;
 
         // messages sent or received by Gptp
         GptpPdelayReq *pdelayReq = nullptr;
@@ -72,8 +72,8 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
         State state = State::INITIALIZED;
 
         // measured by reading the unsynchronized local clock on notification from the physical layer
-        clocktime_t pdelayReqReceptionStartUnsychronized = -1;
-        clocktime_t pdelayRespTransmissionStartUnsychronized = -1;
+        clocktime_t pdelayReqReceptionStartUnsynchronized = -1;
+        clocktime_t pdelayRespTransmissionStartUnsynchronized = -1;
 
         // messages sent or received by Gptp
         GptpPdelayReq *pdelayReq = nullptr;
@@ -101,7 +101,7 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
         State state = State::INITIALIZED;
 
         // measured by reading the unsynchronized local clock on notification from the physical layer
-        clocktime_t syncTransmissionStartUnsychronized = -1;
+        clocktime_t syncTransmissionStartUnsynchronized = -1;
 
         // measured by reading the synchronized clock on notification from the physical layer
         clocktime_t syncTransmissionStartSynchronized = -1;
@@ -130,7 +130,7 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
         State state = State::INITIALIZED;
 
         // measured by reading the unsynchronized local clock on notification from the physical layer
-        clocktime_t syncReceptionStartUnsychronized = -1;
+        clocktime_t syncReceptionStartUnsynchronized = -1;
 
         // measured by reading the synchronized clock on notification from the physical layer
         clocktime_t syncReceptionStartSynchronized = -1;
