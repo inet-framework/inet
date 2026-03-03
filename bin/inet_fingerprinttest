@@ -528,7 +528,10 @@ class FingerprintTestCase(SimulationTestCase):
         if anyFingerprintBad:
             self.storeFingerprintCallback(computedFingerprints)
             (afp, efp) = diffFpGroups(computedFingerprints, self.fingerprint)
-            assert False, "some fingerprint mismatch: actual '" + formatFingerprintGroupForCsv(afp) + "', expected: '" + formatFingerprintGroupForCsv(efp) + "'"
+            # Calculate passed fingerprints (those that match between actual and expected)
+            passedFp = [fp for fp in self.fingerprint if fp not in efp]
+            passedStr = formatFingerprintGroupForCsv(passedFp) if passedFp else "none"
+            assert False, "some fingerprint mismatch: actual '" + formatFingerprintGroupForCsv(afp) + "', expected: '" + formatFingerprintGroupForCsv(efp) + "', passed: '" + passedStr + "'"
 
     def __str__(self):
         return self.title
