@@ -23,12 +23,17 @@ StpTester::~StpTester()
     cancelAndDelete(checkTimer);
 }
 
-void StpTester::initialize()
+void StpTester::initialize(int stage)
 {
-    checkTimer = new cMessage("checktime");
-    checkTime = par("checkTime");
-    scheduleAfter(checkTime, checkTimer);
-    add_watches();
+    if (stage == INITSTAGE_LOCAL) {
+        checkTimer = new cMessage("checktime");
+        checkTime = par("checkTime");
+        scheduleAfter(checkTime, checkTimer);
+        add_watches();
+    }
+    else if (stage == INITSTAGE_LAST) {
+        depthFirstSearch();
+    }
 }
 
 void StpTester::add_watches()
@@ -65,7 +70,13 @@ void StpTester::depthFirstSearch()
     loop = false;
     numOfVisitedNodes = 0;
     graph.extractFromNetwork(Topology::selectTopologyNode);
-    numOfNodes = graph.getNumNodes();
+
+    numOfNodes = 0;
+    for (int i = 0; i < graph.getNumNodes(); i++) {
+        NodeStatus *status = dynamic_cast<NodeStatus *>(graph.getNode(i)->getModule()->getSubmodule("status"));
+        if (status == nullptr || status->getState() == NodeStatus::UP)
+            numOfNodes++;
+    }
 
     for (int i = 0; i < graph.getNumNodes(); i++) {
         color[graph.getNode(i)] = WHITE;
@@ -88,6 +99,10 @@ void StpTester::depthFirstSearch()
 
 void StpTester::dfsVisit(Topology::Node *node)
 {
+    NodeStatus *myStatus = dynamic_cast<NodeStatus *>(node->getModule()->getSubmodule("status"));
+    if (myStatus != nullptr && myStatus->getState() != NodeStatus::UP)
+        return;
+
     color[node] = GRAY;
 
     for (int i = 0; i < node->getNumOutLinks(); i++) {
@@ -106,7 +121,8 @@ void StpTester::dfsVisit(Topology::Node *node)
 
         auto remoteGate = linkOut->getLinkOutRemoteGate();
         int remotePort = remoteGate->isVector() ? remoteGate->getIndex() : -1;
-        if (!isForwarding(neighbor, remotePort))
+        NodeStatus *status = dynamic_cast<NodeStatus *>(neighbor->getModule()->getSubmodule("status"));
+        if (!isForwarding(neighbor, remotePort) || (status != nullptr && status->getState() != NodeStatus::UP))
             continue;
 
         if (color[neighbor] == WHITE) {
