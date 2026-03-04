@@ -46,7 +46,8 @@ class INET_API StpTester : public SimpleModule
     // Includes network topology extraction
     StpTester();
     ~StpTester();
-    virtual void initialize() override;
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
     void add_watches();
 
