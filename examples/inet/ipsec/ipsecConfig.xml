@@ -6,7 +6,7 @@
                 <Selector>
                     <LocalAddress>client1</LocalAddress>
                     <RemoteAddress>server</RemoteAddress>
-                    <Protocol>TCP,UDP</Protocol>
+                    <Protocol>TCP,UDP,UDPLite</Protocol>
                     <LocalPort>1000</LocalPort>
                     <RemotePort>2000</RemotePort>
                 </Selector>
@@ -25,7 +25,7 @@
                 <Selector>
                     <LocalAddress>client1</LocalAddress>
                     <RemoteAddress>server</RemoteAddress>
-                    <Protocol>TCP,UDP</Protocol>
+                    <Protocol>TCP,UDP,UDPLite</Protocol>
                     <LocalPort>1000</LocalPort>
                     <RemotePort>2000</RemotePort>
                 </Selector>
@@ -45,7 +45,7 @@
                 <Selector>
                     <LocalAddress>client1</LocalAddress>
                     <RemoteAddress>server</RemoteAddress>
-                    <Protocol>TCP,UDP</Protocol>
+                    <Protocol>TCP,UDP,UDPLite</Protocol>
                     <LocalPort>1001</LocalPort>
                     <RemotePort>2001</RemotePort>
                 </Selector>
@@ -58,7 +58,7 @@
                 <Selector>
                     <LocalAddress>client1</LocalAddress>
                     <RemoteAddress>server</RemoteAddress>
-                    <Protocol>TCP,UDP</Protocol>
+                    <Protocol>TCP,UDP,UDPLite</Protocol>
                     <LocalPort>1001</LocalPort>
                     <RemotePort>2001</RemotePort>
                 </Selector>
@@ -73,7 +73,7 @@
                 <Selector>
                     <LocalAddress>server</LocalAddress>
                     <RemoteAddress>client1</RemoteAddress>
-                    <Protocol>TCP,UDP</Protocol>
+                    <Protocol>TCP,UDP,UDPLite</Protocol>
                     <LocalPort>2000</LocalPort>
                     <RemotePort>1000</RemotePort>
                 </Selector>
@@ -92,7 +92,7 @@
                 <Selector>
                     <LocalAddress>server</LocalAddress>
                     <RemoteAddress>client1</RemoteAddress>
-                    <Protocol>TCP,UDP</Protocol>
+                    <Protocol>TCP,UDP,UDPLite</Protocol>
                     <LocalPort>2000</LocalPort>
                     <RemotePort>1000</RemotePort>
                 </Selector>
@@ -111,7 +111,7 @@
                 <Selector>
                     <LocalAddress>server</LocalAddress>
                     <RemoteAddress>client1</RemoteAddress>
-                    <Protocol>TCP,UDP</Protocol>
+                    <Protocol>TCP,UDP,UDPLite</Protocol>
                     <LocalPort>2001</LocalPort>
                     <RemotePort>1001</RemotePort>
                 </Selector>
@@ -124,7 +124,7 @@
                 <Selector>
                     <LocalAddress>server</LocalAddress>
                     <RemoteAddress>client1</RemoteAddress>
-                    <Protocol>TCP,UDP</Protocol>
+                    <Protocol>TCP,UDP,UDPLite</Protocol>
                     <LocalPort>2001</LocalPort>
                     <RemotePort>1001</RemotePort>
                 </Selector>
