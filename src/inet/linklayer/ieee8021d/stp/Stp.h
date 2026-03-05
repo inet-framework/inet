@@ -45,6 +45,7 @@ class INET_API Stp : public StpBase
     simtime_t currentFwdDelay;
     simtime_t currentHelloTime;
     simtime_t helloTime;
+    simtime_t holdTime;
 
     // Parameter change detection
     unsigned int currentBridgePriority = 0;

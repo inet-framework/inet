@@ -27,6 +27,9 @@ Ieee8021dInterfaceData::PortInfo::PortInfo()
     portNum = -1;
 
     lostBPDU = 0;
+
+    earliestBpduSendTime = 0;
+    bpduSendPending = false;
 }
 
 Ieee8021dInterfaceData::Ieee8021dInterfaceData()
