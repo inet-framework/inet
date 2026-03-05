@@ -1230,7 +1230,7 @@ bool Ldp::lookupLabel(Packet *packet, LabelOpVector& outLabel, std::string& outI
         return false;
 
     // LDP traffic (both discovery...
-    if (protocol == IP_PROT_UDP) {
+    if (protocol == IP_PROT_UDP || protocol == IP_PROT_UDPLITE) {
         const auto& udpHeader = packet->peekDataAt<UdpHeader>(ipv4Header->getChunkLength());
         if (udpHeader->getDestinationPort() == LDP_PORT)
             return false;
