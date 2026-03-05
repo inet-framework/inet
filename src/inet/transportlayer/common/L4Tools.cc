@@ -16,7 +16,7 @@
 #endif
 
 #ifdef INET_WITH_SCTP
-// TODO
+#include "inet/transportlayer/sctp/SctpHeader_m.h"
 #endif
 
 namespace inet {
@@ -53,9 +53,7 @@ const Ptr<const TransportHeaderBase> getTransportProtocolHeader(Packet *packet)
 
 bool isTransportProtocol(const Protocol& protocol)
 {
-    // TODO add other L4 protocols
-    return protocol == Protocol::tcp ||
-           protocol == Protocol::udp;
+    return protocol.getLayer() == Protocol::TransportLayer;
 }
 
 const Ptr<const TransportHeaderBase> peekTransportProtocolHeader(Packet *packet, const Protocol& protocol, int flags)
@@ -65,8 +63,12 @@ const Ptr<const TransportHeaderBase> peekTransportProtocolHeader(Packet *packet,
         return packet->peekAtFront<tcp::TcpHeader>(b(-1), flags);
 #endif
 #ifdef INET_WITH_UDP
-    if (protocol == Protocol::udp)
+    if (protocol == Protocol::udp || protocol == Protocol::udplite)
         return packet->peekAtFront<UdpHeader>(b(-1), flags);
+#endif
+#ifdef INET_WITH_SCTP
+    if (protocol == Protocol::sctp)
+        return packet->peekAtFront<sctp::SctpHeader>(b(-1), flags);
 #endif
     // TODO add other L4 protocols
     if (flags & Chunk::PF_ALLOW_NULLPTR)
@@ -89,8 +91,12 @@ const Ptr<TransportHeaderBase> removeTransportProtocolHeader(Packet *packet, con
         return removeTransportProtocolHeader<tcp::TcpHeader>(packet);
 #endif
 #ifdef INET_WITH_UDP
-    if (protocol == Protocol::udp)
+    if (protocol == Protocol::udp || protocol == Protocol::udplite)
         return removeTransportProtocolHeader<UdpHeader>(packet);
+#endif
+#ifdef INET_WITH_SCTP
+    if (protocol == Protocol::sctp)
+        return removeTransportProtocolHeader<sctp::SctpHeader>(packet);
 #endif
     // TODO add other L4 protocols
     throw cRuntimeError("Unknown protocol: %s", protocol.getName());
