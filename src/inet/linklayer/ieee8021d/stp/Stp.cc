@@ -142,17 +142,11 @@ void Stp::handleTCN(Packet *packet, const Ptr<const BpduTcn>& tcn)
     int arrivalGate = packet->getTag<InterfaceInd>()->getInterfaceId();
     const auto& addressInd = packet->getTag<MacAddressInd>();
     MacAddress srcAddress = addressInd->getSrcAddress();
-    MacAddress destAddress = addressInd->getDestAddress();
 
     // send ACK to the sender
     EV_INFO << "Sending Topology Change Notification ACK." << endl;
     generateBPDU(arrivalGate, srcAddress, false, true);
 
-    if (!isRoot) {
-        Packet *outPacket = new Packet(packet->getName());
-        outPacket->insertAtBack(tcn);
-        sendOut(outPacket, rootInterfaceId, destAddress);
-    }
     delete packet;
 }
 
