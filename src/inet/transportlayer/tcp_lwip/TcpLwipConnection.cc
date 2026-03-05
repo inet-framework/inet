@@ -129,7 +129,7 @@ void TcpLwipConnection::sendEstablishedMsg()
     tcpConnectInfo->setAutoRead(autoRead);
 
     indication->setControlInfo(tcpConnectInfo);
-    indication->addTag<TransportProtocolInd>()->setProtocol(&Protocol::udp);
+    indication->addTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
     indication->addTag<SocketInd>()->setSocketId(connIdM);
 
     tcpLwipM->send(indication, "appOut");
