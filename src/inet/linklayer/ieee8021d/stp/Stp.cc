@@ -32,6 +32,7 @@ void Stp::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         tick = new cMessage("STP_TICK", 0);
+        holdTime = par("holdTime");
         WATCH(bridgeAddress);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
@@ -157,6 +158,12 @@ void Stp::handleTCN(Packet *packet, const Ptr<const BpduTcn>& tcn)
 
 void Stp::generateBPDU(int interfaceId, const MacAddress& address, bool tcFlag, bool tcaFlag)
 {
+    auto portData = getPortInterfaceDataForUpdate(interfaceId);
+    if (simTime() < portData->getEarliestBpduSendTime()) {
+        portData->setBpduSendPending(true);
+        return;
+    }
+
     Packet *packet = new Packet("BPDU");
     const auto& bpdu = makeShared<BpduCfg>();
 
@@ -188,6 +195,9 @@ void Stp::generateBPDU(int interfaceId, const MacAddress& address, bool tcFlag, 
 
     packet->insertAtBack(bpdu);
     sendOut(packet, interfaceId, address);
+
+    portData->setEarliestBpduSendTime(simTime() + holdTime);
+    portData->setBpduSendPending(false);
 }
 
 void Stp::generateTCN()
@@ -306,6 +316,14 @@ void Stp::handleTick()
             port->setFdWhile(port->getFdWhile() + tickInterval);
         }
     }
+    // send pending BPDUs that were suppressed by the hold timer
+    for (unsigned int i = 0; i < numPorts; i++) {
+        int interfaceId = ifTable->getInterface(i)->getInterfaceId();
+        auto port = getPortInterfaceDataForUpdate(interfaceId);
+        if (port->getBpduSendPending() && simTime() >= port->getEarliestBpduSendTime())
+            generateBPDU(interfaceId);
+    }
+
     checkTimers();
     checkParametersChange();
     generateTCN();

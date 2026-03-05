@@ -60,6 +60,9 @@ class INET_API Ieee8021dInterfaceData : public InterfaceProtocolData
         unsigned int lostBPDU;
         simtime_t nextUpgrade;
 
+        simtime_t earliestBpduSendTime; // The earliest time a BPDU can be sent on this port (hold timer)
+        bool bpduSendPending; // True if a BPDU send was suppressed by the hold timer
+
       public:
         PortInfo();
     };
@@ -164,6 +167,14 @@ class INET_API Ieee8021dInterfaceData : public InterfaceProtocolData
     simtime_t getNextUpgrade() const { return portData.nextUpgrade; }
 
     void setNextUpgrade(simtime_t nextUpgrade) { portData.nextUpgrade = nextUpgrade; }
+
+    simtime_t getEarliestBpduSendTime() const { return portData.earliestBpduSendTime; }
+
+    void setEarliestBpduSendTime(simtime_t t) { portData.earliestBpduSendTime = t; }
+
+    bool getBpduSendPending() const { return portData.bpduSendPending; }
+
+    void setBpduSendPending(bool pending) { portData.bpduSendPending = pending; }
 };
 
 } // namespace inet
