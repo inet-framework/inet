@@ -143,10 +143,15 @@ void StpBase::refreshDisplay() const
         if (isUp() && getRootInterfaceId() == -1)
         {
             switchModule->getDisplayString().setTagArg("i", 1, ROOT_SWITCH_COLOR);
-            switchModule->getDisplayString().setTagArg("i", 2, 40);
+            switchModule->getDisplayString().setTagArg("i", 2, 100);
+            switchModule->getDisplayString().setTagArg("i2", 0, "status/excl");
         }
         else
-            switchModule->getDisplayString().setTagArg("i", 1, "");
+        {
+            switchModule->getDisplayString().setTagArg("i", 1, "-");
+            switchModule->getDisplayString().setTagArg("i", 2, int(0));
+            switchModule->getDisplayString().setTagArg("i2", 0, "");
+        }
     }
 }
 
