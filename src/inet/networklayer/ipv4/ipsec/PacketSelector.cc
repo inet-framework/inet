@@ -32,7 +32,7 @@ bool PacketSelector::matches(const PacketInfo *packet) const
         return false;
 
     auto protocol = packet->getNextProtocol();
-    if (protocol == IP_PROT_UDP || protocol == IP_PROT_TCP) {
+    if (protocol == IP_PROT_UDP || protocol == IP_PROT_UDPLITE || protocol == IP_PROT_TCP) {
         if (!localPort.empty() && !localPort.contains(packet->getLocalPort()))
             return false;
         if (!remotePort.empty() && !remotePort.contains(packet->getRemotePort()))

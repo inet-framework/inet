@@ -29,6 +29,7 @@ std::string PacketInfo::str() const
     switch (nextProtocol) {
         case IP_PROT_TCP:
         case IP_PROT_UDP:
+        case IP_PROT_UDPLITE:
             out << " Local: " << localAddress.str() << ":" << localPort << ";";
             out << " Remote: " << remoteAddress.str() << ":" << remotePort << ";";
             break;
