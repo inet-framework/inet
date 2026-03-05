@@ -177,7 +177,7 @@ void IPsec::parseSelector(const cXMLElement *selectorElem, PacketSelector& selec
     if (const cXMLElement *icmpCodeElem = getUniqueChildIfExists(selectorElem, "ICMPCode"))
         selector.setIcmpCode(rangelist<unsigned int>::parse(icmpCodeElem->getNodeValue(), intConv));
 
-    bool udpOrTcp = selector.getNextProtocol().contains(IP_PROT_TCP) || selector.getNextProtocol().contains(IP_PROT_UDP);
+    bool udpOrTcp = selector.getNextProtocol().contains(IP_PROT_TCP) || selector.getNextProtocol().contains(IP_PROT_UDP) || selector.getNextProtocol().contains(IP_PROT_UDPLITE);
     bool portGiven = !selector.getLocalPort().empty() || !selector.getRemotePort().empty();
     if (portGiven && !udpOrTcp)
         throw cRuntimeError(selectorElem, "Ports are only accepted if protocol is TCP or UDP");
@@ -191,6 +191,8 @@ unsigned int IPsec::parseProtocol(const std::string& value)
         return IP_PROT_TCP;
     else if (value == "UDP")
         return IP_PROT_UDP;
+    else if (value == "UDPLite")
+        return IP_PROT_UDPLITE;
     else if (value == "ICMP")
         return IP_PROT_ICMP;
     else
@@ -284,7 +286,7 @@ PacketInfo IPsec::extractEgressPacketInfo(Packet *packet, const Ipv4Address& loc
     }
 #endif
 #ifdef INET_WITH_UDP
-    else if (ipv4datagram->getProtocolId() == IP_PROT_UDP) {
+    else if (ipv4datagram->getProtocolId() == IP_PROT_UDP || ipv4datagram->getProtocolId() == IP_PROT_UDPLITE) {
         const auto& udpHeader = packet->peekDataAt<UdpHeader>(ipv4datagram->getChunkLength());
         packetInfo.setLocalPort(udpHeader->getSourcePort());
         packetInfo.setRemotePort(udpHeader->getDestinationPort());
@@ -368,7 +370,7 @@ PacketInfo IPsec::extractIngressPacketInfo(Packet *packet)
     }
 #endif
 #ifdef INET_WITH_UDP
-    else if (ipv4datagram->getProtocolId() == IP_PROT_UDP) {
+    else if (ipv4datagram->getProtocolId() == IP_PROT_UDP || ipv4datagram->getProtocolId() == IP_PROT_UDPLITE) {
         const auto& udpHeader = packet->peekDataAt<UdpHeader>(ipv4datagram->getChunkLength());
         packetInfo.setLocalPort(udpHeader->getDestinationPort());
         packetInfo.setRemotePort(udpHeader->getSourcePort());
