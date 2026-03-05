@@ -133,7 +133,7 @@ int QosClassifier::getUserPriority(cMessage *msg)
         return it->second;
 
 #ifdef INET_WITH_UDP
-    if (ipProtocol == IP_PROT_UDP) {
+    if (ipProtocol == IP_PROT_UDP || ipProtocol == IP_PROT_UDPLITE) {
         const auto& udpHeader = packet->peekDataAt<UdpHeader>(ethernetMacHeaderLength + ipHeaderLength);
         unsigned int srcPort = udpHeader->getSourcePort();
         unsigned int destPort = udpHeader->getDestinationPort();
