@@ -17,6 +17,7 @@ void ClockBase::initialize(int stage)
 {
     SimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        WATCH_EXPR("clockTime", getClockTime());
         emitClockTimeInterval = par("emitClockTimeInterval");
         if (emitClockTimeInterval != 0) {
             timer = new cMessage("ClockTimeChangedTimer");
