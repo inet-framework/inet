@@ -24,7 +24,13 @@ regardless of its MAC address.
 
 The bridge priority can be set per-switch using the ``**.switchN.**.bridgePriority``
 parameter, or configured across multiple switches using :ned:`L2NetworkConfigurator`.
-The default value is 32768; valid values are multiples of 4096 from 0 to 61440.
+The default value is 32768.
+
+.. note::
+   Per IEEE 802.1D, valid bridge priority values are multiples of 4096 from 0
+   to 61440 (the priority occupies the upper 4 bits of the 2-byte Bridge ID).
+   INET does not enforce this constraint, so any integer value is accepted by
+   the ``bridgePriority`` parameter.
 
 Results
 ~~~~~~~
@@ -34,12 +40,15 @@ compared to Step 2. The blocked ports change accordingly — different links are
 placed in blocking state to create the new loop-free tree.
 
 .. figure:: media/step3result.png
-   :width: 80%
    :align: center
 
 Comparing the two figures (Step 2 vs Step 3) clearly shows how the root bridge
 location determines the shape of the spanning tree. Traffic from ``host2`` to
 ``host1`` still succeeds after convergence, but may follow a different path.
+
+.. video:: media/step3result.mp4
+   :width: 100%
+   :align: center
 
 Sources:
 :download:`omnetpp.ini <../omnetpp.ini>`,

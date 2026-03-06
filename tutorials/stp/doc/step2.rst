@@ -16,8 +16,7 @@ switches (``switch1``–``switch7``) interconnected with redundant links, and tw
 hosts (``host1`` and ``host2``) attached to ``switch6`` and ``switch5``
 respectively.
 
-.. figure:: media/step2network.png
-   :width: 80%
+.. figure:: media/LoopNetwork.png
    :align: center
 
 About STP
@@ -34,8 +33,9 @@ a loop-free topology. The protocol works as follows:
    lowest path cost to the root as its *root port*.
 
 3. **Designated port selection**: On each network segment, one port is elected
-   *designated port* (the one closest to the root). The other ports on that
-   segment are put in *blocking* state.
+   *designated port* (the one with the lowest path cost to the root). If the
+   segment has another switch port that is neither a root port nor the designated
+   port, that port is put in *blocking* state to eliminate the redundant path.
 
 4. **Port states**: STP ports transition through *Blocking → Listening →
    Learning → Forwarding*, with each transition taking ``forwardDelay`` seconds
@@ -43,6 +43,13 @@ a loop-free topology. The protocol works as follows:
 
 In INET, STP is implemented by the :ned:`Stp` module, which is enabled per
 switch via the ``hasStp = true`` and ``spanningTreeProtocol = "Stp"`` parameters.
+
+.. note::
+   INET's :ned:`Stp` implementation does not distinguish Blocking and Listening
+   as separate internal states. Instead, it uses a single ``DISCARDING`` state
+   (borrowed from RSTP) that covers both, transitioning directly to ``LEARNING``
+   and then ``FORWARDING``. As a result, the visualization will display
+   *Discarding* rather than *Blocking* or *Listening* during convergence.
 
 Configuration
 ~~~~~~~~~~~~~
@@ -55,7 +62,8 @@ Configuration
 The MAC addresses are fixed (``AAAAAA000001`` … ``AAAAAA000007``) so that
 ``switch1`` (lowest MAC) is always elected root. The ``visualize = true``
 parameter colors blocked links gray and active (forwarding) links black, and
-highlights the root bridge in cyan.
+highlights the root bridge in cyan. Port roles and states are also displayed
+as labels on each switch interface.
 
 Traffic from ``host2`` to ``host1`` starts at t=60s, after STP has converged.
 
@@ -70,12 +78,15 @@ between switches. After approximately 50 s, the spanning tree has converged:
 - **Active tree**: a subset of links forms a tree rooted at ``switch1``
 
 .. figure:: media/step2result.png
-   :width: 80%
    :align: center
 
 After convergence (t=60s), ``host2`` begins sending frames to ``host1`` and
 receives replies, confirming that the tree provides full connectivity while
 remaining loop-free.
+
+.. video:: media/step2result.mp4
+   :width: 100%
+   :align: center
 
 Sources:
 :download:`omnetpp.ini <../omnetpp.ini>`,

@@ -15,8 +15,7 @@ The simulation uses the ``LargeNet`` network: 11 switches and 6 hosts with a
 heavily meshed topology, providing many redundant paths. This gives the spanning
 tree more work to do when a failure occurs.
 
-.. figure:: media/step6network.png
-   :width: 90%
+.. figure:: media/LargeNet.png
    :align: center
 
 Configuration

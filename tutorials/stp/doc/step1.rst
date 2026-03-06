@@ -18,8 +18,7 @@ switches (``switch1``, ``switch2``, ``switch3``) connected in a ring, with two
 hosts (``host1`` and ``host2``) attached to ``switch1`` and ``switch3``
 respectively.
 
-.. figure:: media/step1network.png
-   :width: 70%
+.. figure:: media/LoopNetwork_nostp.png
    :align: center
 
 The ring topology provides redundant paths between the hosts (``host1`` can reach
