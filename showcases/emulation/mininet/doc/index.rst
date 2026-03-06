@@ -8,7 +8,7 @@ This showcase builds upon the previous one, :doc:`../../voip/doc/index`, and dem
 setting up the virtual network can be vastly simplified using Mininet.
 
 | Verified with INET version: ``4.6``
-| Source files location: `inet/showcases/emulation/voip <https://github.com/inet-framework/inet/tree/master/showcases/emulation/voip>`__
+| Source files location: `inet/showcases/emulation/mininet <https://github.com/inet-framework/inet/tree/master/showcases/emulation/mininet>`__
 
 
 Introduction
