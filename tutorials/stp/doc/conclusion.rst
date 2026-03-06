@@ -11,6 +11,7 @@ You have learned:
 - Why STP convergence takes approximately 50 s and what the port states mean
 - How RSTP achieves convergence in approximately 6 s using edge ports and the proposal/agreement mechanism
 - How both protocols handle switch failures and link reconnects, with RSTP recovering much faster
+- How RSTP operates on a larger dumbbell-shaped topology where two clusters are connected through a bottleneck
 
 In practice, RSTP (or its successor Multiple Spanning Tree Protocol, MSTP) is
 preferred over the original STP in all modern networks due to its significantly
