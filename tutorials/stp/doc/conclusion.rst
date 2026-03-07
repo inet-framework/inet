@@ -9,8 +9,10 @@ You have learned:
 - How STP builds a loop-free spanning tree through root bridge election, port role assignment, and the Blocking/Listening/Learning/Forwarding state machine
 - How to control the root bridge selection using bridge priorities
 - Why STP convergence takes approximately 50 s and what the port states mean
+- How STP handles topology changes using the TCN mechanism, and why reconvergence is slow (~50 s)
 - How RSTP achieves convergence in approximately 6 s using edge ports and the proposal/agreement mechanism
-- How both protocols handle switch failures and link reconnects, with RSTP recovering much faster
+- How RSTP handles switch failures and link reconnects much faster than STP
+- How RSTP operates on a larger dumbbell-shaped topology where two clusters are connected through a bottleneck
 
 In practice, RSTP (or its successor Multiple Spanning Tree Protocol, MSTP) is
 preferred over the original STP in all modern networks due to its significantly

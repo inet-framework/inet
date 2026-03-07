@@ -10,6 +10,27 @@ This step demonstrates that loops in a switched network cause frames to
 circulate indefinitely, creating a broadcast storm that prevents reliable
 communication.
 
+Background
+----------
+
+Ethernet switches (also called *bridges* in the IEEE 802.1D standard) forward
+frames based on destination MAC addresses. When a switch receives a frame, it
+looks up the destination address in its *MAC forwarding table* (also called
+*filtering database*). If the address is found, the frame is sent out the
+corresponding port; if not, the frame is *flooded* — sent out all ports except
+the one it arrived on. Broadcast and multicast frames are always flooded.
+
+Switches build their forwarding tables automatically through *MAC learning*:
+when a frame arrives on a port, the switch records the frame's source MAC
+address and the port it arrived on. Over time, the table is populated with
+entries that map each known host address to a specific port.
+
+In enterprise and data-center networks, redundant links between switches are
+common — they protect against individual link or switch failures that would
+otherwise partition the network. However, redundant links inevitably create
+*loops* in the network topology, and as this step demonstrates, loops and the
+flood-and-learn mechanism are a dangerous combination.
+
 The Network
 -----------
 
@@ -43,15 +64,22 @@ Results
 
 When ``host1`` sends a frame to ``host2``, ``switch1`` does not yet know which
 port leads to ``host2``, so it floods the frame out all other ports. The frame
-arrives at ``switch2`` and ``switch3`` simultaneously. Both switches also don't
-know ``host2``'s location and flood the frame further — creating two copies of
-the frame circulating in opposite directions around the ring.
+arrives at both ``switch2`` and ``switch3``. Neither switch knows ``host2``'s
+location either, so both flood the frame further — creating two copies
+circulating in opposite directions around the ring.
 
 Each time a switch receives one of these circulating copies, it floods it again,
-causing the number of frame copies to grow exponentially. This is a *broadcast
-storm*. The MAC forwarding tables in each switch become inconsistent, as the same
-MAC address appears on different ports depending on which direction the looping
-frames arrive from.
+causing the number of frame copies in the network to grow exponentially. This is
+a *broadcast storm*.
+
+The loop also causes *MAC table instability*. Consider the path of
+``host1``'s frame: when it first arrives at ``switch3`` directly from
+``switch1``, the switch learns that ``host1`` is reachable via the port
+connected to ``switch1``. Moments later, the *same* frame arrives at
+``switch3`` from ``switch2`` (having gone the long way around the ring), and
+the switch overwrites its table entry to say ``host1`` is reachable via the
+``switch2`` port. This oscillation repeats continuously with each circulating
+copy, making the forwarding table useless.
 
 As a result, ``host2`` receives many duplicate copies of each frame sent by
 ``host1``, and communication is completely unreliable.
