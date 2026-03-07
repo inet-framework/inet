@@ -52,6 +52,30 @@ The bridge switch failures are driven by
 At t=30 s — well after RSTP convergence — both ``switch11`` and ``switch12``
 are shut down simultaneously.
 
+Network Design Considerations
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This scenario illustrates an important principle: **STP and RSTP can only
+remove redundant paths to prevent loops — they cannot create paths that do not
+physically exist.** If the physical topology becomes disconnected (here, by
+losing both bridge switches), no spanning tree protocol can restore
+connectivity between the separated parts.
+
+The dumbbell topology is a common pattern in real networks: two groups of
+switches (e.g. two buildings, two floors, or two data-center pods) connected
+through a limited number of uplinks. These uplinks form a *bottleneck* — and
+if all of them fail simultaneously, the network partitions.
+
+Strategies to mitigate this in real deployments include:
+
+- **Diverse physical paths**: running links through different conduits, rooms,
+  or buildings so that a single physical event cannot sever all connections.
+- **More uplinks**: increasing the number of independent paths between clusters
+  so that losing one or two does not cause a partition.
+- **Link aggregation**: bundling multiple physical links into a single logical
+  link (IEEE 802.1AX), which STP/RSTP treats as one connection but which
+  survives individual member link failures.
+
 Results
 ~~~~~~~
 
@@ -64,19 +88,15 @@ across the bottleneck.
    :align: center
 
 **At t=30 s** — Both bridge switches shut down. The two clusters become
-completely disconnected. Hosts in the left cluster (``host1``, ``host2``)
-can still reach each other through the left cluster's internal mesh, and
-likewise for the right cluster (``host3``, ``host4``). However, cross-cluster
-traffic (e.g. ``host1`` → ``host3``) is lost entirely — there is no
-alternate path between the two halves.
+completely disconnected. RSTP detects the failure and rebuilds a spanning tree
+within each half: hosts in the left cluster (``host1``, ``host2``) can still
+reach each other, and likewise for the right cluster (``host3``, ``host4``).
+Cross-cluster traffic (e.g. ``host1`` → ``host3``) is lost entirely — as
+discussed above, RSTP cannot bridge a physical gap.
 
 .. figure:: media/step9after.png
    :width: 90%
    :align: center
-
-RSTP detects the failure and rebuilds a spanning tree within each
-disconnected half, but it cannot restore cross-cluster connectivity because
-no physical path exists.
 
 Sources:
 :download:`omnetpp.ini <../omnetpp.ini>`,

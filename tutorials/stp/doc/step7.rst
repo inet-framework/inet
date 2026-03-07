@@ -24,16 +24,30 @@ difference is ``spanningTreeProtocol = "Rstp"``.
 How RSTP Handles Topology Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-When a switch detects that a neighbor is no longer sending BPDUs (link failure),
-RSTP reacts immediately instead of waiting for ``maxAge`` to expire:
+RSTP reacts to failures fundamentally differently from STP:
 
-1. The switch that loses a root or designated port immediately initiates a new
-   election using its stored *alternate port* as the new root port — no waiting
-   required.
-2. The topology change (TC) flag in BPDUs propagates quickly through the network,
-   causing all switches to flush their MAC forwarding tables on non-edge ports.
-3. The *proposal/agreement* mechanism allows newly designated ports to transition
-   to Forwarding within one or two hello intervals (≈ 2–4 s).
+**Immediate failure detection.** Instead of waiting for ``maxAge`` (20 s) to
+expire, RSTP considers a neighbor lost after missing just 3 consecutive hello
+BPDUs (3 × 2 s = 6 s). With direct link failure detection (carrier loss), the
+reaction can be even faster — effectively instantaneous.
+
+**Alternate port promotion.** If the failed port was a Root port, the switch
+already has an *Alternate port* standing by — a port that was kept in
+Discarding state precisely because it offered a second-best path to the root.
+This port is promoted to Root port immediately, without any election or timer
+delays.
+
+**Rapid designated port activation.** If new ports need to become Designated
+(because the tree shape changed), the *proposal/agreement* handshake described
+in Step 5 activates them within one or two hello intervals (2–4 s), without
+going through the 30 s Listening/Learning cycle.
+
+**Fast TC propagation.** Unlike STP, where topology change notifications must
+travel to the root and back, RSTP floods the TC flag directly in BPDUs from
+the detecting switch. Each switch that receives a TC-flagged BPDU immediately
+flushes its MAC forwarding table on all non-edge ports (rather than merely
+reducing the aging time). This ensures all switches re-learn the correct
+forwarding paths within seconds.
 
 Total re-convergence time after a failure with RSTP: approximately **6 s**.
 

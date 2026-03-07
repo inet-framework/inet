@@ -22,24 +22,49 @@ respectively.
 About STP
 ~~~~~~~~~
 
-STP (IEEE 802.1D-1998) builds a spanning tree over a bridged network to ensure
-a loop-free topology. The protocol works as follows:
+The Spanning Tree Protocol (STP, IEEE 802.1D-1998) eliminates loops by
+computing a *spanning tree* of the network — a subset of links that connects
+all switches without forming any cycles. In graph theory, a *spanning tree* of
+a connected graph is a tree that includes every node but only enough edges to
+keep it connected (exactly *N−1* edges for *N* nodes). Ports on links that are
+not part of the spanning tree are placed in a *blocking* state, effectively
+deactivating those links for data traffic while keeping them available as
+backups.
 
-1. **Root bridge election**: The switch with the lowest bridge ID (priority +
-   MAC address) becomes the root bridge. By default all switches have the same
-   priority (32768), so the one with the lowest MAC address wins.
+STP achieves this through a distributed algorithm. Switches exchange *Bridge
+Protocol Data Units* (BPDUs) to share topology information and collectively
+agree on the tree structure. The algorithm works in the following phases:
 
-2. **Root port selection**: Each non-root switch selects the port with the
-   lowest path cost to the root as its *root port*.
+**1. Root bridge election.** All switches start by assuming they are the root.
+Each switch sends BPDUs containing its own *bridge ID* — a value composed of a
+configurable *bridge priority* (default 32768) and the switch's MAC address.
+When a switch receives a BPDU with a lower bridge ID than its own, it accepts
+the sender's root claim and stops claiming to be root itself. Eventually, the
+switch with the numerically lowest bridge ID wins the election and becomes the
+*root bridge*. The root bridge is the root of the spanning tree; all paths in
+the tree lead toward it.
 
-3. **Designated port selection**: On each network segment, one port is elected
-   *designated port* (the one with the lowest path cost to the root). If the
-   segment has another switch port that is neither a root port nor the designated
-   port, that port is put in *blocking* state to eliminate the redundant path.
+**2. Root port selection.** Each non-root switch must determine which of its
+ports provides the best (lowest-cost) path toward the root bridge. STP assigns
+a *path cost* to each port based on its link speed (e.g. 4 for 1 Gbps in the
+revised cost table, or 19 for 100 Mbps in the original). Each BPDU carries a
+*root path cost* field — the total cost from the sending switch to the root.
+When a switch receives a BPDU, it adds the receiving port's own cost to the
+advertised root path cost. The port with the lowest total cost to the root
+becomes the switch's *root port*. Ties are broken by lowest upstream bridge ID,
+then by lowest upstream port ID.
 
-4. **Port states**: STP ports transition through *Blocking → Listening →
-   Learning → Forwarding*, with each transition taking ``forwardDelay`` seconds
-   (default 15 s). The total convergence time is therefore approximately 30–50 s.
+**3. Designated port selection.** For each network segment (link between two
+switches), one port must be elected as the *designated port* — the port
+responsible for forwarding frames toward the root on that segment. The switch
+that can offer the lowest root path cost on that segment wins. Ties are
+broken by bridge ID, then port ID. The root bridge's ports are always
+designated (cost = 0).
+
+**4. Blocking redundant ports.** Any port that is neither a root port nor a
+designated port is placed in *blocking* state — it does not forward data
+frames, breaking the loop. These blocked ports continue to receive BPDUs so
+they can react if the topology changes.
 
 In INET, STP is implemented by the :ned:`Stp` module, which is enabled per
 switch via the ``hasStp = true`` and ``spanningTreeProtocol = "Stp"`` parameters.
