@@ -11,7 +11,7 @@ import inet.linklayer.ieee8021d.tester.StpTester;
 import inet.node.ethernet.Eth1G;
 import inet.node.ethernet.EthernetHost;
 import inet.node.ethernet.EthernetSwitch;
-import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
+import inet.visualizer.canvas.integrated.IntegratedMultiCanvasVisualizer;
 
 
 //
@@ -21,7 +21,7 @@ import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 network LoopNetwork
 {
     submodules:
-        visualizer: IntegratedCanvasVisualizer {
+        visualizer: IntegratedMultiCanvasVisualizer {
             @display("p=100,351;is=s");
         }
         pcapRecorder: PcapRecorder {
@@ -56,22 +56,22 @@ network LoopNetwork
 //
 network SwitchNetwork
 {
-    @figure[legend](type=text; pos=200,10; text="Port labels: Role/State\nRoles: R=Root D=Designated A=Alternate B=Backup -=NotAssigned X=Disabled\nStates: F=Forwarding L=Learning D=Discarding(RSTP) B=Blocking(STP) N=Listening(STP)");
+    @figure[simtime](type="simTimeText"; pos=550,400; prefix="SimTime: "; font=,10);
     submodules:
         stpTester: StpTester {
-            @display("p=100,100;is=s");
+            @display("p=100,100,col,60;g=left;is=s");
         }
         scenarioManager: ScenarioManager {
-            @display("p=100,200;is=s");
+            @display("p=100,100,col,60;g=left;is=s");
         }
         l2NetworkConfigurator: L2NetworkConfigurator {
-            @display("p=100,300;is=s");
+            @display("p=100,100,col,60;g=left;is=s");
         }
-        visualizer: IntegratedCanvasVisualizer {
-            @display("p=213,101;is=s");
+        visualizer: IntegratedMultiCanvasVisualizer {
+            @display("p=100,100,col,60;g=left;is=s");
         }
         pcapRecorder: PcapRecorder {
-            @display("p=213,200;is=s");
+            @display("p=100,100,col,60;g=left;is=s");
         }
         switch1: EthernetSwitch {
             @display("p=400,100");
@@ -115,11 +115,28 @@ network SwitchNetwork
 }
 
 //
+// STP variant of SwitchNetwork with STP-specific legend.
+//
+network StpSwitchNetwork extends SwitchNetwork
+{
+    @figure[legend](type=text; pos=200,10; text="Port labels: Role/State\nRoles: R=Root D=Designated -=NotAssigned X=Disabled\nStates: F=Forwarding L=Learning B=Blocking N=Listening");
+}
+
+//
+// RSTP variant of SwitchNetwork with RSTP-specific legend.
+//
+network RstpSwitchNetwork extends SwitchNetwork
+{
+    @figure[legend](type=text; pos=200,10; text="Port labels: Role/State\nRoles: R=Root D=Designated A=Alternate B=Backup -=NotAssigned X=Disabled\nStates: F=Forwarding L=Learning D=Discarding");
+}
+
+//
 // Extends SwitchNetwork with four additional switches and four additional hosts,
-// creating a larger meshed topology. Used in Steps 6-8.
+// creating a larger meshed topology. Used in Steps 5-8.
 //
 network LargeNet extends SwitchNetwork
 {
+    @figure[simtime](type="simTimeText"; pos=550,520; prefix="SimTime: "; font=,10);
     submodules:
         switch8: EthernetSwitch {
             @display("p=475,370");
@@ -161,6 +178,22 @@ network LargeNet extends SwitchNetwork
 }
 
 //
+// STP variant of LargeNet with STP-specific legend.
+//
+network StpLargeNet extends LargeNet
+{
+    @figure[legend](type=text; pos=200,10; text="Port labels: Role/State\nRoles: R=Root D=Designated -=NotAssigned X=Disabled\nStates: F=Forwarding L=Learning B=Blocking N=Listening");
+}
+
+//
+// RSTP variant of LargeNet with RSTP-specific legend.
+//
+network RstpLargeNet extends LargeNet
+{
+    @figure[legend](type=text; pos=200,10; text="Port labels: Role/State\nRoles: R=Root D=Designated A=Alternate B=Backup -=NotAssigned X=Disabled\nStates: F=Forwarding L=Learning D=Discarding");
+}
+
+//
 // Dumbbell-shaped network: two internally meshed clusters of four switches each,
 // connected only through two bridge switches in the middle. Used in Step 9.
 //
@@ -176,7 +209,7 @@ network BottleneckNetwork
         l2NetworkConfigurator: L2NetworkConfigurator {
             @display("p=50,190;is=s");
         }
-        visualizer: IntegratedCanvasVisualizer {
+        visualizer: IntegratedMultiCanvasVisualizer {
             @display("p=50,260;is=s");
         }
         pcapRecorder: PcapRecorder {

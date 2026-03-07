@@ -33,28 +33,44 @@ RSTP's rapid state transitions.
 How RSTP Handles Link Events
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-When a link goes down, the port connected to that link immediately loses carrier.
-RSTP detects this and:
+**Carrier-based vs. timer-based detection.** By default, RSTP detects a
+neighbor's disappearance by noticing missed BPDUs — if 3 consecutive hellos
+are missed (6 s), the port's stored information expires. However, when the
+physical link itself goes down (cable unplugged, interface shut down), the
+Ethernet interface can report *carrier loss* to the upper layers immediately.
+
+The ``CarrierBasedLifeTimer`` (configured via
+``lifetimer.typename = "CarrierBasedLifeTimer"``) enables this fast detection
+path in INET: the RSTP module is notified of link-down events as soon as the
+physical layer detects them, rather than waiting for BPDU timeouts. This
+reduces failure detection time from 6 s to effectively zero.
+
+**Link down.** When a link goes down and the port detects carrier loss:
 
 1. If the port was a *Root port*, the switch promotes its best *Alternate port*
    to Root port immediately (no timer wait).
 2. If the port was a *Designated port*, the switch marks it as *Discarding* and
-   sends topology change notifications.
+   sends topology change notifications to flush MAC tables across the network.
 
-When a link comes back up, RSTP runs the *proposal/agreement* handshake with
-the newly connected neighbor to quickly determine port roles and transition
-to Forwarding.
+**Link up.** When a link comes back up and carrier is detected:
+
+1. The port starts in Discarding state and begins sending BPDUs to its new
+   neighbor.
+2. RSTP runs the *proposal/agreement* handshake with the neighbor to determine
+   port roles and safely transition to Forwarding.
+3. If the restored link offers a better path cost than the current tree paths,
+   the tree may restructure to incorporate it. Otherwise, the port becomes an
+   Alternate or Backup port in Discarding state.
 
 Results
 ~~~~~~~
 
-**At t=60 s** — The link ``switch1↔switch3`` goes down. If this link was part
-of the active tree, RSTP reacts within one hello interval (~2 s) and reroutes
-traffic over an alternate path. If it was a blocked alternate path, the topology
-is unaffected.
+**At t=60 s** — The link ``switch1↔switch3`` goes down. This link was part
+of the active tree, so RSTP reacts within one hello interval (~2 s) and reroutes
+traffic over the alternate path between ``switch4`` and ``switch7``.
 
-.. figure:: media/step8disconnect.png
-   :width: 80%
+.. video_noloop:: media/step8failure2.mp4
+   :width: 100%
    :align: center
 
 **At t=120 s** — The link is reconnected. RSTP detects the new link and runs
@@ -62,8 +78,8 @@ the proposal/agreement handshake. If the link's path cost makes it preferable
 to the current tree path, it may become part of the active tree. Otherwise it
 becomes an Alternate (backup) port in Discarding state.
 
-.. figure:: media/step8reconnect.png
-   :width: 80%
+.. video_noloop:: media/step8recovery2.mp4
+   :width: 100%
    :align: center
 
 In both cases, re-convergence completes in a few seconds, and all hosts
