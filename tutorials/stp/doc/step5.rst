@@ -67,13 +67,12 @@ has been connected), it loses its edge status and participates in the normal
 proposal/agreement process.
 
 **Topology change handling.** When RSTP detects a topology change (e.g. a
-non-edge port transitioning to Forwarding), it does not send a separate
-Topology Change Notification toward the root as STP does. Instead, the
-detecting switch sets the *TC* (Topology Change) flag directly in its BPDUs,
-and this flag is flooded throughout the network. Each switch that receives a
-TC-flagged BPDU flushes learned MAC addresses on all ports except the one the
-BPDU arrived on and any edge ports. This is faster and simpler than STP's
-TCN mechanism.
+non-edge port transitioning to Forwarding), the detecting switch sets the *TC*
+(Topology Change) flag directly in its BPDUs, and this flag is flooded
+throughout the network. Each switch that receives a TC-flagged BPDU flushes
+learned MAC addresses on all ports except the one the BPDU arrived on and any
+edge ports. How this compares to STP's topology change mechanism is discussed
+in Steps 6 and 7.
 
 In INET, RSTP is implemented by the :ned:`Rstp` module. Key parameters:
 
