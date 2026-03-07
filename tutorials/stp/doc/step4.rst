@@ -36,6 +36,13 @@ STP ports transition through four states:
   ``forwardDelay`` seconds (default 15 s).
 - **Forwarding**: The port forwards data frames normally.
 
+.. note::
+   INET's :ned:`Stp` implementation does not distinguish Blocking and Listening
+   as separate internal states. Instead, it uses a single ``DISCARDING`` state
+   (borrowed from RSTP) that covers both, transitioning directly to ``LEARNING``
+   and then ``FORWARDING``. As a result, the visualization displays
+   *Discarding* rather than *Blocking* or *Listening* during convergence.
+
 The total time from startup to Forwarding for a Root or Designated port is
 therefore at least ``2 × forwardDelay = 30 s``. Adding the time needed for
 BPDUs to propagate across the network and for the root election to settle

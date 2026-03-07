@@ -69,13 +69,6 @@ they can react if the topology changes.
 In INET, STP is implemented by the :ned:`Stp` module, which is enabled per
 switch via the ``hasStp = true`` and ``spanningTreeProtocol = "Stp"`` parameters.
 
-.. note::
-   INET's :ned:`Stp` implementation does not distinguish Blocking and Listening
-   as separate internal states. Instead, it uses a single ``DISCARDING`` state
-   (borrowed from RSTP) that covers both, transitioning directly to ``LEARNING``
-   and then ``FORWARDING``. As a result, the visualization will display
-   *Discarding* rather than *Blocking* or *Listening* during convergence.
-
 Configuration
 ~~~~~~~~~~~~~
 
@@ -112,6 +105,12 @@ remaining loop-free.
 .. video:: media/step2result.mp4
    :width: 100%
    :align: center
+
+.. note::
+   The visualization displays *Discarding* rather than *Blocking* on inactive
+   ports. This is because INET's STP implementation uses RSTP-style port states
+   internally. The port states and their transitions are discussed in detail in
+   Step 4.
 
 Sources:
 :download:`omnetpp.ini <../omnetpp.ini>`,
