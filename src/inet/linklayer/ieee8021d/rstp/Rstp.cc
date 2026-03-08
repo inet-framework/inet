@@ -261,6 +261,25 @@ void Rstp::handleProposal(const Ptr<const BpduCfg>& frame, unsigned int arrivalI
     sendBPDU(arrivalInterfaceId, true);
 }
 
+void Rstp::handleAgreement(const Ptr<const BpduCfg>& frame, unsigned int arrivalInterfaceId)
+{
+    auto arrivalPort = getPortInterfaceDataForUpdate(arrivalInterfaceId);
+
+    // Only accept Agreement on a Designated port that is not yet Forwarding
+    if (arrivalPort->getRole() != Ieee8021dInterfaceData::DESIGNATED)
+        return;
+    if (arrivalPort->getState() == Ieee8021dInterfaceData::FORWARDING)
+        return;
+
+    EV_INFO << "Agreement received on designated port " << arrivalInterfaceId
+            << ", rapid transition to FORWARDING." << endl;
+    findContainingNode(this)->bubble("Agreement received");
+
+    arrivalPort->setAgreed(true);
+    arrivalPort->setState(Ieee8021dInterfaceData::FORWARDING);
+    flushOtherPorts(arrivalInterfaceId);
+}
+
 void Rstp::handleBackup(const Ptr<const BpduCfg>& frame, unsigned int arrivalInterfaceId)
 {
     EV_DETAIL << "More than one port in the same LAN" << endl;
@@ -317,6 +336,8 @@ void Rstp::handleIncomingFrame(Packet *packet)
             // Handle Proposal/Agreement after role assignment is complete
             if (frame->getProposalFlag())
                 handleProposal(frame, arrivalInterfaceId);
+            if (frame->getAgreementFlag())
+                handleAgreement(frame, arrivalInterfaceId);
         }
     }
     else
