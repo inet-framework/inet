@@ -63,6 +63,11 @@ class INET_API Ieee8021dInterfaceData : public InterfaceProtocolData
         simtime_t earliestBpduSendTime; // The earliest time a BPDU can be sent on this port (hold timer)
         bool bpduSendPending; // True if a BPDU send was suppressed by the hold timer
 
+        // Proposal/Agreement state (RSTP)
+        bool proposing; // This port is sending Proposal flags in BPDUs
+        bool agreed;    // Downstream neighbor has sent Agreement for this port
+        bool synced;    // This port has been synced (blocked) as part of a P/A handshake
+
       public:
         PortInfo();
     };
@@ -175,6 +180,15 @@ class INET_API Ieee8021dInterfaceData : public InterfaceProtocolData
     bool getBpduSendPending() const { return portData.bpduSendPending; }
 
     void setBpduSendPending(bool pending) { portData.bpduSendPending = pending; }
+
+    bool isProposing() const { return portData.proposing; }
+    void setProposing(bool proposing) { portData.proposing = proposing; }
+
+    bool isAgreed() const { return portData.agreed; }
+    void setAgreed(bool agreed) { portData.agreed = agreed; }
+
+    bool isSynced() const { return portData.synced; }
+    void setSynced(bool synced) { portData.synced = synced; }
 };
 
 } // namespace inet

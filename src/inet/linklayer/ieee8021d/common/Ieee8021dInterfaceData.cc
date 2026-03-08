@@ -30,6 +30,10 @@ Ieee8021dInterfaceData::PortInfo::PortInfo()
 
     earliestBpduSendTime = 0;
     bpduSendPending = false;
+
+    proposing = false;
+    agreed = false;
+    synced = false;
 }
 
 Ieee8021dInterfaceData::Ieee8021dInterfaceData()
