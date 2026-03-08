@@ -52,9 +52,10 @@ class BpduCfg extends BpduBase
     protocolVersionIdentifier = SPANNING_TREE;
     bpduType = BPDU_CFG;
                                               // flags: 1 byte
-    bool tcaFlag;                             //   Topology Change Acknowledgment flag
-    uint8_t reserved = 0;                     //   unused 6 bits of Flags
-    bool tcFlag;                              //   Topology Change flag
+    bool tcaFlag;                             //   bit 7: Topology Change Acknowledgment flag
+    bool agreementFlag;                       //   bit 6: Agreement flag (RSTP)
+    bool proposalFlag;                        //   bit 1: Proposal flag (RSTP)
+    bool tcFlag;                              //   bit 0: Topology Change flag
 
     uint16_t rootPriority;                    // 2 bytes, priority of the tree root (part of Root Identifier)
     MacAddress rootAddress;                   // 6 bytes, address of the tree root (part of Root Identifier)

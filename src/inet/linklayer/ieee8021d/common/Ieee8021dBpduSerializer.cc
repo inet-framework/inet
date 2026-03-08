@@ -26,7 +26,9 @@ void Ieee8021dBpduSerializer::serialize(MemoryOutputStream& stream, const Ptr<co
         case BPDU_CFG: {
             const auto& bpdu = CHK(dynamicPtrCast<const BpduCfg>(chunk));
             stream.writeBit(bpdu->getTcaFlag());
-            stream.writeNBitsOfUint64Be(bpdu->getReserved(), 6);
+            stream.writeBit(bpdu->getAgreementFlag());
+            stream.writeNBitsOfUint64Be(0, 4);  // reserved (Forwarding, Learning, Port Role)
+            stream.writeBit(bpdu->getProposalFlag());
             stream.writeBit(bpdu->getTcFlag());
             stream.writeUint16Be(bpdu->getRootPriority());
             stream.writeMacAddress(bpdu->getRootAddress());
@@ -64,7 +66,9 @@ const Ptr<Chunk> Ieee8021dBpduSerializer::deserialize(MemoryInputStream& stream)
             bpdu->setProtocolVersionIdentifier(protocolVersionIdentifier);
             bpdu->setBpduType(bpduType);
             bpdu->setTcaFlag(stream.readBit());
-            bpdu->setReserved(stream.readNBitsToUint64Be(6));
+            bpdu->setAgreementFlag(stream.readBit());
+            stream.readNBitsToUint64Be(4);  // skip reserved (Forwarding, Learning, Port Role)
+            bpdu->setProposalFlag(stream.readBit());
             bpdu->setTcFlag(stream.readBit());
             bpdu->setRootPriority(stream.readUint16Be());
             bpdu->setRootAddress(stream.readMacAddress());
