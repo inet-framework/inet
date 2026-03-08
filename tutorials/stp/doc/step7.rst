@@ -61,21 +61,32 @@ normally. The active tree is identical to the STP case (same root, same paths),
 but it was established much faster.
 
 **At t=60 s** — ``switch4`` shuts down. RSTP detects the failure within one
-hello interval (2 s) and immediately begins re-election using alternate ports.
+hello interval (2 s) and immediately promotes alternate ports to root ports.
 The tree re-stabilizes in approximately **6 s**, compared to **~50 s** for STP.
 Hosts experience only a brief connectivity interruption.
 
-**At t=120 s** — ``switch4`` restarts. RSTP's edge-port and proposal/agreement
-mechanisms allow ``switch4`` to rejoin the tree quickly without going through
-the long Listening/Learning cycle.
+**At t=120 s** — ``switch4`` restarts. RSTP's edge-port detection allows
+``switch4`` to rejoin the tree quickly without going through the long
+Listening/Learning cycle.
 
 .. figure:: media/step7result.png
    :width: 90%
    :align: center
 
-The comparison between Step 5 and Step 7 clearly illustrates why RSTP is
-preferred over STP in modern networks: the ~50 s reconvergence of STP causes
-noticeable outages, while RSTP's ~6 s recovery is nearly transparent.
+In the simulation, watch for:
+
+- **Port role changes** on the interfaces of switches neighboring ``switch4``.
+  When ``switch4`` fails, an ``ALTERNATE/DISCARDING`` port is promoted to
+  ``ROOT/FORWARDING`` — this transition is immediate and is the main reason
+  RSTP recovers so fast.
+- **"TCN received" bubbles** appearing on switches as the TC flag propagates
+  through the network, triggering MAC table flushes.
+- **Link color changes** as the tree reconverges: failed links turn gray,
+  and newly activated links turn black.
+
+Compare this with the Step 5 animation, where the same failure causes a ~50 s
+outage. The difference clearly illustrates why RSTP is preferred over STP in
+modern networks.
 
 Sources:
 :download:`omnetpp.ini <../omnetpp.ini>`,

@@ -125,11 +125,22 @@ action.
 
 In INET, RSTP is implemented by the :ned:`Rstp` module. Key parameters:
 
-- ``forwardDelay`` (default 6 s): used only as a fallback when the
-  proposal/agreement handshake cannot be used; rapid transitions bypass this
+- ``forwardDelay`` (default 6 s): time spent in each transitional state
+  (Discarding → Learning, Learning → Forwarding) for designated ports
 - ``migrateTime`` (default 3 s): time before an unassigned port becomes
   Designated; also used for edge port detection
 - ``autoEdge`` (default true): automatically detect and configure edge ports
+
+.. note::
+
+   INET's :ned:`Rstp` module is a simplified model. It correctly implements
+   port roles (including Alternate and Backup), immediate alternate-to-root
+   promotion, edge port detection, and TC flag propagation. However, it does
+   not implement the Proposal/Agreement handshake — designated ports use
+   ``forwardDelay`` timers instead of rapid P/A transitions. The faster
+   convergence observed in the simulation is primarily due to immediate
+   alternate port promotion and faster failure detection (3 missed hellos
+   instead of ``maxAge``).
 
 Configuration
 ~~~~~~~~~~~~~
@@ -147,16 +158,23 @@ Results
 ~~~~~~~
 
 With RSTP, the spanning tree converges in approximately 6 s — roughly eight
-times faster than STP. The port state labels on switch interfaces cycle
-much more quickly through the RSTP states (Discarding → Learning → Forwarding).
+times faster than STP.
 
 .. figure:: media/step5result.png
    :width: 80%
    :align: center
 
-Edge ports (ports connected to ``host1`` and ``host2``) transition to Forwarding
-almost immediately (within one hello interval ≈ 2 s), because they are
-automatically identified as edge ports.
+In the simulation, observe the following:
+
+- **Port role and state labels** appear on each switch interface (e.g.
+  ``ROOT/FORWARDING``, ``DESIGNATED/DISCARDING``, ``ALTERNATE/DISCARDING``).
+  Compare these with the STP labels in earlier steps — RSTP uses the same
+  states but adds the Alternate and Backup roles.
+- **Link colors** change as ports transition: gray for Discarding, black for
+  Forwarding. Watch how quickly the links turn black compared to STP.
+- **Edge ports** (ports connected to ``host1`` and ``host2``) transition to
+  Forwarding almost immediately (within one hello interval ≈ 2 s), because
+  they are automatically identified as edge ports.
 
 At t=15 s, traffic from ``host2`` reaches ``host1`` reliably, demonstrating
 that the tree has converged well before the STP equivalent would have.
