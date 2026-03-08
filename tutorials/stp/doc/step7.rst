@@ -4,14 +4,14 @@ Step 7. Topology Change with RSTP: Faster Recovery
 Goals
 -----
 
-This step runs the same switch-failure scenario as Step 6 but with RSTP
+This step runs the same switch-failure scenario as Step 5 but with RSTP
 enabled instead of STP. The goal is to observe the dramatically faster
 re-convergence that RSTP provides after a topology change.
 
 Configuration
 ~~~~~~~~~~~~~
 
-The ``Step7`` configuration extends ``Step6`` with only one change:
+The ``Step7`` configuration extends ``Step5`` with only one change:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -39,15 +39,15 @@ delays.
 
 **Rapid designated port activation.** If new ports need to become Designated
 (because the tree shape changed), the *proposal/agreement* handshake described
-in Step 5 activates them within one or two hello intervals (2–4 s), without
+in Step 6 activates them within one or two hello intervals (2–4 s), without
 going through the 30 s Listening/Learning cycle.
 
-**Fast TC propagation.** Unlike STP, where topology change notifications must
-travel to the root and back, RSTP floods the TC flag directly in BPDUs from
-the detecting switch. Each switch that receives a TC-flagged BPDU immediately
-flushes its MAC forwarding table on all non-edge ports (rather than merely
-reducing the aging time). This ensures all switches re-learn the correct
-forwarding paths within seconds.
+**Fast TC propagation.** Unlike STP's TCN mechanism (described in Step 5),
+where topology change notifications must travel to the root and back, RSTP
+floods the TC flag directly in BPDUs from the detecting switch. Each switch
+that receives a TC-flagged BPDU immediately flushes its MAC forwarding table
+on all non-edge ports (rather than merely reducing the aging time). This
+ensures all switches re-learn the correct forwarding paths within seconds.
 
 Total re-convergence time after a failure with RSTP: approximately **6 s**.
 
@@ -71,7 +71,7 @@ the long Listening/Learning cycle.
    :width: 90%
    :align: center
 
-The comparison between Step 6 and Step 7 clearly illustrates why RSTP is
+The comparison between Step 5 and Step 7 clearly illustrates why RSTP is
 preferred over STP in modern networks: the ~50 s reconvergence of STP causes
 noticeable outages, while RSTP's ~6 s recovery is nearly transparent.
 

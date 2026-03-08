@@ -100,8 +100,9 @@ Root ports and designated ports reach the Forwarding state after approximately
    :align: center
 
 By t≈50 s the tree is fully converged and traffic from ``host2`` reaches
-``host1`` without issues. The next step shows how RSTP reduces this 50 s
-convergence time to under 10 s.
+``host1`` without issues. The next step demonstrates how STP handles topology
+changes such as switch failures, and how the same ~50 s convergence delay
+applies to recovery.
 
 Sources:
 :download:`omnetpp.ini <../omnetpp.ini>`,

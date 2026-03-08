@@ -1,22 +1,89 @@
-Step 6. Topology Change with STP: Switch Failure and Recovery
-=============================================================
+Step 6. RSTP: Faster Convergence
+=================================
 
 Goals
 -----
 
-This step demonstrates how STP handles a topology change caused by a switch
-failure. We will observe how the spanning tree rebuilds after a switch goes
-down, and how long STP takes to restore connectivity.
+The previous steps showed that STP takes approximately 50 s to converge — both
+at startup and after a topology change. This step introduces the Rapid Spanning
+Tree Protocol (RSTP, IEEE 802.1D-2004), which dramatically reduces convergence
+time. We will run the same base network as Steps 2–4 with RSTP enabled and
+observe the difference.
 
-The Network
------------
+About RSTP
+~~~~~~~~~~
 
-The simulation uses the ``LargeNet`` network: 11 switches and 6 hosts with a
-heavily meshed topology, providing many redundant paths. This gives the spanning
-tree more work to do when a failure occurs.
+The Rapid Spanning Tree Protocol (RSTP, IEEE 802.1D-2004) is the successor to
+STP. It produces the same loop-free spanning tree but converges dramatically
+faster — typically in a few seconds instead of 30–50 s. RSTP achieves this by
+replacing STP's passive timer-based transitions with active handshakes between
+neighboring switches.
 
-.. figure:: media/LargeNet.png
-   :align: center
+**Simplified port states.** RSTP reduces the four STP states to three:
+
+- **Discarding**: combines STP's Blocking and Listening. The port does not
+  forward data and does not learn MAC addresses. (This is the state displayed
+  by INET's visualization for both STP and RSTP.)
+- **Learning**: the port learns MAC addresses but does not yet forward data.
+- **Forwarding**: the port forwards data normally.
+
+**Port roles.** RSTP keeps the Root and Designated roles from STP and adds two
+new ones:
+
+- **Alternate port**: a port that has a viable path to the root through a
+  *different* upstream switch, but with a higher cost than the current root
+  port. It serves as a hot standby — if the root port fails, the best
+  alternate port can be promoted to root port *immediately*, without running a
+  new election.
+- **Backup port**: a port that receives BPDUs from the *same* switch it
+  belongs to (possible on shared/hub segments). It is a backup for a
+  designated port. This role is rare in modern switched networks.
+
+The distinction matters for failure recovery: an Alternate port already knows
+it has a loop-free path to the root, so it can take over without delay.
+
+**The Proposal/Agreement mechanism.** This is the key innovation that
+eliminates the Listening/Learning delays. When a switch determines that one of
+its ports should become Designated, the following handshake occurs:
+
+1. The switch sends a BPDU with the *Proposal* flag set on the port.
+2. The downstream switch receives the proposal. Before it can agree, it must
+   ensure no loops will form — so it puts all its own non-edge ports into
+   Discarding state (a process called *sync*).
+3. Once sync is complete, the downstream switch sends a BPDU with the
+   *Agreement* flag back to the upstream switch.
+4. The upstream switch receives the agreement and immediately transitions its
+   port to Forwarding — no timer wait needed.
+
+This handshake cascades through the network: each switch syncs and agrees with
+its upstream neighbor, rippling outward from the root. The entire tree
+converges within a few hello intervals.
+
+**Edge ports.** Ports connected to end hosts (not other switches) can never
+create loops, so they can transition directly to Forwarding without any delay
+or handshake. RSTP calls these *edge ports*. In INET, edge ports are detected
+automatically when ``autoEdge = true`` (the default): if a port does not
+receive any BPDUs within the first ``migrateTime`` seconds, it is classified
+as an edge port. If an edge port later receives a BPDU (indicating a switch
+has been connected), it loses its edge status and participates in the normal
+proposal/agreement process.
+
+**Topology change handling.** When RSTP detects a topology change (e.g. a
+non-edge port transitioning to Forwarding), the detecting switch sets the *TC*
+(Topology Change) flag directly in its BPDUs, and this flag is flooded
+throughout the network. Each switch that receives a TC-flagged BPDU flushes
+learned MAC addresses on all ports except the one the BPDU arrived on and any
+edge ports. Compare this with STP's slower TCN mechanism described in Step 5:
+RSTP does not route notifications through the root, and flushes MAC tables
+immediately rather than merely reducing the aging time.
+
+In INET, RSTP is implemented by the :ned:`Rstp` module. Key parameters:
+
+- ``forwardDelay`` (default 6 s): used only as a fallback when the
+  proposal/agreement handshake cannot be used; rapid transitions bypass this
+- ``migrateTime`` (default 3 s): time before an unassigned port becomes
+  Designated; also used for edge port detection
+- ``autoEdge`` (default true): automatically detect and configure edge ports
 
 Configuration
 ~~~~~~~~~~~~~
@@ -26,76 +93,31 @@ Configuration
    :start-at: [Config Step6]
    :end-before: ------
 
-Switch failures are driven by :download:`failure.xml <../failure.xml>`:
-
-.. literalinclude:: ../failure.xml
-   :language: xml
-
-``switch4`` shuts down at t=60 s and restarts at t=120 s. The ``hasStatus = true``
-parameter enables lifecycle operations (shutdown/startup) on all nodes.
-
-Traffic between all host pairs starts at t=10 ms and runs continuously,
-so any disruption to connectivity is immediately visible.
-
-How STP Handles Topology Changes
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-When a switch detects a topology change — such as a port going down or a new
-port transitioning to Forwarding — STP uses a two-phase notification process:
-
-1. The detecting switch sends a *Topology Change Notification* (TCN) BPDU
-   upstream toward the root bridge via its root port. Each intermediate switch
-   relays the TCN further upstream and acknowledges it downstream.
-2. When the root bridge receives the TCN, it sets the *Topology Change* (TC)
-   flag in its periodic Configuration BPDUs for a period of
-   ``maxAge + forwardDelay`` seconds (default 20 + 15 = 35 s).
-3. All switches that receive a TC-flagged BPDU reduce their MAC address aging
-   time from the normal ``agingTime`` (default 300 s) to ``forwardDelay``
-   (15 s). This causes stale entries to expire quickly, forcing the switches
-   to re-learn the correct port mappings through flooding.
-
-This mechanism is slow because it depends on the root bridge as a relay point,
-and the MAC tables are only gradually flushed through accelerated aging rather
-than immediately cleared.
-
-The total reconvergence time after a failure can be broken down as:
-
-- **maxAge** (20 s): neighboring switches wait for the failed switch's stored
-  BPDU information to expire before they accept that the topology has changed.
-- **Listening** (15 s): ports with new roles go through the Listening state.
-- **Learning** (15 s): then through the Learning state.
-- **Total: ~50 s** before data flows again on the reconfigured tree.
+The only change from the STP configuration is ``spanningTreeProtocol = "Rstp"``.
+The simulation runs for only 30 s (versus 200 s for the STP step), because
+RSTP converges quickly. Traffic starts at t=15 s.
 
 Results
 ~~~~~~~
 
-**Before failure (t=0–60 s)**: STP converges in ~50 s. All hosts communicate
-through the active spanning tree. ``switch1`` is root (lowest MAC address).
+With RSTP, the spanning tree converges in approximately 6 s — roughly eight
+times faster than STP. The port state labels on switch interfaces cycle
+much more quickly through the RSTP states (Discarding → Learning → Forwarding).
 
-**At t=60 s** — ``switch4`` shuts down. The switches that had ports connected
-to ``switch4`` stop receiving BPDUs on those ports. After ``maxAge`` (20 s)
-expires, they discard the stored BPDU information and re-evaluate their port
-roles. The affected ports then transition through Listening → Learning →
-Forwarding (another 30 s). During this ~50 s period, hosts that depended on
-paths through ``switch4`` lose connectivity.
-
-When the tree re-stabilizes, they can communicate again via alternate paths
-(the topology has enough redundancy).
-
-**At t=120 s** — ``switch4`` restarts. STP again goes through the full
-convergence cycle before the switch rejoins the active tree.
-
-.. figure:: media/step6failure.png
-   :width: 90%
+.. figure:: media/step5result.png
+   :width: 80%
    :align: center
 
-The slow convergence after failure is the main limitation of STP. The next
-step shows how RSTP handles the same failure much faster.
+Edge ports (ports connected to ``host1`` and ``host2``) transition to Forwarding
+almost immediately (within one hello interval ≈ 2 s), because they are
+automatically identified as edge ports.
+
+At t=15 s, traffic from ``host2`` reaches ``host1`` reliably, demonstrating
+that the tree has converged well before the STP equivalent would have.
 
 Sources:
 :download:`omnetpp.ini <../omnetpp.ini>`,
-:download:`StpTutorial.ned <../StpTutorial.ned>`,
-:download:`failure.xml <../failure.xml>`
+:download:`StpTutorial.ned <../StpTutorial.ned>`
 
 Discussion
 ----------
