@@ -121,6 +121,7 @@ void Rstp::handleUpgrade(cMessage *msg)
                 iPort->setRole(Ieee8021dInterfaceData::DESIGNATED);
                 iPort->setState(Ieee8021dInterfaceData::DISCARDING); // contest to become forwarding.
                 iPort->setNextUpgrade(simTime() + forwardDelay);
+                tryImmediateForwarding();
             }
             else if (iPort->getRole() == Ieee8021dInterfaceData::DESIGNATED) {
                 if (iPort->getState() == Ieee8021dInterfaceData::DISCARDING) {
@@ -245,7 +246,8 @@ void Rstp::handleProposal(const Ptr<const BpduCfg>& frame, unsigned int arrivalI
         if (iPort->isEdge())
             continue;
         if (iPort->getRole() == Ieee8021dInterfaceData::DESIGNATED
-            && iPort->getState() == Ieee8021dInterfaceData::FORWARDING)
+            && iPort->getState() == Ieee8021dInterfaceData::FORWARDING
+            && !iPort->isAgreed())
         {
             EV_DETAIL << "Syncing port " << interfaceId << ": FORWARDING -> DISCARDING" << endl;
             iPort->setState(Ieee8021dInterfaceData::DISCARDING);
@@ -258,6 +260,9 @@ void Rstp::handleProposal(const Ptr<const BpduCfg>& frame, unsigned int arrivalI
 
     // Propagate the wave: send expedited BPDUs with Proposal on synced Designated ports
     sendBPDUs();
+
+    // Syncing may enable implicit agreement on other Designated ports
+    tryImmediateForwarding();
 
     // Send Agreement back on root port
     EV_INFO << "Sending Agreement on root port " << arrivalInterfaceId << endl;
@@ -281,6 +286,48 @@ void Rstp::handleAgreement(const Ptr<const BpduCfg>& frame, unsigned int arrival
     arrivalPort->setAgreed(true);
     arrivalPort->setState(Ieee8021dInterfaceData::FORWARDING);
     flushOtherPorts(arrivalInterfaceId);
+
+    // An explicit Agreement may enable implicit agreement on other ports
+    tryImmediateForwarding();
+}
+
+bool Rstp::allOtherPortsSynced(unsigned int portId)
+{
+    for (unsigned int i = 0; i < numPorts; i++) {
+        int interfaceId = ifTable->getInterface(i)->getInterfaceId();
+        if ((unsigned int)interfaceId == portId)
+            continue;
+        const Ieee8021dInterfaceData *iPort = getPortInterfaceData(interfaceId);
+        if (iPort->isEdge())
+            continue;
+        if (iPort->getRole() == Ieee8021dInterfaceData::ROOT)
+            continue;
+        if (iPort->getState() == Ieee8021dInterfaceData::DISCARDING)
+            continue;
+        if (iPort->isAgreed())
+            continue;
+        // This port is Forwarding or Learning without agreement — not synced
+        return false;
+    }
+    return true;
+}
+
+void Rstp::tryImmediateForwarding()
+{
+    for (unsigned int i = 0; i < numPorts; i++) {
+        int interfaceId = ifTable->getInterface(i)->getInterfaceId();
+        auto iPort = getPortInterfaceDataForUpdate(interfaceId);
+        if (iPort->getRole() != Ieee8021dInterfaceData::DESIGNATED
+            || iPort->getState() == Ieee8021dInterfaceData::FORWARDING)
+            continue;
+        if (!allOtherPortsSynced(interfaceId))
+            continue;
+        EV_INFO << "All other ports synced — implicit agreement, port " << interfaceId
+                << " rapid transition to FORWARDING." << endl;
+        iPort->setAgreed(true);
+        iPort->setState(Ieee8021dInterfaceData::FORWARDING);
+        flushOtherPorts(interfaceId);
+    }
 }
 
 void Rstp::handleBackup(const Ptr<const BpduCfg>& frame, unsigned int arrivalInterfaceId)
@@ -341,6 +388,8 @@ void Rstp::handleIncomingFrame(Packet *packet)
                 handleProposal(frame, arrivalInterfaceId);
             if (frame->getAgreementFlag())
                 handleAgreement(frame, arrivalInterfaceId);
+            // Role changes from BPDU processing may enable implicit agreement
+            tryImmediateForwarding();
         }
     }
     else

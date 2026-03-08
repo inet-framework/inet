@@ -157,6 +157,9 @@ class INET_API Rstp : public StpBase
     virtual void handleProposal(const Ptr<const BpduCfg>& frame, unsigned int arrivalInterfaceId);
     virtual void handleAgreement(const Ptr<const BpduCfg>& frame, unsigned int arrivalInterfaceId);
 
+    virtual bool allOtherPortsSynced(unsigned int portId);
+    virtual void tryImmediateForwarding();
+
     virtual void handleBackup(const Ptr<const BpduCfg>& frame, unsigned int arrivalInterfaceId);
 
     /**
