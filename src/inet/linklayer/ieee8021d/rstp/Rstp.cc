@@ -642,6 +642,12 @@ void Rstp::sendBPDU(int interfaceId)
         frame->setHelloTime(helloTime);
         frame->setForwardDelay(forwardDelay);
 
+        // Proposal/Agreement flags (RSTP)
+        bool isDesignatedNotForwarding = (iport->getRole() == Ieee8021dInterfaceData::DESIGNATED
+                && iport->getState() != Ieee8021dInterfaceData::FORWARDING);
+        frame->setProposalFlag(isDesignatedNotForwarding);
+        frame->setAgreementFlag(iport->isAgreed());
+
         packet->insertAtBack(frame);
         sendOut(packet, interfaceId, MacAddress::STP_MULTICAST_ADDRESS);
     }
