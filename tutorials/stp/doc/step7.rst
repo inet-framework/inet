@@ -43,11 +43,13 @@ in Step 6 activates them within one or two hello intervals (2–4 s), without
 going through the 30 s Listening/Learning cycle.
 
 **Fast TC propagation.** Unlike STP's TCN mechanism (described in Step 5),
-where topology change notifications must travel to the root and back, RSTP
-floods the TC flag directly in BPDUs from the detecting switch. Each switch
-that receives a TC-flagged BPDU immediately flushes its MAC forwarding table
-on all non-edge ports (rather than merely reducing the aging time). This
-ensures all switches re-learn the correct forwarding paths within seconds.
+where topology change notifications must travel to the root and back, the
+detecting switch sets the *TC* (Topology Change) flag directly in its BPDUs,
+and this flag is flooded throughout the network. Each switch that receives a
+TC-flagged BPDU immediately flushes its MAC forwarding table on all ports
+except the one the BPDU arrived on and any edge ports (rather than merely
+reducing the aging time). This ensures all switches re-learn the correct
+forwarding paths within seconds.
 
 Total re-convergence time after a failure with RSTP: approximately **6 s**.
 
