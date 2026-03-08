@@ -58,6 +58,11 @@ Three timers govern STP's operation:
 - ``forwardDelay`` (default 15 s): The duration of the Listening and Learning
   states. It is set conservatively to ensure convergence across networks up to
   a certain diameter (number of hops from root to the farthest switch).
+- ``holdTime`` (default 1 s): The minimum interval between successive BPDU
+  transmissions on a single port. This prevents a switch from flooding the
+  network with BPDUs during rapid topology changes. If a BPDU needs to be sent
+  but the hold timer has not yet expired, the transmission is deferred until
+  the timer allows it.
 
 These timers are related: the network diameter, ``maxAge``, and ``forwardDelay``
 must be chosen so that topology information has time to propagate across the
