@@ -43,21 +43,58 @@ The distinction matters for failure recovery: an Alternate port already knows
 it has a loop-free path to the root, so it can take over without delay.
 
 **The Proposal/Agreement mechanism.** This is the key innovation that
-eliminates the Listening/Learning delays. When a switch determines that one of
-its ports should become Designated, the following handshake occurs:
+eliminates the Listening/Learning delays. The basic idea is that a port can
+skip the long timer-based transition to Forwarding *if its downstream neighbor
+explicitly confirms that doing so is safe* (i.e. will not create a loop). This
+confirmation happens through a quick two-message handshake.
 
-1. The switch sends a BPDU with the *Proposal* flag set on the port.
-2. The downstream switch receives the proposal. Before it can agree, it must
-   ensure no loops will form — so it puts all its own non-edge ports into
-   Discarding state (a process called *sync*).
-3. Once sync is complete, the downstream switch sends a BPDU with the
-   *Agreement* flag back to the upstream switch.
-4. The upstream switch receives the agreement and immediately transitions its
-   port to Forwarding — no timer wait needed.
+To understand the mechanism, it helps to think of it as a **wave of activation
+spreading outward from the root bridge**, one hop at a time:
 
-This handshake cascades through the network: each switch syncs and agrees with
-its upstream neighbor, rippling outward from the root. The entire tree
-converges within a few hello intervals.
+1. **The root bridge starts the wave.** After election, the root bridge knows
+   all its ports should be Designated. It sends a BPDU with the *Proposal*
+   flag set on each port, effectively asking each downstream neighbor: "I want
+   to start forwarding on this link — is it safe?"
+
+2. **Each downstream switch syncs.** When a switch receives a Proposal on a
+   port, it must guarantee that agreeing will not create a loop. It does this
+   by temporarily forcing *all* its other non-edge ports into Discarding state.
+   This is called *sync*: the switch is essentially saying "I'll block
+   everything else first, so there is provably no path through me that could
+   form a loop." Edge ports (host-facing) are exempt because they can never
+   create loops.
+
+3. **The downstream switch agrees.** Once sync is complete (all other non-edge
+   ports are Discarding), the switch sends a BPDU with the *Agreement* flag
+   back on the port where it received the Proposal. It also marks that port as
+   its Root port and moves it to Forwarding immediately.
+
+4. **The upstream switch activates.** Upon receiving the Agreement, the
+   upstream switch moves its Designated port to Forwarding immediately — no
+   timer wait needed. The link between these two switches is now fully active
+   in both directions.
+
+5. **The wave continues.** The downstream switch now has several ports that
+   were forced into Discarding during sync. For each port that should be
+   Designated (toward further downstream switches), it starts *its own*
+   Proposal/Agreement handshake — repeating steps 1–4 one hop further from the
+   root. As each handshake completes, the temporarily blocked ports are
+   released from Discarding and moved to Forwarding.
+
+6. **Leaf switches finish the wave.** When the wave reaches a switch whose
+   only downstream connections are edge ports (end hosts), no further
+   handshakes are needed. Edge ports go to Forwarding immediately.
+
+The net effect is that the tree is activated **hop by hop from root to leaves**.
+Each hop takes only one round-trip exchange (a few milliseconds on a LAN), so
+the entire tree converges within a few hello intervals — typically under 6 s
+for the whole network, compared to STP's 30–50 s.
+
+Note that during the brief sync phase at each hop, some ports are temporarily
+in Discarding. This is the cost of safety: RSTP momentarily interrupts
+forwarding on those ports to guarantee loop-freedom. However, since each
+handshake completes in milliseconds, these interruptions are negligible in
+practice.
 
 **Edge ports.** Ports connected to end hosts (not other switches) can never
 create loops, so they can transition directly to Forwarding without any delay
