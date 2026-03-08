@@ -218,7 +218,8 @@ void Rstp::checkTC(const Ptr<const BpduCfg>& frame, int arrivalInterfaceId)
                 // flushing other ports
                 // TCN over other ports
                 macTable->removeForwardingInterface(interfaceId);
-                port2->setTCWhile(simTime() + tcWhileTime);
+                if (simTime() >= port2->getTCWhile()) // don't refresh if already active (prevents TC storm)
+                    port2->setTCWhile(simTime() + tcWhileTime);
             }
         }
     }
