@@ -35,6 +35,7 @@ void Rstp::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         autoEdge = par("autoEdge");
+        allowStpPeers = par("allowStpPeers");
         tcWhileTime = par("tcWhileTime");
         migrateTime = par("migrateTime");
         helloTimer = new cMessage("itshellotime", SELF_HELLOTIME);
@@ -125,6 +126,10 @@ void Rstp::handleUpgrade(cMessage *msg)
             }
             else if (iPort->getRole() == Ieee8021dInterfaceData::DESIGNATED) {
                 if (iPort->getState() == Ieee8021dInterfaceData::DISCARDING) {
+                    if (!allowStpPeers)
+                        throw cRuntimeError("Designated port %d falling back to forwardDelay timer "
+                            "(DISCARDING->LEARNING) — this should not happen in a pure RSTP network. "
+                            "Set allowStpPeers=true if legacy STP peers are expected.", interfaceId);
                     EV_INFO << "UpgradeTime. Setting port " << interfaceId << " state to learning." << endl;
                     iPort->setState(Ieee8021dInterfaceData::LEARNING);
                     iPort->setNextUpgrade(simTime() + forwardDelay);

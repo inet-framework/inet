@@ -36,6 +36,7 @@ class INET_API Rstp : public StpBase
     // Set by management: see the ned file for more info
     simtime_t migrateTime;
     simtime_t tcWhileTime;
+    bool allowStpPeers = false;
     bool autoEdge = false;
 
     cMessage *helloTimer = nullptr;
