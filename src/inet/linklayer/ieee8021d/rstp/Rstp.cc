@@ -210,8 +210,7 @@ void Rstp::checkTC(const Ptr<const BpduCfg>& frame, int arrivalInterfaceId)
 {
     const Ieee8021dInterfaceData *port = getPortInterfaceData(arrivalInterfaceId);
     if ((frame->getTcFlag() == true) && (port->getState() == Ieee8021dInterfaceData::FORWARDING)) {
-        EV_DETAIL << "TCN received" << endl;
-        findContainingNode(this)->bubble("TCN received");
+        EV_DETAIL << "TC received" << endl;
         for (unsigned int i = 0; i < numPorts; i++) {
             int interfaceId = ifTable->getInterface(i)->getInterfaceId();
             if (interfaceId != arrivalInterfaceId) {
@@ -628,13 +627,12 @@ bool Rstp::processSameSource(const Ptr<const BpduCfg>& frame, unsigned int arriv
 void Rstp::sendTCNtoRoot()
 {
     // if TCWhile is not expired, sends BPDU with TC flag to the root
-    this->bubble("SendTCNtoRoot");
-    EV_DETAIL << "SendTCNtoRoot" << endl;
     int r = getRootInterfaceId();
     if (r >= 0) {
         const Ieee8021dInterfaceData *rootPort = getPortInterfaceData(r);
         if (rootPort->getRole() != Ieee8021dInterfaceData::DISABLED) {
             if (simTime() < rootPort->getTCWhile()) {
+                EV_DETAIL << "Sending TC on root port" << endl;
                 Packet *packet = new Packet("BPDU");
                 const auto& frame = makeShared<BpduCfg>();
                 frame->setRootPriority(rootPort->getRootPriority());
