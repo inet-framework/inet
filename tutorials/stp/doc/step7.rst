@@ -8,19 +8,6 @@ This step runs the same switch-failure scenario as Step 5 but with RSTP
 enabled instead of STP. The goal is to observe the dramatically faster
 re-convergence that RSTP provides after a topology change.
 
-Configuration
-~~~~~~~~~~~~~
-
-The ``Step7`` configuration extends ``Step5`` with only one change:
-
-.. literalinclude:: ../omnetpp.ini
-   :language: ini
-   :start-at: [Config Step7]
-   :end-before: ------
-
-The same ``LargeNet`` network and ``failure.xml`` script are used. The only
-difference is ``spanningTreeProtocol = "Rstp"``.
-
 How RSTP Handles Topology Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -52,6 +39,19 @@ reducing the aging time). This ensures all switches re-learn the correct
 forwarding paths within seconds.
 
 Total re-convergence time after a failure with RSTP: approximately **6 s**.
+
+Configuration
+~~~~~~~~~~~~~
+
+The ``Step7`` configuration extends ``Step5`` with only one change:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: [Config Step7]
+   :end-before: ------
+
+The same ``LargeNet`` network and ``failure.xml`` script are used. The only
+difference is ``spanningTreeProtocol = "Rstp"``.
 
 Results
 ~~~~~~~
