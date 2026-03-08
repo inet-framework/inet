@@ -48,13 +48,19 @@ skip the long timer-based transition to Forwarding *if its downstream neighbor
 explicitly confirms that doing so is safe* (i.e. will not create a loop). This
 confirmation happens through a quick two-message handshake.
 
-To understand the mechanism, it helps to think of it as a **wave of activation
-spreading outward from the root bridge**, one hop at a time:
+The Proposal/Agreement handshake is a general mechanism between any two
+neighboring switches — any switch that determines one of its ports should be
+Designated can send a Proposal on that port. There is no special trigger
+message; switches simply start proposing as soon as the normal BPDU exchange
+has determined their port roles. At startup, this naturally forms a **wave of
+activation spreading outward from the root bridge**, one hop at a time, because
+the root is the first switch whose port roles are settled (all ports
+Designated):
 
-1. **The root bridge starts the wave.** After election, the root bridge knows
-   all its ports should be Designated. It sends a BPDU with the *Proposal*
-   flag set on each port, effectively asking each downstream neighbor: "I want
-   to start forwarding on this link — is it safe?"
+1. **The root bridge starts the wave.** The root bridge knows all its ports
+   should be Designated. It sends a BPDU with the *Proposal* flag set on each
+   port, effectively asking each downstream neighbor: "I want to start
+   forwarding on this link — is it safe?"
 
 2. **Each downstream switch syncs.** When a switch receives a Proposal on a
    port, it must guarantee that agreeing will not create a loop. It does this
@@ -95,6 +101,12 @@ in Discarding. This is the cost of safety: RSTP momentarily interrupts
 forwarding on those ports to guarantee loop-freedom. However, since each
 handshake completes in milliseconds, these interruptions are negligible in
 practice.
+
+The same mechanism also handles root switch failure. If the root goes down, its
+neighbors' stored root information expires (after missing 3 hello BPDUs or
+detecting carrier loss). The normal BPDU exchange then converges on a new root
+(the switch with the next-lowest bridge ID), and the Proposal/Agreement wave
+rebuilds the tree from the new root outward.
 
 **Edge ports.** Ports connected to end hosts (not other switches) can never
 create loops, so they can transition directly to Forwarding without any delay
