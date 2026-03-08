@@ -74,7 +74,7 @@ class INET_API Rstp : public StpBase
     /**
      * @brief Sends BPDU through a port
      */
-    virtual void sendBPDU(int interfaceId);
+    virtual void sendBPDU(int interfaceId, bool agreement = false);
 
     /**
      * @brief General processing
@@ -154,6 +154,8 @@ class INET_API Rstp : public StpBase
     /**
      * @brief Handles the switch to backup in one of the ports
      */
+    virtual void handleProposal(const Ptr<const BpduCfg>& frame, unsigned int arrivalInterfaceId);
+
     virtual void handleBackup(const Ptr<const BpduCfg>& frame, unsigned int arrivalInterfaceId);
 
     /**

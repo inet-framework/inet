@@ -225,6 +225,42 @@ void Rstp::checkTC(const Ptr<const BpduCfg>& frame, int arrivalInterfaceId)
     }
 }
 
+void Rstp::handleProposal(const Ptr<const BpduCfg>& frame, unsigned int arrivalInterfaceId)
+{
+    const Ieee8021dInterfaceData *arrivalPort = getPortInterfaceData(arrivalInterfaceId);
+
+    // Only respond to Proposal if this port is a Root port
+    if (arrivalPort->getRole() != Ieee8021dInterfaceData::ROOT)
+        return;
+
+    EV_INFO << "Proposal received on root port " << arrivalInterfaceId << ", syncing ports." << endl;
+    findContainingNode(this)->bubble("Proposal received");
+
+    // Sync: block all non-edge, non-root forwarding ports
+    for (unsigned int i = 0; i < numPorts; i++) {
+        int interfaceId = ifTable->getInterface(i)->getInterfaceId();
+        if ((unsigned int)interfaceId == arrivalInterfaceId)
+            continue;
+        auto iPort = getPortInterfaceDataForUpdate(interfaceId);
+        if (iPort->isEdge())
+            continue;
+        if (iPort->getRole() == Ieee8021dInterfaceData::DESIGNATED
+            && iPort->getState() == Ieee8021dInterfaceData::FORWARDING)
+        {
+            EV_DETAIL << "Syncing port " << interfaceId << ": FORWARDING -> DISCARDING" << endl;
+            iPort->setState(Ieee8021dInterfaceData::DISCARDING);
+            iPort->setSynced(true);
+            iPort->setNextUpgrade(simTime() + forwardDelay);
+            macTable->removeForwardingInterface(interfaceId);
+        }
+    }
+    scheduleNextUpgrade();
+
+    // Send Agreement back on root port
+    EV_INFO << "Sending Agreement on root port " << arrivalInterfaceId << endl;
+    sendBPDU(arrivalInterfaceId, true);
+}
+
 void Rstp::handleBackup(const Ptr<const BpduCfg>& frame, unsigned int arrivalInterfaceId)
 {
     EV_DETAIL << "More than one port in the same LAN" << endl;
@@ -276,8 +312,12 @@ void Rstp::handleIncomingFrame(Packet *packet)
         // checking possible backup
         if (src.compareTo(bridgeAddress) == 0) // more than one port in the same LAN
             handleBackup(frame, arrivalInterfaceId);
-        else
+        else {
             processBPDU(frame, arrivalInterfaceId);
+            // Handle Proposal/Agreement after role assignment is complete
+            if (frame->getProposalFlag())
+                handleProposal(frame, arrivalInterfaceId);
+        }
     }
     else
         EV_DETAIL << "Expired BPDU" << endl;
@@ -607,7 +647,7 @@ void Rstp::sendBPDUs()
     }
 }
 
-void Rstp::sendBPDU(int interfaceId)
+void Rstp::sendBPDU(int interfaceId, bool agreement)
 {
     // send a BPDU throuth port
     const Ieee8021dInterfaceData *iport = getPortInterfaceData(interfaceId);
@@ -646,7 +686,7 @@ void Rstp::sendBPDU(int interfaceId)
         bool isDesignatedNotForwarding = (iport->getRole() == Ieee8021dInterfaceData::DESIGNATED
                 && iport->getState() != Ieee8021dInterfaceData::FORWARDING);
         frame->setProposalFlag(isDesignatedNotForwarding);
-        frame->setAgreementFlag(iport->isAgreed());
+        frame->setAgreementFlag(agreement);
 
         packet->insertAtBack(frame);
         sendOut(packet, interfaceId, MacAddress::STP_MULTICAST_ADDRESS);
