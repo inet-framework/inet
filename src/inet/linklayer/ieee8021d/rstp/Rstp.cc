@@ -256,6 +256,9 @@ void Rstp::handleProposal(const Ptr<const BpduCfg>& frame, unsigned int arrivalI
     }
     scheduleNextUpgrade();
 
+    // Propagate the wave: send expedited BPDUs with Proposal on synced Designated ports
+    sendBPDUs();
+
     // Send Agreement back on root port
     EV_INFO << "Sending Agreement on root port " << arrivalInterfaceId << endl;
     sendBPDU(arrivalInterfaceId, true);
