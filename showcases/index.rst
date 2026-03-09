@@ -20,6 +20,8 @@ Latest changes:
 
 - :doc:`quic/linksharing/doc/index` added (2026-02-26)
 - :doc:`emulation/mininet/doc/index` added (2026-02-26)
+- :doc:`routing/aodvexternal/doc/index` added (2026-02-26)
+- :doc:`emulation/webserver/doc/index` added (2026-02-26)
 - :doc:`tsn/trafficshaping/underthehood/doc/index` updated (2023-07-28)
 - :doc:`tsn/trafficshaping/cbsandtas/doc/index` released (2023-07-28)
 - :doc:`tsn/trafficshaping/cbsandats/doc/index` updated (2023-07-28)
