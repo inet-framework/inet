@@ -32,10 +32,10 @@ void Stp::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         tick = new cMessage("STP_TICK", 0);
-        bridgePriority = par("bridgePriority");
+        configuredBridgePriority = par("bridgePriority");
         holdTime = par("holdTime");
-        maxAge = par("maxAge");
-        forwardDelay = par("forwardDelay");
+        configuredMaxAge = par("maxAge");
+        configuredForwardDelay = par("forwardDelay");
 
         WATCH(bridgeAddress);
     }
@@ -116,8 +116,8 @@ void Stp::handleBPDU(Packet *packet, const Ptr<const BpduCfg>& bpdu)
         EV_INFO << "Configuration BPDU " << bpdu << " arrived from Root Switch." << endl;
 
         if (bpdu->getTcFlag()) {
-            EV_DEBUG << "MacForwardingTable aging time set to " << currentFwdDelay << "." << endl;
-            macTable->setAgingTime(currentFwdDelay);
+            EV_DEBUG << "MacForwardingTable aging time set to " << forwardDelay << "." << endl;
+            macTable->setAgingTime(forwardDelay);
 
             // config BPDU with TC flag
             for (auto& elem : desPorts)
@@ -169,16 +169,16 @@ void Stp::generateBPDU(int interfaceId, const MacAddress& address, bool tcFlag, 
     bpdu->setProtocolVersionIdentifier(SPANNING_TREE);
 
     bpdu->setBridgeAddress(bridgeAddress);
-    bpdu->setBridgePriority(bridgePriority);
+    bpdu->setBridgePriority(configuredBridgePriority);
     bpdu->setRootPathCost(rootPathCost);
     bpdu->setRootAddress(rootAddress);
     bpdu->setRootPriority(rootPriority);
     bpdu->setPortNum(interfaceId);
     bpdu->setPortPriority(getPortInterfaceData(interfaceId)->getPriority());
     bpdu->setMessageAge(0);
-    bpdu->setMaxAge(currentMaxAge);
-    bpdu->setHelloTime(currentHelloTime);
-    bpdu->setForwardDelay(currentFwdDelay);
+    bpdu->setMaxAge(maxAge);
+    bpdu->setHelloTime(helloInterval);
+    bpdu->setForwardDelay(forwardDelay);
 
     if (topologyChangeNotification) {
         if (isRoot || tcFlag) {
@@ -334,7 +334,7 @@ void Stp::checkTimers()
     Ieee8021dInterfaceData *port;
 
     // hello timer check
-    if (timeSinceLastHello >= currentHelloTime) {
+    if (timeSinceLastHello >= helloInterval) {
         // only the root switch can generate Hello BPDUs
         if (isRoot)
             generateHelloBPDUs();
@@ -347,7 +347,7 @@ void Stp::checkTimers()
         int interfaceId = ifTable->getInterface(i)->getInterfaceId();
         port = getPortInterfaceDataForUpdate(interfaceId);
 
-        if (port->getAge() >= currentMaxAge) {
+        if (port->getAge() >= maxAge) {
             EV_DETAIL << "Port=" << i << " reached its maximum age. Setting it to the default port info." << endl;
             if (port->getRole() == Ieee8021dInterfaceData::ROOT) {
                 initInterfacedata(interfaceId);
@@ -367,7 +367,7 @@ void Stp::checkTimers()
 
         // ROOT / DESIGNATED, can transition
         if (port->getRole() == Ieee8021dInterfaceData::ROOT || port->getRole() == Ieee8021dInterfaceData::DESIGNATED) {
-            if (port->getFdWhile() >= currentFwdDelay) {
+            if (port->getFdWhile() >= forwardDelay) {
                 switch (port->getState()) {
                     case Ieee8021dInterfaceData::DISCARDING:
                         EV_DETAIL << "Port=" << interfaceId << " goes into learning state." << endl;
@@ -398,12 +398,12 @@ void Stp::checkTimers()
 void Stp::checkParametersChange()
 {
     if (isRoot) {
-        currentHelloTime = timeSinceLastHello;
-        currentMaxAge = maxAge;
-        currentFwdDelay = forwardDelay;
+        helloInterval = timeSinceLastHello;
+        maxAge = configuredMaxAge;
+        forwardDelay = configuredForwardDelay;
     }
-    if (currentBridgePriority != bridgePriority) {
-        currentBridgePriority = bridgePriority;
+    if (bridgePriority != configuredBridgePriority) {
+        bridgePriority = configuredBridgePriority;
         reset();
     }
 }
@@ -414,7 +414,7 @@ bool Stp::checkRootEligibility()
         int interfaceId = ifTable->getInterface(i)->getInterfaceId();
         const Ieee8021dInterfaceData *port = getPortInterfaceData(interfaceId);
 
-        if (compareBridgeIDs(port->getRootPriority(), port->getRootAddress(), bridgePriority, bridgeAddress) > 0)
+        if (compareBridgeIDs(port->getRootPriority(), port->getRootAddress(), configuredBridgePriority, bridgeAddress) > 0)
             return false;
     }
 
@@ -427,12 +427,12 @@ void Stp::tryRoot()
         EV_DETAIL << "Switch is elected as root switch." << endl;
         isRoot = true;
         setAllDesignated();
-        rootPriority = bridgePriority;
+        rootPriority = configuredBridgePriority;
         rootAddress = bridgeAddress;
         rootPathCost = 0;
-        currentHelloTime = timeSinceLastHello;
-        currentMaxAge = maxAge;
-        currentFwdDelay = forwardDelay;
+        helloInterval = timeSinceLastHello;
+        maxAge = configuredMaxAge;
+        forwardDelay = configuredForwardDelay;
     }
     else {
         isRoot = false;
@@ -552,9 +552,9 @@ void Stp::selectRootPort()
     rootAddress = best->getRootAddress();
     rootPriority = best->getRootPriority();
 
-    currentMaxAge = best->getMaxAge();
-    currentFwdDelay = best->getFwdDelay();
-    currentHelloTime = best->getHelloTime();
+    maxAge = best->getMaxAge();
+    forwardDelay = best->getFwdDelay();
+    helloInterval = best->getHelloTime();
 }
 
 void Stp::selectDesignatedPorts()
@@ -564,7 +564,7 @@ void Stp::selectDesignatedPorts()
     Ieee8021dInterfaceData *bridgeGlobal = new Ieee8021dInterfaceData();
     int result;
 
-    bridgeGlobal->setBridgePriority(bridgePriority);
+    bridgeGlobal->setBridgePriority(configuredBridgePriority);
     bridgeGlobal->setBridgeAddress(bridgeAddress);
     bridgeGlobal->setRootAddress(rootAddress);
     bridgeGlobal->setRootPriority(rootPriority);
@@ -635,12 +635,12 @@ void Stp::reset()
 {
     // upon booting all switches believe themselves to be the root
     isRoot = true;
-    rootPriority = bridgePriority;
+    rootPriority = configuredBridgePriority;
     rootAddress = bridgeAddress;
     rootPathCost = 0;
-    currentHelloTime = timeSinceLastHello;
-    currentMaxAge = maxAge;
-    currentFwdDelay = forwardDelay;
+    helloInterval = timeSinceLastHello;
+    maxAge = configuredMaxAge;
+    forwardDelay = configuredForwardDelay;
     setAllDesignated();
 }
 
@@ -649,17 +649,17 @@ void Stp::start()
     StpBase::start();
 
     initPortTable();
-    currentBridgePriority = bridgePriority;
+    bridgePriority = configuredBridgePriority;
     isRoot = true;
     topologyChangeNotification = true;
     topologyChangeRecvd = true;
-    rootPriority = bridgePriority;
+    rootPriority = configuredBridgePriority;
     rootAddress = bridgeAddress;
     rootPathCost = 0;
     rootInterfaceId = ifTable->getInterface(0)->getInterfaceId();
-    currentHelloTime = timeSinceLastHello;
-    currentMaxAge = maxAge;
-    currentFwdDelay = forwardDelay;
+    helloInterval = timeSinceLastHello;
+    maxAge = configuredMaxAge;
+    forwardDelay = configuredForwardDelay;
     timeSinceLastHello = 0;
     setAllDesignated();
 
@@ -679,11 +679,11 @@ void Stp::initInterfacedata(unsigned int interfaceId)
     auto ifd = getPortInterfaceDataForUpdate(interfaceId);
     ifd->setRole(Ieee8021dInterfaceData::NOTASSIGNED);
     ifd->setState(Ieee8021dInterfaceData::DISCARDING);
-    ifd->setRootPriority(bridgePriority);
+    ifd->setRootPriority(configuredBridgePriority);
     ifd->setRootAddress(bridgeAddress);
     ifd->setRootPathCost(0);
     ifd->setAge(0);
-    ifd->setBridgePriority(bridgePriority);
+    ifd->setBridgePriority(configuredBridgePriority);
     ifd->setBridgeAddress(bridgeAddress);
     ifd->setPortPriority(-1);
     ifd->setPortNum(-1);
