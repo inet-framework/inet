@@ -141,6 +141,7 @@ class INET_API Ipv6 : public SimpleModule, public NetfilterBase, public Lifecycl
      */
     virtual void handleIndication(Indication *indication);
     virtual void handleIcmpErrorIndication(Indication *indication);
+    virtual void handleIcmpSendErrorRequest(Request *request);
     virtual void datagramLocalOut(Packet *packet, const NetworkInterface *destIE, Ipv6Address requestedNextHopAddress);
 
     /**

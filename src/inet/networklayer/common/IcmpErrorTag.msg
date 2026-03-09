@@ -23,3 +23,26 @@ class IcmpErrorInd extends TagBase
     int mtu = -1;           // only relevant for Packet Too Big / Fragmentation Needed
     Packet *originalPacket @owned;  // progressively unwrapped quoted packet
 }
+
+//
+// Protocol-agnostic error codes for requesting ICMP error generation.
+// The network layer maps these to the appropriate ICMP/ICMPv6 type and code.
+//
+enum IcmpSendErrorCode
+{
+    ICMP_E_PORT_UNREACHABLE = 0;
+}
+
+//
+// This request is sent by the transport layer to the network layer to
+// request sending an ICMP error message. The transport layer sets the
+// networkProtocolHeader (from NetworkProtocolInd) and the originalPacket
+// (with transport header on top). The network layer reconstructs the full
+// datagram from these and delegates to ICMP.
+//
+class IcmpSendErrorReq extends TagBase
+{
+    IcmpSendErrorCode errorCode;
+    ChunkPtr networkProtocolHeader;
+    Packet *originalPacket @owned;
+}

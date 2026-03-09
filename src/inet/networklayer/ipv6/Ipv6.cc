@@ -125,6 +125,11 @@ void Ipv6::handleRegisterProtocol(const Protocol& protocol, cGate *gate, Service
 
 void Ipv6::handleRequest(Request *request)
 {
+    if (request->findTag<IcmpSendErrorReq>()) {
+        handleIcmpSendErrorRequest(request);
+        return;
+    }
+
     auto ctrl = request->getControlInfo();
     if (ctrl == nullptr)
         throw cRuntimeError("Request '%s' arrived without controlinfo", request->getName());
@@ -307,6 +312,28 @@ void Ipv6::handleIcmpErrorIndication(Indication *indication)
 
     EV_INFO << "Forwarding ICMPv6 error indication to transport protocol " << protocol->getName() << "\n";
     send(indication, "transportOut");
+}
+
+void Ipv6::handleIcmpSendErrorRequest(Request *request)
+{
+    auto& errorReq = request->getTagForUpdate<IcmpSendErrorReq>();
+    Packet *originalPacket = errorReq->removeOriginalPacket();
+
+    // Reconstruct the full IPv6 datagram using the network protocol header
+    // provided by the transport layer in the IcmpSendErrorReq tag
+    originalPacket->trim();
+    originalPacket->insertAtFront(errorReq->getNetworkProtocolHeader());
+
+    // Map protocol-agnostic error code to ICMPv6 type and code
+    switch (errorReq->getErrorCode()) {
+        case ICMP_E_PORT_UNREACHABLE:
+            sendIcmpError(originalPacket, ICMPv6_DESTINATION_UNREACHABLE, PORT_UNREACHABLE);
+            break;
+        default:
+            throw cRuntimeError("Unknown IcmpSendErrorCode: %d", errorReq->getErrorCode());
+    }
+
+    delete request;
 }
 
 NetworkInterface *Ipv6::getSourceInterfaceFrom(Packet *packet)

@@ -149,6 +149,7 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
      */
     virtual void handleIndication(Indication *indication);
     virtual void handleIcmpErrorIndication(Indication *indication);
+    virtual void handleIcmpSendErrorRequest(Request *request);
 
     /**
      * Routes and sends datagram received from higher layers.

@@ -147,6 +147,11 @@ void Ipv4::refreshDisplay() const
 
 void Ipv4::handleRequest(Request *request)
 {
+    if (request->findTag<IcmpSendErrorReq>()) {
+        handleIcmpSendErrorRequest(request);
+        return;
+    }
+
     auto ctrl = request->getControlInfo();
     if (ctrl == nullptr)
         throw cRuntimeError("Request '%s' arrived without controlinfo", request->getName());
@@ -241,6 +246,29 @@ void Ipv4::handleIcmpErrorIndication(Indication *indication)
 
     EV_INFO << "Forwarding ICMP error indication to transport protocol " << protocol->getName() << "\n";
     send(indication, "transportOut");
+}
+
+void Ipv4::handleIcmpSendErrorRequest(Request *request)
+{
+    auto& errorReq = request->getTagForUpdate<IcmpSendErrorReq>();
+    Packet *originalPacket = errorReq->removeOriginalPacket();
+
+    // Reconstruct the full IPv4 datagram using the network protocol header
+    // provided by the transport layer in the IcmpSendErrorReq tag
+    originalPacket->trim();
+    originalPacket->insertAtFront(errorReq->getNetworkProtocolHeader());
+    int inputInterfaceId = originalPacket->getTag<InterfaceInd>()->getInterfaceId();
+
+    // Map protocol-agnostic error code to ICMP type and code
+    switch (errorReq->getErrorCode()) {
+        case ICMP_E_PORT_UNREACHABLE:
+            sendIcmpError(originalPacket, inputInterfaceId, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PORT_UNREACHABLE);
+            break;
+        default:
+            throw cRuntimeError("Unknown IcmpSendErrorCode: %d", errorReq->getErrorCode());
+    }
+
+    delete request;
 }
 
 const NetworkInterface *Ipv4::getSourceInterface(Packet *packet)
