@@ -11,7 +11,7 @@
 /showcases/measurement/datarate/,         -f omnetpp.ini -c General -r 0,           1s,           7af9-93b4/tplx;2d48-cf54/~tNl;ce00-3055/~tND;c848-3d2a/tyf, PASS, Ipv4
 /showcases/measurement/endtoenddelay/,    -f omnetpp.ini -c General -r 0,           1s,           a6ec-9c0d/tplx;5632-17e6/~tNl;3b24-2f2d/~tND;1479-9b89/tyf, PASS, Ipv4
 /showcases/measurement/flow/,             -f omnetpp.ini -c Basic -r 0,             1s,           d7da-78a3/tplx;59f8-2338/~tNl;d6e9-4044/~tND;eb87-15f8/tyf, PASS, Ipv4
-/showcases/measurement/flow/,             -f omnetpp.ini -c AnyLocation -r 0,       1s,           e566-d0a6/tplx;5f32-069f/~tNl;0fcc-36d6/~tND;67e9-71e0/tyf, PASS, Ipv4
+/showcases/measurement/flow/,             -f omnetpp.ini -c AnyLocation -r 0,       1s,           e566-d0a6/tplx;5f32-069f/~tNl;0fcc-36d6/~tND;0100-cc0f/tyf, PASS, Ipv4
 /showcases/measurement/jitter/,           -f omnetpp.ini -c General -r 0,           1s,           4ad0-0f73/tplx;238c-7bbd/~tNl;b0ce-ce9d/~tND;75bd-8abc/tyf, PASS, Ipv4
 /showcases/measurement/propagationtime/,  -f omnetpp.ini -c General -r 0,           1s,           fcd3-5507/tplx;b0ce-ce9d/~tNl;985f-f759/~tND;1479-9b89/tyf, PASS, Ipv4
 /showcases/measurement/queueingtime/,     -f omnetpp.ini -c General -r 0,           1s,           e724-f098/tplx;48cf-7d5a/~tNl;7458-c75a/~tND;75bd-8abc/tyf, PASS, Ipv4
@@ -108,8 +108,8 @@
 # /showcases/visualizer/canvas/advanced/,     -f omnetpp.ini -c IncludingMultipleVisualizerModules -r 0, 100s, 1b92-4be3/tplx;0000-0000/~tNl;0000-0000/~tND, PASS,
 # /showcases/visualizer/canvas/advanced/,     -f omnetpp.ini -c Wireless -r 0,               5s,         1543-37d9/tplx;0000-0000/~tNl;0000-0000/~tND, PASS,    wireless
 
-/showcases/visualizer/canvas/datalinkactivity/, -f omnetpp.ini -c EnablingVisualizationWired -r 0,                     500s,            7c74-e2a5/tplx;e06b-b6af/~tNl;5cf1-f86d/~tND;f71d-d9b3/tyf, PASS, EthernetMac Ipv4
-/showcases/visualizer/canvas/datalinkactivity/, -f omnetpp.ini -c EnablingVisualizationWireless -r 0,                  500s,            e6c7-acc6/tplx;4456-ede1/~tNl;9ef7-0907/~tND;90bc-8444/tyf, PASS,    wireless Ipv4
+/showcases/visualizer/canvas/datalinkactivity/, -f omnetpp.ini -c EnablingVisualizationWired -r 0,                     500s,            7c74-e2a5/tplx;e06b-b6af/~tNl;5cf1-f86d/~tND;114c-1633/tyf, PASS, EthernetMac Ipv4
+/showcases/visualizer/canvas/datalinkactivity/, -f omnetpp.ini -c EnablingVisualizationWireless -r 0,                  500s,            e6c7-acc6/tplx;4456-ede1/~tNl;9ef7-0907/~tND;cdd9-f474/tyf, PASS,    wireless Ipv4
 /showcases/visualizer/canvas/datalinkactivity/, -f omnetpp.ini -c Filtering -r 0,                                      500s,            878e-1cac/tplx;26cd-3691/~tNl;1c8b-7d1b/~tND;1dec-8e55/tyf, PASS, EthernetMac Ipv4
 /showcases/visualizer/canvas/datalinkactivity/, -f omnetpp.ini -c ActivityLevel -r 0,      100s,         97d4-2b70/tplx;ceb8-c34c/~tNl;0295-f814/~tND;1e38-2c47/tyf, PASS,    wireless Ipv4
 /showcases/visualizer/canvas/datalinkactivity/, -f omnetpp.ini -c Dynamic -r 0,                                        500s,            6362-d00a/tplx;54c0-9032/~tNl;2617-1d23/~tND, PASS, wireless Ipv4
