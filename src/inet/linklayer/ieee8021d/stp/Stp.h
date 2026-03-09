@@ -69,13 +69,14 @@ class INET_API Stp : public StpBase
     /*
      * Bridge Protocol Data Unit handling
      */
-    void handleBPDU(Packet *packet, const Ptr<const BpduCfg>& bpdu);
+    void handleBpdu(Packet *packet, const Ptr<const BpduCfg>& bpdu);
     virtual void initInterfacedata(unsigned int interfaceId);
 
     /**
      * Topology change handling
      */
-    void handleTCN(Packet *packet, const Ptr<const BpduTcn>& tcn);
+    void handleTcn(Packet *packet, const Ptr<const BpduTcn>& tcn);
+
     virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -83,18 +84,18 @@ class INET_API Stp : public StpBase
     /*
      * Send BPDU with specified parameters (portNum, TCA flag, etc.)
      */
-    void generateBPDU(int interfaceId, const MacAddress& address = MacAddress::STP_MULTICAST_ADDRESS, bool tcFlag = false, bool tcaFlag = false);
+    void generateBpdu(int interfaceId, const MacAddress& address = MacAddress::STP_MULTICAST_ADDRESS, bool tcFlag = false, bool tcaFlag = false);
 
     /*
      * Send hello BPDUs on all ports (only for root switches)
      * Invokes generateBPDU(i) where i goes through all ports
      */
-    void generateHelloBPDUs();
+    void generateHelloBpdus();
 
     /*
      * Generate and send Topology Change Notification
      */
-    void generateTCN();
+    void generateTcn();
 
     /*
      * Comparison of all IDs in Ieee8021dInterfaceData::PortInfo structure
@@ -107,8 +108,8 @@ class INET_API Stp : public StpBase
     /*
      * Check of the received BPDU is superior to port information from InterfaceTable
      */
-    bool isSuperiorBPDU(int interfaceId, const Ptr<const BpduCfg>& bpdu);
-    void setSuperiorBPDU(int interfaceId, const Ptr<const BpduCfg>& bpdu);
+    bool isSuperiorBpdu(int interfaceId, const Ptr<const BpduCfg>& bpdu);
+    void setSuperiorBpdu(int interfaceId, const Ptr<const BpduCfg>& bpdu);
 
     void handleTick();
 

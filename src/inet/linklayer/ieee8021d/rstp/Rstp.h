@@ -74,12 +74,12 @@ class INET_API Rstp : public StpBase
     /**
      * @brief Sends BPDUs through all ports, if they are required
      */
-    virtual void sendBPDUs();
+    virtual void sendBpdus();
 
     /**
      * @brief Sends BPDU through a port
      */
-    virtual void sendBPDU(int interfaceId, bool agreement = false);
+    virtual void sendBpdu(int interfaceId, bool agreement = false);
 
     /**
      * @brief General processing
@@ -91,7 +91,7 @@ class INET_API Rstp : public StpBase
      * Updates port information. Handles port role changes.
      */
     virtual void handleIncomingFrame(Packet *packet);
-    virtual void processBPDU(const Ptr<const BpduCfg>& frame, unsigned int arrivalInterfaceId);
+    virtual void processBpdu(const Ptr<const BpduCfg>& frame, unsigned int arrivalInterfaceId);
     virtual bool processBetterSource(const Ptr<const BpduCfg>& frame, unsigned int arrivalInterfaceId);
     virtual bool processSameSource(const Ptr<const BpduCfg>& frame, unsigned int arrivalInterfaceId);
 
@@ -127,7 +127,7 @@ class INET_API Rstp : public StpBase
      * @brief Compares two RSTP data
      * @return (<0 if vector better than frame)
      */
-    virtual CompareResult compareRSTPData(int rootPriority1, int rootPriority2,
+    virtual CompareResult compareRstpData(int rootPriority1, int rootPriority2,
             MacAddress rootAddress1, MacAddress rootAddress2,
             int rootPathCost1, int rootPathCost2,
             int bridgePriority1, int bridgePriority2,
@@ -138,12 +138,12 @@ class INET_API Rstp : public StpBase
     /**
      * @brief If root TCWhile has not expired, sends a BPDU to the Root with TCFlag=true.
      */
-    virtual void sendTCNtoRoot();
+    virtual void sendTcnToRoot();
 
     /**
      * @brief HelloTime event handling.
      */
-    virtual void handleHelloTime(cMessage *);
+    virtual void handleHelloTimer(cMessage *);
 
     /**
      * @brief Upgrade event handling.
@@ -154,7 +154,7 @@ class INET_API Rstp : public StpBase
      * @brief Checks the frame TC flag.
      * Sets TCWhile if the port was forwarding and the flag is true.
      */
-    virtual void checkTC(const Ptr<const BpduCfg>& frame, int arrivalInterfaceId);
+    virtual void checkTc(const Ptr<const BpduCfg>& frame, int arrivalInterfaceId);
 
     /**
      * @brief Handles the switch to backup in one of the ports
