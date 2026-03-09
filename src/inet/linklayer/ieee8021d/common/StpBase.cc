@@ -36,12 +36,6 @@ void StpBase::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         visualize = par("visualize");
-        bridgePriority = par("bridgePriority");
-
-        maxAge = par("maxAge");
-        helloTime = par("helloTime");
-        forwardDelay = par("forwardDelay");
-
         macTable.reference(this, "macTableModule", true);
         ifTable.reference(this, "interfaceTableModule", true);
         switchModule = getContainingNode(this);

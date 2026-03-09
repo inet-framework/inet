@@ -32,7 +32,11 @@ void Stp::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         tick = new cMessage("STP_TICK", 0);
+        bridgePriority = par("bridgePriority");
         holdTime = par("holdTime");
+        maxAge = par("maxAge");
+        forwardDelay = par("forwardDelay");
+
         WATCH(bridgeAddress);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {

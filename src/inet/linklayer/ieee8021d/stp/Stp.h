@@ -41,6 +41,9 @@ class INET_API Stp : public StpBase
     unsigned int rootPriority = 0;
     MacAddress rootAddress;
 
+    uint16_t bridgePriority = 0;
+    simtime_t maxAge;
+    simtime_t forwardDelay;
     simtime_t currentMaxAge;
     simtime_t currentFwdDelay;
     simtime_t currentHelloTime;
