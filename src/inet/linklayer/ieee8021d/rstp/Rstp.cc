@@ -688,7 +688,7 @@ void Rstp::sendTCNtoRoot()
         if (rootPort->getRole() != Ieee8021dInterfaceData::DISABLED) {
             if (simTime() < rootPort->getTCWhile()) {
                 EV_DETAIL << "Sending TC on root port" << endl;
-                Packet *packet = new Packet("BPDU");
+                Packet *packet = new Packet("rstp-tc");
                 const auto& frame = makeShared<BpduCfg>();
                 frame->setRootPriority(rootPort->getRootPriority());
                 frame->setRootAddress(rootPort->getRootAddress());
@@ -764,6 +764,14 @@ void Rstp::sendBPDU(int interfaceId, bool agreement)
                 && iport->getState() != Ieee8021dInterfaceData::FORWARDING);
         frame->setProposalFlag(isDesignatedNotForwarding);
         frame->setAgreementFlag(agreement);
+
+        // Build descriptive packet name from flags
+        std::string name = "rstp";
+        if (frame->getTcFlag()) name += "-tc";
+        if (frame->getProposalFlag()) name += "-pr";
+        if (frame->getAgreementFlag()) name += "-ag";
+        if (name == "rstp") name += "-hello";
+        packet->setName(name.c_str());
 
         packet->insertAtBack(frame);
         sendOut(packet, interfaceId, MacAddress::STP_MULTICAST_ADDRESS);
