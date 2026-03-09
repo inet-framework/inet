@@ -44,6 +44,15 @@ void Rstp::initialize(int stage)
         migrateTime = par("migrateTime");
         helloTimer = new cMessage("itshellotime", SELF_HELLOTIME);
         upgradeTimer = new cMessage("upgrade", SELF_UPGRADE);
+
+        WATCH(bridgePriority);
+        WATCH(maxAge);
+        WATCH(helloInterval);
+        WATCH(forwardDelay);
+        WATCH(migrateTime);
+        WATCH(tcWhileTime);
+        WATCH(autoEdge);
+        WATCH(allowStpPeers);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         registerProtocol(Protocol::stp, gate("relayOut"), gate("relayIn"));

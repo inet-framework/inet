@@ -39,6 +39,9 @@ void StpBase::initialize(int stage)
         macTable.reference(this, "macTableModule", true);
         ifTable.reference(this, "interfaceTableModule", true);
         switchModule = getContainingNode(this);
+
+        WATCH(bridgeAddress);
+        WATCH(numPorts);
     }
 }
 
