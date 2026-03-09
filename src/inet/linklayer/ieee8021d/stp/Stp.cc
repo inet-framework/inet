@@ -685,7 +685,8 @@ void Stp::start()
     timeSinceLastHello = 0;
     setAllDesignated();
 
-    scheduleAfter(tickInterval, tick);
+    simtime_t startTime = par("startTime");
+    scheduleAfter(startTime + tickInterval, tick);
 }
 
 void Stp::stop()

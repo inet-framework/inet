@@ -1017,7 +1017,8 @@ void Rstp::start()
 {
     StpBase::start();
     initPorts();
-    scheduleAfter(SIMTIME_ZERO, helloTimer);
+    simtime_t startTime = par("startTime");
+    scheduleAfter(startTime, helloTimer);
 }
 
 void Rstp::stop()
