@@ -26,12 +26,7 @@ class INET_API StpBase : public OperationalBase, public cListener
     bool visualize = false; // if true it visualize the spanning tree
     unsigned int numPorts = 0; // number of ports
 
-    unsigned int bridgePriority = 0; // bridge's priority
     MacAddress bridgeAddress; // bridge's MAC address
-
-    simtime_t maxAge;
-    simtime_t helloTime;
-    simtime_t forwardDelay;
 
     opp_component_ptr<cModule> switchModule;
     ModuleRefByPar<IMacForwardingTable> macTable;

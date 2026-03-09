@@ -34,6 +34,10 @@ void Rstp::initialize(int stage)
     StpBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
+        bridgePriority = par("bridgePriority");
+        maxAge = par("maxAge");
+        helloTime = par("helloTime");
+        forwardDelay = par("forwardDelay");
         autoEdge = par("autoEdge");
         allowStpPeers = par("allowStpPeers");
         tcWhileTime = par("tcWhileTime");
