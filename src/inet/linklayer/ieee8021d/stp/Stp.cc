@@ -158,7 +158,7 @@ void Stp::generateBPDU(int interfaceId, const MacAddress& address, bool tcFlag, 
         return;
     }
 
-    Packet *packet = new Packet("BPDU");
+    Packet *packet = new Packet("stp-hello");
     const auto& bpdu = makeShared<BpduCfg>();
 
     bpdu->setProtocolIdentifier(SPANNING_TREE_PROTOCOL);
@@ -180,10 +180,12 @@ void Stp::generateBPDU(int interfaceId, const MacAddress& address, bool tcFlag, 
         if (isRoot || tcFlag) {
             bpdu->setTcFlag(true);
             bpdu->setTcaFlag(false);
+            packet->setName("stp-tc");
         }
         else if (tcaFlag) {
             bpdu->setTcFlag(false);
             bpdu->setTcaFlag(true);
+            packet->setName("stp-tca");
         }
     }
 
@@ -201,7 +203,7 @@ void Stp::generateTCN()
         if (getPortInterfaceData(rootInterfaceId)->getRole() == Ieee8021dInterfaceData::ROOT) {
             // exist root port to notifying
             topologyChangeNotification = false;
-            Packet *packet = new Packet("BPDU-TCN");
+            Packet *packet = new Packet("stp-tcn");
             const auto& tcn = makeShared<BpduTcn>();
             tcn->setProtocolIdentifier(SPANNING_TREE_PROTOCOL);
             tcn->setProtocolVersionIdentifier(SPANNING_TREE);
