@@ -44,7 +44,7 @@ class INET_API Stp : public StpBase
     simtime_t currentMaxAge;
     simtime_t currentFwdDelay;
     simtime_t currentHelloTime;
-    simtime_t helloTime;
+    simtime_t timeSinceLastHello;
     simtime_t holdTime;
 
     // Parameter change detection
@@ -235,7 +235,7 @@ inline std::ostream& operator<<(std::ostream& os, Stp i)
     os << "  Forward Delay: " << i.currentFwdDelay << " \n";
     os << "BridgeID Priority: " << i.bridgePriority << "\n";
     os << "  Address: " << i.bridgeAddress << " \n";
-    os << "  Hello Time: " << i.helloTime << " \n";
+    os << "  Hello Time: " << i.timeSinceLastHello << " \n";
     os << "  Max Age: " << i.maxAge << " \n";
     os << "  Forward Delay: " << i.forwardDelay << " \n";
     os << "Port Flag Role State Cost Priority \n";
