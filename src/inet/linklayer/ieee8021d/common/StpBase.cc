@@ -122,7 +122,7 @@ void StpBase::refreshDisplay() const
 
                 // label ethernet interface with port status and role
                 if (nicModule != nullptr) {
-                    std::string buf = std::string(port->getRoleName()) + "\n" + port->getStateName();
+                    std::string buf = std::string(port->getRoleShortName()) + "/" + port->getStateShortName();
                     nicModule->getDisplayString().setTagArg("t", 0, buf.c_str());
                     ie->configChanged(NetworkInterface::F_IEEE8021D_DATA);
                 }
