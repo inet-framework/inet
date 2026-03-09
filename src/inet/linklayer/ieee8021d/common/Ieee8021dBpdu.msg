@@ -70,6 +70,6 @@ class BpduCfg extends BpduBase
 
     simtime_t messageAge;                     // 2 bytes, Message Age (in 256ths of a second)
     simtime_t maxAge;                         // 2 bytes, maximum lifetime of the BPDU (in 256ths of a second)
-    simtime_t helloTime;                      // 2 bytes, Hello Time of the sender bridge (in 256ths of a second)
+    simtime_t helloTime;                      // 2 bytes, Hello Time (Hello Interval) of the sender bridge (in 256ths of a second)
     simtime_t forwardDelay;                   // 2 bytes, Forward Delay timer of the sender bridge (in 256ths of a second)
 }

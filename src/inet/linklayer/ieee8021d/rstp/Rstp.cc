@@ -36,7 +36,7 @@ void Rstp::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         bridgePriority = par("bridgePriority");
         maxAge = par("maxAge");
-        helloTime = par("helloTime");
+        helloInterval = par("helloTime");
         forwardDelay = par("forwardDelay");
         autoEdge = par("autoEdge");
         allowStpPeers = par("allowStpPeers");
@@ -213,7 +213,7 @@ void Rstp::handleHelloTimer(cMessage *msg)
     }
     sendBpdus(); // generating and sending new BPDUs
     sendTcnToRoot();
-    scheduleAfter(helloTime, msg); // programming next hello time
+    scheduleAfter(helloInterval, msg); // programming next hello time
 }
 
 void Rstp::checkTc(const Ptr<const BpduCfg>& frame, int arrivalInterfaceId)
@@ -704,7 +704,7 @@ void Rstp::sendTcnToRoot()
                 frame->setBridgeAddress(bridgeAddress);
                 frame->setTcFlag(true);
                 frame->setMaxAge(maxAge);
-                frame->setHelloTime(helloTime);
+                frame->setHelloTime(helloInterval);
                 frame->setForwardDelay(forwardDelay);
                 packet->insertAtBack(frame);
                 sendOut(packet, r, MacAddress::STP_MULTICAST_ADDRESS);
@@ -760,7 +760,7 @@ void Rstp::sendBpdu(int interfaceId, bool agreement)
         else
             frame->setTcFlag(false);
         frame->setMaxAge(maxAge);
-        frame->setHelloTime(helloTime);
+        frame->setHelloTime(helloInterval);
         frame->setForwardDelay(forwardDelay);
 
         // Proposal/Agreement flags (RSTP)
