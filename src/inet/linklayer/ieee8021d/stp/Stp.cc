@@ -290,9 +290,9 @@ void Stp::handleTick()
 {
     // hello BPDU timer
     if (isRoot)
-        helloTime = helloTime + 1;
+        timeSinceLastHello = timeSinceLastHello + 1;
     else
-        helloTime = 0;
+        timeSinceLastHello = 0;
 
     for (unsigned int i = 0; i < numPorts; i++) {
         int interfaceId = ifTable->getInterface(i)->getInterfaceId();
@@ -330,12 +330,12 @@ void Stp::checkTimers()
     Ieee8021dInterfaceData *port;
 
     // hello timer check
-    if (helloTime >= currentHelloTime) {
+    if (timeSinceLastHello >= currentHelloTime) {
         // only the root switch can generate Hello BPDUs
         if (isRoot)
             generateHelloBPDUs();
 
-        helloTime = 0;
+        timeSinceLastHello = 0;
     }
 
     // information age check
@@ -394,7 +394,7 @@ void Stp::checkTimers()
 void Stp::checkParametersChange()
 {
     if (isRoot) {
-        currentHelloTime = helloTime;
+        currentHelloTime = timeSinceLastHello;
         currentMaxAge = maxAge;
         currentFwdDelay = forwardDelay;
     }
@@ -426,7 +426,7 @@ void Stp::tryRoot()
         rootPriority = bridgePriority;
         rootAddress = bridgeAddress;
         rootPathCost = 0;
-        currentHelloTime = helloTime;
+        currentHelloTime = timeSinceLastHello;
         currentMaxAge = maxAge;
         currentFwdDelay = forwardDelay;
     }
@@ -634,7 +634,7 @@ void Stp::reset()
     rootPriority = bridgePriority;
     rootAddress = bridgeAddress;
     rootPathCost = 0;
-    currentHelloTime = helloTime;
+    currentHelloTime = timeSinceLastHello;
     currentMaxAge = maxAge;
     currentFwdDelay = forwardDelay;
     setAllDesignated();
@@ -653,10 +653,10 @@ void Stp::start()
     rootAddress = bridgeAddress;
     rootPathCost = 0;
     rootInterfaceId = ifTable->getInterface(0)->getInterfaceId();
-    currentHelloTime = helloTime;
+    currentHelloTime = timeSinceLastHello;
     currentMaxAge = maxAge;
     currentFwdDelay = forwardDelay;
-    helloTime = 0;
+    timeSinceLastHello = 0;
     setAllDesignated();
 
     scheduleAfter(tickInterval, tick);
