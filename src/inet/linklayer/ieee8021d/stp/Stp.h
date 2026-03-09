@@ -128,7 +128,7 @@ class INET_API Stp : public StpBase
      * Helper functions to handle state changes
      */
     void lostRoot();
-    void lostAlternate();
+    void lostNonDesignated();
     void reset();
 
     /*

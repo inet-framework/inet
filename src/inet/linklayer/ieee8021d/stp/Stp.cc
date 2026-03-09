@@ -351,7 +351,7 @@ void Stp::checkTimers()
             }
             else {
                 initInterfacedata(interfaceId);
-                lostAlternate();
+                lostNonDesignated();
             }
         }
     }
@@ -588,8 +588,8 @@ void Stp::selectDesignatedPorts()
             continue;
         }
         if (result < 0) {
-            EV_DETAIL << "Port=" << ie->getFullName() << " goes into alternate role." << endl;
-            portData->setRole(Ieee8021dInterfaceData::ALTERNATE);
+            EV_DETAIL << "Port=" << ie->getFullName() << " lost election, stays blocking." << endl;
+            ASSERT(portData->getRole() != Ieee8021dInterfaceData::ALTERNATE);
             continue;
         }
     }
@@ -621,7 +621,7 @@ void Stp::lostRoot()
     tryRoot();
 }
 
-void Stp::lostAlternate()
+void Stp::lostNonDesignated()
 {
     selectDesignatedPorts();
     topologyChangeNotification = true;
