@@ -30,7 +30,7 @@ class INET_API Ieee8021dInterfaceData : public InterfaceProtocolData
         /* The following values have same meaning in both STP and RSTP.
          * See Ieee8021dBDPU for more info.
          */
-        unsigned int priority;
+        uint16_t priority;
         unsigned int linkCost;
         bool edge;
 
