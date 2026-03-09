@@ -12,6 +12,9 @@ the simulations (NED, ini and other files) and the web pages are in the
 
 Recently released tutorials:
 
+- :doc:`ospf/doc/index` :sub:`(released on: 2026-02-26)`
+- :doc:`bgp/doc/index` :sub:`(released on: 2026-02-26)`
+- :doc:`rip/doc/index` :sub:`(released on: 2026-02-26)`
 - :doc:`fingerprint/doc/index` :sub:`(released on: 2020-11-24)`
 
 The following tutorials are available:
