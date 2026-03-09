@@ -38,7 +38,23 @@ void Stp::initialize(int stage)
         configuredForwardDelay = par("forwardDelay");
         configuredHelloInterval = par("helloTime");
 
-        WATCH(bridgeAddress);
+        WATCH(isRoot);
+        WATCH(rootInterfaceId);
+        WATCH(rootPathCost);
+        WATCH(rootPriority);
+        WATCH(rootAddress);
+        WATCH(configuredBridgePriority);
+        WATCH(configuredMaxAge);
+        WATCH(configuredForwardDelay);
+        WATCH(configuredHelloInterval);
+        WATCH(bridgePriority);
+        WATCH(maxAge);
+        WATCH(forwardDelay);
+        WATCH(helloInterval);
+        WATCH(timeSinceLastHello);
+        WATCH(holdTime);
+        WATCH(topologyChangeNotification);
+        WATCH(topologyChangeRecvd);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         registerProtocol(Protocol::stp, gate("relayOut"), gate("relayIn"));
