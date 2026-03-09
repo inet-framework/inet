@@ -18,14 +18,7 @@
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 
-#ifdef INET_WITH_IPv4
-#include "inet/networklayer/ipv4/IcmpHeader_m.h"
-#endif // ifdef INET_WITH_IPv4
-
-#ifdef INET_WITH_IPv6
-#include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
-#endif // ifdef INET_WITH_IPv6
-
+#include "inet/networklayer/common/IcmpErrorTag_m.h"
 #include "inet/transportlayer/common/TransportPseudoHeader_m.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/tcp/Tcp.h"
@@ -176,12 +169,22 @@ void Tcp::handleLowerPacket(Packet *packet)
             segmentArrivalWhileClosed(packet, tcpHeader, srcAddr, destAddr);
         }
     }
-    else if (protocol == &Protocol::icmpv4 || protocol == &Protocol::icmpv6) {
-        EV_DETAIL << "ICMP error received -- discarding\n"; // FIXME can ICMP packets really make it up to Tcp???
-        delete packet;
-    }
     else
         throw cRuntimeError("Unknown protocol: '%s'", (protocol != nullptr ? protocol->getName() : "<nullptr>"));
+}
+
+void Tcp::handleLowerCommand(cMessage *msg)
+{
+    if (auto indication = dynamic_cast<Indication *>(msg)) {
+        if (indication->findTag<IcmpErrorInd>()) {
+            EV_DETAIL << "ICMP error received -- discarding\n";
+            delete indication;
+        }
+        else
+            throw cRuntimeError("Unknown Indication arrived from network layer: %s", indication->getName());
+    }
+    else
+        LayeredProtocolBase::handleLowerCommand(msg);
 }
 
 TcpConnection *Tcp::createConnection(int socketId)
