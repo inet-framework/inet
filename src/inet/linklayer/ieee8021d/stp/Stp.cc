@@ -76,10 +76,10 @@ void Stp::handleMessageWhenUp(cMessage *msg)
 
         switch (bpdu->getBpduType()) {
             case BPDU_CFG:
-                handleBPDU(packet, CHK(dynamicPtrCast<const BpduCfg>(bpdu)));
+                handleBpdu(packet, CHK(dynamicPtrCast<const BpduCfg>(bpdu)));
                 break;
             case BPDU_TCN:
-                handleTCN(packet, CHK(dynamicPtrCast<const BpduTcn>(bpdu)));
+                handleTcn(packet, CHK(dynamicPtrCast<const BpduTcn>(bpdu)));
                 break;
             default:
                 throw cRuntimeError("unknown BPDU TYPE: %d", bpdu->getBpduType());
@@ -95,7 +95,7 @@ void Stp::handleMessageWhenUp(cMessage *msg)
     }
 }
 
-void Stp::handleBPDU(Packet *packet, const Ptr<const BpduCfg>& bpdu)
+void Stp::handleBpdu(Packet *packet, const Ptr<const BpduCfg>& bpdu)
 {
     int arrivalGate = packet->getTag<InterfaceInd>()->getInterfaceId();
     const Ieee8021dInterfaceData *port = getPortInterfaceData(arrivalGate);
@@ -106,10 +106,10 @@ void Stp::handleBPDU(Packet *packet, const Ptr<const BpduCfg>& bpdu)
     }
 
     // get inferior BPDU, reply with superior
-    if (!isSuperiorBPDU(arrivalGate, bpdu)) {
+    if (!isSuperiorBpdu(arrivalGate, bpdu)) {
         if (port->getRole() == Ieee8021dInterfaceData::DESIGNATED) {
             EV_DETAIL << "Inferior Configuration BPDU " << bpdu << " arrived on port=" << arrivalGate << " responding to it with a superior BPDU." << endl;
-            generateBPDU(arrivalGate);
+            generateBpdu(arrivalGate);
         }
     }
     // BPDU from root
@@ -122,7 +122,7 @@ void Stp::handleBPDU(Packet *packet, const Ptr<const BpduCfg>& bpdu)
 
             // config BPDU with TC flag
             for (auto& elem : desPorts)
-                generateBPDU(elem, MacAddress::STP_MULTICAST_ADDRESS, true, false);
+                generateBpdu(elem, MacAddress::STP_MULTICAST_ADDRESS, true, false);
         }
         else {
             macTable->setAgingTime(-1);
@@ -131,7 +131,7 @@ void Stp::handleBPDU(Packet *packet, const Ptr<const BpduCfg>& bpdu)
 
             // BPDUs are sent on all designated ports
             for (auto& elem : desPorts)
-                generateBPDU(elem);
+                generateBpdu(elem);
         }
     }
 
@@ -139,7 +139,7 @@ void Stp::handleBPDU(Packet *packet, const Ptr<const BpduCfg>& bpdu)
     delete packet;
 }
 
-void Stp::handleTCN(Packet *packet, const Ptr<const BpduTcn>& tcn)
+void Stp::handleTcn(Packet *packet, const Ptr<const BpduTcn>& tcn)
 {
     EV_INFO << "Topology Change Notification BPDU " << tcn << " arrived." << endl;
     topologyChangeNotification = true;
@@ -150,12 +150,12 @@ void Stp::handleTCN(Packet *packet, const Ptr<const BpduTcn>& tcn)
 
     // send ACK to the sender
     EV_INFO << "Sending Topology Change Notification ACK." << endl;
-    generateBPDU(arrivalGate, srcAddress, false, true);
+    generateBpdu(arrivalGate, srcAddress, false, true);
 
     delete packet;
 }
 
-void Stp::generateBPDU(int interfaceId, const MacAddress& address, bool tcFlag, bool tcaFlag)
+void Stp::generateBpdu(int interfaceId, const MacAddress& address, bool tcFlag, bool tcaFlag)
 {
     auto portData = getPortInterfaceDataForUpdate(interfaceId);
     if (simTime() < portData->getEarliestBpduSendTime()) {
@@ -201,7 +201,7 @@ void Stp::generateBPDU(int interfaceId, const MacAddress& address, bool tcFlag, 
     portData->setBpduSendPending(false);
 }
 
-void Stp::generateTCN()
+void Stp::generateTcn()
 {
     // there is something to notify
     if (topologyChangeNotification || !topologyChangeRecvd) {
@@ -220,7 +220,7 @@ void Stp::generateTCN()
     }
 }
 
-bool Stp::isSuperiorBPDU(int interfaceId, const Ptr<const BpduCfg>& bpdu)
+bool Stp::isSuperiorBpdu(int interfaceId, const Ptr<const BpduCfg>& bpdu)
 {
     auto port = getPortInterfaceDataForUpdate(interfaceId);
     Ieee8021dInterfaceData *xBpdu = new Ieee8021dInterfaceData();
@@ -247,17 +247,17 @@ bool Stp::isSuperiorBPDU(int interfaceId, const Ptr<const BpduCfg>& bpdu)
         // BPDU is superior
         port->setFdWhile(0); // renew info
         port->setState(Ieee8021dInterfaceData::DISCARDING);
-        setSuperiorBPDU(interfaceId, bpdu); // renew information
+        setSuperiorBpdu(interfaceId, bpdu); // renew information
         delete xBpdu;
         return true;
     }
 
-    setSuperiorBPDU(interfaceId, bpdu); // renew information
+    setSuperiorBpdu(interfaceId, bpdu); // renew information
     delete xBpdu;
     return true;
 }
 
-void Stp::setSuperiorBPDU(int interfaceId, const Ptr<const BpduCfg>& bpdu)
+void Stp::setSuperiorBpdu(int interfaceId, const Ptr<const BpduCfg>& bpdu)
 {
     // BPDU is out-of-date
     if (bpdu->getMessageAge() >= bpdu->getMaxAge())
@@ -280,14 +280,14 @@ void Stp::setSuperiorBPDU(int interfaceId, const Ptr<const BpduCfg>& bpdu)
     portData->setAge(0);
 }
 
-void Stp::generateHelloBPDUs()
+void Stp::generateHelloBpdus()
 {
     EV_INFO << "It is hello time. Root switch sending hello BPDUs on all its ports." << endl;
 
     // send hello BPDUs on all ports
     for (unsigned int i = 0; i < numPorts; i++) {
         int interfaceId = ifTable->getInterface(i)->getInterfaceId();
-        generateBPDU(interfaceId);
+        generateBpdu(interfaceId);
     }
 }
 
@@ -322,12 +322,12 @@ void Stp::handleTick()
         int interfaceId = ifTable->getInterface(i)->getInterfaceId();
         auto port = getPortInterfaceDataForUpdate(interfaceId);
         if (port->getBpduSendPending() && simTime() >= port->getEarliestBpduSendTime())
-            generateBPDU(interfaceId);
+            generateBpdu(interfaceId);
     }
 
     checkTimers();
     checkParametersChange();
-    generateTCN();
+    generateTcn();
 }
 
 void Stp::checkTimers()
@@ -338,7 +338,7 @@ void Stp::checkTimers()
     if (timeSinceLastHello >= helloInterval) {
         // only the root switch can generate Hello BPDUs
         if (isRoot)
-            generateHelloBPDUs();
+            generateHelloBpdus();
 
         timeSinceLastHello = 0;
     }
