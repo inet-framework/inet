@@ -16,21 +16,27 @@ the simulations (NED, ini, and other files) and the web pages are in the
 
 .. The following showcases are available:
 
-Latest changes:
+Latest updates:
 
-- :doc:`quic/linksharing/doc/index` added (2026-02-26)
-- :doc:`emulation/mininet/doc/index` added (2026-02-26)
-- :doc:`routing/aodvexternal/doc/index` added (2026-02-26)
-- :doc:`emulation/webserver/doc/index` added (2026-02-26)
-- :doc:`tsn/trafficshaping/underthehood/doc/index` updated (2023-07-28)
-- :doc:`tsn/trafficshaping/cbsandtas/doc/index` released (2023-07-28)
-- :doc:`tsn/trafficshaping/cbsandats/doc/index` updated (2023-07-28)
-- :doc:`tsn/trafficshaping/asynchronousshaper/doc/index` updated (2023-07-28)
-- :doc:`tsn/trafficshaping/creditbasedshaper/doc/index` updated (2023-07-28)
-- :doc:`tsn/combiningfeatures/gptpandtas/doc/index` updated (2023-07-28)
-- :doc:`tsn/timesynchronization/gptp/doc/index` updated for INET 4.5 (2023-07-28)
-- :doc:`tsn/timesynchronization/clockdrift/doc/index` updated for INET 4.5 (2023-03-17)
-- :doc:`Several Time-Sensitive Networking showcases released </showcases/tsn/index>` (2022-06-13)
+- Added: :doc:`quic/linksharing/doc/index` (2026-02-26)
+- Added: :doc:`emulation/webserver/doc/index` (2026-02-26)
+- Added: :doc:`emulation/mininet/doc/index` (2026-02-26)
+- Added: :doc:`routing/aodvexternal/doc/index` (2026-02-26)
+- Revised: :doc:`tsn/trafficshaping/timeawareshaper/doc/index` (2026-02-26)
+- Revised: :doc:`tsn/trafficshaping/creditbasedshaper/doc/index` (2026-02-26)
+- Revised: :doc:`tsn/trafficshaping/underthehood/doc/index` (2026-02-26)
+- Revised: :doc:`tsn/streamfiltering/tokenbucket/doc/index` (2026-02-26)
+- Revised: :doc:`tsn/streamfiltering/statistical/doc/index` (2026-02-26)
+- Revised: :doc:`tsn/streamfiltering/underthehood/doc/index` (2026-02-26)
+- Revised: :doc:`tsn/framereplication/manualconfiguration/doc/index` (2026-02-26)
+- Revised: :doc:`tsn/framereplication/automaticmultipathconfiguration/doc/index` (2026-02-26)
+- Revised: :doc:`tsn/framereplication/automaticfailureprotection/doc/index` (2026-02-26)
+- Revised: :doc:`tsn/framepreemption/doc/index` (2026-02-26)
+- Revised: :doc:`tsn/cutthroughswitching/doc/index` (2026-02-26)
+- Revised: :doc:`tsn/timesynchronization/gptp/doc/index` (2026-02-26)
+- Revised: :doc:`tsn/timesynchronization/clockdrift/doc/index` (2026-02-26)
+- Revised: :doc:`tsn/combiningfeatures/gptpandtas/doc/index` (2026-02-26)
+- Added: :doc:`Several Time-Sensitive Networking showcases </showcases/tsn/index>` (2022-06-13)
 
 All showcases:
 
