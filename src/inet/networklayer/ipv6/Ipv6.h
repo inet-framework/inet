@@ -133,6 +133,14 @@ class INET_API Ipv6 : public SimpleModule, public NetfilterBase, public Lifecycl
      * Invokes encapsulate(), then routePacket().
      */
     virtual void handleMessageFromHL(Packet *msg);
+
+    /**
+     * Handle an ICMPv6 error indication arriving from the ICMPv6 module.
+     * Pops the quoted IPv6 header from the original packet, converts it
+     * to tags, and forwards the indication to the appropriate transport protocol.
+     */
+    virtual void handleIndication(Indication *indication);
+    virtual void handleIcmpErrorIndication(Indication *indication);
     virtual void datagramLocalOut(Packet *packet, const NetworkInterface *destIE, Ipv6Address requestedNextHopAddress);
 
     /**

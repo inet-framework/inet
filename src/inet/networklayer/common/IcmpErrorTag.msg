@@ -13,13 +13,13 @@ namespace inet;
 
 //
 // This indication specifies the ICMP error data associated with a transport
-// layer error indication. It contains the ICMP packet data that triggered the error.
+// layer error indication. Each layer pops its own header from the original
+// packet and converts it to tags before forwarding the indication upward.
 //
 class IcmpErrorInd extends TagBase
 {
-    // TODO this includes the ICMP header as well.
-    // Instead, it should be popped (the checksum verified)
-    // and the `type` and `code` fields should be added as
-    // separate fields to this tag. See: IcmpHeader chunk.
-    Packet *quotedPacket @owned;
+    int type;               // ICMP type (e.g. ICMP_DESTINATION_UNREACHABLE)
+    int code;               // ICMP code (e.g. ICMP_DU_FRAGMENTATION_NEEDED)
+    int mtu = -1;           // only relevant for Packet Too Big / Fragmentation Needed
+    Packet *originalPacket @owned;  // progressively unwrapped quoted packet
 }

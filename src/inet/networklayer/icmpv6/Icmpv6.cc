@@ -11,6 +11,8 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Message.h"
+#include "inet/networklayer/common/IcmpErrorTag_m.h"
 #include "inet/common/checksum/Checksum.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -72,45 +74,48 @@ void Icmpv6::processICMPv6Message(Packet *packet)
     auto icmpv6msg = packet->peekAtFront<Icmpv6Header>();
     int type = icmpv6msg->getType();
     if (type < 128) {
-        // ICMP errors are delivered to the appropriate higher layer protocols
-        EV_INFO << "ICMPv6 packet: passing it to higher layer\n";
-        const auto& bogusIpv6Header = packet->peekDataAt<Ipv6Header>(icmpv6msg->getChunkLength());
+        // ICMPv6 error messages (type < 128).
+        // Pop the ICMPv6 header and create an Indication with IcmpErrorInd tag.
+        // The remaining packet content (quoted IPv6 + transport + payload) becomes
+        // the originalPacket, progressively unwrapped by upper layers.
+        const auto& icmpHeader = packet->popAtFront<Icmpv6Header>();
+
+        auto *indication = new Indication("ICMPv6-error");
+        auto& errorInd = indication->addTag<IcmpErrorInd>();
+        errorInd->setType(icmpHeader->getType());
+        // Extract code and MTU from the specific ICMPv6 subtypes
+        if (auto du = dynamicPtrCast<const Icmpv6DestUnreachableMsg>(icmpHeader)) {
+            errorInd->setCode(du->getCode());
+        }
+        else if (auto ptb = dynamicPtrCast<const Icmpv6PacketTooBigMsg>(icmpHeader)) {
+            errorInd->setCode(ptb->getCode());
+            errorInd->setMtu(ptb->getMTU());
+        }
+        else if (auto te = dynamicPtrCast<const Icmpv6TimeExceededMsg>(icmpHeader)) {
+            errorInd->setCode(te->getCode());
+        }
+        else if (auto pp = dynamicPtrCast<const Icmpv6ParamProblemMsg>(icmpHeader)) {
+            errorInd->setCode(pp->getCode());
+        }
+        errorInd->setOriginalPacket(packet); // ownership transfer, no dup needed
+
+        // Peek at the quoted IPv6 header to determine the transport protocol
+        const auto& bogusIpv6Header = packet->peekAtFront<Ipv6Header>();
         int transportProtocol = bogusIpv6Header->getProtocolId();
         if (transportProtocol == IP_PROT_IPv6_ICMP) {
             // ICMP error answer to an ICMP packet:
-            errorOut(icmpv6msg);
-            delete packet;
+            errorOut(indication);
         }
         else {
-            auto dispatchProtocolReq = packet->addTagIfAbsent<DispatchProtocolReq>();
-            dispatchProtocolReq->setServicePrimitive(SP_INDICATION);
-            dispatchProtocolReq->setProtocol(ProtocolGroup::getIpProtocolGroup()->getProtocol(transportProtocol));
-            send(packet, "transportOut");
+            // Send the Indication to IPv6 via ipv6Out; IPv6 will pop the quoted
+            // IPv6 header and forward the indication to the transport protocol.
+            indication->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv6);
+            send(indication, "ipv6Out");
         }
     }
     else {
         auto icmpv6msg = packet->popAtFront<Icmpv6Header>();
-        if (dynamicPtrCast<const Icmpv6DestUnreachableMsg>(icmpv6msg)) {
-            EV_INFO << "ICMPv6 Destination Unreachable Message Received." << endl;
-            errorOut(icmpv6msg);
-            delete packet;
-        }
-        else if (dynamicPtrCast<const Icmpv6PacketTooBigMsg>(icmpv6msg)) {
-            EV_INFO << "ICMPv6 Packet Too Big Message Received." << endl;
-            errorOut(icmpv6msg);
-            delete packet;
-        }
-        else if (dynamicPtrCast<const Icmpv6TimeExceededMsg>(icmpv6msg)) {
-            EV_INFO << "ICMPv6 Time Exceeded Message Received." << endl;
-            errorOut(icmpv6msg);
-            delete packet;
-        }
-        else if (dynamicPtrCast<const Icmpv6ParamProblemMsg>(icmpv6msg)) {
-            EV_INFO << "ICMPv6 Parameter Problem Message Received." << endl;
-            errorOut(icmpv6msg);
-            delete packet;
-        }
-        else if (auto echoRequest = dynamicPtrCast<const Icmpv6EchoRequestMsg>(icmpv6msg)) {
+        if (auto echoRequest = dynamicPtrCast<const Icmpv6EchoRequestMsg>(icmpv6msg)) {
             EV_INFO << "ICMPv6 Echo Request Message Received." << endl;
             processEchoRequest(packet, echoRequest);
         }
@@ -311,8 +316,9 @@ bool Icmpv6::validateDatagramPromptingError(Packet *packet)
     return true;
 }
 
-void Icmpv6::errorOut(const Ptr<const Icmpv6Header>& icmpv6msg)
+void Icmpv6::errorOut(Indication *indication)
 {
+    delete indication;
 }
 
 void Icmpv6::handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
