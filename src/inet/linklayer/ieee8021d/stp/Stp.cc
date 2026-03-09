@@ -246,7 +246,7 @@ bool Stp::isSuperiorBpdu(int interfaceId, const Ptr<const BpduCfg>& bpdu)
     if (result < 0) {
         // BPDU is superior
         port->setFdWhile(0); // renew info
-        port->setState(Ieee8021dInterfaceData::DISCARDING);
+        port->setState(Ieee8021dInterfaceData::BLOCKING);
         setSuperiorBpdu(interfaceId, bpdu); // renew information
         delete xBpdu;
         return true;
@@ -368,9 +368,14 @@ void Stp::checkTimers()
 
         // ROOT / DESIGNATED, can transition
         if (port->getRole() == Ieee8021dInterfaceData::ROOT || port->getRole() == Ieee8021dInterfaceData::DESIGNATED) {
-            if (port->getFdWhile() >= forwardDelay) {
+            if (port->getState() == Ieee8021dInterfaceData::BLOCKING) {
+                EV_DETAIL << "Port=" << interfaceId << " goes into listening state." << endl;
+                port->setState(Ieee8021dInterfaceData::LISTENING);
+                port->setFdWhile(0);
+            }
+            else if (port->getFdWhile() >= forwardDelay) {
                 switch (port->getState()) {
-                    case Ieee8021dInterfaceData::DISCARDING:
+                    case Ieee8021dInterfaceData::LISTENING:
                         EV_DETAIL << "Port=" << interfaceId << " goes into learning state." << endl;
                         port->setState(Ieee8021dInterfaceData::LEARNING);
                         port->setFdWhile(0);
@@ -389,9 +394,9 @@ void Stp::checkTimers()
             }
         }
         else {
-            EV_DETAIL << "Port=" << interfaceId << " goes into discarding state." << endl;
+            EV_DETAIL << "Port=" << interfaceId << " goes into blocking state." << endl;
             port->setFdWhile(0);
-            port->setState(Ieee8021dInterfaceData::DISCARDING);
+            port->setState(Ieee8021dInterfaceData::BLOCKING);
         }
     }
 }
@@ -679,7 +684,7 @@ void Stp::initInterfacedata(unsigned int interfaceId)
 {
     auto ifd = getPortInterfaceDataForUpdate(interfaceId);
     ifd->setRole(Ieee8021dInterfaceData::NOTASSIGNED);
-    ifd->setState(Ieee8021dInterfaceData::DISCARDING);
+    ifd->setState(Ieee8021dInterfaceData::BLOCKING);
     ifd->setRootPriority(configuredBridgePriority);
     ifd->setRootAddress(bridgeAddress);
     ifd->setRootPathCost(0);

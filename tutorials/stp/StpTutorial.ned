@@ -56,7 +56,7 @@ network LoopNetwork
 //
 network SwitchNetwork
 {
-    @figure[legend](type=text; pos=200,10; text="Port labels: Role/State\nRoles: R=Root D=Designated A=Alternate B=Backup -=NotAssigned X=Disabled\nStates: F=Forwarding D=Discarding L=Learning");
+    @figure[legend](type=text; pos=200,10; text="Port labels: Role/State\nRoles: R=Root D=Designated A=Alternate B=Backup -=NotAssigned X=Disabled\nStates: F=Forwarding L=Learning D=Discarding(RSTP) B=Blocking(STP) N=Listening(STP)");
     submodules:
         stpTester: StpTester {
             @display("p=100,100;is=s");

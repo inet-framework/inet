@@ -199,6 +199,14 @@ inline std::ostream& operator<<(std::ostream& os, const Ieee8021dInterfaceData::
             os << "FWD";
             break;
 
+        case Ieee8021dInterfaceData::BLOCKING:
+            os << "BLK";
+            break;
+
+        case Ieee8021dInterfaceData::LISTENING:
+            os << "LIS";
+            break;
+
         default:
             os << "<?>";
             break;

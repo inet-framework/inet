@@ -23,7 +23,7 @@ class INET_API Ieee8021dInterfaceData : public InterfaceProtocolData
   public:
     enum PortRole { ALTERNATE, NOTASSIGNED, DISABLED, DESIGNATED, BACKUP, ROOT };
 
-    enum PortState { DISCARDING, LEARNING, FORWARDING };
+    enum PortState { DISCARDING, LEARNING, FORWARDING, BLOCKING, LISTENING }; // DISCARDING is RSTP-only; BLOCKING and LISTENING are STP-only
 
     class INET_API PortInfo {
       public:
