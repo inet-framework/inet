@@ -148,7 +148,7 @@ class INET_API Stp : public StpBase
     friend inline std::ostream& operator<<(std::ostream& os, const Ieee8021dInterfaceData::PortRole r);
     friend inline std::ostream& operator<<(std::ostream& os, const Ieee8021dInterfaceData::PortState s);
     friend inline std::ostream& operator<<(std::ostream& os, Ieee8021dInterfaceData *p);
-    friend inline std::ostream& operator<<(std::ostream& os, Stp i);
+    friend inline std::ostream& operator<<(std::ostream& os, const Stp& i);
 
 
   protected:
@@ -227,30 +227,23 @@ inline std::ostream& operator<<(std::ostream& os, Ieee8021dInterfaceData *p)
     return os;
 }
 
-inline std::ostream& operator<<(std::ostream& os, Stp i)
+inline std::ostream& operator<<(std::ostream& os, const Stp& i)
 {
-    os << "RootID Priority: " << i.rootPriority << " \n";
-    os << "  Address: " << i.rootAddress << " \n";
-    if (i.isRoot)
-        os << "  This bridge is the Root. \n";
-    else {
-        os << "  Cost: " << i.rootPathCost << " \n";
-        os << "  Port: " << i.rootInterfaceId << " \n";
-    }
-    os << "  Hello Time: " << i.helloInterval << " \n";
-    os << "  Max Age: " << i.maxAge << " \n";
-    os << "  Forward Delay: " << i.forwardDelay << " \n";
-    os << "BridgeID Priority: " << i.configuredBridgePriority << "\n";
-    os << "  Address: " << i.bridgeAddress << " \n";
-    os << "  Hello Time: " << i.timeSinceLastHello << " \n";
-    os << "  Max Age: " << i.configuredMaxAge << " \n";
-    os << "  Forward Delay: " << i.configuredForwardDelay << " \n";
-    os << "Port Flag Role State Cost Priority \n";
-    os << "-----------------------------------------\n";
-
+    os << "isRoot=" << i.isRoot << "\n";
+    os << "bridgeAddress=" << i.bridgeAddress << "\n";
+    os << "configuredBridgePriority=" << i.configuredBridgePriority << "\n";
+    os << "configuredHelloInterval=" << i.configuredHelloInterval << "\n";
+    os << "configuredMaxAge=" << i.configuredMaxAge << "\n";
+    os << "configuredForwardDelay=" << i.configuredForwardDelay << "\n";
+    os << "rootPriority=" << i.rootPriority << " rootAddress=" << i.rootAddress << "\n";
+    os << "rootPathCost=" << i.rootPathCost << " rootInterfaceId=" << i.rootInterfaceId << "\n";
+    os << "bridgePriority=" << i.bridgePriority << "\n";
+    os << "helloInterval=" << i.helloInterval << " maxAge=" << i.maxAge << " forwardDelay=" << i.forwardDelay << "\n";
+    os << "timeSinceLastHello=" << i.timeSinceLastHello << "\n";
+    os << "Port  Role  State  Cost  Priority\n";
+    os << "----------------------------------\n";
     for (unsigned int x = 0; x < i.numPorts; x++)
-        os << x << "  " << i.getPortInterfaceData(x) << " \n";
-
+        os << x << "  " << i.getPortInterfaceData(x) << "\n";
     return os;
 }
 
