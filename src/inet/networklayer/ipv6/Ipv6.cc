@@ -10,6 +10,7 @@
 #include "inet/common/INETUtils.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Message.h"
@@ -19,6 +20,7 @@
 #include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/networklayer/common/EcnTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
+#include "inet/networklayer/common/IcmpErrorTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/common/TosTag_m.h"
@@ -211,7 +213,9 @@ void Ipv6::handleMessage(cMessage *msg)
     else
 #endif /* INET_WITH_xMIPv6 */
 
-    if (auto request = dynamic_cast<Request *>(msg))
+    if (auto indication = dynamic_cast<Indication *>(msg))
+        handleIndication(indication);
+    else if (auto request = dynamic_cast<Request *>(msg))
         handleRequest(request);
     else if (msg->getArrivalGate()->isName("transportIn")
              || (msg->arrivedOn("ndIn") && tags.getTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv6)
@@ -271,6 +275,38 @@ void Ipv6::handleMessage(cMessage *msg)
                 preroutingFinish(packet, fromIE, destIE, nextHop.toIpv6());
         }
     }
+}
+
+void Ipv6::handleIndication(Indication *indication)
+{
+    if (indication->findTag<IcmpErrorInd>())
+        handleIcmpErrorIndication(indication);
+    else
+        throw cRuntimeError("Unknown Indication arrived: %s", indication->getName());
+}
+
+void Ipv6::handleIcmpErrorIndication(Indication *indication)
+{
+    auto& errorInd = indication->getTagForUpdate<IcmpErrorInd>();
+    Packet *originalPacket = errorInd->getOriginalPacketForUpdate();
+
+    // Pop the quoted IPv6 header and convert it to tags on the original packet
+    const auto& ipv6Header = originalPacket->popAtFront<Ipv6Header>();
+
+    auto& l3Ind = originalPacket->addTagIfAbsent<L3AddressInd>();
+    l3Ind->setSrcAddress(ipv6Header->getSrcAddress());
+    l3Ind->setDestAddress(ipv6Header->getDestAddress());
+    originalPacket->addTagIfAbsent<HopLimitInd>()->setHopLimit(ipv6Header->getHopLimit());
+
+    // Dispatch the same Indication to the appropriate transport protocol.
+    // SP_INDICATION routes via protocolToGateIndex to the transport module's ipIn gate.
+    auto protocol = ProtocolGroup::getIpProtocolGroup()->getProtocol(ipv6Header->getProtocolId());
+    auto& dispatchReq = indication->addTagIfAbsent<DispatchProtocolReq>();
+    dispatchReq->setProtocol(protocol);
+    dispatchReq->setServicePrimitive(SP_INDICATION);
+
+    EV_INFO << "Forwarding ICMPv6 error indication to transport protocol " << protocol->getName() << "\n";
+    send(indication, "transportOut");
 }
 
 NetworkInterface *Ipv6::getSourceInterfaceFrom(Packet *packet)

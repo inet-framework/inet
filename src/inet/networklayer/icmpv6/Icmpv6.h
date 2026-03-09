@@ -11,6 +11,7 @@
 #include "inet/common/SimpleModule.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
+#include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
 #include "inet/common/checksum/ChecksumMode_m.h"
@@ -84,7 +85,7 @@ class INET_API Icmpv6 : public SimpleModule, public LifecycleUnsupported, public
      */
     virtual bool validateDatagramPromptingError(Packet *packet);
 
-    virtual void errorOut(const Ptr<const Icmpv6Header>& header);
+    virtual void errorOut(Indication *indication);
 
     virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;

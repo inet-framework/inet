@@ -29,6 +29,7 @@
 #include "inet/networklayer/common/EcnTag_m.h"
 #include "inet/networklayer/common/FragmentationTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
+#include "inet/networklayer/common/IcmpErrorTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/common/MulticastTag_m.h"
@@ -192,7 +193,9 @@ void Ipv4::handleRequest(Request *request)
 void Ipv4::handleMessageWhenUp(cMessage *msg)
 {
     if (msg->arrivedOn("transportIn")) { // TODO packet->getArrivalGate()->getBaseId() == transportInGateBaseId
-        if (auto request = dynamic_cast<Request *>(msg))
+        if (auto indication = dynamic_cast<Indication *>(msg))
+            handleIndication(indication);
+        else if (auto request = dynamic_cast<Request *>(msg))
             handleRequest(request);
         else
             handlePacketFromHL(check_and_cast<Packet *>(msg));
@@ -203,6 +206,41 @@ void Ipv4::handleMessageWhenUp(cMessage *msg)
     }
     else
         throw cRuntimeError("message arrived on unknown gate '%s'", msg->getArrivalGate()->getName());
+}
+
+void Ipv4::handleIndication(Indication *indication)
+{
+    if (indication->findTag<IcmpErrorInd>())
+        handleIcmpErrorIndication(indication);
+    else
+        throw cRuntimeError("Unknown Indication arrived on transportIn: %s", indication->getName());
+}
+
+void Ipv4::handleIcmpErrorIndication(Indication *indication)
+{
+    auto& errorInd = indication->getTagForUpdate<IcmpErrorInd>();
+    Packet *originalPacket = errorInd->getOriginalPacketForUpdate();
+
+    // Pop the quoted IPv4 header and convert it to tags on the original packet
+    const auto& ipv4Header = originalPacket->popAtFront<Ipv4Header>();
+
+    auto& l3Ind = originalPacket->addTagIfAbsent<L3AddressInd>();
+    l3Ind->setSrcAddress(ipv4Header->getSrcAddress());
+    l3Ind->setDestAddress(ipv4Header->getDestAddress());
+    originalPacket->addTagIfAbsent<HopLimitInd>()->setHopLimit(ipv4Header->getTimeToLive());
+    originalPacket->addTagIfAbsent<DscpInd>()->setDifferentiatedServicesCodePoint(ipv4Header->getDscp());
+    originalPacket->addTagIfAbsent<EcnInd>()->setExplicitCongestionNotification(ipv4Header->getEcn());
+    originalPacket->addTagIfAbsent<TosInd>()->setTos(ipv4Header->getTypeOfService());
+
+    // Dispatch the same Indication to the appropriate transport protocol.
+    // SP_INDICATION routes via protocolToGateIndex to the transport module's ipIn gate.
+    auto protocol = ProtocolGroup::getIpProtocolGroup()->getProtocol(ipv4Header->getProtocolId());
+    auto& dispatchReq = indication->addTagIfAbsent<DispatchProtocolReq>();
+    dispatchReq->setProtocol(protocol);
+    dispatchReq->setServicePrimitive(SP_INDICATION);
+
+    EV_INFO << "Forwarding ICMP error indication to transport protocol " << protocol->getName() << "\n";
+    send(indication, "transportOut");
 }
 
 const NetworkInterface *Ipv4::getSourceInterface(Packet *packet)

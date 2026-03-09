@@ -12,6 +12,7 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleRefByPar.h"
+#include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/ipv4/IcmpHeader.h"
@@ -36,7 +37,7 @@ class INET_API Icmp : public SimpleModule, public DefaultProtocolRegistrationLis
 
   protected:
     virtual void processIcmpMessage(Packet *);
-    virtual void errorOut(Packet *);
+    virtual void errorOut(Indication *);
     virtual void processEchoRequest(Packet *);
     virtual void sendToIP(Packet *, const Ipv4Address& dest);
     virtual void sendToIP(Packet *msg);

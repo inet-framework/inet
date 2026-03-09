@@ -168,11 +168,13 @@ class INET_API Udp : public TransportProtocolBase
     virtual SockDesc *findFirstSocketByLocalAddress(const L3Address& localAddr, ushort localPort);
     virtual void sendUp(Ptr<const UdpHeader>& header, Packet *payload, SockDesc *sd, ushort srcPort, ushort destPort);
     virtual void processUndeliverablePacket(Packet *udpPacket);
-    virtual void sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort localPort, const L3Address& remoteAddr, ushort remotePort, Packet *quotedPacket);
+    virtual void sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort localPort, const L3Address& remoteAddr, ushort remotePort, Indication *indication);
 
-    // process an ICMP error packet
-    virtual void processICMPv4Error(Packet *icmpPacket);
-    virtual void processICMPv6Error(Packet *icmpPacket);
+    // handle an Indication arriving from the network layer
+    virtual void handleIndication(Indication *indication);
+
+    // process an ICMP error indication (unified for ICMPv4 and ICMPv6)
+    virtual void processIcmpError(Indication *indication);
 
     // process Udp packets coming from IP
     virtual void processUDPPacket(Packet *udpPacket);
@@ -180,8 +182,11 @@ class INET_API Udp : public TransportProtocolBase
     // process packets from application
     virtual void handleUpperPacket(Packet *appData) override;
 
-    // process packets from network layr
-    virtual void handleLowerPacket(Packet *appData) override;
+    // process packets from network layer
+    virtual void handleLowerPacket(Packet *packet) override;
+
+    // process ICMP error indications from network layer
+    virtual void handleLowerCommand(cMessage *msg) override;
 
     // process commands from application
     virtual void handleUpperCommand(cMessage *msg) override;

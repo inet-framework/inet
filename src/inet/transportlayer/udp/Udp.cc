@@ -30,18 +30,11 @@
 #include "inet/networklayer/contract/IL3AddressType.h"
 
 #ifdef INET_WITH_IPv4
-#include "inet/networklayer/ipv4/IcmpHeader.h"
-#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #endif // ifdef INET_WITH_IPv4
-
 #ifdef INET_WITH_IPv6
-#include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
-#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders_m.h"
-#include "inet/networklayer/ipv6/Ipv6Header.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #endif // ifdef INET_WITH_IPv6
-
 #include "inet/transportlayer/common/L4PortTag_m.h"
 #include "inet/transportlayer/common/L4Tools.h"
 
@@ -75,7 +68,6 @@ void Udp::initialize(int stage)
 #ifdef INET_WITH_IPv6
         icmpv6 = nullptr;
 #endif
-
         numSent = 0;
         numPassedUp = 0;
         numDroppedWrongPort = 0;
@@ -129,14 +121,24 @@ void Udp::handleLowerPacket(Packet *packet)
     if (protocol == &Protocol::udp) {
         processUDPPacket(packet);
     }
-    else if (protocol == &Protocol::icmpv4) {
-        processICMPv4Error(packet); // assume it's an ICMP error
-    }
-    else if (protocol == &Protocol::icmpv6) {
-        processICMPv6Error(packet); // assume it's an ICMP error
-    }
     else
         throw cRuntimeError("Unknown protocol: %s(%d)", protocol->getName(), protocol->getId());
+}
+
+void Udp::handleLowerCommand(cMessage *msg)
+{
+    if (auto indication = dynamic_cast<Indication *>(msg))
+        handleIndication(indication);
+    else
+        LayeredProtocolBase::handleLowerCommand(msg);
+}
+
+void Udp::handleIndication(Indication *indication)
+{
+    if (indication->findTag<IcmpErrorInd>())
+        processIcmpError(indication);
+    else
+        throw cRuntimeError("Unknown Indication arrived from network layer: %s", indication->getName());
 }
 
 void Udp::handleUpperCommand(cMessage *msg)
@@ -1148,143 +1150,50 @@ void Udp::sendUp(Ptr<const UdpHeader>& header, Packet *payload, SockDesc *sd, us
     numPassedUp++;
 }
 
-void Udp::processICMPv4Error(Packet *packet)
+void Udp::processIcmpError(Indication *indication)
 {
-#ifdef INET_WITH_IPv4
-    // extract details from the error message, then try to notify socket that sent bogus packet
+    // The Indication carries an IcmpErrorInd tag with type/code/mtu and an
+    // originalPacket whose ICMP and IP headers have already been popped by
+    // the ICMP and IP layers respectively. The originalPacket now starts
+    // with the quoted UDP header.
+    auto& errorInd = indication->getTagForUpdate<IcmpErrorInd>();
+    Packet *originalPacket = errorInd->getOriginalPacketForUpdate();
 
-    if (!icmp)
-        // TODO move to initialize?
-        icmp = getModuleFromPar<Icmp>(par("icmpModule"), this);
-    if (!icmp->verifyChecksum(packet)) {
-        EV_WARN << "incoming ICMP packet has wrong checksum, dropped\n";
-        PacketDropDetails details;
-        details.setReason(INCORRECTLY_RECEIVED);
-        emit(packetDroppedSignal, packet, &details);
-        delete packet;
-        return;
-    }
-    int type, code;
-    L3Address localAddr, remoteAddr;
-    int localPort = -1, remotePort = -1;
-    bool udpHeaderAvailable = false;
+    auto l3Ind = originalPacket->getTag<L3AddressInd>();
+    L3Address localAddr = l3Ind->getSrcAddress();
+    L3Address remoteAddr = l3Ind->getDestAddress();
 
-    const auto& icmpHeader = packet->popAtFront<IcmpHeader>();
-    ASSERT(icmpHeader);
-    type = icmpHeader->getType();
-    code = icmpHeader->getCode();
-    const auto& ipv4Header = packet->popAtFront<Ipv4Header>();
-    if (ipv4Header->getDontFragment() || ipv4Header->getFragmentOffset() == 0) {
-        const auto& udpHeader = packet->peekAtFront<UdpHeader>(B(8), Chunk::PF_ALLOW_INCOMPLETE);
-        localAddr = ipv4Header->getSrcAddress();
-        remoteAddr = ipv4Header->getDestAddress();
-        localPort = udpHeader->getSourcePort();
-        remotePort = udpHeader->getDestinationPort();
-        udpHeaderAvailable = true;
-    }
-    EV_WARN << "ICMP error received: type=" << type << " code=" << code
+    const auto& udpHeader = originalPacket->peekAtFront<UdpHeader>(B(8), Chunk::PF_ALLOW_INCOMPLETE);
+    ushort localPort = udpHeader->getSourcePort();
+    ushort remotePort = udpHeader->getDestinationPort();
+
+    EV_WARN << "ICMP error received: type=" << errorInd->getType() << " code=" << errorInd->getCode()
             << " about packet " << localAddr << ":" << localPort << " > "
             << remoteAddr << ":" << remotePort << "\n";
 
-    // identify socket and report error to it
-    if (udpHeaderAvailable) {
-        SockDesc *sd = findSocketForUnicastPacket(localAddr, localPort, remoteAddr, remotePort);
-        if (sd) {
-            // send UDP_I_ERROR to socket
-            EV_DETAIL << "Source socket is sockId=" << sd->sockId << ", notifying.\n";
-            Packet *packetQuote = packet->dup();
-            packetQuote->setFrontOffset(packetQuote->getFrontOffset() - ipv4Header->getChunkLength() - icmpHeader->getChunkLength());
-            sendUpErrorIndication(sd, localAddr, localPort, remoteAddr, remotePort, packetQuote);
-        }
-        else {
-            EV_WARN << "No socket on that local port, ignoring ICMP error\n";
-        }
+    SockDesc *sd = findSocketForUnicastPacket(localAddr, localPort, remoteAddr, remotePort);
+    if (sd) {
+        EV_DETAIL << "Source socket is sockId=" << sd->sockId << ", notifying.\n";
+        // Pop the UDP header from the original packet so upper layers only
+        // see their own payload
+        originalPacket->popAtFront<UdpHeader>(B(8), Chunk::PF_ALLOW_INCOMPLETE);
+        auto ports = originalPacket->addTagIfAbsent<L4PortInd>();
+        ports->setSrcPort(localPort);
+        ports->setDestPort(remotePort);
+        sendUpErrorIndication(sd, localAddr, localPort, remoteAddr, remotePort, indication);
     }
-    else
-        EV_WARN << "Udp header not available, ignoring ICMP error\n";
-#endif // ifdef INET_WITH_IPv4
-
-    delete packet;
+    else {
+        EV_WARN << "No socket on that local port, ignoring ICMP error\n";
+        delete indication;
+    }
 }
 
-void Udp::processICMPv6Error(Packet *packet)
+void Udp::sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort localPort, const L3Address& remoteAddr, ushort remotePort, Indication *indication)
 {
-#ifdef INET_WITH_IPv6
-    if (!icmpv6)
-        // TODO move to initialize?
-        icmpv6 = getModuleFromPar<Icmpv6>(par("icmpv6Module"), this);
-    if (!icmpv6->verifyChecksum(packet)) {
-        EV_WARN << "incoming ICMPv6 packet has wrong checksum, dropped\n";
-        PacketDropDetails details;
-        details.setReason(INCORRECTLY_RECEIVED);
-        emit(packetDroppedSignal, packet, &details);
-        delete packet;
-        return;
-    }
-
-    // extract details from the error message, then try to notify socket that sent bogus packet
-    int type, code;
-    L3Address localAddr, remoteAddr;
-    ushort localPort, remotePort;
-    bool udpHeaderAvailable = false;
-
-    const auto& icmpHeader = packet->popAtFront<Icmpv6Header>();
-    ASSERT(icmpHeader);
-
-    type = icmpHeader->getType();
-    code = -1; // FIXME this is dependent on getType()...
-    // Note: we must NOT use decapsulate() because payload in ICMP is conceptually truncated
-    const auto& ipv6Header = packet->popAtFront<Ipv6Header>();
-    const Ipv6FragmentHeader *fh = dynamic_cast<const Ipv6FragmentHeader *>(ipv6Header->findExtensionHeaderByType(IP_PROT_IPv6EXT_FRAGMENT));
-    if (!fh || fh->getFragmentOffset() == 0) {
-        const auto& udpHeader = packet->peekAtFront<UdpHeader>(B(8), Chunk::PF_ALLOW_INCOMPLETE);
-        localAddr = ipv6Header->getSrcAddress();
-        remoteAddr = ipv6Header->getDestAddress();
-        localPort = udpHeader->getSourcePort();
-        remotePort = udpHeader->getDestinationPort();
-        udpHeaderAvailable = true;
-    }
-
-    // identify socket and report error to it
-    if (udpHeaderAvailable) {
-        EV_WARN << "ICMP error received: type=" << type << " code=" << code
-                << " about packet " << localAddr << ":" << localPort << " > "
-                << remoteAddr << ":" << remotePort << "\n";
-
-        SockDesc *sd = findSocketForUnicastPacket(localAddr, localPort, remoteAddr, remotePort);
-        if (sd) {
-            // send UDP_I_ERROR to socket
-            EV_DETAIL << "Source socket is sockId=" << sd->sockId << ", notifying.\n";
-            Packet *packetQuote = packet->dup();
-            packetQuote->setFrontOffset(packetQuote->getFrontOffset() - ipv6Header->getChunkLength() - icmpHeader->getChunkLength());
-            sendUpErrorIndication(sd, localAddr, localPort, remoteAddr, remotePort, packetQuote);
-        }
-        else {
-            EV_WARN << "No socket on that local port, ignoring ICMPv6 error\n";
-        }
-    }
-    else
-        EV_WARN << "Udp header not available, ignoring ICMPv6 error\n";
-
-#endif // ifdef INET_WITH_IPv6
-
-    delete packet;
-}
-
-void Udp::sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort localPort, const L3Address& remoteAddr, ushort remotePort, Packet *quotedPacket)
-{
-    auto indication = new Indication("ERROR", UDP_I_ERROR);
-    UdpErrorIndication *udpCtrl = new UdpErrorIndication();
-    indication->setControlInfo(udpCtrl);
-    // FIXME notifyMsg->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceId);
+    // Reuse the same Indication, just update the kind and add socket/address/port tags
+    indication->setName("ERROR");
+    indication->setKind(UDP_I_ERROR);
     indication->addTag<SocketInd>()->setSocketId(sd->sockId);
-    auto addresses = indication->addTag<L3AddressInd>();
-    addresses->setSrcAddress(localAddr);
-    addresses->setDestAddress(remoteAddr);
-    auto ports = indication->addTag<L4PortInd>();
-    ports->setSrcPort(sd->localPort);
-    ports->setDestPort(remotePort);
-    indication->addTag<IcmpErrorInd>()->setQuotedPacket(quotedPacket);
 
     send(indication, "appOut");
 }
