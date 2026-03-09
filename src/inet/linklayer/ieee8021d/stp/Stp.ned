@@ -58,6 +58,11 @@ simple Stp extends SimpleModule like ISpanningTree
         // The path to the MacForwardingTable module
         string macTableModule;
 
+        // Delay before the protocol starts sending BPDUs. Default is 0 (all
+        // switches start synchronized). Set to e.g. uniform(0s,1s) for
+        // realistic randomized startup times.
+        double startTime @unit(s) = default(0s);
+
         // Shows the spanning tree by coloring connections in the network graphics.
         // Label ethernet interface with port role and status. Mark root switch
         bool visualize = default(false);
