@@ -101,5 +101,39 @@ const char *Ieee8021dInterfaceData::getStateName(PortState state)
     }
 }
 
+const char *Ieee8021dInterfaceData::getRoleShortName(PortRole role)
+{
+    switch (role) {
+        case ALTERNATE:
+            return "A";
+        case NOTASSIGNED:
+            return "-";
+        case DISABLED:
+            return "X";
+        case DESIGNATED:
+            return "D";
+        case BACKUP:
+            return "B";
+        case ROOT:
+            return "R";
+        default:
+            throw cRuntimeError("Unknown port role %d", role);
+    }
+}
+
+const char *Ieee8021dInterfaceData::getStateShortName(PortState state)
+{
+    switch (state) {
+        case DISCARDING:
+            return "D";
+        case LEARNING:
+            return "L";
+        case FORWARDING:
+            return "F";
+        default:
+            throw cRuntimeError("Unknown port state %d", state);
+    }
+}
+
 } // namespace inet
 

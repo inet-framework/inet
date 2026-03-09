@@ -165,9 +165,17 @@ class INET_API Ieee8021dInterfaceData : public InterfaceProtocolData
 
     const char *getStateName() const { return getStateName(getState()); }
 
+    const char *getRoleShortName() const { return getRoleShortName(getRole()); }
+
+    const char *getStateShortName() const { return getStateShortName(getState()); }
+
     static const char *getRoleName(PortRole role);
 
     static const char *getStateName(PortState state);
+
+    static const char *getRoleShortName(PortRole role);
+
+    static const char *getStateShortName(PortState state);
 
     simtime_t getNextUpgrade() const { return portData.nextUpgrade; }
 
