@@ -36,6 +36,7 @@ void Stp::initialize(int stage)
         holdTime = par("holdTime");
         configuredMaxAge = par("maxAge");
         configuredForwardDelay = par("forwardDelay");
+        configuredHelloInterval = par("helloTime");
 
         WATCH(bridgeAddress);
     }
@@ -398,7 +399,7 @@ void Stp::checkTimers()
 void Stp::checkParametersChange()
 {
     if (isRoot) {
-        helloInterval = timeSinceLastHello;
+        helloInterval = configuredHelloInterval;
         maxAge = configuredMaxAge;
         forwardDelay = configuredForwardDelay;
     }
@@ -430,7 +431,7 @@ void Stp::tryRoot()
         rootPriority = configuredBridgePriority;
         rootAddress = bridgeAddress;
         rootPathCost = 0;
-        helloInterval = timeSinceLastHello;
+        helloInterval = configuredHelloInterval;
         maxAge = configuredMaxAge;
         forwardDelay = configuredForwardDelay;
     }
@@ -638,7 +639,7 @@ void Stp::reset()
     rootPriority = configuredBridgePriority;
     rootAddress = bridgeAddress;
     rootPathCost = 0;
-    helloInterval = timeSinceLastHello;
+    helloInterval = configuredHelloInterval;
     maxAge = configuredMaxAge;
     forwardDelay = configuredForwardDelay;
     setAllDesignated();
@@ -657,7 +658,7 @@ void Stp::start()
     rootAddress = bridgeAddress;
     rootPathCost = 0;
     rootInterfaceId = ifTable->getInterface(0)->getInterfaceId();
-    helloInterval = timeSinceLastHello;
+    helloInterval = configuredHelloInterval;
     maxAge = configuredMaxAge;
     forwardDelay = configuredForwardDelay;
     timeSinceLastHello = 0;
