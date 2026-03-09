@@ -41,17 +41,20 @@ class INET_API Stp : public StpBase
     unsigned int rootPriority = 0;
     MacAddress rootAddress;
 
+    uint16_t configuredBridgePriority = 0;
+    simtime_t configuredMaxAge;
+    simtime_t configuredForwardDelay;
+    simtime_t configuredHelloInterval;
+
     uint16_t bridgePriority = 0;
     simtime_t maxAge;
     simtime_t forwardDelay;
-    simtime_t currentMaxAge;
-    simtime_t currentFwdDelay;
-    simtime_t currentHelloTime;
+    simtime_t helloInterval;
+
     simtime_t timeSinceLastHello;
     simtime_t holdTime;
 
     // Parameter change detection
-    unsigned int currentBridgePriority = 0;
     // Topology change commencing
     bool topologyChangeNotification = false;
     bool topologyChangeRecvd = false;
@@ -233,14 +236,14 @@ inline std::ostream& operator<<(std::ostream& os, Stp i)
         os << "  Cost: " << i.rootPathCost << " \n";
         os << "  Port: " << i.rootInterfaceId << " \n";
     }
-    os << "  Hello Time: " << i.currentHelloTime << " \n";
-    os << "  Max Age: " << i.currentMaxAge << " \n";
-    os << "  Forward Delay: " << i.currentFwdDelay << " \n";
-    os << "BridgeID Priority: " << i.bridgePriority << "\n";
-    os << "  Address: " << i.bridgeAddress << " \n";
-    os << "  Hello Time: " << i.timeSinceLastHello << " \n";
+    os << "  Hello Time: " << i.helloInterval << " \n";
     os << "  Max Age: " << i.maxAge << " \n";
     os << "  Forward Delay: " << i.forwardDelay << " \n";
+    os << "BridgeID Priority: " << i.configuredBridgePriority << "\n";
+    os << "  Address: " << i.bridgeAddress << " \n";
+    os << "  Hello Time: " << i.timeSinceLastHello << " \n";
+    os << "  Max Age: " << i.configuredMaxAge << " \n";
+    os << "  Forward Delay: " << i.configuredForwardDelay << " \n";
     os << "Port Flag Role State Cost Priority \n";
     os << "-----------------------------------------\n";
 
