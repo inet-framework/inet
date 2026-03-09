@@ -62,12 +62,6 @@ void Udp::initialize(int stage)
 
         lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
         ift.reference(this, "interfaceTableModule", true);
-#ifdef INET_WITH_IPv4
-        icmp = nullptr;
-#endif
-#ifdef INET_WITH_IPv6
-        icmpv6 = nullptr;
-#endif
         numSent = 0;
         numPassedUp = 0;
         numDroppedWrongPort = 0;
@@ -1087,48 +1081,31 @@ void Udp::processUndeliverablePacket(Packet *udpPacket)
     emit(packetDroppedSignal, udpPacket, &details);
     numDroppedWrongPort++;
 
-    // send back ICMP PORT_UNREACHABLE
-    char buff[80];
-    snprintf(buff, sizeof(buff), "Port %d unreachable", udpHeader->getDestinationPort());
-    udpPacket->setName(buff);
-    const Protocol *protocol = udpPacket->getTag<NetworkProtocolInd>()->getProtocol();
-
-    if (protocol == nullptr) {
+    // Request the network layer to send an ICMP port unreachable error.
+    // The transport layer provides the network protocol header and the original
+    // packet (with transport header on top). The network layer reconstructs
+    // the full datagram and maps the error code to ICMP/ICMPv6 type and code.
+    const auto& networkProtocolInd = udpPacket->getTag<NetworkProtocolInd>();
+    const Protocol *networkProtocol = networkProtocolInd->getProtocol();
+    if (networkProtocol == nullptr) {
         throw cRuntimeError("(%s)%s arrived from lower layer without NetworkProtocolInd",
                 udpPacket->getClassName(), udpPacket->getName());
     }
 
-    // push back network protocol header
-    udpPacket->trim();
-    udpPacket->insertAtFront(udpPacket->getTag<NetworkProtocolInd>()->getNetworkProtocolHeader());
-    auto inIe = udpPacket->getTag<InterfaceInd>()->getInterfaceId();
+    char buff[80];
+    snprintf(buff, sizeof(buff), "Port %d unreachable", udpHeader->getDestinationPort());
 
-    if (protocol->getId() == Protocol::ipv4.getId()) {
-#ifdef INET_WITH_IPv4
-        if (!icmp)
-            // TODO move to initialize?
-            icmp = getModuleFromPar<Icmp>(par("icmpModule"), this);
-        icmp->sendErrorMessage(udpPacket, inIe, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PORT_UNREACHABLE);
-#endif // ifdef INET_WITH_IPv4
-        delete udpPacket;
-    }
-    else if (protocol->getId() == Protocol::ipv6.getId()) {
-#ifdef INET_WITH_IPv6
-        if (!icmpv6)
-            // TODO move to initialize?
-            icmpv6 = getModuleFromPar<Icmpv6>(par("icmpv6Module"), this);
-        icmpv6->sendErrorMessage(udpPacket, ICMPv6_DESTINATION_UNREACHABLE, PORT_UNREACHABLE);
-#endif // ifdef INET_WITH_IPv6
-        delete udpPacket;
-    }
-    else if (protocol->getId() == Protocol::nextHopForwarding.getId()) {
-        delete udpPacket;
-    }
-    else {
-        throw cRuntimeError("(%s)%s arrived from lower layer with unrecognized NetworkProtocolInd %s",
-                udpPacket->getClassName(), udpPacket->getName(), protocol->getName());
-        // delete udpPacket;
-    }
+    auto *request = new Request(buff);
+    auto& errorReq = request->addTag<IcmpSendErrorReq>();
+    errorReq->setErrorCode(ICMP_E_PORT_UNREACHABLE);
+    errorReq->setNetworkProtocolHeader(networkProtocolInd->getNetworkProtocolHeader());
+    errorReq->setOriginalPacket(udpPacket);
+
+    auto& dispatchReq = request->addTag<DispatchProtocolReq>();
+    dispatchReq->setProtocol(networkProtocol);
+    dispatchReq->setServicePrimitive(SP_REQUEST);
+
+    send(request, "ipOut");
 }
 
 void Udp::sendUp(Ptr<const UdpHeader>& header, Packet *payload, SockDesc *sd, ushort srcPort, ushort destPort)
@@ -1204,34 +1181,16 @@ void Udp::sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort
 
 void Udp::handleStartOperation(LifecycleOperation *operation)
 {
-#ifdef INET_WITH_IPv4
-    icmp = nullptr;
-#endif
-#ifdef INET_WITH_IPv6
-    icmpv6 = nullptr;
-#endif
 }
 
 void Udp::handleStopOperation(LifecycleOperation *operation)
 {
     clearAllSockets();
-#ifdef INET_WITH_IPv4
-    icmp = nullptr;
-#endif
-#ifdef INET_WITH_IPv6
-    icmpv6 = nullptr;
-#endif
 }
 
 void Udp::handleCrashOperation(LifecycleOperation *operation)
 {
     clearAllSockets();
-#ifdef INET_WITH_IPv4
-    icmp = nullptr;
-#endif
-#ifdef INET_WITH_IPv6
-    icmpv6 = nullptr;
-#endif
 }
 
 void Udp::clearAllSockets()

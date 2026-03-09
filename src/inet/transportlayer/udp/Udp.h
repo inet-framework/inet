@@ -26,14 +26,6 @@
 #include "inet/transportlayer/contract/udp/UdpCommand_m.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 
-#ifdef INET_WITH_IPv4
-#include "inet/networklayer/ipv4/Icmp.h"
-#endif
-
-#ifdef INET_WITH_IPv6
-#include "inet/networklayer/icmpv6/Icmpv6.h"
-#endif
-
 namespace inet {
 
 const uint16_t UDP_MAX_MESSAGE_SIZE = 65535; // bytes
@@ -116,13 +108,6 @@ class INET_API Udp : public TransportProtocolBase
     // other state vars
     ushort lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
     ModuleRefByPar<IInterfaceTable> ift;
-#ifdef INET_WITH_IPv4
-    opp_component_ptr<Icmp> icmp;
-#endif
-#ifdef INET_WITH_IPv6
-    opp_component_ptr<Icmpv6> icmpv6;
-#endif
-
     // statistics
     int numSent = 0;
     int numPassedUp = 0;
