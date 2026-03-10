@@ -31,6 +31,8 @@ simple L2NodeConfigurator extends SimpleModule like IL2NodeConfigurator
     parameters:
         @class(L2NodeConfigurator);
         @display("i=block/cogwheel");
+        bool hasStp = default(false);
+        bool hasMrp = default(false);
         string interfaceTableModule;
         string l2ConfiguratorModule = default("l2NetworkConfigurator"); // The absolute path to the ~L2NetworkConfigurator; use "" if there is no configurator
 }

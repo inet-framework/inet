@@ -87,6 +87,8 @@ module EthernetSwitch like IEthernetNetworkNode
         }
         l2NodeConfigurator: <default("L2NodeConfigurator")> like IL2NodeConfigurator if hasStp || hasMrp {
             @display("p=100,300;is=s");
+            hasStp = parent.hasStp;
+            hasMrp = parent.hasMrp;
         }
         status: NodeStatus if hasStatus {
             @display("p=100,400;is=s");

@@ -60,10 +60,11 @@ void L2NodeConfigurator::prepareNode()
 
 void L2NodeConfigurator::prepareInterface(NetworkInterface *networkInterface)
 {
-//    ASSERT(!networkInterface->getProtocolData<Ieee8021dInterfaceData>());
-    networkInterface->addProtocolData<Ieee8021dInterfaceData>();
+    if (par("hasStp"))
+        networkInterface->addProtocolData<Ieee8021dInterfaceData>();
 #ifdef INET_WITH_MRP
-    networkInterface->addProtocolData<MrpInterfaceData>();
+    if (par("hasMrp"))
+        networkInterface->addProtocolData<MrpInterfaceData>();
 #endif
 }
 
