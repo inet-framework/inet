@@ -142,7 +142,6 @@ void StpBase::refreshDisplay() const
             if (rootInterfaceId == -1) {
                 switchModule->getDisplayString().setTagArg("i", 1, ROOT_SWITCH_COLOR);
                 switchModule->getDisplayString().setTagArg("i", 2, 100);
-                switchModule->getDisplayString().setTagArg("i2", 0, "status/excl");
                 switchModule->getDisplayString().setTagArg("t", 0, "cost: 0");
             }
             else {
@@ -150,14 +149,12 @@ void StpBase::refreshDisplay() const
                 std::string costStr = "cost: " + std::to_string(rootPort->getRootPathCost());
                 switchModule->getDisplayString().setTagArg("i", 1, "-");
                 switchModule->getDisplayString().setTagArg("i", 2, int(0));
-                switchModule->getDisplayString().setTagArg("i2", 0, "");
                 switchModule->getDisplayString().setTagArg("t", 0, costStr.c_str());
             }
         }
         else {
             switchModule->getDisplayString().setTagArg("i", 1, "-");
             switchModule->getDisplayString().setTagArg("i", 2, int(0));
-            switchModule->getDisplayString().setTagArg("i2", 0, "");
             switchModule->getDisplayString().setTagArg("t", 0, "");
         }
     }
