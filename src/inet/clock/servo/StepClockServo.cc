@@ -13,11 +13,18 @@ namespace inet {
 
 Define_Module(StepClockServo);
 
+void StepClockServo::initialize(int stage)
+{
+    ClockServoBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL)
+        resetOscillator = par("resetOscillator");
+}
+
 void StepClockServo::adjustClockForDifference(clocktime_t timeDifference, ppm rateDifference)
 {
     Enter_Method("adjustClockForDifference");
     EV_INFO << "Immediately adjusting clock time and oscillator compensation for difference" << EV_FIELD(timeDifference) << EV_FIELD(rateDifference) << EV_ENDL;
-    clock->setClockTime(clock->getClockTime() - timeDifference, rateDifference, true);
+    clock->setClockTime(clock->getClockTime() - timeDifference, rateDifference, resetOscillator);
 }
 
 } // namespace inet

@@ -52,4 +52,5 @@ module StepClockServo extends ClockServoBase like IClockServo
 {
     parameters:
         @class(StepClockServo);
+        bool resetOscillator = default(true);
 }

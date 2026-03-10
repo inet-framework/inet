@@ -14,6 +14,12 @@ namespace inet {
 
 class INET_API StepClockServo : public ClockServoBase
 {
+  protected:
+    bool resetOscillator = true;
+
+  protected:
+    virtual void initialize(int stage) override;
+
   public:
     virtual void adjustClockForDifference(clocktime_t timeDifference, ppm rateDifference) override;
 };
