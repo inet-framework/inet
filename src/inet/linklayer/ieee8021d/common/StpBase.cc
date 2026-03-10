@@ -136,18 +136,29 @@ void StpBase::refreshDisplay() const
             }
         }
 
-        // mark root switch
-        if (isUp() && getRootInterfaceId() == -1)
-        {
-            switchModule->getDisplayString().setTagArg("i", 1, ROOT_SWITCH_COLOR);
-            switchModule->getDisplayString().setTagArg("i", 2, 100);
-            switchModule->getDisplayString().setTagArg("i2", 0, "status/excl");
+        // mark root switch and display root path cost
+        if (isUp()) {
+            int rootInterfaceId = getRootInterfaceId();
+            if (rootInterfaceId == -1) {
+                switchModule->getDisplayString().setTagArg("i", 1, ROOT_SWITCH_COLOR);
+                switchModule->getDisplayString().setTagArg("i", 2, 100);
+                switchModule->getDisplayString().setTagArg("i2", 0, "status/excl");
+                switchModule->getDisplayString().setTagArg("t", 0, "cost: 0");
+            }
+            else {
+                const Ieee8021dInterfaceData *rootPort = getPortInterfaceData(rootInterfaceId);
+                std::string costStr = "cost: " + std::to_string(rootPort->getRootPathCost());
+                switchModule->getDisplayString().setTagArg("i", 1, "-");
+                switchModule->getDisplayString().setTagArg("i", 2, int(0));
+                switchModule->getDisplayString().setTagArg("i2", 0, "");
+                switchModule->getDisplayString().setTagArg("t", 0, costStr.c_str());
+            }
         }
-        else
-        {
+        else {
             switchModule->getDisplayString().setTagArg("i", 1, "-");
             switchModule->getDisplayString().setTagArg("i", 2, int(0));
             switchModule->getDisplayString().setTagArg("i2", 0, "");
+            switchModule->getDisplayString().setTagArg("t", 0, "");
         }
     }
 }
