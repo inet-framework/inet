@@ -12,7 +12,7 @@
 /tutorials/configurator/,            -f omnetpp.ini -c Step7C -r 0,                             500s,           0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND;0000-0000/tyf, PASS,
 /tutorials/configurator/,            -f omnetpp.ini -c Step8A -r 0,                             100s,           84ac-6cbf/tplx;5611-cffd/~tNl;ebe4-55d1/~tND;2522-dbad/tyf, PASS,    wireless EthernetMac Ipv4   # Step8A extended
 /tutorials/configurator/,            -f omnetpp.ini -c Step8B -r 0,                             100s,           e6d7-97c8/tplx;5611-cffd/~tNl;13f1-f991/~tND;59c7-27b1/tyf, PASS,    wireless EthernetMac Ipv4
-/tutorials/configurator/,            -f omnetpp.ini -c Step9 -r 0,                              100s,           daa5-f273/tplx;1374-346a/~tNl;c423-d956/~tND;aab0-e827/tyf, PASS,    wireless EthernetMac Ipv4
+/tutorials/configurator/,            -f omnetpp.ini -c Step9 -r 0,                              100s,           82f8-47a2/tplx;1374-346a/~tNl;c423-d956/~tND;003d-d2ed/tyf, PASS,    wireless EthernetMac Ipv4
 /tutorials/configurator/,            -f omnetpp.ini -c Step10A -r 0,                            100s,           4b6f-7cd9/tplx;0000-0000/~tNl;0000-0000/~tND;d8a9-88fc/tyf, PASS,   wireless # Step10A extended
 /tutorials/configurator/,            -f omnetpp.ini -c Step10B -r 0,                            100s,           4b6f-7cd9/tplx;0000-0000/~tNl;0000-0000/~tND;62d4-c5ba/tyf, PASS,   wireless # Step10B extended
 /tutorials/configurator/,            -f omnetpp.ini -c Step10C -r 0,                            100s,           71f5-b341/tplx;4a61-20ba/~tNl;7612-50df/~tND;0f54-e4cf/tyf, PASS,    wireless Ipv4
@@ -35,7 +35,7 @@
 /tutorials/rip/,                     -f omnetpp.ini -c Step7SplitHorizon -r 0,                  500s,           24fb-1d1f/tplx;4629-6b51/~tNl;0751-babc/~tND;36fb-9379/tyf, PASS,
 /tutorials/rip/,                     -f omnetpp.ini -c Step7TriggeredUpdates -r 0,              200s,           67cd-48fa/tplx;b2ab-ca2f/~tNl;c149-ab28/~tND;6ddf-3916/tyf, PASS,
 /tutorials/rip/,                     -f omnetpp.ini -c Step8 -r 0,                              500s,           d061-d69d/tplx;15a6-b39d/~tNl;3eba-7b3c/~tND;9f85-5586/tyf, PASS,
-/tutorials/rip/,                     -f omnetpp.ini -c Step9 -r 0,                              1500s,           ae8d-4988/tplx;4ec9-481b/~tNl;9ffc-8cff/~tND;7a59-8cbc/tyf, PASS,   # Step9 extended
+/tutorials/rip/,                     -f omnetpp.ini -c Step9 -r 0,                              1500s,           2d2f-ca2a/tplx;4ec9-481b/~tNl;9ffc-8cff/~tND;1e82-a567/tyf, PASS,   # Step9 extended
 /tutorials/rip/,                     -f omnetpp.ini -c Step9NoNetmaskRoutes -r 0,               1500s,           9e4e-3c63/tplx;faf3-e550/~tNl;ea69-ea38/~tND;5f1f-77a4/tyf, PASS,
 /tutorials/rip/,                     -f omnetpp.ini -c Step10 -r 0,                             100s,           fbaa-fc94/tplx;9a06-ebb7/~tNl;cf0a-6cb1/~tND;6332-75bc/tyf, PASS,
 
@@ -76,11 +76,11 @@
 /tutorials/ospf/,                -f omnetpp.ini -c Step15 -r 0,                         1000s,           7702-64db/tplx;34d3-5823/~tNl;b93e-4947/~tND;a9a6-3b91/tyf, PASS,
 /tutorials/ospf/,                -f omnetpp.ini -c Step16 -r 0,                         1000s,           275d-a845/tplx;036e-bbfe/~tNl;0c48-dd9e/~tND;614a-edf9/tyf, PASS,
 /tutorials/ospf/,                -f omnetpp.ini -c Step17 -r 0,                         1000s,           088b-6cd7/tplx;43b6-6d34/~tNl;c46a-8e39/~tND;9925-d5a0/tyf, PASS,
-/tutorials/ospf/,                -f omnetpp.ini -c Step18 -r 0,                         1000s,           b833-3864/tplx;c917-01aa/~tNl;26b2-a605/~tND;3fcb-19de/tyf, PASS,
-/tutorials/ospf/,                -f omnetpp.ini -c Step18a -r 0,                         1000s,           7878-ac47/tplx;e1be-651d/~tNl;24a2-9378/~tND;01c2-d710/tyf, PASS,
-/tutorials/ospf/,                -f omnetpp.ini -c Step18b -r 0,                         1000s,           b833-3864/tplx;c917-01aa/~tNl;76a0-f440/~tND;3fcb-19de/tyf, PASS,
-/tutorials/ospf/,                -f omnetpp.ini -c Step18c -r 0,                         1000s,           d0ea-f5df/tplx;98b6-bdf6/~tNl;7605-ddc7/~tND;7da7-84ab/tyf, PASS,
-/tutorials/ospf/,                -f omnetpp.ini -c Step18d -r 0,                         1000s,           bb9b-2872/tplx;55fc-68bc/~tNl;2a45-c708/~tND;0b02-86e0/tyf, PASS,
+/tutorials/ospf/,                -f omnetpp.ini -c Step18 -r 0,                         1000s,           77dc-3970/tplx;c917-01aa/~tNl;26b2-a605/~tND;304b-595f/tyf, PASS,
+/tutorials/ospf/,                -f omnetpp.ini -c Step18a -r 0,                         1000s,           70cb-7342/tplx;e1be-651d/~tNl;24a2-9378/~tND;d854-089e/tyf, PASS,
+/tutorials/ospf/,                -f omnetpp.ini -c Step18b -r 0,                         1000s,           77dc-3970/tplx;c917-01aa/~tNl;76a0-f440/~tND;304b-595f/tyf, PASS,
+/tutorials/ospf/,                -f omnetpp.ini -c Step18c -r 0,                         1000s,           cd7e-33aa/tplx;98b6-bdf6/~tNl;7605-ddc7/~tND;058a-af0d/tyf, PASS,
+/tutorials/ospf/,                -f omnetpp.ini -c Step18d -r 0,                         1000s,           7249-3923/tplx;55fc-68bc/~tNl;2a45-c708/~tND;3b65-50fb/tyf, PASS,
 /tutorials/ospf/,                -f omnetpp.ini -c Step18e -r 0,                         1000s,           d1b4-0b3d/tplx;4264-fc26/~tNl;e7b2-7e77/~tND;ebfb-19c7/tyf, PASS,
 /tutorials/ospf/,                -f omnetpp.ini -c Step19 -r 0,                         1000s,           069c-6060/tplx;49c2-5f29/~tNl;d048-57f1/~tND;9068-7dea/tyf, PASS,
 /tutorials/ospf/,                -f omnetpp.ini -c Step20 -r 0,                         1000s,           84ad-6d51/tplx;cb0c-3234/~tNl;f6d1-7f28/~tND;8006-446a/tyf, PASS,
