@@ -248,8 +248,7 @@ void Icmp::processIcmpMessage(Packet *packet)
 
             auto *indication = new Indication("ICMP-error");
             auto& errorInd = indication->addTag<IcmpErrorInd>();
-            errorInd->setType(icmpHeader->getType());
-            errorInd->setCode(icmpHeader->getCode());
+            errorInd->setErrorCode(mapToErrorCode(icmpHeader));
             if (auto ptb = dynamicPtrCast<const IcmpPtb>(icmpHeader))
                 errorInd->setMtu(ptb->getMtu());
             errorInd->setOriginalPacket(packet); // ownership transfer, no dup needed
@@ -295,6 +294,35 @@ void Icmp::processIcmpMessage(Packet *packet)
 
         default:
             throw cRuntimeError("Unknown ICMP type %d", icmpmsg->getType());
+    }
+}
+
+IcmpErrorCode Icmp::mapToErrorCode(const Ptr<const IcmpHeader>& icmpHeader) const
+{
+    switch (icmpHeader->getType()) {
+        case ICMP_DESTINATION_UNREACHABLE:
+            switch (icmpHeader->getCode()) {
+                case ICMP_DU_NETWORK_UNREACHABLE: return ICMP_E_NET_UNREACHABLE;
+                case ICMP_DU_HOST_UNREACHABLE: return ICMP_E_HOST_UNREACHABLE;
+                case ICMP_DU_PROTOCOL_UNREACHABLE: return ICMP_E_PROTOCOL_UNREACHABLE;
+                case ICMP_DU_PORT_UNREACHABLE: return ICMP_E_PORT_UNREACHABLE;
+                case ICMP_DU_FRAGMENTATION_NEEDED: return ICMP_E_FRAGMENTATION_NEEDED;
+                case ICMP_DU_SOURCE_ROUTE_FAILED: return ICMP_E_SOURCE_ROUTE_FAILED;
+                case ICMP_DU_NETWORK_PROHIBITED:
+                case ICMP_DU_HOST_PROHIBITED:
+                case ICMP_DU_COMMUNICATION_PROHIBITED: return ICMP_E_ADMIN_PROHIBITED;
+                default: return ICMP_E_DESTINATION_UNREACHABLE;
+            }
+        case ICMP_TIME_EXCEEDED:
+            switch (icmpHeader->getCode()) {
+                case ICMP_TIMXCEED_INTRANS: return ICMP_E_TTL_EXCEEDED;
+                case ICMP_TIMXCEED_REASS: return ICMP_E_REASSEMBLY_TIMEOUT;
+                default: return ICMP_E_TTL_EXCEEDED;
+            }
+        case ICMP_PARAMETER_PROBLEM:
+            return ICMP_E_PARAMETER_PROBLEM;
+        default:
+            throw cRuntimeError("Unknown ICMP error type: %d", icmpHeader->getType());
     }
 }
 

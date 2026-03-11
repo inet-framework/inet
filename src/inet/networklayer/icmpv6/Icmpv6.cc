@@ -82,20 +82,10 @@ void Icmpv6::processICMPv6Message(Packet *packet)
 
         auto *indication = new Indication("ICMPv6-error");
         auto& errorInd = indication->addTag<IcmpErrorInd>();
-        errorInd->setType(icmpHeader->getType());
-        // Extract code and MTU from the specific ICMPv6 subtypes
-        if (auto du = dynamicPtrCast<const Icmpv6DestUnreachableMsg>(icmpHeader)) {
-            errorInd->setCode(du->getCode());
-        }
-        else if (auto ptb = dynamicPtrCast<const Icmpv6PacketTooBigMsg>(icmpHeader)) {
-            errorInd->setCode(ptb->getCode());
-            errorInd->setMtu(ptb->getMTU());
-        }
-        else if (auto te = dynamicPtrCast<const Icmpv6TimeExceededMsg>(icmpHeader)) {
-            errorInd->setCode(te->getCode());
-        }
-        else if (auto pp = dynamicPtrCast<const Icmpv6ParamProblemMsg>(icmpHeader)) {
-            errorInd->setCode(pp->getCode());
+        errorInd->setErrorCode(mapToErrorCode(icmpHeader));
+        if (icmpHeader->getType() == ICMPv6_PACKET_TOO_BIG) {
+            auto icmpv6PacketTooBigMsg =CHK(dynamicPtrCast<const Icmpv6PacketTooBigMsg>(icmpHeader));
+            errorInd->setMtu(icmpv6PacketTooBigMsg->getMTU());
         }
         errorInd->setOriginalPacket(packet); // ownership transfer, no dup needed
 
@@ -125,6 +115,38 @@ void Icmpv6::processICMPv6Message(Packet *packet)
         }
         else
             throw cRuntimeError("Unknown message type received: (%s)%s.\n", icmpv6msg->getClassName(), icmpv6msg->getName());
+    }
+}
+
+IcmpErrorCode Icmpv6::mapToErrorCode(const Ptr<const Icmpv6Header>& icmpHeader) const
+{
+    switch (icmpHeader->getType()) {
+        case ICMPv6_DESTINATION_UNREACHABLE: {
+            auto du = CHK(dynamicPtrCast<const Icmpv6DestUnreachableMsg>(icmpHeader));
+            switch (du->getCode()) {
+                case NO_ROUTE_TO_DEST: return ICMP_E_NET_UNREACHABLE;
+                case COMM_WITH_DEST_PROHIBITED: return ICMP_E_ADMIN_PROHIBITED;
+                case ADDRESS_UNREACHABLE: return ICMP_E_HOST_UNREACHABLE;
+                case PORT_UNREACHABLE: return ICMP_E_PORT_UNREACHABLE;
+                default: return ICMP_E_DESTINATION_UNREACHABLE;
+            }
+        }
+        case ICMPv6_PACKET_TOO_BIG:
+            CHK(dynamicPtrCast<const Icmpv6PacketTooBigMsg>(icmpHeader));
+            return ICMP_E_FRAGMENTATION_NEEDED;
+        case ICMPv6_TIME_EXCEEDED: {
+            auto te = CHK(dynamicPtrCast<const Icmpv6TimeExceededMsg>(icmpHeader));
+            switch (te->getCode()) {
+                case ND_HOP_LIMIT_EXCEEDED: return ICMP_E_TTL_EXCEEDED;
+                case ND_FRAGMENT_REASSEMBLY_TIME: return ICMP_E_REASSEMBLY_TIMEOUT;
+                default: return ICMP_E_TTL_EXCEEDED;
+            }
+        }
+        case ICMPv6_PARAMETER_PROBLEM:
+            CHK(dynamicPtrCast<const Icmpv6ParamProblemMsg>(icmpHeader));
+            return ICMP_E_PARAMETER_PROBLEM;
+        default:
+            throw cRuntimeError("Unknown ICMPv6 error type: %d", icmpHeader->getType());
     }
 }
 

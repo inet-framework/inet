@@ -12,25 +12,40 @@ import inet.common.packet.Packet;
 namespace inet;
 
 //
+// Protocol-agnostic ICMP error codes used in both directions:
+// - Receive: ICMP/ICMPv6 modules map raw type/code to this enum
+// - Send: transport layer uses this enum, network layer maps to ICMP/ICMPv6
+//
+enum IcmpErrorCode
+{
+    // Destination Unreachable
+    ICMP_E_NET_UNREACHABLE = 0;
+    ICMP_E_HOST_UNREACHABLE = 1;
+    ICMP_E_PROTOCOL_UNREACHABLE = 2;
+    ICMP_E_PORT_UNREACHABLE = 3;
+    ICMP_E_FRAGMENTATION_NEEDED = 4;    // also Packet Too Big; use mtu field
+    ICMP_E_SOURCE_ROUTE_FAILED = 5;
+    ICMP_E_ADMIN_PROHIBITED = 6;
+    ICMP_E_DESTINATION_UNREACHABLE = 7;  // generic/unmapped dest unreachable
+
+    // Time Exceeded
+    ICMP_E_TTL_EXCEEDED = 10;
+    ICMP_E_REASSEMBLY_TIMEOUT = 11;
+
+    // Parameter Problem
+    ICMP_E_PARAMETER_PROBLEM = 20;
+}
+
+//
 // This indication specifies the ICMP error data associated with a transport
 // layer error indication. Each layer pops its own header from the original
 // packet and converts it to tags before forwarding the indication upward.
 //
 class IcmpErrorInd extends TagBase
 {
-    int type;               // ICMP type (e.g. ICMP_DESTINATION_UNREACHABLE)
-    int code;               // ICMP code (e.g. ICMP_DU_FRAGMENTATION_NEEDED)
-    int mtu = -1;           // only relevant for Packet Too Big / Fragmentation Needed
+    IcmpErrorCode errorCode;
+    int mtu = -1;           // only relevant for ICMP_E_FRAGMENTATION_NEEDED
     Packet *originalPacket @owned;  // progressively unwrapped quoted packet
-}
-
-//
-// Protocol-agnostic error codes for requesting ICMP error generation.
-// The network layer maps these to the appropriate ICMP/ICMPv6 type and code.
-//
-enum IcmpSendErrorCode
-{
-    ICMP_E_PORT_UNREACHABLE = 0;
 }
 
 //
@@ -42,7 +57,7 @@ enum IcmpSendErrorCode
 //
 class IcmpSendErrorReq extends TagBase
 {
-    IcmpSendErrorCode errorCode;
+    IcmpErrorCode errorCode;
     ChunkPtr networkProtocolHeader;
     Packet *originalPacket @owned;
 }
