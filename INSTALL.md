@@ -100,6 +100,12 @@ VoipStream requires a "devel" package of the avcodec library (part of FFmpeg)
 to be installed on your system. On Ubuntu, this package can be installed with the 
 following command:
 
-    $ sudo apt-get install libavcodec-dev libavformat-dev libavresample-dev libavutil-dev
+    $ sudo apt-get install libavcodec-dev libavformat-dev libavutil-dev
 
 The package name and installation command may vary for other Linux systems.
+
+
+Z3... TODO
+=====
+TODO description
+    $ sudo apt-get install libz3-dev
