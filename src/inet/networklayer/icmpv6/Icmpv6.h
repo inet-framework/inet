@@ -14,6 +14,7 @@
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
+#include "inet/networklayer/common/IcmpErrorTag_m.h"
 #include "inet/common/checksum/ChecksumMode_m.h"
 
 namespace inet {
@@ -86,6 +87,7 @@ class INET_API Icmpv6 : public SimpleModule, public LifecycleUnsupported, public
     virtual bool validateDatagramPromptingError(Packet *packet);
 
     virtual void errorOut(Indication *indication);
+    virtual IcmpErrorCode mapToErrorCode(const Ptr<const Icmpv6Header>& icmpHeader) const;
 
     virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;

@@ -16,6 +16,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/ipv4/IcmpHeader.h"
+#include "inet/networklayer/common/IcmpErrorTag_m.h"
 #include "inet/common/checksum/ChecksumMode_m.h"
 
 namespace inet {
@@ -39,6 +40,7 @@ class INET_API Icmp : public SimpleModule, public DefaultProtocolRegistrationLis
     virtual void processIcmpMessage(Packet *);
     virtual void errorOut(Indication *);
     virtual void processEchoRequest(Packet *);
+    virtual IcmpErrorCode mapToErrorCode(const Ptr<const IcmpHeader>& icmpHeader) const;
     virtual void sendToIP(Packet *, const Ipv4Address& dest);
     virtual void sendToIP(Packet *msg);
     virtual bool possiblyLocalBroadcast(const Ipv4Address& addr, int interfaceId);

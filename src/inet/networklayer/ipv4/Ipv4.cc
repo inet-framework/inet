@@ -265,7 +265,7 @@ void Ipv4::handleIcmpSendErrorRequest(Request *request)
             sendIcmpError(originalPacket, inputInterfaceId, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PORT_UNREACHABLE);
             break;
         default:
-            throw cRuntimeError("Unknown IcmpSendErrorCode: %d", errorReq->getErrorCode());
+            throw cRuntimeError("Unknown IcmpErrorCode: %d", errorReq->getErrorCode());
     }
 
     delete request;

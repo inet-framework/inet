@@ -1129,7 +1129,7 @@ void Udp::sendUp(Ptr<const UdpHeader>& header, Packet *payload, SockDesc *sd, us
 
 void Udp::processIcmpError(Indication *indication)
 {
-    // The Indication carries an IcmpErrorInd tag with type/code/mtu and an
+    // The Indication carries an IcmpErrorInd tag with errorCode/mtu and an
     // originalPacket whose ICMP and IP headers have already been popped by
     // the ICMP and IP layers respectively. The originalPacket now starts
     // with the quoted UDP header.
@@ -1144,7 +1144,7 @@ void Udp::processIcmpError(Indication *indication)
     ushort localPort = udpHeader->getSourcePort();
     ushort remotePort = udpHeader->getDestinationPort();
 
-    EV_WARN << "ICMP error received: type=" << errorInd->getType() << " code=" << errorInd->getCode()
+    EV_WARN << "ICMP error received: errorCode=" << errorInd->getErrorCode()
             << " about packet " << localAddr << ":" << localPort << " > "
             << remoteAddr << ":" << remotePort << "\n";
 
