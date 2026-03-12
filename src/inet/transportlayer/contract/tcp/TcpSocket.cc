@@ -372,6 +372,14 @@ void TcpSocket::processMessage(cMessage *msg)
             delete msg;
             break;
 
+        case TCP_I_ICMP_ERROR: {
+            auto *info = check_and_cast<TcpIcmpErrorInfo *>(msg->getControlInfo());
+            if (cb)
+                cb->socketIcmpError(this, info->getIcmpErrorCode(), info->getMtu());
+            delete msg;
+            break;
+        }
+
         case TCP_I_STATUS:
             status = check_and_cast<TcpStatusInfo *>(msg->getControlInfo());
             if (cb)

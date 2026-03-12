@@ -149,6 +149,13 @@ class INET_API TcpSocket : public ISocket
         virtual void socketFailure(TcpSocket *socket, int code) = 0;
         virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) = 0;
         virtual void socketDeleted(TcpSocket *socket) = 0;
+
+        /**
+         * Notifies about an ICMP error received for this connection.
+         * This is a soft notification — the connection remains open.
+         * Default implementation does nothing (backward compatible).
+         */
+        virtual void socketIcmpError(TcpSocket *socket, int icmpErrorCode, int mtu) {}
     };
 
     /**

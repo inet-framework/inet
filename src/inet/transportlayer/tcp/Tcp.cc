@@ -176,10 +176,8 @@ void Tcp::handleLowerPacket(Packet *packet)
 void Tcp::handleLowerCommand(cMessage *msg)
 {
     if (auto indication = dynamic_cast<Indication *>(msg)) {
-        if (indication->findTag<IcmpErrorInd>()) {
-            EV_DETAIL << "ICMP error received -- discarding\n";
-            delete indication;
-        }
+        if (indication->findTag<IcmpErrorInd>())
+            processIcmpError(indication);
         else
             throw cRuntimeError("Unknown Indication arrived from network layer: %s", indication->getName());
     }
@@ -228,7 +226,12 @@ TcpConnection *Tcp::findConnForSegment(const Ptr<const TcpHeader>& tcpHeader, L3
     key.remoteAddr = srcAddr;
     key.localPort = tcpHeader->getDestPort();
     key.remotePort = tcpHeader->getSrcPort();
-    SockPair save = key;
+    return findConnForSockPair(key);
+}
+
+TcpConnection *Tcp::findConnForSockPair(const SockPair& keyPar)
+{
+    SockPair key = keyPar;
 
     // try with fully qualified SockPair
     auto i = tcpConnMap.find(key);
@@ -243,7 +246,7 @@ TcpConnection *Tcp::findConnForSegment(const Ptr<const TcpHeader>& tcpHeader, L3
         return i->second;
 
     // try fully qualified local socket + blank remote socket (for incoming SYN)
-    key = save;
+    key = keyPar;
     key.remoteAddr = L3Address();
     key.remotePort = -1;
     i = tcpConnMap.find(key);
@@ -260,6 +263,43 @@ TcpConnection *Tcp::findConnForSegment(const Ptr<const TcpHeader>& tcpHeader, L3
 
     // given up
     return nullptr;
+}
+
+void Tcp::processIcmpError(Indication *indication)
+{
+    auto& errorInd = indication->getTagForUpdate<IcmpErrorInd>();
+    Packet *originalPacket = errorInd->getOriginalPacketForUpdate();
+
+    // The originalPacket contains the quoted IP packet that triggered the ICMP
+    // error. IP headers have already been popped; it now starts with the TCP header.
+    // The L3AddressInd on the originalPacket reflects the original (outgoing) packet:
+    //   srcAddress = our local address, destAddress = remote address.
+    auto l3Ind = originalPacket->getTag<L3AddressInd>();
+    L3Address localAddr = l3Ind->getSrcAddress();
+    L3Address remoteAddr = l3Ind->getDestAddress();
+
+    const auto& tcpHeader = originalPacket->peekAtFront<TcpHeader>(b(-1), Chunk::PF_ALLOW_INCOMPLETE);
+    int localPort = tcpHeader->getSrcPort();
+    int remotePort = tcpHeader->getDestPort();
+
+    EV_WARN << "ICMP error received: errorCode=" << errorInd->getErrorCode()
+            << " about packet " << localAddr << ":" << localPort << " > "
+            << remoteAddr << ":" << remotePort << "\n";
+
+    SockPair key;
+    key.localAddr = localAddr;
+    key.remoteAddr = remoteAddr;
+    key.localPort = localPort;
+    key.remotePort = remotePort;
+
+    TcpConnection *conn = findConnForSockPair(key);
+    if (conn) {
+        conn->processIcmpError(indication);
+    }
+    else {
+        EV_WARN << "No matching connection, ignoring ICMP error\n";
+        delete indication;
+    }
 }
 
 void Tcp::segmentArrivalWhileClosed(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader, L3Address srcAddr, L3Address destAddr)
