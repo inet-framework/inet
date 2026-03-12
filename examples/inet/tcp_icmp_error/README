@@ -1,0 +1,29 @@
+TCP ICMP Error Handling Demo
+============================
+
+Two configurations demonstrating TCP ICMP error handling.
+
+Config HardError (Phase 2)
+--------------------------
+Network: client (StandardHost) <--Ethernet--> target (Router, no TCP)
+
+The client tries to TCP-connect to a Router that has no TCP module.
+The Router's IPv4 sends ICMP Protocol Unreachable (hard error).
+TCP immediately reports CONNECTION_REFUSED instead of waiting for
+the connection establishment timeout.
+
+Config Pmtud (Phase 3)
+----------------------
+Network: client <--PPP (MTU 1500)--> router <--PPP (MTU 800)--> server
+
+The client sends a large TCP stream to the server through a router
+whose outgoing link has a smaller MTU (800 bytes).
+
+Before Phase 3:
+  TCP does not set the DF (Don't Fragment) bit. IPv4 silently
+  fragments oversized packets at the router. No ICMP errors.
+
+After Phase 3:
+  TCP sets DF on all segments. The router sends ICMP Fragmentation
+  Needed (Packet Too Big) with MTU=800. TCP reduces snd_mss and
+  retransmits with smaller segments — no IP fragmentation needed.
