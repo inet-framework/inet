@@ -5,6 +5,7 @@
 //
 
 import inet.common.INETDefs;
+import inet.networklayer.common.IcmpErrorTag;
 import inet.networklayer.common.IpProtocolId;
 import inet.networklayer.common.L3Address;
 
@@ -50,6 +51,7 @@ enum TcpStatusInd
     TCP_I_TIMED_OUT = 9;         // conn-estab timer went off, or max retransm. count reached
     TCP_I_STATUS = 10;           // status info (will carry ~TcpStatusInfo)
     TCP_I_SEND_MSG = 11;         // send queue abated, send more messages
+    TCP_I_ICMP_ERROR = 12;       // ICMP error received (will carry ~TcpIcmpErrorInfo)
 }
 
 //
@@ -85,6 +87,16 @@ class TcpErrorInfo extends TcpCommand
 {
     TcpErrorCode errorCode;
     string messageText;
+}
+
+//
+// Control info for TCP_I_ICMP_ERROR indication.
+// Carries the ICMP error code and MTU (for fragmentation needed errors).
+//
+class TcpIcmpErrorInfo extends TcpCommand
+{
+    IcmpErrorCode icmpErrorCode;
+    int mtu = -1;
 }
 
 //

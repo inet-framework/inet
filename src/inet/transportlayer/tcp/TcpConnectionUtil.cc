@@ -16,6 +16,7 @@
 #include "inet/common/packet/Message.h"
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/networklayer/common/DscpTag_m.h"
+#include "inet/networklayer/common/IcmpErrorTag_m.h"
 #include "inet/networklayer/common/EcnTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
@@ -113,6 +114,7 @@ const char *TcpConnection::indicationName(int code)
         CASE(TCP_I_TIMED_OUT);
         CASE(TCP_I_STATUS);
         CASE(TCP_I_SEND_MSG);
+        CASE(TCP_I_ICMP_ERROR);
     }
     return s;
 #undef CASE
@@ -352,6 +354,28 @@ void TcpConnection::sendIndicationToApp(int code, const int id)
     indication->addTag<SocketInd>()->setSocketId(socketId);
     indication->setControlInfo(ind);
     sendToApp(indication);
+}
+
+void TcpConnection::processIcmpError(Indication *indication)
+{
+    auto& errorInd = indication->getTagForUpdate<IcmpErrorInd>();
+    IcmpErrorCode errorCode = errorInd->getErrorCode();
+    int mtu = errorInd->getMtu();
+
+    EV_WARN << "ICMP error for connection " << localAddr << ":" << localPort
+            << " > " << remoteAddr << ":" << remotePort
+            << " errorCode=" << errorCode << "\n";
+
+    // Notify the application about the ICMP error (soft notification, no state change)
+    auto appIndication = new Indication(indicationName(TCP_I_ICMP_ERROR), TCP_I_ICMP_ERROR);
+    auto info = new TcpIcmpErrorInfo();
+    info->setIcmpErrorCode(errorCode);
+    info->setMtu(mtu);
+    appIndication->addTag<SocketInd>()->setSocketId(socketId);
+    appIndication->setControlInfo(info);
+    sendToApp(appIndication);
+
+    delete indication;
 }
 
 void TcpConnection::sendAvailableIndicationToApp()
