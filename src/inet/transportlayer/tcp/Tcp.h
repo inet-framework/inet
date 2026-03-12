@@ -12,6 +12,7 @@
 #include <set>
 
 #include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/base/TransportProtocolBase.h"
@@ -169,8 +170,11 @@ class INET_API Tcp : public TransportProtocolBase
 
     // utility methods
     virtual TcpConnection *findConnForSegment(const Ptr<const TcpHeader>& tcpHeader, L3Address srcAddr, L3Address destAddr);
+    virtual TcpConnection *findConnForSockPair(const SockPair& key);
     virtual TcpConnection *findConnForApp(int socketId);
     virtual void segmentArrivalWhileClosed(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader, L3Address src, L3Address dest);
+    virtual void processIcmpv4Error(Indication *indication);
+    virtual void processIcmpv6Error(Indication *indication);
     virtual void refreshDisplay() const override;
 
   public:

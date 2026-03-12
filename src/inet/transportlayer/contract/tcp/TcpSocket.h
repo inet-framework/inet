@@ -13,6 +13,8 @@
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/socket/ISocket.h"
+#include "inet/networklayer/common/Icmpv4ErrorTag_m.h"
+#include "inet/networklayer/common/Icmpv6ErrorTag_m.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 
@@ -149,6 +151,20 @@ class INET_API TcpSocket : public ISocket
         virtual void socketFailure(TcpSocket *socket, int code) = 0;
         virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) = 0;
         virtual void socketDeleted(TcpSocket *socket) = 0;
+
+        /**
+         * Notifies about an ICMPv4 error received for this connection.
+         * This is a soft notification — the connection remains open.
+         * Default implementation does nothing (backward compatible).
+         */
+        virtual void socketIcmpv4Error(TcpSocket *socket, Indication *errorInd) {}
+
+        /**
+         * Notifies about an ICMPv6 error received for this connection.
+         * This is a soft notification — the connection remains open.
+         * Default implementation does nothing (backward compatible).
+         */
+        virtual void socketIcmpv6Error(TcpSocket *socket, Indication *errorInd) {}
     };
 
     /**

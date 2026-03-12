@@ -372,6 +372,22 @@ void TcpSocket::processMessage(cMessage *msg)
             delete msg;
             break;
 
+        case TCP_I_ICMPv4_ERROR: {
+            auto *errorInd = check_and_cast<Indication *>(msg);
+            if (cb)
+                cb->socketIcmpv4Error(this, errorInd);
+            delete msg;
+            break;
+        }
+
+        case TCP_I_ICMPv6_ERROR: {
+            auto *errorInd = check_and_cast<Indication *>(msg);
+            if (cb)
+                cb->socketIcmpv6Error(this, errorInd);
+            delete msg;
+            break;
+        }
+
         case TCP_I_STATUS:
             status = check_and_cast<TcpStatusInfo *>(msg->getControlInfo());
             if (cb)

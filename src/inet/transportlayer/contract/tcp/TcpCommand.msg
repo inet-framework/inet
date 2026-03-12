@@ -50,6 +50,8 @@ enum TcpStatusInd
     TCP_I_TIMED_OUT = 9;         // conn-estab timer went off, or max retransm. count reached
     TCP_I_STATUS = 10;           // status info (will carry ~TcpStatusInfo)
     TCP_I_SEND_MSG = 11;         // send queue abated, send more messages
+    TCP_I_ICMPv4_ERROR = 12;       // ICMPv4 error received (carries ~Icmpv4ErrorInd tag)
+    TCP_I_ICMPv6_ERROR = 13;     // ICMPv6 error received (carries ~Icmpv6ErrorInd tag)
 }
 
 //

@@ -16,6 +16,8 @@
 #include "inet/common/packet/Message.h"
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/networklayer/common/DscpTag_m.h"
+#include "inet/networklayer/common/Icmpv4ErrorTag_m.h"
+#include "inet/networklayer/common/Icmpv6ErrorTag_m.h"
 #include "inet/networklayer/common/EcnTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
@@ -113,6 +115,8 @@ const char *TcpConnection::indicationName(int code)
         CASE(TCP_I_TIMED_OUT);
         CASE(TCP_I_STATUS);
         CASE(TCP_I_SEND_MSG);
+        CASE(TCP_I_ICMPv4_ERROR);
+        CASE(TCP_I_ICMPv6_ERROR);
     }
     return s;
 #undef CASE
@@ -351,6 +355,38 @@ void TcpConnection::sendIndicationToApp(int code, const int id)
     ind->setUserId(id);
     indication->addTag<SocketInd>()->setSocketId(socketId);
     indication->setControlInfo(ind);
+    sendToApp(indication);
+}
+
+void TcpConnection::processIcmpv4Error(Indication *indication)
+{
+    auto& errorInd = indication->getTag<Icmpv4ErrorInd>();
+
+    EV_WARN << "ICMPv4 error for connection " << localAddr << ":" << localPort
+            << " > " << remoteAddr << ":" << remotePort
+            << " type=" << errorInd->getType() << " code=" << errorInd->getCode() << "\n";
+
+    // Forward the original indication to the application (soft notification, no state change).
+    // The Icmpv4ErrorInd tag is already attached; just relabel and add SocketInd.
+    indication->setName(indicationName(TCP_I_ICMPv4_ERROR));
+    indication->setKind(TCP_I_ICMPv4_ERROR);
+    indication->addTag<SocketInd>()->setSocketId(socketId);
+    sendToApp(indication);
+}
+
+void TcpConnection::processIcmpv6Error(Indication *indication)
+{
+    auto& errorInd = indication->getTag<Icmpv6ErrorInd>();
+
+    EV_WARN << "ICMPv6 error for connection " << localAddr << ":" << localPort
+            << " > " << remoteAddr << ":" << remotePort
+            << " type=" << errorInd->getType() << " code=" << errorInd->getCode() << "\n";
+
+    // Forward the original indication to the application (soft notification, no state change).
+    // The Icmpv6ErrorInd tag is already attached; just relabel and add SocketInd.
+    indication->setName(indicationName(TCP_I_ICMPv6_ERROR));
+    indication->setKind(TCP_I_ICMPv6_ERROR);
+    indication->addTag<SocketInd>()->setSocketId(socketId);
     sendToApp(indication);
 }
 

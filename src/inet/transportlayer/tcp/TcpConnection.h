@@ -421,6 +421,18 @@ class INET_API TcpConnection : public SimpleModule
     virtual void handleMessage(cMessage *msg);
 
     /**
+     * Process an ICMPv4 error indication for this connection.
+     * Notifies the application via TCP_I_ICMPv4_ERROR.
+     */
+    virtual void processIcmpv4Error(Indication *indication);
+
+    /**
+     * Process an ICMPv6 error indication for this connection.
+     * Notifies the application via TCP_I_ICMPv6_ERROR.
+     */
+    virtual void processIcmpv6Error(Indication *indication);
+
+    /**
      * For SACK TCP. RFC 3517, page 3: "This routine returns whether the given
      * sequence number is considered to be lost.  The routine returns true when
      * either DupThresh discontiguous SACKed sequences have arrived above
