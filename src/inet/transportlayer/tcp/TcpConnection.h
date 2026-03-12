@@ -422,9 +422,17 @@ class INET_API TcpConnection : public SimpleModule
 
     /**
      * Process an ICMP error indication for this connection.
-     * Notifies the application via TCP_I_ICMP_ERROR.
+     * Hard errors (port/protocol unreachable) abort connections in SYN_SENT state.
+     * All other cases send a soft TCP_I_ICMP_ERROR notification to the app.
+     * Returns false if the connection should be deleted (caller should call removeConnection).
      */
-    virtual void processIcmpError(Indication *indication);
+    virtual bool processIcmpError(Indication *indication);
+
+    /**
+     * Returns true if the given ICMP error code is a "hard" error
+     * (protocol unreachable, port unreachable, admin prohibited).
+     */
+    static bool isHardIcmpError(IcmpErrorCode code);
 
     /**
      * For SACK TCP. RFC 3517, page 3: "This routine returns whether the given

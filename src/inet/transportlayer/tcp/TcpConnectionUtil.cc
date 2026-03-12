@@ -356,8 +356,11 @@ void TcpConnection::sendIndicationToApp(int code, const int id)
     sendToApp(indication);
 }
 
-void TcpConnection::processIcmpError(Indication *indication)
+bool TcpConnection::processIcmpError(Indication *indication)
 {
+    Enter_Method("processIcmpError");
+    take(indication);
+
     auto& errorInd = indication->getTagForUpdate<IcmpErrorInd>();
     IcmpErrorCode errorCode = errorInd->getErrorCode();
     int mtu = errorInd->getMtu();
@@ -366,7 +369,25 @@ void TcpConnection::processIcmpError(Indication *indication)
             << " > " << remoteAddr << ":" << remotePort
             << " errorCode=" << errorCode << "\n";
 
-    // Notify the application about the ICMP error (soft notification, no state change)
+    // Hard errors abort the connection during setup (RFC 5461).
+    // Once ESTABLISHED, even hard errors are treated as soft to prevent
+    // blind reset attacks.
+    if (isHardIcmpError(errorCode) && fsm.getState() == TCP_S_SYN_SENT) {
+        EV_DETAIL << "Hard ICMP error during connection setup -- connection refused\n";
+
+        // Flush queues (same as RST processing in SYN_SENT)
+        sendQueue->discardUpTo(sendQueue->getBufferEndSeq());
+        if (state->sack_enabled)
+            rexmitQueue->discardUpTo(rexmitQueue->getBufferEndSeq());
+
+        sendIndicationToApp(TCP_I_CONNECTION_REFUSED);
+        delete indication;
+
+        // Transition FSM to CLOSED — cancels timers, cleans up state
+        return performStateTransition(TCP_E_RCV_RST);
+    }
+
+    // Soft notification: inform the application, no state change
     auto appIndication = new Indication(indicationName(TCP_I_ICMP_ERROR), TCP_I_ICMP_ERROR);
     auto info = new TcpIcmpErrorInfo();
     info->setIcmpErrorCode(errorCode);
@@ -376,6 +397,19 @@ void TcpConnection::processIcmpError(Indication *indication)
     sendToApp(appIndication);
 
     delete indication;
+    return true;
+}
+
+bool TcpConnection::isHardIcmpError(IcmpErrorCode code)
+{
+    switch (code) {
+        case ICMP_E_PROTOCOL_UNREACHABLE:
+        case ICMP_E_PORT_UNREACHABLE:
+        case ICMP_E_ADMIN_PROHIBITED:
+            return true;
+        default:
+            return false;
+    }
 }
 
 void TcpConnection::sendAvailableIndicationToApp()

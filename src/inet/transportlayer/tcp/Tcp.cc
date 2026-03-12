@@ -294,7 +294,8 @@ void Tcp::processIcmpError(Indication *indication)
 
     TcpConnection *conn = findConnForSockPair(key);
     if (conn) {
-        conn->processIcmpError(indication);
+        if (!conn->processIcmpError(indication))
+            removeConnection(conn);
     }
     else {
         EV_WARN << "No matching connection, ignoring ICMP error\n";
