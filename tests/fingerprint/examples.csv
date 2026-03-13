@@ -223,6 +223,9 @@
 /examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_halfduplex -r 0, 10s,        adc4-719f/tplx;e5ae-b931/~tNl;a294-ab6d/~tND;38c8-fb23/tyf, PASS, EthernetCsmaMac Ipv4
 /examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_halfduplex -r 1, 10s,        0ba9-ca2f/tplx;894e-5243/~tNl;0d46-ef82/~tND;9cc0-778f/tyf, PASS, EthernetCsmaMac Ipv4
 
+/examples/inet/tcp_icmp_error/,      -f omnetpp.ini -c HardError -r 0,              100s,            c081-a642/tplx;22be-05a3/~tNl;b8b9-84cd/~tND;52d5-228e/tyf, PASS, Ipv4
+/examples/inet/tcp_icmp_error/,      -f omnetpp.ini -c Pmtud -r 0,                  100s,            8271-c5d1/tplx;e6a7-0a86/~tNl;064e-62ef/~tND;1039-31c6/tyf, PASS, Ipv4
+
 /examples/inet/tcp_ppp_reconnect/,   -f omnetpp.ini -c General -r 0,                  10s,        c390-6895/tplx;0cf5-894b/~tNl;3675-9aee/~tND;32ba-9e70/tyf, PASS, Ipv4
 
 /examples/inet/tcpapp/,              -f omnetpp.ini -c BurstyTraffic -r 0,          100s,         a8dd-b6be/tplx;14d3-8271/~tNl;550a-4121/~tND;c076-5b46/tyf, PASS, Ipv4
