@@ -435,6 +435,12 @@ class INET_API TcpConnection : public SimpleModule
     static bool isHardIcmpError(IcmpErrorCode code);
 
     /**
+     * PMTUD: reduce snd_mss based on the MTU reported in an ICMP
+     * Fragmentation Needed / Packet Too Big message (RFC 1191).
+     */
+    virtual void processPathMtuUpdate(int reportedMtu);
+
+    /**
      * For SACK TCP. RFC 3517, page 3: "This routine returns whether the given
      * sequence number is considered to be lost.  The routine returns true when
      * either DupThresh discontiguous SACKed sequences have arrived above

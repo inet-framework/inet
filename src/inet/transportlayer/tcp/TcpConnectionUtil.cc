@@ -16,6 +16,7 @@
 #include "inet/common/packet/Message.h"
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/networklayer/common/DscpTag_m.h"
+#include "inet/networklayer/common/FragmentationTag_m.h"
 #include "inet/networklayer/common/IcmpErrorTag_m.h"
 #include "inet/networklayer/common/EcnTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
@@ -304,6 +305,10 @@ void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader
     // (ECT(0) or ECT(1)) in the IP header for retransmitted data packets
     tcpSegment->addTagIfAbsent<EcnReq>()->setExplicitCongestionNotification((state->ect && !state->sndAck && !state->rexmit) ? IP_ECN_ECT_1 : IP_ECN_NOT_ECT);
 
+    // PMTUD: set Don't Fragment bit so routers send ICMP Fragmentation Needed
+    // instead of silently fragmenting (RFC 1191)
+    tcpSegment->addTagIfAbsent<FragmentationReq>()->setDontFragment(true);
+
     tcpHeader->setChecksum(0);
     tcpHeader->setChecksumMode(tcpMain->checksumMode);
 
@@ -387,6 +392,22 @@ bool TcpConnection::processIcmpError(Indication *indication)
         return performStateTransition(TCP_E_RCV_RST);
     }
 
+    // PMTUD: ICMP Fragmentation Needed / Packet Too Big (RFC 1191)
+    if (errorCode == ICMP_E_FRAGMENTATION_NEEDED && mtu > 0) {
+        // Validate: quoted seq number must fall within [snd_una, snd_nxt)
+        Packet *originalPacket = errorInd->getOriginalPacketForUpdate();
+        const auto& quotedTcpHeader = originalPacket->peekAtFront<tcp::TcpHeader>(b(-1), Chunk::PF_ALLOW_INCOMPLETE);
+        uint32_t quotedSeqNo = quotedTcpHeader->getSequenceNo();
+
+        if (seqLE(state->snd_una, quotedSeqNo) && seqLess(quotedSeqNo, state->snd_nxt)) {
+            processPathMtuUpdate(mtu);
+        }
+        else {
+            EV_WARN << "PMTUD: ignoring ICMP PTB with stale seq=" << quotedSeqNo
+                    << " (snd_una=" << state->snd_una << ", snd_nxt=" << state->snd_nxt << ")\n";
+        }
+    }
+
     // Soft notification: inform the application, no state change
     auto appIndication = new Indication(indicationName(TCP_I_ICMP_ERROR), TCP_I_ICMP_ERROR);
     auto info = new TcpIcmpErrorInfo();
@@ -398,6 +419,35 @@ bool TcpConnection::processIcmpError(Indication *indication)
 
     delete indication;
     return true;
+}
+
+void TcpConnection::processPathMtuUpdate(int reportedMtu)
+{
+    // Compute new MSS: subtract IP and TCP header sizes from the reported MTU.
+    // IPv4 header = 20 bytes, IPv6 header = 40 bytes, TCP header = 20 bytes (minimum).
+    int ipHeaderSize = remoteAddr.getType() == L3Address::IPv6 ? 40 : 20;
+    int tcpHeaderSize = TCP_MIN_HEADER_LENGTH.get<B>();
+    int newMss = reportedMtu - ipHeaderSize - tcpHeaderSize;
+
+    // Clamp to a reasonable minimum
+    if (newMss < 64) {
+        EV_WARN << "PMTUD: reported MTU=" << reportedMtu << " too small, clamping MSS to 64\n";
+        newMss = 64;
+    }
+
+    if ((uint32_t)newMss < state->snd_mss) {
+        EV_INFO << "PMTUD: reducing snd_mss from " << state->snd_mss << " to " << newMss
+                << " (reported MTU=" << reportedMtu << ")\n";
+        state->snd_mss = newMss;
+
+        // Retransmit the outstanding segment with the new (smaller) MSS
+        if (state->snd_max > state->snd_una)
+            retransmitOneSegment(false);
+    }
+    else {
+        EV_DETAIL << "PMTUD: ignoring MTU=" << reportedMtu << ", new MSS=" << newMss
+                  << " >= current snd_mss=" << state->snd_mss << "\n";
+    }
 }
 
 bool TcpConnection::isHardIcmpError(IcmpErrorCode code)
