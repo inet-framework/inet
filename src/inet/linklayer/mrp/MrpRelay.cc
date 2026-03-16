@@ -64,8 +64,8 @@ void MrpRelay::handleLowerPacket(Packet *incomingPacket)
                    << EV_FIELD(incomingPacket) << EV_ENDL;
     updatePeerAddress(incomingInterface, sourceAddress, vlanId);
 
-    const auto &stpData = incomingInterface->findProtocolData<Ieee8021dInterfaceData>();
-    const auto &mrpInterfaceData = incomingInterface->findProtocolData<MrpInterfaceData>();
+    const auto* stpData = incomingInterface->findProtocolData<Ieee8021dInterfaceData>();
+    const auto* mrpInterfaceData = incomingInterface->findProtocolData<MrpInterfaceData>();
 
     auto outgoingPacket = incomingPacket->dup();
     outgoingPacket->trim();
@@ -79,7 +79,9 @@ void MrpRelay::handleLowerPacket(Packet *incomingPacket)
     macAddressReq->setSrcAddress(sourceAddress);
     macAddressReq->setDestAddress(destinationAddress);
 
-    if (mrpInterfaceData->getRole() != MrpInterfaceData::NOTASSIGNED
+    if (!mrpInterfaceData)
+        throw cRuntimeError("MrpInterfaceData not found on interface '%s'; enable hasMrp in the network node configuration", incomingInterface->getInterfaceName());
+    if ((mrpInterfaceData->getRole() != MrpInterfaceData::NOTASSIGNED)
             && isMrpMulticast(destinationAddress)) {
         //Mrp-Multicast Handling, forwarding to RingPort according to MrpFilteringDatabase in case incoming interface is not filtering, send up if registered
         auto outgoingInterfaceIds = mrpMacForwardingTable->getMrpForwardingInterfaces(destinationAddress, vlanId);
@@ -206,14 +208,13 @@ void MrpRelay::handleLowerPacket(Packet *incomingPacket)
 
 bool MrpRelay::isForwardingInterface(NetworkInterface *networkInterface) const
 {
-    const auto &MrpData = networkInterface->findProtocolData<MrpInterfaceData>();
-    const auto &Ieee8021dData = networkInterface->findProtocolData<Ieee8021dInterfaceData>();
     if (networkInterface->isLoopback() || !networkInterface->isBroadcast())
         return false;
-    else if (!MrpData->isForwarding() || !Ieee8021dData->isForwarding())
-        return false;
-    else
-        return true;
+    const auto* mrpData = networkInterface->findProtocolData<MrpInterfaceData>();
+    if (!mrpData)
+        throw cRuntimeError("MrpInterfaceData not found on interface '%s'; enable hasMrp in the network node configuration", networkInterface->getInterfaceName());
+    const auto* ieee8021dData = networkInterface->findProtocolData<Ieee8021dInterfaceData>();
+    return mrpData->isForwarding() && (!ieee8021dData || ieee8021dData->isForwarding());
 }
 
 int MrpRelay::getCcmLevel(Packet *packet)
