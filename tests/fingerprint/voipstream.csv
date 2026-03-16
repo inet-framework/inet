@@ -41,4 +41,4 @@
 
 /examples/voipstream/VoIPStreamLargeNet/,    -f omnetpp.ini -c General -r 0,      5s,     6846-bb46/tplx;3bc9-bf14/tpl;f93d-006b/~tNl;b942-1c11/tyf, PASS, udp EthernetMac EthernetCsmaMac Ipv4
 
-/examples/voipstream/VoIPStreamTrafficTest/, -f omnetpp.ini -c General -r 0,      2s,     2035-6024/tplx;8510-8b61/tpl;a2c4-fe86/~tNl;b492-b86a/~tND;bb64-619d/tyf, PASS, udp EthernetMac Ipv4
+/examples/voipstream/VoIPStreamTrafficTest/, -f omnetpp.ini -c General -r 0,      2s,     2035-6024/tplx;8510-8b61/tpl;a2c4-fe86/~tNl;e731-45e9/~tND;bb64-619d/tyf, PASS, udp EthernetMac Ipv4
