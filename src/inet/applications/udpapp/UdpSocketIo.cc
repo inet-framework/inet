@@ -7,6 +7,7 @@
 
 #include "inet/applications/udpapp/UdpSocketIo.h"
 
+#include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/networklayer/common/FragmentationTag_m.h"
@@ -20,7 +21,6 @@ void UdpSocketIo::initialize(int stage)
 {
     ApplicationBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        dontFragment = par("dontFragment");
         numSent = 0;
         numReceived = 0;
         WATCH(numSent);
@@ -34,8 +34,9 @@ void UdpSocketIo::handleMessageWhenUp(cMessage *message)
         socket.processMessage(message);
     else {
         auto packet = check_and_cast<Packet *>(message);
-        if (dontFragment)
-            packet->addTagIfAbsent<FragmentationReq>()->setDontFragment(true);
+        bool dontFragment;
+        if (utils::getOptionalBoolPar(par("dontFragment"), dontFragment))
+            packet->addTagIfAbsent<FragmentationReq>()->setDontFragment(dontFragment);
         socket.send(packet);
         numSent++;
         emit(packetSentSignal, packet);

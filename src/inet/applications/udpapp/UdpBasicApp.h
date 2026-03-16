@@ -33,7 +33,6 @@ class INET_API UdpBasicApp : public ClockUserModuleMixin<ApplicationBase>, publi
     int localPort = -1, destPort = -1;
     clocktime_t startTime;
     clocktime_t stopTime;
-    bool dontFragment = false;
     const char *packetName = nullptr;
 
     // state

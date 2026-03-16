@@ -10,6 +10,7 @@
 #include "inet/applications/udpapp/UdpBasicBurst.h"
 
 #include "inet/applications/base/ApplicationPacket_m.h"
+#include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/TimeTag_m.h"
 #include "inet/common/packet/Packet.h"
@@ -54,8 +55,6 @@ void UdpBasicBurst::initialize(int stage)
         nextSleep = startTime;
         nextBurst = startTime;
         nextPkt = startTime;
-        dontFragment = par("dontFragment");
-
         destAddrRNG = par("destAddrRNG");
         const char *addrModeStr = par("chooseDestAddrMode");
         std::string addrModeEnumStr = opp_replacesubstring(opp_strupper(addrModeStr), "PER", "PER_", false);
@@ -300,8 +299,9 @@ void UdpBasicBurst::generateBurst()
         destAddr = chooseDestAddr();
 
     Packet *payload = createPacket();
-    if (dontFragment)
-        payload->addTag<FragmentationReq>()->setDontFragment(true);
+    bool dontFragment;
+    if (utils::getOptionalBoolPar(par("dontFragment"), dontFragment))
+        payload->addTag<FragmentationReq>()->setDontFragment(dontFragment);
     payload->setTimestamp();
     emit(packetSentSignal, payload);
     socket.sendTo(payload, destAddr, destPort);

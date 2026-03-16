@@ -43,7 +43,7 @@ simple UdpBasicApp extends SimpleModule like IApp
         double stopTime @unit(s) = default(-1s);  // Time of finishing sending, -1s means forever
         volatile double sendInterval @unit(s); // Should usually be a random value, e.g. exponential(1)
         int timeToLive = default(-1); // If not -1, set the TTL (IPv4) or Hop Limit (IPv6) field of sent packets to this value
-        bool dontFragment = default(false); // If true, asks IP to not fragment the message during routing
+        object dontFragment = default(nullptr); // If not null, set the Don't Fragment (DF) bit on sent packets (true) or clear it (false)
         int dscp = default(-1); // If not -1, set the DSCP field (on IPv4/IPv6) of sent packets to this value
         int tos = default(-1); // If not -1, set the Type Of Service (IPv4) / Traffic Class (IPv6) field of sent packets to this value
         string multicastInterface = default("");  // If not empty, set the multicast output interface option on the socket (interface name expected)

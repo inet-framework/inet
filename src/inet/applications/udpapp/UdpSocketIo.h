@@ -16,7 +16,6 @@ namespace inet {
 class INET_API UdpSocketIo : public ApplicationBase, public UdpSocket::ICallback
 {
   protected:
-    bool dontFragment = false;
     UdpSocket socket;
     int numSent = 0;
     int numReceived = 0;

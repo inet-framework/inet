@@ -22,7 +22,7 @@ simple UdpSocketIo extends SimpleModule
         string destAddress = default("");
         int destPort;
         int timeToLive = default(-1); // If not -1, set the TTL (IPv4) or Hop Limit (IPv6) field of sent packets to this value
-        bool dontFragment = default(false); // If true, ask IP to not fragment the message during routing
+        object dontFragment = default(nullptr); // If not null, set the Don't Fragment (DF) bit on sent packets (true) or clear it (false)
         int dscp = default(-1); // If not -1, set the DSCP (IPv4/IPv6) field of sent packets to this value
         int tos = default(-1); // If not -1, set the Type Of Service (IPv4) / Traffic Class (IPv6) field of sent packets to this value
         string multicastInterface = default("");  // If not empty, set the multicast output interface option on the socket (interface name expected)

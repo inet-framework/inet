@@ -9,6 +9,7 @@
 #include "inet/applications/udpapp/UdpBasicApp.h"
 
 #include "inet/applications/base/ApplicationPacket_m.h"
+#include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/TagBase_m.h"
 #include "inet/common/TimeTag_m.h"
@@ -42,7 +43,6 @@ void UdpBasicApp::initialize(int stage)
         startTime = par("startTime");
         stopTime = par("stopTime");
         packetName = par("packetName");
-        dontFragment = par("dontFragment");
         if (stopTime >= CLOCKTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
         selfMsg = new ClockEvent("sendTimer");
@@ -105,8 +105,9 @@ void UdpBasicApp::sendPacket()
     std::ostringstream str;
     str << packetName << "-" << numSent;
     Packet *packet = new Packet(str.str().c_str());
-    if (dontFragment)
-        packet->addTag<FragmentationReq>()->setDontFragment(true);
+    bool dontFragment;
+    if (utils::getOptionalBoolPar(par("dontFragment"), dontFragment))
+        packet->addTag<FragmentationReq>()->setDontFragment(dontFragment);
     const auto& payload = makeShared<ApplicationPacket>();
     payload->setChunkLength(B(par("messageLength")));
     payload->setSequenceNumber(numSent);
