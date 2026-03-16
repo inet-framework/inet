@@ -172,6 +172,7 @@ simple Tcp extends SimpleModule like ITcp
         int initialSsthresh = default(0xFFFFFFFF); // Initial value for Slow Start threshold used in TahoeRenoFamily. The initial value of ssthresh SHOULD be set arbitrarily high (e.g., to the size of the largest possible advertised window) Without user interaction there is no limit...
         double stopOperationExtraTime @unit(s) = default(0s);    // Extra time after lifecycle stop operation finished
         double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation
+        bool dontFragment = default(false); // Set DF bit on TCP segments to enable Path MTU Discovery (RFC 1191)
         bool ecnWillingness = default(false); // True if willing to use ECN
         double dctcpGamma = default(0.0625); // A fixed estimation gain for calculating dctcp_alpha (RFC 8257 4.2)
         @display("i=block/wheelbarrow");

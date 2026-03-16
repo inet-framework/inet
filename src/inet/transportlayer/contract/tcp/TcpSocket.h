@@ -416,6 +416,12 @@ class INET_API TcpSocket : public ISocket
     void setTos(short tos);
 
     /**
+     * Sets the Don't Fragment bit on TCP segments to enable Path MTU
+     * Discovery (RFC 1191).
+     */
+    void setDontFragment(bool dontFragment);
+
+    /**
      * Required to re-connect with a "used" TcpSocket object.
      * By default, a TcpSocket object is tied to a single TCP connection,
      * via the connectionId. When the connection gets closed or aborted,

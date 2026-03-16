@@ -126,6 +126,7 @@ class INET_API TcpConnection : public SimpleModule
     int ttl = -1;
     short dscp = -1;
     short tos = -1;
+    bool dontFragment = false;
     bool autoRead = true;
     bool peerClosedSentUp = false;
     int32_t maxByteCountRequested = 0;  // from READ requests

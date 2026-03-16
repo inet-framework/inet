@@ -252,6 +252,15 @@ void TcpSocket::setTos(short dscp)
     sendToTcp(request);
 }
 
+void TcpSocket::setDontFragment(bool dontFragment)
+{
+    auto request = new Request("setDontFragment", TCP_C_SETOPTION);
+    auto *cmd = new TcpSetDontFragmentCommand();
+    cmd->setDontFragment(dontFragment);
+    request->setControlInfo(cmd);
+    sendToTcp(request);
+}
+
 // ######################
 // TCP Socket Options End
 // ######################

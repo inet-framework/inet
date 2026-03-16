@@ -307,7 +307,8 @@ void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader
 
     // PMTUD: set Don't Fragment bit so routers send ICMP Fragmentation Needed
     // instead of silently fragmenting (RFC 1191)
-    tcpSegment->addTagIfAbsent<FragmentationReq>()->setDontFragment(true);
+    if (dontFragment)
+        tcpSegment->addTagIfAbsent<FragmentationReq>()->setDontFragment(true);
 
     tcpHeader->setChecksum(0);
     tcpHeader->setChecksumMode(tcpMain->checksumMode);
@@ -583,6 +584,7 @@ void TcpConnection::configureStateVariables()
     state->increased_IW_enabled = tcpMain->par("increasedIWEnabled"); // Increased Initial Window (RFC 3390) enabled/disabled
     state->snd_mss = tcpMain->par("mss"); // Maximum Segment Size (RFC 793)
     state->ts_support = tcpMain->par("timestampSupport"); // if set, this means that current host supports TS (RFC 1323)
+    dontFragment = tcpMain->par("dontFragment"); // set DF bit on TCP segments for PMTUD (RFC 1191)
     state->ecnWillingness = tcpMain->par("ecnWillingness"); // if set, current host is willing to use ECN
     state->dupthresh = tcpMain->par("dupthresh");
     state->sack_support = tcpMain->par("sackSupport"); // if set, this means that current host supports SACK (RFC 2018, 2883, 3517)

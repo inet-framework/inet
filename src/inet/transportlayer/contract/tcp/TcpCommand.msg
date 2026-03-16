@@ -183,6 +183,11 @@ class TcpSetTosCommand extends TcpSetOptionCommand
     short tos;   // type of service for Ipv4 / traffic class for Ipv6
 }
 
+class TcpSetDontFragmentCommand extends TcpSetOptionCommand
+{
+    bool dontFragment;   // set DF bit on TCP segments for PMTUD (RFC 1191)
+}
+
 //
 // Sent with message kind TCP_I_AVAILABLE, to let the app know
 // about the local and remote IP address and port.
