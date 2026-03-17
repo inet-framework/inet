@@ -552,26 +552,26 @@ int IPsec::getBlockSizeBytes(EncryptionAlg alg)
     switch (alg) {
         case EncryptionAlg::NONE: return 1; // the "NULL" cipher is essentially a do-nothing cipher with blocksize=1
         // DES RFC 2405
-        case EncryptionAlg::DES: return 64;
+        case EncryptionAlg::DES: return 8;
         // 3DES RFC 2451
-        case EncryptionAlg::TRIPLE_DES: return 64;
+        case EncryptionAlg::TRIPLE_DES: return 8;
         // AES_CBC RFC 3602
         case EncryptionAlg::AES_CBC_128:
         case EncryptionAlg::AES_CBC_192:
-        case EncryptionAlg::AES_CBC_256: return 128;
+        case EncryptionAlg::AES_CBC_256: return 16;
         // AES_CCM RFC 4309
         case EncryptionAlg::AES_CCM_8_128:
         case EncryptionAlg::AES_CCM_8_192:
         case EncryptionAlg::AES_CCM_8_256:
         case EncryptionAlg::AES_CCM_16_128:
         case EncryptionAlg::AES_CCM_16_192:
-        case EncryptionAlg::AES_CCM_16_256: return 128;
+        case EncryptionAlg::AES_CCM_16_256: return 16;
         // AES_GCM RFC 4106
         case EncryptionAlg::AES_GCM_16_128:
         case EncryptionAlg::AES_GCM_16_192:
-        case EncryptionAlg::AES_GCM_16_256: return 128;
+        case EncryptionAlg::AES_GCM_16_256: return 16;
         // CHACHA20_POLY1305 RFC 7634
-        case EncryptionAlg::CHACHA20_POLY1305: return 32; //It is a stream cipher, but when used in ESP the ciphertext needs to be aligned so that padLength and nextHeader are right aligned to multiple of 4 octets.
+        case EncryptionAlg::CHACHA20_POLY1305: return 4; //It is a stream cipher, but when used in ESP the ciphertext needs to be aligned so that padLength and nextHeader are right aligned to multiple of 4 octets.
 
     }
 
