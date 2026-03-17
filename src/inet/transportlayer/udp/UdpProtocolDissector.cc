@@ -15,18 +15,25 @@
 namespace inet {
 
 Register_Protocol_Dissector(&Protocol::udp, UdpProtocolDissector);
+Register_Protocol_Dissector(&Protocol::udplite, UdpProtocolDissector);
 
 void UdpProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
     auto originalTrailerPopOffset = packet->getBackOffset();
     auto udpHeaderOffset = packet->getFrontOffset();
     auto header = packet->popAtFront<UdpHeader>();
-    callback.startProtocolDataUnit(&Protocol::udp);
-    bool isCorrectPacket = Udp::isCorrectPacket(packet, header);
+    callback.startProtocolDataUnit(protocol);
+    bool isCorrectPacket = Udp::isCorrectPacket(packet, header, protocol);
     if (!isCorrectPacket)
         callback.markIncorrect();
-    callback.visitChunk(header, &Protocol::udp);
-    auto udpPayloadEndOffset = udpHeaderOffset + header->getTotalLengthField();
+    callback.visitChunk(header, protocol);
+    b udpPayloadEndOffset;
+    if (protocol == &Protocol::udplite) {
+        udpPayloadEndOffset = packet->getBackOffset();
+    }
+    else {
+        udpPayloadEndOffset = udpHeaderOffset + header->getTotalLengthField();
+    }
     packet->setBackOffset(udpPayloadEndOffset);
     auto dataProtocol = ProtocolGroup::getUdpProtocolGroup()->findProtocol(header->getDestPort());
     if (dataProtocol == nullptr)
@@ -35,7 +42,12 @@ void UdpProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICa
     ASSERT(packet->getDataLength() == B(0));
     packet->setFrontOffset(udpPayloadEndOffset);
     packet->setBackOffset(originalTrailerPopOffset);
-    callback.endProtocolDataUnit(&Protocol::udp);
+    auto paddingLength = packet->getDataLength();
+    if (paddingLength > b(0)) {
+        const auto& padding = packet->popAtFront(paddingLength);
+        callback.visitChunk(padding, protocol);
+    }
+    callback.endProtocolDataUnit(protocol);
 }
 
 } // namespace inet
