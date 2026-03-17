@@ -166,6 +166,7 @@ const Ptr<Chunk> MrpTlvSerializer::deserialize(MemoryInputStream &stream) const
     size_t startPos = stream.getPosition().get<B>();
     auto headerType = static_cast<TlvHeaderType>(stream.readUint8());
     uint8_t headerLength = stream.readUint8();
+    Ptr<MrpTlvHeader> tlvReturnValue;
 
     switch (headerType) {
     case END: {
@@ -181,7 +182,8 @@ const Ptr<Chunk> MrpTlvSerializer::deserialize(MemoryInputStream &stream) const
         tlv->setSequenceID(stream.readUint16Be());
         tlv->setUuid0(stream.readUint64Be());
         tlv->setUuid1(stream.readUint64Be());
-        return tlv;
+        tlvReturnValue = tlv;
+        break;
     }
     case TEST: {
         auto tlv = makeShared<MrpTest>();
@@ -193,7 +195,8 @@ const Ptr<Chunk> MrpTlvSerializer::deserialize(MemoryInputStream &stream) const
         tlv->setRingState(stream.readUint16Be());
         tlv->setTransition(stream.readUint16Be());
         tlv->setTimeStamp(stream.readUint32Be());
-        return tlv;
+        tlvReturnValue = tlv;
+        break;
     }
     case TOPOLOGYCHANGE: {
         auto tlv = makeShared<MrpTopologyChange>();
@@ -202,7 +205,8 @@ const Ptr<Chunk> MrpTlvSerializer::deserialize(MemoryInputStream &stream) const
         tlv->setPrio(stream.readUint16Be());
         tlv->setSa(stream.readMacAddress());
         tlv->setInterval(stream.readUint16Be());
-        return tlv;
+        tlvReturnValue = tlv;
+        break;
     }
     case LINKDOWN:
     case LINKUP: {
@@ -212,7 +216,8 @@ const Ptr<Chunk> MrpTlvSerializer::deserialize(MemoryInputStream &stream) const
         tlv->setSa(stream.readMacAddress());
         tlv->setInterval(stream.readUint16Be());
         tlv->setBlocked(stream.readUint16Be());
-        return tlv;
+        tlvReturnValue = tlv;
+        break;
     }
     case INTEST: {
         auto tlv = makeShared<MrpInTest>();
@@ -224,7 +229,8 @@ const Ptr<Chunk> MrpTlvSerializer::deserialize(MemoryInputStream &stream) const
         tlv->setInState(stream.readUint16Be());
         tlv->setTransition(stream.readUint16Be());
         tlv->setTimeStamp(stream.readUint32Be());
-        return tlv;
+        tlvReturnValue = tlv;
+        break;
     }
     case INTOPOLOGYCHANGE: {
         auto tlv = makeShared<MrpInTopologyChange>();
@@ -233,7 +239,8 @@ const Ptr<Chunk> MrpTlvSerializer::deserialize(MemoryInputStream &stream) const
         tlv->setSa(stream.readMacAddress());
         tlv->setInID(stream.readUint16Be());
         tlv->setInterval(stream.readUint16Be());
-        return tlv;
+        tlvReturnValue = tlv;
+        break;
     }
     case INLINKDOWN:
     case INLINKUP: {
@@ -245,7 +252,8 @@ const Ptr<Chunk> MrpTlvSerializer::deserialize(MemoryInputStream &stream) const
         tlv->setInID(stream.readUint16Be());
         tlv->setInterval(stream.readUint16Be());
         tlv->setLinkInfo(stream.readUint16Be());
-        return tlv;
+        tlvReturnValue = tlv;
+        break;
     }
     case INLINKSTATUSPOLL: {
         auto tlv = makeShared<MrpInLinkStatusPoll>();
@@ -254,7 +262,8 @@ const Ptr<Chunk> MrpTlvSerializer::deserialize(MemoryInputStream &stream) const
         tlv->setSa(stream.readMacAddress());
         tlv->setPortRole(stream.readUint16Be());
         tlv->setInID(stream.readUint16Be());
-        return tlv;
+        tlvReturnValue = tlv;
+        break;
     }
     case OPTION: {
         auto tlv = makeShared<MrpOption>();
@@ -262,18 +271,19 @@ const Ptr<Chunk> MrpTlvSerializer::deserialize(MemoryInputStream &stream) const
         tlv->setValueLength(headerLength);
         tlv->setOuiType(static_cast<MrpOuiType>(stream.readUint24Be()));
         tlv->setEd1Type(stream.readUint8());
-        return tlv;
+        tlvReturnValue = tlv;
+        break;
     }
     default:
         throw cRuntimeError("Unknown Header TYPE value: %d",
                 static_cast<int>(headerType));
     }
 
-    if (headerType != END) {
-        size_t length = stream.getPosition().get<B>() - startPos;
-        size_t paddingLength = (4 - (length % 4)) % 4;
-        stream.readByteRepeatedly(0, paddingLength);
-    }
+    size_t length = stream.getPosition().get<B>() - startPos;
+    size_t paddingLength = (4 - (length % 4)) % 4;
+    stream.readByteRepeatedly(0, paddingLength);
+
+    return tlvReturnValue;
 }
 
 const Ptr<Chunk> MrpSubTlvSerializer::deserialize(MemoryInputStream &stream) const
