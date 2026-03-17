@@ -228,15 +228,15 @@ const IReceptionSampleModel *Ieee80211OfdmErrorModel::computeSampleModel(const I
 {
     throw cRuntimeError("Unimplemented!");
     // TODO implement sample error model
-    auto transmission = snir->getReception()->getTransmission();
-    const ITransmissionSampleModel *transmissionSampleModel = transmission->getSampleModel();
-    int headerSampleLength = transmissionSampleModel->getHeaderSampleLength();
-    double headerSampleRate = transmissionSampleModel->getHeaderSampleRate();
-    int dataSampleLength = transmissionSampleModel->getDataSampleLength();
-    double dataSampleRate = transmissionSampleModel->getDataSampleRate();
-    const std::vector<W> *samples = transmissionSampleModel->getSamples();
+    // auto transmission = snir->getReception()->getTransmission();
+    // const ITransmissionSampleModel *transmissionSampleModel = transmission->getSampleModel();
+    // int headerSampleLength = transmissionSampleModel->getHeaderSampleLength();
+    // double headerSampleRate = transmissionSampleModel->getHeaderSampleRate();
+    // int dataSampleLength = transmissionSampleModel->getDataSampleLength();
+    // double dataSampleRate = transmissionSampleModel->getDataSampleRate();
+    // const std::vector<W> *samples = transmissionSampleModel->getSamples();
     // TODO error model?
-    return new ReceptionSampleModel(headerSampleLength, headerSampleRate, dataSampleLength, dataSampleRate, samples);
+    // return new ReceptionSampleModel(headerSampleLength, headerSampleRate, dataSampleLength, dataSampleRate, samples);
 }
 
 // TODO: This is duplicated from LayeredErrorModelBase
