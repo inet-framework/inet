@@ -1786,8 +1786,10 @@ bool Aodv::isExternalAddress(const L3Address& address) const
             if (auto ipv6Data = interface->findProtocolData<Ipv6InterfaceData>()) {
                 for (int j = 0; j < ipv6Data->getNumAdvPrefixes(); j++) {
                     const Ipv6InterfaceData::AdvPrefix& advPrefix = ipv6Data->getAdvPrefix(j);
-                    return !address.toIpv6().matches(advPrefix.prefix, advPrefix.prefixLength);
+                    if (address.toIpv6().matches(advPrefix.prefix, advPrefix.prefixLength))
+                        return false;  // matches local prefix -> not external
                 }
+                return true;  // no prefix matched -> external
             }
             break;
 
