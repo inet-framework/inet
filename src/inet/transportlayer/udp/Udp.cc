@@ -261,6 +261,7 @@ void Udp::handleUpperCommand(cMessage *msg)
                     setMulticastSourceFilter(sd, ie, cmd->getMulticastAddr(), cmd->getFilterMode(), sourceList);
                     break;
                 }
+                default:
                     throw cRuntimeError("Unknown subclass of UdpSetOptionCommand received from app: code=%d, name=%s", ctrl->getOptionCode(), ctrl->getClassName());
             }
             break;
