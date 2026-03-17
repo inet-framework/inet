@@ -204,8 +204,8 @@ void Mpls::processPacketFromL2(Packet *packet)
     }
     else {
         throw cRuntimeError("Unknown message received");
-        // FIXME remove throw below
-        sendToL3(packet);
+        // FIXME remove throw above
+        // sendToL3(packet);
     }
 }
 
