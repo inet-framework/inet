@@ -168,7 +168,7 @@
 /examples/inet/igmp/,                -f omnetpp.ini -c IGMPv3 -r 0,                 200s,            7870-3657/tplx;d310-7157/~tNl;6944-a12d/~tND;7e18-e77f/tyf, PASS, EthernetMac Ipv4
 
 /examples/inet/ipsec/,               -f omnetpp.ini -c TCPTraffic -r 0,             200s,            d82a-f166/tplx;28f5-eaa3/~tNl, PASS, IPSec
-/examples/inet/ipsec/,               -f omnetpp.ini -c UDPTraffic -r 0,             200s,            faa6-e4a7/tplx;0149-b491/~tNl, PASS, IPSec
+/examples/inet/ipsec/,               -f omnetpp.ini -c UDPTraffic -r 0,             200s,            faa6-e487/tplx;0149-b491/~tNl, PASS, IPSec
 /examples/inet/ipsec/,               -f omnetpp.ini -c Multicast -r 0,              200s,            5f11-cfba/tplx;6ac3-ef6b/~tNl, PASS, IPSec
 
 /examples/inet/ipv4hook/,            -f omnetpp.ini -c General -r 0,                100s,            1afb-5eeb/tplx;3df8-bb36/~tNl;2891-5a4e/~tND;48e1-2966/tyf, PASS, EthernetMac Ipv4
