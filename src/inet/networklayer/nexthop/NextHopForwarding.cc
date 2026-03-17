@@ -525,8 +525,9 @@ void NextHopForwarding::encapsulate(Packet *transportPacket, const NetworkInterf
     if (ttl != -1) {
         ASSERT(ttl > 0);
     }
-    else if (false) // TODO datagram->getDestinationAddress().isLinkLocalMulticast())
-        ttl = 1;
+    // TODO: handle link-local multicast with ttl = 1
+    // else if (datagram->getDestinationAddress().isLinkLocalMulticast())
+    //     ttl = 1;
     else
         ttl = defaultHopLimit;
 
