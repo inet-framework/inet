@@ -794,7 +794,7 @@ INetfilter::IHook::Result IPsec::processIngressPacket(Packet *packet)
             if (espTrailer->getPadLength() > 0)
                 packet->removeAtBack(B(espTrailer->getPadLength()));
             ipv4Header->setProtocolId((IpProtocolId)espTrailer->getNextHeader());
-            ipv4Header->setTotalLengthField(ipv4Header->getChunkLength() + data->getChunkLength() - B(espTrailer->getPadLength()));
+            ipv4Header->setTotalLengthField(ipv4Header->getChunkLength() + packet->getDataLength());
             packet->insertAtFront(ipv4Header);
 
             delay += espProtectInDelay->doubleValue();
