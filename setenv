@@ -41,6 +41,14 @@ if [ "$1" = "-r" ]; then
     return 0
 fi
 
+if [ ! -f "$dir/.project" ] && [ -f "$dir/.project.default" ]; then
+    cp "$dir/.project.default" "$dir/.project"
+fi
+
+if [ ! -f "$dir/.cproject" ] && [ -f "$dir/.cproject.default" ]; then
+    cp "$dir/.cproject.default" "$dir/.cproject"
+fi
+
 export PATH=$dir/bin:$PATH
 export PYTHONPATH=$dir/python:$PYTHONPATH && PYTHONPATH=${PYTHONPATH%:}  # required because colon at the end causes issues on Windows
 export INET_ROOT=$dir

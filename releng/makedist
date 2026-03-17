@@ -42,6 +42,7 @@ cp -r doc/src/_build/latex/*.pdf $INET_ROOT/out/$DIRNAME/doc || { echo --- error
 
 # switch to the destination dir
 cd $INET_ROOT/out/$DIRNAME
+
 # patching files
 perl -i -pe $REGEXPREPLACE s/##BUILDID##/$BUILDID/g doc/neddoc/overview.html
 perl -i -pe $REGEXPREPLACE s/##BUILDID##/$BUILDID/g src/inet-index.ned
@@ -50,6 +51,8 @@ perl -i -pe $REGEXPREPLACE s/##BUILDID##/$BUILDID/g src/inet-index.ned
 rm -rf _scripts doc/src doc/misc releng .agent .windsurf .github .settings .gitattributes .gitignore .gitmodules .circleci .travis.yml .clang-format .oppfeaturestate .nedexclusions
 mv .oppfeaturestate.default .oppfeaturestate
 mv .nedexclusions.default .nedexclusions
+mv .project.default .project
+mv .cproject.default .cproject
 
 todofiles=$(find . -name '__TODO*')
 if [ "$todofiles" != "" ]; then
