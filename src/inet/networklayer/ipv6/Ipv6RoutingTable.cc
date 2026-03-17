@@ -747,8 +747,11 @@ const Ipv6Address& Ipv6RoutingTable::getHomeAddress()
 {
     for (int i = 0; i < ift->getNumInterfaces(); ++i) {
         NetworkInterface *ie = ift->getInterface(i);
-
-        return ie->getProtocolData<Ipv6InterfaceData>()->getMNHomeAddress();
+        if (auto ipv6Data = ie->findProtocolData<Ipv6InterfaceData>()) {
+            const Ipv6Address& addr = ipv6Data->getMNHomeAddress();
+            if (!addr.isUnspecified())
+                return addr;
+        }
     }
 
     return Ipv6Address::UNSPECIFIED_ADDRESS;
