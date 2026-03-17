@@ -942,7 +942,7 @@ void Udp::processUDPPacket(Packet *udpPacket)
     }
 
     // remove lower layer paddings:
-    if (totalLength < udpPacket->getDataLength()) {
+    if (udpHeaderPopPosition + totalLength < udpPacket->getBackOffset()) {
         udpPacket->setBackOffset(udpHeaderPopPosition + totalLength);
     }
 
