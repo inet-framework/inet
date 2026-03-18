@@ -69,6 +69,9 @@ void TcpAppBase::connect()
     if (tos != -1)
         socket.setTos(tos);
 
+    if (!par("dontFragment"))
+        socket.setDontFragment(false);
+
     // connect
     const char *connectAddress = par("connectAddress");
     int connectPort = par("connectPort");
