@@ -7,6 +7,7 @@
 
 #include "inet/applications/tcpapp/TcpAppBase.h"
 
+#include "inet/common/INETUtils.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
@@ -69,8 +70,9 @@ void TcpAppBase::connect()
     if (tos != -1)
         socket.setTos(tos);
 
-    if (!par("dontFragment"))
-        socket.setDontFragment(false);
+    bool dontFragment;
+    if (utils::getOptionalBoolPar(par("dontFragment"), dontFragment))
+        socket.setDontFragment(dontFragment);
 
     // connect
     const char *connectAddress = par("connectAddress");

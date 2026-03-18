@@ -97,6 +97,20 @@ T *dupPacketAndControlInfo(T *packet) {
     return copy;
 }
 
+/**
+ * Read an optional bool from an 'object' NED parameter.
+ * The parameter value must be nullptr (null) or a bool (true/false).
+ * Returns true and sets 'result' if the parameter contains a bool value.
+ * Returns false if the parameter is nullptr (unset/default).
+ */
+inline bool getOptionalBoolPar(cPar& par, bool& result) {
+    cObject *obj = par.objectValue();
+    if (obj == nullptr)
+        return false;
+    result = check_and_cast<cValueHolder *>(obj)->get().boolValue();
+    return true;
+}
+
 INET_API bool fileExists(const char *pathname);
 INET_API void splitFileName(const char *pathname, std::string& dir, std::string& fnameonly);
 INET_API void makePath(const char *pathname);
