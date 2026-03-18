@@ -18,16 +18,16 @@ class Packet extends cPacket
 {
     @existingClass;
     @descriptor(readonly);
-    b dataLength;
-    b totalLength;
-    ChunkTemporarySharedPtr *data @packetData @getter(getData);
-    ChunkTemporarySharedPtr *dissection @packetData @getter(getDissection);
-    Chunk *content @packetData @getter(getContent);
-    cObject *tags[] @getter(_getTag) @sizeGetter(getNumTags);
-    SharingRegionTagSet::TagBaseRegionTag regionTags[] @getter(_getRegionTag) @sizeGetter(getNumRegionTags);
+    b dataLength @hint("Length of packet data excluding popped parts");
+    b totalLength @hint("Length of packet data including popped parts");
+    ChunkTemporarySharedPtr *data @packetData @getter(getData) @hint("Packet data, excluding popped parts");
+    ChunkTemporarySharedPtr *dissection @packetData @getter(getDissection) @hint("Complete packet data according to protocol dissectors");
+    Chunk *content @packetData @getter(getContent) @hint("Complete packet data, including popped parts");
+    cObject *tags[] @getter(_getTag) @sizeGetter(getNumTags) @hint("Metadata attached to the whole packet");
+    SharingRegionTagSet::TagBaseRegionTag regionTags[] @getter(_getRegionTag) @sizeGetter(getNumRegionTags) @hint("Metadata attached to bit regions");
 
-    b frontOffset;
-    b backOffset;
-    ChunkTemporarySharedPtr *front @packetData @getter(getFront);
-    ChunkTemporarySharedPtr *back @packetData @getter(getBack);
+    b frontOffset @hint("Front pop position");
+    b backOffset @hint("Back pop position");
+    ChunkTemporarySharedPtr *front @packetData @getter(getFront) @hint("Packet data popped from the front");
+    ChunkTemporarySharedPtr *back @packetData @getter(getBack) @hint("Packet data popped from the back");
 }
