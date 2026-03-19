@@ -15,6 +15,8 @@
 #include "AppSocket.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/IcmpErrorTag_m.h"
+#include "inet/networklayer/ipv4/IcmpHeader_m.h"
+#include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
 #include "exception/ConnectionDiedException.h"
 #include "packet/ConnectionId.h"
 
@@ -128,12 +130,21 @@ void Quic::handleMessageFromUdp(cMessage *msg)
         if (ind->findTag<Icmpv4ErrorInd>()) {
             auto& errorInd = ind->getTagForUpdate<Icmpv4ErrorInd>();
             originalPacket = errorInd->getOriginalPacketForUpdate();
-            mtu = errorInd->getMtu();
+            // ICMPv4 Fragmentation Needed: type=3 (Destination Unreachable), code=4
+            if (errorInd->getType() == ICMP_DESTINATION_UNREACHABLE &&
+                errorInd->getCode() == ICMP_DU_FRAGMENTATION_NEEDED)
+                mtu = errorInd->getMtu();
+            else
+                EV_WARN << "ICMPv4 error type=" << errorInd->getType() << " code=" << errorInd->getCode() << " not handled" << endl;
         }
         else if (ind->findTag<Icmpv6ErrorInd>()) {
             auto& errorInd = ind->getTagForUpdate<Icmpv6ErrorInd>();
             originalPacket = errorInd->getOriginalPacketForUpdate();
-            mtu = errorInd->getMtu();
+            // ICMPv6 Packet Too Big: type=2
+            if (errorInd->getType() == ICMPv6_PACKET_TOO_BIG)
+                mtu = errorInd->getMtu();
+            else
+                EV_WARN << "ICMPv6 error type=" << errorInd->getType() << " code=" << errorInd->getCode() << " not handled" << endl;
         }
         else {
             EV_ERROR << "UDP_I_ERROR received without ICMP error indication tag" << endl;
