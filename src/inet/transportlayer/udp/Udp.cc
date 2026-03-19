@@ -31,10 +31,10 @@
 
 #ifdef INET_WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
-#endif // ifdef INET_WITH_IPv4
+#endif
 #ifdef INET_WITH_IPv6
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
-#endif // ifdef INET_WITH_IPv6
+#endif
 #include "inet/transportlayer/common/L4PortTag_m.h"
 #include "inet/transportlayer/common/L4Tools.h"
 
@@ -62,12 +62,6 @@ void Udp::initialize(int stage)
 
         lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
         ift.reference(this, "interfaceTableModule", true);
-#ifdef INET_WITH_IPv4
-        icmp = nullptr;
-#endif
-#ifdef INET_WITH_IPv6
-        icmpv6 = nullptr;
-#endif
         numSent = 0;
         numPassedUp = 0;
         numDroppedWrongPort = 0;
@@ -1106,22 +1100,23 @@ void Udp::processUndeliverablePacket(Packet *udpPacket)
     auto inIe = udpPacket->getTag<InterfaceInd>()->getInterfaceId();
 
     if (protocol->getId() == Protocol::ipv4.getId()) {
-#ifdef INET_WITH_IPv4
-        if (!icmp)
-            // TODO move to initialize?
-            icmp = getModuleFromPar<Icmp>(par("icmpModule"), this);
-        icmp->sendErrorMessage(udpPacket, inIe, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PORT_UNREACHABLE);
-#endif // ifdef INET_WITH_IPv4
-        delete udpPacket;
+        auto request = new Request("ICMP_send_error");
+        auto& tag = request->addTag<Icmpv4SendErrorReq>();
+        tag->setType(ICMP_DESTINATION_UNREACHABLE);
+        tag->setCode(ICMP_DU_PORT_UNREACHABLE);
+        tag->setInputInterfaceId(inIe);
+        tag->setOriginalPacket(udpPacket);
+        request->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::icmpv4);
+        send(request, "ipOut");
     }
     else if (protocol->getId() == Protocol::ipv6.getId()) {
-#ifdef INET_WITH_IPv6
-        if (!icmpv6)
-            // TODO move to initialize?
-            icmpv6 = getModuleFromPar<Icmpv6>(par("icmpv6Module"), this);
-        icmpv6->sendErrorMessage(udpPacket, ICMPv6_DESTINATION_UNREACHABLE, PORT_UNREACHABLE);
-#endif // ifdef INET_WITH_IPv6
-        delete udpPacket;
+        auto request = new Request("ICMPv6_send_error");
+        auto& tag = request->addTag<Icmpv6SendErrorReq>();
+        tag->setType(ICMPv6_DESTINATION_UNREACHABLE);
+        tag->setCode(PORT_UNREACHABLE);
+        tag->setOriginalPacket(udpPacket);
+        request->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::icmpv6);
+        send(request, "ipOut");
     }
     else if (protocol->getId() == Protocol::nextHopForwarding.getId()) {
         delete udpPacket;
@@ -1236,34 +1231,16 @@ void Udp::sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort
 
 void Udp::handleStartOperation(LifecycleOperation *operation)
 {
-#ifdef INET_WITH_IPv4
-    icmp = nullptr;
-#endif
-#ifdef INET_WITH_IPv6
-    icmpv6 = nullptr;
-#endif
 }
 
 void Udp::handleStopOperation(LifecycleOperation *operation)
 {
     clearAllSockets();
-#ifdef INET_WITH_IPv4
-    icmp = nullptr;
-#endif
-#ifdef INET_WITH_IPv6
-    icmpv6 = nullptr;
-#endif
 }
 
 void Udp::handleCrashOperation(LifecycleOperation *operation)
 {
     clearAllSockets();
-#ifdef INET_WITH_IPv4
-    icmp = nullptr;
-#endif
-#ifdef INET_WITH_IPv6
-    icmpv6 = nullptr;
-#endif
 }
 
 void Udp::clearAllSockets()

@@ -55,6 +55,19 @@ void Icmpv6::handleMessage(cMessage *msg)
         processICMPv6Message(check_and_cast<Packet *>(msg));
         return;
     }
+    else if (msg->getArrivalGate()->isName("transportIn")) {
+        // Handle send-error requests from transport layers (e.g. UDP)
+        auto request = check_and_cast<Request *>(msg);
+        if (auto tag = request->findTagForUpdate<Icmpv6SendErrorReq>()) {
+            auto origPacket = tag->getOriginalPacketForUpdate();
+            sendErrorMessage(origPacket, tag->getType(), tag->getCode());
+        }
+        else {
+            throw cRuntimeError("Unknown Request arrived on transportIn: %s", request->getName());
+        }
+        delete request;
+        return;
+    }
     else
         throw cRuntimeError("Message %s(%s) arrived in unknown '%s' gate", msg->getName(), msg->getClassName(), msg->getArrivalGate()->getName());
 }

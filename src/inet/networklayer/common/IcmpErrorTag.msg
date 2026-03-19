@@ -38,3 +38,26 @@ class Icmpv6ErrorInd extends TagBase
     int mtu = -1;           // only relevant for Packet Too Big
     Packet *originalPacket @owned;  // progressively unwrapped quoted packet
 }
+
+//
+// Request tag: asks the ICMP module to send an ICMPv4 error message.
+// Attached to a Request sent to ICMP via the MessageDispatcher.
+//
+class Icmpv4SendErrorReq extends TagBase
+{
+    IcmpType type;          // ICMPv4 type (e.g. ICMP_DESTINATION_UNREACHABLE)
+    int code;               // ICMPv4 code (e.g. ICMP_DU_PORT_UNREACHABLE)
+    int inputInterfaceId = -1;
+    Packet *originalPacket @owned;  // the packet that triggered the error
+}
+
+//
+// Request tag: asks the ICMPv6 module to send an ICMPv6 error message.
+// Attached to a Request sent to ICMPv6 via the MessageDispatcher.
+//
+class Icmpv6SendErrorReq extends TagBase
+{
+    Icmpv6Type type;        // ICMPv6 type (e.g. ICMPv6_DESTINATION_UNREACHABLE)
+    int code;               // ICMPv6 code (e.g. PORT_UNREACHABLE)
+    Packet *originalPacket @owned;  // the packet that triggered the error
+}
