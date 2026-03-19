@@ -135,8 +135,10 @@ void Udp::handleLowerCommand(cMessage *msg)
 
 void Udp::handleIndication(Indication *indication)
 {
-    if (indication->findTag<IcmpErrorInd>())
-        processIcmpError(indication);
+    if (indication->findTag<Icmpv4ErrorInd>())
+        processIcmpv4Error(indication);
+    else if (indication->findTag<Icmpv6ErrorInd>())
+        processIcmpv6Error(indication);
     else
         throw cRuntimeError("Unknown Indication arrived from network layer: %s", indication->getName());
 }
@@ -1150,13 +1152,13 @@ void Udp::sendUp(Ptr<const UdpHeader>& header, Packet *payload, SockDesc *sd, us
     numPassedUp++;
 }
 
-void Udp::processIcmpError(Indication *indication)
+void Udp::processIcmpv4Error(Indication *indication)
 {
-    // The Indication carries an IcmpErrorInd tag with type/code/mtu and an
+    // The Indication carries an Icmpv4ErrorInd tag with type/code/mtu and an
     // originalPacket whose ICMP and IP headers have already been popped by
     // the ICMP and IP layers respectively. The originalPacket now starts
     // with the quoted UDP header.
-    auto& errorInd = indication->getTagForUpdate<IcmpErrorInd>();
+    auto& errorInd = indication->getTagForUpdate<Icmpv4ErrorInd>();
     Packet *originalPacket = errorInd->getOriginalPacketForUpdate();
 
     auto l3Ind = originalPacket->getTag<L3AddressInd>();
@@ -1167,10 +1169,40 @@ void Udp::processIcmpError(Indication *indication)
     ushort localPort = udpHeader->getSourcePort();
     ushort remotePort = udpHeader->getDestinationPort();
 
-    EV_WARN << "ICMP error received: type=" << errorInd->getType() << " code=" << errorInd->getCode()
+    EV_WARN << "ICMPv4 error received: type=" << errorInd->getType() << " code=" << errorInd->getCode()
             << " about packet " << localAddr << ":" << localPort << " > "
             << remoteAddr << ":" << remotePort << "\n";
 
+    processIcmpErrorForSocket(indication, originalPacket, localAddr, localPort, remoteAddr, remotePort);
+}
+
+void Udp::processIcmpv6Error(Indication *indication)
+{
+    // The Indication carries an Icmpv6ErrorInd tag with type/code/mtu and an
+    // originalPacket whose ICMP and IP headers have already been popped by
+    // the ICMP and IP layers respectively. The originalPacket now starts
+    // with the quoted UDP header.
+    auto& errorInd = indication->getTagForUpdate<Icmpv6ErrorInd>();
+    Packet *originalPacket = errorInd->getOriginalPacketForUpdate();
+
+    auto l3Ind = originalPacket->getTag<L3AddressInd>();
+    L3Address localAddr = l3Ind->getSrcAddress();
+    L3Address remoteAddr = l3Ind->getDestAddress();
+
+    const auto& udpHeader = originalPacket->peekAtFront<UdpHeader>(B(8), Chunk::PF_ALLOW_INCOMPLETE);
+    ushort localPort = udpHeader->getSourcePort();
+    ushort remotePort = udpHeader->getDestinationPort();
+
+    EV_WARN << "ICMPv6 error received: type=" << errorInd->getType() << " code=" << errorInd->getCode()
+            << " about packet " << localAddr << ":" << localPort << " > "
+            << remoteAddr << ":" << remotePort << "\n";
+
+    processIcmpErrorForSocket(indication, originalPacket, localAddr, localPort, remoteAddr, remotePort);
+}
+
+void Udp::processIcmpErrorForSocket(Indication *indication, Packet *originalPacket,
+        const L3Address& localAddr, ushort localPort, const L3Address& remoteAddr, ushort remotePort)
+{
     SockDesc *sd = findSocketForUnicastPacket(localAddr, localPort, remoteAddr, remotePort);
     if (sd) {
         EV_DETAIL << "Source socket is sockId=" << sd->sockId << ", notifying.\n";

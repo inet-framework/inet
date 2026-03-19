@@ -176,7 +176,7 @@ void Tcp::handleLowerPacket(Packet *packet)
 void Tcp::handleLowerCommand(cMessage *msg)
 {
     if (auto indication = dynamic_cast<Indication *>(msg)) {
-        if (indication->findTag<IcmpErrorInd>()) {
+        if (indication->findTag<Icmpv4ErrorInd>() || indication->findTag<Icmpv6ErrorInd>()) {
             EV_DETAIL << "ICMP error received -- discarding\n";
             delete indication;
         }

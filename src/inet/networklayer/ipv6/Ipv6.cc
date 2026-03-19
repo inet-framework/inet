@@ -279,7 +279,7 @@ void Ipv6::handleMessage(cMessage *msg)
 
 void Ipv6::handleIndication(Indication *indication)
 {
-    if (indication->findTag<IcmpErrorInd>())
+    if (indication->findTag<Icmpv6ErrorInd>())
         handleIcmpErrorIndication(indication);
     else
         throw cRuntimeError("Unknown Indication arrived: %s", indication->getName());
@@ -287,7 +287,7 @@ void Ipv6::handleIndication(Indication *indication)
 
 void Ipv6::handleIcmpErrorIndication(Indication *indication)
 {
-    auto& errorInd = indication->getTagForUpdate<IcmpErrorInd>();
+    auto& errorInd = indication->getTagForUpdate<Icmpv6ErrorInd>();
     Packet *originalPacket = errorInd->getOriginalPacketForUpdate();
 
     // Pop the quoted IPv6 header and convert it to tags on the original packet

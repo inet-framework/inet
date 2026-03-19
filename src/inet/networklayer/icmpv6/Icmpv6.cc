@@ -75,13 +75,13 @@ void Icmpv6::processICMPv6Message(Packet *packet)
     int type = icmpv6msg->getType();
     if (type < 128) {
         // ICMPv6 error messages (type < 128).
-        // Pop the ICMPv6 header and create an Indication with IcmpErrorInd tag.
+        // Pop the ICMPv6 header and create an Indication with Icmpv6ErrorInd tag.
         // The remaining packet content (quoted IPv6 + transport + payload) becomes
         // the originalPacket, progressively unwrapped by upper layers.
         const auto& icmpHeader = packet->popAtFront<Icmpv6Header>();
 
         auto *indication = new Indication("ICMPv6-error");
-        auto& errorInd = indication->addTag<IcmpErrorInd>();
+        auto& errorInd = indication->addTag<Icmpv6ErrorInd>();
         errorInd->setType(icmpHeader->getType());
         // Extract code and MTU from the specific ICMPv6 subtypes
         if (auto du = dynamicPtrCast<const Icmpv6DestUnreachableMsg>(icmpHeader)) {

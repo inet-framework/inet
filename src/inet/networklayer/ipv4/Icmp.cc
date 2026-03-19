@@ -241,13 +241,13 @@ void Icmp::processIcmpMessage(Packet *packet)
         case ICMP_DESTINATION_UNREACHABLE:
         case ICMP_TIME_EXCEEDED:
         case ICMP_PARAMETER_PROBLEM: {
-            // Pop the ICMP header and create an Indication with IcmpErrorInd tag.
+            // Pop the ICMP header and create an Indication with Icmpv4ErrorInd tag.
             // The remaining packet content (quoted IPv4 + transport + payload) becomes
             // the originalPacket, which will be progressively unwrapped by upper layers.
             const auto& icmpHeader = packet->popAtFront<IcmpHeader>();
 
             auto *indication = new Indication("ICMP-error");
-            auto& errorInd = indication->addTag<IcmpErrorInd>();
+            auto& errorInd = indication->addTag<Icmpv4ErrorInd>();
             errorInd->setType(icmpHeader->getType());
             errorInd->setCode(icmpHeader->getCode());
             if (auto ptb = dynamicPtrCast<const IcmpPtb>(icmpHeader))

@@ -173,8 +173,11 @@ class INET_API Udp : public TransportProtocolBase
     // handle an Indication arriving from the network layer
     virtual void handleIndication(Indication *indication);
 
-    // process an ICMP error indication (unified for ICMPv4 and ICMPv6)
-    virtual void processIcmpError(Indication *indication);
+    // process ICMPv4/ICMPv6 error indications
+    virtual void processIcmpv4Error(Indication *indication);
+    virtual void processIcmpv6Error(Indication *indication);
+    virtual void processIcmpErrorForSocket(Indication *indication, Packet *originalPacket,
+            const L3Address& localAddr, ushort localPort, const L3Address& remoteAddr, ushort remotePort);
 
     // process Udp packets coming from IP
     virtual void processUDPPacket(Packet *udpPacket);

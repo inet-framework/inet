@@ -119,13 +119,29 @@ void Quic::handleMessageFromUdp(cMessage *msg)
     } else if (msg->getKind() == UDP_I_ERROR) {
         EV_WARN << "Error message received from UDP" << endl;
         Indication *ind = check_and_cast<Indication *>(msg);
-        auto& errorInd = ind->getTagForUpdate<IcmpErrorInd>();
 
         // The originalPacket has already been unwrapped by ICMP, IP, and UDP
         // layers. It now contains only the QUIC payload.
-        Packet *originalPacket = errorInd->getOriginalPacketForUpdate();
+        Packet *originalPacket;
+        int mtu = -1;
 
-        if (errorInd->getMtu() >= 0) {
+        if (ind->findTag<Icmpv4ErrorInd>()) {
+            auto& errorInd = ind->getTagForUpdate<Icmpv4ErrorInd>();
+            originalPacket = errorInd->getOriginalPacketForUpdate();
+            mtu = errorInd->getMtu();
+        }
+        else if (ind->findTag<Icmpv6ErrorInd>()) {
+            auto& errorInd = ind->getTagForUpdate<Icmpv6ErrorInd>();
+            originalPacket = errorInd->getOriginalPacketForUpdate();
+            mtu = errorInd->getMtu();
+        }
+        else {
+            EV_ERROR << "UDP_I_ERROR received without ICMP error indication tag" << endl;
+            delete msg;
+            return;
+        }
+
+        if (mtu >= 0) {
             // Packet Too Big (PTB) / Fragmentation Needed message
             if (originalPacket->getByteLength() > 0) {
                 bool readSrcConnectionId = true;
@@ -138,15 +154,13 @@ void Quic::handleMessageFromUdp(cMessage *msg)
                 }
 
                 if (connection) {
-                    connection->processIcmpPtb(originalPacket, errorInd->getMtu());
+                    connection->processIcmpPtb(originalPacket, mtu);
                 } else {
                     EV_WARN << "Could not find connection for ICMP PTB" << endl;
                 }
             } else {
                 EV_WARN << "ICMP PTB message reflects not enough data from the original packet." << endl;
             }
-        } else {
-            EV_WARN << "ICMP types other than PTB not handled" << endl;
         }
     } else if (msg->getKind() == UDP_I_DATA) {
         Packet *pkt = check_and_cast<Packet *>(msg);

@@ -210,7 +210,7 @@ void Ipv4::handleMessageWhenUp(cMessage *msg)
 
 void Ipv4::handleIndication(Indication *indication)
 {
-    if (indication->findTag<IcmpErrorInd>())
+    if (indication->findTag<Icmpv4ErrorInd>())
         handleIcmpErrorIndication(indication);
     else
         throw cRuntimeError("Unknown Indication arrived on transportIn: %s", indication->getName());
@@ -218,7 +218,7 @@ void Ipv4::handleIndication(Indication *indication)
 
 void Ipv4::handleIcmpErrorIndication(Indication *indication)
 {
-    auto& errorInd = indication->getTagForUpdate<IcmpErrorInd>();
+    auto& errorInd = indication->getTagForUpdate<Icmpv4ErrorInd>();
     Packet *originalPacket = errorInd->getOriginalPacketForUpdate();
 
     // Pop the quoted IPv4 header and convert it to tags on the original packet
