@@ -186,6 +186,7 @@ class NetworkProtocolReq extends ProtocolTagBase
 class NetworkProtocolInd extends ProtocolTagBase
 {
     ChunkPtr networkProtocolHeader;
+    b networkHeaderFrontOffset = b(-1);  // front offset where the network header starts in the packet
 }
 
 //

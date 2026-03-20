@@ -792,6 +792,9 @@ void Ipv6::handleReceivedIcmp(Packet *msg)
 
 void Ipv6::decapsulate(Packet *packet)
 {
+    // save the front offset so upper layers can restore the original IP datagram
+    auto networkHeaderFrontOffset = packet->getFrontOffset();
+
     // decapsulate transport packet
     auto ipv6Header = packet->popAtFront<Ipv6Header>();
 
@@ -814,6 +817,7 @@ void Ipv6::decapsulate(Packet *packet)
     auto networkProtocolInd = packet->addTagIfAbsent<NetworkProtocolInd>();
     networkProtocolInd->setProtocol(&Protocol::ipv6);
     networkProtocolInd->setNetworkProtocolHeader(ipv6Header);
+    networkProtocolInd->setNetworkHeaderFrontOffset(networkHeaderFrontOffset);
     auto l3AddressInd = packet->addTagIfAbsent<L3AddressInd>();
     l3AddressInd->setSrcAddress(ipv6Header->getSrcAddress());
     l3AddressInd->setDestAddress(ipv6Header->getDestAddress());

@@ -891,6 +891,9 @@ void Ipv4::reassembleAndDeliverFinish(Packet *packet)
 
 void Ipv4::decapsulate(Packet *packet)
 {
+    // save the front offset so upper layers can restore the original IP datagram
+    packet->getTagForUpdate<NetworkProtocolInd>()->setNetworkHeaderFrontOffset(packet->getFrontOffset());
+
     // decapsulate transport packet
     const auto& ipv4Header = packet->popAtFront<Ipv4Header>();
 
