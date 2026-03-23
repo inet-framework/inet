@@ -216,7 +216,12 @@ void Icmpv6::sendErrorMessage(Packet *origDatagram, Icmpv6Type type, int code)
 {
     Enter_Method("sendErrorMessage(datagram, type=%d, code=%d)", type, code);
 
-    if (!validateDatagramPromptingError(origDatagram))
+    // Packets received from the network have an InterfaceInd tag;
+    // locally originated packets don't. Skip validation for locally
+    // originated packets so the error can be processed locally (see below).
+    bool fromNetwork = origDatagram->findTag<InterfaceInd>() != nullptr;
+
+    if (fromNetwork && !validateDatagramPromptingError(origDatagram))
         return;
 
     Packet *errorMsg;
@@ -328,6 +333,16 @@ bool Icmpv6::validateDatagramPromptingError(Packet *packet)
     // don't send ICMP error messages for multicast messages
     if (ipv6Header->getDestAddress().isMulticast()) {
         EV_INFO << "won't send ICMP error messages for multicast message " << ipv6Header << endl;
+        return false;
+    }
+
+    // RFC 4443 Section 2.4(e): don't send ICMPv6 error if source is unspecified or multicast
+    if (ipv6Header->getSrcAddress().isUnspecified()) {
+        EV_INFO << "won't send ICMP error messages to unspecified address, message " << ipv6Header << endl;
+        return false;
+    }
+    if (ipv6Header->getSrcAddress().isMulticast()) {
+        EV_INFO << "won't send ICMP error messages to multicast address, message " << ipv6Header << endl;
         return false;
     }
 
