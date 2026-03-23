@@ -50,9 +50,8 @@ class INET_API Icmp : public SimpleModule, public DefaultProtocolRegistrationLis
      * This method can be called from other modules to send an ICMP error packet
      * in response to a received bogus packet. It will not send ICMP error in response
      * to broadcast or multicast packets -- in that case it will simply delete the packet.
-     * KLUDGE if inputInterfaceId cannot be determined, pass in -1.
      */
-    virtual void sendErrorMessage(Packet *packet, int inputInterfaceId, IcmpType type, IcmpCode code);
+    virtual void sendErrorMessage(Packet *packet, IcmpType type, IcmpCode code);
     virtual void sendPtbMessage(Packet *packet, int mtu);
     static void insertChecksum(ChecksumMode checksumMode, const Ptr<IcmpHeader>& icmpHeader, Packet *payload);
     void insertChecksum(const Ptr<IcmpHeader>& icmpHeader, Packet *payload) { insertChecksum(checksumMode, icmpHeader, payload); }
@@ -64,7 +63,7 @@ class INET_API Icmp : public SimpleModule, public DefaultProtocolRegistrationLis
     virtual void handleMessage(cMessage *msg) override;
     virtual void handleParameterChange(const char *name) override;
     virtual void parseQuoteLengthParameter();
-    virtual bool maySendErrorMessage(Packet *packet, int inputInterfaceId);
+    virtual bool maySendErrorMessage(Packet *packet);
     virtual void sendOrProcessIcmpPacket(Packet *packet, Ipv4Address origSrcAddr);
 };
 

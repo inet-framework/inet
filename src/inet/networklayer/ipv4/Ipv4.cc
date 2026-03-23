@@ -264,7 +264,7 @@ Ipv4Address Ipv4::getNextHop(Packet *packet)
 void Ipv4::handleIncomingDatagram(Packet *packet)
 {
     ASSERT(packet);
-    int interfaceId = packet->getTag<InterfaceInd>()->getInterfaceId();
+    ASSERT(packet->getTag<InterfaceInd>());
     emit(packetReceivedFromLowerSignal, packet);
 
     //
@@ -286,7 +286,7 @@ void Ipv4::handleIncomingDatagram(Packet *packet)
 
     if (ipv4Header->getTotalLengthField() > packet->getDataLength()) {
         EV_WARN << "length error found, sending ICMP_PARAMETER_PROBLEM\n";
-        sendIcmpError(packet, interfaceId, ICMP_PARAMETER_PROBLEM, 0);
+        sendIcmpError(packet, ICMP_PARAMETER_PROBLEM, 0);
         return;
     }
 
@@ -302,7 +302,7 @@ void Ipv4::handleIncomingDatagram(Packet *packet)
         double relativeHeaderLength = ipv4Header->getHeaderLength().get<B>() / (double)ipv4Header->getChunkLength().get<B>();
         if (dblrand() <= relativeHeaderLength) {
             EV_WARN << "bit error found, sending ICMP_PARAMETER_PROBLEM\n";
-            sendIcmpError(packet, interfaceId, ICMP_PARAMETER_PROBLEM, 0);
+            sendIcmpError(packet, ICMP_PARAMETER_PROBLEM, 0);
             return;
         }
     }
@@ -656,7 +656,7 @@ void Ipv4::routeUnicastPacket(Packet *packet)
         PacketDropDetails details;
         details.setReason(NO_ROUTE_FOUND);
         emit(packetDroppedSignal, packet, &details);
-        sendIcmpError(packet, fromIE ? fromIE->getInterfaceId() : -1, ICMP_DESTINATION_UNREACHABLE, 0);
+        sendIcmpError(packet, ICMP_DESTINATION_UNREACHABLE, 0);
     }
     else { // fragment and send
         if (fromIE != nullptr) {
@@ -883,9 +883,7 @@ void Ipv4::reassembleAndDeliverFinish(Packet *packet)
     else {
         EV_ERROR << "Transport protocol '" << protocol->getName() << "' not connected, discarding packet\n";
         packet->setFrontOffset(ipv4HeaderPosition);
-        // get source interface:
-        const auto& tag = packet->findTag<InterfaceInd>();
-        sendIcmpError(packet, tag ? tag->getInterfaceId() : -1, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
+        sendIcmpError(packet, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
     }
 }
 
@@ -944,7 +942,7 @@ void Ipv4::fragmentAndSend(Packet *packet)
         details.setReason(HOP_LIMIT_REACHED);
         emit(packetDroppedSignal, packet, &details);
         EV_WARN << "datagram TTL reached zero, sending ICMP_TIME_EXCEEDED\n";
-        sendIcmpError(packet, -1 /*TODO*/, ICMP_TIME_EXCEEDED, 0);
+        sendIcmpError(packet, ICMP_TIME_EXCEEDED, 0);
         numDropped++;
         return;
     }
@@ -1485,9 +1483,9 @@ void Ipv4::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj,
     }
 }
 
-void Ipv4::sendIcmpError(Packet *origPacket, int inputInterfaceId, IcmpType type, IcmpCode code)
+void Ipv4::sendIcmpError(Packet *origPacket, IcmpType type, IcmpCode code)
 {
-    icmp->sendErrorMessage(origPacket, inputInterfaceId, type, code);
+    icmp->sendErrorMessage(origPacket, type, code);
     delete origPacket;
 }
 

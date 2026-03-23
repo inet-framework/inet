@@ -1094,14 +1094,11 @@ void Udp::processUndeliverablePacket(Packet *udpPacket)
                 udpPacket->getClassName(), udpPacket->getName());
     }
 
-    auto inIe = udpPacket->getTag<InterfaceInd>()->getInterfaceId();
-
     if (protocol->getId() == Protocol::ipv4.getId()) {
         auto request = new Request("ICMP_send_error");
         auto& tag = request->addTag<Icmpv4SendErrorReq>();
         tag->setType(ICMP_DESTINATION_UNREACHABLE);
         tag->setCode(ICMP_DU_PORT_UNREACHABLE);
-        tag->setInputInterfaceId(inIe);
         tag->setOriginalPacket(udpPacket);
         request->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::icmpv4);
         send(request, "ipOut");

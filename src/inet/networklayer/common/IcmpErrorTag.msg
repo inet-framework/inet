@@ -47,7 +47,6 @@ class Icmpv4SendErrorReq extends TagBase
 {
     IcmpType type;          // ICMPv4 type (e.g. ICMP_DESTINATION_UNREACHABLE)
     int code;               // ICMPv4 code (e.g. ICMP_DU_PORT_UNREACHABLE)
-    int inputInterfaceId = -1;
     Packet *originalPacket @owned;  // the packet that triggered the error
 }
 

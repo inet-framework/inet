@@ -210,7 +210,7 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
 
     virtual void sendPacketToNIC(Packet *packet);
 
-    virtual void sendIcmpError(Packet *packet, int inputInterfaceId, IcmpType type, IcmpCode code);
+    virtual void sendIcmpError(Packet *packet, IcmpType type, IcmpCode code);
 
     virtual Packet *prepareForForwarding(Packet *packet) const;
 

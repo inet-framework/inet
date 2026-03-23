@@ -79,7 +79,7 @@ void Icmp::handleMessage(cMessage *msg)
             auto origPacket = tag->getOriginalPacketForUpdate();
             // restore the original network datagram (IP header + transport payload)
             origPacket->setFrontOffset(origPacket->getTag<NetworkProtocolInd>()->getNetworkHeaderFrontOffset());
-            sendErrorMessage(origPacket, tag->getInputInterfaceId(), tag->getType(), static_cast<IcmpCode>(tag->getCode()));
+            sendErrorMessage(origPacket, tag->getType(), static_cast<IcmpCode>(tag->getCode()));
         }
         else {
             throw cRuntimeError("Unknown Request arrived on transportIn: %s", request->getName());
@@ -91,11 +91,14 @@ void Icmp::handleMessage(cMessage *msg)
         throw cRuntimeError("Message %s(%s) arrived in unknown '%s' gate", msg->getName(), msg->getClassName(), msg->getArrivalGate()->getName());
 }
 
-bool Icmp::maySendErrorMessage(Packet *packet, int inputInterfaceId)
+bool Icmp::maySendErrorMessage(Packet *packet)
 {
     const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
     Ipv4Address origSrcAddr = ipv4Header->getSrcAddress();
     Ipv4Address origDestAddr = ipv4Header->getDestAddress();
+
+    auto& interfaceInd = packet->findTag<InterfaceInd>();
+    int inputInterfaceId = interfaceInd ? interfaceInd->getInterfaceId() : -1;
 
     // don't send ICMP error messages in response to broadcast or multicast messages
     if (origDestAddr.isMulticast() || origDestAddr.isLimitedBroadcastAddress() || possiblyLocalBroadcast(origDestAddr, inputInterfaceId)) {
@@ -152,7 +155,7 @@ void Icmp::sendPtbMessage(Packet *packet, int mtu)
 {
     Enter_Method("sendPtbMessage(datagram, mtu=%d)", mtu);
 
-    if (maySendErrorMessage(packet, -1)) {
+    if (maySendErrorMessage(packet)) {
         // assemble a message name
         char msgname[80];
         snprintf(msgname, sizeof(msgname), "ICMP-PTB-#%" PRIu64 "-mtu%d", ++ctr, mtu);
@@ -176,11 +179,11 @@ void Icmp::sendPtbMessage(Packet *packet, int mtu)
     }
 }
 
-void Icmp::sendErrorMessage(Packet *packet, int inputInterfaceId, IcmpType type, IcmpCode code)
+void Icmp::sendErrorMessage(Packet *packet, IcmpType type, IcmpCode code)
 {
     Enter_Method("sendErrorMessage(datagram, type=%d, code=%d)", type, code);
 
-    if (maySendErrorMessage(packet, inputInterfaceId)) {
+    if (maySendErrorMessage(packet)) {
         // assemble a message name
         char msgname[80];
         snprintf(msgname, sizeof(msgname), "ICMP-error-#%" PRIu64 "-type%d-code%d", ++ctr, type, code);
