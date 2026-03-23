@@ -43,7 +43,12 @@ void IpvxTrafSink::initialize(int stage)
 
 void IpvxTrafSink::handleMessageWhenUp(cMessage *msg)
 {
-    processPacket(check_and_cast<Packet *>(msg));
+    if (msg->isPacket())
+        processPacket(check_and_cast<Packet *>(msg));
+    else {
+        EV_WARN << "Received non-packet message: " << msg->getName() << "\n";
+        delete msg;
+    }
 }
 
 void IpvxTrafSink::printPacket(Packet *msg)

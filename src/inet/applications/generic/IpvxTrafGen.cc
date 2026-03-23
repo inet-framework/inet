@@ -80,29 +80,37 @@ void IpvxTrafGen::startApp()
 
 void IpvxTrafGen::handleMessageWhenUp(cMessage *msg)
 {
-    if (msg == timer) {
-        if (msg->getKind() == START) {
-            destAddresses.clear();
-            const char *destAddrs = par("destAddresses");
-            cStringTokenizer tokenizer(destAddrs);
-            const char *token;
-            while ((token = tokenizer.nextToken()) != nullptr) {
-                L3Address result;
-                L3AddressResolver().tryResolve(token, result);
-                if (result.isUnspecified())
-                    EV_ERROR << "cannot resolve destination address: " << token << endl;
-                else
-                    destAddresses.push_back(result);
+    if (msg->isSelfMessage()) {
+        if (msg == timer) {
+            if (msg->getKind() == START) {
+                destAddresses.clear();
+                const char *destAddrs = par("destAddresses");
+                cStringTokenizer tokenizer(destAddrs);
+                const char *token;
+                while ((token = tokenizer.nextToken()) != nullptr) {
+                    L3Address result;
+                    L3AddressResolver().tryResolve(token, result);
+                    if (result.isUnspecified())
+                        EV_ERROR << "cannot resolve destination address: " << token << endl;
+                    else
+                        destAddresses.push_back(result);
+                }
+            }
+            if (!destAddresses.empty()) {
+                sendPacket();
+                if (isEnabled())
+                    scheduleNextPacket(simTime());
             }
         }
-        if (!destAddresses.empty()) {
-            sendPacket();
-            if (isEnabled())
-                scheduleNextPacket(simTime());
-        }
+        else
+            throw cRuntimeError("Model error: unknown self message");
     }
-    else
+    else if (msg->isPacket())
         processPacket(check_and_cast<Packet *>(msg));
+    else {
+        EV_WARN << "Received non-packet message: " << msg->getName() << "\n";
+        delete msg;
+    }
 }
 
 void IpvxTrafGen::scheduleNextPacket(simtime_t previous)
