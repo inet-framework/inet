@@ -99,18 +99,22 @@ void Icmpv6::processICMPv6Message(Packet *packet)
         auto& errorInd = indication->addTag<Icmpv6ErrorInd>();
         errorInd->setType(icmpHeader->getType());
         // Extract code and MTU from the specific ICMPv6 subtypes
-        if (auto du = dynamicPtrCast<const Icmpv6DestUnreachableMsg>(icmpHeader)) {
-            errorInd->setCode(du->getCode());
-        }
-        else if (auto ptb = dynamicPtrCast<const Icmpv6PacketTooBigMsg>(icmpHeader)) {
-            errorInd->setCode(ptb->getCode());
-            errorInd->setMtu(ptb->getMTU());
-        }
-        else if (auto te = dynamicPtrCast<const Icmpv6TimeExceededMsg>(icmpHeader)) {
-            errorInd->setCode(te->getCode());
-        }
-        else if (auto pp = dynamicPtrCast<const Icmpv6ParamProblemMsg>(icmpHeader)) {
-            errorInd->setCode(pp->getCode());
+        switch (type) {
+            case ICMPv6_DESTINATION_UNREACHABLE:
+                errorInd->setCode(CHK(dynamicPtrCast<const Icmpv6DestUnreachableMsg>(icmpHeader))->getCode());
+                break;
+            case ICMPv6_PACKET_TOO_BIG: {
+                auto ptb = CHK(dynamicPtrCast<const Icmpv6PacketTooBigMsg>(icmpHeader));
+                errorInd->setCode(ptb->getCode());
+                errorInd->setMtu(ptb->getMTU());
+                break;
+            }
+            case ICMPv6_TIME_EXCEEDED:
+                errorInd->setCode(CHK(dynamicPtrCast<const Icmpv6TimeExceededMsg>(icmpHeader))->getCode());
+                break;
+            case ICMPv6_PARAMETER_PROBLEM:
+                errorInd->setCode(CHK(dynamicPtrCast<const Icmpv6ParamProblemMsg>(icmpHeader))->getCode());
+                break;
         }
         packet->trim();
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
@@ -131,17 +135,22 @@ void Icmpv6::processICMPv6Message(Packet *packet)
         }
     }
     else {
-        auto icmpv6msg = packet->popAtFront<Icmpv6Header>();
-        if (auto echoRequest = dynamicPtrCast<const Icmpv6EchoRequestMsg>(icmpv6msg)) {
-            EV_INFO << "ICMPv6 Echo Request Message Received." << endl;
-            processEchoRequest(packet, echoRequest);
+        switch (type) {
+            case ICMPv6_ECHO_REQUEST: {
+                EV_INFO << "ICMPv6 Echo Request Message Received." << endl;
+                const auto& echoRequest = packet->popAtFront<Icmpv6EchoRequestMsg>();
+                processEchoRequest(packet, echoRequest);
+                break;
+            }
+            case ICMPv6_ECHO_REPLY: {
+                EV_INFO << "ICMPv6 Echo Reply Message Received." << endl;
+                const auto& echoReply = packet->popAtFront<Icmpv6EchoReplyMsg>();
+                processEchoReply(packet, echoReply);
+                break;
+            }
+            default:
+                throw cRuntimeError("Unknown ICMPv6 message type %d received", type);
         }
-        else if (auto echoReply = dynamicPtrCast<const Icmpv6EchoReplyMsg>(icmpv6msg)) {
-            EV_INFO << "ICMPv6 Echo Reply Message Received." << endl;
-            processEchoReply(packet, echoReply);
-        }
-        else
-            throw cRuntimeError("Unknown message type received: (%s)%s.\n", icmpv6msg->getClassName(), icmpv6msg->getName());
     }
 }
 
