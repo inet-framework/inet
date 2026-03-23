@@ -265,6 +265,8 @@ void Icmp::processIcmpMessage(Packet *packet)
             errorInd->setCode(icmpHeader->getCode());
             if (auto ptb = dynamicPtrCast<const IcmpPtb>(icmpHeader))
                 errorInd->setMtu(ptb->getMtu());
+            packet->trim();
+            packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
             errorInd->setOriginalPacket(packet); // ownership transfer, no dup needed
 
             // Peek at the quoted IPv4 header to determine the transport protocol

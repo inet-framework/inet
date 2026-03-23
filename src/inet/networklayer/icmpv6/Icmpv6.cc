@@ -110,6 +110,8 @@ void Icmpv6::processICMPv6Message(Packet *packet)
         else if (auto pp = dynamicPtrCast<const Icmpv6ParamProblemMsg>(icmpHeader)) {
             errorInd->setCode(pp->getCode());
         }
+        packet->trim();
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
         errorInd->setOriginalPacket(packet); // ownership transfer, no dup needed
 
         // Peek at the quoted IPv6 header to determine the transport protocol
