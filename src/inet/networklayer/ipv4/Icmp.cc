@@ -77,6 +77,8 @@ void Icmp::handleMessage(cMessage *msg)
         auto request = check_and_cast<Request *>(msg);
         if (auto tag = request->findTagForUpdate<Icmpv4SendErrorReq>()) {
             auto origPacket = tag->getOriginalPacketForUpdate();
+            // restore the original network datagram (IP header + transport payload)
+            origPacket->setFrontOffset(origPacket->getTag<NetworkProtocolInd>()->getNetworkHeaderFrontOffset());
             sendErrorMessage(origPacket, tag->getInputInterfaceId(), tag->getType(), static_cast<IcmpCode>(tag->getCode()));
         }
         else {

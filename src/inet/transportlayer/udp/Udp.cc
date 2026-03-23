@@ -1094,8 +1094,6 @@ void Udp::processUndeliverablePacket(Packet *udpPacket)
                 udpPacket->getClassName(), udpPacket->getName());
     }
 
-    // restore the original network datagram (IP header + transport payload)
-    udpPacket->setFrontOffset(udpPacket->getTag<NetworkProtocolInd>()->getNetworkHeaderFrontOffset());
     auto inIe = udpPacket->getTag<InterfaceInd>()->getInterfaceId();
 
     if (protocol->getId() == Protocol::ipv4.getId()) {

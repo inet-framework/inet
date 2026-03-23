@@ -60,6 +60,8 @@ void Icmpv6::handleMessage(cMessage *msg)
         auto request = check_and_cast<Request *>(msg);
         if (auto tag = request->findTagForUpdate<Icmpv6SendErrorReq>()) {
             auto origPacket = tag->getOriginalPacketForUpdate();
+            // restore the original network datagram (IP header + transport payload)
+            origPacket->setFrontOffset(origPacket->getTag<NetworkProtocolInd>()->getNetworkHeaderFrontOffset());
             sendErrorMessage(origPacket, tag->getType(), tag->getCode());
         }
         else {
