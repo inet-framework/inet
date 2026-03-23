@@ -44,8 +44,13 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.eth[*].queue.dataQueue.typename = "DropTailQueue" # in routers
 **.eth[*].queue.dataQueue.packetCapacity = 10  # in routers
 
+%#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-ICMPv6 packet: passing it to higher layer
+Forwarding ICMPv6 error indication to transport protocol udp
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+ICMPv6 error received: type=1 code=0 about packet
+%#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
 Ignoring UDP error report
 %#--------------------------------------------------------------------------------------------------------------
