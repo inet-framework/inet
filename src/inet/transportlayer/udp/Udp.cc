@@ -1117,13 +1117,9 @@ void Udp::processUndeliverablePacket(Packet *udpPacket)
         request->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::icmpv6);
         send(request, "ipOut");
     }
-    else if (protocol->getId() == Protocol::nextHopForwarding.getId()) {
-        delete udpPacket;
-    }
     else {
-        throw cRuntimeError("(%s)%s arrived from lower layer with unrecognized NetworkProtocolInd %s",
-                udpPacket->getClassName(), udpPacket->getName(), protocol->getName());
-        // delete udpPacket;
+        EV_WARN << "Cannot send ICMP error for protocol " << protocol->getName() << "\n";
+        delete udpPacket;
     }
 }
 
