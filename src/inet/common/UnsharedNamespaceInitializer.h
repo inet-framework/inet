@@ -21,7 +21,7 @@ namespace inet {
 class UnsharedNamespaceInitializer : public omnetpp::cISimulationLifecycleListener
 {
   public:
-    static UnsharedNamespaceInitializer singleton;
+    static UnsharedNamespaceInitializer *singleton;
 
     int originalNetworkNamespaceFd = -1;
 

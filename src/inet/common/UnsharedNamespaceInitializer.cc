@@ -17,11 +17,11 @@ namespace inet {
 
 Register_GlobalConfigOption(CFGID_UNSHARE_NAMESPACES, "unshare-namespaces", CFG_BOOL, "false", "Unshares the user and network namespaces using the unshare() system call. The simulation continues running as the root user in the new user namespace. This allows creating new network namespaces and assign network resources without using sudo or setting capabilities for opp_run.");
 
-UnsharedNamespaceInitializer UnsharedNamespaceInitializer::singleton;
+UnsharedNamespaceInitializer *UnsharedNamespaceInitializer::singleton = nullptr;
 
 #ifdef __linux__
 #if OMNETPP_VERSION < 0x0700
-EXECUTE_ON_STARTUP(getEnvir()->addLifecycleListener(&UnsharedNamespaceInitializer::singleton));
+EXECUTE_ON_STARTUP(UnsharedNamespaceInitializer::singleton = new UnsharedNamespaceInitializer(); getEnvir()->addLifecycleListener(UnsharedNamespaceInitializer::singleton));
 #endif
 #endif
 

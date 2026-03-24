@@ -96,7 +96,7 @@ NetworkNamespaceContext::NetworkNamespaceContext(const char *name)
 #ifdef __linux__
         auto it = localNetworkNamespaces.find(name);
         if (it != localNetworkNamespaces.end()) {
-            oldFd = UnsharedNamespaceInitializer::singleton.originalNetworkNamespaceFd;
+            oldFd = UnsharedNamespaceInitializer::singleton->originalNetworkNamespaceFd;
             newFd = it->second;
             global = false;
         }
