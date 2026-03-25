@@ -9,6 +9,7 @@ import inet.networks.base.TsnNetworkBase;
 import inet.node.contract.IEthernetNetworkNode;
 import inet.node.ethernet.EthernetLink;
 
+
 network TsnLinearNetwork extends TsnNetworkBase
 {
     parameters:

@@ -7,7 +7,9 @@
 
 package inet.networks.base;
 
+import inet.linklayer.configurator.gatescheduling.contract.IGateScheduleConfigurator;
 import inet.networklayer.configurator.contract.INetworkConfigurator;
+
 
 network WiredNetworkBase extends NetworkBase
 {
