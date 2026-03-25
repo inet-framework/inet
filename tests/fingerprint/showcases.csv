@@ -332,11 +332,11 @@
 #/showcases/wireless/scaling/,        -f omnetpp.ini -c IdealRadioUdp -r 0,                                      500s,            b428-a77d/tplx;0000-0000/~tNl;0000-0000/~tND, PASS,
 
 /showcases/wireless/sensornetwork/,  -f omnetpp.ini -c BMac -r 0,                   25s,         2fdb-bd74/tplx;e869-c24c/~tNl;a500-cde2/tyf, PASS,    wireless EthernetMac Ipv4
-/showcases/wireless/sensornetwork/,  -f omnetpp.ini -c XMac -r 0,                   25s,         88e8-7e9c/tplx;953b-dde8/~tNl;e359-53dd/tyf, PASS,    wireless EthernetMac Ipv4
+/showcases/wireless/sensornetwork/,  -f omnetpp.ini -c XMac -r 0,                   25s,         fe90-1723/tplx;1f66-0393/~tNl;4ee5-4689/tyf, PASS,    wireless EthernetMac Ipv4
 /showcases/wireless/sensornetwork/,  -f omnetpp.ini -c LMac -r 0,                   25s,         9d51-0951/tplx;ef40-a9e8/~tNl;277b-2859/tyf, PASS,    wireless EthernetMac Ipv4
 # /showcases/wireless/sensornetwork/,  -f omnetpp.ini -c StatisticBase -r 0,          25s,         0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND, PASS,   # StatisticBase extended
 /showcases/wireless/sensornetwork/,  -f omnetpp.ini -c StatisticBMac -r 100,          25s,         171b-e9a6/tplx;d5e3-49c0/~tNl;5a3b-fbb7/tyf, PASS,    wireless EthernetMac Ipv4
-/showcases/wireless/sensornetwork/,  -f omnetpp.ini -c StatisticXMac -r 100,          25s,         9271-1704/tplx;1890-24d8/~tNl;21f5-073a/tyf, PASS,    wireless Ipv4
+/showcases/wireless/sensornetwork/,  -f omnetpp.ini -c StatisticXMac -r 100,          25s,         485a-fc8e/tplx;a132-711a/~tNl;2fba-dd67/tyf, PASS,    wireless Ipv4
 /showcases/wireless/sensornetwork/,  -f omnetpp.ini -c StatisticLMac -r 100,          25s,         60e4-3fd6/tplx;6f72-dc77/~tNl;87a0-68be/tyf, PASS,    wireless EthernetMac Ipv4
 
 /showcases/wireless/throughput/,     -f omnetpp.ini -c General -r 0,                1s,         030e-c416/tplx;66e6-0bca/~tNl;1b85-1592/~tND;9066-7760/tyf, PASS,    wireless Ipv4

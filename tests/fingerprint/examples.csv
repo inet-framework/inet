@@ -624,9 +624,9 @@
 /examples/wireless/nic/,             -f omnetpp.ini -c BMacWithUnitDiskRadio -r 0,                100s,     7743-0a38/tplx;082c-ca7d/~tNl;0c54-e505/tyf, PASS, wireless Ipv4
 /examples/wireless/nic/,             -f omnetpp.ini -c BMacWithApskScalarRadio -r 0,              100s,     2db0-de11/tplx;14f4-ecfa/~tNl;6ac6-ea89/tyf, PASS, wireless Ipv4
 /examples/wireless/nic/,             -f omnetpp.ini -c BMacWithApskDimensionalRadio -r 0,         100s,     2db0-de11/tplx;14f4-ecfa/~tNl;6ac6-ea89/tyf, PASS, wireless Ipv4
-/examples/wireless/nic/,             -f omnetpp.ini -c XMacWithUnitDiskRadio -r 0,                100s,     c1b4-d21b/tplx;8594-8455/~tNl;896c-7bb3/~tND;5f06-85dc/tyf, PASS, wireless Ipv4
-/examples/wireless/nic/,             -f omnetpp.ini -c XMacWithApskScalarRadio -r 0,              100s,     c1b4-d21b/tplx;8594-8455/~tNl;8736-8e34/~tND;aacf-dfc5/tyf, PASS, wireless Ipv4
-/examples/wireless/nic/,             -f omnetpp.ini -c XMacWithApskDimensionalRadio -r 0,         100s,     c1b4-d21b/tplx;8594-8455/~tNl;8736-8e34/~tND;aacf-dfc5/tyf, PASS, wireless Ipv4
+/examples/wireless/nic/,             -f omnetpp.ini -c XMacWithUnitDiskRadio -r 0,                100s,     3659-ad87/tplx;2f39-bb48/~tNl;cecf-60ed/~tND;e19c-4f2e/tyf, PASS, wireless Ipv4
+/examples/wireless/nic/,             -f omnetpp.ini -c XMacWithApskScalarRadio -r 0,              100s,     3659-ad87/tplx;2f39-bb48/~tNl;73d0-88fc/~tND;cc71-4e4e/tyf, PASS, wireless Ipv4
+/examples/wireless/nic/,             -f omnetpp.ini -c XMacWithApskDimensionalRadio -r 0,         100s,     3659-ad87/tplx;2f39-bb48/~tNl;73d0-88fc/~tND;cc71-4e4e/tyf, PASS, wireless Ipv4
 /examples/wireless/nic/,             -f omnetpp.ini -c Ieee80211MacV2X,                           1s,       31cd-9228/tplx;525a-e618/~tNl;b8b6-91be/~tND;2dab-090b/tyf, PASS, wireless Ipv4
 /examples/wireless/nic/,             -f omnetpp.ini -c Ieee80211MacWithUnitDiskRadio -r 0,        100s,     18e0-fd73/tplx;ce2f-7222/~tNl;813a-9291/~tND;68f0-f5e2/tyf, PASS, wireless Ipv4
 /examples/wireless/nic/,             -f omnetpp.ini -c Ieee80211MacWithIeee80211DimensionalRadio -r 0, 100s,     ac92-009c/tplx;3628-f8af/~tNl;a2de-d2ba/~tND;4844-aef4/tyf, PASS, wireless Ipv4
