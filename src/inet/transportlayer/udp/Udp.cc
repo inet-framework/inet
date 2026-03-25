@@ -337,7 +337,7 @@ Udp::SockDesc *Udp::findFirstSocketByLocalAddress(const L3Address& localAddr, us
 
     SockDescList& list = it->second;
     for (auto sd : list) {
-        if (sd->localAddr.isUnspecified() || sd->localAddr == localAddr)
+        if (sd->localAddr.isUnspecified() || localAddr.isUnspecified() || sd->localAddr == localAddr)
             return sd;
     }
     return nullptr;
