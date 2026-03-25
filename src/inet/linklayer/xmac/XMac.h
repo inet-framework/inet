@@ -192,8 +192,12 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol, public queuei
     double slotDuration;
     /** @brief The bitrate of transmission */
     double bitrate;
-    /** @brief The duration of CCA */
+    /** @brief The duration of CCA (R_l in the X-MAC paper) */
     double checkInterval;
+    /** @brief Time to transmit one control frame: ctrlFrameLength / bitrate (S_p, R_a in the X-MAC paper) */
+    double ctrlTxTime;
+    /** @brief Sender ACK listen duration in preamble RX phase (S_al in the X-MAC paper) */
+    double ackWaitDuration;
     /** @brief Transmission power of the node */
     double txPower;
     /** @brief Use MAC level acks or not */

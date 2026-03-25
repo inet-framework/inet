@@ -40,6 +40,18 @@ void XMac::initialize(int stage)
         maxTxAttempts = par("maxTxAttempts");
         EV_DEBUG << "headerLength: " << headerLength << "ctrlFrameLength: " << ctrlFrameLength << ", bitrate: " << bitrate << endl;
 
+        ctrlTxTime = b(ctrlFrameLength).get() / bitrate;
+        // S_al: sender ACK listen duration (optimal: R_a = ctrlTxTime, per paper Theorem 4.2).
+        ackWaitDuration = par("ackWaitDuration").doubleValue();
+        // Paper constraint (A.2, eq. 8): R_l > S_p — the receiver's CCA window
+        // must be longer than a preamble TX to guarantee reception.
+        if (checkInterval <= ctrlTxTime)
+            throw cRuntimeError("Configuration error: checkInterval (%.4fs) must be > "
+                    "ctrl frame TX time (%.4fs for %s at %.0f bps). "
+                    "Increase checkInterval, decrease ctrlFrameLength, or increase bitrate.",
+                    checkInterval, ctrlTxTime,
+                    ctrlFrameLength.str().c_str(), bitrate);
+
         stats = par("stats");
         nbTxDataPackets = 0;
         nbTxPreambles = 0;
@@ -218,11 +230,10 @@ void XMac::handleStateEvent(cMessage *msg)
         case SLEEP:
             if (kind == XMAC_WAKE_UP) {
                 EV_DEBUG << "node " << address << " : State SLEEP, message XMAC_WAKEUP, new state CCA, simTime "
-                         << simTime() << " to " << simTime() + 1.7f * checkInterval << endl;
-                // this CCA is useful when in RX to detect preamble and has to make room for
-                // 0.2f = Tx switch, 0.5f = Tx send_preamble, 1f = time_for_ack_back
+                         << simTime() << " to " << simTime() + checkInterval << endl;
+                // CCA duration = checkInterval (R_l in the X-MAC paper)
                 macState = CCA;
-                scheduleAfter(1.7f * checkInterval, cca_timeout);
+                scheduleAfter(checkInterval, cca_timeout);
                 radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
                 changeDisplayColor(GREEN);
                 return;
@@ -246,12 +257,12 @@ void XMac::handleStateEvent(cMessage *msg)
                 // channel is clear and we wanna SEND
                 if (!txQueue->isEmpty()) {
                     EV_DEBUG << "node " << address << " : State CCA, message XMAC_CCA_TIMEOUT, new state SEND_PREAMBLE" << endl;
-                    radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
                     macState = SEND_PREAMBLE;
+                    radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
                     // We send the preamble for a whole SLOT duration :)
                     scheduleAfter(slotDuration, stop_preambles);
-                    // if 0.2f * CI = 2ms to switch to TX -> has to be accounted for RX_preamble_detection
-                    scheduleAfter(0.2f * checkInterval, switch_preamble_phase);
+                    // radioModeChangedSignal → switching_done → sendPreamble()
+                    // transmissionStateChangedSignal → switch to RX, start ackWaitDuration timer
                     changeDisplayColor(YELLOW);
                     return;
                 }
@@ -327,24 +338,11 @@ void XMac::handleStateEvent(cMessage *msg)
 
         case SEND_PREAMBLE:
             if (kind == SWITCH_PREAMBLE_PHASE) {
-                // ~ make room for preamble + time_for_ack_back, check_interval is 10ms by default (from NetworkXMAC.ini)
-                // 0.5f* = 5ms
-                if (radio->getRadioMode() == IRadio::RADIO_MODE_RECEIVER) {
-                    radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
-                    EV_DEBUG << "node " << address << " : preamble_phase tx, simTime = " << simTime() << endl;
-                    scheduleAfter(0.5f * checkInterval, switch_preamble_phase);
-                    changeDisplayColor(YELLOW);
-                }
-                // 1.0f* = 10ms
-                else if (radio->getRadioMode() == IRadio::RADIO_MODE_TRANSMITTER) {
-                    if (radio->getTransmissionState() == physicallayer::IRadio::TRANSMISSION_STATE_TRANSMITTING)
-                        throw cRuntimeError("checkInterval is too short, transmission not finished");
-                    radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
-                    EV_DEBUG << "node " << address << " : preamble_phase rx, simTime = " << simTime() << endl;
-                    scheduleAfter(1.0f * checkInterval, switch_preamble_phase);
-                    changeDisplayColor(GREEN);
-                }
-                else { ASSERT(false); }
+                // RX phase (S_al) timeout — no early ACK received, send next preamble.
+                // TX phase is event-driven: transmissionStateChangedSignal triggers RX switch.
+                EV_DEBUG << "node " << address << " : preamble_phase rx timeout, switching to tx, simTime = " << simTime() << endl;
+                radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
+                changeDisplayColor(YELLOW);
                 return;
             }
             // radio switch from above
@@ -369,12 +367,25 @@ void XMac::handleStateEvent(cMessage *msg)
                 else if (kind == XMAC_STOP_PREAMBLES) {
                     EV << "node " << address << " : State SEND_PREAMBLE, message XMAC_STOP_PREAMBLES" << endl;
                 }
-                macState = SEND_DATA;
                 cancelEvent(stop_preambles);
                 cancelEvent(switch_preamble_phase);
-                radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
+                cancelEvent(switching_done);
                 txAttempts = 1;
+                macState = SEND_DATA;
                 changeDisplayColor(RED);
+                if (radio->getRadioMode() == IRadio::RADIO_MODE_TRANSMITTER) {
+                    if (radio->getTransmissionState() != IRadio::TRANSMISSION_STATE_TRANSMITTING) {
+                        // TX mode, idle — send data now
+                        sendDataPacket();
+                        macState = WAIT_TX_DATA_OVER;
+                    }
+                    // else: still transmitting preamble — transmissionStateChangedSignal
+                    // will trigger sendDataPacket() when the preamble TX finishes.
+                }
+                else {
+                    // RX or switching — switch to TX first
+                    radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
+                }
                 return;
             }
             // next is the case of a node receiving 1 preamble or data while in his preamble gaps, ignore, we are sending!
@@ -407,6 +418,13 @@ void XMac::handleStateEvent(cMessage *msg)
                 sendDataPacket();
                 macState = WAIT_TX_DATA_OVER;
                 changeDisplayColor(GREEN);
+                return;
+            }
+            else if ((kind == XMAC_PREAMBLE) || (kind == XMAC_DATA) || (kind == XMAC_ACK)) {
+                EV_DEBUG << "node " << address << " : State SEND_DATA, unexpected packet kind=" << kind << ", ignored" << endl;
+                if (kind == XMAC_DATA)
+                    nbDroppedDataPackets++;
+                delete msg;
                 return;
             }
             else {
@@ -517,7 +535,7 @@ void XMac::handleStateEvent(cMessage *msg)
                 EV_DEBUG << "node " << address << " : State WAIT_ACK_TX, message XMAC_ACK_TX_OVER, new state WAIT_DATA" << endl;
                 macState = WAIT_DATA;
                 cancelEvent(cca_timeout);
-                scheduleAfter((slotDuration / 2), data_timeout);
+                scheduleAfter(slotDuration / 2, data_timeout);
                 radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
                 changeDisplayColor(GREEN);
                 return;
@@ -581,8 +599,18 @@ void XMac::receiveSignal(cComponent *source, simsignal_t signalID, intval_t valu
                 scheduleAfter(SIMTIME_ZERO, ack_tx_over);
             }
             else if (macState == SEND_PREAMBLE) {
-                // TODO Preamble transmission finished, should the radio mode be switched to receiving?
-                ;
+                // Preamble TX finished, switch to RX to listen for early ACK.
+                // ackWaitDuration timer starts in radioModeChangedSignal when
+                // the radio actually enters RX (so it measures true listen time).
+                radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
+                changeDisplayColor(GREEN);
+            }
+            else if (macState == SEND_DATA) {
+                // Preamble TX finished after transition to SEND_DATA
+                // (stop_preambles fired during preamble TX). Send data now.
+                sendDataPacket();
+                macState = WAIT_TX_DATA_OVER;
+                changeDisplayColor(GREEN);
             }
         }
         else if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING)
@@ -592,10 +620,19 @@ void XMac::receiveSignal(cComponent *source, simsignal_t signalID, intval_t valu
     else if (signalID == IRadio::radioModeChangedSignal) {
         // Radio switching (to RX or TX) is over, ignore switching to SLEEP.
         if (macState == SEND_PREAMBLE) {
-            scheduleAfter(SIMTIME_ZERO, switching_done);
+            if (radio->getRadioMode() == IRadio::RADIO_MODE_TRANSMITTER) {
+                // TX switch complete — send preamble
+                scheduleAfter(SIMTIME_ZERO, switching_done);
+            }
+            else if (radio->getRadioMode() == IRadio::RADIO_MODE_RECEIVER) {
+                // RX switch complete — start S_al listen phase
+                scheduleAfter(ackWaitDuration, switch_preamble_phase);
+            }
         }
         else if (macState == SEND_ACK) {
-            scheduleAfter(0.5f * checkInterval, delay_for_ack_within_remote_rx);
+            // Send ACK immediately after switching to TX (no artificial delay
+            // needed — with event-driven TX, sender is already in RX).
+            scheduleAfter(SIMTIME_ZERO, delay_for_ack_within_remote_rx);
         }
         else if (macState == SEND_DATA) {
             scheduleAfter(SIMTIME_ZERO, switching_done);

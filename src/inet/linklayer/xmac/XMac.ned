@@ -31,8 +31,13 @@ module XMac extends MacProtocolBase like IMacProtocol
         // how long is one slot?
         double slotDuration @unit(s) = default(1s);
 
-        // how long is the check interval (CCA)?
+        // how long is the check interval (CCA)? (R_l in the X-MAC paper)
         double checkInterval @unit(s) = default(0.01s);
+
+        // sender ACK listen duration in the preamble cycle RX phase (S_al in
+        // the X-MAC paper). Paper-optimal: ctrlFrameLength/bitrate (= R_a).
+        // Default uses checkInterval for robustness against radio switching delays.
+        double ackWaitDuration @unit(s) = default(checkInterval);
 
         // should we animate the nodes with colors depending on their state or
         // not?
