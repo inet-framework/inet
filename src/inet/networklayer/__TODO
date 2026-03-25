@@ -1,11 +1,4 @@
- - DONE: refactored ICMP/ICMPv6 error indication propagation (see GitHub issue #1066)
-   - ICMP pops its own header, creates an Indication with Icmpv4ErrorInd tag (IcmpType type/code/mtu + originalPacket)
-   - ICMPv6 pops its own header, creates an Indication with Icmpv6ErrorInd tag (Icmpv6Type type/code/mtu + originalPacket)
-   - IPv4/IPv6 pops the quoted IP header from originalPacket, converts to L3AddressInd/HopLimitInd/etc. tags
-   - UDP pops the quoted UDP header, adds L4PortInd, looks up socket, forwards the same Indication as UDP_I_ERROR
-   - QUIC and other transport consumers get the originalPacket with only their own payload, no cross-layer parsing needed
-   - UDP now sends ICMP errors via Request messages (Icmpv4SendErrorReq / Icmpv6SendErrorReq) through the MessageDispatcher
-   - TODO: other callers (Ipv4, Ipv6, Ipv4FragBuf, Ipv6FragBuf, Ipv6NeighbourDiscovery) still use direct sendErrorMessage() calls — refactor later
+ - ICMP error sending: Ipv4, Ipv6, Ipv4FragBuf, Ipv6FragBuf, Ipv6NeighbourDiscovery still use direct sendErrorMessage() calls — refactor to Request messages via MessageDispatcher (like UDP already does with Icmpv4SendErrorReq/Icmpv6SendErrorReq)
  - implement ICMP rate limiting, see e.g bsd.mod/netinet/ip_icmp.c, badport_bandlim()
  - ICMP options: stopOnError (bool param), UDPBadPortSendICMP (bool param)
  - ICMP: shouldn't we unify ICMP and ICMPv6...? at least types and codes?
