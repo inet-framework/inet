@@ -29,7 +29,7 @@
 
 namespace inet {
 
-const uint16_t UDP_MAX_MESSAGE_SIZE = 65535; // bytes
+const uint16_t UDP_MAX_DATAGRAM_SIZE = 65535; // bytes (UDP header + payload, per RFC 768 16-bit Length field)
 
 class INET_API UdpChecksumInsertionHook : public SimpleModule, public NetfilterBase::HookBase
 {
@@ -115,6 +115,7 @@ class INET_API Udp : public TransportProtocolBase
     int numPassedUp = 0;
     int numDroppedWrongPort = 0;
     int numDroppedBadChecksum = 0;
+    int numDroppedBadLength = 0;
 
   protected:
     // utility: show current statistics above the icon

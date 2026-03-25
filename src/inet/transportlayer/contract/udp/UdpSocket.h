@@ -118,13 +118,13 @@ class INET_API UdpSocket : public ISocket
     void setOutputGate(cGate *toUdp) { gateToUdp = toUdp; }
 
     /**
-     * Bind the socket to a local port number. Use port=0 for ephemeral port.
+     * Bind the socket to a local port number. Use port=-1 for ephemeral port.
      */
     void bind(int localPort);
 
     /**
      * Bind the socket to a local port number and IP address (useful with
-     * multi-homing or multicast addresses). Use port=0 for an ephemeral port.
+     * multi-homing or multicast addresses). Use port=-1 for an ephemeral port.
      */
     void bind(L3Address localAddr, int localPort);
 

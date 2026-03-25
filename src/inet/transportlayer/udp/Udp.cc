@@ -67,6 +67,7 @@ void Udp::initialize(int stage)
         numPassedUp = 0;
         numDroppedWrongPort = 0;
         numDroppedBadChecksum = 0;
+        numDroppedBadLength = 0;
 
         WATCH(checksumMode);
         WATCH(lastEphemeralPort);
@@ -74,6 +75,7 @@ void Udp::initialize(int stage)
         WATCH(numPassedUp);
         WATCH(numDroppedWrongPort);
         WATCH(numDroppedBadChecksum);
+        WATCH(numDroppedBadLength);
         WATCH_EXPR("udpDroppedText", numDroppedWrongPort > 0 ? "\ndropped (no app): " + std::to_string(numDroppedWrongPort) + " pks" : std::string());
         WATCH(socketsByIdMap);
         WATCH(socketsByPortMap);
@@ -387,7 +389,7 @@ void Udp::connect(int sockId, const L3Address& remoteAddr, int remotePort)
 {
     if (remoteAddr.isUnspecified())
         throw cRuntimeError("connect: unspecified remote address");
-    if (remotePort <= 0 || remotePort > 65535)
+    if (remotePort < 0 || remotePort > 65535)
         throw cRuntimeError("connect: invalid remote port number %d", remotePort);
 
     SockDesc *sd = getOrCreateSocket(sockId);
@@ -732,6 +734,9 @@ void Udp::handleUpperPacket(Packet *packet)
         destPort = portsReq->getDestPort();
     }
 
+    // Note: per RFC 768, source port 0 means "not used". This implementation
+    // always assigns an ephemeral port if none is bound, so source port 0 is
+    // only possible via explicit bind(addr, 0).
     if (srcPort == -1)
         srcPort = sd->localPort;
 
@@ -751,7 +756,7 @@ void Udp::handleUpperPacket(Packet *packet)
     if (addressReq->getDestAddress().isUnspecified())
         throw cRuntimeError("send: unspecified destination address");
 
-    if (destPort <= 0 || destPort > 65535)
+    if (destPort < 0 || destPort > 65535)
         throw cRuntimeError("send: invalid remote port number %d", destPort);
 
     if (packet->findTag<MulticastReq>() == nullptr)
@@ -778,8 +783,8 @@ void Udp::handleUpperPacket(Packet *packet)
     udpHeader->setDestinationPort(destPort);
 
     B totalLength = udpHeader->getChunkLength() + packet->getDataLength();
-    if (totalLength.get() > UDP_MAX_MESSAGE_SIZE)
-        throw cRuntimeError("send: total UDP message size exceeds %u", UDP_MAX_MESSAGE_SIZE);
+    if (totalLength.get() > UDP_MAX_DATAGRAM_SIZE)
+        throw cRuntimeError("send: total UDP message size exceeds %u", UDP_MAX_DATAGRAM_SIZE);
 
     udpHeader->setTotalLengthField(totalLength);
     if (checksumMode == CHECKSUM_COMPUTED) {
@@ -933,12 +938,22 @@ void Udp::processUDPPacket(Packet *udpPacket)
     auto hasIncorrectLength = totalLength<udpHeader->getChunkLength() || totalLength> udpHeader->getChunkLength() + udpPacket->getDataLength();
     auto networkProtocol = udpPacket->getTag<NetworkProtocolInd>()->getProtocol();
 
-    if (hasIncorrectLength || !verifyChecksum(networkProtocol, udpHeader, udpPacket)) {
-        EV_WARN << "Packet has bit error, discarding\n";
+    if (!verifyChecksum(networkProtocol, udpHeader, udpPacket)) {
+        EV_WARN << "Packet has bad checksum, discarding\n";
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);
         emit(packetDroppedSignal, udpPacket, &details);
         numDroppedBadChecksum++;
+        delete udpPacket;
+        return;
+    }
+
+    if (hasIncorrectLength) {
+        EV_WARN << "Packet has incorrect length field, discarding\n";
+        PacketDropDetails details;
+        details.setReason(INCORRECTLY_RECEIVED);
+        emit(packetDroppedSignal, udpPacket, &details);
+        numDroppedBadLength++;
         delete udpPacket;
         return;
     }
@@ -1005,15 +1020,14 @@ bool Udp::verifyChecksum(const Protocol *networkProtocol, const Ptr<const UdpHea
                 return true;
             }
             else {
-                // otherwise compute the checksum, the check passes if the result is 0xFFFF (includes the received checksum) and the chunks are correct
+                // otherwise compute the checksum, the check passes if the result is 0xFFFF (includes the received checksum)
                 auto l3AddressInd = packet->getTag<L3AddressInd>();
                 auto srcAddress = l3AddressInd->getSrcAddress();
                 auto destAddress = l3AddressInd->getDestAddress();
                 auto totalLength = udpHeader->getTotalLengthField();
                 auto udpData = packet->peekDataAt(B(0), totalLength - udpHeader->getChunkLength(), Chunk::PF_ALLOW_EMPTY | Chunk::PF_ALLOW_INCORRECT);
                 auto computedChecksum = computeChecksum(networkProtocol, srcAddress, destAddress, udpHeader, udpData);
-                // TODO delete these isCorrect calls, rely on checksum only
-                return computedChecksum == 0xFFFF && udpHeader->isCorrect() && udpData->isCorrect();
+                return computedChecksum == 0xFFFF;
             }
         }
         default:
