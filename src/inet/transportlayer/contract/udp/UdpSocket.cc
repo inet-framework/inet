@@ -54,7 +54,7 @@ void UdpSocket::connect(L3Address addr, int port)
 {
     if (addr.isUnspecified())
         throw cRuntimeError("UdpSocket::connect(): unspecified remote address");
-    if (port <= 0 || port > 65535)
+    if (port < 0 || port > 65535)
         throw cRuntimeError("UdpSocket::connect(): invalid remote port number %d", port);
 
     UdpConnectCommand *ctrl = new UdpConnectCommand();
