@@ -1,6 +1,8 @@
 #include "inet/routing/ospfv3/Ospfv3Splitter.h"
 
 #include "inet/common/Protocol.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 
 namespace inet {
 namespace ospfv3 {
@@ -24,6 +26,9 @@ void Ospfv3Splitter::initialize(int stage)
 {
     SimpleModule::initialize(stage);
 
+    if (stage == INITSTAGE_LOCAL) {
+        ipOutSink.reference(gate("ipOut"), true);
+    }
     if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         containingModule = findContainingNode(this);
         routingModule = this->getParentModule();
@@ -31,6 +36,12 @@ void Ospfv3Splitter::initialize(int stage)
         ift.reference(this, "interfaceTableModule", true);
 
         this->parseConfig(par("ospfv3RoutingConfig"), par("ospfv3IntConfig"));
+
+        // initialize processOutSinks after parseConfig sets up the gate vector
+        int numProcessGates = this->gateSize("processOut");
+        processOutSinks.resize(numProcessGates);
+        for (int i = 0; i < numProcessGates; i++)
+            processOutSinks[i].reference(gate("processOut", i), true);
 
         WATCH_PTRVECTOR(this->processesModules);
     }
@@ -44,7 +55,7 @@ void Ospfv3Splitter::handleMessage(cMessage *msg)
     }
     else {
         if (strcmp(msg->getArrivalGate()->getBaseName(), "processIn") == 0) {
-            this->send(msg, "ipOut"); // A message from one of the processes
+            ipOutSink.pushPacket(check_and_cast<Packet *>(msg)); // A message from one of the processes
         }
         else if (strcmp(msg->getArrivalGate()->getBaseName(), "ipIn") == 0) {
             Packet *packet = check_and_cast<Packet *>(msg);
@@ -66,12 +77,11 @@ void Ospfv3Splitter::handleMessage(cMessage *msg)
                 auto it = this->interfaceToProcess.find(ieName);
                 // Is there a process with this interface??
                 if (it != this->interfaceToProcess.end()) {
-                    this->send(msg, "processOut", it->second.first); // first is always there
-
                     if (it->second.second != -1) {
-                        cMessage *copy = msg->dup();
-                        this->send(copy, "processOut", it->second.second);
+                        Packet *copy = packet->dup();
+                        processOutSinks[it->second.second].pushPacket(copy);
                     }
+                    processOutSinks[it->second.first].pushPacket(packet); // first is always there
                 }
             }
             else {
@@ -199,6 +209,13 @@ void Ospfv3Splitter::addNewProcess(cXMLElement *process, cXMLElement *interfaces
     newProcessModule->scheduleStart(simTime());
     this->processesModules.push_back(newProcessModule);
 } // addNewProcess
+
+void Ospfv3Splitter::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
+}
 
 } // namespace ospfv3
 } // namespace inet
