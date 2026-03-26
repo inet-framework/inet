@@ -17,9 +17,12 @@
 #include "inet/networklayer/rsvpte/RsvpPathMsg_m.h"
 #include "inet/networklayer/rsvpte/RsvpResvMsg_m.h"
 #include "inet/networklayer/rsvpte/SignallingMsg_m.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 class RsvpClassifier;
 class IIpv4RoutingTable;
@@ -30,7 +33,7 @@ class LibTable;
 /**
  * TODO documentation
  */
-class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
+class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable, public IPassivePacketSink
 {
   protected:
 
@@ -164,6 +167,8 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
     ModuleRefByPar<LibTable> lt;
     ModuleRefByPar<IRsvpClassifier> rpct;
 
+    PassivePacketSinkRef ipOutSink;
+
     int maxPsbId = 0;
     int maxRsbId = 0;
 
@@ -279,6 +284,14 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
 
     // IScriptable implementation
     virtual void processCommand(const cXMLElement& node) override;
+
+  public:
+    virtual bool canPushSomePacket(const cGate *gate) const override { return true; }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return true; }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 };
 
 bool operator==(const SessionObj& a, const SessionObj& b);

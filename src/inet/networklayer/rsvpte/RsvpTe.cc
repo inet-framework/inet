@@ -63,6 +63,7 @@ void RsvpTe::initialize(int stage)
     RoutingProtocolBase::initialize(stage);
     // TODO INITSTAGE
     if (stage == INITSTAGE_LOCAL) {
+        ipOutSink.reference(gate("ipOut"), true);
         tedmod.reference(this, "tedModule", true);
         rt.reference(this, "routingTableModule", true);
         ift.reference(this, "interfaceTableModule", true);
@@ -1862,7 +1863,14 @@ void RsvpTe::sendToIP(Packet *msg, Ipv4Address destAddr)
     msg->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::rsvpTe);
     msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     msg->addTagIfAbsent<L3AddressReq>()->setDestAddress(destAddr);
-    send(msg, "ipOut");
+    ipOutSink.pushPacket(msg);
+}
+
+void RsvpTe::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessageWhenUp(packet);
 }
 
 void RsvpTe::scheduleTimeout(PathStateBlock *psbEle)
