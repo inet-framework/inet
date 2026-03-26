@@ -13,6 +13,7 @@ Define_Module(ThruputMeter);
 
 void ThruputMeter::initialize()
 {
+    outSink.reference(gate("out"), true);
     startTime = par("startTime");
     long _batchSize = par("batchSize");
     if ((_batchSize < 0) || (((long)(unsigned int)_batchSize) != _batchSize))
@@ -36,8 +37,16 @@ void ThruputMeter::initialize()
 
 void ThruputMeter::handleMessage(cMessage *msg)
 {
-    updateStats(simTime(), PK(msg)->getBitLength());
-    send(msg, "out");
+    auto packet = check_and_cast<Packet *>(msg);
+    updateStats(simTime(), packet->getBitLength());
+    outSink.pushPacket(packet);
+}
+
+void ThruputMeter::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
 }
 
 void ThruputMeter::updateStats(simtime_t now, unsigned long bits)
