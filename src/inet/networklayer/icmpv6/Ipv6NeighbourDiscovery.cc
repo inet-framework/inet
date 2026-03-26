@@ -80,6 +80,7 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
     OperationalBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
+        ipv6OutSink.reference(gate("ipv6Out"), true);
         const char *checksumModeString = par("checksumMode");
         checksumMode = parseChecksumMode(checksumModeString, false);
         WATCH(numSent);
@@ -293,12 +294,12 @@ void Ipv6NeighbourDiscovery::processIpv6Datagram(Packet *packet)
             break;
         case Ipv6NeighbourCache::STALE:
             EV_INFO << "Reachability State is STALE.\n";
-            send(packet, "ipv6Out");
+            ipv6OutSink.pushPacket(packet);
             initiateNeighbourUnreachabilityDetection(nce);
             break;
         case Ipv6NeighbourCache::REACHABLE:
             EV_INFO << "Next hop is REACHABLE, sending packet to next-hop address.";
-            send(packet, "ipv6Out");
+            ipv6OutSink.pushPacket(packet);
             break;
         case Ipv6NeighbourCache::DELAY:
             if (nce->macAddress.isUnspecified()) {
@@ -308,7 +309,7 @@ void Ipv6NeighbourDiscovery::processIpv6Datagram(Packet *packet)
             }
             else {
                 EV_INFO << "Next hop is in DELAY state, sending packet to next-hop address.";
-                send(packet, "ipv6Out");
+                ipv6OutSink.pushPacket(packet);
             }
             break;
         case Ipv6NeighbourCache::PROBE:
@@ -319,7 +320,7 @@ void Ipv6NeighbourDiscovery::processIpv6Datagram(Packet *packet)
             }
             else {
                 EV_INFO << "Next hop is in PROBE state, sending packet to next-hop address.";
-                send(packet, "ipv6Out");
+                ipv6OutSink.pushPacket(packet);
             }
             break;
         default:
@@ -2707,5 +2708,12 @@ void Ipv6NeighbourDiscovery::stop()
     // clear neighbour cache
     neighbourCache.clear();
 }
+void Ipv6NeighbourDiscovery::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
+}
+
 } // namespace inet
 

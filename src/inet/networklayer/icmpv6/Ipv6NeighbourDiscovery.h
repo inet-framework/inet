@@ -14,6 +14,7 @@
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 #include "inet/networklayer/icmpv6/Ipv6NdMessage_m.h"
@@ -36,7 +37,7 @@ class Mipv6;
 /**
  * Implements RFC 2461 Neighbor Discovery for Ipv6.
  */
-class INET_API Ipv6NeighbourDiscovery : public OperationalBase, protected cListener
+class INET_API Ipv6NeighbourDiscovery : public OperationalBase, protected cListener, public queueing::IPassivePacketSink
 {
   public:
     typedef std::vector<Packet *> MsgPtrVector;
@@ -90,6 +91,7 @@ class INET_API Ipv6NeighbourDiscovery : public OperationalBase, protected cListe
     long numSent = 0;
     long numReceived = 0;
 
+    queueing::PassivePacketSinkRef ipv6OutSink;
     ModuleRefByPar<IInterfaceTable> ift;
     ModuleRefByPar<Ipv6RoutingTable> rt6;
     ModuleRefByPar<Icmpv6> icmpv6;
@@ -397,6 +399,14 @@ class INET_API Ipv6NeighbourDiscovery : public OperationalBase, protected cListe
 
   protected:
     void routersUnreachabilityDetection(const NetworkInterface *ie); // 3.9.07 - CB
+
+  public:
+    virtual bool canPushSomePacket(const cGate *gate) const override { return true; }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return true; }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 };
 
 } // namespace inet
