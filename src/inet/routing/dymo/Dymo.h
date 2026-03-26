@@ -15,6 +15,7 @@
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/routing/dymo/DymoDefs.h"
 #include "inet/routing/dymo/DymoRouteData.h"
@@ -22,6 +23,8 @@
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 namespace dymo {
 
@@ -41,7 +44,7 @@ namespace dymo {
  *  - 13.6. Message Aggregation
  *    RFC5148 add jitter to broadcasts
  */
-class INET_API Dymo : public RoutingProtocolBase, public cListener, public NetfilterBase::HookBase
+class INET_API Dymo : public RoutingProtocolBase, public cListener, public NetfilterBase::HookBase, public IPassivePacketSink
 {
   private:
     // Dymo parameters from RFC
@@ -80,6 +83,7 @@ class INET_API Dymo : public RoutingProtocolBase, public cListener, public Netfi
     std::multimap<L3Address, Packet *> targetAddressToDelayedPackets;
     std::set<PacketJitterTimer *> packetJitterTimers;
     std::vector<std::pair<L3Address, int>> clientAddressAndPrefixLengthPairs; // 5.3.  Router Clients and Client Networks
+    PassivePacketSinkRef ipOutSink;
 
   public:
     Dymo();
@@ -215,6 +219,14 @@ class INET_API Dymo : public RoutingProtocolBase, public cListener, public Netfi
 
     // notification
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
+
+  public:
+    virtual bool canPushSomePacket(const cGate *gate) const override { return true; }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return true; }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 };
 
 } // namespace dymo
