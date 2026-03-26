@@ -51,6 +51,7 @@ void TcpLwip::initialize(int stage)
     EV_TRACE << this << ": initialize stage " << stage << endl;
 
     if (stage == INITSTAGE_LOCAL) {
+        ipOutSink.reference(gate("ipOut"), true);
         const char *q;
         q = par("sendQueueClass");
         if (*q != '\0')
@@ -626,7 +627,7 @@ void TcpLwip::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP, L3Add
         EV_INFO << " URG";
     EV_INFO << " len=" << B(packet->getDataLength()) - tcpHdr->getHeaderLength() << "\n";
 
-    send(packet, "ipOut");
+    ipOutSink.pushPacket(packet);
 }
 
 TcpLwipSendQueue *TcpLwip::createSendQueue()
@@ -637,6 +638,13 @@ TcpLwipSendQueue *TcpLwip::createSendQueue()
 TcpLwipReceiveQueue *TcpLwip::createReceiveQueue()
 {
     return new TcpLwipReceiveQueue();
+}
+
+void TcpLwip::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
 }
 
 } // namespace tcp

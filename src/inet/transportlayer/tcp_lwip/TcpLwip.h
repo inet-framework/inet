@@ -13,6 +13,7 @@
 #include <map>
 
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
@@ -31,7 +32,7 @@ namespace tcp {
 /**
  * Module for using the LwIP TCP stack.
  */
-class INET_API TcpLwip : public SimpleModule, public LwipTcpStackIf, public LifecycleUnsupported
+class INET_API TcpLwip : public SimpleModule, public LwipTcpStackIf, public LifecycleUnsupported, public queueing::IPassivePacketSink
 {
   public:
     TcpLwip();
@@ -116,10 +117,19 @@ class INET_API TcpLwip : public SimpleModule, public LwipTcpStackIf, public Life
     struct netif netIf;
 
   protected:
+    queueing::PassivePacketSinkRef ipOutSink;
     LwipTcpLayer *pLwipTcpLayerM = nullptr;
     bool isAliveM = false;
     Packet *pCurTcpSegM = nullptr;
     ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
+
+  public:
+    virtual bool canPushSomePacket(const cGate *gate) const override { return true; }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return true; }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 };
 
 } // namespace tcp
