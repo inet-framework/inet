@@ -525,12 +525,6 @@ void SctpAssociation::sendEstabIndicationToApp()
     msg->addTag<SocketInd>()->setSocketId(assocId);
 //    msg->setControlInfo(establishIndication);
     callback->handleEstablished(msg);
-
-    char vectorName[128];
-    for (uint16_t i = 0; i < inboundStreams; i++) {
-        snprintf(vectorName, sizeof(vectorName), "Stream %d Throughput", i);
-        streamThroughputVectors[i] = new cOutVector(vectorName);
-    }
 }
 
 void SctpAssociation::sendToApp(cMessage *msg)
