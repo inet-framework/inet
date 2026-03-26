@@ -94,6 +94,7 @@ void Mipv6::initialize(int stage)
     OperationalBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
+        toIpv6Sink.reference(gate("toIPv6"), true);
         EV_TRACE << "Initializing Mipv6 module" << endl;
 
         // moved rt6 initialization to here, as we should
@@ -2932,6 +2933,13 @@ void Mipv6::handleCrashOperation(LifecycleOperation *operation)
 
     tunnels.clear();
     noOfNonSplitTunnels = 0;
+}
+
+void Mipv6::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
 }
 
 } // namespace inet

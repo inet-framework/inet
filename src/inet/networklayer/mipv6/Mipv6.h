@@ -20,6 +20,7 @@
 #include "inet/common/lifecycle/ModuleOperations.h"
 
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/ipv6/IIpv6ExtensionHeaderHandler.h"
 #include "inet/networklayer/mipv6/BindingUpdateList.h"
@@ -59,7 +60,7 @@ enum TimerIfEntryType {
 /**
  * Implements RFC 3775 Mobility Support in Ipv6.
  */
-class INET_API Mipv6 : public OperationalBase, public IIpv6ExtensionHeaderHandler, public IIpv6TlvOptionHandler, public NetfilterBase::HookBase
+class INET_API Mipv6 : public OperationalBase, public IIpv6ExtensionHeaderHandler, public IIpv6TlvOptionHandler, public NetfilterBase::HookBase, public queueing::IPassivePacketSink
 {
   public:
     virtual ~Mipv6();
@@ -666,6 +667,16 @@ class INET_API Mipv6 : public OperationalBase, public IIpv6ExtensionHeaderHandle
      * Handles the event that indicates that a {care-of,home} keygen token has expired.
      */
     void handleTokenExpiry(cMessage *msg);
+
+    queueing::PassivePacketSinkRef toIpv6Sink;
+
+  public:
+    virtual bool canPushSomePacket(const cGate *gate) const override { return true; }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return true; }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 };
 
 } // namespace inet
