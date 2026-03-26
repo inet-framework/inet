@@ -15,6 +15,7 @@
 
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 #include "inet/networklayer/icmpv6/Ipv6NdMessage_m.h"
@@ -37,7 +38,7 @@ class xMIPv6;
 /**
  * Implements RFC 2461 Neighbor Discovery for Ipv6.
  */
-class INET_API Ipv6NeighbourDiscovery : public SimpleModule, public LifecycleUnsupported
+class INET_API Ipv6NeighbourDiscovery : public SimpleModule, public LifecycleUnsupported, public queueing::IPassivePacketSink
 {
   public:
     typedef std::vector<Packet *> MsgPtrVector;
@@ -87,6 +88,7 @@ class INET_API Ipv6NeighbourDiscovery : public SimpleModule, public LifecycleUns
     // Packets awaiting Address Resolution or Next-Hop Determination.
     cQueue pendingQueue;
 
+    queueing::PassivePacketSinkRef ipv6OutSink;
     ModuleRefByPar<IInterfaceTable> ift;
     ModuleRefByPar<Ipv6RoutingTable> rt6;
     ModuleRefByPar<Icmpv6> icmpv6;
@@ -381,6 +383,14 @@ class INET_API Ipv6NeighbourDiscovery : public SimpleModule, public LifecycleUns
     void routersUnreachabilityDetection(const NetworkInterface *ie); // 3.9.07 - CB
     bool isWirelessAccessPoint(cModule *module);
 #endif /* INET_WITH_xMIPv6 */
+
+  public:
+    virtual bool canPushSomePacket(const cGate *gate) const override { return true; }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return true; }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 };
 
 } // namespace inet

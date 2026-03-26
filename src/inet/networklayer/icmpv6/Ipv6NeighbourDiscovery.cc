@@ -79,6 +79,7 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
     SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
+        ipv6OutSink.reference(gate("ipv6Out"), true);
         const char *checksumModeString = par("checksumMode");
         checksumMode = parseChecksumMode(checksumModeString, false);
     }
@@ -286,20 +287,20 @@ void Ipv6NeighbourDiscovery::processIpv6Datagram(Packet *packet)
             break;
         case Ipv6NeighbourCache::STALE:
             EV_INFO << "Reachability State is STALE.\n";
-            send(packet, "ipv6Out");
+            ipv6OutSink.pushPacket(packet);
             initiateNeighbourUnreachabilityDetection(nce);
             break;
         case Ipv6NeighbourCache::REACHABLE:
             EV_INFO << "Next hop is REACHABLE, sending packet to next-hop address.";
-            send(packet, "ipv6Out");
+            ipv6OutSink.pushPacket(packet);
             break;
         case Ipv6NeighbourCache::DELAY:
             EV_INFO << "Next hop is in DELAY state, sending packet to next-hop address.";
-            send(packet, "ipv6Out");
+            ipv6OutSink.pushPacket(packet);
             break;
         case Ipv6NeighbourCache::PROBE:
             EV_INFO << "Next hop is in PROBE state, sending packet to next-hop address.";
-            send(packet, "ipv6Out");
+            ipv6OutSink.pushPacket(packet);
             break;
         default:
             throw cRuntimeError("Unknown Neighbour cache entry state.");
@@ -2628,6 +2629,13 @@ bool Ipv6NeighbourDiscovery::isWirelessAccessPoint(cModule *module)
 }
 
 #endif /* INET_WITH_xMIPv6 */
+
+void Ipv6NeighbourDiscovery::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
+}
 
 } // namespace inet
 
