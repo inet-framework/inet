@@ -20,6 +20,8 @@ Define_Module(EchoProtocol);
 void EchoProtocol::initialize(int stage)
 {
     SimpleModule::initialize(stage);
+    if (stage == INITSTAGE_LOCAL)
+        ipOutSink.reference(gate("ipOut"), true);
 }
 
 
@@ -69,13 +71,20 @@ void EchoProtocol::processEchoRequest(Packet *request)
 
     reply->addTag<DispatchProtocolReq>()->setProtocol(request->getTag<NetworkProtocolInd>()->getProtocol());
     reply->addTag<PacketProtocolTag>()->setProtocol(&Protocol::echo);
-    send(reply, "ipOut");
     delete request;
+    ipOutSink.pushPacket(reply);
 }
 
 void EchoProtocol::processEchoReply(Packet *reply)
 {
     delete reply;
+}
+
+void EchoProtocol::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    processPacket(packet);
 }
 
 } // namespace inet
