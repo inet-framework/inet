@@ -35,6 +35,8 @@ void Mpls::initialize(int stage)
         lt.reference(this, "libTableModule", true);
         ift.reference(this, "interfaceTableModule", true);
         pct.reference(this, "classifierModule", true);
+        lowerLayerOutSink.reference(gate("lowerLayerOut"), true);
+        upperLayerOutSink.reference(gate("upperLayerOut"), true);
     }
 }
 
@@ -280,14 +282,21 @@ void Mpls::sendToL2(Packet *msg)
 {
     ASSERT(msg->findTag<InterfaceReq>());
     ASSERT(msg->findTag<PacketProtocolTag>());
-    send(msg, "lowerLayerOut");
+    lowerLayerOutSink.pushPacket(msg);
 }
 
 void Mpls::sendToL3(Packet *msg)
 {
     ASSERT(msg->findTag<InterfaceInd>());
     ASSERT(msg->findTag<DispatchProtocolReq>());
-    send(msg, "upperLayerOut");
+    upperLayerOutSink.pushPacket(msg);
+}
+
+void Mpls::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
 }
 
 } // namespace inet
