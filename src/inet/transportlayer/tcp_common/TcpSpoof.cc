@@ -20,6 +20,7 @@ Define_Module(TcpSpoof);
 
 void TcpSpoof::initialize()
 {
+    ipOutSink.reference(gate("ipOut"), true);
     simtime_t t = par("t");
     scheduleAt(t, new cMessage("timer"));
 }
@@ -72,13 +73,20 @@ void TcpSpoof::sendToIP(Packet *pk, L3Address src, L3Address dest)
     addresses->setDestAddress(dest);
 
     emit(packetSentSignal, pk);
-    send(pk, "ipOut");
+    ipOutSink.pushPacket(pk);
 }
 
 unsigned long TcpSpoof::chooseInitialSeqNum()
 {
     // choose an initial send sequence number in the same way as TCP does
     return (unsigned long)SIMTIME_DBL(fmod(simTime() * 250000.0, 1.0 + (double)(unsigned)0xffffffffUL)) & 0xffffffffUL;
+}
+
+void TcpSpoof::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
 }
 
 } // namespace tcp
