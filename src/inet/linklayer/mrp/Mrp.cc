@@ -7,7 +7,6 @@
 #include "Mrp.h"
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
@@ -154,8 +153,6 @@ void Mrp::initialize(int stage)
         switchModule->subscribe(interfaceStateChangedSignal, this);
     }
     if (stage == INITSTAGE_LINK_LAYER) { // "auto" MAC addresses assignment takes place in stage 0
-        registerProtocol(Protocol::mrp, gate("relayOut"), gate("relayIn"), nullptr, nullptr);
-        registerProtocol(Protocol::ieee8021qCFM, gate("relayOut"), gate("relayIn"), nullptr, nullptr);
         initPortTable();
         primaryRingPortId = resolveInterfaceIndex(par("ringPort1"));
         secondaryRingPortId = resolveInterfaceIndex(par("ringPort2"));

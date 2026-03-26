@@ -7,7 +7,6 @@
 
 #include "inet/protocolelement/checksum/ChecksumHeaderChecker.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/protocolelement/checksum/header/ChecksumHeader_m.h"
 #include "inet/protocolelement/common/AccessoryProtocol.h"
 
@@ -20,8 +19,6 @@ void ChecksumHeaderChecker::initialize(int stage)
     ChecksumCheckerBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         headerPosition = parseHeaderPosition(par("headerPosition"));
-        registerService(AccessoryProtocol::checksum, nullptr, inputGate);
-        registerProtocol(AccessoryProtocol::checksum, nullptr, outputGate);
     }
 }
 

@@ -7,7 +7,6 @@
 
 #include "Quic.h"
 #include "inet/common/Protocol.h"
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/transportlayer/contract/quic/QuicCommand_m.h"
@@ -43,8 +42,6 @@ Quic::~Quic() {
 void Quic::handleStartOperation(LifecycleOperation *operation)
 {
     EV_DEBUG << "start operation" << endl;
-    registerService(Protocol::quic, gate("appIn"), gate("udpIn"));
-    registerProtocol(Protocol::quic, gate("udpOut"), gate("appOut"));
 }
 
 void Quic::handleStopOperation(LifecycleOperation *operation)

@@ -55,7 +55,6 @@ void Gptp::initialize(int stage)
         socketSink.reference(gate("socketOut"), true);
     }
     if (stage == INITSTAGE_LINK_LAYER) {
-        registerProtocol(Protocol::gptp, gate("socketOut"), gate("socketIn"));
         // configure slave port
         const char *str = par("slavePort");
         if (*str) {

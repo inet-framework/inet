@@ -6,7 +6,6 @@
 
 #include "MrpRelay.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/DirectionTag_m.h"
 #include "inet/linklayer/common/EtherType_m.h"
@@ -41,7 +40,6 @@ void MrpRelay::initialize(int stage)
         WATCH(numDeliveredPDUsToMRP);
         WATCH(numDispatchedNonMRPFrames);
     } else if (stage == INITSTAGE_LINK_LAYER) {
-        registerService(Protocol::ethernetMac, gate("upperLayerIn"), gate("upperLayerOut"));
         bridgeNetworkInterface = chooseBridgeInterface();
         bridgeAddress = bridgeNetworkInterface->getMacAddress();
     }
