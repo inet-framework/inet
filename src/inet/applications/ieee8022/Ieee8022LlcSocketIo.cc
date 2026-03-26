@@ -25,6 +25,7 @@ void Ieee8022LlcSocketIo::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         localSap = par("localSap");
         remoteSap = par("remoteSap");
+        trafficOutSink.reference(gate("trafficOut"), true);
         numSent = 0;
         numReceived = 0;
         WATCH(numSent);
@@ -97,7 +98,7 @@ void Ieee8022LlcSocketIo::socketDataArrived(Ieee8022LlcSocket *socket, Packet *p
     EV_INFO << "Received packet: " << packet << endl;
     numReceived++;
     packet->removeTag<SocketInd>();
-    send(packet, "trafficOut");
+    trafficOutSink.pushPacket(packet);
 }
 
 void Ieee8022LlcSocketIo::socketClosed(Ieee8022LlcSocket *socket)
@@ -122,6 +123,13 @@ void Ieee8022LlcSocketIo::handleStopOperation(LifecycleOperation *operation)
 void Ieee8022LlcSocketIo::handleCrashOperation(LifecycleOperation *operation)
 {
     socket.destroy();
+}
+
+void Ieee8022LlcSocketIo::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
 }
 
 } // namespace inet
