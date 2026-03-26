@@ -12,10 +12,13 @@
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
 
-class INET_API Ipv4Encap : public SimpleModule
+using namespace inet::queueing;
+
+class INET_API Ipv4Encap : public SimpleModule, public IPassivePacketSink
 {
   protected:
     struct SocketDescriptor {
@@ -28,6 +31,8 @@ class INET_API Ipv4Encap : public SimpleModule
     };
 
   protected:
+    PassivePacketSinkRef upperLayerSink;
+    PassivePacketSinkRef lowerLayerSink;
     ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
     int defaultTimeToLive = -1;
     int defaultMCTimeToLive = -1;
@@ -41,6 +46,14 @@ class INET_API Ipv4Encap : public SimpleModule
     virtual void handleRequest(Request *request);
     virtual void encapsulate(Packet *packet);
     virtual void decapsulate(Packet *packet);
+
+  public:
+    virtual bool canPushSomePacket(const cGate *gate) const override { return true; }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return true; }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 };
 
 } // namespace inet

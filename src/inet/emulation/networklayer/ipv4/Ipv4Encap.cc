@@ -34,6 +34,8 @@ void Ipv4Encap::initialize(int stage)
         WATCH(defaultTimeToLive);
         WATCH(defaultMCTimeToLive);
         WATCH(checksumMode);
+        upperLayerSink.reference(gate("upperLayerOut"), true);
+        lowerLayerSink.reference(gate("lowerLayerOut"), true);
     }
 }
 
@@ -46,7 +48,7 @@ void Ipv4Encap::handleMessage(cMessage *msg)
         EV << "Encapsulating\n";
         encapsulate(packet);
         EV << "SEnding\n";
-        send(packet, "lowerLayerOut");
+        lowerLayerSink.pushPacket(packet);
     }
     else {
         auto packet = check_and_cast<Packet *>(msg);
@@ -67,14 +69,14 @@ void Ipv4Encap::handleMessage(cMessage *msg)
                 packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
                 EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
 //                emit(packetSentToUpperSignal, packetCopy);
-                send(packetCopy, "upperLayerOut");
+                upperLayerSink.pushPacket(packetCopy);
                 hasSocket = true;
             }
         }
         if (contains(upperProtocols, protocol)) {
             EV_INFO << "Passing up to protocol " << protocol << "\n";
 //            emit(packetSentToUpperSignal, packet);
-            send(packet, "upperLayerOut");
+            upperLayerSink.pushPacket(packet);
         }
         else if (hasSocket) {
             delete packet;
@@ -85,7 +87,7 @@ void Ipv4Encap::handleMessage(cMessage *msg)
 //            const NetworkInterface* fromIE = getSourceInterface(packet);
 //            sendIcmpError(packet, fromIE ? fromIE->getInterfaceId() : -1, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
         }
-        send(packet, "upperLayerOut");
+        upperLayerSink.pushPacket(packet);
     }
 }
 
@@ -219,6 +221,13 @@ void Ipv4Encap::decapsulate(Packet *packet)
     l3AddressInd->setSrcAddress(ipv4Header->getSrcAddress());
     l3AddressInd->setDestAddress(ipv4Header->getDestAddress());
     packet->addTagIfAbsent<HopLimitInd>()->setHopLimit(ipv4Header->getTimeToLive());
+}
+
+void Ipv4Encap::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
 }
 
 } // namespace inet
