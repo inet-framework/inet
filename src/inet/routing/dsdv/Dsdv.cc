@@ -23,6 +23,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -175,6 +176,7 @@ void Dsdv::handleSelfMessage(cMessage *msg)
         packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
 
         // broadcast to other nodes the hello message
+        yieldBeforePush();
         ipSink.pushPacket(packet);
         packet = nullptr;
         hello = nullptr;
@@ -191,6 +193,7 @@ void Dsdv::handleSelfMessage(cMessage *msg)
         for (auto it = forwardList->begin(); it != forwardList->end(); it++) {
             if ((*it)->event == msg) {
                 EV << "Vou mandar forward do " << (*it)->hello->peekData<DsdvHello>()->getSrcAddress() << endl; // todo
+                yieldBeforePush();
                 ipSink.pushPacket((*it)->hello);
                 (*it)->hello = nullptr;
                 delete *it;
@@ -304,7 +307,7 @@ void Dsdv::handleMessageWhenUp(cMessage *msg)
 //                    waitTime= SIMTIME_DBL (simTime())+waitTime;
                     EV_DETAIL << "waitime for forward is " << waitTime << " And host is " << source << "\n"; // FIXME unchanged waitTime showed twice!!!
                     packet->insertAtBack(recHello);
-                    inet::scheduleAfter("delay", waitTime, [=] () { ipSink.pushPacket(packet); });
+                    inet::scheduleAfter("delay", waitTime, [=] () { yieldBeforePush(); ipSink.pushPacket(packet); });
                     packet = nullptr;
                 }
                 else {

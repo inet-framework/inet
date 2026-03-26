@@ -13,6 +13,7 @@
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcSocketCommand_m.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -79,6 +80,7 @@ void Ieee8022LlcSocket::send(Packet *packet)
             interfaceReq->setInterfaceId(interfaceId);
     }
     EV_INFO << "Sending packet on socket" << EV_FIELD(socketId) << EV_FIELD(packet) << EV_ENDL;
+    yieldBeforePush();
     sink.pushPacket(packet);
     isOpen_ = true;
 }

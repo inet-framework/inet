@@ -38,6 +38,7 @@
 #endif
 #include "inet/transportlayer/common/L4PortTag_m.h"
 #include "inet/transportlayer/common/L4Tools.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -838,6 +839,7 @@ void Udp::handleUpperPacket(Packet *packet)
     EV_INFO << "Sending packet to lower layer" << EV_FIELD(protocol, l3Protocol->getName()) << EV_FIELD(packet) << EV_ENDL;
     emit(packetSentSignal, packet);
     emit(packetSentToLowerSignal, packet);
+    yieldBeforePush();
     ipSink.pushPacket(packet);
     numSent++;
 }
@@ -1180,6 +1182,7 @@ void Udp::sendUp(Ptr<const UdpHeader>& header, Packet *payload, SockDesc *sd, us
     payload->addTagIfAbsent<L4PortInd>()->setDestPort(destPort);
 
     emit(packetSentToUpperSignal, payload);
+    yieldBeforePush();
     appSink.pushPacket(payload);
     numPassedUp++;
 }

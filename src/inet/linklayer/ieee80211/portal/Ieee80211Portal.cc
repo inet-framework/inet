@@ -20,6 +20,7 @@
 #include "inet/linklayer/ieee80211/portal/Ieee80211Portal.h"
 #include "inet/linklayer/ieee8022/Ieee8022Llc.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -43,13 +44,16 @@ void Ieee80211Portal::handleMessage(cMessage *message)
     if (message->arrivedOn("upperLayerIn")) {
         auto packet = check_and_cast<Packet *>(message);
         encapsulate(packet);
+        yieldBeforePush();
         lowerLayerSink.pushPacket(packet);
     }
     else if (message->arrivedOn("lowerLayerIn")) {
         auto packet = check_and_cast<Packet *>(message);
         decapsulate(packet);
-        if (upperLayerOutConnected)
+        if (upperLayerOutConnected) {
+            yieldBeforePush();
             upperLayerSink.pushPacket(packet);
+        }
         else
             delete packet;
     }
@@ -126,12 +130,15 @@ void Ieee80211Portal::pushPacket(Packet *packet, const cGate *gate)
     take(packet);
     if (gate->isName("upperLayerIn")) {
         encapsulate(packet);
+        yieldBeforePush();
         lowerLayerSink.pushPacket(packet);
     }
     else if (gate->isName("lowerLayerIn")) {
         decapsulate(packet);
-        if (upperLayerOutConnected)
+        if (upperLayerOutConnected) {
+            yieldBeforePush();
             upperLayerSink.pushPacket(packet);
+        }
         else
             delete packet;
     }

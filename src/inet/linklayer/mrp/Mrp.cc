@@ -20,6 +20,7 @@
 #include "inet/linklayer/ethernet/common/Ethernet.h"
 #include "inet/linklayer/mrp/Timers_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -1889,6 +1890,7 @@ void Mrp::sendFrameReq(int portId, const MacAddress &destinationAddress, const M
     macAddressReq->setSrcAddress(sourceAddress);
     macAddressReq->setDestAddress(destinationAddress);
     EV_INFO << "Sending packet down" << EV_FIELD(mrpPDU) << EV_FIELD(destinationAddress) << EV_ENDL;
+    yieldBeforePush();
     relayOutSink.pushPacket(mrpPDU);
 }
 
@@ -1901,6 +1903,7 @@ void Mrp::sendCCM(int portId, Packet *ccm)
     macAddressReq->setSrcAddress(getPortNetworkInterface(portId)->getMacAddress());
     macAddressReq->setDestAddress(MacAddress::CFM_CCM_MULTICAST_ADDRESS);
     EV_INFO << "Sending packet down" << EV_FIELD(ccm) << EV_ENDL;
+    yieldBeforePush();
     relayOutSink.pushPacket(ccm);
 }
 

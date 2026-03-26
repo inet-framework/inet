@@ -42,6 +42,7 @@
 #ifdef INET_WITH_xMIPv6
 #include "inet/networklayer/xmipv6/MobilityHeader_m.h" // for HA Option header
 #include "inet/networklayer/xmipv6/xMIPv6.h"
+#include "inet/common/SimulationContinuation.h"
 #endif // ifdef INET_WITH_xMIPv6
 
 namespace inet {
@@ -440,6 +441,7 @@ void Ipv6Tunneling::encapsulateDatagram(Packet *packet)
         // copy old dest addr
         addresses->setDestAddress(dest);
 
+        yieldBeforePush();
         upperLayerSink.pushPacket(packet);
     }
     else {
@@ -452,6 +454,7 @@ void Ipv6Tunneling::encapsulateDatagram(Packet *packet)
     addresses->setSrcAddress(tunnels[vIfIndex].entry);
     addresses->setDestAddress(tunnels[vIfIndex].exit);
 
+    yieldBeforePush();
     upperLayerSink.pushPacket(packet);
 #ifdef INET_WITH_xMIPv6
 }
@@ -491,6 +494,7 @@ void Ipv6Tunneling::decapsulateDatagram(Packet *packet)
     // (important if several interfaces are available)
 //    controlInfo->setInterfaceId(-1);
 
+    yieldBeforePush();
     linkLayerSink.pushPacket(packet);
 
 #ifdef INET_WITH_xMIPv6

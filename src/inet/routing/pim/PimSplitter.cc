@@ -14,6 +14,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -64,6 +65,7 @@ void PimSplitter::handleMessage(cMessage *msg)
         EV_INFO << "Received packet from PIM module, sending it to the network." << endl;
         auto packet = check_and_cast<Packet *>(msg);
         packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
+        yieldBeforePush();
         ipSink.pushPacket(packet);
     }
     else
@@ -89,11 +91,13 @@ void PimSplitter::processPIMPacket(Packet *pkt)
     switch (pimInt->getMode()) {
         case PimInterface::DenseMode:
             EV_INFO << "Sending packet to PimDm.\n";
+            yieldBeforePush();
             pimDMSink.pushPacket(pkt);
             break;
 
         case PimInterface::SparseMode:
             EV_INFO << "Sending packet to PimSm.\n";
+            yieldBeforePush();
             pimSMSink.pushPacket(pkt);
             break;
 

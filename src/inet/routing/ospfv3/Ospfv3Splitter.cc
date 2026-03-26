@@ -3,6 +3,7 @@
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 namespace ospfv3 {
@@ -55,6 +56,7 @@ void Ospfv3Splitter::handleMessage(cMessage *msg)
     }
     else {
         if (strcmp(msg->getArrivalGate()->getBaseName(), "processIn") == 0) {
+            yieldBeforePush();
             ipOutSink.pushPacket(check_and_cast<Packet *>(msg)); // A message from one of the processes
         }
         else if (strcmp(msg->getArrivalGate()->getBaseName(), "ipIn") == 0) {
@@ -79,8 +81,10 @@ void Ospfv3Splitter::handleMessage(cMessage *msg)
                 if (it != this->interfaceToProcess.end()) {
                     if (it->second.second != -1) {
                         Packet *copy = packet->dup();
+                        yieldBeforePush();
                         processOutSinks[it->second.second].pushPacket(copy);
                     }
+                    yieldBeforePush();
                     processOutSinks[it->second.first].pushPacket(packet); // first is always there
                 }
             }

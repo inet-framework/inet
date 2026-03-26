@@ -16,6 +16,7 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -85,6 +86,7 @@ void Ieee80211MgmtBase::sendDown(Packet *frame)
 {
     ASSERT(isUp());
     frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mgmt);
+    yieldBeforePush();
     macOutSink.pushPacket(frame);
 }
 

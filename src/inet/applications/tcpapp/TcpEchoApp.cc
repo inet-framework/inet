@@ -15,6 +15,7 @@
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/TimeTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -52,6 +53,7 @@ void TcpEchoApp::sendDown(Packet *msg)
     bytesSent += msg->getByteLength();
     msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
     msg->getTag<SocketReq>();
+    yieldBeforePush();
     socketSink.pushPacket(msg);
 }
 

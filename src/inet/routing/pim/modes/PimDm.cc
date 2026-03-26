@@ -15,6 +15,7 @@
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -1673,6 +1674,7 @@ void PimDm::sendToIP(Packet *packet, Ipv4Address srcAddr, Ipv4Address destAddr, 
     addresses->setSrcAddress(srcAddr);
     addresses->setDestAddress(destAddr);
     packet->addTagIfAbsent<HopLimitReq>()->setHopLimit(1);
+    yieldBeforePush();
     ipSink.pushPacket(packet);
 }
 

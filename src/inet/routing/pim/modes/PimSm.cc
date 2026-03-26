@@ -19,6 +19,7 @@
 #include "inet/networklayer/ipv4/Ipv4.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -1530,6 +1531,7 @@ void PimSm::sendToIP(Packet *packet, Ipv4Address srcAddr, Ipv4Address destAddr, 
     packet->addTagIfAbsent<L3AddressReq>()->setSrcAddress(srcAddr);
     packet->addTagIfAbsent<L3AddressReq>()->setDestAddress(destAddr);
     packet->addTagIfAbsent<HopLimitReq>()->setHopLimit(ttl);
+    yieldBeforePush();
     ipSink.pushPacket(packet);
 }
 
@@ -1556,6 +1558,7 @@ void PimSm::forwardMulticastData(Packet *data, int outInterfaceId)
     addrTag->setDestAddress(ipv4Header->getDestAddress());
     data->addTagIfAbsent<HopLimitReq>()->setHopLimit(MAX_TTL - 2); // one minus for source DR router and one for RP router // TODO specification???
     data->trim();
+    yieldBeforePush();
     ipSink.pushPacket(data);
 }
 

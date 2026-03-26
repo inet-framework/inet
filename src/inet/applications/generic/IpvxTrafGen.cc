@@ -17,6 +17,7 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -160,6 +161,7 @@ void IpvxTrafGen::sendPacket()
     EV_INFO << "Sending packet: ";
     printPacket(packet);
     emit(packetSentSignal, packet);
+    yieldBeforePush();
     ipSink.pushPacket(packet);
     numSent++;
 }

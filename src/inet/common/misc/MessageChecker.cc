@@ -8,6 +8,7 @@
 
 #include "inet/common/FunctionalEvent.h"
 #include "inet/common/stlutils.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -210,6 +211,7 @@ void MessageChecker::forwardMessage(cMessage *msg)
     if (endTransmissionTime > now)
         delayToWait = endTransmissionTime - now;
     inet::scheduleAfter("forward", delayToWait, [=] () {
+        yieldBeforePush();
         outSink.pushPacket(check_and_cast<Packet *>(msg));
     });
 }

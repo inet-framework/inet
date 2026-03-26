@@ -19,6 +19,7 @@
 #include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/common/TosTag_m.h"
 #include "inet/networklayer/contract/ipv4/Ipv4SocketCommand_m.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -45,6 +46,7 @@ void Ipv4Encap::handleMessage(cMessage *msg)
         EV << "Encapsulating\n";
         encapsulate(packet);
         EV << "SEnding\n";
+        yieldBeforePush();
         lowerLayerSink.pushPacket(packet);
     }
     else {
@@ -66,6 +68,7 @@ void Ipv4Encap::handleMessage(cMessage *msg)
                 packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
                 EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
 //                emit(packetSentToUpperSignal, packetCopy);
+                yieldBeforePush();
                 upperLayerSink.pushPacket(packetCopy);
                 hasSocket = true;
             }
@@ -73,6 +76,7 @@ void Ipv4Encap::handleMessage(cMessage *msg)
         if (contains(upperProtocols, protocol)) {
             EV_INFO << "Passing up to protocol " << protocol << "\n";
 //            emit(packetSentToUpperSignal, packet);
+            yieldBeforePush();
             upperLayerSink.pushPacket(packet);
         }
         else if (hasSocket) {
@@ -84,6 +88,7 @@ void Ipv4Encap::handleMessage(cMessage *msg)
 //            const NetworkInterface* fromIE = getSourceInterface(packet);
 //            sendIcmpError(packet, fromIE ? fromIE->getInterfaceId() : -1, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
         }
+        yieldBeforePush();
         upperLayerSink.pushPacket(packet);
     }
 }

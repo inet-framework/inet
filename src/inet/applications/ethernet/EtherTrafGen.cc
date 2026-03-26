@@ -21,6 +21,7 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -164,6 +165,7 @@ void EtherTrafGen::sendBurstPackets()
 
         EV_INFO << "Send packet `" << msgname << "' dest=" << destMacAddress << " length=" << len << "B ssap/dsap=" << ssap << "/" << dsap << "\n";
         emit(packetSentSignal, datapacket);
+        yieldBeforePush();
         outSink.pushPacket(datapacket);
         packetsSent++;
     }

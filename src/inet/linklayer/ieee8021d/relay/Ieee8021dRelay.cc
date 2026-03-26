@@ -14,6 +14,7 @@
 #include "inet/linklayer/common/UserPriorityTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
 #include "inet/linklayer/ieee8021d/common/Ieee8021dInterfaceData.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -211,6 +212,7 @@ void Ieee8021dRelay::updatePeerAddress(NetworkInterface *incomingInterface, MacA
 void Ieee8021dRelay::sendUp(Packet *packet)
 {
     EV_INFO << "Sending frame to the upper layer" << EV_FIELD(packet) << EV_ENDL;
+    yieldBeforePush();
     upperLayerSink.pushPacket(packet);
 }
 

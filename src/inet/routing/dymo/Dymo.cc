@@ -20,6 +20,7 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/transportlayer/contract/udp/UdpCommand_m.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -376,6 +377,7 @@ void Dymo::processRreqHolddownTimer(RreqHolddownTimer *message)
 
 void Dymo::sendUdpPacket(cPacket *packet)
 {
+    yieldBeforePush();
     ipOutSink.pushPacket(check_and_cast<Packet *>(packet));
 }
 

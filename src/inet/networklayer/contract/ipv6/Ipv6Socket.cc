@@ -13,6 +13,7 @@
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/ipv6/Ipv6SocketCommand_m.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -76,6 +77,7 @@ void Ipv6Socket::send(Packet *packet)
 {
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv6);
     packet->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    yieldBeforePush();
     sink.pushPacket(packet);
 }
 

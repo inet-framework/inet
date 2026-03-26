@@ -14,6 +14,7 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -103,6 +104,7 @@ void VirtualTunnel::socketDataArrived(EthernetSocket *socket, Packet *packet)
 {
     packet->removeTag<SocketInd>();
     packet->getTagForUpdate<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
+    yieldBeforePush();
     upperLayerSink.pushPacket(packet);
 }
 #endif
@@ -112,6 +114,7 @@ void VirtualTunnel::socketDataArrived(Ieee8021qSocket *socket, Packet *packet)
 {
     packet->removeTag<SocketInd>();
     packet->getTagForUpdate<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
+    yieldBeforePush();
     upperLayerSink.pushPacket(packet);
 }
 #endif

@@ -11,6 +11,7 @@
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/tun/TunControlInfo_m.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -71,6 +72,7 @@ void TunSocket::send(Packet *packet)
     packet->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
     packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
     EV_INFO << "Sending packet on socket" << EV_FIELD(socketId) << EV_FIELD(packet) << EV_ENDL;
+    yieldBeforePush();
     sink.pushPacket(packet);
 }
 

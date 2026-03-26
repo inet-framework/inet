@@ -19,6 +19,7 @@
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/rsvpte/Utils.h"
 #include "inet/networklayer/ted/Ted.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -1863,6 +1864,7 @@ void RsvpTe::sendToIP(Packet *msg, Ipv4Address destAddr)
     msg->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::rsvpTe);
     msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     msg->addTagIfAbsent<L3AddressReq>()->setDestAddress(destAddr);
+    yieldBeforePush();
     ipOutSink.pushPacket(msg);
 }
 

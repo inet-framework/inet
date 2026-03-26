@@ -11,6 +11,7 @@
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/networklayer/common/FragmentationTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -69,6 +70,7 @@ void IpSocketIo::socketDataArrived(Ipv4Socket *socket, Packet *packet)
     emit(packetReceivedSignal, packet);
     numReceived++;
     packet->removeTag<SocketInd>();
+    yieldBeforePush();
     trafficOutSink.pushPacket(packet);
 }
 

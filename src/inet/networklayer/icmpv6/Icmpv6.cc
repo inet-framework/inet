@@ -20,6 +20,7 @@
 #include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -281,6 +282,7 @@ void Icmpv6::sendToIP(Packet *msg)
 {
     msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv6);
     msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
+    yieldBeforePush();
     ipv6Sink.pushPacket(msg);
 }
 

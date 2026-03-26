@@ -11,6 +11,7 @@
 #include "inet/protocolelement/acknowledgement/AcknowledgeHeader_m.h"
 #include "inet/protocolelement/common/AccessoryProtocol.h"
 #include "inet/protocolelement/ordering/SequenceNumberHeader_m.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -53,6 +54,7 @@ void SendWithAcknowledge::processPacket(Packet *packet)
         header->setSequenceNumber(sequenceNumber);
         packet->insertAtFront(header);
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&AccessoryProtocol::withAcknowledge);
+        yieldBeforePush();
         consumer.pushPacket(packet);
         auto timer = new cMessage("AcknowledgeTimer");
         timer->setKind(sequenceNumber);

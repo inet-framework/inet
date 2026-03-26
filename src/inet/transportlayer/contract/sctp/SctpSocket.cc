@@ -13,6 +13,7 @@
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -342,6 +343,7 @@ void SctpSocket::send(Packet *packet)
     packet->addTagIfAbsent<SocketReq>()->setSocketId(assocId);
     if (interfaceIdToTun != -1)
         packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceIdToTun);
+    yieldBeforePush();
     sink.pushPacket(packet);
 }
 

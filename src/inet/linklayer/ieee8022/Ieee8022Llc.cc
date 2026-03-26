@@ -18,6 +18,7 @@
 #include "inet/common/stlutils.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcSocketCommand_m.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -64,6 +65,7 @@ void Ieee8022Llc::handleMessageWhenUp(cMessage *msg)
 void Ieee8022Llc::processPacketFromHigherLayer(Packet *packet)
 {
     encapsulate(packet);
+    yieldBeforePush();
     lowerLayerSink.pushPacket(packet);
 }
 
@@ -117,6 +119,7 @@ bool Ieee8022Llc::deliverCopyToSockets(Packet *packet)
                 packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
                 EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
                 packetCopy->setKind(SOCKET_I_DATA);
+                yieldBeforePush();
                 upperLayerSink.pushPacket(packetCopy);
                 isSent = true;
             }
@@ -156,6 +159,7 @@ void Ieee8022Llc::processPacketFromMac(Packet *packet)
     bool isSent = deliverCopyToSockets(packet);
 
     if (isDeliverableToUpperLayer(packet)) {
+        yieldBeforePush();
         upperLayerSink.pushPacket(packet);
     }
     else {

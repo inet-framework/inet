@@ -33,6 +33,7 @@
 
 #ifdef INET_WITH_xMIPv6
 #include "inet/networklayer/xmipv6/MobilityHeader_m.h"
+#include "inet/common/SimulationContinuation.h"
 #endif /* INET_WITH_xMIPv6 */
 
 namespace inet {
@@ -737,6 +738,7 @@ void Ipv6::localDeliver(Packet *packet, const NetworkInterface *fromIE)
             packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
             EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
             emit(packetSentToUpperSignal, packetCopy);
+            yieldBeforePush();
             transportSink.pushPacket(packetCopy);
             hasSocket = true;
         }
@@ -770,6 +772,7 @@ void Ipv6::localDeliver(Packet *packet, const NetworkInterface *fromIE)
     else if (hasUpperProtocol(protocol)) {
         EV_INFO << "Passing up to protocol " << *protocol << "\n";
         emit(packetSentToUpperSignal, packet);
+        yieldBeforePush();
         transportSink.pushPacket(packet);
     }
     else if (!hasSocket) {
@@ -791,6 +794,7 @@ void Ipv6::handleReceivedIcmp(Packet *msg)
     }
     else {
         EV_INFO << "ICMPv6 packet: passing it to ICMPv6 module\n";
+        yieldBeforePush();
         transportSink.pushPacket(msg);
     }
 }
@@ -1010,6 +1014,7 @@ void Ipv6::sendDatagramToOutput(Packet *packet, const NetworkInterface *destIE, 
         packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
     else
         packet->removeTagIfPresent<DispatchProtocolReq>();
+    yieldBeforePush();
     queueSink.pushPacket(packet);
 }
 

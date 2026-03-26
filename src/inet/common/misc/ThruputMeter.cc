@@ -6,6 +6,7 @@
 
 
 #include "inet/common/misc/ThruputMeter.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -39,6 +40,7 @@ void ThruputMeter::handleMessage(cMessage *msg)
 {
     auto packet = check_and_cast<Packet *>(msg);
     updateStats(simTime(), packet->getBitLength());
+    yieldBeforePush();
     outSink.pushPacket(packet);
 }
 

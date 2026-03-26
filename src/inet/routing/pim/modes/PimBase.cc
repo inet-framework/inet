@@ -18,6 +18,7 @@
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -147,6 +148,7 @@ void PimBase::sendHelloPacket(PimInterface *pimInterface)
 
     emit(sentHelloPkSignal, pk);
 
+    yieldBeforePush();
     ipSink.pushPacket(pk);
 }
 

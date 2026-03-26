@@ -29,6 +29,7 @@
 #include "inet/networklayer/ipv6tunneling/Ipv6Tunneling.h"
 #include "inet/networklayer/xmipv6/BindingCache.h"
 #include "inet/networklayer/xmipv6/BindingUpdateList.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -2081,6 +2082,7 @@ void xMIPv6::processType2RH(Packet *packet, Ipv6RoutingHeader *rh)
 
     if (validRH2) {
         EV_INFO << "Valid RH2 - copied address from RH2 to datagram" << endl;
+        yieldBeforePush();
         toIpv6Sink.pushPacket(packet);
     }
     else {
@@ -2164,6 +2166,7 @@ void xMIPv6::processHoAOpt(Packet *packet, HomeAddressOption *hoaOpt)
 
     if (validHoAOpt) {
         EV_INFO << "Valid HoA Option - copied address from HoA Option to datagram" << endl;
+        yieldBeforePush();
         toIpv6Sink.pushPacket(packet);
     }
     else {

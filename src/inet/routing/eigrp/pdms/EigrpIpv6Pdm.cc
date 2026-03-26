@@ -28,6 +28,7 @@
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/routing/eigrp/EigrpDeviceConfigurator.h"
 #include "inet/routing/eigrp/pdms/EigrpPrint.h"
+#include "inet/common/SimulationContinuation.h"
 #define EIGRP_DEBUG
 
 namespace inet {
@@ -421,6 +422,7 @@ void EigrpIpv6Pdm::processMsgFromRtp(cMessage *msg)
     pk->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv6);
     pk->addTagIfAbsent<L3AddressReq>()->setSrcAddress(ift->getInterfaceById(destIface)->getProtocolData<Ipv6InterfaceData>()->getLinkLocalAddress());
     pk->addTagIfAbsent<HopLimitReq>()->setHopLimit(1);
+    yieldBeforePush();
     splitterOutSink.pushPacket(pk);
 }
 

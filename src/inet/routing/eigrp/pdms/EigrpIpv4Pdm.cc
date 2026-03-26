@@ -27,6 +27,7 @@
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/routing/eigrp/pdms/EigrpPrint.h"
+#include "inet/common/SimulationContinuation.h"
 #define EIGRP_DEBUG
 
 namespace inet {
@@ -415,6 +416,7 @@ void EigrpIpv4Pdm::processMsgFromRtp(cMessage *msg)
     pk->addTagIfAbsent<L3AddressReq>()->setDestAddress(destAddress);
     pk->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     pk->addTagIfAbsent<HopLimitReq>()->setHopLimit(1);
+    yieldBeforePush();
     splitterOutSink.pushPacket(pk);
 }
 

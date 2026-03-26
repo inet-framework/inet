@@ -18,6 +18,7 @@
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/physicallayer/wired/ethernet/EthernetSignal_m.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -434,6 +435,7 @@ void EthernetMacPhy::processReceivedDataFrame(Packet *packet, const Ptr<const Et
     emit(packetSentToUpperSignal, packet);
     // pass up to upper layer
     EV_INFO << "Sending packet to upper layer" << EV_FIELD(packet) << EV_ENDL;
+    yieldBeforePush();
     upperLayerSink.pushPacket(packet);
 }
 

@@ -23,6 +23,7 @@
 #include "inet/networklayer/nexthop/NextHopInterfaceData.h"
 #include "inet/networklayer/nexthop/NextHopRoute.h"
 #include "inet/networklayer/nexthop/NextHopRoutingTable.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -546,6 +547,7 @@ void NextHopForwarding::sendDatagramToHL(Packet *packet)
             packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
             EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
             emit(packetSentToUpperSignal, packetCopy);
+            yieldBeforePush();
             transportSink.pushPacket(packetCopy);
             hasSocket = true;
         }
@@ -554,6 +556,7 @@ void NextHopForwarding::sendDatagramToHL(Packet *packet)
     if (contains(upperProtocols, protocol)) {
         EV_INFO << "Passing up to protocol " << *protocol << "\n";
         emit(packetSentToUpperSignal, packet);
+        yieldBeforePush();
         transportSink.pushPacket(packet);
         numLocalDeliver++;
     }

@@ -14,6 +14,7 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -69,6 +70,7 @@ void StpBase::sendOut(Packet *packet, int interfaceId, const MacAddress& destAdd
     auto macAddressReq = packet->addTag<MacAddressReq>();
     macAddressReq->setSrcAddress(bridgeAddress);
     macAddressReq->setDestAddress(destAddress);
+    yieldBeforePush();
     relaySink.pushPacket(packet);
 }
 

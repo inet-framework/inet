@@ -25,6 +25,7 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -356,6 +357,7 @@ void Icmp::sendToIP(Packet *msg)
     EV_INFO << "Sending " << msg << " to lower layer.\n";
     msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
+    yieldBeforePush();
     ipSink.pushPacket(msg);
 }
 

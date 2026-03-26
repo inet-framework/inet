@@ -27,6 +27,7 @@
 
 #ifdef INET_WITH_NEXTHOP
 #include "inet/networklayer/nexthop/NextHopInterfaceData.h"
+#include "inet/common/SimulationContinuation.h"
 #endif // ifdef INET_WITH_NEXTHOP
 
 namespace inet {
@@ -223,8 +224,10 @@ void NetworkInterface::pushPacket(Packet *packet, const cGate *gate)
     }
     else if (gate == upperLayerOut) {
         packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceId);
-        if (upperLayerOutConsumer != nullptr)
+        if (upperLayerOutConsumer != nullptr) {
+            yieldBeforePush();
             upperLayerOutConsumer.pushPacket(packet);
+        }
         else {
             EV_WARN << "Network interface has no upper layer connection, dropping packet" << EV_FIELD(packet) << EV_ENDL;
             dropPacket(packet, OTHER_PACKET_DROP);

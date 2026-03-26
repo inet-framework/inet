@@ -15,6 +15,7 @@
 
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 namespace eigrp {
@@ -45,6 +46,7 @@ void EigrpSplitter::handleMessage(cMessage *msg)
     }
     else {
         if (strcmp(msg->getArrivalGate()->getBaseName(), "splitterIn") == 0 || strcmp(msg->getArrivalGate()->getBaseName(), "splitter6In") == 0) {
+            yieldBeforePush();
             ipOutSink.pushPacket(check_and_cast<Packet *>(msg)); // A message from ipv6pdm or ipv4pdm to outside
         }
         else if (strcmp(msg->getArrivalGate()->getBaseName(), "ipIn") == 0) {
@@ -59,9 +61,11 @@ void EigrpSplitter::handleMessage(cMessage *msg)
 
             auto ipversion = packet->getTag<L3AddressInd>()->getSrcAddress().getType();
             if (ipversion == inet::L3Address::IPv4) {
+                yieldBeforePush();
                 splitterOutSink.pushPacket(packet);
             }
             else if (ipversion == inet::L3Address::IPv6) {
+                yieldBeforePush();
                 splitter6OutSink.pushPacket(packet);
             }
             else {

@@ -27,6 +27,7 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -318,8 +319,10 @@ void Ieee80211Mac::sendUpFrame(Packet *frame)
     take(frame);
     const auto& header = frame->peekAtFront<Ieee80211DataOrMgmtHeader>();
     decapsulate(frame);
-    if (!(header->getType() & 0x30))
+    if (!(header->getType() & 0x30)) {
+        yieldBeforePush();
         mgmtOutSink.pushPacket(frame);
+    }
     else
         ds->processDataFrame(frame, dynamicPtrCast<const Ieee80211DataHeader>(header));
 }

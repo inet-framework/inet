@@ -25,6 +25,7 @@
 
 #ifdef INET_WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/common/SimulationContinuation.h"
 #endif // ifdef INET_WITH_IPv4
 
 namespace inet {
@@ -441,6 +442,7 @@ void Sctp::sendShutdownCompleteFromMain(SctpHeader *sctpmsg, L3Address fromAddr,
 void Sctp::send_to_ip(Packet *msg)
 {
     EV_INFO << "send packet " << msg << " to IP\n";
+    yieldBeforePush();
     ipSink.pushPacket(msg);
 }
 

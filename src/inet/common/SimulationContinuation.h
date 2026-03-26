@@ -51,6 +51,18 @@ class INET_API SimulationContextSwitchingEvent : public cEvent
     virtual void execute() override;
 };
 
+/**
+ * When enabled, inserts a yield (sleepSimulationTime(0)) before each new pushPacket()
+ * call that replaced a send() during the intra-node communication refactoring.
+ * This recreates the old event-by-event processing for trajectory verification.
+ */
+INET_API extern bool yieldBeforePushPacket;
+
+inline void yieldBeforePush() {
+    if (yieldBeforePushPacket)
+        sleepSimulationTime(0);
+}
+
 } // namespace inet
 
 #endif

@@ -14,6 +14,7 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/common/FragmentationTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -105,6 +106,7 @@ void Ieee8022LlcSocketIo::socketDataArrived(Ieee8022LlcSocket *socket, Packet *p
     EV_INFO << "Received packet: " << packet << endl;
     numReceived++;
     packet->removeTag<SocketInd>();
+    yieldBeforePush();
     trafficOutSink.pushPacket(packet);
 }
 

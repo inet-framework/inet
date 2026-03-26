@@ -9,6 +9,7 @@
 
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -63,6 +64,7 @@ void TcpClientSocketIo::handleMessage(cMessage *message)
 void TcpClientSocketIo::socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent)
 {
     packet->removeTag<SocketInd>();
+    yieldBeforePush();
     trafficSink.pushPacket(packet);
     sendOrScheduleReadCommandIfNeeded();
 }

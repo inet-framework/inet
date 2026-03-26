@@ -27,6 +27,7 @@
 #include "inet/transportlayer/tcp/TcpReceiveQueue.h"
 #include "inet/transportlayer/tcp/TcpSendQueue.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 namespace tcp {
@@ -121,11 +122,13 @@ void Tcp::sendFromConn(cMessage *msg, const char *gatename, int gateindex)
     if (!strcmp(gatename, "ipOut"))
         // KLUDGE: this schedule call is here to keep the fingerprints
         inet::scheduleAfter("SendToIp", 0, [=] () {
+            yieldBeforePush();
             ipSink.pushPacket(check_and_cast<Packet *>(msg));
         });
     else if (!strcmp(gatename, "appOut")) {
         // KLUDGE: this schedule call is here to keep the fingerprints
         inet::scheduleAfter("SendToApp", 0, [=] () {
+            yieldBeforePush();
             appSink.pushPacket(check_and_cast<Packet *>(msg));
         });
     }

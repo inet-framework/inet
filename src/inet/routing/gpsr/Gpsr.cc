@@ -32,6 +32,7 @@
 
 #ifdef INET_WITH_NEXTHOP
 #include "inet/networklayer/nexthop/NextHopForwardingHeader_m.h"
+#include "inet/common/SimulationContinuation.h"
 #endif
 
 namespace inet {
@@ -197,6 +198,7 @@ void Gpsr::processPurgeNeighborsTimer()
 
 void Gpsr::sendUdpPacket(Packet *packet)
 {
+    yieldBeforePush();
     ipOutSink.pushPacket(packet);
 }
 

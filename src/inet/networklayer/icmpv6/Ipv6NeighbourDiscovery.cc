@@ -21,6 +21,7 @@
 
 #ifdef INET_WITH_xMIPv6
 #include "inet/networklayer/xmipv6/xMIPv6.h"
+#include "inet/common/SimulationContinuation.h"
 #endif /* INET_WITH_xMIPv6 */
 
 namespace inet {
@@ -287,19 +288,23 @@ void Ipv6NeighbourDiscovery::processIpv6Datagram(Packet *packet)
             break;
         case Ipv6NeighbourCache::STALE:
             EV_INFO << "Reachability State is STALE.\n";
+            yieldBeforePush();
             ipv6OutSink.pushPacket(packet);
             initiateNeighbourUnreachabilityDetection(nce);
             break;
         case Ipv6NeighbourCache::REACHABLE:
             EV_INFO << "Next hop is REACHABLE, sending packet to next-hop address.";
+            yieldBeforePush();
             ipv6OutSink.pushPacket(packet);
             break;
         case Ipv6NeighbourCache::DELAY:
             EV_INFO << "Next hop is in DELAY state, sending packet to next-hop address.";
+            yieldBeforePush();
             ipv6OutSink.pushPacket(packet);
             break;
         case Ipv6NeighbourCache::PROBE:
             EV_INFO << "Next hop is in PROBE state, sending packet to next-hop address.";
+            yieldBeforePush();
             ipv6OutSink.pushPacket(packet);
             break;
         default:

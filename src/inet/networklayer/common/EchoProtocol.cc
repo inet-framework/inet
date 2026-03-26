@@ -12,6 +12,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -72,6 +73,7 @@ void EchoProtocol::processEchoRequest(Packet *request)
     reply->addTag<DispatchProtocolReq>()->setProtocol(request->getTag<NetworkProtocolInd>()->getProtocol());
     reply->addTag<PacketProtocolTag>()->setProtocol(&Protocol::echo);
     delete request;
+    yieldBeforePush();
     ipOutSink.pushPacket(reply);
 }
 

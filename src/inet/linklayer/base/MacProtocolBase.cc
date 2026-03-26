@@ -9,6 +9,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -64,6 +65,7 @@ void MacProtocolBase::sendUp(cMessage *message)
 {
     if (message->isPacket()) {
         emit(packetSentToUpperSignal, message);
+        yieldBeforePush();
         upperLayerSink.pushPacket(check_and_cast<Packet *>(message));
     }
     else
@@ -74,6 +76,7 @@ void MacProtocolBase::sendDown(cMessage *message)
 {
     if (message->isPacket()) {
         emit(packetSentToLowerSignal, message);
+        yieldBeforePush();
         lowerLayerSink.pushPacket(check_and_cast<Packet *>(message));
     }
     else

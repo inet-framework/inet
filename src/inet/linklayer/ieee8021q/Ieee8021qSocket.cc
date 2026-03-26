@@ -12,6 +12,7 @@
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ieee8021q/Ieee8021qCommand_m.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -30,6 +31,7 @@ void Ieee8021qSocket::sendOut(Packet *packet)
     packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(networkInterface->getInterfaceId());
     if (packet->findTag<DispatchProtocolReq>() == nullptr)
         packet->addTag<DispatchProtocolReq>()->setProtocol(protocol);
+    yieldBeforePush();
     sink.pushPacket(packet);
 }
 
