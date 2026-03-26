@@ -86,6 +86,7 @@ void xMIPv6::initialize(int stage)
     SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
+        toIpv6Sink.reference(gate("toIPv6"), true);
         EV_TRACE << "Initializing xMIPv6 module" << endl;
 
         // statistic collection
@@ -2080,7 +2081,7 @@ void xMIPv6::processType2RH(Packet *packet, Ipv6RoutingHeader *rh)
 
     if (validRH2) {
         EV_INFO << "Valid RH2 - copied address from RH2 to datagram" << endl;
-        send(packet, "toIPv6");
+        toIpv6Sink.pushPacket(packet);
     }
     else {
         PacketDropDetails details;
@@ -2163,7 +2164,7 @@ void xMIPv6::processHoAOpt(Packet *packet, HomeAddressOption *hoaOpt)
 
     if (validHoAOpt) {
         EV_INFO << "Valid HoA Option - copied address from HoA Option to datagram" << endl;
-        send(packet, "toIPv6");
+        toIpv6Sink.pushPacket(packet);
     }
     else {
         PacketDropDetails details;
@@ -2704,6 +2705,13 @@ void xMIPv6::handleTokenExpiry(cMessage *msg)
         createAndSendHoTIMessage(tokenExpIfEntry->cnAddr, tokenExpIfEntry->ifEntry);
 
 //    delete msg;
+}
+
+void xMIPv6::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
 }
 
 } // namespace inet

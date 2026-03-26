@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/networklayer/ipv6tunneling/Ipv6Tunneling.h"
 #include "inet/networklayer/xmipv6/BindingUpdateList.h"
 #include "inet/networklayer/xmipv6/MobilityHeader_m.h" // for HAOpt & RH2
@@ -53,7 +54,7 @@ class Ipv6RoutingTable;
 /**
  * Implements RFC 3775 Mobility Support in Ipv6.
  */
-class INET_API xMIPv6 : public SimpleModule
+class INET_API xMIPv6 : public SimpleModule, public queueing::IPassivePacketSink
 {
   public:
     virtual ~xMIPv6();
@@ -527,6 +528,16 @@ class INET_API xMIPv6 : public SimpleModule
      * Handles the event that indicates that a {care-of,home} keygen token has expired.
      */
     void handleTokenExpiry(cMessage *msg);
+
+    queueing::PassivePacketSinkRef toIpv6Sink;
+
+  public:
+    virtual bool canPushSomePacket(const cGate *gate) const override { return true; }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return true; }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 };
 
 } // namespace inet
