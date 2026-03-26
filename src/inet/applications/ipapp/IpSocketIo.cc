@@ -23,6 +23,7 @@ void IpSocketIo::initialize(int stage)
         const char *protocolAsString = par("protocol");
         if (!opp_isempty(protocolAsString))
             protocol = Protocol::getProtocol(protocolAsString);
+        trafficOutSink.reference(gate("trafficOut"), true);
         numSent = 0;
         numReceived = 0;
         WATCH(numSent);
@@ -68,7 +69,7 @@ void IpSocketIo::socketDataArrived(Ipv4Socket *socket, Packet *packet)
     emit(packetReceivedSignal, packet);
     numReceived++;
     packet->removeTag<SocketInd>();
-    send(packet, "trafficOut");
+    trafficOutSink.pushPacket(packet);
 }
 
 void IpSocketIo::socketClosed(Ipv4Socket *socket)
@@ -97,6 +98,13 @@ void IpSocketIo::handleStopOperation(LifecycleOperation *operation)
 void IpSocketIo::handleCrashOperation(LifecycleOperation *operation)
 {
     socket.destroy();
+}
+
+void IpSocketIo::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
 }
 
 } // namespace inet

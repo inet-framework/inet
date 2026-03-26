@@ -11,12 +11,16 @@
 #include "inet/applications/base/ApplicationBase.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcSocket.h"
 #include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
 
-class INET_API Ieee8022LlcSocketIo : public ApplicationBase, public Ieee8022LlcSocket::ICallback
+using namespace inet::queueing;
+
+class INET_API Ieee8022LlcSocketIo : public ApplicationBase, public Ieee8022LlcSocket::ICallback, public IPassivePacketSink
 {
   protected:
+    PassivePacketSinkRef trafficOutSink;
     int localSap = -1;
     int remoteSap = -1;
     MacAddress remoteAddress;
@@ -43,6 +47,14 @@ class INET_API Ieee8022LlcSocketIo : public ApplicationBase, public Ieee8022LlcS
     virtual void handleStartOperation(LifecycleOperation *operation) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
+
+  public:
+    virtual bool canPushSomePacket(const cGate *gate) const override { return true; }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return true; }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 };
 
 } // namespace inet
