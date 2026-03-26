@@ -22,6 +22,7 @@
 #include <omnetpp.h>
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/packet/Packet.h"
@@ -49,13 +50,14 @@
 namespace inet {
 namespace eigrp {
 
-class INET_API EigrpIpv4Pdm : public SimpleModule, public IEigrpModule<Ipv4Address>, public IEigrpPdm<Ipv4Address>, protected cListener
+class INET_API EigrpIpv4Pdm : public SimpleModule, public IEigrpModule<Ipv4Address>, public IEigrpPdm<Ipv4Address>, protected cListener, public queueing::IPassivePacketSink
 {
   protected:
     typedef std::vector<Ipv4Route *> RouteVector;
     typedef std::vector<EigrpMsgReq *> RequestVector;
 
     cModule *host = nullptr;
+    queueing::PassivePacketSinkRef splitterOutSink;
 
     const int64_t sizeOfMsg = 20;
     const char *SPLITTER_OUTGW;         /**< Output gateway to the EIGRP Splitter module */
@@ -317,6 +319,14 @@ class INET_API EigrpIpv4Pdm : public SimpleModule, public IEigrpModule<Ipv4Addre
     virtual void preDelete(cComponent *root) override;
     virtual void handleMessage(cMessage *msg) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
+
+  public:
+    virtual bool canPushSomePacket(const cGate *gate) const override { return true; }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return true; }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 };
 
 } // namespace eigrp
