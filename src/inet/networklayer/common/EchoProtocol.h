@@ -27,6 +27,7 @@ class INET_API EchoProtocol : public SimpleModule
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
 };
 
