@@ -3,9 +3,7 @@
 //
 
 
-package inet.networks.datacenter;
-
-import inet.topology.FatTreeNetwork;
+package inet.topology;
 
 //
 // Fat-tree topology pre-configured with typical datacenter parameters.

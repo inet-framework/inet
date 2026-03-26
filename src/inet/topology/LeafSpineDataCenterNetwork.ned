@@ -3,9 +3,7 @@
 //
 
 
-package inet.networks.datacenter;
-
-import inet.topology.LeafSpineNetwork;
+package inet.topology;
 
 //
 // Leaf-spine topology pre-configured with typical datacenter parameters.
