@@ -13,6 +13,7 @@
 #include "inet/common/StringFormat.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -68,6 +69,7 @@ void MacRelayUnitBase::sendPacket(Packet *packet, const MacAddress& destinationA
     else
         packet->removeTagIfPresent<DispatchProtocolReq>();
     emit(packetSentToLowerSignal, packet);
+    yieldBeforePush();
     lowerLayerSink.pushPacket(packet);
 }
 

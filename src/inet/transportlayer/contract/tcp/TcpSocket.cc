@@ -10,6 +10,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/socket/SocketTag_m.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -152,6 +153,7 @@ void TcpSocket::send(Packet *msg)
     auto packet = check_and_cast<Packet *>(msg);
     packet->addTagIfAbsent<SocketReq>()->setSocketId(connId);
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
+    yieldBeforePush();
     sink.pushPacket(packet);
 }
 

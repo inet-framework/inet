@@ -27,6 +27,7 @@
 #include "inet/transportlayer/tcp/TcpReceiveQueue.h"
 #include "inet/transportlayer/tcp/TcpSendQueue.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 namespace tcp {
@@ -126,6 +127,7 @@ void Tcp::sendToIp(Packet *segment)
     numSegmentsSent++;
     // KLUDGE: this schedule call is here to keep the fingerprints
     inet::scheduleAfter("SendToIp", 0, [=] () {
+        yieldBeforePush();
         ipSink.pushPacket(segment);
     });
 }
@@ -136,6 +138,7 @@ void Tcp::sendToApp(cMessage *msg)
     take(msg);
     // KLUDGE: this schedule call is here to keep the fingerprints
     inet::scheduleAfter("SendToApp", 0, [=] () {
+        yieldBeforePush();
         appSink.pushPacket(check_and_cast<Packet *>(msg));
     });
 }

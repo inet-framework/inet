@@ -11,6 +11,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/physicallayer/wired/ethernet/EthernetPhyHeader_m.h"
 #include "inet/physicallayer/wired/ethernet/EthernetSignal_m.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -48,6 +49,7 @@ void EthernetPhy::handleMessage(cMessage *message)
         delete signal;
         auto phyHeader = packet->popAtFront<EthernetPhyHeader>();
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
+        yieldBeforePush();
         upperLayerSink.pushPacket(packet);
     }
     else

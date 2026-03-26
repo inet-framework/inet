@@ -13,6 +13,7 @@
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/ipv4/IcmpHeader.h"
 #include "inet/routing/ospfv2/router/Ospfv2Router.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -367,6 +368,7 @@ void MessageHandler::sendPacket(Packet *packet, Ipv4Address destination, Ospfv2I
 
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     check_and_cast<Ospfv2 *>(ospfModule)->countSentPacket();
+    yieldBeforePush();
     ipSink.pushPacket(packet);
 }
 

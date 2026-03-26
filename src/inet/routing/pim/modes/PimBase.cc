@@ -11,6 +11,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/SimulationContinuation.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/InterfaceTable.h"
@@ -172,6 +173,7 @@ void PimBase::sendHelloPacket(PimInterface *pimInterface)
 
     emit(sentHelloPkSignal, pk);
 
+    yieldBeforePush();
     ipSink.pushPacket(pk);
 }
 

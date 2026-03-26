@@ -12,6 +12,7 @@
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/transportlayer/common/L4Tools.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 namespace tcp {
@@ -73,6 +74,7 @@ void TcpSpoof::sendToIP(Packet *pk, L3Address src, L3Address dest)
     addresses->setDestAddress(dest);
 
     emit(packetSentSignal, pk);
+    yieldBeforePush();
     ipOutSink.pushPacket(pk);
 }
 

@@ -9,6 +9,7 @@
 
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -167,6 +168,7 @@ void TCPScriptableTester::dispatchSegment(Packet *pk)
     bool fromA = cmd->fromA;
     bubble("introducing copy");
     dump(seg, pk->getByteLength(), fromA, "introducing copy");
+    yieldBeforePush();
     fromA ? outSink2.pushPacket(pk) : outSink1.pushPacket(pk);
 }
 
@@ -194,6 +196,7 @@ void TCPScriptableTester::processIncomingSegment(Packet *pk, bool fromA)
     {
         // dump & forward
         dump(seg, pk->getByteLength(), fromA);
+        yieldBeforePush();
         fromA ? outSink2.pushPacket(pk) : outSink1.pushPacket(pk);
     }
     else if (cmd->command==CMD_DELETE)
@@ -215,6 +218,7 @@ void TCPScriptableTester::processIncomingSegment(Packet *pk, bool fromA)
             {
                 bubble("forwarding after 0 delay");
                 dump(seg, pk->getByteLength(), fromA, "introducing copy");
+                yieldBeforePush();
                 fromA ? outSink2.pushPacket(segcopy) : outSink1.pushPacket(segcopy);
             }
             else
@@ -272,6 +276,7 @@ void TCPRandomTester::dispatchSegment(Packet *pk)
     bool fromA = (bool)pk->getContextPointer();
     bubble("introducing copy");
     dump(seg, pk->getByteLength(), fromA, "introducing copy");
+    yieldBeforePush();
     fromA ? outSink2.pushPacket(pk) : outSink1.pushPacket(pk);
 }
 
@@ -324,6 +329,7 @@ void TCPRandomTester::processIncomingSegment(Packet *pk, bool fromA)
     {
         // dump & forward
         dump(seg, pk->getByteLength(), fromA);
+        yieldBeforePush();
         fromA ? outSink2.pushPacket(pk) : outSink1.pushPacket(pk);
     }
 }

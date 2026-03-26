@@ -11,6 +11,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/SimulationContinuation.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
@@ -1735,6 +1736,7 @@ void PimDm::sendToIP(Packet *packet, L3Address srcAddr, L3Address destAddr, int 
     addresses->setDestAddress(destAddr);
     packet->addTagIfAbsent<HopLimitReq>()->setHopLimit(1);
     numSent++;
+    yieldBeforePush();
     ipSink.pushPacket(packet);
 }
 

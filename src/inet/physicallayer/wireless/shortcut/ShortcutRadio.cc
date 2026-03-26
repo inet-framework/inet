@@ -15,6 +15,7 @@
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/physicallayer/wireless/shortcut/ShortcutPhyHeader_m.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 namespace physicallayer {
@@ -112,6 +113,7 @@ void ShortcutRadio::receiveFromPeer(Packet *packet)
         packetProtocolTag->setProtocol(header->getPayloadProtocol());
     }
     emit(packetSentToUpperSignal, packet);
+    yieldBeforePush();
     upperLayerSink.pushPacket(packet);
 }
 

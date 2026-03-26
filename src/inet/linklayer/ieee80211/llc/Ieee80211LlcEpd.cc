@@ -11,6 +11,7 @@
 #include "inet/common/Simsignals.h"
 #include "inet/common/Simsignals_m.h"
 #include "inet/linklayer/ieee802/Ieee802EpdHeader_m.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -30,13 +31,16 @@ void Ieee80211LlcEpd::handleMessage(cMessage *message)
     if (message->arrivedOn("upperLayerIn")) {
         auto packet = check_and_cast<Packet *>(message);
         encapsulate(packet);
+        yieldBeforePush();
         lowerLayerSink.pushPacket(packet);
     }
     else if (message->arrivedOn("lowerLayerIn")) {
         auto packet = check_and_cast<Packet *>(message);
         decapsulate(packet);
-        if (packet->getTag<PacketProtocolTag>()->getProtocol() != nullptr)
+        if (packet->getTag<PacketProtocolTag>()->getProtocol() != nullptr) {
+            yieldBeforePush();
             upperLayerSink.pushPacket(packet);
+        }
         else {
             EV_WARN << "Unknown protocol, dropping packet\n";
             PacketDropDetails details;

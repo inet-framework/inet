@@ -11,6 +11,7 @@
 #include "inet/protocolelement/acknowledgement/AcknowledgeHeader_m.h"
 #include "inet/protocolelement/common/AccessoryProtocol.h"
 #include "inet/protocolelement/ordering/SequenceNumberHeader_m.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -29,11 +30,13 @@ void ReceiveWithAcknowledge::pushPacket(Packet *dataPacket, const cGate *gate)
     Enter_Method("pushPacket");
     take(dataPacket);
     auto dataHeader = dataPacket->popAtFront<SequenceNumberHeader>();
+    yieldBeforePush();
     consumer.pushPacket(dataPacket);
     auto ackHeader = makeShared<AcknowledgeHeader>();
     ackHeader->setSequenceNumber(dataHeader->getSequenceNumber());
     auto ackPacket = new Packet("Ack", ackHeader);
     ackPacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&AccessoryProtocol::acknowledge);
+    yieldBeforePush();
     ackOutSink.pushPacket(ackPacket);
 }
 

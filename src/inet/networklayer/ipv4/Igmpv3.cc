@@ -28,6 +28,7 @@
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/ipv4/Ipv4OptionsTag_m.h"
 #include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -1472,6 +1473,7 @@ void Igmpv3::sendReportToIP(Packet *msg, NetworkInterface *ie, Ipv4Address dest)
     msg->addTag<Ipv4OptionsReq>()->appendOption(raOption);
     // TODO set Type of Service to 0xc0
 //    msg->addTag<DscpReq>()->setDifferentiatedServicesCodePoint(0xc0 >> 2);
+    yieldBeforePush();
     ipSink.pushPacket(msg);
 }
 
@@ -1491,6 +1493,7 @@ void Igmpv3::sendQueryToIP(Packet *msg, NetworkInterface *ie, Ipv4Address dest)
     msg->addTag<Ipv4OptionsReq>()->appendOption(raOption);
     // set Type of Service to 0xc0
     msg->addTag<DscpReq>()->setDifferentiatedServicesCodePoint(0xc0 >> 2);
+    yieldBeforePush();
     ipSink.pushPacket(msg);
 }
 

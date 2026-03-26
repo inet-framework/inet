@@ -21,6 +21,7 @@
 #include "inet/transportlayer/common/L4Tools.h"
 #include "lwip/lwip_ip.h"
 #include "lwip/lwip_tcp.h"
+#include "inet/common/SimulationContinuation.h"
 
 
 namespace inet {
@@ -684,6 +685,7 @@ void TcpLwip::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP, L3Add
     EV_INFO << " len=" << B(packet->getDataLength()) - tcpHdr->getHeaderLength() << "\n";
 
     numSegmentsSent++;
+    yieldBeforePush();
     ipOutSink.pushPacket(packet);
 }
 

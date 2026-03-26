@@ -18,6 +18,7 @@
 #include "inet/linklayer/tun/ITun.h"
 #include "inet/linklayer/tun/TunControlInfo_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -61,6 +62,7 @@ void Tun::handleUpperPacket(Packet *packet)
         packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         emit(packetSentToUpperSignal, packet);
         EV_INFO << "Sending packet to IPv4" << EV_FIELD(packet) << EV_ENDL;
+        yieldBeforePush();
         upperLayerSink.pushPacket(packet);
     }
     else {
@@ -75,6 +77,7 @@ void Tun::handleUpperPacket(Packet *packet)
             auto newnpTag = copy->addTag<NetworkProtocolInd>();
             *newnpTag = *npTag;
             EV_INFO << "Sending packet to socket" << EV_FIELD(socketId) << EV_FIELD(packet) << EV_ENDL;
+            yieldBeforePush();
             upperLayerSink.pushPacket(copy);
         }
         delete packet;

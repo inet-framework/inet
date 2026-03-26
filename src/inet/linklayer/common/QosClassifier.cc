@@ -28,6 +28,7 @@
 #endif
 #ifdef INET_WITH_UDP
 #include "inet/transportlayer/udp/UdpHeader_m.h"
+#include "inet/common/SimulationContinuation.h"
 #endif
 
 namespace inet {
@@ -54,6 +55,7 @@ void QosClassifier::handleMessage(cMessage *msg)
 {
     auto packet = check_and_cast<Packet *>(msg);
     packet->addTagIfAbsent<UserPriorityReq>()->setUserPriority(getUserPriority(msg));
+    yieldBeforePush();
     outSink.pushPacket(packet);
 }
 

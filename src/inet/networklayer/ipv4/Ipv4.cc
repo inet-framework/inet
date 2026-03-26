@@ -43,6 +43,7 @@
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/ipv4/Ipv4OptionsTag_m.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -879,6 +880,7 @@ void Ipv4::reassembleAndDeliverFinish(Packet *packet)
             packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
             EV_INFO << "Sending packet to socket " << elem.second->socketId << "\n";
             emit(packetSentToUpperSignal, packetCopy);
+            yieldBeforePush();
             transportSink.pushPacket(packetCopy);
             hasSocket = true;
         }
@@ -886,6 +888,7 @@ void Ipv4::reassembleAndDeliverFinish(Packet *packet)
     EV_INFO << "Sending packet to protocol" << EV_FIELD(protocol, *protocol) << EV_FIELD(packet) << EV_ENDL;
     if (hasUpperProtocol(protocol)) {
         emit(packetSentToUpperSignal, packet);
+        yieldBeforePush();
         transportSink.pushPacket(packet);
         numLocalDeliver++;
     }
@@ -1242,6 +1245,7 @@ void Ipv4::sendPacketToNIC(Packet *packet)
     if (auto dispatchProtocolReq = packet->findTag<DispatchProtocolReq>())
         EV_INFO << EV_FIELD(protocol, *dispatchProtocolReq->getProtocol());
     EV_INFO << EV_FIELD(interface, networkInterface->getInterfaceName()) << EV_FIELD(packet) << EV_ENDL;
+    yieldBeforePush();
     queueSink.pushPacket(packet);
 }
 

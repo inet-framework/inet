@@ -13,6 +13,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/SimulationContinuation.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
@@ -294,11 +295,13 @@ void Ipv6NeighbourDiscovery::processIpv6Datagram(Packet *packet)
             break;
         case Ipv6NeighbourCache::STALE:
             EV_INFO << "Reachability State is STALE.\n";
+            yieldBeforePush();
             ipv6OutSink.pushPacket(packet);
             initiateNeighbourUnreachabilityDetection(nce);
             break;
         case Ipv6NeighbourCache::REACHABLE:
             EV_INFO << "Next hop is REACHABLE, sending packet to next-hop address.";
+            yieldBeforePush();
             ipv6OutSink.pushPacket(packet);
             break;
         case Ipv6NeighbourCache::DELAY:
@@ -309,6 +312,7 @@ void Ipv6NeighbourDiscovery::processIpv6Datagram(Packet *packet)
             }
             else {
                 EV_INFO << "Next hop is in DELAY state, sending packet to next-hop address.";
+                yieldBeforePush();
                 ipv6OutSink.pushPacket(packet);
             }
             break;
@@ -320,6 +324,7 @@ void Ipv6NeighbourDiscovery::processIpv6Datagram(Packet *packet)
             }
             else {
                 EV_INFO << "Next hop is in PROBE state, sending packet to next-hop address.";
+                yieldBeforePush();
                 ipv6OutSink.pushPacket(packet);
             }
             break;

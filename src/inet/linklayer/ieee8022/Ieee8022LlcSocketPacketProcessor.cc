@@ -11,6 +11,7 @@
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcSocketCommand_m.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -36,10 +37,12 @@ void Ieee8022LlcSocketPacketProcessor::pushPacket(Packet *packet, const cGate *g
         packetCopy->setKind(SOCKET_I_DATA);
         packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(socket->socketId);
         EV_INFO << "Passing up packet to socket" << EV_FIELD(socket) << EV_FIELD(packet) << EV_ENDL;
+        yieldBeforePush();
         upperLayerSink.pushPacket(packetCopy);
     }
 
     // TODO mark packet when sent to any socket
+    yieldBeforePush();
     consumer.pushPacket(packet);
 }
 

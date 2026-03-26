@@ -9,6 +9,7 @@
 
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -32,6 +33,7 @@ void EthernetPauseCommandProcessor::handleMessage(cMessage *msg)
             return;
         }
     }
+    yieldBeforePush();
     outSink.pushPacket(check_and_cast<Packet *>(msg));
 }
 
@@ -56,6 +58,7 @@ void EthernetPauseCommandProcessor::handleSendPause(Request *msg, Ieee802PauseCo
 
     EV_INFO << "Sending Pause command " << frame << " to lower layer.\n";
     emit(pauseSentSignal, pauseUnits);
+    yieldBeforePush();
     outSink.pushPacket(packet);
 }
 

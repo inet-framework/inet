@@ -1,4 +1,5 @@
 #include "inet/routing/ospfv3/process/Ospfv3Process.h"
+#include "inet/common/SimulationContinuation.h"
 
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/routing/ospfv3/Ospfv3Checksum.h"
@@ -814,6 +815,7 @@ void Ospfv3Process::sendPacket(Packet *packet, Ipv6Address destination, const ch
             break;
     }
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv6);
+    yieldBeforePush();
     splitterOutSink.pushPacket(packet);
 } // sendPacket
 

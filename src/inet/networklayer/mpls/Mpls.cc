@@ -18,6 +18,7 @@
 #include "inet/networklayer/mpls/IIngressClassifier.h"
 #include "inet/networklayer/rsvpte/Utils.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -288,6 +289,7 @@ void Mpls::sendToL2(Packet *msg)
     ASSERT(msg->findTag<InterfaceReq>());
     ASSERT(msg->findTag<PacketProtocolTag>());
     numSent++;
+    yieldBeforePush();
     lowerLayerOutSink.pushPacket(msg);
 }
 
@@ -296,6 +298,7 @@ void Mpls::sendToL3(Packet *msg)
     ASSERT(msg->findTag<InterfaceInd>());
     ASSERT(msg->findTag<DispatchProtocolReq>());
     numSent++;
+    yieldBeforePush();
     upperLayerOutSink.pushPacket(msg);
 }
 

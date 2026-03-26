@@ -15,6 +15,7 @@
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/Simsignals.h"
+#include "inet/common/SimulationContinuation.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
@@ -1694,6 +1695,7 @@ void PimSm::sendToIP(Packet *packet, L3Address srcAddr, L3Address destAddr, int 
     packet->addTagIfAbsent<L3AddressReq>()->setDestAddress(destAddr);
     packet->addTagIfAbsent<HopLimitReq>()->setHopLimit(ttl);
     numSent++;
+    yieldBeforePush();
     ipSink.pushPacket(packet);
 }
 
@@ -1736,6 +1738,7 @@ void PimSm::forwardMulticastData(Packet *data, int outInterfaceId)
     addrTag->setDestAddress(destAddr);
     data->addTagIfAbsent<HopLimitReq>()->setHopLimit(MAX_TTL - 2); // one minus for source DR router and one for RP router // TODO specification???
     data->trim();
+    yieldBeforePush();
     ipSink.pushPacket(data);
 }
 

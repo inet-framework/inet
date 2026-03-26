@@ -14,6 +14,7 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -495,6 +496,7 @@ void Gptp::sendPacketToNic(Packet *packet, int portId)
         packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
     else
         packet->removeTagIfPresent<DispatchProtocolReq>();
+    yieldBeforePush();
     socketSink.pushPacket(packet);
 }
 

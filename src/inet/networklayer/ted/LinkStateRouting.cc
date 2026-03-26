@@ -18,6 +18,7 @@
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/ted/Ted.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -253,6 +254,7 @@ void LinkStateRouting::sendToIP(Packet *msg, Ipv4Address destAddr)
     msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     msg->addTagIfAbsent<L3AddressReq>()->setDestAddress(destAddr);
     msg->addTagIfAbsent<L3AddressReq>()->setSrcAddress(routerId);
+    yieldBeforePush();
     ipOutSink.pushPacket(msg);
 }
 

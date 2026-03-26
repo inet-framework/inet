@@ -9,6 +9,8 @@
 
 namespace inet {
 
+bool yieldBeforePushPacket = false;
+
 static void runSimulationEventLoop()
 {
     EV_DEBUG << "Running event loop" << EV_ENDL;

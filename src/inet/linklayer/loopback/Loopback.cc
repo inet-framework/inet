@@ -17,6 +17,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -64,6 +65,7 @@ void Loopback::handleUpperPacket(Packet *packet)
     packet->addTag<PacketProtocolTag>()->setProtocol(protocol);
     packet->addTag<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
     emit(packetSentToUpperSignal, packet);
+    yieldBeforePush();
     upperLayerSink.pushPacket(packet);
 }
 

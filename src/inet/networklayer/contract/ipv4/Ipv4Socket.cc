@@ -13,6 +13,7 @@
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/ipv4/Ipv4SocketCommand_m.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -79,6 +80,7 @@ void Ipv4Socket::send(Packet *packet)
 {
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     packet->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    yieldBeforePush();
     sink.pushPacket(packet);
 }
 

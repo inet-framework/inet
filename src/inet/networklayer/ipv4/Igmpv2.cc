@@ -21,6 +21,7 @@
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/ipv4/Ipv4OptionsTag_m.h"
 #include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -358,8 +359,10 @@ void Igmpv2::handleMessage(cMessage *msg)
                 break;
         }
     }
-    else if (!strcmp(msg->getArrivalGate()->getName(), "routerIn"))
+    else if (!strcmp(msg->getArrivalGate()->getName(), "routerIn")) {
+        yieldBeforePush();
         ipSink.pushPacket(check_and_cast<Packet *>(msg));
+    }
     else {
         auto packet = check_and_cast<Packet *>(msg);
         processIgmpMessage(packet);
@@ -469,8 +472,10 @@ void Igmpv2::processIgmpMessage(Packet *packet)
             break;
 
         default:
-            if (externalRouter)
+            if (externalRouter) {
+                yieldBeforePush();
                 routerSink.pushPacket(packet);
+            }
             else {
 //                delete msg;
                 throw cRuntimeError("Igmpv2: Unhandled message type (%d) in packet %s", igmp->getType(), packet->getName());
@@ -511,6 +516,7 @@ void Igmpv2::processQuery(NetworkInterface *ie, Packet *packet)
 
     if (rt->isMulticastForwardingEnabled()) {
         if (externalRouter) {
+            yieldBeforePush();
             routerSink.pushPacket(packet);
             return;
         }
@@ -577,6 +583,7 @@ void Igmpv2::processV2Report(NetworkInterface *ie, Packet *packet)
 
     if (rt->isMulticastForwardingEnabled()) {
         if (externalRouter) {
+            yieldBeforePush();
             routerSink.pushPacket(packet);
             return;
         }
@@ -625,6 +632,7 @@ void Igmpv2::processLeave(NetworkInterface *ie, Packet *packet)
 
     if (rt->isMulticastForwardingEnabled()) {
         if (externalRouter) {
+            yieldBeforePush();
             routerSink.pushPacket(packet);
             return;
         }
@@ -725,6 +733,7 @@ void Igmpv2::sendToIP(Packet *msg, NetworkInterface *ie, const Ipv4Address& dest
     msg->addTagIfAbsent<L3AddressReq>()->setDestAddress(dest);
     msg->addTagIfAbsent<HopLimitReq>()->setHopLimit(1);
 
+    yieldBeforePush();
     ipSink.pushPacket(msg);
 }
 
@@ -1000,8 +1009,10 @@ void Igmpv2::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);
-    if (gate->isName("routerIn"))
+    if (gate->isName("routerIn")) {
+        yieldBeforePush();
         ipSink.pushPacket(packet);
+    }
     else
         processIgmpMessage(packet);
 }

@@ -20,6 +20,7 @@
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -169,6 +170,7 @@ void Arp::sendArpRequest(const NetworkInterface *ie, Ipv4Address ipAddress)
     // send out
     EV_INFO << "Sending " << packet << " to network protocol.\n";
     emit(arpRequestSentSignal, packet);
+    yieldBeforePush();
     ifOutSink.pushPacket(packet);
     numRequestsSent++;
 }
@@ -335,6 +337,7 @@ void Arp::processArpPacket(Packet *packet)
                 // send out
                 EV_INFO << "Sending " << outPk << " to network protocol.\n";
                 emit(arpReplySentSignal, outPk);
+                yieldBeforePush();
                 ifOutSink.pushPacket(outPk);
                 numRepliesSent++;
                 break;
@@ -476,6 +479,7 @@ void Arp::sendArpGratuitous(const NetworkInterface *ie, MacAddress srcAddr, Ipv4
     // updateARPCache(entry, srcAddr); //FIXME
 
     // send out
+    yieldBeforePush();
     ifOutSink.pushPacket(packet);
 }
 
@@ -509,6 +513,7 @@ void Arp::sendArpProbe(const NetworkInterface *ie, MacAddress srcAddr, Ipv4Addre
     packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::arp);
 
     // send out
+    yieldBeforePush();
     ifOutSink.pushPacket(packet);
 }
 
