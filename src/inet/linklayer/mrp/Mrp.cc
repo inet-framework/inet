@@ -113,6 +113,7 @@ void Mrp::initialize(int stage)
 {
     OperationalBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        relayOutSink.reference(gate("relayOut"), true);
         //modules
         mrpMacForwardingTable.reference(this, "macTableModule", true);
         interfaceTable.reference(this, "interfaceTableModule", true);
@@ -1888,7 +1889,7 @@ void Mrp::sendFrameReq(int portId, const MacAddress &destinationAddress, const M
     macAddressReq->setSrcAddress(sourceAddress);
     macAddressReq->setDestAddress(destinationAddress);
     EV_INFO << "Sending packet down" << EV_FIELD(mrpPDU) << EV_FIELD(destinationAddress) << EV_ENDL;
-    send(mrpPDU, "relayOut");
+    relayOutSink.pushPacket(mrpPDU);
 }
 
 void Mrp::sendCCM(int portId, Packet *ccm)
@@ -1900,7 +1901,14 @@ void Mrp::sendCCM(int portId, Packet *ccm)
     macAddressReq->setSrcAddress(getPortNetworkInterface(portId)->getMacAddress());
     macAddressReq->setDestAddress(MacAddress::CFM_CCM_MULTICAST_ADDRESS);
     EV_INFO << "Sending packet down" << EV_FIELD(ccm) << EV_ENDL;
-    send(ccm, "relayOut");
+    relayOutSink.pushPacket(ccm);
+}
+
+void Mrp::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessageWhenUp(packet);
 }
 
 void Mrp::handleStartOperation(LifecycleOperation *operation)
