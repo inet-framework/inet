@@ -18,6 +18,7 @@ simsignal_t EthernetPauseCommandProcessor::pauseSentSignal = registerSignal("pau
 
 void EthernetPauseCommandProcessor::initialize()
 {
+    outSink.reference(gate("out"), true);
     seqNum = 0;
 }
 
@@ -30,7 +31,7 @@ void EthernetPauseCommandProcessor::handleMessage(cMessage *msg)
             return;
         }
     }
-    send(msg, "out");
+    outSink.pushPacket(check_and_cast<Packet *>(msg));
 }
 
 void EthernetPauseCommandProcessor::handleSendPause(Request *msg, Ieee802PauseCommand *etherctrl)
@@ -53,9 +54,15 @@ void EthernetPauseCommandProcessor::handleSendPause(Request *msg, Ieee802PauseCo
     packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernetFlowCtrl);
 
     EV_INFO << "Sending Pause command " << frame << " to lower layer.\n";
-    send(packet, "out");
-
     emit(pauseSentSignal, pauseUnits);
+    outSink.pushPacket(packet);
+}
+
+void EthernetPauseCommandProcessor::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
 }
 
 } // namespace inet
