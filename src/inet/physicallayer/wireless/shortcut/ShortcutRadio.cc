@@ -31,6 +31,7 @@ void ShortcutRadio::initialize(int stage)
         propagationDelay = &par("propagationDelay");
         packetLoss = &par("packetLoss");
         gate("radioIn")->setDeliverImmediately(true);
+        upperLayerSink.reference(gate("upperLayerOut"), true);
     }
     // TODO INITSTAGE
     else if (stage == INITSTAGE_LINK_LAYER) {
@@ -109,7 +110,7 @@ void ShortcutRadio::receiveFromPeer(Packet *packet)
         packetProtocolTag->setProtocol(header->getPayloadProtocol());
     }
     emit(packetSentToUpperSignal, packet);
-    send(packet, gate("upperLayerOut"));
+    upperLayerSink.pushPacket(packet);
 }
 
 } // namespace physicallayer
