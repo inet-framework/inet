@@ -32,6 +32,9 @@ Ospfv3Process::~Ospfv3Process()
 
 void Ospfv3Process::initialize(int stage)
 {
+    if (stage == INITSTAGE_LOCAL) {
+        splitterOutSink.reference(gate("splitterOut"), true);
+    }
     if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         this->containingModule = findContainingNode(this);
         ift.reference(this, "interfaceTableModule", true);
@@ -735,7 +738,7 @@ void Ospfv3Process::sendPacket(Packet *packet, Ipv6Address destination, const ch
             break;
     }
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv6);
-    this->send(packet, "splitterOut");
+    splitterOutSink.pushPacket(packet);
 } // sendPacket
 
 Ospfv3Lsa *Ospfv3Process::findLSA(LSAKeyType lsaKey, Ipv4Address areaID, int instanceID)
@@ -1000,6 +1003,13 @@ void Ospfv3Process::rebuildRoutingTable()
         }
     }
 } // end of rebuildRoutingTable
+
+void Ospfv3Process::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
+}
 
 } // namespace ospfv3
 } // namespace inet
