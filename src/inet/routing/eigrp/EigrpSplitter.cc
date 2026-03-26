@@ -30,6 +30,11 @@ EigrpSplitter::~EigrpSplitter() {
 void EigrpSplitter::initialize(int stage)
 {
     SimpleModule::initialize(stage);
+    if (stage == INITSTAGE_LOCAL) {
+        ipOutSink.reference(gate("ipOut"), true);
+        splitterOutSink.reference(gate("splitterOut"), true);
+        splitter6OutSink.reference(gate("splitter6Out"), true);
+    }
 }
 
 void EigrpSplitter::handleMessage(cMessage *msg)
@@ -40,7 +45,7 @@ void EigrpSplitter::handleMessage(cMessage *msg)
     }
     else {
         if (strcmp(msg->getArrivalGate()->getBaseName(), "splitterIn") == 0 || strcmp(msg->getArrivalGate()->getBaseName(), "splitter6In") == 0) {
-            this->send(msg, "ipOut"); // A message from ipv6pdm or ipv4pdm to outside
+            ipOutSink.pushPacket(check_and_cast<Packet *>(msg)); // A message from ipv6pdm or ipv4pdm to outside
         }
         else if (strcmp(msg->getArrivalGate()->getBaseName(), "ipIn") == 0) {
 
@@ -54,16 +59,23 @@ void EigrpSplitter::handleMessage(cMessage *msg)
 
             auto ipversion = packet->getTag<L3AddressInd>()->getSrcAddress().getType();
             if (ipversion == inet::L3Address::IPv4) {
-                this->send(msg, "splitterOut");
+                splitterOutSink.pushPacket(packet);
             }
             else if (ipversion == inet::L3Address::IPv6) {
-                this->send(msg, "splitter6Out");
+                splitter6OutSink.pushPacket(packet);
             }
             else {
                 delete msg;
             }
         }
     }
+}
+
+void EigrpSplitter::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
 }
 
 } // eigrp
