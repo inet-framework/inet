@@ -14,11 +14,23 @@ namespace inet {
 
 Define_Module(RandomQosClassifier);
 
+void RandomQosClassifier::initialize()
+{
+    outSink.reference(gate("out"), true);
+}
+
 void RandomQosClassifier::handleMessage(cMessage *msg)
 {
     auto packet = check_and_cast<Packet *>(msg);
     packet->addTagIfAbsent<UserPriorityReq>()->setUserPriority(intrand(8));
-    send(msg, "out");
+    outSink.pushPacket(packet);
+}
+
+void RandomQosClassifier::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
 }
 
 } // namespace inet
