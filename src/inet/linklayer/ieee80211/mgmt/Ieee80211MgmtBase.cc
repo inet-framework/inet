@@ -30,6 +30,7 @@ void Ieee80211MgmtBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         mib.reference(this, "mibModule", true);
         interfaceTable.reference(this, "interfaceTableModule", true);
+        macOutSink.reference(gate("macOut"), true);
         myIface = getContainingNicModule(this);
         numMgmtFramesReceived = 0;
         numMgmtFramesDropped = 0;
@@ -84,7 +85,7 @@ void Ieee80211MgmtBase::sendDown(Packet *frame)
 {
     ASSERT(isUp());
     frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mgmt);
-    send(frame, "macOut");
+    macOutSink.pushPacket(frame);
 }
 
 void Ieee80211MgmtBase::dropManagementFrame(Packet *frame)
@@ -158,6 +159,13 @@ void Ieee80211MgmtBase::start()
 
 void Ieee80211MgmtBase::stop()
 {
+}
+
+void Ieee80211MgmtBase::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
 }
 
 } // namespace ieee80211

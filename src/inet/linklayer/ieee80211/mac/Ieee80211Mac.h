@@ -10,6 +10,7 @@
 
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/linklayer/ieee80211/llc/IIeee80211Llc.h"
 #include "inet/linklayer/ieee80211/mac/contract/IDs.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateControl.h"
@@ -39,6 +40,7 @@ class INET_API Ieee80211Mac : public MacProtocolBase
 {
   protected:
     FcsMode fcsMode;
+    queueing::PassivePacketSinkRef mgmtOutSink;
 
     ModuleRefByPar<Ieee80211Mib> mib;
     opp_component_ptr<IIeee80211Llc> llc;

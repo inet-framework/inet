@@ -12,6 +12,7 @@
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
@@ -27,10 +28,11 @@ namespace ieee80211 {
  * Abstract base class for 802.11 infrastructure mode management components.
  *
  */
-class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener
+class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener, public queueing::IPassivePacketSink
 {
   protected:
     // configuration
+    queueing::PassivePacketSinkRef macOutSink;
     ModuleRefByPar<Ieee80211Mib> mib;
     ModuleRefByPar<IInterfaceTable> interfaceTable;
     NetworkInterface *myIface = nullptr;
@@ -92,6 +94,14 @@ class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener
     virtual void start();
     virtual void stop();
     //@}
+
+  public:
+    virtual bool canPushSomePacket(const cGate *gate) const override { return true; }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return true; }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 };
 
 } // namespace ieee80211

@@ -47,6 +47,7 @@ void Ieee80211Mac::initialize(int stage)
         fcsMode = parseFcsMode(par("fcsMode"));
         mib.reference(this, "mibModule", true);
         mib->qos = par("qosStation");
+        mgmtOutSink.reference(gate("mgmtOut"), true);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         cModule *llcModule = gate("upperLayerOut")->getNextGate()->getOwnerModule();
@@ -318,7 +319,7 @@ void Ieee80211Mac::sendUpFrame(Packet *frame)
     const auto& header = frame->peekAtFront<Ieee80211DataOrMgmtHeader>();
     decapsulate(frame);
     if (!(header->getType() & 0x30))
-        send(frame, "mgmtOut");
+        mgmtOutSink.pushPacket(frame);
     else
         ds->processDataFrame(frame, dynamicPtrCast<const Ieee80211DataHeader>(header));
 }
