@@ -12,8 +12,11 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/rsvpte/IntServ_m.h"
 #include "inet/networklayer/ted/LinkStatePacket_m.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 #define TED_TRAFFIC    1
 
@@ -45,12 +48,13 @@ class NetworkInterface;
  *
  * See NED file for more info.
  */
-class INET_API LinkStateRouting : public SimpleModule, public cListener
+class INET_API LinkStateRouting : public SimpleModule, public cListener, public IPassivePacketSink
 {
   protected:
     ModuleRefByPar<Ted> tedmod;
     cMessage *announceMsg = nullptr;
     Ipv4Address routerId;
+    PassivePacketSinkRef ipOutSink;
 
     Ipv4AddressVector peerIfAddrs; // addresses of interfaces towards neighbouring routers
 
@@ -71,6 +75,14 @@ class INET_API LinkStateRouting : public SimpleModule, public cListener
     virtual void sendToPeers(const std::vector<TeLinkStateInfo>& list, bool req, Ipv4Address exceptPeer);
     virtual void sendToPeer(Ipv4Address peer, const std::vector<TeLinkStateInfo>& list, bool req);
     virtual void sendToIP(Packet *msg, Ipv4Address destAddr);
+
+  public:
+    virtual bool canPushSomePacket(const cGate *gate) const override { return true; }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return true; }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 };
 
 } // namespace inet
