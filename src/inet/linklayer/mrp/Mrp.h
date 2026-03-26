@@ -18,13 +18,16 @@
 #include "inet/linklayer/mrp/MrpRelay.h"
 #include "inet/linklayer/mrp/MrpPdu_m.h"
 #include "inet/linklayer/mrp/CfmContinuityCheckMessage_m.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 /**
  * Implements the base part of the MRP protocol, i.e. roles MRC, MRM and MRA.
  */
-class INET_API Mrp: public OperationalBase, public cListener
+class INET_API Mrp: public OperationalBase, public cListener, public IPassivePacketSink
 {
 public:
     enum FrameType : uint64_t {
@@ -156,6 +159,7 @@ protected:
     ModuleRefByPar<MrpRelay> relay;
 
     FrameSentDatabase testFrameSent;
+    PassivePacketSinkRef relayOutSink;
 
     simsignal_t ringPort1StateChangedSignal;
     simsignal_t ringPort2StateChangedSignal;
@@ -243,6 +247,13 @@ public:
     virtual bool isModuleStartStage(int stage) const override { return stage == ModuleStartOperation::STAGE_LAST; }
     virtual bool isModuleStopStage(int stage) const override { return stage == ModuleStopOperation::STAGE_LINK_LAYER; }
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { return true; }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return true; }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 };
 
 } // namespace inet
