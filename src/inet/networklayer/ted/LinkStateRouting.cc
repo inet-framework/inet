@@ -36,6 +36,7 @@ void LinkStateRouting::initialize(int stage)
     SimpleModule::initialize(stage);
     // TODO INITSTAGE
     if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
+        ipOutSink.reference(gate("ipOut"), true);
         tedmod.reference(this, "tedModule", true);
 
         IIpv4RoutingTable *rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
@@ -216,7 +217,14 @@ void LinkStateRouting::sendToIP(Packet *msg, Ipv4Address destAddr)
     msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     msg->addTagIfAbsent<L3AddressReq>()->setDestAddress(destAddr);
     msg->addTagIfAbsent<L3AddressReq>()->setSrcAddress(routerId);
-    send(msg, "ipOut");
+    ipOutSink.pushPacket(msg);
+}
+
+void LinkStateRouting::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
 }
 
 } // namespace inet
