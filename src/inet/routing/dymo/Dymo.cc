@@ -79,6 +79,7 @@ void Dymo::initialize(int stage)
     RoutingProtocolBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
+        ipOutSink.reference(gate("ipOut"), true);
         // Dymo parameters from RFC
         clientAddresses = par("clientAddresses");
         useMulticastRREP = par("useMulticastRREP");
@@ -383,7 +384,7 @@ void Dymo::processRreqHolddownTimer(RreqHolddownTimer *message)
 void Dymo::sendUdpPacket(cPacket *packet)
 {
     numSent++;
-    send(packet, "ipOut");
+    ipOutSink.pushPacket(check_and_cast<Packet *>(packet));
 }
 
 void Dymo::scheduleJitterTimerPacket(cPacket *packet, double delay)
@@ -1475,6 +1476,13 @@ void Dymo::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj,
             }
         }
     }
+}
+
+void Dymo::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessageWhenUp(packet);
 }
 
 } // namespace dymo
