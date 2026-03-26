@@ -16,18 +16,24 @@
 #include "inet/routing/ospfv3/Ospfv3Packet_m.h"
 #include "inet/routing/ospfv3/Ospfv3Timers.h"
 #include "inet/routing/ospfv3/process/Ospfv3Process.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
+
+using namespace inet::queueing;
+
 namespace ospfv3 {
 
 int ospfv3InterfaceIndex = 1;
 
-class INET_API Ospfv3Splitter : protected cListener, public SimpleModule
+class INET_API Ospfv3Splitter : protected cListener, public SimpleModule, public IPassivePacketSink
 {
   public:
     Ospfv3Splitter();
     virtual ~Ospfv3Splitter();
     ModuleRefByPar<IInterfaceTable> ift;
+    PassivePacketSinkRef ipOutSink;
+    std::vector<PassivePacketSinkRef> processOutSinks;
 
   private:
     void parseConfig(cXMLElement *, cXMLElement *);
@@ -47,6 +53,14 @@ class INET_API Ospfv3Splitter : protected cListener, public SimpleModule
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+
+  public:
+    virtual bool canPushSomePacket(const cGate *gate) const override { return true; }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return true; }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 };
 
 } // namespace ospfv3
