@@ -68,6 +68,7 @@ void EigrpIpv4Pdm::initialize(int stage) {
 
     if (stage == INITSTAGE_LOCAL) {
         host = getContainingNode(this);
+        splitterOutSink.reference(gate(SPLITTER_OUTGW), true);
 
         ift.reference(this, "interfaceTableModule", true);
         rt.reference(this, "routingTableModule", true);
@@ -414,7 +415,7 @@ void EigrpIpv4Pdm::processMsgFromRtp(cMessage *msg)
     pk->addTagIfAbsent<L3AddressReq>()->setDestAddress(destAddress);
     pk->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     pk->addTagIfAbsent<HopLimitReq>()->setHopLimit(1);
-    send(pk, SPLITTER_OUTGW);
+    splitterOutSink.pushPacket(pk);
 }
 
 bool EigrpIpv4Pdm::getDestIpAddress(int destNeigh, Ipv4Address *resultAddress)
@@ -1951,6 +1952,13 @@ void EigrpIpv4Pdm::sendUpdateToStubs(EigrpRouteSource<Ipv4Address> *succ, EigrpR
         else // Send successor
             sendUpdate(IEigrpPdm::STUB_RECEIVER, route, succ, true, "notify stubs about change");
     }
+}
+
+void EigrpIpv4Pdm::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
 }
 
 } // namespace eigrp

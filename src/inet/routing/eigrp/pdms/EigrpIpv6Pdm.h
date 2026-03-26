@@ -23,6 +23,7 @@
 #include <omnetpp.h>
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/NetworkInterface.h"
@@ -43,7 +44,7 @@
 namespace inet {
 namespace eigrp {
 
-class INET_API EigrpIpv6Pdm : public SimpleModule, public IEigrpModule<Ipv6Address>, public IEigrpPdm<Ipv6Address>, protected cListener
+class INET_API EigrpIpv6Pdm : public SimpleModule, public IEigrpModule<Ipv6Address>, public IEigrpPdm<Ipv6Address>, protected cListener, public queueing::IPassivePacketSink
 {
   protected:
     struct IPv6netPrefix {
@@ -56,6 +57,7 @@ class INET_API EigrpIpv6Pdm : public SimpleModule, public IEigrpModule<Ipv6Addre
     typedef std::vector<IPv6netPrefix> PrefixVector;
 
     cModule *host = nullptr;
+    queueing::PassivePacketSinkRef splitterOutSink;
 
     const int64_t sizeOfMsg = 20;
     const char *SPLITTER_OUTGW;         /**< Output gateway to the EIGRP Splitter module */
@@ -328,6 +330,14 @@ class INET_API EigrpIpv6Pdm : public SimpleModule, public IEigrpModule<Ipv6Addre
     void sendUpdateToStubs(EigrpRouteSource<Ipv6Address> *succ, EigrpRouteSource<Ipv6Address> *oldSucc, EigrpRoute<Ipv6Address> *route) override;
 
     bool addNetPrefix(const Ipv6Address& network, const short int prefixLen, const int ifaceId) override;
+
+  public:
+    virtual bool canPushSomePacket(const cGate *gate) const override { return true; }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return true; }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 };
 
 } // namespace eigrp

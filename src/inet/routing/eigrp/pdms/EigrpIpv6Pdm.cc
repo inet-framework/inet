@@ -69,6 +69,7 @@ void EigrpIpv6Pdm::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         host = getContainingNode(this);
+        splitterOutSink.reference(gate(SPLITTER_OUTGW), true);
 
         ift.reference(this, "interfaceTableModule", true);
         rt.reference(this, "routingTableModule", true);
@@ -420,7 +421,7 @@ void EigrpIpv6Pdm::processMsgFromRtp(cMessage *msg)
     pk->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv6);
     pk->addTagIfAbsent<L3AddressReq>()->setSrcAddress(ift->getInterfaceById(destIface)->getProtocolData<Ipv6InterfaceData>()->getLinkLocalAddress());
     pk->addTagIfAbsent<HopLimitReq>()->setHopLimit(1);
-    send(pk, SPLITTER_OUTGW);
+    splitterOutSink.pushPacket(pk);
 }
 
 bool EigrpIpv6Pdm::getDestIpAddress(int destNeigh, Ipv6Address *resultAddress)
@@ -1967,6 +1968,13 @@ bool EigrpIpv6Pdm::addNetPrefix(const Ipv6Address& network, const short int pref
 //    EV_DEBUG << "Added prefix: " << this->netPrefixes.back().network << "/" << this->netPrefixes.back().prefixLength << " on iface " << this->netPrefixes.back().ifaceId << endl;
 
     return true;
+}
+
+void EigrpIpv6Pdm::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
 }
 
 } // namespace eigrp
