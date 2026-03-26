@@ -24,6 +24,7 @@ void EthernetPhy::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         physInGate = gate("phys$i");
         upperLayerInGate = gate("upperLayerIn");
+        upperLayerSink.reference(gate("upperLayerOut"), true);
     }
 }
 
@@ -47,10 +48,17 @@ void EthernetPhy::handleMessage(cMessage *message)
         delete signal;
         auto phyHeader = packet->popAtFront<EthernetPhyHeader>();
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
-        send(packet, "upperLayerOut");
+        upperLayerSink.pushPacket(packet);
     }
     else
         throw cRuntimeError("Received unknown message");
+}
+
+void EthernetPhy::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
 }
 
 } // namespace physicallayer
