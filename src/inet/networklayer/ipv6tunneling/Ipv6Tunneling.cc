@@ -59,6 +59,8 @@ void Ipv6Tunneling::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         ift.reference(this, "interfaceTableModule", true);
         rt.reference(this, "routingTableModule", true);
+        upperLayerSink.reference(gate("upperLayerOut"), true);
+        linkLayerSink.reference(gate("linkLayerOut"), true);
 
         vIfIndexTop = INT_MAX; // virtual interface number set to maximum int value
         noOfNonSplitTunnels = 0; // current number of non-split tunnels on this host
@@ -438,7 +440,7 @@ void Ipv6Tunneling::encapsulateDatagram(Packet *packet)
         // copy old dest addr
         addresses->setDestAddress(dest);
 
-        send(packet, "upperLayerOut");
+        upperLayerSink.pushPacket(packet);
     }
     else {
 #endif // INET_WITH_xMIPv6
@@ -450,7 +452,7 @@ void Ipv6Tunneling::encapsulateDatagram(Packet *packet)
     addresses->setSrcAddress(tunnels[vIfIndex].entry);
     addresses->setDestAddress(tunnels[vIfIndex].exit);
 
-    send(packet, "upperLayerOut");
+    upperLayerSink.pushPacket(packet);
 #ifdef INET_WITH_xMIPv6
 }
 
@@ -489,7 +491,7 @@ void Ipv6Tunneling::decapsulateDatagram(Packet *packet)
     // (important if several interfaces are available)
 //    controlInfo->setInterfaceId(-1);
 
-    send(packet, "linkLayerOut");
+    linkLayerSink.pushPacket(packet);
 
 #ifdef INET_WITH_xMIPv6
     // Alain Tigyo, 21.03.2008
@@ -596,6 +598,13 @@ std::ostream& operator<<(std::ostream& os, const Ipv6Tunneling::Tunnel& tun)
     os << endl;
 
     return os;
+}
+
+void Ipv6Tunneling::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
 }
 
 } // namespace inet
