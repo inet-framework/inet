@@ -39,6 +39,8 @@ void Mpls::initialize(int stage)
         WATCH(delay1);
         WATCH(numReceived);
         WATCH(numSent);
+        lowerLayerOutSink.reference(gate("lowerLayerOut"), true);
+        upperLayerOutSink.reference(gate("upperLayerOut"), true);
     }
 }
 
@@ -286,7 +288,7 @@ void Mpls::sendToL2(Packet *msg)
     ASSERT(msg->findTag<InterfaceReq>());
     ASSERT(msg->findTag<PacketProtocolTag>());
     numSent++;
-    send(msg, "lowerLayerOut");
+    lowerLayerOutSink.pushPacket(msg);
 }
 
 void Mpls::sendToL3(Packet *msg)
@@ -294,7 +296,14 @@ void Mpls::sendToL3(Packet *msg)
     ASSERT(msg->findTag<InterfaceInd>());
     ASSERT(msg->findTag<DispatchProtocolReq>());
     numSent++;
-    send(msg, "upperLayerOut");
+    upperLayerOutSink.pushPacket(msg);
+}
+
+void Mpls::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
 }
 
 cGate *Mpls::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)

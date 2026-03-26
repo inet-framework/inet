@@ -20,13 +20,16 @@
 #include "inet/networklayer/mpls/IIngressClassifier.h"
 #include "inet/networklayer/mpls/LibTable.h"
 #include "inet/networklayer/mpls/MplsPacket_m.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 /**
  * Implements the MPLS protocol; see the NED file for more info.
  */
-class INET_API Mpls : public SimpleModule, public IModuleInterfaceLookup
+class INET_API Mpls : public SimpleModule, public IPassivePacketSink, public IModuleInterfaceLookup
 {
   protected:
     simtime_t delay1;
@@ -39,6 +42,9 @@ class INET_API Mpls : public SimpleModule, public IModuleInterfaceLookup
     ModuleRefByPar<LibTable> lt;
     ModuleRefByPar<IInterfaceTable> ift;
     ModuleRefByPar<IIngressClassifier> pct;
+
+    PassivePacketSinkRef lowerLayerOutSink;
+    PassivePacketSinkRef upperLayerOutSink;
 
   protected:
     virtual void initialize(int stage) override;
@@ -62,6 +68,13 @@ class INET_API Mpls : public SimpleModule, public IModuleInterfaceLookup
     virtual void doStackOps(Packet *packet, const LabelOpVector& outLabel);
 
   public:
+    virtual bool canPushSomePacket(const cGate *gate) const override { return true; }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return true; }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
+
     virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 };
 
