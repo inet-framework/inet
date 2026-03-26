@@ -16,17 +16,25 @@ namespace inet {
 
 Define_Module(ReceiveWithAcknowledge);
 
+void ReceiveWithAcknowledge::initialize(int stage)
+{
+    PacketPusherBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL) {
+        ackOutSink.reference(gate("ackOut"), true);
+    }
+}
+
 void ReceiveWithAcknowledge::pushPacket(Packet *dataPacket, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(dataPacket);
     auto dataHeader = dataPacket->popAtFront<SequenceNumberHeader>();
-    send(dataPacket, "out");
+    consumer.pushPacket(dataPacket);
     auto ackHeader = makeShared<AcknowledgeHeader>();
     ackHeader->setSequenceNumber(dataHeader->getSequenceNumber());
     auto ackPacket = new Packet("Ack", ackHeader);
     ackPacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&AccessoryProtocol::acknowledge);
-    send(ackPacket, "ackOut");
+    ackOutSink.pushPacket(ackPacket);
 }
 
 } // namespace inet

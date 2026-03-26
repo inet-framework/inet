@@ -16,6 +16,12 @@ using namespace inet::queueing;
 
 class INET_API ReceiveWithAcknowledge : public PacketPusherBase
 {
+  protected:
+    PassivePacketSinkRef ackOutSink;
+
+  protected:
+    virtual void initialize(int stage) override;
+
   public:
     virtual void pushPacket(Packet *packet, const cGate *gate) override;
 };
