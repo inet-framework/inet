@@ -53,7 +53,7 @@ void SendWithAcknowledge::processPacket(Packet *packet)
         header->setSequenceNumber(sequenceNumber);
         packet->insertAtFront(header);
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&AccessoryProtocol::withAcknowledge);
-        send(packet, "out");
+        consumer.pushPacket(packet);
         auto timer = new cMessage("AcknowledgeTimer");
         timer->setKind(sequenceNumber);
         timer->setContextPointer(packet);
