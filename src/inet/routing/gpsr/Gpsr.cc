@@ -65,6 +65,7 @@ void Gpsr::initialize(int stage)
     RoutingProtocolBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
+        ipOutSink.reference(gate("ipOut"), true);
         // Gpsr parameters
         const char *planarizationModeString = par("planarizationMode");
         if (!strcmp(planarizationModeString, ""))
@@ -196,7 +197,7 @@ void Gpsr::processPurgeNeighborsTimer()
 
 void Gpsr::sendUdpPacket(Packet *packet)
 {
-    send(packet, "ipOut");
+    ipOutSink.pushPacket(packet);
 }
 
 void Gpsr::processUdpPacket(Packet *packet)
@@ -813,6 +814,13 @@ void Gpsr::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj,
         EV_WARN << "Received link break" << endl;
         // TODO remove the neighbor
     }
+}
+
+void Gpsr::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessageWhenUp(packet);
 }
 
 } // namespace inet

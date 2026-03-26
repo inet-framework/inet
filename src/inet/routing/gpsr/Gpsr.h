@@ -15,6 +15,7 @@
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/routing/gpsr/Gpsr_m.h"
 #include "inet/routing/gpsr/GpsrNeighborTable.h"
@@ -22,6 +23,8 @@
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 /**
  * This class implements the Greedy Perimeter Stateless Routing for Wireless Networks.
@@ -34,7 +37,7 @@ namespace inet {
 // TODO implement position piggybacking that is all packets should carry the position of the sender, all packets act as a beacon and reset beacon timer
 // TODO implement promiscuous mode, all receivers should process all packets with respect to neighbor positions
 // KLUDGE implement position registry protocol instead of using a global variable
-class INET_API Gpsr : public RoutingProtocolBase, public cListener, public NetfilterBase::HookBase
+class INET_API Gpsr : public RoutingProtocolBase, public cListener, public NetfilterBase::HookBase, public IPassivePacketSink
 {
   private:
     // GPSR parameters
@@ -61,6 +64,7 @@ class INET_API Gpsr : public RoutingProtocolBase, public cListener, public Netfi
     cMessage *beaconTimer = nullptr;
     cMessage *purgeNeighborsTimer = nullptr;
     GpsrNeighborTable neighborTable;
+    PassivePacketSinkRef ipOutSink;
 
   public:
     Gpsr();
@@ -154,6 +158,14 @@ class INET_API Gpsr : public RoutingProtocolBase, public cListener, public Netfi
 
     // notification
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
+
+  public:
+    virtual bool canPushSomePacket(const cGate *gate) const override { return true; }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return true; }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 };
 
 } // namespace inet
