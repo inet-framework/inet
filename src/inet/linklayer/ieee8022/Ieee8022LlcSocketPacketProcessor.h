@@ -18,6 +18,7 @@ class INET_API Ieee8022LlcSocketPacketProcessor : public queueing::PacketPusherB
 {
   protected:
     ModuleRefByPar<Ieee8022LlcSocketTable> socketTable;
+    queueing::PassivePacketSinkRef upperLayerSink;
 
   protected:
     virtual void initialize(int stage) override;

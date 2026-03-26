@@ -19,8 +19,10 @@ Define_Module(Ieee8022LlcSocketPacketProcessor);
 void Ieee8022LlcSocketPacketProcessor::initialize(int stage)
 {
     PacketPusherBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
+    if (stage == INITSTAGE_LOCAL) {
         socketTable.reference(this, "socketTableModule", true);
+        upperLayerSink.reference(gate("upperLayerOut"), true);
+    }
 }
 
 void Ieee8022LlcSocketPacketProcessor::pushPacket(Packet *packet, const cGate *gate)
@@ -34,11 +36,11 @@ void Ieee8022LlcSocketPacketProcessor::pushPacket(Packet *packet, const cGate *g
         packetCopy->setKind(SOCKET_I_DATA);
         packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(socket->socketId);
         EV_INFO << "Passing up packet to socket" << EV_FIELD(socket) << EV_FIELD(packet) << EV_ENDL;
-        send(packetCopy, "upperLayerOut");
+        upperLayerSink.pushPacket(packetCopy);
     }
 
     // TODO mark packet when sent to any socket
-    send(packet, "out");
+    consumer.pushPacket(packet);
 }
 
 } // namespace inet
