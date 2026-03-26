@@ -291,7 +291,7 @@ void EthernetEncapsulation::handleSendPause(cMessage *msg)
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
 
     EV_INFO << "Sending " << frame << " to lower layer.\n";
-    send(packet, "lowerLayerOut");
+    lowerLayerSink.pushPacket(packet);
 
     emit(pauseSentSignal, pauseUnits);
     totalPauseSent++;
