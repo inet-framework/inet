@@ -752,7 +752,7 @@ void EthernetCsmaMacPhy::processReceivedDataFrame(Packet *packet)
     emit(packetSentToUpperSignal, packet);
     // pass up to upper layer
     EV_INFO << "Sending " << packet << " to upper layer.\n";
-    send(packet, "upperLayerOut");
+    upperLayerSink.pushPacket(packet);
 }
 
 void EthernetCsmaMacPhy::processReceivedControlFrame(Packet *packet)
