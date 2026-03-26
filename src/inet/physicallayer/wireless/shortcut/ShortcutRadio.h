@@ -11,8 +11,11 @@
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/PhysicalLayerBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 namespace physicallayer {
 
@@ -23,6 +26,7 @@ class INET_API ShortcutRadio : public PhysicalLayerBase, public virtual IRadio
     std::map<MacAddress, ShortcutRadio *>& shortcutRadios = SIMULATION_SHARED_VARIABLE(shortcutRadios);
 
   protected:
+    PassivePacketSinkRef upperLayerSink;
     RadioMode radioMode = RADIO_MODE_OFF;
     double bitrate = NaN;
     cPar *lengthOverhead = nullptr;
