@@ -10,9 +10,9 @@
 
 #include "inet/common/INETDefs.h"
 
-// NOTE: use the following library if ucontext_t is not supported on your platform: https://github.com/kaniini/libucontext
-
 namespace inet {
+
+struct CoroutineSlot;
 
 /**
  * Stops the execution of the current event and schedules resuming the execution after the specified simulation time.
@@ -26,8 +26,7 @@ class INET_API SimulationContinuation
 {
   protected:
     bool isStopped = false;
-    ucontext_t oldContext;
-    ContextType oldContextType;
+    CoroutineSlot *suspendedSlot = nullptr;
 
   public:
     virtual ~SimulationContinuation() { }
@@ -39,8 +38,7 @@ class INET_API SimulationContinuation
 class INET_API SimulationContextSwitchingEvent : public cEvent
 {
   public:
-    ucontext_t oldContext;
-    ContextType oldContextType;
+    CoroutineSlot *suspendedSlot = nullptr;
 
   public:
     SimulationContextSwitchingEvent(const char *name) : cEvent(name) { }

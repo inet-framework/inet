@@ -28,9 +28,7 @@ void scheduleAfter(const char *name, simtime_t delay, std::function<void()> f)
 void FunctionalEvent::execute()
 {
     f();
-    // TODO: when f() calls swapcontext it doesn't return, so how should this event be deleted?
-    // TODO: it cannot be deleted before calling f() in such a case because that would corrupt the closure's data
-    // TODO: perhaps we need a list of objects that should be eventually deleted (in the event loop)
+    removeFromOwnershipTree();
     delete this;
 }
 

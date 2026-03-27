@@ -386,6 +386,19 @@ void Ieee80211Mac::handleCrashOperation(LifecycleOperation *operation)
 {
 }
 
+void Ieee80211Mac::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    if (gate->isName("mgmtIn")) {
+        handleMgmtPacket(packet);
+    }
+    else {
+        emit(packetReceivedFromUpperSignal, packet);
+        handleUpperPacket(packet);
+    }
+}
+
 } // namespace ieee80211
 } // namespace inet
 
