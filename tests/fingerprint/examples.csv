@@ -214,14 +214,14 @@
 # /examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP_common -r 0,             100s,            0, ERROR,   # abstract-config
 /examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP -r 0,                    100s,            e795-4489/tplx;6259-1610/~tNl;504b-1988/tyf, PASS, EthernetMac Ipv4
 /examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP -r 1,                    100s,            acc0-2cb6/tplx;b258-3e06/~tNl;59fb-0c14/tyf, PASS, EthernetMac Ipv4
-/examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP -r 2,                    100s,            69ed-e298/tplx;56b0-e363/~tNl;b4d1-73f2/tyf, PASS, EthernetMac Ipv4
+/examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP -r 2,                    100s,            f4fe-b8f0/tplx;56b0-e363/~tNl;e388-7d5d/tyf, PASS, EthernetMac Ipv4
 
-/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex -r 0,  10s,        25c5-b549/tplx;273f-6d68/~tNl;68a3-9d13/~tND;e3c0-b135/tyf, PASS, EthernetMac Ipv4
-/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex -r 1,  10s,        25c5-b549/tplx;273f-6d68/~tNl;68a3-9d13/~tND;be92-251f/tyf, PASS, EthernetMac Ipv4
-/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_fullduplex -r 0, 10s,        b8dc-bf76/tplx;6359-0047/~tNl;f12c-b386/~tND;47f7-5ec5/tyf, PASS, EthernetCsmaMac Ipv4
-/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_fullduplex -r 1, 10s,        b8dc-bf76/tplx;6359-0047/~tNl;f12c-b386/~tND;916f-e21f/tyf, PASS, EthernetCsmaMac Ipv4
-/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_halfduplex -r 0, 10s,        9a63-0c80/tplx;e5ae-b931/~tNl;a294-ab6d/~tND;811a-d075/tyf, PASS, EthernetCsmaMac Ipv4
-/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_halfduplex -r 1, 10s,        215a-7021/tplx;894e-5243/~tNl;0d46-ef82/~tND;39be-b6dd/tyf, PASS, EthernetCsmaMac Ipv4
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex -r 0,  10s,        e697-39c8/tplx;273f-6d68/~tNl;68a3-9d13/~tND;1343-4cd7/tyf, PASS, EthernetMac Ipv4
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex -r 1,  10s,        e697-39c8/tplx;273f-6d68/~tNl;68a3-9d13/~tND;4b20-04ab/tyf, PASS, EthernetMac Ipv4
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_fullduplex -r 0, 10s,        0d05-5618/tplx;6359-0047/~tNl;f12c-b386/~tND;c29f-bea3/tyf, PASS, EthernetCsmaMac Ipv4
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_fullduplex -r 1, 10s,        0d05-5618/tplx;6359-0047/~tNl;f12c-b386/~tND;51e4-4847/tyf, PASS, EthernetCsmaMac Ipv4
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_halfduplex -r 0, 10s,        9c86-8ad8/tplx;e5ae-b931/~tNl;a294-ab6d/~tND;e64c-0e13/tyf, PASS, EthernetCsmaMac Ipv4
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_halfduplex -r 1, 10s,        cb6b-b553/tplx;894e-5243/~tNl;0d46-ef82/~tND;8ed6-a146/tyf, PASS, EthernetCsmaMac Ipv4
 
 /examples/inet/tcp_ppp_reconnect/,   -f omnetpp.ini -c General -r 0,                  10s,        c390-6895/tplx;0cf5-894b/~tNl;3675-9aee/~tND;32ba-9e70/tyf, PASS, Ipv4
 
