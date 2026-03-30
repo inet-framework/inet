@@ -9,7 +9,7 @@ package inet.common;
 
 import ned.DatarateChannel;
 
-channel Cable extends DatarateChannel
+channel Cable extends DatarateChannel like ILink
 {
     parameters:
         string enabledLineStyle = default("solid");
