@@ -340,6 +340,77 @@ Define_NED_Function2(nedf_iterate,
         "Returns the next number (starting from the front of the array) each time the expression is evaluated. The index is stored as associated to the full path of the context component."
         );
 
+cValue nedf_sum(cComponent *context, cValue argv[], int argc)
+{
+    cObject *obj = argv[0].objectValue();
+    cValueArray *arr = dynamic_cast<cValueArray *>(obj);
+    if (!arr)
+        throw cRuntimeError("sum(): argument must be an array");
+    if (arr->size() == 0)
+        return (intval_t)0;
+    bool allInt = true;
+    for (int i = 0; i < arr->size(); i++)
+        if (arr->get(i).getType() != cValue::INT) { allInt = false; break; }
+    if (allInt) {
+        intval_t result = 0;
+        for (int i = 0; i < arr->size(); i++)
+            result += arr->get(i).intValue();
+        return result;
+    }
+    else {
+        double result = 0;
+        for (int i = 0; i < arr->size(); i++)
+            result += arr->get(i).doubleValue();
+        return result;
+    }
+}
+
+Define_NED_Function2(nedf_sum,
+    "any sum(object array)",
+    "misc",
+    "Returns the sum of the elements in the array.");
+
+cValue nedf_repeatPar(cComponent *context, cValue argv[], int argc)
+{
+    if (!context)
+        throw cRuntimeError("repeatPar(): no context component");
+    const char *paramName = argv[0].stringValue();
+    int count = (int)argv[1].intValue();
+    cValueArray *result = new cValueArray();
+    for (int i = 0; i < count; i++)
+        result->add(context->par(paramName).getValue());
+    return result;
+}
+
+Define_NED_Function2(nedf_repeatPar,
+    "object repeatPar(string paramName, int count)",
+    "misc",
+    "Reads the named parameter count times and returns the results as an array. "
+    "Useful with volatile parameters to generate an array of independent random values.");
+
+cValue nedf_groupIndex(cComponent *context, cValue argv[], int argc)
+{
+    cObject *obj = argv[0].objectValue();
+    cValueArray *arr = dynamic_cast<cValueArray *>(obj);
+    if (!arr)
+        throw cRuntimeError("groupIndex(): first argument must be an array");
+    int flatIndex = (int)argv[1].intValue();
+    int offset = 0;
+    for (int i = 0; i < arr->size(); i++) {
+        int count = (int)arr->get(i).intValue();
+        if (flatIndex < offset + count)
+            return i;
+        offset += count;
+    }
+    throw cRuntimeError("groupIndex(): flat index %d is out of range (total: %d)", flatIndex, offset);
+}
+
+Define_NED_Function2(nedf_groupIndex,
+    "int groupIndex(object counts, int flatIndex)",
+    "misc",
+    "Given an array of group sizes and a flat index, "
+    "returns the group index that the flat index belongs to.");
+
 } // namespace utils
 
 } // namespace inet
