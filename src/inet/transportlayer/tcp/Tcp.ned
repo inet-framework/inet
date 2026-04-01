@@ -63,6 +63,23 @@ import inet.transportlayer.contract.ITcp;
 //      windowScalingFactor=-1 sets the shift count automatically to a value
 //      suitable for the `advertisedWindow` setting.
 //
+//   -# The `sackSupport` parameter enables SACK (RFC 2018). SACK is only
+//      used on a connection if both endpoints have it enabled.
+//
+//   -# The `timestampSupport` parameter enables the Timestamps option
+//      (RFC 1323). Like SACK, it is only used if both endpoints support it.
+//
+//   -# The `ecnWillingness` parameter enables Explicit Congestion Notification
+//      (RFC 3168). ECN is negotiated during the three-way handshake and is
+//      only active if both endpoints are willing.  When using the `DcTcp`
+//      algorithm, the `dctcpGamma` parameter controls the EWMA gain for
+//      estimating the congestion level (RFC 8257).
+//
+//   -# The `pmtudEnabled` parameter enables Path MTU Discovery (RFC 1191,
+//      RFC 1981). When enabled, IPv4 segments are sent with the DF bit set.
+//      The `pmtudTimeout` parameter controls how long the reduced MSS is
+//      kept before probing with the original MSS again.
+//
 // Notes:
 //  - if you do active OPEN, then send data and close before the connection
 //    has reached ESTABLISHED, the connection will go from SYN_SENT to CLOSED
@@ -86,6 +103,10 @@ import inet.transportlayer.contract.ITcp;
 //   - RFC 3517 - A Conservative Selective Acknowledgment (SACK)-based Loss Recovery
 //                Algorithm for TCP
 //   - RFC 3782 - The `NewReno` Modification to TCP's Fast Recovery Algorithm
+//   - RFC 1191 - Path MTU Discovery
+//   - RFC 1981 - Path MTU Discovery for IP version 6
+//   - RFC 3168 - The Addition of Explicit Congestion Notification (ECN) to IP
+//   - RFC 8257 - Data Center TCP (DCTCP): ECN Marking at the Data Sender
 //
 // Implemented features include the following:
 //  - all RFC 793 TCP states and state transitions
@@ -118,6 +139,15 @@ import inet.transportlayer.contract.ITcp;
 //    segments) and the payload length of a newly received segment
 //    is higher than free receiver buffer, the new segment will be dropped.
 //    Such drops are recorded in `tcpRcvQueueDropsVector`.
+//  - Path MTU Discovery (RFC 1191, RFC 1981): when enabled, the DF bit is set
+//    on IPv4 segments. Upon receiving an ICMPv4 Fragmentation Needed or ICMPv6
+//    Packet Too Big error, the MSS is reduced accordingly and the offending
+//    segment is retransmitted. After a configurable timeout (`pmtudTimeout`),
+//    the original MSS is restored to probe for an increased path MTU.
+//  - Explicit Congestion Notification (RFC 3168): ECN-setup during the
+//    three-way handshake, ECE/CWR flag handling, and CE codepoint processing.
+//  - Data Center TCP (RFC 8257): DCTCP congestion control based on ECN
+//    feedback, implemented in the `DcTcp` algorithm class.
 //
 // The `TcpNewReno`, `TcpReno`, and `TcpTahoe` algorithms implement:
 //  - RFC 1122 - delayed ACK algorithm (optional) with 200ms timeout
@@ -133,6 +163,8 @@ import inet.transportlayer.contract.ITcp;
 //    (can be used for `TcpNewReno`, `TcpReno`, `TcpTahoe`, and `TcpNoCongestionControl` but not
 //    for `DumbTcp`).
 //
+// Additional congestion control algorithms: `TcpVegas`, `TcpWestwood`, `DcTcp`.
+//
 // Missing bits:
 //  - URG and PSH bits not handled. Receiver always acts as if PSH was set
 //    on all segments: always forwards data to the app as soon as possible.
@@ -143,7 +175,6 @@ import inet.transportlayer.contract.ITcp;
 //  - all timeouts are precisely calculated: timer granularity (which is caused
 //    by "slow" and "fast" i.e. 500ms and 200ms timers found in many *nix Tcp
 //    implementations) is not simulated
-//  - new ECN flags (CWR and ECE). Need to be added to the header by [RFC 3168].
 //
 // `TcpNewReno`, `TcpReno`, and `TcpTahoe` issues and missing features:
 //  - KEEP-ALIVE not implemented (idle connections never time out)
@@ -165,7 +196,7 @@ simple Tcp extends SimpleModule like ITcp
         bool windowScalingSupport = default(false); // Window Scale (RFC 1323) support (header option) (WS will be enabled for a connection if both endpoints support it)
         int windowScalingFactor = default(-1); // Window Scaling Factor given as a shift count. Valid values are 0..14, and -1 for automatic selection (it chooses the smallest shift count that makes advertisedWindow representable in 16 bits)
         bool timestampSupport = default(false); // Timestamps (RFC 1323) support (header option) (TS will be enabled for a connection if both endpoints support it)
-        int mss = default(536); // Maximum Segment Size (RFC 793) (header option)
+        int mss = default(536); // Maximum Segment Size (header option). Default 536 per RFC 1122.
         int msl @unit(s) = default(120s);   // Maximum Segment Lifetime
         string tcpAlgorithmClass @examples("TcpVegas", "TcpWestwood", "DcTcp", "TcpNewReno", "TcpReno", "TcpTahoe", "TcpNoCongestionControl") = default("TcpReno");
         int dupthresh = default(3); // Used for TcpTahoe, TcpReno, and SACK (RFC 3517) DO NOT change unless you really know what you are doing
