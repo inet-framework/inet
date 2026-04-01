@@ -421,16 +421,38 @@ class INET_API TcpConnection : public SimpleModule
     virtual void handleMessage(cMessage *msg);
 
     /**
-     * Process an ICMPv4 error indication for this connection.
-     * Notifies the application via TCP_I_ICMPv4_ERROR.
+     * Return value for processIcmpv4Error() / processIcmpv6Error().
      */
-    virtual void processIcmpv4Error(Indication *indication);
+    enum IcmpErrorAction {
+        ICMP_ERROR_KEEP,       // connection stays alive (soft notification sent)
+        ICMP_ERROR_ABORT       // connection was aborted (caller must call removeConnection)
+    };
+
+    /**
+     * Process an ICMPv4 error indication for this connection.
+     * Hard errors (port/protocol unreachable) abort connections in SYN_SENT state.
+     * All other cases send a soft TCP_I_ICMPv4_ERROR notification to the app.
+     */
+    virtual IcmpErrorAction processIcmpv4Error(Indication *indication);
 
     /**
      * Process an ICMPv6 error indication for this connection.
-     * Notifies the application via TCP_I_ICMPv6_ERROR.
+     * Hard errors (port unreachable, admin prohibited) abort connections in SYN_SENT state.
+     * All other cases send a soft TCP_I_ICMPv6_ERROR notification to the app.
      */
-    virtual void processIcmpv6Error(Indication *indication);
+    virtual IcmpErrorAction processIcmpv6Error(Indication *indication);
+
+    /**
+     * Returns true if the given ICMPv4 type+code is a "hard" error
+     * (protocol unreachable, port unreachable, admin prohibited).
+     */
+    static bool isHardIcmpv4Error(int type, int code);
+
+    /**
+     * Returns true if the given ICMPv6 type+code is a "hard" error
+     * (port unreachable, admin prohibited).
+     */
+    static bool isHardIcmpv6Error(int type, int code);
 
     /**
      * For SACK TCP. RFC 3517, page 3: "This routine returns whether the given

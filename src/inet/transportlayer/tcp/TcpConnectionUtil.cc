@@ -18,6 +18,8 @@
 #include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/networklayer/common/Icmpv4ErrorTag_m.h"
 #include "inet/networklayer/common/Icmpv6ErrorTag_m.h"
+#include "inet/networklayer/ipv4/IcmpHeader_m.h"
+#include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
 #include "inet/networklayer/common/EcnTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
@@ -358,36 +360,95 @@ void TcpConnection::sendIndicationToApp(int code, const int id)
     sendToApp(indication);
 }
 
-void TcpConnection::processIcmpv4Error(Indication *indication)
+TcpConnection::IcmpErrorAction TcpConnection::processIcmpv4Error(Indication *indication)
 {
+    Enter_Method("processIcmpv4Error");
+    take(indication);
+
     auto& errorInd = indication->getTag<Icmpv4ErrorInd>();
 
     EV_WARN << "ICMPv4 error for connection " << localAddr << ":" << localPort
             << " > " << remoteAddr << ":" << remotePort
             << " type=" << errorInd->getType() << " code=" << errorInd->getCode() << "\n";
 
-    // Forward the original indication to the application (soft notification, no state change).
+    // Hard errors abort the connection during setup (RFC 5461).
+    // Once ESTABLISHED, even hard errors are treated as soft to prevent
+    // blind reset attacks.
+    if (isHardIcmpv4Error(errorInd->getType(), errorInd->getCode()) && fsm.getState() == TCP_S_SYN_SENT) {
+        EV_DETAIL << "Hard ICMPv4 error during connection setup -- connection refused\n";
+
+        sendQueue->discardUpTo(sendQueue->getBufferEndSeq());
+        if (state->sack_enabled)
+            rexmitQueue->discardUpTo(rexmitQueue->getBufferEndSeq());
+
+        sendIndicationToApp(TCP_I_CONNECTION_REFUSED);
+        delete indication;
+
+        performStateTransition(TCP_E_RCV_RST);
+        return ICMP_ERROR_ABORT;
+    }
+
+    // Soft notification: forward the original indication to the application, no state change.
     // The Icmpv4ErrorInd tag is already attached; just relabel and add SocketInd.
     indication->setName(indicationName(TCP_I_ICMPv4_ERROR));
     indication->setKind(TCP_I_ICMPv4_ERROR);
     indication->addTag<SocketInd>()->setSocketId(socketId);
     sendToApp(indication);
+    return ICMP_ERROR_KEEP;
 }
 
-void TcpConnection::processIcmpv6Error(Indication *indication)
+TcpConnection::IcmpErrorAction TcpConnection::processIcmpv6Error(Indication *indication)
 {
+    Enter_Method("processIcmpv6Error");
+    take(indication);
+
     auto& errorInd = indication->getTag<Icmpv6ErrorInd>();
 
     EV_WARN << "ICMPv6 error for connection " << localAddr << ":" << localPort
             << " > " << remoteAddr << ":" << remotePort
             << " type=" << errorInd->getType() << " code=" << errorInd->getCode() << "\n";
 
-    // Forward the original indication to the application (soft notification, no state change).
+    // Hard errors abort the connection during setup (RFC 5461).
+    // Once ESTABLISHED, even hard errors are treated as soft to prevent
+    // blind reset attacks.
+    if (isHardIcmpv6Error(errorInd->getType(), errorInd->getCode()) && fsm.getState() == TCP_S_SYN_SENT) {
+        EV_DETAIL << "Hard ICMPv6 error during connection setup -- connection refused\n";
+
+        sendQueue->discardUpTo(sendQueue->getBufferEndSeq());
+        if (state->sack_enabled)
+            rexmitQueue->discardUpTo(rexmitQueue->getBufferEndSeq());
+
+        sendIndicationToApp(TCP_I_CONNECTION_REFUSED);
+        delete indication;
+
+        performStateTransition(TCP_E_RCV_RST);
+        return ICMP_ERROR_ABORT;
+    }
+
+    // Soft notification: forward the original indication to the application, no state change.
     // The Icmpv6ErrorInd tag is already attached; just relabel and add SocketInd.
     indication->setName(indicationName(TCP_I_ICMPv6_ERROR));
     indication->setKind(TCP_I_ICMPv6_ERROR);
     indication->addTag<SocketInd>()->setSocketId(socketId);
     sendToApp(indication);
+    return ICMP_ERROR_KEEP;
+}
+
+bool TcpConnection::isHardIcmpv4Error(int type, int code)
+{
+    // ICMPv4 Destination Unreachable with protocol/port unreachable or admin prohibited
+    return type == ICMP_DESTINATION_UNREACHABLE
+           && (code == ICMP_DU_PROTOCOL_UNREACHABLE
+               || code == ICMP_DU_PORT_UNREACHABLE
+               || code == ICMP_DU_COMMUNICATION_PROHIBITED);
+}
+
+bool TcpConnection::isHardIcmpv6Error(int type, int code)
+{
+    // ICMPv6 Destination Unreachable with port unreachable or admin prohibited
+    return type == ICMPv6_DESTINATION_UNREACHABLE
+           && (code == PORT_UNREACHABLE
+               || code == COMM_WITH_DEST_PROHIBITED);
 }
 
 void TcpConnection::sendAvailableIndicationToApp()
