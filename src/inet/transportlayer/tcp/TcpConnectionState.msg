@@ -232,6 +232,12 @@ struct TcpStateVariables
     simtime_t eceReactionTime; // records the time of the last ECE reaction
 
     uint32_t dupthresh = 0; // used for TcpTahoe, TcpReno and SACK (RFC 3517)
+
+    // Path MTU Discovery (RFC 1191, RFC 1981)
+    bool pmtudEnabled = false;              // set if Path MTU Discovery is enabled
+    uint32_t pmtudOriginalMss = 0;          // negotiated MSS before any PMTUD reduction
+    simtime_t pmtudTimeout;                 // time after which the original MSS is restored to probe for increased path MTU
+    simtime_t pmtudLastMssReduction;        // timestamp of last PMTUD-triggered MSS reduction (-1 = never reduced)
 };
 
 cplusplus(TcpStateVariables) {{

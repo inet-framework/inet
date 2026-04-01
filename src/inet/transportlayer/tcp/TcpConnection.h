@@ -11,6 +11,8 @@
 
 #include "inet/common/SimpleModule.h"
 #include "inet/networklayer/common/L3Address.h"
+#include "inet/networklayer/ipv4/IcmpHeader_m.h"
+#include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
 #include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp/TcpConnectionState_m.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
@@ -447,6 +449,18 @@ class INET_API TcpConnection : public SimpleModule
      * (port unreachable, admin prohibited).
      */
     static bool isHardIcmpv6Error(int type, int code);
+
+    /**
+     * Returns true if the ICMPv4 error is "Fragmentation Needed and DF Set"
+     * (type=3, code=4), used for Path MTU Discovery (RFC 1191).
+     */
+    static bool isFragNeeded(IcmpType type, int code);
+
+    /**
+     * Returns true if the ICMPv6 error is "Packet Too Big"
+     * (type=2), used for Path MTU Discovery (RFC 1981).
+     */
+    static bool isPacketTooBig(Icmpv6Type type, int code);
 
     /**
      * For SACK TCP. RFC 3517, page 3: "This routine returns whether the given

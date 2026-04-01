@@ -174,6 +174,8 @@ simple Tcp extends SimpleModule like ITcp
         double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation
         bool ecnWillingness = default(false); // True if willing to use ECN
         double dctcpGamma = default(0.0625); // A fixed estimation gain for calculating dctcp_alpha (RFC 8257 4.2)
+        bool pmtudEnabled = default(false); // Path MTU Discovery (RFC 1191, RFC 1981) enabled/disabled
+        double pmtudTimeout @unit(s) = default(600s); // Time after which the original MSS is restored to probe for increased path MTU (RFC 1191, Section 6.3)
         @display("i=block/wheelbarrow");
         @signal[tcpConnectionAdded];
         @signal[tcpConnectionRemoved];
