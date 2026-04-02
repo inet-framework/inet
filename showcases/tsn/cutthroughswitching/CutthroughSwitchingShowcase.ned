@@ -5,12 +5,12 @@
 
 package inet.showcases.tsn.cutthroughswitching;
 
-import inet.networks.base.TsnNetworkBase;
+import inet.networks.base.WiredNetworkBase;
 import inet.node.ethernet.EthernetLink;
 import inet.node.tsn.TsnDevice;
 import inet.node.tsn.TsnSwitch;
 
-network CutthroughSwitchingShowcase extends TsnNetworkBase
+network CutthroughSwitchingShowcase extends WiredNetworkBase
 {
     submodules:
         device1: TsnDevice {

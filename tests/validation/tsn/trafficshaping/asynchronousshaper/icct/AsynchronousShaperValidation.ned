@@ -7,12 +7,12 @@
 
 package inet.validation.tsn.trafficshaping.asynchronousshaper.icct;
 
-import inet.networks.base.TsnNetworkBase;
+import inet.networks.base.WiredNetworkBase;
 import inet.node.ethernet.Eth100M;
 import inet.node.tsn.TsnDevice;
 import inet.node.tsn.TsnSwitch;
 
-network AsynchronousShaperValidation extends TsnNetworkBase
+network AsynchronousShaperValidation extends WiredNetworkBase
 {
     submodules:
         N1: TsnDevice {

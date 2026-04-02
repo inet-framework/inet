@@ -7,12 +7,12 @@
 
 package inet.validation.tsn.trafficshaping.creditbasedshaper;
 
-import inet.networks.base.TsnNetworkBase;
+import inet.networks.base.WiredNetworkBase;
 import inet.node.ethernet.Eth100M;
 import inet.node.tsn.TsnDevice;
 import inet.node.tsn.TsnSwitch;
 
-network CreditBasedShaperValidation extends TsnNetworkBase
+network CreditBasedShaperValidation extends WiredNetworkBase
 {
     submodules:
         S0: TsnDevice {

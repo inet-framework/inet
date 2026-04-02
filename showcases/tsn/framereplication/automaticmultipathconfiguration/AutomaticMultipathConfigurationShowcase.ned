@@ -6,7 +6,7 @@
 package inet.showcases.tsn.framereplication.automaticmultipathconfiguration;
 
 import inet.common.scenario.ScenarioManager;
-import inet.networks.base.TsnNetworkBase;
+import inet.networks.base.WiredNetworkBase;
 import inet.node.ethernet.EthernetLink;
 import inet.node.tsn.TsnDevice;
 import inet.node.tsn.TsnSwitch;
@@ -17,7 +17,7 @@ module LocalTsnSwitch extends TsnSwitch
     @defaultStatistic("gateStateChanged:vector"; module="eth[0].macLayer.queue.gate[0]");
 }
 
-network AutomaticMultipathConfigurationShowcase extends TsnNetworkBase
+network AutomaticMultipathConfigurationShowcase extends WiredNetworkBase
 {
     submodules:
         scenarioManager: ScenarioManager {

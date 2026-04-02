@@ -16,8 +16,18 @@ network WiredNetworkBase extends NetworkBase
     parameters:
         bool hasGlobalArp = default(true);
         **.ipv4.arp.typename = default(hasGlobalArp ? "GlobalArp" : "Arp");
+        **.clock.defaultOverdueClockEventHandlingMode = default("execute");
     submodules:
         macForwardingTableConfigurator: <default(hasGlobalArp ? "MacForwardingTableConfigurator" : "")> like INetworkConfigurator if typename != "" {
             @display("p=100,400;is=s");
+        }
+        gateScheduleConfigurator: <default("")> like IGateScheduleConfigurator if typename != "" {
+            @display("p=100,500;is=s");
+        }
+        streamRedundancyConfigurator: <default("")> like INetworkConfigurator if typename != "" {
+            @display("p=100,600;is=s");
+        }
+        failureProtectionConfigurator: <default("")> like INetworkConfigurator if typename != "" {
+            @display("p=100,700;is=s");
         }
 }

@@ -5,11 +5,11 @@
 
 package inet.showcases.tsn.streamfiltering.tokenbucket;
 
-import inet.networks.base.TsnNetworkBase;
+import inet.networks.base.WiredNetworkBase;
 import inet.node.contract.IEthernetNetworkNode;
 import inet.node.ethernet.EthernetLink;
 
-network TokenBucketPolicingShowcaseNetwork extends TsnNetworkBase
+network TokenBucketPolicingShowcaseNetwork extends WiredNetworkBase
 {
     parameters:
         *.eth[*].bitrate = default(100Mbps);

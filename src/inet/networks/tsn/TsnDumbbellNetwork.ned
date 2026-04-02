@@ -5,11 +5,11 @@
 
 package inet.networks.tsn;
 
-import inet.networks.base.TsnNetworkBase;
+import inet.networks.base.WiredNetworkBase;
 import inet.node.contract.IEthernetNetworkNode;
 import inet.node.ethernet.EthernetLink;
 
-network TsnDumbbellNetwork extends TsnNetworkBase
+network TsnDumbbellNetwork extends WiredNetworkBase
 {
     parameters:
         *.eth[*].bitrate = default(100Mbps);

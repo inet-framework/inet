@@ -5,13 +5,13 @@
 package inet.showcases.tsn.combiningfeatures.gptpandtas;
 
 import inet.common.scenario.ScenarioManager;
-import inet.networks.base.TsnNetworkBase;
+import inet.networks.base.WiredNetworkBase;
 import inet.node.ethernet.EthernetLink;
 import inet.node.tsn.TsnClock;
 import inet.node.tsn.TsnDevice;
 import inet.node.tsn.TsnSwitch;
 
-network GptpAndTasShowcase extends TsnNetworkBase
+network GptpAndTasShowcase extends WiredNetworkBase
 {
     submodules:
         scenarioManager: ScenarioManager {

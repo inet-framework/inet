@@ -5,11 +5,11 @@
 
 package inet.showcases.tsn.streamfiltering.statistical;
 
-import inet.networks.base.TsnNetworkBase;
+import inet.networks.base.WiredNetworkBase;
 import inet.node.contract.IEthernetNetworkNode;
 import inet.node.ethernet.EthernetLink;
 
-network StatisticalPolicingShowcaseNetwork extends TsnNetworkBase
+network StatisticalPolicingShowcaseNetwork extends WiredNetworkBase
 {
     parameters:
         *.eth[*].bitrate = default(100Mbps);

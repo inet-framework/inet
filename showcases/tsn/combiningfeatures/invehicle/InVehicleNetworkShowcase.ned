@@ -4,11 +4,11 @@
 
 package inet.showcases.tsn.combiningfeatures.invehicle;
 
-import inet.networks.base.TsnNetworkBase;
+import inet.networks.base.WiredNetworkBase;
 import inet.node.contract.IEthernetNetworkNode;
 import inet.node.ethernet.Eth100M;
 
-network InVehicleNetworkShowcase extends TsnNetworkBase
+network InVehicleNetworkShowcase extends WiredNetworkBase
 {
     parameters:
         string brokenComponent @enum("none", "link", "wheel", "camera") = default("none");

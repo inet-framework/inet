@@ -5,13 +5,13 @@
 package inet.showcases.tsn.timesynchronization.gptp;
 
 import inet.common.scenario.ScenarioManager;
-import inet.networks.base.TsnNetworkBase;
+import inet.networks.base.WiredNetworkBase;
 import inet.node.ethernet.EthernetLink;
 import inet.node.tsn.TsnClock;
 import inet.node.tsn.TsnDevice;
 import inet.node.tsn.TsnSwitch;
 
-network OneMasterClockGptpShowcase extends TsnNetworkBase
+network OneMasterClockGptpShowcase extends WiredNetworkBase
 {
     submodules:
         tsnClock: TsnClock {
@@ -32,7 +32,7 @@ network OneMasterClockGptpShowcase extends TsnNetworkBase
         tsnSwitch.ethg++ <--> EthernetLink <--> tsnDevice2.ethg++;
 }
 
-network TwoMasterClocksTreeGptpShowcase extends TsnNetworkBase
+network TwoMasterClocksTreeGptpShowcase extends WiredNetworkBase
 {
     submodules:
         tsnClock1: TsnClock {
@@ -69,7 +69,7 @@ network TwoMasterClocksTreeGptpShowcase extends TsnNetworkBase
         tsnSwitch2.ethg++ <--> EthernetLink <--> tsnDevice4.ethg++;
 }
 
-network TwoMasterClocksRingGptpShowcase extends TsnNetworkBase
+network TwoMasterClocksRingGptpShowcase extends WiredNetworkBase
 {
     submodules:
         scenarioManager: ScenarioManager {

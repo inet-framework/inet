@@ -5,12 +5,12 @@
 
 package inet.validation.tsn.framereplication;
 
-import inet.networks.base.TsnNetworkBase;
+import inet.networks.base.WiredNetworkBase;
 import inet.node.ethernet.EthernetLink;
 import inet.node.tsn.TsnDevice;
 import inet.node.tsn.TsnSwitch;
 
-network FrameReplicationValidation extends TsnNetworkBase
+network FrameReplicationValidation extends WiredNetworkBase
 {
     submodules:
         source: TsnDevice {

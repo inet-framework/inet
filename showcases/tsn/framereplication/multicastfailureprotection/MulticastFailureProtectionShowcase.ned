@@ -5,11 +5,11 @@
 
 package inet.showcases.tsn.framereplication.multicastfailureprotection;
 
-import inet.networks.base.TsnNetworkBase;
+import inet.networks.base.WiredNetworkBase;
 import inet.node.ethernet.EthernetLink;
 import inet.node.tsn.TsnSwitch;
 
-network MulticastFailureProtectionShowcase extends TsnNetworkBase
+network MulticastFailureProtectionShowcase extends WiredNetworkBase
 {
     submodules:
         a: TsnSwitch {
