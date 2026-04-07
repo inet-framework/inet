@@ -34,9 +34,10 @@ void Ieee8022Llc::initialize(int stage)
     OperationalBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         upperLayerSink.reference(gate("upperLayerOut"), true);
-        PacketProtocolTag packetProtocolTag;
-        packetProtocolTag.setProtocol(&Protocol::ieee8022llc);
-        lowerLayerSink.reference(gate("lowerLayerOut"), true, &packetProtocolTag);
+        DispatchProtocolReq dispatchProtocolReq;
+        dispatchProtocolReq.setProtocol(&Protocol::ethernetMac);
+        dispatchProtocolReq.setServicePrimitive(SP_REQUEST);
+        lowerLayerSink.reference(gate("lowerLayerOut"), true, &dispatchProtocolReq);
 
         // TODO parameterization for llc or snap?
         WATCH_PTRMAP(socketIdToSocketDescriptor);
