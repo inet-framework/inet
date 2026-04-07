@@ -174,6 +174,6 @@ simple Mrp extends SimpleModule like IMrp
         @statistic[testFrameLatency](title="Latency of Received Test Frames"; source=testFrameLatency; record=vector; interpolationmode=none);
 
     gates:
-        input relayIn;
+        input relayIn @interface[inet::queueing::IPassivePacketSink](protocol=mrp; service=indication);
         output relayOut;
 }
