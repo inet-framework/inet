@@ -31,11 +31,14 @@
 #include "inet/networklayer/contract/IL3AddressType.h"
 
 #ifdef INET_WITH_IPv4
+#include "inet/networklayer/ipv4/Icmp.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #endif
 #ifdef INET_WITH_IPv6
+#include "inet/networklayer/icmpv6/Icmpv6.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #endif
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/transportlayer/common/L4PortTag_m.h"
 #include "inet/transportlayer/common/L4Tools.h"
 #include "inet/common/SimulationContinuation.h"
@@ -81,6 +84,26 @@ void Udp::initialize(int stage)
         WATCH_MAP(socketsByPortMap);
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
+#ifdef INET_WITH_IPv4
+        {
+            DispatchProtocolReq req;
+            req.setProtocol(&Protocol::icmpv4);
+            req.setServicePrimitive(SP_INDICATION);
+            auto icmpGate = findModuleInterface(gate("ipOut"), typeid(IPassivePacketSink), &req);
+            if (icmpGate)
+                icmpv4Module = check_and_cast<Icmp *>(icmpGate->getOwnerModule());
+        }
+#endif
+#ifdef INET_WITH_IPv6
+        {
+            DispatchProtocolReq req;
+            req.setProtocol(&Protocol::icmpv6);
+            req.setServicePrimitive(SP_INDICATION);
+            auto icmpGate = findModuleInterface(gate("ipOut"), typeid(IPassivePacketSink), &req);
+            if (icmpGate)
+                icmpv6Module = check_and_cast<Icmpv6 *>(icmpGate->getOwnerModule());
+        }
+#endif
         if (checksumMode == CHECKSUM_COMPUTED) {
             cModuleType *moduleType = cModuleType::get("inet.transportlayer.udp.UdpChecksumInsertionHook");
             auto checksumInsertion = check_and_cast<UdpChecksumInsertionHook *>(moduleType->create("checksumInsertion", this));
@@ -1144,22 +1167,14 @@ void Udp::processUndeliverablePacket(Packet *udpPacket)
     }
 
     if (protocol->getId() == Protocol::ipv4.getId()) {
-        auto request = new Request("ICMP_send_error");
-        auto& tag = request->addTag<Icmpv4SendErrorReq>();
-        tag->setType(ICMP_DESTINATION_UNREACHABLE);
-        tag->setCode(ICMP_DU_PORT_UNREACHABLE);
-        tag->setOriginalPacket(udpPacket);
-        request->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::icmpv4);
-        send(request, "ipOut");
+        udpPacket->setFrontOffset(udpPacket->getTag<NetworkProtocolInd>()->getNetworkHeaderFrontOffset());
+        icmpv4Module->sendErrorMessage(udpPacket, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PORT_UNREACHABLE);
+        delete udpPacket;
     }
     else if (protocol->getId() == Protocol::ipv6.getId()) {
-        auto request = new Request("ICMPv6_send_error");
-        auto& tag = request->addTag<Icmpv6SendErrorReq>();
-        tag->setType(ICMPv6_DESTINATION_UNREACHABLE);
-        tag->setCode(PORT_UNREACHABLE);
-        tag->setOriginalPacket(udpPacket);
-        request->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::icmpv6);
-        send(request, "ipOut");
+        udpPacket->setFrontOffset(udpPacket->getTag<NetworkProtocolInd>()->getNetworkHeaderFrontOffset());
+        icmpv6Module->sendErrorMessage(udpPacket, ICMPv6_DESTINATION_UNREACHABLE, PORT_UNREACHABLE);
+        delete udpPacket;
     }
     else {
         EV_WARN << "Cannot send ICMP error for protocol " << protocol->getName() << "\n";
@@ -1189,6 +1204,8 @@ void Udp::sendUp(Ptr<const UdpHeader>& header, Packet *payload, SockDesc *sd, us
 
 void Udp::processIcmpv4Error(Indication *indication)
 {
+    Enter_Method("processIcmpv4Error");
+    take(indication);
     // The Indication carries an Icmpv4ErrorInd tag with type/code/mtu and an
     // originalPacket whose ICMP and IP headers have already been popped by
     // the ICMP and IP layers respectively. The originalPacket now starts
@@ -1213,6 +1230,8 @@ void Udp::processIcmpv4Error(Indication *indication)
 
 void Udp::processIcmpv6Error(Indication *indication)
 {
+    Enter_Method("processIcmpv6Error");
+    take(indication);
     // The Indication carries an Icmpv6ErrorInd tag with type/code/mtu and an
     // originalPacket whose ICMP and IP headers have already been popped by
     // the ICMP and IP layers respectively. The originalPacket now starts

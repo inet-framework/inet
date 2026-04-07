@@ -249,6 +249,10 @@ class INET_API Tcp : public TransportProtocolBase, public ITcp, public IPassiveP
     // called at shutdown/crash
     virtual void reset();
 
+    // process ICMPv4/ICMPv6 error indications (public for direct calls from Ipv4)
+    virtual void processIcmpv4Error(Indication *indication);
+    virtual void processIcmpv6Error(Indication *indication);
+
     bool checkChecksum(Packet *pk);
     int getMsl() { return msl; }
 

@@ -144,7 +144,6 @@ class INET_API Ipv6 : public SimpleModule, public NetfilterBase, public Lifecycl
      * to tags, and forwards the indication to the appropriate transport protocol.
      */
     virtual void handleIndication(Indication *indication);
-    virtual void handleIcmpErrorIndication(Indication *indication);
     virtual void datagramLocalOut(Packet *packet, const NetworkInterface *destIE, Ipv6Address requestedNextHopAddress);
 
     /**
@@ -238,6 +237,13 @@ class INET_API Ipv6 : public SimpleModule, public NetfilterBase, public Lifecycl
     virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
     virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
     virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
+
+    /**
+     * Handle an ICMPv6 error indication arriving from the ICMPv6 module.
+     * Pops the quoted IPv6 header from the original packet, converts it
+     * to tags, and forwards the indication to the appropriate transport protocol.
+     */
+    virtual void handleIcmpErrorIndication(Indication *indication);
 
     virtual void bind(int socketId, const Protocol *protocol, Ipv6Address localAddress) override;
     virtual void connect(int socketId, const Ipv6Address& remoteAddress) override;

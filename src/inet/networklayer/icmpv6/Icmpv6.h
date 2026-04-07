@@ -21,6 +21,7 @@ namespace inet {
 using namespace inet::queueing;
 
 // foreign declarations:
+class Ipv6;
 class Ipv6Address;
 class Ipv6Header;
 class PingPayload;
@@ -103,6 +104,7 @@ class INET_API Icmpv6 : public SimpleModule, public LifecycleUnsupported, public
   protected:
     PassivePacketSinkRef ipv6Sink;
     PassivePacketSinkRef transportSink;
+    Ipv6 *ipv6Module = nullptr;
 
     ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
     typedef std::map<long, int> PingMap;

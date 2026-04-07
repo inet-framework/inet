@@ -30,6 +30,13 @@
 #include "inet/networklayer/ipv6/Ipv6ExtHeaderTag_m.h"
 #include "inet/networklayer/ipv6/Ipv6ExtensionHeaders_m.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
+#include "inet/common/IModuleInterfaceLookup.h"
+#ifdef INET_WITH_UDP
+#include "inet/transportlayer/udp/Udp.h"
+#endif
+#ifdef INET_WITH_TCP
+#include "inet/transportlayer/tcp/Tcp.h"
+#endif
 
 #ifdef INET_WITH_xMIPv6
 #include "inet/networklayer/xmipv6/MobilityHeader_m.h"
@@ -274,6 +281,9 @@ void Ipv6::handleIndication(Indication *indication)
 
 void Ipv6::handleIcmpErrorIndication(Indication *indication)
 {
+    Enter_Method("handleIcmpErrorIndication");
+    take(indication);
+
     auto& errorInd = indication->getTagForUpdate<Icmpv6ErrorInd>();
     Packet *originalPacket = errorInd->getOriginalPacketForUpdate();
 
@@ -285,15 +295,35 @@ void Ipv6::handleIcmpErrorIndication(Indication *indication)
     l3Ind->setDestAddress(ipv6Header->getDestAddress());
     originalPacket->addTagIfAbsent<HopLimitInd>()->setHopLimit(ipv6Header->getHopLimit());
 
-    // Dispatch the same Indication to the appropriate transport protocol.
-    // SP_INDICATION routes via protocolToGateIndex to the transport module's ipIn gate.
     auto protocol = ProtocolGroup::getIpProtocolGroup()->getProtocol(ipv6Header->getProtocolId());
-    auto& dispatchReq = indication->addTagIfAbsent<DispatchProtocolReq>();
-    dispatchReq->setProtocol(protocol);
-    dispatchReq->setServicePrimitive(SP_INDICATION);
-
     EV_INFO << "Forwarding ICMPv6 error indication to transport protocol " << protocol->getName() << "\n";
-    send(indication, "transportOut");
+
+    // Find the target transport module through gate connections and call it directly
+    DispatchProtocolReq req;
+    req.setProtocol(protocol);
+    req.setServicePrimitive(SP_INDICATION);
+    auto targetGate = findModuleInterface(gate("transportOut"), typeid(IPassivePacketSink), &req);
+    if (targetGate == nullptr) {
+        EV_WARN << "No transport module found for protocol " << protocol->getName() << ", discarding ICMPv6 error\n";
+        delete indication;
+        return;
+    }
+    auto targetModule = targetGate->getOwnerModule();
+
+#ifdef INET_WITH_UDP
+    if (auto udp = dynamic_cast<Udp *>(targetModule)) {
+        udp->processIcmpv6Error(indication);
+        return;
+    }
+#endif
+#ifdef INET_WITH_TCP
+    if (auto tcp = dynamic_cast<tcp::Tcp *>(targetModule)) {
+        tcp->processIcmpv6Error(indication);
+        return;
+    }
+#endif
+    EV_WARN << "Transport module " << targetModule->getClassName() << " does not handle ICMPv6 errors, discarding\n";
+    delete indication;
 }
 
 NetworkInterface *Ipv6::getSourceInterfaceFrom(Packet *packet)

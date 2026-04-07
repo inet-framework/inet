@@ -941,7 +941,7 @@ void Sctp::sendToIp(cMessage *msg)
 {
     Enter_Method_Silent();
     take(msg);
-    send(msg, "ipOut");
+    send_to_ip(check_and_cast<Packet *>(msg));
 }
 
 void Sctp::sendToApp(cMessage *msg)

@@ -34,6 +34,9 @@ namespace inet {
 
 using namespace inet::queueing;
 
+class Icmp;
+class Icmpv6;
+
 const uint16_t UDP_MAX_MESSAGE_SIZE = 65535; // bytes
 
 class INET_API UdpChecksumInsertionHook : public SimpleModule, public NetfilterBase::HookBase
@@ -117,6 +120,8 @@ class INET_API Udp : public TransportProtocolBase, public IUdp, public IPassiveP
     ModuleRefByPar<IInterfaceTable> ift;
     PassivePacketSinkRef ipSink;
     PassivePacketSinkRef appSink;
+    Icmp *icmpv4Module = nullptr;
+    Icmpv6 *icmpv6Module = nullptr;
 
     // statistics
     int numSent = 0;
@@ -164,9 +169,6 @@ class INET_API Udp : public TransportProtocolBase, public IUdp, public IPassiveP
     // handle an Indication arriving from the network layer
     virtual void handleIndication(Indication *indication);
 
-    // process ICMPv4/ICMPv6 error indications
-    virtual void processIcmpv4Error(Indication *indication);
-    virtual void processIcmpv6Error(Indication *indication);
     virtual void processIcmpErrorForSocket(Indication *indication, Packet *originalPacket,
             const L3Address& localAddr, ushort localPort, const L3Address& remoteAddr, ushort remotePort);
 
@@ -211,6 +213,10 @@ class INET_API Udp : public TransportProtocolBase, public IUdp, public IPassiveP
     virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
     virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
     virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
+
+    // process ICMPv4/ICMPv6 error indications (public for direct calls from Ipv4)
+    virtual void processIcmpv4Error(Indication *indication);
+    virtual void processIcmpv6Error(Indication *indication);
 
     virtual void setCallback(int socketId, ICallback *callback) override;
     virtual void bind(int socketId, const L3Address& localAddr, int localPort) override;

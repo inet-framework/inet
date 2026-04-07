@@ -19,7 +19,9 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
 #include "inet/networklayer/ipv6/Ipv6Header.h"
+#include "inet/networklayer/ipv6/Ipv6.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/common/SimulationContinuation.h"
 
 namespace inet {
@@ -35,6 +37,10 @@ void Icmpv6::initialize(int stage)
         checksumMode = parseChecksumMode(checksumModeString, false);
         ipv6Sink.reference(gate("ipv6Out"), true);
         transportSink.reference(gate("transportOut"), true);
+
+        auto ipv6Gate = findModuleInterface(gate("ipv6Out"), typeid(IIpv6));
+        if (ipv6Gate)
+            ipv6Module = check_and_cast<Ipv6 *>(ipv6Gate->getOwnerModule());
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {
         bool isOperational;
@@ -128,10 +134,8 @@ void Icmpv6::processICMPv6Message(Packet *packet)
             errorOut(indication);
         }
         else {
-            // Send the Indication to IPv6 via ipv6Out; IPv6 will pop the quoted
-            // IPv6 header and forward the indication to the transport protocol.
-            indication->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv6);
-            send(indication, "ipv6Out");
+            // Call Ipv6 directly to forward the ICMPv6 error to the transport protocol.
+            ipv6Module->handleIcmpErrorIndication(indication);
         }
     }
     else {

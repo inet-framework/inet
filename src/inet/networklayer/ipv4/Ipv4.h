@@ -147,13 +147,7 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public IIpv4
      */
     virtual void handlePacketFromHL(Packet *packet);
 
-    /**
-     * Handle an ICMP error indication arriving from the ICMP module.
-     * Pops the quoted IPv4 header from the original packet, converts it
-     * to tags, and forwards the indication to the appropriate transport protocol.
-     */
     virtual void handleIndication(Indication *indication);
-    virtual void handleIcmpErrorIndication(Indication *indication);
 
     /**
      * Routes and sends datagram received from higher layers.
@@ -302,6 +296,13 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public IIpv4
     virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
     virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
     virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
+
+    /**
+     * Handle an ICMP error indication arriving from the ICMP module.
+     * Pops the quoted IPv4 header from the original packet, converts it
+     * to tags, and forwards the indication to the appropriate transport protocol.
+     */
+    virtual void handleIcmpErrorIndication(Indication *indication);
 
     virtual void setCallback(int socketId, ICallback *callback) override;
     virtual void bind(int socketId, const Protocol *protocol, Ipv4Address localAddress) override;

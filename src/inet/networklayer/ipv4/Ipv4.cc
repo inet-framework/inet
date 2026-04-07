@@ -43,6 +43,13 @@
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/ipv4/Ipv4OptionsTag_m.h"
+#include "inet/common/IModuleInterfaceLookup.h"
+#ifdef INET_WITH_UDP
+#include "inet/transportlayer/udp/Udp.h"
+#endif
+#ifdef INET_WITH_TCP
+#include "inet/transportlayer/tcp/Tcp.h"
+#endif
 #include "inet/common/SimulationContinuation.h"
 
 namespace inet {
@@ -159,13 +166,11 @@ void Ipv4::handleRequest(Request *request)
         int socketId = request->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketDescriptor.find(socketId);
         if (it != socketIdToSocketDescriptor.end()) {
+            auto callback = it->second->callback;
             delete it->second;
             socketIdToSocketDescriptor.erase(it);
-            auto indication = new Indication("closed", IPv4_I_SOCKET_CLOSED);
-            auto ctrl = new Ipv4SocketClosedIndication();
-            indication->setControlInfo(ctrl);
-            indication->addTag<SocketInd>()->setSocketId(socketId);
-            send(indication, "transportOut");
+            if (callback)
+                inet::scheduleAfter("handleClose", 0, [=]() { callback->handleClosed(); });
         }
         delete request;
     }
@@ -210,6 +215,9 @@ void Ipv4::handleIndication(Indication *indication)
 
 void Ipv4::handleIcmpErrorIndication(Indication *indication)
 {
+    Enter_Method("handleIcmpErrorIndication");
+    take(indication);
+
     auto& errorInd = indication->getTagForUpdate<Icmpv4ErrorInd>();
     Packet *originalPacket = errorInd->getOriginalPacketForUpdate();
 
@@ -224,15 +232,35 @@ void Ipv4::handleIcmpErrorIndication(Indication *indication)
     originalPacket->addTagIfAbsent<EcnInd>()->setExplicitCongestionNotification(ipv4Header->getEcn());
     originalPacket->addTagIfAbsent<TosInd>()->setTos(ipv4Header->getTypeOfService());
 
-    // Dispatch the same Indication to the appropriate transport protocol.
-    // SP_INDICATION routes via protocolToGateIndex to the transport module's ipIn gate.
     auto protocol = ProtocolGroup::getIpProtocolGroup()->getProtocol(ipv4Header->getProtocolId());
-    auto& dispatchReq = indication->addTagIfAbsent<DispatchProtocolReq>();
-    dispatchReq->setProtocol(protocol);
-    dispatchReq->setServicePrimitive(SP_INDICATION);
-
     EV_INFO << "Forwarding ICMP error indication to transport protocol " << protocol->getName() << "\n";
-    send(indication, "transportOut");
+
+    // Find the target transport module through gate connections and call it directly
+    DispatchProtocolReq req;
+    req.setProtocol(protocol);
+    req.setServicePrimitive(SP_INDICATION);
+    auto targetGate = findModuleInterface(gate("transportOut"), typeid(IPassivePacketSink), &req);
+    if (targetGate == nullptr) {
+        EV_WARN << "No transport module found for protocol " << protocol->getName() << ", discarding ICMP error\n";
+        delete indication;
+        return;
+    }
+    auto targetModule = targetGate->getOwnerModule();
+
+#ifdef INET_WITH_UDP
+    if (auto udp = dynamic_cast<Udp *>(targetModule)) {
+        udp->processIcmpv4Error(indication);
+        return;
+    }
+#endif
+#ifdef INET_WITH_TCP
+    if (auto tcp = dynamic_cast<tcp::Tcp *>(targetModule)) {
+        tcp->processIcmpv4Error(indication);
+        return;
+    }
+#endif
+    EV_WARN << "Transport module " << targetModule->getClassName() << " does not handle ICMP errors, discarding\n";
+    delete indication;
 }
 
 const NetworkInterface *Ipv4::getSourceInterface(Packet *packet)

@@ -27,10 +27,13 @@ class Ipv4Header;
 /**
  * Icmp module.
  */
+class Ipv4;
+
 class INET_API Icmp : public SimpleModule, public IPassivePacketSink
 {
   protected:
     PassivePacketSinkRef ipSink;
+    Ipv4 *ipv4Module = nullptr;
 
     std::set<int> transportProtocols; // where to send up packets
     ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
