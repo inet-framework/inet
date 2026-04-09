@@ -12,7 +12,7 @@
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Message.h"
-#include "inet/networklayer/common/IcmpErrorTag_m.h"
+#include "inet/networklayer/common/Icmpv6ErrorTag_m.h"
 #include "inet/common/checksum/Checksum.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"

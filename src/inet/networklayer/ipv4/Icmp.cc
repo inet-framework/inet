@@ -16,7 +16,7 @@
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Message.h"
-#include "inet/networklayer/common/IcmpErrorTag_m.h"
+#include "inet/networklayer/common/Icmpv4ErrorTag_m.h"
 #include "inet/common/checksum/Checksum.h"
 #include "inet/common/packet/dissector/ProtocolDissector.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
