@@ -47,23 +47,18 @@ failedIngredients = []
 failedIngredientsLock = threading.Lock()
 useColors = sys.stdout.isatty()
 
+def red(txt):
+    return '\033[0;31m' + txt + "\033[0;0m" if useColors else txt
+
+def yellow(txt):
+    return '\033[0;33m' + txt + "\033[0;0m" if useColors else txt
+
+def green(txt):
+    return '\033[0;32m' + txt + "\033[0;0m" if useColors else txt
+
 defaultFingerprintCalculator = 'inet::FingerprintCalculator'
 defaultExecutable = "inet"
 
-txtPASS = "PASS"
-txtPASS_unexpected = "PASS (unexpected)"
-txtFAILED = "FAILED"
-txtFAILED_expected = "FAILED (expected)"
-txtERROR = "ERROR"
-txtERROR_expected = "ERROR (expected)"
-
-if useColors:
-    txtPASS = '\033[0;32m' + "PASS" + "\033[0;0m"     # GREEN
-    txtPASS_unexpected = '\033[0;32m' + "PASS" + "\033[0;0m" + " " + "\033[1;31m" + "(unexpected)" + "\033[0;0m"     # GREEN + RED
-    txtFAILED = "\033[1;33m" + "FAILED" + "\033[0;0m"    # YELLOW
-    txtFAILED_expected = "\033[2;32m" + "FAILED (expected)" + "\033[0;0m"    # DARK GREEN
-    txtERROR = "\033[1;31m" + "ERROR" + "\033[0;0m"      # RED
-    txtERROR_expected = "\033[2;32m" + "ERROR (expected)" + "\033[0;0m"    # DARK GREEN
 
 fpExtraArgs = {
     "~tND": { "'--**.checksumMode=\"computed\"'",
@@ -691,7 +686,7 @@ class SimulationTextTestResult(ThreadedTestResult):
         super(SimulationTextTestResult, self).addSuccess(test)
         if test.expectedResult == 'PASS':
             if self.showAll:
-                self.stream.write(": " + txtPASS + self._runtimeStr(test) + "\n")
+                self.stream.write(": " + green("PASS") + self._runtimeStr(test) + "\n")
             elif self.dots:
                 self.stream.write('.')
                 self.stream.flush()
@@ -710,7 +705,7 @@ class SimulationTextTestResult(ThreadedTestResult):
 
             self.errors[-1] = (test, errmsg)  # super class method inserts stack trace; we don't need that, so overwrite it
             if self.showAll:
-                self.stream.write(": " + txtERROR + " (should be %s): %s%s\n" % (test.expectedResult, errmsg, self._runtimeStr(test)))
+                self.stream.write(": " + red("ERROR") + " (should be %s): %s%s\n" % (test.expectedResult, errmsg, self._runtimeStr(test)))
             elif self.dots:
                 self.stream.write('E')
                 self.stream.flush()
@@ -722,7 +717,7 @@ class SimulationTextTestResult(ThreadedTestResult):
         self._mirrorOutput = True
         self.expectedErrors[-1] = (test, err[1])  # super class method inserts stack trace; we don't need that, so overwrite it
         if self.showAll:
-            self.stream.write(": " + txtERROR_expected + self._runtimeStr(test) + "\n")
+            self.stream.write(": " + red("ERROR") + " " + green("(expected)") + self._runtimeStr(test) + "\n")
         elif self.dots:
             self.stream.write('e')
             self.stream.flush()
@@ -736,7 +731,7 @@ class SimulationTextTestResult(ThreadedTestResult):
             errmsg = err[1]
             self.failures[-1] = (test, errmsg)  # super class method inserts stack trace; we don't need that, so overwrite it
             if self.showAll:
-                self.stream.write(": " + txtFAILED + " (should be %s): %s%s\n" % (test.expectedResult, errmsg, self._runtimeStr(test)))
+                self.stream.write(": " + yellow("FAILED") + " (should be %s): %s%s\n" % (test.expectedResult, errmsg, self._runtimeStr(test)))
             elif self.dots:
                 self.stream.write('F')
                 self.stream.flush()
@@ -756,7 +751,7 @@ class SimulationTextTestResult(ThreadedTestResult):
         super(SimulationTextTestResult, self).addExpectedFailure(test, err)
         self.expectedFailures[-1] = (test, err[1])  # super class method inserts stack trace; we don't need that, so overwrite it
         if self.showAll:
-            self.stream.write(": " + txtFAILED_expected + self._runtimeStr(test) + "\n")
+            self.stream.write(": " + yellow("FAILED") + " " + green("(expected)") + self._runtimeStr(test) + "\n")
         elif self.dots:
             self.stream.write("x")
             self.stream.flush()
@@ -765,7 +760,7 @@ class SimulationTextTestResult(ThreadedTestResult):
         super(SimulationTextTestResult, self).addUnexpectedSuccess(test)
         self.unexpectedSuccesses[-1] = (test)  # super class method inserts stack trace; we don't need that, so overwrite it
         if self.showAll:
-            self.stream.write(": " + txtPASS_unexpected + self._runtimeStr(test) + "\n")
+            self.stream.write(": " + green("PASS") + " " + red("(unexpected)") + self._runtimeStr(test) + "\n")
         elif self.dots:
             self.stream.write("u")
             self.stream.flush()
