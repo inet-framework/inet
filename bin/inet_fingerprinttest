@@ -42,6 +42,8 @@ release=False
 exitCode = 0
 writeOutfile = True
 showPassedFingerprints = False
+failedIngredients = []
+failedIngredientsLock = threading.Lock()
 useColors = sys.stdout.isatty()
 
 defaultFingerprintCalculator = 'inet::FingerprintCalculator'
@@ -535,6 +537,11 @@ class FingerprintTestCase(SimulationTestCase):
                 passedFp = [fp for fp in self.fingerprint if fp not in efp]
                 passedStr = formatFingerprintGroupForCsv(passedFp) if passedFp else "none"
                 msg += ", passed: '" + passedStr + "'"
+            with failedIngredientsLock:
+                for fpGroup in efp:
+                    for fp in fpGroup:
+                        ingredient = fp.split('/', 1)[1] if '/' in fp else fp
+                        failedIngredients.append(ingredient)
             assert False, msg
 
     def __str__(self):
@@ -873,4 +880,10 @@ if __name__ == "__main__":
         print("Test results equals to expected results")
     else:
         print("Test results differ from expected results")
+        if failedIngredients:
+            from collections import Counter
+            counts = Counter(failedIngredients)
+            print("\nUnexpected failure ingredient summary:")
+            for ingredient, count in sorted(counts.items(), key=lambda x: -x[1]):
+                print("  %s: %d" % (ingredient, count))
     exit(exitCode)
