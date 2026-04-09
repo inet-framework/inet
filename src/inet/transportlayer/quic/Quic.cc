@@ -16,8 +16,6 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/Icmpv4ErrorTag_m.h"
 #include "inet/networklayer/common/Icmpv6ErrorTag_m.h"
-#include "inet/networklayer/ipv4/IcmpHeader_m.h"
-#include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
 #include "exception/ConnectionDiedException.h"
 #include "packet/ConnectionId.h"
 

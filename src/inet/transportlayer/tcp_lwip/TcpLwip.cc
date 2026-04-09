@@ -18,15 +18,6 @@
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
-
-#ifdef INET_WITH_IPv6
-#include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
-#endif // ifdef INET_WITH_IPv6
-
-#ifdef INET_WITH_IPv4
-#include "inet/networklayer/ipv4/IcmpHeader_m.h"
-#endif // ifdef INET_WITH_IPv4
-
 #include "inet/transportlayer/common/L4Tools.h"
 #include "lwip/lwip_ip.h"
 #include "lwip/lwip_tcp.h"
