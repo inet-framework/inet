@@ -42,6 +42,7 @@ release=False
 exitCode = 0
 writeOutfile = True
 showPassedFingerprints = False
+showRuntime = False
 failedIngredients = []
 failedIngredientsLock = threading.Lock()
 useColors = sys.stdout.isatty()
@@ -478,6 +479,7 @@ class FingerprintTestCase(SimulationTestCase):
         # CPU time limit is a safety guard: fingerprint checks shouldn't take forever
         global rootDir, executable, debug, release, cpuTimeLimit, extraOppRunArgs
 
+        self.elapsedTime = 0
 
         # run the simulation
         workingdir = _iif(self.wd.startswith('/'), rootDir + "/" + self.wd, self.wd)
@@ -505,6 +507,7 @@ class FingerprintTestCase(SimulationTestCase):
         for rep in range(self.repeat):
             curFp = list()
             result = self.runSimulation(self.title, command, workingdir, resultdir)
+            self.elapsedTime += result.elapsedTime
 
             # process the result
             # note: fingerprint mismatch is technically NOT an error in omnetpp 6.0 or before! (exitcode==0)
@@ -688,7 +691,7 @@ class SimulationTextTestResult(ThreadedTestResult):
         super(SimulationTextTestResult, self).addSuccess(test)
         if test.expectedResult == 'PASS':
             if self.showAll:
-                self.stream.write(": " + txtPASS + "\n")
+                self.stream.write(": " + txtPASS + self._runtimeStr(test) + "\n")
             elif self.dots:
                 self.stream.write('.')
                 self.stream.flush()
@@ -707,7 +710,7 @@ class SimulationTextTestResult(ThreadedTestResult):
 
             self.errors[-1] = (test, errmsg)  # super class method inserts stack trace; we don't need that, so overwrite it
             if self.showAll:
-                self.stream.write(": " + txtERROR + " (should be %s): %s\n" % (test.expectedResult, errmsg))
+                self.stream.write(": " + txtERROR + " (should be %s): %s%s\n" % (test.expectedResult, errmsg, self._runtimeStr(test)))
             elif self.dots:
                 self.stream.write('E')
                 self.stream.flush()
@@ -719,7 +722,7 @@ class SimulationTextTestResult(ThreadedTestResult):
         self._mirrorOutput = True
         self.expectedErrors[-1] = (test, err[1])  # super class method inserts stack trace; we don't need that, so overwrite it
         if self.showAll:
-            self.stream.write(": " + txtERROR_expected + "\n")
+            self.stream.write(": " + txtERROR_expected + self._runtimeStr(test) + "\n")
         elif self.dots:
             self.stream.write('e')
             self.stream.flush()
@@ -733,7 +736,7 @@ class SimulationTextTestResult(ThreadedTestResult):
             errmsg = err[1]
             self.failures[-1] = (test, errmsg)  # super class method inserts stack trace; we don't need that, so overwrite it
             if self.showAll:
-                self.stream.write(": " + txtFAILED + " (should be %s): %s\n" % (test.expectedResult, errmsg))
+                self.stream.write(": " + txtFAILED + " (should be %s): %s%s\n" % (test.expectedResult, errmsg, self._runtimeStr(test)))
             elif self.dots:
                 self.stream.write('F')
                 self.stream.flush()
@@ -753,7 +756,7 @@ class SimulationTextTestResult(ThreadedTestResult):
         super(SimulationTextTestResult, self).addExpectedFailure(test, err)
         self.expectedFailures[-1] = (test, err[1])  # super class method inserts stack trace; we don't need that, so overwrite it
         if self.showAll:
-            self.stream.write(": " + txtFAILED_expected + "\n")
+            self.stream.write(": " + txtFAILED_expected + self._runtimeStr(test) + "\n")
         elif self.dots:
             self.stream.write("x")
             self.stream.flush()
@@ -762,12 +765,17 @@ class SimulationTextTestResult(ThreadedTestResult):
         super(SimulationTextTestResult, self).addUnexpectedSuccess(test)
         self.unexpectedSuccesses[-1] = (test)  # super class method inserts stack trace; we don't need that, so overwrite it
         if self.showAll:
-            self.stream.write(": " + txtPASS_unexpected + "\n")
+            self.stream.write(": " + txtPASS_unexpected + self._runtimeStr(test) + "\n")
         elif self.dots:
             self.stream.write("u")
             self.stream.flush()
         global exitCode
         exitCode = 1   # result is not the expected result
+
+    def _runtimeStr(self, test):
+        if showRuntime and hasattr(test, 'elapsedTime'):
+            return " [%.1fs]" % test.elapsedTime
+        return ""
 
     def printErrors(self):
         # modified
@@ -824,6 +832,7 @@ if __name__ == "__main__":
     parser.add_argument('-i', type=int, default=0, help='Which set of test cases to run [0..n-1]')
     parser.add_argument('-l', '--logfile', default = "fingerprinttest.out", metavar='filename', help='name of the logfile')
     parser.add_argument('--show-passed', action='store_true', help='show passed fingerprints in mismatch error messages')
+    parser.add_argument('--show-runtime', action='store_true', help='show elapsed time for each test case')
     args = parser.parse_args()
 
     logFile = args.logfile
@@ -853,6 +862,7 @@ if __name__ == "__main__":
     release = args.release
     writeOutfile = args.writeOutfile
     showPassedFingerprints = args.show_passed
+    showRuntime = args.show_runtime
 
     generator = FingerprintTestCaseGenerator()
     testcases = generator.generateFromCSV(args.testspecfiles, args.fpfilter, args.excludefpfilter, args.match, args.exclude, args.repeat)
