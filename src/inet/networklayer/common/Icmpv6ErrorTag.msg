@@ -8,7 +8,7 @@ import inet.common.INETDefs;
 import inet.common.TagBase;
 import inet.common.packet.chunk.Chunk;
 import inet.common.packet.Packet;
-import inet.networklayer.icmpv6.Icmpv6Header;
+import inet.networklayer.common.Icmpv6Type;
 
 namespace inet;
 
