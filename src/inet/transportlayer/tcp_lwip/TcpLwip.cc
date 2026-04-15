@@ -85,16 +85,11 @@ void TcpLwip::initialize(int stage)
             checksumInsertion->finalizeParameters();
             checksumInsertion->callInitialize();
 
-#ifdef INET_WITH_IPv4
-            auto ipv4 = dynamic_cast<INetfilter *>(findModuleByPath("^.ipv4.ip"));
-            if (ipv4 != nullptr)
-                ipv4->registerHook(0, checksumInsertion);
-#endif
-#ifdef INET_WITH_IPv6
-            auto ipv6 = dynamic_cast<INetfilter *>(findModuleByPath("^.ipv6.ipv6"));
-            if (ipv6 != nullptr)
-                ipv6->registerHook(0, checksumInsertion);
-#endif
+            for (const char *paramName : {"ipv4Module", "ipv6Module"}) {
+                auto& p = par(paramName);
+                if (!p.isEmptyString())
+                    getModuleFromPar<INetfilter>(p, this)->registerHook(0, checksumInsertion);
+            }
         }
     }
     else if (stage == INITSTAGE_LAST) {

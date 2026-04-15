@@ -62,6 +62,8 @@ simple Udp extends SimpleModule like IUdp
         @class(Udp);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string checksumMode @enum("disabled", "declared", "computed") = default("declared");
+        string ipv4Module; // Module path implementing INetfilter for IPv4
+        string ipv6Module; // Module path implementing INetfilter for IPv6
         bool defaultMulticastLoop = default(true);
         @display("i=block/transport");
         @signal[packetSentToUpper](type=cPacket);

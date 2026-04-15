@@ -47,11 +47,11 @@ void Pim::initialize(int stage)
             // except in Register messages where it is set to the length of
             // the PIM register header (8).  The Next Header value used in the
             // pseudo-header is 103.
-#ifdef INET_WITH_IPv6
-            auto ipv6 = dynamic_cast<INetfilter *>(findModuleByPath("^.ipv6.ipv6"));
-            if (ipv6 != nullptr)
-                ipv6->registerHook(0, checksumInsertion);
-#endif
+            for (const char *paramName : {"ipv4Module", "ipv6Module"}) {
+                auto& p = par(paramName);
+                if (!p.isEmptyString())
+                    getModuleFromPar<INetfilter>(p, this)->registerHook(0, checksumInsertion);
+            }
         }
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {

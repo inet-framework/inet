@@ -20,6 +20,7 @@ simple SctpNatHook extends SimpleModule
         string interfaceTableModule;
         string networkProtocolModule;
         string routingTableModule;
+        string ipv4Module; // Module path implementing INetfilter for IPv4
         string natTableModule;
 }
 

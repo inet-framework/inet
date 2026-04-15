@@ -42,6 +42,8 @@ module LdpMplsRouter
         *.routingTable.routerId = this.routerId;
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.routingTableModule = default(absPath(".ipv4.routingTable"));
+        *.ipv4Module = default("^.ipv4.ip");
+        *.ipv6Module = default("");
         *.tedModule = default(absPath(".ted"));
         *.libTableModule = default(absPath(".libTable"));
     gates:
