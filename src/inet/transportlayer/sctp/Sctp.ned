@@ -21,6 +21,8 @@ simple Sctp extends SimpleModule like ISctp
         string interfaceTableModule;
         string routingTableModule;
         string checksumMode @enum("declared", "computed") = default("declared");
+        string ipv4Module; // Module path implementing INetfilter for IPv4
+        string ipv6Module; // Module path implementing INetfilter for IPv6
 
         //#====== SCTP Association Parameters =================================
         int numGapReports = default(3);

@@ -32,6 +32,8 @@ module TransportLayerNodeBase extends NetworkLayerNodeBase
         bool hasQuic = default(false);
         @figure[transportLayer](type=rectangle; pos=250,158; size=1000,134; fillColor=#ff0000; lineColor=#808080; cornerRadius=5; fillOpacity=0.1);
         @figure[transportLayer.title](type=text; pos=1245,163; anchor=ne; text="transport layer");
+        *.ipv4Module = default(hasIpv4 ? "^.ipv4.ip" : "");
+        *.ipv6Module = default(hasIpv6 ? "^.ipv6.ipv6" : "");
     submodules:
         udp: <default(firstAvailableOrEmpty("Udp"))> like IUdp if hasUdp {
             @display("p=375,225");

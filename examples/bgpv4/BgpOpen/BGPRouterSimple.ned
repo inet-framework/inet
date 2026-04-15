@@ -27,6 +27,8 @@ module BGPRouterSimple
         @display("i=abstract/router");
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.routingTableModule = default(absPath(".routingTable"));
+        *.ipv4Module = default("^.ipv4.ip");
+        *.ipv6Module = default("");
     gates:
         inout pppg[] @labels(PppFrame-conn);
     submodules:

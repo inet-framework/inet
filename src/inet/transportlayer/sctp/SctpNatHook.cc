@@ -30,8 +30,9 @@ void SctpNatHook::initialize()
     rt.reference(this, "routingTableModule", true);
     ift.reference(this, "interfaceTableModule", true);
     natTable.reference(this, "natTableModule", true);
-    auto ipv4 = dynamic_cast<INetfilter *>(getModuleByPath("^.ipv4.ip"));
-    ipv4->registerHook(0, this);
+    auto& p = par("ipv4Module");
+    if (!p.isEmptyString())
+        getModuleFromPar<INetfilter>(p, this)->registerHook(0, this);
 }
 
 /*INetfilter::IHook::Result SctpNatHook::datagramForwardHook(INetworkHeader *datagram, const NetworkInterface *inIE, const NetworkInterface *& outIE, L3Address& nextHopAddr)*/
@@ -314,9 +315,9 @@ void SctpNatHook::sendBackError(SctpHeader *sctp)
 
 void SctpNatHook::finish()
 {
-    auto ipv4 = dynamic_cast<INetfilter *>(getModuleByPath("^.ipv4.ip"));
-    if (isRegisteredHook(ipv4))
-        ipv4->unregisterHook(this);
+    auto *netfilter = findModuleFromPar<INetfilter>(par("ipv4Module"), this);
+    if (netfilter != nullptr && isRegisteredHook(netfilter))
+        netfilter->unregisterHook(this);
     ipLayer = nullptr;
     EV_INFO << getFullPath() << ": Natted packets: " << nattedPackets << "\n";
 }

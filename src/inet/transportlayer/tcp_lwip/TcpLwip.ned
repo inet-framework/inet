@@ -24,6 +24,8 @@ simple TcpLwip extends SimpleModule like ITcp
         string sendQueueClass = default("");    //# TODO Obsolete!!!
         string receiveQueueClass = default(""); //# TODO Obsolete!!!
         string checksumMode @enum("declared", "computed") = default("declared");
+        string ipv4Module; // Module path implementing INetfilter for IPv4
+        string ipv6Module; // Module path implementing INetfilter for IPv6
         @display("i=block/wheelbarrow");
 
     gates:

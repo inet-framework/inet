@@ -32,6 +32,8 @@ module Pim extends Module like IPim
         string interfaceTableModule;
         string routingTableModule;
         string checksumMode @enum("declared", "computed") = default("declared");
+        string ipv4Module; // Module path implementing INetfilter for IPv4
+        string ipv6Module; // Module path implementing INetfilter for IPv6
         *.interfaceTableModule = default(absPath(this.interfaceTableModule));
         *.routingTableModule = default(absPath(this.routingTableModule));
         *.pimInterfaceTableModule = default("^.pimInterfaceTable");

@@ -187,6 +187,8 @@ simple Tcp extends SimpleModule like ITcp
     parameters:
         @class(Tcp);
         string checksumMode @enum("declared", "computed") = default("declared");
+        string ipv4Module; // Module path implementing INetfilter for IPv4
+        string ipv6Module; // Module path implementing INetfilter for IPv6
         int advertisedWindow = default(14 * this.mss); // In bytes, corresponds with the maximal receiver buffer capacity (Note: normally, NIC queues should be at least this size)
         bool delayedAcksEnabled = default(false); // Delayed ACK algorithm (RFC 1122) enabled/disabled
         bool nagleEnabled = default(true); // Nagle's algorithm (RFC 896) enabled/disabled

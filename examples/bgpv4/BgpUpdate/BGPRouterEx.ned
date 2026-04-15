@@ -34,6 +34,8 @@ module BGPRouterEx
         *.multicastForwarding = this.multicastForwarding;
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.routingTableModule = default(absPath(".ipv4.routingTable"));
+        *.ipv4Module = default("^.ipv4.ip");
+        *.ipv6Module = default("");
     gates:
         inout pppg[] @labels(PppFrame-conn);
         inout ethg[] @labels(EtherFrame-conn);
