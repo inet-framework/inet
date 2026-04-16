@@ -101,12 +101,12 @@ static void coroutineEventExecutor(cSimulation *sim, cEvent *event)
 
 void installCoroutineEventExecution()
 {
-    cSimulation::getActiveSimulation()->setEventExecutor(coroutineEventExecutor);
+    // cSimulation::getActiveSimulation()->setEventExecutor(coroutineEventExecutor);
 }
 
 void uninstallCoroutineEventExecution()
 {
-    cSimulation::getActiveSimulation()->setEventExecutor(nullptr);
+    // cSimulation::getActiveSimulation()->setEventExecutor(nullptr);
 }
 
 } // namespace inet
