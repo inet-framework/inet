@@ -20,7 +20,7 @@ void Ds::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         mac = check_and_cast<Ieee80211Mac *>(getContainingNicModule(this)->getSubmodule("mac"));
-        mib = check_and_cast<Ieee80211Mib *>(getModuleByPath(par("mibModule")));
+        mib = getModuleFromPar<Ieee80211Mib>(par("mibModule"), this);
     }
 }
 

@@ -18,8 +18,8 @@ void CtsPolicy::initialize(int stage)
 {
     ModeSetListener::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        rx = check_and_cast<IRx *>(getModuleByPath(par("rxModule")));
-        rateSelection = check_and_cast<IRateSelection *>(getModuleByPath(par("rateSelectionModule")));
+        rx = getModuleFromPar<IRx>(par("rxModule"), this);
+        rateSelection = getModuleFromPar<IRateSelection>(par("rateSelectionModule"), this);
     }
 }
 

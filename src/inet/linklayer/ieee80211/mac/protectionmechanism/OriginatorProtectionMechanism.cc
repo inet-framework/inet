@@ -7,6 +7,7 @@
 
 #include "inet/linklayer/ieee80211/mac/protectionmechanism/OriginatorProtectionMechanism.h"
 
+#include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Dcf.h"
 #include "inet/linklayer/ieee80211/mac/rateselection/RateSelection.h"
 
@@ -19,7 +20,7 @@ void OriginatorProtectionMechanism::initialize(int stage)
 {
     ModeSetListener::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        rateSelection = check_and_cast<IRateSelection *>(getModuleByPath(par("rateSelectionModule")));
+        rateSelection = getModuleFromPar<IRateSelection>(par("rateSelectionModule"), this);
     }
 }
 

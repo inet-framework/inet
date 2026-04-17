@@ -7,6 +7,8 @@
 
 #include "inet/linklayer/ieee80211/mac/originator/RtsPolicy.h"
 
+#include "inet/common/ModuleAccess.h"
+
 namespace inet {
 namespace ieee80211 {
 
@@ -16,7 +18,7 @@ void RtsPolicy::initialize(int stage)
 {
     ModeSetListener::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        rateSelection = check_and_cast<IRateSelection *>(getModuleByPath(par("rateSelectionModule")));
+        rateSelection = getModuleFromPar<IRateSelection>(par("rateSelectionModule"), this);
         rtsThreshold = par("rtsThreshold");
         ctsTimeout = par("ctsTimeout");
     }

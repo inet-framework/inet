@@ -27,8 +27,8 @@ void Dcf::initialize(int stage)
         startRxTimer = new cMessage("startRxTimeout");
         mac = check_and_cast<Ieee80211Mac *>(getContainingNicModule(this)->getSubmodule("mac"));
         dataAndMgmtRateControl = dynamic_cast<IRateControl *>(getSubmodule(("rateControl")));
-        tx = check_and_cast<ITx *>(getModuleByPath(par("txModule")));
-        rx = check_and_cast<IRx *>(getModuleByPath(par("rxModule")));
+        tx = getModuleFromPar<ITx>(par("txModule"), this);
+        rx = getModuleFromPar<IRx>(par("rxModule"), this);
         channelAccess = check_and_cast<Dcaf *>(getSubmodule("channelAccess"));
         originatorDataService = check_and_cast<IOriginatorMacDataService *>(getSubmodule(("originatorMacDataService")));
         recipientDataService = check_and_cast<IRecipientMacDataService *>(getSubmodule("recipientMacDataService"));

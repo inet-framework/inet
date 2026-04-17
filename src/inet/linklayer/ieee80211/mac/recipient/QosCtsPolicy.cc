@@ -18,8 +18,8 @@ void QosCtsPolicy::initialize(int stage)
 {
     ModeSetListener::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        rx = check_and_cast<IRx *>(getModuleByPath(par("rxModule")));
-        rateSelection = check_and_cast<IQosRateSelection *>(getModuleByPath(par("rateSelectionModule")));
+        rx = getModuleFromPar<IRx>(par("rxModule"), this);
+        rateSelection = getModuleFromPar<IQosRateSelection>(par("rateSelectionModule"), this);
     }
 }
 
