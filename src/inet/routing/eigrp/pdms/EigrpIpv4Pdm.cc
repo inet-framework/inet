@@ -74,9 +74,9 @@ void EigrpIpv4Pdm::initialize(int stage) {
     }
 
     if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
-        eigrpIft = check_and_cast<EigrpInterfaceTable *>(getModuleByPath("^.eigrpInterfaceTable"));
-        eigrpNt = check_and_cast<EigrpIpv4NeighborTable *>(getModuleByPath("^.eigrpIpv4NeighborTable"));
-        eigrpTt = check_and_cast<EigrpIpv4TopologyTable *>(getModuleByPath("^.eigrpIpv4TopologyTable"));
+        eigrpIft = getModuleFromPar<EigrpInterfaceTable>(par("eigrpInterfaceTableModule"), this);
+        eigrpNt = getModuleFromPar<EigrpIpv4NeighborTable>(par("eigrpNeighborTableModule"), this);
+        eigrpTt = getModuleFromPar<EigrpIpv4TopologyTable>(par("eigrpTopologyTableModule"), this);
 
         this->eigrpIftDisabled = new EigrpDisabledInterfaces();
         this->routingForNetworks = new EigrpNetworkTable<Ipv4Address>();

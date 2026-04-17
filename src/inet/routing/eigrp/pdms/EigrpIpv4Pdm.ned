@@ -21,6 +21,9 @@ simple EigrpIpv4Pdm extends SimpleModule
         xml configData = default(xmldoc("config.xml"));
         string interfaceTableModule;
         string routingTableModule;
+        string eigrpInterfaceTableModule = default("^.eigrpInterfaceTable");
+        string eigrpNeighborTableModule = default("^.eigrpIpv4NeighborTable");
+        string eigrpTopologyTableModule = default("^.eigrpIpv4TopologyTable");
     gates:
         input splitterIn;
         input rtpIn;

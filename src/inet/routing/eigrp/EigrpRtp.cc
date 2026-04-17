@@ -230,8 +230,8 @@ void EigrpRtpT<Ipv4Address>::initialize(int stage)
 
 //        this->eigrpIft = EigrpIfTableAccess().get();
 //        this->eigrpNt = Eigrpv4NeighTableAccess().get();
-        eigrpIft = check_and_cast<EigrpInterfaceTable *>(getModuleByPath("^.eigrpInterfaceTable"));
-        eigrpNt = check_and_cast<EigrpIpv4NeighborTable *>(getModuleByPath("^.eigrpIpv4NeighborTable"));
+        eigrpIft = getModuleFromPar<EigrpInterfaceTable>(par("eigrpInterfaceTableModule"), this);
+        eigrpNt = getModuleFromPar<EigrpIpv4NeighborTable>(par("eigrpNeighborTableModule"), this);
 
         requestQ = new EigrpRequestQueue();
 
@@ -249,8 +249,8 @@ void EigrpRtpT<Ipv6Address>::initialize(int stage)
 
 //        this->eigrpIft = EigrpIfTable6Access().get();
 //        this->eigrpNt = Eigrpv6NeighTableAccess().get();
-        eigrpIft = check_and_cast<EigrpInterfaceTable *>(getModuleByPath("^.eigrpInterfaceTable6"));
-        eigrpNt = check_and_cast<EigrpIpv6NeighborTable *>(getModuleByPath("^.eigrpIpv6NeighborTable"));
+        eigrpIft = getModuleFromPar<EigrpInterfaceTable>(par("eigrpInterfaceTableModule"), this);
+        eigrpNt = getModuleFromPar<EigrpIpv6NeighborTable>(par("eigrpNeighborTableModule"), this);
         requestQ = new EigrpRequestQueue();
 
 //        WATCH_PTRLIST(requestQ->reqQueue);
