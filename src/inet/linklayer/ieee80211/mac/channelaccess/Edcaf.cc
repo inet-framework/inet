@@ -32,7 +32,7 @@ void Edcaf::initialize(int stage)
         getContainingNicModule(this)->subscribe(modesetChangedSignal, this);
         ac = getAccessCategory(par("accessCategory"));
         contention = check_and_cast<IContention *>(getSubmodule("contention"));
-        collisionController = check_and_cast<IEdcaCollisionController *>(getModuleByPath(par("collisionControllerModule")));
+        collisionController = getModuleFromPar<IEdcaCollisionController>(par("collisionControllerModule"), this);
         pendingQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("pendingQueue"));
         recoveryProcedure = check_and_cast<QosRecoveryProcedure *>(getSubmodule("recoveryProcedure"));
         ackHandler = check_and_cast<QosAckHandler *>(getSubmodule("ackHandler"));
@@ -50,7 +50,7 @@ void Edcaf::initialize(int stage)
         WATCH(cwMax);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
-        auto rx = check_and_cast<IRx *>(getModuleByPath(par("rxModule")));
+        auto rx = getModuleFromPar<IRx>(par("rxModule"), this);
         rx->registerContention(contention);
         calculateTimingParameters();
     }

@@ -7,6 +7,7 @@
 
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementPolicy.h"
 
+#include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
 
@@ -19,7 +20,7 @@ void OriginatorBlockAckAgreementPolicy::initialize(int stage)
 {
     ModeSetListener::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        ackPolicy = check_and_cast<IOriginatorQoSAckPolicy *>(getModuleByPath(par("originatorAckPolicyModule")));
+        ackPolicy = getModuleFromPar<IOriginatorQoSAckPolicy>(par("originatorAckPolicyModule"), this);
         delayedAckPolicySupported = par("delayedAckPolicySupported");
         aMsduSupported = par("aMsduSupported");
         maximumAllowedBufferSize = par("maximumAllowedBufferSize");

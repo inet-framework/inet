@@ -36,8 +36,8 @@ void Hcf::initialize(int stage)
         inactivityTimer = new cMessage("blockAckInactivityTimer");
         edca = check_and_cast<Edca *>(getSubmodule("edca"));
         hcca = check_and_cast<Hcca *>(getSubmodule("hcca"));
-        tx = check_and_cast<ITx *>(getModuleByPath(par("txModule")));
-        rx = check_and_cast<IRx *>(getModuleByPath(par("rxModule")));
+        tx = getModuleFromPar<ITx>(par("txModule"), this);
+        rx = getModuleFromPar<IRx>(par("rxModule"), this);
         dataAndMgmtRateControl = dynamic_cast<IRateControl *>(getSubmodule("rateControl"));
         originatorBlockAckAgreementPolicy = dynamic_cast<IOriginatorBlockAckAgreementPolicy *>(getSubmodule("originatorBlockAckAgreementPolicy"));
         recipientBlockAckAgreementPolicy = dynamic_cast<IRecipientBlockAckAgreementPolicy *>(getSubmodule("recipientBlockAckAgreementPolicy"));

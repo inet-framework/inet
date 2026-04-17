@@ -29,7 +29,7 @@ void Dcaf::initialize(int stage)
         pendingQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("pendingQueue"));
         inProgressFrames = check_and_cast<InProgressFrames *>(getSubmodule("inProgressFrames"));
         contention = check_and_cast<IContention *>(getSubmodule("contention"));
-        auto rx = check_and_cast<IRx *>(getModuleByPath(par("rxModule")));
+        auto rx = getModuleFromPar<IRx>(par("rxModule"), this);
         rx->registerContention(contention);
         calculateTimingParameters();
         WATCH(owning);

@@ -7,6 +7,7 @@
 
 #include "inet/linklayer/ieee80211/mac/originator/NonQosRecoveryProcedure.h"
 
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/stlutils.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRtsPolicy.h"
 
@@ -29,8 +30,8 @@ Define_Module(NonQosRecoveryProcedure);
 void NonQosRecoveryProcedure::initialize(int stage)
 {
     if (stage == INITSTAGE_LAST) {
-        auto rtsPolicy = check_and_cast<IRtsPolicy *>(getModuleByPath(par("rtsPolicyModule")));
-        cwCalculator = check_and_cast<ICwCalculator *>(getModuleByPath(par("cwCalculatorModule")));
+        auto rtsPolicy = getModuleFromPar<IRtsPolicy>(par("rtsPolicyModule"), this);
+        cwCalculator = getModuleFromPar<ICwCalculator>(par("cwCalculatorModule"), this);
         rtsThreshold = rtsPolicy->getRtsThreshold();
         shortRetryLimit = par("shortRetryLimit");
         longRetryLimit = par("longRetryLimit");

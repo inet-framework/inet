@@ -7,6 +7,8 @@
 
 #include "inet/linklayer/ieee80211/mac/originator/QosRtsPolicy.h"
 
+#include "inet/common/ModuleAccess.h"
+
 namespace inet {
 namespace ieee80211 {
 
@@ -18,7 +20,7 @@ void QosRtsPolicy::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         rtsThreshold = par("rtsThreshold");
         ctsTimeout = par("ctsTimeout");
-        rateSelection = check_and_cast<IQosRateSelection *>(getModuleByPath(par("rateSelectionModule")));
+        rateSelection = getModuleFromPar<IQosRateSelection>(par("rateSelectionModule"), this);
     }
 }
 

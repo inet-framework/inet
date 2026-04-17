@@ -9,6 +9,8 @@
 
 #include <tuple>
 
+#include "inet/common/ModuleAccess.h"
+
 namespace inet {
 namespace ieee80211 {
 
@@ -18,7 +20,7 @@ void OriginatorQosAckPolicy::initialize(int stage)
 {
     ModeSetListener::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        rateSelection = check_and_cast<IQosRateSelection *>(getModuleByPath(par("rateSelectionModule")));
+        rateSelection = getModuleFromPar<IQosRateSelection>(par("rateSelectionModule"), this);
         maxBlockAckPolicyFrameLength = par("maxBlockAckPolicyFrameLength");
         blockAckReqThreshold = par("blockAckReqThreshold");
         blockAckTimeout = par("blockAckTimeout");

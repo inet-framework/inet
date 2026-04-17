@@ -9,6 +9,8 @@
 
 #include <algorithm>
 
+#include "inet/common/ModuleAccess.h"
+
 namespace inet {
 namespace ieee80211 {
 
@@ -20,9 +22,9 @@ simsignal_t InProgressFrames::packetDequeuedSignal = cComponent::registerSignal(
 void InProgressFrames::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        pendingQueue = check_and_cast<queueing::IPacketQueue *>(getModuleByPath(par("pendingQueueModule")));
-        dataService = check_and_cast<IOriginatorMacDataService *>(getModuleByPath(par("originatorMacDataServiceModule")));
-        ackHandler = check_and_cast<IAckHandler *>(getModuleByPath(par("ackHandlerModule")));
+        pendingQueue = getModuleFromPar<queueing::IPacketQueue>(par("pendingQueueModule"), this);
+        dataService = getModuleFromPar<IOriginatorMacDataService>(par("originatorMacDataServiceModule"), this);
+        ackHandler = getModuleFromPar<IAckHandler>(par("ackHandlerModule"), this);
     }
 }
 
