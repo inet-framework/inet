@@ -1,0 +1,12 @@
+SimulationProject(
+    name="inet+omnetpp",
+    root_folder=".",
+    omnetpp_project="omnetpp",
+    overlay_name="inet+omnetpp",
+    library_folder="src",
+    bin_folder="bin",
+    build_types=["dynamic library"],
+    dynamic_libraries=["INET"],
+    ned_folders=["src", "examples", "showcases", "tutorials", "tests/networks"],
+    ini_file_folders=["examples"],
+)
