@@ -21,6 +21,9 @@ simple EigrpIpv6Pdm extends SimpleModule
         xml configData = default(xmldoc("config.xml"));
         string interfaceTableModule;
         string routingTableModule;
+        string eigrpInterfaceTableModule = default("^.eigrpInterfaceTable6");
+        string eigrpNeighborTableModule = default("^.eigrpIpv6NeighborTable");
+        string eigrpTopologyTableModule = default("^.eigrpIpv6TopologyTable");
 
     gates:
         input splitterIn;

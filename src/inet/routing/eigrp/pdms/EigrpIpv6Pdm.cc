@@ -75,9 +75,9 @@ void EigrpIpv6Pdm::initialize(int stage)
     }
 
     if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
-        eigrpIft = check_and_cast<EigrpInterfaceTable *>(getModuleByPath("^.eigrpInterfaceTable6"));
-        eigrpNt = check_and_cast<EigrpIpv6NeighborTable *>(getModuleByPath("^.eigrpIpv6NeighborTable"));
-        eigrpTt = check_and_cast<EigrpIpv6TopologyTable *>(getModuleByPath("^.eigrpIpv6TopologyTable"));
+        eigrpIft = getModuleFromPar<EigrpInterfaceTable>(par("eigrpInterfaceTableModule"), this);
+        eigrpNt = getModuleFromPar<EigrpIpv6NeighborTable>(par("eigrpNeighborTableModule"), this);
+        eigrpTt = getModuleFromPar<EigrpIpv6TopologyTable>(par("eigrpTopologyTableModule"), this);
 
         this->eigrpIftDisabled = new EigrpDisabledInterfaces();
         this->routingForNetworks = new EigrpNetworkTable<Ipv6Address>();

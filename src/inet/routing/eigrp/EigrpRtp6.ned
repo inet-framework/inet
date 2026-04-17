@@ -18,6 +18,8 @@ simple EigrpRtp6 extends SimpleModule
 {
     parameters:
         @class(EigrpRtp6);
+        string eigrpInterfaceTableModule = default("^.eigrpInterfaceTable6");
+        string eigrpNeighborTableModule = default("^.eigrpIpv6NeighborTable");
 
     gates:
         input pdmIn;
