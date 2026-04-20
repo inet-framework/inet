@@ -421,26 +421,20 @@ class INET_API TcpConnection : public SimpleModule
     virtual void handleMessage(cMessage *msg);
 
     /**
-     * Return value for processIcmpv4Error() / processIcmpv6Error().
-     */
-    enum IcmpErrorAction {
-        ICMP_ERROR_KEEP,       // connection stays alive (soft notification sent)
-        ICMP_ERROR_ABORT       // connection was aborted (caller must call removeConnection)
-    };
-
-    /**
      * Process an ICMPv4 error indication for this connection.
      * Hard errors (port/protocol unreachable) abort connections in SYN_SENT state.
      * All other cases send a soft TCP_I_ICMPv4_ERROR notification to the app.
+     * Returns false if the connection has moved to CLOSED.
      */
-    virtual IcmpErrorAction processIcmpv4Error(Indication *indication);
+    virtual bool processIcmpv4Error(Indication *indication);
 
     /**
      * Process an ICMPv6 error indication for this connection.
      * Hard errors (port unreachable, admin prohibited) abort connections in SYN_SENT state.
      * All other cases send a soft TCP_I_ICMPv6_ERROR notification to the app.
+     * Returns false if the connection has moved to CLOSED.
      */
-    virtual IcmpErrorAction processIcmpv6Error(Indication *indication);
+    virtual bool processIcmpv6Error(Indication *indication);
 
     /**
      * Returns true if the given ICMPv4 type+code is a "hard" error

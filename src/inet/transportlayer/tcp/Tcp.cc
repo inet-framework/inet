@@ -298,7 +298,7 @@ void Tcp::processIcmpv4Error(Indication *indication)
 
     TcpConnection *conn = findConnForSockPair(key);
     if (conn) {
-        if (conn->processIcmpv4Error(indication) == TcpConnection::ICMP_ERROR_ABORT)
+        if (!conn->processIcmpv4Error(indication))
             removeConnection(conn);
     }
     else {
@@ -333,7 +333,7 @@ void Tcp::processIcmpv6Error(Indication *indication)
 
     TcpConnection *conn = findConnForSockPair(key);
     if (conn) {
-        if (conn->processIcmpv6Error(indication) == TcpConnection::ICMP_ERROR_ABORT)
+        if (!conn->processIcmpv6Error(indication))
             removeConnection(conn);
     }
     else {

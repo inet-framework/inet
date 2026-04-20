@@ -360,7 +360,7 @@ void TcpConnection::sendIndicationToApp(int code, const int id)
     sendToApp(indication);
 }
 
-TcpConnection::IcmpErrorAction TcpConnection::processIcmpv4Error(Indication *indication)
+bool TcpConnection::processIcmpv4Error(Indication *indication)
 {
     Enter_Method("processIcmpv4Error");
     take(indication);
@@ -384,8 +384,7 @@ TcpConnection::IcmpErrorAction TcpConnection::processIcmpv4Error(Indication *ind
         sendIndicationToApp(TCP_I_CONNECTION_REFUSED);
         delete indication;
 
-        performStateTransition(TCP_E_RCV_RST);
-        return ICMP_ERROR_ABORT;
+        return performStateTransition(TCP_E_RCV_RST);
     }
 
     // Soft notification: forward the original indication to the application, no state change.
@@ -394,10 +393,10 @@ TcpConnection::IcmpErrorAction TcpConnection::processIcmpv4Error(Indication *ind
     indication->setKind(TCP_I_ICMPv4_ERROR);
     indication->addTag<SocketInd>()->setSocketId(socketId);
     sendToApp(indication);
-    return ICMP_ERROR_KEEP;
+    return true;
 }
 
-TcpConnection::IcmpErrorAction TcpConnection::processIcmpv6Error(Indication *indication)
+bool TcpConnection::processIcmpv6Error(Indication *indication)
 {
     Enter_Method("processIcmpv6Error");
     take(indication);
@@ -421,8 +420,7 @@ TcpConnection::IcmpErrorAction TcpConnection::processIcmpv6Error(Indication *ind
         sendIndicationToApp(TCP_I_CONNECTION_REFUSED);
         delete indication;
 
-        performStateTransition(TCP_E_RCV_RST);
-        return ICMP_ERROR_ABORT;
+        return performStateTransition(TCP_E_RCV_RST);
     }
 
     // Soft notification: forward the original indication to the application, no state change.
@@ -431,7 +429,7 @@ TcpConnection::IcmpErrorAction TcpConnection::processIcmpv6Error(Indication *ind
     indication->setKind(TCP_I_ICMPv6_ERROR);
     indication->addTag<SocketInd>()->setSocketId(socketId);
     sendToApp(indication);
-    return ICMP_ERROR_KEEP;
+    return true;
 }
 
 bool TcpConnection::isHardIcmpv4Error(int type, int code)
