@@ -448,6 +448,7 @@ newreno_cc_after_idle(struct cc_var *ccv)
     CCV(ccv, snd_ssthresh) = std::max(CCV(ccv, snd_ssthresh),
         CCV(ccv, snd_cwnd)-(CCV(ccv, snd_cwnd)>>2));
 
+    // FIXME rw is uninitialized!
     CCV(ccv, snd_cwnd) = std::min(rw, CCV(ccv, snd_cwnd));
 }
 
