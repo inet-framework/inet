@@ -104,6 +104,8 @@ void Tcp::handleUpperCommand(cMessage *msg)
         EV_INFO << "Tcp connection created for " << msg << "\n";
     }
 
+    // TODO replace bool return convention with void + conn->getFsmState() == TCP_S_CLOSED check
+    // (applies to processAppCommand, processTCPSegment, processIcmpv4Error, processIcmpv6Error)
     if (!conn->processAppCommand(msg))
         removeConnection(conn);
 }
