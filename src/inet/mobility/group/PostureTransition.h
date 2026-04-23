@@ -73,10 +73,11 @@ class INET_API PostureTransition
     int defaultMatrixID;
 
     /** @brief Data type for one instance of Markov transition matrix. */
-    typedef struct {
+    struct TransMatrix
+    {
         std::string name;
         double **matrix;
-    } TransMatrix;
+    };
 
     /** @brief Data type for a list of Markov transition matrices. */
     typedef std::vector<TransMatrix *> TransMatrixList;
@@ -85,16 +86,18 @@ class INET_API PostureTransition
     TransMatrixList matrixList;
 
     /** @brief Data type for one instance of the area (space) boundary. */
-    typedef struct {
+    struct AreaBound
+    {
         Coord low;
         Coord high;
-    } AreaBound;
+    };
 
     /** @brief Data type for one instance of area type. */
-    typedef struct {
+    struct AreaType
+    {
         std::string name;
         std::vector<AreaBound *> boundries;
-    } AreaType;
+    };
 
     /** @brief Data type for the list of area types. */
     typedef std::vector<AreaType *> AreaTypeList;
@@ -103,16 +106,18 @@ class INET_API PostureTransition
     AreaTypeList areaTypeList;
 
     /** @brief Data type for one instance of the time boundary. */
-    typedef struct {
+    struct TimeBound
+    {
         simtime_t low;
         simtime_t high;
-    } TimeBound;
+    };
 
     /** @brief Data type for one instance of time domain. */
-    typedef struct {
+    struct TimeDomainType
+    {
         std::string name;
         std::vector<TimeBound *> boundries;
-    } TimeDomainType;
+    };
 
     /** @brief Data type for the list of time domains. */
     typedef std::vector<TimeDomainType *> TimeDomainList;
@@ -121,11 +126,12 @@ class INET_API PostureTransition
     TimeDomainList timeDomainList;
 
     /** @brief Data type for one instance of space-time combination. */
-    typedef struct {
+    struct CombinationType
+    {
         int timeID;
         int areaID;
         int matrixID;
-    } CombinationType;
+    };
 
     /** @brief Data type for the list of space-time combinations. */
     typedef std::vector<CombinationType *> CombinationList;
