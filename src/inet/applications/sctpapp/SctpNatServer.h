@@ -20,7 +20,7 @@ namespace inet {
  * arrives on them.
  */
 
-typedef struct natInfo
+struct NatInfo
 {
     bool multi;
     uint32_t peer1;
@@ -35,7 +35,7 @@ typedef struct natInfo
     uint32_t peer2Assoc;
     uint32_t peer2Port;
     int32_t peer2Gate;
-} NatInfo;
+};
 typedef std::vector<NatInfo *> NatVector;
 
 class INET_API SctpNatServer : public SimpleModule, public LifecycleUnsupported

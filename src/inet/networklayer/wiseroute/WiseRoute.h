@@ -86,10 +86,11 @@ class INET_API WiseRoute : public NetworkProtocolBase, public INetworkProtocol
         DUPLICATE
     } floodTypes;
 
-    typedef struct tRouteTableEntry {
+    struct tRouteTableEntry
+    {
         L3Address nextHop;
         double rssi;
-    } tRouteTableEntry;
+    };
 
     typedef std::map<L3Address, tRouteTableEntry> tRouteTable;
     typedef std::multimap<tRouteTable::key_type, unsigned long> tFloodTable;
