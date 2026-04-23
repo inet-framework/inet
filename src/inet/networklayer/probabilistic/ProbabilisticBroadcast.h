@@ -61,13 +61,14 @@ class INET_API ProbabilisticBroadcast : public NetworkProtocolBase, public INetw
     /** @brief Store messages in a structure so that we can keep some
      *         information needed by the protocol
      **/
-    typedef struct tMsgDesc {
+    struct tMsgDesc
+    {
         Packet *pkt;
         int nbBcast; // number of times the present node has passed the
                      // message through a broadcast attempt.
         bool initialSend; // true if message to be sent for first
                           // time by its creator.
-    } tMsgDesc;
+    };
 
     typedef std::set<unsigned int> MsgIdSet;
     typedef std::multimap<simtime_t, tMsgDesc *> TimeMsgMap;

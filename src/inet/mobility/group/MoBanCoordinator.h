@@ -121,12 +121,13 @@ class INET_API MoBanCoordinator : public LineSegmentsMobilityBase
     bool useMobilityPattern;
 
     /** @brief Data type for one instance of mobility pattern. */
-    typedef struct pattern {
+    struct Pattern
+    {
         unsigned int postureID;
         Coord targetPos;
         double speed;
         simtime_t duration;
-    } Pattern;
+    };
 
     /** @brief The mobility pattern data base. */
     Pattern *mobilityPattern;
