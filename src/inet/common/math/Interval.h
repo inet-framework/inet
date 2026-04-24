@@ -183,12 +183,14 @@ class INET_API Interval
     }
 };
 
-inline void iterateCorners(const Interval<>& i, const std::function<void(const Point<>&)> f) {
+inline void iterateCorners(const Interval<>& i, const std::function<void(const Point<>&)> f)
+{
     f(Point<>());
 }
 
 template<typename T0, typename... TS>
-inline void iterateCorners(const Interval<T0, TS ...>& i, const std::function<void(const Point<T0, TS ...>&)> f) {
+inline void iterateCorners(const Interval<T0, TS ...>& i, const std::function<void(const Point<T0, TS ...>&)> f)
+{
     Interval<TS ...> i1(tail(i.getLower()), tail(i.getUpper()), i.getLowerClosed() >> 1, i.getUpperClosed() >> 1, i.getFixed() >> 1);
     iterateCorners(i1, std::function<void(const Point<TS ...>&)>([&] (const Point<TS ...>& q) {
         f(concat(Point<T0>(head(i.getLower())), q));
@@ -199,7 +201,8 @@ inline void iterateCorners(const Interval<T0, TS ...>& i, const std::function<vo
 namespace internal {
 
 template<typename... T, size_t ... IS>
-inline std::ostream& print(std::ostream& os, const Interval<T ...>& i, std::integer_sequence<size_t, IS...>) {
+inline std::ostream& print(std::ostream& os, const Interval<T ...>& i, std::integer_sequence<size_t, IS...>)
+{
     const auto& lower = i.getLower();
     const auto& upper = i.getUpper();
     auto lowerClosed = i.getLowerClosed();
@@ -218,7 +221,8 @@ inline std::ostream& print(std::ostream& os, const Interval<T ...>& i, std::inte
 } // namespace internal
 
 template<typename... T>
-inline std::ostream& operator<<(std::ostream& os, const Interval<T ...>& i) {
+inline std::ostream& operator<<(std::ostream& os, const Interval<T ...>& i)
+{
     internal::print(os, i, std::index_sequence_for<T ...>{});
     return os;
 }

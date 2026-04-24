@@ -69,7 +69,8 @@ bool existsNetworkNamespace(const char *name)
 #endif
 }
 
-void deleteNetworkNamespace(const char *name) {
+void deleteNetworkNamespace(const char *name)
+{
 #ifdef __linux__
     auto it = localNetworkNamespaces.find(name);
     if (it != localNetworkNamespaces.end()) {

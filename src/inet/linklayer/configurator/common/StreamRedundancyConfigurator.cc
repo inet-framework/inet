@@ -64,7 +64,8 @@ void StreamRedundancyConfigurator::computeStreams()
     }
 }
 
-static std::string getNodeName(std::string name) {
+static std::string getNodeName(std::string name)
+{
     auto pos = name.find('.');
     return pos == std::string::npos ? name : name.substr(0, pos);
 }

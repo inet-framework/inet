@@ -73,7 +73,8 @@ void Radio::initialize(int stage)
     }
 }
 
-void Radio::initializeRadioMode() {
+void Radio::initializeRadioMode()
+{
     const char *initialRadioMode = par("initialRadioMode");
     if (!strcmp(initialRadioMode, "off"))
         completeRadioModeSwitch(IRadio::RADIO_MODE_OFF);

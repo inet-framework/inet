@@ -67,7 +67,8 @@ struct _DbgStream {
 
 inline void print_args(std::ostream&) {}
 template <typename T, typename... Ts>
-inline void print_args(std::ostream& os, const T& t, const Ts&... ts) {
+inline void print_args(std::ostream& os, const T& t, const Ts&... ts)
+{
     os << t;
     (void)std::initializer_list<int>{ ( (void)(os << ", " << ts), 0 )... };
 }

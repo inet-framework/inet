@@ -14,32 +14,37 @@ namespace quic {
 
 DplpmtudProbes::DplpmtudProbes() { }
 
-DplpmtudProbes::~DplpmtudProbes() {
+DplpmtudProbes::~DplpmtudProbes()
+{
     for (auto it=this->begin(); it != this->end(); ++it) {
         delete it->second;
     }
 }
 
-void DplpmtudProbes::add(DplpmtudProbe *probe) {
+void DplpmtudProbes::add(DplpmtudProbe *probe)
+{
     if (getBySize(probe->getSize()) != nullptr) {
         throw omnetpp::cRuntimeError("DPLPMTUD: add probe already outstanding");
     }
     this->insert( {probe->getSize(), probe} );
 }
 
-void DplpmtudProbes::removeAll() {
+void DplpmtudProbes::removeAll()
+{
     for (auto it=this->begin(); it != this->end(); it = this->erase(it)) {
         delete it->second;
     }
 }
 
-void DplpmtudProbes::removeAllEqualOrSmaller(int size) {
+void DplpmtudProbes::removeAllEqualOrSmaller(int size)
+{
     for (auto it=this->begin(); it != this->end() && it->first <= size; it = this->erase(it)) {
         delete it->second;
     }
 }
 
-void DplpmtudProbes::removeAllLarger(int size) {
+void DplpmtudProbes::removeAllLarger(int size)
+{
     auto it=this->begin();
     for (; it != this->end() && it->first <= size; ++it);
     for (; it != this->end(); it = this->erase(it)) {
@@ -47,7 +52,8 @@ void DplpmtudProbes::removeAllLarger(int size) {
     }
 }
 
-void DplpmtudProbes::removeAllEqualOrLarger(int size) {
+void DplpmtudProbes::removeAllEqualOrLarger(int size)
+{
     auto it=this->begin();
     for (; it != this->end() && it->first < size; ++it);
     for (; it != this->end(); it = this->erase(it)) {
@@ -55,7 +61,8 @@ void DplpmtudProbes::removeAllEqualOrLarger(int size) {
     }
 }
 
-DplpmtudProbe *DplpmtudProbes::getBySize(int size) {
+DplpmtudProbe *DplpmtudProbes::getBySize(int size)
+{
     auto it = this->find(size);
     if (it == this->end()) {
         return nullptr;
@@ -63,14 +70,16 @@ DplpmtudProbe *DplpmtudProbes::getBySize(int size) {
     return it->second;
 }
 
-DplpmtudProbe *DplpmtudProbes::getSmallest() {
+DplpmtudProbe *DplpmtudProbes::getSmallest()
+{
     if (this->size() == 0) {
         return nullptr;
     }
     return this->begin()->second;
 }
 
-DplpmtudProbe *DplpmtudProbes::getSmallestLost() {
+DplpmtudProbe *DplpmtudProbes::getSmallestLost()
+{
     for (auto it=this->begin(); it != this->end(); ++it) {
         DplpmtudProbe *probe = it->second;
         if (probe->isLost()) {
@@ -80,7 +89,8 @@ DplpmtudProbe *DplpmtudProbes::getSmallestLost() {
     return nullptr;
 }
 
-bool DplpmtudProbes::containsProbesNotLost() {
+bool DplpmtudProbes::containsProbesNotLost()
+{
     for (auto it=this->begin(); it != this->end(); ++it) {
         DplpmtudProbe *probe = it->second;
         if (!probe->isLost()) {
@@ -90,7 +100,8 @@ bool DplpmtudProbes::containsProbesNotLost() {
     return false;
 }
 
-std::string DplpmtudProbes::str() {
+std::string DplpmtudProbes::str()
+{
     std::stringstream str;
     bool first = true;
     str << "[";

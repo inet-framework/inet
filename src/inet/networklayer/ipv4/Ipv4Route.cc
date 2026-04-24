@@ -40,7 +40,8 @@ Ipv4Route::~Ipv4Route()
     delete protocolData;
 }
 
-const char *inet::Ipv4Route::getSourceTypeAbbreviation() const {
+const char *inet::Ipv4Route::getSourceTypeAbbreviation() const
+{
     switch (sourceType) {
         case IFACENETMASK:
             return "C";

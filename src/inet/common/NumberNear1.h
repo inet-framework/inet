@@ -595,17 +595,20 @@ struct INET_API NumberNear1 {
 };
 
 template<typename I>
-inline I operator*(I t, const NumberNear1<I> &s) {
+inline I operator*(I t, const NumberNear1<I> &s)
+{
     return s.mul(t);
 }
 
 template<typename I>
-inline I operator/(I t, const NumberNear1<I> &s) {
+inline I operator/(I t, const NumberNear1<I> &s)
+{
     return s.div(t);
 }
 
 template<typename I>
-inline std::ostream& operator<<(std::ostream &os, const NumberNear1<I> &s) {
+inline std::ostream& operator<<(std::ostream &os, const NumberNear1<I> &s)
+{
     std::ios::fmtflags f = os.flags();
     std::streamsize old_prec = os.precision();
     char old_fill = os.fill();

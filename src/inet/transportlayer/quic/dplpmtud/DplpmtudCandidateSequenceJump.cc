@@ -17,7 +17,8 @@ namespace quic {
 using namespace std;
 using namespace omnetpp;
 
-string print2(std::vector<int> tree) {
+string print2(std::vector<int> tree)
+{
     stringstream output;
     for (auto it = tree.begin(); it != tree.end(); ++it) {
         output << *it << " ";
@@ -25,7 +26,8 @@ string print2(std::vector<int> tree) {
     return output.str();
 }
 
-DplpmtudCandidateSequenceJump::DplpmtudCandidateSequenceJump(int minPmtu, int maxPmtu, int stepSize) : DplpmtudCandidateSequence(minPmtu, maxPmtu, stepSize) {
+DplpmtudCandidateSequenceJump::DplpmtudCandidateSequenceJump(int minPmtu, int maxPmtu, int stepSize) : DplpmtudCandidateSequence(minPmtu, maxPmtu, stepSize)
+{
     downward = true;
 
     // add initial candidates to test
@@ -60,7 +62,8 @@ DplpmtudCandidateSequenceJump::DplpmtudCandidateSequenceJump(int minPmtu, int ma
 }
 DplpmtudCandidateSequenceJump::~DplpmtudCandidateSequenceJump() { }
 
-void DplpmtudCandidateSequenceJump::ptbReceived(int ptbMtu) {
+void DplpmtudCandidateSequenceJump::ptbReceived(int ptbMtu)
+{
     DplpmtudCandidateSequence::ptbReceived(ptbMtu);
     std::vector<int>::iterator it;
     for(it = candidates.begin(); it != candidates.end() && *it < ptbMtu; ++it);
@@ -69,7 +72,8 @@ void DplpmtudCandidateSequenceJump::ptbReceived(int ptbMtu) {
     candidates.push_back(ptbMtu);
 }
 
-std::vector<int>::iterator DplpmtudCandidateSequenceJump::getIterator(int value) {
+std::vector<int>::iterator DplpmtudCandidateSequenceJump::getIterator(int value)
+{
     for(std::vector<int>::iterator it = candidates.begin(); it != candidates.end(); ++it) {
         if (*it == value) {
             return it;
@@ -78,7 +82,8 @@ std::vector<int>::iterator DplpmtudCandidateSequenceJump::getIterator(int value)
     throw cRuntimeError("DplpmtudSearchAlgorithmJump: Could not find iterator for value");
 }
 
-void DplpmtudCandidateSequenceJump::addCandidates(std::vector<int>::iterator &after) {
+void DplpmtudCandidateSequenceJump::addCandidates(std::vector<int>::iterator &after)
+{
     int lower = *after;
     int upper = *(after+1);
     int d = upper - lower;
@@ -104,7 +109,8 @@ void DplpmtudCandidateSequenceJump::addCandidates(std::vector<int>::iterator &af
 }
 
 
-int DplpmtudCandidateSequenceJump::getNextCandidate(int probeSizeLimit) {
+int DplpmtudCandidateSequenceJump::getNextCandidate(int probeSizeLimit)
+{
     EV_DEBUG << "DplpmtudSearchAlgorithmJump::getNextCandidate begin candidates: " << print2(candidates) << ", currentIt: " << *currentIt << endl;
     if (downward) {
         if (currentIt == candidates.begin()
@@ -130,7 +136,8 @@ int DplpmtudCandidateSequenceJump::getNextCandidate(int probeSizeLimit) {
     return *currentIt;
 }
 
-void DplpmtudCandidateSequenceJump::testSucceeded(int succeededCandidate) {
+void DplpmtudCandidateSequenceJump::testSucceeded(int succeededCandidate)
+{
     EV_DEBUG << "DplpmtudSearchAlgorithmJump::testSucceeded(" << succeededCandidate << ") begin candidate: " << print2(candidates) << ", currentIt: " << *currentIt << endl;
     if (downward) {
         downward = false;
@@ -145,7 +152,8 @@ void DplpmtudCandidateSequenceJump::testSucceeded(int succeededCandidate) {
 }
 
 
-void DplpmtudCandidateSequenceJump::testFailed(int failedCandidate) {
+void DplpmtudCandidateSequenceJump::testFailed(int failedCandidate)
+{
     EV_DEBUG << "DplpmtudSearchAlgorithmJump::testFailed(" << failedCandidate << ") begin candidate: " << print2(candidates) << ", currentIt: " << *currentIt << endl;
     maxPmtu = failedCandidate-stepSize;
     auto deleteStartingFrom = candidates.begin();
@@ -155,7 +163,8 @@ void DplpmtudCandidateSequenceJump::testFailed(int failedCandidate) {
     EV_DEBUG << "DplpmtudSearchAlgorithmJump::testFailed(" << failedCandidate << ") end candidate: " << print2(candidates) << ", currentIt: " << *currentIt << endl;
 }
 
-bool DplpmtudCandidateSequenceJump::repeatOnTimeout(int size) {
+bool DplpmtudCandidateSequenceJump::repeatOnTimeout(int size)
+{
     auto it = getIterator(size);
     if (it == candidates.begin()) {
         EV_DEBUG << "DplpmtudSearchAlgorithmJump::repeatOnTimeout(" << size << ") returns true, because it is the smallest candidate, currentIt: " << *currentIt << endl;
@@ -184,7 +193,8 @@ bool DplpmtudCandidateSequenceJump::repeatOnTimeout(int size) {
     return false;
 }
 
-void DplpmtudCandidateSequenceJump::smallestProbeTimedOut(int size) {
+void DplpmtudCandidateSequenceJump::smallestProbeTimedOut(int size)
+{
     if (!downward) {
         auto it = getIterator(size);
         if (it != candidates.begin()) {

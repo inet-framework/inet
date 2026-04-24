@@ -23,7 +23,8 @@ namespace fsm {
 // State declarations
 
 // Machine's top state
-TOPSTATE(TopState) {
+TOPSTATE(TopState)
+{
     struct Box {
         Box() : _mod(0) {}
         Box(BgpSession& session) : _mod(&session) {}
@@ -112,7 +113,8 @@ TOPSTATE(TopState) {
 };
 
 // A superstate
-SUBSTATE(Idle, TopState) {
+SUBSTATE(Idle, TopState)
+{
     STATE(Idle)
 
     void ManualStart() override;
@@ -123,7 +125,8 @@ SUBSTATE(Idle, TopState) {
 };
 
 // A substate
-SUBSTATE(Connect, TopState) {
+SUBSTATE(Connect, TopState)
+{
     STATE(Connect)
 
     void ConnectRetryTimer_Expires() override;
@@ -140,7 +143,8 @@ SUBSTATE(Connect, TopState) {
 };
 
 // A substate
-SUBSTATE(Active, TopState) {
+SUBSTATE(Active, TopState)
+{
     STATE(Active)
 
     void ConnectRetryTimer_Expires() override;
@@ -158,7 +162,8 @@ SUBSTATE(Active, TopState) {
 };
 
 // A substate
-SUBSTATE(OpenSent, TopState) {
+SUBSTATE(OpenSent, TopState)
+{
     STATE(OpenSent)
 
     void ConnectRetryTimer_Expires() override;
@@ -175,7 +180,8 @@ SUBSTATE(OpenSent, TopState) {
 };
 
 // A substate
-SUBSTATE(OpenConfirm, TopState) {
+SUBSTATE(OpenConfirm, TopState)
+{
     STATE(OpenConfirm)
 
     void ConnectRetryTimer_Expires() override;
@@ -192,7 +198,8 @@ SUBSTATE(OpenConfirm, TopState) {
 };
 
 // A substate
-SUBSTATE(Established, TopState) {
+SUBSTATE(Established, TopState)
+{
     STATE(Established)
 
     void ConnectRetryTimer_Expires() override;

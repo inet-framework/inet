@@ -10,7 +10,8 @@
 namespace inet {
 namespace quic {
 
-DplpmtudProbePacket::DplpmtudProbePacket(std::string name, Dplpmtud *dplpmtud) : QuicPacket(name) {
+DplpmtudProbePacket::DplpmtudProbePacket(std::string name, Dplpmtud *dplpmtud) : QuicPacket(name)
+{
     this->dplpmtud = dplpmtud;
 }
 

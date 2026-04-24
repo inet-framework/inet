@@ -196,7 +196,8 @@ QuicSocket *QuicSocket::accept()
     return newSocket;
 }
 
-void QuicSocket::processMessage(cMessage *msg) {
+void QuicSocket::processMessage(cMessage *msg)
+{
     ASSERT(belongsToSocket(msg));
 
     switch (msg->getKind()) {

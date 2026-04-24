@@ -12,7 +12,8 @@
 namespace inet {
 namespace quic {
 
-ReliabilityManager::ReliabilityManager(Connection *connection, TransportParameters *transportParameter, ReceivedPacketsAccountant *receivedPacketsAccountant, ICongestionController *congestionController, Statistics *stats) {
+ReliabilityManager::ReliabilityManager(Connection *connection, TransportParameters *transportParameter, ReceivedPacketsAccountant *receivedPacketsAccountant, ICongestionController *congestionController, Statistics *stats)
+{
     this->connection = connection;
     this->transportParameter = transportParameter;
     this->receivedPacketsAccountant = receivedPacketsAccountant;
@@ -42,7 +43,8 @@ ReliabilityManager::ReliabilityManager(Connection *connection, TransportParamete
     //lastSentCryptoPacketTime = SIMTIME_ZERO;
 }
 
-ReliabilityManager::~ReliabilityManager() {
+ReliabilityManager::~ReliabilityManager()
+{
     delete lossDetectionTimer;
     int memSize = 0;
     for (PacketNumberSpace pnSpace : {PacketNumberSpace::Initial, PacketNumberSpace::Handshake, PacketNumberSpace::ApplicationData} ) {
@@ -582,7 +584,8 @@ void ReliabilityManager::onPacketsLost(std::vector<QuicPacket*> *lostPackets)
     }
 }
 
-SimTime ReliabilityManager::getReducePacketSizeTime() {
+SimTime ReliabilityManager::getReducePacketSizeTime()
+{
     if (reducePacketTimeThreshold < SimTime::ZERO) {
         SimTime ptoDuration = getPtoDuration(PacketNumberSpace::ApplicationData);
         return simTime() - (reducePacketPtoFactorThreshold * ptoDuration);
@@ -591,7 +594,8 @@ SimTime ReliabilityManager::getReducePacketSizeTime() {
     }
 }
 
-bool ReliabilityManager::reducePacketSize(int minSize, int maxSize) {
+bool ReliabilityManager::reducePacketSize(int minSize, int maxSize)
+{
     PacketNumberSpace pnSpace = PacketNumberSpace::ApplicationData;
     if (reducePacketTimeThreshold == SimTime::ZERO) {
         return false;

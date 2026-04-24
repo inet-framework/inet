@@ -299,7 +299,8 @@ class INET_API UnireciprocalFunction : public FunctionBase<R, D>
 //    const int dimension2;
 //
 //  protected:
-//    double getIntegral(const typename D::P& p) const {
+//    double getIntegral(const typename D::P& p) const
+//    {
 //        double x = p.get(dimension1);
 //        double y = p.get(dimension2);
 //        throw cRuntimeError("TODO");
@@ -309,25 +310,30 @@ class INET_API UnireciprocalFunction : public FunctionBase<R, D>
 //    BireciprocalFunction(double a0, double a1, double a2, double a3, double b0, double b1, double b2, double b3, int dimension1, int dimension2) :
 //        a0(a0), a1(a1), a2(a2), a3(a3), b0(b0), b1(b1), b2(b2), b3(b3), dimension1(dimension1), dimension2(dimension2) {}
 //
-//    virtual R getValue(const typename D::P& p) const override {
+//    virtual R getValue(const typename D::P& p) const override
+//    {
 //        double x = p.get(dimension1);
 //        double y = p.get(dimension2);
 //        return R((a0 + a1 * x + a2 * y + a3 * x * y) / (b0 + b1 * x + b2 * y + b3 * x * y));
 //    }
 //
-//    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) const override {
+//    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) const override
+//    {
 //        callback(i, this);
 //    }
 //
-//    virtual R getMin(const typename D::I& i) const override {
+//    virtual R getMin(const typename D::I& i) const override
+//    {
 //        throw cRuntimeError("TODO");
 //    }
 //
-//    virtual R getMax(const typename D::I& i) const override {
+//    virtual R getMax(const typename D::I& i) const override
+//    {
 //        throw cRuntimeError("TODO");
 //    }
 //
-//    virtual R getMean(const typename D::I& i) const override {
+//    virtual R getMean(const typename D::I& i) const override
+//    {
 //        throw cRuntimeError("TODO");
 //    }
 //};
@@ -343,11 +349,13 @@ class INET_API UnireciprocalFunction : public FunctionBase<R, D>
 //  public:
 //    QuadraticFunction(double a, double b, double c) : a(a), b(b), c(c) {}
 //
-//    virtual R getValue(const typename D::P& p) const override {
+//    virtual R getValue(const typename D::P& p) const override
+//    {
 //        return R(0);
 //    }
 //
-//    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) const override {
+//    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) const override
+//    {
 //        callback(i, this);
 //    }
 //};
@@ -773,12 +781,14 @@ class INET_API Interpolated1DFunction : public FunctionBase<R, Domain<X>>
 };
 
 template<typename R, typename D>
-void simplifyAndCall(const typename D::I& i, const IFunction<R, D> *f, const std::function<void(const typename D::I&, const IFunction<R, D> *)> callback) {
+void simplifyAndCall(const typename D::I& i, const IFunction<R, D> *f, const std::function<void(const typename D::I&, const IFunction<R, D> *)> callback)
+{
     callback(i, f);
 }
 
 template<typename R, typename D>
-void simplifyAndCall(const typename D::I& i, const UnilinearFunction<R, D> *f, const std::function<void(const typename D::I&, const IFunction<R, D> *)> callback) {
+void simplifyAndCall(const typename D::I& i, const UnilinearFunction<R, D> *f, const std::function<void(const typename D::I&, const IFunction<R, D> *)> callback)
+{
     if (f->getRLower() == f->getRUpper()) {
         ConstantFunction<R, D> g(f->getRLower());
         callback(i, &g);
@@ -788,7 +798,8 @@ void simplifyAndCall(const typename D::I& i, const UnilinearFunction<R, D> *f, c
 }
 
 template<typename R, typename D>
-void simplifyAndCall(const typename D::I& i, const BilinearFunction<R, D> *f, const std::function<void(const typename D::I&, const IFunction<R, D> *)> callback) {
+void simplifyAndCall(const typename D::I& i, const BilinearFunction<R, D> *f, const std::function<void(const typename D::I&, const IFunction<R, D> *)> callback)
+{
     if (f->getRLowerLower() == f->getRLowerUpper() && f->getRLowerLower() == f->getRUpperLower() && f->getRLowerLower() == f->getRUpperUpper()) {
         ConstantFunction<R, D> g(f->getRLowerLower());
         callback(i, &g);

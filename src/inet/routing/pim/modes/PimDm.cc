@@ -1992,7 +1992,8 @@ void PimDm::DownstreamInterface::stopPrunePendingTimer()
 //
 // lost_assert(S,G) = {all interfaces I such that lost_assert(S,G,I) == TRUE}
 //
-// bool lost_assert(S,G,I) {
+// bool lost_assert(S,G,I)
+// {
 //   if ( RPF_interface(S) == I ) {
 //     return FALSE
 //   } else {

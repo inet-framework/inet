@@ -34,7 +34,8 @@ CallTrace::~CallTrace()
     state = oldState;
 }
 
-std::string CallTrace::demangle(const char* mangledName) {
+std::string CallTrace::demangle(const char* mangledName)
+{
     int status = -1;
     // The abi::__cxa_demangle function allocates memory for the demangled name using malloc,
     // so we use a unique_ptr with a custom deleter to ensure that it gets freed.

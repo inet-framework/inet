@@ -19,7 +19,8 @@ Register_Serializer(RtcpSenderReportPacket, RtcpPacketSerializer);
 
 namespace {
 
-void serializeReceptionReport(MemoryOutputStream& stream, const ReceptionReport *receptionReport) {
+void serializeReceptionReport(MemoryOutputStream& stream, const ReceptionReport *receptionReport)
+{
     if (receptionReport != nullptr) {
         stream.writeUint32Be(receptionReport->getSsrc());
         stream.writeByte(receptionReport->getFractionLost());
@@ -33,7 +34,8 @@ void serializeReceptionReport(MemoryOutputStream& stream, const ReceptionReport 
         throw cRuntimeError("Cannot serialize RTCP packet: receptionReport is a null pointer.");
 }
 
-void deserializeReceptionReport(MemoryInputStream& stream, ReceptionReport& receptionReport) {
+void deserializeReceptionReport(MemoryInputStream& stream, ReceptionReport& receptionReport)
+{
     receptionReport.setSsrc(stream.readUint32Be());
     receptionReport.setFractionLost(stream.readByte());
     receptionReport.setPacketsLostCumulative(stream.readUint24Be());
@@ -43,7 +45,8 @@ void deserializeReceptionReport(MemoryInputStream& stream, ReceptionReport& rece
     receptionReport.setDelaySinceLastSR(stream.readUint32Be());
 }
 
-void serializeSdesChunk(MemoryOutputStream& stream, const SdesChunk *sdesChunk) {
+void serializeSdesChunk(MemoryOutputStream& stream, const SdesChunk *sdesChunk)
+{
     stream.writeUint32Be(sdesChunk->getSsrc());
     uint64_t numBytes = 4;
     for (int e = 0; e < sdesChunk->size(); ++e) {
@@ -65,7 +68,8 @@ void serializeSdesChunk(MemoryOutputStream& stream, const SdesChunk *sdesChunk) 
         stream.writeByteRepeatedly(0, 4 - (numBytes % 4));
 }
 
-void deserializeSdesChunk(MemoryInputStream& stream, const Ptr<RtcpPacket> rtcpPacket, SdesChunk& sdesChunk) {
+void deserializeSdesChunk(MemoryInputStream& stream, const Ptr<RtcpPacket> rtcpPacket, SdesChunk& sdesChunk)
+{
     sdesChunk.setName("SdesChunk");
     sdesChunk.setSsrc(stream.readUint32Be());
     uint8_t type = stream.readByte();

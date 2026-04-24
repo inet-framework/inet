@@ -10,7 +10,8 @@
 namespace inet {
 namespace quic {
 
-DplpmtudProbe::DplpmtudProbe(int probeSize, SimTime timeSent, int probeCount) {
+DplpmtudProbe::DplpmtudProbe(int probeSize, SimTime timeSent, int probeCount)
+{
     this->probeSize = probeSize;
     this->timeSent = timeSent;
     this->probeCount = probeCount;

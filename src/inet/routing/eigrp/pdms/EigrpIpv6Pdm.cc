@@ -1918,7 +1918,8 @@ void EigrpIpv6Pdm::sendUpdateToStubs(EigrpRouteSource<Ipv6Address> *succ, EigrpR
 }
 
 Ipv6Route *EigrpIpv6Pdm::findRoute(const Ipv6Address& prefix,
-        int prefixLength) {
+        int prefixLength)
+{
     Ipv6Route *route = nullptr;
 
     for (int i = 0; i < rt->getNumRoutes(); i++) {
@@ -1934,7 +1935,8 @@ Ipv6Route *EigrpIpv6Pdm::findRoute(const Ipv6Address& prefix,
 }
 
 Ipv6Route *EigrpIpv6Pdm::findRoute(const Ipv6Address& prefix, int prefixLength,
-        const Ipv6Address& nexthop) {
+        const Ipv6Address& nexthop)
+{
     Ipv6Route *route = nullptr;
     for (int i = 0; i < rt->getNumRoutes(); i++) {
         auto it = rt->getRoute(i);

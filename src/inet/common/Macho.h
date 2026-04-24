@@ -72,7 +72,8 @@
 // using namespace std;
 //
 
-//     TOPSTATE(Top) {
+//     TOPSTATE(Top)
+//     {
 //         struct Box {
 //             Box() : data(0) {}
 //             long data;
@@ -89,7 +90,8 @@
 //         void init();
 //     };
 //
-//     SUBSTATE(Super, Top) {
+//     SUBSTATE(Super, Top)
+//     {
 //         STATE(Super)
 //         HISTORY()
 //
@@ -98,7 +100,8 @@
 //         void exit();
 //     };
 //
-//     SUBSTATE(StateA, Super) {
+//     SUBSTATE(StateA, Super)
+//     {
 //         struct Box {
 //             Box() : data(0) {}
 //             int data;
@@ -114,7 +117,8 @@
 //         void init(int i);
 //     };
 //
-//     SUBSTATE(StateB, Super) {
+//     SUBSTATE(StateB, Super)
+//     {
 //         STATE(StateB)
 //
 //         void event2();
@@ -141,7 +145,8 @@
 //     void StateB::event2() { setState<StateA>(); }
 // }
 //
-// int main() {
+// int main()
+// {
 //     Macho::Machine<Example::Top> m;
 //     m->event1();
 //     m->event2();

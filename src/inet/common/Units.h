@@ -1372,7 +1372,8 @@ typedef value<double, units::bakers_dozen> bakers_dozen;
 typedef value<double, units::ppm> ppm;
 
 template<typename Value, typename Unit>
-std::string unit2string(const value<Value, Unit>& value) {
+std::string unit2string(const value<Value, Unit>& value)
+{
     std::stringstream ss;
     ss << value;
     return ss.str();
@@ -1381,7 +1382,8 @@ std::string unit2string(const value<Value, Unit>& value) {
 } // namespace values
 
 template <typename T>
-bool isDivisibleBy8(T value) {
+bool isDivisibleBy8(T value)
+{
     if constexpr (std::is_integral_v<T>) return value % 8 == 0;
     else if constexpr (std::is_floating_point_v<T>) return std::fmod(value, 8.0) == 0.0;
     else return false;

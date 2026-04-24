@@ -189,9 +189,11 @@ inline bool operator||(const Int128& a, const Int128& b)
 }
 
 #ifdef __GNUC__
-// inline Int128 operator <? (const Int128& a, const Int128& b) {
+// inline Int128 operator <? (const Int128& a, const Int128& b)
+// {
 //     return (a < b) ? a : b; }
-// inline Int128 operator >? (const Int128& a, const Int128& b) {
+// inline Int128 operator >? (const Int128& a, const Int128& b)
+// {
 //     return (a < b) ? b : a; }
 #endif // ifdef __GNUC__
 

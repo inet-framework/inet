@@ -223,7 +223,8 @@ template<typename X, typename Y>
 const LineardbInterpolator<X, Y> LineardbInterpolator<X, Y>::singleton;
 
 template<typename X, typename Y>
-const IInterpolator<X, Y> *createInterpolator(const char *text) {
+const IInterpolator<X, Y> *createInterpolator(const char *text)
+{
     if (!strcmp("either", text))
         return &EitherInterpolator<X, Y>::singleton;
     else if (!strcmp("left", text))

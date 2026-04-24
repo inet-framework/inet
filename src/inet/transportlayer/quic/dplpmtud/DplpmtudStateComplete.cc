@@ -12,16 +12,19 @@
 namespace inet {
 namespace quic {
 
-DplpmtudStateComplete::DplpmtudStateComplete(Dplpmtud *context) : DplpmtudState(context) {
+DplpmtudStateComplete::DplpmtudStateComplete(Dplpmtud *context) : DplpmtudState(context)
+{
     start();
 }
-DplpmtudStateComplete::~DplpmtudStateComplete() {
+DplpmtudStateComplete::~DplpmtudStateComplete()
+{
     if (raiseTimer != nullptr) {
         delete raiseTimer;
     }
 }
 
-void DplpmtudStateComplete::start() {
+void DplpmtudStateComplete::start()
+{
     probedSize = 0;
     raiseTimer = nullptr;
     context->resetMinPmtu();
@@ -36,7 +39,8 @@ void DplpmtudStateComplete::start() {
     }
 }
 
-DplpmtudState *DplpmtudStateComplete::onProbeAcked(int ackedProbeSize) {
+DplpmtudState *DplpmtudStateComplete::onProbeAcked(int ackedProbeSize)
+{
     if (ackedProbeSize <= context->getPmtu()) {
         return this;
     }
@@ -51,7 +55,8 @@ DplpmtudState *DplpmtudStateComplete::onProbeAcked(int ackedProbeSize) {
     return this;
 }
 
-DplpmtudState *DplpmtudStateComplete::onProbeLost(int lostProbeSize) {
+DplpmtudState *DplpmtudStateComplete::onProbeLost(int lostProbeSize)
+{
     if (lostProbeSize != probedSize) {
         return this;
     }
@@ -66,7 +71,8 @@ DplpmtudState *DplpmtudStateComplete::onProbeLost(int lostProbeSize) {
     return this;
 }
 
-DplpmtudState *DplpmtudStateComplete::onPtbReceived(int ptbMtu) {
+DplpmtudState *DplpmtudStateComplete::onPtbReceived(int ptbMtu)
+{
     EV_DEBUG << "DPLPMTUD in COMPLETE: PTB received" << endl;
 
     if (ptbMtu < context->getPmtu()) {
@@ -97,7 +103,8 @@ DplpmtudState *DplpmtudStateComplete::onPtbReceived(int ptbMtu) {
     return newState(new DplpmtudStateSearch(context));
 }
 
-DplpmtudState *DplpmtudStateComplete::onPmtuInvalid(int largestAckedSinceLoss) {
+DplpmtudState *DplpmtudStateComplete::onPmtuInvalid(int largestAckedSinceLoss)
+{
     int currentPmtu = context->getPmtu();
     EV_DEBUG << "DPLPMTUD in COMPLETE: PMTU reported invalid with largestAckedSinceLoss=" << largestAckedSinceLoss << ". Set maxPmtu=" << currentPmtu;
     context->setMaxPmtu(currentPmtu);
@@ -113,7 +120,8 @@ DplpmtudState *DplpmtudStateComplete::onPmtuInvalid(int largestAckedSinceLoss) {
     }
 }
 
-void DplpmtudStateComplete::onRaiseTimeout() {
+void DplpmtudStateComplete::onRaiseTimeout()
+{
     probedSize = context->getNextLargerPmtu();
     probeCount = 0;
     EV_DEBUG << "DPLPMTUD in COMPLETE: raise timer fired, send probe for " << probedSize << "B" << endl;

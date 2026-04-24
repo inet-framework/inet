@@ -65,7 +65,8 @@ void InitialConnectionState::processCryptoFrame(const Ptr<const CryptoFrameHeade
     }
 }
 
-ConnectionState *InitialConnectionState::processInitialPacket(const Ptr<const InitialPacketHeader>& packetHeader, Packet *pkt) {
+ConnectionState *InitialConnectionState::processInitialPacket(const Ptr<const InitialPacketHeader>& packetHeader, Packet *pkt)
+{
     EV_DEBUG << "processInitialPacket in " << name << endl;
 
     ackElicitingPacket = false;

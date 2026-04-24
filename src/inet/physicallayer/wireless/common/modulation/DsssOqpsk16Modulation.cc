@@ -22,7 +22,8 @@ DsssOqpsk16Modulation::DsssOqpsk16Modulation() :
 {
 }
 
-DsssOqpsk16Modulation::~DsssOqpsk16Modulation() {
+DsssOqpsk16Modulation::~DsssOqpsk16Modulation()
+{
     delete constellation;
 }
 

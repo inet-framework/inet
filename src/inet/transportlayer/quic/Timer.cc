@@ -10,12 +10,14 @@
 namespace inet {
 namespace quic {
 
-Timer::Timer(Quic *quicSimpleMod, cMessage *msg) {
+Timer::Timer(Quic *quicSimpleMod, cMessage *msg)
+{
     this->quicSimpleMod = quicSimpleMod;
     timerMessage = msg;
 }
 
-Timer::~Timer() {
+Timer::~Timer()
+{
     quicSimpleMod->cancelAndDelete(timerMessage);
 }
 

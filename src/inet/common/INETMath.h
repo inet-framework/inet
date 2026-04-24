@@ -191,7 +191,8 @@ inline double rad2deg(double rad) { return rad * 180 / M_PI; }
  * Implementation of the n choose k (binomial coefficient) function, from the MiXiM Framework
  * Author Karl Wessel
  */
-inline double n_choose_k(int n, int k) {
+inline double n_choose_k(int n, int k)
+{
     if (n < k)
         return 0.0;
 
@@ -213,7 +214,8 @@ inline double n_choose_k(int n, int k) {
  * See 'Not a number' section at https://2pi.dk/2016/05/ieee-min-max
  */
 template<typename T>
-inline const T minnan(const T& a, const T& b) {
+inline const T minnan(const T& a, const T& b)
+{
 static_assert(!std::is_integral<T>::value, "minnan() is only meant for doubles and double based units, use std::min() for integers");
     if (a < b)
         return a;
@@ -231,7 +233,8 @@ static_assert(!std::is_integral<T>::value, "minnan() is only meant for doubles a
  * See 'Not a number' section at https://2pi.dk/2016/05/ieee-min-max
  */
 template<typename T>
-inline const T maxnan(const T& a, const T& b) {
+inline const T maxnan(const T& a, const T& b)
+{
 static_assert(!std::is_integral<T>::value, "maxnan() is only meant for doubles and double based units, use std::max() for integers");
     if (a > b)
         return a;

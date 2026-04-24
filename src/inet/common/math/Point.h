@@ -80,7 +80,8 @@ template<int DIMS, int SIZE>
 using make_bits_to_indices_sequence = typename bits_to_indices_sequence<DIMS, SIZE>::type;
 
 template<typename S, size_t ... SIS, typename D, size_t ... DIS>
-void copyTupleElements(const S& source, std::integer_sequence<size_t, SIS ...>, D& destination, std::integer_sequence<size_t, DIS ...>) {
+void copyTupleElements(const S& source, std::integer_sequence<size_t, SIS ...>, D& destination, std::integer_sequence<size_t, DIS ...>)
+{
     (void)std::initializer_list<double>{ toDouble(std::get<DIS>(destination) = std::get<SIS>(source)) ... };
 }
 
@@ -200,17 +201,20 @@ class INET_API Point : public std::tuple<T ...>
 namespace internal {
 
 template<std::size_t ... NS, typename T, typename... TS>
-inline Point<TS ...> tailImpl(std::index_sequence<NS ...>, const Point<T, TS ...>& p) {
+inline Point<TS ...> tailImpl(std::index_sequence<NS ...>, const Point<T, TS ...>& p)
+{
     return Point<TS ...>(std::get<NS + 1u>(p) ...);
 }
 
 template<typename... TS1, size_t ... IS1, typename... TS2, size_t ... IS2>
-inline Point<TS1 ..., TS2 ...> concatImpl(const Point<TS1 ...>& p1, std::integer_sequence<size_t, IS1 ...>, const Point<TS2 ...>& p2, std::integer_sequence<size_t, IS2 ...>) {
+inline Point<TS1 ..., TS2 ...> concatImpl(const Point<TS1 ...>& p1, std::integer_sequence<size_t, IS1 ...>, const Point<TS2 ...>& p2, std::integer_sequence<size_t, IS2 ...>)
+{
     return Point<TS1 ..., TS2 ...>{ (std::get<IS1>(p1)) ..., (std::get<IS2>(p2)) ... };
 }
 
 template<typename... T, size_t ... IS>
-inline std::ostream& print(std::ostream& os, const Point<T ...>& p, std::integer_sequence<size_t, IS...>) {
+inline std::ostream& print(std::ostream& os, const Point<T ...>& p, std::integer_sequence<size_t, IS...>)
+{
     (void)std::initializer_list<bool>{ (os << (IS == 0 ? "" : ", ") << std::get<IS>(p), true) ... };
     return os;
 }
@@ -219,29 +223,34 @@ inline std::ostream& print(std::ostream& os, const Point<T ...>& p, std::integer
 
 /// Returns the first coordinate of p.
 template<typename T, typename... TS>
-T head(const Point<T, TS ...>& p) {
+T head(const Point<T, TS ...>& p)
+{
     return std::get<0>(p);
 }
 
 /// Returns all but the first coordinate of p.
 template<typename T, typename... TS>
-Point<TS ...> tail(const Point<T, TS ...>& p) {
+Point<TS ...> tail(const Point<T, TS ...>& p)
+{
     return internal::tailImpl(std::make_index_sequence<sizeof...(TS)>(), p);
 }
 
 /// Returns a point by concatenating the coordinates of p1 and p2.
 template<typename... TS1, typename... TS2>
-Point<TS1 ..., TS2 ...> concat(const Point<TS1 ...>& p1, const Point<TS2 ...>& p2) {
+Point<TS1 ..., TS2 ...> concat(const Point<TS1 ...>& p1, const Point<TS2 ...>& p2)
+{
     return internal::concatImpl(p1, std::index_sequence_for<TS1 ...>{}, p2, std::index_sequence_for<TS2 ...>{});
 }
 
 template<typename T0>
-inline std::ostream& operator<<(std::ostream& os, const Point<T0>& p) {
+inline std::ostream& operator<<(std::ostream& os, const Point<T0>& p)
+{
     return os << std::get<0>(p);
 }
 
 template<typename... T>
-inline std::ostream& operator<<(std::ostream& os, const Point<T ...>& p) {
+inline std::ostream& operator<<(std::ostream& os, const Point<T ...>& p)
+{
     os << "(";
     internal::print(os, p, std::index_sequence_for<T ...>{});
     os << ")";

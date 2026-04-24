@@ -90,7 +90,8 @@ INET_API cObject *createOne(const char *className, const char *defaultNamespace 
  * it will be nullptr in the returned copy).
  */
 template<typename T>
-T *dupPacketAndControlInfo(T *packet) {
+T *dupPacketAndControlInfo(T *packet)
+{
     T *copy = packet->dup();
     if (cObject *ctrl = packet->getControlInfo())
         copy->setControlInfo(ctrl->dup());

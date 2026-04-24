@@ -10,12 +10,14 @@
 namespace inet {
 namespace quic {
 
-ConnectionId::ConnectionId(uint64_t id, uint8_t length) {
+ConnectionId::ConnectionId(uint64_t id, uint8_t length)
+{
     this->id = id;
     this->length = length;
 }
 
-ConnectionId::ConnectionId(uint64_t id) {
+ConnectionId::ConnectionId(uint64_t id)
+{
     this->id = id;
     length = 1;
     if (id > 0) {

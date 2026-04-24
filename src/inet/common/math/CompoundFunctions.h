@@ -68,7 +68,8 @@ class INET_API DomainLimitedFunction : public FunctionBase<R, D>
 };
 
 template<typename R, typename D>
-Ptr<const DomainLimitedFunction<R, D>> makeFirstQuadrantLimitedFunction(const Ptr<const IFunction<R, D>>& f) {
+Ptr<const DomainLimitedFunction<R, D>> makeFirstQuadrantLimitedFunction(const Ptr<const IFunction<R, D>>& f)
+{
     auto m = (1 << std::tuple_size<typename D::P::type>::value) - 1;
     typename D::I i(D::P::getZero(), D::P::getUpperBounds(), m, 0, 0);
     return makeShared<DomainLimitedFunction<R, D>>(f, i);
@@ -136,7 +137,8 @@ class INET_API DomainShiftedFunction : public FunctionBase<R, D>
 //    virtual Interval<R> getRange() const override { return range; }
 //    virtual typename D::I getDomain() const override { return domain; }
 //
-//    virtual R getValue(const typename D::P& p) const override {
+//    virtual R getValue(const typename D::P& p) const override
+//    {
 //        if (domain.contains(p))
 //            return function->getValue(p);
 //        else
@@ -847,7 +849,8 @@ class INET_API IntegratedFunction : public FunctionBase<RI, DI>
 };
 
 template<typename R, typename D, int DIMS, typename RI, typename DI>
-Ptr<const IFunction<RI, DI>> integrate(const Ptr<const IFunction<R, D>>& f) {
+Ptr<const IFunction<RI, DI>> integrate(const Ptr<const IFunction<R, D>>& f)
+{
     return makeShared<IntegratedFunction<R, D, DIMS, RI, DI>>(f);
 }
 

@@ -23,7 +23,8 @@ namespace eigrp {
 
 using namespace std;
 
-EigrpDeviceConfigurator::EigrpDeviceConfigurator() {
+EigrpDeviceConfigurator::EigrpDeviceConfigurator()
+{
 //    deviceId = nullptr;
 //    deviceType = nullptr;
     configFile = nullptr;
@@ -34,13 +35,15 @@ EigrpDeviceConfigurator::EigrpDeviceConfigurator(cXMLElement *confFile, IInterfa
 {
 }
 
-EigrpDeviceConfigurator::~EigrpDeviceConfigurator() {
+EigrpDeviceConfigurator::~EigrpDeviceConfigurator()
+{
 //    deviceId = nullptr;
 //    deviceType = nullptr;
     configFile = nullptr;
 }
 
-cXMLElement *EigrpDeviceConfigurator::GetInterface(cXMLElement *iface, cXMLElement *device) {
+cXMLElement *EigrpDeviceConfigurator::GetInterface(cXMLElement *iface, cXMLElement *device)
+{
 
     // initial call of the method - find <Interfaces> and get first "Interface" node
     if (device != nullptr) {
@@ -63,7 +66,8 @@ cXMLElement *EigrpDeviceConfigurator::GetInterface(cXMLElement *iface, cXMLEleme
     return iface;
 }
 
-cXMLElement *EigrpDeviceConfigurator::GetIPv6Address(cXMLElement *addr, cXMLElement *iface) {
+cXMLElement *EigrpDeviceConfigurator::GetIPv6Address(cXMLElement *addr, cXMLElement *iface)
+{
 
     // initial call of the method - get first "Ipv6Address" child node
     if (iface != nullptr) {
@@ -84,7 +88,8 @@ cXMLElement *EigrpDeviceConfigurator::GetIPv6Address(cXMLElement *addr, cXMLElem
 /*
  * A utility method for proper str -> int conversion with error checking.
  */
-bool EigrpDeviceConfigurator::Str2Int(int *retValue, const char *str) {
+bool EigrpDeviceConfigurator::Str2Int(int *retValue, const char *str)
+{
 
     if (retValue == nullptr || str == nullptr) {
         return false;
@@ -104,7 +109,8 @@ bool EigrpDeviceConfigurator::Str2Int(int *retValue, const char *str) {
     return true;
 }
 
-bool EigrpDeviceConfigurator::Str2Bool(bool *ret, const char *str) {
+bool EigrpDeviceConfigurator::Str2Bool(bool *ret, const char *str)
+{
 
     if ((strcmp(str, "yes") == 0)
         || (strcmp(str, "enabled") == 0)

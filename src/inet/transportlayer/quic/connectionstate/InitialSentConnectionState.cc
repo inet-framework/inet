@@ -10,7 +10,8 @@
 namespace inet {
 namespace quic {
 
-ConnectionState *InitialSentConnectionState::processInitialPacket(const Ptr<const InitialPacketHeader>& packetHeader, Packet *pkt) {
+ConnectionState *InitialSentConnectionState::processInitialPacket(const Ptr<const InitialPacketHeader>& packetHeader, Packet *pkt)
+{
     EV_DEBUG << "processInitialPacket in " << name << endl;
 
     ackElicitingPacket = false;
