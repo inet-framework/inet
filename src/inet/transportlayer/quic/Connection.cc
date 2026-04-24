@@ -23,7 +23,8 @@
 namespace inet {
 namespace quic {
 
-Connection::Connection(Quic *quicSimpleMod, UdpSocket *udpSocket, AppSocket *appSocket, L3Address remoteAddr, uint16_t remotePort, uint64_t srcConnectionId) {
+Connection::Connection(Quic *quicSimpleMod, UdpSocket *udpSocket, AppSocket *appSocket, L3Address remoteAddr, uint16_t remotePort, uint64_t srcConnectionId)
+{
     this->quicSimpleMod = quicSimpleMod;
     this->udpSocket = udpSocket;
     this->appSocket = appSocket;
@@ -89,7 +90,8 @@ Connection::Connection(Quic *quicSimpleMod, UdpSocket *udpSocket, AppSocket *app
     connectionFlowControlResponder = new ConnectionFlowControlResponder(this, localTransportParameters->initialMaxData, maxDataFrameThreshold, roundConsumedDataValue, stats);
 }
 
-Connection::~Connection() {
+Connection::~Connection()
+{
     if (!closed) {
         delete reliabilityManager;
         delete receivedPacketsAccountants[PacketNumberSpace::ApplicationData];
@@ -345,17 +347,20 @@ void Connection::sendProbePacket(uint ptoCount)
     sendPacket(packet, PacketNumberSpace::ApplicationData);
 }
 
-void Connection::sendClientInitialPacket(uint32_t token) {
+void Connection::sendClientInitialPacket(uint32_t token)
+{
     int maxQuicPacketSize = path->getMaxQuicPacketSize();
     sendPacket(packetBuilder->buildClientInitialPacket(maxQuicPacketSize, localTransportParameters, token), PacketNumberSpace::Initial);
 }
 
-void Connection::sendServerInitialPacket() {
+void Connection::sendServerInitialPacket()
+{
     int maxQuicPacketSize = path->getMaxQuicPacketSize();
     sendPacket(packetBuilder->buildServerInitialPacket(maxQuicPacketSize), PacketNumberSpace::Initial);
 }
 
-void Connection::sendHandshakePacket(bool includeTransportParamters) {
+void Connection::sendHandshakePacket(bool includeTransportParamters)
+{
     int maxQuicPacketSize = path->getMaxQuicPacketSize();
 
     QuicPacket *packet;
@@ -421,41 +426,48 @@ void Connection::accountReceivedPacket(uint64_t packetNumber, bool ackEliciting,
     }
 }
 
-Timer *Connection::createTimer(TimerType kind, std::string name) {
+Timer *Connection::createTimer(TimerType kind, std::string name)
+{
     cMessage *msg = new cMessage(name.c_str(), kind);
     return createTimer(msg);
 }
 
-Timer *Connection::createTimer(cMessage *msg) {
+Timer *Connection::createTimer(cMessage *msg)
+{
     msg->setContextPointer(this);
     return new Timer(quicSimpleMod, msg);
 }
 
-void Connection::onMaxDataFrameReceived(uint64_t maxData){
+void Connection::onMaxDataFrameReceived(uint64_t maxData)
+{
     connectionFlowController->onMaxFrameReceived(maxData);
     // MAX_DATA frame might enable us to send packets, when we were previously blocked by the flow control
     sendPackets();
 }
 
-void Connection::onMaxDataFrameLost(){
+void Connection::onMaxDataFrameLost()
+{
     auto maxDataFrame = connectionFlowControlResponder->onMaxDataFrameLost();
     controlQueue.push_back(maxDataFrame);
     sendPackets(); // send retransmission of FC update immediately
 }
 
-void Connection::onMaxStreamDataFrameReceived(uint64_t streamId, uint64_t maxStreamData){
+void Connection::onMaxStreamDataFrameReceived(uint64_t streamId, uint64_t maxStreamData)
+{
     Stream *stream = findOrCreateStream(streamId);
     stream->onMaxStreamDataFrameReceived(maxStreamData);
     // MAX_STREAM_DATA frame might enable us to send packets, when we were previously blocked by the flow control
     sendPackets();
 }
 
-void Connection::onStreamDataBlockedFrameReceived(uint64_t streamId, uint64_t streamDataLimit){
+void Connection::onStreamDataBlockedFrameReceived(uint64_t streamId, uint64_t streamDataLimit)
+{
     Stream *stream = findOrCreateStream(streamId);
     stream->onDataBlockedFrameReceived(streamDataLimit);
 }
 
-void Connection::onDataBlockedFrameReceived(uint64_t dataLimit){
+void Connection::onDataBlockedFrameReceived(uint64_t dataLimit)
+{
     connectionFlowControlResponder->onDataBlockedFrameReceived(dataLimit);
 }
 

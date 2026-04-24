@@ -13,7 +13,8 @@ namespace quic {
 
 #define minvalue(x,y,z) (x < y ? (x < z ? x : z) : (y < z ? y : z))
 
-Stream::Stream(uint64_t id, Connection *connection, Statistics *connStats) {
+Stream::Stream(uint64_t id, Connection *connection, Statistics *connStats)
+{
     this->id = id;
     this->connection = connection;
     this->streamCreatedTime = simTime();
@@ -28,7 +29,8 @@ Stream::Stream(uint64_t id, Connection *connection, Statistics *connStats) {
     receiveQueue = new StreamRcvQueue(this, stats);
 }
 
-Stream::~Stream() {
+Stream::~Stream()
+{
     delete streamFlowController;
     delete streamFlowControlResponder;
     delete receiveQueue;
@@ -206,7 +208,8 @@ void Stream::processFlowControlResponder(uint64_t dataSize)
      }
 }
 
-void Stream::updateHighestRecievedOffset(uint64_t offset){
+void Stream::updateHighestRecievedOffset(uint64_t offset)
+{
     streamFlowControlResponder->updateHighestRecievedOffset(offset);
 }
 

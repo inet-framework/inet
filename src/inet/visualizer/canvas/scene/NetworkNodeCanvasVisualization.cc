@@ -114,47 +114,58 @@ void NetworkNodeCanvasVisualization::setAnnotationVisible(cFigure *figure, bool 
     isLayoutInvalid = true;
 }
 
-static cFigure::Point getTopLeft(const cFigure::Rectangle& rc) {
+static cFigure::Point getTopLeft(const cFigure::Rectangle& rc)
+{
     return cFigure::Point(rc.x, rc.y);
 }
 
-static cFigure::Point getTopCenter(const cFigure::Rectangle& rc) {
+static cFigure::Point getTopCenter(const cFigure::Rectangle& rc)
+{
     return cFigure::Point(rc.x + rc.width / 2, rc.y);
 }
 
-static cFigure::Point getTopRight(const cFigure::Rectangle& rc) {
+static cFigure::Point getTopRight(const cFigure::Rectangle& rc)
+{
     return cFigure::Point(rc.x + rc.width, rc.y);
 }
 
-static cFigure::Point getCenterLeft(const cFigure::Rectangle& rc) {
+static cFigure::Point getCenterLeft(const cFigure::Rectangle& rc)
+{
     return cFigure::Point(rc.x, rc.y + rc.height / 2);
 }
 
-static cFigure::Point getCenterCenter(const cFigure::Rectangle& rc) {
+static cFigure::Point getCenterCenter(const cFigure::Rectangle& rc)
+{
     return cFigure::Point(rc.x + rc.width / 2, rc.y + rc.height / 2);
 }
 
-static cFigure::Point getCenterRight(const cFigure::Rectangle& rc) {
+static cFigure::Point getCenterRight(const cFigure::Rectangle& rc)
+{
     return cFigure::Point(rc.x + rc.width, rc.y + rc.height / 2);
 }
 
-static cFigure::Point getBottomLeft(const cFigure::Rectangle& rc) {
+static cFigure::Point getBottomLeft(const cFigure::Rectangle& rc)
+{
     return cFigure::Point(rc.x, rc.y + rc.height);
 }
 
-static cFigure::Point getBottomCenter(const cFigure::Rectangle& rc) {
+static cFigure::Point getBottomCenter(const cFigure::Rectangle& rc)
+{
     return cFigure::Point(rc.x + rc.width / 2, rc.y + rc.height);
 }
 
-static cFigure::Point getBottomRight(const cFigure::Rectangle& rc) {
+static cFigure::Point getBottomRight(const cFigure::Rectangle& rc)
+{
     return cFigure::Point(rc.x + rc.width, rc.y + rc.height);
 }
 
-static bool containsPoint(const cFigure::Rectangle& rc, const cFigure::Point& p) {
+static bool containsPoint(const cFigure::Rectangle& rc, const cFigure::Point& p)
+{
     return rc.x < p.x && p.x < rc.x + rc.width && rc.y < p.y && p.y < rc.y + rc.height;
 }
 
-static bool intersectsRectangle(const cFigure::Rectangle& rc1, const cFigure::Rectangle& rc2) {
+static bool intersectsRectangle(const cFigure::Rectangle& rc1, const cFigure::Rectangle& rc2)
+{
     return rc1.x < rc2.x + rc2.width && rc1.x + rc1.width > rc2.x &&
            rc1.y < rc2.y + rc2.height && rc1.y + rc1.height > rc2.y;
 }
@@ -173,7 +184,8 @@ static void pushUnlessContains(std::vector<cFigure::Point>& pts, const std::vect
     pts.push_back(pt);
 }
 
-static double getDistance(const cFigure::Rectangle& rc, const cFigure::Point& pt) {
+static double getDistance(const cFigure::Rectangle& rc, const cFigure::Point& pt)
+{
     if (pt.x <= rc.x && pt.y <= rc.y)
         return pt.distanceTo(getTopLeft(rc));
     else if (rc.x <= pt.x && pt.x <= rc.x + rc.width && pt.y <= rc.y)
@@ -194,7 +206,8 @@ static double getDistance(const cFigure::Rectangle& rc, const cFigure::Point& pt
         return 0;
 }
 
-static double getClosestPlacementDistance(const cFigure::Rectangle& rc, Placement placement, const cFigure::Point& pt) {
+static double getClosestPlacementDistance(const cFigure::Rectangle& rc, Placement placement, const cFigure::Point& pt)
+{
     double size = 1000;
     double distance = std::numeric_limits<double>::infinity();
     if (placement & PLACEMENT_TOP_LEFT)
@@ -216,7 +229,8 @@ static double getClosestPlacementDistance(const cFigure::Rectangle& rc, Placemen
     return distance;
 }
 
-bool NetworkNodeCanvasVisualization::Annotation::comparePlacementPriority(const Annotation& a1, const Annotation& a2) {
+bool NetworkNodeCanvasVisualization::Annotation::comparePlacementPriority(const Annotation& a1, const Annotation& a2)
+{
     return a1.placementPriority < a2.placementPriority;
 }
 

@@ -61,7 +61,8 @@ std::string NetworkInterfaceChangeDetails::str() const
     return out.str();
 }
 
-bool NetworkInterface::LocalGate::deliver(cMessage *msg, const SendOptions &options, simtime_t t) {
+bool NetworkInterface::LocalGate::deliver(cMessage *msg, const SendOptions &options, simtime_t t)
+{
     if (!networkInterface->isUp()) {
         if (networkInterface->upperLayerIn == this) {
             auto packet = check_and_cast<Packet*>(msg);
@@ -593,7 +594,8 @@ void NetworkInterface::changeMulticastGroupMembership(const L3Address& multicast
     }
 }
 
-Ipv4Address NetworkInterface::getIpv4Address() const {
+Ipv4Address NetworkInterface::getIpv4Address() const
+{
 #ifdef INET_WITH_IPv4
     auto ipv4data = findProtocolData<Ipv4InterfaceData>();
     return ipv4data == nullptr ? Ipv4Address::UNSPECIFIED_ADDRESS : ipv4data->getIPAddress();
@@ -602,7 +604,8 @@ Ipv4Address NetworkInterface::getIpv4Address() const {
 #endif // ifdef INET_WITH_IPv4
 }
 
-Ipv4Address NetworkInterface::getIpv4Netmask() const {
+Ipv4Address NetworkInterface::getIpv4Netmask() const
+{
 #ifdef INET_WITH_IPv4
     auto ipv4data = findProtocolData<Ipv4InterfaceData>();
     return ipv4data == nullptr ? Ipv4Address::UNSPECIFIED_ADDRESS : ipv4data->getNetmask();

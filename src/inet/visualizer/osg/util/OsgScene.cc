@@ -12,7 +12,8 @@ namespace inet {
 namespace osg {
 
 template<typename T>
-void FindNodesVisitor<T>::apply(Node& node) {
+void FindNodesVisitor<T>::apply(Node& node)
+{
     T *result = dynamic_cast<T *>(&node);
     if (result)
         foundNodes.push_back(result);

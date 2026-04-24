@@ -19,7 +19,8 @@
 namespace inet {
 namespace quic {
 
-Dplpmtud::Dplpmtud(Path *path, int mtu, int overhead, Statistics *stats) {
+Dplpmtud::Dplpmtud(Path *path, int mtu, int overhead, Statistics *stats)
+{
     this->path = path;
     this->overhead = overhead;
     this->stats = stats;
@@ -39,13 +40,15 @@ Dplpmtud::Dplpmtud(Path *path, int mtu, int overhead, Statistics *stats) {
     pmtuNumOfProbesBeforeAckStat = stats->createStatisticEntry("dplpmtudNumOfProbesBeforeAck");
 }
 
-Dplpmtud::~Dplpmtud() {
+Dplpmtud::~Dplpmtud()
+{
     if (state != nullptr) {
         delete state;
     }
 }
 
-void Dplpmtud::start(bool probeBase) {
+void Dplpmtud::start(bool probeBase)
+{
     if (probeBase) {
         state = new DplpmtudStateBase(this);
     } else {
@@ -63,7 +66,8 @@ void Dplpmtud::readParameters(cModule *module)
     this->maxProbes = module->par("dplpmtudMaxProbes");
 }
 
-void Dplpmtud::determinePmtuBounds(int mtu) {
+void Dplpmtud::determinePmtuBounds(int mtu)
+{
     maxPmtu = mtu;
 
     L3Address remoteAddr = path->getRemoteAddr();
@@ -83,18 +87,21 @@ void Dplpmtud::determinePmtuBounds(int mtu) {
     initialMaxPmtu = maxPmtu;
 }
 
-int Dplpmtud::getNextLargerPmtu() {
+int Dplpmtud::getNextLargerPmtu()
+{
     if (pmtu == maxPmtu) {
         return 0;
     }
     return std::min(pmtu + step, maxPmtu);
 }
 
-simtime_t Dplpmtud::getRaiseTime() {
+simtime_t Dplpmtud::getRaiseTime()
+{
     return simTime() + RAISE_TIMEOUT;
 }
 
-DplpmtudCandidateSequence *Dplpmtud::createSearchAlgorithm() {
+DplpmtudCandidateSequence *Dplpmtud::createSearchAlgorithm()
+{
     if (candidateSequence == "Up") {
         return new DplpmtudCandidateSequenceUp(pmtu, maxPmtu, step);
     } else if (candidateSequence == "Down") {
@@ -112,15 +119,18 @@ DplpmtudCandidateSequence *Dplpmtud::createSearchAlgorithm() {
     }
 }
 
-void Dplpmtud::onProbePacketAcked(int quicPacketSize) {
+void Dplpmtud::onProbePacketAcked(int quicPacketSize)
+{
     state = state->onProbeAcked(quicPacketSize + overhead);
 }
 
-void Dplpmtud::onProbePacketLost(int quicPacketSize) {
+void Dplpmtud::onProbePacketLost(int quicPacketSize)
+{
     state = state->onProbeLost(quicPacketSize + overhead);
 }
 
-void Dplpmtud::onPtbReceived(int quicPacketSize, int ptbMtu) {
+void Dplpmtud::onPtbReceived(int quicPacketSize, int ptbMtu)
+{
     if (!usePtb) {
         return;
     }
@@ -141,59 +151,71 @@ void Dplpmtud::onPtbReceived(int quicPacketSize, int ptbMtu) {
     state = state->onPtbReceived(ptbMtu);
 }
 
-void Dplpmtud::onRaiseTimeout() {
+void Dplpmtud::onRaiseTimeout()
+{
     state->onRaiseTimeout();
 }
 
-void Dplpmtud::prepareProbe(int probeSize) {
+void Dplpmtud::prepareProbe(int probeSize)
+{
     this->probeSize = probeSize - overhead;
 }
 
-void Dplpmtud::sendProbe(int probeSize) {
+void Dplpmtud::sendProbe(int probeSize)
+{
     prepareProbe(probeSize);
     doSendProbe = true;
     path->getConnection()->sendPackets();
 }
 
-void Dplpmtud::setPmtu(int pmtu) {
+void Dplpmtud::setPmtu(int pmtu)
+{
     this->pmtu = pmtu;
     stats->getMod()->emit(pmtuStat, pmtu);
 }
 
-int Dplpmtud::getPlpmtu() {
+int Dplpmtud::getPlpmtu()
+{
     return pmtu - overhead;
 }
 
-int Dplpmtud::getMinPlpmtu() {
+int Dplpmtud::getMinPlpmtu()
+{
     return minPmtu - overhead;
 }
 
-void Dplpmtud::probePacketBuilt() {
+void Dplpmtud::probePacketBuilt()
+{
     doSendProbe = false;
 }
 
-void Dplpmtud::onPmtuInvalid(int largestAckedSinceLoss) {
+void Dplpmtud::onPmtuInvalid(int largestAckedSinceLoss)
+{
     largestAckedSinceLoss += overhead;
     stats->getMod()->emit(pmtuInvalidSignalsStat, largestAckedSinceLoss);
     state = state->onPmtuInvalid(largestAckedSinceLoss);
 }
 
-void Dplpmtud::giveProbeSendPermission(int probeSizeLimit) {
+void Dplpmtud::giveProbeSendPermission(int probeSizeLimit)
+{
     state->onGotProbeSendPermission(probeSizeLimit, overhead);
 }
 
-bool Dplpmtud::canSendProbe(int probeSizeLimit) {
+bool Dplpmtud::canSendProbe(int probeSizeLimit)
+{
     return state != nullptr && state->canSendAnotherProbePacket(probeSizeLimit, overhead);
 }
 
-void Dplpmtud::initPmtuValidator() {
+void Dplpmtud::initPmtuValidator()
+{
     if (!usePmtuValidator) {
         return;
     }
     path->setPmtuValidator(new PmtuValidator(path, stats));
 }
 
-void Dplpmtud::destroyPmtuValidator() {
+void Dplpmtud::destroyPmtuValidator()
+{
     if (!usePmtuValidator) {
         return;
     }

@@ -13,12 +13,14 @@
 namespace inet {
 namespace quic {
 
-DplpmtudStateSearch::DplpmtudStateSearch(Dplpmtud *context) : DplpmtudState(context) {
+DplpmtudStateSearch::DplpmtudStateSearch(Dplpmtud *context) : DplpmtudState(context)
+{
     testedCandidates.clear();
     networkLoad = 0;
     start();
 }
-DplpmtudStateSearch::~DplpmtudStateSearch() {
+DplpmtudStateSearch::~DplpmtudStateSearch()
+{
     delete sequence;
     if (probeTimer != nullptr) {
         delete probeTimer;
@@ -28,7 +30,8 @@ DplpmtudStateSearch::~DplpmtudStateSearch() {
     context->stats->getMod()->emit(context->networkLoadStat, networkLoad);
 }
 
-void DplpmtudStateSearch::start() {
+void DplpmtudStateSearch::start()
+{
     sequence = context->createSearchAlgorithm();
     probeTimer = nullptr;
     startSearchTime = simTime();
@@ -39,7 +42,8 @@ void DplpmtudStateSearch::start() {
     sendProbe(probeSize);
 }
 
-DplpmtudState *DplpmtudStateSearch::onProbeAcked(int ackedProbeSize) {
+DplpmtudState *DplpmtudStateSearch::onProbeAcked(int ackedProbeSize)
+{
     EV_DEBUG << "DPLPMTUD in SEARCH: probe for " << ackedProbeSize << "B acked" << endl;
     if (ackedProbeSize < context->getPmtu()) {
         return this;
@@ -83,7 +87,8 @@ DplpmtudState *DplpmtudStateSearch::onProbeAcked(int ackedProbeSize) {
     return this;
 }
 
-DplpmtudState *DplpmtudStateSearch::onProbeLost(int lostProbeSize) {
+DplpmtudState *DplpmtudStateSearch::onProbeLost(int lostProbeSize)
+{
     EV_DEBUG << "DPLPMTUD in SEARCH: probe for " << lostProbeSize << "B lost." << endl;
     DplpmtudProbe *lostProbe = outstandingProbes.getBySize(lostProbeSize);
     if (lostProbe == nullptr) {
@@ -129,7 +134,8 @@ DplpmtudState *DplpmtudStateSearch::onProbeLost(int lostProbeSize) {
     return this;
 }
 
-DplpmtudState *DplpmtudStateSearch::onPtbReceived(int ptbMtu) {
+DplpmtudState *DplpmtudStateSearch::onPtbReceived(int ptbMtu)
+{
     EV_DEBUG << "DPLPMTUD in SEARCH: PTB received" << endl;
 
     if (ptbMtu < context->getPmtu()) {
@@ -158,7 +164,8 @@ DplpmtudState *DplpmtudStateSearch::onPtbReceived(int ptbMtu) {
     return this;
 }
 
-void DplpmtudStateSearch::sendProbe(int probeSize, bool triggerSendRoutine) {
+void DplpmtudStateSearch::sendProbe(int probeSize, bool triggerSendRoutine)
+{
     DplpmtudProbe *oldProbe = outstandingProbes.getBySize(probeSize);
     DplpmtudProbe *newProbe = nullptr;
     if (oldProbe == nullptr) {
@@ -179,16 +186,19 @@ void DplpmtudStateSearch::sendProbe(int probeSize, bool triggerSendRoutine) {
     }
 }
 
-DplpmtudState *DplpmtudStateSearch::onPmtuInvalid(int largestAckedSinceLoss) {
+DplpmtudState *DplpmtudStateSearch::onPmtuInvalid(int largestAckedSinceLoss)
+{
     return newState(new DplpmtudStateBase(context));
 }
 
-void DplpmtudStateSearch::onRaiseTimeout() {
+void DplpmtudStateSearch::onRaiseTimeout()
+{
     throw cRuntimeError("DPLPMTUD: Raise Timeout in search state should not happen");
     //return this;
 }
 
-void DplpmtudStateSearch::updateSmallestExpiredProbeSize() {
+void DplpmtudStateSearch::updateSmallestExpiredProbeSize()
+{
     DplpmtudProbe *probe = outstandingProbes.getSmallestLost();
     if (probe == nullptr) {
         smallestExpiredProbeSize = Dplpmtud::MAX_IP_PACKET_SIZE;
@@ -198,7 +208,8 @@ void DplpmtudStateSearch::updateSmallestExpiredProbeSize() {
     sequence->setSmallestExpiredProbeSize(smallestExpiredProbeSize);
 }
 
-void DplpmtudStateSearch::onGotProbeSendPermission(int probeSizeLimit, int overhead) {
+void DplpmtudStateSearch::onGotProbeSendPermission(int probeSizeLimit, int overhead)
+{
     EV_DEBUG << "DPLPMTUD in SEARCH: got probe send permission for " << probeSizeLimit << "B" << endl;
     int probeSize = 0;
     while ( (probeSize = sequence->getNextCandidate(probeSizeLimit+overhead)) > 0 ) {
@@ -207,7 +218,8 @@ void DplpmtudStateSearch::onGotProbeSendPermission(int probeSizeLimit, int overh
     }
 }
 
-bool DplpmtudStateSearch::canSendAnotherProbePacket(int probeSizeLimit, int overhead) {
+bool DplpmtudStateSearch::canSendAnotherProbePacket(int probeSizeLimit, int overhead)
+{
     EV_DEBUG << "DPLPMTUD in SEARCH: got permission to send another probe packet for " << probeSizeLimit << "B" << endl;
     int probeSize = sequence->getNextCandidate(probeSizeLimit+overhead);
     if (probeSize > 0) {

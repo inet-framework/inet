@@ -2416,7 +2416,8 @@ SctpDataVariables *SctpAssociation::peekAbandonedChunk(const SctpPathVariables *
     return retChunk;
 }
 
-void SctpAssociation::fragmentOutboundDataMsgs() {
+void SctpAssociation::fragmentOutboundDataMsgs()
+{
     cPacketQueue *streamQ = nullptr;
     for (auto iter = sendStreams.begin(); iter != sendStreams.end(); ++iter) {
         SctpSendStream *stream = iter->second;

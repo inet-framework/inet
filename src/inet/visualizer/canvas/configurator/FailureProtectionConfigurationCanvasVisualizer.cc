@@ -16,7 +16,8 @@ namespace visualizer {
 
 Define_Module(FailureProtectionConfigurationCanvasVisualizer);
 
-void FailureProtectionConfigurationCanvasVisualizer::initialize(int stage) {
+void FailureProtectionConfigurationCanvasVisualizer::initialize(int stage)
+{
     TreeCanvasVisualizerBase::initialize(stage);
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {

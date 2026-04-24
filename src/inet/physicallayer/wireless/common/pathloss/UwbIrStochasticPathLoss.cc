@@ -69,7 +69,8 @@ std::ostream& UwbIrStochasticPathLoss::printToStream(std::ostream& stream, int l
     return stream;
 }
 
-double UwbIrStochasticPathLoss::getFDPathLoss(Hz frequency, m distance) const {
+double UwbIrStochasticPathLoss::getFDPathLoss(Hz frequency, m distance) const
+{
     return 0.5 * PL0 * pow((frequency / fc).get<unit>(), -2 * (kappa + 1)) / pow((distance / d0).get<unit>(), pathloss_exponent);
 }
 

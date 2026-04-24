@@ -10,7 +10,8 @@
 namespace inet {
 namespace quic {
 
-QuicStreamFrame::QuicStreamFrame(Stream *stream) {
+QuicStreamFrame::QuicStreamFrame(Stream *stream)
+{
     this->setStream(stream);
 }
 

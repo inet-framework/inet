@@ -21,10 +21,12 @@ namespace eigrp {
 
 Define_Module(EigrpSplitter);
 
-EigrpSplitter::EigrpSplitter() {
+EigrpSplitter::EigrpSplitter()
+{
 }
 
-EigrpSplitter::~EigrpSplitter() {
+EigrpSplitter::~EigrpSplitter()
+{
 }
 
 void EigrpSplitter::initialize(int stage)

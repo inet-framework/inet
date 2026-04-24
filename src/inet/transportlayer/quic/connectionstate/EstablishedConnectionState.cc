@@ -79,7 +79,8 @@ void EstablishedConnectionState::processAckFrame(const Ptr<const AckFrameHeader>
     context->handleAckFrame(frameHeader, pnSpace);
 }
 
-void EstablishedConnectionState::processMaxDataFrame(const Ptr<const MaxDataFrameHeader>& frameHeader){
+void EstablishedConnectionState::processMaxDataFrame(const Ptr<const MaxDataFrameHeader>& frameHeader)
+{
      EV_DEBUG << "processMaxDataFrame in " << name << endl;
      context->onMaxDataFrameReceived(frameHeader->getMaximumData());
 }
@@ -167,7 +168,8 @@ ConnectionState *EstablishedConnectionState::processDplpmtudRaiseTimeout(cMessag
     return this;
 }
 
-ConnectionState *EstablishedConnectionState::processInitialPacket(const Ptr<const InitialPacketHeader>& packetHeader, Packet *pkt) {
+ConnectionState *EstablishedConnectionState::processInitialPacket(const Ptr<const InitialPacketHeader>& packetHeader, Packet *pkt)
+{
     EV_DEBUG << "processInitialPacket in " << name << endl;
 
     ackElicitingPacket = false;
@@ -178,7 +180,8 @@ ConnectionState *EstablishedConnectionState::processInitialPacket(const Ptr<cons
     return this;
 }
 
-ConnectionState *EstablishedConnectionState::processHandshakePacket(const Ptr<const HandshakePacketHeader>& packetHeader, Packet *pkt) {
+ConnectionState *EstablishedConnectionState::processHandshakePacket(const Ptr<const HandshakePacketHeader>& packetHeader, Packet *pkt)
+{
     EV_DEBUG << "processHandshakePacket in " << name << endl;
 
     ackElicitingPacket = false;

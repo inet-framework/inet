@@ -23,20 +23,23 @@ namespace inet {
 Define_Module(TrafficgenSimple);
 simsignal_t TrafficgenSimple::sentPktSignal = registerSignal("sentPkt");
 
-TrafficgenSimple::TrafficgenSimple() {
+TrafficgenSimple::TrafficgenSimple()
+{
     active = false;
     timerStartSending = new cMessage("timer start",TRAFFICGEN_TIMER_START_SENDING);
     timerStopSending = new cMessage("timer stop",TRAFFICGEN_TIMER_STOP_SENDING);
     timerSendPacket = new cMessage("timer send",TRAFFICGEN_TIMER_SEND_PACKET);
 }
 
-TrafficgenSimple::~TrafficgenSimple() {
+TrafficgenSimple::~TrafficgenSimple()
+{
     cancelAndDelete(timerStartSending);
     cancelAndDelete(timerStopSending);
     cancelAndDelete(timerSendPacket);
 }
 
-void TrafficgenSimple::initialize(int stage) {
+void TrafficgenSimple::initialize(int stage)
+{
     cSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
@@ -74,7 +77,8 @@ void TrafficgenSimple::initialize(int stage) {
 /*
  * Handle Messages
  */
-void TrafficgenSimple::handleMessage(cMessage *msg) {
+void TrafficgenSimple::handleMessage(cMessage *msg)
+{
     if (msg->isSelfMessage()) {
         EVD << msg->getKind() << endl;
 
@@ -105,7 +109,8 @@ void TrafficgenSimple::handleMessage(cMessage *msg) {
 /*
  * Send initial message to inform app
  */
-void TrafficgenSimple::sendInit() {
+void TrafficgenSimple::sendInit()
+{
     char packetname [256];
     snprintf(packetname, 256, "%s - %s", name.c_str(), "init");
     TrafficgenInfo* info = new TrafficgenInfo(packetname);
@@ -119,7 +124,8 @@ void TrafficgenSimple::sendInit() {
 /*
  * Send data to app
  */
-void TrafficgenSimple::sendData() {
+void TrafficgenSimple::sendData()
+{
     // prepare data chunk
     char packetname [256];
     snprintf(packetname, 256, "%s - %s", name.c_str(), "data");
@@ -155,7 +161,8 @@ void TrafficgenSimple::sendData() {
  * Send finish message
  */
 
-void TrafficgenSimple::sendFinish() {
+void TrafficgenSimple::sendFinish()
+{
     if (!active) {
         return;
     }
@@ -173,7 +180,8 @@ void TrafficgenSimple::sendFinish() {
 /*
  * Handle indication from app
  */
-void TrafficgenSimple::handleTrafficControlMessage(TrafficgenControl *ind) {
+void TrafficgenSimple::handleTrafficControlMessage(TrafficgenControl *ind)
+{
     EVD << "indication received" << endl;
 
     if(ind->getControlMessageType() == TRAFFICGEN_START_SENDING &&
@@ -192,13 +200,15 @@ void TrafficgenSimple::handleTrafficControlMessage(TrafficgenControl *ind) {
     }
 }
 
-void TrafficgenSimple::finish() {
+void TrafficgenSimple::finish()
+{
     EV << "### STATS ###" << endl;
     EV << sentPktCount << " pkt sent" << endl;
     EV << "###" << endl;
 };
 
-void TrafficgenSimple::setStatusString(const char *s) {
+void TrafficgenSimple::setStatusString(const char *s)
+{
     if (hasGUI()) {
         getDisplayString().setTagArg("t", 0, s);
     }

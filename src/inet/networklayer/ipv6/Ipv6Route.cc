@@ -13,7 +13,8 @@ namespace inet {
 
 Register_Abstract_Class(Ipv6Route);
 
-const char *inet::Ipv6Route::getSourceTypeAbbreviation() const {
+const char *inet::Ipv6Route::getSourceTypeAbbreviation() const
+{
     switch (_sourceType) {
         case IFACENETMASK:
             return "C";

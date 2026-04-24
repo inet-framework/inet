@@ -200,7 +200,8 @@ void Ospfv3InterfaceState::changeState(Ospfv3Interface *interface, Ospfv3Interfa
     }
 }
 
-void Ospfv3InterfaceState::calculateDesignatedRouter(Ospfv3Interface *intf) {
+void Ospfv3InterfaceState::calculateDesignatedRouter(Ospfv3Interface *intf)
+{
     Ipv4Address routerID = intf->getArea()->getInstance()->getProcess()->getRouterID();
     Ipv4Address currentDesignatedRouter = intf->getDesignatedID();
     Ipv4Address currentBackupRouter = intf->getBackupID();

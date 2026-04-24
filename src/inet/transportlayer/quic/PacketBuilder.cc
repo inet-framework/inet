@@ -13,7 +13,8 @@
 namespace inet {
 namespace quic {
 
-PacketBuilder::PacketBuilder(std::vector<QuicFrame*> *controlQueue, IScheduler *scheduler, ReceivedPacketsAccountant *receivedPacketsAccountant[]) {
+PacketBuilder::PacketBuilder(std::vector<QuicFrame*> *controlQueue, IScheduler *scheduler, ReceivedPacketsAccountant *receivedPacketsAccountant[])
+{
     this->controlQueue = controlQueue;
     this->scheduler = scheduler;
     this->receivedPacketsAccountant = receivedPacketsAccountant;

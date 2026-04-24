@@ -10,7 +10,8 @@
 namespace inet {
 namespace quic {
 
-StreamRcvQueue::StreamRcvQueue(Stream *stream, Statistics *stats) {
+StreamRcvQueue::StreamRcvQueue(Stream *stream, Statistics *stats)
+{
     this->stream = stream;
     reorderBuffer.clear();
     reorderBuffer.setExpectedOffset(B(startSeq));
@@ -20,10 +21,12 @@ StreamRcvQueue::StreamRcvQueue(Stream *stream, Statistics *stats) {
     this->streamRcvFrameEndOffsetStat = stats->createStatisticEntry("streamRcvFrameEndOffset");
 }
 
-StreamRcvQueue::~StreamRcvQueue() {
+StreamRcvQueue::~StreamRcvQueue()
+{
 }
 
-void StreamRcvQueue::push(Ptr<const Chunk> data, uint64_t offset){
+void StreamRcvQueue::push(Ptr<const Chunk> data, uint64_t offset)
+{
 
     numStreamFramesReceived++;
 
@@ -84,14 +87,16 @@ void StreamRcvQueue::push(Ptr<const Chunk> data, uint64_t offset){
    }
 }
 
-bool StreamRcvQueue::hasDataForApp(){
+bool StreamRcvQueue::hasDataForApp()
+{
     if (!reorderBuffer.isEmpty()){
         return (offsetToSeq(reorderBuffer.getAvailableDataLength()) > 0);
     }
     return false;
 }
 
-const Ptr<const Chunk> StreamRcvQueue::pop(B dataSize) {
+const Ptr<const Chunk> StreamRcvQueue::pop(B dataSize)
+{
 
     if (reorderBuffer.isEmpty()) return nullptr;
 

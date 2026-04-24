@@ -54,11 +54,13 @@ void SctpSendStream::deleteQueue()
     delete uStreamQ;
 }
 
-uint32_t SctpSendStream::getNextStreamSeqNum() {
+uint32_t SctpSendStream::getNextStreamSeqNum()
+{
     return nextStreamSeqNum;
 };
 
-void SctpSendStream::setNextStreamSeqNum(const uint16_t num) {
+void SctpSendStream::setNextStreamSeqNum(const uint16_t num)
+{
     nextStreamSeqNum = num;
 };
 

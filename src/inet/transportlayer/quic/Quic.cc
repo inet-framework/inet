@@ -24,7 +24,8 @@ namespace quic {
 
 Define_Module(Quic);
 
-Quic::~Quic() {
+Quic::~Quic()
+{
     std::set<Connection *> connections;
     for (std::map<uint64_t, Connection *>::iterator it = connectionIdConnectionMap.begin(); it != connectionIdConnectionMap.end(); ++it) {
         connections.insert(it->second);
@@ -361,7 +362,8 @@ bool Quic::isUdpSocketInUse(UdpSocket *udpSocket)
     return false;
 }
 
-IRoutingTable *Quic::getRoutingTable() {
+IRoutingTable *Quic::getRoutingTable()
+{
     return getModuleFromPar<IRoutingTable>(par("routingTableModule"), this);
 }
 

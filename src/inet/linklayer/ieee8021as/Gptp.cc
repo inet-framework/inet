@@ -178,7 +178,8 @@ void Gptp::startSyncProcesses()
     nextSequenceId++;
 }
 
-void Gptp::startSyncProcess(int portId) {
+void Gptp::startSyncProcess(int portId)
+{
     ASSERT(gptpNodeType == MASTER_NODE);
     syncSenderProcesses[portId] = SyncSenderProcess();
     sendSync(portId);
