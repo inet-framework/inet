@@ -10,7 +10,8 @@
 namespace inet {
 namespace quic {
 
-Path::Path(Connection *connection, L3Address localAddr, uint16_t localPort, L3Address remoteAddr, uint16_t remotePort, bool useDplpmtud, Statistics *connStats) {
+Path::Path(Connection *connection, L3Address localAddr, uint16_t localPort, L3Address remoteAddr, uint16_t remotePort, bool useDplpmtud, Statistics *connStats)
+{
     this->connection = connection;
     this->localAddr = localAddr;
     this->localPort = localPort;
@@ -36,7 +37,8 @@ Path::Path(Connection *connection, L3Address localAddr, uint16_t localPort, L3Ad
     }
 }
 
-Path::~Path() {
+Path::~Path()
+{
     delete stats;
     if (dplpmtud != nullptr) {
         delete dplpmtud;
@@ -46,7 +48,8 @@ Path::~Path() {
     }
 }
 
-int Path::getLocalInterfaceMtu() {
+int Path::getLocalInterfaceMtu()
+{
     // determine MTU of outgoing interface
     IRoutingTable *rt = connection->getModule()->getRoutingTable();
     NetworkInterface *rtie = rt->getOutputInterfaceForDestination(remoteAddr);
@@ -56,7 +59,8 @@ int Path::getLocalInterfaceMtu() {
     return rtie->getMtu();
 }
 
-int Path::determineOverhead() {
+int Path::determineOverhead()
+{
     int overhead = 0;
 
     if (remoteAddr.getType() == L3Address::IPv4) {
@@ -71,7 +75,8 @@ int Path::determineOverhead() {
     return overhead;
 }
 
-int Path::getMaxQuicPacketSize() {
+int Path::getMaxQuicPacketSize()
+{
     if (useDplpmtud) {
         if (this->pmtuValidator != nullptr) {
             if (this->getConnection()->getReliabilityManager()->reducePacketSize(dplpmtud->getMinPlpmtu(), dplpmtud->getPlpmtu())) {
@@ -84,14 +89,16 @@ int Path::getMaxQuicPacketSize() {
     return maxQuicPacketSize;
 }
 
-int Path::getSafeQuicPacketSize() {
+int Path::getSafeQuicPacketSize()
+{
     if (useDplpmtud) {
         return dplpmtud->getMinPlpmtu();
     }
     return safeQuicPacketSize;
 }
 
-void Path::setPmtuValidator(PmtuValidator *pmtuValidator) {
+void Path::setPmtuValidator(PmtuValidator *pmtuValidator)
+{
     if (this->pmtuValidator != nullptr) {
         delete this->pmtuValidator;
     }

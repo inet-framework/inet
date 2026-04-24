@@ -146,11 +146,13 @@ uint32_t SctpReceiveStream::enqueueNewDataChunk(SctpDataVariables *dchunk)
     return delivery;
 }
 
-int32_t SctpReceiveStream::getExpectedStreamSeqNum() {
+int32_t SctpReceiveStream::getExpectedStreamSeqNum()
+{
     return expectedStreamSeqNum;
 }
 
-void SctpReceiveStream::setExpectedStreamSeqNum(int32_t seqNum) {
+void SctpReceiveStream::setExpectedStreamSeqNum(int32_t seqNum)
+{
     expectedStreamSeqNum = seqNum;
 }
 

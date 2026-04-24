@@ -62,7 +62,8 @@ EigrpIpv4Pdm::~EigrpIpv4Pdm()
     delete this->eigrpMetric;
 }
 
-void EigrpIpv4Pdm::initialize(int stage) {
+void EigrpIpv4Pdm::initialize(int stage)
+{
 
     SimpleModule::initialize(stage);
 
@@ -153,7 +154,8 @@ void EigrpIpv4Pdm::receiveSignal(cComponent *source, simsignal_t signalID, cObje
     }
 }
 
-void EigrpIpv4Pdm::handleMessage(cMessage *msg) {
+void EigrpIpv4Pdm::handleMessage(cMessage *msg)
+{
     if (msg->isSelfMessage()) { // Timer Message
         this->processTimer(msg);
     }
@@ -1915,7 +1917,8 @@ void EigrpIpv4Pdm::setDelayedRemove(int neighId, EigrpRouteSource<Ipv4Address> *
 }
 
 Ipv4Route *EigrpIpv4Pdm::findRoute(const Ipv4Address& network,
-        const Ipv4Address& netmask) {
+        const Ipv4Address& netmask)
+{
     Ipv4Route *route = nullptr;
     for (int i = 0; i < rt->getNumRoutes(); i++) {
         auto it = rt->getRoute(i);
@@ -1929,7 +1932,8 @@ Ipv4Route *EigrpIpv4Pdm::findRoute(const Ipv4Address& network,
 }
 
 Ipv4Route *EigrpIpv4Pdm::findRoute(const Ipv4Address& network,
-        const Ipv4Address& netmask, const Ipv4Address& nexthop) {
+        const Ipv4Address& netmask, const Ipv4Address& nexthop)
+{
     Ipv4Route *route = nullptr;
     for (int i = 0; i < rt->getNumRoutes(); i++) {
         auto it = rt->getRoute(i);

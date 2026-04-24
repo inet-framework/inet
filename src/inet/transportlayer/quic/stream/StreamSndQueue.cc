@@ -10,7 +10,8 @@
 namespace inet {
 namespace quic {
 
-void StreamSndQueue::addData(const Ptr<const Chunk> data) {
+void StreamSndQueue::addData(const Ptr<const Chunk> data)
+{
     sendBuffer.replace(addOffset, data);
     addOffset += data->getChunkLength();
 }
@@ -33,11 +34,13 @@ bool StreamSndQueue::removeOutstandingRegion(b offset, b length)
     return false;
 }
 
-void StreamSndQueue::dataLost(b offset, b length) {
+void StreamSndQueue::dataLost(b offset, b length)
+{
     removeOutstandingRegion(offset, length);
 }
 
-void StreamSndQueue::dataAcked(b offset, b length) {
+void StreamSndQueue::dataAcked(b offset, b length)
+{
     if (removeOutstandingRegion(offset, length)) {
         sendBuffer.clear(offset, length);
     }

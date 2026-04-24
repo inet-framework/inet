@@ -15,45 +15,54 @@ namespace inet {
 Register_ResultRecorder("groupCount", GroupCountRecorder);
 Register_ResultRecorder("weightedHistogram", WeightedHistogramRecorder);
 
-void GroupCountRecorder::collect(std::string value) {
+void GroupCountRecorder::collect(std::string value)
+{
     groupcounts[value]++;
 }
 
-void GroupCountRecorder::receiveSignal(cResultFilter *prev, simtime_t_cref t, bool b, cObject *details) {
+void GroupCountRecorder::receiveSignal(cResultFilter *prev, simtime_t_cref t, bool b, cObject *details)
+{
     collect(b ? "true" : "false");
 }
 
-void GroupCountRecorder::receiveSignal(cResultFilter *prev, simtime_t_cref t, intval_t l, cObject *details) {
+void GroupCountRecorder::receiveSignal(cResultFilter *prev, simtime_t_cref t, intval_t l, cObject *details)
+{
     std::stringstream s;
     s << l;
     collect(s.str());
 }
 
-void GroupCountRecorder::receiveSignal(cResultFilter *prev, simtime_t_cref t, uintval_t l, cObject *details) {
+void GroupCountRecorder::receiveSignal(cResultFilter *prev, simtime_t_cref t, uintval_t l, cObject *details)
+{
     std::stringstream s;
     s << l;
     collect(s.str());
 }
 
-void GroupCountRecorder::receiveSignal(cResultFilter *prev, simtime_t_cref t, double d, cObject *details) {
+void GroupCountRecorder::receiveSignal(cResultFilter *prev, simtime_t_cref t, double d, cObject *details)
+{
     std::stringstream s;
     s << d;
     collect(s.str());
 }
 
-void GroupCountRecorder::receiveSignal(cResultFilter *prev, simtime_t_cref t, const SimTime& v, cObject *details) {
+void GroupCountRecorder::receiveSignal(cResultFilter *prev, simtime_t_cref t, const SimTime& v, cObject *details)
+{
     collect(v.str());
 }
 
-void GroupCountRecorder::receiveSignal(cResultFilter *prev, simtime_t_cref t, const char *s, cObject *details) {
+void GroupCountRecorder::receiveSignal(cResultFilter *prev, simtime_t_cref t, const char *s, cObject *details)
+{
     collect(s);
 }
 
-void GroupCountRecorder::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *obj, cObject *details) {
+void GroupCountRecorder::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *obj, cObject *details)
+{
     collect(obj->getFullPath());
 }
 
-void GroupCountRecorder::finish(cResultFilter *prev) {
+void GroupCountRecorder::finish(cResultFilter *prev)
+{
     opp_string_map attributes = getStatisticAttributes();
 
     for (auto& elem : groupcounts) {

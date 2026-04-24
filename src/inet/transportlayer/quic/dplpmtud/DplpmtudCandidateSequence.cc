@@ -10,7 +10,8 @@
 namespace inet {
 namespace quic {
 
-DplpmtudCandidateSequence::DplpmtudCandidateSequence(int minPmtu, int maxPmtu, int stepSize) {
+DplpmtudCandidateSequence::DplpmtudCandidateSequence(int minPmtu, int maxPmtu, int stepSize)
+{
     this->minPmtu = minPmtu;
     this->maxPmtu = maxPmtu;
     this->stepSize = stepSize;

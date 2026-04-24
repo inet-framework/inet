@@ -13,7 +13,8 @@ namespace inet {
 
 Define_Module(QuicTrafficgen);
 
-QuicTrafficgen::QuicTrafficgen() {
+QuicTrafficgen::QuicTrafficgen()
+{
     timerConnect = new cMessage("QuicTrafficgen Timer - Connect");
     timerConnect->setKind(TIMER_CONNECT);
 
@@ -23,7 +24,8 @@ QuicTrafficgen::QuicTrafficgen() {
     generatorsActive = 0;
 }
 
-QuicTrafficgen::~QuicTrafficgen() {
+QuicTrafficgen::~QuicTrafficgen()
+{
     cancelAndDelete(timerConnect);
     cancelAndDelete(timerLimitRuntime);
 }
@@ -112,7 +114,8 @@ void QuicTrafficgen::handleMessageFromGenerator(cMessage *msg)
     }
 }
 
-void QuicTrafficgen::handleGeneratorInfo(TrafficgenInfo* msg) {
+void QuicTrafficgen::handleGeneratorInfo(TrafficgenInfo* msg)
+{
     switch(msg->getType()) {
         case TRAFFICGEN_INFO_INIT:
             generatorsActive++;
@@ -143,23 +146,27 @@ void QuicTrafficgen::handleGeneratorInfo(TrafficgenInfo* msg) {
     }
 }
 
-void QuicTrafficgen::socketEstablished(QuicSocket *socket) {
+void QuicTrafficgen::socketEstablished(QuicSocket *socket)
+{
     EV_INFO << "socketEstablished" << endl;
     sendGeneratorControl(TRAFFICGEN_START_SENDING);
     sendingAllowed = true;
     setStatusString("connected");
 }
 
-void QuicTrafficgen::socketDataArrived(QuicSocket* socket, Packet *packet) {
+void QuicTrafficgen::socketDataArrived(QuicSocket* socket, Packet *packet)
+{
     EV_DEBUG << "Data arrived" << endl;
 }
 
-void QuicTrafficgen::socketClosed(QuicSocket *socket) {
+void QuicTrafficgen::socketClosed(QuicSocket *socket)
+{
     EV_INFO << "socketClosed" << endl;
     setStatusString("closed");
 }
 
-void QuicTrafficgen::sendGeneratorControl(uint8_t controlMessageType) {
+void QuicTrafficgen::sendGeneratorControl(uint8_t controlMessageType)
+{
 
     TrafficgenControl* ctrl = new TrafficgenControl("TrafficgenControl");
     ctrl->setKind(TRAFFICGEN_MSG_CONTROL);
@@ -190,13 +197,15 @@ void QuicTrafficgen::sendData(TrafficgenData* gmsg)
     socket.send(packet);
 }
 
-void QuicTrafficgen::close() {
+void QuicTrafficgen::close()
+{
     EV_INFO << "sendShutdown" << endl;
     socket.close();
     //socket.abort();
 }
 
-void QuicTrafficgen::setStatusString(const char *s) {
+void QuicTrafficgen::setStatusString(const char *s)
+{
     if (hasGUI()) {
         //getDisplayString().setTagArg("t", 0, s);
     }
@@ -214,7 +223,8 @@ void QuicTrafficgen::socketSendQueueDrain(QuicSocket *socket)
     sendingAllowed = true;
 }
 
-uint32_t QuicTrafficgen::getStreamId(int generatorId){
+uint32_t QuicTrafficgen::getStreamId(int generatorId)
+{
     if(generatorId < 0) throw cRuntimeError("Invalid generatorId: %d, %s", (int) generatorId, "correct ini file!");
     return generatorId;
 }

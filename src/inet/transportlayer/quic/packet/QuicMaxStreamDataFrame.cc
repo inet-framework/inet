@@ -24,7 +24,8 @@ QuicMaxStreamDataFrame::QuicMaxStreamDataFrame(Stream *stream, uint64_t maxRecei
     this->setHeader(header);
 }
 
-QuicMaxStreamDataFrame::~QuicMaxStreamDataFrame() {
+QuicMaxStreamDataFrame::~QuicMaxStreamDataFrame()
+{
 }
 
 void QuicMaxStreamDataFrame::setHeader(Ptr<const FrameHeader> header)

@@ -83,7 +83,8 @@ bool EigrpInterface::isMulticastAllowedOnIface(NetworkInterface *iface)
     return false;
 }
 
-void EigrpInterface::setInterfaceDatarate(double datarate) {
+void EigrpInterface::setInterfaceDatarate(double datarate)
+{
 
     interfaceDatarate = datarate;
 

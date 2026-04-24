@@ -13,7 +13,8 @@ Register_Figure("simTimeText", SimTimeTextFigure);
 
 static const char *PKEY_PREFIX = "prefix";
 
-void SimTimeTextFigure::refreshDisplay() {
+void SimTimeTextFigure::refreshDisplay()
+{
     setText((prefix + simTime().format(SimTime::getScaleExp(), ".", "'", true, "", " ")).c_str());
 }
 

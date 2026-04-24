@@ -11,7 +11,8 @@
 namespace inet {
 namespace quic {
 
-ConnectionState *CloseConnectionState::processHandshakePacket(const Ptr<const HandshakePacketHeader>& packetHeader, Packet *pkt) {
+ConnectionState *CloseConnectionState::processHandshakePacket(const Ptr<const HandshakePacketHeader>& packetHeader, Packet *pkt)
+{
     EV_DEBUG << "processHandshakePacket in " << name << endl;
     discardFrames(pkt);
     return this;

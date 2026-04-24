@@ -10,14 +10,16 @@
 namespace inet {
 namespace quic {
 
-DplpmtudState::DplpmtudState(Dplpmtud *context) {
+DplpmtudState::DplpmtudState(Dplpmtud *context)
+{
     this->context = context;
     probeCount = 0;
 }
 
 DplpmtudState::~DplpmtudState() { }
 
-void DplpmtudState::sendProbe(int probeSize, bool triggerSendRoutine) {
+void DplpmtudState::sendProbe(int probeSize, bool triggerSendRoutine)
+{
     probeCount++;
     if (triggerSendRoutine) {
         context->sendProbe(probeSize);
@@ -26,7 +28,8 @@ void DplpmtudState::sendProbe(int probeSize, bool triggerSendRoutine) {
     }
 }
 
-DplpmtudState *DplpmtudState::newState(DplpmtudState *state) {
+DplpmtudState *DplpmtudState::newState(DplpmtudState *state)
+{
     delete this;
     return state;
 }

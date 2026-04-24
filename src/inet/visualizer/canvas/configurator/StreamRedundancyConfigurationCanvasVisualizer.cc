@@ -16,7 +16,8 @@ namespace visualizer {
 
 Define_Module(StreamRedundancyConfigurationCanvasVisualizer);
 
-void StreamRedundancyConfigurationCanvasVisualizer::initialize(int stage) {
+void StreamRedundancyConfigurationCanvasVisualizer::initialize(int stage)
+{
     TreeCanvasVisualizerBase::initialize(stage);
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {

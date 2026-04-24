@@ -23,7 +23,8 @@ QuicMaxDataFrame::QuicMaxDataFrame(Connection *connection, uint64_t maxReceiveOf
     this->setHeader(header);
 }
 
-QuicMaxDataFrame::~QuicMaxDataFrame() {
+QuicMaxDataFrame::~QuicMaxDataFrame()
+{
 }
 
 void QuicMaxDataFrame::setHeader(Ptr<const FrameHeader> header)

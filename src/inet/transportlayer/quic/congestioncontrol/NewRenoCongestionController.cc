@@ -10,7 +10,8 @@
 namespace inet {
 namespace quic {
 
-NewRenoCongestionController::NewRenoCongestionController() {
+NewRenoCongestionController::NewRenoCongestionController()
+{
     this->stats = nullptr;
     this->path = nullptr;
 
@@ -240,11 +241,13 @@ void NewRenoCongestionController::emitStatValue(simsignal_t signal, uint32_t val
     }
 }
 
-uint32_t NewRenoCongestionController::getMinimumWindow() {
+uint32_t NewRenoCongestionController::getMinimumWindow()
+{
     return 2 * getMaxDatagramSize();
 }
 
-uint32_t NewRenoCongestionController::getInitialWindow() {
+uint32_t NewRenoCongestionController::getInitialWindow()
+{
     return std::min(10 * getMaxDatagramSize(), std::max(2 * getMaxDatagramSize(), 14720u));
 }
 

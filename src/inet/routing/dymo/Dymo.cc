@@ -400,7 +400,8 @@ void Dymo::processJitterTimerPacket(PacketJitterTimer *msg)
     delete msg;
 }
 
-void Dymo::cancelJitterTimerPacket(PacketJitterTimer *msg) {
+void Dymo::cancelJitterTimerPacket(PacketJitterTimer *msg)
+{
     packetJitterTimers.erase(msg);
     cancelAndDelete(msg);
 }

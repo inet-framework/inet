@@ -16,7 +16,8 @@ namespace quic {
 using namespace std;
 using namespace omnetpp;
 
-string print(std::vector<int> tree) {
+string print(std::vector<int> tree)
+{
     stringstream output;
     for (auto it = tree.begin(); it != tree.end(); ++it) {
         output << *it << " ";
@@ -24,7 +25,8 @@ string print(std::vector<int> tree) {
     return output.str();
 }
 
-DplpmtudCandidateSequenceBinary::DplpmtudCandidateSequenceBinary(int minPmtu, int maxPmtu, int stepSize) : DplpmtudCandidateSequence(minPmtu, maxPmtu, stepSize) {
+DplpmtudCandidateSequenceBinary::DplpmtudCandidateSequenceBinary(int minPmtu, int maxPmtu, int stepSize) : DplpmtudCandidateSequence(minPmtu, maxPmtu, stepSize)
+{
     gotAck = false;
 
     candidatesTree.push_back(minPmtu);
@@ -33,7 +35,8 @@ DplpmtudCandidateSequenceBinary::DplpmtudCandidateSequenceBinary(int minPmtu, in
 }
 DplpmtudCandidateSequenceBinary::~DplpmtudCandidateSequenceBinary() { }
 
-int DplpmtudCandidateSequenceBinary::calculateNextValue() {
+int DplpmtudCandidateSequenceBinary::calculateNextValue()
+{
     std::vector<int>::iterator lastMinusOneIt;
     int next;
 
@@ -84,7 +87,8 @@ int DplpmtudCandidateSequenceBinary::calculateNextValue() {
     return next;
 }
 
-void DplpmtudCandidateSequenceBinary::testSucceeded(int succeededCandidate) {
+void DplpmtudCandidateSequenceBinary::testSucceeded(int succeededCandidate)
+{
     // delete candidates equal or smaller than succeededCandidate
     for (auto it = candidatesTree.begin(); it != candidatesTree.end()-1 && *it <= succeededCandidate; it = candidatesTree.erase(it));
 
@@ -101,7 +105,8 @@ void DplpmtudCandidateSequenceBinary::testSucceeded(int succeededCandidate) {
         }
     }
 }
-void DplpmtudCandidateSequenceBinary::testFailed(int failedCandidate) {
+void DplpmtudCandidateSequenceBinary::testFailed(int failedCandidate)
+{
     // delete all candidates equal or larger than failedCandidate
     for (auto it = candidatesTree.end()-1; it != candidatesTree.begin() && (*it >= failedCandidate || *it == -1); it = candidatesTree.erase(it)-1);
 
@@ -119,7 +124,8 @@ void DplpmtudCandidateSequenceBinary::testFailed(int failedCandidate) {
     }
 }
 
-void DplpmtudCandidateSequenceBinary::ptbReceived(int ptbMtu) {
+void DplpmtudCandidateSequenceBinary::ptbReceived(int ptbMtu)
+{
     DplpmtudCandidateSequence::ptbReceived(ptbMtu);
     // delete all candidates equal or larger  than ptbMtu
     for (auto it = candidatesTree.end()-1; it != candidatesTree.begin() && (*it >= ptbMtu || *it == -1); it = candidatesTree.erase(it)-1);
@@ -138,7 +144,8 @@ void DplpmtudCandidateSequenceBinary::ptbReceived(int ptbMtu) {
     }
 }
 
-int DplpmtudCandidateSequenceBinary::getNextCandidate(int probeSizeLimit) {
+int DplpmtudCandidateSequenceBinary::getNextCandidate(int probeSizeLimit)
+{
     if (candidatesTree.size() == 2 && candidatesTree[0] > candidatesTree[1]) {
         return 0;
     }
@@ -162,7 +169,8 @@ int DplpmtudCandidateSequenceBinary::getNextCandidate(int probeSizeLimit) {
     return next;
 }
 
-bool DplpmtudCandidateSequenceBinary::repeatOnTimeout(int size) {
+bool DplpmtudCandidateSequenceBinary::repeatOnTimeout(int size)
+{
     return (candidatesTree[0] >= size);
 }
 

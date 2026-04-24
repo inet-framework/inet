@@ -10,7 +10,8 @@
 namespace inet {
 namespace quic {
 
-PmtuValidator::PmtuValidator(Path *path, Statistics *stats) {
+PmtuValidator::PmtuValidator(Path *path, Statistics *stats)
+{
     this->path = path;
     this->stats = stats;
     this->dplpmtud = path->getDplpmtud();
@@ -23,7 +24,8 @@ PmtuValidator::PmtuValidator(Path *path, Statistics *stats) {
     persistentCongestionsStat = stats->createStatisticEntry("pmtuValidatorPersistentCongestions");
 }
 
-PmtuValidator::PmtuValidator(PmtuValidator *copy) {
+PmtuValidator::PmtuValidator(PmtuValidator *copy)
+{
     this->path = copy->path;
     this->stats = nullptr; // do not write stats in a copy
     this->dplpmtud = copy->dplpmtud;
@@ -48,7 +50,8 @@ void PmtuValidator::readParameters(cModule *module)
 }
 
 /*
-std::string listToString(std::list<struct timeSize> &list) {
+std::string listToString(std::list<struct timeSize> &list)
+{
     std::stringstream ss;
     ss << "[";
     for (auto it: list) {
@@ -86,7 +89,8 @@ void PmtuValidator::onPacketsAcked(std::vector<QuicPacket*> *ackedPackets)
     }
 }
 
-bool PmtuValidator::doLostPacketsFulfillPmtuInvalidCriterium(int &largestAckedSinceFirst) {
+bool PmtuValidator::doLostPacketsFulfillPmtuInvalidCriterium(int &largestAckedSinceFirst)
+{
     EV_DEBUG << "PmtuValidator: doLostPacketsFulfillPmtuInvalidCriterium()" << endl;
     for (auto it=lostPacketsBySize.begin(); it != lostPacketsBySize.end(); ++it) {
         EV_DEBUG << "* lost packet sent at " << it->at << " with size " << it->size << endl;
@@ -250,7 +254,8 @@ std::list<struct timeSize>::iterator PmtuValidator::deleteEarlierAndSmallerEntri
     return it;
 }
 
-int PmtuValidator::largestAckedSince(SimTime since) {
+int PmtuValidator::largestAckedSince(SimTime since)
+{
     for (auto it: largestPacketSizeAcked) {
         if (it.at >= since) {
 //        if (it.at > since) {

@@ -10,12 +10,14 @@
 namespace inet {
 namespace quic {
 
-DplpmtudCandidateSequenceOptUp::DplpmtudCandidateSequenceOptUp(int minPmtu, int maxPmtu, int stepSize) : DplpmtudCandidateSequenceUp(minPmtu, maxPmtu, stepSize) {
+DplpmtudCandidateSequenceOptUp::DplpmtudCandidateSequenceOptUp(int minPmtu, int maxPmtu, int stepSize) : DplpmtudCandidateSequenceUp(minPmtu, maxPmtu, stepSize)
+{
     optProbe = true;
 }
 DplpmtudCandidateSequenceOptUp::~DplpmtudCandidateSequenceOptUp() { }
 
-int DplpmtudCandidateSequenceOptUp::getNextCandidate(int probeSizeLimit) {
+int DplpmtudCandidateSequenceOptUp::getNextCandidate(int probeSizeLimit)
+{
     static bool firstProbe = true;
     if (firstProbe) {
         firstProbe = false;
@@ -30,7 +32,8 @@ int DplpmtudCandidateSequenceOptUp::getNextCandidate(int probeSizeLimit) {
     return next;
 }
 
-bool DplpmtudCandidateSequenceOptUp::repeatOnTimeout(int size) {
+bool DplpmtudCandidateSequenceOptUp::repeatOnTimeout(int size)
+{
     return !optProbe;
 }
 

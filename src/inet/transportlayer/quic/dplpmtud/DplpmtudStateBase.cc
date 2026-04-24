@@ -12,12 +12,14 @@
 namespace inet {
 namespace quic {
 
-DplpmtudStateBase::DplpmtudStateBase(Dplpmtud *context) : DplpmtudState(context) {
+DplpmtudStateBase::DplpmtudStateBase(Dplpmtud *context) : DplpmtudState(context)
+{
     start();
 }
 DplpmtudStateBase::~DplpmtudStateBase() { }
 
-void DplpmtudStateBase::start() {
+void DplpmtudStateBase::start()
+{
     context->resetMinPmtu();
     base = context->getMinPmtu();
     context->setPmtu(base);
@@ -26,7 +28,8 @@ void DplpmtudStateBase::start() {
     sendProbe(base);
 }
 
-DplpmtudState *DplpmtudStateBase::onProbeAcked(int ackedProbeSize) {
+DplpmtudState *DplpmtudStateBase::onProbeAcked(int ackedProbeSize)
+{
     if (ackedProbeSize != base) {
         return this;
     }
@@ -39,7 +42,8 @@ DplpmtudState *DplpmtudStateBase::onProbeAcked(int ackedProbeSize) {
     return newState(new DplpmtudStateSearch(context));
 }
 
-DplpmtudState *DplpmtudStateBase::onProbeLost(int lostProbeSize) {
+DplpmtudState *DplpmtudStateBase::onProbeLost(int lostProbeSize)
+{
     if (lostProbeSize != base) {
         return this;
     }
@@ -52,17 +56,20 @@ DplpmtudState *DplpmtudStateBase::onProbeLost(int lostProbeSize) {
     throw cRuntimeError("DPLPMTUD: Failed to probe in base state");
 }
 
-DplpmtudState *DplpmtudStateBase::onPtbReceived(int ptbMtu) {
+DplpmtudState *DplpmtudStateBase::onPtbReceived(int ptbMtu)
+{
     EV_DEBUG << "DPLPMTUD in BASE: PTB received" << endl;
     // already in base
     return this;
 }
 
-DplpmtudState *DplpmtudStateBase::onPmtuInvalid(int largestAckedSinceLoss) {
+DplpmtudState *DplpmtudStateBase::onPmtuInvalid(int largestAckedSinceLoss)
+{
     return this;
 }
 
-void DplpmtudStateBase::onRaiseTimeout() {
+void DplpmtudStateBase::onRaiseTimeout()
+{
     throw cRuntimeError("DPLPMTUD: Raise Timeout in base state should not happen");
     //return this;
 }

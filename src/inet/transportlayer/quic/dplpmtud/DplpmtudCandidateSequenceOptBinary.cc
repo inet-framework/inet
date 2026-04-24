@@ -13,7 +13,8 @@ namespace quic {
 DplpmtudCandidateSequenceOptBinary::DplpmtudCandidateSequenceOptBinary(int minPmtu, int maxPmtu, int stepSize) : DplpmtudCandidateSequenceBinary(minPmtu, maxPmtu, stepSize) { }
 DplpmtudCandidateSequenceOptBinary::~DplpmtudCandidateSequenceOptBinary() { }
 
-int DplpmtudCandidateSequenceOptBinary::getNextCandidate(int probeSizeLimit) {
+int DplpmtudCandidateSequenceOptBinary::getNextCandidate(int probeSizeLimit)
+{
     if (firstCandidate) {
         firstCandidate = false;
         return maxPmtu;

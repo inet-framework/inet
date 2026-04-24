@@ -12,20 +12,24 @@
 namespace inet {
 namespace quic {
 
-DplpmtudCandidateSequenceDown::DplpmtudCandidateSequenceDown(int minPmtu, int maxPmtu, int stepSize) : DplpmtudCandidateSequence(minPmtu, maxPmtu, stepSize) {
+DplpmtudCandidateSequenceDown::DplpmtudCandidateSequenceDown(int minPmtu, int maxPmtu, int stepSize) : DplpmtudCandidateSequence(minPmtu, maxPmtu, stepSize)
+{
     currentCandidate = 0;
 }
 DplpmtudCandidateSequenceDown::~DplpmtudCandidateSequenceDown() { }
 
-void DplpmtudCandidateSequenceDown::testSucceeded(int candidate) {
+void DplpmtudCandidateSequenceDown::testSucceeded(int candidate)
+{
     minPmtu = std::max(minPmtu, candidate);
 }
 
-void DplpmtudCandidateSequenceDown::testFailed(int candidate) {
+void DplpmtudCandidateSequenceDown::testFailed(int candidate)
+{
     maxPmtu = std::min(maxPmtu, candidate-stepSize);
 }
 
-int DplpmtudCandidateSequenceDown::getNextCandidate(int probeSizeLimit) {
+int DplpmtudCandidateSequenceDown::getNextCandidate(int probeSizeLimit)
+{
     int next = currentCandidate - stepSize;
     if (currentCandidate == 0 || currentCandidate > maxPmtu) {
         currentCandidate = maxPmtu;
@@ -39,7 +43,8 @@ int DplpmtudCandidateSequenceDown::getNextCandidate(int probeSizeLimit) {
     return next;
 }
 
-bool DplpmtudCandidateSequenceDown::repeatOnTimeout(int size) {
+bool DplpmtudCandidateSequenceDown::repeatOnTimeout(int size)
+{
     return (minPmtu >= currentCandidate || minPmtu >= size);
 }
 

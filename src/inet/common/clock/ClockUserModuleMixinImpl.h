@@ -15,14 +15,16 @@ namespace inet {
 #ifdef INET_WITH_CLOCK
 
 template<typename T>
-void ClockUserModuleMixin<T>::findClockModule() {
+void ClockUserModuleMixin<T>::findClockModule()
+{
     if (T::hasPar("clockModule")) {
         clock.reference(this, "clockModule", false);
     }
 }
 
 template<typename T>
-ClockUserModuleMixin<T>::~ClockUserModuleMixin() {
+ClockUserModuleMixin<T>::~ClockUserModuleMixin()
+{
 #ifndef NDEBUG
     if (clock != nullptr && !usedClockApi)
         EV_WARN << "Class '" << className << "' has a clock module set but does not use the clock API (at least in this simulation)\n";
@@ -32,7 +34,8 @@ ClockUserModuleMixin<T>::~ClockUserModuleMixin() {
 }
 
 template<typename T>
-void ClockUserModuleMixin<T>::initialize(int stage) {
+void ClockUserModuleMixin<T>::initialize(int stage)
+{
     T::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         findClockModule();
@@ -43,7 +46,8 @@ void ClockUserModuleMixin<T>::initialize(int stage) {
 }
 
 template<typename T>
-void ClockUserModuleMixin<T>::scheduleClockEventAt(clocktime_t t, ClockEvent *msg) {
+void ClockUserModuleMixin<T>::scheduleClockEventAt(clocktime_t t, ClockEvent *msg)
+{
 #ifndef NDEBUG
     usedClockApi = true;
 #endif
@@ -54,7 +58,8 @@ void ClockUserModuleMixin<T>::scheduleClockEventAt(clocktime_t t, ClockEvent *ms
 }
 
 template<typename T>
-void ClockUserModuleMixin<T>::scheduleClockEventAfter(clocktime_t t, ClockEvent *msg) {
+void ClockUserModuleMixin<T>::scheduleClockEventAfter(clocktime_t t, ClockEvent *msg)
+{
 #ifndef NDEBUG
     usedClockApi = true;
 #endif
@@ -65,7 +70,8 @@ void ClockUserModuleMixin<T>::scheduleClockEventAfter(clocktime_t t, ClockEvent 
 }
 
 template<typename T>
-cMessage *ClockUserModuleMixin<T>::cancelClockEvent(ClockEvent *msg) {
+cMessage *ClockUserModuleMixin<T>::cancelClockEvent(ClockEvent *msg)
+{
 #ifndef NDEBUG
     usedClockApi = true;
 #endif
@@ -76,7 +82,8 @@ cMessage *ClockUserModuleMixin<T>::cancelClockEvent(ClockEvent *msg) {
 }
 
 template<typename T>
-void ClockUserModuleMixin<T>::cancelAndDeleteClockEvent(ClockEvent *msg) {
+void ClockUserModuleMixin<T>::cancelAndDeleteClockEvent(ClockEvent *msg)
+{
 #ifndef NDEBUG
     usedClockApi = true;
 #endif
@@ -149,7 +156,8 @@ simtime_t ClockUserModuleMixin<T>::computeSimTimeFromClockTime(clocktime_t t) co
 }
 
 template<typename T>
-clocktime_t ClockUserModuleMixin<T>::getClockTime() const {
+clocktime_t ClockUserModuleMixin<T>::getClockTime() const
+{
 #ifndef NDEBUG
     usedClockApi = true;
 #endif
@@ -160,7 +168,8 @@ clocktime_t ClockUserModuleMixin<T>::getClockTime() const {
 }
 
 template<typename T>
-clocktime_t ClockUserModuleMixin<T>::getArrivalClockTime(ClockEvent *msg) const {
+clocktime_t ClockUserModuleMixin<T>::getArrivalClockTime(ClockEvent *msg) const
+{
 #ifndef NDEBUG
     usedClockApi = true;
 #endif

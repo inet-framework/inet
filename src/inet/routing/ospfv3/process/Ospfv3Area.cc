@@ -881,7 +881,8 @@ bool Ospfv3Area::routerLSADiffersFrom(Ospfv3RouterLsa *currentLsa, const Ospfv3R
     return differentHeader || differentBody;
 } // routerLSADiffersFrom
 
-void Ospfv3Area::deleteRouterLSA(int index) {
+void Ospfv3Area::deleteRouterLSA(int index)
+{
     RouterLSA *delRouter = this->routerLSAList.at(index);
     const Ospfv3LsaHeader& routerHeader = delRouter->getHeader();
 

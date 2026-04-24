@@ -45,7 +45,8 @@ static simtime_raw_t roundNone(simtime_raw_t t, simtime_raw_t l)
     return t;
 }
 
-bool compareClockEvents(const ClockEvent *e1, const ClockEvent *e2) {
+bool compareClockEvents(const ClockEvent *e1, const ClockEvent *e2)
+{
     return e2->getArrivalClockTime() < e1->getArrivalClockTime() ? true :
            e2->getArrivalClockTime() > e1->getArrivalClockTime() ? false :
            e2->getSchedulingPriority() == e1->getSchedulingPriority() ? e2->getInsertionOrder() < e1->getInsertionOrder() :

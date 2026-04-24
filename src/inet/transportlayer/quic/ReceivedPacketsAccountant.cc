@@ -10,7 +10,8 @@
 namespace inet {
 namespace quic {
 
-ReceivedPacketsAccountant::ReceivedPacketsAccountant(Timer *ackDelayTimer, TransportParameters *transportParameter) {
+ReceivedPacketsAccountant::ReceivedPacketsAccountant(Timer *ackDelayTimer, TransportParameters *transportParameter)
+{
     this->ackDelayTimer = ackDelayTimer;
     this->transportParameter = transportParameter;
     newAckInfo = false;
@@ -24,7 +25,8 @@ ReceivedPacketsAccountant::ReceivedPacketsAccountant(Timer *ackDelayTimer, Trans
     timeLastAckElicitingReceivedOutOfOrder = SimTime::ZERO;
 }
 
-ReceivedPacketsAccountant::~ReceivedPacketsAccountant() {
+ReceivedPacketsAccountant::~ReceivedPacketsAccountant()
+{
     if (ackDelayTimer != nullptr) {
         delete ackDelayTimer;
     }
@@ -255,7 +257,8 @@ void ReceivedPacketsAccountant::removeOldGapRanges()
     gapRanges.erase(gapRanges.begin(), gapRanges.begin()+removeBefore);
 }
 
-bool ReceivedPacketsAccountant::hasGapsSince(uint64_t packetNumber) {
+bool ReceivedPacketsAccountant::hasGapsSince(uint64_t packetNumber)
+{
     for (GapRange gapRange : gapRanges) {
         if (gapRange.firstMissing >= packetNumber) {
             return true;

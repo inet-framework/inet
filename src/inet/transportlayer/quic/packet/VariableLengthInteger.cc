@@ -9,7 +9,8 @@
 namespace inet {
 namespace quic {
 
-size_t getVariableLengthIntegerSize(VariableLengthInteger i) {
+size_t getVariableLengthIntegerSize(VariableLengthInteger i)
+{
     if (i < 64ull) {
         return 1;
     }

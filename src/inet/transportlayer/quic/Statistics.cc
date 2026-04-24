@@ -10,12 +10,14 @@
 namespace inet {
 namespace quic {
 
-Statistics::Statistics(cModule *module, std::string statEntryNamePostfix) {
+Statistics::Statistics(cModule *module, std::string statEntryNamePostfix)
+{
     this->module = module;
     this->statEntryNamePostfix = statEntryNamePostfix;
 }
 
-Statistics::Statistics(Statistics *other, std::string addStatEntryNamePostfix) {
+Statistics::Statistics(Statistics *other, std::string addStatEntryNamePostfix)
+{
     this->module = other->module;
     this->statEntryNamePostfix = other->statEntryNamePostfix + addStatEntryNamePostfix;
 
@@ -23,7 +25,8 @@ Statistics::Statistics(Statistics *other, std::string addStatEntryNamePostfix) {
 
 Statistics::~Statistics() { }
 
-simsignal_t Statistics::createStatisticEntry(std::string name, std::string templateName) {
+simsignal_t Statistics::createStatisticEntry(std::string name, std::string templateName)
+{
     std::string fullName = name + statEntryNamePostfix;
     cProperty *statisticTemplate;
     simsignal_t signalId;
@@ -36,7 +39,8 @@ simsignal_t Statistics::createStatisticEntry(std::string name, std::string templ
     return signalId;
 }
 
-simsignal_t Statistics::createStatisticEntry(std::string name) {
+simsignal_t Statistics::createStatisticEntry(std::string name)
+{
     return createStatisticEntry(name, name);
 }
 

@@ -78,7 +78,8 @@ void Ieee80211Mac::initialize(int stage)
     }
 }
 
-void Ieee80211Mac::initializeRadioMode() {
+void Ieee80211Mac::initializeRadioMode()
+{
     const char *initialRadioMode = par("initialRadioMode");
     if (!strcmp(initialRadioMode, "off"))
         radio->setRadioMode(IRadio::RADIO_MODE_OFF);

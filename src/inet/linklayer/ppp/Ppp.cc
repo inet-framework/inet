@@ -292,7 +292,8 @@ void Ppp::refreshDisplay() const
     getDisplayString().setTagArg("i", 1, color);
 }
 
-std::string Ppp::resolveDirective(char directive) const {
+std::string Ppp::resolveDirective(char directive) const
+{
     switch (directive) {
         case 's':
             return std::to_string(numSent);

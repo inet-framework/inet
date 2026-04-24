@@ -189,7 +189,8 @@ static uint32_t updateMPTCP(const uint32_t w,
     return w + increase;
 }
 
-void SctpAssociation::recalculateOLIABasis() {
+void SctpAssociation::recalculateOLIABasis()
+{
     // it is necessary to calculate all flow information
     double assoc_best_paths_l_rXl_r__rtt_r = 0.0;
     // max_w_paths: The set of paths in all_paths with largest congestion windows.
@@ -250,7 +251,8 @@ void SctpAssociation::recalculateOLIABasis() {
 
 uint32_t SctpAssociation::updateOLIA(uint32_t w, const uint32_t s,
         const uint32_t totalW, double a, const uint32_t mtu,
-        const uint32_t ackedBytes, SctpPathVariables *path) {
+        const uint32_t ackedBytes, SctpPathVariables *path)
+{
     int32_t increase = 0;
     bool isInCollectedPath = false;
     bool isMaxWndPaths = false;
