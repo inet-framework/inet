@@ -572,7 +572,7 @@ SctpAssociation::SctpAssociation()
     ssFunctions.ssUsableStreams = nullptr;
 }
 
-void SctpAssociation::initAssociation(Sctp *_module, int32_t _appGateIndex, int32_t _assocId, IRoutingTable *_rt, IInterfaceTable *_ift)
+void SctpAssociation::initAssociation(Sctp *_module, int _appGateIndex, int _assocId, IRoutingTable *_rt, IInterfaceTable *_ift)
 {
     Enter_Method_Silent();
 
@@ -916,7 +916,7 @@ bool SctpAssociation::processSctpMessage(SctpHeader *sctpmsg,
     return process_RCV_Message(sctpmsg, msgSrcAddr, msgDestAddr);
 }
 
-SctpEventCode SctpAssociation::preanalyseAppCommandEvent(int32_t commandCode)
+SctpEventCode SctpAssociation::preanalyseAppCommandEvent(int commandCode)
 {
     switch (commandCode) {
         case SCTP_C_ASSOCIATE:
@@ -1109,7 +1109,7 @@ bool SctpAssociation::performStateTransition(const SctpEventCode& event)
     }
 
     // state machine
-    int32_t oldState = fsm->getState();
+    int oldState = fsm->getState();
 
     switch (fsm->getState()) {
         case SCTP_S_CLOSED:
@@ -1341,7 +1341,7 @@ bool SctpAssociation::performStateTransition(const SctpEventCode& event)
         return true;
 }
 
-void SctpAssociation::stateEntered(int32_t status)
+void SctpAssociation::stateEntered(int status)
 {
     switch (status) {
         case SCTP_S_COOKIE_WAIT:
