@@ -450,7 +450,7 @@ void Udp::setReuseAddress(SockDesc *sd, bool reuseAddr)
 
 void Udp::joinMulticastGroups(SockDesc *sd, const std::vector<L3Address>& multicastAddresses, const std::vector<int> interfaceIds)
 {
-    for (uint32_t k = 0; k < multicastAddresses.size(); k++) {
+    for (size_t k = 0; k < multicastAddresses.size(); k++) {
         const L3Address& multicastAddr = multicastAddresses[k];
         int interfaceId = k < interfaceIds.size() ? interfaceIds[k] : -1;
         ASSERT(multicastAddr.isMulticast());

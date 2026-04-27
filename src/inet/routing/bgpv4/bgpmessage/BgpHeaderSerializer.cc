@@ -175,7 +175,7 @@ const Ptr<Chunk> BgpHeaderSerializer::deserialize(MemoryInputStream& stream) con
 {
     bool incorrect = false;
     uint8_t marker[16];
-    for (uint8_t i = 0; i < 16; ++i) {
+    for (int i = 0; i < 16; ++i) {
         marker[i] = stream.readByte();
         if (marker[i] != 0xFF)
             incorrect = true;

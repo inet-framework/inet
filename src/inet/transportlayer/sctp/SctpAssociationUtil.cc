@@ -603,7 +603,7 @@ void SctpAssociation::sendInit()
     initChunk->setIpv6Supported(false);
 #endif
     if (localAddressList.front().isUnspecified()) {
-        for (int32_t i = 0; i < ift->getNumInterfaces(); ++i) {
+        for (int i = 0; i < ift->getNumInterfaces(); ++i) {
 #ifdef INET_WITH_IPv4
             if (auto ipv4Data = ift->getInterface(i)->findProtocolData<Ipv4InterfaceData>()) {
                 adv.push_back(ipv4Data->getIPAddress());
@@ -612,7 +612,7 @@ void SctpAssociation::sendInit()
 #endif // ifdef INET_WITH_IPv4
 #ifdef INET_WITH_IPv6
             if (auto ipv6Data = ift->getInterface(i)->findProtocolData<Ipv6InterfaceData>()) {
-                for (int32_t j = 0; j < ipv6Data->getNumAddresses(); j++) {
+                for (int j = 0; j < ipv6Data->getNumAddresses(); j++) {
                     EV_DETAIL << "add address " << ipv6Data->getAddress(j) << "\n";
                     adv.push_back(ipv6Data->getAddress(j));
                 }
@@ -679,7 +679,7 @@ void SctpAssociation::sendInit()
         initChunk->setSepChunks(count - 1, AUTH);
         state->keyVector[0] = (uint8_t)RANDOM;
         state->keyVector[2] = 36;
-        for (int32_t k = 0; k < 32; k++) {
+        for (int k = 0; k < 32; k++) {
             initChunk->setRandomArraySize(k + 1);
             initChunk->setRandom(k, (uint8_t)(RNGCONTEXT intrand(256)));
             state->keyVector[k + 2] = initChunk->getRandom(k);
@@ -806,7 +806,7 @@ void SctpAssociation::sendInitAck(SctpInitChunk *initChunk)
         state->streamResetSequenceNumber = state->nextTsn;
         cookie->setLocalTag(localVTag);
         cookie->setPeerTag(peerVTag);
-        for (int32_t i = 0; i < 32; i++) {
+        for (int i = 0; i < 32; i++) {
             cookie->setLocalTieTag(i, 0);
             cookie->setPeerTieTag(i, 0);
         }
@@ -821,7 +821,7 @@ void SctpAssociation::sendInitAck(SctpInitChunk *initChunk)
         state->gapList.forwardCumAckTsn(initPeerTsn - 1);
         cookie->setLocalTag(initChunk->getInitTag());
         cookie->setPeerTag(peerVTag);
-        for (int32_t i = 0; i < 32; i++) {
+        for (int i = 0; i < 32; i++) {
             cookie->setPeerTieTag(i, (uint8_t)(RNGCONTEXT intrand(256)));
             state->peerTieTag[i] = cookie->getPeerTieTag(i);
             if (fsm->getState() == SCTP_S_COOKIE_ECHOED) {
@@ -844,7 +844,7 @@ void SctpAssociation::sendInitAck(SctpInitChunk *initChunk)
         initAckChunk->setInitTsn(state->nextTsn);
         cookie->setLocalTag(localVTag);
         cookie->setPeerTag(peerVTag);
-        for (int32_t i = 0; i < 32; i++) {
+        for (int i = 0; i < 32; i++) {
             cookie->setPeerTieTag(i, state->peerTieTag[i]);
             cookie->setLocalTieTag(i, state->localTieTag[i]);
         }
@@ -893,7 +893,7 @@ void SctpAssociation::sendInitAck(SctpInitChunk *initChunk)
     if (sctpMain->auth == true) {
         initAckChunk->setSepChunksArraySize(++count);
         initAckChunk->setSepChunks(count - 1, AUTH);
-        for (int32_t k = 0; k < 32; k++) {
+        for (int k = 0; k < 32; k++) {
             initAckChunk->setRandomArraySize(k + 1);
             initAckChunk->setRandom(k, (uint8_t)(RNGCONTEXT intrand(256)));
         }

@@ -92,7 +92,7 @@ inline std::ostream& operator<<(std::ostream& out, BgpRoutingTableEntry& entry)
     if (entry.isIBgpLearned())
         out << " localPref: " << entry.getLocalPreference();
     out << " ASlist: ";
-    for (uint32_t i = 0; i < entry.getASCount(); i++)
+    for (unsigned int i = 0; i < entry.getASCount(); i++)
         out << entry.getAS(i) << ' ';
 
     return out;

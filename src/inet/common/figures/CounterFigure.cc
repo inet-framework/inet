@@ -380,7 +380,7 @@ void CounterFigure::layout()
     // Add frame
     bounds.x += PADDING + DIGIT_PADDING / 2;
 
-    for (uint32_t i = 0; i < digits.size(); ++i) {
+    for (size_t i = 0; i < digits.size(); ++i) {
         double rectWidth = getDigitFont().pointSize * DIGIT_WIDTH_PERCENT;
         double rectHeight = getDigitFont().pointSize * DIGIT_HEIGHT_PERCENT;
         double x = bounds.x + (rectWidth + DIGIT_PADDING) * i;
