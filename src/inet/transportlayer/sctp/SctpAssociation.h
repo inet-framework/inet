@@ -614,7 +614,7 @@ class INET_API SctpStateVariables : public cObject
     uint32_t numRequests;
     uint32_t bytesToRetransmit;
     uint32_t messagesToPush;
-    int32_t pushMessagesLeft;
+    int pushMessagesLeft;
     uint32_t count;
     uint8_t localTieTag[32];
     uint8_t peerTieTag[32];
@@ -850,7 +850,7 @@ class INET_API SctpAssociation : public SimpleModule
 
     // ====== Association Statistics =========================================
     struct AssociationStatistics {
-        int32_t assocId = -1;
+        int assocId = -1;
         simtime_t start = SIMTIME_ZERO;
         simtime_t stop = SIMTIME_ZERO;
         uint64_t rcvdBytes = 0;
@@ -985,10 +985,10 @@ class INET_API SctpAssociation : public SimpleModule
 
   public:
     // connection identification by apps: appgateIndex+assocId
-    int32_t appGateIndex; // Application gate index
-    int32_t assocId; // Identifies connection within the app
-    int32_t listeningAssocId;
-    int32_t fd;
+    int appGateIndex; // Application gate index
+    int assocId; // Identifies connection within the app
+    int listeningAssocId;
+    int fd;
     bool listening;
     L3Address remoteAddr; // Remote address from last message
     L3Address localAddr; // Local address from last message
@@ -1021,7 +1021,7 @@ class INET_API SctpAssociation : public SimpleModule
     uint32_t outboundStreams;
     uint32_t initInboundStreams;
 
-    int32_t status;
+    int status;
     uint32_t initTsn;
     uint32_t initPeerTsn;
     uint32_t sackFrequency;
@@ -1074,7 +1074,7 @@ class INET_API SctpAssociation : public SimpleModule
     /**
      * Initialize the association (called after module creation).
      */
-    void initAssociation(Sctp *mod, int32_t appGateIndex, int32_t assocId, IRoutingTable *rt, IInterfaceTable *ift);
+    void initAssociation(Sctp *mod, int appGateIndex, int assocId, IRoutingTable *rt, IInterfaceTable *ift);
 
     /**
      * Module initialization.
@@ -1184,10 +1184,10 @@ class INET_API SctpAssociation : public SimpleModule
     /** @name FSM transitions: analysing events and executing state transitions */
     //@{
     /** Maps app command codes (msg kind of app command msgs) to SCTP_E_xxx event codes */
-    SctpEventCode preanalyseAppCommandEvent(int32_t commandCode);
+    SctpEventCode preanalyseAppCommandEvent(int commandCode);
     /** Implemements the pure SCTP state machine */
     bool performStateTransition(const SctpEventCode& event);
-    void stateEntered(int32_t state);
+    void stateEntered(int state);
     //@}
     /** @name Processing app commands. Invoked from processAppCommand(). */
     //@{
@@ -1292,7 +1292,7 @@ class INET_API SctpAssociation : public SimpleModule
     void sendToApp(cMessage *msg);
 
     /** Utility: sends status indication (SCTP_I_xxx) to application */
-    void sendIndicationToApp(int32_t code, int32_t value = 0);
+    void sendIndicationToApp(int code, int value = 0);
 
     /** Utility: sends SCTP_I_ESTABLISHED indication with SctpConnectInfo to application */
     void sendEstabIndicationToApp();
