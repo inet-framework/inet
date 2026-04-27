@@ -37,6 +37,16 @@ void RtpPayloadSender::initialize()
     _sequenceNumberBase = intrand(0x7fffffff);
     _sequenceNumber = _sequenceNumberBase;
     _reminderMessage = nullptr;
+
+    WATCH(_mtu);
+    WATCH(_ssrc);
+    WATCH(_payloadType);
+    WATCH(_clockRate);
+    WATCH(_timeStampBase);
+    WATCH(_timeStamp);
+    WATCH(_sequenceNumberBase);
+    WATCH(_sequenceNumber);
+    WATCH(_reminderMessage);
 }
 
 void RtpPayloadSender::handleMessage(cMessage *msg)

@@ -64,6 +64,18 @@ void TcpLwipConnection::initConnection(TcpLwip& tcpLwipP, int connIdP)
     pcbM->callback_arg = this;
     sendQueueM->setConnection(this);
     receiveQueueM->setConnection(this);
+
+    WATCH(connIdM);
+    WATCH(pcbM);
+    WATCH(sendQueueM);
+    WATCH(receiveQueueM);
+    WATCH(tcpLwipM);
+    WATCH(totalSentM);
+    WATCH(isListenerM);
+    WATCH(onCloseM);
+    WATCH(sendUpEnabled);
+    WATCH(autoRead);
+    WATCH(maxByteCountRequested);
 }
 
 void TcpLwipConnection::initConnection(TcpLwipConnection& connP, int connIdP, LwipTcpLayer::tcp_pcb *pcbP)

@@ -42,6 +42,17 @@ void Rtcp::initialize(int stage)
         _averagePacketSize = 0.0;
 
         _participantInfos.setName("ParticipantInfos");
+
+        WATCH(_mtu);
+        WATCH(_bandwidth);
+        WATCH(_rtcpPercentage);
+        WATCH(_destinationAddress);
+        WATCH(_port);
+        WATCH(_ssrcChosen);
+        WATCH(_leaveSession);
+        WATCH(_senderInfo);
+        WATCH(_packetsCalculated);
+        WATCH(_averagePacketSize);
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
         cModule *node = findContainingNode(this);

@@ -42,6 +42,18 @@ void Rtp::initialize(int stage)
         rtcpInGate = findGate("rtcpIn");
         udpInGate = findGate("udpIn");
         _udpSocket.setOutputGate(gate("udpOut"));
+
+        WATCH(_commonName);
+        WATCH(_bandwidth);
+        WATCH(_destinationAddress);
+        WATCH(_port);
+        WATCH(_mtu);
+        WATCH(_rtcpPercentage);
+        WATCH(_leaveSession);
+        WATCH(appInGate);
+        WATCH(profileInGate);
+        WATCH(rtcpInGate);
+        WATCH(udpInGate);
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
         cModule *node = findContainingNode(this);
