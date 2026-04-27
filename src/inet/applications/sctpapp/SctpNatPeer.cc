@@ -85,7 +85,7 @@ void SctpNatPeer::initialize(int stage)
         // parameters
         const char *addressesString = par("localAddress");
         AddressVector addresses = L3AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
-        int32_t port = par("localPort");
+        int port = par("localPort");
         echo = par("echo");
         delay = par("echoDelay");
         outboundStreams = par("outboundStreams");
@@ -146,7 +146,7 @@ void SctpNatPeer::generateAndSend()
     clientSocket.send(applicationPacket);
 }
 
-void SctpNatPeer::connectx(AddressVector connectAddressList, int32_t connectPort)
+void SctpNatPeer::connectx(AddressVector connectAddressList, int connectPort)
 {
     uint32_t outStreams = par("outboundStreams");
     clientSocket.setOutboundStreams(outStreams);
@@ -176,7 +176,7 @@ void SctpNatPeer::connectx(AddressVector connectAddressList, int32_t connectPort
     }
 }
 
-void SctpNatPeer::connect(L3Address connectAddress, int32_t connectPort)
+void SctpNatPeer::connect(L3Address connectAddress, int connectPort)
 {
     clientSocket.setOutboundStreams(outboundStreams);
     clientSocket.setInboundStreams(inboundStreams);
@@ -206,7 +206,7 @@ void SctpNatPeer::connect(L3Address connectAddress, int32_t connectPort)
 
 void SctpNatPeer::handleMessage(cMessage *msg)
 {
-    int32_t id;
+    int id;
 
     if (msg->isSelfMessage()) {
         handleTimer(msg);
@@ -248,7 +248,7 @@ void SctpNatPeer::handleMessage(cMessage *msg)
                     clientSocket.processMessage(msg);
                 }
                 else {
-                    int32_t count = 0;
+                    int count = 0;
                     Message *message = check_and_cast<Message *>(msg);
                     auto& tags = message->getTags();
                     auto& connectInfo = tags.findTag<SctpConnectReq>();
@@ -478,7 +478,7 @@ void SctpNatPeer::handleMessage(cMessage *msg)
 
 void SctpNatPeer::handleTimer(cMessage *msg)
 {
-    int32_t id;
+    int id;
 
     EV << "SctpNatPeer::handleTimer\n";
 
@@ -551,7 +551,7 @@ void SctpNatPeer::socketPeerClosed(SctpSocket *socket)
         if (rendezvous) {
             const char *addressesString = par("localAddress");
             AddressVector addresses = L3AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
-            int32_t port = par("localPort");
+            int port = par("localPort");
             rendezvousSocket.setOutputGate(gate("socketOut"));
             rendezvousSocket.setOutboundStreams(outboundStreams);
             rendezvousSocket.setInboundStreams(inboundStreams);
@@ -583,7 +583,7 @@ void SctpNatPeer::socketClosed(SctpSocket *socket)
     if (rendezvous) {
         const char *addressesString = par("localAddress");
         AddressVector addresses = L3AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
-        int32_t port = par("localPort");
+        int port = par("localPort");
         rendezvousSocket.setOutputGate(gate("socketOut"));
         rendezvousSocket.setOutboundStreams(outboundStreams);
         rendezvousSocket.setInboundStreams(inboundStreams);
@@ -604,7 +604,7 @@ void SctpNatPeer::socketClosed(SctpSocket *socket)
     }
 }
 
-void SctpNatPeer::socketFailure(SctpSocket *socket, int32_t code)
+void SctpNatPeer::socketFailure(SctpSocket *socket, int code)
 {
     // subclasses may override this function, and add code try to reconnect after a delay.
     EV << "connection broken\n";
@@ -667,7 +667,7 @@ void SctpNatPeer::sendRequest(bool last)
 
 void SctpNatPeer::socketEstablished(SctpSocket *socket, unsigned long int buffer)
 {
-    int32_t count = 0;
+    int count = 0;
     // *redefine* to perform or schedule first sending
     EV << "SctpNatPeer: socketEstablished\n";
     setStatusString("connected");
@@ -770,7 +770,7 @@ void SctpNatPeer::sendQueueRequest()
 
 void SctpNatPeer::sendRequestArrived(SctpSocket *socket)
 {
-    int32_t count = 0;
+    int count = 0;
 
     EV << "sendRequestArrived numRequestsToSend=" << numRequestsToSend << "\n";
     while (numRequestsToSend > 0 && count++ < queueSize && sendAllowed) {

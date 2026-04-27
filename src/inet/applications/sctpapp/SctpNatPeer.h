@@ -39,8 +39,8 @@ class INET_API SctpNatPeer : public SimpleModule, public SctpSocket::ICallback, 
 {
   protected:
 //    SctpAssociation* assoc;
-    int32_t notifications;
-    int32_t serverAssocId;
+    int notifications;
+    int serverAssocId;
     SctpSocket clientSocket;
     SctpSocket peerSocket;
     SctpSocket rendezvousSocket;
@@ -52,37 +52,37 @@ class INET_API SctpNatPeer : public SimpleModule, public SctpSocket::ICallback, 
     long bytesSent;
     long packetsSent;
     long packetsRcvd;
-    int32_t numSessions;
-    int32_t numRequestsToSend; // requests to send in this session
+    int numSessions;
+    int numRequestsToSend; // requests to send in this session
     bool ordered;
-    int32_t queueSize;
+    int queueSize;
     cMessage *timeoutMsg;
     cMessage *timeMsg;
-    int32_t outboundStreams;
-    int32_t inboundStreams;
+    int outboundStreams;
+    int inboundStreams;
     long bytesRcvd;
     long echoedBytesSent;
-    int32_t lastStream;
+    int lastStream;
     bool sendAllowed;
-    int32_t chunksAbandoned;
-    int32_t numPacketsToReceive;
+    int chunksAbandoned;
+    int numPacketsToReceive;
     bool rendezvous;
     L3Address peerAddress;
-    int32_t peerPort;
+    int peerPort;
     AddressVector peerAddressList;
     AddressVector localAddressList;
 //    cOutVector* rcvdBytes;
-    typedef std::map<int32_t, long> RcvdPacketsPerAssoc;
+    typedef std::map<int, long> RcvdPacketsPerAssoc;
     RcvdPacketsPerAssoc rcvdPacketsPerAssoc;
-    typedef std::map<int32_t, long> SentPacketsPerAssoc;
+    typedef std::map<int, long> SentPacketsPerAssoc;
     SentPacketsPerAssoc sentPacketsPerAssoc;
-    typedef std::map<int32_t, long> RcvdBytesPerAssoc;
+    typedef std::map<int, long> RcvdBytesPerAssoc;
     RcvdBytesPerAssoc rcvdBytesPerAssoc;
-    typedef std::map<int32_t, cOutVector *> BytesPerAssoc;
+    typedef std::map<int, cOutVector *> BytesPerAssoc;
     BytesPerAssoc bytesPerAssoc;
-    typedef std::map<int32_t, cHistogram *> HistEndToEndDelay;
+    typedef std::map<int, cHistogram *> HistEndToEndDelay;
     HistEndToEndDelay histEndToEndDelay;
-    typedef std::map<int32_t, cOutVector *> EndToEndDelay;
+    typedef std::map<int, cOutVector *> EndToEndDelay;
     EndToEndDelay endToEndDelay;
     void sendOrSchedule(cMessage *msg);
     void sendRequest(bool last = true);
@@ -104,8 +104,8 @@ class INET_API SctpNatPeer : public SimpleModule, public SctpSocket::ICallback, 
     void handleTimer(cMessage *msg);
 //    void setAssociation(SctpAssociation *_assoc) { assoc = _assoc; }
     void generateAndSend();
-    void connect(L3Address connectAddress, int32_t connectPort);
-    void connectx(AddressVector connectAddressList, int32_t connectPort);
+    void connect(L3Address connectAddress, int connectPort);
+    void connectx(AddressVector connectAddressList, int connectPort);
 
     virtual void socketAvailable(SctpSocket *socket, Indication *indication) override {
         throw cRuntimeError("Model error, this module doesn't use any listener SCTP sockets");
@@ -128,7 +128,7 @@ class INET_API SctpNatPeer : public SimpleModule, public SctpSocket::ICallback, 
     void socketClosed(SctpSocket *socket) override;
 
     /** Does nothing but update statistics/status. Redefine if you want to try reconnecting after a delay. */
-    void socketFailure(SctpSocket *socket, int32_t code) override;
+    void socketFailure(SctpSocket *socket, int code) override;
 
     /** Redefine to handle incoming SctpStatusInfo. */
     void socketStatusArrived(SctpSocket *socket, SctpStatusReq *status) override;
