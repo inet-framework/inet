@@ -104,7 +104,7 @@ void Ieee80211MgmtSta::initialize(int stage)
 
         WATCH(scanning);
         WATCH(assocAP);
-        WATCH_LIST(apList);
+        WATCH(apList);
     }
 }
 

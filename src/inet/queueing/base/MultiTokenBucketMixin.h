@@ -49,7 +49,7 @@ class INET_API MultiTokenBucketMixin : public T, public ITokenStorage
                 auto excessTokenStorage = bucketConfiguration->containsKey("excessTokenModule") ? getExcessTokenStorage(bucketConfiguration->get("excessTokenModule")) : (i < bucketConfigurations->size() - 1 ? &tokenBuckets[i + 1] : nullptr);
                 tokenBuckets[i] = (TokenBucket(numTokens, maxNumTokens, tokenProductionRate, excessTokenStorage));
             }
-            WATCH_VECTOR(tokenBuckets);
+            WATCH(tokenBuckets);
         }
         else if (stage == INITSTAGE_QUEUEING)
             emitTokensChangedSignals();

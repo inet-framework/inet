@@ -29,10 +29,10 @@ void MessageDispatcher::initialize(int stage)
         forwardServiceRegistration = par("forwardServiceRegistration");
         forwardProtocolRegistration = par("forwardProtocolRegistration");
         interfaceTable.reference(this, "interfaceTableModule", true);
-        WATCH_MAP(socketIdToGateIndex);
-        WATCH_MAP(interfaceIdToGateIndex);
-        WATCH_MAP(serviceToGateIndex);
-        WATCH_MAP(protocolToGateIndex);
+        WATCH(socketIdToGateIndex);
+        WATCH(interfaceIdToGateIndex);
+        WATCH(serviceToGateIndex);
+        WATCH(protocolToGateIndex);
     }
     else if (stage == INITSTAGE_LAST) {
         cValueMap *interfaceMapping = check_and_cast<cValueMap *>(par("interfaceMapping").objectValue());

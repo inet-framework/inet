@@ -17,7 +17,7 @@ std::ostream& operator<<(std::ostream& os, const AckHandler::Status& status) { r
 void AckHandler::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        WATCH_MAP(ackStatuses);
+        WATCH(ackStatuses);
     }
 }
 

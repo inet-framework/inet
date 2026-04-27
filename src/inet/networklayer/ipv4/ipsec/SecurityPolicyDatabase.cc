@@ -36,7 +36,7 @@ SecurityPolicyDatabase::~SecurityPolicyDatabase()
 
 void SecurityPolicyDatabase::initialize()
 {
-    WATCH_PTRVECTOR(entries);
+    WATCH(entries);
 }
 
 SecurityPolicy *SecurityPolicyDatabase::findEntry(IPsecRule::Direction direction, PacketInfo *packet)

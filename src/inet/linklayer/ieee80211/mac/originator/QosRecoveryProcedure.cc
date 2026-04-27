@@ -39,8 +39,8 @@ void QosRecoveryProcedure::initialize(int stage)
         emit(contentionWindowChangedSignal, cwCalculator->getCw());
         WATCH(stationLongRetryCounter);
         WATCH(stationShortRetryCounter);
-        WATCH_MAP(shortRetryCounter);
-        WATCH_MAP(longRetryCounter);
+        WATCH(shortRetryCounter);
+        WATCH(longRetryCounter);
     }
 }
 

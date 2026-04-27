@@ -20,7 +20,7 @@ Ospfv3Area::Ospfv3Area(Ipv4Address areaID, Ospfv3Instance *parent, Ospfv3AreaTyp
     this->areaType = type;
     this->spfTreeRoot = nullptr;
 
-    WATCH_PTRVECTOR(this->interfaceList);
+    WATCH(this->interfaceList);
 }
 
 Ospfv3Area::~Ospfv3Area()

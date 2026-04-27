@@ -49,10 +49,10 @@ Ospfv2Area::~Ospfv2Area()
 
 void Ospfv2Area::addWatches()
 {
-    WATCH_PTRVECTOR(routerLSAs);
-    WATCH_PTRVECTOR(networkLSAs);
-    WATCH_PTRVECTOR(summaryLSAs);
-    WATCH_PTRVECTOR(associatedInterfaces);
+    WATCH(routerLSAs);
+    WATCH(networkLSAs);
+    WATCH(summaryLSAs);
+    WATCH(associatedInterfaces);
 }
 
 void Ospfv2Area::addInterface(Ospfv2Interface *intf)

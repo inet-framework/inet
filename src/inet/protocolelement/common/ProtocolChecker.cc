@@ -18,7 +18,7 @@ void ProtocolChecker::initialize(int stage)
 {
     PacketFilterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        WATCH_PTRSET(protocols);
+        WATCH(protocols);
     }
 }
 

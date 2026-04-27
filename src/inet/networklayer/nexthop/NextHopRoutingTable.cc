@@ -65,8 +65,8 @@ void NextHopRoutingTable::initialize(int stage)
         forwarding = par("forwarding");
         multicastForwarding = par("multicastForwarding");
 
-        WATCH_PTRVECTOR(routes);
-        WATCH_PTRVECTOR(multicastRoutes);
+        WATCH(routes);
+        WATCH(multicastRoutes);
         WATCH(forwarding);
         WATCH(multicastForwarding);
         WATCH(routerId);
