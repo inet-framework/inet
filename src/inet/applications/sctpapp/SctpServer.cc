@@ -207,7 +207,7 @@ void SctpServer::handleMessage(cMessage *msg)
                     }
                 }
                 else {
-                    if (serverAssocStatMap[assocId].rcvdPackets == static_cast<unsigned long int>(par("numPacketsToReceivePerClient"))
+                    if (serverAssocStatMap[assocId].rcvdPackets == (long)par("numPacketsToReceivePerClient")
                         && serverAssocStatMap[assocId].abortSent == false)
                     {
                         sendOrSchedule(makeAbortNotification(command->dup()));

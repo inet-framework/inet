@@ -45,9 +45,9 @@ class INET_API SctpNatServer : public SimpleModule, public LifecycleUnsupported
     uint32_t assocId;
     SctpSocket *socket;
     bool shutdownReceived;
-    int64_t bytesSent;
-    int32_t packetsSent;
-    int32_t packetsRcvd;
+    long bytesSent;
+    long packetsSent;
+    long packetsRcvd;
     int32_t numSessions;
     int32_t numRequestsToSend; // requests to send in this session
     bool ordered;
