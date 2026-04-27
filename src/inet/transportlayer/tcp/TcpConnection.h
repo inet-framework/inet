@@ -10,9 +10,9 @@
 #define __INET_TCPCONNECTION_H
 
 #include "inet/common/SimpleModule.h"
+#include "inet/networklayer/common/IcmpType_m.h"
+#include "inet/networklayer/common/Icmpv6Type_m.h"
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/networklayer/ipv4/IcmpHeader_m.h"
-#include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
 #include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp/TcpConnectionState_m.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
