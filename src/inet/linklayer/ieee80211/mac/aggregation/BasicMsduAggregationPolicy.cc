@@ -18,6 +18,10 @@ void BasicMsduAggregationPolicy::initialize()
     aggregationLengthThreshold = par("aggregationLengthThreshold");
     maxAMsduSize = B(par("maxAMsduSize"));
     qOsCheck = par("qOsCheck");
+
+    WATCH(qOsCheck);
+    WATCH(subframeNumThreshold);
+    WATCH(aggregationLengthThreshold);
 }
 
 bool BasicMsduAggregationPolicy::isAggregationPossible(int numOfFramesToAggragate, int aMsduLength)

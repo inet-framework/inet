@@ -17,6 +17,8 @@ Define_Module(BasicFragmentationPolicy);
 void BasicFragmentationPolicy::initialize()
 {
     fragmentationThreshold = par("fragmentationThreshold");
+
+    WATCH(fragmentationThreshold);
 }
 
 std::vector<int> BasicFragmentationPolicy::computeFragmentSizes(Packet *frame)

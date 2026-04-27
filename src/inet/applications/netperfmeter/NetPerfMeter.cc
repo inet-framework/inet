@@ -192,6 +192,32 @@ void NetPerfMeter::initialize(int stage)
                 }
             }
         }
+
+        WATCH(ActiveMode);
+        WATCH(SendingAllowed);
+        WATCH(HasFinished);
+        WATCH(MaxMsgSize);
+        WATCH(QueueSize);
+        WATCH(UnorderedMode);
+        WATCH(UnreliableMode);
+        WATCH(DecoupleSaturatedStreams);
+        WATCH(ConnectTime);
+        WATCH(StartTime);
+        WATCH(ResetTime);
+        WATCH(StopTime);
+        WATCH(ConnectTimer);
+        WATCH(StartTimer);
+        WATCH(StopTimer);
+        WATCH(ResetTimer);
+        WATCH(OffTimer);
+        WATCH(OnTimer);
+        WATCH(OnOffCycleCounter);
+        WATCH(MaxOnOffCycles);
+        WATCH(RequestedOutboundStreams);
+        WATCH(MaxInboundStreams);
+        WATCH(ActualOutboundStreams);
+        WATCH(ActualInboundStreams);
+        WATCH(ConnectionID);
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         // ====== Initialize and bind socket =====================================

@@ -15,6 +15,9 @@ void SignalSource::initialize()
 {
     startTime = par("startTime");
     endTime = par("endTime");
+
+    WATCH(startTime);
+    WATCH(endTime);
     signal = registerSignal(par("signalName"));
     scheduleAt(startTime, new cMessage("timer"));
 }

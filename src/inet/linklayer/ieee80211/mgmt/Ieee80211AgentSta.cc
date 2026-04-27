@@ -55,6 +55,15 @@ void Ieee80211AgentSta::initialize(int stage)
         scheduleAfter(startingTime, new cMessage("startUp", MK_STARTUP));
 
         myIface = nullptr;
+
+        WATCH(activeScan);
+        WATCH(channelsToScan);
+        WATCH(probeDelay);
+        WATCH(minChannelTime);
+        WATCH(maxChannelTime);
+        WATCH(authenticationTimeout);
+        WATCH(associationTimeout);
+        WATCH(defaultSsid);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         IInterfaceTable *ift = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);

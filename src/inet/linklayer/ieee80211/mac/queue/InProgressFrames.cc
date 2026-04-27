@@ -23,6 +23,9 @@ void InProgressFrames::initialize(int stage)
         pendingQueue = check_and_cast<queueing::IPacketQueue *>(getModuleByPath(par("pendingQueueModule")));
         dataService = check_and_cast<IOriginatorMacDataService *>(getModuleByPath(par("originatorMacDataServiceModule")));
         ackHandler = check_and_cast<IAckHandler *>(getModuleByPath(par("ackHandlerModule")));
+
+        WATCH(inProgressFrames);
+        WATCH(droppedFrames);
     }
 }
 

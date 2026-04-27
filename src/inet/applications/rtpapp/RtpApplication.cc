@@ -53,6 +53,9 @@ void RtpApplication::initialize(int stage)
 
         ssrc = 0;
         isActiveSession = false;
+
+        WATCH(ssrc);
+        WATCH(isActiveSession);
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         cModule *node = findContainingNode(this);

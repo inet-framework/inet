@@ -47,6 +47,17 @@ void SimpleVoipSender::initialize(int stage)
         selfSender = new cMessage("selfSender");
         localPort = par("localPort");
         destPort = par("destPort");
+
+        WATCH(talkspurtDuration);
+        WATCH(silenceDuration);
+        WATCH(isTalk);
+        WATCH(talkspurtID);
+        WATCH(talkspurtNumPackets);
+        WATCH(packetID);
+        WATCH(talkPacketSize);
+        WATCH(packetizationInterval);
+        WATCH(localPort);
+        WATCH(destPort);
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         cModule *node = findContainingNode(this);

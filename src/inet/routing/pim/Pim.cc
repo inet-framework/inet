@@ -31,6 +31,8 @@ void Pim::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         const char *checksumModeString = par("checksumMode");
         checksumMode = parseChecksumMode(checksumModeString, false);
+
+        WATCH(checksumMode);
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
         if (checksumMode == CHECKSUM_COMPUTED) {

@@ -28,6 +28,11 @@ void ExternalProcess::initialize()
 {
     printStdout = par("printStdout");
     printStderr = par("printStderr");
+
+    WATCH(printStdout);
+    WATCH(printStderr);
+    WATCH(processStdout);
+    WATCH(processStderr);
     command = par("command");
     rtScheduler = check_and_cast<RealTimeScheduler *>(getSimulation()->getScheduler());
     startTimer = new cMessage("startTimer");

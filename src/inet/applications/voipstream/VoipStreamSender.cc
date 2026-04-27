@@ -96,6 +96,15 @@ void VoipStreamSender::initialize(int stage)
         pReSampleCtx = nullptr;
         localPort = par("localPort");
         destPort = par("destPort");
+
+        WATCH(voipHeaderSize);
+        WATCH(compressedBitRate);
+        WATCH(packetTimeLength);
+        WATCH(repeatCount);
+        WATCH(streamIndex);
+        WATCH(samplesPerPacket);
+        WATCH(localPort);
+        WATCH(destPort);
         EV_DEBUG << "libavcodec: " << LIBAVCODEC_VERSION_MAJOR << "." << LIBAVCODEC_VERSION_MINOR << "." << LIBAVCODEC_VERSION_MICRO << endl;
         EV_DEBUG << "libavformat: " << LIBAVFORMAT_VERSION_MAJOR << "." << LIBAVFORMAT_VERSION_MINOR << "." << LIBAVFORMAT_VERSION_MICRO << endl;
         EV_DEBUG << "libavutil: " << LIBAVUTIL_VERSION_MAJOR << "." << LIBAVUTIL_VERSION_MINOR << "." << LIBAVUTIL_VERSION_MICRO << endl;

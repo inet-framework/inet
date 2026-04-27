@@ -53,6 +53,16 @@ void TrafficgenSimple::initialize(int stage)
         ordered         = par("ordered");
         sentPktCount    = 0;
 
+        WATCH(id);
+        WATCH(name);
+        WATCH(priority);
+        WATCH(packetCount);
+        WATCH(active);
+        WATCH(reliable);
+        WATCH(ordered);
+        WATCH(startTime);
+        WATCH(stopTime);
+        WATCH(sentPktCount);
     }
 
     // inform connected application about parameters

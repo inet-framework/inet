@@ -41,6 +41,11 @@ void QosClassifier::initialize(int stage)
         parseUserPriorityMap(par("ipProtocolUpMap"), ipProtocolUpMap);
         parseUserPriorityMap(par("udpPortUpMap"), udpPortUpMap);
         parseUserPriorityMap(par("tcpPortUpMap"), tcpPortUpMap);
+
+        WATCH(defaultUp);
+        WATCH(ipProtocolUpMap);
+        WATCH(udpPortUpMap);
+        WATCH(tcpPortUpMap);
     }
 }
 
