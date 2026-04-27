@@ -73,6 +73,18 @@ void SctpNatPeer::initialize(int stage)
     SimpleModule::initialize(stage);
     EV_DEBUG << "initialize SCTP NAT Peer stage " << stage << endl;
     if (stage == INITSTAGE_LOCAL) {
+        WATCH(localAddressList);
+        WATCH(peerAddressList);
+        WATCH(peerAddress);
+        WATCH(bytesPerAssoc);
+        WATCH(endToEndDelay);
+        WATCH(histEndToEndDelay);
+        WATCH(rcvdPacketsPerAssoc);
+        WATCH(rcvdBytesPerAssoc);
+        WATCH(sentPacketsPerAssoc);
+        WATCH(schedule);
+        WATCH(sendAllowed);
+        WATCH(shutdownReceived);
         WATCH(numSessions);
         WATCH(packetsSent);
         WATCH(packetsRcvd);

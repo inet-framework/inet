@@ -19,6 +19,7 @@ void ModuleDump::initialize()
     printClassNames = par("printClassNames").boolValue();
     printProperties = par("printProperties").boolValue();
     printParamAssignmentLocations = par("printParamAssignmentLocations").boolValue();
+
     scheduleAt(par("time"), new cMessage());
 }
 

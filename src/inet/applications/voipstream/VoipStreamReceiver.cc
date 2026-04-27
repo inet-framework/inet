@@ -54,6 +54,7 @@ void VoipStreamReceiver::initialize(int stage)
 
         // initialize avcodec library
         av_log_set_callback(&inet_av_log);
+
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         cModule *node = findContainingNode(this);

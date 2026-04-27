@@ -237,6 +237,15 @@ void IPsec::initialize(int stage)
 
         spdModule = getModuleFromPar<SecurityPolicyDatabase>(par("spdModule"), this);
         sadModule = getModuleFromPar<SecurityAssociationDatabase>(par("sadModule"), this);
+
+        WATCH(lastProtectedIn);
+        WATCH(lastProtectedOut);
+        WATCH(inAccept);
+        WATCH(inDrop);
+        WATCH(inBypass);
+        WATCH(outProtect);
+        WATCH(outDrop);
+        WATCH(outBypass);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {  // TODO: was INITSTAGE_NETWORK_LAYER_3
         cXMLElement *spdConfig = par("spdConfig").xmlValue();

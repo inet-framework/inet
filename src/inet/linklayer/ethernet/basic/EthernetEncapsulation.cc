@@ -68,6 +68,7 @@ void EthernetEncapsulation::initialize(int stage)
         totalFromHigherLayer = totalFromMAC = totalPauseSent = 0;
         interfaceTable.reference(this, "interfaceTableModule", true);
 
+        WATCH(anyUpperProtocols);
         WATCH(upperProtocols);
         WATCH(socketIdToSocketMap);
         WATCH(totalFromHigherLayer);

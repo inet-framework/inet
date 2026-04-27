@@ -63,6 +63,8 @@ void Ipv6Tunneling::initialize(int stage)
         vIfIndexTop = INT_MAX; // virtual interface number set to maximum int value
         noOfNonSplitTunnels = 0; // current number of non-split tunnels on this host
 
+        WATCH(vIfIndexTop);
+        WATCH(noOfNonSplitTunnels);
         WATCH(tunnels);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {

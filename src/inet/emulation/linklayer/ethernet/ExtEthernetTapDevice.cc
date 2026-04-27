@@ -43,6 +43,7 @@ void ExtEthernetTapDevice::initialize(int stage)
         packetNameFormat = par("packetNameFormat");
         rtScheduler = check_and_cast<RealTimeScheduler *>(getSimulation()->getScheduler());
         numSent = numReceived = 0;
+        WATCH(fd);
         WATCH(numSent);
         WATCH(numReceived);
     }

@@ -33,6 +33,7 @@ void TcpGenericServerApp::initialize(int stage)
         // statistics
         msgsRcvd = msgsSent = bytesRcvd = bytesSent = 0;
 
+        WATCH(maxMsgDelay);
         WATCH(msgsRcvd);
         WATCH(msgsSent);
         WATCH(bytesRcvd);

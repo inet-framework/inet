@@ -58,6 +58,8 @@ void XMac::initialize(int stage)
         macState = INIT;
         txQueue = getQueue(gate(upperLayerInGateId));
         WATCH(macState);
+        WATCH(nbTxDataPackets);
+        WATCH(nbRxDataPackets);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         radio.reference(this, "radioModule", true);

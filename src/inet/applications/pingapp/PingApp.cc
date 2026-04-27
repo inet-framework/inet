@@ -105,6 +105,10 @@ void PingApp::initialize(int stage)
             sendTimeHistory[i] = SIMTIME_MAX;
             pongReceived[i] = false;
         }
+        WATCH(pid);
+        WATCH(lastStart);
+        WATCH(destAddrIdx);
+        WATCH(numDuplicatedPongs);
         WATCH(sendSeqNo);
         WATCH(expectedReplySeqNo);
 

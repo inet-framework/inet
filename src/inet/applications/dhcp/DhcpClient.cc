@@ -52,6 +52,10 @@ void DhcpClient::initialize(int stage)
         // DHCP UDP ports
         clientPort = 68; // client
         serverPort = 67; // server
+        WATCH(clientPort);
+        WATCH(serverPort);
+        WATCH(macAddress);
+        WATCH(responseTimeout);
         // get the routing table to update and subscribe it to the blackboard
         irt.reference(this, "routingTableModule", true);
         // set client to idle state

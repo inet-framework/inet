@@ -30,6 +30,9 @@ void AttachedMobility::initialize(int stage)
         orientationOffset = Quaternion(EulerAngles(alpha, beta, gamma));
         isZeroOffset = positionOffset == Coord::ZERO;
         check_and_cast<cModule *>(mobility.get())->subscribe(IMobility::mobilityStateChangedSignal, this);
+        WATCH(isZeroOffset);
+        WATCH(orientationOffset);
+        WATCH(positionOffset);
         WATCH(lastVelocity);
         WATCH(lastAngularPosition);
     }

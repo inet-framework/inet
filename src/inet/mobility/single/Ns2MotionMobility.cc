@@ -132,6 +132,8 @@ void Ns2MotionMobility::initialize(int stage)
         ns2File = new Ns2MotionFile;
         parseFile(fname.c_str());
         vecpos = 0;
+        WATCH(vecpos);
+        WATCH(maxSpeed);
         WATCH(nodeId);
     }
 }

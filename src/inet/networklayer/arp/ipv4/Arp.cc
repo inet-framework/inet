@@ -61,7 +61,6 @@ void Arp::initialize(int stage)
         WATCH(numRepliesSent);
         WATCH(numResolutions);
         WATCH(numFailedResolutions);
-
         WATCH(arpCache);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {

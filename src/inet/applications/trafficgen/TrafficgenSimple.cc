@@ -53,6 +53,9 @@ void TrafficgenSimple::initialize(int stage)
         ordered         = par("ordered");
         sentPktCount    = 0;
 
+        WATCH(active);
+        WATCH(statRuntime);
+        WATCH(sentPktCount);
     }
 
     // inform connected application about parameters

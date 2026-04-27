@@ -49,6 +49,10 @@ void DhcpServer::initialize(int stage)
         // DHCP UDP ports
         clientPort = 68; // client
         serverPort = 67; // server
+        WATCH(subnetMask);
+        WATCH(clientPort);
+        WATCH(serverPort);
+        WATCH(ipAddressStart);
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         cModule *host = getContainingNode(this);

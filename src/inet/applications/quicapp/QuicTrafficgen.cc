@@ -30,6 +30,15 @@ QuicTrafficgen::~QuicTrafficgen()
     cancelAndDelete(timerLimitRuntime);
 }
 
+void QuicTrafficgen::initialize(int stage)
+{
+    ApplicationBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL) {
+        WATCH(generatorsActive);
+        WATCH(sendingAllowed);
+    }
+}
+
 void QuicTrafficgen::handleStartOperation(LifecycleOperation *operation)
 {
     EV_DEBUG << "initialize QuicTrafficgen" << endl;

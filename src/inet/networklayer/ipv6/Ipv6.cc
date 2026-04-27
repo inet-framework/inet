@@ -93,6 +93,8 @@ void Ipv6::initialize(int stage)
 
         numMulticast = numLocalDeliver = numDropped = numUnroutable = numForwarded = 0;
 
+        WATCH(curFragmentId);
+        WATCH(lastCheckTime);
         WATCH(numMulticast);
         WATCH(numLocalDeliver);
         WATCH(numDropped);

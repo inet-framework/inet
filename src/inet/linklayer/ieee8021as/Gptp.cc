@@ -99,6 +99,7 @@ void Gptp::initialize(int stage)
             pdelayTimer = new ClockEvent("PdelayTimer");
             scheduleClockEventAfter(par("pdelayInitialOffset"), pdelayTimer);
         }
+        WATCH(slavePortId);
         WATCH(nextSequenceId);
         WATCH(gmRateRatio);
         WATCH(neighborRateRatio);

@@ -85,6 +85,8 @@ void BehaviorAggregateClassifier::initialize(int stage)
                     numDscps, numOutGates);
         for (int i = 0; i < numDscps; ++i)
             dscpToGateIndexMap[dscps[i]] = i;
+        numOutGates = gateSize("out");
+        WATCH(numOutGates);
 
         numRcvd = 0;
         WATCH(numRcvd);

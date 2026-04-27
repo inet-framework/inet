@@ -67,6 +67,23 @@ void WiseRoute::initialize(int stage)
         nbGetRouteFailures = 0;
         nbRoutesRecorded = 0;
         nbHops = 0;
+
+        WATCH(floodSeqNumber);
+        WATCH(myNetwAddr);
+        WATCH(trace);
+        WATCH(nbDataPacketsForwarded);
+        WATCH(nbDataPacketsReceived);
+        WATCH(nbDataPacketsSent);
+        WATCH(nbDuplicatedFloodsReceived);
+        WATCH(nbGetRouteFailures);
+        WATCH(nbHops);
+        WATCH(nbPureUnicastForwarded);
+        WATCH(nbPureUnicastSent);
+        WATCH(nbRouteFloodsReceived);
+        WATCH(nbRouteFloodsSent);
+        WATCH(nbRoutesRecorded);
+        WATCH(nbFloodsSent);
+        WATCH(nbUnicastFloodForwarded);
         receivedRSSI.setName("receivedRSSI");
         routeRSSI.setName("routeRSSI");
         allReceivedRSSI.setName("allReceivedRSSI");

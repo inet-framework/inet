@@ -33,6 +33,9 @@ void RtpAvProfilePayload32Sender::initialize()
 
     _clockRate = 90000;
     _payloadType = 32;
+    WATCH(_frameNumber);
+    WATCH(_framesPerSecond);
+    WATCH(_initialDelay);
 }
 
 void RtpAvProfilePayload32Sender::initializeSenderModule(RtpInnerPacket *rinpIn)

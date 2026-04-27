@@ -60,10 +60,14 @@ void EthernetCsmaPhy::initialize(int stage)
         crsOffTimer->setSchedulingPriority(SHRT_MAX);
         fsm.setStateChangedSignal(stateChangedSignal);
         fsm.setState(IDLE, "IDLE");
+
         setTxUpdateSupport(true);
         emit(receivedSignalTypeSignal, NONE);
         emit(transmittedSignalTypeSignal, NONE);
         emit(busUsedSignal, 0);
+
+        WATCH(txEndTime);
+        WATCH_EXPR("fsmState", std::string(fsm.getStateName()));
     }
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         networkInterface = getContainingNicModule(this);

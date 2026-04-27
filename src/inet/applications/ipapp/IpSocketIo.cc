@@ -25,6 +25,7 @@ void IpSocketIo::initialize(int stage)
             protocol = Protocol::getProtocol(protocolAsString);
         numSent = 0;
         numReceived = 0;
+        WATCH(dontFragment);
         WATCH(numSent);
         WATCH(numReceived);
     }

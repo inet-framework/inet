@@ -121,6 +121,29 @@ void TcpConnection::initConnection(Tcp *_mod, int _socketId)
     connEstabTimer->setContextPointer(this);
     finWait2Timer->setContextPointer(this);
     synRexmitTimer->setContextPointer(this);
+
+    WATCH(socketId);
+    WATCH(listeningSocketId);
+    WATCH(localAddr);
+    WATCH(remoteAddr);
+    WATCH(localPort);
+    WATCH(remotePort);
+    WATCH(ttl);
+    WATCH(dscp);
+    WATCH(tos);
+    WATCH(autoRead);
+    WATCH(peerClosedSentUp);
+    WATCH(maxByteCountRequested);
+    WATCH(fsm);
+    WATCH(state);
+    WATCH(sendQueue);
+    WATCH(receiveQueue);
+    WATCH(rexmitQueue);
+    WATCH(tcpAlgorithm);
+    WATCH(the2MSLTimer);
+    WATCH(connEstabTimer);
+    WATCH(finWait2Timer);
+    WATCH(synRexmitTimer);
 }
 
 TcpConnection::~TcpConnection()

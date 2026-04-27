@@ -129,6 +129,12 @@ void NetworkInterface::initialize(int stage)
         setInterfaceName(utils::stripnonalnum(getFullName()).c_str());
         setCarrier(computeCarrier());
         setDatarate(computeDatarate());
+        WATCH(hasModuleIdAddress);
+        WATCH(hasModulePathAddress);
+        WATCH(nodeInputGateId);
+        WATCH(nodeOutputGateId);
+        WATCH(interfaceId);
+        WATCH(interfaceName);
         WATCH(mtu);
         WATCH(state);
         WATCH(carrier);

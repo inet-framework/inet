@@ -43,6 +43,9 @@ void ExtEthernetSocket::initialize(int stage)
         packetNameFormat = par("packetNameFormat");
         rtScheduler = check_and_cast<RealTimeScheduler *>(getSimulation()->getScheduler());
         numSent = numReceived = 0;
+        WATCH(fd);
+        WATCH(ifindex);
+        WATCH(macAddress);
         WATCH(numSent);
         WATCH(numReceived);
     }

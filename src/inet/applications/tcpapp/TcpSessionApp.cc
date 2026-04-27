@@ -41,6 +41,7 @@ void TcpSessionApp::initialize(int stage)
         tClose = par("tClose");
         sendBytes = par("sendBytes");
         commandIndex = 0;
+        WATCH(commandIndex);
 
         const char *script = par("sendScript");
         parseScript(script);

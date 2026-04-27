@@ -123,6 +123,9 @@ void Dymo::initialize(int stage)
             }
             clientAddressAndPrefixLengthPairs.push_back(std::pair<L3Address, int>(address, prefixLength));
         }
+
+        WATCH(sequenceNumber);
+        WATCH_LAMBDA("numPending", [this]() { return (int)targetAddressToRREQTimer.size(); });
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         registerProtocol(Protocol::manet, gate("ipOut"), gate("ipIn"));

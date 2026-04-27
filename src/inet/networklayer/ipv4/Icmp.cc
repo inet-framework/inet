@@ -55,6 +55,10 @@ void Icmp::initialize(int stage)
         rt.reference(this, "routingTableModule", true);
         checksumMode = parseChecksumMode(par("checksumMode"), false);
         parseQuoteLengthParameter();
+
+        WATCH(checksumMode);
+        WATCH(quoteLength);
+        WATCH(transportProtocols);
     }
     if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {
         registerService(Protocol::icmpv4, gate("transportIn"), gate("transportOut"));

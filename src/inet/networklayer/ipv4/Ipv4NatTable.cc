@@ -39,6 +39,8 @@ void Ipv4NatTable::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         config = par("config");
         networkProtocol.reference(this, "networkProtocolModule", true);
+
+        WATCH(natEntries);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         parseConfig();

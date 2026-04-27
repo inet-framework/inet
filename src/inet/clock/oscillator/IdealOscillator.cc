@@ -19,6 +19,7 @@ void IdealOscillator::initialize(int stage)
         tickLength = par("tickLength");
         if (tickLength == 0)
             tickLength.setRaw(1);
+        WATCH(origin);
         WATCH(tickLength);
     }
 }

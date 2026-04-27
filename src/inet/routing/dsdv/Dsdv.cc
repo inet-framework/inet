@@ -54,6 +54,9 @@ void Dsdv::initialize(int stage)
 
     // reads from omnetpp.ini
     if (stage == INITSTAGE_LOCAL) {
+        WATCH(sequencenumber);
+        WATCH(interfaceId);
+        WATCH(isForwardHello);
         sequencenumber = 0;
         host = getContainingNode(this);
         ift.reference(this, "interfaceTableModule", true);

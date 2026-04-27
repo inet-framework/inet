@@ -39,6 +39,9 @@ void Ted::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         maxMessageId = 0;
 
+        WATCH(interfaceAddrs);
+        WATCH(maxMessageId);
+        WATCH(routerId);
         WATCH(ted);
 
         rt.reference(this, "routingTableModule", true);

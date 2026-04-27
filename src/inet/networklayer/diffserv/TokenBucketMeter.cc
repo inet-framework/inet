@@ -29,12 +29,16 @@ void TokenBucketMeter::initialize(int stage)
         CBS = 8 * par("cbs").intValue();
         colorAwareMode = par("colorAwareMode");
         Tc = CBS;
+        WATCH(CBS);
+        WATCH(Tc);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         const char *cirStr = par("cir");
         IInterfaceTable *ift = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         CIR = parseInformationRate(cirStr, "cir", ift, *this, 0);
         lastUpdateTime = simTime();
+        WATCH(CIR);
+        WATCH(lastUpdateTime);
     }
 }
 

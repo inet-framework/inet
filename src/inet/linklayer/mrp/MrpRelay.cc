@@ -39,6 +39,7 @@ void MrpRelay::initialize(int stage)
         WATCH(numReceivedNetworkFrames);
         WATCH(numReceivedPDUsFromMRP);
         WATCH(numDeliveredPDUsToMRP);
+        WATCH(numDispatchedMRPFrames);
         WATCH(numDispatchedNonMRPFrames);
     } else if (stage == INITSTAGE_LINK_LAYER) {
         registerService(Protocol::ethernetMac, gate("upperLayerIn"), gate("upperLayerOut"));

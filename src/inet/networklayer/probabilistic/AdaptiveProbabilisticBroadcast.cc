@@ -26,6 +26,7 @@ void AdaptiveProbabilisticBroadcast::initialize(int stage)
         bvec.setName("Beta Vector");
 
         timeInNeighboursTable = par("timeInNeighboursTable");
+        WATCH(neighMap);
     }
 }
 

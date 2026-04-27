@@ -73,6 +73,8 @@ void SimpleVoipReceiver::initialize(int stage)
         mosSpareTime = par("mosSpareTime");
 
         currentTalkspurt.talkspurtID = -1;
+
+        WATCH(playoutDelay);
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         cModule *node = findContainingNode(this);

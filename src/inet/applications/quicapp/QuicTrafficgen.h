@@ -26,6 +26,7 @@ class QuicTrafficgen : public ApplicationBase, public QuicSocket::ICallback
     protected:
       QuicSocket socket;
 
+      virtual void initialize(int stage) override;
       virtual void handleMessageWhenUp(cMessage *msg) override;
 
       virtual void handleStartOperation(LifecycleOperation *operation) override;

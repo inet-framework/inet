@@ -49,6 +49,8 @@ void CreditBasedGate::initialize(int stage)
         module->subscribe(transmissionEndedSignal, this);
         module->subscribe(interpacketGapEndedSignal, this);
         changeTimer = new cMessage("ChangeTimer");
+        WATCH(lastCurrentCreditEmitted);
+        WATCH(lastCurrentCreditEmittedTime);
         WATCH(isTransmitting);
         WATCH(isInterpacketGap);
         WATCH(currentCredit);

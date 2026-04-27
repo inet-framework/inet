@@ -20,6 +20,8 @@ void DimensionalTransmitterAnalogModel::initialize(int stage)
         defaultCenterFrequency = Hz(par("centerFrequency"));
         defaultBandwidth = Hz(par("bandwidth"));
         defaultPower = W(par("power"));
+        WATCH(defaultCenterFrequency);
+        WATCH(defaultBandwidth);
         gainFunctionCacheLimit = par("gainFunctionCacheLimit");
         parseTimeGains(par("timeGains"));
         parseFrequencyGains(par("frequencyGains"));

@@ -30,6 +30,7 @@ void TurtleMobility::initialize(int stage)
 
     EV_TRACE << "initializing TurtleMobility stage " << stage << endl;
     if (stage == INITSTAGE_LOCAL) {
+        WATCH(maxSpeed);
         WATCH(speed);
         WATCH(heading);
         WATCH(elevation);

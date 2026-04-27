@@ -83,6 +83,10 @@ void SctpClient::initialize(int stage)
         stopTimer = nullptr;
         primaryChangeTimer = nullptr;
 
+        WATCH(timer);
+        WATCH(chunksAbandoned);
+        WATCH(echoedBytesSent);
+        WATCH(sendAllowed);
         WATCH(numSessions);
         WATCH(numBroken);
         WATCH(packetsSent);

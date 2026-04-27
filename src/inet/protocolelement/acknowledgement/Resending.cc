@@ -16,8 +16,10 @@ Define_Module(Resending);
 void Resending::initialize(int stage)
 {
     PacketPusherBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
+    if (stage == INITSTAGE_LOCAL) {
         numRetries = par("numRetries");
+        WATCH(retry);
+    }
 }
 
 void Resending::pushPacket(Packet *packet, const cGate *gate)

@@ -29,6 +29,7 @@ void PacketMultiplexer::initialize(int stage)
         }
         outputGate = gate("out");
         consumer.reference(outputGate, false);
+        WATCH(inProgressStreamId);
     }
     else if (stage == INITSTAGE_QUEUEING) {
         for (auto& inputGate : inputGates)

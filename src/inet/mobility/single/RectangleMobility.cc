@@ -48,6 +48,10 @@ void RectangleMobility::initialize(int stage)
             d = corner2 + (startPos - 2) * dx; // bottom side
         else
             d = corner3 + (startPos - 3) * dy; // left side
+        WATCH(corner1);
+        WATCH(corner2);
+        WATCH(corner3);
+        WATCH(corner4);
         WATCH(d);
     }
 }

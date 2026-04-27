@@ -73,8 +73,12 @@ void RsvpTe::initialize(int stage)
         maxPsbId = 0;
         maxRsbId = 0;
         maxSrcInstance = 0;
-
         retryInterval = 1.0;
+        WATCH(maxPsbId);
+        WATCH(maxRsbId);
+        WATCH(maxSrcInstance);
+        WATCH(retryInterval);
+        WATCH(routerId);
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         // process traffic configuration

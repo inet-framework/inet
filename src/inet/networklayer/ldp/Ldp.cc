@@ -112,6 +112,7 @@ void Ldp::initialize(int stage)
         WATCH(pending);
 
         maxFecid = 0;
+        WATCH(maxFecid);
         sendHelloMsg = new cMessage("LDPSendHello");
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {

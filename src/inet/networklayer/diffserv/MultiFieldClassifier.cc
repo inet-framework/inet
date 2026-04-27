@@ -135,6 +135,7 @@ void MultiFieldClassifier::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         numOutGates = gateSize("out");
+        WATCH(numOutGates);
 
         numRcvd = 0;
         WATCH(numRcvd);

@@ -19,6 +19,7 @@ simsignal_t EthernetPauseCommandProcessor::pauseSentSignal = registerSignal("pau
 void EthernetPauseCommandProcessor::initialize()
 {
     seqNum = 0;
+    WATCH(seqNum);
 }
 
 void EthernetPauseCommandProcessor::handleMessage(cMessage *msg)

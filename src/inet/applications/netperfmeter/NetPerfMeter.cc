@@ -192,6 +192,28 @@ void NetPerfMeter::initialize(int stage)
                 }
             }
         }
+
+        WATCH(SendingAllowed);
+        WATCH(HasFinished);
+        WATCH(QueueSize);
+        WATCH(ConnectTimer);
+        WATCH(StartTimer);
+        WATCH(StopTimer);
+        WATCH(ResetTimer);
+        WATCH(OffTimer);
+        WATCH(OnTimer);
+        WATCH(OnOffCycleCounter);
+        WATCH(RequestedOutboundStreams);
+        WATCH(MaxInboundStreams);
+        WATCH(ActualOutboundStreams);
+        WATCH(ActualInboundStreams);
+        WATCH(ConnectionEstablishmentTime);
+        WATCH(LastStreamID);
+        WATCH(PrimaryPath);
+        WATCH(StatisticsResetTime);
+        WATCH(StatisticsStartTime);
+        WATCH(TransmissionStartTime);
+        WATCH(ConnectionID);
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         // ====== Initialize and bind socket =====================================
@@ -266,7 +288,7 @@ void NetPerfMeter::finish()
 void NetPerfMeter::refreshDisplay() const
 {
     SimpleModule::refreshDisplay();
-    
+
     unsigned long long totalSentBytes = 0;
     for (std::map<unsigned int, SenderStatistics *>::const_iterator iterator = SenderStatisticsMap.begin();
          iterator != SenderStatisticsMap.end(); iterator++)
