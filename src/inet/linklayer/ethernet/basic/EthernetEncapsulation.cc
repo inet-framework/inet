@@ -145,13 +145,6 @@ void EthernetEncapsulation::processCommandFromHigherLayer(Request *msg)
         throw cRuntimeError("Unknown command: '%s' with %s", msg->getName(), ctrl->getClassName());
 }
 
-void EthernetEncapsulation::refreshDisplay() const
-{
-    OperationalBase::refreshDisplay();
-    std::string buf = "passed up: " + std::to_string(totalFromMAC) + "\nsent: " + std::to_string(totalFromHigherLayer);
-    getDisplayString().setTagArg("t", 0, buf.c_str());
-}
-
 void EthernetEncapsulation::processPacketFromHigherLayer(Packet *packet)
 {
     if (packet->getDataLength() > MAX_ETHERNET_DATA_BYTES)

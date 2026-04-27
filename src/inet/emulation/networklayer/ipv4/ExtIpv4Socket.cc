@@ -75,12 +75,6 @@ void ExtIpv4Socket::handleMessage(cMessage *msg)
     delete packet;
 }
 
-void ExtIpv4Socket::refreshDisplay() const
-{
-    std::string buf = "snt:" + std::to_string(numSent) + " rcv:" + std::to_string(numReceived);
-    getDisplayString().setTagArg("t", 0, buf.c_str());
-}
-
 void ExtIpv4Socket::finish()
 {
     std::cout << getFullPath() << ": " << numSent << " packets sent, " << numReceived << " packets received\n";

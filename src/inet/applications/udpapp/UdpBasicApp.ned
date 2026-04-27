@@ -49,6 +49,7 @@ simple UdpBasicApp extends SimpleModule like IApp
         string multicastInterface = default("");  // If not empty, set the multicast output interface option on the socket (interface name expected)
         bool receiveBroadcast = default(false); // If true, makes the socket receive broadcast packets
         bool joinLocalMulticastGroups = default(false); // If true, makes the socket receive packets from all multicast groups set on local interfaces
+        displayStringTextFormat = default("rcvd: {numReceived} pks\nsent: {numSent} pks");
         @display("i=block/app");
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finished

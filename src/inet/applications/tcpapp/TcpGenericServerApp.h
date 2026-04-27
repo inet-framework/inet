@@ -45,7 +45,6 @@ class INET_API TcpGenericServerApp : public SimpleModule, public LifecycleUnsupp
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
-    virtual void refreshDisplay() const override;
 };
 
 } // namespace inet

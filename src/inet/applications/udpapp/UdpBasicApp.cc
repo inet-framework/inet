@@ -212,14 +212,6 @@ void UdpBasicApp::socketClosed(UdpSocket *socket)
         startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
 
-void UdpBasicApp::refreshDisplay() const
-{
-    ApplicationBase::refreshDisplay();
-
-    std::string buf = "rcvd: " + std::to_string(numReceived) + " pks\nsent: " + std::to_string(numSent) + " pks";
-    getDisplayString().setTagArg("t", 0, buf.c_str());
-}
-
 void UdpBasicApp::processPacket(Packet *pk)
 {
     emit(packetReceivedSignal, pk);

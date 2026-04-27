@@ -42,6 +42,7 @@ simple EthernetEncapsulation extends SimpleModule like IEthernetLayer
         double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after the lifecycle stop operation has finished
         double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for the lifecycle stop operation
         @class(EthernetEncapsulation);
+        displayStringTextFormat = default("passed up: {totalFromMAC}\nsent: {totalFromHigherLayer}");
         @display("i=block/layer");
         @signal[encapPk](type=cPacket);
         @signal[decapPk](type=cPacket);

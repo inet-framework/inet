@@ -77,12 +77,6 @@ void ExtIpv4TunDevice::handleMessage(cMessage *msg)
     delete [] buffer;
 }
 
-void ExtIpv4TunDevice::refreshDisplay() const
-{
-    std::string buf = "TUN device: " + device + "\nrcv:" + std::to_string(numReceived) + " snt:" + std::to_string(numSent);
-    getDisplayString().setTagArg("t", 0, buf.c_str());
-}
-
 void ExtIpv4TunDevice::finish()
 {
     EV_INFO << numSent << " packets sent, " << numReceived << " packets received.\n";

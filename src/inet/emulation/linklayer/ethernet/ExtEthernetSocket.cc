@@ -85,13 +85,6 @@ void ExtEthernetSocket::handleMessage(cMessage *message)
     delete [] buffer;
 }
 
-void ExtEthernetSocket::refreshDisplay() const
-{
-    SimpleModule::refreshDisplay();
-    std::string buf = std::string("device: ") + device + "\nsnt:" + std::to_string(numSent) + " rcv:" + std::to_string(numReceived);
-    getDisplayString().setTagArg("t", 0, buf.c_str());
-}
-
 void ExtEthernetSocket::finish()
 {
     std::cout << numSent << " packets sent, " << numReceived << " packets received\n";

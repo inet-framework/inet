@@ -27,7 +27,6 @@ class INET_API IpSocketIo : public ApplicationBase, public Ipv4Socket::ICallback
     virtual void initialize(int stage) override;
     virtual void handleMessageWhenUp(cMessage *message) override;
     virtual void finish() override;
-    virtual void refreshDisplay() const override;
 
     virtual void setSocketOptions();
 

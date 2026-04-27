@@ -33,7 +33,6 @@ class INET_API Ieee8022LlcSocketIo : public ApplicationBase, public Ieee8022LlcS
     virtual void initialize(int stage) override;
     virtual void handleMessageWhenUp(cMessage *message) override;
     virtual void finish() override;
-    virtual void refreshDisplay() const override;
 
     virtual void setSocketOptions();
 

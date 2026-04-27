@@ -112,6 +112,7 @@ simple UdpBasicBurst extends SimpleModule like IApp
         bool dontFragment = default(false); // If true, asks IP to not fragment the message during routing
         int dscp = default(-1); // If not -1, set the DSCP field (on IPv4/IPv6) of sent packets to this value
         int tos = default(-1); // If not -1, set the Type Of Service (IPv4) / Traffic Class (IPv6) field of sent packets to this value
+        displayStringTextFormat = default("rcvd: {numReceived} pks\nsent: {numSent} pks");
         @display("i=block/app");
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finished

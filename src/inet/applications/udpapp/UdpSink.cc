@@ -78,14 +78,6 @@ void UdpSink::socketClosed(UdpSocket *socket)
         startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
 
-void UdpSink::refreshDisplay() const
-{
-    ApplicationBase::refreshDisplay();
-
-    std::string buf = "rcvd: " + std::to_string(numReceived) + " pks";
-    getDisplayString().setTagArg("t", 0, buf.c_str());
-}
-
 void UdpSink::finish()
 {
     ApplicationBase::finish();

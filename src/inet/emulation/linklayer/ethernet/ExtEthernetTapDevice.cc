@@ -81,13 +81,6 @@ void ExtEthernetTapDevice::handleMessage(cMessage *msg)
     delete [] buffer;
 }
 
-void ExtEthernetTapDevice::refreshDisplay() const
-{
-    SimpleModule::refreshDisplay();
-    std::string buf = "TAP device: " + device + "\nrcv:" + std::to_string(numReceived) + " snt:" + std::to_string(numSent);
-    getDisplayString().setTagArg("t", 0, buf.c_str());
-}
-
 void ExtEthernetTapDevice::finish()
 {
     EV_INFO << numSent << " packets sent, " << numReceived << " packets received.\n";

@@ -22,6 +22,7 @@ simple ExtEthernetTapDevice extends SimpleModule
         string device; // Name of the existing real tap interface
         string namespace = default("");
         string packetNameFormat = default("Ext-%p-%t-%n");
+        displayStringTextFormat = default("TAP device: {device}\nrcv: {numReceived} snt: {numSent}");
         @display("i=block/rxtx");
         @signal[packetSentToLower](type=Packet);
         @signal[packetReceivedFromLower](type=Packet);
