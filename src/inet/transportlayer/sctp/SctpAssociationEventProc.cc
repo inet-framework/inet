@@ -348,7 +348,7 @@ void SctpAssociation::process_STREAM_RESET(SctpCommandReq *sctpCommand)
         else if (state->outstandingBytes > 0) {
             if (rinfo->getRequestType() == RESET_OUTGOING || rinfo->getRequestType() == RESET_INCOMING || rinfo->getRequestType() == RESET_BOTH) {
                 if (rinfo->getStreamsArraySize() > 0) {
-                    for (uint16_t i = 0; i < rinfo->getStreamsArraySize(); i++) {
+                    for (size_t i = 0; i < rinfo->getStreamsArraySize(); i++) {
                         if ((getBytesInFlightOfStream(rinfo->getStreams(i)) > 0) ||
                             getFragInProgressOfStream(rinfo->getStreams(i)) ||
                             !orderedQueueEmptyOfStream(rinfo->getStreams(i)) ||

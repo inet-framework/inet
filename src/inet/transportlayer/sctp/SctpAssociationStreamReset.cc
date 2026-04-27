@@ -176,7 +176,7 @@ void SctpAssociation::sendOutgoingResetRequest(SctpIncomingSsnResetRequestParame
         }
         else if (requestParam->getStreamNumbersArraySize() > 0) {
             outResetParam->setStreamNumbersArraySize(requestParam->getStreamNumbersArraySize());
-            for (uint16_t i = 0; i < requestParam->getStreamNumbersArraySize(); i++) {
+            for (size_t i = 0; i < requestParam->getStreamNumbersArraySize(); i++) {
                 outResetParam->setStreamNumbers(i, requestParam->getStreamNumbers(i));
                 state->requests[srsn - 1].streams.push_back(requestParam->getStreamNumbers(i));
             }
@@ -257,7 +257,7 @@ void SctpAssociation::sendBundledOutgoingResetAndResponse(SctpIncomingSsnResetRe
         }
         else if (requestParam->getStreamNumbersArraySize() > 0) {
             outResetParam->setStreamNumbersArraySize(requestParam->getStreamNumbersArraySize());
-            for (uint16_t i = 0; i < requestParam->getStreamNumbersArraySize(); i++) {
+            for (size_t i = 0; i < requestParam->getStreamNumbersArraySize(); i++) {
                 outResetParam->setStreamNumbers(i, requestParam->getStreamNumbers(i));
             }
             len = requestParam->getStreamNumbersArraySize() * 2;

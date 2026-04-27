@@ -903,7 +903,7 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
         auto dataMessage = makeShared<BytesChunk>();
         std::vector<uint8_t> vec;
         vec.resize(frameSize);
-        for (uint32_t i = 0; i < frameSize; i++)
+        for (unsigned int i = 0; i < frameSize; i++)
             vec[i] = ((i & 1) ? 'D' : 'T');
         dataMessage->setBytes(vec);
         dataMessage->addTag<CreationTimeTag>()->setCreationTime(simTime());
@@ -939,7 +939,7 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
                 auto dataMessage = makeShared<BytesChunk>();
                 std::vector<uint8_t> vec;
                 vec.resize(msgSize);
-                for (uint32_t i = 0; i < msgSize; i++)
+                for (unsigned int i = 0; i < msgSize; i++)
                     vec[i] = ((i & 1) ? 'D' : 'T');
                 dataMessage->setBytes(vec);
                 dataMessage->addTag<CreationTimeTag>()->setCreationTime(simTime());
@@ -971,7 +971,7 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
                 auto dataMessage = makeShared<BytesChunk>();
                 std::vector<uint8_t> vec;
                 vec.resize(msgSize);
-                for (uint32_t i = 0; i < msgSize; i++)
+                for (unsigned int i = 0; i < msgSize; i++)
                     vec[i] = ((i & 1) ? 'D' : 'T');
                 dataMessage->setBytes(vec);
                 dataMessage->addTag<CreationTimeTag>()->setCreationTime(simTime());

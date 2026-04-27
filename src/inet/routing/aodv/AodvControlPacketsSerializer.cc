@@ -100,7 +100,7 @@ void AodvControlPacketsSerializer::serialize(MemoryOutputStream& stream, const P
             }
 
             stream.writeByte(aodvRerr->getUnreachableNodesArraySize());
-            for (uint8_t index = 0; index < aodvRerr->getUnreachableNodesArraySize(); ++index) {
+            for (size_t index = 0; index < aodvRerr->getUnreachableNodesArraySize(); ++index) {
                 stream.writeIpv4Address(aodvRerr->getUnreachableNodes(aodvRerr->getUnreachableNodesArraySize() - (index + 1)).addr.toIpv4());
                 stream.writeUint32Be(aodvRerr->getUnreachableNodes(aodvRerr->getUnreachableNodesArraySize() - (index + 1)).seqNum);
             }
@@ -117,7 +117,7 @@ void AodvControlPacketsSerializer::serialize(MemoryOutputStream& stream, const P
             }
 
             stream.writeByte(aodvRerr->getUnreachableNodesArraySize());
-            for (uint8_t index = 0; index < aodvRerr->getUnreachableNodesArraySize(); ++index) {
+            for (size_t index = 0; index < aodvRerr->getUnreachableNodesArraySize(); ++index) {
                 stream.writeUint32Be(aodvRerr->getUnreachableNodes(aodvRerr->getUnreachableNodesArraySize() - (index + 1)).seqNum);
                 stream.writeIpv6Address(aodvRerr->getUnreachableNodes(aodvRerr->getUnreachableNodesArraySize() - (index + 1)).addr.toIpv6());
             }
@@ -218,7 +218,7 @@ const Ptr<Chunk> AodvControlPacketsSerializer::deserialize(MemoryInputStream& st
             if (aodvRerr->getUnreachableNodesArraySize() == 0)
                 aodvRerr->markIncorrect();
             UnreachableNode node = UnreachableNode();
-            for (uint8_t index = 0; index < aodvRerr->getUnreachableNodesArraySize(); ++index) {
+            for (size_t index = 0; index < aodvRerr->getUnreachableNodesArraySize(); ++index) {
                 node.addr = L3Address(stream.readIpv4Address());
                 node.seqNum = stream.readUint32Be();
                 aodvRerr->setUnreachableNodes(aodvRerr->getUnreachableNodesArraySize() - (index + 1), node);
@@ -235,7 +235,7 @@ const Ptr<Chunk> AodvControlPacketsSerializer::deserialize(MemoryInputStream& st
             if (aodvRerr->getUnreachableNodesArraySize() == 0)
                 aodvRerr->markIncorrect();
             UnreachableNode node = UnreachableNode();
-            for (uint8_t index = 0; index < aodvRerr->getUnreachableNodesArraySize(); ++index) {
+            for (size_t index = 0; index < aodvRerr->getUnreachableNodesArraySize(); ++index) {
                 node.seqNum = stream.readUint32Be();
                 node.addr = L3Address(stream.readIpv6Address());
                 aodvRerr->setUnreachableNodes(aodvRerr->getUnreachableNodesArraySize() - (index + 1), node);

@@ -49,7 +49,7 @@ void SctpAssociation::storePacket(SctpPathVariables *pathVar,
         const bool authAdded)
 {
     uint32_t packetBytes = 0;
-    for (uint16_t i = 0; i < sctpMsg->getSctpChunksArraySize(); i++) {
+    for (size_t i = 0; i < sctpMsg->getSctpChunksArraySize(); i++) {
         const SctpChunk *chunkPtr = sctpMsg->getSctpChunks(i);
         if (chunkPtr->getSctpChunkType() == DATA) {
             const SctpDataChunk *dataChunk = check_and_cast<const SctpDataChunk *>(chunkPtr);
@@ -100,7 +100,7 @@ void SctpAssociation::loadPacket(SctpPathVariables *pathVar,
     }
     qCounter.bookedSumSendStreams -= state->packetBytes;
 
-    for (uint16_t i = 0; i < (*sctpMsg)->getSctpChunksArraySize(); i++) {
+    for (size_t i = 0; i < (*sctpMsg)->getSctpChunksArraySize(); i++) {
         const SctpChunk *chunkPtr = (*sctpMsg)->getSctpChunks(i);
         if (chunkPtr->getSctpChunkType() == 0) {
             const SctpDataChunk *dataChunk = check_and_cast<const SctpDataChunk *>(chunkPtr);

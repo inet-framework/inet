@@ -213,7 +213,7 @@ SctpAuthenticationChunk *SctpAssociation::createAuthChunk()
     authChunk->setHMacIdentifier(1);
     authChunk->setHMacOk(true);
     authChunk->setHMACArraySize(SHA_LENGTH);
-    for (int32_t i = 0; i < SHA_LENGTH; i++) {
+    for (int i = 0; i < SHA_LENGTH; i++) {
         authChunk->setHMAC(i, 0);
     }
     authChunk->setByteLength(SCTP_AUTH_CHUNK_LENGTH + SHA_LENGTH);

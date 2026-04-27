@@ -92,7 +92,7 @@ B calculateLSASize(const Ospfv2Lsa *lsa)
 B calculateLsaSize(const Ospfv2RouterLsa& lsa)
 {
     B lsaLength = OSPFv2_LSA_HEADER_LENGTH + OSPFv2_ROUTERLSA_HEADER_LENGTH;
-    for (uint32_t i = 0; i < lsa.getLinksArraySize(); i++) {
+    for (size_t i = 0; i < lsa.getLinksArraySize(); i++) {
         const auto& link = lsa.getLinks(i);
         lsaLength += OSPFv2_LINK_HEADER_LENGTH + (OSPFv2_TOS_LENGTH * link.getTosDataArraySize());
     }
