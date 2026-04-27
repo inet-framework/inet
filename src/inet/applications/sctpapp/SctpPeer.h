@@ -71,10 +71,10 @@ class INET_API SctpPeer : public SimpleModule, public SctpSocket::ICallback, pub
     HistEndToEndDelay histEndToEndDelay;
     EndToEndDelay endToEndDelay;
     long bytesSent;
-    int echoedBytesSent;
-    int packetsSent;
-    int bytesRcvd;
-    int packetsRcvd;
+    long echoedBytesSent;
+    long packetsSent;
+    long bytesRcvd;
+    long packetsRcvd;
     int notificationsReceived;
     int numSessions;
     int chunksAbandoned;

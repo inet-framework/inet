@@ -71,7 +71,7 @@ class INET_API SctpQueue : public cObject
 
     bool deleteMsg(const uint32_t tsn);
 
-    int32_t getNumBytes() const;
+    long getNumBytes() const;
 
     SctpDataVariables *dequeueChunkBySSN(const uint16_t ssn);
 

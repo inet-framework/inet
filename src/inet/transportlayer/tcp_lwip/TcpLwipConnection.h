@@ -91,7 +91,7 @@ class INET_API TcpLwipConnection : public SimpleModule
     bool onCloseM = false;
     bool sendUpEnabled = false;
     bool autoRead = true;
-    int32_t maxByteCountRequested = 0;  // from READ requests
+    long maxByteCountRequested = 0;  // from READ requests
 
     // statistics
     static simsignal_t sndWndSignal; // snd_wnd

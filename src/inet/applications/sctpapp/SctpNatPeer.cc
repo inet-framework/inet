@@ -257,8 +257,8 @@ void SctpNatPeer::handleMessage(cMessage *msg)
                     id = serverAssocId;
                     outboundStreams = connectInfo->getOutboundStreams();
                     inboundStreams = connectInfo->getInboundStreams();
-                    rcvdPacketsPerAssoc[serverAssocId] = static_cast<int64_t>(par("numPacketsToReceivePerClient"));
-                    sentPacketsPerAssoc[serverAssocId] = static_cast<int64_t>(par("numPacketsToSendPerClient"));
+                    rcvdPacketsPerAssoc[serverAssocId] = (long)par("numPacketsToReceivePerClient");
+                    sentPacketsPerAssoc[serverAssocId] = (long)par("numPacketsToSendPerClient");
                     char text[128];
                     snprintf(text, sizeof(text), "App: Received Bytes of assoc %d", serverAssocId);
                     bytesPerAssoc[serverAssocId] = new cOutVector(text);
@@ -270,7 +270,7 @@ void SctpNatPeer::handleMessage(cMessage *msg)
 
                     delete msg;
 
-                    if (static_cast<int64_t>(par("numPacketsToSendPerClient")) > 0) {
+                    if ((long)par("numPacketsToSendPerClient") > 0) {
                         auto i = sentPacketsPerAssoc.find(serverAssocId);
                         numRequestsToSend = i->second;
                         if (par("thinkTime").doubleValue() > 0.0) {

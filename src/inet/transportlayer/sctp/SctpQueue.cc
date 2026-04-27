@@ -162,9 +162,9 @@ bool SctpQueue::deleteMsg(const uint32_t tsn)
     return false;
 }
 
-int32_t SctpQueue::getNumBytes() const
+long SctpQueue::getNumBytes() const
 {
-    int32_t qb = 0;
+    long qb = 0;
     for (const auto& elem : payloadQueue) {
         qb += (elem.second->len / 8);
     }

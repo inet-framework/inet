@@ -27,9 +27,9 @@ class INET_API SctpServer : public SimpleModule, public LifecycleUnsupported
         simtime_t start;
         simtime_t stop;
         simtime_t lifeTime;
-        unsigned long int rcvdBytes;
-        unsigned long int sentPackets;
-        unsigned long int rcvdPackets;
+        long rcvdBytes;
+        long sentPackets;
+        long rcvdPackets;
         bool abortSent;
         bool peerClosed;
     };
@@ -65,10 +65,10 @@ class INET_API SctpServer : public SimpleModule, public LifecycleUnsupported
     int numSessions;
     int count;
     int notificationsReceived;
-    unsigned long int bytesSent;
-    unsigned long int packetsSent;
-    unsigned long int packetsRcvd;
-    unsigned long int numRequestsToSend; // requests to send in this session
+    long bytesSent;
+    long packetsSent;
+    long packetsRcvd;
+    long numRequestsToSend; // requests to send in this session
     BytesPerAssoc bytesPerAssoc;
     ServerAssocStatMap serverAssocStatMap;
 

@@ -49,9 +49,9 @@ class INET_API SctpNatPeer : public SimpleModule, public SctpSocket::ICallback, 
     bool schedule;
     bool shutdownReceived;
 //    long bytesRcvd;
-    int64_t bytesSent;
-    int32_t packetsSent;
-    int32_t packetsRcvd;
+    long bytesSent;
+    long packetsSent;
+    long packetsRcvd;
     int32_t numSessions;
     int32_t numRequestsToSend; // requests to send in this session
     bool ordered;
@@ -60,8 +60,8 @@ class INET_API SctpNatPeer : public SimpleModule, public SctpSocket::ICallback, 
     cMessage *timeMsg;
     int32_t outboundStreams;
     int32_t inboundStreams;
-    int32_t bytesRcvd;
-    int32_t echoedBytesSent;
+    long bytesRcvd;
+    long echoedBytesSent;
     int32_t lastStream;
     bool sendAllowed;
     int32_t chunksAbandoned;
@@ -72,11 +72,11 @@ class INET_API SctpNatPeer : public SimpleModule, public SctpSocket::ICallback, 
     AddressVector peerAddressList;
     AddressVector localAddressList;
 //    cOutVector* rcvdBytes;
-    typedef std::map<int32_t, int64_t> RcvdPacketsPerAssoc;
+    typedef std::map<int32_t, long> RcvdPacketsPerAssoc;
     RcvdPacketsPerAssoc rcvdPacketsPerAssoc;
-    typedef std::map<int32_t, int64_t> SentPacketsPerAssoc;
+    typedef std::map<int32_t, long> SentPacketsPerAssoc;
     SentPacketsPerAssoc sentPacketsPerAssoc;
-    typedef std::map<int32_t, int64_t> RcvdBytesPerAssoc;
+    typedef std::map<int32_t, long> RcvdBytesPerAssoc;
     RcvdBytesPerAssoc rcvdBytesPerAssoc;
     typedef std::map<int32_t, cOutVector *> BytesPerAssoc;
     BytesPerAssoc bytesPerAssoc;

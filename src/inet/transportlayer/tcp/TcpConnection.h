@@ -130,7 +130,7 @@ class INET_API TcpConnection : public SimpleModule
     short tos = -1;
     bool autoRead = true;
     bool peerClosedSentUp = false;
-    int32_t maxByteCountRequested = 0;  // from READ requests
+    long maxByteCountRequested = 0;  // from READ requests
 
     Tcp *tcpMain = nullptr; // Tcp module
 

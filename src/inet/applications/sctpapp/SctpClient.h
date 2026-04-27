@@ -57,13 +57,13 @@ class INET_API SctpClient : public SimpleModule, public SctpSocket::ICallback, p
     const char *stateNameStr;
 
     // statistics
-    unsigned long int packetsSent;
-    unsigned long int packetsRcvd;
-    unsigned long int bytesSent;
-    unsigned long int echoedBytesSent;
-    unsigned long int bytesRcvd;
-    unsigned long int numRequestsToSend; // requests to send in this session
-    unsigned long int numPacketsToReceive;
+    long packetsSent;
+    long packetsRcvd;
+    long bytesSent;
+    long echoedBytesSent;
+    long bytesRcvd;
+    long numRequestsToSend; // requests to send in this session
+    long numPacketsToReceive;
     int numSessions;
     int numBroken;
     int chunksAbandoned;
