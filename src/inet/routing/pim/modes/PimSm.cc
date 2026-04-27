@@ -85,8 +85,8 @@ void PimSm::handleStartOperation(LifecycleOperation *operation)
         host->subscribe(pimNeighborDeletedSignal, this);
         host->subscribe(pimNeighborChangedSignal, this);
 
-        WATCH_PTRMAP(gRoutes);
-        WATCH_PTRMAP(sgRoutes);
+        WATCH(gRoutes);
+        WATCH(sgRoutes);
     }
 }
 

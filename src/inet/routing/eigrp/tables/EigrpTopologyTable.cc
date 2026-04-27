@@ -74,9 +74,9 @@ void EigrpTopologyTable<IPAddress>::initialize(int stage)
     if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         // TODO
         WATCH(routerID);
-        WATCH_PTRVECTOR(routeVec);
+        WATCH(routeVec);
         #ifdef EIGRP_TT_DEBUG
-        WATCH_PTRVECTOR(routeInfoVec);
+        WATCH(routeInfoVec);
         #endif
     }
 }

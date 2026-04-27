@@ -55,8 +55,8 @@ void MacForwardingTable::initialize(int stage)
         agingTime = par("agingTime");
         lastPurge = SIMTIME_ZERO;
         ifTable.reference(this, "interfaceTableModule", true);
-        WATCH_MAP(forwardingTable);
-        WATCH_MAP(multicastForwardingTable);
+        WATCH(forwardingTable);
+        WATCH(multicastForwardingTable);
     }
 }
 

@@ -54,7 +54,7 @@ void Ieee80211MgmtAp::initialize(int stage)
         WATCH(channelNumber);
         WATCH(beaconInterval);
         WATCH(numAuthSteps);
-        WATCH_MAP(staList);
+        WATCH(staList);
 
         // TODO fill in supportedRates
 

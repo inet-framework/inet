@@ -56,8 +56,8 @@ void BgpRouter::printSessionSummary()
 void BgpRouter::addWatches()
 {
     WATCH(myAsId);
-    WATCH_PTRMAP(_BGPSessions);
-    WATCH_PTRVECTOR(bgpRoutingTable);
+    WATCH(_BGPSessions);
+    WATCH(bgpRoutingTable);
     _socketMap.addWatch();
 }
 

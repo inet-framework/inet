@@ -22,7 +22,7 @@ void Ieee80211Mib::initialize(int stage)
         WATCH(bssData.bssid);
         WATCH(bssStationData.stationType);
         WATCH(bssStationData.isAssociated);
-        WATCH_MAP(bssAccessPointData.stations);
+        WATCH(bssAccessPointData.stations);
     }
 }
 

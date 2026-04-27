@@ -88,7 +88,7 @@ BindingUpdateList::~BindingUpdateList()
 
 void BindingUpdateList::initialize()
 {
-    WATCH_MAP(bindingUpdateList); // added by Zarrar Yousaf
+    WATCH(bindingUpdateList); // added by Zarrar Yousaf
 }
 
 void BindingUpdateList::handleMessage(cMessage *msg)

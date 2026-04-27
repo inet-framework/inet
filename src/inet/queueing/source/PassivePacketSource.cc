@@ -20,7 +20,7 @@ void PassivePacketSource::initialize(int stage)
         providingIntervalParameter = &par("providingInterval");
         providingTimer = new ClockEvent("ProvidingTimer");
         scheduleForAbsoluteTime = par("scheduleForAbsoluteTime");
-        WATCH_PTR(nextPacket);
+        WATCH(nextPacket);
     }
     else if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(outputGate);

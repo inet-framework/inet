@@ -124,8 +124,8 @@ void xMIPv6::initialize(int stage)
             bc.reference(this, "bindingCacheModule", true);
         }
 
-        WATCH_VECTOR(cnList);
-        WATCH_MAP(interfaceCoAList);
+        WATCH(cnList);
+        WATCH(interfaceCoAList);
     }
 }
 

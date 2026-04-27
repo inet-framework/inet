@@ -22,8 +22,8 @@ std::ostream& operator<<(std::ostream& os, const std::pair<K, V>& pair) { return
 void QosAckHandler::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        WATCH_MAP(ackStatuses);
-        WATCH_MAP(mgmtAckStatuses);
+        WATCH(ackStatuses);
+        WATCH(mgmtAckStatuses);
     }
 }
 

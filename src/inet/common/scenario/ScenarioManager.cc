@@ -53,7 +53,7 @@ static const char *OP_RESUME = "resume";
 
 void ScenarioManager::initialize()
 {
-    WATCH_PTRLIST(scheduledEvents);
+    WATCH(scheduledEvents);
     WATCH(numChanges);
     WATCH(numDone);
 

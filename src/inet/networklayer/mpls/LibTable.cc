@@ -21,7 +21,7 @@ void LibTable::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         maxLabel = 0;
-        WATCH_VECTOR(lib);
+        WATCH(lib);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         // read configuration

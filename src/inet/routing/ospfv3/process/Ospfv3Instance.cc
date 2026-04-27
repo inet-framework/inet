@@ -153,7 +153,7 @@ void Ospfv3Instance::init()
     for (auto it = this->areas.begin(); it != this->areas.end(); it++)
         (*it)->init();
 
-    WATCH_PTRVECTOR(this->areas);
+    WATCH(this->areas);
 } // init
 
 void Ospfv3Instance::debugDump()

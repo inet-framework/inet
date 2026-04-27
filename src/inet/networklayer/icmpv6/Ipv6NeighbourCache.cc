@@ -70,7 +70,7 @@ std::ostream& operator<<(std::ostream& os, const Ipv6NeighbourCache::Neighbour& 
 Ipv6NeighbourCache::Ipv6NeighbourCache(cSimpleModule& neighbourDiscovery)
     : neighbourDiscovery(neighbourDiscovery)
 {
-    WATCH_MAP(neighbourMap);
+    WATCH(neighbourMap);
 }
 
 Ipv6NeighbourCache::Neighbour *Ipv6NeighbourCache::lookup(const Ipv6Address& addr, int interfaceID)

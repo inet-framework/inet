@@ -22,7 +22,7 @@ std::ostream& operator<<(std::ostream& os, const Ieee8021qSocketTable::Socket& s
 void Ieee8021qSocketTable::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
-        WATCH_PTRMAP(socketIdToSocketMap);
+        WATCH(socketIdToSocketMap);
 }
 
 Ieee8021qSocketTable::~Ieee8021qSocketTable()

@@ -30,7 +30,7 @@ SecurityAssociationDatabase::~SecurityAssociationDatabase()
 
 void SecurityAssociationDatabase::initialize()
 {
-    WATCH_PTRVECTOR(entries);
+    WATCH(entries);
 }
 
 void SecurityAssociationDatabase::addEntry(SecurityAssociation *sadEntry)

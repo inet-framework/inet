@@ -64,7 +64,7 @@ void TcpLwip::initialize(int stage)
         const char *checksumModeString = par("checksumMode");
         checksumMode = parseChecksumMode(checksumModeString, false);
 
-        WATCH_MAP(tcpAppConnMapM);
+        WATCH(tcpAppConnMapM);
 
         pLwipTcpLayerM = new LwipTcpLayer(*this);
         pLwipFastTimerM = new cMessage("lwip_fast_timer");

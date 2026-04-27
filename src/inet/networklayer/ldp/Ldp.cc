@@ -105,11 +105,11 @@ void Ldp::initialize(int stage)
         lt.reference(this, "libTableModule", true);
         tedmod.reference(this, "tedModule", true);
 
-        WATCH_VECTOR(myPeers);
-        WATCH_VECTOR(fecUp);
-        WATCH_VECTOR(fecDown);
-        WATCH_VECTOR(fecList);
-        WATCH_VECTOR(pending);
+        WATCH(myPeers);
+        WATCH(fecUp);
+        WATCH(fecDown);
+        WATCH(fecList);
+        WATCH(pending);
 
         maxFecid = 0;
         sendHelloMsg = new cMessage("LDPSendHello");

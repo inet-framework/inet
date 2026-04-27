@@ -25,7 +25,7 @@ void MultiTokenBucketMeter::initialize(int stage)
             cValueMap *bucketConfiguration = check_and_cast<cValueMap *>(bucketConfigurations->get(i).objectValue());
             labels.push_back(bucketConfiguration->get("label").stringValue());
         }
-        WATCH_VECTOR(tokenBuckets);
+        WATCH(tokenBuckets);
     }
 }
 

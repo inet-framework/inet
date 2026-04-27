@@ -73,7 +73,7 @@ void PimDm::handleStartOperation(LifecycleOperation *operation)
         host->subscribe(pimNeighborAddedSignal, this);
         host->subscribe(pimNeighborDeletedSignal, this);
 
-        WATCH_PTRMAP(routes);
+        WATCH(routes);
     }
 }
 

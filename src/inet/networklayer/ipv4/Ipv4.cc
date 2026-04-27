@@ -102,8 +102,8 @@ void Ipv4::initialize(int stage)
         WATCH(numDropped);
         WATCH(numUnroutable);
         WATCH(numForwarded);
-        WATCH_MAP(pendingPackets);
-        WATCH_MAP(socketIdToSocketDescriptor);
+        WATCH(pendingPackets);
+        WATCH(socketIdToSocketDescriptor);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         cModule *arpModule = check_and_cast<cModule *>(arp.get());

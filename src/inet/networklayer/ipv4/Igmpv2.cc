@@ -215,8 +215,8 @@ void Igmpv2::addWatches()
     WATCH(numLeavesSent);
     WATCH(numLeavesRecv);
 
-    WATCH_PTRMAP(hostData);
-    WATCH_PTRMAP(routerData);
+    WATCH(hostData);
+    WATCH(routerData);
 }
 
 void Igmpv2::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)

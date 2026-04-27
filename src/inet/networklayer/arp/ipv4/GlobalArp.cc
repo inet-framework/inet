@@ -62,7 +62,7 @@ void GlobalArp::initialize(int stage)
             addressType = L3Address::MODULEID;
         else
             throw cRuntimeError("Unknown address type");
-        WATCH_PTRMAP(globalArpCache);
+        WATCH(globalArpCache);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         interfaceTable.reference(this, "interfaceTableModule", true);

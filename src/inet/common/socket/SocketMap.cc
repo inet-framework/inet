@@ -50,7 +50,7 @@ void SocketMap::deleteSockets()
 
 void SocketMap::addWatch()
 {
-    WATCH_PTRMAP(socketMap);
+    WATCH(socketMap);
 }
 
 std::ostream& operator<<(std::ostream& out, const ISocket& entry)

@@ -62,7 +62,7 @@ void InterfaceTable::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         // get a pointer to the host module
         host = getContainingNode(this);
-        WATCH_PTRVECTOR(idToInterface);
+        WATCH(idToInterface);
     }
 }
 

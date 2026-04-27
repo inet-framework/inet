@@ -25,7 +25,7 @@ void MrpMacForwardingTable::initialize(int stage)
         agingTime = SimTime(3, SIMTIME_S);
         lastPurge = SIMTIME_ZERO;
         //ifTable.reference(this, "interfaceTableModule", true);
-        //WATCH_MAP(mrpForwardingTable);
+        //WATCH(mrpForwardingTable);
     }
 }
 

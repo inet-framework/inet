@@ -50,7 +50,7 @@ void UdpVideoStreamServer::initialize(int stage)
         numStreams = 0;
         numPkSent = 0;
 
-        WATCH_MAP(streams);
+        WATCH(streams);
     }
 }
 
