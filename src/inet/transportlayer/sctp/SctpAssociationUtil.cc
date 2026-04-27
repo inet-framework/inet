@@ -603,7 +603,7 @@ void SctpAssociation::sendInit()
     initChunk->setIpv6Supported(false);
 #endif
     if (localAddressList.front().isUnspecified()) {
-        for (int32_t i = 0; i < ift->getNumInterfaces(); ++i) {
+        for (int i = 0; i < ift->getNumInterfaces(); ++i) {
 #ifdef INET_WITH_IPv4
             if (auto ipv4Data = ift->getInterface(i)->findProtocolData<Ipv4InterfaceData>()) {
                 adv.push_back(ipv4Data->getIPAddress());
@@ -612,7 +612,7 @@ void SctpAssociation::sendInit()
 #endif // ifdef INET_WITH_IPv4
 #ifdef INET_WITH_IPv6
             if (auto ipv6Data = ift->getInterface(i)->findProtocolData<Ipv6InterfaceData>()) {
-                for (int32_t j = 0; j < ipv6Data->getNumAddresses(); j++) {
+                for (int j = 0; j < ipv6Data->getNumAddresses(); j++) {
                     EV_DETAIL << "add address " << ipv6Data->getAddress(j) << "\n";
                     adv.push_back(ipv6Data->getAddress(j));
                 }
@@ -679,7 +679,7 @@ void SctpAssociation::sendInit()
         initChunk->setSepChunks(count - 1, AUTH);
         state->keyVector[0] = (uint8_t)RANDOM;
         state->keyVector[2] = 36;
-        for (int32_t k = 0; k < 32; k++) {
+        for (int k = 0; k < 32; k++) {
             initChunk->setRandomArraySize(k + 1);
             initChunk->setRandom(k, (uint8_t)(RNGCONTEXT intrand(256)));
             state->keyVector[k + 2] = initChunk->getRandom(k);
@@ -806,7 +806,7 @@ void SctpAssociation::sendInitAck(SctpInitChunk *initChunk)
         state->streamResetSequenceNumber = state->nextTsn;
         cookie->setLocalTag(localVTag);
         cookie->setPeerTag(peerVTag);
-        for (int32_t i = 0; i < 32; i++) {
+        for (int i = 0; i < 32; i++) {
             cookie->setLocalTieTag(i, 0);
             cookie->setPeerTieTag(i, 0);
         }
@@ -821,7 +821,7 @@ void SctpAssociation::sendInitAck(SctpInitChunk *initChunk)
         state->gapList.forwardCumAckTsn(initPeerTsn - 1);
         cookie->setLocalTag(initChunk->getInitTag());
         cookie->setPeerTag(peerVTag);
-        for (int32_t i = 0; i < 32; i++) {
+        for (int i = 0; i < 32; i++) {
             cookie->setPeerTieTag(i, (uint8_t)(RNGCONTEXT intrand(256)));
             state->peerTieTag[i] = cookie->getPeerTieTag(i);
             if (fsm->getState() == SCTP_S_COOKIE_ECHOED) {
@@ -844,7 +844,7 @@ void SctpAssociation::sendInitAck(SctpInitChunk *initChunk)
         initAckChunk->setInitTsn(state->nextTsn);
         cookie->setLocalTag(localVTag);
         cookie->setPeerTag(peerVTag);
-        for (int32_t i = 0; i < 32; i++) {
+        for (int i = 0; i < 32; i++) {
             cookie->setPeerTieTag(i, state->peerTieTag[i]);
             cookie->setLocalTieTag(i, state->localTieTag[i]);
         }
@@ -893,7 +893,7 @@ void SctpAssociation::sendInitAck(SctpInitChunk *initChunk)
     if (sctpMain->auth == true) {
         initAckChunk->setSepChunksArraySize(++count);
         initAckChunk->setSepChunks(count - 1, AUTH);
-        for (int32_t k = 0; k < 32; k++) {
+        for (int k = 0; k < 32; k++) {
             initAckChunk->setRandomArraySize(k + 1);
             initAckChunk->setRandom(k, (uint8_t)(RNGCONTEXT intrand(256)));
         }
@@ -907,11 +907,11 @@ void SctpAssociation::sendInitAck(SctpInitChunk *initChunk)
         initAckChunk->setHmacTypes(0, 1);
         length += ADD_PADDING(initAckChunk->getSctpChunkTypesArraySize() + 48);
     }
-    uint32_t unknownLen = initChunk->getUnrecognizedParametersArraySize();
+    size_t unknownLen = initChunk->getUnrecognizedParametersArraySize();
     if (unknownLen > 0) {
         EV_INFO << "Found unrecognized Parameters in INIT chunk with a length of " << unknownLen << " bytes.\n";
         initAckChunk->setUnrecognizedParametersArraySize(unknownLen);
-        for (uint32_t i = 0; i < unknownLen; i++)
+        for (size_t i = 0; i < unknownLen; i++)
             initAckChunk->setUnrecognizedParameters(i, initChunk->getUnrecognizedParameters(i));
         length += unknownLen;
     }
@@ -968,10 +968,10 @@ void SctpAssociation::sendCookieEcho(SctpInitAckChunk *initAckChunk)
     sctpcookieecho->setDestPort(remotePort);
     SctpCookieEchoChunk *cookieEchoChunk = new SctpCookieEchoChunk();
     cookieEchoChunk->setSctpChunkType(COOKIE_ECHO);
-    int32_t len = initAckChunk->getCookieArraySize();
+    size_t len = initAckChunk->getCookieArraySize();
     cookieEchoChunk->setCookieArraySize(len);
     if (len > 0) {
-        for (int32_t i = 0; i < len; i++)
+        for (size_t i = 0; i < len; i++)
             cookieEchoChunk->setCookie(i, initAckChunk->getCookie(i));
         cookieEchoChunk->setByteLength(SCTP_COOKIE_ACK_LENGTH + len);
     }
@@ -980,11 +980,11 @@ void SctpAssociation::sendCookieEcho(SctpInitAckChunk *initAckChunk)
         cookieEchoChunk->setStateCookie(cookie);
         cookieEchoChunk->setByteLength(SCTP_COOKIE_ACK_LENGTH + cookie->getLength());
     }
-    uint32_t unknownLen = initAckChunk->getUnrecognizedParametersArraySize();
+    size_t unknownLen = initAckChunk->getUnrecognizedParametersArraySize();
     if (unknownLen > 0) {
         EV_INFO << "Found unrecognized Parameters in INIT-ACK chunk with a length of " << unknownLen << " bytes.\n";
         cookieEchoChunk->setUnrecognizedParametersArraySize(unknownLen);
-        for (uint32_t i = 0; i < unknownLen; i++)
+        for (size_t i = 0; i < unknownLen; i++)
             cookieEchoChunk->setUnrecognizedParameters(i, initAckChunk->getUnrecognizedParameters(i));
     }
     else
@@ -1063,10 +1063,10 @@ void SctpAssociation::sendHeartbeatAck(const SctpHeartbeatChunk *heartbeatChunk,
     heartbeatAckChunk->setSctpChunkType(HEARTBEAT_ACK);
     heartbeatAckChunk->setRemoteAddr(heartbeatChunk->getRemoteAddr());
     heartbeatAckChunk->setTimeField(heartbeatChunk->getTimeField());
-    const int32_t len = heartbeatChunk->getInfoArraySize();
+    const size_t len = heartbeatChunk->getInfoArraySize();
     if (len > 0) {
         heartbeatAckChunk->setInfoArraySize(len);
-        for (int32_t i = 0; i < len; i++)
+        for (size_t i = 0; i < len; i++)
             heartbeatAckChunk->setInfo(i, heartbeatChunk->getInfo(i));
     }
 
@@ -2875,9 +2875,9 @@ void SctpAssociation::removeFirstChunk(SctpHeader *sctpmsg)
 void SctpAssociation::disposeOf(SctpHeader *sctpmsg)
 {
     SctpChunk *chunk;
-    uint32_t numberOfChunks = sctpmsg->getSctpChunksArraySize();
+    size_t numberOfChunks = sctpmsg->getSctpChunksArraySize();
     if (numberOfChunks > 0)
-        for (uint32_t i = 0; i < numberOfChunks; i++) {
+        for (size_t i = 0; i < numberOfChunks; i++) {
             chunk = sctpmsg->removeFirstChunk();
          /*   if (chunk->getSctpChunkType() == DATA) {
                 delete chunk->Chunk::peek<SctpSimpleMessage>(Chunk::BackwardIterator(B(0)));

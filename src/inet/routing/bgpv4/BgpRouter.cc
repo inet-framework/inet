@@ -493,9 +493,9 @@ void BgpRouter::processMessage(const BgpUpdateMessage& msg)
     for (size_t i = 0; i < msg.getPathAttributesArraySize(); i++) {
         if (msg.getPathAttributes(i)->getTypeCode() == BgpUpdateAttributeTypeCode::AS_PATH) {
             auto& asPath = *check_and_cast<const BgpUpdatePathAttributesAsPath *>(msg.getPathAttributes(i));
-            for (uint32_t k = 0; k < asPath.getValueArraySize(); k++) {
+            for (size_t k = 0; k < asPath.getValueArraySize(); k++) {
                 const BgpAsPathSegment& asPathVal = asPath.getValue(k);
-                for (uint32_t n = 0; n < asPathVal.getAsValueArraySize(); n++) {
+                for (size_t n = 0; n < asPathVal.getAsValueArraySize(); n++) {
                     entry->addAS(asPathVal.getAsValue(n));
                 }
             }
@@ -895,7 +895,7 @@ void BgpRouter::printOpenMessage(const BgpOpenMessage& openMsg)
     EV_INFO << "  BGP Id: " << openMsg.getBGPIdentifier() << "\n";
     if (openMsg.getOptionalParameterArraySize() == 0)
         EV_INFO << "  Optional parameters: empty \n";
-    for (uint32_t i = 0; i < openMsg.getOptionalParameterArraySize(); i++) {
+    for (size_t i = 0; i < openMsg.getOptionalParameterArraySize(); i++) {
         auto optParam = openMsg.getOptionalParameter(i);
         ASSERT(optParam != nullptr);
         EV_INFO << "  Optional parameter " << i + 1 << ": \n";
@@ -908,7 +908,7 @@ void BgpRouter::printUpdateMessage(const BgpUpdateMessage& updateMsg)
 {
     if (updateMsg.getWithdrawnRoutesArraySize() == 0)
         EV_INFO << "  Withdrawn routes: empty \n";
-    for (uint32_t i = 0; i < updateMsg.getWithdrawnRoutesArraySize(); i++) {
+    for (size_t i = 0; i < updateMsg.getWithdrawnRoutesArraySize(); i++) {
         const BgpUpdateWithdrawnRoutes& withdrwan = updateMsg.getWithdrawnRoutes(i);
         EV_INFO << "  Withdrawn route " << i + 1 << ": \n";
         EV_INFO << "    length: " << (int)withdrwan.length << "\n";
@@ -916,7 +916,7 @@ void BgpRouter::printUpdateMessage(const BgpUpdateMessage& updateMsg)
     }
     if (updateMsg.getPathAttributesArraySize() == 0)
         EV_INFO << "  Path attribute: empty \n";
-    for (uint32_t i = 0; i < updateMsg.getPathAttributesArraySize(); i++) {
+    for (size_t i = 0; i < updateMsg.getPathAttributesArraySize(); i++) {
         EV_INFO << "  Path attribute " << i + 1 << ": [len:" << updateMsg.getPathAttributes(i)->getLength() << "]\n";
         switch (updateMsg.getPathAttributes(i)->getTypeCode()) {
             case BgpUpdateAttributeTypeCode::ORIGIN: {
@@ -927,9 +927,9 @@ void BgpRouter::printUpdateMessage(const BgpUpdateMessage& updateMsg)
             case BgpUpdateAttributeTypeCode::AS_PATH: {
                 auto& asPath = *check_and_cast<const BgpUpdatePathAttributesAsPath *>(updateMsg.getPathAttributes(i));
                 EV_INFO << "    AS_PATH:";
-                for (uint32_t k = 0; k < asPath.getValueArraySize(); k++) {
+                for (size_t k = 0; k < asPath.getValueArraySize(); k++) {
                     const BgpAsPathSegment& asPathVal = asPath.getValue(k);
-                    for (uint32_t n = 0; n < asPathVal.getAsValueArraySize(); n++) {
+                    for (size_t n = 0; n < asPathVal.getAsValueArraySize(); n++) {
                         EV_INFO << " " << asPathVal.getAsValue(n);
                     }
                 }

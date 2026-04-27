@@ -176,7 +176,7 @@ void Ospfv2::insertExternalRoute(int ifIndex, const Ipv4AddressRange& netAddr)
 int Ospfv2::checkExternalRoute(const Ipv4Address& route)
 {
     Enter_Method("checkExternalRoute");
-    for (uint32_t i = 0; i < ospfRouter->getASExternalLSACount(); i++) {
+    for (unsigned long i = 0; i < ospfRouter->getASExternalLSACount(); i++) {
         AsExternalLsa *externalLSA = ospfRouter->getASExternalLSA(i);
         Ipv4Address externalAddr = externalLSA->getHeader().getLinkStateID();
         if (externalAddr == route) { // FIXME was this meant???
@@ -196,7 +196,7 @@ void Ospfv2::handleInterfaceDown(const NetworkInterface *ie)
     // Step 1: delete all direct-routes connected to this interface
 
     // ... from OSPF table
-    for (uint32_t i = 0; i < ospfRouter->getRoutingTableEntryCount(); i++) {
+    for (unsigned long i = 0; i < ospfRouter->getRoutingTableEntryCount(); i++) {
         Ospfv2RoutingTableEntry *ospfRoute = ospfRouter->getRoutingTableEntry(i);
         if (ospfRoute && ospfRoute->getInterface() == ie && ospfRoute->getNextHopAsGeneric().isUnspecified()) {
             EV_DEBUG << "removing route from OSPF routing table: " << ospfRoute << "\n";
@@ -205,7 +205,7 @@ void Ospfv2::handleInterfaceDown(const NetworkInterface *ie)
         }
     }
     // ... from Ipv4 table
-    for (int32_t i = 0; i < rt->getNumRoutes(); i++) {
+    for (int i = 0; i < rt->getNumRoutes(); i++) {
         Ipv4Route *route = rt->getRoute(i);
         if (route && route->getInterface() == ie && route->getNextHopAsGeneric().isUnspecified()) {
             EV_DEBUG << "removing route from Ipv4 routing table: " << route << "\n";

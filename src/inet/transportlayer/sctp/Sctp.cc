@@ -549,8 +549,8 @@ SctpAssociation *Sctp::findAssocWithVTag(uint32_t peerVTag, uint32_t remotePort,
 SctpAssociation *Sctp::findAssocForInitAck(SctpInitAckChunk *initAckChunk, L3Address srcAddr, L3Address destAddr, uint32_t srcPort, uint32_t destPort, bool findListen)
 {
     SctpAssociation *assoc = nullptr;
-    int numberAddresses = initAckChunk->getAddressesArraySize();
-    for (int32_t j = 0; j < numberAddresses; j++) {
+    size_t numberAddresses = initAckChunk->getAddressesArraySize();
+    for (size_t j = 0; j < numberAddresses; j++) {
         if (initAckChunk->getAddresses(j).getType() == L3Address::IPv6)
             continue;
         assoc = findAssocForMessage(initAckChunk->getAddresses(j), destAddr, srcPort, destPort, findListen);

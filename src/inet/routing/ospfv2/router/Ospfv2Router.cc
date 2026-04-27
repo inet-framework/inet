@@ -595,7 +595,7 @@ Ospfv2RoutingTableEntry *Router::lookup(Ipv4Address destination, std::vector<Osp
     std::vector<Ospfv2RoutingTableEntry *> discard;
 
     for (auto area : areas) {
-        for (uint32_t j = 0; j < area->getAddressRangeCount(); j++) {
+        for (unsigned int j = 0; j < area->getAddressRangeCount(); j++) {
             Ipv4AddressRange range = area->getAddressRange(j);
             for (auto entry : rTable) {
                 if (entry->getDestinationType() != Ospfv2RoutingTableEntry::NETWORK_DESTINATION)
@@ -702,7 +702,7 @@ void Router::rebuildRoutingTable()
 
     // remove entries from the Ipv4 routing table inserted by the OSPF module
     std::vector<Ipv4Route *> eraseEntries;
-    for (int32_t i = 0; i < rt->getNumRoutes(); i++) {
+    for (int i = 0; i < rt->getNumRoutes(); i++) {
         Ipv4Route *entry = rt->getRoute(i);
         Ospfv2RoutingTableEntry *ospfEntry = dynamic_cast<Ospfv2RoutingTableEntry *>(entry);
         if (ospfEntry != nullptr)
@@ -1338,7 +1338,7 @@ void Router::notifyAboutRoutingTableChanges(std::vector<Ospfv2RoutingTableEntry 
 
 Ipv4Route *Router::getDefaultRoute()
 {
-    for (int32_t i = 0; i < rt->getNumRoutes(); i++) {
+    for (int i = 0; i < rt->getNumRoutes(); i++) {
         Ipv4Route *entry = rt->getRoute(i);
         if (entry->getDestination().isUnspecified() && entry->getNetmask().isUnspecified())
             return entry;
@@ -1352,7 +1352,7 @@ void Router::updateExternalRoute(Ipv4Address networkAddress, const Ospfv2AsExter
         bool inRoutingTable = false;
         Ipv4Route *entry = nullptr;
         // add the external route to the routing table if it was not added by another module
-        for (int32_t i = 0; i < rt->getNumRoutes(); i++) {
+        for (int i = 0; i < rt->getNumRoutes(); i++) {
             entry = rt->getRoute(i);
             if ((entry->getDestination() == networkAddress)
                 && (entry->getNetmask() == externalRouteContents.getNetworkMask())) // TODO is it enough?
@@ -1409,7 +1409,7 @@ void Router::addExternalRouteInIPTable(Ipv4Address networkAddress, const Ospfv2A
 {
     // add the external route to the Ipv4 routing table if it was not added by another module
     bool inRoutingTable = false;
-    for (int32_t i = 1; i < rt->getNumRoutes(); i++) {
+    for (int i = 1; i < rt->getNumRoutes(); i++) {
         const Ipv4Route *entry = rt->getRoute(i);
         if ((entry->getDestination() == networkAddress)
             && (entry->getNetmask() == externalRouteContents.getNetworkMask())) // TODO is it enough?

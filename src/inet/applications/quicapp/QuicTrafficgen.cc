@@ -173,7 +173,7 @@ void QuicTrafficgen::sendGeneratorControl(uint8_t controlMessageType)
     ctrl->setControlMessageType(controlMessageType);
 
     int outGateBaseId = gateBaseId("generatorOut");
-    for (uint32_t i = 0; i < streams.size(); i++) {
+    for (size_t i = 0; i < streams.size(); i++) {
         send(i == streams.size() - 1 ? ctrl : ctrl->dup(), outGateBaseId + i);
     }
 }

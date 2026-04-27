@@ -518,7 +518,7 @@ void HeatMapPlotFigure::redrawXTicks()
         }
     }
 
-    for (uint32_t i = 0; i < xTicks.size(); ++i) {
+    for (size_t i = 0; i < xTicks.size(); ++i) {
         double x = bounds.x + bounds.width * (i * xTickSize) / (maxX - minX);
         double y = bounds.y + bounds.height;
         if (x > bounds.x && x < bounds.x + bounds.width) {

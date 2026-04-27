@@ -171,7 +171,7 @@ INetfilter::IHook::Result SctpNatHook::datagramPreRoutingHook(Packet *datagram)
     if (!local) {
         entry = natTable->getEntry(dgram->getSourceAddress(), sctpMsg->getSrcPort(), dgram->getDestinationAddress(), sctpMsg->getDestPort(), sctpMsg->getVTag());
         EV_INFO << "getEntry for " << dgram->getSourceAddress() << ":" << sctpMsg->getSrcPort() << " to " << dgram->getDestinationAddress() << ":" << sctpMsg->getDestPort() << " peerVTag=" << sctpMsg->getVTag() << "\n";
-        uint32_t numberOfChunks = sctpMsg->getSctpChunksArraySize();
+        size_t numberOfChunks = sctpMsg->getSctpChunksArraySize();
         if (entry == nullptr) {
             EV_INFO << "no entry found\n";
             if (numberOfChunks == 1)
