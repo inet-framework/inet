@@ -122,6 +122,44 @@ void EthernetPlca::initialize(int stage)
         emit(curIDSignal, curID);
         emit(carrierSenseChangedSignal, (int)CRS);
         emit(collisionChangedSignal, (int)COL);
+
+        WATCH(plca_node_count);
+        WATCH(local_nodeID);
+        WATCH(max_bc);
+        WATCH(delay_line_length);
+        WATCH(to_timer_length);
+        WATCH(burst_timer_length);
+        WATCH(beacon_timer_length);
+        WATCH(beacon_det_timer_length);
+        WATCH(pending_timer_length);
+        WATCH(commit_timer_length);
+        WATCH(COL);
+        WATCH(committed);
+        WATCH(CRS);
+        WATCH(packetPending);
+        WATCH(PMCD);
+        WATCH(receiving);
+        WATCH(RX_DV);
+        WATCH(TX_EN);
+        WATCH(bc);
+        WATCH(curID);
+        WATCH(old_carrier_sense_signal);
+        WATCH(old_collision_signal);
+        WATCH(macStartFrameTransmissionTime);
+        WATCH(phyStartFrameTransmissionTime);
+        WATCH(beacon_timer);
+        WATCH(beacon_det_timer);
+        WATCH(burst_timer);
+        WATCH(to_timer);
+        WATCH(syncing_timer);
+        WATCH(hold_timer);
+        WATCH(pending_timer);
+        WATCH(commit_timer);
+        WATCH(tx_timer);
+        WATCH(numPacketsPerTo);
+        WATCH(numPacketsPerCycle);
+        WATCH(toStartTime);
+        WATCH(cycleStartTime);
     }
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         auto networkInterface = getContainingNicModule(this);

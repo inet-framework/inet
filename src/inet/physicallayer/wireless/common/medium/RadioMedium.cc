@@ -104,6 +104,31 @@ void RadioMedium::initialize(int stage)
         if (recordTransmissionLog || recordReceptionLog)
             communicationLog.open();
         sameTransmissionStartTimeCheck = par("sameTransmissionStartTimeCheck");
+
+        WATCH(radioModeFilter);
+        WATCH(listeningFilter);
+        WATCH(macAddressFilter);
+        WATCH(recordTransmissionLog);
+        WATCH(recordReceptionLog);
+        WATCH(transmissionCount);
+        WATCH(signalSendCount);
+        WATCH(receptionComputationCount);
+        WATCH(interferenceComputationCount);
+        WATCH(receptionDecisionComputationCount);
+        WATCH(receptionResultComputationCount);
+        WATCH(listeningDecisionComputationCount);
+        WATCH(cacheReceptionGetCount);
+        WATCH(cacheReceptionHitCount);
+        WATCH(cacheInterferenceGetCount);
+        WATCH(cacheInterferenceHitCount);
+        WATCH(cacheNoiseGetCount);
+        WATCH(cacheNoiseHitCount);
+        WATCH(cacheSNIRGetCount);
+        WATCH(cacheSNIRHitCount);
+        WATCH(cacheDecisionGetCount);
+        WATCH(cacheDecisionHitCount);
+        WATCH(cacheResultGetCount);
+        WATCH(cacheResultHitCount);
     }
     else if (stage == INITSTAGE_LAST)
         EV_INFO << "Initialized " << getCompleteStringRepresentation() << endl;

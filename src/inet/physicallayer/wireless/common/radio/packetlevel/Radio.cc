@@ -55,11 +55,21 @@ void Radio::initialize(int stage)
         sendRawBytes = par("sendRawBytes");
         separateTransmissionParts = par("separateTransmissionParts");
         separateReceptionParts = par("separateReceptionParts");
+        WATCH(mediumModuleId);
+        WATCH(sendRawBytes);
+        WATCH(separateTransmissionParts);
+        WATCH(separateReceptionParts);
         WATCH(radioMode);
+        WATCH(nextRadioMode);
+        WATCH(previousRadioMode);
         WATCH(receptionState);
         WATCH(transmissionState);
         WATCH(receivedSignalPart);
         WATCH(transmittedSignalPart);
+        WATCH(transmissionTimer);
+        WATCH(receptionTimer);
+        WATCH(switchTimer);
+        WATCH(allReceptionTimers);
     }
     else if (stage == INITSTAGE_PHYSICAL_LAYER) {
         medium->addRadio(this);
