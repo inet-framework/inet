@@ -57,6 +57,9 @@ void L3NetworkConfiguratorBase::initialize(int stage)
         minLinkWeight = par("minLinkWeight");
         configureIsolatedNetworksSeparatly = par("configureIsolatedNetworksSeparatly").boolValue();
         configuration = par("config");
+
+        WATCH(minLinkWeight);
+        WATCH(configureIsolatedNetworksSeparatly);
     }
 }
 

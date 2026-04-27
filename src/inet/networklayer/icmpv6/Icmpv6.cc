@@ -33,6 +33,10 @@ void Icmpv6::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         const char *checksumModeString = par("checksumMode");
         checksumMode = parseChecksumMode(checksumModeString, false);
+
+        WATCH(checksumMode);
+        WATCH(pingMap);
+        WATCH(transportProtocols);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {
         bool isOperational;
