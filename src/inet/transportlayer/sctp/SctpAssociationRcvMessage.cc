@@ -77,7 +77,7 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
     SctpPathVariables *path = getPath(src);
     const uint16_t srcPort = sctpmsg->getDestPort();
     const uint16_t destPort = sctpmsg->getSrcPort();
-    const uint32_t numberOfChunks = sctpmsg->getSctpChunksArraySize();
+    const size_t numberOfChunks = sctpmsg->getSctpChunksArraySize();
     EV_DETAIL << "numberOfChunks=" << numberOfChunks << endl;
 
 //    state->sctpmsg = sctpmsg->dup();
@@ -104,7 +104,7 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
     bool dataChunkReceived = false;
     bool shutdownCalled = false;
     bool sackWasReceived = false;
-    for (uint32_t i = 0; i < numberOfChunks; i++) {
+    for (size_t i = 0; i < numberOfChunks; i++) {
 //        SctpChunk *header = (SctpChunk *)(sctpmsg->getSctpChunks(0));
         SctpChunk *header = sctpmsg->removeFirstChunk();
         const uint8_t type = header->getSctpChunkType();
@@ -2798,10 +2798,10 @@ SctpEventCode SctpAssociation::processStreamResetArrived(SctpStreamResetChunk *r
     EV_INFO << "processStreamResetArrived\n";
     SctpParameter *parameter, *nextParam;
     std::map<uint32_t, SctpStateVariables::RequestData>::reverse_iterator rit;
-    uint32_t numberOfParameters = resetChunk->getParametersArraySize();
+    size_t numberOfParameters = resetChunk->getParametersArraySize();
     if (numberOfParameters == 0)
         return SCTP_E_IGNORE;
-    for (uint16_t i = 0; i < numberOfParameters; i++) {
+    for (size_t i = 0; i < numberOfParameters; i++) {
         parameter = (SctpParameter *)(resetChunk->getParameters(i));
         switch (parameter->getParameterType()) {
             case OUTGOING_RESET_REQUEST_PARAMETER: {
@@ -3173,9 +3173,9 @@ SctpEventCode SctpAssociation::processAsconfArrived(SctpAsconfChunk *asconfChunk
     if (state->numberAsconfReceived > 0 || (state->numberAsconfReceived == 0 && asconfChunk->getSerialNumber() == initPeerTsn + state->numberAsconfReceived)) {
         SctpAsconfAckChunk *asconfAckChunk = createAsconfAckChunk(asconfChunk->getSerialNumber());
         state->numberAsconfReceived++;
-        int32_t count = asconfChunk->getAsconfParamsArraySize();
+        size_t count = asconfChunk->getAsconfParamsArraySize();
         EV_DETAIL << "Number of Asconf parameters=" << count << "\n";
-        for (int32_t c = 0; c < count; c++) {
+        for (size_t c = 0; c < count; c++) {
             sctpParam = (SctpParameter *)(asconfChunk->removeAsconfParam());
             switch (sctpParam->getParameterType()) {
                 case ADD_IP_ADDRESS:
@@ -3396,9 +3396,9 @@ bool SctpAssociation::processPacketDropArrived(SctpPacketDropChunk *packetDropCh
         EV_TRACE << "processPacketDropArrived" << endl;
         if (packetDropChunk->getEncapsulatedPacket() != nullptr) {
             SctpHeader *sctpmsg = (SctpHeader *)(packetDropChunk->decapsulate());
-            const uint32_t numberOfChunks = sctpmsg->getChunksArraySize();
+            const size_t numberOfChunks = sctpmsg->getChunksArraySize();
             EV_DETAIL << "numberOfChunks=" << numberOfChunks << endl;
-            for (uint32_t i = 0; i < numberOfChunks; i++) {
+            for (size_t i = 0; i < numberOfChunks; i++) {
                 SctpChunk *chunk = (SctpChunk *)(sctpmsg->removeChunk());
                 const uint8_t type = chunk->getSctpChunkType();
                 switch (type) {

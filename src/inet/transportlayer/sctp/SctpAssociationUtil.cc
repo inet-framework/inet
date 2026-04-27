@@ -907,11 +907,11 @@ void SctpAssociation::sendInitAck(SctpInitChunk *initChunk)
         initAckChunk->setHmacTypes(0, 1);
         length += ADD_PADDING(initAckChunk->getSctpChunkTypesArraySize() + 48);
     }
-    uint32_t unknownLen = initChunk->getUnrecognizedParametersArraySize();
+    size_t unknownLen = initChunk->getUnrecognizedParametersArraySize();
     if (unknownLen > 0) {
         EV_INFO << "Found unrecognized Parameters in INIT chunk with a length of " << unknownLen << " bytes.\n";
         initAckChunk->setUnrecognizedParametersArraySize(unknownLen);
-        for (uint32_t i = 0; i < unknownLen; i++)
+        for (size_t i = 0; i < unknownLen; i++)
             initAckChunk->setUnrecognizedParameters(i, initChunk->getUnrecognizedParameters(i));
         length += unknownLen;
     }
@@ -968,10 +968,10 @@ void SctpAssociation::sendCookieEcho(SctpInitAckChunk *initAckChunk)
     sctpcookieecho->setDestPort(remotePort);
     SctpCookieEchoChunk *cookieEchoChunk = new SctpCookieEchoChunk();
     cookieEchoChunk->setSctpChunkType(COOKIE_ECHO);
-    int32_t len = initAckChunk->getCookieArraySize();
+    size_t len = initAckChunk->getCookieArraySize();
     cookieEchoChunk->setCookieArraySize(len);
     if (len > 0) {
-        for (int32_t i = 0; i < len; i++)
+        for (size_t i = 0; i < len; i++)
             cookieEchoChunk->setCookie(i, initAckChunk->getCookie(i));
         cookieEchoChunk->setByteLength(SCTP_COOKIE_ACK_LENGTH + len);
     }
@@ -980,11 +980,11 @@ void SctpAssociation::sendCookieEcho(SctpInitAckChunk *initAckChunk)
         cookieEchoChunk->setStateCookie(cookie);
         cookieEchoChunk->setByteLength(SCTP_COOKIE_ACK_LENGTH + cookie->getLength());
     }
-    uint32_t unknownLen = initAckChunk->getUnrecognizedParametersArraySize();
+    size_t unknownLen = initAckChunk->getUnrecognizedParametersArraySize();
     if (unknownLen > 0) {
         EV_INFO << "Found unrecognized Parameters in INIT-ACK chunk with a length of " << unknownLen << " bytes.\n";
         cookieEchoChunk->setUnrecognizedParametersArraySize(unknownLen);
-        for (uint32_t i = 0; i < unknownLen; i++)
+        for (size_t i = 0; i < unknownLen; i++)
             cookieEchoChunk->setUnrecognizedParameters(i, initAckChunk->getUnrecognizedParameters(i));
     }
     else
@@ -1063,10 +1063,10 @@ void SctpAssociation::sendHeartbeatAck(const SctpHeartbeatChunk *heartbeatChunk,
     heartbeatAckChunk->setSctpChunkType(HEARTBEAT_ACK);
     heartbeatAckChunk->setRemoteAddr(heartbeatChunk->getRemoteAddr());
     heartbeatAckChunk->setTimeField(heartbeatChunk->getTimeField());
-    const int32_t len = heartbeatChunk->getInfoArraySize();
+    const size_t len = heartbeatChunk->getInfoArraySize();
     if (len > 0) {
         heartbeatAckChunk->setInfoArraySize(len);
-        for (int32_t i = 0; i < len; i++)
+        for (size_t i = 0; i < len; i++)
             heartbeatAckChunk->setInfo(i, heartbeatChunk->getInfo(i));
     }
 
@@ -2875,9 +2875,9 @@ void SctpAssociation::removeFirstChunk(SctpHeader *sctpmsg)
 void SctpAssociation::disposeOf(SctpHeader *sctpmsg)
 {
     SctpChunk *chunk;
-    uint32_t numberOfChunks = sctpmsg->getSctpChunksArraySize();
+    size_t numberOfChunks = sctpmsg->getSctpChunksArraySize();
     if (numberOfChunks > 0)
-        for (uint32_t i = 0; i < numberOfChunks; i++) {
+        for (size_t i = 0; i < numberOfChunks; i++) {
             chunk = sctpmsg->removeFirstChunk();
          /*   if (chunk->getSctpChunkType() == DATA) {
                 delete chunk->Chunk::peek<SctpSimpleMessage>(Chunk::BackwardIterator(B(0)));

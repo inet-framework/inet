@@ -2466,9 +2466,9 @@ void Ospfv2Area::recheckSummaryLSAs(std::vector<Ospfv2RoutingTableEntry *>& newR
                     destinationEntry->clearNextHops();
                 }
 
-                unsigned long nextHopCount = borderRouterEntry->getNextHopCount();
+                unsigned int nextHopCount = borderRouterEntry->getNextHopCount();
 
-                for (unsigned long j = 0; j < nextHopCount; j++) {
+                for (unsigned int j = 0; j < nextHopCount; j++) {
                     destinationEntry->addNextHop(borderRouterEntry->getNextHop(j));
                 }
             }
