@@ -53,7 +53,7 @@ void Sctp::printInfoAssocMap()
 
 void Sctp::printVTagMap()
 {
-    int32_t assocId;
+    int assocId;
     VTagPair key;
     EV_DETAIL << "Number of Assocs: " << sctpVTagMap.size() << "\n";
     if (sctpVTagMap.size() > 0) {
@@ -253,7 +253,7 @@ void Sctp::handleMessage(cMessage *msg)
     else { // must be from app
         EV_DEBUG << "must be from app\n";
         auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
-        int32_t assocId = tags.getTag<SocketReq>()->getSocketId();
+        int assocId = tags.getTag<SocketReq>()->getSocketId();
         EV_INFO << "assocId = " << assocId << endl;
         if (msg->getKind() == SCTP_C_GETSOCKETOPTIONS) {
             auto controlInfo = tags.getTag<SctpSendReq>();
@@ -268,8 +268,8 @@ void Sctp::handleMessage(cMessage *msg)
             delete msg;
         }
         else {
-            int32_t appGateIndex;
-            int32_t fd;
+            int appGateIndex;
+            int fd;
             Ptr<const SctpCommandReq> controlInfo = tags.findTag<SctpOpenReq>();
             if (!controlInfo) {
                 controlInfo = tags.findTag<SctpSendReq>();
@@ -459,12 +459,12 @@ void Sctp::refreshDisplay() const
 //    snprintf(buf, sizeof(buf), "%d conns", sctpAppConnMap.size());
 //    displayString().setTagArg("t",0,buf);
 
-    int32_t numCLOSED = 0, numLISTEN = 0, numSYN_SENT = 0, numSYN_RCVD = 0,
+    int numCLOSED = 0, numLISTEN = 0, numSYN_SENT = 0, numSYN_RCVD = 0,
             numESTABLISHED = 0, numCLOSE_WAIT = 0, numLAST_ACK = 0, numFIN_WAIT_1 = 0,
             numFIN_WAIT_2 = 0, numCLOSING = 0, numTIME_WAIT = 0;
 
     for (auto i = sctpAppConnMap.begin(); i != sctpAppConnMap.end(); ++i) {
-        int32_t state = (*i).second->getFsmState();
+        int state = (*i).second->getFsmState();
         switch (state) {
 //            case SCTP_S_INIT:           numINIT++; break;
             case SCTP_S_CLOSED:
@@ -612,7 +612,7 @@ SctpAssociation *Sctp::findAssocForMessage(L3Address srcAddr, L3Address destAddr
     return nullptr;
 }
 
-SctpAssociation *Sctp::findAssocForApp(int32_t appGateIndex, int32_t assocId)
+SctpAssociation *Sctp::findAssocForApp(int appGateIndex, int assocId)
 {
     AppAssocKey key;
     key.appGateIndex = appGateIndex;
@@ -622,7 +622,7 @@ SctpAssociation *Sctp::findAssocForApp(int32_t appGateIndex, int32_t assocId)
     return (i == sctpAppAssocMap.end()) ? nullptr : i->second;
 }
 
-int32_t Sctp::findAssocForFd(int32_t fd)
+int Sctp::findAssocForFd(int fd)
 {
     SctpAssociation *assoc = nullptr;
     for (auto& elem : sctpAppAssocMap) {
@@ -809,7 +809,7 @@ void Sctp::addForkedAssociation(SctpAssociation *workingAssoc, SctpAssociation *
     SockPair keyAssoc;
     bool found = false;
 
-    EV_INFO << "addForkedConnection: workingAssocId=" << workingAssoc->assocId 
+    EV_INFO << "addForkedConnection: workingAssocId=" << workingAssoc->assocId
             << " listenerAssocId=" << listenerAssoc->assocId << "\n";
 
     // Find the listener's original socket pair
@@ -837,7 +837,7 @@ void Sctp::addForkedAssociation(SctpAssociation *workingAssoc, SctpAssociation *
 
     workingAssoc->listeningAssocId = listenerAssoc->assocId;  // Reference to listener
     key.assocId = workingAssoc->assocId;
-    EV_INFO << "Working connection: listeningAssocId=" << workingAssoc->listeningAssocId 
+    EV_INFO << "Working connection: listeningAssocId=" << workingAssoc->listeningAssocId
             << " new assocId=" << workingAssoc->assocId << endl;
     sctpAppAssocMap[key] = workingAssoc;
 
@@ -854,7 +854,7 @@ void Sctp::removeAssociation(SctpAssociation *assoc)
 {
     bool ok = false;
     bool find = false;
-    const int32_t id = assoc->assocId;
+    const int id = assoc->assocId;
 
     EV_INFO << "Deleting SCTP connection " << assoc << " id= " << id << endl;
 
@@ -907,7 +907,7 @@ void Sctp::removeAssociation(SctpAssociation *assoc)
     assoc->deleteModule();
 }
 
-SctpAssociation *Sctp::getAssoc(int32_t assocId)
+SctpAssociation *Sctp::getAssoc(int assocId)
 {
     for (auto& elem : sctpAppAssocMap) {
         if (elem.first.assocId == assocId)

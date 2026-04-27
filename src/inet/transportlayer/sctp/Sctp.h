@@ -81,8 +81,8 @@ class INET_API Sctp : public SimpleModule
 {
   public:
     struct AppAssocKey {
-        int32_t appGateIndex;
-        int32_t assocId;
+        int appGateIndex;
+        int assocId;
 
         bool operator<(const AppAssocKey& b) const
         {
@@ -119,7 +119,7 @@ class INET_API Sctp : public SimpleModule
         uint16_t remotePort;
     };
 
-    typedef std::map<int32_t, VTagPair> SctpVTagMap;
+    typedef std::map<int, VTagPair> SctpVTagMap;
     SctpVTagMap sctpVTagMap;
 
     typedef std::map<AppAssocKey, SctpAssociation *> SctpAppAssocMap;
@@ -138,13 +138,13 @@ class INET_API Sctp : public SimpleModule
     ModuleRefByPar<IRoutingTable> rt;
     ModuleRefByPar<IInterfaceTable> ift;
 
-    int32_t sizeAssocMap;
+    int sizeAssocMap;
 
     uint16_t nextEphemeralPort;
 
     SctpAssociation *findAssocForMessage(L3Address srcAddr, L3Address destAddr, uint32_t srcPort, uint32_t destPort, bool findListen);
-    SctpAssociation *findAssocForApp(int32_t appGateIndex, int32_t assocId);
-    int32_t findAssocForFd(int32_t fd);
+    SctpAssociation *findAssocForApp(int appGateIndex, int assocId);
+    int findAssocForFd(int fd);
     void sendAbortFromMain(SctpHeader *sctpMsg, L3Address fromAddr, L3Address toAddr);
     void sendShutdownCompleteFromMain(SctpHeader *sctpMsg, L3Address fromAddr, L3Address toAddr);
     virtual void refreshDisplay() const override;
@@ -194,7 +194,7 @@ class INET_API Sctp : public SimpleModule
      */
     uint16_t getEphemeralPort();
 
-    SctpAssociation *getAssoc(int32_t assocId);
+    SctpAssociation *getAssoc(int assocId);
     SctpAssociation *findAssocWithVTag(uint32_t peerVTag, uint32_t remotePort, uint32_t localPort);
 
     SctpAssociation *findAssocForInitAck(SctpInitAckChunk *initack, L3Address srcAddr, L3Address destAddr, uint32_t srcPort, uint32_t destPort, bool findListen);
