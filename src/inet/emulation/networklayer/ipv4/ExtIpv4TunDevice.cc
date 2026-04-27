@@ -45,6 +45,7 @@ void ExtIpv4TunDevice::initialize(int stage)
         rtScheduler = check_and_cast<RealTimeScheduler *>(getSimulation()->getScheduler());
         openTun(device);
         numSent = numReceived = 0;
+        WATCH(fd);
         WATCH(numSent);
         WATCH(numReceived);
     }

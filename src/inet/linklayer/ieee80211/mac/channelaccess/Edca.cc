@@ -16,6 +16,7 @@ void Edca::initialize(int stage)
 {
     if (stage == INITSTAGE_LINK_LAYER) {
         numEdcafs = par("numEdcafs");
+        WATCH(numEdcafs);
         edcafs = new Edcaf *[numEdcafs];
         for (int ac = 0; ac < numEdcafs; ac++) {
             edcafs[ac] = check_and_cast<Edcaf *>(getSubmodule("edcaf", ac));

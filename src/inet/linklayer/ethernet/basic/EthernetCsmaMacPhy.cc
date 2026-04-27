@@ -78,6 +78,9 @@ void EthernetCsmaMacPhy::initializeStatistics()
     totalSuccessfulRxTxTime = 0.0;
     numCollisions = numBackoffs = 0;
 
+    WATCH(channelBusySince);
+    WATCH(totalCollisionTime);
+    WATCH(totalSuccessfulRxTxTime);
     WATCH(numCollisions);
     WATCH(numBackoffs);
 }

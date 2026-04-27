@@ -35,6 +35,8 @@ void Bgp::initialize(int stage)
         rt.reference(this, "routingTableModule", true);
 
         startupTimer = new cMessage("BGP-startup");
+
+        WATCH(isUp);
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) { // interfaces and static routes are already initialized
         cModule *node = findContainingNode(this);

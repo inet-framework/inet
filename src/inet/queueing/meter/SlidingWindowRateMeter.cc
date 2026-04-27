@@ -23,6 +23,8 @@ void SlidingWindowRateMeter::initialize(int stage)
     PacketMeterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         timeWindow = par("timeWindow");
+        WATCH(currentNumPackets);
+        WATCH(currentTotalPacketLength);
         WATCH(packetrate);
         WATCH(datarate);
     }

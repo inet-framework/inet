@@ -30,6 +30,7 @@ void SimpleCcBattery::initialize(int stage)
                 throw cRuntimeError("Cannot find node status");
         }
         setResidualCapacity(C(par("initialCapacity")));
+        WATCH(lastResidualCapacityUpdate);
         WATCH(residualCapacity);
     }
 }

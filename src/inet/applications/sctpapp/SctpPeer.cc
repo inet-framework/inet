@@ -85,10 +85,25 @@ void SctpPeer::initialize(int stage)
     SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
+        WATCH(chunksAbandoned);
+        WATCH(echoedBytesSent);
+        WATCH(lastStream);
+        WATCH(notificationsReceived);
+        WATCH(schedule);
+        WATCH(sendAllowed);
+        WATCH(serverAssocId);
+        WATCH(shutdownReceived);
+        WATCH(bytesPerAssoc);
+        WATCH(endToEndDelay);
+        WATCH(histEndToEndDelay);
+        WATCH(rcvdPacketsPerAssoc);
+        WATCH(sentPacketsPerAssoc);
+        WATCH(rcvdBytesPerAssoc);
         WATCH(numSessions);
         WATCH(packetsSent);
         WATCH(packetsRcvd);
         WATCH(bytesSent);
+        WATCH(bytesRcvd);
         WATCH(numRequestsToSend);
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {

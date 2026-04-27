@@ -48,6 +48,10 @@ void SuperpositioningMobility::initialize(int stage)
             element->subscribe(IMobility::mobilityStateChangedSignal, this);
             elements.push_back(check_and_cast<IMobility *>(element));
         }
+        WATCH(lastAngularAcceleration);
+        WATCH(lastAngularVelocity);
+        WATCH(orientationElementIndex);
+        WATCH(positionElementIndex);
         WATCH(lastVelocity);
         WATCH(lastAcceleration);
     }

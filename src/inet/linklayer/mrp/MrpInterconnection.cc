@@ -60,6 +60,15 @@ void MrpInterconnection::initialize(int stage)
         inStatusPollSentSignal = registerSignal("inStatusPollSent");
         inLinkChangeDetectedSignal = registerSignal("inLinkChangeDetected");
         inTestFrameLatencySignal = registerSignal("inTestFrameLatency");
+
+        WATCH(inLinkChangeInterval);
+        WATCH(inLinkCheckEnabled);
+        WATCH(inLinkStatusPollInterval);
+        WATCH(inRingCheckEnabled);
+        WATCH(inTestDefaultInterval);
+        WATCH(inTopologyChangeInterval);
+        WATCH(inTestFrameSent);
+        WATCH(interconnectionPortId);
     }
     if (stage == INITSTAGE_LINK_LAYER) {
         EV_DETAIL << "Initialize Interconnection Stage link layer" << EV_ENDL;

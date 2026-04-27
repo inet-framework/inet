@@ -103,6 +103,14 @@ void MoBanCoordinator::initialize(int stage)
         lastPosition = selectDestination();
         publishToNodes();
         computeMaxSpeed();
+
+        WATCH(currentPattern);
+        WATCH(maxDuration);
+        WATCH(maxSpeed);
+        WATCH(minDuration);
+        WATCH(numPostures);
+        WATCH(patternLength);
+        WATCH(speed);
     }
 }
 

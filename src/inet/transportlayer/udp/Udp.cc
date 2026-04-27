@@ -68,11 +68,12 @@ void Udp::initialize(int stage)
         numDroppedWrongPort = 0;
         numDroppedBadChecksum = 0;
 
+        WATCH(checksumMode);
+        WATCH(lastEphemeralPort);
         WATCH(numSent);
         WATCH(numPassedUp);
         WATCH(numDroppedWrongPort);
         WATCH(numDroppedBadChecksum);
-
         WATCH(socketsByIdMap);
         WATCH(socketsByPortMap);
     }

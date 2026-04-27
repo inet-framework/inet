@@ -57,11 +57,14 @@ void Arp::initialize(int stage)
         // init statistics
         numRequestsSent = numRepliesSent = 0;
         numResolutions = numFailedResolutions = 0;
+        WATCH(retryTimeout);
+        WATCH(retryCount);
+        WATCH(cacheTimeout);
+        WATCH(proxyArpInterfaces);
         WATCH(numRequestsSent);
         WATCH(numRepliesSent);
         WATCH(numResolutions);
         WATCH(numFailedResolutions);
-
         WATCH(arpCache);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {

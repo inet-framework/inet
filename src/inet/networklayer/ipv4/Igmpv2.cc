@@ -200,6 +200,7 @@ void Igmpv2::initialize(int stage)
 
 void Igmpv2::addWatches()
 {
+    WATCH(externalRouter);
     WATCH(numGroups);
     WATCH(numHostGroups);
     WATCH(numRouterGroups);

@@ -37,6 +37,7 @@ void SimpleEpEnergyStorage::initialize(int stage)
         }
         setResidualCapacity(J(par("initialCapacity")));
         scheduleTimer();
+        WATCH(lastResidualCapacityUpdate);
         WATCH(residualCapacity);
     }
 }

@@ -19,6 +19,7 @@ void OnoeRateControl::initialize(int stage)
     RateControlBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         interval = par("interval");
+        WATCH(timer);
         WATCH(numOfRetries);
         WATCH(credit);
         WATCH(numOfSuccTransmissions);

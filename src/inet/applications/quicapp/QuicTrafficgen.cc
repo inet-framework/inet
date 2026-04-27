@@ -30,6 +30,8 @@ QuicTrafficgen::~QuicTrafficgen()
     cancelAndDelete(timerLimitRuntime);
 }
 
+        WATCH(generatorsActive);
+        WATCH(sendingAllowed);
 void QuicTrafficgen::handleStartOperation(LifecycleOperation *operation)
 {
     EV_DEBUG << "initialize QuicTrafficgen" << endl;

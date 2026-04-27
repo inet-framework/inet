@@ -33,6 +33,14 @@ void RtpProfile::initialize()
     _maxReceivers = gateSize("payloadReceiverOut");
     _ssrcGates.clear();
     _autoOutputFileNames = par("autoOutputFileNames");
+
+    WATCH(_profileName);
+    WATCH(_maxReceivers);
+    WATCH(_ssrcGates);
+    WATCH(_rtcpPercentage);
+    WATCH(_preferredPort);
+    WATCH(_mtu);
+    WATCH(_autoOutputFileNames);
     EV_TRACE << "initialize() Exit" << endl;
 }
 

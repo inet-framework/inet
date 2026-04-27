@@ -21,6 +21,7 @@ void ActivePacketSink::initialize(int stage)
         collectionTimer = new ClockEvent("CollectionTimer");
         scheduleForAbsoluteTime = par("scheduleForAbsoluteTime");
         initialCollectionOffsetScheduled = false;
+        WATCH(initialCollectionOffsetScheduled);
     }
     else if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(inputGate);

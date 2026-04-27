@@ -26,6 +26,8 @@ void RandomWaypointMobility::initialize(int stage)
         hasWaitTime = waitTimeParameter->isExpression() || waitTimeParameter->doubleValue() != 0;
         speedParameter = &par("speed");
         stationary = !speedParameter->isExpression() && speedParameter->doubleValue() == 0;
+        WATCH(hasWaitTime);
+        WATCH(nextMoveIsWait);
     }
 }
 

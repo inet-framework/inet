@@ -24,6 +24,7 @@ void TokenBasedServer::initialize(int stage)
         displayStringTextFormat = par("displayStringTextFormat");
         numTokens = par("initialNumTokens");
         maxNumTokens = par("maxNumTokens");
+        WATCH(tokensDepletedSignaled);
         WATCH(numTokens);
     }
 }

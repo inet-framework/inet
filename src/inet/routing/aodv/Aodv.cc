@@ -40,6 +40,15 @@ void Aodv::initialize(int stage)
     RoutingProtocolBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
+        WATCH(usingIpv6);
+        WATCH(hasExternalGateway);
+        WATCH(rreqId);
+        WATCH(sequenceNum);
+        WATCH(rreqCount);
+        WATCH(rerrCount);
+        WATCH(lastBroadcastTime);
+        WATCH(rebootTime);
+        WATCH(failedNextHop);
         lastBroadcastTime = SIMTIME_ZERO;
         rebootTime = SIMTIME_ZERO;
         rreqId = sequenceNum = 0;
@@ -87,7 +96,7 @@ void Aodv::initialize(int stage)
         interface = interfaceTable->findInterfaceByName(par("interface"));
         if (!interface)
             throw cRuntimeError("Unknown network interface in parameter 'interface': '%s'", par("interface").stringValue());
-    } 
+    }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         networkProtocol->registerHook(0, this);
         host->subscribe(linkBrokenSignal, this);
@@ -202,7 +211,7 @@ INetfilter::IHook::Result Aodv::ensureRouteForDatagram(Packet *datagram)
     // Check if this is an external address
     if (hasExternalGateway && isExternalAddress(destAddr)) {
         EV_INFO << "External address detected: " << destAddr << ", routing via gateway" << endl;
-        
+
         // Resolve gateway address on first use
         if (gatewayAddress.isUnspecified()) {
             gatewayAddress = L3AddressResolver().resolve(par("gatewayAddress"));
@@ -219,35 +228,35 @@ INetfilter::IHook::Result Aodv::ensureRouteForDatagram(Packet *datagram)
         // Lazy initialization of gateway route
         if (!defaultGatewayRoute)
             createDefaultGatewayRoute();
-        
+
         // Update gateway route status
         updateGatewayRoute();
-        
+
         // Check if default route is active
         AodvRouteData *defaultRouteData = check_and_cast<AodvRouteData *>(defaultGatewayRoute->getProtocolData());
         if (defaultRouteData->isActive()) {
             EV_INFO << "Using active default route for external traffic" << endl;
             return ACCEPT;
         }
-        
+
         // No active route to gateway, start discovery
         EV_INFO << "Starting route discovery to gateway: " << gatewayAddress << endl;
         delayDatagram(datagram);
-        
+
         if (!hasOngoingRouteDiscovery(gatewayAddress)) {
             startRouteDiscovery(gatewayAddress);
         }
-        
+
         return QUEUE;
     }
-    
+
     // Normal AODV logic for internal addresses
     else {
         EV_INFO << "Finding route for source " << sourceAddr << " with destination " << destAddr << endl;
         IRoute *route = routingTable->findBestMatchingRoute(destAddr);
         AodvRouteData *routeData = route ? dynamic_cast<AodvRouteData *>(route->getProtocolData()) : nullptr;
         bool isActive = routeData && routeData->isActive();
-        
+
         if (isActive && !route->getNextHopAsGeneric().isUnspecified()) {
             EV_INFO << "Active route found: " << route << endl;
 
@@ -754,7 +763,7 @@ void Aodv::handleRREP(const Ptr<Rrep>& rrep, const L3Address& sourceAddr)
             EV_INFO << "The Route Reply has arrived for our Route Request to node " << rrep->getDestAddr() << endl;
             updateRoutingTable(destRoute, sourceAddr, newHopCount, true, destSeqNum, true, simTime() + lifeTime);
             completeRouteDiscovery(rrep->getDestAddr());
-            
+
             // Check if this is a route reply for the gateway
             if (!gatewayAddress.isUnspecified() && rrep->getDestAddr() == gatewayAddress) {
                 EV_INFO << "Route reply received for gateway, updating default route" << endl;
@@ -1824,7 +1833,7 @@ void Aodv::createDefaultGatewayRoute()
 
     routingTable->addRoute(route);
     defaultGatewayRoute = route;
-    
+
     EV_INFO << "Created inactive default gateway route (0.0.0.0/0)" << endl;
 }
 
@@ -1839,14 +1848,14 @@ void Aodv::updateGatewayRoute()
     IRoute *gatewayRoute = routingTable->findBestMatchingRoute(gatewayAddress);
     if (gatewayRoute && gatewayRoute->getSource() == this) {
         AodvRouteData *gatewayRouteData = check_and_cast<AodvRouteData *>(gatewayRoute->getProtocolData());
-        
+
         if (gatewayRouteData->isActive()) {
             // Activate default route using gateway route info
             defaultGatewayRoute->setNextHop(gatewayRoute->getNextHopAsGeneric());
             defaultGatewayRoute->setMetric(gatewayRoute->getMetric() + 1);
             defaultRouteData->setIsActive(true);
             defaultRouteData->setLifeTime(gatewayRouteData->getLifeTime());
-            
+
             EV_INFO << "Default gateway route activated via " << gatewayRoute->getNextHopAsGeneric() << endl;
         }
     } else {

@@ -71,6 +71,7 @@ void Ipv6RoutingTable::initialize(int stage)
         WATCH(ismobile_node);
 
         mipv6Support = false; // 4.9.07 - CB
+        WATCH(mipv6Support);
 #endif /* INET_WITH_xMIPv6 */
 
         cModule *host = getContainingNode(this);

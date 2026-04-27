@@ -103,6 +103,10 @@ void Ieee802154Mac::initialize(int stage)
         txAttempts = 0;
         txQueue = getQueue(gate(upperLayerInGateId));
         radio.reference(this, "radioModule", true);
+        WATCH(NB);
+        WATCH(transmissionAttemptInterruptedByRx);
+        WATCH(txAttempts);
+        WATCH(txPower);
         WATCH(macState);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {

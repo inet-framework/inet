@@ -35,6 +35,7 @@ void NonQosRecoveryProcedure::initialize(int stage)
         shortRetryLimit = par("shortRetryLimit");
         longRetryLimit = par("longRetryLimit");
         emit(contentionWindowChangedSignal, cwCalculator->getCw());
+        WATCH(rtsThreshold);
         WATCH(shortRetryCounter);
         WATCH(longRetryCounter);
     }

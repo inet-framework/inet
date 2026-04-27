@@ -52,6 +52,7 @@ void Ppp::initialize(int stage)
         datarateChannel = connected ? physOutGate->getTransmissionChannel() : nullptr;
 
         numSent = numRcvdOK = numDroppedBitErr = numDroppedIfaceDown = 0;
+        WATCH(oldConnColor);
         WATCH(numSent);
         WATCH(numRcvdOK);
         WATCH(numDroppedBitErr);

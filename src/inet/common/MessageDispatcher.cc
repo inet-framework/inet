@@ -29,6 +29,7 @@ void MessageDispatcher::initialize(int stage)
         forwardServiceRegistration = par("forwardServiceRegistration");
         forwardProtocolRegistration = par("forwardProtocolRegistration");
         interfaceTable.reference(this, "interfaceTableModule", true);
+        WATCH(registeringAny);
         WATCH(socketIdToGateIndex);
         WATCH(interfaceIdToGateIndex);
         WATCH(serviceToGateIndex);

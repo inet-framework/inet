@@ -37,6 +37,7 @@ void QosRecoveryProcedure::initialize(int stage)
         shortRetryLimit = par("shortRetryLimit");
         longRetryLimit = par("longRetryLimit");
         emit(contentionWindowChangedSignal, cwCalculator->getCw());
+        WATCH(rtsThreshold);
         WATCH(stationLongRetryCounter);
         WATCH(stationShortRetryCounter);
         WATCH(shortRetryCounter);

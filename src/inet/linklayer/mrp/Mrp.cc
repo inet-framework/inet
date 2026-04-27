@@ -151,6 +151,22 @@ void Mrp::initialize(int stage)
         linkChangeDetectedSignal = registerSignal("linkChangeDetected");
         testFrameLatencySignal = registerSignal("testFrameLatency");
 
+        WATCH(addTest);
+        WATCH(defaultTestInterval);
+        WATCH(hostBestMRMPriority);
+        WATCH(hostBestMRMSourceAddress);
+        WATCH(linkDownInterval);
+        WATCH(linkUpInterval);
+        WATCH(localBridgeAddress);
+        WATCH(noTopologyChange);
+        WATCH(primaryRingPortId);
+        WATCH(secondaryRingPortId);
+        WATCH(sequenceCCM1);
+        WATCH(sequenceCCM2);
+        WATCH(shortTestInterval);
+        WATCH(topologyChangeInterval);
+        WATCH(testFrameSent);
+
         switchModule->subscribe(interfaceStateChangedSignal, this);
     }
     if (stage == INITSTAGE_LINK_LAYER) { // "auto" MAC addresses assignment takes place in stage 0

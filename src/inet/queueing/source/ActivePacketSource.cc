@@ -20,6 +20,7 @@ void ActivePacketSource::initialize(int stage)
         productionIntervalParameter = &par("productionInterval");
         productionTimer = new ClockEvent("ProductionTimer");
         scheduleForAbsoluteTime = par("scheduleForAbsoluteTime");
+        WATCH(initialProductionOffsetScheduled);
     }
     else if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(outputGate);

@@ -30,6 +30,7 @@ void Ieee8021qTagTpidHeaderChecker::initialize(int stage)
         else
             throw cRuntimeError("Unknown tag type");
         vlanIdFilter = check_and_cast<cValueArray *>(par("vlanIdFilter").objectValue());
+        WATCH(tpid);
     }
 }
 

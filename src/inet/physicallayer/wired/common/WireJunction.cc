@@ -32,6 +32,9 @@ void WireJunction::initialize()
     outputGateBaseId = gateBaseId((gateName + "$o").c_str());
 
     numMessages = 0;
+    WATCH(inputGateBaseId);
+    WATCH(numPorts);
+    WATCH(outputGateBaseId);
     WATCH(numMessages);
 
     subscribe(POST_MODEL_CHANGE, this);

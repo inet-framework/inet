@@ -28,6 +28,7 @@ void AarfRateControl::initialize(int stage)
         WATCH(maxIncreaseThreshold);
         WATCH(decreaseThreshold);
         WATCH(interval);
+        WATCH(timer);
         WATCH(probing);
         WATCH(numberOfConsSuccTransmissions);
     }

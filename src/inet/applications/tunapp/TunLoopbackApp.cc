@@ -27,6 +27,8 @@ void TunLoopbackApp::initialize(int stage)
         tunInterface = par("tunInterface");
         packetsSent = 0;
         packetsReceived = 0;
+        WATCH(packetsSent);
+        WATCH(packetsReceived);
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         IInterfaceTable *interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);

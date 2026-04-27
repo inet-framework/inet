@@ -42,6 +42,16 @@ void ProbabilisticBroadcast::initialize(int stage)
         debugNbMessageKnown = 0;
         nbDataPacketsForwarded = 0;
         nbHops = 0;
+        WATCH(knownMsgIds);
+        WATCH(msgQueue);
+        WATCH(debugMsgIdSet);
+        WATCH(nbDataPacketsReceived);
+        WATCH(nbDataPacketsSent);
+        WATCH(nbHops);
+        WATCH(debugNbMessageKnown);
+        WATCH(nbDataPacketsForwarded);
+        WATCH(oneHopLatencies);
+        WATCH(myNetwAddr);
     }
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         for (int i = 0; i < interfaceTable->getNumInterfaces(); i++)

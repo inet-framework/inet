@@ -46,6 +46,7 @@ void EtherAppClient::initialize(int stage)
         remoteSap = par("remoteSAP");
 
         seqNum = 0;
+        WATCH(destMacAddress);
         WATCH(seqNum);
 
         // statistics

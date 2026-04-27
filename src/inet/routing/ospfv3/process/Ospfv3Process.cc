@@ -48,6 +48,7 @@ void Ospfv3Process::initialize(int stage)
         cMessage *init = new cMessage();
         init->setKind(INIT_PROCESS);
         scheduleAfter(OSPFV3_START, init);
+        WATCH(isActive);
         WATCH(this->instances);
         WATCH(this->routingTableIPv6);
         WATCH(this->routingTableIPv4);

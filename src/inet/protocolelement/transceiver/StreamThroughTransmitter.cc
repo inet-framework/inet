@@ -14,8 +14,13 @@ Define_Module(StreamThroughTransmitter);
 void StreamThroughTransmitter::initialize(int stage)
 {
     StreamingTransmitterBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
+    if (stage == INITSTAGE_LOCAL) {
         bufferUnderrunTimer = new cMessage("BufferUnderrunTimer");
+        WATCH(lastInputProgressPosition);
+        WATCH(lastInputProgressTime);
+        WATCH(lastTxProgressPosition);
+        WATCH(lastTxProgressTime);
+    }
 }
 
 void StreamThroughTransmitter::handleMessageWhenUp(cMessage *message)

@@ -34,6 +34,8 @@ void Mpls::initialize(int stage)
         lt.reference(this, "libTableModule", true);
         ift.reference(this, "interfaceTableModule", true);
         pct.reference(this, "classifierModule", true);
+
+        WATCH(delay1);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         registerService(Protocol::mpls, gate("upperLayerIn"), gate("upperLayerOut"));

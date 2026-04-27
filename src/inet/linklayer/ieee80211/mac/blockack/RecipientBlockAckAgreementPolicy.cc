@@ -19,6 +19,11 @@ void RecipientBlockAckAgreementPolicy::initialize(int stage)
         isAMsduSupported = par("aMsduSupported");
         maximumAllowedBufferSize = par("maximumAllowedBufferSize");
         blockAckTimeoutValue = par("blockAckTimeoutValue");
+
+        WATCH(isDelayedBlockAckPolicySupported);
+        WATCH(isAMsduSupported);
+        WATCH(maximumAllowedBufferSize);
+        WATCH(blockAckTimeoutValue);
     }
 }
 

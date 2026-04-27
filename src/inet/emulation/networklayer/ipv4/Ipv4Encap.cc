@@ -32,6 +32,9 @@ void Ipv4Encap::initialize(int stage)
         defaultTimeToLive = 16; // par("timeToLive");
         defaultMCTimeToLive = 16; // par("multicastTimeToLive");
         checksumMode = CHECKSUM_COMPUTED;
+        WATCH(defaultTimeToLive);
+        WATCH(defaultMCTimeToLive);
+        WATCH(checksumMode);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         registerService(Protocol::ipv4, gate("upperLayerIn"), gate("upperLayerOut"));

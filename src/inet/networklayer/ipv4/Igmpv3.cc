@@ -119,6 +119,7 @@ void Igmpv3::initialize(int stage)
 
 void Igmpv3::addWatches()
 {
+    WATCH(lastMemberQueryTime);
     WATCH(numGroups);
     WATCH(numHostGroups);
     WATCH(numRouterGroups);

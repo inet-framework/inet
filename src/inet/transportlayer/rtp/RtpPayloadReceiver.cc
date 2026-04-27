@@ -34,6 +34,8 @@ void RtpPayloadReceiver::initialize()
         snprintf(logName, sizeof(logName), logFileName.c_str(), getId());
         _outputLogLoss.open(logName);
     }
+
+    WATCH(_payloadType);
 }
 
 void RtpPayloadReceiver::handleMessage(cMessage *msg)

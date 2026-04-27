@@ -26,6 +26,8 @@ void RsvpClassifier::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         maxLabel = 0;
+        WATCH(maxLabel);
+        WATCH(routerId);
         WATCH(bindings);
     }
     // TODO INITSTAGE

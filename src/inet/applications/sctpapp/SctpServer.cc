@@ -34,6 +34,18 @@ void SctpServer::initialize(int stage)
     SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
+        WATCH(abortSent);
+        WATCH(assocId);
+        WATCH(count);
+        WATCH(firstData);
+        WATCH(lastStream);
+        WATCH(notificationsReceived);
+        WATCH(readInt);
+        WATCH(schedule);
+        WATCH(shutdownReceived);
+        WATCH(bytesPerAssoc);
+        WATCH(endToEndDelay);
+        WATCH(serverAssocStatMap);
         WATCH(numSessions);
         WATCH(packetsSent);
         WATCH(packetsRcvd);

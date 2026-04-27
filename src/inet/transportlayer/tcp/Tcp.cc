@@ -52,7 +52,10 @@ void Tcp::initialize(int stage)
 
         msl = par("msl");
 
+        WATCH(checksumMode);
         WATCH(lastEphemeralPort);
+        WATCH(usedEphemeralPorts);
+        WATCH(msl);
         WATCH(tcpConnMap);
         WATCH(tcpAppConnMap);
     }

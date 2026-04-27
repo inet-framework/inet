@@ -23,6 +23,9 @@ void ExponentialRateMeter::initialize(int stage)
     PacketMeterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         alpha = par("alpha");
+        WATCH(currentNumPackets);
+        WATCH(currentTotalPacketLength);
+        WATCH(lastUpdate);
         WATCH(packetrate);
         WATCH(datarate);
     }

@@ -57,6 +57,8 @@ void EtherTrafGen::initialize(int stage)
         dsap = par("dsap");
 
         seqNum = 0;
+        WATCH(destMacAddress);
+        WATCH(outInterface);
         WATCH(seqNum);
 
         // statistics

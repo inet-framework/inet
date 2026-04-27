@@ -64,6 +64,14 @@ void UdpBasicBurst::initialize(int stage)
             throw cRuntimeError("Invalid chooseDestAddrMode: '%s'", addrModeStr);
         chooseDestAddrMode = static_cast<ChooseDestAddrMode>(addrMode);
 
+        WATCH(sourceSequence);
+        WATCH(isSource);
+        WATCH(nextBurst);
+        WATCH(nextPkt);
+        WATCH(nextSleep);
+        WATCH(activeBurst);
+        WATCH(destAddr);
+        WATCH(haveSleepDuration);
         WATCH(numSent);
         WATCH(numReceived);
         WATCH(numDeleted);

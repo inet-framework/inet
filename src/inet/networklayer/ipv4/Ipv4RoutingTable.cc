@@ -75,6 +75,7 @@ void Ipv4RoutingTable::initialize(int stage)
         WATCH(netmaskRoutes);
         WATCH(forwarding);
         WATCH(multicastForward);
+        WATCH(isNodeUp);
         WATCH(routerId);
     }
     else if (stage == INITSTAGE_ROUTER_ID_ASSIGNMENT) {

@@ -97,12 +97,25 @@ void Ipv4::initialize(int stage)
 
         pendingPackets.clear();
 
+        WATCH(checksumMode);
+        WATCH(defaultTimeToLive);
+        WATCH(defaultMCTimeToLive);
+        WATCH(fragmentTimeoutTime);
+        WATCH(limitedBroadcast);
+        WATCH(directBroadcastInterfaces);
+        WATCH(enableLocalOutMulticastRouting);
+        WATCH(enableTimestampOption);
+        WATCH(maxLifetime);
+        WATCH(curFragmentId);
+        WATCH(lastCheckTime);
+        WATCH(upperProtocols);
         WATCH(numMulticast);
         WATCH(numLocalDeliver);
         WATCH(numDropped);
         WATCH(numUnroutable);
         WATCH(numForwarded);
         WATCH(pendingPackets);
+        WATCH(queuedDatagramsForHooks);
         WATCH(socketIdToSocketDescriptor);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {

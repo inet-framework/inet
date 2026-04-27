@@ -34,10 +34,17 @@ void FlowMeasurementStarter::initialize(int stage)
         measureMatcher.setPattern(par("measure"), false, true, true);
         measureElapsedTime = matchesString(measureMatcher, "elapsedTime");
         measureDelayingTime = matchesString(measureMatcher, "delayingTime");
+        WATCH(measureElapsedTime);
+        WATCH(measureDelayingTime);
+        WATCH(measurePacketEvents);
         measureQueueingTime = matchesString(measureMatcher, "queueingTime");
+        WATCH(measureQueueingTime);
         measureProcessingTime = matchesString(measureMatcher, "processingTime");
+        WATCH(measureProcessingTime);
         measureTransmissionTime = matchesString(measureMatcher, "transmissionTime");
+        WATCH(measureTransmissionTime);
         measurePropagationTime = matchesString(measureMatcher, "propagationTime");
+        WATCH(measurePropagationTime);
         measurePacketEvents = matchesString(measureMatcher, "packetEvent");
     }
 }

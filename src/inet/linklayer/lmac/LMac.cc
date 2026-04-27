@@ -63,6 +63,11 @@ void LMac::initialize(int stage)
         radioModule->subscribe(IRadio::radioModeChangedSignal, this);
         radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
 
+        WATCH(myId);
+        WATCH(mySlot);
+        WATCH(SETUP_PHASE);
+        WATCH(controlDuration);
+        WATCH(currSlot);
         WATCH(macState);
 
         EV_DETAIL << " slotDuration = " << slotDuration

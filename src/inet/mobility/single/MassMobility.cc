@@ -33,6 +33,8 @@ void MassMobility::initialize(int stage)
         rotationAxisAngleParameter = &par("rotationAxisAngle");
         speedParameter = &par("speed");
         quaternion = Quaternion(EulerAngles(heading, -elevation, rad(0)));
+        WATCH(previousChange);
+        WATCH(sourcePosition);
         WATCH(quaternion);
     }
 }

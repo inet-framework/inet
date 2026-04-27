@@ -28,6 +28,7 @@ void InstantServer::initialize(int stage)
             serveTimer = new cMessage("ServeTimer");
             serveTimer->setSchedulingPriority(serveSchedulingPriority);
         }
+        WATCH(isProcessing);
     }
 }
 
