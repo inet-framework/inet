@@ -42,21 +42,21 @@ void RateSelection::initialize(int stage)
         double responseCtsFrameBitrate = par("responseCtsFrameBitrate");
         responseCtsFrameMode = (responseCtsFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(responseCtsFrameBitrate));
         fastestMandatoryMode = modeSet->getFastestMandatoryMode();
-//        WATCH_PTR(dataOrMgmtRateControl);
+//        WATCH(dataOrMgmtRateControl);
 
-//        WATCH_PTR(*((cObject**)&fastestMandatoryMode));
-//        WATCH_PTR(*((cObject**)&modeSet));
-        WATCH_MAP(lastTransmittedFrameMode);
-//        WATCH_PTR(*((cObject**)&multicastFrameMode));
-//        WATCH_PTR(*((cObject**)&dataFrameMode));
-//        WATCH_PTR(*((cObject**)&mgmtFrameMode));
-//        WATCH_PTR(*((cObject**)&controlFrameMode));
-//        WATCH_PTR(*((cObject**)&responseAckFrameMode));
-//        WATCH_PTR(*((cObject**)&responseCtsFrameMode));
-//        WATCH_PTR();
-//        WATCH_PTR();
-//        WATCH_PTR();
-//        WATCH_PTR();
+//        WATCH(*((cObject**)&fastestMandatoryMode));
+//        WATCH(*((cObject**)&modeSet));
+        WATCH(lastTransmittedFrameMode);
+//        WATCH(*((cObject**)&multicastFrameMode));
+//        WATCH(*((cObject**)&dataFrameMode));
+//        WATCH(*((cObject**)&mgmtFrameMode));
+//        WATCH(*((cObject**)&controlFrameMode));
+//        WATCH(*((cObject**)&responseAckFrameMode));
+//        WATCH(*((cObject**)&responseCtsFrameMode));
+//        WATCH();
+//        WATCH();
+//        WATCH();
+//        WATCH();
     }
 }
 

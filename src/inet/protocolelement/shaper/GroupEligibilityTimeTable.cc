@@ -49,7 +49,7 @@ void GroupEligibilityTimeTable::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
     {
-        WATCH_MAP(groupEligibilityTimeTable);
+        WATCH(groupEligibilityTimeTable);
     }
 }
 

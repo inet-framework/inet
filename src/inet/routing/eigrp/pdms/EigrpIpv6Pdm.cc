@@ -91,7 +91,7 @@ void EigrpIpv6Pdm::initialize(int stage)
 //        registerService(Protocol::eigrp, nullptr, gate("splitterIn"));
 //        registerProtocol(Protocol::eigrp, gate("splitterOut"), nullptr);
 
-        WATCH_PTRVECTOR(*routingForNetworks->getAllNetworks());
+        WATCH(*routingForNetworks->getAllNetworks());
         WATCH(asNum);
         WATCH(kValues.K1);
         WATCH(kValues.K2);

@@ -73,8 +73,8 @@ void Udp::initialize(int stage)
         WATCH(numDroppedWrongPort);
         WATCH(numDroppedBadChecksum);
 
-        WATCH_PTRMAP(socketsByIdMap);
-        WATCH_MAP(socketsByPortMap);
+        WATCH(socketsByIdMap);
+        WATCH(socketsByPortMap);
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
         if (checksumMode == CHECKSUM_COMPUTED) {

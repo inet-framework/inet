@@ -61,7 +61,7 @@ void MoBanLocal::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         WATCH(lastCompositePosition);
         WATCH(lastCompositeVelocity);
-        WATCH_PTR(coordinator);
+        WATCH(coordinator);
         WATCH(referencePosition);
         WATCH(radius);
         WATCH(speed);

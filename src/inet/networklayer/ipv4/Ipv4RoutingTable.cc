@@ -70,8 +70,8 @@ void Ipv4RoutingTable::initialize(int stage)
         multicastForward = par("multicastForwarding");
         useAdminDist = par("useAdminDist");
 
-        WATCH_PTRVECTOR(routes);
-        WATCH_PTRVECTOR(multicastRoutes);
+        WATCH(routes);
+        WATCH(multicastRoutes);
         WATCH(netmaskRoutes);
         WATCH(forwarding);
         WATCH(multicastForward);

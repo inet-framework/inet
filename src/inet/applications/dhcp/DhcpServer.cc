@@ -44,7 +44,7 @@ void DhcpServer::initialize(int stage)
         numReceived = 0;
         WATCH(numSent);
         WATCH(numReceived);
-        WATCH_MAP(leased);
+        WATCH(leased);
 
         // DHCP UDP ports
         clientPort = 68; // client

@@ -134,8 +134,8 @@ void Igmpv3::addWatches()
     WATCH(numReportsSent);
     WATCH(numReportsRecv);
 
-    WATCH_PTRMAP(hostData);
-    WATCH_PTRMAP(routerData);
+    WATCH(hostData);
+    WATCH(routerData);
 }
 
 void Igmpv3::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)

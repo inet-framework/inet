@@ -30,7 +30,7 @@ PimNeighbor::~PimNeighbor()
     delete livenessTimer;
 }
 
-// for WATCH_MAP()
+// for WATCH()
 std::ostream& operator<<(std::ostream& os, const PimNeighborTable::PimNeighborVector& v)
 {
     for (unsigned int i = 0; i < v.size(); i++) {
@@ -70,7 +70,7 @@ void PimNeighborTable::initialize(int stage)
     SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        WATCH_MAP(neighbors);
+        WATCH(neighbors);
     }
 }
 

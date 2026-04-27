@@ -21,7 +21,7 @@ std::ostream& operator<<(std::ostream& o, const Ieee8022LlcSocketTable::Socket& 
 
 void Ieee8022LlcSocketTable::initialize()
 {
-    WATCH_PTRMAP(socketIdToSocketMap);
+    WATCH(socketIdToSocketMap);
 }
 
 void Ieee8022LlcSocketTable::addSocket(int socketId, int localSap, int remoteSap)

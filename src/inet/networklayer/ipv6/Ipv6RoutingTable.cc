@@ -53,8 +53,8 @@ void Ipv6RoutingTable::initialize(int stage)
     SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        WATCH_PTRVECTOR(routeList);
-        WATCH_MAP(destCache); // FIXME commented out for now
+        WATCH(routeList);
+        WATCH(destCache); // FIXME commented out for now
         isrouter = par("isRouter");
         multicastForward = par("multicastForwarding");
         useAdminDist = par("useAdminDist");

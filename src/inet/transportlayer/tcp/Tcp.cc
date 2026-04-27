@@ -53,8 +53,8 @@ void Tcp::initialize(int stage)
         msl = par("msl");
 
         WATCH(lastEphemeralPort);
-        WATCH_PTRMAP(tcpConnMap);
-        WATCH_PTRMAP(tcpAppConnMap);
+        WATCH(tcpConnMap);
+        WATCH(tcpAppConnMap);
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
         registerService(Protocol::tcp, gate("appIn"), gate("appOut"));

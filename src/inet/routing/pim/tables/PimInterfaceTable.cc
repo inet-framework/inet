@@ -33,7 +33,7 @@ void PimInterfaceTable::initialize(int stage)
     SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        WATCH_VECTOR(pimInterfaces);
+        WATCH(pimInterfaces);
     }
     // TODO INITSTAGE
     else if (stage == INITSTAGE_LINK_LAYER) {
@@ -145,7 +145,7 @@ void PimInterfaceTable::removeInterface(NetworkInterface *ie)
         pimInterfaces.erase(it);
 }
 
-// for WATCH_VECTOR
+// for WATCH
 std::ostream& operator<<(std::ostream& os, const PimInterface *e)
 {
     os << "name: " << e->getInterfacePtr()->getInterfaceName() << " ";

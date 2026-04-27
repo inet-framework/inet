@@ -120,8 +120,8 @@ void Rip::initialize(int stage)
         startupTimer = new cMessage("RIP-startup");
         shutdownTimer = new cMessage("RIP-shutdown");
 
-        WATCH_VECTOR(ripInterfaces);
-        WATCH_PTRVECTOR(ripRoutingTable);
+        WATCH(ripInterfaces);
+        WATCH(ripRoutingTable);
     }
 }
 
