@@ -102,6 +102,24 @@ void Sctp::initialize(int stage)
         }
         const char *checksumModeString = par("checksumMode");
         checksumMode = parseChecksumMode(checksumModeString, false);
+
+        WATCH(auth);
+        WATCH(addIP);
+        WATCH(pktdrop);
+        WATCH(sackNow);
+        WATCH(checksumMode);
+        WATCH(interfaceId);
+        WATCH(udpSockId);
+        WATCH(testTimeout);
+        WATCH(numGapReports);
+        WATCH(numPktDropReports);
+        WATCH(numPacketsReceived);
+        WATCH(numPacketsDropped);
+        WATCH(sizeAssocMap);
+        WATCH(nextEphemeralPort);
+        WATCH(sctpAppAssocMap);
+        WATCH(sctpAssocMap);
+        WATCH(sctpVTagMap);
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
         registerService(Protocol::sctp, gate("appIn"), gate("appOut"));

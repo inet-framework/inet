@@ -737,6 +737,36 @@ void SctpAssociation::initAssociation(Sctp *_module, int32_t _appGateIndex, int3
             EV_DETAIL << "Setting Stream Scheduler: PATH_MAP_TO_PATH" << endl;
             break;
     }
+
+    WATCH(appGateIndex);
+    WATCH(assocId);
+    WATCH(listeningAssocId);
+    WATCH(fd);
+    WATCH(listening);
+    WATCH(localPort);
+    WATCH(remotePort);
+    WATCH(localVTag);
+    WATCH(peerVTag);
+    WATCH(fairTimer);
+    WATCH(dacPacketsRcvd);
+    WATCH(numberOfRemoteAddresses);
+    WATCH(inboundStreams);
+    WATCH(outboundStreams);
+    WATCH(initInboundStreams);
+    WATCH(status);
+    WATCH(initTsn);
+    WATCH(initPeerTsn);
+    WATCH(sackFrequency);
+    WATCH(sackPeriod);
+    WATCH(ccModule);
+    WATCH(ssModule);
+    WATCH(T1_InitTimer);
+    WATCH(T2_ShutdownTimer);
+    WATCH(T5_ShutdownGuardTimer);
+    WATCH(SackTimer);
+    WATCH(StartAddIP);
+    WATCH(FairStartTimer);
+    WATCH(FairStopTimer);
 }
 
 void SctpAssociation::initialize()
