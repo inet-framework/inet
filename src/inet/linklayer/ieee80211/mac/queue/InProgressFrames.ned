@@ -17,6 +17,7 @@ simple InProgressFrames extends SimpleModule
         string pendingQueueModule;
         string originatorMacDataServiceModule;
         string ackHandlerModule;
+        displayStringTextFormat = default("{numInProgress} packets");
         @display("i=block/queue");
         @signal[packetEnqueued](type=inet::Packet);
         @signal[packetDequeued](type=inet::Packet);

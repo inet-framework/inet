@@ -51,6 +51,7 @@ void EthernetCsmaMac::initialize(int stage)
         jamTimer = new cMessage("JamTimer", END_JAM_TIMER);
         backoffTimer = new cMessage("BackoffTimer", END_BACKOFF_TIMER);
         fsm.setStateChangedSignal(stateChangedSignal);
+        WATCH_LAMBDA("fsmState", [this]() { return std::string(fsm.getStateName()); });
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         fsm.setState(IDLE, "IDLE");
@@ -68,14 +69,6 @@ void EthernetCsmaMac::finish()
     emit(carrierSenseChangedSignal, (int)carrierSense);
     emit(collisionChangedSignal, (int)collision);
     emit(stateChangedSignal, fsm.getState());
-}
-
-void EthernetCsmaMac::refreshDisplay() const
-{
-    auto& displayString = getDisplayString();
-    std::stringstream stream;
-    stream << fsm.getStateName();
-    displayString.setTagArg("t", 0, stream.str().c_str());
 }
 
 void EthernetCsmaMac::configureNetworkInterface()

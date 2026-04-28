@@ -48,24 +48,18 @@ void Edcaf::initialize(int stage)
         WATCH(cw);
         WATCH(cwMin);
         WATCH(cwMax);
+        WATCH_LAMBDA("accessCategory", [this]() -> std::string { return printAccessCategory(ac); });
+        WATCH_LAMBDA("contentionState", [this]() -> std::string {
+            if (owning) return "Owning";
+            else if (contention->isContentionInProgress()) return "Contending";
+            else return "Idle";
+        });
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         auto rx = check_and_cast<IRx *>(getModuleByPath(par("rxModule")));
         rx->registerContention(contention);
         calculateTimingParameters();
     }
-}
-
-void Edcaf::refreshDisplay() const
-{
-    std::string text(printAccessCategory(ac));
-    if (owning)
-        text += "\nOwning";
-    else if (contention->isContentionInProgress())
-        text += "\nContending";
-    else
-        text += "\nIdle";
-    getDisplayString().setTagArg("t", 0, text.c_str());
 }
 
 void Edcaf::calculateTimingParameters()

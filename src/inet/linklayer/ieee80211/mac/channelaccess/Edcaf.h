@@ -61,7 +61,6 @@ class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, pub
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void refreshDisplay() const override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
     virtual AccessCategory getAccessCategory(const char *ac);
