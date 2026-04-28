@@ -70,6 +70,8 @@ void NextHopRoutingTable::initialize(int stage)
         WATCH(forwarding);
         WATCH(multicastForwarding);
         WATCH(routerId);
+        WATCH_EXPR("numRoutes", routes.size());
+        WATCH_EXPR("numMulticastRoutes", multicastRoutes.size());
 
         cModule *host = getContainingNode(this);
         host->subscribe(interfaceCreatedSignal, this);
@@ -188,17 +190,6 @@ void NextHopRoutingTable::configureLoopback()
 //    d->setNetmask(Ipv4Address::LOOPBACK_NETMASK);
 //    d->setMetric(1);
 //    ie->setIPv4Data(d);
-}
-
-void NextHopRoutingTable::refreshDisplay() const
-{
-// TODO
-//    char buf[80];
-//    if (routerId.isUnspecified())
-//        snprintf(buf, sizeof(buf), "%d+%d routes", (int)routes.size(), (int)multicastRoutes.size());
-//    else
-//        snprintf(buf, sizeof(buf), "routerId: %s\n%d+%d routes", routerId.str().c_str(), (int)routes.size(), (int)multicastRoutes.size());
-//    getDisplayString().setTagArg("t", 0, buf);
 }
 
 bool NextHopRoutingTable::routeLessThan(const NextHopRoute *a, const NextHopRoute *b)
