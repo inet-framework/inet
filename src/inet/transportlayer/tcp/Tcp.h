@@ -179,8 +179,6 @@ class INET_API Tcp : public TransportProtocolBase, public ITcp, public IPassiveP
     virtual TcpConnection *findConnForSegment(const Ptr<const TcpHeader>& tcpHeader, L3Address srcAddr, L3Address destAddr);
     virtual TcpConnection *findConnForSockPair(const SockPair& key);
     virtual void segmentArrivalWhileClosed(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader, L3Address src, L3Address dest);
-    virtual void processIcmpv4Error(Indication *indication);
-    virtual void processIcmpv6Error(Indication *indication);
     virtual void refreshDisplay() const override;
 
   public:

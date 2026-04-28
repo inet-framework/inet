@@ -209,22 +209,6 @@ void Tcp::handleLowerCommand(cMessage *msg)
         LayeredProtocolBase::handleLowerCommand(msg);
 }
 
-void Tcp::processIcmpv4Error(Indication *indication)
-{
-    Enter_Method("processIcmpv4Error");
-    take(indication);
-    EV_DETAIL << "ICMP error received -- discarding\n";
-    delete indication;
-}
-
-void Tcp::processIcmpv6Error(Indication *indication)
-{
-    Enter_Method("processIcmpv6Error");
-    take(indication);
-    EV_DETAIL << "ICMP error received -- discarding\n";
-    delete indication;
-}
-
 TcpConnection *Tcp::createConnection(int socketId)
 {
     auto moduleType = cModuleType::get("inet.transportlayer.tcp.TcpConnection");
