@@ -18,6 +18,7 @@ simple NodeStatus extends SimpleModule
 {
     parameters:
         @class(NodeStatus);
+        displayStringTextFormat = default("{stateStr}");
         //TODO @signal, @statistic
         string initialStatus = default("UP"); // Initial status of the network node
         @display("i=block/cogwheel;is=s");

@@ -21,6 +21,7 @@ simple Rx extends SimpleModule like IRx
 {
     parameters:
         @class(Rx);
+        displayStringTextFormat = default("{rxStatus}");
         @display("i=block/rx");
         @signal[navChanged](type=simtime_t);
         @signal[packetDropped](type=inet::Packet);

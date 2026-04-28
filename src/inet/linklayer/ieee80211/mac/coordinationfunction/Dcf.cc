@@ -45,6 +45,9 @@ void Dcf::initialize(int stage)
         ctsPolicy = check_and_cast<ICtsPolicy *>(getSubmodule("ctsPolicy"));
         stationRetryCounters = new StationRetryCounters();
         originatorProtectionMechanism = check_and_cast<OriginatorProtectionMechanism *>(getSubmodule("originatorProtectionMechanism"));
+        WATCH_LAMBDA("frameSequenceInfo", [this]() -> std::string {
+            return frameSequenceHandler->isSequenceRunning() ? "Fs: " + frameSequenceHandler->getFrameSequence()->getHistory() : "";
+        });
     }
 }
 
@@ -64,16 +67,6 @@ void Dcf::handleMessage(cMessage *msg)
     }
     else
         throw cRuntimeError("Unknown msg type");
-}
-
-void Dcf::refreshDisplay() const
-{
-    if (frameSequenceHandler->isSequenceRunning()) {
-        auto history = frameSequenceHandler->getFrameSequence()->getHistory();
-        getDisplayString().setTagArg("t", 0, ("Fs: " + history).c_str());
-    }
-    else
-        getDisplayString().removeTag("t");
 }
 
 void Dcf::channelGranted(IChannelAccess *channelAccess)

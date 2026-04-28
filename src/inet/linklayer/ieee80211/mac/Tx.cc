@@ -34,6 +34,12 @@ void Tx::initialize(int stage)
         endIfsTimer = new cMessage("endIFS");
         rx = dynamic_cast<IRx *>(findModuleByPath(par("rxModule")));
         WATCH(transmitting);
+        WATCH_LAMBDA("txState", [this]() -> std::string {
+            return endIfsTimer != nullptr && endIfsTimer->isScheduled() ? "WAIT_IFS" : transmitting ? "TRANSMIT" : "IDLE";
+        });
+        WATCH_LAMBDA("txFramePrefix", [this]() -> std::string {
+            return frame ? std::string(frame->getName()) + "\n" : "";
+        });
     }
 }
 
@@ -108,17 +114,6 @@ void Tx::handleMessage(cMessage *msg)
     }
     else
         ASSERT(false);
-}
-
-void Tx::refreshDisplay() const
-{
-    const char *stateName = endIfsTimer != nullptr && endIfsTimer->isScheduled() ? "WAIT_IFS" : transmitting ? "TRANSMIT" : "IDLE";
-    // faster version is just to display the state: getDisplayString().setTagArg("t", 0, stateName);
-    std::stringstream os;
-    if (frame)
-        os << frame->getName() << "\n";
-    os << stateName;
-    getDisplayString().setTagArg("t", 0, os.str().c_str());
 }
 
 } // namespace ieee80211

@@ -19,6 +19,7 @@ simple Tx extends SimpleModule like ITx
 {
     parameters:
         @class(Tx);
+        displayStringTextFormat = default("{txFramePrefix}{txState}");
         string rxModule;
         @display("i=block/tx");
 }

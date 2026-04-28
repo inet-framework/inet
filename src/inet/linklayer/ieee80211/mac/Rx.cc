@@ -40,6 +40,34 @@ void Rx::initialize(int stage)
         WATCH(transmissionState);
         WATCH(receivedPart);
         WATCH(mediumFree);
+        WATCH_LAMBDA("rxStatus", [this]() -> std::string {
+            if (mediumFree)
+                return "FREE";
+            std::string s = "BUSY (";
+            bool addSpace = false;
+            if (transmissionState != IRadio::TRANSMISSION_STATE_UNDEFINED) {
+                switch (transmissionState) {
+                    case IRadio::TRANSMISSION_STATE_IDLE: s += "Tx-Idle"; break;
+                    case IRadio::TRANSMISSION_STATE_TRANSMITTING: s += "Tx"; break;
+                    default: break;
+                }
+                addSpace = true;
+            }
+            else {
+                switch (receptionState) {
+                    case IRadio::RECEPTION_STATE_UNDEFINED: s += "Switching"; break;
+                    case IRadio::RECEPTION_STATE_IDLE: s += "Rx-Idle"; break;
+                    case IRadio::RECEPTION_STATE_BUSY: s += "Noise"; break;
+                    case IRadio::RECEPTION_STATE_RECEIVING: s += "Recv"; break;
+                    default: break;
+                }
+                addSpace = true;
+            }
+            if (endNavTimer->isScheduled())
+                s += std::string(addSpace ? " " : "") + "NAV";
+            s += ")";
+            return s;
+        });
     }
     // TODO INITSTAGE
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
@@ -174,39 +202,6 @@ void Rx::setOrExtendNav(simtime_t navInterval)
         scheduleAt(endNav, endNavTimer);
         emit(navChangedSignal, endNav - simTime());
         recomputeMediumFree();
-    }
-}
-
-void Rx::refreshDisplay() const
-{
-    if (mediumFree)
-        getDisplayString().setTagArg("t", 0, "FREE");
-    else {
-        std::stringstream os;
-        os << "BUSY (";
-        bool addSpace = false;
-        if (transmissionState != IRadio::TRANSMISSION_STATE_UNDEFINED) {
-            switch (transmissionState) {
-                case IRadio::IRadio::TRANSMISSION_STATE_UNDEFINED: break; // cannot happen
-                case IRadio::IRadio::TRANSMISSION_STATE_IDLE: os << "Tx-Idle"; break;
-                case IRadio::IRadio::TRANSMISSION_STATE_TRANSMITTING: os << "Tx"; break;
-            }
-            addSpace = true;
-        }
-        else {
-            switch (receptionState) {
-                case IRadio::RECEPTION_STATE_UNDEFINED: os << "Switching"; break;
-                case IRadio::RECEPTION_STATE_IDLE: os << "Rx-Idle"; break; // cannot happen
-                case IRadio::RECEPTION_STATE_BUSY: os << "Noise"; break;
-                case IRadio::RECEPTION_STATE_RECEIVING: os << "Recv"; break;
-            }
-            addSpace = true;
-        }
-        if (endNavTimer->isScheduled()) {
-            os << (addSpace ? " " : "") << "NAV";
-        }
-        os << ")";
-        getDisplayString().setTagArg("t", 0, os.str().c_str());
     }
 }
 
