@@ -52,7 +52,6 @@ class INET_API BehaviorAggregateClassifier : public queueing::PacketClassifierBa
 
   protected:
     virtual void initialize(int stage) override;
-    virtual void refreshDisplay() const override;
 
     virtual void pushPacket(Packet *packet, const cGate *gate) override;
     virtual int classifyPacket(Packet *packet) override;

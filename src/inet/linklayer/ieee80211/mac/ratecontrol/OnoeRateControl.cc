@@ -27,11 +27,6 @@ void OnoeRateControl::initialize(int stage)
     }
 }
 
-void OnoeRateControl::refreshDisplay() const
-{
-    getDisplayString().setTagArg("t", 0, currentMode->getName());
-}
-
 void OnoeRateControl::resetStatisticalVariables()
 {
     numOfRetries = 0;

@@ -48,6 +48,7 @@ void DhcpClient::initialize(int stage)
         WATCH(numReceived);
         WATCH(clientState);
         WATCH(xid);
+        WATCH_LAMBDA("clientStateName", [this]() { return std::string(getStateName(clientState)); });
 
         // DHCP UDP ports
         clientPort = 68; // client
@@ -166,13 +167,6 @@ const char *DhcpClient::getAndCheckMessageTypeName(DhcpMessageType type)
             throw cRuntimeError("Unknown or invalid DHCP message type %d", type);
 #undef CASE
     }
-}
-
-void DhcpClient::refreshDisplay() const
-{
-    ApplicationBase::refreshDisplay();
-
-    getDisplayString().setTagArg("t", 0, getStateName(clientState));
 }
 
 void DhcpClient::handleMessageWhenUp(cMessage *msg)

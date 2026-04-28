@@ -63,15 +63,13 @@ void InterfaceTable::initialize(int stage)
         // get a pointer to the host module
         host = getContainingNode(this);
         WATCH(idToInterface);
+        WATCH_LAMBDA("numInterfaces", [this]() { return getNumInterfaces(); });
     }
 }
 
 void InterfaceTable::refreshDisplay() const
 {
     OperationalBase::refreshDisplay();
-
-    std::string buf = std::to_string(getNumInterfaces()) + " interfaces";
-    getDisplayString().setTagArg("t", 0, buf.c_str());
 
     if (par("displayAddresses")) {
         for (auto& elem : idToInterface) {

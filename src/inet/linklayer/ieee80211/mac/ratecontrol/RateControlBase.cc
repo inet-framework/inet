@@ -19,6 +19,9 @@ simsignal_t RateControlBase::datarateChangedSignal = cComponent::registerSignal(
 void RateControlBase::initialize(int stage)
 {
     ModeSetListener::initialize(stage);
+
+    if (stage == INITSTAGE_LOCAL)
+        WATCH_LAMBDA("currentMode", [this]() -> std::string { return currentMode ? currentMode->getName() : "none"; });
 }
 
 const IIeee80211Mode *RateControlBase::increaseRateIfPossible(const IIeee80211Mode *currentMode)

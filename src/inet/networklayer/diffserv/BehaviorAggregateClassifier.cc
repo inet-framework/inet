@@ -107,16 +107,6 @@ void BehaviorAggregateClassifier::pushPacket(Packet *packet, const cGate *inputG
     }
 }
 
-void BehaviorAggregateClassifier::refreshDisplay() const
-{
-    if (numRcvd > 0) {
-        std::string buf = "rcvd:" + std::to_string(numRcvd) + " ";
-        getDisplayString().setTagArg("t", 0, buf.c_str());
-    }
-    else
-        getDisplayString().setTagArg("t", 0, "");
-}
-
 int BehaviorAggregateClassifier::classifyPacket(Packet *packet)
 {
     PacketDissectorCallback callback;
