@@ -60,6 +60,7 @@ void EthernetCsmaPhy::initialize(int stage)
         crsOffTimer->setSchedulingPriority(SHRT_MAX);
         fsm.setStateChangedSignal(stateChangedSignal);
         fsm.setState(IDLE, "IDLE");
+        WATCH_LAMBDA("fsmState", [this]() { return std::string(fsm.getStateName()); });
         setTxUpdateSupport(true);
         emit(receivedSignalTypeSignal, NONE);
         emit(transmittedSignalTypeSignal, NONE);
@@ -78,14 +79,6 @@ void EthernetCsmaPhy::finish()
     emit(receivedSignalTypeSignal, currentRxSignal != nullptr ? currentRxSignal->getKind() : NONE);
     emit(transmittedSignalTypeSignal, currentTxSignal != nullptr ? currentTxSignal->getKind() : NONE);
     emit(busUsedSignal, (currentRxSignal != nullptr && currentRxSignal->getKind() == DATA) || (currentTxSignal != nullptr && currentTxSignal->getKind() == DATA) ? 1 : 0);
-}
-
-void EthernetCsmaPhy::refreshDisplay() const
-{
-    auto& displayString = getDisplayString();
-    std::stringstream stream;
-    stream << fsm.getStateName();
-    displayString.setTagArg("t", 0, stream.str().c_str());
 }
 
 void EthernetCsmaPhy::handleMessage(cMessage *message)

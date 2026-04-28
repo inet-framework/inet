@@ -20,6 +20,7 @@ simple Loopback extends SimpleModule
         @class(Loopback);
         string interfaceTableModule;   // The path to the InterfaceTable module
         int mtu @unit(B) = default(4470B);
+        displayStringTextFormat = default("rcv:{numRcvdOK} snt:{numSent}");
         @display("i=block/rxtx");
 
         @signal[packetSentToUpper](type=cPacket);

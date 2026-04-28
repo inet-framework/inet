@@ -85,7 +85,6 @@ class INET_API EthernetCsmaPhy : public PassivePacketSinkBase, public virtual IE
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void finish() override;
-    virtual void refreshDisplay() const override;
 
     virtual void handleMessage(cMessage *message) override;
     virtual void handleSelfMessage(cMessage *message);

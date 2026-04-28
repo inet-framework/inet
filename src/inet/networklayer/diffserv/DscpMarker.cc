@@ -73,16 +73,6 @@ void DscpMarker::pushPacket(Packet *packet, const cGate *inputGate)
     pushOrSendPacket(packet, outputGate, consumer);
 }
 
-void DscpMarker::refreshDisplay() const
-{
-    std::string buf;
-    if (numRcvd > 0)
-        buf += "rcvd: " + std::to_string(numRcvd) + " ";
-    if (numMarked > 0)
-        buf += "mark:" + std::to_string(numMarked) + " ";
-    getDisplayString().setTagArg("t", 0, buf.c_str());
-}
-
 bool DscpMarker::markPacket(Packet *packet, int dscp)
 {
     EV_DETAIL << "Marking packet with dscp=" << dscpToString(dscp) << "\n";

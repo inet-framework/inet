@@ -53,7 +53,6 @@ class INET_API DscpMarker : public queueing::PacketProcessorBase, public queuein
   protected:
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
-    virtual void refreshDisplay() const override;
 
     virtual bool markPacket(Packet *msg, int dscp);
 

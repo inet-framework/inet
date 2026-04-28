@@ -107,10 +107,6 @@ class INET_API Ipv6RoutingTable : public SimpleModule, public IRoutingTable, pro
     Ipv6Route *internalRemoveRoute(Ipv6Route *route);
     RouteList::iterator internalDeleteRoute(RouteList::iterator it);
 
-  protected:
-    // displays summary above the icon
-    virtual void refreshDisplay() const override;
-
   public:
     Ipv6RoutingTable();
     virtual ~Ipv6RoutingTable();

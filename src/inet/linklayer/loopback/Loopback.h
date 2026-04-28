@@ -35,7 +35,6 @@ class INET_API Loopback : public MacProtocolBase
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleUpperPacket(Packet *packet) override;
-    virtual void refreshDisplay() const override;
 };
 
 } // namespace inet

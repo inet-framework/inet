@@ -59,6 +59,8 @@ void Ipv6RoutingTable::initialize(int stage)
         multicastForward = par("multicastForwarding");
         useAdminDist = par("useAdminDist");
         WATCH(isrouter);
+        WATCH_EXPR("numRoutes", routeList.size());
+        WATCH_EXPR("numDestCache", destCache.size());
 
         ift.reference(this, "interfaceTableModule", true);
 
@@ -148,14 +150,6 @@ void Ipv6RoutingTable::parseXmlConfigFile()
                 configureTunnelFromXml(ifTag);
         }
     }
-}
-
-void Ipv6RoutingTable::refreshDisplay() const
-{
-    std::stringstream os;
-
-    os << getNumRoutes() << " routes\n" << destCache.size() << " destcache entries";
-    getDisplayString().setTagArg("t", 0, os.str().c_str());
 }
 
 void Ipv6RoutingTable::handleMessage(cMessage *msg)

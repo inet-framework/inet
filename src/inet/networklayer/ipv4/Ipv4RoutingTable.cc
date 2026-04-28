@@ -76,6 +76,8 @@ void Ipv4RoutingTable::initialize(int stage)
         WATCH(forwarding);
         WATCH(multicastForward);
         WATCH(routerId);
+        WATCH_EXPR("numRoutes", routes.size());
+        WATCH_EXPR("numMcastRoutes", multicastRoutes.size());
     }
     else if (stage == INITSTAGE_ROUTER_ID_ASSIGNMENT) {
         cModule *node = findContainingNode(this);
@@ -129,16 +131,6 @@ void Ipv4RoutingTable::configureRouterId()
             ipv4Data->setNetmask(Ipv4Address::ALLONES_ADDRESS);
         }
     }
-}
-
-void Ipv4RoutingTable::refreshDisplay() const
-{
-    std::string buf;
-    if (routerId.isUnspecified())
-        buf = std::to_string(routes.size()) + "+" + std::to_string(multicastRoutes.size()) + " routes";
-    else
-        buf = std::string("routerId: ") + routerId.str() + "\n" + std::to_string(routes.size()) + "+" + std::to_string(multicastRoutes.size()) + " routes";
-    getDisplayString().setTagArg("t", 0, buf.c_str());
 }
 
 void Ipv4RoutingTable::handleMessage(cMessage *msg)
