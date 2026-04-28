@@ -54,16 +54,6 @@ void TokenBucketMeter::pushPacket(Packet *packet, const cGate *inputGate)
     pushOrSendPacket(packet, outputGate, consumer);
 }
 
-void TokenBucketMeter::refreshDisplay() const
-{
-    std::string buf;
-    if (numRcvd > 0)
-        buf = "rcvd: " + std::to_string(numRcvd) + " ";
-    if (numRed > 0)
-        buf += "red:" + std::to_string(numRed) + " ";
-    getDisplayString().setTagArg("t", 0, buf.c_str());
-}
-
 int TokenBucketMeter::meterPacket(Packet *packet)
 {
     // update token buckets

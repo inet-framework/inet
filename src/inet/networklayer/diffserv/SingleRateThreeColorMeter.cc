@@ -67,18 +67,6 @@ void SingleRateThreeColorMeter::pushPacket(Packet *packet, const cGate *inputGat
     pushOrSendPacket(packet, outputGate, consumer);
 }
 
-void SingleRateThreeColorMeter::refreshDisplay() const
-{
-    std::ostringstream stream;
-    if (numRcvd > 0)
-        stream << "rcvd: " << numRcvd << " ";
-    if (numYellow > 0)
-        stream << "yellow:" << numYellow << " ";
-    if (numRed > 0)
-        stream << "red:" << numRed << " ";
-    getDisplayString().setTagArg("t", 0, stream.str().c_str());
-}
-
 int SingleRateThreeColorMeter::meterPacket(Packet *packet)
 {
     // update token buckets

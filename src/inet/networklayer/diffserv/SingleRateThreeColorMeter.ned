@@ -33,6 +33,7 @@ simple SingleRateThreeColorMeter extends SimpleModule
 {
     parameters:
         @class(SingleRateThreeColorMeter);
+        displayStringTextFormat = default("rcvd: {numRcvd} yellow:{numYellow} red:{numRed}");
         @display("i=block/timer");
         string interfaceTableModule;   // The path to the InterfaceTable module
         string cir;       // Committed information rate, either absolute bitrate (e.g. "100kbps") or relative to the link's datarate (e.g. "20%")

@@ -38,7 +38,6 @@ class INET_API SecurityAssociationDatabase : public SimpleModule
 
   protected:
     virtual void initialize() override;
-    void refreshDisplay() const override;
 
   public:
     ~SecurityAssociationDatabase();

@@ -60,6 +60,7 @@ simple Ipv6 extends SimpleModule
         string icmpv6Module;
         string ipv6TunnelingModule;
         double procDelay @unit(s) = default(0s);
+        displayStringTextFormat = default("fwd:{numForwarded} up:{numLocalDeliver} mcast:{numMulticast} DROP:{numDropped} UNROUTABLE:{numUnroutable}");
         @display("i=block/network2");
         @signal[packetDropped](type=inet::Packet);
         @signal[packetSentToUpper](type=inet::Packet);

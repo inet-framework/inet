@@ -161,14 +161,6 @@ void MultiFieldClassifier::pushPacket(Packet *packet, const cGate *inputGate)
     pushOrSendPacket(packet, outputGate, consumer);
 }
 
-void MultiFieldClassifier::refreshDisplay() const
-{
-    std::string buf;
-    if (numRcvd > 0)
-        buf = "rcvd:" + std::to_string(numRcvd) + " ";
-    getDisplayString().setTagArg("t", 0, buf.c_str());
-}
-
 int MultiFieldClassifier::classifyPacket(Packet *packet)
 {
     for (auto& elem : filters)

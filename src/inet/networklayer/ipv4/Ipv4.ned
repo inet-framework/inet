@@ -103,6 +103,7 @@ simple Ipv4 extends SimpleModule like IIpv4
         bool enableLocalOutMulticastRouting = default(false); // Enable using the multicast routing table for determining outgoing interfaces for local out packets
         bool enableTimestampOption = default(false); // When enabled, IP inserts a timestamp option into the IP header
         double maxLifetime @unit(s) = default(-1s); // Packets older than the limit are discarded
+        displayStringTextFormat = default("fwd:{numForwarded} up:{numLocalDeliver} mcast:{numMulticast} DROP:{numDropped} UNROUTABLE:{numUnroutable}");
         @display("i=block/routing");
         @signal[packetSentToUpper](type=cPacket);
         @signal[packetReceivedFromUpper](type=cPacket);

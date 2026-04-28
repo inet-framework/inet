@@ -45,7 +45,6 @@ class INET_API TwoRateThreeColorMeter : public PacketMeterBase
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void pushPacket(Packet *packet, const cGate *gate) override;
-    virtual void refreshDisplay() const override;
 
     virtual int meterPacket(Packet *packet) override;
 };

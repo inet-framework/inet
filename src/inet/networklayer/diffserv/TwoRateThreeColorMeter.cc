@@ -67,18 +67,6 @@ void TwoRateThreeColorMeter::pushPacket(Packet *packet, const cGate *inputGate)
     pushOrSendPacket(packet, outputGate, consumer);
 }
 
-void TwoRateThreeColorMeter::refreshDisplay() const
-{
-    std::string buf;
-    if (numRcvd > 0)
-        buf += "rcvd: " + std::to_string(numRcvd) + " ";
-    if (numYellow > 0)
-        buf += "yellow:" + std::to_string(numYellow) + " ";
-    if (numRed > 0)
-        buf += "red:" + std::to_string(numRed) + " ";
-    getDisplayString().setTagArg("t", 0, buf.c_str());
-}
-
 int TwoRateThreeColorMeter::meterPacket(Packet *packet)
 {
     // update token buckets

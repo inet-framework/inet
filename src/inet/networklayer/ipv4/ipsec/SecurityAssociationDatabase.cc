@@ -31,6 +31,7 @@ SecurityAssociationDatabase::~SecurityAssociationDatabase()
 void SecurityAssociationDatabase::initialize()
 {
     WATCH(entries);
+    WATCH_EXPR("numEntries", entries.size());
 }
 
 void SecurityAssociationDatabase::addEntry(SecurityAssociation *sadEntry)
@@ -44,12 +45,6 @@ SecurityAssociation *SecurityAssociationDatabase::findEntry(IPsecRule::Direction
         if (entry->getDirection() == direction && entry->getSpi() == spi)
             return entry;
     return nullptr;
-}
-
-void SecurityAssociationDatabase::refreshDisplay() const
-{
-    std::string buf = "entries: " + std::to_string(entries.size());
-    getDisplayString().setTagArg("t", 0, buf.c_str());
 }
 
 }    //ipsec namespace

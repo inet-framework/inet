@@ -66,6 +66,7 @@ void Arp::initialize(int stage)
         WATCH(numResolutions);
         WATCH(numFailedResolutions);
         WATCH(arpCache);
+        WATCH_EXPR("arpCacheSize", arpCache.size());
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         ift.reference(this, "interfaceTableModule", true);
@@ -121,18 +122,6 @@ void Arp::flush()
         delete entry;
         arpCache.erase(i);
     }
-}
-
-void Arp::refreshDisplay() const
-{
-    OperationalBase::refreshDisplay();
-
-    std::stringstream os;
-
-    os << "size:" << arpCache.size() << " sent:" << numRequestsSent << "\n"
-       << "repl:" << numRepliesSent << " fail:" << numFailedResolutions;
-
-    getDisplayString().setTagArg("t", 0, os.str().c_str());
 }
 
 void Arp::initiateArpResolution(Ipv4Address nextHopAddr, ArpCacheEntry *entry)

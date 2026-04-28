@@ -82,22 +82,6 @@ void NextHopForwarding::handleRegisterProtocol(const Protocol& protocol, cGate *
         upperProtocols.insert(&protocol);
 }
 
-void NextHopForwarding::refreshDisplay() const
-{
-    OperationalBase::refreshDisplay();
-
-    std::string buf;
-    if (numForwarded > 0)
-        buf += "fwd:" + std::to_string(numForwarded) + " ";
-    if (numLocalDeliver > 0)
-        buf += "up:" + std::to_string(numLocalDeliver) + " ";
-    if (numDropped > 0)
-        buf += "DROP:%d" + std::to_string(numDropped) + " ";
-    if (numUnroutable > 0)
-        buf += "UNROUTABLE:" + std::to_string(numUnroutable) + " ";
-    getDisplayString().setTagArg("t", 0, buf.c_str());
-}
-
 void NextHopForwarding::handleMessageWhenUp(cMessage *msg)
 {
     if (msg->arrivedOn("transportIn")) { // TODO packet->getArrivalGate()->getBaseId() == transportInGateBaseId

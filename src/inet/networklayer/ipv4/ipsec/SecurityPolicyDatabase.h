@@ -38,7 +38,6 @@ class INET_API SecurityPolicyDatabase : public SimpleModule
 
   protected:
     virtual void initialize() override;
-    void refreshDisplay() const override;
 
   public:
     ~SecurityPolicyDatabase();

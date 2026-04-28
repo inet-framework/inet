@@ -170,22 +170,6 @@ void Ipv6::handleRequest(Request *request)
         throw cRuntimeError("Unknown command: '%s' with %s", request->getName(), ctrl->getClassName());
 }
 
-void Ipv6::refreshDisplay() const
-{
-    std::string buf;
-    if (numForwarded > 0)
-        buf += "fwd:" + std::to_string(numForwarded) + " ";
-    if (numLocalDeliver > 0)
-        buf += "up:" + std::to_string(numLocalDeliver) + " ";
-    if (numMulticast > 0)
-        buf += "mcast:" + std::to_string(numMulticast) + " ";
-    if (numDropped > 0)
-        buf += "DROP:" + std::to_string(numDropped) + " ";
-    if (numUnroutable > 0)
-        buf += "UNROUTABLE:" + std::to_string(numUnroutable) + " ";
-    getDisplayString().setTagArg("t", 0, buf.c_str());
-}
-
 void Ipv6::handleMessage(cMessage *msg)
 {
     auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
