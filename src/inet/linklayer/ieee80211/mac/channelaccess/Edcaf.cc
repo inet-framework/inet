@@ -50,9 +50,7 @@ void Edcaf::initialize(int stage)
         WATCH(cwMax);
         WATCH_LAMBDA("accessCategory", [this]() -> std::string { return printAccessCategory(ac); });
         WATCH_LAMBDA("contentionState", [this]() -> std::string {
-            if (owning) return "Owning";
-            else if (contention->isContentionInProgress()) return "Contending";
-            else return "Idle";
+            return owning ? "Owning" : contention->isContentionInProgress() ? "Contending" : "Idle";
         });
     }
     else if (stage == INITSTAGE_LINK_LAYER) {

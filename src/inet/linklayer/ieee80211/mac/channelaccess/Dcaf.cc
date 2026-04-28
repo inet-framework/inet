@@ -41,9 +41,7 @@ void Dcaf::initialize(int stage)
         WATCH(cwMin);
         WATCH(cwMax);
         WATCH_LAMBDA("contentionState", [this]() -> std::string {
-            if (owning) return "Owning";
-            else if (contention != nullptr && contention->isContentionInProgress()) return "Contending";
-            else return "Idle";
+            return owning ? "Owning" : (contention != nullptr && contention->isContentionInProgress()) ? "Contending" : "Idle";
         });
     }
 }
