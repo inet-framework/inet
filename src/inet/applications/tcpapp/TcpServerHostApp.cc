@@ -20,6 +20,9 @@ Define_Module(TcpServerHostApp);
 void TcpServerHostApp::initialize(int stage)
 {
     ApplicationBase::initialize(stage);
+
+    if (stage == INITSTAGE_LOCAL)
+        WATCH_EXPR("numThreads", socketMap.size());
 }
 
 void TcpServerHostApp::handleStartOperation(LifecycleOperation *operation)
@@ -55,14 +58,6 @@ void TcpServerHostApp::handleCrashOperation(LifecycleOperation *operation)
     // TODO always?
     if (operation->getRootModule() != getContainingNode(this))
         serverSocket.destroy();
-}
-
-void TcpServerHostApp::refreshDisplay() const
-{
-    ApplicationBase::refreshDisplay();
-
-    std::string buf = std::to_string(socketMap.size()) + " threads";
-    getDisplayString().setTagArg("t", 0, buf.c_str());
 }
 
 void TcpServerHostApp::handleMessageWhenUp(cMessage *msg)
@@ -155,10 +150,14 @@ void TcpServerThreadBase::socketDeleted(TcpSocket *socket)
     }
 }
 
-void TcpServerThreadBase::refreshDisplay() const
+void TcpServerThreadBase::initialize(int stage)
 {
-    SimpleModule::refreshDisplay();
-    getDisplayString().setTagArg("t", 0, TcpSocket::stateName(sock->getState()));
+    SimpleModule::initialize(stage);
+
+    if (stage == INITSTAGE_LOCAL)
+        WATCH_LAMBDA("socketState", [this]() -> std::string {
+            return sock ? TcpSocket::stateName(sock->getState()) : "not connected";
+        });
 }
 
 void TcpServerThreadBase::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)

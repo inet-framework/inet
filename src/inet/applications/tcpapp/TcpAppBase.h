@@ -41,7 +41,6 @@ class INET_API TcpAppBase : public ApplicationBase, public TcpSocket::ICallback
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void finish() override;
-    virtual void refreshDisplay() const override;
 
     /* Utility functions */
     virtual void connect();

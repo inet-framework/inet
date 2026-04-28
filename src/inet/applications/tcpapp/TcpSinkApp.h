@@ -28,7 +28,6 @@ class INET_API TcpSinkApp : public TcpServerHostApp
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void finish() override;
-    virtual void refreshDisplay() const override;
 
   public:
     TcpSinkApp();
@@ -50,7 +49,6 @@ class INET_API TcpSinkAppThread : public TcpServerThreadBase
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *message) override;
-    virtual void refreshDisplay() const override;
 
     virtual void sendOrScheduleReadCommandIfNeeded();
     virtual void read();    // send a read request to the socket

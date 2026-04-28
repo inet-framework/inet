@@ -54,14 +54,6 @@ void TcpEchoApp::sendDown(Packet *msg)
     send(msg, "socketOut");
 }
 
-void TcpEchoApp::refreshDisplay() const
-{
-    ApplicationBase::refreshDisplay();
-
-    std::string buf = "threads: " + std::to_string(socketMap.size()) + "\nrcvd: " + std::to_string(bytesRcvd) + " bytes\nsent: " + std::to_string(bytesSent) + " bytes";
-    getDisplayString().setTagArg("t", 0, buf.c_str());
-}
-
 void TcpEchoApp::finish()
 {
     TcpServerHostApp::finish();

@@ -27,6 +27,7 @@ void TcpAppBase::initialize(int stage)
         WATCH(packetsRcvd);
         WATCH(bytesSent);
         WATCH(bytesRcvd);
+        WATCH_LAMBDA("socketState", [this]() { return std::string(TcpSocket::stateName(socket.getState())); });
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         // parameters
@@ -104,12 +105,6 @@ void TcpAppBase::sendPacket(Packet *msg)
 
     packetsSent++;
     bytesSent += numBytes;
-}
-
-void TcpAppBase::refreshDisplay() const
-{
-    ApplicationBase::refreshDisplay();
-    getDisplayString().setTagArg("t", 0, TcpSocket::stateName(socket.getState()));
 }
 
 void TcpAppBase::socketEstablished(TcpSocket *)
