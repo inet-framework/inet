@@ -23,6 +23,7 @@ simple Ipv6FlatNetworkConfigurator extends SimpleModule like IL3NetworkConfigura
 {
     parameters:
         @class(Ipv6FlatNetworkConfigurator);
+        displayStringTextFormat = default("{numIpv6Nodes} Ipv6 nodes\n{numNonIpv6Nodes} non-IP nodes");
         @display("i=block/cogwheel");
         @labels(node);
 }

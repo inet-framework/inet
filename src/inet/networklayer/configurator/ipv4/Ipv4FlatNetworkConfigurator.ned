@@ -52,6 +52,7 @@ simple Ipv4FlatNetworkConfigurator extends SimpleModule like IL3NetworkConfigura
 {
     parameters:
         @class(Ipv4FlatNetworkConfigurator);
+        displayStringTextFormat = default("{numIpv4Nodes} Ipv4 nodes\n{numNonIpv4Nodes} non-Ipv4 nodes");
         string networkAddress = default("192.168.0.0"); // Network part of the address (see netmask parameter)
         string netmask = default("255.255.0.0"); // Host part of addresses are autoconfigured
         @display("i=block/cogwheel");

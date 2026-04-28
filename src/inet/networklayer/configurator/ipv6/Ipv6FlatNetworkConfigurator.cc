@@ -24,7 +24,11 @@ void Ipv6FlatNetworkConfigurator::initialize(int stage)
 {
     SimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
+    if (stage == INITSTAGE_LOCAL) {
+        WATCH(numIpv6Nodes);
+        WATCH(numNonIpv6Nodes);
+    }
+    else if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
         Topology topo("topo");
 
         // extract topology
@@ -45,9 +49,8 @@ void Ipv6FlatNetworkConfigurator::handleMessage(cMessage *)
 
 void Ipv6FlatNetworkConfigurator::setDisplayString(int numIPNodes, int numNonIPNodes)
 {
-    // update display string
-    std::string buf = std::to_string(numIPNodes) + " Ipv6 nodes\n" + std::to_string(numNonIPNodes) + " non-IP nodes";
-    getDisplayString().setTagArg("t", 0, buf.c_str());
+    numIpv6Nodes = numIPNodes;
+    numNonIpv6Nodes = numNonIPNodes;
 }
 
 bool Ipv6FlatNetworkConfigurator::isIPNode(Topology::Node *node)
