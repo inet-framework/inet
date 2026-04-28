@@ -94,6 +94,7 @@ void CsmaCaMac::initialize(int stage)
 
         // initialize watches
         WATCH(fsm);
+        WATCH_LAMBDA("fsmState", [this]() { return std::string(fsm.getStateName()); });
         WATCH(backoffPeriod);
         WATCH(retryCounter);
         WATCH(numRetry);
@@ -353,7 +354,6 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
     }
     if (isLowerMessage(msg) && frame->getOwner() == this && endSifs->getContextPointer() != frame)
         delete frame;
-    getDisplayString().setTagArg("t", 0, fsm.getStateName());
 }
 
 void CsmaCaMac::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)

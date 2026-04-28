@@ -40,6 +40,8 @@ void Contention::initialize(int stage)
         fsm.setName("Backoff procedure");
         fsm.setState(IDLE, "IDLE");
 
+        WATCH(fsm);
+        WATCH_LAMBDA("fsmState", [this]() { return std::string(fsm.getStateName()); });
         WATCH(ifs);
         WATCH(eifs);
         WATCH(slotTime);
@@ -263,7 +265,6 @@ const char *Contention::getEventName(EventType event)
 
 void Contention::updateDisplayString(simtime_t expectedChannelAccess) const
 {
-    getDisplayString().setTagArg("t", 0, fsm.getStateName());
 }
 
 } // namespace ieee80211

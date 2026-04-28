@@ -68,6 +68,7 @@ module CsmaCaMac extends MacProtocolBase like IMacProtocol
         int cwMulticast = default(cwMin); // Multicast contention window
         int retryLimit = default(7); // Maximum number of retries
         @class(CsmaCaMac);
+        displayStringTextFormat = default("{fsmState}");
         @signal[linkBroken](type=inet::Packet);
         @statistic[linkBroken](title="link break"; source=linkBroken; record=count; interpolationmode=none);
         @statistic[packetDropIncorrectlyReceived](title="packet drop: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
