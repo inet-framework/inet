@@ -23,26 +23,29 @@ void Ieee80211Mib::initialize(int stage)
         WATCH(bssStationData.stationType);
         WATCH(bssStationData.isAssociated);
         WATCH(bssAccessPointData.stations);
+        WATCH_LAMBDA("modeStr", [this]() -> std::string {
+            switch (mode) {
+                case INFRASTRUCTURE: return "Infrastructure";
+                case INDEPENDENT: return "Ad-hoc";
+                case MESH: return "Mesh";
+                default: return "?";
+            }
+        });
+        WATCH_LAMBDA("ssidStr", [this]() -> std::string {
+            return mode == INFRASTRUCTURE ? "\nSSID: " + bssData.ssid + ", " + bssData.bssid.str() : "";
+        });
+        WATCH_LAMBDA("stationTypeStr", [this]() -> std::string {
+            switch (bssStationData.stationType) {
+                case ACCESS_POINT: return ", AP";
+                case STATION: return ", STA";
+                default: return "";
+            }
+        });
+        WATCH_LAMBDA("qosStr", [this]() -> std::string { return qos ? ", QoS" : ", Non-QoS"; });
+        WATCH_LAMBDA("associatedStr", [this]() -> std::string {
+            return bssStationData.stationType == STATION ? (bssStationData.isAssociated ? "\nAssociated" : "\nNot associated") : "";
+        });
     }
-}
-
-void Ieee80211Mib::refreshDisplay() const
-{
-    std::string modeString;
-    std::string ssidString;
-    switch (mode) {
-        case INFRASTRUCTURE: modeString = "Infrastructure"; ssidString = "\nSSID: " + bssData.ssid + ", " + bssData.bssid.str(); break;
-        case INDEPENDENT: modeString = "Ad-hoc"; break;
-        case MESH: modeString = "Mesh"; break;
-    }
-    std::string bssStationTypeString;
-    std::string associatedString;
-    switch (bssStationData.stationType) {
-        case ACCESS_POINT: bssStationTypeString = ", AP"; break;
-        case STATION: bssStationTypeString = ", STA"; associatedString = bssStationData.isAssociated ? "\nAssociated" : "\nNot associated"; break;
-    }
-    auto text = std::string("Address: ") + address.str() + ssidString + "\n" + modeString + bssStationTypeString + (qos ? ", QoS" : ", Non-QoS") + associatedString;
-    getDisplayString().setTagArg("t", 0, text.c_str());
 }
 
 } // namespace ieee80211
