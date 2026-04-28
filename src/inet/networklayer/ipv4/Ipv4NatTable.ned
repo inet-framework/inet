@@ -16,6 +16,7 @@ simple Ipv4NatTable extends SimpleModule
 {
     parameters:
         @class(Ipv4NatTable);
+        displayStringTextFormat = default("{numNatEntries} entries");
         string networkProtocolModule = default("^.ip");
         xml config = default(xml("<config></config>")); // XML configuration parameters for network address translation
         @display("i=block/table");

@@ -160,6 +160,8 @@ void EthernetPlca::initialize(int stage)
         WATCH(numPacketsPerCycle);
         WATCH(toStartTime);
         WATCH(cycleStartTime);
+        WATCH_LAMBDA("controlFsmState", [this]() { return std::string(controlFsm.getStateName()); });
+        WATCH_LAMBDA("dataFsmState", [this]() { return std::string(dataFsm.getStateName()); });
     }
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         auto networkInterface = getContainingNicModule(this);
@@ -186,15 +188,6 @@ void EthernetPlca::finish()
     emit(dataStateChangedSignal, dataFsm.getState());
     emit(rxCmdSignal, rx_cmd);
     emit(txCmdSignal, tx_cmd);
-}
-
-void EthernetPlca::refreshDisplay() const
-{
-    auto& displayString = getDisplayString();
-    std::stringstream stream;
-    stream << curID << "/" << plca_node_count << " (" << local_nodeID << ")\n";
-    stream << controlFsm.getStateName() << " - " << dataFsm.getStateName();
-    displayString.setTagArg("t", 0, stream.str().c_str());
 }
 
 void EthernetPlca::handleMessage(cMessage *message)

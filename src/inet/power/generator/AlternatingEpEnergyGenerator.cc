@@ -50,8 +50,6 @@ void AlternatingEpEnergyGenerator::updatePowerGeneration()
 {
     powerGeneration = isSleeping ? W(0) : W(par("powerGeneration"));
     emit(IEpEnergySink::powerGenerationChangedSignal, powerGeneration.get());
-    auto text = "power: " + powerGeneration.str();
-    getDisplayString().setTagArg("t", 0, text.c_str());
 }
 
 void AlternatingEpEnergyGenerator::scheduleIntervalTimer()

@@ -103,6 +103,7 @@ void MoBanCoordinator::initialize(int stage)
         lastPosition = selectDestination();
         publishToNodes();
         computeMaxSpeed();
+        WATCH_LAMBDA("postureName", [this]() { return std::string(currentPosture->getPostureName()); });
     }
 }
 
@@ -168,13 +169,6 @@ void MoBanCoordinator::setTargetPosition()
 
     EV_DEBUG << "New posture: " << currentPosture->getPostureName() << endl;
     EV_DEBUG << "Destination: " << targetPosition << " Total Time = " << duration << endl;
-}
-
-void MoBanCoordinator::refreshDisplay() const
-{
-    // show posture name in the graphical interface
-    std::string dis_str = std::string(currentPosture->getPostureName()) + " until " + std::to_string(nextChange.dbl());
-    getDisplayString().setTagArg("t", 0, dis_str.c_str());
 }
 
 /**

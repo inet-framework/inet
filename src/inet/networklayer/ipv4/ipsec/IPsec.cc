@@ -868,17 +868,6 @@ INetfilter::IHook::Result IPsec::datagramLocalOutHook(Packet *packet)
     return INetfilter::IHook::ACCEPT;
 }
 
-void IPsec::refreshDisplay() const
-{
-    std::string buf = "IN: ACCEPT: " + std::to_string(inAccept) +
-            " DROP: " + std::to_string(inDrop) +
-            " BYPASS: " + std::to_string(inBypass) +
-            "\n OUT: PROTECT: " + std::to_string(outProtect) +
-            " DROP: " + std::to_string(outDrop) +
-            " BYPASS: " + std::to_string(outBypass);
-    getDisplayString().setTagArg("t", 0, buf.c_str());
-}
-
 }    // namespace ipsec
 }    // namespace inet
 

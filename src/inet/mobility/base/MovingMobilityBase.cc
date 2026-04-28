@@ -31,6 +31,7 @@ void MovingMobilityBase::initialize(int stage)
         moveTimer = new cMessage("move");
         updateInterval = par("updateInterval");
         faceForward = par("faceForward");
+        WATCH(nextChange);
     }
 }
 
