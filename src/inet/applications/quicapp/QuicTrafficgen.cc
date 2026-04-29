@@ -30,6 +30,14 @@ QuicTrafficgen::~QuicTrafficgen()
     cancelAndDelete(timerLimitRuntime);
 }
 
+void QuicTrafficgen::initialize(int stage)
+{
+    ApplicationBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL) {
+        WATCH(statusStr);
+    }
+}
+
 void QuicTrafficgen::handleStartOperation(LifecycleOperation *operation)
 {
     EV_DEBUG << "initialize QuicTrafficgen" << endl;
@@ -206,9 +214,7 @@ void QuicTrafficgen::close()
 
 void QuicTrafficgen::setStatusString(const char *s)
 {
-    if (hasGUI()) {
-        //getDisplayString().setTagArg("t", 0, s);
-    }
+    statusStr = s;
 }
 
 void QuicTrafficgen::socketSendQueueFull(QuicSocket *socket)

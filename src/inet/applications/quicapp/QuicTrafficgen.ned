@@ -14,6 +14,7 @@ simple QuicTrafficgen extends SimpleModule like ITrafficgenHandler
 {
     parameters:
         @class(QuicTrafficgen);
+        displayStringTextFormat = default("{statusStr}");
         string localAddress = default(""); // Local address or empty ("")
         int localPort = default(0); // port number to listen on
         string connectAddress;  // server address (may be symbolic)
