@@ -213,6 +213,18 @@ void NetPerfMeter::initialize(int stage)
         WATCH(OnTimer);
         WATCH(OnOffCycleCounter);
         WATCH(MaxOnOffCycles);
+        WATCH_LAMBDA("totalSentBytes", [this]() {
+            unsigned long long total = 0;
+            for (auto& e : SenderStatisticsMap)
+                total += e.second->SentBytes;
+            return total;
+        });
+        WATCH_LAMBDA("totalReceivedBytes", [this]() {
+            unsigned long long total = 0;
+            for (auto& e : ReceiverStatisticsMap)
+                total += e.second->ReceivedBytes;
+            return total;
+        });
         WATCH(RequestedOutboundStreams);
         WATCH(MaxInboundStreams);
         WATCH(ActualOutboundStreams);
@@ -286,34 +298,6 @@ void NetPerfMeter::finish()
         ReceiverStatisticsMap.erase(receiverStatisticsIterator);
         receiverStatisticsIterator = ReceiverStatisticsMap.begin();
     }
-}
-
-// ###### Show I/O status ###################################################
-void NetPerfMeter::refreshDisplay() const
-{
-    SimpleModule::refreshDisplay();
-    
-    unsigned long long totalSentBytes = 0;
-    for (std::map<unsigned int, SenderStatistics *>::const_iterator iterator = SenderStatisticsMap.begin();
-         iterator != SenderStatisticsMap.end(); iterator++)
-    {
-        const SenderStatistics *senderStatistics = iterator->second;
-        totalSentBytes += senderStatistics->SentBytes;
-    }
-
-    unsigned long long totalReceivedBytes = 0;
-    for (std::map<unsigned int, ReceiverStatistics *>::const_iterator iterator = ReceiverStatisticsMap.begin();
-         iterator != ReceiverStatisticsMap.end(); iterator++)
-    {
-        const ReceiverStatistics *receiverStatistics = iterator->second;
-        totalReceivedBytes += receiverStatistics->ReceivedBytes;
-    }
-
-    char status[64];
-    snprintf(status, sizeof(status), "In: %llu, Out: %llu",
-            totalReceivedBytes, totalSentBytes);
-    getDisplayString().setTagArg("t", 0, status);
-    // TODO also was setStatusString("Connecting"), setStatusString("Closed")
 }
 
 // ###### Handle timer ######################################################

@@ -46,7 +46,6 @@ class INET_API NetPerfMeter : public SimpleModule
     virtual void finish() override;
     virtual void handleMessage(cMessage *msg) override;
 
-    virtual void refreshDisplay() const override;
 
     void establishConnection();
     void successfullyEstablishedConnection(cMessage *msg, const unsigned int queueSize);
