@@ -18,6 +18,7 @@ simple Sctp extends SimpleModule like ISctp
 {
     parameters:
         @class(Sctp);
+        displayStringTextFormat = default("{sctpStatus}");
         string interfaceTableModule;
         string routingTableModule;
         string checksumMode @enum("declared", "computed") = default("declared");

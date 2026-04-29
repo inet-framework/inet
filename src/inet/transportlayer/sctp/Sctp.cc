@@ -118,6 +118,7 @@ void Sctp::initialize(int stage)
         WATCH(sizeAssocMap);
         WATCH(nextEphemeralPort);
         WATCH(sctpAppAssocMap);
+        WATCH_LAMBDA("sctpStatus", [this]() { return getSctpStatusString(); });
         WATCH(sctpAssocMap);
         WATCH(sctpVTagMap);
     }
@@ -463,15 +464,10 @@ void Sctp::send_to_ip(Packet *msg)
     send(msg, "ipOut");
 }
 
-void Sctp::refreshDisplay() const
+std::string Sctp::getSctpStatusString() const
 {
-#if 0
-    if (getEnvir()->disable_tracing) {
-        // in express mode, we don't bother to update the display
-        // (std::map's iteration is not very fast if map is large)
-        getDisplayString().setTagArg("t", 0, "");
-        return;
-    }
+    if (getEnvir()->isExpressMode())
+        return "";
 
 //    char buf[40];
 //    snprintf(buf, sizeof(buf), "%d conns", sctpAppConnMap.size());
@@ -481,7 +477,7 @@ void Sctp::refreshDisplay() const
             numESTABLISHED = 0, numCLOSE_WAIT = 0, numLAST_ACK = 0, numFIN_WAIT_1 = 0,
             numFIN_WAIT_2 = 0, numCLOSING = 0, numTIME_WAIT = 0;
 
-    for (auto i = sctpAppConnMap.begin(); i != sctpAppConnMap.end(); ++i) {
+    for (auto i = sctpAppAssocMap.begin(); i != sctpAppAssocMap.end(); ++i) {
         int32_t state = (*i).second->getFsmState();
         switch (state) {
 //            case SCTP_S_INIT:           numINIT++; break;
@@ -543,8 +539,7 @@ void Sctp::refreshDisplay() const
     if (numTIME_WAIT > 0)
         buf2 << "time_wait:" << numTIME_WAIT << " ";
 
-    getDisplayString().setTagArg("t", 0, buf2.str().c_str());
-#endif // if 0
+    return buf2.str();
 }
 
 SctpAssociation *Sctp::findAssocWithVTag(uint32_t peerVTag, uint32_t remotePort, uint32_t localPort)
