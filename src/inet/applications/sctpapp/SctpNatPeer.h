@@ -65,6 +65,7 @@ class INET_API SctpNatPeer : public SimpleModule, public SctpSocket::ICallback, 
     int32_t lastStream;
     bool sendAllowed;
     int32_t chunksAbandoned;
+    std::string statusStr;
     int32_t numPacketsToReceive;
     bool rendezvous;
     L3Address peerAddress;
