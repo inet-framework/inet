@@ -39,6 +39,9 @@ clock->setClockTime(0.1, ppm(1000000), false); // the clock assumes that the osc
 %# remove formatting
 %subst: /\x1B\[[0-9;]*m//
 
+%# remove method call lines added in OMNeT++ 6.4
+%subst: /^Method call [^\n]*\n//m
+
 %contains: stdout
 ** Event #2  t=0.000001  on OscillatorTickTimer (omnetpp::cMessage)  in TestNetwork.clock.oscillator (ConstantDriftOscillator, id=4)    0% completed  (0% total)
 Setting oscillator origin, origin = 0.000001.

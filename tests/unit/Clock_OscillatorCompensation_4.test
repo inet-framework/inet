@@ -31,6 +31,9 @@ sim-time-limit = 0.1s
 %# remove formatting
 %subst: /\x1B\[[0-9;]*m//
 
+%# remove method call lines added in OMNeT++ 6.4
+%subst: /^Method call [^\n]*\n//m
+
 %contains: stdout
 ** Event #1  t=0.000001  on OscillatorTickTimer (omnetpp::cMessage)  in TestNetwork.clock.oscillator (ConstantDriftOscillator, id=3)    0% completed  (0% total)
 Setting oscillator origin, origin = 0.000001.

@@ -49,6 +49,8 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %#--------------------------------------------------------------------------------------------------------------
 %subst: /DETAIL: //
 %subst: /ERROR: //
+%# remove method call lines added in OMNeT++ 6.4
+%subst: /^Method call [^\n]*\n//m
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
 Transport protocol 'udp' not connected, discarding packet

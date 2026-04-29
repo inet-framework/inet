@@ -49,6 +49,8 @@ network Test
     </at>
 </scenario>
 
+%# remove method call lines added in OMNeT++ 6.4
+%subst: /^Method call [^\n]*\n//m
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
 \*\* Event #\d+  t=3  on scenario-event \(inet::ScenarioTimer\)  in Test\.scenarioManager \(ScenarioManager, id=\d+\)

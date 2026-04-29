@@ -29,6 +29,8 @@ scheduler-class = "inet::RealTimeScheduler"
 *.externalProcess[1].command = "killall ping"
 *.externalProcess[1].startTime = 1s
 
+%# remove method call lines added in OMNeT++ 6.4
+%subst: /^Method call [^\n]*\n//m
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
 \*\* Event #1  t=0  on startTimer \(omnetpp::cMessage\)  in TestNetwork.externalProcess\[0\] \(ExternalProcess, id=2\)

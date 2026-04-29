@@ -153,6 +153,8 @@ cmdenv-log-prefix = "At %ts %N: "
 *.gate.openTime = 1s
 *.gate.closeTime = 3s
 
+%# remove method call lines added in OMNeT++ 6.4
+%subst: /^At \S+ \S+: Method call [^\n]*\n//m
 %contains-regex: stdout
 At 0s source: Starting packet streaming, [^\n]*?
 At 0s scheduler: Starting packet streaming, [^\n]*?
