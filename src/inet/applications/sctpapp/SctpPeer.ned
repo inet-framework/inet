@@ -21,6 +21,7 @@ simple SctpPeer extends SimpleModule like IApp
 {
     parameters:
         @class(SctpPeer);
+        displayStringTextFormat = default("{statusStr}\nrcvd: {bytesRcvd} bytes\nsent: {bytesSent} bytes");
         string localAddress = default(""); // Comma-separated list of addresses
         int localPort = default(0); // Port number to listen on
         bool echo = default(false);  // Echoes received packages when true
