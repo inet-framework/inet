@@ -17,6 +17,7 @@ simple StpTester extends SimpleModule
 {
     parameters:
         @class(StpTester);
+        displayStringTextFormat = default("loopfree: {loopfree}\nconnected: {connected}\ntree: {tree}");
         double checkTime @unit(s) = default(500ms);
 
         @display("i=block/cogwheel");

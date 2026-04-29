@@ -141,6 +141,7 @@ simple Ospfv2 extends SimpleModule like IOspf
 {
     parameters:
         @class(Ospfv2);
+        displayStringTextFormat = default("routerID: {routerID}\n{interfaces}");
         string interfaceTableModule;
         string routingTableModule;
         string checksumMode @enum("declared", "computed") = default("declared");
