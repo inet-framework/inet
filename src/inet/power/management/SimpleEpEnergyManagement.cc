@@ -35,6 +35,7 @@ void SimpleEpEnergyManagement::initialize(int stage)
         if (!nodeStatus)
             throw cRuntimeError("Cannot find node status");
         lifecycleOperationTimer = new cMessage("lifecycleOperation");
+        WATCH_LAMBDA("energyStatus", [this]() { return getEnergyStatusString(); });
     }
 }
 
@@ -48,7 +49,7 @@ void SimpleEpEnergyManagement::handleMessage(cMessage *message)
         throw cRuntimeError("Unknown message");
 }
 
-void SimpleEpEnergyManagement::refreshDisplay() const
+std::string SimpleEpEnergyManagement::getEnergyStatusString() const
 {
     std::string text;
     if (std::isnan(targetCapacity.get()))
@@ -61,7 +62,7 @@ void SimpleEpEnergyManagement::refreshDisplay() const
         throw cRuntimeError("Invalid state");
     if (text.length() != 0)
         text += " in " + (lifecycleOperationTimer->getArrivalTime() - simTime()).str() + " s";
-    getDisplayString().setTagArg("t", 0, text.c_str());
+    return text;
 }
 
 void SimpleEpEnergyManagement::executeNodeOperation(J estimatedEnergyCapacity)
