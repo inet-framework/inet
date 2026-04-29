@@ -65,6 +65,7 @@ void TcpLwip::initialize(int stage)
         checksumMode = parseChecksumMode(checksumModeString, false);
 
         WATCH(tcpAppConnMapM);
+        WATCH_LAMBDA("tcpStatus", [this]() { return getTcpStatusString(); });
 
         pLwipTcpLayerM = new LwipTcpLayer(*this);
         pLwipFastTimerM = new cMessage("lwip_fast_timer");
@@ -457,14 +458,10 @@ void TcpLwip::handleMessage(cMessage *msgP)
     }
 }
 
-void TcpLwip::refreshDisplay() const
+std::string TcpLwip::getTcpStatusString() const
 {
-    if (getEnvir()->isExpressMode()) {
-        // in express mode, we don't bother to update the display
-        // (std::map's iteration is not very fast if map is large)
-        getDisplayString().setTagArg("t", 0, "");
-        return;
-    }
+    if (getEnvir()->isExpressMode())
+        return "";
 
     int numINIT = 0, numCLOSED = 0, numLISTEN = 0, numSYN_SENT = 0, numSYN_RCVD = 0,
         numESTABLISHED = 0, numCLOSE_WAIT = 0, numLAST_ACK = 0, numFIN_WAIT_1 = 0,
@@ -553,7 +550,7 @@ void TcpLwip::refreshDisplay() const
     if (numTIME_WAIT > 0)
         buf2 << "time_wait:" << numTIME_WAIT << " ";
 
-    getDisplayString().setTagArg("t", 0, buf2.str().c_str());
+    return buf2.str();
 }
 
 TcpLwipConnection *TcpLwip::findAppConn(int connIdP)

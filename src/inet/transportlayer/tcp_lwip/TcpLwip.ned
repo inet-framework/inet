@@ -21,6 +21,7 @@ simple TcpLwip extends SimpleModule like ITcp
 {
     parameters:
         @class(TcpLwip);
+        displayStringTextFormat = default("{tcpStatus}");
         string sendQueueClass = default("");    //# TODO Obsolete!!!
         string receiveQueueClass = default(""); //# TODO Obsolete!!!
         string checksumMode @enum("declared", "computed") = default("declared");

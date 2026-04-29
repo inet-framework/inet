@@ -175,7 +175,7 @@ class INET_API Tcp : public TransportProtocolBase
     virtual void segmentArrivalWhileClosed(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader, L3Address src, L3Address dest);
     virtual void processIcmpv4Error(Indication *indication);
     virtual void processIcmpv6Error(Indication *indication);
-    virtual void refreshDisplay() const override;
+    virtual std::string getTcpStatusString() const;
 
   public:
     ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;

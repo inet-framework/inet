@@ -186,6 +186,7 @@ simple Tcp extends SimpleModule like ITcp
 {
     parameters:
         @class(Tcp);
+        displayStringTextFormat = default("{tcpStatus}");
         string checksumMode @enum("declared", "computed") = default("declared");
         int advertisedWindow = default(14 * this.mss); // In bytes, corresponds with the maximal receiver buffer capacity (Note: normally, NIC queues should be at least this size)
         bool delayedAcksEnabled = default(false); // Delayed ACK algorithm (RFC 1122) enabled/disabled

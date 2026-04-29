@@ -44,7 +44,7 @@ class INET_API TcpLwip : public SimpleModule, public LwipTcpStackIf, public Life
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msgP) override;
     virtual void finish() override;
-    virtual void refreshDisplay() const override;
+    virtual std::string getTcpStatusString() const;
     //@}
 
     /** @name LwipTcpStackIf functions */
