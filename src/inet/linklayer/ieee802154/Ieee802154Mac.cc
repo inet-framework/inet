@@ -104,6 +104,18 @@ void Ieee802154Mac::initialize(int stage)
         txQueue = getQueue(gate(upperLayerInGateId));
         radio.reference(this, "radioModule", true);
         WATCH(macState);
+        WATCH_LAMBDA("macStatus", [this]() -> std::string {
+            switch (macState) {
+                case IDLE_1:         return "IDLE";
+                case BACKOFF_2:      return "BACKOFF (" + std::to_string((backoffTimer->getArrivalTime() - simTime()).inUnit(SIMTIME_US)) + "us)";
+                case CCA_3:          return "CCA (" + std::to_string((ccaTimer->getArrivalTime() - simTime()).inUnit(SIMTIME_US)) + "us)";
+                case TRANSMITFRAME_4: return "TRANSMITING FRAME";
+                case WAITACK_5:      return "WAITING ACK (" + std::to_string((rxAckTimer->getArrivalTime() - simTime()).inUnit(SIMTIME_US)) + "us)";
+                case WAITSIFS_6:     return "WAITING SIFS (" + std::to_string((sifsTimer->getArrivalTime() - simTime()).inUnit(SIMTIME_US)) + "us)";
+                case TRANSMITACK_7:  return "TRANSMITING ACK";
+                default:             return "defined state";
+            }
+        });
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         cModule *radioModule = check_and_cast<cModule *>(radio.get());
@@ -946,45 +958,6 @@ void Ieee802154Mac::handleCrashOperation(LifecycleOperation *operation)
     radioModule->unsubscribe(IRadio::transmissionStateChangedSignal, this);
 
     MacProtocolBase::handleCrashOperation(operation);
-}
-
-void Ieee802154Mac::refreshDisplay() const
-{
-    std::stringstream os;
-    os<<"";
-    switch (macState) {
-        case IDLE_1:
-            os<< "IDLE";
-            break;
-
-        case BACKOFF_2:
-            os<< "BACKOFF ("<<(backoffTimer->getArrivalTime()- simTime()).inUnit(SIMTIME_US) <<"us)";
-            break;
-
-        case CCA_3:
-            os<< "CCA ("<<(ccaTimer->getArrivalTime()- simTime()).inUnit(SIMTIME_US) <<"us)";
-            break;
-
-        case TRANSMITFRAME_4:
-            os<< "TRANSMITING FRAME";
-            break;
-
-        case WAITACK_5:
-            os<< "WAITING ACK (" <<(rxAckTimer->getArrivalTime()- simTime()).inUnit(SIMTIME_US) <<"us)";
-            break;
-
-        case WAITSIFS_6:
-            os<< "WAITING SIFS (" <<(sifsTimer->getArrivalTime()- simTime()).inUnit(SIMTIME_US) <<"us)";
-            break;
-
-        case TRANSMITACK_7:
-            os<< "TRANSMITING ACK";
-            break;
-        default:
-            os<< "defined state";
-            break;
-    }
-    getDisplayString().setTagArg("t", 0, os.str().c_str());
 }
 
 queueing::IPassivePacketSource *Ieee802154Mac::getProvider(const cGate *gate)

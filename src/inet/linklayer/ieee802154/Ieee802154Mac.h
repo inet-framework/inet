@@ -273,7 +273,6 @@ class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol, publ
     virtual void handleStartOperation(LifecycleOperation *operation) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
-    virtual void refreshDisplay() const override;
 
     Packet *ackMessage = nullptr;
 
