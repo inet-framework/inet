@@ -40,7 +40,7 @@ TrafficgenSimple::~TrafficgenSimple()
 
 void TrafficgenSimple::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         id              = par("id");
@@ -63,6 +63,7 @@ void TrafficgenSimple::initialize(int stage)
         WATCH(startTime);
         WATCH(stopTime);
         WATCH(sentPktCount);
+        WATCH(statusStr);
     }
 
     // inform connected application about parameters
@@ -219,9 +220,7 @@ void TrafficgenSimple::finish()
 
 void TrafficgenSimple::setStatusString(const char *s)
 {
-    if (hasGUI()) {
-        getDisplayString().setTagArg("t", 0, s);
-    }
+    statusStr = s;
 }
 
 } // namespace inet
