@@ -32,10 +32,10 @@ module MplsRouterBase extends Router
     parameters:
         @display("i=abstract/router");
         string peers;
-        *.forwarding = true;
+        string routerId = default("auto");
+        *.routingTable.routerId = this.routerId;
         *.tedModule = default(absPath(".ted"));
         *.libTableModule = default(absPath(".libTable"));
-        *.routingTableModule = default(absPath(".ipv4.routingTable"));
 
     submodules:
         ted: Ted {
