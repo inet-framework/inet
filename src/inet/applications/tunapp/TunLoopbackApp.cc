@@ -67,7 +67,7 @@ void TunLoopbackApp::handleMessage(cMessage *message)
 
         delete message->removeControlInfo();
         packet->clearTags();
-        packet->addTag<PacketProtocolTag>()->setProtocol(&packetProtocol);
+        packet->addTag<PacketProtocolTag>()->setProtocol(&packetProtocol); // needed to run *** tun-echo.test: PASS
         tunSocket.send(packet);
         packetsSent++;
     }
