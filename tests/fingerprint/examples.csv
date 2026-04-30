@@ -409,7 +409,7 @@
 /examples/mobility/,                 -f omnetpp.ini -c TurtleMobility6 -r 0,        10000s,          45b6-ed3c/tplx;0000-0000/~tNl;0000-0000/~tND;9d00-b77c/tyf, PASS,
 /examples/mobility/,                 -f omnetpp.ini -c VehicleMobility,             10s,             566c-6355/tplx;0000-0000/~tNl;0000-0000/~tND;ddaf-0493/tyf, PASS,
 
-/examples/mpls/ldp/,                 -f omnetpp.ini -c General -r 0,                50s,             bbe9-ada8/tplx;36d7-02a9/~tNl;4ed6-1fbd/tyf, PASS, Ipv4
+/examples/mpls/ldp/,                 -f omnetpp.ini -c General -r 0,                50s,             1fda-4c2d/tplx;9be4-4c79/~tNl;4ed6-1fbd/tyf, PASS, Ipv4
 /examples/mpls/net37/,               -f omnetpp.ini -c General -r 0,                100s,            0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND;0000-0000/tyf, ERROR,    # <!> Error in module (TED) R37.LSR0.ted (id=45) during network initialization: Model error: ASSERT: condition !remote.isUnspecified() false in function initialize, networklayer/ted/TED.cc line 86.
 /examples/mpls/testte_failure/,      -f omnetpp.ini -c General -r 0,                10s,             000f-06fa/tplx;f12b-a8cb/~tNl;5f98-ae65/tyf, PASS, Ipv4
 /examples/mpls/testte_failure2/,     -f omnetpp.ini -c General -r 0,                100s,            ac30-3bb0/tplx;43c5-3934/~tNl;c36d-d2f6/tyf, PASS, Ipv4
