@@ -148,6 +148,12 @@ static inline bool _dbg_function_enabled(const char *function)
 #endif
 #endif
 
+#if OMNETPP_VERSION >= 0x0604
+#define PREPEND_MESSAGE_FORMAT "%s",
+#else
+#define PREPEND_MESSAGE_FORMAT
+#endif
+
 #if DEBUG_CHECK_IMPLEMENTATION
 #define DEBUG_CMP(o1, cmp, o2) { \
     bool _old_dbg_global_enabled = _dbg_global_enabled; _dbg_global_enabled = false; auto _o1 = (o1); auto _o2 = (o2); _dbg_global_enabled = _old_dbg_global_enabled; \
@@ -155,7 +161,7 @@ static inline bool _dbg_function_enabled(const char *function)
         _dbg_global_enabled = true; _o1 = (o1); _o2 = (o2); \
         std::ostringstream oss; oss << "ASSERT: Condition '" << #o1 << " " << #cmp << " " << #o2 << "' as '" << _o1 << " " << #cmp << " " << _o2 << "' does not hold"; \
         omnetpp::cRuntimeError error("in function '%s()' at %s:%d", __FUNCTION__, __FILE__, __LINE__); \
-        error.prependMessage("%s", oss.str().c_str()); \
+        error.prependMessage(PREPEND_MESSAGE_FORMAT oss.str().c_str()); \
         throw error; \
     } \
 }
