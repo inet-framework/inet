@@ -39,6 +39,8 @@ cmdenv-event-banners = false
 *.source.packetLength = 100B
 *.source.productionInterval = 1s
 
+%# remove method call lines added in OMNeT++ 6.4
+%subst: /^Method call [^\n]*\n//m
 %contains-regex: stdout
 Producing packet, .*?source-0.*?
 Passing through packet, .*?source-0.*?

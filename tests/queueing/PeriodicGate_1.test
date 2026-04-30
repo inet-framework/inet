@@ -43,6 +43,8 @@ cmdenv-log-prefix = "At %ts %N: "
 %subst: /\x1B\[[0-9;]*m//
 
 %subst: /\nRunning simulation\.\.\.\n//
+%# remove method call lines added in OMNeT++ 6.4
+%subst: /^At \S+ \S+: Method call [^\n]*\n//m
 
 %contains-regex: stdout
 At 0s provider: Providing packet, .*?provider-0.*?

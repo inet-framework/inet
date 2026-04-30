@@ -41,6 +41,8 @@ cmdenv-event-banners = false
 *.fragmenter.fragmenterPolicy.typename = "LengthBasedFragmenterPolicy"
 *.fragmenter.fragmenterPolicy.maxFragmentLength = 10B
 
+%# remove method call lines added in OMNeT++ 6.4
+%subst: /^Method call [^\n]*\n//m
 %contains-regex: stdout
 Producing packet, .*?source-0.*?
 Fragmenting packet, .*?source-0.*?source-0-frag0.*?
