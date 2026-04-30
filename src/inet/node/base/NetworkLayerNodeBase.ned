@@ -43,6 +43,9 @@ module NetworkLayerNodeBase extends LinkLayerNodeBase
             @display("p=750,450;b=1000,5,,,,1");
         }
     connections allowunconnected:
+        cb.out++ --> nl.in++;   // nl.in[0]: always the link-layer (cb) side
+        cb.in++ <-- nl.out++;   // nl.out[0]: always the link-layer (cb) side
+
         ipv4.ifIn <-- nl.out++ if hasIpv4;
         ipv4.ifOut --> nl.in++ if hasIpv4;
 
@@ -51,9 +54,6 @@ module NetworkLayerNodeBase extends LinkLayerNodeBase
 
         generic.ifIn <-- nl.out++ if exists(generic);
         generic.ifOut --> nl.in++ if exists(generic);
-
-        cb.out++ --> nl.in++;
-        cb.in++ <-- nl.out++;
 
         llc.upperLayerOut --> nl.in++ if exists(llc);
         llc.upperLayerIn <-- nl.out++ if exists(llc);
