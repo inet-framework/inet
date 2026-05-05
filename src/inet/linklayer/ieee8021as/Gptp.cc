@@ -632,12 +632,6 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj
                 process.state = SyncSenderProcess::State::SYNC_TRANSMISSION_STARTED;
                 process.syncTransmissionStartUnsynchronized = localClock->getClockTime();
                 process.syncTransmissionStartSynchronized = clock->getClockTime();
-                if (gptpNodeType == MASTER_NODE)
-                    sendFollowUp(portId);
-                else if (gptpNodeType == BRIDGE_NODE) {
-                    if (syncReceiverProcess.state == SyncReceiverProcess::State::COMPLETED)
-                        sendFollowUp(portId);
-                }
                 break;
             }
             case GPTPTYPE_FOLLOW_UP: {
@@ -681,6 +675,12 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj
                 if (process.state != SyncSenderProcess::State::SYNC_TRANSMISSION_STARTED)
                     throw cRuntimeError("Invalid process state, the network interface module must emit transmissionStarted signal");
                 process.state = SyncSenderProcess::State::SYNC_TRANSMISSION_ENDED;
+                if (gptpNodeType == MASTER_NODE)
+                    sendFollowUp(portId);
+                else if (gptpNodeType == BRIDGE_NODE) {
+                    if (syncReceiverProcess.state == SyncReceiverProcess::State::COMPLETED)
+                        sendFollowUp(portId);
+                }
                 break;
             }
             case GPTPTYPE_FOLLOW_UP: {
