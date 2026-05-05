@@ -145,6 +145,11 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
         }
     };
 
+    struct StartTimestamps {
+        clocktime_t synchronized;
+        clocktime_t unsynchronized;
+    };
+
   protected:
     // module parameters
     ModuleRefByPar<IInterfaceTable> interfaceTable;
@@ -158,6 +163,10 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     clocktime_t pdelayInterval = -1;
     double pdelaySmoothingFactor = NaN;
     uint64_t clockIdentity = 0;
+
+    // timestamps recorded at receptionStarted/transmissionStarted (packet content may not yet be available)
+    std::map<int, StartTimestamps> receptionStartTimestamps;
+    std::map<int, StartTimestamps> transmissionStartTimestamps;
 
     // ongoing pdelay measurement processes
     std::map<int, PdelayMeasurementRequesterProcess> pdelayMeasurementRequesterProcesses;

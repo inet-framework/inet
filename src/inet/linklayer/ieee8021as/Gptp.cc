@@ -518,6 +518,18 @@ bool Gptp::isAllSyncSenderProcessesCompleted() const
 void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *object, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(simSignal));
+    if (simSignal == receptionStartedSignal || simSignal == transmissionStartedSignal) {
+        // The packet content may not be available yet (e.g. with stream-through
+        // receivers/transmitters used for cut-through switching), so just save the
+        // timestamps. The message type will be identified at the corresponding Ended signal.
+        int portId = getContainingNicModule(check_and_cast<cModule*>(source))->getInterfaceId();
+        auto ts = StartTimestamps{clock->getClockTime(), localClock->getClockTime()};
+        if (simSignal == receptionStartedSignal)
+            receptionStartTimestamps[portId] = ts;
+        else
+            transmissionStartTimestamps[portId] = ts;
+        return;
+    }
     auto ethernetSignal = check_and_cast<cPacket *>(object);
     auto packet = check_and_cast_nullable<Packet *>(ethernetSignal->getEncapsulatedPacket());
     if (packet == nullptr)
@@ -526,48 +538,19 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj
     if (gptpMessage == nullptr || gptpMessage->getDomainNumber() != domainNumber)
         return;
     int portId = getContainingNicModule(check_and_cast<cModule*>(source))->getInterfaceId();
-    if (simSignal == receptionStartedSignal) {
+    if (simSignal == receptionEndedSignal) {
+        auto it = receptionStartTimestamps.find(portId);
+        if (it == receptionStartTimestamps.end())
+            throw cRuntimeError("Invalid process state, the network interface module must emit receptionStarted signal");
+        auto ts = it->second;
+        receptionStartTimestamps.erase(it);
         switch (gptpMessage->getMessageType()) {
             case GPTPTYPE_PDELAY_REQ: {
                 auto& process = pdelayMeasurementResponderProcesses[portId];
                 process = PdelayMeasurementResponderProcess();
                 ASSERT(process.state == PdelayMeasurementResponderProcess::State::INITIALIZED);
                 process.state = PdelayMeasurementResponderProcess::State::PDELAY_REQ_RECEPTION_STARTED;
-                process.pdelayReqReceptionStartUnsynchronized = localClock->getClockTime();
-                break;
-            }
-            case GPTPTYPE_PDELAY_RESP: {
-                auto& process = pdelayMeasurementRequesterProcesses[portId];
-                ASSERT(process.state == PdelayMeasurementRequesterProcess::State::PDELAY_REQ_TRANSMISSION_ENDED);
-                process.state = PdelayMeasurementRequesterProcess::State::PDELAY_RESP_RECEPTION_STARTED;
-                process.pdelayRespReceptionStartUnsynchronized = localClock->getClockTime();
-                break;
-            }
-            case GPTPTYPE_PDELAY_RESP_FOLLOW_UP: {
-                auto& process = pdelayMeasurementRequesterProcesses[portId];
-                ASSERT(process.state == PdelayMeasurementRequesterProcess::State::PDELAY_RESP_RECEPTION_ENDED);
-                process.state = PdelayMeasurementRequesterProcess::State::PDELAY_RESP_FOLLOW_UP_RECEPTION_STARTED;
-                break;
-            }
-            case GPTPTYPE_SYNC: {
-                ASSERT(syncReceiverProcess.state == SyncReceiverProcess::State::INITIALIZED);
-                syncReceiverProcess.state = SyncReceiverProcess::State::SYNC_RECEPTION_STARTED;
-                syncReceiverProcess.syncReceptionStartSynchronized = clock->getClockTime();
-                syncReceiverProcess.syncReceptionStartUnsynchronized = localClock->getClockTime();
-                break;
-            }
-            case GPTPTYPE_FOLLOW_UP: {
-                ASSERT(syncReceiverProcess.state == SyncReceiverProcess::State::SYNC_RECEPTION_ENDED);
-                syncReceiverProcess.state = SyncReceiverProcess::State::FOLLOW_UP_RECEPTION_STARTED;
-                break;
-            }
-            default: throw cRuntimeError("Unknown gPTP message");
-        }
-    }
-    else if (simSignal == receptionEndedSignal) {
-        switch (gptpMessage->getMessageType()) {
-            case GPTPTYPE_PDELAY_REQ: {
-                auto& process = pdelayMeasurementResponderProcesses[portId];
+                process.pdelayReqReceptionStartUnsynchronized = ts.unsynchronized;
                 if (process.state != PdelayMeasurementResponderProcess::State::PDELAY_REQ_RECEPTION_STARTED)
                     throw cRuntimeError("Invalid process state, the network interface module must emit receptionStarted signal");
                 process.state = PdelayMeasurementResponderProcess::State::PDELAY_REQ_RECEPTION_ENDED;
@@ -575,6 +558,9 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj
             }
             case GPTPTYPE_PDELAY_RESP: {
                 auto& process = pdelayMeasurementRequesterProcesses[portId];
+                ASSERT(process.state == PdelayMeasurementRequesterProcess::State::PDELAY_REQ_TRANSMISSION_ENDED);
+                process.state = PdelayMeasurementRequesterProcess::State::PDELAY_RESP_RECEPTION_STARTED;
+                process.pdelayRespReceptionStartUnsynchronized = ts.unsynchronized;
                 if (process.state != PdelayMeasurementRequesterProcess::State::PDELAY_RESP_RECEPTION_STARTED)
                     throw cRuntimeError("Invalid process state, the network interface module must emit receptionStarted signal");
                 process.state = PdelayMeasurementRequesterProcess::State::PDELAY_RESP_RECEPTION_ENDED;
@@ -582,18 +568,26 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj
             }
             case GPTPTYPE_PDELAY_RESP_FOLLOW_UP: {
                 auto& process = pdelayMeasurementRequesterProcesses[portId];
+                ASSERT(process.state == PdelayMeasurementRequesterProcess::State::PDELAY_RESP_RECEPTION_ENDED);
+                process.state = PdelayMeasurementRequesterProcess::State::PDELAY_RESP_FOLLOW_UP_RECEPTION_STARTED;
                 if (process.state != PdelayMeasurementRequesterProcess::State::PDELAY_RESP_FOLLOW_UP_RECEPTION_STARTED)
                     throw cRuntimeError("Invalid process state, the network interface module must emit receptionStarted signal");
                 process.state = PdelayMeasurementRequesterProcess::State::PDELAY_RESP_FOLLOW_UP_RECEPTION_ENDED;
                 break;
             }
             case GPTPTYPE_SYNC: {
+                ASSERT(syncReceiverProcess.state == SyncReceiverProcess::State::INITIALIZED);
+                syncReceiverProcess.state = SyncReceiverProcess::State::SYNC_RECEPTION_STARTED;
+                syncReceiverProcess.syncReceptionStartSynchronized = ts.synchronized;
+                syncReceiverProcess.syncReceptionStartUnsynchronized = ts.unsynchronized;
                 if (syncReceiverProcess.state != SyncReceiverProcess::State::SYNC_RECEPTION_STARTED)
                     throw cRuntimeError("Invalid process state, the network interface module must emit receptionStarted signal");
                 syncReceiverProcess.state = SyncReceiverProcess::State::SYNC_RECEPTION_ENDED;
                 break;
             }
             case GPTPTYPE_FOLLOW_UP: {
+                ASSERT(syncReceiverProcess.state == SyncReceiverProcess::State::SYNC_RECEPTION_ENDED);
+                syncReceiverProcess.state = SyncReceiverProcess::State::FOLLOW_UP_RECEPTION_STARTED;
                 if (syncReceiverProcess.state != SyncReceiverProcess::State::FOLLOW_UP_RECEPTION_STARTED)
                     throw cRuntimeError("Invalid process state, the network interface module must emit receptionStarted signal");
                 syncReceiverProcess.state = SyncReceiverProcess::State::FOLLOW_UP_RECEPTION_ENDED;
@@ -602,49 +596,18 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj
             default: throw cRuntimeError("Unknown gPTP message");
         }
     }
-    else if (simSignal == transmissionStartedSignal) {
+    else if (simSignal == transmissionEndedSignal) {
+        auto it = transmissionStartTimestamps.find(portId);
+        if (it == transmissionStartTimestamps.end())
+            throw cRuntimeError("Invalid process state, the network interface module must emit transmissionStarted signal");
+        auto ts = it->second;
+        transmissionStartTimestamps.erase(it);
         switch (gptpMessage->getMessageType()) {
             case GPTPTYPE_PDELAY_REQ: {
                 auto& process = pdelayMeasurementRequesterProcesses[portId];
                 ASSERT(process.state == PdelayMeasurementRequesterProcess::State::INITIALIZED);
                 process.state = PdelayMeasurementRequesterProcess::State::PDELAY_REQ_TRANSMISSION_STARTED;
-                process.pdelayReqTransmissionStartUnsynchronized = localClock->getClockTime();
-                break;
-            }
-            case GPTPTYPE_PDELAY_RESP: {
-                auto& process = pdelayMeasurementResponderProcesses[portId];
-                ASSERT(process.state == PdelayMeasurementResponderProcess::State::PDELAY_REQ_RECEPTION_ENDED);
-                process.state = PdelayMeasurementResponderProcess::State::PDELAY_RESP_TRANSMISSION_STARTED;
-                process.pdelayRespTransmissionStartUnsynchronized = localClock->getClockTime();
-                break;
-            }
-            case GPTPTYPE_PDELAY_RESP_FOLLOW_UP: {
-                auto& process = pdelayMeasurementResponderProcesses[portId];
-                ASSERT(process.state == PdelayMeasurementResponderProcess::State::PDELAY_RESP_TRANSMISSION_ENDED);
-                process.state = PdelayMeasurementResponderProcess::State::PDELAY_RESP_FOLLOW_UP_TRANSMISSION_STARTED;
-                break;
-            }
-            case GPTPTYPE_SYNC: {
-                auto& process = syncSenderProcesses[portId];
-                ASSERT(process.state == SyncSenderProcess::State::INITIALIZED);
-                process.state = SyncSenderProcess::State::SYNC_TRANSMISSION_STARTED;
-                process.syncTransmissionStartUnsynchronized = localClock->getClockTime();
-                process.syncTransmissionStartSynchronized = clock->getClockTime();
-                break;
-            }
-            case GPTPTYPE_FOLLOW_UP: {
-                auto& process = syncSenderProcesses[portId];
-                ASSERT(process.state == SyncSenderProcess::State::SYNC_TRANSMISSION_ENDED);
-                process.state = SyncSenderProcess::State::FOLLOW_UP_TRANSMISSION_STARTED;
-                break;
-            }
-            default: throw cRuntimeError("Unknown gPTP message");
-        }
-    }
-    else if (simSignal == transmissionEndedSignal) {
-        switch (gptpMessage->getMessageType()) {
-            case GPTPTYPE_PDELAY_REQ: {
-                auto& process = pdelayMeasurementRequesterProcesses[portId];
+                process.pdelayReqTransmissionStartUnsynchronized = ts.unsynchronized;
                 if (process.state != PdelayMeasurementRequesterProcess::State::PDELAY_REQ_TRANSMISSION_STARTED)
                     throw cRuntimeError("Invalid process state, the network interface module must emit transmissionStarted signal");
                 process.state = PdelayMeasurementRequesterProcess::State::PDELAY_REQ_TRANSMISSION_ENDED;
@@ -652,6 +615,9 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj
             }
             case GPTPTYPE_PDELAY_RESP: {
                 auto& process = pdelayMeasurementResponderProcesses[portId];
+                ASSERT(process.state == PdelayMeasurementResponderProcess::State::PDELAY_REQ_RECEPTION_ENDED);
+                process.state = PdelayMeasurementResponderProcess::State::PDELAY_RESP_TRANSMISSION_STARTED;
+                process.pdelayRespTransmissionStartUnsynchronized = ts.unsynchronized;
                 if (process.state != PdelayMeasurementResponderProcess::State::PDELAY_RESP_TRANSMISSION_STARTED)
                     throw cRuntimeError("Invalid process state, the network interface module must emit transmissionStarted signal");
                 process.state = PdelayMeasurementResponderProcess::State::PDELAY_RESP_TRANSMISSION_ENDED;
@@ -661,6 +627,8 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj
             }
             case GPTPTYPE_PDELAY_RESP_FOLLOW_UP: {
                 auto& process = pdelayMeasurementResponderProcesses[portId];
+                ASSERT(process.state == PdelayMeasurementResponderProcess::State::PDELAY_RESP_TRANSMISSION_ENDED);
+                process.state = PdelayMeasurementResponderProcess::State::PDELAY_RESP_FOLLOW_UP_TRANSMISSION_STARTED;
                 if (process.state != PdelayMeasurementResponderProcess::State::PDELAY_RESP_FOLLOW_UP_TRANSMISSION_STARTED)
                     throw cRuntimeError("Invalid process state, the network interface module must emit transmissionStarted signal");
                 process.state = PdelayMeasurementResponderProcess::State::PDELAY_RESP_FOLLOW_UP_TRANSMISSION_ENDED;
@@ -670,19 +638,25 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj
             }
             case GPTPTYPE_SYNC: {
                 auto& process = syncSenderProcesses[portId];
-                if (process.state != SyncSenderProcess::State::SYNC_TRANSMISSION_STARTED)
-                    throw cRuntimeError("Invalid process state, the network interface module must emit transmissionStarted signal");
-                process.state = SyncSenderProcess::State::SYNC_TRANSMISSION_ENDED;
+                ASSERT(process.state == SyncSenderProcess::State::INITIALIZED);
+                process.state = SyncSenderProcess::State::SYNC_TRANSMISSION_STARTED;
+                process.syncTransmissionStartUnsynchronized = ts.unsynchronized;
+                process.syncTransmissionStartSynchronized = ts.synchronized;
                 if (gptpNodeType == MASTER_NODE)
                     sendFollowUp(portId);
                 else if (gptpNodeType == BRIDGE_NODE) {
                     if (syncReceiverProcess.state == SyncReceiverProcess::State::COMPLETED)
                         sendFollowUp(portId);
                 }
+                if (process.state != SyncSenderProcess::State::SYNC_TRANSMISSION_STARTED)
+                    throw cRuntimeError("Invalid process state, the network interface module must emit transmissionStarted signal");
+                process.state = SyncSenderProcess::State::SYNC_TRANSMISSION_ENDED;
                 break;
             }
             case GPTPTYPE_FOLLOW_UP: {
                 auto& process = syncSenderProcesses[portId];
+                ASSERT(process.state == SyncSenderProcess::State::SYNC_TRANSMISSION_ENDED);
+                process.state = SyncSenderProcess::State::FOLLOW_UP_TRANSMISSION_STARTED;
                 if (process.state != SyncSenderProcess::State::FOLLOW_UP_TRANSMISSION_STARTED)
                     throw cRuntimeError("Invalid process state, the network interface module must emit transmissionStarted signal");
                 process.state = SyncSenderProcess::State::FOLLOW_UP_TRANSMISSION_ENDED;
