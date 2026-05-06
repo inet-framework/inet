@@ -4,13 +4,13 @@ SELFDOC = tests/fingerprint/SelfDoc
 
 .PHONY: all clean cleanall neddoc makefiles makefiles-so makefiles-lib makefiles-exe checkenvir checkmakefiles doxy doc submodule-init
 
-all: makefiles $(FEATURES_H)
+all: src/Makefile $(FEATURES_H)
 	@cd src && $(MAKE)
 
-clean: makefiles
+clean: src/Makefile
 	@cd src && $(MAKE) clean
 
-cleanall: makefiles
+cleanall: src/Makefile
 	@cd src && $(MAKE) MODE=release clean
 	@cd src && $(MAKE) MODE=debug clean
 	@rm -f src/Makefile $(FEATURES_H) $(SELFDOC).xml
@@ -22,10 +22,14 @@ MAKEMAKE_OPTIONS := $(shell sed -n 's/.*makemake-options\s*=\s*"\([^"]*\)".*/\1/
 # add also options derived from enabled features
 MAKEMAKE_OPTIONS := $(MAKEMAKE_OPTIONS) $(shell $(FEATURETOOL) options -f -l) $(EXTRA_MAKEMAKE_OPTIONS) 
 
-makefiles:
-	@$(info *** CREATING Makefile with:)
-	@$(info opp_makemake $(MAKEMAKE_OPTIONS))
+src/Makefile: .oppbuildspec .oppfeatures $(wildcard .oppfeaturestate)
+	@echo "*** CREATING Makefile with:"
+	@echo "opp_makemake $(MAKEMAKE_OPTIONS)"
 	@cd src && opp_makemake $(MAKEMAKE_OPTIONS)
+
+makefiles:
+	@rm -f src/Makefile
+	@$(MAKE) src/Makefile
 
 # generate an include file that contains all the WITH_FEATURE macros according to the current enablement of features
 $(FEATURES_H): $(wildcard .oppfeaturestate) .oppfeatures

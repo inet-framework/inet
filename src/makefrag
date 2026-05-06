@@ -1,4 +1,8 @@
+ifneq (,$(findstring q,$(firstword $(MAKEFLAGS))))
+.DEFAULT_GOAL := $(TARGET_FILES)
+else
 .DEFAULT_GOAL := all-pch
+endif
 
 FEATURETOOL := opp_featuretool
 
