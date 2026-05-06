@@ -8,7 +8,7 @@
         <input pattern="results/ParabolicAntenna-#0.vec"/>
     </inputs>
     <charts>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="821209593" name="Isotropic" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1445499463" name="Isotropic" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import matplotlib.pyplot as plt
@@ -706,7 +706,7 @@ utils.export_data_if_needed(df, props)
             <property name="data_export_filename" value=""/>
             <property name="xaxis_title" value="Angle [deg]"/>
             <property name="grid_density" value="Major"/>
-            <property name="yaxis_min" value=""/>
+            <property name="yaxis_min" value="0.082"/>
             <property name="image_export_filename" value="isotropicchart"/>
             <property name="xaxis_min" value="0"/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
@@ -721,13 +721,13 @@ utils.export_data_if_needed(df, props)
             <property name="legend_show" value="false"/>
             <property name="matplotlibrc.legend.shadow" value="false"/>
             <property name="simplify" value="false"/>
-            <property name="yaxis_max" value=""/>
+            <property name="yaxis_max" value="0.092"/>
             <property name="xaxis_max" value="360"/>
             <property name="image_export_width" value="7.5"/>
             <property name="matplotlibrc" value="savefig.transparent: True"/>
             <property name="legend_prefer_module_display_paths" value="true"/>
             <property name="legend_prefer_result_titles" value="true"/>
-            <property name="legend_manual" value=""/>
+            <property name="legend_manual" value="false"/>
             <property name="legend_replacements" value=""/>
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
@@ -736,7 +736,7 @@ utils.export_data_if_needed(df, props)
             <property name="secondary_ordering_regex_list" value=""/>
             <property name="omit_empty_vectors" value="false"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="497117111" name="Parabolic" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1917113135" name="Parabolic" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import matplotlib.pyplot as plt
@@ -1464,7 +1464,7 @@ utils.export_data_if_needed(df, props)
             <property name="secondary_ordering_regex_list" value=""/>
             <property name="omit_empty_vectors" value="false"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="591052793" name="Dipole" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="308151461" name="Dipole" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import matplotlib.pyplot as plt
@@ -2192,7 +2192,7 @@ utils.export_data_if_needed(df, props)
             <property name="secondary_ordering_regex_list" value=""/>
             <property name="omit_empty_vectors" value="false"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1855128225" name="Cosine" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1205360334" name="Cosine" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import matplotlib.pyplot as plt
@@ -2920,7 +2920,7 @@ utils.export_data_if_needed(df, props)
             <property name="secondary_ordering_regex_list" value=""/>
             <property name="omit_empty_vectors" value="false"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="252106809" name="16-Yagi" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1451281281" name="16-Yagi" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import matplotlib.pyplot as plt
@@ -3648,7 +3648,7 @@ utils.export_data_if_needed(df, props)
             <property name="secondary_ordering_regex_list" value=""/>
             <property name="omit_empty_vectors" value="false"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="347466033" name="16-Yagi (logarithmic)" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1030252598" name="16-Yagi (logarithmic)" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import matplotlib.pyplot as plt
@@ -4376,7 +4376,7 @@ utils.export_data_if_needed(df, props)
             <property name="secondary_ordering_regex_list" value=""/>
             <property name="omit_empty_vectors" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.220921-6e93d9d2c9" icon="icons/full/obj/linechart.png" id="328837118" name="16-Yagi (linear + logarithmic)" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.220921-6e93d9d2c9" icon="icons/full/obj/linechart.png" id="305821439" name="16-Yagi (linear + logarithmic)" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import matplotlib.pyplot as plt
@@ -5112,7 +5112,7 @@ utils.export_data_if_needed(df, props)
             <property name="secondary_ordering_regex_list" value=""/>
             <property name="omit_empty_vectors" value="false"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="258719465" name="All antennas" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="527500440" name="All antennas" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import matplotlib.pyplot as plt
