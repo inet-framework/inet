@@ -5,10 +5,6 @@
 //
 
 
-#ifdef INET_WITH_ETHERNET
-#include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
-#endif // ifdef INET_WITH_ETHERNET
-
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtApSimplified.h"
 
 namespace inet {
