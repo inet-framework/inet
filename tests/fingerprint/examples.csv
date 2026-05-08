@@ -179,7 +179,7 @@
 
 /examples/inet/multicast/,           -f omnetpp.ini -c General -r 0,                2000s,           8fdb-eda6/tplx;3ac0-3950/~tNl;b4b8-940d/~tND;0318-5176/tyf, PASS, igmp Ipv4
 
-/examples/inet/nclients/,            -f basicHTTP.ini -c General -r 0,              500000s,         2495-ca4e/tplx;f7c7-6437/~tNl;98f1-0c44/tyf, PASS, Ipv4
+/examples/inet/nclients/,            -f basicHTTP.ini -c General -r 0,              1d,              7c51-b718/tplx;3a1d-b4a6/~tNl;fc8f-d880/tyf, PASS, Ipv4
 /examples/inet/nclients/,            -f filetransfer.ini -c Filetransfer -r 0,      50s,             086c-734d/tplx;2aa1-b0d3/~tNl;24dc-e826/~tND;f5e8-0fd1/tyf, PASS, Ipv4
 /examples/inet/nclients/,            -f nclients2.ini -c General -r 0,              50s,             f85e-70c0/tplx;0d1c-e56e/~tNl;1296-a1c2/tyf, PASS, Ipv4
 /examples/inet/nclients/,            -f nclients2.ini -c General -r 1,              50s,             4e5c-5f0f/tplx;afc0-271e/~tNl;b7bd-11cd/tyf, PASS, Ipv4
