@@ -103,7 +103,7 @@ module EthernetSwitch like IEthernetNetworkNode
             @display("p=100,700;is=s");
         }
         mrp: <default("Mrp")> like IMrp if hasMrp {
-            @display("p=500,50");
+            @display("p=300,75");
         }
         stp: <spanningTreeProtocol> like ISpanningTree if hasStp {
             @display("p=500,75");
