@@ -204,7 +204,8 @@ class INET_API Tcp : public TransportProtocolBase
     virtual void addSockPair(TcpConnection *conn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort);
 
     virtual void removeConnection(TcpConnection *conn);
-    virtual void sendFromConn(cMessage *msg, const char *gatename, int gateindex = -1);
+    virtual void sendToIp(Packet *segment);
+    virtual void sendToApp(cMessage *msg);
 
     /**
      * To be called from TcpConnection when socket pair (key for TcpConnMap) changes
