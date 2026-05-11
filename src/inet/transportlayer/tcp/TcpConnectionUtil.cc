@@ -318,7 +318,7 @@ void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader
 
     insertTransportProtocolHeader(tcpSegment, Protocol::tcp, tcpHeader);
 
-    tcpMain->sendFromConn(tcpSegment, "ipOut");
+    tcpMain->sendToIp(tcpSegment);
 }
 
 void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader, L3Address src, L3Address dest)
@@ -346,7 +346,7 @@ void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader
 
     insertTransportProtocolHeader(tcpSegment, Protocol::tcp, tcpHeader);
 
-    tcpMain->sendFromConn(tcpSegment, "ipOut");
+    tcpMain->sendToIp(tcpSegment);
 }
 
 void TcpConnection::signalConnectionTimeout()
@@ -533,7 +533,7 @@ void TcpConnection::sendEstabIndicationToApp()
 
 void TcpConnection::sendToApp(cMessage *msg)
 {
-    tcpMain->sendFromConn(msg, "appOut");
+    tcpMain->sendToApp(msg);
 }
 
 void TcpConnection::sendAvailableDataToApp()

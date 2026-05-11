@@ -110,11 +110,18 @@ void Tcp::handleUpperCommand(cMessage *msg)
         removeConnection(conn);
 }
 
-void Tcp::sendFromConn(cMessage *msg, const char *gatename, int gateindex)
+void Tcp::sendToIp(Packet *segment)
 {
-    Enter_Method("sendFromConn");
+    Enter_Method("sendToIp");
+    take(segment);
+    send(segment, "ipOut");
+}
+
+void Tcp::sendToApp(cMessage *msg)
+{
+    Enter_Method("sendToApp");
     take(msg);
-    send(msg, gatename, gateindex);
+    send(msg, "appOut");
 }
 
 void Tcp::handleUpperPacket(Packet *packet)
