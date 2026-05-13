@@ -24,7 +24,7 @@ enum AccessCategory {
     AC_NUMCATEGORIES
 };
 
-inline std::string printAccessCategory(AccessCategory ac)
+inline const char *printAccessCategory(AccessCategory ac)
 {
     switch (ac) {
         case AC_BK: return "Background";
