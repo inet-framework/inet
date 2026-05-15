@@ -49,7 +49,8 @@ The initial address acquisition uses a four-message exchange known as
 2. **Offer** — The server responds with a DHCPOFFER containing an available
    IP address, the subnet mask, the default gateway, and the lease duration.
 3. **Request** — The client broadcasts a DHCPREQUEST indicating which offer
-   it accepts.
+   it accepts. (Broadcasting rather than unicasting informs any other servers
+   that their offers were not chosen.)
 4. **Acknowledge** — The server confirms the lease with a DHCPACK.
 
 After receiving the DHCPACK, the client enters the **BOUND** state and
@@ -72,7 +73,13 @@ unreachable:
 If neither succeeds and the lease expires, the client loses its address and
 must start over with a new Discover.
 
-The full client state machine is:
+The full client state machine maps directly onto these steps: the client
+starts in **INIT**, moves to **SELECTING** while waiting for offers after
+sending a Discover, transitions to **REQUESTING** after choosing an offer
+and sending the Request, and enters **BOUND** once the Acknowledge is
+received. From there, renewal timers drive the **RENEWING** and
+**REBINDING** states:
+
 INIT → SELECTING → REQUESTING → BOUND → RENEWING → REBINDING.
 
 This showcase includes three configurations that illustrate different
@@ -96,8 +103,12 @@ INET provides two application modules for DHCP:
 - :ned:`DhcpServer` — Listens on a network interface, manages the address
   pool, and responds to client requests. Key parameters:
   :par:`numReservedAddresses` (how many addresses to skip at the start of
-  the subnet range), :par:`maxNumClients` (pool size), :par:`gateway`
-  (default gateway announced to clients), and :par:`leaseTime`.
+  the leasable range — addresses below the server's own IP are excluded
+  automatically, so with a server at 192.168.1.1/24 and
+  ``numReservedAddresses=10``, the pool starts at 192.168.1.11),
+  :par:`maxNumClients` (maximum number of concurrent leases),
+  :par:`gateway` (default gateway announced to clients), and
+  :par:`leaseTime`.
 
 - :ned:`DhcpClient` — Runs the DHCP client state machine on a host
   interface. Its main parameter is :par:`startTime`, which controls when
@@ -151,9 +162,11 @@ starts its DHCP process at a random time within the first 2 seconds.
    :end-before: [Config LeaseRenewal]
 
 After running this configuration, all three clients should obtain IP
-addresses in the 192.168.1.11–192.168.1.60 range (since the first 10
-addresses are reserved). The interface table visualizer displays the
-acquired address and prefix length next to each host.
+addresses in the 192.168.1.11–192.168.1.60 range: the server's own address
+(.1) is excluded from the pool, the next 10 addresses (.2–.11) are skipped
+by ``numReservedAddresses=10``, so the pool starts at .11 and spans 50
+addresses (.11–.60) as limited by ``maxNumClients=50``. The interface table
+visualizer displays the acquired address and prefix length next to each host.
 
 LeaseRenewal
 ~~~~~~~~~~~~
@@ -230,8 +243,12 @@ ClientReboot
 ~~~~~~~~~~~~
 
 At t=30s, ``client[0]`` is shut down and its interface is deconfigured.
-At t=60s, the client restarts and performs a new DORA exchange. The other
-two clients remain unaffected throughout.
+At t=60s, the client restarts and performs a new DORA exchange. Because
+the lease time is 120 seconds and only 30 seconds have elapsed since the
+lease was granted, the server still considers the lease valid when the
+client restarts. The client requests its previously held address and the
+server re-acknowledges it, so ``client[0]`` receives the same IP address
+as before the reboot. The other two clients remain unaffected throughout.
 
 .. figure:: media/client_reboot.png
    :width: 100%
