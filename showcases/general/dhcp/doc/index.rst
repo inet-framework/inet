@@ -74,9 +74,9 @@ If neither succeeds and the lease expires, the client loses its address and
 must start over with a new Discover.
 
 The full client state machine maps directly onto these steps: the client
-starts in **INIT**, moves to **SELECTING** while waiting for offers after
-sending a Discover, transitions to **REQUESTING** after choosing an offer
-and sending the Request, and enters **BOUND** once the Acknowledge is
+starts in **INIT** and moves to **SELECTING** as soon as it sends the
+Discover, then transitions to **REQUESTING** after choosing an offer and
+sending the Request, and enters **BOUND** once the Acknowledge is
 received. From there, renewal timers drive the **RENEWING** and
 **REBINDING** states:
 
@@ -102,10 +102,10 @@ INET provides two application modules for DHCP:
 
 - :ned:`DhcpServer` — Listens on a network interface, manages the address
   pool, and responds to client requests. Key parameters:
-  :par:`numReservedAddresses` (how many addresses to skip at the start of
-  the leasable range — addresses below the server's own IP are excluded
-  automatically, so with a server at 192.168.1.1/24 and
-  ``numReservedAddresses=10``, the pool starts at 192.168.1.11),
+  :par:`numReservedAddresses` (number of addresses to skip at the start
+  of the subnet range, counting from the lowest host address; with
+  ``numReservedAddresses=10`` on a /24 subnet, the pool starts at
+  the 11th host address),
   :par:`maxNumClients` (maximum number of concurrent leases),
   :par:`gateway` (default gateway announced to clients), and
   :par:`leaseTime`.
@@ -162,11 +162,11 @@ starts its DHCP process at a random time within the first 2 seconds.
    :end-before: [Config LeaseRenewal]
 
 After running this configuration, all three clients should obtain IP
-addresses in the 192.168.1.11–192.168.1.60 range: the server's own address
-(.1) is excluded from the pool, the next 10 addresses (.2–.11) are skipped
-by ``numReservedAddresses=10``, so the pool starts at .11 and spans 50
-addresses (.11–.60) as limited by ``maxNumClients=50``. The interface table
-visualizer displays the acquired address and prefix length next to each host.
+addresses in the 192.168.1.11–192.168.1.60 range: ``numReservedAddresses=10``
+skips the first 10 host addresses (.1–.10), so the pool starts at .11 and
+spans 50 addresses (.11–.60) as limited by ``maxNumClients=50``. The
+interface table visualizer displays the acquired address and prefix length
+next to each host.
 
 LeaseRenewal
 ~~~~~~~~~~~~
@@ -187,10 +187,11 @@ ClientReboot
 
 This configuration demonstrates how a DHCP client re-acquires its address
 after a reboot. It uses a :ned:`ScenarioManager` to shut down ``client[0]``
-at t=30s and restart it at t=60s. When the client comes back up, it
-performs a new DORA exchange to obtain an address. The lease time is set
-to 120 seconds, and ``**.hasStatus = true`` enables lifecycle management
-on all hosts.
+at t=30s and restart it at t=60s. When the client comes back up, it retains
+its lease state from before the shutdown and enters the INIT-REBOOT state:
+instead of a full DORA exchange, it sends a single DHCPREQUEST directly and
+the server responds with a DHCPACK. The lease time is set to 120 seconds,
+and ``**.hasStatus = true`` enables lifecycle management on all hosts.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -243,12 +244,11 @@ ClientReboot
 ~~~~~~~~~~~~
 
 At t=30s, ``client[0]`` is shut down and its interface is deconfigured.
-At t=60s, the client restarts and performs a new DORA exchange. Because
-the lease time is 120 seconds and only 30 seconds have elapsed since the
-lease was granted, the server still considers the lease valid when the
-client restarts. The client requests its previously held address and the
-server re-acknowledges it, so ``client[0]`` receives the same IP address
-as before the reboot. The other two clients remain unaffected throughout.
+At t=60s, the client restarts. Because the lease is still valid (120s lease,
+only 30s elapsed), the client enters the INIT-REBOOT state and sends a
+single DHCPREQUEST — skipping the Discover and Offer steps — and the server
+responds with a DHCPACK confirming the same address. The other two clients
+remain unaffected throughout.
 
 .. figure:: media/client_reboot.png
    :width: 100%
