@@ -8,6 +8,7 @@ simulations with INET.
    :maxdepth: 1
 
    pcaprecording/doc/index
+   dhcp/doc/index
    diffserv/doc/index
 .. mobility/doc/index
 .. dynamic/doc/index
