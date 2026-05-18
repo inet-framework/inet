@@ -70,23 +70,22 @@ unreachable:
   server is down), it falls back to *broadcasting* a DHCPREQUEST so that
   any available DHCP server on the LAN can respond and extend the lease.
 
-(In INET, the T1 and T2 values are set by the server in every DHCPACK
-message — they are not client-side defaults.)
-
 If neither succeeds and the lease expires, the client loses its address and
 must start over with a new Discover.
 
 The full client state machine maps directly onto these steps: the client
 starts in **INIT**, sends the Discover and enters **SELECTING** while
 waiting for offers, transitions to **REQUESTING** after choosing an offer
-and sending the Request, and enters **BOUND** once the Acknowledge is
-received. From there, renewal timers drive the **RENEWING** and
+and sending the Request (the client accepts the first offer it receives),
+and enters **BOUND** once the Acknowledge is received. From there,
+renewal timers drive the **RENEWING** and
 **REBINDING** states. A separate path exists for rebooting clients: a
 client that still holds a lease from before a restart enters
 **INIT-REBOOT**, broadcasts a DHCPREQUEST for its old address, and moves
 to **REBOOTING** while waiting for the server's response.
 
-INIT → SELECTING → REQUESTING → BOUND → RENEWING → REBINDING.
+| INIT → SELECTING → REQUESTING → BOUND → RENEWING → REBINDING
+| INIT-REBOOT → REBOOTING → BOUND
 
 This showcase includes three configurations that illustrate different
 aspects of the protocol:
@@ -125,6 +124,10 @@ INET provides two application modules for DHCP:
 - :ned:`DhcpClient` — Runs the DHCP client state machine on a host
   interface. Its main parameter is :par:`startTime`, which controls when
   the client begins the DORA exchange.
+
+The T1 and T2 renewal timers are not client-side defaults — the server
+sets them explicitly in every DHCPACK message (T1 = 0.5 × lease time,
+T2 = 0.875 × lease time).
 
 Both modules are added to a :ned:`StandardHost` as applications
 (``app[*]``). The server needs a statically configured IP address on its
@@ -205,8 +208,7 @@ its lease state from before the shutdown and enters the INIT-REBOOT state:
 instead of a full DORA exchange, it broadcasts a DHCPREQUEST for its
 previously held address and the server responds with a DHCPACK (or a
 DHCPNAK if the address is no longer valid). The lease time is set to 120
-seconds, and ``**.hasStatus = true`` enables lifecycle management on all
-hosts.
+seconds.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
