@@ -60,25 +60,31 @@ Before the lease expires, the client must extend it. This happens in two
 stages, providing a fallback in case the original server becomes
 unreachable:
 
-- **Renewing** (at time T1, by default half the lease time) — The client
+- **Renewing** (at time T1, typically half the lease time) — The client
   sends a unicast DHCPREQUEST directly to the server that granted the
   lease. Under normal conditions, the server replies with a DHCPACK and
   the lease is extended. This is the common case.
 
-- **Rebinding** (at time T2, by default 87.5% of the lease time) — If the
+- **Rebinding** (at time T2, typically 87.5% of the lease time) — If the
   client received no response during the renewing phase (e.g. the original
   server is down), it falls back to *broadcasting* a DHCPREQUEST so that
   any available DHCP server on the LAN can respond and extend the lease.
+
+(In INET, the T1 and T2 values are set by the server in every DHCPACK
+message — they are not client-side defaults.)
 
 If neither succeeds and the lease expires, the client loses its address and
 must start over with a new Discover.
 
 The full client state machine maps directly onto these steps: the client
-starts in **INIT** and moves to **SELECTING** as soon as it sends the
-Discover, then transitions to **REQUESTING** after choosing an offer and
-sending the Request, and enters **BOUND** once the Acknowledge is
+starts in **INIT**, sends the Discover and enters **SELECTING** while
+waiting for offers, transitions to **REQUESTING** after choosing an offer
+and sending the Request, and enters **BOUND** once the Acknowledge is
 received. From there, renewal timers drive the **RENEWING** and
-**REBINDING** states:
+**REBINDING** states. A separate path exists for rebooting clients: a
+client that still holds a lease from before a restart enters
+**INIT-REBOOT**, broadcasts a DHCPREQUEST for its old address, and moves
+to **REBOOTING** while waiting for the server's response.
 
 INIT → SELECTING → REQUESTING → BOUND → RENEWING → REBINDING.
 
@@ -102,13 +108,19 @@ INET provides two application modules for DHCP:
 
 - :ned:`DhcpServer` — Listens on a network interface, manages the address
   pool, and responds to client requests. Key parameters:
-  :par:`numReservedAddresses` (number of addresses to skip at the start
-  of the subnet range, counting from the lowest host address; with
-  ``numReservedAddresses=10`` on a /24 subnet, the pool starts at
-  the 11th host address),
+  :par:`numReservedAddresses` (number of addresses to skip counting from
+  the network address; with a server on 192.168.1.0/24 and
+  ``numReservedAddresses=10``, the pool starts at 192.168.1.10),
   :par:`maxNumClients` (maximum number of concurrent leases),
   :par:`gateway` (default gateway announced to clients), and
   :par:`leaseTime`.
+
+  .. note::
+
+     The INET DHCP server does not expire leases on its own — once an
+     address is leased, it remains marked as in-use until the server is
+     restarted. Lease expiration relies on the client performing timely
+     renewals.
 
 - :ned:`DhcpClient` — Runs the DHCP client state machine on a host
   interface. Its main parameter is :par:`startTime`, which controls when
@@ -162,11 +174,12 @@ starts its DHCP process at a random time within the first 2 seconds.
    :end-before: [Config LeaseRenewal]
 
 After running this configuration, all three clients should obtain IP
-addresses in the 192.168.1.11–192.168.1.60 range: ``numReservedAddresses=10``
-skips the first 10 host addresses (.1–.10), so the pool starts at .11 and
-spans 50 addresses (.11–.60) as limited by ``maxNumClients=50``. The
-interface table visualizer displays the acquired address and prefix length
-next to each host.
+addresses starting from 192.168.1.10: ``numReservedAddresses=10`` skips
+the first 10 addresses from the network address (.0–.9), so the pool
+starts at .10 and spans 50 addresses (.10–.59) as limited by
+``maxNumClients=50``. The server's own address (.1) falls within the
+reserved range. The interface table visualizer displays the acquired
+address and prefix length next to each host.
 
 LeaseRenewal
 ~~~~~~~~~~~~
@@ -189,9 +202,11 @@ This configuration demonstrates how a DHCP client re-acquires its address
 after a reboot. It uses a :ned:`ScenarioManager` to shut down ``client[0]``
 at t=30s and restart it at t=60s. When the client comes back up, it retains
 its lease state from before the shutdown and enters the INIT-REBOOT state:
-instead of a full DORA exchange, it sends a single DHCPREQUEST directly and
-the server responds with a DHCPACK. The lease time is set to 120 seconds,
-and ``**.hasStatus = true`` enables lifecycle management on all hosts.
+instead of a full DORA exchange, it broadcasts a DHCPREQUEST for its
+previously held address and the server responds with a DHCPACK (or a
+DHCPNAK if the address is no longer valid). The lease time is set to 120
+seconds, and ``**.hasStatus = true`` enables lifecycle management on all
+hosts.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -244,11 +259,12 @@ ClientReboot
 ~~~~~~~~~~~~
 
 At t=30s, ``client[0]`` is shut down and its interface is deconfigured.
-At t=60s, the client restarts. Because the lease is still valid (120s lease,
-only 30s elapsed), the client enters the INIT-REBOOT state and sends a
-single DHCPREQUEST — skipping the Discover and Offer steps — and the server
-responds with a DHCPACK confirming the same address. The other two clients
-remain unaffected throughout.
+At t=60s, the client restarts. Because the client still holds its lease
+internally, it enters the INIT-REBOOT state and broadcasts a DHCPREQUEST
+for its previously held address — skipping the Discover and Offer steps.
+The server confirms with a DHCPACK and the client receives the same IP
+address as before the reboot. The other two clients remain unaffected
+throughout.
 
 .. figure:: media/client_reboot.png
    :width: 100%
