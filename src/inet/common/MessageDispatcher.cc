@@ -110,6 +110,9 @@ void MessageDispatcher::arrived(cMessage *message, cGate *inGate, const SendOpti
     }
     else
         outGate = handleMessage(check_and_cast<Message *>(message), inGate);
+    if (outGate->getNextGate() == nullptr)
+        throw cRuntimeError("Output gate '%s' is not connected while dispatching message '%s' (%s) which arrived on gate '%s'",
+            outGate->getFullName(), message->getName(), message->getClassName(), inGate->getFullName());
     bool keepMsg = outGate->deliver(message, options, time);
     if (!keepMsg) {
         take(message);
