@@ -206,7 +206,7 @@ void SctpSocket::listen(bool fork, bool reset, uint32_t requests, uint32_t messa
     sockstate = LISTENING;
 }
 
-void SctpSocket::listen(uint32_t requests, bool fork, uint32_t messagesToPush, bool options, int32_t fd)
+void SctpSocket::listen(uint32_t requests, bool fork, uint32_t messagesToPush, bool options, int fd)
 {
     if (sockstate != CLOSED)
         throw cRuntimeError(sockstate == NOT_BOUND ?
@@ -236,7 +236,7 @@ void SctpSocket::listen(uint32_t requests, bool fork, uint32_t messagesToPush, b
     sockstate = LISTENING;
 }
 
-void SctpSocket::connect(L3Address remoteAddress, int32_t remotePort, bool streamReset, int32_t prMethod, uint32_t numRequests)
+void SctpSocket::connect(L3Address remoteAddress, int remotePort, bool streamReset, int prMethod, uint32_t numRequests)
 {
     EV_INFO << "Socket connect. Assoc=" << assocId << ", sockstate=" << stateName(sockstate) << "\n";
 
@@ -279,7 +279,7 @@ void SctpSocket::connect(L3Address remoteAddress, int32_t remotePort, bool strea
         sockstate = CONNECTING;
 }
 
-void SctpSocket::connect(int32_t fd, L3Address remoteAddress, int32_t remotePort, uint32_t numRequests, bool options)
+void SctpSocket::connect(int fd, L3Address remoteAddress, int remotePort, uint32_t numRequests, bool options)
 {
     EV_INFO << "Socket connect. Assoc=" << assocId << ", sockstate=" << stateName(sockstate) << "\n";
 
@@ -322,7 +322,7 @@ void SctpSocket::connect(int32_t fd, L3Address remoteAddress, int32_t remotePort
         sockstate = CONNECTING;
 }
 
-void SctpSocket::accept(int32_t assId, int32_t fd)
+void SctpSocket::accept(int assId, int fd)
 {
     Request *cmsg = new Request("Accept", SCTP_C_ACCEPT);
     auto cmd = cmsg->addTag<SctpCommandReq>();
@@ -343,7 +343,7 @@ void SctpSocket::acceptSocket(int newSockId)
     check_and_cast<cSimpleModule *>(gateToSctp->getOwnerModule())->send(cmsg, gateToSctp);
 }
 
-void SctpSocket::connectx(AddressVector remoteAddressList, int32_t remotePort, bool streamReset, int32_t prMethod, uint32_t numRequests)
+void SctpSocket::connectx(AddressVector remoteAddressList, int remotePort, bool streamReset, int prMethod, uint32_t numRequests)
 {
     EV_INFO << "Socket connectx.  sockstate=" << stateName(sockstate) << "\n";
     remoteAddresses = remoteAddressList;

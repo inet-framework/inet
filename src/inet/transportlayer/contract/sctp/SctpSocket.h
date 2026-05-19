@@ -243,25 +243,25 @@ class INET_API SctpSocket : public ISocket
      */
     void listen(bool fork = true, bool streamReset = false, uint32_t requests = 0, uint32_t messagesToPush = 0);
 
-    void listen(uint32_t requests = 0, bool fork = false, uint32_t messagesToPush = 0, bool options = false, int32_t fd = -1);
+    void listen(uint32_t requests = 0, bool fork = false, uint32_t messagesToPush = 0, bool options = false, int fd = -1);
 
     void accept(int socketId);
 
     /**
      * Active OPEN to the given remote socket.
      */
-    void connect(L3Address remoteAddress, int32_t remotePort, bool streamReset = false, int32_t prMethod = 0, uint32_t numRequests = 0);
+    void connect(L3Address remoteAddress, int remotePort, bool streamReset = false, int prMethod = 0, uint32_t numRequests = 0);
 
-    void connect(int32_t fd, L3Address remoteAddress, int32_t remotePort, uint32_t numRequests, bool options = false);
+    void connect(int fd, L3Address remoteAddress, int remotePort, uint32_t numRequests, bool options = false);
 
     /**
      * Active OPEN to the given remote socket.
      * The current implementation just calls connect() with the first address
      * of the given list. This behaviour may be improved in the future.
      */
-    void connectx(AddressVector remoteAddresses, int32_t remotePort, bool streamReset = false, int32_t prMethod = 0, uint32_t numRequests = 0);
+    void connectx(AddressVector remoteAddresses, int remotePort, bool streamReset = false, int prMethod = 0, uint32_t numRequests = 0);
 
-    void accept(int32_t assocId, int32_t fd);
+    void accept(int assocId, int fd);
 
     void acceptSocket(int newSockId);
 
