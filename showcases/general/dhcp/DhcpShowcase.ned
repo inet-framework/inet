@@ -21,7 +21,7 @@ network DhcpShowcase
             @display("p=100,50;is=s");
         }
         configurator: Ipv4NetworkConfigurator {
-                @display("p=100,125;is=s");
+            @display("p=100,125;is=s");
         }
         scenarioManager: ScenarioManager {
             @display("p=100,200;is=s");

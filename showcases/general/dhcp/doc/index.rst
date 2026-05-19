@@ -166,9 +166,10 @@ canvas.
 Configuration
 ~~~~~~~~~~~~~
 
-The ``[General]`` section sets up Ethernet bitrate, enables the interface
-table visualizer, configures computed checksums for PCAP recording, and
-attaches a :ned:`PcapRecorder` to the server:
+The ``[General]`` section configures the :ned:`Ipv4NetworkConfigurator` to
+assign the server's static IP address, sets the Ethernet bitrate, enables
+the interface table visualizer, configures computed checksums for PCAP
+recording, and attaches a :ned:`PcapRecorder` to the server:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
