@@ -1,0 +1,8 @@
+<scenario>
+    <at t="30">
+        <shutdown module="dhcpServer"/>
+    </at>
+    <at t="50">
+        <startup module="dhcpServer"/>
+    </at>
+</scenario>

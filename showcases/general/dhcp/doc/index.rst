@@ -87,7 +87,7 @@ to **REBOOTING** while waiting for the server's response.
 | INIT → SELECTING → REQUESTING → BOUND → RENEWING → REBINDING
 | INIT-REBOOT → REBOOTING → BOUND
 
-This showcase includes three configurations that illustrate different
+This showcase includes five configurations that illustrate different
 aspects of the protocol:
 
 - **BasicDHCP** — The standard four-message DORA exchange where clients
@@ -96,6 +96,11 @@ aspects of the protocol:
   during the simulation.
 - **ClientReboot** — A client is shut down and restarted mid-simulation,
   demonstrating DHCP re-acquisition after a reboot.
+- **ServerReboot** — The DHCP server is shut down and restarted, losing
+  its lease database. When clients attempt to renew, the server rejects
+  the request and clients must re-acquire addresses.
+- **Roaming** — A mobile wireless client moves between two access points,
+  each served by a separate DHCP server on a different subnet.
 
 The Model
 ---------
@@ -213,11 +218,65 @@ seconds.
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: [Config ClientReboot]
+   :end-before: [Config ServerReboot]
 
 The scenario script:
 
 .. literalinclude:: ../scenario.xml
    :language: xml
+
+ServerReboot
+~~~~~~~~~~~~
+
+This configuration demonstrates what happens when the DHCP server reboots
+and loses its lease database. The server is shut down at t=30s and
+restarted at t=50s via :ned:`ScenarioManager`. When the server comes back
+up, it has no record of previously granted leases.
+
+The lease time is set to 100 seconds, so the T1 renewal timer fires at
+t≈50s. When a client sends a unicast DHCPREQUEST to renew its lease, the
+server does not recognize it and responds with a DHCPNAK. The client then
+falls back to the INIT state and performs a full DORA exchange to obtain
+a new address.
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: [Config ServerReboot]
+   :end-before: [Config Roaming]
+
+The scenario script:
+
+.. literalinclude:: ../scenario_server_reboot.xml
+   :language: xml
+
+Roaming
+~~~~~~~
+
+This configuration uses a different network (:ned:`DhcpRoaming`) to
+demonstrate DHCP in a wireless roaming scenario. Two access points
+(``ap1``, ``ap2``) are each connected to a dedicated DHCP server on a
+separate subnet (192.168.1.0/24 and 192.168.2.0/24). A wired
+``server`` is reachable through both DHCP servers, which act as
+gateways (``forwarding = true``). Static routes on the ``server``
+ensure both subnets are reachable.
+
+.. figure:: media/roaming_network.png
+   :width: 80%
+   :align: center
+
+.. literalinclude:: ../DhcpShowcase.ned
+   :language: ned
+   :start-at: network DhcpRoaming
+
+The wireless client uses :ned:`RectangleMobility` to move back and forth
+across the playground at 20 m/s. As it moves out of range of one access
+point and into range of the other, it associates with the new AP. The
+DHCP client then obtains a new address from the DHCP server attached to
+that AP.
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: [Config Roaming]
 
 Results
 -------
@@ -274,7 +333,37 @@ throughout.
 
    Client shutdown and restart with DHCP re-acquisition.
 
-Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`DhcpShowcase.ned <../DhcpShowcase.ned>`, :download:`scenario.xml <../scenario.xml>`
+ServerReboot
+~~~~~~~~~~~~
+
+The server shuts down at t=30s and restarts at t=50s. When the clients'
+T1 timers fire around t≈50s, the server no longer recognizes their
+leases. The sequence chart shows the server responding with a DHCPNAK,
+followed by the client performing a complete DORA exchange to obtain a
+new address.
+
+.. figure:: media/server_reboot.png
+   :width: 100%
+   :align: center
+
+   Server reboot causes lease rejection and full re-acquisition.
+
+Roaming
+~~~~~~~
+
+As the client moves from one access point's coverage area to the other,
+it disassociates from the old AP and associates with the new one. The
+DHCP client detects the interface change and initiates a new DORA
+exchange with the DHCP server on the new subnet, obtaining an address
+from a different address range.
+
+.. figure:: media/roaming.png
+   :width: 100%
+   :align: center
+
+   Client roaming between two DHCP servers on different subnets.
+
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`DhcpShowcase.ned <../DhcpShowcase.ned>`, :download:`scenario.xml <../scenario.xml>`, :download:`scenario_server_reboot.xml <../scenario_server_reboot.xml>`
 
 Try It Yourself
 ---------------
