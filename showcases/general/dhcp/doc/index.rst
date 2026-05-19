@@ -149,31 +149,21 @@ The Network
 
 The network consists of a DHCP server (``dhcpServer``), an Ethernet switch
 (``switch``), and three DHCP clients (``client[0..2]``), all connected via
-100 Mbps Ethernet links. An :ned:`Ipv4NetworkConfigurator` assigns a static
-IP address (192.168.1.1/24) only to the server; client interfaces are left
-unconfigured so they obtain their addresses via DHCP. An
-:ned:`IntegratedCanvasVisualizer` displays the acquired addresses on the
-canvas.
+100 Mbps Ethernet links. An :ned:`IntegratedCanvasVisualizer` displays the
+acquired addresses on the canvas.
 
 .. figure:: media/network.png
    :width: 80%
    :align: center
 
-.. literalinclude:: ../DhcpShowcase.ned
-   :language: ned
-   :end-before: network DhcpRoaming
-
-Configuration
-~~~~~~~~~~~~~
-
-The ``[General]`` section configures the :ned:`Ipv4NetworkConfigurator` to
-assign the server's static IP address, sets the Ethernet bitrate, enables
-the interface table visualizer, configures computed checksums for PCAP
-recording, and attaches a :ned:`PcapRecorder` to the server:
+The :ned:`Ipv4NetworkConfigurator` assigns a static IP address only to the
+server — client interfaces are left unconfigured so they obtain addresses
+via DHCP:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :end-before: [Config BasicDHCP]
+   :start-at: [General]
+   :end-at: netmask
 
 BasicDHCP
 ~~~~~~~~~
@@ -271,10 +261,6 @@ ensure both subnets are reachable.
 .. figure:: media/roaming_network.png
    :width: 80%
    :align: center
-
-.. literalinclude:: ../DhcpShowcase.ned
-   :language: ned
-   :start-at: network DhcpRoaming
 
 The wireless client uses :ned:`RectangleMobility` to move back and forth
 between the two access points at 20 m/s. As it moves out of range of one access
