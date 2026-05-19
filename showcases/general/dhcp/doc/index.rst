@@ -33,13 +33,13 @@ forward DHCP broadcasts unless a DHCP relay agent is configured.
 
 The DHCP server is configured with a pool of IP addresses that it can
 hand out. It derives the available range from its own interface address and
-subnet mask, and maintains a table of which addresses are currently in use,
-by which client (identified by MAC address), and for how long.
+subnet mask, and maintains a table of which addresses are currently in use
+and by which client (identified by MAC address).
 
 A DHCP address assignment is called a *lease* — the server does not give
 the address to the client permanently, but grants it for a limited duration
-(the *lease time*). This ensures that addresses are eventually returned to
-the pool if a client leaves the network without explicitly releasing them.
+(the *lease time*). In a real network this ensures that addresses are eventually returned to
+the pool if a client leaves without explicitly releasing them.
 
 The initial address acquisition uses a four-message exchange known as
 **DORA**:
@@ -112,6 +112,8 @@ INET provides two application modules for DHCP:
 
 - :ned:`DhcpServer` — Listens on a network interface, manages the address
   pool, and responds to client requests. Key parameters:
+  :par:`interface` (interface to serve DHCP on; if omitted, uses the only
+  non-loopback interface),
   :par:`numReservedAddresses` (number of addresses to skip counting from
   the network address; with a server on 192.168.1.0/24 and
   ``numReservedAddresses=10``, the pool starts at 192.168.1.10),
@@ -124,7 +126,9 @@ INET provides two application modules for DHCP:
      The INET DHCP server does not expire leases on its own — once an
      address is leased, it remains marked as in-use until the server is
      restarted. Lease expiration relies on the client performing timely
-     renewals.
+     renewals. Additionally, the client does not send a DHCPRELEASE
+     message on shutdown; addresses are reclaimed only when the lease
+     expires or the server restarts.
 
 - :ned:`DhcpClient` — Runs the DHCP client state machine on a host
   interface. Its main parameter is :par:`startTime`, which controls when
@@ -156,6 +160,7 @@ canvas.
 
 .. literalinclude:: ../DhcpShowcase.ned
    :language: ned
+   :end-before: network DhcpRoaming
 
 Configuration
 ~~~~~~~~~~~~~
@@ -230,7 +235,7 @@ ServerReboot
 
 This configuration demonstrates what happens when the DHCP server reboots
 and loses its lease database. The server is shut down at t=30s and
-restarted at t=50s via :ned:`ScenarioManager`. When the server comes back
+restarted at t=40s via :ned:`ScenarioManager`. When the server comes back
 up, it has no record of previously granted leases.
 
 The lease time is set to 100 seconds, so the T1 renewal timer fires at
@@ -271,8 +276,10 @@ ensure both subnets are reachable.
 The wireless client uses :ned:`RectangleMobility` to move back and forth
 across the playground at 20 m/s. As it moves out of range of one access
 point and into range of the other, it associates with the new AP. The
-DHCP client then obtains a new address from the DHCP server attached to
-that AP.
+:ned:`DhcpClient` subscribes to the link-layer association signal; when a
+new association is detected it unbinds the current lease and restarts the
+DORA exchange, obtaining an address from the DHCP server on the new
+subnet.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -336,7 +343,7 @@ throughout.
 ServerReboot
 ~~~~~~~~~~~~
 
-The server shuts down at t=30s and restarts at t=50s. When the clients'
+The server shuts down at t=30s and restarts at t=40s. When the clients'
 T1 timers fire around t≈50s, the server no longer recognizes their
 leases. The sequence chart shows the server responding with a DHCPNAK,
 followed by the client performing a complete DORA exchange to obtain a

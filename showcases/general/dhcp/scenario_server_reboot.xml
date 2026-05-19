@@ -2,7 +2,7 @@
     <at t="30">
         <shutdown module="dhcpServer"/>
     </at>
-    <at t="50">
+    <at t="40">
         <startup module="dhcpServer"/>
     </at>
 </scenario>
