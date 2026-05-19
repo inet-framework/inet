@@ -21,8 +21,6 @@ network DhcpShowcase
             @display("p=100,50;is=s");
         }
         configurator: Ipv4NetworkConfigurator {
-            parameters:
-                config = xml("<config><interface hosts='dhcpServer' address='192.168.1.1' netmask='255.255.255.0'/></config>");
                 @display("p=100,125;is=s");
         }
         scenarioManager: ScenarioManager {

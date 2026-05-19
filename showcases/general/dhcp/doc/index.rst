@@ -118,7 +118,8 @@ INET provides two application modules for DHCP:
   the network address; with a server on 192.168.1.0/24 and
   ``numReservedAddresses=10``, the pool starts at 192.168.1.10),
   :par:`maxNumClients` (maximum number of concurrent leases),
-  :par:`gateway` (default gateway announced to clients), and
+  :par:`gateway` (default gateway announced to clients; if left empty,
+  defaults to the server's own interface address), and
   :par:`leaseTime`.
 
   .. note::
@@ -127,8 +128,8 @@ INET provides two application modules for DHCP:
      address is leased, it remains marked as in-use until the server is
      restarted. Lease expiration relies on the client performing timely
      renewals. Additionally, the client does not send a DHCPRELEASE
-     message on shutdown; addresses are reclaimed only when the lease
-     expires or the server restarts.
+     message on shutdown; addresses are reclaimed only when the server
+     restarts.
 
 - :ned:`DhcpClient` — Runs the DHCP client state machine on a host
   interface. Its main parameter is :par:`startTime`, which controls when
@@ -213,8 +214,9 @@ ClientReboot
 
 This configuration demonstrates how a DHCP client re-acquires its address
 after a reboot. It uses a :ned:`ScenarioManager` to shut down ``client[0]``
-at t=30s and restart it at t=60s. When the client comes back up, it retains
-its lease state from before the shutdown and enters the INIT-REBOOT state:
+at t=30s and restart it at t=60s. When the client comes back up, it still
+holds its lease object in memory (the application module's internal state
+survives the stop/start lifecycle) and enters the INIT-REBOOT state:
 instead of a full DORA exchange, it broadcasts a DHCPREQUEST for its
 previously held address and the server responds with a DHCPACK (or a
 DHCPNAK if the address is no longer valid). The lease time is set to 120
@@ -274,7 +276,7 @@ ensure both subnets are reachable.
    :start-at: network DhcpRoaming
 
 The wireless client uses :ned:`RectangleMobility` to move back and forth
-across the playground at 20 m/s. As it moves out of range of one access
+between the two access points at 20 m/s. As it moves out of range of one access
 point and into range of the other, it associates with the new AP. The
 :ned:`DhcpClient` subscribes to the link-layer association signal; when a
 new association is detected it unbinds the current lease and restarts the
@@ -410,3 +412,7 @@ Discussion
 
 Use `this page <https://github.com/inet-framework/inet-showcases/issues/TODO>`__ in
 the GitHub issue tracker for commenting on this showcase.
+
+.. TODO: The DhcpServer does not expose a parameter for the DNS server address
+   announced to clients (the field defaults to 0.0.0.0). Consider adding a
+   ``dns`` parameter and documenting it in the parameter list above.
