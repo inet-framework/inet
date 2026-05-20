@@ -519,13 +519,7 @@ std::string EthernetMacBase::getDatarateString() const
 {
     if (transmissionChannel == nullptr)
         return "not connected";
-    double dr = transmissionChannel->getNominalDatarate();
-    char buf[40];
-    if (dr >= 1e9) sprintf(buf, "%gGbps", dr / 1e9);
-    else if (dr >= 1e6) sprintf(buf, "%gMbps", dr / 1e6);
-    else if (dr >= 1e3) sprintf(buf, "%gkbps", dr / 1e3);
-    else sprintf(buf, "%gbps", dr);
-    return buf;
+    return cValue::formatQuantityInBestUnit(transmissionChannel->getNominalDatarate(), "bps");
 }
 
 std::string EthernetMacBase::resolveDirective(char directive) const 

@@ -7,9 +7,6 @@
 
 #include "inet/linklayer/ppp/Ppp.h"
 
-#include <stdio.h>
-#include <string.h>
-
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
@@ -61,13 +58,7 @@ void Ppp::initialize(int stage)
         WATCH_EXPR("txQueueLen", txQueue ? txQueue->getNumPackets() : 0);
         WATCH_LAMBDA("datarate", [this]() -> std::string {
             if (datarateChannel == nullptr) return "not connected";
-            double dr = datarateChannel->getNominalDatarate();
-            char buf[40];
-            if (dr >= 1e9) sprintf(buf, "%gGbps", dr / 1e9);
-            else if (dr >= 1e6) sprintf(buf, "%gMbps", dr / 1e6);
-            else if (dr >= 1e3) sprintf(buf, "%gkbps", dr / 1e3);
-            else sprintf(buf, "%gbps", dr);
-            return buf;
+            return cValue::formatQuantityInBestUnit(datarateChannel->getNominalDatarate(), "bps");
         });
 
         subscribe(PRE_MODEL_CHANGE, this);
@@ -319,19 +310,8 @@ std::string Ppp::resolveDirective(char directive) const
         case 'b':
             if (datarateChannel == nullptr)
                 return "not connected";
-            else {
-                char datarateText[40];
-                double datarate = datarateChannel->getNominalDatarate();
-                if (datarate >= 1e9)
-                    sprintf(datarateText, "%gGbps", datarate / 1e9);
-                else if (datarate >= 1e6)
-                    sprintf(datarateText, "%gMbps", datarate / 1e6);
-                else if (datarate >= 1e3)
-                    sprintf(datarateText, "%gkbps", datarate / 1e3);
-                else
-                    sprintf(datarateText, "%gbps", datarate);
-                return datarateText;
-            }
+            else
+                return cValue::formatQuantityInBestUnit(datarateChannel->getNominalDatarate(), "bps");
         default:
             return MacProtocolBase::resolveDirective(directive);
     }
