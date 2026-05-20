@@ -152,8 +152,9 @@ The network consists of a DHCP server (``dhcpServer``), an Ethernet switch
 100 Mbps Ethernet links. An :ned:`IntegratedCanvasVisualizer` displays the
 acquired addresses on the canvas.
 
+The network topology:
+
 .. figure:: media/network.png
-   :width: 80%
    :align: center
 
 The :ned:`Ipv4NetworkConfigurator` assigns a static IP address only to the
@@ -192,16 +193,12 @@ The following sequence chart shows the DORA exchange between one of the
 clients and the server:
 
 .. figure:: media/dora_sequence_chart.png
-   :width: 100%
    :align: center
 
-   DHCP DORA exchange between client and server.
+The interface table visualizer displays the acquired addresses:
 
 .. figure:: media/interface_tables.png
-   :width: 80%
    :align: center
-
-   Interface table visualization after DHCP address assignment.
 
 LeaseRenewal
 ~~~~~~~~~~~~
@@ -222,11 +219,10 @@ triggering a unicast DHCPREQUEST to the server. The server responds with
 a DHCPACK, extending the lease. This renewal cycle repeats throughout
 the simulation.
 
-.. figure:: media/lease_renewal.png
-   :width: 100%
-   :align: center
+The sequence chart shows the lease renewal exchange:
 
-   Lease renewal exchange visible in the sequence chart.
+.. figure:: media/lease_renewal.png
+   :align: center
 
 ClientReboot
 ~~~~~~~~~~~~
@@ -259,11 +255,10 @@ The server confirms with a DHCPACK and the client receives the same IP
 address as before the reboot. The other two clients remain unaffected
 throughout.
 
-.. figure:: media/client_reboot.png
-   :width: 100%
-   :align: center
+The sequence chart shows the client shutdown and restart:
 
-   Client shutdown and restart with DHCP re-acquisition.
+.. figure:: media/client_reboot.png
+   :align: center
 
 ServerReboot
 ~~~~~~~~~~~~
@@ -295,11 +290,10 @@ leases. The sequence chart shows the server responding with a DHCPNAK,
 followed by the client performing a complete DORA exchange to obtain a
 new address.
 
-.. figure:: media/server_reboot.png
-   :width: 100%
-   :align: center
+The sequence chart shows the server reboot and subsequent lease rejection:
 
-   Server reboot causes lease rejection and full re-acquisition.
+.. figure:: media/server_reboot.png
+   :align: center
 
 Roaming
 ~~~~~~~
@@ -312,8 +306,9 @@ separate subnet (192.168.1.0/24 and 192.168.2.0/24). A wired
 gateways (``forwarding = true``). Static routes on the ``server``
 ensure both subnets are reachable.
 
+The network topology for the roaming scenario:
+
 .. figure:: media/roaming_network.png
-   :width: 80%
    :align: center
 
 The wireless client uses :ned:`RectangleMobility` to move back and forth
@@ -333,11 +328,10 @@ DHCP client detects the interface change and initiates a new DORA
 exchange with the DHCP server on the new subnet, obtaining an address
 from a different address range.
 
-.. figure:: media/roaming.png
-   :width: 100%
-   :align: center
+The sequence chart shows the client roaming between the two DHCP servers:
 
-   Client roaming between two DHCP servers on different subnets.
+.. figure:: media/roaming.png
+   :align: center
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`DhcpShowcase.ned <../DhcpShowcase.ned>`, :download:`scenario.xml <../scenario.xml>`, :download:`scenario_server_reboot.xml <../scenario_server_reboot.xml>`
 
