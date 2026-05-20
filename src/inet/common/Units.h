@@ -1398,81 +1398,78 @@ template<typename Value> std::ostream& operator<<(std::ostream& os, const value<
     return os;
 }
 
-// TODO extract these SI prefix printing fallback mechanisms
 template<typename Value>
 std::ostream& operator<<(std::ostream& os, const value<Value, units::W>& value)
 {
-    if (value == values::W(0))
-        os << "0 W";
-    else if (value > values::pW(-1000.0) && value < values::pW(1000.0))
-        os << values::pW(value);
-    else if (value > values::nW(-1000.0) && value < values::nW(1000.0))
-        os << values::nW(value);
-    else if (value > values::uW(-1000.0) && value < values::uW(1000.0))
-        os << values::uW(value);
-    else if (value > values::mW(-1000.0) && value < values::mW(1000.0))
-        os << values::mW(value);
+    if constexpr (std::is_floating_point_v<Value>)
+        os << cValue::formatQuantityInBestUnit(value.get(), "W", 6, "");
     else {
-        os << value.get() << ' ';
-        output_unit<units::W>::fn(os);
+        if (value == values::W(0))
+            os << "0 W";
+        else if (value > values::pW(-1000.0) && value < values::pW(1000.0))
+            os << values::pW(value);
+        else if (value > values::nW(-1000.0) && value < values::nW(1000.0))
+            os << values::nW(value);
+        else if (value > values::uW(-1000.0) && value < values::uW(1000.0))
+            os << values::uW(value);
+        else if (value > values::mW(-1000.0) && value < values::mW(1000.0))
+            os << values::mW(value);
+        else {
+            os << value.get() << ' ';
+            output_unit<units::W>::fn(os);
+        }
     }
     return os;
 }
 
-// TODO extract these SI prefix printing fallback mechanisms
 template<typename Value>
 std::ostream& operator<<(std::ostream& os, const value<Value, units::Hz>& value)
 {
-    if (value >= values::GHz(1.0))
-        os << values::GHz(value);
-    else if (value >= values::MHz(1.0))
-        os << values::MHz(value);
-    else if (value >= values::kHz(1.0))
-        os << values::kHz(value);
+    if constexpr (std::is_floating_point_v<Value>)
+        os << cValue::formatQuantityInBestUnit(value.get(), "Hz", 6, "");
     else {
-        os << value.get() << ' ';
-        output_unit<units::Hz>::fn(os);
+        if (value >= values::GHz(1.0))
+            os << values::GHz(value);
+        else if (value >= values::MHz(1.0))
+            os << values::MHz(value);
+        else if (value >= values::kHz(1.0))
+            os << values::kHz(value);
+        else {
+            os << value.get() << ' ';
+            output_unit<units::Hz>::fn(os);
+        }
     }
     return os;
 }
 
-// TODO extract these SI prefix printing fallback mechanisms
 template<typename Value>
 std::ostream& operator<<(std::ostream& os, const value<Value, units::bps>& value)
 {
-    if (value >= values::Gbps(1.0))
-        os << values::Gbps(value);
-    else if (value >= values::Mbps(1.0))
-        os << values::Mbps(value);
-    else if (value >= values::kbps(1.0))
-        os << values::kbps(value);
+    if constexpr (std::is_floating_point_v<Value>)
+        os << cValue::formatQuantityInBestUnit(value.get(), "bps", 6, "");
     else {
-        os << value.get() << ' ';
-        output_unit<units::bps>::fn(os);
+        if (value >= values::Gbps(1.0))
+            os << values::Gbps(value);
+        else if (value >= values::Mbps(1.0))
+            os << values::Mbps(value);
+        else if (value >= values::kbps(1.0))
+            os << values::kbps(value);
+        else {
+            os << value.get() << ' ';
+            output_unit<units::bps>::fn(os);
+        }
     }
     return os;
 }
 
 inline std::ostream& operator<<(std::ostream& os, const value<double, units::s>& value)
 {
-    if (value == values::s(0))
-        os << "0 s";
-    else if (value.get() == INFINITY)
+    if (value.get() == INFINITY)
         os << "inf s";
     else if (value.get() == -INFINITY)
         os << "-inf s";
-    else if (value > values::ps(-1000.0) && value < values::ps(1000.0))
-        os << values::ps(value);
-    else if (value > values::ns(-1000.0) && value < values::ns(1000.0))
-        os << values::ns(value);
-    else if (value > values::us(-1000.0) && value < values::us(1000.0))
-        os << values::us(value);
-    else if (value > values::ms(-1000.0) && value < values::ms(1000.0))
-        os << values::ms(value);
-    else {
-        os << value.get() << ' ';
-        output_unit<units::s>::fn(os);
-    }
+    else
+        os << cValue::formatQuantityInBestUnit(value.get(), "s", 6, "");
     return os;
 }
 
