@@ -165,6 +165,9 @@ via DHCP:
    :start-at: [General]
    :end-at: netmask
 
+Configurations and Results
+--------------------------
+
 BasicDHCP
 ~~~~~~~~~
 
@@ -178,13 +181,27 @@ starts its DHCP process at a random time within the first 2 seconds.
    :start-at: [Config BasicDHCP]
    :end-before: [Config LeaseRenewal]
 
-After running this configuration, all three clients should obtain IP
-addresses starting from 192.168.1.10: ``numReservedAddresses=10`` skips
-the first 10 addresses from the network address (.0–.9), so the pool
-starts at .10 and spans 50 addresses (.10–.59) as limited by
-``maxNumClients=50``. The server's own address (.1) falls within the
-reserved range. The interface table visualizer displays the acquired
-address and prefix length next to each host.
+All three clients obtain IP addresses starting from 192.168.1.10:
+``numReservedAddresses=10`` skips the first 10 addresses from the network
+address (.0–.9), so the pool starts at .10 and spans 50 addresses (.10–.59)
+as limited by ``maxNumClients=50``. The server's own address (.1) falls
+within the reserved range. The interface table visualizer displays the
+acquired address and prefix length next to each host.
+
+The following sequence chart shows the DORA exchange between one of the
+clients and the server:
+
+.. figure:: media/dora_sequence_chart.png
+   :width: 100%
+   :align: center
+
+   DHCP DORA exchange between client and server.
+
+.. figure:: media/interface_tables.png
+   :width: 80%
+   :align: center
+
+   Interface table visualization after DHCP address assignment.
 
 LeaseRenewal
 ~~~~~~~~~~~~
@@ -199,6 +216,17 @@ unicast DHCPREQUEST/DHCPACK renewal exchange.
    :language: ini
    :start-at: [Config LeaseRenewal]
    :end-before: [Config ClientReboot]
+
+During the simulation, the T1 timer fires at t≈30s for each client,
+triggering a unicast DHCPREQUEST to the server. The server responds with
+a DHCPACK, extending the lease. This renewal cycle repeats throughout
+the simulation.
+
+.. figure:: media/lease_renewal.png
+   :width: 100%
+   :align: center
+
+   Lease renewal exchange visible in the sequence chart.
 
 ClientReboot
 ~~~~~~~~~~~~
@@ -222,6 +250,20 @@ The scenario script:
 
 .. literalinclude:: ../scenario.xml
    :language: xml
+
+At t=30s, ``client[0]`` is shut down and its interface is deconfigured.
+At t=60s, the client restarts. Because the client still holds its lease
+internally, it enters the INIT-REBOOT state and broadcasts a DHCPREQUEST
+for its previously held address — skipping the Discover and Offer steps.
+The server confirms with a DHCPACK and the client receives the same IP
+address as before the reboot. The other two clients remain unaffected
+throughout.
+
+.. figure:: media/client_reboot.png
+   :width: 100%
+   :align: center
+
+   Client shutdown and restart with DHCP re-acquisition.
 
 ServerReboot
 ~~~~~~~~~~~~
@@ -247,6 +289,18 @@ The scenario script:
 .. literalinclude:: ../scenario_server_reboot.xml
    :language: xml
 
+The server shuts down at t=30s and restarts at t=40s. When the clients'
+T1 timers fire around t≈50s, the server no longer recognizes their
+leases. The sequence chart shows the server responding with a DHCPNAK,
+followed by the client performing a complete DORA exchange to obtain a
+new address.
+
+.. figure:: media/server_reboot.png
+   :width: 100%
+   :align: center
+
+   Server reboot causes lease rejection and full re-acquisition.
+
 Roaming
 ~~~~~~~
 
@@ -263,89 +317,15 @@ ensure both subnets are reachable.
    :align: center
 
 The wireless client uses :ned:`RectangleMobility` to move back and forth
-between the two access points at 20 m/s. As it moves out of range of one access
-point and into range of the other, it associates with the new AP. The
-:ned:`DhcpClient` subscribes to the link-layer association signal; when a
-new association is detected it unbinds the current lease and restarts the
-DORA exchange, obtaining an address from the DHCP server on the new
-subnet.
+between the two access points at 20 m/s. As it moves out of range of one
+access point and into range of the other, it associates with the new AP.
+The :ned:`DhcpClient` subscribes to the link-layer association signal; when
+a new association is detected it unbinds the current lease and restarts the
+DORA exchange, obtaining an address from the DHCP server on the new subnet.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: [Config Roaming]
-
-Results
--------
-
-BasicDHCP
-~~~~~~~~~
-
-The following sequence chart shows the DORA exchange between one of the
-clients and the server:
-
-.. figure:: media/dora_sequence_chart.png
-   :width: 100%
-   :align: center
-
-   DHCP DORA exchange between client and server.
-
-The interface table visualizer displays the addresses acquired by each
-client:
-
-.. figure:: media/interface_tables.png
-   :width: 80%
-   :align: center
-
-   Interface table visualization after DHCP address assignment.
-
-LeaseRenewal
-~~~~~~~~~~~~
-
-During the simulation, the T1 timer fires at t≈30s for each client,
-triggering a unicast DHCPREQUEST to the server. The server responds with
-a DHCPACK, extending the lease. This renewal cycle repeats throughout
-the simulation.
-
-.. figure:: media/lease_renewal.png
-   :width: 100%
-   :align: center
-
-   Lease renewal exchange visible in the sequence chart.
-
-ClientReboot
-~~~~~~~~~~~~
-
-At t=30s, ``client[0]`` is shut down and its interface is deconfigured.
-At t=60s, the client restarts. Because the client still holds its lease
-internally, it enters the INIT-REBOOT state and broadcasts a DHCPREQUEST
-for its previously held address — skipping the Discover and Offer steps.
-The server confirms with a DHCPACK and the client receives the same IP
-address as before the reboot. The other two clients remain unaffected
-throughout.
-
-.. figure:: media/client_reboot.png
-   :width: 100%
-   :align: center
-
-   Client shutdown and restart with DHCP re-acquisition.
-
-ServerReboot
-~~~~~~~~~~~~
-
-The server shuts down at t=30s and restarts at t=40s. When the clients'
-T1 timers fire around t≈50s, the server no longer recognizes their
-leases. The sequence chart shows the server responding with a DHCPNAK,
-followed by the client performing a complete DORA exchange to obtain a
-new address.
-
-.. figure:: media/server_reboot.png
-   :width: 100%
-   :align: center
-
-   Server reboot causes lease rejection and full re-acquisition.
-
-Roaming
-~~~~~~~
 
 As the client moves from one access point's coverage area to the other,
 it disassociates from the old AP and associates with the new one. The
