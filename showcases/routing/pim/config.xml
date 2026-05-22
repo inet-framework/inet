@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+
+<config>
+  <interface hosts="Source" names="eth0" address="10.0.0.1" netmask="255.255.255.0"/>
+  <interface hosts="R1" names="eth0" address="10.0.0.2" netmask="255.255.255.0"/>
+  <interface hosts="R1" names="eth1" address="10.0.1.1" netmask="255.255.255.0"/>
+  <interface hosts="R1" names="eth2" address="10.0.2.1" netmask="255.255.255.0"/>
+  <interface hosts="R2" names="eth0" address="10.0.1.2" netmask="255.255.255.0"/>
+  <interface hosts="R2" names="eth1" address="10.0.3.1" netmask="255.255.255.0"/>
+  <interface hosts="R3" names="eth0" address="10.0.3.2" netmask="255.255.255.0"/>
+  <interface hosts="R3" names="eth1" address="10.0.4.1" netmask="255.255.255.0"/>
+  <interface hosts="R3" names="eth2" address="10.0.5.1" netmask="255.255.255.0"/>
+  <interface hosts="R4" names="eth0" address="10.0.2.2" netmask="255.255.255.0"/>
+  <interface hosts="R4" names="eth1" address="10.0.4.2" netmask="255.255.255.0"/>
+  <interface hosts="R4" names="eth2" address="10.0.6.1" netmask="255.255.255.0"/>
+  <interface hosts="Receiver1" names="eth0" address="10.0.5.2" netmask="255.255.255.0"/>
+  <interface hosts="Receiver2" names="eth0" address="10.0.6.2" netmask="255.255.255.0"/>
+
+  <route hosts="Source" destination="*" gateway="R1"/>
+  <route hosts="Receiver1" destination="*" gateway="R3"/>
+  <route hosts="Receiver2" destination="*" gateway="R4"/>
+
+  <route hosts="R1" destination="10.0.3.0" netmask="255.255.255.0" gateway="R2"/>
+  <route hosts="R1" destination="10.0.4.0" netmask="255.255.255.0" gateway="R2"/>
+  <route hosts="R1" destination="10.0.5.0" netmask="255.255.255.0" gateway="R2"/>
+  <route hosts="R1" destination="10.0.6.0" netmask="255.255.255.0" gateway="R4"/>
+
+  <route hosts="R2" destination="10.0.0.0" netmask="255.255.255.0" gateway="R1"/>
+  <route hosts="R2" destination="10.0.2.0" netmask="255.255.255.0" gateway="R1"/>
+  <route hosts="R2" destination="10.0.4.0" netmask="255.255.255.0" gateway="R3"/>
+  <route hosts="R2" destination="10.0.5.0" netmask="255.255.255.0" gateway="R3"/>
+  <route hosts="R2" destination="10.0.6.0" netmask="255.255.255.0" gateway="R3"/>
+
+  <route hosts="R3" destination="10.0.0.0" netmask="255.255.255.0" gateway="R2"/>
+  <route hosts="R3" destination="10.0.1.0" netmask="255.255.255.0" gateway="R2"/>
+  <route hosts="R3" destination="10.0.2.0" netmask="255.255.255.0" gateway="R4"/>
+  <route hosts="R3" destination="10.0.6.0" netmask="255.255.255.0" gateway="R4"/>
+
+  <route hosts="R4" destination="10.0.0.0" netmask="255.255.255.0" gateway="R1"/>
+  <route hosts="R4" destination="10.0.1.0" netmask="255.255.255.0" gateway="R1"/>
+  <route hosts="R4" destination="10.0.3.0" netmask="255.255.255.0" gateway="R3"/>
+  <route hosts="R4" destination="10.0.5.0" netmask="255.255.255.0" gateway="R3"/>
+
+  <multicast-group hosts="Receiver1" address="239.0.0.1"/>
+</config>
