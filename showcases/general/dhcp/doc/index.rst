@@ -189,8 +189,7 @@ as limited by ``maxNumClients=50``. The server's own address (.1) falls
 within the reserved range. The interface table visualizer displays the
 acquired address and prefix length next to each host.
 
-The following sequence chart shows the DORA exchange between one of the
-clients and the server:
+The following sequence chart shows the DORA exchange (time is non-linear):
 
 .. figure:: media/dora_sequence_chart.png
    :align: center
@@ -219,7 +218,7 @@ triggering a unicast DHCPREQUEST to the server. The server responds with
 a DHCPACK, extending the lease. This renewal cycle repeats throughout
 the simulation.
 
-The sequence chart shows the lease renewal exchange:
+The following sequence chart shows the lease renewal exchange (time is non-linear):
 
 .. figure:: media/lease_renewal.png
    :align: center
@@ -255,7 +254,7 @@ The server confirms with a DHCPACK and the client receives the same IP
 address as before the reboot. The other two clients remain unaffected
 throughout.
 
-The sequence chart shows the client shutdown and restart:
+The following sequence chart shows the client shutdown and restart (time is non-linear):
 
 .. figure:: media/client_reboot.png
    :align: center
@@ -290,7 +289,7 @@ leases. The sequence chart shows the server responding with a DHCPNAK,
 followed by the client performing a complete DORA exchange to obtain a
 new address.
 
-The sequence chart shows the server reboot and subsequent lease rejection:
+The following sequence chart shows the server reboot and subsequent lease rejection (time is non-linear):
 
 .. figure:: media/server_reboot.png
    :align: center
@@ -328,7 +327,7 @@ DHCP client detects the interface change and initiates a new DORA
 exchange with the DHCP server on the new subnet, obtaining an address
 from a different address range.
 
-The sequence chart shows the client roaming between the two DHCP servers:
+The following sequence chart shows the client roaming between the two DHCP servers (time is non-linear):
 
 .. figure:: media/roaming.png
    :align: center
