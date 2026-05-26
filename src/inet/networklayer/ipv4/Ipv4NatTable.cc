@@ -41,13 +41,12 @@ void Ipv4NatTable::initialize(int stage)
         networkProtocol.reference(this, "networkProtocolModule", true);
 
         WATCH(natEntries);
+        WATCH_EXPR("numNatEntries", natEntries.size());
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         parseConfig();
         if (natEntries.size() != 0)
             networkProtocol->registerHook(0, this);
-        auto text = std::to_string(natEntries.size()) + " entries";
-        getDisplayString().setTagArg("t", 0, text.c_str());
     }
 }
 

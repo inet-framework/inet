@@ -166,6 +166,10 @@ void Mrp::initialize(int stage)
         WATCH(shortTestInterval);
         WATCH(topologyChangeInterval);
         WATCH(testFrameSent);
+        WATCH_EXPR("roleStr", getMrpRoleName(role, true));
+        WATCH_EXPR("nodeStateStr", getNodeStateName(nodeState));
+        WATCH_EXPR("ringStateStr", getRingStateName(ringState));
+        WATCH_EXPR("localManagerPrio", (int)localManagerPrio);
 
         switchModule->subscribe(interfaceStateChangedSignal, this);
     }

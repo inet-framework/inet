@@ -12,6 +12,15 @@ namespace inet {
 
 Define_Module(QuicDiscardServer);
 
+void QuicDiscardServer::initialize(int stage)
+{
+    ApplicationBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL) {
+        WATCH_EXPR("numSessions", clientSockets.size());
+        WATCH(numReceived);
+    }
+}
+
 QuicDiscardServer::~QuicDiscardServer()
 {
     for (QuicSocket *clientSocket : clientSockets) {
@@ -68,6 +77,7 @@ void QuicDiscardServer::socketDataArrived(QuicSocket* socket, Packet *packet)
     auto data = packet->popAtFront();
     static simsignal_t bytesReceivedSignal = registerSignal("bytesReceived");
     emit(bytesReceivedSignal, (long)B(data->getChunkLength()).get());
+    numReceived++;
     EV_DEBUG << data << " received and discarded over socket " << socket->getSocketId() << endl;
     delete packet;
 }

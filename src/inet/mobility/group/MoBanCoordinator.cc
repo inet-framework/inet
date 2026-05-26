@@ -111,6 +111,7 @@ void MoBanCoordinator::initialize(int stage)
         WATCH(numPostures);
         WATCH(patternLength);
         WATCH(speed);
+        WATCH_EXPR("postureName", currentPosture->getPostureName());
     }
 }
 

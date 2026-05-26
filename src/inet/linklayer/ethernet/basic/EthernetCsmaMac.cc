@@ -55,6 +55,9 @@ void EthernetCsmaMac::initialize(int stage)
         WATCH(carrierSense);
         WATCH(collision);
         WATCH(numRetries);
+        WATCH(numFramesSent);
+        WATCH(numFramesReceived);
+        WATCH_EXPR("fsmState", fsm.getStateName());
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         fsm.setState(IDLE, "IDLE");
@@ -72,14 +75,6 @@ void EthernetCsmaMac::finish()
     emit(carrierSenseChangedSignal, (int)carrierSense);
     emit(collisionChangedSignal, (int)collision);
     emit(stateChangedSignal, fsm.getState());
-}
-
-void EthernetCsmaMac::refreshDisplay() const
-{
-    auto& displayString = getDisplayString();
-    std::stringstream stream;
-    stream << fsm.getStateName();
-    displayString.setTagArg("t", 0, stream.str().c_str());
 }
 
 void EthernetCsmaMac::configureNetworkInterface()
@@ -346,6 +341,7 @@ void EthernetCsmaMac::startTransmission()
 void EthernetCsmaMac::endTransmission()
 {
     EV_DEBUG << "Ending frame transmission" << EV_FIELD(currentTxFrame) << EV_ENDL;
+    numFramesSent++;
     delete currentTxFrame;
     currentTxFrame = nullptr;
     numRetries = 0;
@@ -400,6 +396,7 @@ void EthernetCsmaMac::processReceivedFrame(Packet *packet)
             packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
             if (networkInterface)
                 packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
+            numFramesReceived++;
             sendUp(packet);
         }
     }

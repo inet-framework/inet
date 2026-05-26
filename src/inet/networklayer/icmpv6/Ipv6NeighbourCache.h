@@ -158,6 +158,9 @@ class INET_API Ipv6NeighbourCache
 
     DefaultRouterList& getDefaultRouterList() { return defaultRouterList; }
 
+    /** Returns the number of entries in the neighbour cache. */
+    size_t getNumNeighbours() const { return neighbourMap.size(); }
+
     /** For iteration on the internal std::map */
     NeighbourMap::iterator begin() { return neighbourMap.begin(); }
 

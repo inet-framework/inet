@@ -27,6 +27,18 @@ void NodeStatus::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         state = getStateByName(par("initialStatus"));
         WATCH(state);
+        WATCH_EXPR("stateStr", getStateName(state));
+    }
+}
+
+const char *NodeStatus::getStateName(NodeStatus::State state)
+{
+    switch (state) {
+        case UP: return "up";
+        case DOWN: return "down";
+        case GOING_UP: return "going up";
+        case GOING_DOWN: return "going down";
+        default: throw cRuntimeError("Unknown status");
     }
 }
 

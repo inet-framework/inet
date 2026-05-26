@@ -58,6 +58,8 @@ class INET_API Gpsr : public RoutingProtocolBase, public cListener, public Netfi
     int positionByteLength = -1;
 
     // internal
+    long numSent = 0;
+    long numReceived = 0;
     cMessage *beaconTimer = nullptr;
     cMessage *purgeNeighborsTimer = nullptr;
     GpsrNeighborTable neighborTable;

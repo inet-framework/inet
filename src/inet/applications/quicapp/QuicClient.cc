@@ -13,6 +13,15 @@ namespace inet {
 
 Define_Module(QuicClient);
 
+void QuicClient::initialize(int stage)
+{
+    ApplicationBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL) {
+        WATCH(numSent);
+        WATCH(numReceived);
+    }
+}
+
 void QuicClient::handleStartOperation(LifecycleOperation *operation)
 {
     //EV_DEBUG << "initialize QUIC Client stage " << stage << endl;
@@ -72,6 +81,7 @@ void QuicClient::socketEstablished(QuicSocket *socket)
     auto& tags2 = packet->getTags();
     tags2.addTagIfAbsent<QuicStreamReq>()->setStreamID(0);
     socket->send(packet);
+    numSent += 2;
 
     socket->close();
 }
@@ -79,6 +89,7 @@ void QuicClient::socketEstablished(QuicSocket *socket)
 void QuicClient::socketDataArrived(QuicSocket* socket, Packet *packet)
 {
     EV_DEBUG << "Data arrived" << endl;
+    numReceived++;
     delete packet;
 }
 

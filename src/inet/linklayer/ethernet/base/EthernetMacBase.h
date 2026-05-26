@@ -174,6 +174,7 @@ class INET_API EthernetMacBase : public MacProtocolBase, public queueing::IActiv
     // display
     virtual void refreshDisplay() const override;
 
+    virtual std::string getDatarateString() const;
     virtual std::string resolveDirective(char directive) const override;
 
     // model change related functions

@@ -37,6 +37,8 @@ class INET_API EigrpSplitter : protected cListener, public SimpleModule
     virtual ~EigrpSplitter();
 
   protected:
+    long numSent = 0;
+    long numReceived = 0;
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

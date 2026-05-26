@@ -26,6 +26,7 @@ class QuicTrafficgen : public ApplicationBase, public QuicSocket::ICallback
     protected:
       QuicSocket socket;
 
+      virtual void initialize(int stage) override;
       virtual void handleMessageWhenUp(cMessage *msg) override;
 
       virtual void handleStartOperation(LifecycleOperation *operation) override;
@@ -71,6 +72,7 @@ class QuicTrafficgen : public ApplicationBase, public QuicSocket::ICallback
       void handleMessageFromGenerator(cMessage *msg);
       void handleGeneratorInfo(TrafficgenInfo* msg);
       void sendGeneratorControl(uint8_t controlMessageType);
+      std::string statusStr;
       void setStatusString(const char *s);
       void close();
 };

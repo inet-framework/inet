@@ -24,6 +24,8 @@ class INET_API TunnelApp : public ApplicationBase, public UdpSocket::ICallback, 
     const char *destinationAddress = nullptr;
     int destinationPort = -1;
     int localPort = -1;
+    long numSent = 0;
+    long numReceived = 0;
 
     Ipv4Socket ipv4Socket;
     UdpSocket serverSocket;

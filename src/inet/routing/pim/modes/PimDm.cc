@@ -51,6 +51,9 @@ void PimDm::initialize(int stage)
         sourceActiveInterval = par("sourceActiveInterval");
         stateRefreshInterval = par("stateRefreshInterval");
         assertTime = par("assertTime");
+        WATCH(numSent);
+        WATCH(numReceived);
+        WATCH_EXPR("numRoutes", routes.size());
     }
 }
 
@@ -152,6 +155,7 @@ void PimDm::handleMessageWhenUp(cMessage *msg)
         }
     }
     else {
+        numReceived++;
         Packet *pk = check_and_cast<Packet *>(msg);
         const auto& pkt = pk->peekAtFront<PimPacket>();
         if (pkt == nullptr)
@@ -1673,6 +1677,7 @@ void PimDm::sendToIP(Packet *packet, Ipv4Address srcAddr, Ipv4Address destAddr, 
     addresses->setSrcAddress(srcAddr);
     addresses->setDestAddress(destAddr);
     packet->addTagIfAbsent<HopLimitReq>()->setHopLimit(1);
+    numSent++;
     send(packet, "ipOut");
 }
 

@@ -42,6 +42,7 @@ void StpBase::initialize(int stage)
 
         WATCH(bridgeAddress);
         WATCH(numPorts);
+        WATCH_EXPR("stpStatus", getStpStatusString());
     }
 }
 
@@ -69,6 +70,17 @@ void StpBase::sendOut(Packet *packet, int interfaceId, const MacAddress& destAdd
     macAddressReq->setSrcAddress(bridgeAddress);
     macAddressReq->setDestAddress(destAddress);
     send(packet, "relayOut");
+}
+
+std::string StpBase::getStpStatusString() const
+{
+    if (!isUp())
+        return "down";
+    int rootInterfaceId = getRootInterfaceId();
+    if (rootInterfaceId == -1)
+        return "ROOT";
+    const Ieee8021dInterfaceData *rootPort = getPortInterfaceData(rootInterfaceId);
+    return "cost: " + std::to_string(rootPort->getRootPathCost());
 }
 
 void StpBase::colorLink(NetworkInterface *ie, bool forwarding) const

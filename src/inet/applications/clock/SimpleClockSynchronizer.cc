@@ -18,6 +18,7 @@ void SimpleClockSynchronizer::initialize(int stage)
 {
     ApplicationBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        WATCH(numSynchronizations);
         synhronizationTimer = new cMessage("SynchronizationTimer");
         masterClock.reference(this, "masterClockModule", true);
         slaveClock.reference(this, "slaveClockModule", true);
@@ -52,6 +53,7 @@ static double getCurrentRelativeTickLength(IClock *clock)
 
 void SimpleClockSynchronizer::synchronizeSlaveClock()
 {
+    numSynchronizations++;
     auto clockTime = masterClock->getClockTime() + synchronizationClockTimeErrorParameter->doubleValue();
     ppm idealOscillatorCompensation = unit(getCurrentRelativeTickLength(slaveClock.get()) / getCurrentRelativeTickLength(masterClock.get()) - 1);
     ppm oscillatorCompensationError = ppm(synchronizationOscillatorCompensationErrorParameter->doubleValue());

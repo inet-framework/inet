@@ -23,7 +23,11 @@ void Ipv4FlatNetworkConfigurator::initialize(int stage)
 {
     SimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
+    if (stage == INITSTAGE_LOCAL) {
+        WATCH(numIpv4Nodes);
+        WATCH(numNonIpv4Nodes);
+    }
+    else if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
         Topology topo("topo");
         NodeInfoVector nodeInfo; // will be of size topo.nodes[]
 
@@ -199,14 +203,11 @@ void Ipv4FlatNetworkConfigurator::handleMessage(cMessage *msg)
 
 void Ipv4FlatNetworkConfigurator::setDisplayString(Topology& topo, NodeInfoVector& nodeInfo)
 {
-    int numIPNodes = 0;
+    numIpv4Nodes = 0;
     for (int i = 0; i < topo.getNumNodes(); i++)
         if (nodeInfo[i].isIPNode)
-            numIPNodes++;
-
-    // update display string
-    std::string buf = std::to_string(numIPNodes) + " Ipv4 nodes\n" + std::to_string(topo.getNumNodes() - numIPNodes) + " non-Ipv4 nodes";
-    getDisplayString().setTagArg("t", 0, buf.c_str());
+            numIpv4Nodes++;
+    numNonIpv4Nodes = topo.getNumNodes() - numIpv4Nodes;
 }
 
 } // namespace inet

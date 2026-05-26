@@ -86,8 +86,12 @@ void PimSm::handleStartOperation(LifecycleOperation *operation)
         host->subscribe(pimNeighborChangedSignal, this);
 
         WATCH(rpAddr);
+        WATCH(numSent);
+        WATCH(numReceived);
         WATCH(gRoutes);
         WATCH(sgRoutes);
+        WATCH_EXPR("numGRoutes", gRoutes.size());
+        WATCH_EXPR("numSgRoutes", sgRoutes.size());
     }
 }
 
@@ -161,6 +165,7 @@ void PimSm::handleMessageWhenUp(cMessage *msg)
         }
     }
     else {
+        numReceived++;
         Packet *pk = check_and_cast<Packet *>(msg);
         const auto& pkt = pk->peekAtFront<PimPacket>();
         if (pkt == nullptr)
@@ -1531,6 +1536,7 @@ void PimSm::sendToIP(Packet *packet, Ipv4Address srcAddr, Ipv4Address destAddr, 
     packet->addTagIfAbsent<L3AddressReq>()->setSrcAddress(srcAddr);
     packet->addTagIfAbsent<L3AddressReq>()->setDestAddress(destAddr);
     packet->addTagIfAbsent<HopLimitReq>()->setHopLimit(ttl);
+    numSent++;
     send(packet, "ipOut");
 }
 

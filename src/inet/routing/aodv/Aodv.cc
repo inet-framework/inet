@@ -40,6 +40,8 @@ void Aodv::initialize(int stage)
     RoutingProtocolBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
+        WATCH(numSent);
+        WATCH(numReceived);
         WATCH(usingIpv6);
         WATCH(hasExternalGateway);
         WATCH(rreqId);
@@ -49,6 +51,7 @@ void Aodv::initialize(int stage)
         WATCH(lastBroadcastTime);
         WATCH(rebootTime);
         WATCH(failedNextHop);
+        WATCH_EXPR("numRoutes", routingTable->getNumRoutes());
         lastBroadcastTime = SIMTIME_ZERO;
         rebootTime = SIMTIME_ZERO;
         rreqId = sequenceNum = 0;
@@ -811,6 +814,7 @@ void Aodv::sendAODVPacket(const Ptr<AodvControlPacket>& aodvPacket, const L3Addr
     if (destAddr.isBroadcast())
         lastBroadcastTime = simTime();
 
+    numSent++;
     if (delay == 0)
         socket.send(packet);
     else {
@@ -822,7 +826,7 @@ void Aodv::sendAODVPacket(const Ptr<AodvControlPacket>& aodvPacket, const L3Addr
 
 void Aodv::socketDataArrived(UdpSocket *socket, Packet *packet)
 {
-    // process incoming packet
+    numReceived++;
     processPacket(packet);
 }
 

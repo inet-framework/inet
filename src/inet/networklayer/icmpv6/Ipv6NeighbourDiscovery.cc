@@ -81,6 +81,10 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         const char *checksumModeString = par("checksumMode");
         checksumMode = parseChecksumMode(checksumModeString, false);
+        WATCH(numSent);
+        WATCH(numReceived);
+        WATCH_EXPR("numNeighbors", neighbourCache.getNumNeighbours());
+        WATCH_EXPR("numPending", pendingQueue.getLength());
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {
         cModule *node = findContainingNode(this);
@@ -174,6 +178,7 @@ void Ipv6NeighbourDiscovery::handleMessage(cMessage *msg)
     else if (auto packet = dynamic_cast<Packet *>(msg)) {
         auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
         if (protocol == &Protocol::icmpv6) {
+            numReceived++;
             // This information will serve as input parameters to various processors.
             const auto& ndMsg = packet->peekAtFront<Icmpv6Header>();
             processNDMessage(packet, ndMsg.get()); // KLUDGE remove get()
@@ -751,6 +756,7 @@ void Ipv6NeighbourDiscovery::sendPacketToIpv6Module(Packet *msg, const Ipv6Addre
     addressReq->setDestAddress(destAddr);
     msg->addTagIfAbsent<HopLimitReq>()->setHopLimit(255);
 
+    numSent++;
     send(msg, "ipv6Out");
 }
 

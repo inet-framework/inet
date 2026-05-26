@@ -75,6 +75,7 @@ void EigrpTopologyTable<IPAddress>::initialize(int stage)
         // TODO
         WATCH(routerID);
         WATCH(routeVec);
+        WATCH_EXPR("numRoutes", routeVec.size());
         #ifdef EIGRP_TT_DEBUG
         WATCH(routeInfoVec);
         #endif

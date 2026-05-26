@@ -71,6 +71,7 @@ void PimNeighborTable::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         WATCH(neighbors);
+        WATCH_EXPR("numNeighbors", getTotalNumNeighbors());
     }
 }
 
@@ -169,6 +170,14 @@ PimNeighbor *PimNeighborTable::getNeighbor(int interfaceId, int index)
 {
     auto it = neighbors.find(interfaceId);
     return it != neighbors.end() ? it->second.at(index) : nullptr;
+}
+
+size_t PimNeighborTable::getTotalNumNeighbors() const
+{
+    size_t n = 0;
+    for (auto& p : neighbors)
+        n += p.second.size();
+    return n;
 }
 
 } // namespace inet

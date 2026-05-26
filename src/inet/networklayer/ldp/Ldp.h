@@ -119,6 +119,8 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
     cMessage *sendHelloMsg = nullptr;
 
     int maxFecid = 0;
+    long numSent = 0;
+    long numReceived = 0;
 
   protected:
     /**

@@ -108,6 +108,7 @@ void Ieee802154Mac::initialize(int stage)
         WATCH(txAttempts);
         WATCH(txPower);
         WATCH(macState);
+        WATCH_EXPR("macStatus", getMacStatusString());
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         cModule *radioModule = check_and_cast<cModule *>(radio.get());
@@ -952,43 +953,20 @@ void Ieee802154Mac::handleCrashOperation(LifecycleOperation *operation)
     MacProtocolBase::handleCrashOperation(operation);
 }
 
-void Ieee802154Mac::refreshDisplay() const
+std::string Ieee802154Mac::getMacStatusString() const
 {
-    std::stringstream os;
-    os<<"";
+#define CASE(x)   case x: return #x;
     switch (macState) {
-        case IDLE_1:
-            os<< "IDLE";
-            break;
-
-        case BACKOFF_2:
-            os<< "BACKOFF ("<<(backoffTimer->getArrivalTime()- simTime()).inUnit(SIMTIME_US) <<"us)";
-            break;
-
-        case CCA_3:
-            os<< "CCA ("<<(ccaTimer->getArrivalTime()- simTime()).inUnit(SIMTIME_US) <<"us)";
-            break;
-
-        case TRANSMITFRAME_4:
-            os<< "TRANSMITING FRAME";
-            break;
-
-        case WAITACK_5:
-            os<< "WAITING ACK (" <<(rxAckTimer->getArrivalTime()- simTime()).inUnit(SIMTIME_US) <<"us)";
-            break;
-
-        case WAITSIFS_6:
-            os<< "WAITING SIFS (" <<(sifsTimer->getArrivalTime()- simTime()).inUnit(SIMTIME_US) <<"us)";
-            break;
-
-        case TRANSMITACK_7:
-            os<< "TRANSMITING ACK";
-            break;
-        default:
-            os<< "defined state";
-            break;
+        CASE(IDLE_1);
+        case BACKOFF_2:       return "BACKOFF (" + std::to_string((backoffTimer->getArrivalTime() - simTime()).inUnit(SIMTIME_US)) + "us)";
+        case CCA_3:           return "CCA (" + std::to_string((ccaTimer->getArrivalTime() - simTime()).inUnit(SIMTIME_US)) + "us)";
+        CASE(TRANSMITFRAME_4);
+        case WAITACK_5:       return "WAITING ACK (" + std::to_string((rxAckTimer->getArrivalTime() - simTime()).inUnit(SIMTIME_US)) + "us)";
+        case WAITSIFS_6:      return "WAITING SIFS (" + std::to_string((sifsTimer->getArrivalTime() - simTime()).inUnit(SIMTIME_US)) + "us)";
+        CASE(TRANSMITACK_7);
+        default: ASSERT(false); return "?";
     }
-    getDisplayString().setTagArg("t", 0, os.str().c_str());
+#undef CASE
 }
 
 queueing::IPassivePacketSource *Ieee802154Mac::getProvider(const cGate *gate)

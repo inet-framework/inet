@@ -31,6 +31,8 @@ void ShortcutRadio::initialize(int stage)
         propagationDelay = &par("propagationDelay");
         packetLoss = &par("packetLoss");
         gate("radioIn")->setDeliverImmediately(true);
+        WATCH_EXPR("radioMode", IRadio::getRadioModeName(radioMode));
+        WATCH_EXPR("transmissionState", IRadio::getRadioTransmissionStateName(transmissionState));
     }
     // TODO INITSTAGE
     else if (stage == INITSTAGE_LINK_LAYER) {

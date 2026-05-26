@@ -63,7 +63,11 @@ class INET_API Ieee80211Mib : public SimpleModule
 
   protected:
     virtual void initialize(int stage) override;
-    virtual void refreshDisplay() const override;
+
+  public:
+    static const char *getModeStr(Ieee80211Mib::Mode mode);
+    static const char *getStationTypeStr(Ieee80211Mib::BssStationType stationType);
+    std::string getSsidStr() const;
 };
 
 } // namespace ieee80211

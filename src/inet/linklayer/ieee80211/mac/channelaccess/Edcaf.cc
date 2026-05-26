@@ -48,6 +48,8 @@ void Edcaf::initialize(int stage)
         WATCH(cw);
         WATCH(cwMin);
         WATCH(cwMax);
+        WATCH_EXPR("accessCategory", printAccessCategory(ac));
+        WATCH_EXPR("contentionState", owning ? "Owning" : contention->isContentionInProgress() ? "Contending" : "Idle");
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         auto rx = check_and_cast<IRx *>(getModuleByPath(par("rxModule")));

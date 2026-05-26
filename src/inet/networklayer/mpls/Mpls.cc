@@ -36,6 +36,8 @@ void Mpls::initialize(int stage)
         pct.reference(this, "classifierModule", true);
 
         WATCH(delay1);
+        WATCH(numReceived);
+        WATCH(numSent);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         registerService(Protocol::mpls, gate("upperLayerIn"), gate("upperLayerOut"));
@@ -46,6 +48,7 @@ void Mpls::initialize(int stage)
 void Mpls::handleMessage(cMessage *msg)
 {
     Packet *pk = check_and_cast<Packet *>(msg);
+    numReceived++;
     if (msg->getArrivalGate()->isName("lowerLayerIn")) {
         EV_INFO << "Processing message from L2: " << pk << endl;
         processPacketFromL2(pk);
@@ -285,6 +288,7 @@ void Mpls::sendToL2(Packet *msg)
 {
     ASSERT(msg->findTag<InterfaceReq>());
     ASSERT(msg->findTag<PacketProtocolTag>());
+    numSent++;
     send(msg, "lowerLayerOut");
 }
 
@@ -292,6 +296,7 @@ void Mpls::sendToL3(Packet *msg)
 {
     ASSERT(msg->findTag<InterfaceInd>());
     ASSERT(msg->findTag<DispatchProtocolReq>());
+    numSent++;
     send(msg, "upperLayerOut");
 }
 

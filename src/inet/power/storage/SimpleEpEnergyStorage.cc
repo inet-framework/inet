@@ -39,6 +39,7 @@ void SimpleEpEnergyStorage::initialize(int stage)
         scheduleTimer();
         WATCH(lastResidualCapacityUpdate);
         WATCH(residualCapacity);
+        WATCH_EXPR("energyPercent", std::to_string((int)std::round(100 * (getResidualEnergyCapacity() / getNominalEnergyCapacity()).get<unit>())) + "%");
     }
 }
 

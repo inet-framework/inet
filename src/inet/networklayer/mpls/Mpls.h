@@ -31,6 +31,8 @@ class INET_API Mpls : public SimpleModule, public DefaultProtocolRegistrationLis
 {
   protected:
     simtime_t delay1;
+    long numSent = 0;
+    long numReceived = 0;
 
     // no longer used, see comment in intialize
 //    std::vector<bool> labelIf;

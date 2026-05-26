@@ -124,8 +124,10 @@ void Dymo::initialize(int stage)
             clientAddressAndPrefixLengthPairs.push_back(std::pair<L3Address, int>(address, prefixLength));
         }
 
+        WATCH(numSent);
+        WATCH(numReceived);
         WATCH(sequenceNumber);
-        WATCH_LAMBDA("numPending", [this]() { return (int)targetAddressToRREQTimer.size(); });
+        WATCH_EXPR("numPending", targetAddressToRREQTimer.size());
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         registerProtocol(Protocol::manet, gate("ipOut"), gate("ipIn"));
@@ -380,6 +382,7 @@ void Dymo::processRreqHolddownTimer(RreqHolddownTimer *message)
 
 void Dymo::sendUdpPacket(cPacket *packet)
 {
+    numSent++;
     send(packet, "ipOut");
 }
 
@@ -411,6 +414,7 @@ void Dymo::cancelJitterTimerPacket(PacketJitterTimer *msg)
 
 void Dymo::processUdpPacket(Packet *packet)
 {
+    numReceived++;
     packet->popAtFront<UdpHeader>();
     processDymoPacket(packet, packet->peekDataAt<DymoPacket>(b(0), packet->getDataLength()));
     delete packet;

@@ -58,6 +58,9 @@ void Tcp::initialize(int stage)
         WATCH(msl);
         WATCH(tcpConnMap);
         WATCH(tcpAppConnMap);
+        WATCH_EXPR("tcpStatus", getTcpStatusString());
+        WATCH(numSegmentsSent);
+        WATCH(numSegmentsRcvd);
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
         registerService(Protocol::tcp, gate("appIn"), gate("appOut"));
@@ -117,6 +120,7 @@ void Tcp::sendToIp(Packet *segment)
 {
     Enter_Method("sendToIp");
     take(segment);
+    numSegmentsSent++;
     send(segment, "ipOut");
 }
 
@@ -151,6 +155,7 @@ void Tcp::handleLowerPacket(Packet *packet)
             return;
         }
 
+        numSegmentsRcvd++;
         // must be a TcpHeader
         auto tcpHeader = packet->peekAtFront<TcpHeader>();
 
@@ -529,20 +534,14 @@ bool Tcp::checkChecksum(Packet *tcpSegment)
     throw cRuntimeError("unknown checksum mode: %d", tcpHeader->getChecksumMode());
 }
 
-void Tcp::refreshDisplay() const
+std::string Tcp::getTcpStatusString() const
 {
-    OperationalBase::refreshDisplay();
-
-    if (getEnvir()->isExpressMode()) {
-        // in express mode, we don't bother to update the display
-        // (std::map's iteration is not very fast if map is large)
-        getDisplayString().setTagArg("t", 0, "");
-        return;
-    }
+    if (getEnvir()->isExpressMode())
+        return "";
 
     int numINIT = 0, numCLOSED = 0, numLISTEN = 0, numSYN_SENT = 0, numSYN_RCVD = 0,
-        numESTABLISHED = 0, numCLOSE_WAIT = 0, numLAST_ACK = 0, numFIN_WAIT_1 = 0,
-        numFIN_WAIT_2 = 0, numCLOSING = 0, numTIME_WAIT = 0;
+            numESTABLISHED = 0, numCLOSE_WAIT = 0, numLAST_ACK = 0, numFIN_WAIT_1 = 0,
+            numFIN_WAIT_2 = 0, numCLOSING = 0, numTIME_WAIT = 0;
 
     for (auto& elem : tcpAppConnMap) {
         int state = (elem).second->getFsmState();
@@ -624,7 +623,7 @@ void Tcp::refreshDisplay() const
     if (numTIME_WAIT > 0)
         buf2 << "time_wait:" << numTIME_WAIT << " ";
 
-    getDisplayString().setTagArg("t", 0, buf2.str().c_str());
+    return buf2.str();
 }
 
 std::ostream& operator<<(std::ostream& os, const Tcp::SockPair& sp)

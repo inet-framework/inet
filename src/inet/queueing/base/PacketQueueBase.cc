@@ -29,6 +29,8 @@ void PacketQueueBase::initialize(int stage)
         WATCH(numPulledPackets);
         WATCH(numRemovedPackets);
         WATCH(numDroppedPackets);
+        WATCH_EXPR("numPackets", getNumPackets());
+        WATCH_EXPR("totalLength", getTotalLength());
     }
 }
 

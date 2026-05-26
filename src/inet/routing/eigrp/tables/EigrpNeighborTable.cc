@@ -75,6 +75,7 @@ void EigrpNeighborTable<IPAddress>::initialize(int stage)
     SimpleModule::initialize(stage);
     if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         WATCH(neighborVec);
+        WATCH_EXPR("numNeighbors", neighborVec.size());
     }
 }
 

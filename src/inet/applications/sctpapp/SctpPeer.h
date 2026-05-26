@@ -75,6 +75,7 @@ class INET_API SctpPeer : public SimpleModule, public SctpSocket::ICallback, pub
     long packetsSent;
     long bytesRcvd;
     long packetsRcvd;
+    std::string statusStr;
     int notificationsReceived;
     int numSessions;
     int chunksAbandoned;

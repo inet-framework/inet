@@ -26,13 +26,8 @@ void InProgressFrames::initialize(int stage)
 
         WATCH(inProgressFrames);
         WATCH(droppedFrames);
+        WATCH_EXPR("numInProgress", inProgressFrames.size());
     }
-}
-
-void InProgressFrames::refreshDisplay() const
-{
-    std::string text = std::to_string(inProgressFrames.size()) + " packets";
-    getDisplayString().setTagArg("t", 0, text.c_str());
 }
 
 std::string InProgressFrames::str() const

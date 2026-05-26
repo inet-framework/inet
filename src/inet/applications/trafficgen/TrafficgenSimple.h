@@ -9,6 +9,7 @@
 #define __INET_TRAFFICGENSIMPLE_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/SimpleModule.h"
 #include "inet/applications/base/ApplicationBase.h"
 #include "TrafficgenMessage_m.h"
 
@@ -22,7 +23,7 @@ enum IndicationCode {
     TRAFFICGEN_TIMER_SEND_PACKET
 };
 
-class INET_API TrafficgenSimple : public cSimpleModule {
+class INET_API TrafficgenSimple : public SimpleModule {
     protected:
         int id;
         std::string name;
@@ -44,6 +45,7 @@ class INET_API TrafficgenSimple : public cSimpleModule {
         simtime_t statRuntime;
         int sentPktCount;
         static simsignal_t sentPktSignal;
+        std::string statusStr;
 
     public:
         TrafficgenSimple();

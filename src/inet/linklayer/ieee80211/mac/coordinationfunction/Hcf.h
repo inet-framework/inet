@@ -159,6 +159,8 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     // IProcedureCallback
     virtual void scheduleInactivityTimer(simtime_t timeout) override;
 
+    std::string getFrameSequenceInfo() const;
+
   public:
     virtual ~Hcf();
 

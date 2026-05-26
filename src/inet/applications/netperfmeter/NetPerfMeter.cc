@@ -213,6 +213,8 @@ void NetPerfMeter::initialize(int stage)
         WATCH(OnTimer);
         WATCH(OnOffCycleCounter);
         WATCH(MaxOnOffCycles);
+        WATCH_EXPR("totalSentBytes", getTotalSentBytes());
+        WATCH_EXPR("totalReceivedBytes", getTotalReceivedBytes());
         WATCH(RequestedOutboundStreams);
         WATCH(MaxInboundStreams);
         WATCH(ActualOutboundStreams);
@@ -1270,6 +1272,22 @@ opp_string NetPerfMeter::format(const char *formatString, ...)
     vsnprintf(str, sizeof(str), formatString, args);
     va_end(args);
     return opp_string(str);
+}
+
+unsigned long NetPerfMeter::getTotalSentBytes() const
+{
+    unsigned long total = 0;
+    for (auto& e : SenderStatisticsMap)
+        total += e.second->SentBytes;
+    return total;
+}
+
+unsigned long NetPerfMeter::getTotalReceivedBytes() const
+{
+    unsigned long total = 0;
+    for (auto& e : ReceiverStatisticsMap)
+        total += e.second->ReceivedBytes;
+    return total;
 }
 
 } // namespace inet

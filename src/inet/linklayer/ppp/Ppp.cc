@@ -57,6 +57,18 @@ void Ppp::initialize(int stage)
         WATCH(numRcvdOK);
         WATCH(numDroppedBitErr);
         WATCH(numDroppedIfaceDown);
+        WATCH_EXPR("numDropped", numDroppedIfaceDown + numDroppedBitErr);
+        WATCH_EXPR("txQueueLen", txQueue ? txQueue->getNumPackets() : 0);
+        WATCH_LAMBDA("datarate", [this]() -> std::string {
+            if (datarateChannel == nullptr) return "not connected";
+            double dr = datarateChannel->getNominalDatarate();
+            char buf[40];
+            if (dr >= 1e9) sprintf(buf, "%gGbps", dr / 1e9);
+            else if (dr >= 1e6) sprintf(buf, "%gMbps", dr / 1e6);
+            else if (dr >= 1e3) sprintf(buf, "%gkbps", dr / 1e3);
+            else sprintf(buf, "%gbps", dr);
+            return buf;
+        });
 
         subscribe(PRE_MODEL_CHANGE, this);
         subscribe(POST_MODEL_CHANGE, this);

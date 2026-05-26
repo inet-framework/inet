@@ -110,6 +110,10 @@ void Ldp::initialize(int stage)
         WATCH(fecDown);
         WATCH(fecList);
         WATCH(pending);
+        WATCH(numSent);
+        WATCH(numReceived);
+        WATCH_EXPR("numPeers", myPeers.size());
+        WATCH_EXPR("numFecs", fecList.size());
 
         maxFecid = 0;
         WATCH(maxFecid);
@@ -211,6 +215,7 @@ void Ldp::handleMessageWhenUp(cMessage *msg)
 
 void Ldp::socketDataArrived(UdpSocket *socket, Packet *packet)
 {
+    numReceived++;
     // process incoming udp packet
     // FIXME add implementation
     processLDPHello(check_and_cast<Packet *>(packet));
@@ -263,6 +268,7 @@ void Ldp::handleCrashOperation(LifecycleOperation *operation)
 
 void Ldp::sendToPeer(Ipv4Address dest, Packet *msg)
 {
+    numSent++;
     getPeerSocket(dest)->send(msg);
 }
 
@@ -671,6 +677,7 @@ void Ldp::socketDataArrived(TcpSocket *socket)
 
     auto queue = socket->getReadBuffer();
     while (queue->has<LdpPacket>()) {
+        numReceived++;
         auto header = queue->pop<LdpPacket>();
         processLdpPacketFromTcp(header);
     }

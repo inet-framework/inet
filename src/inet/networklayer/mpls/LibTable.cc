@@ -23,6 +23,7 @@ void LibTable::initialize(int stage)
         maxLabel = 0;
         WATCH(maxLabel);
         WATCH(lib);
+        WATCH_EXPR("numLabels", lib.size());
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         // read configuration

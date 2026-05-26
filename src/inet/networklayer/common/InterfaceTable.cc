@@ -63,6 +63,7 @@ void InterfaceTable::initialize(int stage)
         // get a pointer to the host module
         host = getContainingNode(this);
         WATCH(idToInterface);
+        WATCH_EXPR("numInterfaces", getNumInterfaces());
     }
 }
 
