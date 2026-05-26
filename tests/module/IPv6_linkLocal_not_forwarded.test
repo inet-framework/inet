@@ -1,0 +1,54 @@
+%description:
+Tests that a router drops packets with a link-local destination address
+that would require forwarding, as per RFC 4291 (link-local addresses
+have link-only scope and must not be forwarded by routers).
+
+NClientsPPP example network is used (cli -- r1 -- r2 -- r3 -- srv).
+The client sends a UDP datagram to a link-local address (fe80::dead)
+over the PPP link. Since PPP has no address resolution, the packet
+arrives at the first router (r1). Because the destination is link-local
+but not the router's own address, the router drops the packet.
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+ned-path = ../../../../examples;../../../../src
+network = inet.examples.ipv6.nclients.NClientsPPP
+sim-time-limit = 15s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+# number of client computers
+*.n = 1
+
+# udp apps: send to a link-local address that nobody owns
+**.cli[*].numApps = 1
+**.cli[*].app[0].typename = "UdpBasicApp"
+**.cli[*].app[0].destAddresses = "fe80::dead"
+**.cli[*].app[0].destPort = 1000
+**.cli[*].app[0].messageLength = 64B
+
+**.cli[*].app[0].startTime = 10s
+**.cli[*].app[0].stopTime = 11s
+**.cli[*].app[0].sendInterval = 10s
+
+**.srv.numApps = 1
+**.srv.app[0].typename = "UdpSink"
+**.srv.app[0].localPort = 1000
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+NClientsPPP.r1.ipv6.ipv6: dest address is link-local (or weaker) scope, doesn't get forwarded
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
