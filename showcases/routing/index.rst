@@ -8,5 +8,5 @@ These showcases demonstrate various aspects of simulations concerning routing:
 
    manet/doc/index
    aodvexternal/doc/index
-   pim/doc/index
+   pim2/doc/index
   
