@@ -49,6 +49,7 @@ module BMac extends MacProtocolBase like IMacProtocol
         int maxTxAttempts = default(2);     // Maximum transmission attempts per data packet, when ACKs are used
 
         @class(BMac);
+        displayStringTextFormat = default("{macStatus}\nrcvd:{nbRxDataPackets} sent:{nbTxDataPackets} pks");
         @signal[linkBroken](type=inet::Packet);
         @statistic[linkBroken](title="link break"; source=linkBroken; record=count; interpolationmode=none);
         @statistic[packetDropIncorrectlyReceived](title="packet drop: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);

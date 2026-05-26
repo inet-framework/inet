@@ -191,11 +191,6 @@ void SctpClient::close()
     socket.close();
 }
 
-void SctpClient::refreshDisplay() const
-{
-    SimpleModule::refreshDisplay();
-    getDisplayString().setTagArg("t", 0, SctpSocket::stateName(socket.getState()));
-}
 
 void SctpClient::socketEstablished(SctpSocket *socket, unsigned long int buffer)
 {

@@ -17,5 +17,6 @@ simple EigrpIpv6TopologyTable extends SimpleModule
 {
     parameters:
         @class(EigrpIpv6TopologyTable);
+        displayStringTextFormat = default("{routerID}\n{numRoutes} routes");
         @display("i=block/table");
 }

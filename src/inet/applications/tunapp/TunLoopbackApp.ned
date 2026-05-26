@@ -22,6 +22,7 @@ simple TunLoopbackApp extends SimpleModule like IApp
 {
     parameters:
         @class(TunLoopbackApp);
+        displayStringTextFormat = default("rcvd: {packetsReceived} pks\nsent: {packetsSent} pks");
         string interfaceTableModule;
         string tunInterface;
         @display("i=block/app");

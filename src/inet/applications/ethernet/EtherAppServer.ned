@@ -18,6 +18,7 @@ simple EtherAppServer extends SimpleModule
 {
     parameters:
         @class(EtherAppServer);
+        displayStringTextFormat = default("rcvd: {packetsReceived} pks\nsent: {packetsSent} pks");
         int localSAP = default(0xf1);
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation is finished

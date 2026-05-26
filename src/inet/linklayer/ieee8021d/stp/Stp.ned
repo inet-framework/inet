@@ -67,6 +67,7 @@ simple Stp extends SimpleModule like ISpanningTree
         // Label ethernet interface with port role and status. Mark root switch
         bool visualize = default(false);
 
+        displayStringTextFormat = default("{stpStatus}");
         @display("i=block/network2");
     gates:
         input relayIn;

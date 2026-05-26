@@ -18,7 +18,7 @@ import inet.queueing.contract.IPacketServer;
 simple PacketServer extends PacketServerBase like IPacketServer
 {
     parameters:
-        displayStringTextFormat = default("served %p pk (%l)\n%s");
+        displayStringTextFormat = default("served {numProcessedPackets} pk ({processedTotalLength})\n{processingState}");
         string clockModule = default(""); // Relative path of a module that implements IClock; optional
         int serveSchedulingPriority = default(-1); // Specifies the FES scheduling priority for the extra event that is pulling the packet, -1 means no extra event
         volatile double processingTime @unit(s); // Determines additional processing time per packet

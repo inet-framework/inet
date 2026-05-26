@@ -153,7 +153,7 @@ simple Mrp extends SimpleModule like IMrp
 
         // Format for the text displayed above the module icon.
         // Directives: `%r`: MRP role, `%n`: node state, `%g`: ring state
-        displayStringTextFormat = default("role: %r\nnode: %n\nring: %g");
+        displayStringTextFormat = default("role: {roleStr}\nnode: {nodeStateStr}\nring: {ringStateStr}");
 
         @display("i=block/network2");
         @signal[ringStateChanged](type=long);

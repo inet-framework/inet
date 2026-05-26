@@ -134,16 +134,6 @@ void Ipv4RoutingTable::configureRouterId()
     }
 }
 
-void Ipv4RoutingTable::refreshDisplay() const
-{
-    std::string buf;
-    if (routerId.isUnspecified())
-        buf = std::to_string(routes.size()) + "+" + std::to_string(multicastRoutes.size()) + " routes";
-    else
-        buf = std::string("routerId: ") + routerId.str() + "\n" + std::to_string(routes.size()) + "+" + std::to_string(multicastRoutes.size()) + " routes";
-    getDisplayString().setTagArg("t", 0, buf.c_str());
-}
-
 void Ipv4RoutingTable::handleMessage(cMessage *msg)
 {
     throw cRuntimeError("This module doesn't process messages");

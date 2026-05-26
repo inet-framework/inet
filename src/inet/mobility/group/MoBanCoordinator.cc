@@ -179,13 +179,6 @@ void MoBanCoordinator::setTargetPosition()
     EV_DEBUG << "Destination: " << targetPosition << " Total Time = " << duration << endl;
 }
 
-void MoBanCoordinator::refreshDisplay() const
-{
-    // show posture name in the graphical interface
-    std::string dis_str = std::string(currentPosture->getPostureName()) + " until " + std::to_string(nextChange.dbl());
-    getDisplayString().setTagArg("t", 0, dis_str.c_str());
-}
-
 /**
  * Select a new posture randomly or based on the given Markov model.
  * If the requested strategy is not uniform random, A Markov chain will be used. If the strategy is INDIVIDUAL_MARKOV,

@@ -23,7 +23,7 @@ import inet.common.packet.recorder.PcapRecorder;
 module NetworkInterface extends Module
 {
     parameters:
-        displayStringTextFormat = default("%a (%i)\n%m");
+        displayStringTextFormat = default("{networkAddress} ({interfaceId})\n{macAddr}");
         bool recordPcap = default(false);
         int numPcapRecorders = default(recordPcap ? 1 : 0);
         pcapRecorder[*].pcapFile = default("${resultdir}/${configname}-#${runnumber}" + fullPath() + ".pcap");

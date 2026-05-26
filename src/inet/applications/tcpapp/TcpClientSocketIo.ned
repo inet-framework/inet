@@ -28,6 +28,7 @@ simple TcpClientSocketIo extends SimpleModule
 {
     parameters:
         @class(TcpClientSocketIo);
+        displayStringTextFormat = default("{socketState}\nrcvd: {bytesRcvd} bytes\nsent: {bytesSent} bytes");
         string localAddress = default("");
         int localPort = default(-1);
         string connectAddress;

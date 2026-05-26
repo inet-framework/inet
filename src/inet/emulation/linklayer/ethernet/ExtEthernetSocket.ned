@@ -37,6 +37,7 @@ simple ExtEthernetSocket extends SimpleModule
         string device; // Name of an existing real Ethernet device
         string namespace = default("");
         string packetNameFormat = default("Ext-%p-%t-%n"); // Name of received packets
+        displayStringTextFormat = default("device: {device}\nsnt: {numSent} rcv: {numReceived}");
         @display("i=block/rxtx");
         @signal[packetSentToUpper](type=Packet);
         @signal[packetReceivedFromUpper](type=Packet);

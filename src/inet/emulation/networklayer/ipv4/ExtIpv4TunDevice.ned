@@ -22,6 +22,7 @@ simple ExtIpv4TunDevice extends SimpleModule
         string device;
         string namespace = default("");
         string packetNameFormat = default("Ext");
+        displayStringTextFormat = default("TUN device: {device}\nrcv: {numReceived} snt: {numSent}");
         @signal[packetSentToLower](type=Packet);
         @signal[packetReceivedFromLower](type=Packet);
         @signal[packetSent](type=Packet);

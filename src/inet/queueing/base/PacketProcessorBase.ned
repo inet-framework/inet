@@ -21,6 +21,6 @@ simple PacketProcessorBase extends SimpleModule
 {
     parameters:
         @class(PacketProcessorBase);
-        displayStringTextFormat = default("processed %p pk (%l)"); // Determines the text that is written on top of the submodule
+        displayStringTextFormat = default("processed {numProcessedPackets} pk ({processedTotalLength})"); // Determines the text that is written on top of the submodule
         @display("i=block/star");
 }

@@ -153,14 +153,6 @@ void Ipv6RoutingTable::parseXmlConfigFile()
     }
 }
 
-void Ipv6RoutingTable::refreshDisplay() const
-{
-    std::stringstream os;
-
-    os << getNumRoutes() << " routes\n" << destCache.size() << " destcache entries";
-    getDisplayString().setTagArg("t", 0, os.str().c_str());
-}
-
 void Ipv6RoutingTable::handleMessage(cMessage *msg)
 {
     throw cRuntimeError("This module doesn't process messages");

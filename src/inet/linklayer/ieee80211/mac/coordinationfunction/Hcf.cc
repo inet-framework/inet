@@ -106,14 +106,8 @@ void Hcf::refreshDisplay() const
     if (frameSequenceHandler->isSequenceRunning()) {
         auto history = frameSequenceHandler->getFrameSequence()->getHistory();
         getDisplayString().setTagArg("tt", 0, ("Fs: " + history).c_str());
-        if (history.length() > 32) {
-            history.erase(history.begin(), history.end() - 32);
-            history = "..." + history;
-        }
-        getDisplayString().setTagArg("t", 0, ("Fs: " + history).c_str());
     }
     else {
-        getDisplayString().removeTag("t");
         getDisplayString().removeTag("tt");
     }
 }

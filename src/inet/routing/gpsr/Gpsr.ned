@@ -21,6 +21,7 @@ simple Gpsr extends SimpleModule like IManetRouting
 {
     parameters:
         @class(Gpsr);
+        displayStringTextFormat = default("neighbors:{numNeighbors}\nrcvd:{numReceived} sent:{numSent} pks");
         // properties
         @display("i=block/routing");
 

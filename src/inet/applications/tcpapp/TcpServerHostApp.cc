@@ -60,14 +60,6 @@ void TcpServerHostApp::handleCrashOperation(LifecycleOperation *operation)
         serverSocket.destroy();
 }
 
-void TcpServerHostApp::refreshDisplay() const
-{
-    ApplicationBase::refreshDisplay();
-
-    std::string buf = std::to_string(socketMap.size()) + " threads";
-    getDisplayString().setTagArg("t", 0, buf.c_str());
-}
-
 void TcpServerHostApp::handleMessageWhenUp(cMessage *msg)
 {
     if (msg->isSelfMessage()) {

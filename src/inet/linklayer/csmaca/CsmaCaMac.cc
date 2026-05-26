@@ -354,7 +354,6 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
     }
     if (isLowerMessage(msg) && frame->getOwner() == this && endSifs->getContextPointer() != frame)
         delete frame;
-    getDisplayString().setTagArg("t", 0, fsm.getStateName());
 }
 
 void CsmaCaMac::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)

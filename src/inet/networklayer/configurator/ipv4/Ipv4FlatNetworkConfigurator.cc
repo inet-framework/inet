@@ -45,8 +45,7 @@ void Ipv4FlatNetworkConfigurator::initialize(int stage)
         // calculate shortest paths, and add corresponding static routes
         fillRoutingTables(topo, nodeInfo);
 
-        // update display string
-        setDisplayString(topo, nodeInfo);
+        updateNodeCounts(topo, nodeInfo);
     }
 }
 
@@ -201,7 +200,7 @@ void Ipv4FlatNetworkConfigurator::handleMessage(cMessage *msg)
     throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()");
 }
 
-void Ipv4FlatNetworkConfigurator::setDisplayString(Topology& topo, NodeInfoVector& nodeInfo)
+void Ipv4FlatNetworkConfigurator::updateNodeCounts(Topology& topo, NodeInfoVector& nodeInfo)
 {
     numIpv4Nodes = 0;
     for (int i = 0; i < topo.getNumNodes(); i++)

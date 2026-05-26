@@ -23,6 +23,7 @@ simple NextHopForwarding extends SimpleModule
         double procDelay @unit(s) = default(0s);
         int hopLimit = default(32);
         int headerLength @unit(B) = default(10B);
+        displayStringTextFormat = default("fwd:{numForwarded} up:{numLocalDeliver} DROP:{numDropped} UNROUTABLE:{numUnroutable}");
         @display("i=block/routing");
         @signal[packetDropped](type=inet::Packet);
         @signal[packetSentToUpper](type=inet::Packet);

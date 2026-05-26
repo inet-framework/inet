@@ -18,8 +18,9 @@
 package inet.applications.trafficgen;
 
 import inet.applications.trafficgen.ITrafficgen;
+import inet.common.SimpleModule;
 
-simple TrafficgenSimple like ITrafficgen
+simple TrafficgenSimple extends SimpleModule like ITrafficgen
 {
     parameters:
         int id;
@@ -33,8 +34,9 @@ simple TrafficgenSimple like ITrafficgen
     	double stopTime @unit("s")					= default(-1s);		// -1 = infiniter
     	bool reliable								= default(true);
     	bool ordered								= default(true);
-    	
-    	@display("i=block/plug");
+        @class(TrafficgenSimple);
+        displayStringTextFormat = default("{statusStr}");
+        @display("i=block/plug");
     	@signal[sentPkt](type=cPacket);
     	@statistic[sentPkt](title="packets sent"; source=sentPkt; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
     	

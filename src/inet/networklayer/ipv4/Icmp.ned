@@ -17,6 +17,7 @@ simple Icmp extends SimpleModule
 {
     parameters:
         @class(Icmp);
+        displayStringTextFormat = default("echo:{numEchoReplied} errSent:{numErrorsSent}\nerrRcvd:{numErrorsReceived}");
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
         string checksumMode @mutable @enum("declared", "computed") = default("declared");

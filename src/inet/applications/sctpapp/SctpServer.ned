@@ -19,6 +19,7 @@ simple SctpServer extends SimpleModule like IApp
 {
     parameters:
         @class(SctpServer);
+        displayStringTextFormat = default("{numSessions} sessions\nrcvd: {packetsRcvd} pks\nsent: {bytesSent} bytes");
         string localAddress = default(""); // Comma-separated list of addresses
         int localPort = default(0); // Port number to listen on
         bool echo = default(false);  // Echoes received packages when true

@@ -64,6 +64,7 @@ module XMac extends MacProtocolBase like IMacProtocol
         string radioModule = default("^.radio");   // The path to the Radio module  // FIXME remove the default value
 
         @class(XMac);
+        displayStringTextFormat = default("{macStatus}\nrcvd:{nbRxDataPackets} sent:{nbTxDataPackets} pks");
         @signal[packetDropped](type=inet::Packet);
         @selfMessageKinds(inet::XMacTypes);
 }

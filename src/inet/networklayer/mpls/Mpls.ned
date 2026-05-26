@@ -47,6 +47,7 @@ simple Mpls extends SimpleModule like IProtocolLayer
 {
     parameters:
         @class(Mpls);
+        displayStringTextFormat = default("rcvd:{numReceived} sent:{numSent} pks");
         string interfaceTableModule;   // The path to the InterfaceTable module
         string libTableModule;
         string classifierModule; // The path to the module which implements the IIngressClassifier C++ interface

@@ -34,7 +34,6 @@ class INET_API ExtIpv4Socket : public SimpleModule, public RealTimeScheduler::IC
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
-    virtual void refreshDisplay() const override;
 
     virtual void openSocket();
     virtual void closeSocket();

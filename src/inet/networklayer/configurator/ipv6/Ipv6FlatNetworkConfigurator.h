@@ -36,7 +36,7 @@ class INET_API Ipv6FlatNetworkConfigurator : public SimpleModule
     virtual void addOwnAdvPrefixRoutes(Topology& topo);
     virtual void addStaticRoutes(Topology& topo);
 
-    virtual void setDisplayString(int numIPNodes, int numNonIPNodes);
+    virtual void updateNodeCounts(int numIPNodes, int numNonIPNodes);
     virtual bool isIPNode(Topology::Node *node);
 };
 

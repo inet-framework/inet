@@ -55,8 +55,6 @@ class INET_API NextHopRoutingTable : public SimpleModule, public IRoutingTable, 
 
     virtual void configureRouterId();
 
-    virtual void refreshDisplay() const override;
-
     virtual void configureInterface(NetworkInterface *ie);
 
     virtual void configureLoopback();

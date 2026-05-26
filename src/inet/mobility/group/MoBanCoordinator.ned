@@ -58,4 +58,5 @@ simple MoBanCoordinator extends MovingMobilityBase
         bool useMobilityPattern;    // Set if the logged mobility pattern is used.
         string mobilityPatternFile; // The input file for the mobility pattern if it is going to be used.
         @class(MoBanCoordinator);
+        displayStringTextFormat = default("{postureName} until {nextChange}");
 }

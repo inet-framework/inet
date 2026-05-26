@@ -17,5 +17,6 @@ simple EigrpInterfaceTable extends SimpleModule
 {
     parameters:
         @class(EigrpInterfaceTable);
+        displayStringTextFormat = default("{numInterfaces} interfaces");
         @display("i=block/table");
 }

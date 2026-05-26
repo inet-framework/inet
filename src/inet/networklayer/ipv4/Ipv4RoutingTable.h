@@ -103,9 +103,6 @@ class INET_API Ipv4RoutingTable : public SimpleModule, public IIpv4RoutingTable,
     // creates a new empty route
     virtual Ipv4Route *createNewRoute();
 
-    // displays summary above the icon
-    virtual void refreshDisplay() const override;
-
     // delete routes for the given interface
     virtual void deleteInterfaceRoutes(const NetworkInterface *entry);
 

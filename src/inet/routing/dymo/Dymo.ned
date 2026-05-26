@@ -22,6 +22,7 @@ simple Dymo extends SimpleModule like IManetRouting
     parameters:
         // properties
         @class(dymo::Dymo);
+        displayStringTextFormat = default("pending:{numPending}\nrcvd:{numReceived} sent:{numSent} pks");
         @display("i=block/routing");
 
         // context parameters

@@ -35,6 +35,7 @@ module Dcf extends Module like IDcf
         *.rxModule = "^." + this.rxModule;
 
         @class(Dcf);
+        displayStringTextFormat = default("{frameSequenceInfo}");
         @display("i=block/layer");
         @signal[packetSentToPeer](type=inet::Packet);
         @signal[packetReceivedFromPeer](type=inet::Packet);

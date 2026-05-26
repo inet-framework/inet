@@ -17,6 +17,7 @@ simple Contention extends SimpleModule like IContention
 {
     parameters:
         @class(Contention);
+        displayStringTextFormat = default("{fsmState}");
         bool initialChannelBusy = default(true); // Assume that the channel was busy before the simulation started
         bool backoffOptimization = default(true);    // We can pretend the frame has arrived into the queue a little bit earlier, and maybe able to start transmitting immediately
         @display("i=block/timer");

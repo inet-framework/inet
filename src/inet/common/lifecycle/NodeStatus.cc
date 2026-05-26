@@ -117,29 +117,14 @@ void NodeStatus::setState(State s)
 void NodeStatus::refreshDisplay() const
 {
     const char *icon;
-    const char *text;
     switch (state) {
-        case UP:
-            icon = "";
-            text = "up";
-            break;
-        case DOWN:
-            icon = "status/cross";
-            text = "down";
-            break;
-        case GOING_UP:
-            icon = "status/execute";
-            text = "going up";
-            break;
-        case GOING_DOWN:
-            icon = "status/execute";
-            text = "going down";
-            break;
-        default:
-            throw cRuntimeError("Unknown status");
+        case UP:        icon = ""; break;
+        case DOWN:      icon = "status/cross"; break;
+        case GOING_UP:  icon = "status/execute"; break;
+        case GOING_DOWN: icon = "status/execute"; break;
+        default: throw cRuntimeError("Unknown status");
     }
     auto& displayString = getDisplayString();
-    displayString.setTagArg("t", 0, text);
     cModule *node = getContainingNode(this);
     if (*icon) {
         displayString.setTagArg("i2", 0, icon);

@@ -18,7 +18,7 @@ import inet.queueing.contract.IPacketScheduler;
 simple MarkovScheduler extends PacketSchedulerBase like IPacketScheduler
 {
     parameters:
-        displayStringTextFormat = default("classified %p pk (%l)\ncurrent state: %s");
+        displayStringTextFormat = default("classified {numProcessedPackets} pk ({processedTotalLength})\ncurrent state: {state}");
         string clockModule = default(""); // Relative path to a module that implements IClock; optional
         int initialState = default(0); // The starting state of the Markov process
         string transitionProbabilities; // The transition matrix (N x N) of the Markov process, specified as a list of probabilities

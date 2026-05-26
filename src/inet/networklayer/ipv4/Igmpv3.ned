@@ -13,6 +13,7 @@ simple Igmpv3 extends SimpleModule like IIgmp
 {
     parameters:
         @class(Igmpv3);
+        displayStringTextFormat = default("groups:{numGroups}\nqry:{numQueriesSent}/{numQueriesRecv} rep:{numReportsSent}/{numReportsRecv}");
         bool enabled = default(true);
         string interfaceTableModule;
         string routingTableModule;

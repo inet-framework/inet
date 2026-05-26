@@ -21,6 +21,7 @@ simple Bgp extends SimpleModule like IBgp
 {
     parameters:
         @class(Bgp);
+        displayStringTextFormat = default("{isUp}");
         string interfaceTableModule;
         string routingTableModule;
         string ospfRoutingModule;

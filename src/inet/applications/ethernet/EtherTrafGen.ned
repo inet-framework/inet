@@ -18,6 +18,7 @@ simple EtherTrafGen extends SimpleModule
 {
     parameters:
         @class(EtherTrafGen);
+        displayStringTextFormat = default("rcvd: {packetsReceived} pks\nsent: {packetsSent} pks");
         string destAddress = default("");  // Destination MAC address, or module path name of destination station; empty means off
         string interface;   // Outgoing interface
         string interfaceTableModule;

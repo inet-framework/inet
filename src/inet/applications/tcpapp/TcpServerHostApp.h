@@ -33,7 +33,6 @@ class INET_API TcpServerHostApp : public ApplicationBase, public TcpSocket::ICal
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void finish() override;
-    virtual void refreshDisplay() const override;
 
     virtual void socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent) override { throw cRuntimeError("Unexpected data"); }
     virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override;

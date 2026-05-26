@@ -22,6 +22,7 @@ simple DscpMarker extends PacketProcessorBase
     parameters:
         string dscps; // A space-separated list of DSCP values; both names (e.g., AF11, EF) and numbers (0x0A, 0b101110) can be used
         @class(DscpMarker);
+        displayStringTextFormat = default("rcvd: {numRcvd} mark:{numMarked}");
         @display("i=block/star");
         @signal[packetMarked](type=cPacket);
         @statistic[packetMarked](title="packets marked"; source=packetMarked; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

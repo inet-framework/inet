@@ -25,6 +25,7 @@ simple MultiFieldClassifier extends PacketClassifierBase
     parameters:
         xml filters = default(xml("<filters/>"));
         @class(MultiFieldClassifier);
+        displayStringTextFormat = default("rcvd:{numRcvd}");
         @signal[pkClass](type=long);
         @statistic[pkClass](title="packet class"; source=pkClass; record=vector; interpolationmode=none);
     gates:

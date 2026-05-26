@@ -18,6 +18,7 @@ simple PimNeighborTable extends SimpleModule
 {
     parameters:
         @class(PimNeighborTable);
+        displayStringTextFormat = default("{numNeighbors} neighbors");
         @display("i=block/table");
         @signal[pimNeighborAdded](type=inet::PimNeighbor);
         @signal[pimNeighborDeleted](type=inet::PimNeighbor);

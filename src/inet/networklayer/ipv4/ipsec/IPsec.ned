@@ -181,7 +181,8 @@ simple IPsec extends SimpleModule
 {
     parameters:
         @class(IPsec);
-		@display("i=block/control;is=s");
+        displayStringTextFormat = default("IN: ACCEPT: {inAccept} DROP: {inDrop} BYPASS: {inBypass}\n OUT: PROTECT: {outProtect} DROP: {outDrop} BYPASS: {outBypass}");
+        @display("i=block/control;is=s");
 
         string networkProtocolModule = default("^.ip");
         string interfaceTableModule;

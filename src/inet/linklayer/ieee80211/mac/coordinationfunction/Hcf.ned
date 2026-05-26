@@ -38,6 +38,7 @@ module Hcf extends Module like IHcf
         *.*.originatorMacDataServiceModule = "^.^.originatorMacDataService";
 
         @class(Hcf);
+        displayStringTextFormat = default("{frameSequenceInfo}");
         @display("i=block/layer");
         @signal[packetSentToPeer](type=inet::Packet);
         @signal[packetReceivedFromPeer](type=inet::Packet);

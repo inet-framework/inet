@@ -26,6 +26,7 @@ simple VoipStreamSender extends SimpleModule like IApp
 {
     parameters:
         @class(VoipStreamSender);
+        displayStringTextFormat = default("stream: {streamIndex} rep: {repeatCount}");
         int localPort;
         int destPort;
         string destAddress;

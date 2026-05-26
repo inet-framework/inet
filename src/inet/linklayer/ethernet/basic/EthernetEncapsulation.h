@@ -70,8 +70,6 @@ class INET_API EthernetEncapsulation : public OperationalBase, public DefaultPro
     virtual void processPacketFromMac(Packet *packet);
     virtual void handleSendPause(cMessage *msg);
 
-    virtual void refreshDisplay() const override;
-
     // for lifecycle:
     virtual bool isInitializeStage(int stage) const override { return stage == INITSTAGE_LINK_LAYER; }
     virtual bool isModuleStartStage(int stage) const override { return stage == ModuleStartOperation::STAGE_LINK_LAYER; }

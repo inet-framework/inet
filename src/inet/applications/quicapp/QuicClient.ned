@@ -14,6 +14,7 @@ simple QuicClient extends SimpleModule like IApp
 {
     parameters:
         @class(QuicClient);
+        displayStringTextFormat = default("rcvd: {numReceived} pks\nsent: {numSent} pks");
         string localAddress = default(""); // comma separated list of addresses
         int localPort = default(0); // port number to listen on
         string connectAddress;  // server address (may be symbolic)

@@ -192,17 +192,6 @@ void NextHopRoutingTable::configureLoopback()
 //    ie->setIPv4Data(d);
 }
 
-void NextHopRoutingTable::refreshDisplay() const
-{
-// TODO
-//    char buf[80];
-//    if (routerId.isUnspecified())
-//        snprintf(buf, sizeof(buf), "%d+%d routes", (int)routes.size(), (int)multicastRoutes.size());
-//    else
-//        snprintf(buf, sizeof(buf), "routerId: %s\n%d+%d routes", routerId.str().c_str(), (int)routes.size(), (int)multicastRoutes.size());
-//    getDisplayString().setTagArg("t", 0, buf);
-}
-
 bool NextHopRoutingTable::routeLessThan(const NextHopRoute *a, const NextHopRoute *b)
 {
     // helper for sort() in addRoute(). We want routes with longer

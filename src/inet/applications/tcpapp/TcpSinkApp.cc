@@ -37,14 +37,6 @@ void TcpSinkApp::initialize(int stage)
     }
 }
 
-void TcpSinkApp::refreshDisplay() const
-{
-    ApplicationBase::refreshDisplay();
-
-    std::string buf = "threads: " + std::to_string(socketMap.size()) + "\nrcvd: " + std::to_string(bytesRcvd) + " bytes";
-    getDisplayString().setTagArg("t", 0, buf.c_str());
-}
-
 void TcpSinkApp::finish()
 {
     TcpServerHostApp::finish();
@@ -119,15 +111,6 @@ void TcpSinkAppThread::dataArrived(Packet *pk, bool urgent)
     emit(packetReceivedSignal, pk);
     delete pk;
     sendOrScheduleReadCommandIfNeeded();
-}
-
-void TcpSinkAppThread::refreshDisplay() const
-{
-    TcpServerThreadBase::refreshDisplay();
-    
-    std::ostringstream os;
-    os << (sock ? TcpSocket::stateName(sock->getState()) : "NULL_SOCKET") << "\nrcvd: " << bytesRcvd << " bytes";
-    getDisplayString().setTagArg("t", 0, os.str().c_str());
 }
 
 void TcpSinkAppThread::read()

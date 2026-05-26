@@ -18,6 +18,7 @@ simple EigrpIpv4Pdm extends SimpleModule
 {
     parameters:
         @class(EigrpIpv4Pdm);
+        displayStringTextFormat = default("AS {asNum}");
         xml configData = default(xmldoc("config.xml"));
         string interfaceTableModule;
         string routingTableModule;

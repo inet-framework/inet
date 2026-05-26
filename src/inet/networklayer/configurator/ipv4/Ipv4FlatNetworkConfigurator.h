@@ -52,7 +52,7 @@ class INET_API Ipv4FlatNetworkConfigurator : public SimpleModule
     virtual void addDefaultRoutes(Topology& topo, NodeInfoVector& nodeInfo);
     virtual void fillRoutingTables(Topology& topo, NodeInfoVector& nodeInfo);
 
-    virtual void setDisplayString(Topology& topo, NodeInfoVector& nodeInfo);
+    virtual void updateNodeCounts(Topology& topo, NodeInfoVector& nodeInfo);
 };
 
 } // namespace inet

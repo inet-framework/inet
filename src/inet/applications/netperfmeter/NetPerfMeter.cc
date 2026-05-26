@@ -296,34 +296,6 @@ void NetPerfMeter::finish()
     }
 }
 
-// ###### Show I/O status ###################################################
-void NetPerfMeter::refreshDisplay() const
-{
-    SimpleModule::refreshDisplay();
-    
-    unsigned long long totalSentBytes = 0;
-    for (std::map<unsigned int, SenderStatistics *>::const_iterator iterator = SenderStatisticsMap.begin();
-         iterator != SenderStatisticsMap.end(); iterator++)
-    {
-        const SenderStatistics *senderStatistics = iterator->second;
-        totalSentBytes += senderStatistics->SentBytes;
-    }
-
-    unsigned long long totalReceivedBytes = 0;
-    for (std::map<unsigned int, ReceiverStatistics *>::const_iterator iterator = ReceiverStatisticsMap.begin();
-         iterator != ReceiverStatisticsMap.end(); iterator++)
-    {
-        const ReceiverStatistics *receiverStatistics = iterator->second;
-        totalReceivedBytes += receiverStatistics->ReceivedBytes;
-    }
-
-    char status[64];
-    snprintf(status, sizeof(status), "In: %llu, Out: %llu",
-            totalReceivedBytes, totalSentBytes);
-    getDisplayString().setTagArg("t", 0, status);
-    // TODO also was setStatusString("Connecting"), setStatusString("Closed")
-}
-
 // ###### Handle timer ######################################################
 void NetPerfMeter::handleTimer(cMessage *msg)
 {

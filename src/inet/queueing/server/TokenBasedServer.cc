@@ -21,7 +21,6 @@ void TokenBasedServer::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         tokenConsumptionPerPacketParameter = &par("tokenConsumptionPerPacket");
         tokenConsumptionPerBitParameter = &par("tokenConsumptionPerBit");
-        displayStringTextFormat = par("displayStringTextFormat");
         numTokens = par("initialNumTokens");
         maxNumTokens = par("maxNumTokens");
         WATCH(tokensDepletedSignaled);

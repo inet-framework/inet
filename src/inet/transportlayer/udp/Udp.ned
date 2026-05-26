@@ -63,6 +63,7 @@ simple Udp extends SimpleModule like IUdp
         string interfaceTableModule;   // The path to the InterfaceTable module
         string checksumMode @enum("disabled", "declared", "computed") = default("declared");
         bool defaultMulticastLoop = default(true);
+        displayStringTextFormat = default("passed up: {numPassedUp} pks\nsent: {numSent} pks\ndropped (no app): {numDroppedWrongPort} pks");
         @display("i=block/transport");
         @signal[packetSentToUpper](type=cPacket);
         @signal[packetReceivedFromUpper](type=cPacket);

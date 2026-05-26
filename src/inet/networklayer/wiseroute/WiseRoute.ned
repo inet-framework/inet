@@ -65,6 +65,7 @@ simple WiseRoute extends NetworkProtocolBase like INetworkProtocol
         string arpModule; // The path to the ARP module
 
         @display("i=block/fork");
+        displayStringTextFormat = default("routes:{nbRoutesRecorded} floods:{nbFloodsSent}\nrcvd:{nbDataPacketsReceived} sent:{nbDataPacketsSent} pks");
         @class(WiseRoute);
 }
 

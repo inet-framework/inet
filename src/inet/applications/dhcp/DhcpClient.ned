@@ -26,6 +26,7 @@ simple DhcpClient extends SimpleModule like IApp
         string routingTableModule; // Path to the Ipv4RoutingTable module
         string interface = default(""); // Which NIC should be configured (i.e. wlan0, eth1 etc.)
         double startTime @unit(s) = default(0s); // Starting time of DHCP initialization
+        displayStringTextFormat = default("{clientStateName}");
         @display("i=block/app2");
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finished

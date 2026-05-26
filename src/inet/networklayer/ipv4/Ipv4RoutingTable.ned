@@ -50,6 +50,7 @@ simple Ipv4RoutingTable extends SimpleModule like IRoutingTable
         bool multicastForwarding = default(false); // Turns multicast forwarding on/off
         bool useAdminDist = default(false);     // Use Cisco-like administrative distances
         string routingFile = default("");  // Routing table file name
+        displayStringTextFormat = default("{routerId}\n{numRoutes}+{numMcastRoutes} routes");
         @display("i=block/table");
         @signal[routeAdded](type=inet::Ipv4Route);
         @signal[routeDeleted](type=inet::Ipv4Route);

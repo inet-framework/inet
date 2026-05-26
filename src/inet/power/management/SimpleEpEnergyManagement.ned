@@ -24,9 +24,9 @@ simple SimpleEpEnergyManagement extends SimpleModule like IEpEnergyManagement
 {
     parameters:
         @class(SimpleEpEnergyManagement);
+        displayStringTextFormat = default("{energyStatus}");
         double nodeShutdownCapacity @unit(J) = default(nan J); // Initiates node shutdown when the residual energy capacity decreases below this value
         double nodeStartCapacity @unit(J) = default(nan J); // Initiates node start when the residual energy capacity increases above this value
-        @class(SimpleEpEnergyManagement);
         @display("i=block/plug");
 }
 

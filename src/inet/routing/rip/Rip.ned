@@ -57,6 +57,7 @@ simple Rip extends SimpleModule like IApp
 {
     parameters:
         @class(Rip);
+        displayStringTextFormat = default("routes:{numRoutes}\nrcvd:{numReceived} sent:{numSent} pks");
         @display("i=block/network2");
 
         string interfaceTableModule;   // The path to the InterfaceTable module

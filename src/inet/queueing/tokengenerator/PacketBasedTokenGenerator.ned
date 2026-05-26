@@ -20,7 +20,7 @@ simple PacketBasedTokenGenerator extends TokenGeneratorBase like ITokenGenerator
     parameters:
         volatile double numTokensPerPacket = default(1); // Number of tokens per consumed packet
         volatile double numTokensPerBit = default(0); // Number of tokens per consumed bit
-        displayStringTextFormat = default("processed %p pk (%l)\ngenerated %t tk\nto %s"); // %p number of packets, %l total length
+        displayStringTextFormat = default("processed {numProcessedPackets} pk ({processedTotalLength})\ngenerated {numTokensGenerated} tk\nto {storageModule}");
         @class(PacketBasedTokenGenerator);
     gates:
         input in;

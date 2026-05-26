@@ -27,6 +27,7 @@ simple TcpServerSocketIo extends SimpleModule
 {
     parameters:
         @class(TcpServerSocketIo);
+        displayStringTextFormat = default("{socketState}\nrcvd: {bytesRcvd} bytes\nsent: {bytesSent} bytes");
         @display("i=block/socket");
         volatile int readSize @unit(B) = default(-1B);    // Used only with autoRead==false
         volatile double readDelay @unit(s) = default(-1s);    // Used only with autoRead==false; delay for issuing a READ command after previous READ was satisfied; -1 means immediately, 0 means zero delay

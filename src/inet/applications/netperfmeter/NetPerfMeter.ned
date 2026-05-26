@@ -41,6 +41,7 @@ simple NetPerfMeter extends SimpleModule like IApp
 {
     parameters:
         @class(NetPerfMeter);
+        displayStringTextFormat = default("In: {totalReceivedBytes}, Out: {totalSentBytes}");
         bool            activeMode               = default(true);      // Server (false) or client (true)
         string          localAddress             = default("");        // May be left empty ("")
         int             localPort                = default(9000);      // Port number to listen on

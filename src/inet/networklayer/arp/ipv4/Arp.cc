@@ -124,18 +124,6 @@ void Arp::flush()
     }
 }
 
-void Arp::refreshDisplay() const
-{
-    OperationalBase::refreshDisplay();
-
-    std::stringstream os;
-
-    os << "size:" << arpCache.size() << " sent:" << numRequestsSent << "\n"
-       << "repl:" << numRepliesSent << " fail:" << numFailedResolutions;
-
-    getDisplayString().setTagArg("t", 0, os.str().c_str());
-}
-
 void Arp::initiateArpResolution(Ipv4Address nextHopAddr, ArpCacheEntry *entry)
 {
     entry->pending = true;

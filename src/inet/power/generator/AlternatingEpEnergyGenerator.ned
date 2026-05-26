@@ -25,4 +25,5 @@ simple AlternatingEpEnergyGenerator extends EpEnergyGeneratorBase
         volatile double generationInterval @unit(s); // The time interval for the generation mode
         volatile double sleepInterval @unit(s); // The time interval for the sleep mode
         @class(AlternatingEpEnergyGenerator);
+        displayStringTextFormat = default("power: {powerGeneration}");
 }

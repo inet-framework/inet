@@ -20,5 +20,6 @@ simple EigrpIpv4NeighborTable extends SimpleModule
 {
     parameters:
         @class(EigrpIpv4NeighborTable);
+        displayStringTextFormat = default("{numNeighbors} neighbors");
         @display("i=block/table");
 }
