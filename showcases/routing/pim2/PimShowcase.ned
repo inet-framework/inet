@@ -8,9 +8,9 @@ import inet.node.inet.StandardHost;
 //
 // Simple tree topology for demonstrating PIM-DM and PIM-SM.
 //
-// A multicast source sends traffic through a network of three routers
-// to two receivers. The topology forms a tree with R1 at the root,
-// branching to R2 and R3, each connecting to a receiver.
+// A multicast source sends traffic through a network of four routers
+// to two receivers. R0 is the source's first-hop router. R1 is the
+// tree root (and the RP in PIM-SM). R2 and R3 branch to the receivers.
 //
 network PimShowcaseNetwork extends WiredNetworkBase
 {
@@ -18,23 +18,27 @@ network PimShowcaseNetwork extends WiredNetworkBase
         source: StandardHost {
             @display("i=device/server;p=400,50");
         }
+        R0: MulticastRouter {
+            @display("p=400,150");
+        }
         R1: MulticastRouter {
-            @display("p=400,175");
+            @display("p=400,250");
         }
         R2: MulticastRouter {
-            @display("p=250,300");
+            @display("p=250,375");
         }
         R3: MulticastRouter {
-            @display("p=550,300");
+            @display("p=550,375");
         }
         receiver1: StandardHost {
-            @display("i=device/pc;p=250,425");
+            @display("i=device/pc;p=250,500");
         }
         receiver2: StandardHost {
-            @display("i=device/pc;p=550,425");
+            @display("i=device/pc;p=550,500");
         }
     connections:
-        source.ethg++ <--> Eth100M <--> R1.ethg++;
+        source.ethg++ <--> Eth100M <--> R0.ethg++;
+        R0.ethg++ <--> Eth100M <--> R1.ethg++;
         R1.ethg++ <--> Eth100M <--> R2.ethg++;
         R1.ethg++ <--> Eth100M <--> R3.ethg++;
         R2.ethg++ <--> Eth100M <--> receiver1.ethg++;
