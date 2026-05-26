@@ -2066,6 +2066,14 @@ void xMIPv6::processType2RH(Packet *packet, Ipv6RoutingHeader *rh)
         packet->trimFront();
         auto newIpv6Header = packet->removeAtFront<Ipv6Header>();
         newIpv6Header->setDestAddress(HoA);
+        // decrement segmentsLeft as required by RFC 3775
+        for (int i = 0; i < (int)newIpv6Header->getExtensionHeaderArraySize(); i++) {
+            Ipv6RoutingHeader *routingHdr = dynamic_cast<Ipv6RoutingHeader *>(newIpv6Header->getExtensionHeaderForUpdate(i));
+            if (routingHdr && routingHdr->getRoutingType() == 2) {
+                routingHdr->setSegmentsLeft(routingHdr->getSegmentsLeft() - 1);
+                break;
+            }
+        }
         insertNetworkProtocolHeader(packet, Protocol::ipv6, newIpv6Header);
         validRH2 = true;
     }
@@ -2159,7 +2167,6 @@ void xMIPv6::processHoAOpt(Packet *packet, HomeAddressOption *hoaOpt)
     }
 
     packet->setContextPointer(nullptr);
-    delete hoaOpt;
 
     if (validHoAOpt) {
         EV_INFO << "Valid HoA Option - copied address from HoA Option to datagram" << endl;

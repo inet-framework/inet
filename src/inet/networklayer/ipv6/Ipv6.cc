@@ -1067,7 +1067,7 @@ bool Ipv6::processExtensionHeaders(Packet *packet, const Ipv6Header *ipv6Header)
 
                 // type 2 routing header should be processed by MIPv6 module
                 // if no MIP support, ignore the header
-                if (rt->hasMipv6Support() && rh->getRoutingType() == 2) {
+                if (rt->hasMipv6Support() && rh->getRoutingType() == 2 && rh->getSegmentsLeft() > 0) {
                     // for simplicity, we set a context pointer on the datagram
                     packet->setContextPointer((void *)rh);
                     EV_INFO << "Sending datagram with RH2 to MIPv6 module" << endl;
