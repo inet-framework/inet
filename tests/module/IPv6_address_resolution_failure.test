@@ -1,0 +1,79 @@
+%description:
+Tests that IPv6 address resolution (NDP) failure is handled correctly:
+when a node cannot resolve the link-layer address for a next hop, it
+drops the queued packets and sends ICMPv6 Destination Unreachable
+(Address Unreachable) back to the sender.
+
+A minimal network with a router, a host, and a second host is used.
+The host sends to a non-existent address on the same prefix as the second
+host. The router receives the packet, determines it is on-link for its
+interface toward the second host's link, but cannot resolve the address
+because no node has it. After MAX_MULTICAST_SOLICIT retries, AR fails.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network ArFailNetwork
+{
+    types:
+        channel ethline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 10Mbps;
+        }
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator;
+        router: Router6;
+        host: StandardHost6;
+        otherHost: StandardHost6;
+    connections:
+        host.ethg++ <--> ethline <--> router.ethg++;
+        otherHost.ethg++ <--> ethline <--> router.ethg++;
+}
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+ned-path = ../../../../src
+network = ArFailNetwork
+sim-time-limit = 20s
+cmdenv-express-mode = false
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+# udp apps: send to a non-existent address on otherHost's prefix
+# The router's eth[1] (toward otherHost) gets prefix aaaa:0:66:0::/64.
+# We send to aaaa:0:66:0::dead which nobody owns -> AR failure at router.
+**.host.numApps = 1
+**.host.app[0].typename = "UdpBasicApp"
+**.host.app[0].destAddresses = "aaaa:0:66:0::dead"
+**.host.app[0].destPort = 1000
+**.host.app[0].messageLength = 64B
+**.host.app[0].startTime = 10s
+**.host.app[0].stopTime = 11s
+**.host.app[0].sendInterval = 10s
+
+# Ethernet NIC configuration
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue"
+**.eth[*].queue.dataQueue.packetCapacity = 10
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Address Resolution has failed.
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Sending ICMP unreachable destination.
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
