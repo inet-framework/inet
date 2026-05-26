@@ -1,0 +1,84 @@
+%description:
+Tests IPv6 Neighbour Unreachability Detection (NUD) state transitions.
+
+A host sends two UDP bursts separated by more than the reachable time.
+The first burst causes the next-hop router's NCE to enter REACHABLE.
+After the reachable time expires, the NCE transitions to STALE.
+The second burst triggers NUD: STALE -> DELAY -> PROBE.
+
+The advReachableTime parameter is set to 3s (instead of the default 3600s)
+to make the test practical.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network NudTestNetwork
+{
+    types:
+        channel ethline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 10Mbps;
+        }
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator;
+        router: Router6;
+        host: StandardHost6;
+        srv: StandardHost6;
+    connections:
+        host.ethg++ <--> ethline <--> router.ethg++;
+        router.ethg++ <--> ethline <--> srv.ethg++;
+}
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+ned-path = ../../../../src
+network = NudTestNetwork
+sim-time-limit = 25s
+cmdenv-express-mode = false
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+# Short reachable time so NUD kicks in quickly
+**.router.ipv6.neighbourDiscovery.advReachableTime = 3s
+
+# Two UDP bursts: t=6 and t=15 (separated by more than advReachableTime)
+**.host.numApps = 1
+**.host.app[0].typename = "UdpBasicApp"
+**.host.app[0].destAddresses = "srv"
+**.host.app[0].destPort = 1000
+**.host.app[0].messageLength = 64B
+**.host.app[0].startTime = 6s
+**.host.app[0].stopTime = 16s
+**.host.app[0].sendInterval = 9s
+
+**.srv.numApps = 1
+**.srv.app[0].typename = "UdpSink"
+**.srv.app[0].localPort = 1000
+
+# Ethernet NIC configuration
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue"
+**.eth[*].queue.dataQueue.packetCapacity = 10
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Setting NCE state to DELAY.
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+NUD has timed out
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

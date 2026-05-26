@@ -115,12 +115,12 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
            }*/
 #endif /* INET_WITH_xMIPv6 */
 
-        int advReachableTime = (int)par("advReachableTime").doubleValueInUnit("s");
+        simtime_t advReachableTime = par("advReachableTime");
         for (int i = 0; i < ift->getNumInterfaces(); i++) {
             NetworkInterface *ie = ift->getInterface(i);
 
             if (ie->getProtocolData<Ipv6InterfaceData>()->getAdvSendAdvertisements() && !(ie->isLoopback())) {
-                ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->setAdvReachableTime(advReachableTime);
+                ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->setAdvReachableTime((int)advReachableTime.dbl());
                 createRaTimer(ie);
             }
         }
