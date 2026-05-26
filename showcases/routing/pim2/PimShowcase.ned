@@ -1,6 +1,6 @@
 package inet.showcases.routing.pim2;
 
-import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.networks.base.WiredNetworkBase;
 import inet.node.ethernet.Eth100M;
 import inet.node.inet.MulticastRouter;
 import inet.node.inet.StandardHost;
@@ -12,12 +12,9 @@ import inet.node.inet.StandardHost;
 // to two receivers. The topology forms a tree with R1 at the root,
 // branching to R2 and R3, each connecting to a receiver.
 //
-network PimShowcaseNetwork
+network PimShowcaseNetwork extends WiredNetworkBase
 {
     submodules:
-        configurator: Ipv4NetworkConfigurator {
-            @display("p=100,100;is=s");
-        }
         source: StandardHost {
             @display("i=device/server;p=400,50");
         }
@@ -48,15 +45,12 @@ network PimShowcaseNetwork
 // Larger network for demonstrating an IPTV streaming scenario with PIM-SM.
 //
 // An IPTV server streams multicast video through a 3x3 grid of routers
-// running OSPF for unicast routing and PIM-SM for multicast. A client
-// joins the multicast group to receive the stream.
+// running PIM-SM for multicast. A client joins the multicast group to
+// receive the stream.
 //
-network PimIptvNetwork
+network PimIptvNetwork extends WiredNetworkBase
 {
     submodules:
-        configurator: Ipv4NetworkConfigurator {
-            @display("p=100,100;is=s");
-        }
         server: StandardHost {
             @display("i=device/server;p=200,100");
         }

@@ -45,26 +45,24 @@ The Model
 ---------
 
 We use two network topologies in this showcase. The first, ``PimShowcaseNetwork``,
-is a simple tree with a multicast source connected through three routers to two
-receivers. This network is used for both the PIM-DM and PIM-SM configurations.
+is a simple tree topology used for both the PIM-DM and PIM-SM configurations.
+A :ned:`StandardHost` (``source``) sends UDP multicast traffic to the group
+address ``239.1.1.1`` through three :ned:`MulticastRouter` nodes (R1–R3) to two
+receivers. The receivers run :ned:`UdpSink` applications configured to join this
+multicast group.
 
-.. literalinclude:: ../PimShowcase.ned
-   :language: ned
-   :start-after: network PimShowcaseNetwork
-   :end-before: //
+.. figure:: media/PimShowcaseNetwork.png
 
-The source host sends UDP multicast traffic to the group address ``239.1.1.1``.
-The receivers run :ned:`UdpSink` applications configured to join this multicast
-group.
+The second network, ``PimIptvNetwork``, models a more realistic scenario. Nine
+:ned:`MulticastRouter` nodes are arranged in a 3×3 grid, with an IPTV server
+(:ned:`StandardHost`) attached at one corner and a client at the opposite corner.
 
-The second network, ``PimIptvNetwork``, models a more realistic scenario with a
-3×3 grid of routers. An IPTV server is attached at one corner and a client at
-the opposite corner. The :ned:`Ipv4NetworkConfigurator` provides unicast routes,
-and PIM-SM handles multicast delivery.
+.. figure:: media/PimIptvNetwork.png
 
-All routers in both networks are :ned:`MulticastRouter` nodes, which are
-:ned:`Router` nodes with PIM enabled (``hasPim = true``) and multicast forwarding
-turned on by default.
+Both networks extend :ned:`WiredNetworkBase`, which provides an
+:ned:`Ipv4NetworkConfigurator` for IP address assignment and unicast routing. All
+routers are :ned:`MulticastRouter` nodes — :ned:`Router` nodes with PIM enabled
+(``hasPim = true``) and multicast forwarding turned on by default.
 
 PIM configuration
 ~~~~~~~~~~~~~~~~~
