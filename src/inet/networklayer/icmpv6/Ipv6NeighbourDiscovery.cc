@@ -115,10 +115,12 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
            }*/
 #endif /* INET_WITH_xMIPv6 */
 
+        int advReachableTime = (int)par("advReachableTime").doubleValueInUnit("s");
         for (int i = 0; i < ift->getNumInterfaces(); i++) {
             NetworkInterface *ie = ift->getInterface(i);
 
             if (ie->getProtocolData<Ipv6InterfaceData>()->getAdvSendAdvertisements() && !(ie->isLoopback())) {
+                ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->setAdvReachableTime(advReachableTime);
                 createRaTimer(ie);
             }
         }
@@ -878,6 +880,7 @@ void Ipv6NeighbourDiscovery::processDadTimeout(cMessage *msg)
 
 void Ipv6NeighbourDiscovery::makeTentativeAddressPermanent(const Ipv6Address& tentativeAddr, NetworkInterface *ie)
 {
+    EV_INFO << "DAD completed for address " << tentativeAddr << " on " << ie->getInterfaceName() << ", address is unique\n";
     ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->permanentlyAssign(tentativeAddr);
 
 #ifdef INET_WITH_xMIPv6

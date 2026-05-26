@@ -28,6 +28,7 @@ simple Ipv6NeighbourDiscovery extends SimpleModule
         string routingTableModule;
         double minIntervalBetweenRAs @unit(s) = default(30ms); // MinRtrAdvInterval:  0.03 sec for MIPv6
         double maxIntervalBetweenRAs @unit(s) = default(70ms);  // MaxrtrAdvInterval: 0.07 sec for MIPv6
+        double advReachableTime @unit(s) = default(3600s); // advertised reachable time in RAs; hosts use it as base for NUD
         @display("i=block/network");
         @signal[startDad](type=long); // Emits value=1
         @statistic[startDad](title="DAD started";record=count,vector);
