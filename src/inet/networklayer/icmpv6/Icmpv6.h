@@ -99,6 +99,9 @@ class INET_API Icmpv6 : public SimpleModule, public LifecycleUnsupported, public
     typedef std::map<long, int> PingMap;
     PingMap pingMap;
     std::set<int> transportProtocols; // where to send up packets
+    int numEchoReplied = 0;
+    long numErrorsSent = 0;
+    long numErrorsReceived = 0;
 };
 
 } // namespace inet

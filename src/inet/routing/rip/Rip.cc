@@ -92,6 +92,9 @@ void Rip::initialize(int stage)
     RoutingProtocolBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
+        WATCH(numSent);
+        WATCH(numReceived);
+        WATCH_EXPR("numRoutes", ripRoutingTable.size());
         host = getContainingNode(this);
         ift.reference(this, "interfaceTableModule", true);
         rt.reference(this, "routingTableModule", true);
@@ -641,6 +644,7 @@ void Rip::sendRoutes(const L3Address& address, int port, const RipNetworkInterfa
  */
 void Rip::processResponse(Packet *packet)
 {
+    numReceived++;
     emit(rcvdResponseSignal, packet);
 
     bool isValid = isValidResponse(packet);
@@ -984,6 +988,7 @@ void Rip::sendPacket(Packet *packet, const L3Address& destAddr, int destPort, co
             packet->addTagIfAbsent<L3AddressReq>()->setSrcAddress(addressType->getLinkLocalAddress(destInterface));
         }
     }
+    numSent++;
     socket.sendTo(packet, destAddr, destPort);
 }
 

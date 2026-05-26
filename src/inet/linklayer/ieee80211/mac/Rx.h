@@ -46,6 +46,7 @@ class INET_API Rx : public SimpleModule, public IRx
     virtual bool isFcsOk(Packet *packet) const;
     virtual void recomputeMediumFree();
     virtual void refreshDisplay() const override;
+    std::string getRxStatusTxt() const;
 
   public:
     Rx();

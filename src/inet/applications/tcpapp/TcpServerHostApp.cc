@@ -20,6 +20,9 @@ Define_Module(TcpServerHostApp);
 void TcpServerHostApp::initialize(int stage)
 {
     ApplicationBase::initialize(stage);
+
+    if (stage == INITSTAGE_LOCAL)
+        WATCH_EXPR("numThreads", socketMap.size());
 }
 
 void TcpServerHostApp::handleStartOperation(LifecycleOperation *operation)
@@ -153,6 +156,14 @@ void TcpServerThreadBase::socketDeleted(TcpSocket *socket)
         sock = nullptr;
         hostmod->socketDeleted(socket);
     }
+}
+
+void TcpServerThreadBase::initialize(int stage)
+{
+    SimpleModule::initialize(stage);
+
+    if (stage == INITSTAGE_LOCAL)
+        WATCH_EXPR("socketState", sock ? TcpSocket::stateName(sock->getState()) : "not connected");
 }
 
 void TcpServerThreadBase::refreshDisplay() const

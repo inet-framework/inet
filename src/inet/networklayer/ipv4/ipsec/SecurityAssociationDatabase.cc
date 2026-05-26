@@ -31,6 +31,7 @@ SecurityAssociationDatabase::~SecurityAssociationDatabase()
 void SecurityAssociationDatabase::initialize()
 {
     WATCH(entries);
+    WATCH_EXPR("numEntries", entries.size());
 }
 
 void SecurityAssociationDatabase::addEntry(SecurityAssociation *sadEntry)

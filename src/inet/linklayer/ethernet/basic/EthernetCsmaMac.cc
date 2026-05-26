@@ -55,6 +55,9 @@ void EthernetCsmaMac::initialize(int stage)
         WATCH(carrierSense);
         WATCH(collision);
         WATCH(numRetries);
+        WATCH(numFramesSent);
+        WATCH(numFramesReceived);
+        WATCH_EXPR("fsmState", fsm.getStateName());
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         fsm.setState(IDLE, "IDLE");
@@ -346,6 +349,7 @@ void EthernetCsmaMac::startTransmission()
 void EthernetCsmaMac::endTransmission()
 {
     EV_DEBUG << "Ending frame transmission" << EV_FIELD(currentTxFrame) << EV_ENDL;
+    numFramesSent++;
     delete currentTxFrame;
     currentTxFrame = nullptr;
     numRetries = 0;
@@ -400,6 +404,7 @@ void EthernetCsmaMac::processReceivedFrame(Packet *packet)
             packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
             if (networkInterface)
                 packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
+            numFramesReceived++;
             sendUp(packet);
         }
     }

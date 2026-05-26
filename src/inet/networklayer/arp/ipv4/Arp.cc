@@ -62,6 +62,7 @@ void Arp::initialize(int stage)
         WATCH(numResolutions);
         WATCH(numFailedResolutions);
         WATCH(arpCache);
+        WATCH_EXPR("arpCacheSize", arpCache.size());
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         ift.reference(this, "interfaceTableModule", true);

@@ -104,6 +104,8 @@ class INET_API Rip : public RoutingProtocolBase, protected cListener
     simtime_t holdDownTime;
     simtime_t shutdownTime; // time of shutdown processing
     bool triggeredUpdate = false;
+    long numSent = 0;
+    long numReceived = 0;
 
     // signals
     static simsignal_t sentRequestSignal;

@@ -108,6 +108,7 @@ void Ieee802154Mac::initialize(int stage)
         WATCH(txAttempts);
         WATCH(txPower);
         WATCH(macState);
+        WATCH_EXPR("macStatus", getMacStatusString());
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         cModule *radioModule = check_and_cast<cModule *>(radio.get());
@@ -950,6 +951,22 @@ void Ieee802154Mac::handleCrashOperation(LifecycleOperation *operation)
     radioModule->unsubscribe(IRadio::transmissionStateChangedSignal, this);
 
     MacProtocolBase::handleCrashOperation(operation);
+}
+
+std::string Ieee802154Mac::getMacStatusString() const
+{
+#define CASE(x)   case x: return #x;
+    switch (macState) {
+        CASE(IDLE_1);
+        case BACKOFF_2:       return "BACKOFF (" + std::to_string((backoffTimer->getArrivalTime() - simTime()).inUnit(SIMTIME_US)) + "us)";
+        case CCA_3:           return "CCA (" + std::to_string((ccaTimer->getArrivalTime() - simTime()).inUnit(SIMTIME_US)) + "us)";
+        CASE(TRANSMITFRAME_4);
+        case WAITACK_5:       return "WAITING ACK (" + std::to_string((rxAckTimer->getArrivalTime() - simTime()).inUnit(SIMTIME_US)) + "us)";
+        case WAITSIFS_6:      return "WAITING SIFS (" + std::to_string((sifsTimer->getArrivalTime() - simTime()).inUnit(SIMTIME_US)) + "us)";
+        CASE(TRANSMITACK_7);
+        default: ASSERT(false); return "?";
+    }
+#undef CASE
 }
 
 void Ieee802154Mac::refreshDisplay() const

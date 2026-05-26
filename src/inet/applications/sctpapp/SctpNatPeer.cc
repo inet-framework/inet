@@ -89,6 +89,8 @@ void SctpNatPeer::initialize(int stage)
         WATCH(packetsSent);
         WATCH(packetsRcvd);
         WATCH(bytesSent);
+        WATCH(bytesRcvd);
+        WATCH(statusStr);
         WATCH(numRequestsToSend);
         timeoutMsg = new cMessage("SrvAppTimer");
         queueSize = par("queueSize");
@@ -647,6 +649,7 @@ void SctpNatPeer::socketStatusArrived(SctpSocket *socket, SctpStatusReq *status)
 
 void SctpNatPeer::setStatusString(const char *s)
 {
+    statusStr = s;
     if (hasGUI())
         getDisplayString().setTagArg("t", 0, s);
 }

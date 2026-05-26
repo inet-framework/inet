@@ -40,12 +40,43 @@ void Rx::initialize(int stage)
         WATCH(transmissionState);
         WATCH(receivedPart);
         WATCH(mediumFree);
+        WATCH_EXPR("rxStatus", getRxStatusTxt());
     }
     // TODO INITSTAGE
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         address = check_and_cast<Ieee80211Mac *>(getContainingNicModule(this)->getSubmodule("mac"))->getAddress();
         recomputeMediumFree();
     }
+}
+
+std::string Rx::getRxStatusTxt() const
+{
+    if (mediumFree)
+        return "FREE";
+    std::string s = "BUSY (";
+    bool addSpace = false;
+    if (transmissionState != IRadio::TRANSMISSION_STATE_UNDEFINED) {
+        switch (transmissionState) {
+            case IRadio::TRANSMISSION_STATE_IDLE: s += "Tx-Idle"; break;
+            case IRadio::TRANSMISSION_STATE_TRANSMITTING: s += "Tx"; break;
+            default: break;
+        }
+        addSpace = true;
+    }
+    else {
+        switch (receptionState) {
+            case IRadio::RECEPTION_STATE_UNDEFINED: s += "Switching"; break;
+            case IRadio::RECEPTION_STATE_IDLE: s += "Rx-Idle"; break;
+            case IRadio::RECEPTION_STATE_BUSY: s += "Noise"; break;
+            case IRadio::RECEPTION_STATE_RECEIVING: s += "Recv"; break;
+            default: break;
+        }
+        addSpace = true;
+    }
+    if (endNavTimer->isScheduled())
+        s += std::string(addSpace ? " " : "") + "NAV";
+    s += ")";
+    return s;
 }
 
 void Rx::handleMessage(cMessage *msg)

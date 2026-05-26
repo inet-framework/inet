@@ -93,6 +93,7 @@ void SctpClient::initialize(int stage)
         WATCH(packetsRcvd);
         WATCH(bytesSent);
         WATCH(bytesRcvd);
+        WATCH_EXPR("socketState", SctpSocket::stateName(socket.getState()));
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         cModule *node = findContainingNode(this);

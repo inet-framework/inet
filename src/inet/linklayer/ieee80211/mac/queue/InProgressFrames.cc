@@ -26,6 +26,7 @@ void InProgressFrames::initialize(int stage)
 
         WATCH(inProgressFrames);
         WATCH(droppedFrames);
+        WATCH_EXPR("numInProgress", inProgressFrames.size());
     }
 }
 

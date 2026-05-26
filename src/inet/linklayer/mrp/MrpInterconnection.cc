@@ -69,6 +69,9 @@ void MrpInterconnection::initialize(int stage)
         WATCH(inTopologyChangeInterval);
         WATCH(inTestFrameSent);
         WATCH(interconnectionPortId);
+        WATCH_EXPR("inRoleStr", getInterconnectionRoleName(inRole, true));
+        WATCH_EXPR("inNodeStateStr", getInterconnectionNodeStateName(inNodeState));
+        WATCH_EXPR("inTopologyStateStr", getInterconnectionStateName(inTopologyState));
     }
     if (stage == INITSTAGE_LINK_LAYER) {
         EV_DETAIL << "Initialize Interconnection Stage link layer" << EV_ENDL;

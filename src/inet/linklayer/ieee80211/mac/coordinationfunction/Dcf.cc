@@ -45,6 +45,7 @@ void Dcf::initialize(int stage)
         ctsPolicy = check_and_cast<ICtsPolicy *>(getSubmodule("ctsPolicy"));
         stationRetryCounters = new StationRetryCounters();
         originatorProtectionMechanism = check_and_cast<OriginatorProtectionMechanism *>(getSubmodule("originatorProtectionMechanism"));
+        WATCH_EXPR("frameSequenceInfo", frameSequenceHandler->isSequenceRunning() ? "Fs: " + frameSequenceHandler->getFrameSequence()->getHistory() : "");
     }
 }
 

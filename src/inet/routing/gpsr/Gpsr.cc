@@ -99,6 +99,9 @@ void Gpsr::initialize(int stage)
         registerProtocol(Protocol::manet, gate("ipOut"), gate("ipIn"));
         host->subscribe(linkBrokenSignal, this);
         networkProtocol->registerHook(0, this);
+        WATCH(numSent);
+        WATCH(numReceived);
+        WATCH_EXPR("numNeighbors", neighborTable.getAddresses().size());
         WATCH(neighborTable);
         WATCH(globalPositionTable);
     }
@@ -198,11 +201,13 @@ void Gpsr::processPurgeNeighborsTimer()
 
 void Gpsr::sendUdpPacket(Packet *packet)
 {
+    numSent++;
     send(packet, "ipOut");
 }
 
 void Gpsr::processUdpPacket(Packet *packet)
 {
+    numReceived++;
     packet->popAtFront<UdpHeader>();
     processBeacon(packet);
     schedulePurgeNeighborsTimer();

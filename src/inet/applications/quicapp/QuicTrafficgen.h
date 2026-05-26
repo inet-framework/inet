@@ -72,6 +72,7 @@ class QuicTrafficgen : public ApplicationBase, public QuicSocket::ICallback
       void handleMessageFromGenerator(cMessage *msg);
       void handleGeneratorInfo(TrafficgenInfo* msg);
       void sendGeneratorControl(uint8_t controlMessageType);
+      std::string statusStr;
       void setStatusString(const char *s);
       void close();
 };

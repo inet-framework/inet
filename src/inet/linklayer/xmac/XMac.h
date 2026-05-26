@@ -99,6 +99,7 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol, public queuei
     /** implements MacBase functions */
     //@{
     virtual void configureNetworkInterface() override;
+    virtual std::string getMacStatusString() const;
     //@}
 
     /** @name Different tracked statistics.*/

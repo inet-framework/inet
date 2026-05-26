@@ -58,6 +58,9 @@ class INET_API NetPerfMeter : public SimpleModule
     void sendSCTPQueueRequest(const unsigned int queueSize);
     void sendTCPQueueRequest(const unsigned int queueSize);
 
+    unsigned long getTotalSentBytes() const;
+    unsigned long getTotalReceivedBytes() const;
+
   protected:
     // ====== Parameters =====================================================
     enum Protocol {

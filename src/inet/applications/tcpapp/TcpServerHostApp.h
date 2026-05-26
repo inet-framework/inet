@@ -77,6 +77,8 @@ class INET_API TcpServerThreadBase : public SimpleModule, public TcpSocket::ICal
     virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override;
     virtual void socketDeleted(TcpSocket *socket) override;
 
+    virtual void initialize(int stage) override;
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void refreshDisplay() const override;
 
   public:

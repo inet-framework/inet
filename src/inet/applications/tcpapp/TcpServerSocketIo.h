@@ -19,7 +19,11 @@ class INET_API TcpServerSocketIo : public SimpleModule, public TcpSocket::ICallb
     TcpSocket *socket = nullptr;
     cMessage *readDelayTimer = nullptr;
 
+    long bytesRcvd = 0;
+    long bytesSent = 0;
+
   protected:
+    virtual void initialize() override;
     virtual void handleMessage(cMessage *message) override;
 
   public:

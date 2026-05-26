@@ -118,6 +118,11 @@ class INET_API PimNeighborTable : public SimpleModule
      */
     virtual PimNeighbor *getNeighbor(int interfaceId, int index);
 
+    /**
+     * Returns the total number of neighbors.
+     */
+    size_t getTotalNumNeighbors() const;
+
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;

@@ -41,6 +41,7 @@ void Ipv4NatTable::initialize(int stage)
         networkProtocol.reference(this, "networkProtocolModule", true);
 
         WATCH(natEntries);
+        WATCH_EXPR("numNatEntries", natEntries.size());
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         parseConfig();

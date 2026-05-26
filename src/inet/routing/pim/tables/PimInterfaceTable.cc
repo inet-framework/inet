@@ -34,6 +34,7 @@ void PimInterfaceTable::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         WATCH(pimInterfaces);
+        WATCH_EXPR("numInterfaces", pimInterfaces.size());
     }
     // TODO INITSTAGE
     else if (stage == INITSTAGE_LINK_LAYER) {

@@ -80,6 +80,8 @@ class INET_API EthernetCsmaMac : public MacProtocolBase, public virtual IEtherne
     cMessage *backoffTimer = nullptr;
 
     // statistics
+    long numFramesSent = 0;
+    long numFramesReceived = 0;
 
   protected:
     virtual void initialize(int stage) override;

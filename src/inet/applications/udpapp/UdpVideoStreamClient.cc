@@ -24,6 +24,8 @@ void UdpVideoStreamClient::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         selfMsg = new cMessage("UDPVideoStreamStart");
+        WATCH(numReceived);
+        WATCH(bytesReceived);
     }
 }
 
@@ -86,6 +88,8 @@ void UdpVideoStreamClient::requestStream()
 void UdpVideoStreamClient::receiveStream(Packet *pk)
 {
     EV_INFO << "Video stream packet: " << UdpSocket::getReceivedPacketInfo(pk) << endl;
+    numReceived++;
+    bytesReceived += pk->getByteLength();
     emit(packetReceivedSignal, pk);
     delete pk;
 }

@@ -156,6 +156,12 @@ void EthernetPlca::initialize(int stage)
         WATCH(numPacketsPerCycle);
         WATCH(toStartTime);
         WATCH(cycleStartTime);
+        WATCH_EXPR("CARRIER_STATUS", cEnum::getNameForValue(CARRIER_STATUS));
+        WATCH_EXPR("SIGNAL_STATUS", cEnum::getNameForValue(SIGNAL_STATUS));
+        WATCH_EXPR("rx_cmd", cEnum::getNameForValue(rx_cmd));
+        WATCH_EXPR("tx_cmd", cEnum::getNameForValue(tx_cmd));
+        WATCH_EXPR("controlFsmState", controlFsm.getStateName());
+        WATCH_EXPR("dataFsmState", std::string(dataFsm.getStateName()));
     }
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         auto networkInterface = getContainingNicModule(this);

@@ -164,6 +164,8 @@ class INET_API PimDm : public PimBase, protected cListener
     static simsignal_t rcvdStateRefreshPkSignal;
 
     // state
+    long numSent = 0;
+    long numReceived = 0;
     RoutingTable routes;
 
   public:

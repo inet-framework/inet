@@ -59,6 +59,8 @@ void Ipv6RoutingTable::initialize(int stage)
         multicastForward = par("multicastForwarding");
         useAdminDist = par("useAdminDist");
         WATCH(isrouter);
+        WATCH_EXPR("numRoutes", routeList.size());
+        WATCH_EXPR("numDestCache", destCache.size());
 
         ift.reference(this, "interfaceTableModule", true);
 

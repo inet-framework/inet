@@ -37,6 +37,9 @@ void Icmpv6::initialize(int stage)
         WATCH(checksumMode);
         WATCH(pingMap);
         WATCH(transportProtocols);
+        WATCH(numEchoReplied);
+        WATCH(numErrorsSent);
+        WATCH(numErrorsReceived);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {
         bool isOperational;
@@ -93,6 +96,7 @@ void Icmpv6::processICMPv6Message(Packet *packet)
     auto icmpv6msg = packet->peekAtFront<Icmpv6Header>();
     int type = icmpv6msg->getType();
     if (type < 128) {
+        numErrorsReceived++;
         // ICMPv6 error messages (type < 128).
         // Pop the ICMPv6 header and create an Indication with Icmpv6ErrorInd tag.
         // The remaining packet content (quoted IPv6 + transport + payload) becomes
@@ -208,6 +212,7 @@ void Icmpv6::processEchoRequest(Packet *requestPacket, const Ptr<const Icmpv6Ech
         addressReq->setSrcAddress(addressInd->getDestAddress());
 
     delete requestPacket;
+    numEchoReplied++;
     sendToIP(replyPacket);
 }
 
@@ -263,6 +268,7 @@ void Icmpv6::sendErrorMessage(Packet *origDatagram, Icmpv6Type type, int code)
     // if srcAddr is not filled in, we're still in the src node, so we just
     // process the ICMP message locally, right away
     const auto& ipv6Header = origDatagram->peekAtFront<Ipv6Header>();
+    numErrorsSent++;
     if (ipv6Header->getSrcAddress().isUnspecified()) {
         // pretend it came from the IP layer
         errorMsg->addTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);

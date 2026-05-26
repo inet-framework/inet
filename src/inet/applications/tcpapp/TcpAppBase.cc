@@ -27,6 +27,7 @@ void TcpAppBase::initialize(int stage)
         WATCH(packetsRcvd);
         WATCH(bytesSent);
         WATCH(bytesRcvd);
+        WATCH_EXPR("socketState", TcpSocket::stateName(socket.getState()));
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         // parameters

@@ -139,6 +139,9 @@ void EthernetMacBase::initializeStatistics()
     WATCH(numFramesPassedToHL);
     WATCH(numPauseFramesRcvd);
     WATCH(numPauseFramesSent);
+    WATCH_EXPR("numDropped", numDroppedPkFromHLIfaceDown + numDroppedIfaceDown + numDroppedBitError + numDroppedNotForUs);
+    WATCH_EXPR("txQueueLen", txQueue != nullptr ? txQueue->getNumPackets() : 0);
+    WATCH_EXPR("datarate", getDatarateString());
 }
 
 void EthernetMacBase::configureNetworkInterface()
@@ -512,6 +515,19 @@ void EthernetMacBase::refreshDisplay() const
         getParentModule()->getDisplayString().setTagArg("i", 1, color);
 }
 
+std::string EthernetMacBase::getDatarateString() const
+{
+    if (transmissionChannel == nullptr)
+        return "not connected";
+    double dr = transmissionChannel->getNominalDatarate();
+    char buf[40];
+    if (dr >= 1e9) sprintf(buf, "%gGbps", dr / 1e9);
+    else if (dr >= 1e6) sprintf(buf, "%gMbps", dr / 1e6);
+    else if (dr >= 1e3) sprintf(buf, "%gkbps", dr / 1e3);
+    else sprintf(buf, "%gbps", dr);
+    return buf;
+}
+
 std::string EthernetMacBase::resolveDirective(char directive) const 
 {
     switch (directive) {
@@ -524,21 +540,7 @@ std::string EthernetMacBase::resolveDirective(char directive) const
         case 'q':
             return txQueue != nullptr ? std::to_string(txQueue->getNumPackets()) : "";
         case 'b':
-            if (transmissionChannel == nullptr)
-                return "not connected";
-            else {
-                char datarateText[40];
-                double datarate = transmissionChannel->getNominalDatarate();
-                if (datarate >= 1e9)
-                    sprintf(datarateText, "%gGbps", datarate / 1e9);
-                else if (datarate >= 1e6)
-                    sprintf(datarateText, "%gMbps", datarate / 1e6);
-                else if (datarate >= 1e3)
-                    sprintf(datarateText, "%gkbps", datarate / 1e3);
-                else
-                    sprintf(datarateText, "%gbps", datarate);
-                return datarateText;
-            }
+            return getDatarateString();
         default:
             return MacProtocolBase::resolveDirective(directive);
     }

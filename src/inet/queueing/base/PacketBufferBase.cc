@@ -24,6 +24,8 @@ void PacketBufferBase::initialize(int stage)
         WATCH(numAddedPackets);
         WATCH(numRemovedPackets);
         WATCH(numDroppedPackets);
+        WATCH_EXPR("numPackets", getNumPackets());
+        WATCH_EXPR("totalLength", getTotalLength());
     }
 }
 

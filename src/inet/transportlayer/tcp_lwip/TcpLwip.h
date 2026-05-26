@@ -44,6 +44,7 @@ class INET_API TcpLwip : public SimpleModule, public LwipTcpStackIf, public Life
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msgP) override;
     virtual void finish() override;
+    virtual std::string getTcpStatusString() const;
     virtual void refreshDisplay() const override;
     //@}
 
@@ -120,6 +121,8 @@ class INET_API TcpLwip : public SimpleModule, public LwipTcpStackIf, public Life
     bool isAliveM = false;
     Packet *pCurTcpSegM = nullptr;
     ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
+    long numSegmentsSent = 0;
+    long numSegmentsRcvd = 0;
 };
 
 } // namespace tcp

@@ -24,8 +24,10 @@ class QuicDiscardServer : public ApplicationBase, public QuicSocket::ICallback
   protected:
     QuicSocket listeningSocket;
     std::vector<QuicSocket *> clientSockets;
+    long numReceived = 0;
 
   protected:
+    virtual void initialize(int stage) override;
     virtual void handleMessageWhenUp(cMessage *msg) override;
 
     virtual void handleStartOperation(LifecycleOperation *operation) override;

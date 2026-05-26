@@ -15,6 +15,15 @@ Define_Module(TcpServerListener);
 
 const char *TcpServerListener::submoduleVectorName = "connection";
 
+void TcpServerListener::initialize(int stage)
+{
+    ApplicationBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL) {
+        WATCH_EXPR("socketState", TcpSocket::stateName(serverSocket.getState()));
+        WATCH_EXPR("numThreads", connectionSet.size());
+    }
+}
+
 void TcpServerListener::handleStartOperation(LifecycleOperation *operation)
 {
     const char *localAddress = par("localAddress");

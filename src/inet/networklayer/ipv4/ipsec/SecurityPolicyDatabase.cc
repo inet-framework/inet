@@ -37,6 +37,7 @@ SecurityPolicyDatabase::~SecurityPolicyDatabase()
 void SecurityPolicyDatabase::initialize()
 {
     WATCH(entries);
+    WATCH_EXPR("numEntries", entries.size());
 }
 
 SecurityPolicy *SecurityPolicyDatabase::findEntry(IPsecRule::Direction direction, PacketInfo *packet)

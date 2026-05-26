@@ -43,6 +43,7 @@ void Hcf::initialize(int stage)
         recipientBlockAckAgreementPolicy = dynamic_cast<IRecipientBlockAckAgreementPolicy *>(getSubmodule("recipientBlockAckAgreementPolicy"));
         rateSelection = check_and_cast<IQosRateSelection *>(getSubmodule("rateSelection"));
         frameSequenceHandler = new FrameSequenceHandler();
+        WATCH_EXPR("frameSequenceInfo", getFrameSequenceInfo());
         originatorDataService = check_and_cast<IOriginatorMacDataService *>(getSubmodule(("originatorMacDataService")));
         recipientDataService = check_and_cast<IRecipientQosMacDataService *>(getSubmodule("recipientMacDataService"));
         originatorAckPolicy = check_and_cast<IOriginatorQoSAckPolicy *>(getSubmodule("originatorAckPolicy"));
@@ -60,6 +61,18 @@ void Hcf::initialize(int stage)
             recipientBlockAckProcedure = new RecipientBlockAckProcedure();
         }
     }
+}
+
+std::string Hcf::getFrameSequenceInfo() const
+{
+    if (!frameSequenceHandler->isSequenceRunning())
+        return "";
+    auto history = frameSequenceHandler->getFrameSequence()->getHistory();
+    if (history.length() > 32) {
+        history.erase(history.begin(), history.end() - 32);
+        history = "..." + history;
+    }
+    return "Fs: " + history;
 }
 
 void Hcf::forEachChild(cVisitor *v)

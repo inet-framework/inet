@@ -40,6 +40,7 @@ void Dcaf::initialize(int stage)
         WATCH(cw);
         WATCH(cwMin);
         WATCH(cwMax);
+        WATCH_EXPR("contentionState", owning ? "Owning" : (contention != nullptr && contention->isContentionInProgress()) ? "Contending" : "Idle");
     }
 }
 

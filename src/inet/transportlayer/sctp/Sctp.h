@@ -147,6 +147,7 @@ class INET_API Sctp : public SimpleModule
     int findAssocForFd(int fd);
     void sendAbortFromMain(SctpHeader *sctpMsg, L3Address fromAddr, L3Address toAddr);
     void sendShutdownCompleteFromMain(SctpHeader *sctpMsg, L3Address fromAddr, L3Address toAddr);
+    virtual std::string getSctpStatusString() const;
     virtual void refreshDisplay() const override;
 
   public:

@@ -129,6 +129,7 @@ void NetworkInterface::initialize(int stage)
         setInterfaceName(utils::stripnonalnum(getFullName()).c_str());
         setCarrier(computeCarrier());
         setDatarate(computeDatarate());
+
         WATCH(hasModuleIdAddress);
         WATCH(hasModulePathAddress);
         WATCH(nodeInputGateId);
@@ -145,6 +146,7 @@ void NetworkInterface::initialize(int stage)
         WATCH(datarate);
         WATCH(macAddr);
         WATCH(wireless);
+        WATCH_EXPR("networkAddress", getNetworkAddress());
         cModule *node = findContainingNode(this);
         NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
         if (!nodeStatus || nodeStatus->getState() == NodeStatus::UP) {

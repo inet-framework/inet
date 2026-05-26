@@ -77,6 +77,8 @@ void Ipv4RoutingTable::initialize(int stage)
         WATCH(multicastForward);
         WATCH(isNodeUp);
         WATCH(routerId);
+        WATCH_EXPR("numRoutes", routes.size());
+        WATCH_EXPR("numMcastRoutes", multicastRoutes.size());
     }
     else if (stage == INITSTAGE_ROUTER_ID_ASSIGNMENT) {
         cModule *node = findContainingNode(this);

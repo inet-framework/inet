@@ -127,6 +127,7 @@ void EigrpInterfaceTable::initialize(int stage)
     SimpleModule::initialize(stage);
     if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         WATCH(eigrpInterfaces);
+        WATCH_EXPR("numInterfaces", eigrpInterfaces.size());
     }
 }
 

@@ -70,6 +70,8 @@ void NextHopRoutingTable::initialize(int stage)
         WATCH(forwarding);
         WATCH(multicastForwarding);
         WATCH(routerId);
+        WATCH_EXPR("numRoutes", routes.size());
+        WATCH_EXPR("numMulticastRoutes", multicastRoutes.size());
 
         cModule *host = getContainingNode(this);
         host->subscribe(interfaceCreatedSignal, this);

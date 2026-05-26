@@ -20,8 +20,11 @@ class QuicClient : public ApplicationBase, public QuicSocket::ICallback
 {
   protected:
     QuicSocket socket;
+    long numSent = 0;
+    long numReceived = 0;
 
   protected:
+    virtual void initialize(int stage) override;
     virtual void handleMessageWhenUp(cMessage *msg) override;
 
     virtual void handleStartOperation(LifecycleOperation *operation) override;

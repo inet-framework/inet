@@ -66,6 +66,9 @@ void TcpLwip::initialize(int stage)
 
         WATCH(isAliveM);
         WATCH(tcpAppConnMapM);
+        WATCH_EXPR("tcpStatus", getTcpStatusString());
+        WATCH(numSegmentsSent);
+        WATCH(numSegmentsRcvd);
 
         pLwipTcpLayerM = new LwipTcpLayer(*this);
         pLwipFastTimerM = new cMessage("lwip_fast_timer");
@@ -149,6 +152,7 @@ void TcpLwip::handleLowerPacket(Packet *packet)
             break;
     }
 
+    numSegmentsRcvd++;
     // process segment
     size_t ipHdrLen = sizeof(ip_hdr);
     size_t const maxBufferSize = 4096;
@@ -458,14 +462,10 @@ void TcpLwip::handleMessage(cMessage *msgP)
     }
 }
 
-void TcpLwip::refreshDisplay() const
+std::string TcpLwip::getTcpStatusString() const
 {
-    if (getEnvir()->isExpressMode()) {
-        // in express mode, we don't bother to update the display
-        // (std::map's iteration is not very fast if map is large)
-        getDisplayString().setTagArg("t", 0, "");
-        return;
-    }
+    if (getEnvir()->isExpressMode())
+        return "";
 
     int numINIT = 0, numCLOSED = 0, numLISTEN = 0, numSYN_SENT = 0, numSYN_RCVD = 0,
         numESTABLISHED = 0, numCLOSE_WAIT = 0, numLAST_ACK = 0, numFIN_WAIT_1 = 0,
@@ -554,7 +554,12 @@ void TcpLwip::refreshDisplay() const
     if (numTIME_WAIT > 0)
         buf2 << "time_wait:" << numTIME_WAIT << " ";
 
-    getDisplayString().setTagArg("t", 0, buf2.str().c_str());
+    return buf2.str();
+}
+
+void TcpLwip::refreshDisplay() const
+{
+    getDisplayString().setTagArg("t", 0, getTcpStatusString().c_str());
 }
 
 TcpLwipConnection *TcpLwip::findAppConn(int connIdP)
@@ -630,6 +635,7 @@ void TcpLwip::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP, L3Add
         EV_INFO << " URG";
     EV_INFO << " len=" << B(packet->getDataLength()) - tcpHdr->getHeaderLength() << "\n";
 
+    numSegmentsSent++;
     send(packet, "ipOut");
 }
 

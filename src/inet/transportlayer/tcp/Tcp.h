@@ -163,6 +163,8 @@ class INET_API Tcp : public TransportProtocolBase
 
     ushort lastEphemeralPort = static_cast<ushort>(-1);
     std::multiset<ushort> usedEphemeralPorts;
+    long numSegmentsSent = 0;
+    long numSegmentsRcvd = 0;
 
   protected:
     /** Factory method; may be overriden for customizing Tcp */
@@ -175,6 +177,7 @@ class INET_API Tcp : public TransportProtocolBase
     virtual void segmentArrivalWhileClosed(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader, L3Address src, L3Address dest);
     virtual void processIcmpv4Error(Indication *indication);
     virtual void processIcmpv6Error(Indication *indication);
+    virtual std::string getTcpStatusString() const;
     virtual void refreshDisplay() const override;
 
   public:

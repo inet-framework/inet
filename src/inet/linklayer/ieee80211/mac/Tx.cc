@@ -34,6 +34,8 @@ void Tx::initialize(int stage)
         endIfsTimer = new cMessage("endIFS");
         rx = dynamic_cast<IRx *>(findModuleByPath(par("rxModule")));
         WATCH(transmitting);
+        WATCH_EXPR("txState", endIfsTimer != nullptr && endIfsTimer->isScheduled() ? "WAIT_IFS" : transmitting ? "TRANSMIT" : "IDLE");
+        WATCH_EXPR("txFramePrefix", frame ? std::string(frame->getName()) + "\n" : "");
     }
 }
 

@@ -48,6 +48,7 @@ void DhcpClient::initialize(int stage)
         WATCH(numReceived);
         WATCH(clientState);
         WATCH(xid);
+        WATCH_EXPR("clientStateName", getStateName(clientState));
 
         // DHCP UDP ports
         clientPort = 68; // client

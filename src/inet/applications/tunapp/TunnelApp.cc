@@ -32,6 +32,8 @@ void TunnelApp::initialize(int stage)
 {
     ApplicationBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        WATCH(numSent);
+        WATCH(numReceived);
         interface = par("interface");
         const char *protocolName = par("protocol");
         protocol = Protocol::getProtocol(protocolName);
@@ -100,8 +102,10 @@ void TunnelApp::socketDataArrived(UdpSocket *socket, Packet *packet)
 {
     auto packetProtocol = packet->getTag<TransportProtocolInd>()->getProtocol();
     if (protocol == packetProtocol) {
+        numReceived++;
         packet->clearTags();
         tunSocket.send(packet);
+        numSent++;
     }
     else
         throw cRuntimeError("Unknown protocol: %s", packetProtocol->getName());
@@ -122,8 +126,10 @@ void TunnelApp::socketDataArrived(Ipv4Socket *socket, Packet *packet)
 {
     auto packetProtocol = packet->getTag<NetworkProtocolInd>()->getProtocol();
     if (protocol == packetProtocol) {
+        numReceived++;
         packet->clearTags();
         tunSocket.send(packet);
+        numSent++;
     }
     else
         throw cRuntimeError("Unknown protocol: %s", packetProtocol->getName());
@@ -138,15 +144,18 @@ void TunnelApp::socketClosed(Ipv4Socket *socket)
 void TunnelApp::socketDataArrived(TunSocket *socket, Packet *packet)
 {
     // InterfaceInd says packet is from tunnel interface and socket id is present and equals to tunSocket
+    numReceived++;
     if (protocol == &Protocol::ipv4) {
         packet->clearTags();
         packet->addTag<L3AddressReq>()->setDestAddress(L3AddressResolver().resolve(destinationAddress));
         packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         ipv4Socket.send(packet);
+        numSent++;
     }
     else if (protocol == &Protocol::udp) {
         packet->clearTags();
         clientSocket.send(packet);
+        numSent++;
     }
     else
         throw cRuntimeError("Unknown protocol: %s", protocol->getName());

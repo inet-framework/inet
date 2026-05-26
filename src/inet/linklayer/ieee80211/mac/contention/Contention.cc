@@ -40,6 +40,8 @@ void Contention::initialize(int stage)
         fsm.setName("Backoff procedure");
         fsm.setState(IDLE, "IDLE");
 
+        WATCH(fsm);
+        WATCH_EXPR("fsmState", fsm.getStateName());
         WATCH(ifs);
         WATCH(eifs);
         WATCH(slotTime);
@@ -256,7 +258,7 @@ const char *Contention::getEventName(EventType event)
         CASE(MEDIUM_STATE_CHANGED);
         CASE(CORRUPTED_FRAME_RECEIVED);
         CASE(CHANNEL_ACCESS_GRANTED);
-        default: ASSERT(false); return "";
+        default: ASSERT(false); return "?";
     }
 #undef CASE
 }

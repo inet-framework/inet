@@ -36,6 +36,7 @@ void QuicTrafficgen::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         WATCH(generatorsActive);
         WATCH(sendingAllowed);
+        WATCH(statusStr);
     }
 }
 
@@ -215,9 +216,7 @@ void QuicTrafficgen::close()
 
 void QuicTrafficgen::setStatusString(const char *s)
 {
-    if (hasGUI()) {
-        //getDisplayString().setTagArg("t", 0, s);
-    }
+    statusStr = s;
 }
 
 void QuicTrafficgen::socketSendQueueFull(QuicSocket *socket)
