@@ -15,6 +15,7 @@ ned-path = ../../../../examples;../../../../src
 network = inet.examples.ipv6.nclients.NClientsEth
 sim-time-limit = 15s
 cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
 
 #omnetpp 5.0 - 5.1 compatibility:
 eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
@@ -50,10 +51,10 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %subst: /omnetpp:://
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-datagram hopLimit reached zero, sending ICMPv6_TIME_EXCEEDED
+NClientsEth.r1.ipv6.ipv6: datagram hopLimit reached zero, sending ICMPv6_TIME_EXCEEDED
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-Forwarding ICMPv6 error indication to transport protocol udp
+NClientsEth.cli[0].ipv6.ipv6: Forwarding ICMPv6 error indication to transport protocol udp
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out
