@@ -10,7 +10,7 @@ Independent Multicast (PIM) is the standard family of multicast routing
 protocols used to build distribution trees for multicast traffic across IP
 networks. It is called "protocol independent" because it does not include its
 own topology discovery mechanism — instead it relies on the unicast routing table
-populated by any unicast routing protocol.
+(populated by any unicast routing protocol or static configuration).
 
 In this showcase, we demonstrate two PIM modes available in INET — Dense Mode
 (PIM-DM) and Sparse Mode (PIM-SM) — using simple example networks. We also
@@ -30,16 +30,22 @@ pattern:
   distributed throughout the network. It uses a *flood-and-prune* strategy:
   multicast traffic is initially flooded to all parts of the network, and
   branches that have no interested receivers send Prune messages back upstream
-  to stop receiving the traffic. The prune state times out periodically,
-  causing the traffic to be re-flooded and re-pruned. PIM-DM is defined in
-  RFC 3973.
+  to stop receiving the traffic. If a previously pruned host wants to rejoin,
+  its router can send a *Graft* message for immediate re-attachment without
+  waiting for the prune timer to expire. PIM-DM also supports *State Refresh*
+  messages to maintain prune state without periodic re-flooding. PIM-DM is
+  defined in RFC 3973.
 
 - **PIM Sparse Mode (PIM-SM)** assumes receivers are sparsely distributed and
   uses an explicit join model. A special router called the *Rendezvous Point
   (RP)* serves as the root of a shared multicast distribution tree. Receivers
-  send Join messages towards the RP to receive traffic. Sources send their
-  multicast traffic to the RP, which forwards it down the shared tree to all
-  joined receivers. PIM-SM is defined in RFC 4601.
+  send Join messages towards the RP to receive traffic. When a source starts
+  sending, its first-hop router encapsulates multicast packets in PIM *Register*
+  messages and unicasts them to the RP. The RP decapsulates these packets and
+  forwards them down the shared tree, while simultaneously sending an (S,G) Join
+  towards the source to establish native multicast forwarding. Once native
+  forwarding is established, the RP sends a *Register-Stop* to the source's
+  first-hop router. PIM-SM is defined in RFC 4601.
 
 The Model
 ---------
@@ -59,10 +65,19 @@ The second network, ``PimIptvNetwork``, models a more realistic scenario. Nine
 
 .. figure:: media/PimIptvNetwork.png
 
-Both networks extend :ned:`WiredNetworkBase`, which provides an
-:ned:`Ipv4NetworkConfigurator` for IP address assignment and unicast routing. All
-routers are :ned:`MulticastRouter` nodes — :ned:`Router` nodes with PIM enabled
-(``hasPim = true``) and multicast forwarding turned on by default.
+Both networks extend :ned:`WiredNetworkBase` (which inherits an
+:ned:`Ipv4NetworkConfigurator` from :ned:`NetworkBase`). The configurator assigns
+IP addresses and populates static unicast routes, which PIM uses for Reverse
+Path Forwarding (RPF) checks. All routers are :ned:`MulticastRouter` nodes —
+:ned:`Router` nodes with PIM enabled (``hasPim = true``) and multicast forwarding
+turned on by default.
+
+.. note::
+
+   The INET PIM-SM implementation has some limitations compared to the full
+   RFC 4601 specification: only a single global RP is supported (configured
+   statically), switchover to the Shortest Path Tree (SPT) is not implemented,
+   and PIM Bootstrap / RP discovery mechanisms are not available.
 
 PIM configuration
 ~~~~~~~~~~~~~~~~~
@@ -79,8 +94,11 @@ an XML string that specifies which mode to use:
    **.pimConfig = xml("<config><interface mode='sparse'/></config>")
 
 For PIM-SM, the Rendezvous Point must also be configured by setting the ``RP``
-parameter of the :ned:`PimSm` module to the IP address of the router that acts
-as the RP. The chosen router's ``routerId`` must match:
+parameter of the :ned:`PimSm` module to an IP address that is assigned to one of
+the RP router's interfaces. The RP router identifies itself by checking whether
+the configured RP address is local to one of its interfaces. A convenient way to
+achieve this is to set the router's ``routerId`` to the desired RP address — this
+causes the address to be assigned to the router's loopback interface:
 
 .. code-block:: ini
 
@@ -101,11 +119,10 @@ and the source begins sending at 10s.
 
 Since PIM-DM uses flood-and-prune, the multicast traffic is initially forwarded
 to all router interfaces. Routers connected to networks with no group members
-send Prune messages upstream. When a Prune timer expires (after 180s by default),
-traffic is re-flooded and pruned again.
-
-In this configuration, both receivers are present, so no branches are pruned and
-the traffic flows through all three routers to both receivers.
+send Prune messages upstream. In this configuration, both receivers are present,
+so no branches are pruned and the traffic flows through all three routers to both
+receivers. PIM Hello messages are exchanged periodically between all neighboring
+routers to maintain adjacency.
 
 PIM-SM Configuration
 ~~~~~~~~~~~~~~~~~~~~~
@@ -119,10 +136,10 @@ Sparse Mode. Router ``R1`` is configured as the Rendezvous Point.
    :end-before: [Config Iptv]
 
 In PIM-SM, no traffic flows until a receiver explicitly joins. When ``receiver1``
-starts at 5s, its designated router (R2) sends a Join message towards the RP
-(R1). When the source starts sending at 10s, the multicast traffic is
-encapsulated in PIM Register messages and sent to the RP, which then forwards
-it down the shared tree to ``receiver1``.
+starts at 5s, its designated router (R2) sends a (*,G) Join message towards the
+RP (R1). When the source starts sending at 10s, its first-hop router (also R1 in
+this topology) receives the multicast packets and — since R1 is itself the RP —
+immediately forwards them down the shared tree to ``receiver1``.
 
 When ``receiver2`` joins at 30s, its designated router (R3) also sends a Join to
 the RP, extending the shared tree to include that branch as well.
@@ -143,8 +160,9 @@ build the multicast distribution tree.
 
 The IPTV server sends high-rate multicast traffic (one 1000-byte packet every
 40ms, simulating a ~200 kbps video stream) starting at 25s. The client joins
-the multicast group at 30s and begins receiving the stream via the PIM-SM
-shared tree rooted at ``R10``.
+the multicast group at 30s. At that point, the client's designated router sends
+a (*,G) Join towards the RP (R10), and once the shared tree is established, the
+client begins receiving the stream.
 
 Results
 -------
@@ -153,19 +171,21 @@ After running each configuration, the simulation produces result files that can
 be analyzed in the OMNeT++ IDE. Key observations:
 
 - **PIM-DM**: Multicast traffic reaches both receivers immediately after the
-  source starts sending, as PIM-DM floods traffic to all branches by default.
-  PIM Hello messages are exchanged periodically between neighboring routers.
+  source starts sending at 10s, as PIM-DM floods traffic to all branches by
+  default. Both receivers receive all 80 packets sent during the simulation.
+  PIM Hello messages are exchanged periodically between all neighboring routers.
 
 - **PIM-SM**: Traffic only flows to a receiver after it has joined the group.
   ``receiver1`` gets traffic from 10s onward (it joined at 5s, source starts
-  at 10s). ``receiver2`` starts receiving after 30s when it joins the group.
-  PIM Register, Join/Prune, and Hello messages can be observed in the logs.
+  at 10s) and receives all 80 packets. ``receiver2`` starts receiving after 30s
+  when it joins the group, receiving 60 packets. PIM Register, Join/Prune, and
+  Hello messages can be observed in the logs.
 
-- **IPTV**: The IPTV server starts streaming at 25s. The client joins at 30s
-  and starts receiving the multicast stream through the PIM-SM shared tree.
-  The server sends 750 packets during the stream; the client receives 625 of
-  them (missing the ones sent before it joined). The stream traverses the grid
-  of routers from the server's corner to the client's corner.
+- **IPTV**: The IPTV server starts streaming at 25s (750 packets total at 25
+  packets/s). The client joins at 30s and receives 625 packets — missing those
+  sent during the 5s before its Join propagated through the network. The
+  multicast stream traverses the grid of routers from the server's corner to the
+  client's corner via the shared tree rooted at R10.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`PimShowcase.ned <../PimShowcase.ned>`
 
@@ -205,5 +225,5 @@ then start exploring.
 Discussion
 ----------
 
-Use `this page <https://github.com/inet-framework/inet-showcases/issues/TODO>`__
-in the GitHub issue tracker for commenting on this showcase.
+Use `this page <https://github.com/inet-framework/inet/discussions>`__
+on GitHub for commenting on this showcase.
