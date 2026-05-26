@@ -3,11 +3,10 @@ Tests MIPv6 Route Optimization: after the MN hands over to a foreign
 network, the CN's traffic triggers the Return Routability procedure
 (HoTI/CoTI/HoT/CoT) followed by a direct Binding Update from MN to CN.
 
-The existing mIPv6Network example is reused. The CN sends a single ping
-to the MN's home address at t=71s. After the MN moves to AP_1 and
+The existing mIPv6Network example is reused. The CN sends pings to the
+MN's home address starting at t=71s. After the MN moves to AP_1 and
 registers with its HA, the tunneled traffic from CN triggers route
-optimization. Only one ping is sent to avoid a routing loop bug that
-causes infinite packet bouncing on subsequent pings.
+optimization.
 
 Note: RO can only start after t=70s due to recentlySentHOTI() check
 (maxTokenLifeTime/3 = 210/3 = 70s threshold from sentHoTI=0 init).
@@ -75,7 +74,7 @@ num-rngs = 3
 **.CN*.app[0].packetSize = 56B
 **.CN*.app[*].sendInterval = 2s
 **.CN*.app[0].hopLimit = 32
-**.CN[0].app[0].count = 1
+**.CN[0].app[0].count = 5
 **.CN[0].app[0].startTime = 71s
 **.CN*.app[0].printPing = true
 
