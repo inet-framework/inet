@@ -29,7 +29,7 @@ module NarrowbandReceiverBase extends SnirReceiverBase like IReceiver
 
     submodules:
         errorModel: <> like IErrorModel if typename != "" {
-            @display("p=100,100");
+            @display("p=250,100");
         }
 }
 
