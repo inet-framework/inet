@@ -20,7 +20,7 @@ simple Ieee80211Mib extends SimpleModule
 {
     parameters:
         @class(Ieee80211Mib);
-        displayStringTextFormat = default("Address: {address}\n{modeStr}{stationTypeStr}{qosStr}\n{associatedStr}");
+        displayStringTextFormat = default("{address}\n{modeStr}{stationTypeStr}{qosStr}\n{associatedStr}");
         @display("i=block/table");
 }
 
