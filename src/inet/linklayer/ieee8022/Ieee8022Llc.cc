@@ -42,6 +42,8 @@ void Ieee8022Llc::initialize(int stage)
 
         WATCH(socketIdToSocketDescriptor);
         WATCH(upperProtocols);
+        WATCH_EXPR("sockets", socketIdToSocketDescriptor.size());
+        WATCH_EXPR("protocols", upperProtocols.size());
     }
 }
 

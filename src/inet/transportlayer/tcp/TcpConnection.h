@@ -351,7 +351,7 @@ class INET_API TcpConnection : public SimpleModule
   public:
     TcpConnection() {}
     TcpConnection(const TcpConnection& other) {} // FIXME kludge
-    void initialize() {}
+    void initialize();
 
     /**
      * The "normal" constructor.

@@ -96,6 +96,11 @@ std::string TcpStateVariables::detailedInfo() const
     return out.str();
 }
 
+void TcpConnection::initialize()
+{
+    WATCH_EXPR("fsmState", fsm.getStateName());
+}
+
 //
 // FSM framework, TCP FSM
 //
