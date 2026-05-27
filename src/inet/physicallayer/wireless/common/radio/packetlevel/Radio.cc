@@ -59,11 +59,11 @@ void Radio::initialize(int stage)
         WATCH(sendRawBytes);
         WATCH(separateTransmissionParts);
         WATCH(separateReceptionParts);
-        WATCH(radioMode);
-        WATCH(nextRadioMode);
-        WATCH(previousRadioMode);
-        WATCH(receptionState);
-        WATCH(transmissionState);
+        WATCH_EXPR("radioMode", opp_removestart(cEnum::getNameForValue(radioMode), "RADIO_MODE_"));
+        WATCH_EXPR("nextRadioMode", opp_removestart(cEnum::getNameForValue(nextRadioMode), "RADIO_MODE_"));
+        WATCH_EXPR("previousRadioMode", opp_removestart(cEnum::getNameForValue(previousRadioMode), "RADIO_MODE_"));
+        WATCH_EXPR("receptionState", opp_removestart(cEnum::getNameForValue(receptionState), "RECEPTION_STATE_"));
+        WATCH_EXPR("transmissionState", opp_removestart(cEnum::getNameForValue(transmissionState), "TRANSMISSION_STATE_"));
         WATCH(receivedSignalPart);
         WATCH(transmittedSignalPart);
         WATCH(transmissionTimer);
