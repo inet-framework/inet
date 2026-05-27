@@ -18,8 +18,6 @@ void ScalarTransmitterAnalogModel::initialize(int stage)
         defaultCenterFrequency = Hz(par("centerFrequency"));
         defaultBandwidth = Hz(par("bandwidth"));
         defaultPower = W(par("power"));
-        WATCH(defaultCenterFrequency);
-        WATCH(defaultBandwidth);
     }
 }
 
