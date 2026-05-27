@@ -146,7 +146,7 @@ void NetworkInterface::initialize(int stage)
         WATCH(datarate);
         WATCH(macAddr);
         WATCH(wireless);
-        WATCH_EXPR("networkAddress", getNetworkAddress().str());
+        WATCH_EXPR("networkAddress", getNetworkAddress());
         cModule *node = findContainingNode(this);
         NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
         if (!nodeStatus || nodeStatus->getState() == NodeStatus::UP) {
