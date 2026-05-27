@@ -27,7 +27,7 @@ module Ipv4NetworkLayer extends Module like INetworkLayer
         bool multicastForwarding = default(false);
         bool hasIpsec = default(false);
         string interfaceTableModule;
-        displayStringTextFormat = default("{ipText}");
+        displayStringTextFormat = default("fwd:{.ip.numForwarded} up:{.ip.numLocalDeliver} mcast:{.ip.numMulticast}\ndrop:{.ip.numDropped} unroutable:{.ip.numUnroutable}");
         *.forwarding = this.forwarding;
         *.multicastForwarding = this.multicastForwarding;
         *.interfaceTableModule = default(absPath(this.interfaceTableModule));

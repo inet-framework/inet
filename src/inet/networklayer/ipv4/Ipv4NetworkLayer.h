@@ -16,8 +16,6 @@ namespace inet {
 class INET_API Ipv4NetworkLayer : public Module
 {
   protected:
-    virtual void initialize(int stage) override;
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual std::string resolveDirective(char directive) const override;
 };
 
