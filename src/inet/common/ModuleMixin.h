@@ -100,6 +100,10 @@ class INET_API ModuleMixin : public T, public StringFormat::IResolver
         }
 
         // special case so that strings are displayed without quotes
+        if (auto *par = dynamic_cast<cPar *>(visitor.objects[0])) {
+            if (par->getType() == cPar::STRING)
+                return par->stdstringValue();
+        }
         if (auto *watchBase = dynamic_cast<cWatchBase *>(visitor.objects[0])) {
             any_ptr ptr = watchBase->getValuePointer();
             if (ptr.contains<std::string>())
