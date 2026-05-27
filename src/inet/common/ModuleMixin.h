@@ -89,17 +89,24 @@ class INET_API ModuleMixin : public T, public StringFormat::IResolver
         
         cCollectObjectsVisitor visitor(fieldName);
         visitor.processChildrenOf(targetModule);
-        
-        if (!visitor.objects.empty()) {
-            if (visitor.objects.size() > 1) {
-                std::stable_sort(visitor.objects.begin(), visitor.objects.end(), [] (const cObject *o1, const cObject *o2) {
-                    return dynamic_cast<const cWatchBase *>(o1) != nullptr && dynamic_cast<const cWatchBase *>(o2) == nullptr;
-                });
-            }
-            return visitor.objects[0]->str();
-        }
-        else
+
+        if (visitor.objects.empty())
             throw cRuntimeError("Unknown expression: %s", expression);
+        
+        if (visitor.objects.size() > 1) {
+            std::stable_sort(visitor.objects.begin(), visitor.objects.end(), [] (const cObject *o1, const cObject *o2) {
+                return dynamic_cast<const cWatchBase *>(o1) != nullptr && dynamic_cast<const cWatchBase *>(o2) == nullptr;
+            });
+        }
+
+        // special case so that strings are displayed without quotes
+        if (auto *watchBase = dynamic_cast<cWatchBase *>(visitor.objects[0])) {
+            any_ptr ptr = watchBase->getValuePointer();
+            if (ptr.contains<std::string>())
+                return *ptr.get<std::string>();
+        }
+
+        return visitor.objects[0]->str();
     }
 };
 
