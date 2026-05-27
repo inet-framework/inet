@@ -17,4 +17,5 @@ module IsotropicAntenna extends AntennaBase
 {
     parameters:
         @class(IsotropicAntenna);
+        displayStringTextFormat = default("isotropic\n{numAntennas} antennas");
 }

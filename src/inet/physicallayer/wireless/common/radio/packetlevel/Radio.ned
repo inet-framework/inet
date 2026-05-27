@@ -58,6 +58,8 @@ module Radio extends PhysicalLayerBase like IRadio
 
         string signalAnalogRepresentation @enum("unitDisk", "scalar", "dimensional") = default("scalar");
 
+        displayStringTextFormat = default("{radioMode}\nrx:{receptionState} tx:{transmissionState}");
+
         *.signalAnalogRepresentation = default(this.signalAnalogRepresentation);
         *.energySourceModule = default(absPath(this.energySourceModule));
 

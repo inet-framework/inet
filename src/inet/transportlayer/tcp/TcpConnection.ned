@@ -20,6 +20,7 @@ import inet.common.SimpleModule;
 simple TcpConnection extends SimpleModule {
     parameters:
         @class(TcpConnection);
+        displayStringTextFormat = default("{fsmState}\n{remoteAddr}:{remotePort}");
         @signal[state];    // FSM state
         @signal[sndWnd];    // Snd_wnd
         @signal[rcvWnd];    // Rcv_wnd

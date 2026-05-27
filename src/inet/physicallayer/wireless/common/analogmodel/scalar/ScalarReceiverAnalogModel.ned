@@ -17,5 +17,6 @@ simple ScalarReceiverAnalogModel extends SimpleModule like IReceiverAnalogModel
         double defaultCenterFrequency @unit(Hz) = default(nan Hz);
         double defaultBandwidth @unit(Hz) = default(nan Hz);
         double defaultSensitivity @unit(dBm) = default(nan dBm);     // Reception is not possible if the signal power is below sensitivity (idle or busy states)
+        displayStringTextFormat = default("{defaultCenterFrequency} {defaultBandwidth}\n{defaultSensitivity}");
         @display("i=block/tunnel");
 }

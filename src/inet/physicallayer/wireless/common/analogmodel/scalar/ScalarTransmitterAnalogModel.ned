@@ -16,6 +16,7 @@ module ScalarTransmitterAnalogModel extends Module like ITransmitterAnalogModel
         double power @unit(W) = default(nan W); // Default power
         double centerFrequency @unit(Hz) = default(nan Hz); // Default center frequency
         double bandwidth @unit(Hz) = default(nan Hz); // Default bandwidth
+        displayStringTextFormat = default("{power}\n{centerFrequency} {bandwidth}");
         @class(ScalarTransmitterAnalogModel);
         @display("i=block/tunnel");
 }
