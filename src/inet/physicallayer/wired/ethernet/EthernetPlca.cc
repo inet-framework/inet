@@ -160,10 +160,10 @@ void EthernetPlca::initialize(int stage)
         WATCH(numPacketsPerCycle);
         WATCH(toStartTime);
         WATCH(cycleStartTime);
-        WATCH_EXPR("CARRIER_STATUS", cEnum::get(opp_typename(typeid(CARRIER_STATUS_ENUM)))->getStringFor(CARRIER_STATUS));
-        WATCH_EXPR("SIGNAL_STATUS", cEnum::get(opp_typename(typeid(SIGNAL_STATUS_ENUM)))->getStringFor(SIGNAL_STATUS));
-        WATCH_EXPR("rx_cmd", cEnum::get(opp_typename(typeid(CMD_ENUM)))->getStringFor(rx_cmd));
-        WATCH_EXPR("tx_cmd", cEnum::get(opp_typename(typeid(CMD_ENUM)))->getStringFor(tx_cmd));
+        WATCH_EXPR("CARRIER_STATUS", cEnum::getNameForValue(CARRIER_STATUS));
+        WATCH_EXPR("SIGNAL_STATUS", cEnum::getNameForValue(SIGNAL_STATUS));
+        WATCH_EXPR("rx_cmd", cEnum::getNameForValue(rx_cmd));
+        WATCH_EXPR("tx_cmd", cEnum::getNameForValue(tx_cmd));
         WATCH_EXPR("controlFsmState", controlFsm.getStateName());
         WATCH_EXPR("dataFsmState", std::string(dataFsm.getStateName()));
     }
