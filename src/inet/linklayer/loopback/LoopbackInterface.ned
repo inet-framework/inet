@@ -18,6 +18,7 @@ module LoopbackInterface extends NetworkInterface like ILoopbackInterface
     parameters:
         @display("i=block/ifcard");
         string interfaceTableModule;
+        displayStringTextFormat = default("rcv:{.lo.numRcvdOK} snt:{.lo.numSent}");
         *.interfaceTableModule = default(absPath(this.interfaceTableModule));
     gates:
         input upperLayerIn;
