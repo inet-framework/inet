@@ -49,15 +49,11 @@ distributed throughout the network. It uses a *flood-and-prune* strategy:
 - If a previously pruned host wants to rejoin *before* the prune timer expires,
   its router sends a **Graft** message for immediate re-attachment — without
   waiting for the next flood cycle.
+- To avoid the periodic flood-and-prune cycle, the source's first-hop router
+  can periodically send **State Refresh** messages (every 60s by default)
+  downstream to maintain prune state without re-flooding.
 
 PIM-DM is defined in RFC 3973 (Experimental).
-
-.. note::
-
-   The INET PIM-DM implementation also supports *State Refresh* — the source's
-   first-hop router periodically sends State Refresh messages (every 60s by
-   default) downstream to maintain prune state, avoiding the periodic
-   flood-and-prune cycle described above.
 
 **PIM Sparse Mode (PIM-SM)** assumes receivers are sparsely distributed and
 uses an explicit join model. Unlike PIM-DM, traffic does not flow until a
@@ -110,6 +106,16 @@ The basic operation works as follows:
   **Register-Stop** to the DR. The DR stops encapsulating, and from this point
   on, traffic flows as plain multicast end-to-end — the RP is just another
   router in the tree, not a unicast relay.
+
+.. TODO: The Register-Null bullet below might be too detailed for the About
+   section. Consider removing it if it distracts from the main flow.
+
+- After receiving Register-Stop, the DR starts a *Register-Stop Timer*. When
+  the timer nears expiry, the DR sends a **Register-Null** message (a Register
+  with no data) to the RP to check whether receivers still exist. If they do,
+  the RP replies with another Register-Stop and the cycle repeats. This
+  probing keeps the source's DR in sync with the RP without sending actual
+  data.
 
 PIM-SM is defined in RFC 4601.
 
