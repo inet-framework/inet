@@ -40,18 +40,6 @@ void Aodv::initialize(int stage)
     RoutingProtocolBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        WATCH(numSent);
-        WATCH(numReceived);
-        WATCH(usingIpv6);
-        WATCH(hasExternalGateway);
-        WATCH(rreqId);
-        WATCH(sequenceNum);
-        WATCH(rreqCount);
-        WATCH(rerrCount);
-        WATCH(lastBroadcastTime);
-        WATCH(rebootTime);
-        WATCH(failedNextHop);
-        WATCH_EXPR("numRoutes", routingTable->getNumRoutes());
         lastBroadcastTime = SIMTIME_ZERO;
         rebootTime = SIMTIME_ZERO;
         rreqId = sequenceNum = 0;
@@ -94,6 +82,18 @@ void Aodv::initialize(int stage)
         blacklistTimer = new cMessage("BlackListTimer");
         if (useHelloMessages)
             helloMsgTimer = new cMessage("HelloMsgTimer");
+        WATCH(numSent);
+        WATCH(numReceived);
+        WATCH(usingIpv6);
+        WATCH(hasExternalGateway);
+        WATCH(rreqId);
+        WATCH(sequenceNum);
+        WATCH(rreqCount);
+        WATCH(rerrCount);
+        WATCH(lastBroadcastTime);
+        WATCH(rebootTime);
+        WATCH(failedNextHop);
+        WATCH_EXPR("numRoutes", routingTable->getNumRoutes());
     }
     else if (stage == INITSTAGE_ROUTER_ID_ASSIGNMENT) {
         interface = interfaceTable->findInterfaceByName(par("interface"));

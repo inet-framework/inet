@@ -28,6 +28,8 @@ void PacketQueueBase::initialize(int stage)
         WATCH(numPulledPackets);
         WATCH(numRemovedPackets);
         WATCH(numDroppedPackets);
+    }
+    else if (stage == INITSTAGE_LAST) {
         WATCH_EXPR("numPackets", getNumPackets());
         WATCH_EXPR("totalLength", getTotalLength());
     }

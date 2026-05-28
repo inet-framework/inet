@@ -54,12 +54,6 @@ void Dsdv::initialize(int stage)
 
     // reads from omnetpp.ini
     if (stage == INITSTAGE_LOCAL) {
-        WATCH(numSent);
-        WATCH(numReceived);
-        WATCH(sequencenumber);
-        WATCH(interfaceId);
-        WATCH(isForwardHello);
-        WATCH_EXPR("numRoutes", rt->getNumRoutes());
         sequencenumber = 0;
         host = getContainingNode(this);
         ift.reference(this, "interfaceTableModule", true);
@@ -70,6 +64,13 @@ void Dsdv::initialize(int stage)
         forwardList = new std::list<ForwardEntry *>();
         event = new cMessage("event");
         purgeTimer = new cMessage("purge");
+
+        WATCH(numSent);
+        WATCH(numReceived);
+        WATCH(sequencenumber);
+        WATCH(interfaceId);
+        WATCH(isForwardHello);
+        WATCH_EXPR("numRoutes", rt->getNumRoutes());
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         registerProtocol(Protocol::manet, gate("ipOut"), gate("ipIn"));

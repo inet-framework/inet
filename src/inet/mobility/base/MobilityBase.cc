@@ -95,12 +95,12 @@ void MobilityBase::initialize(int stage)
         WATCH(constraintAreaMax);
         WATCH(lastPosition);
         WATCH(lastOrientation);
-        WATCH_EXPR("position", getCurrentPosition());
-        WATCH_EXPR("velocity", getCurrentVelocity());
     }
     else if (stage == INITSTAGE_SINGLE_MOBILITY) {
         initializeOrientation();
         initializePosition();
+        WATCH_EXPR("position", getCurrentPosition());
+        WATCH_EXPR("velocity", getCurrentVelocity());
     }
 }
 

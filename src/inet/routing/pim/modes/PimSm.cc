@@ -60,6 +60,14 @@ void PimSm::initialize(int stage)
         registerProbeTime = par("registerProbeTime");
         assertTime = par("assertTime");
         assertOverrideInterval = par("assertOverrideInterval");
+
+        WATCH(rpAddr);
+        WATCH(numSent);
+        WATCH(numReceived);
+        WATCH(gRoutes);
+        WATCH(sgRoutes);
+        WATCH_EXPR("numGRoutes", gRoutes.size());
+        WATCH_EXPR("numSgRoutes", sgRoutes.size());
     }
 }
 
@@ -84,14 +92,6 @@ void PimSm::handleStartOperation(LifecycleOperation *operation)
         host->subscribe(pimNeighborAddedSignal, this);
         host->subscribe(pimNeighborDeletedSignal, this);
         host->subscribe(pimNeighborChangedSignal, this);
-
-        WATCH(rpAddr);
-        WATCH(numSent);
-        WATCH(numReceived);
-        WATCH(gRoutes);
-        WATCH(sgRoutes);
-        WATCH_EXPR("numGRoutes", gRoutes.size());
-        WATCH_EXPR("numSgRoutes", sgRoutes.size());
     }
 }
 
