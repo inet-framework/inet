@@ -68,6 +68,18 @@ TcpEchoAppThread::~TcpEchoAppThread()
     cancelAndDelete(delayedPacket);
 }
 
+void TcpEchoAppThread::initialize(int stage)
+{
+    TcpServerThreadBase::initialize(stage);
+
+    if (stage == INITSTAGE_LOCAL) {
+        bytesRcvd = 0;
+        bytesSent = 0;
+        WATCH(bytesRcvd);
+        WATCH(bytesSent);
+    }
+}
+
 void TcpEchoAppThread::sendOrScheduleReadCommandIfNeeded()
 {
     if (!sock->getAutoRead() && sock->isOpen()) {
@@ -96,6 +108,7 @@ void TcpEchoAppThread::dataArrived(Packet *rcvdPkt, bool urgent)
     take(rcvdPkt);
     emit(packetReceivedSignal, rcvdPkt);
     int64_t rcvdBytes = rcvdPkt->getByteLength();
+    bytesRcvd += rcvdBytes;
     echoAppModule->bytesRcvd += rcvdBytes;
 
     if (sock->getState() != TcpSocket::CONNECTED) {
@@ -181,6 +194,7 @@ void TcpEchoAppThread::close()
 
 void TcpEchoAppThread::sendDown(Packet *msg)
 {
+    bytesSent += msg->getByteLength();
     emit(packetSentSignal, msg);
     drop(msg);
     echoAppModule->sendDown(msg);
