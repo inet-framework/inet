@@ -630,6 +630,10 @@ void TcpConnection::configureStateVariables()
     state->pmtudTimeout = tcpMain->par("pmtudTimeout"); // time after which original MSS is restored
     state->pmtudLastMssReduction = -1; // never reduced yet
 
+    WATCH_EXPR("snd_nxt", state->snd_nxt);
+    WATCH_EXPR("rcv_nxt", state->rcv_nxt);
+    WATCH_EXPR("snd_una", state->snd_una);
+
     if (state->sack_support) {
         std::string algorithmName1 = "TcpReno";
         std::string algorithmName2 = tcpMain->par("tcpAlgorithmClass");
