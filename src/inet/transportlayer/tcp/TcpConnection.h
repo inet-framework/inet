@@ -154,6 +154,12 @@ class INET_API TcpConnection : public SimpleModule
     cMessage *finWait2Timer = nullptr;
     cMessage *synRexmitTimer = nullptr; // for retransmitting SYN and SYN+ACK
 
+    // statistics
+    long rcvdSegments = 0;
+    long sentSegments = 0;
+    uint32_t lastRcvdSeqNo = 0;
+    uint32_t lastSentAck = 0;
+
   protected:
     /** @name FSM transitions: analysing events and executing state transitions */
     //@{

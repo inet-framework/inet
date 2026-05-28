@@ -257,6 +257,9 @@ TcpConnection *TcpConnection::cloneListeningConnection()
 
 void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader)
 {
+    sentSegments++;
+    lastSentAck = tcpHeader->getAckNo();
+
     // record seq (only if we do send data) and ackno
     if (tcpSegment->getByteLength() > tcpHeader->getChunkLength().get<B>())
         emit(sndNxtSignal, tcpHeader->getSequenceNo());

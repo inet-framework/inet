@@ -149,6 +149,10 @@ void TcpConnection::initConnection(Tcp *_mod, int _socketId)
     WATCH(connEstabTimer);
     WATCH(finWait2Timer);
     WATCH(synRexmitTimer);
+    WATCH(rcvdSegments);
+    WATCH(sentSegments);
+    WATCH(lastRcvdSeqNo);
+    WATCH(lastSentAck);
 }
 
 TcpConnection::~TcpConnection()
@@ -218,6 +222,8 @@ bool TcpConnection::processTCPSegment(Packet *tcpSegment, const Ptr<const TcpHea
 
     take(tcpSegment);
     printConnBrief();
+    rcvdSegments++;
+    lastRcvdSeqNo = tcpHeader->getSequenceNo();
     if (!localAddr.isUnspecified()) {
         ASSERT(localAddr == segDestAddr);
         ASSERT(localPort == tcpHeader->getDestPort());
