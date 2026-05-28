@@ -98,7 +98,14 @@ void SharedDataManager::lifecycleEvent(SimulationLifecycleEventType eventType, c
     if (eventType == LF_POST_NETWORK_DELETE)
         clear();
 
+    // Temporarily suppress EV logging during CodeFragment execution to avoid
+    // a crash when the eventlog file hasn't been opened yet (the SharedDataManager
+    // lifecycle listener may be notified before EventlogFileManager during
+    // LF_PRE_NETWORK_SETUP, and log output at that point would hit a null fileLock).
+    auto savedLogLevel = cLog::logLevel;
+    cLog::logLevel = LOGLEVEL_OFF;
     CodeFragment::executeAll(eventType);
+    cLog::logLevel = savedLogLevel;
 }
 
 SharedDataManager *SharedDataManager::getInstance()
