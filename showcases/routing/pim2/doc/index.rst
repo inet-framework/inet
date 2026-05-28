@@ -43,12 +43,21 @@ distributed throughout the network. It uses a *flood-and-prune* strategy:
 
 - Multicast traffic is initially **flooded** to all parts of the network.
 - Routers with no interested downstream receivers send **Prune** messages back
-  upstream to stop receiving the traffic.
-- If a previously pruned host later wants to rejoin, its router sends a
-  **Graft** message for immediate re-attachment — without waiting for the prune
-  timer to expire.
+  upstream to stop receiving the traffic. This prune state is temporary — it
+  expires after a *prune timer* (default 180s), at which point the router
+  resumes flooding. This creates a periodic flood-and-prune cycle.
+- If a previously pruned host wants to rejoin *before* the prune timer expires,
+  its router sends a **Graft** message for immediate re-attachment — without
+  waiting for the next flood cycle.
 
-PIM-DM is defined in RFC 3973.
+PIM-DM is defined in RFC 3973 (Experimental).
+
+.. note::
+
+   The INET PIM-DM implementation also supports *State Refresh* — the source's
+   first-hop router periodically sends State Refresh messages (every 60s by
+   default) downstream to maintain prune state, avoiding the periodic
+   flood-and-prune cycle described above.
 
 **PIM Sparse Mode (PIM-SM)** assumes receivers are sparsely distributed and
 uses an explicit join model. Unlike PIM-DM, traffic does not flow until a
@@ -103,6 +112,15 @@ The basic operation works as follows:
   router in the tree, not a unicast relay.
 
 PIM-SM is defined in RFC 4601.
+
+.. note::
+
+   The INET PIM-SM implementation simplifies the Register-Stop timing: the RP
+   sends the Register-Stop immediately upon receiving the first Register
+   message — in the same step as the (S,G) Join — rather than waiting for the
+   native path to be established. This means only one Register-encapsulated
+   packet is ever delivered, followed by a brief gap until the native (S,G)
+   path propagates.
 
 The Model
 ---------
