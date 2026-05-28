@@ -5,10 +5,15 @@ Goals
 -----
 
 IP multicast enables efficient one-to-many data delivery by sending a single
-copy of each packet that is replicated only where paths diverge. Protocol
-Independent Multicast (PIM) is the standard family of multicast routing
-protocols used to build distribution trees for multicast traffic across IP
-networks. It is called "protocol independent" because it does not include its
+copy of each packet that is replicated only where paths diverge. Each link in
+the tree carries only one copy of each packet. On the local network segment,
+the last-hop router sends the packet as a multicast frame — all interested
+hosts receive it without individual copies. Hosts signal their interest to the
+router using IGMP (Internet Group Management Protocol).
+
+Protocol Independent Multicast (PIM) is the standard family of multicast
+routing protocols used to build distribution trees for multicast traffic across
+IP networks. It is called "protocol independent" because it does not include its
 own topology discovery mechanism — instead it relies on the unicast routing table
 (populated by any unicast routing protocol or static configuration).
 
@@ -24,27 +29,41 @@ About PIM
 ---------
 
 PIM operates in two primary modes, each suited to a different multicast traffic
-pattern:
+pattern.
 
-- **PIM Dense Mode (PIM-DM)** assumes that multicast group members are densely
-  distributed throughout the network. It uses a *flood-and-prune* strategy:
-  multicast traffic is initially flooded to all parts of the network, and
-  branches that have no interested receivers send Prune messages back upstream
-  to stop receiving the traffic. If a previously pruned host wants to rejoin,
-  its router can send a *Graft* message for immediate re-attachment without
-  waiting for the prune timer to expire. PIM-DM is defined in RFC 3973.
+**PIM Dense Mode (PIM-DM)** assumes that multicast group members are densely
+distributed throughout the network. It uses a *flood-and-prune* strategy:
 
-- **PIM Sparse Mode (PIM-SM)** assumes receivers are sparsely distributed and
-  uses an explicit join model. A special router called the *Rendezvous Point
-  (RP)* serves as the root of a shared multicast distribution tree. Receivers
-  send Join messages towards the RP to receive traffic. When a source starts
-  sending, its first-hop router (called the *designated router* or DR — the
-  router directly connected to the source's network) encapsulates multicast
-  packets in PIM *Register* messages and unicasts them to the RP. The RP
-  decapsulates these packets and forwards them down the shared tree, while
-  simultaneously sending an (S,G) Join towards the source to establish native
-  multicast forwarding. Once native forwarding is established, the RP sends a
-  *Register-Stop* to the source's DR. PIM-SM is defined in RFC 4601.
+- Multicast traffic is initially **flooded** to all parts of the network.
+- Routers with no interested downstream receivers send **Prune** messages back
+  upstream to stop receiving the traffic.
+- If a previously pruned host later wants to rejoin, its router sends a
+  **Graft** message for immediate re-attachment — without waiting for the prune
+  timer to expire.
+
+PIM-DM is defined in RFC 3973.
+
+**PIM Sparse Mode (PIM-SM)** assumes receivers are sparsely distributed and
+uses an explicit join model. A special router called the *Rendezvous Point
+(RP)* serves as the root of a shared multicast distribution tree. All routers
+in the PIM domain must know the RP's address — in real networks this is
+typically learned via the PIM Bootstrap mechanism, but in INET it is configured
+statically on every router.
+
+The basic operation works as follows:
+
+- Receivers send **Join** messages towards the RP to subscribe to a group.
+  Traffic only flows along branches that have been explicitly requested.
+- When a source starts sending, its first-hop router (the *designated router*
+  or DR) encapsulates multicast packets in **Register** messages and unicasts
+  them to the RP.
+- The RP decapsulates these packets and forwards them down the shared tree. At
+  the same time, it sends an (S,G) Join towards the source to establish native
+  multicast forwarding.
+- Once native forwarding is established, the RP sends a **Register-Stop** to
+  the DR, ending the encapsulation overhead.
+
+PIM-SM is defined in RFC 4601.
 
 The Model
 ---------
