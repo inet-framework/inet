@@ -46,10 +46,10 @@ distributed throughout the network. It uses a *flood-and-prune* strategy:
   upstream to stop receiving the traffic. This prune state is temporary — it
   expires after a *prune timer* (default 180s), at which point the router
   resumes flooding. This creates a periodic flood-and-prune cycle.
-- If a previously pruned host wants to rejoin *before* the prune timer expires,
-  its router sends a **Graft** message for immediate re-attachment — without
-  waiting for the next flood cycle.
-- To avoid the periodic flood-and-prune cycle, the source's first-hop router
+- If a new receiver appears on a previously pruned branch *before* the prune
+  timer expires, its router sends a **Graft** message for immediate
+  re-attachment — without waiting for the next flood cycle.
+- To avoid the periodic flood-and-prune cycle, the source's first-hop router (also called the *designated router* or DR)
   can periodically send **State Refresh** messages (every 60s by default)
   downstream to maintain prune state without re-flooding.
 
@@ -116,6 +116,9 @@ The basic operation works as follows:
   the RP replies with another Register-Stop and the cycle repeats. This
   probing keeps the source's DR in sync with the RP without sending actual
   data.
+
+When a receiver leaves the group, its router sends a **Prune** message towards
+the RP to remove that branch from the shared tree.
 
 PIM-SM is defined in RFC 4601.
 
