@@ -98,7 +98,7 @@ std::string TcpStateVariables::detailedInfo() const
 
 void TcpConnection::initialize()
 {
-    WATCH_EXPR("fsmState", fsm.getStateName());
+    WATCH_EXPR("fsmState", stateName(fsm.getState()));
 }
 
 //
