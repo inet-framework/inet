@@ -42,7 +42,7 @@ simple TcpBasicClientApp extends SimpleModule like IApp
 {
     parameters:
         @class(TcpBasicClientApp);
-        displayStringTextFormat = default("{socketState}");
+        displayStringTextFormat = default("{socketState}\nrcvd: {packetsRcvd} pks\nsent: {packetsSent} pks");
         string localAddress = default(""); // May be left empty ("")
         int localPort = default(-1); // Port number to listen on
         string connectAddress = default("");  // Server address (may be symbolic)

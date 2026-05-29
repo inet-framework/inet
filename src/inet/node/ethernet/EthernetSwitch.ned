@@ -11,6 +11,7 @@ import inet.applications.contract.IApp;
 import inet.clock.contract.IClock;
 import inet.common.IMeasurer;
 import inet.common.MessageDispatcher;
+import inet.common.Module;
 import inet.common.lifecycle.NodeStatus;
 import inet.common.packet.recorder.PcapRecorder;
 import inet.linklayer.configurator.contract.IL2NodeConfigurator;
@@ -26,6 +27,7 @@ import inet.linklayer.contract.ISpanningTree;
 import inet.networklayer.common.InterfaceTable;
 import inet.node.contract.IEthernetNetworkNode;
 import inet.protocolelement.contract.IProtocolLayer;
+
 
 //
 // EthernetSwitch models a Layer 2 Ethernet switch with support for various IEEE 802.1
@@ -47,7 +49,7 @@ import inet.protocolelement.contract.IProtocolLayer;
 // - Configurable number of Ethernet interfaces
 // - Optional PCAP recording for traffic analysis
 //
-module EthernetSwitch like IEthernetNetworkNode
+module EthernetSwitch extends Module like IEthernetNetworkNode
 {
     parameters:
         @networkNode();

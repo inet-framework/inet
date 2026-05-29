@@ -18,6 +18,7 @@ simple EigrpRtp6 extends SimpleModule
 {
     parameters:
         @class(EigrpRtp6);
+        displayStringTextFormat = default("EIGRP RTP6");
 
     gates:
         input pdmIn;

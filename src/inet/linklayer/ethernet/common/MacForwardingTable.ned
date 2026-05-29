@@ -34,6 +34,6 @@ simple MacForwardingTable extends SimpleModule like IMacForwardingTable
         object forwardingTable @mutable = default([]);
         string forwardingTableFile = default("");
         string interfaceTableModule;
-        displayStringTextFormat = default("addr: %a\nvlan: %v");
+        displayStringTextFormat = default("addr: {numAddresses}");
 }
 

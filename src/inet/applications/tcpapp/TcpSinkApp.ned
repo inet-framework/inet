@@ -28,7 +28,7 @@ module TcpSinkApp extends TcpServerHostApp
         volatile int readSize @unit(B) = default(-1B);    // Used only with autoRead==false
         volatile double readDelay @unit(s) = default(-1s);    // Used only with autoRead==false; delay for issuing a READ command after previous READ was satisfied; -1 means immediately, 0 means zero delay
         @class(TcpSinkApp);
-        displayStringTextFormat = default("threads: {numThreads}\nrcvd: {bytesRcvd} bytes");
+        displayStringTextFormat = default("{numThreads} threads\nrcvd: {bytesRcvd} bytes");
         @display("i=block/sink");
         @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none; checkSignals=false);
         @statistic[endToEndDelay](title="end-to-end delay"; source="dataAge(packetReceived)"; unit=s; record=histogram,weightedHistogram,vector; interpolationmode=none; checkSignals=false);

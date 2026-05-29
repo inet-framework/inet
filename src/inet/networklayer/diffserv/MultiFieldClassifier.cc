@@ -139,7 +139,6 @@ void MultiFieldClassifier::initialize(int stage)
 
         numRcvd = 0;
         WATCH(numRcvd);
-        WATCH_EXPR("mfClassifierStatus", numRcvd > 0 ? "rcvd:" + std::to_string(numRcvd) + " " : std::string());
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         cXMLElement *config = par("filters");

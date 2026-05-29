@@ -46,6 +46,7 @@ simple PimSm extends SimpleModule
 {
     parameters:
         @class(PimSm);
+        displayStringTextFormat = default("*G:{numGRoutes} SG:{numSgRoutes}\nrcvd:{numReceived} sent:{numSent} pks");
         @display("i=block/network2");
         string interfaceTableModule;
         string routingTableModule;

@@ -95,6 +95,7 @@ simple Igmpv2 extends SimpleModule like IIgmp
 {
     parameters:
         @class(Igmpv2);
+        displayStringTextFormat = default("groups:{numGroups}\nqry:{numQueriesSent}/{numQueriesRecv} rep:{numReportsSent}/{numReportsRecv}");
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
         string checksumMode @enum("declared","computed") = default("declared");

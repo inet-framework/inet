@@ -27,7 +27,6 @@ void SingleRateThreeColorMeter::initialize(int stage)
         WATCH(numRcvd);
         WATCH(numYellow);
         WATCH(numRed);
-        WATCH_EXPR("meterStatus", (numRcvd > 0 ? "rcvd: " + std::to_string(numRcvd) + " " : std::string()) + (numYellow > 0 ? "yellow:" + std::to_string(numYellow) + " " : std::string()) + (numRed > 0 ? "red:" + std::to_string(numRed) + " " : std::string()));
 
         CBS = 8 * par("cbs").intValue();
         EBS = 8 * par("ebs").intValue();

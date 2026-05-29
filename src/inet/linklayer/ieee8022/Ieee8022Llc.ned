@@ -15,6 +15,7 @@ simple Ieee8022Llc extends SimpleModule like IIeee8022Llc
     parameters:
         @class(Ieee8022Llc);
         bool registerProtocol = default(false);     //FIXME //KLUDGE should redesign the placement of EthernetEncapsulation and LLC modules
+        displayStringTextFormat = default("sockets: {sockets}");
         @display("i=block/layer");
         @signal[packetDropped](type=inet::Packet);
     gates:

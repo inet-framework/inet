@@ -18,7 +18,7 @@ import inet.queueing.contract.IPacketClassifier;
 simple MarkovClassifier extends PacketClassifierBase like IPacketClassifier
 {
     parameters:
-        displayStringTextFormat = default("classified %p pk (%l)\ncurrent state: %s");
+        displayStringTextFormat = default("classified {numProcessedPackets} pk ({processedTotalLength})\ncurrent state: {state}");
         string clockModule = default(""); // Relative path of a module that implements IClock; optional
         int initialState = default(0); // The index of the start state of the Markov process
         string transitionProbabilities; // The transition matrix (N x N) of the Markov process, specified as a list of probabilities

@@ -25,7 +25,6 @@ void TokenBucketMeter::initialize(int stage)
         numRed = 0;
         WATCH(numRcvd);
         WATCH(numRed);
-        WATCH_EXPR("meterStatus", (numRcvd > 0 ? "rcvd: " + std::to_string(numRcvd) + " " : std::string()) + (numRed > 0 ? "red:" + std::to_string(numRed) + " " : std::string()));
 
         CBS = 8 * par("cbs").intValue();
         colorAwareMode = par("colorAwareMode");

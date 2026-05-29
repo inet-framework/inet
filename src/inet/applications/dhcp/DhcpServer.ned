@@ -22,6 +22,7 @@ simple DhcpServer extends SimpleModule like IApp
 {
     parameters:
         @class(DhcpServer);
+        displayStringTextFormat = default("rcvd: {numReceived} pks\nsent: {numSent} pks\nleased: {numLeased}");
         string interfaceTableModule; // The path to the InterfaceTable module
         string interface = default(""); // Interface to listen on; can be left empty if there is only one non-loopback interface
         int numReservedAddresses; // Number of addresses to skip at the start of the network's address range

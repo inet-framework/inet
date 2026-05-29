@@ -6,7 +6,8 @@ import inet.common.SimpleModule;
 simple Ospfv3Splitter extends SimpleModule
 {
     parameters:
-        @class(Ospfv3Splitter);                     // these are parameters which need to be filled in the omnetpp.ini file
+        @class(Ospfv3Splitter);
+        displayStringTextFormat = default("{numProcesses} processes");                     // these are parameters which need to be filled in the omnetpp.ini file
         xml ospfv3RoutingConfig;
         xml ospfv3IntConfig;
 

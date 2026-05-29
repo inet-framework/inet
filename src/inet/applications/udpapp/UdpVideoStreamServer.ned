@@ -30,6 +30,7 @@ simple UdpVideoStreamServer extends SimpleModule like IApp
 {
     parameters:
         @class(UdpVideoStreamServer);
+        displayStringTextFormat = default("{numStreams} streams");
         int localPort; // Port to listen on
         volatile double sendInterval @unit(s); // Interval between sending video stream packets
         volatile int packetLen @unit(B);  // Length of a video packet in bytes

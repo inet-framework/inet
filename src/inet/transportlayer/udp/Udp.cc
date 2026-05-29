@@ -74,7 +74,6 @@ void Udp::initialize(int stage)
         WATCH(numPassedUp);
         WATCH(numDroppedWrongPort);
         WATCH(numDroppedBadChecksum);
-        WATCH_EXPR("udpDroppedText", numDroppedWrongPort > 0 ? "\ndropped (no app): " + std::to_string(numDroppedWrongPort) + " pks" : std::string());
         WATCH(socketsByIdMap);
         WATCH(socketsByPortMap);
     }

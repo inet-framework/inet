@@ -48,7 +48,7 @@ simple SctpClient extends SimpleModule like IApp
         string streamRequestRatio = default("");
         string streamPriorities = default("");
         bool finishEndsSimulation = default(false);
-        displayStringTextFormat = default("{socketState}");
+        displayStringTextFormat = default("{socketState}\nrcvd:{packetsRcvd} sent:{packetsSent} pks");
         @signal[packetSent](type=inet::Packet);
         @signal[packetReceived](type=inet::Packet);
         @signal[echoedPk](type=inet::Packet);

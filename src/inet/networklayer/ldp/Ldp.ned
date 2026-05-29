@@ -32,6 +32,7 @@ simple Ldp extends SimpleModule like IApp
 {
     parameters:
         @class(Ldp);
+        displayStringTextFormat = default("peers:{numPeers} fecs:{numFecs}\nrcvd:{numReceived} sent:{numSent} pks");
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
         string libTableModule;

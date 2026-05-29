@@ -115,7 +115,6 @@ class INET_API Ipv6 : public SimpleModule, public NetfilterBase, public Lifecycl
     virtual NetworkInterface *getSourceInterfaceFrom(Packet *msg);
 
     // utility: show current statistics above the icon
-    virtual std::string getIpv6StatusText() const;
 
     /**
      * Encapsulate packet coming from higher layers into IPv6Datagram

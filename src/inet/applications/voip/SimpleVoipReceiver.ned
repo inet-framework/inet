@@ -29,6 +29,7 @@ simple SimpleVoipReceiver extends SimpleModule like IApp
 {
     parameters:
         @class(SimpleVoipReceiver);
+        displayStringTextFormat = default("delay: {playoutDelay}\nbuf: {bufferSpace}");
         int localPort;
         int emodelIe = default(5);        // Equipment impairment factor
         int emodelBpl = default(10);      // Packet-loss robustness factor

@@ -22,6 +22,7 @@ simple SctpNatServer extends SimpleModule like IApp
 {
     parameters:
         @class(SctpNatServer);
+        displayStringTextFormat = default("{numSessions} sessions\nrcvd: {packetsRcvd} pks\nsent: {bytesSent} bytes");
         string localAddress = default(""); // May be left empty ("")
         int localPort = default(0); // Port number to listen on
         int numPacketsToSendPerClient = default(0);  // Number of requests sent per session

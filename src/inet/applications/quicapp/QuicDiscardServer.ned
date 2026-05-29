@@ -15,6 +15,7 @@ simple QuicDiscardServer extends SimpleModule like IApp
 {
     parameters:
         @class(QuicDiscardServer);
+        displayStringTextFormat = default("{numSessions} sessions\nrcvd: {numReceived} pks");
         @signal[bytesReceived];
         @statistic[bytesReceived](record=vector);
         

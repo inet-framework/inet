@@ -26,6 +26,7 @@ simple VoipStreamReceiver extends SimpleModule like IApp
 {
     parameters:
         @class(VoipStreamReceiver);
+        displayStringTextFormat = default("delay: {playoutDelay}");
         int localPort;
         double playoutDelay @unit(s) = default(20ms);
         string resultFile;

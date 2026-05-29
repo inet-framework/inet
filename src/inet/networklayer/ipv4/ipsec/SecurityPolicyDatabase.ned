@@ -27,6 +27,6 @@ simple SecurityPolicyDatabase extends SimpleModule
 {
     parameters:
         @class(SecurityPolicyDatabase);
-        displayStringTextFormat = default("entries: {numEntries}");
+        displayStringTextFormat = default("{numEntries} entries");
         @display("i=block/table2;is=s");
 }

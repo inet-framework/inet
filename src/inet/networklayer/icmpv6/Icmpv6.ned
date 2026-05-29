@@ -19,6 +19,7 @@ simple Icmpv6 extends SimpleModule
 {
     parameters:
         @class(Icmpv6);
+        displayStringTextFormat = default("echo:{numEchoReplied} errSent:{numErrorsSent}\nerrRcvd:{numErrorsReceived}");
         string interfaceTableModule;   // The path to the InterfaceTable module
         string checksumMode @enum("declared", "computed") = default("declared");
         @display("i=block/control");

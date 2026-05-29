@@ -25,6 +25,7 @@ simple TunnelApp extends SimpleModule like IApp
 {
     parameters:
         @class(TunnelApp);
+        displayStringTextFormat = default("rcvd: {numReceived} pks\nsent: {numSent} pks");
         string interfaceTableModule;
         string interface;
         string protocol @enum("udp", "ipv4") = default("udp");

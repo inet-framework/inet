@@ -26,7 +26,7 @@ simple MacRelayUnitBase extends SimpleModule
         @class(MacRelayUnitBase);
         string macTableModule;
         string interfaceTableModule;
-        displayStringTextFormat = default("proc: %p\ndisc: %d");
+        displayStringTextFormat = default("proc: {numProcessedFrames}\ndisc: {numDroppedFrames}");
         @display("i=block/switch");
         @signal[packetSentToLower](type=inet::Packet);
         @signal[packetReceivedFromUpper](type=inet::Packet);

@@ -79,7 +79,6 @@ void Ipv4RoutingTable::initialize(int stage)
         WATCH(routerId);
         WATCH_EXPR("numRoutes", routes.size());
         WATCH_EXPR("numMcastRoutes", multicastRoutes.size());
-        WATCH_EXPR("routingTableStatusText", getRoutingTableStatusText());
     }
     else if (stage == INITSTAGE_ROUTER_ID_ASSIGNMENT) {
         cModule *node = findContainingNode(this);
@@ -104,16 +103,6 @@ void Ipv4RoutingTable::initialize(int stage)
         // we don't use notifications during initialize(), so we do it manually.
         updateNetmaskRoutes();
     }
-}
-
-std::string Ipv4RoutingTable::getRoutingTableStatusText() const
-{
-    std::string buf;
-    if (routerId.isUnspecified())
-        buf = std::to_string(routes.size()) + "+" + std::to_string(multicastRoutes.size()) + " routes";
-    else
-        buf = std::string("routerId: ") + routerId.str() + "\n" + std::to_string(routes.size()) + "+" + std::to_string(multicastRoutes.size()) + " routes";
-    return buf;
 }
 
 void Ipv4RoutingTable::configureRouterId()

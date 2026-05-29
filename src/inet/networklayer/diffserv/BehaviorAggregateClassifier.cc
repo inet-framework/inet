@@ -90,7 +90,6 @@ void BehaviorAggregateClassifier::initialize(int stage)
 
         numRcvd = 0;
         WATCH(numRcvd);
-        WATCH_EXPR("classifierStatus", numRcvd > 0 ? "rcvd:" + std::to_string(numRcvd) + " " : std::string());
     }
 }
 

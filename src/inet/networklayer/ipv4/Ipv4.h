@@ -111,7 +111,6 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
     virtual const NetworkInterface *getShortestPathInterfaceToSource(const Ptr<const Ipv4Header>& ipv4Header) const;
 
     // utility: show current statistics above the icon
-    virtual std::string getIpv4StatusText() const;
 
     // utility: processing requested ARP resolution completed
     void arpResolutionCompleted(IArp::Notification *entry);

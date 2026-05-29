@@ -15,6 +15,7 @@ simple QuicOrderedReceiver extends SimpleModule like IApp
 {
     parameters:
         @class(QuicOrderedReceiver);
+        displayStringTextFormat = default("rcvd: {bytesReceived} bytes");
         @signal[bytesReceived];
         @statistic[bytesReceived](record=vector);
         

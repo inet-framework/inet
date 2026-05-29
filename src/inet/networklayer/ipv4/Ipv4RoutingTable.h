@@ -94,9 +94,6 @@ class INET_API Ipv4RoutingTable : public SimpleModule, public IIpv4RoutingTable,
     MulticastRouteVector multicastRoutes; // Multicast route array, sorted by netmask desc, origin asc, metric asc
 
   protected:
-    // utility: show current statistics above the icon
-    virtual std::string getRoutingTableStatusText() const;
-
     // set router Id
     virtual void configureRouterId();
 

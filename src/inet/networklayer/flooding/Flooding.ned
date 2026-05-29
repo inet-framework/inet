@@ -43,6 +43,7 @@ simple Flooding extends NetworkProtocolBase like INetworkProtocol
 {
     parameters:
         @display("i=block/fork");
+        displayStringTextFormat = default("fwd:{nbDataPacketsForwarded}\nrcvd:{nbDataPacketsReceived} sent:{nbDataPacketsSent} pks");
         int headerLength @unit(b) = default(96b); // Length of the network packet header (in bits)
         bool plainFlooding = default(true); // Flag whether to use plain flooding
         // Max number of entries in the list of already broadcasted messages

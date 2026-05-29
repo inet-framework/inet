@@ -21,6 +21,7 @@ module NarrowbandReceiverBase extends SnirReceiverBase like IReceiver
         double centerFrequency @unit(Hz); // Center frequency of the band where this receiver listens on the medium
         double bandwidth @unit(Hz);        // Bandwidth of the band where this receiver listens on the medium
         string modulation;                 // One of "BPSK", "16-QAM", "256-QAM"
+        displayStringTextFormat = default("{centerFrequency} {bandwidth}\n{sensitivity}");
         analogModel.defaultSensitivity = default(this.sensitivity);
         analogModel.defaultCenterFrequency = default(this.centerFrequency);
         analogModel.defaultBandwidth = default(this.bandwidth);

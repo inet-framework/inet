@@ -21,7 +21,7 @@ simple ExtIpv4Socket extends SimpleModule
         @class(ExtIpv4Socket);
         string namespace = default("");
         string packetName = default("Ext-%p-%t-%n");
-        displayStringTextFormat = default("snt:{numSent} rcv:{numReceived}");
+        displayStringTextFormat = default("snt: {numSent} rcv: {numReceived}");
         @display("i=block/rxtx");
         @signal[packetSentToUpper](type=Packet);
         @signal[packetReceivedFromUpper](type=Packet);

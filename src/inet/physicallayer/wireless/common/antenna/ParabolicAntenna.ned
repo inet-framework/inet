@@ -24,5 +24,6 @@ module ParabolicAntenna extends AntennaBase
         double maxGain @unit(dB);    // Maximum gain of the antenna radiation pattern
         double minGain @unit(dB);    // Minimum gain of the antenna radiation pattern
         double beamWidth @unit(deg); // 3dB beam width
+        displayStringTextFormat = default("gain: {minGain}-{maxGain}\nbeam: {beamWidth}");
         @class(ParabolicAntenna);
 }

@@ -51,7 +51,6 @@ void DscpMarker::initialize(int stage)
         numMarked = 0;
         WATCH(numRcvd);
         WATCH(numMarked);
-        WATCH_EXPR("markerStatus", (numRcvd > 0 ? "rcvd: " + std::to_string(numRcvd) + " " : std::string()) + (numMarked > 0 ? "mark:" + std::to_string(numMarked) + " " : std::string()));
     }
 }
 

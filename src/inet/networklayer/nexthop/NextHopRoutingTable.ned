@@ -18,7 +18,7 @@ simple NextHopRoutingTable extends SimpleModule like IRoutingTable
     parameters:
         @class(NextHopRoutingTable);
         string interfaceTableModule;   // The path to the InterfaceTable module
-        displayStringTextFormat = default("");
+        displayStringTextFormat = default("routerId: {routerId}\n{numRoutes}+{numMulticastRoutes} routes");
         @display("i=block/table");
         string addressType @enum("mac","modulepath","moduleid") = default("modulepath");
         string routerId = default("auto"); // For routers, the router id using address dotted

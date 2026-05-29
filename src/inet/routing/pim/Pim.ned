@@ -28,6 +28,7 @@ module Pim extends Module like IPim
 {
     parameters:
         @class(Pim);
+        displayStringTextFormat = default("{checksumMode}");
         @display("i=block/network2");
         string interfaceTableModule;
         string routingTableModule;

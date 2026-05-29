@@ -106,7 +106,6 @@ void Ipv4::initialize(int stage)
         WATCH(numDropped);
         WATCH(numUnroutable);
         WATCH(numForwarded);
-        WATCH_EXPR("ipv4StatusText", getIpv4StatusText());
         WATCH(pendingPackets);
         WATCH(queuedDatagramsForHooks);
         WATCH(socketIdToSocketDescriptor);
@@ -119,22 +118,6 @@ void Ipv4::initialize(int stage)
         registerService(Protocol::ipv4, gate("transportIn"), gate("transportOut"));
         registerProtocol(Protocol::ipv4, gate("queueOut"), gate("queueIn"));
     }
-}
-
-std::string Ipv4::getIpv4StatusText() const
-{
-    std::string buf;
-    if (numForwarded > 0)
-        buf += "fwd:" + std::to_string(numForwarded) + " ";
-    if (numLocalDeliver > 0)
-        buf += "up:" + std::to_string(numLocalDeliver) + " ";
-    if (numMulticast > 0)
-        buf += "mcast:" + std::to_string(numMulticast) + " ";
-    if (numDropped > 0)
-        buf += "DROP:" + std::to_string(numDropped) + " ";
-    if (numUnroutable > 0)
-        buf += "UNROUTABLE:" + std::to_string(numUnroutable) + " ";
-    return buf;
 }
 
 void Ipv4::handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)

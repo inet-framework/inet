@@ -18,5 +18,6 @@ simple UnitDiskReceiverAnalogModel extends SimpleModule like IReceiverAnalogMode
     parameters:
         @class(UnitDiskReceiverAnalogModel);
         bool ignoreInterference = default(false); // True means interfering transmissions are ignored when determining whether a reception is successful or not
+        displayStringTextFormat = default("interference {ignoreInterference}");
         @display("i=block/tunnel");
 }

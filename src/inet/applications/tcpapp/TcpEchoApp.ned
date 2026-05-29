@@ -35,7 +35,7 @@ simple TcpEchoApp extends TcpServerHostApp
         double echoFactor = default(1);
         double echoDelay @unit(s) = default(0s);
         serverThreadModuleType = default("inet.applications.tcpapp.TcpEchoAppThread"); // Module type of the "thread" module to launch on incoming connections
-        displayStringTextFormat = default("threads: {numThreads}\nrcvd: {bytesRcvd} bytes\nsent: {bytesSent} bytes");
+        displayStringTextFormat = default("{numThreads} threads\nrcvd: {bytesRcvd} bytes\nsent: {bytesSent} bytes");
         @signal[packetSent](type=inet::Packet);
         @signal[packetReceived](type=inet::Packet);
         @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
@@ -48,7 +48,7 @@ simple TcpEchoAppThread extends SimpleModule
 {
     parameters:
         @class(TcpEchoAppThread);
-        displayStringTextFormat = default("{socketState}");
+        displayStringTextFormat = default("{socketState}\nrcvd: {bytesRcvd} bytes\nsent: {bytesSent} bytes");
         @signal[packetSent](type=inet::Packet);
         @signal[packetReceived](type=inet::Packet);
         @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

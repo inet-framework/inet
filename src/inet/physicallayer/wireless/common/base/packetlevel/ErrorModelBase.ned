@@ -20,6 +20,8 @@ module ErrorModelBase extends Module like IErrorModel
         string snirMode @enum("min", "mean") = default("min");
         double snirOffset @unit(dB) = default(0dB); // Offset the calculated SNIR before further computing the PER, BER, SER or corrupt bits and symbols
                                                     // this can be used, for example, to represent cross symbol interference due to OFDM lobe overlapping, symbol frequency/time offset mismatch, and symbol frequency/time size mismatch
+        displayStringTextFormat = default("{corruptionMode} {snirMode} {snirOffset}");
+
         @display("i=block/broadcast");
         @class(ErrorModelBase);
 }

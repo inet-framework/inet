@@ -38,6 +38,7 @@ simple SimpleVoipSender extends SimpleModule like IApp
 {
     parameters:
         @class(SimpleVoipSender);
+        displayStringTextFormat = default("{isTalk}\ntalkspurt: {talkspurtID}");
         int localPort = default(-1);
         int destPort;
         string destAddress;

@@ -80,6 +80,7 @@ simple Rstp extends SimpleModule like ISpanningTree
         // If true, edge ports immediately become designated/forwarding, else they will have to wait to get designated.
         bool autoEdge = default(true);
 
+        displayStringTextFormat = default("{stpStatus}");
         @display("i=block/network2");
     gates:
         input relayIn;

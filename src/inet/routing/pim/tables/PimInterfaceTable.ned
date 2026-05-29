@@ -35,6 +35,7 @@ simple PimInterfaceTable extends SimpleModule
 {
     parameters:
         @class(PimInterfaceTable);
+        displayStringTextFormat = default("{numInterfaces} interfaces");
         @display("i=block/table");
         string interfaceTableModule;
         xml pimConfig = default(xml("<config/>"));

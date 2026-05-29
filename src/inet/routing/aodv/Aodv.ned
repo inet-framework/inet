@@ -30,6 +30,7 @@ simple Aodv extends SimpleModule like IApp
 {
     parameters:
         @class(aodv::Aodv);
+        displayStringTextFormat = default("routes:{numRoutes}\nrcvd:{numReceived} sent:{numSent} pks");
         @display("i=block/network2");
         string routingTableModule = default("^.ipv4.routingTable");
         string interfaceTableModule = default("^.interfaceTable");

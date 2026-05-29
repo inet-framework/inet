@@ -14,6 +14,7 @@ simple QuicOrderedTrafficgen extends SimpleModule like ITrafficgenHandler
 {
     parameters:
         @class(QuicOrderedTrafficgen);
+        displayStringTextFormat = default("{statusStr}");
         string localAddress = default(""); // comma separated list of addresses
         int localPort = default(0); // port number to listen on
         string connectAddress;  // server address (may be symbolic)

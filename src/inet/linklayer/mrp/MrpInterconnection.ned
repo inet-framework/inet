@@ -82,7 +82,7 @@ simple MrpInterconnection extends Mrp like IMrp
         // Format for the text displayed above the module icon.
         // Directives: `%r`: MRP role, `%n`: node state, `%g`: ring state,
         // `%R`: interconnection role, `%N`: interconnection node state, `%I`: interconnection state.
-        displayStringTextFormat = default("role: %r, %R\nstate: %n, in: %N\nring: %g in: %I");
+        displayStringTextFormat = default("role: {roleStr}, {inRoleStr}\nstate: {nodeStateStr}, in: {inNodeStateStr}\nring: {ringStateStr} in: {inTopologyStateStr}");
 
         @signal[inRoleChanged](type="long");
         @signal[inNodeStateChanged](type="unsigned long");

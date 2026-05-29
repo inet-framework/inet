@@ -89,7 +89,6 @@ class INET_API NextHopForwarding : public OperationalBase, public NetfilterBase,
     virtual const NetworkInterface *getSourceInterfaceFrom(Packet *packet);
 
     // utility: show current statistics above the icon
-    virtual std::string getNextHopStatusText() const;
 
     /**
      * Handle NextHopDatagram messages arriving from lower layer.

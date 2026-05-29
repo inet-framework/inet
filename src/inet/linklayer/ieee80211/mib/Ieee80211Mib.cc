@@ -27,7 +27,7 @@ void Ieee80211Mib::initialize(int stage)
         WATCH_EXPR("stationTypeStr", getStationTypeStr(bssStationData.stationType));
         WATCH_EXPR("qosStr", qos ? ", QoS" : ", Non-QoS");
         WATCH_EXPR("ssidStr", getSsidStr());
-        WATCH_EXPR("associatedStr", bssStationData.stationType == STATION ? (bssStationData.isAssociated ? "\nAssociated" : "\nNot associated") : "");
+        WATCH_EXPR("associatedStr", bssStationData.stationType == STATION ? (bssStationData.isAssociated ? "Associated" : "Not associated") : "");
     }
 }
 

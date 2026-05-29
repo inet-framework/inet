@@ -28,6 +28,7 @@ simple Dsdv extends SimpleModule like IManetRouting
 {
     parameters:
         @class(Dsdv);
+        displayStringTextFormat = default("routes:{numRoutes}\nrcvd:{numReceived} sent:{numSent} pks");
         @display("i=block/routing");
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;

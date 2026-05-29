@@ -85,6 +85,8 @@ module Ieee80211Mac extends MacProtocolBase like IIeee80211Mac
         int mtu @unit(B) = default(2304B);
         bool qosStation = default(false);
 
+        displayStringTextFormat = default("rx:{.rx.rxStatus}\ntx:{.tx.txState}");
+
         *.mibModule = default(absPath(this.mibModule));
         *.rxModule = "^.rx";
         *.txModule = "^.tx";

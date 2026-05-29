@@ -27,6 +27,6 @@ simple SecurityAssociationDatabase extends SimpleModule
 {
     parameters:
         @class(SecurityAssociationDatabase);
-        displayStringTextFormat = default("entries: {numEntries}");
+        displayStringTextFormat = default("{numEntries} entries");
         @display("i=block/table2;is=s");
 }

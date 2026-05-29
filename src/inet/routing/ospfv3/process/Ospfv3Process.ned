@@ -13,6 +13,7 @@ simple Ospfv3Process extends SimpleModule
 {
     parameters:
         @class(Ospfv3Process);
+        displayStringTextFormat = default("{numInstances} instances");
         int processID;
         string routerID;
         xml interfaceConfig;

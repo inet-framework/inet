@@ -21,6 +21,7 @@ simple Ipv6NeighbourDiscovery extends SimpleModule
 {
     parameters:
         @class(Ipv6NeighbourDiscovery);
+        displayStringTextFormat = default("neighbors:{numNeighbors} pending:{numPending}\nrcvd:{numReceived} sent:{numSent} pks");
         string interfaceTableModule;   // The path to the InterfaceTable module
         string checksumMode @enum("declared", "computed") = default("declared");
         string icmpv6Module;

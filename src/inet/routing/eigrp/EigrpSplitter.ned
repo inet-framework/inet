@@ -17,6 +17,7 @@ simple EigrpSplitter extends SimpleModule
 {
     parameters:
         @class(EigrpSplitter);
+        displayStringTextFormat = default("rcvd: {numReceived} pks\nsent: {numSent} pks");
     gates:
         input ipIn @labels(Ipv4ControlInfo/up,Ipv6ControlInfo/up);
         output ipOut @labels(Ipv4ControlInfo/down,Ipv6ControlInfo/down);

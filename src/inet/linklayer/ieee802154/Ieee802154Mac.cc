@@ -955,16 +955,18 @@ void Ieee802154Mac::handleCrashOperation(LifecycleOperation *operation)
 
 std::string Ieee802154Mac::getMacStatusString() const
 {
+#define CASE(x)   case x: return #x;
     switch (macState) {
-        case IDLE_1:          return "IDLE";
+        CASE(IDLE_1);
         case BACKOFF_2:       return "BACKOFF (" + std::to_string((backoffTimer->getArrivalTime() - simTime()).inUnit(SIMTIME_US)) + "us)";
         case CCA_3:           return "CCA (" + std::to_string((ccaTimer->getArrivalTime() - simTime()).inUnit(SIMTIME_US)) + "us)";
-        case TRANSMITFRAME_4: return "TRANSMITING FRAME";
+        CASE(TRANSMITFRAME_4);
         case WAITACK_5:       return "WAITING ACK (" + std::to_string((rxAckTimer->getArrivalTime() - simTime()).inUnit(SIMTIME_US)) + "us)";
         case WAITSIFS_6:      return "WAITING SIFS (" + std::to_string((sifsTimer->getArrivalTime() - simTime()).inUnit(SIMTIME_US)) + "us)";
-        case TRANSMITACK_7:   return "TRANSMITING ACK";
-        default:              return "defined state";
+        CASE(TRANSMITACK_7);
+        default: ASSERT(false); return "?";
     }
+#undef CASE
 }
 
 queueing::IPassivePacketSource *Ieee802154Mac::getProvider(const cGate *gate)
