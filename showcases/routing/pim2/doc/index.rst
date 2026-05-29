@@ -16,7 +16,9 @@ tree branches. Each link carries only one copy, regardless of how many
 receivers are downstream. On the local network segment, the last-hop router
 sends the packet as a multicast frame — all interested hosts receive it
 directly. Hosts signal their interest to their local router using IGMP
-(Internet Group Management Protocol).
+(Internet Group Management Protocol): a host sends an IGMP Report to join a
+multicast group, and the router periodically sends IGMP Queries to check
+whether any group members are still present on the link.
 
 Protocol Independent Multicast (PIM) is the protocol that builds and maintains
 these distribution trees. It is called "protocol independent" because it does
@@ -34,6 +36,11 @@ network.
 
 About PIM
 ---------
+
+Regardless of the mode, all PIM routers periodically exchange **PIM Hello**
+messages on each interface (every 30s by default). Hellos serve as neighbor
+discovery and keepalive — a router learns who its PIM neighbors are, and if a
+neighbor's Hellos stop arriving, it is declared unreachable.
 
 PIM operates in two primary modes, each suited to a different multicast traffic
 pattern.
