@@ -39,10 +39,16 @@ namespace internal {
 void refreshDisplayString(cModule *thisModule, const StringFormat::IResolver *thisModuleAsResolver)
 {
     if (thisModule->hasPar("displayStringTextFormat")) {
-        auto displayStringTextFormat = thisModule->par("displayStringTextFormat").stringValue();
-        if (!opp_isempty(displayStringTextFormat)) {
-            auto text = StringFormat::formatString(displayStringTextFormat, thisModuleAsResolver);
-            thisModule->getDisplayString().setTagArg("t", 0, text.c_str());
+        try {
+            auto displayStringTextFormat = thisModule->par("displayStringTextFormat").stringValue();
+            if (!opp_isempty(displayStringTextFormat)) {
+                auto text = StringFormat::formatString(displayStringTextFormat, thisModuleAsResolver);
+                thisModule->getDisplayString().setTagArg("t", 0, text.c_str());
+            }
+        }
+        catch (cException& e) {
+            e.prependMessage("While processing displayStringTextFormat: ");
+            throw;
         }
     }
 }
