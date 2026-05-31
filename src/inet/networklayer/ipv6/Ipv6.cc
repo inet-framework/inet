@@ -401,14 +401,15 @@ void Ipv6::handleMessageFromHL(Packet *packet)
 void Ipv6::datagramLocalOut(Packet *packet, const NetworkInterface *destIE, Ipv6Address requestedNextHopAddress)
 {
     const auto& ipv6Header = packet->peekAtFront<Ipv6Header>();
+
     // route packet
     if (destIE != nullptr)
-        fragmentPostRouting(packet, destIE, MacAddress::BROADCAST_ADDRESS, true); // FIXME what MAC address to use?
+        fragmentPostRouting(packet, destIE, ipv6Header->getDestAddress(), true);
     else if (!ipv6Header->getDestAddress().isMulticast())
         routePacket(packet, destIE, nullptr, requestedNextHopAddress, true);
     else
         routeMulticastPacket(packet, destIE, nullptr, true);
-}
+ }
 
 void Ipv6::routePacket(Packet *packet, const NetworkInterface *destIE, const NetworkInterface *fromIE, Ipv6Address requestedNextHopAddress, bool fromHL)
 {
