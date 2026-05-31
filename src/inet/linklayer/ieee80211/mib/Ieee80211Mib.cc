@@ -27,7 +27,7 @@ void Ieee80211Mib::initialize(int stage)
         WATCH_EXPR("stationTypeStr", getStationTypeStr(bssStationData.stationType));
         WATCH_EXPR("qosStr", qos ? ", QoS" : ", Non-QoS");
         WATCH_EXPR("ssidStr", getSsidStr());
-        WATCH_EXPR("associatedStr", bssStationData.stationType == STATION ? (bssStationData.isAssociated ? "Associated" : "Not associated") : "");
+        WATCH_EXPR("associatedStr", bssStationData.stationType == STATION ? (bssStationData.isAssociated ? "\nAssociated" : "\nNot associated") : "");
     }
 }
 
@@ -55,18 +55,6 @@ const char *Ieee80211Mib::getStationTypeStr(Ieee80211Mib::BssStationType station
         case STATION: return ", STA";
         default: return "";
     }
-}
-
-void Ieee80211Mib::refreshDisplay() const
-{
-    std::string modeString = getModeStr(mode);
-    std::string ssidString = getSsidStr();
-    std::string bssStationTypeString = getStationTypeStr(bssStationData.stationType);
-    std::string associatedString;
-    if (bssStationData.stationType == STATION)
-        associatedString = bssStationData.isAssociated ? "\nAssociated" : "\nNot associated";
-    auto text = std::string("Address: ") + address.str() + ssidString + "\n" + modeString + bssStationTypeString + (qos ? ", QoS" : ", Non-QoS") + associatedString;
-    getDisplayString().setTagArg("t", 0, text.c_str());
 }
 
 } // namespace ieee80211

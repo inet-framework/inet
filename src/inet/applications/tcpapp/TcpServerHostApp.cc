@@ -60,14 +60,6 @@ void TcpServerHostApp::handleCrashOperation(LifecycleOperation *operation)
         serverSocket.destroy();
 }
 
-void TcpServerHostApp::refreshDisplay() const
-{
-    ApplicationBase::refreshDisplay();
-
-    std::string buf = std::to_string(socketMap.size()) + " threads";
-    getDisplayString().setTagArg("t", 0, buf.c_str());
-}
-
 void TcpServerHostApp::handleMessageWhenUp(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
@@ -164,12 +156,6 @@ void TcpServerThreadBase::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL)
         WATCH_EXPR("socketState", sock ? TcpSocket::stateName(sock->getState()) : "not connected");
-}
-
-void TcpServerThreadBase::refreshDisplay() const
-{
-    SimpleModule::refreshDisplay();
-    getDisplayString().setTagArg("t", 0, TcpSocket::stateName(sock->getState()));
 }
 
 void TcpServerThreadBase::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)

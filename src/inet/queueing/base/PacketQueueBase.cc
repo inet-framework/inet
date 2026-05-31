@@ -19,7 +19,6 @@ void PacketQueueBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         inputGate = gate("in");
         outputGate = gate("out");
-        displayStringTextFormat = par("displayStringTextFormat");
         numPushedPackets = 0;
         numPulledPackets = 0;
         numRemovedPackets = 0;

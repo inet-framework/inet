@@ -107,12 +107,6 @@ void TcpAppBase::sendPacket(Packet *msg)
     bytesSent += numBytes;
 }
 
-void TcpAppBase::refreshDisplay() const
-{
-    ApplicationBase::refreshDisplay();
-    getDisplayString().setTagArg("t", 0, TcpSocket::stateName(socket.getState()));
-}
-
 void TcpAppBase::socketEstablished(TcpSocket *)
 {
     // *redefine* to perform or schedule first sending

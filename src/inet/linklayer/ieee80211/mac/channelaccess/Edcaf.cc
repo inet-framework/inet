@@ -58,18 +58,6 @@ void Edcaf::initialize(int stage)
     }
 }
 
-void Edcaf::refreshDisplay() const
-{
-    std::string text(printAccessCategory(ac));
-    if (owning)
-        text += "\nOwning";
-    else if (contention->isContentionInProgress())
-        text += "\nContending";
-    else
-        text += "\nIdle";
-    getDisplayString().setTagArg("t", 0, text.c_str());
-}
-
 void Edcaf::calculateTimingParameters()
 {
     slotTime = modeSet->getSlotTime();

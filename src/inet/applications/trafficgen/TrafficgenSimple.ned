@@ -18,27 +18,30 @@
 package inet.applications.trafficgen;
 
 import inet.applications.trafficgen.ITrafficgen;
+import inet.common.SimpleModule;
 
-simple TrafficgenSimple like ITrafficgen
+simple TrafficgenSimple extends SimpleModule like ITrafficgen
 {
     parameters:
+        @class(TrafficgenSimple);
         int id;
         string name									= default("trafficgen");
-       	int priority								= default(512);		
+       	int priority								= default(512);
        	int packetCount								= default(-1);		// -1 = infinite
-        volatile int packetSize @unit("B")			= default(1024B);	
-        volatile double packetInterval @unit("s")	= default(0ms);	
+        volatile int packetSize @unit("B")			= default(1024B);
+        volatile double packetInterval @unit("s")	= default(0ms);
         volatile int packetBurstSize				= default(1);
     	double startTime @unit("s")					= default(1s);
     	double stopTime @unit("s")					= default(-1s);		// -1 = infiniter
     	bool reliable								= default(true);
     	bool ordered								= default(true);
-    	
+
+    	displayStringTextFormat = default("{statusStr}");
     	@display("i=block/plug");
     	@signal[sentPkt](type=cPacket);
     	@statistic[sentPkt](title="packets sent"; source=sentPkt; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-    	
+
     gates:
         input generatorIn @labels(trafficGen/up);
-        output generatorOut @labels(trafficGen/down);	
+        output generatorOut @labels(trafficGen/down);
 }

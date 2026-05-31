@@ -77,14 +77,6 @@ void EthernetCsmaMac::finish()
     emit(stateChangedSignal, fsm.getState());
 }
 
-void EthernetCsmaMac::refreshDisplay() const
-{
-    auto& displayString = getDisplayString();
-    std::stringstream stream;
-    stream << fsm.getStateName();
-    displayString.setTagArg("t", 0, stream.str().c_str());
-}
-
 void EthernetCsmaMac::configureNetworkInterface()
 {
     // MTU: typical values are 576 (Internet de facto), 1500 (Ethernet-friendly),

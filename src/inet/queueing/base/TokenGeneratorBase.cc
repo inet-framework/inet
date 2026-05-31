@@ -18,7 +18,6 @@ void TokenGeneratorBase::initialize(int stage)
 {
     PacketProcessorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        displayStringTextFormat = par("displayStringTextFormat");
         storage.reference(this, "storageModule", true);
         numTokensGenerated = 0;
         WATCH(numTokensGenerated);

@@ -23,6 +23,7 @@ module Dcaf extends Module
         int cwMax = default(-1);
         string rxModule;
         @class(Dcaf);
+        displayStringTextFormat = default("{contentionState}");
         @display("i=block/star");
         @signal[channelOwnershipChanged](type=bool);
         @statistic[channelOwnershipChanged](title="channel ownership"; record=count,vector?; interpolationmode=sample-hold);

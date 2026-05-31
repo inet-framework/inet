@@ -106,6 +106,7 @@ void Ipv4::initialize(int stage)
         WATCH(numDropped);
         WATCH(numUnroutable);
         WATCH(numForwarded);
+        WATCH_EXPR("ipv4StatusText", getIpv4StatusText());
         WATCH(pendingPackets);
         WATCH(queuedDatagramsForHooks);
         WATCH(socketIdToSocketDescriptor);
@@ -120,22 +121,8 @@ void Ipv4::initialize(int stage)
     }
 }
 
-void Ipv4::handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
+std::string Ipv4::getIpv4StatusText() const
 {
-    Enter_Method("handleRegisterService");
-}
-
-void Ipv4::handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterProtocol");
-    if (gate->isName("transportOut"))
-        upperProtocols.insert(&protocol);
-}
-
-void Ipv4::refreshDisplay() const
-{
-    OperationalBase::refreshDisplay();
-
     std::string buf;
     if (numForwarded > 0)
         buf += "fwd:" + std::to_string(numForwarded) + " ";
@@ -147,7 +134,19 @@ void Ipv4::refreshDisplay() const
         buf += "DROP:" + std::to_string(numDropped) + " ";
     if (numUnroutable > 0)
         buf += "UNROUTABLE:" + std::to_string(numUnroutable) + " ";
-    getDisplayString().setTagArg("t", 0, buf.c_str());
+    return buf;
+}
+
+void Ipv4::handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
+{
+    Enter_Method("handleRegisterService");
+}
+
+void Ipv4::handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
+{
+    Enter_Method("handleRegisterProtocol");
+    if (gate->isName("transportOut"))
+        upperProtocols.insert(&protocol);
 }
 
 void Ipv4::handleRequest(Request *request)

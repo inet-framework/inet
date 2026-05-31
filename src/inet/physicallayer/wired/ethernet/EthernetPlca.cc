@@ -190,15 +190,6 @@ void EthernetPlca::finish()
     emit(txCmdSignal, tx_cmd);
 }
 
-void EthernetPlca::refreshDisplay() const
-{
-    auto& displayString = getDisplayString();
-    std::stringstream stream;
-    stream << curID << "/" << plca_node_count << " (" << local_nodeID << ")\n";
-    stream << controlFsm.getStateName() << " - " << dataFsm.getStateName();
-    displayString.setTagArg("t", 0, stream.str().c_str());
-}
-
 void EthernetPlca::handleMessage(cMessage *message)
 {
     if (message->isSelfMessage())

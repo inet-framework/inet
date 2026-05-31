@@ -208,39 +208,6 @@ void Rx::setOrExtendNav(simtime_t navInterval)
     }
 }
 
-void Rx::refreshDisplay() const
-{
-    if (mediumFree)
-        getDisplayString().setTagArg("t", 0, "FREE");
-    else {
-        std::stringstream os;
-        os << "BUSY (";
-        bool addSpace = false;
-        if (transmissionState != IRadio::TRANSMISSION_STATE_UNDEFINED) {
-            switch (transmissionState) {
-                case IRadio::IRadio::TRANSMISSION_STATE_UNDEFINED: break; // cannot happen
-                case IRadio::IRadio::TRANSMISSION_STATE_IDLE: os << "Tx-Idle"; break;
-                case IRadio::IRadio::TRANSMISSION_STATE_TRANSMITTING: os << "Tx"; break;
-            }
-            addSpace = true;
-        }
-        else {
-            switch (receptionState) {
-                case IRadio::RECEPTION_STATE_UNDEFINED: os << "Switching"; break;
-                case IRadio::RECEPTION_STATE_IDLE: os << "Rx-Idle"; break; // cannot happen
-                case IRadio::RECEPTION_STATE_BUSY: os << "Noise"; break;
-                case IRadio::RECEPTION_STATE_RECEIVING: os << "Recv"; break;
-            }
-            addSpace = true;
-        }
-        if (endNavTimer->isScheduled()) {
-            os << (addSpace ? " " : "") << "NAV";
-        }
-        os << ")";
-        getDisplayString().setTagArg("t", 0, os.str().c_str());
-    }
-}
-
 void Rx::registerContention(IContention *contention)
 {
     contention->mediumStateChanged(mediumFree);

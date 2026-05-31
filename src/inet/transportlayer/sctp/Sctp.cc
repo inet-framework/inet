@@ -539,13 +539,6 @@ std::string Sctp::getSctpStatusString() const
     return buf2.str();
 }
 
-void Sctp::refreshDisplay() const
-{
-#if 0
-    getDisplayString().setTagArg("t", 0, getSctpStatusString().c_str());
-#endif
-}
-
 SctpAssociation *Sctp::findAssocWithVTag(uint32_t peerVTag, uint32_t remotePort, uint32_t localPort)
 {
     printVTagMap();

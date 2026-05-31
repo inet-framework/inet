@@ -86,7 +86,6 @@ class INET_API EthernetCsmaMac : public MacProtocolBase, public virtual IEtherne
   protected:
     virtual void initialize(int stage) override;
     virtual void finish() override;
-    virtual void refreshDisplay() const override;
     virtual void configureNetworkInterface() override;
 
     virtual void handleWithFsm(int event, cMessage *message);

@@ -36,7 +36,6 @@ class INET_API ExtEthernetSocket : public SimpleModule, public RealTimeScheduler
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
-    virtual void refreshDisplay() const override;
     virtual void finish() override;
 
     virtual void openSocket();

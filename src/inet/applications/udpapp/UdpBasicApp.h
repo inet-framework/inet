@@ -49,7 +49,6 @@ class INET_API UdpBasicApp : public ClockUserModuleMixin<ApplicationBase>, publi
     virtual void initialize(int stage) override;
     virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void finish() override;
-    virtual void refreshDisplay() const override;
 
     // chooses random destination address
     virtual L3Address chooseDestAddr();

@@ -84,14 +84,6 @@ void EthernetCsmaPhy::finish()
     emit(busUsedSignal, (currentRxSignal != nullptr && currentRxSignal->getKind() == DATA) || (currentTxSignal != nullptr && currentTxSignal->getKind() == DATA) ? 1 : 0);
 }
 
-void EthernetCsmaPhy::refreshDisplay() const
-{
-    auto& displayString = getDisplayString();
-    std::stringstream stream;
-    stream << fsm.getStateName();
-    displayString.setTagArg("t", 0, stream.str().c_str());
-}
-
 void EthernetCsmaPhy::handleMessage(cMessage *message)
 {
     if (message->isSelfMessage())

@@ -483,11 +483,6 @@ void SctpNatPeer::handleMessage(cMessage *msg)
         }
     }
 
-    if (hasGUI()) {
-        auto l = rcvdBytesPerAssoc.find(id);
-        std::string buf = "rcvd: " + std::to_string(l->second) + " bytes\nsent: " + std::to_string(bytesSent) + " bytes";
-        getDisplayString().setTagArg("t", 0, buf.c_str());
-    }
 }
 
 void SctpNatPeer::handleTimer(cMessage *msg)
@@ -650,8 +645,6 @@ void SctpNatPeer::socketStatusArrived(SctpSocket *socket, SctpStatusReq *status)
 void SctpNatPeer::setStatusString(const char *s)
 {
     statusStr = s;
-    if (hasGUI())
-        getDisplayString().setTagArg("t", 0, s);
 }
 
 void SctpNatPeer::sendRequest(bool last)

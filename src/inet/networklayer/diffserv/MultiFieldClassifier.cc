@@ -139,6 +139,7 @@ void MultiFieldClassifier::initialize(int stage)
 
         numRcvd = 0;
         WATCH(numRcvd);
+        WATCH_EXPR("mfClassifierStatus", numRcvd > 0 ? "rcvd:" + std::to_string(numRcvd) + " " : std::string());
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         cXMLElement *config = par("filters");
@@ -160,14 +161,6 @@ void MultiFieldClassifier::pushPacket(Packet *packet, const cGate *inputGate)
     queueing::PassivePacketSinkRef consumer;
     consumer.reference(outputGate, false);
     pushOrSendPacket(packet, outputGate, consumer);
-}
-
-void MultiFieldClassifier::refreshDisplay() const
-{
-    std::string buf;
-    if (numRcvd > 0)
-        buf = "rcvd:" + std::to_string(numRcvd) + " ";
-    getDisplayString().setTagArg("t", 0, buf.c_str());
 }
 
 int MultiFieldClassifier::classifyPacket(Packet *packet)

@@ -27,6 +27,7 @@ void TwoRateThreeColorMeter::initialize(int stage)
         WATCH(numRcvd);
         WATCH(numYellow);
         WATCH(numRed);
+        WATCH_EXPR("meterStatus", (numRcvd > 0 ? "rcvd: " + std::to_string(numRcvd) + " " : std::string()) + (numYellow > 0 ? "yellow:" + std::to_string(numYellow) + " " : std::string()) + (numRed > 0 ? "red:" + std::to_string(numRed) + " " : std::string()));
 
         PBS = 8 * par("pbs").intValue();
         CBS = 8 * par("cbs").intValue();
@@ -72,18 +73,6 @@ void TwoRateThreeColorMeter::pushPacket(Packet *packet, const cGate *inputGate)
     queueing::PassivePacketSinkRef consumer;
     consumer.reference(outputGate, false);
     pushOrSendPacket(packet, outputGate, consumer);
-}
-
-void TwoRateThreeColorMeter::refreshDisplay() const
-{
-    std::string buf;
-    if (numRcvd > 0)
-        buf += "rcvd: " + std::to_string(numRcvd) + " ";
-    if (numYellow > 0)
-        buf += "yellow:" + std::to_string(numYellow) + " ";
-    if (numRed > 0)
-        buf += "red:" + std::to_string(numRed) + " ";
-    getDisplayString().setTagArg("t", 0, buf.c_str());
 }
 
 int TwoRateThreeColorMeter::meterPacket(Packet *packet)

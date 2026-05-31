@@ -112,17 +112,6 @@ void Tx::handleMessage(cMessage *msg)
         ASSERT(false);
 }
 
-void Tx::refreshDisplay() const
-{
-    const char *stateName = endIfsTimer != nullptr && endIfsTimer->isScheduled() ? "WAIT_IFS" : transmitting ? "TRANSMIT" : "IDLE";
-    // faster version is just to display the state: getDisplayString().setTagArg("t", 0, stateName);
-    std::stringstream os;
-    if (frame)
-        os << frame->getName() << "\n";
-    os << stateName;
-    getDisplayString().setTagArg("t", 0, os.str().c_str());
-}
-
 } // namespace ieee80211
 } // namespace inet
 

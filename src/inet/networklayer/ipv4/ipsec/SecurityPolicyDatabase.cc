@@ -54,12 +54,6 @@ void SecurityPolicyDatabase::addEntry(SecurityPolicy *entry)
     entries.push_back(entry);
 }
 
-void SecurityPolicyDatabase::refreshDisplay() const
-{
-    std::string buf = "entries: " + std::to_string(entries.size());
-    getDisplayString().setTagArg("t", 0, buf.c_str());
-}
-
 }    // namespace ipsec
 }    // namespace inet
 

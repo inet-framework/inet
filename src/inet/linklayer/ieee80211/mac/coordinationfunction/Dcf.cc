@@ -67,16 +67,6 @@ void Dcf::handleMessage(cMessage *msg)
         throw cRuntimeError("Unknown msg type");
 }
 
-void Dcf::refreshDisplay() const
-{
-    if (frameSequenceHandler->isSequenceRunning()) {
-        auto history = frameSequenceHandler->getFrameSequence()->getHistory();
-        getDisplayString().setTagArg("t", 0, ("Fs: " + history).c_str());
-    }
-    else
-        getDisplayString().removeTag("t");
-}
-
 void Dcf::channelGranted(IChannelAccess *channelAccess)
 {
     Enter_Method("channelGranted");

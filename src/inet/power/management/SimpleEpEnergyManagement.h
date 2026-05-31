@@ -36,7 +36,6 @@ class INET_API SimpleEpEnergyManagement : public SimpleModule, public virtual IE
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
     virtual std::string getEnergyStatusString() const;
-    virtual void refreshDisplay() const override;
 
     virtual void executeNodeOperation(J estimatedEnergyCapacity);
     virtual void scheduleLifecycleOperationTimer();

@@ -443,11 +443,6 @@ void SctpPeer::handleMessage(cMessage *msg)
             break;
     }
 
-    if (hasGUI()) {
-        auto l = rcvdBytesPerAssoc.find(id);
-        std::string buf = "rcvd: " + std::to_string(l->second) + " bytes\nsent: " + std::to_string(bytesSent) + " bytes";
-        getDisplayString().setTagArg("t", 0, buf.c_str());
-    }
 }
 
 void SctpPeer::handleTimer(cMessage *msg)
@@ -547,8 +542,6 @@ void SctpPeer::socketStatusArrived(SctpSocket *socket, SctpStatusReq *status)
 void SctpPeer::setStatusString(const char *s)
 {
     statusStr = s;
-    if (hasGUI())
-        getDisplayString().setTagArg("t", 0, s);
 }
 
 void SctpPeer::sendRequest(bool last)

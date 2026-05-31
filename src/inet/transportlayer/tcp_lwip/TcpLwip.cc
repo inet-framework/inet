@@ -557,11 +557,6 @@ std::string TcpLwip::getTcpStatusString() const
     return buf2.str();
 }
 
-void TcpLwip::refreshDisplay() const
-{
-    getDisplayString().setTagArg("t", 0, getTcpStatusString().c_str());
-}
-
 TcpLwipConnection *TcpLwip::findAppConn(int connIdP)
 {
     auto i = tcpAppConnMapM.find(connIdP);

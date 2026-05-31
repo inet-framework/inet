@@ -31,7 +31,7 @@ simple MobilityBase extends SimpleModule like IMobility
         @display("i=block/cogwheel");
         string subjectModule = default("^"); // The module path that determines the subject module, the motion of which this mobility model describes. The default value is the parent module
         string coordinateSystemModule = default(""); // The module path of the geographic coordinate system module
-        displayStringTextFormat = default("p: %p\nv: %v"); // The format string for the mobility module's display string text
+        displayStringTextFormat = default("p: {position}\nv: {velocity}"); // The format string for the mobility module's display string text
         bool updateDisplayString = default(true); // Enables continuous update of the subject module's position by modifying its display string
         double constraintAreaMinX @unit(m) = default(-inf m); // The minimum x position of the constraint area. It is unconstrained by default (negative infinity)
         double constraintAreaMinY @unit(m) = default(-inf m); // The minimum y position of the constraint area. It is unconstrained by default (negative infinity)

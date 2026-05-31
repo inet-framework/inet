@@ -625,12 +625,6 @@ std::string Tcp::getTcpStatusString() const
     return buf2.str();
 }
 
-void Tcp::refreshDisplay() const
-{
-    OperationalBase::refreshDisplay();
-    getDisplayString().setTagArg("t", 0, getTcpStatusString().c_str());
-}
-
 std::ostream& operator<<(std::ostream& os, const Tcp::SockPair& sp)
 {
     os << "locSocket=" << sp.localAddr << ":" << sp.localPort << " "

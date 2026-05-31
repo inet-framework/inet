@@ -31,6 +31,7 @@ simple TcpServerHostApp extends SimpleModule like IApp
         string localAddress = default(""); // May be left empty ("")
         int localPort = default(1000); // Port number to listen on
         string serverThreadModuleType; // Module type of "thread" module to launch on incoming connections
+        displayStringTextFormat = default("{numThreads} threads");
         @display("i=block/app");
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finished

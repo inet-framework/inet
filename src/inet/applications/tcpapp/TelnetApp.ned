@@ -29,6 +29,7 @@ simple TelnetApp extends SimpleModule like IApp
 {
     parameters:
         @class(TelnetApp);
+        displayStringTextFormat = default("{socketState}");
         string localAddress = default(""); // Local address or empty ("")
         int localPort; // Local port number
         string connectAddress;  // Server address (may be symbolic)

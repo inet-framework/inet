@@ -265,7 +265,6 @@ const char *Contention::getEventName(EventType event)
 
 void Contention::updateDisplayString(simtime_t expectedChannelAccess) const
 {
-    getDisplayString().setTagArg("t", 0, fsm.getStateName());
 }
 
 } // namespace ieee80211

@@ -80,13 +80,6 @@ void EthernetSocketIo::finish()
     ApplicationBase::finish();
 }
 
-void EthernetSocketIo::refreshDisplay() const
-{
-    ApplicationBase::refreshDisplay();
-    std::string buf = "rcvd: " + std::to_string(numReceived) + " pks\nsent: " + std::to_string(numSent) + " pks";
-    getDisplayString().setTagArg("t", 0, buf.c_str());
-}
-
 void EthernetSocketIo::setSocketOptions()
 {
     socket.setCallback(this);

@@ -34,7 +34,6 @@ class INET_API ExtIpv4TunDevice : public SimpleModule, public RealTimeScheduler:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
-    virtual void refreshDisplay() const override;
     virtual void finish() override;
 
     virtual void openTun(std::string dev);

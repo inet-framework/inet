@@ -68,7 +68,6 @@ class INET_API Ieee80211Mib : public SimpleModule
     static const char *getModeStr(Ieee80211Mib::Mode mode);
     static const char *getStationTypeStr(Ieee80211Mib::BssStationType stationType);
     std::string getSsidStr() const;
-    virtual void refreshDisplay() const override;
 };
 
 } // namespace ieee80211

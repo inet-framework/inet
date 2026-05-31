@@ -178,7 +178,6 @@ class INET_API Tcp : public TransportProtocolBase
     virtual void processIcmpv4Error(Indication *indication);
     virtual void processIcmpv6Error(Indication *indication);
     virtual std::string getTcpStatusString() const;
-    virtual void refreshDisplay() const override;
 
   public:
     ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;

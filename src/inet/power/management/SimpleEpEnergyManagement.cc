@@ -65,11 +65,6 @@ std::string SimpleEpEnergyManagement::getEnergyStatusString() const
     return text;
 }
 
-void SimpleEpEnergyManagement::refreshDisplay() const
-{
-    getDisplayString().setTagArg("t", 0, getEnergyStatusString().c_str());
-}
-
 void SimpleEpEnergyManagement::executeNodeOperation(J estimatedEnergyCapacity)
 {
     if (!std::isnan(nodeShutdownCapacity.get()) && estimatedEnergyCapacity <= nodeShutdownCapacity && nodeStatus->getState() == NodeStatus::UP) {

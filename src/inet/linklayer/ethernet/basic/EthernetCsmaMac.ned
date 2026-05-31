@@ -33,6 +33,7 @@ simple EthernetCsmaMac extends MacProtocolBase
         int mtu @unit(B) = default(1500B);
         string fcsMode @enum("declared","computed");
         @class(EthernetCsmaMac);
+        displayStringTextFormat = default("{fsmState}");
         // emitted when the incoming carrier sense signal changes, the value is 1 or 0
         @signal[carrierSenseChanged](type=int);
         // emitted when the incoming collision signal changes, the value is 1 or 0

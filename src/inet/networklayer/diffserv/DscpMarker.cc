@@ -51,6 +51,7 @@ void DscpMarker::initialize(int stage)
         numMarked = 0;
         WATCH(numRcvd);
         WATCH(numMarked);
+        WATCH_EXPR("markerStatus", (numRcvd > 0 ? "rcvd: " + std::to_string(numRcvd) + " " : std::string()) + (numMarked > 0 ? "mark:" + std::to_string(numMarked) + " " : std::string()));
     }
 }
 
@@ -71,16 +72,6 @@ void DscpMarker::pushPacket(Packet *packet, const cGate *inputGate)
         numMarked++;
     }
     pushOrSendPacket(packet, outputGate, consumer);
-}
-
-void DscpMarker::refreshDisplay() const
-{
-    std::string buf;
-    if (numRcvd > 0)
-        buf += "rcvd: " + std::to_string(numRcvd) + " ";
-    if (numMarked > 0)
-        buf += "mark:" + std::to_string(numMarked) + " ";
-    getDisplayString().setTagArg("t", 0, buf.c_str());
 }
 
 bool DscpMarker::markPacket(Packet *packet, int dscp)

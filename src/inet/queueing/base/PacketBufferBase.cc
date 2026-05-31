@@ -17,7 +17,6 @@ void PacketBufferBase::initialize(int stage)
 {
     PacketProcessorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        displayStringTextFormat = par("displayStringTextFormat");
         numAddedPackets = 0;
         numRemovedPackets = 0;
         numDroppedPackets = 0;

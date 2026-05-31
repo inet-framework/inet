@@ -214,8 +214,6 @@ void TrafficgenSimple::finish()
 void TrafficgenSimple::setStatusString(const char *s)
 {
     statusStr = s;
-    if (hasGUI())
-        getDisplayString().setTagArg("t", 0, s);
 }
 
 } // namespace inet

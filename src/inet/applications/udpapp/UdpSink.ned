@@ -25,6 +25,7 @@ simple UdpSink extends SimpleModule like IApp
         string multicastGroup = default(""); // If non-empty, makes the socket receive multicast packets sent to that group
         string multicastSources = default(""); // If non-empty, then the socket receives multicast packets from those sources only
 
+        displayStringTextFormat = default("rcvd: {numReceived} pks");
         @display("i=block/sink");
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finished

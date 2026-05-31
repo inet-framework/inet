@@ -25,6 +25,7 @@ simple EthernetSocketIo extends SimpleModule
         double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finished
         double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation
         @lifecycleSupport();
+        displayStringTextFormat = default("rcvd: {numReceived} pks\nsent: {numSent} pks");
         @display("i=block/socket");
         @signal[packetSent](type=inet::Packet);
         @signal[packetReceived](type=inet::Packet);
