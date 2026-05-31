@@ -409,7 +409,7 @@ void Ipv6::datagramLocalOut(Packet *packet, const NetworkInterface *destIE, Ipv6
         routePacket(packet, destIE, nullptr, requestedNextHopAddress, true);
     else
         routeMulticastPacket(packet, destIE, nullptr, true);
- }
+}
 
 void Ipv6::routePacket(Packet *packet, const NetworkInterface *destIE, const NetworkInterface *fromIE, Ipv6Address requestedNextHopAddress, bool fromHL)
 {
