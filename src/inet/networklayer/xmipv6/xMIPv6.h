@@ -33,22 +33,25 @@ class Ipv6Tunneling;
 class Ipv6RoutingTable;
 
 // Keys for timer list (=message type)
-#define KEY_BU               0 // Binding Update
-#define KEY_HI               1 // HoTI
-#define KEY_CI               2 // CoTI
-#define KEY_BR               3 // Binding Refresh Request
-#define KEY_BUL_EXP          4 // BUL entry expiry
-#define KEY_BC_EXP           5 // BC entry expiry
-#define KEY_HTOKEN_EXP       6 // home token expiry
-#define KEY_CTOKEN_EXP       7 // care-of token expiry
+enum TimerKey {
+    KEY_BU               = 0, // Binding Update
+    KEY_HI               = 1, // HoTI
+    KEY_CI               = 2, // CoTI
+    KEY_BR               = 3, // Binding Refresh Request
+    KEY_BUL_EXP          = 4, // BUL entry expiry
+    KEY_BC_EXP           = 5, // BC entry expiry
+    KEY_HTOKEN_EXP       = 6, // home token expiry
+    KEY_CTOKEN_EXP       = 7, // care-of token expiry
+};
 
-#define TRANSMIT_TYPE_BU     51 // BuTransmitIfEntry
-#define TRANSMIT_TYPE_TI     52 // TestInitTransmitIfEntry
-
-#define EXPIRY_TYPE_BUL      61 // BulExpiryIfEntry
-#define EXPIRY_TYPE_BC       62 // BcExpiryIfEntry
-
-#define EXPIRY_TYPE_TOKEN    63 // {Home, CareOf}TokenExpiryIfEntry
+// Timer-if-entry type codes
+enum TimerIfEntryType {
+    TRANSMIT_TYPE_BU     = 51, // BuTransmitIfEntry
+    TRANSMIT_TYPE_TI     = 52, // TestInitTransmitIfEntry
+    EXPIRY_TYPE_BUL      = 61, // BulExpiryIfEntry
+    EXPIRY_TYPE_BC       = 62, // BcExpiryIfEntry
+    EXPIRY_TYPE_TOKEN    = 63, // {Home, CareOf}TokenExpiryIfEntry
+};
 
 /**
  * Implements RFC 3775 Mobility Support in Ipv6.

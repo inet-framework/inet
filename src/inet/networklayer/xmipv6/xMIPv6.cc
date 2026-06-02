@@ -32,31 +32,34 @@
 
 namespace inet {
 
-#define MK_SEND_PERIODIC_BU         1
-#define MK_SEND_PERIODIC_BR         2
-#define MK_SEND_TEST_INIT           11
-#define MK_BUL_EXPIRY               21
-#define MK_BC_EXPIRY                22
-#define MK_TOKEN_EXPIRY             23
-#define BRR_TIMEOUT_THRESHOLD       5    // time in seconds before the expiry of a BU when a Binding Refresh Msg. will be sent
-#define BRR_RETRIES                 4    // number of BRRs to be sent to MN
-#define MAX_TOKEN_LIFETIME          500  // 210 // maximum valid lifetime for the tokens used in RR
-#define MAX_RR_BINDING_LIFETIME     4000 // 420 // maximum valid lifetime of a binding for CNs
-#define TEST_INIT_RETRANS_FACTOR    8    // HoTI and CoTI will be retransmitted every MAX_RR_BINDING_LIFETIME * TEST_INIT_RETRANS_FACTOR seconds
+// Self-message kinds
+constexpr int MK_SEND_PERIODIC_BU       = 1;
+constexpr int MK_SEND_PERIODIC_BR       = 2;
+constexpr int MK_SEND_TEST_INIT         = 11;
+constexpr int MK_BUL_EXPIRY             = 21;
+constexpr int MK_BC_EXPIRY              = 22;
+constexpr int MK_TOKEN_EXPIRY           = 23;
 
-// sizes of mobility messages and headers in bytes
-#define SIZE_MOBILITY_HEADER        6    // 6.1.1 mobility header = 48 bit
-#define SIZE_BU                     6    // 6.1.7 BU message = 48 bit
-#define SIZE_HOA_OPTION             20   // HoA option = 128+16 bit + 16 (dest. opts. header)
-#define SIZE_BIND_AUTH_DATA         14   // 6.2.7 Binding Auth. Data = 112 bit
-#define SIZE_BACK                   6    // 6.1.8 BAck message = 48 bit
-#define SIZE_NONCE_INDICES          6    // 6.2.6 Nonce Indices = 48 bit (PadN = 16 bit) -> no padding required for nonce indices
-#define SIZE_HOTI                   10   // 6.1.3 HoTI = 80 bit
-#define SIZE_COTI                   10   // 6.1.4 CoTI = 80 bit
-#define SIZE_HOT                    18   // 6.1.5 HoT = 144 bit
-#define SIZE_COT                    18   // 6.1.6 CoT = 144 bit
-#define SIZE_BE                     18   // 6.1.9 BE message = 144 bit
-#define SIZE_BRR                    2    // 6.1.2 BRR reserved = 16 bit
+// Protocol constants
+constexpr int BRR_TIMEOUT_THRESHOLD     = 5;    // time in seconds before the expiry of a BU when a Binding Refresh Msg. will be sent
+constexpr int BRR_RETRIES               = 4;    // number of BRRs to be sent to MN
+[[maybe_unused]] constexpr int MAX_TOKEN_LIFETIME        = 500;   // 210 // maximum valid lifetime for the tokens used in RR
+[[maybe_unused]] constexpr int MAX_RR_BINDING_LIFETIME   = 4000;  // 420 // maximum valid lifetime of a binding for CNs
+[[maybe_unused]] constexpr int TEST_INIT_RETRANS_FACTOR  = 8;    // HoTI and CoTI will be retransmitted every MAX_RR_BINDING_LIFETIME * TEST_INIT_RETRANS_FACTOR seconds
+
+// Sizes of mobility messages and headers in bytes
+constexpr int SIZE_MOBILITY_HEADER      = 6;    // 6.1.1 mobility header = 48 bit
+constexpr int SIZE_BU                   = 6;    // 6.1.7 BU message = 48 bit
+constexpr int SIZE_HOA_OPTION           = 20;   // HoA option = 128+16 bit + 16 (dest. opts. header)
+constexpr int SIZE_BIND_AUTH_DATA       = 14;   // 6.2.7 Binding Auth. Data = 112 bit
+constexpr int SIZE_BACK                 = 6;    // 6.1.8 BAck message = 48 bit
+constexpr int SIZE_NONCE_INDICES        = 6;    // 6.2.6 Nonce Indices = 48 bit (PadN = 16 bit) -> no padding required for nonce indices
+constexpr int SIZE_HOTI                 = 10;   // 6.1.3 HoTI = 80 bit
+constexpr int SIZE_COTI                 = 10;   // 6.1.4 CoTI = 80 bit
+constexpr int SIZE_HOT                  = 18;   // 6.1.5 HoT = 144 bit
+constexpr int SIZE_COT                  = 18;   // 6.1.6 CoT = 144 bit
+constexpr int SIZE_BE                   = 18;   // 6.1.9 BE message = 144 bit
+constexpr int SIZE_BRR                  = 2;    // 6.1.2 BRR reserved = 16 bit
 
 Define_Module(xMIPv6);
 

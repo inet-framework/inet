@@ -14,22 +14,12 @@
 
 #include "inet/common/SimpleModule.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
+#include "inet/networklayer/xmipv6/MobilityConstants.h"
 
 namespace inet {
 
 // Foreign declarations:
 class NetworkInterface;
-
-// used for the RR tokens
-#define UNDEFINED_TOKEN             0
-#define UNDEFINED_COOKIE            0
-#define UNDEFINED_BIND_AUTH_DATA    0
-#define HO_COOKIE                   11
-#define HO_TOKEN                    1101
-#define CO_COOKIE                   21
-#define CO_TOKEN                    2101
-
-#define PRE_BINDING_EXPIRY          2 // amount of seconds before BUL expiry that indicate that a binding will shortly expiry
 
 class INET_API BindingUpdateList : public SimpleModule
 {
