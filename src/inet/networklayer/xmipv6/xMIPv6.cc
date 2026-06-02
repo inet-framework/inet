@@ -24,6 +24,8 @@
 #include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/icmpv6/Ipv6NeighbourDiscovery.h"
+#include "inet/networklayer/ipv6/Ipv6ExtHeaderIndexTag_m.h"
+#include "inet/networklayer/ipv6/Ipv6Header_m.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 #include "inet/networklayer/ipv6tunneling/Ipv6Tunneling.h"
@@ -171,16 +173,20 @@ void xMIPv6::handleMessage(cMessage *msg)
             EV_INFO << " Received MIPv6 related message" << endl;
             processMobilityMessage(packet);
         }
-        // CB on 29.08.07
-        // normal datagram with an extension header
+        // normal datagram with an extension header, identified by tag
         else if (auto packet = dynamic_cast<Packet *>(msg)) {
-            Ipv6ExtensionHeader *eh = (Ipv6ExtensionHeader *)packet->getContextPointer();
-            if (auto rh = dynamic_cast<Ipv6RoutingHeader *>(eh))
-                processType2RH(packet, rh);
-            else if (auto hao = dynamic_cast<HomeAddressOption *>(eh))
-                processHoAOpt(packet, hao);
+            auto tag = packet->findTag<Ipv6ExtHeaderIndexTag>();
+            if (!tag)
+                throw cRuntimeError("Received packet without Ipv6ExtHeaderIndexTag.");
+            int ehIndex = tag->getExtensionHeaderIndex();
+            const auto& ipv6Header = packet->peekAtFront<Ipv6Header>();
+            const Ipv6ExtensionHeader *eh = ipv6Header->getExtensionHeader(ehIndex);
+            if (auto rh = dynamic_cast<const Ipv6RoutingHeader *>(eh))
+                processType2RH(packet, const_cast<Ipv6RoutingHeader *>(rh));
+            else if (auto hao = dynamic_cast<const HomeAddressOption *>(eh))
+                processHoAOpt(packet, const_cast<HomeAddressOption *>(hao));
             else
-                throw cRuntimeError("Unknown Extension Header.");
+                throw cRuntimeError("Unknown Extension Header at index %d.", ehIndex);
         }
         else
             throw cRuntimeError("Unknown message type received.");
@@ -2087,7 +2093,7 @@ void xMIPv6::processType2RH(Packet *packet, Ipv6RoutingHeader *rh)
         EV_WARN << "Invalid RH2 - not a HoA. Dropping packet." << endl;
     }
 
-    packet->setContextPointer(nullptr);
+    packet->removeTagIfPresent<Ipv6ExtHeaderIndexTag>();
 
     if (validRH2) {
         EV_INFO << "Valid RH2 - copied address from RH2 to datagram" << endl;
@@ -2169,7 +2175,7 @@ void xMIPv6::processHoAOpt(Packet *packet, HomeAddressOption *hoaOpt)
         createAndSendBEMessage(CoA, status);
     }
 
-    packet->setContextPointer(nullptr);
+    packet->removeTagIfPresent<Ipv6ExtHeaderIndexTag>();
 
     if (validHoAOpt) {
         EV_INFO << "Valid HoA Option - copied address from HoA Option to datagram" << endl;

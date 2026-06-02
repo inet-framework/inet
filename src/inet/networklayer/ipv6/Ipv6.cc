@@ -27,6 +27,7 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv6/Ipv6SocketCommand_m.h"
 #include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
+#include "inet/networklayer/ipv6/Ipv6ExtHeaderIndexTag_m.h"
 #include "inet/networklayer/icmpv6/Ipv6NdMessage_m.h"
 #include "inet/networklayer/ipv6/Ipv6ExtHeaderTag_m.h"
 #include "inet/networklayer/ipv6/Ipv6ExtensionHeaders_m.h"
@@ -1068,8 +1069,7 @@ bool Ipv6::processExtensionHeaders(Packet *packet, const Ipv6Header *ipv6Header)
                 // type 2 routing header should be processed by MIPv6 module
                 // if no MIP support, ignore the header
                 if (rt->hasMipv6Support() && rh->getRoutingType() == 2 && rh->getSegmentsLeft() > 0) {
-                    // for simplicity, we set a context pointer on the datagram
-                    packet->setContextPointer((void *)rh);
+                    packet->addTagIfAbsent<Ipv6ExtHeaderIndexTag>()->setExtensionHeaderIndex(i);
                     EV_INFO << "Sending datagram with RH2 to MIPv6 module" << endl;
                     send(packet, "xMIPv6Out");
                     return false;
@@ -1085,7 +1085,7 @@ bool Ipv6::processExtensionHeaders(Packet *packet, const Ipv6Header *ipv6Header)
                 // EV << "object of type=" << typeid(eh).name() << endl;
 
                 if (rt->hasMipv6Support() && dynamic_cast<const HomeAddressOption *>(eh)) {
-                    packet->setContextPointer((void *)eh);
+                    packet->addTagIfAbsent<Ipv6ExtHeaderIndexTag>()->setExtensionHeaderIndex(i);
                     EV_INFO << "Sending datagram with HoA Option to MIPv6 module" << endl;
                     send(packet, "xMIPv6Out");
                     return false;
