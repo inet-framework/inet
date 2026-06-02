@@ -1,0 +1,61 @@
+%description:
+
+Verifies the SGP4-based SatelliteMobility against Vallado's published verification
+case (NORAD catalog 00005, the "TEME example"). With the epoch left at the TLE epoch,
+the propagation time since epoch is zero, so the position must match the reference
+TEME vector r = (7022.46529266, -1400.08296755, 0.03995155) km. Its magnitude (which
+is preserved by the TEME->ECEF rotation and equals the geocentric radius in the
+GeocentricCoordinateSystem scene) is 7160.67 km.
+
+%file: sat5.tle
+
+TEME EXAMPLE
+1 00005U 58002B   00179.78495062  .00000023  00000-0  28098-4 0  4753
+2 00005  34.2682 348.7242 1859667 331.7664  19.3264 10.82419157413667
+
+%file: test.ned
+
+import inet.common.geometry.common.GeocentricCoordinateSystem;
+import inet.mobility.contract.IMobility;
+
+module SatNode
+{
+    parameters:
+        @networkNode;
+        @display("i=misc/sat");
+    submodules:
+        mobility: <default("inet.mobility.satellite.SatelliteMobility")> like IMobility;
+}
+
+network Test
+{
+    submodules:
+        coordinateSystem: GeocentricCoordinateSystem;
+        satNode: SatNode;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+sim-time-limit = 0s
+ned-path = .;../../../../src
+**.cmdenv-log-level = info
+cmdenv-express-mode = false
+
+*.satNode.mobility.typename = "SatelliteMobility"
+*.satNode.mobility.tleFile = "sat5.tle"
+*.satNode.mobility.coordinateSystemModule = "^.^.coordinateSystem"
+*.satNode.mobility.updateDisplayString = false
+
+%#--------------------------------------------------------------------------------------------------------------
+%# remove colorizing
+%subst: /\x1B\[[0-9;]*m//
+%#--------------------------------------------------------------------------------------------------------------
+%contains: test.out
+geocentric radius=7160.67km
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

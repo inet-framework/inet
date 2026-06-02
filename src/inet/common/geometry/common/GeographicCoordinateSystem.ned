@@ -35,6 +35,21 @@ simple SimpleGeographicCoordinateSystem extends SimpleModule like IGeographicCoo
 }
 
 //
+// Provides a globally accurate geographic coordinate system in which the scene
+// coordinate frame coincides with the Earth-Centered Earth-Fixed (ECEF) frame
+// (origin at the center of the Earth, Z towards the north pole, meters), using
+// the WGS84 ellipsoid. Unlike ~SimpleGeographicCoordinateSystem it is valid
+// across the whole globe (required for satellite scenarios), and unlike
+// ~OsgGeographicCoordinateSystem it does not depend on osgEarth.
+//
+simple GeocentricCoordinateSystem extends SimpleModule like IGeographicCoordinateSystem
+{
+    parameters:
+        @class(GeocentricCoordinateSystem);
+        @display("i=block/table2");
+}
+
+//
 // Provides an accurate geographic coordinate system using the
 // built-in OSG API.
 //
