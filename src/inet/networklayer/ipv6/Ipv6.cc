@@ -857,7 +857,7 @@ void Ipv6::encapsulate(Packet *transportPacket)
     if (auto& ecnReq = transportPacket->removeTagIfPresent<EcnReq>())
         ipv6Header->setEcn(ecnReq->getExplicitCongestionNotification());
 
-    ipv6Header->setHopLimit(ttl != -1 ? ttl : 32); // FIXME use iface hop limit instead of 32?
+    ipv6Header->setHopLimit(ttl != -1 ? ttl : IPv6_DEFAULT_ADVCURHOPLIMIT);
     ASSERT(ipv6Header->getHopLimit() > 0);
     ipv6Header->setProtocolId(static_cast<IpProtocolId>(ProtocolGroup::getIpProtocolGroup()->getProtocolNumber(transportPacket->getTag<PacketProtocolTag>()->getProtocol())));
 
