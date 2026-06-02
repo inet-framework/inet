@@ -449,29 +449,21 @@ const Ipv6Address& Ipv6RoutingTable::lookupDestCache(const Ipv6Address& dest, in
     return entry.nextHopAddr;
 }
 
-const Ipv6Route *Ipv6RoutingTable::doLongestPrefixMatch(const Ipv6Address& dest)
+const Ipv6Route *Ipv6RoutingTable::doLongestPrefixMatch(const Ipv6Address& dest) const
 {
     Enter_Method("doLongestPrefixMatch(%s)", dest.str().c_str());
 
     // we'll just stop at the first match, because the table is sorted
     // by prefix lengths and metric (see addRoute())
 
-    auto it = routeList.begin();
-    while (it != routeList.end()) {
-        if (dest.matches((*it)->getDestPrefix(), (*it)->getPrefixLength())) {
-            if (simTime() > (*it)->getExpiryTime() && (*it)->getExpiryTime() != 0) { // since 0 represents infinity.
-                if ((*it)->getSourceType() == IRoute::ROUTER_ADVERTISEMENT) {
-                    EV_INFO << "Expired prefix detected!!" << endl;
-                    it = internalDeleteRoute(it); // TODO update display string
-                }
-            }
-            else
-                return *it;
+    for (const auto *route : routeList) {
+        if (dest.matches(route->getDestPrefix(), route->getPrefixLength())) {
+            // skip expired routes (0 means infinity)
+            if (route->getExpiryTime() != 0 && simTime() > route->getExpiryTime())
+                continue;
+            return route;
         }
-        else
-            ++it;
     }
-    // FIXME todo: if we selected an expired route, throw it out and select again!
     return nullptr;
 }
 
