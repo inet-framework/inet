@@ -1,8 +1,0 @@
-- in the class: int NUM_OF_SOLICIT_SENT, simtime_t MAX_ANYCAST_DELAY_TIME:
-  turn them into #define or const double
-
-- initiateDad(): get rid of chaining of contextPointers, and dup'ing of NS packet.
-
-- assignLinkLocalAddress(cMessage *timerMsg): remove message as argument (why
-  is it passed in the 1st place? the function doesn't need it)
-

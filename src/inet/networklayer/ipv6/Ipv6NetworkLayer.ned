@@ -42,8 +42,8 @@ module Ipv6NetworkLayer like INetworkLayer
     gates:
         input ifIn @labels(INetworkHeader);
         output ifOut @labels(INetworkHeader);
-        input transportIn @labels(Ipv4ControlInfo/down);
-        output transportOut @labels(Ipv4ControlInfo/up);
+        input transportIn @labels(Ipv6ControlInfo/down);
+        output transportOut @labels(Ipv6ControlInfo/up);
 
     submodules:
         routingTable: Ipv6RoutingTable {
