@@ -322,7 +322,7 @@
 /examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c ten_senders -r 0,            100s,            b9d8-0bf1/tplx;95c5-fab7/~tNl;5258-6972/~tND;3b49-27ea/tyf, PASS, EthernetMac Ipv4
 /examples/internetcloud/earthcloud/, -f omnetpp.ini -c General -r 0,                100s,            7520-6d78/tplx;6aa7-af64/~tNl;9acb-7636/~tND;b3d2-5bdc/tyf, PASS, EthernetMac Ipv4
 
-/examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,                50000s,          253f-ba1b/tplx;7a43-77b8/~tNl;1637-43fc/tyf, PASS, EthernetMac
+/examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,                50000s,          253f-ba1b/tplx;7a43-77b8/~tNl;d0dc-fc8c/tyf, PASS, EthernetMac
 /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_inet -r 0,              50s,             ea75-5750/tplx;63fd-0642/~tNl;37fc-28b0/~tND;bc74-06f4/tyf, PASS, EthernetMac
 /examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c ETH -r 0,                    50s,             2b21-0aa7/tplx;e179-c3bf/~tNl;efc9-7ce2/tyf, PASS, EthernetMac
 /examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c Mixed -r 0,                  50s,             6aae-6db8/tplx;f8e9-857b/~tNl;abf0-779e/tyf, PASS, EthernetMac

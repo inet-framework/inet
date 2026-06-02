@@ -7,6 +7,8 @@
 
 #include "inet/networklayer/icmpv6/Ipv6NeighbourDiscovery.h"
 
+#include <algorithm>
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/NodeStatus.h"
@@ -820,7 +822,7 @@ void Ipv6NeighbourDiscovery::initiateDad(const Ipv6Address& tentativeAddr, Netwo
     dadEntry->interfaceId = ie->getInterfaceId();
     dadEntry->address = tentativeAddr;
     dadEntry->numNSSent = 0;
-    dadList.insert(dadEntry);
+    dadList.push_back(dadEntry);
     /*
        RFC2462: Section 5.4.2
        To check an address, a node sends DupAddrDetectTransmits Neighbor
@@ -869,7 +871,7 @@ void Ipv6NeighbourDiscovery::processDadTimeout(cMessage *msg)
     }
     else {
         bubble("Max number of DAD messages for interface sent. Address is unique.");
-        dadList.erase(dadEntry);
+        dadList.erase(std::find(dadList.begin(), dadList.end(), dadEntry));
         EV_DETAIL << "delete dadEntry and msg\n";
         delete dadEntry;
         delete msg;
@@ -890,7 +892,7 @@ void Ipv6NeighbourDiscovery::makeTentativeAddressPermanent(const Ipv6Address& te
     // after the link-local address was verified to be unique
     // we can assign the address and initiate the MIPv6 protocol
     // in case there are any pending entries in the list
-    auto it = dadGlobalList.find(ie);
+    auto it = dadGlobalList.find(ie->getInterfaceId());
     if (it != dadGlobalList.end()) {
         DadGlobalEntry& entry = it->second;
 
@@ -1015,7 +1017,7 @@ void Ipv6NeighbourDiscovery::initiateRouterDiscovery(cMessage *msg)
     cMessage *rdTimeoutMsg = new cMessage("processRDTimeout", MK_RD_TIMEOUT);
     rdTimeoutMsg->setContextPointer(ie);
     rdEntry->timeoutMsg = rdTimeoutMsg;
-    rdList.insert(rdEntry);
+    rdList.push_back(rdEntry);
     /*Before a host sends an initial solicitation, it SHOULD delay the
        transmission for a random amount of time between 0 and
        MAX_RTR_SOLICITATION_DELAY.  This serves to alleviate congestion when
@@ -1035,7 +1037,7 @@ void Ipv6NeighbourDiscovery::cancelRouterDiscovery(NetworkInterface *ie)
     if (rdEntry != nullptr) {
         EV_DETAIL << "rdEntry is not nullptr, RD cancelled!" << endl;
         cancelAndDelete(rdEntry->timeoutMsg);
-        rdList.erase(rdEntry);
+        rdList.erase(std::find(rdList.begin(), rdList.end(), rdEntry));
         delete rdEntry;
     }
     else
@@ -1068,7 +1070,7 @@ void Ipv6NeighbourDiscovery::processRdTimeout(cMessage *msg)
            appear on the link.*/
         bubble("Max number of RS messages sent");
         EV_INFO << "No RA messages were received. Assume no routers are on-link";
-        rdList.erase(rdEntry);
+        rdList.erase(std::find(rdList.begin(), rdList.end(), rdEntry));
         delete rdEntry;
         delete msg;
     }
@@ -1685,7 +1687,7 @@ void Ipv6NeighbourDiscovery::createRaTimer(NetworkInterface *ie)
 
     simtime_t nextScheduledTime = simTime() + interval;
     advIfEntry->nextScheduledRATime = nextScheduledTime;
-    advIfList.insert(advIfEntry);
+    advIfList.push_back(advIfEntry);
     EV_DETAIL << "Interval: " << interval << endl;
     EV_DETAIL << "Next scheduled time: " << nextScheduledTime << endl;
     // now we schedule the msg for whatever time that was derived
@@ -2537,12 +2539,12 @@ void Ipv6NeighbourDiscovery::processRaPrefixInfoForAddrAutoConf(const Ipv6NdPref
                 initiateDad(ie->getProtocolData<Ipv6InterfaceData>()->getLinkLocalAddress(), ie);
 
                 // set MIPv6Init structure that will later on be used for initiating MIPv6 protocol after DAD was performed
-                dadGlobalList[ie].hFlag = hFlag;
-                dadGlobalList[ie].validLifetime = validLifetime;
-                dadGlobalList[ie].preferredLifetime = preferredLifetime;
-                dadGlobalList[ie].addr = newAddr;
-//                dadGlobalList[ie].returnedHome = returnedHome;
-                dadGlobalList[ie].CoA = CoA;
+                dadGlobalList[ie->getInterfaceId()].hFlag = hFlag;
+                dadGlobalList[ie->getInterfaceId()].validLifetime = validLifetime;
+                dadGlobalList[ie->getInterfaceId()].preferredLifetime = preferredLifetime;
+                dadGlobalList[ie->getInterfaceId()].addr = newAddr;
+//                dadGlobalList[ie->getInterfaceId()].returnedHome = returnedHome;
+                dadGlobalList[ie->getInterfaceId()].CoA = CoA;
             }
         }
     }

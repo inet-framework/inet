@@ -99,7 +99,7 @@ class INET_API Ipv6NeighbourDiscovery : public SimpleModule, public LifecycleUns
 #endif /* INET_WITH_xMIPv6 */
 
     Ipv6NeighbourCache neighbourCache;
-    typedef std::set<cMessage *> RaTimerList; // FIXME add comparator for stable fingerprints!
+    typedef std::vector<cMessage *> RaTimerList;
 
     // stores information about a pending Duplicate Address Detection for
     // an interface
@@ -109,7 +109,7 @@ class INET_API Ipv6NeighbourDiscovery : public SimpleModule, public LifecycleUns
         int numNSSent; // number of DAD solicitations sent since start of sim
         cMessage *timeoutMsg; // the message to cancel when NA is received
     };
-    typedef std::set<DadEntry *> DadList; // FIXME why ptrs are stored?    //FIXME add comparator for stable fingerprints!
+    typedef std::vector<DadEntry *> DadList;
 
     // stores information about Router Discovery for an interface
     struct RdEntry {
@@ -117,7 +117,7 @@ class INET_API Ipv6NeighbourDiscovery : public SimpleModule, public LifecycleUns
         unsigned int numRSSent; // number of Router Solicitations sent since start of sim
         cMessage *timeoutMsg; // the message to cancel when RA is received
     };
-    typedef std::set<RdEntry *> RdList; // FIXME why ptrs are stored?    //FIXME add comparator for stable fingerprints!
+    typedef std::vector<RdEntry *> RdList;
 
     // An entry that stores information for an Advertising Interface
     struct AdvIfEntry {
@@ -126,7 +126,7 @@ class INET_API Ipv6NeighbourDiscovery : public SimpleModule, public LifecycleUns
         simtime_t nextScheduledRATime; // stores time when next RA will be sent.
         cMessage *raTimeoutMsg; // the message to cancel when resetting RA timer
     };
-    typedef std::set<AdvIfEntry *> AdvIfList; // FIXME why ptrs are stored?    //FIXME add comparator for stable fingerprints!
+    typedef std::vector<AdvIfEntry *> AdvIfList;
 
     // List of periodic RA msgs(used only for router interfaces)
     RaTimerList raTimerList;
@@ -152,7 +152,7 @@ class INET_API Ipv6NeighbourDiscovery : public SimpleModule, public LifecycleUns
         // bool returnedHome; // MIPv6-related: whether we returned home after a visit in a foreign network
         Ipv6Address CoA; // MIPv6-related: the old CoA, in case we returned home
     };
-    typedef std::map<NetworkInterface *, DadGlobalEntry> DadGlobalList; // FIXME add comparator for stable fingerprints!
+    typedef std::map<int, DadGlobalEntry> DadGlobalList; // keyed by interfaceId
     DadGlobalList dadGlobalList;
 #endif /* INET_WITH_xMIPv6 */
 
