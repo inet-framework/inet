@@ -2406,32 +2406,12 @@ void Ipv6NeighbourDiscovery::processNaForOtherNceStates(const Ipv6NeighbourAdver
 
 void Ipv6NeighbourDiscovery::createAndSendRedirectPacket(NetworkInterface *ie)
 {
-    // Construct a Redirect message
-    auto redirect = makeShared<Ipv6Redirect>(); // TODO "redirectMsg");
-
-    // FIXME incomplete code
-#if 0
-    // Redirect Message Specific Information
-    redirect->setTargetAddress();
-    redirect->setDestinationAddress();
-
-    // Possible Option
-    redirect->setTargetLinkLayerAddress();
-    redirect->addByteLength(IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH);
-#endif
+    throw cRuntimeError("ICMPv6 Redirect sending not yet implemented");
 }
 
 void Ipv6NeighbourDiscovery::processRedirectPacket(const Ipv6Redirect *redirect)
 {
-    // FIXME incomplete code
-#if 0
-    // First we need to extract information from the redirect message
-    Ipv6Address targetAddr = redirect->getTargetAddress(); // Addressed to me
-    Ipv6Address destAddr = redirect->getDestinationAddress(); // new dest addr
-
-    // Optional
-    MacAddress macAddr = redirect->getTargetLinkLayerAddress();
-#endif
+    throw cRuntimeError("ICMPv6 Redirect processing not yet implemented");
 }
 
 #ifdef INET_WITH_xMIPv6
