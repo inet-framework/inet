@@ -141,8 +141,6 @@ class INET_API Ipv6RoutingTable : public SimpleModule, public IRoutingTable, pro
      */
     virtual bool isRouter() const { return isrouter; }
 
-    virtual bool isMulticastForwardingEnabled() { return multicastForward; }
-
     /**
      * To be called from route objects whenever a field changes. Used for
      * maintaining internal data structures and firing "routing table changed"
@@ -372,7 +370,7 @@ class INET_API Ipv6RoutingTable : public SimpleModule, public IRoutingTable, pro
     // IRoutingTable methods:
     virtual bool isAdminDistEnabled() const override { return useAdminDist; }
     virtual bool isForwardingEnabled() const override { return isRouter(); } // TODO inconsistent names
-    virtual bool isMulticastForwardingEnabled() const override { return true; /*TODO isMulticastForwardingEnabled();*/ }
+    virtual bool isMulticastForwardingEnabled() const override { return multicastForward; }
     virtual L3Address getRouterIdAsGeneric() const override { return L3Address(Ipv6Address()); /*TODO getRouterId();*/ }
     virtual bool isLocalAddress(const L3Address& dest) const override { return isLocalAddress(dest.toIpv6()); }
     virtual bool isLocalBroadcastAddress(const L3Address& dest) const { return false; /*TODO isLocalBroadcastAddress(dest.toIPv6());*/ }
