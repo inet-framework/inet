@@ -33,9 +33,6 @@
 #include "inet/networklayer/ipv6/Ipv6ExtensionHeaders_m.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 
-#ifdef INET_WITH_xMIPv6
-#include "inet/networklayer/xmipv6/MobilityHeader_m.h"
-#endif /* INET_WITH_xMIPv6 */
 
 namespace inet {
 
@@ -708,8 +705,6 @@ void Ipv6::localDeliver(Packet *packet, const NetworkInterface *fromIE)
         EV_DETAIL << "This fragment completes the datagram.\n";
     }
 
-#ifdef INET_WITH_xMIPv6
-    // #### 29.08.07 - CB
     // check for extension headers
     if (!processExtensionHeaders(packet, ipv6Header.get())) {
         // ext. header processing not yet finished
@@ -717,8 +712,6 @@ void Ipv6::localDeliver(Packet *packet, const NetworkInterface *fromIE)
         // -> interrupt local delivery process
         return;
     }
-    // #### end CB
-#endif /* INET_WITH_xMIPv6 */
 
     auto origPacket = packet->dup();
     const Protocol *protocol = ipv6Header->getProtocol();
@@ -1052,61 +1045,101 @@ bool Ipv6::determineOutputInterface(const Ipv6Address& destAddress, Ipv6Address&
     return true;
 }
 
-#ifdef INET_WITH_xMIPv6
 bool Ipv6::processExtensionHeaders(Packet *packet, const Ipv6Header *ipv6Header)
 {
     int noExtHeaders = ipv6Header->getExtensionHeaderArraySize();
     EV_INFO << noExtHeaders << " extension header(s) for processing..." << endl;
 
-    // walk through all extension headers
     for (int i = 0; i < noExtHeaders; i++) {
         const Ipv6ExtensionHeader *eh = ipv6Header->getExtensionHeader(i);
         switch (eh->getExtensionType()) {
-            case IP_PROT_IPv6EXT_ROUTING: {
-                const Ipv6RoutingHeader *rh = check_and_cast<const Ipv6RoutingHeader *>(eh);
-                EV_DETAIL << "Routing Header with type=" << rh->getRoutingType() << endl;
-
-                // type 2 routing header should be processed by MIPv6 module
-                // if no MIP support, ignore the header
-                if (rt->hasMipv6Support() && rh->getRoutingType() == 2 && rh->getSegmentsLeft() > 0) {
-                    packet->addTagIfAbsent<Ipv6ExtHeaderIndexTag>()->setExtensionHeaderIndex(i);
-                    EV_INFO << "Sending datagram with RH2 to MIPv6 module" << endl;
-                    send(packet, "xMIPv6Out");
-                    return false;
-                }
-                else {
-                    EV_INFO << "Ignoring unknown routing header" << endl;
+            case IP_PROT_IPv6EXT_HOP: {
+                auto *hopHdr = check_and_cast<const Ipv6HopByHopOptionsHeader *>(eh);
+                const TlvOptions& opts = hopHdr->getTlvOptions();
+                for (size_t j = 0; j < opts.getTlvOptionArraySize(); j++) {
+                    const TlvOptionBase *opt = opts.getTlvOption(j);
+                    int optType = opt->getType();
+                    if (optType == IPv6TLVOPTION_NOP1 || optType == IPv6TLVOPTION_NOPN)
+                        continue;
+                    auto it = hopByHopOptionHandlers.find(optType);
+                    if (it != hopByHopOptionHandlers.end()) {
+                        if (!it->second->processTlvOption(packet, eh, opt))
+                            return false;
+                    }
+                    else {
+                        throw cRuntimeError("No handler registered for Hop-by-Hop option type %d", optType);
+                    }
                 }
                 break;
             }
-            case IP_PROT_IPv6EXT_DEST: {
-                auto *destOptsHdr = check_and_cast<const Ipv6DestinationOptionsHeader *>(eh);
-
-                if (rt->hasMipv6Support() && destOptsHdr->getTlvOptions().findByType(IPv6TLVOPTION_HOME_ADDRESS) != -1) {
-                    packet->addTagIfAbsent<Ipv6ExtHeaderIndexTag>()->setExtensionHeaderIndex(i);
-                    EV_INFO << "Sending datagram with HoA Option to MIPv6 module" << endl;
-                    send(packet, "xMIPv6Out");
-                    return false;
+            case IP_PROT_IPv6EXT_ROUTING: {
+                auto *rh = check_and_cast<const Ipv6RoutingHeader *>(eh);
+                EV_DETAIL << "Routing Header with type=" << rh->getRoutingType() << endl;
+                if (rh->getSegmentsLeft() == 0) {
+                    EV_INFO << "Ignoring routing header with segmentsLeft=0" << endl;
+                    break;
+                }
+                auto it = routingHeaderHandlers.find(rh->getRoutingType());
+                if (it != routingHeaderHandlers.end()) {
+                    if (!it->second->processExtensionHeader(packet, eh))
+                        return false;
                 }
                 else {
-                    EV_INFO << "Ignoring destination options header" << endl;
+                    throw cRuntimeError("No handler registered for routing header type %d", (int)rh->getRoutingType());
+                }
+                break;
+            }
+            case IP_PROT_IPv6EXT_FRAGMENT:
+                // handled by localDeliver() reassembly before this function is called
+                break;
+            case IP_PROT_IPv6EXT_DEST: {
+                auto *destOptsHdr = check_and_cast<const Ipv6DestinationOptionsHeader *>(eh);
+                const TlvOptions& opts = destOptsHdr->getTlvOptions();
+                for (size_t j = 0; j < opts.getTlvOptionArraySize(); j++) {
+                    const TlvOptionBase *opt = opts.getTlvOption(j);
+                    int optType = opt->getType();
+                    if (optType == IPv6TLVOPTION_NOP1 || optType == IPv6TLVOPTION_NOPN)
+                        continue;
+                    auto it = destOptionHandlers.find(optType);
+                    if (it != destOptionHandlers.end()) {
+                        if (!it->second->processTlvOption(packet, eh, opt))
+                            return false;
+                    }
+                    else {
+                        throw cRuntimeError("No handler registered for Destination option type %d", optType);
+                    }
                 }
                 break;
             }
             default:
-                // delete eh;
-                EV_INFO << "Ignoring unknown extension header" << endl;
+                EV_INFO << "Ignoring unknown extension header type " << eh->getExtensionType() << endl;
                 break;
         }
-
     }
 
-    // we have processed no extension headers -> the Ipv6 module can continue
-    // working on this datagram
     return true;
 }
 
-#endif /* INET_WITH_xMIPv6 */
+void Ipv6::registerRoutingHeaderHandler(int routingType, IIpv6ExtensionHeaderHandler *handler)
+{
+    if (routingHeaderHandlers.find(routingType) != routingHeaderHandlers.end())
+        throw cRuntimeError("Routing header handler already registered for type %d", routingType);
+    routingHeaderHandlers[routingType] = handler;
+}
+
+void Ipv6::registerHopByHopOptionHandler(int optionType, IIpv6TlvOptionHandler *handler)
+{
+    if (hopByHopOptionHandlers.find(optionType) != hopByHopOptionHandlers.end())
+        throw cRuntimeError("Hop-by-Hop option handler already registered for type %d", optionType);
+    hopByHopOptionHandlers[optionType] = handler;
+}
+
+void Ipv6::registerDestinationOptionHandler(int optionType, IIpv6TlvOptionHandler *handler)
+{
+    if (destOptionHandlers.find(optionType) != destOptionHandlers.end())
+        throw cRuntimeError("Destination option handler already registered for type %d", optionType);
+    destOptionHandlers[optionType] = handler;
+}
 
 // NetFilter:
 void Ipv6::registerHook(int priority, INetfilter::IHook *hook)

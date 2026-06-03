@@ -13,6 +13,7 @@
 #include <set>
 
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/networklayer/ipv6/IIpv6ExtensionHeaderHandler.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/common/packet/Message.h"
 #include "inet/networklayer/contract/INetfilter.h"
@@ -75,6 +76,11 @@ class INET_API Ipv6 : public SimpleModule, public NetfilterBase, public Lifecycl
     simtime_t lastCheckTime; // when fragbuf was last checked for state fragments
     std::set<const Protocol *> upperProtocols; // where to send packets after decapsulation
     std::map<int, SocketDescriptor *> socketIdToSocketDescriptor;
+
+    // extension header handler registries
+    std::map<int, IIpv6ExtensionHeaderHandler *> routingHeaderHandlers;    // keyed by routing type
+    std::map<int, IIpv6TlvOptionHandler *> hopByHopOptionHandlers;         // keyed by TLV option type
+    std::map<int, IIpv6TlvOptionHandler *> destOptionHandlers;             // keyed by TLV option type
 
     // statistics
     int numMulticast = 0;
@@ -243,7 +249,6 @@ class INET_API Ipv6 : public SimpleModule, public NetfilterBase, public Lifecycl
     bool determineOutputInterface(const Ipv6Address& destAddress, Ipv6Address& nextHop, int& interfaceId,
             Packet *packet, bool fromHL);
 
-#ifdef INET_WITH_xMIPv6
     /**
      * Process the extension headers of the datagram.
      * Returns true if all have been processed successfully and false if errors occured
@@ -251,7 +256,12 @@ class INET_API Ipv6 : public SimpleModule, public NetfilterBase, public Lifecycl
      * module for further processing.
      */
     bool processExtensionHeaders(Packet *packet, const Ipv6Header *ipv6Header);
-#endif /* INET_WITH_xMIPv6 */
+
+  public:
+    // Extension header handler registration
+    void registerRoutingHeaderHandler(int routingType, IIpv6ExtensionHeaderHandler *handler);
+    void registerHopByHopOptionHandler(int optionType, IIpv6TlvOptionHandler *handler);
+    void registerDestinationOptionHandler(int optionType, IIpv6TlvOptionHandler *handler);
 };
 
 } // namespace inet

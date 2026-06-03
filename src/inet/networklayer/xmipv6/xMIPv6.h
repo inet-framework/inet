@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
+#include "inet/networklayer/ipv6/IIpv6ExtensionHeaderHandler.h"
 #include "inet/networklayer/ipv6tunneling/Ipv6Tunneling.h"
 #include "inet/networklayer/xmipv6/BindingUpdateList.h"
 #include "inet/networklayer/xmipv6/MobilityHeader_m.h" // for HAOpt & RH2
@@ -56,7 +57,7 @@ enum TimerIfEntryType {
 /**
  * Implements RFC 3775 Mobility Support in Ipv6.
  */
-class INET_API xMIPv6 : public SimpleModule
+class INET_API xMIPv6 : public SimpleModule, public IIpv6ExtensionHeaderHandler, public IIpv6TlvOptionHandler
 {
   public:
     virtual ~xMIPv6();
@@ -382,7 +383,12 @@ class INET_API xMIPv6 : public SimpleModule
      * Swaps the addresses between the original destination address of the datagram and
      * the field in the routing header.
      */
-    void processType2RH(Packet *packet, Ipv6RoutingHeader *rh);
+    bool processType2RH(Packet *packet, Ipv6RoutingHeader *rh);
+
+    // IIpv6ExtensionHeaderHandler
+    virtual bool processExtensionHeader(Packet *packet, const Ipv6ExtensionHeader *eh) override;
+    // IIpv6TlvOptionHandler
+    virtual bool processTlvOption(Packet *packet, const Ipv6ExtensionHeader *eh, const TlvOptionBase *option) override;
 
     /**
      * Perform validity checks according to RFC 3775 - Section 6.4
@@ -395,7 +401,7 @@ class INET_API xMIPv6 : public SimpleModule
      * Swaps the addresses between the original source address of the datagram and
      * the field in the option.
      */
-    void processHoAOpt(Packet *packet, HomeAddressOption *hoaOpt);
+    bool processHoAOpt(Packet *packet, HomeAddressOption *hoaOpt);
 
 //
 // Binding Refresh Request related functions

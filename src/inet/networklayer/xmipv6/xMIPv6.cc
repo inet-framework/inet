@@ -24,6 +24,7 @@
 #include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/icmpv6/Ipv6NeighbourDiscovery.h"
+#include "inet/networklayer/ipv6/Ipv6.h"
 #include "inet/networklayer/ipv6/Ipv6ExtHeaderIndexTag_m.h"
 #include "inet/networklayer/ipv6/Ipv6Header_m.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
@@ -129,6 +130,11 @@ void xMIPv6::initialize(int stage)
             bc.reference(this, "bindingCacheModule", true);
         }
 
+        // Register extension header handlers with the Ipv6 module
+        auto *ipv6 = check_and_cast<Ipv6 *>(getModuleByPath("^.^.ipv6"));
+        ipv6->registerRoutingHeaderHandler(2, this);            // RH Type 2
+        ipv6->registerDestinationOptionHandler(IPv6TLVOPTION_HOME_ADDRESS, this);  // Home Address Option
+
         WATCH(cnList);
         WATCH(interfaceCoAList);
     }
@@ -166,34 +172,12 @@ void xMIPv6::handleMessage(cMessage *msg)
         else
             throw cRuntimeError("Unrecognized Timer"); // stops sim w/ error msg.
     }
-    // if its a MIPv6 related mobility message
+    // MIPv6 related mobility message
     else {
         auto packet = check_and_cast<Packet *>(msg);
         if (packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::mobileipv6) {
             EV_INFO << " Received MIPv6 related message" << endl;
             processMobilityMessage(packet);
-        }
-        // normal datagram with an extension header, identified by tag
-        else if (auto packet = dynamic_cast<Packet *>(msg)) {
-            auto tag = packet->findTag<Ipv6ExtHeaderIndexTag>();
-            if (!tag)
-                throw cRuntimeError("Received packet without Ipv6ExtHeaderIndexTag.");
-            int ehIndex = tag->getExtensionHeaderIndex();
-            const auto& ipv6Header = packet->peekAtFront<Ipv6Header>();
-            const Ipv6ExtensionHeader *eh = ipv6Header->getExtensionHeader(ehIndex);
-            if (auto rh = dynamic_cast<const Ipv6RoutingHeader *>(eh))
-                processType2RH(packet, const_cast<Ipv6RoutingHeader *>(rh));
-            else if (auto destOpts = dynamic_cast<const Ipv6DestinationOptionsHeader *>(eh)) {
-                int optIdx = destOpts->getTlvOptions().findByType(IPv6TLVOPTION_HOME_ADDRESS);
-                if (optIdx != -1) {
-                    auto *hao = check_and_cast<const HomeAddressOption *>(destOpts->getTlvOptions().getTlvOption(optIdx));
-                    processHoAOpt(packet, const_cast<HomeAddressOption *>(hao));
-                }
-                else
-                    throw cRuntimeError("DestinationOptionsHeader without HomeAddressOption at index %d.", ehIndex);
-            }
-            else
-                throw cRuntimeError("Unknown Extension Header at index %d.", ehIndex);
         }
         else
             throw cRuntimeError("Unknown message type received.");
@@ -2030,20 +2014,18 @@ void xMIPv6::sendBUtoCN(BindingUpdateList::BindingUpdateListEntry& bulEntry, Net
 //    createBUTimer(bulEntry.destAddress, ie, false);
 }
 
-void xMIPv6::processType2RH(Packet *packet, Ipv6RoutingHeader *rh)
+bool xMIPv6::processType2RH(Packet *packet, Ipv6RoutingHeader *rh)
 {
     auto ipv6Header = packet->peekAtFront<Ipv6Header>();
-//    EV << "Processing RH2..." << endl;
 
     if (!validateType2RH(*ipv6Header.get(), *rh)) {
         PacketDropDetails details;
         details.setReason(OTHER_PACKET_DROP);
         emit(packetDroppedSignal, packet, &details);
         delete packet;
-        return;
+        return false;
     }
 
-    bool validRH2 = false;
     const Ipv6Address& HoA = rh->getAddress(0);
 
     /*11.3.3
@@ -2064,7 +2046,7 @@ void xMIPv6::processType2RH(Packet *packet, Ipv6RoutingHeader *rh)
         details.setReason(OTHER_PACKET_DROP);
         emit(packetDroppedSignal, packet, &details);
         delete packet;
-        return;
+        return false;
     }
 
     // probably datagram from CN to MN
@@ -2091,26 +2073,16 @@ void xMIPv6::processType2RH(Packet *packet, Ipv6RoutingHeader *rh)
             }
         }
         insertNetworkProtocolHeader(packet, Protocol::ipv6, newIpv6Header);
-        validRH2 = true;
-    }
-    else {
-        /*If any of these checks fail, the node MUST
-           silently discard the packet.*/
-//        delete datagram;
-        EV_WARN << "Invalid RH2 - not a HoA. Dropping packet." << endl;
-    }
-
-    packet->removeTagIfPresent<Ipv6ExtHeaderIndexTag>();
-
-    if (validRH2) {
         EV_INFO << "Valid RH2 - copied address from RH2 to datagram" << endl;
-        send(packet, "toIPv6");
+        return true;
     }
     else {
+        EV_WARN << "Invalid RH2 - not a HoA. Dropping packet." << endl;
         PacketDropDetails details;
         details.setReason(OTHER_PACKET_DROP);
         emit(packetDroppedSignal, packet, &details);
         delete packet;
+        return false;
     }
 }
 
@@ -2143,12 +2115,11 @@ bool xMIPv6::validateType2RH(const Ipv6Header& ipv6Header, const Ipv6RoutingHead
     return true;
 }
 
-void xMIPv6::processHoAOpt(Packet *packet, HomeAddressOption *hoaOpt)
+bool xMIPv6::processHoAOpt(Packet *packet, HomeAddressOption *hoaOpt)
 {
     auto ipv6Header = packet->peekAtFront<Ipv6Header>();
 
     // datagram from MN to CN
-    bool validHoAOpt = false;
     const Ipv6Address& HoA = hoaOpt->getHomeAddress();
     const Ipv6Address& CoA = ipv6Header->getSrcAddress();
 
@@ -2167,10 +2138,11 @@ void xMIPv6::processHoAOpt(Packet *packet, HomeAddressOption *hoaOpt)
         auto newIpv6Header = packet->removeAtFront<Ipv6Header>();
         newIpv6Header->setSrcAddress(HoA);
         insertNetworkProtocolHeader(packet, Protocol::ipv6, newIpv6Header);
-        validHoAOpt = true;
+        EV_INFO << "Valid HoA Option - copied address from HoA Option to datagram" << endl;
+        return true;
     }
     else {
-        EV_WARN << "Invalid RH2 destination - no entry in binding cache. Dropping packet." << endl;
+        EV_WARN << "Invalid HoA Option - no entry in binding cache. Dropping packet." << endl;
 
         /*If the packet is dropped due the above tests, the correspondent node
            MUST send the Binding Error message as described in Section 9.3.3.
@@ -2180,20 +2152,25 @@ void xMIPv6::processHoAOpt(Packet *packet, HomeAddressOption *hoaOpt)
         // not a valid address of the interfaces of this node
         BeStatus status = UNKNOWN_BINDING_FOR_HOME_ADDRESS_DEST_OPTION;
         createAndSendBEMessage(CoA, status);
-    }
 
-    packet->removeTagIfPresent<Ipv6ExtHeaderIndexTag>();
-
-    if (validHoAOpt) {
-        EV_INFO << "Valid HoA Option - copied address from HoA Option to datagram" << endl;
-        send(packet, "toIPv6");
-    }
-    else {
         PacketDropDetails details;
         details.setReason(OTHER_PACKET_DROP);
         emit(packetDroppedSignal, packet, &details);
         delete packet;
+        return false;
     }
+}
+
+bool xMIPv6::processExtensionHeader(Packet *packet, const Ipv6ExtensionHeader *eh)
+{
+    auto *rh = check_and_cast<const Ipv6RoutingHeader *>(eh);
+    return processType2RH(packet, const_cast<Ipv6RoutingHeader *>(rh));
+}
+
+bool xMIPv6::processTlvOption(Packet *packet, const Ipv6ExtensionHeader *eh, const TlvOptionBase *option)
+{
+    auto *hao = check_and_cast<const HomeAddressOption *>(option);
+    return processHoAOpt(packet, const_cast<HomeAddressOption *>(hao));
 }
 
 void xMIPv6::createAndSendBEMessage(const Ipv6Address& dest, const BeStatus& beStatus)
