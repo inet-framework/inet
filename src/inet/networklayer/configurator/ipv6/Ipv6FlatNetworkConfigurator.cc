@@ -109,9 +109,7 @@ void Ipv6FlatNetworkConfigurator::configureAdvPrefixes(Topology& topo)
             p.advPreferredLifetime = 604800;
             // Default: TRUE
             p.advAutonomousFlag = true;
-#ifdef INET_WITH_xMIPv6
             p.advRtrAddr = false;
-#endif
             ipv6Data->addAdvPrefix(p);
 
             // add a link-local address (tentative) if it doesn't have one

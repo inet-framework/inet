@@ -114,15 +114,13 @@ Ipv6InterfaceData::Ipv6InterfaceData()
     rtrVars.advCurHopLimit = IPv6_DEFAULT_ADVCURHOPLIMIT;
     rtrVars.advDefaultLifetime = 3 * rtrVars.maxRtrAdvInterval;
 
-#ifdef INET_WITH_xMIPv6
-    rtrVars.advHomeAgentFlag = false; // Zarrar Yousaf Feb-March 2007
-    hostConstants.initialBindAckTimeout = MIPv6_INITIAL_BINDACK_TIMEOUT; // MIPv6: added by Zarrar Yousaf @ CNI UniDo 17.06.07
-    hostConstants.maxBindAckTimeout = MIPv6_MAX_BINDACK_TIMEOUT; // MIPv6: added by Zarrar Yousaf @ CNI UniDo 17.06.07
-    hostConstants.initialBindAckTimeoutFirst = MIPv6_INITIAL_BINDACK_TIMEOUT_FIRST; // MIPv6: 12.9.07 - CB
-    hostConstants.maxRRBindingLifeTime = MIPv6_MAX_RR_BINDING_LIFETIME; // 14.9.07 - CB
-    hostConstants.maxHABindingLifeTime = MIPv6_MAX_HA_BINDING_LIFETIME; // 14.9.07 - CB
-    hostConstants.maxTokenLifeTime = MIPv6_MAX_TOKEN_LIFETIME; // 14.9.07 - CB
-#endif /* INET_WITH_xMIPv6 */
+    rtrVars.advHomeAgentFlag = false;
+    hostConstants.initialBindAckTimeout = MIPv6_INITIAL_BINDACK_TIMEOUT;
+    hostConstants.maxBindAckTimeout = MIPv6_MAX_BINDACK_TIMEOUT;
+    hostConstants.initialBindAckTimeoutFirst = MIPv6_INITIAL_BINDACK_TIMEOUT_FIRST;
+    hostConstants.maxRRBindingLifeTime = MIPv6_MAX_RR_BINDING_LIFETIME;
+    hostConstants.maxHABindingLifeTime = MIPv6_MAX_HA_BINDING_LIFETIME;
+    hostConstants.maxTokenLifeTime = MIPv6_MAX_TOKEN_LIFETIME;
 
 #if USE_MOBILITY
     if (rtrVars.advDefaultLifetime < 1)
@@ -146,12 +144,6 @@ std::string Ipv6InterfaceData::str() const
            << "(" << Ipv6Address::scopeName(getAddress(i).getScope())
            << (isTentativeAddress(i) ? " tent" : "") << ") "
 
-#ifdef INET_WITH_xMIPv6
-// TODO revise, routing table is not that simple to access
-//           << ((rt6->isMobileNode() && getAddress(i).isGlobal())
-//               ? (addresses[i].addrType==HoA ? "HoA" : "CoA") : "")
-#endif /* INET_WITH_xMIPv6 */
-
            << " expiryTime: " << (addresses[i].expiryTime == SIMTIME_ZERO ? "inf" : SIMTIME_STR(addresses[i].expiryTime))
            << " prefExpiryTime: " << (addresses[i].prefExpiryTime == SIMTIME_ZERO ? "inf" : SIMTIME_STR(addresses[i].prefExpiryTime))
            << endl;
@@ -166,9 +158,7 @@ std::string Ipv6InterfaceData::str() const
            << (a.advOnLinkFlag ? "" : "off-link ")
            << (a.advAutonomousFlag ? "" : "non-auto ");
 
-#ifdef INET_WITH_xMIPv6
         os << "R-Flag = " << (a.advRtrAddr ? "1 " : "0 ");
-#endif /* INET_WITH_xMIPv6 */
 
         if (a.advValidLifetime == SIMTIME_ZERO)
             os << "lifetime:inf";
@@ -190,15 +180,6 @@ std::string Ipv6InterfaceData::str() const
 //    os << " retransTimer=" << hostVars.retransTimer;
 //    os << " baseReachableTime=" << hostVars.baseReachableTime;
     os << " reachableTime=" << hostVars.reachableTime << endl;
-
-#ifdef INET_WITH_xMIPv6
-    // the following is for MIPv6 support
-    // 4.9.07 - Zarrar, CB
-// TODO revise, routing table is not that simple to access
-//    if ( rt6->isMobileNode() )
-//        os << "\tHome Network Info: " << " HoA="<< homeInfo.HoA << ", HA=" << homeInfo.homeAgentAddr
-//           << ", home prefix=" << homeInfo.prefix/*.prefix()*/ << "\n";
-#endif /* INET_WITH_xMIPv6 */
 
     if (rtrVars.advSendAdvertisements) {
         os << "\tRouter:";
@@ -222,13 +203,8 @@ std::string Ipv6InterfaceData::detailedInfo() const
     return str(); // TODO this could be improved: multi-line text, etc
 }
 
-#ifndef INET_WITH_xMIPv6
-void Ipv6InterfaceData::assignAddress(const Ipv6Address& addr, bool tentative,
-        simtime_t expiryTime, simtime_t prefExpiryTime)
-#else /* INET_WITH_xMIPv6 */
 void Ipv6InterfaceData::assignAddress(const Ipv6Address& addr, bool tentative,
         simtime_t expiryTime, simtime_t prefExpiryTime, bool hFlag)
-#endif /* INET_WITH_xMIPv6 */
 {
     addresses.push_back(AddressData());
     AddressData& a = addresses.back();
@@ -237,15 +213,9 @@ void Ipv6InterfaceData::assignAddress(const Ipv6Address& addr, bool tentative,
     a.expiryTime = expiryTime;
     a.prefExpiryTime = prefExpiryTime;
 
-#ifdef INET_WITH_xMIPv6
-    if (addr.isGlobal()) { // only tag a global scope address as HoA or CoA, depending on the status of the H-Flag
-        if (hFlag == true)
-            a.addrType = HoA; // if H-Flag is set then the auto-conf address is the Home address -.....
-        else
-            a.addrType = CoA; // else it is a care of address (CoA)
+    if (addr.isGlobal()) {
+        a.addrType = hFlag ? HoA : CoA;
     }
-    // FIXME else a.addrType = ???;
-#endif /* INET_WITH_xMIPv6 */
 
     choosePreferredAddress();
     changed1(F_IP_ADDRESS);
@@ -293,7 +263,6 @@ bool Ipv6InterfaceData::isTentativeAddress(int i) const
     return addresses[i].tentative;
 }
 
-#ifdef INET_WITH_xMIPv6
 Ipv6InterfaceData::AddressType Ipv6InterfaceData::getAddressType(int i) const
 {
     ASSERT(i >= 0 && i < (int)addresses.size());
@@ -305,7 +274,6 @@ Ipv6InterfaceData::AddressType Ipv6InterfaceData::getAddressType(const Ipv6Addre
     return getAddressType(findAddress(addr));
 }
 
-#endif /* INET_WITH_xMIPv6 */
 bool Ipv6InterfaceData::hasAddress(const Ipv6Address& addr) const
 {
     return findAddress(addr) != -1;
@@ -334,7 +302,6 @@ void Ipv6InterfaceData::permanentlyAssign(const Ipv6Address& addr)
     choosePreferredAddress();
 }
 
-#ifdef INET_WITH_xMIPv6
 void Ipv6InterfaceData::tentativelyAssign(int i)
 {
     ASSERT(i >= 0 && i < (int)addresses.size());
@@ -342,7 +309,6 @@ void Ipv6InterfaceData::tentativelyAssign(int i)
     choosePreferredAddress();
 }
 
-#endif /* INET_WITH_xMIPv6 */
 
 const Ipv6Address& Ipv6InterfaceData::getLinkLocalAddress() const
 {
@@ -372,12 +338,8 @@ bool Ipv6InterfaceData::addrLess(const AddressData& a, const AddressData& b)
     if (a.address.getScope() != b.address.getScope())
         return a.address.getScope() > b.address.getScope(); // bigger scope is better
 
-#ifdef INET_WITH_xMIPv6
-    // FIXME  check a.address.isGlobal() != b.address.isGlobal()
-
     if (a.address.isGlobal() && b.address.isGlobal() && a.addrType != b.addrType)
-        return a.addrType == CoA; // HoA is better than CoA, 24.9.07 - CB
-#endif /* INET_WITH_xMIPv6 */
+        return a.addrType == CoA; // HoA is better than CoA
 
     return (a.expiryTime == SIMTIME_ZERO && b.expiryTime != SIMTIME_ZERO) || a.expiryTime > b.expiryTime; // longer expiry time is better
 }
@@ -535,9 +497,6 @@ void Ipv6InterfaceData::removeMulticastListener(const Ipv6Address& multicastAddr
     }
 }
 
-#ifdef INET_WITH_xMIPv6
-//#############    Additional function definitions added by Zarrar Yousaf @ CNI UNI Dortmund 23.05.07######
-
 const Ipv6Address& Ipv6InterfaceData::getGlobalAddress(AddressType type) const
 {
     for (const auto& elem : addresses)
@@ -623,8 +582,6 @@ void Ipv6InterfaceData::updateHomeNetworkInfo(const Ipv6Address& hoa, const Ipv6
     if (addr == Ipv6Address::UNSPECIFIED_ADDRESS)
         this->assignAddress(hoa, false, SIMTIME_ZERO, SIMTIME_ZERO, true);
 }
-
-#endif /* INET_WITH_xMIPv6 */
 
 } // namespace inet
 
