@@ -8,9 +8,6 @@ MN's home address starting at t=71s. After the MN moves to AP_1 and
 registers with its HA, the tunneled traffic from CN triggers route
 optimization.
 
-Note: RO can only start after t=70s due to recentlySentHOTI() check
-(maxTokenLifeTime/3 = 210/3 = 70s threshold from sentHoTI=0 init).
-
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 [General]

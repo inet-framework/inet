@@ -31,12 +31,12 @@ std::ostream& operator<<(std::ostream& os, const BindingUpdateList::BindingUpdat
        << " BU_Ack: " << bul.BAck << "\n";
 
     // this part will only be displayed if the BUL entry is for CN registration
-    if (bul.sentHoTI != 0) {
+    if (bul.sentHoTI >= SIMTIME_ZERO) {
         os << "Sent Time HoTI: " << SIMTIME_STR(bul.sentHoTI) << " HoTI cookie: " << bul.cookieHoTI
            << " home token: " << bul.tokenH << "\n";
     }
 
-    if (bul.sentCoTI != 0) {
+    if (bul.sentCoTI >= SIMTIME_ZERO) {
         os << " Sent Time CoTI: " << SIMTIME_STR(bul.sentCoTI) << " CoTI cookie: " << bul.cookieCoTI
            << " care-of token: " << bul.tokenC << "\n";
     }
@@ -148,8 +148,8 @@ void BindingUpdateList::initializeBUValues(BindingUpdateListEntry& entry)
     entry.BAck = false;
 
     // RR specific values
-    entry.sentHoTI = 0;
-    entry.sentCoTI = 0;
+    entry.sentHoTI = -1;
+    entry.sentCoTI = -1;
     entry.cookieHoTI = UNDEFINED_COOKIE;
     entry.cookieCoTI = UNDEFINED_COOKIE;
 //    entry.sendNext = 0;
@@ -356,6 +356,9 @@ bool BindingUpdateList::recentlySentCOTI(const Ipv6Address& dest, NetworkInterfa
 
     ASSERT(entry != nullptr);
 
+    if (entry->sentCoTI < SIMTIME_ZERO)
+        return false; // never sent
+
     return entry->sentCoTI + ie->getProtocolData<Ipv6InterfaceData>()->_getMaxTokenLifeTime() / 3 > simTime();
 }
 
@@ -364,6 +367,9 @@ bool BindingUpdateList::recentlySentHOTI(const Ipv6Address& dest, NetworkInterfa
     BindingUpdateList::BindingUpdateListEntry *entry = lookup(dest);
 
     ASSERT(entry != nullptr);
+
+    if (entry->sentHoTI < SIMTIME_ZERO)
+        return false; // never sent
 
     return entry->sentHoTI + ie->getProtocolData<Ipv6InterfaceData>()->_getMaxTokenLifeTime() / 3 > simTime();
 }

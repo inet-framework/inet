@@ -923,14 +923,10 @@ void xMIPv6::processBUMessage(Packet *inPacket, const Ptr<const BindingUpdate>& 
                 int interfaceID = ifTag->getInterfaceId();
                 cancelTimerIfEntry(HoA, interfaceID, KEY_BR);
 
-                // and then we initialize a (new) BRR timer that gets
-                // fired as soon as the BU lifetime is closing to 0.
-                // Then we send Binding Refresh Requests once again
-                // until we receive a valid BU.
-                // FOX uncommented BRR below
-//                NetworkInterface *ie = ift->interfaceAt(interfaceID);
-//                createBRRTimer(HoA, ie, buLifetime - BRR_TIMEOUT_THRESHOLD);
-//                createBRRTimer(HoA, ie, BRR_TIMEOUT_THRESHOLD);
+                // Initialize a BRR timer that fires shortly before the
+                // binding expires, prompting the MN to refresh its binding.
+                NetworkInterface *ie = ift->getInterfaceById(interfaceID);
+                createBRRTimer(HoA, ie, buLifetime - BRR_TIMEOUT_THRESHOLD);
             }
         }
     }
@@ -1903,7 +1899,7 @@ bool xMIPv6::validateCoTMessage(Packet *inPacket, const CareOfTest& CoT)
         return false; // no entry in BUL
     }
 
-    if (bulEntry->sentHoTI == 0 && bulEntry->sentCoTI == 0) {
+    if (bulEntry->sentHoTI < SIMTIME_ZERO && bulEntry->sentCoTI < SIMTIME_ZERO) {
         EV_WARN << "Invalid CoT: No RR procedure initialized for this CN." << endl;
         return false; // no RR procedure started for this entry
     }
@@ -2466,10 +2462,8 @@ void xMIPv6::createAndSendBRRMessage(const Ipv6Address& dest, NetworkInterface *
     brr->setChunkLength(B(SIZE_MOBILITY_HEADER + SIZE_BRR));
     outPacket->insertAtFront(brr);
 
-    EV_INFO << "\n<<======BRR MESSAGE FORMED; APPENDING CONTROL INFO=====>>\n";
-    Ipv6Address CoA = ie->getProtocolData<Ipv6InterfaceData>()->getGlobalAddress(Ipv6InterfaceData::CoA);
-    ASSERT(!CoA.isUnspecified());
-    sendMobilityMessageToIPv6Module(outPacket, dest, CoA, ie->getInterfaceId());
+    EV_INFO << "Sending Binding Refresh Request to " << dest << endl;
+    sendMobilityMessageToIPv6Module(outPacket, dest, Ipv6Address::UNSPECIFIED_ADDRESS, ie->getInterfaceId());
 }
 
 void xMIPv6::processBRRMessage(Packet *inPacket, const Ptr<const BindingRefreshRequest>& brr)
