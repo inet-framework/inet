@@ -296,13 +296,8 @@ class INET_API Ipv6NeighbourDiscovery : public SimpleModule, public LifecycleUns
        operate independently on the prefixes that have the appropriate flag set.*/
     virtual void processRaPrefixInfo(const Ipv6RouterAdvertisement *ra, NetworkInterface *ie);
 
-#ifndef INET_WITH_xMIPv6
     virtual void processRaPrefixInfoForAddrAutoConf(const Ipv6NdPrefixInformation& prefixInfo,
-            NetworkInterface *ie);
-#else /* INET_WITH_xMIPv6 */
-    virtual void processRaPrefixInfoForAddrAutoConf(const Ipv6NdPrefixInformation& prefixInfo,
-            NetworkInterface *ie, bool hFlag = false); // overloaded method - 3.9.07 CB
-#endif /* INET_WITH_xMIPv6 */
+            NetworkInterface *ie, bool hFlag = false);
 
     /**
      *  Create a timer for the given interface entry that sends periodic

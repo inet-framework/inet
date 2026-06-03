@@ -1528,81 +1528,7 @@ void Ipv6NeighbourDiscovery::processRaPrefixInfo(const Ipv6RouterAdvertisement *
     }
 }
 
-#ifndef INET_WITH_xMIPv6
-void Ipv6NeighbourDiscovery::processRaPrefixInfoForAddrAutoConf(const Ipv6NdPrefixInformation& prefixInfo, NetworkInterface *ie)
-{
-    EV_INFO << "Processing Prefix Info for address auto-configuration.\n";
-    Ipv6Address prefix = prefixInfo.getPrefix();
-    uint prefixLength = prefixInfo.getPrefixLength();
-    simtime_t preferredLifetime = prefixInfo.getPreferredLifetime();
-    simtime_t validLifetime = prefixInfo.getValidLifetime();
-
-    // RFC 2461: Section 5.5.3
-    // First condition tested, the autonomous flag is already set
-
-    // b) If the prefix is the link-local prefix, silently ignore the Prefix
-    // Information option.
-    if (prefixInfo.getPrefix().isLinkLocal() == true) {
-        EV_INFO << "Prefix is link-local, ignore Prefix Information Option\n";
-        return;
-    }
-
-    // c) If the preferred lifetime is greater than the valid lifetime, silently
-    // ignore the Prefix Information option. A node MAY wish to log a system
-    // management error in this case.
-    if (preferredLifetime > validLifetime) {
-        EV_INFO << "Preferred lifetime is greater than valid lifetime, ignore Prefix Information\n";
-        return;
-    }
-
-    bool isPrefixAssignedToInterface = false;
-    for (int i = 0; i < ie->getProtocolData<Ipv6InterfaceData>()->getNumAddresses(); i++) {
-        if (ie->getProtocolData<Ipv6InterfaceData>()->getAddress(i).matches(prefix, prefixLength) == true)
-            isPrefixAssignedToInterface = true;
-    }
-
-    /*d) If the prefix advertised does not match the prefix of an address already
-         in the list, and the Valid Lifetime is not 0, form an address (and add
-         it to the list) by combining the advertised prefix with the link�s
-         interface identifier as follows:*/
-    if (isPrefixAssignedToInterface == false && validLifetime != 0) {
-        Ipv6Address linkLocalAddress = ie->getProtocolData<Ipv6InterfaceData>()->getLinkLocalAddress();
-        ASSERT(linkLocalAddress.isUnspecified() == false);
-        Ipv6Address newAddr = linkLocalAddress.setPrefix(prefix, prefixLength);
-        // TODO for now we leave the newly formed address as not tentative,
-        // according to Greg, we have to always perform DAD for a newly formed address.
-        EV_INFO << "Assigning new address to: " << ie->getInterfaceName() << endl;
-        ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->assignAddress(newAddr, false, simTime() + validLifetime,
-                simTime() + preferredLifetime);
-    }
-
-    // TODO this is the simplified version.
-    /*e) If the advertised prefix matches the prefix of an autoconfigured
-       address (i.e., one obtained via stateless or stateful address
-       autoconfiguration) in the list of addresses associated with the
-       interface, the specific action to perform depends on the Valid
-       Lifetime in the received advertisement and the Lifetime
-       associated with the previously autoconfigured address (which we
-       call StoredLifetime in the discussion that follows):
-
-       1) If the received Lifetime is greater than 2 hours or greater
-          than StoredLifetime, update the stored Lifetime of the
-          corresponding address.
-
-       2) If the StoredLifetime is less than or equal to 2 hours and the
-          received Lifetime is less than or equal to StoredLifetime,
-          ignore the prefix, unless the Router Advertisement from which
-
-          this Prefix Information option was obtained has been
-          authenticated (e.g., via IPSec [RFC2402]). If the Router
-          Advertisment was authenticated, the StoredLifetime should be
-          set to the Lifetime in the received option.
-
-       3) Otherwise, reset the stored Lifetime in the corresponding
-          address to two hours.*/
-}
-
-#endif /* INET_WITH_xMIPv6 */
+// (non-MIPv6 version removed; unified with MIPv6 version below)
 
 void Ipv6NeighbourDiscovery::createRaTimer(NetworkInterface *ie)
 {
@@ -2348,8 +2274,6 @@ void Ipv6NeighbourDiscovery::processRedirectPacket(const Ipv6Redirect *redirect)
     throw cRuntimeError("ICMPv6 Redirect processing not yet implemented");
 }
 
-#ifdef INET_WITH_xMIPv6
-// The overlaoded function has been added by zarrar yousaf on 20.07.07
 void Ipv6NeighbourDiscovery::processRaPrefixInfoForAddrAutoConf(const Ipv6NdPrefixInformation& prefixInfo, NetworkInterface *ie, bool hFlag)
 {
     EV_INFO << "Processing Prefix Info for address auto-configuration.\n";
@@ -2549,8 +2473,6 @@ bool Ipv6NeighbourDiscovery::isWirelessAccessPoint(cModule *module)
     return isNetworkNode(module) && module->getSubmodule("bridging") &&
            (module->getSubmodule("wlan", 0) || module->getSubmodule("wlan"));
 }
-
-#endif /* INET_WITH_xMIPv6 */
 
 } // namespace inet
 
