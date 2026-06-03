@@ -1080,19 +1080,16 @@ bool Ipv6::processExtensionHeaders(Packet *packet, const Ipv6Header *ipv6Header)
                 break;
             }
             case IP_PROT_IPv6EXT_DEST: {
-                (void)check_and_cast<const Ipv6DestinationOptionsHeader *>(eh);
-                // Ipv6DestinationOptionsHeader* doh = (Ipv6DestinationOptionsHeader*) (eh);
-                // EV << "object of type=" << typeid(eh).name() << endl;
+                auto *destOptsHdr = check_and_cast<const Ipv6DestinationOptionsHeader *>(eh);
 
-                if (rt->hasMipv6Support() && dynamic_cast<const HomeAddressOption *>(eh)) {
+                if (rt->hasMipv6Support() && destOptsHdr->getTlvOptions().findByType(IPv6TLVOPTION_HOME_ADDRESS) != -1) {
                     packet->addTagIfAbsent<Ipv6ExtHeaderIndexTag>()->setExtensionHeaderIndex(i);
                     EV_INFO << "Sending datagram with HoA Option to MIPv6 module" << endl;
                     send(packet, "xMIPv6Out");
                     return false;
                 }
                 else {
-                    // delete eh;
-                    EV_INFO << "Ignoring unknown destination options header" << endl;
+                    EV_INFO << "Ignoring destination options header" << endl;
                 }
                 break;
             }

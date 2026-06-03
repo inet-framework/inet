@@ -31,6 +31,7 @@ enum Ipv6TlvOptionTypes
     IPv6TLVOPTION_NOP1 = 0;
     IPv6TLVOPTION_NOPN = 1;
     IPv6TLVOPTION_TLV_GPSR = 47;
+    IPv6TLVOPTION_HOME_ADDRESS = 201;   // 0xC9, RFC 6275 Section 6.3
 };
 
 //

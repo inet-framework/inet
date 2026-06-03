@@ -183,8 +183,15 @@ void xMIPv6::handleMessage(cMessage *msg)
             const Ipv6ExtensionHeader *eh = ipv6Header->getExtensionHeader(ehIndex);
             if (auto rh = dynamic_cast<const Ipv6RoutingHeader *>(eh))
                 processType2RH(packet, const_cast<Ipv6RoutingHeader *>(rh));
-            else if (auto hao = dynamic_cast<const HomeAddressOption *>(eh))
-                processHoAOpt(packet, const_cast<HomeAddressOption *>(hao));
+            else if (auto destOpts = dynamic_cast<const Ipv6DestinationOptionsHeader *>(eh)) {
+                int optIdx = destOpts->getTlvOptions().findByType(IPv6TLVOPTION_HOME_ADDRESS);
+                if (optIdx != -1) {
+                    auto *hao = check_and_cast<const HomeAddressOption *>(destOpts->getTlvOptions().getTlvOption(optIdx));
+                    processHoAOpt(packet, const_cast<HomeAddressOption *>(hao));
+                }
+                else
+                    throw cRuntimeError("DestinationOptionsHeader without HomeAddressOption at index %d.", ehIndex);
+            }
             else
                 throw cRuntimeError("Unknown Extension Header at index %d.", ehIndex);
         }

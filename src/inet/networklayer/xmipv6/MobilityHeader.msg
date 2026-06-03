@@ -10,6 +10,7 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.TlvOptions;
 import inet.common.packet.chunk.Chunk;
 import inet.networklayer.contract.ipv6.Ipv6Address;
 import inet.networklayer.ipv6.Ipv6Header;
@@ -134,7 +135,8 @@ class BindingRefreshRequest extends MobilityHeader
 ///////////////////////////////////////////
 // 17.10.07 - CB
 ///////////////////////////////////////////
-class HomeAddressOption extends Ipv6DestinationOptionsHeader
+class HomeAddressOption extends TlvOptionBase
 {
+    type = IPv6TLVOPTION_HOME_ADDRESS;
     Ipv6Address homeAddress;
 }

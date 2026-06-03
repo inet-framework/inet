@@ -425,11 +425,13 @@ void Ipv6Tunneling::encapsulateDatagram(Packet *packet)
                   extension header (Next Header value = 60).  It is used in a packet
                   sent by a mobile node while away from home, to inform the recipient
                   of the mobile node's home address.*/
-            HomeAddressOption *haOpt = new HomeAddressOption();
+            auto *destOptsHdr = new Ipv6DestinationOptionsHeader();
+            auto *haOpt = new HomeAddressOption();
             haOpt->setHomeAddress(rh2);
+            destOptsHdr->getTlvOptionsForUpdate().appendTlvOption(haOpt);
 
-            // append HA option to routing headers
-            packet->addTagIfAbsent<Ipv6ExtHeaderReq>()->appendExtensionHeader(haOpt);
+            // append Destination Options header containing HA option
+            packet->addTagIfAbsent<Ipv6ExtHeaderReq>()->appendExtensionHeader(destOptsHdr);
 
             EV_INFO << "Added Home Address Option header." << endl;
         }
