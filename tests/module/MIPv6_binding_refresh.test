@@ -1,0 +1,137 @@
+%description:
+Tests MIPv6 Binding Refresh Request: after route optimization completes,
+the CN sends a Binding Refresh Request to the MN before the RO binding
+expires, prompting the MN to re-initiate the Return Routability procedure.
+
+The RR binding lifetime is set to 20s (via maxRrBindingLifeTime parameter).
+After the MN's BU is accepted by the CN (~t=42s), the CN schedules a BRR
+to fire 5s before expiry (at ~t=57s). The MN should receive the BRR and
+re-initiate Return Routability.
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+ned-path = ../../../../examples;../../../../src
+network = inet.examples.mobileipv6.mIPv6Network
+sim-time-limit = 65s
+cpu-time-limit = 120s
+seed-set = 1
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+num-rngs = 3
+**.mobility.rng-0 = 2
+
+# number of MNs and CNs
+*.total_mn = 1
+*.total_cn = 1
+
+**.neighbourDiscovery.minIntervalBetweenRAs = 0.03s
+**.neighbourDiscovery.maxIntervalBetweenRAs = 0.07s
+
+# Short RR binding lifetime to trigger BRR within simulation time
+**.xMobileIPv6.maxRrBindingLifeTime = 20s
+
+# channel physical parameters
+*.radioMedium.mediumLimitCache.maxTransmissionPower = 2.0mW
+*.radioMedium.mediumLimitCache.minReceptionPower = -82dBm
+*.radioMedium.mediumLimitCache.minInterferencePower = -82dBm
+
+# access point
+**.wlan*.mgmt.numAuthSteps = 4
+
+# ALL APs common parameters
+**.AP*.wlan*.mgmt.beaconInterval = 0.1s
+
+# Access Point parameters
+**.AP_Home.wlan*.mgmt.ssid = "HOME"
+**.AP_Home.wlan*.address = "10:AA:00:00:00:01"
+**.AP_Home.eth[0].address = "10:AE:00:00:00:02"
+**.AP_Home.eth[0].duplexMode = true
+
+**.AP_1.wlan*.mgmt.ssid = "AP1"
+**.AP_1.wlan*.address = "10:AA:00:00:A1:01"
+**.AP_1.eth[0].address = "10:AE:00:00:A1:02"
+**.AP_1.eth[0].duplexMode = true
+
+# mobility - MN moves to AP_1, handover completes by ~t=33s
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxZ = 0m
+
+**.MN[0].mobility.typename = "RectangleMobility"
+**.MN[0].mobility.constraintAreaMinX = 180m
+**.MN[0].mobility.constraintAreaMinY = 170m
+**.MN[0].mobility.constraintAreaMaxX = 630m
+**.MN[0].mobility.constraintAreaMaxY = 180m
+**.MN[0].mobility.startPos = 0
+**.MN[0].mobility.speed = 10mps
+**.MN*.mobility.updateInterval = 0.1s
+
+# CN sends pings at t=40s to trigger RO
+**.MN*.numApps = 0
+**.CN*.numApps = 1
+**.CN*.app[*].typename = "PingApp"
+**.CN[0].app[0].destAddr = "aaaa:0:66:0:8aa:ff:fe00:8"
+**.CN*.app[0].packetSize = 56B
+**.CN*.app[*].sendInterval = 2s
+**.CN[0].app[0].count = 5
+**.CN[0].app[0].startTime = 40s
+**.CN*.app[0].hopLimit = 32
+**.CN*.app[0].printPing = true
+
+# ip settings
+**.forwarding = false
+
+# Ethernet NIC configuration
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue"
+**.eth[*].queue.dataQueue.packetCapacity = 10
+**.eth*.duplexMode = true
+
+# analog model
+**.analogModel.ignorePartialInterference = true
+
+# wireless channels
+**.AP_Home.wlan*.radio.channelNumber = 1
+**.AP_1.wlan*.radio.channelNumber = 2
+**.MN*.wlan*.radio.channelNumber = 0
+
+# wireless configuration
+**.wlan*.agent.activeScan = true
+**.wlan*.agent.defaultSsid = ""
+**.wlan*.agent.channelsToScan = "1 2"
+**.wlan*.agent.probeDelay = 0.1s
+**.wlan*.agent.minChannelTime = 0.15s
+**.wlan*.agent.maxChannelTime = 0.3s
+**.wlan*.agent.authenticationTimeout = 5s
+**.wlan*.agent.associationTimeout = 5s
+
+# nic settings
+**.wlan*.bitrate = 2Mbps
+**.wlan*.mac.dcf.channelAccess.cwMin = 7
+**.radio.transmitter.power = 2.0mW
+
+**.constraintAreaMinX = 0m
+**.constraintAreaMinY = 0m
+**.constraintAreaMaxX = 850m
+**.constraintAreaMaxY = 850m
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%subst: /^\([^)]*\)//
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+mIPv6Network.CN[0].ipv6.mipv6support.xMobileIPv6: Sending Binding Refresh Request to
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+mIPv6Network.MN[0].ipv6.mipv6support.xMobileIPv6: Message recognised as Binding Refresh Request
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
