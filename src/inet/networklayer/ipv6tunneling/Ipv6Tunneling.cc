@@ -39,10 +39,8 @@
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 
-#ifdef INET_WITH_xMIPv6
 #include "inet/networklayer/xmipv6/MobilityHeader_m.h" // for HA Option header
 #include "inet/networklayer/xmipv6/xMIPv6.h"
-#endif // ifdef INET_WITH_xMIPv6
 
 namespace inet {
 
@@ -368,7 +366,6 @@ void Ipv6Tunneling::encapsulateDatagram(Packet *packet)
     // TODO copy information from old ctrlInfo into new one (Traffic Class, Flow label, etc.)
     delete packet->removeControlInfo();
 
-#ifdef INET_WITH_xMIPv6
     if ((tunnels[vIfIndex].tunnelType == T2RH) || (tunnels[vIfIndex].tunnelType == HA_OPT)) {
         // pseudo-tunnel for Type 2 Routing Header
         // or Home Address Option
@@ -384,7 +381,7 @@ void Ipv6Tunneling::encapsulateDatagram(Packet *packet)
             (void)(rt->lookupDestCache(dest, interfaceId));
         }
 
-        if (tunnels[vIfIndex].tunnelType == T2RH) { // update 15.01.08 - CB
+        if (tunnels[vIfIndex].tunnelType == T2RH) {
             // this is the CN -> MN path
             src = tunnels[vIfIndex].entry; // CN address
             dest = tunnels[vIfIndex].exit; // CoA
@@ -403,10 +400,6 @@ void Ipv6Tunneling::encapsulateDatagram(Packet *packet)
 
         if (tunnels[vIfIndex].tunnelType == T2RH) {
             // construct Type 2 Routing Header (RFC 3775 - 6.4.1)
-            /*For a type 2 routing header, the Hdr Ext Len MUST be 2.  The Segments
-               Left value describes the number of route segments remaining; i.e.,
-               number of explicitly listed intermediate nodes still to be visited
-               before reaching the final destination.  Segments Left MUST be 1.*/
             Ipv6RoutingHeader *t2RH = new Ipv6RoutingHeader();
             t2RH->setRoutingType(2);
             t2RH->setSegmentsLeft(1);
@@ -421,10 +414,6 @@ void Ipv6Tunneling::encapsulateDatagram(Packet *packet)
             EV_INFO << "Added Type 2 Routing Header." << endl;
         }
         else { // HA_OPT
-               /*The Home Address option is carried by the Destination Option
-                  extension header (Next Header value = 60).  It is used in a packet
-                  sent by a mobile node while away from home, to inform the recipient
-                  of the mobile node's home address.*/
             auto *destOptsHdr = new Ipv6DestinationOptionsHeader();
             auto *haOpt = new HomeAddressOption();
             haOpt->setHomeAddress(rh2);
@@ -445,20 +434,16 @@ void Ipv6Tunneling::encapsulateDatagram(Packet *packet)
         send(packet, "upperLayerOut");
     }
     else {
-#endif // INET_WITH_xMIPv6
-    // normal tunnel - just modify controlInfo and send
-    // datagram back to Ipv6 module for encapsulation
+        // normal tunnel - just modify controlInfo and send
+        // datagram back to Ipv6 module for encapsulation
 
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
-    auto addresses = packet->addTagIfAbsent<L3AddressReq>();
-    addresses->setSrcAddress(tunnels[vIfIndex].entry);
-    addresses->setDestAddress(tunnels[vIfIndex].exit);
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
+        auto addresses = packet->addTagIfAbsent<L3AddressReq>();
+        addresses->setSrcAddress(tunnels[vIfIndex].entry);
+        addresses->setDestAddress(tunnels[vIfIndex].exit);
 
-    send(packet, "upperLayerOut");
-#ifdef INET_WITH_xMIPv6
-}
-
-#endif // ifdef INET_WITH_xMIPv6
+        send(packet, "upperLayerOut");
+    }
 }
 
 void Ipv6Tunneling::decapsulateDatagram(Packet *packet)
@@ -467,26 +452,12 @@ void Ipv6Tunneling::decapsulateDatagram(Packet *packet)
     // decapsulation is performed in Ipv6 module
     Ipv6Address srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress().toIpv6();
 
-#ifdef INET_WITH_xMIPv6
-    // we only decapsulate packets for which we have a tunnel
-    // where the exit point is equal to the packets source
-    // 11.9.07 - CB
+    // RFC 3775, 10.4.5: HA must verify tunnel source matches a known tunnel exit
     if (rt->isHomeAgent() && !isTunnelExit(srcAddr)) {
-        /*RFC 3775, 10.4.5
-           Otherwise, when a home agent decapsulates a tunneled packet from
-           the mobile node, the home agent MUST verify that the Source
-           Address in the tunnel IP header is the mobile node's primary
-           care-of address.  Otherwise, any node in the Internet could send
-           traffic through the home agent and escape ingress filtering
-           limitations.  This simple check forces the attacker to know the
-           current location of the real mobile node and be able to defeat
-           ingress filtering. This check is not necessary if the reverse-
-           tunneled packet is protected by ESP in tunnel mode.*/
         EV_INFO << "Dropping packet: source address of tunnel IP header different from tunnel exit points!" << endl;
         delete packet;
         return;
     }
-#endif // ifdef INET_WITH_xMIPv6
 
     // FIX: we leave the interface Id to it's previous value to make sure
     // that later processing knowns from which interface the datagram came from
@@ -495,19 +466,18 @@ void Ipv6Tunneling::decapsulateDatagram(Packet *packet)
 
     send(packet, "linkLayerOut");
 
-#ifdef INET_WITH_xMIPv6
-    // Alain Tigyo, 21.03.2008
-    // The following code is used for triggering RO to a CN
-    NetworkInterface *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
-    if (rt->isMobileNode() && (srcAddr == ie->getProtocolData<Ipv6InterfaceData>()->getHomeAgentAddress())
-        && (ipv6Header->getProtocolId() != IP_PROT_IPv6EXT_MOB))
-    {
-        EV_INFO << "Checking Route Optimization for: " << ipv6Header->getSrcAddress() << endl;
-        xMIPv6 *mipv6 = findModuleFromPar<xMIPv6>(par("xmipv6Module"), this);
-        if (mipv6)
-            mipv6->triggerRouteOptimization(ipv6Header->getSrcAddress(), ie->getProtocolData<Ipv6InterfaceData>()->getMNHomeAddress(), ie);
+    // trigger Route Optimization if we are a MN receiving tunneled data from HA
+    if (rt->isMobileNode()) {
+        NetworkInterface *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
+        if ((srcAddr == ie->getProtocolData<Ipv6InterfaceData>()->getHomeAgentAddress())
+            && (ipv6Header->getProtocolId() != IP_PROT_IPv6EXT_MOB))
+        {
+            EV_INFO << "Checking Route Optimization for: " << ipv6Header->getSrcAddress() << endl;
+            xMIPv6 *mipv6 = findModuleFromPar<xMIPv6>(par("xmipv6Module"), this);
+            if (mipv6)
+                mipv6->triggerRouteOptimization(ipv6Header->getSrcAddress(), ie->getProtocolData<Ipv6InterfaceData>()->getMNHomeAddress(), ie);
+        }
     }
-#endif // ifdef INET_WITH_xMIPv6
 }
 
 int Ipv6Tunneling::lookupTunnels(const Ipv6Address& dest)
