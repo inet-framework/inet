@@ -30,9 +30,7 @@ class NetworkInterface;
 class Ipv6Header;
 class Ipv6RoutingTable;
 
-#ifdef INET_WITH_xMIPv6
 class xMIPv6;
-#endif /* INET_WITH_xMIPv6 */
 
 /**
  * Implements RFC 2461 Neighbor Discovery for Ipv6.
@@ -94,9 +92,7 @@ class INET_API Ipv6NeighbourDiscovery : public SimpleModule, public LifecycleUns
     ModuleRefByPar<Icmpv6> icmpv6;
     ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
 
-#ifdef INET_WITH_xMIPv6
     ModuleRefByPar<xMIPv6> mipv6; // in case the node has MIP support
-#endif /* INET_WITH_xMIPv6 */
 
     Ipv6NeighbourCache neighbourCache;
     typedef std::vector<cMessage *> RaTimerList;
@@ -140,7 +136,6 @@ class INET_API Ipv6NeighbourDiscovery : public SimpleModule, public LifecycleUns
     // List of Advertising Interfaces
     AdvIfList advIfList;
 
-#ifdef INET_WITH_xMIPv6
     // An entry that stores information for configuring the global unicast
     // address, after DAD was succesfully performed
     struct DadGlobalEntry {
@@ -154,7 +149,6 @@ class INET_API Ipv6NeighbourDiscovery : public SimpleModule, public LifecycleUns
     };
     typedef std::map<int, DadGlobalEntry> DadGlobalList; // keyed by interfaceId
     DadGlobalList dadGlobalList;
-#endif /* INET_WITH_xMIPv6 */
 
   protected:
     /************************Miscellaneous Stuff***************************/
@@ -342,16 +336,10 @@ class INET_API Ipv6NeighbourDiscovery : public SimpleModule, public LifecycleUns
 
     virtual void sendSolicitedNa(Packet *packet, const Ipv6NeighbourSolicitation *ns, NetworkInterface *ie);
 
-#ifdef INET_WITH_xMIPv6
-
-  public: // update 12.9.07 - CB
-#endif /* INET_WITH_xMIPv6 */
+  public:
     virtual void sendUnsolicitedNa(NetworkInterface *ie);
 
-#ifdef INET_WITH_xMIPv6
-
-  protected: // update 12.9.07 - CB
-#endif /* INET_WITH_xMIPv6 */
+  protected:
 
     virtual void processNaPacket(Packet *packet, const Ipv6NeighbourAdvertisement *na);
     virtual bool validateNaPacket(Packet *packet, const Ipv6NeighbourAdvertisement *na);
@@ -364,7 +352,6 @@ class INET_API Ipv6NeighbourDiscovery : public SimpleModule, public LifecycleUns
     virtual void processRedirectPacket(const Ipv6Redirect *redirect);
     /************End Of Redirect Message Stuff*****************************/
 
-#ifdef INET_WITH_xMIPv6
     /* Determine that this router can communicate with wireless nodes
      * on the LAN connected to the given interface.
      * The result is true if the interface is a wireless interface
@@ -382,7 +369,6 @@ class INET_API Ipv6NeighbourDiscovery : public SimpleModule, public LifecycleUns
   protected:
     void routersUnreachabilityDetection(const NetworkInterface *ie); // 3.9.07 - CB
     bool isWirelessAccessPoint(cModule *module);
-#endif /* INET_WITH_xMIPv6 */
 };
 
 } // namespace inet

@@ -21,9 +21,7 @@
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 
-#ifdef INET_WITH_xMIPv6
 #include "inet/networklayer/xmipv6/xMIPv6.h"
-#endif /* INET_WITH_xMIPv6 */
 
 namespace inet {
 
@@ -104,18 +102,6 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
 #endif /* INET_WITH_xMIPv6 */
 
         pendingQueue.setName("pendingQueue");
-
-#ifdef INET_WITH_xMIPv6
-//         MIPv6Enabled = par("MIPv6Support"); // (Zarrar 14.07.07)
-        /*if(rt6->isRouter()) // 12.9.07 - CB
-           {
-            minRAInterval = par("minIntervalBetweenRAs"); // from the omnetpp.ini file (Zarrar 15.07.07)
-            maxRAInterval = par("maxIntervalBetweenRAs"); // from the omnetpp.ini file (Zarrar 15.07.07)
-            //WATCH (MIPv6Enabled);    // (Zarrar 14.07.07)
-            WATCH(minRAInterval);    // (Zarrar 15.07.07)
-            WATCH(maxRAInterval);    // (Zarrar 15.07.07)
-           }*/
-#endif /* INET_WITH_xMIPv6 */
 
         simtime_t advReachableTime = par("advReachableTime");
         for (int i = 0; i < ift->getNumInterfaces(); i++) {
@@ -812,11 +798,9 @@ void Ipv6NeighbourDiscovery::assignLinkLocalAddress(cMessage *timerMsg)
 
 void Ipv6NeighbourDiscovery::initiateDad(const Ipv6Address& tentativeAddr, NetworkInterface *ie)
 {
-#ifdef INET_WITH_xMIPv6
     Enter_Method("initiateDad");
     EV_INFO << "----------INITIATING DUPLICATE ADDRESS DISCOVERY----------" << endl;
     ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->setDadInProgress(true);
-#endif /* INET_WITH_xMIPv6 */
 
     DadEntry *dadEntry = new DadEntry();
     dadEntry->interfaceId = ie->getInterfaceId();
@@ -1385,10 +1369,6 @@ void Ipv6NeighbourDiscovery::processRaForRouterUpdates(Packet *packet, const Ipv
        Router Lifetime field.*/
     Neighbour *neighbour = neighbourCache.lookup(raSrcAddr, ifID);
 
-#ifdef INET_WITH_xMIPv6
-    // update 3.9.07 - CB // if (neighbour == nullptr && (ra->homeAgentFlag() == true)) //the RA is from a Router acting as a Home Agent as well
-#endif /* INET_WITH_xMIPv6 */
-
     if (neighbour == nullptr) {
         EV_INFO << "Neighbour Cache Entry does not contain RA's source address\n";
         if (ra->getRouterLifetime() != 0) {
@@ -1729,15 +1709,11 @@ void Ipv6NeighbourDiscovery::sendPeriodicRa(cMessage *msg)
        configured MinRtrAdvInterval and MaxRtrAdvInterval; expiration of the timer
        causes the next advertisement to be sent and a new random value to be chosen.*/
 
-#ifdef INET_WITH_xMIPv6
     EV_DEBUG << "\n+=+=+= MIPv6 Feature: " << rt6->hasMipv6Support() << " +=+=+=\n";
-#endif /* INET_WITH_xMIPv6 */
 
     simtime_t interval = uniform(ie->getProtocolData<Ipv6InterfaceData>()->getMinRtrAdvInterval(), ie->getProtocolData<Ipv6InterfaceData>()->getMaxRtrAdvInterval());
 
-#ifdef INET_WITH_xMIPv6
     EV_DETAIL << "\n +=+=+= The random calculated interval is: " << interval << " +=+=+=\n";
-#endif /* INET_WITH_xMIPv6 */
 
     /*For the first few advertisements (up to MAX_INITIAL_RTR_ADVERTISEMENTS)
        sent from an interface when it becomes an advertising interface,*/
@@ -1826,9 +1802,7 @@ bool Ipv6NeighbourDiscovery::validateRaPacket(Packet *packet, const Ipv6RouterAd
 void Ipv6NeighbourDiscovery::createAndSendNsPacket(const Ipv6Address& nsTargetAddr, const Ipv6Address& dgDestAddr,
         const Ipv6Address& dgSrcAddr, NetworkInterface *ie)
 {
-#ifdef INET_WITH_xMIPv6
     Enter_Method("createAndSendNsPacket");
-#endif /* INET_WITH_xMIPv6 */
 
     MacAddress myMacAddr = ie->getMacAddress();
 
