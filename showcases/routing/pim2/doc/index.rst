@@ -138,15 +138,71 @@ PIM-SM is defined in RFC 4601.
    packet is ever delivered, followed by a brief gap until the native (S,G)
    path propagates.
 
+PIM in INET
+-----------
+
+The :ned:`MulticastRouter` node type is a standard :ned:`Router` with PIM and IGMP
+protocols enabled (``hasPim = true``) and multicast forwarding turned on by
+default. Inside each router, the compound module ``pim`` contains a :ned:`PimDm`
+and a :ned:`PimSm` submodule (both always present), along with a splitter that
+directs incoming PIM packets to the appropriate mode based on the receiving
+interface's configuration. Every router along a multicast path must run PIM so it
+can process Join/Prune messages and build its own multicast forwarding state.
+
+.. figure:: media/PimModule.png
+
+PIM relies on *Reverse Path Forwarding (RPF) checks* to prevent loops. When a
+multicast packet arrives at a router, PIM looks up the source address (or the RP
+address, for shared trees) in the unicast routing table and checks whether the
+packet arrived on the interface that leads back towards that address. If it did,
+the packet is accepted and forwarded. If it arrived on a different interface —
+for example, because of a redundant path in the network — the packet is dropped.
+This prevents forwarding loops and duplicate delivery. The
+:ned:`Ipv4NetworkConfigurator` populates the unicast routes that PIM uses for
+these checks.
+
+**Configuring PIM mode.** PIM is enabled on router interfaces using the
+``pimConfig`` parameter, an XML string that specifies the mode:
+
+.. code-block:: ini
+
+   # For Dense Mode:
+   **.pimConfig = xml("<config><interface mode='dense'/></config>")
+
+   # For Sparse Mode:
+   **.pimConfig = xml("<config><interface mode='sparse'/></config>")
+
+**Configuring the Rendezvous Point (PIM-SM only).** The RP address is set via the
+``RP`` parameter of the :ned:`PimSm` module (path: ``**.pim.pimSM.RP``). All
+routers are configured with the same address. The router that owns this address
+recognizes itself as the RP. You can assign a well-known address to any interface
+on the RP router using the :ned:`Ipv4NetworkConfigurator` XML — the configurator
+will then automatically generate unicast routes to it from all other routers
+(which is necessary for Join and Register messages to reach the RP):
+
+.. code-block:: ini
+
+   **.configurator.config = xml("<config>..." \
+       "<interface hosts='R1' towards='R0' address='10.99.0.1' netmask='255.255.255.0'/>" \
+       "...</config>")
+   **.pim.pimSM.RP = "10.99.0.1"
+
+.. note::
+
+   The INET PIM-SM implementation has some limitations compared to the full
+   RFC 4601 specification: only a single global RP is supported (configured
+   statically), switchover to the Shortest Path Tree (SPT) is not implemented,
+   and PIM Bootstrap / RP discovery mechanisms are not available.
+
 The Model
 ---------
 
 We use two network topologies in this showcase. The first, ``PimShowcaseNetwork``,
 is a simple tree topology used for both the PIM-DM and PIM-SM configurations.
 A :ned:`StandardHost` (``source``) sends UDP multicast traffic to the group
-address ``239.1.1.1`` through four :ned:`MulticastRouter` nodes (R0–R3) to two
+address ``239.1.1.1`` through five :ned:`MulticastRouter` nodes (R0–R4) to three
 receivers. R0 is the source's directly connected router, R1 is the tree root,
-and R2/R3 branch towards the receivers. The receivers run :ned:`UdpSink`
+and R2, R3, and R4 branch towards the receivers. The receivers run :ned:`UdpSink`
 applications configured to join this multicast group.
 
 .. figure:: media/PimShowcaseNetwork.png
@@ -158,53 +214,8 @@ The second network, ``PimIptvNetwork``, models a more realistic scenario. Nine
 .. figure:: media/PimIptvNetwork.png
 
 Both networks extend :ned:`WiredNetworkBase` (which provides an
-:ned:`Ipv4NetworkConfigurator`). The configurator automatically assigns IP
-addresses and populates static unicast routes. PIM needs these unicast routes for
-*Reverse Path Forwarding (RPF) checks* — when a multicast packet arrives at a
-router, PIM verifies that it arrived on the interface that the unicast routing
-table considers the shortest path back towards the source (or the RP, for shared
-trees). This check prevents forwarding loops and ensures packets travel along the
-correct distribution tree. All routers are :ned:`MulticastRouter` nodes —
-:ned:`Router` nodes with PIM enabled (``hasPim = true``) and multicast forwarding
-turned on by default. Every router along the path must run PIM so it can
-process Join and Prune messages and build its own multicast forwarding state
-(i.e., learn which interfaces to forward each group's traffic to).
-
-.. note::
-
-   The INET PIM-SM implementation has some limitations compared to the full
-   RFC 4601 specification: only a single global RP is supported (configured
-   statically), switchover to the Shortest Path Tree (SPT) is not implemented,
-   and PIM Bootstrap / RP discovery mechanisms are not available.
-
-PIM configuration
-~~~~~~~~~~~~~~~~~
-
-PIM is configured on router interfaces using the ``pimConfig`` parameter. This is
-an XML string that specifies which mode to use:
-
-.. code-block:: ini
-
-   # For Dense Mode:
-   **.pimConfig = xml("<config><interface mode='dense'/></config>")
-
-   # For Sparse Mode:
-   **.pimConfig = xml("<config><interface mode='sparse'/></config>")
-
-For PIM-SM, the Rendezvous Point must also be configured by setting the ``RP``
-parameter of the :ned:`PimSm` module to an IP address belonging to the designated
-RP router. The RP router identifies itself by checking whether the configured RP
-address is local to one of its interfaces. A convenient way to assign a
-well-known address is to configure the RP router's loopback interface in the
-:ned:`Ipv4NetworkConfigurator` XML — the configurator will then generate routes
-to it from all other routers:
-
-.. code-block:: ini
-
-   **.configurator.config = xml("<config>..." \
-       "<interface hosts='R1' names='lo0' address='10.99.0.1' netmask='255.255.255.255'/>" \
-       "...</config>")
-   **.pim.pimSM.RP = "10.99.0.1"
+:ned:`Ipv4NetworkConfigurator` for automatic IP address assignment and unicast
+route generation).
 
 PIM-DM Configuration
 ~~~~~~~~~~~~~~~~~~~~~
