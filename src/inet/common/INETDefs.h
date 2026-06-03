@@ -26,6 +26,7 @@
 //
 
 #include "inet/common/Compat.h"
+#include "inet/common/ParsimPacking.h"
 
 namespace inet {
 using namespace omnetpp;

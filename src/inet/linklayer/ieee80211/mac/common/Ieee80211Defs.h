@@ -57,6 +57,9 @@ inline std::ostream& operator<<(std::ostream& os, const SequenceNumberCyclic& se
     return os;
 }
 
+inline void doParsimPacking(omnetpp::cCommBuffer *b, const SequenceNumberCyclic& s) { doParsimPacking(b, s.get()); }
+inline void doParsimUnpacking(omnetpp::cCommBuffer *b, SequenceNumberCyclic& s) { SequenceNumber v; doParsimUnpacking(b, v); s = SequenceNumberCyclic(v); }
+
 } // namespace ieee80211
 } // namespace inet
 

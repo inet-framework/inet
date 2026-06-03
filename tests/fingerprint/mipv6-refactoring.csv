@@ -1,0 +1,36 @@
+# Network-level content fingerprints (~tNlb) for IPv6 / MIPv6 refactoring verification.
+# These must NOT change across any refactoring stage.
+# Baseline established from current (pre-refactoring) code.
+
+# MIPv6 example — the primary test
+/examples/mobileipv6/,               -f omnetpp.ini -c One -r 0,                    25s,             e3b2-3a7b/~tNlb, PASS, wireless EthernetMac
+
+# IPv6 examples
+/examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,                50000s,          75eb-1421/~tNlb, PASS, EthernetMac
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_inet -r 0,              50s,             6925-41c3/~tNlb, PASS, EthernetMac
+/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c ETH -r 0,                    50s,             03e1-5de3/~tNlb, PASS, EthernetMac
+/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c Mixed -r 0,                  50s,             45b4-10d4/~tNlb, PASS, EthernetMac
+/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c PPP -r 0,                    50s,             7596-fa8b/~tNlb, PASS,
+/examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           cf59-c687/~tNlb, PASS, EthernetMac
+/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           f5d6-597d/~tNlb, PASS,
+/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            f0bf-3a4a/~tNlb, PASS,
+
+# IPv6 networking examples
+/examples/inet/hierarchical99/,      -f networklayer.ini -c IPv6 -r 0,              10000s,          0fc2-d6ef/~tNlb, PASS, EthernetMac
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_OK_ipv6 -r 0,            10s,             959c-86fc/~tNlb, PASS,
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Port_Unav_ipv6 -r 0,     10s,             d195-00a9/~tNlb, PASS,
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Host_Unav_ipv6 -r 0,     10s,             3beb-a47b/~tNlb, PASS,
+
+# DYMO with IPv6
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv6 -r 0,                   10s,             18c3-c143/~tNlb, PASS,  wireless adhoc
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv6 -r 0,              10s,             18c3-c143/~tNlb, PASS,  wireless adhoc
+
+# EIGRP with IPv6
+/examples/eigrp/testing_scenario6/,    -f omnetpp.ini -c EIGRP-IPv6_exp1_bandwidth-change -r 0,              3min,         71b5-3efa/~tNlb,  PASS,  eigrp EthernetMac
+/examples/eigrp/testing_scenario6/,    -f omnetpp.ini -c EIGRP-IPv6_exp2_interface-down -r 0,                3min,         2dbe-d03c/~tNlb,  PASS,  eigrp EthernetMac
+/examples/eigrp/testing_scenario6/,    -f omnetpp.ini -c EIGRP-IPv6_exp1_bandwidth-change_global-addr -r 0,  3min,         37bc-ab12/~tNlb,  PASS,  eigrp EthernetMac
+/examples/eigrp/testing_scenario6/,    -f omnetpp.ini -c EIGRP-IPv6_exp2_interface-down_global-addr -r 0,    3min,         4f1e-718c/~tNlb,  PASS,  eigrp EthernetMac
+/examples/eigrp/testing_scenario_ds/,  -f omnetpp.ini -c EIGRP-IPv6_exp1_datarate-change -r 0,               3min,         e5c8-d36f/~tNlb,  PASS,  eigrp EthernetMac Ipv4
+/examples/eigrp/testing_scenario_ds/,  -f omnetpp.ini -c EIGRP-IPv6_exp2_interface-down -r 0,                3min,         5100-9416/~tNlb,  PASS,  eigrp EthernetMac Ipv4
+/examples/eigrp/testing_scenario_ds/,  -f omnetpp.ini -c EIGRP-IPv6_exp1_datarate-change_global-addr -r 0,   3min,         52eb-4821/~tNlb,  PASS,  eigrp EthernetMac Ipv4
+/examples/eigrp/testing_scenario_ds/,  -f omnetpp.ini -c EIGRP-IPv6_exp2_interface-down_global-addr -r 0,    3min,         0da1-66ea/~tNlb,  PASS,  eigrp EthernetMac Ipv4
