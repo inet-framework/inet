@@ -47,11 +47,10 @@ class INET_API Ipv6RoutingTable : public SimpleModule, public IRoutingTable, pro
     bool multicastForward = false; // If node is forwarding multicast info
     bool useAdminDist = false; // Use Cisco like administrative distances
 
-#ifdef INET_WITH_xMIPv6
-    bool ishome_agent = false; // added by Zarrar Yousaf @ CNI, UniDortmund on 20.02.07
-    bool ismobile_node = false; // added by Zarrar Yousaf @ CNI, UniDortmund on 25.02.07
-    bool mipv6Support = false; // 4.9.07 - CB
-#endif /* INET_WITH_xMIPv6 */
+    // MIPv6 support flags (set by the xMIPv6 module at init time, default false)
+    bool ishome_agent = false;
+    bool ismobile_node = false;
+    bool mipv6Support = false;
 
     // Destination Cache maps dest address to next hop and interfaceId.
     // NOTE: nextHop might be a link-local address from which interfaceId cannot be deduced
@@ -148,9 +147,10 @@ class INET_API Ipv6RoutingTable : public SimpleModule, public IRoutingTable, pro
      */
     virtual void routeChanged(Ipv6Route *entry, int fieldCode);
 
-#ifdef INET_WITH_xMIPv6
+    /** @name MIPv6 support */
+    //@{
     /**
-     * Determine whether normal Router or Home Agent
+     * Determine whether normal Router or Home Agent.
      */
     bool isHomeAgent() const { return ishome_agent; }
 
@@ -161,16 +161,16 @@ class INET_API Ipv6RoutingTable : public SimpleModule, public IRoutingTable, pro
 
     /**
      * Determine whether a node is a Mobile Node or Correspondent Node:
-     * MN if TRUE or else a CN
+     * MN if TRUE or else a CN.
      */
     bool isMobileNode() const { return ismobile_node; }
 
     /**
      * Define whether a node is a Mobile Node or Correspondent Node:
-     * MN if TRUE or else a CN
+     * MN if TRUE or else a CN.
      */
     void setIsMobileNode(bool value) { ismobile_node = value; }
-#endif /* INET_WITH_xMIPv6 */
+    //@}
 
     /** @name Routing functions */
     //@{
@@ -315,16 +315,15 @@ class INET_API Ipv6RoutingTable : public SimpleModule, public IRoutingTable, pro
     virtual Ipv6Route *getRoute(int i) const override;
     //@}
 
-#ifdef INET_WITH_xMIPv6
-    //================Added by Zarrar Yousaf ===================================
-
-    //void updateHomeNetworkInfo(const Ipv6Address& hoa, const Ipv6Address& ha);//10.07.07 This updates the struct HomeNetwork Info{} with the MN's Home Address(HoA) and the global scope address of the MNs Home Agent (ha).
-    //const Ipv6Address& getHomeAgentAddress() { return homeInfo.homeAgentAddr; } // Zarrar 15.07.07 // return by reference - CB
-    //const Ipv6Address& getMNHomeAddress() { return homeInfo.HoA; } // Zarrar 15.07.07 // return by reference - CB
-    const Ipv6Address& getHomeAddress(); // NEW, 14.01.08 - CB
+    /** @name MIPv6 routing table operations */
+    //@{
+    /**
+     * Returns the MN's home address (first non-unspecified HoA found on any interface).
+     */
+    const Ipv6Address& getHomeAddress();
 
     /**
-     * Check whether provided address is a HoA
+     * Check whether provided address is a HoA.
      */
     bool isHomeAddress(const Ipv6Address& addr);
 
@@ -356,11 +355,11 @@ class INET_API Ipv6RoutingTable : public SimpleModule, public IRoutingTable, pro
     void setMipv6Support(bool value) { mipv6Support = value; }
 
     /**
-     * Checks whether the provided address is in an on-link address
+     * Checks whether the provided address is an on-link address
      * with respect to the prefix advertisement list.
      */
-    bool isOnLinkAddress(const Ipv6Address& address); // update 11.9.07 - CB
-#endif /* INET_WITH_xMIPv6 */
+    bool isOnLinkAddress(const Ipv6Address& address);
+    //@}
 
     /**
      * ILifecycle method

@@ -64,17 +64,15 @@ void Ipv6RoutingTable::initialize(int stage)
 
         ift.reference(this, "interfaceTableModule", true);
 
-#ifdef INET_WITH_xMIPv6
-        // the following MIPv6 related flags will be overridden by the MIPv6 module (if existing)
+        // MIPv6 support flags (overridden by the xMIPv6 module if present)
         ishome_agent = false;
         WATCH(ishome_agent);
 
         ismobile_node = false;
         WATCH(ismobile_node);
 
-        mipv6Support = false; // 4.9.07 - CB
+        mipv6Support = false;
         WATCH(mipv6Support);
-#endif /* INET_WITH_xMIPv6 */
 
         cModule *host = getContainingNode(this);
 
@@ -619,9 +617,7 @@ void Ipv6RoutingTable::addDefaultRoute(const Ipv6Address& nextHop, unsigned int 
     route->setMetric(10); // FIXMEshould be filled from interface metric
     route->setAdminDist(Ipv6Route::dStatic);
 
-#ifdef INET_WITH_xMIPv6
-    route->setExpiryTime(routerLifetime); // lifetime useful after transitioning to new AR // 27.07.08 - CB
-#endif /* INET_WITH_xMIPv6 */
+    route->setExpiryTime(routerLifetime);
 
     // then add it
     addRoute(route);
@@ -727,9 +723,6 @@ Ipv6Route *Ipv6RoutingTable::getRoute(int i) const
     return routeList[i];
 }
 
-#ifdef INET_WITH_xMIPv6
-//#####Added by Zarrar Yousaf##################################################################
-
 const Ipv6Address& Ipv6RoutingTable::getHomeAddress()
 {
     for (int i = 0; i < ift->getNumInterfaces(); ++i) {
@@ -817,8 +810,6 @@ bool Ipv6RoutingTable::isOnLinkAddress(const Ipv6Address& address)
 
     return false;
 }
-
-#endif /* INET_WITH_xMIPv6 */
 
 void Ipv6RoutingTable::deleteInterfaceRoutes(const NetworkInterface *entry)
 {
