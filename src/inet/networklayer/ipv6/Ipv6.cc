@@ -55,7 +55,6 @@ Ipv6::~Ipv6()
     }
 }
 
-#ifdef INET_WITH_xMIPv6
 Ipv6::ScheduledDatagram::ScheduledDatagram(Packet *packet, const Ipv6Header *ipv6Header, const NetworkInterface *ie, MacAddress macAddr, bool fromHL) :
     packet(packet),
     ipv6Header(ipv6Header),
@@ -69,8 +68,6 @@ Ipv6::ScheduledDatagram::~ScheduledDatagram()
 {
     delete packet;
 }
-
-#endif /* INET_WITH_xMIPv6 */
 
 void Ipv6::initialize(int stage)
 {
@@ -191,17 +188,13 @@ void Ipv6::handleMessage(cMessage *msg)
 {
     auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
 
-#ifdef INET_WITH_xMIPv6
-    // 28.09.07 - CB
-    // support for rescheduling datagrams which are supposed to be sent over
-    // a tentative address.
+    // RFC 4862: retry sending datagrams deferred due to tentative source address
     if (msg->isSelfMessage()) {
         ScheduledDatagram *sDgram = check_and_cast<ScheduledDatagram *>(msg);
 
         // take care of datagram which was supposed to be sent over a tentative address
         if (sDgram->getIE()->getProtocolData<Ipv6InterfaceData>()->isTentativeAddress(sDgram->getSrcAddress())) {
             // address is still tentative - enqueue again
-//            queue.insert(sDgram);
             scheduleAfter(1.0, sDgram); // KLUDGE wait 1s for tentative->permanent. MISSING: timeout for drop or send back icmpv6 error, processing signals from IE, need another msg queue for waiting (similar to Ipv4 ARP)
         }
         else {
@@ -211,10 +204,7 @@ void Ipv6::handleMessage(cMessage *msg)
             delete sDgram;
         }
     }
-    else
-#endif /* INET_WITH_xMIPv6 */
-
-    if (auto indication = dynamic_cast<Indication *>(msg))
+    else if (auto indication = dynamic_cast<Indication *>(msg))
         handleIndication(indication);
     else if (auto request = dynamic_cast<Request *>(msg))
         handleRequest(request);
@@ -901,17 +891,13 @@ void Ipv6::fragmentAndSend(Packet *packet, const NetworkInterface *ie, const Mac
         packet->insertAtFront(ipv6HeaderCopy);
         ipv6Header = ipv6HeaderCopy;
 
-    #ifdef INET_WITH_xMIPv6
-        // if the datagram has a tentative address as source we have to reschedule it
-        // as it can not be sent before the address' tentative status is cleared - CB
+        // RFC 4862: if source address is still tentative (DAD in progress), defer sending
         if (ie->getProtocolData<Ipv6InterfaceData>()->isTentativeAddress(srcAddr)) {
             EV_INFO << "Source address is tentative - enqueueing datagram for later resubmission." << endl;
             ScheduledDatagram *sDgram = new ScheduledDatagram(packet, ipv6Header.get(), ie, nextHopAddr, fromHL);
-//            queue.insert(sDgram);
             scheduleAfter(1.0, sDgram); // KLUDGE wait 1s for tentative->permanent. MISSING: timeout for drop or send back icmpv6 error, processing signals from IE, need another msg queue for waiting (similar to Ipv4 ARP)
             return;
         }
-    #endif /* INET_WITH_xMIPv6 */
     }
 
     int mtu = ie->getMtu();

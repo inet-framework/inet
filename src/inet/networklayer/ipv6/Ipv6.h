@@ -89,10 +89,7 @@ class INET_API Ipv6 : public SimpleModule, public NetfilterBase, public Lifecycl
     int numUnroutable = 0;
     int numForwarded = 0;
 
-#ifdef INET_WITH_xMIPv6
-    // 28.9.07 - CB
-    // datagrams that are supposed to be sent with a tentative Ipv6 address
-    // are rescheduled for later resubmission.
+    // RFC 4862: defer sending when source address is tentative (DAD in progress)
     class INET_API ScheduledDatagram : public cPacket {
       protected:
         Packet *packet = nullptr;
@@ -110,7 +107,6 @@ class INET_API Ipv6 : public SimpleModule, public NetfilterBase, public Lifecycl
         bool getFromHL() { return fromHL; }
         Packet *removeDatagram() { Packet *ret = packet; packet = nullptr; return ret; }
     };
-#endif /* INET_WITH_xMIPv6 */
 
     // netfilter hook variables
     typedef std::list<QueuedDatagramForHook> DatagramQueueForHooks;
