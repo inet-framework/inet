@@ -105,8 +105,8 @@ module Ipv6NetworkLayer like INetworkLayer
         neighbourDiscovery.ipv6Out --> ipv6.ndIn;
         neighbourDiscovery.ipv6In <-- ipv6.ndOut;
 
-        mipv6support.fromIPv6 <-- ipv6.xMIPv6Out if xMIPv6Support;
-        mipv6support.toIPv6 --> ipv6.xMIPv6In if xMIPv6Support;
+        mipv6support.fromIPv6 <-- lp.out++ if xMIPv6Support;
+        mipv6support.toIPv6 --> lp.in++ if xMIPv6Support;
 
         ipv6.queueOut --> { @display("m=s"); } --> ifOut;
         ipv6.queueIn <-- { @display("m=s"); } <-- ifIn;

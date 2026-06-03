@@ -135,6 +135,9 @@ void xMIPv6::initialize(int stage)
         ipv6->registerRoutingHeaderHandler(2, this);            // RH Type 2
         ipv6->registerDestinationOptionHandler(IPv6TLVOPTION_HOME_ADDRESS, this);  // Home Address Option
 
+        // Register for Protocol::mobileipv6 so the dispatcher delivers mobility messages to us
+        registerProtocol(Protocol::mobileipv6, gate("toIPv6"), gate("fromIPv6"));
+
         WATCH(cnList);
         WATCH(interfaceCoAList);
     }
@@ -623,7 +626,7 @@ void xMIPv6::sendMobilityMessageToIPv6Module(Packet *msg, const Ipv6Address& des
         const Ipv6Address& srcAddr, int interfaceId, simtime_t sendTime) // overloaded for use at CN - CB
 {
     EV_INFO << "Appending ControlInfo to mobility message\n";
-    msg->removeTagIfPresent<DispatchProtocolReq>();
+    msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv6);
     msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::mobileipv6);
     if (interfaceId != -1)
         msg->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);

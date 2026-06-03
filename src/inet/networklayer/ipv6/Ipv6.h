@@ -258,10 +258,25 @@ class INET_API Ipv6 : public SimpleModule, public NetfilterBase, public Lifecycl
     bool processExtensionHeaders(Packet *packet, const Ipv6Header *ipv6Header);
 
   public:
-    // Extension header handler registration
+    /** @name Extension header handler registration */
+    //@{
+    /**
+     * Register a handler for a specific Routing Header type (e.g. type 2 for MIPv6).
+     * Called during initialization by modules that process routing headers.
+     */
     void registerRoutingHeaderHandler(int routingType, IIpv6ExtensionHeaderHandler *handler);
+
+    /**
+     * Register a handler for a specific TLV option type within Hop-by-Hop Options headers.
+     */
     void registerHopByHopOptionHandler(int optionType, IIpv6TlvOptionHandler *handler);
+
+    /**
+     * Register a handler for a specific TLV option type within Destination Options headers
+     * (e.g. Home Address Option 0xC9 for MIPv6).
+     */
     void registerDestinationOptionHandler(int optionType, IIpv6TlvOptionHandler *handler);
+    //@}
 };
 
 } // namespace inet

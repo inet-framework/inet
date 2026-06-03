@@ -79,7 +79,5 @@ simple Ipv6 extends SimpleModule
         output upperTunnelingOut;
         input lowerTunnelingIn;
         output lowerTunnelingOut;
-        input xMIPv6In;
-        output xMIPv6Out;
 }
 

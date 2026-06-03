@@ -221,9 +221,6 @@ void Ipv6::handleMessage(cMessage *msg)
     else if (msg->getArrivalGate()->isName("transportIn")
              || (msg->arrivedOn("ndIn") && tags.getTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv6)
              || (msg->arrivedOn("upperTunnelingIn")) // for tunneling support-CB
-#ifdef INET_WITH_xMIPv6
-             || (msg->arrivedOn("xMIPv6In") && tags.getTag<PacketProtocolTag>()->getProtocol() == &Protocol::mobileipv6)
-#endif /* INET_WITH_xMIPv6 */
              )
     {
         // packet from upper layers, tunnel link-layer output or ND: encapsulate and send out
@@ -737,24 +734,6 @@ void Ipv6::localDeliver(Packet *packet, const NetworkInterface *fromIE)
     if (protocol == &Protocol::icmpv6) {
         handleReceivedIcmp(packet);
     } // Added by WEI to forward ICMPv6 msgs to ICMPv6 module.
-#ifdef INET_WITH_xMIPv6
-    else if (protocol == &Protocol::mobileipv6) {
-        // added check for MIPv6 support to prevent nodes w/o the
-        // xMIP module from processing related messages, 4.9.07 - CB
-        if (rt->hasMipv6Support()) {
-            EV_INFO << "MIPv6 packet: passing it to xMIPv6 module\n";
-            send(packet, "xMIPv6Out");
-        }
-        else {
-            // update 12.9.07 - CB
-            /*RFC3775, 11.3.5
-               Any node that does not recognize the Mobility header will return an
-               ICMP Parameter Problem, Code 1, message to the sender of the packet*/
-            EV_INFO << "No MIPv6 support on this node!\n";
-            sendIcmpError(packet, ICMPv6_PARAMETER_PROBLEM, UNRECOGNIZED_NEXT_HDR_TYPE);
-        }
-    }
-#endif /* INET_WITH_xMIPv6 */
     else if (protocol == &Protocol::ipv4 || protocol == &Protocol::ipv6) {
         EV_INFO << "Tunnelled IP datagram\n";
         send(packet, "upperTunnelingOut");
