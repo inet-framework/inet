@@ -493,7 +493,6 @@ void Ipv6::resolveMACAddressAndSendPacket(Packet *packet, int interfaceId, Ipv6A
     Ipv6Address destAddress = ipv6Header->getDestAddress();
     EV_INFO << "next hop for " << destAddress << " is " << nextHop << ", interface " << ie->getInterfaceName() << "\n";
 
-#ifdef INET_WITH_xMIPv6
     if (rt->isMobileNode()) {
         // if the source address is the HoA and we have a CoA then drop the packet
         // (address is topologically incorrect!)
@@ -506,7 +505,6 @@ void Ipv6::resolveMACAddressAndSendPacket(Packet *packet, int interfaceId, Ipv6A
             return;
         }
     }
-#endif /* INET_WITH_xMIPv6 */
 
     MacAddress macAddr = nd->resolveNeighbour(nextHop, interfaceId); // might initiate NUD
     if (macAddr.isUnspecified()) {
