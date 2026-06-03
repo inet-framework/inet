@@ -822,13 +822,9 @@ void Ipv6NeighbourDiscovery::initiateDad(const Ipv6Address& tentativeAddr, Netwo
     cMessage *msg = new cMessage("dadTimeout", MK_DAD_TIMEOUT);
     msg->setContextPointer(dadEntry);
 
-#ifndef INET_WITH_xMIPv6
-    scheduleAfter(ie->getProtocolData<Ipv6InterfaceData>()->getRetransTimer(), msg);
-#else /* INET_WITH_xMIPv6 */
-    // update: added uniform(0, IPv6_MAX_RTR_SOLICITATION_DELAY) to account for joining the solicited-node multicast
-    // group which is delay up to one 1 second (RFC 4862, 5.4.2) - 16.01.08, CB
+    // added uniform(0, IPv6_MAX_RTR_SOLICITATION_DELAY) to account for joining the solicited-node multicast
+    // group which is delay up to one 1 second (RFC 4862, 5.4.2)
     scheduleAfter(ie->getProtocolData<Ipv6InterfaceData>()->getRetransTimer() + uniform(0, IPv6_MAX_RTR_SOLICITATION_DELAY), msg);
-#endif /* INET_WITH_xMIPv6 */
 
     emit(startDadSignal, 1);
 }
@@ -867,10 +863,8 @@ void Ipv6NeighbourDiscovery::makeTentativeAddressPermanent(const Ipv6Address& te
     EV_INFO << "DAD completed for address " << tentativeAddr << " on " << ie->getInterfaceName() << ", address is unique\n";
     ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->permanentlyAssign(tentativeAddr);
 
-#ifdef INET_WITH_xMIPv6
     ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->setDadInProgress(false);
 
-    // update 28.09.07 - CB
     // after the link-local address was verified to be unique
     // we can assign the address and initiate the MIPv6 protocol
     // in case there are any pending entries in the list
@@ -899,32 +893,20 @@ void Ipv6NeighbourDiscovery::makeTentativeAddressPermanent(const Ipv6Address& te
         if (rt6->isMobileNode()) {
             if (entry.hFlag == false) // if we are not in the home network, send BUs
                 mipv6->initiateMipv6Protocol(ie, tentativeAddr);
-            /*
-               else if ( entry.returnedHome ) // if we are again in the home network
-               {
-                ASSERT(entry.CoA.isUnspecified() == false);
-                mipv6->returningHome(entry.CoA, ie); // initiate the returning home procedure
-               }*/
         }
 
         dadGlobalList.erase(it->first);
     }
 
-    // an optimization to make sure that the access router on the link gets our L2 address
-//    sendUnsolicitedNA(ie);
-
-    // =================================Start: Zarrar Yousaf 08.07.07 ===============================================
-    /* == Calling the routine to assign global scope adddresses to the the routers only. At present during the simulation initialization, the Ipv6FlatNetworkConfigurator assigns a 64 bit prefix to the routers but for xMIPv6 operation, we need full 128bit global scope address, only for routers. The call to  autoConfRouterGlobalScopeAddress() will autoconfigure the full 128 bit global scope address, which will be used by the MN in its BU message destination address, especially for home registeration.
-     */
+    // Assign global scope addresses to routers. The Ipv6FlatNetworkConfigurator assigns
+    // a 64 bit prefix to the routers but for xMIPv6 operation, we need full 128bit global
+    // scope address for routers.
     if (rt6->isRouter() && !(ie->isLoopback())) {
         for (int i = 0; i < ie->getProtocolData<Ipv6InterfaceData>()->getNumAdvPrefixes(); i++) {
             Ipv6Address globalAddress = ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->autoConfRouterGlobalScopeAddress(i);
             ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->assignAddress(globalAddress, false, 0, 0);
-//            ie->getProtocolData<Ipv6InterfaceData>()->deduceAdvPrefix(); //commented out but the above two statements can be replaced with this single statement. But i am using the above two statements for clarity reasons.
         }
     }
-    // ==================================End: Zarrar Yousaf 08.07.07===========================================
-#endif /* INET_WITH_xMIPv6 */
 
     /*RFC 2461: Section 6.3.7 2nd Paragraph
        Before a host sends an initial solicitation, it SHOULD delay the
@@ -1528,8 +1510,6 @@ void Ipv6NeighbourDiscovery::processRaPrefixInfo(const Ipv6RouterAdvertisement *
     }
 }
 
-// (non-MIPv6 version removed; unified with MIPv6 version below)
-
 void Ipv6NeighbourDiscovery::createRaTimer(NetworkInterface *ie)
 {
     cMessage *msg = new cMessage("sendPeriodicRA", MK_SEND_PERIODIC_RTRADV);
@@ -1967,7 +1947,6 @@ void Ipv6NeighbourDiscovery::sendUnsolicitedNa(NetworkInterface *ie)
 {
     // RFC 2461
     // Section 7.2.6: Sending Unsolicited Neighbor Advertisements
-#ifdef INET_WITH_xMIPv6
     Enter_Method("sendUnsolicitedNa");
 
     // In some cases a node may be able to determine that its link-layer
@@ -2035,7 +2014,6 @@ void Ipv6NeighbourDiscovery::sendUnsolicitedNa(NetworkInterface *ie)
     Icmpv6::insertChecksum(checksumMode, na, packet);
     packet->insertAtFront(na);
     sendPacketToIpv6Module(packet, Ipv6Address::ALL_NODES_2, myIPv6Addr, ie->getInterfaceId());
-#endif /* INET_WITH_xMIPv6 */
 }
 
 void Ipv6NeighbourDiscovery::processNaPacket(Packet *packet, const Ipv6NeighbourAdvertisement *na)
