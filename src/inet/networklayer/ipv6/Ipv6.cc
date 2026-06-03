@@ -340,17 +340,12 @@ void Ipv6::handleMessageFromHL(Packet *packet)
     if (!src.isUnspecified()) {
         // if interface parameter does not match existing interface, do not send datagram
         if (rt->getInterfaceByAddress(src) == nullptr) {
-#ifdef INET_WITH_xMIPv6
-            EV_WARN << "Encapsulation failed - dropping packet." << endl;
+            EV_WARN << "Encapsulation failed - Loss of interface with source address " << src << ", dropping packet." << endl;
             PacketDropDetails details;
             details.setReason(NO_INTERFACE_FOUND);
             emit(packetDroppedSignal, packet, &details);
             delete packet;
             return;
-#else /* INET_WITH_xMIPv6 */
-            throw cRuntimeError("Wrong source address %s in (%s)%s: no interface with such address",
-                    src.str().c_str(), packet->getClassName(), packet->getFullName());
-#endif /* INET_WITH_xMIPv6 */
         }
     }
 
@@ -453,29 +448,21 @@ void Ipv6::routePacket(Packet *packet, const NetworkInterface *destIE, const Net
     int interfaceId = -1;
     Ipv6Address nextHop(requestedNextHopAddress);
 
-#ifdef INET_WITH_xMIPv6
-    // tunneling support - CB
     // check if destination is covered by tunnel lists
     if ((ipv6Header->getProtocolId() != IP_PROT_IPv6) && // if datagram was already tunneled, don't tunnel again
-        (ipv6Header->getExtensionHeaderArraySize() == 0) && // we do not already have extension headers - FIXME check for RH2 existence
-        ((rt->isMobileNode() && rt->isHomeAddress(ipv6Header->getSrcAddress())) || // for MNs: only if source address is a HoA // 27.08.07 - CB
+        (ipv6Header->getExtensionHeaderArraySize() == 0) && // we do not already have extension headers
+        ((rt->isMobileNode() && rt->isHomeAddress(ipv6Header->getSrcAddress())) || // for MNs: only if source address is a HoA
          rt->isHomeAgent() || // but always check for tunnel if node is a HA
          !rt->isMobileNode())) // or if it is a correspondent or non-MIP node
     {
         if (ipv6Header->getProtocolId() == IP_PROT_IPv6EXT_MOB)
             // in case of mobility header we can only search for "real" tunnels
             // as T2RH or HoA Opt. are not allowed with these messages
-            interfaceId = tunneling->getVIfIndexForDest(destAddress, Ipv6Tunneling::NORMAL); // 10.06.08 - CB
-//        getVIfIndexForDestForXSplitTunnel(destAddress);
+            interfaceId = tunneling->getVIfIndexForDest(destAddress, Ipv6Tunneling::NORMAL);
         else
             // otherwise we can search for everything
             interfaceId = tunneling->getVIfIndexForDest(destAddress);
     }
-#else // ifdef INET_WITH_xMIPv6
-    // FIXME this is not the same as the code above (when INET_WITH_xMIPv6 is defined),
-    // so tunneling examples could not work with xMIPv6
-    interfaceId = tunneling->getVIfIndexForDest(destAddress, Ipv6Tunneling::NORMAL);
-#endif /* INET_WITH_xMIPv6 */
 
     if (interfaceId == -1 && destIE != nullptr)
         interfaceId = destIE->getInterfaceId(); // set interfaceId to destIE when not tunneling
