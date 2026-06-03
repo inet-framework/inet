@@ -324,12 +324,12 @@ void xMIPv6::createBUTimer(const Ipv6Address& buDest, NetworkInterface *ie)
     // update lifetime, 14.9.07
     //if (homeRegistration)
     if (buDest == ie->getProtocolData<Ipv6InterfaceData>()->getHomeAgentAddress())
-        createBUTimer(buDest, ie, ie->getProtocolData<Ipv6InterfaceData>()->_getMaxHaBindingLifeTime(), true);
+        createBUTimer(buDest, ie, (uint)par("maxHaBindingLifeTime").doubleValueInUnit("s"), true);
     else {
         if (bulEntry->state == BindingUpdateList::DEREGISTER)
             createDeregisterBUTimer(buDest, ie);
         else
-            createBUTimer(buDest, ie, ie->getProtocolData<Ipv6InterfaceData>()->_getMaxRrBindingLifeTime(), false);
+            createBUTimer(buDest, ie, (uint)par("maxRrBindingLifeTime").doubleValueInUnit("s"), false);
     }
 }
 

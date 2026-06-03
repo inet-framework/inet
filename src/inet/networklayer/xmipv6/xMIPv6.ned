@@ -27,6 +27,8 @@ simple xMIPv6 extends SimpleModule
         string bindingCacheModule;
         bool isHomeAgent;
         bool isMobileNode;
+        double maxHaBindingLifeTime @unit(s) = default(3600s); // max binding lifetime for HA registration
+        double maxRrBindingLifeTime @unit(s) = default(420s);  // max binding lifetime for CN (route optimization)
         @display("i=block/classifier2");
         @signal[mipv6RoCompleted](type=cMessage?);
         @signal[packetDropped](type=cPacket);
