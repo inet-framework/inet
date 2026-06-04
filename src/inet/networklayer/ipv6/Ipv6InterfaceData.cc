@@ -364,19 +364,35 @@ void Ipv6InterfaceData::choosePreferredAddress()
         return;
     }
 
-    // sort addresses by scope and expiry time, then pick the first one
+    // sort addresses by scope and expiry time
     std::stable_sort(addresses.begin(), addresses.end(), addrLess);
-    // choose first unicast address
+    // Choose the preferred (default) source address. Prefer a routable
+    // (non-link-local) unicast address: this is the source used for off-link
+    // destinations. A tentative global address is still preferred over a
+    // link-local one -- the sender (Ipv6) then either defers the datagram until
+    // DAD completes (RFC 4862) or, under Optimistic DAD (RFC 4429), uses it
+    // right away. Falling back to a link-local source for an off-link
+    // destination would be non-routable (RFC 4291 Section 2.5.6), so link-local
+    // is used only when no routable address exists at all.
+    Ipv6Address linkLocalCandidate = Ipv6Address::UNSPECIFIED_ADDRESS;
+    simtime_t linkLocalExpiry = SIMTIME_ZERO;
     for (auto& elem : addresses) {
-        if (elem.address.isUnicast()) {
+        if (!elem.address.isUnicast())
+            continue;
+        if (!elem.address.isLinkLocal()) {
             preferredAddr = elem.address;
             preferredAddrExpiryTime = elem.expiryTime;
             if (changed)
                 changed1(F_IP_ADDRESS);
             return;
         }
+        if (linkLocalCandidate.isUnspecified()) {
+            linkLocalCandidate = elem.address;
+            linkLocalExpiry = elem.expiryTime;
+        }
     }
-    preferredAddr = Ipv6Address::UNSPECIFIED_ADDRESS;
+    preferredAddr = linkLocalCandidate;
+    preferredAddrExpiryTime = linkLocalExpiry;
     if (changed)
         changed1(F_IP_ADDRESS);
 }

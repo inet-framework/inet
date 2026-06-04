@@ -3,17 +3,17 @@
 # Baseline established from current (pre-refactoring) code.
 
 # MIPv6 example — the primary test
-/examples/mobileipv6/,               -f omnetpp.ini -c One -r 0,                    25s,             e3b2-3a7b/~tNlb, PASS, wireless EthernetMac
+/examples/mobileipv6/,               -f omnetpp.ini -c One -r 0,                    25s,             8e75-f714/~tNlb, PASS, wireless EthernetMac
 
 # IPv6 examples
-/examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,                50000s,          75eb-1421/~tNlb, PASS, EthernetMac
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_inet -r 0,              50s,             6925-41c3/~tNlb, PASS, EthernetMac
-/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c ETH -r 0,                    50s,             03e1-5de3/~tNlb, PASS, EthernetMac
-/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c Mixed -r 0,                  50s,             45b4-10d4/~tNlb, PASS, EthernetMac
-/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c PPP -r 0,                    50s,             7596-fa8b/~tNlb, PASS,
-/examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           cf59-c687/~tNlb, PASS, EthernetMac
-/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           f5d6-597d/~tNlb, PASS,
-/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            f0bf-3a4a/~tNlb, PASS,
+/examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,                50000s,          ff08-3d6f/~tNlb, PASS, EthernetMac
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_inet -r 0,              50s,             c0b8-1e28/~tNlb, PASS, EthernetMac
+/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c ETH -r 0,                    50s,             2221-ba0b/~tNlb, PASS, EthernetMac
+/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c Mixed -r 0,                  50s,             e963-ce38/~tNlb, PASS, EthernetMac
+/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c PPP -r 0,                    50s,             6194-857b/~tNlb, PASS,
+/examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           dda1-3f94/~tNlb, PASS, EthernetMac
+/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           6903-a642/~tNlb, PASS,
+/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            c95f-6f6f/~tNlb, PASS,
 
 # IPv6 networking examples
 /examples/inet/hierarchical99/,      -f networklayer.ini -c IPv6 -r 0,              10000s,          0fc2-d6ef/~tNlb, PASS, EthernetMac

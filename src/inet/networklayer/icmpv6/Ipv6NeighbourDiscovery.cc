@@ -850,9 +850,14 @@ void Ipv6NeighbourDiscovery::makeTentativeAddressPermanent(const Ipv6Address& te
 
     ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->setDadInProgress(false);
 
-    // after the link-local address was verified to be unique
-    // we can assign the address and initiate the MIPv6 protocol
-    // in case there are any pending entries in the list
+    if (!tentativeAddr.isLinkLocal()) {
+        // DAD completed for a global address -- nothing else to do
+        return;
+    }
+
+    // --- Link-local DAD completed: perform post-DAD setup ---
+
+    // Process dadGlobalList (MIPv6 handover: assign global address, remove old CoA)
     auto it = dadGlobalList.find(ie->getInterfaceId());
     if (it != dadGlobalList.end()) {
         DadGlobalEntry& entry = it->second;
@@ -908,6 +913,17 @@ void Ipv6NeighbourDiscovery::makeTentativeAddressPermanent(const Ipv6Address& te
         rtrDisMsg->setContextPointer(ie);
         simtime_t interval = uniform(0, ie->getProtocolData<Ipv6InterfaceData>()->_getMaxRtrSolicitationDelay()); // random delay
         scheduleAfter(interval, rtrDisMsg);
+    }
+
+    // RFC 4862: If a global address was assigned tentative while link-local DAD
+    // was in progress, start DAD for it now.
+    for (int i = 0; i < ie->getProtocolData<Ipv6InterfaceData>()->getNumAddresses(); i++) {
+        Ipv6Address addr = ie->getProtocolData<Ipv6InterfaceData>()->getAddress(i);
+        if (ie->getProtocolData<Ipv6InterfaceData>()->isTentativeAddress(addr)) {
+            EV_INFO << "Starting DAD for tentative global address " << addr << "\n";
+            initiateDad(addr, ie);
+            return;
+        }
     }
 }
 
@@ -2359,10 +2375,8 @@ void Ipv6NeighbourDiscovery::processRaPrefixInfoForAddrAutoConf(const Ipv6NdPref
             EV_ERROR << "No link-local address on interface (DAD may have failed) -- cannot autoconfigure global address\n";
             return;
         }
-        Ipv6Address newAddr = linkLocalAddress.setPrefix(prefix, prefixLength);
+        Ipv6Address newAddr = Ipv6Address(linkLocalAddress).setPrefix(prefix, prefixLength);
         Ipv6Address CoA;
-        // TODO for now we leave the newly formed address as not tentative,
-        // according to Greg, we have to always perform DAD for a newly formed address.
         EV_INFO << "Assigning new address to: " << ie->getInterfaceName() << endl;
 
         // we are for sure either in the home network or in a new foreign network
@@ -2389,13 +2403,19 @@ void Ipv6NeighbourDiscovery::processRaPrefixInfoForAddrAutoConf(const Ipv6NdPref
             // form new address and initiate DAD, as we are in a foreign network
 
             if (ie->getProtocolData<Ipv6InterfaceData>()->getNumAddresses() == 1) {
-                // we only have a link-layer and no unicast address of scope > link-local
-                // this means DAD is already running or has already been completed
-                // create a unicast address with scope > link-local
+                // we only have a link-local and no unicast address of scope > link-local
+                // RFC 4862 Section 5.5.3 step (e): assign the global address as tentative
+                // and perform DAD before using it
                 bool isLinkLocalTentative = ie->getProtocolData<Ipv6InterfaceData>()->isTentativeAddress(linkLocalAddress);
-                // if the link local address is tentative, then we make the global unicast address tentative as well
-                ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->assignAddress(newAddr, isLinkLocalTentative,
+                ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->assignAddress(newAddr, true,
                         simTime() + validLifetime, simTime() + preferredLifetime, hFlag);
+
+                if (!isLinkLocalTentative) {
+                    // link-local DAD already completed, start DAD for the global address now
+                    initiateDad(newAddr, ie);
+                }
+                // else: link-local DAD still running; makeTentativeAddressPermanent()
+                // will initiate DAD for this global address after link-local DAD completes
             }
             else {
                 // set tentative flag for all addresses on this interface

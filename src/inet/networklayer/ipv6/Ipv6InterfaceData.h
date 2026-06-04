@@ -199,10 +199,13 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
     friend std::ostream& operator<<(std::ostream& os, const HomeNetworkInfo& homeNetInfo);
     HomeNetworkInfo homeInfo;
     bool dadInProgress = false;
+    bool optimisticDad = false; // RFC 4429: if true, a tentative (optimistic) address may be used as a source address while DAD is still in progress
 
   public:
     bool isDadInProgress() { return dadInProgress; }
     void setDadInProgress(bool val) { dadInProgress = val; }
+    bool isOptimisticDad() const { return optimisticDad; }
+    void setOptimisticDad(bool val) { optimisticDad = val; }
     //@}
 
   protected:

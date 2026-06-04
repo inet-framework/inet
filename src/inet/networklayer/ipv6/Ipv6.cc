@@ -869,8 +869,11 @@ void Ipv6::fragmentPostRouting(Packet *packet, const NetworkInterface *ie, const
         insertNetworkProtocolHeader(packet, Protocol::ipv6, newIpv6Header);
         ipv6Header = newIpv6Header;
 
-        // RFC 4862: if source address is still tentative (DAD in progress), defer sending
-        if (ie->getProtocolData<Ipv6InterfaceData>()->isTentativeAddress(srcAddr)) {
+        // RFC 4862: a tentative source address (DAD still in progress) must not be
+        // used, so defer the datagram until DAD completes. Under RFC 4429 Optimistic
+        // DAD the address may be used right away, so the deferral is skipped.
+        if (ie->getProtocolData<Ipv6InterfaceData>()->isTentativeAddress(srcAddr)
+                && !ie->getProtocolData<Ipv6InterfaceData>()->isOptimisticDad()) {
             EV_INFO << "Source address is tentative - enqueueing datagram for later resubmission." << endl;
             ScheduledDatagram *sDgram = new ScheduledDatagram(packet, ipv6Header.get(), ie, nextHopAddr, fromHL);
             take(sDgram);
