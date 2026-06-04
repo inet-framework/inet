@@ -47,32 +47,22 @@ Ipv6NeighbourDiscovery::Ipv6NeighbourDiscovery()
 
 Ipv6NeighbourDiscovery::~Ipv6NeighbourDiscovery()
 {
-    // FIXME delete the following data structures, cancelAndDelete timers in them etc.
-    // Deleting the data structures my become unnecessary if the lists store the
-    // structs themselves and not pointers.
+    for (auto *msg : raTimerList)
+        cancelAndDelete(msg);
 
-//    RaTimerList raTimerList;
-    for (const auto& elem : raTimerList) {
-        cancelAndDelete(elem);
-        delete elem;
+    for (auto *entry : dadList) {
+        cancelAndDelete(entry->timeoutMsg);
+        delete entry;
     }
 
-//    DadList dadList;
-    for (const auto& elem : dadList) {
-        cancelAndDelete((elem)->timeoutMsg);
-        delete elem;
+    for (auto *entry : rdList) {
+        cancelAndDelete(entry->timeoutMsg);
+        delete entry;
     }
 
-//    RdList rdList;
-    for (const auto& elem : rdList) {
-        cancelAndDelete((elem)->timeoutMsg);
-        delete elem;
-    }
-
-//    AdvIfList advIfList;
-    for (const auto& elem : advIfList) {
-        cancelAndDelete((elem)->raTimeoutMsg);
-        delete elem;
+    for (auto *entry : advIfList) {
+        cancelAndDelete(entry->raTimeoutMsg);
+        delete entry;
     }
 }
 
