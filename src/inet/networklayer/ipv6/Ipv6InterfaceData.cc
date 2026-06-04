@@ -346,16 +346,23 @@ bool Ipv6InterfaceData::addrLess(const AddressData& a, const AddressData& b)
 
 void Ipv6InterfaceData::choosePreferredAddress()
 {
-    // do we have addresses?
-    if (addresses.size() == 0) {
+    // remove expired addresses (expiryTime == 0 means infinite lifetime)
+    simtime_t now = simTime();
+    bool changed = false;
+    for (auto it = addresses.begin(); it != addresses.end(); ) {
+        if (it->expiryTime != SIMTIME_ZERO && it->expiryTime <= now) {
+            EV_INFO << "Address " << it->address << " has expired, removing\n";
+            it = addresses.erase(it);
+            changed = true;
+        }
+        else
+            ++it;
+    }
+
+    if (addresses.empty()) {
         preferredAddr = Ipv6Address();
         return;
     }
-
-    // FIXME shouldn't we stick to the current preferredAddress if its prefLifetime
-    // hasn't expired yet?
-
-    // FIXME TODO throw out expired addresses! 0 should be treated as infinity
 
     // sort addresses by scope and expiry time, then pick the first one
     std::stable_sort(addresses.begin(), addresses.end(), addrLess);
@@ -364,10 +371,14 @@ void Ipv6InterfaceData::choosePreferredAddress()
         if (elem.address.isUnicast()) {
             preferredAddr = elem.address;
             preferredAddrExpiryTime = elem.expiryTime;
+            if (changed)
+                changed1(F_IP_ADDRESS);
             return;
         }
     }
     preferredAddr = Ipv6Address::UNSPECIFIED_ADDRESS;
+    if (changed)
+        changed1(F_IP_ADDRESS);
 }
 
 void Ipv6InterfaceData::addAdvPrefix(const AdvPrefix& advPrefix)
