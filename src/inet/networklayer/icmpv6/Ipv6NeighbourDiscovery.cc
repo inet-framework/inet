@@ -37,6 +37,7 @@ namespace inet {
 Define_Module(Ipv6NeighbourDiscovery);
 
 simsignal_t Ipv6NeighbourDiscovery::startDadSignal = registerSignal("startDad");
+simsignal_t Ipv6NeighbourDiscovery::dadFailedSignal = registerSignal("dadFailed");
 
 Ipv6NeighbourDiscovery::Ipv6NeighbourDiscovery()
     : neighbourCache(*this)
@@ -821,6 +822,7 @@ void Ipv6NeighbourDiscovery::initiateDad(const Ipv6Address& tentativeAddr, Netwo
 
     cMessage *msg = new cMessage("dadTimeout", MK_DAD_TIMEOUT);
     msg->setContextPointer(dadEntry);
+    dadEntry->timeoutMsg = msg;
 
     // added uniform(0, IPv6_MAX_RTR_SOLICITATION_DELAY) to account for joining the solicited-node multicast
     // group which is delay up to one 1 second (RFC 4862, 5.4.2)
@@ -923,6 +925,32 @@ void Ipv6NeighbourDiscovery::makeTentativeAddressPermanent(const Ipv6Address& te
         simtime_t interval = uniform(0, ie->getProtocolData<Ipv6InterfaceData>()->_getMaxRtrSolicitationDelay()); // random delay
         scheduleAfter(interval, rtrDisMsg);
     }
+}
+
+void Ipv6NeighbourDiscovery::dadHasFailed(const Ipv6Address& duplicateAddr, NetworkInterface *ie)
+{
+    EV_WARN << "DAD failed for address " << duplicateAddr << " on " << ie->getInterfaceName()
+            << " -- Loss of DAD, address will not be assigned\n";
+
+    for (auto it = dadList.begin(); it != dadList.end(); ++it) {
+        DadEntry *dadEntry = *it;
+        if (dadEntry->interfaceId == ie->getInterfaceId() && dadEntry->address == duplicateAddr) {
+            cancelAndDelete(dadEntry->timeoutMsg);
+            dadList.erase(it);
+            delete dadEntry;
+            break;
+        }
+    }
+
+    ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->removeAddress(duplicateAddr);
+
+    auto git = dadGlobalList.find(ie->getInterfaceId());
+    if (git != dadGlobalList.end())
+        dadGlobalList.erase(git);
+
+    ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->setDadInProgress(false);
+
+    emit(dadFailedSignal, 1);
 }
 
 void Ipv6NeighbourDiscovery::createAndSendRsPacket(NetworkInterface *ie)
@@ -1789,7 +1817,8 @@ void Ipv6NeighbourDiscovery::processNsForTentativeAddress(Packet *packet, const 
             EV_INFO << "NS comes from myself. Ignoring NS\n";
         else {
             EV_INFO << "NS comes from another node. Address is duplicate!\n";
-            throw cRuntimeError("Duplicate Address Detected! Manual Attention Required!");
+            NetworkInterface *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
+            dadHasFailed(ns->getTargetAddress(), ie);
         }
     }
     else if (nsSrcAddr.isUnicast()) {
@@ -2030,7 +2059,10 @@ void Ipv6NeighbourDiscovery::processNaPacket(Packet *packet, const Ipv6Neighbour
     // was received on is tentative.
     NetworkInterface *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
     if (ie->getProtocolData<Ipv6InterfaceData>()->isTentativeAddress(naTargetAddr)) {
-        throw cRuntimeError("Duplicate Address Detected! Manual attention needed!");
+        EV_WARN << "Received NA for tentative address " << naTargetAddr << " - Loss of DAD\n";
+        dadHasFailed(naTargetAddr, ie);
+        delete packet;
+        return;
     }
     // Logic as defined in Section 7.2.5
     Neighbour *neighbourEntry = neighbourCache.lookup(naTargetAddr, ie->getInterfaceId());
@@ -2322,7 +2354,10 @@ void Ipv6NeighbourDiscovery::processRaPrefixInfoForAddrAutoConf(const Ipv6NdPref
     if ((isPrefixAssignedToInterface == false) && (validLifetime != 0)) {
         EV_INFO << "Prefix not assigned to interface. Possible new router detected. Auto-configuring new address.\n";
         Ipv6Address linkLocalAddress = ie->getProtocolData<Ipv6InterfaceData>()->getLinkLocalAddress();
-        ASSERT(linkLocalAddress.isUnspecified() == false);
+        if (linkLocalAddress.isUnspecified()) {
+            EV_ERROR << "No link-local address on interface (DAD may have failed) -- cannot autoconfigure global address\n";
+            return;
+        }
         Ipv6Address newAddr = linkLocalAddress.setPrefix(prefix, prefixLength);
         Ipv6Address CoA;
         // TODO for now we leave the newly formed address as not tentative,

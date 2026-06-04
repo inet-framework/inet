@@ -47,8 +47,9 @@ class INET_API Ipv6NeighbourDiscovery : public SimpleModule, public LifecycleUns
     Ipv6NeighbourDiscovery();
     virtual ~Ipv6NeighbourDiscovery();
 
-  private:
+  public:
     static simsignal_t startDadSignal;
+    static simsignal_t dadFailedSignal;
 
   public:
     /**
@@ -245,6 +246,13 @@ class INET_API Ipv6NeighbourDiscovery : public SimpleModule, public LifecycleUns
      * To be called after successful DAD.
      */
     virtual void makeTentativeAddressPermanent(const Ipv6Address& tentativeAddr, NetworkInterface *ie);
+
+    /**
+     * Called when DAD detects a duplicate address (RFC 4862, Section 5.4.5).
+     * Cancels the DAD timer, removes the tentative address from the interface,
+     * and emits a dadFailed signal.
+     */
+    virtual void dadHasFailed(const Ipv6Address& duplicateAddr, NetworkInterface *ie);
 
     /************Address Autoconfiguration Stuff***************************/
     /**

@@ -1,0 +1,64 @@
+%description:
+Tests that Duplicate Address Detection (DAD) properly handles a duplicate
+address. Two hosts on the same link are configured with the same MAC address,
+causing them to form the same link-local address. When one host's DAD NS is
+received by the other (which is also performing DAD for the same address),
+DAD should fail and the address should not be permanently assigned.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network DadFailureNetwork
+{
+    types:
+        channel ethline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 10Mbps;
+        }
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator;
+        switch: EthernetSwitch;
+        router: Router6;
+        host1: StandardHost6;
+        host2: StandardHost6;
+    connections:
+        host1.ethg++ <--> ethline <--> switch.ethg++;
+        host2.ethg++ <--> ethline <--> switch.ethg++;
+        router.ethg++ <--> ethline <--> switch.ethg++;
+}
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+ned-path = ../../../../src
+network = DadFailureNetwork
+sim-time-limit = 5s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+# Give both hosts the same MAC address to force a link-local collision
+**.host1.eth[0].address = "AA:BB:CC:DD:EE:01"
+**.host2.eth[0].address = "AA:BB:CC:DD:EE:01"
+
+# Ethernet NIC configuration
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue"
+**.eth[*].queue.dataQueue.packetCapacity = 10
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+DAD failed for address
+%#--------------------------------------------------------------------------------------------------------------

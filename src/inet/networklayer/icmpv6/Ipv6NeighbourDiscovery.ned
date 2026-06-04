@@ -31,7 +31,9 @@ simple Ipv6NeighbourDiscovery extends SimpleModule
         double advReachableTime @unit(s) = default(3600s); // advertised reachable time in RAs; hosts use it as base for NUD
         @display("i=block/network");
         @signal[startDad](type=long); // Emits value=1
+        @signal[dadFailed](type=long); // Emits value=1
         @statistic[startDad](title="DAD started";record=count,vector);
+        @statistic[dadFailed](title="DAD failed";record=count,vector);
     gates:
         input ipv6In;
         output ipv6Out;
