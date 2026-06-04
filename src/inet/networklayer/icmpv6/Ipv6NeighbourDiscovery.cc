@@ -899,8 +899,9 @@ void Ipv6NeighbourDiscovery::makeTentativeAddressPermanent(const Ipv6Address& te
        MAX_RTR_SOLICITATION_DELAY.  This serves to alleviate congestion when
        many hosts start up on a link at the same time, such as might happen
        after recovery from a power failure.*/
-    // TODO Placing these operations here means fast router solicitation is
-    // not adopted. Will relocate.
+    // Router solicitation starts after DAD completes.  RFC 4861 says the
+    // initial random delay [0, MAX_RTR_SOLICITATION_DELAY] can be skipped
+    // if DAD already provided one -- we still apply it for safety.
     if (ie->getProtocolData<Ipv6InterfaceData>()->getAdvSendAdvertisements() == false) {
         EV_INFO << "creating router discovery message timer\n";
         cMessage *rtrDisMsg = new cMessage("initiateRTRDIS", MK_INITIATE_RTRDIS);
@@ -975,13 +976,10 @@ void Ipv6NeighbourDiscovery::initiateRouterDiscovery(cMessage *msg)
     EV_INFO << "Initiating Router Discovery" << endl;
     NetworkInterface *ie = (NetworkInterface *)msg->getContextPointer();
     delete msg;
-    // RFC2461: Section 6.3.7
-    /*When an interface becomes enabled, a host may be unwilling to wait for the
-       next unsolicited Router Advertisement to locate default routers or learn
-       prefixes.  To obtain Router Advertisements quickly, a host SHOULD transmit up
-       to MAX_RTR_SOLICITATIONS Router Solicitation messages each separated by at
-       least RTR_SOLICITATION_INTERVAL seconds.(FIXMETherefore this should be invoked
-       at the beginning of the simulation-WEI)*/
+    // RFC 4861 Section 6.3.7: a host SHOULD transmit up to MAX_RTR_SOLICITATIONS
+    // Router Solicitation messages, each separated by at least
+    // RTR_SOLICITATION_INTERVAL seconds.  This is invoked after DAD completes
+    // (from makeTentativeAddressPermanent) with a random initial delay.
     RdEntry *rdEntry = new RdEntry();
     rdEntry->interfaceId = ie->getInterfaceId();
     rdEntry->numRSSent = 0;
