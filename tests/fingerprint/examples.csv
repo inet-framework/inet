@@ -307,9 +307,9 @@
 /examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Fragment_ipv4 -r 0,      10s,             f8fb-0997/tplx;3f90-c480/~tNl;0b85-3891/~tND;a03d-f93b/tyf, PASS, Ipv4
 /examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Port_Unav_ipv4 -r 0,     10s,             744f-ba84/tplx;e23b-dc11/~tNl;d637-dffb/~tND;bfe9-7735/tyf, PASS, Ipv4
 /examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Host_Unav_ipv4 -r 0,     10s,             acca-28f8/tplx;0000-0000/~tNl;0000-0000/~tND;d93d-fffd/tyf, PASS, Ipv4
-/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_OK_ipv6 -r 0,            10s,             8fe6-9756/tplx;a01e-d6d4/~tNl;762e-32be/~tND;bf48-8079/tyf, PASS,
-/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Port_Unav_ipv6 -r 0,     10s,             ffe5-61fe/tplx;5686-d296/~tNl;319b-3ee7/~tND;ee7a-abde/tyf, PASS,
-/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Host_Unav_ipv6 -r 0,     10s,             e4ab-2322/tplx;9aaf-0585/~tNl;226f-523e/~tND;bbfc-db05/tyf, PASS,
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_OK_ipv6 -r 0,            10s,             d73a-ba68/tplx;3ffa-4292/~tNl;3f49-6ccd/~tND;b4a8-56cd/tyf, PASS,
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Port_Unav_ipv6 -r 0,     10s,             fefe-0afc/tplx;402a-1aac/~tNl;c236-0e73/~tND;ed35-7858/tyf, PASS,
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Host_Unav_ipv6 -r 0,     10s,             289c-06ea/tplx;b123-55f0/~tNl;a861-f74f/~tND;dd10-78b2/tyf, PASS,
 /examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_OK_gn -r 0,              10s,             4460-ccf4/tplx;0000-0000/~tNl;0000-0000/~tND;1720-6af0/tyf, PASS,
 /examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Port_Unav_gn -r 0,       10s,             4460-ccf4/tplx;0000-0000/~tNl;0000-0000/~tND;1720-6af0/tyf, PASS,
 /examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Host_Unav_gn -r 0,       10s,             4460-ccf4/tplx;0000-0000/~tNl;0000-0000/~tND;1720-6af0/tyf, PASS,

@@ -868,6 +868,15 @@ void Ipv6::fragmentPostRouting(Packet *packet, const NetworkInterface *ie, const
         newIpv6Header->setSrcAddress(srcAddr);
         insertNetworkProtocolHeader(packet, Protocol::ipv6, newIpv6Header);
         ipv6Header = newIpv6Header;
+
+        // RFC 4862: if source address is still tentative (DAD in progress), defer sending
+        if (ie->getProtocolData<Ipv6InterfaceData>()->isTentativeAddress(srcAddr)) {
+            EV_INFO << "Source address is tentative - enqueueing datagram for later resubmission." << endl;
+            ScheduledDatagram *sDgram = new ScheduledDatagram(packet, ipv6Header.get(), ie, nextHopAddr, fromHL);
+            take(sDgram);
+            pendingDadQueue.push_back(sDgram);
+            return;
+        }
     }
     const NetworkInterface *fromIe = fromHL ? nullptr : ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
     L3Address nextHopAddr_(nextHopAddr);
