@@ -313,7 +313,7 @@ void Ipv6InterfaceData::tentativelyAssign(int i)
 const Ipv6Address& Ipv6InterfaceData::getLinkLocalAddress() const
 {
     for (const auto& elem : addresses)
-        if (elem.address.isLinkLocal()) // FIXME and valid
+        if (elem.address.isLinkLocal() && (elem.expiryTime == SIMTIME_ZERO || elem.expiryTime > simTime()))
             return elem.address;
 
     return Ipv6Address::UNSPECIFIED_ADDRESS;
