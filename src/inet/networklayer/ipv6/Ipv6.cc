@@ -896,32 +896,6 @@ void Ipv6::fragmentAndSend(Packet *packet, const NetworkInterface *ie, const Mac
         return;
     }
 
-    // ensure source address is filled
-    if (fromHL && ipv6Header->getSrcAddress().isUnspecified() &&
-        !ipv6Header->getDestAddress().isSolicitedNodeMulticastAddress())
-    {
-        // source address can be unspecified during DAD
-        const Ipv6Address& srcAddr = ie->getProtocolData<Ipv6InterfaceData>()->getPreferredAddress();
-        ASSERT(!srcAddr.isUnspecified()); // FIXME what if we don't have an address yet?
-
-        // TODO factor out
-        packet->eraseAtFront(ipv6Header->getChunkLength());
-        auto ipv6HeaderCopy = staticPtrCast<Ipv6Header>(ipv6Header->dupShared());
-        // TODO dup or mark ipv4Header->markMutableIfExclusivelyOwned();
-        ipv6HeaderCopy->setSrcAddress(srcAddr);
-        packet->insertAtFront(ipv6HeaderCopy);
-        ipv6Header = ipv6HeaderCopy;
-
-        // RFC 4862: if source address is still tentative (DAD in progress), defer sending
-        if (ie->getProtocolData<Ipv6InterfaceData>()->isTentativeAddress(srcAddr)) {
-            EV_INFO << "Source address is tentative - enqueueing datagram for later resubmission." << endl;
-            ScheduledDatagram *sDgram = new ScheduledDatagram(packet, ipv6Header.get(), ie, nextHopAddr, fromHL);
-            take(sDgram);
-            pendingDadQueue.push_back(sDgram);
-            return;
-        }
-    }
-
     int mtu = ie->getMtu();
 
     // check if datagram does not require fragmentation
