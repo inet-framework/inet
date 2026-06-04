@@ -344,7 +344,7 @@ class INET_API Ipv6NeighbourDiscovery : public SimpleModule, public LifecycleUns
 
     /************Redirect Message Stuff************************************/
     virtual void createAndSendRedirectPacket(NetworkInterface *ie);
-    virtual void processRedirectPacket(const Ipv6Redirect *redirect);
+    virtual void processRedirectPacket(Packet *packet, const Ipv6Redirect *redirect);
     /************End Of Redirect Message Stuff*****************************/
 
     /* Determine that this router can communicate with wireless nodes
@@ -361,6 +361,8 @@ class INET_API Ipv6NeighbourDiscovery : public SimpleModule, public LifecycleUns
 
   public:
     void invalidateNeigbourCache();
+    virtual void sendRedirect(Packet *redirectedPacket, const Ipv6Address& targetAddr,
+            const Ipv6Address& destAddr, NetworkInterface *ie);
 
   protected:
     void routersUnreachabilityDetection(const NetworkInterface *ie); // 3.9.07 - CB

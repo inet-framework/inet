@@ -508,6 +508,16 @@ void Ipv6::routePacket(Packet *packet, const NetworkInterface *destIE, const Net
             return;
     // don't raise error if sent to ND or ICMP!
 
+    // RFC 4861 Section 8.2: send a Redirect if we are forwarding a packet back
+    // out on the same interface it arrived on, to a different next-hop
+    if (!fromHL && fromIE && interfaceId == fromIE->getInterfaceId()) {
+        Ipv6Address pktSrcAddr = ipv6Header->getSrcAddress();
+        if (nextHop != pktSrcAddr && !pktSrcAddr.isUnspecified() && !pktSrcAddr.isMulticast()) {
+            NetworkInterface *outIe = ift->getInterfaceById(interfaceId);
+            nd->sendRedirect(packet, nextHop, destAddress, outIe);
+        }
+    }
+
     resolveMACAddressAndSendPacket(packet, interfaceId, nextHop, fromHL);
 }
 
