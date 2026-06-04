@@ -1824,14 +1824,14 @@ void Ipv6NeighbourDiscovery::processNsForTentativeAddress(Packet *packet, const 
     if (nsSrcAddr.isUnspecified()) {
         EV_INFO << "Source Address is UNSPECIFIED. Sender is performing DAD\n";
 
-        // Sender performing Duplicate Address Detection
-        if (rt6->isLocalAddress(nsSrcAddr)) // FIXME isLocalAddress(UNSPECIFIED) is always false!!! Must write another check for detecting source is myself/foreign node!!!
-            EV_INFO << "NS comes from myself. Ignoring NS\n";
-        else {
-            EV_INFO << "NS comes from another node. Address is duplicate!\n";
-            NetworkInterface *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
-            dadHasFailed(ns->getTargetAddress(), ie);
-        }
+        // RFC 4862 Section 5.4.3: another node is performing DAD for the same
+        // address.  In a real stack, looped-back self-generated NS would need to
+        // be filtered (e.g. via RFC 7527 Nonce option).  In simulation, the MAC
+        // layer never delivers a frame back to the sender, so all DAD NS received
+        // here originate from a different node -- treat as duplicate.
+        EV_INFO << "NS comes from another node. Address is duplicate!\n";
+        NetworkInterface *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
+        dadHasFailed(ns->getTargetAddress(), ie);
     }
     else if (nsSrcAddr.isUnicast()) {
         // Sender performing address resolution
