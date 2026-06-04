@@ -357,6 +357,7 @@ class INET_API Ipv6NeighbourDiscovery : public SimpleModule, public LifecycleUns
      * (RFC 3775 7.5.).
      */
     virtual bool canServeWirelessNodes(NetworkInterface *ie);
+    bool findWirelessAccessPointBehind(cGate *outGate, std::set<cModule *>& visited);
 
   public:
     void invalidateNeigbourCache();

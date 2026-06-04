@@ -2482,20 +2482,41 @@ bool Ipv6NeighbourDiscovery::canServeWirelessNodes(NetworkInterface *ie)
     if (ie->isWireless())
         return true;
 
-    // check if this interface is directly connected to an AccessPoint.
+    // Check if an AccessPoint is reachable from this interface,
+    // potentially through Ethernet switches and/or hubs.
     cModule *node = getContainingNode(this);
     cGate *gate = node->gate(ie->getNodeOutputGateId());
     ASSERT(gate != nullptr);
-    cGate *connectedGate = gate->getPathEndGate();
-    if (connectedGate != gate) {
-        cModule *connectedNode = getContainingNode(connectedGate->getOwnerModule());
-        if (!connectedNode)
-            throw cRuntimeError("The connected module %s is not in a network node.", connectedGate->getOwnerModule()->getFullPath().c_str());
-        if (isWirelessAccessPoint(connectedNode))
-            return true;
-    }
 
-    // FIXME The AccessPoint can be connected to this router via Ethernet switches and/or hubs.
+    std::set<cModule *> visited;
+    visited.insert(node);
+    return findWirelessAccessPointBehind(gate, visited);
+}
+
+bool Ipv6NeighbourDiscovery::findWirelessAccessPointBehind(cGate *outGate, std::set<cModule *>& visited)
+{
+    cGate *remoteGate = outGate->getPathEndGate();
+    if (remoteGate == outGate)
+        return false;
+
+    cModule *remoteNode = findContainingNode(remoteGate->getOwnerModule());
+    if (!remoteNode || visited.count(remoteNode))
+        return false;
+    visited.insert(remoteNode);
+
+    if (isWirelessAccessPoint(remoteNode))
+        return true;
+
+    // If it's an L2-only device (no network layer), traverse through its other ports
+    if (!remoteNode->getSubmodule("ipv6") && !remoteNode->getSubmodule("networkLayer")) {
+        for (cModule::GateIterator gi(remoteNode); !gi.end(); ++gi) {
+            cGate *g = *gi;
+            if (g->getType() == cGate::OUTPUT && g->isConnected()) {
+                if (findWirelessAccessPointBehind(g, visited))
+                    return true;
+            }
+        }
+    }
 
     return false;
 }
