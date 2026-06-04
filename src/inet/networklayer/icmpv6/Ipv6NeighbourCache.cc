@@ -73,6 +73,15 @@ Ipv6NeighbourCache::Ipv6NeighbourCache(cSimpleModule& neighbourDiscovery)
     WATCH(neighbourMap);
 }
 
+Ipv6NeighbourCache::~Ipv6NeighbourCache()
+{
+    for (auto& elem : neighbourMap) {
+        Neighbour& nbor = elem.second;
+        neighbourDiscovery.cancelAndDelete(nbor.nudTimeoutEvent);
+        neighbourDiscovery.cancelAndDelete(nbor.arTimer);
+    }
+}
+
 Ipv6NeighbourCache::Neighbour *Ipv6NeighbourCache::lookup(const Ipv6Address& addr, int interfaceID)
 {
     Key key(addr, interfaceID);

@@ -64,6 +64,9 @@ Ipv6NeighbourDiscovery::~Ipv6NeighbourDiscovery()
         cancelAndDelete(entry->raTimeoutMsg);
         delete entry;
     }
+
+    while (!pendingQueue.isEmpty())
+        delete pendingQueue.pop();
 }
 
 void Ipv6NeighbourDiscovery::initialize(int stage)
@@ -2305,15 +2308,6 @@ void Ipv6NeighbourDiscovery::sendRedirect(Packet *redirectedPacket, const Ipv6Ad
     // RFC 4861 Section 8.2: build and send a Redirect message
     auto ipv6Header = redirectedPacket->peekAtFront<Ipv6Header>();
     Ipv6Address pktSrcAddr = ipv6Header->getSrcAddress();
-
-    // Only send a Redirect if the packet source is a known on-link neighbor.
-    // If not in the cache, the host may have moved and the Redirect is undeliverable.
-    Neighbour *nce = neighbourCache.lookup(pktSrcAddr, ie->getInterfaceId());
-    if (!nce || nce->reachabilityState == Ipv6NeighbourCache::INCOMPLETE) {
-        EV_INFO << "Not sending Redirect: source " << pktSrcAddr << " not in neighbour cache\n";
-        return;
-    }
-
     Ipv6Address srcAddr = ie->getProtocolData<Ipv6InterfaceData>()->getLinkLocalAddress();
 
     EV_INFO << "Sending ICMPv6 Redirect to " << pktSrcAddr << ": use " << targetAddr
@@ -2345,6 +2339,7 @@ void Ipv6NeighbourDiscovery::processRedirectPacket(Packet *packet, const Ipv6Red
     // Validation: source must be link-local (routers use link-local for ND messages)
     if (!srcAddr.isLinkLocal()) {
         EV_WARN << "Redirect source address is not link-local, discarding\n";
+        delete packet;
         return;
     }
 
@@ -2355,21 +2350,31 @@ void Ipv6NeighbourDiscovery::processRedirectPacket(Packet *packet, const Ipv6Red
     // Validation: target must be link-local or equal to destination
     if (!targetAddr.isLinkLocal() && targetAddr != destAddr) {
         EV_WARN << "Redirect target is neither link-local nor equal to destination, discarding\n";
+        delete packet;
         return;
     }
 
     // Validation: destination must not be multicast
     if (destAddr.isMulticast()) {
         EV_WARN << "Redirect destination is multicast, discarding\n";
+        delete packet;
         return;
     }
 
-    // Validation: source must be the current first-hop router for the destination
+    // Validation: source must be the current first-hop router for the destination.
+    // Check destination cache first, then fall back to routing table.
     int lookupIfId = -1;
-    const Ipv6Address& currentNextHop = rt6->lookupDestCache(destAddr, lookupIfId);
+    Ipv6Address currentNextHop = rt6->lookupDestCache(destAddr, lookupIfId);
+    if (lookupIfId == -1) {
+        // No destination cache entry: check routing table
+        const Ipv6Route *route = rt6->doLongestPrefixMatch(destAddr);
+        if (route)
+            currentNextHop = route->getNextHop();
+    }
     if (currentNextHop != srcAddr) {
         EV_WARN << "Redirect source " << srcAddr << " is not the current next-hop ("
                 << currentNextHop << ") for " << destAddr << ", discarding\n";
+        delete packet;
         return;
     }
 
@@ -2377,6 +2382,7 @@ void Ipv6NeighbourDiscovery::processRedirectPacket(Packet *packet, const Ipv6Red
     EV_INFO << "Updating destination cache: " << destAddr << " -> next hop " << targetAddr
             << " on interface " << interfaceId << "\n";
     rt6->updateDestCache(destAddr, targetAddr, interfaceId, SIMTIME_ZERO);
+    delete packet;
 }
 
 void Ipv6NeighbourDiscovery::processRaPrefixInfoForAddrAutoConf(const Ipv6NdPrefixInformation& prefixInfo, NetworkInterface *ie, bool hFlag)

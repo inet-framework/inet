@@ -148,7 +148,8 @@ class INET_API Ipv6NeighbourCache
 
   public:
     Ipv6NeighbourCache(cSimpleModule& neighbourDiscovery);
-    virtual ~Ipv6NeighbourCache() {}
+    virtual ~Ipv6NeighbourCache();
+
 
     /** Returns a neighbour entry, or nullptr. */
     virtual Neighbour *lookup(const Ipv6Address& addr, int interfaceID);
