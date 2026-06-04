@@ -49,6 +49,7 @@ class INET_API Ipv6NeighbourDiscovery : public SimpleModule, public LifecycleUns
 
   public:
     static simsignal_t startDadSignal;
+    static simsignal_t dadCompletedSignal;
     static simsignal_t dadFailedSignal;
 
   public:

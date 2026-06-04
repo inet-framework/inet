@@ -53,6 +53,9 @@ Ipv6::~Ipv6()
     for (auto& elem : queuedDatagramsForHooks) {
         delete elem.packet;
     }
+
+    for (auto *sDgram : pendingDadQueue)
+        delete sDgram;
 }
 
 Ipv6::ScheduledDatagram::ScheduledDatagram(Packet *packet, const Ipv6Header *ipv6Header, const NetworkInterface *ie, MacAddress macAddr, bool fromHL) :
@@ -106,6 +109,10 @@ void Ipv6::initialize(int stage)
 
         registerService(Protocol::ipv6, gate("transportIn"), gate("transportOut"));
         registerProtocol(Protocol::ipv6, gate("queueOut"), gate("queueIn"));
+
+        // Subscribe to DAD signals from the NeighbourDiscovery module
+        nd->subscribe(Ipv6NeighbourDiscovery::dadCompletedSignal, this);
+        nd->subscribe(Ipv6NeighbourDiscovery::dadFailedSignal, this);
     }
 }
 
@@ -188,23 +195,7 @@ void Ipv6::handleMessage(cMessage *msg)
 {
     auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
 
-    // RFC 4862: retry sending datagrams deferred due to tentative source address
-    if (msg->isSelfMessage()) {
-        ScheduledDatagram *sDgram = check_and_cast<ScheduledDatagram *>(msg);
-
-        // take care of datagram which was supposed to be sent over a tentative address
-        if (sDgram->getIE()->getProtocolData<Ipv6InterfaceData>()->isTentativeAddress(sDgram->getSrcAddress())) {
-            // address is still tentative - enqueue again
-            scheduleAfter(1.0, sDgram); // KLUDGE wait 1s for tentative->permanent. MISSING: timeout for drop or send back icmpv6 error, processing signals from IE, need another msg queue for waiting (similar to Ipv4 ARP)
-        }
-        else {
-            // address is not tentative anymore - send out datagram
-            numForwarded++;
-            fragmentPostRouting(sDgram->removeDatagram(), sDgram->getIE(), sDgram->getMacAddress(), sDgram->getFromHL());
-            delete sDgram;
-        }
-    }
-    else if (auto indication = dynamic_cast<Indication *>(msg))
+    if (auto indication = dynamic_cast<Indication *>(msg))
         handleIndication(indication);
     else if (auto request = dynamic_cast<Request *>(msg))
         handleRequest(request);
@@ -261,6 +252,42 @@ void Ipv6::handleMessage(cMessage *msg)
         else {
             if (datagramPreRoutingHook(packet) == INetfilter::IHook::ACCEPT)
                 preroutingFinish(packet, fromIE, destIE, nextHop.toIpv6());
+        }
+    }
+}
+
+void Ipv6::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
+{
+    Enter_Method("%s", cComponent::getSignalName(signalID));
+
+    if (signalID == Ipv6NeighbourDiscovery::dadCompletedSignal) {
+        // DAD completed: send out all queued datagrams whose source address is no longer tentative
+        for (auto it = pendingDadQueue.begin(); it != pendingDadQueue.end(); ) {
+            ScheduledDatagram *sDgram = *it;
+            if (!sDgram->getIE()->getProtocolData<Ipv6InterfaceData>()->isTentativeAddress(sDgram->getSrcAddress())) {
+                it = pendingDadQueue.erase(it);
+                numForwarded++;
+                fragmentPostRouting(sDgram->removeDatagram(), sDgram->getIE(), sDgram->getMacAddress(), sDgram->getFromHL());
+                delete sDgram;
+            }
+            else {
+                ++it;
+            }
+        }
+    }
+    else if (signalID == Ipv6NeighbourDiscovery::dadFailedSignal) {
+        // DAD failed: drop all queued datagrams whose source address was removed
+        for (auto it = pendingDadQueue.begin(); it != pendingDadQueue.end(); ) {
+            ScheduledDatagram *sDgram = *it;
+            if (!sDgram->getIE()->getProtocolData<Ipv6InterfaceData>()->hasAddress(sDgram->getSrcAddress())) {
+                EV_WARN << "Dropping queued datagram -- source address " << sDgram->getSrcAddress() << " DAD failed\n";
+                it = pendingDadQueue.erase(it);
+                delete sDgram;
+                numDropped++;
+            }
+            else {
+                ++it;
+            }
         }
     }
 }
@@ -880,7 +907,8 @@ void Ipv6::fragmentAndSend(Packet *packet, const NetworkInterface *ie, const Mac
         if (ie->getProtocolData<Ipv6InterfaceData>()->isTentativeAddress(srcAddr)) {
             EV_INFO << "Source address is tentative - enqueueing datagram for later resubmission." << endl;
             ScheduledDatagram *sDgram = new ScheduledDatagram(packet, ipv6Header.get(), ie, nextHopAddr, fromHL);
-            scheduleAfter(1.0, sDgram); // KLUDGE wait 1s for tentative->permanent. MISSING: timeout for drop or send back icmpv6 error, processing signals from IE, need another msg queue for waiting (similar to Ipv4 ARP)
+            take(sDgram);
+            pendingDadQueue.push_back(sDgram);
             return;
         }
     }

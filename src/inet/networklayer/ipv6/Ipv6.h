@@ -32,7 +32,7 @@ class Icmpv6Header;
 /**
  * Ipv6 implementation.
  */
-class INET_API Ipv6 : public SimpleModule, public NetfilterBase, public LifecycleUnsupported, public INetworkProtocol, public DefaultProtocolRegistrationListener
+class INET_API Ipv6 : public SimpleModule, public NetfilterBase, public LifecycleUnsupported, public INetworkProtocol, public DefaultProtocolRegistrationListener, protected cListener
 {
   public:
     /**
@@ -108,6 +108,9 @@ class INET_API Ipv6 : public SimpleModule, public NetfilterBase, public Lifecycl
         Packet *removeDatagram() { Packet *ret = packet; packet = nullptr; return ret; }
     };
 
+    // Queue of datagrams waiting for tentative source address to become permanent
+    std::vector<ScheduledDatagram *> pendingDadQueue;
+
     // netfilter hook variables
     typedef std::list<QueuedDatagramForHook> DatagramQueueForHooks;
     DatagramQueueForHooks queuedDatagramsForHooks;
@@ -127,6 +130,9 @@ class INET_API Ipv6 : public SimpleModule, public NetfilterBase, public Lifecycl
     virtual void preroutingFinish(Packet *packet, const NetworkInterface *fromIE, const NetworkInterface *destIE, Ipv6Address nextHopAddr);
 
     virtual void handleMessage(cMessage *msg) override;
+
+    using cListener::receiveSignal;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
 
     virtual void handleRequest(Request *request);
 

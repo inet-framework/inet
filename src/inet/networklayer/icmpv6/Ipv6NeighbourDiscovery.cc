@@ -37,6 +37,7 @@ namespace inet {
 Define_Module(Ipv6NeighbourDiscovery);
 
 simsignal_t Ipv6NeighbourDiscovery::startDadSignal = registerSignal("startDad");
+simsignal_t Ipv6NeighbourDiscovery::dadCompletedSignal = registerSignal("dadCompleted");
 simsignal_t Ipv6NeighbourDiscovery::dadFailedSignal = registerSignal("dadFailed");
 
 Ipv6NeighbourDiscovery::Ipv6NeighbourDiscovery()
@@ -864,6 +865,8 @@ void Ipv6NeighbourDiscovery::makeTentativeAddressPermanent(const Ipv6Address& te
 {
     EV_INFO << "DAD completed for address " << tentativeAddr << " on " << ie->getInterfaceName() << ", address is unique\n";
     ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->permanentlyAssign(tentativeAddr);
+
+    emit(dadCompletedSignal, 1);
 
     ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->setDadInProgress(false);
 
