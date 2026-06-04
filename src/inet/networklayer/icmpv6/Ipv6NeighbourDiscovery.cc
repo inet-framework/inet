@@ -2270,10 +2270,10 @@ void Ipv6NeighbourDiscovery::processNaForOtherNceStates(const Ipv6NeighbourAdver
            using that neighbor as a router as specified in Section 7.3.3. This is
            needed to detect when a node that is used as a router stops forwarding
            packets due to being configured as a host.*/
-        if (nce->isDefaultRouter() && !nce->isRouter)
+        if (nce->isDefaultRouter() && !nce->isRouter) {
             neighbourCache.getDefaultRouterList().remove(*nce);
-
-        // TODO remove destination cache entries
+            rt6->purgeDestCacheEntriesToNeighbour(nce->nceKey->address, nce->nceKey->interfaceID);
+        }
     }
 }
 
