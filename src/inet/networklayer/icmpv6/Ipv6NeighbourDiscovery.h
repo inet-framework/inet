@@ -180,15 +180,6 @@ class INET_API Ipv6NeighbourDiscovery : public SimpleModule, public LifecycleUns
     virtual Ipv6Address selectDefaultRouter(int& outIfID);
     /**
      *  RFC 2461: Section 6.3.5
-     *  Whenever the invalidation timer expires for a Prefix List entry, that
-     *  entry is discarded. No existing Destination Cache entries need be
-     *  updated, however. Should a reachability problem arise with an
-     *  existing Neighbor Cache entry, Neighbor Unreachability Detection will
-     *  perform any needed recovery.
-     */
-    virtual void timeoutPrefixEntry(const Ipv6Address& destPrefix, int prefixLength);
-    /**
-     *  RFC 2461: Section 6.3.5
      *  Whenever the Lifetime of an entry in the Default Router List expires,
      *  that entry is discarded. When removing a router from the Default
      *  Router list, the node MUST update the Destination Cache in such a way

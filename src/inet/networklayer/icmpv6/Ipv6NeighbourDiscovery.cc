@@ -589,19 +589,9 @@ Ipv6Address Ipv6NeighbourDiscovery::selectDefaultRouter(int& outIfID)
     return Ipv6Address::UNSPECIFIED_ADDRESS;
 }
 
-void Ipv6NeighbourDiscovery::timeoutPrefixEntry(const Ipv6Address& destPrefix, int prefixLength) // REDUNDANT
-{
-    // RFC 2461: Section 6.3.5
-    /*Whenever the invalidation timer expires for a Prefix List entry, that
-       entry is discarded.*/
-    rt6->deleteOnLinkPrefix(destPrefix, prefixLength);
-    // hmmm... should the unicast address associated with this prefix be deleted
-    // as well?-TODO The address should be timeout/deleted as well!!
-
-    /*No existing Destination Cache entries need be updated, however. Should a
-       reachability problem arise with an existing Neighbor Cache entry, Neighbor
-       Unreachability Detection will perform any needed recovery.*/
-}
+// timeoutPrefixEntry() removed: prefix invalidation is handled inline in
+// processRaPrefixInfo() (validLifetime == 0 case) which also removes the
+// autoconfigured address.
 
 void Ipv6NeighbourDiscovery::timeoutDefaultRouter(const Ipv6Address& addr,
         int interfaceID)
@@ -1518,6 +1508,17 @@ void Ipv6NeighbourDiscovery::processRaPrefixInfo(const Ipv6RouterAdvertisement *
             if (validLifetime == 0) {
                 EV_INFO << "Prefix Info's valid lifetime is 0, time-out prefix\n";
                 rt6->deleteOnLinkPrefix(prefix, prefixLength);
+
+                // RFC 4862 Section 5.5.3: also invalidate autoconfigured address(es)
+                // derived from this prefix
+                auto *ipv6Data = ie->getProtocolDataForUpdate<Ipv6InterfaceData>();
+                for (int j = ipv6Data->getNumAddresses() - 1; j >= 0; j--) {
+                    if (ipv6Data->getAddress(j).matches(prefix, prefixLength)) {
+                        EV_INFO << "Removing address " << ipv6Data->getAddress(j)
+                                << " (prefix invalidated)\n";
+                        ipv6Data->removeAddress(ipv6Data->getAddress(j));
+                    }
+                }
                 return;
             }
 
