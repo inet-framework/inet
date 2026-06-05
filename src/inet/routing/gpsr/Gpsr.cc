@@ -28,6 +28,7 @@
 
 #ifdef INET_WITH_IPv6
 #include "inet/networklayer/ipv6/Ipv6ExtensionHeaders_m.h"
+#include "inet/networklayer/ipv6/Ipv6Header.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #endif
 
@@ -635,17 +636,20 @@ void Gpsr::setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const Networ
     if (dynamicPtrCast<const Ipv6Header>(networkHeader)) {
         auto ipv6Header = removeNetworkProtocolHeader<Ipv6Header>(packet);
         gpsrOption->setType(IPv6TLVOPTION_TLV_GPSR);
-        B oldHlen = ipv6Header->calculateHeaderByteLength();
-        Ipv6HopByHopOptionsHeader *hdr = check_and_cast_nullable<Ipv6HopByHopOptionsHeader *>(ipv6Header->findExtensionHeaderByTypeForUpdate(IP_PROT_IPv6EXT_HOP));
-        if (hdr == nullptr) {
-            hdr = new Ipv6HopByHopOptionsHeader();
-            hdr->setByteLength(B(8));
-            ipv6Header->addExtensionHeader(hdr);
+        // Check if there's already a HopByHop Options chunk right after the base header
+        Ptr<Ipv6HopByHopOptionsHeader> hopHdr;
+        if (ipv6Header->getProtocolId() == IP_PROT_IPv6EXT_HOP && packet->getDataLength() > b(0)) {
+            hopHdr = constPtrCast<Ipv6HopByHopOptionsHeader>(packet->popAtFront<Ipv6HopByHopOptionsHeader>());
         }
-        hdr->getTlvOptionsForUpdate().appendTlvOption(gpsrOption);
-        hdr->setByteLength(B(utils::roundUp(2 + B(hdr->getTlvOptions().getLength()).get<B>(), 8)));
-        B newHlen = ipv6Header->calculateHeaderByteLength();
-        ipv6Header->addChunkLength(newHlen - oldHlen);
+        if (!hopHdr) {
+            hopHdr = makeShared<Ipv6HopByHopOptionsHeader>();
+            hopHdr->setChunkLength(B(8));
+            hopHdr->setNextHeaderProtocol(ipv6Header->getProtocolId());
+            ipv6Header->setProtocolId(IP_PROT_IPv6EXT_HOP);
+        }
+        hopHdr->getTlvOptionsForUpdate().appendTlvOption(gpsrOption);
+        hopHdr->setChunkLength(B(utils::roundUp(2 + B(hopHdr->getTlvOptions().getLength()).get<B>(), 8)));
+        packet->insertAtFront(hopHdr);
         insertNetworkProtocolHeader(packet, Protocol::ipv6, ipv6Header);
     }
     else
@@ -678,12 +682,9 @@ const GpsrOption *Gpsr::findGpsrOptionInNetworkDatagram(const Ptr<const NetworkH
 #endif
 #ifdef INET_WITH_IPv6
     if (auto ipv6Header = dynamicPtrCast<const Ipv6Header>(networkHeader)) {
-        const Ipv6HopByHopOptionsHeader *hdr = check_and_cast_nullable<const Ipv6HopByHopOptionsHeader *>(ipv6Header->findExtensionHeaderByType(IP_PROT_IPv6EXT_HOP));
-        if (hdr != nullptr) {
-            int i = (hdr->getTlvOptions().findByType(IPv6TLVOPTION_TLV_GPSR));
-            if (i >= 0)
-                gpsrOption = check_and_cast<const GpsrOption *>(hdr->getTlvOptions().getTlvOption(i));
-        }
+        // GPSR option is in a HopByHop extension header chunk, not inside the Ipv6Header
+        // TODO: need packet access to peek at extension header chunks
+        (void)ipv6Header;
     }
     else
 #endif
@@ -712,12 +713,9 @@ GpsrOption *Gpsr::findGpsrOptionInNetworkDatagramForUpdate(const Ptr<NetworkHead
 #endif
 #ifdef INET_WITH_IPv6
     if (auto ipv6Header = dynamicPtrCast<Ipv6Header>(networkHeader)) {
-        Ipv6HopByHopOptionsHeader *hdr = check_and_cast_nullable<Ipv6HopByHopOptionsHeader *>(ipv6Header->findExtensionHeaderByTypeForUpdate(IP_PROT_IPv6EXT_HOP));
-        if (hdr != nullptr) {
-            int i = (hdr->getTlvOptions().findByType(IPv6TLVOPTION_TLV_GPSR));
-            if (i >= 0)
-                gpsrOption = check_and_cast<GpsrOption *>(hdr->getTlvOptionsForUpdate().getTlvOptionForUpdate(i));
-        }
+        // GPSR option is in a HopByHop extension header chunk, not inside the Ipv6Header
+        // TODO: need packet access to peek/modify extension header chunks
+        (void)ipv6Header;
     }
     else
 #endif

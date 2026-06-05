@@ -12,7 +12,7 @@
 
 #include "inet/networklayer/icmpv6/Icmpv6.h"
 #include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
-#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders_m.h"
+#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders.h"
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 
 namespace inet {
@@ -56,7 +56,20 @@ Packet *Ipv6FragBuf::addFragment(Packet *pk, const Ipv6Header *ipv6Header, const
         buf = &(i->second);
     }
 
-    int fragmentLength = pk->getByteLength() - ipv6Header->getChunkLength().get<B>(); // datagram->calculateFragmentLength();
+    // Calculate total header length: base header (40) + all extension header chunks (including fragment header)
+    B totalHeaderLength = ipv6Header->getChunkLength();
+    {
+        IpProtocolId nextHdr = ipv6Header->getProtocolId();
+        b off = b(totalHeaderLength);
+        while (isIpv6ExtensionHeader(nextHdr)) {
+            auto extHdr = peekIpv6ExtensionHeaderAt(pk, off, nextHdr);
+            off += b(extHdr->getChunkLength());
+            nextHdr = extHdr->getNextHeaderProtocol();
+        }
+        totalHeaderLength = B(off);
+    }
+
+    int fragmentLength = pk->getByteLength() - totalHeaderLength.get();
     unsigned short offset = fh->getFragmentOffset();
     bool moreFragments = fh->getMoreFragments();
 
@@ -86,8 +99,8 @@ Packet *Ipv6FragBuf::addFragment(Packet *pk, const Ipv6Header *ipv6Header, const
         return nullptr;
     }
 
-    // add fragment to buffer
-    buf->buf.replace(B(offset), pk->peekDataAt(ipv6Header->getChunkLength(), B(fragmentLength)));
+    // add fragment to buffer (fragment payload starts after all headers)
+    buf->buf.replace(B(offset), pk->peekDataAt(totalHeaderLength, B(fragmentLength)));
 
     if (!moreFragments) {
         buf->buf.setExpectedLength(B(offset + fragmentLength));
@@ -113,12 +126,44 @@ Packet *Ipv6FragBuf::addFragment(Packet *pk, const Ipv6Header *ipv6Header, const
             pkName.resize(found);
         Packet *pk = new Packet(pkName.c_str());
         pk->copyTags(*buf->packet);
+
+        // Reconstruct the packet: base header + unfragmentable ext headers (without fragment header) + reassembled payload
+        // Copy base header, fix protocolId to skip over the fragment header
         auto hdr = Ptr<Ipv6Header>(buf->packet->peekAtFront<Ipv6Header>()->dup());
-        const auto& payload = buf->buf.getReassembledData();
-        hdr->removeExtensionHeader(IP_PROT_IPv6EXT_FRAGMENT);
-        hdr->setChunkLength(B(hdr->calculateUnfragmentableHeaderByteLength()));
+        // Walk ext headers from the first fragment, inserting all except the fragment header
+        IpProtocolId nextHdr = hdr->getProtocolId();
+        b off = b(hdr->getChunkLength());
+        std::vector<Ptr<Ipv6ExtensionHeader>> unfragmentableExtHdrs;
+        IpProtocolId fragNextHdr = IP_PROT_NONE;
+        while (isIpv6ExtensionHeader(nextHdr)) {
+            auto extHdr = peekIpv6ExtensionHeaderAt(buf->packet, off, nextHdr);
+            off += b(extHdr->getChunkLength());
+            if (nextHdr == IP_PROT_IPv6EXT_FRAGMENT) {
+                // Skip the fragment header, but remember what it points to
+                auto fragHdr = staticPtrCast<const Ipv6FragmentHeader>(extHdr);
+                fragNextHdr = fragHdr->getNextHeaderProtocol();
+            }
+            else {
+                unfragmentableExtHdrs.push_back(Ptr<Ipv6ExtensionHeader>(extHdr->dup()));
+            }
+            nextHdr = extHdr->getNextHeaderProtocol();
+        }
+
+        // Fix the next-header chain to skip the fragment header
+        if (unfragmentableExtHdrs.empty()) {
+            hdr->setProtocolId(fragNextHdr);
+        }
+        else {
+            // The base header points to the first ext header; we need to patch
+            // the ext header that used to point to the fragment header
+            // to now point to fragNextHdr
+            unfragmentableExtHdrs.back()->setNextHeaderProtocol(fragNextHdr);
+        }
+
         pk->insertAtFront(hdr);
-        pk->insertAtBack(payload);
+        for (auto& extHdr : unfragmentableExtHdrs)
+            pk->insertAtBack(extHdr);
+        pk->insertAtBack(buf->buf.getReassembledData());
         delete buf->packet;
         bufs.erase(i);
         return pk;

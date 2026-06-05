@@ -10,7 +10,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/networklayer/ipv6/Ipv6.h"
-#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders_m.h"
+#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders.h"
 
 namespace inet {
 
@@ -29,8 +29,20 @@ void Ipv6ProtocolDissector::dissect(Packet *packet, const Protocol *protocol, IC
     }
     callback.visitChunk(header, &Protocol::ipv6);
     packet->setBackOffset(ipv6EndOffset);
-    const Ipv6FragmentHeader *fh = dynamic_cast<const Ipv6FragmentHeader *>(header->findExtensionHeaderByType(IP_PROT_IPv6EXT_FRAGMENT));
-    if (fh)
+
+    // Walk extension header chunks
+    IpProtocolId nextHdr = header->getProtocolId();
+    bool isFragment = false;
+    while (isIpv6ExtensionHeader(nextHdr)) {
+        auto extHdr = peekIpv6ExtensionHeaderAt(packet, b(0), nextHdr);
+        packet->popAtFront(extHdr->getChunkLength());
+        callback.visitChunk(extHdr, &Protocol::ipv6);
+        if (nextHdr == IP_PROT_IPv6EXT_FRAGMENT)
+            isFragment = true;
+        nextHdr = extHdr->getNextHeaderProtocol();
+    }
+
+    if (isFragment)
         callback.dissectPacket(packet, nullptr); // Fragment
     else
         callback.dissectPacket(packet, header->getProtocol());

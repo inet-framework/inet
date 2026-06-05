@@ -257,7 +257,7 @@ class INET_API Ipv6 : public SimpleModule, public NetfilterBase, public Lifecycl
      * and the packet has to be dropped or if the datagram has been forwarded to another
      * module for further processing.
      */
-    bool processExtensionHeaders(Packet *packet, const Ipv6Header *ipv6Header);
+    bool processExtensionHeaders(Packet *packet);
 
   public:
     /** @name Extension header handler registration */

@@ -30,13 +30,14 @@
 #include "inet/networklayer/ipv6/Ipv6ExtHeaderIndexTag_m.h"
 #include "inet/networklayer/icmpv6/Ipv6NdMessage_m.h"
 #include "inet/networklayer/ipv6/Ipv6ExtHeaderTag_m.h"
-#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders_m.h"
+#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 
 
 namespace inet {
 
 #define FRAGMENT_TIMEOUT    60   // 60 sec, from Ipv6 RFC
+
 
 Define_Module(Ipv6);
 
@@ -481,7 +482,7 @@ void Ipv6::routePacket(Packet *packet, const NetworkInterface *destIE, const Net
 
     // check if destination is covered by tunnel lists
     if ((ipv6Header->getProtocolId() != IP_PROT_IPv6) && // if datagram was already tunneled, don't tunnel again
-        (ipv6Header->getExtensionHeaderArraySize() == 0) && // we do not already have extension headers
+        (!isIpv6ExtensionHeader(ipv6Header->getProtocolId())) && // we do not already have extension headers
         ((rt->isMobileNode() && rt->isHomeAddress(ipv6Header->getSrcAddress())) || // for MNs: only if source address is a HoA
          rt->isHomeAgent() || // but always check for tunnel if node is a HA
          !rt->isMobileNode())) // or if it is a correspondent or non-MIP node
@@ -696,10 +697,27 @@ void Ipv6::routeMulticastPacket(Packet *packet, const NetworkInterface *destIE, 
 
 void Ipv6::localDeliver(Packet *packet, const NetworkInterface *fromIE)
 {
-    const auto& ipv6Header = packet->peekAtFront<Ipv6Header>();
+    auto ipv6Header = packet->peekAtFront<Ipv6Header>();
 
-    // Defragmentation. skip defragmentation if datagram is not fragmented
-    const Ipv6FragmentHeader *fh = dynamic_cast<const Ipv6FragmentHeader *>(ipv6Header->findExtensionHeaderByType(IP_PROT_IPv6EXT_FRAGMENT));
+    // Defragmentation: look for Ipv6FragmentHeader chunk after the base header
+    // Scan extension header chunks to find the fragment header
+    const Ipv6FragmentHeader *fh = nullptr;
+    {
+        b offset = ipv6Header->getChunkLength();
+        IpProtocolId nextHdr = ipv6Header->getProtocolId();
+        while (isIpv6ExtensionHeader(nextHdr)) {
+            auto extHdr = peekIpv6ExtensionHeaderAt(packet, offset, nextHdr);
+            if (nextHdr == IP_PROT_IPv6EXT_FRAGMENT) {
+                auto fragHdr = dynamicPtrCast<const Ipv6FragmentHeader>(extHdr);
+                if (fragHdr) {
+                    fh = fragHdr.get();
+                    break;
+                }
+            }
+            nextHdr = extHdr->getNextHeaderProtocol();
+            offset += extHdr->getChunkLength();
+        }
+    }
     if (fh) {
         EV_DETAIL << "Datagram fragment: offset=" << fh->getFragmentOffset()
                   << ", MORE=" << (fh->getMoreFragments() ? "true" : "false") << ".\n";
@@ -716,10 +734,12 @@ void Ipv6::localDeliver(Packet *packet, const NetworkInterface *fromIE)
             return;
         }
         EV_DETAIL << "This fragment completes the datagram.\n";
+        // Re-peek header from the reassembled packet (old reference is stale)
+        ipv6Header = packet->peekAtFront<Ipv6Header>();
     }
 
     // check for extension headers
-    if (!processExtensionHeaders(packet, ipv6Header.get())) {
+    if (!processExtensionHeaders(packet)) {
         // ext. header processing not yet finished
         // datagram was sent to another module or dropped
         // -> interrupt local delivery process
@@ -727,7 +747,17 @@ void Ipv6::localDeliver(Packet *packet, const NetworkInterface *fromIE)
     }
 
     auto origPacket = packet->dup();
-    const Protocol *protocol = ipv6Header->getProtocol();
+    // Determine actual transport protocol by walking extension header chain
+    IpProtocolId finalProtoId = ipv6Header->getProtocolId();
+    {
+        b off = ipv6Header->getChunkLength();
+        while (isIpv6ExtensionHeader(finalProtoId)) {
+            auto extHdr = peekIpv6ExtensionHeaderAt(packet, off, finalProtoId);
+            finalProtoId = extHdr->getNextHeaderProtocol();
+            off += extHdr->getChunkLength();
+        }
+    }
+    const Protocol *protocol = ProtocolGroup::getIpProtocolGroup()->findProtocol(finalProtoId);
     auto remoteAddress(ipv6Header->getSrcAddress());
     auto localAddress(ipv6Header->getDestAddress());
     decapsulate(packet);
@@ -798,12 +828,20 @@ void Ipv6::decapsulate(Packet *packet)
             packet->setBackOffset(packet->getFrontOffset() + payloadLength);
     }
 
+    // Pop extension header chunks and find the actual transport protocol
+    IpProtocolId nextHdr = ipv6Header->getProtocolId();
+    while (isIpv6ExtensionHeader(nextHdr)) {
+        auto extHdr = peekIpv6ExtensionHeaderAt(packet, b(0), nextHdr);
+        packet->popAtFront(extHdr->getChunkLength());
+        nextHdr = extHdr->getNextHeaderProtocol();
+    }
+    auto payloadProtocol = ProtocolGroup::getIpProtocolGroup()->findProtocol(nextHdr);
+
     // create and fill in control info
     packet->addTagIfAbsent<TosInd>()->setTos(ipv6Header->getTrafficClass());
     packet->addTagIfAbsent<DscpInd>()->setDifferentiatedServicesCodePoint(ipv6Header->getDscp());
     packet->addTagIfAbsent<EcnInd>()->setExplicitCongestionNotification(ipv6Header->getEcn());
     packet->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::ipv6);
-    auto payloadProtocol = ipv6Header->getProtocol();
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
     auto networkProtocolInd = packet->addTagIfAbsent<NetworkProtocolInd>();
@@ -850,17 +888,35 @@ void Ipv6::encapsulate(Packet *transportPacket)
     ASSERT(ipv6Header->getHopLimit() > 0);
     ipv6Header->setProtocolId(static_cast<IpProtocolId>(ProtocolGroup::getIpProtocolGroup()->getProtocolNumber(transportPacket->getTag<PacketProtocolTag>()->getProtocol())));
 
-    // #### Move extension headers from ctrlInfo to datagram if present
+    // #### Move extension headers from tag to packet as separate chunks
     auto extHeadersTag = transportPacket->removeTagIfPresent<Ipv6ExtHeaderReq>();
+    std::vector<Ipv6ExtensionHeader *> extHeaders;
     while (extHeadersTag && 0 < extHeadersTag->getExtensionHeaderArraySize()) {
-        Ipv6ExtensionHeader *extHeader = extHeadersTag->removeFirstExtensionHeader();
-        ipv6Header->addExtensionHeader(extHeader);
-//        EV << "Move extension header to datagram." << endl;
+        extHeaders.push_back(extHeadersTag->removeFirstExtensionHeader());
+    }
+    // Sort extension headers according to RFC 2460 §4.1 order
+    std::stable_sort(extHeaders.begin(), extHeaders.end(),
+        [](const Ipv6ExtensionHeader *a, const Ipv6ExtensionHeader *b) {
+            return a->getOrder() < b->getOrder();
+        });
+
+    // Chain the Next Header fields
+    IpProtocolId transportProto = ipv6Header->getProtocolId();
+    if (!extHeaders.empty()) {
+        ipv6Header->setProtocolId(static_cast<IpProtocolId>(extHeaders.front()->getExtensionType()));
+        for (size_t i = 0; i < extHeaders.size() - 1; i++)
+            extHeaders[i]->setNextHeaderProtocol(static_cast<IpProtocolId>(extHeaders[i + 1]->getExtensionType()));
+        extHeaders.back()->setNextHeaderProtocol(transportProto);
     }
 
-    ipv6Header->setChunkLength(B(ipv6Header->calculateHeaderByteLength()));
     transportPacket->trimFront();
+    // Insert extension headers (in reverse order, each at front, so they end up in correct order)
+    for (int i = (int)extHeaders.size() - 1; i >= 0; i--)
+        transportPacket->insertAtFront(Ptr<Ipv6ExtensionHeader>(extHeaders[i]->dup()));
     insertNetworkProtocolHeader(transportPacket, Protocol::ipv6, ipv6Header);
+    // Clean up owned ext headers from tag (originals)
+    for (auto *eh : extHeaders)
+        delete eh;
     // setting IP options is currently not supported
 }
 
@@ -929,8 +985,13 @@ void Ipv6::fragmentAndSend(Packet *packet, const NetworkInterface *ie, const Mac
     }
 
     // create and send fragments
+    // Pop the base header (extension header chunks, if any, remain in the packet data)
     ipv6Header = packet->popAtFront<Ipv6Header>();
-    B headerLength = ipv6Header->calculateUnfragmentableHeaderByteLength();
+
+    // Calculate unfragmentable header length: base header + extension headers up to (but not including) the first
+    // fragmentable point. For simplicity, the unfragmentable part is the base header only (40 bytes).
+    // TODO: properly split unfragmentable/fragmentable extension headers
+    B headerLength = IPv6_HEADER_BYTES;
     B payloadLength = packet->getDataLength();
     B fragmentLength = ((B(mtu) - headerLength - IPv6_FRAGMENT_HEADER_LENGTH) / 8) * 8;
     ASSERT(fragmentLength > B(0));
@@ -940,9 +1001,11 @@ void Ipv6::fragmentAndSend(Packet *packet, const NetworkInterface *ie, const Mac
     std::string fragMsgName = packet->getName();
     fragMsgName += "-frag-";
 
-    // FIXME is need to remove unfragmentable header extensions? see calculateUnfragmentableHeaderByteLength()
-
     unsigned int identification = curFragmentId++;
+    // The base header's protocolId currently points to the first ext header (or transport).
+    // We need to insert a Fragment Header into the chain.
+    IpProtocolId origNextHdr = ipv6Header->getProtocolId();
+
     for (B offset = B(0); offset < payloadLength; offset += fragmentLength) {
         bool lastFragment = (offset + fragmentLength >= payloadLength);
         B thisFragmentLength = lastFragment ? payloadLength - offset : fragmentLength;
@@ -951,17 +1014,23 @@ void Ipv6::fragmentAndSend(Packet *packet, const NetworkInterface *ie, const Mac
         if (lastFragment)
             curFragName += "-last";
         Packet *fragPk = new Packet(curFragName.c_str());
-        const auto& fragHdr = staticPtrCast<Ipv6Header>(ipv6Header->dupShared());
-        auto *fh = new Ipv6FragmentHeader();
+
+        // Create fragment header chunk
+        auto fh = makeShared<Ipv6FragmentHeader>();
         fh->setIdentification(identification);
         fh->setFragmentOffset(offset.get());
         fh->setMoreFragments(!lastFragment);
-        fragHdr->addExtensionHeader(fh);
-        fragHdr->setChunkLength(headerLength + fh->getByteLength()); // KLUDGE
-        fragPk->insertAtFront(fragHdr);
+        fh->setNextHeaderProtocol(origNextHdr);
+
+        // Base header points to Fragment Header
+        const auto& fragBaseHdr = staticPtrCast<Ipv6Header>(ipv6Header->dupShared());
+        fragBaseHdr->setProtocolId(IP_PROT_IPv6EXT_FRAGMENT);
+
+        fragPk->insertAtFront(fh);
+        fragPk->insertAtFront(fragBaseHdr);
         fragPk->insertAtBack(packet->peekDataAt(offset, thisFragmentLength));
 
-        ASSERT(fragPk->getDataLength() == headerLength + fh->getByteLength() + thisFragmentLength);
+        ASSERT(fragPk->getDataLength() == headerLength + IPv6_FRAGMENT_HEADER_LENGTH + thisFragmentLength);
 
         sendDatagramToOutput(fragPk, ie, nextHopAddr);
     }
@@ -1023,47 +1092,52 @@ bool Ipv6::determineOutputInterface(const Ipv6Address& destAddress, Ipv6Address&
     return true;
 }
 
-bool Ipv6::processExtensionHeaders(Packet *packet, const Ipv6Header *ipv6Header)
+bool Ipv6::processExtensionHeaders(Packet *packet)
 {
-    int noExtHeaders = ipv6Header->getExtensionHeaderArraySize();
-    EV_INFO << noExtHeaders << " extension header(s) for processing..." << endl;
+    const auto& ipv6Header = packet->peekAtFront<Ipv6Header>();
+    b offset = ipv6Header->getChunkLength();
+    IpProtocolId nextHdr = ipv6Header->getProtocolId();
 
-    for (int i = 0; i < noExtHeaders; i++) {
-        const Ipv6ExtensionHeader *eh = ipv6Header->getExtensionHeader(i);
-        switch (eh->getExtensionType()) {
+    while (isIpv6ExtensionHeader(nextHdr)) {
+        auto extHdr = peekIpv6ExtensionHeaderAt(packet, offset, nextHdr);
+        switch (nextHdr) {
             case IP_PROT_IPv6EXT_HOP: {
-                auto *hopHdr = check_and_cast<const Ipv6HopByHopOptionsHeader *>(eh);
-                const TlvOptions& opts = hopHdr->getTlvOptions();
-                for (size_t j = 0; j < opts.getTlvOptionArraySize(); j++) {
-                    const TlvOptionBase *opt = opts.getTlvOption(j);
-                    int optType = opt->getType();
-                    if (optType == IPv6TLVOPTION_NOP1 || optType == IPv6TLVOPTION_NOPN)
-                        continue;
-                    auto it = hopByHopOptionHandlers.find(optType);
-                    if (it != hopByHopOptionHandlers.end()) {
-                        if (!it->second->processTlvOption(packet, eh, opt))
-                            return false;
-                    }
-                    else {
-                        throw cRuntimeError("No handler registered for Hop-by-Hop option type %d", optType);
+                auto hopHdr = dynamicPtrCast<const Ipv6HopByHopOptionsHeader>(extHdr);
+                if (hopHdr) {
+                    const TlvOptions& opts = hopHdr->getTlvOptions();
+                    for (size_t j = 0; j < opts.getTlvOptionArraySize(); j++) {
+                        const TlvOptionBase *opt = opts.getTlvOption(j);
+                        int optType = opt->getType();
+                        if (optType == IPv6TLVOPTION_NOP1 || optType == IPv6TLVOPTION_NOPN)
+                            continue;
+                        auto it = hopByHopOptionHandlers.find(optType);
+                        if (it != hopByHopOptionHandlers.end()) {
+                            if (!it->second->processTlvOption(packet, hopHdr.get(), opt))
+                                return false;
+                        }
+                        else {
+                            throw cRuntimeError("No handler registered for Hop-by-Hop option type %d", optType);
+                        }
                     }
                 }
                 break;
             }
             case IP_PROT_IPv6EXT_ROUTING: {
-                auto *rh = check_and_cast<const Ipv6RoutingHeader *>(eh);
-                EV_DETAIL << "Routing Header with type=" << rh->getRoutingType() << endl;
-                if (rh->getSegmentsLeft() == 0) {
-                    EV_INFO << "Ignoring routing header with segmentsLeft=0" << endl;
-                    break;
-                }
-                auto it = routingHeaderHandlers.find(rh->getRoutingType());
-                if (it != routingHeaderHandlers.end()) {
-                    if (!it->second->processExtensionHeader(packet, eh))
-                        return false;
-                }
-                else {
-                    throw cRuntimeError("No handler registered for routing header type %d", (int)rh->getRoutingType());
+                auto rh = dynamicPtrCast<const Ipv6RoutingHeader>(extHdr);
+                if (rh) {
+                    EV_DETAIL << "Routing Header with type=" << rh->getRoutingType() << endl;
+                    if (rh->getSegmentsLeft() == 0) {
+                        EV_INFO << "Ignoring routing header with segmentsLeft=0" << endl;
+                        break;
+                    }
+                    auto it = routingHeaderHandlers.find(rh->getRoutingType());
+                    if (it != routingHeaderHandlers.end()) {
+                        if (!it->second->processExtensionHeader(packet, rh.get()))
+                            return false;
+                    }
+                    else {
+                        throw cRuntimeError("No handler registered for routing header type %d", (int)rh->getRoutingType());
+                    }
                 }
                 break;
             }
@@ -1071,28 +1145,32 @@ bool Ipv6::processExtensionHeaders(Packet *packet, const Ipv6Header *ipv6Header)
                 // handled by localDeliver() reassembly before this function is called
                 break;
             case IP_PROT_IPv6EXT_DEST: {
-                auto *destOptsHdr = check_and_cast<const Ipv6DestinationOptionsHeader *>(eh);
-                const TlvOptions& opts = destOptsHdr->getTlvOptions();
-                for (size_t j = 0; j < opts.getTlvOptionArraySize(); j++) {
-                    const TlvOptionBase *opt = opts.getTlvOption(j);
-                    int optType = opt->getType();
-                    if (optType == IPv6TLVOPTION_NOP1 || optType == IPv6TLVOPTION_NOPN)
-                        continue;
-                    auto it = destOptionHandlers.find(optType);
-                    if (it != destOptionHandlers.end()) {
-                        if (!it->second->processTlvOption(packet, eh, opt))
-                            return false;
-                    }
-                    else {
-                        throw cRuntimeError("No handler registered for Destination option type %d", optType);
+                auto destOptsHdr = dynamicPtrCast<const Ipv6DestinationOptionsHeader>(extHdr);
+                if (destOptsHdr) {
+                    const TlvOptions& opts = destOptsHdr->getTlvOptions();
+                    for (size_t j = 0; j < opts.getTlvOptionArraySize(); j++) {
+                        const TlvOptionBase *opt = opts.getTlvOption(j);
+                        int optType = opt->getType();
+                        if (optType == IPv6TLVOPTION_NOP1 || optType == IPv6TLVOPTION_NOPN)
+                            continue;
+                        auto it = destOptionHandlers.find(optType);
+                        if (it != destOptionHandlers.end()) {
+                            if (!it->second->processTlvOption(packet, destOptsHdr.get(), opt))
+                                return false;
+                        }
+                        else {
+                            throw cRuntimeError("No handler registered for Destination option type %d", optType);
+                        }
                     }
                 }
                 break;
             }
             default:
-                EV_INFO << "Ignoring unknown extension header type " << eh->getExtensionType() << endl;
+                EV_INFO << "Ignoring unknown extension header type " << nextHdr << endl;
                 break;
         }
+        nextHdr = extHdr->getNextHeaderProtocol();
+        offset += extHdr->getChunkLength();
     }
 
     return true;

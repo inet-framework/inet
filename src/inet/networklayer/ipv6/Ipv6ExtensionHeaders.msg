@@ -9,18 +9,29 @@
 import inet.common.INETDefs;
 import inet.common.Units;
 import inet.common.TlvOptions;
+import inet.common.packet.chunk.Chunk;
 import inet.networklayer.common.IpProtocolId;
-import inet.networklayer.ipv6.Ipv6Header;
 import inet.networklayer.contract.ipv6.Ipv6Address;
-
-cplusplus {{
-#include "inet/networklayer/ipv6/Ipv6Header.h"
-}}
 
 namespace inet;
 
 cplusplus {{
 const B IPv6_FRAGMENT_HEADER_LENGTH = B(8);
+}}
+
+//
+// This serves as the base class for all the Ipv6 extension headers.
+//
+class Ipv6ExtensionHeader extends FieldsChunk
+{
+    @packetData;
+    IpProtocolId extensionType = IP_PROT_NONE;
+    IpProtocolId nextHeaderProtocol = IP_PROT_NONE; // Next Header field (on the wire)
+}
+
+cplusplus(Ipv6ExtensionHeader) {{
+  public:
+    int getOrder() const;
 }}
 
 //
@@ -42,7 +53,8 @@ enum Ipv6TlvOptionTypes
 class Ipv6HopByHopOptionsHeader extends Ipv6ExtensionHeader
 {
     extensionType = IP_PROT_IPv6EXT_HOP;
-    // byteLength = utils::roundUp(2 + tlvOptions.getLength(), 8);
+    chunkLength = B(8);
+    // chunkLength = utils::roundUp(2 + tlvOptions.getLength(), 8);
     TlvOptions tlvOptions;
 }
 
@@ -54,8 +66,8 @@ class Ipv6HopByHopOptionsHeader extends Ipv6ExtensionHeader
 class Ipv6RoutingHeader extends Ipv6ExtensionHeader
 {
     extensionType = IP_PROT_IPv6EXT_ROUTING;
-    byteLength = B(8);
-    //byteLength = 8+16*getAddressArraySize() when routingType == 0
+    chunkLength = B(8);
+    //chunkLength = 8+16*getAddressArraySize() when routingType == 0
     uint8_t routingType;
     uint8_t segmentsLeft;
     Ipv6Address address[];
@@ -69,7 +81,7 @@ class Ipv6RoutingHeader extends Ipv6ExtensionHeader
 class Ipv6FragmentHeader extends Ipv6ExtensionHeader
 {
     extensionType = IP_PROT_IPv6EXT_FRAGMENT;
-    byteLength = IPv6_FRAGMENT_HEADER_LENGTH;
+    chunkLength = IPv6_FRAGMENT_HEADER_LENGTH;
     uint16_t fragmentOffset;    // @bit(13), divided by 8
     uint8_t reserved = 0;    // @bit(2)
     bool moreFragments; //Is this the last fragment?
@@ -84,7 +96,7 @@ class Ipv6FragmentHeader extends Ipv6ExtensionHeader
 class Ipv6DestinationOptionsHeader extends Ipv6ExtensionHeader
 {
     extensionType = IP_PROT_IPv6EXT_DEST;
-    byteLength = B(8);    // utils::roundUp(2 + tlvOptions.getLength(), 8);
+    chunkLength = B(8);    // utils::roundUp(2 + tlvOptions.getLength(), 8);
     TlvOptions tlvOptions;
 }
 
@@ -96,7 +108,7 @@ class Ipv6DestinationOptionsHeader extends Ipv6ExtensionHeader
 class Ipv6AuthenticationHeader extends Ipv6ExtensionHeader
 {
     extensionType = IP_PROT_IPv6EXT_AUTH;
-    byteLength = B(8); // FIXME verify
+    chunkLength = B(8); // FIXME verify
 }
 
 //
@@ -107,5 +119,5 @@ class Ipv6AuthenticationHeader extends Ipv6ExtensionHeader
 class Ipv6EncapsulatingSecurityPayloadHeader extends Ipv6ExtensionHeader
 {
     extensionType = IP_PROT_IPv6EXT_ESP;
-    byteLength = B(8); // FIXME verify
+    chunkLength = B(8); // FIXME verify
 }

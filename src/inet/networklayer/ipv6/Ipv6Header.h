@@ -15,8 +15,6 @@
 
 namespace inet {
 
-std::ostream& operator<<(std::ostream& out, const Ipv6ExtensionHeader&);
-
 } // namespace inet
 
 #endif

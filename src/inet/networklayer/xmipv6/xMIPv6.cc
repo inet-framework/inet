@@ -26,6 +26,7 @@
 #include "inet/networklayer/icmpv6/Ipv6NeighbourDiscovery.h"
 #include "inet/networklayer/ipv6/Ipv6.h"
 #include "inet/networklayer/ipv6/Ipv6ExtHeaderIndexTag_m.h"
+#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders.h"
 #include "inet/networklayer/ipv6/Ipv6Header_m.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
@@ -2064,11 +2065,23 @@ bool xMIPv6::processType2RH(Packet *packet, Ipv6RoutingHeader *rh)
         auto newIpv6Header = packet->removeAtFront<Ipv6Header>();
         newIpv6Header->setDestAddress(HoA);
         // decrement segmentsLeft as required by RFC 3775
-        for (int i = 0; i < (int)newIpv6Header->getExtensionHeaderArraySize(); i++) {
-            Ipv6RoutingHeader *routingHdr = dynamic_cast<Ipv6RoutingHeader *>(newIpv6Header->getExtensionHeaderForUpdate(i));
-            if (routingHdr && routingHdr->getRoutingType() == 2) {
-                routingHdr->setSegmentsLeft(routingHdr->getSegmentsLeft() - 1);
-                break;
+        // Walk extension header chunks to find the Type 2 Routing Header
+        {
+            b off = b(0);
+            IpProtocolId nextHdr = newIpv6Header->getProtocolId();
+            while (isIpv6ExtensionHeader(nextHdr)) {
+                if (nextHdr == IP_PROT_IPv6EXT_ROUTING) {
+                    auto routingHdr = packet->removeAt<Ipv6RoutingHeader>(off);
+                    if (routingHdr->getRoutingType() == 2) {
+                        routingHdr->setSegmentsLeft(routingHdr->getSegmentsLeft() - 1);
+                        packet->insertAt(routingHdr, off);
+                        break;
+                    }
+                    packet->insertAt(routingHdr, off);
+                }
+                auto extHdr = peekIpv6ExtensionHeaderAt(packet, off, nextHdr);
+                nextHdr = extHdr->getNextHeaderProtocol();
+                off += b(extHdr->getChunkLength());
             }
         }
         insertNetworkProtocolHeader(packet, Protocol::ipv6, newIpv6Header);
