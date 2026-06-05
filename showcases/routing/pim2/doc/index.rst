@@ -296,6 +296,25 @@ directly (blue) without encapsulation:
 
 .. video:: media/PimSm_register_native.mp4
 
+The PIM Register message encapsulates the original multicast packet inside a
+unicast wrapper:
+
+.. code-block:: text
+
+   PIM Register Header (8 B)
+     Version: 2, Type: Register
+   Encapsulated IPv4 Header (20 B)
+     Src: 10.0.0.1, Dst: 239.1.1.1 (multicast group)
+     Protocol: UDP, TTL: 31, Total length: 528 B
+   Encapsulated UDP Header (8 B)
+     Src port: 1025, Dst port: 5000, Length: 508 B
+   Application payload (500 B)
+
+The outer IP packet (not shown above) is a unicast delivery from R0
+(10.99.0.2) to the RP R1 (10.99.0.1). Once the RP sends a Register-Stop and
+the native multicast path is established, the source's data flows as plain
+multicast without this extra encapsulation.
+
 IPTV Configuration
 ~~~~~~~~~~~~~~~~~~
 
