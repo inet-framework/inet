@@ -35,8 +35,8 @@
 /showcases/mobility/combining/,      -f omnetpp.ini -c Superpositioning2 -r 0,      100s,         b664-c41c/tplx;0000-0000/~tNl;0000-0000/~tND;3c27-0c97/tyf, PASS,
 /showcases/mobility/combining/,      -f omnetpp.ini -c AntennaOrientation -r 0,     100s,         8b9e-18a2/tplx;0000-0000/~tNl;0000-0000/~tND;26e9-25fa/tyf, PASS,
 /showcases/mobility/combining/,      -f omnetpp.ini -c Attached3D -r 0,             100s,         b664-c41c/tplx;0000-0000/~tNl;0000-0000/~tND;6cf1-de63/tyf, PASS,
-/showcases/mobility/spatial/,        -f omnetpp.ini -c Spiral -r 0,                 100s,         d129-5465/tplx;0000-0000/~tNl;0000-0000/~tND;d7a7-dd7c/tyf, PASS,
-/showcases/mobility/spatial/,        -f omnetpp.ini -c Drone -r 0,                  100s,         9475-d04c/tplx;0000-0000/~tNl;0000-0000/~tND;1ec0-fec3/tyf, PASS,
+/showcases/mobility/spatial/,        -f omnetpp.ini -c Spiral -r 0,                 100s,         d129-5465/tplx;0000-0000/~tNl;0000-0000/~tND;cc0b-457c/tyf, PASS,
+/showcases/mobility/spatial/,        -f omnetpp.ini -c Drone -r 0,                  100s,         9475-d04c/tplx;0000-0000/~tNl;0000-0000/~tND;7bb2-646d/tyf, PASS,
 
 # /showcases/routing/manet/,           -f omnetpp.ini -c MobileNodesBase -r 0,        100s,         0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND, PASS,   # MobileNodesBase extended
 /showcases/routing/manet/,           -f omnetpp.ini -c Aodv -r 0,                   100s,         d4f1-1c35/tplx;c268-fae7/~tNl;0d5b-c7a9/~tND;cfeb-1d46/tyf, PASS,    wireless Ipv4
@@ -143,7 +143,7 @@
 /showcases/visualizer/osg/networknode/,  -f omnetpp.ini -c AddingMovement -r 0,         1s,         3a4c-d088/tplx;0000-0000/~tNl;0000-0000/~tND;c907-1d8c/tyf, PASS,
 /showcases/visualizer/osg/networknode/,  -f omnetpp.ini -c BoxmanRotated -r 0,          1s,         3a4c-d088/tplx;0000-0000/~tNl;0000-0000/~tND;c907-1d8c/tyf, PASS,
 
-/showcases/visualizer/canvas/networkpathactivity/, -f omnetpp.ini -c EnablingVisualization -r 0,                       500s,            456d-1982/tplx;bd58-e496/~tNl;1b76-9a17/~tND;4b2b-9088/tyf, PASS, EthernetMac Ipv4
+/showcases/visualizer/canvas/networkpathactivity/, -f omnetpp.ini -c EnablingVisualization -r 0,                       500s,            456d-1982/tplx;bd58-e496/~tNl;1b76-9a17/~tND;81b8-8019/tyf, PASS, EthernetMac Ipv4
 /showcases/visualizer/canvas/networkpathactivity/, -f omnetpp.ini -c StaticNetworkPaths -r 0,                          500s,            5995-953f/tplx;cfc6-5083/~tNl;aa2b-919c/~tND;a8ff-b27d/tyf, PASS, EthernetMac Ipv4
 /showcases/visualizer/canvas/networkpathactivity/, -f omnetpp.ini -c Mobile -r 0,                                      500s,            cbb7-c036/tplx;fdcd-ce11/~tNl;2338-8bc2/~tND, PASS, wireless Ipv4
 /showcases/visualizer/canvas/networkpathactivity/, -f omnetpp.ini -c ChangingPaths -r 0,                               250s,            cdd5-ba18/tplx;5fcc-8ab3/~tNl;b19d-7a62/~tND;eade-62dc/tyf, PASS, EthernetMac Ipv4

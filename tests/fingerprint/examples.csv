@@ -3,7 +3,7 @@
 /examples/adhoc/hostautoconf/,       -f omnetpp.ini -c General -r 0,                100s,            7b7d-7775/tplx;e181-fce3/~tNl;5515-8a29/~tND;6eb7-92d0/tyf, PASS, wireless adhoc Ipv4
 /examples/adhoc/idealwireless/,      -f omnetpp.ini -c Ping1 -r 0,                  100s,            b364-e54a/tplx;026f-a7b7/~tNl;25a3-3820/~tND;4f73-b60f/tyf, PASS, wireless adhoc Ipv4
 # /examples/adhoc/idealwireless/,      -f omnetpp.ini -c Ping2 -r 0,                   100s,           0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND, ERROR, wireless adhoc # interactive config, needed a *.numHosts parameter
-/examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping1 -r 0,                  1000s,           8668-d4e7/tplx;e2b1-205b/~tNl;7da0-5dcb/~tND;e1f1-f93c/tyf, PASS, wireless adhoc Ipv4
+/examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping1 -r 0,                  1000s,           8668-d4e7/tplx;e2b1-205b/~tNl;7da0-5dcb/~tND;7e5f-bd19/tyf, PASS, wireless adhoc Ipv4
 # /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping2 -r 0,                  100s,            0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND, ERROR, wireless adhoc # [Config Ping2]    # interactive config, needed a *.numHosts parameter
 /examples/adhoc/qos/,                -f omnetpp.ini -c MacNonQos -r 0,              10s,             5749-0281/tplx;f38a-cb93/~tNl;c60e-ef2c/~tND;0eb8-3e3b/tyf, PASS, wireless adhoc Ipv4
 /examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 0,                 10s,             8d50-a4b1/tplx;d392-4369/~tNl;9028-7098/~tND;2c1e-66e5/tyf, PASS, wireless adhoc Ipv4
@@ -637,8 +637,8 @@
 /examples/wireless/nic/,             -f omnetpp.ini -c Ieee80211MacWithIeee80211ScalarRadio -r 0, 100s,     1e64-2bbd/tplx;5f04-c720/~tNl;db69-6442/~tND;2131-67b2/tyf, PASS, wireless Ipv4
 
 /examples/wireless/obstacle/,        -f omnetpp.ini -c Outdoor -r 0,                100s,            d208-e7af/tplx;2176-a413/~tNl;5962-3c23/~tND, PASS, wireless Ipv4
-/examples/wireless/obstacle/,        -f omnetpp.ini -c Indoor -r 0,                 100s,            2266-617f/tplx;10ba-3618/~tNl;e338-1510/~tND;aa1f-6922/tyf, PASS, wireless Ipv4
-/examples/wireless/obstacle/,        -f omnetpp.ini -c Orbit -r 0,                  100s,            9d0b-2d8e/tplx;19c6-aa59/~tNl;24eb-6d2f/~tND;84d5-634b/tyf, PASS, wireless Ipv4
+/examples/wireless/obstacle/,        -f omnetpp.ini -c Indoor -r 0,                 100s,            2266-617f/tplx;10ba-3618/~tNl;e338-1510/~tND;9132-a915/tyf, PASS, wireless Ipv4
+/examples/wireless/obstacle/,        -f omnetpp.ini -c Orbit -r 0,                  100s,            9d0b-2d8e/tplx;19c6-aa59/~tNl;24eb-6d2f/~tND;bfde-f3e7/tyf, PASS, wireless Ipv4
 
 /examples/wireless/power/,           -f omnetpp.ini -c General -r 0,                100s,            6fae-d558/tplx;b8ea-b2fc/~tNl;aa2c-8354/~tND, PASS, wireless Ipv4
 
