@@ -243,6 +243,19 @@ This configuration demonstrates all three key PIM-DM behaviors:
    new local member (via IGMP) and sends a Graft message to R1. R1 resumes
    forwarding to R3, and ``receiver2`` begins receiving the stream immediately.
 
+The following video shows the flood-and-prune cycle. When the source starts
+sending at 10s, traffic is flooded to all routers (blue arrows). Since
+``receiver2`` has not yet joined, R3 sends a Prune message (red arrow) upstream
+to R1, which stops forwarding towards R3:
+
+.. video:: media/PimDm_flood_prune.mp4
+
+At 50s, ``receiver2`` joins the multicast group. R3 sends a Graft message to R1,
+which resumes forwarding. The video below shows R3 grafting back onto the tree
+and traffic resuming:
+
+.. video:: media/PimDm_graft.mp4
+
 PIM-SM Configuration
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -275,6 +288,14 @@ events is:
 4. At 30s, ``receiver2`` joins. Its designated router R3 sends a (*,G) Join to
    R1, extending the shared tree to include the R1→R3 branch.
 
+The following video shows the Register and native path establishment. When the
+source starts at 10s, R0 encapsulates the multicast data in a PIM Register
+message (red) and unicasts it to the RP (R1). R1 then initiates a shortest-path
+join towards the source, and once the native path is established, traffic flows
+directly (blue) without encapsulation:
+
+.. video:: media/PimSm_register_native.mp4
+
 IPTV Configuration
 ~~~~~~~~~~~~~~~~~~
 
@@ -297,42 +318,8 @@ tree is established along the shortest path from the server's corner (R00)
 through the RP (R10) to the client's corner (R22). Once the tree is built,
 the client begins receiving the stream.
 
-Results
--------
-
-PIM-DM
-~~~~~~
-
-The following video shows the flood-and-prune cycle. When the source starts
-sending at 10s, traffic is flooded to all routers (blue arrows). Since
-``receiver2`` has not yet joined, R3 sends a Prune message (red arrow) upstream
-to R1, which stops forwarding towards R3:
-
-.. video:: media/PimDm_flood_prune.mp4
-
-At 50s, ``receiver2`` joins the multicast group. R3 sends a Graft message to R1,
-which resumes forwarding. The video below shows R3 grafting back onto the tree
-and traffic resuming:
-
-.. video:: media/PimDm_graft.mp4
-
-PIM-SM
-~~~~~~
-
-The following video shows the Register and native path establishment in PIM
-Sparse Mode. When the source starts at 10s, R0 encapsulates the multicast data
-in a PIM Register message (red) and unicasts it to the RP (R1). R1 then
-initiates a shortest-path join towards the source, and once the native path is
-established, traffic flows directly (blue) without encapsulation:
-
-.. video:: media/PimSm_register_native.mp4
-
-IPTV
-~~~~
-
-In the IPTV scenario, the tree is built across a 3×3 grid of routers. The video
-shows the server starting to send at 30s — the multicast traffic (blue arrows)
-lights up the path from the server's corner through the network to the client:
+The video shows the tree building — multicast traffic (blue arrows) lights up
+the path from the server's corner through the network to the client:
 
 .. video:: media/Iptv_tree_building.mp4
 
