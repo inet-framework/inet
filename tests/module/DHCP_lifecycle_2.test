@@ -14,6 +14,10 @@ ned-path = .;../../../../src;../../lib
 cmdenv-express-mode = false
 sim-time-limit = 300s
 
+**.app[*].cmdenv-log-level = detail
+**.status.cmdenv-log-level = detail
+**.cmdenv-log-level = off
+
 #omnetpp 5.0 - 5.1 compatibility:
 eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
 output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
@@ -74,27 +78,27 @@ network LifecycleTest
 
 %contains-regex: stdout
 .*
-LifecycleTest.server shutting down
+LifecycleTest\.server shutting down
+.*
+Sending DHCPDISCOVER\.
+.*
+(DETAIL: )?No DHCP offer received within timeout\. Restarting\.
 .*
 Sending DHCPDISCOVER.
 .*
-(DETAIL: )?No DHCP offer received within timeout. Restarting.
+(DETAIL: )?No DHCP offer received within timeout\. Restarting\.
 .*
 Sending DHCPDISCOVER.
 .*
-(DETAIL: )?No DHCP offer received within timeout. Restarting.
+(DETAIL: )?No DHCP offer received within timeout\. Restarting\.
 .*
-Sending DHCPDISCOVER.
+LifecycleTest\.server started
 .*
-(DETAIL: )?No DHCP offer received within timeout. Restarting.
+Sending DHCPDISCOVER\.
 .*
-LifecycleTest.server started
+DHCPDISCOVER arrived\. Handling it\.
 .*
-Sending DHCPDISCOVER.
-.*
-DHCPDISCOVER arrived. Handling it.
-.*
-The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available. Assigning it to client.
+The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to client\.
 .*
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true

@@ -56,6 +56,9 @@ network = Dhcptest
 sim-time-limit = 10500s
 cmdenv-express-mode = false
 
+**.app[*].cmdenv-log-level = detail
+**.cmdenv-log-level = off
+
 **.dhcpServer.app[0].typename = "DhcpServer"
 **.dhcpServer.app[0].numReservedAddresses = 100    # ip to start to lease
 **.dhcpServer.app[0].maxNumClients = 100     # number of ip to lease
