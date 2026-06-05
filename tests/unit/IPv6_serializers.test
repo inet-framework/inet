@@ -1,0 +1,295 @@
+%description:
+Round-trip serialization tests for IPv6/MIPv6 headers:
+Ipv6Redirect, MobilityHeader subtypes, and Destination Options with HomeAddressOption.
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
+#include "inet/networklayer/icmpv6/Ipv6NdMessage_m.h"
+#include "inet/networklayer/ipv6/Ipv6Header.h"
+#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders_m.h"
+#include "inet/networklayer/xmipv6/MobilityHeader_m.h"
+
+using namespace inet;
+
+%global:
+
+// Serialize a chunk to bytes, then deserialize it back
+template<typename T>
+Ptr<const T> roundTrip(const Ptr<const T>& original)
+{
+    // Serialize: put chunk into a packet, extract raw bytes
+    Packet pkt("test");
+    pkt.insertAtFront(original);
+    auto bytes = pkt.peekAllAsBytes();
+
+    // Deserialize: create packet from raw bytes, pop the header
+    Packet pkt2("test2");
+    pkt2.insertAtFront(bytes);
+    return pkt2.popAtFront<T>(pkt2.getDataLength());
+}
+
+%activity:
+
+// === 1. Ipv6Redirect ===
+{
+    EV << "=== Ipv6Redirect ===" << endl;
+    auto redirect = makeShared<Ipv6Redirect>();
+    redirect->setTargetAddress(Ipv6Address("fe80::1"));
+    redirect->setDestinationAddress(Ipv6Address("2001:db8::1"));
+    auto *tlla = new Ipv6NdTargetLinkLayerAddress();
+    tlla->setLinkLayerAddress(MacAddress("0A:0B:0C:0D:0E:0F"));
+    redirect->getOptionsForUpdate().appendOption(tlla);
+    redirect->setChunkLength(B(40 + 8)); // 40 base + 8 for TLLA option
+
+    auto r = roundTrip(staticPtrCast<const Icmpv6Header>(redirect));
+    auto rd = dynamicPtrCast<const Ipv6Redirect>(r);
+    ASSERT(rd != nullptr);
+    ASSERT(rd->getTargetAddress() == Ipv6Address("fe80::1"));
+    ASSERT(rd->getDestinationAddress() == Ipv6Address("2001:db8::1"));
+    ASSERT(rd->getOptions().getOptionArraySize() == 1);
+    auto *opt = dynamic_cast<const Ipv6NdTargetLinkLayerAddress *>(rd->getOptions().getOption(0));
+    ASSERT(opt != nullptr);
+    ASSERT(opt->getLinkLayerAddress() == MacAddress("0A:0B:0C:0D:0E:0F"));
+    EV << "  targetAddress: " << rd->getTargetAddress() << endl;
+    EV << "  destinationAddress: " << rd->getDestinationAddress() << endl;
+    EV << "  TLLA: " << opt->getLinkLayerAddress() << endl;
+    EV << "  PASS" << endl;
+}
+
+// === 2. BindingUpdate ===
+{
+    EV << "=== BindingUpdate ===" << endl;
+    auto bu = makeShared<BindingUpdate>();
+    bu->setMobilityHeaderType(BINDING_UPDATE);
+    bu->setSequence(42);
+    bu->setLifetime(300);
+    bu->setAckFlag(true);
+    bu->setHomeRegistrationFlag(true);
+    bu->setLinkLocalAddressCompatibilityFlag(false);
+    bu->setKeyManagementFlag(true);
+    bu->setChunkLength(B(48)); // SIZE_MOBILITY_HEADER(6) + SIZE_BU(6) + SIZE_HOA_OPTION(20) + SIZE_BIND_AUTH_DATA(14) + PadN(2)
+
+    auto r = roundTrip(staticPtrCast<const MobilityHeader>(bu));
+    auto bu2 = dynamicPtrCast<const BindingUpdate>(r);
+    ASSERT(bu2 != nullptr);
+    ASSERT(bu2->getSequence() == 42);
+    ASSERT(bu2->getLifetime() == 300);
+    ASSERT(bu2->getAckFlag() == true);
+    ASSERT(bu2->getHomeRegistrationFlag() == true);
+    ASSERT(bu2->getLinkLocalAddressCompatibilityFlag() == false);
+    ASSERT(bu2->getKeyManagementFlag() == true);
+    EV << "  sequence: " << bu2->getSequence() << endl;
+    EV << "  lifetime: " << bu2->getLifetime() << endl;
+    EV << "  flags: A=" << bu2->getAckFlag() << " H=" << bu2->getHomeRegistrationFlag()
+       << " L=" << bu2->getLinkLocalAddressCompatibilityFlag() << " K=" << bu2->getKeyManagementFlag() << endl;
+    EV << "  PASS" << endl;
+}
+
+// === 3. BindingAcknowledgement ===
+{
+    EV << "=== BindingAcknowledgement ===" << endl;
+    auto ba = makeShared<BindingAcknowledgement>();
+    ba->setMobilityHeaderType(BINDING_ACKNOWLEDGEMENT);
+    ba->setStatus(BINDING_UPDATE_ACCEPTED);
+    ba->setSequenceNumber(42);
+    ba->setLifetime(300);
+    ba->setKeyManagementFlag(true);
+    ba->setChunkLength(B(16)); // SIZE_MOBILITY_HEADER(6) + SIZE_BACK(6) + padding(4)
+
+    auto r = roundTrip(staticPtrCast<const MobilityHeader>(ba));
+    auto ba2 = dynamicPtrCast<const BindingAcknowledgement>(r);
+    ASSERT(ba2 != nullptr);
+    ASSERT(ba2->getStatus() == BINDING_UPDATE_ACCEPTED);
+    ASSERT(ba2->getSequenceNumber() == 42);
+    ASSERT(ba2->getLifetime() == 300);
+    ASSERT(ba2->getKeyManagementFlag() == true);
+    EV << "  status: " << ba2->getStatus() << endl;
+    EV << "  sequenceNumber: " << ba2->getSequenceNumber() << endl;
+    EV << "  lifetime: " << ba2->getLifetime() << endl;
+    EV << "  K-flag: " << ba2->getKeyManagementFlag() << endl;
+    EV << "  PASS" << endl;
+}
+
+// === 4. HomeTestInit ===
+{
+    EV << "=== HomeTestInit ===" << endl;
+    auto hoti = makeShared<HomeTestInit>();
+    hoti->setMobilityHeaderType(HOME_TEST_INIT);
+    hoti->setHomeInitCookie(0xDEADBEEF);
+    hoti->setChunkLength(B(16)); // SIZE_MOBILITY_HEADER(6) + SIZE_HOTI(10)
+
+    auto r = roundTrip(staticPtrCast<const MobilityHeader>(hoti));
+    auto hoti2 = dynamicPtrCast<const HomeTestInit>(r);
+    ASSERT(hoti2 != nullptr);
+    ASSERT(hoti2->getHomeInitCookie() == 0xDEADBEEF);
+    EV << "  homeInitCookie: 0x" << std::hex << hoti2->getHomeInitCookie() << std::dec << endl;
+    EV << "  PASS" << endl;
+}
+
+// === 5. HomeTest ===
+{
+    EV << "=== HomeTest ===" << endl;
+    auto hot = makeShared<HomeTest>();
+    hot->setMobilityHeaderType(HOME_TEST);
+    hot->setHomeInitCookie(0xCAFEBABE);
+    hot->setHomeKeyGenToken(0x12345678);
+    hot->setChunkLength(B(24)); // SIZE_MOBILITY_HEADER(6) + SIZE_HOT(18)
+
+    auto r = roundTrip(staticPtrCast<const MobilityHeader>(hot));
+    auto hot2 = dynamicPtrCast<const HomeTest>(r);
+    ASSERT(hot2 != nullptr);
+    ASSERT(hot2->getHomeInitCookie() == 0xCAFEBABE);
+    ASSERT(hot2->getHomeKeyGenToken() == 0x12345678);
+    EV << "  homeInitCookie: 0x" << std::hex << hot2->getHomeInitCookie() << std::dec << endl;
+    EV << "  homeKeyGenToken: 0x" << std::hex << hot2->getHomeKeyGenToken() << std::dec << endl;
+    EV << "  PASS" << endl;
+}
+
+// === 6. CareOfTestInit ===
+{
+    EV << "=== CareOfTestInit ===" << endl;
+    auto coti = makeShared<CareOfTestInit>();
+    coti->setMobilityHeaderType(CARE_OF_TEST_INIT);
+    coti->setCareOfInitCookie(0xFACEFEED);
+    coti->setChunkLength(B(16)); // SIZE_MOBILITY_HEADER(6) + SIZE_COTI(10)
+
+    auto r = roundTrip(staticPtrCast<const MobilityHeader>(coti));
+    auto coti2 = dynamicPtrCast<const CareOfTestInit>(r);
+    ASSERT(coti2 != nullptr);
+    ASSERT(coti2->getCareOfInitCookie() == 0xFACEFEED);
+    EV << "  careOfInitCookie: 0x" << std::hex << coti2->getCareOfInitCookie() << std::dec << endl;
+    EV << "  PASS" << endl;
+}
+
+// === 7. CareOfTest ===
+{
+    EV << "=== CareOfTest ===" << endl;
+    auto cot = makeShared<CareOfTest>();
+    cot->setMobilityHeaderType(CARE_OF_TEST);
+    cot->setCareOfInitCookie(0xAAAABBBB);
+    cot->setCareOfKeyGenToken(0xCCCCDDDD);
+    cot->setChunkLength(B(24)); // SIZE_MOBILITY_HEADER(6) + SIZE_COT(18)
+
+    auto r = roundTrip(staticPtrCast<const MobilityHeader>(cot));
+    auto cot2 = dynamicPtrCast<const CareOfTest>(r);
+    ASSERT(cot2 != nullptr);
+    ASSERT(cot2->getCareOfInitCookie() == 0xAAAABBBB);
+    ASSERT(cot2->getCareOfKeyGenToken() == 0xCCCCDDDD);
+    EV << "  careOfInitCookie: 0x" << std::hex << cot2->getCareOfInitCookie() << std::dec << endl;
+    EV << "  careOfKeyGenToken: 0x" << std::hex << cot2->getCareOfKeyGenToken() << std::dec << endl;
+    EV << "  PASS" << endl;
+}
+
+// === 8. BindingError ===
+{
+    EV << "=== BindingError ===" << endl;
+    auto be = makeShared<BindingError>();
+    be->setMobilityHeaderType(BINDING_ERROR);
+    be->setStatus(UNKNOWN_MH_TYPE);
+    be->setHomeAddress(Ipv6Address("2001:db8::99"));
+    be->setChunkLength(B(24)); // SIZE_MOBILITY_HEADER(6) + SIZE_BE(18)
+
+    auto r = roundTrip(staticPtrCast<const MobilityHeader>(be));
+    auto be2 = dynamicPtrCast<const BindingError>(r);
+    ASSERT(be2 != nullptr);
+    ASSERT(be2->getStatus() == UNKNOWN_MH_TYPE);
+    ASSERT(be2->getHomeAddress() == Ipv6Address("2001:db8::99"));
+    EV << "  status: " << be2->getStatus() << endl;
+    EV << "  homeAddress: " << be2->getHomeAddress() << endl;
+    EV << "  PASS" << endl;
+}
+
+// === 9. BindingRefreshRequest ===
+{
+    EV << "=== BindingRefreshRequest ===" << endl;
+    auto brr = makeShared<BindingRefreshRequest>();
+    brr->setMobilityHeaderType(BINDING_REFRESH_REQUEST);
+    brr->setChunkLength(B(8)); // SIZE_MOBILITY_HEADER(6) + SIZE_BRR(2)
+
+    auto r = roundTrip(staticPtrCast<const MobilityHeader>(brr));
+    auto brr2 = dynamicPtrCast<const BindingRefreshRequest>(r);
+    ASSERT(brr2 != nullptr);
+    ASSERT(brr2->getMobilityHeaderType() == BINDING_REFRESH_REQUEST);
+    EV << "  type: " << brr2->getMobilityHeaderType() << endl;
+    EV << "  PASS" << endl;
+}
+
+// === 10. Ipv6DestinationOptionsHeader with HomeAddressOption ===
+{
+    EV << "=== DestOpts + HomeAddressOption ===" << endl;
+    auto ipv6 = makeShared<Ipv6Header>();
+    ipv6->setSrcAddress(Ipv6Address("2001:db8::1"));
+    ipv6->setDestAddress(Ipv6Address("2001:db8::2"));
+    ipv6->setHopLimit(64);
+    ipv6->setProtocolId(IP_PROT_UDP);
+
+    auto *destOpts = new Ipv6DestinationOptionsHeader();
+    auto *hao = new HomeAddressOption();
+    hao->setHomeAddress(Ipv6Address("2001:db8::abcd"));
+    destOpts->getTlvOptionsForUpdate().appendTlvOption(hao);
+    destOpts->setByteLength(B(24)); // 2 (next-hdr+len) + 18 (type+len+16-byte addr) + 4 (padding)
+    ipv6->appendExtensionHeader(destOpts);
+    ipv6->setChunkLength(ipv6->calculateHeaderByteLength());
+
+    auto r = roundTrip(staticPtrCast<const Ipv6Header>(ipv6));
+    ASSERT(r->getExtensionHeaderArraySize() == 1);
+    auto *dh = dynamic_cast<const Ipv6DestinationOptionsHeader *>(r->getExtensionHeader(0));
+    ASSERT(dh != nullptr);
+    ASSERT(dh->getTlvOptions().getTlvOptionArraySize() >= 1);
+    const HomeAddressOption *hao2 = nullptr;
+    for (size_t i = 0; i < dh->getTlvOptions().getTlvOptionArraySize(); i++) {
+        hao2 = dynamic_cast<const HomeAddressOption *>(dh->getTlvOptions().getTlvOption(i));
+        if (hao2) break;
+    }
+    ASSERT(hao2 != nullptr);
+    ASSERT(hao2->getHomeAddress() == Ipv6Address("2001:db8::abcd"));
+    EV << "  homeAddress: " << hao2->getHomeAddress() << endl;
+    EV << "  PASS" << endl;
+}
+
+EV << "All serializer round-trip tests passed." << endl;
+
+%contains: stdout
+=== Ipv6Redirect ===
+  targetAddress: fe80::1
+  destinationAddress: 2001:db8::1
+  TLLA: 0A-0B-0C-0D-0E-0F
+  PASS
+=== BindingUpdate ===
+  sequence: 42
+  lifetime: 300
+  flags: A=1 H=1 L=0 K=1
+  PASS
+=== BindingAcknowledgement ===
+  status: 0
+  sequenceNumber: 42
+  lifetime: 300
+  K-flag: 1
+  PASS
+=== HomeTestInit ===
+  homeInitCookie: 0xdeadbeef
+  PASS
+=== HomeTest ===
+  homeInitCookie: 0xcafebabe
+  homeKeyGenToken: 0x12345678
+  PASS
+=== CareOfTestInit ===
+  careOfInitCookie: 0xfacefeed
+  PASS
+=== CareOfTest ===
+  careOfInitCookie: 0xaaaabbbb
+  careOfKeyGenToken: 0xccccdddd
+  PASS
+=== BindingError ===
+  status: 2
+  homeAddress: 2001:db8::99
+  PASS
+=== BindingRefreshRequest ===
+  type: 0
+  PASS
+=== DestOpts + HomeAddressOption ===
+  homeAddress: 2001:db8::abcd
+  PASS
+All serializer round-trip tests passed.

@@ -27,6 +27,7 @@ Register_Serializer(Ipv6NeighbourSolicitation, Icmpv6HeaderSerializer);
 Register_Serializer(Ipv6NeighbourAdvertisement, Icmpv6HeaderSerializer);
 Register_Serializer(Ipv6RouterSolicitation, Icmpv6HeaderSerializer);
 Register_Serializer(Ipv6RouterAdvertisement, Icmpv6HeaderSerializer);
+Register_Serializer(Ipv6Redirect, Icmpv6HeaderSerializer);
 
 void serializeIpv6NdOptions(MemoryOutputStream& stream, const Ipv6NdOptions& options)
 {
@@ -287,6 +288,18 @@ void Icmpv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
             break;
         }
 
+        case ICMPv6_REDIRECT: {
+            auto frame = check_and_cast<const Ipv6Redirect *>(pkt.get());
+            stream.writeByte(pkt->getType());
+            stream.writeByte(frame->getCode());
+            stream.writeUint16Be(frame->getChksum());
+            stream.writeUint32Be(0); // reserved
+            stream.writeIpv6Address(frame->getTargetAddress());
+            stream.writeIpv6Address(frame->getDestinationAddress());
+            serializeIpv6NdOptions(stream, frame->getOptions());
+            break;
+        }
+
         default:
             throw cRuntimeError("Cannot serialize ICMPv6 packet: type %d  not supported.", pkt->getType());
     }
@@ -389,6 +402,18 @@ const Ptr<Chunk> Icmpv6HeaderSerializer::deserialize(MemoryInputStream& stream) 
             routerAd->setReachableTime(stream.readUint32Be());
             routerAd->setRetransTimer(stream.readUint32Be());
             deserializeIpv6NdOptions(*routerAd, routerAd->getOptionsForUpdate(), stream);
+            break;
+        }
+
+        case ICMPv6_REDIRECT: {
+            auto redirect = makeShared<Ipv6Redirect>();
+            icmpv6Header = redirect;
+            redirect->setType(type);
+            redirect->setCode(subcode);
+            stream.readUint32Be(); // reserved
+            redirect->setTargetAddress(stream.readIpv6Address());
+            redirect->setDestinationAddress(stream.readIpv6Address());
+            deserializeIpv6NdOptions(*redirect, redirect->getOptionsForUpdate(), stream);
             break;
         }
 
