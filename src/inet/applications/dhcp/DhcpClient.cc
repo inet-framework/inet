@@ -214,7 +214,7 @@ void DhcpClient::handleMessageWhenUp(cMessage *msg)
 
 void DhcpClient::socketDataArrived(UdpSocket *socket, Packet *packet)
 {
-    // process incoming packet
+    numReceived++;
     handleDhcpMessage(packet);
     delete packet;
 }
@@ -975,6 +975,7 @@ void DhcpClient::sendToUdp(Packet *msg, int srcPort, const L3Address& destAddr, 
     EV_INFO << "Sending packet " << msg << endl;
     msg->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
     socket.sendTo(msg, destAddr, destPort);
+    numSent++;
 }
 
 void DhcpClient::openSocket()
