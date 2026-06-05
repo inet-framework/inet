@@ -300,26 +300,41 @@ the client begins receiving the stream.
 Results
 -------
 
-After running each configuration, the simulation produces result files that can
-be analyzed in the OMNeT++ IDE. Key observations:
+PIM-DM
+~~~~~~
 
-- **PIM-DM**: ``receiver1`` receives all 80 packets sent between 10–90s.
-  ``receiver2`` joins at 50s and receives approximately 40 packets (from 50s
-  onward). Between 10–50s, the R3 branch is in the pruned state — no multicast
-  traffic is forwarded towards ``receiver2``. The Graft message from R3 at 50s
-  restores the flow.
+The following video shows the flood-and-prune cycle. When the source starts
+sending at 10s, traffic is flooded to all routers (blue arrows). Since
+``receiver2`` has not yet joined, R3 sends a Prune message (red arrow) upstream
+to R1, which stops forwarding towards R3:
 
-- **PIM-SM**: ``receiver1`` gets traffic from 10s onward (it joined at 5s,
-  source starts at 10s) and receives all 80 packets. ``receiver2`` starts
-  receiving at 30s when it joins the group, receiving 60 packets. PIM Register
-  messages from R0 to R1 can be observed in the event log at 10s, followed by a
-  Register-Stop once the (S,G) state is established.
+.. video:: media/PimDm_flood_prune.mp4
 
-- **IPTV**: The IPTV server sends 750 packets total (25 packets/s for 30s). The
-  client joins at 30s — 5s after the source starts at 25s — and receives 625
-  packets. The 125 missing packets correspond exactly to the 5s window between
-  the source starting and the client's group membership being established (the
-  client simply had not joined yet during that interval).
+At 50s, ``receiver2`` joins the multicast group. R3 sends a Graft message to R1,
+which resumes forwarding. The video below shows R3 grafting back onto the tree
+and traffic resuming:
+
+.. video:: media/PimDm_graft.mp4
+
+PIM-SM
+~~~~~~
+
+The following video shows the Register and native path establishment in PIM
+Sparse Mode. When the source starts at 10s, R0 encapsulates the multicast data
+in a PIM Register message (red) and unicasts it to the RP (R1). R1 then
+initiates a shortest-path join towards the source, and once the native path is
+established, traffic flows directly (blue) without encapsulation:
+
+.. video:: media/PimSm_register_native.mp4
+
+IPTV
+~~~~
+
+In the IPTV scenario, the tree is built across a 3×3 grid of routers. The video
+shows the server starting to send at 30s — the multicast traffic (blue arrows)
+lights up the path from the server's corner through the network to the client:
+
+.. video:: media/Iptv_tree_building.mp4
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`PimShowcase.ned <../PimShowcase.ned>`
 
