@@ -219,33 +219,94 @@ Ptr<const T> roundTrip(const Ptr<const T>& original)
 // === 10. Ipv6DestinationOptionsHeader with HomeAddressOption ===
 {
     EV << "=== DestOpts + HomeAddressOption ===" << endl;
-    auto ipv6 = makeShared<Ipv6Header>();
-    ipv6->setSrcAddress(Ipv6Address("2001:db8::1"));
-    ipv6->setDestAddress(Ipv6Address("2001:db8::2"));
-    ipv6->setHopLimit(64);
-    ipv6->setProtocolId(IP_PROT_UDP);
-
-    auto *destOpts = new Ipv6DestinationOptionsHeader();
+    auto destOpts = makeShared<Ipv6DestinationOptionsHeader>();
+    destOpts->setNextHeaderProtocol(IP_PROT_UDP);
     auto *hao = new HomeAddressOption();
     hao->setHomeAddress(Ipv6Address("2001:db8::abcd"));
     destOpts->getTlvOptionsForUpdate().appendTlvOption(hao);
-    destOpts->setByteLength(B(24)); // 2 (next-hdr+len) + 18 (type+len+16-byte addr) + 4 (padding)
-    ipv6->appendExtensionHeader(destOpts);
-    ipv6->setChunkLength(ipv6->calculateHeaderByteLength());
+    destOpts->setChunkLength(B(24)); // 2 (next-hdr+len) + 18 (type+len+16-byte addr) + 4 (padding)
 
-    auto r = roundTrip(staticPtrCast<const Ipv6Header>(ipv6));
-    ASSERT(r->getExtensionHeaderArraySize() == 1);
-    auto *dh = dynamic_cast<const Ipv6DestinationOptionsHeader *>(r->getExtensionHeader(0));
-    ASSERT(dh != nullptr);
-    ASSERT(dh->getTlvOptions().getTlvOptionArraySize() >= 1);
+    auto r = roundTrip(staticPtrCast<const Ipv6DestinationOptionsHeader>(destOpts));
+    ASSERT(r->getNextHeaderProtocol() == IP_PROT_UDP);
+    ASSERT(r->getTlvOptions().getTlvOptionArraySize() >= 1);
     const HomeAddressOption *hao2 = nullptr;
-    for (size_t i = 0; i < dh->getTlvOptions().getTlvOptionArraySize(); i++) {
-        hao2 = dynamic_cast<const HomeAddressOption *>(dh->getTlvOptions().getTlvOption(i));
+    for (size_t i = 0; i < r->getTlvOptions().getTlvOptionArraySize(); i++) {
+        hao2 = dynamic_cast<const HomeAddressOption *>(r->getTlvOptions().getTlvOption(i));
         if (hao2) break;
     }
     ASSERT(hao2 != nullptr);
     ASSERT(hao2->getHomeAddress() == Ipv6Address("2001:db8::abcd"));
+    EV << "  nextHeader: " << r->getNextHeaderProtocol() << endl;
     EV << "  homeAddress: " << hao2->getHomeAddress() << endl;
+    EV << "  PASS" << endl;
+}
+
+// === 11. Ipv6FragmentHeader ===
+{
+    EV << "=== Ipv6FragmentHeader ===" << endl;
+    auto frag = makeShared<Ipv6FragmentHeader>();
+    frag->setNextHeaderProtocol(IP_PROT_TCP);
+    frag->setFragmentOffset(1024); // must be multiple of 8
+    frag->setMoreFragments(true);
+    frag->setIdentification(0xABCD1234);
+
+    auto r = roundTrip(staticPtrCast<const Ipv6FragmentHeader>(frag));
+    ASSERT(r->getNextHeaderProtocol() == IP_PROT_TCP);
+    ASSERT(r->getFragmentOffset() == 1024);
+    ASSERT(r->getMoreFragments() == true);
+    ASSERT(r->getIdentification() == 0xABCD1234);
+    EV << "  nextHeader: " << r->getNextHeaderProtocol() << endl;
+    EV << "  fragmentOffset: " << r->getFragmentOffset() << endl;
+    EV << "  moreFragments: " << r->getMoreFragments() << endl;
+    EV << "  identification: 0x" << std::hex << r->getIdentification() << std::dec << endl;
+    EV << "  PASS" << endl;
+}
+
+// === 12. Ipv6RoutingHeader (Type 2) ===
+{
+    EV << "=== Ipv6RoutingHeader ===" << endl;
+    auto rh = makeShared<Ipv6RoutingHeader>();
+    rh->setNextHeaderProtocol(IP_PROT_UDP);
+    rh->setRoutingType(2);
+    rh->setSegmentsLeft(1);
+    rh->setAddressArraySize(1);
+    rh->setAddress(0, Ipv6Address("2001:db8::99"));
+    rh->setChunkLength(B(24)); // 8 base + 16 per address
+
+    auto r = roundTrip(staticPtrCast<const Ipv6RoutingHeader>(rh));
+    ASSERT(r->getNextHeaderProtocol() == IP_PROT_UDP);
+    ASSERT(r->getRoutingType() == 2);
+    ASSERT(r->getSegmentsLeft() == 1);
+    ASSERT(r->getAddressArraySize() == 1);
+    ASSERT(r->getAddress(0) == Ipv6Address("2001:db8::99"));
+    EV << "  nextHeader: " << r->getNextHeaderProtocol() << endl;
+    EV << "  routingType: " << (int)r->getRoutingType() << endl;
+    EV << "  segmentsLeft: " << (int)r->getSegmentsLeft() << endl;
+    EV << "  address[0]: " << r->getAddress(0) << endl;
+    EV << "  PASS" << endl;
+}
+
+// === 13. Ipv6HopByHopOptionsHeader ===
+{
+    EV << "=== Ipv6HopByHopOptionsHeader ===" << endl;
+    auto hbh = makeShared<Ipv6HopByHopOptionsHeader>();
+    hbh->setNextHeaderProtocol(IP_PROT_IPv6EXT_DEST);
+    // Add a PadN option (type=1, length=4, 4 zero bytes)
+    auto *padN = new TlvOptionBase();
+    padN->setType(IPv6TLVOPTION_NOPN);
+    padN->setLength(4);
+    hbh->getTlvOptionsForUpdate().appendTlvOption(padN);
+    hbh->setChunkLength(B(8)); // minimum: 2 (next-hdr+len) + 6 (options area)
+
+    auto r = roundTrip(staticPtrCast<const Ipv6HopByHopOptionsHeader>(hbh));
+    ASSERT(r->getNextHeaderProtocol() == IP_PROT_IPv6EXT_DEST);
+    ASSERT(r->getTlvOptions().getTlvOptionArraySize() >= 1);
+    auto *opt = r->getTlvOptions().getTlvOption(0);
+    ASSERT(opt->getType() == IPv6TLVOPTION_NOPN);
+    ASSERT(opt->getLength() == 4);
+    EV << "  nextHeader: " << r->getNextHeaderProtocol() << endl;
+    EV << "  option type: " << opt->getType() << endl;
+    EV << "  option length: " << opt->getLength() << endl;
     EV << "  PASS" << endl;
 }
 
@@ -290,6 +351,24 @@ EV << "All serializer round-trip tests passed." << endl;
   type: 0
   PASS
 === DestOpts + HomeAddressOption ===
+  nextHeader: 17
   homeAddress: 2001:db8::abcd
+  PASS
+=== Ipv6FragmentHeader ===
+  nextHeader: 6
+  fragmentOffset: 1024
+  moreFragments: 1
+  identification: 0xabcd1234
+  PASS
+=== Ipv6RoutingHeader ===
+  nextHeader: 17
+  routingType: 2
+  segmentsLeft: 1
+  address[0]: 2001:db8::99
+  PASS
+=== Ipv6HopByHopOptionsHeader ===
+  nextHeader: 60
+  option type: 1
+  option length: 4
   PASS
 All serializer round-trip tests passed.

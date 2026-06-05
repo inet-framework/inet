@@ -22,6 +22,8 @@ Test serializing frames
 #include "inet/networklayer/ipv4/IcmpHeader_m.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv6/Ipv6Header.h"
+#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders_m.h"
+#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 
@@ -273,8 +275,56 @@ static Packet *deserialize(const Protocol *protocol, Packet *pk)
     }
     else if (*protocol == Protocol::ipv6) {
         const auto& header = pk->popAtFront<Ipv6Header>();
-        protocol = ProtocolGroup::getIpProtocolGroup()->findProtocol(header->getProtocolId());
+        IpProtocolId nextHdr = header->getProtocolId();
+        // Pop extension headers as separate chunks
+        std::vector<Ptr<const Chunk>> extHeaders;
+        while (isIpv6ExtensionHeader(nextHdr)) {
+            switch (nextHdr) {
+                case IP_PROT_IPv6EXT_HOP: {
+                    auto ext = pk->popAtFront<Ipv6HopByHopOptionsHeader>();
+                    nextHdr = ext->getNextHeaderProtocol();
+                    extHeaders.push_back(ext);
+                    break;
+                }
+                case IP_PROT_IPv6EXT_DEST: {
+                    auto ext = pk->popAtFront<Ipv6DestinationOptionsHeader>();
+                    nextHdr = ext->getNextHeaderProtocol();
+                    extHeaders.push_back(ext);
+                    break;
+                }
+                case IP_PROT_IPv6EXT_ROUTING: {
+                    auto ext = pk->popAtFront<Ipv6RoutingHeader>();
+                    nextHdr = ext->getNextHeaderProtocol();
+                    extHeaders.push_back(ext);
+                    break;
+                }
+                case IP_PROT_IPv6EXT_FRAGMENT: {
+                    auto ext = pk->popAtFront<Ipv6FragmentHeader>();
+                    nextHdr = ext->getNextHeaderProtocol();
+                    extHeaders.push_back(ext);
+                    break;
+                }
+                case IP_PROT_IPv6EXT_AUTH: {
+                    auto ext = pk->popAtFront<Ipv6AuthenticationHeader>();
+                    nextHdr = ext->getNextHeaderProtocol();
+                    extHeaders.push_back(ext);
+                    break;
+                }
+                case IP_PROT_IPv6EXT_ESP: {
+                    auto ext = pk->popAtFront<Ipv6EncapsulatingSecurityPayloadHeader>();
+                    nextHdr = ext->getNextHeaderProtocol();
+                    extHeaders.push_back(ext);
+                    break;
+                }
+                default:
+                    throw cRuntimeError("Unknown IPv6 extension header type %d", (int)nextHdr);
+            }
+        }
+        protocol = ProtocolGroup::getIpProtocolGroup()->findProtocol(nextHdr);
         outPk = deserialize(protocol, pk);
+        // Re-insert extension headers in reverse order
+        for (int i = extHeaders.size() - 1; i >= 0; i--)
+            outPk->insertAtFront(extHeaders[i]);
         outPk->insertAtFront(header);
     }
     else if (*protocol == Protocol::tcp) {
