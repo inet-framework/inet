@@ -8,12 +8,12 @@
 #ifndef __INET_IPV6NEIGHBOURDISCOVERY_H
 #define __INET_IPV6NEIGHBOURDISCOVERY_H
 
-#include "inet/common/SimpleModule.h"
 #include <map>
 #include <vector>
 
 #include "inet/common/ModuleRefByPar.h"
-#include "inet/common/lifecycle/LifecycleUnsupported.h"
+#include "inet/common/lifecycle/OperationalBase.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 #include "inet/networklayer/icmpv6/Ipv6NdMessage_m.h"
@@ -34,7 +34,7 @@ class xMIPv6;
 /**
  * Implements RFC 2461 Neighbor Discovery for Ipv6.
  */
-class INET_API Ipv6NeighbourDiscovery : public SimpleModule, public LifecycleUnsupported
+class INET_API Ipv6NeighbourDiscovery : public OperationalBase
 {
   public:
     typedef std::vector<Packet *> MsgPtrVector;
@@ -125,6 +125,9 @@ class INET_API Ipv6NeighbourDiscovery : public SimpleModule, public LifecycleUns
     };
     typedef std::vector<AdvIfEntry *> AdvIfList;
 
+    // Timer for link-local address assignment at boot
+    cMessage *assignLinkLocalAddrTimer = nullptr;
+
     // List of periodic RA msgs(used only for router interfaces)
     RaTimerList raTimerList;
 
@@ -153,9 +156,19 @@ class INET_API Ipv6NeighbourDiscovery : public SimpleModule, public LifecycleUns
 
   protected:
     /************************Miscellaneous Stuff***************************/
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
+
+    // lifecycle:
+    virtual bool isInitializeStage(int stage) const override { return stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS; }
+    virtual bool isModuleStartStage(int stage) const override { return stage == ModuleStartOperation::STAGE_NETWORK_LAYER; }
+    virtual bool isModuleStopStage(int stage) const override { return stage == ModuleStopOperation::STAGE_NETWORK_LAYER; }
+    virtual void handleStartOperation(LifecycleOperation *operation) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
+
+    virtual void start();
+    virtual void stop();
     virtual void processNDMessage(Packet *packet, const Icmpv6Header *msg);
     virtual void finish() override;
 

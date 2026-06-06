@@ -14,15 +14,15 @@
 
 /examples/eigrp/testing_scenario/,     -f omnetpp.ini -c General -r 0,                                       3min,         8435-b374/tplx;58f4-fede/~tNl;0727-1d2d/tyf,  PASS,  eigrp EthernetMac Ipv4
 
-/examples/eigrp/testing_scenario6/,    -f omnetpp.ini -c EIGRP-IPv6_exp1_bandwidth-change -r 0,              3min,         532a-8a5d/tplx;6c9a-b218/~tNl;cd56-c66e/tyf,  PASS,  eigrp EthernetMac
-/examples/eigrp/testing_scenario6/,    -f omnetpp.ini -c EIGRP-IPv6_exp2_interface-down -r 0,                3min,         293f-aca2/tplx;57a2-3ad9/~tNl;ce44-9442/tyf,  PASS,  eigrp EthernetMac
-/examples/eigrp/testing_scenario6/,    -f omnetpp.ini -c EIGRP-IPv6_exp1_bandwidth-change_global-addr -r 0,  3min,         aef5-3d36/tplx;ec5d-2cf1/~tNl;4356-2e4d/tyf,  PASS,  eigrp EthernetMac
-/examples/eigrp/testing_scenario6/,    -f omnetpp.ini -c EIGRP-IPv6_exp2_interface-down_global-addr -r 0,    3min,         6c40-33af/tplx;0dd3-3d49/~tNl;0e0e-985d/tyf,  PASS,  eigrp EthernetMac
+/examples/eigrp/testing_scenario6/,    -f omnetpp.ini -c EIGRP-IPv6_exp1_bandwidth-change -r 0,              3min,         532a-8a5d/tplx;6c9a-b218/~tNl;007c-82d0/tyf,  PASS,  eigrp EthernetMac
+/examples/eigrp/testing_scenario6/,    -f omnetpp.ini -c EIGRP-IPv6_exp2_interface-down -r 0,                3min,         293f-aca2/tplx;57a2-3ad9/~tNl;e571-e622/tyf,  PASS,  eigrp EthernetMac
+/examples/eigrp/testing_scenario6/,    -f omnetpp.ini -c EIGRP-IPv6_exp1_bandwidth-change_global-addr -r 0,  3min,         aef5-3d36/tplx;ec5d-2cf1/~tNl;7997-c358/tyf,  PASS,  eigrp EthernetMac
+/examples/eigrp/testing_scenario6/,    -f omnetpp.ini -c EIGRP-IPv6_exp2_interface-down_global-addr -r 0,    3min,         6c40-33af/tplx;0dd3-3d49/~tNl;e079-c01e/tyf,  PASS,  eigrp EthernetMac
 
-/examples/eigrp/testing_scenario_ds/,  -f omnetpp.ini -c EIGRP-IPv6_exp1_datarate-change -r 0,               3min,         bff2-f865/tplx;1651-3a62/~tNl;39c1-76f6/tyf,  PASS,  eigrp EthernetMac Ipv4
-/examples/eigrp/testing_scenario_ds/,  -f omnetpp.ini -c EIGRP-IPv6_exp2_interface-down -r 0,                3min,         3c8d-44c3/tplx;1740-6064/~tNl;42ba-489b/tyf,  PASS,  eigrp EthernetMac Ipv4
-/examples/eigrp/testing_scenario_ds/,  -f omnetpp.ini -c EIGRP-IPv6_exp1_datarate-change_global-addr -r 0,   3min,         4fe7-2bfe/tplx;aa9c-c9a7/~tNl;a15c-3152/tyf,  PASS,  eigrp EthernetMac Ipv4
-/examples/eigrp/testing_scenario_ds/,  -f omnetpp.ini -c EIGRP-IPv6_exp2_interface-down_global-addr -r 0,    3min,         78e9-b38a/tplx;d916-0f0d/~tNl;2092-ee59/tyf,  PASS,  eigrp EthernetMac Ipv4
+/examples/eigrp/testing_scenario_ds/,  -f omnetpp.ini -c EIGRP-IPv6_exp1_datarate-change -r 0,               3min,         bff2-f865/tplx;1651-3a62/~tNl;646d-6524/tyf,  PASS,  eigrp EthernetMac Ipv4
+/examples/eigrp/testing_scenario_ds/,  -f omnetpp.ini -c EIGRP-IPv6_exp2_interface-down -r 0,                3min,         3c8d-44c3/tplx;1740-6064/~tNl;7867-c855/tyf,  PASS,  eigrp EthernetMac Ipv4
+/examples/eigrp/testing_scenario_ds/,  -f omnetpp.ini -c EIGRP-IPv6_exp1_datarate-change_global-addr -r 0,   3min,         4fe7-2bfe/tplx;aa9c-c9a7/~tNl;0e1c-f954/tyf,  PASS,  eigrp EthernetMac Ipv4
+/examples/eigrp/testing_scenario_ds/,  -f omnetpp.ini -c EIGRP-IPv6_exp2_interface-down_global-addr -r 0,    3min,         78e9-b38a/tplx;d916-0f0d/~tNl;d7c9-f924/tyf,  PASS,  eigrp EthernetMac Ipv4
 
 /examples/eigrp/two_node/,             -f omnetpp.ini -c General -r 0,                                       3min,         69b1-e907/tplx;2c6a-9db7/~tNl;df9f-1663/tyf,  PASS,  eigrp EthernetMac Ipv4
 

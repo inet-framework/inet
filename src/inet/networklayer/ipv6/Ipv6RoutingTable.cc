@@ -865,8 +865,14 @@ bool Ipv6RoutingTable::handleOperationStage(LifecycleOperation *operation, IDone
     Enter_Method("handleOperationStage");
     int stage = operation->getCurrentStage();
     if (dynamic_cast<ModuleStartOperation *>(operation)) {
-        if (static_cast<ModuleStartOperation::Stage>(stage) == ModuleStartOperation::STAGE_NETWORK_LAYER)
-            ; // TODO
+        if (static_cast<ModuleStartOperation::Stage>(stage) == ModuleStartOperation::STAGE_NETWORK_LAYER) {
+            // re-add Ipv6InterfaceData to interfaces and reconfigure
+            for (int i = 0; i < ift->getNumInterfaces(); i++) {
+                NetworkInterface *ie = ift->getInterface(i);
+                if (!ie->findProtocolData<Ipv6InterfaceData>())
+                    configureInterfaceForIpv6(ie);
+            }
+        }
     }
     else if (dynamic_cast<ModuleStopOperation *>(operation)) {
         if (static_cast<ModuleStopOperation::Stage>(stage) == ModuleStopOperation::STAGE_NETWORK_LAYER)

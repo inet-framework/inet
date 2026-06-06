@@ -217,5 +217,21 @@ const char *Ipv6NeighbourCache::stateName(ReachabilityState state)
     }
 }
 
+void Ipv6NeighbourCache::clear()
+{
+    for (auto& elem : neighbourMap) {
+        Neighbour& nbor = elem.second;
+        neighbourDiscovery.cancelAndDelete(nbor.nudTimeoutEvent);
+        nbor.nudTimeoutEvent = nullptr;
+        neighbourDiscovery.cancelAndDelete(nbor.arTimer);
+        nbor.arTimer = nullptr;
+        for (auto *pkt : nbor.pendingPackets)
+            delete pkt;
+        nbor.pendingPackets.clear();
+    }
+    neighbourMap.clear();
+    defaultRouterList.clear();
+}
+
 } // namespace inet
 

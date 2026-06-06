@@ -213,5 +213,12 @@ void Ipv6FragBuf::purgeStaleFragments(simtime_t lastupdate)
     }
 }
 
+void Ipv6FragBuf::flush()
+{
+    for (auto i = bufs.begin(); i != bufs.end(); ++i)
+        delete i->second.packet;
+    bufs.clear();
+}
+
 } // namespace inet
 

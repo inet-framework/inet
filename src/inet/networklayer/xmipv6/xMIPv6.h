@@ -12,9 +12,11 @@
 #ifndef __INET_XMIPV6_H
 #define __INET_XMIPV6_H
 
-#include "inet/common/SimpleModule.h"
 #include <map>
 #include <vector>
+
+#include "inet/common/lifecycle/OperationalBase.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 #include "inet/networklayer/ipv6/IIpv6ExtensionHeaderHandler.h"
@@ -57,7 +59,7 @@ enum TimerIfEntryType {
 /**
  * Implements RFC 3775 Mobility Support in Ipv6.
  */
-class INET_API xMIPv6 : public SimpleModule, public IIpv6ExtensionHeaderHandler, public IIpv6TlvOptionHandler
+class INET_API xMIPv6 : public OperationalBase, public IIpv6ExtensionHeaderHandler, public IIpv6TlvOptionHandler
 {
   public:
     virtual ~xMIPv6();
@@ -168,9 +170,16 @@ class INET_API xMIPv6 : public SimpleModule, public IIpv6ExtensionHeaderHandler,
 
   protected:
     /************************Miscellaneous Stuff***************************/
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
+
+    // lifecycle:
+    virtual bool isInitializeStage(int stage) const override { return stage == INITSTAGE_NETWORK_LAYER; }
+    virtual bool isModuleStartStage(int stage) const override { return stage == ModuleStartOperation::STAGE_NETWORK_LAYER; }
+    virtual bool isModuleStopStage(int stage) const override { return stage == ModuleStopOperation::STAGE_NETWORK_LAYER; }
+    virtual void handleStartOperation(LifecycleOperation *operation) override {}
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
     //================MIPv6 Related Functions=================================================
     /**

@@ -19,9 +19,9 @@
 #ifndef __INET_IPV6TUNNELING_H
 #define __INET_IPV6TUNNELING_H
 
-#include "inet/common/SimpleModule.h"
 #include "inet/common/ModuleRefByPar.h"
-#include "inet/common/lifecycle/LifecycleUnsupported.h"
+#include "inet/common/lifecycle/OperationalBase.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 
@@ -35,7 +35,7 @@ class Ipv6RoutingTable;
 /**
  * Management of IP tunnels.
  */
-class INET_API Ipv6Tunneling : public SimpleModule, public LifecycleUnsupported
+class INET_API Ipv6Tunneling : public OperationalBase
 {
   public:
     enum TunnelType {
@@ -117,12 +117,19 @@ class INET_API Ipv6Tunneling : public SimpleModule, public LifecycleUnsupported
      * Initialize tunnel manager.
      */
     virtual void initialize(int stage) override;
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
     /**
      * Receive messages from Ipv6 module and encapsulate/decapsulate them.
      */
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
+
+    // lifecycle:
+    virtual bool isInitializeStage(int stage) const override { return stage == INITSTAGE_NETWORK_LAYER; }
+    virtual bool isModuleStartStage(int stage) const override { return stage == ModuleStartOperation::STAGE_NETWORK_LAYER; }
+    virtual bool isModuleStopStage(int stage) const override { return stage == ModuleStopOperation::STAGE_NETWORK_LAYER; }
+    virtual void handleStartOperation(LifecycleOperation *operation) override {}
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
     /**
      * Creates a tunnel with given entry and exit point, which will be used for datagrams

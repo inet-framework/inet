@@ -30,7 +30,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -52,7 +52,7 @@ Ipv6Tunneling::Ipv6Tunneling()
 
 void Ipv6Tunneling::initialize(int stage)
 {
-    SimpleModule::initialize(stage);
+    OperationalBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         ift.reference(this, "interfaceTableModule", true);
@@ -65,16 +65,9 @@ void Ipv6Tunneling::initialize(int stage)
         WATCH(noOfNonSplitTunnels);
         WATCH(tunnels);
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER) {
-        cModule *node = findContainingNode(this);
-        NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
-        bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-        if (!isOperational)
-            throw cRuntimeError("This module doesn't support starting in node DOWN state");
-    }
 }
 
-void Ipv6Tunneling::handleMessage(cMessage *msg)
+void Ipv6Tunneling::handleMessageWhenUp(cMessage *msg)
 {
     Packet *packet = check_and_cast<Packet *>(msg);
 
@@ -570,6 +563,22 @@ std::ostream& operator<<(std::ostream& os, const Ipv6Tunneling::Tunnel& tun)
     os << endl;
 
     return os;
+}
+
+// lifecycle management
+
+void Ipv6Tunneling::handleStopOperation(LifecycleOperation *operation)
+{
+    tunnels.clear();
+    vIfIndexTop = INT_MAX;
+    noOfNonSplitTunnels = 0;
+}
+
+void Ipv6Tunneling::handleCrashOperation(LifecycleOperation *operation)
+{
+    tunnels.clear();
+    vIfIndexTop = INT_MAX;
+    noOfNonSplitTunnels = 0;
 }
 
 } // namespace inet

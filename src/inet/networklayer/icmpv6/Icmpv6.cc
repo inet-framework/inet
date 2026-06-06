@@ -14,7 +14,7 @@
 #include "inet/common/packet/Message.h"
 #include "inet/networklayer/common/Icmpv6ErrorTag_m.h"
 #include "inet/common/checksum/Checksum.h"
-#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -28,7 +28,7 @@ Define_Module(Icmpv6);
 
 void Icmpv6::initialize(int stage)
 {
-    SimpleModule::initialize(stage);
+    OperationalBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         const char *checksumModeString = par("checksumMode");
@@ -42,17 +42,12 @@ void Icmpv6::initialize(int stage)
         WATCH(numErrorsReceived);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {
-        bool isOperational;
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(getContainingNode(this)->getSubmodule("status"));
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-        if (!isOperational)
-            throw cRuntimeError("This module doesn't support starting in node DOWN state");
         registerService(Protocol::icmpv6, gate("transportIn"), gate("transportOut"));
         registerProtocol(Protocol::icmpv6, gate("ipv6Out"), gate("ipv6In"));
     }
 }
 
-void Icmpv6::handleMessage(cMessage *msg)
+void Icmpv6::handleMessageWhenUp(cMessage *msg)
 {
     ASSERT(!msg->isSelfMessage()); // no timers in ICMPv6
 

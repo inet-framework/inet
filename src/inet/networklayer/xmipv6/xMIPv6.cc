@@ -90,7 +90,7 @@ xMIPv6::~xMIPv6()
 
 void xMIPv6::initialize(int stage)
 {
-    SimpleModule::initialize(stage);
+    OperationalBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         EV_TRACE << "Initializing xMIPv6 module" << endl;
@@ -144,7 +144,7 @@ void xMIPv6::initialize(int stage)
     }
 }
 
-void xMIPv6::handleMessage(cMessage *msg)
+void xMIPv6::handleMessageWhenUp(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
         EV_DETAIL << "Self message received!\n";
@@ -2714,6 +2714,34 @@ void xMIPv6::handleTokenExpiry(cMessage *msg)
         createAndSendHoTIMessage(tokenExpIfEntry->cnAddr, tokenExpIfEntry->ifEntry);
 
 //    delete msg;
+}
+
+// lifecycle management
+
+void xMIPv6::handleStopOperation(LifecycleOperation *operation)
+{
+    // cancel and delete all timer entries
+    for (auto& entry : transmitIfList) {
+        cancelAndDelete(entry.second->timer);
+        delete entry.second;
+    }
+    transmitIfList.clear();
+
+    interfaceCoAList.clear();
+    cnList.clear();
+}
+
+void xMIPv6::handleCrashOperation(LifecycleOperation *operation)
+{
+    // cancel and delete all timer entries
+    for (auto& entry : transmitIfList) {
+        cancelAndDelete(entry.second->timer);
+        delete entry.second;
+    }
+    transmitIfList.clear();
+
+    interfaceCoAList.clear();
+    cnList.clear();
 }
 
 } // namespace inet

@@ -11,7 +11,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
@@ -47,6 +47,8 @@ Ipv6NeighbourDiscovery::Ipv6NeighbourDiscovery()
 
 Ipv6NeighbourDiscovery::~Ipv6NeighbourDiscovery()
 {
+    cancelAndDelete(assignLinkLocalAddrTimer);
+
     for (auto *msg : raTimerList)
         cancelAndDelete(msg);
 
@@ -71,7 +73,7 @@ Ipv6NeighbourDiscovery::~Ipv6NeighbourDiscovery()
 
 void Ipv6NeighbourDiscovery::initialize(int stage)
 {
-    SimpleModule::initialize(stage);
+    OperationalBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         const char *checksumModeString = par("checksumMode");
@@ -80,30 +82,22 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
         WATCH(numReceived);
         WATCH_EXPR("numNeighbors", neighbourCache.getNumNeighbours());
         WATCH_EXPR("numPending", pendingQueue.getLength());
-    }
-    else if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {
-        cModule *node = findContainingNode(this);
-        NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
-        bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-        if (!isOperational)
-            throw cRuntimeError("This module doesn't support starting in node DOWN state");
+
         ift.reference(this, "interfaceTableModule", true);
         rt6.reference(this, "routingTableModule", true);
         icmpv6.reference(this, "icmpv6Module", true);
 
+        pendingQueue.setName("pendingQueue");
+    }
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
         if (rt6->isMobileNode())
             mipv6.reference(this, "xmipv6Module", true);
-
-        pendingQueue.setName("pendingQueue");
 
         // Apply NDP parameters from NED to all interfaces
         int dupAddrDetectTransmits = par("dupAddrDetectTransmits");
         bool optimisticDad = par("optimisticDad");
         simtime_t retransTimer = par("retransTimer");
         simtime_t baseReachableTime = par("baseReachableTime");
-        simtime_t advReachableTime = par("advReachableTime");
-        simtime_t minRAInterval = par("minIntervalBetweenRAs");
-        simtime_t maxRAInterval = par("maxIntervalBetweenRAs");
         for (int i = 0; i < ift->getNumInterfaces(); i++) {
             NetworkInterface *ie = ift->getInterface(i);
             if (ie->isLoopback())
@@ -114,28 +108,11 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
             ipv6Data->setOptimisticDad(optimisticDad);
             ipv6Data->setRetransTimer((uint)retransTimer.dbl());
             ipv6Data->setBaseReachableTime((uint)baseReachableTime.dbl());
-
-            if (ipv6Data->getAdvSendAdvertisements()) {
-                ipv6Data->setMinRtrAdvInterval(minRAInterval.dbl());
-                ipv6Data->setMaxRtrAdvInterval(maxRAInterval.dbl());
-                ipv6Data->setAdvReachableTime((int)advReachableTime.dbl());
-                createRaTimer(ie);
-            }
         }
-
-        // This simulates random node bootup time. Link local address assignment
-        // takes place during this time.
-        cMessage *msg = new cMessage("assignLinkLocalAddr", MK_ASSIGN_LINKLOCAL_ADDRESS);
-
-        // We want routers to boot up faster!
-        if (rt6->isRouter())
-            scheduleAfter(uniform(0, 0.3), msg); // Random Router bootup time
-        else
-            scheduleAfter(uniform(0.4, 1), msg); // Random Host bootup time
     }
 }
 
-void Ipv6NeighbourDiscovery::handleMessage(cMessage *msg)
+void Ipv6NeighbourDiscovery::handleMessageWhenUp(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
         EV_TRACE << "Self message received!\n";
@@ -793,6 +770,7 @@ void Ipv6NeighbourDiscovery::assignLinkLocalAddress(cMessage *timerMsg)
                 makeTentativeAddressPermanent(linkLocalAddr, ie);
         }
     }
+    assignLinkLocalAddrTimer = nullptr;
     delete timerMsg;
 }
 
@@ -2567,5 +2545,93 @@ void Ipv6NeighbourDiscovery::invalidateNeigbourCache()
     neighbourCache.invalidateAllEntries();
 }
 
+// lifecycle management
+
+void Ipv6NeighbourDiscovery::handleStartOperation(LifecycleOperation *operation)
+{
+    start();
+}
+
+void Ipv6NeighbourDiscovery::handleStopOperation(LifecycleOperation *operation)
+{
+    stop();
+}
+
+void Ipv6NeighbourDiscovery::handleCrashOperation(LifecycleOperation *operation)
+{
+    stop();
+}
+
+void Ipv6NeighbourDiscovery::start()
+{
+    simtime_t advReachableTime = par("advReachableTime");
+    simtime_t minRAInterval = par("minIntervalBetweenRAs");
+    simtime_t maxRAInterval = par("maxIntervalBetweenRAs");
+    for (int i = 0; i < ift->getNumInterfaces(); i++) {
+        NetworkInterface *ie = ift->getInterface(i);
+
+        auto *ipv6Data = ie->findProtocolData<Ipv6InterfaceData>();
+        if (ipv6Data && ipv6Data->getAdvSendAdvertisements() && !(ie->isLoopback())) {
+            auto *ipv6DataMut = ie->getProtocolDataForUpdate<Ipv6InterfaceData>();
+            ipv6DataMut->setMinRtrAdvInterval(minRAInterval.dbl());
+            ipv6DataMut->setMaxRtrAdvInterval(maxRAInterval.dbl());
+            ipv6DataMut->setAdvReachableTime((int)advReachableTime.dbl());
+            createRaTimer(ie);
+        }
+    }
+
+    // This simulates random node bootup time. Link local address assignment
+    // takes place during this time.
+    assignLinkLocalAddrTimer = new cMessage("assignLinkLocalAddr", MK_ASSIGN_LINKLOCAL_ADDRESS);
+
+    // We want routers to boot up faster!
+    if (rt6->isRouter())
+        scheduleAfter(uniform(0, 0.3), assignLinkLocalAddrTimer); // Random Router bootup time
+    else
+        scheduleAfter(uniform(0.4, 1), assignLinkLocalAddrTimer); // Random Host bootup time
+}
+
+void Ipv6NeighbourDiscovery::stop()
+{
+    // cancel and delete the link-local address assignment timer
+    cancelAndDelete(assignLinkLocalAddrTimer);
+    assignLinkLocalAddrTimer = nullptr;
+
+    // cancel and delete all RA timers
+    for (auto *msg : raTimerList)
+        cancelAndDelete(msg);
+    raTimerList.clear();
+
+    // cancel and delete all DAD entries
+    for (auto *entry : dadList) {
+        cancelAndDelete(entry->timeoutMsg);
+        delete entry;
+    }
+    dadList.clear();
+
+    // cancel and delete all RD entries
+    for (auto *entry : rdList) {
+        cancelAndDelete(entry->timeoutMsg);
+        delete entry;
+    }
+    rdList.clear();
+
+    // cancel and delete all advertising interface entries
+    for (auto *entry : advIfList) {
+        cancelAndDelete(entry->raTimeoutMsg);
+        delete entry;
+    }
+    advIfList.clear();
+
+    // clear DAD global list
+    dadGlobalList.clear();
+
+    // clear pending queue
+    while (!pendingQueue.isEmpty())
+        delete pendingQueue.pop();
+
+    // clear neighbour cache
+    neighbourCache.clear();
+}
 } // namespace inet
 

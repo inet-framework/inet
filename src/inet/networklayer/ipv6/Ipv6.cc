@@ -12,7 +12,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -75,6 +75,8 @@ Ipv6::ScheduledDatagram::~ScheduledDatagram()
 
 void Ipv6::initialize(int stage)
 {
+    OperationalBase::initialize(stage);
+
     if (stage == INITSTAGE_LOCAL) {
         ift.reference(this, "interfaceTableModule", true);
         rt.reference(this, "routingTableModule", true);
@@ -102,12 +104,6 @@ void Ipv6::initialize(int stage)
         WATCH_EXPR("ipv6StatusText", getIpv6StatusText());
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
-        cModule *node = findContainingNode(this);
-        NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
-        bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-        if (!isOperational)
-            throw cRuntimeError("This module doesn't support starting in node DOWN state");
-
         registerService(Protocol::ipv6, gate("transportIn"), gate("transportOut"));
         registerProtocol(Protocol::ipv6, gate("queueOut"), gate("queueIn"));
 
@@ -192,7 +188,7 @@ void Ipv6::handleRequest(Request *request)
         throw cRuntimeError("Unknown command: '%s' with %s", request->getName(), ctrl->getClassName());
 }
 
-void Ipv6::handleMessage(cMessage *msg)
+void Ipv6::handleMessageWhenUp(cMessage *msg)
 {
     auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
 
@@ -1395,6 +1391,50 @@ void Ipv6::sendIcmpError(Packet *packet, Icmpv6Type type, int code)
 {
     icmp->sendErrorMessage(packet, type, code);
     delete packet;
+}
+
+// lifecycle management
+
+void Ipv6::handleStartOperation(LifecycleOperation *operation)
+{
+    start();
+}
+
+void Ipv6::handleStopOperation(LifecycleOperation *operation)
+{
+    stop();
+}
+
+void Ipv6::handleCrashOperation(LifecycleOperation *operation)
+{
+    stop();
+}
+
+void Ipv6::start()
+{
+}
+
+void Ipv6::stop()
+{
+    flush();
+    for (auto it : socketIdToSocketDescriptor)
+        delete it.second;
+    socketIdToSocketDescriptor.clear();
+}
+
+void Ipv6::flush()
+{
+    EV_DEBUG << "Ipv6::flush(): packets in hooks: " << queuedDatagramsForHooks.size() << endl;
+    for (auto& elem : queuedDatagramsForHooks)
+        delete elem.packet;
+    queuedDatagramsForHooks.clear();
+
+    EV_DEBUG << "Ipv6::flush(): pending DAD queue: " << pendingDadQueue.size() << endl;
+    for (auto *sDgram : pendingDadQueue)
+        delete sDgram;
+    pendingDadQueue.clear();
+
+    fragbuf.flush();
 }
 
 } // namespace inet

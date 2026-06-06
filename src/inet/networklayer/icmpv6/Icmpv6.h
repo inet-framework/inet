@@ -8,9 +8,9 @@
 #ifndef __INET_ICMPV6_H
 #define __INET_ICMPV6_H
 
-#include "inet/common/SimpleModule.h"
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/common/lifecycle/LifecycleUnsupported.h"
+#include "inet/common/lifecycle/OperationalBase.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
@@ -26,7 +26,7 @@ class PingPayload;
 /**
  * ICMPv6 implementation.
  */
-class INET_API Icmpv6 : public SimpleModule, public LifecycleUnsupported, public DefaultProtocolRegistrationListener
+class INET_API Icmpv6 : public OperationalBase, public DefaultProtocolRegistrationListener
 {
   public:
     /**
@@ -61,13 +61,20 @@ class INET_API Icmpv6 : public SimpleModule, public LifecycleUnsupported, public
      * Initialization
      */
     virtual void initialize(int stage) override;
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
     /**
      *  Processing of messages that arrive in this module. Messages arrived here
      *  could be for ICMP ping requests or ICMPv6 messages that require processing.
      */
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
+
+    // lifecycle:
+    virtual bool isInitializeStage(int stage) const override { return stage == INITSTAGE_NETWORK_LAYER; }
+    virtual bool isModuleStartStage(int stage) const override { return stage == ModuleStartOperation::STAGE_NETWORK_LAYER; }
+    virtual bool isModuleStopStage(int stage) const override { return stage == ModuleStopOperation::STAGE_NETWORK_LAYER; }
+    virtual void handleStartOperation(LifecycleOperation *operation) override {}
+    virtual void handleStopOperation(LifecycleOperation *operation) override {}
+    virtual void handleCrashOperation(LifecycleOperation *operation) override {}
     virtual void processICMPv6Message(Packet *packet);
 
     /**

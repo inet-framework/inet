@@ -8,13 +8,13 @@
 #ifndef __INET_IPV6_H
 #define __INET_IPV6_H
 
-#include "inet/common/SimpleModule.h"
 #include <map>
 #include <set>
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/networklayer/ipv6/IIpv6ExtensionHeaderHandler.h"
-#include "inet/common/lifecycle/LifecycleUnsupported.h"
+#include "inet/common/lifecycle/OperationalBase.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/Message.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/contract/INetworkProtocol.h"
@@ -32,7 +32,7 @@ class Icmpv6Header;
 /**
  * Ipv6 implementation.
  */
-class INET_API Ipv6 : public SimpleModule, public NetfilterBase, public LifecycleUnsupported, public INetworkProtocol, public DefaultProtocolRegistrationListener, protected cListener
+class INET_API Ipv6 : public OperationalBase, public NetfilterBase, public INetworkProtocol, public DefaultProtocolRegistrationListener, protected cListener
 {
   public:
     /**
@@ -129,7 +129,7 @@ class INET_API Ipv6 : public SimpleModule, public NetfilterBase, public Lifecycl
 
     virtual void preroutingFinish(Packet *packet, const NetworkInterface *fromIE, const NetworkInterface *destIE, Ipv6Address nextHopAddr);
 
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
 
     using cListener::receiveSignal;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
@@ -242,7 +242,18 @@ class INET_API Ipv6 : public SimpleModule, public NetfilterBase, public Lifecycl
      * Initialization
      */
     virtual void initialize(int stage) override;
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+
+    // lifecycle:
+    virtual bool isInitializeStage(int stage) const override { return stage == INITSTAGE_NETWORK_LAYER; }
+    virtual bool isModuleStartStage(int stage) const override { return stage == ModuleStartOperation::STAGE_NETWORK_LAYER; }
+    virtual bool isModuleStopStage(int stage) const override { return stage == ModuleStopOperation::STAGE_NETWORK_LAYER; }
+    virtual void handleStartOperation(LifecycleOperation *operation) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
+
+    virtual void start();
+    virtual void stop();
+    virtual void flush();
 
     /**
      * Determines the correct interface for the specified destination address.

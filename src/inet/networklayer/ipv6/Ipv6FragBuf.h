@@ -93,6 +93,11 @@ class INET_API Ipv6FragBuf
      * 10..30 seconds or so.
      */
     void purgeStaleFragments(simtime_t lastupdate);
+
+    /**
+     * Clear all state (used during lifecycle stop/crash).
+     */
+    void flush();
 };
 
 } // namespace inet

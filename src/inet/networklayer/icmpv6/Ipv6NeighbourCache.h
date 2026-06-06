@@ -196,6 +196,9 @@ class INET_API Ipv6NeighbourCache
 
     /** Returns the name of the given state as string */
     static const char *stateName(ReachabilityState state);
+
+    /** Clear all entries (used during lifecycle stop/crash). */
+    virtual void clear();
 };
 
 } // namespace inet
