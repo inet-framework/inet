@@ -24,6 +24,7 @@ void SimpleGeographicCoordinateSystem::initialize(int stage)
         sceneLatitude = deg(par("sceneLatitude"));
         sceneLongitude = deg(par("sceneLongitude"));
         sceneAltitude = m(par("sceneAltitude"));
+        WATCH(metersPerDegree);
     }
 }
 
@@ -63,6 +64,7 @@ void OsgGeographicCoordinateSystem::initialize(int stage)
         // The parameter is conventional direction of heading and elevation (positive heading turns left,
         // positive elevation lifts nose), but the EulerAngles class has different expectations.
         sceneOrientation = Quaternion(EulerAngles(-rad(sceneHeading - deg(90)), -rad(sceneElevation), rad(sceneBank)));
+        WATCH(sceneOrientation);
 
         osg::ref_ptr<osgEarth::GeoTransform> geoTransform = new osgEarth::GeoTransform();
         osg::ref_ptr<osg::PositionAttitudeTransform> localTransform = new osg::PositionAttitudeTransform();

@@ -85,9 +85,12 @@ void BehaviorAggregateClassifier::initialize(int stage)
                     numDscps, numOutGates);
         for (int i = 0; i < numDscps; ++i)
             dscpToGateIndexMap[dscps[i]] = i;
+        numOutGates = gateSize("out");
+        WATCH(numOutGates);
 
         numRcvd = 0;
         WATCH(numRcvd);
+        WATCH_EXPR("classifierStatus", numRcvd > 0 ? "rcvd:" + std::to_string(numRcvd) + " " : std::string());
     }
 }
 
@@ -105,16 +108,6 @@ void BehaviorAggregateClassifier::pushPacket(Packet *packet, const cGate *inputG
         defaultConsumer.reference(defaultOutputGate, false);
         pushOrSendPacket(packet, defaultOutputGate, defaultConsumer);
     }
-}
-
-void BehaviorAggregateClassifier::refreshDisplay() const
-{
-    if (numRcvd > 0) {
-        std::string buf = "rcvd:" + std::to_string(numRcvd) + " ";
-        getDisplayString().setTagArg("t", 0, buf.c_str());
-    }
-    else
-        getDisplayString().setTagArg("t", 0, "");
 }
 
 int BehaviorAggregateClassifier::classifyPacket(Packet *packet)

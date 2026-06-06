@@ -26,6 +26,8 @@ void PacketFilterBase::initialize(int stage)
         consumer.reference(outputGate, false);
         numDroppedPackets = 0;
         droppedTotalLength = b(0);
+        WATCH(numDroppedPackets);
+        WATCH(droppedTotalLength);
     }
     else if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(inputGate);

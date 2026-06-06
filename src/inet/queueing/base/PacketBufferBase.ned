@@ -23,7 +23,7 @@ package inet.queueing.base;
 simple PacketBufferBase extends PacketProcessorBase
 {
     parameters:
-        displayStringTextFormat = default("contains %p pk (%l)\nadded %a removed %r dropped %d"); // Determines display string text above the submodule
+        displayStringTextFormat = default("contains {numPackets} pk ({totalLength})\nadded {numAddedPackets} removed {numRemovedPackets} dropped {numDroppedPackets}"); // Determines display string text above the submodule
         @display("i=block/buffer");
     gates:
         input in @loose;

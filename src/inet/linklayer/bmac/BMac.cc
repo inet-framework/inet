@@ -54,7 +54,11 @@ void BMac::initialize(int stage)
 
         macState = INIT;
         txQueue = getQueue(gate(upperLayerInGateId));
+        WATCH(stats);
         WATCH(macState);
+        WATCH(nbTxDataPackets);
+        WATCH(nbRxDataPackets);
+        WATCH_EXPR("macStatus", getMacStatusString());
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         radio.reference(this, "radioModule", true);
@@ -63,7 +67,6 @@ void BMac::initialize(int stage)
         radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
 
         // init the dropped packet info
-        WATCH(macState);
 
         wakeup = new cMessage("wakeup", BMAC_WAKE_UP);
 
@@ -709,6 +712,25 @@ void BMac::handlePullPacketProcessed(Packet *packet, const cGate *gate, bool suc
 {
     Enter_Method("handlePullPacketProcessed");
     throw cRuntimeError("Not supported callback");
+}
+
+std::string BMac::getMacStatusString() const
+{
+#define CASE(x)   case x: return #x;
+    switch (macState) {
+        CASE(INIT);
+        CASE(SLEEP);
+        CASE(CCA);
+        CASE(SEND_PREAMBLE);
+        CASE(WAIT_DATA);
+        CASE(SEND_DATA);
+        CASE(WAIT_TX_DATA_OVER);
+        CASE(WAIT_ACK);
+        CASE(SEND_ACK);
+        CASE(WAIT_ACK_TX);
+        default: ASSERT(false); return "?";
+    }
+#undef CASE
 }
 
 } // namespace inet

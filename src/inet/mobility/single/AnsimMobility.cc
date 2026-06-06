@@ -91,6 +91,7 @@ void AnsimMobility::initialize(int stage)
             throw cRuntimeError("Element doesn't have <mobility> child or <position_change> grandchild at %s",
                     rootElem->getSourceLocation());
         computeMaxSpeed();
+        WATCH(maxSpeed);
     }
 }
 

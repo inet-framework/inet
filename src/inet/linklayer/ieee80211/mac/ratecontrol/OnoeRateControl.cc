@@ -19,17 +19,13 @@ void OnoeRateControl::initialize(int stage)
     RateControlBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         interval = par("interval");
+        WATCH(timer);
         WATCH(numOfRetries);
         WATCH(credit);
         WATCH(numOfSuccTransmissions);
         WATCH(numOfGivenUpTransmissions);
         WATCH(avgRetriesPerFrame);
     }
-}
-
-void OnoeRateControl::refreshDisplay() const
-{
-    getDisplayString().setTagArg("t", 0, currentMode->getName());
 }
 
 void OnoeRateControl::resetStatisticalVariables()

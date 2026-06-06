@@ -146,6 +146,7 @@ simple EthernetPlca extends SimpleModule like IProtocolLayer
         @statistic[ownToLength](title="own transmit opportunity length"; record=vector; interpolationmode=none);
         // the time evolution of the cycle length
         @statistic[cycleLength](title="cycle length"; record=vector; interpolationmode=none);
+        displayStringTextFormat = default("{curID}/{plca_node_count} ({local_nodeID})\n{controlFsmState} - {dataFsmState}");
         @display("i=block/rxtx");
     gates:
         input upperLayerIn @labels(EtherFrame);

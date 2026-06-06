@@ -53,12 +53,14 @@ void Ipv6RoutingTable::initialize(int stage)
     SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        WATCH_PTRVECTOR(routeList);
-        WATCH_MAP(destCache); // FIXME commented out for now
+        WATCH(routeList);
+        WATCH(destCache); // FIXME commented out for now
         isrouter = par("isRouter");
         multicastForward = par("multicastForwarding");
         useAdminDist = par("useAdminDist");
         WATCH(isrouter);
+        WATCH_EXPR("numRoutes", routeList.size());
+        WATCH_EXPR("numDestCache", destCache.size());
 
         ift.reference(this, "interfaceTableModule", true);
 
@@ -71,6 +73,7 @@ void Ipv6RoutingTable::initialize(int stage)
         WATCH(ismobile_node);
 
         mipv6Support = false; // 4.9.07 - CB
+        WATCH(mipv6Support);
 #endif /* INET_WITH_xMIPv6 */
 
         cModule *host = getContainingNode(this);
@@ -148,14 +151,6 @@ void Ipv6RoutingTable::parseXmlConfigFile()
                 configureTunnelFromXml(ifTag);
         }
     }
-}
-
-void Ipv6RoutingTable::refreshDisplay() const
-{
-    std::stringstream os;
-
-    os << getNumRoutes() << " routes\n" << destCache.size() << " destcache entries";
-    getDisplayString().setTagArg("t", 0, os.str().c_str());
 }
 
 void Ipv6RoutingTable::handleMessage(cMessage *msg)

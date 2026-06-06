@@ -122,6 +122,46 @@ void EthernetPlca::initialize(int stage)
         emit(curIDSignal, curID);
         emit(carrierSenseChangedSignal, (int)CRS);
         emit(collisionChangedSignal, (int)COL);
+
+        WATCH(to_timer_length);
+        WATCH(burst_timer_length);
+        WATCH(beacon_timer_length);
+        WATCH(beacon_det_timer_length);
+        WATCH(pending_timer_length);
+        WATCH(commit_timer_length);
+        WATCH(COL);
+        WATCH(committed);
+        WATCH(CRS);
+        WATCH(packetPending);
+        WATCH(PMCD);
+        WATCH(receiving);
+        WATCH(RX_DV);
+        WATCH(TX_EN);
+        WATCH(bc);
+        WATCH(curID);
+        WATCH(old_carrier_sense_signal);
+        WATCH(old_collision_signal);
+        WATCH(macStartFrameTransmissionTime);
+        WATCH(phyStartFrameTransmissionTime);
+        WATCH(beacon_timer);
+        WATCH(beacon_det_timer);
+        WATCH(burst_timer);
+        WATCH(to_timer);
+        WATCH(syncing_timer);
+        WATCH(hold_timer);
+        WATCH(pending_timer);
+        WATCH(commit_timer);
+        WATCH(tx_timer);
+        WATCH(numPacketsPerTo);
+        WATCH(numPacketsPerCycle);
+        WATCH(toStartTime);
+        WATCH(cycleStartTime);
+        WATCH_EXPR("CARRIER_STATUS", cEnum::getNameForValue(CARRIER_STATUS));
+        WATCH_EXPR("SIGNAL_STATUS", cEnum::getNameForValue(SIGNAL_STATUS));
+        WATCH_EXPR("rx_cmd", cEnum::getNameForValue(rx_cmd));
+        WATCH_EXPR("tx_cmd", cEnum::getNameForValue(tx_cmd));
+        WATCH_EXPR("controlFsmState", controlFsm.getStateName());
+        WATCH_EXPR("dataFsmState", std::string(dataFsm.getStateName()));
     }
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         auto networkInterface = getContainingNicModule(this);
@@ -148,15 +188,6 @@ void EthernetPlca::finish()
     emit(dataStateChangedSignal, dataFsm.getState());
     emit(rxCmdSignal, rx_cmd);
     emit(txCmdSignal, tx_cmd);
-}
-
-void EthernetPlca::refreshDisplay() const
-{
-    auto& displayString = getDisplayString();
-    std::stringstream stream;
-    stream << curID << "/" << plca_node_count << " (" << local_nodeID << ")\n";
-    stream << controlFsm.getStateName() << " - " << dataFsm.getStateName();
-    displayString.setTagArg("t", 0, stream.str().c_str());
 }
 
 void EthernetPlca::handleMessage(cMessage *message)

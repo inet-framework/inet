@@ -38,6 +38,8 @@ void ChiangMobility::initialize(int stage)
         stationary = (speed == 0);
         xState = 1;
         yState = 1;
+        WATCH(xState);
+        WATCH(yState);
     }
 }
 

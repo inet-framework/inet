@@ -59,9 +59,10 @@ void MoBanLocal::initialize(int stage)
 
     EV_TRACE << "initializing MoBanLocal stage " << stage << endl;
     if (stage == INITSTAGE_LOCAL) {
+        WATCH(maxSpeed);
         WATCH(lastCompositePosition);
         WATCH(lastCompositeVelocity);
-        WATCH_PTR(coordinator);
+        WATCH(coordinator);
         WATCH(referencePosition);
         WATCH(radius);
         WATCH(speed);

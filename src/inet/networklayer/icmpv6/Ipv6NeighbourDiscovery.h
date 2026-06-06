@@ -86,6 +86,8 @@ class INET_API Ipv6NeighbourDiscovery : public SimpleModule, public LifecycleUns
 
     // Packets awaiting Address Resolution or Next-Hop Determination.
     cQueue pendingQueue;
+    long numSent = 0;
+    long numReceived = 0;
 
     ModuleRefByPar<IInterfaceTable> ift;
     ModuleRefByPar<Ipv6RoutingTable> rt6;

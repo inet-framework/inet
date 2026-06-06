@@ -21,6 +21,8 @@ void EligibilityTimeGate::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         eligibilityTimer = new ClockEvent("EligibilityTimer");
         lastRemainingEligibilityTimeSignalTime = simTime();
+        WATCH(lastRemainingEligibilityTimeSignalTime);
+        WATCH(lastRemainingEligibilityTimeSignalValue);
 #if OMNETPP_VERSION >= 0x0602
         WATCH_EXPR("remainingEligibilityTime", getRemainingEligibilityTime());
 #endif

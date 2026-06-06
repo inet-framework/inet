@@ -28,6 +28,10 @@ void RedDropper::initialize(int stage)
         maxp = par("maxp");
         pkrate = par("pkrate");
         count = -1;
+        WATCH(avg);
+        WATCH(count);
+        WATCH(markNext);
+        WATCH(q_time);
         if (minth < 0.0)
             throw cRuntimeError("minth parameter must not be negative");
         if (maxth < 0.0)

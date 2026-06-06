@@ -37,6 +37,7 @@ void TractorMobility::initialize(int stage)
         y2 = par("y2");
         rowCount = par("rowCount");
         step = 0;
+        WATCH(step);
     }
 }
 

@@ -31,10 +31,13 @@ class INET_API Ospfv2 : public RoutingProtocolBase, protected cListener
     ModuleRefByPar<IInterfaceTable> ift;
     Router *ospfRouter = nullptr; // root object of the OSPF data structure
     cMessage *startupTimer = nullptr; // timer for delayed startup
+    long numSent = 0;
+    long numReceived = 0;
 
   public:
     Ospfv2();
     virtual ~Ospfv2();
+    void countSentPacket() { numSent++; }
 
     /**
      * Insert a route learn by BGP in OSPF routingTable as an external route.

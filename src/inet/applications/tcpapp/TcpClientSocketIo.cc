@@ -19,6 +19,13 @@ TcpClientSocketIo::~TcpClientSocketIo()
     cancelAndDelete(readDelayTimer);
 }
 
+void TcpClientSocketIo::initialize()
+{
+    WATCH(bytesRcvd);
+    WATCH(bytesSent);
+    WATCH_EXPR("socketState", TcpSocket::stateName(socket.getState()));
+}
+
 void TcpClientSocketIo::open()
 {
     socket.setOutputGate(gate("socketOut"));
@@ -45,7 +52,9 @@ void TcpClientSocketIo::handleMessage(cMessage *message)
     else if (message->arrivedOn("trafficIn")) {
         if (!socket.isOpen())
             open();
-        socket.send(check_and_cast<Packet *>(message));
+        auto *pkt = check_and_cast<Packet *>(message);
+        bytesSent += pkt->getByteLength();
+        socket.send(pkt);
     }
     else if (message == readDelayTimer) {
         socket.read(par("readSize"));
@@ -56,6 +65,7 @@ void TcpClientSocketIo::handleMessage(cMessage *message)
 
 void TcpClientSocketIo::socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent)
 {
+    bytesRcvd += packet->getByteLength();
     packet->removeTag<SocketInd>();
     send(packet, "trafficOut");
     sendOrScheduleReadCommandIfNeeded();

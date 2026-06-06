@@ -19,6 +19,7 @@ void IdealEpEnergyStorage::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         energyBalance = J(0);
         lastEnergyBalanceUpdate = 0;
+        WATCH(lastEnergyBalanceUpdate);
         WATCH(energyBalance);
     }
 }

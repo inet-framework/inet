@@ -30,7 +30,7 @@ PimNeighbor::~PimNeighbor()
     delete livenessTimer;
 }
 
-// for WATCH_MAP()
+// for WATCH()
 std::ostream& operator<<(std::ostream& os, const PimNeighborTable::PimNeighborVector& v)
 {
     for (unsigned int i = 0; i < v.size(); i++) {
@@ -70,7 +70,8 @@ void PimNeighborTable::initialize(int stage)
     SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        WATCH_MAP(neighbors);
+        WATCH(neighbors);
+        WATCH_EXPR("numNeighbors", getTotalNumNeighbors());
     }
 }
 
@@ -169,6 +170,14 @@ PimNeighbor *PimNeighborTable::getNeighbor(int interfaceId, int index)
 {
     auto it = neighbors.find(interfaceId);
     return it != neighbors.end() ? it->second.at(index) : nullptr;
+}
+
+size_t PimNeighborTable::getTotalNumNeighbors() const
+{
+    size_t n = 0;
+    for (auto& p : neighbors)
+        n += p.second.size();
+    return n;
 }
 
 } // namespace inet

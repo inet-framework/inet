@@ -33,7 +33,11 @@ void EigrpSplitter::initialize(int stage)
 {
     SimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
+    if (stage == INITSTAGE_LOCAL) {
+        WATCH(numSent);
+        WATCH(numReceived);
+    }
+    else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         registerService(Protocol::eigrp, gate("splitterIn"), gate("splitterOut"));
         registerService(Protocol::eigrp, gate("splitter6In"), gate("splitter6Out"));
         registerProtocol(Protocol::eigrp, gate("ipOut"), gate("ipIn"));
@@ -48,10 +52,11 @@ void EigrpSplitter::handleMessage(cMessage *msg)
     }
     else {
         if (strcmp(msg->getArrivalGate()->getBaseName(), "splitterIn") == 0 || strcmp(msg->getArrivalGate()->getBaseName(), "splitter6In") == 0) {
+            numSent++;
             this->send(msg, "ipOut"); // A message from ipv6pdm or ipv4pdm to outside
         }
         else if (strcmp(msg->getArrivalGate()->getBaseName(), "ipIn") == 0) {
-
+            numReceived++;
             Packet *packet = check_and_cast<Packet *>(msg); // A message to ipv6pdm or ipv4pdm
 
             auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();

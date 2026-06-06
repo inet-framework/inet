@@ -73,6 +73,8 @@ class INET_API Dymo : public RoutingProtocolBase, public cListener, public Netfi
     ModuleRefByPar<INetfilter> networkProtocol;
 
     // internal
+    long numSent = 0;
+    long numReceived = 0;
     cMessage *expungeTimer;
     DymoSequenceNumber sequenceNumber;
     std::map<L3Address, DymoSequenceNumber> targetAddressToSequenceNumber;

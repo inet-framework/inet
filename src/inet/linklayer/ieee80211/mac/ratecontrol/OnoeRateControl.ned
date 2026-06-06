@@ -20,6 +20,7 @@ simple OnoeRateControl extends SimpleModule like IRateControl
         @class(OnoeRateControl);
         double initialRate @unit(bps) = default(-1bps); // -1 means the fastest mandatory rate
         double interval @unit(s) = default(1s);
+        displayStringTextFormat = default("{currentMode}");
         @display("i=block/cogwheel");
         @signal[datarateChanged];
         @statistic[datarateChanged](title="datarate"; record=vector; interpolationmode=sample-hold);

@@ -26,6 +26,7 @@ simple AarfRateControl extends SimpleModule like IRateControl
                                             // needed to increase the rate
         double increaseThresholdFactor = default(2); // When the transmission of the probing packet fails, increaseThreshold is multiplied by increaseThresholdFactor.
         int maxIncreaseThreshold = default(50); // Upper bound for increaseThreshold.
+        displayStringTextFormat = default("{currentMode}");
         @display("i=block/cogwheel");
         @signal[datarateChanged];
         @statistic[datarateChanged](title="datarate"; record=vector; interpolationmode=sample-hold);

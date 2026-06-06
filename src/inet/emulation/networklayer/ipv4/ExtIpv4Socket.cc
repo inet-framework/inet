@@ -42,6 +42,7 @@ void ExtIpv4Socket::initialize(int stage)
         rtScheduler = check_and_cast<RealTimeScheduler *>(getSimulation()->getScheduler());
         openSocket();
         numSent = numReceived = 0;
+        WATCH(fd);
         WATCH(numSent);
         WATCH(numReceived);
     }
@@ -73,12 +74,6 @@ void ExtIpv4Socket::handleMessage(cMessage *msg)
         EV << "Sending packet FAILED! (sendto returned " << sent << " (" << strerror(errno) << ") instead of " << packetLength << ").\n";
     numSent++;
     delete packet;
-}
-
-void ExtIpv4Socket::refreshDisplay() const
-{
-    std::string buf = "snt:" + std::to_string(numSent) + " rcv:" + std::to_string(numReceived);
-    getDisplayString().setTagArg("t", 0, buf.c_str());
 }
 
 void ExtIpv4Socket::finish()

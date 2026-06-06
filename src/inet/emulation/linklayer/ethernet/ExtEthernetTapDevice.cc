@@ -43,6 +43,7 @@ void ExtEthernetTapDevice::initialize(int stage)
         packetNameFormat = par("packetNameFormat");
         rtScheduler = check_and_cast<RealTimeScheduler *>(getSimulation()->getScheduler());
         numSent = numReceived = 0;
+        WATCH(fd);
         WATCH(numSent);
         WATCH(numReceived);
     }
@@ -79,13 +80,6 @@ void ExtEthernetTapDevice::handleMessage(cMessage *msg)
         EV_ERROR << "Sending Ethernet packet FAILED! (sendto returned " << nwrite << " (" << strerror(errno) << ") instead of " << packetLength << ").\n";
     delete packet;
     delete [] buffer;
-}
-
-void ExtEthernetTapDevice::refreshDisplay() const
-{
-    SimpleModule::refreshDisplay();
-    std::string buf = "TAP device: " + device + "\nrcv:" + std::to_string(numReceived) + " snt:" + std::to_string(numSent);
-    getDisplayString().setTagArg("t", 0, buf.c_str());
 }
 
 void ExtEthernetTapDevice::finish()

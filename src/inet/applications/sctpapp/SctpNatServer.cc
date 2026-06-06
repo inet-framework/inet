@@ -34,6 +34,7 @@ void SctpNatServer::initialize(int stage)
 
     SimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        WATCH(shutdownReceived);
         WATCH(numSessions);
         WATCH(packetsSent);
         WATCH(packetsRcvd);

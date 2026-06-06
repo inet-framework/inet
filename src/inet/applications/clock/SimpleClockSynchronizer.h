@@ -20,6 +20,7 @@ class INET_API SimpleClockSynchronizer : public ApplicationBase
 {
   protected:
     cMessage *synhronizationTimer = nullptr;
+    int numSynchronizations = 0;
     ModuleRefByPar<IClock> masterClock;
     ModuleRefByPar<SettableClock> slaveClock;
     cPar *synchronizationIntervalParameter = nullptr;

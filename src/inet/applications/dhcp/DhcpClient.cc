@@ -48,10 +48,15 @@ void DhcpClient::initialize(int stage)
         WATCH(numReceived);
         WATCH(clientState);
         WATCH(xid);
+        WATCH_EXPR("clientStateName", getStateName(clientState));
 
         // DHCP UDP ports
         clientPort = 68; // client
         serverPort = 67; // server
+        WATCH(clientPort);
+        WATCH(serverPort);
+        WATCH(macAddress);
+        WATCH(responseTimeout);
         // get the routing table to update and subscribe it to the blackboard
         irt.reference(this, "routingTableModule", true);
         // set client to idle state
@@ -166,13 +171,6 @@ const char *DhcpClient::getAndCheckMessageTypeName(DhcpMessageType type)
             throw cRuntimeError("Unknown or invalid DHCP message type %d", type);
 #undef CASE
     }
-}
-
-void DhcpClient::refreshDisplay() const
-{
-    ApplicationBase::refreshDisplay();
-
-    getDisplayString().setTagArg("t", 0, getStateName(clientState));
 }
 
 void DhcpClient::handleMessageWhenUp(cMessage *msg)

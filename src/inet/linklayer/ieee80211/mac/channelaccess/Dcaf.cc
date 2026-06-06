@@ -40,19 +40,8 @@ void Dcaf::initialize(int stage)
         WATCH(cw);
         WATCH(cwMin);
         WATCH(cwMax);
+        WATCH_EXPR("contentionState", owning ? "Owning" : (contention != nullptr && contention->isContentionInProgress()) ? "Contending" : "Idle");
     }
-}
-
-void Dcaf::refreshDisplay() const
-{
-    std::string text;
-    if (owning)
-        text = "Owning";
-    else if (contention != nullptr && contention->isContentionInProgress())
-        text = "Contending";
-    else
-        text = "Idle";
-    getDisplayString().setTagArg("t", 0, text.c_str());
 }
 
 void Dcaf::calculateTimingParameters()

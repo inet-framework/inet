@@ -33,6 +33,7 @@ void PacketServer::initialize(int stage)
             serveTimer->setSchedulingPriority(serveSchedulingPriority);
         }
         processingTimer = new ClockEvent("ProcessingTimer");
+        WATCH_EXPR("processingState", processingTimer->isScheduled() ? "processing" : "");
     }
 }
 

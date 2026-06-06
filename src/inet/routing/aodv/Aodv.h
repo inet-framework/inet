@@ -71,6 +71,8 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     UdpSocket socket;
     NetworkInterface *interface;
     bool usingIpv6 = false;
+    long numSent = 0;
+    long numReceived = 0;
 
     // AODV parameters: the following parameters are configurable, see the NED file for more info.
     unsigned int rerrRatelimit = 0;

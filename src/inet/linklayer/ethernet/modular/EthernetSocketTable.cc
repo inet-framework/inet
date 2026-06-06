@@ -29,7 +29,7 @@ EthernetSocketTable::~EthernetSocketTable()
 void EthernetSocketTable::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
-        WATCH_PTRMAP(socketIdToSocketMap);
+        WATCH(socketIdToSocketMap);
 }
 
 void EthernetSocketTable::addSocket(int socketId, MacAddress localAddress, MacAddress remoteAddress, const Protocol *protocol, bool steal)

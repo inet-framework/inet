@@ -68,8 +68,9 @@ void EthernetEncapsulation::initialize(int stage)
         totalFromHigherLayer = totalFromMAC = totalPauseSent = 0;
         interfaceTable.reference(this, "interfaceTableModule", true);
 
-        WATCH_PTRSET(upperProtocols);
-        WATCH_PTRMAP(socketIdToSocketMap);
+        WATCH(anyUpperProtocols);
+        WATCH(upperProtocols);
+        WATCH(socketIdToSocketMap);
         WATCH(totalFromHigherLayer);
         WATCH(totalFromMAC);
         WATCH(totalPauseSent);
@@ -143,13 +144,6 @@ void EthernetEncapsulation::processCommandFromHigherLayer(Request *msg)
     }
     else
         throw cRuntimeError("Unknown command: '%s' with %s", msg->getName(), ctrl->getClassName());
-}
-
-void EthernetEncapsulation::refreshDisplay() const
-{
-    OperationalBase::refreshDisplay();
-    std::string buf = "passed up: " + std::to_string(totalFromMAC) + "\nsent: " + std::to_string(totalFromHigherLayer);
-    getDisplayString().setTagArg("t", 0, buf.c_str());
 }
 
 void EthernetEncapsulation::processPacketFromHigherLayer(Packet *packet)

@@ -31,6 +31,7 @@ void Ieee8021dRelay::initialize(int stage)
         WATCH(numReceivedNetworkFrames);
         WATCH(numReceivedBPDUsFromSTP);
         WATCH(numDeliveredBDPUsToSTP);
+        WATCH(numDispatchedBDPUFrames);
         WATCH(numDispatchedNonBPDUFrames);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {

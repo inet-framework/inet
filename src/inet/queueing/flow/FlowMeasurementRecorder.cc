@@ -57,11 +57,19 @@ void FlowMeasurementRecorder::initialize(int stage)
         measureLifeTime = matchesString(measureMatcher, "lifeTime");
         measureElapsedTime = matchesString(measureMatcher, "elapsedTime");
         measureDelayingTime = matchesString(measureMatcher, "delayingTime");
+        WATCH(measureLifeTime);
+        WATCH(measureElapsedTime);
+        WATCH(measureDelayingTime);
         measureQueueingTime = matchesString(measureMatcher, "queueingTime");
+        WATCH(measureQueueingTime);
         measureProcessingTime = matchesString(measureMatcher, "processingTime");
+        WATCH(measureProcessingTime);
         measureTransmissionTime = matchesString(measureMatcher, "transmissionTime");
+        WATCH(measureTransmissionTime);
         measurePropagationTime = matchesString(measureMatcher, "propagationTime");
+        WATCH(measurePropagationTime);
         measurePacketEvent = matchesString(measureMatcher, "packetEvent");
+        WATCH(measurePacketEvent);
         if (measurePacketEvent) {
             std::string fileName = getEnvir()->getConfig()->substituteVariables(par("packetEventFileName"));
             inet::utils::makePathForFile(fileName.c_str());

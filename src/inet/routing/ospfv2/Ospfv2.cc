@@ -44,6 +44,10 @@ void Ospfv2::initialize(int stage)
         ift.reference(this, "interfaceTableModule", true);
         rt.reference(this, "routingTableModule", true);
         startupTimer = new cMessage("OSPF-startup");
+        WATCH(numSent);
+        WATCH(numReceived);
+        WATCH_EXPR("numRoutes", ospfRouter ? (int)ospfRouter->getRoutingTableEntryCount() : 0);
+        WATCH_EXPR("numAreas", ospfRouter ? (int)ospfRouter->getAreaCount() : 0);
         WATCH_EXPR("interfaces", ospfRouter ? ospfRouter->getInterfaceInfo() : std::string());
         WATCH_EXPR("routerID", ospfRouter ? ospfRouter->getRouterID().str() : std::string("<ospf inactive>"));
     }
@@ -58,8 +62,10 @@ void Ospfv2::handleMessageWhenUp(cMessage *msg)
         createOspfRouter();
         subscribe();
     }
-    else
+    else {
+        numReceived++;
         ospfRouter->getMessageHandler()->messageReceived(msg);
+    }
 
 }
 

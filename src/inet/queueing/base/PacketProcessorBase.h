@@ -25,8 +25,6 @@ class INET_API PacketProcessorBase : public SimpleModule, public virtual IPacket
         PULL,
     };
 
-  protected:
-    const char *displayStringTextFormat = nullptr;
     int numProcessedPackets = -1;
     b processedTotalLength = b(-1);
 

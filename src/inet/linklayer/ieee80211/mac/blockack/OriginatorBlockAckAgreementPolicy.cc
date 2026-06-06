@@ -25,6 +25,7 @@ void OriginatorBlockAckAgreementPolicy::initialize(int stage)
         maximumAllowedBufferSize = par("maximumAllowedBufferSize");
         blockAckTimeoutValue = par("blockAckTimeoutValue");
         // TODO addbaFailureTimeout = par("addbaFailureTimeout");
+        WATCH(blockAckReqThreshold);
     }
 }
 

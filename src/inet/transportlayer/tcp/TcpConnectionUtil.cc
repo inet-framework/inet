@@ -257,6 +257,9 @@ TcpConnection *TcpConnection::cloneListeningConnection()
 
 void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader)
 {
+    sentSegments++;
+    lastSentAck = tcpHeader->getAckNo();
+
     // record seq (only if we do send data) and ackno
     if (tcpSegment->getByteLength() > tcpHeader->getChunkLength().get<B>())
         emit(sndNxtSignal, tcpHeader->getSequenceNo());
@@ -626,6 +629,10 @@ void TcpConnection::configureStateVariables()
     state->pmtudEnabled = tcpMain->par("pmtudEnabled"); // Path MTU Discovery (RFC 1191, RFC 1981)
     state->pmtudTimeout = tcpMain->par("pmtudTimeout"); // time after which original MSS is restored
     state->pmtudLastMssReduction = -1; // never reduced yet
+
+    WATCH_EXPR("snd_nxt", state->snd_nxt);
+    WATCH_EXPR("rcv_nxt", state->rcv_nxt);
+    WATCH_EXPR("snd_una", state->snd_una);
 
     if (state->sack_support) {
         std::string algorithmName1 = "TcpReno";

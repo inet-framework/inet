@@ -35,6 +35,12 @@ void GridNeighborCache::initialize(int stage)
         cellSize.z = par("cellSizeZ");
         refillPeriod = par("refillPeriod");
         refillCellsTimer = new cMessage("refillCellsTimer");
+
+        WATCH(maxSpeed);
+        WATCH(cellSize);
+        WATCH(constraintAreaMin);
+        WATCH(constraintAreaMax);
+        WATCH(refillCellsTimer);
     }
     else if (stage == INITSTAGE_PHYSICAL_LAYER_NEIGHBOR_CACHE) {
         constraintAreaMin = radioMedium->getMediumLimitCache()->getMinConstraintArea();

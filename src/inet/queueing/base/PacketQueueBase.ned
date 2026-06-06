@@ -25,7 +25,7 @@ package inet.queueing.base;
 simple PacketQueueBase extends PacketProcessorBase
 {
     parameters:
-        displayStringTextFormat = default("contains %p pk (%l)\npushed %u pulled %o dropped %d"); // Determines display string text above the submodule
+        displayStringTextFormat = default("contains {numPackets} pk ({totalLength})\npushed {numPushedPackets} pulled {numPulledPackets} dropped {numDroppedPackets}"); // Determines display string text above the submodule
         @display("i=block/queue");
     gates:
         input in @loose;

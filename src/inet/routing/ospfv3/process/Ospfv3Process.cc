@@ -48,9 +48,11 @@ void Ospfv3Process::initialize(int stage)
         cMessage *init = new cMessage();
         init->setKind(INIT_PROCESS);
         scheduleAfter(OSPFV3_START, init);
-        WATCH_PTRVECTOR(this->instances);
-        WATCH_PTRVECTOR(this->routingTableIPv6);
-        WATCH_PTRVECTOR(this->routingTableIPv4);
+        WATCH(isActive);
+        WATCH(this->instances);
+        WATCH(this->routingTableIPv6);
+        WATCH(this->routingTableIPv4);
+        WATCH_EXPR("numInstances", instances.size());
 
         ageTimer = new cMessage("Ospfv3Process::DatabaseAgeTimer", DATABASE_AGE_TIMER);
         ageTimer->setContextPointer(this);

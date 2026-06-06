@@ -33,6 +33,11 @@ void QuadTreeNeighborCache::initialize(int stage)
         rebuildQuadTreeTimer = new cMessage("rebuildQuadTreeTimer");
         refillPeriod = par("refillPeriod");
         maxNumOfPointsPerQuadrant = par("maxNumOfPointsPerQuadrant");
+
+        WATCH(maxSpeed);
+        WATCH(constraintAreaMin);
+        WATCH(constraintAreaMax);
+        WATCH(rebuildQuadTreeTimer);
     }
     else if (stage == INITSTAGE_PHYSICAL_LAYER_NEIGHBOR_CACHE) {
         constraintAreaMin = radioMedium->getMediumLimitCache()->getMinConstraintArea();

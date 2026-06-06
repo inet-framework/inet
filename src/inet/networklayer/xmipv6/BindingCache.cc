@@ -38,7 +38,7 @@ BindingCache::~BindingCache()
 
 void BindingCache::initialize()
 {
-    WATCH_MAP(bindingCache); // added by Zarrar Yousaf
+    WATCH(bindingCache); // added by Zarrar Yousaf
 }
 
 void BindingCache::handleMessage(cMessage *msg)

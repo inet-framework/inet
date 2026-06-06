@@ -99,6 +99,8 @@ void MobilityBase::initialize(int stage)
     else if (stage == INITSTAGE_SINGLE_MOBILITY) {
         initializeOrientation();
         initializePosition();
+        WATCH_EXPR("position", getCurrentPosition());
+        WATCH_EXPR("velocity", getCurrentVelocity());
     }
 }
 

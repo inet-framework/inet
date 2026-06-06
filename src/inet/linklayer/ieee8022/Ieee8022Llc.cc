@@ -40,8 +40,10 @@ void Ieee8022Llc::initialize(int stage)
             registerProtocol(Protocol::ieee8022llc, gate("lowerLayerOut"), gate("lowerLayerIn"));
         }
 
-        WATCH_PTRMAP(socketIdToSocketDescriptor);
-        WATCH_PTRSET(upperProtocols);
+        WATCH(socketIdToSocketDescriptor);
+        WATCH(upperProtocols);
+        WATCH_EXPR("sockets", socketIdToSocketDescriptor.size());
+        WATCH_EXPR("protocols", upperProtocols.size());
     }
 }
 

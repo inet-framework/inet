@@ -20,6 +20,13 @@ QuicOrderedReceiver::~QuicOrderedReceiver()
     }
 }
 
+void QuicOrderedReceiver::initialize(int stage)
+{
+    ApplicationBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL)
+        WATCH(bytesReceived);
+}
+
 void QuicOrderedReceiver::handleStartOperation(LifecycleOperation *operation)
 {
     L3Address localAddress = L3AddressResolver().resolve(par("localAddress"));
@@ -63,7 +70,9 @@ void QuicOrderedReceiver::socketDataArrived(QuicSocket* socket, Packet *packet)
 {
     auto data = packet->popAtFront();
     static simsignal_t bytesReceivedSignal = registerSignal("bytesReceived");
-    emit(bytesReceivedSignal, (long)B(data->getChunkLength()).get());
+    long chunkBytes = (long)B(data->getChunkLength()).get();
+    emit(bytesReceivedSignal, chunkBytes);
+    bytesReceived += chunkBytes;
     EV_DEBUG << data << " received, check..." << endl;
     checkData(data);
     delete packet;

@@ -27,6 +27,7 @@ void Ipv4NodeConfigurator::initialize(int stage)
         _configureRoutingTable = par("configureRoutingTable");
         cModule *node = getContainingNode(this);
         nodeStatus = dynamic_cast<NodeStatus *>(node->getSubmodule("status"));
+
         interfaceTable.reference(this, "interfaceTableModule", true);
         routingTable.reference(this, "routingTableModule", true);
         networkConfigurator.reference(this, "networkConfiguratorModule", false);

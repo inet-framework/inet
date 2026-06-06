@@ -64,6 +64,11 @@ void SuiPathLoss::initialize(int stage)
         }
         else
             throw cRuntimeError("Unknown terrain");
+        WATCH(a);
+        WATCH(b);
+        WATCH(c);
+        WATCH(d);
+        WATCH(s);
     }
 }
 

@@ -88,6 +88,8 @@ void EthernetMacPhy::initializeStatistics()
 
     // initialize statistics
     totalSuccessfulRxTime = 0.0;
+    WATCH(receptionOnStart);
+    WATCH(totalSuccessfulRxTime);
 }
 
 void EthernetMacPhy::setReceptionOnStartMode()

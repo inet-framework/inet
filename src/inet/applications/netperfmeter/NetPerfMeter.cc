@@ -192,6 +192,30 @@ void NetPerfMeter::initialize(int stage)
                 }
             }
         }
+
+        WATCH(SendingAllowed);
+        WATCH(HasFinished);
+        WATCH(QueueSize);
+        WATCH(ConnectTimer);
+        WATCH(StartTimer);
+        WATCH(StopTimer);
+        WATCH(ResetTimer);
+        WATCH(OffTimer);
+        WATCH(OnTimer);
+        WATCH(OnOffCycleCounter);
+        WATCH_EXPR("totalSentBytes", getTotalSentBytes());
+        WATCH_EXPR("totalReceivedBytes", getTotalReceivedBytes());
+        WATCH(RequestedOutboundStreams);
+        WATCH(MaxInboundStreams);
+        WATCH(ActualOutboundStreams);
+        WATCH(ActualInboundStreams);
+        WATCH(ConnectionEstablishmentTime);
+        WATCH(LastStreamID);
+        WATCH(PrimaryPath);
+        WATCH(StatisticsResetTime);
+        WATCH(StatisticsStartTime);
+        WATCH(TransmissionStartTime);
+        WATCH(ConnectionID);
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         // ====== Initialize and bind socket =====================================
@@ -260,34 +284,6 @@ void NetPerfMeter::finish()
         ReceiverStatisticsMap.erase(receiverStatisticsIterator);
         receiverStatisticsIterator = ReceiverStatisticsMap.begin();
     }
-}
-
-// ###### Show I/O status ###################################################
-void NetPerfMeter::refreshDisplay() const
-{
-    SimpleModule::refreshDisplay();
-    
-    unsigned long long totalSentBytes = 0;
-    for (std::map<unsigned int, SenderStatistics *>::const_iterator iterator = SenderStatisticsMap.begin();
-         iterator != SenderStatisticsMap.end(); iterator++)
-    {
-        const SenderStatistics *senderStatistics = iterator->second;
-        totalSentBytes += senderStatistics->SentBytes;
-    }
-
-    unsigned long long totalReceivedBytes = 0;
-    for (std::map<unsigned int, ReceiverStatistics *>::const_iterator iterator = ReceiverStatisticsMap.begin();
-         iterator != ReceiverStatisticsMap.end(); iterator++)
-    {
-        const ReceiverStatistics *receiverStatistics = iterator->second;
-        totalReceivedBytes += receiverStatistics->ReceivedBytes;
-    }
-
-    char status[64];
-    snprintf(status, sizeof(status), "In: %llu, Out: %llu",
-            totalReceivedBytes, totalSentBytes);
-    getDisplayString().setTagArg("t", 0, status);
-    // TODO also was setStatusString("Connecting"), setStatusString("Closed")
 }
 
 // ###### Handle timer ######################################################
@@ -1238,6 +1234,22 @@ opp_string NetPerfMeter::format(const char *formatString, ...)
     vsnprintf(str, sizeof(str), formatString, args);
     va_end(args);
     return opp_string(str);
+}
+
+unsigned long NetPerfMeter::getTotalSentBytes() const
+{
+    unsigned long total = 0;
+    for (auto& e : SenderStatisticsMap)
+        total += e.second->SentBytes;
+    return total;
+}
+
+unsigned long NetPerfMeter::getTotalReceivedBytes() const
+{
+    unsigned long total = 0;
+    for (auto& e : ReceiverStatisticsMap)
+        total += e.second->ReceivedBytes;
+    return total;
 }
 
 } // namespace inet

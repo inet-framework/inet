@@ -24,7 +24,11 @@ void Ipv6FlatNetworkConfigurator::initialize(int stage)
 {
     SimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
+    if (stage == INITSTAGE_LOCAL) {
+        WATCH(numIpv6Nodes);
+        WATCH(numNonIpv6Nodes);
+    }
+    else if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
         Topology topo("topo");
 
         // extract topology
@@ -43,11 +47,10 @@ void Ipv6FlatNetworkConfigurator::handleMessage(cMessage *)
     throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()");
 }
 
-void Ipv6FlatNetworkConfigurator::setDisplayString(int numIPNodes, int numNonIPNodes)
+void Ipv6FlatNetworkConfigurator::updateNodeCounts(int numIPNodes, int numNonIPNodes)
 {
-    // update display string
-    std::string buf = std::to_string(numIPNodes) + " Ipv6 nodes\n" + std::to_string(numNonIPNodes) + " non-IP nodes";
-    getDisplayString().setTagArg("t", 0, buf.c_str());
+    numIpv6Nodes = numIPNodes;
+    numNonIpv6Nodes = numNonIPNodes;
 }
 
 bool Ipv6FlatNetworkConfigurator::isIPNode(Topology::Node *node)
@@ -259,8 +262,7 @@ void Ipv6FlatNetworkConfigurator::addStaticRoutes(Topology& topo)
         }
     }
 
-    // update display string
-    setDisplayString(numIPNodes, topo.getNumNodes() - numIPNodes);
+    updateNodeCounts(numIPNodes, topo.getNumNodes() - numIPNodes);
 }
 
 } // namespace inet

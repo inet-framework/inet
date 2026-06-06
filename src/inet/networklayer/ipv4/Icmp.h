@@ -34,6 +34,9 @@ class INET_API Icmp : public SimpleModule, public DefaultProtocolRegistrationLis
     ModuleRefByPar<IIpv4RoutingTable> rt;
     ModuleRefByPar<IInterfaceTable> ift;
     uint64_t& ctr = SIMULATION_SHARED_COUNTER(ctr);
+    int numEchoReplied = 0;
+    long numErrorsSent = 0;
+    long numErrorsReceived = 0;
 
   protected:
     virtual void processIcmpMessage(Packet *);

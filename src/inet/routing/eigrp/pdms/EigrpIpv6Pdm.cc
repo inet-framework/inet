@@ -91,16 +91,24 @@ void EigrpIpv6Pdm::initialize(int stage)
 //        registerService(Protocol::eigrp, nullptr, gate("splitterIn"));
 //        registerProtocol(Protocol::eigrp, gate("splitterOut"), nullptr);
 
-        WATCH_PTRVECTOR(*routingForNetworks->getAllNetworks());
+        WATCH(*routingForNetworks->getAllNetworks());
         WATCH(asNum);
+        WATCH(adminDistInt);
+        WATCH(eigrpStubEnabled);
+        WATCH(ribScale);
+        WATCH(useClassicMetric);
+        WATCH(kValues);
         WATCH(kValues.K1);
         WATCH(kValues.K2);
         WATCH(kValues.K3);
         WATCH(kValues.K4);
         WATCH(kValues.K5);
         WATCH(kValues.K6);
+        WATCH(KVALUES_MAX);
+        WATCH(reqQueue);
         WATCH(maximumPath);
         WATCH(variance);
+        WATCH(eigrpStub);
         WATCH(eigrpStub.connectedRt);
         WATCH(eigrpStub.leakMapRt);
         WATCH(eigrpStub.recvOnlyRt);

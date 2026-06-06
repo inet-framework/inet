@@ -152,6 +152,9 @@ void PcapRecorder::initialize()
         pcapWriter->setFlush(par("alwaysFlush"));
     }
 
+    WATCH(recordPcap);
+    WATCH(frontOffset);
+    WATCH(backOffset);
     WATCH(numRecorded);
 }
 

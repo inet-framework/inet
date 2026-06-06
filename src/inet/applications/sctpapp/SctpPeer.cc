@@ -85,10 +85,26 @@ void SctpPeer::initialize(int stage)
     SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
+        WATCH(chunksAbandoned);
+        WATCH(echoedBytesSent);
+        WATCH(lastStream);
+        WATCH(notificationsReceived);
+        WATCH(schedule);
+        WATCH(sendAllowed);
+        WATCH(serverAssocId);
+        WATCH(shutdownReceived);
+        WATCH(bytesPerAssoc);
+        WATCH(endToEndDelay);
+        WATCH(histEndToEndDelay);
+        WATCH(rcvdPacketsPerAssoc);
+        WATCH(sentPacketsPerAssoc);
+        WATCH(rcvdBytesPerAssoc);
         WATCH(numSessions);
         WATCH(packetsSent);
         WATCH(packetsRcvd);
         WATCH(bytesSent);
+        WATCH(bytesRcvd);
+        WATCH(statusStr);
         WATCH(numRequestsToSend);
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
@@ -427,11 +443,6 @@ void SctpPeer::handleMessage(cMessage *msg)
             break;
     }
 
-    if (hasGUI()) {
-        auto l = rcvdBytesPerAssoc.find(id);
-        std::string buf = "rcvd: " + std::to_string(l->second) + " bytes\nsent: " + std::to_string(bytesSent) + " bytes";
-        getDisplayString().setTagArg("t", 0, buf.c_str());
-    }
 }
 
 void SctpPeer::handleTimer(cMessage *msg)
@@ -530,8 +541,7 @@ void SctpPeer::socketStatusArrived(SctpSocket *socket, SctpStatusReq *status)
 
 void SctpPeer::setStatusString(const char *s)
 {
-    if (hasGUI())
-        getDisplayString().setTagArg("t", 0, s);
+    statusStr = s;
 }
 
 void SctpPeer::sendRequest(bool last)

@@ -46,8 +46,6 @@ class INET_API NetPerfMeter : public SimpleModule
     virtual void finish() override;
     virtual void handleMessage(cMessage *msg) override;
 
-    virtual void refreshDisplay() const override;
-
     void establishConnection();
     void successfullyEstablishedConnection(cMessage *msg, const unsigned int queueSize);
     void teardownConnection(const bool stopTimeReached = false);
@@ -57,6 +55,9 @@ class INET_API NetPerfMeter : public SimpleModule
 
     void sendSCTPQueueRequest(const unsigned int queueSize);
     void sendTCPQueueRequest(const unsigned int queueSize);
+
+    unsigned long getTotalSentBytes() const;
+    unsigned long getTotalReceivedBytes() const;
 
   protected:
     // ====== Parameters =====================================================

@@ -202,6 +202,8 @@ class INET_API PimSm : public PimBase, protected cListener
     static simsignal_t rcvdAssertPkSignal;
 
     // state
+    long numSent = 0;
+    long numReceived = 0;
     RoutingTable gRoutes;
     RoutingTable sgRoutes;
 

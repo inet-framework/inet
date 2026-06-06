@@ -187,6 +187,7 @@ class INET_API BMac : public MacProtocolBase, public IMacProtocol, public queuei
 
     /** @brief Generate new interface address*/
     virtual void configureNetworkInterface() override;
+    virtual std::string getMacStatusString() const;
     virtual void handleCommand(cMessage *msg) {}
 
     /** @brief Internal function to send the first packet in the queue */

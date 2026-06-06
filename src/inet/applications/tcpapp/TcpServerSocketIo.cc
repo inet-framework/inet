@@ -14,6 +14,13 @@ namespace inet {
 
 Define_Module(TcpServerSocketIo);
 
+void TcpServerSocketIo::initialize()
+{
+    WATCH(bytesRcvd);
+    WATCH(bytesSent);
+    WATCH_EXPR("socketState", socket ? TcpSocket::stateName(socket->getState()) : "none");
+}
+
 void TcpServerSocketIo::acceptSocket(TcpAvailableInfo *availableInfo)
 {
     Enter_Method("acceptSocket");
@@ -29,8 +36,11 @@ void TcpServerSocketIo::handleMessage(cMessage *message)
         ASSERT(socket != nullptr && socket->belongsToSocket(message));
         socket->processMessage(message);
     }
-    else if (message->arrivedOn("trafficIn"))
-        socket->send(check_and_cast<Packet *>(message));
+    else if (message->arrivedOn("trafficIn")) {
+        auto *pkt = check_and_cast<Packet *>(message);
+        bytesSent += pkt->getByteLength();
+        socket->send(pkt);
+    }
     else if (message == readDelayTimer) {
         if (socket->isOpen())
             socket->read(par("readSize"));
@@ -42,6 +52,7 @@ void TcpServerSocketIo::handleMessage(cMessage *message)
 void TcpServerSocketIo::socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent)
 {
     ASSERT(socket == this->socket);
+    bytesRcvd += packet->getByteLength();
     packet->removeTag<SocketInd>();
     send(packet, "trafficOut");
     sendOrScheduleReadCommandIfNeeded();

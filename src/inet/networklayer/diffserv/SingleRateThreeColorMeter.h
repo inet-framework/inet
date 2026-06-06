@@ -43,7 +43,6 @@ class INET_API SingleRateThreeColorMeter : public PacketMeterBase
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void refreshDisplay() const override;
 
     virtual void pushPacket(Packet *packet, const cGate *gate) override;
     virtual int meterPacket(Packet *packet) override;

@@ -45,6 +45,13 @@ void Flooding::initialize(int stage)
         nbDataPacketsSent = 0;
         nbDataPacketsForwarded = 0;
         nbHops = 0;
+        WATCH(seqNum);
+        WATCH(myNetwAddr);
+        WATCH(bcMsgs);
+        WATCH(nbDataPacketsReceived);
+        WATCH(nbDataPacketsSent);
+        WATCH(nbDataPacketsForwarded);
+        WATCH(nbHops);
         headerLength = par("headerLength");
         defaultTtl = par("defaultTtl");
         plainFlooding = par("plainFlooding");

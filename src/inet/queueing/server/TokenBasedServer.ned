@@ -23,7 +23,7 @@ simple TokenBasedServer extends PacketServerBase like IPacketServer
         double maxNumTokens = default(nan); // Maximum number of tokens
         volatile double tokenConsumptionPerPacket = default(1); // How many tokens are consumed per processed packet
         volatile double tokenConsumptionPerBit = default(0); // How many tokens are consumed per processed bit
-        displayStringTextFormat = default("contains %n tk\nserved %p pk (%l)"); // Determines display string text above the submodule
+        displayStringTextFormat = default("contains {numTokens} tk\nserved {numProcessedPackets} pk ({processedTotalLength})"); // Determines display string text above the submodule
         @signal[tokensAdded](type=double);
         @signal[tokensRemoved](type=double);
         @signal[tokensDepleted](type=double);

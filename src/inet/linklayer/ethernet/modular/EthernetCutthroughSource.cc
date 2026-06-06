@@ -22,6 +22,7 @@ void EthernetCutthroughSource::initialize(int stage)
         networkInterface = getContainingNicModule(this);
         macForwardingTable.reference(this, "macTableModule", true);
         cutthroughTimer = new cMessage("CutthroughTimer");
+        WATCH(cutthroughInProgress);
     }
 }
 

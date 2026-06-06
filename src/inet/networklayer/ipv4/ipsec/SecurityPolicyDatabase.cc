@@ -36,7 +36,8 @@ SecurityPolicyDatabase::~SecurityPolicyDatabase()
 
 void SecurityPolicyDatabase::initialize()
 {
-    WATCH_PTRVECTOR(entries);
+    WATCH(entries);
+    WATCH_EXPR("numEntries", entries.size());
 }
 
 SecurityPolicy *SecurityPolicyDatabase::findEntry(IPsecRule::Direction direction, PacketInfo *packet)
@@ -51,12 +52,6 @@ SecurityPolicy *SecurityPolicyDatabase::findEntry(IPsecRule::Direction direction
 void SecurityPolicyDatabase::addEntry(SecurityPolicy *entry)
 {
     entries.push_back(entry);
-}
-
-void SecurityPolicyDatabase::refreshDisplay() const
-{
-    std::string buf = "entries: " + std::to_string(entries.size());
-    getDisplayString().setTagArg("t", 0, buf.c_str());
 }
 
 }    // namespace ipsec

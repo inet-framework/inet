@@ -33,6 +33,7 @@ void TcpGenericServerApp::initialize(int stage)
         // statistics
         msgsRcvd = msgsSent = bytesRcvd = bytesSent = 0;
 
+        WATCH(maxMsgDelay);
         WATCH(msgsRcvd);
         WATCH(msgsSent);
         WATCH(bytesRcvd);
@@ -161,12 +162,6 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
     }
 }
 
-void TcpGenericServerApp::refreshDisplay() const
-{
-    SimpleModule::refreshDisplay();
-    std::string buf = "rcvd: " + std::to_string(msgsRcvd) + " pks " + std::to_string(bytesRcvd) + " bytes\nsent: " + std::to_string(msgsSent) + " pks " + std::to_string(bytesSent) + " bytes";
-    getDisplayString().setTagArg("t", 0, buf.c_str());
-}
 
 void TcpGenericServerApp::finish()
 {

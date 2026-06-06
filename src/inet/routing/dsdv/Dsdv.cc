@@ -64,6 +64,13 @@ void Dsdv::initialize(int stage)
         forwardList = new std::list<ForwardEntry *>();
         event = new cMessage("event");
         purgeTimer = new cMessage("purge");
+
+        WATCH(numSent);
+        WATCH(numReceived);
+        WATCH(sequencenumber);
+        WATCH(interfaceId);
+        WATCH(isForwardHello);
+        WATCH_EXPR("numRoutes", rt->getNumRoutes());
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         registerProtocol(Protocol::manet, gate("ipOut"), gate("ipIn"));
@@ -177,6 +184,7 @@ void Dsdv::handleSelfMessage(cMessage *msg)
         packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
 
         // broadcast to other nodes the hello message
+        numSent++;
         send(packet, "ipOut");
         packet = nullptr;
         hello = nullptr;
@@ -193,6 +201,7 @@ void Dsdv::handleSelfMessage(cMessage *msg)
         for (auto it = forwardList->begin(); it != forwardList->end(); it++) {
             if ((*it)->event == msg) {
                 EV << "Vou mandar forward do " << (*it)->hello->peekData<DsdvHello>()->getSrcAddress() << endl; // todo
+                numSent++;
                 send((*it)->hello, "ipOut");
                 (*it)->hello = nullptr;
                 delete *it;
@@ -210,6 +219,7 @@ void Dsdv::handleMessageWhenUp(cMessage *msg)
         handleSelfMessage(msg);
     }
     else if (check_and_cast<Packet *>(msg)->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::manet) {
+        numReceived++;
         auto packet = new Packet("Hello");
 
         // When DSDV module receives DsdvHello from other host

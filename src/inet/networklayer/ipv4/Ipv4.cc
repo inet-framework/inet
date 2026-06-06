@@ -97,13 +97,19 @@ void Ipv4::initialize(int stage)
 
         pendingPackets.clear();
 
+        WATCH(checksumMode);
+        WATCH(curFragmentId);
+        WATCH(lastCheckTime);
+        WATCH(upperProtocols);
         WATCH(numMulticast);
         WATCH(numLocalDeliver);
         WATCH(numDropped);
         WATCH(numUnroutable);
         WATCH(numForwarded);
-        WATCH_MAP(pendingPackets);
-        WATCH_MAP(socketIdToSocketDescriptor);
+        WATCH_EXPR("ipv4StatusText", getIpv4StatusText());
+        WATCH(pendingPackets);
+        WATCH(queuedDatagramsForHooks);
+        WATCH(socketIdToSocketDescriptor);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         cModule *arpModule = check_and_cast<cModule *>(arp.get());
@@ -113,6 +119,22 @@ void Ipv4::initialize(int stage)
         registerService(Protocol::ipv4, gate("transportIn"), gate("transportOut"));
         registerProtocol(Protocol::ipv4, gate("queueOut"), gate("queueIn"));
     }
+}
+
+std::string Ipv4::getIpv4StatusText() const
+{
+    std::string buf;
+    if (numForwarded > 0)
+        buf += "fwd:" + std::to_string(numForwarded) + " ";
+    if (numLocalDeliver > 0)
+        buf += "up:" + std::to_string(numLocalDeliver) + " ";
+    if (numMulticast > 0)
+        buf += "mcast:" + std::to_string(numMulticast) + " ";
+    if (numDropped > 0)
+        buf += "DROP:" + std::to_string(numDropped) + " ";
+    if (numUnroutable > 0)
+        buf += "UNROUTABLE:" + std::to_string(numUnroutable) + " ";
+    return buf;
 }
 
 void Ipv4::handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
@@ -125,24 +147,6 @@ void Ipv4::handleRegisterProtocol(const Protocol& protocol, cGate *gate, Service
     Enter_Method("handleRegisterProtocol");
     if (gate->isName("transportOut"))
         upperProtocols.insert(&protocol);
-}
-
-void Ipv4::refreshDisplay() const
-{
-    OperationalBase::refreshDisplay();
-
-    std::string buf;
-    if (numForwarded > 0)
-        buf += "fwd:" + std::to_string(numForwarded) + " ";
-    if (numLocalDeliver > 0)
-        buf += "up:" + std::to_string(numLocalDeliver) + " ";
-    if (numMulticast > 0)
-        buf += "mcast:" + std::to_string(numMulticast) + " ";
-    if (numDropped > 0)
-        buf += "DROP:" + std::to_string(numDropped) + " ";
-    if (numUnroutable > 0)
-        buf += "UNROUTABLE:" + std::to_string(numUnroutable) + " ";
-    getDisplayString().setTagArg("t", 0, buf.c_str());
 }
 
 void Ipv4::handleRequest(Request *request)

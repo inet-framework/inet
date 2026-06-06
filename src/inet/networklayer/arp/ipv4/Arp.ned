@@ -43,6 +43,7 @@ simple Arp extends SimpleModule like IArp
         int retryCount = default(3);                  // Number of times ARP will attempt to resolve an IPv4 address
         double cacheTimeout @unit(s) = default(120s); // Number of seconds unused entries in the cache will time out
         string proxyArpInterfaces = default("*");     // List of interfaces that proxy ARP is enabled on (all interfaces by default)
+        displayStringTextFormat = default("size:{arpCacheSize} sent:{numRequestsSent}\nrepl:{numRepliesSent} fail:{numFailedResolutions}");
         @display("i=block/layer");
         @signal[arpRequestSent](type=inet::Packet);
         @signal[arpReplySent](type=inet::Packet);

@@ -43,6 +43,7 @@ class INET_API NodeStatus : public SimpleModule, public ILifecycle
     virtual void setState(State state);
     virtual void refreshDisplay() const override;
     static State getStateByName(const char *name);
+    static const char *getStateName(State state);
 };
 
 } // namespace inet

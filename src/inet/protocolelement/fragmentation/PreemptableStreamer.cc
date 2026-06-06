@@ -36,6 +36,7 @@ void PreemptableStreamer::initialize(int stage)
         consumer.reference(outputGate, false);
         collector.reference(outputGate, false);
         endStreamingTimer = new ClockEvent("EndStreamingTimer");
+        WATCH(streamStart);
     }
     else if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(inputGate);

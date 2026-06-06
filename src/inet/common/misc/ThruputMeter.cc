@@ -27,6 +27,7 @@ void ThruputMeter::initialize()
     WATCH(numPackets);
     WATCH(numBits);
     WATCH(intvlStartTime);
+    WATCH(intvlLastPkTime);
     WATCH(intvlNumPackets);
     WATCH(intvlNumBits);
 

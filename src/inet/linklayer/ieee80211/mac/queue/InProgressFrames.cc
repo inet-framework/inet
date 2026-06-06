@@ -23,13 +23,11 @@ void InProgressFrames::initialize(int stage)
         pendingQueue = check_and_cast<queueing::IPacketQueue *>(getModuleByPath(par("pendingQueueModule")));
         dataService = check_and_cast<IOriginatorMacDataService *>(getModuleByPath(par("originatorMacDataServiceModule")));
         ackHandler = check_and_cast<IAckHandler *>(getModuleByPath(par("ackHandlerModule")));
-    }
-}
 
-void InProgressFrames::refreshDisplay() const
-{
-    std::string text = std::to_string(inProgressFrames.size()) + " packets";
-    getDisplayString().setTagArg("t", 0, text.c_str());
+        WATCH(inProgressFrames);
+        WATCH(droppedFrames);
+        WATCH_EXPR("numInProgress", inProgressFrames.size());
+    }
 }
 
 std::string InProgressFrames::str() const

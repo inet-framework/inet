@@ -24,6 +24,10 @@ namespace inet {
 class INET_API Ipv6FlatNetworkConfigurator : public SimpleModule
 {
   protected:
+    int numIpv6Nodes = 0;
+    int numNonIpv6Nodes = 0;
+
+  protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
@@ -32,7 +36,7 @@ class INET_API Ipv6FlatNetworkConfigurator : public SimpleModule
     virtual void addOwnAdvPrefixRoutes(Topology& topo);
     virtual void addStaticRoutes(Topology& topo);
 
-    virtual void setDisplayString(int numIPNodes, int numNonIPNodes);
+    virtual void updateNodeCounts(int numIPNodes, int numNonIPNodes);
     virtual bool isIPNode(Topology::Node *node);
 };
 

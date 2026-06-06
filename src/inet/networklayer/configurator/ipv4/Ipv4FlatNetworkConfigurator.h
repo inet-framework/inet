@@ -39,6 +39,10 @@ class INET_API Ipv4FlatNetworkConfigurator : public SimpleModule
     typedef std::vector<NodeInfo> NodeInfoVector;
 
   protected:
+    int numIpv4Nodes = 0;
+    int numNonIpv4Nodes = 0;
+
+  protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
@@ -48,7 +52,7 @@ class INET_API Ipv4FlatNetworkConfigurator : public SimpleModule
     virtual void addDefaultRoutes(Topology& topo, NodeInfoVector& nodeInfo);
     virtual void fillRoutingTables(Topology& topo, NodeInfoVector& nodeInfo);
 
-    virtual void setDisplayString(Topology& topo, NodeInfoVector& nodeInfo);
+    virtual void updateNodeCounts(Topology& topo, NodeInfoVector& nodeInfo);
 };
 
 } // namespace inet

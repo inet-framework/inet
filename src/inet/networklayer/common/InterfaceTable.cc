@@ -62,16 +62,14 @@ void InterfaceTable::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         // get a pointer to the host module
         host = getContainingNode(this);
-        WATCH_PTRVECTOR(idToInterface);
+        WATCH(idToInterface);
+        WATCH_EXPR("numInterfaces", getNumInterfaces());
     }
 }
 
 void InterfaceTable::refreshDisplay() const
 {
     OperationalBase::refreshDisplay();
-
-    std::string buf = std::to_string(getNumInterfaces()) + " interfaces";
-    getDisplayString().setTagArg("t", 0, buf.c_str());
 
     if (par("displayAddresses")) {
         for (auto& elem : idToInterface) {

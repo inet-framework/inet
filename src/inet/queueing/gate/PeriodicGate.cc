@@ -28,6 +28,7 @@ void PeriodicGate::initialize(int stage)
         enableImplicitGuardBand = par("enableImplicitGuardBand");
         openSchedulingPriority = par("openSchedulingPriority");
         closeSchedulingPriority = par("closeSchedulingPriority");
+        WATCH(index);
         WATCH(isInGuardBand_);
     }
     else if (stage == INITSTAGE_QUEUEING)

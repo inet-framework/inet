@@ -105,13 +105,18 @@ void Ldp::initialize(int stage)
         lt.reference(this, "libTableModule", true);
         tedmod.reference(this, "tedModule", true);
 
-        WATCH_VECTOR(myPeers);
-        WATCH_VECTOR(fecUp);
-        WATCH_VECTOR(fecDown);
-        WATCH_VECTOR(fecList);
-        WATCH_VECTOR(pending);
+        WATCH(myPeers);
+        WATCH(fecUp);
+        WATCH(fecDown);
+        WATCH(fecList);
+        WATCH(pending);
+        WATCH(numSent);
+        WATCH(numReceived);
+        WATCH_EXPR("numPeers", myPeers.size());
+        WATCH_EXPR("numFecs", fecList.size());
 
         maxFecid = 0;
+        WATCH(maxFecid);
         sendHelloMsg = new cMessage("LDPSendHello");
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
@@ -210,6 +215,7 @@ void Ldp::handleMessageWhenUp(cMessage *msg)
 
 void Ldp::socketDataArrived(UdpSocket *socket, Packet *packet)
 {
+    numReceived++;
     // process incoming udp packet
     // FIXME add implementation
     processLDPHello(check_and_cast<Packet *>(packet));
@@ -262,6 +268,7 @@ void Ldp::handleCrashOperation(LifecycleOperation *operation)
 
 void Ldp::sendToPeer(Ipv4Address dest, Packet *msg)
 {
+    numSent++;
     getPeerSocket(dest)->send(msg);
 }
 
@@ -670,6 +677,7 @@ void Ldp::socketDataArrived(TcpSocket *socket)
 
     auto queue = socket->getReadBuffer();
     while (queue->has<LdpPacket>()) {
+        numReceived++;
         auto header = queue->pop<LdpPacket>();
         processLdpPacketFromTcp(header);
     }

@@ -30,6 +30,11 @@ void StpTester::initialize(int stage)
         checkTime = par("checkTime");
         scheduleAfter(checkTime, checkTimer);
         add_watches();
+
+        WATCH(loop);
+        WATCH(numOfVisitedNodes);
+        WATCH(numOfNodes);
+        WATCH(checkTimer);
     }
     else if (stage == INITSTAGE_LAST) {
         depthFirstSearch();

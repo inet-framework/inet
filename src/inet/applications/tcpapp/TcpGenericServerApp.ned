@@ -41,6 +41,7 @@ simple TcpGenericServerApp extends SimpleModule like IApp
         volatile int readSize @unit(B) = default(-1B);    // Used only with autoRead==false
         volatile double readDelay @unit(s) = default(-1s);    // Used only with autoRead==false; delay for issuing a READ command after the previous READ was satisfied; -1 means immediately, 0 means zero delay
         double replyDelay @unit(s) = default(0s);
+        displayStringTextFormat = default("rcvd: {msgsRcvd} pks {bytesRcvd} bytes\nsent: {msgsSent} pks {bytesSent} bytes");
         @display("i=block/app");
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finished

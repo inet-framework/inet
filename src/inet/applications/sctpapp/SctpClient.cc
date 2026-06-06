@@ -83,12 +83,17 @@ void SctpClient::initialize(int stage)
         stopTimer = nullptr;
         primaryChangeTimer = nullptr;
 
+        WATCH(timer);
+        WATCH(chunksAbandoned);
+        WATCH(echoedBytesSent);
+        WATCH(sendAllowed);
         WATCH(numSessions);
         WATCH(numBroken);
         WATCH(packetsSent);
         WATCH(packetsRcvd);
         WATCH(bytesSent);
         WATCH(bytesRcvd);
+        WATCH_EXPR("socketState", SctpSocket::stateName(socket.getState()));
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         cModule *node = findContainingNode(this);
@@ -186,11 +191,6 @@ void SctpClient::close()
     socket.close();
 }
 
-void SctpClient::refreshDisplay() const
-{
-    SimpleModule::refreshDisplay();
-    getDisplayString().setTagArg("t", 0, SctpSocket::stateName(socket.getState()));
-}
 
 void SctpClient::socketEstablished(SctpSocket *socket, unsigned long int buffer)
 {

@@ -68,13 +68,15 @@ void Udp::initialize(int stage)
         numDroppedWrongPort = 0;
         numDroppedBadChecksum = 0;
 
+        WATCH(checksumMode);
+        WATCH(lastEphemeralPort);
         WATCH(numSent);
         WATCH(numPassedUp);
         WATCH(numDroppedWrongPort);
         WATCH(numDroppedBadChecksum);
-
-        WATCH_PTRMAP(socketsByIdMap);
-        WATCH_MAP(socketsByPortMap);
+        WATCH_EXPR("udpDroppedText", numDroppedWrongPort > 0 ? "\ndropped (no app): " + std::to_string(numDroppedWrongPort) + " pks" : std::string());
+        WATCH(socketsByIdMap);
+        WATCH(socketsByPortMap);
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
         if (checksumMode == CHECKSUM_COMPUTED) {
@@ -1252,13 +1254,8 @@ void Udp::clearAllSockets()
 void Udp::refreshDisplay() const
 {
     OperationalBase::refreshDisplay();
-
-    std::string buf = "passed up: " + std::to_string(numPassedUp) + " pks\nsent: " + std::to_string(numSent) + " pks";
-    if (numDroppedWrongPort > 0) {
-        buf += "\ndropped (no app): " + std::to_string(numDroppedWrongPort) + " pks";
+    if (numDroppedWrongPort > 0)
         getDisplayString().setTagArg("i", 1, "red");
-    }
-    getDisplayString().setTagArg("t", 0, buf.c_str());
 }
 
 // used in UdpProtocolDissector

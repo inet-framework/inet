@@ -27,6 +27,7 @@ void Reordering::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         registerService(AccessoryProtocol::sequenceNumber, inputGate, nullptr);
         registerProtocol(AccessoryProtocol::sequenceNumber, outputGate, nullptr);
+        WATCH(expectedSequenceNumber);
     }
 }
 

@@ -34,7 +34,8 @@ void Ospfv3Splitter::initialize(int stage)
 
         this->parseConfig(par("ospfv3RoutingConfig"), par("ospfv3IntConfig"));
 
-        WATCH_PTRVECTOR(this->processesModules);
+        WATCH(this->processesModules);
+        WATCH_EXPR("numProcesses", processesModules.size());
     }
 }
 

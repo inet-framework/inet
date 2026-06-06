@@ -51,6 +51,8 @@ class INET_API Dsdv : public RoutingProtocolBase
     };
 
     bool isForwardHello = false;
+    long numSent = 0;
+    long numReceived = 0;
     cMessage *event = nullptr;
     cMessage *purgeTimer = nullptr;
     cPar *broadcastDelay = nullptr;

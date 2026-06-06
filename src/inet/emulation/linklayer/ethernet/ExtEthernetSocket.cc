@@ -43,6 +43,9 @@ void ExtEthernetSocket::initialize(int stage)
         packetNameFormat = par("packetNameFormat");
         rtScheduler = check_and_cast<RealTimeScheduler *>(getSimulation()->getScheduler());
         numSent = numReceived = 0;
+        WATCH(fd);
+        WATCH(ifindex);
+        WATCH(macAddress);
         WATCH(numSent);
         WATCH(numReceived);
     }
@@ -83,13 +86,6 @@ void ExtEthernetSocket::handleMessage(cMessage *message)
     numSent++;
     delete packet;
     delete [] buffer;
-}
-
-void ExtEthernetSocket::refreshDisplay() const
-{
-    SimpleModule::refreshDisplay();
-    std::string buf = std::string("device: ") + device + "\nsnt:" + std::to_string(numSent) + " rcv:" + std::to_string(numReceived);
-    getDisplayString().setTagArg("t", 0, buf.c_str());
 }
 
 void ExtEthernetSocket::finish()

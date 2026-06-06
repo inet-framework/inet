@@ -44,11 +44,16 @@ void DhcpServer::initialize(int stage)
         numReceived = 0;
         WATCH(numSent);
         WATCH(numReceived);
-        WATCH_MAP(leased);
+        WATCH(leased);
+        WATCH_EXPR("numLeased", leased.size());
 
         // DHCP UDP ports
         clientPort = 68; // client
         serverPort = 67; // server
+        WATCH(subnetMask);
+        WATCH(clientPort);
+        WATCH(serverPort);
+        WATCH(ipAddressStart);
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         cModule *host = getContainingNode(this);

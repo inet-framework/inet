@@ -60,10 +60,14 @@ void EthernetCsmaPhy::initialize(int stage)
         crsOffTimer->setSchedulingPriority(SHRT_MAX);
         fsm.setStateChangedSignal(stateChangedSignal);
         fsm.setState(IDLE, "IDLE");
+
         setTxUpdateSupport(true);
         emit(receivedSignalTypeSignal, NONE);
         emit(transmittedSignalTypeSignal, NONE);
         emit(busUsedSignal, 0);
+
+        WATCH(txEndTime);
+        WATCH_EXPR("fsmState", std::string(fsm.getStateName()));
     }
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         networkInterface = getContainingNicModule(this);
@@ -78,14 +82,6 @@ void EthernetCsmaPhy::finish()
     emit(receivedSignalTypeSignal, currentRxSignal != nullptr ? currentRxSignal->getKind() : NONE);
     emit(transmittedSignalTypeSignal, currentTxSignal != nullptr ? currentTxSignal->getKind() : NONE);
     emit(busUsedSignal, (currentRxSignal != nullptr && currentRxSignal->getKind() == DATA) || (currentTxSignal != nullptr && currentTxSignal->getKind() == DATA) ? 1 : 0);
-}
-
-void EthernetCsmaPhy::refreshDisplay() const
-{
-    auto& displayString = getDisplayString();
-    std::stringstream stream;
-    stream << fsm.getStateName();
-    displayString.setTagArg("t", 0, stream.str().c_str());
 }
 
 void EthernetCsmaPhy::handleMessage(cMessage *message)

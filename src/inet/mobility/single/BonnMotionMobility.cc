@@ -51,6 +51,8 @@ void BonnMotionMobility::initialize(int stage)
             throw cRuntimeError("Invalid nodeId %d -- no such line in file '%s'", nodeId, fname.c_str());
         currentLine = 0;
         computeMaxSpeed();
+        WATCH(currentLine);
+        WATCH(maxSpeed);
     }
 }
 

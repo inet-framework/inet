@@ -19,7 +19,6 @@ void PacketQueueBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         inputGate = gate("in");
         outputGate = gate("out");
-        displayStringTextFormat = par("displayStringTextFormat");
         numPushedPackets = 0;
         numPulledPackets = 0;
         numRemovedPackets = 0;
@@ -29,6 +28,10 @@ void PacketQueueBase::initialize(int stage)
         WATCH(numPulledPackets);
         WATCH(numRemovedPackets);
         WATCH(numDroppedPackets);
+    }
+    else if (stage == INITSTAGE_LAST) {
+        WATCH_EXPR("numPackets", getNumPackets());
+        WATCH_EXPR("totalLength", getTotalLength());
     }
 }
 

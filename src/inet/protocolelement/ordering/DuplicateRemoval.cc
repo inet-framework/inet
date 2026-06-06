@@ -21,6 +21,7 @@ void DuplicateRemoval::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         registerService(AccessoryProtocol::sequenceNumber, nullptr, inputGate);
         registerProtocol(AccessoryProtocol::sequenceNumber, nullptr, outputGate);
+        WATCH(lastSequenceNumber);
     }
 }
 

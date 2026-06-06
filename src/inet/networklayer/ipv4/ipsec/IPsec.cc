@@ -237,6 +237,15 @@ void IPsec::initialize(int stage)
 
         spdModule = getModuleFromPar<SecurityPolicyDatabase>(par("spdModule"), this);
         sadModule = getModuleFromPar<SecurityAssociationDatabase>(par("sadModule"), this);
+
+        WATCH(lastProtectedIn);
+        WATCH(lastProtectedOut);
+        WATCH(inAccept);
+        WATCH(inDrop);
+        WATCH(inBypass);
+        WATCH(outProtect);
+        WATCH(outDrop);
+        WATCH(outBypass);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {  // TODO: was INITSTAGE_NETWORK_LAYER_3
         cXMLElement *spdConfig = par("spdConfig").xmlValue();
@@ -857,17 +866,6 @@ INetfilter::IHook::Result IPsec::processIngressPacket(Packet *packet)
 INetfilter::IHook::Result IPsec::datagramLocalOutHook(Packet *packet)
 {
     return INetfilter::IHook::ACCEPT;
-}
-
-void IPsec::refreshDisplay() const
-{
-    std::string buf = "IN: ACCEPT: " + std::to_string(inAccept) +
-            " DROP: " + std::to_string(inDrop) +
-            " BYPASS: " + std::to_string(inBypass) +
-            "\n OUT: PROTECT: " + std::to_string(outProtect) +
-            " DROP: " + std::to_string(outDrop) +
-            " BYPASS: " + std::to_string(outBypass);
-    getDisplayString().setTagArg("t", 0, buf.c_str());
 }
 
 }    // namespace ipsec

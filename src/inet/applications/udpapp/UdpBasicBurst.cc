@@ -64,6 +64,14 @@ void UdpBasicBurst::initialize(int stage)
             throw cRuntimeError("Invalid chooseDestAddrMode: '%s'", addrModeStr);
         chooseDestAddrMode = static_cast<ChooseDestAddrMode>(addrMode);
 
+        WATCH(sourceSequence);
+        WATCH(isSource);
+        WATCH(nextBurst);
+        WATCH(nextPkt);
+        WATCH(nextSleep);
+        WATCH(activeBurst);
+        WATCH(destAddr);
+        WATCH(haveSleepDuration);
         WATCH(numSent);
         WATCH(numReceived);
         WATCH(numDeleted);
@@ -209,14 +217,6 @@ void UdpBasicBurst::socketClosed(UdpSocket *socket)
 {
     if (operationalState == State::STOPPING_OPERATION)
         startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
-}
-
-void UdpBasicBurst::refreshDisplay() const
-{
-    ApplicationBase::refreshDisplay();
-
-    std::string buf = "rcvd: " + std::to_string(numReceived) + " pks\nsent: " + std::to_string(numSent) + " pks";
-    getDisplayString().setTagArg("t", 0, buf.c_str());
 }
 
 void UdpBasicBurst::processPacket(Packet *pk)

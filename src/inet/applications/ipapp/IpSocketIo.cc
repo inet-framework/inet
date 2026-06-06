@@ -25,6 +25,7 @@ void IpSocketIo::initialize(int stage)
             protocol = Protocol::getProtocol(protocolAsString);
         numSent = 0;
         numReceived = 0;
+        WATCH(dontFragment);
         WATCH(numSent);
         WATCH(numReceived);
     }
@@ -49,13 +50,6 @@ void IpSocketIo::finish()
     recordScalar("packets sent", numSent);
     recordScalar("packets received", numReceived);
     ApplicationBase::finish();
-}
-
-void IpSocketIo::refreshDisplay() const
-{
-    ApplicationBase::refreshDisplay();
-    std::string buf = "rcvd: " + std::to_string(numReceived) + " pks\nsent: " + std::to_string(numSent) + " pks";
-    getDisplayString().setTagArg("t", 0, buf.c_str());
 }
 
 void IpSocketIo::setSocketOptions()

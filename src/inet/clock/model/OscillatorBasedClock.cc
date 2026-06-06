@@ -116,7 +116,7 @@ void OscillatorBasedClock::initialize(int stage)
         WATCH(originSimulationTime);
         WATCH(originClockTime);
         WATCH(oscillatorCompensationAccumulator);
-        WATCH_PTRVECTOR(events);
+        WATCH(events);
     }
     else if (stage == INITSTAGE_CLOCK) {
         clocktime_t l = SIMTIME_AS_CLOCKTIME(oscillator->getNominalTickLength());

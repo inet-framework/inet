@@ -30,6 +30,7 @@ module Edcaf extends Module
         int cwMin = default(-1);
         int cwMax = default(-1);
         @class(Edcaf);
+        displayStringTextFormat = default("{accessCategory}\n{contentionState}");
         @display("i=block/queue");
         @signal[packetSentToPeer](type=inet::Packet);
         @signal[channelOwnershipChanged](type=bool);

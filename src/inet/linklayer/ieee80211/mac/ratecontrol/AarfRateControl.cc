@@ -28,6 +28,7 @@ void AarfRateControl::initialize(int stage)
         WATCH(maxIncreaseThreshold);
         WATCH(decreaseThreshold);
         WATCH(interval);
+        WATCH(timer);
         WATCH(probing);
         WATCH(numberOfConsSuccTransmissions);
     }
@@ -38,11 +39,6 @@ void AarfRateControl::initialize(int stage)
 void AarfRateControl::handleMessage(cMessage *msg)
 {
     throw cRuntimeError("This module doesn't handle self messages");
-}
-
-void AarfRateControl::refreshDisplay() const
-{
-    getDisplayString().setTagArg("t", 0, currentMode->getName());
 }
 
 void AarfRateControl::frameTransmitted(Packet *frame, int retryCount, bool isSuccessful, bool isGivenUp)

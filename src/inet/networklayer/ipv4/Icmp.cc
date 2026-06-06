@@ -55,6 +55,13 @@ void Icmp::initialize(int stage)
         rt.reference(this, "routingTableModule", true);
         checksumMode = parseChecksumMode(par("checksumMode"), false);
         parseQuoteLengthParameter();
+
+        WATCH(checksumMode);
+        WATCH(quoteLength);
+        WATCH(transportProtocols);
+        WATCH(numEchoReplied);
+        WATCH(numErrorsSent);
+        WATCH(numErrorsReceived);
     }
     if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {
         registerService(Protocol::icmpv4, gate("transportIn"), gate("transportOut"));
@@ -204,6 +211,7 @@ void Icmp::sendErrorMessage(Packet *packet, IcmpType type, IcmpCode code)
         insertChecksum(icmpHeader, errorPacket);
         errorPacket->insertAtFront(icmpHeader);
 
+        numErrorsSent++;
         sendOrProcessIcmpPacket(errorPacket, ipv4Header->getSrcAddress());
     }
 }
@@ -259,6 +267,7 @@ void Icmp::processIcmpMessage(Packet *packet)
         case ICMP_DESTINATION_UNREACHABLE:
         case ICMP_TIME_EXCEEDED:
         case ICMP_PARAMETER_PROBLEM: {
+            numErrorsReceived++;
             // Pop the ICMP header and create an Indication with Icmpv4ErrorInd tag.
             // The remaining packet content (quoted IPv4 + transport + payload) becomes
             // the originalPacket, which will be progressively unwrapped by upper layers.
@@ -345,6 +354,7 @@ void Icmp::processEchoRequest(Packet *request)
     addressReq->setSrcAddress(addressInd->getDestAddress().toIpv4());
     addressReq->setDestAddress(addressInd->getSrcAddress().toIpv4());
 
+    numEchoReplied++;
     sendToIP(reply);
     delete request;
 }

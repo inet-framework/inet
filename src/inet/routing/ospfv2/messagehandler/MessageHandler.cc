@@ -5,6 +5,7 @@
 //
 
 #include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
+#include "inet/routing/ospfv2/Ospfv2.h"
 
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -364,6 +365,7 @@ void MessageHandler::sendPacket(Packet *packet, Ipv4Address destination, Ospfv2I
     }
 
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
+    check_and_cast<Ospfv2 *>(ospfModule)->countSentPacket();
     ospfModule->send(packet, "ipOut");
 }
 

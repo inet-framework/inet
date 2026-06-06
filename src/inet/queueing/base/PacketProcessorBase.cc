@@ -16,7 +16,6 @@ namespace queueing {
 void PacketProcessorBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        displayStringTextFormat = par("displayStringTextFormat");
         numProcessedPackets = 0;
         processedTotalLength = b(0);
         WATCH(numProcessedPackets);

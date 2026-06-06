@@ -17,13 +17,14 @@ void PacketBufferBase::initialize(int stage)
 {
     PacketProcessorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        displayStringTextFormat = par("displayStringTextFormat");
         numAddedPackets = 0;
         numRemovedPackets = 0;
         numDroppedPackets = 0;
         WATCH(numAddedPackets);
         WATCH(numRemovedPackets);
         WATCH(numDroppedPackets);
+        WATCH_EXPR("numPackets", getNumPackets());
+        WATCH_EXPR("totalLength", getTotalLength());
     }
 }
 

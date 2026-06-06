@@ -235,7 +235,7 @@ void EigrpRtpT<Ipv4Address>::initialize(int stage)
 
         requestQ = new EigrpRequestQueue();
 
-//        WATCH_PTRLIST(requestQ->reqQueue);
+//        WATCH(requestQ->reqQueue);
     }
 }
 
@@ -253,7 +253,7 @@ void EigrpRtpT<Ipv6Address>::initialize(int stage)
         eigrpNt = check_and_cast<EigrpIpv6NeighborTable *>(getModuleByPath("^.eigrpIpv6NeighborTable"));
         requestQ = new EigrpRequestQueue();
 
-//        WATCH_PTRLIST(requestQ->reqQueue);
+//        WATCH(requestQ->reqQueue);
     }
 }
 

@@ -45,6 +45,7 @@ void ExtIpv4TunDevice::initialize(int stage)
         rtScheduler = check_and_cast<RealTimeScheduler *>(getSimulation()->getScheduler());
         openTun(device);
         numSent = numReceived = 0;
+        WATCH(fd);
         WATCH(numSent);
         WATCH(numReceived);
     }
@@ -75,12 +76,6 @@ void ExtIpv4TunDevice::handleMessage(cMessage *msg)
         EV_ERROR << "Sending IPv4 packet FAILED! (sendto returned " << nwrite << " (" << strerror(errno) << ") instead of " << packetLength << ").\n";
     delete packet;
     delete [] buffer;
-}
-
-void ExtIpv4TunDevice::refreshDisplay() const
-{
-    std::string buf = "TUN device: " + device + "\nrcv:" + std::to_string(numReceived) + " snt:" + std::to_string(numSent);
-    getDisplayString().setTagArg("t", 0, buf.c_str());
 }
 
 void ExtIpv4TunDevice::finish()

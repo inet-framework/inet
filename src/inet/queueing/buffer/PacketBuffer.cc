@@ -22,7 +22,6 @@ void PacketBuffer::initialize(int stage)
 {
     PacketBufferBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        displayStringTextFormat = par("displayStringTextFormat");
         packetCapacity = par("packetCapacity");
         dataCapacity = b(par("dataCapacity"));
         packetDropperFunction = createDropperFunction(par("dropperClass"));

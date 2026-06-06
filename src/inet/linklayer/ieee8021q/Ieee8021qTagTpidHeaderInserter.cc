@@ -36,6 +36,7 @@ void Ieee8021qTagTpidHeaderInserter::initialize(int stage)
         defaultPcp = par("defaultPcp");
         defaultUserPriority = par("defaultUserPriority");
         defaultDropEligible = par("defaultDropEligible");
+        WATCH(tpid);
     }
 }
 

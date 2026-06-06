@@ -115,7 +115,6 @@ class INET_API Arp : public OperationalBase, public IArp
     virtual MacAddress resolveMacAddressForArpReply(const NetworkInterface *ie, const ArpPacket *arp);
 
     virtual void dumpArpPacket(const ArpPacket *arp);
-    virtual void refreshDisplay() const override;
 };
 
 } // namespace inet
