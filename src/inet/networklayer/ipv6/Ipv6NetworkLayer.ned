@@ -10,6 +10,7 @@
 package inet.networklayer.ipv6;
 
 import inet.common.MessageDispatcher;
+import inet.networklayer.configurator.contract.IIpv6NodeConfigurator;
 import inet.networklayer.contract.IIpv6Tunneling;
 import inet.networklayer.contract.INetworkLayer;
 import inet.networklayer.contract.IxMIPv6Support;
@@ -46,6 +47,10 @@ module Ipv6NetworkLayer like INetworkLayer
         output transportOut @labels(Ipv6ControlInfo/up);
 
     submodules:
+        configurator: <default("Ipv6NodeConfigurator")> like IIpv6NodeConfigurator if typename != "" {
+            parameters:
+                @display("p=100,50;is=s");
+        }
         routingTable: Ipv6RoutingTable {
             parameters:
                 @display("p=100,100;is=s");
