@@ -330,6 +330,24 @@ void DhcpServer::processDhcpMessage(Packet *packet)
                 }
             }
         }
+        else if (messageType == DHCPRELEASE) { // RFC 2131, 4.3.4
+            // Client unicasts DHCPRELEASE; ciaddr is the address being given up.
+            Ipv4Address releasedIp = dhcpMsg->getCiaddr();
+            auto it = leased.find(releasedIp);
+            if (it == leased.end()) {
+                EV_WARN << "DHCPRELEASE for unknown IP " << releasedIp << ", ignoring." << endl;
+            }
+            else if (it->second.mac != dhcpMsg->getChaddr()) {
+                EV_WARN << "DHCPRELEASE for " << releasedIp << " arrived from "
+                        << dhcpMsg->getChaddr() << " but lease belongs to "
+                        << it->second.mac << ", ignoring." << endl;
+            }
+            else {
+                EV_INFO << "DHCPRELEASE received: returning " << releasedIp
+                        << " from " << it->second.mac << " to the pool." << endl;
+                setLeaseState(&it->second, DHCP_LEASE_FREE, SIMTIME_ZERO);
+            }
+        }
         else
             EV_WARN << "BOOTREQUEST arrived, but DHCP message type is unknown. Dropping it." << endl;
     }

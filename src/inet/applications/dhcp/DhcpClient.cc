@@ -207,8 +207,16 @@ void DhcpClient::socketErrorArrived(UdpSocket *socket, Indication *indication)
 
 void DhcpClient::socketClosed(UdpSocket *socket_)
 {
-    if (operationalState == State::STOPPING_OPERATION && !socket.isOpen())
-        startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
+    if (operationalState == State::STOPPING_OPERATION && !socket.isOpen()) {
+        simtime_t extra = par("stopOperationExtraTime");
+        // If we sent a DHCPRELEASE while stopping, hold the lifecycle off long
+        // enough for the IPv4 layer to forward the queued packet — otherwise
+        // the subsequent network-layer stop stage would flush it as a pending
+        // ARP-waiting packet (see Ipv4::flush()).
+        if (releaseInFlight && extra < SIMTIME_ZERO)
+            extra = SimTime(1, SIMTIME_MS);
+        startActiveOperationExtraTimeOrFinish(extra);
+    }
 }
 
 void DhcpClient::handleTimer(cMessage *msg)
@@ -724,6 +732,42 @@ void DhcpClient::sendDecline(Ipv4Address declinedIp)
     sendToUdp(packet, clientPort, Ipv4Address::ALLONES_ADDRESS, serverPort);
 }
 
+void DhcpClient::sendRelease()
+{
+    // RFC 2131 §4.4.4: DHCPRELEASE is unicast to the server identifier with
+    // ciaddr set to the IP being released. A fresh xid is used.
+    xid = intuniform(0, RAND_MAX);
+    Packet *packet = new Packet("DHCPRELEASE");
+    const auto& release = makeShared<DhcpMessage>();
+    release->setOp(BOOTREQUEST);
+    uint16_t length = 236;
+    release->setHtype(1);
+    release->setHlen(6);
+    release->setHops(0);
+    release->setXid(xid);
+    release->setSecs(0);
+    release->setBroadcast(false);
+    release->setCiaddr(lease->ip); // the IP being given up
+    release->setChaddr(macAddress);
+    release->setSname("");
+    release->setFile("");
+    auto& options = release->getOptionsForUpdate();
+    options.setMessageType(DHCPRELEASE);
+    length += 3;
+    options.setClientIdentifier(macAddress);
+    length += 9;
+    options.setServerIdentifier(lease->serverId);
+    length += 6;
+    length += 5; // magic cookie + end
+    release->setChunkLength(B(length));
+
+    packet->insertAtBack(release);
+
+    EV_INFO << "Sending DHCPRELEASE for " << lease->ip << " to server "
+            << lease->serverId << "." << endl;
+    sendToUdp(packet, clientPort, lease->serverId, serverPort);
+}
+
 void DhcpClient::handleDhcpAck(const Ptr<const DhcpMessage>& msg)
 {
     recordLease(msg);
@@ -788,20 +832,42 @@ void DhcpClient::handleStartOperation(LifecycleOperation *operation)
     simtime_t start = std::max(startTime, simTime());
     ie = chooseInterface();
     macAddress = ie->getMacAddress();
+    releaseInFlight = false;
     scheduleAt(start, startTimer);
 }
 
 void DhcpClient::handleStopOperation(LifecycleOperation *operation)
 {
+    // RFC 2131 §4.4.4: a client SHOULD send DHCPRELEASE if it relinquishes
+    // its lease (e.g. graceful shutdown). Only meaningful when we currently
+    // hold one; in INIT/SELECTING/REQUESTING/REBOOTING there is nothing to
+    // release.
+    if (lease != nullptr && (clientState == BOUND || clientState == RENEWING || clientState == REBINDING)) {
+        sendRelease();
+        releaseInFlight = true;
+        // unbindLease() would clear the interface IP synchronously, but the
+        // RELEASE packet is processed *after* this method returns. With the
+        // IP cleared, the ARP request that the unicast RELEASE triggers would
+        // assert. Drop the route now (it does not affect the outgoing packet)
+        // and leave the interface IP for the lifecycle teardown that will
+        // shortly take the interface itself down.
+        if (route != nullptr) {
+            irt->deleteRoute(route);
+            route = nullptr;
+        }
+        // The lease is gone — a subsequent startup should do a fresh DORA,
+        // not INIT-REBOOT a slot the server has already freed.
+        delete lease;
+        lease = nullptr;
+        clientState = IDLE;
+    }
+
     cancelEvent(timerT1);
     cancelEvent(timerT2);
     cancelEvent(timerTo);
     cancelEvent(leaseTimer);
     cancelEvent(startTimer);
     ie = nullptr;
-
-    // TODO Client should send DHCPRELEASE to the server. However, the correct operation
-    // of DHCP does not depend on the transmission of DHCPRELEASE messages.
 
     socket.close();
     delayActiveOperationFinish(par("stopOperationTimeout"));
