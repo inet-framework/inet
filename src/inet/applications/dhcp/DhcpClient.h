@@ -49,6 +49,7 @@ class INET_API DhcpClient : public ApplicationBase, public cListener, public Udp
     cMessage *startTimer = nullptr; // self message to start DHCP initialization
     ClientState clientState = INIT; // current state
     unsigned int xid = 0; // transaction id; to associate messages and responses between a client and a server
+    simtime_t dhcpStartTime; // time when the current DHCP process started (for the 'secs' field)
     DhcpLease *lease = nullptr; // leased IP information
     Ipv4Route *route = nullptr; // last added route
 

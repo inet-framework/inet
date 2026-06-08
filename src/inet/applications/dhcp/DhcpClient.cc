@@ -56,6 +56,7 @@ void DhcpClient::initialize(int stage)
         WATCH(numReceived);
         WATCH(clientState);
         WATCH(xid);
+        WATCH(dhcpStartTime);
         WATCH_EXPR("clientStateName", getStateName(clientState));
 
         // DHCP UDP ports
@@ -440,6 +441,7 @@ void DhcpClient::initClient()
     cancelEvent(timerTo);
     cancelEvent(leaseTimer);
 
+    dhcpStartTime = simTime();
     sendDiscover();
     scheduleTimerTO(WAIT_OFFER);
     clientState = SELECTING;
@@ -447,6 +449,7 @@ void DhcpClient::initClient()
 
 void DhcpClient::initRebootedClient()
 {
+    dhcpStartTime = simTime();
     sendRequest();
     scheduleTimerTO(WAIT_ACK);
     clientState = REBOOTING;
@@ -600,7 +603,7 @@ void DhcpClient::sendRequest(bool retransmit)
     request->setHlen(6); // hardware Address length (6 octets)
     request->setHops(0);
     request->setXid(xid); // transaction id
-    request->setSecs(0); // 0 seconds from transaction started
+    request->setSecs((uint16_t)(simTime() - dhcpStartTime).dbl()); // seconds since DHCP process started
     request->setBroadcast(false); // unicast
     request->setYiaddr(Ipv4Address()); // no 'your IP' addr
     request->setGiaddr(Ipv4Address()); // no DHCP Gateway Agents
@@ -676,7 +679,7 @@ void DhcpClient::sendDiscover(bool retransmit)
     discover->setHlen(6); // hardware Address lenght (6 octets)
     discover->setHops(0);
     discover->setXid(xid); // transaction id
-    discover->setSecs(0); // 0 seconds from transaction started
+    discover->setSecs((uint16_t)(simTime() - dhcpStartTime).dbl()); // seconds since DHCP process started
     discover->setBroadcast(false); // unicast
     discover->setChaddr(macAddress); // my mac address
     discover->setSname(""); // no server name given
