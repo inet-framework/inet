@@ -16,7 +16,11 @@ import inet.networklayer.contract.IRoutingTable;
 // a ~StandardHost/~Router etc. in order to be accessible by the
 // ~Ipv6 and other modules.
 //
-// <b>XML Configuration</b>
+// <b>XML Configuration (legacy)</b>
+//
+// NOTE: For new simulations, prefer ~Ipv6NetworkConfigurator which provides
+// automatic prefix assignment, hierarchical addressing, route computation,
+// and per-interface RA/NDP parameter configuration using pattern-based XML.
 //
 // The `routes` XML parameter allows manual configuration of interface
 // IPv6 settings and IPv6 tunnels. The root element is `<routingTable>`,
@@ -92,6 +96,12 @@ simple Ipv6RoutingTable extends SimpleModule like IRoutingTable
         bool isRouter = default(this.forwarding);
         bool multicastForwarding = default(false);
         bool useAdminDist = default(false);     // Use Cisco-like administrative distances
+        // Router Advertisement defaults (applied to all router interfaces)
+        bool advManagedFlag = default(false); // "Managed address configuration" (M) flag in RAs
+        bool advOtherConfigFlag = default(false); // "Other configuration" (O) flag in RAs
+        int advLinkMtu = default(1280); // MTU option in RAs (1280 = IPv6 minimum MTU, 0 = don't include)
+        int advCurHopLimit = default(30); // Cur Hop Limit field in RAs (0 = unspecified)
+        double advDefaultLifetime @unit(s) = default(-1s); // Router Lifetime in RAs (-1 = auto: 3*maxRtrAdvInterval)
         @signal[routeAdded](type=inet::Ipv6Route);
         @signal[routeChanged](type=inet::Ipv6Route);
         @signal[routeDeleted](type=inet::Ipv6Route);

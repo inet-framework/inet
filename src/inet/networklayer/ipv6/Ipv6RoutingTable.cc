@@ -219,6 +219,18 @@ void Ipv6RoutingTable::configureInterfaceForIpv6(NetworkInterface *ie)
     // as a host?
     ipv6IfData->setAdvSendAdvertisements(isrouter); // Added by WEI
 
+    // Apply router-side RA parameters from NED
+    if (isrouter) {
+        ipv6IfData->setAdvManagedFlag(par("advManagedFlag"));
+        ipv6IfData->setAdvOtherConfigFlag(par("advOtherConfigFlag"));
+        ipv6IfData->setAdvLinkMtu(par("advLinkMtu"));
+        ipv6IfData->setAdvCurHopLimit(par("advCurHopLimit"));
+        simtime_t advDefaultLifetime = par("advDefaultLifetime");
+        if (advDefaultLifetime >= SIMTIME_ZERO)
+            ipv6IfData->setAdvDefaultLifetime(advDefaultLifetime);
+        // else: leave at default (3*maxRtrAdvInterval), already set by Ipv6InterfaceData constructor
+    }
+
     // metric: some hints: OSPF cost (2e9/bps value), MS KB article Q299540, ...
     //d->setMetric((int)ceil(2e9/ie->getDatarate())); // use OSPF cost as default
     // FIXME TODO fill in the rest
@@ -306,24 +318,37 @@ void Ipv6RoutingTable::configureInterfaceFromXml(NetworkInterface *ie, cXMLEleme
 
     // parse basic config (attributes)
     d->setAdvSendAdvertisements(toBool(getRequiredAttr(cfg, "AdvSendAdvertisements")));
-    // TODO leave this off first!! They overwrite stuff!
 
-    /* TODO Wei commented out the stuff below. To be checked why (Andras).
-       d->setMaxRtrAdvInterval(utils::atod(getRequiredAttr(cfg, "MaxRtrAdvInterval")));
-       d->setMinRtrAdvInterval(utils::atod(getRequiredAttr(cfg, "MinRtrAdvInterval")));
-       d->setAdvManagedFlag(toBool(getRequiredAttr(cfg, "AdvManagedFlag")));
-       d->setAdvOtherConfigFlag(toBool(getRequiredAttr(cfg, "AdvOtherConfigFlag")));
-       d->setAdvLinkMTU(utils::atoul(getRequiredAttr(cfg, "AdvLinkMTU")));
-       d->setAdvReachableTime(utils::atoul(getRequiredAttr(cfg, "AdvReachableTime")));
-       d->setAdvRetransTimer(utils::atoul(getRequiredAttr(cfg, "AdvRetransTimer")));
-       d->setAdvCurHopLimit(utils::atoul(getRequiredAttr(cfg, "AdvCurHopLimit")));
-       d->setAdvDefaultLifetime(utils::atoul(getRequiredAttr(cfg, "AdvDefaultLifetime")));
-       ie->setMtu(utils::atoul(getRequiredAttr(cfg, "HostLinkMTU")));
-       d->setCurHopLimit(utils::atoul(getRequiredAttr(cfg, "HostCurHopLimit")));
-       d->setBaseReachableTime(utils::atoul(getRequiredAttr(cfg, "HostBaseReachableTime")));
-       d->setRetransTimer(utils::atoul(getRequiredAttr(cfg, "HostRetransTimer")));
-       d->setDupAddrDetectTransmits(utils::atoul(getRequiredAttr(cfg, "HostDupAddrDetectTransmits")));
-     */
+    // optional RA/NDP attributes (all use defaults if not specified)
+    const char *s;
+    if ((s = cfg->getAttribute("MaxRtrAdvInterval")) != nullptr)
+        d->setMaxRtrAdvInterval(utils::atod(s));
+    if ((s = cfg->getAttribute("MinRtrAdvInterval")) != nullptr)
+        d->setMinRtrAdvInterval(utils::atod(s));
+    if ((s = cfg->getAttribute("AdvManagedFlag")) != nullptr)
+        d->setAdvManagedFlag(toBool(s));
+    if ((s = cfg->getAttribute("AdvOtherConfigFlag")) != nullptr)
+        d->setAdvOtherConfigFlag(toBool(s));
+    if ((s = cfg->getAttribute("AdvLinkMTU")) != nullptr)
+        d->setAdvLinkMtu(utils::atoul(s));
+    if ((s = cfg->getAttribute("AdvReachableTime")) != nullptr)
+        d->setAdvReachableTime(utils::atoul(s));
+    if ((s = cfg->getAttribute("AdvRetransTimer")) != nullptr)
+        d->setAdvRetransTimer(utils::atoul(s));
+    if ((s = cfg->getAttribute("AdvCurHopLimit")) != nullptr)
+        d->setAdvCurHopLimit(utils::atoul(s));
+    if ((s = cfg->getAttribute("AdvDefaultLifetime")) != nullptr)
+        d->setAdvDefaultLifetime(utils::atoul(s));
+    if ((s = cfg->getAttribute("HostLinkMTU")) != nullptr)
+        ie->setMtu(utils::atoul(s));
+    if ((s = cfg->getAttribute("HostCurHopLimit")) != nullptr)
+        d->setCurHopLimit(utils::atoul(s));
+    if ((s = cfg->getAttribute("HostBaseReachableTime")) != nullptr)
+        d->setBaseReachableTime(utils::atoul(s));
+    if ((s = cfg->getAttribute("HostRetransTimer")) != nullptr)
+        d->setRetransTimer(utils::atoul(s));
+    if ((s = cfg->getAttribute("HostDupAddrDetectTransmits")) != nullptr)
+        d->setDupAddrDetectTransmits(utils::atoul(s));
 
     // parse prefixes (AdvPrefix elements; they should be inside an AdvPrefixList
     // element, but we don't check that)

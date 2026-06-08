@@ -155,10 +155,10 @@ void Ipv6NetworkConfigurator::configureInterface(InterfaceInfo *interfaceInfo)
     if (interfaceInfo->mtu != -1)
         networkInterface->setMtu(interfaceInfo->mtu);
 
-    if (assignAddressesParameter && !interfaceInfo->globalAddress.isUnspecified()) {
-        Node *node = static_cast<Node *>(interfaceInfo->node);
-        bool isRouter = node->routingTable && node->routingTable->isForwardingEnabled();
+    Node *node = static_cast<Node *>(interfaceInfo->node);
+    bool isRouter = node->routingTable && node->routingTable->isForwardingEnabled();
 
+    if (assignAddressesParameter && !interfaceInfo->globalAddress.isUnspecified()) {
         if (!configureAdvPrefixesParameter || isRouter) {
             // Mode A: assign global address to all interfaces
             // Mode B: assign global address only to router interfaces (hosts use SLAAC)
@@ -173,10 +173,10 @@ void Ipv6NetworkConfigurator::configureInterface(InterfaceInfo *interfaceInfo)
             Ipv6InterfaceData::AdvPrefix advPrefix;
             advPrefix.prefix = interfaceInfo->prefix;
             advPrefix.prefixLength = interfaceInfo->prefixLength;
-            advPrefix.advOnLinkFlag = true;
-            advPrefix.advAutonomousFlag = true;
-            advPrefix.advValidLifetime = 2592000; // 30 days
-            advPrefix.advPreferredLifetime = 604800; // 7 days
+            advPrefix.advOnLinkFlag = (interfaceInfo->advOnLinkFlag >= 0) ? (bool)interfaceInfo->advOnLinkFlag : true;
+            advPrefix.advAutonomousFlag = (interfaceInfo->advAutonomousFlag >= 0) ? (bool)interfaceInfo->advAutonomousFlag : true;
+            advPrefix.advValidLifetime = (interfaceInfo->advValidLifetime >= 0) ? interfaceInfo->advValidLifetime : 2592000; // 30 days
+            advPrefix.advPreferredLifetime = (interfaceInfo->advPreferredLifetime >= 0) ? interfaceInfo->advPreferredLifetime : 604800; // 7 days
             advPrefix.advRtrAddr = false;
 
             // Check if this prefix is already advertised
@@ -194,6 +194,24 @@ void Ipv6NetworkConfigurator::configureInterface(InterfaceInfo *interfaceInfo)
             }
         }
     }
+
+    // Apply per-interface RA parameters from XML (independent of address assignment)
+    if (isRouter) {
+        if (interfaceInfo->advManagedFlag >= 0)
+            ipv6Data->setAdvManagedFlag((bool)interfaceInfo->advManagedFlag);
+        if (interfaceInfo->advOtherConfigFlag >= 0)
+            ipv6Data->setAdvOtherConfigFlag((bool)interfaceInfo->advOtherConfigFlag);
+        if (interfaceInfo->maxRtrAdvInterval >= 0)
+            ipv6Data->setMaxRtrAdvInterval(SimTime(interfaceInfo->maxRtrAdvInterval));
+        if (interfaceInfo->minRtrAdvInterval >= 0)
+            ipv6Data->setMinRtrAdvInterval(SimTime(interfaceInfo->minRtrAdvInterval));
+        if (interfaceInfo->advDefaultLifetime >= 0)
+            ipv6Data->setAdvDefaultLifetime(SimTime(interfaceInfo->advDefaultLifetime));
+    }
+
+    // Apply per-interface DAD parameter from XML (applies to hosts and routers)
+    if (interfaceInfo->dupAddrDetectTransmits >= 0)
+        ipv6Data->setDupAddrDetectTransmits(interfaceInfo->dupAddrDetectTransmits);
 }
 
 void Ipv6NetworkConfigurator::configureRoutingTable(Node *node)
@@ -411,6 +429,18 @@ void Ipv6NetworkConfigurator::readInterfaceConfiguration(Topology& topology)
         bool addStaticRouteAttr = getAttributeBoolValue(interfaceElement, "add-static-route", true);
         bool addDefaultRouteAttr = getAttributeBoolValue(interfaceElement, "add-default-route", true);
 
+        // RA/NDP optional attributes
+        const char *advValidLifetimeAttr = interfaceElement->getAttribute("advValidLifetime");
+        const char *advPreferredLifetimeAttr = interfaceElement->getAttribute("advPreferredLifetime");
+        const char *advOnLinkFlagAttr = interfaceElement->getAttribute("advOnLinkFlag");
+        const char *advAutonomousFlagAttr = interfaceElement->getAttribute("advAutonomousFlag");
+        const char *advManagedFlagAttr = interfaceElement->getAttribute("advManagedFlag");
+        const char *advOtherConfigFlagAttr = interfaceElement->getAttribute("advOtherConfigFlag");
+        const char *maxRtrAdvIntervalAttr = interfaceElement->getAttribute("maxRtrAdvInterval");
+        const char *minRtrAdvIntervalAttr = interfaceElement->getAttribute("minRtrAdvInterval");
+        const char *advDefaultLifetimeAttr = interfaceElement->getAttribute("advDefaultLifetime");
+        const char *dupAddrDetectTransmitsAttr = interfaceElement->getAttribute("dupAddrDetectTransmits");
+
         if (amongAttr && *amongAttr) {
             if ((hostAttr && *hostAttr) || (towardsAttr && *towardsAttr))
                 throw cRuntimeError("The 'hosts'/'towards' and 'among' attributes are mutually exclusive, at %s", interfaceElement->getSourceLocation());
@@ -443,7 +473,7 @@ void Ipv6NetworkConfigurator::readInterfaceConfiguration(Topology& topology)
                         {
                             EV_DEBUG << "Processing interface configuration for " << interfaceInfo->getFullPath() << " using " << interfaceElement->str() << endl;
 
-                            interfaceInfo->configure = havePrefixConstraint;
+                            interfaceInfo->configure = true;
                             if (havePrefixConstraint) {
                                 interfaceInfo->prefix = prefixTemplate;
                                 interfaceInfo->prefixLength = prefixLength;
@@ -457,6 +487,28 @@ void Ipv6NetworkConfigurator::readInterfaceConfiguration(Topology& topology)
                                 interfaceInfo->mtu = atoi(mtuAttr);
                             if (!opp_isempty(metricAttr))
                                 interfaceInfo->metric = atoi(metricAttr);
+
+                            // Store RA/NDP parameters
+                            if (!opp_isempty(advValidLifetimeAttr))
+                                interfaceInfo->advValidLifetime = atoi(advValidLifetimeAttr);
+                            if (!opp_isempty(advPreferredLifetimeAttr))
+                                interfaceInfo->advPreferredLifetime = atoi(advPreferredLifetimeAttr);
+                            if (!opp_isempty(advOnLinkFlagAttr))
+                                interfaceInfo->advOnLinkFlag = getAttributeBoolValue(interfaceElement, "advOnLinkFlag", true) ? 1 : 0;
+                            if (!opp_isempty(advAutonomousFlagAttr))
+                                interfaceInfo->advAutonomousFlag = getAttributeBoolValue(interfaceElement, "advAutonomousFlag", true) ? 1 : 0;
+                            if (!opp_isempty(advManagedFlagAttr))
+                                interfaceInfo->advManagedFlag = getAttributeBoolValue(interfaceElement, "advManagedFlag", false) ? 1 : 0;
+                            if (!opp_isempty(advOtherConfigFlagAttr))
+                                interfaceInfo->advOtherConfigFlag = getAttributeBoolValue(interfaceElement, "advOtherConfigFlag", false) ? 1 : 0;
+                            if (!opp_isempty(maxRtrAdvIntervalAttr))
+                                interfaceInfo->maxRtrAdvInterval = atof(maxRtrAdvIntervalAttr);
+                            if (!opp_isempty(minRtrAdvIntervalAttr))
+                                interfaceInfo->minRtrAdvInterval = atof(minRtrAdvIntervalAttr);
+                            if (!opp_isempty(advDefaultLifetimeAttr))
+                                interfaceInfo->advDefaultLifetime = atoi(advDefaultLifetimeAttr);
+                            if (!opp_isempty(dupAddrDetectTransmitsAttr))
+                                interfaceInfo->dupAddrDetectTransmits = atoi(dupAddrDetectTransmitsAttr);
 
                             interfacesSeen.insert(interfaceInfo);
                         }

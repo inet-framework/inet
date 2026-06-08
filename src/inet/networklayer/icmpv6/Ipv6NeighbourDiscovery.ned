@@ -29,6 +29,10 @@ simple Ipv6NeighbourDiscovery extends SimpleModule
         double minIntervalBetweenRAs @unit(s) = default(30ms); // MinRtrAdvInterval:  0.03 sec for MIPv6
         double maxIntervalBetweenRAs @unit(s) = default(70ms);  // MaxrtrAdvInterval: 0.07 sec for MIPv6
         double advReachableTime @unit(s) = default(3600s); // advertised reachable time in RAs; hosts use it as base for NUD
+        int dupAddrDetectTransmits = default(1); // RFC 4862 Section 5.1: number of NS sent for DAD (0 = disable DAD)
+        bool optimisticDad = default(false); // RFC 4429 Optimistic DAD: if true, an autoconfigured address may be used as a source address while DAD is still in progress; if false (RFC 4862), packets that would use it are deferred until DAD completes
+        double retransTimer @unit(s) = default(1s); // RFC 4861 Section 10: delay between retransmitted NS messages
+        double baseReachableTime @unit(s) = default(30s); // RFC 4861 Section 10: base value for computing random ReachableTime
         @display("i=block/network");
         @signal[startDad](type=long); // Emits value=1
         @signal[dadCompleted](type=long); // Emits value=1

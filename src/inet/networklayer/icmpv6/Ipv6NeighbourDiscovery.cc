@@ -96,12 +96,25 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
 
         pendingQueue.setName("pendingQueue");
 
+        // Apply NDP parameters from NED to all interfaces
+        int dupAddrDetectTransmits = par("dupAddrDetectTransmits");
+        bool optimisticDad = par("optimisticDad");
+        simtime_t retransTimer = par("retransTimer");
+        simtime_t baseReachableTime = par("baseReachableTime");
         simtime_t advReachableTime = par("advReachableTime");
         for (int i = 0; i < ift->getNumInterfaces(); i++) {
             NetworkInterface *ie = ift->getInterface(i);
+            if (ie->isLoopback())
+                continue;
 
-            if (ie->getProtocolData<Ipv6InterfaceData>()->getAdvSendAdvertisements() && !(ie->isLoopback())) {
-                ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->setAdvReachableTime((int)advReachableTime.dbl());
+            auto ipv6Data = ie->getProtocolDataForUpdate<Ipv6InterfaceData>();
+            ipv6Data->setDupAddrDetectTransmits(dupAddrDetectTransmits);
+            ipv6Data->setOptimisticDad(optimisticDad);
+            ipv6Data->setRetransTimer((uint)retransTimer.dbl());
+            ipv6Data->setBaseReachableTime((uint)baseReachableTime.dbl());
+
+            if (ipv6Data->getAdvSendAdvertisements()) {
+                ipv6Data->setAdvReachableTime((int)advReachableTime.dbl());
                 createRaTimer(ie);
             }
         }

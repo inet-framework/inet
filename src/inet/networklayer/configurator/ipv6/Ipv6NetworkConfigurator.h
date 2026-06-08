@@ -60,6 +60,18 @@ class INET_API Ipv6NetworkConfigurator : public L3NetworkConfiguratorBase, publi
         uint32_t specifiedGroups = 0;  // bitmask: bit i (from MSB) = 1 means 16-bit group i is specified in the prefix template
         Ipv6Address globalAddress;     // the full global address (prefix + IID)
 
+        // RA/NDP parameters from XML (sentinel -1 = not specified, use module default)
+        int advValidLifetime = -1;      // AdvPrefix valid lifetime in seconds
+        int advPreferredLifetime = -1;  // AdvPrefix preferred lifetime in seconds
+        int advOnLinkFlag = -1;         // AdvPrefix on-link flag (0/1, -1 = default)
+        int advAutonomousFlag = -1;     // AdvPrefix autonomous flag (0/1, -1 = default)
+        int advManagedFlag = -1;        // M flag in RA (0/1, -1 = default)
+        int advOtherConfigFlag = -1;    // O flag in RA (0/1, -1 = default)
+        double maxRtrAdvInterval = -1;  // max interval between RAs in seconds
+        double minRtrAdvInterval = -1;  // min interval between RAs in seconds
+        int advDefaultLifetime = -1;    // Router Lifetime in RA in seconds
+        int dupAddrDetectTransmits = -1; // number of DAD NS transmissions
+
       public:
         InterfaceInfo(Node *node, LinkInfo *linkInfo, NetworkInterface *networkInterface);
     };

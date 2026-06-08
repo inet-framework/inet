@@ -55,6 +55,16 @@ import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 //    - `@metric` - optional metric override
 //    - `@add-static-route` - optional bool (default true)
 //    - `@add-default-route` - optional bool (default true)
+//    - `@advValidLifetime` - AdvPrefix valid lifetime in seconds (default: 2592000 = 30 days)
+//    - `@advPreferredLifetime` - AdvPrefix preferred lifetime in seconds (default: 604800 = 7 days)
+//    - `@advOnLinkFlag` - AdvPrefix on-link flag (default: true)
+//    - `@advAutonomousFlag` - AdvPrefix autonomous flag for SLAAC (default: true)
+//    - `@advManagedFlag` - "Managed address configuration" (M) flag in RAs (default: false)
+//    - `@advOtherConfigFlag` - "Other configuration" (O) flag in RAs (default: false)
+//    - `@maxRtrAdvInterval` - max time between unsolicited RAs in seconds (default: 600)
+//    - `@minRtrAdvInterval` - min time between unsolicited RAs in seconds (default: 200)
+//    - `@advDefaultLifetime` - Router Lifetime in RAs in seconds (default: 3*maxRtrAdvInterval)
+//    - `@dupAddrDetectTransmits` - number of NS sent for DAD (default: 1; 0 = disable DAD)
 //
 //  - `<route>`
 //    Adds manual static routes.
