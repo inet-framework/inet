@@ -9,6 +9,7 @@ be invoked while the server is down.
 network = LifecycleTest
 ned-path = .;../../../../src;../../lib
 cmdenv-express-mode = false
+cmdenv-log-prefix = "[%t %M] "
 sim-time-limit = 300s
 
 **.app[*].cmdenv-log-level = detail
@@ -71,26 +72,20 @@ network LifecycleTest
     </at>
 </scenario>
 
-%contains-regex: stdout
-.*
-Sending DHCPDISCOVER\.
-.*
-(DETAIL: )?No DHCP offer received within timeout\. Restarting\.
-.*
-Sending DHCPDISCOVER\.
-.*
-(DETAIL: )?No DHCP offer received within timeout\. Restarting\.
-.*
-Sending DHCPDISCOVER\.
-.*
-(DETAIL: )?No DHCP offer received within timeout\. Restarting\.
-.*
-Sending DHCPDISCOVER\.
-.*
-DHCPDISCOVER arrived\. Handling it\.
-.*
-The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to client\.
-.*
+%# With RFC 2131 §4.1 exponential-backoff retransmission, the client emits
+%# multiple retransmits while the server is down (instead of a single 60s
+%# WAIT_OFFER timeout that restarts the whole DORA). Once the server comes
+%# up at t=190s, the client's next retransmit gets a reply and it binds.
+%# Timestamps are deterministic given the default seed.
+%contains: stdout
+[4.185689232778 LifecycleTest.client.app[0]] No DHCPOFFER yet; retransmitting DHCPDISCOVER (attempt 1, next wait ~8s).
+
+%contains: stdout
+[12.616067962721 LifecycleTest.client.app[0]] No DHCPOFFER yet; retransmitting DHCPDISCOVER (attempt 2, next wait ~16s).
+
+%contains: stdout
+[251.076564138874 LifecycleTest.client.app[0]] The requested IP 192.168.1.100/255.255.255.0 is available. Assigning it to client.
+
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out

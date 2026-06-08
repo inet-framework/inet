@@ -55,7 +55,16 @@ class INET_API DhcpClient : public ApplicationBase, public cListener, public Udp
     // statistics
     int numSent = 0; // number of sent DHCP messages
     int numReceived = 0; // number of received DHCP messages
-    int responseTimeout = 0; // timeout waiting for DHCPACKs, DHCPOFFERs
+
+    // Retransmission state (RFC 2131 §4.1 for DORA, §4.4.5 for RENEWING/REBINDING).
+    simtime_t initialRetransmitDelay;
+    simtime_t maxRetransmitDelay;
+    int maxRetransmitCount = 0;
+    simtime_t minRenewRetransmitInterval;
+    simtime_t currentRetransmitDelay; // doubled each retransmit, capped at maxRetransmitDelay
+    int retransmitCount = 0;
+    simtime_t t2AbsoluteTime; // absolute simtime at which T2 fires (set at lease bind)
+    simtime_t leaseAbsoluteExpiry; // absolute simtime at which the lease ends
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -65,6 +74,16 @@ class INET_API DhcpClient : public ApplicationBase, public cListener, public Udp
     virtual void scheduleTimerTO(DhcpTimerType type);
     virtual void scheduleTimerT1();
     virtual void scheduleTimerT2();
+
+    /*
+     * Resets retransmit counters at the start of a new DORA / INIT-REBOOT.
+     */
+    virtual void resetRetransmitState();
+
+    /*
+     * Schedules the next retransmit, applying ±1s jitter (RFC 2131 §4.1).
+     */
+    virtual void scheduleRetransmit(DhcpTimerType type, simtime_t delay);
     static const char *getStateName(ClientState state);
     const char *getAndCheckMessageTypeName(DhcpMessageType type);
 
@@ -96,18 +115,20 @@ class INET_API DhcpClient : public ApplicationBase, public cListener, public Udp
     virtual void sendToUdp(Packet *msg, int srcPort, const L3Address& destAddr, int destPort);
 
     /*
-     * Client broadcast to locate available servers.
+     * Client broadcast to locate available servers. When retransmit=true
+     * the same xid is reused so the server can match the request to its
+     * earlier reply (RFC 2131 §4.1).
      */
-    virtual void sendDiscover();
+    virtual void sendDiscover(bool retransmit = false);
 
     /*
      * Client message to servers either (a) requesting offered parameters
      * from one server and implicitly declining offers from all others,
      * (b) confirming correctness of previously allocated address after,
      * e.g., system reboot, or (c) extending the lease on a particular
-     * network address.
+     * network address. retransmit=true reuses the existing xid.
      */
-    virtual void sendRequest();
+    virtual void sendRequest(bool retransmit = false);
 
     /*
      * Client to server indicating network address is already in use.

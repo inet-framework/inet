@@ -26,6 +26,15 @@ simple DhcpClient extends SimpleModule like IApp
         string routingTableModule; // Path to the Ipv4RoutingTable module
         string interface = default(""); // Which NIC should be configured (i.e. wlan0, eth1 etc.)
         double startTime @unit(s) = default(0s); // Starting time of DHCP initialization
+        // Retransmission strategy for DHCPDISCOVER/DHCPREQUEST while waiting for OFFER/ACK
+        // in INIT, SELECTING, REQUESTING and REBOOTING states (RFC 2131 §4.1).
+        double initialRetransmitDelay @unit(s) = default(4s); // First retransmit wait (jittered by +-1s)
+        double maxRetransmitDelay @unit(s) = default(64s); // Per-attempt wait is doubled up to this cap
+        int maxRetransmitCount = default(4); // After this many retransmits with no reply, give up and restart from INIT
+        // Retransmission strategy in RENEWING/REBINDING (RFC 2131 §4.4.5):
+        // half of the remaining interval to T2 (RENEWING) or to lease expiry (REBINDING),
+        // floored at this minimum.
+        double minRenewRetransmitInterval @unit(s) = default(60s);
         displayStringTextFormat = default("{clientStateName}");
         @display("i=block/app2");
         @lifecycleSupport;

@@ -42,7 +42,12 @@ void DhcpClient::initialize(int stage)
         numSent = 0;
         numReceived = 0;
         xid = 0;
-        responseTimeout = 60; // response timeout in seconds RFC 2131, 4.4.3
+        initialRetransmitDelay = par("initialRetransmitDelay");
+        maxRetransmitDelay = par("maxRetransmitDelay");
+        maxRetransmitCount = par("maxRetransmitCount");
+        minRenewRetransmitInterval = par("minRenewRetransmitInterval");
+        currentRetransmitDelay = initialRetransmitDelay;
+        retransmitCount = 0;
 
         WATCH(numSent);
         WATCH(numReceived);
@@ -56,7 +61,6 @@ void DhcpClient::initialize(int stage)
         WATCH(clientPort);
         WATCH(serverPort);
         WATCH(macAddress);
-        WATCH(responseTimeout);
         // get the routing table to update and subscribe it to the blackboard
         irt.reference(this, "routingTableModule", true);
         // set client to idle state
@@ -220,18 +224,68 @@ void DhcpClient::handleTimer(cMessage *msg)
         }
     }
     else if (category == WAIT_OFFER) {
-        EV_DETAIL << "No DHCP offer received within timeout. Restarting. " << endl;
-        initClient();
+        if (retransmitCount < maxRetransmitCount) {
+            retransmitCount++;
+            currentRetransmitDelay = std::min(currentRetransmitDelay * 2, maxRetransmitDelay);
+            EV_INFO << "No DHCPOFFER yet; retransmitting DHCPDISCOVER (attempt "
+                    << retransmitCount << ", next wait ~" << currentRetransmitDelay << "s)." << endl;
+            sendDiscover(true); // reuse xid
+            scheduleRetransmit(WAIT_OFFER, currentRetransmitDelay);
+        }
+        else {
+            EV_DETAIL << "Maximum DHCPDISCOVER retransmits reached; restarting DHCP process." << endl;
+            initClient();
+        }
     }
     else if (category == WAIT_ACK) {
-        EV_DETAIL << "No DHCP ACK received within timeout. Restarting." << endl;
-        initClient();
+        if ((clientState == REQUESTING || clientState == REBOOTING) && retransmitCount < maxRetransmitCount) {
+            retransmitCount++;
+            currentRetransmitDelay = std::min(currentRetransmitDelay * 2, maxRetransmitDelay);
+            EV_INFO << "No DHCPACK yet; retransmitting DHCPREQUEST (attempt "
+                    << retransmitCount << ", next wait ~" << currentRetransmitDelay << "s)." << endl;
+            sendRequest(true); // reuse xid
+            scheduleRetransmit(WAIT_ACK, currentRetransmitDelay);
+        }
+        else if (clientState == RENEWING) {
+            // RFC 2131 §4.4.5: retransmit at half the remaining interval to T2,
+            // floored at minRenewRetransmitInterval.
+            simtime_t remaining = t2AbsoluteTime - simTime();
+            if (remaining <= SIMTIME_ZERO) {
+                // T2 will fire (or has just fired); let its handler take over.
+                EV_DETAIL << "RENEWING: T2 reached, not retransmitting." << endl;
+            }
+            else {
+                simtime_t nextDelay = std::max(remaining / 2, minRenewRetransmitInterval);
+                EV_DETAIL << "RENEWING: no DHCPACK yet; retransmitting in ~" << nextDelay << "s." << endl;
+                sendRequest(true);
+                scheduleRetransmit(WAIT_ACK, nextDelay);
+            }
+        }
+        else if (clientState == REBINDING) {
+            simtime_t remaining = leaseAbsoluteExpiry - simTime();
+            if (remaining <= SIMTIME_ZERO) {
+                EV_DETAIL << "REBINDING: lease expired, not retransmitting." << endl;
+            }
+            else {
+                simtime_t nextDelay = std::max(remaining / 2, minRenewRetransmitInterval);
+                EV_DETAIL << "REBINDING: no DHCPACK yet; retransmitting in ~" << nextDelay << "s." << endl;
+                sendRequest(true);
+                scheduleRetransmit(WAIT_ACK, nextDelay);
+            }
+        }
+        else {
+            EV_DETAIL << "Maximum DHCPREQUEST retransmits reached; restarting DHCP process." << endl;
+            initClient();
+        }
     }
     else if (category == T1) {
         EV_DETAIL << "T1 expired. Starting RENEWING state." << endl;
         clientState = RENEWING;
-        scheduleTimerTO(WAIT_ACK);
         sendRequest();
+        // §4.4.5 retransmit schedule for RENEWING — start with half-remaining-to-T2 (or min).
+        simtime_t remaining = t2AbsoluteTime - simTime();
+        simtime_t firstDelay = std::max(remaining / 2, minRenewRetransmitInterval);
+        scheduleRetransmit(WAIT_ACK, firstDelay);
     }
     else if (category == T2 && clientState == RENEWING) {
         EV_DETAIL << "T2 expired. Starting REBINDING state." << endl;
@@ -239,10 +293,11 @@ void DhcpClient::handleTimer(cMessage *msg)
         cancelEvent(timerT1);
         cancelEvent(timerT2);
         cancelEvent(timerTo);
-//        cancelEvent(leaseTimer);
 
         sendRequest();
-        scheduleTimerTO(WAIT_ACK);
+        simtime_t remaining = leaseAbsoluteExpiry - simTime();
+        simtime_t firstDelay = std::max(remaining / 2, minRenewRetransmitInterval);
+        scheduleRetransmit(WAIT_ACK, firstDelay);
     }
     else if (category == T2) {
         // T1 < T2 always holds by definition and when T1 expires client will move to RENEWING
@@ -344,6 +399,8 @@ void DhcpClient::bindLease()
 
     // update the routing table
     rescheduleAfter(lease->leaseTime, leaseTimer);
+    t2AbsoluteTime = simTime() + lease->rebindTime;
+    leaseAbsoluteExpiry = simTime() + lease->leaseTime;
 }
 
 void DhcpClient::unbindLease()
@@ -509,10 +566,12 @@ void DhcpClient::receiveSignal(cComponent *source, int signalID, cObject *obj, c
     }
 }
 
-void DhcpClient::sendRequest()
+void DhcpClient::sendRequest(bool retransmit)
 {
-    // setting the xid
-    xid = intuniform(0, RAND_MAX); // generating a new xid for each transmission
+    // Per RFC 2131 §4.1, retransmissions of the same DHCPREQUEST must reuse
+    // the original xid so the server can match the reply.
+    if (!retransmit)
+        xid = intuniform(0, RAND_MAX);
 
     const auto& request = makeShared<DhcpMessage>();
     request->setOp(BOOTREQUEST);
@@ -584,11 +643,11 @@ void DhcpClient::sendRequest()
     sendToUdp(packet, clientPort, destAddr, serverPort);
 }
 
-void DhcpClient::sendDiscover()
+void DhcpClient::sendDiscover(bool retransmit)
 {
-    // setting the xid
-    xid = intuniform(0, RAND_MAX);
-//    std::cout << xid << endl;
+    // Same xid across retransmits, RFC 2131 §4.1.
+    if (!retransmit)
+        xid = intuniform(0, RAND_MAX);
     Packet *packet = new Packet("DHCPDISCOVER");
     const auto& discover = makeShared<DhcpMessage>();
     discover->setOp(BOOTREQUEST);
@@ -673,9 +732,26 @@ void DhcpClient::handleDhcpAck(const Ptr<const DhcpMessage>& msg)
 
 void DhcpClient::scheduleTimerTO(DhcpTimerType type)
 {
-    // cancel the previous timeout
+    // Start of a fresh wait — reset the retransmit progression (RFC 2131 §4.1).
+    resetRetransmitState();
+    scheduleRetransmit(type, currentRetransmitDelay);
+}
+
+void DhcpClient::resetRetransmitState()
+{
+    retransmitCount = 0;
+    currentRetransmitDelay = initialRetransmitDelay;
+}
+
+void DhcpClient::scheduleRetransmit(DhcpTimerType type, simtime_t delay)
+{
+    // RFC 2131 §4.1: each interval is randomized by ±1 second.
+    simtime_t jitter = uniform(-1, 1);
+    simtime_t actualDelay = delay + jitter;
+    if (actualDelay < SIMTIME_ZERO)
+        actualDelay = SIMTIME_ZERO;
     timerTo->setKind(type);
-    rescheduleAfter(responseTimeout, timerTo);
+    rescheduleAfter(actualDelay, timerTo);
 }
 
 void DhcpClient::scheduleTimerT1()
