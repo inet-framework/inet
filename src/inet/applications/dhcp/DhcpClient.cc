@@ -854,7 +854,7 @@ void DhcpClient::openSocket()
 {
     socket.bind(clientPort);
     socket.setBroadcast(true);
-    EV_INFO << "DHCP server bound to port " << serverPort << "." << endl;
+    EV_INFO << "DHCP client bound to port " << clientPort << "." << endl;
 }
 
 void DhcpClient::handleStartOperation(LifecycleOperation *operation)
