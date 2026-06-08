@@ -104,6 +104,7 @@ class DhcpMessage extends FieldsChunk
     uint16_t reserved = 0; // MUST BE ZERO (reserved for future use)
     Ipv4Address ciaddr; // client IP address; only filled in if client is in BOUND, RENEW or REBINDING state and can respond to Arp requests
     Ipv4Address yiaddr; // 'your' (client) IP address
+    Ipv4Address siaddr; // IP address of next server to use in bootstrap (RFC 2131 Table 1)
     Ipv4Address giaddr; // relay agent IP address, used in booting via a relay agent
     MacAddress chaddr; // client hardware address (MAC)
     string sname; // optional server host name

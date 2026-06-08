@@ -31,8 +31,7 @@ void DhcpMessageSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
     stream.writeNBitsOfUint64Be(dhcpMessage->getReserved(), 15);
     stream.writeIpv4Address(dhcpMessage->getCiaddr());
     stream.writeIpv4Address(dhcpMessage->getYiaddr());
-    // FIXME siaddr is missing from the packet representation
-    stream.writeUint32Be(0);
+    stream.writeIpv4Address(dhcpMessage->getSiaddr());
     stream.writeIpv4Address(dhcpMessage->getGiaddr());
     stream.writeMacAddress(dhcpMessage->getChaddr());
     stream.writeByte(0);
@@ -232,8 +231,7 @@ const Ptr<Chunk> DhcpMessageSerializer::deserialize(MemoryInputStream& stream) c
     dhcpMessage->setReserved(stream.readNBitsToUint64Be(15));
     dhcpMessage->setCiaddr(stream.readIpv4Address());
     dhcpMessage->setYiaddr(stream.readIpv4Address());
-    // FIXME siaddr is missing from the packet representation
-    stream.readUint32Be();
+    dhcpMessage->setSiaddr(stream.readIpv4Address());
     dhcpMessage->setGiaddr(stream.readIpv4Address());
     dhcpMessage->setChaddr(stream.readMacAddress());
     stream.readByte();

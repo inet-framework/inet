@@ -439,6 +439,7 @@ void DhcpServer::sendAck(DhcpLease *lease, const Ptr<const DhcpMessage>& packet)
     ack->setBroadcast(false);
     ack->setCiaddr(lease->ip); // client IP addr.
     ack->setYiaddr(lease->ip); // client IP addr.
+    ack->setSiaddr(ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress()); // server IP
 
     ack->setChaddr(lease->mac); // client MAC address
     ack->setSname(""); // no server name given
@@ -517,6 +518,7 @@ void DhcpServer::sendOffer(DhcpLease *lease, const Ptr<const DhcpMessage>& packe
     offer->setBroadcast(false); // unicast
 
     offer->setYiaddr(lease->ip); // ip offered.
+    offer->setSiaddr(ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress()); // server IP
     offer->setGiaddr(lease->gateway); // next server ip
 
     offer->setChaddr(lease->mac); // client mac address
