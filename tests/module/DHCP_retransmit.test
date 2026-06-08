@@ -1,0 +1,84 @@
+%description:
+
+Tests client-side DHCPDISCOVER retransmission with exponential backoff
+(RFC 2131 §4.1). The DHCP server starts in DOWN state and is brought up by
+ScenarioManager only at t=10s. The client starts at t=0 and sends its first
+DHCPDISCOVER immediately. With initialRetransmitDelay=4s and a backoff that
+doubles each attempt, the client retransmits at roughly t=4, t=8, t=16, ...
+(±1s of jitter), so it should bind the address shortly after the server
+comes up.
+
+Before the fix, the client would wait a single 60-second timeout and then
+restart the whole DORA — so it would not bind until roughly t=60.
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+ned-path = .;../../../../src;../../lib
+cmdenv-express-mode = false
+cmdenv-log-prefix = "[%t %M] "
+sim-time-limit = 30s
+
+
+**.hasStatus = true
+*.server.status.initialStatus = "down"
+*.scenarioManager.script = xmldoc("scenario.xml")
+
+*.configurator.config = xml("<config><interface hosts='server' address='192.168.1.1' netmask='255.255.255.0'/></config>")
+
+*.server.numApps = 1
+*.server.app[0].typename = "DhcpServer"
+*.server.app[0].numReservedAddresses = 100
+*.server.app[0].maxNumClients = 10
+*.server.app[0].gateway = "192.168.1.1"
+*.server.app[0].leaseTime = 100s
+
+*.client.numApps = 1
+*.client.app[0].typename = "DhcpClient"
+
+%file: test.ned
+
+import inet.test.moduletest.lib.*;
+import inet.node.ethernet.Eth10M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.common.scenario.ScenarioManager;
+
+network Test
+{
+    submodules:
+        scenarioManager: ScenarioManager;
+        configurator: Ipv4NetworkConfigurator;
+        switch: EthernetSwitch;
+        server: StandardHost;
+        client: StandardHost;
+    connections:
+        server.ethg++ <--> Eth10M <--> switch.ethg++;
+        client.ethg++ <--> Eth10M <--> switch.ethg++;
+}
+
+%file: scenario.xml
+
+<scenario>
+    <at t="10">
+        <startup module="server"/>
+    </at>
+</scenario>
+
+%# Must observe at least two retransmits (the server is down until t=10s)
+%# and the client must eventually bind. Times are deterministic given the
+%# default seed (jitter is uniform(-1,1) from a fixed RNG).
+%contains: stdout
+[4.185689232778 Test.client.app[0]] No DHCPOFFER yet; retransmitting DHCPDISCOVER (attempt 1, next wait ~8s).
+
+%contains: stdout
+[12.616067962721 Test.client.app[0]] No DHCPOFFER yet; retransmitting DHCPDISCOVER (attempt 2, next wait ~16s).
+
+%contains: stdout
+[12.618177162721 Test.client.app[0]] The requested IP 192.168.1.100/255.255.255.0 is available. Assigning it to client.
+
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
