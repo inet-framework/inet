@@ -412,6 +412,18 @@ bool TcpConnection::processIcmpv4Error(Indication *indication)
     }
 
     // Soft notification: forward the original indication to the application, no state change.
+    // Don't forward if the connection is in a state where the app may not have
+    // the socket registered (would cause MessageDispatcher error).
+    int fsmState = fsm.getState();
+    if (fsmState != TCP_S_ESTABLISHED && fsmState != TCP_S_FIN_WAIT_1 &&
+        fsmState != TCP_S_FIN_WAIT_2 && fsmState != TCP_S_CLOSE_WAIT &&
+        fsmState != TCP_S_CLOSING)
+    {
+        EV_DETAIL << "Ignoring soft ICMPv4 error in " << stateName(fsmState) << " state (app may not have socket registered)\n";
+        delete indication;
+        return true;
+    }
+
     // The Icmpv4ErrorInd tag is already attached; just relabel and add SocketInd.
     indication->setName(indicationName(TCP_I_ICMPv4_ERROR));
     indication->setKind(TCP_I_ICMPv4_ERROR);
@@ -464,6 +476,18 @@ bool TcpConnection::processIcmpv6Error(Indication *indication)
     }
 
     // Soft notification: forward the original indication to the application, no state change.
+    // Don't forward if the connection is in a closing/closed state where the app
+    // may have already cleaned up its socket (would cause MessageDispatcher error).
+    int fsmState = fsm.getState();
+    if (fsmState != TCP_S_ESTABLISHED && fsmState != TCP_S_FIN_WAIT_1 &&
+        fsmState != TCP_S_FIN_WAIT_2 && fsmState != TCP_S_CLOSE_WAIT &&
+        fsmState != TCP_S_CLOSING)
+    {
+        EV_DETAIL << "Ignoring soft ICMPv6 error in " << stateName(fsmState) << " state (app may not have socket registered)\n";
+        delete indication;
+        return true;
+    }
+
     // The Icmpv6ErrorInd tag is already attached; just relabel and add SocketInd.
     indication->setName(indicationName(TCP_I_ICMPv6_ERROR));
     indication->setKind(TCP_I_ICMPv6_ERROR);
