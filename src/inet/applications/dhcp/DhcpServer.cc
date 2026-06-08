@@ -26,11 +26,13 @@ DhcpServer::DhcpServer()
 {
     ie = nullptr;
     startTimer = nullptr;
+    expiryTimer = nullptr;
 }
 
 DhcpServer::~DhcpServer()
 {
     cancelAndDelete(startTimer);
+    cancelAndDelete(expiryTimer);
 }
 
 void DhcpServer::initialize(int stage)
@@ -39,6 +41,7 @@ void DhcpServer::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         startTimer = new cMessage("Start DHCP server", START_DHCP);
+        expiryTimer = new cMessage("Lease expiry", LEASE_EXPIRY);
         startTime = par("startTime");
         numSent = 0;
         numReceived = 0;
@@ -145,8 +148,68 @@ void DhcpServer::handleSelfMessages(cMessage *msg)
     if (msg->getKind() == START_DHCP) {
         openSocket();
     }
+    else if (msg->getKind() == LEASE_EXPIRY) {
+        processExpiredLeases();
+        rescheduleExpiryTimer();
+    }
     else
         throw cRuntimeError("Unknown selfmessage type!");
+}
+
+void DhcpServer::setLeaseState(DhcpLease *lease, DhcpLeaseState state, simtime_t holdTime)
+{
+    lease->state = state;
+    if (state == DHCP_LEASE_FREE)
+        lease->serverExpiryTime = SIMTIME_ZERO;
+    else
+        lease->serverExpiryTime = simTime() + holdTime;
+    rescheduleExpiryTimer();
+}
+
+void DhcpServer::rescheduleExpiryTimer()
+{
+    simtime_t earliest = SIMTIME_ZERO;
+    for (auto& elem : leased) {
+        const DhcpLease& l = elem.second;
+        if (l.state == DHCP_LEASE_FREE)
+            continue;
+        if (earliest == SIMTIME_ZERO || l.serverExpiryTime < earliest)
+            earliest = l.serverExpiryTime;
+    }
+    if (earliest == SIMTIME_ZERO) {
+        if (expiryTimer->isScheduled())
+            cancelEvent(expiryTimer);
+        return;
+    }
+    if (earliest <= simTime()) {
+        // already past — fire immediately
+        if (!expiryTimer->isScheduled())
+            scheduleAt(simTime(), expiryTimer);
+        return;
+    }
+    if (expiryTimer->isScheduled()) {
+        if (expiryTimer->getArrivalTime() == earliest)
+            return;
+        cancelEvent(expiryTimer);
+    }
+    scheduleAt(earliest, expiryTimer);
+}
+
+void DhcpServer::processExpiredLeases()
+{
+    simtime_t now = simTime();
+    for (auto& elem : leased) {
+        DhcpLease& l = elem.second;
+        if (l.state != DHCP_LEASE_FREE && l.serverExpiryTime <= now) {
+            EV_INFO << "Lease " << l.ip << " (" << l.mac << ") "
+                    << (l.state == DHCP_LEASE_LEASED ? "expired" :
+                        l.state == DHCP_LEASE_OFFERED ? "offer hold expired" :
+                        "decline hold expired")
+                    << ", returning address to the pool." << endl;
+            l.state = DHCP_LEASE_FREE;
+            l.serverExpiryTime = SIMTIME_ZERO;
+        }
+    }
 }
 
 void DhcpServer::processDhcpMessage(Packet *packet)
@@ -175,11 +238,9 @@ void DhcpServer::processDhcpMessage(Packet *packet)
                 // MAC not registered, create offering a new lease to the client
                 lease = getAvailableLease(dhcpMsg->getOptions().getRequestedIp(), dhcpMsg->getChaddr());
                 if (lease != nullptr) {
-//                    std::cout << "MAC: " << packet->getChaddr() << " ----> IP: " << lease->ip << endl;
                     lease->mac = dhcpMsg->getChaddr();
                     lease->xid = dhcpMsg->getXid();
-//                    lease->parameterRequestList = packet->getOptions().get(PARAM_LIST); TODO !!
-                    lease->leased = true; // TODO
+                    setLeaseState(lease, DHCP_LEASE_OFFERED, offerHoldTime);
                     sendOffer(lease, dhcpMsg);
                 }
                 else
@@ -188,7 +249,7 @@ void DhcpServer::processDhcpMessage(Packet *packet)
             else {
                 // MAC already exist, offering the same lease
                 lease->xid = dhcpMsg->getXid();
-//                lease->parameterRequestList = packet->getOptions().get(PARAM_LIST); // TODO !!
+                setLeaseState(lease, DHCP_LEASE_OFFERED, offerHoldTime);
                 sendOffer(lease, dhcpMsg);
             }
         }
@@ -196,7 +257,9 @@ void DhcpServer::processDhcpMessage(Packet *packet)
             EV_INFO << "DHCPREQUEST arrived. Handling it." << endl;
 
             // check if the request was in response of an offering
-            if (dhcpMsg->getOptions().getServerIdentifier() == ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress()) {
+            Ipv4Address myIp = ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
+            Ipv4Address requestedServerId = dhcpMsg->getOptions().getServerIdentifier();
+            if (requestedServerId == myIp) {
                 // the REQUEST is in response to an offering (because SERVER_ID is filled)
                 // otherwise the msg is a request to extend an existing lease (e. g. INIT-REBOOT)
 
@@ -209,13 +272,8 @@ void DhcpServer::processDhcpMessage(Packet *packet)
                     else {
                         EV_INFO << "From now " << lease->ip << " is leased to " << lease->mac << "." << endl;
                         lease->xid = dhcpMsg->getXid();
-                        lease->leaseTime = leaseTime;
-                        lease->leased = true;
-
-                        // TODO final check before ACK (it is not necessary but recommended)
+                        setLeaseState(lease, DHCP_LEASE_LEASED, SimTime((double)leaseTime, SIMTIME_S));
                         sendAck(lease, dhcpMsg);
-
-                        // TODO update the display string to inform how many clients are assigned
                     }
                 }
                 else {
@@ -223,9 +281,18 @@ void DhcpServer::processDhcpMessage(Packet *packet)
                     sendNak(dhcpMsg);
                 }
             }
+            else if (!requestedServerId.isUnspecified()) {
+                // The REQUEST names a *different* DHCP server. RFC 2131 4.3.2:
+                // "Servers receiving a DHCPREQUEST with an incorrect server identifier
+                // MUST release the offered network address."
+                EV_INFO << "DHCPREQUEST names another server (" << requestedServerId
+                        << "). Releasing our offer for " << dhcpMsg->getChaddr() << "." << endl;
+                DhcpLease *lease = getLeaseByMac(dhcpMsg->getChaddr());
+                if (lease != nullptr && lease->state == DHCP_LEASE_OFFERED)
+                    setLeaseState(lease, DHCP_LEASE_FREE, SIMTIME_ZERO);
+            }
             else {
                 if (dhcpMsg->getCiaddr().isUnspecified()) { // init-reboot
-//                    std::cout << "init-reboot" << endl;
                     Ipv4Address requestedAddress = dhcpMsg->getOptions().getRequestedIp();
                     auto it = leased.find(requestedAddress);
                     if (it == leased.end()) {
@@ -237,10 +304,7 @@ void DhcpServer::processDhcpMessage(Packet *packet)
                         DhcpLease *lease = &it->second;
                         EV_INFO << "Initialization with known IP address (INIT-REBOOT) " << lease->ip << " on " << lease->mac << " was successful." << endl;
                         lease->xid = dhcpMsg->getXid();
-                        lease->leaseTime = leaseTime;
-                        lease->leased = true;
-
-                        // TODO final check before ACK (it is not necessary but recommended)
+                        setLeaseState(lease, DHCP_LEASE_LEASED, SimTime((double)leaseTime, SIMTIME_S));
                         sendAck(lease, dhcpMsg);
                     }
                     else {
@@ -254,8 +318,7 @@ void DhcpServer::processDhcpMessage(Packet *packet)
                         DhcpLease *lease = &it->second;
                         EV_INFO << "Request for renewal/rebinding IP " << lease->ip << " to " << lease->mac << "." << endl;
                         lease->xid = dhcpMsg->getXid();
-                        lease->leaseTime = leaseTime;
-                        lease->leased = true;
+                        setLeaseState(lease, DHCP_LEASE_LEASED, SimTime((double)leaseTime, SIMTIME_S));
 
                         // unicast ACK to ciaddr
                         sendAck(lease, dhcpMsg);
@@ -367,9 +430,6 @@ void DhcpServer::sendAck(DhcpLease *lease, const Ptr<const DhcpMessage>& packet)
 
     pk->insertAtBack(ack);
 
-    // register the lease time
-    lease->leaseTime = simTime();
-
     /* RFC 2131, 4.1
      * If the 'giaddr' field in a DHCP message from a client is non-zero,
      * the server sends any return messages to the 'DHCP server' port on the
@@ -447,8 +507,6 @@ void DhcpServer::sendOffer(DhcpLease *lease, const Ptr<const DhcpMessage>& packe
 
     offer->setChunkLength(B(length));
 
-    // register the offering time // todo: ?
-    lease->leaseTime = simTime();
     pk->insertAtBack(offer);
 
     /* RFC 2131, 4.1
@@ -481,9 +539,10 @@ void DhcpServer::sendOffer(DhcpLease *lease, const Ptr<const DhcpMessage>& packe
 
 DhcpLease *DhcpServer::getLeaseByMac(MacAddress mac)
 {
+    // Skip DECLINED slots: they belong to the MAC historically but are
+    // quarantined; the caller should pick a different address.
     for (auto& elem : leased) {
-        // lease exist
-        if (elem.second.mac == mac) {
+        if (elem.second.mac == mac && elem.second.state != DHCP_LEASE_DECLINED) {
             EV_DETAIL << "Found lease for MAC " << mac << "." << endl;
             return &(elem.second);
         }
@@ -498,26 +557,34 @@ DhcpLease *DhcpServer::getAvailableLease(Ipv4Address requestedAddress, const Mac
 {
     int beginAddr = ipAddressStart.getInt(); // the first address that we might use
 
-    // try to allocate the requested address if that address is valid and not already allocated
+    // try to allocate the requested address if that address is valid and not already in use
     if (!requestedAddress.isUnspecified()) { // valid
-        if (containsKey(leased, requestedAddress) && !leased[requestedAddress].leased) // not already leased (allocated)
-            return &leased[requestedAddress];
-
-        // lease does not exist, create it
-        leased[requestedAddress] = DhcpLease();
-        leased[requestedAddress].ip = requestedAddress;
-        leased[requestedAddress].gateway = gateway;
-        leased[requestedAddress].subnetMask = subnetMask;
-
-        return &leased[requestedAddress];
+        auto it = leased.find(requestedAddress);
+        if (it != leased.end()) {
+            if (it->second.state == DHCP_LEASE_FREE)
+                return &it->second;
+            // requested address is OFFERED to or LEASED by another client, or DECLINED — fall through
+        }
+        else {
+            // is the requested address inside the pool?
+            if (Ipv4Address::maskedAddrAreEqual(requestedAddress, ipAddressStart, subnetMask) &&
+                requestedAddress.getInt() >= (uint32_t)beginAddr &&
+                requestedAddress.getInt() < (uint32_t)beginAddr + maxNumOfClients) {
+                leased[requestedAddress] = DhcpLease();
+                leased[requestedAddress].ip = requestedAddress;
+                leased[requestedAddress].gateway = gateway;
+                leased[requestedAddress].subnetMask = subnetMask;
+                return &leased[requestedAddress];
+            }
+        }
     }
 
     // allocate new address from server's pool of available addresses
     for (unsigned int i = 0; i < maxNumOfClients; i++) {
         Ipv4Address ip(beginAddr + i);
         if (containsKey(leased, ip)) {
-            // lease exists but not allocated (e.g. expired or released)
-            if (!leased[ip].leased)
+            // lease exists; reusable only if FREE
+            if (leased[ip].state == DHCP_LEASE_FREE)
                 return &(leased[ip]);
         }
         else {
@@ -545,6 +612,8 @@ void DhcpServer::handleStartOperation(LifecycleOperation *operation)
 {
     maxNumOfClients = par("maxNumClients");
     leaseTime = par("leaseTime");
+    offerHoldTime = par("offerHoldTime");
+    declineHoldTime = par("declineHoldTime");
 
     simtime_t start = std::max(startTime, simTime());
     ie = chooseInterface();
@@ -567,6 +636,7 @@ void DhcpServer::handleStopOperation(LifecycleOperation *operation)
     leased.clear();
     ie = nullptr;
     cancelEvent(startTimer);
+    cancelEvent(expiryTimer);
     socket.close();
     delayActiveOperationFinish(par("stopOperationTimeout"));
 }
@@ -576,6 +646,7 @@ void DhcpServer::handleCrashOperation(LifecycleOperation *operation)
     leased.clear();
     ie = nullptr;
     cancelEvent(startTimer);
+    cancelEvent(expiryTimer);
     if (operation->getRootModule() != getContainingNode(this)) // closes socket when the application crashed only
         socket.destroy(); // TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
 }

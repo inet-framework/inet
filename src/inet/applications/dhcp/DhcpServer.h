@@ -28,7 +28,8 @@ class INET_API DhcpServer : public ApplicationBase, public cListener, public Udp
   protected:
     typedef std::map<Ipv4Address, DhcpLease> DhcpLeased;
     enum TimerType {
-        START_DHCP
+        START_DHCP,
+        LEASE_EXPIRY
     };
     DhcpLeased leased; // lookup table for lease infos
 
@@ -40,6 +41,8 @@ class INET_API DhcpServer : public ApplicationBase, public cListener, public Udp
     /* Set by management, see DhcpServer NED file. */
     unsigned int maxNumOfClients = 0;
     unsigned int leaseTime = 0;
+    simtime_t offerHoldTime; // how long an OFFERED slot is reserved without a matching REQUEST
+    simtime_t declineHoldTime; // how long a DECLINED address is kept out of the pool
     Ipv4Address subnetMask;
     Ipv4Address gateway;
     Ipv4Address ipAddressStart;
@@ -48,6 +51,7 @@ class INET_API DhcpServer : public ApplicationBase, public cListener, public Udp
     UdpSocket socket;
     simtime_t startTime; // application start time
     cMessage *startTimer = nullptr; // self message to start DHCP server
+    cMessage *expiryTimer = nullptr; // self message firing at the next OFFERED/LEASED/DECLINED expiry
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -94,6 +98,23 @@ class INET_API DhcpServer : public ApplicationBase, public cListener, public Udp
     virtual void handleSelfMessages(cMessage *msg);
     virtual NetworkInterface *chooseInterface();
     virtual void sendToUDP(Packet *msg, int srcPort, const L3Address& destAddr, int destPort);
+
+    /*
+     * Transitions a lease entry to the given state with the given hold duration,
+     * and reschedules the expiry timer if the new expiry is earlier than the next one.
+     */
+    virtual void setLeaseState(DhcpLease *lease, DhcpLeaseState state, simtime_t holdTime);
+
+    /*
+     * Scans the lease table for the earliest non-FREE expiry and (re)schedules expiryTimer.
+     */
+    virtual void rescheduleExpiryTimer();
+
+    /*
+     * Called when expiryTimer fires: reclaims all leases whose serverExpiryTime has passed,
+     * setting them to FREE.
+     */
+    virtual void processExpiredLeases();
 
     // UdpSocket::ICallback methods
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
