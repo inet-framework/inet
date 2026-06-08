@@ -133,7 +133,7 @@
 /showcases/visualizer/canvas/instrumentfigures/,    -f omnetpp.ini -c General -r 0,                                            3s,              6622-adb9/tplx;28ca-9f8c/~tNl;3417-d991/~tND;4266-0d42/tyf, PASS,    wireless Ipv4
 
 /showcases/visualizer/canvas/interfacetable/, -f omnetpp.ini -c EnablingVisualization -r 0,                  5s,            0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND;0000-0000/tyf, PASS,
-/showcases/visualizer/canvas/interfacetable/, -f omnetpp.ini -c AdvancedFeatures -r 0,                       5s,            af25-6e91/tplx;886f-c834/~tNl;d3a4-a707/~tND;8882-5b6c/tyf, PASS,    wireless EthernetMac Ipv4 DhcpClient DhcpServer
+/showcases/visualizer/canvas/interfacetable/, -f omnetpp.ini -c AdvancedFeatures -r 0,                       5s,            af25-6e91/tplx;886f-c834/~tNl;d158-5a5a/~tND;8882-5b6c/tyf, PASS,    wireless EthernetMac Ipv4 DhcpClient DhcpServer
 
 /showcases/visualizer/canvas/mobility/,     -f omnetpp.ini -c VisualizingFeatures -r 0,                                500s,            54a1-0f8d/tplx;0000-0000/~tNl;0000-0000/~tND;df51-b287/tyf, PASS,    wireless
 
