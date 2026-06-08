@@ -15,6 +15,21 @@
 namespace inet {
 
 /**
+ * Lifecycle state of a DHCP lease entry at the server.
+ *
+ * FREE     - slot is unused or has been released/expired and may be re-offered;
+ * OFFERED  - server has sent a DHCPOFFER and is waiting for DHCPREQUEST;
+ * LEASED   - server has sent DHCPACK and the binding is active until expiry;
+ * DECLINED - client sent DHCPDECLINE; address is quarantined until expiry.
+ */
+enum DhcpLeaseState {
+    DHCP_LEASE_FREE,
+    DHCP_LEASE_OFFERED,
+    DHCP_LEASE_LEASED,
+    DHCP_LEASE_DECLINED
+};
+
+/**
  * Describes a DHCP lease.
  */
 class INET_API DhcpLease
@@ -32,7 +47,10 @@ class INET_API DhcpLease
     simtime_t leaseTime;
     simtime_t renewalTime;
     simtime_t rebindTime;
-    bool leased = false;
+    // Server-side state machine for the lease (used only by DhcpServer).
+    DhcpLeaseState state = DHCP_LEASE_FREE;
+    // Absolute simulation time at which OFFERED/LEASED/DECLINED expires.
+    simtime_t serverExpiryTime;
 };
 
 inline std::ostream& operator<<(std::ostream& os, DhcpLease obj)
