@@ -373,6 +373,10 @@ void DhcpServer::processDhcpMessage(Packet *packet)
                 setLeaseState(&it->second, DHCP_LEASE_FREE, SIMTIME_ZERO);
             }
         }
+        else if (messageType == DHCPINFORM) { // RFC 2131, 4.3.5
+            EV_INFO << "DHCPINFORM arrived. Handling it." << endl;
+            sendInformAck(dhcpMsg);
+        }
         else
             EV_WARN << "BOOTREQUEST arrived, but DHCP message type is unknown. Dropping it." << endl;
     }
@@ -421,6 +425,50 @@ void DhcpServer::sendNak(const Ptr<const DhcpMessage>& msg)
     if (!msg->getGiaddr().isUnspecified())
         destAddr = msg->getGiaddr();
     sendToUDP(pk, serverPort, destAddr, clientPort);
+}
+
+void DhcpServer::sendInformAck(const Ptr<const DhcpMessage>& msg)
+{
+    EV_INFO << "Sending DHCPACK in response to DHCPINFORM from " << msg->getCiaddr() << "." << endl;
+
+    Packet *pk = new Packet("DHCPACK");
+    const auto& ack = makeShared<DhcpMessage>();
+    ack->setOp(BOOTREPLY);
+    uint16_t length = 236; // packet size without the options field
+    ack->setHtype(1); // ethernet
+    ack->setHlen(6); // hardware address length (6 octets)
+    ack->setHops(0);
+    ack->setXid(msg->getXid());
+    ack->setSecs(0);
+    ack->setBroadcast(false);
+    ack->setCiaddr(msg->getCiaddr());
+    // RFC 4.3.5: MUST NOT send lease time, SHOULD NOT fill in yiaddr
+    ack->setYiaddr(Ipv4Address::UNSPECIFIED_ADDRESS);
+    ack->setChaddr(msg->getChaddr());
+    ack->setSname("");
+    ack->setFile("");
+    ack->getOptionsForUpdate().setMessageType(DHCPACK);
+    length += 3;
+
+    // provide configuration parameters
+    ack->getOptionsForUpdate().setSubnetMask(subnetMask);
+    length += 6;
+    ack->getOptionsForUpdate().setRouterArraySize(1);
+    ack->getOptionsForUpdate().setRouter(0, gateway);
+    length += (2 + 1 * sizeof(uint32_t));
+
+    // add the server ID as the RFC says
+    ack->getOptionsForUpdate().setServerIdentifier(ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
+    length += 6;
+
+    // magic cookie and the end field
+    length += 5;
+
+    ack->setChunkLength(B(length));
+    pk->insertAtBack(ack);
+
+    // RFC 4.3.5: unicast to ciaddr
+    sendToUDP(pk, serverPort, msg->getCiaddr(), clientPort);
 }
 
 void DhcpServer::sendAck(DhcpLease *lease, const Ptr<const DhcpMessage>& packet)

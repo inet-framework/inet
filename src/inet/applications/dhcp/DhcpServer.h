@@ -95,6 +95,12 @@ class INET_API DhcpServer : public ApplicationBase, public cListener, public Udp
      */
     virtual void sendNak(const Ptr<const DhcpMessage>& dhcpMsg);
 
+    /*
+     * Send DHCPACK in response to DHCPINFORM (RFC 2131, 4.3.5).
+     * No lease time, no yiaddr; unicast to ciaddr.
+     */
+    virtual void sendInformAck(const Ptr<const DhcpMessage>& dhcpMsg);
+
     virtual void handleSelfMessages(cMessage *msg);
     virtual NetworkInterface *chooseInterface();
     virtual void sendToUDP(Packet *msg, int srcPort, const L3Address& destAddr, int destPort);
