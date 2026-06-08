@@ -72,6 +72,11 @@ class INET_API DhcpClient : public ApplicationBase, public cListener, public Udp
     // SHOULD-deliver, balanced against not blocking shutdown indefinitely).
     bool releaseInFlight = false;
 
+    // If non-empty, the next ACK granting this address triggers a
+    // DHCPDECLINE instead of a normal bind. One-shot: cleared on decline.
+    // See the NED parameter for rationale.
+    Ipv4Address declineOfferedIp;
+
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
@@ -147,6 +152,13 @@ class INET_API DhcpClient : public ApplicationBase, public cListener, public Udp
      * Unicast to the server that granted the lease.
      */
     virtual void sendRelease();
+
+    /*
+     * If declineOfferedIp matches the address the server has just confirmed,
+     * sends DHCPDECLINE, throws the rejected lease away, restarts from INIT,
+     * and returns true; otherwise returns false. The check is one-shot.
+     */
+    virtual bool triggerDeclineIfConfigured();
 
     /*
      * Records configuration parameters from a DHCPACK message.
