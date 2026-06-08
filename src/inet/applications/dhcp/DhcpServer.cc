@@ -436,8 +436,8 @@ void DhcpServer::sendAck(DhcpLease *lease, const Ptr<const DhcpMessage>& packet)
     ack->setHops(0);
     ack->setXid(lease->xid); // transaction id;
     ack->setSecs(0); // 0 seconds from transaction started
-    ack->setBroadcast(false);
-    ack->setCiaddr(lease->ip); // client IP addr.
+    ack->setBroadcast(packet->getBroadcast()); // RFC 2131 Table 3: flags from client DHCPREQUEST
+    ack->setCiaddr(packet->getCiaddr()); // RFC 2131 Table 3: ciaddr from DHCPREQUEST or 0
     ack->setYiaddr(lease->ip); // client IP addr.
     ack->setSiaddr(ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress()); // server IP
 
@@ -515,11 +515,11 @@ void DhcpServer::sendOffer(DhcpLease *lease, const Ptr<const DhcpMessage>& packe
     offer->setHops(0);
     offer->setXid(lease->xid); // transaction id
     offer->setSecs(0); // 0 seconds from transaction started
-    offer->setBroadcast(false); // unicast
+    offer->setBroadcast(packet->getBroadcast()); // RFC 2131 Table 3: flags from client DHCPDISCOVER
 
     offer->setYiaddr(lease->ip); // ip offered.
     offer->setSiaddr(ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress()); // server IP
-    offer->setGiaddr(lease->gateway); // next server ip
+    offer->setGiaddr(packet->getGiaddr()); // RFC 2131 Table 3: giaddr from client DHCPDISCOVER
 
     offer->setChaddr(lease->mac); // client mac address
     offer->setSname(""); // no server name given
