@@ -85,7 +85,6 @@ Test.client starting up
 Test.client started
 .*?
 The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to client\.
-.*?
 Test.server shutting down
 .*?
 Test.server shut down

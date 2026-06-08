@@ -77,29 +77,32 @@ network LifecycleTest
 </scenario>
 
 %contains-regex: stdout
-.*
 LifecycleTest\.server shutting down
-.*
+.*?
 Sending DHCPDISCOVER\.
-.*
-(DETAIL: )?No DHCP offer received within timeout\. Restarting\.
-.*
+.*?
+No DHCPOFFER yet; retransmitting DHCPDISCOVER \(attempt 1, next wait ~8s\).
 Sending DHCPDISCOVER.
-.*
-(DETAIL: )?No DHCP offer received within timeout\. Restarting\.
-.*
+.*?
+No DHCPOFFER yet; retransmitting DHCPDISCOVER \(attempt 2, next wait ~16s\).
 Sending DHCPDISCOVER.
-.*
-(DETAIL: )?No DHCP offer received within timeout\. Restarting\.
-.*
+.*?
+No DHCPOFFER yet; retransmitting DHCPDISCOVER \(attempt 3, next wait ~32s\).
+Sending DHCPDISCOVER.
+.*?
+No DHCPOFFER yet; retransmitting DHCPDISCOVER \(attempt 4, next wait ~64s\).
+Sending DHCPDISCOVER.
+.*?
 LifecycleTest\.server started
-.*
+.*?
+Maximum DHCPDISCOVER retransmits reached; restarting DHCP process\.
+Starting DHCP configuration process\.
 Sending DHCPDISCOVER\.
-.*
+.*?
 DHCPDISCOVER arrived\. Handling it\.
-.*
+.*?
 The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to client\.
-.*
+
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out
