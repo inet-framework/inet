@@ -1,0 +1,94 @@
+%description:
+
+Tests DHCPRELEASE (RFC 2131 §4.4.4). A 1-address pool is leased by client A.
+ScenarioManager shuts down clientA cleanly; the client must emit a
+DHCPRELEASE for its address before the socket closes, and the server must
+return that address to the pool *immediately* (not wait for leaseTime to
+expire). Client B, which starts up shortly after, must be able to acquire
+the same address well before the lease would otherwise have expired.
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+ned-path = .;../../../../src;../../lib
+cmdenv-express-mode = false
+cmdenv-log-prefix = "[%t %M] "
+sim-time-limit = 100s
+
+
+**.hasStatus = true
+*.clientB.status.initialStatus = "down"
+*.scenarioManager.script = xmldoc("scenario.xml")
+
+# Pin MACs so server-side log lines identify the source client.
+*.clientA.eth[0].address = "AA-00-00-00-00-0A"
+*.clientB.eth[0].address = "AA-00-00-00-00-0B"
+
+*.configurator.config = xml("<config><interface hosts='server' address='192.168.1.1' netmask='255.255.255.0'/></config>")
+
+*.server.numApps = 1
+*.server.app[0].typename = "DhcpServer"
+*.server.app[0].numReservedAddresses = 100
+*.server.app[0].maxNumClients = 1
+*.server.app[0].gateway = "192.168.1.1"
+%# leaseTime is long so that ONLY a working RELEASE can free the address
+%# within the simulation window.
+*.server.app[0].leaseTime = 10000s
+
+*.clientA.numApps = 1
+*.clientA.app[0].typename = "DhcpClient"
+*.clientB.numApps = 1
+*.clientB.app[0].typename = "DhcpClient"
+
+%file: test.ned
+
+import inet.test.moduletest.lib.*;
+import inet.node.ethernet.Eth10M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.common.scenario.ScenarioManager;
+
+network Test
+{
+    submodules:
+        scenarioManager: ScenarioManager;
+        configurator: Ipv4NetworkConfigurator;
+        switch: EthernetSwitch;
+        server: StandardHost;
+        clientA: StandardHost;
+        clientB: StandardHost;
+    connections:
+        server.ethg++ <--> Eth10M <--> switch.ethg++;
+        clientA.ethg++ <--> Eth10M <--> switch.ethg++;
+        clientB.ethg++ <--> Eth10M <--> switch.ethg++;
+}
+
+%file: scenario.xml
+
+<scenario>
+    <at t="10">
+        <shutdown module="clientA"/>
+    </at>
+    <at t="15">
+        <startup module="clientB"/>
+    </at>
+</scenario>
+
+%# clientA must send a DHCPRELEASE for the address it leased.
+%contains: stdout
+[10 Test.clientA.app[0]] Sending DHCPRELEASE for 192.168.1.100 to server 192.168.1.1.
+
+%# Server must observe the release and free the address.
+%contains: stdout
+[10.0007315 Test.server.app[0]] DHCPRELEASE received: returning 192.168.1.100 from AA-00-00-00-00-0A to the pool.
+
+%# clientB must successfully acquire the same address (leaseTime is 10000s
+%# >> sim-time-limit, so this only succeeds if RELEASE actually freed it).
+%contains: stdout
+[15.0021092 Test.clientB.app[0]] The requested IP 192.168.1.100/255.255.255.0 is available. Assigning it to clientB.
+
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
