@@ -335,6 +335,24 @@ void DhcpServer::processDhcpMessage(Packet *packet)
                 }
             }
         }
+        else if (messageType == DHCPDECLINE) { // RFC 2131, 4.3.3
+            // A client refused the address we just offered/ACKed because it
+            // already saw the IP on the wire. Quarantine the address for
+            // declineHoldTime before reusing it.
+            Ipv4Address declinedIp = dhcpMsg->getOptions().getRequestedIp();
+            auto it = leased.find(declinedIp);
+            if (it == leased.end()) {
+                EV_WARN << "DHCPDECLINE for unknown IP " << declinedIp << ", ignoring." << endl;
+            }
+            else {
+                EV_INFO << "DHCPDECLINE received: " << declinedIp << " is in use; "
+                        << "quarantining for " << declineHoldTime << "." << endl;
+                // Bind the lease's MAC (in case the entry was created from a
+                // requested-IP path that did not set it).
+                it->second.mac = dhcpMsg->getChaddr();
+                setLeaseState(&it->second, DHCP_LEASE_DECLINED, declineHoldTime);
+            }
+        }
         else if (messageType == DHCPRELEASE) { // RFC 2131, 4.3.4
             // Client unicasts DHCPRELEASE; ciaddr is the address being given up.
             Ipv4Address releasedIp = dhcpMsg->getCiaddr();

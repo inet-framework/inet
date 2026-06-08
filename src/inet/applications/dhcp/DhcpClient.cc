@@ -46,6 +46,9 @@ void DhcpClient::initialize(int stage)
         maxRetransmitDelay = par("maxRetransmitDelay");
         maxRetransmitCount = par("maxRetransmitCount");
         minRenewRetransmitInterval = par("minRenewRetransmitInterval");
+        const char *declineIpStr = par("declineOfferedIp");
+        if (declineIpStr && *declineIpStr)
+            declineOfferedIp.set(declineIpStr);
         currentRetransmitDelay = initialRetransmitDelay;
         retransmitCount = 0;
 
@@ -375,13 +378,10 @@ void DhcpClient::bindLease()
     std::string banner = "Got IP " + lease->ip.str();
     host->bubble(banner.c_str());
 
-    /*
-        The client SHOULD perform a final check on the parameters (ping, Arp).
-        If the client detects that the address is already in use:
-        EV_INFO << "The offered IP " << lease->ip << " is not available." << endl;
-        sendDecline(lease->ip);
-        initClient();
-     */
+    // RFC 2131 §2.2 / RFC 5227 recommend an ARP probe before adopting the
+    // address, sending DHCPDECLINE on conflict. We expose that decision via
+    // the declineOfferedIp parameter and handle it in the REQUESTING-state
+    // branch before bindLease is reached; see triggerDeclineIfConfigured.
 
     EV_INFO << "The requested IP " << lease->ip << "/" << lease->subnetMask << " is available. Assigning it to "
             << host->getFullName() << "." << endl;
@@ -485,7 +485,13 @@ void DhcpClient::handleDhcpMessage(Packet *packet)
             }
             else if (messageType == DHCPACK) {
                 EV_INFO << "DHCPACK message arrived in REQUESTING state. The requested IP address is available in the server's pool of addresses." << endl;
-                handleDhcpAck(msg);
+                recordLease(msg);
+                if (triggerDeclineIfConfigured())
+                    break; // restart triggered; do not bind
+                cancelEvent(timerTo);
+                scheduleTimerT1();
+                scheduleTimerT2();
+                bindLease();
                 clientState = BOUND;
             }
             else if (messageType == DHCPNAK) {
@@ -727,6 +733,24 @@ void DhcpClient::sendDecline(Ipv4Address declinedIp)
 
     EV_INFO << "Sending DHCPDECLINE." << endl;
     sendToUdp(packet, clientPort, Ipv4Address::ALLONES_ADDRESS, serverPort);
+}
+
+bool DhcpClient::triggerDeclineIfConfigured()
+{
+    if (declineOfferedIp.isUnspecified() || lease == nullptr || lease->ip != declineOfferedIp)
+        return false;
+    EV_INFO << "Simulated conflict on offered IP " << lease->ip
+            << "; sending DHCPDECLINE." << endl;
+    Ipv4Address declined = lease->ip;
+    sendDecline(declined);
+    // Clear the one-shot trigger so the retried DORA can complete normally.
+    declineOfferedIp = Ipv4Address();
+    // Discard the rejected lease and restart from INIT.
+    delete lease;
+    lease = nullptr;
+    cancelEvent(timerTo);
+    initClient();
+    return true;
 }
 
 void DhcpClient::sendRelease()
