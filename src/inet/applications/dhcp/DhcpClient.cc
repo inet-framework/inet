@@ -64,6 +64,12 @@ void DhcpClient::initialize(int stage)
         WATCH(clientPort);
         WATCH(serverPort);
         WATCH(macAddress);
+        WATCH(currentRetransmitDelay);
+        WATCH(retransmitCount);
+        WATCH(t2AbsoluteTime);
+        WATCH(leaseAbsoluteExpiry);
+        WATCH(releaseInFlight);
+        WATCH(declineOfferedIp);
         // get the routing table to update and subscribe it to the blackboard
         irt.reference(this, "routingTableModule", true);
         // set client to idle state

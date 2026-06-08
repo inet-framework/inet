@@ -57,6 +57,8 @@ void DhcpServer::initialize(int stage)
         WATCH(clientPort);
         WATCH(serverPort);
         WATCH(ipAddressStart);
+        WATCH(offerHoldTime);
+        WATCH(declineHoldTime);
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         cModule *host = getContainingNode(this);
