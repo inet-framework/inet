@@ -66,6 +66,12 @@ class INET_API DhcpClient : public ApplicationBase, public cListener, public Udp
     simtime_t t2AbsoluteTime; // absolute simtime at which T2 fires (set at lease bind)
     simtime_t leaseAbsoluteExpiry; // absolute simtime at which the lease ends
 
+    // Set to true when handleStopOperation has queued a DHCPRELEASE but the
+    // packet has not yet left the node; the socketClosed callback then keeps
+    // the lifecycle stop active for an extra grace period (RFC 2131 §4.4.4
+    // SHOULD-deliver, balanced against not blocking shutdown indefinitely).
+    bool releaseInFlight = false;
+
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
@@ -134,6 +140,12 @@ class INET_API DhcpClient : public ApplicationBase, public cListener, public Udp
      * Client to server indicating network address is already in use.
      */
     virtual void sendDecline(Ipv4Address declinedIp);
+
+    /*
+     * Client to server: relinquish the current lease (RFC 2131 §4.4.4).
+     * Unicast to the server that granted the lease.
+     */
+    virtual void sendRelease();
 
     /*
      * Records configuration parameters from a DHCPACK message.
