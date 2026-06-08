@@ -1,0 +1,105 @@
+%description:
+
+Tests server-side DHCP lease expiration. The server has a pool of exactly one
+address (maxNumClients=1). Client A acquires the lease, then is crashed via
+ScenarioManager (no clean shutdown, so no DHCPRELEASE is sent). After
+leaseTime elapses, the server must reclaim the address back into the pool.
+Client B then arrives and must be able to acquire the same IP address.
+
+Before the fix, the server marked addresses as leased forever (no expiration
+timer), so client B would have been refused.
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+ned-path = .;../../../../src;../../lib
+cmdenv-express-mode = false
+cmdenv-log-prefix = "[%t %M] "
+sim-time-limit = 200s
+
+
+**.hasStatus = true
+*.clientB.status.initialStatus = "down"
+*.scenarioManager.script = xmldoc("scenario.xml")
+
+# Fix MACs so assertions can pin the lease to a known client.
+*.clientA.eth[0].address = "AA-00-00-00-00-0A"
+*.clientB.eth[0].address = "AA-00-00-00-00-0B"
+
+# Configurator: static address only on server
+*.configurator.config = xml("<config><interface hosts='server' address='192.168.1.1' netmask='255.255.255.0'/></config>")
+
+# DHCP server: 1-address pool, 30s lease.  Client A gets .100, never renews
+# (because we crash it before T1=15s). After 30s the server must reclaim.
+*.server.numApps = 1
+*.server.app[0].typename = "DhcpServer"
+*.server.app[0].numReservedAddresses = 100
+*.server.app[0].maxNumClients = 1
+*.server.app[0].gateway = "192.168.1.1"
+*.server.app[0].leaseTime = 30s
+
+# Two clients, each starts via lifecycle (clientA up at t=0, clientB up at t=80s
+# i.e. well after clientA's lease expires).
+*.clientA.numApps = 1
+*.clientA.app[0].typename = "DhcpClient"
+*.clientB.numApps = 1
+*.clientB.app[0].typename = "DhcpClient"
+
+%file: test.ned
+
+import inet.test.moduletest.lib.*;
+import inet.node.ethernet.Eth10M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.common.scenario.ScenarioManager;
+
+network Test
+{
+    submodules:
+        scenarioManager: ScenarioManager;
+        configurator: Ipv4NetworkConfigurator;
+        switch: EthernetSwitch;
+        server: StandardHost;
+        clientA: StandardHost;
+        clientB: StandardHost;
+    connections:
+        server.ethg++ <--> Eth10M <--> switch.ethg++;
+        clientA.ethg++ <--> Eth10M <--> switch.ethg++;
+        clientB.ethg++ <--> Eth10M <--> switch.ethg++;
+}
+
+%file: scenario.xml
+
+<scenario>
+    <at t="5">
+        <crash module="clientA"/>
+    </at>
+    <at t="80">
+        <startup module="clientB"/>
+    </at>
+</scenario>
+
+%# clientA acquires the lease at the end of its DORA exchange.
+%contains: stdout
+[0.0015651 Test.server.app[0]] From now 192.168.1.100 is leased to AA-00-00-00-00-0A.
+
+%contains: stdout
+[0.0021092 Test.clientA.app[0]] The requested IP 192.168.1.100/255.255.255.0 is available. Assigning it to clientA.
+
+%# Server reclaims the address once leaseTime (30s) elapses (no DHCPRELEASE
+%# was sent because clientA crashed).
+%contains: stdout
+[30.0015651 Test.server.app[0]] Lease 192.168.1.100 (AA-00-00-00-00-0A) expired, returning address to the pool.
+
+%# clientB then binds the reclaimed address after starting up at t=80s.
+%contains: stdout
+[80.0015651 Test.server.app[0]] From now 192.168.1.100 is leased to AA-00-00-00-00-0B.
+
+%contains: stdout
+[80.0021092 Test.clientB.app[0]] The requested IP 192.168.1.100/255.255.255.0 is available. Assigning it to clientB.
+
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (

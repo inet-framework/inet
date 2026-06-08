@@ -28,6 +28,8 @@ simple DhcpServer extends SimpleModule like IApp
         int maxNumClients; // Maximum number of clients (IPs) allowed to be leased
         string gateway = default(""); // Gateway to assign, if empty use the interface address
         int leaseTime @unit(s); // Lease time in seconds
+        double offerHoldTime @unit(s) = default(120s); // How long an offered (but not yet acknowledged) address is reserved (RFC 2131 SHOULD timer T2-equivalent for offers)
+        double declineHoldTime @unit(s) = default(60s); // How long an address remains unavailable after a DHCPDECLINE
         double startTime @unit(s) = default(0s); // Application start time
         @display("i=block/app2");
         @lifecycleSupport;
