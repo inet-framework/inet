@@ -370,7 +370,11 @@ void DhcpClient::recordLease(const Ptr<const DhcpMessage>& dhcpACK)
         lease->renewalTime = dhcpACK->getOptions().getRenewalTime();
         lease->rebindTime = dhcpACK->getOptions().getRebindingTime();
 
-//        std::cout << lease->leaseTime << " " << lease->renewalTime << " " << lease->rebindTime << endl;
+        // RFC 2131, 4.4.5: apply defaults if server did not provide T1/T2
+        if (lease->renewalTime == SIMTIME_ZERO)
+            lease->renewalTime = lease->leaseTime * 0.5;
+        if (lease->rebindTime == SIMTIME_ZERO)
+            lease->rebindTime = lease->leaseTime * 0.875;
     }
     else
         EV_ERROR << "DHCPACK arrived, but no IP address confirmed." << endl;
@@ -604,7 +608,8 @@ void DhcpClient::sendRequest(bool retransmit)
     request->setHops(0);
     request->setXid(xid); // transaction id
     request->setSecs((uint16_t)(simTime() - dhcpStartTime).dbl()); // seconds since DHCP process started
-    request->setBroadcast(false); // unicast
+    // RFC 2131, 4.1: set BROADCAST if client cannot receive unicasts (no IP yet)
+    request->setBroadcast(clientState == REQUESTING || clientState == REBOOTING || clientState == INIT_REBOOT);
     request->setYiaddr(Ipv4Address()); // no 'your IP' addr
     request->setGiaddr(Ipv4Address()); // no DHCP Gateway Agents
     request->setChaddr(macAddress); // my mac address;
@@ -680,7 +685,7 @@ void DhcpClient::sendDiscover(bool retransmit)
     discover->setHops(0);
     discover->setXid(xid); // transaction id
     discover->setSecs((uint16_t)(simTime() - dhcpStartTime).dbl()); // seconds since DHCP process started
-    discover->setBroadcast(false); // unicast
+    discover->setBroadcast(true); // client cannot receive unicasts yet (no IP configured)
     discover->setChaddr(macAddress); // my mac address
     discover->setSname(""); // no server name given
     discover->setFile(""); // no file given
