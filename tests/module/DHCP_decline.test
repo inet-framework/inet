@@ -1,0 +1,79 @@
+%description:
+
+Tests DHCPDECLINE (RFC 2131 §4.3.3). The client is configured (via the
+declineOfferedIp test hook) to treat the first ACK granting 192.168.1.100 as
+a conflict — it sends DHCPDECLINE instead of binding, throws the rejected
+lease away, and restarts DORA. The server must quarantine 192.168.1.100 for
+declineHoldTime so that the next OFFER picks the next address (.101) from
+the pool.
+
+A real RFC-5227-compliant ARP probe at bind time would feed the same code
+path; the test hook short-circuits the detection so the protocol round-trip
+can be verified without modifying the Arp module.
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+ned-path = .;../../../../src;../../lib
+cmdenv-express-mode = false
+cmdenv-log-prefix = "[%t %M] "
+sim-time-limit = 60s
+
+
+*.client.eth[0].address = "AA-00-00-00-00-0A"
+
+*.configurator.config = xml("<config><interface hosts='server' address='192.168.1.1' netmask='255.255.255.0'/></config>")
+
+*.server.numApps = 1
+*.server.app[0].typename = "DhcpServer"
+*.server.app[0].numReservedAddresses = 100
+*.server.app[0].maxNumClients = 5
+*.server.app[0].gateway = "192.168.1.1"
+*.server.app[0].leaseTime = 1000s
+*.server.app[0].declineHoldTime = 600s
+
+*.client.numApps = 1
+*.client.app[0].typename = "DhcpClient"
+*.client.app[0].declineOfferedIp = "192.168.1.100"
+
+%file: test.ned
+
+import inet.test.moduletest.lib.*;
+import inet.node.ethernet.Eth10M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+network Test
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        switch: EthernetSwitch;
+        server: StandardHost;
+        client: StandardHost;
+    connections:
+        server.ethg++ <--> Eth10M <--> switch.ethg++;
+        client.ethg++ <--> Eth10M <--> switch.ethg++;
+}
+
+%# Client must send DHCPDECLINE for the first offered address.
+%contains: stdout
+[0.0021092 Test.client.app[0]] Simulated conflict on offered IP 192.168.1.100; sending DHCPDECLINE.
+
+%# Server must quarantine the declined address.
+%contains: stdout
+[0.0025957 Test.server.app[0]] DHCPDECLINE received: 192.168.1.100 is in use; quarantining for 600.
+
+%# On the retry the server must offer a different address (.101 is the next
+%# slot in the pool after .100 is declined-and-quarantined).
+%contains: stdout
+[0.0044712 Test.client.app[0]] The requested IP 192.168.1.101/255.255.255.0 is available. Assigning it to client.
+
+%# And the client must NOT have bound 192.168.1.100 (DECLINE replaces bind).
+%not-contains: stdout
+Test.client.app[0]] The requested IP 192.168.1.100/255.255.255.0 is available.
+
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (

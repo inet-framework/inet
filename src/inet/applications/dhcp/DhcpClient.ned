@@ -35,6 +35,14 @@ simple DhcpClient extends SimpleModule like IApp
         // half of the remaining interval to T2 (RENEWING) or to lease expiry (REBINDING),
         // floored at this minimum.
         double minRenewRetransmitInterval @unit(s) = default(60s);
+        // Test hook for DHCPDECLINE: if non-empty, the next DHCPACK granting
+        // an IP equal to this address triggers a DHCPDECLINE (RFC 2131 §4.3.3)
+        // instead of a normal bind. After declining, the address is cleared
+        // so subsequent ACKs are accepted normally. A real client would set
+        // this from an ARP-probe-detected conflict (RFC 5227); the model
+        // exposes the hook directly because INET's Arp module does not yet
+        // surface the information needed to do passive probe-reply detection.
+        string declineOfferedIp = default("");
         @display("i=block/app2");
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finished
