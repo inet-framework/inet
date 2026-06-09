@@ -276,12 +276,26 @@ void Ipv6NeighbourDiscovery::processIpv6Datagram(Packet *packet)
             send(packet, "ipv6Out");
             break;
         case Ipv6NeighbourCache::DELAY:
-            EV_INFO << "Next hop is in DELAY state, sending packet to next-hop address.";
-            send(packet, "ipv6Out");
+            if (nce->macAddress.isUnspecified()) {
+                EV_INFO << "Next hop is in DELAY state but has no MAC address. Queuing packet.\n";
+                nce->pendingPackets.push_back(packet);
+                pendingQueue.insert(packet);
+            }
+            else {
+                EV_INFO << "Next hop is in DELAY state, sending packet to next-hop address.";
+                send(packet, "ipv6Out");
+            }
             break;
         case Ipv6NeighbourCache::PROBE:
-            EV_INFO << "Next hop is in PROBE state, sending packet to next-hop address.";
-            send(packet, "ipv6Out");
+            if (nce->macAddress.isUnspecified()) {
+                EV_INFO << "Next hop is in PROBE state but has no MAC address. Queuing packet.\n";
+                nce->pendingPackets.push_back(packet);
+                pendingQueue.insert(packet);
+            }
+            else {
+                EV_INFO << "Next hop is in PROBE state, sending packet to next-hop address.";
+                send(packet, "ipv6Out");
+            }
             break;
         default:
             throw cRuntimeError("Unknown Neighbour cache entry state.");
@@ -1867,20 +1881,23 @@ void Ipv6NeighbourDiscovery::processNsWithSpecifiedSrcAddr(Packet *packet, const
     // Look for the Neighbour Cache Entry
     Neighbour *entry = neighbourCache.lookup(nsL3SrcAddr, ifID);
 
-    if (entry == nullptr) {
-        /*If an entry does not already exist, the node SHOULD create a new one
-           and set its reachability state to STALE as specified in Section 7.3.3.*/
-        EV_INFO << "Neighbour Entry not found. Create a Neighbour Cache Entry.\n";
-        neighbourCache.addNeighbour(nsL3SrcAddr, ifID, nsMacAddr);
-    }
-    else {
-        /*If an entry already exists, and the cached link-layer address differs from
-           the one in the received Source Link-Layer option,*/
-        if (!(entry->macAddress.equals(nsMacAddr)) && !nsMacAddr.isUnspecified()) {
-            // the cached address should be replaced by the received address
-            entry->macAddress = nsMacAddr;
-            // and the entry's reachability state MUST be set to STALE.
-            entry->reachabilityState = Ipv6NeighbourCache::STALE;
+    // RFC 4861 Section 7.2.3: only create or update NCE if SLLAO is present
+    if (!nsMacAddr.isUnspecified()) {
+        if (entry == nullptr) {
+            /*If an entry does not already exist, the node SHOULD create a new one
+               and set its reachability state to STALE as specified in Section 7.3.3.*/
+            EV_INFO << "Neighbour Entry not found. Create a Neighbour Cache Entry.\n";
+            neighbourCache.addNeighbour(nsL3SrcAddr, ifID, nsMacAddr);
+        }
+        else {
+            /*If an entry already exists, and the cached link-layer address differs from
+               the one in the received Source Link-Layer option,*/
+            if (!(entry->macAddress.equals(nsMacAddr))) {
+                // the cached address should be replaced by the received address
+                entry->macAddress = nsMacAddr;
+                // and the entry's reachability state MUST be set to STALE.
+                entry->reachabilityState = Ipv6NeighbourCache::STALE;
+            }
         }
     }
 
@@ -2243,6 +2260,8 @@ void Ipv6NeighbourDiscovery::processNaForOtherNceStates(const Ipv6NeighbourAdver
                 cancelAndDelete(msg);
                 nce->nudTimeoutEvent = nullptr;
             }
+            if (!nce->pendingPackets.empty())
+                sendQueuedPacketsToIpv6Module(nce);
         }
         else {
             // If the Solicited flag is zero

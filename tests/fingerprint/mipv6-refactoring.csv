@@ -9,8 +9,8 @@
 /examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,                50000s,          828a-9c07/~tNlb, PASS, EthernetMac
 /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_inet -r 0,              50s,             fe0d-f0fd/~tNlb, PASS, EthernetMac
 /examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c ETH -r 0,                    50s,             9718-892d/~tNlb, PASS, EthernetMac
-/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c Mixed -r 0,                  50s,             2c22-0b0b/~tNlb, PASS, EthernetMac
-/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c PPP -r 0,                    50s,             898a-afbd/~tNlb, PASS,
+/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c Mixed -r 0,                  50s,             75be-9047/~tNlb, PASS, EthernetMac
+/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c PPP -r 0,                    50s,             d729-7fa6/~tNlb, PASS,
 /examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           8cca-bac2/~tNlb, PASS, EthernetMac
 /examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           5f6b-82c0/~tNlb, PASS,
 /examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            4975-1678/~tNlb, PASS,
