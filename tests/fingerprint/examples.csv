@@ -37,10 +37,10 @@
 /examples/communicationcache/,       -f omnetpp.ini -c MapCommunicationCache -r 0,        10s,       4c65-91ae/tplx;72b5-8f0b/~tNl;4180-deca/~tND;40ef-e3e2/tyf, PASS, wireless Ipv4
 /examples/communicationcache/,       -f omnetpp.ini -c VectorCommunicationCache -r 0,     10s,       4c65-91ae/tplx;72b5-8f0b/~tNl;4180-deca/~tND;40ef-e3e2/tyf, PASS, wireless Ipv4
 
-/examples/dhcp/,                     -f omnetpp.ini -c WiredDHCP -r 0,              5000s,           df67-0fe0/tplx;023a-3c37/~tNl;2fd2-8a99/~tND;8a53-9a15/tyf, PASS, EthernetMac Ipv4 DhcpClient DhcpServer
-/examples/dhcp/,                     -f omnetpp.ini -c WirelessDHCP -r 0,           500s,            505e-b3dc/tplx;844e-f866/~tNl;b6bd-b81d/~tND;8013-d51a/tyf, PASS, wireless EthernetMac Ipv4 DhcpClient DhcpServer
+/examples/dhcp/,                     -f omnetpp.ini -c WiredDHCP -r 0,              5000s,           df67-0fe0/tplx;023a-3c37/~tNl;744a-c8f3/~tND;8a53-9a15/tyf, PASS, EthernetMac Ipv4 DhcpClient DhcpServer
+/examples/dhcp/,                     -f omnetpp.ini -c WirelessDHCP -r 0,           500s,            505e-b3dc/tplx;844e-f866/~tNl;0173-c172/~tND;8013-d51a/tyf, PASS, wireless EthernetMac Ipv4 DhcpClient DhcpServer
 /examples/dhcp/,                     -f omnetpp.ini -c Wireless2DHCP -r 0,          500s,            e8d6-3da1/tplx;f45f-45d2/~tNl;2d2a-6acf/~tND;4acc-2179/tyf, PASS, wireless EthernetMac Ipv4 DhcpClient DhcpServer
-/examples/dhcp/,                     -f omnetpp.ini -c RebootingDHCP -r 0,          500s,            476e-1dd7/tplx;302a-f89c/~tNl;0fa3-5d46/~tND;3e93-6065/tyf, PASS, EthernetMac Ipv4 DhcpClient DhcpServer
+/examples/dhcp/,                     -f omnetpp.ini -c RebootingDHCP -r 0,          500s,            476e-1dd7/tplx;302a-f89c/~tNl;da97-401c/~tND;3e93-6065/tyf, PASS, EthernetMac Ipv4 DhcpClient DhcpServer
 
 # /examples/diffserv/onedomain/,       -f omnetpp.ini -c Apps -r 0,                  10s,             0, PASS,   # abstract-config
 # /examples/diffserv/onedomain/,       -f omnetpp.ini -c Exp1 -r 0,                  10s,             0, PASS,   # abstract-config
