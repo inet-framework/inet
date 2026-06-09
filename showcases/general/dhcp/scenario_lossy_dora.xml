@@ -1,0 +1,5 @@
+<scenario>
+    <at t="10">
+        <startup module="dhcpServer"/>
+    </at>
+</scenario>

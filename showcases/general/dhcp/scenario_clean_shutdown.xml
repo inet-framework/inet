@@ -1,6 +1,6 @@
 <scenario>
     <at t="30">
-        <crash module="client[0]"/>
+        <shutdown module="client[0]"/>
     </at>
     <at t="60">
         <startup module="client[0]"/>

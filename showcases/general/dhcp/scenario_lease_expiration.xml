@@ -1,0 +1,11 @@
+<scenario>
+    <at t="0">
+        <startup module="client[0]"/>
+    </at>
+    <at t="5">
+        <crash module="client[0]"/>
+    </at>
+    <at t="80">
+        <startup module="client[1]"/>
+    </at>
+</scenario>

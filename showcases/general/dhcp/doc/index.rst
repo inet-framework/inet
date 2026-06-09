@@ -1,3 +1,16 @@
+..
+   TODO: Re-capture sequence charts, pcap excerpts, and screenshots for
+   the new and renamed configurations:
+     - ClientCrash: rename media/client_reboot.png -> media/client_crash.png
+       (and update the .. figure:: reference below)
+     - CleanShutdown: media/clean_shutdown.png sequence chart
+     - LeaseExpiration: media/lease_expiration.png or a server-log excerpt
+     - LossyDORA: media/lossy_dora.png and a pcap excerpt of the
+       same-xid retransmits
+   Existing media (network.png, dora_sequence_chart.png,
+   interface_tables.png, lease_renewal.png, server_reboot.png,
+   roaming_network.png, roaming.png) are still current.
+
 Dynamic Host Configuration Protocol (DHCP)
 ===========================================
 
@@ -56,6 +69,14 @@ The initial address acquisition uses a four-message exchange known as
 After receiving the DHCPACK, the client enters the **BOUND** state and
 configures its interface with the leased address.
 
+Two additional message types extend the protocol. A client that no
+longer needs its address sends a **DHCPRELEASE** (§4.4.4) so the server
+can return the address to the pool immediately, rather than waiting for
+the lease to expire. A client that detects the offered address is
+already in use on the network (typically via an ARP probe per RFC 5227)
+sends a **DHCPDECLINE** (§4.3.3); the server then quarantines that
+address for a while and the client restarts from INIT.
+
 Before the lease expires, the client must extend it. This happens in two
 stages, providing a fallback in case the original server becomes
 unreachable:
@@ -87,18 +108,27 @@ to **REBOOTING** while waiting for the server's response.
 | INIT → SELECTING → REQUESTING → BOUND → RENEWING → REBINDING
 | INIT-REBOOT → REBOOTING → BOUND
 
-This showcase includes five configurations that illustrate different
+This showcase includes eight configurations that illustrate different
 aspects of the protocol:
 
 - **BasicDHCP** — The standard four-message DORA exchange where clients
   obtain addresses from a server.
 - **LeaseRenewal** — A short lease time triggers the renewal mechanism
   during the simulation.
-- **ClientReboot** — A client is shut down and restarted mid-simulation,
-  demonstrating DHCP re-acquisition after a reboot.
+- **ClientCrash** — A client is crashed and restarted mid-simulation,
+  demonstrating INIT-REBOOT (request previous IP without a full DORA).
+- **CleanShutdown** — A client is shut down cleanly, sending a
+  DHCPRELEASE so the server immediately frees the lease; the restarted
+  client then performs a fresh DORA.
+- **LeaseExpiration** — A client crashes without sending DHCPRELEASE and
+  the server's expiry timer reclaims the address back into the pool, so
+  a different client can acquire it.
 - **ServerReboot** — The DHCP server is shut down and restarted, losing
   its lease database. When clients attempt to renew, the server rejects
   the request and clients must re-acquire addresses.
+- **LossyDORA** — The server is initially down and the client's
+  retransmits drive recovery once it comes back up, illustrating the
+  exponential-backoff retransmission strategy of RFC 2131 §4.1.
 - **Roaming** — A mobile wireless client moves between two access points,
   each served by a separate DHCP server on a different subnet.
 
@@ -122,18 +152,35 @@ INET provides two application modules for DHCP:
   defaults to the server's own interface address), and
   :par:`leaseTime`.
 
+  Additional server parameters control timeouts introduced for
+  RFC 2131 compliance:
+  :par:`offerHoldTime` (how long an offered-but-not-yet-acknowledged
+  address is reserved; default 120 s),
+  :par:`declineHoldTime` (how long a DHCPDECLINEd address is quarantined
+  before being offered again; default 60 s).
+
   .. note::
 
-     The INET DHCP server does not expire leases on its own — once an
-     address is leased, it remains marked as in-use until the server is
-     restarted. Lease expiration relies on the client performing timely
-     renewals. Additionally, the client does not send a DHCPRELEASE
-     message on shutdown; addresses are reclaimed only when the server
-     restarts.
+     The server reclaims leases on its own once the lease expires; an
+     internal expiry timer flips the slot back to FREE so it can be
+     re-offered. Until INET ships an RFC-5227 ARP probe, the client
+     never produces a DHCPDECLINE on its own; the
+     :par:`declineOfferedIp` parameter exists as a test hook that
+     forces the client to decline a specific offered address (see
+     ``tests/module/DHCP_decline.test`` for an example).
 
 - :ned:`DhcpClient` — Runs the DHCP client state machine on a host
   interface. Its main parameter is :par:`startTime`, which controls when
   the client begins the DORA exchange.
+  Retransmission of DHCPDISCOVER / DHCPREQUEST follows RFC 2131 §4.1:
+  :par:`initialRetransmitDelay` (default 4 s), doubled per attempt up to
+  :par:`maxRetransmitDelay` (default 64 s), with ±1 s jitter; after
+  :par:`maxRetransmitCount` (default 4) unanswered retransmits the
+  client restarts from INIT. In RENEWING / REBINDING the client uses the
+  §4.4.5 "half of the remaining interval" rule, floored at
+  :par:`minRenewRetransmitInterval` (default 60 s). On a graceful
+  lifecycle stop in BOUND / RENEWING / REBINDING the client emits a
+  DHCPRELEASE (RFC 2131 §4.4.4); a crash does not.
 
 The T1 and T2 renewal timers are not client-side defaults — the server
 sets them explicitly in every DHCPACK message (T1 = 0.5 × lease time,
@@ -211,7 +258,7 @@ unicast DHCPREQUEST/DHCPACK renewal exchange.
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: [Config LeaseRenewal]
-   :end-before: [Config ClientReboot]
+   :end-before: [Config ClientCrash]
 
 During the simulation, the T1 timer fires at t≈30s for each client,
 triggering a unicast DHCPREQUEST to the server. The server responds with
@@ -223,41 +270,110 @@ The following sequence chart shows the lease renewal exchange (time is non-linea
 .. figure:: media/lease_renewal.png
    :align: center
 
-ClientReboot
-~~~~~~~~~~~~
+ClientCrash
+~~~~~~~~~~~
 
 This configuration demonstrates how a DHCP client re-acquires its address
-after a reboot. It uses a :ned:`ScenarioManager` to shut down ``client[0]``
-at t=30s and restart it at t=60s. When the client comes back up, it still
-holds its lease object in memory (the application module's internal state
-survives the stop/start lifecycle) and enters the INIT-REBOOT state:
-instead of a full DORA exchange, it broadcasts a DHCPREQUEST for its
-previously held address and the server responds with a DHCPACK (or a
-DHCPNAK if the address is no longer valid). The lease time is set to 120
-seconds.
+after an unclean restart. A :ned:`ScenarioManager` ``<crash>`` event takes
+``client[0]`` down at t=30s and a ``<startup>`` event brings it back at
+t=60s. Because the crash bypasses the application's normal stop handler,
+the client does *not* emit a DHCPRELEASE, and its in-memory ``lease``
+object survives the restart. On startup the client therefore enters
+**INIT-REBOOT** and broadcasts a DHCPREQUEST for its previously held
+address (skipping the Discover and Offer steps); the server responds
+with a DHCPACK (or a DHCPNAK if the address is no longer valid). The
+lease time is set to 120 seconds.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-at: [Config ClientReboot]
-   :end-before: [Config ServerReboot]
+   :start-at: [Config ClientCrash]
+   :end-before: [Config CleanShutdown]
 
 The scenario script:
 
 .. literalinclude:: ../scenario.xml
    :language: xml
 
-At t=30s, ``client[0]`` is shut down and its interface is deconfigured.
-At t=60s, the client restarts. Because the client still holds its lease
-internally, it enters the INIT-REBOOT state and broadcasts a DHCPREQUEST
-for its previously held address — skipping the Discover and Offer steps.
-The server confirms with a DHCPACK and the client receives the same IP
-address as before the reboot. The other two clients remain unaffected
-throughout.
+At t=30s, ``client[0]`` is crashed and its interface is deconfigured.
+At t=60s, the client restarts; because its lease object survived the
+crash it enters INIT-REBOOT and broadcasts a DHCPREQUEST for the
+previously held address. The server confirms with a DHCPACK and the
+client receives the same IP address as before the crash. The other two
+clients remain unaffected throughout.
 
-The following sequence chart shows the client shutdown and restart (time is non-linear):
+.. TODO: re-capture client_reboot.png as client_crash.png to match the
+   new config name and the explicit crash semantics.
+
+The following sequence chart shows the client crash and restart (time is non-linear):
 
 .. figure:: media/client_reboot.png
    :align: center
+
+CleanShutdown
+~~~~~~~~~~~~~
+
+This configuration demonstrates the **DHCPRELEASE** path
+(RFC 2131 §4.4.4) and contrasts directly with ``ClientCrash``. The
+scenario is otherwise identical — ``client[0]`` goes down at t=30s and
+back up at t=60s — but the lifecycle event is a *graceful* ``<shutdown>``
+rather than a ``<crash>``. The client's stop handler sees a valid lease
+in BOUND, unicasts a DHCPRELEASE to the granting server, clears its
+in-memory lease, and lets the lifecycle teardown proceed. The server
+immediately returns the address to the pool without waiting for the
+lease to expire. On restart the client has no surviving lease, so it
+performs a fresh DORA from INIT.
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: [Config CleanShutdown]
+   :end-before: [Config LeaseExpiration]
+
+The scenario script:
+
+.. literalinclude:: ../scenario_clean_shutdown.xml
+   :language: xml
+
+The DHCPRELEASE is visible in the server-side pcap as a single
+BOOTREQUEST with message type ``DHCPRELEASE`` (xid generated fresh per
+RFC 2131 §4.4.4), and the server log shows the address returning to
+the pool the moment it arrives. With the pool sized generously (50
+addresses) the client typically reacquires the same IP, but the path
+to it goes through a full DORA, not INIT-REBOOT.
+
+.. TODO: capture clean_shutdown.png sequence chart showing the
+   shutdown → DHCPRELEASE → server free → startup → DORA flow.
+
+LeaseExpiration
+~~~~~~~~~~~~~~~
+
+This configuration exercises the server's **lease-expiration timer**
+(introduced for RFC 2131 compliance). The pool is sized to exactly one
+address (``maxNumClients = 1``) and the lease time is shortened to 30
+seconds. ``client[0]`` starts up at t=0, takes the only address, and is
+then *crashed* at t=5s — so no DHCPRELEASE is sent and the server
+believes the lease is still in use. At t=80s, well after the lease
+duration has elapsed, ``client[1]`` is brought up; it must be able to
+acquire ``192.168.1.10`` only if the server has independently reclaimed
+the abandoned slot.
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: [Config LeaseExpiration]
+   :end-before: [Config LossyDORA]
+
+The scenario script:
+
+.. literalinclude:: ../scenario_lease_expiration.xml
+   :language: xml
+
+The server log shows ``Lease 192.168.1.10 ... expired, returning
+address to the pool.`` at the moment ``leaseTime`` has elapsed since
+client[0]'s ACK (around t=35s). When client[1] joins at t=80s, the
+slot is FREE and the DORA completes normally with ``client[1]``
+receiving the same 192.168.1.10 that ``client[0]`` previously held.
+
+.. TODO: capture lease_expiration.png sequence chart or simulation log
+   excerpt.
 
 ServerReboot
 ~~~~~~~~~~~~
@@ -276,7 +392,7 @@ a new address.
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: [Config ServerReboot]
-   :end-before: [Config Roaming]
+   :end-before: [Config LossyDORA]
 
 The scenario script:
 
@@ -293,6 +409,40 @@ The following sequence chart shows the server reboot and subsequent lease reject
 
 .. figure:: media/server_reboot.png
    :align: center
+
+LossyDORA
+~~~~~~~~~
+
+This configuration exercises the client's **retransmission strategy**
+(RFC 2131 §4.1). The DHCP server is initially DOWN and
+:ned:`ScenarioManager` brings it up at t=10s. ``client[0]`` starts at
+its usual ``uniform(0s, 2s)`` and sends the first DHCPDISCOVER while
+nobody is listening. Rather than sit on a single 60-second timeout, the
+client retransmits the same DHCPDISCOVER (same xid) at exponentially
+growing intervals — ~4 s, then ~8 s, then ~16 s, each with ±1 s of
+jitter — until a reply arrives. The remaining two clients are disabled
+in this config so the trace stays focused on the retransmits.
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: [Config LossyDORA]
+   :end-before: [Config Roaming]
+
+The scenario script:
+
+.. literalinclude:: ../scenario_lossy_dora.xml
+   :language: xml
+
+The pcap on the server (after it starts at t=10s) records the burst of
+DHCPDISCOVER retransmits that arrived during its downtime. The client
+binds shortly after t=10s rather than waiting until t=60s (the old
+single-timeout behavior). The same retransmit machinery applies to
+DHCPREQUEST in REQUESTING / REBOOTING, and to lease renewals in
+RENEWING / REBINDING (where §4.4.5's "half the remaining interval"
+rule replaces the doubled-delay schedule).
+
+.. TODO: capture lossy_dora.png sequence chart and a pcap excerpt
+   showing the retransmit cadence.
 
 Roaming
 ~~~~~~~
@@ -332,7 +482,13 @@ The following sequence chart shows the client roaming between the two DHCP serve
 .. figure:: media/roaming.png
    :align: center
 
-Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`DhcpShowcase.ned <../DhcpShowcase.ned>`, :download:`scenario.xml <../scenario.xml>`, :download:`scenario_server_reboot.xml <../scenario_server_reboot.xml>`
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`,
+:download:`DhcpShowcase.ned <../DhcpShowcase.ned>`,
+:download:`scenario.xml <../scenario.xml>`,
+:download:`scenario_clean_shutdown.xml <../scenario_clean_shutdown.xml>`,
+:download:`scenario_lease_expiration.xml <../scenario_lease_expiration.xml>`,
+:download:`scenario_server_reboot.xml <../scenario_server_reboot.xml>`,
+:download:`scenario_lossy_dora.xml <../scenario_lossy_dora.xml>`
 
 Try It Yourself
 ---------------
