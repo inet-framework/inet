@@ -395,7 +395,7 @@ the abandoned slot.
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: [Config LeaseExpiration]
-   :end-before: [Config LossyDORA]
+   :end-before: [Config ServerReboot]
 
 The scenario script:
 
