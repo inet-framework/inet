@@ -60,7 +60,10 @@ The initial address acquisition uses a four-message exchange known as
 1. **Discover** — The client broadcasts a DHCPDISCOVER message to locate
    available servers.
 2. **Offer** — The server responds with a DHCPOFFER containing an available
-   IP address, the subnet mask, the default gateway, and the lease duration.
+   IP address, the subnet mask, the default gateway, the lease duration,
+   the T1 and T2 timers that drive renewal/rebinding, and a *server
+   identifier* the client uses to direct its DHCPREQUEST at the chosen
+   server.
 3. **Request** — The client broadcasts a DHCPREQUEST indicating which offer
    it accepts. (Broadcasting rather than unicasting informs any other servers
    that their offers were not chosen.)
@@ -94,13 +97,16 @@ unreachable:
 If neither succeeds and the lease expires, the client loses its address and
 must start over with a new Discover.
 
-The full client state machine maps directly onto these steps: the client
-starts in **INIT**, sends the Discover and enters **SELECTING** while
-waiting for offers, transitions to **REQUESTING** after choosing an offer
-and sending the Request (the client accepts the first offer it receives),
-and enters **BOUND** once the Acknowledge is received. From there,
-renewal timers drive the **RENEWING** and
-**REBINDING** states. A separate path exists for rebooting clients: a
+The full client state machine maps directly onto these steps: before
+the application has started it sits in **IDLE**, transitions to
+**INIT** on start, sends the Discover and enters **SELECTING** while
+waiting for offers, transitions to **REQUESTING** after choosing an
+offer and sending the Request — the client accepts the first OFFER it
+receives and silently drops any later OFFERs from other servers — and
+enters **BOUND** once the Acknowledge is received. From there, renewal
+timers drive the **RENEWING** and **REBINDING** states; a graceful
+shutdown sends DHCPRELEASE and returns the client to IDLE.
+A separate path exists for rebooting clients: a
 client that still holds a lease from before a restart enters
 **INIT-REBOOT**, broadcasts a DHCPREQUEST for its old address, and moves
 to **REBOOTING** while waiting for the server's response.
@@ -145,8 +151,8 @@ INET provides two application modules for DHCP:
   :par:`interface` (interface to serve DHCP on; if omitted, uses the only
   non-loopback interface),
   :par:`numReservedAddresses` (number of addresses to skip counting from
-  the network address; with a server on 192.168.1.0/24 and
-  ``numReservedAddresses=10``, the pool starts at 192.168.1.10),
+  the network address; with the server on 192.168.1.1 in 192.168.1.0/24
+  and ``numReservedAddresses=10``, the pool starts at 192.168.1.10),
   :par:`maxNumClients` (maximum number of concurrent leases),
   :par:`gateway` (default gateway announced to clients; if left empty,
   defaults to the server's own interface address), and
@@ -183,8 +189,29 @@ INET provides two application modules for DHCP:
   DHCPRELEASE (RFC 2131 §4.4.4); a crash does not.
 
 The T1 and T2 renewal timers are not client-side defaults — the server
-sets them explicitly in every DHCPACK message (T1 = 0.5 × lease time,
-T2 = 0.875 × lease time).
+sends them in every DHCPOFFER and DHCPACK message (T1 = 0.5 × lease
+time, T2 = 0.875 × lease time). The client adopts them from the
+DHCPACK in recordLease and they take effect when bindLease arms the
+respective timers.
+
+The server NAKs a DHCPREQUEST under three conditions:
+
+- the REQUEST's requested-IP option differs from the address the server
+  most recently offered to this client (REQUESTING-state mismatch);
+- an INIT-REBOOT REQUEST names an address that the server has on file
+  but on a different subnet;
+- a RENEWING or REBINDING REQUEST names an IP the server has no record
+  of (the ServerReboot scenario below).
+
+A REQUEST that names a different *server identifier* (the client picked
+another server's offer) does not cause a NAK; the server simply
+releases its own pending offer for that client.
+
+DHCPDECLINE is handled symmetrically to the implicit ACK path: the
+server moves the slot to a DECLINED state for ``declineHoldTime`` and
+``getLeaseByMac`` skips DECLINED slots when looking up the requesting
+MAC, so a subsequent DISCOVER from the same client is not re-offered
+the same address — it falls through to the next free slot.
 
 Both modules are added to a :ned:`StandardHost` as applications
 (``app[*]``). The server needs a statically configured IP address on its
@@ -230,11 +257,13 @@ starts its DHCP process at a random time within the first 2 seconds.
    :end-before: [Config LeaseRenewal]
 
 All three clients obtain IP addresses starting from 192.168.1.10:
-``numReservedAddresses=10`` skips the first 10 addresses from the network
-address (.0–.9), so the pool starts at .10 and spans 50 addresses (.10–.59)
-as limited by ``maxNumClients=50``. The server's own address (.1) falls
-within the reserved range. The interface table visualizer displays the
-acquired address and prefix length next to each host.
+``numReservedAddresses=10`` skips the first 10 addresses counting from
+the network address (.0 itself is the network address and not assignable
+to a host; .1–.9 are skipped so the static server address .1 falls in
+the reserved range), so the pool starts at .10 and spans 50 addresses
+(.10–.59) as limited by ``maxNumClients=50``. The interface table
+visualizer displays the acquired address and prefix length next to each
+host.
 
 The following sequence chart shows the DORA exchange (time is non-linear):
 
@@ -260,7 +289,9 @@ unicast DHCPREQUEST/DHCPACK renewal exchange.
    :start-at: [Config LeaseRenewal]
    :end-before: [Config ClientCrash]
 
-During the simulation, the T1 timer fires at t≈30s for each client,
+During the simulation, the T1 timer fires at t≈31 s for each client
+(half of the 60 s lease, measured from each client's own bind around
+t≈1 s — clients start at ``uniform(0s, 2s)``),
 triggering a unicast DHCPREQUEST to the server. The server responds with
 a DHCPACK, extending the lease. This renewal cycle repeats throughout
 the simulation.
@@ -299,7 +330,9 @@ At t=60s, the client restarts; because its lease object survived the
 crash it enters INIT-REBOOT and broadcasts a DHCPREQUEST for the
 previously held address. The server confirms with a DHCPACK and the
 client receives the same IP address as before the crash. The other two
-clients remain unaffected throughout.
+clients continue their normal lease renewals throughout — their unicast
+DHCPREQUEST/DHCPACK pairs around t≈61 s, t≈121 s, and t≈181 s (T1 = 60 s
+of the 120 s lease) are visible in the server pcap.
 
 .. TODO: re-capture client_reboot.png as client_crash.png to match the
    new config name and the explicit crash semantics.
@@ -366,9 +399,10 @@ The scenario script:
 .. literalinclude:: ../scenario_lease_expiration.xml
    :language: xml
 
-The server log shows ``Lease 192.168.1.10 ... expired, returning
+The server log shows ``Lease 192.168.1.10 (<mac>) expired, returning
 address to the pool.`` at the moment ``leaseTime`` has elapsed since
-client[0]'s ACK (around t=35s). When client[1] joins at t=80s, the
+client[0]'s ACK (around t=35s) — the gap is filled by the leasee's MAC,
+not an ellipsis. When client[1] joins at t=80s, the
 slot is FREE and the DORA completes normally with ``client[1]``
 receiving the same 192.168.1.10 that ``client[0]`` previously held.
 
@@ -384,10 +418,11 @@ restarted at t=40s via :ned:`ScenarioManager`. When the server comes back
 up, it has no record of previously granted leases.
 
 The lease time is set to 100 seconds, so the T1 renewal timer fires at
-t≈50s. When a client sends a unicast DHCPREQUEST to renew its lease, the
-server does not recognize it and responds with a DHCPNAK. The client then
-falls back to the INIT state and performs a full DORA exchange to obtain
-a new address.
+t≈51 s (50 s after each client's own bind around t≈1 s). When a client
+sends a unicast DHCPREQUEST to renew its lease, the server does not
+recognize it and responds with a DHCPNAK. The client then falls back
+to the INIT state and performs a full DORA exchange to obtain a new
+address.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -400,7 +435,7 @@ The scenario script:
    :language: xml
 
 The server shuts down at t=30s and restarts at t=40s. When the clients'
-T1 timers fire around t≈50s, the server no longer recognizes their
+T1 timers fire around t≈51 s, the server no longer recognizes their
 leases. The sequence chart shows the server responding with a DHCPNAK,
 followed by the client performing a complete DORA exchange to obtain a
 new address.
@@ -433,16 +468,31 @@ The scenario script:
 .. literalinclude:: ../scenario_lossy_dora.xml
    :language: xml
 
-The pcap on the server (after it starts at t=10s) records the burst of
-DHCPDISCOVER retransmits that arrived during its downtime. The client
-binds shortly after t=10s rather than waiting until t=60s (the old
-single-timeout behavior). The same retransmit machinery applies to
-DHCPREQUEST in REQUESTING / REBOOTING, and to lease renewals in
-RENEWING / REBINDING (where §4.4.5's "half the remaining interval"
-rule replaces the doubled-delay schedule).
+A PcapRecorder on the always-up ``switch`` captures the full sequence
+(a recorder on ``dhcpServer`` would only start once the server itself
+came up at t=10s and so would miss the retransmits sent during
+downtime). The capture shows:
 
-.. TODO: capture lossy_dora.png sequence chart and a pcap excerpt
-   showing the retransmit cadence.
+- the initial DHCPDISCOVER at t≈1 s (no reply — server is down);
+- a retransmit at t≈5 s (still no reply);
+- a third attempt at t≈14 s that succeeds, immediately followed by the
+  OFFER, REQUEST and ACK.
+
+The bind therefore lands around t≈14 s, not "right after the server
+comes up at t=10 s": each unanswered DISCOVER doubles the wait, and
+once the next scheduled retransmit is at ~8 s from t=5 s (±1 s of
+jitter), the t=10 s window is already missed. The takeaway is that the
+client recovers in two retransmits rather than waiting on the old
+single 60-second timeout to expire — not that it recovers instantly.
+
+The same retransmit machinery applies to DHCPREQUEST in REQUESTING /
+REBOOTING, and to lease renewals in RENEWING / REBINDING (where
+§4.4.5's "half the remaining interval" rule replaces the doubled-delay
+schedule).
+
+.. TODO: capture lossy_dora.png sequence chart from the same run, and
+   maybe a Wireshark / Qtenv-packet-inspector view of the same-xid
+   retransmits.
 
 Roaming
 ~~~~~~~
