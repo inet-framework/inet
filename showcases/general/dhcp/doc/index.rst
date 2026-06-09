@@ -1,17 +1,10 @@
 ..
-   TODO: Media still to capture. Each per-config TODO comment below
-   lists the specific scene the missing file should show.
-     - media/lease_renewal.png         (LeaseRenewal)
-     - media/client_crash.png          (ClientCrash; old client_reboot.png predates rename)
-     - media/clean_shutdown.png        (CleanShutdown)
-     - media/lease_expiration.png      (LeaseExpiration; a log excerpt would also work)
-     - media/server_reboot.png         (ServerReboot)
-     - media/lossy_dora.png            (LossyDORA)
-     - media/roaming.png               (Roaming)
-   Existing tracked media: network.png, interface_tables.png,
-   roaming_network.png. The dora_sequence_chart.png on disk is from an
-   earlier capture and is referenced under BasicDHCP; verify it still
-   matches before tracking it.
+   All per-config sequence charts are now captured via the OMNeT++ IDE
+   MCP (omnetpp-ide-mcp skill). dora_sequence_chart.png covers BasicDHCP,
+   lease_renewal.png the LeaseRenewal T1 cycle, and so on. The two
+   network topology screenshots (network.png, roaming_network.png) and
+   the interface-tables overlay (interface_tables.png) were captured
+   via the omnetpp-mcp-sim skill.
 
 Dynamic Host Configuration Protocol (DHCP)
 ===========================================
@@ -303,9 +296,13 @@ triggering a unicast DHCPREQUEST to the server. The server responds with
 a DHCPACK, extending the lease. This renewal cycle repeats throughout
 the simulation.
 
-.. TODO: capture media/lease_renewal.png — sequence chart of the
-   client's BOUND → RENEWING → BOUND cycle around T1, ideally the
-   first renewal pair at t≈31 s.
+Sequence chart of two clients' renewal cycles at T1, captured against
+the wired path client → switch → dhcpServer. The unicast renewal is
+preceded by an ARP exchange to resolve the server's MAC, then carries
+the DHCPREQUEST and DHCPACK:
+
+.. figure:: media/lease_renewal.png
+   :align: center
 
 ClientCrash
 ~~~~~~~~~~~
@@ -340,10 +337,12 @@ clients continue their normal lease renewals throughout — their unicast
 DHCPREQUEST/DHCPACK pairs around t≈61 s, t≈121 s, and t≈181 s (T1 = 60 s
 of the 120 s lease) are visible in the server pcap.
 
-.. TODO: capture media/client_crash.png — sequence chart of the crash
-   at t=30 s, the t=60 s restart, and the INIT-REBOOT REQUEST/ACK pair
-   that reuses 192.168.1.10. (The previous file was named
-   client_reboot.png, before the config was renamed.)
+Sequence chart of the INIT-REBOOT exchange at t=60 s. The broadcast
+DHCPREQUEST from ``client[0]`` reaches ``dhcpServer`` via ``switch`` and
+the server confirms the old binding with a DHCPACK — no Discover/Offer:
+
+.. figure:: media/client_crash.png
+   :align: center
 
 CleanShutdown
 ~~~~~~~~~~~~~
@@ -376,8 +375,12 @@ the pool the moment it arrives. With the pool sized generously (50
 addresses) the client typically reacquires the same IP, but the path
 to it goes through a full DORA, not INIT-REBOOT.
 
-.. TODO: capture clean_shutdown.png sequence chart showing the
-   shutdown → DHCPRELEASE → server free → startup → DORA flow.
+Sequence chart of the t=30 s shutdown showing the ARP resolution that
+precedes the unicast DHCPRELEASE, followed by the RELEASE itself
+travelling client → switch → dhcpServer:
+
+.. figure:: media/clean_shutdown.png
+   :align: center
 
 LeaseExpiration
 ~~~~~~~~~~~~~~~
@@ -408,8 +411,12 @@ acquired the address. When client[1] joins at t=80s, the slot is FREE
 and the DORA completes normally with ``client[1]`` receiving the same
 192.168.1.10 that ``client[0]`` previously held.
 
-.. TODO: capture lease_expiration.png sequence chart or simulation log
-   excerpt.
+Sequence chart of ``client[1]``'s DORA at t=80 s, after the server's
+expiry timer has reclaimed ``192.168.1.10`` from the crashed
+``client[0]``:
+
+.. figure:: media/lease_expiration.png
+   :align: center
 
 ServerReboot
 ~~~~~~~~~~~~
@@ -442,10 +449,13 @@ leases. The sequence chart shows the server responding with a DHCPNAK,
 followed by the client performing a complete DORA exchange to obtain a
 new address.
 
-.. TODO: capture media/server_reboot.png — sequence chart of the
-   t=30 s server shutdown, the t=40 s startup, a client's failed
-   RENEWING REQUEST at t≈51 s, the resulting DHCPNAK, and the
-   re-acquisition DORA.
+Sequence chart of the failed renewal and recovery at t≈51 s: the
+unicast DHCPREQUEST (preceded by ARP resolution) reaches the restarted
+server which has no lease record and responds with DHCPNAK, after which
+the client falls back to a full DORA exchange:
+
+.. figure:: media/server_reboot.png
+   :align: center
 
 LossyDORA
 ~~~~~~~~~
@@ -493,9 +503,14 @@ REBOOTING, and to lease renewals in RENEWING / REBINDING (where
 §4.4.5's "half the remaining interval" rule replaces the doubled-delay
 schedule).
 
-.. TODO: capture lossy_dora.png sequence chart from the same run, and
-   maybe a Wireshark / Qtenv-packet-inspector view of the same-xid
-   retransmits.
+Sequence chart of the entire LossyDORA run, with the three retransmits
+visible as three DHCPDISCOVER arrows fanning out to ``dhcpServer`` at
+t≈1 s, t≈5 s, and t≈14 s; only the third one returns an OFFER (the
+server is finally up), and the REQUEST/ACK pair completes immediately
+after:
+
+.. figure:: media/lossy_dora.png
+   :align: center
 
 Roaming
 ~~~~~~~
@@ -530,10 +545,13 @@ DHCP client detects the interface change and initiates a new DORA
 exchange with the DHCP server on the new subnet, obtaining an address
 from a different address range.
 
-.. TODO: capture media/roaming.png — sequence chart over the wireless
-   client roaming back and forth between ap1 and ap2, showing the
-   association change, the subsequent DORA on the new subnet, and the
-   address switching between 192.168.1.x and 192.168.2.x.
+Sequence chart of the t≈17.6 s roam to ``ap2``: 802.11 association
+traffic completes between ``client`` and ``ap2``, and the new DORA goes
+out via ``ap2`` to ``dhcpServer2`` (192.168.2.x subnet), distinct from
+the initial DORA which used ``ap1`` / ``dhcpServer1`` on 192.168.1.x:
+
+.. figure:: media/roaming.png
+   :align: center
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`,
 :download:`DhcpShowcase.ned <../DhcpShowcase.ned>`,
