@@ -535,9 +535,23 @@ The :ned:`DhcpClient` subscribes to the link-layer association signal; when
 a new association is detected it unbinds the current lease and restarts the
 DORA exchange, obtaining an address from the DHCP server on the new subnet.
 
+Config header:
+
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: [Config Roaming]
+   :end-at: sim-time-limit = 200s
+
+The configurator gives the two DHCP servers their static addresses on
+``eth0`` and wires up the routing so the wired ``server`` host is
+reachable through either subnet; the mobility module drives the client
+back and forth across the two coverage areas. The DHCP-relevant
+parameters:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: # DHCP client
+   :end-at: *.dhcpServer*.forwarding = true
 
 As the client moves from one access point's coverage area to the other,
 it disassociates from the old AP and associates with the new one. The
