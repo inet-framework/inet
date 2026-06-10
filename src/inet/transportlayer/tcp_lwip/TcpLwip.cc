@@ -13,6 +13,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/checksum/Checksum.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/packet/Message.h"
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
@@ -437,19 +438,27 @@ void TcpLwip::handleMessage(cMessage *msgP)
         }
     }
     else if (msgP->arrivedOn("ipIn")) {
-        // must be a Packet
-        Packet *pk = check_and_cast<Packet *>(msgP);
-        auto protocol = pk->getTag<PacketProtocolTag>()->getProtocol();
-        if (protocol == &Protocol::tcp) {
-            EV_TRACE << this << ": handle tcp segment: " << msgP->getName() << "\n";
-            handleLowerPacket(pk);
+        if (auto *indication = dynamic_cast<Indication *>(msgP)) {
+            // ICMPv4/ICMPv6 error indication from the network layer. TcpLwip does
+            // not act on ICMP errors, so just discard it (the standard Tcp module
+            // processes these via Icmpv4ErrorInd/Icmpv6ErrorInd tags).
+            EV_WARN << "ICMP error indication received -- discarding\n";
+            delete indication;
         }
-        else if (protocol == &Protocol::icmpv4 || protocol == &Protocol::icmpv6) {
-            EV_WARN << "ICMP error received -- discarding\n"; // FIXME can ICMP packets really make it up to TCP???
-            delete msgP;
+        else {
+            Packet *pk = check_and_cast<Packet *>(msgP);
+            auto protocol = pk->getTag<PacketProtocolTag>()->getProtocol();
+            if (protocol == &Protocol::tcp) {
+                EV_TRACE << this << ": handle tcp segment: " << msgP->getName() << "\n";
+                handleLowerPacket(pk);
+            }
+            else if (protocol == &Protocol::icmpv4 || protocol == &Protocol::icmpv6) {
+                EV_WARN << "ICMP error received -- discarding\n";
+                delete msgP;
+            }
+            else
+                throw cRuntimeError("Unknown protocol: %s(%d)", protocol->getName(), protocol->getId());
         }
-        else
-            throw cRuntimeError("Unknown protocol: %s(%d)", protocol->getName(), protocol->getId());
     }
     else { // must be from app
         EV_TRACE << this << ": handle msg: " << msgP->getName() << "\n";
