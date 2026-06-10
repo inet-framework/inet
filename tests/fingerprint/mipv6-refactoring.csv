@@ -3,7 +3,7 @@
 # Baseline established from current (pre-refactoring) code.
 
 # MIPv6 example — the primary test
-/examples/mobileipv6/,               -f omnetpp.ini -c One -r 0,                    25s,             c3f2-e2bf/~tNlb, PASS, wireless EthernetMac
+/examples/mobileipv6/,               -f omnetpp.ini -c One -r 0,                    25s,             9cdd-7d62/~tNlb, PASS, wireless EthernetMac
 
 # IPv6 examples
 /examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,                50000s,          828a-9c07/~tNlb, PASS, EthernetMac
@@ -22,8 +22,8 @@
 /examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Host_Unav_ipv6 -r 0,     10s,             894b-528c/~tNlb, PASS,
 
 # DYMO with IPv6
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv6 -r 0,                   10s,             d672-8b6a/~tNlb, PASS,  wireless adhoc
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv6 -r 0,              10s,             d672-8b6a/~tNlb, PASS,  wireless adhoc
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv6 -r 0,                   10s,             1839-99ed/~tNlb, PASS,  wireless adhoc
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv6 -r 0,              10s,             1839-99ed/~tNlb, PASS,  wireless adhoc
 
 # EIGRP with IPv6
 /examples/eigrp/testing_scenario6/,    -f omnetpp.ini -c EIGRP-IPv6_exp1_bandwidth-change -r 0,              3min,         58b7-ea40/~tNlb,  PASS,  eigrp EthernetMac

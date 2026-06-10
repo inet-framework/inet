@@ -342,12 +342,12 @@
 # /examples/manetrouting/dymo/,        -f omnetpp.ini -c _IPv4 -r 0      # abstract-config
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv4 -r 0,                   10s,             1a85-cb5d/tplx;dfe8-11b9/~tNl;481c-71b0/tyf, PASS,  wireless adhoc Ipv4
 # /examples/manetrouting/dymo/,        -f omnetpp.ini -c _IPv6 -r 0      # abstract-config
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv6 -r 0,                   10s,             879b-0722/tplx;189d-8ce9/~tNl;932a-220c/tyf, PASS,  wireless adhoc
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv6 -r 0,                   10s,             8ec2-b70f/tplx;fd53-3e15/~tNl;18a7-c6c6/tyf, PASS,  wireless adhoc
 # /examples/manetrouting/dymo/,        -f omnetpp.ini -c _Generic -r 0   # abstract-config
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c Generic -r 0,                10s,             5f8a-7174/tplx;9713-e7fe/~tNl;4334-6e1b/tyf, PASS,  wireless adhoc
 # /examples/manetrouting/dymo/,        -f omnetpp.ini -c _Multi -r 0     # abstract-config
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv4 -r 0,              10s,             40d1-e3f0/tplx;b9af-62dc/~tNl;81ec-dc0e/tyf, PASS,  wireless adhoc Ipv4
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv6 -r 0,              10s,             879b-0722/tplx;189d-8ce9/~tNl;8959-1913/tyf, PASS,  wireless adhoc
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv6 -r 0,              10s,             8ec2-b70f/tplx;fd53-3e15/~tNl;7436-f848/tyf, PASS,  wireless adhoc
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiGeneric -r 0,           10s,             b832-1954/tplx;45c3-d903/~tNl;69be-1418/tyf, PASS,  wireless adhoc
 # /examples/manetrouting/dymo/,        -f omnetpp.ini -c _Dynamic -r 0   # abstract-config
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c DynamicIPv4 -r 0,            22s,             2f57-3280/tplx;8f96-3d9c/~tNl;cdd2-fee8/tyf, PASS,  wireless adhoc Ipv4
@@ -374,7 +374,7 @@
 /examples/manetrouting/multiradio/,  -f omnetpp.ini -c MultiRadio -r 0,             20s,             ec17-5cc2/tplx;55f5-0894/~tNl, PASS,  wireless adhoc Ipv4
 /examples/manetrouting/multiradio/,  -f omnetpp.ini -c SingleRadio -r 0,            20s,             85a0-51b8/tplx;c07a-44e1/~tNl;3aa0-49ed/tyf, PASS,  wireless adhoc Ipv4
 
-/examples/mobileipv6/,               -f omnetpp.ini -c One -r 0,                    25s,             cb9b-5dbf/tplx;3f8c-278c/~tNl;3978-72d1/~tND;8931-1ddd/tyf, PASS, wireless EthernetMac
+/examples/mobileipv6/,               -f omnetpp.ini -c One -r 0,                    25s,             5698-4ff7/tplx;ce34-b423/~tNl;5e3a-cddf/~tND;c55e-179d/tyf, PASS, wireless EthernetMac
 
 /examples/mobility/,                 -f omnetpp.ini -c AnsimMobility -r 0,          10000s,          72f8-5c0b/tplx;0000-0000/~tNl;0000-0000/~tND;7dd1-18eb/tyf, PASS,
 /examples/mobility,                  -f omnetpp.ini -c AttachedMobility,            10s,             566c-6355/tplx;0000-0000/~tNl;0000-0000/~tND;fa92-f68c/tyf, PASS,

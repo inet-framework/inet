@@ -89,15 +89,17 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
 
         pendingQueue.setName("pendingQueue");
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER) {
-        if (rt6->isMobileNode())
-            mipv6.reference(this, "xmipv6Module", true);
-
-        // Apply NDP parameters from NED to all interfaces
+    else if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
+        // Apply NDP parameters from NED to all interfaces as defaults.
+        // This runs BEFORE the Ipv6NodeConfigurator applies per-interface
+        // XML overrides at INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT.
         int dupAddrDetectTransmits = par("dupAddrDetectTransmits");
         bool optimisticDad = par("optimisticDad");
         simtime_t retransTimer = par("retransTimer");
         simtime_t baseReachableTime = par("baseReachableTime");
+        simtime_t advReachableTime = par("advReachableTime");
+        simtime_t minRAInterval = par("minIntervalBetweenRAs");
+        simtime_t maxRAInterval = par("maxIntervalBetweenRAs");
         for (int i = 0; i < ift->getNumInterfaces(); i++) {
             NetworkInterface *ie = ift->getInterface(i);
             if (ie->isLoopback())
@@ -108,7 +110,17 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
             ipv6Data->setOptimisticDad(optimisticDad);
             ipv6Data->setRetransTimer((uint)retransTimer.dbl());
             ipv6Data->setBaseReachableTime((uint)baseReachableTime.dbl());
+
+            if (ipv6Data->getAdvSendAdvertisements()) {
+                ipv6Data->setMinRtrAdvInterval(minRAInterval.dbl());
+                ipv6Data->setMaxRtrAdvInterval(maxRAInterval.dbl());
+                ipv6Data->setAdvReachableTime((int)advReachableTime.dbl());
+            }
         }
+    }
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
+        if (rt6->isMobileNode())
+            mipv6.reference(this, "xmipv6Module", true);
     }
 }
 
@@ -2583,18 +2595,15 @@ void Ipv6NeighbourDiscovery::handleCrashOperation(LifecycleOperation *operation)
 
 void Ipv6NeighbourDiscovery::start()
 {
-    simtime_t advReachableTime = par("advReachableTime");
-    simtime_t minRAInterval = par("minIntervalBetweenRAs");
-    simtime_t maxRAInterval = par("maxIntervalBetweenRAs");
+    // Create RA timers for all advertising interfaces.
+    // NED defaults were applied at INITSTAGE_NETWORK_CONFIGURATION;
+    // per-interface XML overrides were applied by Ipv6NodeConfigurator.
+    // On restart, Ipv6NodeConfigurator re-applies XML config.
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
         NetworkInterface *ie = ift->getInterface(i);
 
         auto *ipv6Data = ie->findProtocolData<Ipv6InterfaceData>();
         if (ipv6Data && ipv6Data->getAdvSendAdvertisements() && !(ie->isLoopback())) {
-            auto *ipv6DataMut = ie->getProtocolDataForUpdate<Ipv6InterfaceData>();
-            ipv6DataMut->setMinRtrAdvInterval(minRAInterval.dbl());
-            ipv6DataMut->setMaxRtrAdvInterval(maxRAInterval.dbl());
-            ipv6DataMut->setAdvReachableTime((int)advReachableTime.dbl());
             createRaTimer(ie);
         }
     }
