@@ -37,7 +37,7 @@ class MobilityHeader extends FieldsChunk  // extends Ipv6ExtensionHeader // TODO
 
 class BindingUpdate extends MobilityHeader
 {
-    unsigned int lifetime;
+    unsigned int lifetime; // in seconds (serialized in RFC 6275 units of 4 seconds)
     unsigned int sequence;
     bool ackFlag;                //A-Flag (Acknowledge Flag)
     bool homeRegistrationFlag;        //H-Flag (Home Registration Flag)
@@ -74,7 +74,7 @@ class BindingAcknowledgement extends MobilityHeader
 {
     BaStatus status;
     unsigned int sequenceNumber;
-    unsigned int lifetime;
+    unsigned int lifetime; // in seconds (serialized in RFC 6275 units of 4 seconds)
     bool keyManagementFlag = false;//K-Flag (Key Management Flag)
     //Mobility Options not defined
 

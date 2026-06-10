@@ -498,7 +498,7 @@ void xMIPv6::createAndSendBUMessage(const Ipv6Address& dest, NetworkInterface *i
        deleted.  (In this case the specified care-of address MUST also be
        set equal to the home address.)  One time unit is 4 seconds.
      */
-    bu->setLifetime(lifeTime / 4);
+    bu->setLifetime(lifeTime);
 
     bu->setSequence(buSeq);
 
@@ -590,7 +590,7 @@ void xMIPv6::createAndSendBUMessage(const Ipv6Address& dest, NetworkInterface *i
 void xMIPv6::updateBUL(BindingUpdate *bu, const Ipv6Address& dest, const Ipv6Address& CoA,
         NetworkInterface *ie, const simtime_t sendTime)
 {
-    uint buLife = 4 * bu->getLifetime(); /* 6.1.7 One time unit is 4 seconds. */
+    uint buLife = bu->getLifetime();
     uint buSeq = bu->getSequence();
 
     Ipv6Address HoA = bu->getHomeAddressMN();
@@ -709,7 +709,7 @@ void xMIPv6::processBUMessage(Packet *inPacket, const Ptr<const BindingUpdate>& 
         const Ipv6Address& HoA = bu->getHomeAddressMN();
         Ipv6Address CoA = addrTag->getSrcAddress().toIpv6();
         Ipv6Address destAddress = addrTag->getDestAddress().toIpv6();
-        uint buLifetime = bu->getLifetime() * 4; /* 6.1.7 One time unit is 4 seconds. */
+        uint buLifetime = bu->getLifetime();
         uint buSequence = bu->getSequence();
         bool homeRegistration = bu->getHomeRegistrationFlag();
 
@@ -1076,7 +1076,7 @@ void xMIPv6::createAndSendBAMessage(const Ipv6Address& src, const Ipv6Address& d
     ba->setSequenceNumber(baSeq); // this sequence number will correspond to the ACKed BU
 
     // we are providing lifetime as a parameter
-    ba->setLifetime(lifeTime / 4); /* 6.1.8 ...in time units of 4 seconds... */
+    ba->setLifetime(lifeTime);
 
     /*9.5.4
        If the Status field in the Binding Acknowledgement contains the value
@@ -1246,7 +1246,7 @@ void xMIPv6::processBAMessage(Packet *inPacket, const Ptr<const BindingAcknowled
                     of the Binding Update List entry should be
                       max((L_remain - (L_update - L_ack)), 0)
                     where max(X, Y) is the maximum of X and Y.*/
-                int l_ack = ba->getLifetime() * 4; /* 6.1.7 One time unit is 4 seconds. */
+                int l_ack = ba->getLifetime();
                 int l_update = entry->bindingLifetime;
                 int l_remain = entry->bindingLifetime - (SIMTIME_DBL(simTime() - entry->sentTime));
                 int x = l_remain - (l_update - l_ack);

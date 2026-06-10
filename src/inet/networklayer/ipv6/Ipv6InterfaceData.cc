@@ -104,7 +104,7 @@ Ipv6InterfaceData::Ipv6InterfaceData()
 
     // rtrVars.advSendAdvertisements is set in Ipv6RoutingTable.cc:line 143
     rtrVars.maxRtrAdvInterval = IPv6_DEFAULT_MAX_RTR_ADV_INT;
-    rtrVars.minRtrAdvInterval = 0.33 * rtrVars.maxRtrAdvInterval;
+    rtrVars.minRtrAdvInterval = IPv6_DEFAULT_MIN_TO_MAX_RTR_ADV_RATIO * rtrVars.maxRtrAdvInterval;
     rtrVars.advManagedFlag = false;
     rtrVars.advOtherConfigFlag = false;
 

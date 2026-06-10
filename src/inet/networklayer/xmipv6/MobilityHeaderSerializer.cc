@@ -6,10 +6,18 @@
 
 #include "inet/networklayer/xmipv6/MobilityHeaderSerializer.h"
 
+#include <algorithm>
+
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/networklayer/xmipv6/MobilityHeader_m.h"
 
 namespace inet {
+
+// RFC 6275 Section 6.1.7/6.1.8: binding lifetimes are carried on the wire in
+// units of 4 seconds (16-bit field). The chunk stores the value in seconds;
+// this quantization is applied only here, at the wire boundary, and over-long
+// lifetimes are clamped to the field maximum (0xFFFF * 4 s) rather than wrapping.
+static constexpr int BINDING_LIFETIME_UNIT = 4;
 
 Register_Serializer(MobilityHeader, MobilityHeaderSerializer);
 Register_Serializer(BindingUpdate, MobilityHeaderSerializer);
@@ -102,7 +110,7 @@ void MobilityHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<c
                     | (bu->getLinkLocalAddressCompatibilityFlag() ? 0x2000u : 0)
                     | (bu->getKeyManagementFlag() ? 0x1000u : 0);
             stream.writeUint16Be(flags);
-            stream.writeUint16Be(bu->getLifetime());
+            stream.writeUint16Be(std::min(bu->getLifetime() / BINDING_LIFETIME_UNIT, 0xFFFFu));
             // Mobility options: write remaining bytes as padding
             b dataWritten = stream.getLength() - startPos;
             b remaining = b(totalLen) - dataWritten;
@@ -117,7 +125,7 @@ void MobilityHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<c
             stream.writeByte(ba->getStatus());
             stream.writeByte(ba->getKeyManagementFlag() ? 0x80u : 0);
             stream.writeUint16Be(ba->getSequenceNumber());
-            stream.writeUint16Be(ba->getLifetime());
+            stream.writeUint16Be(std::min(ba->getLifetime() / BINDING_LIFETIME_UNIT, 0xFFFFu));
             // Mobility options: write remaining bytes as padding
             b dataWritten = stream.getLength() - startPos;
             b remaining = b(totalLen) - dataWritten;
@@ -212,7 +220,7 @@ const Ptr<Chunk> MobilityHeaderSerializer::deserialize(MemoryInputStream& stream
             bu->setHomeRegistrationFlag((flags & 0x4000u) != 0);
             bu->setLinkLocalAddressCompatibilityFlag((flags & 0x2000u) != 0);
             bu->setKeyManagementFlag((flags & 0x1000u) != 0);
-            bu->setLifetime(stream.readUint16Be());
+            bu->setLifetime(stream.readUint16Be() * BINDING_LIFETIME_UNIT);
             // Skip remaining mobility options
             b consumed = stream.getPosition() - startPos;
             b remaining = b(totalLen) - consumed;
@@ -229,7 +237,7 @@ const Ptr<Chunk> MobilityHeaderSerializer::deserialize(MemoryInputStream& stream
             uint8_t kFlag = stream.readByte();
             ba->setKeyManagementFlag((kFlag & 0x80u) != 0);
             ba->setSequenceNumber(stream.readUint16Be());
-            ba->setLifetime(stream.readUint16Be());
+            ba->setLifetime(stream.readUint16Be() * BINDING_LIFETIME_UNIT);
             // Skip remaining mobility options
             b consumed = stream.getPosition() - startPos;
             b remaining = b(totalLen) - consumed;
