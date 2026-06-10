@@ -68,11 +68,11 @@ After receiving the DHCPACK, the client enters the **BOUND** state and
 configures its interface with the leased address.
 
 Two additional message types extend the protocol. A client that no
-longer needs its address sends a **DHCPRELEASE** (§4.4.4) so the server
-can return the address to the pool immediately, rather than waiting for
+longer needs its address sends a **DHCPRELEASE** so the server can
+return the address to the pool immediately, rather than waiting for
 the lease to expire. A client that, after the DHCPACK, detects the
 offered address is already in use on the network (typically via an ARP
-probe per RFC 5227) sends a **DHCPDECLINE** (§4.3.3); the server then
+probe per RFC 5227) sends a **DHCPDECLINE**; the server then
 quarantines that address for a while and the client restarts from
 INIT. INET's coverage of these two messages is described in
 *DHCP in INET* below.
@@ -126,15 +126,15 @@ aspects of the protocol:
 - **CleanShutdown** — A client is shut down cleanly, sending a
   DHCPRELEASE so the server immediately frees the lease; the restarted
   client then performs a fresh DORA.
-- **LeaseExpiration** — A client crashes without sending DHCPRELEASE and
-  the server's expiry timer reclaims the address back into the pool, so
-  a different client can acquire it.
+- **LeaseExpiration** — A client crashes without sending DHCPRELEASE
+  and the server reclaims the address back into the pool once the
+  lease expires, so a different client can acquire it.
 - **ServerReboot** — The DHCP server is shut down and restarted, losing
   its lease database. When clients attempt to renew, the server rejects
   the request and clients must re-acquire addresses.
 - **LossyDORA** — The server is initially down and the client's
   retransmits drive recovery once it comes back up, illustrating the
-  exponential-backoff retransmission strategy of RFC 2131 §4.1.
+  exponential-backoff retransmission strategy from RFC 2131.
 - **Roaming** — A mobile wireless client moves between two access points,
   each served by a separate DHCP server on a different subnet.
 
@@ -167,26 +167,26 @@ INET provides two application modules for DHCP:
 
   .. note::
 
-     The server reclaims leases on its own once the lease expires; an
-     internal expiry timer flips the slot back to FREE so it can be
-     re-offered. Until INET ships an RFC-5227 ARP probe, the client
-     never produces a DHCPDECLINE on its own; the
-     :par:`declineOfferedIp` parameter exists as a test hook that
-     forces the client to decline a specific offered address (see
-     ``tests/module/DHCP_decline.test`` for an example).
+     The server reclaims leases on its own once the lease expires —
+     the address simply becomes available again for the next client.
+     Until INET ships an RFC-5227 ARP probe, the client never
+     produces a DHCPDECLINE on its own; the :par:`declineOfferedIp`
+     parameter is a test hook that forces the client to decline a
+     specific offered address.
 
 - :ned:`DhcpClient` — Runs the DHCP client state machine on a host
   interface. Its main parameter is :par:`startTime`, which controls when
   the client begins the DORA exchange.
-  Retransmission of DHCPDISCOVER / DHCPREQUEST follows RFC 2131 §4.1:
+  Retransmission of DHCPDISCOVER / DHCPREQUEST follows the RFC's
+  exponential-backoff strategy:
   :par:`initialRetransmitDelay` (default 4 s), doubled per attempt up to
   :par:`maxRetransmitDelay` (default 64 s), with ±1 s jitter; after
   :par:`maxRetransmitCount` (default 4) unanswered retransmits the
   client restarts from INIT. In RENEWING / REBINDING the client uses the
-  §4.4.5 "half of the remaining interval" rule, floored at
+  "half of the remaining interval" rule, floored at
   :par:`minRenewRetransmitInterval` (default 60 s). On a graceful
-  lifecycle stop in BOUND / RENEWING / REBINDING the client emits a
-  DHCPRELEASE (RFC 2131 §4.4.4); a crash does not.
+  shutdown in BOUND / RENEWING / REBINDING the client emits a
+  DHCPRELEASE; a crash does not.
 
 The T1 and T2 renewal timers are not client-side defaults — the server
 sends them in every DHCPOFFER and DHCPACK message (T1 = 0.5 × lease
@@ -207,11 +207,10 @@ A REQUEST that names a different *server identifier* (the client picked
 another server's offer) does not cause a NAK; the server simply
 releases its own pending offer for that client.
 
-On receiving a DHCPDECLINE the server flags the slot as DECLINED for
+On receiving a DHCPDECLINE the server quarantines the address for
 ``declineHoldTime`` rather than freeing it. A later DHCPDISCOVER from
-the same client is not re-offered the declined address — the lookup
-that finds the client's previous lease skips quarantined entries — so
-the client is given a different address from the pool.
+the same client is not re-offered the declined address — it is given
+a different address from the pool.
 
 Both modules are added to a :ned:`StandardHost` as applications
 (``app[*]``). The server needs a statically configured IP address on its
@@ -310,10 +309,11 @@ ClientCrash
 This configuration demonstrates how a DHCP client re-acquires its address
 after an unclean restart. A :ned:`ScenarioManager` ``<crash>`` event takes
 ``client[0]`` down at t=30s and a ``<startup>`` event brings it back at
-t=60s. Because the crash bypasses the application's normal stop handler,
-the client does *not* emit a DHCPRELEASE, and its in-memory ``lease``
-object survives the restart. On startup the client therefore enters
-**INIT-REBOOT** and broadcasts a DHCPREQUEST for its previously held
+t=60s. Because a crash skips the graceful-shutdown path, the client
+does *not* emit a DHCPRELEASE, and it still remembers its previously
+held address across the restart. On startup the client therefore
+enters **INIT-REBOOT** and broadcasts a DHCPREQUEST for its previously
+held
 address (skipping the Discover and Offer steps); the server responds
 with a DHCPACK (or a DHCPNAK if the address is no longer valid). The
 lease time is set to 120 seconds.
@@ -348,15 +348,14 @@ CleanShutdown
 ~~~~~~~~~~~~~
 
 This configuration demonstrates the **DHCPRELEASE** path
-(RFC 2131 §4.4.4) and contrasts directly with ``ClientCrash``. The
+and contrasts directly with ``ClientCrash``. The
 scenario is otherwise identical — ``client[0]`` goes down at t=30s and
-back up at t=60s — but the lifecycle event is a *graceful* ``<shutdown>``
-rather than a ``<crash>``. The client's stop handler sees a valid lease
-in BOUND, unicasts a DHCPRELEASE to the granting server, clears its
-in-memory lease, and lets the lifecycle teardown proceed. The server
-immediately returns the address to the pool without waiting for the
-lease to expire. On restart the client has no surviving lease, so it
-performs a fresh DORA from INIT.
+back up at t=60s — but the ScenarioManager event is a *graceful*
+``<shutdown>`` rather than a ``<crash>``. On its way out the client
+unicasts a DHCPRELEASE to the granting server, forgets its address,
+and exits. The server immediately returns the address to the pool
+without waiting for the lease to expire. On restart the client has no
+surviving lease, so it performs a fresh DORA from INIT.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -369,11 +368,11 @@ The scenario script:
    :language: xml
 
 The DHCPRELEASE is visible in the server-side pcap as a single
-BOOTREQUEST with message type ``DHCPRELEASE`` (xid generated fresh per
-RFC 2131 §4.4.4), and the server log shows the address returning to
-the pool the moment it arrives. With the pool sized generously (50
-addresses) the client typically reacquires the same IP, but the path
-to it goes through a full DORA, not INIT-REBOOT.
+BOOTREQUEST with message type ``DHCPRELEASE``, and the server log
+shows the address returning to the pool the moment it arrives. With
+the pool sized generously (50 addresses) the client typically
+reacquires the same IP, but the path to it goes through a full DORA,
+not INIT-REBOOT.
 
 Sequence chart of the t=30 s shutdown showing the ARP resolution that
 precedes the unicast DHCPRELEASE, followed by the RELEASE itself
@@ -407,13 +406,12 @@ The scenario script:
 
 The server log shows a "Lease 192.168.1.10 (...) expired, returning
 address to the pool." line about a lease time after client[0]
-acquired the address. When client[1] joins at t=80s, the slot is FREE
-and the DORA completes normally with ``client[1]`` receiving the same
-192.168.1.10 that ``client[0]`` previously held.
+acquired the address. When client[1] joins at t=80s, the slot is
+already free again and the DORA completes normally with ``client[1]``
+receiving the same 192.168.1.10 that ``client[0]`` previously held.
 
-Sequence chart of ``client[1]``'s DORA at t=80 s, after the server's
-expiry timer has reclaimed ``192.168.1.10`` from the crashed
-``client[0]``:
+Sequence chart of ``client[1]``'s DORA at t=80 s, after the server has
+reclaimed ``192.168.1.10`` from the crashed ``client[0]``:
 
 .. figure:: media/lease_expiration.png
    :align: center
@@ -460,8 +458,8 @@ the client falls back to a full DORA exchange:
 LossyDORA
 ~~~~~~~~~
 
-This configuration exercises the client's **retransmission strategy**
-(RFC 2131 §4.1). The DHCP server is initially DOWN and
+This configuration exercises the client's **retransmission strategy**.
+The DHCP server is initially DOWN and
 :ned:`ScenarioManager` brings it up at t=10s. ``client[0]`` starts at
 its usual ``uniform(0s, 2s)`` and sends the first DHCPDISCOVER while
 nobody is listening. The client then retransmits the same DHCPDISCOVER
@@ -500,7 +498,7 @@ instantly.
 
 The same retransmit machinery applies to DHCPREQUEST in REQUESTING /
 REBOOTING, and to lease renewals in RENEWING / REBINDING (where
-§4.4.5's "half the remaining interval" rule replaces the doubled-delay
+the "half the remaining interval" rule replaces the doubled-delay
 schedule).
 
 Sequence chart of the entire LossyDORA run, with the three retransmits
