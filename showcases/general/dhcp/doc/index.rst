@@ -207,9 +207,9 @@ A REQUEST that names a different *server identifier* (the client picked
 another server's offer) does not cause a NAK; the server simply
 releases its own pending offer for that client.
 
-On receiving a DHCPDECLINE the server quarantines the address for
+On receiving a DHCPDECLINE the server marks the slot as DECLINED for
 ``declineHoldTime`` rather than freeing it. A later DHCPDISCOVER from
-the same client is not re-offered the declined address — it is given
+the same client is not re-offered the DECLINED address — it is given
 a different address from the pool.
 
 Both modules are added to a :ned:`StandardHost` as applications
