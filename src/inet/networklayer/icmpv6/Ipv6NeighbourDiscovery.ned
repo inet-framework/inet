@@ -26,8 +26,8 @@ simple Ipv6NeighbourDiscovery extends SimpleModule
         string icmpv6Module;
         string xmipv6Module;
         string routingTableModule;
-        double minIntervalBetweenRAs @unit(s) = default(30ms); // MinRtrAdvInterval:  0.03 sec for MIPv6
-        double maxIntervalBetweenRAs @unit(s) = default(70ms);  // MaxrtrAdvInterval: 0.07 sec for MIPv6
+        double minIntervalBetweenRAs @unit(s) = default(200s); // RFC 4861: MinRtrAdvInterval (0.33 * MaxRtrAdvInterval)
+        double maxIntervalBetweenRAs @unit(s) = default(600s); // RFC 4861: MaxRtrAdvInterval
         double advReachableTime @unit(s) = default(3600s); // advertised reachable time in RAs; hosts use it as base for NUD
         int dupAddrDetectTransmits = default(1); // RFC 4862 Section 5.1: number of NS sent for DAD (0 = disable DAD)
         bool optimisticDad = default(false); // RFC 4429 Optimistic DAD: if true, an autoconfigured address may be used as a source address while DAD is still in progress; if false (RFC 4862), packets that would use it are deferred until DAD completes

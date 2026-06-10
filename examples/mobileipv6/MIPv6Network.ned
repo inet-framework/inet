@@ -13,6 +13,7 @@
 package inet.examples.mobileipv6;
 
 import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
 import inet.node.ethernet.EthernetSwitch;
 import inet.node.ipv6.Router6;
 import inet.node.wireless.AccessPoint;
@@ -48,6 +49,10 @@ network mIPv6Network
         configurator: Ipv6FlatNetworkConfigurator {
             parameters:
                 @display("p=100,100;is=s");
+        }
+        ipv6Configurator: Ipv6NetworkConfigurator {
+            parameters:
+                @display("p=100,150;is=s");
         }
         radioMedium: Ieee80211ScalarRadioMedium {
             parameters:

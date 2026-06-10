@@ -10,7 +10,6 @@
 
 #include "inet/common/SimpleModule.h"
 #include <map>
-#include <set>
 #include <vector>
 
 #include "inet/common/ModuleRefByPar.h"
@@ -347,18 +346,6 @@ class INET_API Ipv6NeighbourDiscovery : public SimpleModule, public LifecycleUns
     virtual void processRedirectPacket(Packet *packet, const Ipv6Redirect *redirect);
     /************End Of Redirect Message Stuff*****************************/
 
-    /* Determine that this router can communicate with wireless nodes
-     * on the LAN connected to the given interface.
-     * The result is true if the interface is a wireless interface
-     * or connected to an wireless access point.
-     *
-     * If wireless nodes can be present on the LAN, the router sends
-     * RAs more frequently in accordance with the MIPv6 specification
-     * (RFC 3775 7.5.).
-     */
-    virtual bool canServeWirelessNodes(NetworkInterface *ie);
-    bool findWirelessAccessPointBehind(cGate *outGate, std::set<cModule *>& visited);
-
   public:
     void invalidateNeigbourCache();
     virtual void sendRedirect(Packet *redirectedPacket, const Ipv6Address& targetAddr,
@@ -366,7 +353,6 @@ class INET_API Ipv6NeighbourDiscovery : public SimpleModule, public LifecycleUns
 
   protected:
     void routersUnreachabilityDetection(const NetworkInterface *ie); // 3.9.07 - CB
-    bool isWirelessAccessPoint(cModule *module);
 };
 
 } // namespace inet

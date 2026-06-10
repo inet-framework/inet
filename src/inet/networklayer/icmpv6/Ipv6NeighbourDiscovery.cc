@@ -102,6 +102,8 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
         simtime_t retransTimer = par("retransTimer");
         simtime_t baseReachableTime = par("baseReachableTime");
         simtime_t advReachableTime = par("advReachableTime");
+        simtime_t minRAInterval = par("minIntervalBetweenRAs");
+        simtime_t maxRAInterval = par("maxIntervalBetweenRAs");
         for (int i = 0; i < ift->getNumInterfaces(); i++) {
             NetworkInterface *ie = ift->getInterface(i);
             if (ie->isLoopback())
@@ -114,6 +116,8 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
             ipv6Data->setBaseReachableTime((uint)baseReachableTime.dbl());
 
             if (ipv6Data->getAdvSendAdvertisements()) {
+                ipv6Data->setMinRtrAdvInterval(minRAInterval.dbl());
+                ipv6Data->setMaxRtrAdvInterval(maxRAInterval.dbl());
                 ipv6Data->setAdvReachableTime((int)advReachableTime.dbl());
                 createRaTimer(ie);
             }
@@ -1579,17 +1583,6 @@ void Ipv6NeighbourDiscovery::createRaTimer(NetworkInterface *ie)
     advIfEntry->interfaceId = ie->getInterfaceId();
     advIfEntry->numRASent = 0;
 
-    if (canServeWirelessNodes(ie)) {
-        EV_INFO << "This Interface is connected to a WLAN AP, hence using MIPv6 Default Values" << endl;
-        simtime_t minRAInterval = par("minIntervalBetweenRAs"); // reading from the omnetpp.ini (ZY 23.07.09)
-        simtime_t maxRAInterval = par("maxIntervalBetweenRAs"); // reading from the omnetpp.ini (ZY 23.07.09
-        ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->setMinRtrAdvInterval(minRAInterval);
-        ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->setMaxRtrAdvInterval(maxRAInterval);
-    }
-    else {
-        EV_INFO << "This Interface is not connected to a WLAN AP, hence using default values" << endl;
-    }
-
     simtime_t interval = uniform(ie->getProtocolData<Ipv6InterfaceData>()->getMinRtrAdvInterval(), ie->getProtocolData<Ipv6InterfaceData>()->getMaxRtrAdvInterval());
     advIfEntry->raTimeoutMsg = msg;
 
@@ -2572,58 +2565,6 @@ void Ipv6NeighbourDiscovery::invalidateNeigbourCache()
 {
 //    Enter_Method("Invalidating Neigbour Cache Entries");
     neighbourCache.invalidateAllEntries();
-}
-
-bool Ipv6NeighbourDiscovery::canServeWirelessNodes(NetworkInterface *ie)
-{
-    if (ie->isWireless())
-        return true;
-
-    // Check if an AccessPoint is reachable from this interface,
-    // potentially through Ethernet switches and/or hubs.
-    cModule *node = getContainingNode(this);
-    cGate *gate = node->gate(ie->getNodeOutputGateId());
-    ASSERT(gate != nullptr);
-
-    std::set<cModule *> visited;
-    visited.insert(node);
-    return findWirelessAccessPointBehind(gate, visited);
-}
-
-bool Ipv6NeighbourDiscovery::findWirelessAccessPointBehind(cGate *outGate, std::set<cModule *>& visited)
-{
-    cGate *remoteGate = outGate->getPathEndGate();
-    if (remoteGate == outGate)
-        return false;
-
-    cModule *remoteNode = findContainingNode(remoteGate->getOwnerModule());
-    if (!remoteNode || visited.count(remoteNode))
-        return false;
-    visited.insert(remoteNode);
-
-    if (isWirelessAccessPoint(remoteNode))
-        return true;
-
-    // If it's an L2-only device (no network layer), traverse through its other ports
-    if (!remoteNode->getSubmodule("ipv6") && !remoteNode->getSubmodule("networkLayer")) {
-        for (cModule::GateIterator gi(remoteNode); !gi.end(); ++gi) {
-            cGate *g = *gi;
-            if (g->getType() == cGate::OUTPUT && g->isConnected()) {
-                if (findWirelessAccessPointBehind(g, visited))
-                    return true;
-            }
-        }
-    }
-
-    return false;
-}
-
-bool Ipv6NeighbourDiscovery::isWirelessAccessPoint(cModule *module)
-{
-    // AccessPoint is defined as a node containing "bridging" and
-    // "wlan" submodules
-    return isNetworkNode(module) && module->getSubmodule("bridging") &&
-           (module->getSubmodule("wlan", 0) || module->getSubmodule("wlan"));
 }
 
 } // namespace inet

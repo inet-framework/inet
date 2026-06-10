@@ -7,6 +7,7 @@ package inet.examples.manetrouting.dymo;
 
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
 import inet.node.dymo.DymoRouter;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
@@ -29,6 +30,10 @@ network DYMONetwork
             parameters:
                 config = xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.0.0'/></config>");
                 @display("p=100,100;is=s");
+        }
+        ipv6Configurator: Ipv6NetworkConfigurator {
+            parameters:
+                @display("p=100,150;is=s");
         }
         routingTableRecorder: RoutingTableRecorder {
             parameters:

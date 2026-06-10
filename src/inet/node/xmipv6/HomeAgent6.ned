@@ -19,6 +19,12 @@ import inet.node.ipv6.Router6;
 // current locations. It intercepts packets destined for mobile nodes that are away from
 // their home network and tunnels them to the mobile nodes' current care-of addresses.
 //
+// MIPv6 routers need faster Router Advertisements on wireless-facing interfaces
+// to enable timely movement detection (RFC 3775 Section 7.5). Configure via
+// ~Ipv6NetworkConfigurator XML, e.g.:
+//
+//   `<interface hosts='ha*' names='wlan*' maxRtrAdvInterval='1.5' minRtrAdvInterval='0.5'/>`
+//
 // @see ~MobileHost6, ~CorrespondentNode6
 //
 module HomeAgent6 extends Router6
