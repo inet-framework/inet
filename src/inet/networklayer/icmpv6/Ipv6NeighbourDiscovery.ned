@@ -33,6 +33,8 @@ simple Ipv6NeighbourDiscovery extends SimpleModule
         bool optimisticDad = default(false); // RFC 4429 Optimistic DAD: if true, an autoconfigured address may be used as a source address while DAD is still in progress; if false (RFC 4862), packets that would use it are deferred until DAD completes
         double retransTimer @unit(s) = default(1s); // RFC 4861 Section 10: delay between retransmitted NS messages
         double baseReachableTime @unit(s) = default(30s); // RFC 4861 Section 10: base value for computing random ReachableTime
+        volatile double routerBootupTime @unit(s) = default(uniform(0s, 0.3s)); // random startup delay before a router assigns its link-local address; routers boot faster than hosts so that RAs are available by the time hosts solicit
+        volatile double hostBootupTime @unit(s) = default(uniform(0.4s, 1s)); // random startup delay before a host assigns its link-local address
         @display("i=block/network");
         @signal[startDad](type=long); // Emits value=1
         @signal[dadCompleted](type=long); // Emits value=1

@@ -2612,11 +2612,10 @@ void Ipv6NeighbourDiscovery::start()
     // takes place during this time.
     assignLinkLocalAddrTimer = new cMessage("assignLinkLocalAddr", MK_ASSIGN_LINKLOCAL_ADDRESS);
 
-    // We want routers to boot up faster!
-    if (rt6->isRouter())
-        scheduleAfter(uniform(0, 0.3), assignLinkLocalAddrTimer); // Random Router bootup time
-    else
-        scheduleAfter(uniform(0.4, 1), assignLinkLocalAddrTimer); // Random Host bootup time
+    // Routers boot up faster than hosts (routerBootupTime/hostBootupTime NED
+    // parameters) so that RAs are available by the time hosts solicit.
+    simtime_t bootupTime = rt6->isRouter() ? par("routerBootupTime") : par("hostBootupTime");
+    scheduleAfter(bootupTime, assignLinkLocalAddrTimer);
 }
 
 void Ipv6NeighbourDiscovery::stop()
