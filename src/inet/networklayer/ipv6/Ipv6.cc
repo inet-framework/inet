@@ -412,8 +412,12 @@ void Ipv6::datagramLocalOut(Packet *packet, const NetworkInterface *destIE, Ipv6
 {
     const auto& ipv6Header = packet->peekAtFront<Ipv6Header>();
     // route packet
-    if (destIE != nullptr)
-        fragmentPostRouting(packet, destIE, MacAddress::BROADCAST_ADDRESS, true); // FIXME what MAC address to use?
+    if (destIE != nullptr) {
+        if (!ipv6Header->getDestAddress().isMulticast())
+            fragmentPostRouting(packet, destIE, MacAddress::BROADCAST_ADDRESS, true);
+        else
+            fragmentPostRouting(packet, destIE, ipv6Header->getDestAddress().mapToMulticastMacAddress(), true);
+    }
     else if (!ipv6Header->getDestAddress().isMulticast())
         routePacket(packet, destIE, nullptr, requestedNextHopAddress, true);
     else
@@ -612,7 +616,7 @@ void Ipv6::routeMulticastPacket(Packet *packet, const NetworkInterface *destIE, 
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
         NetworkInterface *ie = ift->getInterface(i);
         if (fromIE != ie && !ie->isLoopback())
-            fragmentPostRouting(packet->dup(), ie, MacAddress::BROADCAST_ADDRESS, fromHL);
+            fragmentPostRouting(packet->dup(), ie, ipv6Header->getDestAddress().mapToMulticastMacAddress(), fromHL);
     }
     delete packet;
 
