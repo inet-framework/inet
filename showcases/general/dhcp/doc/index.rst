@@ -131,49 +131,52 @@ The Model
 DHCP in INET
 ~~~~~~~~~~~~
 
-INET provides two application modules for DHCP:
+INET provides two application modules for DHCP.
 
-- :ned:`DhcpServer` — Listens on a network interface, manages the address
-  pool, and responds to client requests. Key parameters:
-  :par:`interface` (interface to serve DHCP on; if omitted, uses the only
-  non-loopback interface),
-  :par:`numReservedAddresses` (number of addresses to skip counting from
-  the network address; with the server on 192.168.1.1 in 192.168.1.0/24
-  and ``numReservedAddresses=10``, the pool starts at 192.168.1.10),
-  :par:`maxNumClients` (maximum number of concurrent leases),
-  :par:`gateway` (default gateway announced to clients; if left empty,
-  defaults to the server's own interface address), and
-  :par:`leaseTime`.
+:ned:`DhcpServer` listens on a network interface, manages the address
+pool, and responds to client requests. Key parameters:
 
-  Additional server parameters control timeouts introduced for
-  RFC 2131 compliance:
-  :par:`offerHoldTime` (how long an offered-but-not-yet-acknowledged
-  address is reserved; default 120 s),
-  :par:`declineHoldTime` (how long a DHCPDECLINEd address is quarantined
-  before being offered again; default 60 s).
+- :par:`interface` — which interface to serve DHCP on; if omitted, the
+  only non-loopback interface is used.
+- :par:`numReservedAddresses` — number of addresses to skip counting
+  from the network address. With the server on 192.168.1.1 in
+  192.168.1.0/24 and ``numReservedAddresses=10``, the pool starts at
+  192.168.1.10.
+- :par:`maxNumClients` — maximum number of concurrent leases.
+- :par:`gateway` — default gateway announced to clients; if left
+  empty, defaults to the server's own interface address.
+- :par:`leaseTime` — how long the server grants a lease for.
+- :par:`offerHoldTime` — how long an offered-but-not-yet-acknowledged
+  address is reserved (default 120 s).
+- :par:`declineHoldTime` — how long a DHCPDECLINEd address is
+  quarantined before being offered again (default 60 s).
 
-  .. note::
+.. note::
 
-     The server reclaims leases on its own once the lease expires —
-     the address simply becomes available again for the next client.
-     Until INET ships an RFC-5227 ARP probe, the client never
-     produces a DHCPDECLINE on its own; the :par:`declineOfferedIp`
-     parameter is a test hook that forces the client to decline a
-     specific offered address.
+   The server reclaims leases on its own once the lease expires — the
+   address simply becomes available again for the next client. Until
+   INET ships an RFC-5227 ARP probe, the client never produces a
+   DHCPDECLINE on its own; the :par:`declineOfferedIp` parameter is a
+   test hook that forces the client to decline a specific offered
+   address.
 
-- :ned:`DhcpClient` — Runs the DHCP client state machine on a host
-  interface. Its main parameter is :par:`startTime`, which controls when
-  the client begins the DORA exchange.
-  Retransmission of DHCPDISCOVER / DHCPREQUEST follows the RFC's
-  exponential-backoff strategy:
-  :par:`initialRetransmitDelay` (default 4 s), doubled per attempt up to
-  :par:`maxRetransmitDelay` (default 64 s), with ±1 s jitter; after
-  :par:`maxRetransmitCount` (default 4) unanswered retransmits the
-  client restarts the DORA exchange. In RENEWING / REBINDING the client uses the
-  "half of the remaining interval" rule, floored at
-  :par:`minRenewRetransmitInterval` (default 60 s). On a graceful
-  shutdown in BOUND / RENEWING / REBINDING the client emits a
-  DHCPRELEASE; a crash does not.
+:ned:`DhcpClient` runs the DHCP client on a host interface. Key
+parameters:
+
+- :par:`startTime` — when the client begins the DORA exchange.
+- :par:`initialRetransmitDelay` (default 4 s) — initial wait between
+  retransmits of DHCPDISCOVER / DHCPREQUEST.
+- :par:`maxRetransmitDelay` (default 64 s) — cap on the
+  exponentially-doubled retransmit delay; ±1 s jitter is added on
+  each attempt.
+- :par:`maxRetransmitCount` (default 4) — after this many unanswered
+  retransmits the client restarts the DORA exchange.
+- :par:`minRenewRetransmitInterval` (default 60 s) — floor on the
+  retransmit interval during renewal and rebinding, which otherwise
+  follows a "half of the remaining interval" rule.
+
+On a graceful shutdown while holding a lease the client emits a
+DHCPRELEASE; a crash does not.
 
 The T1 and T2 renewal timers are not client-side defaults — the server
 sends them in every DHCPOFFER and DHCPACK message (T1 = 0.5 × lease
