@@ -28,7 +28,7 @@ class INET_API DhcpClient : public ApplicationBase, public cListener, public Udp
 
     // DHCP client states (RFC 2131, Figure 5: state transition diagram)
     enum ClientState {
-        IDLE, INIT, INIT_REBOOT, REBOOTING, SELECTING, REQUESTING, BOUND, RENEWING, REBINDING
+        IDLE, INIT, INIT_REBOOT, REBOOTING, SELECTING, REQUESTING, BOUND, RENEWING, REBINDING, INFORMING
     };
 
     // parameters
@@ -77,6 +77,11 @@ class INET_API DhcpClient : public ApplicationBase, public cListener, public Udp
     // DHCPDECLINE instead of a normal bind. One-shot: cleared on decline.
     // See the NED parameter for rationale.
     Ipv4Address declineOfferedIp;
+
+    // If true, the client uses DHCPINFORM (RFC 2131 §4.4.3) to obtain local
+    // configuration parameters for an already-configured IP, instead of
+    // acquiring a lease via DORA. See the NED parameter for rationale.
+    bool informMode = false;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -148,6 +153,13 @@ class INET_API DhcpClient : public ApplicationBase, public cListener, public Udp
     virtual void sendDecline(Ipv4Address declinedIp);
 
     /*
+     * Client to server requesting only local configuration parameters for an
+     * already externally-configured address (RFC 2131 §4.4.3). ciaddr is set
+     * to the client's own IP; no lease is requested.
+     */
+    virtual void sendInformRequest();
+
+    /*
      * Client to server: relinquish the current lease (RFC 2131 §4.4.4).
      * Unicast to the server that granted the lease.
      */
@@ -171,6 +183,13 @@ class INET_API DhcpClient : public ApplicationBase, public cListener, public Udp
     virtual void recordOffer(const Ptr<const DhcpMessage>& dhcpOffer);
 
     /*
+     * Installs a default route (0.0.0.0/0) towards the given gateway on the
+     * configured interface, unless an equivalent route is already present.
+     * Shared by bindLease() and the DHCPINFORM parameter handling.
+     */
+    virtual void installDefaultRoute(const Ipv4Address& gateway);
+
+    /*
      * Assigns the IP address to the interface.
      */
     virtual void bindLease();
@@ -190,6 +209,19 @@ class INET_API DhcpClient : public ApplicationBase, public cListener, public Udp
      * Starts the DHCP configuration process with known network address.
      */
     virtual void initRebootedClient();
+
+    /*
+     * Starts the DHCPINFORM process for an already externally-configured
+     * address (RFC 2131 §4.4.3).
+     */
+    virtual void initInformClient();
+
+    /*
+     * Records local configuration parameters from a DHCPACK received in
+     * response to a DHCPINFORM. No lease is bound (the address is already
+     * configured externally).
+     */
+    virtual void recordInformParameters(const Ptr<const DhcpMessage>& dhcpACK);
 
     /*
      * Handles DHCPACK in any state. Note that, handleDHCPACK() doesn't handle DHCPACK messages

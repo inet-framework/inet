@@ -43,6 +43,13 @@ simple DhcpClient extends SimpleModule like IApp
         // exposes the hook directly because INET's Arp module does not yet
         // surface the information needed to do passive probe-reply detection.
         string declineOfferedIp = default("");
+        // If true, the client does not acquire a lease via DORA; instead it
+        // uses DHCPINFORM (RFC 2131 §4.4.3) to obtain local configuration
+        // parameters for an already externally-configured IP address. The
+        // interface is expected to have an IP assigned (e.g. by the network
+        // configurator); the client sets ciaddr to that address, sends a
+        // DHCPINFORM and processes the resulting DHCPACK without binding a lease.
+        bool informMode = default(false);
         displayStringTextFormat = default("{clientStateName}");
         @display("i=block/app2");
         @lifecycleSupport;

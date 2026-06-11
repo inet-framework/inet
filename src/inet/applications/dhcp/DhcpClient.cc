@@ -49,6 +49,7 @@ void DhcpClient::initialize(int stage)
         const char *declineIpStr = par("declineOfferedIp");
         if (declineIpStr && *declineIpStr)
             declineOfferedIp.set(declineIpStr);
+        informMode = par("informMode");
         currentRetransmitDelay = initialRetransmitDelay;
         retransmitCount = 0;
 
@@ -71,6 +72,7 @@ void DhcpClient::initialize(int stage)
         WATCH(leaseAbsoluteExpiry);
         WATCH(releaseInFlight);
         WATCH(declineOfferedIp);
+        WATCH(informMode);
         // get the routing table to update and subscribe it to the blackboard
         irt.reference(this, "routingTableModule", true);
         // set client to idle state
@@ -113,7 +115,17 @@ NetworkInterface *DhcpClient::chooseInterface()
             throw cRuntimeError("No non-loopback interface found to be configured via DHCP");
     }
 
-    if (!ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress().isUnspecified())
+    bool hasIp = !ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress().isUnspecified();
+    if (informMode) {
+        // RFC 2131 §4.4.3: DHCPINFORM only supplements an address that has
+        // already been configured by other means. Without one there is nothing
+        // to put in 'ciaddr', and the server's unicast ACK could not be
+        // delivered, so refuse to start.
+        if (!hasIp)
+            throw cRuntimeError("informMode is set on interface \"%s\", but it has no pre-configured IP address; "
+                    "DHCPINFORM supplements an externally-configured address (RFC 2131 §4.4.3)", ie->getInterfaceName());
+    }
+    else if (hasIp)
         throw cRuntimeError("Refusing to start DHCP on interface \"%s\" that already has an IP address", ie->getInterfaceName());
     return ie;
 }
@@ -160,6 +172,7 @@ const char *DhcpClient::getStateName(ClientState state)
         CASE(BOUND);
         CASE(RENEWING);
         CASE(REBINDING);
+        CASE(INFORMING);
 
         default:
             return "???";
@@ -232,7 +245,10 @@ void DhcpClient::handleTimer(cMessage *msg)
 
     if (category == START_DHCP) {
         openSocket();
-        if (lease) {
+        if (informMode) { // RFC 2131 §4.4.3: query parameters only, no lease
+            initInformClient();
+        }
+        else if (lease) {
             clientState = INIT_REBOOT;
             initRebootedClient();
         }
@@ -380,6 +396,23 @@ void DhcpClient::recordLease(const Ptr<const DhcpMessage>& dhcpACK)
         EV_ERROR << "DHCPACK arrived, but no IP address confirmed." << endl;
 }
 
+void DhcpClient::installDefaultRoute(const Ipv4Address& gateway)
+{
+    for (int i = 0; i < irt->getNumRoutes(); i++) {
+        Ipv4Route *e = irt->getRoute(i);
+        if (routeMatches(e, Ipv4Address(), Ipv4Address(), gateway, 0, ie->getInterfaceName()))
+            return; // an equivalent default route is already present
+    }
+    // create the default gateway route
+    route = new Ipv4Route();
+    route->setDestination(Ipv4Address());
+    route->setNetmask(Ipv4Address());
+    route->setGateway(gateway);
+    route->setInterface(ie);
+    route->setSourceType(Ipv4Route::MANUAL);
+    irt->addRoute(route);
+}
+
 void DhcpClient::bindLease()
 {
     auto ipv4Data = ie->getProtocolDataForUpdate<Ipv4InterfaceData>();
@@ -397,24 +430,7 @@ void DhcpClient::bindLease()
     EV_INFO << "The requested IP " << lease->ip << "/" << lease->subnetMask << " is available. Assigning it to "
             << host->getFullName() << "." << endl;
 
-    Ipv4Route *iroute = nullptr;
-    for (int i = 0; i < irt->getNumRoutes(); i++) {
-        Ipv4Route *e = irt->getRoute(i);
-        if (routeMatches(e, Ipv4Address(), Ipv4Address(), lease->gateway, 0, ie->getInterfaceName())) {
-            iroute = e;
-            break;
-        }
-    }
-    if (iroute == nullptr) {
-        // create gateway route
-        route = new Ipv4Route();
-        route->setDestination(Ipv4Address());
-        route->setNetmask(Ipv4Address());
-        route->setGateway(lease->gateway);
-        route->setInterface(ie);
-        route->setSourceType(Ipv4Route::MANUAL);
-        irt->addRoute(route);
-    }
+    installDefaultRoute(lease->gateway);
 
     // update the routing table
     rescheduleAfter(lease->leaseTime, leaseTimer);
@@ -457,6 +473,55 @@ void DhcpClient::initRebootedClient()
     sendRequest();
     scheduleTimerTO(WAIT_ACK);
     clientState = REBOOTING;
+}
+
+void DhcpClient::initInformClient()
+{
+    EV_INFO << "Starting DHCPINFORM process for the externally-configured address." << endl;
+
+    cancelEvent(timerT1);
+    cancelEvent(timerT2);
+    cancelEvent(timerTo);
+    cancelEvent(leaseTimer);
+
+    dhcpStartTime = simTime();
+    sendInformRequest();
+    scheduleTimerTO(WAIT_ACK);
+    clientState = INFORMING;
+}
+
+void DhcpClient::recordInformParameters(const Ptr<const DhcpMessage>& dhcpACK)
+{
+    // RFC 2131 §4.4.3: the address and netmask are already configured
+    // externally, so no lease is bound and yiaddr/lease-time are ignored. We
+    // apply only the local configuration parameters the server returned - most
+    // importantly the default gateway (router option) - installing the default
+    // route the same way bindLease() does.
+    if (dhcpACK->getOptions().getRouterArraySize() > 0) {
+        Ipv4Address gateway = dhcpACK->getOptions().getRouter(0);
+        auto ipv4Data = ie->getProtocolData<Ipv4InterfaceData>();
+        Ipv4Address myIp = ipv4Data->getIPAddress();
+        Ipv4Address netmask = ipv4Data->getNetmask();
+        bool haveSubnet = !netmask.isUnspecified() && netmask != Ipv4Address::ALLONES_ADDRESS;
+        if (gateway.isUnspecified()) {
+            EV_WARN << "DHCPINFORM ACK carries an unspecified gateway; not installing a default route." << endl;
+        }
+        else if (haveSubnet && !Ipv4Address::maskedAddrAreEqual(gateway, myIp, netmask)) {
+            // A default-route gateway must be directly reachable on the local
+            // subnet; a server-provided address outside it would be unusable.
+            EV_WARN << "DHCPINFORM ACK gateway " << gateway << " is not on the locally configured subnet "
+                    << myIp << "/" << netmask << "; ignoring it (not installing a default route)." << endl;
+        }
+        else {
+            EV_DETAIL << "DHCPINFORM ACK router (default gateway): " << gateway << endl;
+            installDefaultRoute(gateway);
+        }
+    }
+    if (dhcpACK->getOptions().getDnsArraySize() > 0)
+        EV_DETAIL << "DHCPINFORM ACK DNS: " << dhcpACK->getOptions().getDns(0) << endl;
+    if (dhcpACK->getOptions().getNtpArraySize() > 0)
+        EV_DETAIL << "DHCPINFORM ACK NTP: " << dhcpACK->getOptions().getNtp(0) << endl;
+    EV_INFO << "DHCPINFORM completed; local configuration parameters applied without acquiring a lease." << endl;
 }
 
 void DhcpClient::handleDhcpMessage(Packet *packet)
@@ -518,6 +583,17 @@ void DhcpClient::handleDhcpMessage(Packet *packet)
 
         case BOUND:
             EV_DETAIL << "We are in BOUND, discard all DHCP messages." << endl; // remain in BOUND
+            break;
+
+        case INFORMING:
+            if (messageType == DHCPACK) {
+                EV_INFO << "DHCPACK message arrived in INFORMING state. Recording local configuration parameters (no lease)." << endl;
+                cancelEvent(timerTo);
+                recordInformParameters(msg);
+                clientState = BOUND;
+            }
+            else
+                EV_WARN << getAndCheckMessageTypeName(messageType) << " message arrived in INFORMING state. In this state, client only expects a DHCPACK, dropping." << endl;
             break;
 
         case RENEWING:
@@ -746,6 +822,52 @@ void DhcpClient::sendDecline(Ipv4Address declinedIp)
     packet->insertAtBack(decline);
 
     EV_INFO << "Sending DHCPDECLINE." << endl;
+    sendToUdp(packet, clientPort, Ipv4Address::ALLONES_ADDRESS, serverPort);
+}
+
+void DhcpClient::sendInformRequest()
+{
+    // RFC 2131 §4.4.3: a fresh xid is chosen for the DHCPINFORM exchange.
+    xid = intuniform(0, RAND_MAX);
+    Packet *packet = new Packet("DHCPINFORM");
+    const auto& inform = makeShared<DhcpMessage>();
+    inform->setOp(BOOTREQUEST);
+    uint16_t length = 236; // packet size without the options field
+    inform->setHtype(1); // ethernet
+    inform->setHlen(6); // hardware address length (6 octets)
+    inform->setHops(0);
+    inform->setXid(xid); // transaction id
+    inform->setSecs((uint16_t)(simTime() - dhcpStartTime).dbl()); // seconds since process started
+    // The client already has a usable address and can receive unicast, so the
+    // broadcast flag stays clear (RFC 2131 §4.4.3).
+    inform->setBroadcast(false);
+    // RFC 2131 §4.4.3: ciaddr MUST be filled in with the client's own IP.
+    inform->setCiaddr(ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
+    inform->setChaddr(macAddress); // my mac address
+    inform->setSname(""); // no server name given
+    inform->setFile(""); // no file given
+    auto& options = inform->getOptionsForUpdate();
+    options.setMessageType(DHCPINFORM);
+    length += 3;
+    options.setClientIdentifier(macAddress);
+    length += 9;
+
+    // request the local configuration parameters
+    options.setParameterRequestListArraySize(4);
+    options.setParameterRequestList(0, SUBNET_MASK);
+    options.setParameterRequestList(1, ROUTER);
+    options.setParameterRequestList(2, DNS);
+    options.setParameterRequestList(3, NTP_SRV);
+    length += (2 + options.getParameterRequestListArraySize());
+
+    // magic cookie and the end field
+    length += 5;
+
+    inform->setChunkLength(B(length));
+
+    packet->insertAtBack(inform);
+
+    EV_INFO << "Sending DHCPINFORM for already-configured IP " << inform->getCiaddr() << "." << endl;
     sendToUdp(packet, clientPort, Ipv4Address::ALLONES_ADDRESS, serverPort);
 }
 
