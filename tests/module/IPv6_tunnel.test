@@ -1,0 +1,94 @@
+%description:
+Tests the Ipv6TunnelInterface (IPv6-in-IPv6 encapsulation, RFC 2473).
+
+Topology: A --- B --- H. Host A has an Ipv6TunnelInterface whose exit point is
+router B. A static route directs A's traffic for H through the tunnel interface,
+so packets A->H are encapsulated (outer A->B), forwarded to B, decapsulated there
+(by the existing decapsulation path), and delivered to H.
+
+We verify that B receives an IPv6-in-IPv6 ("Tunnelled IP datagram") packet,
+i.e. the new tunnel interface encapsulated correctly, and that the UDP traffic
+reaches H.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network Ipv6TunnelTestNetwork
+{
+    types:
+        channel ethline extends DatarateChannel {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        configurator: Ipv6NetworkConfigurator;
+        A: StandardHost6;
+        B: Router6;
+        H: StandardHost6;
+    connections:
+        A.ethg++ <--> ethline <--> B.ethg++;
+        B.ethg++ <--> ethline <--> H.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = Ipv6TunnelTestNetwork
+ned-path = ../../../../src
+sim-time-limit = 5s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+**.configurator.dumpAddresses = true
+**.configurator.dumpRoutes = true
+**.configurator.config = xml("<config> \
+    <interface among='A B' prefix='2001:db8:1::/64'/> \
+    <interface among='B H' prefix='2001:db8:2::/64'/> \
+    <route hosts='A' destination='2001:db8:1::' prefixLength='64' interface='eth0'/> \
+    <route hosts='A' destination='2001:db8:2:0:8aa:ff:fe00:4' prefixLength='128' interface='tun0'/> \
+  </config>")
+
+# tunnel interface on A, exit = B (A asks IPv6 to encapsulate the inner packet
+# toward the exit and originates it locally -- no forwarding needed)
+**.A.numTunInterfaces = 1
+**.A.tun[0].typename = "Ipv6TunnelInterface"
+**.A.tun[0].source = "2001:db8:1:0:8aa:ff:fe00:1"
+**.A.tun[0].destination = "2001:db8:1:0:8aa:ff:fe00:2"
+
+# UDP traffic A -> H
+**.A.numApps = 1
+**.A.app[0].typename = "UdpBasicApp"
+**.A.app[0].destAddresses = "H(ipv6)"
+**.A.app[0].destPort = 5000
+**.A.app[0].messageLength = 100B
+**.A.app[0].sendInterval = 0.5s
+**.A.app[0].startTime = 1s
+
+**.H.numApps = 1
+**.H.app[0].typename = "UdpSink"
+**.H.app[0].localPort = 5000
+
+%#--------------------------------------------------------------------------------------------------------------
+%# B receives an IPv6-in-IPv6 datagram: the tunnel interface encapsulated correctly
+%contains: stdout
+Tunnelled IP datagram
+%#--------------------------------------------------------------------------------------------------------------
+%# the UDP traffic completed the trip A -(tunnel)-> B -(decap)-> H
+%contains: stdout
+received 8 packets
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
