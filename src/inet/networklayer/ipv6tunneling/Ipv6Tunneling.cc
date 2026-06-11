@@ -119,39 +119,49 @@ int Ipv6Tunneling::createTunnel(TunnelType tunnelType,
 
     // 6.1-6.2
     ASSERT(entry.isUnicast());
-    tunnels[vIfIndexTop] = Tunnel(entry, exit, destTrigger);
 
-    if (tunnelType == NORMAL || tunnelType == SPLIT || tunnelType == NON_SPLIT) {
+    // "Real" tunnels (NORMAL/SPLIT/NON_SPLIT) are backed by a dynamically created
+    // Ipv6TunnelInterface: the IPv6 layer routes to it like any interface and the
+    // interface performs the encapsulation. The pseudo "tunnels" (T2RH, HA_OPT)
+    // still use a virtual interface index (vIfIndexTop) and the legacy path.
+    bool useNetworkInterface = (tunnelType == NORMAL || tunnelType == SPLIT || tunnelType == NON_SPLIT);
+    NetworkInterface *networkInterface = useNetworkInterface ? createTunnelNetworkInterface(entry, exit) : nullptr;
+    int key = useNetworkInterface ? networkInterface->getInterfaceId() : vIfIndexTop;
+
+    tunnels[key] = Tunnel(entry, exit, destTrigger);
+    tunnels[key].networkInterface = networkInterface;
+
+    if (useNetworkInterface) {
         if (destTrigger == Ipv6Address::UNSPECIFIED_ADDRESS) {
             // this is a "full" tunnel over which everything gets routed
-            tunnels[vIfIndexTop].tunnelType = NON_SPLIT;
+            tunnels[key].tunnelType = NON_SPLIT;
             noOfNonSplitTunnels++;
         }
 
         // default values: 5.
         // 6.4
-        tunnels[vIfIndexTop].trafficClass = 0;
+        tunnels[key].trafficClass = 0;
 
         // 6.5
-        tunnels[vIfIndexTop].flowLabel = 0;
+        tunnels[key].flowLabel = 0;
 
         // 6.3
         // The tunnel hop limit default value for hosts is the Ipv6 Neighbor
         // Discovery advertised hop limit [ND-Spec].
         if (rt->isRouter())
-            tunnels[vIfIndexTop].hopLimit = IPv6__INET_DEFAULT_ROUTER_HOPLIMIT;
+            tunnels[key].hopLimit = IPv6__INET_DEFAULT_ROUTER_HOPLIMIT;
         else
-            tunnels[vIfIndexTop].hopLimit = 255;
+            tunnels[key].hopLimit = 255;
 
         // 6.7
         // TODO perform path MTU on link (interface resolved via exit address)
-        tunnels[vIfIndexTop].tunnelMTU = IPv6_MIN_MTU - 40;
+        tunnels[key].tunnelMTU = IPv6_MIN_MTU - 40;
 
         EV_INFO << "Tunneling: Created tunnel with entry=" << entry << ", exit=" << exit
                 << " and trigger=" << destTrigger << endl;
     }
     else if (tunnelType == T2RH || tunnelType == HA_OPT) {
-        tunnels[vIfIndexTop].tunnelType = tunnelType;
+        tunnels[key].tunnelType = tunnelType;
 
         if (tunnelType == T2RH)
             EV_INFO << "Tunneling: Created RH2 path with entry=" << entry << ", exit=" << exit
@@ -167,7 +177,8 @@ int Ipv6Tunneling::createTunnel(TunnelType tunnelType,
     if (hasGUI())
         bubble("Created Tunnel");
 
-    return vIfIndexTop--; // decrement vIfIndex for use with next createTunnel() call
+    // real tunnels are keyed by their interface id; pseudo tunnels consume a vIfIndex
+    return useNetworkInterface ? key : vIfIndexTop--;
 }
 
 int Ipv6Tunneling::findTunnel(const Ipv6Address& src, const Ipv6Address& dest,
@@ -199,6 +210,10 @@ bool Ipv6Tunneling::destroyTunnel(const Ipv6Address& src, const Ipv6Address& des
     // also decrement the appropriate counter
     if (tunnels[vIfIndex].tunnelType == NON_SPLIT)
         noOfNonSplitTunnels--;
+
+    // tear down the backing virtual interface for real tunnels
+    if (tunnels[vIfIndex].networkInterface)
+        deleteTunnelNetworkInterface(tunnels[vIfIndex].networkInterface);
 
     // TODO store vIfIndex for later reuse when creating a new tunnel
     tunnels.erase(vIfIndex);
@@ -520,6 +535,37 @@ bool Ipv6Tunneling::isTunnelExit(const Ipv6Address& exit)
     }
 
     return false;
+}
+
+NetworkInterface *Ipv6Tunneling::createTunnelNetworkInterface(const Ipv6Address& source, const Ipv6Address& destination)
+{
+    cModule *node = getContainingNode(this);
+    cModuleType *moduleType = cModuleType::get("inet.networklayer.ipv6tunneling.Ipv6TunnelInterface");
+    std::string name = std::string("ip6tun") + std::to_string(tunnelInterfaceCounter++);
+    cModule *module = moduleType->create(name.c_str(), node);
+    module->par("interfaceTableModule") = check_and_cast<cModule *>(ift.get())->getFullPath().c_str();
+    module->par("source") = source.str().c_str();
+    module->par("destination") = destination.str().c_str();
+    module->finalizeParameters();
+    module->buildInside();
+
+    // wire it into the node's link-layer dispatcher exactly as LinkLayerNodeBase
+    // wires its static tun[] slot: tun.upperLayerOut --> li.in++, li.out++ --> tun.upperLayerIn
+    cModule *li = node->getSubmodule("li");
+    cGate *liOut = li->getOrCreateFirstUnconnectedGate("out", 0, false, true);
+    cGate *liIn = li->getOrCreateFirstUnconnectedGate("in", 0, false, true);
+    liOut->connectTo(module->gate("upperLayerIn"));
+    module->gate("upperLayerOut")->connectTo(liIn);
+
+    module->callInitialize();
+    return check_and_cast<NetworkInterface *>(module);
+}
+
+void Ipv6Tunneling::deleteTunnelNetworkInterface(NetworkInterface *networkInterface)
+{
+    // InterfaceTable::deleteInterface() removes the interface from the table and
+    // deletes the module (which disconnects its gates), so nothing else is needed.
+    ift->deleteInterface(networkInterface);
 }
 
 /*

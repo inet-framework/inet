@@ -31,6 +31,7 @@ namespace inet {
 class IInterfaceTable;
 class Ipv6Header;
 class Ipv6RoutingTable;
+class NetworkInterface;
 
 /**
  * Management of IP tunnels.
@@ -96,6 +97,10 @@ class INET_API Ipv6Tunneling : public OperationalBase
         Ipv6Address destTrigger;
 
         bool isTriggerPrefix = false;
+
+        // for real (NORMAL/SPLIT/NON_SPLIT) tunnels: the backing virtual
+        // interface that performs the encapsulation; nullptr for pseudo tunnels
+        NetworkInterface *networkInterface = nullptr;
     };
 
     typedef std::map<int, struct Tunnel> Tunnels;
@@ -108,6 +113,9 @@ class INET_API Ipv6Tunneling : public OperationalBase
 
     // number of tunnels which are not split tunnels
     int noOfNonSplitTunnels = 0;
+
+    // running counter for naming dynamically created tunnel interfaces
+    int tunnelInterfaceCounter = 0;
 
   public:
     Ipv6Tunneling();
@@ -203,6 +211,19 @@ class INET_API Ipv6Tunneling : public OperationalBase
      * Check if there exists a tunnel with exit equal to the provided address.
      */
     bool isTunnelExit(const Ipv6Address& exit); // 11.9.07 - CB
+
+    /**
+     * Dynamically create an ~Ipv6TunnelInterface (IPv6-in-IPv6, source -> dest),
+     * wire it into the node's network layer and register it. Returns the new
+     * NetworkInterface. The caller installs the route(s) that steer traffic to it.
+     */
+    NetworkInterface *createTunnelNetworkInterface(const Ipv6Address& source, const Ipv6Address& destination);
+
+    /**
+     * Tear down and delete a tunnel interface previously created with
+     * createTunnelNetworkInterface().
+     */
+    void deleteTunnelNetworkInterface(NetworkInterface *networkInterface);
 
     /**
      * Returns the type of the tunnels: non-split, split, T2RH, ...

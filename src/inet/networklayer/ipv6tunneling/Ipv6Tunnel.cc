@@ -47,8 +47,7 @@ void Ipv6Tunnel::handleUpperPacket(Packet *packet)
     // datagram toward the exit -- no tunneling-specific code in the IPv6 core.
     packet->clearTags();
     auto addresses = packet->addTag<L3AddressReq>();
-    // leave the source unspecified: IPv6 selects the entry-point address from the
-    // route toward the exit (for a mobile node, that is the care-of address)
+    addresses->setSrcAddress(source); // the tunnel entry point (RFC 2473)
     addresses->setDestAddress(destination);
     packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
     auto req = packet->addTag<DispatchProtocolReq>();

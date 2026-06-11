@@ -493,6 +493,14 @@ void Ipv6::routePacket(Packet *packet, const NetworkInterface *destIE, const Net
             interfaceId = tunneling->getVIfIndexForDest(destAddress);
     }
 
+    // If a real (interface-backed) tunnel was selected by getVIfIndexForDest(),
+    // determineOutputInterface() below is skipped (interfaceId is already set), so
+    // no next hop is resolved. The tunnel interface is point-to-point, so use the
+    // destination as the nominal next hop: it is not used to address the link, but
+    // resolveMACAddressAndSendPacket() requires a specified next hop.
+    if (interfaceId != -1 && interfaceId <= ift->getBiggestInterfaceId())
+        nextHop = destAddress;
+
     if (interfaceId == -1 && destIE != nullptr)
         interfaceId = destIE->getInterfaceId(); // set interfaceId to destIE when not tunneling
 
@@ -534,9 +542,14 @@ void Ipv6::resolveMACAddressAndSendPacket(Packet *packet, int interfaceId, Ipv6A
 
     if (rt->isMobileNode()) {
         // if the source address is the HoA and we have a CoA then drop the packet
-        // (address is topologically incorrect!)
-        if (ipv6Header->getSrcAddress() == ie->getProtocolData<Mipv6InterfaceData>()->getMNHomeAddress()
-            && !ie->getProtocolData<Ipv6InterfaceData>()->getGlobalAddress(Ipv6InterfaceData::CoA).isUnspecified())
+        // (address is topologically incorrect!). Skipped for interfaces without
+        // MIPv6 data (e.g. a tunnel interface, which legitimately carries
+        // HoA-sourced inner packets toward the home agent).
+        auto mipv6Data = ie->findProtocolData<Mipv6InterfaceData>();
+        auto ipv6Data = ie->findProtocolData<Ipv6InterfaceData>();
+        if (mipv6Data && ipv6Data
+            && ipv6Header->getSrcAddress() == mipv6Data->getMNHomeAddress()
+            && !ipv6Data->getGlobalAddress(Ipv6InterfaceData::CoA).isUnspecified())
         {
             EV_WARN << "Using HoA instead of CoA... dropping datagram" << endl;
             delete packet;

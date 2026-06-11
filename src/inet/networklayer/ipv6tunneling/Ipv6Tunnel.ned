@@ -23,6 +23,10 @@ simple Ipv6Tunnel extends SimpleModule
         string destination; // tunnel exit point
         int mtu @unit(B) = default(1500B);
         @display("i=block/tunnel");
+        @signal[packetReceivedFromUpper](type=cPacket);
+        @signal[packetReceivedFromLower](type=cPacket);
+        @signal[packetSentToUpper](type=cPacket);
+        @signal[packetSentToLower](type=cPacket);
     gates:
         input upperLayerIn;
         output upperLayerOut;
