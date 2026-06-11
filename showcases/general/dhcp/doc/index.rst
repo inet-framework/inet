@@ -73,9 +73,9 @@ return the address to the pool immediately, rather than waiting for
 the lease to expire. A client that, after the DHCPACK, detects the
 offered address is already in use on the network (typically via an ARP
 probe per RFC 5227) sends a **DHCPDECLINE**; the server then
-quarantines that address for a while and the client restarts from
-INIT. INET's coverage of these two messages is described in
-*DHCP in INET* below.
+quarantines that address for a while and the client restarts the DORA
+exchange. INET's coverage of these two messages is described in
+the *DHCP in INET* section below.
 
 Before the lease expires, the client must extend it. This happens in two
 stages, providing a fallback in case the original server becomes
@@ -182,7 +182,7 @@ INET provides two application modules for DHCP:
   :par:`initialRetransmitDelay` (default 4 s), doubled per attempt up to
   :par:`maxRetransmitDelay` (default 64 s), with ±1 s jitter; after
   :par:`maxRetransmitCount` (default 4) unanswered retransmits the
-  client restarts from INIT. In RENEWING / REBINDING the client uses the
+  client restarts the DORA exchange. In RENEWING / REBINDING the client uses the
   "half of the remaining interval" rule, floored at
   :par:`minRenewRetransmitInterval` (default 60 s). On a graceful
   shutdown in BOUND / RENEWING / REBINDING the client emits a
