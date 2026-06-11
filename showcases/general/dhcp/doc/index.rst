@@ -154,11 +154,7 @@ pool, and responds to client requests. Key parameters:
 .. note::
 
    The server reclaims leases on its own once the lease expires — the
-   address simply becomes available again for the next client. Until
-   INET ships an RFC-5227 ARP probe, the client never produces a
-   DHCPDECLINE on its own; the :par:`declineOfferedIp` parameter is a
-   test hook that forces the client to decline a specific offered
-   address.
+   address simply becomes available again for the next client.
 
 :ned:`DhcpClient` runs the DHCP client on a host interface. Key
 parameters:
@@ -174,6 +170,10 @@ parameters:
 - :par:`minRenewRetransmitInterval` (default 60 s) — floor on the
   retransmit interval during renewal and rebinding, which otherwise
   follows a "half of the remaining interval" rule.
+- :par:`declineOfferedIp` — test hook that forces the client to
+  decline a specific offered address. Until INET ships an RFC-5227
+  ARP probe the client never produces a DHCPDECLINE on its own, so
+  this parameter is the only way to exercise the DECLINE round-trip.
 
 On a graceful shutdown while holding a lease the client emits a
 DHCPRELEASE; a crash does not.
