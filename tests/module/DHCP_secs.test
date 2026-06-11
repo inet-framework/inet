@@ -1,0 +1,85 @@
+%description:
+
+Tests that the client fills in the 'secs' field with the number of seconds
+elapsed since the address-acquisition process started (RFC 2131 §3.1, §4.1).
+Before the improvement over master the field was always left at 0.
+
+The server is kept DOWN until t=10s (via ScenarioManager) so the client must
+retransmit its DHCPDISCOVER several times. The very first DHCPDISCOVER (at
+t=0) carries secs = 0, but every retransmit must carry a strictly positive
+secs value, because dhcpStartTime is captured once at the start of the DORA
+process and reused across retransmits. Applications log at DETAIL level so the
+DhcpMessage field dump is visible.
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+ned-path = .;../../../../src;../../lib
+cmdenv-express-mode = false
+cmdenv-log-prefix = "[%t %M] "
+sim-time-limit = 30s
+
+**.app[*].cmdenv-log-level = detail
+
+**.hasStatus = true
+*.server.status.initialStatus = "down"
+*.scenarioManager.script = xmldoc("scenario.xml")
+
+*.configurator.config = xml("<config><interface hosts='server' address='192.168.1.1' netmask='255.255.255.0'/></config>")
+
+*.server.numApps = 1
+*.server.app[0].typename = "DhcpServer"
+*.server.app[0].numReservedAddresses = 100
+*.server.app[0].maxNumClients = 10
+*.server.app[0].gateway = "192.168.1.1"
+*.server.app[0].leaseTime = 100s
+
+*.client.numApps = 1
+*.client.app[0].typename = "DhcpClient"
+
+%file: test.ned
+
+import inet.test.moduletest.lib.*;
+import inet.node.ethernet.Eth10M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.common.scenario.ScenarioManager;
+
+network Test
+{
+    submodules:
+        scenarioManager: ScenarioManager;
+        configurator: Ipv4NetworkConfigurator;
+        switch: EthernetSwitch;
+        server: StandardHost;
+        client: StandardHost;
+    connections:
+        server.ethg++ <--> Eth10M <--> switch.ethg++;
+        client.ethg++ <--> Eth10M <--> switch.ethg++;
+}
+
+%file: scenario.xml
+
+<scenario>
+    <at t="10">
+        <startup module="server"/>
+    </at>
+</scenario>
+
+%# Strip ANSI styling emitted by the EV_FIELD packet dump.
+%subst: /\x1B\[[0-9;]*m//
+
+%# The initial DHCPDISCOVER (sent at t=0) carries secs = 0.
+%contains-regex: stdout
+Sending DHCP message, msg = \(Packet\)DHCPDISCOVER .*secs = 0, broadcast = true
+
+%# A retransmitted DHCPDISCOVER must carry a strictly positive secs value,
+%# proving the field tracks the elapsed acquisition time.
+%contains-regex: stdout
+Sending DHCP message, msg = \(Packet\)DHCPDISCOVER .*secs = [1-9][0-9]*, broadcast = true
+
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (

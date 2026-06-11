@@ -1,0 +1,76 @@
+%description:
+
+Tests the RFC 2131 compliance of the DHCP packet header fields that the
+server fills in (and that did not exist / were not set correctly before the
+improvements over master). A single client runs a normal DORA exchange while
+the applications log at DETAIL level, so the full DhcpMessage field dump
+appears in the log for every sent packet.
+
+Asserted improvements:
+  * 'siaddr' (next-server address) is a new field; the server now sets it to
+    its own interface address in both DHCPOFFER and DHCPACK (RFC 2131 Table 1).
+  * The server echoes the client's 'broadcast' flag, 'ciaddr' and 'giaddr'
+    into DHCPOFFER/DHCPACK (RFC 2131 Table 3), instead of leaving them at
+    fixed values.
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+ned-path = .;../../../../src;../../lib
+cmdenv-express-mode = false
+cmdenv-log-prefix = "[%t %M] "
+sim-time-limit = 60s
+
+**.app[*].cmdenv-log-level = detail
+
+*.client.eth[0].address = "AA-00-00-00-00-0A"
+
+*.configurator.config = xml("<config><interface hosts='server' address='192.168.1.1' netmask='255.255.255.0'/></config>")
+
+*.server.numApps = 1
+*.server.app[0].typename = "DhcpServer"
+*.server.app[0].numReservedAddresses = 100
+*.server.app[0].maxNumClients = 5
+*.server.app[0].gateway = "192.168.1.1"
+*.server.app[0].leaseTime = 1000s
+
+*.client.numApps = 1
+*.client.app[0].typename = "DhcpClient"
+
+%file: test.ned
+
+import inet.test.moduletest.lib.*;
+import inet.node.ethernet.Eth10M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+network Test
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        switch: EthernetSwitch;
+        server: StandardHost;
+        client: StandardHost;
+    connections:
+        server.ethg++ <--> Eth10M <--> switch.ethg++;
+        client.ethg++ <--> Eth10M <--> switch.ethg++;
+}
+
+%# Strip ANSI styling emitted by the EV_FIELD packet dump.
+%subst: /\x1B\[[0-9;]*m//
+
+%# DHCPOFFER must carry siaddr = server IP, and echo the client's broadcast
+%# flag (true) with ciaddr/giaddr unspecified (RFC 2131 Tables 1 and 3).
+%contains-regex: stdout
+Sending DHCP message, msg = \(Packet\)DHCPOFFER .*broadcast = true, .*ciaddr = <unspec>, yiaddr = 192\.168\.1\.100, siaddr = 192\.168\.1\.1, giaddr = <unspec>
+
+%# DHCPACK must likewise carry siaddr = server IP (new field) with the
+%# echoed ciaddr/giaddr.
+%contains-regex: stdout
+Sending DHCP message, msg = \(Packet\)DHCPACK .*yiaddr = 192\.168\.1\.100, siaddr = 192\.168\.1\.1, giaddr = <unspec>
+
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (

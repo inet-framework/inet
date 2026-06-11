@@ -1,0 +1,73 @@
+%description:
+
+Tests the DHCPINFORM client-side gateway sanity check. The client runs in
+informMode with an externally configured address (192.168.1.50/24), but the
+server is configured to hand out a router (default gateway) option that lies
+outside the client's local subnet (10.0.0.1). A default-route gateway must be
+directly reachable on the local subnet, so the client must reject the
+off-link gateway with a warning and must NOT install a default route.
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+ned-path = .;../../../../src;../../lib
+cmdenv-express-mode = false
+cmdenv-log-prefix = "[%t %M] "
+sim-time-limit = 60s
+
+**.app[*].cmdenv-log-level = detail
+
+*.client.eth[0].address = "AA-00-00-00-00-0A"
+
+*.configurator.config = xml("<config> \
+        <interface hosts='server' address='192.168.1.1' netmask='255.255.255.0'/> \
+        <interface hosts='client' address='192.168.1.50' netmask='255.255.255.0'/> \
+        </config>")
+
+*.server.numApps = 1
+*.server.app[0].typename = "DhcpServer"
+*.server.app[0].numReservedAddresses = 100
+*.server.app[0].maxNumClients = 5
+*.server.app[0].gateway = "10.0.0.1"
+*.server.app[0].leaseTime = 1000s
+
+*.client.numApps = 1
+*.client.app[0].typename = "DhcpClient"
+*.client.app[0].informMode = true
+
+%file: test.ned
+
+import inet.test.moduletest.lib.*;
+import inet.node.ethernet.Eth10M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+network Test
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        switch: EthernetSwitch;
+        server: StandardHost;
+        client: StandardHost;
+    connections:
+        server.ethg++ <--> Eth10M <--> switch.ethg++;
+        client.ethg++ <--> Eth10M <--> switch.ethg++;
+}
+
+%# The exchange must still complete normally.
+%contains: stdout
+DHCPINFORM completed; local configuration parameters applied without acquiring a lease.
+
+%# The off-subnet gateway must be detected and rejected.
+%contains: stdout
+DHCPINFORM ACK gateway 10.0.0.1 is not on the locally configured subnet 192.168.1.50/255.255.255.0; ignoring it (not installing a default route).
+
+%# Therefore no default route is installed (the accept-path log must not appear).
+%not-contains: stdout
+DHCPINFORM ACK router (default gateway):
+
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (

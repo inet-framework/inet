@@ -1,0 +1,93 @@
+%description:
+
+Tests DHCPINFORM (RFC 2131 §4.4.3). The client already has an externally
+configured IP address (assigned here by the network configurator) and is run
+in informMode, so instead of acquiring a lease via DORA it sends a single
+DHCPINFORM with ciaddr set to its own address to obtain local configuration
+parameters. The server answers with a DHCPACK that carries the parameters but
+no lease time and no yiaddr; the client records the parameters without binding
+a lease.
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+ned-path = .;../../../../src;../../lib
+cmdenv-express-mode = false
+cmdenv-log-prefix = "[%t %M] "
+sim-time-limit = 60s
+
+**.app[*].cmdenv-log-level = detail
+
+*.client.eth[0].address = "AA-00-00-00-00-0A"
+
+*.configurator.config = xml("<config> \
+        <interface hosts='server' address='192.168.1.1' netmask='255.255.255.0'/> \
+        <interface hosts='client' address='192.168.1.50' netmask='255.255.255.0'/> \
+        </config>")
+
+*.server.numApps = 1
+*.server.app[0].typename = "DhcpServer"
+*.server.app[0].numReservedAddresses = 100
+*.server.app[0].maxNumClients = 5
+*.server.app[0].gateway = "192.168.1.1"
+*.server.app[0].leaseTime = 1000s
+
+*.client.numApps = 1
+*.client.app[0].typename = "DhcpClient"
+*.client.app[0].informMode = true
+
+%file: test.ned
+
+import inet.test.moduletest.lib.*;
+import inet.node.ethernet.Eth10M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+network Test
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        switch: EthernetSwitch;
+        server: StandardHost;
+        client: StandardHost;
+    connections:
+        server.ethg++ <--> Eth10M <--> switch.ethg++;
+        client.ethg++ <--> Eth10M <--> switch.ethg++;
+}
+
+%# The client must send a DHCPINFORM with ciaddr = its own configured IP.
+%contains: stdout
+Sending DHCPINFORM for already-configured IP 192.168.1.50.
+
+%# The server must recognize and handle the DHCPINFORM.
+%contains: stdout
+DHCPINFORM arrived. Handling it.
+
+%# The server must answer with a DHCPACK unicast back to the client's ciaddr.
+%contains: stdout
+Sending DHCPACK in response to DHCPINFORM from 192.168.1.50.
+
+%# The client must accept the ACK in the INFORMING state and record parameters.
+%contains: stdout
+DHCPACK message arrived in INFORMING state. Recording local configuration parameters (no lease).
+
+%contains: stdout
+DHCPINFORM completed; local configuration parameters applied without acquiring a lease.
+
+%# The client must install the default gateway (router option) from the ACK.
+%contains: stdout
+DHCPINFORM ACK router (default gateway): 192.168.1.1
+
+%# No lease is ever bound: the bindLease() banner must never appear.
+%not-contains: stdout
+is available. Assigning it to client.
+
+%# The client must never enter the DORA path (no DHCPDISCOVER).
+%not-contains: stdout
+Sending DHCPDISCOVER.
+
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
