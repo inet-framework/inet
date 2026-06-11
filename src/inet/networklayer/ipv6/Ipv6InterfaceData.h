@@ -60,21 +60,6 @@ class Ipv6RoutingTable;
 #define IPv6_MAX_RANDOM_FACTOR                  1.5
 /***************END of RFC 2461 Protocol Constants*****************************/
 
-/***************RFC 3775: Section 12 Protocol Constants************************/
-#define MIPv6_DHAAD_RETRIES                    4 // retransmissions
-#define MIPv6_INITIAL_BINDACK_TIMEOUT          1 // second
-#define MIPv6_INITIAL_DHAAD_TIMEOUT            3 // seconds
-#define MIPv6_INITIAL_SOLICIT_TIMER            3 // seconds
-#define MIPv6_MAX_BINDACK_TIMEOUT              32 // seconds
-#define MIPv6_MAX_NONCE_LIFETIME               240 // seconds
-#define MIPv6_MAX_TOKEN_LIFETIME               210 // seconds
-#define MIPv6_MAX_UPDATE_RATE                  3 // times
-#define MIPv6_PREFIX_ADV_RETRIES               3 // retransmissions
-#define MIPv6_PREFIX_ADV_TIMEOUT               3 // seconds
-#define MIPv6_INITIAL_BINDACK_TIMEOUT_FIRST    1 // seconds
-#define MIPv6_MAX_RR_BINDING_LIFETIME          420 // seconds
-#define MIPv6_MAX_HA_BINDING_LIFETIME          3600 // seconds (1 hour)
-/***************END of RFC 3775 Protocol Constants*****************************/
 
 /*
  * Info for ipv6MulticastGroupJoinedSignal and ipv6MulticastGroupLeftSignal notifications
@@ -162,14 +147,6 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
         simtime_t maxRtrSolicitationDelay;
         simtime_t rtrSolicitationInterval;
         int maxRtrSolicitations;
-
-        // MIPv6 host constants (RFC 3775 Section 12)
-        uint initialBindAckTimeout;
-        uint maxBindAckTimeout;
-        simtime_t initialBindAckTimeoutFirst;
-        uint maxRRBindingLifeTime;
-        uint maxHABindingLifeTime;
-        uint maxTokenLifeTime;
     };
     HostConstants hostConstants;
 
@@ -192,13 +169,6 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
     enum AddressType { HoA, CoA }; ///< Tags a MN's address as Home-Address or Care-of-Address
 
   protected:
-    struct HomeNetworkInfo {
-        Ipv6Address HoA; // Home Address of the MN
-        Ipv6Address homeAgentAddr;
-        Ipv6Address prefix;
-    };
-    friend std::ostream& operator<<(std::ostream& os, const HomeNetworkInfo& homeNetInfo);
-    HomeNetworkInfo homeInfo;
     bool dadInProgress = false;
     bool optimisticDad = false; // RFC 4429: if true, a tentative (optimistic) address may be used as a source address while DAD is still in progress
 
@@ -543,26 +513,10 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
     simtime_t _getRtrSolicitationInterval() const { return hostConstants.rtrSolicitationInterval; }
     uint _getMaxRtrSolicitations() const { return hostConstants.maxRtrSolicitations; }
 
-    // MIPv6 host constant getters (RFC 3775)
-    simtime_t _getInitialBindAckTimeout() const { return hostConstants.initialBindAckTimeout; }
-    simtime_t _getMaxBindAckTimeout() const { return hostConstants.maxBindAckTimeout; }
-    simtime_t _getInitialBindAckTimeoutFirst() const { return hostConstants.initialBindAckTimeoutFirst; }
-    uint _getMaxRrBindingLifeTime() const { return hostConstants.maxRRBindingLifeTime; }
-    uint _getMaxHaBindingLifeTime() const { return hostConstants.maxHABindingLifeTime; }
-    uint _getMaxTokenLifeTime() const { return hostConstants.maxTokenLifeTime; }
-
     /************Setters for Host Protocol Constants***************************/
     virtual void _setMaxRtrSolicitationDelay(simtime_t d) { hostConstants.maxRtrSolicitationDelay = d; }
     virtual void _setRtrSolicitationInterval(simtime_t d) { hostConstants.rtrSolicitationInterval = d; }
     virtual void _setMaxRtrSolicitations(uint d) { hostConstants.maxRtrSolicitations = d; }
-
-    // MIPv6 host constant setters (RFC 3775)
-    virtual void _setInitialBindAckTimeout(simtime_t d) { hostConstants.initialBindAckTimeout = SIMTIME_DBL(d); }
-    virtual void _setMaxBindAckTimeout(simtime_t d) { hostConstants.maxBindAckTimeout = SIMTIME_DBL(d); }
-    virtual void _setInitialBindAckTimeoutFirst(simtime_t d) { hostConstants.initialBindAckTimeoutFirst = d; }
-    virtual void _setMaxRrBindingLifeTime(uint d) { hostConstants.maxRRBindingLifeTime = d; }
-    virtual void _setMaxHaBindingLifeTime(uint d) { hostConstants.maxHABindingLifeTime = d; }
-    virtual void _setMaxTokenLifeTime(uint d) { hostConstants.maxTokenLifeTime = d; }
     /************End of Host Protocol Constant getters and setters*************/
 
     /************Getters for Node Protocol Constants***************************/
@@ -695,16 +649,6 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
     void autoConfRouterGlobalScopeAddress(AdvPrefix& p);
 
     void deduceAdvPrefix();
-
-    /**
-     * Updates the Home Network Information with the MN's HoA, the HA's
-     * address, and the home network prefix.
-     */
-    void updateHomeNetworkInfo(const Ipv6Address& hoa, const Ipv6Address& ha, const Ipv6Address& prefix, const int prefixLength);
-
-    const Ipv6Address& getHomeAgentAddress() const { return homeInfo.homeAgentAddr; }
-    const Ipv6Address& getMNHomeAddress() const { return homeInfo.HoA; }
-    const Ipv6Address& getMnPrefix() const { return homeInfo.prefix; }
 
     /**
      * Removes an address of the given type from the interface if one exists.

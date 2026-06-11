@@ -32,6 +32,7 @@
 #include "inet/networklayer/ipv6/Ipv6ExtHeaderTag_m.h"
 #include "inet/networklayer/ipv6/Ipv6ExtensionHeaders.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
+#include "inet/networklayer/ipv6/Mipv6InterfaceData.h"
 
 
 namespace inet {
@@ -534,7 +535,7 @@ void Ipv6::resolveMACAddressAndSendPacket(Packet *packet, int interfaceId, Ipv6A
     if (rt->isMobileNode()) {
         // if the source address is the HoA and we have a CoA then drop the packet
         // (address is topologically incorrect!)
-        if (ipv6Header->getSrcAddress() == ie->getProtocolData<Ipv6InterfaceData>()->getMNHomeAddress()
+        if (ipv6Header->getSrcAddress() == ie->getProtocolData<Mipv6InterfaceData>()->getMNHomeAddress()
             && !ie->getProtocolData<Ipv6InterfaceData>()->getGlobalAddress(Ipv6InterfaceData::CoA).isUnspecified())
         {
             EV_WARN << "Using HoA instead of CoA... dropping datagram" << endl;

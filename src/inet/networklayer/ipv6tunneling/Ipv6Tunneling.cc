@@ -37,6 +37,7 @@
 #include "inet/networklayer/ipv6/Ipv6ExtHeaderTag_m.h"
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
+#include "inet/networklayer/ipv6/Mipv6InterfaceData.h"
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 
 #include "inet/networklayer/xmipv6/MobilityHeader_m.h" // for HA Option header
@@ -462,13 +463,13 @@ void Ipv6Tunneling::decapsulateDatagram(Packet *packet)
     // trigger Route Optimization if we are a MN receiving tunneled data from HA
     if (rt->isMobileNode()) {
         NetworkInterface *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
-        if ((srcAddr == ie->getProtocolData<Ipv6InterfaceData>()->getHomeAgentAddress())
+        if ((srcAddr == ie->getProtocolData<Mipv6InterfaceData>()->getHomeAgentAddress())
             && (ipv6Header->getProtocolId() != IP_PROT_IPv6EXT_MOB))
         {
             EV_INFO << "Checking Route Optimization for: " << ipv6Header->getSrcAddress() << endl;
             xMIPv6 *mipv6 = findModuleFromPar<xMIPv6>(par("xmipv6Module"), this);
             if (mipv6)
-                mipv6->triggerRouteOptimization(ipv6Header->getSrcAddress(), ie->getProtocolData<Ipv6InterfaceData>()->getMNHomeAddress(), ie);
+                mipv6->triggerRouteOptimization(ipv6Header->getSrcAddress(), ie->getProtocolData<Mipv6InterfaceData>()->getMNHomeAddress(), ie);
         }
     }
 }

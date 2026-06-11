@@ -115,12 +115,6 @@ Ipv6InterfaceData::Ipv6InterfaceData()
     rtrVars.advDefaultLifetime = 3 * rtrVars.maxRtrAdvInterval;
 
     rtrVars.advHomeAgentFlag = false;
-    hostConstants.initialBindAckTimeout = MIPv6_INITIAL_BINDACK_TIMEOUT;
-    hostConstants.maxBindAckTimeout = MIPv6_MAX_BINDACK_TIMEOUT;
-    hostConstants.initialBindAckTimeoutFirst = MIPv6_INITIAL_BINDACK_TIMEOUT_FIRST;
-    hostConstants.maxRRBindingLifeTime = MIPv6_MAX_RR_BINDING_LIFETIME;
-    hostConstants.maxHABindingLifeTime = MIPv6_MAX_HA_BINDING_LIFETIME;
-    hostConstants.maxTokenLifeTime = MIPv6_MAX_TOKEN_LIFETIME;
 
 #if USE_MOBILITY
     if (rtrVars.advDefaultLifetime < 1)
@@ -586,28 +580,6 @@ Ipv6Address Ipv6InterfaceData::removeAddress(Ipv6InterfaceData::AddressType type
     changed1(F_IP_ADDRESS);
 
     return addr;
-}
-
-std::ostream& operator<<(std::ostream& os, const Ipv6InterfaceData::HomeNetworkInfo& homeNetInfo)
-{
-    os << "HoA of MN:" << homeNetInfo.HoA << " HA Address: " << homeNetInfo.homeAgentAddr
-       << " Home Network Prefix: " << homeNetInfo.prefix /*.prefix()*/;
-    return os;
-}
-
-void Ipv6InterfaceData::updateHomeNetworkInfo(const Ipv6Address& hoa, const Ipv6Address& ha, const Ipv6Address& prefix, const int prefixLength)
-{
-    EV_INFO << "\n++++++ Updating the Home Network Information \n";
-    homeInfo.HoA = hoa;
-    homeInfo.homeAgentAddr = ha;
-    homeInfo.prefix = prefix;
-
-    // check if we already have a HoA on this interface
-    // if not, then we create one
-    Ipv6Address addr = getGlobalAddress(HoA);
-
-    if (addr == Ipv6Address::UNSPECIFIED_ADDRESS)
-        this->assignAddress(hoa, false, SIMTIME_ZERO, SIMTIME_ZERO, true);
 }
 
 } // namespace inet

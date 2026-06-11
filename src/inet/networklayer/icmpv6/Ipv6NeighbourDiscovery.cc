@@ -19,6 +19,7 @@
 #include "inet/networklayer/icmpv6/Icmpv6.h"
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
+#include "inet/networklayer/ipv6/Mipv6InterfaceData.h"
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 
 #include "inet/networklayer/xmipv6/xMIPv6.h"
@@ -1350,7 +1351,7 @@ void Ipv6NeighbourDiscovery::processRaPacket(Packet *packet, const Ipv6RouterAdv
                 Ipv6Address HA = packet->getTag<L3AddressInd>()->getSrcAddress().toIpv6().setPrefix(prefixInfo.getPrefix(), prefixInfo.getPrefixLength());
                 EV_DETAIL << "The HoA of MN is: " << HoA << ", MN's HA Address is: " << HA
                           << " and the home prefix is " << prefixInfo.getPrefix() << endl;
-                ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->updateHomeNetworkInfo(HoA, HA, prefixInfo.getPrefix(), prefixInfo.getPrefixLength()); // populate the HoA of MN, the HA global scope address and the home network prefix
+                ie->getProtocolDataForUpdate<Mipv6InterfaceData>()->updateHomeNetworkInfo(HoA, HA, prefixInfo.getPrefix(), prefixInfo.getPrefixLength()); // populate the HoA of MN, the HA global scope address and the home network prefix
             }
         }
     }

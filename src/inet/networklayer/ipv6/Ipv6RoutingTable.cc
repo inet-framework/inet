@@ -15,6 +15,7 @@
 #include "inet/common/stlutils.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
+#include "inet/networklayer/ipv6/Mipv6InterfaceData.h"
 #include "inet/networklayer/ipv6tunneling/Ipv6Tunneling.h"
 
 namespace inet {
@@ -212,6 +213,7 @@ void Ipv6RoutingTable::routeChanged(Ipv6Route *entry, int fieldCode)
 void Ipv6RoutingTable::configureInterfaceForIpv6(NetworkInterface *ie)
 {
     auto ipv6IfData = ie->addProtocolData<Ipv6InterfaceData>();
+    ie->addProtocolData<Mipv6InterfaceData>();
 
     // for routers, turn on advertisements by default
     // FIXME we will use this isRouter flag for now. what if future implementations
@@ -752,8 +754,8 @@ const Ipv6Address& Ipv6RoutingTable::getHomeAddress()
 {
     for (int i = 0; i < ift->getNumInterfaces(); ++i) {
         NetworkInterface *ie = ift->getInterface(i);
-        if (auto ipv6Data = ie->findProtocolData<Ipv6InterfaceData>()) {
-            const Ipv6Address& addr = ipv6Data->getMNHomeAddress();
+        if (auto mipv6Data = ie->findProtocolData<Mipv6InterfaceData>()) {
+            const Ipv6Address& addr = mipv6Data->getMNHomeAddress();
             if (!addr.isUnspecified())
                 return addr;
         }
@@ -769,7 +771,7 @@ bool Ipv6RoutingTable::isHomeAddress(const Ipv6Address& addr)
     // provided address as HoA
     for (int i = 0; i < ift->getNumInterfaces(); ++i) {
         NetworkInterface *ie = ift->getInterface(i);
-        if (ie->getProtocolData<Ipv6InterfaceData>()->getMNHomeAddress() == addr)
+        if (ie->getProtocolData<Mipv6InterfaceData>()->getMNHomeAddress() == addr)
             return true;
     }
 
