@@ -972,7 +972,7 @@ void DhcpClient::scheduleTimerT2()
 
 void DhcpClient::sendToUdp(Packet *msg, int srcPort, const L3Address& destAddr, int destPort)
 {
-    EV_INFO << "Sending packet " << msg << endl;
+    EV_INFO << "Sending DHCP message" << EV_FIELD(msg) << EV_ENDL;
     msg->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
     socket.sendTo(msg, destAddr, destPort);
     numSent++;

@@ -695,7 +695,7 @@ DhcpLease *DhcpServer::getAvailableLease(Ipv4Address requestedAddress, const Mac
 
 void DhcpServer::sendToUDP(Packet *msg, int srcPort, const L3Address& destAddr, int destPort)
 {
-    EV_INFO << "Sending packet: " << msg << "." << endl;
+    EV_INFO << "Sending DHCP message" << EV_FIELD(msg) << EV_ENDL;
     numSent++;
     msg->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
     socket.sendTo(msg, destAddr, destPort);
