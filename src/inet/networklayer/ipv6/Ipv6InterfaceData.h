@@ -72,6 +72,17 @@ struct INET_API Ipv6MulticastGroupInfo : public cObject
     Ipv6Address groupAddress;
 };
 
+/*
+ * Info for ipv6AddressAssignedSignal and ipv6AddressRemovedSignal notifications
+ */
+struct INET_API Ipv6AddressInfo : public cObject
+{
+    Ipv6AddressInfo(NetworkInterface *const ie, const Ipv6Address& address)
+        : ie(ie), address(address) {}
+    NetworkInterface *ie;
+    Ipv6Address address;
+};
+
 /**
  * Ipv6-specific data for NetworkInterface. Most of this comes from
  * section 6.2.1 of RFC 2461 (Ipv6 Neighbor Discovery, Router Configuration

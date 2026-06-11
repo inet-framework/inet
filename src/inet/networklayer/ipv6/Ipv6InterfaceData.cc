@@ -16,6 +16,7 @@
 namespace inet {
 
 Register_Abstract_Class(Ipv6MulticastGroupInfo);
+Register_Abstract_Class(Ipv6AddressInfo);
 
 // FIXME invoked changed() from state-changing methods, to trigger notification...
 
@@ -213,6 +214,12 @@ void Ipv6InterfaceData::assignAddress(const Ipv6Address& addr, bool tentative,
 
     choosePreferredAddress();
     changed1(F_IP_ADDRESS);
+
+    cModule *m = ownerp ? dynamic_cast<cModule *>(ownerp->getInterfaceTable()) : nullptr;
+    if (m) {
+        Ipv6AddressInfo info(ownerp, addr);
+        m->emit(ipv6AddressAssignedSignal, &info);
+    }
 }
 
 void Ipv6InterfaceData::updateMatchingAddressExpiryTimes(const Ipv6Address& prefix, int length,
@@ -320,6 +327,12 @@ void Ipv6InterfaceData::removeAddress(const Ipv6Address& address)
     addresses.erase(addresses.begin() + k);
     choosePreferredAddress();
     changed1(F_IP_ADDRESS);
+
+    cModule *m = ownerp ? dynamic_cast<cModule *>(ownerp->getInterfaceTable()) : nullptr;
+    if (m) {
+        Ipv6AddressInfo info(ownerp, address);
+        m->emit(ipv6AddressRemovedSignal, &info);
+    }
 }
 
 bool Ipv6InterfaceData::addrLess(const AddressData& a, const AddressData& b)
@@ -578,6 +591,14 @@ Ipv6Address Ipv6InterfaceData::removeAddress(Ipv6InterfaceData::AddressType type
     // pick new address as we've removed the old one
     choosePreferredAddress();
     changed1(F_IP_ADDRESS);
+
+    if (!addr.isUnspecified()) {
+        cModule *m = ownerp ? dynamic_cast<cModule *>(ownerp->getInterfaceTable()) : nullptr;
+        if (m) {
+            Ipv6AddressInfo info(ownerp, addr);
+            m->emit(ipv6AddressRemovedSignal, &info);
+        }
+    }
 
     return addr;
 }

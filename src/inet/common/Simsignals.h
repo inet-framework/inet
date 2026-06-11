@@ -73,6 +73,8 @@ extern INET_API simsignal_t // admin
 // layer 3 - Ipv6
     ipv6HandoverOccurredSignal,
     mipv6RoCompletedSignal,
+    ipv6AddressAssignedSignal,
+    ipv6AddressRemovedSignal,
     ipv6MulticastGroupJoinedSignal,
     ipv6MulticastGroupLeftSignal,
     ipv6MulticastGroupRegisteredSignal,

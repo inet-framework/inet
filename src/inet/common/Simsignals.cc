@@ -64,6 +64,8 @@ simsignal_t pimNeighborChangedSignal = cComponent::registerSignal("pimNeighborCh
 // layer 3 - Ipv6
 simsignal_t ipv6HandoverOccurredSignal = cComponent::registerSignal("ipv6HandoverOccurred");
 simsignal_t mipv6RoCompletedSignal = cComponent::registerSignal("mipv6RoCompleted");
+simsignal_t ipv6AddressAssignedSignal = cComponent::registerSignal("ipv6AddressAssigned");
+simsignal_t ipv6AddressRemovedSignal = cComponent::registerSignal("ipv6AddressRemoved");
 simsignal_t ipv6MulticastGroupJoinedSignal = cComponent::registerSignal("ipv6MulticastGroupJoined");
 simsignal_t ipv6MulticastGroupLeftSignal = cComponent::registerSignal("ipv6MulticastGroupLeft");
 simsignal_t ipv6MulticastGroupRegisteredSignal = cComponent::registerSignal("ipv6MulticastGroupRegistered");
