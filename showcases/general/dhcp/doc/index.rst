@@ -94,25 +94,12 @@ unreachable:
 If neither succeeds and the lease expires, the client loses its address and
 must start over with a new Discover.
 
-The full client state machine maps directly onto these steps: before
-the application has started it sits in **IDLE**, transitions to
-**INIT** on start, sends the Discover and enters **SELECTING** while
-waiting for offers, transitions to **REQUESTING** after choosing an
-offer and sending the Request — the client accepts the first OFFER it
-receives and silently drops any later OFFERs from other servers — and
-enters **BOUND** once the Acknowledge is received. From there, renewal
-timers drive the **RENEWING** and **REBINDING** states; a graceful
-shutdown sends DHCPRELEASE and returns the client to IDLE.
-A separate path exists for rebooting clients: a
-client that still holds a lease from before a restart enters
-**INIT-REBOOT**, broadcasts a DHCPREQUEST for its old address, and moves
-to **REBOOTING** while waiting for the server's response.
-
-| INIT → SELECTING → REQUESTING → BOUND → RENEWING → REBINDING
-| RENEWING / REBINDING → BOUND on DHCPACK
-| RENEWING / REBINDING → INIT on DHCPNAK or lease expiry
-| INIT-REBOOT → REBOOTING → BOUND
-| REBOOTING → INIT on DHCPNAK or retransmit-budget exhaustion
+A client that restarts (e.g. after a reboot) while still holding a
+previous lease can take a shortcut known as **INIT-REBOOT**: instead
+of a full DORA exchange it broadcasts a DHCPREQUEST naming the
+previously held address. The server confirms with a DHCPACK if the
+binding is still valid, or rejects it with a DHCPNAK, in which case
+the client falls back to a full DORA.
 
 This showcase includes eight configurations that illustrate different
 aspects of the protocol:
