@@ -767,11 +767,12 @@ const Ipv6Address& Ipv6RoutingTable::getHomeAddress()
 // Added by CB
 bool Ipv6RoutingTable::isHomeAddress(const Ipv6Address& addr)
 {
-    // check all interfaces whether they have the
-    // provided address as HoA
+    // check all interfaces whether they have the provided address as HoA
+    // (interfaces without MIPv6 data, e.g. a tunnel interface, are skipped)
     for (int i = 0; i < ift->getNumInterfaces(); ++i) {
         NetworkInterface *ie = ift->getInterface(i);
-        if (ie->getProtocolData<Mipv6InterfaceData>()->getMNHomeAddress() == addr)
+        auto mipv6Data = ie->findProtocolData<Mipv6InterfaceData>();
+        if (mipv6Data != nullptr && mipv6Data->getMNHomeAddress() == addr)
             return true;
     }
 

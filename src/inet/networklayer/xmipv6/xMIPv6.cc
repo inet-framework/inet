@@ -2204,70 +2204,94 @@ void xMIPv6::removeRouteOptimizationForExitAndTrigger(const Ipv6Address& exit, c
 
 INetfilter::IHook::Result xMIPv6::datagramLocalOutHook(Packet *datagram)
 {
-    if (routeOptimizations.empty())
-        return ACCEPT;
-
     const auto& ipv6Header = datagram->peekAtFront<Ipv6Header>();
-    // Route optimization (T2RH/HA_OPT) must not be applied to mobility messages
-    // (RFC 3775): those reach a mobile node through the home agent tunnel instead.
-    if (ipv6Header->getProtocolId() == IP_PROT_IPv6EXT_MOB)
-        return ACCEPT;
-    auto it = routeOptimizations.find(ipv6Header->getDestAddress());
-    if (it == routeOptimizations.end())
-        return ACCEPT;
-    const RouteOptimization& ro = it->second;
 
-    if (ro.type == RouteOptimization::TYPE2_ROUTING_HEADER) {
-        // CN -> MN: the destination is the MN's home address (the trigger). Send to
-        // the care-of address (exit) and carry the home address in a Type 2 Routing
-        // Header so the MN can restore the original destination (RFC 3775 6.4.1).
-        Ipv6Address homeAddress = ipv6Header->getDestAddress();
-        auto header = datagram->removeAtFront<Ipv6Header>();
-        IpProtocolId transportProtocol = header->getProtocolId();
+    // Route optimization (T2RH/HA_OPT) -- not applied to mobility messages (RFC 3775:
+    // those reach a mobile node through the home agent tunnel instead).
+    if (!routeOptimizations.empty() && ipv6Header->getProtocolId() != IP_PROT_IPv6EXT_MOB) {
+        auto it = routeOptimizations.find(ipv6Header->getDestAddress());
+        if (it != routeOptimizations.end()) {
+            const RouteOptimization& ro = it->second;
+            if (ro.type == RouteOptimization::TYPE2_ROUTING_HEADER) {
+                // CN -> MN: the destination is the MN's home address (the trigger). Send
+                // to the care-of address (exit) and carry the home address in a Type 2
+                // Routing Header so the MN can restore the destination (RFC 3775 6.4.1).
+                Ipv6Address homeAddress = ipv6Header->getDestAddress();
+                auto header = datagram->removeAtFront<Ipv6Header>();
+                IpProtocolId transportProtocol = header->getProtocolId();
 
-        auto t2RH = makeShared<Ipv6RoutingHeader>();
-        t2RH->setRoutingType(2);
-        t2RH->setSegmentsLeft(1);
-        t2RH->setAddressArraySize(1);
-        t2RH->setChunkLength(B(8 + 1 * 16));
-        t2RH->setAddress(0, homeAddress);
-        t2RH->setNextHeaderProtocol(transportProtocol);
+                auto t2RH = makeShared<Ipv6RoutingHeader>();
+                t2RH->setRoutingType(2);
+                t2RH->setSegmentsLeft(1);
+                t2RH->setAddressArraySize(1);
+                t2RH->setChunkLength(B(8 + 1 * 16));
+                t2RH->setAddress(0, homeAddress);
+                t2RH->setNextHeaderProtocol(transportProtocol);
 
-        header->setDestAddress(ro.exit);
-        header->setProtocolId(static_cast<IpProtocolId>(t2RH->getExtensionType()));
+                header->setDestAddress(ro.exit);
+                header->setProtocolId(static_cast<IpProtocolId>(t2RH->getExtensionType()));
 
-        datagram->insertAtFront(t2RH);
-        datagram->insertAtFront(header);
-        EV_INFO << "Added Type 2 Routing Header." << endl;
+                datagram->insertAtFront(t2RH);
+                datagram->insertAtFront(header);
+                EV_INFO << "Added Type 2 Routing Header." << endl;
+                return ACCEPT;
+            }
+            else if (rt6->isHomeAddress(ipv6Header->getSrcAddress())) {
+                // MN -> CN, sourced from the home address: send from the care-of address
+                // (entry) and carry the home address in a Home Address Option so the
+                // correspondent node can restore the original source.
+                Ipv6Address homeAddress = ro.exit;
+                auto header = datagram->removeAtFront<Ipv6Header>();
+                IpProtocolId transportProtocol = header->getProtocolId();
+
+                auto destOpts = makeShared<Ipv6DestinationOptionsHeader>();
+                auto *haOpt = new HomeAddressOption();
+                haOpt->setHomeAddress(homeAddress);
+                destOpts->getTlvOptionsForUpdate().appendTlvOption(haOpt);
+                destOpts->setNextHeaderProtocol(transportProtocol);
+
+                header->setSrcAddress(ro.entry);
+                header->setProtocolId(static_cast<IpProtocolId>(destOpts->getExtensionType()));
+
+                datagram->insertAtFront(destOpts);
+                datagram->insertAtFront(header);
+                EV_INFO << "Added Home Address Option header." << endl;
+                return ACCEPT;
+            }
+        }
     }
-    else {
-        // MN -> CN: only rewrite packets sourced from the home address. Send from the
-        // care-of address (entry) and carry the home address in a Home Address Option
-        // so the correspondent node can restore the original source.
-        if (!rt6->isHomeAddress(ipv6Header->getSrcAddress()))
-            return ACCEPT;
-        Ipv6Address homeAddress = ro.exit;
-        auto header = datagram->removeAtFront<Ipv6Header>();
-        IpProtocolId transportProtocol = header->getProtocolId();
 
-        auto destOpts = makeShared<Ipv6DestinationOptionsHeader>();
-        auto *haOpt = new HomeAddressOption();
-        haOpt->setHomeAddress(homeAddress);
-        destOpts->getTlvOptionsForUpdate().appendTlvOption(haOpt);
-        destOpts->setNextHeaderProtocol(transportProtocol);
-
-        header->setSrcAddress(ro.entry);
-        header->setProtocolId(static_cast<IpProtocolId>(destOpts->getExtensionType()));
-
-        datagram->insertAtFront(destOpts);
-        datagram->insertAtFront(header);
-        EV_INFO << "Added Home Address Option header." << endl;
-    }
+    // a mobile node's own home-address-sourced traffic goes out the reverse tunnel
+    requestTunnelOutputInterface(datagram);
     return ACCEPT;
+}
+
+void xMIPv6::requestTunnelOutputInterface(Packet *datagram)
+{
+    // Steer home-address-destined traffic (at the home agent, on the forwarding path)
+    // and home-address-sourced traffic (at a mobile node, the reverse tunnel) onto the
+    // corresponding tunnel interface by requesting it as the output interface. This
+    // replaces the MIPv6-specific tunnel lookup that used to live in the Ipv6 module.
+    const auto& ipv6Header = datagram->peekAtFront<Ipv6Header>();
+    if (ipv6Header->getProtocolId() != IP_PROT_IPv6 && // not already tunneled
+        !isIpv6ExtensionHeader(ipv6Header->getProtocolId()) && // no extension headers yet
+        ((rt6->isMobileNode() && rt6->isHomeAddress(ipv6Header->getSrcAddress())) // MN: only home-address-sourced
+         || rt6->isHomeAgent() // HA: always
+         || !rt6->isMobileNode())) // correspondent / non-MIP node
+    {
+        int interfaceId = (ipv6Header->getProtocolId() == IP_PROT_IPv6EXT_MOB)
+            ? tunneling->getVIfIndexForDest(ipv6Header->getDestAddress(), Ipv6Tunneling::NORMAL)
+            : tunneling->getVIfIndexForDest(ipv6Header->getDestAddress());
+        if (interfaceId != -1 && interfaceId <= ift->getBiggestInterfaceId())
+            datagram->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
+    }
 }
 
 INetfilter::IHook::Result xMIPv6::datagramPreRoutingHook(Packet *datagram)
 {
+    // a home agent forwarding home-address-destined traffic sends it out the tunnel
+    requestTunnelOutputInterface(datagram);
+
     if (!rt6->isMobileNode())
         return ACCEPT;
 

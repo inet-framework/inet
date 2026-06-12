@@ -411,6 +411,14 @@ class INET_API xMIPv6 : public OperationalBase, public IIpv6ExtensionHeaderHandl
     virtual Result datagramLocalOutHook(Packet *datagram) override;
 
     /**
+     * If the datagram is home-address-destined traffic at a home agent or
+     * home-address-sourced traffic at a mobile node, request the corresponding tunnel
+     * interface as its output interface (called from the local-out and pre-routing
+     * hooks). Replaces the tunnel lookup that used to be in the Ipv6 module.
+     */
+    void requestTunnelOutputInterface(Packet *datagram);
+
+    /**
      * A route-optimization extension-header insertion that the local-out hook
      * applies to outgoing traffic, replacing a T2RH/HA_OPT pseudo-tunnel.
      */

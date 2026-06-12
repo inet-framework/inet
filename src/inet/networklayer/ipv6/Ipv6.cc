@@ -247,6 +247,9 @@ void Ipv6::handleMessageWhenUp(cMessage *msg)
                 datagramLocalOut(packet, destIE, nextHop.toIpv6());
         }
         else {
+            // a received datagram carries no meaningful egress interface request; drop
+            // any stale one from the sender so it cannot misdirect routing here
+            packet->removeTagIfPresent<InterfaceReq>();
             if (datagramPreRoutingHook(packet) == INetfilter::IHook::ACCEPT)
                 preroutingFinish(packet, fromIE, destIE, nextHop.toIpv6());
         }
@@ -476,32 +479,25 @@ void Ipv6::routePacket(Packet *packet, const NetworkInterface *destIE, const Net
     int interfaceId = -1;
     Ipv6Address nextHop(requestedNextHopAddress);
 
-    // check if destination is covered by tunnel lists
-    if ((ipv6Header->getProtocolId() != IP_PROT_IPv6) && // if datagram was already tunneled, don't tunnel again
-        (!isIpv6ExtensionHeader(ipv6Header->getProtocolId())) && // we do not already have extension headers
-        ((rt->isMobileNode() && rt->isHomeAddress(ipv6Header->getSrcAddress())) || // for MNs: only if source address is a HoA
-         rt->isHomeAgent() || // but always check for tunnel if node is a HA
-         !rt->isMobileNode())) // or if it is a correspondent or non-MIP node
-    {
-        if (ipv6Header->getProtocolId() == IP_PROT_IPv6EXT_MOB)
-            // in case of mobility header we can only search for "real" tunnels
-            // as T2RH or HoA Opt. are not allowed with these messages
-            interfaceId = tunneling->getVIfIndexForDest(destAddress, Ipv6Tunneling::NORMAL);
-        else
-            // otherwise we can search for everything
-            interfaceId = tunneling->getVIfIndexForDest(destAddress);
+    if (interfaceId == -1 && destIE != nullptr)
+        interfaceId = destIE->getInterfaceId(); // output interface from a control-info request
+
+    if (interfaceId == -1) {
+        // a netfilter hook (pre-routing or local-out) may have requested an output
+        // interface for this datagram, e.g. a tunnel interface
+        const auto& ifReq = packet->findTag<InterfaceReq>();
+        if (ifReq != nullptr)
+            interfaceId = ifReq->getInterfaceId();
     }
 
-    // If a real (interface-backed) tunnel was selected by getVIfIndexForDest(),
-    // determineOutputInterface() below is skipped (interfaceId is already set), so
-    // no next hop is resolved. The tunnel interface is point-to-point, so use the
-    // destination as the nominal next hop: it is not used to address the link, but
-    // resolveMACAddressAndSendPacket() requires a specified next hop.
-    if (interfaceId != -1 && interfaceId <= ift->getBiggestInterfaceId())
-        nextHop = destAddress;
-
-    if (interfaceId == -1 && destIE != nullptr)
-        interfaceId = destIE->getInterfaceId(); // set interfaceId to destIE when not tunneling
+    // A point-to-point output interface (e.g. a tunnel interface) has no next hop to
+    // resolve, but resolveMACAddressAndSendPacket() requires one to be specified, so
+    // use the destination as the nominal next hop (not used to address the link).
+    if (interfaceId != -1 && nextHop.isUnspecified()) {
+        NetworkInterface *ie = ift->getInterfaceById(interfaceId);
+        if (ie != nullptr && ie->isPointToPoint())
+            nextHop = destAddress;
+    }
 
     if (interfaceId == -1)
         if (!determineOutputInterface(destAddress, nextHop, interfaceId, packet, fromHL))
