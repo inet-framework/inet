@@ -648,7 +648,7 @@ DhcpLease *DhcpServer::getLeaseByMac(MacAddress mac)
 
 DhcpLease *DhcpServer::getAvailableLease(Ipv4Address requestedAddress, const MacAddress& clientMAC)
 {
-    int beginAddr = ipAddressStart.getInt(); // the first address that we might use
+    uint32_t beginAddr = ipAddressStart.getInt(); // the first address that we might use
 
     // try to allocate the requested address if that address is valid and not already in use
     if (!requestedAddress.isUnspecified()) { // valid
@@ -661,8 +661,8 @@ DhcpLease *DhcpServer::getAvailableLease(Ipv4Address requestedAddress, const Mac
         else {
             // is the requested address inside the pool?
             if (Ipv4Address::maskedAddrAreEqual(requestedAddress, ipAddressStart, subnetMask) &&
-                requestedAddress.getInt() >= (uint32_t)beginAddr &&
-                requestedAddress.getInt() < (uint32_t)beginAddr + maxNumOfClients) {
+                requestedAddress.getInt() >= beginAddr &&
+                requestedAddress.getInt() < beginAddr + maxNumOfClients) {
                 leased[requestedAddress] = DhcpLease();
                 leased[requestedAddress].ip = requestedAddress;
                 leased[requestedAddress].gateway = gateway;
