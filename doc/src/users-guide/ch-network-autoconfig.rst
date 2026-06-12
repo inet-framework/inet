@@ -846,3 +846,40 @@ and sets cost=19 and priority=32768:
 For more information about the usage of the selector attributes, see
 :ned:`Ipv4NetworkConfigurator`.
 
+.. _ug:sec:autoconfig:configuring-tsn:
+
+Configuring Time-Sensitive Networking
+-------------------------------------
+
+Time-Sensitive Networking (TSN) requires additional network-wide
+configuration on top of the addressing and routing covered above: periodic
+gate schedules for the time-aware shapers, redundant streams, and the
+protection of streams against failures. INET provides a family of TSN
+configurators for this; like the configurators above, each discovers the
+network topology and then computes and installs the parameters of the
+underlying per-node modules.
+
+-  *Gate scheduling* configurators compute the gate control lists (the
+   periodic open/close states of the per-class transmission gates) from the
+   stream packet lengths, intervals and latency requirements. Several
+   implementations sharing :ned:`GateScheduleConfiguratorBase` are
+   available: :ned:`EagerGateScheduleConfigurator`,
+   :ned:`Z3GateScheduleConfigurator` (using a SAT solver), and
+   :ned:`TSNschedGateScheduleConfigurator` (using the external TSNsched
+   tool).
+
+-  :ned:`StreamRedundancyConfigurator` sets up stream identification,
+   splitting and merging across the network to form the redundant streams
+   used by frame replication and elimination (IEEE 802.1CB).
+
+-  :ned:`FailureProtectionConfigurator` drives the gate-scheduling and
+   stream-redundancy configurators together to protect every stream against
+   a specified set of link and node failures.
+
+-  :ned:`MacForwardingTableConfigurator` fills in static MAC forwarding
+   tables (an alternative to MAC address learning) for a bridged network.
+
+These work alongside the IPv4/IPv6 and :ned:`L2NetworkConfigurator`
+configurators described above. Their XML configuration and use are covered
+in detail in the :doc:`ch-tsn` chapter.
+

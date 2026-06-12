@@ -99,7 +99,9 @@ other aspects. Some of them are:
    IP address assignment (e.g., via DHCP) or when dynamic routing is not of
    importance. :ned:`L2NetworkConfigurator` allows one to configure
    802.1 LANs and provide STP/RSTP-related parameters such as link cost,
-   port priority, and the “is-edge” flag.
+   port priority, and the “is-edge” flag. Time-Sensitive Networking adds
+   further configurators for gate scheduling, stream redundancy and failure
+   protection (see :doc:`ch-tsn`).
 
 -  :ned:`ScenarioManager` allows scripted scenarios, such as timed
    failure and recovery of network nodes.
