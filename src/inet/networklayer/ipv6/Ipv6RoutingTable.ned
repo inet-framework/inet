@@ -88,7 +88,6 @@ simple Ipv6RoutingTable extends SimpleModule like IRoutingTable
     parameters:
         @class(Ipv6RoutingTable);
         string interfaceTableModule;   // The path to the InterfaceTable module
-        string ipv6TunnelingModule = default("^.ipv6.iptunneling");
         displayStringTextFormat = default("{numRoutes} routes\n{numDestCache} destcache entries");
         @display("i=block/table");
         xml routes = default(xml("<routingTable/>"));

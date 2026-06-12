@@ -22,10 +22,8 @@ module xMIPv6Support like IxMIPv6Support
         bool isHomeAgent;
         bool isMobileNode;
         string interfaceTableModule;
-        string ipv6TunnelingModule;
         string ipv6NeighbourDiscoveryModule;
         *.interfaceTableModule = default(absPath(this.interfaceTableModule));
-        *.ipv6TunnelingModule = default(absPath(this.ipv6TunnelingModule));
         *.ipv6NeighbourDiscoveryModule = default(absPath(this.ipv6NeighbourDiscoveryModule));
         *.bindingUpdateListModule = default(absPath(".buList"));
         *.bindingCacheModule = default(absPath(".bindingCache"));

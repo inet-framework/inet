@@ -58,7 +58,6 @@ simple Ipv6 extends SimpleModule
         string routingTableModule;
         string ipv6NeighbourDiscoveryModule;
         string icmpv6Module;
-        string ipv6TunnelingModule;
         double procDelay @unit(s) = default(0s);
         displayStringTextFormat = default("{ipv6StatusText}");
         @display("i=block/network2");
@@ -74,10 +73,5 @@ simple Ipv6 extends SimpleModule
         output queueOut @labels(IPv6Datagram);
         input ndIn;
         output ndOut;
-        // tunneling gates - CB
-        input upperTunnelingIn;
-        output upperTunnelingOut;
-        input lowerTunnelingIn;
-        output lowerTunnelingOut;
 }
 

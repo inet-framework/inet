@@ -83,7 +83,6 @@ void Ipv6::initialize(int stage)
         rt.reference(this, "routingTableModule", true);
         nd.reference(this, "ipv6NeighbourDiscoveryModule", true);
         icmp.reference(this, "icmpv6Module", true);
-        tunneling.reference(this, "ipv6TunnelingModule", true);
 
         curFragmentId = 0;
         lastCheckTime = SIMTIME_ZERO;

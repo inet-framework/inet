@@ -23,7 +23,6 @@
 #include "inet/networklayer/ipv6/Ipv6FragBuf.h"
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
-#include "inet/networklayer/ipv6tunneling/Ipv6Tunneling.h"
 
 namespace inet {
 
@@ -68,7 +67,6 @@ class INET_API Ipv6 : public OperationalBase, public NetfilterBase, public INetw
     ModuleRefByPar<Ipv6RoutingTable> rt;
     ModuleRefByPar<Ipv6NeighbourDiscovery> nd;
     ModuleRefByPar<Icmpv6> icmp;
-    ModuleRefByPar<Ipv6Tunneling> tunneling;
 
     // working vars
     unsigned int curFragmentId = -1; // counter, used to assign unique fragmentIds to datagrams

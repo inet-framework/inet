@@ -1,7 +1,7 @@
 %description:
 
 Test shutdown and startup operations on an IPv6 StandardHost6.
-Verifies that Ipv6, Ipv6NeighbourDiscovery, Icmpv6, and Ipv6Tunneling
+Verifies that Ipv6, Ipv6NeighbourDiscovery, and Icmpv6
 modules handle lifecycle operations without errors or memory leaks.
 
 %#--------------------------------------------------------------------------------------------------------------

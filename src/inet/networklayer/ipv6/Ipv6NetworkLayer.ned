@@ -11,7 +11,6 @@ package inet.networklayer.ipv6;
 
 import inet.common.MessageDispatcher;
 import inet.networklayer.configurator.contract.IIpv6NodeConfigurator;
-import inet.networklayer.contract.IIpv6Tunneling;
 import inet.networklayer.contract.INetworkLayer;
 import inet.networklayer.contract.IxMIPv6Support;
 import inet.networklayer.icmpv6.Icmpv6;
@@ -37,7 +36,6 @@ module Ipv6NetworkLayer like INetworkLayer
         *.routingTableModule = default(absPath(".routingTable"));
         *.ipv6NeighbourDiscoveryModule = default(absPath(".neighbourDiscovery"));
         *.icmpv6Module = default(absPath(".icmpv6"));
-        *.ipv6TunnelingModule = default(absPath(".iptunneling"));
         @display("i=block/fork");
 
     gates:
@@ -76,10 +74,6 @@ module Ipv6NetworkLayer like INetworkLayer
             parameters:
                 @display("p=550,400");
         }
-        iptunneling: <default(firstAvailable("Ipv6Tunneling"))> like IIpv6Tunneling {
-            parameters:
-                @display("p=700,400");
-        }
         mipv6support: <default("xMIPv6Support")> like IxMIPv6Support if xMIPv6Support {
             parameters:
                 @display("p=700,500");
@@ -100,12 +94,6 @@ module Ipv6NetworkLayer like INetworkLayer
 
         lp.out++ --> ipv6.transportIn;
         lp.in++ <-- ipv6.transportOut;
-
-        iptunneling.upperLayerOut --> ipv6.upperTunnelingIn;
-        iptunneling.upperLayerIn <-- ipv6.upperTunnelingOut;
-
-        iptunneling.linkLayerOut --> ipv6.lowerTunnelingIn;
-        iptunneling.linkLayerIn <-- ipv6.lowerTunnelingOut;
 
         neighbourDiscovery.ipv6Out --> ipv6.ndIn;
         neighbourDiscovery.ipv6In <-- ipv6.ndOut;
