@@ -287,12 +287,15 @@ import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 //
 //    - `@destination`
 //      Optional parameter attribute that specifies the destination address in
-//      the route (`L3AddressResolver` syntax). The default value is "*".
-//      e.g. "192.168.1.1" or "subnet.client[3]" or "subnet.server(ipv4)" or "*"
+//      the route (`L3AddressResolver` syntax). The default value is "*". It may
+//      include the prefix in CIDR "address/prefixlen" notation (e.g. "10.0.0.0/24"),
+//      which must not be combined with a separate `@netmask` attribute.
+//      e.g. "192.168.1.1" or "10.0.0.0/24" or "subnet.server(ipv4)" or "*"
 //
 //    - `@netmask`
 //      Optional parameter attribute that specifies the netmask in the route.
-//      The default value is "*".
+//      The default value is "*". Must not be combined with the "/prefixlen"
+//      notation in `@destination`.
 //      e.g. "255.255.255.0" or "/29" or "*"
 //
 //    - `@gateway`

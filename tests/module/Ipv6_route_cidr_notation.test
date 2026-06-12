@@ -1,0 +1,56 @@
+%description:
+Ipv6NetworkConfigurator <route> accepts the prefix length appended to
+'destination' in "address/prefixlen" notation, equivalently to a separate
+'prefixLength' attribute. Both forms must end up installed with the same prefix
+length.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network Ipv6RouteCidrNetwork
+{
+    types:
+        channel ethline extends DatarateChannel {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        configurator: Ipv6NetworkConfigurator;
+        h1: StandardHost6;
+        r: Router6;
+    connections:
+        h1.ethg++ <--> ethline <--> r.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = Ipv6RouteCidrNetwork
+ned-path = ../../../../src
+sim-time-limit = 1s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+**.configurator.dumpRoutes = true
+**.configurator.config = xml("<config> \
+    <interface among='h1 r' prefix='2001:db8:1::/64'/> \
+    <route hosts='h1' destination='2001:db8:99::/64' interface='eth0'/> \
+    <route hosts='h1' destination='2001:db8:aa::' prefixLength='48' interface='eth0'/> \
+  </config>")
+
+%#--------------------------------------------------------------------------------------------------------------
+%# the "address/prefixlen" route was parsed and installed with prefix length 64
+%contains: stdout
+2001:db8:99::/64
+%#--------------------------------------------------------------------------------------------------------------
+%# the separate-attribute route still works (back-compat)
+%contains: stdout
+2001:db8:aa::/48
+%#--------------------------------------------------------------------------------------------------------------

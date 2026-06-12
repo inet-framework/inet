@@ -70,8 +70,10 @@ import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 //    Adds manual static routes.
 //
 //    - `@hosts` - host name pattern selector
-//    - `@destination` - destination prefix (L3AddressResolver syntax)
-//    - `@prefixLength` - prefix length (default: 64)
+//    - `@destination` - destination prefix (L3AddressResolver syntax); may include
+//      the prefix length in "address/prefixlen" notation (e.g. "2001:db8::/64")
+//    - `@prefixLength` - prefix length (default: 64); must not be combined with the
+//      "/prefixlen" notation in `@destination`
 //    - `@gateway` - next-hop address (L3AddressResolver syntax)
 //    - `@interface` - output interface name
 //    - `@metric` - route metric (default: 0)

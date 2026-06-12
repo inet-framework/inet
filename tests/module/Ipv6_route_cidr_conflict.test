@@ -1,0 +1,51 @@
+%description:
+Ipv6NetworkConfigurator <route> rejects giving the prefix length both ways at
+once: an "address/prefixlen" 'destination' combined with a separate 'prefixLength'
+attribute is an error.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network Ipv6RouteConflictNetwork
+{
+    types:
+        channel ethline extends DatarateChannel {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        configurator: Ipv6NetworkConfigurator;
+        h1: StandardHost6;
+        r: Router6;
+    connections:
+        h1.ethg++ <--> ethline <--> r.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = Ipv6RouteConflictNetwork
+ned-path = ../../../../src
+sim-time-limit = 1s
+cmdenv-express-mode = false
+
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+**.configurator.config = xml("<config> \
+    <interface among='h1 r' prefix='2001:db8:1::/64'/> \
+    <route hosts='h1' destination='2001:db8:99::/64' prefixLength='64' interface='eth0'/> \
+  </config>")
+
+%#--------------------------------------------------------------------------------------------------------------
+%exitcode: 1
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "<!>" test.* > test_err.out || true
+%#--------------------------------------------------------------------------------------------------------------
+%contains: test_err.out
+not both
+%#--------------------------------------------------------------------------------------------------------------

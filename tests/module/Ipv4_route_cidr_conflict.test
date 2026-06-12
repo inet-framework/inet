@@ -1,0 +1,50 @@
+%description:
+Ipv4NetworkConfigurator <route> rejects giving the prefix both ways at once: a
+CIDR "address/prefixlen" 'destination' combined with a separate 'netmask'
+attribute is an error.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+import ned.DatarateChannel;
+
+network Ipv4RouteConflictNetwork
+{
+    types:
+        channel ethline extends DatarateChannel {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        h1: StandardHost;
+        r: Router;
+    connections:
+        h1.ethg++ <--> ethline <--> r.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = Ipv4RouteConflictNetwork
+ned-path = ../../../../src
+sim-time-limit = 1s
+cmdenv-express-mode = false
+
+**.configurator.config = xml("<config> \
+    <interface hosts='*' address='10.0.0.x' netmask='255.255.255.0'/> \
+    <route hosts='h1' destination='10.99.0.0/24' netmask='255.255.255.0' interface='eth0'/> \
+  </config>")
+
+%#--------------------------------------------------------------------------------------------------------------
+%exitcode: 1
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "<!>" test.* > test_err.out || true
+%#--------------------------------------------------------------------------------------------------------------
+%contains: test_err.out
+not both
+%#--------------------------------------------------------------------------------------------------------------

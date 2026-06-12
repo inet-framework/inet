@@ -1113,11 +1113,25 @@ void Ipv4NetworkConfigurator::readManualRouteConfiguration(Topology& topology)
 
         try {
             // parse and check the attributes
-            Ipv4Address destination;
-            if (!opp_isempty(destinationAttr) && strcmp(destinationAttr, "*"))
-                destination = resolve(destinationAttr, L3AddressResolver::ADDR_IPv4).toIpv4();
+            // The prefix may be given either as a separate 'netmask' attribute (a
+            // dotted netmask or "/prefixlen") or appended to 'destination' in
+            // "address/prefixlen" notation; the latter must not be combined with 'netmask'.
+            std::string destinationStr = opp_isempty(destinationAttr) ? "" : destinationAttr;
             Ipv4Address netmask;
-            if (!opp_isempty(netmaskAttr) && strcmp(netmaskAttr, "*")) {
+            bool netmaskFromDestination = false;
+            auto slashPos = destinationStr.find('/');
+            if (slashPos != std::string::npos) {
+                if (!opp_isempty(netmaskAttr))
+                    throw cRuntimeError("Give the prefix either in 'destination' as \"address/prefixlen\" or in a separate 'netmask' attribute, not both");
+                netmask = Ipv4Address::makeNetmask(atoi(destinationStr.substr(slashPos + 1).c_str()));
+                destinationStr = destinationStr.substr(0, slashPos);
+                netmaskFromDestination = true;
+            }
+
+            Ipv4Address destination;
+            if (!destinationStr.empty() && destinationStr != "*")
+                destination = resolve(destinationStr.c_str(), L3AddressResolver::ADDR_IPv4).toIpv4();
+            if (!netmaskFromDestination && !opp_isempty(netmaskAttr) && strcmp(netmaskAttr, "*")) {
                 if (netmaskAttr[0] == '/')
                     netmask = Ipv4Address::makeNetmask(atoi(netmaskAttr + 1));
                 else

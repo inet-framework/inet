@@ -1,0 +1,54 @@
+%description:
+Ipv4NetworkConfigurator <route> accepts the prefix appended to 'destination' in
+CIDR "address/prefixlen" notation, equivalently to a separate 'netmask' attribute
+(which itself accepts both a dotted mask and "/prefixlen").
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+import ned.DatarateChannel;
+
+network Ipv4RouteCidrNetwork
+{
+    types:
+        channel ethline extends DatarateChannel {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        h1: StandardHost;
+        r: Router;
+    connections:
+        h1.ethg++ <--> ethline <--> r.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = Ipv4RouteCidrNetwork
+ned-path = ../../../../src
+sim-time-limit = 1s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+**.configurator.dumpRoutes = true
+**.configurator.config = xml("<config> \
+    <interface hosts='*' address='10.0.0.x' netmask='255.255.255.0'/> \
+    <route hosts='h1' destination='10.99.0.0/24' interface='eth0'/> \
+    <route hosts='h1' destination='10.88.0.0' netmask='255.255.0.0' interface='eth0'/> \
+  </config>")
+
+%#--------------------------------------------------------------------------------------------------------------
+%# the CIDR-notation route was parsed and installed as /24 (netmask 255.255.255.0)
+%contains: stdout
+10.99.0.0/24
+%#--------------------------------------------------------------------------------------------------------------
+%# the separate-attribute route still works (netmask 255.255.0.0 == /16)
+%contains: stdout
+10.88.0.0/16
+%#--------------------------------------------------------------------------------------------------------------

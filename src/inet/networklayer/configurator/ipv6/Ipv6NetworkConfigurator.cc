@@ -542,7 +542,22 @@ void Ipv6NetworkConfigurator::readManualRouteConfiguration(Topology& topology)
 
         try {
             Matcher hostMatcher(hostAttr);
-            int prefixLength = prefixLengthAttr ? atoi(prefixLengthAttr) : 64;
+
+            // The prefix length may be given either as a separate 'prefixLength'
+            // attribute or appended to 'destination' in "address/prefixlen" notation;
+            // the two are equivalent, but specifying both is an error.
+            std::string destinationStr = destinationAttr;
+            int prefixLength;
+            auto slashPos = destinationStr.find('/');
+            if (slashPos != std::string::npos) {
+                if (!opp_isempty(prefixLengthAttr))
+                    throw cRuntimeError("Give the prefix length either in 'destination' as \"address/prefixlen\" or in a separate 'prefixLength' attribute, not both, in <route> at %s", routeElement->getSourceLocation());
+                prefixLength = atoi(destinationStr.substr(slashPos + 1).c_str());
+                destinationStr = destinationStr.substr(0, slashPos);
+            }
+            else
+                prefixLength = prefixLengthAttr ? atoi(prefixLengthAttr) : 64;
+
             int metric = metricAttr ? atoi(metricAttr) : 0;
 
             for (int i = 0; i < topology.getNumNodes(); i++) {
@@ -557,10 +572,10 @@ void Ipv6NetworkConfigurator::readManualRouteConfiguration(Topology& topology)
 
                 // Resolve destination
                 Ipv6Address destination;
-                if (strcmp(destinationAttr, "*") == 0 || strcmp(destinationAttr, "::") == 0)
+                if (destinationStr == "*" || destinationStr == "::")
                     destination = Ipv6Address::UNSPECIFIED_ADDRESS;
                 else {
-                    L3Address addr = L3AddressResolver().resolve(destinationAttr, L3AddressResolver::ADDR_IPv6);
+                    L3Address addr = L3AddressResolver().resolve(destinationStr.c_str(), L3AddressResolver::ADDR_IPv6);
                     destination = addr.toIpv6();
                 }
 
