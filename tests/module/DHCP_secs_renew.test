@@ -1,0 +1,79 @@
+%description:
+
+Tests that the client restarts the 'secs' clock when a renewal begins
+(RFC 2131 §3.1: 'secs' counts from the start of the address acquisition *or
+renewal* process). The client first completes DORA and binds the lease, then
+at T1 (renewalTime) it enters RENEWING and sends a unicast DHCPREQUEST. With
+the fix, dhcpStartTime is reset as the renewal starts, so that request carries
+secs = 0; before the fix it would have carried secs ~= renewalTime, because
+the clock was still counting from the original DORA.
+
+The lease time is 3600s, so T1 fires at ~1800s. The RENEWING request is the only
+DHCPREQUEST sent with broadcast = false (REQUESTING/REBINDING use broadcast),
+which lets us pin the assertion to the renewal specifically. Applications log
+at DETAIL level so the DhcpMessage field dump is visible.
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+ned-path = .;../../../../src;../../lib
+cmdenv-express-mode = false
+cmdenv-log-prefix = "[%t %M] "
+sim-time-limit = 2400s
+
+**.app[*].cmdenv-log-level = detail
+**.status.cmdenv-log-level = detail
+**.cmdenv-log-level = off
+
+*.configurator.config = xml("<config><interface hosts='server' address='192.168.1.1' netmask='255.255.255.0'/></config>")
+
+*.server.numApps = 1
+*.server.app[0].typename = "DhcpServer"
+*.server.app[0].numReservedAddresses = 100
+*.server.app[0].maxNumClients = 10
+*.server.app[0].gateway = "192.168.1.1"
+*.server.app[0].leaseTime = 3600s
+
+*.client.numApps = 1
+*.client.app[0].typename = "DhcpClient"
+
+%file: test.ned
+
+import inet.test.moduletest.lib.*;
+import inet.node.ethernet.Eth10M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+network Test
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        switch: EthernetSwitch;
+        server: StandardHost;
+        client: StandardHost;
+    connections:
+        server.ethg++ <--> Eth10M <--> switch.ethg++;
+        client.ethg++ <--> Eth10M <--> switch.ethg++;
+}
+
+%# Strip ANSI styling emitted by the EV_FIELD packet dump.
+%subst: /\x1B\[[0-9;]*m//
+
+%# The client must actually reach the RENEWING state (T1 fired).
+%# The unicast renewal DHCPREQUEST must carry secs = 0: the clock was reset as
+%# the renewal began, not left counting from the original DORA (~10s ago).
+%contains-regex: stdout
+\[1800\.[0-9]+ Test.client.app\[0\]\] T1 expired\. Starting RENEWING state\.
+\[1800\.[0-9]+ Test.client.app\[0\]\] Sending DHCPREQUEST extending lease for IP 192\.168\.1\.100 via unicast to 192\.168\.1\.1\.
+\[1800\.[0-9]+ Test.client.app\[0\]\] Sending DHCP message, msg = \(Packet\)DHCPREQUEST .*secs = 0, broadcast = false
+
+%# Regression guard: no unicast (renewal) DHCPREQUEST may carry a positive secs;
+%# that would mean the clock kept running from acquisition instead of resetting.
+%not-contains-regex: stdout
+Sending DHCP message, msg = \(Packet\)DHCPREQUEST .*secs = [1-9][0-9]*, broadcast = false
+
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
