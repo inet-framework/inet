@@ -108,11 +108,11 @@ aspects of the protocol:
   obtain addresses from a server.
 - **LeaseRenewal** — A short lease time triggers the renewal mechanism
   during the simulation.
-- **ClientCrash** — A client is crashed and restarted mid-simulation,
-  demonstrating INIT-REBOOT (request previous IP without a full DORA).
 - **CleanShutdown** — A client is shut down cleanly, sending a
   DHCPRELEASE so the server immediately frees the lease; the restarted
   client then performs a fresh DORA.
+- **ClientCrash** — A client is crashed and restarted mid-simulation,
+  demonstrating INIT-REBOOT (request previous IP without a full DORA).
 - **LeaseExpiration** — A client crashes without sending DHCPRELEASE
   and the server reclaims the address back into the pool once the
   lease expires, so a different client can acquire it.
@@ -150,6 +150,8 @@ pool, and responds to client requests. Key parameters:
   address is reserved (default 120 s).
 - :par:`declineHoldTime` — how long a DHCPDECLINEd address is
   quarantined before being offered again (default 60 s).
+- :par:`startTime` — when the DhcpServer application begins listening
+  (default 0 s).
 
 .. note::
 
@@ -159,6 +161,8 @@ pool, and responds to client requests. Key parameters:
 :ned:`DhcpClient` runs the DHCP client on a host interface. Key
 parameters:
 
+- :par:`interface` — which NIC to configure via DHCP; if omitted, the
+  only non-loopback interface is used.
 - :par:`startTime` — when the client begins the DORA exchange.
 - :par:`initialRetransmitDelay` (default 4 s) — initial wait between
   retransmits of DHCPDISCOVER / DHCPREQUEST.
@@ -220,6 +224,18 @@ The network topology:
 .. figure:: media/network.png
    :align: center
 
+..
+   FIGURE RECIPE (redo via the "omnetpp-mcp-sim" skill)
+   type:     canvas
+   config:   BasicDHCP                 # ../omnetpp.ini
+   seed:     default
+   shows:    the network topology — dhcpServer, switch, client[0..2] on
+             100 Mbps Ethernet
+   anchor:   initial state (t=0, before run). No timing — the self-check is
+             structural: if the module set/links differ, the NED changed.
+   capture:  get_canvas_image, area=all_elements; was 728×478
+   stamp:    captured 2026-06, INET 4.6
+
 The :ned:`Ipv4NetworkConfigurator` assigns a static IP address only to the
 server — client interfaces are left unconfigured so they obtain addresses
 via DHCP:
@@ -245,12 +261,12 @@ starts its DHCP process at a random time within the first 2 seconds.
    :start-at: [Config BasicDHCP]
    :end-before: [Config LeaseRenewal]
 
-All three clients obtain IP addresses starting from 192.168.1.10:
-``numReservedAddresses=10`` skips the first 10 addresses counting from
-the network address (.0 itself is the network address and not assignable
-to a host; .1–.9 are skipped so the static server address .1 falls in
-the reserved range), so the pool starts at .10 and spans 50 addresses
-(.10–.59) as limited by ``maxNumClients=50``. The interface table
+All three clients obtain addresses starting from 192.168.1.10.
+``numReservedAddresses=10`` reserves the first 10 addresses, counting
+from the network address: .0 is the network address (not assignable to
+a host) and .1–.9 are reserved, which keeps the static server address
+.1 inside that range. The pool therefore starts at .10 and, capped by
+``maxNumClients=50``, spans 50 addresses (.10–.59). The interface table
 visualizer displays the acquired address and prefix length next to each
 host.
 
@@ -259,10 +275,80 @@ The following sequence chart shows the DORA exchange (time is non-linear):
 .. figure:: media/dora_sequence_chart.png
    :align: center
 
+The sequence chart shows the message *flow*; the *contents* of one of
+those messages — the server's DHCPOFFER to ``client[0]`` — are shown
+below, dissected with ``tshark`` from the server-side pcap. The offer
+carries the assigned address (``yiaddr`` = 192.168.1.10), the subnet
+mask, the gateway (``Router``), the lease time, the renewal/rebinding
+(T1/T2) timers, and the server identifier:
+
+.. figure:: media/dhcp_offer_packet.png
+   :align: center
+
+..
+   FIGURE RECIPE (redo with tshark on the server pcap)
+   type:     pcap dissection (tshark)
+   config:   BasicDHCP                 # ../omnetpp.ini
+   shows:    one DHCPOFFER fully dissected (BOOTP fields + DHCP options)
+   source:   results/BasicDHCP-dhcpServer.pcap, frame 2 (first Offer)
+   capture:  tshark -r <pcap> -Y 'frame.number==2' -O dhcp, rendered in an
+             xterm (DejaVu Sans Mono 11, dark theme), grabbed with `import`
+   stamp:    captured 2026-06, INET 4.6, Wireshark 4.6
+
 The interface table visualizer displays the acquired addresses:
 
 .. figure:: media/interface_tables.png
    :align: center
+
+On the server side, the same three bindings are recorded in its lease
+database. The ``leased`` map, exposed in the server's module inspector,
+maps each leased IP to the client MAC that holds it:
+
+.. figure:: media/lease_table.png
+   :align: center
+
+..
+   FIGURE RECIPE (redo via the "omnetpp-mcp-sim" skill)
+   type:     inspector
+   config:   BasicDHCP                 # ../omnetpp.ini
+   seed:     default
+   shows:    the server's `leased` map — three IP→client-MAC bindings
+             (.10/.11/.12) after all clients are BOUND
+   target:   dhcpServer → module inspector → `leased` field
+   anchor:   after all 3 clients BOUND (~t=2–3s; same anchor as basicdhcp.mp4).
+             Fewer/more bindings ⇒ client count or timing changed.
+   capture:  open_inspector(dhcpServer) → get_inspector_screenshot, cropped;
+             was 720×170
+   stamp:    captured 2026-06, INET 4.6
+
+The animation below shows the three DORA exchanges running back-to-back
+through the switch, the per-client "Got IP …" bubbles fired when each
+lease binds, and the interface-table labels updating from
+``<unspec>`` to ``192.168.1.10/24`` / ``.11/24`` / ``.12/24``:
+
+.. video:: media/basicdhcp.mp4
+   :align: center
+
+..
+   VIDEO RECIPE (redo via the "video-recording" skill)
+   config:   BasicDHCP                  # ../omnetpp.ini
+   seed:     default
+   shows:    three back-to-back DORA exchanges through the switch, the
+             per-client "Got IP …" bubbles, and the interface-table labels
+             flipping <unspec> → 192.168.1.10/.11/.12
+   anchors:  all 3 clients complete DORA and reach BOUND within the first
+             ~2–3s (client startTime=uniform(0s,2s)); last observed bind
+             ~t=2.1s. Mechanism must hold; exact times are seed-dependent —
+             if the binds drift far from this, an RNG-affecting .ini edit
+             changed timing → re-tune and rewrite this recipe.
+   window:   record sim-time 0s → ~3s (record from start; only an
+             interfaceTableVisualizer is configured — no channel visualizer,
+             so no fade-out wait)
+   anim:     playback_speed=1           # set_animation_parameters, normal profile
+   capture:  fps=2, crop_area=with_padding   # re-read crop_rect; canvas was 732×482
+   encode:   ffmpeg -r 30 -vcodec libx264 -pix_fmt yuv420p (pad to even dims)
+   post:     none
+   stamp:    recorded 2026-06, INET 4.6
 
 LeaseRenewal
 ~~~~~~~~~~~~
@@ -276,7 +362,7 @@ unicast DHCPREQUEST/DHCPACK renewal exchange.
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: [Config LeaseRenewal]
-   :end-before: [Config ClientCrash]
+   :end-before: [Config CleanShutdown]
 
 During the simulation, the T1 timer fires at t≈31 s for each client
 (half of the 60 s lease, measured from each client's own bind around
@@ -286,32 +372,113 @@ a DHCPACK, extending the lease. This renewal cycle repeats throughout
 the simulation.
 
 Sequence chart of two clients' renewal cycles at T1, captured against
-the wired path client → switch → dhcpServer. The unicast renewal is
-preceded by an ARP exchange to resolve the server's MAC, then carries
-the DHCPREQUEST and DHCPACK:
+the wired path client → switch → dhcpServer. Renewal is the client's
+first unicast to the server — the DORA exchange was all broadcast, so
+the server's MAC was never cached. The renewal is therefore preceded by
+an ARP exchange to resolve it, then carries the DHCPREQUEST and DHCPACK:
 
 .. figure:: media/lease_renewal.png
    :align: center
 
+The animation below shows the three clients renewing their leases at T1
+(~31 s). Unlike the broadcast DORA, each renewal is a unicast exchange:
+the client first ARPs for the server's MAC (never cached, since the DORA
+was all broadcast), then sends a DHCPREQUEST directly to the server,
+which replies with a DHCPACK:
+
+.. video:: media/lease_renewal.mp4
+   :align: center
+
+..
+   VIDEO RECIPE (redo via the "video-recording" skill)
+   config:   LeaseRenewal               # ../omnetpp.ini; leaseTime=60s, T1=30s
+   seed:     default
+   shows:    three clients renewing at T1 — each ARPs for the server MAC
+             (never cached, the DORA was all-broadcast), then sends a unicast
+             DHCPREQUEST answered by a DHCPACK
+   anchors:  T1 renewals cluster ~t=31s (clients bind ~t=1s, T1=0.5×60s);
+             per client ARP → DHCPREQUEST → DHCPACK. Mechanism must hold;
+             if the ~31s cluster moves, timing changed → re-tune and rewrite.
+   window:   record sim-time ~30s → ~33s (express-run to ~30s; no channel
+             visualizer, so no fade-out wait)
+   anim:     playback_speed=1           # set_animation_parameters, normal profile
+   capture:  fps=2, crop_area=with_padding   # re-read crop_rect; canvas was 732×482
+   encode:   ffmpeg -r 30 -vcodec libx264 -pix_fmt yuv420p (pad to even dims)
+   post:     none
+   stamp:    recorded 2026-06, INET 4.6
+
+CleanShutdown
+~~~~~~~~~~~~~
+
+This configuration demonstrates the **DHCPRELEASE** path. A
+:ned:`ScenarioManager` ``<shutdown>`` event gracefully takes
+``client[0]`` down at t=30s, and a ``<startup>`` event brings it back
+at t=60s. On its way out the client unicasts a DHCPRELEASE to the
+granting server, forgets its address, and exits. The server immediately
+returns the address to the pool without waiting for the lease to
+expire. On restart the client has no surviving lease, so it performs a
+fresh DORA from INIT.
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: [Config CleanShutdown]
+   :end-before: [Config ClientCrash]
+
+The scenario script:
+
+.. literalinclude:: ../scenario_clean_shutdown.xml
+   :language: xml
+
+The DHCPRELEASE is visible in the server-side pcap as a single
+BOOTREQUEST with message type ``DHCPRELEASE``, and the server log
+shows the address returning to the pool the moment it arrives. With
+the pool sized generously (50 addresses) the client typically
+reacquires the same IP, but the path to it goes through a full DORA,
+not INIT-REBOOT.
+
+Sequence chart of the t=30 s shutdown showing the ARP resolution that
+precedes the unicast DHCPRELEASE, followed by the RELEASE itself
+travelling client → switch → dhcpServer:
+
+.. figure:: media/clean_shutdown.png
+   :align: center
+
+The server's lease table confirms the release: ``client[0]``'s address
+``192.168.1.10`` flips to ``FREE`` the instant the DHCPRELEASE arrives,
+while ``.11`` and ``.12`` stay ``LEASED``:
+
+.. figure:: media/clean_shutdown_leases.png
+   :align: center
+
+..
+   FIGURE RECIPE (redo via the "omnetpp-mcp-sim" skill)
+   type:     inspector
+   config:   CleanShutdown             # ../omnetpp.ini
+   shows:    server `leased` map with .10 FREE (released), .11/.12 LEASED
+   target:   dhcpServer.app[0].leased → object inspector
+   anchor:   just after the t=30 s DHCPRELEASE (~t=30–60 s, before restart)
+   capture:  open_inspector(...leased) → expand → get_inspector_screenshot;
+             was 720×170
+   stamp:    captured 2026-06, INET 4.6
+
 ClientCrash
 ~~~~~~~~~~~
 
-This configuration demonstrates how a DHCP client re-acquires its address
-after an unclean restart. A :ned:`ScenarioManager` ``<crash>`` event takes
-``client[0]`` down at t=30s and a ``<startup>`` event brings it back at
-t=60s. Because a crash skips the graceful-shutdown path, the client
-does *not* emit a DHCPRELEASE, and it still remembers its previously
-held address across the restart. On startup the client therefore
-enters **INIT-REBOOT** and broadcasts a DHCPREQUEST for its previously
-held
-address (skipping the Discover and Offer steps); the server responds
-with a DHCPACK (or a DHCPNAK if the address is no longer valid). The
-lease time is set to 120 seconds.
+This configuration contrasts directly with ``CleanShutdown``: the
+scenario is otherwise identical — ``client[0]`` goes down at t=30s and
+back up at t=60s — but the :ned:`ScenarioManager` event is a ``<crash>``
+rather than a graceful ``<shutdown>``. Because a crash skips the
+graceful-shutdown path, the client does *not* emit a DHCPRELEASE, and
+it still remembers its previously held address across the restart. On
+startup the client therefore enters **INIT-REBOOT** and broadcasts a
+DHCPREQUEST for its previously held address (skipping the Discover and
+Offer steps); the server responds with a DHCPACK (or a DHCPNAK if the
+address is no longer valid). The lease time is set to 120 seconds.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: [Config ClientCrash]
-   :end-before: [Config CleanShutdown]
+   :end-before: [Config LeaseExpiration]
 
 The scenario script:
 
@@ -334,42 +501,22 @@ the server confirms the old binding with a DHCPACK — no Discover/Offer:
 .. figure:: media/client_crash.png
    :align: center
 
-CleanShutdown
-~~~~~~~~~~~~~
-
-This configuration demonstrates the **DHCPRELEASE** path
-and contrasts directly with ``ClientCrash``. The
-scenario is otherwise identical — ``client[0]`` goes down at t=30s and
-back up at t=60s — but the ScenarioManager event is a *graceful*
-``<shutdown>`` rather than a ``<crash>``. On its way out the client
-unicasts a DHCPRELEASE to the granting server, forgets its address,
-and exits. The server immediately returns the address to the pool
-without waiting for the lease to expire. On restart the client has no
-surviving lease, so it performs a fresh DORA from INIT.
-
-.. literalinclude:: ../omnetpp.ini
-   :language: ini
-   :start-at: [Config CleanShutdown]
-   :end-before: [Config LeaseExpiration]
-
-The scenario script:
-
-.. literalinclude:: ../scenario_clean_shutdown.xml
-   :language: xml
-
-The DHCPRELEASE is visible in the server-side pcap as a single
-BOOTREQUEST with message type ``DHCPRELEASE``, and the server log
-shows the address returning to the pool the moment it arrives. With
-the pool sized generously (50 addresses) the client typically
-reacquires the same IP, but the path to it goes through a full DORA,
-not INIT-REBOOT.
-
-Sequence chart of the t=30 s shutdown showing the ARP resolution that
-precedes the unicast DHCPRELEASE, followed by the RELEASE itself
-travelling client → switch → dhcpServer:
-
-.. figure:: media/clean_shutdown.png
-   :align: center
+..
+   FIGURE RECIPE (redo via the "omnetpp-ide-mcp" skill)
+   type:     seqchart
+   config:   ClientCrash               # ../omnetpp.ini, record-eventlog=true
+   seed:     default
+   shows:    the INIT-REBOOT exchange — client[0]'s broadcast DHCPREQUEST
+             reaching dhcpServer via switch, answered by a DHCPACK (no
+             Discover/Offer)
+   source:   results/ClientCrash-*.elog (produced by record-eventlog=true)
+   axes:     client[0] · switch · dhcpServer   (this top-to-bottom order)
+   anchor:   REQUEST→ACK at t≈60s (client crashes t=30s, restarts t=60s).
+             If the exchange moves off ~60s the scenario/timing changed →
+             re-capture and rewrite.
+   capture:  Sequence Chart screenshot, NONLINEAR timeline, cropped to the
+             exchange; was 963×578
+   stamp:    captured 2026-06, INET 4.6
 
 LeaseExpiration
 ~~~~~~~~~~~~~~~
@@ -405,6 +552,31 @@ reclaimed ``192.168.1.10`` from the crashed ``client[0]``:
 
 .. figure:: media/lease_expiration.png
    :align: center
+
+The server's lease table tells the rest of the story. With ``client[0]``
+crashed and silent, its lease simply ages out: about 30 s after the bind
+the entry flips to ``FREE``, even though no DHCPRELEASE was ever sent —
+
+.. figure:: media/lease_expiration_reclaimed.png
+   :align: center
+
+— and once ``client[1]`` starts at t=80 s, that same ``192.168.1.10`` is
+handed to it (note the new client MAC ending ``…07``):
+
+.. figure:: media/lease_expiration_reassigned.png
+   :align: center
+
+..
+   FIGURE RECIPE (redo via the "omnetpp-mcp-sim" skill)
+   type:     inspector (two anchors)
+   config:   LeaseExpiration           # ../omnetpp.ini
+   shows:    .10 FREE after the ~t=31 s expiry (reclaimed), then .10 LEASED
+             to client[1] (...07) after its t=80 s DORA
+   target:   dhcpServer.app[0].leased → object inspector
+   anchor:   reclaimed ~t=31–80 s (single FREE entry); reassigned ~t=90 s
+   capture:  open_inspector(...leased) → expand → get_inspector_screenshot;
+             was 720×130
+   stamp:    captured 2026-06, INET 4.6
 
 ServerReboot
 ~~~~~~~~~~~~
@@ -444,6 +616,23 @@ the client falls back to a full DORA exchange:
 
 .. figure:: media/server_reboot.png
    :align: center
+
+Right after the reboot the server's lease table is **empty** — every
+binding from before the crash is gone, which is exactly why the renewing
+clients are met with a DHCPNAK:
+
+.. figure:: media/server_reboot_leases.png
+   :align: center
+
+..
+   FIGURE RECIPE (redo via the "omnetpp-mcp-sim" skill)
+   type:     inspector
+   config:   ServerReboot              # ../omnetpp.ini
+   shows:    server `leased` map empty (size 0) just after the t=40 s restart
+   target:   dhcpServer.app[0].leased → object inspector
+   anchor:   t≈40–50 s, after restart, before clients re-DORA and repopulate it
+   capture:  open_inspector(...leased) → get_inspector_screenshot; was 720×90
+   stamp:    captured 2026-06, INET 4.6
 
 LossyDORA
 ~~~~~~~~~
