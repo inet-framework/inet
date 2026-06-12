@@ -41,7 +41,6 @@
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 
 #include "inet/networklayer/xmipv6/MobilityHeader_m.h" // for HA Option header
-#include "inet/networklayer/xmipv6/xMIPv6.h"
 
 namespace inet {
 
@@ -457,7 +456,6 @@ void Ipv6Tunneling::encapsulateDatagram(Packet *packet)
 
 void Ipv6Tunneling::decapsulateDatagram(Packet *packet)
 {
-    auto ipv6Header = packet->peekAtFront<Ipv6Header>();
     // decapsulation is performed in Ipv6 module
     Ipv6Address srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress().toIpv6();
 
@@ -473,20 +471,9 @@ void Ipv6Tunneling::decapsulateDatagram(Packet *packet)
     // (important if several interfaces are available)
 //    controlInfo->setInterfaceId(-1);
 
+    // Route optimization is triggered by xMIPv6's pre-routing hook, which sees the
+    // decapsulated datagram re-enter IPv6 addressed to the mobile node's home address.
     send(packet, "linkLayerOut");
-
-    // trigger Route Optimization if we are a MN receiving tunneled data from HA
-    if (rt->isMobileNode()) {
-        NetworkInterface *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
-        if ((srcAddr == ie->getProtocolData<Mipv6InterfaceData>()->getHomeAgentAddress())
-            && (ipv6Header->getProtocolId() != IP_PROT_IPv6EXT_MOB))
-        {
-            EV_INFO << "Checking Route Optimization for: " << ipv6Header->getSrcAddress() << endl;
-            xMIPv6 *mipv6 = findModuleFromPar<xMIPv6>(par("xmipv6Module"), this);
-            if (mipv6)
-                mipv6->triggerRouteOptimization(ipv6Header->getSrcAddress(), ie->getProtocolData<Mipv6InterfaceData>()->getMNHomeAddress(), ie);
-        }
-    }
 }
 
 int Ipv6Tunneling::lookupTunnels(const Ipv6Address& dest)

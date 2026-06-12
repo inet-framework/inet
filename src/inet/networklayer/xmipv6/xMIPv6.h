@@ -404,7 +404,7 @@ class INET_API xMIPv6 : public OperationalBase, public IIpv6ExtensionHeaderHandl
     // the Home Address Option (MN->CN) on locally-originated, route-optimized
     // traffic via the datagramLocalOutHook (instead of the old T2RH/HA_OPT
     // pseudo-tunnels in Ipv6Tunneling).
-    virtual Result datagramPreRoutingHook(Packet *datagram) override { return ACCEPT; }
+    virtual Result datagramPreRoutingHook(Packet *datagram) override;
     virtual Result datagramForwardHook(Packet *datagram) override { return ACCEPT; }
     virtual Result datagramPostRoutingHook(Packet *datagram) override { return ACCEPT; }
     virtual Result datagramLocalInHook(Packet *datagram) override { return ACCEPT; }

@@ -126,7 +126,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %subst: /^\([^)]*\)//
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-mIPv6Network.MN[0].ipv6.iptunneling: Initialise Route Optimization for:
+mIPv6Network.MN[0].ipv6.mipv6support.xMobileIPv6: Initialise Route Optimization for:
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
 mIPv6Network.CN[0].ipv6.mipv6support.xMobileIPv6: Message recognised as HOME TEST INIT (HoTI)

@@ -1361,9 +1361,9 @@ void xMIPv6::triggerRouteOptimization(const Ipv6Address& destAddress, const Ipv6
     if (bul->getMobilityState(destAddress) == BindingUpdateList::NONE)
         bul->setMobilityState(destAddress, BindingUpdateList::RR);
 
-    int vIndex = tunneling->getVIfIndexForDest(destAddress, Ipv6Tunneling::MOBILITY);
-
-    if (vIndex > ift->getNumInterfaces()) {
+    // a route optimization entry for this correspondent means return routability
+    // has already completed (the former MOBILITY pseudo-tunnel check)
+    if (routeOptimizations.count(destAddress) != 0) {
         EV_INFO << "Route Optimization for: " << destAddress << " already triggered";
 
         // we have to check whether our current CoA is different from the one saved in the BUL
@@ -2262,6 +2262,37 @@ INetfilter::IHook::Result xMIPv6::datagramLocalOutHook(Packet *datagram)
         datagram->insertAtFront(destOpts);
         datagram->insertAtFront(header);
         EV_INFO << "Added Home Address Option header." << endl;
+    }
+    return ACCEPT;
+}
+
+INetfilter::IHook::Result xMIPv6::datagramPreRoutingHook(Packet *datagram)
+{
+    if (!rt6->isMobileNode())
+        return ACCEPT;
+
+    const auto& ipv6Header = datagram->peekAtFront<Ipv6Header>();
+    // a mobility message is signalling, not route-optimization-triggering data
+    if (ipv6Header->getProtocolId() == IP_PROT_IPv6EXT_MOB)
+        return ACCEPT;
+
+    auto interfaceInd = datagram->findTag<InterfaceInd>();
+    NetworkInterface *ie = interfaceInd ? ift->getInterfaceById(interfaceInd->getInterfaceId()) : nullptr;
+    auto mipv6Data = ie ? ie->findProtocolData<Mipv6InterfaceData>() : nullptr;
+    auto ipv6Data = ie ? ie->findProtocolData<Ipv6InterfaceData>() : nullptr;
+    if (mipv6Data == nullptr || ipv6Data == nullptr)
+        return ACCEPT;
+
+    // The mobile node received a datagram addressed to its home address while away
+    // from home (it has a care-of address): it can only have arrived through the
+    // home agent tunnel, so trigger route optimization toward the source. This
+    // replaces the trigger that used to live in Ipv6Tunneling::decapsulateDatagram.
+    if (ipv6Header->getDestAddress() == mipv6Data->getMNHomeAddress()
+        && !ipv6Data->getGlobalAddress(Ipv6InterfaceData::CoA).isUnspecified())
+    {
+        Enter_Method("triggerRouteOptimization");
+        EV_INFO << "Checking Route Optimization for: " << ipv6Header->getSrcAddress() << endl;
+        triggerRouteOptimization(ipv6Header->getSrcAddress(), mipv6Data->getMNHomeAddress(), ie);
     }
     return ACCEPT;
 }
