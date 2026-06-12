@@ -8,6 +8,8 @@
 
 #include "inet/applications/dhcp/DhcpClient.h"
 
+#include "inet/common/Protocol.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
@@ -841,6 +843,7 @@ void DhcpClient::sendToUdp(Packet *msg, int srcPort, const L3Address& destAddr, 
 {
     EV_INFO << "Sending packet " << msg << endl;
     msg->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
+    msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::dhcp);
     socket.sendTo(msg, destAddr, destPort);
 }
 

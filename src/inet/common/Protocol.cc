@@ -93,6 +93,7 @@ const Protocol Protocol::bgp("bgp", "BGP");
 const Protocol Protocol::bmac("bmac", "B-MAC", Protocol::LinkLayer);
 const Protocol Protocol::cdp("cdp", "CDP", Protocol::NetworkLayer);
 const Protocol Protocol::clns("clns", "CLNS", Protocol::NetworkLayer);
+const Protocol Protocol::dhcp("dhcp", "DHCP");
 const Protocol Protocol::dsdv2("dsdv2", "DSDV 2");
 const Protocol Protocol::dsr("dsr", "DSR");
 const Protocol Protocol::dymo("dymo", "DYMO");

@@ -155,6 +155,7 @@ static const ProtocolGroup::Protocols ieee8022Protocols {
 };
 
 static const ProtocolGroup::Protocols udpProtocols {
+    { 67, &Protocol::dhcp }, // server port; one of the two DHCP endpoints is always 67, so this covers both directions
     { 554, &Protocol::rtsp },
     { 6696, &Protocol::babel },
     { 11111, &Protocol::unknown }, // INET specific non-standard protocol

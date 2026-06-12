@@ -10,6 +10,8 @@
 
 #include <algorithm>
 
+#include "inet/common/Protocol.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/stlutils.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -641,6 +643,7 @@ void DhcpServer::sendToUDP(Packet *msg, int srcPort, const L3Address& destAddr, 
     EV_INFO << "Sending packet: " << msg << "." << endl;
     numSent++;
     msg->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
+    msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::dhcp);
     socket.sendTo(msg, destAddr, destPort);
 }
 
