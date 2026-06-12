@@ -14,9 +14,18 @@ package inet.networklayer.mipv6;
 import inet.common.SimpleModule;
 
 //
-// ~Mipv6 Data structure for the HA and CN(s) only.
+// Holds the Binding Cache of a home agent or correspondent node (RFC 3775): the
+// bindings registered by mobile nodes, mapping each mobile node's home address to
+// its current care-of address, together with the sequence number and binding
+// lifetime. A home agent uses it to intercept and tunnel traffic to a mobile node
+// that is away from home; a correspondent node uses it for route optimization
+// (sending directly to the care-of address). It also keeps the return-routability
+// nonces used to validate Binding Updates.
 //
-// @see  ~Mipv6.
+// This is a passive data-store module (no gates); it is read and updated by the
+// ~Mipv6 protocol engine through C++ method calls.
+//
+// @see ~Mipv6, ~BindingUpdateList
 //
 simple BindingCache extends SimpleModule
 {

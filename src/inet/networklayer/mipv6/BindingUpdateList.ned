@@ -14,9 +14,16 @@ package inet.networklayer.mipv6;
 import inet.common.SimpleModule;
 
 //
-// ~Mipv6 Data structure for the Mobile Node.
+// Holds the Binding Update List of a mobile node (RFC 3775): one entry per home
+// agent and correspondent node the node has sent a Binding Update to, recording
+// the care-of address registered, sequence numbers, binding lifetimes, the
+// return-routability state (home/care-of keygen tokens and nonce indices), and
+// retransmission bookkeeping.
 //
-// @see ~Mipv6.
+// This is a passive data-store module (no gates); it is read and updated by the
+// ~Mipv6 protocol engine through C++ method calls.
+//
+// @see ~Mipv6, ~BindingCache
 //
 simple BindingUpdateList extends SimpleModule
 {

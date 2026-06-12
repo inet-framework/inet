@@ -10,10 +10,16 @@ package inet.networklayer.icmpv6;
 import inet.common.SimpleModule;
 
 //
-// ICMPv6 implementation.
+// Implements ICMPv6 (RFC 4443): it generates and processes ICMPv6 error
+// messages (destination unreachable, packet too big, time exceeded, parameter
+// problem) on behalf of ~Ipv6, and answers Echo Requests (ping) with Echo
+// Replies. Neighbor Discovery messages (RS/RA/NS/NA/Redirect) are not handled
+// here but by ~Ipv6NeighbourDiscovery.
+//
+// The `transportIn`/`transportOut` gates connect to upper-layer users such as a
+// ping application; the `ipv6In`/`ipv6Out` gates connect to ~Ipv6.
 //
 // @see ~Ipv6, ~Ipv6RoutingTable, ~Ipv6NeighbourDiscovery
-//#FIXME gate descriptions needed...
 //
 simple Icmpv6 extends SimpleModule
 {

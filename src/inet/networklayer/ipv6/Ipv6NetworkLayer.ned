@@ -19,10 +19,30 @@ import inet.networklayer.mipv6.BindingUpdateList;
 import inet.networklayer.mipv6.Mipv6;
 
 //
-// Represents an IPv6 network layer (L3).
+// Represents a complete IPv6 network layer (L3), to be used within hosts and
+// routers. It connects to higher-layer protocols (TCP, UDP, ...) on top and to
+// the network interfaces below, and bundles the modules that together implement
+// IPv6:
 //
-// The module has ports to connect to a higher layer (TCP, UDP) and
-// several network interfaces.
+//  - ~Ipv6: the core protocol (encapsulation, routing, forwarding, fragmentation);
+//  - ~Ipv6RoutingTable: the routing table and destination cache;
+//  - ~Icmpv6: ICMPv6 error messages and echo (ping);
+//  - ~Ipv6NeighbourDiscovery: address autoconfiguration, DAD, neighbour
+//    unreachability detection, and Router Advertisements/Solicitations;
+//  - an ~IIpv6NodeConfigurator that applies the addresses and routes computed by
+//    the network configurator.
+//
+// Internal ~MessageDispatcher submodules route packets between these components
+// and the interfaces by protocol.
+//
+// <b>Mobile IPv6</b>
+//
+// When `hasMipv6` is set, the layer additionally contains the Mobile IPv6
+// (RFC 3775) modules: the ~Mipv6 protocol engine plus its ~BindingUpdateList and
+// ~BindingCache data structures. ~Mipv6 plugs into ~Ipv6 through netfilter hooks
+// and extension-header handlers; no change to the IPv6 core is required. The
+// node types ~MobileHost6, ~HomeAgent6 and ~CorrespondentNode6 enable it and
+// select the role via the `isMobileNode` / `isHomeAgent` parameters of ~Mipv6.
 //
 module Ipv6NetworkLayer like INetworkLayer
 {

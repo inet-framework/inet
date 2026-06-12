@@ -37,10 +37,18 @@ import inet.common.SimpleModule;
 // calling C++ methods of ~Ipv6RoutingTable. No message exchange with ~Ipv6RoutingTable
 // takes place.
 //
-//#FIXME describe operation
-//
 // Routing protocol implementations can also query and manipulate the route table
 // by calling ~Ipv6RoutingTable's methods in C++.
+//
+// <b>Netfilter hooks</b>
+//
+// Other modules can register INetfilter hooks on ~Ipv6 to inspect, modify, drop
+// or queue datagrams at well-defined points (pre-routing, local-out,
+// post-routing). Mobile IPv6 (~Mipv6) uses these hooks to steer home-address
+// traffic onto tunnel interfaces and to insert the Type 2 Routing Header / Home
+// Address Option on route-optimized traffic, so the IPv6 core itself needs no
+// mobility-specific knowledge. IPv6-in-IPv6 tunnels (RFC 2473) are likewise plain
+// ~Ipv6TunnelInterface network interfaces plus routes, not a special path in ~Ipv6.
 //
 // <b>Performance model, QoS</b>
 //
