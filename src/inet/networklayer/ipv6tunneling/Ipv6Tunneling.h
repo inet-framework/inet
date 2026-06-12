@@ -236,13 +236,6 @@ class INET_API Ipv6Tunneling : public OperationalBase
      */
     int findTunnel(const Ipv6Address& src, const Ipv6Address& dest, const Ipv6Address& destTrigger) const;
 
-    /**
-     * Encapsulate a datagram with tunnel headers.
-     *
-     * Attaches a Type 2 Routing Header in the control info if the datagram is routed over an
-     * appropriate RH2 pseudo tunnel.
-     */
-    void encapsulateDatagram(Packet *packet);
 
     /**
      * Strip tunnel headers from datagram

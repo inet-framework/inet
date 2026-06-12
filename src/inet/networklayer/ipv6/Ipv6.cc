@@ -199,10 +199,9 @@ void Ipv6::handleMessageWhenUp(cMessage *msg)
         handleRequest(request);
     else if (msg->getArrivalGate()->isName("transportIn")
              || (msg->arrivedOn("ndIn") && tags.getTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv6)
-             || (msg->arrivedOn("upperTunnelingIn")) // for tunneling support-CB
              )
     {
-        // packet from upper layers, tunnel link-layer output or ND: encapsulate and send out
+        // packet from upper layers or ND: encapsulate and send out
         handleMessageFromHL(check_and_cast<Packet *>(msg));
     }
     else if (msg->arrivedOn("ndIn") && tags.getTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv6) {
@@ -503,13 +502,6 @@ void Ipv6::routePacket(Packet *packet, const NetworkInterface *destIE, const Net
 
     if (interfaceId == -1 && destIE != nullptr)
         interfaceId = destIE->getInterfaceId(); // set interfaceId to destIE when not tunneling
-
-    if (interfaceId > ift->getBiggestInterfaceId()) {
-        // a virtual tunnel interface provides a path to the destination: do tunneling
-        EV_INFO << "tunneling: src addr=" << ipv6Header->getSrcAddress() << ", dest addr=" << destAddress << std::endl;
-        send(packet, "lowerTunnelingOut");
-        return;
-    }
 
     if (interfaceId == -1)
         if (!determineOutputInterface(destAddress, nextHop, interfaceId, packet, fromHL))

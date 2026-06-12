@@ -75,10 +75,6 @@ void Ipv6Tunneling::handleMessageWhenUp(cMessage *msg)
         // decapsulate
         decapsulateDatagram(packet);
     }
-    else if (packet->getArrivalGate()->isName("linkLayerIn")) {
-        // encapsulate
-        encapsulateDatagram(packet);
-    }
     else
         throw cRuntimeError("Ipv6Tunneling: Unknown gate: %s!", packet->getArrivalGate()->getFullName());
 }
@@ -349,109 +345,6 @@ int Ipv6Tunneling::getVIfIndexForDest(const Ipv6Address& destAddress, TunnelType
     }
 
     return outInterfaceId;
-}
-
-void Ipv6Tunneling::encapsulateDatagram(Packet *packet)
-{
-    auto ipv6Header = packet->peekAtFront<Ipv6Header>();
-    int vIfIndex = -1;
-
-    if (ipv6Header->getProtocolId() == IP_PROT_IPv6EXT_MOB) {
-        // only look at non-split tunnel
-        // (HoTI is only sent over HA tunnel)
-        vIfIndex = doPrefixMatch(ipv6Header->getDestAddress());
-    }
-
-    if ((ipv6Header->getProtocolId() != IP_PROT_IPv6EXT_MOB) || (vIfIndex == -1)) {
-        // look up all tunnels for dgram's destination
-        vIfIndex = getVIfIndexForDest(ipv6Header->getDestAddress());
-//        EV << "looked up again!" << endl;
-    }
-
-    if (vIfIndex == -1)
-        throw cRuntimeError("encapsulateDatagram(): tunnel not existent");
-
-    // TODO copy information from old ctrlInfo into new one (Traffic Class, Flow label, etc.)
-    delete packet->removeControlInfo();
-
-    if ((tunnels[vIfIndex].tunnelType == T2RH) || (tunnels[vIfIndex].tunnelType == HA_OPT)) {
-        // pseudo-tunnel for Type 2 Routing Header
-        // or Home Address Option
-
-        Ipv6Address src = ipv6Header->getSrcAddress();
-        Ipv6Address dest = ipv6Header->getDestAddress();
-        Ipv6Address rh2; // dest
-
-        if (src.isUnspecified()) {
-            // if we do not have a valid source address, we'll have to ask
-            // the routing table for the correct interface.
-            int interfaceId;
-            (void)(rt->lookupDestCache(dest, interfaceId));
-        }
-
-        if (tunnels[vIfIndex].tunnelType == T2RH) {
-            // this is the CN -> MN path
-            src = tunnels[vIfIndex].entry; // CN address
-            dest = tunnels[vIfIndex].exit; // CoA
-            rh2 = tunnels[vIfIndex].destTrigger; // HoA
-        }
-        else {
-            // path MN -> CN
-            src = tunnels[vIfIndex].entry; // CoA
-            dest = tunnels[vIfIndex].destTrigger; // CN address
-            rh2 = tunnels[vIfIndex].exit; // HoA
-        }
-
-        // get rid of the encapsulation of the Ipv6 module
-        packet->popAtFront<Ipv6Header>();
-        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(ipv6Header->getProtocol());
-
-        if (tunnels[vIfIndex].tunnelType == T2RH) {
-            // construct Type 2 Routing Header (RFC 3775 - 6.4.1)
-            Ipv6RoutingHeader *t2RH = new Ipv6RoutingHeader();
-            t2RH->setRoutingType(2);
-            t2RH->setSegmentsLeft(1);
-            t2RH->setAddressArraySize(1);
-            t2RH->setChunkLength(B(8 + 1 * 16));
-            // old src becomes address of T2RH
-            t2RH->setAddress(0, rh2);
-
-            // append T2RH to routing headers
-            packet->addTagIfAbsent<Ipv6ExtHeaderReq>()->appendExtensionHeader(t2RH);
-
-            EV_INFO << "Added Type 2 Routing Header." << endl;
-        }
-        else { // HA_OPT
-            auto *destOptsHdr = new Ipv6DestinationOptionsHeader();
-            auto *haOpt = new HomeAddressOption();
-            haOpt->setHomeAddress(rh2);
-            destOptsHdr->getTlvOptionsForUpdate().appendTlvOption(haOpt);
-
-            // append Destination Options header containing HA option
-            packet->addTagIfAbsent<Ipv6ExtHeaderReq>()->appendExtensionHeader(destOptsHdr);
-
-            EV_INFO << "Added Home Address Option header." << endl;
-        }
-
-        auto addresses = packet->addTagIfAbsent<L3AddressReq>();
-        // new src is tunnel entry (either CoA or CN)
-        addresses->setSrcAddress(src);
-        // copy old dest addr
-        addresses->setDestAddress(dest);
-
-        send(packet, "upperLayerOut");
-    }
-    else {
-        // normal tunnel - just modify controlInfo and send
-        // datagram back to Ipv6 module for encapsulation
-
-        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
-        auto addresses = packet->addTagIfAbsent<L3AddressReq>();
-        addresses->setSrcAddress(tunnels[vIfIndex].entry);
-        addresses->setDestAddress(tunnels[vIfIndex].exit);
-
-        send(packet, "upperLayerOut");
-    }
 }
 
 void Ipv6Tunneling::decapsulateDatagram(Packet *packet)
