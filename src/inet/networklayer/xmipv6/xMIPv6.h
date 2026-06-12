@@ -15,13 +15,13 @@
 #include <map>
 #include <vector>
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/ipv6/IIpv6ExtensionHeaderHandler.h"
-#include "inet/networklayer/ipv6tunneling/Ipv6Tunneling.h"
 #include "inet/networklayer/xmipv6/BindingUpdateList.h"
 #include "inet/networklayer/xmipv6/MobilityHeader_m.h" // for HAOpt & RH2
 
@@ -33,7 +33,6 @@ class BindingUpdate;
 class NetworkInterface;
 class Ipv6Header;
 class Ipv6NeighbourDiscovery;
-class Ipv6Tunneling;
 class Ipv6RoutingTable;
 
 // Keys for timer list (=message type)
@@ -70,8 +69,73 @@ class INET_API xMIPv6 : public OperationalBase, public IIpv6ExtensionHeaderHandl
     opp_component_ptr<Ipv6RoutingTable> rt6;
     ModuleRefByPar<BindingUpdateList> bul;
     ModuleRefByPar<BindingCache> bc;
-    ModuleRefByPar<Ipv6Tunneling> tunneling;
     ModuleRefByPar<Ipv6NeighbourDiscovery> ipv6nd;
+
+    //
+    // IP tunnel management (RFC 2473), moved here from the former Ipv6Tunneling
+    // module. A "tunnel" is a dynamically created Ipv6TunnelInterface (built by
+    // Ipv6RoutingTable::createTunnelNetworkInterface) that performs IPv6-in-IPv6
+    // encapsulation; the IPv6 layer routes to it like any interface. Tunnels are
+    // indexed by their interface id. xMIPv6 steers home-address traffic onto them
+    // via requestTunnelOutputInterface().
+    //
+    enum TunnelType {
+        INVALID = 0,
+        SPLIT,
+        NON_SPLIT,
+        NORMAL, // either split or non-split
+    };
+
+    struct Tunnel {
+        Tunnel(const Ipv6Address& entry = Ipv6Address::UNSPECIFIED_ADDRESS,
+                const Ipv6Address& exit = Ipv6Address::UNSPECIFIED_ADDRESS,
+                const Ipv6Address& destTrigger = Ipv6Address::UNSPECIFIED_ADDRESS)
+            : entry(entry), exit(exit), tunnelType(SPLIT), destTrigger(destTrigger) {}
+
+        bool operator==(const Tunnel& rhs) const
+        {
+            return entry == rhs.entry && exit == rhs.exit && destTrigger == rhs.destTrigger;
+        }
+
+        Ipv6Address entry; // entry point of the tunnel
+        Ipv6Address exit; // exit point of the tunnel
+        TunnelType tunnelType = INVALID; // split or non-split (defaults to SPLIT, see ctor)
+        // if set, only packets to this destination are routed over the tunnel
+        // (split tunnel); if unspecified, (nearly) everything is (non-split tunnel)
+        Ipv6Address destTrigger;
+        // the backing virtual interface that performs the encapsulation
+        NetworkInterface *networkInterface = nullptr;
+    };
+
+    typedef std::map<int, struct Tunnel> Tunnels;
+    Tunnels tunnels; // indexed by the tunnel interface id
+    int noOfNonSplitTunnels = 0; // number of non-split tunnels on this host
+
+    /**
+     * Create a tunnel (entry -> exit). If destTrigger is set, only traffic to that
+     * destination is routed over it (split tunnel); otherwise everything is
+     * (non-split tunnel). Returns the tunnel interface id (0 if not created).
+     */
+    int createTunnel(TunnelType tunnelType, const Ipv6Address& entry, const Ipv6Address& exit,
+            const Ipv6Address& destTrigger = Ipv6Address::UNSPECIFIED_ADDRESS);
+    bool destroyTunnel(const Ipv6Address& src, const Ipv6Address& dest, const Ipv6Address& destTrigger);
+    void destroyTunnels(const Ipv6Address& entry);
+    void destroyTunnel(const Ipv6Address& entry, const Ipv6Address& exit);
+    void destroyTunnelForExitAndTrigger(const Ipv6Address& exit, const Ipv6Address& trigger);
+    void destroyTunnelForEntryAndTrigger(const Ipv6Address& entry, const Ipv6Address& trigger);
+    void destroyTunnelFromTrigger(const Ipv6Address& trigger);
+    /**
+     * Returns the tunnel interface id whose destination trigger matches destAddress
+     * (split tunnels first, then the non-split catch-all), or -1 if none.
+     */
+    int getVIfIndexForDest(const Ipv6Address& destAddress);
+    int getVIfIndexForDest(const Ipv6Address& destAddress, TunnelType tunnelType);
+    // true if there exists a tunnel with the given exit point
+    bool isTunnelExit(const Ipv6Address& exit);
+    // returns the interface id of the matching tunnel, or 0 if none
+    int findTunnel(const Ipv6Address& src, const Ipv6Address& dest, const Ipv6Address& destTrigger) const;
+    int lookupTunnels(const Ipv6Address& dest);
+    int doPrefixMatch(const Ipv6Address& dest);
 
     // statistic collection
     cOutVector statVectorBUtoHA, statVectorBUtoCN, statVectorBUtoMN;

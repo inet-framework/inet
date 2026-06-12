@@ -47,6 +47,9 @@ class INET_API Ipv6RoutingTable : public SimpleModule, public IRoutingTable, pro
     bool multicastForward = false; // If node is forwarding multicast info
     bool useAdminDist = false; // Use Cisco like administrative distances
 
+    // running counter for naming dynamically created tunnel interfaces
+    int tunnelInterfaceCounter = 0;
+
     // MIPv6 support flags (set by the xMIPv6 module at init time, default false)
     bool ishome_agent = false;
     bool ismobile_node = false;
@@ -272,6 +275,21 @@ class INET_API Ipv6RoutingTable : public SimpleModule, public IRoutingTable, pro
     virtual void addStaticRoute(const Ipv6Address& destPrefix, int prefixLength,
             unsigned int interfaceId, const Ipv6Address& nextHop,
             int metric = 0);
+
+    /**
+     * Dynamically create an ~Ipv6TunnelInterface (IPv6-in-IPv6, source -> dest),
+     * wire it into the node's network layer and register it. Returns the new
+     * NetworkInterface. The caller installs the route(s) that steer traffic to it.
+     * This is the generic tunnel-interface plumbing used by both static tunnel
+     * configuration (configureTunnelFromXml) and MIPv6 (xMIPv6).
+     */
+    virtual NetworkInterface *createTunnelNetworkInterface(const Ipv6Address& source, const Ipv6Address& destination);
+
+    /**
+     * Tear down and delete a tunnel interface previously created with
+     * createTunnelNetworkInterface().
+     */
+    virtual void deleteTunnelNetworkInterface(NetworkInterface *networkInterface);
 
     /**
      *  Adds a default route for a host. This method requires the RA's source

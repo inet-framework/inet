@@ -31,7 +31,6 @@
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #include "inet/networklayer/ipv6/Mipv6InterfaceData.h"
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
-#include "inet/networklayer/ipv6tunneling/Ipv6Tunneling.h"
 #include "inet/networklayer/xmipv6/BindingCache.h"
 #include "inet/networklayer/xmipv6/BindingUpdateList.h"
 
@@ -109,8 +108,6 @@ void xMIPv6::initialize(int stage)
            statVectorCoTtoMN.setName("CoT to MN");
            statVectorHoTfromCN.setName("HoT from CN");
            statVectorCoTfromCN.setName("CoT from CN");*/
-
-        tunneling.reference(this, "ipv6TunnelingModule", true); // access to tunneling module
 
         // moved rt6 initialization to here, as we should
         // set the MIPv6 flag as soon as possible for use
@@ -265,7 +262,7 @@ void xMIPv6::initiateMipv6Protocol(NetworkInterface *ie, const Ipv6Address& CoA)
         bul->removeBinding(cn); //FIXME need revision: this function sometimes remove the entry from bul, and bul->resetCareOfToken(cn, HoA) creates assert
         // care-of token becomes invalid with new CoA
         bul->resetCareOfToken(cn, HoA);
-        tunneling->destroyTunnelForExitAndTrigger(HoA, cn);
+        destroyTunnelForExitAndTrigger(HoA, cn);
         removeRouteOptimizationForExitAndTrigger(HoA, cn);
     }
 }
@@ -292,7 +289,7 @@ void xMIPv6::returningHome(const Ipv6Address& CoA, NetworkInterface *ie)
     const Ipv6Address& HA = ie->getProtocolData<Mipv6InterfaceData>()->getHomeAgentAddress();
     removeTimerEntries(HA, ie->getInterfaceId());
     // destroy tunnel to HA
-    tunneling->destroyTunnel(CoA, HA);
+    destroyTunnel(CoA, HA);
     // unregister binding from HA..
     createDeregisterBUTimer(HA, ie);
     bul->setMobilityState(HA, BindingUpdateList::DEREGISTER);
@@ -314,7 +311,7 @@ void xMIPv6::returningHome(const Ipv6Address& CoA, NetworkInterface *ie)
 
         // destroy the tunnel now
         // we have to as it is invalid (bound to old CoA that is not available anymore)
-        tunneling->destroyTunnelForExitAndTrigger(ie->getProtocolData<Mipv6InterfaceData>()->getMNHomeAddress(), *(itCNList));
+        destroyTunnelForExitAndTrigger(ie->getProtocolData<Mipv6InterfaceData>()->getMNHomeAddress(), *(itCNList));
         removeRouteOptimizationForExitAndTrigger(ie->getProtocolData<Mipv6InterfaceData>()->getMNHomeAddress(), *(itCNList));
     }
 }
@@ -762,7 +759,7 @@ void xMIPv6::processBUMessage(Packet *inPacket, const Ptr<const BindingUpdate>& 
             /*In addition, the home agent MUST stop intercepting packets on the
                mobile node's home link that are addressed to the mobile node*/
             // of course this is also true for CNs
-            tunneling->destroyTunnelFromTrigger(HoA);
+            destroyTunnelFromTrigger(HoA);
 
             // kill BC expiry timer
             cancelTimerIfEntry(HoA, ifTag->getInterfaceId(), KEY_BC_EXP);
@@ -913,9 +910,9 @@ void xMIPv6::processBUMessage(Packet *inPacket, const Ptr<const BindingUpdate>& 
 
                 // we first destroy the already existing tunnel if
                 // there exists one
-                tunneling->destroyTunnelForEntryAndTrigger(HA, HoA);
+                destroyTunnelForEntryAndTrigger(HA, HoA);
 
-                tunneling->createTunnel(Ipv6Tunneling::NORMAL, HA, CoA, HoA);
+                createTunnel(NORMAL, HA, CoA, HoA);
 //                bubble("Established tunnel to mobile node.");
             }
             else {
@@ -1200,7 +1197,7 @@ void xMIPv6::processBAMessage(Packet *inPacket, const Ptr<const BindingAcknowled
                     removeCoAEntries(); // TODO would be better if this is done somewhere else or in a comletely different way
                     interfaceCoAList[ie->getInterfaceId()] = entry->careOfAddress;
 
-                    tunneling->createTunnel(Ipv6Tunneling::NORMAL, entry->careOfAddress, entry->destAddress);
+                    createTunnel(NORMAL, entry->careOfAddress, entry->destAddress);
 //                    bubble("Established tunnel to home agent.");
 
                     /**11.5.1
@@ -1223,7 +1220,7 @@ void xMIPv6::processBAMessage(Packet *inPacket, const Ptr<const BindingAcknowled
                 else if (entry->BAck == false) { // BA from CN
                     removeRouteOptimizationForExitAndTrigger(entry->homeAddress, baSource);
                     addRouteOptimization(RouteOptimization::HOME_ADDRESS_OPTION, entry->careOfAddress, entry->homeAddress, baSource);
-//                    tunneling->createPseudoTunnel(CoA, bu->getHomeAddressMN(), dest, TUNNEL_HA_OPT);
+//                    createPseudoTunnel(CoA, bu->getHomeAddressMN(), dest, TUNNEL_HA_OPT);
 //                    bubble("Established Type 2 Routing Header path to CN.");
 
                     // statistic collection
@@ -2280,11 +2277,253 @@ void xMIPv6::requestTunnelOutputInterface(Packet *datagram)
          || !rt6->isMobileNode())) // correspondent / non-MIP node
     {
         int interfaceId = (ipv6Header->getProtocolId() == IP_PROT_IPv6EXT_MOB)
-            ? tunneling->getVIfIndexForDest(ipv6Header->getDestAddress(), Ipv6Tunneling::NORMAL)
-            : tunneling->getVIfIndexForDest(ipv6Header->getDestAddress());
+            ? getVIfIndexForDest(ipv6Header->getDestAddress(), NORMAL)
+            : getVIfIndexForDest(ipv6Header->getDestAddress());
         if (interfaceId != -1 && interfaceId <= ift->getBiggestInterfaceId())
             datagram->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
     }
+}
+
+//
+// IP tunnel management (RFC 2473), moved here from the former Ipv6Tunneling module.
+// The backing Ipv6TunnelInterface is created/destroyed by the (always-present)
+// Ipv6RoutingTable; xMIPv6 only keeps the registry of tunnels and the policy for
+// steering home-address traffic onto them.
+//
+
+int xMIPv6::createTunnel(TunnelType tunnelType,
+        const Ipv6Address& entry, const Ipv6Address& exit, const Ipv6Address& destTrigger)
+{
+    ASSERT(entry != Ipv6Address::UNSPECIFIED_ADDRESS);
+    ASSERT(exit != Ipv6Address::UNSPECIFIED_ADDRESS);
+
+    // Test for entry and exit point node pointing to same node i.e. localDeliver
+    // addresses to prevent loopback encapsulation 4.1.2
+    if ((tunnelType == NORMAL || tunnelType == SPLIT || tunnelType == NON_SPLIT)
+        && rt6->isLocalAddress(entry) && rt6->isLocalAddress(exit))
+    {
+        EV_INFO << "Cannot create tunnel with local endpoints (prevents loopback tunneling)" << endl;
+        return 0;
+    }
+
+    int search = findTunnel(entry, exit, destTrigger);
+    if (search != 0) {
+        EV_INFO << "Tunnel with entry = " << entry << ", exit = " << exit << " and trigger = "
+                << destTrigger << " already exists!" << endl;
+        return search;
+    }
+
+    if ((destTrigger == Ipv6Address::UNSPECIFIED_ADDRESS) && (noOfNonSplitTunnels == 1))
+        throw cRuntimeError("Error: Not more than 1 non-split tunnel supported!");
+
+    // 6.1-6.2
+    ASSERT(entry.isUnicast());
+
+    // The tunnel is backed by a dynamically created Ipv6TunnelInterface: the IPv6
+    // layer routes to it like any interface and the interface performs the
+    // encapsulation. The tunnel is keyed by that interface's id.
+    NetworkInterface *networkInterface = rt6->createTunnelNetworkInterface(entry, exit);
+    int key = networkInterface->getInterfaceId();
+
+    tunnels[key] = Tunnel(entry, exit, destTrigger);
+    tunnels[key].networkInterface = networkInterface;
+
+    if (destTrigger == Ipv6Address::UNSPECIFIED_ADDRESS) {
+        // this is a "full" tunnel over which everything gets routed
+        tunnels[key].tunnelType = NON_SPLIT;
+        noOfNonSplitTunnels++;
+    }
+
+    EV_INFO << "Tunneling: Created tunnel with entry=" << entry << ", exit=" << exit
+            << " and trigger=" << destTrigger << endl;
+
+    if (hasGUI())
+        bubble("Created Tunnel");
+
+    return key;
+}
+
+int xMIPv6::findTunnel(const Ipv6Address& src, const Ipv6Address& dest,
+        const Ipv6Address& destTrigger) const
+{
+    Tunnel t0(src, dest, destTrigger);
+    for (const auto& tun : tunnels) {
+        if (tun.second == t0)
+            return tun.first;
+    }
+    return 0;
+}
+
+bool xMIPv6::destroyTunnel(const Ipv6Address& src, const Ipv6Address& dest,
+        const Ipv6Address& destTrigger)
+{
+    EV_INFO << "Destroy tunnel entry =" << src << ", exit = " << dest
+            << ", destTrigger = " << destTrigger << "\n";
+
+    // search for tunnel with given entry and exit point as well as trigger
+    int vIfIndex = findTunnel(src, dest, destTrigger);
+
+    if (vIfIndex == 0) {
+        EV_WARN << "Tunnel not found\n";
+        return false;
+    }
+
+    // if we delete a non-split tunnel, then we can
+    // also decrement the appropriate counter
+    if (tunnels[vIfIndex].tunnelType == NON_SPLIT)
+        noOfNonSplitTunnels--;
+
+    // tear down the backing virtual interface
+    if (tunnels[vIfIndex].networkInterface)
+        rt6->deleteTunnelNetworkInterface(tunnels[vIfIndex].networkInterface);
+
+    tunnels.erase(vIfIndex);
+
+    if (hasGUI())
+        bubble("Destroyed Tunnel");
+
+    return true;
+}
+
+void xMIPv6::destroyTunnel(const Ipv6Address& entry, const Ipv6Address& exit)
+{
+    for (auto it = tunnels.begin(); it != tunnels.end();) {
+        if (it->second.entry == entry && it->second.exit == exit) {
+            destroyTunnel(it->second.entry, it->second.exit, it->second.destTrigger);
+            break;
+        }
+        else
+            ++it;
+    }
+}
+
+void xMIPv6::destroyTunnelForExitAndTrigger(const Ipv6Address& exit, const Ipv6Address& trigger)
+{
+    for (auto it = tunnels.begin(); it != tunnels.end();) {
+        if (it->second.exit == exit && it->second.destTrigger == trigger) {
+            destroyTunnel(it->second.entry, it->second.exit, it->second.destTrigger);
+            break;
+        }
+        else
+            ++it;
+    }
+}
+
+void xMIPv6::destroyTunnelForEntryAndTrigger(const Ipv6Address& entry, const Ipv6Address& trigger)
+{
+    for (auto it = tunnels.begin(); it != tunnels.end();) {
+        if (it->second.entry == entry && it->second.destTrigger == trigger) {
+            destroyTunnel(it->second.entry, it->second.exit, it->second.destTrigger);
+            break;
+        }
+        else
+            ++it;
+    }
+}
+
+void xMIPv6::destroyTunnels(const Ipv6Address& entry)
+{
+    for (auto it = tunnels.begin(); it != tunnels.end();) {
+        if (it->second.entry == entry) {
+            auto oldIt = it;
+            ++it;
+            destroyTunnel(oldIt->second.entry, oldIt->second.exit, oldIt->second.destTrigger);
+        }
+        else
+            ++it;
+    }
+}
+
+void xMIPv6::destroyTunnelFromTrigger(const Ipv6Address& trigger)
+{
+    for (auto& elem : tunnels) {
+        if (elem.second.destTrigger == trigger) {
+            destroyTunnel(elem.second.entry, elem.second.exit, elem.second.destTrigger);
+            return; // there can not be more than one tunnel for a trigger
+        }
+    }
+}
+
+int xMIPv6::getVIfIndexForDest(const Ipv6Address& destAddress)
+{
+    EV_INFO << "Looking up tunnels...";
+
+    // first we look for tunnels with destAddress as trigger
+    int vIfIndex = lookupTunnels(destAddress);
+
+    if (vIfIndex == -1) {
+        // then the only chance left for finding a suitable tunnel
+        // is to find a non-split tunnel
+        vIfIndex = doPrefixMatch(destAddress);
+    }
+
+    EV_DETAIL << "found vIf=" << vIfIndex << endl;
+
+    return vIfIndex;
+}
+
+int xMIPv6::getVIfIndexForDest(const Ipv6Address& destAddress, TunnelType tunnelType)
+{
+    int outInterfaceId = -1;
+
+    for (auto& elem : tunnels) {
+        if (tunnelType == NORMAL || tunnelType == NON_SPLIT || tunnelType == SPLIT) {
+            // we search here for tunnels which have a destination trigger and
+            // check whether the trigger is equal to the destination
+            // only "normal" tunnels, both split and non-split, are possible entry points
+            if ((elem.second.tunnelType == NON_SPLIT) ||
+                (elem.second.tunnelType == SPLIT && elem.second.destTrigger == destAddress))
+            {
+                outInterfaceId = elem.first;
+                break;
+            }
+        }
+    }
+
+    return outInterfaceId;
+}
+
+int xMIPv6::lookupTunnels(const Ipv6Address& dest)
+{
+    int outInterfaceId = -1;
+
+    // we search here for tunnels which have a destination trigger and
+    // check whether the trigger is equal to the destination
+    // only split tunnels are possible entry points
+    for (auto& elem : tunnels) {
+        if ((elem.second.tunnelType != NON_SPLIT) && (elem.second.destTrigger == dest)) {
+            outInterfaceId = elem.first;
+            break;
+        }
+    }
+
+    return outInterfaceId;
+}
+
+int xMIPv6::doPrefixMatch(const Ipv6Address& dest)
+{
+    int outInterfaceId = -1;
+
+    // we'll just stop at the first match, because it is assumed that not
+    // more than a single non-split tunnel is possible
+    for (auto& elem : tunnels) {
+        if (elem.second.tunnelType == NON_SPLIT) {
+            outInterfaceId = elem.first;
+            break;
+        }
+    }
+
+    return outInterfaceId;
+}
+
+bool xMIPv6::isTunnelExit(const Ipv6Address& exit)
+{
+    for (auto& elem : tunnels) {
+        if (elem.second.exit == exit)
+            return true;
+    }
+
+    return false;
 }
 
 INetfilter::IHook::Result xMIPv6::datagramPreRoutingHook(Packet *datagram)
@@ -2298,7 +2537,7 @@ INetfilter::IHook::Result xMIPv6::datagramPreRoutingHook(Packet *datagram)
     // datagram has no L3AddressInd at this point.
     if (rt6->isHomeAgent()) {
         const auto& l3Ind = datagram->findTag<L3AddressInd>();
-        if (l3Ind != nullptr && !tunneling->isTunnelExit(l3Ind->getSrcAddress().toIpv6())) {
+        if (l3Ind != nullptr && !isTunnelExit(l3Ind->getSrcAddress().toIpv6())) {
             EV_INFO << "Dropping packet: tunnel source is not a known tunnel exit point." << endl;
             return DROP;
         }
@@ -2518,7 +2757,7 @@ void xMIPv6::cancelEntries(int interfaceId, Ipv6Address& CoA)
 //    Ipv6Address HoA = ie->ipv6()->getMNHomeAddress();
 
     cancelTimerIfEntry(HA, interfaceId, KEY_BU);
-    tunneling->destroyTunnel(CoA, HA);
+    destroyTunnel(CoA, HA);
 
     // ...and then for the CNs
     for (auto it = transmitIfList.begin(); it != transmitIfList.end();) {
@@ -2527,7 +2766,7 @@ void xMIPv6::cancelEntries(int interfaceId, Ipv6Address& CoA)
 
             // destroy tunnel (if we have a BU entry here)
             if ((*oldIt).first.type == KEY_BU)
-                tunneling->destroyTunnelForEntryAndTrigger(CoA, (*oldIt).first.dest);
+                destroyTunnelForEntryAndTrigger(CoA, (*oldIt).first.dest);
                 removeRouteOptimizationForTrigger((*oldIt).first.dest);
 
             // then cancel the pending event
@@ -2766,7 +3005,7 @@ void xMIPv6::handleBULExpiry(cMessage *msg)
         removeTimerEntries(bulExpIfEntry->dest, interfaceID);
 
         // destroy tunnel
-        tunneling->destroyTunnel(bulExpIfEntry->CoA, bulExpIfEntry->dest);
+        destroyTunnel(bulExpIfEntry->CoA, bulExpIfEntry->dest);
 
         // and remove entry from list
         cancelTimerIfEntry(bulExpIfEntry->dest, interfaceID, KEY_BUL_EXP);
@@ -2814,7 +3053,7 @@ void xMIPv6::handleBCExpiry(cMessage *msg)
     bc->deleteEntry(bcExpIfEntry->HoA);
 
     // and remove the tunnel
-    tunneling->destroyTunnelFromTrigger(bcExpIfEntry->HoA);
+    destroyTunnelFromTrigger(bcExpIfEntry->HoA);
     removeRouteOptimizationForTrigger(bcExpIfEntry->HoA);
 
     // and remove entry from list
@@ -2891,6 +3130,9 @@ void xMIPv6::handleStopOperation(LifecycleOperation *operation)
 
     interfaceCoAList.clear();
     cnList.clear();
+
+    tunnels.clear();
+    noOfNonSplitTunnels = 0;
 }
 
 void xMIPv6::handleCrashOperation(LifecycleOperation *operation)
@@ -2904,6 +3146,9 @@ void xMIPv6::handleCrashOperation(LifecycleOperation *operation)
 
     interfaceCoAList.clear();
     cnList.clear();
+
+    tunnels.clear();
+    noOfNonSplitTunnels = 0;
 }
 
 } // namespace inet

@@ -13,10 +13,10 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/stlutils.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #include "inet/networklayer/ipv6/Mipv6InterfaceData.h"
-#include "inet/networklayer/ipv6tunneling/Ipv6Tunneling.h"
 
 namespace inet {
 
@@ -387,8 +387,6 @@ void Ipv6RoutingTable::configureInterfaceFromXml(NetworkInterface *ie, cXMLEleme
 
 void Ipv6RoutingTable::configureTunnelFromXml(cXMLElement *cfg)
 {
-    Ipv6Tunneling *tunneling = getModuleFromPar<Ipv6Tunneling>(par("ipv6TunnelingModule"), this);
-
     // parse basic config (attributes)
     cXMLElementList tunnelList = cfg->getElementsByTagName("tunnelEntry");
     for (auto& elem : tunnelList) {
@@ -408,8 +406,44 @@ void Ipv6RoutingTable::configureTunnelFromXml(cXMLElement *cfg)
         trigger.set(getRequiredAttr(triggerNode, "destination"));
 
         EV_INFO << "New tunnel: " << "entry=" << entry << ",exit=" << exit << ",trigger=" << trigger << endl;
-        tunneling->createTunnel(Ipv6Tunneling::NORMAL, entry, exit, trigger);
+
+        // A tunnel is a dynamically created Ipv6TunnelInterface plus a route that
+        // steers the triggering traffic onto it (the interface performs the
+        // IPv6-in-IPv6 encapsulation, RFC 2473).
+        NetworkInterface *ie = createTunnelNetworkInterface(entry, exit);
+        addStaticRoute(trigger, 128, ie->getInterfaceId(), Ipv6Address::UNSPECIFIED_ADDRESS);
     }
+}
+
+NetworkInterface *Ipv6RoutingTable::createTunnelNetworkInterface(const Ipv6Address& source, const Ipv6Address& destination)
+{
+    cModule *node = getContainingNode(this);
+    cModuleType *moduleType = cModuleType::get("inet.networklayer.ipv6tunneling.Ipv6TunnelInterface");
+    std::string name = std::string("ip6tun") + std::to_string(tunnelInterfaceCounter++);
+    cModule *module = moduleType->create(name.c_str(), node);
+    module->par("interfaceTableModule") = check_and_cast<cModule *>(ift.get())->getFullPath().c_str();
+    module->par("source") = source.str().c_str();
+    module->par("destination") = destination.str().c_str();
+    module->finalizeParameters();
+    module->buildInside();
+
+    // wire it into the node's link-layer dispatcher exactly as LinkLayerNodeBase
+    // wires its static tun[] slot: tun.upperLayerOut --> li.in++, li.out++ --> tun.upperLayerIn
+    cModule *li = node->getSubmodule("li");
+    cGate *liOut = li->getOrCreateFirstUnconnectedGate("out", 0, false, true);
+    cGate *liIn = li->getOrCreateFirstUnconnectedGate("in", 0, false, true);
+    liOut->connectTo(module->gate("upperLayerIn"));
+    module->gate("upperLayerOut")->connectTo(liIn);
+
+    module->callInitialize();
+    return check_and_cast<NetworkInterface *>(module);
+}
+
+void Ipv6RoutingTable::deleteTunnelNetworkInterface(NetworkInterface *networkInterface)
+{
+    // InterfaceTable::deleteInterface() removes the interface from the table and
+    // deletes the module (which disconnects its gates), so nothing else is needed.
+    ift->deleteInterface(networkInterface);
 }
 
 NetworkInterface *Ipv6RoutingTable::getInterfaceByAddress(const Ipv6Address& addr) const
