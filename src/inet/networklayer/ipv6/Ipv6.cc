@@ -778,9 +778,18 @@ void Ipv6::localDeliver(Packet *packet, const NetworkInterface *fromIE)
     if (protocol == &Protocol::icmpv6) {
         handleReceivedIcmp(packet);
     } // Added by WEI to forward ICMPv6 msgs to ICMPv6 module.
-    else if (protocol == &Protocol::ipv4 || protocol == &Protocol::ipv6) {
+    else if (protocol == &Protocol::ipv6) {
         EV_INFO << "Tunnelled IP datagram\n";
-        send(packet, "upperTunnelingOut");
+        // Generic IPv6-in-IPv6 decapsulation (RFC 2473): the decapsulated inner
+        // datagram is re-processed as if received from the network, so it is routed
+        // or forwarded -- and seen by the netfilter pre-routing hooks -- normally.
+        // The L3AddressInd left by decapsulate() carries the tunnel (outer) source.
+        packet->removeTagIfPresent<InterfaceReq>();
+        auto verdict = datagramPreRoutingHook(packet);
+        if (verdict == INetfilter::IHook::ACCEPT)
+            preroutingFinish(packet, fromIE, nullptr, Ipv6Address::UNSPECIFIED_ADDRESS);
+        else if (verdict == INetfilter::IHook::DROP)
+            delete packet;
     }
     else if (contains(upperProtocols, protocol)) {
         EV_INFO << "Passing up to protocol " << *protocol << "\n";

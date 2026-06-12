@@ -2292,6 +2292,18 @@ INetfilter::IHook::Result xMIPv6::datagramPreRoutingHook(Packet *datagram)
     // a home agent forwarding home-address-destined traffic sends it out the tunnel
     requestTunnelOutputInterface(datagram);
 
+    // RFC 3775 10.4.5: a home agent must verify that a datagram tunnelled to it came
+    // from a known tunnel exit. A decapsulated inner datagram carries the outer (tunnel)
+    // source in the L3AddressInd that Ipv6::decapsulate() left on it; an ordinary
+    // datagram has no L3AddressInd at this point.
+    if (rt6->isHomeAgent()) {
+        const auto& l3Ind = datagram->findTag<L3AddressInd>();
+        if (l3Ind != nullptr && !tunneling->isTunnelExit(l3Ind->getSrcAddress().toIpv6())) {
+            EV_INFO << "Dropping packet: tunnel source is not a known tunnel exit point." << endl;
+            return DROP;
+        }
+    }
+
     if (!rt6->isMobileNode())
         return ACCEPT;
 
