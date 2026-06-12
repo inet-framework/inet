@@ -688,7 +688,7 @@ void DhcpClient::sendRequest(bool retransmit)
     request->setHlen(6); // hardware Address length (6 octets)
     request->setHops(0);
     request->setXid(xid); // transaction id
-    request->setSecs((uint16_t)(simTime() - dhcpStartTime).dbl()); // seconds since DHCP process started
+    request->setSecs((uint16_t)std::min((simTime() - dhcpStartTime).dbl(), 65535.0)); // seconds since DHCP process started (RFC 2131: field is 16-bit, saturate)
     // RFC 2131, 4.1: set BROADCAST if client cannot receive unicasts (no IP yet)
     request->setBroadcast(clientState == REQUESTING || clientState == REBOOTING || clientState == INIT_REBOOT);
     request->setYiaddr(Ipv4Address()); // no 'your IP' addr
@@ -765,7 +765,7 @@ void DhcpClient::sendDiscover(bool retransmit)
     discover->setHlen(6); // hardware Address lenght (6 octets)
     discover->setHops(0);
     discover->setXid(xid); // transaction id
-    discover->setSecs((uint16_t)(simTime() - dhcpStartTime).dbl()); // seconds since DHCP process started
+    discover->setSecs((uint16_t)std::min((simTime() - dhcpStartTime).dbl(), 65535.0)); // seconds since DHCP process started (RFC 2131: field is 16-bit, saturate)
     discover->setBroadcast(true); // client cannot receive unicasts yet (no IP configured)
     discover->setChaddr(macAddress); // my mac address
     discover->setSname(""); // no server name given
@@ -842,7 +842,7 @@ void DhcpClient::sendInformRequest()
     inform->setHlen(6); // hardware address length (6 octets)
     inform->setHops(0);
     inform->setXid(xid); // transaction id
-    inform->setSecs((uint16_t)(simTime() - dhcpStartTime).dbl()); // seconds since process started
+    inform->setSecs((uint16_t)std::min((simTime() - dhcpStartTime).dbl(), 65535.0)); // seconds since process started (RFC 2131: field is 16-bit, saturate)
     // The client already has a usable address and can receive unicast, so the
     // broadcast flag stays clear (RFC 2131 §4.4.3).
     inform->setBroadcast(false);
