@@ -42,7 +42,7 @@ std::string InterfaceTableVisualizerBase::DirectiveResolver::resolveDirective(ch
         case 'l': // TODO Ipv4 or Ipv6
 #ifdef INET_WITH_IPv4
             if (auto ipv4Data = networkInterface->findProtocolData<Ipv4InterfaceData>())
-                return std::to_string(ipv4Data->getNetmask().getNetmaskLength());
+                return ipv4Data->getIPAddress().isUnspecified() ? "" : std::to_string(ipv4Data->getNetmask().getNetmaskLength());
 #endif // INET_WITH_IPv4
             return "";
         case '4':
