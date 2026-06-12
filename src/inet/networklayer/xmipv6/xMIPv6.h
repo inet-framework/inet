@@ -19,6 +19,7 @@
 #include "inet/common/lifecycle/ModuleOperations.h"
 
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
+#include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/ipv6/IIpv6ExtensionHeaderHandler.h"
 #include "inet/networklayer/ipv6tunneling/Ipv6Tunneling.h"
 #include "inet/networklayer/xmipv6/BindingUpdateList.h"
@@ -59,7 +60,7 @@ enum TimerIfEntryType {
 /**
  * Implements RFC 3775 Mobility Support in Ipv6.
  */
-class INET_API xMIPv6 : public OperationalBase, public IIpv6ExtensionHeaderHandler, public IIpv6TlvOptionHandler
+class INET_API xMIPv6 : public OperationalBase, public IIpv6ExtensionHeaderHandler, public IIpv6TlvOptionHandler, public NetfilterBase::HookBase
 {
   public:
     virtual ~xMIPv6();
@@ -398,6 +399,35 @@ class INET_API xMIPv6 : public OperationalBase, public IIpv6ExtensionHeaderHandl
     virtual bool processExtensionHeader(Packet *packet, const Ipv6ExtensionHeader *eh) override;
     // IIpv6TlvOptionHandler
     virtual bool processTlvOption(Packet *packet, const Ipv6ExtensionHeader *eh, const TlvOptionBase *option) override;
+
+    // INetfilter::IHook -- xMIPv6 inserts the Type 2 Routing Header (CN->MN) and
+    // the Home Address Option (MN->CN) on locally-originated, route-optimized
+    // traffic via the datagramLocalOutHook (instead of the old T2RH/HA_OPT
+    // pseudo-tunnels in Ipv6Tunneling).
+    virtual Result datagramPreRoutingHook(Packet *datagram) override { return ACCEPT; }
+    virtual Result datagramForwardHook(Packet *datagram) override { return ACCEPT; }
+    virtual Result datagramPostRoutingHook(Packet *datagram) override { return ACCEPT; }
+    virtual Result datagramLocalInHook(Packet *datagram) override { return ACCEPT; }
+    virtual Result datagramLocalOutHook(Packet *datagram) override;
+
+    /**
+     * A route-optimization extension-header insertion that the local-out hook
+     * applies to outgoing traffic, replacing a T2RH/HA_OPT pseudo-tunnel.
+     */
+    struct RouteOptimization {
+        enum Type { TYPE2_ROUTING_HEADER, HOME_ADDRESS_OPTION };
+        Type type = TYPE2_ROUTING_HEADER;
+        Ipv6Address entry; // T2RH: CN address; HA_OPT: care-of address
+        Ipv6Address exit;  // T2RH: care-of address; HA_OPT: home address
+    };
+
+    // route-optimization insertions, keyed by the destination that triggers them
+    // (T2RH: the MN home address; HA_OPT: the correspondent node address)
+    std::map<Ipv6Address, RouteOptimization> routeOptimizations;
+
+    void addRouteOptimization(RouteOptimization::Type type, const Ipv6Address& entry, const Ipv6Address& exit, const Ipv6Address& trigger);
+    void removeRouteOptimizationForTrigger(const Ipv6Address& trigger);
+    void removeRouteOptimizationForExitAndTrigger(const Ipv6Address& exit, const Ipv6Address& trigger);
 
     /**
      * Perform validity checks according to RFC 3775 - Section 6.4

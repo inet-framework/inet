@@ -137,6 +137,11 @@ void xMIPv6::initialize(int stage)
         ipv6->registerRoutingHeaderHandler(2, this);            // RH Type 2
         ipv6->registerDestinationOptionHandler(IPv6TLVOPTION_HOME_ADDRESS, this);  // Home Address Option
 
+        // Register an output hook to insert the Type 2 Routing Header (CN->MN) and
+        // the Home Address Option (MN->CN) on route-optimized outgoing traffic
+        // (replacing the old T2RH/HA_OPT pseudo-tunnels).
+        ipv6->registerHook(0, this);
+
         // Register for Protocol::mobileipv6 so the dispatcher delivers mobility messages to us
         registerProtocol(Protocol::mobileipv6, gate("toIPv6"), gate("fromIPv6"));
 
@@ -261,6 +266,7 @@ void xMIPv6::initiateMipv6Protocol(NetworkInterface *ie, const Ipv6Address& CoA)
         // care-of token becomes invalid with new CoA
         bul->resetCareOfToken(cn, HoA);
         tunneling->destroyTunnelForExitAndTrigger(HoA, cn);
+        removeRouteOptimizationForExitAndTrigger(HoA, cn);
     }
 }
 
@@ -309,6 +315,7 @@ void xMIPv6::returningHome(const Ipv6Address& CoA, NetworkInterface *ie)
         // destroy the tunnel now
         // we have to as it is invalid (bound to old CoA that is not available anymore)
         tunneling->destroyTunnelForExitAndTrigger(ie->getProtocolData<Mipv6InterfaceData>()->getMNHomeAddress(), *(itCNList));
+        removeRouteOptimizationForExitAndTrigger(ie->getProtocolData<Mipv6InterfaceData>()->getMNHomeAddress(), *(itCNList));
     }
 }
 
@@ -915,10 +922,10 @@ void xMIPv6::processBUMessage(Packet *inPacket, const Ptr<const BindingUpdate>& 
                 // we first destroy the already existing RH2 path if
                 // there exists one
                 Ipv6Address& CNAddress = destAddress;
-                tunneling->destroyTunnelForEntryAndTrigger(CNAddress, HoA);
+                removeRouteOptimizationForTrigger(HoA);
 
-                // establish RH2 pseudo-tunnel at correspondent node
-                tunneling->createTunnel(Ipv6Tunneling::T2RH, CNAddress, CoA, HoA);
+                // establish the Type 2 Routing Header route optimization at the correspondent node
+                addRouteOptimization(RouteOptimization::TYPE2_ROUTING_HEADER, CNAddress, CoA, HoA);
 
                 // cancel existing Binding Refresh Request timer
                 // (if there exists one)
@@ -1214,8 +1221,8 @@ void xMIPv6::processBAMessage(Packet *inPacket, const Ptr<const BindingAcknowled
                     /*statVectorBAfromHA.record(1);*/
                 }
                 else if (entry->BAck == false) { // BA from CN
-                    tunneling->destroyTunnelForExitAndTrigger(entry->homeAddress, baSource);
-                    tunneling->createTunnel(Ipv6Tunneling::HA_OPT, entry->careOfAddress, entry->homeAddress, baSource);
+                    removeRouteOptimizationForExitAndTrigger(entry->homeAddress, baSource);
+                    addRouteOptimization(RouteOptimization::HOME_ADDRESS_OPTION, entry->careOfAddress, entry->homeAddress, baSource);
 //                    tunneling->createPseudoTunnel(CoA, bu->getHomeAddressMN(), dest, TUNNEL_HA_OPT);
 //                    bubble("Established Type 2 Routing Header path to CN.");
 
@@ -2174,6 +2181,91 @@ bool xMIPv6::processHoAOpt(Packet *packet, HomeAddressOption *hoaOpt)
     }
 }
 
+void xMIPv6::addRouteOptimization(RouteOptimization::Type type, const Ipv6Address& entry, const Ipv6Address& exit, const Ipv6Address& trigger)
+{
+    RouteOptimization ro;
+    ro.type = type;
+    ro.entry = entry;
+    ro.exit = exit;
+    routeOptimizations[trigger] = ro;
+}
+
+void xMIPv6::removeRouteOptimizationForTrigger(const Ipv6Address& trigger)
+{
+    routeOptimizations.erase(trigger);
+}
+
+void xMIPv6::removeRouteOptimizationForExitAndTrigger(const Ipv6Address& exit, const Ipv6Address& trigger)
+{
+    auto it = routeOptimizations.find(trigger);
+    if (it != routeOptimizations.end() && it->second.exit == exit)
+        routeOptimizations.erase(it);
+}
+
+INetfilter::IHook::Result xMIPv6::datagramLocalOutHook(Packet *datagram)
+{
+    if (routeOptimizations.empty())
+        return ACCEPT;
+
+    const auto& ipv6Header = datagram->peekAtFront<Ipv6Header>();
+    // Route optimization (T2RH/HA_OPT) must not be applied to mobility messages
+    // (RFC 3775): those reach a mobile node through the home agent tunnel instead.
+    if (ipv6Header->getProtocolId() == IP_PROT_IPv6EXT_MOB)
+        return ACCEPT;
+    auto it = routeOptimizations.find(ipv6Header->getDestAddress());
+    if (it == routeOptimizations.end())
+        return ACCEPT;
+    const RouteOptimization& ro = it->second;
+
+    if (ro.type == RouteOptimization::TYPE2_ROUTING_HEADER) {
+        // CN -> MN: the destination is the MN's home address (the trigger). Send to
+        // the care-of address (exit) and carry the home address in a Type 2 Routing
+        // Header so the MN can restore the original destination (RFC 3775 6.4.1).
+        Ipv6Address homeAddress = ipv6Header->getDestAddress();
+        auto header = datagram->removeAtFront<Ipv6Header>();
+        IpProtocolId transportProtocol = header->getProtocolId();
+
+        auto t2RH = makeShared<Ipv6RoutingHeader>();
+        t2RH->setRoutingType(2);
+        t2RH->setSegmentsLeft(1);
+        t2RH->setAddressArraySize(1);
+        t2RH->setChunkLength(B(8 + 1 * 16));
+        t2RH->setAddress(0, homeAddress);
+        t2RH->setNextHeaderProtocol(transportProtocol);
+
+        header->setDestAddress(ro.exit);
+        header->setProtocolId(static_cast<IpProtocolId>(t2RH->getExtensionType()));
+
+        datagram->insertAtFront(t2RH);
+        datagram->insertAtFront(header);
+        EV_INFO << "Added Type 2 Routing Header." << endl;
+    }
+    else {
+        // MN -> CN: only rewrite packets sourced from the home address. Send from the
+        // care-of address (entry) and carry the home address in a Home Address Option
+        // so the correspondent node can restore the original source.
+        if (!rt6->isHomeAddress(ipv6Header->getSrcAddress()))
+            return ACCEPT;
+        Ipv6Address homeAddress = ro.exit;
+        auto header = datagram->removeAtFront<Ipv6Header>();
+        IpProtocolId transportProtocol = header->getProtocolId();
+
+        auto destOpts = makeShared<Ipv6DestinationOptionsHeader>();
+        auto *haOpt = new HomeAddressOption();
+        haOpt->setHomeAddress(homeAddress);
+        destOpts->getTlvOptionsForUpdate().appendTlvOption(haOpt);
+        destOpts->setNextHeaderProtocol(transportProtocol);
+
+        header->setSrcAddress(ro.entry);
+        header->setProtocolId(static_cast<IpProtocolId>(destOpts->getExtensionType()));
+
+        datagram->insertAtFront(destOpts);
+        datagram->insertAtFront(header);
+        EV_INFO << "Added Home Address Option header." << endl;
+    }
+    return ACCEPT;
+}
+
 bool xMIPv6::processExtensionHeader(Packet *packet, const Ipv6ExtensionHeader *eh)
 {
     auto *rh = check_and_cast<const Ipv6RoutingHeader *>(eh);
@@ -2369,6 +2461,7 @@ void xMIPv6::cancelEntries(int interfaceId, Ipv6Address& CoA)
             // destroy tunnel (if we have a BU entry here)
             if ((*oldIt).first.type == KEY_BU)
                 tunneling->destroyTunnelForEntryAndTrigger(CoA, (*oldIt).first.dest);
+                removeRouteOptimizationForTrigger((*oldIt).first.dest);
 
             // then cancel the pending event
             cancelTimerIfEntry((*oldIt).first.dest, (*oldIt).first.interfaceID, (*oldIt).first.type);
@@ -2655,6 +2748,7 @@ void xMIPv6::handleBCExpiry(cMessage *msg)
 
     // and remove the tunnel
     tunneling->destroyTunnelFromTrigger(bcExpIfEntry->HoA);
+    removeRouteOptimizationForTrigger(bcExpIfEntry->HoA);
 
     // and remove entry from list
     cancelTimerIfEntry(bcExpIfEntry->dest, bcExpIfEntry->ifEntry->getInterfaceId(), KEY_BC_EXP);
