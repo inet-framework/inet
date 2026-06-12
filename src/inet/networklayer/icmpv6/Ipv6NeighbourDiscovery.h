@@ -29,7 +29,7 @@ class NetworkInterface;
 class Ipv6Header;
 class Ipv6RoutingTable;
 
-class xMIPv6;
+class Mipv6;
 
 /**
  * Implements RFC 2461 Neighbor Discovery for Ipv6.
@@ -93,7 +93,7 @@ class INET_API Ipv6NeighbourDiscovery : public OperationalBase
     ModuleRefByPar<Icmpv6> icmpv6;
     ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
 
-    ModuleRefByPar<xMIPv6> mipv6; // in case the node has MIP support
+    ModuleRefByPar<Mipv6> mipv6; // in case the node has MIP support
 
     Ipv6NeighbourCache neighbourCache;
     typedef std::vector<cMessage *> RaTimerList;

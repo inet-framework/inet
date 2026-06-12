@@ -113,10 +113,10 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %subst: /omnetpp:://
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-mIPv6Network.MN[0].ipv6.mipv6support.xMobileIPv6: MIPv6 Returning home procedure...
+mIPv6Network.MN[0].ipv6.mipv6: MIPv6 Returning home procedure...
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-mIPv6Network.Home_Agent.ipv6.mipv6support.xMobileIPv6: Deregistered binding
+mIPv6Network.Home_Agent.ipv6.mipv6: Deregistered binding
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out

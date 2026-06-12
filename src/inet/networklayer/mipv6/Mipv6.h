@@ -9,8 +9,8 @@
 //
 //
 
-#ifndef __INET_XMIPV6_H
-#define __INET_XMIPV6_H
+#ifndef __INET_MIPV6_H
+#define __INET_MIPV6_H
 
 #include <map>
 #include <vector>
@@ -22,8 +22,8 @@
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/ipv6/IIpv6ExtensionHeaderHandler.h"
-#include "inet/networklayer/xmipv6/BindingUpdateList.h"
-#include "inet/networklayer/xmipv6/MobilityHeader_m.h" // for HAOpt & RH2
+#include "inet/networklayer/mipv6/BindingUpdateList.h"
+#include "inet/networklayer/mipv6/MobilityHeader_m.h" // for HAOpt & RH2
 
 namespace inet {
 
@@ -59,10 +59,10 @@ enum TimerIfEntryType {
 /**
  * Implements RFC 3775 Mobility Support in Ipv6.
  */
-class INET_API xMIPv6 : public OperationalBase, public IIpv6ExtensionHeaderHandler, public IIpv6TlvOptionHandler, public NetfilterBase::HookBase
+class INET_API Mipv6 : public OperationalBase, public IIpv6ExtensionHeaderHandler, public IIpv6TlvOptionHandler, public NetfilterBase::HookBase
 {
   public:
-    virtual ~xMIPv6();
+    virtual ~Mipv6();
 
   protected:
     ModuleRefByPar<IInterfaceTable> ift;
@@ -76,7 +76,7 @@ class INET_API xMIPv6 : public OperationalBase, public IIpv6ExtensionHeaderHandl
     // module. A "tunnel" is a dynamically created Ipv6TunnelInterface (built by
     // Ipv6RoutingTable::createTunnelNetworkInterface) that performs IPv6-in-IPv6
     // encapsulation; the IPv6 layer routes to it like any interface. Tunnels are
-    // indexed by their interface id. xMIPv6 steers home-address traffic onto them
+    // indexed by their interface id. Mipv6 steers home-address traffic onto them
     // via requestTunnelOutputInterface().
     //
     enum TunnelType {
@@ -293,7 +293,7 @@ class INET_API xMIPv6 : public OperationalBase, public IIpv6ExtensionHeaderHandl
      * This method takes an interface and a destination address and returns the appropriate IfEntry for an BU.
      * Is supposed to be used until the valid BA is received for the respective BU.
      */
-    xMIPv6::BuTransmitIfEntry *fetchBUTransmitIfEntry(NetworkInterface *ie, const Ipv6Address& dest);
+    Mipv6::BuTransmitIfEntry *fetchBUTransmitIfEntry(NetworkInterface *ie, const Ipv6Address& dest);
 
     /**
      * Append tags to the Mobility Messages (BU, BA etc) and send it out to the Ipv6 Module
@@ -464,7 +464,7 @@ class INET_API xMIPv6 : public OperationalBase, public IIpv6ExtensionHeaderHandl
     // IIpv6TlvOptionHandler
     virtual bool processTlvOption(Packet *packet, const Ipv6ExtensionHeader *eh, const TlvOptionBase *option) override;
 
-    // INetfilter::IHook -- xMIPv6 inserts the Type 2 Routing Header (CN->MN) and
+    // INetfilter::IHook -- Mipv6 inserts the Type 2 Routing Header (CN->MN) and
     // the Home Address Option (MN->CN) on locally-originated, route-optimized
     // traffic via the datagramLocalOutHook (instead of the old T2RH/HA_OPT
     // pseudo-tunnels in Ipv6Tunneling).

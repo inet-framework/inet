@@ -473,7 +473,7 @@
   ],
   "Xmipv6": [
    "inet.networklayer.xmipv6",
-   "inet.node.xmipv6"
+   "inet.node.mipv6"
   ],
   "Xmipv6Examples": [
    "inet.examples.mobileipv6"
@@ -614,7 +614,7 @@
   "inet.node.rtp",
   "inet.node.tsn",
   "inet.node.wireless",
-  "inet.node.xmipv6",
+  "inet.node.mipv6",
   "inet.physicallayer.common",
   "inet.physicallayer.wired.common",
   "inet.physicallayer.wired.ethernet",
@@ -854,7 +854,7 @@
   "src/inet/node/rtp": "inet.node.rtp",
   "src/inet/node/tsn": "inet.node.tsn",
   "src/inet/node/wireless": "inet.node.wireless",
-  "src/inet/node/xmipv6": "inet.node.xmipv6",
+  "src/inet/node/xmipv6": "inet.node.mipv6",
   "src/inet/physicallayer/common": "inet.physicallayer.common",
   "src/inet/physicallayer/wired/common": "inet.physicallayer.wired.common",
   "src/inet/physicallayer/wired/ethernet": "inet.physicallayer.wired.ethernet",
@@ -1198,7 +1198,7 @@
   "inet.networklayer.wiseroute": "WiseRoute",
   "inet.linklayer.xmac": "XMac",
   "inet.networklayer.xmipv6": "Xmipv6",
-  "inet.node.xmipv6": "Xmipv6",
+  "inet.node.mipv6": "Xmipv6",
   "inet.examples.mobileipv6": "Xmipv6Examples",
   "inet.linklayer.configurator.gatescheduling.z3": "Z3GateSchedulingConfigurator"
  },

@@ -9,7 +9,7 @@
 //
 //
 
-#include "inet/networklayer/xmipv6/xMIPv6.h"
+#include "inet/networklayer/mipv6/Mipv6.h"
 
 #include <algorithm>
 
@@ -31,8 +31,8 @@
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #include "inet/networklayer/ipv6/Mipv6InterfaceData.h"
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
-#include "inet/networklayer/xmipv6/BindingCache.h"
-#include "inet/networklayer/xmipv6/BindingUpdateList.h"
+#include "inet/networklayer/mipv6/BindingCache.h"
+#include "inet/networklayer/mipv6/BindingUpdateList.h"
 
 namespace inet {
 
@@ -65,7 +65,7 @@ constexpr int SIZE_COT                  = 18;   // 6.1.6 CoT = 144 bit
 constexpr int SIZE_BE                   = 18;   // 6.1.9 BE message = 144 bit
 constexpr int SIZE_BRR                  = 2;    // 6.1.2 BRR reserved = 16 bit
 
-Define_Module(xMIPv6);
+Define_Module(Mipv6);
 
 /**
  * Destructur
@@ -73,7 +73,7 @@ Define_Module(xMIPv6);
  * Ensures that the memory from the list with all TimerIfEntry's gets
  * properly released.
  */
-xMIPv6::~xMIPv6()
+Mipv6::~Mipv6()
 {
     auto it = transmitIfList.begin();
 
@@ -88,12 +88,12 @@ xMIPv6::~xMIPv6()
     }
 }
 
-void xMIPv6::initialize(int stage)
+void Mipv6::initialize(int stage)
 {
     OperationalBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        EV_TRACE << "Initializing xMIPv6 module" << endl;
+        EV_TRACE << "Initializing Mipv6 module" << endl;
 
         // statistic collection
         /*statVectorBUtoHA.setName("BU to HA");
@@ -129,8 +129,9 @@ void xMIPv6::initialize(int stage)
             bc.reference(this, "bindingCacheModule", true);
         }
 
-        // Register extension header handlers with the Ipv6 module
-        auto *ipv6 = check_and_cast<Ipv6 *>(getModuleByPath("^.^.ipv6"));
+        // Register extension header handlers with the Ipv6 module (a sibling
+        // submodule of this one within the Ipv6NetworkLayer)
+        auto *ipv6 = check_and_cast<Ipv6 *>(getModuleByPath("^.ipv6"));
         ipv6->registerRoutingHeaderHandler(2, this);            // RH Type 2
         ipv6->registerDestinationOptionHandler(IPv6TLVOPTION_HOME_ADDRESS, this);  // Home Address Option
 
@@ -147,7 +148,7 @@ void xMIPv6::initialize(int stage)
     }
 }
 
-void xMIPv6::handleMessageWhenUp(cMessage *msg)
+void Mipv6::handleMessageWhenUp(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
         EV_DETAIL << "Self message received!\n";
@@ -191,7 +192,7 @@ void xMIPv6::handleMessageWhenUp(cMessage *msg)
     }
 }
 
-void xMIPv6::processMobilityMessage(Packet *inPacket)
+void Mipv6::processMobilityMessage(Packet *inPacket)
 {
     const auto& mipv6Msg = inPacket->peekAtFront<MobilityHeader>();
 
@@ -237,7 +238,7 @@ void xMIPv6::processMobilityMessage(Packet *inPacket)
     }
 }
 
-void xMIPv6::initiateMipv6Protocol(NetworkInterface *ie, const Ipv6Address& CoA)
+void Mipv6::initiateMipv6Protocol(NetworkInterface *ie, const Ipv6Address& CoA)
 {
     Enter_Method("initiateMipv6Protocol"); // can be called by NeighborDiscovery module
 
@@ -271,7 +272,7 @@ void xMIPv6::initiateMipv6Protocol(NetworkInterface *ie, const Ipv6Address& CoA)
  * This method destroys the HA tunnel associated to the previous CoA
  * and sends an appropriate BU to the HA.
  */
-void xMIPv6::returningHome(const Ipv6Address& CoA, NetworkInterface *ie)
+void Mipv6::returningHome(const Ipv6Address& CoA, NetworkInterface *ie)
 {
     Enter_Method("returningHome"); // can be called by NeighborDiscovery module
 
@@ -316,7 +317,7 @@ void xMIPv6::returningHome(const Ipv6Address& CoA, NetworkInterface *ie)
     }
 }
 
-void xMIPv6::createBUTimer(const Ipv6Address& buDest, NetworkInterface *ie)
+void Mipv6::createBUTimer(const Ipv6Address& buDest, NetworkInterface *ie)
 {
     // if we send a new BU we can delete any potential existing BUL expiry timer for this destination
     cancelTimerIfEntry(buDest, ie->getInterfaceId(), KEY_BUL_EXP);
@@ -339,7 +340,7 @@ void xMIPv6::createBUTimer(const Ipv6Address& buDest, NetworkInterface *ie)
     }
 }
 
-void xMIPv6::createDeregisterBUTimer(const Ipv6Address& buDest, NetworkInterface *ie)
+void Mipv6::createDeregisterBUTimer(const Ipv6Address& buDest, NetworkInterface *ie)
 {
     /*11.5.4
        The mobile node SHOULD then send a Binding Update to its home agent,
@@ -360,7 +361,7 @@ void xMIPv6::createDeregisterBUTimer(const Ipv6Address& buDest, NetworkInterface
     createBUTimer(buDest, ie, 0, buDest == ie->getProtocolData<Mipv6InterfaceData>()->getHomeAgentAddress());
 }
 
-void xMIPv6::createBUTimer(const Ipv6Address& buDest, NetworkInterface *ie, const uint lifeTime,
+void Mipv6::createBUTimer(const Ipv6Address& buDest, NetworkInterface *ie, const uint lifeTime,
         bool homeRegistration)
 {
     Enter_Method("createBUTimer()");
@@ -405,7 +406,7 @@ void xMIPv6::createBUTimer(const Ipv6Address& buDest, NetworkInterface *ie, cons
     scheduleAfter(SIMTIME_ZERO, buTriggerMsg); // Scheduling a message which will trigger a BU towards buIfEntry->dest
 }
 
-void xMIPv6::sendPeriodicBU(cMessage *msg)
+void Mipv6::sendPeriodicBU(cMessage *msg)
 {
     EV_INFO << "Sending periodic BU message at time: " << simTime() << " seconds." << endl;
     BuTransmitIfEntry *buIfEntry = (BuTransmitIfEntry *)msg->getContextPointer(); // detaching the corresponding buIfEntry pointer
@@ -469,7 +470,7 @@ void xMIPv6::sendPeriodicBU(cMessage *msg)
     scheduleAt(buIfEntry->nextScheduledTime, msg);
 }
 
-void xMIPv6::createAndSendBUMessage(const Ipv6Address& dest, NetworkInterface *ie, const uint buSeq, const uint lifeTime, const int bindAuthData)
+void Mipv6::createAndSendBUMessage(const Ipv6Address& dest, NetworkInterface *ie, const uint buSeq, const uint lifeTime, const int bindAuthData)
 {
     EV_INFO << "Creating and sending Binding Update" << endl;
     // TODO use the globalAddress(Ipv6InterfaceData::CoA) in the address selection somewhere above (caller)
@@ -592,7 +593,7 @@ void xMIPv6::createAndSendBUMessage(const Ipv6Address& dest, NetworkInterface *i
 //    sendMobilityMessageToIPv6Module(bu, dest);
 }
 
-void xMIPv6::updateBUL(BindingUpdate *bu, const Ipv6Address& dest, const Ipv6Address& CoA,
+void Mipv6::updateBUL(BindingUpdate *bu, const Ipv6Address& dest, const Ipv6Address& CoA,
         NetworkInterface *ie, const simtime_t sendTime)
 {
     uint buLife = bu->getLifetime();
@@ -616,7 +617,7 @@ void xMIPv6::updateBUL(BindingUpdate *bu, const Ipv6Address& dest, const Ipv6Add
 //    EV << "#### Updated BUL with lifetime=" << buLife << "and sentTime=" << sentTime << endl;
 }
 
-xMIPv6::BuTransmitIfEntry *xMIPv6::fetchBUTransmitIfEntry(NetworkInterface *ie, const Ipv6Address& dest)
+Mipv6::BuTransmitIfEntry *Mipv6::fetchBUTransmitIfEntry(NetworkInterface *ie, const Ipv6Address& dest)
 {
     // TODO use STL search algorithm
     for (auto& elem : transmitIfList) {
@@ -628,7 +629,7 @@ xMIPv6::BuTransmitIfEntry *xMIPv6::fetchBUTransmitIfEntry(NetworkInterface *ie, 
     return nullptr;
 }
 
-void xMIPv6::sendMobilityMessageToIPv6Module(Packet *msg, const Ipv6Address& destAddr,
+void Mipv6::sendMobilityMessageToIPv6Module(Packet *msg, const Ipv6Address& destAddr,
         const Ipv6Address& srcAddr, int interfaceId, simtime_t sendTime) // overloaded for use at CN - CB
 {
     EV_INFO << "Appending ControlInfo to mobility message\n";
@@ -654,7 +655,7 @@ void xMIPv6::sendMobilityMessageToIPv6Module(Packet *msg, const Ipv6Address& des
 }
 
 /*
-   void xMIPv6::sendMobilityMessageToIPv6Module(cMessage *msg, const Ipv6Address& destAddr)
+   void Mipv6::sendMobilityMessageToIPv6Module(cMessage *msg, const Ipv6Address& destAddr)
    {
     EV << "\n<<======THIS IS THE (SMALL) ROUTINE FOR APPENDING CONTROL INFO TO MOBILITY MESSAGES =====>>\n";
 
@@ -686,7 +687,7 @@ void xMIPv6::sendMobilityMessageToIPv6Module(Packet *msg, const Ipv6Address& des
    }
  */
 
-void xMIPv6::processBUMessage(Packet *inPacket, const Ptr<const BindingUpdate>& bu)
+void Mipv6::processBUMessage(Packet *inPacket, const Ptr<const BindingUpdate>& bu)
 {
     EV_INFO << "Entered BU processing method" << endl;
 
@@ -944,7 +945,7 @@ void xMIPv6::processBUMessage(Packet *inPacket, const Ptr<const BindingUpdate>& 
     delete inPacket;
 }
 
-bool xMIPv6::validateBUMessage(Packet *packet, const Ptr<const BindingUpdate>& bu)
+bool Mipv6::validateBUMessage(Packet *packet, const Ptr<const BindingUpdate>& bu)
 {
     auto ifTag = packet->getTag<InterfaceInd>();
     // Performs BU Validation according to RFC3775 Sec 9.5.1
@@ -1044,7 +1045,7 @@ bool xMIPv6::validateBUMessage(Packet *packet, const Ptr<const BindingUpdate>& b
     return true; // result;
 }
 
-bool xMIPv6::validateBUderegisterMessage(Packet *inPacket, const Ptr<const BindingUpdate>& bu)
+bool Mipv6::validateBUderegisterMessage(Packet *inPacket, const Ptr<const BindingUpdate>& bu)
 {
     /*To begin processing the Binding Update, the home agent MUST perform
        the following test:
@@ -1058,7 +1059,7 @@ bool xMIPv6::validateBUderegisterMessage(Packet *inPacket, const Ptr<const Bindi
            && bc->getHomeRegistration(bu->getHomeAddressMN());
 }
 
-void xMIPv6::createAndSendBAMessage(const Ipv6Address& src, const Ipv6Address& dest,
+void Mipv6::createAndSendBAMessage(const Ipv6Address& src, const Ipv6Address& dest,
         int interfaceId, const BaStatus& baStatus, const uint baSeq,
         const int bindingAuthorizationData, const uint lifeTime, const simtime_t sendTime)
 {
@@ -1126,7 +1127,7 @@ void xMIPv6::createAndSendBAMessage(const Ipv6Address& src, const Ipv6Address& d
         statVectorBAtoMN.record(2);*/
 }
 
-void xMIPv6::processBAMessage(Packet *inPacket, const Ptr<const BindingAcknowledgement>& ba)
+void Mipv6::processBAMessage(Packet *inPacket, const Ptr<const BindingAcknowledgement>& ba)
 {
     EV_TRACE << "\n<<<<<<<<<This is where BA gets processed>>>>>>>>>\n";
 //    bool retransmitBU = false;
@@ -1315,7 +1316,7 @@ void xMIPv6::processBAMessage(Packet *inPacket, const Ptr<const BindingAcknowled
     delete inPacket;
 }
 
-bool xMIPv6::validateBAck(Packet *packet, const BindingAcknowledgement& ba)
+bool Mipv6::validateBAck(Packet *packet, const BindingAcknowledgement& ba)
 {
     /*11.7.3
        Upon receiving a packet carrying a Binding Acknowledgement, a mobile
@@ -1353,7 +1354,7 @@ bool xMIPv6::validateBAck(Packet *packet, const BindingAcknowledgement& ba)
  * Alain Tigyo, 21.03.2008
  * The following code is used for triggering RO to a CN.
  */
-void xMIPv6::triggerRouteOptimization(const Ipv6Address& destAddress, const Ipv6Address& HoA, NetworkInterface *ie)
+void Mipv6::triggerRouteOptimization(const Ipv6Address& destAddress, const Ipv6Address& HoA, NetworkInterface *ie)
 {
     if (bul->getMobilityState(destAddress) == BindingUpdateList::NONE)
         bul->setMobilityState(destAddress, BindingUpdateList::RR);
@@ -1388,7 +1389,7 @@ void xMIPv6::triggerRouteOptimization(const Ipv6Address& destAddress, const Ipv6
     }
 }
 
-void xMIPv6::initReturnRoutability(const Ipv6Address& cnDest, NetworkInterface *ie)
+void Mipv6::initReturnRoutability(const Ipv6Address& cnDest, NetworkInterface *ie)
 {
     EV_TRACE << "Initiating Return Routability...\n";
     Enter_Method("initReturnRoutability()");
@@ -1459,7 +1460,7 @@ void xMIPv6::initReturnRoutability(const Ipv6Address& cnDest, NetworkInterface *
     }
 }
 
-void xMIPv6::createTestInitTimer(const Ptr<MobilityHeader> testInit, const Ipv6Address& dest, NetworkInterface *ie, simtime_t sendTime)
+void Mipv6::createTestInitTimer(const Ptr<MobilityHeader> testInit, const Ipv6Address& dest, NetworkInterface *ie, simtime_t sendTime)
 {
     EV_DETAIL << "\n++++++++++TEST INIT TIMER CREATED AT SIM TIME: " << simTime()
               << " seconds+++++++++++++++++ \n";
@@ -1503,7 +1504,7 @@ void xMIPv6::createTestInitTimer(const Ptr<MobilityHeader> testInit, const Ipv6A
     scheduleAfter(sendTime, testInitTriggerMsg);
 }
 
-void xMIPv6::sendTestInit(cMessage *msg)
+void Mipv6::sendTestInit(cMessage *msg)
 {
     // FIXME the following line is unsafe, rewrite it
     TestInitTransmitIfEntry *tiIfEntry = (TestInitTransmitIfEntry *)msg->getContextPointer(); // check_and_cast<TestInitTransmitIfEntry*>((TestInitTransmitIfEntry*) msg->contextPointer());
@@ -1593,7 +1594,7 @@ void xMIPv6::sendTestInit(cMessage *msg)
 //    delete msg;
 }
 
-/*void xMIPv6::resetTestInitIfEntry(const Ipv6Address& dest, int interfaceID, int msgType)
+/*void Mipv6::resetTestInitIfEntry(const Ipv6Address& dest, int interfaceID, int msgType)
    {
     ASSERT(msgType == KEY_HI || msgType == KEY_CI);
 
@@ -1622,7 +1623,7 @@ void xMIPv6::sendTestInit(cMessage *msg)
     // TODO check for token expiry in BUL
    }*/
 
-/*void xMIPv6::resetTestInitIfEntry(const Ipv6Address& dest, int msgType)
+/*void Mipv6::resetTestInitIfEntry(const Ipv6Address& dest, int msgType)
    {
     ASSERT(msgType == KEY_HI || msgType == KEY_CI);
 
@@ -1653,7 +1654,7 @@ void xMIPv6::sendTestInit(cMessage *msg)
     // TODO check for token expiry in BUL
    }*/
 
-void xMIPv6::resetBUIfEntry(const Ipv6Address& dest, int interfaceID, simtime_t retransmissionTime)
+void Mipv6::resetBUIfEntry(const Ipv6Address& dest, int interfaceID, simtime_t retransmissionTime)
 {
     /*ASSERT(msgType == KEY_BU);
        Key key(dest, interfaceID, msgType);*/
@@ -1680,7 +1681,7 @@ void xMIPv6::resetBUIfEntry(const Ipv6Address& dest, int interfaceID, simtime_t 
     EV_INFO << "Updated BuTransmitIfEntry and corresponding timer.\n";
 }
 
-void xMIPv6::createAndSendHoTIMessage(const Ipv6Address& cnDest, NetworkInterface *ie)
+void Mipv6::createAndSendHoTIMessage(const Ipv6Address& cnDest, NetworkInterface *ie)
 {
     const auto& HoTI = makeShared<HomeTestInit>();
     HoTI->setMobilityHeaderType(HOME_TEST_INIT);
@@ -1691,7 +1692,7 @@ void xMIPv6::createAndSendHoTIMessage(const Ipv6Address& cnDest, NetworkInterfac
     createTestInitTimer(HoTI, cnDest, ie);
 }
 
-void xMIPv6::createAndSendCoTIMessage(const Ipv6Address& cnDest, NetworkInterface *ie)
+void Mipv6::createAndSendCoTIMessage(const Ipv6Address& cnDest, NetworkInterface *ie)
 {
     const auto& CoTI = makeShared<CareOfTestInit>();
     CoTI->setMobilityHeaderType(CARE_OF_TEST_INIT);
@@ -1702,7 +1703,7 @@ void xMIPv6::createAndSendCoTIMessage(const Ipv6Address& cnDest, NetworkInterfac
     createTestInitTimer(CoTI, cnDest, ie);
 }
 
-void xMIPv6::processHoTIMessage(Packet *inPacket, const Ptr<const HomeTestInit>& homeTestInit)
+void Mipv6::processHoTIMessage(Packet *inPacket, const Ptr<const HomeTestInit>& homeTestInit)
 {
     // 9.4.1 & 9.4.3
     Ipv6Address srcAddr = inPacket->getTag<L3AddressInd>()->getSrcAddress().toIpv6();
@@ -1726,7 +1727,7 @@ void xMIPv6::processHoTIMessage(Packet *inPacket, const Ptr<const HomeTestInit>&
     delete inPacket;
 }
 
-void xMIPv6::processCoTIMessage(Packet *inPacket, const Ptr<const CareOfTestInit>& coti)
+void Mipv6::processCoTIMessage(Packet *inPacket, const Ptr<const CareOfTestInit>& coti)
 {
     // 9.4.2 & 9.4.4
     Ipv6Address srcAddr = inPacket->getTag<L3AddressInd>()->getSrcAddress().toIpv6();
@@ -1750,7 +1751,7 @@ void xMIPv6::processCoTIMessage(Packet *inPacket, const Ptr<const CareOfTestInit
     delete inPacket;
 }
 
-void xMIPv6::processHoTMessage(Packet *inPacket, const Ptr<const HomeTest>& homeTest)
+void Mipv6::processHoTMessage(Packet *inPacket, const Ptr<const HomeTest>& homeTest)
 {
     if (!validateHoTMessage(inPacket, *homeTest)) {
         EV_WARN << "HoT validation not passed: dropping message" << endl;
@@ -1790,7 +1791,7 @@ void xMIPv6::processHoTMessage(Packet *inPacket, const Ptr<const HomeTest>& home
     delete inPacket;
 }
 
-bool xMIPv6::validateHoTMessage(Packet *inPacket, const HomeTest& homeTest)
+bool Mipv6::validateHoTMessage(Packet *inPacket, const HomeTest& homeTest)
 {
     // RFC - 11.6.2
     Ipv6Address srcAddr = inPacket->getTag<L3AddressInd>()->getSrcAddress().toIpv6();
@@ -1837,7 +1838,7 @@ bool xMIPv6::validateHoTMessage(Packet *inPacket, const HomeTest& homeTest)
     return true;
 }
 
-void xMIPv6::processCoTMessage(Packet *inPacket, const Ptr<const CareOfTest>& CoT)
+void Mipv6::processCoTMessage(Packet *inPacket, const Ptr<const CareOfTest>& CoT)
 {
     if (!validateCoTMessage(inPacket, *CoT)) {
         EV_WARN << "CoT validation not passed: dropping message" << endl;
@@ -1887,7 +1888,7 @@ void xMIPv6::processCoTMessage(Packet *inPacket, const Ptr<const CareOfTest>& Co
     delete inPacket;
 }
 
-bool xMIPv6::validateCoTMessage(Packet *inPacket, const CareOfTest& CoT)
+bool Mipv6::validateCoTMessage(Packet *inPacket, const CareOfTest& CoT)
 {
     // RFC - 11.6.2
     Ipv6Address srcAddr = inPacket->getTag<L3AddressInd>()->getSrcAddress().toIpv6();
@@ -1938,7 +1939,7 @@ bool xMIPv6::validateCoTMessage(Packet *inPacket, const CareOfTest& CoT)
     return true;
 }
 
-bool xMIPv6::checkForBUtoCN(BindingUpdateList::BindingUpdateListEntry& bulEntry, NetworkInterface *ie)
+bool Mipv6::checkForBUtoCN(BindingUpdateList::BindingUpdateListEntry& bulEntry, NetworkInterface *ie)
 {
     EV_INFO << "Checking whether a new BU has to be sent to CN." << endl;
 
@@ -1997,7 +1998,7 @@ bool xMIPv6::checkForBUtoCN(BindingUpdateList::BindingUpdateListEntry& bulEntry,
     }
 }
 
-void xMIPv6::sendBUtoCN(BindingUpdateList::BindingUpdateListEntry& bulEntry, NetworkInterface *ie)
+void Mipv6::sendBUtoCN(BindingUpdateList::BindingUpdateListEntry& bulEntry, NetworkInterface *ie)
 {
     /*11.7.2
        Upon successfully completing the return routability procedure, and
@@ -2019,7 +2020,7 @@ void xMIPv6::sendBUtoCN(BindingUpdateList::BindingUpdateListEntry& bulEntry, Net
 //    createBUTimer(bulEntry.destAddress, ie, false);
 }
 
-bool xMIPv6::processType2RH(Packet *packet, Ipv6RoutingHeader *rh)
+bool Mipv6::processType2RH(Packet *packet, Ipv6RoutingHeader *rh)
 {
     auto ipv6Header = packet->peekAtFront<Ipv6Header>();
 
@@ -2103,7 +2104,7 @@ bool xMIPv6::processType2RH(Packet *packet, Ipv6RoutingHeader *rh)
     }
 }
 
-bool xMIPv6::validateType2RH(const Ipv6Header& ipv6Header, const Ipv6RoutingHeader& rh)
+bool Mipv6::validateType2RH(const Ipv6Header& ipv6Header, const Ipv6RoutingHeader& rh)
 {
     // cf. RFC 3775 - 6.4
 
@@ -2132,7 +2133,7 @@ bool xMIPv6::validateType2RH(const Ipv6Header& ipv6Header, const Ipv6RoutingHead
     return true;
 }
 
-bool xMIPv6::processHoAOpt(Packet *packet, HomeAddressOption *hoaOpt)
+bool Mipv6::processHoAOpt(Packet *packet, HomeAddressOption *hoaOpt)
 {
     auto ipv6Header = packet->peekAtFront<Ipv6Header>();
 
@@ -2178,7 +2179,7 @@ bool xMIPv6::processHoAOpt(Packet *packet, HomeAddressOption *hoaOpt)
     }
 }
 
-void xMIPv6::addRouteOptimization(RouteOptimization::Type type, const Ipv6Address& entry, const Ipv6Address& exit, const Ipv6Address& trigger)
+void Mipv6::addRouteOptimization(RouteOptimization::Type type, const Ipv6Address& entry, const Ipv6Address& exit, const Ipv6Address& trigger)
 {
     RouteOptimization ro;
     ro.type = type;
@@ -2187,19 +2188,19 @@ void xMIPv6::addRouteOptimization(RouteOptimization::Type type, const Ipv6Addres
     routeOptimizations[trigger] = ro;
 }
 
-void xMIPv6::removeRouteOptimizationForTrigger(const Ipv6Address& trigger)
+void Mipv6::removeRouteOptimizationForTrigger(const Ipv6Address& trigger)
 {
     routeOptimizations.erase(trigger);
 }
 
-void xMIPv6::removeRouteOptimizationForExitAndTrigger(const Ipv6Address& exit, const Ipv6Address& trigger)
+void Mipv6::removeRouteOptimizationForExitAndTrigger(const Ipv6Address& exit, const Ipv6Address& trigger)
 {
     auto it = routeOptimizations.find(trigger);
     if (it != routeOptimizations.end() && it->second.exit == exit)
         routeOptimizations.erase(it);
 }
 
-INetfilter::IHook::Result xMIPv6::datagramLocalOutHook(Packet *datagram)
+INetfilter::IHook::Result Mipv6::datagramLocalOutHook(Packet *datagram)
 {
     const auto& ipv6Header = datagram->peekAtFront<Ipv6Header>();
 
@@ -2263,7 +2264,7 @@ INetfilter::IHook::Result xMIPv6::datagramLocalOutHook(Packet *datagram)
     return ACCEPT;
 }
 
-void xMIPv6::requestTunnelOutputInterface(Packet *datagram)
+void Mipv6::requestTunnelOutputInterface(Packet *datagram)
 {
     // Steer home-address-destined traffic (at the home agent, on the forwarding path)
     // and home-address-sourced traffic (at a mobile node, the reverse tunnel) onto the
@@ -2287,11 +2288,11 @@ void xMIPv6::requestTunnelOutputInterface(Packet *datagram)
 //
 // IP tunnel management (RFC 2473), moved here from the former Ipv6Tunneling module.
 // The backing Ipv6TunnelInterface is created/destroyed by the (always-present)
-// Ipv6RoutingTable; xMIPv6 only keeps the registry of tunnels and the policy for
+// Ipv6RoutingTable; Mipv6 only keeps the registry of tunnels and the policy for
 // steering home-address traffic onto them.
 //
 
-int xMIPv6::createTunnel(TunnelType tunnelType,
+int Mipv6::createTunnel(TunnelType tunnelType,
         const Ipv6Address& entry, const Ipv6Address& exit, const Ipv6Address& destTrigger)
 {
     ASSERT(entry != Ipv6Address::UNSPECIFIED_ADDRESS);
@@ -2343,7 +2344,7 @@ int xMIPv6::createTunnel(TunnelType tunnelType,
     return key;
 }
 
-int xMIPv6::findTunnel(const Ipv6Address& src, const Ipv6Address& dest,
+int Mipv6::findTunnel(const Ipv6Address& src, const Ipv6Address& dest,
         const Ipv6Address& destTrigger) const
 {
     Tunnel t0(src, dest, destTrigger);
@@ -2354,7 +2355,7 @@ int xMIPv6::findTunnel(const Ipv6Address& src, const Ipv6Address& dest,
     return 0;
 }
 
-bool xMIPv6::destroyTunnel(const Ipv6Address& src, const Ipv6Address& dest,
+bool Mipv6::destroyTunnel(const Ipv6Address& src, const Ipv6Address& dest,
         const Ipv6Address& destTrigger)
 {
     EV_INFO << "Destroy tunnel entry =" << src << ", exit = " << dest
@@ -2385,7 +2386,7 @@ bool xMIPv6::destroyTunnel(const Ipv6Address& src, const Ipv6Address& dest,
     return true;
 }
 
-void xMIPv6::destroyTunnel(const Ipv6Address& entry, const Ipv6Address& exit)
+void Mipv6::destroyTunnel(const Ipv6Address& entry, const Ipv6Address& exit)
 {
     for (auto it = tunnels.begin(); it != tunnels.end();) {
         if (it->second.entry == entry && it->second.exit == exit) {
@@ -2397,7 +2398,7 @@ void xMIPv6::destroyTunnel(const Ipv6Address& entry, const Ipv6Address& exit)
     }
 }
 
-void xMIPv6::destroyTunnelForExitAndTrigger(const Ipv6Address& exit, const Ipv6Address& trigger)
+void Mipv6::destroyTunnelForExitAndTrigger(const Ipv6Address& exit, const Ipv6Address& trigger)
 {
     for (auto it = tunnels.begin(); it != tunnels.end();) {
         if (it->second.exit == exit && it->second.destTrigger == trigger) {
@@ -2409,7 +2410,7 @@ void xMIPv6::destroyTunnelForExitAndTrigger(const Ipv6Address& exit, const Ipv6A
     }
 }
 
-void xMIPv6::destroyTunnelForEntryAndTrigger(const Ipv6Address& entry, const Ipv6Address& trigger)
+void Mipv6::destroyTunnelForEntryAndTrigger(const Ipv6Address& entry, const Ipv6Address& trigger)
 {
     for (auto it = tunnels.begin(); it != tunnels.end();) {
         if (it->second.entry == entry && it->second.destTrigger == trigger) {
@@ -2421,7 +2422,7 @@ void xMIPv6::destroyTunnelForEntryAndTrigger(const Ipv6Address& entry, const Ipv
     }
 }
 
-void xMIPv6::destroyTunnels(const Ipv6Address& entry)
+void Mipv6::destroyTunnels(const Ipv6Address& entry)
 {
     for (auto it = tunnels.begin(); it != tunnels.end();) {
         if (it->second.entry == entry) {
@@ -2434,7 +2435,7 @@ void xMIPv6::destroyTunnels(const Ipv6Address& entry)
     }
 }
 
-void xMIPv6::destroyTunnelFromTrigger(const Ipv6Address& trigger)
+void Mipv6::destroyTunnelFromTrigger(const Ipv6Address& trigger)
 {
     for (auto& elem : tunnels) {
         if (elem.second.destTrigger == trigger) {
@@ -2444,7 +2445,7 @@ void xMIPv6::destroyTunnelFromTrigger(const Ipv6Address& trigger)
     }
 }
 
-int xMIPv6::getVIfIndexForDest(const Ipv6Address& destAddress)
+int Mipv6::getVIfIndexForDest(const Ipv6Address& destAddress)
 {
     EV_INFO << "Looking up tunnels...";
 
@@ -2462,7 +2463,7 @@ int xMIPv6::getVIfIndexForDest(const Ipv6Address& destAddress)
     return vIfIndex;
 }
 
-int xMIPv6::getVIfIndexForDest(const Ipv6Address& destAddress, TunnelType tunnelType)
+int Mipv6::getVIfIndexForDest(const Ipv6Address& destAddress, TunnelType tunnelType)
 {
     int outInterfaceId = -1;
 
@@ -2483,7 +2484,7 @@ int xMIPv6::getVIfIndexForDest(const Ipv6Address& destAddress, TunnelType tunnel
     return outInterfaceId;
 }
 
-int xMIPv6::lookupTunnels(const Ipv6Address& dest)
+int Mipv6::lookupTunnels(const Ipv6Address& dest)
 {
     int outInterfaceId = -1;
 
@@ -2500,7 +2501,7 @@ int xMIPv6::lookupTunnels(const Ipv6Address& dest)
     return outInterfaceId;
 }
 
-int xMIPv6::doPrefixMatch(const Ipv6Address& dest)
+int Mipv6::doPrefixMatch(const Ipv6Address& dest)
 {
     int outInterfaceId = -1;
 
@@ -2516,7 +2517,7 @@ int xMIPv6::doPrefixMatch(const Ipv6Address& dest)
     return outInterfaceId;
 }
 
-bool xMIPv6::isTunnelExit(const Ipv6Address& exit)
+bool Mipv6::isTunnelExit(const Ipv6Address& exit)
 {
     for (auto& elem : tunnels) {
         if (elem.second.exit == exit)
@@ -2526,7 +2527,7 @@ bool xMIPv6::isTunnelExit(const Ipv6Address& exit)
     return false;
 }
 
-INetfilter::IHook::Result xMIPv6::datagramPreRoutingHook(Packet *datagram)
+INetfilter::IHook::Result Mipv6::datagramPreRoutingHook(Packet *datagram)
 {
     // a home agent forwarding home-address-destined traffic sends it out the tunnel
     requestTunnelOutputInterface(datagram);
@@ -2572,19 +2573,19 @@ INetfilter::IHook::Result xMIPv6::datagramPreRoutingHook(Packet *datagram)
     return ACCEPT;
 }
 
-bool xMIPv6::processExtensionHeader(Packet *packet, const Ipv6ExtensionHeader *eh)
+bool Mipv6::processExtensionHeader(Packet *packet, const Ipv6ExtensionHeader *eh)
 {
     auto *rh = check_and_cast<const Ipv6RoutingHeader *>(eh);
     return processType2RH(packet, const_cast<Ipv6RoutingHeader *>(rh));
 }
 
-bool xMIPv6::processTlvOption(Packet *packet, const Ipv6ExtensionHeader *eh, const TlvOptionBase *option)
+bool Mipv6::processTlvOption(Packet *packet, const Ipv6ExtensionHeader *eh, const TlvOptionBase *option)
 {
     auto *hao = check_and_cast<const HomeAddressOption *>(option);
     return processHoAOpt(packet, const_cast<HomeAddressOption *>(hao));
 }
 
-void xMIPv6::createAndSendBEMessage(const Ipv6Address& dest, const BeStatus& beStatus)
+void Mipv6::createAndSendBEMessage(const Ipv6Address& dest, const BeStatus& beStatus)
 {
     EV_TRACE << "\n<<<<<<<<< Entered createAndSendBEMessage() Function>>>>>>>\n";
 
@@ -2600,7 +2601,7 @@ void xMIPv6::createAndSendBEMessage(const Ipv6Address& dest, const BeStatus& beS
     sendMobilityMessageToIPv6Module(packet, dest);
 }
 
-bool xMIPv6::cancelTimerIfEntry(const Ipv6Address& dest, int interfaceID, int msgType)
+bool Mipv6::cancelTimerIfEntry(const Ipv6Address& dest, int interfaceID, int msgType)
 {
     Key key(dest, interfaceID, msgType);
     auto pos = transmitIfList.find(key);
@@ -2624,7 +2625,7 @@ bool xMIPv6::cancelTimerIfEntry(const Ipv6Address& dest, int interfaceID, int ms
     return true;
 }
 
-bool xMIPv6::pendingTimerIfEntry(Ipv6Address& dest, int interfaceID, int msgType)
+bool Mipv6::pendingTimerIfEntry(Ipv6Address& dest, int interfaceID, int msgType)
 {
     Key key(dest, interfaceID, msgType);
     // return true if there is an entry
@@ -2632,7 +2633,7 @@ bool xMIPv6::pendingTimerIfEntry(Ipv6Address& dest, int interfaceID, int msgType
     return containsKey(transmitIfList, key);
 }
 
-xMIPv6::TimerIfEntry *xMIPv6::getTimerIfEntry(Key& key, int timerType)
+Mipv6::TimerIfEntry *Mipv6::getTimerIfEntry(Key& key, int timerType)
 {
     TimerIfEntry *ifEntry;
     auto pos = transmitIfList.find(key);
@@ -2709,7 +2710,7 @@ xMIPv6::TimerIfEntry *xMIPv6::getTimerIfEntry(Key& key, int timerType)
     return ifEntry;
 }
 
-xMIPv6::TimerIfEntry *xMIPv6::searchTimerIfEntry(Ipv6Address& dest, int timerType)
+Mipv6::TimerIfEntry *Mipv6::searchTimerIfEntry(Ipv6Address& dest, int timerType)
 {
     for (auto& elem : transmitIfList) {
         if (elem.first.type == timerType && elem.first.dest == dest)
@@ -2719,7 +2720,7 @@ xMIPv6::TimerIfEntry *xMIPv6::searchTimerIfEntry(Ipv6Address& dest, int timerTyp
     return nullptr;
 }
 
-void xMIPv6::removeTimerEntries(const Ipv6Address& dest, int interfaceId)
+void Mipv6::removeTimerEntries(const Ipv6Address& dest, int interfaceId)
 {
     if (rt6->isMobileNode()) {
         // HoTI
@@ -2746,7 +2747,7 @@ void xMIPv6::removeTimerEntries(const Ipv6Address& dest, int interfaceId)
     }
 }
 
-void xMIPv6::cancelEntries(int interfaceId, Ipv6Address& CoA)
+void Mipv6::cancelEntries(int interfaceId, Ipv6Address& CoA)
 {
     NetworkInterface *ie = ift->getInterfaceById(interfaceId);
 
@@ -2777,7 +2778,7 @@ void xMIPv6::cancelEntries(int interfaceId, Ipv6Address& CoA)
     }
 }
 
-void xMIPv6::removeCoAEntries()
+void Mipv6::removeCoAEntries()
 {
     for (auto& elem : interfaceCoAList) {
         //if (it->first == ie->interfaceId())
@@ -2789,7 +2790,7 @@ void xMIPv6::removeCoAEntries()
     interfaceCoAList.clear();
 }
 
-void xMIPv6::createBRRTimer(const Ipv6Address& brDest, NetworkInterface *ie, const uint scheduledTime)
+void Mipv6::createBRRTimer(const Ipv6Address& brDest, NetworkInterface *ie, const uint scheduledTime)
 {
     /*9.5.5
        If the sender knows that the Binding Cache entry is still in active
@@ -2834,7 +2835,7 @@ void xMIPv6::createBRRTimer(const Ipv6Address& brDest, NetworkInterface *ie, con
               << " seconds+++++++++++++++++ \n";
 }
 
-void xMIPv6::sendPeriodicBRR(cMessage *msg)
+void Mipv6::sendPeriodicBRR(cMessage *msg)
 {
     EV_INFO << "\n<<====== Periodic BRR MESSAGE at time: " << simTime() << " seconds =====>>\n";
     BrTransmitIfEntry *brIfEntry = (BrTransmitIfEntry *)msg->getContextPointer(); // detaching the corresponding brIfEntry pointer
@@ -2860,7 +2861,7 @@ void xMIPv6::sendPeriodicBRR(cMessage *msg)
     }
 }
 
-void xMIPv6::createAndSendBRRMessage(const Ipv6Address& dest, NetworkInterface *ie)
+void Mipv6::createAndSendBRRMessage(const Ipv6Address& dest, NetworkInterface *ie)
 {
     EV_TRACE << "\n<<======THIS IS THE ROUTINE FOR CREATING AND SENDING BRR MESSAGE =====>>\n";
     auto outPacket = new Packet("Binding Refresh Request");
@@ -2879,7 +2880,7 @@ void xMIPv6::createAndSendBRRMessage(const Ipv6Address& dest, NetworkInterface *
     sendMobilityMessageToIPv6Module(outPacket, dest, Ipv6Address::UNSPECIFIED_ADDRESS, ie->getInterfaceId());
 }
 
-void xMIPv6::processBRRMessage(Packet *inPacket, const Ptr<const BindingRefreshRequest>& brr)
+void Mipv6::processBRRMessage(Packet *inPacket, const Ptr<const BindingRefreshRequest>& brr)
 {
     /*11.7.4
        When a mobile node receives a packet containing a Binding Refresh
@@ -2905,7 +2906,7 @@ void xMIPv6::processBRRMessage(Packet *inPacket, const Ptr<const BindingRefreshR
     delete inPacket;
 }
 
-void xMIPv6::createBULEntryExpiryTimer(BindingUpdateList::BindingUpdateListEntry *entry, NetworkInterface *ie, simtime_t scheduledTime)
+void Mipv6::createBULEntryExpiryTimer(BindingUpdateList::BindingUpdateListEntry *entry, NetworkInterface *ie, simtime_t scheduledTime)
 {
 //    Enter_Method("createBULEntryExpiryTimer()");
 //    EV << "Creating BUL entry expiry timer for sim time: " << entry->bindingExpiry << " seconds." << endl;
@@ -2935,7 +2936,7 @@ void xMIPv6::createBULEntryExpiryTimer(BindingUpdateList::BindingUpdateListEntry
     // WAS SCHEDULED FOR EXPIRY, NOT 2 SECONDS BEFORE!?!?!?
 }
 
-/*BulExpiryIfEntry* xMIPv6::createBULEntryExpiryTimer(Key& key, IPv6Adress& dest, IPv6Adress& HoA, IPv6Adress& CoA, NetworkInterface* ie, cMessage* bulExpiryMsg)
+/*BulExpiryIfEntry* Mipv6::createBULEntryExpiryTimer(Key& key, IPv6Adress& dest, IPv6Adress& HoA, IPv6Adress& CoA, NetworkInterface* ie, cMessage* bulExpiryMsg)
    {
     BulExpiryIfEntry* bulExpIfEntry = (BulExpiryIfEntry*) getTimerIfEntry(key, EXPIRY_TYPE_BUL);
 
@@ -2950,7 +2951,7 @@ void xMIPv6::createBULEntryExpiryTimer(BindingUpdateList::BindingUpdateListEntry
     return bulExpIfEntry;
    }*/
 
-void xMIPv6::handleBULExpiry(cMessage *msg)
+void Mipv6::handleBULExpiry(cMessage *msg)
 {
     /*11.7.1
        Also, if the mobile node wants the services of the home agent beyond
@@ -3015,7 +3016,7 @@ void xMIPv6::handleBULExpiry(cMessage *msg)
     }
 }
 
-void xMIPv6::createBCEntryExpiryTimer(const Ipv6Address& HoA, NetworkInterface *ie, simtime_t scheduledTime)
+void Mipv6::createBCEntryExpiryTimer(const Ipv6Address& HoA, NetworkInterface *ie, simtime_t scheduledTime)
 {
     cMessage *bcExpiryMsg = new cMessage("BCEntryExpiry", MK_BC_EXPIRY);
 
@@ -3034,7 +3035,7 @@ void xMIPv6::createBCEntryExpiryTimer(const Ipv6Address& HoA, NetworkInterface *
     EV_INFO << "Scheduled BC expiry for time " << scheduledTime << "s" << endl;
 }
 
-void xMIPv6::handleBCExpiry(cMessage *msg)
+void Mipv6::handleBCExpiry(cMessage *msg)
 {
     /*10.3.1
        The home agent MAY further decrease the specified lifetime for the
@@ -3064,7 +3065,7 @@ void xMIPv6::handleBCExpiry(cMessage *msg)
     // in the future we might send a Binding Refresh Request shortly before the expiration of the BCE
 }
 
-void xMIPv6::createTokenEntryExpiryTimer(Ipv6Address& cnAddr, NetworkInterface *ie,
+void Mipv6::createTokenEntryExpiryTimer(Ipv6Address& cnAddr, NetworkInterface *ie,
         simtime_t scheduledTime, int tokenType)
 {
     cMessage *tokenExpiryMsg = new cMessage("TokenEntryExpiry", MK_TOKEN_EXPIRY);
@@ -3085,7 +3086,7 @@ void xMIPv6::createTokenEntryExpiryTimer(Ipv6Address& cnAddr, NetworkInterface *
     EV_INFO << "Scheduled token expiry for time " << scheduledTime << "s" << endl;
 }
 
-void xMIPv6::handleTokenExpiry(cMessage *msg)
+void Mipv6::handleTokenExpiry(cMessage *msg)
 {
     TokenExpiryIfEntry *tokenExpIfEntry = (TokenExpiryIfEntry *)msg->getContextPointer(); // detaching the corresponding tokenExpIfEntry pointer
     ASSERT(tokenExpIfEntry != nullptr);
@@ -3119,7 +3120,7 @@ void xMIPv6::handleTokenExpiry(cMessage *msg)
 
 // lifecycle management
 
-void xMIPv6::handleStopOperation(LifecycleOperation *operation)
+void Mipv6::handleStopOperation(LifecycleOperation *operation)
 {
     // cancel and delete all timer entries
     for (auto& entry : transmitIfList) {
@@ -3135,7 +3136,7 @@ void xMIPv6::handleStopOperation(LifecycleOperation *operation)
     noOfNonSplitTunnels = 0;
 }
 
-void xMIPv6::handleCrashOperation(LifecycleOperation *operation)
+void Mipv6::handleCrashOperation(LifecycleOperation *operation)
 {
     // cancel and delete all timer entries
     for (auto& entry : transmitIfList) {

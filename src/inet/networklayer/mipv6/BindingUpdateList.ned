@@ -9,18 +9,19 @@
 //
 //
 
-package inet.networklayer.xmipv6;
+package inet.networklayer.mipv6;
 
 import inet.common.SimpleModule;
 
 //
-// ~xMIPv6 Data structure for the Mobile Node.
+// ~Mipv6 Data structure for the Mobile Node.
 //
-// @see ~xMIPv6.
+// @see ~Mipv6.
 //
 simple BindingUpdateList extends SimpleModule
 {
     parameters:
         @class(BindingUpdateList);
+        @display("i=old/harddisk");
 }
 

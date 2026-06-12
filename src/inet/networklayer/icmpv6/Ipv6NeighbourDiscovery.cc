@@ -22,7 +22,7 @@
 #include "inet/networklayer/ipv6/Mipv6InterfaceData.h"
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 
-#include "inet/networklayer/xmipv6/xMIPv6.h"
+#include "inet/networklayer/mipv6/Mipv6.h"
 
 namespace inet {
 
@@ -121,7 +121,7 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         if (rt6->isMobileNode())
-            mipv6.reference(this, "xmipv6Module", true);
+            mipv6.reference(this, "mipv6Module", true);
     }
 }
 
@@ -914,7 +914,7 @@ void Ipv6NeighbourDiscovery::makeTentativeAddressPermanent(const Ipv6Address& te
     }
 
     // Assign global scope addresses to routers. The Ipv6FlatNetworkConfigurator assigns
-    // a 64 bit prefix to the routers but for xMIPv6 operation, we need full 128bit global
+    // a 64 bit prefix to the routers but for Mipv6 operation, we need full 128bit global
     // scope address for routers.
     if (rt6->isRouter() && !(ie->isLoopback())) {
         for (int i = 0; i < ie->getProtocolData<Ipv6InterfaceData>()->getNumAdvPrefixes(); i++) {

@@ -50,7 +50,7 @@ class INET_API Ipv6RoutingTable : public SimpleModule, public IRoutingTable, pro
     // running counter for naming dynamically created tunnel interfaces
     int tunnelInterfaceCounter = 0;
 
-    // MIPv6 support flags (set by the xMIPv6 module at init time, default false)
+    // MIPv6 support flags (set by the Mipv6 module at init time, default false)
     bool ishome_agent = false;
     bool ismobile_node = false;
     bool mipv6Support = false;
@@ -281,7 +281,7 @@ class INET_API Ipv6RoutingTable : public SimpleModule, public IRoutingTable, pro
      * wire it into the node's network layer and register it. Returns the new
      * NetworkInterface. The caller installs the route(s) that steer traffic to it.
      * This is the generic tunnel-interface plumbing used by both static tunnel
-     * configuration (configureTunnelFromXml) and MIPv6 (xMIPv6).
+     * configuration (configureTunnelFromXml) and MIPv6 (Mipv6).
      */
     virtual NetworkInterface *createTunnelNetworkInterface(const Ipv6Address& source, const Ipv6Address& destination);
 

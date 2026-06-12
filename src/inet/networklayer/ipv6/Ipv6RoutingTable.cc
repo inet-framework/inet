@@ -65,7 +65,7 @@ void Ipv6RoutingTable::initialize(int stage)
 
         ift.reference(this, "interfaceTableModule", true);
 
-        // MIPv6 support flags (overridden by the xMIPv6 module if present)
+        // MIPv6 support flags (overridden by the Mipv6 module if present)
         ishome_agent = false;
         WATCH(ishome_agent);
 

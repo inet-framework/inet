@@ -12,9 +12,11 @@ package inet.networklayer.ipv6;
 import inet.common.MessageDispatcher;
 import inet.networklayer.configurator.contract.IIpv6NodeConfigurator;
 import inet.networklayer.contract.INetworkLayer;
-import inet.networklayer.contract.IxMIPv6Support;
 import inet.networklayer.icmpv6.Icmpv6;
 import inet.networklayer.icmpv6.Ipv6NeighbourDiscovery;
+import inet.networklayer.mipv6.BindingCache;
+import inet.networklayer.mipv6.BindingUpdateList;
+import inet.networklayer.mipv6.Mipv6;
 
 //
 // Represents an IPv6 network layer (L3).
@@ -25,10 +27,10 @@ import inet.networklayer.icmpv6.Ipv6NeighbourDiscovery;
 module Ipv6NetworkLayer like INetworkLayer
 {
     parameters:
-        bool xMIPv6Support = default(false);
+        bool hasMipv6 = default(false);
         bool forwarding = default(false);
         bool multicastForwarding = default(false);
-        *.xmipv6Module = xMIPv6Support ? absPath(".mipv6support.xMobileIPv6") : "";
+        *.mipv6Module = hasMipv6 ? absPath(".mipv6") : "";
         string interfaceTableModule;
         *.forwarding = this.forwarding;
         *.multicastForwarding = this.multicastForwarding;
@@ -36,6 +38,8 @@ module Ipv6NetworkLayer like INetworkLayer
         *.routingTableModule = default(absPath(".routingTable"));
         *.ipv6NeighbourDiscoveryModule = default(absPath(".neighbourDiscovery"));
         *.icmpv6Module = default(absPath(".icmpv6"));
+        *.bindingUpdateListModule = default(absPath(".buList"));
+        *.bindingCacheModule = default(absPath(".bindingCache"));
         @display("i=block/fork");
 
     gates:
@@ -74,9 +78,17 @@ module Ipv6NetworkLayer like INetworkLayer
             parameters:
                 @display("p=550,400");
         }
-        mipv6support: <default("xMIPv6Support")> like IxMIPv6Support if xMIPv6Support {
+        mipv6: Mipv6 if hasMipv6 {
             parameters:
                 @display("p=700,500");
+        }
+        buList: BindingUpdateList if hasMipv6 {
+            parameters:
+                @display("p=850,450");
+        }
+        bindingCache: BindingCache if hasMipv6 {
+            parameters:
+                @display("p=850,550");
         }
 
     connections allowunconnected:  // FIXME remove 'nocheck'!
@@ -98,8 +110,8 @@ module Ipv6NetworkLayer like INetworkLayer
         neighbourDiscovery.ipv6Out --> ipv6.ndIn;
         neighbourDiscovery.ipv6In <-- ipv6.ndOut;
 
-        mipv6support.fromIPv6 <-- lp.out++ if xMIPv6Support;
-        mipv6support.toIPv6 --> lp.in++ if xMIPv6Support;
+        mipv6.fromIPv6 <-- lp.out++ if hasMipv6;
+        mipv6.toIPv6 --> lp.in++ if hasMipv6;
 
         ipv6.queueOut --> { @display("m=s"); } --> ifOut;
         ipv6.queueIn <-- { @display("m=s"); } <-- ifIn;

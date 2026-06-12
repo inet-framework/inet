@@ -7,7 +7,7 @@
 //
 //
 
-package inet.node.xmipv6;
+package inet.node.mipv6;
 
 import inet.node.ipv6.StandardHost6;
 
@@ -25,7 +25,7 @@ import inet.node.ipv6.StandardHost6;
 //
 module CorrespondentNode6 extends StandardHost6
 {
-    ipv6.xMIPv6Support = true;
-    ipv6.mipv6support.isMobileNode = false; // Is a Mobile Node
-    ipv6.mipv6support.isHomeAgent = false; // Is a Home Agent
+    ipv6.hasMipv6 = true;
+    ipv6.mipv6.isMobileNode = false; // Is a Mobile Node
+    ipv6.mipv6.isHomeAgent = false; // Is a Home Agent
 }

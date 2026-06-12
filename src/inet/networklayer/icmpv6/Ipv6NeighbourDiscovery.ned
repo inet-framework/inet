@@ -24,7 +24,7 @@ simple Ipv6NeighbourDiscovery extends SimpleModule
         string interfaceTableModule;   // The path to the InterfaceTable module
         string checksumMode @enum("declared", "computed") = default("declared");
         string icmpv6Module;
-        string xmipv6Module;
+        string mipv6Module;
         string routingTableModule;
         double minIntervalBetweenRAs @unit(s) = default(200s); // RFC 4861: MinRtrAdvInterval (0.33 * MaxRtrAdvInterval)
         double maxIntervalBetweenRAs @unit(s) = default(600s); // RFC 4861: MaxRtrAdvInterval

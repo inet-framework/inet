@@ -9,18 +9,19 @@
 //
 //
 
-package inet.networklayer.xmipv6;
+package inet.networklayer.mipv6;
 
 import inet.common.SimpleModule;
 
 //
-// ~xMIPv6 Data structure for the HA and CN(s) only.
+// ~Mipv6 Data structure for the HA and CN(s) only.
 //
-// @see  ~xMIPv6.
+// @see  ~Mipv6.
 //
 simple BindingCache extends SimpleModule
 {
     parameters:
         @class(BindingCache);
+        @display("i=old/harddisk");
 }
 

@@ -4,12 +4,12 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#include "inet/networklayer/xmipv6/MobilityHeaderSerializer.h"
+#include "inet/networklayer/mipv6/MobilityHeaderSerializer.h"
 
 #include <algorithm>
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/networklayer/xmipv6/MobilityHeader_m.h"
+#include "inet/networklayer/mipv6/MobilityHeader_m.h"
 
 namespace inet {
 

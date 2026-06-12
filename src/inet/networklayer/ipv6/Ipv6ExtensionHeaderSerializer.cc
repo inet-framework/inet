@@ -9,7 +9,7 @@
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/common/TlvOptions_m.h"
 #include "inet/networklayer/ipv6/Ipv6ExtensionHeaders_m.h"
-#include "inet/networklayer/xmipv6/MobilityHeader_m.h"
+#include "inet/networklayer/mipv6/MobilityHeader_m.h"
 
 namespace inet {
 

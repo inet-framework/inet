@@ -9,7 +9,7 @@
 //
 //
 
-#include "inet/networklayer/xmipv6/BindingCache.h"
+#include "inet/networklayer/mipv6/BindingCache.h"
 
 #include "inet/common/stlutils.h"
 

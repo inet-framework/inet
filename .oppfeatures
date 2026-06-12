@@ -1911,27 +1911,27 @@
         linkerFlags = ""
         />
     <feature
-        id = "Xmipv6"
-        name = "xMIPv6 Mobile IPv6 protocol"
-        description = "Mobile IPv6 support with Tunneling."
+        id = "Mipv6"
+        name = "Mobile IPv6 protocol"
+        description = "Mobile IPv6 (RFC 3775) support."
         initiallyEnabled = "true"
         requires = "Ipv6"
         recommended = ""
         labels = "protocols"
         nedPackages = "
-                       inet.networklayer.xmipv6
-                       inet.node.xmipv6
+                       inet.networklayer.mipv6
+                       inet.node.mipv6
                       "
         extraSourceFolders = ""
-        compileFlags = "-DINET_WITH_xMIPv6"
+        compileFlags = "-DINET_WITH_MIPV6"
         linkerFlags = ""
         />
     <feature
-        id = "Xmipv6Examples"
-        name = "xMIPv6 Mobile IPv6 protocol examples"
-        description = "Examples for Mobile IPv6 support (xMIPv6)."
+        id = "Mipv6Examples"
+        name = "Mobile IPv6 protocol examples"
+        description = "Examples for Mobile IPv6 (RFC 3775) support."
         initiallyEnabled = "true"
-        requires = "Ethernet Ieee80211 Ieee8021d Ipv6 Loopback Mobility PhysicalLayerWirelessCommon PingApplication Queueing TcpInet Udp Xmipv6"
+        requires = "Ethernet Ieee80211 Ieee8021d Ipv6 Loopback Mobility PhysicalLayerWirelessCommon PingApplication Queueing TcpInet Udp Mipv6"
         recommended = ""
         labels = ""
         nedPackages = "

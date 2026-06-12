@@ -14,7 +14,7 @@
 
 #include "inet/common/SimpleModule.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
-#include "inet/networklayer/xmipv6/MobilityConstants.h"
+#include "inet/networklayer/mipv6/MobilityConstants.h"
 
 namespace inet {
 

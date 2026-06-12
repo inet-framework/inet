@@ -9,17 +9,21 @@
 //
 //
 
-package inet.networklayer.xmipv6;
+package inet.networklayer.mipv6;
 
 import inet.common.SimpleModule;
 
 //
-// Implements xMIPv6 (where x = F, H, F-H).
+// Implements Mobile IPv6 (RFC 3775): the mobility signalling and binding
+// management logic for a mobile node, home agent, or correspondent node (the
+// role is selected by the `isMobileNode` and `isHomeAgent` parameters). It is
+// a submodule of ~Ipv6NetworkLayer (enabled by its `hasMipv6` parameter) and
+// works together with the ~BindingUpdateList and ~BindingCache modules.
 //
-simple xMIPv6 extends SimpleModule
+simple Mipv6 extends SimpleModule
 {
     parameters:
-        @class(xMIPv6);
+        @class(Mipv6);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string ipv6NeighbourDiscoveryModule;
         string bindingUpdateListModule;
