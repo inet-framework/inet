@@ -8,7 +8,9 @@ Network Autoconfiguration
 Overview
 --------
 
-This chapter describes static autoconfiguration of networks.
+This chapter describes static autoconfiguration of networks: assigning
+addresses and filling in routing tables at the start of the simulation. It
+covers the IPv4 and IPv6 network configurators and layer-2 configuration.
 
 .. _ug:sec:autoconfig:configuring-ipv4-networks:
 
@@ -720,6 +722,100 @@ is also accepted with the meaning ``0.0.0.0``.
    (considering the longest match). If the application wants to send the multicast
    datagram on each interface, then it must explicitly loop and specify the multicast
    interface.
+
+.. _ug:sec:autoconfig:configuring-ipv6-networks:
+
+Configuring IPv6 Networks
+-------------------------
+
+IPv6 networks are configured by the :ned:`Ipv6NetworkConfigurator` module,
+the IPv6 counterpart of :ned:`Ipv4NetworkConfigurator`. Like it, it is a
+global module: a single instance assigns addresses and sets up static
+routes for the whole network at the start of the simulation, and takes no
+further part in the run.
+
+.. _ug:sec:autoconfig:ipv6networkconfigurator:
+
+Ipv6NetworkConfigurator
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The :ned:`Ipv6NetworkConfigurator` assigns IPv6 prefixes and addresses, and
+computes and installs static routes. It discovers the network topology and
+its links, accepts partially specified configurations (filling in the rest
+automatically), and is driven by an XML document given in its :par:`config`
+parameter. It shares the topology-graph model and the host-selection
+attributes (``@hosts``, ``@names``, ``@towards``, ``@among``) with
+:ned:`Ipv4NetworkConfigurator`; see that section for the concepts common to
+both. As with IPv4, each node's network layer reaches the global instance
+through the :par:`networkConfiguratorModule` parameter of its per-node
+configurator (e.g. ``**.ipv6.configurator.networkConfiguratorModule = "configurator"``).
+
+**Address assignment.** Two modes are available, selected by the
+:par:`configureAdvPrefixes` parameter:
+
+-  *Direct assignment* (the default): every interface is given a global
+   address derived from its link's prefix. This is the simplest setup and
+   needs no Router Advertisements.
+
+-  *Stateless autoconfiguration* (:par:`configureAdvPrefixes` = ``true``):
+   only router interfaces are configured, with the on-link prefix they
+   advertise; hosts then form their own global addresses by SLAAC from the
+   Router Advertisements (see :doc:`ch-ipv6`). This more closely models a
+   real IPv6 network.
+
+The ``<interface>`` element selects interfaces and sets their ``prefix``
+(e.g. ``prefix='2001:db8:1::/64'``; an ``x`` group lets the configurator
+fill in a unique value), ``mtu``, and -- on routers -- the Router
+Advertisement flags and lifetimes (``advValidLifetime``,
+``advPreferredLifetime``, ``advOnLinkFlag``, ``advAutonomousFlag``,
+``advManagedFlag``, ``advOtherConfigFlag``, ``advDefaultLifetime``), the RA
+timing (``maxRtrAdvInterval``, ``minRtrAdvInterval``) and
+``dupAddrDetectTransmits``. For example, Mobile IPv6 needs fast RAs on
+wireless-facing router interfaces:
+
+.. code-block:: xml
+
+   <config>
+     <interface among='Home_Agent R_1' names='eth1'
+                maxRtrAdvInterval='0.07' minRtrAdvInterval='0.03'/>
+   </config>
+
+**Routes.** When :par:`addStaticRoutes` is set, the configurator computes
+shortest-path routes between all nodes, and adds default and on-link routes
+where appropriate. Routes may also be given explicitly with ``<route>``
+elements (attributes ``hosts``, ``destination``, ``gateway``, ``interface``,
+``metric``). The destination prefix length may be supplied either as a
+separate ``prefixLength`` attribute or appended to ``destination`` in CIDR
+notation:
+
+.. code-block:: xml
+
+   <config>
+     <interface among='*' prefix='2001:db8:1::/64'/>
+     <route hosts='h1' destination='2001:db8:2::/64' interface='eth0'/>
+   </config>
+
+An ``<autoroute>`` element tunes the automatic route generation (source and
+destination selection, link metrics), analogously to
+:ned:`Ipv4NetworkConfigurator`.
+
+**Parameters.** The most commonly used parameters are:
+
+-  :par:`config`: the XML configuration document (``<interface>``,
+   ``<route>`` and ``<autoroute>`` elements).
+
+-  :par:`assignAddresses`: assign global addresses to interfaces (default
+   ``true``).
+
+-  :par:`configureAdvPrefixes`: use SLAAC mode -- configure router
+   AdvPrefixes only and let hosts autoconfigure (default ``false``).
+
+-  :par:`addStaticRoutes`, :par:`addDefaultRoutes`, :par:`addDirectRoutes`:
+   enable the kinds of automatic route generation (all default ``true``).
+
+-  :par:`dumpAddresses`, :par:`dumpRoutes`, :par:`dumpTopology`,
+   :par:`dumpLinks`: print the assigned addresses, the routing tables, and
+   the discovered topology and links, for debugging (all default ``false``).
 
 .. _ug:sec:autoconfig:configuring-layer-2:
 
