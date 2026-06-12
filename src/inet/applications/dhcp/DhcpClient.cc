@@ -315,6 +315,11 @@ void DhcpClient::handleTimer(cMessage *msg)
     else if (category == T1) {
         EV_DETAIL << "T1 expired. Starting RENEWING state." << endl;
         clientState = RENEWING;
+        // RFC 2131 §3.1: 'secs' counts from the start of the acquisition *or*
+        // renewal process, so restart the clock as the renewal begins. T2
+        // (REBINDING) is a continuation of this same process and must not reset
+        // it again.
+        dhcpStartTime = simTime();
         sendRequest();
         // §4.4.5 retransmit schedule for RENEWING — start with half-remaining-to-T2 (or min).
         simtime_t remaining = t2AbsoluteTime - simTime();
