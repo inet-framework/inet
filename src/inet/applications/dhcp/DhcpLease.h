@@ -53,10 +53,22 @@ class INET_API DhcpLease
     simtime_t serverExpiryTime;
 };
 
+inline const char *dhcpLeaseStateName(DhcpLeaseState state)
+{
+    switch (state) {
+        case DHCP_LEASE_FREE: return "FREE";
+        case DHCP_LEASE_OFFERED: return "OFFERED";
+        case DHCP_LEASE_LEASED: return "LEASED";
+        case DHCP_LEASE_DECLINED: return "DECLINED";
+    }
+    return "?";
+}
+
 inline std::ostream& operator<<(std::ostream& os, DhcpLease obj)
 {
-    os << " IP: " << obj.ip << " with subnet mask: " << obj.subnetMask
-       << " to " << obj.mac;
+    os << obj.mac << "  [" << dhcpLeaseStateName(obj.state) << "]";
+    if (obj.state != DHCP_LEASE_FREE)
+        os << ", expires t=" << (long)obj.serverExpiryTime.dbl() << "s";
     return os;
 }
 
