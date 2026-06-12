@@ -91,10 +91,11 @@ other aspects. Some of them are:
    optional component.
 
 -  *Configurators*, such as :ned:`Ipv4NetworkConfigurator`,
-   :ned:`L2NetworkConfigurator`, and :ned:`NextHopNetworkConfigurator`,
-   configure various aspects of the network. For example,
-   :ned:`Ipv4NetworkConfigurator` assigns IP addresses to hosts and
-   routers and sets up static routing. It is used when modeling dynamic
+   :ned:`Ipv6NetworkConfigurator`, :ned:`L2NetworkConfigurator`, and
+   :ned:`NextHopNetworkConfigurator`, configure various aspects of the
+   network. For example, :ned:`Ipv4NetworkConfigurator` (and its IPv6
+   counterpart :ned:`Ipv6NetworkConfigurator`) assigns IP addresses to
+   hosts and routers and sets up static routing. It is used when modeling dynamic
    IP address assignment (e.g., via DHCP) or when dynamic routing is not of
    importance. :ned:`L2NetworkConfigurator` allows one to configure
    802.1 LANs and provide STP/RSTP-related parameters such as link cost,
