@@ -15,6 +15,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/stlutils.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -181,8 +182,7 @@ void Mipv6::handleMessageWhenUp(cMessage *msg)
             throw cRuntimeError("Unrecognized Timer"); // stops sim w/ error msg.
     }
     // MIPv6 related mobility message
-    else {
-        auto packet = check_and_cast<Packet *>(msg);
+    else if (auto packet = dynamic_cast<Packet *>(msg)) {
         if (packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::mobileipv6) {
             EV_INFO << " Received MIPv6 related message" << endl;
             processMobilityMessage(packet);
@@ -190,6 +190,17 @@ void Mipv6::handleMessageWhenUp(cMessage *msg)
         else
             throw cRuntimeError("Unknown message type received.");
     }
+    else if (auto indication = dynamic_cast<Indication *>(msg)) {
+        // The IPv6 layer reports an ICMPv6 error for a mobility message we sent
+        // (e.g. a Binding Update/Acknowledgement or Binding Refresh Request that
+        // could not be delivered). The mobility protocol recovers via its own
+        // retransmission timers, so the error is simply discarded here.
+        EV_WARN << "Received an error indication (" << indication->getName()
+                << ") for a mobility message; ignoring it" << endl;
+        delete indication;
+    }
+    else
+        throw cRuntimeError("Unknown message '%s' (%s) received", msg->getName(), msg->getClassName());
 }
 
 void Mipv6::processMobilityMessage(Packet *inPacket)
