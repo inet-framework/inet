@@ -31,7 +31,8 @@ class INET_API GeographicMapCanvasVisualizer : public GeographicMapVisualizerBas
     class INET_API MapNodeCanvasVisualization : public MapNodeVisualization {
       public:
         cFigure *markerFigure = nullptr; // cImageFigure or cOvalFigure
-        cLabelFigure *labelFigure = nullptr;
+        cLabelFigure *labelFigure = nullptr; // network node name
+        cLabelFigure *satelliteNameLabelFigure = nullptr; // TLE satellite name, shown below the node name (null if none)
         TrailFigure *groundTrackFigure = nullptr;
         cGroupFigure *footprintFigure = nullptr; // holds one or more polygon pieces (the footprint can be split across the seam)
         bool hasLastPoint = false;
@@ -73,6 +74,8 @@ class INET_API GeographicMapCanvasVisualizer : public GeographicMapVisualizerBas
     virtual void removeMapNodeVisualization(const MapNodeVisualization *visualization) override;
 
     virtual const char *getNodeName(const IMobility *mobility) const;
+    // Returns the TLE satellite name exposed by the mobility's 'satelliteName' parameter, or "" if none.
+    virtual std::string getSatelliteName(const IMobility *mobility) const;
 };
 
 } // namespace visualizer

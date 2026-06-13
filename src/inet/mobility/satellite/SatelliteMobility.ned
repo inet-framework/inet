@@ -33,6 +33,7 @@ simple SatelliteMobility extends MovingMobilityBase
         string pointing @enum("none", "nadir", "velocity") = default("nadir"); // Satellite attitude: none, body +Z toward nadir, or body +X along velocity
         updateInterval = default(1s); // Satellites move continuously; update the state once per second by default
         faceForward = default(false); // Orientation is controlled by the 'pointing' parameter
+        updateDisplayString = default(false); // A satellite's scene position is geocentric (ECEF) and not meaningful to plot on the flat 2D scene, so leave the node icon at its layout position (the map visualizer shows the real position); set true to track it on the scene
         @class(SatelliteMobility);
 }
 

@@ -29,6 +29,10 @@ void SatelliteController::initialize(int stage)
         nodeTypeName = par("nodeType").stringValue();
         nodeName = par("nodeName").stringValue();
         coordinateSystemModule = par("coordinateSystemModule").stringValue();
+        nodeIcon = par("nodeIcon").stringValue();
+        nodeIconRowX = par("nodeIconRowX");
+        nodeIconRowY = par("nodeIconRowY");
+        nodeIconSpacing = par("nodeIconSpacing");
         timer = new cMessage("satelliteEvent");
         loadTleFiles();
         scheduleEvents();
@@ -156,6 +160,20 @@ void SatelliteController::insertSatellite(int entryIndex)
     mobility->par("epoch").setStringValue(epoch.c_str());
     if (!coordinateSystemModule.empty() && mobility->hasPar("coordinateSystemModule"))
         mobility->par("coordinateSystemModule").setStringValue(coordinateSystemModule.c_str());
+
+    // lay out the created node icons in a left-to-right row (e.g. below the map); set the
+    // display-string position before initialization so the icon is placed correctly from the
+    // start. SatelliteMobility has updateDisplayString=false, so this position is not overwritten.
+    cDisplayString& displayString = module->getDisplayString();
+    displayString.setTagArg("p", 0, (long)(nodeIconRowX + vectorSize * nodeIconSpacing));
+    displayString.setTagArg("p", 1, (long)nodeIconRowY);
+    if (!nodeIcon.empty())
+        displayString.setTagArg("i", 0, nodeIcon.c_str());
+    // show the TLE satellite name as text above the icon (the module name stays below it)
+    if (!entry.name.empty()) {
+        displayString.setTagArg("t", 0, entry.name.c_str());
+        displayString.setTagArg("t", 1, "t"); // text position: top
+    }
 
     // module add notifications are emitted automatically during creation;
     // initialize the new node (this triggers radio medium registration etc.)

@@ -57,6 +57,10 @@ class INET_API SatelliteController : public SimpleModule
     std::string nodeTypeName;
     std::string nodeName;
     std::string coordinateSystemModule;
+    std::string nodeIcon;
+    double nodeIconRowX = 0;
+    double nodeIconRowY = 0;
+    double nodeIconSpacing = 0;
 
     std::vector<SatelliteEntry> entries;
     std::vector<Event> events; // sorted by time

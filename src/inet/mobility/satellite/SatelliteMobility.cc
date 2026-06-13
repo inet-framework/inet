@@ -37,6 +37,8 @@ void SatelliteMobility::initialize(int stage)
         if (index >= tleFile.getNumSatellites())
             throw cRuntimeError("Satellite index %d out of range (file has %d satellites)", index, tleFile.getNumSatellites());
         satrec = tleFile.getRecord(index).satrec;
+        // expose the resolved TLE name (so map visualizers can display it)
+        par("satelliteName").setStringValue(tleFile.getRecord(index).name.c_str());
 
         // determine the UTC epoch (simulation time 0); default to the TLE epoch
         const char *epoch = par("epoch");

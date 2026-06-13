@@ -98,6 +98,7 @@ GeographicMapCanvasVisualizer::MapNodeCanvasVisualization::~MapNodeCanvasVisuali
 {
     delete markerFigure;
     delete labelFigure;
+    delete satelliteNameLabelFigure;
     delete groundTrackFigure;
     delete footprintFigure;
 }
@@ -316,9 +317,13 @@ void GeographicMapCanvasVisualizer::refreshDisplay() const
         else if (auto ovalFigure = dynamic_cast<cOvalFigure *>(visualization->markerFigure))
             ovalFigure->setBounds(cFigure::Rectangle(point.x - markerRadius, point.y - markerRadius, 2 * markerRadius, 2 * markerRadius));
 
-        // label
-        if (visualization->labelFigure != nullptr)
-            visualization->labelFigure->setPosition(cFigure::Point(point.x + markerRadius + 2, point.y));
+        // labels (node name, and the TLE satellite name below it when present)
+        if (visualization->labelFigure != nullptr) {
+            cFigure::Point labelPosition(point.x + markerRadius + 2, point.y);
+            visualization->labelFigure->setPosition(labelPosition);
+            if (visualization->satelliteNameLabelFigure != nullptr)
+                visualization->satelliteNameLabelFigure->setPosition(labelPosition);
+        }
 
         // coverage footprint (a small circle on the Earth, correctly projected, wrapped and clipped to the map)
         if (visualization->footprintFigure != nullptr)
@@ -390,12 +395,23 @@ GeographicMapVisualizerBase::MapNodeVisualization *GeographicMapCanvasVisualizer
     visualization->markerFigure->setZIndex(zIndex);
 
     if (displayLabels) {
+        std::string satelliteName = getSatelliteName(mobility);
         visualization->labelFigure = new cLabelFigure("label");
         visualization->labelFigure->setTags((std::string("node_label ") + tags).c_str());
         visualization->labelFigure->setText(getNodeName(mobility));
         visualization->labelFigure->setColor(labelColor);
-        visualization->labelFigure->setAnchor(cFigure::ANCHOR_W);
+        // when a TLE name is shown too, anchor the node name above the marker line and the
+        // TLE name below it; otherwise keep the single label vertically centered on the marker
+        visualization->labelFigure->setAnchor(satelliteName.empty() ? cFigure::ANCHOR_W : cFigure::ANCHOR_SW);
         visualization->labelFigure->setZIndex(zIndex);
+        if (!satelliteName.empty()) {
+            visualization->satelliteNameLabelFigure = new cLabelFigure("satelliteName");
+            visualization->satelliteNameLabelFigure->setTags((std::string("node_label ") + tags).c_str());
+            visualization->satelliteNameLabelFigure->setText(satelliteName.c_str());
+            visualization->satelliteNameLabelFigure->setColor(labelColor);
+            visualization->satelliteNameLabelFigure->setAnchor(cFigure::ANCHOR_NW);
+            visualization->satelliteNameLabelFigure->setZIndex(zIndex);
+        }
     }
 
     if (displayGroundTracks) {
@@ -428,6 +444,8 @@ void GeographicMapCanvasVisualizer::addMapNodeVisualization(const IMobility *mob
     canvas->addFigure(canvasVisualization->markerFigure);
     if (canvasVisualization->labelFigure != nullptr)
         canvas->addFigure(canvasVisualization->labelFigure);
+    if (canvasVisualization->satelliteNameLabelFigure != nullptr)
+        canvas->addFigure(canvasVisualization->satelliteNameLabelFigure);
 }
 
 void GeographicMapCanvasVisualizer::removeMapNodeVisualization(const MapNodeVisualization *visualization)
@@ -441,6 +459,8 @@ void GeographicMapCanvasVisualizer::removeMapNodeVisualization(const MapNodeVisu
     canvas->removeFigure(canvasVisualization->markerFigure);
     if (canvasVisualization->labelFigure != nullptr)
         canvas->removeFigure(canvasVisualization->labelFigure);
+    if (canvasVisualization->satelliteNameLabelFigure != nullptr)
+        canvas->removeFigure(canvasVisualization->satelliteNameLabelFigure);
     GeographicMapVisualizerBase::removeMapNodeVisualization(visualization);
 }
 
@@ -462,6 +482,17 @@ const char *GeographicMapCanvasVisualizer::getNodeName(const IMobility *mobility
     auto module = check_and_cast<const cModule *>(mobility);
     auto networkNode = module->getParentModule();
     return networkNode != nullptr ? networkNode->getFullName() : module->getFullName();
+}
+
+std::string GeographicMapCanvasVisualizer::getSatelliteName(const IMobility *mobility) const
+{
+    auto module = const_cast<cModule *>(check_and_cast<const cModule *>(mobility));
+    if (module->hasPar("satelliteName")) {
+        const char *name = module->par("satelliteName").stringValue();
+        if (*name)
+            return name;
+    }
+    return "";
 }
 
 } // namespace visualizer

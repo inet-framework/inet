@@ -42,5 +42,10 @@ simple SatelliteController extends SimpleModule
         string coordinateSystemModule = default(""); // Geographic coordinate system path injected into the satellite mobilities (optional)
         double insertionTime @unit(s) = default(0s); // Default time at which satellites are inserted
         xml schedule = default(xml("<schedule/>")); // Optional per-satellite insertion/removal schedule
+        // scene layout and icon of the created node modules
+        string nodeIcon = default("misc/satellite2"); // icon image for created node modules (display-string 'i' tag); empty keeps the node type's own icon
+        double nodeIconRowX = default(40); // x position (pixels) of the first created node icon
+        double nodeIconRowY = default(400); // y position (pixels) of the created node icon row
+        double nodeIconSpacing = default(80); // horizontal spacing (pixels) between created node icons
 }
 

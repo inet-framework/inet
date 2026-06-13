@@ -34,16 +34,18 @@ module MobileNode
 network SatelliteMobilityShowcase
 {
     submodules:
+        // utility modules placed to the right of the map; the row below the map
+        // (y=400) is left free for the dynamically created satellite[*] icons
         coordinateSystem: GeocentricCoordinateSystem {
-            @display("p=100,400");
-        }
-        controller: SatelliteController {
-            @display("p=200,400");
-        }
-        groundStation: MobileNode {
-            @display("p=300,400");
+            @display("p=780,40");
         }
         visualizer: IntegratedCanvasVisualizer {
-            @display("p=400,400");
+            @display("p=780,120");
+        }
+        controller: SatelliteController {
+            @display("p=780,200");
+        }
+        groundStation: MobileNode {
+            @display("p=0,0");
         }
 }
