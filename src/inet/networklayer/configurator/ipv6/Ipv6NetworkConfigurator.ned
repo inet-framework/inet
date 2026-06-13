@@ -14,18 +14,26 @@ import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 // It assigns per-interface global IPv6 addresses based on prefix templates,
 // and can configure static routes using Dijkstra's shortest path algorithm.
 //
-// This module supports two modes of operation:
+// Whether host interfaces are addressed statically or left to autoconfigure is
+// controlled by the `assignAddressesToHosts` parameter:
 //
-//  - **Mode A (static configuration)**: The configurator directly assigns
-//    global addresses to all interfaces and adds static routes to routing
-//    tables. Neighbor Discovery Protocol (NDP) is not needed for address
-//    assignment. This is the default mode.
+//  - `assignAddressesToHosts = true` (default): the configurator directly
+//    assigns global addresses to every interface (hosts and routers) and adds
+//    static routes to the routing tables. Neighbor Discovery is not needed for
+//    address assignment.
 //
-//  - **Mode B (prefix advertisement)**: The configurator only sets up
-//    advertised prefix (AdvPrefix) entries on router interfaces. Host
-//    interfaces then obtain their global addresses via Stateless Address
-//    Autoconfiguration (SLAAC) triggered by Router Advertisements. Static
-//    routes are still added by the configurator.
+//  - `assignAddressesToHosts = false`: the configurator addresses only router
+//    interfaces and sets up their advertised prefixes (AdvPrefix); host
+//    interfaces then obtain their global addresses through dynamic
+//    configuration -- Stateless Address Autoconfiguration (SLAAC) today, or
+//    potentially DHCPv6 via the Managed/Other-config RA flags. The dynamic
+//    method is selected by the usual mechanisms, not by this parameter. Static
+//    routes are still added, including on-link routes for the router links that
+//    such hosts attach to. This mode is required for mobile nodes (MIPv6),
+//    whose home/care-of addresses must be autoconfigured.
+//
+// Independently, `assignAddresses = false` disables address assignment
+// entirely, and `addStaticRoutes = false` disables static route generation.
 //
 // Network nodes are supposed to contain an instance of ~Ipv6NodeConfigurator
 // (normally part of the network layer compound module) that actually
