@@ -813,6 +813,12 @@ void Ipv6::localDeliver(Packet *packet, const NetworkInterface *fromIE)
         origPacket = nullptr; // for not delete
         delete packet; // delete decapsulated packet
     }
+    else {
+        // the packet was delivered to one or more sockets above (a copy per socket) and
+        // is not also handled by a registered upper protocol, so the original is now
+        // redundant and must be freed (otherwise it leaks).
+        delete packet;
+    }
     delete origPacket;
 }
 
