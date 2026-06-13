@@ -10,6 +10,7 @@
 # MIPv6 example — the primary test
 /examples/mobileipv6/,               -f omnetpp.ini -c Handover -r 0,                70s,            cfd6-3471/~tNlb, PASS, wireless EthernetMac
 /examples/mobileipv6/,               -f omnetpp.ini -c RouteOptimizationTwoCNs -r 0,  90s,            7c66-b2f0/~tNlb, PASS, wireless EthernetMac
+/examples/mobileipv6roaming/,        -f omnetpp.ini -c Roaming -r 0,                 100s,           5d4d-3668/~tNlb, PASS, wireless EthernetMac
 
 # IPv6 examples
 /examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,                50000s,          eb79-fc97/~tNlb, PASS, EthernetMac
