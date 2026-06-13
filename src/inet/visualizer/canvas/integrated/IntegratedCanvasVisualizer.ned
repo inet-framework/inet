@@ -13,6 +13,7 @@ import inet.visualizer.contract.IEnergyStorageVisualizer;
 import inet.visualizer.contract.IFailureProtectionConfigurationVisualizer;
 import inet.visualizer.contract.IGateScheduleVisualizer;
 import inet.visualizer.contract.IGeographicMapVisualizer;
+import inet.visualizer.contract.IGeographicSkyViewVisualizer;
 import inet.visualizer.contract.IIeee80211Visualizer;
 import inet.visualizer.contract.IInfoVisualizer;
 import inet.visualizer.contract.IIntegratedVisualizer;
@@ -162,6 +163,10 @@ module IntegratedCanvasVisualizer like IIntegratedVisualizer
         geographicMapVisualizer: <default("")> like IGeographicMapVisualizer if typename != "" {
             parameters:
                 @display("p=750,400");
+        }
+        geographicSkyViewVisualizer: <default("")> like IGeographicSkyViewVisualizer if typename != "" {
+            parameters:
+                @display("p=750,500");
         }
 }
 

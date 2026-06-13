@@ -27,7 +27,7 @@ simple GeographicMapVisualizerBase extends VisualizerBase
         string moduleFilter @mutable = default("**.mobility"); // Which mobilities are considered, matches all mobilities by default
 
         // map background and projection
-        string projection = default("equirectangular"); // Map projection, either "equirectangular" (plate carree) or "mercator"
+        string projection @enum("equirectangular", "mercator") = default("equirectangular"); // Map projection: "equirectangular" (plate carree) or "mercator"
         string mapImage = default(""); // Background world map image name (looked up on the image path), empty means no raster background
         double mapWidth = default(720); // Width of the map area in pixels
         double mapHeight = default(360); // Height of the map area in pixels
@@ -36,8 +36,8 @@ simple GeographicMapVisualizerBase extends VisualizerBase
 
         // graticule (latitude/longitude grid)
         bool displayGraticule = default(true); // Display a latitude/longitude grid, enabled by default
-        double graticuleLatSpacing = default(30); // Spacing between parallels in degrees
-        double graticuleLonSpacing = default(30); // Spacing between meridians in degrees
+        double graticuleLatSpacing @unit(deg) = default(30deg); // Spacing between parallels
+        double graticuleLonSpacing @unit(deg) = default(30deg); // Spacing between meridians
         string graticuleLineColor = default("#EEEEEE"); // Graticule line color
         double graticuleLineWidth = default(1); // Graticule line width
 
@@ -57,7 +57,7 @@ simple GeographicMapVisualizerBase extends VisualizerBase
 
         // coverage footprints
         bool displayFootprints = default(false); // Display the coverage footprint of each node, disabled by default
-        double minElevationAngle = default(0); // Minimum elevation angle in degrees used to compute the footprint radius
+        double minElevationAngle @unit(deg) = default(0deg); // Minimum elevation angle used to compute the footprint radius
         string footprintLineColor = default("blue"); // Footprint outline color
         string footprintFillColor = default("blue"); // Footprint fill color
         double footprintOpacity = default(0.1); // Footprint opacity

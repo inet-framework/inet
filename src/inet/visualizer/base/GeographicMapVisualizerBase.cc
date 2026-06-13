@@ -42,8 +42,8 @@ void GeographicMapVisualizerBase::initialize(int stage)
         adjustBackgroundBox = par("adjustBackgroundBox");
         // graticule
         displayGraticule = par("displayGraticule");
-        graticuleLatSpacing = par("graticuleLatSpacing");
-        graticuleLonSpacing = par("graticuleLonSpacing");
+        graticuleLatSpacing = deg(par("graticuleLatSpacing")).get<deg>();
+        graticuleLonSpacing = deg(par("graticuleLonSpacing")).get<deg>();
         graticuleLineColor = cFigure::parseColor(par("graticuleLineColor"));
         graticuleLineWidth = par("graticuleLineWidth");
         // markers and labels
@@ -60,7 +60,7 @@ void GeographicMapVisualizerBase::initialize(int stage)
         groundTrackLineWidth = par("groundTrackLineWidth");
         // footprints
         displayFootprints = par("displayFootprints");
-        minElevationAngle = par("minElevationAngle");
+        minElevationAngle = deg(par("minElevationAngle")).get<deg>();
         footprintLineColor = cFigure::parseColor(par("footprintLineColor"));
         footprintFillColor = cFigure::parseColor(par("footprintFillColor"));
         footprintOpacity = par("footprintOpacity");
