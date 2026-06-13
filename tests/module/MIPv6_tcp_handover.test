@@ -1,0 +1,148 @@
+%description:
+Tests that a TCP connection survives a MIPv6 handover. The mobile node opens a TCP
+connection to the correspondent node while at home and keeps sending 1000-byte chunks
+as it moves into the foreign network and hands over. Because the connection is bound to
+the (stable) home address, it is preserved across the handover -- the home agent tunnels
+it to the care-of address -- so the chunks sent after the handover are delivered too,
+and the connection is never reset.
+
+The mIPv6Network test network is reused (1 MN, 1 CN).
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+network = inet.test.moduletest.lib.mIPv6Network
+sim-time-limit = 55s
+cpu-time-limit = 180s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+num-rngs = 3
+seed-set = 1
+**.mobility.rng-0 = 2
+
+# number of MNs and CNs
+*.total_mn = 1
+*.total_cn = 1
+
+**.neighbourDiscovery.minIntervalBetweenRAs = 0.03s
+**.neighbourDiscovery.maxIntervalBetweenRAs = 0.07s
+**.neighbourDiscovery.detectL2Movement = false   # legacy: detect movement from periodic RAs only
+
+# channel physical parameters
+*.radioMedium.mediumLimitCache.maxTransmissionPower = 2.0mW
+*.radioMedium.mediumLimitCache.minReceptionPower = -82dBm
+*.radioMedium.mediumLimitCache.minInterferencePower = -82dBm
+
+# access point
+**.wlan*.mgmt.numAuthSteps = 4
+
+# ALL APs common parameters
+**.AP*.wlan*.mgmt.beaconInterval = 0.1s
+
+# Access Point parameters
+**.AP_Home.wlan*.mgmt.ssid = "HOME"
+**.AP_Home.wlan*.address = "10:AA:00:00:00:01"
+**.AP_Home.eth[0].address = "10:AE:00:00:00:02"
+**.AP_Home.eth[0].duplexMode = true
+
+**.AP_1.wlan*.mgmt.ssid = "AP1"
+**.AP_1.wlan*.address = "10:AA:00:00:A1:01"
+**.AP_1.eth[0].address = "10:AE:00:00:A1:02"
+**.AP_1.eth[0].duplexMode = true
+
+# mobility - MN moves from home to the foreign network, handing over in mid-run
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxZ = 0m
+
+**.MN[0].mobility.typename = "RectangleMobility"
+**.MN[0].mobility.constraintAreaMinX = 180m
+**.MN[0].mobility.constraintAreaMinY = 170m
+**.MN[0].mobility.constraintAreaMaxX = 630m
+**.MN[0].mobility.constraintAreaMaxY = 180m
+**.MN[0].mobility.startPos = 0
+**.MN[0].mobility.speed = 10mps
+**.MN*.mobility.updateInterval = 0.1s
+
+# TCP: the MN is the client (it carries the connection through the handover), the CN a sink.
+**.tcp.typename = "Tcp"
+**.MN[0].numApps = 1
+**.MN[0].app[0].typename = "TcpSessionApp"
+**.MN[0].app[0].active = true
+**.MN[0].app[0].connectAddress = "CN[0]"
+**.MN[0].app[0].connectPort = 1000
+**.MN[0].app[0].localPort = -1
+**.MN[0].app[0].tOpen = 2s
+**.MN[0].app[0].sendBytes = 0B   # use sendScript instead of tSend+sendBytes
+# 1000-byte chunks spanning the handover: the first few while at home, the rest after
+# the MN has moved into the foreign network and handed over
+**.MN[0].app[0].sendScript = "5 1000; 15 1000; 25 1000; 35 1000; 45 1000"
+**.MN[0].app[0].tClose = 52s
+
+**.CN[0].numApps = 1
+**.CN[0].app[0].typename = "TcpSinkApp"
+**.CN[0].app[0].localPort = 1000
+
+# ip settings
+**.forwarding = false
+
+# Ethernet NIC configuration
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue"
+**.eth[*].queue.dataQueue.packetCapacity = 10
+**.eth*.duplexMode = true
+
+# analog model
+**.analogModel.ignorePartialInterference = true
+
+# wireless channels
+**.AP_Home.wlan*.radio.channelNumber = 1
+**.AP_1.wlan*.radio.channelNumber = 2
+**.MN*.wlan*.radio.channelNumber = 0
+
+# wireless configuration
+**.wlan*.agent.activeScan = true
+**.wlan*.agent.defaultSsid = ""
+**.wlan*.agent.channelsToScan = "1 2"
+**.wlan*.agent.probeDelay = 0.1s
+**.wlan*.agent.minChannelTime = 0.15s
+**.wlan*.agent.maxChannelTime = 0.3s
+**.wlan*.agent.authenticationTimeout = 5s
+**.wlan*.agent.associationTimeout = 5s
+
+# nic settings
+**.wlan*.bitrate = 2Mbps
+**.wlan*.mac.dcf.channelAccess.cwMin = 7
+**.radio.transmitter.power = 2.0mW
+
+**.constraintAreaMinX = 0m
+**.constraintAreaMinY = 0m
+**.constraintAreaMaxX = 850m
+**.constraintAreaMaxY = 850m
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%# the MN hands over and registers a care-of address with the home agent
+%contains: stdout
+mIPv6Network.MN[0].ipv6.mipv6: Binding was accepted.
+%#--------------------------------------------------------------------------------------------------------------
+%# the correspondent node receives TCP data delivered over the connection (which carried
+%# it through the handover; the post-handover chunks are tunneled to the care-of address)
+%contains: stdout
+dataArrived
+%#--------------------------------------------------------------------------------------------------------------
+%# the connection was never reset (it closes cleanly at tClose, it is not aborted)
+%not-contains: stdout
+RCV_RST
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
