@@ -274,6 +274,14 @@ void Mipv6::initiateMipv6Protocol(NetworkInterface *ie, const Ipv6Address& CoA)
         bul->removeBinding(cn); //FIXME need revision: this function sometimes remove the entry from bul, and bul->resetCareOfToken(cn, HoA) creates assert
         // care-of token becomes invalid with new CoA
         bul->resetCareOfToken(cn, HoA);
+        // Also clear the care-of test rate-limit timestamp. The previous CoTI was sent
+        // from the old care-of address, so recentlySentCOTI() must not suppress the fresh
+        // CoTI we now need to obtain a care-of token for the new CoA. Without this, return
+        // routability stalls on the second (and any later) handover, so the BU updating the
+        // CN's binding is never sent and route-optimized traffic blackholes to the stale CoA.
+        // (The home token is left intact on purpose: it is bound to the home address, which
+        // does not change across handovers, and may therefore be reused -- RFC 3775 11.6.1.)
+        bul->fetch(cn)->sentCoTI = -1;
         destroyTunnelForExitAndTrigger(HoA, cn);
         removeRouteOptimizationForExitAndTrigger(HoA, cn);
     }
