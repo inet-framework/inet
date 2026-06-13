@@ -1,0 +1,40 @@
+Mobile IPv6 roaming example
+============================
+
+A Mobile IPv6 (RFC 3775) scenario with THREE access networks, in which a
+single mobile node (MN) performs two successive handovers:
+
+    home network (AP_Home, behind the home agent)
+        -> foreign network 1 (AP_1, behind router R_1)
+        -> foreign network 2 (AP_2, behind router R_2_acc)
+
+As the MN roams it forms a new care-of address (CoA) in each foreign network
+via stateless address autoconfiguration and re-registers it with its home
+agent. A correspondent node (CN) pings the MN's stable home address (HoA)
+throughout the run; the traffic follows the MN across both handovers, with
+only a brief interruption each time the MN moves and re-establishes
+connectivity (home-agent registration plus return routability / route
+optimization with the CN).
+
+Topology:
+
+    CN --- switch --- backbone --- Home_Agent --- AP_Home   (home network)
+                          |
+                          +------- R_1 ---------- AP_1       (foreign net 1)
+                          |
+                          +------- R_2_acc ------ AP_2       (foreign net 2)
+
+The home agent and the access routers are interconnected through a backbone
+router; the correspondent node hangs off an Ethernet switch. Addresses and
+routes are assigned by the (modern) Ipv6NetworkConfigurator, configured with
+assignAddressesToHosts = false so that hosts -- in particular the mobile node
+-- autoconfigure their home and care-of addresses.
+
+Run:
+
+    inet -u Cmdenv -c Roaming
+
+or open omnetpp.ini in the IDE / Qtenv and run the "Roaming" configuration.
+
+This example notably exercises route optimization across more than one
+handover, which the single-handover examples do not.
