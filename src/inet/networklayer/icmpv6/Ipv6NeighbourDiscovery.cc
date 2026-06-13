@@ -11,6 +11,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/Simsignals.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
@@ -87,6 +88,10 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
         ift.reference(this, "interfaceTableModule", true);
         rt6.reference(this, "routingTableModule", true);
         icmpv6.reference(this, "icmpv6Module", true);
+
+        detectL2Movement = par("detectL2Movement");
+        if (detectL2Movement)
+            getContainingNode(this)->subscribe(l2AssociatedSignal, this);
 
         pendingQueue.setName("pendingQueue");
     }
@@ -1012,15 +1017,40 @@ void Ipv6NeighbourDiscovery::createAndSendRsPacket(NetworkInterface *ie)
     sendPacketToIpv6Module(packet, destAddr, myIPv6Address, ie->getInterfaceId());
 }
 
+void Ipv6NeighbourDiscovery::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+{
+    Enter_Method("%s", cComponent::getSignalName(signalID));
+    if (signalID == l2AssociatedSignal) {
+        // The interface (re)associated at the link layer (e.g. a wireless handover
+        // to a new access point). Restart Router Discovery so the node solicits a
+        // Router Advertisement immediately -- this is how a mobile node detects the
+        // move and obtains a new prefix/care-of address without having to wait for
+        // the next unsolicited RA.
+        NetworkInterface *ie = check_and_cast_nullable<NetworkInterface *>(obj);
+        if (ie != nullptr && ie->findProtocolData<Ipv6InterfaceData>() != nullptr) {
+            EV_INFO << "Interface " << ie->getInterfaceName()
+                    << " (re)associated at the link layer; restarting Router Discovery." << endl;
+            cancelRouterDiscovery(ie);
+            startRouterDiscovery(ie);
+        }
+    }
+}
+
 void Ipv6NeighbourDiscovery::initiateRouterDiscovery(cMessage *msg)
 {
     EV_INFO << "Initiating Router Discovery" << endl;
     NetworkInterface *ie = (NetworkInterface *)msg->getContextPointer();
     delete msg;
+    startRouterDiscovery(ie);
+}
+
+void Ipv6NeighbourDiscovery::startRouterDiscovery(NetworkInterface *ie)
+{
     // RFC 4861 Section 6.3.7: a host SHOULD transmit up to MAX_RTR_SOLICITATIONS
     // Router Solicitation messages, each separated by at least
     // RTR_SOLICITATION_INTERVAL seconds.  This is invoked after DAD completes
-    // (from makeTentativeAddressPermanent) with a random initial delay.
+    // (from makeTentativeAddressPermanent) with a random initial delay, and on
+    // link-layer (re)association when detectL2Movement is set.
     RdEntry *rdEntry = new RdEntry();
     rdEntry->interfaceId = ie->getInterfaceId();
     rdEntry->numRSSent = 0;

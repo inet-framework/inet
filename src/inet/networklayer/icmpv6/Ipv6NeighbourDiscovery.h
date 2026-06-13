@@ -34,7 +34,7 @@ class Mipv6;
 /**
  * Implements RFC 2461 Neighbor Discovery for Ipv6.
  */
-class INET_API Ipv6NeighbourDiscovery : public OperationalBase
+class INET_API Ipv6NeighbourDiscovery : public OperationalBase, protected cListener
 {
   public:
     typedef std::vector<Packet *> MsgPtrVector;
@@ -154,10 +154,20 @@ class INET_API Ipv6NeighbourDiscovery : public OperationalBase
     typedef std::map<int, DadGlobalEntry> DadGlobalList; // keyed by interfaceId
     DadGlobalList dadGlobalList;
 
+    // If true, (re)start Router Discovery whenever an interface associates at the
+    // link layer (l2Associated signal, e.g. a wireless handover to a new AP), so a
+    // mobile node solicits a Router Advertisement and detects movement immediately
+    // instead of waiting for the next unsolicited RA. Set from the NED parameter.
+    bool detectL2Movement = false;
+
   protected:
     /************************Miscellaneous Stuff***************************/
     virtual void initialize(int stage) override;
     virtual void handleMessageWhenUp(cMessage *msg) override;
+
+    // Reacts to the l2Associated signal when detectL2Movement is set.
+    using cListener::receiveSignal;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
     // lifecycle:
     virtual bool isInitializeStage(int stage) const override { return stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS; }
@@ -280,6 +290,10 @@ class INET_API Ipv6NeighbourDiscovery : public OperationalBase
     /************Router Solicitation Stuff*********************************/
     virtual void createAndSendRsPacket(NetworkInterface *ie);
     virtual void initiateRouterDiscovery(cMessage *msg);
+    // Start the Router Discovery procedure on the given interface (send the first
+    // Router Solicitation and schedule retransmissions). Shared by the post-DAD
+    // startup path and the l2Associated handler.
+    virtual void startRouterDiscovery(NetworkInterface *ie);
     /**
      *  RFC 2461: Section 6.3.7 4th paragraph
      *  Once the host sends a Router Solicitation, and receives a valid
