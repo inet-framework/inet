@@ -53,8 +53,21 @@ void Icmpv6::handleMessageWhenUp(cMessage *msg)
 
     // process arriving ICMP message
     if (msg->getArrivalGate()->isName("ipv6In")) {
-        EV_INFO << "Processing ICMPv6 message.\n";
-        processICMPv6Message(check_and_cast<Packet *>(msg));
+        if (auto packet = dynamic_cast<Packet *>(msg)) {
+            EV_INFO << "Processing ICMPv6 message.\n";
+            processICMPv6Message(packet);
+        }
+        else if (auto indication = dynamic_cast<Indication *>(msg)) {
+            // IPv6 reports an ICMPv6 error for an ICMPv6 message we originated (e.g. an
+            // error or NDP message that could not be delivered). There is nothing to
+            // retransmit, and ICMPv6 must not generate errors about errors, so the
+            // notification is simply discarded.
+            EV_WARN << "Received an error indication (" << indication->getName()
+                    << ") for an ICMPv6 message we sent; ignoring it" << endl;
+            delete indication;
+        }
+        else
+            throw cRuntimeError("Unexpected message %s(%s) arrived on ipv6In", msg->getName(), msg->getClassName());
         return;
     }
     else if (msg->getArrivalGate()->isName("transportIn")) {
