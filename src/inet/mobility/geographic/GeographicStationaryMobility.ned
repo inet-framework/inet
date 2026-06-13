@@ -33,5 +33,6 @@ simple GeographicStationaryMobility extends StationaryMobility
         initFromDisplayString = default(false);   // take the position from latitude/longitude, not the display string
         updateDisplayString = default(false);     // keep the icon at its display-string position; do not move it to the ECEF coordinate
         updateFromDisplayString = default(false);  // do not read the icon position back into the scene position
+        displayStringTextFormat = default("%g\np: %p"); // Show the geographic (latitude/longitude/altitude) position above the scene position
         @class(StationaryMobility);
 }

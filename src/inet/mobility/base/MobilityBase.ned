@@ -22,6 +22,7 @@ import inet.mobility.contract.IMobility;
 //  - %V angular velocity
 //  - %S angular speed
 //  - %A angular acceleration
+//  - %g geographic position (latitude, longitude, altitude; requires a coordinate system)
 //
 simple MobilityBase extends SimpleModule like IMobility
 {

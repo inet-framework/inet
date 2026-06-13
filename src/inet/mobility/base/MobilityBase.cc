@@ -5,6 +5,8 @@
 
 #include "inet/mobility/base/MobilityBase.h"
 
+#include <cstdio>
+
 #include "inet/common/INETMath.h"
 #include "inet/common/geometry/common/GeographicCoordinateSystem.h"
 #include "inet/common/geometry/common/Quaternion.h"
@@ -70,6 +72,17 @@ std::string MobilityBase::resolveDirective(char directive) const
         }
         case 'A':
             return constthis->getCurrentAngularAcceleration().str();
+        case 'g': {
+            // geographic position (latitude/longitude/altitude), empty if there is no coordinate system
+            auto coordinateSystem = findModuleFromPar<IGeographicCoordinateSystem>(constthis->par("coordinateSystemModule"), constthis);
+            if (coordinateSystem == nullptr)
+                return "";
+            GeoCoord geographicPosition = coordinateSystem->computeGeographicCoordinate(constthis->getCurrentPosition());
+            char buf[80];
+            snprintf(buf, sizeof(buf), "lat %.3f° lon %.3f° alt %.0fm",
+                    geographicPosition.latitude.get<deg>(), geographicPosition.longitude.get<deg>(), geographicPosition.altitude.get<m>());
+            return buf;
+        }
         default:
             return SimpleModule::resolveDirective(directive);   
     }
