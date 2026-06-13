@@ -314,7 +314,18 @@ void Ipv6::handleIcmpErrorIndication(Indication *indication)
 
     // Dispatch the same Indication to the appropriate transport protocol.
     // SP_INDICATION routes via protocolToGateIndex to the transport module's ipIn gate.
-    auto protocol = ProtocolGroup::getIpProtocolGroup()->getProtocol(ipv6Header->getProtocolId());
+    // The offending packet may begin with an IPv6 extension header (e.g. a Type-2
+    // Routing Header inserted by route optimization), which is not a registered
+    // transport protocol; in that case the error cannot be delivered to a transport,
+    // so discard it -- the protocol recovers on its own (e.g. via retransmission).
+    auto protocol = ProtocolGroup::getIpProtocolGroup()->findProtocol(ipv6Header->getProtocolId());
+    if (protocol == nullptr) {
+        EV_WARN << "ICMPv6 error indication for a packet whose leading header ("
+                << ipv6Header->getProtocolId() << ") is not a registered transport protocol "
+                << "(e.g. an IPv6 extension header); discarding\n";
+        delete indication;
+        return;
+    }
     auto& dispatchReq = indication->addTagIfAbsent<DispatchProtocolReq>();
     dispatchReq->setProtocol(protocol);
     dispatchReq->setServicePrimitive(SP_INDICATION);
