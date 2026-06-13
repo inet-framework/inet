@@ -854,15 +854,38 @@ void Ipv6NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
                         Ipv6Address destPrefix = destinationInterfaceInfo->prefix;
                         int destPrefixLength = destinationInterfaceInfo->prefixLength;
 
-                        // Determine next-hop: use link-local address of next-hop router
-                        Ipv6Address nextHop;
-                        auto nhIpv6Data = nextHopInterfaceInfo->networkInterface->findProtocolData<Ipv6InterfaceData>();
-                        if (nhIpv6Data)
-                            nextHop = nhIpv6Data->getLinkLocalAddress();
-                        if (nextHop.isUnspecified())
-                            nextHop = nextHopInterfaceInfo->globalAddress; // fallback
+                        // If THIS destination interface sits on a link the source node is
+                        // itself attached to, install a DIRECT (on-link) route -- unspecified
+                        // next hop, output on the source's interface on that link -- so the
+                        // source resolves the destination directly via Neighbour Discovery.
+                        // A "via <host>" route would be wrong on a link shared by several
+                        // hosts: each host's prefix route would point at whichever host was
+                        // added first, so traffic to the other hosts would be misdelivered
+                        // to it. A direct route is also correct and de-duplicates: all hosts
+                        // on one link collapse to a single on-link prefix route.
+                        NetworkInterface *directOutInterface = nullptr;
+                        for (auto& ifInfoBase : destinationInterfaceInfo->linkInfo->interfaceInfos) {
+                            InterfaceInfo *onLinkIf = static_cast<InterfaceInfo *>(ifInfoBase);
+                            if (static_cast<Node *>(onLinkIf->node) == sourceNode) {
+                                directOutInterface = onLinkIf->networkInterface;
+                                break;
+                            }
+                        }
 
-                        // Skip if this is a direct route (same link)
+                        Ipv6Address nextHop;
+                        NetworkInterface *outInterface;
+                        if (directOutInterface != nullptr)
+                            outInterface = directOutInterface; // on-link: resolve the destination directly
+                        else {
+                            outInterface = sourceNetworkInterface;
+                            auto nhIpv6Data = nextHopInterfaceInfo->networkInterface->findProtocolData<Ipv6InterfaceData>();
+                            if (nhIpv6Data)
+                                nextHop = nhIpv6Data->getLinkLocalAddress();
+                            if (nextHop.isUnspecified())
+                                nextHop = nextHopInterfaceInfo->globalAddress; // fallback
+                        }
+
+                        // Skip direct (on-link) routes when direct routes are disabled
                         if (!addDirectRoutesParameter && nextHop.isUnspecified())
                             continue;
 
@@ -872,7 +895,7 @@ void Ipv6NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
                             if (existingRoute->getDestPrefix() == destPrefix &&
                                 existingRoute->getPrefixLength() == destPrefixLength &&
                                 existingRoute->getNextHop() == nextHop &&
-                                existingRoute->getInterface() == sourceNetworkInterface) {
+                                existingRoute->getInterface() == outInterface) {
                                 duplicate = true;
                                 break;
                             }
@@ -882,13 +905,17 @@ void Ipv6NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
 
                         Ipv6Route *route = new Ipv6Route(destPrefix, destPrefixLength, IRoute::MANUAL);
                         route->setNextHop(nextHop);
-                        route->setInterface(sourceNetworkInterface);
+                        route->setInterface(outInterface);
                         route->setMetric(0);
                         sourceNode->staticRoutes.push_back(route);
                         sourceNode->routingTableNetworkInterfaces.push_back(route->getInterface());
-                        EV_DEBUG << "Adding route " << sourceNetworkInterface->getInterfaceFullPath() << " -> "
-                                 << destinationNetworkInterface->getInterfaceFullPath() << " as "
-                                 << destPrefix << "/" << destPrefixLength << " via " << nextHop << endl;
+                        EV_DETAIL << "Adding route " << outInterface->getInterfaceFullPath() << " -> "
+                                  << destinationNetworkInterface->getInterfaceFullPath() << " as "
+                                  << destPrefix << "/" << destPrefixLength;
+                        if (nextHop.isUnspecified())
+                            EV_DETAIL << " (on-link)" << endl;
+                        else
+                            EV_DETAIL << " via " << nextHop << endl;
                     }
                 }
             }
