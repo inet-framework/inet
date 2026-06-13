@@ -893,6 +893,42 @@ void Ipv6NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
                 }
             }
         }
+
+        // The loops above only add routes toward other CONFIGURED interfaces. A router
+        // interface on a link with no other configured member -- e.g. an access router
+        // serving a wireless link whose hosts autoconfigure (SLAAC) only at runtime --
+        // would then have no route to its own on-link prefix and could not deliver to
+        // those hosts. Fill such gaps with on-link (direct) routes. Prefixes that already
+        // have a route (every multi-member, e.g. wired, link) are left untouched.
+        if (addDirectRoutesParameter && sourceNode->routingTable) {
+            for (size_t k = 0; k < sourceNode->interfaceInfos.size(); k++) {
+                InterfaceInfo *interfaceInfo = static_cast<InterfaceInfo *>(sourceNode->interfaceInfos[k]);
+                NetworkInterface *networkInterface = interfaceInfo->networkInterface;
+                if (networkInterface->isLoopback())
+                    continue;
+                if (interfaceInfo->prefix.isUnspecified() || interfaceInfo->globalAddress.isUnspecified())
+                    continue;
+                bool haveRoute = false;
+                for (auto *existingRoute : sourceNode->staticRoutes)
+                    if (existingRoute->getDestPrefix() == interfaceInfo->prefix &&
+                        existingRoute->getPrefixLength() == interfaceInfo->prefixLength)
+                    {
+                        haveRoute = true;
+                        break;
+                    }
+                if (haveRoute)
+                    continue;
+                Ipv6Route *route = new Ipv6Route(interfaceInfo->prefix, interfaceInfo->prefixLength, IRoute::MANUAL);
+                route->setNextHop(Ipv6Address::UNSPECIFIED_ADDRESS);
+                route->setInterface(networkInterface);
+                route->setMetric(0);
+                EV_DEBUG << "Adding on-link route " << interfaceInfo->prefix << "/" << interfaceInfo->prefixLength
+                         << " dev " << networkInterface->getInterfaceName() << " to " << sourceNode->module->getFullPath()
+                         << " (directly-connected prefix with no other configured member)" << endl;
+                sourceNode->staticRoutes.push_back(route);
+                sourceNode->routingTableNetworkInterfaces.push_back(route->getInterface());
+            }
+        }
     }
 }
 
