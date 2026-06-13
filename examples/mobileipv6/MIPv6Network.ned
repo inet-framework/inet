@@ -12,7 +12,6 @@
 
 package inet.examples.mobileipv6;
 
-import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
 import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
 import inet.node.ethernet.EthernetSwitch;
 import inet.node.ipv6.Router6;
@@ -43,15 +42,15 @@ network mIPv6Network
         int total_mn;
         int total_cn;
         **.mgmt.numChannels = 5;
+        **.ipv6.configurator.networkConfiguratorModule = "ipv6Configurator";
 
         @display("bgb=799,698");
     submodules:
-        configurator: Ipv6FlatNetworkConfigurator {
-            parameters:
-                @display("p=100,100;is=s");
-        }
         ipv6Configurator: Ipv6NetworkConfigurator {
             parameters:
+                // The mobile node must autoconfigure its home/care-of addresses (SLAAC),
+                // so the configurator addresses only routers and lets hosts use SLAAC.
+                assignAddressesToHosts = false;
                 @display("p=100,150;is=s");
         }
         radioMedium: Ieee80211ScalarRadioMedium {
