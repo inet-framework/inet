@@ -8,7 +8,8 @@
 # empty-shim step, which kept these fingerprints bit-for-bit identical.
 
 # MIPv6 example — the primary test
-/examples/mobileipv6/,               -f omnetpp.ini -c One -r 0,                    25s,             f6b3-0b96/~tNlb, PASS, wireless EthernetMac
+/examples/mobileipv6/,               -f omnetpp.ini -c Handover -r 0,                70s,            889f-dea3/~tNlb, PASS, wireless EthernetMac
+/examples/mobileipv6/,               -f omnetpp.ini -c RouteOptimizationTwoCNs -r 0,  90s,            8f5e-8e8d/~tNlb, PASS, wireless EthernetMac
 
 # IPv6 examples
 /examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,                50000s,          eb79-fc97/~tNlb, PASS, EthernetMac

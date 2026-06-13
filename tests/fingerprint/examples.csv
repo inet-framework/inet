@@ -374,7 +374,8 @@
 /examples/manetrouting/multiradio/,  -f omnetpp.ini -c MultiRadio -r 0,             20s,             ec17-5cc2/tplx;55f5-0894/~tNl, PASS,  wireless adhoc Ipv4
 /examples/manetrouting/multiradio/,  -f omnetpp.ini -c SingleRadio -r 0,            20s,             85a0-51b8/tplx;c07a-44e1/~tNl;3aa0-49ed/tyf, PASS,  wireless adhoc Ipv4
 
-/examples/mobileipv6/,               -f omnetpp.ini -c One -r 0,                    25s,             5698-4ff7/tplx;ce34-b423/~tNl;5e3a-cddf/~tND;c55e-179d/tyf, PASS, wireless EthernetMac
+/examples/mobileipv6/,               -f omnetpp.ini -c Handover -r 0,                70s,             01ce-0e2e/tplx;e8b7-9112/~tNl;aa70-ef78/~tND;6f4c-1b33/tyf, PASS, wireless EthernetMac
+/examples/mobileipv6/,               -f omnetpp.ini -c RouteOptimizationTwoCNs -r 0,  90s,             3530-3abd/tplx;e889-2881/~tNl;f4f9-93ea/~tND;66d4-1bd0/tyf, PASS, wireless EthernetMac
 
 /examples/mobility/,                 -f omnetpp.ini -c AnsimMobility -r 0,          10000s,          72f8-5c0b/tplx;0000-0000/~tNl;0000-0000/~tND;7dd1-18eb/tyf, PASS,
 /examples/mobility,                  -f omnetpp.ini -c AttachedMobility,            10s,             566c-6355/tplx;0000-0000/~tNl;0000-0000/~tND;fa92-f68c/tyf, PASS,
