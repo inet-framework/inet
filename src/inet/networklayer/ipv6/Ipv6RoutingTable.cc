@@ -481,7 +481,13 @@ bool Ipv6RoutingTable::isLocalAddress(const Ipv6Address& dest) const
     if (dest.matches(Ipv6Address::SOLICITED_NODE_PREFIX, 104)) {
         for (int i = 0; i < ift->getNumInterfaces(); i++) {
             NetworkInterface *ie = ift->getInterface(i);
-            if (ie->getProtocolData<Ipv6InterfaceData>()->matchesSolicitedNodeMulticastAddress(dest))
+            // skip interfaces without IPv6 data (e.g. the loopback): this runs for every
+            // received solicited-node multicast (e.g. a neighbour's DAD NS), and only the
+            // matching interface short-circuits, so the others -- including any without
+            // Ipv6InterfaceData -- are visited too. Using getProtocolData() (non-nullable)
+            // here aborted the simulation on such an interface.
+            auto ipv6Data = ie->findProtocolData<Ipv6InterfaceData>();
+            if (ipv6Data && ipv6Data->matchesSolicitedNodeMulticastAddress(dest))
                 return true;
         }
     }
