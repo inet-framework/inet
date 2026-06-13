@@ -2239,6 +2239,11 @@ INetfilter::IHook::Result Mipv6::datagramLocalOutHook(Packet *datagram)
 
                 header->setDestAddress(ro.exit);
                 header->setProtocolId(static_cast<IpProtocolId>(t2RH->getExtensionType()));
+                // the inserted extension header is part of the IPv6 payload: grow
+                // payloadLength accordingly, otherwise the receiver truncates the packet
+                // at decapsulation (and a small transport segment, e.g. a TCP ACK, would
+                // then be too short for the routing header to be peeked back).
+                header->setPayloadLength(header->getPayloadLength() + B(t2RH->getChunkLength()));
 
                 datagram->insertAtFront(t2RH);
                 datagram->insertAtFront(header);
@@ -2261,6 +2266,9 @@ INetfilter::IHook::Result Mipv6::datagramLocalOutHook(Packet *datagram)
 
                 header->setSrcAddress(ro.entry);
                 header->setProtocolId(static_cast<IpProtocolId>(destOpts->getExtensionType()));
+                // the inserted extension header is part of the IPv6 payload (see the
+                // Type 2 Routing Header branch above)
+                header->setPayloadLength(header->getPayloadLength() + B(destOpts->getChunkLength()));
 
                 datagram->insertAtFront(destOpts);
                 datagram->insertAtFront(header);
