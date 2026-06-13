@@ -46,6 +46,6 @@ network SatelliteMobilityShowcase
             @display("p=780,200");
         }
         groundStation: MobileNode {
-            @display("p=0,0");
+            @display("p=780,280;i=device/receiverdish");
         }
 }
