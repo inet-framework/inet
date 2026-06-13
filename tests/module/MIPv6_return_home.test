@@ -4,7 +4,7 @@ network to a foreign network (triggering handover), then moves back home.
 Upon returning, the MN detects its home prefix is on-link again and sends
 a deregistration Binding Update (lifetime=0) to the Home Agent.
 
-The existing mIPv6Network example is reused with RectangleMobility at
+The existing Mipv6Network example is reused with RectangleMobility at
 20mps so the MN completes a full home->foreign->home trip within the
 simulation time.
 
@@ -12,7 +12,7 @@ simulation time.
 %inifile: omnetpp.ini
 [General]
 ned-path = .;../../../../src;../../lib
-network = inet.test.moduletest.lib.mIPv6Network
+network = inet.test.moduletest.lib.Mipv6Network
 sim-time-limit = 55s
 cmdenv-express-mode = false
 cmdenv-log-prefix = "%C: "
@@ -114,10 +114,10 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %subst: /omnetpp:://
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-mIPv6Network.MN[0].ipv6.mipv6: MIPv6 Returning home procedure...
+Mipv6Network.MN[0].ipv6.mipv6: MIPv6 Returning home procedure...
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-mIPv6Network.Home_Agent.ipv6.mipv6: Deregistered binding
+Mipv6Network.Home_Agent.ipv6.mipv6: Deregistered binding
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out

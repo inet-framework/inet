@@ -29,7 +29,7 @@ channel ethernetline extends ned.DatarateChannel
         datarate = 100Mbps;
 }
 
-network mIPv6RoamingNetwork
+network Mipv6RoamingNetwork
 {
     parameters:
         int total_mn;

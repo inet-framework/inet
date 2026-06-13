@@ -3,7 +3,7 @@ Tests basic MIPv6 handover: the Mobile Node moves from its home network
 to a foreign network, obtains a Care-of Address, and registers with
 its Home Agent via a Binding Update.
 
-The existing mIPv6Network example is reused. The MN starts near AP_Home,
+The existing Mipv6Network example is reused. The MN starts near AP_Home,
 moves toward AP_1 (foreign network), and performs handover. We verify
 that the MN initiates the MIPv6 protocol and the HA accepts the binding.
 
@@ -11,7 +11,7 @@ that the MN initiates the MIPv6 protocol and the HA accepts the binding.
 %inifile: omnetpp.ini
 [General]
 ned-path = .;../../../../src;../../lib
-network = inet.test.moduletest.lib.mIPv6Network
+network = inet.test.moduletest.lib.Mipv6Network
 sim-time-limit = 60s
 cmdenv-express-mode = false
 cmdenv-log-prefix = "%C: "
@@ -113,13 +113,13 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %subst: /omnetpp:://
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-mIPv6Network.MN[0].ipv6.mipv6: Initiating Mobile Ipv6 protocol...
+Mipv6Network.MN[0].ipv6.mipv6: Initiating Mobile Ipv6 protocol...
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-mIPv6Network.Home_Agent.ipv6.mipv6: BU validation passed
+Mipv6Network.Home_Agent.ipv6.mipv6: BU validation passed
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-mIPv6Network.MN[0].ipv6.mipv6: Binding was accepted.
+Mipv6Network.MN[0].ipv6.mipv6: Binding was accepted.
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out

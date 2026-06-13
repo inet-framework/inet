@@ -6,13 +6,13 @@ triggers the Return Routability procedure (HoTI/CoTI/HoT/CoT) and a Binding Upda
 so the MN ends up maintaining a route-optimization binding with each CN concurrently.
 This exercises the binding/tunnel registry with more than one entry.
 
-The mIPv6Network test network is reused with total_cn=2.
+The Mipv6Network test network is reused with total_cn=2.
 
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 [General]
 ned-path = .;../../../../src;../../lib
-network = inet.test.moduletest.lib.mIPv6Network
+network = inet.test.moduletest.lib.Mipv6Network
 sim-time-limit = 90s
 cpu-time-limit = 120s
 seed-set = 1
@@ -124,26 +124,26 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %subst: /^\([^)]*\)//
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-mIPv6Network.MN[0].ipv6.mipv6: Initialise Route Optimization for:
+Mipv6Network.MN[0].ipv6.mipv6: Initialise Route Optimization for:
 %#--------------------------------------------------------------------------------------------------------------
 %# Return Routability runs independently with each correspondent node
 %contains: stdout
-mIPv6Network.CN[0].ipv6.mipv6: Message recognised as HOME TEST INIT (HoTI)
+Mipv6Network.CN[0].ipv6.mipv6: Message recognised as HOME TEST INIT (HoTI)
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-mIPv6Network.CN[0].ipv6.mipv6: Message recognised as CARE-OF TEST INIT (CoTI)
+Mipv6Network.CN[0].ipv6.mipv6: Message recognised as CARE-OF TEST INIT (CoTI)
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-mIPv6Network.CN[1].ipv6.mipv6: Message recognised as HOME TEST INIT (HoTI)
+Mipv6Network.CN[1].ipv6.mipv6: Message recognised as HOME TEST INIT (HoTI)
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-mIPv6Network.CN[1].ipv6.mipv6: Message recognised as CARE-OF TEST INIT (CoTI)
+Mipv6Network.CN[1].ipv6.mipv6: Message recognised as CARE-OF TEST INIT (CoTI)
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-mIPv6Network.MN[0].ipv6.mipv6: Message recognised as HOME TEST (HoT)
+Mipv6Network.MN[0].ipv6.mipv6: Message recognised as HOME TEST (HoT)
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-mIPv6Network.MN[0].ipv6.mipv6: Message recognised as CARE-OF TEST (CoT)
+Mipv6Network.MN[0].ipv6.mipv6: Message recognised as CARE-OF TEST (CoT)
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out

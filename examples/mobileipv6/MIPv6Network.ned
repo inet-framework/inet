@@ -36,7 +36,7 @@ channel ethernetline extends ned.DatarateChannel
         datarate = 100Mbps;
 }
 
-network mIPv6Network
+network Mipv6Network
 {
     parameters:
         int total_mn;

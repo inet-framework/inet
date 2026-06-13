@@ -14,7 +14,7 @@ possible via the Router Solicitation sent on L2 (re)association.
 %inifile: omnetpp.ini
 [General]
 ned-path = .;../../../../src;../../lib
-network = inet.test.moduletest.lib.mIPv6Network
+network = inet.test.moduletest.lib.Mipv6Network
 sim-time-limit = 60s
 cmdenv-express-mode = false
 cmdenv-log-prefix = "%C: "
@@ -119,13 +119,13 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %subst: /omnetpp:://
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-mIPv6Network.MN[0].ipv6.mipv6: Initiating Mobile Ipv6 protocol...
+Mipv6Network.MN[0].ipv6.mipv6: Initiating Mobile Ipv6 protocol...
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-mIPv6Network.Home_Agent.ipv6.mipv6: BU validation passed
+Mipv6Network.Home_Agent.ipv6.mipv6: BU validation passed
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-mIPv6Network.MN[0].ipv6.mipv6: Binding was accepted.
+Mipv6Network.MN[0].ipv6.mipv6: Binding was accepted.
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out

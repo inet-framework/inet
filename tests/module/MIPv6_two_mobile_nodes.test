@@ -8,7 +8,7 @@ separate binding per mobile node.
 %inifile: omnetpp.ini
 [General]
 ned-path = .;../../../../src;../../lib
-network = inet.test.moduletest.lib.mIPv6Network
+network = inet.test.moduletest.lib.Mipv6Network
 sim-time-limit = 70s
 cmdenv-express-mode = false
 cmdenv-log-prefix = "%C: "
@@ -88,8 +88,8 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %subst: /omnetpp:://
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-mIPv6Network.MN[0].ipv6.mipv6: Binding was accepted.
+Mipv6Network.MN[0].ipv6.mipv6: Binding was accepted.
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-mIPv6Network.MN[1].ipv6.mipv6: Binding was accepted.
+Mipv6Network.MN[1].ipv6.mipv6: Binding was accepted.
 %#--------------------------------------------------------------------------------------------------------------

@@ -3905,8 +3905,8 @@
     <filename>inet.tutorials.queueing.MeterTutorialStep.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.mobileipv6.mIPv6Network</name>
-    <filename>inet.examples.mobileipv6.mIPv6Network.html</filename>
+    <name>inet.examples.mobileipv6.Mipv6Network</name>
+    <filename>inet.examples.mobileipv6.Mipv6Network.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.examples.ethernet.lans.MixedLAN</name>

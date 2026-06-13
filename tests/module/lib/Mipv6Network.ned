@@ -5,13 +5,13 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
-// Frozen copy of examples/mobileipv6/MIPv6Network.ned as it was when the MIPv6_*
+// Frozen copy of examples/mobileipv6/Mipv6Network.ned as it was when the MIPv6_*
 // module tests were written: it uses the legacy Ipv6FlatNetworkConfigurator (which
 // assigns the aaaa:: addresses the tests assert on). The example itself has since
 // been modernized to the Ipv6NetworkConfigurator; keeping this copy here makes the
 // module tests independent of the example (tests must not depend on examples or
-// showcases). The network type is still named mIPv6Network so the existing
-// module-path assertions (mIPv6Network.MN[0].ipv6.mipv6: ...) keep matching.
+// showcases). The network type is still named Mipv6Network so the existing
+// module-path assertions (Mipv6Network.MN[0].ipv6.mipv6: ...) keep matching.
 //
 
 package inet.test.moduletest.lib;
@@ -41,7 +41,7 @@ channel ethernetline extends ned.DatarateChannel
         datarate = 100Mbps;
 }
 
-network mIPv6Network
+network Mipv6Network
 {
     parameters:
         int total_mn;

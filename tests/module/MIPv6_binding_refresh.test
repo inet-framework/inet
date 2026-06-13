@@ -12,7 +12,7 @@ re-initiate Return Routability.
 %inifile: omnetpp.ini
 [General]
 ned-path = .;../../../../src;../../lib
-network = inet.test.moduletest.lib.mIPv6Network
+network = inet.test.moduletest.lib.Mipv6Network
 sim-time-limit = 65s
 cpu-time-limit = 120s
 seed-set = 1
@@ -127,10 +127,10 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %subst: /^\([^)]*\)//
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-mIPv6Network.CN[0].ipv6.mipv6: Sending Binding Refresh Request to
+Mipv6Network.CN[0].ipv6.mipv6: Sending Binding Refresh Request to
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-mIPv6Network.MN[0].ipv6.mipv6: Message recognised as Binding Refresh Request
+Mipv6Network.MN[0].ipv6.mipv6: Message recognised as Binding Refresh Request
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out

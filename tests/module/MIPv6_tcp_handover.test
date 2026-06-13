@@ -6,13 +6,13 @@ the (stable) home address, it is preserved across the handover -- the home agent
 it to the care-of address -- so the chunks sent after the handover are delivered too,
 and the connection is never reset.
 
-The mIPv6Network test network is reused (1 MN, 1 CN).
+The Mipv6Network test network is reused (1 MN, 1 CN).
 
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 [General]
 ned-path = .;../../../../src;../../lib
-network = inet.test.moduletest.lib.mIPv6Network
+network = inet.test.moduletest.lib.Mipv6Network
 sim-time-limit = 55s
 cpu-time-limit = 180s
 cmdenv-express-mode = false
@@ -131,7 +131,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %#--------------------------------------------------------------------------------------------------------------
 %# the MN hands over and registers a care-of address with the home agent
 %contains: stdout
-mIPv6Network.MN[0].ipv6.mipv6: Binding was accepted.
+Mipv6Network.MN[0].ipv6.mipv6: Binding was accepted.
 %#--------------------------------------------------------------------------------------------------------------
 %# the correspondent node receives TCP data delivered over the connection (which carried
 %# it through the handover; the post-handover chunks are tunneled to the care-of address)

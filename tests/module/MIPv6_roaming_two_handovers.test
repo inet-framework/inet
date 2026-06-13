@@ -18,7 +18,7 @@ correctly redone for the second care-of address.
 %inifile: omnetpp.ini
 [General]
 ned-path = .;../../../../src;../../lib
-network = inet.test.moduletest.lib.mIPv6RoamingNetwork
+network = inet.test.moduletest.lib.Mipv6RoamingNetwork
 sim-time-limit = 90s
 cmdenv-express-mode = false
 cmdenv-log-prefix = "%C: "
@@ -110,7 +110,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %subst: /omnetpp:://
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-mIPv6RoamingNetwork.MN[0].ipv6.mipv6: Binding was accepted.
+Mipv6RoamingNetwork.MN[0].ipv6.mipv6: Binding was accepted.
 %#--------------------------------------------------------------------------------------------------------------
 %# Connectivity must survive the SECOND handover: ping reply #160 (sent at ~t=81s, long
 %# after the AP_1 -> AP_2 handover near t=64s) only arrives once route optimization is
@@ -118,7 +118,7 @@ mIPv6RoamingNetwork.MN[0].ipv6.mipv6: Binding was accepted.
 %# correspondent node's binding stays stale, replies stop shortly after the handover, and
 %# this high-sequence reply never appears.
 %contains: stdout
-mIPv6RoamingNetwork.CN[0].app[0]: Ping reply #160 arrived
+Mipv6RoamingNetwork.CN[0].app[0]: Ping reply #160 arrived
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out

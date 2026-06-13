@@ -27,7 +27,7 @@ import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMed
 
 // NOTE: the ethernetline channel is declared in MIPv6TestNetwork.ned (same package).
 
-network mIPv6RoamingNetwork
+network Mipv6RoamingNetwork
 {
     parameters:
         int total_mn;
