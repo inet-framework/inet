@@ -13,8 +13,8 @@ trigger immediately upon receiving tunneled traffic from the CN.
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 [General]
-ned-path = ../../../../examples;../../../../src
-network = inet.examples.mobileipv6.mIPv6Network
+ned-path = .;../../../../src;../../lib
+network = inet.test.moduletest.lib.mIPv6Network
 sim-time-limit = 60s
 cpu-time-limit = 120s
 seed-set = 1
@@ -29,6 +29,7 @@ num-rngs = 3
 
 **.neighbourDiscovery.minIntervalBetweenRAs = 0.03s
 **.neighbourDiscovery.maxIntervalBetweenRAs = 0.07s
+**.neighbourDiscovery.detectL2Movement = false   # legacy: detect movement from periodic RAs only
 
 # channel physical parameters
 *.radioMedium.mediumLimitCache.maxTransmissionPower = 2.0mW

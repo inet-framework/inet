@@ -10,8 +10,8 @@ that the MN initiates the MIPv6 protocol and the HA accepts the binding.
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 [General]
-ned-path = ../../../../examples;../../../../src
-network = inet.examples.mobileipv6.mIPv6Network
+ned-path = .;../../../../src;../../lib
+network = inet.test.moduletest.lib.mIPv6Network
 sim-time-limit = 60s
 cmdenv-express-mode = false
 cmdenv-log-prefix = "%C: "
@@ -25,6 +25,7 @@ seed-set = 1
 
 **.neighbourDiscovery.minIntervalBetweenRAs = 0.03s
 **.neighbourDiscovery.maxIntervalBetweenRAs = 0.07s
+**.neighbourDiscovery.detectL2Movement = false   # legacy: detect movement from periodic RAs only
 
 # channel physical parameters
 *.radioMedium.mediumLimitCache.maxTransmissionPower = 2.0mW

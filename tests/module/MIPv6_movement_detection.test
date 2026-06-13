@@ -13,8 +13,8 @@ possible via the Router Solicitation sent on L2 (re)association.
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 [General]
-ned-path = ../../../../examples;../../../../src
-network = inet.examples.mobileipv6.mIPv6Network
+ned-path = .;../../../../src;../../lib
+network = inet.test.moduletest.lib.mIPv6Network
 sim-time-limit = 60s
 cmdenv-express-mode = false
 cmdenv-log-prefix = "%C: "
