@@ -24,7 +24,7 @@ module SatNode
         @networkNode;
         @display("i=misc/sat");
     submodules:
-        mobility: <default("inet.mobility.satellite.SatelliteMobility")> like IMobility;
+        mobility: <default("inet.mobility.geographic.SatelliteMobility")> like IMobility;
 }
 
 network Test

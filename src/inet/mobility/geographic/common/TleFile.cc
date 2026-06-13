@@ -3,9 +3,8 @@
 //
 
 
-#include "inet/mobility/satellite/common/TleFile.h"
+#include "inet/mobility/geographic/common/TleFile.h"
 
-#ifdef INET_WITH_SATELLITE_MOBILITY
 
 #include <cstring>
 #include <fstream>
@@ -92,5 +91,4 @@ int TleFile::findByCatalogNumber(const char *catalogNumber) const
 
 } // namespace inet
 
-#endif // INET_WITH_SATELLITE_MOBILITY
 

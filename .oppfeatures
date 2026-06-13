@@ -792,27 +792,13 @@
         labels = ""
         nedPackages = "
                        inet.mobility.base
+                       inet.mobility.geographic
                        inet.mobility.group
                        inet.mobility.single
                        inet.mobility.static
                       "
         extraSourceFolders = ""
         compileFlags = ""
-        linkerFlags = ""
-        />
-    <feature
-        id = "SatelliteMobility"
-        name = "Satellite Mobility"
-        description = "Satellite orbit mobility (SGP4/TLE), a geocentric (WGS84/ECEF) coordinate system, geographic anchoring of terrestrial mobility, and a controller that inserts/removes satellite nodes on a schedule."
-        initiallyEnabled = "true"
-        requires = "Mobility"
-        recommended = ""
-        labels = "mobility satellite"
-        nedPackages = "
-                       inet.mobility.satellite
-                      "
-        extraSourceFolders = ""
-        compileFlags = "-DINET_WITH_SATELLITE_MOBILITY"
         linkerFlags = ""
         />
     <feature

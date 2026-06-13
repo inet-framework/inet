@@ -8,12 +8,11 @@
 
 #include "inet/common/INETDefs.h"
 
-#ifdef INET_WITH_SATELLITE_MOBILITY
 
 #include <string>
 #include <vector>
 
-#include "inet/mobility/satellite/sgp4/SGP4.h"
+#include "inet/mobility/geographic/sgp4/SGP4.h"
 
 namespace inet {
 
@@ -55,7 +54,6 @@ class INET_API TleFile
 
 } // namespace inet
 
-#endif // INET_WITH_SATELLITE_MOBILITY
 
 #endif
 

@@ -7,7 +7,7 @@ package inet.examples.mobility.satellite;
 
 import inet.common.geometry.common.GeocentricCoordinateSystem;
 import inet.mobility.contract.IMobility;
-import inet.mobility.satellite.SatelliteController;
+import inet.mobility.geographic.SatelliteController;
 import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 
 //

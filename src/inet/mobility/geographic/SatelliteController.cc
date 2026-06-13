@@ -3,9 +3,8 @@
 //
 
 
-#include "inet/mobility/satellite/SatelliteController.h"
+#include "inet/mobility/geographic/SatelliteController.h"
 
-#ifdef INET_WITH_SATELLITE_MOBILITY
 
 #include <algorithm>
 
@@ -153,7 +152,7 @@ void SatelliteController::insertSatellite(int entryIndex)
     cModule *mobility = module->getSubmodule("mobility");
     if (mobility == nullptr || !mobility->hasPar("tleFile") || !mobility->hasPar("satelliteIndex"))
         throw cRuntimeError("Node type '%s' must have a 'mobility' submodule of type SatelliteMobility "
-                            "(set **.%s[*].mobility.typename = \"inet.mobility.satellite.SatelliteMobility\")",
+                            "(set **.%s[*].mobility.typename = \"inet.mobility.geographic.SatelliteMobility\")",
                 nodeTypeName.c_str(), nodeName.c_str());
     mobility->par("tleFile").setStringValue(entry.tleFile.c_str());
     mobility->par("satelliteIndex").setIntValue(entry.index);
@@ -211,5 +210,4 @@ void SatelliteController::finish()
 
 } // namespace inet
 
-#endif // INET_WITH_SATELLITE_MOBILITY
 

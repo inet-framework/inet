@@ -5,7 +5,9 @@
 //
 
 
-package inet.mobility.static;
+package inet.mobility.geographic;
+
+import inet.mobility.static.StationaryMobility;
 
 //
 // Mobility for stationary nodes placed by geographic coordinates (latitude,

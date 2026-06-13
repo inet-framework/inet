@@ -3,7 +3,7 @@
 //
 
 
-package inet.mobility.satellite;
+package inet.mobility.geographic;
 
 import inet.mobility.base.MovingMobilityBase;
 

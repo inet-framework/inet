@@ -8,13 +8,12 @@
 
 #include "inet/common/INETDefs.h"
 
-#ifdef INET_WITH_SATELLITE_MOBILITY
 
 #include <string>
 #include <vector>
 
 #include "inet/common/SimpleModule.h"
-#include "inet/mobility/satellite/common/TleFile.h"
+#include "inet/mobility/geographic/common/TleFile.h"
 
 namespace inet {
 
@@ -93,7 +92,6 @@ class INET_API SatelliteController : public SimpleModule
 
 } // namespace inet
 
-#endif // INET_WITH_SATELLITE_MOBILITY
 
 #endif
 

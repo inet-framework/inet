@@ -3,9 +3,8 @@
 //
 
 
-#include "inet/mobility/satellite/SatelliteMobility.h"
+#include "inet/mobility/geographic/SatelliteMobility.h"
 
-#ifdef INET_WITH_SATELLITE_MOBILITY
 
 #include "inet/common/geometry/common/Wgs84.h"
 
@@ -127,5 +126,4 @@ void SatelliteMobility::orient()
 
 } // namespace inet
 
-#endif // INET_WITH_SATELLITE_MOBILITY
 

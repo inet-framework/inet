@@ -8,11 +8,10 @@
 
 #include "inet/common/INETDefs.h"
 
-#ifdef INET_WITH_SATELLITE_MOBILITY
 
 #include "inet/common/geometry/common/GeographicCoordinateSystem.h"
 #include "inet/mobility/base/MovingMobilityBase.h"
-#include "inet/mobility/satellite/common/TleFile.h"
+#include "inet/mobility/geographic/common/TleFile.h"
 
 namespace inet {
 
@@ -71,7 +70,6 @@ class INET_API SatelliteMobility : public MovingMobilityBase
 
 } // namespace inet
 
-#endif // INET_WITH_SATELLITE_MOBILITY
 
 #endif
 
