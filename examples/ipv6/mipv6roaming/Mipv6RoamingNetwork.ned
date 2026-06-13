@@ -1,16 +1,10 @@
 //
-// Copyright (C) 2004 OpenSim Ltd.
+// Copyright (C) 2026 OpenSim Ltd.
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
-// A Mobile IPv6 topology with THREE access networks, so a mobile node performs two
-// successive handovers: its home network (AP_Home, behind the home agent) and two
-// distinct foreign networks (AP_1 behind R_1, AP_2 behind R_2_acc). As the mobile node
-// roams home -> AP_1 -> AP_2 it forms a new care-of address in each foreign network and
-// re-registers it with the home agent.
-//
 
-package inet.examples.mobileipv6roaming;
+package inet.examples.ipv6.mipv6roaming;
 
 import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
 import inet.node.ethernet.EthernetSwitch;
@@ -29,6 +23,13 @@ channel ethernetline extends ned.DatarateChannel
         datarate = 100Mbps;
 }
 
+//
+// A model with three access networks, where the mobile node performs two
+// successive handovers: its home network (AP_Home, behind the home agent) and two
+// distinct foreign networks (AP_1 behind R_1, AP_2 behind R_2_acc). As the mobile node
+// roams home -> AP_1 -> AP_2 it forms a new care-of address in each foreign network and
+// re-registers it with the home agent.
+//
 network Mipv6RoamingNetwork
 {
     parameters:
@@ -36,8 +37,8 @@ network Mipv6RoamingNetwork
         int total_cn;
         **.mgmt.numChannels = 5;
         **.ipv6.configurator.networkConfiguratorModule = "ipv6Configurator";
-
         @display("bgb=1050,698");
+
     submodules:
         ipv6Configurator: Ipv6NetworkConfigurator {
             parameters:

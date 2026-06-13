@@ -374,9 +374,9 @@
 /examples/manetrouting/multiradio/,  -f omnetpp.ini -c MultiRadio -r 0,             20s,             ec17-5cc2/tplx;55f5-0894/~tNl, PASS,  wireless adhoc Ipv4
 /examples/manetrouting/multiradio/,  -f omnetpp.ini -c SingleRadio -r 0,            20s,             85a0-51b8/tplx;c07a-44e1/~tNl;3aa0-49ed/tyf, PASS,  wireless adhoc Ipv4
 
-/examples/mobileipv6/,               -f omnetpp.ini -c Handover -r 0,                70s,             b203-ffca/tplx;a46a-2006/~tNl;f3aa-7a5b/~tND;2ed7-b81b/tyf, PASS, wireless EthernetMac
-/examples/mobileipv6/,               -f omnetpp.ini -c RouteOptimizationTwoCNs -r 0,  90s,             9c77-20d1/tplx;0ee5-2cb9/~tNl;dede-5d60/~tND;1ad7-7123/tyf, PASS, wireless EthernetMac
-/examples/mobileipv6roaming/,        -f omnetpp.ini -c Roaming -r 0,                 100s,            1a3a-2af9/tplx;515e-f092/~tNl;cab7-6db1/~tND;9cac-fbf5/tyf, PASS, wireless EthernetMac
+/examples/ipv6/mipv6/,               -f omnetpp.ini -c Handover -r 0,                70s,             f45b-0ab6/tplx;2ce1-89ff/~tNl;f8b3-da32/~tND;2ed7-b81b/tyf, PASS, wireless EthernetMac
+/examples/ipv6/mipv6/,               -f omnetpp.ini -c RouteOptimizationTwoCNs -r 0,  90s,             66f1-8b75/tplx;540b-76e0/~tNl;2a8d-0500/~tND;1ad7-7123/tyf, PASS, wireless EthernetMac
+/examples/ipv6/mipv6roaming/,        -f omnetpp.ini -c Roaming -r 0,                 100s,            4654-b30d/tplx;3e8b-3a87/~tNl;70bb-dcd6/~tND;9cac-fbf5/tyf, PASS, wireless EthernetMac
 
 /examples/mobility/,                 -f omnetpp.ini -c AnsimMobility -r 0,          10000s,          72f8-5c0b/tplx;0000-0000/~tNl;0000-0000/~tND;7dd1-18eb/tyf, PASS,
 /examples/mobility,                  -f omnetpp.ini -c AttachedMobility,            10s,             566c-6355/tplx;0000-0000/~tNl;0000-0000/~tND;fa92-f68c/tyf, PASS,

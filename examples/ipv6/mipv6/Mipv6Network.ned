@@ -1,16 +1,11 @@
-// Copyright (C) 2007 Faqir Zarrar Yousaf
-// Communication Networks Institute
-// University of Dortmund, Germany
-// faqir.yousaf@uni-dortmund.de
 //
 // Copyright (C) 2004 OpenSim Ltd.
+// Copyright (C) 2007 Faqir Zarrar Yousaf, Communication Networks Institute, University of Dortmund, Germany (faqir.yousaf@uni-dortmund.de)
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
-//
 
-
-package inet.examples.mobileipv6;
+package inet.examples.ipv6.mipv6;
 
 import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
 import inet.node.ethernet.EthernetSwitch;
@@ -43,8 +38,8 @@ network Mipv6Network
         int total_cn;
         **.mgmt.numChannels = 5;
         **.ipv6.configurator.networkConfiguratorModule = "ipv6Configurator";
-
         @display("bgb=799,698");
+
     submodules:
         ipv6Configurator: Ipv6NetworkConfigurator {
             parameters:

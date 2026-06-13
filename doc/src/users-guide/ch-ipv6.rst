@@ -236,7 +236,7 @@ Binding lifetimes are bounded by the :par:`maxHaBindingLifeTime` (home
 registration) and :par:`maxRrBindingLifeTime` (route optimization)
 parameters of :ned:`Mipv6`; bindings are refreshed before they expire.
 
-A complete, runnable example is provided under ``examples/mobileipv6``.
+A complete, runnable example is provided under ``examples/ipv6/mipv6``.
 Note that Mobile IPv6 (network-layer mobility) is distinct from the
 physical mobility models described in the :doc:`ch-mobility` chapter,
 although a wireless mobile node typically uses both.

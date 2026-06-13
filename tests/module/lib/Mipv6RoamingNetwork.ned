@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 // Test network for the MIPv6 two-handover (roaming) module test. It mirrors
-// examples/mobileipv6roaming/MIPv6RoamingNetwork.ned but uses the legacy
+// examples/ipv6/mipv6roaming/Mipv6RoamingNetwork.ned but uses the legacy
 // Ipv6FlatNetworkConfigurator (which assigns the aaaa:: addresses the module
 // tests assert on), keeping the test independent of the example (tests must
 // not depend on examples or showcases).
