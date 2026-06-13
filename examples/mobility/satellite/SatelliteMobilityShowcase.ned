@@ -8,6 +8,7 @@ package inet.examples.mobility.satellite;
 import inet.common.geometry.common.GeocentricCoordinateSystem;
 import inet.mobility.contract.IMobility;
 import inet.mobility.satellite.SatelliteController;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 
 //
 // A minimal node carrying only a mobility submodule, used to demonstrate the
@@ -34,12 +35,15 @@ network SatelliteMobilityShowcase
 {
     submodules:
         coordinateSystem: GeocentricCoordinateSystem {
-            @display("p=100,100");
+            @display("p=100,400");
         }
         controller: SatelliteController {
-            @display("p=100,200");
+            @display("p=200,400");
         }
         groundStation: MobileNode {
-            @display("p=300,200");
+            @display("p=300,400");
+        }
+        visualizer: IntegratedCanvasVisualizer {
+            @display("p=400,400");
         }
 }
