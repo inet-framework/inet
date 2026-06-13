@@ -32,7 +32,7 @@ void Ipv6NetworkConfigurator::initialize(int stage)
     L3NetworkConfiguratorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         assignAddressesParameter = par("assignAddresses");
-        configureAdvPrefixesParameter = par("configureAdvPrefixes");
+        assignAddressesToHostsParameter = par("assignAddressesToHosts");
         addStaticRoutesParameter = par("addStaticRoutes");
         addDefaultRoutesParameter = par("addDefaultRoutes");
         addDirectRoutesParameter = par("addDirectRoutes");
@@ -159,9 +159,9 @@ void Ipv6NetworkConfigurator::configureInterface(InterfaceInfo *interfaceInfo)
     bool isRouter = node->routingTable && node->routingTable->isForwardingEnabled();
 
     if (assignAddressesParameter && !interfaceInfo->globalAddress.isUnspecified()) {
-        if (!configureAdvPrefixesParameter || isRouter) {
-            // Mode A: assign global address to all interfaces
-            // Mode B: assign global address only to router interfaces (hosts use SLAAC)
+        if (assignAddressesToHostsParameter || isRouter) {
+            // assignAddressesToHosts: statically address every interface
+            // !assignAddressesToHosts: address only routers; hosts use dynamic config (SLAAC/DHCPv6)
             if (!ipv6Data->hasAddress(interfaceInfo->globalAddress)) {
                 ipv6Data->assignAddress(interfaceInfo->globalAddress, false, SIMTIME_ZERO, SIMTIME_ZERO);
                 EV_DETAIL << "  assigned global address " << interfaceInfo->globalAddress << " to " << interfaceInfo->getFullPath() << endl;

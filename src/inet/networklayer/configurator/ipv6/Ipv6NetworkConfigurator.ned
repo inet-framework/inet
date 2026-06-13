@@ -89,8 +89,8 @@ simple Ipv6NetworkConfigurator extends L3NetworkConfiguratorBase
 {
     parameters:
         xml config = default(xml("<config><interface hosts='**' prefix='2001:db8:x:x::/64'/></config>")); // XML configuration parameters for IPv6 prefix assignment and manual routes
-        bool assignAddresses = default(true); // Assign IPv6 global addresses to all interfaces
-        bool configureAdvPrefixes = default(false); // Mode B: only set AdvPrefix on router interfaces, let hosts use SLAAC (if false, Mode A: directly assign addresses)
+        bool assignAddresses = default(true); // Assign IPv6 global addresses to interfaces
+        bool assignAddressesToHosts = default(true); // If true, statically assign global addresses to host (non-router) interfaces too. If false, configure only router interfaces and their advertised prefixes, leaving hosts to obtain addresses through DYNAMIC configuration; which dynamic method is used is selected by the usual mechanisms (router AdvAutonomousFlag for SLAAC; the Managed/Other-config RA flags plus a DHCPv6 server for DHCPv6), not by this parameter. Set to false for mobile nodes (MIPv6), whose home/care-of addresses must be autoconfigured. Routers always get static addresses regardless of this setting.
         bool addStaticRoutes = default(true); // Add static routes to all routing tables
         bool addDefaultRoutes = default(true); // Add default routes if all routes from a source go through the same gateway
         bool addDirectRoutes = default(true); // Add direct routes (on-link prefix routes) for local network members

@@ -79,7 +79,7 @@ class INET_API Ipv6NetworkConfigurator : public L3NetworkConfiguratorBase, publi
   protected:
     // parameters
     bool assignAddressesParameter = false;
-    bool configureAdvPrefixesParameter = false;
+    bool assignAddressesToHostsParameter = true;
     bool addStaticRoutesParameter = false;
     bool addDefaultRoutesParameter = false;
     bool addDirectRoutesParameter = false;
