@@ -183,6 +183,31 @@ superposition and other ways.
    affected by the respective quantities and also the orientation of the
    referenced mobility.
 
+Satellite and Geographic
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+These models position and move nodes using geographic coordinates
+(latitude, longitude, altitude) in a geocentric (WGS84/ECEF) scene. They
+require a :ned:`GeocentricCoordinateSystem` in the network, referenced
+through their :par:`coordinateSystemModule` parameter.
+
+-  :ned:`SatelliteMobility` propagates a satellite orbit from a TLE
+   (two-line element) set using an embedded SGP4 model, and reports the
+   resulting sub-satellite position.
+
+-  :ned:`GeographicStationaryMobility` places a stationary node, such as a
+   ground station, by its :par:`initialLatitude`, :par:`initialLongitude`,
+   and :par:`initialAltitude` parameters. It keeps the on-canvas module
+   icon decoupled from the (Earth-scale) scene coordinate.
+
+-  :ned:`GeographicAnchorMobility` re-bases another (terrestrial) mobility
+   model onto a geographic anchor in the global ECEF frame, so a local
+   scenario (such as a car or a UAV) can be placed anywhere on the globe.
+
+A companion :ned:`SatelliteController` module reads one or more TLE files
+and dynamically creates and removes satellite nodes on a schedule,
+distributing the common UTC epoch to them.
+
 .. _ug:sec:mobility:more-information-on-some-mobility-models:
 
 More Information on Some Mobility Models
@@ -312,6 +337,38 @@ probability that the state changes from :math:`i` to :math:`j`:
      0.3 & 0 & 0.7
    \end{array}
    \right)
+
+SatelliteMobility
+^^^^^^^^^^^^^^^^^
+
+:ned:`SatelliteMobility` models the motion of an Earth-orbiting satellite.
+The orbit is given as a TLE (two-line element) set, the standard format
+published for tracked objects, and is propagated with an embedded SGP4
+analytical model. At each update the model computes the satellite state in
+the TEME inertial frame, rotates it to the Earth-fixed frame using the
+Greenwich sidereal time, and converts it to WGS84 geodetic coordinates
+(latitude, longitude, altitude), which are finally mapped to the scene by
+the :ned:`GeocentricCoordinateSystem`.
+
+The satellite is selected from the file given in :par:`tleFile` by
+:par:`satelliteIndex`, :par:`satelliteName`, or
+:par:`satelliteCatalogNumber`. The :par:`epoch` parameter is the absolute
+UTC time (ISO-8601, e.g. ``2026-06-02T00:00:00Z``) mapped to simulation
+time zero; if left empty, the satellite's own TLE epoch is used. The
+:par:`pointing` parameter controls the body orientation (``none``,
+``nadir``, or ``velocity``).
+
+In a typical scenario the satellites are not instantiated in the NED file,
+but created at run time by a :ned:`SatelliteController`. The controller
+reads the TLE file(s), distributes the common epoch, and inserts (and
+optionally removes) one node per orbit on a configurable schedule.
+
+.. note::
+
+   The Earth-orientation model is GMST-only: nutation, polar motion, and
+   the UT1-UTC difference are neglected. This yields a ground-track error
+   on the order of tens of meters, which is adequate for network simulation
+   but not for precision orbit determination.
 
 .. _ug:sec:mobility:replaying-trace-files:
 

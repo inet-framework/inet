@@ -409,3 +409,70 @@ These features are disabled by default but can be enabled by setting the
 visualizer's :par:`displayMovementTrails`, :par:`displayVelocities`, and
 :par:`displayOrientations` parameters to true.
 
+.. _ug:sec:visualization:geographic-scenarios:
+
+Visualizing Satellite and Geographic Scenarios
+----------------------------------------------
+
+INET can run global, map-based scenarios in which network nodes (satellites,
+ground stations) are positioned by geographic coordinates in a geocentric
+scene (see :ned:`GeocentricCoordinateSystem`). Because such a scene spans the
+whole Earth, the default 2D scene view is not useful; INET provides two
+dedicated canvas visualizers for these scenarios.
+
+.. _ug:sec:visualization:geographic-map:
+
+Visualizing Nodes on a World Map
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The :ned:`GeographicMapCanvasVisualizer` projects geographically located
+nodes (satellites, ground stations, or anything carrying a mobility model)
+onto a 2D world map drawn on the canvas. The geographic position of each node
+is obtained through the geographic coordinate system referenced by the
+:par:`coordinateSystemModule` parameter; which nodes are shown is selected
+with the :par:`moduleFilter` parameter.
+
+A background map image is configured with the :par:`mapImage` parameter (an
+image name looked up on the image path), and a latitude/longitude graticule
+can be overlaid as well. The map :par:`projection` is either
+``equirectangular`` (plate carree, the default) or ``mercator``; the
+:par:`longitudeOffset` parameter horizontally calibrates the projection when
+longitude zero is not at the center of the supplied image.
+
+The visualizer can additionally display:
+
+- the orbital ground track of each satellite (a trailing polyline of the
+  sub-satellite point), enabled with :par:`displayGroundTracks`;
+
+- the ground coverage footprint of each satellite, computed from its altitude
+  and the :par:`minElevationAngle` parameter, enabled with
+  :par:`displayFootprints`;
+
+- an absolute wall-clock (UTC date and time) in the lower-left corner, taken
+  from the epoch of the :ned:`SatelliteController` referenced by the
+  :par:`satelliteController` parameter.
+
+.. _ug:sec:visualization:sky-view:
+
+Visualizing the Sky View
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The :ned:`GeographicSkyViewCanvasVisualizer` draws an azimuth/elevation polar
+plot, the "sky view", next to each observer node, showing where the target
+nodes currently are in the observer's sky. It is primarily intended for
+ground stations observing satellites.
+
+The nodes that get a plot are selected with the :par:`observerFilter`
+parameter, and the nodes drawn in each plot with the :par:`targetFilter`
+parameter. For every observer-target pair, the visualizer computes the
+topocentric look angles (azimuth, elevation, and range) from their geographic
+positions.
+
+In the plot, the center is the zenith (90 degrees elevation) and the outer rim
+is the horizon (0 degrees); North is up and East is to the right. Concentric
+rings mark the elevation, the N/E/S/W cardinal directions are drawn, and the
+band below the :par:`minElevationAngle` parameter is shaded with a translucent
+mask. Each visible target is shown as a colored dot, optionally with its name
+and a fading "sky trail" of its recent path; a target that drops below the
+horizon is hidden.
+

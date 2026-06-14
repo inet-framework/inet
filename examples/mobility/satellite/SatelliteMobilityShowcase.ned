@@ -45,10 +45,10 @@ network SatelliteMobilityShowcase
         controller: SatelliteController {
             @display("p=780,200");
         }
-        lima: MobileNode {
-            @display("p=780,300;i=device/receiverdish");
-        }
         losAngeles: MobileNode {
-            @display("p=780,500;i=device/receiverdish");
+            @display("p=300,450;i=device/receiverdish");
+        }
+        lima: MobileNode {
+            @display("p=500,450;i=device/receiverdish");
         }
 }
