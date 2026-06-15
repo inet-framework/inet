@@ -397,10 +397,8 @@ void MediumVsgVisualizer::handleRadioAdded(const IRadio *radio)
 
         if (displayInterferenceRanges) {
             auto maxInterferenceRange = radioMedium->getMediumLimitCache()->getMaxInterferenceRange(radio);
-            // TODO: the OSG version uses createCircleGeometry + a line stateSet (with line
-            //       style, color, width) placed via NO_ROTATION AutoTransform (stays in the xy plane).
-            //       VSG createCircle draws a circle in the xy plane; line style is approximated
-            //       (LINE_SOLID only; see VsgUtils.h capability gaps).
+            // createCircle draws an xy-plane circle and now honors the line style (solid/dotted/dashed
+            // via real dash geometry). Line width still clamps to 1px where wideLines is unsupported.
             auto circle = inet::vsg::createCircle(Coord::ZERO, maxInterferenceRange.get(),
                 interferenceRangeLineColor, interferenceRangeLineStyle, interferenceRangeLineWidth);
             networkNodeVisualization->addChild(circle);
@@ -408,7 +406,6 @@ void MediumVsgVisualizer::handleRadioAdded(const IRadio *radio)
 
         if (displayCommunicationRanges) {
             auto maxCommunicationRange = radioMedium->getMediumLimitCache()->getMaxCommunicationRange(radio);
-            // TODO: same plane/line-style approximation note as interference range above.
             auto circle = inet::vsg::createCircle(Coord::ZERO, maxCommunicationRange.get(),
                 communicationRangeLineColor, communicationRangeLineStyle, communicationRangeLineWidth);
             networkNodeVisualization->addChild(circle);
