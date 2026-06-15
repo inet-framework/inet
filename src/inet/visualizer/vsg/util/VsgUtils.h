@@ -64,16 +64,16 @@ ref_ptr<Node> createGeometry(ref_ptr<vec3Array> vertices, ref_ptr<vec3Array> nor
 
 // --- high-level node creators (return ready-to-render nodes) -------------------------------
 ref_ptr<Node> createLine(const Coord& start, const Coord& end, cFigure::Arrowhead startArrowhead, cFigure::Arrowhead endArrowhead,
-        const cFigure::Color& color, const cFigure::LineStyle& style = cFigure::LINE_SOLID, double width = 1.0);
+        const cFigure::Color& color, const cFigure::LineStyle& style = cFigure::LINE_SOLID, double width = 1.0, double opacity = 1.0);
 ref_ptr<Node> createPolyline(const std::vector<Coord>& coords, cFigure::Arrowhead startArrowhead, cFigure::Arrowhead endArrowhead,
-        const cFigure::Color& color, const cFigure::LineStyle& style = cFigure::LINE_SOLID, double width = 1.0);
+        const cFigure::Color& color, const cFigure::LineStyle& style = cFigure::LINE_SOLID, double width = 1.0, double opacity = 1.0);
 ref_ptr<Node> createCircle(const Coord& center, double radius, const cFigure::Color& color,
         const cFigure::LineStyle& style = cFigure::LINE_SOLID, double width = 1.0, int polygonSize = 64);
 ref_ptr<Node> createAnnulus(const Coord& center, double outerRadius, double innerRadius,
         const cFigure::Color& color, double opacity = 1.0, int polygonSize = 64);
 ref_ptr<Node> createQuad(const Coord& min, const Coord& max, const cFigure::Color& color, double opacity = 1.0);
 ref_ptr<Node> createPolygon(const std::vector<Coord>& points, const cFigure::Color& color, double opacity = 1.0, const Coord& translation = Coord::ZERO);
-ref_ptr<Node> createArrowhead(const Coord& start, const Coord& end, const cFigure::Color& color, double width = 10.0, double height = 20.0);
+ref_ptr<Node> createArrowhead(const Coord& start, const Coord& end, const cFigure::Color& color, double width = 10.0, double height = 20.0, double opacity = 1.0);
 ref_ptr<Node> createSphere(const Coord& center, double radius, const cFigure::Color& color, double opacity = 1.0);
 ref_ptr<Node> createBox(const Coord& center, const Coord& size, const cFigure::Color& color, double opacity = 1.0);
 
@@ -110,6 +110,7 @@ class INET_API LineNode : public Inherit<Group, LineNode>
     cFigure::Color color = cFigure::BLACK;
     cFigure::LineStyle style = cFigure::LINE_SOLID;
     double lineWidth = 1.0;
+    double opacity = 1.0;
 
     void rebuild();
 
@@ -120,6 +121,7 @@ class INET_API LineNode : public Inherit<Group, LineNode>
             const cFigure::Color& color, const cFigure::LineStyle& style, double lineWidth);
     void setStart(const Coord& start);
     void setEnd(const Coord& end);
+    void setAlpha(double opacity);   // for fade-out; rebuilds the line at the new opacity
 };
 
 } // namespace vsg

@@ -184,48 +184,48 @@ static ref_ptr<vec3Array> createArrowheadVertices(const Coord& start, const Coor
 // High-level node creators
 // ---------------------------------------------------------------------------------------------
 
-ref_ptr<Node> createArrowhead(const Coord& start, const Coord& end, const cFigure::Color& color, double width, double height)
+ref_ptr<Node> createArrowhead(const Coord& start, const Coord& end, const cFigure::Color& color, double width, double height, double opacity)
 {
     // TODO: arrowheads are world-fixed size (OSG used AutoTransform autoScaleToScreen for a
     // constant on-screen size, which the off-screen path can't reproduce).
     auto vertices = createArrowheadVertices(start, end, width, height);
-    return createGeometry(vertices, {}, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, color, 1.0, /*lit*/ false, 1.0, /*cullBackFace*/ false);
+    return createGeometry(vertices, {}, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, color, opacity, /*lit*/ false, 1.0, /*cullBackFace*/ false);
 }
 
 ref_ptr<Node> createLine(const Coord& start, const Coord& end, cFigure::Arrowhead startArrowhead, cFigure::Arrowhead endArrowhead,
-        const cFigure::Color& color, const cFigure::LineStyle& style, double width)
+        const cFigure::Color& color, const cFigure::LineStyle& style, double width, double opacity)
 {
     // TODO: style (dotted/dashed) is rendered solid for now (no Vulkan core line stipple, R-STIPPLE).
     (void)style;
     auto vertices = vec3Array::create({ toVsg(start), toVsg(end) });
-    auto line = createGeometry(vertices, {}, VK_PRIMITIVE_TOPOLOGY_LINE_STRIP, color, 1.0, /*lit*/ false, width);
+    auto line = createGeometry(vertices, {}, VK_PRIMITIVE_TOPOLOGY_LINE_STRIP, color, opacity, /*lit*/ false, width);
     if (!startArrowhead && !endArrowhead)
         return line;
     auto group = Group::create();
     group->addChild(line);
     if (startArrowhead)
-        group->addChild(createArrowhead(end, start, color));
+        group->addChild(createArrowhead(end, start, color, 10.0, 20.0, opacity));
     if (endArrowhead)
-        group->addChild(createArrowhead(start, end, color));
+        group->addChild(createArrowhead(start, end, color, 10.0, 20.0, opacity));
     return group;
 }
 
 ref_ptr<Node> createPolyline(const std::vector<Coord>& coords, cFigure::Arrowhead startArrowhead, cFigure::Arrowhead endArrowhead,
-        const cFigure::Color& color, const cFigure::LineStyle& style, double width)
+        const cFigure::Color& color, const cFigure::LineStyle& style, double width, double opacity)
 {
     (void)style;
     auto vertices = vec3Array::create(coords.size());
     for (size_t i = 0; i < coords.size(); i++)
         vertices->set(i, toVsg(coords[i]));
-    auto line = createGeometry(vertices, {}, VK_PRIMITIVE_TOPOLOGY_LINE_STRIP, color, 1.0, /*lit*/ false, width);
+    auto line = createGeometry(vertices, {}, VK_PRIMITIVE_TOPOLOGY_LINE_STRIP, color, opacity, /*lit*/ false, width);
     if ((!startArrowhead && !endArrowhead) || coords.size() < 2)
         return line;
     auto group = Group::create();
     group->addChild(line);
     if (startArrowhead)
-        group->addChild(createArrowhead(coords[1], coords[0], color));
+        group->addChild(createArrowhead(coords[1], coords[0], color, 10.0, 20.0, opacity));
     if (endArrowhead)
-        group->addChild(createArrowhead(coords[coords.size() - 2], coords[coords.size() - 1], color));
+        group->addChild(createArrowhead(coords[coords.size() - 2], coords[coords.size() - 1], color, 10.0, 20.0, opacity));
     return group;
 }
 
@@ -392,7 +392,7 @@ ref_ptr<Data> createImageFromResource(const char *imageName)
 void LineNode::rebuild()
 {
     children.clear();
-    addChild(createLine(start, end, startArrowhead, endArrowhead, color, style, lineWidth));
+    addChild(createLine(start, end, startArrowhead, endArrowhead, color, style, lineWidth, opacity));
 }
 
 void LineNode::set(const Coord& start, const Coord& end, cFigure::Arrowhead startArrowhead, cFigure::Arrowhead endArrowhead,
@@ -417,6 +417,12 @@ void LineNode::setStart(const Coord& start)
 void LineNode::setEnd(const Coord& end)
 {
     this->end = end;
+    rebuild();
+}
+
+void LineNode::setAlpha(double opacity)
+{
+    this->opacity = opacity;
     rebuild();
 }
 
