@@ -1,0 +1,127 @@
+%description:
+Regression test for the return-home route-optimization de-registration bug.
+
+The mobile node dwells at home, moves into the foreign network where it
+route-optimizes with a correspondent node (the CN pings the MN's home address
+throughout, which triggers return routability and a binding update), and then
+moves back home and stays there.
+
+When the mobile node returns home it must de-register from the correspondent
+node, so the CN stops inserting a Type 2 Routing Header towards the abandoned
+care-of address and delivers to the home address again. Two bugs used to prevent
+that (returningHome() gating the de-registration BU on the broken isValidBinding(),
+and the de-registration handler not clearing the routeOptimizations state that
+drives the Type 2 Routing Header), so the CN's traffic blackholed for the whole
+time the node was home. This test asserts that the CN de-registers and that its
+pings are still answered well after the node has returned home (a high ping
+sequence number that only arrives once route optimization has been torn down).
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+network = inet.test.moduletest.lib.Mipv6Network
+sim-time-limit = 60s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+num-rngs = 3
+seed-set = 1
+**.mobility.rng-0 = 2
+
+*.total_mn = 1
+*.total_cn = 1
+
+# realistic Router Advertisement intervals; movement is detected from a Router
+# Solicitation sent on each L2 (re)association (default detectL2Movement)
+**.neighbourDiscovery.minIntervalBetweenRAs = 3s
+**.neighbourDiscovery.maxIntervalBetweenRAs = 7s
+
+*.radioMedium.mediumLimitCache.maxTransmissionPower = 2.0mW
+*.radioMedium.mediumLimitCache.minReceptionPower = -82dBm
+*.radioMedium.mediumLimitCache.minInterferencePower = -82dBm
+
+**.wlan*.mgmt.numAuthSteps = 4
+**.AP*.wlan*.mgmt.beaconInterval = 0.1s
+**.AP_Home.wlan*.mgmt.ssid = "HOME"
+**.AP_Home.wlan*.address = "10:AA:00:00:00:01"
+**.AP_Home.eth[0].address = "10:AE:00:00:00:02"
+**.AP_Home.eth[0].duplexMode = true
+**.AP_1.wlan*.mgmt.ssid = "AP1"
+**.AP_1.wlan*.address = "10:AA:00:00:A1:01"
+**.AP_1.eth[0].address = "10:AE:00:00:A1:02"
+**.AP_1.eth[0].duplexMode = true
+
+# the MN dwells at home, dashes to the foreign network, dwells there, then returns
+# home and stays -- so the post-return-home connectivity can be observed
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxZ = 0m
+**.MN[0].mobility.typename = "TurtleMobility"
+**.MN[0].mobility.turtleScript = xml("<movement><set x='249' y='175'/><wait t='12'/><moveto x='566' y='175' t='3'/><wait t='20'/><moveto x='249' y='175' t='3'/><wait t='22'/></movement>")
+**.MN*.mobility.updateInterval = 0.1s
+
+# the correspondent node pings the MN's home address throughout
+**.MN*.numApps = 0
+**.CN*.numApps = 1
+**.CN[0].app[0].typename = "PingApp"
+**.CN[0].app[0].destAddr = "aaaa:0:66:0:8aa:ff:fe00:8"
+**.CN[0].app[0].packetSize = 56B
+**.CN[0].app[0].sendInterval = 0.5s
+**.CN[0].app[0].startTime = 1s
+**.CN[0].app[0].hopLimit = 32
+**.CN[0].app[0].printPing = true
+
+**.forwarding = false
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue"
+**.eth[*].queue.dataQueue.packetCapacity = 10
+**.eth*.duplexMode = true
+**.analogModel.ignorePartialInterference = true
+**.AP_Home.wlan*.radio.channelNumber = 1
+**.AP_1.wlan*.radio.channelNumber = 2
+**.MN*.wlan*.radio.channelNumber = 0
+**.wlan*.agent.activeScan = true
+**.wlan*.agent.defaultSsid = ""
+**.wlan*.agent.channelsToScan = "1 2"
+**.wlan*.agent.probeDelay = 0.1s
+**.wlan*.agent.minChannelTime = 0.15s
+**.wlan*.agent.maxChannelTime = 0.3s
+**.wlan*.agent.authenticationTimeout = 5s
+**.wlan*.agent.associationTimeout = 5s
+**.wlan*.bitrate = 2Mbps
+**.wlan*.mac.dcf.channelAccess.cwMin = 7
+**.radio.transmitter.power = 2.0mW
+**.constraintAreaMinX = 0m
+**.constraintAreaMinY = 0m
+**.constraintAreaMaxX = 850m
+**.constraintAreaMaxY = 850m
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%# route optimization must complete in the foreign network (CN inserts a Type 2 Routing Header)
+%contains: stdout
+Mipv6Network.CN[0].ipv6.ipv6: Added Type 2 Routing Header.
+%#--------------------------------------------------------------------------------------------------------------
+%# the mobile node returns home ...
+%contains: stdout
+Mipv6Network.MN[0].ipv6.mipv6: MIPv6 Returning home procedure...
+%#--------------------------------------------------------------------------------------------------------------
+%# ... and the correspondent node de-registers its binding
+%contains: stdout
+Mipv6Network.CN[0].ipv6.mipv6: Deregistered binding
+%#--------------------------------------------------------------------------------------------------------------
+%# and its pings are still answered long after the return home (only happens once the
+%# route-optimization state has been torn down at the CN)
+%contains: stdout
+Mipv6Network.CN[0].app[0]: Ping reply #99 arrived
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
