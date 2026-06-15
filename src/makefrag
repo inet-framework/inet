@@ -70,6 +70,22 @@ ifeq ($(WITH_VISUALIZATIONOSG), enabled)
 endif
 
 #
+# VisualizationVsg feature requires VulkanSceneGraph (the OSG-free 3D replacement).
+# VSG_CFLAGS/VSG_LIBS come from OMNeT++'s Makefile.inc (set when WITH_VSG=yes); the
+# extra -I$(OMNETPP_ROOT)/src gives access to the plugin's qtenv/vsg/vsgscenehandle.h
+# (createScene3DNode / cScene3DNode), exactly as the omnetpp vsg-* samples do.
+#
+WITH_VISUALIZATIONVSG := $(shell (cd .. && $(FEATURETOOL) -q isenabled VisualizationVsg && echo enabled) )
+ifeq ($(WITH_VISUALIZATIONVSG), enabled)
+  ifeq ($(WITH_VSG), yes)
+    CFLAGS += $(VSG_CFLAGS) -I$(OMNETPP_ROOT)/src
+    OMNETPP_LIBS += $(VSG_LIBS)
+  else
+    $(error Please rebuild OMNeT++/OMNEST with VSG support (WITH_VSG=yes), or disable 'VisualizationVsg' feature in INET )
+  endif
+endif
+
+#
 # Z3GateSchedulingConfigurator feature:
 #
 WITH_Z3 := $(shell (cd .. && $(FEATURETOOL) -q isenabled Z3GateSchedulingConfigurator && echo enabled) )
@@ -172,6 +188,11 @@ endif
 ifeq ($(WITH_OSGEARTH),yes)
 	@echo "#ifndef WITH_OSGEARTH" >> $(DEFINES_FILE).new
 	@echo "#define WITH_OSGEARTH" >> $(DEFINES_FILE).new
+	@echo "#endif" >> $(DEFINES_FILE).new
+endif
+ifeq ($(WITH_VSG),yes)
+	@echo "#ifndef WITH_VSG" >> $(DEFINES_FILE).new
+	@echo "#define WITH_VSG" >> $(DEFINES_FILE).new
 	@echo "#endif" >> $(DEFINES_FILE).new
 endif
 	@if ! cmp -s $(DEFINES_FILE) $(DEFINES_FILE).new; then \

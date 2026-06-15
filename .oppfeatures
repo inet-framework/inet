@@ -1755,6 +1755,26 @@
         linkerFlags = ""
         />
     <feature
+        id = "VisualizationVsg"
+        name = "Visualization VSG (3D)"
+        description = "Provides network-level 3D visualization features for physical layer,
+                       data link layer and network layer communications, and more.
+                       This is the VulkanSceneGraph-based replacement for the OpenSceneGraph
+                       (VisualizationOsg) 3D visualizer; it requires OMNeT++ built with VSG
+                       support (WITH_VSG=yes). VisualizationOsg and VisualizationVsg are
+                       mutually exclusive (OMNeT++ is built with either OSG or VSG, not both)."
+        initiallyEnabled = "false"
+        requires = "PhysicalEnvironment VisualizationCommon"
+        recommended = ""
+        labels = "information"
+        nedPackages = "
+                       inet.visualizer.vsg
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DINET_WITH_VISUALIZATIONVSG"
+        linkerFlags = ""
+        />
+    <feature
         id = "VisualizationCanvasShowcases"
         name = "Visualization Canvas (2D) showcases"
         description = "Showcases that demonstrate the 2D visualization of state and behavior
