@@ -291,6 +291,14 @@ void MediumVsgVisualizer::refreshRingTransmissionNode(const ITransmission *trans
         maxRadius = radioMedium->getMediumLimitCache()->getMaxInterferenceRange(transmitterRadio).get();
 
     cFigure::Color color = signalColorSet.getColor(transmission->getId());
+    // Translucent fill of the signal region at 25% opacity. NOTE: because the backend can't blend over
+    // the opaque floor, this reads the (light) background, so it appears as a pale wash rather than a
+    // floor-tinted color — but it's a faint visible area, not a black blob. A crisp opaque edge circle
+    // marks the actual wavefront.
+    double fillOuter = std::min(startRadius, maxRadius);
+    double fillInner = std::min(endRadius, maxRadius);
+    if (fillOuter > fillInner)
+        annulusHolder->addChild(inet::vsg::createAnnulus(Coord::ZERO, fillOuter, fillInner, color, 0.25, 100));
     if (startRadius > 0 && startRadius <= maxRadius)  // leading edge
         annulusHolder->addChild(inet::vsg::createCircle(Coord::ZERO, startRadius, color, cFigure::LINE_SOLID, 2.0, 100));
     if (endRadius > 0 && endRadius <= maxRadius)       // trailing edge (after the transmission ends)
