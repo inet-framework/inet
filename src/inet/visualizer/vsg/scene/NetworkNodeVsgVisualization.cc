@@ -35,8 +35,9 @@ NetworkNodeVsgVisualization::NetworkNodeVsgVisualization(cModule *networkNode, b
     size = ::vsg::dvec3(markerSize, 0, markerSize);
 
     if (displayModuleName)
-        // createLabel faces the default camera (bare vsg::Text faces away -> renders mirrored)
-        group->addChild(inet::vsg::createLabel(networkNode->getFullName(), Coord(0, 0, markerSize + 2), cFigure::BLACK, 5));
+        // createLabel is a camera-facing, screen-constant-size billboard, so use OSG's characterSize 18
+        // (it no longer scales with the world, so the small value that compensated for that is gone).
+        group->addChild(inet::vsg::createLabel(networkNode->getFullName(), Coord(0, 0, markerSize + 2), cFigure::BLACK, 18));
 
     annotationNode = ::vsg::Group::create();
     group->addChild(annotationNode);

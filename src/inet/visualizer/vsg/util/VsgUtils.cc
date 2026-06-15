@@ -184,21 +184,28 @@ static ref_ptr<vec3Array> createArrowheadVertices(const Coord& start, const Coor
 // High-level node creators
 // ---------------------------------------------------------------------------------------------
 
-// Keeps its children at a ~constant on-screen size regardless of camera distance/zoom. OSG used
-// osg::AutoTransform(autoScaleToScreen); VSG 1.1 has no such node, so we subclass vsg::Transform and
-// compute the scale from the live modelview during the record traversal (vsg::RecordTraversal calls
-// Transform::transform(mv) for every Transform). Children are scaled about a world-space pivot by
-// (eye-distance / refDistance), which cancels the perspective shrink and so holds the projected size
-// fixed; orientation is preserved (unlike a billboard), so a directional shape keeps pointing.
+// Reproduces osg::AutoTransform's screen-relative effects, which VSG 1.1 has no node for (and the
+// shader-side StandardLayout::billboardAutoScaleDistance does NOT work in the off-screen path). We
+// subclass vsg::Transform and compute the matrix from the live modelview during the record traversal
+// (vsg::RecordTraversal calls Transform::transform(mv) for every Transform). Children are scaled by
+// (eye-distance / refDistance), which cancels the perspective shrink and so holds their projected
+// (on-screen) size ~constant across zoom — like autoScaleToScreen.
+//   billboard == false: scale about the world pivot, keep orientation (for directional shapes like
+//                       arrowheads, which must keep pointing).
+//   billboard == true : also drop the inherited rotation so children face the camera (== OSG
+//                       ROTATE_TO_SCREEN + autoScaleToScreen); used for text labels.
 class AutoScaleTransform : public ::vsg::Inherit<::vsg::Transform, AutoScaleTransform> {
   public:
     ::vsg::dvec3 pivot;            // world-space anchor; scaling is about this point
     double refDistance = 600.0;    // eye distance at which children render at their natural size
+    bool billboard = false;        // true -> children also face the camera (screen-aligned)
 
     ::vsg::dmat4 transform(const ::vsg::dmat4& mv) const override {
         ::vsg::dvec3 eye = mv * pivot;     // pivot in eye space (the camera looks down -Z)
         double dist = -eye.z;
         double s = (dist > 0.0 && refDistance > 0.0) ? dist / refDistance : 1.0;
+        if (billboard)
+            return ::vsg::translate(eye) * ::vsg::scale(s, s, s);   // camera-facing + screen-constant
         return mv * ::vsg::translate(pivot) * ::vsg::scale(s, s, s) * ::vsg::translate(-pivot);
     }
 };
@@ -317,7 +324,7 @@ ref_ptr<Node> createBox(const Coord& center, const Coord& size, const cFigure::C
     return getBuilder()->createBox(gi, si);
 }
 
-ref_ptr<Text> createText(const char *string, const Coord& position, const cFigure::Color& color, double characterSize, bool billboard)
+ref_ptr<Text> createText(const char *string, const Coord& position, const cFigure::Color& color, double characterSize)
 {
     static ref_ptr<Font>& font = *(new ref_ptr<Font>());  // leaked singleton (see getOptions note)
     if (!font) {
@@ -333,21 +340,19 @@ ref_ptr<Text> createText(const char *string, const Coord& position, const cFigur
     auto layout = StandardLayout::create();
     layout->position = toVsg(position);
     float s = (float)characterSize;
+    // Glyphs are laid out in the X-Y plane (horizontal +X, vertical +Y) so that when createLabel wraps
+    // the text in a billboard AutoScaleTransform (which gives the subgraph an identity rotation in eye
+    // space) +X maps to screen-right and +Y to screen-up — i.e. the text reads upright and facing the
+    // camera. The default (Cpu) layout technique produces plain glyph geometry, which the transform can
+    // freely scale; the shader-side billboard/auto-scale is unused (it has no effect off-screen).
     layout->horizontal = ::vsg::vec3(s, 0.0f, 0.0f);
-    // Billboard text is oriented to face the camera by the GPU layout shader, so its in-plane "up"
-    // is screen-up (+Y). Non-billboard text stands up in the world along +Z.
-    layout->vertical = billboard ? ::vsg::vec3(0.0f, s, 0.0f) : ::vsg::vec3(0.0f, 0.0f, s);
+    layout->vertical = ::vsg::vec3(0.0f, s, 0.0f);
     layout->color = toVsgColor(color);
     layout->horizontalAlignment = StandardLayout::CENTER_ALIGNMENT;
-    layout->billboard = billboard;
     auto text = Text::create();
     text->font = font;
     text->layout = layout;
     text->text = stringValue::create(string ? string : "");
-    // Billboarding is implemented in the GpuLayoutTechnique (the vertex shader rotates each glyph
-    // quad toward the camera using the live view matrix), so force that technique when billboarding.
-    if (billboard)
-        text->technique = GpuLayoutTechnique::create();
     if (font)
         text->setup(0, getOptions());
     return text;
@@ -357,13 +362,25 @@ ref_ptr<Text> createText(const char *string, const Coord& position, const cFigur
 // Transforms
 // ---------------------------------------------------------------------------------------------
 
+// refDistance for label text: chosen so characterSize ~18 renders at roughly OSG's on-screen label
+// size (~18 px in a typical viewport). Smaller -> larger on-screen text. Shared by every label so the
+// per-call characterSize keeps its relative meaning.
+static const double LABEL_AUTOSCALE_REF_DISTANCE = 1400.0;
+
 ref_ptr<Node> createLabel(const char *string, const Coord& position, const cFigure::Color& color, double characterSize)
 {
-    // Billboard text always faces the camera (true camera-facing, computed per-frame in the GPU
-    // layout shader), so labels read correctly from any view angle — unlike the old fixed 180-deg-Z
-    // MatrixTransform, which mirrored once the camera orbited past the label. The world position is
-    // baked into the text layout and still honors any parent transform the label is added under.
-    return createText(string, position, color, characterSize, /*billboard*/ true);
+    // Plain text at the local origin, wrapped in a billboard AutoScaleTransform so the label (a) always
+    // faces the camera (reads correctly from any orbit angle, unlike the old fixed 180-deg-Z wrap that
+    // mirrored from behind) and (b) holds a ~constant on-screen size regardless of zoom/scene scale
+    // (== OSG AutoTransform autoScaleToScreen). 'position' becomes the world-space pivot and still
+    // honors any parent transform the label is added under.
+    auto autoScale = AutoScaleTransform::create();
+    autoScale->pivot = toVsgDouble(position);
+    autoScale->billboard = true;
+    autoScale->refDistance = LABEL_AUTOSCALE_REF_DISTANCE;
+    autoScale->subgraphRequiresLocalFrustum = false;
+    autoScale->addChild(createText(string, Coord::ZERO, color, characterSize));
+    return autoScale;
 }
 
 ref_ptr<MatrixTransform> createPositionAttitudeTransform(const Coord& position, const Quaternion& orientation)
