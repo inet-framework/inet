@@ -61,9 +61,9 @@ void SceneVsgVisualizerBase::initializeAxis(double axisLength)
     axes->addChild(inet::vsg::createLine(Coord::ZERO, Coord(0.0, 0.0, axisLength), cFigure::ARROW_NONE, cFigure::ARROW_BARBED, cFigure::BLACK));
     scene->addChild(axes);
     double spacing = 1;
-    scene->addChild(inet::vsg::createAutoTransform(inet::vsg::createText("X", Coord::ZERO, cFigure::BLACK), Coord(axisLength + spacing, 0.0, 0.0), true));
-    scene->addChild(inet::vsg::createAutoTransform(inet::vsg::createText("Y", Coord::ZERO, cFigure::BLACK), Coord(0.0, axisLength + spacing, 0.0), true));
-    scene->addChild(inet::vsg::createAutoTransform(inet::vsg::createText("Z", Coord::ZERO, cFigure::BLACK), Coord(0.0, 0.0, axisLength + spacing), true));
+    scene->addChild(inet::vsg::createLabel("X", Coord(axisLength + spacing, 0.0, 0.0), cFigure::BLACK));
+    scene->addChild(inet::vsg::createLabel("Y", Coord(0.0, axisLength + spacing, 0.0), cFigure::BLACK));
+    scene->addChild(inet::vsg::createLabel("Z", Coord(0.0, 0.0, axisLength + spacing), cFigure::BLACK));
 }
 
 void SceneVsgVisualizerBase::initializeSceneFloor()

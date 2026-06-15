@@ -21,8 +21,10 @@
 //    may clamp to 1; TODO geometry-thickened lines.
 //  - line stipple (dotted/dashed) has no Vulkan core equivalent -> TODO fragment-shader dash;
 //    currently rendered solid.
-//  - osg::AutoTransform screen-facing/auto-scale billboards have no node equivalent in the
-//    off-screen path -> approximated with a fixed-orientation MatrixTransform.
+//  - osg::AutoTransform has no VSG 1.1 node equivalent, so its two screen-relative effects are
+//    reproduced separately: text labels use native billboard text (StandardLayout::billboard, faces
+//    the camera via the GPU layout shader); arrowheads use a custom AutoScaleTransform (a
+//    vsg::Transform subclass that scales to a ~constant on-screen size from the live modelview).
 //
 
 #ifndef __INET_VSGUTILS_H
@@ -80,7 +82,7 @@ ref_ptr<Node> createBox(const Coord& center, const Coord& size, const cFigure::C
 // Native text (vsg::Text). The returned Text can be mutated later: set ->text and call ->setup(0, getOptions()).
 // NOTE: bare text faces away from the default off-screen camera (renders mirrored); place it via
 // createAutoTransform, or use createLabel() below for the common static-label case.
-ref_ptr<Text> createText(const char *string, const Coord& position, const cFigure::Color& color, double characterSize = 18);
+ref_ptr<Text> createText(const char *string, const Coord& position, const cFigure::Color& color, double characterSize = 18, bool billboard = false);
 
 // Camera-facing text label at a world position (createText + createAutoTransform). Use this for
 // static labels so they always read correctly; use createText directly only when you must mutate it.

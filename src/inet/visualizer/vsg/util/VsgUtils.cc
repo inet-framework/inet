@@ -184,12 +184,36 @@ static ref_ptr<vec3Array> createArrowheadVertices(const Coord& start, const Coor
 // High-level node creators
 // ---------------------------------------------------------------------------------------------
 
+// Keeps its children at a ~constant on-screen size regardless of camera distance/zoom. OSG used
+// osg::AutoTransform(autoScaleToScreen); VSG 1.1 has no such node, so we subclass vsg::Transform and
+// compute the scale from the live modelview during the record traversal (vsg::RecordTraversal calls
+// Transform::transform(mv) for every Transform). Children are scaled about a world-space pivot by
+// (eye-distance / refDistance), which cancels the perspective shrink and so holds the projected size
+// fixed; orientation is preserved (unlike a billboard), so a directional shape keeps pointing.
+class AutoScaleTransform : public ::vsg::Inherit<::vsg::Transform, AutoScaleTransform> {
+  public:
+    ::vsg::dvec3 pivot;            // world-space anchor; scaling is about this point
+    double refDistance = 600.0;    // eye distance at which children render at their natural size
+
+    ::vsg::dmat4 transform(const ::vsg::dmat4& mv) const override {
+        ::vsg::dvec3 eye = mv * pivot;     // pivot in eye space (the camera looks down -Z)
+        double dist = -eye.z;
+        double s = (dist > 0.0 && refDistance > 0.0) ? dist / refDistance : 1.0;
+        return mv * ::vsg::translate(pivot) * ::vsg::scale(s, s, s) * ::vsg::translate(-pivot);
+    }
+};
+
 ref_ptr<Node> createArrowhead(const Coord& start, const Coord& end, const cFigure::Color& color, double width, double height, double opacity)
 {
-    // TODO: arrowheads are world-fixed size (OSG used AutoTransform autoScaleToScreen for a
-    // constant on-screen size, which the off-screen path can't reproduce).
+    // The triangle is built in world space at 'end'; an AutoScaleTransform then holds its on-screen
+    // size ~constant across zoom (OSG used AutoTransform autoScaleToScreen for the same effect).
     auto vertices = createArrowheadVertices(start, end, width, height);
-    return createGeometry(vertices, {}, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, color, opacity, /*lit*/ false, 1.0, /*cullBackFace*/ false);
+    auto geometry = createGeometry(vertices, {}, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, color, opacity, /*lit*/ false, 1.0, /*cullBackFace*/ false);
+    auto autoScale = AutoScaleTransform::create();
+    autoScale->pivot = toVsgDouble(end);
+    autoScale->subgraphRequiresLocalFrustum = false;  // tiny dynamic-scaled shape; skip per-node frustum
+    autoScale->addChild(geometry);
+    return autoScale;
 }
 
 ref_ptr<Node> createLine(const Coord& start, const Coord& end, cFigure::Arrowhead startArrowhead, cFigure::Arrowhead endArrowhead,
@@ -293,7 +317,7 @@ ref_ptr<Node> createBox(const Coord& center, const Coord& size, const cFigure::C
     return getBuilder()->createBox(gi, si);
 }
 
-ref_ptr<Text> createText(const char *string, const Coord& position, const cFigure::Color& color, double characterSize)
+ref_ptr<Text> createText(const char *string, const Coord& position, const cFigure::Color& color, double characterSize, bool billboard)
 {
     static ref_ptr<Font>& font = *(new ref_ptr<Font>());  // leaked singleton (see getOptions note)
     if (!font) {
@@ -310,13 +334,20 @@ ref_ptr<Text> createText(const char *string, const Coord& position, const cFigur
     layout->position = toVsg(position);
     float s = (float)characterSize;
     layout->horizontal = ::vsg::vec3(s, 0.0f, 0.0f);
-    layout->vertical = ::vsg::vec3(0.0f, 0.0f, s);   // glyphs stand up along +Z
+    // Billboard text is oriented to face the camera by the GPU layout shader, so its in-plane "up"
+    // is screen-up (+Y). Non-billboard text stands up in the world along +Z.
+    layout->vertical = billboard ? ::vsg::vec3(0.0f, s, 0.0f) : ::vsg::vec3(0.0f, 0.0f, s);
     layout->color = toVsgColor(color);
     layout->horizontalAlignment = StandardLayout::CENTER_ALIGNMENT;
+    layout->billboard = billboard;
     auto text = Text::create();
     text->font = font;
     text->layout = layout;
     text->text = stringValue::create(string ? string : "");
+    // Billboarding is implemented in the GpuLayoutTechnique (the vertex shader rotates each glyph
+    // quad toward the camera using the live view matrix), so force that technique when billboarding.
+    if (billboard)
+        text->technique = GpuLayoutTechnique::create();
     if (font)
         text->setup(0, getOptions());
     return text;
@@ -328,7 +359,11 @@ ref_ptr<Text> createText(const char *string, const Coord& position, const cFigur
 
 ref_ptr<Node> createLabel(const char *string, const Coord& position, const cFigure::Color& color, double characterSize)
 {
-    return createAutoTransform(createText(string, Coord::ZERO, color, characterSize), position, true);
+    // Billboard text always faces the camera (true camera-facing, computed per-frame in the GPU
+    // layout shader), so labels read correctly from any view angle — unlike the old fixed 180-deg-Z
+    // MatrixTransform, which mirrored once the camera orbited past the label. The world position is
+    // baked into the text layout and still honors any parent transform the label is added under.
+    return createText(string, position, color, characterSize, /*billboard*/ true);
 }
 
 ref_ptr<MatrixTransform> createPositionAttitudeTransform(const Coord& position, const Quaternion& orientation)
