@@ -119,9 +119,14 @@ void PacketDropVsgVisualizer::setAlpha(const PacketDropVisualization *packetDrop
             markerGroup->addChild(inet::vsg::createLabel(labelText.c_str(), Coord(0, radius + 4.0, 0), labelColor, 14));
     }
 
-    // Animate position upward and outward as alpha decreases, mirroring the OSG trajectory.
-    double dx = 10.0 / alpha;
-    double dy = 10.0 / alpha;
+    // Animate the icon up and outward as it fades, mirroring the OSG trajectory — but CLAMP alpha for
+    // the trajectory: OSG uses dx = 10/alpha, which flies to infinity as alpha -> 0 (dz -> -inf, the
+    // icon plummets below the floor). OSG hides that with the fade; here the fade can't fully hide it,
+    // so cap the excursion (alpha >= 0.25 => dx,dy <= 40) — the icon rises and drifts a bounded amount,
+    // then holds while fading out.
+    double a = std::max(alpha, 0.25);
+    double dx = 10.0 / a;
+    double dy = 10.0 / a;
     double dz = 58.0 - std::pow((dx / 4.0 - 9.0), 2.0);
     const auto& position = packetDropVisualization->packetDrop->getPosition();
     // Rewrite the MatrixTransform matrix to the new position.
