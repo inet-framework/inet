@@ -275,13 +275,69 @@ ref_ptr<Node> createArrowhead(const Coord& start, const Coord& end, const cFigur
     return autoScale;
 }
 
+// Dash/gap pattern (world units) for a non-solid line style; returns false for LINE_SOLID. Scaled by
+// the line width so wider lines get proportionally longer dashes (mirrors cFigure's width-scaled
+// stipple). Values are world-space because the off-screen path has no screen-space line stipple.
+static bool dashPattern(const cFigure::LineStyle& style, double width, double& dashLen, double& gapLen)
+{
+    double w = std::max(1.0, width);
+    switch (style) {
+        case cFigure::LINE_DASHED: dashLen = 12.0 * w; gapLen = 8.0 * w; return true;
+        case cFigure::LINE_DOTTED: dashLen = 2.0 * w;  gapLen = 6.0 * w; return true;
+        default:                   return false;  // LINE_SOLID
+    }
+}
+
+// Turn a polyline (vertices, optionally closed) into a dashed/dotted LINE_LIST: walk the path by arc
+// length and emit only the "dash" intervals of the dash+gap pattern as real geometry (Vulkan core has
+// no line stipple). Dashing is continuous across vertices, so circles/polylines dash smoothly.
+static ref_ptr<vec3Array> dashifyVertices(ref_ptr<vec3Array> path, bool closed, double dashLen, double gapLen)
+{
+    double period = dashLen + gapLen;
+    std::vector<::vsg::vec3> pts;
+    for (size_t i = 0; i < path->size(); i++) pts.push_back(path->at(i));
+    if (closed && path->size() > 1) pts.push_back(path->at(0));
+    std::vector<::vsg::vec3> out;
+    if (period > 1e-9) {
+        double globalS = 0.0;
+        for (size_t i = 0; i + 1 < pts.size(); i++) {
+            ::vsg::vec3 p0 = pts[i], d = pts[i + 1] - pts[i];
+            double segLen = ::vsg::length(d);
+            if (segLen < 1e-9) continue;
+            ::vsg::vec3 dir = d / (float)segLen;
+            double localS = 0.0;
+            while (localS < segLen) {
+                double phase = std::fmod(globalS + localS, period);
+                if (phase < dashLen) {  // inside a dash
+                    double dashEnd = std::min(localS + (dashLen - phase), segLen);
+                    out.push_back(p0 + dir * (float)localS);
+                    out.push_back(p0 + dir * (float)dashEnd);
+                    localS = (dashEnd > localS) ? dashEnd : localS + 1e-6;  // always advance
+                }
+                else  // inside a gap: skip to the next dash
+                    localS += (period - phase);
+            }
+            globalS += segLen;
+        }
+    }
+    auto result = vec3Array::create(out.size());
+    for (size_t i = 0; i < out.size(); i++) result->set(i, out[i]);
+    return result;
+}
+
 ref_ptr<Node> createLine(const Coord& start, const Coord& end, cFigure::Arrowhead startArrowhead, cFigure::Arrowhead endArrowhead,
         const cFigure::Color& color, const cFigure::LineStyle& style, double width, double opacity)
 {
-    // TODO: style (dotted/dashed) is rendered solid for now (no Vulkan core line stipple, R-STIPPLE).
-    (void)style;
-    auto vertices = vec3Array::create({ toVsg(start), toVsg(end) });
-    auto line = createGeometry(vertices, {}, VK_PRIMITIVE_TOPOLOGY_LINE_STRIP, color, opacity, /*lit*/ false, width);
+    ref_ptr<Node> line;
+    double dashLen, gapLen;
+    if (dashPattern(style, width, dashLen, gapLen)) {  // dotted/dashed -> real dash segments (LINE_LIST)
+        auto path = vec3Array::create({ toVsg(start), toVsg(end) });
+        line = createGeometry(dashifyVertices(path, false, dashLen, gapLen), {}, VK_PRIMITIVE_TOPOLOGY_LINE_LIST, color, opacity, /*lit*/ false, width);
+    }
+    else {
+        auto vertices = vec3Array::create({ toVsg(start), toVsg(end) });
+        line = createGeometry(vertices, {}, VK_PRIMITIVE_TOPOLOGY_LINE_STRIP, color, opacity, /*lit*/ false, width);
+    }
     if (!startArrowhead && !endArrowhead)
         return line;
     auto group = Group::create();
@@ -296,11 +352,15 @@ ref_ptr<Node> createLine(const Coord& start, const Coord& end, cFigure::Arrowhea
 ref_ptr<Node> createPolyline(const std::vector<Coord>& coords, cFigure::Arrowhead startArrowhead, cFigure::Arrowhead endArrowhead,
         const cFigure::Color& color, const cFigure::LineStyle& style, double width, double opacity)
 {
-    (void)style;
     auto vertices = vec3Array::create(coords.size());
     for (size_t i = 0; i < coords.size(); i++)
         vertices->set(i, toVsg(coords[i]));
-    auto line = createGeometry(vertices, {}, VK_PRIMITIVE_TOPOLOGY_LINE_STRIP, color, opacity, /*lit*/ false, width);
+    ref_ptr<Node> line;
+    double dashLen, gapLen;
+    if (dashPattern(style, width, dashLen, gapLen))  // dotted/dashed -> real dash segments (LINE_LIST)
+        line = createGeometry(dashifyVertices(vertices, false, dashLen, gapLen), {}, VK_PRIMITIVE_TOPOLOGY_LINE_LIST, color, opacity, /*lit*/ false, width);
+    else
+        line = createGeometry(vertices, {}, VK_PRIMITIVE_TOPOLOGY_LINE_STRIP, color, opacity, /*lit*/ false, width);
     if ((!startArrowhead && !endArrowhead) || coords.size() < 2)
         return line;
     auto group = Group::create();
@@ -315,9 +375,11 @@ ref_ptr<Node> createPolyline(const std::vector<Coord>& coords, cFigure::Arrowhea
 ref_ptr<Node> createCircle(const Coord& center, double radius, const cFigure::Color& color,
         const cFigure::LineStyle& style, double width, int polygonSize)
 {
-    (void)style;
-    // close the loop (Vulkan has no LINE_LOOP): repeat the first vertex with a LINE_STRIP
     auto base = createCircleVertices(center, radius, polygonSize);
+    double dashLen, gapLen;
+    if (dashPattern(style, width, dashLen, gapLen))  // dotted/dashed -> dash around the circumference
+        return createGeometry(dashifyVertices(base, /*closed*/ true, dashLen, gapLen), {}, VK_PRIMITIVE_TOPOLOGY_LINE_LIST, color, 1.0, /*lit*/ false, width);
+    // solid: close the loop (Vulkan has no LINE_LOOP) by repeating the first vertex with a LINE_STRIP
     auto vertices = vec3Array::create(polygonSize + 1);
     for (int i = 0; i < polygonSize; i++)
         vertices->set(i, base->at(i));

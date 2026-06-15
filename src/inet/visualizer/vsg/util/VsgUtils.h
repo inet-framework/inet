@@ -19,8 +19,8 @@
 // Known capability gaps (see docs/04-capability-mapping.md), handled pragmatically here:
 //  - line width > 1 needs the wideLines device feature (absent on MoltenVK) -> requested but
 //    may clamp to 1; TODO geometry-thickened lines.
-//  - line stipple (dotted/dashed) has no Vulkan core equivalent -> TODO fragment-shader dash;
-//    currently rendered solid.
+//  - line stipple (dotted/dashed) has no Vulkan core equivalent -> emulated with real dash geometry
+//    (createLine/createPolyline/createCircle split the path into dash segments; world-unit pattern).
 //  - osg::AutoTransform has no VSG 1.1 node equivalent, and the shader-side billboard/auto-scale
 //    (StandardLayout::billboard / billboardAutoScaleDistance) does NOT work in the off-screen path.
 //    So its screen-relative effects are reproduced by a custom AutoScaleTransform (a vsg::Transform
