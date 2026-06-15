@@ -319,8 +319,10 @@ void Mipv6::returningHome(const Ipv6Address& CoA, NetworkInterface *ie)
         // we first cancel potential timers for the respective CN
         removeTimerEntries(*(itCNList), ie->getInterfaceId());
 
-        // then we send the BU for deregistration
-        if (bul->isValidBinding(*(itCNList))) {
+        // then we send the BU for deregistration (so the CN stops route-optimizing
+        // to our now-abandoned care-of address and reverts to delivering via the home
+        // address). hasActiveBinding(), not the buggy isValidBinding(), is required here.
+        if (bul->hasActiveBinding(*(itCNList))) {
             Ipv6Address cn = *(itCNList);
 //            createDeregisterBUTimer(*(itCNList), ie);
             BindingUpdateList::BindingUpdateListEntry *bulEntry = bul->lookup(cn);
@@ -780,6 +782,13 @@ void Mipv6::processBUMessage(Packet *inPacket, const Ptr<const BindingUpdate>& b
                mobile node's home link that are addressed to the mobile node*/
             // of course this is also true for CNs
             destroyTunnelFromTrigger(HoA);
+
+            // A correspondent node inserts the Type 2 Routing Header for this home
+            // address based on its route-optimization state (see datagramLocalOutHook),
+            // not on the binding cache, so that state must be dropped here too -- otherwise
+            // the CN keeps routing to the now-abandoned care-of address after the mobile
+            // node has returned home. (No-op on a home agent, which has no such entry.)
+            removeRouteOptimizationForTrigger(HoA);
 
             // kill BC expiry timer
             cancelTimerIfEntry(HoA, ifTag->getInterfaceId(), KEY_BC_EXP);
@@ -1965,8 +1974,8 @@ bool Mipv6::checkForBUtoCN(BindingUpdateList::BindingUpdateListEntry& bulEntry, 
     if (bulEntry.state == BindingUpdateList::DEREGISTER) {
         // we are supposed to send a deregistration BU
 
-        if (!bul->isValidBinding(bulEntry.destAddress)) {
-            // no valid binding existing; nothing to do
+        if (!bul->hasActiveBinding(bulEntry.destAddress)) {
+            // no active binding existing; nothing to do
             // TODO cleanup operations?
             return false;
         }

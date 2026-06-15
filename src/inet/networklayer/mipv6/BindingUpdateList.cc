@@ -311,6 +311,15 @@ bool BindingUpdateList::isValidBinding(const Ipv6Address& dest)
     return (entry == nullptr) ? false : entry->BAck && (entry->bindingLifetime < SIMTIME_DBL(simTime()));
 }
 
+bool BindingUpdateList::hasActiveBinding(const Ipv6Address& dest)
+{
+    // Correct version of isValidBinding(): an acknowledged binding whose expiry
+    // time still lies in the future (bindingExpiry == simTime()+lifetime when the
+    // binding was registered). See the header for why isValidBinding() is not fixed.
+    BindingUpdateList::BindingUpdateListEntry *entry = lookup(dest);
+    return (entry == nullptr) ? false : entry->BAck && (entry->bindingExpiry > simTime());
+}
+
 bool BindingUpdateList::isBindingAboutToExpire(const Ipv6Address& dest)
 {
     BindingUpdateList::BindingUpdateListEntry *entry = lookup(dest);

@@ -223,6 +223,18 @@ class INET_API BindingUpdateList : public SimpleModule
     virtual bool isValidBinding(const Ipv6Address& dest);
 
     /**
+     * Returns true if there currently is an acknowledged, unexpired binding for
+     * the given destination. This is what isValidBinding() is documented to do,
+     * but isValidBinding() has a long-standing bug (it compares the binding
+     * *lifetime* against the absolute current time instead of the binding
+     * *expiry*) and the route-optimization registration path now relies on that
+     * buggy behaviour, so the correct check lives here and is used where
+     * correctness actually matters (e.g. de-registering correspondent nodes when
+     * the mobile node returns home).
+     */
+    virtual bool hasActiveBinding(const Ipv6Address& dest);
+
+    /**
      * Returns true if a binding is about to expire.
      */
     virtual bool isBindingAboutToExpire(const Ipv6Address& dest);
