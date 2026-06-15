@@ -134,11 +134,12 @@ ref_ptr<Data> createImage(const char *fileName);
 ref_ptr<Data> createImageFromResource(const char *imageName);
 
 // Textured quad in the X-Y plane (unlit, alpha-blended), larger side = screenSize (label units),
-// aspect preserved. Wrap in a billboard AutoScaleTransform for a camera-facing, constant-size icon.
-ref_ptr<Node> createTexturedQuad(ref_ptr<Data> image, double screenSize, double opacity = 1.0);
+// aspect preserved. 'tint' multiplies the texture (use WHITE for none, e.g. a per-icon tint color).
+// Wrap in a billboard AutoScaleTransform for a camera-facing, constant-size icon.
+ref_ptr<Node> createTexturedQuad(ref_ptr<Data> image, double screenSize, const cFigure::Color& tint = cFigure::WHITE, double opacity = 1.0);
 // Camera-facing, constant-on-screen-size textured icon at a world position (textured quad in a
 // billboard AutoScaleTransform) — the VSG counterpart of an OSG icon under AutoTransform.
-ref_ptr<Node> createTexturedBillboard(ref_ptr<Data> image, const Coord& position, double screenSize, double opacity = 1.0);
+ref_ptr<Node> createTexturedBillboard(ref_ptr<Data> image, const Coord& position, double screenSize, const cFigure::Color& tint = cFigure::WHITE, double opacity = 1.0);
 
 // --- mutable line with optional arrowheads (port of OSG LineNode) -------------------------
 // Used by LinkVsgVisualizerBase for links whose endpoints move. Color/style/width are baked

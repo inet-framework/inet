@@ -37,27 +37,27 @@ void Ieee80211VsgVisualizer::initialize(int stage)
 Ieee80211VisualizerBase::Ieee80211Visualization *Ieee80211VsgVisualizer::createIeee80211Visualization(
         cModule *networkNode, NetworkInterface *networkInterface, std::string ssid, W power)
 {
-    // The OSG twin renders a textured-quad billboard (osg::Texture2D + osg::Geode) loaded
-    // from the icon image (e.g. "misc/signal_power_N.png"), tinted by a color derived from
-    // the SSID hash. VSG has no ready-to-use textured-billboard helper in VsgUtils yet, so
-    // we approximate with:
-    //   - a small colored sphere whose color encodes the SSID (same iconColorSet logic), and
-    //   - a text label showing the SSID.
-    // TODO: textured icon — replace with createTexturedBillboard() once VsgUtils supports it.
-
+    // This node is attached as an annotation, so NetworkNodeVsgVisualization wraps it in a billboard
+    // AutoScaleTransform (camera-facing, constant on-screen size) — author content in the X-Y plane.
     auto node = ::vsg::Group::create();
 
-    // Derive a color from the SSID hash, mirroring the OSG logic.
+    // Tint color derived from the SSID hash (mirrors the OSG iconColorSet logic).
     std::hash<std::string> hasher;
     auto color = iconColorSet.getColor(hasher(ssid));
 
-    // Sphere approximating the signal-strength icon.
-    const double radius = 6.0;
-    node->addChild(inet::vsg::createSphere(Coord(0, 0, radius), radius, color, 1.0));
+    // The signal-strength icon getIcon(power), tinted; fall back to a colored sphere if it can't load.
+    const double iconSize = 32;
+    ::vsg::ref_ptr<::vsg::Data> iconImage;
+    try { iconImage = inet::vsg::createImage(inet::vsg::resolveImageResource(getIcon(power).c_str(), networkNode).c_str()); }
+    catch (const std::exception&) { iconImage = nullptr; }
+    if (iconImage)
+        node->addChild(inet::vsg::createTexturedQuad(iconImage, iconSize, color));
+    else
+        node->addChild(inet::vsg::createSphere(Coord(0, 0, 6), 6, color, 1.0));
 
-    // SSID label just above the sphere.
+    // SSID label above the icon (+Y is screen-up under the billboard wrapper).
     if (!ssid.empty())
-        node->addChild(inet::vsg::createText(ssid.c_str(), Coord(0, 0, radius * 2 + 2), labelColor, 14));
+        node->addChild(inet::vsg::createText(ssid.c_str(), Coord(0, iconSize / 2 + 4, 0), labelColor, 14));
 
     auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
     return new Ieee80211VsgVisualization(networkNodeVisualization, node, networkNode->getId(), networkInterface->getInterfaceId());

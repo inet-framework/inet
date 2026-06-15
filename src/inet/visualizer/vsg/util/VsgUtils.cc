@@ -10,6 +10,7 @@
 #include <vsgXchange/all.h>
 
 #include <cmath>
+#include <map>
 
 namespace inet {
 
@@ -395,9 +396,17 @@ std::string resolveImageResource(const char *imageName, cComponent *context)
 
 ref_ptr<Data> createImage(const char *fileName)
 {
+    // Cache loaded images by path (LEAKED, like the other VsgUtils singletons): the same icon is
+    // reused by many nodes, and fade-out rebuilds (e.g. PacketDrop) would otherwise re-read it every
+    // frame. Sharing the Data also lets the Builder dedup the resulting texture.
+    static std::map<std::string, ref_ptr<Data>>& cache = *(new std::map<std::string, ref_ptr<Data>>());
+    auto it = cache.find(fileName);
+    if (it != cache.end())
+        return it->second;
     auto image = read_cast<Data>(fileName, getOptions());
     if (!image)
         throw cRuntimeError("Cannot load image '%s'", fileName);
+    cache[fileName] = image;
     return image;
 }
 
@@ -410,7 +419,7 @@ ref_ptr<Data> createImageFromResource(const char *imageName)
 // (in label units; aspect ratio preserved). Unlit + alpha-blended, two-sided. Intended to be wrapped
 // in a billboard AutoScaleTransform (see createTexturedBillboard) so it faces the camera at a constant
 // on-screen size — the VSG counterpart of an OSG textured-quad icon under autoScaleToScreen.
-ref_ptr<Node> createTexturedQuad(ref_ptr<Data> image, double screenSize, double opacity)
+ref_ptr<Node> createTexturedQuad(ref_ptr<Data> image, double screenSize, const cFigure::Color& tint, double opacity)
 {
     double w = image ? (double)image->width() : 1.0;
     double h = image ? (double)image->height() : 1.0;
@@ -421,7 +430,7 @@ ref_ptr<Node> createTexturedQuad(ref_ptr<Data> image, double screenSize, double 
     gi.dx = ::vsg::vec3((float)(w / maxDim * screenSize), 0, 0);
     gi.dy = ::vsg::vec3(0, (float)(h / maxDim * screenSize), 0);
     gi.dz = ::vsg::vec3(0, 0, 0);
-    gi.color = ::vsg::vec4(1, 1, 1, (float)opacity);  // modulates the texture (alpha enables fade)
+    gi.color = toVsgColor(tint, opacity);  // multiplies the texture (alpha enables fade)
     StateInfo si;
     si.image = image;
     si.lighting = false;
@@ -432,14 +441,14 @@ ref_ptr<Node> createTexturedQuad(ref_ptr<Data> image, double screenSize, double 
 
 // A textured-quad icon that always faces the camera at a constant on-screen size (textured quad in a
 // billboard AutoScaleTransform). screenSize is the larger on-screen side in label units.
-ref_ptr<Node> createTexturedBillboard(ref_ptr<Data> image, const Coord& position, double screenSize, double opacity)
+ref_ptr<Node> createTexturedBillboard(ref_ptr<Data> image, const Coord& position, double screenSize, const cFigure::Color& tint, double opacity)
 {
     auto autoScale = AutoScaleTransform::create();
     autoScale->pivot = toVsgDouble(position);
     autoScale->billboard = true;
     autoScale->refDistance = LABEL_AUTOSCALE_REF_DISTANCE;
     autoScale->subgraphRequiresLocalFrustum = false;
-    autoScale->addChild(createTexturedQuad(image, screenSize, opacity));
+    autoScale->addChild(createTexturedQuad(image, screenSize, tint, opacity));
     return autoScale;
 }
 

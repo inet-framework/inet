@@ -34,11 +34,16 @@ void TransportConnectionVsgVisualizer::initialize(int stage)
 
 ::vsg::ref_ptr<::vsg::Node> TransportConnectionVsgVisualizer::createConnectionEndNode(tcp::TcpConnection *tcpConnection) const
 {
-    // OSG renders a textured quad (icon image) with a coloured overlay.
-    // VSG has no generic textured-quad billboard helper yet, so we approximate
-    // with a solid-colored quad of the same on-screen footprint.
-    // TODO: replace with a textured billboard once VsgUtils gains createTexturedBillboard().
+    // The end node is attached as an annotation (billboard-wrapped by NetworkNodeVsgVisualization),
+    // so this is the connection icon as a tinted textured quad in the X-Y plane; fall back to a
+    // solid-colored quad if the icon image can't be loaded.
     auto color = iconColorSet.getColor(connectionVisualizations.size());
+    const double iconSize = 32.0;
+    ::vsg::ref_ptr<::vsg::Data> iconImage;
+    try { iconImage = inet::vsg::createImageFromResource(icon); }
+    catch (const std::exception&) { iconImage = nullptr; }
+    if (iconImage)
+        return inet::vsg::createTexturedQuad(iconImage, iconSize, color);
     const double halfSize = 16.0;
     return inet::vsg::createQuad(Coord(-halfSize, 0.0, 0.0), Coord(halfSize, halfSize * 2, 0.0), color);
 }

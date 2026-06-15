@@ -39,18 +39,22 @@ const PacketDropVisualizerBase::PacketDropVisualization *PacketDropVsgVisualizer
     // Choose a tint colour for this drop reason, matching the OSG iconTintColorSet logic.
     auto iconTintColor = iconTintColorSet.getColor(packetDrop->getReason() % iconTintColorSet.getSize());
 
-    // OSG renders a textured quad (msg/packet_s icon) auto-rotated to face the camera.
-    // VSG cannot load arbitrary images as a texture via VsgUtils without additional plumbing.
-    // TODO: replace the sphere with a textured-quad billboard using the "msg/packet_s" image
-    //       once VsgUtils gains createTexturedBillboard() support.
-    // Approximate: a coloured sphere at the packet drop position.
+    // The "msg/packet_s" icon, tinted by drop reason, as a camera-facing billboard (matching OSG);
+    // fall back to a colored sphere if it can't load. createImage caches, so the fade rebuild is cheap.
     const double radius = 8.0;
+    const double iconSize = 24.0;
     const auto& pos = packetDrop->getPosition();
 
     // Build a mutable container: a MatrixTransform (for position/fade movement) holding a
     // Group (for opacity rebuilds in setAlpha).
     auto markerGroup = ::vsg::Group::create();
-    markerGroup->addChild(inet::vsg::createSphere(Coord::ZERO, radius, iconTintColor, 1.0));
+    ::vsg::ref_ptr<::vsg::Data> iconImage;
+    try { iconImage = inet::vsg::createImageFromResource("msg/packet_s"); }
+    catch (const std::exception&) { iconImage = nullptr; }
+    if (iconImage)
+        markerGroup->addChild(inet::vsg::createTexturedBillboard(iconImage, Coord::ZERO, iconSize, iconTintColor));
+    else
+        markerGroup->addChild(inet::vsg::createSphere(Coord::ZERO, radius, iconTintColor, 1.0));
 
     // Text label above the sphere showing the configured labelFormat string.
     std::string labelText = getPacketDropVisualizationText(packetDrop);
@@ -92,6 +96,7 @@ void PacketDropVsgVisualizer::setAlpha(const PacketDropVisualization *packetDrop
     //       efficient and avoid the per-frame subgraph rebuild during fade-out.
     auto iconTintColor = iconTintColorSet.getColor(packetDropVisualization->packetDrop->getReason() % iconTintColorSet.getSize());
     const double radius = 8.0;
+    const double iconSize = 24.0;
 
     // The markerGroup is the first (and only) child of the transform.
     // children is a vector of ::vsg::ref_ptr<::vsg::Node>; cast the first element.
@@ -99,7 +104,13 @@ void PacketDropVsgVisualizer::setAlpha(const PacketDropVisualization *packetDrop
     if (!markerGroup)
         return;
     markerGroup->children.clear();
-    markerGroup->addChild(inet::vsg::createSphere(Coord::ZERO, radius, iconTintColor, alpha));
+    ::vsg::ref_ptr<::vsg::Data> iconImage;
+    try { iconImage = inet::vsg::createImageFromResource("msg/packet_s"); }
+    catch (const std::exception&) { iconImage = nullptr; }
+    if (iconImage)
+        markerGroup->addChild(inet::vsg::createTexturedBillboard(iconImage, Coord::ZERO, iconSize, iconTintColor, alpha));
+    else
+        markerGroup->addChild(inet::vsg::createSphere(Coord::ZERO, radius, iconTintColor, alpha));
 
     // Rebuild label if any (label opacity is not easily controlled; skip when nearly faded).
     if (alpha > 0.1) {
