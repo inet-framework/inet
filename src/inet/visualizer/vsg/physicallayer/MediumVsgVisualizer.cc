@@ -291,18 +291,19 @@ void MediumVsgVisualizer::refreshRingTransmissionNode(const ITransmission *trans
         maxRadius = radioMedium->getMediumLimitCache()->getMaxInterferenceRange(transmitterRadio).get();
 
     cFigure::Color color = signalColorSet.getColor(transmission->getId());
-    // Translucent fill of the signal region at 25% opacity. NOTE: because the backend can't blend over
-    // the opaque floor, this reads the (light) background, so it appears as a pale wash rather than a
-    // floor-tinted color — but it's a faint visible area, not a black blob. A crisp opaque edge circle
-    // marks the actual wavefront.
-    double fillOuter = std::min(startRadius, maxRadius);
-    double fillInner = std::min(endRadius, maxRadius);
-    if (fillOuter > fillInner)
-        annulusHolder->addChild(inet::vsg::createAnnulus(Coord::ZERO, fillOuter, fillInner, color, 0.25, 100));
+    // OPAQUE band at each wavefront edge (a solid filled annulus a few % of the radius wide), not a
+    // translucent fill: the backend can't composite transparency over the floor, so a translucent fill
+    // blends with the background (pale over a light view, BLACK over a dark view) — unreliable. An
+    // opaque band always shows the true signal color, and a thin band (vs a full disc) keeps the floor
+    // visible. (Wide lines clamp to 1px on MoltenVK, so a band is also how we get a thick-looking ring.)
+    auto edgeBand = [&](double r) {
+        double w = std::max(4.0, r * 0.05);   // band thickness ~5% of the radius
+        annulusHolder->addChild(inet::vsg::createAnnulus(Coord::ZERO, r, std::max(0.0, r - w), color, 1.0, 100));
+    };
     if (startRadius > 0 && startRadius <= maxRadius)  // leading edge
-        annulusHolder->addChild(inet::vsg::createCircle(Coord::ZERO, startRadius, color, cFigure::LINE_SOLID, 2.0, 100));
+        edgeBand(startRadius);
     if (endRadius > 0 && endRadius <= maxRadius)       // trailing edge (after the transmission ends)
-        annulusHolder->addChild(inet::vsg::createCircle(Coord::ZERO, endRadius, color, cFigure::LINE_SOLID, 2.0, 100));
+        edgeBand(endRadius);
 
     // Update label position (placed at edge of inner radius in the direction of transmission->getId()).
     double phi = transmission->getId();
