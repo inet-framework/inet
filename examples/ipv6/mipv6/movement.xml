@@ -17,11 +17,11 @@
   speed; the x coordinates match the AP positions in Mipv6Network.ned.
 -->
 <movement>
-    <set x="300" y="200"/>
+    <set x="300" y="150"/>
     <repeat>
         <wait t="15"/>
-        <moveto x="600" y="200" t="5"/>
+        <moveto x="600" y="150" t="5"/>
         <wait t="15"/>
-        <moveto x="300" y="200" t="5"/>
+        <moveto x="300" y="150" t="5"/>
     </repeat>
 </movement>

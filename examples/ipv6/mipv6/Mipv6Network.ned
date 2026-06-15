@@ -66,18 +66,18 @@ network Mipv6Network
         }
         MN[total_mn]: WirelessHost6 {
             parameters:
-                @display("p=300,200");
+                @display("p=300,150");
         }
         CN[total_cn]: CorrespondentNode6 {
             @display("p=450,600,r,50");
         }
         AP_Home: AccessPoint {
             parameters:
-                @display("p=300,150;i=device/accesspoint_s");
+                @display("p=300,200;i=device/accesspoint_s");
         }
         AP_1: AccessPoint {
             parameters:
-                @display("p=600,150;i=device/accesspoint_s");
+                @display("p=600,200;i=device/accesspoint_s");
         }
         switch: EthernetSwitch {
             parameters:
