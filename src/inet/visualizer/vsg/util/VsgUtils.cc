@@ -19,9 +19,14 @@ namespace vsg {
 // Shared resources (options, shader sets, builder) — created lazily and cached.
 // ---------------------------------------------------------------------------------------------
 
+// These shared VSG objects are cached as INTENTIONALLY-LEAKED singletons (heap ref_ptrs that are
+// never destroyed). Destroying a vsg object during C++ static/exit teardown crashes, because vsg's
+// global allocator may already be gone (vsg::deallocate -> null deref). Leaking them avoids that;
+// the OS reclaims the memory at process exit. (The off-screen device is leaked for the same reason.)
+
 ref_ptr<Options> getOptions()
 {
-    static ref_ptr<Options> options;
+    static ref_ptr<Options>& options = *(new ref_ptr<Options>());
     if (!options) {
         options = Options::create();
         options->add(vsgXchange::all::create());
@@ -31,21 +36,21 @@ ref_ptr<Options> getOptions()
 
 static ref_ptr<ShaderSet> getFlatShaderSet()
 {
-    static ref_ptr<ShaderSet> shaderSet;
+    static ref_ptr<ShaderSet>& shaderSet = *(new ref_ptr<ShaderSet>());
     if (!shaderSet) shaderSet = createFlatShadedShaderSet(getOptions());
     return shaderSet;
 }
 
 static ref_ptr<ShaderSet> getPhongShaderSet()
 {
-    static ref_ptr<ShaderSet> shaderSet;
+    static ref_ptr<ShaderSet>& shaderSet = *(new ref_ptr<ShaderSet>());
     if (!shaderSet) shaderSet = createPhongShaderSet(getOptions());
     return shaderSet;
 }
 
 static ref_ptr<Builder> getBuilder()
 {
-    static ref_ptr<Builder> builder;
+    static ref_ptr<Builder>& builder = *(new ref_ptr<Builder>());
     if (!builder) {
         builder = Builder::create();
         builder->options = getOptions();
@@ -290,7 +295,7 @@ ref_ptr<Node> createBox(const Coord& center, const Coord& size, const cFigure::C
 
 ref_ptr<Text> createText(const char *string, const Coord& position, const cFigure::Color& color, double characterSize)
 {
-    static ref_ptr<Font> font;
+    static ref_ptr<Font>& font = *(new ref_ptr<Font>());  // leaked singleton (see getOptions note)
     if (!font) {
         for (const char *path : {
                  "/System/Library/Fonts/Supplemental/Arial.ttf",                     // macOS

@@ -6,7 +6,8 @@
 
 package inet.examples.visualizer.vsgsmoketest;
 
-import inet.mobility.static.StationaryMobility;
+import inet.mobility.contract.IMobility;
+import inet.visualizer.vsg.mobility.MobilityVsgVisualizer;
 import inet.visualizer.vsg.scene.NetworkConnectionVsgVisualizer;
 import inet.visualizer.vsg.scene.NetworkNodeVsgVisualizer;
 import inet.visualizer.vsg.scene.SceneVsgVisualizer;
@@ -26,7 +27,7 @@ module VsgSmokeNode
     gates:
         inout g[];
     submodules:
-        mobility: StationaryMobility {
+        mobility: <default("StationaryMobility")> like IMobility {
             @display("p=60,60;is=s");
         }
     connections allowunconnected:
@@ -50,6 +51,9 @@ network VsgSmokeTest
         }
         networkConnectionVisualizer: NetworkConnectionVsgVisualizer {
             @display("p=20,100");
+        }
+        mobilityVisualizer: MobilityVsgVisualizer {
+            @display("p=20,140");
         }
         host0: VsgSmokeNode {
             @display("p=80,80");
