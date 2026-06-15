@@ -146,7 +146,28 @@ void Mipv6::initialize(int stage)
 
         WATCH(cnList);
         WATCH(interfaceCoAList);
+        // friendly values for the node's display string (see displayStringTextFormat)
+        WATCH_EXPR("mobilityStatus", getMobilityStatusInfo());
+        WATCH_EXPR("careOfAddress", getCareOfAddressInfo());
     }
+}
+
+std::string Mipv6::getMobilityStatusInfo() const
+{
+    if (atHome)
+        return "at home";
+    if (!routeOptimizations.empty()) {
+        size_t n = routeOptimizations.size();
+        return "away (route-optimized, " + std::to_string(n) + (n == 1 ? " CN)" : " CNs)");
+    }
+    return "away (via home agent)";
+}
+
+std::string Mipv6::getCareOfAddressInfo() const
+{
+    if (atHome || interfaceCoAList.empty())
+        return "(home)";
+    return interfaceCoAList.begin()->second.str();
 }
 
 void Mipv6::handleMessageWhenUp(cMessage *msg)
@@ -255,6 +276,7 @@ void Mipv6::initiateMipv6Protocol(NetworkInterface *ie, const Ipv6Address& CoA)
 
     if (!(ie->isLoopback()) && rt6->isMobileNode()) {
         EV_INFO << "Initiating Mobile Ipv6 protocol..." << endl;
+        atHome = false; // we have formed a care-of address -> away from home (display only)
 
         // The MN is supposed to send a BU to the HA after forming a CoA
         Ipv6Address haDest = ie->getProtocolData<Mipv6InterfaceData>()->getHomeAgentAddress(); // HA address for use in the BU for Home Registration
@@ -294,6 +316,8 @@ void Mipv6::initiateMipv6Protocol(NetworkInterface *ie, const Ipv6Address& CoA)
 void Mipv6::returningHome(const Ipv6Address& CoA, NetworkInterface *ie)
 {
     Enter_Method("returningHome"); // can be called by NeighborDiscovery module
+
+    atHome = true; // home subnet prefix is on-link again (display only)
 
     /*11.5.4
        A mobile node detects that it has returned to its home link through

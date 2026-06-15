@@ -192,6 +192,12 @@ class INET_API Mipv6 : public OperationalBase, public IIpv6ExtensionHeaderHandle
     typedef std::map<int, Ipv6Address> InterfaceCoAList;
     InterfaceCoAList interfaceCoAList;
 
+    /** whether this mobile node is currently at home; toggled at the home/away
+     *  transitions (returningHome() / initiateMipv6Protocol()). Used only for the
+     *  display string -- interfaceCoAList is not a reliable "at home" indicator
+     *  because it is not cleared on returning home. */
+    bool atHome = true;
+
     // A vector that will contain and maintain a list of all the CN(s) that the MN is in communication with. Although this is a quick fix, but this list should be populated and depopulated in sync with the destination cache. Final version should rely on the destinaion cache for acquiring the CN(s) address for use in Correspodent Registeration
     typedef std::vector<Ipv6Address> CnList;
     CnList cnList;
@@ -591,6 +597,19 @@ class INET_API Mipv6 : public OperationalBase, public IIpv6ExtensionHeaderHandle
      * Remove all entries from the interfaceCoAList.
      */
     void removeCoAEntries();
+
+    /**
+     * Human-readable mobility status of this (mobile) node, for the display string
+     * (WATCH_EXPR "mobilityStatus"): "at home", "away (via home agent)" or
+     * "route-optimized (N CN[s])".
+     */
+    std::string getMobilityStatusInfo() const;
+
+    /**
+     * The node's current care-of address as a string, or "(home)" when it has none,
+     * for the display string (WATCH_EXPR "careOfAddress").
+     */
+    std::string getCareOfAddressInfo() const;
 
 //
 // Helper functions for BUL/BC expiry management

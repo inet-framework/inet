@@ -27,6 +27,7 @@ void Ieee80211Mib::initialize(int stage)
         WATCH_EXPR("stationTypeStr", getStationTypeStr(bssStationData.stationType));
         WATCH_EXPR("qosStr", qos ? ", QoS" : ", Non-QoS");
         WATCH_EXPR("ssidStr", getSsidStr());
+        WATCH_EXPR("ssid", bssData.ssid.empty() ? std::string("-") : bssData.ssid); // associated SSID ("-" if none), for node display strings
         WATCH_EXPR("associatedStr", bssStationData.stationType == STATION ? (bssStationData.isAssociated ? "\nAssociated" : "\nNot associated") : "");
     }
 }
