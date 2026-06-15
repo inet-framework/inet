@@ -64,7 +64,7 @@ void StatisticVsgVisualizer::refreshStatisticVisualization(const StatisticVisual
     statisticVsgVisualization->lastText = text;
     statisticVsgVisualization->node->children.clear();
     if (!text.empty())
-        statisticVsgVisualization->node->addChild(inet::vsg::createLabel(text.c_str(), Coord::ZERO, textColor, 18));
+        statisticVsgVisualization->node->addChild(inet::vsg::createText(text.c_str(), Coord::ZERO, textColor, 18));
 }
 
 } // namespace visualizer

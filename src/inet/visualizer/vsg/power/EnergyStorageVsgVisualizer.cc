@@ -68,7 +68,7 @@ void EnergyStorageVsgVisualizer::refreshEnergyStorageVisualization(const EnergyS
         return; // unchanged — avoid rebuilding the label
     energyStorageVsgVisualization->lastText = text;
     energyStorageVsgVisualization->node->children.clear();
-    energyStorageVsgVisualization->node->addChild(inet::vsg::createLabel(text.c_str(), Coord::ZERO, color, 18));
+    energyStorageVsgVisualization->node->addChild(inet::vsg::createText(text.c_str(), Coord::ZERO, color, 18));
 }
 
 } // namespace visualizer

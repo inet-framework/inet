@@ -53,7 +53,7 @@ void InfoVsgVisualizer::refreshInfoVisualization(const InfoVisualization *infoVi
     infoVsgVisualization->lastInfo = info;
     infoVsgVisualization->node->children.clear();
     if (info != nullptr && *info != '\0')
-        infoVsgVisualization->node->addChild(inet::vsg::createLabel(info, Coord::ZERO, textColor, 18));
+        infoVsgVisualization->node->addChild(inet::vsg::createText(info, Coord::ZERO, textColor, 18));
 }
 
 } // namespace visualizer

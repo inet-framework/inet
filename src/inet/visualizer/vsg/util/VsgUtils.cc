@@ -184,32 +184,6 @@ static ref_ptr<vec3Array> createArrowheadVertices(const Coord& start, const Coor
 // High-level node creators
 // ---------------------------------------------------------------------------------------------
 
-// Reproduces osg::AutoTransform's screen-relative effects, which VSG 1.1 has no node for (and the
-// shader-side StandardLayout::billboardAutoScaleDistance does NOT work in the off-screen path). We
-// subclass vsg::Transform and compute the matrix from the live modelview during the record traversal
-// (vsg::RecordTraversal calls Transform::transform(mv) for every Transform). Children are scaled by
-// (eye-distance / refDistance), which cancels the perspective shrink and so holds their projected
-// (on-screen) size ~constant across zoom — like autoScaleToScreen.
-//   billboard == false: scale about the world pivot, keep orientation (for directional shapes like
-//                       arrowheads, which must keep pointing).
-//   billboard == true : also drop the inherited rotation so children face the camera (== OSG
-//                       ROTATE_TO_SCREEN + autoScaleToScreen); used for text labels.
-class AutoScaleTransform : public ::vsg::Inherit<::vsg::Transform, AutoScaleTransform> {
-  public:
-    ::vsg::dvec3 pivot;            // world-space anchor; scaling is about this point
-    double refDistance = 600.0;    // eye distance at which children render at their natural size
-    bool billboard = false;        // true -> children also face the camera (screen-aligned)
-
-    ::vsg::dmat4 transform(const ::vsg::dmat4& mv) const override {
-        ::vsg::dvec3 eye = mv * pivot;     // pivot in eye space (the camera looks down -Z)
-        double dist = -eye.z;
-        double s = (dist > 0.0 && refDistance > 0.0) ? dist / refDistance : 1.0;
-        if (billboard)
-            return ::vsg::translate(eye) * ::vsg::scale(s, s, s);   // camera-facing + screen-constant
-        return mv * ::vsg::translate(pivot) * ::vsg::scale(s, s, s) * ::vsg::translate(-pivot);
-    }
-};
-
 ref_ptr<Node> createArrowhead(const Coord& start, const Coord& end, const cFigure::Color& color, double width, double height, double opacity)
 {
     // The triangle is built in world space at 'end'; an AutoScaleTransform then holds its on-screen
@@ -361,11 +335,6 @@ ref_ptr<Text> createText(const char *string, const Coord& position, const cFigur
 // ---------------------------------------------------------------------------------------------
 // Transforms
 // ---------------------------------------------------------------------------------------------
-
-// refDistance for label text: chosen so characterSize ~18 renders at roughly OSG's on-screen label
-// size (~18 px in a typical viewport). Smaller -> larger on-screen text. Shared by every label so the
-// per-call characterSize keeps its relative meaning.
-static const double LABEL_AUTOSCALE_REF_DISTANCE = 1400.0;
 
 ref_ptr<Node> createLabel(const char *string, const Coord& position, const cFigure::Color& color, double characterSize)
 {

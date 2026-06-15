@@ -81,7 +81,7 @@ void GateScheduleVsgVisualizer::refreshGateVisualization(const GateVisualization
     // Label above the box.
     if (!labelText.empty()) {
         gateVsgVisualization->node->addChild(
-            inet::vsg::createLabel(labelText.c_str(), Coord(0, boxH + 2.0, 0), cFigure::BLACK, 14));
+            inet::vsg::createText(labelText.c_str(), Coord(0, boxH + 2.0, 0), cFigure::BLACK, 14));
     }
 }
 

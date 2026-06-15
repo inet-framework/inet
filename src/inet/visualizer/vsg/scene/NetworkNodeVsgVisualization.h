@@ -13,6 +13,7 @@
 #include <vsg/nodes/MatrixTransform.h>
 
 #include "inet/visualizer/base/NetworkNodeVisualizerBase.h"
+#include "inet/visualizer/vsg/util/VsgUtils.h"
 
 namespace inet {
 
@@ -30,11 +31,11 @@ class INET_API NetworkNodeVsgVisualization : public NetworkNodeVisualizerBase::N
   protected:
     class Annotation {
       public:
-        ::vsg::ref_ptr<::vsg::Node> node;
-        ::vsg::ref_ptr<::vsg::MatrixTransform> transform;
+        ::vsg::ref_ptr<::vsg::Node> node;                          // the content (plain text/geometry)
+        ::vsg::ref_ptr<inet::vsg::AutoScaleTransform> transform;   // billboard+autoscale wrapper (stable across content rebuilds)
         ::vsg::dvec3 size;
         double priority;
-        Annotation(::vsg::ref_ptr<::vsg::Node> node, ::vsg::ref_ptr<::vsg::MatrixTransform> transform, ::vsg::dvec3 size, double priority) :
+        Annotation(::vsg::ref_ptr<::vsg::Node> node, ::vsg::ref_ptr<inet::vsg::AutoScaleTransform> transform, ::vsg::dvec3 size, double priority) :
             node(node), transform(transform), size(size), priority(priority) {}
     };
 
@@ -42,6 +43,8 @@ class INET_API NetworkNodeVsgVisualization : public NetworkNodeVisualizerBase::N
     ::vsg::ref_ptr<::vsg::Group> annotationNode;
     std::vector<Annotation> annotations;
     Coord position = Coord::ZERO;
+    ::vsg::dvec3 labelPivot = {0, 0, 0};   // shared world anchor (box top) for the name + all annotations
+    double labelBaseHeight = 0;            // on-screen height reserved below annotations (the name label)
 
     virtual void updateAnnotationPositions();
 

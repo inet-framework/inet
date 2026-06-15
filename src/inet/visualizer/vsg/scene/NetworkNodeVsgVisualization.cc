@@ -34,10 +34,18 @@ NetworkNodeVsgVisualization::NetworkNodeVsgVisualization(cModule *networkNode, b
     group->addChild(mainPart);
     size = ::vsg::dvec3(markerSize, 0, markerSize);
 
-    if (displayModuleName)
-        // createLabel is a camera-facing, screen-constant-size billboard, so use OSG's characterSize 18
-        // (it no longer scales with the world, so the small value that compensated for that is gone).
-        group->addChild(inet::vsg::createLabel(networkNode->getFullName(), Coord(0, 0, markerSize + 2), cFigure::BLACK, 18));
+    // Shared world anchor (just above the box) for the name label and every annotation. They differ
+    // only by an on-screen (screenOffset) amount, so the stack never overlaps regardless of zoom.
+    labelPivot = ::vsg::dvec3(0, 0, markerSize + 2);
+
+    if (displayModuleName) {
+        // The name label is a camera-facing, screen-constant-size billboard at the anchor (the bottom
+        // of the stack); annotations stack above it. characterSize 18 matches OSG (it no longer scales
+        // with the world, so the small value that used to compensate for that is gone).
+        const double nameSize = 18;
+        group->addChild(inet::vsg::createLabel(networkNode->getFullName(), Coord(0, 0, markerSize + 2), cFigure::BLACK, nameSize));
+        labelBaseHeight = nameSize + 8;  // reserve the name's on-screen height (+spacing) below annotations
+    }
 
     annotationNode = ::vsg::Group::create();
     group->addChild(annotationNode);
@@ -51,18 +59,30 @@ NetworkNodeVsgVisualization::NetworkNodeVsgVisualization(cModule *networkNode, b
 
 void NetworkNodeVsgVisualization::updateAnnotationPositions()
 {
-    double spacing = 4;
-    double totalHeight = 0;
+    // Stack the annotations in SCREEN space (constant gaps regardless of zoom), above the name label.
+    // Each annotation's wrapper is a billboard AutoScaleTransform sharing labelPivot; they differ only
+    // by screenOffset.y. (Stacking by world Z instead would collapse to nothing on screen, because the
+    // labels are screen-constant size.) This mirrors OSG, which stacks annotations inside the node's
+    // autoScaleToScreen AutoTransform.
+    const double spacing = 8;
+    double stackY = labelBaseHeight;
     for (auto& annotation : annotations) {
-        double dz = size.z + spacing + totalHeight;
-        annotation.transform->matrix = ::vsg::translate(::vsg::dvec3(0, 0, dz));
-        totalHeight += annotation.size.z + spacing;
+        annotation.transform->screenOffset = ::vsg::dvec3(0, stackY, 0);
+        double h = std::max(annotation.size.y, 18.0);  // size.y is the content's on-screen height (px-ish)
+        stackY += h + spacing;
     }
 }
 
 void NetworkNodeVsgVisualization::addAnnotation(::vsg::ref_ptr<::vsg::Node> node, ::vsg::dvec3 size, double priority)
 {
-    auto transform = ::vsg::MatrixTransform::create();
+    // Wrap the (plain) content in a billboard AutoScaleTransform: it faces the camera, holds a
+    // ~constant on-screen size, and carries the screen-space stacking offset. The wrapper is stable
+    // even when a visualizer rebuilds its content on refresh (so the stacking survives).
+    auto transform = inet::vsg::AutoScaleTransform::create();
+    transform->pivot = labelPivot;
+    transform->billboard = true;
+    transform->refDistance = inet::vsg::LABEL_AUTOSCALE_REF_DISTANCE;
+    transform->subgraphRequiresLocalFrustum = false;
     transform->addChild(node);
     annotations.push_back(Annotation(node, transform, size, priority));
     std::stable_sort(annotations.begin(), annotations.end(), [] (const Annotation& a1, const Annotation& a2) {

@@ -57,7 +57,7 @@ Ieee80211VisualizerBase::Ieee80211Visualization *Ieee80211VsgVisualizer::createI
 
     // SSID label just above the sphere.
     if (!ssid.empty())
-        node->addChild(inet::vsg::createLabel(ssid.c_str(), Coord(0, 0, radius * 2 + 2), labelColor, 14));
+        node->addChild(inet::vsg::createText(ssid.c_str(), Coord(0, 0, radius * 2 + 2), labelColor, 14));
 
     auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
     return new Ieee80211VsgVisualization(networkNodeVisualization, node, networkNode->getId(), networkInterface->getInterfaceId());

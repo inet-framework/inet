@@ -37,7 +37,7 @@ InterfaceTableVisualizerBase::InterfaceVisualization *InterfaceTableVsgVisualize
     auto node = ::vsg::Group::create();
     auto text = getVisualizationText(networkInterface);
     if (!text.empty())
-        node->addChild(inet::vsg::createLabel(text.c_str(), Coord::ZERO, textColor, 18));
+        node->addChild(inet::vsg::createText(text.c_str(), Coord::ZERO, textColor, 18));
     auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
     return new InterfaceVsgVisualization(networkNodeVisualization, node, networkNode->getId(), gate == nullptr ? -1 : gate->getId(), networkInterface->getInterfaceId());
 }
@@ -66,7 +66,7 @@ void InterfaceTableVsgVisualizer::refreshInterfaceVisualization(const InterfaceV
     interfaceVsgVisualization->lastText = text;
     interfaceVsgVisualization->node->children.clear();
     if (!text.empty())
-        interfaceVsgVisualization->node->addChild(inet::vsg::createLabel(text.c_str(), Coord::ZERO, textColor, 18));
+        interfaceVsgVisualization->node->addChild(inet::vsg::createText(text.c_str(), Coord::ZERO, textColor, 18));
 }
 
 } // namespace visualizer

@@ -98,7 +98,7 @@ void QueueVsgVisualizer::refreshQueueVisualization(const QueueVisualization *que
     else
         ss << numPackets;
     queueVsgVisualization->node->addChild(
-        inet::vsg::createLabel(ss.str().c_str(), Coord(0, barHeight + 2.0, 0), color, 14));
+        inet::vsg::createText(ss.str().c_str(), Coord(0, barHeight + 2.0, 0), color, 14));
 }
 
 } // namespace visualizer

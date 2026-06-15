@@ -81,19 +81,51 @@ ref_ptr<Node> createArrowhead(const Coord& start, const Coord& end, const cFigur
 ref_ptr<Node> createSphere(const Coord& center, double radius, const cFigure::Color& color, double opacity = 1.0);
 ref_ptr<Node> createBox(const Coord& center, const Coord& size, const cFigure::Color& color, double opacity = 1.0);
 
-// Native text (vsg::Text). The returned Text can be mutated later: set ->text and call ->setup(0, getOptions()).
-// NOTE: bare text faces away from the default off-screen camera (renders mirrored); place it via
-// createAutoTransform, or use createLabel() below for the common static-label case.
+// Native text (vsg::Text) with glyphs laid out in the X-Y plane. Returned Text can be mutated later
+// (set ->text, call ->setup(0, getOptions())). It is plain, world-space text; wrap it in a billboard
+// AutoScaleTransform (see createLabel) to make it face the camera at a constant on-screen size.
 ref_ptr<Text> createText(const char *string, const Coord& position, const cFigure::Color& color, double characterSize = 18);
 
-// Camera-facing text label at a world position (createText + createAutoTransform). Use this for
-// static labels so they always read correctly; use createText directly only when you must mutate it.
+// Camera-facing, constant-on-screen-size text label at a world position (plain text wrapped in a
+// billboard AutoScaleTransform). Reads correctly from any view angle and does not change apparent
+// size with zoom — the VSG counterpart of an OSG label under AutoTransform(autoScaleToScreen).
 ref_ptr<Node> createLabel(const char *string, const Coord& position, const cFigure::Color& color, double characterSize = 18);
 
 // --- transforms ---------------------------------------------------------------------------
+// refDistance for label text: chosen so characterSize ~18 renders at roughly OSG's on-screen label
+// size in a typical viewport. Smaller -> larger on-screen text. Shared by createLabel and by the
+// node-annotation wrapper so every label keeps a consistent on-screen size + stacking.
+constexpr double LABEL_AUTOSCALE_REF_DISTANCE = 1400.0;
+
+// Reproduces osg::AutoTransform's screen-relative effects (VSG 1.1 has no such node, and the
+// shader-side StandardLayout::billboard/billboardAutoScaleDistance do NOT work off-screen). It is a
+// vsg::Transform whose matrix is computed from the live modelview during the record traversal:
+// children are scaled by (eye-distance / refDistance) so their projected (on-screen) size stays
+// ~constant across zoom. In billboard mode children also face the camera (== autoScaleToScreen +
+// ROTATE_TO_SCREEN); screenOffset then shifts them by a constant on-screen amount (used to stack
+// node annotations in screen space so they never overlap regardless of zoom). In non-billboard mode
+// orientation is preserved (for directional shapes such as arrowheads).
+class INET_API AutoScaleTransform : public Inherit<Transform, AutoScaleTransform>
+{
+  public:
+    ::vsg::dvec3 pivot;                    // world-space anchor; scaling/billboarding is about this point
+    double refDistance = 600.0;           // eye distance at which children render at their natural size
+    bool billboard = false;               // true -> children also face the camera (screen-aligned)
+    ::vsg::dvec3 screenOffset = {0, 0, 0}; // billboard-only: constant on-screen offset (in label units)
+
+    ::vsg::dmat4 transform(const ::vsg::dmat4& mv) const override {
+        ::vsg::dvec3 eye = mv * pivot;     // pivot in eye space (the camera looks down -Z)
+        double dist = -eye.z;
+        double s = (dist > 0.0 && refDistance > 0.0) ? dist / refDistance : 1.0;
+        if (billboard)
+            return ::vsg::translate(eye) * ::vsg::scale(s, s, s) * ::vsg::translate(screenOffset);
+        return mv * ::vsg::translate(pivot) * ::vsg::scale(s, s, s) * ::vsg::translate(-pivot);
+    }
+};
+
 ref_ptr<MatrixTransform> createPositionAttitudeTransform(const Coord& position, const Quaternion& orientation);
-// Fixed-orientation stand-in for osg::AutoTransform (the off-screen path has no live billboard);
-// faces the default camera. autoScaleToScreen is accepted for call-site compatibility (no-op).
+// Fixed-orientation stand-in for osg::AutoTransform (legacy; createLabel/AutoScaleTransform supersede
+// it). faces the default camera. autoScaleToScreen is accepted for call-site compatibility (no-op).
 ref_ptr<MatrixTransform> createAutoTransform(ref_ptr<Node> child, const Coord& position, bool autoScaleToScreen = false);
 
 // --- images ------------------------------------------------------------------------------
