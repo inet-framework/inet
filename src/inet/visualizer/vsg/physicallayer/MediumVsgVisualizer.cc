@@ -175,25 +175,10 @@ void MediumVsgVisualizer::setSignalVsgNode(const ITransmission *transmission, ::
 
 ::vsg::ref_ptr<::vsg::Node> MediumVsgVisualizer::createRingSignalNode(const ITransmission *transmission) const
 {
-    // The OSG version creates an annulus geometry with a GLSL fragment shader that computes
-    // wave-modulated, distance-attenuated opacity, driven by per-frame uniforms (waveOffset,
-    // waveFadingFactor). The ring is placed via a PositionAttitudeTransform at the
-    // transmission start position and faces the camera (or a fixed plane) via AutoTransform.
-    //
-    // VSG has no built-in shader/uniform equivalent in VsgUtils yet, so we approximate:
-    // - A solid/translucent annulus rendered via inet::vsg::createAnnulus.
-    // - Opacity is fixed at construction (0.7) and updated on each refreshDisplay call
-    //   by rebuilding the annulus child (see refreshRingTransmissionNode).
-    // - The ring is positioned via a MatrixTransform at the transmission start position.
-    // - The signalPlane parameter (camera/xy/xz/yz) is noted; only xy is currently applied;
-    //   other planes require orientation hints that VsgUtils::createAutoTransform does not yet
-    //   support (it is a no-op billboard approximation).
-    //
-    // TODO: implement wave-modulated opacity via a VSG push-constant or per-vertex attribute
-    //       driven by refreshDisplay, matching the OSG GLSL shader uniforms:
-    //       waveLength, waveAmplitude, waveOffset, waveFadingFactor, fadingFactor, fadingDistance.
-    // TODO: implement signalPlane-driven orientation (xz/yz planes) via a proper rotation on
-    //       the MatrixTransform once VsgUtils grows an orientation-aware createAutoTransform.
+    // The wavefront is an annulus with wave-modulated, distance-attenuated opacity, rebuilt each frame
+    // by refreshRingTransmissionNode (inet::vsg::createWaveRing bakes the OSG signal-shader's per-vertex
+    // alpha — the shader-side approach has no off-screen equivalent). The ring is positioned at the
+    // transmission start via a MatrixTransform, tilted per the signalPlane parameter below.
 
     auto color = signalColorSet.getColor(transmission->getId());
     auto transmissionStart = transmission->getStartPosition();
@@ -224,8 +209,17 @@ void MediumVsgVisualizer::setSignalVsgNode(const ITransmission *transmission, ::
         ringGroup->addChild(::vsg::Group::create());
     }
 
-    // Wrap in a MatrixTransform positioned at the transmission start.
+    // Wrap in a MatrixTransform positioned at the transmission start, oriented by signalPlane:
+    // xy = flat on the ground (default); xz/yz tilt the ring into the vertical planes. ("camera" =
+    // always facing the viewer needs a live billboard for a world-sized, growing ring, which the
+    // off-screen path can't do, so it behaves like xy.)
     auto transform = inet::vsg::createPositionAttitudeTransform(transmissionStart, Quaternion::IDENTITY);
+    if (signalPlane != nullptr) {
+        if (!strcmp(signalPlane, "xz"))
+            transform->matrix = transform->matrix * ::vsg::rotate(M_PI / 2, 1.0, 0.0, 0.0);
+        else if (!strcmp(signalPlane, "yz"))
+            transform->matrix = transform->matrix * ::vsg::rotate(M_PI / 2, 0.0, 1.0, 0.0);
+    }
     transform->addChild(ringGroup);
     return transform;
 }
@@ -285,22 +279,18 @@ void MediumVsgVisualizer::refreshRingTransmissionNode(const ITransmission *trans
     annulusHolder->children.clear();
 
     if (startRadius > 0) {
-        // TODO: OSG computes a per-vertex wave-modulated alpha via GLSL uniforms
-        //       (waveOffset=startRadius, waveFadingFactor driven by animation speed ratio).
-        //       Here we approximate with a linearly faded solid annulus.  The fade
-        //       follows the same exponential formula used by the sphere path, applied to
-        //       the outer (start) radius.
-        double alpha = (signalFadingDistance > 0 && signalFadingFactor > 1.0)
-            ? std::min(1.0, pow(signalFadingFactor, -startRadius / signalFadingDistance))
-            : 0.7;
-        alpha = std::max(0.05, alpha);
-
         cFigure::Color color = signalColorSet.getColor(transmission->getId());
-        // TODO: the OSG ring uses a wave-amplitude modulation on the opacity that
-        //       produces a ripple effect across the annulus face.  VSG has no
-        //       per-fragment shader yet, so the annulus is rendered at a uniform opacity.
-        auto annulus = inet::vsg::createAnnulus(Coord::ZERO, startRadius, endRadius, color, alpha, 100);
-        annulusHolder->addChild(annulus);
+        // Wave-fading factor dampens the ripple amplitude when the animation runs much faster than the
+        // wave propagates (matches the OSG uniform). waveOffset = startRadius puts a crest at the
+        // leading edge, so the ripple animates outward as the wavefront grows.
+        double animSpeed = getSimulation()->getEnvir()->getAnimationSpeed();
+        double waveFadingFactor = 1.0;
+        if (animSpeed > 0 && signalWaveFadingAnimationSpeedFactor > 0 && !std::isnan(signalPropagationAnimationSpeed))
+            waveFadingFactor = std::min(1.0, signalPropagationAnimationSpeed / animSpeed / signalWaveFadingAnimationSpeedFactor);
+        auto ring = inet::vsg::createWaveRing(Coord::ZERO, /*inner*/ endRadius, /*outer*/ startRadius, color,
+                signalWaveLength, signalWaveAmplitude * waveFadingFactor, /*waveOffset*/ startRadius,
+                signalFadingFactor, signalFadingDistance);
+        annulusHolder->addChild(ring);
     }
 
     // Update label position (placed at edge of inner radius in the direction of transmission->getId()).

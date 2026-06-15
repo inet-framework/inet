@@ -129,6 +129,70 @@ ref_ptr<Node> createGeometry(ref_ptr<vec3Array> vertices, ref_ptr<vec3Array> nor
     return stateGroup;
 }
 
+// A radially-subdivided ring (annulus) whose PER-VERTEX opacity reproduces the OSG signal wave: a
+// distance fade pow(fadingFactor, -d/fadingDistance) times a cosine ripple across the radius (period
+// waveLength, leading edge at waveOffset; 'a' = waveAmplitude/2). The medium visualizer rebuilds this
+// each frame with the current radii/waveOffset; per-vertex vsg_Color (interpolated) + alpha blending
+// produce the gradient with no custom shader/uniforms (which don't work in the off-screen path).
+ref_ptr<Node> createWaveRing(const Coord& center, double innerRadius, double outerRadius,
+        const cFigure::Color& color, double waveLength, double waveAmplitude, double waveOffset,
+        double fadingFactor, double fadingDistance, int radialBands, int segments)
+{
+    if (outerRadius <= innerRadius || radialBands < 1 || segments < 3)
+        return Group::create();  // nothing visible yet
+    float cr = (float)color.red / 255.0f, cg = (float)color.green / 255.0f, cb = (float)color.blue / 255.0f;
+    double a = waveAmplitude / 2.0;
+    auto alphaAt = [&](double d) {
+        double fade = (fadingDistance > 0 && fadingFactor > 1.0) ? std::pow(fadingFactor, -d / fadingDistance) : 1.0;
+        double phi = (waveLength > 0) ? (d - waveOffset) / waveLength * 2.0 * M_PI : 0.0;
+        return (float)std::max(0.0, std::min(1.0, fade * (1.0 - a + std::cos(phi) * a)));
+    };
+    int quads = radialBands * segments;
+    auto vertices = vec3Array::create(quads * 6);
+    auto colors = vec4Array::create(quads * 6);
+    size_t k = 0;
+    for (int i = 0; i < radialBands; i++) {
+        double r0 = innerRadius + (outerRadius - innerRadius) * i / radialBands;
+        double r1 = innerRadius + (outerRadius - innerRadius) * (i + 1) / radialBands;
+        ::vsg::vec4 c0(cr, cg, cb, alphaAt(r0)), c1(cr, cg, cb, alphaAt(r1));
+        for (int j = 0; j < segments; j++) {
+            double t0 = 2.0 * M_PI * j / segments, t1 = 2.0 * M_PI * (j + 1) / segments;
+            auto P = [&](double r, double t) { return ::vsg::vec3((float)(center.x + r * cos(t)), (float)(center.y + r * sin(t)), (float)center.z); };
+            ::vsg::vec3 p00 = P(r0, t0), p01 = P(r0, t1), p10 = P(r1, t0), p11 = P(r1, t1);
+            vertices->set(k, p00); colors->set(k++, c0);
+            vertices->set(k, p10); colors->set(k++, c1);
+            vertices->set(k, p11); colors->set(k++, c1);
+            vertices->set(k, p00); colors->set(k++, c0);
+            vertices->set(k, p11); colors->set(k++, c1);
+            vertices->set(k, p01); colors->set(k++, c0);
+        }
+    }
+    // flat (unlit) shader set, alpha blending, vsg_Color bound PER-VERTEX (so the alpha interpolates)
+    auto config = GraphicsPipelineConfigurator::create(getFlatShaderSet());
+    getPipelineState<InputAssemblyState>(config)->topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    getPipelineState<RasterizationState>(config)->cullMode = VK_CULL_MODE_NONE;
+    getPipelineState<ColorBlendState>(config)->configureAttachments(true);
+    auto material = PhongMaterialValue::create();
+    material->value().diffuse = ::vsg::vec4(1, 1, 1, 1);
+    material->value().ambient = ::vsg::vec4(1, 1, 1, 1);
+    config->assignDescriptor("material", material);
+    auto normals = vec3Array::create(vertices->size(), ::vsg::vec3(0, 0, 1));
+    auto texCoordValue = vec2Value::create(::vsg::vec2(0, 0));
+    DataList vertexArrays;
+    config->assignArray(vertexArrays, "vsg_Vertex", VK_VERTEX_INPUT_RATE_VERTEX, vertices);
+    config->assignArray(vertexArrays, "vsg_Normal", VK_VERTEX_INPUT_RATE_VERTEX, normals);
+    config->assignArray(vertexArrays, "vsg_Color", VK_VERTEX_INPUT_RATE_VERTEX, colors);
+    config->assignArray(vertexArrays, "vsg_TexCoord0", VK_VERTEX_INPUT_RATE_INSTANCE, texCoordValue);
+    config->init();
+    auto stateGroup = StateGroup::create();
+    config->copyTo(stateGroup);
+    auto commands = Commands::create();
+    commands->addChild(BindVertexBuffers::create(config->baseAttributeBinding, vertexArrays));
+    commands->addChild(Draw::create(vertices->size(), 1, 0, 0));
+    stateGroup->addChild(commands);
+    return stateGroup;
+}
+
 // ---------------------------------------------------------------------------------------------
 // Vertex-array builders
 // ---------------------------------------------------------------------------------------------
