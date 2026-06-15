@@ -406,6 +406,43 @@ ref_ptr<Data> createImageFromResource(const char *imageName)
     return createImage(resolveImageResource(imageName).c_str());
 }
 
+// A textured quad in the X-Y plane, centred at the origin, sized so its larger side is screenSize
+// (in label units; aspect ratio preserved). Unlit + alpha-blended, two-sided. Intended to be wrapped
+// in a billboard AutoScaleTransform (see createTexturedBillboard) so it faces the camera at a constant
+// on-screen size — the VSG counterpart of an OSG textured-quad icon under autoScaleToScreen.
+ref_ptr<Node> createTexturedQuad(ref_ptr<Data> image, double screenSize, double opacity)
+{
+    double w = image ? (double)image->width() : 1.0;
+    double h = image ? (double)image->height() : 1.0;
+    double maxDim = std::max(w, h);
+    if (maxDim <= 0.0) maxDim = 1.0;
+    GeometryInfo gi;
+    gi.position = ::vsg::vec3(0, 0, 0);
+    gi.dx = ::vsg::vec3((float)(w / maxDim * screenSize), 0, 0);
+    gi.dy = ::vsg::vec3(0, (float)(h / maxDim * screenSize), 0);
+    gi.dz = ::vsg::vec3(0, 0, 0);
+    gi.color = ::vsg::vec4(1, 1, 1, (float)opacity);  // modulates the texture (alpha enables fade)
+    StateInfo si;
+    si.image = image;
+    si.lighting = false;
+    si.blending = true;
+    si.two_sided = true;
+    return getBuilder()->createQuad(gi, si);
+}
+
+// A textured-quad icon that always faces the camera at a constant on-screen size (textured quad in a
+// billboard AutoScaleTransform). screenSize is the larger on-screen side in label units.
+ref_ptr<Node> createTexturedBillboard(ref_ptr<Data> image, const Coord& position, double screenSize, double opacity)
+{
+    auto autoScale = AutoScaleTransform::create();
+    autoScale->pivot = toVsgDouble(position);
+    autoScale->billboard = true;
+    autoScale->refDistance = LABEL_AUTOSCALE_REF_DISTANCE;
+    autoScale->subgraphRequiresLocalFrustum = false;
+    autoScale->addChild(createTexturedQuad(image, screenSize, opacity));
+    return autoScale;
+}
+
 // ---------------------------------------------------------------------------------------------
 // LineNode (mutable line with optional arrowheads)
 // ---------------------------------------------------------------------------------------------

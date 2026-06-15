@@ -21,31 +21,62 @@ NetworkNodeVsgVisualization::NetworkNodeVsgVisualization(cModule *networkNode, b
     NetworkNodeVisualization(networkNode)
 {
     cDisplayString& displayString = networkNode->getDisplayString();
-
-    // TODO: render the node's 2D icon (display string "i" tag) as a textured billboard quad, or
-    // its 3D model ("osgModel" par), to match the OSG visualizer. For now a colored box marker.
-    double markerSize = 10;
-    cFigure::Color color("#4080C0");
-    // sit the marker ON the ground (bottom at z=0) rather than centered on the ground plane
-    auto mainPart = inet::vsg::createBox(Coord(0, 0, markerSize / 2), Coord(markerSize, markerSize, markerSize), color);
-    mainPart->setValue("omnetpp.object", (int64_t)(intptr_t)(cObject *)networkNode); // selectable: click -> select module
-
     auto group = ::vsg::Group::create();
-    group->addChild(mainPart);
-    size = ::vsg::dvec3(markerSize, 0, markerSize);
+    double representationTop;   // on-screen height (above labelPivot) taken by the node representation
 
-    // Shared world anchor (just above the box) for the name label and every annotation. They differ
-    // only by an on-screen (screenOffset) amount, so the stack never overlaps regardless of zoom.
-    labelPivot = ::vsg::dvec3(0, 0, markerSize + 2);
-
-    if (displayModuleName) {
-        // The name label is a camera-facing, screen-constant-size billboard at the anchor (the bottom
-        // of the stack); annotations stack above it. characterSize 18 matches OSG (it no longer scales
-        // with the world, so the small value that used to compensate for that is gone).
-        const double nameSize = 18;
-        group->addChild(inet::vsg::createLabel(networkNode->getFullName(), Coord(0, 0, markerSize + 2), cFigure::BLACK, nameSize));
-        labelBaseHeight = nameSize + 8;  // reserve the name's on-screen height (+spacing) below annotations
+    // --- representation: the node's 2D icon (display string "i" tag) as a camera-facing, constant-size
+    //     textured billboard (matching the OSG visualizer); fall back to a colored box marker if there
+    //     is no icon or it cannot be loaded. (TODO: 3D model from the "osgModel"/"model" parameter.)
+    ::vsg::ref_ptr<::vsg::Data> iconImage;
+    const char *iconName = displayString.getTagArg("i", 0);
+    if (iconName && *iconName) {
+        try { iconImage = inet::vsg::createImage(inet::vsg::resolveImageResource(iconName, networkNode).c_str()); }
+        catch (const std::exception&) { iconImage = nullptr; }  // missing icon -> box fallback
     }
+    if (iconImage) {
+        const double iconSize = 40;            // nominal on-screen icon size (label units)
+        labelPivot = ::vsg::dvec3(0, 0, 0);    // anchor the whole stack at the node base; stack up in screen space
+        auto iconBillboard = inet::vsg::AutoScaleTransform::create();
+        iconBillboard->pivot = labelPivot;
+        iconBillboard->billboard = true;
+        iconBillboard->refDistance = inet::vsg::LABEL_AUTOSCALE_REF_DISTANCE;
+        iconBillboard->subgraphRequiresLocalFrustum = false;
+        iconBillboard->screenOffset = ::vsg::dvec3(0, iconSize / 2, 0);  // icon bottom sits at the node base
+        iconBillboard->setValue("omnetpp.object", (int64_t)(intptr_t)(cObject *)networkNode); // selectable
+        iconBillboard->addChild(inet::vsg::createTexturedQuad(iconImage, iconSize));
+        group->addChild(iconBillboard);
+        size = ::vsg::dvec3(iconSize, 0, iconSize);
+        representationTop = iconSize + 6;
+    }
+    else {
+        const double markerSize = 10;
+        cFigure::Color color("#4080C0");
+        // sit the marker ON the ground (bottom at z=0) rather than centered on the ground plane
+        auto box = inet::vsg::createBox(Coord(0, 0, markerSize / 2), Coord(markerSize, markerSize, markerSize), color);
+        box->setValue("omnetpp.object", (int64_t)(intptr_t)(cObject *)networkNode); // selectable: click -> select module
+        group->addChild(box);
+        size = ::vsg::dvec3(markerSize, 0, markerSize);
+        labelPivot = ::vsg::dvec3(0, 0, markerSize + 2);  // labels anchor at the box top (world)
+        representationTop = 0;
+    }
+
+    // The name label and all annotations are camera-facing, screen-constant-size billboards sharing
+    // labelPivot, separated only by an on-screen (screenOffset) amount, so the stack never overlaps
+    // regardless of zoom. The name is the bottom of the stack (just above the representation).
+    if (displayModuleName) {
+        const double nameSize = 18;
+        auto nameBillboard = inet::vsg::AutoScaleTransform::create();
+        nameBillboard->pivot = labelPivot;
+        nameBillboard->billboard = true;
+        nameBillboard->refDistance = inet::vsg::LABEL_AUTOSCALE_REF_DISTANCE;
+        nameBillboard->subgraphRequiresLocalFrustum = false;
+        nameBillboard->screenOffset = ::vsg::dvec3(0, representationTop, 0);
+        nameBillboard->addChild(inet::vsg::createText(networkNode->getFullName(), Coord::ZERO, cFigure::BLACK, nameSize));
+        group->addChild(nameBillboard);
+        labelBaseHeight = representationTop + nameSize + 8;  // annotations stack above the name
+    }
+    else
+        labelBaseHeight = representationTop;
 
     annotationNode = ::vsg::Group::create();
     group->addChild(annotationNode);
