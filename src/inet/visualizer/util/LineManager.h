@@ -69,6 +69,7 @@ class INET_API LineManager
 
     static LineManager *getCanvasLineManager(const cCanvas *canvas);
     static LineManager *getOsgLineManager(const cCanvas *canvas);
+    static LineManager *getVsgLineManager(const cCanvas *canvas);
 };
 
 } // namespace visualizer
