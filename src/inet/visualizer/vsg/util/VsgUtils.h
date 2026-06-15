@@ -79,7 +79,7 @@ ref_ptr<Node> createAnnulus(const Coord& center, double outerRadius, double inne
 // signal wavefront — reproduces the OSG signal GLSL shader). See the .cc for the alpha formula.
 ref_ptr<Node> createWaveRing(const Coord& center, double innerRadius, double outerRadius,
         const cFigure::Color& color, double waveLength, double waveAmplitude, double waveOffset,
-        double fadingFactor, double fadingDistance, int radialBands = 48, int segments = 100);
+        double fadingFactor, double fadingDistance, int segments = 100);
 ref_ptr<Node> createQuad(const Coord& min, const Coord& max, const cFigure::Color& color, double opacity = 1.0);
 ref_ptr<Node> createPolygon(const std::vector<Coord>& points, const cFigure::Color& color, double opacity = 1.0, const Coord& translation = Coord::ZERO);
 ref_ptr<Node> createArrowhead(const Coord& start, const Coord& end, const cFigure::Color& color, double width = 10.0, double height = 20.0, double opacity = 1.0);

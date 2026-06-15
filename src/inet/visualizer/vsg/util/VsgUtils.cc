@@ -136,24 +136,37 @@ ref_ptr<Node> createGeometry(ref_ptr<vec3Array> vertices, ref_ptr<vec3Array> nor
 // produce the gradient with no custom shader/uniforms (which don't work in the off-screen path).
 ref_ptr<Node> createWaveRing(const Coord& center, double innerRadius, double outerRadius,
         const cFigure::Color& color, double waveLength, double waveAmplitude, double waveOffset,
-        double fadingFactor, double fadingDistance, int radialBands, int segments)
+        double fadingFactor, double fadingDistance, int segments)
 {
-    if (outerRadius <= innerRadius || radialBands < 1 || segments < 3)
-        return Group::create();  // nothing visible yet
-    float cr = (float)color.red / 255.0f, cg = (float)color.green / 255.0f, cb = (float)color.blue / 255.0f;
     double a = waveAmplitude / 2.0;
     auto alphaAt = [&](double d) {
         double fade = (fadingDistance > 0 && fadingFactor > 1.0) ? std::pow(fadingFactor, -d / fadingDistance) : 1.0;
         double phi = (waveLength > 0) ? (d - waveOffset) / waveLength * 2.0 * M_PI : 0.0;
         return (float)std::max(0.0, std::min(1.0, fade * (1.0 - a + std::cos(phi) * a)));
     };
+    // Clamp the OUTER radius to where the distance fade renders the wave invisible (alpha < alphaFloor).
+    // A signal propagates at light speed, so its true radius reaches hundreds of km within a packet's
+    // duration; without clamping, the whole scene would fall inside one huge radial band and render as a
+    // flat opaque disc instead of a faded, rippling wavefront.
+    const double alphaFloor = 0.02;
+    double inner = std::max(0.0, innerRadius);
+    double outer = outerRadius;
+    if (fadingDistance > 0 && fadingFactor > 1.0)
+        outer = std::min(outer, fadingDistance * std::log(1.0 / alphaFloor) / std::log(fadingFactor));
+    if (outer <= inner || segments < 3)
+        return Group::create();  // fully faded out, or nothing to draw
+    // Adaptive radial subdivision: ~4 bands per wavelength so the ripple is resolved (bounded so a wide
+    // ring doesn't explode the vertex count).
+    double step = (waveLength > 0 ? waveLength : (outer - inner)) / 4.0;
+    int radialBands = std::max(4, std::min(200, (int)std::ceil((outer - inner) / std::max(1.0, step))));
+    float cr = (float)color.red / 255.0f, cg = (float)color.green / 255.0f, cb = (float)color.blue / 255.0f;
     int quads = radialBands * segments;
     auto vertices = vec3Array::create(quads * 6);
     auto colors = vec4Array::create(quads * 6);
     size_t k = 0;
     for (int i = 0; i < radialBands; i++) {
-        double r0 = innerRadius + (outerRadius - innerRadius) * i / radialBands;
-        double r1 = innerRadius + (outerRadius - innerRadius) * (i + 1) / radialBands;
+        double r0 = inner + (outer - inner) * i / radialBands;
+        double r1 = inner + (outer - inner) * (i + 1) / radialBands;
         ::vsg::vec4 c0(cr, cg, cb, alphaAt(r0)), c1(cr, cg, cb, alphaAt(r1));
         for (int j = 0; j < segments; j++) {
             double t0 = 2.0 * M_PI * j / segments, t1 = 2.0 * M_PI * (j + 1) / segments;
