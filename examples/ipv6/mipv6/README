@@ -1,3 +1,45 @@
-xMIPv6 is a simulation model that has been implemented with strict conformance 
-to IETF’s official specification for the Mobile IPv6 (MIPv6) protocol that 
-has been standardised in RFC 3775.
+Mobile IPv6 example
+===================
+
+A basic Mobile IPv6 (RFC 3775) scenario: a mobile node (MN) moves between its
+home network and a single foreign access network, registering a care-of address
+(CoA) with its home agent and exchanging traffic with one or more correspondent
+nodes (CN).
+
+The mobile node uses TurtleMobility to dwell in each network for a while and then
+dash to the other, looping forever, so the "at home / handing over / in the
+foreign network" phases are easy to follow in Qtenv. Its current status -- the
+associated access point and whether it is at home, away (tunneled via the home
+agent), or route-optimized -- is shown above its icon.
+
+Topology:
+
+    CN --- switch --- R_2 --- Home_Agent --- AP_Home   (home network)
+                       |
+                       +----- R_1 ---------- AP_1       (foreign network)
+
+R_2 is a backbone router interconnecting the home agent, the foreign access
+router and the correspondent nodes. Addresses and routes are assigned by the
+Ipv6NetworkConfigurator, configured with assignAddressesToHosts = false so that
+hosts -- in particular the mobile node -- autoconfigure their home and care-of
+addresses (SLAAC).
+
+Configurations:
+
+  Handover -- one correspondent node pings the mobile node's stable home address
+    throughout. The replies reach it directly while it is home, then via the
+    home-agent tunnel once it has registered a care-of address, and finally
+    route-optimized directly to the care-of address.
+
+  RouteOptimizationTwoCNs -- two correspondent nodes ping the mobile node while
+    it is in the foreign network; each flow independently runs the return-
+    routability procedure and route-optimizes with the mobile node.
+
+Run:
+
+    inet -u Cmdenv -c Handover
+
+or open omnetpp.ini in the IDE / Qtenv and pick a configuration.
+
+For a scenario with two foreign networks and two successive handovers, see the
+mipv6roaming example.
