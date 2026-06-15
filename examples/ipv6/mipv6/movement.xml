@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Movement script for the mobile node (TurtleMobility).
+
+  The node endlessly shuttles between its home network and the foreign network,
+  dwelling in each for a while and then dashing to the other, so the
+  "at home / handing over / in the foreign network" phases repeat and are easy to
+  watch (e.g. in Qtenv):
+
+      dwell in the HOME network
+      travel to the foreign network, handing over
+      dwell in the FOREIGN network
+      travel back home
+      ... and repeat forever
+
+  Each move gives its duration (t, in seconds) and lets TurtleMobility compute the
+  speed; the x coordinates match the AP positions in Mipv6Network.ned.
+-->
+<movement>
+    <set x="300" y="200"/>
+    <repeat>
+        <wait t="15"/>
+        <moveto x="600" y="200" t="5"/>
+        <wait t="15"/>
+        <moveto x="300" y="200" t="5"/>
+    </repeat>
+</movement>

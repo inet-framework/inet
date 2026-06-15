@@ -38,7 +38,7 @@ network Mipv6Network
         int total_cn;
         **.mgmt.numChannels = 5;
         **.ipv6.configurator.networkConfiguratorModule = "ipv6Configurator";
-        @display("bgb=799,698");
+        @display("bgb=800,700");
 
     submodules:
         ipv6Configurator: Ipv6NetworkConfigurator {
@@ -50,38 +50,38 @@ network Mipv6Network
         }
         radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
-                @display("p=100,200;is=s");
+                @display("p=100,250;is=s");
         }
         Home_Agent: HomeAgent6 {
             parameters:
-                @display("p=249,229;i=abstract/router");
+                @display("p=300,300;i=abstract/router");
         }
         R_1: Router6 {
             parameters:
-                @display("p=566,227");
+                @display("p=600,300");
         }
         R_2: Router6 {
             parameters:
-                @display("p=406,355");
+                @display("p=450,400");
         }
         MN[total_mn]: WirelessHost6 {
             parameters:
-                @display("p=220,404");
+                @display("p=300,200");
         }
         CN[total_cn]: CorrespondentNode6 {
-            @display("p=405,595,r,50");
+            @display("p=450,600,r,50");
         }
         AP_Home: AccessPoint {
             parameters:
-                @display("p=249,172;i=device/accesspoint_s");
+                @display("p=300,150;i=device/accesspoint_s");
         }
         AP_1: AccessPoint {
             parameters:
-                @display("p=566,172;i=device/accesspoint_s");
+                @display("p=600,150;i=device/accesspoint_s");
         }
         switch: EthernetSwitch {
             parameters:
-                @display("p=405,467;i=device/hub_s");
+                @display("p=450,500;i=device/hub_s");
         }
 
     connections allowunconnected:
@@ -99,4 +99,3 @@ network Mipv6Network
 
         AP_1.ethg++ <--> ethernetline <--> R_1.ethg++;
 }
-
