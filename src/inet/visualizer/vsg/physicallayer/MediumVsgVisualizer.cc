@@ -274,24 +274,27 @@ void MediumVsgVisualizer::refreshRingTransmissionNode(const ITransmission *trans
     auto ringGroup = static_cast<::vsg::Group *>(transform->children[0].get());
     auto annulusHolder = static_cast<::vsg::Group *>(ringGroup->children[0].get());
 
-    // Rebuild annulus geometry with current radii.
-    // VSG bakes geometry: clear holder and re-add with updated outer/inner radius.
+    // Rebuild the wavefront geometry with the current radii (VSG bakes geometry, so clear + re-add).
     annulusHolder->children.clear();
 
-    if (startRadius > 0) {
-        cFigure::Color color = signalColorSet.getColor(transmission->getId());
-        // Wave-fading factor dampens the ripple amplitude when the animation runs much faster than the
-        // wave propagates (matches the OSG uniform). waveOffset = startRadius puts a crest at the
-        // leading edge, so the ripple animates outward as the wavefront grows.
-        double animSpeed = getSimulation()->getEnvir()->getAnimationSpeed();
-        double waveFadingFactor = 1.0;
-        if (animSpeed > 0 && signalWaveFadingAnimationSpeedFactor > 0 && !std::isnan(signalPropagationAnimationSpeed))
-            waveFadingFactor = std::min(1.0, signalPropagationAnimationSpeed / animSpeed / signalWaveFadingAnimationSpeedFactor);
-        auto ring = inet::vsg::createWaveRing(Coord::ZERO, /*inner*/ endRadius, /*outer*/ startRadius, color,
-                signalWaveLength, signalWaveAmplitude * waveFadingFactor, /*waveOffset*/ startRadius,
-                signalFadingFactor, signalFadingDistance);
-        annulusHolder->addChild(ring);
-    }
+    // The signal is drawn as OPAQUE thin expanding circles at the wavefront edges, not a faded/
+    // wave-modulated translucent disc: the off-screen backend cannot composite transparency over opaque
+    // geometry (a translucent overlay reads the background, not the floor behind it), so any alpha-based
+    // signal renders as a dark blob. Opaque circles avoid that entirely. (createWaveRing remains in
+    // VsgUtils for when the backend transparency bug is fixed.)
+    //
+    // Bound the drawn radius to the transmitter's interference range: a signal propagates at light
+    // speed, so within a packet's duration its radius reaches hundreds of km — past the range there is
+    // nothing meaningful to show, and an off-scene circle would just clutter the horizon.
+    double maxRadius = 1e18;
+    if (auto transmitterRadio = transmission->getTransmitterRadio())
+        maxRadius = radioMedium->getMediumLimitCache()->getMaxInterferenceRange(transmitterRadio).get();
+
+    cFigure::Color color = signalColorSet.getColor(transmission->getId());
+    if (startRadius > 0 && startRadius <= maxRadius)  // leading edge
+        annulusHolder->addChild(inet::vsg::createCircle(Coord::ZERO, startRadius, color, cFigure::LINE_SOLID, 2.0, 100));
+    if (endRadius > 0 && endRadius <= maxRadius)       // trailing edge (after the transmission ends)
+        annulusHolder->addChild(inet::vsg::createCircle(Coord::ZERO, endRadius, color, cFigure::LINE_SOLID, 2.0, 100));
 
     // Update label position (placed at edge of inner radius in the direction of transmission->getId()).
     double phi = transmission->getId();
