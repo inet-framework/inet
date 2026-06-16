@@ -53,6 +53,22 @@ simple Mldv1 extends SimpleModule like IMld
         // RFC 2710 §7.2 Unsolicited Report Interval: time between unsolicited
         // Multicast Listener Reports sent on join (default 10s per RFC 2710).
         double unsolicitedReportInterval @unit(s) = default(10s);
+        // RFC 2710 §7.3 Robustness Variable: tunable for expected packet loss.
+        int robustnessVariable = default(2);
+        // RFC 2710 §7.4 Query Interval: time between periodic General Queries.
+        double queryInterval @unit(s) = default(125s);
+        // RFC 2710 §7.5 Query Response Interval: max response delay for General Queries (also used as maxRespDelay).
+        double queryResponseInterval @unit(s) = default(10s);
+        // RFC 2710 §7.1 Multicast Listener Interval: duration a router keeps state without a Report.
+        double multicastListenerInterval @unit(s) = default((robustnessVariable * queryInterval) + queryResponseInterval);
+        // RFC 2710 §7.6.1 Startup Query Interval: interval between startup queries.
+        double startupQueryInterval @unit(s) = default(queryInterval / 4);
+        // RFC 2710 §7.6.2 Startup Query Count: number of startup General Queries.
+        int startupQueryCount = default(robustnessVariable);
+        // RFC 2710 §7.8 Last Listener Query Interval: time between MAS Queries on Done.
+        double lastListenerQueryInterval @unit(s) = default(1s);
+        // RFC 2710 §7.9 Last Listener Query Count: number of MAS Queries on Done.
+        int lastListenerQueryCount = default(robustnessVariable);
         @display("i=block/cogwheel");
 
     gates:

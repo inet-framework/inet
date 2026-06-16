@@ -35,9 +35,12 @@ class INET_API Mldv1 : public OperationalBase, public cListener
         MLD_HGS_IDLE_LISTENER,
     };
 
-    // Timer kind constants (router timer kinds added in Phase 4)
+    // Timer kind constants (RFC 2710 router timer kinds added here)
     enum MldTimerKind {
         MLD_HOSTGROUP_TIMER = 1,
+        MLD_QUERY_TIMER     = 2,    // periodic General Query timer on RouterInterfaceData
+        MLD_LEAVE_TIMER     = 3,    // group membership timer on RouterGroupData (→ NO_LISTENERS)
+        MLD_REXMT_TIMER     = 4,    // last-listener retransmit timer on RouterGroupData
     };
 
     struct HostGroupData {
@@ -68,7 +71,43 @@ class INET_API Mldv1 : public OperationalBase, public cListener
         MldHostTimerContext(NetworkInterface *ie, HostGroupData *hostGroup) : ie(ie), hostGroup(hostGroup) {}
     };
 
-    // --- Phase 4: router-side declarations will be added here ---
+    // --- Router/querier state machine (RFC 2710 §6) ---
+
+    // RFC 2710 §6 router group state names
+    enum RouterGroupState {
+        MLD_RGS_NO_LISTENERS_PRESENT,
+        MLD_RGS_LISTENERS_PRESENT,
+        MLD_RGS_CHECKING_LISTENERS,
+    };
+
+    struct RouterGroupData {
+        Mldv1 *owner;
+        Ipv6Address groupAddr;
+        RouterGroupState state;
+        cMessage *timer;        // group membership timer (→ leave/group-timer expiry → NO_LISTENERS)
+        cMessage *rexmtTimer;   // last-listener retransmit timer (used in CHECKING_LISTENERS)
+
+        RouterGroupData(Mldv1 *owner, const Ipv6Address& group);
+        virtual ~RouterGroupData();
+    };
+    typedef std::map<Ipv6Address, RouterGroupData *> GroupToRouterDataMap;
+
+    struct RouterInterfaceData {
+        Mldv1 *owner;
+        GroupToRouterDataMap groups;
+        cMessage *mldQueryTimer;    // periodic General Query timer
+
+        RouterInterfaceData(Mldv1 *owner);
+        virtual ~RouterInterfaceData();
+    };
+
+    struct MldRouterTimerContext {
+        NetworkInterface *ie;
+        RouterGroupData *routerGroup;
+        MldRouterTimerContext(NetworkInterface *ie, RouterGroupData *routerGroup) : ie(ie), routerGroup(routerGroup) {}
+    };
+
+    typedef std::map<int, RouterInterfaceData *> InterfaceToRouterDataMap;
 
   protected:
     ModuleRefByPar<IInterfaceTable> ift;
@@ -87,17 +126,38 @@ class INET_API Mldv1 : public OperationalBase, public cListener
     // Host parameters
     double unsolicitedReportInterval = 10; // RFC 2710 §7.2 default 10s
 
+    // Router parameters (RFC 2710 §7)
+    int robustness = 2;                        // RFC 2710 §7.3
+    double queryInterval = 125;                // RFC 2710 §7.4
+    double queryResponseInterval = 10;         // RFC 2710 §7.5
+    double multicastListenerInterval = 260;    // RFC 2710 §7.1 (= robustness*queryInterval + queryResponseInterval)
+    double lastListenerQueryInterval = 1;      // RFC 2710 §7.8
+    int lastListenerQueryCount = 2;            // RFC 2710 §7.9 (= robustness)
+    double startupQueryInterval = 31.25;       // RFC 2710 §7.6.1 (= queryInterval / 4)
+    int startupQueryCount = 2;                 // RFC 2710 §7.6.2 (= robustness)
+
     // Group counters
     int numGroups = 0;
     int numHostGroups = 0;
+    int numRouterGroups = 0;
 
     // Message counters
     int numReportsSent = 0;
     int numReportsRecv = 0;
     int numDonesSent = 0;
+    int numDonesRecv = 0;
+    int numQueriesSent = 0;
+    int numQueriesRecv = 0;
+    int numGeneralQueriesSent = 0;
+    int numGeneralQueriesRecv = 0;
+    int numGroupSpecificQueriesSent = 0;
+    int numGroupSpecificQueriesRecv = 0;
 
     // Per-interface host state (keyed by NetworkInterface::getInterfaceId())
     InterfaceToHostDataMap hostData;
+
+    // Per-interface router state (keyed by NetworkInterface::getInterfaceId())
+    InterfaceToRouterDataMap routerData;
 
   protected:
     virtual bool isInitializeStage(int stage) const override { return stage == INITSTAGE_NETWORK_LAYER; }
@@ -147,6 +207,30 @@ class INET_API Mldv1 : public OperationalBase, public cListener
     // MLD message dispatch and IP send helper
     virtual void processMldMessage(Packet *packet);
     virtual void sendToIPv6(Packet *msg, NetworkInterface *ie, const Ipv6Address& dest);
+
+    // Router interface lifecycle
+    virtual void configureInterface(NetworkInterface *ie);
+    virtual void deleteRouterInterfaceData(int interfaceId);
+
+    // Router timer handlers
+    virtual void processQueryTimer(cMessage *msg);
+    virtual void processLeaveTimer(cMessage *msg);
+    virtual void processRexmtTimer(cMessage *msg);
+
+    // Router outbound query
+    virtual void sendQuery(NetworkInterface *ie, const Ipv6Address& groupAddr, double maxRespTime);
+
+    // Router group-data CRUD
+    virtual RouterGroupData *createRouterGroupData(NetworkInterface *ie, const Ipv6Address& group);
+    virtual RouterGroupData *getRouterGroupData(NetworkInterface *ie, const Ipv6Address& group);
+    virtual void deleteRouterGroupData(NetworkInterface *ie, const Ipv6Address& group);
+
+    // Router interface-data CRUD
+    virtual RouterInterfaceData *getRouterInterfaceData(NetworkInterface *ie);
+    virtual RouterInterfaceData *createRouterInterfaceData();
+
+    // Router Done handler
+    virtual void processDone(NetworkInterface *ie, Packet *packet);
 };
 
 } // namespace inet
