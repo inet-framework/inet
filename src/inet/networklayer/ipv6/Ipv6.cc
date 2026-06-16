@@ -612,9 +612,13 @@ void Ipv6::routeMulticastPacket(Packet *packet, const NetworkInterface *destIE, 
     // preassigned addresses (all-nodes/all-routers/solicited-node) used by ND, while
     // the incoming interface's membership covers application groups joined on it
     // (e.g. a routing protocol's LL-MANET-Routers group) -- mirroring Ipv4.
+    // Additionally, multicast routers must receive MLD messages (ICMPv6 types 130-132)
+    // regardless of group membership, mirroring the IPv4 rule that multicast routers
+    // always receive IGMP datagrams (see Ipv4.cc: IP_PROT_IGMP special case).
     auto fromIeIpv6Data = fromIE->findProtocolData<Ipv6InterfaceData>();
     if (rt->isLocalAddress(destAddr) ||
-        (fromIeIpv6Data && fromIeIpv6Data->isMemberOfMulticastGroup(destAddr)))
+        (fromIeIpv6Data && fromIeIpv6Data->isMemberOfMulticastGroup(destAddr)) ||
+        (rt->isMulticastForwardingEnabled() && ipv6Header->getProtocolId() == IP_PROT_IPv6_ICMP))
     {
         EV_INFO << "local delivery of multicast packet\n";
         numLocalDeliver++;

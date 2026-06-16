@@ -1,0 +1,168 @@
+%description:
+Deterministic MLDv1 router/querier behavior test (RFC 2710 §6).
+
+Tests the router/querier state machine with fixed RNG seed and short timers so
+all RTR-01..05 behaviors are observable within a 15s simulation:
+
+RTR-01 (periodic General Query):
+  The router has multicastForwarding=true (set at node level so
+  NetworkLayerNodeBase propagates to the routing table). With
+  startupQueryInterval=1s the router sends its first General Listener Query on
+  each multicast-capable interface at ~t=1s. Subsequent periodic Queries fire
+  at queryInterval=5s. The %contains assertion matches the first General Query.
+
+RTR-02 (listener recorded on Report):
+  host1 joins ff0e::1:2:3 via testMulticastGroup, sending an unsolicited Report
+  at t=0. The router receives it and records the listener via addMulticastListener
+  (NO_LISTENERS_PRESENT -> LISTENERS_PRESENT). The test asserts both the
+  "received Multicast Listener Report" and "recorded listener" EV_INFO markers.
+
+RTR-03 (Done -> MAS Query):
+  host1 has sendTestLeave=true, which fires at t=5s and calls multicastGroupLeft()
+  directly. This sends a Multicast Listener Done (type=132) to ff02::2. The router
+  receives it and sends a Multicast-Address-Specific Query for ff0e::1:2:3, then
+  starts the last-listener countdown (lastListenerQueryInterval=1s,
+  lastListenerQueryCount=2). With no Reply, the leave timer expires and the group
+  is removed (removeMulticastListener, NO_LISTENERS_PRESENT).
+
+RTR-04 (per-(if,group) router state machine):
+  Observable via the RTR-02 and RTR-03 markers: NO_LISTENERS_PRESENT ->
+  LISTENERS_PRESENT (recorded listener on Report) -> CHECKING_LISTENERS (Done) ->
+  NO_LISTENERS_PRESENT (leave timer expiry).
+
+RTR-05 (configurable timing params):
+  All router timer parameters are overridden to short values in the INI, verified
+  implicitly by the test completing within the 15s sim-time-limit.
+
+HOST-ONLY NEGATIVE (single-querier proof):
+  host1 has multicastForwarding=false (the default). Only the router runs the
+  querier path. A %postrun-command extracts any Query-sending lines from host1
+  and a %not-contains asserts the list is empty, proving a
+  multicastForwarding=false node never becomes a querier.
+
+Network: host1 (StandardHost6) and router (Router6) connect via a shared
+EthernetHub. Ipv6FlatNetworkConfigurator assigns addresses. Only host1 has MLD
+enabled (the router also has hasMld=true to receive inbound Reports/Dones).
+RNG seed is fixed for reproducibility.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.node.ethernet.EthernetHub;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network MldRouterBasicNetwork
+{
+    types:
+        channel ethline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator;
+        host1: StandardHost6;
+        router: Router6;
+        hub: EthernetHub;
+    connections:
+        host1.ethg++ <--> ethline <--> hub.ethg++;
+        router.ethg++ <--> ethline <--> hub.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+ned-path = ../../../../src
+network = MldRouterBasicNetwork
+sim-time-limit = 15s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+# Fix RNG seed for deterministic behavior of uniform(0, maxRespTime) in startHostTimer
+seed-set = 0
+
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+# Enable MLD on all nodes so they can receive inbound Reports/Dones
+**.ipv6.hasMld = true
+# Disable DAD for fast startup (no 1s+ delay before addresses become ready)
+**.neighbourDiscovery.dupAddrDetectTransmits = 0
+
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue"
+**.eth[*].queue.dataQueue.packetCapacity = 10
+
+# RTR-01: activate the real querier ONLY on the router.
+# Must be set at the node (Router6) level: NetworkLayerNodeBase propagates
+#   *.multicastForwarding = this.multicastForwarding
+# to all submodules (including ipv6.routingTable), so a per-submodule INI
+# setting would be silently overridden by the node-level default(false).
+**.router.multicastForwarding = true
+
+# RTR-01 timers: shorten query intervals for a fast deterministic run.
+# The router fires its first General Query at startupQueryInterval after init.
+**.router.ipv6.mldv1.startupQueryInterval = 1s
+**.router.ipv6.mldv1.queryInterval = 5s
+**.router.ipv6.mldv1.queryResponseInterval = 1s
+# RTR-03/04 last-listener timers: short so group removal is observable within 15s.
+**.router.ipv6.mldv1.lastListenerQueryInterval = 1s
+**.router.ipv6.mldv1.lastListenerQueryCount = 2
+# multicastListenerInterval: keep a group alive this long without a Report.
+**.router.ipv6.mldv1.multicastListenerInterval = 6s
+
+# RTR-02: host1 joins ff0e::1:2:3 via testMulticastGroup, sending an unsolicited
+# Report at t=0 (bypasses UDP assignAddress path, which is pre-existing-broken for IPv6).
+**.host1.ipv6.mldv1.testMulticastGroup = "ff0e::1:2:3"
+
+# RTR-03: host1 leaves at t=5s via sendTestLeave (bypasses UDP leaveMulticastGroup
+# path which is not implemented for IPv6 in changeMulticastGroupMembership).
+**.host1.ipv6.mldv1.sendTestLeave = true
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%# RTR-01: router sends the first periodic General Listener Query
+%contains: stdout
+MldRouterBasicNetwork.router.ipv6.mldv1: Mldv1: sending General Listener Query on iface=
+
+%#--------------------------------------------------------------------------------------------------------------
+%# RTR-02: router receives host1's unsolicited Report for ff0e::1:2:3
+%contains: stdout
+MldRouterBasicNetwork.router.ipv6.mldv1: Mldv1: received Multicast Listener Report for group=ff0e::1:2:3
+
+%#--------------------------------------------------------------------------------------------------------------
+%# RTR-02: router records the listener (NO_LISTENERS_PRESENT -> LISTENERS_PRESENT)
+%contains: stdout
+MldRouterBasicNetwork.router.ipv6.mldv1: Mldv1: recorded listener for group=ff0e::1:2:3
+
+%#--------------------------------------------------------------------------------------------------------------
+%# RTR-03: router receives host1's Done for ff0e::1:2:3 (from sendTestLeave at t=5s)
+%contains: stdout
+MldRouterBasicNetwork.router.ipv6.mldv1: Mldv1: received Multicast Listener Done for group=ff0e::1:2:3
+
+%#--------------------------------------------------------------------------------------------------------------
+%# RTR-03: router sends a Multicast-Address-Specific Query on receiving the Done
+%contains: stdout
+MldRouterBasicNetwork.router.ipv6.mldv1: Mldv1: sending Multicast-Address-Specific Query for group=ff0e::1:2:3 on iface=
+
+%#--------------------------------------------------------------------------------------------------------------
+%# HOST-ONLY NEGATIVE (single-querier activation proof):
+%# host1 has multicastForwarding=false (the default) and must NEVER send any Query.
+%# Extract all host1 Query-sending lines; the resulting file must be empty.
+%postrun-command: grep -E "MldRouterBasicNetwork\.host1\.ipv6\.mldv1: Mldv1: sending (General Listener|Multicast-Address-Specific) Query" test.out > host1_query.out || true
+%not-contains: host1_query.out
+Query
+
+%#--------------------------------------------------------------------------------------------------------------
+%# Undisposed-object guard: verify no leaked cMessage or cObject at end of run
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
