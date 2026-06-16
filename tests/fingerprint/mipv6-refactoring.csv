@@ -29,8 +29,16 @@
 /examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Host_Unav_ipv6 -r 0,     10s,             901c-6e9a/~tNlb, PASS,
 
 # DYMO with IPv6
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv6 -r 0,                   10s,             1839-99ed/~tNlb, PASS,  wireless adhoc
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv6 -r 0,              10s,             1839-99ed/~tNlb, PASS,  wireless adhoc
+# ~tNlb re-recorded (1839-99ed -> 84e9-900a) when IPv6 multicast forwarding was added.
+# Cause: Ipv6 now delivers a received multicast datagram to the upper layers when the
+# arrival interface has joined the group (mirroring Ipv4), instead of only for the
+# preassigned ND addresses recognised by isLocalAddress(). DYMO joins LL-MANET-Routers
+# (ff02::6d) and addresses its RREQ/RREP/RERR there; previously those packets reached the
+# neighbours' IPv6 layer but were dropped before DYMO, so route discovery never received
+# them. They are now delivered, so DYMO actually processes them -- changing the on-wire
+# control traffic (network-content ingredient ~tNlb). Deterministic across repeated runs.
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv6 -r 0,                   10s,             84e9-900a/~tNlb, PASS,  wireless adhoc
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv6 -r 0,              10s,             84e9-900a/~tNlb, PASS,  wireless adhoc
 
 # EIGRP with IPv6
 /examples/eigrp/testing_scenario6/,    -f omnetpp.ini -c EIGRP-IPv6_exp1_bandwidth-change -r 0,              3min,         c645-565e/~tNlb,  PASS,  eigrp EthernetMac

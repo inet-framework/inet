@@ -15,6 +15,7 @@
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
+#include "inet/networklayer/ipv6/Ipv6MulticastRoute.h"
 #include "inet/networklayer/ipv6/Ipv6Route.h"
 
 namespace inet {
@@ -72,6 +73,10 @@ class INET_API Ipv6RoutingTable : public SimpleModule, public IRoutingTable, pro
     typedef std::vector<Ipv6Route *> RouteList;
     RouteList routeList;
 
+    // Multicast route array, sorted by prefixLength desc, origin asc, group, metric asc
+    typedef std::vector<Ipv6MulticastRoute *> MulticastRouteVector;
+    MulticastRouteVector multicastRoutes;
+
   protected:
     // creates a new empty route, factory method overriden in subclasses that use custom routes
     virtual Ipv6Route *createNewRoute(Ipv6Address destPrefix, int prefixLength, IRoute::SourceType src);
@@ -108,6 +113,11 @@ class INET_API Ipv6RoutingTable : public SimpleModule, public IRoutingTable, pro
     void internalAddRoute(Ipv6Route *route);
     Ipv6Route *internalRemoveRoute(Ipv6Route *route);
     RouteList::iterator internalDeleteRoute(RouteList::iterator it);
+
+    // helper for sorting the multicast routing table, used by addMulticastRoute()
+    static bool multicastRouteLessThan(const Ipv6MulticastRoute *a, const Ipv6MulticastRoute *b);
+    void internalAddMulticastRoute(Ipv6MulticastRoute *entry);
+    Ipv6MulticastRoute *internalRemoveMulticastRoute(Ipv6MulticastRoute *entry);
 
   public:
     Ipv6RoutingTable();
@@ -333,6 +343,49 @@ class INET_API Ipv6RoutingTable : public SimpleModule, public IRoutingTable, pro
     virtual Ipv6Route *getRoute(int i) const override;
     //@}
 
+    /** @name Multicast routing table operations */
+    //@{
+    /**
+     * Returns true if the address is a multicast group this node is a member of.
+     */
+    virtual bool isLocalMulticastAddress(const Ipv6Address& dest) const;
+
+    /**
+     * Returns the longest-prefix-matching multicast route for the given
+     * (origin, group) pair, or nullptr if there is no matching route.
+     */
+    virtual Ipv6MulticastRoute *findBestMatchingMulticastRoute(const Ipv6Address& origin, const Ipv6Address& group) const;
+
+    /**
+     * Returns the kth multicast route, or nullptr if k is out of range.
+     */
+    virtual Ipv6MulticastRoute *getMulticastRoute(int k) const override { return k >= 0 && static_cast<size_t>(k) < multicastRoutes.size() ? multicastRoutes[k] : nullptr; }
+
+    /**
+     * Adds the given multicast route to the routing table. Ownership is
+     * transferred to the routing table.
+     */
+    virtual void addMulticastRoute(Ipv6MulticastRoute *entry);
+
+    /**
+     * Removes the given multicast route from the routing table, and returns it.
+     * nullptr is returned if the route was not in the routing table.
+     */
+    virtual Ipv6MulticastRoute *removeMulticastRoute(Ipv6MulticastRoute *entry);
+
+    /**
+     * Deletes the given multicast route from the routing table.
+     * Returns true if it was deleted, false if it was not found.
+     */
+    virtual bool deleteMulticastRoute(Ipv6MulticastRoute *entry);
+
+    /**
+     * To be called from multicast route objects whenever a field changes.
+     * Used for maintaining internal data structures and firing notifications.
+     */
+    virtual void multicastRouteChanged(Ipv6MulticastRoute *entry, int fieldCode);
+    //@}
+
     /** @name MIPv6 routing table operations */
     //@{
     /**
@@ -396,17 +449,16 @@ class INET_API Ipv6RoutingTable : public SimpleModule, public IRoutingTable, pro
     virtual IRoute *findBestMatchingRoute(const L3Address& dest) const override { return const_cast<Ipv6Route *>(doLongestPrefixMatch(dest.toIpv6())); }
     virtual NetworkInterface *getOutputInterfaceForDestination(const L3Address& dest) const override { const Ipv6Route *e = doLongestPrefixMatch(dest.toIpv6()); return e ? e->getInterface() : nullptr; }
     virtual L3Address getNextHopForDestination(const L3Address& dest) const override { const Ipv6Route *e = doLongestPrefixMatch(dest.toIpv6()); return e ? e->getNextHopAsGeneric() : L3Address(); }
-    virtual bool isLocalMulticastAddress(const L3Address& dest) const override { return false; /*TODO isLocalMulticastAddress(dest.toIPv6());*/ }
-    virtual IMulticastRoute *findBestMatchingMulticastRoute(const L3Address& origin, const L3Address& group) const override { return nullptr; /*TODO findBestMatchingMulticastRoute(origin.toIPv6(), group.toIPv6());*/ }
+    virtual bool isLocalMulticastAddress(const L3Address& dest) const override { return isLocalMulticastAddress(dest.toIpv6()); }
+    virtual IMulticastRoute *findBestMatchingMulticastRoute(const L3Address& origin, const L3Address& group) const override { return findBestMatchingMulticastRoute(origin.toIpv6(), group.toIpv6()); }
     virtual IRoute *getDefaultRoute() const override { return nullptr; /*TODO getDefaultRoute();*/ }
     virtual void addRoute(IRoute *entry) override { addRoutingProtocolRoute(check_and_cast<Ipv6Route *>(entry)); } // TODO contrast that with addStaticRoute()!
     virtual IRoute *removeRoute(IRoute *entry) override { return removeRoute(check_and_cast<Ipv6Route *>(entry)); }
     virtual bool deleteRoute(IRoute *entry) override { return deleteRoute(check_and_cast<Ipv6Route *>(entry)); }
-    virtual IMulticastRoute *getMulticastRoute(int i) const override { return nullptr; /*TODO*/ }
-    virtual int getNumMulticastRoutes() const override { return 0; /*TODO getNumMulticastRoutes();*/ }
-    virtual void addMulticastRoute(IMulticastRoute *entry) override { /*TODO addMulticastRoute(entry);*/ }
-    virtual IMulticastRoute *removeMulticastRoute(IMulticastRoute *entry) override { /*TODO removeMulticastRoute(entry);*/ return entry; }
-    virtual bool deleteMulticastRoute(IMulticastRoute *entry) override { return false; /*TODO deleteMulticastRoute(entry);*/ }
+    virtual int getNumMulticastRoutes() const override { return multicastRoutes.size(); }
+    virtual void addMulticastRoute(IMulticastRoute *entry) override { addMulticastRoute(check_and_cast<Ipv6MulticastRoute *>(entry)); }
+    virtual IMulticastRoute *removeMulticastRoute(IMulticastRoute *entry) override { return removeMulticastRoute(check_and_cast<Ipv6MulticastRoute *>(entry)); }
+    virtual bool deleteMulticastRoute(IMulticastRoute *entry) override { return deleteMulticastRoute(check_and_cast<Ipv6MulticastRoute *>(entry)); }
     virtual IRoute *createRoute() override { return new Ipv6Route(Ipv6Address(), 0, IRoute::MANUAL); }
 
     /**

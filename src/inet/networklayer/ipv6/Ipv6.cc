@@ -32,6 +32,7 @@
 #include "inet/networklayer/ipv6/Ipv6ExtHeaderTag_m.h"
 #include "inet/networklayer/ipv6/Ipv6ExtensionHeaders.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
+#include "inet/networklayer/ipv6/Ipv6MulticastRoute.h"
 #include "inet/networklayer/ipv6/Mipv6InterfaceData.h"
 
 
@@ -580,127 +581,128 @@ void Ipv6::resolveMACAddressAndSendPacket(Packet *packet, int interfaceId, Ipv6A
 void Ipv6::routeMulticastPacket(Packet *packet, const NetworkInterface *destIE, const NetworkInterface *fromIE, bool fromHL)
 {
     auto ipv6Header = packet->peekAtFront<Ipv6Header>();
-    const Ipv6Address& destAddr = ipv6Header->getDestAddress();
+    Ipv6Address srcAddr = ipv6Header->getSrcAddress();
+    Ipv6Address destAddr = ipv6Header->getDestAddress();
+    ASSERT(destAddr.isMulticast());
 
     EV_INFO << "destination address " << destAddr << " is multicast, doing multicast routing\n";
     numMulticast++;
 
-    // if received from the network...
-    if (fromIE != nullptr) {
-        ASSERT(!fromHL);
-        // deliver locally
-        if (rt->isLocalAddress(destAddr)) {
-            EV_INFO << "local delivery of multicast packet\n";
-            numLocalDeliver++;
-            localDeliver(packet->dup(), fromIE);
+    // Locally-originated multicast without a pinned output interface: send it onto
+    // the local link(s). When the upper layer pins a destIE, datagramLocalOut() sends
+    // the packet out directly and never reaches this method, so fromIE/destIE are null
+    // here. A source host typically has a single non-loopback interface, so this just
+    // puts the datagram on its link; multi-homed senders emit on each multicast link.
+    if (fromHL) {
+        ASSERT(fromIE == nullptr);
+        EV_INFO << "sending locally-originated multicast datagram out on local interfaces\n";
+        for (int i = 0; i < ift->getNumInterfaces(); i++) {
+            NetworkInterface *ie = ift->getInterface(i);
+            if (!ie->isLoopback() && ie->isMulticast())
+                fragmentPostRouting(packet->dup(), ie, destAddr.mapToMulticastMacAddress(), true);
         }
-
-        // if ipv6Header arrived from input gate and IP forwarding is off, delete datagram
-        if (!rt->isRouter()) {
-            EV_INFO << "forwarding is off\n";
-            delete packet;
-            return;
-        }
-
-        // make sure scope of multicast address is large enough to be forwarded to other links
-        if (destAddr.getMulticastScope() <= 2) {
-            EV_INFO << "multicast dest address is link-local (or smaller) scope\n";
-            delete packet;
-            return;
-        }
-
-        // hop counter decrement: only if datagram arrived from network, and will be
-        // sent out to the network (hoplimit check will be done just before sending
-        // out datagram)
-        packet->trim();
-        ipv6Header = nullptr;
-        const auto& newIpv6Header = removeNetworkProtocolHeader<Ipv6Header>(packet);
-        newIpv6Header->setHopLimit(ipv6Header->getHopLimit() - 1);
-        insertNetworkProtocolHeader(packet, Protocol::ipv6, newIpv6Header);
-        ipv6Header = newIpv6Header;
-    }
-
-    // for now, we just send it out on every interface except on which it came. FIXME better!!!
-    EV_INFO << "sending out datagram on every interface (except incoming one)\n";
-    for (int i = 0; i < ift->getNumInterfaces(); i++) {
-        NetworkInterface *ie = ift->getInterface(i);
-        if (fromIE != ie && !ie->isLoopback())
-            fragmentPostRouting(packet->dup(), ie, ipv6Header->getDestAddress().mapToMulticastMacAddress(), fromHL);
-    }
-    delete packet;
-
-/* FIXME implement handling of multicast
-
-    According to Gopi: "multicast routing table" should map
-       srcAddr+multicastDestAddr to a set of next hops (interface+nexthopAddr)
-    Where srcAddr is the multicast server, and destAddr sort of narrows it down to a given stream
-
-    // FIXME multicast-->tunneling link (present in original IPSuite) missing from here
-
-    // DVMRP: process datagram only if sent locally or arrived on the shortest
-    // route (provided routing table already contains srcAddr); otherwise
-    // discard and continue.
-    int inputGateIndex = datagram->getArrivalGate() ? datagram->getArrivalGate()->getIndex() : -1;
-    int shortestPathInputGateIndex = rt->outputGateIndexNo(datagram->getSrcAddress());
-    if (inputGateIndex!=-1 && shortestPathInputGateIndex!=-1 && inputGateIndex!=shortestPathInputGateIndex)
-    {
-        // FIXME count dropped
-        EV << "Packet dropped.\n";
-        delete datagram;
+        delete packet;
         return;
     }
 
-    // check for local delivery
-    Ipv6Address destAddress = datagram->getDestAddress();
-    if (rt->isLocalMulticastAddress(destAddress))
+    // arrived from the network
+    ASSERT(fromIE != nullptr);
+
+    // Deliver locally if we belong to the group. isLocalAddress() covers the
+    // preassigned addresses (all-nodes/all-routers/solicited-node) used by ND, while
+    // the incoming interface's membership covers application groups joined on it
+    // (e.g. a routing protocol's LL-MANET-Routers group) -- mirroring Ipv4.
+    auto fromIeIpv6Data = fromIE->findProtocolData<Ipv6InterfaceData>();
+    if (rt->isLocalAddress(destAddr) ||
+        (fromIeIpv6Data && fromIeIpv6Data->isMemberOfMulticastGroup(destAddr)))
     {
-        IPv6Datagram *datagramCopy = datagram->dup();
-
-        // FIXME code from the Mpls model: set packet dest address to routerId (???)
-        datagramCopy->setDestAddress(rt->getRouterId());
-
-        localDeliver(datagramCopy, fromIE);
+        EV_INFO << "local delivery of multicast packet\n";
+        numLocalDeliver++;
+        localDeliver(packet->dup(), fromIE);
     }
 
-    // forward datagram only if IP forward is enabled, or sent locally
-    if (inputGateIndex!=-1 && !rt->isRouter())
-    {
-        delete datagram;
+    // forward only if forwarding is enabled on this node
+    if (!rt->isRouter()) {
+        EV_INFO << "forwarding is off\n";
+        delete packet;
         return;
     }
 
-    MulticastRoutes routes = rt->getMulticastRoutesFor(destAddress);
-    if (routes.size()==0)
-    {
-        // no destination: delete datagram
-        delete datagram;
+    // link-local (or smaller) scope multicast is never forwarded off-link
+    if (destAddr.getMulticastScope() <= 2) {
+        EV_INFO << "multicast dest address is link-local (or smaller) scope, not forwarding\n";
+        delete packet;
+        return;
     }
-    else
-    {
-        // copy original datagram for multiple destinations
-        for (unsigned int i=0; i<routes.size(); i++)
-        {
-            int outputGateIndex = routes[i].interf->outputGateIndex();
 
-            // don't forward to input port
-            if (outputGateIndex>=0 && outputGateIndex!=inputGateIndex)
-            {
-                IPv6Datagram *datagramCopy = datagram->dup();
+    // find the multicast route for (source, group); if there is none, give a multicast
+    // routing protocol (e.g. PIM) a chance to create one, then look up again
+    Ipv6MulticastRoute *route = rt->findBestMatchingMulticastRoute(srcAddr, destAddr);
+    if (!route) {
+        EV_WARN << "Multicast route does not exist, trying to add.\n";
+        emit(ipv6NewMulticastSignal, ipv6Header.get(), const_cast<NetworkInterface *>(fromIE));
+        route = rt->findBestMatchingMulticastRoute(srcAddr, destAddr);
+        if (!route) {
+            EV_ERROR << "No multicast route, packet dropped.\n";
+            numUnroutable++;
+            PacketDropDetails details;
+            details.setReason(NO_ROUTE_FOUND);
+            emit(packetDroppedSignal, packet, &details);
+            delete packet;
+            return;
+        }
+    }
 
-                // set datagram source address if not yet set
-                if (datagramCopy->getSrcAddress().isUnspecified())
-                    datagramCopy->setSrcAddress(ift->interfaceByPortNo(outputGateIndex)->getProtocolData<Ipv6InterfaceData>()->getIPAddress());
+    // Reverse Path Forwarding: the datagram must arrive on the route's parent
+    // (upstream) interface; otherwise drop it (and notify, e.g. for PIM assert handling)
+    if (route->getInInterface() && fromIE != route->getInInterface()->getInterface()) {
+        EV_ERROR << "Multicast datagram did not arrive on the RPF interface, packet dropped.\n";
+        emit(ipv6DataOnNonrpfSignal, ipv6Header.get(), const_cast<NetworkInterface *>(fromIE));
+        numDropped++;
+        PacketDropDetails details;
+        emit(packetDroppedSignal, packet, &details);
+        delete packet;
+        return;
+    }
+    emit(ipv6DataOnRpfSignal, ipv6Header.get(), const_cast<NetworkInterface *>(fromIE)); // forwarding hook
 
-                // send
-                Ipv6Address nextHopAddr = routes[i].gateway;
-                fragmentPostRouting(datagramCopy, outputGateIndex, macAddr, fromHL);
+    // decrement the hop limit before forwarding
+    packet->trim();
+    ipv6Header = nullptr;
+    auto newIpv6Header = removeNetworkProtocolHeader<Ipv6Header>(packet);
+    newIpv6Header->setHopLimit(newIpv6Header->getHopLimit() - 1);
+    insertNetworkProtocolHeader(packet, Protocol::ipv6, newIpv6Header);
+    ipv6Header = newIpv6Header;
+
+    if (ipv6Header->getHopLimit() <= 0) {
+        // RFC 4443: no ICMPv6 error is generated for a multicast packet
+        EV_INFO << "multicast datagram hopLimit reached zero, dropping\n";
+        numDropped++;
+        PacketDropDetails details;
+        details.setReason(HOP_LIMIT_REACHED);
+        emit(packetDroppedSignal, packet, &details);
+        delete packet;
+        return;
+    }
+
+    // forward a copy onto each downstream (child) interface of the route
+    numForwarded++;
+    for (unsigned int i = 0; i < route->getNumOutInterfaces(); i++) {
+        Ipv6MulticastRoute::OutInterface *outInterface = route->getOutInterface(i);
+        const NetworkInterface *outIE = outInterface->getInterface();
+        if (outIE != fromIE) {
+            // TRPB: on a leaf interface, forward only if there are group listeners
+            if (outInterface->isLeaf() && !outIE->getProtocolData<Ipv6InterfaceData>()->hasMulticastListener(destAddr))
+                EV_DETAIL << "Not forwarding to " << outIE->getInterfaceName() << " (leaf interface with no listeners)\n";
+            else {
+                EV_DETAIL << "Forwarding to " << outIE->getInterfaceName() << "\n";
+                fragmentPostRouting(packet->dup(), outIE, destAddr.mapToMulticastMacAddress(), false);
             }
         }
-
-        // only copies sent, delete original datagram
-        delete datagram;
     }
- */
+
+    emit(ipv6MdataRegisterSignal, packet, const_cast<NetworkInterface *>(fromIE)); // postRouting hook
+    delete packet;
 }
 
 void Ipv6::localDeliver(Packet *packet, const NetworkInterface *fromIE)

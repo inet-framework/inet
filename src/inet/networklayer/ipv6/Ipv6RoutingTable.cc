@@ -42,6 +42,8 @@ Ipv6RoutingTable::~Ipv6RoutingTable()
 {
     for (auto& elem : routeList)
         delete elem;
+    for (auto& elem : multicastRoutes)
+        delete elem;
 }
 
 Ipv6Route *Ipv6RoutingTable::createNewRoute(Ipv6Address destPrefix, int prefixLength, IRoute::SourceType src)
@@ -55,12 +57,15 @@ void Ipv6RoutingTable::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         WATCH(routeList);
+        WATCH(multicastRoutes);
         WATCH(destCache); // FIXME commented out for now
         isrouter = par("isRouter");
         multicastForward = par("multicastForwarding");
         useAdminDist = par("useAdminDist");
         WATCH(isrouter);
+        WATCH(multicastForward);
         WATCH_EXPR("numRoutes", routeList.size());
+        WATCH_EXPR("numMulticastRoutes", multicastRoutes.size());
         WATCH_EXPR("numDestCache", destCache.size());
 
         ift.reference(this, "interfaceTableModule", true);
@@ -788,6 +793,136 @@ Ipv6Route *Ipv6RoutingTable::getRoute(int i) const
 {
     ASSERT(i >= 0 && i < (int)routeList.size());
     return routeList[i];
+}
+
+//
+// Multicast routing table (RIB/FIB)
+//
+
+bool Ipv6RoutingTable::isLocalMulticastAddress(const Ipv6Address& dest) const
+{
+    for (int i = 0; i < ift->getNumInterfaces(); i++) {
+        NetworkInterface *ie = ift->getInterface(i);
+        if (ie->getProtocolData<Ipv6InterfaceData>()->isMemberOfMulticastGroup(dest))
+            return true;
+    }
+    return false;
+}
+
+Ipv6MulticastRoute *Ipv6RoutingTable::findBestMatchingMulticastRoute(const Ipv6Address& origin, const Ipv6Address& group) const
+{
+    // TODO caching?
+    for (auto e : multicastRoutes) {
+        if (e->matches(origin, group))
+            return e;
+    }
+    return nullptr;
+}
+
+bool Ipv6RoutingTable::multicastRouteLessThan(const Ipv6MulticastRoute *a, const Ipv6MulticastRoute *b)
+{
+    // We want routes with longer prefixes to be at front, so we compare them as "less".
+    if (a->getPrefixLength() != b->getPrefixLength())
+        return a->getPrefixLength() > b->getPrefixLength();
+
+    // For origin, a smaller value is "less" (put earlier).
+    if (a->getOrigin() != b->getOrigin())
+        return a->getOrigin() < b->getOrigin();
+
+    // put the unspecified group after the specified ones
+    if (a->getMulticastGroup() != b->getMulticastGroup())
+        return a->getMulticastGroup() > b->getMulticastGroup();
+
+    return a->getMetric() < b->getMetric();
+}
+
+void Ipv6RoutingTable::internalAddMulticastRoute(Ipv6MulticastRoute *entry)
+{
+    if (entry->getPrefixLength() < 0 || entry->getPrefixLength() > 128)
+        throw cRuntimeError("addMulticastRoute(): invalid prefix length %d in multicast route", entry->getPrefixLength());
+
+    if (entry->getOrigin() != entry->getOrigin().getPrefix(entry->getPrefixLength()))
+        throw cRuntimeError("addMulticastRoute(): suspicious route: origin address %s has bits set outside prefix length %d",
+                entry->getOrigin().str().c_str(), entry->getPrefixLength());
+
+    if (!entry->getMulticastGroup().isUnspecified() && !entry->getMulticastGroup().isMulticast())
+        throw cRuntimeError("addMulticastRoute(): group address (%s) is not a multicast address",
+                entry->getMulticastGroup().str().c_str());
+
+    // check that the interfaces exist and are multicast-capable
+    if (entry->getInInterface() && !entry->getInInterface()->getInterface()->isMulticast())
+        throw cRuntimeError("addMulticastRoute(): input interface must be multicast capable");
+
+    for (unsigned int i = 0; i < entry->getNumOutInterfaces(); i++) {
+        Ipv6MulticastRoute::OutInterface *outInterface = entry->getOutInterface(i);
+        if (!outInterface)
+            throw cRuntimeError("addMulticastRoute(): output interface cannot be nullptr");
+        else if (!outInterface->getInterface()->isMulticast())
+            throw cRuntimeError("addMulticastRoute(): output interface must be multicast capable");
+        else if (entry->getInInterface() && outInterface->getInterface() == entry->getInInterface()->getInterface())
+            throw cRuntimeError("addMulticastRoute(): output interface cannot be the same as the input interface");
+    }
+
+    // add to table, keeping entries sorted by prefix length desc so that we can
+    // stop at the first match when doing longest-prefix matching
+    auto pos = upper_bound(multicastRoutes.begin(), multicastRoutes.end(), entry, multicastRouteLessThan);
+    multicastRoutes.insert(pos, entry);
+    entry->setRoutingTable(this);
+}
+
+void Ipv6RoutingTable::addMulticastRoute(Ipv6MulticastRoute *entry)
+{
+    Enter_Method("addMulticastRoute(...)");
+    internalAddMulticastRoute(entry);
+    emit(mrouteAddedSignal, entry);
+}
+
+Ipv6MulticastRoute *Ipv6RoutingTable::internalRemoveMulticastRoute(Ipv6MulticastRoute *entry)
+{
+    auto i = find(multicastRoutes, entry);
+    if (i != multicastRoutes.end()) {
+        multicastRoutes.erase(i);
+        return entry;
+    }
+    return nullptr;
+}
+
+Ipv6MulticastRoute *Ipv6RoutingTable::removeMulticastRoute(Ipv6MulticastRoute *entry)
+{
+    Enter_Method("removeMulticastRoute(...)");
+
+    entry = internalRemoveMulticastRoute(entry);
+
+    if (entry != nullptr) {
+        ASSERT(entry->getRoutingTable() == this); // still filled in, for the listeners' benefit
+        emit(mrouteDeletedSignal, entry);
+        entry->setRoutingTable(nullptr);
+    }
+    return entry;
+}
+
+bool Ipv6RoutingTable::deleteMulticastRoute(Ipv6MulticastRoute *entry)
+{
+    Enter_Method("deleteMulticastRoute(...)");
+    entry = internalRemoveMulticastRoute(entry);
+    if (entry != nullptr) {
+        ASSERT(entry->getRoutingTable() == this); // still filled in, for the listeners' benefit
+        emit(mrouteDeletedSignal, entry);
+        delete entry;
+    }
+    return entry != nullptr;
+}
+
+void Ipv6RoutingTable::multicastRouteChanged(Ipv6MulticastRoute *entry, int fieldCode)
+{
+    if (fieldCode == Ipv6MulticastRoute::F_ORIGIN || fieldCode == Ipv6MulticastRoute::F_ORIGINPREFIX ||
+        fieldCode == Ipv6MulticastRoute::F_MULTICASTGROUP || fieldCode == Ipv6MulticastRoute::F_METRIC) // our data structures depend on these fields
+    {
+        entry = internalRemoveMulticastRoute(entry);
+        ASSERT(entry != nullptr); // failure means inconsistency: route was not found in this routing table
+        internalAddMulticastRoute(entry);
+    }
+    emit(mrouteChangedSignal, entry); // TODO include fieldCode in the notification
 }
 
 const Ipv6Address& Ipv6RoutingTable::getHomeAddress()

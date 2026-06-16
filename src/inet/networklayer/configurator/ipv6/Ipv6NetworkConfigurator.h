@@ -36,12 +36,14 @@ class INET_API Ipv6NetworkConfigurator : public L3NetworkConfiguratorBase, publi
     class INET_API Node : public L3NetworkConfiguratorBase::Node {
       public:
         std::vector<Ipv6Route *> staticRoutes;
+        std::vector<Ipv6MulticastRoute *> staticMulticastRoutes;
         std::vector<const NetworkInterface *> routingTableNetworkInterfaces;
 
       public:
         Node(cModule *module) : L3NetworkConfiguratorBase::Node(module) {}
         ~Node() {
             for (size_t i = 0; i < staticRoutes.size(); i++) delete staticRoutes[i];
+            for (size_t i = 0; i < staticMulticastRoutes.size(); i++) delete staticMulticastRoutes[i];
         }
     };
 
@@ -128,6 +130,13 @@ class INET_API Ipv6NetworkConfigurator : public L3NetworkConfiguratorBase, publi
      * Reads route elements from configuration file and stores the result.
      */
     virtual void readManualRouteConfiguration(Topology& topology);
+
+    /**
+     * Reads multicast-route elements from the configuration file and stores the
+     * result. Each <multicast-route> names an RPF (parent) interface and a set of
+     * output (children) interfaces, and is installed as a static Ipv6MulticastRoute.
+     */
+    virtual void readManualMulticastRouteConfiguration(Topology& topology);
 
     /**
      * Assigns prefixes and global addresses to all interfaces.

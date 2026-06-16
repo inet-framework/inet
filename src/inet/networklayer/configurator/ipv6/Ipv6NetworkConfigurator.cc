@@ -58,6 +58,8 @@ void Ipv6NetworkConfigurator::computeConfiguration()
         TIME(assignAddresses(topology));
     // read and configure manual routes from the XML configuration
     readManualRouteConfiguration(topology);
+    // read and configure manual multicast routes from the XML configuration
+    readManualMulticastRouteConfiguration(topology);
     // calculate shortest paths, and add corresponding static routes
     if (addStaticRoutesParameter) {
         cXMLElementList autorouteElements = configuration->getChildrenByTagName("autoroute");
@@ -251,6 +253,29 @@ void Ipv6NetworkConfigurator::configureRoutingTable(Node *node)
                         route->getInterface()->getInterfaceId(), route->getNextHop(), route->getMetric());
                 delete route;
             }
+        }
+    }
+
+    // Add static multicast routes. The node owns the originals (computed once), so
+    // install independent copies into the routing table; guard against re-adding if
+    // this routing table was already configured (this method may run more than once).
+    for (auto original : node->staticMulticastRoutes) {
+        bool found = false;
+        for (int j = 0; j < routingTable->getNumMulticastRoutes(); j++) {
+            Ipv6MulticastRoute *existing = routingTable->getMulticastRoute(j);
+            bool sameParent = (existing->getInInterface() == nullptr && original->getInInterface() == nullptr) ||
+                    (existing->getInInterface() != nullptr && original->getInInterface() != nullptr &&
+                     existing->getInInterface()->getInterface() == original->getInInterface()->getInterface());
+            if (existing->getOrigin() == original->getOrigin() &&
+                existing->getPrefixLength() == original->getPrefixLength() &&
+                existing->getMulticastGroup() == original->getMulticastGroup() && sameParent) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            EV_DETAIL << "Adding multicast route " << *original << " to " << nodePath << endl;
+            routingTable->addMulticastRoute(new Ipv6MulticastRoute(*original));
         }
     }
 }
@@ -611,6 +636,109 @@ void Ipv6NetworkConfigurator::readManualRouteConfiguration(Topology& topology)
         }
         catch (std::exception& e) {
             throw cRuntimeError("Error in XML <route> element at %s: %s", routeElement->getSourceLocation(), e.what());
+        }
+    }
+}
+
+void Ipv6NetworkConfigurator::readManualMulticastRouteConfiguration(Topology& topology)
+{
+    cXMLElementList routeElements = configuration->getChildrenByTagName("multicast-route");
+    EV_INFO << "Reading IPv6 multicast route configuration of " << routeElements.size() << " XML elements" << endl;
+
+    for (auto& routeElement : routeElements) {
+        const char *hostAttr = routeElement->getAttribute("hosts");
+        const char *sourceAttr = routeElement->getAttribute("source"); // source address (L3AddressResolver syntax), default: all sources
+        const char *prefixLengthAttr = routeElement->getAttribute("prefixLength"); // length of source prefix to match
+        const char *groupsAttr = routeElement->getAttribute("groups"); // multicast group addresses, default: all groups
+        const char *parentAttr = routeElement->getAttribute("parent"); // name of expected (RPF) input interface
+        const char *childrenAttr = routeElement->getAttribute("children"); // names of output interfaces
+        const char *metricAttr = routeElement->getAttribute("metric");
+
+        try {
+            // parse the source prefix (origin); empty or "*" means "any source"
+            Ipv6Address source = Ipv6Address::UNSPECIFIED_ADDRESS;
+            int prefixLength = 0;
+            if (!opp_isempty(sourceAttr) && strcmp(sourceAttr, "*") != 0) {
+                source = L3AddressResolver().resolve(sourceAttr, L3AddressResolver::ADDR_IPv6).toIpv6();
+                prefixLength = !opp_isempty(prefixLengthAttr) ? atoi(prefixLengthAttr) : 128;
+            }
+
+            // parse the group addresses; empty means "any group"
+            std::vector<Ipv6Address> groups;
+            if (opp_isempty(groupsAttr))
+                groups.push_back(Ipv6Address::UNSPECIFIED_ADDRESS);
+            else {
+                cStringTokenizer tokenizer(groupsAttr);
+                while (tokenizer.hasMoreTokens()) {
+                    Ipv6Address group = Ipv6Address(tokenizer.nextToken());
+                    if (!group.isMulticast())
+                        throw cRuntimeError("Address '%s' in 'groups' attribute is not a multicast address", group.str().c_str());
+                    groups.push_back(group);
+                }
+            }
+
+            int metric = !opp_isempty(metricAttr) ? atoi(metricAttr) : 0;
+
+            // find matching host(s) and add the route
+            Matcher hostMatcher(hostAttr);
+            InterfaceMatcher childrenMatcher(childrenAttr);
+            for (int i = 0; i < topology.getNumNodes(); i++) {
+                Node *node = (Node *)topology.getNode(i);
+                // Install the route on any node with a routing table that matches the
+                // host pattern. Unlike Ipv4NetworkConfigurator we do not also require
+                // isMulticastForwardingEnabled() here: that flag is not reliably set at
+                // configuration time, and a multicast route on a non-forwarding node is
+                // harmless (Ipv6::routeMulticastPacket gates forwarding on isRouter()).
+                if (!node->routingTable)
+                    continue;
+
+                std::string hostFullPath = node->module->getFullPath();
+                std::string hostShortenedFullPath = hostFullPath.substr(hostFullPath.find('.') + 1);
+                if (!hostMatcher.matchesAny() && !hostMatcher.matches(hostShortenedFullPath.c_str()) && !hostMatcher.matches(hostFullPath.c_str()))
+                    continue;
+
+                // resolve the parent (RPF) interface
+                NetworkInterface *parent = nullptr;
+                if (!opp_isempty(parentAttr)) {
+                    parent = node->interfaceTable->findInterfaceByName(parentAttr);
+                    if (!parent)
+                        throw cRuntimeError("Parent interface '%s' not found in node '%s'", parentAttr, hostFullPath.c_str());
+                    if (!parent->isMulticast())
+                        throw cRuntimeError("Parent interface '%s' in node '%s' is not multicast", parentAttr, hostFullPath.c_str());
+                }
+
+                // collect the child (output) interfaces
+                std::vector<NetworkInterface *> children;
+                for (auto& element : node->interfaceInfos) {
+                    InterfaceInfo *interfaceInfo = static_cast<InterfaceInfo *>(element);
+                    NetworkInterface *ie = interfaceInfo->networkInterface;
+                    if (ie != parent && ie->isMulticast() && childrenMatcher.matches(interfaceInfo))
+                        children.push_back(ie);
+                }
+
+                for (auto& group : groups) {
+                    Ipv6MulticastRoute *route = new Ipv6MulticastRoute();
+                    route->setSourceType(IMulticastRoute::MANUAL);
+                    route->setSource(this);
+                    route->setOrigin(source);
+                    route->setPrefixLength(prefixLength);
+                    route->setMulticastGroup(group);
+                    route->setMetric(metric);
+                    if (parent) {
+                        route->setInInterface(new Ipv6MulticastRoute::InInterface(parent));
+                        node->routingTableNetworkInterfaces.push_back(parent);
+                    }
+                    for (auto& child : children) {
+                        route->addOutInterface(new Ipv6MulticastRoute::OutInterface(child, false /*TODO isLeaf*/));
+                        node->routingTableNetworkInterfaces.push_back(child);
+                    }
+                    EV_INFO << "Adding manual IPv6 multicast route " << *route << " to " << hostFullPath << endl;
+                    node->staticMulticastRoutes.push_back(route);
+                }
+            }
+        }
+        catch (std::exception& e) {
+            throw cRuntimeError("Error in XML <multicast-route> element at %s: %s", routeElement->getSourceLocation(), e.what());
         }
     }
 }

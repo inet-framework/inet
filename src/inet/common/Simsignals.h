@@ -80,6 +80,12 @@ extern INET_API simsignal_t // admin
     ipv6MulticastGroupRegisteredSignal,
     ipv6MulticastGroupUnregisteredSignal,
 
+// for PIM (IPv6)
+    ipv6NewMulticastSignal,
+    ipv6DataOnNonrpfSignal,
+    ipv6DataOnRpfSignal,
+    ipv6MdataRegisterSignal,
+
 // layer 3 - ISIS
     isisAdjChangedSignal,
 
