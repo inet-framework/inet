@@ -32,11 +32,6 @@ simple Mldv1 extends SimpleModule like IMld
         // a real state machine. MUST remain default(false) so it is inert for
         // all production scenarios and other tests.
         bool sendTestMessage = default(false);
-        // Test-only: when true, injects one General MLD Query (type 130, maxRespDelay=1000ms,
-        // multicastAddress=::) on the first multicast-capable interface at t=2s.
-        // This lets MLD_host_basic.test exercise the HOST-02 (Delaying Listener) path
-        // without a real router querier (Phase 4). MUST remain default(false).
-        bool sendTestQuery = default(false);
         // Test-only: when true, simulates leaving all joined groups at t=5s by calling
         // multicastGroupLeft() directly. This bypasses the UDP leaveMulticastGroup path
         // (which is not implemented for IPv6 in NetworkInterface::changeMulticastGroupMembership).

@@ -107,7 +107,6 @@ Mldv1::HostInterfaceData::~HostInterfaceData()
 Mldv1::~Mldv1()
 {
     cancelAndDelete(testTimer);
-    cancelAndDelete(testQueryTimer);
     cancelAndDelete(testLeaveTimer);
     while (!hostData.empty())
         deleteHostInterfaceData(hostData.begin()->first);
@@ -124,7 +123,6 @@ void Mldv1::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         enabled = par("enabled");
         sendTestMessage = par("sendTestMessage");
-        sendTestQuery = par("sendTestQuery");
         sendTestLeave = par("sendTestLeave");
         const char *testGroupStr = par("testMulticastGroup");
         if (testGroupStr && *testGroupStr)
@@ -144,10 +142,6 @@ void Mldv1::initialize(int stage)
         if (sendTestMessage) {
             testTimer = new cMessage("mldTestTimer");
             scheduleAt(0.5, testTimer);
-        }
-        if (sendTestQuery) {
-            testQueryTimer = new cMessage("mldTestQueryTimer");
-            scheduleAt(2.0, testQueryTimer);
         }
         if (sendTestLeave) {
             testLeaveTimer = new cMessage("mldTestLeaveTimer");
@@ -228,25 +222,6 @@ void Mldv1::handleMessageWhenUp(cMessage *msg)
                     Icmpv6::insertChecksum(checksumMode, report, pkt);
                     pkt->insertAtFront(report);
                     sendToIPv6(pkt, ie, Ipv6Address::ALL_NODES_2);
-                    break; // send on first multicast-capable interface only
-                }
-            }
-        }
-        else if (msg == testQueryTimer) {
-            // Test-only Query injection (sendTestQuery=true): send a General MLD Query
-            // on the first multicast-capable interface so that hosts on the link receive
-            // it and schedule delayed Reports (HOST-02 / Delaying Listener path).
-            // RFC 2710 §3: General Query is sent to ff02::1, multicastAddress=::, maxRespDelay=1000ms.
-            for (int i = 0; i < ift->getNumInterfaces(); i++) {
-                NetworkInterface *ie = ift->getInterface(i);
-                if (ie->isMulticast() && !ie->isLoopback()) {
-                    Packet *pkt = new Packet("MLD General Query (test)");
-                    const auto& qry = makeShared<MldQuery>();
-                    qry->setMulticastAddress(Ipv6Address::UNSPECIFIED_ADDRESS); // :: = General Query
-                    qry->setMaxRespDelay(1000);  // 1000 ms max response delay
-                    Icmpv6::insertChecksum(checksumMode, qry, pkt);
-                    pkt->insertAtFront(qry);
-                    sendToIPv6(pkt, ie, Ipv6Address::ALL_NODES_2); // dest = ff02::1
                     break; // send on first multicast-capable interface only
                 }
             }

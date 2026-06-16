@@ -20,8 +20,9 @@ HOST-03 (report suppression):
   Report" log line from host2, proving the suppression path was exercised.
 
 HOST-02 (delayed Report on General Query):
-  The router has sendTestQuery=true, which fires at t=2s and sends a General
-  MLD Query (type=130, multicastAddress=::, maxRespDelay=1000ms) to ff02::1.
+  The router has multicastForwarding=true (Phase 4 real querier). With
+  startupQueryInterval=2s the router sends its first General MLD Query at ~t=2s
+  (type=130, multicastAddress=::, maxRespDelay=1000ms) to ff02::1.
   All nodes on the shared Ethernet segment receive it. Hosts receive it via
   processMldMessage -> processQuery -> processGroupQuery. Idle Listeners
   transition to Delaying Listener and schedule uniform(0, 1s) delayed Reports.
@@ -37,11 +38,13 @@ HOST-04 (Done on leave):
 
 Network: host1, host2, and router all connect to a shared EthernetHub, putting
 them on the same Ethernet segment. Ipv6FlatNetworkConfigurator assigns addresses.
-All three nodes have hasMld=true. The router injects the test Query at t=2s.
+All three nodes have hasMld=true. The router is a real querier (router.multicastForwarding
+enabled — set at node level so NetworkLayerNodeBase propagates it to the routing table)
+with short startup timer so the General Query arrives within the 10s limit.
 RNG seed is fixed for reproducibility.
 
-Note: the Mldv1 testMulticastGroup, sendTestQuery, and sendTestLeave parameters
-are all default(false)/"" so they are inert in all production scenarios.
+Note: the Mldv1 testMulticastGroup and sendTestLeave parameters are default("")/false
+so they are inert in all production scenarios.
 
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
@@ -107,9 +110,16 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.host1.ipv6.mldv1.testMulticastGroup = "ff0e::1:2:3"
 **.host2.ipv6.mldv1.testMulticastGroup = "ff0e::1:2:3"
 
-# HOST-02: router sends one General MLD Query at t=2s (sendTestQuery=true).
-# All nodes on the shared segment receive it; hosts transition Idle -> Delaying.
-**.router.ipv6.mldv1.sendTestQuery = true
+# HOST-02: enable real querier on the router (Phase 4). The router sends a General
+# MLD Query at startupQueryInterval (~2s) to ff02::1. All nodes on the shared
+# segment receive it; hosts transition Idle -> Delaying and send delayed Reports.
+# Note: multicastForwarding must be set at the node level (not routing table level)
+# because NetworkLayerNodeBase propagates *.multicastForwarding = this.multicastForwarding
+# which overrides any per-submodule INI setting.
+**.router.multicastForwarding = true
+**.router.ipv6.mldv1.startupQueryInterval = 2s
+**.router.ipv6.mldv1.queryInterval = 5s
+**.router.ipv6.mldv1.queryResponseInterval = 1s
 
 # HOST-04: host1 triggers multicastGroupLeft at t=5s via sendTestLeave=true.
 # This bypasses the UDP leaveMulticastGroup path (not implemented for IPv6).
