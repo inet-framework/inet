@@ -194,7 +194,6 @@ class INET_API Igmpv3 : public SimpleModule, protected cListener
     ModuleRefByPar<IInterfaceTable> ift;
 
     bool enabled;
-    int robustness;
     double queryInterval; // TODO these should probably be simtime_t
     double queryResponseInterval;
     double groupMembershipInterval;

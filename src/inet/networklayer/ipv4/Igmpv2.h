@@ -134,7 +134,6 @@ class INET_API Igmpv2 : public SimpleModule, public DefaultProtocolRegistrationL
 
     bool enabled;
     bool externalRouter;
-    int robustness; // RFC 2236: Section 8.1
     double queryInterval; // RFC 2236: Section 8.2
     double queryResponseInterval; // RFC 2236: Section 8.3
     double groupMembershipInterval; // RFC 2236: Section 8.4

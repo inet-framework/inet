@@ -67,7 +67,9 @@ void Igmpv3::initialize(int stage)
         rt.reference(this, "routingTableModule", true);
 
         enabled = par("enabled");
-        robustness = par("robustnessVariable");
+        // robustnessVariable is consumed only via the NED default() expressions of
+        // groupMembershipInterval / otherQuerierPresentInterval / startupQueryCount /
+        // lastMemberQueryCount; it has no separate runtime use.
         queryInterval = par("queryInterval");
         queryResponseInterval = par("queryResponseInterval");
         groupMembershipInterval = par("groupMembershipInterval");
