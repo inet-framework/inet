@@ -106,8 +106,6 @@ Mldv1::HostInterfaceData::~HostInterfaceData()
 
 Mldv1::~Mldv1()
 {
-    cancelAndDelete(testTimer);
-    cancelAndDelete(testLeaveTimer);
     while (!hostData.empty())
         deleteHostInterfaceData(hostData.begin()->first);
     while (!routerData.empty())
@@ -122,11 +120,6 @@ void Mldv1::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         enabled = par("enabled");
-        sendTestMessage = par("sendTestMessage");
-        sendTestLeave = par("sendTestLeave");
-        const char *testGroupStr = par("testMulticastGroup");
-        if (testGroupStr && *testGroupStr)
-            testMulticastGroup = Ipv6Address(testGroupStr);
         const char *checksumModeString = par("checksumMode");
         checksumMode = parseChecksumMode(checksumModeString, false);
 
@@ -139,14 +132,6 @@ void Mldv1::initialize(int stage)
         startupQueryCount = par("startupQueryCount");
         lastListenerQueryInterval = par("lastListenerQueryInterval");
         lastListenerQueryCount = par("lastListenerQueryCount");
-        if (sendTestMessage) {
-            testTimer = new cMessage("mldTestTimer");
-            scheduleAt(0.5, testTimer);
-        }
-        if (sendTestLeave) {
-            testLeaveTimer = new cMessage("mldTestLeaveTimer");
-            scheduleAt(5.0, testLeaveTimer);
-        }
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         ift.reference(this, "interfaceTableModule", true);
@@ -182,26 +167,6 @@ void Mldv1::initialize(int stage)
         host->subscribe(interfaceDeletedSignal, this);
         host->subscribe(ipv6MulticastGroupJoinedSignal, this);
         host->subscribe(ipv6MulticastGroupLeftSignal, this);
-
-        // Test-only: directly join testMulticastGroup on all multicast-capable interfaces.
-        // Calls both Ipv6InterfaceData::joinMulticastGroup (so IPv6 accepts inbound packets
-        // destined to this group) and then multicastGroupJoined() (so Mldv1 sends the
-        // unsolicited Report and sets up host state). Bypasses the UDP assignAddress path
-        // (which calls assignAddress instead of joinMulticastGroup for IPv6, and does not
-        // fire ipv6MulticastGroupJoinedSignal).
-        if (!testMulticastGroup.isUnspecified()) {
-            for (int i = 0; i < ift->getNumInterfaces(); ++i) {
-                NetworkInterface *ie = ift->getInterface(i);
-                if (ie->isMulticast() && !ie->isLoopback()) {
-                    // Register the group with the IPv6 data so inbound packets are accepted
-                    if (auto *ipv6data = ie->findProtocolDataForUpdate<Ipv6InterfaceData>())
-                        ipv6data->joinMulticastGroup(testMulticastGroup);
-                    // Note: joinMulticastGroup fires ipv6MulticastGroupJoinedSignal,
-                    // which triggers receiveSignal -> multicastGroupJoined (sends Report).
-                    // No need to call multicastGroupJoined directly.
-                }
-            }
-        }
     }
 }
 
@@ -210,57 +175,21 @@ void Mldv1::initialize(int stage)
 void Mldv1::handleMessageWhenUp(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
-        if (msg == testTimer) {
-            // Test-only send: send a single MLD Report to all-nodes multicast
-            // so MLD_smoke.test can assert the receive-path marker on the peer.
-            for (int i = 0; i < ift->getNumInterfaces(); i++) {
-                NetworkInterface *ie = ift->getInterface(i);
-                if (ie->isMulticast() && !ie->isLoopback()) {
-                    Packet *pkt = new Packet("MLD Report (test)");
-                    const auto& report = makeShared<MldReport>();
-                    report->setMulticastAddress(Ipv6Address::ALL_NODES_2);
-                    Icmpv6::insertChecksum(checksumMode, report, pkt);
-                    pkt->insertAtFront(report);
-                    sendToIPv6(pkt, ie, Ipv6Address::ALL_NODES_2);
-                    break; // send on first multicast-capable interface only
-                }
-            }
-        }
-        else if (msg == testLeaveTimer) {
-            // Test-only leave trigger (sendTestLeave=true): simulates leaving all joined groups
-            // at t=5s by calling multicastGroupLeft() directly. This bypasses the UDP
-            // leaveMulticastGroup path (changeMulticastGroupMembership not implemented for IPv6).
-            // Used in MLD_host_basic.test to observe HOST-04 Done-on-leave behavior.
-            for (int i = 0; i < ift->getNumInterfaces(); i++) {
-                NetworkInterface *ie = ift->getInterface(i);
-                if (!ie->isMulticast() || ie->isLoopback())
-                    continue;
-                HostInterfaceData *interfaceData = getHostInterfaceData(ie);
-                // Snapshot the group addresses since multicastGroupLeft() modifies the map
-                std::vector<Ipv6Address> groupAddrs;
-                for (auto& elem : interfaceData->groups)
-                    groupAddrs.push_back(elem.first);
-                for (const auto& groupAddr : groupAddrs)
-                    multicastGroupLeft(ie, groupAddr);
-            }
-        }
-        else {
-            switch (msg->getKind()) {
-                case MLD_HOSTGROUP_TIMER:
-                    processHostGroupTimer(msg);
-                    break;
-                case MLD_QUERY_TIMER:
-                    processQueryTimer(msg);
-                    break;
-                case MLD_LEAVE_TIMER:
-                    processLeaveTimer(msg);
-                    break;
-                case MLD_REXMT_TIMER:
-                    processRexmtTimer(msg);
-                    break;
-                default:
-                    throw cRuntimeError("Unknown self-message kind %d: %s", msg->getKind(), msg->getName());
-            }
+        switch (msg->getKind()) {
+            case MLD_HOSTGROUP_TIMER:
+                processHostGroupTimer(msg);
+                break;
+            case MLD_QUERY_TIMER:
+                processQueryTimer(msg);
+                break;
+            case MLD_LEAVE_TIMER:
+                processLeaveTimer(msg);
+                break;
+            case MLD_REXMT_TIMER:
+                processRexmtTimer(msg);
+                break;
+            default:
+                throw cRuntimeError("Unknown self-message kind %d: %s", msg->getKind(), msg->getName());
         }
     }
     else if (auto packet = dynamic_cast<Packet *>(msg)) {

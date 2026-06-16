@@ -115,11 +115,6 @@ class INET_API Mldv1 : public OperationalBase, public cListener
 
     bool enabled = true;
     ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
-    bool sendTestMessage = false;
-    bool sendTestLeave = false;
-    Ipv6Address testMulticastGroup;  // UNSPECIFIED_ADDRESS when inactive
-    cMessage *testTimer = nullptr;
-    cMessage *testLeaveTimer = nullptr;
 
     // Host parameters
     double unsolicitedReportInterval = 10; // RFC 2710 §7.2 default 10s
