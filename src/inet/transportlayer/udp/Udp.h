@@ -146,6 +146,7 @@ class INET_API Udp : public TransportProtocolBase
     virtual void setMulticastSourceFilter(SockDesc *sd, NetworkInterface *ie, L3Address multicastAddress, UdpSourceFilterMode filterMode, const std::vector<L3Address>& sourceList);
 
     virtual void addMulticastAddressToInterface(NetworkInterface *ie, const L3Address& multicastAddr);
+    virtual void removeMulticastAddressFromInterface(NetworkInterface *ie, const L3Address& multicastAddr, McastSourceFilterMode oldFilterMode, const std::vector<L3Address>& oldSourceList);
 
     // ephemeral port
     virtual ushort getEphemeralPort();

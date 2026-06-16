@@ -499,17 +499,37 @@ void Udp::addMulticastAddressToInterface(NetworkInterface *ie, const L3Address& 
     }
     else if (multicastAddr.getType() == L3Address::IPv6) {
 #ifdef INET_WITH_IPv6
-        ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->assignAddress(multicastAddr.toIpv6(), false, SimTime::getMaxTime(), SimTime::getMaxTime());
+        // Join the IPv6 multicast group (not merely assignAddress): this records the
+        // membership and emits ipv6MulticastGroupJoinedSignal, which MLD (RFC 2710)
+        // listens for to send a Report. Mirrors the IPv4 branch above.
+        ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->joinMulticastGroup(multicastAddr.toIpv6());
 #endif // ifdef INET_WITH_IPv6
     }
     else
         ie->joinMulticastGroup(multicastAddr);
 }
 
+void Udp::removeMulticastAddressFromInterface(NetworkInterface *ie, const L3Address& multicastAddr, McastSourceFilterMode oldFilterMode, const std::vector<L3Address>& oldSourceList)
+{
+    ASSERT(ie && ie->isMulticast());
+    ASSERT(multicastAddr.isMulticast());
+
+    if (multicastAddr.getType() == L3Address::IPv6) {
+#ifdef INET_WITH_IPv6
+        // IPv6 has no source-filter (SSM) membership API and MLDv1 is any-source.
+        // Leave via Ipv6InterfaceData so ipv6MulticastGroupLeftSignal fires (drives the
+        // MLD Done). The generic changeMulticastGroupMembership() throws for IPv6.
+        ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->leaveMulticastGroup(multicastAddr.toIpv6());
+#endif // ifdef INET_WITH_IPv6
+    }
+    else {
+        std::vector<L3Address> empty;
+        ie->changeMulticastGroupMembership(multicastAddr, oldFilterMode, oldSourceList, MCAST_INCLUDE_SOURCES, empty);
+    }
+}
+
 void Udp::leaveMulticastGroups(SockDesc *sd, const std::vector<L3Address>& multicastAddresses)
 {
-    std::vector<L3Address> empty;
-
     for (auto& multicastAddresse : multicastAddresses) {
         auto it = sd->findFirstMulticastMembership(multicastAddresse);
         while (it != sd->multicastMembershipTable.end()) {
@@ -523,15 +543,13 @@ void Udp::leaveMulticastGroups(SockDesc *sd, const std::vector<L3Address>& multi
 
             if (membership->interfaceId != -1) {
                 NetworkInterface *ie = ift->getInterfaceById(membership->interfaceId);
-                ie->changeMulticastGroupMembership(membership->multicastAddress,
-                        oldFilterMode, membership->sourceList, MCAST_INCLUDE_SOURCES, empty);
+                removeMulticastAddressFromInterface(ie, membership->multicastAddress, oldFilterMode, membership->sourceList);
             }
             else {
                 for (int j = 0; j < ift->getNumInterfaces(); ++j) {
                     NetworkInterface *ie = ift->getInterface(j);
                     if (ie->isMulticast())
-                        ie->changeMulticastGroupMembership(membership->multicastAddress,
-                                oldFilterMode, membership->sourceList, MCAST_INCLUDE_SOURCES, empty);
+                        removeMulticastAddressFromInterface(ie, membership->multicastAddress, oldFilterMode, membership->sourceList);
                 }
             }
 
