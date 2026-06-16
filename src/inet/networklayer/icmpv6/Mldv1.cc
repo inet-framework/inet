@@ -309,6 +309,7 @@ void Mldv1::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
         if (ie->isMulticast()) {
             interfaceId = ie->getInterfaceId();
             deleteHostInterfaceData(interfaceId);
+            deleteRouterInterfaceData(interfaceId);    // mirror Igmpv2: also free router state + General-Query timer
         }
     }
 }
