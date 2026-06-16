@@ -1,0 +1,133 @@
+%description:
+Tests static IPv6 multicast forwarding with Reverse Path Forwarding (RPF).
+
+Topology (all links are Ethernet):
+
+    source ==(link1: router.eth0)== router --(eth2)-- recv1
+           ==(link2: router.eth1)==   |
+                                     (eth3)
+                                       |
+                                     recv2
+
+The source is dual-homed to the router (two parallel links). It sends UDP
+datagrams to the global-scope multicast group ff0e::1. recv1 and recv2 join
+that group. A static <multicast-route> on the router has the source-facing
+interface eth0 as its RPF (parent) interface, and the recv1/recv2 interfaces
+as its output (children) interfaces.
+
+The source's locally-originated multicast goes out on both of its interfaces,
+so the router receives each datagram twice:
+  - the copy arriving on eth0 (the RPF interface) is forwarded to recv1 and recv2;
+  - the copy arriving on eth1 (NOT the RPF interface) is dropped by the RPF check.
+
+This exercises, in a single deterministic run: FIB-based forwarding to the
+output interfaces, the RPF drop of the off-path copy (so no loop/duplication),
+and exactly-once delivery to each receiver.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network MulticastTest6
+{
+    types:
+        channel ethernetline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        ipv6Configurator: Ipv6NetworkConfigurator;
+        source: StandardHost6;
+        router: Router6;
+        recv1: StandardHost6;
+        recv2: StandardHost6;
+    connections:
+        // connection order fixes the router's interface indices:
+        //   eth0,eth1 -> source (link1,link2); eth2 -> recv1; eth3 -> recv2
+        source.ethg++ <--> ethernetline <--> router.ethg++;
+        source.ethg++ <--> ethernetline <--> router.ethg++;
+        router.ethg++ <--> ethernetline <--> recv1.ethg++;
+        router.ethg++ <--> ethernetline <--> recv2.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = MulticastTest6
+sim-time-limit = 10s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+ned-path = .;../../../../src
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+# Static addresses + routes, plus the multicast route installed on the router.
+*.ipv6Configurator.config = xmldoc("config.xml")
+# the per-node Ipv6NodeConfigurators pull their config from the global configurator
+**.ipv6.configurator.networkConfiguratorModule = "ipv6Configurator"
+
+# enable multicast forwarding on the router (off by default)
+*.router.ipv6.routingTable.multicastForwarding = true
+
+# source: send 3 datagrams to the global-scope multicast group
+*.source.numApps = 1
+*.source.app[0].typename = "UdpBasicApp"
+*.source.app[0].destAddresses = "ff0e::1"
+*.source.app[0].destPort = 1000
+*.source.app[0].messageLength = 64B
+*.source.app[0].timeToLive = 10       # hop limit > 1 so the router can forward
+*.source.app[0].startTime = 4s
+*.source.app[0].sendInterval = 1s
+*.source.app[0].stopTime = 6.5s       # sends at t=4s,5s,6s -> 3 packets
+
+# receivers: join the group and count what arrives
+*.recv1.numApps = 1
+*.recv1.app[0].typename = "UdpSink"
+*.recv1.app[0].localPort = 1000
+*.recv1.app[0].multicastGroup = "ff0e::1"
+*.recv2.numApps = 1
+*.recv2.app[0].typename = "UdpSink"
+*.recv2.app[0].localPort = 1000
+*.recv2.app[0].multicastGroup = "ff0e::1"
+
+# Ethernet queues
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue"
+**.eth[*].queue.dataQueue.packetCapacity = 100
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: config.xml
+<config>
+    <interface hosts="**" prefix="2001:db8:x:x::/64"/>
+    <!-- RPF (parent) interface = eth0 (towards source link1); forward to recv1 and recv2 -->
+    <multicast-route hosts="router" groups="ff0e::1" parent="eth0" children="&gt;recv1 &gt;recv2"/>
+</config>
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%# both receivers must receive exactly the 3 datagrams (forwarding works, no duplication, no loss)
+%contains: stdout
+recv1.app[0]: received 3 packets
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+recv2.app[0]: received 3 packets
+%#--------------------------------------------------------------------------------------------------------------
+%# the off-path (non-RPF) copy of each datagram must be dropped by the RPF check
+%contains: stdout
+Multicast datagram did not arrive on the RPF interface, packet dropped.
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
