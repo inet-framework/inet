@@ -425,8 +425,7 @@ void Mldv1::processMldMessage(Packet *packet)
             processReport(ie, packet);
             break;
         case ICMPv6_MLD_DONE:
-            // Host side: Done is sent by us, not processed (ignored on receive).
-            delete packet;
+            processDone(ie, packet);
             break;
         default:
             throw cRuntimeError("Mldv1: Unknown MLD message type %d", (int)mldMsg->getType());
@@ -461,8 +460,6 @@ void Mldv1::processQuery(NetworkInterface *ie, Packet *packet)
         if (it != interfaceData->groups.end())
             processGroupQuery(ie, it->second, maxRespTime);
     }
-
-    // Phase 4: router-side query handling (Other Querier Present / startup query) goes here
 
     delete packet;
 }
@@ -504,7 +501,34 @@ void Mldv1::processReport(NetworkInterface *ie, Packet *packet)
         hostGroupData->state = MLD_HGS_IDLE_LISTENER;
     }
 
-    // Phase 4: router-side report handling (record in reportedMulticastGroups, arm membership timer) goes here
+    // RTR-02: router-side listener recording
+    if (rt->isMulticastForwardingEnabled()) {
+        RouterGroupData *routerGroupData = getRouterGroupData(ie, groupAddr);
+        if (!routerGroupData) {
+            routerGroupData = createRouterGroupData(ie, groupAddr);
+            numGroups++;
+        }
+
+        if (!routerGroupData->timer) {
+            routerGroupData->timer = new cMessage("Mldv1 group timer", MLD_LEAVE_TIMER);
+            routerGroupData->timer->setContextPointer(new MldRouterTimerContext(ie, routerGroupData));
+        }
+        if (!routerGroupData->rexmtTimer) {
+            routerGroupData->rexmtTimer = new cMessage("Mldv1 rexmt timer", MLD_REXMT_TIMER);
+            routerGroupData->rexmtTimer->setContextPointer(new MldRouterTimerContext(ie, routerGroupData));
+        }
+
+        if (routerGroupData->state == MLD_RGS_NO_LISTENERS_PRESENT) {
+            ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->addMulticastListener(groupAddr);
+            numRouterGroups++;
+            EV_INFO << "Mldv1: recorded listener for group=" << groupAddr << " on " << ie->getInterfaceName() << "\n";
+        }
+        else if (routerGroupData->state == MLD_RGS_CHECKING_LISTENERS)
+            cancelEvent(routerGroupData->rexmtTimer);
+
+        startTimer(routerGroupData->timer, multicastListenerInterval);
+        routerGroupData->state = MLD_RGS_LISTENERS_PRESENT;
+    }
 
     delete packet;
 }
@@ -726,12 +750,29 @@ void Mldv1::processQueryTimer(cMessage *msg)
 
 void Mldv1::processLeaveTimer(cMessage *msg)
 {
-    // Plan 04-02: implement — group timer expired → NO_LISTENERS, removeMulticastListener
+    MldRouterTimerContext *ctx = (MldRouterTimerContext *)msg->getContextPointer();
+    EV_DEBUG << "Mldv1: Leave Timer expired, removing group=" << ctx->routerGroup->groupAddr
+             << " from listener list of '" << ctx->ie->getInterfaceName() << "'\n";
+
+    ctx->ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->removeMulticastListener(ctx->routerGroup->groupAddr);
+    numRouterGroups--;
+
+    if (ctx->routerGroup->state == MLD_RGS_CHECKING_LISTENERS)
+        cancelEvent(ctx->routerGroup->rexmtTimer);
+
+    ctx->routerGroup->state = MLD_RGS_NO_LISTENERS_PRESENT;
+    deleteRouterGroupData(ctx->ie, ctx->routerGroup->groupAddr);
+    numGroups--;
 }
 
 void Mldv1::processRexmtTimer(cMessage *msg)
 {
-    // Plan 04-02: implement — retransmit MAS Query while in CHECKING_LISTENERS
+    MldRouterTimerContext *ctx = (MldRouterTimerContext *)msg->getContextPointer();
+    EV_DEBUG << "Mldv1: Rexmt Timer expired for group=" << ctx->routerGroup->groupAddr
+             << " iface=" << ctx->ie->getInterfaceName() << "\n";
+    sendQuery(ctx->ie, ctx->routerGroup->groupAddr, lastListenerQueryInterval);
+    startTimer(ctx->routerGroup->rexmtTimer, lastListenerQueryInterval);
+    ctx->routerGroup->state = MLD_RGS_CHECKING_LISTENERS;
 }
 
 void Mldv1::sendQuery(NetworkInterface *ie, const Ipv6Address& groupAddr, double maxRespTime)
@@ -761,7 +802,26 @@ void Mldv1::sendQuery(NetworkInterface *ie, const Ipv6Address& groupAddr, double
 
 void Mldv1::processDone(NetworkInterface *ie, Packet *packet)
 {
-    // Plan 04-02: implement — router Done handling: send MAS queries, CHECKING_LISTENERS
+    ASSERT(ie->isMulticast());
+
+    const auto& msg = packet->peekAtFront<MldDone>();
+    Ipv6Address groupAddr = msg->getMulticastAddress();
+
+    EV_INFO << "Mldv1: received Multicast Listener Done for group=" << groupAddr
+            << " iface=" << ie->getInterfaceName() << "\n";
+    numDonesRecv++;
+
+    if (rt->isMulticastForwardingEnabled()) {
+        RouterGroupData *groupData = getRouterGroupData(ie, groupAddr);
+        if (groupData && groupData->state == MLD_RGS_LISTENERS_PRESENT) {
+            // No querier check — we are always the querier (single-querier decision)
+            startTimer(groupData->timer, lastListenerQueryInterval * lastListenerQueryCount);
+            startTimer(groupData->rexmtTimer, lastListenerQueryInterval);
+            sendQuery(ie, groupAddr, lastListenerQueryInterval);
+            groupData->state = MLD_RGS_CHECKING_LISTENERS;
+        }
+    }
+
     delete packet;
 }
 
