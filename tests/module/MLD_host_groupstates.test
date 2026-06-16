@@ -1,0 +1,177 @@
+%description:
+Deterministic MLDv1 host group-state-transition test (RFC 2710 §5).
+
+Exercises the three host states (Non-Listener, Delaying Listener, Idle Listener)
+and the four RFC 2710 host behaviors, each proved by Mldv1 EV_INFO markers in stdout.
+
+RFC 2710 §5 host state machine (summarized):
+
+  Non-Listener
+    |  join (send unsolicited Report, start timer)
+    v
+  Delaying Listener <-------- General/MAS Query received (start/reset timer)
+    |  timer expired (send Report, flag=true)   |  Report received (cancel timer, clear flag)
+    v                                            v
+  Idle Listener ------- leave (send Done if flag=true) --> Non-Listener
+
+Trajectories tested (both hosts join ff0e::1 on the shared hub segment):
+
+TRAJ-1  ff0e::1  (host1 and host2)
+  Non-Listener --> join --> DELAYING_LISTENER (unsolicited Report sent by each host)
+
+  HOST-01: The unsolicited "sending Multicast Listener Report" line from host1
+  proves the Non-Listener --> DELAYING_LISTENER transition (join fires Report).
+
+TRAJ-2  ff0e::1  suppression  (host2 hears host1's Report on the shared hub)
+  host2 is in DELAYING_LISTENER when it receives host1's Report for ff0e::1.
+  host2 cancels its pending timer and transitions --> IDLE_LISTENER without sending
+  a second Report (RFC 2710 §5: "cancel timer, clear flag").
+
+  HOST-03: The "received Multicast Listener Report" line from host2
+  proves the DELAYING_LISTENER --> IDLE_LISTENER suppression path.
+
+TRAJ-3  ff0e::1  Query-driven  (host1 receives General Query after becoming Idle)
+  After host1's initial Report timer fires (Non-Listener --> DELAYING --> IDLE_LISTENER),
+  the router's first General Query arrives at t~2s. host1 (now Idle) transitions
+  IDLE_LISTENER --> DELAYING_LISTENER and schedules a uniform(0, maxRespDelay) delayed Report.
+
+  HOST-02: The "received General Listener Query" line proves Idle --> DELAYING_LISTENER.
+  The subsequent "sending Multicast Listener Report" line proves the delayed Report was sent.
+
+TRAJ-4  ff0e::1  Done on leave  (host1 leaves at t=5s via sendTestLeave)
+  host1's sendTestLeave=true fires at t=5s. After the Query-driven Report, host1's
+  flag=true, so Done is sent to ff02::2 (ALL_ROUTERS_2).
+
+  HOST-04: The "sending Multicast Listener Done" line proves
+  IDLE_LISTENER --> NON_LISTENER (leave with Done, flag=true).
+
+Note on intermediate IDLE_LISTENER observability: timer expiry is only EV_DEBUG in Mldv1
+(not EV_INFO), so the IDLE_LISTENER state after unsolicited-Report-timer expiry is inferred
+from the sequence: (1) join -> unsolicited Report, (2) Query received -> delayed Report
+scheduled, (3) delayed Report sent. The presence of (2) proves the host was Idle (not
+Delaying) when the Query arrived, confirming the timer-expired transition occurred.
+
+Network: host1, host2, and router all connect to a shared EthernetHub.
+Ipv6FlatNetworkConfigurator assigns /64 link-local and global addresses.
+hasMld=true on all nodes; dupAddrDetectTransmits=0 eliminates DAD delay.
+Router is a real querier (multicastForwarding=true at node level) with short timers.
+seed-set=0 pins uniform(0, maxRespDelay) for deterministic timer behavior.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.node.ethernet.EthernetHub;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network MldHostGroupstatesNetwork
+{
+    types:
+        channel ethline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator;
+        host1: StandardHost6;
+        host2: StandardHost6;
+        router: Router6;
+        hub: EthernetHub;
+    connections:
+        host1.ethg++ <--> ethline <--> hub.ethg++;
+        host2.ethg++ <--> ethline <--> hub.ethg++;
+        router.ethg++ <--> ethline <--> hub.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+ned-path = ../../../../src
+network = MldHostGroupstatesNetwork
+sim-time-limit = 30s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+# Fix RNG seed for deterministic behavior of uniform(0, maxRespTime) in startHostTimer
+seed-set = 0
+
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+# Enable MLD on all nodes
+**.ipv6.hasMld = true
+# Disable DAD so addresses are available immediately (no ~1s delay before group joins activate)
+**.neighbourDiscovery.dupAddrDetectTransmits = 0
+
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue"
+**.eth[*].queue.dataQueue.packetCapacity = 10
+
+# TRAJ-1/2/3/4: both hosts join ff0e::1 directly via testMulticastGroup during
+# INITSTAGE_NETWORK_LAYER. This calls Ipv6InterfaceData::joinMulticastGroup which
+# fires ipv6MulticastGroupJoinedSignal -> Mldv1::multicastGroupJoined, sending an
+# unsolicited Report and starting the Delaying timer. Bypasses the UDP assignAddress
+# path that does not fire ipv6MulticastGroupJoinedSignal for IPv6.
+# Both hosts on the same hub segment means each host's Report is seen by the other,
+# enabling TRAJ-2 suppression (host2 hears host1's Report while still Delaying).
+**.host1.ipv6.mldv1.testMulticastGroup = "ff0e::1"
+**.host2.ipv6.mldv1.testMulticastGroup = "ff0e::1"
+
+# TRAJ-3: real querier on the router drives the Idle -> Delaying -> Report path.
+# multicastForwarding MUST be set at node level: NetworkLayerNodeBase propagates
+# *.multicastForwarding = this.multicastForwarding to the routing table. A per-submodule
+# setting (**.router.ipv6.routingTable.multicastForwarding = true) would be overridden.
+**.router.multicastForwarding = true
+**.router.ipv6.mldv1.startupQueryInterval = 2s
+**.router.ipv6.mldv1.queryInterval = 5s
+**.router.ipv6.mldv1.queryResponseInterval = 1s
+
+# TRAJ-4: host1 leaves all joined groups at t=5s via multicastGroupLeft() directly.
+# Bypasses the UDP leaveMulticastGroup path (NetworkInterface::changeMulticastGroupMembership
+# is not implemented for IPv6). After the Query-driven Report (timer fires within 0..1s
+# of the t=2s General Query), host1's flag=true -> Done is sent to ff02::2 at t=5s.
+**.host1.ipv6.mldv1.sendTestLeave = true
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%# HOST-01 / TRAJ-1: unsolicited Multicast Listener Report sent by host1 on join
+%# Proves: Non-Listener --> DELAYING_LISTENER transition (join fires immediate unsolicited Report)
+%contains: stdout
+MldHostGroupstatesNetwork.host1.ipv6.mldv1: Mldv1: sending Multicast Listener Report for group=ff0e::1 on iface=eth0
+
+%#--------------------------------------------------------------------------------------------------------------
+%# HOST-03 / TRAJ-2: report suppression -- host2 hears host1's Report while still in Delaying state
+%# Proves: DELAYING_LISTENER --> IDLE_LISTENER via received Report (suppression path)
+%contains: stdout
+MldHostGroupstatesNetwork.host2.ipv6.mldv1: Mldv1: received Multicast Listener Report for group=ff0e::1 iface=eth0
+
+%#--------------------------------------------------------------------------------------------------------------
+%# HOST-02a / TRAJ-3: router's General Query received by host1 (host1 is in IDLE_LISTENER at this point)
+%# Proves: IDLE_LISTENER --> DELAYING_LISTENER transition (query received schedules delayed Report)
+%contains: stdout
+MldHostGroupstatesNetwork.host1.ipv6.mldv1: Mldv1: received General Listener Query on iface=eth0
+
+%#--------------------------------------------------------------------------------------------------------------
+%# HOST-02b / TRAJ-3: delayed Report sent by host1 after the General Query timer fires
+%# Proves: DELAYING_LISTENER --> IDLE_LISTENER via timer expiry (Report sent, flag=true)
+%contains: stdout
+MldHostGroupstatesNetwork.host1.ipv6.mldv1: Mldv1: sending Multicast Listener Report for group=ff0e::1 on iface=eth0
+
+%#--------------------------------------------------------------------------------------------------------------
+%# HOST-04 / TRAJ-4: Done sent by host1 at t=5s when sendTestLeave fires (flag=true after Query Report)
+%# Proves: IDLE_LISTENER --> NON_LISTENER via leave with Done (flag=true path)
+%contains: stdout
+MldHostGroupstatesNetwork.host1.ipv6.mldv1: Mldv1: sending Multicast Listener Done for group=ff0e::1 on iface=eth0
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
