@@ -58,6 +58,11 @@ simple Mldv1 extends SimpleModule like IMld
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
         string checksumMode @enum("declared","computed") = default("declared");
+        // Administratively enables MLD on this node. When false, the module is
+        // inert: it sends no Report/Done on group join/leave, runs no querier
+        // (no General/MAS Queries, no listener recording), and drops any inbound
+        // MLD message. The module is still instantiated and registered, but
+        // performs no MLD protocol activity.
         bool enabled = default(true);
         // RFC 2710 §7.2 Unsolicited Report Interval: time between unsolicited
         // Multicast Listener Reports sent on join (default 10s per RFC 2710).

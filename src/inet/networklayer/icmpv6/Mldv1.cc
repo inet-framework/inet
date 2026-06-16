@@ -319,6 +319,13 @@ void Mldv1::startHostTimer(NetworkInterface *ie, HostGroupData *group, double ma
 
 void Mldv1::processMldMessage(Packet *packet)
 {
+    if (!enabled) {
+        // MLD administratively disabled on this node: ignore inbound MLD messages.
+        EV_INFO << "MLD disabled, dropping received MLD message.\n";
+        delete packet;
+        return;
+    }
+
     const auto& mldMsg = packet->peekAtFront<MldMessage>();
     NetworkInterface *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
     EV_INFO << "Received MLD message, type=" << (int)mldMsg->getType() << endl;  // keep for MLD_smoke.test
