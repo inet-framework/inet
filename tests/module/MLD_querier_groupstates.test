@@ -171,10 +171,13 @@ MldQuerierGroupstatesNetwork.router.ipv6.mldv1: Mldv1: recorded listener for gro
 
 %#--------------------------------------------------------------------------------------------------------------
 %# TRAJ-1 indirect No-Listeners-Present proof: rexmt timer fires a second MAS Query for ff0e::1.
-%# Extract all MAS Query lines for ff0e::1 and count them; must be >= 2 (Done-triggered + rexmt).
-%# This proves the Checking Listeners countdown ran (both MAS Queries were sent before removal).
-%postrun-command: grep "MldQuerierGroupstatesNetwork.router.ipv6.mldv1: Mldv1: sending Multicast-Address-Specific Query for group=ff0e::1" test.out > mas_query_ff0e1.out || true
-%contains: mas_query_ff0e1.out
+%# lastListenerQueryCount=2 means the router sends MAS Query twice: once on receiving the Done
+%# (Listeners Present --> Checking Listeners) and once more when the rexmt timer fires.
+%# Extract the 2nd MAS Query line via sed -n '2p'; a non-empty result proves the rexmt path
+%# actually ran.  If the rexmt were broken, only 1 MAS Query would be sent and the output file
+%# would be empty, causing %contains to fail.
+%postrun-command: grep "MldQuerierGroupstatesNetwork.router.ipv6.mldv1: Mldv1: sending Multicast-Address-Specific Query for group=ff0e::1" test.out | sed -n '2p' > mas_query_ff0e1_rexmt.out || true
+%contains: mas_query_ff0e1_rexmt.out
 Multicast-Address-Specific Query for group=ff0e::1
 
 %#--------------------------------------------------------------------------------------------------------------
