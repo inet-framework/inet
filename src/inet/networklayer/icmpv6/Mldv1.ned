@@ -37,6 +37,19 @@ simple Mldv1 extends SimpleModule like IMld
         // This lets MLD_host_basic.test exercise the HOST-02 (Delaying Listener) path
         // without a real router querier (Phase 4). MUST remain default(false).
         bool sendTestQuery = default(false);
+        // Test-only: when true, simulates leaving all joined groups at t=5s by calling
+        // multicastGroupLeft() directly. This bypasses the UDP leaveMulticastGroup path
+        // (which is not implemented for IPv6 in NetworkInterface::changeMulticastGroupMembership).
+        // Used in MLD_host_basic.test to observe the HOST-04 (Done to ff02::2) behavior.
+        // MUST remain default(false).
+        bool sendTestLeave = default(false);
+        // Test-only: if non-empty, Mldv1 directly calls multicastGroupJoined() for this
+        // IPv6 multicast address on every multicast-capable interface during INITSTAGE_NETWORK_LAYER.
+        // This bypasses the UDP addMulticastAddressToInterface path (which uses assignAddress
+        // for IPv6 instead of joinMulticastGroup and thus does not fire ipv6MulticastGroupJoinedSignal).
+        // Used in MLD_host_basic.test to join a group and observe HOST-01/02/03/04 behavior.
+        // MUST remain default("") (empty = inactive) so it is inert for production scenarios.
+        string testMulticastGroup = default("");
         // RFC 2710 §7.2 Unsolicited Report Interval: time between unsolicited
         // Multicast Listener Reports sent on join (default 10s per RFC 2710).
         double unsolicitedReportInterval @unit(s) = default(10s);

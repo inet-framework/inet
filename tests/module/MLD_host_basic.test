@@ -1,0 +1,151 @@
+%description:
+Deterministic MLDv1 host-behavior test (RFC 2710).
+
+Tests all four host behaviors via Cmdenv log assertions with a fixed RNG seed:
+
+HOST-01 (unsolicited Report on join):
+  host1 and host2 join ff0e::1:2:3 via Mldv1's testMulticastGroup parameter,
+  which calls multicastGroupJoined() directly during INITSTAGE_NETWORK_LAYER.
+  This bypasses the UDP addMulticastAddressToInterface path (which calls
+  assignAddress for IPv6 instead of joinMulticastGroup, thus not firing
+  ipv6MulticastGroupJoinedSignal). Mldv1 sends an unsolicited Multicast Listener
+  Report immediately on the join.
+
+HOST-03 (report suppression):
+  Both hosts join the same group and both send unsolicited Reports at t=0.
+  Because all nodes are on the SAME Ethernet segment (via EthernetHub), host2
+  hears host1's Report while host2 is still in DELAYING_LISTENER state.
+  host2 suppresses its own pending timer (cancelEvent, flag=false,
+  state=IDLE_LISTENER). The test asserts the "received Multicast Listener
+  Report" log line from host2, proving the suppression path was exercised.
+
+HOST-02 (delayed Report on General Query):
+  The router has sendTestQuery=true, which fires at t=2s and sends a General
+  MLD Query (type=130, multicastAddress=::, maxRespDelay=1000ms) to ff02::1.
+  All nodes on the shared Ethernet segment receive it. Hosts receive it via
+  processMldMessage -> processQuery -> processGroupQuery. Idle Listeners
+  transition to Delaying Listener and schedule uniform(0, 1s) delayed Reports.
+  The test asserts the "received General Listener Query" log line from host1
+  and then a subsequent "sending Multicast Listener Report".
+
+HOST-04 (Done on leave):
+  host1 has sendTestLeave=true, which fires at t=5s and calls multicastGroupLeft()
+  directly for all joined groups. This bypasses the UDP leaveMulticastGroup path
+  (NetworkInterface::changeMulticastGroupMembership is not implemented for IPv6).
+  After the Query-driven Report (t~2..3s), host1's flag=true, so Done is sent to
+  ff02::2 (ALL_ROUTERS_2).
+
+Network: host1, host2, and router all connect to a shared EthernetHub, putting
+them on the same Ethernet segment. Ipv6FlatNetworkConfigurator assigns addresses.
+All three nodes have hasMld=true. The router injects the test Query at t=2s.
+RNG seed is fixed for reproducibility.
+
+Note: the Mldv1 testMulticastGroup, sendTestQuery, and sendTestLeave parameters
+are all default(false)/"" so they are inert in all production scenarios.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.node.ethernet.EthernetHub;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network MldHostBasicNetwork
+{
+    types:
+        channel ethline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator;
+        host1: StandardHost6;
+        host2: StandardHost6;
+        router: Router6;
+        hub: EthernetHub;
+    connections:
+        host1.ethg++ <--> ethline <--> hub.ethg++;
+        host2.ethg++ <--> ethline <--> hub.ethg++;
+        router.ethg++ <--> ethline <--> hub.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+ned-path = ../../../../src
+network = MldHostBasicNetwork
+sim-time-limit = 10s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+# Fix RNG seed for deterministic behavior of uniform(0, maxRespTime) in startHostTimer
+seed-set = 0
+
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+# Enable MLD on all nodes
+**.ipv6.hasMld = true
+# Disable DAD for fast startup (no 1s+ delay before addresses are ready)
+**.neighbourDiscovery.dupAddrDetectTransmits = 0
+
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue"
+**.eth[*].queue.dataQueue.packetCapacity = 10
+
+# HOST-01/03: host1 and host2 both join ff0e::1:2:3 directly via testMulticastGroup.
+# This calls multicastGroupJoined() during INITSTAGE_NETWORK_LAYER, bypassing the
+# UDP assignAddress path that does not fire ipv6MulticastGroupJoinedSignal for IPv6.
+# On the shared Ethernet segment, each host's unsolicited Report is seen by the other,
+# triggering report suppression (HOST-03).
+**.host1.ipv6.mldv1.testMulticastGroup = "ff0e::1:2:3"
+**.host2.ipv6.mldv1.testMulticastGroup = "ff0e::1:2:3"
+
+# HOST-02: router sends one General MLD Query at t=2s (sendTestQuery=true).
+# All nodes on the shared segment receive it; hosts transition Idle -> Delaying.
+**.router.ipv6.mldv1.sendTestQuery = true
+
+# HOST-04: host1 triggers multicastGroupLeft at t=5s via sendTestLeave=true.
+# This bypasses the UDP leaveMulticastGroup path (not implemented for IPv6).
+# After the Query-driven Report (t~2..3s), host1's flag=true -> Done sent to ff02::2.
+**.host1.ipv6.mldv1.sendTestLeave = true
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%# HOST-01: unsolicited Multicast Listener Report sent by host1 on join
+%contains: stdout
+MldHostBasicNetwork.host1.ipv6.mldv1: Mldv1: sending Multicast Listener Report for group=ff0e::1:2:3
+
+%#--------------------------------------------------------------------------------------------------------------
+%# HOST-03: report suppression -- host2 hears host1's Report for ff0e::1:2:3 while in DELAYING state
+%# and cancels its own pending timer (both hosts are on the same Ethernet segment via hub)
+%contains: stdout
+MldHostBasicNetwork.host2.ipv6.mldv1: Mldv1: received Multicast Listener Report for group=ff0e::1:2:3
+
+%#--------------------------------------------------------------------------------------------------------------
+%# HOST-02: router's General Query at t=2s is received by host1
+%contains: stdout
+MldHostBasicNetwork.host1.ipv6.mldv1: Mldv1: received General Listener Query on iface=
+
+%#--------------------------------------------------------------------------------------------------------------
+%# HOST-02: after the General Query, host1 schedules and sends a delayed Report (within 1s)
+%contains: stdout
+MldHostBasicNetwork.host1.ipv6.mldv1: Mldv1: sending Multicast Listener Report for group=ff0e::1:2:3
+
+%#--------------------------------------------------------------------------------------------------------------
+%# HOST-04: Done sent to ff02::2 when host1 leaves at t=5s (flag=true after Query-driven Report)
+%contains: stdout
+MldHostBasicNetwork.host1.ipv6.mldv1: Mldv1: sending Multicast Listener Done for group=ff0e::1:2:3
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
