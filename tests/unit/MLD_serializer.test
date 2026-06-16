@@ -1,0 +1,153 @@
+%description:
+Byte-exact round-trip serialization tests for MLDv1 headers (RFC 2710 §3):
+MldQuery, MldReport, and MldDone — 24-byte wire layout encode→decode.
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/networklayer/icmpv6/MldMessage_m.h"
+
+using namespace inet;
+
+%global:
+
+// Serialize a chunk to bytes, then deserialize it back
+template<typename T>
+Ptr<const T> roundTrip(const Ptr<const T>& original)
+{
+    Packet pkt("test");
+    pkt.insertAtFront(original);
+    auto bytes = pkt.peekAllAsBytes();
+
+    Packet pkt2("test2");
+    pkt2.insertAtFront(bytes);
+    return pkt2.popAtFront<T>(pkt2.getDataLength());
+}
+
+%activity:
+
+// === 1. MldQuery (general query) ===
+{
+    EV << "=== MldQuery (general) ===" << endl;
+    auto q = makeShared<MldQuery>();
+    q->setMaxRespDelay(10000);
+    q->setReserved(0);
+    q->setMulticastAddress(Ipv6Address::UNSPECIFIED_ADDRESS);
+
+    Packet pkt("sz");
+    pkt.insertAtFront(q);
+    B len = pkt.getDataLength();
+    EV << "  serializedLength: " << len.get() << endl;
+    ASSERT(len == B(24));
+
+    auto q2 = roundTrip(staticPtrCast<const MldMessage>(q));
+    ASSERT(q2 != nullptr);
+    ASSERT(q2->getType() == ICMPv6_MLD_QUERY);
+    ASSERT(q2->getMaxRespDelay() == 10000);
+    ASSERT(q2->getReserved() == 0);
+    ASSERT(q2->getMulticastAddress().isUnspecified());
+    EV << "  type: " << (int)q2->getType() << endl;
+    EV << "  maxRespDelay: " << q2->getMaxRespDelay() << endl;
+    EV << "  reserved: " << q2->getReserved() << endl;
+    EV << "  multicastAddress: " << q2->getMulticastAddress() << endl;
+    EV << "  PASS" << endl;
+}
+
+// === 2. MldQuery (group-specific) ===
+{
+    EV << "=== MldQuery (group-specific) ===" << endl;
+    auto q = makeShared<MldQuery>();
+    q->setMaxRespDelay(5000);
+    q->setReserved(0);
+    q->setMulticastAddress(Ipv6Address("ff02::1"));
+
+    Packet pkt("sz");
+    pkt.insertAtFront(q);
+    ASSERT(pkt.getDataLength() == B(24));
+
+    auto q2 = roundTrip(staticPtrCast<const MldMessage>(q));
+    ASSERT(q2 != nullptr);
+    ASSERT(q2->getType() == ICMPv6_MLD_QUERY);
+    ASSERT(q2->getMaxRespDelay() == 5000);
+    ASSERT(q2->getReserved() == 0);
+    ASSERT(q2->getMulticastAddress() == Ipv6Address("ff02::1"));
+    EV << "  type: " << (int)q2->getType() << endl;
+    EV << "  maxRespDelay: " << q2->getMaxRespDelay() << endl;
+    EV << "  multicastAddress: " << q2->getMulticastAddress() << endl;
+    EV << "  PASS" << endl;
+}
+
+// === 3. MldReport ===
+{
+    EV << "=== MldReport ===" << endl;
+    auto r = makeShared<MldReport>();
+    r->setMaxRespDelay(0);
+    r->setReserved(0);
+    r->setMulticastAddress(Ipv6Address("ff02::1:ff00:1"));
+
+    Packet pkt("sz");
+    pkt.insertAtFront(r);
+    ASSERT(pkt.getDataLength() == B(24));
+
+    auto r2 = roundTrip(staticPtrCast<const MldMessage>(r));
+    ASSERT(r2 != nullptr);
+    ASSERT(r2->getType() == ICMPv6_MLD_REPORT);
+    ASSERT(r2->getMaxRespDelay() == 0);
+    ASSERT(r2->getReserved() == 0);
+    ASSERT(r2->getMulticastAddress() == Ipv6Address("ff02::1:ff00:1"));
+    EV << "  type: " << (int)r2->getType() << endl;
+    EV << "  maxRespDelay: " << r2->getMaxRespDelay() << endl;
+    EV << "  multicastAddress: " << r2->getMulticastAddress() << endl;
+    EV << "  PASS" << endl;
+}
+
+// === 4. MldDone ===
+{
+    EV << "=== MldDone ===" << endl;
+    auto d = makeShared<MldDone>();
+    d->setMaxRespDelay(0);
+    d->setReserved(0);
+    d->setMulticastAddress(Ipv6Address("ff02::2"));
+
+    Packet pkt("sz");
+    pkt.insertAtFront(d);
+    ASSERT(pkt.getDataLength() == B(24));
+
+    auto d2 = roundTrip(staticPtrCast<const MldMessage>(d));
+    ASSERT(d2 != nullptr);
+    ASSERT(d2->getType() == ICMPv6_MLD_DONE);
+    ASSERT(d2->getMaxRespDelay() == 0);
+    ASSERT(d2->getReserved() == 0);
+    ASSERT(d2->getMulticastAddress() == Ipv6Address("ff02::2"));
+    EV << "  type: " << (int)d2->getType() << endl;
+    EV << "  maxRespDelay: " << d2->getMaxRespDelay() << endl;
+    EV << "  multicastAddress: " << d2->getMulticastAddress() << endl;
+    EV << "  PASS" << endl;
+}
+
+EV << "All MLD serializer round-trip tests passed." << endl;
+
+%contains: stdout
+=== MldQuery (general) ===
+  serializedLength: 24
+  type: 130
+  maxRespDelay: 10000
+  reserved: 0
+  multicastAddress: <unspec>
+  PASS
+=== MldQuery (group-specific) ===
+  type: 130
+  maxRespDelay: 5000
+  multicastAddress: ff02::1
+  PASS
+=== MldReport ===
+  type: 131
+  maxRespDelay: 0
+  multicastAddress: ff02::1:ff00:1
+  PASS
+=== MldDone ===
+  type: 132
+  maxRespDelay: 0
+  multicastAddress: ff02::2
+  PASS
+All MLD serializer round-trip tests passed.
