@@ -18,9 +18,6 @@ import ned.DatarateChannel;
 // router querier sends periodic General Queries. One host leaves the group,
 // triggering an MLD Done -> Multicast-Address-Specific Query sequence.
 //
-// Run command (from this directory):
-//   inet -u Cmdenv -f omnetpp.ini -c MldDemo -r 0
-//
 network MldDemo
 {
     types:
