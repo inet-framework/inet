@@ -701,7 +701,7 @@ void Mldv1::deleteRouterInterfaceData(int interfaceId)
     }
 }
 
-// --- Router behavior skeleton bodies (logic implemented in Plan 04-02) ---
+// --- Router (querier) behavior ---
 
 void Mldv1::configureInterface(NetworkInterface *ie)
 {
