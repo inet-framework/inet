@@ -304,11 +304,11 @@ void Mldv1::multicastGroupLeft(NetworkInterface *ie, const Ipv6Address& groupAdd
 
             if (groupData->flag)
                 sendDone(ie, groupData);
-        }
 
-        deleteHostGroupData(ie, groupAddr);
-        numHostGroups--;
-        numGroups--;
+            deleteHostGroupData(ie, groupAddr);
+            numHostGroups--;
+            numGroups--;
+        }
     }
 }
 
@@ -498,29 +498,18 @@ void Mldv1::sendToIPv6(Packet *msg, NetworkInterface *ie, const Ipv6Address& des
 
 void Mldv1::handleStopOperation(LifecycleOperation *operation)
 {
+    // Clear per-interface host state and cancel timers. Signal subscriptions are
+    // NOT removed here: like Igmpv2, MLD subscribes once in initialize() and keeps
+    // the subscription for the module's lifetime, so a stop/start lifecycle cycle
+    // does not leave the module deaf to membership-change signals.
     while (!hostData.empty())
         deleteHostInterfaceData(hostData.begin()->first);
-    cModule *host = getContainingNode(this);
-    host->unsubscribe(interfaceCreatedSignal, this);
-    host->unsubscribe(interfaceDeletedSignal, this);
-    host->unsubscribe(ipv6MulticastGroupJoinedSignal, this);
-    host->unsubscribe(ipv6MulticastGroupLeftSignal, this);
 }
 
 void Mldv1::handleCrashOperation(LifecycleOperation *operation)
 {
     while (!hostData.empty())
         deleteHostInterfaceData(hostData.begin()->first);
-    // On crash: signals may already be torn down; attempt unsubscribe defensively
-    cModule *host = getContainingNode(this);
-    if (host->isSubscribed(interfaceCreatedSignal, this))
-        host->unsubscribe(interfaceCreatedSignal, this);
-    if (host->isSubscribed(interfaceDeletedSignal, this))
-        host->unsubscribe(interfaceDeletedSignal, this);
-    if (host->isSubscribed(ipv6MulticastGroupJoinedSignal, this))
-        host->unsubscribe(ipv6MulticastGroupJoinedSignal, this);
-    if (host->isSubscribed(ipv6MulticastGroupLeftSignal, this))
-        host->unsubscribe(ipv6MulticastGroupLeftSignal, this);
 }
 
 // --- Host group-data CRUD helpers ---
