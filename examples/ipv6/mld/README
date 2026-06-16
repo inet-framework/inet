@@ -1,0 +1,36 @@
+MLDv1 Example (examples/ipv6/mld)
+===================================
+
+This example demonstrates IPv6 Multicast Listener Discovery version 1 (MLDv1,
+RFC 2710) using real application-driven group membership.
+
+Topology
+--------
+A shared Ethernet hub connects two listener hosts (host1, host2), one router
+querier, and one UDP data sender. Ipv6FlatNetworkConfigurator assigns addresses.
+
+Scenario (config MldDemo)
+--------------------------
+1. host1 and host2 join multicast group ff0e::1 by opening UdpSink sockets with
+   multicastGroup="ff0e::1" — this fires an unsolicited Multicast Listener Report.
+2. The Router6 querier sends a General Listener Query on the shared link every
+   queryInterval seconds (first query at startupQueryInterval=2s).
+3. host2 closes its UdpSink socket at stopTime=10s — this fires an MLD Done,
+   which the router processes by sending a Multicast-Address-Specific Query for
+   ff0e::1. host1 remains joined for the full simulation.
+4. An optional UdpBasicApp sender transmits data to ff0e::1 to show delivery
+   to the joined listeners.
+
+Run command (from this directory)
+----------------------------------
+    inet -u Cmdenv -f omnetpp.ini -c MldDemo -r 0
+
+Key EV markers to look for in the Cmdenv log
+----------------------------------------------
+    "sending Multicast Listener Report for group=ff0e::1 on iface="  (host join)
+    "recorded listener for group=ff0e::1"                            (router records)
+    "sending General Listener Query on iface="                       (router periodic query)
+    "received General Listener Query on iface="                      (host sees query)
+    "sending Multicast Listener Done for group=ff0e::1 on iface="    (host2 leave)
+    "received Multicast Listener Done for group=ff0e::1"             (router sees done)
+    "sending Multicast-Address-Specific Query for group=ff0e::1"     (router MAS query)
