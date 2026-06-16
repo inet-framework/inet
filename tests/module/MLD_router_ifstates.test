@@ -1,0 +1,131 @@
+%description:
+Deterministic MLDv1 router/querier interface-state test (RFC 2710 §7).
+
+NOTE: Mldv1 is SINGLE-QUERIER — there is NO NON_QUERIER state, no
+otherQuerierPresentTimer, and no querier-election mechanism (Q2 decision).
+The IGMP_router_ifstates.test trajectory (QUERIER <-> NON_QUERIER transitions
+driven by a lower-IP router) has NO MLD equivalent and is OMITTED here.
+
+This test covers the QUERIER-SIDE interface behavior that IS present in Mldv1:
+
+IFSTATE-01 (initial General Query on configureInterface):
+  The router has multicastForwarding=true (set at the node level so
+  NetworkLayerNodeBase propagates it to the routing table). At
+  startupQueryInterval=2s, the router sends its first General Listener Query
+  on each multicast-capable interface. The %contains assertion matches this
+  first emission.
+
+IFSTATE-02 (periodic General Query on gen-query timer rearm):
+  After the initial Query, processQueryTimer re-arms and fires at queryInterval=5s,
+  sending a second General Listener Query (RTR-01 periodic cycle). A
+  %postrun-command counts all General-Query-sending lines from the router;
+  the count must be >= 2, proving the timer-rearm path executed.
+
+SINGLE-QUERIER PROOF (host-only no-Query negative):
+  host1 has multicastForwarding=false (the default). Only the router runs the
+  querier path. A %postrun-command extracts any Query-sending lines from host1
+  and a %not-contains asserts the file is empty, proving that a non-forwarding
+  node never becomes a querier.
+
+Network: host1 (StandardHost6) and router (Router6) connect via a shared
+EthernetHub. Ipv6FlatNetworkConfigurator assigns addresses. hasMld=true on
+both nodes. dupAddrDetectTransmits=0 eliminates DAD delay. seed-set=0 pins RNG.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.node.ethernet.EthernetHub;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network MldRouterIfstatesNetwork
+{
+    types:
+        channel ethline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator;
+        host1: StandardHost6;
+        router: Router6;
+        hub: EthernetHub;
+    connections:
+        host1.ethg++ <--> ethline <--> hub.ethg++;
+        router.ethg++ <--> ethline <--> hub.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+ned-path = ../../../../src
+network = MldRouterIfstatesNetwork
+sim-time-limit = 20s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+# Fix RNG seed for deterministic behavior
+seed-set = 0
+
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+# Enable MLD on all nodes
+**.ipv6.hasMld = true
+# Disable DAD for fast startup (no 1s+ delay before addresses become ready)
+**.neighbourDiscovery.dupAddrDetectTransmits = 0
+
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue"
+**.eth[*].queue.dataQueue.packetCapacity = 10
+
+# IFSTATE-01/02: activate the real querier ONLY on the router.
+# Must be set at the node (Router6) level: NetworkLayerNodeBase propagates
+#   *.multicastForwarding = this.multicastForwarding
+# to all submodules (including ipv6.routingTable), overriding any per-submodule INI setting.
+**.router.multicastForwarding = true
+
+# IFSTATE-01: first General Query fires at startupQueryInterval after init (~2s).
+**.router.ipv6.mldv1.startupQueryInterval = 2s
+# IFSTATE-02: second (periodic) General Query fires at queryInterval=5s after first.
+# With sim-time-limit=20s, the second Query fires at ~7s: well within the window.
+**.router.ipv6.mldv1.queryInterval = 5s
+**.router.ipv6.mldv1.queryResponseInterval = 1s
+
+# host1: multicastForwarding=false (the default — not set explicitly).
+# This is the subject of the single-querier negative proof.
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%# IFSTATE-01: router sends the initial General Listener Query (configureInterface path)
+%contains: stdout
+MldRouterIfstatesNetwork.router.ipv6.mldv1: Mldv1: sending General Listener Query on iface=
+
+%#--------------------------------------------------------------------------------------------------------------
+%# IFSTATE-02: router sends a SECOND periodic General Listener Query (gen-query timer rearm).
+%# Extract all General-Query-sending lines from the router; the second line must exist.
+%# startupQueryInterval=2s -> first Query at ~2s; queryInterval=5s -> second at ~7s (both within 20s).
+%postrun-command: grep "MldRouterIfstatesNetwork.router.ipv6.mldv1: Mldv1: sending General Listener Query" test.out | sed -n '2p' > gq_second.out || true
+%contains: gq_second.out
+sending General Listener Query on iface=
+
+%#--------------------------------------------------------------------------------------------------------------
+%# SINGLE-QUERIER PROOF: host1 has multicastForwarding=false (the default) and must
+%# NEVER send any Query. Extract all host1 Query-sending lines; the file must be empty.
+%postrun-command: grep -E "MldRouterIfstatesNetwork\.host1\.ipv6\.mldv1: Mldv1: sending (General Listener|Multicast-Address-Specific) Query" test.out > host1_query.out || true
+%not-contains: host1_query.out
+Query
+
+%#--------------------------------------------------------------------------------------------------------------
+%# Undisposed-object guard: verify no leaked cMessage or cObject at end of run
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
