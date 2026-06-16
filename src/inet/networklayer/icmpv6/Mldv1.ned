@@ -27,6 +27,11 @@ simple Mldv1 extends SimpleModule like IMld
         string routingTableModule;
         string checksumMode @enum("declared","computed") = default("declared");
         bool enabled = default(true);
+        // Test-only: when true, schedules a single MLD Report send at t=0.5s
+        // so the MLD_smoke.test can verify end-to-end dispatcher flow without
+        // a real state machine. MUST remain default(false) so it is inert for
+        // all production scenarios and other tests.
+        bool sendTestMessage = default(false);
         @display("i=block/cogwheel");
 
     gates:

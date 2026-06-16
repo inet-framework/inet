@@ -164,6 +164,17 @@ void Icmpv6::processICMPv6Message(Packet *packet)
                 processEchoReply(packet, echoReply);
                 break;
             }
+            case ICMPv6_MLD_QUERY:
+            case ICMPv6_MLD_REPORT:
+            case ICMPv6_MLD_DONE: {
+                // MLD messages (RFC 2710) are ICMPv6 subtypes; forward to Mldv1
+                // via the lp dispatcher by re-tagging with Protocol::mld.
+                EV_INFO << "ICMPv6: forwarding MLD message (type=" << type << ") to MLD module.\n";
+                packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::mld);
+                packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::mld);
+                send(packet, "ipv6Out");
+                break;
+            }
             default:
                 throw cRuntimeError("Unknown ICMPv6 message type %d received", type);
         }

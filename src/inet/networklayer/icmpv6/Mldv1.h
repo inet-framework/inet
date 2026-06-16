@@ -29,6 +29,8 @@ class INET_API Mldv1 : public OperationalBase
 
     bool enabled = true;
     ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
+    bool sendTestMessage = false;
+    cMessage *testTimer = nullptr;
 
   protected:
     virtual bool isInitializeStage(int stage) const override { return stage == INITSTAGE_NETWORK_LAYER; }
@@ -37,6 +39,8 @@ class INET_API Mldv1 : public OperationalBase
     virtual void handleStartOperation(LifecycleOperation *operation) override {}
     virtual void handleStopOperation(LifecycleOperation *operation) override {}
     virtual void handleCrashOperation(LifecycleOperation *operation) override {}
+
+    virtual ~Mldv1() { cancelAndDelete(testTimer); }
 
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;

@@ -1,0 +1,83 @@
+%description:
+MLD (RFC 2710) smoke test: verifies end-to-end dispatcher flow for MLDv1.
+
+This is a skeleton smoke test (single deterministic send) that proves a real
+MLD packet traversed the lp MessageDispatcher and was received:
+  1. The sender's Mldv1 sends one MLD Report packet via sendTestMessage=true
+     (a test-only NED parameter, inert when false -- the default in all other
+     tests).
+  2. The packet travels host->Ethernet->router, is decapsulated by the router's
+     IPv6 module (ICMPv6 payload), forwarded by Icmpv6 to the lp dispatcher
+     with Protocol::mld, and finally delivered to the router's Mldv1 module.
+  3. Mldv1::processMldMessage emits the mandatory receive-path log line
+     "Received MLD message" -- asserted here to prove a real packet traversed
+     the dispatcher (a protocol-registration-only line is NOT acceptable for
+     this assertion, per MOD-04 requirements).
+
+Full join/leave-driven MLD flows are validated in Phase 5.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network MldSmokeNetwork
+{
+    types:
+        channel ethline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator;
+        host: StandardHost6;
+        router: Router6;
+    connections:
+        host.ethg++ <--> ethline <--> router.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+ned-path = ../../../../src
+network = MldSmokeNetwork
+sim-time-limit = 5s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+**.ipv6.hasMld = true
+**.neighbourDiscovery.dupAddrDetectTransmits = 0
+**.host.ipv6.mldv1.sendTestMessage = true
+
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue"
+**.eth[*].queue.dataQueue.packetCapacity = 10
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+MldSmokeNetwork.router.ipv6.mldv1: Received MLD message
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep -i "no module registered for protocol\|unhandled protocol\|no suitable module\|Unknown ICMPv6 message" test.out test.err > test_errors.out 2>/dev/null || true
+%not-contains: test_errors.out
+no module registered for protocol
+%not-contains: test_errors.out
+unhandled protocol
+%not-contains: test_errors.out
+Unknown ICMPv6 message
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

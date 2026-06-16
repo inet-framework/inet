@@ -17,6 +17,7 @@
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/icmpv6/Icmpv6.h"
 #include "inet/networklayer/icmpv6/MldMessage_m.h"
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 
@@ -30,8 +31,13 @@ void Mldv1::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         enabled = par("enabled");
+        sendTestMessage = par("sendTestMessage");
         const char *checksumModeString = par("checksumMode");
         checksumMode = parseChecksumMode(checksumModeString, false);
+        if (sendTestMessage) {
+            testTimer = new cMessage("mldTestTimer");
+            scheduleAt(0.5, testTimer);
+        }
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         ift.reference(this, "interfaceTableModule", true);
@@ -45,8 +51,24 @@ void Mldv1::initialize(int stage)
 void Mldv1::handleMessageWhenUp(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
-        // No timers in this phase (state machines deferred to Phases 3/4)
-        throw cRuntimeError("Unexpected self-message: %s", msg->getName());
+        if (msg == testTimer) {
+            // Test-only send: send a single MLD Report to all-nodes multicast
+            // so MLD_smoke.test can assert the receive-path marker on the peer.
+            for (int i = 0; i < ift->getNumInterfaces(); i++) {
+                NetworkInterface *ie = ift->getInterface(i);
+                if (ie->isMulticast() && !ie->isLoopback()) {
+                    Packet *pkt = new Packet("MLD Report (test)");
+                    const auto& report = makeShared<MldReport>();
+                    report->setMulticastAddress(Ipv6Address::ALL_NODES_2);
+                    Icmpv6::insertChecksum(checksumMode, report, pkt);
+                    pkt->insertAtFront(report);
+                    sendToIPv6(pkt, ie, Ipv6Address::ALL_NODES_2);
+                    break; // send on first multicast-capable interface only
+                }
+            }
+        }
+        else
+            throw cRuntimeError("Unexpected self-message: %s", msg->getName());
     }
     else if (auto packet = dynamic_cast<Packet *>(msg)) {
         if (packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::mld) {
@@ -77,7 +99,11 @@ void Mldv1::processMldMessage(Packet *packet)
 void Mldv1::sendToIPv6(Packet *msg, NetworkInterface *ie, const Ipv6Address& dest)
 {
     ASSERT(ie->isMulticast());
-    msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::mld);
+    // MLD is an ICMPv6 sub-protocol (RFC 2710 §3); at the IP level it is carried
+    // as ICMPv6 (protocol 58). Use Protocol::icmpv6 for the PacketProtocolTag so
+    // that the IPv6 module encodes protocol number 58 in the IPv6 header, and
+    // Protocol::ipv6 in DispatchProtocolReq so the lp dispatcher routes to Ipv6.
+    msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
     msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv6);
     msg->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
     msg->addTagIfAbsent<L3AddressReq>()->setDestAddress(dest);
