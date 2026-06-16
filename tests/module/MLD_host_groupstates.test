@@ -141,28 +141,40 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %#--------------------------------------------------------------------------------------------------------------
 %subst: /omnetpp:://
 %#--------------------------------------------------------------------------------------------------------------
-%# HOST-01 / TRAJ-1: unsolicited Multicast Listener Report sent by host1 on join
-%# Proves: Non-Listener --> DELAYING_LISTENER transition (join fires immediate unsolicited Report)
-%contains: stdout
-MldHostGroupstatesNetwork.host1.ipv6.mldv1: Mldv1: sending Multicast Listener Report for group=ff0e::1 on iface=eth0
+%# HOST-01 / TRAJ-1: unsolicited Multicast Listener Report sent by host1 on join, AND
+%# HOST-02b / TRAJ-3: query-driven Report sent by host1 after General Query timer fires.
+%# Proves both: (a) Non-Listener --> DELAYING_LISTENER (join fires unsolicited Report) and
+%#              (b) DELAYING_LISTENER --> IDLE_LISTENER (delayed Report sent after query).
+%# Disambiguated by asserting >= 2 host1 Report sends (unsolicited + at least one query-driven).
+%# Extracting the 2nd occurrence proves it is independent of the 1st (regression in either path
+%# would reduce the count to 1, causing %contains to fail on an empty file).
+%postrun-command: grep "MldHostGroupstatesNetwork.host1.ipv6.mldv1: Mldv1: sending Multicast Listener Report for group=ff0e::1" test.out | sed -n '2p' > host1_report2.out || true
+%contains: host1_report2.out
+sending Multicast Listener Report for group=ff0e::1
 
 %#--------------------------------------------------------------------------------------------------------------
 %# HOST-03 / TRAJ-2: report suppression -- host2 hears host1's Report while still in Delaying state
-%# Proves: DELAYING_LISTENER --> IDLE_LISTENER via received Report (suppression path)
+%# Proves: DELAYING_LISTENER --> IDLE_LISTENER via received Report (suppression path) -- input proof
 %contains: stdout
 MldHostGroupstatesNetwork.host2.ipv6.mldv1: Mldv1: received Multicast Listener Report for group=ff0e::1 iface=eth0
+
+%#--------------------------------------------------------------------------------------------------------------
+%# HOST-03 / TRAJ-2: suppression output proof -- host2 must NOT fire its pending unsolicited-retransmit
+%# timer before the first General Query.  After host2 sends its join-time unsolicited Report and
+%# then receives host1's Report on the shared hub, Mldv1 must call cancelEvent(timer) on the
+%# retransmit timer.  If that cancelEvent were missing, the timer would fire and a second
+%# "sending Multicast Listener Report" line from host2 would appear before the first General Query.
+%# Count host2 Report sends up to (not including) host2's first "received General Listener Query";
+%# must be exactly 1 (the join-time unsolicited Report only).
+%postrun-command: awk '/MldHostGroupstatesNetwork.host2.ipv6.mldv1: Mldv1: received General Listener Query/{exit} /MldHostGroupstatesNetwork.host2.ipv6.mldv1: Mldv1: sending Multicast Listener Report for group=ff0e::1/{count++} END{print count+0}' test.out > host2_suppress_count.out || true
+%contains: host2_suppress_count.out
+1
 
 %#--------------------------------------------------------------------------------------------------------------
 %# HOST-02a / TRAJ-3: router's General Query received by host1 (host1 is in IDLE_LISTENER at this point)
 %# Proves: IDLE_LISTENER --> DELAYING_LISTENER transition (query received schedules delayed Report)
 %contains: stdout
 MldHostGroupstatesNetwork.host1.ipv6.mldv1: Mldv1: received General Listener Query on iface=eth0
-
-%#--------------------------------------------------------------------------------------------------------------
-%# HOST-02b / TRAJ-3: delayed Report sent by host1 after the General Query timer fires
-%# Proves: DELAYING_LISTENER --> IDLE_LISTENER via timer expiry (Report sent, flag=true)
-%contains: stdout
-MldHostGroupstatesNetwork.host1.ipv6.mldv1: Mldv1: sending Multicast Listener Report for group=ff0e::1 on iface=eth0
 
 %#--------------------------------------------------------------------------------------------------------------
 %# HOST-04 / TRAJ-4: Done sent by host1 at t=5s when sendTestLeave fires (flag=true after Query Report)
