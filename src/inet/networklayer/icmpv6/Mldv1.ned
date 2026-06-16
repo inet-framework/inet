@@ -32,6 +32,9 @@ simple Mldv1 extends SimpleModule like IMld
         // a real state machine. MUST remain default(false) so it is inert for
         // all production scenarios and other tests.
         bool sendTestMessage = default(false);
+        // RFC 2710 §7.2 Unsolicited Report Interval: time between unsolicited
+        // Multicast Listener Reports sent on join (default 10s per RFC 2710).
+        double unsolicitedReportInterval @unit(s) = default(10s);
         @display("i=block/cogwheel");
 
     gates:
