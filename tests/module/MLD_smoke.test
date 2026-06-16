@@ -1,11 +1,10 @@
 %description:
 MLD (RFC 2710) smoke test: verifies end-to-end dispatcher flow for MLDv1.
 
-This is a skeleton smoke test (single deterministic send) that proves a real
-MLD packet traversed the lp MessageDispatcher and was received:
-  1. The sender's Mldv1 sends one MLD Report packet via sendTestMessage=true
-     (a test-only NED parameter, inert when false -- the default in all other
-     tests).
+Proves that a real MLD packet traverses the lp MessageDispatcher and is received:
+  1. host runs a UdpSink with multicastGroup="ff0e::1".  The socket join
+     fires ipv6MulticastGroupJoinedSignal -> Mldv1::multicastGroupJoined ->
+     an unsolicited Multicast Listener Report is sent.
   2. The packet travels host->Ethernet->router, is decapsulated by the router's
      IPv6 module (ICMPv6 payload), forwarded by Icmpv6 to the lp dispatcher
      with Protocol::mld, and finally delivered to the router's Mldv1 module.
@@ -13,8 +12,6 @@ MLD packet traversed the lp MessageDispatcher and was received:
      "Received MLD message" -- asserted here to prove a real packet traversed
      the dispatcher (a protocol-registration-only line is NOT acceptable for
      this assertion, per MOD-04 requirements).
-
-Full join/leave-driven MLD flows are validated in Phase 5.
 
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
@@ -57,11 +54,22 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 **.ipv6.hasMld = true
 **.neighbourDiscovery.dupAddrDetectTransmits = 0
-**.host.ipv6.mldv1.sendTestMessage = true
 
 **.eth[*].queue.typename = "EthernetQosQueue"
 **.eth[*].queue.dataQueue.typename = "DropTailQueue"
 **.eth[*].queue.dataQueue.packetCapacity = 10
+
+# Router is a querier: multicastForwarding=true ensures the Ipv6 module locally
+# delivers MLD ICMPv6 messages to the Mldv1 module regardless of group membership
+# (RFC 2710: multicast routers must receive MLD messages).
+**.router.multicastForwarding = true
+
+# JOIN via real app: UdpSink joins ff0e::1 at startTime=0.
+# Socket join fires ipv6MulticastGroupJoinedSignal -> Mldv1 sends unsolicited Report.
+**.host.numApps = 1
+**.host.app[0].typename = "UdpSink"
+**.host.app[0].localPort = 1000
+**.host.app[0].multicastGroup = "ff0e::1"
 
 %#--------------------------------------------------------------------------------------------------------------
 %subst: /omnetpp:://

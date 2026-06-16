@@ -2,7 +2,8 @@
 Deterministic MLDv1 router/querier behavior test (RFC 2710 §6).
 
 Tests the router/querier state machine with fixed RNG seed and short timers so
-all RTR-01..05 behaviors are observable within a 15s simulation:
+all RTR-01..05 behaviors are observable within a 15s simulation.
+Membership is driven by real apps (UdpSink with multicastGroup), the production path.
 
 RTR-01 (periodic General Query):
   The router has multicastForwarding=true (set at node level so
@@ -12,16 +13,18 @@ RTR-01 (periodic General Query):
   at queryInterval=5s. The %contains assertion matches the first General Query.
 
 RTR-02 (listener recorded on Report):
-  host1 joins ff0e::1:2:3 via testMulticastGroup, sending an unsolicited Report
-  at t=0. The router receives it and records the listener via addMulticastListener
-  (NO_LISTENERS_PRESENT -> LISTENERS_PRESENT). The test asserts both the
-  "received Multicast Listener Report" and "recorded listener" EV_INFO markers.
+  host1 runs UdpSink with multicastGroup="ff0e::1:2:3".  The socket join at
+  t=0 fires ipv6MulticastGroupJoinedSignal -> Mldv1::multicastGroupJoined ->
+  unsolicited Report sent.  The router receives it and records the listener via
+  addMulticastListener (NO_LISTENERS_PRESENT -> LISTENERS_PRESENT). The test
+  asserts both the "received Multicast Listener Report" and "recorded listener"
+  EV_INFO markers.
 
 RTR-03 (Done -> MAS Query):
-  host1 has sendTestLeave=true, which fires at t=5s and calls multicastGroupLeft()
-  directly. This sends a Multicast Listener Done (type=132) to ff02::2. The router
-  receives it and sends a Multicast-Address-Specific Query for ff0e::1:2:3, then
-  starts the last-listener countdown (lastListenerQueryInterval=1s,
+  host1's UdpSink has stopTime=5s. Socket close fires ipv6MulticastGroupLeftSignal ->
+  Mldv1::multicastGroupLeft -> Multicast Listener Done (type=132) to ff02::2.
+  The router receives it and sends a Multicast-Address-Specific Query for
+  ff0e::1:2:3, then starts the last-listener countdown (lastListenerQueryInterval=1s,
   lastListenerQueryCount=2). With no Reply, the leave timer expires and the group
   is removed (removeMulticastListener, NO_LISTENERS_PRESENT).
 
@@ -41,9 +44,8 @@ HOST-ONLY NEGATIVE (single-querier proof):
   multicastForwarding=false node never becomes a querier.
 
 Network: host1 (StandardHost6) and router (Router6) connect via a shared
-EthernetHub. Ipv6FlatNetworkConfigurator assigns addresses. Only host1 has MLD
-enabled (the router also has hasMld=true to receive inbound Reports/Dones).
-RNG seed is fixed for reproducibility.
+EthernetHub. Ipv6FlatNetworkConfigurator assigns addresses. Both nodes have
+hasMld=true. RNG seed is fixed for reproducibility.
 
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
@@ -117,13 +119,13 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 # multicastListenerInterval: keep a group alive this long without a Report.
 **.router.ipv6.mldv1.multicastListenerInterval = 6s
 
-# RTR-02: host1 joins ff0e::1:2:3 via testMulticastGroup, sending an unsolicited
-# Report at t=0 (bypasses UDP assignAddress path, which is pre-existing-broken for IPv6).
-**.host1.ipv6.mldv1.testMulticastGroup = "ff0e::1:2:3"
-
-# RTR-03: host1 leaves at t=5s via sendTestLeave (bypasses UDP leaveMulticastGroup
-# path which is not implemented for IPv6 in changeMulticastGroupMembership).
-**.host1.ipv6.mldv1.sendTestLeave = true
+# RTR-02: host1 joins ff0e::1:2:3 via UdpSink (fires ipv6MulticastGroupJoinedSignal -> unsolicited Report).
+**.host1.numApps = 1
+**.host1.app[0].typename = "UdpSink"
+**.host1.app[0].localPort = 1000
+**.host1.app[0].multicastGroup = "ff0e::1:2:3"
+# RTR-03: host1 leaves at t=5s via socket close (fires ipv6MulticastGroupLeftSignal -> Done).
+**.host1.app[0].stopTime = 5s
 
 %#--------------------------------------------------------------------------------------------------------------
 %subst: /omnetpp:://
@@ -143,7 +145,7 @@ MldRouterBasicNetwork.router.ipv6.mldv1: Mldv1: received Multicast Listener Repo
 MldRouterBasicNetwork.router.ipv6.mldv1: Mldv1: recorded listener for group=ff0e::1:2:3
 
 %#--------------------------------------------------------------------------------------------------------------
-%# RTR-03: router receives host1's Done for ff0e::1:2:3 (from sendTestLeave at t=5s)
+%# RTR-03: router receives host1's Done for ff0e::1:2:3 (from socket close at t=5s)
 %contains: stdout
 MldRouterBasicNetwork.router.ipv6.mldv1: Mldv1: received Multicast Listener Done for group=ff0e::1:2:3
 

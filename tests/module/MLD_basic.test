@@ -4,23 +4,25 @@ Deterministic end-to-end MLDv1 exchange test (RFC 2710).
 Mirrors the six observable checks from IGMP_basic.test, translated to IPv6/MLD
 via Mldv1 EV_INFO markers (Mldv1 has no TestMLD subclass, outputFile, or
 IScriptable interface; state-string dumps are not available).
+Membership is driven by real apps (UdpSink with multicastGroup), the production path.
 
 IGMP_basic check mapping:
 
 Check 1 (host joined ff02::1 on startup):
-  Implicit — ff02::1 (ALL_NODES_2) is joined automatically by every IPv6 node.
+  Implicit -- ff02::1 (ALL_NODES_2) is joined automatically by every IPv6 node.
   Not directly assertable via EV_INFO without an outputFile mechanism. Verified
   implicitly: if the host receives the router's General Query (directed to ff02::1),
   the node must have ff02::1 registered.
 
 Check 2 (router joined ff02::2 on startup):
-  Implicit — ff02::2 (ALL_ROUTERS_2) is joined automatically by IPv6 routers.
+  Implicit -- ff02::2 (ALL_ROUTERS_2) is joined automatically by IPv6 routers.
   Not directly assertable. Verified implicitly: Done messages are sent to ff02::2
   by the host after leaving (MLD §8.2), and the router processes them.
 
 Check 3 (host joins ff0e::1 -> Report sent immediately):
-  host.ipv6.mldv1.testMulticastGroup = "ff0e::1" joins the group at
-  INITSTAGE_NETWORK_LAYER, sending an unsolicited Multicast Listener Report.
+  host runs UdpSink with multicastGroup="ff0e::1".  Socket join at t=0 fires
+  ipv6MulticastGroupJoinedSignal -> Mldv1::multicastGroupJoined -> unsolicited
+  Multicast Listener Report sent.
   ASSERTED: "sending Multicast Listener Report for group=ff0e::1 on iface="
 
 Check 4 (router receives Report, records listener):
@@ -30,14 +32,14 @@ Check 4 (router receives Report, records listener):
   - "recorded listener for group=ff0e::1"
 
 Check 5 (host leaves ff0e::1 -> Done sent immediately):
-  host.ipv6.mldv1.sendTestLeave = true fires multicastGroupLeft() at t=5s,
-  sending a Multicast Listener Done to ff02::2 (ALL_ROUTERS_2) for ff0e::1.
+  host's UdpSink has stopTime=5s. Socket close fires ipv6MulticastGroupLeftSignal
+  -> Mldv1::multicastGroupLeft -> Done sent to ff02::2 (ALL_ROUTERS_2).
   ASSERTED: "sending Multicast Listener Done for group=ff0e::1 on iface="
 
 Check 6 (router removes listener after lastListenerQueryCount * lastListenerQueryInterval):
   On receiving the Done, the router sends a Multicast-Address-Specific Query
   (Listeners Present --> Checking Listeners). With no Reply, the leave timer
-  fires and the group is removed (EV_DEBUG only — processLeaveTimer emits only
+  fires and the group is removed (EV_DEBUG only -- processLeaveTimer emits only
   EV_DEBUG). Asserted indirectly:
   - MAS Query sent: "sending Multicast-Address-Specific Query for group=ff0e::1"
   - No further "recorded listener for group=ff0e::1" after the Done confirms
@@ -122,14 +124,14 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 # multicastListenerInterval=6s: ensures the listener entry stays alive until the Done arrives at t=5s.
 **.router.ipv6.mldv1.multicastListenerInterval = 6s
 
-# Check 3: host joins ff0e::1 at INITSTAGE_NETWORK_LAYER via testMulticastGroup.
-# Bypasses the UDP assignAddress path that does not fire ipv6MulticastGroupJoinedSignal for IPv6.
-**.host.ipv6.mldv1.testMulticastGroup = "ff0e::1"
-
-# Check 5: host leaves ff0e::1 at t=5s via sendTestLeave.
-# Bypasses NetworkInterface::changeMulticastGroupMembership (not implemented for IPv6).
+# Check 3: host joins ff0e::1 via UdpSink (fires ipv6MulticastGroupJoinedSignal -> unsolicited Report).
+**.host.numApps = 1
+**.host.app[0].typename = "UdpSink"
+**.host.app[0].localPort = 1000
+**.host.app[0].multicastGroup = "ff0e::1"
+# Check 5: host leaves ff0e::1 at t=5s via socket close (fires ipv6MulticastGroupLeftSignal -> Done).
 # After the General Query at t=2s, host's flag=true -> Done is sent for ff0e::1 at t=5s.
-**.host.ipv6.mldv1.sendTestLeave = true
+**.host.app[0].stopTime = 5s
 
 %#--------------------------------------------------------------------------------------------------------------
 %subst: /omnetpp:://
@@ -157,7 +159,7 @@ MldBasicNetwork.router.ipv6.mldv1: Mldv1: recorded listener for group=ff0e::1
 MldBasicNetwork.host.ipv6.mldv1: Mldv1: received General Listener Query on iface=
 
 %#--------------------------------------------------------------------------------------------------------------
-%# Check 5: host sends Multicast Listener Done for ff0e::1 at t=5s (sendTestLeave fires)
+%# Check 5: host sends Multicast Listener Done for ff0e::1 at t=5s (socket close)
 %# Proves: group removed from host immediately; host sends Done because flag=true after Query-driven Report
 %contains: stdout
 MldBasicNetwork.host.ipv6.mldv1: Mldv1: sending Multicast Listener Done for group=ff0e::1 on iface=

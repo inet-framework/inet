@@ -1,15 +1,13 @@
 %description:
 Deterministic MLDv1 host-behavior test (RFC 2710).
 
-Tests all four host behaviors via Cmdenv log assertions with a fixed RNG seed:
+Tests all four host behaviors via Cmdenv log assertions with a fixed RNG seed.
+Membership is driven by real apps (UdpSink with multicastGroup), the production path.
 
 HOST-01 (unsolicited Report on join):
-  host1 and host2 join ff0e::1:2:3 via Mldv1's testMulticastGroup parameter,
-  which calls multicastGroupJoined() directly during INITSTAGE_NETWORK_LAYER.
-  This bypasses the UDP addMulticastAddressToInterface path (which calls
-  assignAddress for IPv6 instead of joinMulticastGroup, thus not firing
-  ipv6MulticastGroupJoinedSignal). Mldv1 sends an unsolicited Multicast Listener
-  Report immediately on the join.
+  host1 and host2 run UdpSink with multicastGroup="ff0e::1:2:3".  The socket
+  join at t=0 fires ipv6MulticastGroupJoinedSignal -> Mldv1::multicastGroupJoined
+  -> unsolicited Multicast Listener Report sent immediately.
 
 HOST-03 (report suppression):
   Both hosts join the same group and both send unsolicited Reports at t=0.
@@ -20,7 +18,7 @@ HOST-03 (report suppression):
   Report" log line from host2, proving the suppression path was exercised.
 
 HOST-02 (delayed Report on General Query):
-  The router has multicastForwarding=true (Phase 4 real querier). With
+  The router has multicastForwarding=true (real querier). With
   startupQueryInterval=2s the router sends its first General MLD Query at ~t=2s
   (type=130, multicastAddress=::, maxRespDelay=1000ms) to ff02::1.
   All nodes on the shared Ethernet segment receive it. Hosts receive it via
@@ -30,21 +28,17 @@ HOST-02 (delayed Report on General Query):
   and then a subsequent "sending Multicast Listener Report".
 
 HOST-04 (Done on leave):
-  host1 has sendTestLeave=true, which fires at t=5s and calls multicastGroupLeft()
-  directly for all joined groups. This bypasses the UDP leaveMulticastGroup path
-  (NetworkInterface::changeMulticastGroupMembership is not implemented for IPv6).
-  After the Query-driven Report (t~2..3s), host1's flag=true, so Done is sent to
-  ff02::2 (ALL_ROUTERS_2).
+  host1's UdpSink has stopTime=5s, which closes the socket and fires
+  ipv6MulticastGroupLeftSignal -> Mldv1::multicastGroupLeft -> Done sent to
+  ff02::2 (ALL_ROUTERS_2). After the Query-driven Report (t~2..3s),
+  host1's flag=true, so Done is sent.
 
 Network: host1, host2, and router all connect to a shared EthernetHub, putting
 them on the same Ethernet segment. Ipv6FlatNetworkConfigurator assigns addresses.
 All three nodes have hasMld=true. The router is a real querier (router.multicastForwarding
-enabled — set at node level so NetworkLayerNodeBase propagates it to the routing table)
+enabled -- set at node level so NetworkLayerNodeBase propagates it to the routing table)
 with short startup timer so the General Query arrives within the 10s limit.
 RNG seed is fixed for reproducibility.
-
-Note: the Mldv1 testMulticastGroup and sendTestLeave parameters are default("")/false
-so they are inert in all production scenarios.
 
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
@@ -102,29 +96,30 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.eth[*].queue.dataQueue.typename = "DropTailQueue"
 **.eth[*].queue.dataQueue.packetCapacity = 10
 
-# HOST-01/03: host1 and host2 both join ff0e::1:2:3 directly via testMulticastGroup.
-# This calls multicastGroupJoined() during INITSTAGE_NETWORK_LAYER, bypassing the
-# UDP assignAddress path that does not fire ipv6MulticastGroupJoinedSignal for IPv6.
+# HOST-01/03: host1 and host2 join ff0e::1:2:3 via UdpSink (real production path).
+# Socket join fires ipv6MulticastGroupJoinedSignal -> Mldv1::multicastGroupJoined.
 # On the shared Ethernet segment, each host's unsolicited Report is seen by the other,
 # triggering report suppression (HOST-03).
-**.host1.ipv6.mldv1.testMulticastGroup = "ff0e::1:2:3"
-**.host2.ipv6.mldv1.testMulticastGroup = "ff0e::1:2:3"
+**.host1.numApps = 1
+**.host1.app[0].typename = "UdpSink"
+**.host1.app[0].localPort = 1000
+**.host1.app[0].multicastGroup = "ff0e::1:2:3"
+# HOST-04: host1 leaves at t=5s (socket close fires ipv6MulticastGroupLeftSignal -> Done).
+# After the Query-driven Report (flag=true), Done is sent to ff02::2.
+**.host1.app[0].stopTime = 5s
 
-# HOST-02: enable real querier on the router (Phase 4). The router sends a General
-# MLD Query at startupQueryInterval (~2s) to ff02::1. All nodes on the shared
-# segment receive it; hosts transition Idle -> Delaying and send delayed Reports.
-# Note: multicastForwarding must be set at the node level (not routing table level)
-# because NetworkLayerNodeBase propagates *.multicastForwarding = this.multicastForwarding
-# which overrides any per-submodule INI setting.
+**.host2.numApps = 1
+**.host2.app[0].typename = "UdpSink"
+**.host2.app[0].localPort = 1000
+**.host2.app[0].multicastGroup = "ff0e::1:2:3"
+
+# HOST-02: enable real querier on the router (multicastForwarding at node level so
+# NetworkLayerNodeBase propagates *.multicastForwarding = this.multicastForwarding
+# to all submodules, overriding any per-submodule INI setting).
 **.router.multicastForwarding = true
 **.router.ipv6.mldv1.startupQueryInterval = 2s
 **.router.ipv6.mldv1.queryInterval = 5s
 **.router.ipv6.mldv1.queryResponseInterval = 1s
-
-# HOST-04: host1 triggers multicastGroupLeft at t=5s via sendTestLeave=true.
-# This bypasses the UDP leaveMulticastGroup path (not implemented for IPv6).
-# After the Query-driven Report (t~2..3s), host1's flag=true -> Done sent to ff02::2.
-**.host1.ipv6.mldv1.sendTestLeave = true
 
 %#--------------------------------------------------------------------------------------------------------------
 %subst: /omnetpp:://

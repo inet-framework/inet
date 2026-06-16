@@ -2,8 +2,8 @@
 Deterministic MLDv1 router/querier group-state-transition test (RFC 2710 §6).
 
 Exercises the three querier group states across two trajectories, proved by
-Mldv1 EV_INFO markers in stdout. Group removal (EV_DEBUG only) is verified
-indirectly via the Checking-Listeners rexmt countdown.
+Mldv1 EV_INFO markers in stdout.  Membership is driven by real apps (UdpSink
+with multicastGroup), the production path.
 
 RFC 2710 §6 router group state machine (simplified):
   No Listeners Present
@@ -20,9 +20,10 @@ RFC 2710 §6 router group state machine (simplified):
 Trajectories tested:
 
 TRAJ-1  ff0e::1  (leave-driven removal)
-  host1 joins ff0e::1 via testMulticastGroup at t=0 -> sends unsolicited Report.
-  Router records listener (No Listeners Present --> Listeners Present).
-  host1 leaves at t=5s via sendTestLeave -> sends Done to ff02::2.
+  host1 runs UdpSink with multicastGroup="ff0e::1" and stopTime=5s.
+  At t=0 the socket join fires -> unsolicited Report sent -> router records listener
+  (No Listeners Present --> Listeners Present).
+  At t=5s the socket close fires ipv6MulticastGroupLeftSignal -> Done sent to ff02::2.
   Router receives Done -> sends Multicast-Address-Specific Query
   (Listeners Present --> Checking Listeners), starts leave timer and rexmt timer.
   rexmt timer fires at t~6s -> second MAS Query sent (proves Checking Listeners
@@ -31,8 +32,8 @@ TRAJ-1  ff0e::1  (leave-driven removal)
   %not-contains on the post-rexmt window).
 
 TRAJ-2  ff0e::2  (leave-free multicast-listener-interval timeout)
-  host2 joins ff0e::2 at t=0 -> sends unsolicited Report.
-  Router records listener (No Listeners Present --> Listeners Present).
+  host2 runs UdpSink with multicastGroup="ff0e::2" (no stopTime -- persistent listener).
+  At t=0 the socket join fires -> unsolicited Report -> router records listener.
   No Done is sent; multicastListenerInterval=10s fires at t~10s -> leave timer
   expires -> group removed (EV_DEBUG only). The absence of ff0e::2 from any
   MAS Query proves the router never entered Checking Listeners for this group
@@ -122,15 +123,19 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 # multicastListenerInterval=10s: short so TRAJ-2 (ff0e::2, no Done) ages out by t~10s within 20s sim
 **.router.ipv6.mldv1.multicastListenerInterval = 10s
 
-# TRAJ-1: host1 joins ff0e::1 via testMulticastGroup (sends unsolicited Report at t=0).
-# Bypasses the UDP assignAddress path that does not fire ipv6MulticastGroupJoinedSignal for IPv6.
-**.host1.ipv6.mldv1.testMulticastGroup = "ff0e::1"
-# TRAJ-1: host1 leaves at t=5s via sendTestLeave (fires multicastGroupLeft() directly).
-# Bypasses NetworkInterface::changeMulticastGroupMembership which is not implemented for IPv6.
-**.host1.ipv6.mldv1.sendTestLeave = true
+# TRAJ-1: host1 joins ff0e::1 via UdpSink (fires ipv6MulticastGroupJoinedSignal -> unsolicited Report).
+# host1 leaves at t=5s via socket close (fires ipv6MulticastGroupLeftSignal -> Done).
+**.host1.numApps = 1
+**.host1.app[0].typename = "UdpSink"
+**.host1.app[0].localPort = 1000
+**.host1.app[0].multicastGroup = "ff0e::1"
+**.host1.app[0].stopTime = 5s
 
-# TRAJ-2: host2 joins ff0e::2 at t=0; no leave -- group ages out via multicastListenerInterval.
-**.host2.ipv6.mldv1.testMulticastGroup = "ff0e::2"
+# TRAJ-2: host2 joins ff0e::2; no leave -- group ages out via multicastListenerInterval.
+**.host2.numApps = 1
+**.host2.app[0].typename = "UdpSink"
+**.host2.app[0].localPort = 1000
+**.host2.app[0].multicastGroup = "ff0e::2"
 
 %#--------------------------------------------------------------------------------------------------------------
 %subst: /omnetpp:://
@@ -147,7 +152,7 @@ MldQuerierGroupstatesNetwork.router.ipv6.mldv1: Mldv1: received Multicast Listen
 MldQuerierGroupstatesNetwork.router.ipv6.mldv1: Mldv1: recorded listener for group=ff0e::1
 
 %#--------------------------------------------------------------------------------------------------------------
-%# TRAJ-1 RTR-03: router receives host1's Done for ff0e::1 (from sendTestLeave at t=5s)
+%# TRAJ-1 RTR-03: router receives host1's Done for ff0e::1 (from socket close at t=5s)
 %# Proves: Listeners Present state was active (Done only matters when a listener was present)
 %contains: stdout
 MldQuerierGroupstatesNetwork.router.ipv6.mldv1: Mldv1: received Multicast Listener Done for group=ff0e::1 iface=
