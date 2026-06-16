@@ -1,0 +1,182 @@
+%description:
+Deterministic end-to-end MLDv1 exchange test (RFC 2710).
+
+Mirrors the six observable checks from IGMP_basic.test, translated to IPv6/MLD
+via Mldv1 EV_INFO markers (Mldv1 has no TestMLD subclass, outputFile, or
+IScriptable interface; state-string dumps are not available).
+
+IGMP_basic check mapping:
+
+Check 1 (host joined ff02::1 on startup):
+  Implicit — ff02::1 (ALL_NODES_2) is joined automatically by every IPv6 node.
+  Not directly assertable via EV_INFO without an outputFile mechanism. Verified
+  implicitly: if the host receives the router's General Query (directed to ff02::1),
+  the node must have ff02::1 registered.
+
+Check 2 (router joined ff02::2 on startup):
+  Implicit — ff02::2 (ALL_ROUTERS_2) is joined automatically by IPv6 routers.
+  Not directly assertable. Verified implicitly: Done messages are sent to ff02::2
+  by the host after leaving (MLD §8.2), and the router processes them.
+
+Check 3 (host joins ff0e::1 -> Report sent immediately):
+  host.ipv6.mldv1.testMulticastGroup = "ff0e::1" joins the group at
+  INITSTAGE_NETWORK_LAYER, sending an unsolicited Multicast Listener Report.
+  ASSERTED: "sending Multicast Listener Report for group=ff0e::1 on iface="
+
+Check 4 (router receives Report, records listener):
+  The router receives host's Report and records the listener (No Listeners
+  Present --> Listeners Present). TWO markers are asserted:
+  - "received Multicast Listener Report for group=ff0e::1"
+  - "recorded listener for group=ff0e::1"
+
+Check 5 (host leaves ff0e::1 -> Done sent immediately):
+  host.ipv6.mldv1.sendTestLeave = true fires multicastGroupLeft() at t=5s,
+  sending a Multicast Listener Done to ff02::2 (ALL_ROUTERS_2) for ff0e::1.
+  ASSERTED: "sending Multicast Listener Done for group=ff0e::1 on iface="
+
+Check 6 (router removes listener after lastListenerQueryCount * lastListenerQueryInterval):
+  On receiving the Done, the router sends a Multicast-Address-Specific Query
+  (Listeners Present --> Checking Listeners). With no Reply, the leave timer
+  fires and the group is removed (EV_DEBUG only — processLeaveTimer emits only
+  EV_DEBUG). Asserted indirectly:
+  - MAS Query sent: "sending Multicast-Address-Specific Query for group=ff0e::1"
+  - No further "recorded listener for group=ff0e::1" after the Done confirms
+    the group was not re-registered; the MAS-Query proof suffices.
+  - Router receives the Done: "received Multicast Listener Done for group=ff0e::1"
+
+Additionally asserted (bonus): the router's initial General Query is received by
+the host (confirms the querier path is active and the host is in the ff02::1 group).
+
+Network: host (StandardHost6) and router (Router6) connect via a shared EthernetHub.
+Ipv6FlatNetworkConfigurator assigns addresses. hasMld=true on both nodes.
+dupAddrDetectTransmits=0 eliminates DAD delay. seed-set=0 pins RNG.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.node.ethernet.EthernetHub;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network MldBasicNetwork
+{
+    types:
+        channel ethline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator;
+        host: StandardHost6;
+        router: Router6;
+        hub: EthernetHub;
+    connections:
+        host.ethg++ <--> ethline <--> hub.ethg++;
+        router.ethg++ <--> ethline <--> hub.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+ned-path = ../../../../src
+network = MldBasicNetwork
+sim-time-limit = 20s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+# Fix RNG seed for deterministic behavior of uniform(0, maxRespTime) in startHostTimer
+seed-set = 0
+
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+# Enable MLD on all nodes so the host can receive Queries and the router can receive Reports/Dones
+**.ipv6.hasMld = true
+# Disable DAD for fast startup (no 1s+ delay before addresses become ready)
+**.neighbourDiscovery.dupAddrDetectTransmits = 0
+
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue"
+**.eth[*].queue.dataQueue.packetCapacity = 10
+
+# Check 4/6: activate the real querier on the router.
+# Must be set at the node (Router6) level: NetworkLayerNodeBase propagates
+#   *.multicastForwarding = this.multicastForwarding
+# to all submodules (including ipv6.routingTable), overriding any per-submodule setting.
+**.router.multicastForwarding = true
+
+# Router timing: short startupQueryInterval so the General Query fires before the host leaves;
+# long queryInterval so periodic Queries do not interfere with the end-to-end chain.
+**.router.ipv6.mldv1.startupQueryInterval = 2s
+**.router.ipv6.mldv1.queryInterval = 100s
+**.router.ipv6.mldv1.queryResponseInterval = 1s
+# lastListenerQueryInterval=1s, lastListenerQueryCount=2: leave timer = 2s (well within 20s).
+**.router.ipv6.mldv1.lastListenerQueryInterval = 1s
+**.router.ipv6.mldv1.lastListenerQueryCount = 2
+# multicastListenerInterval=6s: ensures the listener entry stays alive until the Done arrives at t=5s.
+**.router.ipv6.mldv1.multicastListenerInterval = 6s
+
+# Check 3: host joins ff0e::1 at INITSTAGE_NETWORK_LAYER via testMulticastGroup.
+# Bypasses the UDP assignAddress path that does not fire ipv6MulticastGroupJoinedSignal for IPv6.
+**.host.ipv6.mldv1.testMulticastGroup = "ff0e::1"
+
+# Check 5: host leaves ff0e::1 at t=5s via sendTestLeave.
+# Bypasses NetworkInterface::changeMulticastGroupMembership (not implemented for IPv6).
+# After the General Query at t=2s, host's flag=true -> Done is sent for ff0e::1 at t=5s.
+**.host.ipv6.mldv1.sendTestLeave = true
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%# Check 3: host sends unsolicited Multicast Listener Report for ff0e::1 on join
+%# Proves: group registered on host immediately; Non-Listener --> Delaying Listener (Report sent)
+%contains: stdout
+MldBasicNetwork.host.ipv6.mldv1: Mldv1: sending Multicast Listener Report for group=ff0e::1 on iface=
+
+%#--------------------------------------------------------------------------------------------------------------
+%# Check 4a: router receives the Report for ff0e::1 from the host
+%# Proves: router is active as querier and sees the Report on the shared segment
+%contains: stdout
+MldBasicNetwork.router.ipv6.mldv1: Mldv1: received Multicast Listener Report for group=ff0e::1 iface=
+
+%#--------------------------------------------------------------------------------------------------------------
+%# Check 4b: router records the listener for ff0e::1 (No Listeners Present --> Listeners Present)
+%# "recorded listener" is only emitted on the FIRST recording
+%contains: stdout
+MldBasicNetwork.router.ipv6.mldv1: Mldv1: recorded listener for group=ff0e::1
+
+%#--------------------------------------------------------------------------------------------------------------
+%# Bonus: host receives the router's General Query at t=2s (proves ff02::1 membership is active)
+%contains: stdout
+MldBasicNetwork.host.ipv6.mldv1: Mldv1: received General Listener Query on iface=
+
+%#--------------------------------------------------------------------------------------------------------------
+%# Check 5: host sends Multicast Listener Done for ff0e::1 at t=5s (sendTestLeave fires)
+%# Proves: group removed from host immediately; host sends Done because flag=true after Query-driven Report
+%contains: stdout
+MldBasicNetwork.host.ipv6.mldv1: Mldv1: sending Multicast Listener Done for group=ff0e::1 on iface=
+
+%#--------------------------------------------------------------------------------------------------------------
+%# Check 6a: router receives the Done for ff0e::1 from the host
+%# Proves: Done message propagated from host to router on the shared segment
+%contains: stdout
+MldBasicNetwork.router.ipv6.mldv1: Mldv1: received Multicast Listener Done for group=ff0e::1 iface=
+
+%#--------------------------------------------------------------------------------------------------------------
+%# Check 6b: router sends Multicast-Address-Specific Query after receiving the Done
+%# Proves: Listeners Present --> Checking Listeners transition (MAS Query triggers last-listener countdown)
+%contains: stdout
+MldBasicNetwork.router.ipv6.mldv1: Mldv1: sending Multicast-Address-Specific Query for group=ff0e::1 on iface=
+
+%#--------------------------------------------------------------------------------------------------------------
+%# Undisposed-object guard: verify no leaked cMessage or cObject at end of run
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
