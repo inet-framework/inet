@@ -27,6 +27,46 @@ namespace inet {
 
 Define_Module(Mldv1);
 
+// --- RouterGroupData ---
+
+Mldv1::RouterGroupData::RouterGroupData(Mldv1 *owner, const Ipv6Address& group)
+    : owner(owner), groupAddr(group)
+{
+    ASSERT(owner);
+    ASSERT(groupAddr.isMulticast());
+    state = MLD_RGS_NO_LISTENERS_PRESENT;
+    timer = nullptr;
+    rexmtTimer = nullptr;
+}
+
+Mldv1::RouterGroupData::~RouterGroupData()
+{
+    if (timer) {
+        delete (MldRouterTimerContext *)timer->getContextPointer();
+        owner->cancelAndDelete(timer);
+    }
+    if (rexmtTimer) {
+        delete (MldRouterTimerContext *)rexmtTimer->getContextPointer();
+        owner->cancelAndDelete(rexmtTimer);
+    }
+}
+
+// --- RouterInterfaceData ---
+
+Mldv1::RouterInterfaceData::RouterInterfaceData(Mldv1 *owner)
+    : owner(owner)
+{
+    ASSERT(owner);
+    mldQueryTimer = nullptr;
+}
+
+Mldv1::RouterInterfaceData::~RouterInterfaceData()
+{
+    owner->cancelAndDelete(mldQueryTimer);
+    for (auto& elem : groups)
+        delete elem.second;
+}
+
 // --- HostGroupData ---
 
 Mldv1::HostGroupData::HostGroupData(Mldv1 *owner, const Ipv6Address& group)
@@ -71,7 +111,8 @@ Mldv1::~Mldv1()
     cancelAndDelete(testLeaveTimer);
     while (!hostData.empty())
         deleteHostInterfaceData(hostData.begin()->first);
-    // Router teardown added in Phase 4
+    while (!routerData.empty())
+        deleteRouterInterfaceData(routerData.begin()->first);
 }
 
 // --- Initialize ---
@@ -90,6 +131,16 @@ void Mldv1::initialize(int stage)
             testMulticastGroup = Ipv6Address(testGroupStr);
         const char *checksumModeString = par("checksumMode");
         checksumMode = parseChecksumMode(checksumModeString, false);
+
+        // Read router NED params (RFC 2710 §7)
+        robustness = par("robustnessVariable");
+        queryInterval = par("queryInterval");
+        queryResponseInterval = par("queryResponseInterval");
+        multicastListenerInterval = par("multicastListenerInterval");
+        startupQueryInterval = par("startupQueryInterval");
+        startupQueryCount = par("startupQueryCount");
+        lastListenerQueryInterval = par("lastListenerQueryInterval");
+        lastListenerQueryCount = par("lastListenerQueryCount");
         if (sendTestMessage) {
             testTimer = new cMessage("mldTestTimer");
             scheduleAt(0.5, testTimer);
@@ -215,6 +266,15 @@ void Mldv1::handleMessageWhenUp(cMessage *msg)
             switch (msg->getKind()) {
                 case MLD_HOSTGROUP_TIMER:
                     processHostGroupTimer(msg);
+                    break;
+                case MLD_QUERY_TIMER:
+                    processQueryTimer(msg);
+                    break;
+                case MLD_LEAVE_TIMER:
+                    processLeaveTimer(msg);
+                    break;
+                case MLD_REXMT_TIMER:
+                    processRexmtTimer(msg);
                     break;
                 default:
                     throw cRuntimeError("Unknown self-message kind %d: %s", msg->getKind(), msg->getName());
@@ -504,12 +564,16 @@ void Mldv1::handleStopOperation(LifecycleOperation *operation)
     // does not leave the module deaf to membership-change signals.
     while (!hostData.empty())
         deleteHostInterfaceData(hostData.begin()->first);
+    while (!routerData.empty())
+        deleteRouterInterfaceData(routerData.begin()->first);
 }
 
 void Mldv1::handleCrashOperation(LifecycleOperation *operation)
 {
     while (!hostData.empty())
         deleteHostInterfaceData(hostData.begin()->first);
+    while (!routerData.empty())
+        deleteRouterInterfaceData(routerData.begin()->first);
 }
 
 // --- Host group-data CRUD helpers ---
@@ -569,6 +633,98 @@ void Mldv1::deleteHostInterfaceData(int interfaceId)
         hostData.erase(interfaceIt);
         delete data;
     }
+}
+
+// --- Router group-data CRUD helpers ---
+
+Mldv1::RouterGroupData *Mldv1::createRouterGroupData(NetworkInterface *ie, const Ipv6Address& group)
+{
+    RouterInterfaceData *ifData = getRouterInterfaceData(ie);
+    ASSERT(ifData->groups.find(group) == ifData->groups.end());
+    RouterGroupData *data = new RouterGroupData(this, group);
+    ifData->groups[group] = data;
+    return data;
+}
+
+Mldv1::RouterGroupData *Mldv1::getRouterGroupData(NetworkInterface *ie, const Ipv6Address& group)
+{
+    RouterInterfaceData *ifData = getRouterInterfaceData(ie);
+    auto it = ifData->groups.find(group);
+    return it != ifData->groups.end() ? it->second : nullptr;
+}
+
+void Mldv1::deleteRouterGroupData(NetworkInterface *ie, const Ipv6Address& group)
+{
+    RouterInterfaceData *ifData = getRouterInterfaceData(ie);
+    auto it = ifData->groups.find(group);
+    if (it != ifData->groups.end()) {
+        RouterGroupData *data = it->second;
+        ifData->groups.erase(it);
+        delete data;
+    }
+}
+
+// --- Router interface-data CRUD helpers ---
+
+Mldv1::RouterInterfaceData *Mldv1::getRouterInterfaceData(NetworkInterface *ie)
+{
+    int interfaceId = ie->getInterfaceId();
+    auto it = routerData.find(interfaceId);
+    if (it != routerData.end())
+        return it->second;
+
+    // Create on demand
+    RouterInterfaceData *data = createRouterInterfaceData();
+    routerData[interfaceId] = data;
+    return data;
+}
+
+Mldv1::RouterInterfaceData *Mldv1::createRouterInterfaceData()
+{
+    return new RouterInterfaceData(this);
+}
+
+void Mldv1::deleteRouterInterfaceData(int interfaceId)
+{
+    auto it = routerData.find(interfaceId);
+    if (it != routerData.end()) {
+        RouterInterfaceData *data = it->second;
+        routerData.erase(it);
+        delete data;
+    }
+}
+
+// --- Router behavior skeleton bodies (logic implemented in Plan 04-02) ---
+
+void Mldv1::configureInterface(NetworkInterface *ie)
+{
+    // Plan 04-02: implement — arms query timer if multicast router
+}
+
+void Mldv1::processQueryTimer(cMessage *msg)
+{
+    // Plan 04-02: implement — send periodic General Query, restart timer
+}
+
+void Mldv1::processLeaveTimer(cMessage *msg)
+{
+    // Plan 04-02: implement — group timer expired → NO_LISTENERS, removeMulticastListener
+}
+
+void Mldv1::processRexmtTimer(cMessage *msg)
+{
+    // Plan 04-02: implement — retransmit MAS Query while in CHECKING_LISTENERS
+}
+
+void Mldv1::sendQuery(NetworkInterface *ie, const Ipv6Address& groupAddr, double maxRespTime)
+{
+    // Plan 04-02: implement — build and send MldQuery message
+}
+
+void Mldv1::processDone(NetworkInterface *ie, Packet *packet)
+{
+    // Plan 04-02: implement — router Done handling: send MAS queries, CHECKING_LISTENERS
+    delete packet;
 }
 
 } // namespace inet
