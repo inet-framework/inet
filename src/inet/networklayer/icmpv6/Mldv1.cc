@@ -175,6 +175,13 @@ void Mldv1::initialize(int stage)
             }
         }
 
+        // Activate router/querier role on each multicast interface (gated by isMulticastForwardingEnabled)
+        for (int i = 0; i < ift->getNumInterfaces(); ++i) {
+            NetworkInterface *ie = ift->getInterface(i);
+            if (ie->isMulticast())
+                configureInterface(ie);
+        }
+
         // Subscribe to interface and multicast group signals at the containing node
         cModule *host = getContainingNode(this);
         host->subscribe(interfaceCreatedSignal, this);
@@ -320,7 +327,7 @@ void Mldv1::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
     else if (signalID == interfaceCreatedSignal) {
         ie = check_and_cast<NetworkInterface *>(obj);
         if (ie->isMulticast())
-            ; // Phase 4: configureInterface(ie) for router role
+            configureInterface(ie);
     }
     else if (signalID == interfaceDeletedSignal) {
         ie = check_and_cast<NetworkInterface *>(obj);
@@ -698,12 +705,23 @@ void Mldv1::deleteRouterInterfaceData(int interfaceId)
 
 void Mldv1::configureInterface(NetworkInterface *ie)
 {
-    // Plan 04-02: implement — arms query timer if multicast router
+    if (enabled && rt->isMulticastForwardingEnabled()) {
+        cMessage *timer = new cMessage("Mldv1 query timer", MLD_QUERY_TIMER);
+        timer->setContextPointer(ie);
+        RouterInterfaceData *routerIfData = getRouterInterfaceData(ie);
+        routerIfData->mldQueryTimer = timer;
+        sendQuery(ie, Ipv6Address::UNSPECIFIED_ADDRESS, queryResponseInterval);
+        startTimer(timer, startupQueryInterval);
+    }
 }
 
 void Mldv1::processQueryTimer(cMessage *msg)
 {
-    // Plan 04-02: implement — send periodic General Query, restart timer
+    NetworkInterface *ie = (NetworkInterface *)msg->getContextPointer();
+    ASSERT(ie);
+    EV_DEBUG << "Mldv1: General Query timer expired, iface=" << ie->getInterfaceName() << "\n";
+    sendQuery(ie, Ipv6Address::UNSPECIFIED_ADDRESS, queryResponseInterval);
+    startTimer(msg, queryInterval);
 }
 
 void Mldv1::processLeaveTimer(cMessage *msg)
@@ -718,7 +736,27 @@ void Mldv1::processRexmtTimer(cMessage *msg)
 
 void Mldv1::sendQuery(NetworkInterface *ie, const Ipv6Address& groupAddr, double maxRespTime)
 {
-    // Plan 04-02: implement — build and send MldQuery message
+    if (groupAddr.isUnspecified())
+        EV_INFO << "Mldv1: sending General Listener Query on iface=" << ie->getInterfaceName() << "\n";
+    else
+        EV_INFO << "Mldv1: sending Multicast-Address-Specific Query for group=" << groupAddr
+                << " on iface=" << ie->getInterfaceName() << "\n";
+
+    Packet *packet = new Packet("Mldv1 query");
+    const auto& msg = makeShared<MldQuery>();
+    msg->setMulticastAddress(groupAddr);                            // :: for General, group for MAS
+    msg->setMaxRespDelay((uint16_t)(maxRespTime * 1000));           // MILLISECONDS (RFC 2710 §3.4)
+    msg->setChunkLength(B(24));
+    Icmpv6::insertChecksum(checksumMode, msg, packet);
+    packet->insertAtFront(msg);
+    Ipv6Address dest = groupAddr.isUnspecified() ? Ipv6Address::ALL_NODES_2 : groupAddr;
+    sendToIPv6(packet, ie, dest);
+
+    numQueriesSent++;
+    if (groupAddr.isUnspecified())
+        numGeneralQueriesSent++;
+    else
+        numGroupSpecificQueriesSent++;
 }
 
 void Mldv1::processDone(NetworkInterface *ie, Packet *packet)
