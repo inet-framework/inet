@@ -41,10 +41,15 @@ import inet.common.SimpleModule;
 // link (querier election is not modelled): it sends periodic General Queries
 // (every `queryInterval`), records the listeners reported on each interface in
 // Ipv6InterfaceData (`reportedMulticastGroups`), and on receiving a Done sends
-// Multicast-Address-Specific Queries (`lastListenerQueryCount` of them, spaced
-// `lastListenerQueryInterval` apart) and removes the group if no Report arrives
-// before the last-listener timeout. Per-(interface, group) state is one of No
-// Listeners Present, Listeners Present, or Checking Listeners.
+// group-specific Queries (called Multicast-Address-Specific Queries in RFC 2710;
+// `lastListenerQueryCount` of them, spaced `lastListenerQueryInterval` apart) and
+// removes the group if no Report arrives before the last-listener timeout.
+// Per-(interface, group) state is one of No Listeners Present, Listeners Present,
+// or Checking Listeners.
+//
+// When `enabled` is false the module is inert: it sends no Report or Done on
+// group join/leave, runs no querier, and drops any inbound MLD message (it stays
+// instantiated and registered, but performs no MLD protocol activity).
 //
 // Querier election, source filtering (SSM), MLD snooping, and MLDv2 are not
 // implemented.
@@ -55,34 +60,19 @@ simple Mldv1 extends SimpleModule like IMld
 {
     parameters:
         @class(Mldv1);
-        string interfaceTableModule;   // The path to the InterfaceTable module
-        string routingTableModule;
-        string checksumMode @enum("declared","computed") = default("declared");
-        // Administratively enables MLD on this node. When false, the module is
-        // inert: it sends no Report/Done on group join/leave, runs no querier
-        // (no General/MAS Queries, no listener recording), and drops any inbound
-        // MLD message. The module is still instantiated and registered, but
-        // performs no MLD protocol activity.
-        bool enabled = default(true);
-        // RFC 2710 §7.2 Unsolicited Report Interval: time between unsolicited
-        // Multicast Listener Reports sent on join (default 10s per RFC 2710).
-        double unsolicitedReportInterval @unit(s) = default(10s);
-        // RFC 2710 §7.3 Robustness Variable: tunable for expected packet loss.
-        int robustnessVariable = default(2);
-        // RFC 2710 §7.4 Query Interval: time between periodic General Queries.
-        double queryInterval @unit(s) = default(125s);
-        // RFC 2710 §7.5 Query Response Interval: max response delay for General Queries (also used as maxRespDelay).
-        double queryResponseInterval @unit(s) = default(10s);
-        // RFC 2710 §7.1 Multicast Listener Interval: duration a router keeps state without a Report.
-        double multicastListenerInterval @unit(s) = default((robustnessVariable * queryInterval) + queryResponseInterval);
-        // RFC 2710 §7.6.1 Startup Query Interval: interval between startup queries.
-        double startupQueryInterval @unit(s) = default(queryInterval / 4);
-        // RFC 2710 §7.6.2 Startup Query Count: number of startup General Queries.
-        int startupQueryCount = default(robustnessVariable);
-        // RFC 2710 §7.8 Last Listener Query Interval: time between MAS Queries on Done.
-        double lastListenerQueryInterval @unit(s) = default(1s);
-        // RFC 2710 §7.9 Last Listener Query Count: number of MAS Queries on Done.
-        int lastListenerQueryCount = default(robustnessVariable);
+        string interfaceTableModule;  // path to the InterfaceTable module
+        string routingTableModule;    // path to the Ipv6RoutingTable module
+        string checksumMode @enum("declared","computed") = default("declared");  // how the ICMPv6 checksum is handled
+        bool enabled = default(true);  // when false, MLD is inert on this node (see above)
+        double unsolicitedReportInterval @unit(s) = default(10s);  // host: delay before the repeated Report after a join
+        int robustnessVariable = default(2);  // loss tolerance; only supplies the defaults of the three params marked (RV) below
+        double queryInterval @unit(s) = default(125s);  // querier: interval between periodic General Queries
+        double queryResponseInterval @unit(s) = default(10s);  // querier: max delay a host may wait before answering a General Query
+        double multicastListenerInterval @unit(s) = default((robustnessVariable * queryInterval) + queryResponseInterval);  // querier: how long a group stays "has listeners" without a new Report (RV)
+        double startupQueryInterval @unit(s) = default(queryInterval / 4);  // querier: interval between the initial General Queries at startup
+        int startupQueryCount = default(robustnessVariable);  // querier: number of General Queries sent at startup (RV)
+        double lastListenerQueryInterval @unit(s) = default(1s);  // querier: interval between the group-specific Queries sent after a Done
+        int lastListenerQueryCount = default(robustnessVariable);  // querier: number of group-specific Queries sent after a Done (RV)
         @display("i=block/cogwheel");
 
     gates:

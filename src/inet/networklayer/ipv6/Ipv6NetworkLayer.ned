@@ -116,7 +116,7 @@ module Ipv6NetworkLayer like INetworkLayer
         }
         mldv1: <default("Mldv1")> like IMld if hasMld {
             parameters:
-                @display("p=550,500");
+                @display("p=800,200");
         }
 
     connections allowunconnected:  // FIXME remove 'nocheck'!

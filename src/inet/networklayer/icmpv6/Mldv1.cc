@@ -123,8 +123,7 @@ void Mldv1::initialize(int stage)
         const char *checksumModeString = par("checksumMode");
         checksumMode = parseChecksumMode(checksumModeString, false);
 
-        // Read router NED params (RFC 2710 §7)
-        robustness = par("robustnessVariable");
+        // Read router (querier) NED params
         queryInterval = par("queryInterval");
         queryResponseInterval = par("queryResponseInterval");
         multicastListenerInterval = par("multicastListenerInterval");

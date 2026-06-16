@@ -117,17 +117,16 @@ class INET_API Mldv1 : public OperationalBase, public cListener
     ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
 
     // Host parameters
-    double unsolicitedReportInterval = 10; // RFC 2710 §7.2 default 10s
+    double unsolicitedReportInterval = 10; // delay between a host's repeated Reports after a join
 
-    // Router parameters (RFC 2710 §7)
-    int robustness = 2;                        // RFC 2710 §7.3
-    double queryInterval = 125;                // RFC 2710 §7.4
-    double queryResponseInterval = 10;         // RFC 2710 §7.5
-    double multicastListenerInterval = 260;    // RFC 2710 §7.1 (= robustness*queryInterval + queryResponseInterval)
-    double lastListenerQueryInterval = 1;      // RFC 2710 §7.8
-    int lastListenerQueryCount = 2;            // RFC 2710 §7.9 (= robustness)
-    double startupQueryInterval = 31.25;       // RFC 2710 §7.6.1 (= queryInterval / 4)
-    int startupQueryCount = 2;                 // RFC 2710 §7.6.2 (= robustness)
+    // Router (querier) parameters
+    double queryInterval = 125;             // interval between periodic General Queries
+    double queryResponseInterval = 10;      // max delay a host may wait before answering a General Query
+    double multicastListenerInterval = 260; // how long a group stays "has listeners" without a new Report
+    double lastListenerQueryInterval = 1;   // interval between the group-specific Queries sent after a Done
+    int lastListenerQueryCount = 2;         // number of group-specific Queries sent after a Done
+    double startupQueryInterval = 31.25;    // interval between the initial General Queries at startup
+    int startupQueryCount = 2;              // number of General Queries sent at startup
 
     // Group counters
     int numGroups = 0;
