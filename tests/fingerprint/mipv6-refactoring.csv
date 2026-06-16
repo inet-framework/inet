@@ -13,6 +13,10 @@
 /examples/ipv6/mipv6roaming/,        -f omnetpp.ini -c Roaming -r 0,                 70s,            51b9-f65e/~tNlb, PASS, wireless EthernetMac
 
 # IPv6 examples
+# MLD example — new PASS row; ~tNl locks the MLD Report/Query/Done/MAS-Query packet exchange (traffic+lengths);
+# ~tNlb excluded: EthernetHub (WireJunction) adds a pointer-typed 'originalSender' cPar to the signal which
+# causes parsimPack() to abort — use ~tNl (no parsim serialization) instead; tyf excluded as unreliable
+/examples/ipv6/mld/,            -f omnetpp.ini -c MldDemo -r 0,              30s,             0afa-a0ac/~tNl, PASS, EthernetMac MLD
 /examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,                50000s,          eb79-fc97/~tNlb, PASS, EthernetMac
 /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_inet -r 0,              50s,             9ff4-d7f2/~tNlb, PASS, EthernetMac
 /examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c ETH -r 0,                    50s,             9782-c706/~tNlb, PASS, EthernetMac
