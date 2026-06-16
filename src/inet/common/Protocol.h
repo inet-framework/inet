@@ -100,6 +100,7 @@ class INET_API Protocol
     static const Protocol lldp;
     static const Protocol lmac;
     static const Protocol manet;
+    static const Protocol mld;
     static const Protocol mobileipv6;
     static const Protocol mpls;
     static const Protocol mrp;
