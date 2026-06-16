@@ -1408,6 +1408,9 @@ bool Mipv6::validateBAck(Packet *packet, const BindingAcknowledgement& ba)
  */
 void Mipv6::triggerRouteOptimization(const Ipv6Address& destAddress, const Ipv6Address& HoA, NetworkInterface *ie)
 {
+    if (!par("useRouteOptimization").boolValue())
+        return; // route optimization disabled: correspondent-node traffic stays on the bidirectional home-agent tunnel
+
     if (bul->getMobilityState(destAddress) == BindingUpdateList::NONE)
         bul->setMobilityState(destAddress, BindingUpdateList::RR);
 

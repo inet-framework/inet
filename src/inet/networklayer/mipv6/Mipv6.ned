@@ -32,6 +32,7 @@ simple Mipv6 extends SimpleModule
         bool isMobileNode;
         double maxHaBindingLifeTime @unit(s) = default(3600s); // max binding lifetime for HA registration
         double maxRrBindingLifeTime @unit(s) = default(420s);  // max binding lifetime for CN (route optimization)
+        bool useRouteOptimization = default(true);  // whether a mobile node route-optimizes with correspondent nodes (RFC 3775); if false, their traffic always uses the bidirectional home-agent tunnel
         @display("i=block/classifier2");
         @signal[mipv6RoCompleted](type=cMessage?);
         @signal[packetDropped](type=cPacket);
