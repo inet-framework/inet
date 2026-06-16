@@ -60,6 +60,7 @@ const Ptr<Chunk> MldHeaderSerializer::deserialize(MemoryInputStream& stream) con
         default: {
             EV_ERROR << "MldHeaderSerializer: cannot parse MLD packet: type " << (int)type << " not supported\n";
             auto unknown = makeShared<MldMessage>();
+            unknown->setChunkLength(B(24)); // 24 bytes already consumed; keep length in sync so later chunks parse correctly
             unknown->markIncorrect();
             return unknown;
         }
