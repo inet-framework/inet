@@ -27,6 +27,7 @@ simple Icmpv6 extends SimpleModule
         @class(Icmpv6);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string checksumMode @enum("declared", "computed") = default("declared");
+        string mldModule = default("");  // Path to the MLD module, or "" if MLD is not enabled; MLD messages are dropped when empty
         @display("i=block/control");
     gates:
         input transportIn;

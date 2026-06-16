@@ -16,6 +16,7 @@ import inet.networklayer.icmpv6.Icmpv6;
 import inet.networklayer.icmpv6.Ipv6NeighbourDiscovery;
 import inet.networklayer.mipv6.BindingCache;
 import inet.networklayer.mipv6.BindingUpdateList;
+import inet.networklayer.icmpv6.IMld;
 import inet.networklayer.icmpv6.Mldv1;
 import inet.networklayer.mipv6.Mipv6;
 
@@ -53,6 +54,7 @@ module Ipv6NetworkLayer like INetworkLayer
         bool forwarding = default(false);
         bool multicastForwarding = default(false);
         *.mipv6Module = hasMipv6 ? absPath(".mipv6") : "";
+        *.mldModule = hasMld ? absPath(".mldv1") : "";
         string interfaceTableModule;
         *.forwarding = this.forwarding;
         *.multicastForwarding = this.multicastForwarding;
@@ -112,7 +114,7 @@ module Ipv6NetworkLayer like INetworkLayer
             parameters:
                 @display("p=850,550");
         }
-        mldv1: Mldv1 if hasMld {
+        mldv1: <default("Mldv1")> like IMld if hasMld {
             parameters:
                 @display("p=550,500");
         }
