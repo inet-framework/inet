@@ -77,7 +77,9 @@ class INET_API Mldv1 : public OperationalBase, public cListener
     bool enabled = true;
     ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
     bool sendTestMessage = false;
+    bool sendTestQuery = false;
     cMessage *testTimer = nullptr;
+    cMessage *testQueryTimer = nullptr;
 
     // Host parameters
     double unsolicitedReportInterval = 10; // RFC 2710 §7.2 default 10s

@@ -67,6 +67,7 @@ Mldv1::HostInterfaceData::~HostInterfaceData()
 Mldv1::~Mldv1()
 {
     cancelAndDelete(testTimer);
+    cancelAndDelete(testQueryTimer);
     while (!hostData.empty())
         deleteHostInterfaceData(hostData.begin()->first);
     // Router teardown added in Phase 4
@@ -81,11 +82,16 @@ void Mldv1::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         enabled = par("enabled");
         sendTestMessage = par("sendTestMessage");
+        sendTestQuery = par("sendTestQuery");
         const char *checksumModeString = par("checksumMode");
         checksumMode = parseChecksumMode(checksumModeString, false);
         if (sendTestMessage) {
             testTimer = new cMessage("mldTestTimer");
             scheduleAt(0.5, testTimer);
+        }
+        if (sendTestQuery) {
+            testQueryTimer = new cMessage("mldTestQueryTimer");
+            scheduleAt(2.0, testQueryTimer);
         }
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
@@ -135,6 +141,25 @@ void Mldv1::handleMessageWhenUp(cMessage *msg)
                     Icmpv6::insertChecksum(checksumMode, report, pkt);
                     pkt->insertAtFront(report);
                     sendToIPv6(pkt, ie, Ipv6Address::ALL_NODES_2);
+                    break; // send on first multicast-capable interface only
+                }
+            }
+        }
+        else if (msg == testQueryTimer) {
+            // Test-only Query injection (sendTestQuery=true): send a General MLD Query
+            // on the first multicast-capable interface so that hosts on the link receive
+            // it and schedule delayed Reports (HOST-02 / Delaying Listener path).
+            // RFC 2710 §3: General Query is sent to ff02::1, multicastAddress=::, maxRespDelay=1000ms.
+            for (int i = 0; i < ift->getNumInterfaces(); i++) {
+                NetworkInterface *ie = ift->getInterface(i);
+                if (ie->isMulticast() && !ie->isLoopback()) {
+                    Packet *pkt = new Packet("MLD General Query (test)");
+                    const auto& qry = makeShared<MldQuery>();
+                    qry->setMulticastAddress(Ipv6Address::UNSPECIFIED_ADDRESS); // :: = General Query
+                    qry->setMaxRespDelay(1000);  // 1000 ms max response delay
+                    Icmpv6::insertChecksum(checksumMode, qry, pkt);
+                    pkt->insertAtFront(qry);
+                    sendToIPv6(pkt, ie, Ipv6Address::ALL_NODES_2); // dest = ff02::1
                     break; // send on first multicast-capable interface only
                 }
             }
@@ -294,22 +319,79 @@ void Mldv1::processMldMessage(Packet *packet)
     }
 }
 
-// Plan 03-02: processQuery and processGroupQuery bodies are implemented there.
 void Mldv1::processQuery(NetworkInterface *ie, Packet *packet)
 {
-    // TODO (Plan 03-02): implement general and group-specific query handling
+    ASSERT(ie->isMulticast());
+
+    HostInterfaceData *interfaceData = getHostInterfaceData(ie);
+    const auto& mldQry = packet->peekAtFront<MldQuery>();
+
+    // MLD maxRespDelay is in MILLISECONDS (uint16_t, RFC 2710 §3.4)
+    // Guard against zero (would produce a negative/zero timer interval via uniform(0,0))
+    uint16_t rawDelay = mldQry->getMaxRespDelay();
+    simtime_t maxRespTime = (rawDelay > 0) ? SimTime(rawDelay, SIMTIME_MS) : SimTime(1, SIMTIME_MS);
+
+    Ipv6Address groupAddr = mldQry->getMulticastAddress();
+
+    if (groupAddr.isUnspecified()) {
+        // General Listener Query: schedule a delayed Report for every joined group
+        EV_INFO << "Mldv1: received General Listener Query on iface=" << ie->getInterfaceName() << "\n";
+        for (auto& elem : interfaceData->groups)
+            processGroupQuery(ie, elem.second, maxRespTime);
+    }
+    else {
+        // Multicast-Address-Specific Query: only the addressed group responds
+        EV_INFO << "Mldv1: received Multicast-Address-Specific Query for group=" << groupAddr
+                << " iface=" << ie->getInterfaceName() << "\n";
+        auto it = interfaceData->groups.find(groupAddr);
+        if (it != interfaceData->groups.end())
+            processGroupQuery(ie, it->second, maxRespTime);
+    }
+
+    // Phase 4: router-side query handling (Other Querier Present / startup query) goes here
+
     delete packet;
 }
 
 void Mldv1::processGroupQuery(NetworkInterface *ie, HostGroupData *group, simtime_t maxRespTime)
 {
-    // TODO (Plan 03-02): implement query-driven timer scheduling
+    double maxRespTimeSecs = maxRespTime.dbl();
+
+    if (group->state == MLD_HGS_DELAYING_LISTENER) {
+        // RFC 2710 §5: only re-arm timer if the new max response time is sooner
+        simtime_t maxAbsoluteRespTime = simTime() + maxRespTimeSecs;
+        if (group->timer->isScheduled() && maxAbsoluteRespTime < group->timer->getArrivalTime())
+            startHostTimer(ie, group, maxRespTimeSecs);
+    }
+    else if (group->state == MLD_HGS_IDLE_LISTENER) {
+        // Idle Listener → Delaying Listener: arm the random-delay timer
+        startHostTimer(ie, group, maxRespTimeSecs);
+        group->state = MLD_HGS_DELAYING_LISTENER;
+    }
+    // else Non-Listener: ignore (not a member of this group)
 }
 
-// Plan 03-02: processReport body (report suppression) is implemented there.
 void Mldv1::processReport(NetworkInterface *ie, Packet *packet)
 {
-    // TODO (Plan 03-02): implement report suppression
+    ASSERT(ie->isMulticast());
+
+    const auto& msg = packet->peekAtFront<MldReport>();
+    Ipv6Address groupAddr = msg->getMulticastAddress();
+
+    EV_INFO << "Mldv1: received Multicast Listener Report for group=" << groupAddr
+            << " iface=" << ie->getInterfaceName() << "\n";
+    numReportsRecv++;
+
+    // HOST-03: report suppression — hearing another node's Report cancels our pending Report
+    HostGroupData *hostGroupData = getHostGroupData(ie, groupAddr);
+    if (hostGroupData && hostGroupData->state == MLD_HGS_DELAYING_LISTENER) {
+        cancelEvent(hostGroupData->timer);
+        hostGroupData->flag = false;
+        hostGroupData->state = MLD_HGS_IDLE_LISTENER;
+    }
+
+    // Phase 4: router-side report handling (record in reportedMulticastGroups, arm membership timer) goes here
+
     delete packet;
 }
 
