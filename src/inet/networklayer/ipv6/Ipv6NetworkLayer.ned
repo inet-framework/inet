@@ -16,6 +16,7 @@ import inet.networklayer.icmpv6.Icmpv6;
 import inet.networklayer.icmpv6.Ipv6NeighbourDiscovery;
 import inet.networklayer.mipv6.BindingCache;
 import inet.networklayer.mipv6.BindingUpdateList;
+import inet.networklayer.icmpv6.Mldv1;
 import inet.networklayer.mipv6.Mipv6;
 
 //
@@ -48,6 +49,7 @@ module Ipv6NetworkLayer like INetworkLayer
 {
     parameters:
         bool hasMipv6 = default(false);
+        bool hasMld = default(false);
         bool forwarding = default(false);
         bool multicastForwarding = default(false);
         *.mipv6Module = hasMipv6 ? absPath(".mipv6") : "";
@@ -110,6 +112,10 @@ module Ipv6NetworkLayer like INetworkLayer
             parameters:
                 @display("p=850,550");
         }
+        mldv1: Mldv1 if hasMld {
+            parameters:
+                @display("p=550,500");
+        }
 
     connections allowunconnected:  // FIXME remove 'nocheck'!
         transportIn --> { @display("m=n"); } --> up.in++;
@@ -132,6 +138,9 @@ module Ipv6NetworkLayer like INetworkLayer
 
         mipv6.fromIPv6 <-- lp.out++ if hasMipv6;
         mipv6.toIPv6 --> lp.in++ if hasMipv6;
+
+        mldv1.ipIn <-- lp.out++ if hasMld;
+        mldv1.ipOut --> lp.in++ if hasMld;
 
         ipv6.queueOut --> { @display("m=s"); } --> ifOut;
         ipv6.queueIn <-- { @display("m=s"); } <-- ifIn;
