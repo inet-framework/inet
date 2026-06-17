@@ -32,6 +32,7 @@ enum Mldv2TimerKind {
     MLDV2_R_GENERAL_QUERY_TIMER,
     MLDV2_R_GROUP_TIMER,
     MLDV2_R_SOURCE_TIMER,
+    MLDV2_R_REXMT_TIMER,
     MLDV2_H_GENERAL_QUERY_TIMER,
     MLDV2_H_GROUP_TIMER,
     MLDV2_H_STATE_CHANGE_TIMER,
@@ -137,6 +138,14 @@ class INET_API Mldv2 : public OperationalBase, protected cListener
         RouterGroupState state;
         cMessage *timer;
         SourceToSourceRecordMap sources;
+
+        // Last-Listener/Multicast-Address-Specific Query retransmission (RFC 3810 7.6.3):
+        // a Multicast-Address-Specific or -and-Source-Specific Query is sent [Last
+        // Listener Query Count] times in total, lastMemberQueryInterval apart.
+        cMessage *rexmtTimer; // fires at lastMemberQueryInterval
+        int rexmtCount = 0; // remaining retransmissions (0 = nothing pending)
+        bool rexmtGroupAndSource = false; // false=Multicast-Address-Specific, true=-and-Source-Specific
+        Ipv6AddressVector rexmtSources; // for the address-and-source case: sources to resend; sorted
 
         RouterGroupData(RouterInterfaceData *parent, const Ipv6Address& group);
         virtual ~RouterGroupData();
@@ -279,6 +288,7 @@ class INET_API Mldv2 : public OperationalBase, protected cListener
     virtual void processRouterGeneralQueryTimer(cMessage *msg);
     virtual void processRouterGroupTimer(cMessage *msg);
     virtual void processRouterSourceTimer(cMessage *msg);
+    virtual void processRexmtTimer(cMessage *msg);
 
     virtual void processMldMessage(Packet *msg);
     virtual void processQuery(Packet *msg);

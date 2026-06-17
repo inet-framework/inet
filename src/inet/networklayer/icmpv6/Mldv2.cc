@@ -319,6 +319,10 @@ void Mldv2::handleMessageWhenUp(cMessage *msg)
                 processRouterSourceTimer(msg);
                 break;
 
+            case MLDV2_R_REXMT_TIMER:
+                processRexmtTimer(msg);
+                break;
+
             case MLDV2_H_GENERAL_QUERY_TIMER:
                 processHostGeneralQueryTimer(msg);
                 break;
@@ -453,6 +457,80 @@ void Mldv2::processRouterSourceTimer(cMessage *msg)
         ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->removeMulticastListener(groupData->groupAddr);
         groupData->parent->deleteGroupData(groupData->groupAddr);
     }
+}
+
+// RFC 3810 7.6.3: retransmit a pending Multicast-Address-Specific or
+// -and-Source-Specific Query. The Query is sent [Last Listener Query Count] times in
+// total; this handler covers the extra transmissions after the initial one in
+// sendGroup[AndSource]SpecificQuery().
+void Mldv2::processRexmtTimer(cMessage *msg)
+{
+    RouterGroupData *groupData = (RouterGroupData *)msg->getContextPointer();
+    NetworkInterface *ie = groupData->parent->ie;
+    ASSERT(groupData->rexmtCount > 0);
+
+    Ipv6AddressVector sourcesToQuery;
+    if (groupData->rexmtGroupAndSource) {
+        // RFC 3810 7.6.3: on retransmission, query only the sources that are still
+        // being queried, i.e. those with a source timer still running above LMQT.
+        // A Report that moved a source back (raising its timer) or away (deleting it)
+        // thus drops it from the retransmitted Query; if none remain, stop.
+        simtime_t lmqt = simTime() + lastMemberQueryTime;
+        for (auto& src : groupData->rexmtSources) {
+            auto it = groupData->sources.find(src);
+            if (it != groupData->sources.end() && it->second->sourceTimer->isScheduled()
+                && it->second->sourceTimer->getArrivalTime() > lmqt)
+                sourcesToQuery.push_back(src);
+        }
+        if (sourcesToQuery.empty()) {
+            EV_INFO << "No sources are still being queried for group '" << groupData->groupAddr
+                    << "', stopping Multicast-Address-and-Source-Specific Query retransmission.\n";
+            groupData->rexmtCount = 0;
+            groupData->rexmtSources.clear();
+            return;
+        }
+        EV_INFO << "Retransmitting Multicast-Address-and-Source-Specific Query for group '" << groupData->groupAddr
+                << "' on interface '" << ie->getInterfaceName() << "' (" << groupData->rexmtCount
+                << " transmission(s) left).\n";
+    }
+    else {
+        EV_INFO << "Retransmitting Multicast-Address-Specific Query for group '" << groupData->groupAddr
+                << "' on interface '" << ie->getInterfaceName() << "' (" << groupData->rexmtCount
+                << " transmission(s) left).\n";
+    }
+
+    RouterInterfaceData *interfaceData = groupData->parent;
+    if (interfaceData->state == MLDV2_RS_QUERIER) {
+        Packet *packet = new Packet("Mldv2 query");
+        const auto& query = makeShared<Mldv2Query>();
+        query->setType(ICMPv6_MLD_QUERY);
+        query->setMulticastAddress(groupData->groupAddr);
+        query->setMaxRespDelay(codeMaxRespCode((uint16_t)(1000.0 * lastMemberQueryInterval))); // milliseconds
+        if (groupData->rexmtGroupAndSource) {
+            query->setSourceList(sourcesToQuery);
+            query->setChunkLength(B(28 + (16 * sourcesToQuery.size())));
+        }
+        else {
+            // suppressRouterProc is set on retransmissions: listeners' reports keep the
+            // group/source timers up, but the querier already lowered its own timers.
+            query->setSuppressRouterProc(true);
+            query->setChunkLength(B(28));
+        }
+        Icmpv6::insertChecksum(checksumMode, query, packet);
+        packet->insertAtFront(query);
+        sendQueryToIPv6(packet, ie, groupData->groupAddr);
+
+        numQueriesSent++;
+        if (groupData->rexmtGroupAndSource)
+            numGroupAndSourceSpecificQueriesSent++;
+        else
+            numGroupSpecificQueriesSent++;
+    }
+
+    if (--groupData->rexmtCount > 0)
+        startTimer(groupData->rexmtTimer, lastMemberQueryInterval);
+    else
+        groupData->rexmtSources.clear();
 }
 
 // RFC 3810 §6.1  report generation, point 1.
@@ -711,6 +789,15 @@ void Mldv2::processReport(Packet *packet)
             groupData->collectForwardedSources(oldSourceList);
 
             EV_DETAIL << "Router State is " << groupData->getStateInfo() << ".\n";
+
+            // RFC 3810 7.6.3: a new Report for this group supersedes any in-progress
+            // Last-Listener Query retransmission. Cancel it; if this record still needs
+            // a Query, the send below re-arms the retransmission from scratch.
+            if (groupData->rexmtCount > 0) {
+                groupData->rexmtCount = 0;
+                groupData->rexmtSources.clear();
+                cancelEvent(groupData->rexmtTimer);
+            }
 
             // RFC 3810 §7.4: Reception of Current State Record
             if (gr.getRecordType() == MLD_MODE_IS_INCLUDE) {
@@ -995,7 +1082,17 @@ void Mldv2::sendGroupSpecificQuery(RouterGroupData *groupData)
         numGroupSpecificQueriesSent++;
     }
 
-    // TODO retransmission [Last Member Query Count]-1 times
+    // RFC 3810 7.6.3: the Multicast-Address-Specific Query is (re)transmitted [Last
+    // Listener Query Count] times in total, lastMemberQueryInterval apart.
+    groupData->rexmtGroupAndSource = false;
+    groupData->rexmtSources.clear();
+    groupData->rexmtCount = lastMemberQueryCount - 1;
+    if (groupData->rexmtCount > 0 && lastMemberQueryInterval > 0)
+        startTimer(groupData->rexmtTimer, lastMemberQueryInterval);
+    else {
+        groupData->rexmtCount = 0;
+        cancelEvent(groupData->rexmtTimer); // nothing to retransmit, drop any leftover schedule
+    }
 }
 
 void Mldv2::sendGroupReport(NetworkInterface *ie, const vector<Mldv2MulticastAddressRecord>& records)
@@ -1040,6 +1137,21 @@ void Mldv2::sendGroupAndSourceSpecificQuery(RouterGroupData *groupData, const Ip
 
         numQueriesSent++;
         numGroupAndSourceSpecificQueriesSent++;
+    }
+
+    // RFC 3810 7.6.3: the Multicast-Address-and-Source-Specific Query is
+    // (re)transmitted [Last Listener Query Count] times in total,
+    // lastMemberQueryInterval apart. On each retransmission the set of queried
+    // sources is recomputed (see processRexmtTimer), so remember them here.
+    groupData->rexmtGroupAndSource = true;
+    groupData->rexmtSources = sources;
+    sort(groupData->rexmtSources.begin(), groupData->rexmtSources.end());
+    groupData->rexmtCount = lastMemberQueryCount - 1;
+    if (groupData->rexmtCount > 0 && lastMemberQueryInterval > 0)
+        startTimer(groupData->rexmtTimer, lastMemberQueryInterval);
+    else {
+        groupData->rexmtCount = 0;
+        cancelEvent(groupData->rexmtTimer); // nothing to retransmit, drop any leftover schedule
     }
 }
 
@@ -1168,11 +1280,15 @@ Mldv2::RouterGroupData::RouterGroupData(RouterInterfaceData *parent, const Ipv6A
 
     timer = new cMessage("Mldv2 router group timer", MLDV2_R_GROUP_TIMER);
     timer->setContextPointer(this);
+
+    rexmtTimer = new cMessage("Mldv2 router rexmt timer", MLDV2_R_REXMT_TIMER);
+    rexmtTimer->setContextPointer(this);
 }
 
 Mldv2::RouterGroupData::~RouterGroupData()
 {
     parent->owner->cancelAndDelete(timer);
+    parent->owner->cancelAndDelete(rexmtTimer);
 }
 
 Mldv2::SourceRecord *Mldv2::RouterGroupData::createSourceRecord(const Ipv6Address& source)

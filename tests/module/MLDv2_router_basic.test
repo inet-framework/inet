@@ -28,6 +28,12 @@ RTRv2-03 (Multicast-Address-Specific Query after a leave):
   TO_IN it follows RFC 3810 §7.4 "Reception of a TO_IN" for the EXCLUDE case and sends a
   Multicast-Address-Specific Query Q(G) for ff0e::1:2:3. That marker is asserted.
 
+RTRv2-04 (Multicast-Address-Specific Query retransmission, RFC 3810 §7.6.3):
+  The Query is sent [Last Listener Query Count] (=lastMemberQueryCount=2) times in
+  total, lastMemberQueryInterval (=1s) apart: the initial send plus one
+  retransmission. The "Retransmitting Multicast-Address-Specific Query ..." marker is
+  asserted.
+
 HOST-ONLY NEGATIVE (single-querier proof):
   host1 has multicastForwarding=false (the default); only the router runs the querier
   path. A %postrun-command extracts any "Sending ... Query" lines emitted by host1's MLD
@@ -137,6 +143,11 @@ Mldv2RouterBasicNetwork.router.ipv6.mld: Received TO_EX() report.
 %# RTRv2-03: on the leave (TO_IN while in EXCLUDE mode) the router sends a Multicast-Address-Specific Query
 %contains: stdout
 Mldv2RouterBasicNetwork.router.ipv6.mld: Sending Multicast-Address-Specific Query for group 'ff0e::1:2:3' on interface 'eth0'.
+
+%#--------------------------------------------------------------------------------------------------------------
+%# RTRv2-04: the Multicast-Address-Specific Query is retransmitted lastMemberQueryCount-1 times (RFC 3810 7.6.3)
+%contains: stdout
+Mldv2RouterBasicNetwork.router.ipv6.mld: Retransmitting Multicast-Address-Specific Query for group 'ff0e::1:2:3' on interface 'eth0'
 
 %#--------------------------------------------------------------------------------------------------------------
 %# HOST-ONLY NEGATIVE (single-querier proof): host1 has multicastForwarding=false and must
