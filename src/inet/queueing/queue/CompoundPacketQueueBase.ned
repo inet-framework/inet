@@ -34,28 +34,28 @@ module CompoundPacketQueueBase extends PacketQueueBase like IPacketQueue
         // the statistical value is the total bit length of all packets in the queue
         @statistic[queueBitLength](title="queue bit length"; source=warmup(atomic(constant0(localSignal(packetPushEnded)) + sum(packetLength(localSignal(packetPushStarted))) - sum(packetLength(localSignal(packetPulled))) - sum(packetLength(localSignal(packetRemoved))) - sum(packetLength(localSignal(packetDropped))))); record=last,max,timeavg,vector; unit=b; interpolationmode=sample-hold; autoWarmupFilter=false);
         // the statistical value is the queueing time of packets
-        @statistic[queueingTime](title="queueing times"; source=queueingTime(localSignal(packetPulled)); record=histogram,vector; unit=s; interpolationmode=none);
+        @statistic[queueingTime](title="queueing times"; source=queueingTime(warmup(localSignal(packetPulled))); record=histogram,vector; unit=s; interpolationmode=none; autoWarmupFilter=false);
         // the statistical value is the incoming packet
-        @statistic[incomingPackets](title="incoming packets"; source=localSignal(packetPushStarted); record=count; unit=pk);
+        @statistic[incomingPackets](title="incoming packets"; source=warmup(localSignal(packetPushStarted)); record=count; unit=pk; autoWarmupFilter=false);
         // the statistical value is the length of the incoming packet
-        @statistic[incomingPacketLengths](title="incoming packet lengths"; source=packetLength(localSignal(packetPushStarted)); record=sum,histogram,vector; unit=b; interpolationmode=none);
+        @statistic[incomingPacketLengths](title="incoming packet lengths"; source=packetLength(warmup(localSignal(packetPushStarted))); record=sum,histogram,vector; unit=b; interpolationmode=none; autoWarmupFilter=false);
         // the statistical value is the data rate of the incoming packets
-        @statistic[incomingDataRate](title="incoming datarate"; source=throughput(localSignal(packetPushStarted)); record=vector; unit=bps; interpolationmode=linear);
+        @statistic[incomingDataRate](title="incoming datarate"; source=throughput(warmup(localSignal(packetPushStarted))); record=vector; unit=bps; interpolationmode=linear; autoWarmupFilter=false);
         // the statistical value is the outgoing packet
-        @statistic[outgoingPackets](title="outgoing packets"; source=localSignal(packetPulled); record=count; unit=pk);
+        @statistic[outgoingPackets](title="outgoing packets"; source=warmup(localSignal(packetPulled)); record=count; unit=pk; autoWarmupFilter=false);
         // the statistical value is the length of the outgoing packet
-        @statistic[outgoingPacketLengths](title="outgoing packet lengths"; source=packetLength(localSignal(packetPulled)); record=sum,histogram,vector; unit=b; interpolationmode=none);
+        @statistic[outgoingPacketLengths](title="outgoing packet lengths"; source=packetLength(warmup(localSignal(packetPulled))); record=sum,histogram,vector; unit=b; interpolationmode=none; autoWarmupFilter=false);
         // the statistical value is the data rate of the outgoing packets
-        @statistic[outgoingDataRate](title="outgoing datarate"; source=throughput(localSignal(packetPulled)); record=vector; unit=bps; interpolationmode=linear);
+        @statistic[outgoingDataRate](title="outgoing datarate"; source=throughput(warmup(localSignal(packetPulled))); record=vector; unit=bps; interpolationmode=linear; autoWarmupFilter=false);
         // the statistical value is the packet that is dropped due to queue overflow
-        @statistic[droppedPacketsQueueOverflow](title="dropped packets: queue overflow"; source=packetDropReasonIsQueueOverflow(localSignal(packetDropped)); record=count; unit=pk; interpolationmode=none);
+        @statistic[droppedPacketsQueueOverflow](title="dropped packets: queue overflow"; source=packetDropReasonIsQueueOverflow(warmup(localSignal(packetDropped))); record=count; unit=pk; interpolationmode=none; autoWarmupFilter=false);
         // the statistical value is the length of the packet that is dropped due to queue overflow
-        @statistic[droppedPacketLengthsQueueOverflow](title="dropped packet lengths: queue overflow"; source=packetLength(packetDropReasonIsQueueOverflow(localSignal(packetDropped))); record=sum,vector; unit=b; interpolationmode=none);
+        @statistic[droppedPacketLengthsQueueOverflow](title="dropped packet lengths: queue overflow"; source=packetLength(packetDropReasonIsQueueOverflow(warmup(localSignal(packetDropped)))); record=sum,vector; unit=b; interpolationmode=none; autoWarmupFilter=false);
         // the statistical value is the flow specific queueing time of packets
-        @statistic[flowQueueingTime](title="flow queueing times"; source=queueingTime(demuxFlow(localSignal(packetPulled))); record=histogram,vector; unit=s; interpolationmode=none);
+        @statistic[flowQueueingTime](title="flow queueing times"; source=queueingTime(demuxFlow(warmup(localSignal(packetPulled)))); record=histogram,vector; unit=s; interpolationmode=none; autoWarmupFilter=false);
         // the statistical value is the flow specific data rate of the incoming packets
-        @statistic[flowIncomingDataRate](title="flow specific incoming data rate"; source=throughput(flowPacketLength(demuxFlow(localSignal(packetPushStarted)))); record=vector; unit=bps; interpolationmode=linear);
+        @statistic[flowIncomingDataRate](title="flow specific incoming data rate"; source=throughput(flowPacketLength(demuxFlow(warmup(localSignal(packetPushStarted))))); record=vector; unit=bps; interpolationmode=linear; autoWarmupFilter=false);
         // the statistical value is the flow specific data rate of the outgoing packets
-        @statistic[flowOutgoingDataRate](title="flow specific outgoing data rate"; source=throughput(flowPacketLength(demuxFlow(localSignal(packetPulled)))); record=vector; unit=bps; interpolationmode=linear);
+        @statistic[flowOutgoingDataRate](title="flow specific outgoing data rate"; source=throughput(flowPacketLength(demuxFlow(warmup(localSignal(packetPulled))))); record=vector; unit=bps; interpolationmode=linear; autoWarmupFilter=false);
         @defaultStatistic(queueLength:vector);
 }
