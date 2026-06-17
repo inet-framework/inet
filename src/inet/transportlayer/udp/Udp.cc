@@ -514,18 +514,12 @@ void Udp::removeMulticastAddressFromInterface(NetworkInterface *ie, const L3Addr
     ASSERT(ie && ie->isMulticast());
     ASSERT(multicastAddr.isMulticast());
 
-    if (multicastAddr.getType() == L3Address::IPv6) {
-#ifdef INET_WITH_IPv6
-        // IPv6 has no source-filter (SSM) membership API and MLDv1 is any-source.
-        // Leave via Ipv6InterfaceData so ipv6MulticastGroupLeftSignal fires (drives the
-        // MLD Done). The generic changeMulticastGroupMembership() throws for IPv6.
-        ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->leaveMulticastGroup(multicastAddr.toIpv6());
-#endif // ifdef INET_WITH_IPv6
-    }
-    else {
-        std::vector<L3Address> empty;
-        ie->changeMulticastGroupMembership(multicastAddr, oldFilterMode, oldSourceList, MCAST_INCLUDE_SOURCES, empty);
-    }
+    // Both IPv4 and IPv6 go through the generic source-filter-aware path. For a plain
+    // any-source membership (EXCLUDE{}) this reduces to a leave and fires the legacy
+    // join/left signal that MLDv1/IGMP listen for; for an INCLUDE{...} (SSM) membership
+    // it correctly tears down the source filter.
+    std::vector<L3Address> empty;
+    ie->changeMulticastGroupMembership(multicastAddr, oldFilterMode, oldSourceList, MCAST_INCLUDE_SOURCES, empty);
 }
 
 void Udp::leaveMulticastGroups(SockDesc *sd, const std::vector<L3Address>& multicastAddresses)

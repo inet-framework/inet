@@ -9,6 +9,8 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/transportlayer/contract/udp/UdpCommand_m.h"
 
 namespace inet {
@@ -99,7 +101,25 @@ void UdpSink::setSocketOptions()
     if (!multicastGroup.isUnspecified()) {
         if (!multicastGroup.isMulticast())
             throw cRuntimeError("Wrong multicastGroup setting: not a multicast address: %s", groupAddr);
-        socket.joinMulticastGroup(multicastGroup);
+
+        const char *sourcesStr = par("multicastSources");
+        if (sourcesStr[0]) {
+            // Source-specific (SSM) membership: receive only from the listed sources
+            // (INCLUDE filter mode). Joined on every multicast-capable interface, mirroring
+            // the all-interface behaviour of a plain joinMulticastGroup().
+            std::vector<L3Address> sourceList;
+            cStringTokenizer tokenizer(sourcesStr);
+            while (tokenizer.hasMoreTokens())
+                sourceList.push_back(L3AddressResolver().resolve(tokenizer.nextToken()));
+            IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+            for (int i = 0; i < ift->getNumInterfaces(); i++) {
+                NetworkInterface *ie = ift->getInterface(i);
+                if (ie->isMulticast() && !ie->isLoopback())
+                    socket.joinMulticastSources(ie->getInterfaceId(), multicastGroup, sourceList);
+            }
+        }
+        else
+            socket.joinMulticastGroup(multicastGroup);
     }
     socket.setCallback(this);
 }
