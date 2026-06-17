@@ -69,6 +69,7 @@ class INET_API Igmpv3 : public SimpleModule, protected cListener
         IGMPV3_R_GENERAL_QUERY_TIMER,
         IGMPV3_R_GROUP_TIMER,
         IGMPV3_R_SOURCE_TIMER,
+        IGMPV3_R_REXMT_TIMER,
         IGMPV3_H_GENERAL_QUERY_TIMER,
         IGMPV3_H_GROUP_TIMER,
         IGMPV3_H_STATE_CHANGE_TIMER,
@@ -150,6 +151,14 @@ class INET_API Igmpv3 : public SimpleModule, protected cListener
         cMessage *timer;
         SourceToSourceRecordMap sources; // TODO should map source addresses to source timers
                                          // i.e. map<Ipv4Address,cMessage*>
+
+        // Last-Member/Group-Specific Query retransmission (RFC 3376 6.4.2): a
+        // Group-Specific or Group-and-Source-Specific Query is sent [Last Member
+        // Query Count] times in total, lastMemberQueryInterval apart.
+        cMessage *rexmtTimer; // fires at lastMemberQueryInterval
+        int rexmtCount = 0; // remaining retransmissions (0 = nothing pending)
+        bool rexmtGroupAndSource = false; // false=Group-Specific, true=Group-and-Source-Specific
+        Ipv4AddressVector rexmtSources; // for the group-and-source case: sources to resend; sorted
 
         RouterGroupData(RouterInterfaceData *parent, Ipv4Address group);
         virtual ~RouterGroupData();
@@ -284,6 +293,7 @@ class INET_API Igmpv3 : public SimpleModule, protected cListener
     virtual void processRouterGeneralQueryTimer(cMessage *msg);
     virtual void processRouterGroupTimer(cMessage *msg);
     virtual void processRouterSourceTimer(cMessage *msg);
+    virtual void processRexmtTimer(cMessage *msg);
 
     virtual void processIgmpMessage(Packet *msg);
     virtual void processQuery(Packet *msg);

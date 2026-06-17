@@ -4,6 +4,15 @@ Checks that a router sends Group-Specific and Group-and-Source-Specific Queries
 in response to Filter-Mode-Change and Source-List-Change records.
 See RFC 3376 6.4.2.
 
+Each such Query is sent [Last Member Query Count] times in total,
+[Last Member Query Interval] apart (the initial send plus
+lastMemberQueryCount-1 retransmissions). With lastMemberQueryCount=2 and
+lastMemberQueryInterval=1s, every Group-/Group-and-Source-Specific Query
+below appears twice, 1s apart. The exception at t=8 (TO_IN while in EXCLUDE
+mode): the record sends Q(G,X-A) then Q(G); the later Q(G) re-arms the single
+per-group retransmission timer, so the Q(G,X-A) is sent only once while the
+following Q(G) is the one that gets retransmitted.
+
 %#--------------------------------------------------------------------------------------------------------------
 
 %inifile: omnetpp.ini
@@ -23,6 +32,13 @@ network = inet.test.moduletest.lib.TestIGMPNetwork
 **.igmp.typename = "Igmpv3"
 **.IPForward = true
 **.multicastForwarding = true
+
+# Pin RNG and the last-member retransmission timers for determinism. With
+# lastMemberQueryCount=2 each Group-/Group-and-Source-Specific Query is sent
+# twice, lastMemberQueryInterval=1s apart, well within the 100s sim-time.
+seed-set = 0
+**.igmp.lastMemberQueryInterval = 1s
+**.igmp.lastMemberQueryCount = 2
 
 **.scenarioManager.script = xmldoc("scenario.xml")
 
@@ -87,6 +103,40 @@ IGMPTester: Received: inet::Igmpv3Query<group=225.0.0.1, sourceList=\(10.0.0.4\)
 IGMPTester: Received: inet::Igmpv3Query<group=225.0.0.1, sourceList=\(10.0.0.1,10.0.0.3\),.*>.
 IGMPTester: Received: inet::Igmpv3Query<group=225.0.0.1, sourceList=\(10.0.0.3\),.*>.
 IGMPTester: Received: inet::Igmpv3Query<group=225.0.0.1, sourceList=\(\),.*>.
+
+%#--------------------------------------------------------------------------------------------------------------
+%#
+%# Each Group-/Group-and-Source-Specific Query is sent lastMemberQueryCount (=2)
+%# times. Reduce every received group query to its source-list and assert the
+%# exact ordered sequence: each query content appears twice, except the t=8
+%# Q(G,10.0.0.3) which is superseded by the following Q(G) on the shared
+%# per-group retransmission timer (see %description).
+%#
+%postrun-command: grep "IGMPTester: Received" test.out | grep -v "unspec" | sed -E 's/.*sourceList=(\([^)]*\)).*/\1/' > query_sources.out || true
+%contains: query_sources.out
+(10.0.0.1)
+(10.0.0.1)
+(10.0.0.1,10.0.0.2)
+(10.0.0.1,10.0.0.2)
+(10.0.0.3)
+(10.0.0.3)
+(10.0.0.4)
+(10.0.0.4)
+(10.0.0.1,10.0.0.3)
+(10.0.0.1,10.0.0.3)
+(10.0.0.3)
+()
+()
+
+%#--------------------------------------------------------------------------------------------------------------
+%#
+%# Check that the retransmission actually fires (RFC 3376 6.4.2).
+%#
+%postrun-command: grep "Retransmitting Group" test.out > rexmt.out || true
+%contains: rexmt.out
+Retransmitting Group-and-Source-Specific Query for group '225.0.0.1'
+%contains: rexmt.out
+Retransmitting Group-Specific Query for group '225.0.0.1'
 
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
