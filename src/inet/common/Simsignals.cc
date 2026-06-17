@@ -70,6 +70,7 @@ simsignal_t ipv6MulticastGroupJoinedSignal = cComponent::registerSignal("ipv6Mul
 simsignal_t ipv6MulticastGroupLeftSignal = cComponent::registerSignal("ipv6MulticastGroupLeft");
 simsignal_t ipv6MulticastGroupRegisteredSignal = cComponent::registerSignal("ipv6MulticastGroupRegistered");
 simsignal_t ipv6MulticastGroupUnregisteredSignal = cComponent::registerSignal("ipv6MulticastGroupUnregistered");
+simsignal_t ipv6MulticastChangeSignal = cComponent::registerSignal("ipv6McastChange");
 simsignal_t ipv6NewMulticastSignal = cComponent::registerSignal("ipv6NewMulticast");
 simsignal_t ipv6DataOnNonrpfSignal = cComponent::registerSignal("ipv6DataOnNonrpf");
 simsignal_t ipv6DataOnRpfSignal = cComponent::registerSignal("ipv6DataOnRpf");

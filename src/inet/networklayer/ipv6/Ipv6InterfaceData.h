@@ -8,6 +8,7 @@
 #ifndef __INET_IPV6INTERFACEDATA_H
 #define __INET_IPV6INTERFACEDATA_H
 
+#include <map>
 #include <vector>
 
 #include "inet/common/INETDefs.h"
@@ -62,6 +63,33 @@ class Ipv6RoutingTable;
 
 
 /*
+ * A source-filtered multicast membership: a filter mode (INCLUDE/EXCLUDE) plus a
+ * sorted source list. The IPv6 counterpart of Ipv4MulticastSourceList, used by MLDv2.
+ */
+struct INET_API Ipv6MulticastSourceList
+{
+    typedef std::vector<Ipv6Address> Ipv6AddressVector;
+    McastSourceFilterMode filterMode;
+    Ipv6AddressVector sources; // sorted
+
+    Ipv6MulticastSourceList()
+        : filterMode(MCAST_INCLUDE_SOURCES) {}
+    Ipv6MulticastSourceList(McastSourceFilterMode filterMode, const Ipv6AddressVector& sources)
+        : filterMode(filterMode), sources(sources) {}
+    static const Ipv6MulticastSourceList ALL_SOURCES;
+
+    bool operator==(const Ipv6MulticastSourceList& other) { return filterMode == other.filterMode && sources == other.sources; }
+    bool operator!=(const Ipv6MulticastSourceList& other) { return filterMode != other.filterMode || sources != other.sources; }
+    bool isEmpty() const { return filterMode == MCAST_INCLUDE_SOURCES && sources.empty(); }
+    bool containsAll() const { return filterMode == MCAST_EXCLUDE_SOURCES && sources.empty(); }
+    bool contains(Ipv6Address source);
+    bool add(Ipv6Address source);
+    bool remove(Ipv6Address source);
+    std::string str() const;
+    std::string detailedInfo() const;
+};
+
+/*
  * Info for ipv6MulticastGroupJoinedSignal and ipv6MulticastGroupLeftSignal notifications
  */
 struct INET_API Ipv6MulticastGroupInfo : public cObject
@@ -70,6 +98,16 @@ struct INET_API Ipv6MulticastGroupInfo : public cObject
         : ie(ie), groupAddress(groupAddress) {}
     NetworkInterface *ie;
     Ipv6Address groupAddress;
+};
+
+/*
+ * Info for ipv6MulticastChangeSignal notifications (source-filtered membership change)
+ */
+struct INET_API Ipv6MulticastGroupSourceInfo : public Ipv6MulticastGroupInfo
+{
+    Ipv6MulticastGroupSourceInfo(NetworkInterface *const ie, const Ipv6Address& groupAddress, const Ipv6MulticastSourceList& sourceList)
+        : Ipv6MulticastGroupInfo(ie, groupAddress), sourceList(sourceList) {}
+    Ipv6MulticastSourceList sourceList;
 };
 
 /*
@@ -97,17 +135,44 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
     enum { F_IP_ADDRESS, F_MULTICAST_ADDRESSES, F_MULTICAST_LISTENERS }; // FIXME missed field IDs and missed notifications in setter functions
 
   protected:
-    struct HostMulticastData {
-        Ipv6AddressVector joinedMulticastGroups;
-        std::vector<int> refCounts;
+    struct INET_API HostMulticastGroupData {
+        Ipv6Address multicastGroup;
+        std::map<Ipv6Address, int> includeCounts;
+        std::map<Ipv6Address, int> excludeCounts;
+        int numOfExcludeModeSockets;
 
+        // computed from the above (the merged interface-level filter for this group)
+        Ipv6MulticastSourceList sourceList;
+
+        HostMulticastGroupData(Ipv6Address multicastGroup)
+            : multicastGroup(multicastGroup), numOfExcludeModeSockets(0) {}
+        bool updateSourceList();
+    };
+
+    typedef std::vector<HostMulticastGroupData *> HostMulticastGroupVector;
+
+    struct INET_API HostMulticastData {
+        HostMulticastGroupVector joinedMulticastGroups; // multicast groups this interface joined
+
+        virtual ~HostMulticastData();
         std::string str();
         std::string detailedInfo();
     };
 
-    struct RouterMulticastData {
-        Ipv6AddressVector reportedMulticastGroups; ///< multicast groups that have listeners on the link connected to this interface
+    struct INET_API RouterMulticastGroupData {
+        Ipv6Address multicastGroup;
+        Ipv6MulticastSourceList sourceList;
 
+        RouterMulticastGroupData(Ipv6Address multicastGroup)
+            : multicastGroup(multicastGroup) {}
+    };
+
+    typedef std::vector<RouterMulticastGroupData *> RouterMulticastGroupVector;
+
+    struct INET_API RouterMulticastData {
+        RouterMulticastGroupVector reportedMulticastGroups; ///< multicast groups that have listeners on the link connected to this interface
+
+        virtual ~RouterMulticastData();
         std::string str();
         std::string detailedInfo();
     };
@@ -372,8 +437,12 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
     void changed1(int fieldId) { changed(interfaceIpv6ConfigChangedSignal, fieldId); }
     HostMulticastData *getHostData() { if (!hostMcastData) hostMcastData = new HostMulticastData(); return hostMcastData; }
     const HostMulticastData *getHostData() const { return const_cast<Ipv6InterfaceData *>(this)->getHostData(); }
+    HostMulticastGroupData *findHostGroupData(Ipv6Address multicastAddress);
+    bool removeHostGroupData(Ipv6Address multicastAddress);
     RouterMulticastData *getRouterData() { if (!routerMcastData) routerMcastData = new RouterMulticastData(); return routerMcastData; }
     const RouterMulticastData *getRouterData() const { return const_cast<Ipv6InterfaceData *>(this)->getRouterData(); }
+    RouterMulticastGroupData *findRouterGroupData(Ipv6Address multicastAddress) const;
+    bool removeRouterGroupData(Ipv6Address multicastAddress);
 
     static bool addrLess(const AddressData& a, const AddressData& b);
 
@@ -453,16 +522,26 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
      */
     virtual void permanentlyAssign(const Ipv6Address& addr);
 
-    const Ipv6AddressVector& getJoinedMulticastGroups() const { return getHostData()->joinedMulticastGroups; }
-    const Ipv6AddressVector& getReportedMulticastGroups() const { return getRouterData()->reportedMulticastGroups; }
+    int getNumOfJoinedMulticastGroups() const { return getHostData()->joinedMulticastGroups.size(); }
+    Ipv6Address getJoinedMulticastGroup(int index) const { return getHostData()->joinedMulticastGroups[index]->multicastGroup; }
+    const Ipv6MulticastSourceList& getJoinedMulticastSources(int index) { return getHostData()->joinedMulticastGroups[index]->sourceList; }
+    int getNumOfReportedMulticastGroups() const { return getRouterData()->reportedMulticastGroups.size(); }
+    Ipv6Address getReportedMulticastGroup(int index) const { return getRouterData()->reportedMulticastGroups[index]->multicastGroup; }
+    const Ipv6MulticastSourceList& getReportedMulticastSources(int index) const { return getRouterData()->reportedMulticastGroups[index]->sourceList; }
 
     bool isMemberOfMulticastGroup(const Ipv6Address& multicastAddress) const;
     virtual void joinMulticastGroup(const Ipv6Address& multicastAddress);
     virtual void leaveMulticastGroup(const Ipv6Address& multicastAddress);
+    virtual void changeMulticastGroupMembership(Ipv6Address multicastAddress, McastSourceFilterMode oldFilterMode, const Ipv6AddressVector& oldSourceList,
+            McastSourceFilterMode newFilterMode, const Ipv6AddressVector& newSourceList);
 
     bool hasMulticastListener(const Ipv6Address& multicastAddress) const;
+    bool hasMulticastListener(const Ipv6Address& multicastAddress, const Ipv6Address& sourceAddress) const;
     virtual void addMulticastListener(const Ipv6Address& multicastAddress);
+    virtual void addMulticastListener(const Ipv6Address& multicastAddress, const Ipv6Address& sourceAddress);
     virtual void removeMulticastListener(const Ipv6Address& multicastAddress);
+    virtual void removeMulticastListener(const Ipv6Address& multicastAddress, const Ipv6Address& sourceAddress);
+    virtual void setMulticastListeners(Ipv6Address multicastAddress, McastSourceFilterMode filterMode, const Ipv6AddressVector& sourceList);
 
     /**
      * Sets the "tentative" flag of the ith address of the interface.

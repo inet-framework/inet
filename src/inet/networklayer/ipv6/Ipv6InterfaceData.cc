@@ -20,17 +20,102 @@ Register_Abstract_Class(Ipv6AddressInfo);
 
 // FIXME invoked changed() from state-changing methods, to trigger notification...
 
+const Ipv6MulticastSourceList Ipv6MulticastSourceList::ALL_SOURCES(MCAST_EXCLUDE_SOURCES, Ipv6MulticastSourceList::Ipv6AddressVector());
+
+bool Ipv6MulticastSourceList::contains(Ipv6Address source)
+{
+    return (filterMode == MCAST_INCLUDE_SOURCES && inet::contains(sources, source)) ||
+           (filterMode == MCAST_EXCLUDE_SOURCES && !inet::contains(sources, source));
+}
+
+bool Ipv6MulticastSourceList::add(Ipv6Address source)
+{
+    size_t oldSize = sources.size();
+    if (filterMode == MCAST_INCLUDE_SOURCES) {
+        auto it = std::lower_bound(sources.begin(), sources.end(), source);
+        if (it == sources.end() || *it != source)
+            sources.insert(it, source);
+    }
+    else
+        sources.erase(std::remove(sources.begin(), sources.end(), source), sources.end());
+    return sources.size() != oldSize;
+}
+
+bool Ipv6MulticastSourceList::remove(Ipv6Address source)
+{
+    size_t oldSize = sources.size();
+    if (filterMode == MCAST_INCLUDE_SOURCES)
+        sources.erase(std::remove(sources.begin(), sources.end(), source), sources.end());
+    else {
+        auto it = std::lower_bound(sources.begin(), sources.end(), source);
+        if (it == sources.end() || *it != source)
+            sources.insert(it, source);
+    }
+    return sources.size() != oldSize;
+}
+
+std::string Ipv6MulticastSourceList::str() const
+{
+    std::stringstream out;
+    out << (filterMode == MCAST_INCLUDE_SOURCES ? "I" : "E");
+    for (auto& elem : sources)
+        out << " " << elem;
+    return out.str();
+}
+
+std::string Ipv6MulticastSourceList::detailedInfo() const
+{
+    std::stringstream out;
+    out << "Source list: " << str();
+    return out.str();
+}
+
+bool Ipv6InterfaceData::HostMulticastGroupData::updateSourceList()
+{
+    // Filter mode is EXCLUDE if any of the sockets are in EXCLUDE mode, otherwise INCLUDE
+    McastSourceFilterMode filterMode = numOfExcludeModeSockets == 0 ? MCAST_INCLUDE_SOURCES : MCAST_EXCLUDE_SOURCES;
+
+    Ipv6MulticastSourceList::Ipv6AddressVector sourceList;
+    if (numOfExcludeModeSockets == 0) {
+        // all sockets INCLUDE: the source list is the union of the included sources
+        for (auto& elem : includeCounts)
+            sourceList.push_back(elem.first);
+    }
+    else {
+        // some socket EXCLUDE: the source list contains the sources excluded by every
+        // EXCLUDE-mode socket, unless some socket includes them
+        for (auto& elem : excludeCounts)
+            if (elem.second == numOfExcludeModeSockets && !containsKey(includeCounts, elem.first))
+                sourceList.push_back(elem.first);
+    }
+
+    if (this->sourceList.filterMode != filterMode || this->sourceList.sources != sourceList) {
+        this->sourceList.filterMode = filterMode;
+        this->sourceList.sources = sourceList;
+        return true;
+    }
+    else
+        return false;
+}
+
+Ipv6InterfaceData::HostMulticastData::~HostMulticastData()
+{
+    for (auto& elem : joinedMulticastGroups)
+        delete elem;
+    joinedMulticastGroups.clear();
+}
+
 std::string Ipv6InterfaceData::HostMulticastData::str()
 {
     std::stringstream out;
-    if (!joinedMulticastGroups.empty() &&
-        (joinedMulticastGroups[0] != Ipv6Address::ALL_NODES_1 || joinedMulticastGroups.size() > 1))
-    {
+    if (!joinedMulticastGroups.empty()) {
         out << "\tmcastgrps:";
         bool addComma = false;
-        for (auto& elem : joinedMulticastGroups) {
-            if (elem != Ipv6Address::ALL_NODES_1) {
-                out << (addComma ? "," : "") << elem;
+        for (auto& group : joinedMulticastGroups) {
+            if (group->multicastGroup != Ipv6Address::ALL_NODES_1) {
+                out << (addComma ? "," : "") << group->multicastGroup;
+                if (!group->sourceList.containsAll())
+                    out << " " << group->sourceList.str();
                 addComma = true;
             }
         }
@@ -42,10 +127,20 @@ std::string Ipv6InterfaceData::HostMulticastData::detailedInfo()
 {
     std::stringstream out;
     out << "Joined Groups:";
-    for (size_t i = 0; i < joinedMulticastGroups.size(); ++i)
-        out << " " << joinedMulticastGroups[i] << "(" << refCounts[i] << ")";
+    for (auto& group : joinedMulticastGroups) {
+        out << " " << group->multicastGroup;
+        if (!group->sourceList.containsAll())
+            out << "(" << group->sourceList.str() << ")";
+    }
     out << "\n";
     return out.str();
+}
+
+Ipv6InterfaceData::RouterMulticastData::~RouterMulticastData()
+{
+    for (auto& elem : reportedMulticastGroups)
+        delete elem;
+    reportedMulticastGroups.clear();
 }
 
 std::string Ipv6InterfaceData::RouterMulticastData::str()
@@ -53,8 +148,11 @@ std::string Ipv6InterfaceData::RouterMulticastData::str()
     std::stringstream out;
     if (reportedMulticastGroups.size() > 0) {
         out << "\tmcast_listeners:";
-        for (size_t i = 0; i < reportedMulticastGroups.size(); ++i)
-            out << (i > 0 ? "," : "") << reportedMulticastGroups[i];
+        for (size_t i = 0; i < reportedMulticastGroups.size(); ++i) {
+            out << (i > 0 ? "," : "") << reportedMulticastGroups[i]->multicastGroup;
+            if (!reportedMulticastGroups[i]->sourceList.containsAll())
+                out << " " << reportedMulticastGroups[i]->sourceList.str();
+        }
     }
     return out.str();
 }
@@ -63,8 +161,11 @@ std::string Ipv6InterfaceData::RouterMulticastData::detailedInfo()
 {
     std::stringstream out;
     out << "Multicast Listeners:";
-    for (auto& elem : reportedMulticastGroups)
-        out << " " << elem;
+    for (auto& group : reportedMulticastGroups) {
+        out << " " << group->multicastGroup;
+        if (!group->sourceList.containsAll())
+            out << "(" << group->sourceList.str() << ")";
+    }
     out << "\n";
     return out.str();
 }
@@ -442,66 +543,148 @@ simtime_t Ipv6InterfaceData::generateReachableTime()
 
 bool Ipv6InterfaceData::isMemberOfMulticastGroup(const Ipv6Address& multicastAddress) const
 {
-    const Ipv6AddressVector& multicastGroups = getJoinedMulticastGroups();
-    return contains(multicastGroups, multicastAddress);
+    const HostMulticastGroupVector& groups = getHostData()->joinedMulticastGroups;
+    for (auto& group : groups)
+        if (group->multicastGroup == multicastAddress)
+            return true;
+    return false;
 }
 
 void Ipv6InterfaceData::joinMulticastGroup(const Ipv6Address& multicastAddress)
 {
-    if (!multicastAddress.isMulticast())
-        throw cRuntimeError("Ipv6InterfaceData::joinMulticastGroup(): multicast address expected, received %s.", multicastAddress.str().c_str());
-
-    Ipv6AddressVector& multicastGroups = getHostData()->joinedMulticastGroups;
-
-    std::vector<int>& refCounts = getHostData()->refCounts;
-    for (size_t i = 0; i < multicastGroups.size(); ++i) {
-        if (multicastGroups[i] == multicastAddress) {
-            refCounts[i]++;
-            return;
-        }
-    }
-
-    multicastGroups.push_back(multicastAddress);
-    refCounts.push_back(1);
-
-    changed1(F_MULTICAST_ADDRESSES);
-
-    cModule *m = ownerp ? dynamic_cast<cModule *>(ownerp->getInterfaceTable()) : nullptr;
-    if (m) {
-        Ipv6MulticastGroupInfo info(ownerp, multicastAddress);
-        m->emit(ipv6MulticastGroupJoinedSignal, &info);
-    }
+    Ipv6AddressVector empty;
+    changeMulticastGroupMembership(multicastAddress, MCAST_INCLUDE_SOURCES, empty, MCAST_EXCLUDE_SOURCES, empty);
 }
 
 void Ipv6InterfaceData::leaveMulticastGroup(const Ipv6Address& multicastAddress)
 {
+    Ipv6AddressVector empty;
+    changeMulticastGroupMembership(multicastAddress, MCAST_EXCLUDE_SOURCES, empty, MCAST_INCLUDE_SOURCES, empty);
+}
+
+void Ipv6InterfaceData::changeMulticastGroupMembership(Ipv6Address multicastAddress,
+        McastSourceFilterMode oldFilterMode, const Ipv6AddressVector& oldSourceList,
+        McastSourceFilterMode newFilterMode, const Ipv6AddressVector& newSourceList)
+{
+    if (ownerp && !ownerp->isMulticast())
+        throw cRuntimeError("Ipv6InterfaceData::changeMulticastGroupMembership(): multicast interface expected, received %s.", ownerp->getInterfaceFullPath().c_str());
     if (!multicastAddress.isMulticast())
-        throw cRuntimeError("Ipv6InterfaceData::leaveMulticastGroup(): multicast address expected, received %s.", multicastAddress.str().c_str());
+        throw cRuntimeError("Ipv6InterfaceData::changeMulticastGroupMembership(): multicast address expected, received %s.", multicastAddress.str().c_str());
 
-    Ipv6AddressVector& multicastGroups = getHostData()->joinedMulticastGroups;
-    std::vector<int>& refCounts = getHostData()->refCounts;
-    for (size_t i = 0; i < multicastGroups.size(); ++i) {
-        if (multicastGroups[i] == multicastAddress) {
-            if (--refCounts[i] == 0) {
-                multicastGroups.erase(multicastGroups.begin() + i);
-                refCounts.erase(refCounts.begin() + i);
+    HostMulticastGroupData *entry = findHostGroupData(multicastAddress);
+    if (!entry) {
+        ASSERT(oldFilterMode == MCAST_INCLUDE_SOURCES && oldSourceList.empty());
+        HostMulticastData *data = getHostData();
+        data->joinedMulticastGroups.push_back(new HostMulticastGroupData(multicastAddress));
+        entry = data->joinedMulticastGroups.back();
+    }
 
-                changed1(F_MULTICAST_ADDRESSES);
+    std::map<Ipv6Address, int> *counts = oldFilterMode == MCAST_INCLUDE_SOURCES ? &entry->includeCounts : &entry->excludeCounts;
+    for (const auto& elem : oldSourceList) {
+        auto count = counts->find(elem);
+        if (count == counts->end())
+            throw cRuntimeError("Inconsistent reference counts in Ipv6InterfaceData.");
+        else if (count->second == 1)
+            counts->erase(count);
+        else
+            count->second--;
+    }
 
-                cModule *m = ownerp ? dynamic_cast<cModule *>(ownerp->getInterfaceTable()) : nullptr;
-                if (m) {
-                    Ipv6MulticastGroupInfo info(ownerp, multicastAddress);
-                    m->emit(ipv6MulticastGroupLeftSignal, &info);
-                }
+    counts = newFilterMode == MCAST_INCLUDE_SOURCES ? &entry->includeCounts : &entry->excludeCounts;
+    for (const auto& elem : newSourceList) {
+        auto count = counts->find(elem);
+        if (count == counts->end())
+            (*counts)[elem] = 1;
+        else
+            count->second++;
+    }
+
+    // update number of EXCLUDE mode sockets
+    if (oldFilterMode == MCAST_INCLUDE_SOURCES && newFilterMode == MCAST_EXCLUDE_SOURCES)
+        entry->numOfExcludeModeSockets++;
+    else if (oldFilterMode == MCAST_EXCLUDE_SOURCES && newFilterMode == MCAST_INCLUDE_SOURCES)
+        entry->numOfExcludeModeSockets--;
+
+    // recompute the merged interface-level filterMode + sourceList
+    bool changed = entry->updateSourceList();
+
+    if (changed) {
+        changed1(F_MULTICAST_ADDRESSES);
+
+        cModule *m = ownerp ? dynamic_cast<cModule *>(ownerp->getInterfaceTable()) : nullptr;
+        if (m) {
+            Ipv6MulticastGroupSourceInfo info(ownerp, multicastAddress, entry->sourceList);
+            m->emit(ipv6MulticastChangeSignal, &info);
+
+            // legacy any-source join/leave notifications (these drive MLDv1)
+            if (oldFilterMode != newFilterMode && oldSourceList.empty() && newSourceList.empty()) {
+                Ipv6MulticastGroupInfo info2(ownerp, multicastAddress);
+                m->emit(newFilterMode == MCAST_EXCLUDE_SOURCES ? ipv6MulticastGroupJoinedSignal : ipv6MulticastGroupLeftSignal, &info2);
             }
         }
+
+        // drop the group entry if it has become INCLUDE(empty)
+        if (entry->sourceList.isEmpty())
+            removeHostGroupData(multicastAddress);
     }
+}
+
+Ipv6InterfaceData::HostMulticastGroupData *Ipv6InterfaceData::findHostGroupData(Ipv6Address multicastAddress)
+{
+    ASSERT(multicastAddress.isMulticast());
+    HostMulticastGroupVector& entries = getHostData()->joinedMulticastGroups;
+    for (auto& entry : entries)
+        if (entry->multicastGroup == multicastAddress)
+            return entry;
+    return nullptr;
+}
+
+bool Ipv6InterfaceData::removeHostGroupData(Ipv6Address multicastAddress)
+{
+    ASSERT(multicastAddress.isMulticast());
+    HostMulticastGroupVector& entries = getHostData()->joinedMulticastGroups;
+    for (auto it = entries.begin(); it != entries.end(); ++it)
+        if ((*it)->multicastGroup == multicastAddress) {
+            delete *it;
+            entries.erase(it);
+            return true;
+        }
+    return false;
+}
+
+Ipv6InterfaceData::RouterMulticastGroupData *Ipv6InterfaceData::findRouterGroupData(Ipv6Address multicastAddress) const
+{
+    ASSERT(multicastAddress.isMulticast());
+    const RouterMulticastGroupVector& entries = getRouterData()->reportedMulticastGroups;
+    for (auto& entry : entries)
+        if (entry->multicastGroup == multicastAddress)
+            return entry;
+    return nullptr;
+}
+
+bool Ipv6InterfaceData::removeRouterGroupData(Ipv6Address multicastAddress)
+{
+    ASSERT(multicastAddress.isMulticast());
+    RouterMulticastGroupVector& entries = getRouterData()->reportedMulticastGroups;
+    for (auto it = entries.begin(); it != entries.end(); ++it)
+        if ((*it)->multicastGroup == multicastAddress) {
+            delete *it;
+            entries.erase(it);
+            return true;
+        }
+    return false;
 }
 
 bool Ipv6InterfaceData::hasMulticastListener(const Ipv6Address& multicastAddress) const
 {
-    const Ipv6AddressVector& multicastGroups = getRouterData()->reportedMulticastGroups;
-    return contains(multicastGroups, multicastAddress);
+    RouterMulticastGroupData *groupData = findRouterGroupData(multicastAddress);
+    return groupData && !groupData->sourceList.isEmpty();
+}
+
+bool Ipv6InterfaceData::hasMulticastListener(const Ipv6Address& multicastAddress, const Ipv6Address& sourceAddress) const
+{
+    RouterMulticastGroupData *groupData = findRouterGroupData(multicastAddress);
+    return groupData && groupData->sourceList.contains(sourceAddress);
 }
 
 void Ipv6InterfaceData::addMulticastListener(const Ipv6Address& multicastAddress)
@@ -509,24 +692,71 @@ void Ipv6InterfaceData::addMulticastListener(const Ipv6Address& multicastAddress
     if (!multicastAddress.isMulticast())
         throw cRuntimeError("Ipv6InterfaceData::addMulticastListener(): multicast address expected, received %s.", multicastAddress.str().c_str());
 
-    if (!hasMulticastListener(multicastAddress)) {
-        getRouterData()->reportedMulticastGroups.push_back(multicastAddress);
+    RouterMulticastGroupData *groupData = findRouterGroupData(multicastAddress);
+    if (!groupData) {
+        groupData = new RouterMulticastGroupData(multicastAddress);
+        getRouterData()->reportedMulticastGroups.push_back(groupData);
+    }
+
+    if (!groupData->sourceList.containsAll()) {
+        groupData->sourceList = Ipv6MulticastSourceList::ALL_SOURCES;
+        changed1(F_MULTICAST_LISTENERS);
+    }
+}
+
+void Ipv6InterfaceData::addMulticastListener(const Ipv6Address& multicastAddress, const Ipv6Address& sourceAddress)
+{
+    if (!multicastAddress.isMulticast())
+        throw cRuntimeError("Ipv6InterfaceData::addMulticastListener(): multicast address expected, received %s.", multicastAddress.str().c_str());
+
+    RouterMulticastGroupData *groupData = findRouterGroupData(multicastAddress);
+    if (!groupData) {
+        groupData = new RouterMulticastGroupData(multicastAddress);
+        getRouterData()->reportedMulticastGroups.push_back(groupData);
+    }
+
+    if (!groupData->sourceList.contains(sourceAddress)) {
+        groupData->sourceList.add(sourceAddress);
         changed1(F_MULTICAST_LISTENERS);
     }
 }
 
 void Ipv6InterfaceData::removeMulticastListener(const Ipv6Address& multicastAddress)
 {
-    Ipv6AddressVector& multicastGroups = getRouterData()->reportedMulticastGroups;
+    if (removeRouterGroupData(multicastAddress))
+        changed1(F_MULTICAST_LISTENERS);
+}
 
-    int n = multicastGroups.size();
-    int i;
-    for (i = 0; i < n; i++)
-        if (multicastGroups[i] == multicastAddress)
-            break;
+void Ipv6InterfaceData::removeMulticastListener(const Ipv6Address& multicastAddress, const Ipv6Address& sourceAddress)
+{
+    RouterMulticastGroupData *groupData = findRouterGroupData(multicastAddress);
+    if (groupData) {
+        groupData->sourceList.remove(sourceAddress);
+        if (groupData->sourceList.isEmpty())
+            removeRouterGroupData(multicastAddress);
+        changed1(F_MULTICAST_LISTENERS);
+    }
+}
 
-    if (i != n) {
-        multicastGroups.erase(multicastGroups.begin() + i);
+void Ipv6InterfaceData::setMulticastListeners(Ipv6Address multicastAddress, McastSourceFilterMode filterMode, const Ipv6AddressVector& sourceList)
+{
+    if (!multicastAddress.isMulticast())
+        throw cRuntimeError("Ipv6InterfaceData::setMulticastListeners(): multicast address expected, received %s.", multicastAddress.str().c_str());
+
+    RouterMulticastGroupData *groupData = findRouterGroupData(multicastAddress);
+    if (!groupData) {
+        groupData = new RouterMulticastGroupData(multicastAddress);
+        getRouterData()->reportedMulticastGroups.push_back(groupData);
+    }
+
+    if (filterMode != groupData->sourceList.filterMode || sourceList != groupData->sourceList.sources) {
+        if (filterMode != MCAST_INCLUDE_SOURCES || !sourceList.empty()) {
+            groupData->sourceList.filterMode = filterMode;
+            groupData->sourceList.sources = sourceList;
+        }
+        else
+            removeRouterGroupData(multicastAddress);
+
         changed1(F_MULTICAST_LISTENERS);
     }
 }

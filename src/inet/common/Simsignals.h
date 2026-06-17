@@ -79,6 +79,7 @@ extern INET_API simsignal_t // admin
     ipv6MulticastGroupLeftSignal,
     ipv6MulticastGroupRegisteredSignal,
     ipv6MulticastGroupUnregisteredSignal,
+    ipv6MulticastChangeSignal, // host's source-filtered multicast membership changed (for MLDv2)
 
 // for PIM (IPv6)
     ipv6NewMulticastSignal,

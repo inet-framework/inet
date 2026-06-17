@@ -30,6 +30,7 @@ const Ipv6Address Ipv6Address::ALL_NODES_2("FF02::1");
 const Ipv6Address Ipv6Address::ALL_ROUTERS_1("FF01::2");
 const Ipv6Address Ipv6Address::ALL_ROUTERS_2("FF02::2");
 const Ipv6Address Ipv6Address::ALL_ROUTERS_5("FF05::2");
+const Ipv6Address Ipv6Address::ALL_MLDV2_ROUTERS("FF02::16");
 const Ipv6Address Ipv6Address::SOLICITED_NODE_PREFIX("FF02:0:0:0:0:1:FF00:0");
 const Ipv6Address Ipv6Address::LINKLOCAL_PREFIX("FE80::");
 const Ipv6Address Ipv6Address::LL_MANET_ROUTERS("FF02:0:0:0:0:0:0:6D");

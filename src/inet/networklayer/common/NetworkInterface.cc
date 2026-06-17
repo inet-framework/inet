@@ -584,10 +584,18 @@ void NetworkInterface::changeMulticastGroupMembership(const L3Address& multicast
 
 #endif // ifdef INET_WITH_IPv4
 #ifdef INET_WITH_IPv6
-        case L3Address::IPv6:
-            // TODO
-            throw cRuntimeError("changeMulticastGroupMembership() not implemented for type %s", L3Address::getTypeName(multicastAddress.getType()));
+        case L3Address::IPv6: {
+            std::vector<Ipv6Address> oldIPv6SourceList, newIPv6SourceList;
+            oldIPv6SourceList.reserve(oldSourceList.size());
+            for (auto& a : oldSourceList)
+                oldIPv6SourceList.push_back(a.toIpv6());
+            newIPv6SourceList.reserve(newSourceList.size());
+            for (auto& a : newSourceList)
+                newIPv6SourceList.push_back(a.toIpv6());
+            getProtocolDataForUpdate<Ipv6InterfaceData>()->changeMulticastGroupMembership(multicastAddress.toIpv6(),
+                    oldFilterMode, oldIPv6SourceList, newFilterMode, newIPv6SourceList);
             break;
+        }
 
 #endif // ifdef INET_WITH_IPv6
         case L3Address::MAC:

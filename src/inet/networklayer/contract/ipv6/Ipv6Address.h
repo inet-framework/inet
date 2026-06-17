@@ -71,6 +71,9 @@ class INET_API Ipv6Address
     /** All-routers multicast address, scope 5 (site-local) */
     static const Ipv6Address ALL_ROUTERS_5;
 
+    /** All MLDv2-capable routers multicast address (ff02::16), scope 2 (link-local) */
+    static const Ipv6Address ALL_MLDV2_ROUTERS;
+
     /** The solicited-node multicast address prefix (prefix length = 104) */
     static const Ipv6Address SOLICITED_NODE_PREFIX;
 

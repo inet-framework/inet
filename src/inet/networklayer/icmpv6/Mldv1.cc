@@ -147,8 +147,8 @@ void Mldv1::initialize(int stage)
             NetworkInterface *ie = ift->getInterface(i);
             if (ie->isMulticast()) {
                 if (auto *ipv6data = ie->findProtocolData<Ipv6InterfaceData>()) {
-                    for (const auto& groupAddr : ipv6data->getJoinedMulticastGroups())
-                        multicastGroupJoined(ie, groupAddr);
+                    for (int g = 0; g < ipv6data->getNumOfJoinedMulticastGroups(); ++g)
+                        multicastGroupJoined(ie, ipv6data->getJoinedMulticastGroup(g));
                 }
             }
         }
