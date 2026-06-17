@@ -12,9 +12,18 @@ cplusplus {{
 
 namespace inet;
 
+cplusplus {{
+typedef std::vector<Ipv6Address> Ipv6AddressVector;
+}}
+
 class Ipv6Address
 {
     @existingClass;
     @opaque;
     @toString(.str());
+}
+
+class Ipv6AddressVector
+{
+    @existingClass;
 }
