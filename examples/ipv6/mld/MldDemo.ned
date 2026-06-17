@@ -13,10 +13,12 @@ import inet.node.ipv6.StandardHost6;
 import ned.DatarateChannel;
 
 //
-// MLDv1 demonstration network: two listener hosts and a router querier share an
-// Ethernet hub. The hosts join a multicast group (ff0e::1) via UdpSink and the
-// router querier sends periodic General Queries. One host leaves the group,
-// triggering an MLD Done -> Multicast-Address-Specific Query sequence.
+// MLD demonstration network: listener hosts, a UDP sender, and a router querier
+// share an Ethernet hub. Used by two configs in omnetpp.ini: MldDemo (MLDv1,
+// any-source: hosts join ff0e::1, the querier sends General Queries, a leave
+// triggers an MLD Done -> Multicast-Address-Specific Query) and MldV2Ssm (MLDv2
+// source-specific multicast: a receiver subscribes to one of two sources of an
+// ff3e:: SSM group in INCLUDE mode).
 //
 network MldDemo
 {

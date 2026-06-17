@@ -1,8 +1,11 @@
-MLDv1 Example (examples/ipv6/mld)
+MLD Example (examples/ipv6/mld)
 ===================================
 
-This example demonstrates IPv6 Multicast Listener Discovery version 1 (MLDv1,
-RFC 2710) using real application-driven group membership.
+This example demonstrates IPv6 Multicast Listener Discovery using real
+application-driven group membership. Two configurations are provided:
+
+  MldDemo   - MLDv1 (RFC 2710), any-source multicast
+  MldV2Ssm  - MLDv2 (RFC 3810), source-specific multicast (SSM)
 
 Topology
 --------
@@ -21,12 +24,24 @@ Scenario (config MldDemo)
 4. An optional UdpBasicApp sender transmits data to ff0e::1 to show delivery
    to the joined listeners.
 
-Run command (from this directory)
+Scenario (config MldV2Ssm)
+--------------------------
+Demonstrates source-specific multicast with MLDv2 (selected via
+**.ipv6.mld.typename = "Mldv2"). Two sources, 'sender' (S1) and 'host2' (S2),
+both transmit to the SSM group ff3e::8 (the FF3E::/32 range is reserved for SSM).
+host1 subscribes to the group in INCLUDE mode naming only S1, so:
+  - MLDv2 carries an INCLUDE{S1} membership (a State-Change Report with an
+    ALLOW record naming S1's address), and
+  - host1 receives S1's stream only; S2's packets to the same group are filtered
+    out (host1 reports "received 10 packets", all from S1).
+
+Run commands (from this directory)
 ----------------------------------
     inet -u Cmdenv -f omnetpp.ini -c MldDemo -r 0
+    inet -u Cmdenv -f omnetpp.ini -c MldV2Ssm -r 0
 
-Key EV markers to look for in the Cmdenv log
-----------------------------------------------
+Key EV markers to look for in the Cmdenv log (MldDemo)
+------------------------------------------------------
     "sending Multicast Listener Report for group=ff0e::1 on iface="  (host join)
     "recorded listener for group=ff0e::1"                            (router records)
     "sending General Listener Query on iface="                       (router periodic query)
