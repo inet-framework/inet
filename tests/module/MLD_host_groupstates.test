@@ -137,9 +137,9 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 # *.multicastForwarding = this.multicastForwarding to the routing table. A per-submodule
 # setting (**.router.ipv6.routingTable.multicastForwarding = true) would be overridden.
 **.router.multicastForwarding = true
-**.router.ipv6.mldv1.startupQueryInterval = 2s
-**.router.ipv6.mldv1.queryInterval = 5s
-**.router.ipv6.mldv1.queryResponseInterval = 1s
+**.router.ipv6.mld.startupQueryInterval = 2s
+**.router.ipv6.mld.queryInterval = 5s
+**.router.ipv6.mld.queryResponseInterval = 1s
 
 %#--------------------------------------------------------------------------------------------------------------
 %subst: /omnetpp:://
@@ -151,7 +151,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %# Disambiguated by asserting >= 2 host1 Report sends (unsolicited + at least one query-driven).
 %# Extracting the 2nd occurrence proves it is independent of the 1st (regression in either path
 %# would reduce the count to 1, causing %contains to fail on an empty file).
-%postrun-command: grep "MldHostGroupstatesNetwork.host1.ipv6.mldv1: Mldv1: sending Multicast Listener Report for group=ff0e::1" test.out | sed -n '2p' > host1_report2.out || true
+%postrun-command: grep "MldHostGroupstatesNetwork.host1.ipv6.mld: Mldv1: sending Multicast Listener Report for group=ff0e::1" test.out | sed -n '2p' > host1_report2.out || true
 %contains: host1_report2.out
 sending Multicast Listener Report for group=ff0e::1
 
@@ -159,7 +159,7 @@ sending Multicast Listener Report for group=ff0e::1
 %# HOST-03 / TRAJ-2: report suppression -- host2 hears host1's Report while still in Delaying state
 %# Proves: DELAYING_LISTENER --> IDLE_LISTENER via received Report (suppression path) -- input proof
 %contains: stdout
-MldHostGroupstatesNetwork.host2.ipv6.mldv1: Mldv1: received Multicast Listener Report for group=ff0e::1 iface=eth0
+MldHostGroupstatesNetwork.host2.ipv6.mld: Mldv1: received Multicast Listener Report for group=ff0e::1 iface=eth0
 
 %#--------------------------------------------------------------------------------------------------------------
 %# HOST-03 / TRAJ-2: suppression output proof -- host2 must NOT fire its pending unsolicited-retransmit
@@ -169,7 +169,7 @@ MldHostGroupstatesNetwork.host2.ipv6.mldv1: Mldv1: received Multicast Listener R
 %# "sending Multicast Listener Report" line from host2 would appear before the first General Query.
 %# Count host2 Report sends up to (not including) host2's first "received General Listener Query";
 %# must be exactly 1 (the join-time unsolicited Report only).
-%postrun-command: awk '/MldHostGroupstatesNetwork.host2.ipv6.mldv1: Mldv1: received General Listener Query/{exit} /MldHostGroupstatesNetwork.host2.ipv6.mldv1: Mldv1: sending Multicast Listener Report for group=ff0e::1/{count++} END{print count+0}' test.out > host2_suppress_count.out || true
+%postrun-command: awk '/MldHostGroupstatesNetwork.host2.ipv6.mld: Mldv1: received General Listener Query/{exit} /MldHostGroupstatesNetwork.host2.ipv6.mld: Mldv1: sending Multicast Listener Report for group=ff0e::1/{count++} END{print count+0}' test.out > host2_suppress_count.out || true
 %contains: host2_suppress_count.out
 1
 
@@ -177,13 +177,13 @@ MldHostGroupstatesNetwork.host2.ipv6.mldv1: Mldv1: received Multicast Listener R
 %# HOST-02a / TRAJ-3: router's General Query received by host1 (host1 is in IDLE_LISTENER at this point)
 %# Proves: IDLE_LISTENER --> DELAYING_LISTENER transition (query received schedules delayed Report)
 %contains: stdout
-MldHostGroupstatesNetwork.host1.ipv6.mldv1: Mldv1: received General Listener Query on iface=eth0
+MldHostGroupstatesNetwork.host1.ipv6.mld: Mldv1: received General Listener Query on iface=eth0
 
 %#--------------------------------------------------------------------------------------------------------------
 %# HOST-04 / TRAJ-4: Done sent by host1 at t=5s when UdpSink stopTime fires (flag=true after Query Report)
 %# Proves: IDLE_LISTENER --> NON_LISTENER via leave with Done (flag=true path)
 %contains: stdout
-MldHostGroupstatesNetwork.host1.ipv6.mldv1: Mldv1: sending Multicast Listener Done for group=ff0e::1 on iface=eth0
+MldHostGroupstatesNetwork.host1.ipv6.mld: Mldv1: sending Multicast Listener Done for group=ff0e::1 on iface=eth0
 
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true

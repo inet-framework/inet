@@ -92,11 +92,11 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.router.multicastForwarding = true
 
 # IFSTATE-01: first General Query fires at startupQueryInterval after init (~2s).
-**.router.ipv6.mldv1.startupQueryInterval = 2s
+**.router.ipv6.mld.startupQueryInterval = 2s
 # IFSTATE-02: second (periodic) General Query fires at queryInterval=5s after first.
 # With sim-time-limit=20s, the second Query fires at ~7s: well within the window.
-**.router.ipv6.mldv1.queryInterval = 5s
-**.router.ipv6.mldv1.queryResponseInterval = 1s
+**.router.ipv6.mld.queryInterval = 5s
+**.router.ipv6.mld.queryResponseInterval = 1s
 
 # host1: multicastForwarding=false (the default — not set explicitly).
 # This is the subject of the single-querier negative proof.
@@ -106,20 +106,20 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %#--------------------------------------------------------------------------------------------------------------
 %# IFSTATE-01: router sends the initial General Listener Query (configureInterface path)
 %contains: stdout
-MldRouterIfstatesNetwork.router.ipv6.mldv1: Mldv1: sending General Listener Query on iface=
+MldRouterIfstatesNetwork.router.ipv6.mld: Mldv1: sending General Listener Query on iface=
 
 %#--------------------------------------------------------------------------------------------------------------
 %# IFSTATE-02: router sends a SECOND periodic General Listener Query (gen-query timer rearm).
 %# Extract all General-Query-sending lines from the router; the second line must exist.
 %# startupQueryInterval=2s -> first Query at ~2s; queryInterval=5s -> second at ~7s (both within 20s).
-%postrun-command: grep "MldRouterIfstatesNetwork.router.ipv6.mldv1: Mldv1: sending General Listener Query" test.out | sed -n '2p' > gq_second.out || true
+%postrun-command: grep "MldRouterIfstatesNetwork.router.ipv6.mld: Mldv1: sending General Listener Query" test.out | sed -n '2p' > gq_second.out || true
 %contains: gq_second.out
 sending General Listener Query on iface=
 
 %#--------------------------------------------------------------------------------------------------------------
 %# SINGLE-QUERIER PROOF: host1 has multicastForwarding=false (the default) and must
 %# NEVER send any Query. Extract all host1 Query-sending lines; the file must be empty.
-%postrun-command: grep -E "MldRouterIfstatesNetwork\.host1\.ipv6\.mldv1: Mldv1: sending (General Listener|Multicast-Address-Specific) Query" test.out > host1_query.out || true
+%postrun-command: grep -E "MldRouterIfstatesNetwork\.host1\.ipv6\.mld: Mldv1: sending (General Listener|Multicast-Address-Specific) Query" test.out > host1_query.out || true
 %not-contains: host1_query.out
 Query
 

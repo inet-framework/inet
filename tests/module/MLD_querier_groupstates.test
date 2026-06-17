@@ -112,16 +112,16 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 # Router timer settings:
 # startupQueryInterval=1s: first General Query fires shortly after init (not the focus here)
-**.router.ipv6.mldv1.startupQueryInterval = 1s
+**.router.ipv6.mld.startupQueryInterval = 1s
 # queryInterval=100s: long so periodic General Queries do not interfere with per-group trajectories
-**.router.ipv6.mldv1.queryInterval = 100s
-**.router.ipv6.mldv1.queryResponseInterval = 1s
+**.router.ipv6.mld.queryInterval = 100s
+**.router.ipv6.mld.queryResponseInterval = 1s
 # lastListenerQueryInterval=1s, lastListenerQueryCount=2: leave timer = 2s, rexmt fires at 1s
 # This allows observing both the Done-triggered MAS Query and the rexmt MAS Query within sim time.
-**.router.ipv6.mldv1.lastListenerQueryInterval = 1s
-**.router.ipv6.mldv1.lastListenerQueryCount = 2
+**.router.ipv6.mld.lastListenerQueryInterval = 1s
+**.router.ipv6.mld.lastListenerQueryCount = 2
 # multicastListenerInterval=10s: short so TRAJ-2 (ff0e::2, no Done) ages out by t~10s within 20s sim
-**.router.ipv6.mldv1.multicastListenerInterval = 10s
+**.router.ipv6.mld.multicastListenerInterval = 10s
 
 # TRAJ-1: host1 joins ff0e::1 via UdpSink (fires ipv6MulticastGroupJoinedSignal -> unsolicited Report).
 # host1 leaves at t=5s via socket close (fires ipv6MulticastGroupLeftSignal -> Done).
@@ -143,36 +143,36 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %# TRAJ-1 RTR-02: router receives host1's unsolicited Report for ff0e::1
 %# Proves: No Listeners Present - router sees the Report
 %contains: stdout
-MldQuerierGroupstatesNetwork.router.ipv6.mldv1: Mldv1: received Multicast Listener Report for group=ff0e::1 iface=
+MldQuerierGroupstatesNetwork.router.ipv6.mld: Mldv1: received Multicast Listener Report for group=ff0e::1 iface=
 
 %#--------------------------------------------------------------------------------------------------------------
 %# TRAJ-1 RTR-02: router records the listener (No Listeners Present --> Listeners Present)
 %# "recorded listener" is only emitted on the FIRST recording (not on timer refresh)
 %contains: stdout
-MldQuerierGroupstatesNetwork.router.ipv6.mldv1: Mldv1: recorded listener for group=ff0e::1
+MldQuerierGroupstatesNetwork.router.ipv6.mld: Mldv1: recorded listener for group=ff0e::1
 
 %#--------------------------------------------------------------------------------------------------------------
 %# TRAJ-1 RTR-03: router receives host1's Done for ff0e::1 (from socket close at t=5s)
 %# Proves: Listeners Present state was active (Done only matters when a listener was present)
 %contains: stdout
-MldQuerierGroupstatesNetwork.router.ipv6.mldv1: Mldv1: received Multicast Listener Done for group=ff0e::1 iface=
+MldQuerierGroupstatesNetwork.router.ipv6.mld: Mldv1: received Multicast Listener Done for group=ff0e::1 iface=
 
 %#--------------------------------------------------------------------------------------------------------------
 %# TRAJ-1 RTR-03: router sends Multicast-Address-Specific Query on receiving the Done
 %# Proves: Listeners Present --> Checking Listeners transition
 %contains: stdout
-MldQuerierGroupstatesNetwork.router.ipv6.mldv1: Mldv1: sending Multicast-Address-Specific Query for group=ff0e::1 on iface=
+MldQuerierGroupstatesNetwork.router.ipv6.mld: Mldv1: sending Multicast-Address-Specific Query for group=ff0e::1 on iface=
 
 %#--------------------------------------------------------------------------------------------------------------
 %# TRAJ-2 RTR-02: router receives host2's unsolicited Report for ff0e::2
 %# Proves: No Listeners Present for ff0e::2 - router sees the Report
 %contains: stdout
-MldQuerierGroupstatesNetwork.router.ipv6.mldv1: Mldv1: received Multicast Listener Report for group=ff0e::2 iface=
+MldQuerierGroupstatesNetwork.router.ipv6.mld: Mldv1: received Multicast Listener Report for group=ff0e::2 iface=
 
 %#--------------------------------------------------------------------------------------------------------------
 %# TRAJ-2 RTR-02: router records listener for ff0e::2 (No Listeners Present --> Listeners Present)
 %contains: stdout
-MldQuerierGroupstatesNetwork.router.ipv6.mldv1: Mldv1: recorded listener for group=ff0e::2
+MldQuerierGroupstatesNetwork.router.ipv6.mld: Mldv1: recorded listener for group=ff0e::2
 
 %#--------------------------------------------------------------------------------------------------------------
 %# TRAJ-1 indirect No-Listeners-Present proof: rexmt timer fires a second MAS Query for ff0e::1.
@@ -181,21 +181,21 @@ MldQuerierGroupstatesNetwork.router.ipv6.mldv1: Mldv1: recorded listener for gro
 %# Extract the 2nd MAS Query line via sed -n '2p'; a non-empty result proves the rexmt path
 %# actually ran.  If the rexmt were broken, only 1 MAS Query would be sent and the output file
 %# would be empty, causing %contains to fail.
-%postrun-command: grep "MldQuerierGroupstatesNetwork.router.ipv6.mldv1: Mldv1: sending Multicast-Address-Specific Query for group=ff0e::1" test.out | sed -n '2p' > mas_query_ff0e1_rexmt.out || true
+%postrun-command: grep "MldQuerierGroupstatesNetwork.router.ipv6.mld: Mldv1: sending Multicast-Address-Specific Query for group=ff0e::1" test.out | sed -n '2p' > mas_query_ff0e1_rexmt.out || true
 %contains: mas_query_ff0e1_rexmt.out
 Multicast-Address-Specific Query for group=ff0e::1
 
 %#--------------------------------------------------------------------------------------------------------------
 %# TRAJ-2 indirect No-Listeners-Present proof: ff0e::2 never triggers a Done so the router
 %# should NEVER send a MAS Query for it (it goes directly to No Listeners Present via timer expiry).
-%postrun-command: grep "MldQuerierGroupstatesNetwork.router.ipv6.mldv1: Mldv1: sending Multicast-Address-Specific Query for group=ff0e::2" test.out > mas_query_ff0e2.out || true
+%postrun-command: grep "MldQuerierGroupstatesNetwork.router.ipv6.mld: Mldv1: sending Multicast-Address-Specific Query for group=ff0e::2" test.out > mas_query_ff0e2.out || true
 %not-contains: mas_query_ff0e2.out
 Multicast-Address-Specific Query for group=ff0e::2
 
 %#--------------------------------------------------------------------------------------------------------------
 %# SINGLE-QUERIER PROOF: host1 and host2 have multicastForwarding=false (the default) and
 %# must NEVER send any Query. Extract all host Query-sending lines; the file must be empty.
-%postrun-command: grep -E "MldQuerierGroupstatesNetwork\.(host1|host2)\.ipv6\.mldv1: Mldv1: sending (General Listener|Multicast-Address-Specific) Query" test.out > host_query.out || true
+%postrun-command: grep -E "MldQuerierGroupstatesNetwork\.(host1|host2)\.ipv6\.mld: Mldv1: sending (General Listener|Multicast-Address-Specific) Query" test.out > host_query.out || true
 %not-contains: host_query.out
 Query
 

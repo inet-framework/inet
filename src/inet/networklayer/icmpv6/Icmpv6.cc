@@ -166,11 +166,13 @@ void Icmpv6::processICMPv6Message(Packet *packet)
             }
             case ICMPv6_MLD_QUERY:
             case ICMPv6_MLD_REPORT:
-            case ICMPv6_MLD_DONE: {
-                // MLD messages (RFC 2710) are ICMPv6 subtypes. If this node runs MLD,
-                // forward to the Mldv1 module via the lp dispatcher by re-tagging with
+            case ICMPv6_MLD_DONE:
+            case ICMPv6_MLDv2_REPORT: {
+                // MLD messages (RFC 2710 / RFC 3810) are ICMPv6 subtypes: Query (130),
+                // MLDv1 Report (131), Done (132), and MLDv2 Report (143). If this node runs
+                // MLD, forward to the MLD module via the lp dispatcher by re-tagging with
                 // Protocol::mld. If MLD is not enabled (no mldModule configured), a node
-                // not participating in MLD silently ignores the message (RFC 2710).
+                // not participating in MLD silently ignores the message.
                 if (par("mldModule").stringValue()[0] == '\0') {
                     EV_INFO << "ICMPv6: received MLD message (type=" << type << ") but MLD is not enabled on this node; dropping.\n";
                     PacketDropDetails details;

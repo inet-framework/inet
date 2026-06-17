@@ -54,7 +54,7 @@ module Ipv6NetworkLayer like INetworkLayer
         bool forwarding = default(false);
         bool multicastForwarding = default(false);
         *.mipv6Module = hasMipv6 ? absPath(".mipv6") : "";
-        *.mldModule = hasMld ? absPath(".mldv1") : "";
+        *.mldModule = hasMld ? absPath(".mld") : "";
         string interfaceTableModule;
         *.forwarding = this.forwarding;
         *.multicastForwarding = this.multicastForwarding;
@@ -114,7 +114,7 @@ module Ipv6NetworkLayer like INetworkLayer
             parameters:
                 @display("p=850,550");
         }
-        mldv1: <default("Mldv1")> like IMld if hasMld {
+        mld: <default("Mldv1")> like IMld if hasMld {
             parameters:
                 @display("p=800,200");
         }
@@ -141,8 +141,8 @@ module Ipv6NetworkLayer like INetworkLayer
         mipv6.fromIPv6 <-- lp.out++ if hasMipv6;
         mipv6.toIPv6 --> lp.in++ if hasMipv6;
 
-        mldv1.ipIn <-- lp.out++ if hasMld;
-        mldv1.ipOut --> lp.in++ if hasMld;
+        mld.ipIn <-- lp.out++ if hasMld;
+        mld.ipOut --> lp.in++ if hasMld;
 
         ipv6.queueOut --> { @display("m=s"); } --> ifOut;
         ipv6.queueIn <-- { @display("m=s"); } <-- ifIn;

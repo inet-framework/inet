@@ -117,37 +117,37 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 # NetworkLayerNodeBase propagates *.multicastForwarding = this.multicastForwarding
 # to all submodules, overriding any per-submodule INI setting).
 **.router.multicastForwarding = true
-**.router.ipv6.mldv1.startupQueryInterval = 2s
-**.router.ipv6.mldv1.queryInterval = 5s
-**.router.ipv6.mldv1.queryResponseInterval = 1s
+**.router.ipv6.mld.startupQueryInterval = 2s
+**.router.ipv6.mld.queryInterval = 5s
+**.router.ipv6.mld.queryResponseInterval = 1s
 
 %#--------------------------------------------------------------------------------------------------------------
 %subst: /omnetpp:://
 %#--------------------------------------------------------------------------------------------------------------
 %# HOST-01: unsolicited Multicast Listener Report sent by host1 on join
 %contains: stdout
-MldHostBasicNetwork.host1.ipv6.mldv1: Mldv1: sending Multicast Listener Report for group=ff0e::1:2:3
+MldHostBasicNetwork.host1.ipv6.mld: Mldv1: sending Multicast Listener Report for group=ff0e::1:2:3
 
 %#--------------------------------------------------------------------------------------------------------------
 %# HOST-03: report suppression -- host2 hears host1's Report for ff0e::1:2:3 while in DELAYING state
 %# and cancels its own pending timer (both hosts are on the same Ethernet segment via hub)
 %contains: stdout
-MldHostBasicNetwork.host2.ipv6.mldv1: Mldv1: received Multicast Listener Report for group=ff0e::1:2:3
+MldHostBasicNetwork.host2.ipv6.mld: Mldv1: received Multicast Listener Report for group=ff0e::1:2:3
 
 %#--------------------------------------------------------------------------------------------------------------
 %# HOST-02: router's General Query at t=2s is received by host1
 %contains: stdout
-MldHostBasicNetwork.host1.ipv6.mldv1: Mldv1: received General Listener Query on iface=
+MldHostBasicNetwork.host1.ipv6.mld: Mldv1: received General Listener Query on iface=
 
 %#--------------------------------------------------------------------------------------------------------------
 %# HOST-02: after the General Query, host1 schedules and sends a delayed Report (within 1s)
 %contains: stdout
-MldHostBasicNetwork.host1.ipv6.mldv1: Mldv1: sending Multicast Listener Report for group=ff0e::1:2:3
+MldHostBasicNetwork.host1.ipv6.mld: Mldv1: sending Multicast Listener Report for group=ff0e::1:2:3
 
 %#--------------------------------------------------------------------------------------------------------------
 %# HOST-04: Done sent to ff02::2 when host1 leaves at t=5s (flag=true after Query-driven Report)
 %contains: stdout
-MldHostBasicNetwork.host1.ipv6.mldv1: Mldv1: sending Multicast Listener Done for group=ff0e::1:2:3
+MldHostBasicNetwork.host1.ipv6.mld: Mldv1: sending Multicast Listener Done for group=ff0e::1:2:3
 
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true

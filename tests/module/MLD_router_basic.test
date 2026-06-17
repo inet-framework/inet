@@ -110,14 +110,14 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 # RTR-01 timers: shorten query intervals for a fast deterministic run.
 # The router fires its first General Query at startupQueryInterval after init.
-**.router.ipv6.mldv1.startupQueryInterval = 1s
-**.router.ipv6.mldv1.queryInterval = 5s
-**.router.ipv6.mldv1.queryResponseInterval = 1s
+**.router.ipv6.mld.startupQueryInterval = 1s
+**.router.ipv6.mld.queryInterval = 5s
+**.router.ipv6.mld.queryResponseInterval = 1s
 # RTR-03/04 last-listener timers: short so group removal is observable within 15s.
-**.router.ipv6.mldv1.lastListenerQueryInterval = 1s
-**.router.ipv6.mldv1.lastListenerQueryCount = 2
+**.router.ipv6.mld.lastListenerQueryInterval = 1s
+**.router.ipv6.mld.lastListenerQueryCount = 2
 # multicastListenerInterval: keep a group alive this long without a Report.
-**.router.ipv6.mldv1.multicastListenerInterval = 6s
+**.router.ipv6.mld.multicastListenerInterval = 6s
 
 # RTR-02: host1 joins ff0e::1:2:3 via UdpSink (fires ipv6MulticastGroupJoinedSignal -> unsolicited Report).
 **.host1.numApps = 1
@@ -132,33 +132,33 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %#--------------------------------------------------------------------------------------------------------------
 %# RTR-01: router sends the first periodic General Listener Query
 %contains: stdout
-MldRouterBasicNetwork.router.ipv6.mldv1: Mldv1: sending General Listener Query on iface=
+MldRouterBasicNetwork.router.ipv6.mld: Mldv1: sending General Listener Query on iface=
 
 %#--------------------------------------------------------------------------------------------------------------
 %# RTR-02: router receives host1's unsolicited Report for ff0e::1:2:3
 %contains: stdout
-MldRouterBasicNetwork.router.ipv6.mldv1: Mldv1: received Multicast Listener Report for group=ff0e::1:2:3
+MldRouterBasicNetwork.router.ipv6.mld: Mldv1: received Multicast Listener Report for group=ff0e::1:2:3
 
 %#--------------------------------------------------------------------------------------------------------------
 %# RTR-02: router records the listener (NO_LISTENERS_PRESENT -> LISTENERS_PRESENT)
 %contains: stdout
-MldRouterBasicNetwork.router.ipv6.mldv1: Mldv1: recorded listener for group=ff0e::1:2:3
+MldRouterBasicNetwork.router.ipv6.mld: Mldv1: recorded listener for group=ff0e::1:2:3
 
 %#--------------------------------------------------------------------------------------------------------------
 %# RTR-03: router receives host1's Done for ff0e::1:2:3 (from socket close at t=5s)
 %contains: stdout
-MldRouterBasicNetwork.router.ipv6.mldv1: Mldv1: received Multicast Listener Done for group=ff0e::1:2:3
+MldRouterBasicNetwork.router.ipv6.mld: Mldv1: received Multicast Listener Done for group=ff0e::1:2:3
 
 %#--------------------------------------------------------------------------------------------------------------
 %# RTR-03: router sends a Multicast-Address-Specific Query on receiving the Done
 %contains: stdout
-MldRouterBasicNetwork.router.ipv6.mldv1: Mldv1: sending Multicast-Address-Specific Query for group=ff0e::1:2:3 on iface=
+MldRouterBasicNetwork.router.ipv6.mld: Mldv1: sending Multicast-Address-Specific Query for group=ff0e::1:2:3 on iface=
 
 %#--------------------------------------------------------------------------------------------------------------
 %# HOST-ONLY NEGATIVE (single-querier activation proof):
 %# host1 has multicastForwarding=false (the default) and must NEVER send any Query.
 %# Extract all host1 Query-sending lines; the resulting file must be empty.
-%postrun-command: grep -E "MldRouterBasicNetwork\.host1\.ipv6\.mldv1: Mldv1: sending (General Listener|Multicast-Address-Specific) Query" test.out > host1_query.out || true
+%postrun-command: grep -E "MldRouterBasicNetwork\.host1\.ipv6\.mld: Mldv1: sending (General Listener|Multicast-Address-Specific) Query" test.out > host1_query.out || true
 %not-contains: host1_query.out
 Query
 

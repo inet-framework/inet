@@ -75,7 +75,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %subst: /omnetpp:://
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-MldSmokeNetwork.router.ipv6.mldv1: Received MLD message
+MldSmokeNetwork.router.ipv6.mld: Received MLD message
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep -i "no module registered for protocol\|unhandled protocol\|no suitable module\|Unknown ICMPv6 message" test.out test.err > test_errors.out 2>/dev/null || true
 %not-contains: test_errors.out

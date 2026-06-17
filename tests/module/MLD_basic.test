@@ -115,14 +115,14 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 # Router timing: short startupQueryInterval so the General Query fires before the host leaves;
 # long queryInterval so periodic Queries do not interfere with the end-to-end chain.
-**.router.ipv6.mldv1.startupQueryInterval = 2s
-**.router.ipv6.mldv1.queryInterval = 100s
-**.router.ipv6.mldv1.queryResponseInterval = 1s
+**.router.ipv6.mld.startupQueryInterval = 2s
+**.router.ipv6.mld.queryInterval = 100s
+**.router.ipv6.mld.queryResponseInterval = 1s
 # lastListenerQueryInterval=1s, lastListenerQueryCount=2: leave timer = 2s (well within 20s).
-**.router.ipv6.mldv1.lastListenerQueryInterval = 1s
-**.router.ipv6.mldv1.lastListenerQueryCount = 2
+**.router.ipv6.mld.lastListenerQueryInterval = 1s
+**.router.ipv6.mld.lastListenerQueryCount = 2
 # multicastListenerInterval=6s: ensures the listener entry stays alive until the Done arrives at t=5s.
-**.router.ipv6.mldv1.multicastListenerInterval = 6s
+**.router.ipv6.mld.multicastListenerInterval = 6s
 
 # Check 3: host joins ff0e::1 via UdpSink (fires ipv6MulticastGroupJoinedSignal -> unsolicited Report).
 **.host.numApps = 1
@@ -139,42 +139,42 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %# Check 3: host sends unsolicited Multicast Listener Report for ff0e::1 on join
 %# Proves: group registered on host immediately; Non-Listener --> Delaying Listener (Report sent)
 %contains: stdout
-MldBasicNetwork.host.ipv6.mldv1: Mldv1: sending Multicast Listener Report for group=ff0e::1 on iface=
+MldBasicNetwork.host.ipv6.mld: Mldv1: sending Multicast Listener Report for group=ff0e::1 on iface=
 
 %#--------------------------------------------------------------------------------------------------------------
 %# Check 4a: router receives the Report for ff0e::1 from the host
 %# Proves: router is active as querier and sees the Report on the shared segment
 %contains: stdout
-MldBasicNetwork.router.ipv6.mldv1: Mldv1: received Multicast Listener Report for group=ff0e::1 iface=
+MldBasicNetwork.router.ipv6.mld: Mldv1: received Multicast Listener Report for group=ff0e::1 iface=
 
 %#--------------------------------------------------------------------------------------------------------------
 %# Check 4b: router records the listener for ff0e::1 (No Listeners Present --> Listeners Present)
 %# "recorded listener" is only emitted on the FIRST recording
 %contains: stdout
-MldBasicNetwork.router.ipv6.mldv1: Mldv1: recorded listener for group=ff0e::1
+MldBasicNetwork.router.ipv6.mld: Mldv1: recorded listener for group=ff0e::1
 
 %#--------------------------------------------------------------------------------------------------------------
 %# Bonus: host receives the router's General Query at t=2s (proves ff02::1 membership is active)
 %contains: stdout
-MldBasicNetwork.host.ipv6.mldv1: Mldv1: received General Listener Query on iface=
+MldBasicNetwork.host.ipv6.mld: Mldv1: received General Listener Query on iface=
 
 %#--------------------------------------------------------------------------------------------------------------
 %# Check 5: host sends Multicast Listener Done for ff0e::1 at t=5s (socket close)
 %# Proves: group removed from host immediately; host sends Done because flag=true after Query-driven Report
 %contains: stdout
-MldBasicNetwork.host.ipv6.mldv1: Mldv1: sending Multicast Listener Done for group=ff0e::1 on iface=
+MldBasicNetwork.host.ipv6.mld: Mldv1: sending Multicast Listener Done for group=ff0e::1 on iface=
 
 %#--------------------------------------------------------------------------------------------------------------
 %# Check 6a: router receives the Done for ff0e::1 from the host
 %# Proves: Done message propagated from host to router on the shared segment
 %contains: stdout
-MldBasicNetwork.router.ipv6.mldv1: Mldv1: received Multicast Listener Done for group=ff0e::1 iface=
+MldBasicNetwork.router.ipv6.mld: Mldv1: received Multicast Listener Done for group=ff0e::1 iface=
 
 %#--------------------------------------------------------------------------------------------------------------
 %# Check 6b: router sends Multicast-Address-Specific Query after receiving the Done
 %# Proves: Listeners Present --> Checking Listeners transition (MAS Query triggers last-listener countdown)
 %contains: stdout
-MldBasicNetwork.router.ipv6.mldv1: Mldv1: sending Multicast-Address-Specific Query for group=ff0e::1 on iface=
+MldBasicNetwork.router.ipv6.mld: Mldv1: sending Multicast-Address-Specific Query for group=ff0e::1 on iface=
 
 %#--------------------------------------------------------------------------------------------------------------
 %# Undisposed-object guard: verify no leaked cMessage or cObject at end of run
