@@ -1,0 +1,114 @@
+%description:
+
+Checks that an MLDv2 host reports source-filtered multicast state changes of the
+interface. The IPv6/MLD counterpart of IGMPv3_host1.test (RFC 3810 §6.1; mirrors
+RFC 3376 §5.1 for IGMPv3).
+
+A scriptable TestMld tester drives a sequence of <set-filter> commands on its single
+interface, taking the (interface, group) filter through INCLUDE -> INCLUDE -> EXCLUDE ->
+EXCLUDE -> INCLUDE transitions, and dumps the resulting interface filter after each step.
+The test asserts:
+  1. the merged interface filter after each command (<dump what="groups"/>),
+  2. the Mldv2 "Old state / New state" log for each transition, and
+  3. that the Mldv2 module immediately emits the correct State-Change Report record:
+       INCLUDE() -> INCLUDE(S1,S2)  : ALLOW(S1,S2)
+       INCLUDE(S1,S2) -> INCLUDE(S1): BLOCK(S2)
+       INCLUDE(S1) -> EXCLUDE(S2)   : TO_EX(S2)
+       EXCLUDE(S2) -> EXCLUDE(S1,S2): BLOCK(S1)   [EXCLUDE(A)->EXCLUDE(B): BLOCK(B-A)]
+       EXCLUDE(S1,S2) -> INCLUDE(S1): TO_IN(S1)
+The reports the Mldv2 module sends are looped back to the tester and decoded by
+TestMld::handleMessage as "TestMld: Received: inet::Mldv2Report<...>".
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+sim-time-limit=10s
+cmdenv-express-mode = false
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+network = inet.test.moduletest.lib.TestMLDNetwork
+**.mld.typename = "Mldv2"
+**.multicastForwarding = false
+
+**.scenarioManager.script = xmldoc("scenario.xml")
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%file: scenario.xml
+<scenario>
+
+<dump t="1" module="node.tester.mac" ifname="eth0" what="groups"/>
+
+<set-filter t="2" module="node.tester.mac" ifname="eth0" group="ff3e::1" sources="I 2001::1 2001::2"/>
+<dump t="2" module="node.tester.mac" ifname="eth0" what="groups"/>
+
+<set-filter t="3" module="node.tester.mac" ifname="eth0" group="ff3e::1" sources="I 2001::1"/>
+<dump t="3" module="node.tester.mac" ifname="eth0" what="groups"/>
+
+<set-filter t="4" module="node.tester.mac" ifname="eth0" group="ff3e::1" sources="E 2001::2"/>
+<dump t="4" module="node.tester.mac" ifname="eth0" what="groups"/>
+
+<set-filter t="5" module="node.tester.mac" ifname="eth0" group="ff3e::1" sources="E 2001::1 2001::2"/>
+<dump t="5" module="node.tester.mac" ifname="eth0" what="groups"/>
+
+<set-filter t="6" module="node.tester.mac" ifname="eth0" group="ff3e::1" sources="I 2001::1"/>
+<dump t="6" module="node.tester.mac" ifname="eth0" what="groups"/>
+
+</scenario>
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%#
+%# First check that the set-filter commands modified the interface state
+%#
+%postrun-command: grep "TestMld: .* groups = " test.out > groups.out || true
+%contains: groups.out
+TestMld: eth0: groups = ff3e::1 I 2001::1 2001::2.
+TestMld: eth0: groups = ff3e::1 I 2001::1.
+TestMld: eth0: groups = ff3e::1 E 2001::2.
+TestMld: eth0: groups = ff3e::1 E 2001::1 2001::2.
+TestMld: eth0: groups = ff3e::1 I 2001::1.
+
+%#
+%# Now check the state transitions of the Mldv2 module
+%#
+%postrun-command: grep ".*[Ss]tate" test.out > mld.out || true
+%contains: mld.out
+State of group 'ff3e::1' on interface 'eth0' has changed:
+    Old state: INCLUDE().
+    New state: INCLUDE(2001::1,2001::2).
+State of group 'ff3e::1' on interface 'eth0' has changed:
+    Old state: INCLUDE(2001::1,2001::2).
+    New state: INCLUDE(2001::1).
+State of group 'ff3e::1' on interface 'eth0' has changed:
+    Old state: INCLUDE(2001::1).
+    New state: EXCLUDE(2001::2).
+State of group 'ff3e::1' on interface 'eth0' has changed:
+    Old state: EXCLUDE(2001::2).
+    New state: EXCLUDE(2001::1,2001::2).
+State of group 'ff3e::1' on interface 'eth0' has changed:
+    Old state: EXCLUDE(2001::1,2001::2).
+    New state: INCLUDE(2001::1).
+
+%#
+%# Now check that the Mldv2 module sent the reports immediately, looped back to the tester
+%#
+%postrun-command: grep "TestMld: Received" test.out > received.out || true
+%contains: received.out
+TestMld: Received: inet::Mldv2Report<ff3e::1=ALLOW (2001::1,2001::2)>.
+TestMld: Received: inet::Mldv2Report<ff3e::1=BLOCK (2001::2)>.
+TestMld: Received: inet::Mldv2Report<ff3e::1=TO_EX (2001::2)>.
+TestMld: Received: inet::Mldv2Report<ff3e::1=BLOCK (2001::1)>.
+TestMld: Received: inet::Mldv2Report<ff3e::1=TO_IN (2001::1)>.
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

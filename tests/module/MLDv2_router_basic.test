@@ -1,0 +1,153 @@
+%description:
+Deterministic MLDv2 router/querier behavior test (RFC 3810 §7).
+
+Tests the MLDv2 router (querier) side with a fixed RNG seed and short timers so the
+behaviors are observable within a 15s simulation. Membership is driven by a real app
+(UdpSink with multicastGroup), the production path. Same scenario as
+MLD_router_basic.test, but with **.ipv6.mld.typename="Mldv2".
+
+RTRv2-01 (General Query on startup):
+  The router has multicastForwarding=true (set at node level so NetworkLayerNodeBase
+  propagates it to the routing table). configureInterface() starts the querier on each
+  multicast-capable interface and sends the first General Query immediately, scheduling
+  the next at startupQueryInterval. The "Sending General Query on interface ..." EV_INFO
+  marker is asserted.
+
+RTRv2-02 (listener recorded on Report):
+  host1 runs UdpSink with multicastGroup="ff0e::1:2:3" (any-source join). The socket
+  join at t=0 fires the membership change -> the host sends a State-Change Report
+  (TO_EX). The router receives it ("Received Mldv2 Multicast Listener Report ..."),
+  finds the record for ff0e::1:2:3, and -- because TO_EX moves the router group to
+  EXCLUDE filter mode with Group Timer = GMI -- records the group's forwarding state.
+  The "Found a record for group 'ff0e::1:2:3'" and TO_EX-reception markers are asserted.
+
+RTRv2-03 (Multicast-Address-Specific Query after a leave):
+  host1's UdpSink has stopTime=5s. The socket close fires the EXCLUDE()->INCLUDE()
+  membership change, so the host sends a CHANGE_TO_INCLUDE_MODE (TO_IN, empty source
+  list) Report. The router is in EXCLUDE filter mode for the group, so on receiving the
+  TO_IN it follows RFC 3810 §7.4 "Reception of a TO_IN" for the EXCLUDE case and sends a
+  Multicast-Address-Specific Query Q(G) for ff0e::1:2:3. That marker is asserted.
+
+HOST-ONLY NEGATIVE (single-querier proof):
+  host1 has multicastForwarding=false (the default); only the router runs the querier
+  path. A %postrun-command extracts any "Sending ... Query" lines emitted by host1's MLD
+  module and a %not-contains asserts the list is empty.
+
+Network: host1 (StandardHost6) and router (Router6) on a shared EthernetHub.
+Ipv6FlatNetworkConfigurator assigns addresses. Both nodes have hasMld=true and
+mld.typename="Mldv2". DAD disabled; RNG seed pinned.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.node.ethernet.EthernetHub;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network Mldv2RouterBasicNetwork
+{
+    types:
+        channel ethline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator;
+        host1: StandardHost6;
+        router: Router6;
+        hub: EthernetHub;
+    connections:
+        host1.ethg++ <--> ethline <--> hub.ethg++;
+        router.ethg++ <--> ethline <--> hub.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+ned-path = ../../../../src
+network = Mldv2RouterBasicNetwork
+sim-time-limit = 15s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+# Fix RNG seed for deterministic behavior of uniform(0, maxRespDelay) in the host timer
+seed-set = 0
+
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+# Enable MLDv2 on all nodes so they can receive inbound Reports
+**.ipv6.hasMld = true
+**.ipv6.mld.typename = "Mldv2"
+# Disable DAD for fast startup
+**.neighbourDiscovery.dupAddrDetectTransmits = 0
+
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue"
+**.eth[*].queue.dataQueue.packetCapacity = 10
+
+# RTRv2-01: activate the real querier ONLY on the router (node-level multicastForwarding).
+**.router.multicastForwarding = true
+
+# RTRv2-01 timers: shorten query intervals for a fast deterministic run.
+**.router.ipv6.mld.startupQueryInterval = 1s
+**.router.ipv6.mld.queryInterval = 5s
+**.router.ipv6.mld.queryResponseInterval = 1s
+# RTRv2-03 last-member timers
+**.router.ipv6.mld.lastMemberQueryInterval = 1s
+**.router.ipv6.mld.lastMemberQueryCount = 2
+
+# RTRv2-02: host1 joins ff0e::1:2:3 via UdpSink (fires the membership change -> State-Change Report).
+**.host1.numApps = 1
+**.host1.app[0].typename = "UdpSink"
+**.host1.app[0].localPort = 1000
+**.host1.app[0].multicastGroup = "ff0e::1:2:3"
+# RTRv2-03: host1 leaves at t=5s via socket close (fires the EXCLUDE()->INCLUDE() change -> TO_IN).
+**.host1.app[0].stopTime = 5s
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%# RTRv2-01: router sends the first General Query on startup
+%contains: stdout
+Mldv2RouterBasicNetwork.router.ipv6.mld: Sending General Query on interface 'eth0', and scheduling next Query
+
+%#--------------------------------------------------------------------------------------------------------------
+%# RTRv2-02: router receives host1's State-Change Report
+%contains: stdout
+Mldv2RouterBasicNetwork.router.ipv6.mld: Received Mldv2 Multicast Listener Report on interface 'eth0'.
+
+%#--------------------------------------------------------------------------------------------------------------
+%# RTRv2-02: router finds the record for ff0e::1:2:3
+%contains: stdout
+Mldv2RouterBasicNetwork.router.ipv6.mld: Found a record for group 'ff0e::1:2:3'.
+
+%#--------------------------------------------------------------------------------------------------------------
+%# RTRv2-02: the join is a TO_EX (any-source/EXCLUDE) record, received and processed by the router
+%contains: stdout
+Mldv2RouterBasicNetwork.router.ipv6.mld: Received TO_EX() report.
+
+%#--------------------------------------------------------------------------------------------------------------
+%# RTRv2-03: on the leave (TO_IN while in EXCLUDE mode) the router sends a Multicast-Address-Specific Query
+%contains: stdout
+Mldv2RouterBasicNetwork.router.ipv6.mld: Sending Multicast-Address-Specific Query for group 'ff0e::1:2:3' on interface 'eth0'.
+
+%#--------------------------------------------------------------------------------------------------------------
+%# HOST-ONLY NEGATIVE (single-querier proof): host1 has multicastForwarding=false and must
+%# NEVER send any Query. Extract all host1 Query-sending lines; the resulting file must be empty.
+%postrun-command: grep -E "Mldv2RouterBasicNetwork\.host1\.ipv6\.mld: Sending (General|Multicast-Address-Specific|Multicast-Address-and-Source-Specific) Query" test.out > host1_query.out || true
+%not-contains: host1_query.out
+Query
+
+%#--------------------------------------------------------------------------------------------------------------
+%# Undisposed-object guard
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

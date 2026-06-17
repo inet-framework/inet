@@ -1,0 +1,188 @@
+%description:
+MLDv2 Source-Specific Multicast (SSM) membership test (RFC 3810, RFC 4604).
+
+A receiver joins an SSM group ff3e::8:8:8 in INCLUDE mode for a single source S1,
+using UdpSink's `multicastSources` parameter (the production path: it calls
+joinMulticastSources -> INCLUDE-mode changeMulticastGroupMembership). Two senders S1
+and S2 both transmit UDP datagrams to the SSM group. The test asserts that the MLDv2
+host puts a correct INCLUDE{S1} State-Change Report on the wire:
+
+SSM-01 (INCLUDE-mode membership):
+  The receiver's socket join takes its (interface,group) filter from INCLUDE() to
+  INCLUDE(S1). Mldv2::multicastSourceListChanged logs the state change and -- because
+  this is an INCLUDE(A)->INCLUDE(B) source-list change with A empty and B={S1} -- emits
+  an ALLOW_NEW_SOURCES record naming S1 (RFC 3810 §6.1, §5.2.12).
+
+SSM-02 (ALLOW record names S1, not S2):
+  The emitted record is ALLOW and its source list is exactly {S1}. The router receives
+  the State-Change Report and finds the record for ff3e::8:8:8 carrying the ALLOW for
+  S1's address. S2's address must not appear in any INCLUDE/ALLOW source list on the
+  receiver side (the receiver requested S1 only).
+
+SSM-03 (Current-State Report on a General Query):
+  When the router's General Query response timer fires on the receiver, it answers with
+  a MODE_IS_INCLUDE Current-State Report (the receiver is in INCLUDE filter mode).
+
+Addresses are pinned with Ipv6NetworkConfigurator so the receiver's `multicastSources`
+can reference S1's global address (2001:db8:1:1::1) deterministically. All nodes share a
+single Ethernet segment via a hub. MLDv2 is enabled everywhere; the router is the
+querier (multicastForwarding=true at node level). DAD disabled; RNG seed pinned.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ethernet.EthernetHub;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network Mldv2SsmNetwork
+{
+    types:
+        channel ethline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        configurator: Ipv6NetworkConfigurator;
+        s1: StandardHost6;
+        s2: StandardHost6;
+        recv: StandardHost6;
+        router: Router6;
+        hub: EthernetHub;
+    connections:
+        s1.ethg++ <--> ethline <--> hub.ethg++;
+        s2.ethg++ <--> ethline <--> hub.ethg++;
+        recv.ethg++ <--> ethline <--> hub.ethg++;
+        router.ethg++ <--> ethline <--> hub.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+ned-path = .;../../../../src
+network = Mldv2SsmNetwork
+sim-time-limit = 10s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+# Fix RNG seed for deterministic behavior of uniform(0, maxRespDelay) in the host timer
+seed-set = 0
+
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+# Pin addresses so the receiver's multicastSources can name S1 deterministically.
+*.configurator.config = xmldoc("config.xml")
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+
+# Enable MLDv2 everywhere
+**.ipv6.hasMld = true
+**.ipv6.mld.typename = "Mldv2"
+# Disable DAD for fast startup
+**.neighbourDiscovery.dupAddrDetectTransmits = 0
+
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue"
+**.eth[*].queue.dataQueue.packetCapacity = 100
+
+# Router is the MLDv2 querier (node-level multicastForwarding).
+**.router.multicastForwarding = true
+**.router.ipv6.mld.startupQueryInterval = 2s
+**.router.ipv6.mld.queryInterval = 5s
+**.router.ipv6.mld.queryResponseInterval = 1s
+
+# Two senders to the SSM group.
+*.s1.numApps = 1
+*.s1.app[0].typename = "UdpBasicApp"
+*.s1.app[0].destAddresses = "ff3e::8:8:8"
+*.s1.app[0].destPort = 1000
+*.s1.app[0].messageLength = 64B
+*.s1.app[0].timeToLive = 10
+*.s1.app[0].startTime = 4s
+*.s1.app[0].sendInterval = 1s
+*.s1.app[0].stopTime = 6.5s
+
+*.s2.numApps = 1
+*.s2.app[0].typename = "UdpBasicApp"
+*.s2.app[0].destAddresses = "ff3e::8:8:8"
+*.s2.app[0].destPort = 1000
+*.s2.app[0].messageLength = 64B
+*.s2.app[0].timeToLive = 10
+*.s2.app[0].startTime = 4s
+*.s2.app[0].sendInterval = 1s
+*.s2.app[0].stopTime = 6.5s
+
+# Receiver: SSM INCLUDE-mode join for S1 only.
+*.recv.numApps = 1
+*.recv.app[0].typename = "UdpSink"
+*.recv.app[0].localPort = 1000
+*.recv.app[0].multicastGroup = "ff3e::8:8:8"
+*.recv.app[0].multicastSources = "2001:db8:1:1::1"
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: config.xml
+<config>
+    <interface hosts="s1" address="2001:db8:1:1::1" netmask="64"/>
+    <interface hosts="s2" address="2001:db8:1:1::2" netmask="64"/>
+    <interface hosts="recv" address="2001:db8:1:1::3" netmask="64"/>
+    <interface hosts="router" address="2001:db8:1:1::4" netmask="64"/>
+</config>
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%# SSM-01: the receiver's filter goes INCLUDE() -> INCLUDE(2001:db8:1:1::1)
+%# (each EV line carries the "%C: " node-path prefix, asserted line by line)
+%contains: stdout
+Mldv2SsmNetwork.recv.ipv6.mld: State of group 'ff3e::8:8:8' on interface 'eth0' has changed:
+%contains: stdout
+Mldv2SsmNetwork.recv.ipv6.mld:     Old state: INCLUDE().
+%contains: stdout
+Mldv2SsmNetwork.recv.ipv6.mld:     New state: INCLUDE(2001:db8:1:1::1).
+
+%#--------------------------------------------------------------------------------------------------------------
+%# SSM-01/02: an INCLUDE source-list change emits an ALLOW/BLOCK State-Change Report
+%contains: stdout
+Mldv2SsmNetwork.recv.ipv6.mld: Sending ALLOW/BLOCK report.
+
+%#--------------------------------------------------------------------------------------------------------------
+%# SSM-01: a Multicast Listener Report is put on the wire by the receiver
+%contains: stdout
+Mldv2SsmNetwork.recv.ipv6.mld: Mldv2: sending Multicast Listener Report on iface=eth0
+
+%#--------------------------------------------------------------------------------------------------------------
+%# SSM-02: the router receives the receiver's Report and finds the SSM group record
+%contains: stdout
+Mldv2SsmNetwork.router.ipv6.mld: Found a record for group 'ff3e::8:8:8'.
+
+%#--------------------------------------------------------------------------------------------------------------
+%# SSM-02: the router sees an ALLOW record naming S1 (2001:db8:1:1::1)
+%contains: stdout
+Mldv2SsmNetwork.router.ipv6.mld: Received ALLOW(2001:db8:1:1::1) report.
+
+%#--------------------------------------------------------------------------------------------------------------
+%# SSM-03: a General Query gets a MODE_IS_INCLUDE Current-State response from the receiver.
+%# (the receiver is in INCLUDE filter mode; the General Query response carries IS_IN{S1})
+%contains: stdout
+Mldv2SsmNetwork.recv.ipv6.mld: Sending response to a General Query on interface 'eth0'.
+
+%#--------------------------------------------------------------------------------------------------------------
+%# SSM-02 negative: S2's address (2001:db8:1:1::2) must NEVER appear in any State-Change report
+%# the RECEIVER emits (it requested an INCLUDE filter for S1 only). Extract every "New state"
+%# line logged by recv's MLD module; none may mention S2's address.
+%postrun-command: grep -E "Mldv2SsmNetwork\.recv\.ipv6\.mld: +New state:" test.out > recv_states.out || true
+%not-contains: recv_states.out
+2001:db8:1:1::2
+
+%#--------------------------------------------------------------------------------------------------------------
+%# Undisposed-object guard
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
