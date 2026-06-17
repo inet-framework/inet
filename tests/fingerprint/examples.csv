@@ -324,10 +324,6 @@
 
 /examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,                50000s,          bd16-ac7e/tplx;1682-9c16/~tNl;b0b9-6323/tyf, PASS, EthernetMac
 /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_inet -r 0,              50s,             dc79-67d8/tplx;075b-aac9/~tNl;d7fb-1300/~tND;3ba5-d152/tyf, PASS, EthernetMac
-/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c ETH -r 0,                    50s,             a3a6-6ded/tplx;11e4-e780/~tNl;030f-dbc4/tyf, PASS, EthernetMac
-/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c Mixed -r 0,                  50s,             1773-ba10/tplx;846b-d330/~tNl;c1c5-6bbb/tyf, PASS, EthernetMac
-
-/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c PPP -r 0,                    50s,             7bfd-2d93/tplx;1d08-d618/~tNl;18be-1dbf/tyf, PASS,
 # /examples/ipv6/nclients/,            -f omnetpp.ini -c TCP_APP -r 0    # abstract-config
 # /examples/ipv6/nclients/,            -f omnetpp.ini -c SCTP_APP -r 0   # abstract-config
 /examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           bfe2-b38c/tplx;af0c-de9a/~tNl;5d04-f8b3/tyf, PASS, EthernetMac

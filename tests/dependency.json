@@ -6087,55 +6087,6 @@
    ]
   },
   {
-   "working_directory": "examples/ipv6/ipv6nclients",
-   "ini_file": "omnetpp.ini",
-   "config": "ETH",
-   "run_number": 0,
-   "used_features": [
-    "Ethernet",
-    "Ipv6",
-    "Ipv6Examples",
-    "Loopback",
-    "Queueing",
-    "TcpCommon",
-    "TcpInet",
-    "Udp"
-   ]
-  },
-  {
-   "working_directory": "examples/ipv6/ipv6nclients",
-   "ini_file": "omnetpp.ini",
-   "config": "Mixed",
-   "run_number": 0,
-   "used_features": [
-    "Ethernet",
-    "Ipv6",
-    "Ipv6Examples",
-    "Loopback",
-    "Ppp",
-    "Queueing",
-    "TcpCommon",
-    "TcpInet",
-    "Udp"
-   ]
-  },
-  {
-   "working_directory": "examples/ipv6/ipv6nclients",
-   "ini_file": "omnetpp.ini",
-   "config": "PPP",
-   "run_number": 0,
-   "used_features": [
-    "Ipv6",
-    "Ipv6Examples",
-    "Loopback",
-    "Ppp",
-    "Queueing",
-    "TcpCommon",
-    "TcpInet",
-    "Udp"
-   ]
-  },
-  {
    "working_directory": "examples/ipv6/nclients",
    "ini_file": "omnetpp.ini",
    "config": "ETH",

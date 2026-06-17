@@ -4153,20 +4153,8 @@
     <filename>inet.examples.inet.nclients.NClients2.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.ipv6.ipv6nclients.NClientsEth</name>
-    <filename>inet.examples.ipv6.ipv6nclients.NClientsEth.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.examples.ipv6.nclients.NClientsEth</name>
     <filename>inet.examples.ipv6.nclients.NClientsEth.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.ipv6.ipv6nclients.NClientsEthPpp</name>
-    <filename>inet.examples.ipv6.ipv6nclients.NClientsEthPpp.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.ipv6.ipv6nclients.NClientsPPP</name>
-    <filename>inet.examples.ipv6.ipv6nclients.NClientsPPP.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.examples.ipv6.nclients.NClientsPPP</name>
