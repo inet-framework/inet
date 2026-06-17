@@ -22,6 +22,12 @@ network = inet.test.moduletest.lib.TestIGMPNetwork
 **.IPForward = false
 **.multicastForwarding = false
 
+# RFC 3376 6.1: each State-Change Report is sent [Robustness Variable] (=2) times.
+# Pin the RNG seed and shrink the Unsolicited Report Interval so the single
+# retransmission of each change fires deterministically (< 1s, before the next step).
+seed-set = 0
+**.igmp.unsolicitedReportInterval = 0.5s
+
 **.scenarioManager.script = xmldoc("scenario.xml")
 
 %#--------------------------------------------------------------------------------------------------------------
@@ -50,14 +56,27 @@ IGMPTester: eth0: groups = 224.0.0.1 E, 224.0.0.2 E, 225.0.0.1 I 10.0.0.1.
 IGMPTester: eth0: groups = 224.0.0.1 E, 224.0.0.2 E, 225.0.0.1 E 10.0.0.2.
 
 %#
-%# Now check that the IGMP module responded with a correct report
+%# Now check that the IGMP module responded with a correct report. The join at t=2
+%# (INCLUDE()->INCLUDE(10.0.0.1)) and the t=3 filter change (INCLUDE->EXCLUDE) are
+%# State-Change Reports, so each is sent twice (RFC 3376 6.1, [Robustness Variable] = 2):
+%# the immediate ALLOW/TO_EX plus one retransmission, interleaved with the IS_IN/IS_EX
+%# Current-State responses to the General Queries.
 %#
 %postrun-command: grep "IGMPTester: .*Received" test.out > received.out || true
 %contains-regex: received.out
-IGMPTester: Received: inet::Igmpv3Report<225.0.0.1=IS_IN \(10.0.0.1\)>.
-.*
-IGMPTester: Received: inet::Igmpv3Report<225.0.0.1=IS_EX \(10.0.0.2\)>.
+IGMPTester: Received: inet::Igmpv3Report<225.0.0.1=ALLOW \(10.0.0.1\)>.
+(?:.*\n)*?IGMPTester: Received: inet::Igmpv3Report<225.0.0.1=ALLOW \(10.0.0.1\)>.
+(?:.*\n)*?IGMPTester: Received: inet::Igmpv3Report<225.0.0.1=IS_IN \(10.0.0.1\)>.
+(?:.*\n)*?IGMPTester: Received: inet::Igmpv3Report<225.0.0.1=TO_EX \(10.0.0.2\)>.
+(?:.*\n)*?IGMPTester: Received: inet::Igmpv3Report<225.0.0.1=TO_EX \(10.0.0.2\)>.
+(?:.*\n)*?IGMPTester: Received: inet::Igmpv3Report<225.0.0.1=IS_EX \(10.0.0.2\)>.
 
+%#
+%# Explicitly assert the State-Change Report retransmission (RFC 3376 6.1).
+%#
+%postrun-command: grep "Retransmitting State-Change Report" test.out > retransmit.out || true
+%contains: retransmit.out
+Retransmitting State-Change Report for group '225.0.0.1' on interface 'eth0' (1 transmission(s) left).
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out

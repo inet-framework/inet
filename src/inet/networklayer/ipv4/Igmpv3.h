@@ -71,6 +71,7 @@ class INET_API Igmpv3 : public SimpleModule, protected cListener
         IGMPV3_R_SOURCE_TIMER,
         IGMPV3_H_GENERAL_QUERY_TIMER,
         IGMPV3_H_GROUP_TIMER,
+        IGMPV3_H_STATE_CHANGE_TIMER,
     };
 
     struct HostInterfaceData;
@@ -83,6 +84,12 @@ class INET_API Igmpv3 : public SimpleModule, protected cListener
         HostGroupState state;
         cMessage *timer; // for scheduling responses to Group-Specific and Group-and-Source-Specific Queries
         Ipv4AddressVector queriedSources; // saved from last Group-Specific or Group-and-Source-Specific Query; sorted
+
+        // State-Change Report retransmission (RFC 3376 6.1): the last State-Change
+        // Report is (re)transmitted [Robustness Variable] times in total.
+        std::vector<GroupRecord> pendingRecords; // records of the pending State-Change Report
+        int retransmitCount = 0; // remaining retransmissions (0 = nothing pending)
+        cMessage *retransmitTimer; // fires at uniform(0, unsolicitedReportInterval)
 
         HostGroupData(HostInterfaceData *parent, Ipv4Address group);
         virtual ~HostGroupData();
@@ -194,6 +201,7 @@ class INET_API Igmpv3 : public SimpleModule, protected cListener
     ModuleRefByPar<IInterfaceTable> ift;
 
     bool enabled;
+    int robustnessVariable; // RFC 3376: a State-Change Report is (re)transmitted this many times
     double queryInterval; // TODO these should probably be simtime_t
     double queryResponseInterval;
     double groupMembershipInterval;
@@ -272,6 +280,7 @@ class INET_API Igmpv3 : public SimpleModule, protected cListener
 
     virtual void processHostGeneralQueryTimer(cMessage *msg);
     virtual void processHostGroupQueryTimer(cMessage *msg);
+    virtual void processHostStateChangeTimer(cMessage *msg);
     virtual void processRouterGeneralQueryTimer(cMessage *msg);
     virtual void processRouterGroupTimer(cMessage *msg);
     virtual void processRouterSourceTimer(cMessage *msg);

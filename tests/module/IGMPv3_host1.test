@@ -23,6 +23,12 @@ network = inet.test.moduletest.lib.TestIGMPNetwork
 **.IPForward = false
 **.multicastForwarding = false
 
+# RFC 3376 6.1: each State-Change Report is sent [Robustness Variable] (=2) times.
+# Pin the RNG seed and shrink the Unsolicited Report Interval so the single
+# retransmission of each change fires deterministically (< 1s, before the next step).
+seed-set = 0
+**.igmp.unsolicitedReportInterval = 0.5s
+
 **.scenarioManager.script = xmldoc("scenario.xml")
 
 %#--------------------------------------------------------------------------------------------------------------
@@ -66,7 +72,7 @@ IGMPTester: eth0: groups = 224.0.0.1 E, 224.0.0.2 E, 225.0.0.1 I 10.0.0.1.
 %#
 %# Now check the state transitions of the IGMP module
 %#
-%postrun-command: grep ".*[Ss]tate" test.out > igmp.out || true
+%postrun-command: grep -E "State of group|Old state:|New state:" test.out > igmp.out || true
 %contains: igmp.out
 State of group '225.0.0.1' on interface 'eth0' has changed:
     Old state: INCLUDE().
@@ -85,15 +91,30 @@ State of group '225.0.0.1' on interface 'eth0' has changed:
     New state: INCLUDE(10.0.0.1).
 
 %#
-%# Now check that the IGMP module sent the reports immediately
+%# Now check that the IGMP module sent the reports immediately. Each State-Change
+%# Report is sent twice (RFC 3376 6.1: [Robustness Variable] = 2 transmissions):
+%# the immediate report followed by one retransmission within the Unsolicited Report
+%# Interval, before the next scenario step.
 %#
 %postrun-command: grep "IGMPTester: Received" test.out > received.out || true
 %contains: received.out
 IGMPTester: Received: inet::Igmpv3Report<225.0.0.1=ALLOW (10.0.0.1,10.0.0.2)>.
+IGMPTester: Received: inet::Igmpv3Report<225.0.0.1=ALLOW (10.0.0.1,10.0.0.2)>.
+IGMPTester: Received: inet::Igmpv3Report<225.0.0.1=BLOCK (10.0.0.2)>.
 IGMPTester: Received: inet::Igmpv3Report<225.0.0.1=BLOCK (10.0.0.2)>.
 IGMPTester: Received: inet::Igmpv3Report<225.0.0.1=TO_EX (10.0.0.2)>.
+IGMPTester: Received: inet::Igmpv3Report<225.0.0.1=TO_EX (10.0.0.2)>.
+IGMPTester: Received: inet::Igmpv3Report<225.0.0.1=BLOCK (10.0.0.1)>.
 IGMPTester: Received: inet::Igmpv3Report<225.0.0.1=BLOCK (10.0.0.1)>.
 IGMPTester: Received: inet::Igmpv3Report<225.0.0.1=TO_IN (10.0.0.1)>.
+IGMPTester: Received: inet::Igmpv3Report<225.0.0.1=TO_IN (10.0.0.1)>.
+
+%#
+%# Explicitly assert the retransmission (RFC 3376 6.1 State-Change Report repeat).
+%#
+%postrun-command: grep "Retransmitting State-Change Report" test.out > retransmit.out || true
+%contains: retransmit.out
+Retransmitting State-Change Report for group '225.0.0.1' on interface 'eth0' (1 transmission(s) left).
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out
