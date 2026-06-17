@@ -425,10 +425,6 @@
     <filename>inet.examples.inet.bulktransfer.BulkTransfer.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.ipv6.ipv6bulk.BulkTransfer6</name>
-    <filename>inet.examples.ipv6.ipv6bulk.BulkTransfer6.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.examples.inet.routerperf.BurstHost</name>
     <filename>inet.examples.inet.routerperf.BurstHost.html</filename>
   </compound>
@@ -875,10 +871,6 @@
   <compound kind="class">
     <name>inet.tutorials.queueing.DelayerTutorialStep</name>
     <filename>inet.tutorials.queueing.DelayerTutorialStep.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.ipv6.demonetworketh.DemoNetworkEth</name>
-    <filename>inet.examples.ipv6.demonetworketh.DemoNetworkEth.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.tutorials.queueing.DemultiplexerTutorialStep</name>

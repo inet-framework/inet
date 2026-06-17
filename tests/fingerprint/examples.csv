@@ -322,8 +322,6 @@
 /examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c ten_senders -r 0,            100s,            b9d8-0bf1/tplx;95c5-fab7/~tNl;5258-6972/~tND;3b49-27ea/tyf, PASS, EthernetMac Ipv4
 /examples/internetcloud/earthcloud/, -f omnetpp.ini -c General -r 0,                100s,            7520-6d78/tplx;6aa7-af64/~tNl;9acb-7636/~tND;b3d2-5bdc/tyf, PASS, EthernetMac Ipv4
 
-/examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,                50000s,          bd16-ac7e/tplx;1682-9c16/~tNl;b0b9-6323/tyf, PASS, EthernetMac
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_inet -r 0,              50s,             dc79-67d8/tplx;075b-aac9/~tNl;d7fb-1300/~tND;3ba5-d152/tyf, PASS, EthernetMac
 # /examples/ipv6/nclients/,            -f omnetpp.ini -c TCP_APP -r 0    # abstract-config
 # /examples/ipv6/nclients/,            -f omnetpp.ini -c SCTP_APP -r 0   # abstract-config
 /examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           bfe2-b38c/tplx;af0c-de9a/~tNl;5d04-f8b3/tyf, PASS, EthernetMac
