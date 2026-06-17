@@ -20,27 +20,19 @@
 /examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,                50000s,          eb79-fc97/~tNlb, PASS, EthernetMac
 /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_inet -r 0,              50s,             9ff4-d7f2/~tNlb, PASS, EthernetMac
 /examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c ETH -r 0,                    50s,             9782-c706/~tNlb, PASS, EthernetMac
-/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c Mixed -r 0,                  50s,             5e0f-c662/~tNlb, PASS, EthernetMac
-/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c PPP -r 0,                    50s,             447a-60b9/~tNlb, PASS,
+/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c Mixed -r 0,                  50s,             322c-c307/~tNlb, PASS, EthernetMac
+/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c PPP -r 0,                    50s,             6d95-7b0e/~tNlb, PASS,
 /examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           56c5-9341/~tNlb, PASS, EthernetMac
-/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           ab62-ea36/~tNlb, PASS,
-/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            4166-eebd/~tNlb, PASS,
+/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           321f-7c41/~tNlb, PASS,
+/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            ed53-a028/~tNlb, PASS,
 
 # IPv6 networking examples
 /examples/inet/hierarchical99/,      -f networklayer.ini -c IPv6 -r 0,              10000s,          3fd2-976a/~tNlb, PASS, EthernetMac
-/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_OK_ipv6 -r 0,            10s,             5faa-c37f/~tNlb, PASS,
-/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Port_Unav_ipv6 -r 0,     10s,             107d-845e/~tNlb, PASS,
-/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Host_Unav_ipv6 -r 0,     10s,             901c-6e9a/~tNlb, PASS,
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_OK_ipv6 -r 0,            10s,             7fe6-c71d/~tNlb, PASS,
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Port_Unav_ipv6 -r 0,     10s,             84fc-d602/~tNlb, PASS,
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Host_Unav_ipv6 -r 0,     10s,             b010-62f0/~tNlb, PASS,
 
 # DYMO with IPv6
-# ~tNlb re-recorded (1839-99ed -> 84e9-900a) when IPv6 multicast forwarding was added.
-# Cause: Ipv6 now delivers a received multicast datagram to the upper layers when the
-# arrival interface has joined the group (mirroring Ipv4), instead of only for the
-# preassigned ND addresses recognised by isLocalAddress(). DYMO joins LL-MANET-Routers
-# (ff02::6d) and addresses its RREQ/RREP/RERR there; previously those packets reached the
-# neighbours' IPv6 layer but were dropped before DYMO, so route discovery never received
-# them. They are now delivered, so DYMO actually processes them -- changing the on-wire
-# control traffic (network-content ingredient ~tNlb). Deterministic across repeated runs.
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv6 -r 0,                   10s,             84e9-900a/~tNlb, PASS,  wireless adhoc
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv6 -r 0,              10s,             84e9-900a/~tNlb, PASS,  wireless adhoc
 
