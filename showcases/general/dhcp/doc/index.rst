@@ -63,6 +63,11 @@ The initial address acquisition uses a four-message exchange known as
    it accepts. (Broadcasting rather than unicasting informs any other servers
    that their offers were not chosen.)
 4. **Acknowledge** — The server confirms the lease with a DHCPACK.
+   If the request can't be granted (e.g. the address is no longer
+   available, or the client asked for something the server can't
+   honour) the reply is an explicit refusal called a DHCPNAK
+   ("negative acknowledgement"); the client throws its current lease
+   state away and starts a fresh DORA.
 
 After receiving the DHCPACK, the client enters the **BOUND** state and
 configures its interface with the leased address.
@@ -94,12 +99,13 @@ unreachable:
 If neither succeeds and the lease expires, the client loses its address and
 must start over with a new Discover.
 
-A client that restarts (e.g. after a reboot) while still holding a
-previous lease can take a shortcut known as **INIT-REBOOT**: instead
-of a full DORA exchange it broadcasts a DHCPREQUEST naming the
-previously held address. The server confirms with a DHCPACK if the
-binding is still valid, or rejects it with a DHCPNAK, in which case
-the client falls back to a full DORA.
+A client that restarts *without having released its lease* —
+typically after a crash or power cut, where there was no chance to
+send DHCPRELEASE — can take a shortcut known as **INIT-REBOOT**:
+instead of a full DORA exchange it broadcasts a DHCPREQUEST naming
+the previously held address. The server confirms with a DHCPACK if
+the binding is still valid, or rejects it with a DHCPNAK, in which
+case the client falls back to a full DORA.
 
 This showcase includes eight configurations that illustrate different
 aspects of the protocol:
@@ -190,12 +196,18 @@ are ignored.
 
 The server NAKs a DHCPREQUEST under three conditions:
 
-- the REQUEST's requested-IP option differs from the address the server
-  most recently offered to this client (REQUESTING-state mismatch);
-- an INIT-REBOOT REQUEST names an address that the server has on file
-  but on a different subnet;
-- a RENEWING or REBINDING REQUEST names an IP the server has no record
-  of (the ServerReboot scenario below).
+- The client's DORA REQUEST asks for a different address than the one
+  the server just offered. In a normal DORA the REQUEST's
+  *requested-IP* option echoes back the address from the DHCPOFFER —
+  effectively the client saying "yes, I accept that one." A mismatch
+  is a sign of a misbehaving or out-of-sync client; the server
+  refuses.
+- An INIT-REBOOT REQUEST names an address that the server has on file
+  but on a different subnet (the client has moved to another network
+  since it last held this lease).
+- A RENEWING or REBINDING REQUEST names an IP the server has no record
+  of — typically because the server has been restarted and lost its
+  lease database (the ServerReboot scenario below).
 
 A REQUEST that names a different *server identifier* (the client picked
 another server's offer) does not cause a NAK; the server simply
@@ -276,24 +288,62 @@ The following sequence chart shows the DORA exchange (time is non-linear):
    :align: center
 
 The sequence chart shows the message *flow*; the *contents* of one of
-those messages — the server's DHCPOFFER to ``client[0]`` — are shown
-below, dissected with ``tshark`` from the server-side pcap. The offer
-carries the assigned address (``yiaddr`` = 192.168.1.10), the subnet
-mask, the gateway (``Router``), the lease time, the renewal/rebinding
-(T1/T2) timers, and the server identifier:
+those messages — the server's DHCPOFFER — are shown below in Qtenv's
+**packet inspector**. As the offer travels down the protocol stack each
+layer wraps it, so on the wire it is a complete Ethernet frame. The
+inspector's ``content`` field shows that frame as a ``SequenceChunk``
+whose ``chunks`` are the protocol layers, one nested inside the next:
 
-.. figure:: media/dhcp_offer_packet.png
+.. figure:: media/dhcp_offer_frame.png
    :align: center
 
+From outermost to innermost: an ``EthernetPhyHeader`` and
+``EthernetMacHeader`` (a broadcast ``dest``, since the client has no
+address yet, from the server's MAC), an ``Ipv4Header`` (from the server's
+192.168.1.1 to the 255.255.255.255 broadcast), a ``UdpHeader`` (source
+port 67 to destination port 68), the ``DhcpMessage`` itself (``op`` = 2,
+BOOTREPLY, ``yiaddr`` = 192.168.1.10), and an ``EthernetFcs`` trailer.
+Each chunk can be expanded further: drilling into the ``DhcpMessage``
+reveals the DHCP fields and ``options`` — the subnet mask, the gateway
+(``router`` option), the lease time (3600 s), the T1/T2 renewal/rebinding
+timers (1800 s / 3150 s) and the server identifier (192.168.1.1) that the
+offer hands the client.
+
 ..
-   FIGURE RECIPE (redo with tshark on the server pcap)
-   type:     pcap dissection (tshark)
+   FIGURE RECIPE (redo via the "omnetpp-mcp-sim" skill)
+   type:     inspector (packet content / chunks)
    config:   BasicDHCP                 # ../omnetpp.ini
-   shows:    one DHCPOFFER fully dissected (BOOTP fields + DHCP options)
-   source:   results/BasicDHCP-dhcpServer.pcap, frame 2 (first Offer)
-   capture:  tshark -r <pcap> -Y 'frame.number==2' -O dhcp, rendered in an
-             xterm (DejaVu Sans Mono 11, dark theme), grabbed with `import`
-   stamp:    captured 2026-06, INET 4.6, Wireshark 4.6
+   seed:     default
+   shows:    the server's first DHCPOFFER as a complete Ethernet frame in
+             Qtenv's object inspector — the `content` (SequenceChunk)
+             `chunks[6]`: EthernetPhyHeader, EthernetMacHeader, Ipv4Header,
+             UdpHeader, DhcpMessage (yiaddr=192.168.1.10), EthernetFcs, each
+             chunk at its summary line. Cropped to the chunks band — the
+             packet/chunk metadata rows above are left out.
+   anchor:   server's first DHCPOFFER, caught as the EthernetSignal in flight
+             to switch.eth[0].mac at ~t=1.0977s; the frame's IPv4 src is the
+             server's 192.168.1.1 and the DhcpMessage's yiaddr is 192.168.1.10.
+             If those move, the pool/topology changed.
+   capture:  the full frame only exists in flight (inside the EthernetSignal),
+             and this Qtenv build exposes no logged-packet buffer, so it is
+             caught live. Needs execute_cpp, so launch under opp_sandbox with
+             CPLUS_INCLUDE_PATH set to the Qt6 include dirs (so execute_cpp can
+             #include <QTreeView>). Then:
+             1. set_stop_condition (before_event) firing when the next event is
+                an inet::physicallayer::EthernetSignal named "DHCPOFFER";
+                run_simulation stops with the signal still in the FES.
+             2. execute_cpp: find that signal in the FES, take its
+                getEncapsulatedPacket() (the inet::Packet whole frame), dup() it
+                and re-parent the copy onto dhcpServer (cSoftOwner::take, reached
+                via a derived-class pointer-to-member) for an inspectable path.
+             3. open_inspector(type=object) on the copy, then execute_cpp drives
+                its QTreeView: collapseAll(), expand `content` then its `chunks`
+                node (chunk children left collapsed at their summaries).
+             4. get_inspector_screenshot (was 1080 wide, to fit the chunk
+                summaries incl. DhcpMessage's yiaddr), then PIL-crop to just the
+                `chunks[6]` band (its header through EthernetFcs), dropping the
+                packet/chunk metadata rows above (was ~1036x123).
+   stamp:    captured 2026-06, INET 4.6, OMNeT++ 6.4.0aipre2
 
 The interface table visualizer displays the acquired addresses:
 
@@ -371,11 +421,12 @@ triggering a unicast DHCPREQUEST to the server. The server responds with
 a DHCPACK, extending the lease. This renewal cycle repeats throughout
 the simulation.
 
-Sequence chart of two clients' renewal cycles at T1, captured against
-the wired path client → switch → dhcpServer. Renewal is the client's
-first unicast to the server — the DORA exchange was all broadcast, so
-the server's MAC was never cached. The renewal is therefore preceded by
-an ARP exchange to resolve it, then carries the DHCPREQUEST and DHCPACK:
+Sequence chart of one client's first renewal cycle at T1, captured
+against the wired path client → switch → dhcpServer. Renewal is the
+client's first unicast to the server — the DORA exchange was all
+broadcast, so the server's MAC was never cached. The renewal is
+therefore preceded by an ARP exchange to resolve it, then carries the
+DHCPREQUEST and DHCPACK:
 
 .. figure:: media/lease_renewal.png
    :align: center
@@ -521,8 +572,8 @@ the server confirms the old binding with a DHCPACK — no Discover/Offer:
 LeaseExpiration
 ~~~~~~~~~~~~~~~
 
-This configuration exercises the server's **lease-expiration timer**
-(introduced for RFC 2131 compliance). The pool is sized to exactly one
+This configuration exercises the server's automatic **lease
+expiration**. The pool is sized to exactly one
 address (``maxNumClients = 1``) and the lease time is shortened to 30
 seconds. ``client[0]`` starts up at t=0, takes the only address, and is
 then *crashed* at t=5s — so no DHCPRELEASE is sent and the server
