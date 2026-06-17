@@ -79,6 +79,10 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 # Enable MLDv2 on all nodes
 **.ipv6.hasMld = true
 **.ipv6.mld.typename = "Mldv2"
+# RFC 3810 6.1: each State-Change Report is sent [Robustness Variable] (=2) times.
+# Shrink the host's Unsolicited Report Interval so the retransmission of the join
+# (TO_EX) and leave (TO_IN) changes fires promptly within the 10s run (seed pinned above).
+**.host1.ipv6.mld.unsolicitedReportInterval = 0.5s
 # Disable DAD for fast startup (no 1s+ delay before addresses are ready)
 **.neighbourDiscovery.dupAddrDetectTransmits = 0
 
@@ -152,6 +156,13 @@ Mldv2HostBasicNetwork.host1.ipv6.mld:     New state: INCLUDE().
 %# HOSTv2-03: ... and is reported as a CHANGE_TO_INCLUDE_MODE (TO_IN) record
 %contains: stdout
 Mldv2HostBasicNetwork.host1.ipv6.mld: Sending TO_IN report.
+
+%#--------------------------------------------------------------------------------------------------------------
+%# HOSTv2-04 (RFC 3810 6.1): each host State-Change Report (the join TO_EX and the leave
+%# TO_IN) is sent [Robustness Variable] (=2) times: the immediate report plus one
+%# retransmission within the Unsolicited Report Interval. Assert host1 retransmits.
+%contains: stdout
+Mldv2HostBasicNetwork.host1.ipv6.mld: Retransmitting State-Change Report for group 'ff0e::1:2:3' on interface 'eth0' (1 transmission(s) left).
 
 %#--------------------------------------------------------------------------------------------------------------
 %# Undisposed-object guard: verify no leaked cMessage or cObject at end of run

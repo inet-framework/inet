@@ -38,6 +38,11 @@ network = inet.test.moduletest.lib.TestMLDNetwork
 **.mld.typename = "Mldv2"
 **.multicastForwarding = false
 
+# RFC 3810 6.1: each State-Change Report is sent [Robustness Variable] (=2) times.
+# Shrink the Unsolicited Report Interval so the single retransmission of each change
+# fires deterministically (< 1s, before the next step). RNG seed already pinned above.
+**.mld.unsolicitedReportInterval = 0.5s
+
 **.scenarioManager.script = xmldoc("scenario.xml")
 
 %#--------------------------------------------------------------------------------------------------------------
@@ -66,14 +71,27 @@ TestMld: eth0: groups = ff3e::1 I 2001::1.
 TestMld: eth0: groups = ff3e::1 E 2001::2.
 
 %#
-%# Now check that the Mldv2 module responded to each General Query with a Current-State Report
+%# Now check that the Mldv2 module responded to each General Query with a Current-State
+%# Report. The join at t=2 (INCLUDE()->INCLUDE(2001::1)) and the t=3 filter change
+%# (INCLUDE->EXCLUDE) are State-Change Reports, so each is sent twice (RFC 3810 6.1,
+%# [Robustness Variable] = 2): the immediate ALLOW/TO_EX plus one retransmission,
+%# interleaved with the IS_IN/IS_EX Current-State responses to the General Queries.
 %#
 %postrun-command: grep "TestMld: .*Received" test.out > received.out || true
 %contains-regex: received.out
-TestMld: Received: inet::Mldv2Report<ff3e::1=IS_IN \(2001::1\)>.
-.*
-TestMld: Received: inet::Mldv2Report<ff3e::1=IS_EX \(2001::2\)>.
+TestMld: Received: inet::Mldv2Report<ff3e::1=ALLOW \(2001::1\)>.
+(?:.*\n)*?TestMld: Received: inet::Mldv2Report<ff3e::1=IS_IN \(2001::1\)>.
+(?:.*\n)*?TestMld: Received: inet::Mldv2Report<ff3e::1=ALLOW \(2001::1\)>.
+(?:.*\n)*?TestMld: Received: inet::Mldv2Report<ff3e::1=TO_EX \(2001::2\)>.
+(?:.*\n)*?TestMld: Received: inet::Mldv2Report<ff3e::1=IS_EX \(2001::2\)>.
+(?:.*\n)*?TestMld: Received: inet::Mldv2Report<ff3e::1=TO_EX \(2001::2\)>.
 
+%#
+%# Explicitly assert the State-Change Report retransmission (RFC 3810 6.1).
+%#
+%postrun-command: grep "Retransmitting State-Change Report" test.out > retransmit.out || true
+%contains: retransmit.out
+Retransmitting State-Change Report for group 'ff3e::1' on interface 'eth0' (1 transmission(s) left).
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out

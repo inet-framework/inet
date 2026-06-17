@@ -59,9 +59,11 @@ void Mldv2::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         enabled = par("enabled");
-        // robustnessVariable is consumed only via the NED default() expressions of
+        // robustnessVariable also seeds the NED default() expressions of
         // groupMembershipInterval / otherQuerierPresentInterval / startupQueryCount /
-        // lastMemberQueryCount; it has no separate runtime use.
+        // lastMemberQueryCount; in addition it controls how many times a host
+        // (re)transmits a State-Change Report (RFC 3810 6.1).
+        robustnessVariable = par("robustnessVariable");
         queryInterval = par("queryInterval");
         queryResponseInterval = par("queryResponseInterval");
         groupMembershipInterval = par("groupMembershipInterval");
@@ -190,10 +192,11 @@ void Mldv2::multicastSourceListChanged(NetworkInterface *ie, const Ipv6Address& 
 
     // Check if IF state is different
     if (!(groupData->filter == filter) || !(groupData->sourceAddressList == sourceList.sources)) {
+        vector<Mldv2MulticastAddressRecord> records;
         // INCLUDE(A) -> INCLUDE(B): Send ALLOW(B-A), BLOCK(A-B)
         if (groupData->filter == MLDV2_FM_INCLUDE && filter == MLDV2_FM_INCLUDE && groupData->sourceAddressList != sourceList.sources) {
             EV_DETAIL << "Sending ALLOW/BLOCK report.\n";
-            vector<Mldv2MulticastAddressRecord> records(2);
+            records.resize(2);
             records[0].setGroupAddress(group);
             records[0].setRecordType(MLD_ALLOW_NEW_SOURCES);
             records[0].setSourceList(set_complement(sourceList.sources, groupData->sourceAddressList));
@@ -201,13 +204,11 @@ void Mldv2::multicastSourceListChanged(NetworkInterface *ie, const Ipv6Address& 
             records[1].setRecordType(MLD_BLOCK_OLD_SOURCES);
             records[1].setSourceList(set_complement(groupData->sourceAddressList, sourceList.sources));
             records.erase(remove_if(records.begin(), records.end(), isEmptyRecord), records.end());
-            if (!records.empty())
-                sendGroupReport(ie, records);
         }
         // EXCLUDE(A) -> EXCLUDE(B): Send ALLOW(A-B), BLOCK(B-A)
         else if (groupData->filter == MLDV2_FM_EXCLUDE && filter == MLDV2_FM_EXCLUDE && groupData->sourceAddressList != sourceList.sources) {
             EV_DETAIL << "Sending ALLOW/BLOCK report.\n";
-            vector<Mldv2MulticastAddressRecord> records(2);
+            records.resize(2);
             records[0].setGroupAddress(group);
             records[0].setRecordType(MLD_ALLOW_NEW_SOURCES);
             records[0].setSourceList(set_complement(groupData->sourceAddressList, sourceList.sources));
@@ -215,26 +216,42 @@ void Mldv2::multicastSourceListChanged(NetworkInterface *ie, const Ipv6Address& 
             records[1].setRecordType(MLD_BLOCK_OLD_SOURCES);
             records[1].setSourceList(set_complement(sourceList.sources, groupData->sourceAddressList));
             records.erase(remove_if(records.begin(), records.end(), isEmptyRecord), records.end());
-            if (!records.empty())
-                sendGroupReport(ie, records);
         }
         // INCLUDE(A) -> EXCLUDE(B): Send TO_EX(B)
         else if (groupData->filter == MLDV2_FM_INCLUDE && filter == MLDV2_FM_EXCLUDE) {
             EV_DETAIL << "Sending TO_EX report.\n";
-            vector<Mldv2MulticastAddressRecord> records(1);
+            records.resize(1);
             records[0].setGroupAddress(group);
             records[0].setRecordType(MLD_CHANGE_TO_EXCLUDE_MODE);
             records[0].setSourceList(sourceList.sources);
-            sendGroupReport(ie, records);
         }
         // EXCLUDE(A) -> INCLUDE(B): Send TO_IN(B)
         else if (groupData->filter == MLDV2_FM_EXCLUDE && filter == MLDV2_FM_INCLUDE) {
             EV_DETAIL << "Sending TO_IN report.\n";
-            vector<Mldv2MulticastAddressRecord> records(1);
+            records.resize(1);
             records[0].setGroupAddress(group);
             records[0].setRecordType(MLD_CHANGE_TO_INCLUDE_MODE);
             records[0].setSourceList(sourceList.sources);
+        }
+
+        if (!records.empty()) {
             sendGroupReport(ie, records);
+
+            // RFC 3810 6.1: the State-Change Report is (re)transmitted [Robustness
+            // Variable] times in total, i.e. robustnessVariable - 1 additional times,
+            // at intervals chosen at random from (0, Unsolicited Report Interval].
+            //
+            // If a new change arrives while a retransmission is still pending, the
+            // records above were recomputed from the current (just-updated) interface
+            // state, so they already reflect the merged result: we simply replace the
+            // pending records and restart the retransmission counter (this is the
+            // 6.1 "merge by recomputation" of the old and new pending reports).
+            groupData->pendingRecords = records;
+            groupData->retransmitCount = robustnessVariable - 1;
+            if (groupData->retransmitCount > 0)
+                startTimer(groupData->retransmitTimer, uniform(0, unsolicitedReportInterval));
+            else
+                cancelEvent(groupData->retransmitTimer); // RV<=1: nothing to retransmit, drop any leftover schedule
         }
 
         // Go to new state
@@ -242,11 +259,6 @@ void Mldv2::multicastSourceListChanged(NetworkInterface *ie, const Ipv6Address& 
         groupData->sourceAddressList = sourceList.sources;
         sort(groupData->sourceAddressList.begin(), groupData->sourceAddressList.end());
     }
-
-    // FIXME missing: the report is retransmitted [Robustness Variable] - 1 more times,
-    //       at intervals chosen at random from the range (0, [Unsolicited Report Interval])
-    // FIXME if an interface change occurred when there is a pending report, then
-    //       the groups of the old report and the new report are to be merged.
 }
 
 void Mldv2::configureInterface(NetworkInterface *ie)
@@ -313,6 +325,10 @@ void Mldv2::handleMessageWhenUp(cMessage *msg)
 
             case MLDV2_H_GROUP_TIMER:
                 processHostGroupQueryTimer(msg);
+                break;
+
+            case MLDV2_H_STATE_CHANGE_TIMER:
+                processHostStateChangeTimer(msg);
                 break;
 
             default:
@@ -516,6 +532,28 @@ void Mldv2::processHostGroupQueryTimer(cMessage *msg)
     }
 
     group->queriedSources.clear();
+}
+
+// RFC 3810 6.1: retransmit a pending State-Change Report. The report is sent
+// [Robustness Variable] times in total; this handler covers the extra
+// transmissions after the initial one done in multicastSourceListChanged().
+void Mldv2::processHostStateChangeTimer(cMessage *msg)
+{
+    HostGroupData *group = (HostGroupData *)msg->getContextPointer();
+    NetworkInterface *ie = group->parent->ie;
+    ASSERT(group->retransmitCount > 0);
+    ASSERT(!group->pendingRecords.empty());
+
+    EV_INFO << "Retransmitting State-Change Report for group '" << group->groupAddr
+            << "' on interface '" << ie->getInterfaceName() << "' (" << group->retransmitCount
+            << " transmission(s) left).\n";
+
+    sendGroupReport(ie, group->pendingRecords);
+
+    if (--group->retransmitCount > 0)
+        startTimer(group->retransmitTimer, uniform(0, unsolicitedReportInterval));
+    else
+        group->pendingRecords.clear();
 }
 
 void Mldv2::startTimer(cMessage *timer, double interval)
@@ -1094,11 +1132,15 @@ Mldv2::HostGroupData::HostGroupData(HostInterfaceData *parent, const Ipv6Address
 
     timer = new cMessage("Mldv2 Host Group Timer", MLDV2_H_GROUP_TIMER);
     timer->setContextPointer(this);
+
+    retransmitTimer = new cMessage("Mldv2 Host State-Change Retransmit Timer", MLDV2_H_STATE_CHANGE_TIMER);
+    retransmitTimer->setContextPointer(this);
 }
 
 Mldv2::HostGroupData::~HostGroupData()
 {
     parent->owner->cancelAndDelete(timer);
+    parent->owner->cancelAndDelete(retransmitTimer);
 }
 
 string Mldv2::HostGroupData::getStateInfo() const
