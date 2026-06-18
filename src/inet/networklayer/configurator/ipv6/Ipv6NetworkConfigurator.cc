@@ -449,6 +449,7 @@ void Ipv6NetworkConfigurator::readInterfaceConfiguration(Topology& topology)
         const char *towardsAttr = interfaceElement->getAttribute("towards");
         const char *amongAttr = interfaceElement->getAttribute("among");
         const char *prefixAttr = interfaceElement->getAttribute("prefix");
+        const char *addressAttr = interfaceElement->getAttribute("address");
         const char *mtuAttr = interfaceElement->getAttribute("mtu");
         const char *metricAttr = interfaceElement->getAttribute("metric");
         bool addStaticRouteAttr = getAttributeBoolValue(interfaceElement, "add-static-route", true);
@@ -484,6 +485,12 @@ void Ipv6NetworkConfigurator::readInterfaceConfiguration(Topology& topology)
             if (havePrefixConstraint)
                 parsePrefixTemplate(prefixAttr, prefixTemplate, prefixLength, specifiedGroups);
 
+            // An explicit full address (e.g. "2001:db8:1:1::1") overrides the EUI-64 interface id.
+            bool haveAddressConstraint = !opp_isempty(addressAttr);
+            Ipv6Address explicitAddress;
+            if (haveAddressConstraint)
+                explicitAddress = Ipv6Address(addressAttr);
+
             for (auto& linkInfo : topology.linkInfos) {
                 for (size_t j = 0; j < linkInfo->interfaceInfos.size(); j++) {
                     InterfaceInfo *interfaceInfo = static_cast<InterfaceInfo *>(linkInfo->interfaceInfos[j]);
@@ -504,6 +511,8 @@ void Ipv6NetworkConfigurator::readInterfaceConfiguration(Topology& topology)
                                 interfaceInfo->prefixLength = prefixLength;
                                 interfaceInfo->specifiedGroups = specifiedGroups;
                             }
+                            if (haveAddressConstraint)
+                                interfaceInfo->explicitAddress = explicitAddress;
 
                             interfaceInfo->addStaticRoute = addStaticRouteAttr;
                             interfaceInfo->addDefaultRoute = addDefaultRouteAttr;
@@ -754,11 +763,12 @@ void Ipv6NetworkConfigurator::assignAddresses(Topology& topology)
         if (linkInfo->interfaceInfos.empty())
             continue;
 
-        // Find the prefix template from the first configured interface on this link
+        // Find a prefix source for this link: the first configured interface that carries either a
+        // prefix template or an explicit @address (an explicit address seeds the link prefix too).
         InterfaceInfo *templateInterface = nullptr;
         for (auto& ifInfo : linkInfo->interfaceInfos) {
             InterfaceInfo *interfaceInfo = static_cast<InterfaceInfo *>(ifInfo);
-            if (interfaceInfo->configure && !interfaceInfo->prefix.isUnspecified()) {
+            if (interfaceInfo->configure && (!interfaceInfo->prefix.isUnspecified() || !interfaceInfo->explicitAddress.isUnspecified())) {
                 templateInterface = interfaceInfo;
                 break;
             }
@@ -766,13 +776,14 @@ void Ipv6NetworkConfigurator::assignAddresses(Topology& topology)
         if (!templateInterface)
             continue;
 
-        // Use the stored prefix template and specifiedGroups from readInterfaceConfiguration
-        Ipv6Address prefixTemplate = templateInterface->prefix;
         int prefixLength = templateInterface->prefixLength;
-        uint32_t specifiedGroups = templateInterface->specifiedGroups;
 
-        // Generate a unique prefix by filling in the unspecified groups
-        Ipv6Address linkPrefix = generateUniquePrefix(prefixTemplate, prefixLength, specifiedGroups, assignedPrefixes);
+        // Derive the link prefix from the prefix template if present, otherwise from the explicit address.
+        Ipv6Address linkPrefix;
+        if (!templateInterface->prefix.isUnspecified())
+            linkPrefix = generateUniquePrefix(templateInterface->prefix, prefixLength, templateInterface->specifiedGroups, assignedPrefixes);
+        else
+            linkPrefix = templateInterface->explicitAddress.getPrefix(prefixLength);
         assignedPrefixes.push_back(linkPrefix);
 
         EV_DEBUG << "Link gets prefix " << linkPrefix << "/" << prefixLength << endl;
@@ -786,27 +797,37 @@ void Ipv6NetworkConfigurator::assignAddresses(Topology& topology)
             interfaceInfo->prefix = linkPrefix;
             interfaceInfo->prefixLength = prefixLength;
 
-            // Derive global address: prefix + interface token (IID)
-            NetworkInterface *networkInterface = interfaceInfo->networkInterface;
-            InterfaceToken token = networkInterface->getInterfaceToken();
-
-            // Build global address from prefix and IID
-            const uint32_t *prefixRaw = linkPrefix.words();
-            uint32_t addr[4];
-            addr[0] = prefixRaw[0];
-            addr[1] = prefixRaw[1];
-            // The lower 64 bits come from the interface token
-            // InterfaceToken: normal() = upper 32 bits of IID, low() = lower 32 bits
-            if (token.length() > 0) {
-                addr[2] = token.normal();
-                addr[3] = token.low();
+            if (!interfaceInfo->explicitAddress.isUnspecified()) {
+                // An explicit @address overrides the EUI-64 interface id; it must lie on the link prefix.
+                if (interfaceInfo->explicitAddress.getPrefix(prefixLength) != linkPrefix)
+                    throw cRuntimeError("Explicit address %s on %s is not within the link prefix %s/%d",
+                            interfaceInfo->explicitAddress.str().c_str(), interfaceInfo->getFullPath().c_str(),
+                            linkPrefix.str().c_str(), prefixLength);
+                interfaceInfo->globalAddress = interfaceInfo->explicitAddress;
             }
             else {
-                // Fallback: use interface ID to generate a unique IID
-                addr[2] = 0;
-                addr[3] = networkInterface->getInterfaceId();
+                // Derive global address: prefix + interface token (IID)
+                NetworkInterface *networkInterface = interfaceInfo->networkInterface;
+                InterfaceToken token = networkInterface->getInterfaceToken();
+
+                // Build global address from prefix and IID
+                const uint32_t *prefixRaw = linkPrefix.words();
+                uint32_t addr[4];
+                addr[0] = prefixRaw[0];
+                addr[1] = prefixRaw[1];
+                // The lower 64 bits come from the interface token
+                // InterfaceToken: normal() = upper 32 bits of IID, low() = lower 32 bits
+                if (token.length() > 0) {
+                    addr[2] = token.normal();
+                    addr[3] = token.low();
+                }
+                else {
+                    // Fallback: use interface ID to generate a unique IID
+                    addr[2] = 0;
+                    addr[3] = networkInterface->getInterfaceId();
+                }
+                interfaceInfo->globalAddress = Ipv6Address(addr[0], addr[1], addr[2], addr[3]);
             }
-            interfaceInfo->globalAddress = Ipv6Address(addr[0], addr[1], addr[2], addr[3]);
 
             EV_DEBUG << "  Interface " << interfaceInfo->getFullPath()
                      << " gets address " << interfaceInfo->globalAddress << "/" << prefixLength << endl;

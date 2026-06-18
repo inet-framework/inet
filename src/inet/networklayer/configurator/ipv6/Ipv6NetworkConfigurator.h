@@ -60,6 +60,7 @@ class INET_API Ipv6NetworkConfigurator : public L3NetworkConfiguratorBase, publi
         Ipv6Address prefix;            // assigned /64 prefix for this interface's link
         int prefixLength = 64;         // prefix length (typically 64)
         uint32_t specifiedGroups = 0;  // bitmask: bit i (from MSB) = 1 means 16-bit group i is specified in the prefix template
+        Ipv6Address explicitAddress;   // full address from the @address attribute; unspecified = not set (derive the IID from the interface token)
         Ipv6Address globalAddress;     // the full global address (prefix + IID)
 
         // RA/NDP parameters from XML (sentinel -1 = not specified, use module default)
