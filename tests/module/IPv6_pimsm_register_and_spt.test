@@ -1,0 +1,148 @@
+%description:
+Tests IPv6 PIM-SM (RFC 4601/7761) over IPv6: the Rendezvous Point machinery
+(Register/Register-Stop), the shared (*,G) tree, and the switchover to the
+(S,G) shortest-path tree.
+
+Topology (all links Ethernet point-to-point); the routers form a triangle so the
+shortest path from the receiver side to the source bypasses the RP:
+
+    Source -- DR_S ===== RP
+                \\       //
+                 == DR_R -- Receiver
+
+DR_S is the source's designated router, RP is the statically configured
+rendezvous point, DR_R is the receiver's designated router. All three routers run
+PIM-SM over IPv6 (addressFamily "ipv6") with link-local PIM addressing (RFC 7761).
+Receiver (behind DR_R) is an MLD listener of the global-scope group ff0e::8 and
+joins before the Source starts.
+
+Expected PIM-SM behavior, all over IPv6:
+  - Receiver's DR_R sends a (*,G) Join toward the RP, building the shared tree.
+  - When the Source sends, DR_S has no (S,G) state, so it encapsulates the data
+    into PIM Register messages unicast to the RP.
+  - The RP decapsulates and forwards the data down the shared tree to the
+    Receiver, joins the source tree with a (S,G) Join toward the Source, and
+    sends a Register-Stop back to DR_S.
+  - The last-hop DR_R switches to the SPT, sending a (S,G) Join toward the Source.
+  - The Receiver receives (almost) the whole stream.
+
+This exercises, over IPv6: PIM neighbor discovery on link-local addresses, the
+MLD-driven shared-tree join (ipv6MulticastGroupRegistered), Register
+encapsulation to the RP, RP decapsulation/forwarding, Register-Stop, and the
+(S,G) SPT join -- while correctly ignoring the link-local control groups
+(ff02::*) the IPv6 stack joins on every interface.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.node.ipv6.MulticastRouter6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network PimSmTest6
+{
+    types:
+        channel ethernetline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        DR_S: MulticastRouter6;
+        RP: MulticastRouter6;
+        DR_R: MulticastRouter6;
+        Source: StandardHost6;
+        Receiver: StandardHost6;
+        configurator: Ipv6FlatNetworkConfigurator;
+    connections:
+        Source.ethg++ <--> ethernetline <--> DR_S.ethg++;
+        DR_S.ethg++ <--> ethernetline <--> RP.ethg++;
+        DR_S.ethg++ <--> ethernetline <--> DR_R.ethg++;
+        RP.ethg++ <--> ethernetline <--> DR_R.ethg++;
+        DR_R.ethg++ <--> ethernetline <--> Receiver.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = PimSmTest6
+sim-time-limit = 60s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+ned-path = .;../../../../src
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+# All PIM interfaces run in sparse mode.
+**.pimConfig = xml("<config><interface mode=\"sparse\"/></config>")
+
+# Statically configured RP. The RP node is reachable at this global address
+# (assigned deterministically by Ipv6FlatNetworkConfigurator for this topology).
+**.pim.pimSM.RP = "aaaa:1:65:0:8aa:ff:fe00:4"
+
+# MLD on every node (hosts become listeners; routers learn local membership).
+**.ipv6.hasMld = true
+
+# Fast deterministic startup: skip Duplicate Address Detection.
+**.neighbourDiscovery.dupAddrDetectTransmits = 0
+
+# Source behind DR_S: send to the IPv6 group ff0e::8 with hop limit > 1.
+*.Source.numApps = 1
+*.Source.app[0].typename = "UdpBasicApp"
+*.Source.app[0].destAddresses = "ff0e::8"
+*.Source.app[0].destPort = 1000
+*.Source.app[0].messageLength = 64B
+*.Source.app[0].timeToLive = 10
+*.Source.app[0].startTime = 20s
+*.Source.app[0].sendInterval = 1s
+*.Source.app[0].stopTime = 39.5s    # sends at t=20s..39s -> 20 packets
+
+# Receiver behind DR_R: persistent MLD listener of ff0e::8, joins from the start.
+*.Receiver.numApps = 1
+*.Receiver.app[0].typename = "UdpSink"
+*.Receiver.app[0].localPort = 1000
+*.Receiver.app[0].multicastGroup = "ff0e::8"
+
+# Ethernet queues
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue"
+**.eth[*].queue.dataQueue.packetCapacity = 100
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%# the source's DR encapsulates the data into PIM Register messages to the RP
+%contains: stdout
+encapsulating data packet into Register packet and sending to RP
+%#--------------------------------------------------------------------------------------------------------------
+%# the RP halts registering with a Register-Stop
+%contains: stdout
+pimSM::sendPIMRegisterStop
+%#--------------------------------------------------------------------------------------------------------------
+%# the receiver's DR builds the shared tree with a (*,G) Join toward the RP
+%contains: stdout
+Sending Join(S=*, G=ff0e::8)
+%#--------------------------------------------------------------------------------------------------------------
+%# the source tree (SPT) is built with a (S,G) Join naming the real source
+%contains: stdout
+Sending Join(S=aaaa:
+%#--------------------------------------------------------------------------------------------------------------
+%# PIM neighbors are learned on their link-local addresses (RFC 7761)
+%contains: stdout
+Received PIM Hello from neighbor: interface=eth1 address=fe80:
+%#--------------------------------------------------------------------------------------------------------------
+%# the receiver receives the stream (a couple of datagrams are lost during the
+%# register/shared-tree/SPT bring-up transient)
+%contains: stdout
+Receiver.app[0]: received 19 packets
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

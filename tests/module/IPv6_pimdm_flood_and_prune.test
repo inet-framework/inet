@@ -33,23 +33,9 @@ explicit upstream Prune of a branch with no receiver.
 %file: test.ned
 
 import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
-import inet.node.inet.MulticastRouter;
+import inet.node.ipv6.MulticastRouter6;
 import inet.node.ipv6.StandardHost6;
 import ned.DatarateChannel;
-
-// IPv6 PIM-DM router: MulticastRouter (PIM + multicast forwarding on) with the
-// PIM data plane switched to IPv6. The dormant IPv4 stack is kept only so the
-// always-present (unused) PIM-SM submodule can bind an IPv4 routing table; it is
-// left unconfigured and inert (no IPv4 configurator, IPv4 IGMP off in the ini).
-module MulticastRouter6 extends MulticastRouter
-{
-    parameters:
-        hasIpv6 = default(true);
-        hasIpv4 = default(true);
-        pim.pimDM.addressFamily = "ipv6";
-        pim.pimSplitter.addressFamily = "ipv6";
-        pim.pimDM.routingTableModule = "^.^.ipv6.routingTable";
-}
 
 network PimDmTest6
 {
@@ -99,10 +85,6 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 # Fast deterministic startup: skip Duplicate Address Detection.
 **.neighbourDiscovery.dupAddrDetectTransmits = 0
-
-# Keep the routers' dormant IPv4 stack inert (PIM-SM binding only).
-**.ipv4.configurator.typename = ""
-**.ipv4.igmp.enabled = false
 
 # source: send to the IPv6 group ff0e::1 with hop limit > 1 so routers forward.
 *.source.numApps = 1
