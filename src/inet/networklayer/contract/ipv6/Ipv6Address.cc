@@ -373,6 +373,29 @@ int Ipv6Address::getMulticastScope() const
     return (d[0] >> 16) & 0x0F;
 }
 
+Ipv6Address Ipv6Address::getEmbeddedRpAddress() const
+{
+    // RFC 3956 section 2: an embedded-RP multicast address has the layout
+    //   FF | flgs(=0x7) | scop | rsvd | RIID | plen | network prefix(64b) | group id(32b)
+    // in the first 32-bit word d[0]:  flgs=(d[0]>>20)&0xF, scop=(d[0]>>16)&0xF,
+    //   rsvd=(d[0]>>12)&0xF, RIID=(d[0]>>8)&0xF, plen=d[0]&0xFF; the network prefix
+    //   occupies d[1]:d[2]. The RP address is the high plen bits of that prefix with
+    //   its interface id set to RIID (RP = prefix::RIID).
+    if (!isEmbeddedRp())
+        throw cRuntimeError("Ipv6Address::getEmbeddedRpAddress(): %s is not an embedded-RP multicast address", str().c_str());
+
+    unsigned int rsvd = (d[0] >> 12) & 0x0F;
+    unsigned int riid = (d[0] >> 8) & 0x0F;
+    unsigned int plen = d[0] & 0xFF;
+    if (rsvd != 0 || riid == 0 || plen < 1 || plen > 64)
+        throw cRuntimeError("Ipv6Address::getEmbeddedRpAddress(): %s has an invalid RFC 3956 encoding (rsvd=%u, RIID=%u, plen=%u)",
+                str().c_str(), rsvd, riid, plen);
+
+    Ipv6Address rp = Ipv6Address(d[1], d[2], 0, 0).getPrefix(plen);
+    rp.d[3] = (rp.d[3] & 0xFFFFFFF0u) | riid;
+    return rp;
+}
+
 MacAddress Ipv6Address::mapToMulticastMacAddress() const
 {
     ASSERT(isMulticast());

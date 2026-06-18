@@ -312,6 +312,22 @@ class INET_API Ipv6Address
      */
     bool isSsm() const { return isMulticast() && ((d[0] >> 20) & 0x0F) == 0x03; }
 
+    /**
+     * Returns true if this is an embedded-RP IPv6 multicast address (RFC 3956),
+     * i.e. it is in the FF7x::/12 range: a multicast address whose 4-bit flags
+     * field equals 0x7 (R=1, P=1, T=1), for any scope x. The rendezvous point
+     * address is encoded in the address itself; see getEmbeddedRpAddress().
+     */
+    bool isEmbeddedRp() const { return isMulticast() && ((d[0] >> 20) & 0x0F) == 0x07; }
+
+    /**
+     * Extracts the encoded rendezvous point (RP) address from an embedded-RP
+     * multicast address (RFC 3956, section 2): the RP is formed from the
+     * network-prefix field (the high plen bits) with its interface id set to
+     * the 4-bit RIID. Throws if this is not a valid embedded-RP address.
+     */
+    Ipv6Address getEmbeddedRpAddress() const;
+
     MacAddress mapToMulticastMacAddress() const;
 };
 

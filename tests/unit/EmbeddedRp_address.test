@@ -1,0 +1,48 @@
+%description:
+Unit test for RFC 3956 embedded-RP IPv6 multicast addresses:
+Ipv6Address::isEmbeddedRp() (the FF7x::/12 range) and getEmbeddedRpAddress()
+(decode the rendezvous point address embedded in the group address: the high
+plen bits of the network-prefix field, with the interface id set to RIID).
+
+%includes:
+#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
+
+using namespace inet;
+
+%global:
+
+static bool throwsForRp(const char *addr)
+{
+    try { Ipv6Address(addr).getEmbeddedRpAddress(); return false; }
+    catch (const cRuntimeError&) { return true; }
+}
+
+%activity:
+
+// === isEmbeddedRp() : flags nibble == 0x7 (any scope) ===
+ASSERT(Ipv6Address("ff7e::1").isEmbeddedRp());       // global-scope embedded-RP
+ASSERT(Ipv6Address("ff75::1").isEmbeddedRp());       // site-scope embedded-RP
+ASSERT(!Ipv6Address("ff0e::1").isEmbeddedRp());      // ASM (flags 0)
+ASSERT(!Ipv6Address("ff3e::1").isEmbeddedRp());      // SSM (flags 3)
+ASSERT(!Ipv6Address("ff02::2").isEmbeddedRp());      // link-local control
+ASSERT(!Ipv6Address("2001:db8::1").isEmbeddedRp());  // unicast
+
+// === getEmbeddedRpAddress() decoding (RFC 3956 section 2) ===
+// group = FF7[scop]:[rsvd RIID][plen]:<network prefix>:<group id>
+// plen=0x40=64, RIID=1, prefix 2001:db8:0:1::/64  ->  RP 2001:db8:0:1::1
+ASSERT(Ipv6Address("ff7e:140:2001:db8:0:1:0:8").getEmbeddedRpAddress() == Ipv6Address("2001:db8:0:1::1"));
+// plen=0x30=48, RIID=2, prefix 2001:db8:abcd::/48  ->  RP 2001:db8:abcd::2
+ASSERT(Ipv6Address("ff7e:230:2001:db8:abcd:0:0:9").getEmbeddedRpAddress() == Ipv6Address("2001:db8:abcd::2"));
+// plen=0x20=32, RIID=f, prefix 2001:db8::/32  ->  RP 2001:db8::f
+ASSERT(Ipv6Address("ff7e:f20:2001:db8::a").getEmbeddedRpAddress() == Ipv6Address("2001:db8::f"));
+
+// === invalid encodings throw ===
+ASSERT(throwsForRp("ff7e:40:2001:db8:0:1:0:8"));     // RIID == 0
+ASSERT(throwsForRp("ff7e:180:2001:db8:0:1:0:8"));    // plen == 128 (> 64)
+ASSERT(throwsForRp("ff7e:1140:2001:db8:0:1:0:8"));   // rsvd nibble != 0
+ASSERT(throwsForRp("ff0e::1"));                      // not an embedded-RP address
+
+EV << "All embedded-RP address checks passed.\n";
+
+%contains: stdout
+All embedded-RP address checks passed.
