@@ -451,6 +451,11 @@ void Ipv4InterfaceData::setMulticastListeners(Ipv4Address multicastAddress, Mcas
             removeRouterGroupData(multicastAddress);
 
         changed1(F_MULTICAST_LISTENERS);
+
+        // notify source-filter-aware listeners (e.g. PIM-SM SSM) that the set of
+        // source-specific listeners on this interface changed
+        Ipv4MulticastGroupSourceInfo info(getNetworkInterface(), multicastAddress, Ipv4MulticastSourceList(filterMode, sourceList));
+        check_and_cast<cModule *>(getNetworkInterface()->getInterfaceTable())->emit(ipv4MulticastListenerChangeSignal, &info);
     }
 }
 

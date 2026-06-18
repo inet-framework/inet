@@ -42,8 +42,10 @@ simple InterfaceTable extends SimpleModule
         @signal[ipv4McastChange](type=inet::Ipv4MulticastGroupSourceInfo);
         @signal[ipv4MulticastGroupRegistered](type=inet::Ipv4MulticastGroupInfo);
         @signal[ipv4MulticastGroupUnregistered](type=inet::Ipv4MulticastGroupInfo);
+        @signal[ipv4MulticastListenerChange](type=inet::Ipv4MulticastGroupSourceInfo);
         @signal[ipv6MulticastGroupJoined](type=inet::Ipv6MulticastGroupInfo);
         @signal[ipv6MulticastGroupLeft](type=inet::Ipv6MulticastGroupInfo);
+        @signal[ipv6MulticastListenerChange](type=inet::Ipv6MulticastGroupSourceInfo);
         @signal[ipv6AddressAssigned](type=inet::Ipv6AddressInfo);
         @signal[ipv6AddressRemoved](type=inet::Ipv6AddressInfo);
 }

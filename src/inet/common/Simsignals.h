@@ -60,6 +60,7 @@ extern INET_API simsignal_t // admin
     ipv4MulticastGroupLeftSignal,
     ipv4MulticastGroupRegisteredSignal,
     ipv4MulticastGroupUnregisteredSignal,
+    ipv4MulticastListenerChangeSignal, // router's source-filtered listener set changed (for PIM-SM SSM)
 
 // for PIM
     ipv4NewMulticastSignal,
@@ -80,6 +81,7 @@ extern INET_API simsignal_t // admin
     ipv6MulticastGroupRegisteredSignal,
     ipv6MulticastGroupUnregisteredSignal,
     ipv6MulticastChangeSignal, // host's source-filtered multicast membership changed (for MLDv2)
+    ipv6MulticastListenerChangeSignal, // router's source-filtered listener set changed (for PIM-SM SSM)
 
 // for PIM (IPv6)
     ipv6NewMulticastSignal,

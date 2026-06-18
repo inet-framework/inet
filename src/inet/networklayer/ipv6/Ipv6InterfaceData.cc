@@ -772,6 +772,11 @@ void Ipv6InterfaceData::setMulticastListeners(Ipv6Address multicastAddress, Mcas
             removeRouterGroupData(multicastAddress);
 
         changed1(F_MULTICAST_LISTENERS);
+
+        // notify source-filter-aware listeners (e.g. PIM-SM SSM) that the set of
+        // source-specific listeners on this interface changed
+        Ipv6MulticastGroupSourceInfo info(getNetworkInterface(), multicastAddress, Ipv6MulticastSourceList(filterMode, sourceList));
+        check_and_cast<cModule *>(getNetworkInterface()->getInterfaceTable())->emit(ipv6MulticastListenerChangeSignal, &info);
     }
 }
 
