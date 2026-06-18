@@ -235,6 +235,7 @@ class INET_API PimDm : public PimBase, protected cListener
     static NetworkInterface *getInInterface(IMulticastRoute *route);
     static bool hasOutInterface(IMulticastRoute *route, const NetworkInterface *ie);
     static unsigned int getAdminDist(IRoute *route);
+    bool isRoutableMulticastSource(const L3Address& srcAddr) const;
     void getMulticastPacketAddresses(cObject *obj, L3Address& srcAddr, L3Address& destAddr, unsigned short& ttl) const;
     void getMulticastGroupInfo(cObject *obj, NetworkInterface *& ie, L3Address& groupAddress) const;
 

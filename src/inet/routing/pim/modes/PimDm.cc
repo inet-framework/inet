@@ -239,6 +239,8 @@ void PimDm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
         L3Address srcAddr, destAddr;
         unsigned short ttl;
         getMulticastPacketAddresses(obj, srcAddr, destAddr, ttl);
+        if (!isRoutableMulticastSource(srcAddr))
+            return; // e.g. an MLD report from a link-local source addressed to the group: not a routable (S,G)
         pimInterface = getIncomingInterface(check_and_cast<NetworkInterface *>(details));
         if (pimInterface && pimInterface->getMode() == PimInterface::DenseMode)
             unroutableMulticastPacketArrived(srcAddr, destAddr, ttl);
@@ -266,6 +268,8 @@ void PimDm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
         L3Address srcAddr, destAddr;
         unsigned short ttl;
         getMulticastPacketAddresses(obj, srcAddr, destAddr, ttl);
+        if (!isRoutableMulticastSource(srcAddr))
+            return; // no (S,G) state is created for link-local sources (see above)
         pimInterface = getIncomingInterface(check_and_cast<NetworkInterface *>(details));
         if (pimInterface && pimInterface->getMode() == PimInterface::DenseMode)
             multicastPacketArrivedOnNonRpfInterface(destAddr, srcAddr, pimInterface->getInterfaceId());
@@ -275,6 +279,8 @@ void PimDm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
         L3Address srcAddr, destAddr;
         unsigned short ttl;
         getMulticastPacketAddresses(obj, srcAddr, destAddr, ttl);
+        if (!isRoutableMulticastSource(srcAddr))
+            return; // no (S,G) state is created for link-local sources (see above)
         pimInterface = getIncomingInterface(check_and_cast<NetworkInterface *>(details));
         if (pimInterface && pimInterface->getMode() == PimInterface::DenseMode)
             multicastPacketArrivedOnRpfInterface(pimInterface->getInterfaceId(), destAddr, srcAddr, ttl);
@@ -1712,6 +1718,16 @@ void PimDm::sendToIP(Packet *packet, L3Address srcAddr, L3Address destAddr, int 
     packet->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::pim);
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(networkProtocol);
     packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outInterfaceId);
+    // RFC 7761: PIM-over-IPv6 messages are sourced from the interface link-local
+    // address. When the caller leaves the source unspecified, fill in the
+    // outgoing interface's link-local address so neighbors learn this router by
+    // the same address used as the RPF next hop (otherwise IPv6 would substitute
+    // the global preferred source). For IPv4 the source is left as given.
+    if (isIpv6() && srcAddr.isUnspecified()) {
+        NetworkInterface *outIE = ift->getInterfaceById(outInterfaceId);
+        if (outIE)
+            srcAddr = getInterfaceAddress(outIE);
+    }
     auto addresses = packet->addTagIfAbsent<L3AddressReq>();
     addresses->setSrcAddress(srcAddr);
     addresses->setDestAddress(destAddr);
@@ -1886,6 +1902,19 @@ void PimDm::clearRoutes()
     for (auto& elem : routes)
         delete elem.second;
     routes.clear();
+}
+
+bool PimDm::isRoutableMulticastSource(const L3Address& srcAddr) const
+{
+    // An IPv6 multicast packet sourced from a link-local address (e.g. an MLD
+    // Multicast Listener Report, sent from fe80::/10 to the group it reports)
+    // does not define a routable (S,G): link-local sources are not reachable by
+    // a unicast route, so no RPF tree can be built toward them (RFC 4291). IPv4
+    // has no such case here, so it is always treated as routable, preserving the
+    // existing IPv4 behavior.
+    if (isIpv6())
+        return !srcAddr.toIpv6().isLinkLocal();
+    return true;
 }
 
 void PimDm::getMulticastPacketAddresses(cObject *obj, L3Address& srcAddr, L3Address& destAddr, unsigned short& ttl) const

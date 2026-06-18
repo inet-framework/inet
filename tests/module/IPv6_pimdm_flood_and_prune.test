@@ -1,0 +1,152 @@
+%description:
+Tests IPv6 PIM-DM (RFC 3973) flood-and-prune over IPv6.
+
+Topology (all links are Ethernet point-to-point):
+
+                       recv
+                        |
+    source -- R1 -- R2 -+
+               |
+               +-- R3 -- idleHost
+
+The source behind R1 sends UDP datagrams to the global-scope IPv6 multicast
+group ff0e::1 (hop limit > 1). All three routers run PIM-DM over IPv6
+(addressFamily "ipv6") and form PIM neighborships with Hellos sourced from their
+link-local addresses. recv (behind R2) is an MLD listener of ff0e::1; idleHost
+(behind R3) never joins.
+
+Expected PIM-DM behavior:
+  - recv RECEIVES the stream: R1 floods to R2 and R3; R2 has a connected receiver
+    (learned via MLD -> ipv6MulticastGroupRegistered -> PIM "receiver added"),
+    so the (S,G) tree forwards end-to-end to recv.
+  - R3 floods the first datagram, finds no receiver (its only downstream is
+    idleHost, which never joined), so its outgoing interface list becomes null
+    and R3 sends a Prune(S,G) upstream to R1. The R1->R3 branch stops forwarding
+    and idleHost receives nothing.
+
+This exercises, over IPv6: PIM neighbor discovery on link-local addresses, the
+MLD-driven receiver-added event (the ipv6MulticastGroupRegistered signal now
+emitted by Ipv6InterfaceData), flood-and-forward end-to-end delivery, and an
+explicit upstream Prune of a branch with no receiver.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.node.inet.MulticastRouter;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+// IPv6 PIM-DM router: MulticastRouter (PIM + multicast forwarding on) with the
+// PIM data plane switched to IPv6. The dormant IPv4 stack is kept only so the
+// always-present (unused) PIM-SM submodule can bind an IPv4 routing table; it is
+// left unconfigured and inert (no IPv4 configurator, IPv4 IGMP off in the ini).
+module MulticastRouter6 extends MulticastRouter
+{
+    parameters:
+        hasIpv6 = default(true);
+        hasIpv4 = default(true);
+        pim.pimDM.addressFamily = "ipv6";
+        pim.pimSplitter.addressFamily = "ipv6";
+        pim.pimDM.routingTableModule = "^.^.ipv6.routingTable";
+}
+
+network PimDmTest6
+{
+    types:
+        channel ethernetline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator;
+        source: StandardHost6;
+        R1: MulticastRouter6;
+        R2: MulticastRouter6;
+        R3: MulticastRouter6;
+        recv: StandardHost6;
+        idleHost: StandardHost6;
+    connections:
+        source.ethg++ <--> ethernetline <--> R1.ethg++;
+        R1.ethg++ <--> ethernetline <--> R2.ethg++;
+        R1.ethg++ <--> ethernetline <--> R3.ethg++;
+        R2.ethg++ <--> ethernetline <--> recv.ethg++;
+        R3.ethg++ <--> ethernetline <--> idleHost.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = PimDmTest6
+sim-time-limit = 60s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+ned-path = .;../../../../src
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+# All PIM interfaces run in dense mode.
+**.pimConfig = xml("<config><interface mode=\"dense\"/></config>")
+
+# MLD on every node (hosts become listeners; routers learn local membership).
+**.ipv6.hasMld = true
+
+# Fast deterministic startup: skip Duplicate Address Detection.
+**.neighbourDiscovery.dupAddrDetectTransmits = 0
+
+# Keep the routers' dormant IPv4 stack inert (PIM-SM binding only).
+**.ipv4.configurator.typename = ""
+**.ipv4.igmp.enabled = false
+
+# source: send to the IPv6 group ff0e::1 with hop limit > 1 so routers forward.
+*.source.numApps = 1
+*.source.app[0].typename = "UdpBasicApp"
+*.source.app[0].destAddresses = "ff0e::1"
+*.source.app[0].destPort = 1000
+*.source.app[0].messageLength = 64B
+*.source.app[0].timeToLive = 10
+*.source.app[0].startTime = 20s
+*.source.app[0].sendInterval = 1s
+*.source.app[0].stopTime = 29.5s    # sends at t=20s..29s -> 10 packets
+
+# recv: persistent MLD listener of ff0e::1 behind R2; must receive the stream.
+*.recv.numApps = 1
+*.recv.app[0].typename = "UdpSink"
+*.recv.app[0].localPort = 1000
+*.recv.app[0].multicastGroup = "ff0e::1"
+
+# idleHost: never joins -> its branch is pruned and it receives nothing.
+*.idleHost.numApps = 1
+*.idleHost.app[0].typename = "UdpSink"
+*.idleHost.app[0].localPort = 1000
+
+# Ethernet queues
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue"
+**.eth[*].queue.dataQueue.packetCapacity = 100
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%# the receiver behind R2 must receive all 10 datagrams (flood-and-forward works end-to-end)
+%contains: stdout
+recv.app[0]: received 10 packets
+%#--------------------------------------------------------------------------------------------------------------
+%# the branch with no listener must be pruned (R1 sends a Prune on the idleHost interface)
+%contains: stdout
+Sending Prune(S=
+%#--------------------------------------------------------------------------------------------------------------
+%# PIM neighbors are learned on their link-local addresses (RFC 7761)
+%contains: stdout
+Received PIM Hello from neighbor: interface=eth1 address=fe80:
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

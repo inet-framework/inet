@@ -154,7 +154,14 @@ void PimBase::sendHelloPacket(PimInterface *pimInterface)
     pk->addTag<InterfaceReq>()->setInterfaceId(pimInterface->getInterfaceId());
     pk->addTag<DispatchProtocolInd>()->setProtocol(&Protocol::pim);
     pk->addTag<DispatchProtocolReq>()->setProtocol(networkProtocol);
-    pk->addTag<L3AddressReq>()->setDestAddress(allPimRoutersMcast);
+    auto addresses = pk->addTag<L3AddressReq>();
+    // RFC 7761: PIM-over-IPv6 messages are sourced from the interface link-local
+    // address. Set it explicitly, otherwise IPv6 would fill in the (global)
+    // preferred source, and neighbors would then learn this router by its global
+    // address -- inconsistent with the link-local RPF next hop used for Joins/Grafts.
+    if (isIpv6())
+        addresses->setSrcAddress(getInterfaceAddress(pimInterface->getInterfacePtr()));
+    addresses->setDestAddress(allPimRoutersMcast);
     pk->addTag<HopLimitReq>()->setHopLimit(1);
 
     emit(sentHelloPkSignal, pk);
@@ -244,8 +251,14 @@ bool PimBase::AssertMetric::operator<(const AssertMetric& other) const
 
 L3Address PimBase::getInterfaceAddress(NetworkInterface *ie) const
 {
+    // RFC 7761/RFC 3973 over IPv6: PIM uses the interface's link-local address as
+    // its own address on the link -- as the Hello source and as the Encoded-Unicast
+    // upstream-neighbor/assert/originator address. The link-local address is also
+    // what unicast next hops resolve to (ND), so the RPF neighbor learned from a
+    // unicast route matches the neighbor's PIM address. (For IPv4 it is the
+    // interface IPv4 address, unchanged.)
     if (isIpv6())
-        return ie->getProtocolData<Ipv6InterfaceData>()->getPreferredAddress();
+        return ie->getProtocolData<Ipv6InterfaceData>()->getLinkLocalAddress();
     else
         return ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
 }
