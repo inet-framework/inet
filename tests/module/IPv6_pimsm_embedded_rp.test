@@ -1,51 +1,56 @@
 %description:
-Tests IPv6 PIM-SM embedded-RP (RFC 3956): a multicast group in the FF7x::/12 range
-carries its rendezvous point address inside the group address, so PIM-SM derives
-the RP per group and builds the shared (*,G) tree toward it WITH NO statically
-configured RP.
+Tests IPv6 PIM-SM embedded-RP (RFC 3956) end-to-end: a multicast group in the
+FF7x::/12 range carries its rendezvous point address inside the group address, so
+PIM-SM derives the RP per group and builds the shared (*,G) tree toward it WITH NO
+statically configured RP -- and a real router that OWNS the encoded RP address
+actually forwards the multicast stream.
 
-Topology (Ethernet point-to-point):
+Topology (the same triangle as the examples/pim/sm/ipv6 demo, so the shortest path
+from the receiver side to the source does not go through the RP):
 
-    Receiver -- DR_R -- RP_router -- Stub
+    Source --- DR_S ===== RP
+                 \\       //
+                  \\     //
+                   == DR_R --- Receiver
 
-The Ipv6FlatNetworkConfigurator gives the RP_router--Stub link the prefix
-aaaa:2:66::/64, which is routable from DR_R via RP_router. The receiver joins the
-embedded-RP group ff7e:140:aaaa:2:66::8, which encodes RIID=1, plen=64, prefix
-aaaa:2:66:0::/64 -- i.e. RP = aaaa:2:66:0::1.  No pim.RP is configured anywhere.
+The group is ff7e:140:aaaa:2:66::8, which encodes RIID=1, plen=64, prefix
+aaaa:2:66::/64 -- i.e. RP = aaaa:2:66::1. The Ipv6NetworkConfigurator gives RP's
+interface toward DR_R exactly that address (prefix aaaa:2:66::/64, address
+aaaa:2:66::1), so RP genuinely owns the embedded RP address; every other link gets
+an auto-assigned 2001:db8:N::/64 prefix and the configurator's autorouting makes
+aaaa:2:66::/64 reachable from everywhere. (DR_S is purely the source's designated
+router; the RP sits on the receiver side, so the source's stream reaches the RP
+via Register and the RP forwards it down the shared tree.) No pim.RP is configured
+anywhere.
 
-Expected: DR_R derives the embedded RP from the group, finds the route toward it,
-and sends a PIM-SM Join(*, ff7e:140:aaaa:2:66::8) upstream toward RP_router --
-all without a static RP. (Full data-plane forwarding through a router that *owns*
-the prefix::RIID RP address is not testable in INET, which cannot assign such an
-address; the RP-derivation algorithm itself is covered by the EmbeddedRp_address
-unit test.)
+Expected: with no static RP, each router warns it will serve only SSM/embedded-RP
+groups; DR_R derives the embedded RP and sends Join(*, ff7e:140:aaaa:2:66::8)
+toward it; the Source's stream reaches the RP (via Register), the RP forwards it
+down the shared tree, and the Receiver actually receives packets.
 
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
-import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
 import inet.node.ipv6.MulticastRouter6;
 import inet.node.ipv6.StandardHost6;
-import ned.DatarateChannel;
 
 network PimSmEmbeddedRpTest6
 {
-    types:
-        channel ethernetline extends DatarateChannel
-        {
-            delay = 0.1us;
-            datarate = 100Mbps;
-        }
     submodules:
+        Source: StandardHost6;
+        DR_S: MulticastRouter6;   // source's designated router
+        RP: MulticastRouter6;     // rendezvous point -- owns the embedded RP address
+        DR_R: MulticastRouter6;   // receiver's designated router
         Receiver: StandardHost6;
-        DR_R: MulticastRouter6;
-        RP_router: MulticastRouter6;
-        Stub: StandardHost6;
-        configurator: Ipv6FlatNetworkConfigurator;
-    connections:
-        Receiver.ethg++ <--> ethernetline <--> DR_R.ethg++;
-        DR_R.ethg++ <--> ethernetline <--> RP_router.ethg++;
-        RP_router.ethg++ <--> ethernetline <--> Stub.ethg++;
+        configurator: Ipv6NetworkConfigurator;
+    connections allowunconnected:
+        Source.ethg++ <--> Eth100M <--> DR_S.ethg++;
+        DR_S.ethg++ <--> Eth100M <--> RP.ethg++;
+        DR_S.ethg++ <--> Eth100M <--> DR_R.ethg++; // direct link enabling a distinct SPT
+        RP.ethg++ <--> Eth100M <--> DR_R.ethg++;
+        DR_R.ethg++ <--> Eth100M <--> Receiver.ethg++;
 }
 
 %#--------------------------------------------------------------------------------------------------------------
@@ -53,7 +58,7 @@ network PimSmEmbeddedRpTest6
 
 [General]
 network = PimSmEmbeddedRpTest6
-sim-time-limit = 30s
+sim-time-limit = 60s
 cmdenv-express-mode = false
 cmdenv-log-prefix = "%C: "
 ned-path = .;../../../../src
@@ -64,20 +69,42 @@ output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
 output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
-# The Ipv6FlatNetworkConfigurator gives the RP_router--Stub link the prefix
-# aaaa:2:66::/64 (and routes toward it), so the embedded RP aaaa:2:66:0::1 -- the RP
-# encoded in the group below -- is routable from DR_R via RP_router.
+# RP owns the embedded RP address aaaa:2:66::1 (decoded from the group below) on
+# its link toward DR_R; that link uses the encoded prefix aaaa:2:66::/64. Every
+# other link gets an auto-assigned unique 2001:db8:N::/64. Autorouting (on by
+# default) makes aaaa:2:66::/64 reachable from all routers.
+*.configurator.config = xml("<config>\
+    <interface hosts='RP'   towards='DR_R' prefix='aaaa:2:66::/64' address='aaaa:2:66::1'/>\
+    <interface hosts='DR_R' towards='RP'   prefix='aaaa:2:66::/64'/>\
+    <interface hosts='**'                  prefix='2001:db8:x::/64'/>\
+    </config>")
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
 
 # Sparse mode PIM, MLD on; NO RP configured (embedded-RP needs none).
 **.pimConfig = xml("<config><interface mode=\"sparse\"/></config>")
 **.ipv6.hasMld = true
 **.neighbourDiscovery.dupAddrDetectTransmits = 0
 
-# Receiver joins the embedded-RP group ff7e:140:aaaa:2:66::8 (RP = aaaa:2:66:0::1).
-*.Receiver.numApps = 1
-*.Receiver.app[0].typename = "UdpSink"
-*.Receiver.app[0].localPort = 1000
-*.Receiver.app[0].multicastGroup = "ff7e:140:aaaa:2:66::8"
+# Source behind DR_S sends to the embedded-RP group; Receiver behind DR_R joins it.
+**.Source.numApps = 1
+**.Source.app[0].typename = "UdpBasicApp"
+**.Source.app[0].destAddresses = "ff7e:140:aaaa:2:66::8"
+**.Source.app[0].destPort = 5000
+**.Source.app[0].messageLength = 100B
+**.Source.app[0].timeToLive = 10
+**.Source.app[0].startTime = 20s
+**.Source.app[0].sendInterval = 1s
+**.Source.app[0].stopTime = 50s
+
+# The Receiver joins at t=10s -- after the routers' PIM adjacencies are up (~t=4s)
+# and before the Source starts (t=20s) -- so the shared (*,G) tree toward the RP is
+# built once PIM neighbors exist (the realistic order: routers converge, then hosts
+# join), then the stream flows down it.
+**.Receiver.numApps = 1
+**.Receiver.app[0].typename = "UdpSink"
+**.Receiver.app[0].localPort = 5000
+**.Receiver.app[0].startTime = 10s
+**.Receiver.app[0].multicastGroup = "ff7e:140:aaaa:2:66::8"
 
 # Ethernet queues
 **.eth[*].queue.typename = "EthernetQosQueue"
@@ -94,6 +121,10 @@ no RP address configured; only source-specific (SSM) and embedded-RP
 %# DR_R derives the embedded RP and builds the shared (*,G) tree toward it
 %contains: stdout
 Sending Join(S=*, G=ff7e:140:aaaa:2:66::8)
+%#--------------------------------------------------------------------------------------------------------------
+%# the stream is forwarded through the real RP and the Receiver actually receives it
+%contains: stdout
+Received packet:
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out

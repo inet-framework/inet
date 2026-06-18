@@ -1,0 +1,100 @@
+%description:
+Tests that Ipv6NetworkConfigurator assigns an explicit per-interface address
+given via the <interface> @address attribute (instead of the link-prefix +
+EUI-64 interface token it derives by default), and that the explicitly assigned
+addresses are routable.
+
+Two hosts share one Ethernet link:
+
+    h1 -- h2
+
+The configurator is told to give h1 the address 2001:db8:1:1::1 and h2 the
+address 2001:db8:1:1::2 (no @prefix template -- the explicit address seeds the
+link's /64 prefix as well). h1 then pings h2 at its explicit address.
+
+Expected: the configurator's address dump shows both interfaces carrying exactly
+the configured addresses, and the ping reply comes back -- proving the explicit
+addresses were both assigned and routable on-link.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network ExplicitAddressTest6
+{
+    types:
+        channel ethernetline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        h1: StandardHost6;
+        h2: StandardHost6;
+        configurator: Ipv6NetworkConfigurator;
+    connections:
+        h1.ethg++ <--> ethernetline <--> h2.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = ExplicitAddressTest6
+sim-time-limit = 5s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+ned-path = .;../../../../src
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+# Assign explicit full addresses to the two interfaces; dump them so the test
+# can assert they were applied.
+*.configurator.dumpAddresses = true
+*.configurator.config = xml("<config>\
+    <interface hosts='h1' address='2001:db8:1:1::1'/>\
+    <interface hosts='h2' address='2001:db8:1:1::2'/>\
+    </config>")
+
+# The per-node configurator must point at the network configurator, otherwise
+# it leaves the interfaces to autoconfigure and the explicit config is ignored.
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+**.neighbourDiscovery.dupAddrDetectTransmits = 0
+
+# h1 pings h2 at its explicit address.
+*.h1.numApps = 1
+*.h1.app[0].typename = "PingApp"
+*.h1.app[0].destAddr = "2001:db8:1:1::2"
+*.h1.app[0].startTime = 1s
+*.h1.app[0].count = 1
+
+# Ethernet queues
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue"
+**.eth[*].queue.dataQueue.packetCapacity = 100
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%# the configurator assigned exactly the configured addresses
+%contains: stdout
+addr=2001:db8:1:1::1/64
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+addr=2001:db8:1:1::2/64
+%#--------------------------------------------------------------------------------------------------------------
+%# the explicit address is routable: the ping reply comes back
+%contains: stdout
+Ping reply #0 arrived
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
