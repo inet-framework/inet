@@ -249,7 +249,7 @@ class INET_API PimSm : public PimBase, protected cListener
     void unroutableMulticastPacketArrived(L3Address srcAddr, L3Address destAddr);
     void multicastPacketArrivedOnRpfInterface(Route *route);
     void multicastPacketArrivedOnNonRpfInterface(Route *route, int interfaceId);
-    void multicastPacketForwarded(Packet *pk); // pk should begin with Ipv4Header
+    void multicastPacketForwarded(Packet *pk); // pk should begin with the IP header
     void multicastReceiverAdded(NetworkInterface *ie, L3Address group);
     void multicastReceiverRemoved(NetworkInterface *ie, L3Address group);
 
@@ -259,14 +259,14 @@ class INET_API PimSm : public PimBase, protected cListener
     void iAmDRHasChanged(NetworkInterface *ie, bool iAmDR);
 
     // send pim messages
-    void sendPIMRegister(Packet *pk, L3Address dest, int outInterfaceId); // pk should begin with Ipv4Header
+    void sendPIMRegister(Packet *pk, L3Address dest, int outInterfaceId); // pk should begin with the IP header
     void sendPIMRegisterStop(L3Address source, L3Address dest, L3Address multGroup, L3Address multSource);
     void sendPIMRegisterNull(L3Address multSource, L3Address multDest);
     void sendPIMJoin(L3Address group, L3Address source, L3Address upstreamNeighbor, RouteType JPtype);
     void sendPIMPrune(L3Address group, L3Address source, L3Address upstreamNeighbor, RouteType JPtype);
     void sendPIMAssert(L3Address source, L3Address group, AssertMetric metric, NetworkInterface *ie, bool rptBit);
     void sendToIP(Packet *packet, L3Address source, L3Address dest, int outInterfaceId, short ttl);
-    void forwardMulticastData(Packet *pk, int outInterfaceId); // pk should begin with Ipv4Header
+    void forwardMulticastData(Packet *pk, int outInterfaceId); // pk should begin with the IP header
 
     // computed intervals
     double joinPruneHoldTime() { return 3.5 * joinPrunePeriod; } // Holdtime in Join/Prune messages
@@ -283,6 +283,10 @@ class INET_API PimSm : public PimBase, protected cListener
     // helpers
     bool IamRP(L3Address rpAddr) { return rt->isLocalAddress(rpAddr); }
     bool IamDR(NetworkInterface *ie);
+    // AF-correct unspecified source used as the 'S' of (*,G) state
+    L3Address getUnspecifiedAddress() const;
+    // read source/group from the inner IP header of a Register-encapsulated datagram
+    void getEncapsulatedAddresses(Packet *pk, L3Address& source, L3Address& group) const;
     PimInterface *getIncomingInterface(NetworkInterface *fromIE);
     bool deleteMulticastRoute(Route *route);
     void clearRoutes();

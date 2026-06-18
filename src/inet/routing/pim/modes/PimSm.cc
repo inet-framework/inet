@@ -16,9 +16,11 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 #include "inet/networklayer/ipv4/Ipv4.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/ipv6/Ipv6Header_m.h"
 
 namespace inet {
 
@@ -47,10 +49,6 @@ void PimSm::initialize(int stage)
     PimBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        // PIM-SM is IPv4-only
-        if (isIpv6())
-            throw cRuntimeError("PimSm: addressFamily='ipv6' is not supported by PIM-SM (only PIM-DM supports IPv6)");
-
         const char *rp = par("RP");
         if (rp && *rp)
             rpAddr = L3Address(rp);
@@ -314,9 +312,10 @@ void PimSm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
     else if (signalID == ipv4MdataRegisterSignal || signalID == ipv6MdataRegisterSignal) {
         EV << "pimSM::receiveChangeNotification - REGISTER DATA" << endl;
         Packet *pk = check_and_cast<Packet *>(obj);
-        const auto& ipv4Header = pk->peekAtFront<Ipv4Header>();
+        L3Address encapSource, encapGroup;
+        getEncapsulatedAddresses(pk, encapSource, encapGroup);
         PimInterface *incomingInterface = getIncomingInterface(check_and_cast<NetworkInterface *>(details));
-        Route *route = findRouteSG(ipv4Header->getSrcAddress(), ipv4Header->getDestAddress());
+        Route *route = findRouteSG(encapSource, encapGroup);
         (void)route; // TODO unused variable
         if (incomingInterface && incomingInterface->getMode() == PimInterface::SparseMode)
             multicastPacketForwarded(pk);
@@ -582,9 +581,8 @@ void PimSm::processRegisterPacket(Packet *pk)
 
     L3Address srcAddr = pk->getTag<L3AddressInd>()->getSrcAddress();
     L3Address destAddr = pk->getTag<L3AddressInd>()->getDestAddress();
-    const auto& encapData = pk->peekAtFront<Ipv4Header>();
-    Ipv4Address source = encapData->getSrcAddress();
-    Ipv4Address group = encapData->getDestAddress();
+    L3Address source, group;
+    getEncapsulatedAddresses(pk, source, group);
     Route *routeG = findRouteG(group);
     Route *routeSG = findRouteSG(source, group);
 
@@ -1272,9 +1270,8 @@ void PimSm::multicastPacketArrivedOnNonRpfInterface(Route *route, int interfaceI
 
 void PimSm::multicastPacketForwarded(Packet *pk)
 {
-    const auto& ipv4Header = pk->peekAtFront<Ipv4Header>();
-    Ipv4Address source = ipv4Header->getSrcAddress();
-    Ipv4Address group = ipv4Header->getDestAddress();
+    L3Address source, group;
+    getEncapsulatedAddresses(pk, source, group);
 
     Route *routeSG = findRouteSG(source, group);
     if (!routeSG || !routeSG->isFlagSet(Route::REGISTER) || !routeSG->isFlagSet(Route::PRUNED))
@@ -1466,16 +1463,26 @@ void PimSm::sendPIMRegisterNull(L3Address multOrigin, L3Address multGroup)
         Pim::insertChecksum(msg);
         pk->insertAtFront(msg);
 
-        // set encapsulated packet (Ipv4 header only)
-        const auto& ipv4Header = makeShared<Ipv4Header>();
-        ipv4Header->setDestAddress(multGroup.toIpv4());
-        ipv4Header->setSrcAddress(multOrigin.toIpv4());
-        ipv4Header->setProtocolId(IP_PROT_PIM);
-        ipv4Header->setHeaderLength(IPv4_MIN_HEADER_LENGTH);
-        ipv4Header->setTotalLengthField(IPv4_MIN_HEADER_LENGTH);
-        ipv4Header->setChecksumMode(pimModule->getChecksumMode());
-        ipv4Header->updateChecksum();
-        pk->insertAtBack(ipv4Header);
+        // set encapsulated packet (IP header only)
+        if (isIpv6()) {
+            const auto& ipv6Header = makeShared<Ipv6Header>();
+            ipv6Header->setSrcAddress(multOrigin.toIpv6());
+            ipv6Header->setDestAddress(multGroup.toIpv6());
+            ipv6Header->setProtocolId(IP_PROT_PIM);
+            ipv6Header->setPayloadLength(B(0));
+            pk->insertAtBack(ipv6Header);
+        }
+        else {
+            const auto& ipv4Header = makeShared<Ipv4Header>();
+            ipv4Header->setDestAddress(multGroup.toIpv4());
+            ipv4Header->setSrcAddress(multOrigin.toIpv4());
+            ipv4Header->setProtocolId(IP_PROT_PIM);
+            ipv4Header->setHeaderLength(IPv4_MIN_HEADER_LENGTH);
+            ipv4Header->setTotalLengthField(IPv4_MIN_HEADER_LENGTH);
+            ipv4Header->setChecksumMode(pimModule->getChecksumMode());
+            ipv4Header->updateChecksum();
+            pk->insertAtBack(ipv4Header);
+        }
 
         emit(sentRegisterPkSignal, pk);
 
@@ -1484,9 +1491,9 @@ void PimSm::sendPIMRegisterNull(L3Address multOrigin, L3Address multGroup)
     }
 }
 
-void PimSm::sendPIMRegister(Packet *ipv4Packet, L3Address dest, int outInterfaceId)
+void PimSm::sendPIMRegister(Packet *ipPacket, L3Address dest, int outInterfaceId)
 {
-    ASSERT(ipv4Packet->peekAtFront<Ipv4Header>() != nullptr);
+    ASSERT(isIpv6() ? (ipPacket->peekAtFront<Ipv6Header>() != nullptr) : (ipPacket->peekAtFront<Ipv4Header>() != nullptr));
 
     EV << "pimSM::sendPIMRegister - encapsulating data packet into Register packet and sending to RP" << endl;
 
@@ -1500,7 +1507,7 @@ void PimSm::sendPIMRegister(Packet *ipv4Packet, L3Address dest, int outInterface
     msg->setChecksumMode(pimModule->getChecksumMode());
     Pim::insertChecksum(msg);
 
-    pk->insertAtBack(ipv4Packet->peekDataAt(b(0), ipv4Packet->getDataLength()));
+    pk->insertAtBack(ipPacket->peekDataAt(b(0), ipPacket->getDataLength()));
     pk->insertAtFront(msg);
 
     emit(sentRegisterPkSignal, pk);
@@ -1582,17 +1589,30 @@ void PimSm::forwardMulticastData(Packet *data, int outInterfaceId)
     EV << "pimSM::forwardMulticastData" << endl;
 
     //
-    // Note: we should inject the datagram somehow into the normal Ipv4 forwarding path.
+    // Note: we should inject the datagram somehow into the normal IP forwarding path.
     //
-    const auto& ipv4Header = data->popAtFront<Ipv4Header>();
+    const Protocol *payloadProtocol;
+    L3Address srcAddr, destAddr;
+    if (isIpv6()) {
+        const auto& ipv6Header = data->popAtFront<Ipv6Header>();
+        payloadProtocol = ipv6Header->getProtocol();
+        srcAddr = ipv6Header->getSrcAddress();
+        destAddr = ipv6Header->getDestAddress();
+    }
+    else {
+        const auto& ipv4Header = data->popAtFront<Ipv4Header>();
+        payloadProtocol = ipv4Header->getProtocol();
+        srcAddr = ipv4Header->getSrcAddress();
+        destAddr = ipv4Header->getDestAddress();
+    }
 
     // set control info
-    data->addTagIfAbsent<PacketProtocolTag>()->setProtocol(ipv4Header->getProtocol());
+    data->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
     data->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outInterfaceId);
     auto addrTag = data->addTagIfAbsent<L3AddressReq>();
-    addrTag->setSrcAddress(ipv4Header->getSrcAddress());
+    addrTag->setSrcAddress(srcAddr);
     addrTag->setNonLocalSrcAddress(true);
-    addrTag->setDestAddress(ipv4Header->getDestAddress());
+    addrTag->setDestAddress(destAddr);
     data->addTagIfAbsent<HopLimitReq>()->setHopLimit(MAX_TTL - 2); // one minus for source DR router and one for RP router // TODO specification???
     data->trim();
     send(data, "ipOut");
@@ -1780,9 +1800,32 @@ void PimSm::clearRoutes()
     sgRoutes.clear();
 }
 
+L3Address PimSm::getUnspecifiedAddress() const
+{
+    // The 'S' of (*,G) state must be an unspecified address of the operating
+    // address family so that it has the same L3Address type as the group it is
+    // keyed with (and so createMulticastRoute()'s setOrigin() builds the right
+    // origin). For IPv4 this is 0.0.0.0 -- unchanged from the original code.
+    return isIpv6() ? L3Address(Ipv6Address::UNSPECIFIED_ADDRESS) : L3Address(Ipv4Address::UNSPECIFIED_ADDRESS);
+}
+
+void PimSm::getEncapsulatedAddresses(Packet *pk, L3Address& source, L3Address& group) const
+{
+    if (isIpv6()) {
+        const auto& ipv6Header = pk->peekAtFront<Ipv6Header>();
+        source = ipv6Header->getSrcAddress();
+        group = ipv6Header->getDestAddress();
+    }
+    else {
+        const auto& ipv4Header = pk->peekAtFront<Ipv4Header>();
+        source = ipv4Header->getSrcAddress();
+        group = ipv4Header->getDestAddress();
+    }
+}
+
 PimSm::Route *PimSm::addNewRouteG(L3Address group, int flags)
 {
-    Route *newRouteG = new Route(this, G, Ipv4Address::UNSPECIFIED_ADDRESS, group);
+    Route *newRouteG = new Route(this, G, getUnspecifiedAddress(), group);
     newRouteG->setFlags(flags);
     newRouteG->rpAddr = rpAddr;
 
@@ -1815,7 +1858,7 @@ PimSm::Route *PimSm::addNewRouteG(L3Address group, int flags)
         }
     }
 
-    SourceAndGroup sg(Ipv4Address::UNSPECIFIED_ADDRESS, group);
+    SourceAndGroup sg(getUnspecifiedAddress(), group);
     gRoutes[sg] = newRouteG;
     rt->addMulticastRoute(createMulticastRoute(newRouteG));
 
@@ -1833,7 +1876,7 @@ PimSm::Route *PimSm::addNewRouteG(L3Address group, int flags)
 PimSm::Route *PimSm::addNewRouteSG(L3Address source, L3Address group, int flags)
 {
     ASSERT(!source.isUnspecified());
-    ASSERT(group.isMulticast() && !group.toIpv4().isLinkLocalMulticast());
+    ASSERT(group.isMulticast() && (isIpv6() ? !group.toIpv6().isLinkLocal() : !group.toIpv4().isLinkLocalMulticast()));
 
     Route *newRouteSG = new Route(this, SG, source, group);
     newRouteSG->setFlags(flags);
@@ -1914,7 +1957,7 @@ bool PimSm::removeRoute(Route *route)
 
 PimSm::Route *PimSm::findRouteG(L3Address group)
 {
-    SourceAndGroup sg(Ipv4Address::UNSPECIFIED_ADDRESS, group);
+    SourceAndGroup sg(getUnspecifiedAddress(), group);
     auto it = gRoutes.find(sg);
     return it != gRoutes.end() ? it->second : nullptr;
 }
