@@ -1,0 +1,111 @@
+%description:
+Tests IPv4 PIM-SM source-specific multicast (SSM, RFC 4607): an IGMPv3 INCLUDE(S,G)
+membership for an SSM-range group (232.0.0.0/8) makes PIM-SM build an (S,G) source
+tree rooted directly at S -- no rendezvous point, no Register. This is the IPv4
+lockstep counterpart of IPv6_pimsm_ssm.
+
+Topology (all links Ethernet point-to-point); there is NO RP:
+
+    Source1 --\
+               R1 ----- R2 ----- Receiver
+    Source2 --/
+
+Both sources send to the same SSM group 232.0.0.8. The Receiver (behind R2) uses
+IGMPv3 to subscribe in INCLUDE mode to Source1 only, so PIM-SM joins
+(Source1, 232.0.0.8) toward the source and the Receiver gets Source1's stream
+but never Source2's.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.MulticastRouter;
+import inet.node.inet.StandardHost;
+import ned.DatarateChannel;
+
+network PimSmSsmTest4
+{
+    types:
+        channel ethernetline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        Source1: StandardHost;
+        Source2: StandardHost;
+        R1: MulticastRouter;
+        R2: MulticastRouter;
+        Receiver: StandardHost;
+        configurator: Ipv4NetworkConfigurator;
+    connections:
+        Source1.ethg++ <--> ethernetline <--> R1.ethg++;
+        Source2.ethg++ <--> ethernetline <--> R1.ethg++;
+        R1.ethg++ <--> ethernetline <--> R2.ethg++;
+        R2.ethg++ <--> ethernetline <--> Receiver.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = PimSmSsmTest4
+sim-time-limit = 40s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+ned-path = .;../../../../src
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+# Sparse mode, IGMPv3, NO RP (SSM groups need none).
+**.pimConfig = xml("<config><interface mode=\"sparse\"/></config>")
+**.igmp.typename = "Igmpv3"
+
+# Two sources, both to the SSM group 232.0.0.8.
+*.Source*.numApps = 1
+*.Source*.app[0].typename = "UdpBasicApp"
+*.Source*.app[0].destAddresses = "232.0.0.8"
+*.Source*.app[0].destPort = 1000
+*.Source*.app[0].messageLength = 64B
+*.Source*.app[0].timeToLive = 10
+*.Source1.app[0].startTime = 20s
+*.Source2.app[0].startTime = 20s
+*.Source*.app[0].sendInterval = 1s
+*.Source*.app[0].stopTime = 29.5s    # sends at t=20s..29s -> 10 packets each
+
+# Receiver: SSM INCLUDE membership for 232.0.0.8 from Source1 only.
+# Source1's address (assigned by Ipv4NetworkConfigurator; stable for this topology).
+*.Receiver.numApps = 1
+*.Receiver.app[0].typename = "UdpSink"
+*.Receiver.app[0].localPort = 1000
+*.Receiver.app[0].multicastGroup = "232.0.0.8"
+*.Receiver.app[0].multicastSources = "10.0.0.1"
+
+# Ethernet queues
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue"
+**.eth[*].queue.dataQueue.packetCapacity = 100
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%# a source tree is built directly toward Source1 (a real source, not *)
+%contains: stdout
+Sending Join(S=10.0.0.1, G=232.0.0.8)
+%#--------------------------------------------------------------------------------------------------------------
+%# SSM uses no rendezvous point: there must be NO Register encapsulation anywhere
+%not-contains: stdout
+encapsulating data packet into Register
+%#--------------------------------------------------------------------------------------------------------------
+%# the Receiver gets Source1's stream only (Source2's never reaches it)
+%contains: stdout
+Receiver.app[0]: received 10 packets
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
