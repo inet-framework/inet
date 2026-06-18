@@ -8,23 +8,8 @@ package inet.examples.pim.dm.ipv6;
 
 import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
 import inet.node.ethernet.Eth100M;
-import inet.node.ipv6.Router6;
+import inet.node.ipv6.MulticastRouter6;
 import inet.node.ipv6.StandardHost6;
-
-//
-// A pure-IPv6 multicast router running PIM (Dense Mode). It extends the IPv6
-// Router6 node (no IPv4 stack; routingTableModule already points at
-// ipv6.routingTable) and enables PIM + multicast forwarding, with the whole PIM
-// compound -- both PIM-DM and PIM-SM -- bound to the IPv6 stack via
-// pim.addressFamily = "ipv6".
-//
-module MulticastRouter6 extends Router6
-{
-    parameters:
-        hasPim = default(true);
-        multicastForwarding = true;
-        pim.addressFamily = "ipv6";
-}
 
 //
 // IPv6 PIM-DM flood-and-prune topology, modeled on the IPv4
