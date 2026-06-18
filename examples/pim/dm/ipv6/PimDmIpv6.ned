@@ -8,34 +8,22 @@ package inet.examples.pim.dm.ipv6;
 
 import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
 import inet.node.ethernet.Eth100M;
-import inet.node.inet.MulticastRouter;
+import inet.node.ipv6.Router6;
 import inet.node.ipv6.StandardHost6;
 
 //
-// An IPv6 multicast router running PIM (Dense Mode). It extends MulticastRouter
-// (PIM + multicast forwarding already enabled) and runs the PIM data plane over
-// IPv6.
+// A pure-IPv6 multicast router running PIM (Dense Mode). It extends the IPv6
+// Router6 node (no IPv4 stack; routingTableModule already points at
+// ipv6.routingTable) and enables PIM + multicast forwarding, with the whole PIM
+// compound -- both PIM-DM and PIM-SM -- bound to the IPv6 stack via
+// pim.addressFamily = "ipv6".
 //
-// Both IP stacks are present: the IPv6 stack carries all data and PIM-DM
-// traffic, while the IPv4 stack is kept only because the Pim compound always
-// instantiates an (unused) PIM-SM submodule, and PIM-SM is IPv4-only and binds
-// an IPv4 routing table at init. The IPv4 stack is otherwise left unconfigured
-// (its node configurator is disabled in the ini), so it has no addresses and no
-// effect on the simulation.
-//
-// pimDM and the splitter run with addressFamily="ipv6" and use the IPv6 routing
-// table; pimSM keeps the ipv4 defaults from Pim.ned / Router.ned.
-//
-module MulticastRouter6 extends MulticastRouter
+module MulticastRouter6 extends Router6
 {
     parameters:
-        hasIpv6 = default(true);
-        hasIpv4 = default(true); // kept so the idle PIM-SM can bind an IPv4 routing table
-        // PIM data plane is IPv6 (pimDM + splitter); pimSM stays ipv4.
-        pim.pimDM.addressFamily = "ipv6";
-        pim.pimSplitter.addressFamily = "ipv6";
-        // pimDM uses the IPv6 routing table; pimSM keeps the node's ipv4 default.
-        pim.pimDM.routingTableModule = "^.^.ipv6.routingTable";
+        hasPim = default(true);
+        multicastForwarding = true;
+        pim.addressFamily = "ipv6";
 }
 
 //
