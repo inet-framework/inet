@@ -308,6 +308,8 @@ class INET_API PimSm : public PimBase, protected cListener
     Route *findRouteSG(L3Address source, L3Address group);
     Route *addNewRouteG(L3Address group, int flags);
     Route *addNewRouteSG(L3Address source, L3Address group, int flags);
+    L3Address resolveRpfNeighbor(NetworkInterface *rpfInterface, const L3Address& routeGateway);
+    void updateUpstreamRpfNeighbor(NetworkInterface *ie);
     IMulticastRoute *createMulticastRoute(Route *route);
 };
 

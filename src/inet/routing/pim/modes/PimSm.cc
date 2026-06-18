@@ -342,6 +342,8 @@ void PimSm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
     else if (signalID == pimNeighborAddedSignal || signalID == pimNeighborDeletedSignal || signalID == pimNeighborChangedSignal) {
         PimNeighbor *neighbor = check_and_cast<PimNeighbor *>(obj);
         updateDesignatedRouterAddress(neighbor->getInterfacePtr());
+        if (signalID == pimNeighborAddedSignal)
+            updateUpstreamRpfNeighbor(neighbor->getInterfacePtr());
     }
 }
 
@@ -1940,6 +1942,47 @@ L3Address PimSm::getRpForGroup(const L3Address& group) const
     return rpAddr;
 }
 
+L3Address PimSm::resolveRpfNeighbor(NetworkInterface *rpfInterface, const L3Address& routeGateway)
+{
+    // The RPF neighbor is the unicast route's next hop. For a directly-connected destination the
+    // route is on-link (gateway unspecified), so fall back to a PIM neighbor on the RPF interface --
+    // but only if one is already known (else the caller is left with an unspecified neighbor, to be
+    // resolved later by updateUpstreamRpfNeighbor() once the PIM adjacency forms).
+    L3Address rpfNeighbor = routeGateway;
+    if (!pimNbt->findNeighbor(rpfInterface->getInterfaceId(), rpfNeighbor) &&
+        pimNbt->getNumNeighbors(rpfInterface->getInterfaceId()) > 0)
+    {
+        if (PimNeighbor *neighbor = pimNbt->getNeighbor(rpfInterface->getInterfaceId(), 0))
+            rpfNeighbor = neighbor->getAddress();
+    }
+    return rpfNeighbor;
+}
+
+void PimSm::updateUpstreamRpfNeighbor(NetworkInterface *ie)
+{
+    // A PIM neighbor has just appeared on 'ie'. Resolve the upstream RPF neighbor of any (*,G) route
+    // that is still waiting on this interface with an unspecified next hop -- the directly-connected-RP
+    // case where the route was created before the PIM adjacency formed -- and (re)send its Join so the
+    // shared tree builds without waiting for the next periodic refresh. ((S,G) routes with an
+    // unspecified next hop are SOURCE_DIRECTLY_CONNECTED and need no upstream Join, so only gRoutes
+    // are scanned.)
+    for (auto& elem : gRoutes) {
+        Route *route = elem.second;
+        UpstreamInterface *upstream = route->upstreamInterface;
+        if (!upstream || upstream->ie != ie || !upstream->nextHop.isUnspecified())
+            continue;
+        IRoute *routeToRP = rt->findBestMatchingRoute(route->rpAddr);
+        if (!routeToRP)
+            continue;
+        L3Address rpfNeighbor = resolveRpfNeighbor(ie, routeToRP->getNextHopAsGeneric());
+        if (rpfNeighbor.isUnspecified())
+            continue;
+        upstream->nextHop = rpfNeighbor;
+        if (route->joinDesired() && !route->isFlagSet(Route::PRUNED))
+            sendPIMJoin(route->group, route->rpAddr, upstream->rpfNeighbor(), G);
+    }
+}
+
 PimSm::Route *PimSm::addNewRouteG(L3Address group, int flags)
 {
     Route *newRouteG = new Route(this, G, getUnspecifiedAddress(), group);
@@ -1951,14 +1994,7 @@ PimSm::Route *PimSm::addNewRouteG(L3Address group, int flags)
         IRoute *routeToRP = rt->findBestMatchingRoute(newRouteG->rpAddr);
         if (routeToRP) {
             NetworkInterface *ieTowardRP = routeToRP->getInterface();
-            L3Address rpfNeighbor = routeToRP->getNextHopAsGeneric();
-            if (!pimNbt->findNeighbor(ieTowardRP->getInterfaceId(), rpfNeighbor) &&
-                pimNbt->getNumNeighbors(ieTowardRP->getInterfaceId()) > 0)
-            {
-                PimNeighbor *neighbor = pimNbt->getNeighbor(ieTowardRP->getInterfaceId(), 0);
-                if (neighbor)
-                    rpfNeighbor = neighbor->getAddress();
-            }
+            L3Address rpfNeighbor = resolveRpfNeighbor(ieTowardRP, routeToRP->getNextHopAsGeneric());
             newRouteG->upstreamInterface = new UpstreamInterface(newRouteG, ieTowardRP, rpfNeighbor);
             newRouteG->metric = AssertMetric(true, getAdminDist(routeToRP), routeToRP->getMetric());
         }
@@ -2007,15 +2043,8 @@ PimSm::Route *PimSm::addNewRouteSG(L3Address source, L3Address group, int flags)
 
         if (rpfNeighbor.isUnspecified())
             newRouteSG->setFlag(Route::SOURCE_DIRECTLY_CONNECTED, true);
-        else {
-            if (!pimNbt->findNeighbor(ieTowardSource->getInterfaceId(), rpfNeighbor) &&
-                pimNbt->getNumNeighbors(ieTowardSource->getInterfaceId()) > 0)
-            {
-                PimNeighbor *neighbor = pimNbt->getNeighbor(ieTowardSource->getInterfaceId(), 0);
-                if (neighbor)
-                    rpfNeighbor = neighbor->getAddress();
-            }
-        }
+        else
+            rpfNeighbor = resolveRpfNeighbor(ieTowardSource, rpfNeighbor);
         newRouteSG->upstreamInterface = new UpstreamInterface(newRouteSG, ieTowardSource, rpfNeighbor);
         newRouteSG->metric = AssertMetric(false, getAdminDist(routeToSource), routeToSource->getMetric());
     }
