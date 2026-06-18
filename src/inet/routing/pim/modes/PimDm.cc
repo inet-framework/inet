@@ -1558,7 +1558,7 @@ void PimDm::sendPrunePacket(L3Address nextHop, L3Address src, L3Address grp, int
     auto& address = group.getPrunedSourceAddressForUpdate(0);
     address.sourceAddress = src;
 
-    msg->setChunkLength(PIM_HEADER_LENGTH + ENCODED_UNICODE_ADDRESS_LENGTH + B(4) + ENCODED_GROUP_ADDRESS_LENGTH + B(4) + ENCODED_SOURCE_ADDRESS_LENGTH);
+    msg->setChunkLength(PIM_HEADER_LENGTH + encodedUnicastAddressLength() + B(4) + encodedGroupAddressLength() + B(4) + encodedSourceAddressLength());
     msg->setChecksumMode(pimModule->getChecksumMode());
     Pim::insertChecksum(msg);
     packet->insertAtFront(msg);
@@ -1588,7 +1588,7 @@ void PimDm::sendJoinPacket(L3Address nextHop, L3Address src, L3Address grp, int 
     auto& address = group.getJoinedSourceAddressForUpdate(0);
     address.sourceAddress = src;
 
-    msg->setChunkLength(PIM_HEADER_LENGTH + ENCODED_UNICODE_ADDRESS_LENGTH + B(4) + ENCODED_GROUP_ADDRESS_LENGTH + B(4) + ENCODED_SOURCE_ADDRESS_LENGTH);
+    msg->setChunkLength(PIM_HEADER_LENGTH + encodedUnicastAddressLength() + B(4) + encodedGroupAddressLength() + B(4) + encodedSourceAddressLength());
     msg->setChecksumMode(pimModule->getChecksumMode());
     Pim::insertChecksum(msg);
     packet->insertAtFront(msg);
@@ -1620,7 +1620,7 @@ void PimDm::sendGraftPacket(L3Address nextHop, L3Address src, L3Address grp, int
     auto& address = group.getJoinedSourceAddressForUpdate(0);
     address.sourceAddress = src;
 
-    msg->setChunkLength(PIM_HEADER_LENGTH + ENCODED_UNICODE_ADDRESS_LENGTH + B(4) + ENCODED_GROUP_ADDRESS_LENGTH + B(4) + ENCODED_SOURCE_ADDRESS_LENGTH);
+    msg->setChunkLength(PIM_HEADER_LENGTH + encodedUnicastAddressLength() + B(4) + encodedGroupAddressLength() + B(4) + encodedSourceAddressLength());
     msg->setChecksumMode(pimModule->getChecksumMode());
     Pim::insertChecksum(msg);
     packet->insertAtFront(msg);
@@ -1674,9 +1674,9 @@ void PimDm::sendStateRefreshPacket(L3Address originator, Route *route, Downstrea
     // TODO set metric
 
     msg->setChunkLength(PIM_HEADER_LENGTH
-            + ENCODED_GROUP_ADDRESS_LENGTH
-            + ENCODED_UNICODE_ADDRESS_LENGTH
-            + ENCODED_UNICODE_ADDRESS_LENGTH
+            + encodedGroupAddressLength()
+            + encodedUnicastAddressLength()
+            + encodedUnicastAddressLength()
             + B(12));
     msg->setChecksumMode(pimModule->getChecksumMode());
     Pim::insertChecksum(msg);
@@ -1700,8 +1700,8 @@ void PimDm::sendAssertPacket(L3Address source, L3Address group, AssertMetric met
     pkt->setMetric(metric.metric);
 
     pkt->setChunkLength(PIM_HEADER_LENGTH
-            + ENCODED_GROUP_ADDRESS_LENGTH
-            + ENCODED_UNICODE_ADDRESS_LENGTH
+            + encodedGroupAddressLength()
+            + encodedUnicastAddressLength()
             + B(8));
     pkt->setChecksumMode(pimModule->getChecksumMode());
     Pim::insertChecksum(pkt);

@@ -350,6 +350,20 @@ bool PimBase::isRoutableMulticastSource(const L3Address& srcAddr) const
     return true;
 }
 
+bool PimBase::isRoutableMulticastGroup(const L3Address& group) const
+{
+    // PIM builds distribution trees only for routable multicast groups. Link-local
+    // (and interface-local) multicast control groups -- IPv6 scope <= 2, ff02::/16
+    // such as the all-routers group ff02::2 and all-PIM-routers ff02::d that the
+    // stack joins on every router interface, or IPv4 224.0.0.0/24 -- are never
+    // managed by PIM and must be ignored when learned as local memberships.
+    // (Note: for IPv6 multicast, Ipv6Address::getScope() returns MULTICAST, so the
+    // scope nibble from getMulticastScope() is what distinguishes link-local.)
+    if (isIpv6())
+        return group.toIpv6().getMulticastScope() > 2;
+    return !group.toIpv4().isLinkLocalMulticast();
+}
+
 void PimBase::getMulticastPacketAddresses(cObject *obj, L3Address& srcAddr, L3Address& destAddr, unsigned short& ttl) const
 {
     if (isIpv6()) {

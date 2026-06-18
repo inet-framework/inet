@@ -260,7 +260,7 @@ void PimSm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
         L3Address group;
         getMulticastGroupInfo(obj, ie, group);
         PimInterface *pimInterface = pimIft->getInterfaceById(ie->getInterfaceId());
-        if (pimInterface && pimInterface->getMode() == PimInterface::SparseMode)
+        if (pimInterface && pimInterface->getMode() == PimInterface::SparseMode && isRoutableMulticastGroup(group))
             multicastReceiverAdded(ie, group);
     }
     else if (signalID == ipv4MulticastGroupUnregisteredSignal || signalID == ipv6MulticastGroupUnregisteredSignal) {
@@ -269,7 +269,7 @@ void PimSm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
         L3Address group;
         getMulticastGroupInfo(obj, ie, group);
         PimInterface *pimInterface = pimIft->getInterfaceById(ie->getInterfaceId());
-        if (pimInterface && pimInterface->getMode() == PimInterface::SparseMode)
+        if (pimInterface && pimInterface->getMode() == PimInterface::SparseMode && isRoutableMulticastGroup(group))
             multicastReceiverRemoved(ie, group);
     }
     else if (signalID == ipv4NewMulticastSignal || signalID == ipv6NewMulticastSignal) {
@@ -1393,11 +1393,11 @@ void PimSm::sendPIMJoin(L3Address group, L3Address source, L3Address upstreamNei
     encodedAddr.R = (routeType == G);
 
     msg->setChunkLength(PIM_HEADER_LENGTH
-            + ENCODED_UNICODE_ADDRESS_LENGTH
+            + encodedUnicastAddressLength()
             + B(4)
-            + ENCODED_GROUP_ADDRESS_LENGTH
+            + encodedGroupAddressLength()
             + B(4)
-            + ENCODED_SOURCE_ADDRESS_LENGTH);
+            + encodedSourceAddressLength());
     msg->setChecksumMode(pimModule->getChecksumMode());
     Pim::insertChecksum(msg);
 
@@ -1430,11 +1430,11 @@ void PimSm::sendPIMPrune(L3Address group, L3Address source, L3Address upstreamNe
     encodedAddr.R = (routeType == G);
 
     msg->setChunkLength(PIM_HEADER_LENGTH
-            + ENCODED_UNICODE_ADDRESS_LENGTH
+            + encodedUnicastAddressLength()
             + B(4)
-            + ENCODED_GROUP_ADDRESS_LENGTH
+            + encodedGroupAddressLength()
             + B(4)
-            + ENCODED_SOURCE_ADDRESS_LENGTH);
+            + encodedSourceAddressLength());
     msg->setChecksumMode(pimModule->getChecksumMode());
     Pim::insertChecksum(msg);
 
@@ -1528,7 +1528,7 @@ void PimSm::sendPIMRegisterStop(L3Address source, L3Address dest, L3Address mult
     msg->getSourceAddressForUpdate().unicastAddress = multSource;
     msg->getGroupAddressForUpdate().groupAddress = multGroup;
 
-    msg->setChunkLength(B(PIM_HEADER_LENGTH + ENCODED_GROUP_ADDRESS_LENGTH + ENCODED_UNICODE_ADDRESS_LENGTH));
+    msg->setChunkLength(B(PIM_HEADER_LENGTH + encodedGroupAddressLength() + encodedUnicastAddressLength()));
     msg->setChecksumMode(pimModule->getChecksumMode());
     Pim::insertChecksum(msg);
     pk->insertAtFront(msg);
@@ -1554,8 +1554,8 @@ void PimSm::sendPIMAssert(L3Address source, L3Address group, AssertMetric metric
     pkt->setMetric(metric.metric);
 
     pkt->setChunkLength(PIM_HEADER_LENGTH
-            + ENCODED_GROUP_ADDRESS_LENGTH
-            + ENCODED_UNICODE_ADDRESS_LENGTH
+            + encodedGroupAddressLength()
+            + encodedUnicastAddressLength()
             + B(8));
     pkt->setChecksumMode(pimModule->getChecksumMode());
     Pim::insertChecksum(pkt);

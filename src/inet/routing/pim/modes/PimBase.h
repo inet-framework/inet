@@ -183,6 +183,13 @@ class INET_API PimBase : public RoutingProtocolBase
     void processHelloTimer(cMessage *timer);
     void processHelloPacket(Packet *pk);
 
+    // RFC 4601 4.9.1 Encoded-Address field lengths -- they depend on the address
+    // family (IPv4: 4-byte addresses, IPv6: 16-byte addresses). The IPv4 sizes are
+    // the ENCODED_*_ADDRESS_LENGTH constants from PimPacket_m.h.
+    B encodedUnicastAddressLength() const { return isIpv6() ? B(2 + 16) : ENCODED_UNICODE_ADDRESS_LENGTH; }
+    B encodedGroupAddressLength() const { return isIpv6() ? B(4 + 16) : ENCODED_GROUP_ADDRESS_LENGTH; }
+    B encodedSourceAddressLength() const { return isIpv6() ? B(4 + 16) : ENCODED_SOURCE_ADDRESS_LENGTH; }
+
     // address-family helpers: dispatch on networkProtocol to Ipv4InterfaceData / Ipv6InterfaceData
     bool isIpv6() const { return networkProtocol == &Protocol::ipv6; }
     L3Address getInterfaceAddress(NetworkInterface *ie) const;
@@ -198,6 +205,7 @@ class INET_API PimBase : public RoutingProtocolBase
     static bool hasOutInterface(IMulticastRoute *route, const NetworkInterface *ie);
     static unsigned int getAdminDist(IRoute *route);
     bool isRoutableMulticastSource(const L3Address& srcAddr) const;
+    bool isRoutableMulticastGroup(const L3Address& group) const;
     void getMulticastPacketAddresses(cObject *obj, L3Address& srcAddr, L3Address& destAddr, unsigned short& ttl) const;
     void getMulticastGroupInfo(cObject *obj, NetworkInterface *& ie, L3Address& groupAddress) const;
 
