@@ -1,0 +1,101 @@
+%description:
+Tests IPv6 PIM-SM embedded-RP (RFC 3956): a multicast group in the FF7x::/12 range
+carries its rendezvous point address inside the group address, so PIM-SM derives
+the RP per group and builds the shared (*,G) tree toward it WITH NO statically
+configured RP.
+
+Topology (Ethernet point-to-point):
+
+    Receiver -- DR_R -- RP_router -- Stub
+
+The Ipv6FlatNetworkConfigurator gives the RP_router--Stub link the prefix
+aaaa:2:66::/64, which is routable from DR_R via RP_router. The receiver joins the
+embedded-RP group ff7e:140:aaaa:2:66::8, which encodes RIID=1, plen=64, prefix
+aaaa:2:66:0::/64 -- i.e. RP = aaaa:2:66:0::1.  No pim.RP is configured anywhere.
+
+Expected: DR_R derives the embedded RP from the group, finds the route toward it,
+and sends a PIM-SM Join(*, ff7e:140:aaaa:2:66::8) upstream toward RP_router --
+all without a static RP. (Full data-plane forwarding through a router that *owns*
+the prefix::RIID RP address is not testable in INET, which cannot assign such an
+address; the RP-derivation algorithm itself is covered by the EmbeddedRp_address
+unit test.)
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.node.ipv6.MulticastRouter6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network PimSmEmbeddedRpTest6
+{
+    types:
+        channel ethernetline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        Receiver: StandardHost6;
+        DR_R: MulticastRouter6;
+        RP_router: MulticastRouter6;
+        Stub: StandardHost6;
+        configurator: Ipv6FlatNetworkConfigurator;
+    connections:
+        Receiver.ethg++ <--> ethernetline <--> DR_R.ethg++;
+        DR_R.ethg++ <--> ethernetline <--> RP_router.ethg++;
+        RP_router.ethg++ <--> ethernetline <--> Stub.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = PimSmEmbeddedRpTest6
+sim-time-limit = 30s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+ned-path = .;../../../../src
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+# The Ipv6FlatNetworkConfigurator gives the RP_router--Stub link the prefix
+# aaaa:2:66::/64 (and routes toward it), so the embedded RP aaaa:2:66:0::1 -- the RP
+# encoded in the group below -- is routable from DR_R via RP_router.
+
+# Sparse mode PIM, MLD on; NO RP configured (embedded-RP needs none).
+**.pimConfig = xml("<config><interface mode=\"sparse\"/></config>")
+**.ipv6.hasMld = true
+**.neighbourDiscovery.dupAddrDetectTransmits = 0
+
+# Receiver joins the embedded-RP group ff7e:140:aaaa:2:66::8 (RP = aaaa:2:66:0::1).
+*.Receiver.numApps = 1
+*.Receiver.app[0].typename = "UdpSink"
+*.Receiver.app[0].localPort = 1000
+*.Receiver.app[0].multicastGroup = "ff7e:140:aaaa:2:66::8"
+
+# Ethernet queues
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue"
+**.eth[*].queue.dataQueue.packetCapacity = 100
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%# no static RP is configured -- only SSM and embedded-RP groups are served
+%contains: stdout
+no RP address configured; only source-specific (SSM) and embedded-RP
+%#--------------------------------------------------------------------------------------------------------------
+%# DR_R derives the embedded RP and builds the shared (*,G) tree toward it
+%contains: stdout
+Sending Join(S=*, G=ff7e:140:aaaa:2:66::8)
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
