@@ -209,6 +209,7 @@ class INET_API PimBase : public RoutingProtocolBase
     bool isSsmGroup(const L3Address& group) const;
     void getMulticastPacketAddresses(cObject *obj, L3Address& srcAddr, L3Address& destAddr, unsigned short& ttl) const;
     void getMulticastGroupInfo(cObject *obj, NetworkInterface *& ie, L3Address& groupAddress) const;
+    void getMulticastListenerSources(cObject *obj, NetworkInterface *& ie, L3Address& groupAddress, McastSourceFilterMode& filterMode, std::vector<L3Address>& sources) const;
 
     virtual void handleStartOperation(LifecycleOperation *operation) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;

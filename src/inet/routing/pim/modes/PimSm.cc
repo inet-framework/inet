@@ -9,6 +9,8 @@
 
 #include "inet/routing/pim/modes/PimSm.h"
 
+#include <set>
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -78,8 +80,11 @@ void PimSm::handleStartOperation(LifecycleOperation *operation)
     PimBase::handleStartOperation(operation);
 
     if (isEnabled) {
+        // An RP is only required for any-source (ASM) groups; source-specific
+        // multicast (SSM) groups are served by RP-less (S,G) trees, so PIM-SM may
+        // run without an RP configured.
         if (rpAddr.isUnspecified())
-            throw cRuntimeError("PimSm: missing RP address parameter.");
+            EV_WARN << "PimSm: no RP address configured; only source-specific multicast (SSM) groups will be served.\n";
 
         // subscribe for notifications
         cModule *host = findContainingNode(this);
@@ -92,6 +97,7 @@ void PimSm::handleStartOperation(LifecycleOperation *operation)
             host->subscribe(ipv6DataOnNonrpfSignal, this);
             host->subscribe(ipv6MulticastGroupRegisteredSignal, this);
             host->subscribe(ipv6MulticastGroupUnregisteredSignal, this);
+            host->subscribe(ipv6MulticastListenerChangeSignal, this);
         }
         else {
             host->subscribe(ipv4NewMulticastSignal, this);
@@ -100,6 +106,7 @@ void PimSm::handleStartOperation(LifecycleOperation *operation)
             host->subscribe(ipv4DataOnNonrpfSignal, this);
             host->subscribe(ipv4MulticastGroupRegisteredSignal, this);
             host->subscribe(ipv4MulticastGroupUnregisteredSignal, this);
+            host->subscribe(ipv4MulticastListenerChangeSignal, this);
         }
         host->subscribe(pimNeighborAddedSignal, this);
         host->subscribe(pimNeighborDeletedSignal, this);
@@ -133,6 +140,7 @@ void PimSm::stopPIMRouting()
             host->unsubscribe(ipv6DataOnNonrpfSignal, this);
             host->unsubscribe(ipv6MulticastGroupRegisteredSignal, this);
             host->unsubscribe(ipv6MulticastGroupUnregisteredSignal, this);
+            host->unsubscribe(ipv6MulticastListenerChangeSignal, this);
         }
         else {
             host->unsubscribe(ipv4NewMulticastSignal, this);
@@ -141,6 +149,7 @@ void PimSm::stopPIMRouting()
             host->unsubscribe(ipv4DataOnNonrpfSignal, this);
             host->unsubscribe(ipv4MulticastGroupRegisteredSignal, this);
             host->unsubscribe(ipv4MulticastGroupUnregisteredSignal, this);
+            host->unsubscribe(ipv4MulticastListenerChangeSignal, this);
         }
         host->unsubscribe(pimNeighborAddedSignal, this);
         host->unsubscribe(pimNeighborDeletedSignal, this);
@@ -271,6 +280,15 @@ void PimSm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
         PimInterface *pimInterface = pimIft->getInterfaceById(ie->getInterfaceId());
         if (pimInterface && pimInterface->getMode() == PimInterface::SparseMode && isRoutableMulticastGroup(group))
             multicastReceiverRemoved(ie, group);
+    }
+    else if (signalID == ipv4MulticastListenerChangeSignal || signalID == ipv6MulticastListenerChangeSignal) {
+        EV << "pimSM::receiveChangeNotification - SSM LISTENER CHANGE" << endl;
+        NetworkInterface *ie;
+        L3Address group;
+        McastSourceFilterMode filterMode;
+        std::vector<L3Address> sources;
+        getMulticastListenerSources(obj, ie, group, filterMode, sources);
+        multicastListenerSourcesChanged(ie, group, filterMode, sources);
     }
     else if (signalID == ipv4NewMulticastSignal || signalID == ipv6NewMulticastSignal) {
         EV << "PimSM::receiveChangeNotification - NEW MULTICAST" << endl;
@@ -1130,6 +1148,12 @@ void PimSm::restartExpiryTimer(Route *route, NetworkInterface *originIntf, int h
 
 void PimSm::unroutableMulticastPacketArrived(L3Address source, L3Address group)
 {
+    // Source-specific multicast groups have no RP: the source's DR does not
+    // Register them. Their (S,G) source trees are built on demand by the (S,G)
+    // Joins that receiver DRs send toward the source (see addSsmReceiver).
+    if (isSsmGroup(group))
+        return;
+
     IRoute *routeTowardSource = rt->findBestMatchingRoute(source); // rt->getOutputInterfaceForDestination(source);
     if (!routeTowardSource)
         return;
@@ -1178,6 +1202,87 @@ void PimSm::multicastReceiverAdded(NetworkInterface *ie, L3Address group)
     downstream->setLocalReceiverInclude(true);
 
     updateJoinDesired(routeG);
+}
+
+void PimSm::multicastListenerSourcesChanged(NetworkInterface *ie, L3Address group, McastSourceFilterMode filterMode, const std::vector<L3Address>& sources)
+{
+    // Source-specific multicast (RFC 4607): only SSM-range groups are served by
+    // RP-less (S,G) source trees here. ASM source filtering (INCLUDE/EXCLUDE for
+    // non-SSM groups) is not handled -- those groups use the (*,G) shared tree.
+    if (!isSsmGroup(group))
+        return;
+
+    PimInterface *pimInterface = pimIft->getInterfaceById(ie->getInterfaceId());
+    if (!pimInterface || pimInterface->getMode() != PimInterface::SparseMode)
+        return;
+
+    // SSM is INCLUDE-only (RFC 4607); an EXCLUDE filter in the SSM range carries
+    // no specific sources, so treat it as "no included sources" on this interface.
+    std::set<L3Address> wanted;
+    if (filterMode == MCAST_INCLUDE_SOURCES)
+        wanted.insert(sources.begin(), sources.end());
+    else
+        EV_WARN << "PIM-SM: ignoring EXCLUDE-mode filter for SSM group " << group << " (RFC 4607)\n";
+
+    // add (S,G) receiver state for the currently-included sources
+    for (const L3Address& source : wanted)
+        addSsmReceiver(ie, source, group);
+
+    // drop (S,G) receiver state for sources no longer included on this interface
+    std::vector<L3Address> noLongerWanted;
+    for (auto& elem : sgRoutes) {
+        Route *routeSG = elem.second;
+        if (routeSG->group != group || wanted.count(routeSG->source))
+            continue;
+        DownstreamInterface *downstream = routeSG->findDownstreamInterfaceByInterfaceId(ie->getInterfaceId());
+        if (downstream && downstream->localReceiverInclude())
+            noLongerWanted.push_back(routeSG->source);
+    }
+    for (const L3Address& source : noLongerWanted)
+        removeSsmReceiver(ie, source, group);
+}
+
+void PimSm::addSsmReceiver(NetworkInterface *ie, L3Address source, L3Address group)
+{
+    Route *routeSG = findRouteSG(source, group);
+    if (!routeSG) {
+        // An (S,G) source tree can only be built if there is a unicast route
+        // toward the source (its RPF interface/neighbor). Without one there is
+        // nowhere to send the Join, so ignore the membership.
+        if (!rt->findBestMatchingRoute(source)) {
+            EV_WARN << "PIM-SM SSM: no route toward source " << source << "; ignoring INCLUDE(" << source << ", " << group << ")\n";
+            return;
+        }
+        // SSM (S,G): a source-rooted tree with no RP and no Register; forwarding
+        // is on the shortest-path tree, and the upstream is RPF(source).
+        routeSG = addNewRouteSG(source, group, Route::PRUNED | Route::SPT_BIT);
+        routeSG->rpAddr = getUnspecifiedAddress();
+    }
+
+    DownstreamInterface *downstream = routeSG->findDownstreamInterfaceByInterfaceId(ie->getInterfaceId());
+    if (!downstream)
+        return; // the receiver's interface is the RPF interface toward the source
+
+    EV_DETAIL << "SSM receiver added for (" << source << ", " << group << ") on interface '" << ie->getInterfaceName() << "'.\n";
+    downstream->setLocalReceiverInclude(true);
+    updateJoinDesired(routeSG);
+}
+
+void PimSm::removeSsmReceiver(NetworkInterface *ie, L3Address source, L3Address group)
+{
+    Route *routeSG = findRouteSG(source, group);
+    if (!routeSG)
+        return;
+
+    EV_DETAIL << "SSM receiver removed for (" << source << ", " << group << ") on interface '" << ie->getInterfaceName() << "'.\n";
+    DownstreamInterface *downstream = routeSG->findDownstreamInterfaceByInterfaceId(ie->getInterfaceId());
+    if (downstream)
+        downstream->setLocalReceiverInclude(false);
+    updateJoinDesired(routeSG);
+
+    // tear the (S,G) down once it no longer forwards to any interface
+    if (routeSG->isInheritedOlistNull())
+        deleteMulticastRoute(routeSG);
 }
 
 /**
@@ -1903,10 +2008,11 @@ PimSm::Route *PimSm::addNewRouteSG(L3Address source, L3Address group, int flags)
         newRouteSG->metric = AssertMetric(false, getAdminDist(routeToSource), routeToSource->getMetric());
     }
 
-    // add downstream interfaces
+    // add downstream interfaces (the upstream interface, if any, is excluded)
     for (int i = 0; i < pimIft->getNumInterfaces(); i++) {
         PimInterface *pimInterface = pimIft->getInterface(i);
-        if (pimInterface->getMode() == PimInterface::SparseMode && pimInterface->getInterfacePtr() != newRouteSG->upstreamInterface->ie) {
+        if (pimInterface->getMode() == PimInterface::SparseMode &&
+            (!newRouteSG->upstreamInterface || pimInterface->getInterfacePtr() != newRouteSG->upstreamInterface->ie)) {
             DownstreamInterface *downstream = new DownstreamInterface(newRouteSG, pimInterface->getInterfacePtr(), DownstreamInterface::NO_INFO);
             newRouteSG->addDownstreamInterface(downstream);
         }

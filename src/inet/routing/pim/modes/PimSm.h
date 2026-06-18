@@ -252,6 +252,11 @@ class INET_API PimSm : public PimBase, protected cListener
     void multicastPacketForwarded(Packet *pk); // pk should begin with the IP header
     void multicastReceiverAdded(NetworkInterface *ie, L3Address group);
     void multicastReceiverRemoved(NetworkInterface *ie, L3Address group);
+    // source-specific multicast (RFC 4607): MLDv2/IGMPv3 INCLUDE(S,G) memberships
+    // drive (S,G) source trees built directly toward S, bypassing the RP
+    void multicastListenerSourcesChanged(NetworkInterface *ie, L3Address group, McastSourceFilterMode filterMode, const std::vector<L3Address>& sources);
+    void addSsmReceiver(NetworkInterface *ie, L3Address source, L3Address group);
+    void removeSsmReceiver(NetworkInterface *ie, L3Address source, L3Address group);
 
     // internal events
     void joinDesiredChanged(Route *route);

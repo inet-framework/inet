@@ -400,6 +400,27 @@ void PimBase::getMulticastGroupInfo(cObject *obj, NetworkInterface *& ie, L3Addr
     }
 }
 
+void PimBase::getMulticastListenerSources(cObject *obj, NetworkInterface *& ie, L3Address& groupAddress, McastSourceFilterMode& filterMode, std::vector<L3Address>& sources) const
+{
+    sources.clear();
+    if (isIpv6()) {
+        auto info = check_and_cast<const Ipv6MulticastGroupSourceInfo *>(obj);
+        ie = info->ie;
+        groupAddress = info->groupAddress;
+        filterMode = info->sourceList.filterMode;
+        for (auto& source : info->sourceList.sources)
+            sources.push_back(source);
+    }
+    else {
+        auto info = check_and_cast<const Ipv4MulticastGroupSourceInfo *>(obj);
+        ie = info->ie;
+        groupAddress = info->groupAddress;
+        filterMode = info->sourceList.filterMode;
+        for (auto& source : info->sourceList.sources)
+            sources.push_back(source);
+    }
+}
+
 std::ostream& operator<<(std::ostream& out, const PimBase::SourceAndGroup& sourceGroup)
 {
     out << "(source: " << (sourceGroup.source.isUnspecified() ? "*" : sourceGroup.source.str()) << ", "
