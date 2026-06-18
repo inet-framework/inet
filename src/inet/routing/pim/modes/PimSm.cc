@@ -80,11 +80,12 @@ void PimSm::handleStartOperation(LifecycleOperation *operation)
     PimBase::handleStartOperation(operation);
 
     if (isEnabled) {
-        // An RP is only required for any-source (ASM) groups; source-specific
-        // multicast (SSM) groups are served by RP-less (S,G) trees, so PIM-SM may
-        // run without an RP configured.
+        // A statically configured RP is only required for any-source (ASM) groups
+        // whose RP is not embedded in the group address: source-specific multicast
+        // (SSM) groups use RP-less (S,G) trees and embedded-RP groups (RFC 3956)
+        // carry their RP in the group address, so PIM-SM may run without one.
         if (rpAddr.isUnspecified())
-            EV_WARN << "PimSm: no RP address configured; only source-specific multicast (SSM) groups will be served.\n";
+            EV_WARN << "PimSm: no RP address configured; only source-specific (SSM) and embedded-RP (RFC 3956) groups will be served.\n";
 
         // subscribe for notifications
         cModule *host = findContainingNode(this);
@@ -999,7 +1000,7 @@ void PimSm::processExpiryTimer(cMessage *timer)
             else
                 i++;
         }
-        if (IamRP(rpAddr) && route->type == G) {
+        if (IamRP(route->rpAddr) && route->type == G) {
             EV << "ET for (*,G) route on RP expires - go to stopped" << endl;
             cancelAndDeleteTimer(route->upstreamInterface->expiryTimer);
         }
@@ -1162,7 +1163,7 @@ void PimSm::unroutableMulticastPacketArrived(L3Address source, L3Address group)
     if (!rpfInterface || rpfInterface->getMode() != PimInterface::SparseMode)
         return;
 
-    NetworkInterface *interfaceTowardRP = rt->getOutputInterfaceForDestination(rpAddr);
+    NetworkInterface *interfaceTowardRP = rt->getOutputInterfaceForDestination(getRpForGroup(group));
 
     // RPF check and check if I am DR of the source
     if ((interfaceTowardRP != routeTowardSource->getInterface()) && routeTowardSource->getNextHopAsGeneric().isUnspecified()) {
@@ -1591,8 +1592,9 @@ void PimSm::sendPIMRegisterNull(L3Address multOrigin, L3Address multGroup)
 
         emit(sentRegisterPkSignal, pk);
 
-        NetworkInterface *interfaceToRP = rt->getOutputInterfaceForDestination(rpAddr);
-        sendToIP(pk, L3Address(), rpAddr, interfaceToRP->getInterfaceId(), MAX_TTL);
+        L3Address rp = getRpForGroup(multGroup);
+        NetworkInterface *interfaceToRP = rt->getOutputInterfaceForDestination(rp);
+        sendToIP(pk, L3Address(), rp, interfaceToRP->getInterfaceId(), MAX_TTL);
     }
 }
 
@@ -1928,15 +1930,25 @@ void PimSm::getEncapsulatedAddresses(Packet *pk, L3Address& source, L3Address& g
     }
 }
 
+L3Address PimSm::getRpForGroup(const L3Address& group) const
+{
+    // RFC 3956 embedded-RP: a group in the FF7x::/12 range carries its RP in the
+    // group address itself, so it needs no static configuration. Every other
+    // (any-source) group uses the statically configured RP.
+    if (isIpv6() && group.toIpv6().isEmbeddedRp())
+        return group.toIpv6().getEmbeddedRpAddress();
+    return rpAddr;
+}
+
 PimSm::Route *PimSm::addNewRouteG(L3Address group, int flags)
 {
     Route *newRouteG = new Route(this, G, getUnspecifiedAddress(), group);
     newRouteG->setFlags(flags);
-    newRouteG->rpAddr = rpAddr;
+    newRouteG->rpAddr = getRpForGroup(group);
 
     // set upstream interface toward RP and set metric
-    if (!IamRP(rpAddr)) {
-        IRoute *routeToRP = rt->findBestMatchingRoute(rpAddr);
+    if (!IamRP(newRouteG->rpAddr)) {
+        IRoute *routeToRP = rt->findBestMatchingRoute(newRouteG->rpAddr);
         if (routeToRP) {
             NetworkInterface *ieTowardRP = routeToRP->getInterface();
             L3Address rpfNeighbor = routeToRP->getNextHopAsGeneric();
@@ -1985,7 +1997,7 @@ PimSm::Route *PimSm::addNewRouteSG(L3Address source, L3Address group, int flags)
 
     Route *newRouteSG = new Route(this, SG, source, group);
     newRouteSG->setFlags(flags);
-    newRouteSG->rpAddr = rpAddr;
+    newRouteSG->rpAddr = getRpForGroup(group);
 
     // set upstream interface toward source and set metric
     IRoute *routeToSource = rt->findBestMatchingRoute(source);

@@ -287,6 +287,9 @@ class INET_API PimSm : public PimBase, protected cListener
 
     // helpers
     bool IamRP(L3Address rpAddr) { return rt->isLocalAddress(rpAddr); }
+    // the RP for a group: the RP embedded in the group address for embedded-RP
+    // groups (RFC 3956, FF7x::/12), otherwise the statically configured RP
+    L3Address getRpForGroup(const L3Address& group) const;
     bool IamDR(NetworkInterface *ie);
     // AF-correct unspecified source used as the 'S' of (*,G) state
     L3Address getUnspecifiedAddress() const;
