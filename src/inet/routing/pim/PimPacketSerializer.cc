@@ -24,76 +24,110 @@ Register_Serializer(PimRegisterStop, PimPacketSerializer);
 
 namespace {
 
-// TODO EncodedAddress serializers/deserializers currently allow only IPv4 addresses with native encoding
+// Encoded-Address forms (RFC 4601 §4.9.1): Address Family (1 byte, 1=IPv4 / 2=IPv6) +
+// Encoding Type (1 byte, 0=native) + the native address (4 bytes for IPv4, 16 for IPv6),
+// plus the flags + Mask Length byte for the group/source forms. The same wire format serves
+// both families; the IPv4 encoding is byte-for-byte unchanged.
 
 void serializeEncodedUnicastAddress(MemoryOutputStream& stream, const EncodedUnicastAddress& addr)
 {
-    stream.writeByte(1); // Address Family: '1' represents the IPv4 address family
-    stream.writeByte(0); // Encoding Type: '0' represents the native encoding of the Address Family.
-    stream.writeIpv4Address(addr.unicastAddress.toIpv4());
+    bool ipv6 = addr.unicastAddress.getType() == L3Address::IPv6;
+    stream.writeByte(ipv6 ? 2 : 1); // Address Family
+    stream.writeByte(0); // Encoding Type: native
+    if (ipv6)
+        stream.writeIpv6Address(addr.unicastAddress.toIpv6());
+    else
+        stream.writeIpv4Address(addr.unicastAddress.toIpv4());
 }
 
 void serializeEncodedGroupAddress(MemoryOutputStream& stream, const EncodedGroupAddress& addr)
 {
-    // Encoded-Group Address:
-    stream.writeByte(1); // Address Family: '1' represents the IPv4 address family
-    stream.writeByte(0); // Encoding Type: '0' represents the native encoding of the Address Family.
+    bool ipv6 = addr.groupAddress.getType() == L3Address::IPv6;
+    stream.writeByte(ipv6 ? 2 : 1); // Address Family
+    stream.writeByte(0); // Encoding Type: native
     stream.writeBit(addr.B);
     stream.writeNBitsOfUint64Be(addr.reserved, 6); // Reserved
     stream.writeBit(addr.Z); // FIXME Admin Scope [Z]one: indicates the group range is an admin scope zone.
-    stream.writeByte(addr.maskLength); // Mask Length: 32 for IPv4 native encoding
-    stream.writeIpv4Address(addr.groupAddress.toIpv4());
+    stream.writeByte(addr.maskLength); // Mask Length: 32 for IPv4, 128 for IPv6 native encoding
+    if (ipv6)
+        stream.writeIpv6Address(addr.groupAddress.toIpv6());
+    else
+        stream.writeIpv4Address(addr.groupAddress.toIpv4());
 }
 
 void serializeEncodedSourceAddress(MemoryOutputStream& stream, const EncodedSourceAddress& addr)
 {
-    stream.writeByte(1); // Address Family: '1' represents the IPv4 address family
-    stream.writeByte(0); // Encoding Type: '0' represents the native encoding of the Address Family.
+    bool ipv6 = addr.sourceAddress.getType() == L3Address::IPv6;
+    stream.writeByte(ipv6 ? 2 : 1); // Address Family
+    stream.writeByte(0); // Encoding Type: native
     stream.writeNBitsOfUint64Be(addr.reserved, 5); // Reserved
     stream.writeBit(addr.S);
     stream.writeBit(addr.W);
     stream.writeBit(addr.R);
-    stream.writeByte(addr.maskLength); // Mask Length: 32 for IPv4 native encoding
-    stream.writeIpv4Address(addr.sourceAddress.toIpv4());
+    stream.writeByte(addr.maskLength); // Mask Length: 32 for IPv4, 128 for IPv6 native encoding
+    if (ipv6)
+        stream.writeIpv6Address(addr.sourceAddress.toIpv6());
+    else
+        stream.writeIpv4Address(addr.sourceAddress.toIpv4());
 }
 
-void deserializeEncodedUnicastAddress(MemoryInputStream& stream, const Ptr<PimPacket> pimPacket, EncodedUnicastAddress& addr)
+// The deserialize helpers return the number of bytes consumed (which differs by address
+// family), so the per-message length accounting stays correct for both IPv4 and IPv6.
+
+B deserializeEncodedUnicastAddress(MemoryInputStream& stream, const Ptr<PimPacket> pimPacket, EncodedUnicastAddress& addr)
 {
     // Encoded-Unicast Address
-    uint8_t addressFamily = stream.readByte(); // Address Family: '1' represents the IPv4 address family
-    uint8_t encodingType = stream.readByte(); // Encoding Type: '0' represents the native encoding of the Address Family.
-    if (addressFamily != 1 || encodingType != 0)
+    uint8_t addressFamily = stream.readByte();
+    uint8_t encodingType = stream.readByte();
+    if (encodingType != 0 || (addressFamily != 1 && addressFamily != 2))
         pimPacket->markIncorrect();
+    if (addressFamily == 2) {
+        addr.unicastAddress = stream.readIpv6Address();
+        return B(2 + 16);
+    }
     addr.unicastAddress = stream.readIpv4Address();
+    return B(2 + 4);
 }
 
-void deserializeEncodedGroupAddress(MemoryInputStream& stream, const Ptr<PimPacket> pimPacket, EncodedGroupAddress& addr)
+B deserializeEncodedGroupAddress(MemoryInputStream& stream, const Ptr<PimPacket> pimPacket, EncodedGroupAddress& addr)
 {
     // Encoded-Group Address:
-    uint8_t addressFamily = stream.readByte(); // Address Family: '1' represents the IPv4 address family
-    uint8_t encodingType = stream.readByte(); // Encoding Type: '0' represents the native encoding of the Address Family.
+    uint8_t addressFamily = stream.readByte();
+    uint8_t encodingType = stream.readByte();
     addr.B = stream.readBit();
     addr.reserved = stream.readNBitsToUint64Be(6); // Reserved
     addr.Z = stream.readBit(); // FIXME Admin Scope [Z]one: indicates the group range is an admin scope zone.
-    addr.maskLength = stream.readByte(); // Mask Length: 32 for IPv4 native encoding
-    if (addressFamily != 1 || encodingType != 0 || addr.maskLength != 32)
+    addr.maskLength = stream.readByte(); // Mask Length: 32 for IPv4, 128 for IPv6 native encoding
+    bool ipv6 = addressFamily == 2;
+    if (encodingType != 0 || (addressFamily != 1 && addressFamily != 2) || addr.maskLength != (ipv6 ? 128 : 32))
         pimPacket->markIncorrect();
+    if (ipv6) {
+        addr.groupAddress = stream.readIpv6Address();
+        return B(4 + 16);
+    }
     addr.groupAddress = stream.readIpv4Address();
+    return B(4 + 4);
 }
 
-void deserializeEncodedSourceAddress(MemoryInputStream& stream, const Ptr<PimPacket> pimPacket, EncodedSourceAddress& addr)
+B deserializeEncodedSourceAddress(MemoryInputStream& stream, const Ptr<PimPacket> pimPacket, EncodedSourceAddress& addr)
 {
     // Encoded-Source Address
-    uint8_t addressFamily = stream.readByte(); // Address Family: '1' represents the IPv4 address family
-    uint8_t encodingType = stream.readByte(); // Encoding Type: '0' represents the native encoding of the Address Family.
+    uint8_t addressFamily = stream.readByte();
+    uint8_t encodingType = stream.readByte();
     addr.reserved = stream.readNBitsToUint64Be(5); // Reserved
     addr.S = stream.readBit();
     addr.W = stream.readBit();
     addr.R = stream.readBit();
-    addr.maskLength = stream.readByte(); // Mask Length: 32 for IPv4 native encoding
-    if (addressFamily != 1 || encodingType != 0 || addr.maskLength != 32)
+    addr.maskLength = stream.readByte(); // Mask Length: 32 for IPv4, 128 for IPv6 native encoding
+    bool ipv6 = addressFamily == 2;
+    if (encodingType != 0 || (addressFamily != 1 && addressFamily != 2) || addr.maskLength != (ipv6 ? 128 : 32))
         pimPacket->markIncorrect();
+    if (ipv6) {
+        addr.sourceAddress = stream.readIpv6Address();
+        return B(4 + 16);
+    }
     addr.sourceAddress = stream.readIpv4Address();
+    return B(4 + 4);
 }
 
 } // namespace
@@ -312,10 +346,8 @@ const Ptr<Chunk> PimPacketSerializer::deserialize(MemoryInputStream& stream) con
             pimRegisterStop->setReserved(pimPacket->getReserved());
             pimRegisterStop->setChecksum(pimPacket->getChecksum());
             pimRegisterStop->setChecksumMode(pimPacket->getChecksumMode());
-            deserializeEncodedGroupAddress(stream, pimRegisterStop, pimRegisterStop->getGroupAddressForUpdate());
-            length += ENCODED_GROUP_ADDRESS_LENGTH;
-            deserializeEncodedUnicastAddress(stream, pimRegisterStop, pimRegisterStop->getSourceAddressForUpdate());
-            length += ENCODED_UNICODE_ADDRESS_LENGTH;
+            length += deserializeEncodedGroupAddress(stream, pimRegisterStop, pimRegisterStop->getGroupAddressForUpdate());
+            length += deserializeEncodedUnicastAddress(stream, pimRegisterStop, pimRegisterStop->getSourceAddressForUpdate());
             pimRegisterStop->setChunkLength(length);
             return pimRegisterStop;
         }
@@ -330,8 +362,7 @@ const Ptr<Chunk> PimPacketSerializer::deserialize(MemoryInputStream& stream) con
             pimJoinPrune->setReserved(pimPacket->getReserved());
             pimJoinPrune->setChecksum(pimPacket->getChecksum());
             pimJoinPrune->setChecksumMode(pimPacket->getChecksumMode());
-            deserializeEncodedUnicastAddress(stream, pimJoinPrune, pimJoinPrune->getUpstreamNeighborAddressForUpdate());
-            length += ENCODED_UNICODE_ADDRESS_LENGTH;
+            length += deserializeEncodedUnicastAddress(stream, pimJoinPrune, pimJoinPrune->getUpstreamNeighborAddressForUpdate());
             pimJoinPrune->setReserved2(stream.readByte()); // Reserved
             pimJoinPrune->setJoinPruneGroupsArraySize(stream.readByte());
             pimJoinPrune->setHoldTime(stream.readUint16Be());
@@ -339,20 +370,15 @@ const Ptr<Chunk> PimPacketSerializer::deserialize(MemoryInputStream& stream) con
             if ((pimPacket->getType() == Graft || pimPacket->getType() == GraftAck) && pimJoinPrune->getHoldTime() != 0)
                 pimJoinPrune->markIncorrect();
             for (size_t i = 0; i < pimJoinPrune->getJoinPruneGroupsArraySize(); ++i) {
-                deserializeEncodedGroupAddress(stream, pimJoinPrune, pimJoinPrune->getJoinPruneGroupsForUpdate(i).getGroupAddressForUpdate());
-                length += ENCODED_GROUP_ADDRESS_LENGTH;
+                length += deserializeEncodedGroupAddress(stream, pimJoinPrune, pimJoinPrune->getJoinPruneGroupsForUpdate(i).getGroupAddressForUpdate());
                 auto& joinPruneGroup = pimJoinPrune->getJoinPruneGroupsForUpdate(i);
                 joinPruneGroup.setJoinedSourceAddressArraySize(stream.readUint16Be());
                 joinPruneGroup.setPrunedSourceAddressArraySize(stream.readUint16Be());
                 length += B(4);
-                for (size_t k = 0; k < joinPruneGroup.getJoinedSourceAddressArraySize(); ++k) {
-                    deserializeEncodedSourceAddress(stream, pimJoinPrune, joinPruneGroup.getJoinedSourceAddressForUpdate(k));
-                    length += ENCODED_SOURCE_ADDRESS_LENGTH;
-                }
-                for (size_t k = 0; k < pimJoinPrune->getJoinPruneGroups(i).getPrunedSourceAddressArraySize(); ++k) {
-                    deserializeEncodedSourceAddress(stream, pimJoinPrune, joinPruneGroup.getPrunedSourceAddressForUpdate(k));
-                    length += ENCODED_SOURCE_ADDRESS_LENGTH;
-                }
+                for (size_t k = 0; k < joinPruneGroup.getJoinedSourceAddressArraySize(); ++k)
+                    length += deserializeEncodedSourceAddress(stream, pimJoinPrune, joinPruneGroup.getJoinedSourceAddressForUpdate(k));
+                for (size_t k = 0; k < pimJoinPrune->getJoinPruneGroups(i).getPrunedSourceAddressArraySize(); ++k)
+                    length += deserializeEncodedSourceAddress(stream, pimJoinPrune, joinPruneGroup.getPrunedSourceAddressForUpdate(k));
             }
             pimJoinPrune->setChunkLength(length);
             return pimJoinPrune;
@@ -364,10 +390,8 @@ const Ptr<Chunk> PimPacketSerializer::deserialize(MemoryInputStream& stream) con
             pimAssert->setReserved(pimPacket->getReserved());
             pimAssert->setChecksum(pimPacket->getChecksum());
             pimAssert->setChecksumMode(pimPacket->getChecksumMode());
-            deserializeEncodedGroupAddress(stream, pimAssert, pimAssert->getGroupAddressForUpdate());
-            length += ENCODED_GROUP_ADDRESS_LENGTH;
-            deserializeEncodedUnicastAddress(stream, pimAssert, pimAssert->getSourceAddressForUpdate());
-            length += ENCODED_UNICODE_ADDRESS_LENGTH;
+            length += deserializeEncodedGroupAddress(stream, pimAssert, pimAssert->getGroupAddressForUpdate());
+            length += deserializeEncodedUnicastAddress(stream, pimAssert, pimAssert->getSourceAddressForUpdate());
             pimAssert->setR(stream.readBit());
             pimAssert->setMetricPreference(stream.readNBitsToUint64Be(31));
             pimAssert->setMetric(stream.readUint32Be());
@@ -381,12 +405,9 @@ const Ptr<Chunk> PimPacketSerializer::deserialize(MemoryInputStream& stream) con
             pimStateRefresh->setReserved(pimPacket->getReserved());
             pimStateRefresh->setChecksum(pimPacket->getChecksum());
             pimStateRefresh->setChecksumMode(pimPacket->getChecksumMode());
-            deserializeEncodedGroupAddress(stream, pimStateRefresh, pimStateRefresh->getGroupAddressForUpdate());
-            length += ENCODED_GROUP_ADDRESS_LENGTH;
-            deserializeEncodedUnicastAddress(stream, pimStateRefresh, pimStateRefresh->getSourceAddressForUpdate());
-            length += ENCODED_UNICODE_ADDRESS_LENGTH;
-            deserializeEncodedUnicastAddress(stream, pimStateRefresh, pimStateRefresh->getOriginatorAddressForUpdate());
-            length += ENCODED_UNICODE_ADDRESS_LENGTH;
+            length += deserializeEncodedGroupAddress(stream, pimStateRefresh, pimStateRefresh->getGroupAddressForUpdate());
+            length += deserializeEncodedUnicastAddress(stream, pimStateRefresh, pimStateRefresh->getSourceAddressForUpdate());
+            length += deserializeEncodedUnicastAddress(stream, pimStateRefresh, pimStateRefresh->getOriginatorAddressForUpdate());
             stream.readBit(); // R: The Rendezvous Point Tree bit.  Set to 0 for PIM-DM.  Ignored upon receipt.
             pimStateRefresh->setMetricPreference(stream.readNBitsToUint64Be(31));
             pimStateRefresh->setMetric(stream.readUint32Be());

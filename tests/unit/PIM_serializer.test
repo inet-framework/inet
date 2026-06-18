@@ -1,0 +1,129 @@
+%description:
+Byte-exact round-trip serialization of PIM packets carrying IPv6 Encoded-Address forms
+(RFC 4601 §4.9.1 with Address Family = 2): an Encoded-Group + Encoded-Unicast address in a
+PimAssert, and an Encoded-Unicast + Encoded-Group + Encoded-Source address in a PimJoinPrune.
+Verifies the serializer writes family=2 with 16-byte addresses (mask length 128) and that
+encode->decode reproduces the IPv6 addresses and the correct lengths.
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/routing/pim/PimPacket_m.h"
+
+using namespace inet;
+
+%global:
+
+template<typename T>
+Ptr<const T> roundTrip(const Ptr<const T>& original)
+{
+    Packet pkt("test");
+    pkt.insertAtFront(original);
+    auto bytes = pkt.peekAllAsBytes();
+
+    Packet pkt2("test2");
+    pkt2.insertAtFront(bytes);
+    return pkt2.popAtFront<T>(pkt2.getDataLength());
+}
+
+%activity:
+
+// === 1. PimAssert with IPv6 group + source ===
+{
+    EV << "=== PimAssert (IPv6) ===" << endl;
+    auto a = makeShared<PimAssert>();
+
+    EncodedGroupAddress ega;
+    ega.B = false;
+    ega.reserved = 0;
+    ega.Z = false;
+    ega.maskLength = 128;
+    ega.groupAddress = L3Address(Ipv6Address("ff3e::1"));
+    a->setGroupAddress(ega);
+
+    EncodedUnicastAddress eua;
+    eua.unicastAddress = L3Address(Ipv6Address("2001:db8::1"));
+    a->setSourceAddress(eua);
+
+    a->setR(false);
+    a->setMetricPreference(101);
+    a->setMetric(20);
+    a->setChunkLength(B(4 + 20 + 18 + 8)); // header + EncGroup(v6) + EncUnicast(v6) + R/pref/metric
+
+    Packet pkt("sz");
+    pkt.insertAtFront(a);
+    B len = pkt.getDataLength();
+    EV << "  serializedLength: " << len.get() << endl;
+    ASSERT(len == B(50));
+
+    auto p = roundTrip(staticPtrCast<const PimPacket>(a));
+    ASSERT(p != nullptr);
+    auto a2 = dynamicPtrCast<const PimAssert>(p);
+    ASSERT(a2 != nullptr);
+    ASSERT(a2->getGroupAddress().groupAddress.getType() == L3Address::IPv6);
+    ASSERT(a2->getGroupAddress().groupAddress == L3Address(Ipv6Address("ff3e::1")));
+    ASSERT(a2->getGroupAddress().maskLength == 128);
+    ASSERT(a2->getSourceAddress().unicastAddress == L3Address(Ipv6Address("2001:db8::1")));
+    ASSERT(a2->getMetricPreference() == 101);
+    ASSERT(a2->getMetric() == 20);
+    EV << "  group: " << a2->getGroupAddress().groupAddress << endl;
+    EV << "  source: " << a2->getSourceAddress().unicastAddress << endl;
+    EV << "  PASS" << endl;
+}
+
+// === 2. PimJoinPrune with IPv6 upstream + one group + one joined source ===
+{
+    EV << "=== PimJoinPrune (IPv6) ===" << endl;
+    auto jp = makeShared<PimJoinPrune>();
+
+    EncodedUnicastAddress up;
+    up.unicastAddress = L3Address(Ipv6Address("fe80::1"));
+    jp->setUpstreamNeighborAddress(up);
+    jp->setReserved2(0);
+    jp->setHoldTime(210);
+    jp->setJoinPruneGroupsArraySize(1);
+
+    JoinPruneGroup g;
+    EncodedGroupAddress grp;
+    grp.B = false; grp.reserved = 0; grp.Z = false; grp.maskLength = 128;
+    grp.groupAddress = L3Address(Ipv6Address("ff3e::2"));
+    g.setGroupAddress(grp);
+    g.setJoinedSourceAddressArraySize(1);
+    EncodedSourceAddress src;
+    src.reserved = 0; src.S = true; src.W = false; src.R = false; src.maskLength = 128;
+    src.sourceAddress = L3Address(Ipv6Address("2001:db8::2"));
+    g.setJoinedSourceAddress(0, src);
+    jp->setJoinPruneGroups(0, g);
+
+    // header(4) + EncUnicast(18) + reserved2/numGroups/holdTime(4)
+    //   + EncGroup(20) + joined/pruned counts(4) + EncSource(20)
+    jp->setChunkLength(B(4 + 18 + 4 + 20 + 4 + 20));
+
+    Packet pkt("sz");
+    pkt.insertAtFront(jp);
+    B len = pkt.getDataLength();
+    EV << "  serializedLength: " << len.get() << endl;
+    ASSERT(len == B(70));
+
+    auto p = roundTrip(staticPtrCast<const PimPacket>(jp));
+    ASSERT(p != nullptr);
+    auto jp2 = dynamicPtrCast<const PimJoinPrune>(p);
+    ASSERT(jp2 != nullptr);
+    ASSERT(jp2->getUpstreamNeighborAddress().unicastAddress == L3Address(Ipv6Address("fe80::1")));
+    ASSERT(jp2->getHoldTime() == 210);
+    ASSERT(jp2->getJoinPruneGroupsArraySize() == 1);
+    auto& g2 = jp2->getJoinPruneGroups(0);
+    ASSERT(g2.getGroupAddress().groupAddress == L3Address(Ipv6Address("ff3e::2")));
+    ASSERT(g2.getJoinedSourceAddressArraySize() == 1);
+    ASSERT(g2.getJoinedSourceAddress(0).sourceAddress == L3Address(Ipv6Address("2001:db8::2")));
+    ASSERT(g2.getJoinedSourceAddress(0).S == true);
+    EV << "  upstream: " << jp2->getUpstreamNeighborAddress().unicastAddress << endl;
+    EV << "  group: " << g2.getGroupAddress().groupAddress << endl;
+    EV << "  joinedSource: " << g2.getJoinedSourceAddress(0).sourceAddress << endl;
+    EV << "  PASS" << endl;
+}
+
+EV << "All PIM IPv6 serializer round-trips passed." << endl;
+
+%contains: stdout
+All PIM IPv6 serializer round-trips passed.
