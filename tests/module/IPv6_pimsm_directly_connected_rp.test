@@ -1,0 +1,113 @@
+%description:
+Regression test for PIM-SM (*,G) upstream RPF-neighbor re-resolution when the PIM
+adjacency toward a DIRECTLY-CONNECTED RP forms only after the (*,G) route is
+created.
+
+A receiver's designated router that is directly connected to the RP reaches the
+RP via an on-link route (unspecified next hop). If a host joins the group at t=0 --
+before the routers have exchanged PIM Hellos -- the (*,G) route is created with no
+upstream PIM neighbor yet. The router must re-resolve the upstream neighbor once
+the RP's Hello arrives and (re)send the Join; otherwise the Join is addressed to
+nobody, the shared tree never forms, and nothing is forwarded.
+
+Topology (Ethernet point-to-point), STATIC RP, normal (non-embedded) ASM group:
+
+    Source -- DR_S -- RP -- DR_R -- Receiver
+
+RP is directly connected to DR_R and owns the static RP address 2001:db8:99::1 on
+that link (assigned with Ipv6NetworkConfigurator's @address). The Receiver joins
+ff0e::8 at t=0 (before PIM convergence); the Source starts sending at t=20s.
+
+Expected: DR_R re-resolves the RP's link-local once the adjacency comes up, the
+shared tree builds, and the Receiver actually receives the stream forwarded
+through the RP. (Without the fix the Receiver receives nothing.)
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ipv6.MulticastRouter6;
+import inet.node.ipv6.StandardHost6;
+
+network PimSmDirectlyConnectedRpTest6
+{
+    submodules:
+        Source: StandardHost6;
+        DR_S: MulticastRouter6;   // source's designated router
+        RP: MulticastRouter6;     // rendezvous point -- directly connected to DR_R
+        DR_R: MulticastRouter6;   // receiver's designated router
+        Receiver: StandardHost6;
+        configurator: Ipv6NetworkConfigurator;
+    connections:
+        Source.ethg++ <--> Eth100M <--> DR_S.ethg++;
+        DR_S.ethg++ <--> Eth100M <--> RP.ethg++;
+        RP.ethg++ <--> Eth100M <--> DR_R.ethg++;
+        DR_R.ethg++ <--> Eth100M <--> Receiver.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = PimSmDirectlyConnectedRpTest6
+sim-time-limit = 60s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+ned-path = .;../../../../src
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+# RP owns the static RP address 2001:db8:99::1 on its link toward DR_R, so DR_R
+# reaches the RP via an ON-LINK route (unspecified next hop) -- the case the fix
+# targets. Every other link gets an auto-assigned unique 2001:db8:N::/64.
+*.configurator.config = xml("<config>\
+    <interface hosts='RP'   towards='DR_R' prefix='2001:db8:99::/64' address='2001:db8:99::1'/>\
+    <interface hosts='DR_R' towards='RP'   prefix='2001:db8:99::/64'/>\
+    <interface hosts='**'                  prefix='2001:db8:x::/64'/>\
+    </config>")
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+
+# Sparse mode PIM with a STATIC RP = the directly-connected RP.
+**.pimConfig = xml("<config><interface mode=\"sparse\"/></config>")
+**.pim.pimSM.RP = "2001:db8:99::1"
+**.ipv6.hasMld = true
+**.neighbourDiscovery.dupAddrDetectTransmits = 0
+
+# Receiver joins at t=0 (default), BEFORE the routers exchange PIM Hellos.
+**.Receiver.numApps = 1
+**.Receiver.app[0].typename = "UdpSink"
+**.Receiver.app[0].localPort = 5000
+**.Receiver.app[0].multicastGroup = "ff0e::8"
+
+# Source behind DR_S starts sending at t=20s.
+**.Source.numApps = 1
+**.Source.app[0].typename = "UdpBasicApp"
+**.Source.app[0].destAddresses = "ff0e::8"
+**.Source.app[0].destPort = 5000
+**.Source.app[0].messageLength = 100B
+**.Source.app[0].timeToLive = 10
+**.Source.app[0].startTime = 20s
+**.Source.app[0].sendInterval = 1s
+**.Source.app[0].stopTime = 50s
+
+# Ethernet queues
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue"
+**.eth[*].queue.dataQueue.packetCapacity = 100
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%# the shared tree forms through the directly-connected RP and the Receiver receives the stream
+%contains: stdout
+Received packet:
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

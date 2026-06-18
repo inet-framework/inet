@@ -96,14 +96,13 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.Source.app[0].sendInterval = 1s
 **.Source.app[0].stopTime = 50s
 
-# The Receiver joins at t=10s -- after the routers' PIM adjacencies are up (~t=4s)
-# and before the Source starts (t=20s) -- so the shared (*,G) tree toward the RP is
-# built once PIM neighbors exist (the realistic order: routers converge, then hosts
-# join), then the stream flows down it.
+# The Receiver joins at t=0 (default), before the routers exchange PIM Hellos: the
+# DR re-resolves the (*,G) upstream neighbor toward the directly-connected RP once
+# the adjacency comes up, so the shared tree still builds (see
+# IPv6_pimsm_directly_connected_rp).
 **.Receiver.numApps = 1
 **.Receiver.app[0].typename = "UdpSink"
 **.Receiver.app[0].localPort = 5000
-**.Receiver.app[0].startTime = 10s
 **.Receiver.app[0].multicastGroup = "ff7e:140:aaaa:2:66::8"
 
 # Ethernet queues
