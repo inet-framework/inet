@@ -696,6 +696,9 @@ void Ipv6InterfaceData::addMulticastListener(const Ipv6Address& multicastAddress
     if (!groupData) {
         groupData = new RouterMulticastGroupData(multicastAddress);
         getRouterData()->reportedMulticastGroups.push_back(groupData);
+
+        Ipv6MulticastGroupInfo info(getNetworkInterface(), multicastAddress);
+        check_and_cast<cModule *>(getNetworkInterface()->getInterfaceTable())->emit(ipv6MulticastGroupRegisteredSignal, &info);
     }
 
     if (!groupData->sourceList.containsAll()) {
@@ -713,6 +716,9 @@ void Ipv6InterfaceData::addMulticastListener(const Ipv6Address& multicastAddress
     if (!groupData) {
         groupData = new RouterMulticastGroupData(multicastAddress);
         getRouterData()->reportedMulticastGroups.push_back(groupData);
+
+        Ipv6MulticastGroupInfo info(getNetworkInterface(), multicastAddress);
+        check_and_cast<cModule *>(getNetworkInterface()->getInterfaceTable())->emit(ipv6MulticastGroupRegisteredSignal, &info);
     }
 
     if (!groupData->sourceList.contains(sourceAddress)) {
@@ -723,8 +729,12 @@ void Ipv6InterfaceData::addMulticastListener(const Ipv6Address& multicastAddress
 
 void Ipv6InterfaceData::removeMulticastListener(const Ipv6Address& multicastAddress)
 {
-    if (removeRouterGroupData(multicastAddress))
+    if (removeRouterGroupData(multicastAddress)) {
         changed1(F_MULTICAST_LISTENERS);
+
+        Ipv6MulticastGroupInfo info(getNetworkInterface(), multicastAddress);
+        check_and_cast<cModule *>(getNetworkInterface()->getInterfaceTable())->emit(ipv6MulticastGroupUnregisteredSignal, &info);
+    }
 }
 
 void Ipv6InterfaceData::removeMulticastListener(const Ipv6Address& multicastAddress, const Ipv6Address& sourceAddress)
@@ -732,8 +742,12 @@ void Ipv6InterfaceData::removeMulticastListener(const Ipv6Address& multicastAddr
     RouterMulticastGroupData *groupData = findRouterGroupData(multicastAddress);
     if (groupData) {
         groupData->sourceList.remove(sourceAddress);
-        if (groupData->sourceList.isEmpty())
+        if (groupData->sourceList.isEmpty()) {
             removeRouterGroupData(multicastAddress);
+
+            Ipv6MulticastGroupInfo info(getNetworkInterface(), multicastAddress);
+            check_and_cast<cModule *>(getNetworkInterface()->getInterfaceTable())->emit(ipv6MulticastGroupUnregisteredSignal, &info);
+        }
         changed1(F_MULTICAST_LISTENERS);
     }
 }
