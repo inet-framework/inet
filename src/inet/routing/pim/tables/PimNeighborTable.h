@@ -11,6 +11,7 @@
 #define __INET_PIMNEIGHBORTABLE_H
 
 #include "inet/common/SimpleModule.h"
+#include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
@@ -32,20 +33,20 @@ class INET_API PimNeighbor : public cObject
   protected:
     PimNeighborTable *nt;
     NetworkInterface *ie;
-    Ipv4Address address;
+    L3Address address;
     int version;
     unsigned int generationId;
     long drPriority; // -1 if not present
     cMessage *livenessTimer;
 
   public:
-    PimNeighbor(NetworkInterface *ie, Ipv4Address address, int version);
+    PimNeighbor(NetworkInterface *ie, L3Address address, int version);
     virtual ~PimNeighbor();
     virtual std::string str() const override;
 
     int getInterfaceId() const { return ie->getInterfaceId(); }
     NetworkInterface *getInterfacePtr() const { return ie; }
-    Ipv4Address getAddress() const { return address; }
+    L3Address getAddress() const { return address; }
     int getVersion() const { return version; }
     unsigned int getGenerationId() const { return generationId; }
     long getDRPriority() const { return drPriority; }
@@ -106,7 +107,7 @@ class INET_API PimNeighborTable : public SimpleModule
      * Returns the neighbor that is identified by the given (interfaceId,addr),
      * or nullptr if no such neighbor.
      */
-    virtual PimNeighbor *findNeighbor(int interfaceId, Ipv4Address addr);
+    virtual PimNeighbor *findNeighbor(int interfaceId, L3Address addr);
 
     /**
      * Returns the number of neighbors on the given interface.

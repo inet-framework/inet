@@ -51,6 +51,7 @@ simple PimSm extends SimpleModule
         string routingTableModule;
         string pimInterfaceTableModule;
         string pimNeighborTableModule;
+        string addressFamily @enum("ipv4","ipv6") = default("ipv4"); // PIM-SM supports only "ipv4"
         string RP = default("");
         int designatedRouterPriority = default(-1);
 

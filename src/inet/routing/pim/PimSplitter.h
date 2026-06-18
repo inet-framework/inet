@@ -12,6 +12,7 @@
 
 #include "inet/common/SimpleModule.h"
 #include "inet/common/ModuleRefByPar.h"
+#include "inet/common/Protocol.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/routing/pim/PimPacket_m.h"
@@ -31,6 +32,8 @@ class INET_API PimSplitter : public SimpleModule
   private:
     ModuleRefByPar<IInterfaceTable> ift;
     ModuleRefByPar<PimInterfaceTable> pimIft;
+
+    const Protocol *networkProtocol = &Protocol::ipv4;
 
     cGate *ipIn = nullptr;
     cGate *ipOut = nullptr;

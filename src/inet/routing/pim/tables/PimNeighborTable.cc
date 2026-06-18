@@ -16,7 +16,7 @@ namespace inet {
 Register_Abstract_Class(PimNeighbor);
 Define_Module(PimNeighborTable);
 
-PimNeighbor::PimNeighbor(NetworkInterface *ie, Ipv4Address address, int version)
+PimNeighbor::PimNeighbor(NetworkInterface *ie, L3Address address, int version)
     : nt(nullptr), ie(ie), address(address), version(version), generationId(0), drPriority(-1L)
 {
     ASSERT(ie);
@@ -93,7 +93,7 @@ void PimNeighborTable::processLivenessTimer(cMessage *livenessTimer)
 {
     EV << "PimNeighborTable::processNLTimer\n";
     PimNeighbor *neighbor = check_and_cast<PimNeighbor *>((cObject *)livenessTimer->getContextPointer());
-    Ipv4Address neighborAddress = neighbor->getAddress();
+    L3Address neighborAddress = neighbor->getAddress();
     deleteNeighbor(neighbor);
     EV << "PIM::processNLTimer: Neighbor " << neighborAddress << "was removed from PIM neighbor table.\n";
 }
@@ -148,7 +148,7 @@ void PimNeighborTable::restartLivenessTimer(PimNeighbor *neighbor, double holdTi
     rescheduleAfter(holdTime, neighbor->getLivenessTimer());
 }
 
-PimNeighbor *PimNeighborTable::findNeighbor(int interfaceId, Ipv4Address addr)
+PimNeighbor *PimNeighborTable::findNeighbor(int interfaceId, L3Address addr)
 {
     auto neighborsOnInterface = neighbors.find(interfaceId);
     if (neighborsOnInterface != neighbors.end()) {

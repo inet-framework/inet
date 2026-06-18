@@ -17,12 +17,12 @@
 #include "inet/networklayer/common/InterfaceTable.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
+#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 
 namespace inet {
-
-const Ipv4Address PimBase::ALL_PIM_ROUTERS_MCAST("224.0.0.13");
 
 const PimBase::AssertMetric PimBase::AssertMetric::PIM_INFINITE;
 
@@ -39,6 +39,18 @@ void PimBase::initialize(int stage)
     RoutingProtocolBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
+        const char *addressFamily = par("addressFamily");
+        if (!strcmp(addressFamily, "ipv4")) {
+            networkProtocol = &Protocol::ipv4;
+            allPimRoutersMcast = Ipv4Address("224.0.0.13");
+        }
+        else if (!strcmp(addressFamily, "ipv6")) {
+            networkProtocol = &Protocol::ipv6;
+            allPimRoutersMcast = Ipv6Address("ff02::d");
+        }
+        else
+            throw cRuntimeError("PimBase: invalid addressFamily '%s' (must be 'ipv4' or 'ipv6')", addressFamily);
+
         ift.reference(this, "interfaceTableModule", true);
         rt.reference(this, "routingTableModule", true);
         pimIft.reference(this, "pimInterfaceTableModule", true);
@@ -66,7 +78,7 @@ void PimBase::handleStartOperation(LifecycleOperation *operation)
     for (int i = 0; i < pimIft->getNumInterfaces(); i++) {
         PimInterface *pimInterface = pimIft->getInterface(i);
         if (pimInterface->getMode() == mode) {
-            pimInterface->getInterfacePtr()->getProtocolDataForUpdate<Ipv4InterfaceData>()->joinMulticastGroup(ALL_PIM_ROUTERS_MCAST);
+            joinMulticastGroup(pimInterface->getInterfacePtr(), allPimRoutersMcast);
             isEnabled = true;
         }
     }
@@ -141,8 +153,8 @@ void PimBase::sendHelloPacket(PimInterface *pimInterface)
     pk->addTag<PacketProtocolTag>()->setProtocol(&Protocol::pim);
     pk->addTag<InterfaceReq>()->setInterfaceId(pimInterface->getInterfaceId());
     pk->addTag<DispatchProtocolInd>()->setProtocol(&Protocol::pim);
-    pk->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
-    pk->addTag<L3AddressReq>()->setDestAddress(ALL_PIM_ROUTERS_MCAST);
+    pk->addTag<DispatchProtocolReq>()->setProtocol(networkProtocol);
+    pk->addTag<L3AddressReq>()->setDestAddress(allPimRoutersMcast);
     pk->addTag<HopLimitReq>()->setHopLimit(1);
 
     emit(sentHelloPkSignal, pk);
@@ -154,7 +166,7 @@ void PimBase::processHelloPacket(Packet *packet)
 {
     int interfaceId = packet->getTag<InterfaceInd>()->getInterfaceId();
 
-    Ipv4Address address = packet->getTag<L3AddressInd>()->getSrcAddress().toIpv4();
+    L3Address address = packet->getTag<L3AddressInd>()->getSrcAddress();
     const auto& pimPacket = packet->peekAtFront<PimHello>();
     int version = pimPacket->getVersion();
 
@@ -228,6 +240,42 @@ bool PimBase::AssertMetric::operator<(const AssertMetric& other) const
     if (metric != other.metric)
         return metric < other.metric;
     return address > other.address;
+}
+
+L3Address PimBase::getInterfaceAddress(NetworkInterface *ie) const
+{
+    if (isIpv6())
+        return ie->getProtocolData<Ipv6InterfaceData>()->getPreferredAddress();
+    else
+        return ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
+}
+
+void PimBase::joinMulticastGroup(NetworkInterface *ie, const L3Address& group)
+{
+    if (isIpv6())
+        ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->joinMulticastGroup(group.toIpv6());
+    else
+        ie->getProtocolDataForUpdate<Ipv4InterfaceData>()->joinMulticastGroup(group.toIpv4());
+}
+
+bool PimBase::hasMulticastListener(NetworkInterface *ie, const L3Address& group) const
+{
+    if (isIpv6())
+        return ie->getProtocolData<Ipv6InterfaceData>()->hasMulticastListener(group.toIpv6());
+    else
+        return ie->getProtocolData<Ipv4InterfaceData>()->hasMulticastListener(group.toIpv4());
+}
+
+bool PimBase::isMemberOfMulticastGroup(NetworkInterface *ie, const L3Address& group) const
+{
+    if (isIpv6()) {
+        auto data = ie->findProtocolData<Ipv6InterfaceData>();
+        return data != nullptr && data->isMemberOfMulticastGroup(group.toIpv6());
+    }
+    else {
+        auto data = ie->findProtocolData<Ipv4InterfaceData>();
+        return data != nullptr && data->isMemberOfMulticastGroup(group.toIpv4());
+    }
 }
 
 std::ostream& operator<<(std::ostream& out, const PimBase::SourceAndGroup& sourceGroup)

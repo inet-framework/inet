@@ -11,6 +11,7 @@
 #define __INET_PIMINTERFACETABLE_H
 
 #include "inet/common/SimpleModule.h"
+#include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
@@ -35,7 +36,7 @@ class INET_API PimInterface : public cObject
     bool stateRefreshFlag;
 
     // state
-    Ipv4Address drAddress;
+    L3Address drAddress;
 
   public:
     PimInterface(NetworkInterface *ie, PimMode mode, bool stateRefreshFlag)
@@ -47,8 +48,8 @@ class INET_API PimInterface : public cObject
     PimMode getMode() const { return mode; }
     bool getSR() const { return stateRefreshFlag; }
 
-    Ipv4Address getDRAddress() const { return drAddress; }
-    void setDRAddress(Ipv4Address address) { drAddress = address; }
+    L3Address getDRAddress() const { return drAddress; }
+    void setDRAddress(L3Address address) { drAddress = address; }
 };
 
 /**

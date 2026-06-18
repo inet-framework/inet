@@ -11,8 +11,10 @@
 #define __INET_PIMBASE_H
 
 #include "inet/common/packet/Packet.h"
+#include "inet/common/Protocol.h"
+#include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/routing/pim/Pim.h"
 #include "inet/routing/pim/PimPacket_m.h"
@@ -32,30 +34,30 @@ class INET_API PimBase : public RoutingProtocolBase
         short rptBit;
         short preference;
         int metric;
-        Ipv4Address address;
+        L3Address address;
 
         static const AssertMetric PIM_INFINITE;
 
         AssertMetric() : rptBit(1), preference(-1), metric(0) {}
-        AssertMetric(int preference, int metric, Ipv4Address address) :
+        AssertMetric(int preference, int metric, L3Address address) :
             rptBit(0), preference(preference), metric(metric), address(address) { ASSERT(preference >= 0); }
-        AssertMetric(bool rptBit, int preference, int metric, Ipv4Address address = Ipv4Address::UNSPECIFIED_ADDRESS)
+        AssertMetric(bool rptBit, int preference, int metric, L3Address address = L3Address())
             : rptBit(rptBit ? 1 : 0), preference(preference), metric(metric), address(address) { ASSERT(preference >= 0); }
         bool isInfinite() const { return preference == -1; }
         bool operator==(const AssertMetric& other) const;
         bool operator!=(const AssertMetric& other) const;
         bool operator<(const AssertMetric& other) const;
-        AssertMetric setAddress(Ipv4Address address) const { return AssertMetric(rptBit, preference, metric, address); }
+        AssertMetric setAddress(L3Address address) const { return AssertMetric(rptBit, preference, metric, address); }
     };
 
     struct RouteEntry {
         PimBase *owner;
-        Ipv4Address source;
-        Ipv4Address group;
+        L3Address source;
+        L3Address group;
         int flags;
         AssertMetric metric; // our metric of the unicast route to the source or RP(group)
 
-        RouteEntry(PimBase *owner, Ipv4Address source, Ipv4Address group)
+        RouteEntry(PimBase *owner, L3Address source, L3Address group)
             : owner(owner), source(source), group(group), flags(0) {}
         virtual ~RouteEntry() {}
 
@@ -105,10 +107,10 @@ class INET_API PimBase : public RoutingProtocolBase
     };
 
     struct SourceAndGroup {
-        Ipv4Address source;
-        Ipv4Address group;
+        L3Address source;
+        L3Address group;
 
-        SourceAndGroup(Ipv4Address source, Ipv4Address group) : source(source), group(group) {}
+        SourceAndGroup(L3Address source, L3Address group) : source(source), group(group) {}
         bool operator==(const SourceAndGroup& other) const { return source == other.source && group == other.group; }
         bool operator!=(const SourceAndGroup& other) const { return source != other.source || group != other.group; }
         bool operator<(const SourceAndGroup& other) const { return source < other.source || (source == other.source && group < other.group); }
@@ -140,14 +142,16 @@ class INET_API PimBase : public RoutingProtocolBase
         JoinTimer,
     };
 
-    static const Ipv4Address ALL_PIM_ROUTERS_MCAST;
-
   protected:
-    ModuleRefByPar<IIpv4RoutingTable> rt;
+    ModuleRefByPar<IRoutingTable> rt;
     ModuleRefByPar<IInterfaceTable> ift;
     ModuleRefByPar<PimInterfaceTable> pimIft;
     ModuleRefByPar<PimNeighborTable> pimNbt;
     opp_component_ptr<Pim> pimModule;
+
+    // address family: ipv4 or ipv6
+    const Protocol *networkProtocol = &Protocol::ipv4;
+    L3Address allPimRoutersMcast; // 224.0.0.13 (IPv4) or ff02::d (IPv6)
 
     bool isUp = false;
     bool isEnabled = false;
@@ -178,6 +182,13 @@ class INET_API PimBase : public RoutingProtocolBase
     void sendHelloPacket(PimInterface *pimInterface);
     void processHelloTimer(cMessage *timer);
     void processHelloPacket(Packet *pk);
+
+    // address-family helpers: dispatch on networkProtocol to Ipv4InterfaceData / Ipv6InterfaceData
+    bool isIpv6() const { return networkProtocol == &Protocol::ipv6; }
+    L3Address getInterfaceAddress(NetworkInterface *ie) const;
+    void joinMulticastGroup(NetworkInterface *ie, const L3Address& group);
+    bool hasMulticastListener(NetworkInterface *ie, const L3Address& group) const;
+    bool isMemberOfMulticastGroup(NetworkInterface *ie, const L3Address& group) const;
 
     virtual void handleStartOperation(LifecycleOperation *operation) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;

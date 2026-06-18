@@ -12,8 +12,8 @@
 
 #include "inet/common/Simsignals.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
-#include "inet/networklayer/ipv4/Ipv4Route.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/networklayer/contract/IRoute.h"
 #include "inet/routing/pim/PimPacket_m.h"
 #include "inet/routing/pim/modes/PimBase.h"
 #include "inet/routing/pim/tables/PimInterfaceTable.h"
@@ -44,7 +44,7 @@ class INET_API PimDm : public PimBase, protected cListener
 
         enum OriginatorState { NOT_ORIGINATOR, ORIGINATOR };
 
-        Ipv4Address nextHop; // rpf neighbor
+        L3Address nextHop; // rpf neighbor
 
         // graft prune state
         GraftPruneState graftPruneState;
@@ -58,7 +58,7 @@ class INET_API PimDm : public PimBase, protected cListener
         cMessage *stateRefreshTimer; // scheduled in ORIGINATOR state for sending the next StateRefresh message
         unsigned short maxTtlSeen;
 
-        UpstreamInterface(Route *owner, NetworkInterface *ie, Ipv4Address neighbor, bool isSourceDirectlyConnected)
+        UpstreamInterface(Route *owner, NetworkInterface *ie, L3Address neighbor, bool isSourceDirectlyConnected)
             : Interface(owner, ie), nextHop(neighbor),
             graftPruneState(FORWARDING), graftRetryTimer(nullptr), overrideTimer(nullptr), lastPruneSentTime(0.0),
             originatorState(NOT_ORIGINATOR), sourceActiveTimer(nullptr), stateRefreshTimer(nullptr), maxTtlSeen(0)
@@ -67,7 +67,7 @@ class INET_API PimDm : public PimBase, protected cListener
         Route *route() const { return check_and_cast<Route *>(owner); }
         PimDm *pimdm() const { return check_and_cast<PimDm *>(owner->owner); }
         int getInterfaceId() const { return ie->getInterfaceId(); }
-        Ipv4Address rpfNeighbor() { return assertState == I_LOST_ASSERT ? winnerMetric.address : nextHop; }
+        L3Address rpfNeighbor() { return assertState == I_LOST_ASSERT ? winnerMetric.address : nextHop; }
         GraftPruneState getGraftPruneState() const { return graftPruneState; }
         cMessage *getGraftRetryTimer() const { return graftRetryTimer; }
         cMessage *getOverrideTimer() const { return overrideTimer; }
@@ -126,14 +126,14 @@ class INET_API PimDm : public PimBase, protected cListener
         UpstreamInterface *upstreamInterface;
         std::vector<DownstreamInterface *> downstreamInterfaces;
 
-        Route(PimDm *owner, Ipv4Address source, Ipv4Address group)
+        Route(PimDm *owner, L3Address source, L3Address group)
             : RouteEntry(owner, source, group), upstreamInterface(nullptr) {}
         virtual ~Route();
         DownstreamInterface *findDownstreamInterfaceByInterfaceId(int interfaceId) const;
         DownstreamInterface *createDownstreamInterface(NetworkInterface *ie);
         DownstreamInterface *removeDownstreamInterface(int interfaceId);
         bool isOlistNull();
-        void updateIpv4Route();
+        void updateRoute();
     };
 
     friend std::ostream& operator<<(std::ostream& out, const PimDm::Route& sourceGroup);
@@ -179,12 +179,12 @@ class INET_API PimDm : public PimBase, protected cListener
   private:
     // process signals
     void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
-    void unroutableMulticastPacketArrived(Ipv4Address srcAddress, Ipv4Address destAddress, unsigned short ttl);
-    void multicastPacketArrivedOnNonRpfInterface(Ipv4Address group, Ipv4Address source, int interfaceId);
-    void multicastPacketArrivedOnRpfInterface(int interfaceId, Ipv4Address group, Ipv4Address source, unsigned short ttl);
-    void multicastReceiverAdded(NetworkInterface *ie, Ipv4Address newAddr);
-    void multicastReceiverRemoved(NetworkInterface *ie, Ipv4Address oldAddr);
-    void rpfInterfaceHasChanged(Ipv4MulticastRoute *route, Ipv4Route *routeToSource);
+    void unroutableMulticastPacketArrived(L3Address srcAddress, L3Address destAddress, unsigned short ttl);
+    void multicastPacketArrivedOnNonRpfInterface(L3Address group, L3Address source, int interfaceId);
+    void multicastPacketArrivedOnRpfInterface(int interfaceId, L3Address group, L3Address source, unsigned short ttl);
+    void multicastReceiverAdded(NetworkInterface *ie, L3Address newAddr);
+    void multicastReceiverRemoved(NetworkInterface *ie, L3Address oldAddr);
+    void rpfInterfaceHasChanged(IMulticastRoute *route, IRoute *routeToSource);
 
     // process timers
     void processPruneTimer(cMessage *timer);
@@ -202,9 +202,9 @@ class INET_API PimDm : public PimBase, protected cListener
     void processStateRefreshPacket(Packet *pk);
     void processAssertPacket(Packet *pk);
 
-    void processPrune(Route *route, int intId, int holdTime, int numRpfNeighbors, Ipv4Address upstreamNeighborField);
-    void processJoin(Route *route, int intId, int numRpfNeighbors, Ipv4Address upstreamNeighborField);
-    void processGraft(Ipv4Address source, Ipv4Address group, Ipv4Address sender, int intId);
+    void processPrune(Route *route, int intId, int holdTime, int numRpfNeighbors, L3Address upstreamNeighborField);
+    void processJoin(Route *route, int intId, int numRpfNeighbors, L3Address upstreamNeighborField);
+    void processGraft(L3Address source, L3Address group, L3Address sender, int intId);
     void processAssert(Interface *downstream, AssertMetric receivedMetric, int stateRefreshInterval);
 
     // process olist changes
@@ -212,23 +212,31 @@ class INET_API PimDm : public PimBase, protected cListener
     void processOlistNonEmptyEvent(Route *route);
 
     // create and send PIM packets
-    void sendPrunePacket(Ipv4Address nextHop, Ipv4Address src, Ipv4Address grp, int holdTime, int intId);
-    void sendJoinPacket(Ipv4Address nextHop, Ipv4Address source, Ipv4Address group, int interfaceId);
-    void sendGraftPacket(Ipv4Address nextHop, Ipv4Address src, Ipv4Address grp, int intId);
+    void sendPrunePacket(L3Address nextHop, L3Address src, L3Address grp, int holdTime, int intId);
+    void sendJoinPacket(L3Address nextHop, L3Address source, L3Address group, int interfaceId);
+    void sendGraftPacket(L3Address nextHop, L3Address src, L3Address grp, int intId);
     void sendGraftAckPacket(Packet *pk, const Ptr<const PimGraft>& graftPacket);
-    void sendStateRefreshPacket(Ipv4Address originator, Route *route, DownstreamInterface *downstream, unsigned short ttl);
-    void sendAssertPacket(Ipv4Address source, Ipv4Address group, AssertMetric metric, NetworkInterface *ie);
-    void sendToIP(Packet *packet, Ipv4Address source, Ipv4Address dest, int outInterfaceId);
+    void sendStateRefreshPacket(L3Address originator, Route *route, DownstreamInterface *downstream, unsigned short ttl);
+    void sendAssertPacket(L3Address source, L3Address group, AssertMetric metric, NetworkInterface *ie);
+    void sendToIP(Packet *packet, L3Address source, L3Address dest, int outInterfaceId);
 
     // helpers
-    bool isMulticastGroupJoined(Ipv4Address address);
+    bool isMulticastGroupJoined(L3Address address);
     void restartTimer(cMessage *timer, double interval);
     void cancelAndDeleteTimer(cMessage *& timer);
     PimInterface *getIncomingInterface(NetworkInterface *fromIE);
-    Ipv4MulticastRoute *findIpv4MulticastRoute(Ipv4Address group, Ipv4Address source);
-    Route *findRoute(Ipv4Address source, Ipv4Address group);
-    void deleteRoute(Ipv4Address source, Ipv4Address group);
+    IMulticastRoute *findMulticastRoute(L3Address group, L3Address source);
+    IMulticastRoute *createMulticastRoute();
+    Route *findRoute(L3Address source, L3Address group);
+    void deleteRoute(L3Address source, L3Address group);
     void clearRoutes();
+
+    // address-family helpers for routes and signal payloads
+    static NetworkInterface *getInInterface(IMulticastRoute *route);
+    static bool hasOutInterface(IMulticastRoute *route, const NetworkInterface *ie);
+    static unsigned int getAdminDist(IRoute *route);
+    void getMulticastPacketAddresses(cObject *obj, L3Address& srcAddr, L3Address& destAddr, unsigned short& ttl) const;
+    void getMulticastGroupInfo(cObject *obj, NetworkInterface *& ie, L3Address& groupAddress) const;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

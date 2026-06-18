@@ -10,6 +10,7 @@
 #ifndef __INET_PIMSM_H
 #define __INET_PIMSM_H
 
+#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4Route.h"
 #include "inet/routing/pim/modes/PimBase.h"
@@ -87,7 +88,7 @@ class INET_API PimSm : public PimBase, protected cListener
         UpstreamInterface(Route *owner, NetworkInterface *ie, Ipv4Address nextHop)
             : PimsmInterface(owner, ie), nextHop(nextHop) {}
         int getInterfaceId() const { return ie->getInterfaceId(); }
-        Ipv4Address rpfNeighbor() { return assertState == I_LOST_ASSERT ? winnerMetric.address : nextHop; }
+        Ipv4Address rpfNeighbor() { return assertState == I_LOST_ASSERT ? winnerMetric.address.toIpv4() : nextHop; }
     };
 
     struct DownstreamInterface : public PimsmInterface {
@@ -178,6 +179,9 @@ class INET_API PimSm : public PimBase, protected cListener
     friend std::ostream& operator<<(std::ostream& out, const PimSm::Route& sourceGroup);
 
     typedef std::map<SourceAndGroup, Route *> RoutingTable;
+
+    // PIM-SM is IPv4-only; this is the IPv4-typed view of the (generic) base-class routing table
+    ModuleRefByPar<IIpv4RoutingTable> ipv4rt;
 
     // parameters
     Ipv4Address rpAddr;

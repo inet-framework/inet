@@ -26,6 +26,7 @@ simple PimSplitter extends SimpleModule
         @display("i=block/dispatch");
         string interfaceTableModule;
         string pimInterfaceTableModule;
+        string addressFamily @enum("ipv4","ipv6") = default("ipv4");
 
     gates:
         input ipIn;

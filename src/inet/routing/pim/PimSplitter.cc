@@ -24,6 +24,12 @@ void PimSplitter::initialize(int stage)
     SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
+        const char *addressFamily = par("addressFamily");
+        if (!strcmp(addressFamily, "ipv6"))
+            networkProtocol = &Protocol::ipv6;
+        else
+            networkProtocol = &Protocol::ipv4;
+
         ift.reference(this, "interfaceTableModule", true);
         pimIft.reference(this, "pimInterfaceTableModule", true);
 
@@ -43,7 +49,7 @@ void PimSplitter::handleMessage(cMessage *msg)
     if (arrivalGate == ipIn) {
         Packet *packet = check_and_cast<Packet *>(msg);
         auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
-        if (protocol == &Protocol::icmpv4) {
+        if (protocol == &Protocol::icmpv4 || protocol == &Protocol::icmpv6) {
             EV_WARN << "Received ICMP error " << msg->getName() << ", ignored\n";
             delete msg;
         }
@@ -56,7 +62,7 @@ void PimSplitter::handleMessage(cMessage *msg)
     else if (arrivalGate == pimSMIn || arrivalGate == pimDMIn) {
         // Send other packets to the network layer
         EV_INFO << "Received packet from PIM module, sending it to the network." << endl;
-        check_and_cast<Packet *>(msg)->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
+        check_and_cast<Packet *>(msg)->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(networkProtocol);
         send(msg, ipOut);
     }
     else

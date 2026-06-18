@@ -40,6 +40,7 @@ simple PimDm extends SimpleModule
         string routingTableModule;
         string pimInterfaceTableModule;
         string pimNeighborTableModule;
+        string addressFamily @enum("ipv4","ipv6") = default("ipv4");
 
         volatile double triggeredHelloDelay @unit(s) = uniform(0s,5s);
         double helloPeriod @unit(s) = 30s; // "Hello_Period: Periodic interval for hello messages"
