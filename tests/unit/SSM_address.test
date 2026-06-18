@@ -1,0 +1,38 @@
+%description:
+Unit test for the source-specific multicast (SSM) range predicates:
+Ipv4Address::isSsm() (232.0.0.0/8, RFC 4607) and Ipv6Address::isSsm()
+(FF3x::/32 -- multicast flags nibble == 3, any scope; RFC 4607 / RFC 3306).
+
+%includes:
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
+#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
+
+using namespace inet;
+
+%activity:
+// === IPv4: 232.0.0.0/8 is SSM ===
+ASSERT(Ipv4Address("232.0.0.1").isSsm());
+ASSERT(Ipv4Address("232.1.2.3").isSsm());
+ASSERT(Ipv4Address("232.255.255.255").isSsm());
+// not SSM:
+ASSERT(!Ipv4Address("224.0.0.1").isSsm());          // link-local control
+ASSERT(!Ipv4Address("239.1.2.3").isSsm());          // ASM admin-scoped
+ASSERT(!Ipv4Address("233.0.0.1").isSsm());          // GLOP, just above SSM
+ASSERT(!Ipv4Address("231.255.255.255").isSsm());    // just below SSM
+ASSERT(!Ipv4Address("10.0.0.1").isSsm());           // unicast
+
+// === IPv6: FF3x::/32 (flags nibble == 3) is SSM, any scope ===
+ASSERT(Ipv6Address("ff3e::1").isSsm());             // global-scope SSM
+ASSERT(Ipv6Address("ff32::1").isSsm());             // link-scope SSM
+ASSERT(Ipv6Address("ff35::1234").isSsm());          // site-scope SSM
+// not SSM:
+ASSERT(!Ipv6Address("ff0e::1").isSsm());            // ASM global (flags 0)
+ASSERT(!Ipv6Address("ff1e::1").isSsm());            // flags nibble 1
+ASSERT(!Ipv6Address("ff02::2").isSsm());            // link-local control
+ASSERT(!Ipv6Address("2001:db8::1").isSsm());        // unicast global
+ASSERT(!Ipv6Address("fe80::1").isSsm());            // link-local unicast
+
+EV << "All SSM range checks passed.\n";
+
+%contains: stdout
+All SSM range checks passed.

@@ -228,6 +228,12 @@ class INET_API Ipv4Address
     bool isLinkLocalMulticast() const { return (addr & 0xFFFFFF00) == 0xE0000000; }
 
     /**
+     * Returns true if this is a source-specific multicast (SSM) address, i.e.
+     * it is in the 232.0.0.0/8 range (RFC 4607).
+     */
+    bool isSsm() const { return (addr & 0xFF000000) == 0xE8000000; }
+
+    /**
      * Returns an address with the network part of the address (the bits
      * of the hosts part are to 0). For D and E class addresses,
      * it returns a null address.

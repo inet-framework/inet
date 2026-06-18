@@ -206,6 +206,7 @@ class INET_API PimBase : public RoutingProtocolBase
     static unsigned int getAdminDist(IRoute *route);
     bool isRoutableMulticastSource(const L3Address& srcAddr) const;
     bool isRoutableMulticastGroup(const L3Address& group) const;
+    bool isSsmGroup(const L3Address& group) const;
     void getMulticastPacketAddresses(cObject *obj, L3Address& srcAddr, L3Address& destAddr, unsigned short& ttl) const;
     void getMulticastGroupInfo(cObject *obj, NetworkInterface *& ie, L3Address& groupAddress) const;
 

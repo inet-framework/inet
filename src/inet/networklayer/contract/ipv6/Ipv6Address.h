@@ -305,6 +305,13 @@ class INET_API Ipv6Address
      */
     int getMulticastScope() const;
 
+    /**
+     * Returns true if this is a source-specific multicast (SSM) address, i.e.
+     * it is in the FF3x::/32 range (RFC 4607 / RFC 3306): a multicast address
+     * whose 4-bit flags field equals 0x3 (P=1, T=1), for any scope x.
+     */
+    bool isSsm() const { return isMulticast() && ((d[0] >> 20) & 0x0F) == 0x03; }
+
     MacAddress mapToMulticastMacAddress() const;
 };
 

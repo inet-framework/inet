@@ -364,6 +364,12 @@ bool PimBase::isRoutableMulticastGroup(const L3Address& group) const
     return !group.toIpv4().isLinkLocalMulticast();
 }
 
+bool PimBase::isSsmGroup(const L3Address& group) const
+{
+    // RFC 4607 source-specific multicast range: IPv4 232.0.0.0/8, IPv6 FF3x::/32.
+    return isIpv6() ? group.toIpv6().isSsm() : group.toIpv4().isSsm();
+}
+
 void PimBase::getMulticastPacketAddresses(cObject *obj, L3Address& srcAddr, L3Address& destAddr, unsigned short& ttl) const
 {
     if (isIpv6()) {
