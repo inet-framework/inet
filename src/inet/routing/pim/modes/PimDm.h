@@ -225,19 +225,9 @@ class INET_API PimDm : public PimBase, protected cListener
     void restartTimer(cMessage *timer, double interval);
     void cancelAndDeleteTimer(cMessage *& timer);
     PimInterface *getIncomingInterface(NetworkInterface *fromIE);
-    IMulticastRoute *findMulticastRoute(L3Address group, L3Address source);
-    IMulticastRoute *createMulticastRoute();
     Route *findRoute(L3Address source, L3Address group);
     void deleteRoute(L3Address source, L3Address group);
     void clearRoutes();
-
-    // address-family helpers for routes and signal payloads
-    static NetworkInterface *getInInterface(IMulticastRoute *route);
-    static bool hasOutInterface(IMulticastRoute *route, const NetworkInterface *ie);
-    static unsigned int getAdminDist(IRoute *route);
-    bool isRoutableMulticastSource(const L3Address& srcAddr) const;
-    void getMulticastPacketAddresses(cObject *obj, L3Address& srcAddr, L3Address& destAddr, unsigned short& ttl) const;
-    void getMulticastGroupInfo(cObject *obj, NetworkInterface *& ie, L3Address& groupAddress) const;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

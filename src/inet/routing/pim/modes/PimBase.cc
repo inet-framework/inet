@@ -20,7 +20,11 @@
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/ipv4/Ipv4Route.h"
+#include "inet/networklayer/ipv6/Ipv6Header_m.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
+#include "inet/networklayer/ipv6/Ipv6MulticastRoute.h"
+#include "inet/networklayer/ipv6/Ipv6Route.h"
 
 namespace inet {
 
@@ -288,6 +292,91 @@ bool PimBase::isMemberOfMulticastGroup(NetworkInterface *ie, const L3Address& gr
     else {
         auto data = ie->findProtocolData<Ipv4InterfaceData>();
         return data != nullptr && data->isMemberOfMulticastGroup(group.toIpv4());
+    }
+}
+
+IMulticastRoute *PimBase::createMulticastRoute()
+{
+    return isIpv6() ? static_cast<IMulticastRoute *>(new Ipv6MulticastRoute())
+                    : static_cast<IMulticastRoute *>(new Ipv4MulticastRoute());
+}
+
+NetworkInterface *PimBase::getInInterface(IMulticastRoute *route)
+{
+    if (auto ipv6Route = dynamic_cast<Ipv6MulticastRoute *>(route)) {
+        auto in = ipv6Route->getInInterface();
+        return in ? in->getInterface() : nullptr;
+    }
+    auto ipv4Route = check_and_cast<Ipv4MulticastRoute *>(route);
+    auto in = ipv4Route->getInInterface();
+    return in ? in->getInterface() : nullptr;
+}
+
+bool PimBase::hasOutInterface(IMulticastRoute *route, const NetworkInterface *ie)
+{
+    if (auto ipv6Route = dynamic_cast<Ipv6MulticastRoute *>(route))
+        return ipv6Route->hasOutInterface(ie);
+    return check_and_cast<Ipv4MulticastRoute *>(route)->hasOutInterface(ie);
+}
+
+unsigned int PimBase::getAdminDist(IRoute *route)
+{
+    if (auto ipv6Route = dynamic_cast<Ipv6Route *>(route))
+        return ipv6Route->getAdminDist();
+    return check_and_cast<Ipv4Route *>(route)->getAdminDist();
+}
+
+IMulticastRoute *PimBase::findMulticastRoute(L3Address group, L3Address source)
+{
+    int numRoutes = rt->getNumMulticastRoutes();
+    for (int i = 0; i < numRoutes; i++) {
+        IMulticastRoute *route = rt->getMulticastRoute(i);
+        if (route->getSource() == this && route->getMulticastGroupAsGeneric() == group && route->getOriginAsGeneric() == source)
+            return route;
+    }
+    return nullptr;
+}
+
+bool PimBase::isRoutableMulticastSource(const L3Address& srcAddr) const
+{
+    // An IPv6 multicast packet sourced from a link-local address (e.g. an MLD
+    // Multicast Listener Report, sent from fe80::/10 to the group it reports)
+    // does not define a routable (S,G): link-local sources are not reachable by
+    // a unicast route, so no RPF tree can be built toward them (RFC 4291). IPv4
+    // has no such case here, so it is always treated as routable, preserving the
+    // existing IPv4 behavior.
+    if (isIpv6())
+        return !srcAddr.toIpv6().isLinkLocal();
+    return true;
+}
+
+void PimBase::getMulticastPacketAddresses(cObject *obj, L3Address& srcAddr, L3Address& destAddr, unsigned short& ttl) const
+{
+    if (isIpv6()) {
+        auto ipv6Header = check_and_cast<const Ipv6Header *>(obj);
+        srcAddr = ipv6Header->getSrcAddress();
+        destAddr = ipv6Header->getDestAddress();
+        ttl = ipv6Header->getHopLimit();
+    }
+    else {
+        auto ipv4Header = check_and_cast<const Ipv4Header *>(obj);
+        srcAddr = ipv4Header->getSrcAddress();
+        destAddr = ipv4Header->getDestAddress();
+        ttl = ipv4Header->getTimeToLive();
+    }
+}
+
+void PimBase::getMulticastGroupInfo(cObject *obj, NetworkInterface *& ie, L3Address& groupAddress) const
+{
+    if (isIpv6()) {
+        auto info = check_and_cast<const Ipv6MulticastGroupInfo *>(obj);
+        ie = info->ie;
+        groupAddress = info->groupAddress;
+    }
+    else {
+        auto info = check_and_cast<const Ipv4MulticastGroupInfo *>(obj);
+        ie = info->ie;
+        groupAddress = info->groupAddress;
     }
 }
 

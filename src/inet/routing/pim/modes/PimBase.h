@@ -190,6 +190,17 @@ class INET_API PimBase : public RoutingProtocolBase
     bool hasMulticastListener(NetworkInterface *ie, const L3Address& group) const;
     bool isMemberOfMulticastGroup(NetworkInterface *ie, const L3Address& group) const;
 
+    // address-family helpers for multicast routes and signal payloads:
+    // dispatch on networkProtocol to the Ipv4/Ipv6 multicast-route and header types
+    IMulticastRoute *createMulticastRoute();
+    IMulticastRoute *findMulticastRoute(L3Address group, L3Address source);
+    static NetworkInterface *getInInterface(IMulticastRoute *route);
+    static bool hasOutInterface(IMulticastRoute *route, const NetworkInterface *ie);
+    static unsigned int getAdminDist(IRoute *route);
+    bool isRoutableMulticastSource(const L3Address& srcAddr) const;
+    void getMulticastPacketAddresses(cObject *obj, L3Address& srcAddr, L3Address& destAddr, unsigned short& ttl) const;
+    void getMulticastGroupInfo(cObject *obj, NetworkInterface *& ie, L3Address& groupAddress) const;
+
     virtual void handleStartOperation(LifecycleOperation *operation) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
