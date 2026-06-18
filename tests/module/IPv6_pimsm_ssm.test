@@ -1,0 +1,125 @@
+%description:
+Tests IPv6 PIM-SM source-specific multicast (SSM, RFC 4607): an MLDv2 INCLUDE(S,G)
+membership for an SSM-range group (FF3x::/32) makes PIM-SM build an (S,G) source
+tree rooted directly at S -- no rendezvous point, no Register.
+
+Topology (all links Ethernet point-to-point); there is NO RP:
+
+    Source1 --\
+               R1 ----- R2 ----- Receiver
+    Source2 --/
+
+Both sources send to the same SSM group ff3e::8. The Receiver (behind R2) uses
+MLDv2 to subscribe in INCLUDE mode to Source1 only.
+
+Expected, all over IPv6:
+  - R2 sends a PIM-SM Join(Source1, ff3e::8) toward the source (via R1), built
+    directly on the source tree -- no RP and no Register messages anywhere.
+  - The Receiver gets Source1's stream end-to-end, but NEVER Source2's (no
+    (Source2, ff3e::8) tree is ever built).
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.node.ipv6.MulticastRouter6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network PimSmSsmTest6
+{
+    types:
+        channel ethernetline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        Source1: StandardHost6;
+        Source2: StandardHost6;
+        R1: MulticastRouter6;
+        R2: MulticastRouter6;
+        Receiver: StandardHost6;
+        configurator: Ipv6FlatNetworkConfigurator;
+    connections:
+        Source1.ethg++ <--> ethernetline <--> R1.ethg++;
+        Source2.ethg++ <--> ethernetline <--> R1.ethg++;
+        R1.ethg++ <--> ethernetline <--> R2.ethg++;
+        R2.ethg++ <--> ethernetline <--> Receiver.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = PimSmSsmTest6
+sim-time-limit = 40s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+ned-path = .;../../../../src
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+# Sparse mode, MLDv2, NO RP (SSM groups need none).
+**.pimConfig = xml("<config><interface mode=\"sparse\"/></config>")
+**.ipv6.hasMld = true
+**.ipv6.mld.typename = "Mldv2"
+**.neighbourDiscovery.dupAddrDetectTransmits = 0
+
+# Two sources, both to the SSM group ff3e::8.
+*.Source*.numApps = 1
+*.Source*.app[0].typename = "UdpBasicApp"
+*.Source*.app[0].destAddresses = "ff3e::8"
+*.Source*.app[0].destPort = 1000
+*.Source*.app[0].messageLength = 64B
+*.Source*.app[0].timeToLive = 10
+*.Source1.app[0].startTime = 20s
+*.Source2.app[0].startTime = 20s
+*.Source*.app[0].sendInterval = 1s
+*.Source*.app[0].stopTime = 29.5s    # sends at t=20s..29s -> 10 packets each
+
+# Receiver: SSM INCLUDE membership for ff3e::8 from Source1 only.
+# Source1's *global* address (Ipv6FlatNetworkConfigurator); hardcoded because the
+# resolver returns the link-local address (see the examples/pim/ssm/ipv6 ini).
+*.Receiver.numApps = 1
+*.Receiver.app[0].typename = "UdpSink"
+*.Receiver.app[0].localPort = 1000
+*.Receiver.app[0].multicastGroup = "ff3e::8"
+*.Receiver.app[0].multicastSources = "aaaa:2:65:0:8aa:ff:fe00:1"
+
+# Ethernet queues
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue"
+**.eth[*].queue.dataQueue.packetCapacity = 100
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%# a source tree is built directly toward Source1 (a real source, not *)
+%contains: stdout
+Sending Join(S=aaaa:2:65:0:8aa:ff:fe00:1, G=ff3e::8)
+%#--------------------------------------------------------------------------------------------------------------
+%# SSM uses no rendezvous point: there must be NO Register encapsulation anywhere
+%not-contains: stdout
+encapsulating data packet into Register
+%#--------------------------------------------------------------------------------------------------------------
+%# and no (Source2, ff3e::8) tree is ever joined
+%not-contains: stdout
+Sending Join(S=aaaa:2:66:0:8aa:ff:fe00:2, G=ff3e::8)
+%#--------------------------------------------------------------------------------------------------------------
+%# PIM neighbors are learned on their link-local addresses (RFC 7761)
+%contains: stdout
+Received PIM Hello from neighbor: interface=eth0 address=fe80:
+%#--------------------------------------------------------------------------------------------------------------
+%# the Receiver gets Source1's stream only (Source2's never reaches it)
+%contains: stdout
+Receiver.app[0]: received 10 packets
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

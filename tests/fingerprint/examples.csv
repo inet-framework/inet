@@ -460,6 +460,7 @@
 /examples/pim/sm/basic/,             -f omnetpp.ini -c Scenario3 -r 0,              300s,            a4d4-39b0/tplx;2e76-520f/~tNl;eb91-fabc/~tND;4f37-e2c3/tyf, PASS, igmp EthernetMac Ipv4
 /examples/pim/sm/basic/,             -f omnetpp.ini -c Scenario4 -r 0,              100s,            1bbc-ce82/tplx;90c6-efdf/~tNl;3c6f-feb9/~tND;015c-b31f/tyf, PASS, igmp EthernetMac Ipv4
 /examples/pim/sm/ipv6/,              -f omnetpp.ini -c General -r 0,                120s,            5db3-139d/~tNlb, PASS, MLD EthernetMac Ipv6
+/examples/pim/ssm/ipv6/,             -f omnetpp.ini -c General -r 0,                60s,             7e74-c43f/~tNl, PASS, MLD EthernetMac Ipv6
 
 /examples/seaport/,                  -f omnetpp.ini -c General -r 0,                1000s,           32cb-156a/tplx;fcf4-00cd/~tNl;e3e9-834d/tyf, PASS, igmp EthernetMac Ipv4
 
