@@ -33,9 +33,11 @@ enum Mldv2TimerKind {
     MLDV2_R_GROUP_TIMER,
     MLDV2_R_SOURCE_TIMER,
     MLDV2_R_REXMT_TIMER,
+    MLDV2_R_OLDER_VERSION_TIMER, // Older Version Host Present timer (RFC 3810 8.3.2), per RouterGroupData
     MLDV2_H_GENERAL_QUERY_TIMER,
     MLDV2_H_GROUP_TIMER,
     MLDV2_H_STATE_CHANGE_TIMER,
+    MLDV2_H_OLDER_VERSION_TIMER, // Older Version Querier Present timer (RFC 3810 8.2.1), per HostInterfaceData
 };
 
 class INET_API Mldv2 : public OperationalBase, protected cListener
@@ -94,6 +96,12 @@ class INET_API Mldv2 : public OperationalBase, protected cListener
         GroupToHostDataMap groups;
         cMessage *generalQueryTimer; // for scheduling responses to General Queries
 
+        // Older Version Querier Present (RFC 3810 8.2.1): while olderVersionTimer is
+        // scheduled, an MLDv1 querier is present on this interface and the host emits
+        // MLDv1 Reports/Dones instead of MLDv2 reports.
+        cMessage *olderVersionTimer; // fires at otherQuerierPresentInterval
+        bool olderVersionPresent = false;
+
         HostInterfaceData(Mldv2 *owner, NetworkInterface *ie);
         virtual ~HostInterfaceData();
         HostGroupData *getOrCreateGroupData(const Ipv6Address& group);
@@ -146,6 +154,12 @@ class INET_API Mldv2 : public OperationalBase, protected cListener
         int rexmtCount = 0; // remaining retransmissions (0 = nothing pending)
         bool rexmtGroupAndSource = false; // false=Multicast-Address-Specific, true=-and-Source-Specific
         Ipv6AddressVector rexmtSources; // for the address-and-source case: sources to resend; sorted
+
+        // Older Version Host Present (RFC 3810 8.3.2): while olderVersionTimer is
+        // scheduled, an MLDv1 host is present for this group. The group is forwarded as
+        // EXCLUDE{} (any-source) and MLDv2 per-source processing is bypassed.
+        cMessage *olderVersionTimer; // fires at groupMembershipInterval
+        bool olderVersionPresent = false;
 
         RouterGroupData(RouterInterfaceData *parent, const Ipv6Address& group);
         virtual ~RouterGroupData();
@@ -285,14 +299,29 @@ class INET_API Mldv2 : public OperationalBase, protected cListener
     virtual void processHostGeneralQueryTimer(cMessage *msg);
     virtual void processHostGroupQueryTimer(cMessage *msg);
     virtual void processHostStateChangeTimer(cMessage *msg);
+    virtual void processHostOlderVersionTimer(cMessage *msg);
     virtual void processRouterGeneralQueryTimer(cMessage *msg);
     virtual void processRouterGroupTimer(cMessage *msg);
     virtual void processRouterSourceTimer(cMessage *msg);
     virtual void processRexmtTimer(cMessage *msg);
+    virtual void processRouterOlderVersionTimer(cMessage *msg);
 
     virtual void processMldMessage(Packet *msg);
     virtual void processQuery(Packet *msg);
     virtual void processReport(Packet *msg);
+
+    // --- Older-version (MLDv1) interop (RFC 3810 8.2/8.3) ---
+    // Host side: enter MLDv1 compatibility on an MLDv1 General Query, and emit MLDv1
+    // Reports/Dones while it is active.
+    virtual void processOlderVersionQuery(NetworkInterface *ie, Packet *packet);
+    virtual void sendOlderVersionReport(NetworkInterface *ie, const Ipv6Address& group);
+    virtual void sendOlderVersionDone(NetworkInterface *ie, const Ipv6Address& group);
+    // Router side: a received MLDv1 Report/Done puts the group into
+    // older-version-host-present mode (forward as EXCLUDE{}).
+    virtual void processOlderVersionReport(NetworkInterface *ie, Packet *packet);
+    virtual void processOlderVersionDone(NetworkInterface *ie, Packet *packet);
+    virtual void enterRouterOlderVersionCompat(NetworkInterface *ie, RouterGroupData *groupData);
+    virtual RouterGroupData *getRouterGroupData(NetworkInterface *ie, const Ipv6Address& group); // nullptr if absent
 
     virtual void multicastSourceListChanged(NetworkInterface *ie, const Ipv6Address& group, const Ipv6MulticastSourceList& sourceList);
 

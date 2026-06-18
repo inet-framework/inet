@@ -1,0 +1,90 @@
+%description:
+
+Older-version interop, HOST side (RFC 3810 8.2.1; the MLD counterpart of
+IGMPv3_interop_host.test).
+
+When an MLDv2 host hears an MLDv1 General Query (24-byte MldQuery, ICMPv6 type 130) on an
+interface, it starts the Older Version Querier Present timer and falls back to MLDv1 on
+that interface: it answers the Query, and subsequent join/leave state changes, with MLDv1
+Reports/Dones instead of MLDv2 reports.
+
+This test injects an MldQuery (v1) to a v2 host that has joined a group, and asserts the
+host answers with an MldReport (v1) and that a later join emits an MldReport and a later
+leave emits an MldDone, all instead of MLDv2 reports.
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+sim-time-limit=30s
+cmdenv-express-mode = false
+
+seed-set = 0
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+network = inet.test.moduletest.lib.TestMLDNetwork
+**.mld.typename = "Mldv2"
+**.multicastForwarding = false
+
+**.mld.unsolicitedReportInterval = 0.5s
+
+**.scenarioManager.script = xmldoc("scenario.xml")
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%file: scenario.xml
+<scenario>
+
+<!-- join an any-source group while still native v2 -->
+<set-filter t="1" module="node.tester.mac" ifname="eth0" group="ff0e::1" sources="E"/>
+
+<!-- older-version (MLDv1) General Query: host enters MLDv1 compatibility and answers -->
+<send t="2" module="node.tester.mac" ifname="eth0" type="MldQuery"/>
+
+<!-- a new join while in MLDv1 compat: host must emit an MldReport (not v2) -->
+<set-filter t="4" module="node.tester.mac" ifname="eth0" group="ff0e::2" sources="E"/>
+
+<!-- a leave while in MLDv1 compat: host must emit an MldDone -->
+<set-filter t="5" module="node.tester.mac" ifname="eth0" group="ff0e::2" sources="I"/>
+
+</scenario>
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%#
+%# The host enters MLDv1 compatibility on the older-version General Query.
+%#
+%postrun-command: grep "entering MLDv1 compatibility" test.out > compat.out || true
+%contains: compat.out
+entering MLDv1 compatibility
+
+%#
+%# The host answers / reports with MLDv1 messages, never an MLDv2 report while in compat.
+%#
+%postrun-command: grep "TestMld: Received" test.out > received.out || true
+%contains: received.out
+TestMld: Received: inet::MldReport<group=ff0e::1>.
+%contains: received.out
+TestMld: Received: inet::MldReport<group=ff0e::2>.
+%contains: received.out
+TestMld: Received: inet::MldDone<group=ff0e::2>.
+
+%#
+%# While in MLDv1 compatibility no MLDv2 report is sent for the compat-mode changes
+%# at t>=2 (the t=1 TO_EX, sent before compat was entered, may still appear).
+%#
+%postrun-command: grep "TestMld: Received" test.out | grep "Mldv2Report<ff0e::2" > v2reports.out || true
+%not-contains: v2reports.out
+Mldv2Report<ff0e::2
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

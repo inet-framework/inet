@@ -20,6 +20,7 @@
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/icmpv6/Icmpv6.h"
+#include "inet/networklayer/icmpv6/MldMessage_m.h" // MLDv1 MldQuery/MldReport/MldDone for older-version interop
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 
@@ -190,6 +191,25 @@ void Mldv2::multicastSourceListChanged(NetworkInterface *ie, const Ipv6Address& 
     EV_DETAIL_C("test") << "    Old state: " << groupData->getStateInfo() << ".\n";
     EV_DETAIL_C("test") << "    New state: " << (filter == MLDV2_FM_INCLUDE ? "INCLUDE" : "EXCLUDE") << sourceList.sources << ".\n";
 
+    // RFC 3810 8.2.1: while in MLDv1 compatibility on this interface, send MLDv1
+    // Reports/Dones instead of MLDv2 State-Change Reports. The MLDv2 INCLUDE/EXCLUDE
+    // bookkeeping below is still kept up to date so that reverting to MLDv2 on timer
+    // expiry resumes from the correct state.
+    if (interfaceData->olderVersionPresent) {
+        bool wasJoined = groupData->filter == MLDV2_FM_EXCLUDE || !groupData->sourceAddressList.empty();
+        bool nowJoined = filter == MLDV2_FM_EXCLUDE || !sourceList.sources.empty();
+        if (!wasJoined && nowJoined)
+            sendOlderVersionReport(ie, group);
+        else if (wasJoined && !nowJoined)
+            sendOlderVersionDone(ie, group);
+        else if (nowJoined)
+            sendOlderVersionReport(ie, group); // refresh membership
+        groupData->filter = filter;
+        groupData->sourceAddressList = sourceList.sources;
+        sort(groupData->sourceAddressList.begin(), groupData->sourceAddressList.end());
+        return;
+    }
+
     // Check if IF state is different
     if (!(groupData->filter == filter) || !(groupData->sourceAddressList == sourceList.sources)) {
         vector<Mldv2MulticastAddressRecord> records;
@@ -323,6 +343,10 @@ void Mldv2::handleMessageWhenUp(cMessage *msg)
                 processRexmtTimer(msg);
                 break;
 
+            case MLDV2_R_OLDER_VERSION_TIMER:
+                processRouterOlderVersionTimer(msg);
+                break;
+
             case MLDV2_H_GENERAL_QUERY_TIMER:
                 processHostGeneralQueryTimer(msg);
                 break;
@@ -333,6 +357,10 @@ void Mldv2::handleMessageWhenUp(cMessage *msg)
 
             case MLDV2_H_STATE_CHANGE_TIMER:
                 processHostStateChangeTimer(msg);
+                break;
+
+            case MLDV2_H_OLDER_VERSION_TIMER:
+                processHostOlderVersionTimer(msg);
                 break;
 
             default:
@@ -645,18 +673,33 @@ void Mldv2::startTimer(cMessage *timer, double interval)
 void Mldv2::processMldMessage(Packet *packet)
 {
     const auto& icmp = packet->peekAtFront<Icmpv6Header>();
+    NetworkInterface *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
     switch (icmp->getType()) {
         case ICMPv6_MLD_QUERY:
-            processQuery(packet);
+            // Type 130 is shared by MLDv1 (24-byte MldQuery) and MLDv2 (>=28-byte
+            // Mldv2Query). Distinguish by chunk length: an MLDv1 General Query makes a
+            // v2 host fall back to MLDv1 on the receiving interface (RFC 3810 8.2.1).
+            if (icmp->getChunkLength() < B(28))
+                processOlderVersionQuery(ie, packet);
+            else
+                processQuery(packet);
             break;
 
         case ICMPv6_MLDv2_REPORT:
             processReport(packet);
             break;
 
+        // RFC 3810 8.3.2: an MLDv1 (type 131) Report or (type 132) Done puts the
+        // addressed group into older-version-host-present compatibility on the router.
+        case ICMPv6_MLD_REPORT:
+            processOlderVersionReport(ie, packet);
+            break;
+
+        case ICMPv6_MLD_DONE:
+            processOlderVersionDone(ie, packet);
+            break;
+
         default:
-            // Out of scope: MLDv1<->MLDv2 interop. Match Igmpv3, which does not
-            // handle older versions; just log and drop unexpected messages.
             EV_WARN << "Mldv2: unexpected MLD message type " << (int)icmp->getType() << ", dropping.\n";
             delete packet;
             break;
@@ -784,6 +827,15 @@ void Mldv2::processReport(Packet *packet)
             Ipv6AddressVector& receivedSources = gr.getSourceListForUpdate(); // sorted
 
             RouterGroupData *groupData = interfaceData->getOrCreateGroupData(gr.getGroupAddress());
+
+            // RFC 3810 8.3.2: while an MLDv1 host is present for this group, the group is
+            // treated as EXCLUDE{} and source-specific records from MLDv2 Reports for that
+            // group are ignored. Skip all v2 per-source processing for this record.
+            if (groupData->olderVersionPresent && groupData->olderVersionTimer->isScheduled()) {
+                EV_DETAIL << "Ignoring v2 source state for group '" << gr.getGroupAddress()
+                          << "': older-version (MLDv1) host present, group forwarded as EXCLUDE{}.\n";
+                continue;
+            }
 
             Ipv6MulticastSourceList oldSourceList;
             groupData->collectForwardedSources(oldSourceList);
@@ -1038,6 +1090,202 @@ void Mldv2::processReport(Packet *packet)
     delete packet;
 }
 
+// --- Older-version (MLDv1) interop (RFC 3810 8.2/8.3) ---
+
+// RFC 3810 8.2.1: an MLDv1 General Query was received. Enter/refresh MLDv1
+// compatibility on the interface and answer the Query in MLDv1 style (an MldReport for
+// each joined group, just as an MLDv1 host would).
+void Mldv2::processOlderVersionQuery(NetworkInterface *ie, Packet *packet)
+{
+    ASSERT(ie->isMulticast());
+    numQueriesRecv++;
+
+    const auto& query = packet->peekAtFront<MldQuery>();
+    Ipv6Address groupAddr = query->getMulticastAddress();
+
+    HostInterfaceData *interfaceData = getHostInterfaceData(ie);
+
+    if (groupAddr.isUnspecified()) {
+        if (!interfaceData->olderVersionPresent)
+            EV_INFO << "Received older-version (MLDv1) General Query on interface '"
+                    << ie->getInterfaceName() << "': entering MLDv1 compatibility.\n";
+        else
+            EV_INFO << "older-version querier present on interface '" << ie->getInterfaceName()
+                    << "', refreshing MLDv1 compatibility.\n";
+        interfaceData->olderVersionPresent = true;
+        startTimer(interfaceData->olderVersionTimer, otherQuerierPresentInterval);
+
+        // Answer the General Query in MLDv1 style for every joined group.
+        for (auto& elem : interfaceData->groups) {
+            HostGroupData *g = elem.second;
+            bool joined = g->filter == MLDV2_FM_EXCLUDE || !g->sourceAddressList.empty();
+            if (joined)
+                sendOlderVersionReport(ie, g->groupAddr);
+        }
+    }
+    else {
+        // Multicast-Address-Specific MLDv1 Query: answer for the addressed group if joined.
+        EV_INFO << "Received older-version (MLDv1) Multicast-Address-Specific Query for group '"
+                << groupAddr << "' on interface '" << ie->getInterfaceName() << "'.\n";
+        auto it = interfaceData->groups.find(groupAddr);
+        if (it != interfaceData->groups.end()) {
+            HostGroupData *g = it->second;
+            bool joined = g->filter == MLDV2_FM_EXCLUDE || !g->sourceAddressList.empty();
+            if (joined)
+                sendOlderVersionReport(ie, groupAddr);
+        }
+    }
+
+    // Router/Querier election still applies (an older-version querier may win).
+    if (rt->isMulticastForwardingEnabled()) {
+        RouterInterfaceData *routerInterfaceData = getRouterInterfaceData(ie);
+        Ipv6Address srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress().toIpv6();
+        if (srcAddr < ie->getProtocolData<Ipv6InterfaceData>()->getLinkLocalAddress()) {
+            startTimer(routerInterfaceData->generalQueryTimer, otherQuerierPresentInterval);
+            routerInterfaceData->state = MLDV2_RS_NON_QUERIER;
+        }
+    }
+
+    delete packet;
+}
+
+// Build/send an MLDv1 Report exactly as Mldv1 does (dest = group address).
+void Mldv2::sendOlderVersionReport(NetworkInterface *ie, const Ipv6Address& group)
+{
+    ASSERT(group.isMulticast() && group != Ipv6Address::ALL_NODES_2);
+
+    EV_INFO << "Mldv2: sending MLDv1 Multicast Listener Report for group '" << group
+            << "' on interface '" << ie->getInterfaceName() << "'.\n";
+    Packet *packet = new Packet("Mldv1 report");
+    const auto& msg = makeShared<MldReport>();
+    msg->setMulticastAddress(group);
+    msg->setChunkLength(B(24));
+    Icmpv6::insertChecksum(checksumMode, msg, packet);
+    packet->insertAtFront(msg);
+    sendToIPv6(packet, ie, group); // dest = group address (RFC 2710 §5)
+    numReportsSent++;
+}
+
+// Build/send an MLDv1 Done exactly as Mldv1 does (dest = ALL_ROUTERS_2, ff02::2).
+void Mldv2::sendOlderVersionDone(NetworkInterface *ie, const Ipv6Address& group)
+{
+    ASSERT(group.isMulticast() && group != Ipv6Address::ALL_NODES_2);
+
+    EV_INFO << "Mldv2: sending MLDv1 Multicast Listener Done for group '" << group
+            << "' on interface '" << ie->getInterfaceName() << "'.\n";
+    Packet *packet = new Packet("Mldv1 done");
+    const auto& msg = makeShared<MldDone>();
+    msg->setMulticastAddress(group);
+    msg->setChunkLength(B(24));
+    Icmpv6::insertChecksum(checksumMode, msg, packet);
+    packet->insertAtFront(msg);
+    sendToIPv6(packet, ie, Ipv6Address::ALL_ROUTERS_2);
+}
+
+// RFC 3810 8.3.2: a received MLDv1 Report puts the addressed group into
+// older-version-host-present mode on the router.
+void Mldv2::processOlderVersionReport(NetworkInterface *ie, Packet *packet)
+{
+    ASSERT(ie->isMulticast());
+    numReportsRecv++;
+
+    Ipv6Address group = packet->peekAtFront<MldReport>()->getMulticastAddress();
+
+    EV_INFO << "Mldv2: received MLDv1 Multicast Listener Report for group '" << group
+            << "' on interface '" << ie->getInterfaceName() << "'.\n";
+
+    if (rt->isMulticastForwardingEnabled() && group.isMulticast() && group != Ipv6Address::ALL_NODES_2) {
+        RouterInterfaceData *interfaceData = getRouterInterfaceData(ie);
+        RouterGroupData *groupData = interfaceData->getOrCreateGroupData(group);
+        enterRouterOlderVersionCompat(ie, groupData);
+    }
+
+    delete packet;
+}
+
+// RFC 3810 8.3.2: a received MLDv1 Done runs the normal last-listener query process
+// (Feature 2 retransmission), exactly like an MLDv2 leave.
+void Mldv2::processOlderVersionDone(NetworkInterface *ie, Packet *packet)
+{
+    ASSERT(ie->isMulticast());
+
+    Ipv6Address group = packet->peekAtFront<MldDone>()->getMulticastAddress();
+
+    EV_INFO << "Mldv2: received MLDv1 Multicast Listener Done for group '" << group
+            << "' on interface '" << ie->getInterfaceName() << "'.\n";
+
+    if (rt->isMulticastForwardingEnabled()) {
+        RouterGroupData *groupData = getRouterGroupData(ie, group);
+        if (groupData && groupData->state == MLDV2_RGS_MEMBERS_PRESENT) {
+            EV_INFO << "Sending Multicast-Address-Specific Query for group '" << group
+                    << "' on interface '" << ie->getInterfaceName() << "' in response to a Done.\n";
+            groupData->state = MLDV2_RGS_CHECKING_MEMBERSHIP;
+            sendGroupSpecificQuery(groupData);
+        }
+    }
+
+    delete packet;
+}
+
+Mldv2::RouterGroupData *Mldv2::getRouterGroupData(NetworkInterface *ie, const Ipv6Address& group)
+{
+    auto it = routerData.find(ie->getInterfaceId());
+    if (it == routerData.end())
+        return nullptr;
+    auto git = it->second->groups.find(group);
+    return git != it->second->groups.end() ? git->second : nullptr;
+}
+
+// Put the group into older-version-host-present mode: forward as EXCLUDE{} (any-source),
+// (re)start the per-group compatibility timer, and record the compat flag.
+void Mldv2::enterRouterOlderVersionCompat(NetworkInterface *ie, RouterGroupData *groupData)
+{
+    bool entering = !groupData->olderVersionPresent || !groupData->olderVersionTimer->isScheduled();
+    if (entering)
+        EV_INFO << "v1 host present for group '" << groupData->groupAddr << "' on interface '"
+                << ie->getInterfaceName() << "': entering MLDv1 compatibility, forwarding as EXCLUDE{}.\n";
+    else
+        EV_INFO << "Refreshing older-version-host-present timer for group '" << groupData->groupAddr
+                << "' on interface '" << ie->getInterfaceName() << "'.\n";
+
+    groupData->olderVersionPresent = true;
+    startTimer(groupData->olderVersionTimer, groupMembershipInterval);
+
+    // Force EXCLUDE{} forwarding and the v2 router group/filter state.
+    Ipv6MulticastSourceList oldSourceList;
+    groupData->collectForwardedSources(oldSourceList);
+
+    groupData->filter = MLDV2_FM_EXCLUDE;
+    groupData->state = MLDV2_RGS_MEMBERS_PRESENT;
+    startTimer(groupData->timer, groupMembershipInterval);
+
+    Ipv6MulticastSourceList newSourceList;
+    newSourceList.filterMode = MCAST_EXCLUDE_SOURCES;
+    newSourceList.sources.clear();
+
+    if (newSourceList != oldSourceList || entering)
+        ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->setMulticastListeners(groupData->groupAddr, MCAST_EXCLUDE_SOURCES, newSourceList.sources);
+}
+
+// RFC 3810 8.2.1: the Older Version Querier Present timer expired; revert to MLDv2.
+void Mldv2::processHostOlderVersionTimer(cMessage *msg)
+{
+    HostInterfaceData *interfaceData = (HostInterfaceData *)msg->getContextPointer();
+    EV_INFO << "Older Version Querier Present timer expired on interface '"
+            << interfaceData->ie->getInterfaceName() << "': reverting to MLDv2.\n";
+    interfaceData->olderVersionPresent = false;
+}
+
+// RFC 3810 8.3.2: the Older Version Host Present timer for a group expired; revert that
+// group to native MLDv2 processing.
+void Mldv2::processRouterOlderVersionTimer(cMessage *msg)
+{
+    RouterGroupData *groupData = (RouterGroupData *)msg->getContextPointer();
+    EV_INFO << "Older Version Host Present timer expired for group '" << groupData->groupAddr
+            << "' on interface '" << groupData->parent->ie->getInterfaceName() << "': reverting to MLDv2.\n";
+    groupData->olderVersionPresent = false;
+}
+
 // --- Methods for sending MLD messages ---
 
 void Mldv2::sendGeneralQuery(RouterInterfaceData *interfaceData, double maxRespTime)
@@ -1283,12 +1531,16 @@ Mldv2::RouterGroupData::RouterGroupData(RouterInterfaceData *parent, const Ipv6A
 
     rexmtTimer = new cMessage("Mldv2 router rexmt timer", MLDV2_R_REXMT_TIMER);
     rexmtTimer->setContextPointer(this);
+
+    olderVersionTimer = new cMessage("Mldv2 Older Version Host Present Timer", MLDV2_R_OLDER_VERSION_TIMER);
+    olderVersionTimer->setContextPointer(this);
 }
 
 Mldv2::RouterGroupData::~RouterGroupData()
 {
     parent->owner->cancelAndDelete(timer);
     parent->owner->cancelAndDelete(rexmtTimer);
+    parent->owner->cancelAndDelete(olderVersionTimer);
 }
 
 Mldv2::SourceRecord *Mldv2::RouterGroupData::createSourceRecord(const Ipv6Address& source)
@@ -1386,11 +1638,15 @@ Mldv2::HostInterfaceData::HostInterfaceData(Mldv2 *owner, NetworkInterface *ie)
 
     generalQueryTimer = new cMessage("Mldv2 Host General Timer", MLDV2_H_GENERAL_QUERY_TIMER);
     generalQueryTimer->setContextPointer(this);
+
+    olderVersionTimer = new cMessage("Mldv2 Older Version Querier Present Timer", MLDV2_H_OLDER_VERSION_TIMER);
+    olderVersionTimer->setContextPointer(this);
 }
 
 Mldv2::HostInterfaceData::~HostInterfaceData()
 {
     owner->cancelAndDelete(generalQueryTimer);
+    owner->cancelAndDelete(olderVersionTimer);
 
     for (auto& elem : groups)
         delete elem.second;

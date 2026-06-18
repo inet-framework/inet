@@ -30,6 +30,7 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 #include "inet/networklayer/icmpv6/Icmpv6.h"
+#include "inet/networklayer/icmpv6/MldMessage_m.h" // MLDv1 MldQuery/MldReport/MldDone for interop tests
 #include "inet/networklayer/icmpv6/Mldv2.h"
 #include "inet/networklayer/icmpv6/Mldv2Message_m.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
@@ -115,8 +116,27 @@ void TestMld::initialize(int stage)
 void TestMld::handleMessage(cMessage *msg)
 {
     Packet *pk = check_and_cast<Packet *>(msg);
-    const auto &report = pk->peekAtFront<Mldv2Report>();
-    EV << "TestMld: Received: " << report.get() << ".\n";
+    const auto &icmp = pk->peekAtFront<Icmpv6Header>();
+    switch (icmp->getType()) {
+        case ICMPv6_MLDv2_REPORT: {
+            const auto &report = pk->peekAtFront<Mldv2Report>();
+            EV << "TestMld: Received: " << report.get() << ".\n";
+            break;
+        }
+        case ICMPv6_MLD_REPORT: {
+            const auto &report = pk->peekAtFront<MldReport>();
+            EV << "TestMld: Received: " << report->getClassName() << "<group=" << report->getMulticastAddress() << ">.\n";
+            break;
+        }
+        case ICMPv6_MLD_DONE: {
+            const auto &done = pk->peekAtFront<MldDone>();
+            EV << "TestMld: Received: " << done->getClassName() << "<group=" << done->getMulticastAddress() << ">.\n";
+            break;
+        }
+        default:
+            EV << "TestMld: Received: unexpected MLD type " << (int)icmp->getType() << ".\n";
+            break;
+    }
     delete msg;
 }
 
@@ -198,6 +218,83 @@ void TestMld::processSendCommand(const cXMLElement &node)
         Icmpv6::insertChecksum(checksumMode, msg, packet);
         packet->insertAtFront(msg);
         sendMld(packet, ie, group.isUnspecified() ? Ipv6Address::ALL_NODES_2 : group);
+    }
+    else if (type == "MldQuery") {
+        // MLDv1 Query (24-byte, ICMPv6 type 130). General if group unspecified.
+        const char *groupStr = node.getAttribute("group");
+        const char *maxRespCodeStr = node.getAttribute("maxRespCode");
+        Ipv6Address group = groupStr ? Ipv6Address(groupStr) : Ipv6Address::UNSPECIFIED_ADDRESS;
+        int maxRespCode = maxRespCodeStr ? atoi(maxRespCodeStr) : 10000; // ms
+
+        Packet *packet = new Packet("Mldv1 query");
+        const auto &msg = makeShared<MldQuery>();
+        msg->setType(ICMPv6_MLD_QUERY);
+        msg->setMulticastAddress(group);
+        msg->setMaxRespDelay((uint16_t)maxRespCode);
+        msg->setChunkLength(B(24));
+        Icmpv6::insertChecksum(checksumMode, msg, packet);
+        packet->insertAtFront(msg);
+        sendMld(packet, ie, group.isUnspecified() ? Ipv6Address::ALL_NODES_2 : group);
+    }
+    else if (type == "Mldv2Report") {
+        // MLDv2 Multicast Listener Report (ICMPv6 type 143) with one or more records.
+        cXMLElementList records = node.getElementsByTagName("record");
+        Packet *packet = new Packet("Mldv2 report");
+        const auto &msg = makeShared<Mldv2Report>();
+        unsigned int byteLength = 8; // Mldv2Report header size
+
+        msg->setMulticastAddressRecordArraySize(records.size());
+        for (size_t i = 0; i < records.size(); ++i) {
+            cXMLElement *recordNode = records[i];
+            const char *groupStr = recordNode->getAttribute("group");
+            string recordTypeStr = recordNode->getAttribute("type");
+            const char *sourcesStr = recordNode->getAttribute("sources");
+            ASSERT(groupStr);
+
+            Mldv2MulticastAddressRecord &record = msg->getMulticastAddressRecordForUpdate(i);
+            record.setGroupAddress(Ipv6Address(groupStr));
+            parseIpv6AddressVector(sourcesStr, record.getSourceListForUpdate());
+            record.setRecordType(recordTypeStr == "IS_IN" ? MLD_MODE_IS_INCLUDE :
+                                recordTypeStr == "IS_EX" ? MLD_MODE_IS_EXCLUDE :
+                                recordTypeStr == "TO_IN" ? MLD_CHANGE_TO_INCLUDE_MODE :
+                                recordTypeStr == "TO_EX" ? MLD_CHANGE_TO_EXCLUDE_MODE :
+                                recordTypeStr == "ALLOW" ? MLD_ALLOW_NEW_SOURCES :
+                                recordTypeStr == "BLOCK" ? MLD_BLOCK_OLD_SOURCES : 0);
+            ASSERT(record.getGroupAddress().isMulticast());
+            ASSERT(record.getRecordType());
+            byteLength += 20 + record.getSourceList().size() * 16; // 20 byte record header + n * 16 byte (Ipv6Address)
+        }
+        msg->setChunkLength(B(byteLength));
+        Icmpv6::insertChecksum(checksumMode, msg, packet);
+        packet->insertAtFront(msg);
+        sendMld(packet, ie, Ipv6Address::ALL_MLDV2_ROUTERS);
+    }
+    else if (type == "MldReport" || type == "MldDone") {
+        // MLDv1 Report (type 131, dest=group) / Done (type 132, dest=ff02::2).
+        const char *groupStr = node.getAttribute("group");
+        ASSERT(groupStr);
+        Ipv6Address group = Ipv6Address(groupStr);
+
+        Packet *packet = new Packet("Mldv1 older-version");
+        Ptr<MldMessage> msg;
+        Ipv6Address dest;
+        if (type == "MldReport") {
+            const auto &m = makeShared<MldReport>();
+            m->setMulticastAddress(group);
+            m->setChunkLength(B(24));
+            msg = m;
+            dest = group;
+        }
+        else { // MldDone
+            const auto &m = makeShared<MldDone>();
+            m->setMulticastAddress(group);
+            m->setChunkLength(B(24));
+            msg = m;
+            dest = Ipv6Address::ALL_ROUTERS_2;
+        }
+        Icmpv6::insertChecksum(checksumMode, msg, packet);
+        packet->insertAtFront(msg);
+        sendMld(packet, ie, dest);
     }
 }
 

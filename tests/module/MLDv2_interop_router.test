@@ -1,0 +1,95 @@
+%description:
+
+Older-version interop, ROUTER side (RFC 3810 8.3.2; the MLD counterpart of
+IGMPv3_interop_router.test).
+
+When an MLDv2 querier hears an MLDv1 Multicast Listener Report (ICMPv6 type 131) for a
+group, it puts that group into older-version-host-present compatibility: the group is
+forwarded as EXCLUDE{} (any-source), and source-specific information in MLDv2 Reports for
+that group is ignored while the compat timer runs.
+
+This test injects an MldReport (v1) for a group, then an MLDv2 Report carrying
+source-specific records for the same group, and asserts the group's forwarding stays
+EXCLUDE{} (the v2 source info is ignored).
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+sim-time-limit=30s
+cmdenv-express-mode = false
+
+seed-set = 0
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+network = inet.test.moduletest.lib.TestMLDNetwork
+**.mld.typename = "Mldv2"
+# Enable the querier/router path on the node's routing table.
+**.node.routingTable.multicastForwarding = true
+
+**.mld.lastMemberQueryInterval = 1s
+**.mld.lastMemberQueryCount = 2
+
+**.scenarioManager.script = xmldoc("scenario.xml")
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%file: scenario.xml
+<scenario>
+
+<!-- older-version (MLDv1) Report for ff0e::1: router enters v1-host-present compat -->
+<send t="1" module="node.tester.mac" ifname="eth0" type="MldReport" group="ff0e::1"/>
+<dump t="1.5" module="node.tester.mac" ifname="eth0" what="listeners"/>
+
+<!-- MLDv2 Report with source-specific records for ff0e::1: must be IGNORED (stay EXCLUDE{}) -->
+<send t="2" module="node.tester.mac" ifname="eth0" type="Mldv2Report">
+  <record group="ff0e::1" type="IS_IN" sources="2001::1 2001::2"/>
+</send>
+<dump t="2.5" module="node.tester.mac" ifname="eth0" what="listeners"/>
+
+</scenario>
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%#
+%# The router enters older-version-host-present compatibility on the MLDv1 Report.
+%#
+%postrun-command: grep "v1 host present for group" test.out > present.out || true
+%contains: present.out
+v1 host present for group 'ff0e::1'
+
+%#
+%# The group is forwarded as EXCLUDE{} (any-source) and stays that way even after an MLDv2
+%# Report carrying source-specific records, which must be ignored.
+%#
+%postrun-command: grep "TestMld: .* listeners = " test.out > listeners.out || true
+%contains: listeners.out
+TestMld: eth0: listeners = ff0e::1 E.
+
+%#
+%# The v2 source info for the compat group is explicitly ignored (twice: dump at t=2.5
+%# still shows EXCLUDE{}).
+%#
+%postrun-command: grep "Ignoring v2 source state for group" test.out > ignored.out || true
+%contains: ignored.out
+Ignoring v2 source state for group 'ff0e::1'
+
+%#
+%# Confirm the forwarding state never gains a source (would show "ff0e::1 E 2001::..." or
+%# "ff0e::1 I ..."): the only listeners line for this group must be the bare EXCLUDE{}.
+%#
+%postrun-command: grep "TestMld: .* listeners = " test.out | grep -E "ff0e::1 (I|E 2001)" > leaked.out || true
+%not-contains: leaked.out
+ff0e::1
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
