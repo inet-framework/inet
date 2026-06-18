@@ -1,0 +1,103 @@
+%description:
+
+Older-version interop, HOST side (RFC 3376 7.2.1).
+
+When an IGMPv3 host hears an older-version General Query (Igmpv1Query or Igmpv2Query)
+on an interface, it starts the Older Version Querier Present timer and falls back to
+that older version on that interface: it answers the Query, and subsequent join/leave
+state changes, with older-version Reports/Leaves instead of v3 reports.
+
+This test injects an Igmpv2Query to a v3 host that has joined a group, and asserts the
+host answers with an Igmpv2Report and that a later join emits an Igmpv2Report (not a v3
+report) and a later leave emits an Igmpv2Leave. A separate Igmpv1Query path asserts the
+host then emits an Igmpv1Report (and suppresses Leaves) instead.
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+sim-time-limit=30s
+cmdenv-express-mode = false
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+network = inet.test.moduletest.lib.TestIGMPNetwork
+**.igmp.typename = "Igmpv3"
+**.IPForward = false
+**.multicastForwarding = false
+
+# Fix RNG seed and shrink intervals so the random response delay fires deterministically.
+seed-set = 0
+**.igmp.unsolicitedReportInterval = 0.5s
+
+**.scenarioManager.script = xmldoc("scenario.xml")
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%file: scenario.xml
+<scenario>
+
+<!-- join an any-source group while still native v3 -->
+<set-filter t="1" module="node.tester.mac" ifname="eth0" group="225.0.0.1" sources="E"/>
+
+<!-- older-version (IGMPv2) General Query: host enters IGMPv2 compatibility and answers -->
+<send t="2" module="node.tester.mac" ifname="eth0" type="Igmpv2Query"/>
+
+<!-- a new join while in IGMPv2 compat: host must emit an Igmpv2Report (not v3) -->
+<set-filter t="4" module="node.tester.mac" ifname="eth0" group="225.0.0.2" sources="E"/>
+
+<!-- a leave while in IGMPv2 compat: host must emit an Igmpv2Leave -->
+<set-filter t="5" module="node.tester.mac" ifname="eth0" group="225.0.0.2" sources="I"/>
+
+<!-- older-version (IGMPv1) General Query: host switches to IGMPv1 compatibility -->
+<send t="6" module="node.tester.mac" ifname="eth0" type="Igmpv1Query"/>
+
+<!-- a new join while in IGMPv1 compat: host must emit an Igmpv1Report -->
+<set-filter t="8" module="node.tester.mac" ifname="eth0" group="225.0.0.3" sources="E"/>
+
+<!-- a leave while in IGMPv1 compat: Leaves are suppressed (no Igmpv2Leave expected) -->
+<set-filter t="9" module="node.tester.mac" ifname="eth0" group="225.0.0.3" sources="I"/>
+
+</scenario>
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%#
+%# The host enters IGMPv2 compatibility on the older-version General Query.
+%#
+%postrun-command: grep -E "entering IGMPv2 compatibility|entering IGMPv1 compatibility" test.out > compat.out || true
+%contains: compat.out
+entering IGMPv2 compatibility
+%contains: compat.out
+entering IGMPv1 compatibility
+
+%#
+%# The host answers / reports with older-version messages, never a v3 report while in compat.
+%#
+%postrun-command: grep "IGMPTester: Received" test.out > received.out || true
+%contains: received.out
+IGMPTester: Received: inet::Igmpv2Report<group=225.0.0.1>.
+%contains: received.out
+IGMPTester: Received: inet::Igmpv2Report<group=225.0.0.2>.
+%contains: received.out
+IGMPTester: Received: inet::Igmpv2Leave<group=225.0.0.2>.
+%contains: received.out
+IGMPTester: Received: inet::Igmpv1Report<group=225.0.0.3>.
+
+%#
+%# While in IGMPv1 compatibility, the host suppresses Leaves: no Igmpv2Leave for 225.0.0.3.
+%#
+%postrun-command: grep "IGMPTester: Received" test.out | grep "Igmpv2Leave<group=225.0.0.3>" > v1leave.out || true
+%not-contains: v1leave.out
+Igmpv2Leave<group=225.0.0.3>
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

@@ -1,0 +1,94 @@
+%description:
+
+Older-version interop, ROUTER side (RFC 3376 7.3.2).
+
+When an IGMPv3 querier hears an older-version (v1/v2) Membership Report for a group, it
+puts that group into older-version-host-present compatibility: the group is forwarded as
+EXCLUDE{} (any-source), and source-specific information in v3 Reports for that group is
+ignored while the compat timer runs.
+
+This test injects an Igmpv2Report for a group, then a v3 Report carrying source-specific
+records for the same group, and asserts the group's forwarding stays EXCLUDE{} (the v3
+source info is ignored). It also injects an Igmpv1Report for a second group and asserts
+the v1-host-present marker.
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+sim-time-limit=30s
+cmdenv-express-mode = false
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+network = inet.test.moduletest.lib.TestIGMPNetwork
+**.igmp.typename = "Igmpv3"
+**.IPForward = true
+**.multicastForwarding = true
+
+seed-set = 0
+**.igmp.lastMemberQueryInterval = 1s
+**.igmp.lastMemberQueryCount = 2
+
+**.scenarioManager.script = xmldoc("scenario.xml")
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%file: scenario.xml
+<scenario>
+
+<!-- older-version (IGMPv2) Report for 225.0.0.1: router enters v2-host-present compat -->
+<send t="1" module="node.tester.mac" ifname="eth0" type="Igmpv2Report" group="225.0.0.1"/>
+<dump t="1.5" module="node.tester.mac" ifname="eth0" what="listeners"/>
+
+<!-- v3 Report with source-specific records for 225.0.0.1: must be IGNORED (stay EXCLUDE{}) -->
+<send t="2" module="node.tester.mac" ifname="eth0" type="Igmpv3Report">
+  <record group="225.0.0.1" type="IS_IN" sources="10.0.0.1 10.0.0.2"/>
+</send>
+<dump t="2.5" module="node.tester.mac" ifname="eth0" what="listeners"/>
+
+<!-- older-version (IGMPv1) Report for 225.0.0.2: router enters v1-host-present compat -->
+<send t="3" module="node.tester.mac" ifname="eth0" type="Igmpv1Report" group="225.0.0.2"/>
+<dump t="3.5" module="node.tester.mac" ifname="eth0" what="listeners"/>
+
+</scenario>
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%#
+%# The router enters older-version-host-present compatibility on the v1/v2 Report.
+%#
+%postrun-command: grep "v1/v2 host present for group" test.out > present.out || true
+%contains: present.out
+v1/v2 host present for group '225.0.0.1'
+%contains: present.out
+v1/v2 host present for group '225.0.0.2'
+
+%#
+%# The group is forwarded as EXCLUDE{} (any-source) and stays that way even after a v3
+%# Report carrying source-specific records, which must be ignored.
+%#
+%postrun-command: grep "IGMPTester: .* listeners = " test.out > listeners.out || true
+%contains: listeners.out
+IGMPTester: eth0: listeners = 225.0.0.1 E.
+%# after the v3 source-specific Report, still EXCLUDE{} (sources ignored)
+%contains: listeners.out
+IGMPTester: eth0: listeners = 225.0.0.1 E, 225.0.0.2 E.
+
+%#
+%# The v3 source info for the compat group is explicitly ignored.
+%#
+%postrun-command: grep "Ignoring v3 source state for group" test.out > ignored.out || true
+%contains: ignored.out
+Ignoring v3 source state for group '225.0.0.1'
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

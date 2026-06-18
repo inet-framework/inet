@@ -70,15 +70,21 @@ static ostream &operator<<(ostream &out, const IgmpMessage* msg)
                 out << ", maxRespTime=" << SimTime(v2Query->getMaxRespTimeCode(), (SimTimeUnit)-1);
             break;
         }
-        case IGMPV1_MEMBERSHIP_REPORT:
-            // TODO
+        case IGMPV1_MEMBERSHIP_REPORT: {
+            auto report = check_and_cast<const Igmpv1Report*>(msg);
+            out << "group=" << report->getGroupAddress();
             break;
-        case IGMPV2_MEMBERSHIP_REPORT:
-            // TODO
+        }
+        case IGMPV2_MEMBERSHIP_REPORT: {
+            auto report = check_and_cast<const Igmpv2Report*>(msg);
+            out << "group=" << report->getGroupAddress();
             break;
-        case IGMPV2_LEAVE_GROUP:
-            // TODO
+        }
+        case IGMPV2_LEAVE_GROUP: {
+            auto leave = check_and_cast<const Igmpv2Leave*>(msg);
+            out << "group=" << leave->getGroupAddress();
             break;
+        }
         case IGMPV3_MEMBERSHIP_REPORT: {
             auto report = check_and_cast<const Igmpv3Report*>(msg);
             for (unsigned int i = 0; i < report->getGroupRecordArraySize(); i++) {
@@ -192,10 +198,64 @@ void IGMPTester::processSendCommand(const cXMLElement &node)
     string type = node.getAttribute("type");
 
     if (type == "Igmpv1Query") {
-        // TODO
+        const char *groupStr = node.getAttribute("group");
+        Ipv4Address group = groupStr ? Ipv4Address(groupStr) : Ipv4Address::UNSPECIFIED_ADDRESS;
+
+        Packet *packet = new Packet("Igmpv1 query");
+        const auto& msg = makeShared<Igmpv1Query>();
+        msg->setType(IGMP_MEMBERSHIP_QUERY);
+        msg->setGroupAddress(group);
+        msg->setChunkLength(B(8));
+        Igmpv3::insertChecksum(checksumMode, msg, packet);
+        packet->insertAtFront(msg);
+        sendIGMP(packet, ie, group.isUnspecified() ? Ipv4Address::ALL_HOSTS_MCAST : group);
     }
     else if (type == "Igmpv2Query") {
-        // TODO
+        const char *groupStr = node.getAttribute("group");
+        const char *maxRespCodeStr = node.getAttribute("maxRespCode");
+        Ipv4Address group = groupStr ? Ipv4Address(groupStr) : Ipv4Address::UNSPECIFIED_ADDRESS;
+        int maxRespCode = maxRespCodeStr ? atoi(maxRespCodeStr) : 100 /*10 sec*/;
+
+        Packet *packet = new Packet("Igmpv2 query");
+        const auto& msg = makeShared<Igmpv2Query>();
+        msg->setType(IGMP_MEMBERSHIP_QUERY);
+        msg->setGroupAddress(group);
+        msg->setMaxRespTimeCode(maxRespCode);
+        msg->setChunkLength(B(8));
+        Igmpv3::insertChecksum(checksumMode, msg, packet);
+        packet->insertAtFront(msg);
+        sendIGMP(packet, ie, group.isUnspecified() ? Ipv4Address::ALL_HOSTS_MCAST : group);
+    }
+    else if (type == "Igmpv1Report" || type == "Igmpv2Report" || type == "Igmpv2Leave") {
+        const char *groupStr = node.getAttribute("group");
+        ASSERT(groupStr);
+        Ipv4Address group = Ipv4Address(groupStr);
+
+        Packet *packet = new Packet("Igmp older-version");
+        Ptr<IgmpMessage> msg;
+        Ipv4Address dest = group;
+        if (type == "Igmpv1Report") {
+            const auto& m = makeShared<Igmpv1Report>();
+            m->setGroupAddress(group);
+            m->setChunkLength(B(8));
+            msg = m;
+        }
+        else if (type == "Igmpv2Report") {
+            const auto& m = makeShared<Igmpv2Report>();
+            m->setGroupAddress(group);
+            m->setChunkLength(B(8));
+            msg = m;
+        }
+        else { // Igmpv2Leave
+            const auto& m = makeShared<Igmpv2Leave>();
+            m->setGroupAddress(group);
+            m->setChunkLength(B(8));
+            msg = m;
+            dest = Ipv4Address::ALL_ROUTERS_MCAST;
+        }
+        Igmpv3::insertChecksum(checksumMode, msg, packet);
+        packet->insertAtFront(msg);
+        sendIGMP(packet, ie, dest);
     }
     else if (type == "Igmpv3Query") {
         const char *groupStr = node.getAttribute("group");
@@ -217,12 +277,6 @@ void IGMPTester::processSendCommand(const cXMLElement &node)
         Igmpv3::insertChecksum(checksumMode, msg, packet);
         packet->insertAtFront(msg);
         sendIGMP(packet, ie, group.isUnspecified() ? Ipv4Address::ALL_HOSTS_MCAST : group);
-    }
-    else if (type == "Igmpv2Report") {
-        // TODO
-    }
-    else if (type == "Igmpv2Leave") {
-        // TODO
     }
     else if (type == "Igmpv3Report") {
         cXMLElementList records = node.getElementsByTagName("record");

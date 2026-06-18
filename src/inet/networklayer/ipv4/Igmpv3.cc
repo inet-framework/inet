@@ -191,6 +191,28 @@ void Igmpv3::multicastSourceListChanged(NetworkInterface *ie, Ipv4Address group,
     EV_DETAIL_C("test") << "    Old state: " << groupData->getStateInfo() << ".\n";
     EV_DETAIL_C("test") << "    New state: " << (filter == IGMPV3_FM_INCLUDE ? "INCLUDE" : "EXCLUDE") << sourceList.sources << ".\n";
 
+    // RFC 3376 7.2.1: while in older-version compatibility on this interface, send
+    // older-version (v1/v2) Reports/Leaves instead of v3 State-Change Reports. The v3
+    // INCLUDE/EXCLUDE bookkeeping below is still kept up to date so that reverting to v3
+    // on timer expiry resumes from the correct state.
+    if (interfaceData->compatVersion != IGMP_COMPAT_NONE) {
+        bool wasJoined = groupData->filter == IGMPV3_FM_EXCLUDE || !groupData->sourceAddressList.empty();
+        bool nowJoined = filter == IGMPV3_FM_EXCLUDE || !sourceList.sources.empty();
+        if (!wasJoined && nowJoined)
+            sendOlderVersionReport(ie, group, interfaceData->compatVersion);
+        else if (wasJoined && !nowJoined) {
+            // leaving the group: send an older-version Leave (suppressed under v1 compat)
+            if (interfaceData->compatVersion == IGMP_COMPAT_V2)
+                sendOlderVersionLeave(ie, group);
+        }
+        else if (nowJoined)
+            sendOlderVersionReport(ie, group, interfaceData->compatVersion); // refresh membership
+        groupData->filter = filter;
+        groupData->sourceAddressList = sourceList.sources;
+        sort(groupData->sourceAddressList.begin(), groupData->sourceAddressList.end());
+        return;
+    }
+
     // Check if IF state is different
     if (!(groupData->filter == filter) || !(groupData->sourceAddressList == sourceList.sources)) {
         vector<GroupRecord> records;
@@ -324,6 +346,10 @@ void Igmpv3::handleMessage(cMessage *msg)
                 processRexmtTimer(msg);
                 break;
 
+            case IGMPV3_R_OLDER_VERSION_TIMER:
+                processRouterOlderVersionTimer(msg);
+                break;
+
             case IGMPV3_H_GENERAL_QUERY_TIMER:
                 processHostGeneralQueryTimer(msg);
                 break;
@@ -334,6 +360,10 @@ void Igmpv3::handleMessage(cMessage *msg)
 
             case IGMPV3_H_STATE_CHANGE_TIMER:
                 processHostStateChangeTimer(msg);
+                break;
+
+            case IGMPV3_H_OLDER_VERSION_TIMER:
+                processHostOlderVersionTimer(msg);
                 break;
 
             default:
@@ -627,6 +657,7 @@ void Igmpv3::processIgmpMessage(Packet *packet)
     }
 
     const auto& msg = packet->peekAtFront<IgmpMessage>();
+    NetworkInterface *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
     switch (msg->getType()) {
         case IGMP_MEMBERSHIP_QUERY:
             processQuery(packet);
@@ -634,6 +665,20 @@ void Igmpv3::processIgmpMessage(Packet *packet)
 
         case IGMPV3_MEMBERSHIP_REPORT:
             processReport(packet);
+            break;
+
+        // RFC 3376 7.3.2: an older-version (v1/v2) Report or Leave puts the addressed
+        // group into older-version-host-present compatibility mode on the router side.
+        case IGMPV1_MEMBERSHIP_REPORT:
+            processOlderVersionReport(ie, packet, IGMP_COMPAT_V1);
+            break;
+
+        case IGMPV2_MEMBERSHIP_REPORT:
+            processOlderVersionReport(ie, packet, IGMP_COMPAT_V2);
+            break;
+
+        case IGMPV2_LEAVE_GROUP:
+            processOlderVersionLeave(ie, packet);
             break;
 
         default:
@@ -646,7 +691,20 @@ void Igmpv3::processIgmpMessage(Packet *packet)
 void Igmpv3::processQuery(Packet *packet)
 {
     NetworkInterface *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
-    const auto& msg = packet->peekAtFront<Igmpv3Query>(); // TODO should processing Igmpv1Query and Igmpv2Query, too
+
+    // The IgmpHeaderSerializer produces the right Query subclass by length, so peek the
+    // base IgmpQuery and detect whether this is an older-version (v1/v2) General Query.
+    // RFC 3376 7.2.1: an older-version General Query makes a v3 host fall back to that
+    // older version on the receiving interface.
+    const auto& query = packet->peekAtFront<IgmpQuery>(b(packet->getBitLength()));
+    if (dynamicPtrCast<const Igmpv3Query>(query) == nullptr) {
+        // Igmpv1Query or Igmpv2Query (no Igmpv3 fields)
+        CompatVersion version = (dynamicPtrCast<const Igmpv2Query>(query) != nullptr) ? IGMP_COMPAT_V2 : IGMP_COMPAT_V1;
+        processOlderVersionQuery(ie, packet, version);
+        return;
+    }
+
+    const auto& msg = packet->peekAtFront<Igmpv3Query>();
     ASSERT(msg != nullptr);
 
     Ipv4Address groupAddr = msg->getGroupAddress();
@@ -776,6 +834,15 @@ void Igmpv3::processReport(Packet *packet)
             Ipv4AddressVector& receivedSources = gr.getSourceListForUpdate(); // sorted
 
             RouterGroupData *groupData = interfaceData->getOrCreateGroupData(gr.getGroupAddress());
+
+            // RFC 3376 7.3.2: while an older-version host is present for this group, the
+            // group is treated as EXCLUDE{} and source-specific records from v3 Reports
+            // are ignored. Skip all v3 per-source processing for this record.
+            if (groupData->olderVersionCompat != IGMP_COMPAT_NONE && groupData->olderVersionTimer->isScheduled()) {
+                EV_DETAIL << "Ignoring v3 source state for group '" << gr.getGroupAddress()
+                          << "': older-version (v1/v2) host present, group forwarded as EXCLUDE{}.\n";
+                continue;
+            }
 
             Ipv4MulticastSourceList oldSourceList;
             groupData->collectForwardedSources(oldSourceList);
@@ -1029,6 +1096,242 @@ void Igmpv3::processReport(Packet *packet)
         }
     }
     delete packet;
+}
+
+// --- Older-version interop (RFC 3376 7.2/7.3) ---
+
+// RFC 3376 7.2.1: an older-version General Query was received. Enter/refresh
+// older-version compatibility on the interface, and answer the Query in older-version
+// style (a v1/v2 Report for each queried group, just as a v1/v2 host would).
+void Igmpv3::processOlderVersionQuery(NetworkInterface *ie, Packet *packet, CompatVersion version)
+{
+    ASSERT(ie->isMulticast());
+    numQueriesRecv++;
+
+    const auto& query = packet->peekAtFront<IgmpQuery>(b(packet->getBitLength()));
+    Ipv4Address groupAddr = query->getGroupAddress();
+
+    HostInterfaceData *interfaceData = getHostInterfaceData(ie);
+
+    // For a General Query, start/refresh the Older Version Querier Present timer.
+    // (A v1/v2 group-specific Query does not change the present-version state per RFC.)
+    if (groupAddr.isUnspecified()) {
+        if (interfaceData->compatVersion != version)
+            EV_INFO << "Received older-version (IGMPv" << (int)version << ") General Query on interface '"
+                    << ie->getInterfaceName() << "': entering IGMPv" << (int)version << " compatibility.\n";
+        else
+            EV_INFO << "older-version querier present on interface '" << ie->getInterfaceName()
+                    << "', refreshing IGMPv" << (int)version << " compatibility.\n";
+        interfaceData->compatVersion = version;
+        startTimer(interfaceData->olderVersionTimer, otherQuerierPresentInterval);
+
+        // Answer the General Query in older-version style for every joined group.
+        for (auto& elem : interfaceData->groups) {
+            HostGroupData *g = elem.second;
+            bool joined = g->filter == IGMPV3_FM_EXCLUDE || !g->sourceAddressList.empty();
+            if (joined)
+                sendOlderVersionReport(ie, g->groupAddr, version);
+        }
+    }
+    else {
+        // Group-specific older-version Query: answer for the addressed group if joined.
+        EV_INFO << "Received older-version (IGMPv" << (int)version << ") Membership Query for group '"
+                << groupAddr << "' on interface '" << ie->getInterfaceName() << "'.\n";
+        auto it = interfaceData->groups.find(groupAddr);
+        if (it != interfaceData->groups.end()) {
+            HostGroupData *g = it->second;
+            bool joined = g->filter == IGMPV3_FM_EXCLUDE || !g->sourceAddressList.empty();
+            if (joined)
+                sendOlderVersionReport(ie, groupAddr, interfaceData->compatVersion != IGMP_COMPAT_NONE ? interfaceData->compatVersion : version);
+        }
+    }
+
+    // Router/Querier election still applies (an older-version querier may win the
+    // election); mirror the v3 path so a co-located router yields appropriately.
+    if (rt->isMulticastForwardingEnabled()) {
+        RouterInterfaceData *routerInterfaceData = getRouterInterfaceData(ie);
+        if (packet->getTag<L3AddressInd>()->getSrcAddress().toIpv4() < ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress()) {
+            startTimer(routerInterfaceData->generalQueryTimer, otherQuerierPresentInterval);
+            routerInterfaceData->state = IGMPV3_RS_NON_QUERIER;
+        }
+    }
+
+    delete packet;
+}
+
+// Build/send an older-version Report exactly as Igmpv2 does (Igmpv2Report for v2,
+// Igmpv1Report for v1), with the IPv4 Router Alert option.
+void Igmpv3::sendOlderVersionReport(NetworkInterface *ie, Ipv4Address group, CompatVersion version)
+{
+    ASSERT(group.isMulticast() && !group.isLinkLocalMulticast());
+
+    Packet *packet;
+    Ptr<IgmpMessage> msg;
+    if (version == IGMP_COMPAT_V1) {
+        EV_INFO << "Igmpv3: sending IGMPv1 Membership Report for group '" << group
+                << "' on interface '" << ie->getInterfaceName() << "'.\n";
+        packet = new Packet("Igmpv1 report");
+        const auto& rep = makeShared<Igmpv1Report>();
+        rep->setGroupAddress(group);
+        rep->setChunkLength(B(8));
+        msg = rep;
+    }
+    else {
+        EV_INFO << "Igmpv3: sending IGMPv2 Membership Report for group '" << group
+                << "' on interface '" << ie->getInterfaceName() << "'.\n";
+        packet = new Packet("Igmpv2 report");
+        const auto& rep = makeShared<Igmpv2Report>();
+        rep->setGroupAddress(group);
+        rep->setChunkLength(B(8));
+        msg = rep;
+    }
+    insertChecksum(msg, packet);
+    packet->insertAtFront(msg);
+    // sendReportToIP adds the IPv4 Router Alert option.
+    sendReportToIP(packet, ie, group);
+    numReportsSent++;
+}
+
+// Build/send an IGMPv2 Leave exactly as Igmpv2 does (dest = ALL_ROUTERS_MCAST).
+void Igmpv3::sendOlderVersionLeave(NetworkInterface *ie, Ipv4Address group)
+{
+    ASSERT(group.isMulticast() && !group.isLinkLocalMulticast());
+
+    EV_INFO << "Igmpv3: sending IGMPv2 Leave Group for group '" << group
+            << "' on interface '" << ie->getInterfaceName() << "'.\n";
+    Packet *packet = new Packet("Igmpv2 leave");
+    const auto& msg = makeShared<Igmpv2Leave>();
+    msg->setGroupAddress(group);
+    msg->setChunkLength(B(8));
+    insertChecksum(msg, packet);
+    packet->insertAtFront(msg);
+    // sendReportToIP adds the IPv4 Router Alert option.
+    sendReportToIP(packet, ie, Ipv4Address::ALL_ROUTERS_MCAST);
+}
+
+// RFC 3376 7.3.2: a received older-version (v1/v2) Membership Report puts the
+// addressed group into older-version-host-present mode on the router.
+void Igmpv3::processOlderVersionReport(NetworkInterface *ie, Packet *packet, CompatVersion version)
+{
+    ASSERT(ie->isMulticast());
+    numReportsRecv++;
+
+    Ipv4Address group;
+    if (version == IGMP_COMPAT_V1)
+        group = packet->peekAtFront<Igmpv1Report>()->getGroupAddress();
+    else
+        group = packet->peekAtFront<Igmpv2Report>()->getGroupAddress();
+
+    EV_INFO << "Igmpv3: received IGMPv" << (int)version << " Membership Report for group '" << group
+            << "' on interface '" << ie->getInterfaceName() << "'.\n";
+
+    if (rt->isMulticastForwardingEnabled() && group.isMulticast() && !group.isLinkLocalMulticast()) {
+        RouterInterfaceData *interfaceData = getRouterInterfaceData(ie);
+        RouterGroupData *groupData = interfaceData->getOrCreateGroupData(group);
+        enterRouterOlderVersionCompat(ie, groupData, version);
+    }
+
+    delete packet;
+}
+
+// RFC 3376 7.3.2: a received IGMPv2 Leave Group. Under IGMPv2 compatibility, run the
+// normal last-member query process (Feature 2 retransmission). Under IGMPv1
+// compatibility, Leaves are ignored.
+void Igmpv3::processOlderVersionLeave(NetworkInterface *ie, Packet *packet)
+{
+    ASSERT(ie->isMulticast());
+
+    Ipv4Address group = packet->peekAtFront<Igmpv2Leave>()->getGroupAddress();
+
+    EV_INFO << "Igmpv3: received IGMPv2 Leave Group for group '" << group
+            << "' on interface '" << ie->getInterfaceName() << "'.\n";
+
+    if (rt->isMulticastForwardingEnabled()) {
+        RouterGroupData *groupData = getRouterGroupData(ie, group);
+        if (groupData) {
+            if (groupData->olderVersionCompat == IGMP_COMPAT_V1 && groupData->olderVersionTimer->isScheduled()) {
+                // RFC 3376 7.3.2: ignore Leaves while in IGMPv1-host-present compatibility.
+                EV_INFO << "Ignoring IGMPv2 Leave for group '" << group
+                        << "': IGMPv1 host present.\n";
+            }
+            else if (groupData->state == IGMPV3_RGS_MEMBERS_PRESENT) {
+                // Run the last-member query process (retransmitted by Feature 2).
+                EV_INFO << "Sending Group-Specific Query for group '" << group
+                        << "' on interface '" << ie->getInterfaceName() << "' in response to a Leave.\n";
+                groupData->state = IGMPV3_RGS_CHECKING_MEMBERSHIP;
+                sendGroupSpecificQuery(groupData);
+            }
+        }
+    }
+
+    delete packet;
+}
+
+Igmpv3::RouterGroupData *Igmpv3::getRouterGroupData(NetworkInterface *ie, Ipv4Address group)
+{
+    auto it = routerData.find(ie->getInterfaceId());
+    if (it == routerData.end())
+        return nullptr;
+    auto git = it->second->groups.find(group);
+    return git != it->second->groups.end() ? git->second : nullptr;
+}
+
+// Put the group into older-version-host-present mode: forward as EXCLUDE{} (any-source),
+// (re)start the per-group compatibility timer, and record the compat version. A v3
+// listener entry is created if needed.
+void Igmpv3::enterRouterOlderVersionCompat(NetworkInterface *ie, RouterGroupData *groupData, CompatVersion version)
+{
+    bool entering = groupData->olderVersionCompat == IGMP_COMPAT_NONE || !groupData->olderVersionTimer->isScheduled();
+    if (entering)
+        EV_INFO << "v1/v2 host present for group '" << groupData->groupAddr << "' on interface '"
+                << ie->getInterfaceName() << "': entering IGMPv" << (int)version
+                << " compatibility, forwarding as EXCLUDE{}.\n";
+    else
+        EV_INFO << "Refreshing older-version-host-present timer for group '" << groupData->groupAddr
+                << "' on interface '" << ie->getInterfaceName() << "'.\n";
+
+    // RFC 3376 7.3.2: IGMPv1 compat is "stickier" than v2 (it additionally ignores
+    // Leaves), so once a group is in v1 compat a later v2 Report must not downgrade it
+    // while the timer is still running.
+    if (!(groupData->olderVersionCompat == IGMP_COMPAT_V1 && version == IGMP_COMPAT_V2 && groupData->olderVersionTimer->isScheduled()))
+        groupData->olderVersionCompat = version;
+
+    startTimer(groupData->olderVersionTimer, groupMembershipInterval);
+
+    // Force EXCLUDE{} forwarding and the v3 router group/filter state.
+    Ipv4MulticastSourceList oldSourceList;
+    groupData->collectForwardedSources(oldSourceList);
+
+    groupData->filter = IGMPV3_FM_EXCLUDE;
+    groupData->state = IGMPV3_RGS_MEMBERS_PRESENT;
+    startTimer(groupData->timer, groupMembershipInterval);
+
+    Ipv4MulticastSourceList newSourceList;
+    newSourceList.filterMode = MCAST_EXCLUDE_SOURCES;
+    newSourceList.sources.clear();
+
+    if (newSourceList != oldSourceList || entering) {
+        ie->getProtocolDataForUpdate<Ipv4InterfaceData>()->setMulticastListeners(groupData->groupAddr, MCAST_EXCLUDE_SOURCES, newSourceList.sources);
+    }
+}
+
+// RFC 3376 7.2.1: the Older Version Querier Present timer expired; revert to native v3.
+void Igmpv3::processHostOlderVersionTimer(cMessage *msg)
+{
+    HostInterfaceData *interfaceData = (HostInterfaceData *)msg->getContextPointer();
+    EV_INFO << "Older Version Querier Present timer expired on interface '"
+            << interfaceData->ie->getInterfaceName() << "': reverting to IGMPv3.\n";
+    interfaceData->compatVersion = IGMP_COMPAT_NONE;
+}
+
+// RFC 3376 7.3.2: the Older Version Host Present timer for a group expired; revert that
+// group to native v3 processing.
+void Igmpv3::processRouterOlderVersionTimer(cMessage *msg)
+{
+    RouterGroupData *groupData = (RouterGroupData *)msg->getContextPointer();
+    EV_INFO << "Older Version Host Present timer expired for group '" << groupData->groupAddr
+            << "' on interface '" << groupData->parent->ie->getInterfaceName() << "': reverting to IGMPv3.\n";
+    groupData->olderVersionCompat = IGMP_COMPAT_NONE;
 }
 
 // --- Methods for sending IGMP messages ---
@@ -1291,12 +1594,16 @@ Igmpv3::RouterGroupData::RouterGroupData(RouterInterfaceData *parent, Ipv4Addres
 
     rexmtTimer = new cMessage("Igmpv3 router rexmt timer", IGMPV3_R_REXMT_TIMER);
     rexmtTimer->setContextPointer(this);
+
+    olderVersionTimer = new cMessage("Igmpv3 Older Version Host Present Timer", IGMPV3_R_OLDER_VERSION_TIMER);
+    olderVersionTimer->setContextPointer(this);
 }
 
 Igmpv3::RouterGroupData::~RouterGroupData()
 {
     parent->owner->cancelAndDelete(timer);
     parent->owner->cancelAndDelete(rexmtTimer);
+    parent->owner->cancelAndDelete(olderVersionTimer);
 }
 
 Igmpv3::SourceRecord *Igmpv3::RouterGroupData::createSourceRecord(Ipv4Address source)
@@ -1394,11 +1701,15 @@ Igmpv3::HostInterfaceData::HostInterfaceData(Igmpv3 *owner, NetworkInterface *ie
 
     generalQueryTimer = new cMessage("Igmpv3 Host General Timer", IGMPV3_H_GENERAL_QUERY_TIMER);
     generalQueryTimer->setContextPointer(this);
+
+    olderVersionTimer = new cMessage("Igmpv3 Older Version Querier Present Timer", IGMPV3_H_OLDER_VERSION_TIMER);
+    olderVersionTimer->setContextPointer(this);
 }
 
 Igmpv3::HostInterfaceData::~HostInterfaceData()
 {
     owner->cancelAndDelete(generalQueryTimer);
+    owner->cancelAndDelete(olderVersionTimer);
 
     for (auto& elem : groups)
         delete elem.second;
