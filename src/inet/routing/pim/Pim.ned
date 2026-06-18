@@ -31,7 +31,7 @@ module Pim extends Module like IPim
         @display("i=block/network2");
         string interfaceTableModule;
         string routingTableModule;
-        string addressFamily @enum("ipv4","ipv6") = default("ipv4"); // address family PIM operates on; PIM-SM supports only "ipv4"
+        string addressFamily @enum("ipv4","ipv6") = default("ipv4"); // address family PIM operates on (one instance serves one family)
         string checksumMode @enum("declared", "computed") = default("declared");
         *.interfaceTableModule = default(absPath(this.interfaceTableModule));
         *.routingTableModule = default(absPath(this.routingTableModule));
