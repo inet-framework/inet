@@ -16,6 +16,7 @@
 namespace inet {
 
 Register_Abstract_Class(Ipv6MulticastGroupInfo);
+Register_Abstract_Class(Ipv6MulticastGroupSourceInfo);
 Register_Abstract_Class(Ipv6AddressInfo);
 
 // FIXME invoked changed() from state-changing methods, to trigger notification...
