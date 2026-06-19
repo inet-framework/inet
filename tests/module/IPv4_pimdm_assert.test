@@ -1,0 +1,115 @@
+%description:
+Tests the PIM-DM (RFC 3973) Assert mechanism: when two PIM-DM routers forward the
+same (S,G) traffic onto a shared LAN, they run an Assert election so that only one
+of them remains the forwarder for that LAN.
+
+Topology (Ethernet; R2 and R3 share a switched LAN with R4):
+
+           R2 ===\
+          /       switch -- R4 -- Receiver
+    Source -- R1          /
+          \       /------/
+           R3 ===/
+
+The Source floods 226.1.1.1; PIM-DM's broadcast-and-prune sends the stream from R1
+to BOTH R2 and R3, and both forward it onto the R2/R3/R4 switched LAN. R4 therefore
+sees duplicates, so R2 and R3 exchange Assert(S,G) messages and elect a single
+forwarder (the one with the better unicast metric/address to the source) for that
+LAN.
+
+(This was formerly examples/pim/dm/assert; it is a behavioral test, not a demo.)
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.MulticastRouter;
+import inet.node.inet.StandardHost;
+
+network PimDmAssertTest
+{
+    submodules:
+        R1: MulticastRouter;
+        R2: MulticastRouter;
+        R3: MulticastRouter;
+        R4: MulticastRouter;
+        Source: StandardHost;
+        Receiver: StandardHost;
+        switch: EthernetSwitch;
+        configurator: Ipv4NetworkConfigurator;
+    connections allowunconnected:
+        R1.ethg++ <--> Eth100M <--> R2.ethg++;
+        R1.ethg++ <--> Eth100M <--> R3.ethg++;
+        R1.ethg++ <--> Eth100M <--> Source.ethg++;
+        switch.ethg++ <--> Eth100M <--> R2.ethg++;
+        switch.ethg++ <--> Eth100M <--> R3.ethg++;
+        R4.ethg++ <--> Eth100M <--> switch.ethg++;
+        R4.ethg++ <--> Eth100M <--> Receiver.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: networkConfig.xml
+
+<config>
+  <interface hosts="Source" names="eth0" address="192.168.11.100" netmask="255.255.255.0"/>
+  <interface hosts="Receiver" names="eth0" address="192.168.22.100" netmask="255.255.255.0"/>
+  <interface hosts="R4" names="eth0" address="10.0.1.1" netmask="255.255.255.0"/>
+  <interface hosts="**" address="10.x.x.x" netmask="x.x.x.x"/>
+  <multicast-group hosts="Receiver" address="226.1.1.1"/>
+</config>
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = PimDmAssertTest
+sim-time-limit = 25s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+ned-path = .;../../../../src
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+**.hasPim = true
+**.configurator.config = xmldoc("networkConfig.xml")
+**.configurator.addStaticRoutes = true
+**.pimConfig = xml("<config><interface mode=\"dense\"/></config>")
+
+# Receiver joins 226.1.1.1 (via the configurator's multicast-group entry).
+**.Receiver.numApps = 1
+**.Receiver.app[0].typename = "UdpBasicApp"
+**.Receiver.app[0].localPort = 5000
+**.Receiver.app[0].joinLocalMulticastGroups = true
+**.Receiver.app[0].destPort = 5000
+**.Receiver.app[0].messageLength = 100B
+**.Receiver.app[0].sendInterval = 1s
+
+# Source floods 226.1.1.1 once PIM-DM adjacencies are up (~t=5s).
+**.Source.numApps = 1
+**.Source.app[0].typename = "UdpBasicApp"
+**.Source.app[0].destPort = 5000
+**.Source.app[0].messageLength = 100B
+**.Source.app[0].destAddresses = "226.1.1.1"
+**.Source.app[0].startTime = 10s
+**.Source.app[0].sendInterval = 1s
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%# the two routers on the shared LAN run the Assert election
+%contains: stdout
+Sending Assert(S=
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Received Assert(S=
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

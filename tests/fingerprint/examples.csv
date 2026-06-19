@@ -450,7 +450,6 @@
 /examples/ospfv3/v3_mesh/,           -f omnetpp.ini -c General -r 0,                500s,            6f79-3a4c/tplx;6831-ccbb/~tNl;8636-082f/tyf, PASS, EthernetMac
 /examples/ospfv3/v3_square_2_areas/, -f omnetpp.ini -c General -r 0,                200s,            7f39-edb0/tplx;1259-4e60/~tNl;2a17-4280/tyf, PASS, EthernetMac
 
-/examples/pim/dm/assert/,            -f omnetpp.ini -c General -r 0,                300s,            8414-831c/tplx;609b-0643/~tNl;6653-ec22/~tND;cdcd-2cb0/tyf, PASS, igmp EthernetMac Ipv4
 /examples/pim/dm/basic/,             -f omnetpp.ini -c General -r 0,                300s,            5542-465a/tplx;320d-ec2e/~tNl;7540-425c/~tND;ed5b-ae9d/tyf, PASS, igmp EthernetMac Ipv4
 /examples/pim/dm/ipv6/,              -f omnetpp.ini -c General -r 0,                120s,            46b7-8d71/~tNlb, PASS, MLD EthernetMac Ipv6
 /examples/pim/iptv/,                 -f omnetpp.ini -c PIM_SM -r 0,                  35s,            9fdf-a54f/tplx;c356-8a7d/~tNl;fddd-28bc/~tND;11d1-62c7/tyf, PASS, igmp ospf EthernetMac Ipv4
