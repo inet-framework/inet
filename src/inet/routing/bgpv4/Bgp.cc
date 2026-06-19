@@ -7,7 +7,6 @@
 #include "inet/routing/bgpv4/Bgp.h"
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/routing/bgpv4/BgpConfigReader.h"
 #include "inet/routing/bgpv4/BgpSession.h"
 
@@ -28,33 +27,19 @@ Bgp::~Bgp()
 
 void Bgp::initialize(int stage)
 {
-    SimpleModule::initialize(stage);
+    RoutingProtocolBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         ift.reference(this, "interfaceTableModule", true);
         rt.reference(this, "routingTableModule", true);
 
         startupTimer = new cMessage("BGP-startup");
-
-        WATCH(isUp);
-    }
-    else if (stage == INITSTAGE_ROUTING_PROTOCOLS) { // interfaces and static routes are already initialized
-        cModule *node = findContainingNode(this);
-        NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
-        isUp = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
-        if (isUp) {
-            simtime_t startupTime = par("startupTime");
-            if (startupTime == 0)
-                createBgpRouter();
-            else
-                scheduleAfter(startupTime, startupTimer);
-        }
     }
 }
 
 void Bgp::finish()
 {
-    if (!isUp) {
+    if (!bgpRouter) {
         EV_ERROR << "Protocol is turned off. \n";
         return;
     }
@@ -62,28 +47,61 @@ void Bgp::finish()
     bgpRouter->recordStatistics();
 }
 
-void Bgp::handleMessage(cMessage *msg)
+void Bgp::handleMessageWhenUp(cMessage *msg)
 {
-    if (!isUp) {
-        if (msg->isSelfMessage())
-            throw cRuntimeError("Model error: self msg '%s' received when protocol is down", msg->getName());
-        EV_ERROR << "Protocol is turned off, dropping '" << msg->getName() << "' message\n";
-        delete msg;
-        return;
-    }
-
     if (msg == startupTimer)
         createBgpRouter();
-    else if (msg->isSelfMessage()) // BGP level
-        handleTimer(msg);
-    else if (!strcmp(msg->getArrivalGate()->getName(), "socketIn")) // TCP level
-        bgpRouter->processMessageFromTCP(msg);
+    else {
+        if (!bgpRouter) {
+            if (msg->isSelfMessage())
+                throw cRuntimeError("Model error: self msg '%s' received before BGP startup", msg->getName());
+            EV_WARN << "BGP has not started yet, dropping '" << msg->getName() << "' message\n";
+            delete msg;
+        }
+        else if (msg->isSelfMessage()) // BGP level
+            handleTimer(msg);
+        else if (!strcmp(msg->getArrivalGate()->getName(), "socketIn")) // TCP level
+            bgpRouter->processMessageFromTCP(msg);
+        else
+            delete msg;
+    }
+}
+
+void Bgp::handleStartOperation(LifecycleOperation *operation)
+{
+    startBgp();
+}
+
+void Bgp::handleStopOperation(LifecycleOperation *operation)
+{
+    stopBgp();
+}
+
+void Bgp::handleCrashOperation(LifecycleOperation *operation)
+{
+    stopBgp();
+}
+
+void Bgp::startBgp()
+{
+    ASSERT(bgpRouter == nullptr);
+    simtime_t startupTime = par("startupTime");
+    if (startupTime == 0)
+        createBgpRouter();
     else
-        delete msg;
+        scheduleAfter(startupTime, startupTimer);
+}
+
+void Bgp::stopBgp()
+{
+    cancelEvent(startupTimer);
+    delete bgpRouter;
+    bgpRouter = nullptr;
 }
 
 void Bgp::createBgpRouter()
 {
+    ASSERT(bgpRouter == nullptr);
     bgpRouter = new BgpRouter(this, ift, rt);
 
     // read BGP configuration
@@ -128,4 +146,3 @@ void Bgp::handleTimer(cMessage *timer)
 
 } // namespace bgp
 } // namespace inet
-
