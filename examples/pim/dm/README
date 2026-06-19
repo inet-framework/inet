@@ -1,0 +1,19 @@
+PIM-DM (Dense Mode) Example
+===========================
+
+This example demonstrates the flood-and-prune behavior of PIM-DM
+(Protocol Independent Multicast - Dense Mode, RFC 3973).
+
+Three multicast routers R1, R2 and R3 run PIM-DM, connecting two sources
+(Source1, Source2) and a receiver host (Host2). Source1 sends to group
+226.1.1.1, which Host2 joins; Source2 sends to group 226.2.2.2, which
+nobody joins.
+
+Dense mode initially floods each stream to every router (broadcast), then
+prunes the branches that have no downstream listeners: 226.2.2.2 is pruned
+everywhere (it has no receiver), while 226.1.1.1 is delivered along the
+branch toward Host2 and pruned on the other branches.
+
+To run the example:
+
+    inet -u Cmdenv -c General

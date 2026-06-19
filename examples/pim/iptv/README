@@ -1,0 +1,30 @@
+PIM IPTV Example
+================
+
+This example models IPTV-style multicast distribution over a 4x4 mesh of
+PIM routers (R00..R33). OSPF runs as the unicast underlay, so that PIM's
+RPF (Reverse Path Forwarding) checks use dynamically learned routes rather
+than static ones.
+
+A 'server' streams to multicast group 239.0.0.11 and a 'client' joins it;
+the multicast tree is built across the mesh toward the client.
+
+The [General] section is abstract; the same scenario runs under two PIM
+modes:
+
+
+1. PIM_SM
+---------
+
+Sparse mode, with the Rendezvous Point located at R10 (192.168.13.1).
+
+
+2. PIM_DM
+---------
+
+Dense mode (flood-and-prune).
+
+
+To run, e.g.:
+
+    inet -u Cmdenv -c PIM_SM

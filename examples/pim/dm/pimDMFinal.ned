@@ -17,6 +17,11 @@ import inet.node.inet.MulticastRouter;
 import inet.node.inet.StandardHost;
 
 
+//
+// Demonstrates PIM-DM (Dense Mode) flood-and-prune across three multicast
+// routers (R1/R2/R3): Source1 feeds the group Host2 joins, Source2 feeds a group
+// with no listeners (pruned everywhere). See omnetpp.ini for the scenario.
+//
 network pimDMFinal
 {
     submodules:

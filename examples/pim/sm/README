@@ -1,0 +1,45 @@
+PIM-SM (Sparse Mode) Examples
+=============================
+
+These examples demonstrate PIM-SM (Protocol Independent Multicast - Sparse
+Mode, RFC 7761) with a statically configured Rendezvous Point (RP).
+
+Topology: receiver-side designated routers DR_R1/DR_R2, the RP (10.2.2.2),
+and source-side designated routers DR_S1/DR_S2, connecting two sources and
+two receivers. Sources register their traffic to the RP, which forwards it
+down the shared (*,G) tree to the receivers; last-hop routers then switch
+over to the (S,G) shortest-path tree.
+
+The [General] section is abstract; run one of the scenarios below. They
+differ in the order and timing of joins versus sends.
+
+
+1. Scenario1
+------------
+
+Receivers join the group before the source starts sending.
+
+
+2. Scenario2
+------------
+
+The source starts sending before the receivers join, and the receivers
+come and go during the simulation.
+
+
+3. Scenario3
+------------
+
+Long send and keepalive intervals exercise the PIM-SM timers.
+
+
+4. Scenario4
+------------
+
+Two sources send to two different groups (239.0.0.11 and 239.0.0.22) at the
+same time, with two receivers each joining one of the groups.
+
+
+To run a scenario, e.g.:
+
+    inet -u Cmdenv -c Scenario1

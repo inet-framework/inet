@@ -17,6 +17,12 @@ import inet.node.inet.MulticastRouter;
 import inet.node.inet.StandardHost;
 
 
+//
+// PIM-SM (Sparse Mode) topology with a static Rendezvous Point: receiver-side
+// designated routers (DR_R1/DR_R2), the RP, and source-side designated routers
+// (DR_S1/DR_S2) connecting two sources and two receivers. The omnetpp.ini
+// scenarios exercise the RP shared tree, Register, and SPT switchover.
+//
 network PIM_SM_Network
 {
     submodules:

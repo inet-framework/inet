@@ -14,7 +14,9 @@ import inet.node.inet.StandardHost;
 
 
 //
-// A generated network with grid topology.
+// A 4x4 mesh of PIM multicast routers (R00..R33) with a server and a client,
+// used to distribute an IPTV-style multicast stream. OSPF provides the unicast
+// underlay for PIM's RPF. The omnetpp.ini runs it under both PIM-SM and PIM-DM.
 //
 network Network
 {
