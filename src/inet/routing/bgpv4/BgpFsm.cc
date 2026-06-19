@@ -78,6 +78,8 @@ void Connect::HoldTimer_Expires()
     // - changes its state to Idle.
     session._info.sessionEstablished = false;
     setState<Idle>();
+    if (session.isLifecycleNode())
+        session.startConnection();
 }
 
 void Connect::KeepaliveTimer_Expires()
@@ -156,6 +158,8 @@ void Active::HoldTimer_Expires()
     // - changes its state to Idle.
     session._info.sessionEstablished = false;
     setState<Idle>();
+    if (session.isLifecycleNode())
+        session.startConnection();
 }
 
 void Active::KeepaliveTimer_Expires()
@@ -444,6 +448,8 @@ void Established::ConnectRetryTimer_Expires()
     // - changes its state to Idle.
     session._info.sessionEstablished = false;
     setState<Idle>();
+    if (session.isLifecycleNode())
+        session.startConnection();
 }
 
 void Established::HoldTimer_Expires()
@@ -461,6 +467,8 @@ void Established::HoldTimer_Expires()
     // - changes its state to Idle.
     session._info.sessionEstablished = false;
     setState<Idle>();
+    if (session.isLifecycleNode())
+        session.startConnection();
 }
 
 void Established::KeepaliveTimer_Expires()
@@ -479,6 +487,14 @@ void Established::KeepaliveTimer_Expires()
 void Established::TcpConnectionFails()
 {
     EV_TRACE << "Processing Established::TcpConnectionFails" << std::endl;
+    BgpSession& session = TopState::box().getModule();
+    session.restartsConnectRetryTimer(false);
+    session._info.socket->abort();
+    ++session._connectRetryCounter;
+    session._info.sessionEstablished = false;
+    setState<Idle>();
+    if (session.isLifecycleNode())
+        session.startConnection();
 }
 
 void Established::OpenMsgEvent()

@@ -74,12 +74,12 @@ void Bgp::handleStartOperation(LifecycleOperation *operation)
 
 void Bgp::handleStopOperation(LifecycleOperation *operation)
 {
-    stopBgp();
+    stopBgp(false);
 }
 
 void Bgp::handleCrashOperation(LifecycleOperation *operation)
 {
-    stopBgp();
+    stopBgp(true);
 }
 
 void Bgp::startBgp()
@@ -92,10 +92,12 @@ void Bgp::startBgp()
         scheduleAfter(startupTime, startupTimer);
 }
 
-void Bgp::stopBgp()
+void Bgp::stopBgp(bool abort)
 {
     cancelEvent(startupTimer);
     removeBgpRoutes();
+    if (bgpRouter)
+        bgpRouter->closeSessions(abort);
     delete bgpRouter;
     bgpRouter = nullptr;
 }
