@@ -77,13 +77,11 @@ void BgpSession::startConnection()
     if (_ptrStartEvent == nullptr)
         _ptrStartEvent = new cMessage("BGP Start", START_EVENT_KIND);
 
-    if (_info.sessionType == IGP) {
-        if (simTime() > _StartEventTime)
-            _StartEventTime = simTime();
-        if (!_ptrStartEvent->isScheduled())
-            bgpRouter.getScheduleAt(_StartEventTime, _ptrStartEvent);
-        _ptrStartEvent->setContextPointer(this);
-    }
+    if (simTime() > _StartEventTime)
+        _StartEventTime = simTime();
+    if (!_ptrStartEvent->isScheduled())
+        bgpRouter.getScheduleAt(_StartEventTime, _ptrStartEvent);
+    _ptrStartEvent->setContextPointer(this);
 }
 
 void BgpSession::restartsHoldTimer()
@@ -232,4 +230,3 @@ std::ostream& operator<<(std::ostream& out, const BgpSession& entry)
 
 } // namespace bgp
 } // namespace inet
-

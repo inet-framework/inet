@@ -78,6 +78,22 @@ void BgpRouter::recordStatistics()
     bgpModule->recordScalar("UpdateMsgRcv", statTab[5]);
 }
 
+void BgpRouter::closeSessions(bool abort)
+{
+    for (auto& elem : _BGPSessions) {
+        TcpSocket *socket = elem.second->getSocket();
+        if (socket) {
+            _socketMap.removeSocket(socket);
+            abort ? socket->abort() : socket->close();
+        }
+        TcpSocket *socketListen = elem.second->getSocketListen();
+        if (socketListen) {
+            _socketMap.removeSocket(socketListen);
+            abort ? socketListen->abort() : socketListen->close();
+        }
+    }
+}
+
 SessionId BgpRouter::createIbgpSession(const char *peerAddr)
 {
     SessionInfo info;
@@ -413,6 +429,15 @@ void BgpRouter::socketFailure(TcpSocket *socket, int code)
     if (_currSessionId != static_cast<SessionId>(-1)) {
         _BGPSessions[_currSessionId]->getFSM()->TcpConnectionFails();
     }
+}
+
+void BgpRouter::socketPeerClosed(TcpSocket *socket)
+{
+    socket->close();
+    int connId = socket->getSocketId();
+    _currSessionId = findIdFromSocketConnId(_BGPSessions, connId);
+    if (_currSessionId != static_cast<SessionId>(-1))
+        _BGPSessions[_currSessionId]->getFSM()->TcpConnectionFails();
 }
 
 void BgpRouter::socketDataArrived(TcpSocket *socket)
@@ -1099,4 +1124,3 @@ bool BgpRouter::isReachable(const Ipv4Address addr) const
 } // namespace bgp
 
 } // namespace inet
-

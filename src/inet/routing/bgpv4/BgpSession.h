@@ -101,6 +101,7 @@ public:
     static const std::string getTypeString(BgpSessionType sessionType);
     NetworkInterface *getLinkIntf() const { return _info.linkIntf; }
     bool getCheckConnection() const { return _info.checkConnection; }
+    bool isLifecycleNode() const { return bgpRouter.isLifecycleNode(); }
     Ipv4Address getPeerAddr() const { return _info.peerAddr; }
     bool getNextHopSelf() const { return _info.nextHopSelf; }
     int getLocalPreference() const { return _info.localPreference; }
@@ -120,4 +121,3 @@ std::ostream& operator<<(std::ostream& out, const BgpSession& entry);
 } // namespace inet
 
 #endif
-
