@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<OSPFASConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="OSPF.xsd">
+
+  <!-- Areas -->
+  <Area id="0.0.0.1">
+    <AddressRange address="H1" mask="H1" status="Advertise" />
+  </Area>
+  <Area id="0.0.0.2">
+    <AddressRange address="H2" mask="H2" status="Advertise" />
+  </Area>
+
+  <!-- Routers -->
+  <Router name="A" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.1" interfaceOutputCost="1" routerPriority="1" />
+  </Router>
+
+  <Router name="B" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.2" interfaceOutputCost="1" routerPriority="1" />
+  </Router>
+
+</OSPFASConfig>
+
