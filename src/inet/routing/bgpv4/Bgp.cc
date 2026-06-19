@@ -95,8 +95,20 @@ void Bgp::startBgp()
 void Bgp::stopBgp()
 {
     cancelEvent(startupTimer);
+    removeBgpRoutes();
     delete bgpRouter;
     bgpRouter = nullptr;
+}
+
+void Bgp::removeBgpRoutes()
+{
+    for (int i = rt->getNumRoutes() - 1; i >= 0; i--) {
+        Ipv4Route *route = rt->getRoute(i);
+        if (route->getSourceType() == IRoute::BGP) {
+            EV_INFO << "Removing BGP route " << route->str() << endl;
+            rt->deleteRoute(route);
+        }
+    }
 }
 
 void Bgp::createBgpRouter()
