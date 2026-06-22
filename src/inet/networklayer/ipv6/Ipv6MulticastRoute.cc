@@ -15,6 +15,8 @@
 
 namespace inet {
 
+Register_Abstract_Class(Ipv6MulticastRoute);
+
 Ipv6MulticastRoute::Ipv6MulticastRoute(const Ipv6MulticastRoute& other) :
     rt(nullptr),
     origin(other.origin),

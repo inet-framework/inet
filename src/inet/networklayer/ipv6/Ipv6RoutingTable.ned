@@ -104,8 +104,8 @@ simple Ipv6RoutingTable extends SimpleModule like IRoutingTable
         @signal[routeAdded](type=inet::Ipv6Route);
         @signal[routeChanged](type=inet::Ipv6Route);
         @signal[routeDeleted](type=inet::Ipv6Route);
-        @signal[mrouteAdded](type=inet::IPv6MulticastRoute);
-        @signal[mrouteDeleted](type=inet::IPv6MulticastRoute);
-        @signal[mrouteChanged](type=inet::IPv6MulticastRoute);
+        @signal[mrouteAdded](type=inet::Ipv6MulticastRoute);
+        @signal[mrouteDeleted](type=inet::Ipv6MulticastRoute);
+        @signal[mrouteChanged](type=inet::Ipv6MulticastRoute);
 }
 
