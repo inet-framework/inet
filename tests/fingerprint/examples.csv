@@ -342,7 +342,7 @@
 # /examples/manetrouting/dymo/,        -f omnetpp.ini -c _Multi -r 0     # abstract-config
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv4 -r 0,              10s,             40d1-e3f0/tplx;b9af-62dc/~tNl;81ec-dc0e/tyf, PASS,  wireless adhoc Ipv4
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv6 -r 0,              10s,             8ec2-b70f/tplx;fd53-3e15/~tNl;7436-f848/tyf, PASS,  wireless adhoc
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiGeneric -r 0,           10s,             b832-1954/tplx;45c3-d903/~tNl;69be-1418/tyf, PASS,  wireless adhoc
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiGeneric -r 0,           10s,             0354-6dd4/tplx;735c-957d/~tNl;fe53-f1d8/tyf, PASS,  wireless adhoc
 # /examples/manetrouting/dymo/,        -f omnetpp.ini -c _Dynamic -r 0   # abstract-config
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c DynamicIPv4 -r 0,            22s,             2f57-3280/tplx;8f96-3d9c/~tNl;cdd2-fee8/tyf, PASS,  wireless adhoc Ipv4
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c DynamicIPv6 -r 0,            22s,             5fe9-22ea/tplx;0000-0000/~tNl;0000-0000/~tND, ERROR, wireless adhoc # IPv6: Shutdown not supported
@@ -440,7 +440,7 @@
 /examples/ospfv2/simpletest/,        -f omnetpp.ini -c CrashAndReboot -r 0,         500s,            73cc-e6f7/tplx;bc6e-6aa5/~tNl;1700-f363/~tND;8ea5-1a49/tyf, PASS, EthernetMac Ipv4
 
 /examples/ospfv3/multiple_areas_FINAL/, -f omnetpp.ini -c General -r 0,             500s,            3a05-c4c3/tplx;9f43-61da/~tNl;17b9-aacc/tyf, PASS, EthernetMac
-/examples/ospfv3/multiple_areas_FINAL/, -f omnetpp.ini -c LinkDown -r 0,            500s,            212f-4dc3/tplx;25ba-8706/~tNl;479e-3075/tyf, PASS, EthernetMac
+/examples/ospfv3/multiple_areas_FINAL/, -f omnetpp.ini -c LinkDown -r 0,            500s,            667c-a763/tplx;5a2d-804a/~tNl;2003-c7d0/tyf, PASS, EthernetMac
 /examples/ospfv3/multiple_areas_FINAL/, -f omnetpp.ini -c LinkDownLinkUp -r 0,      500s,            7870-3cd9/tplx;419a-9028/~tNl;dd76-2caf/tyf, PASS, EthernetMac
 /examples/ospfv3/small/,             -f omnetpp.ini -c General -r 0,                200s,            f948-0e7d/tplx;ef88-4f4a/~tNl;75a6-4971/tyf, PASS, EthernetMac
 /examples/ospfv3/v3_2_routers/,      -f omnetpp.ini -c General -r 0,                400s,            f62f-cb62/tplx;eb08-2467/~tNl;05c2-3a8d/tyf, PASS, EthernetMac
@@ -514,7 +514,7 @@
 /examples/rip/mixednetwork/,         -f omnetpp.ini -c disconnect -r 0,             100s,            cff2-9525/tplx;ba53-ebda/~tNl;24fe-02a7/~tND;65b9-9e8c/tyf, PASS, EthernetMac Ipv4
 /examples/rip/mixednetwork/,         -f omnetpp.ini -c shutdown-restart -r 0,       100s,            3f15-0c9c/tplx;0916-8bd0/~tNl;bdd5-b370/~tND;3d73-91e0/tyf, PASS, EthernetMac Ipv4
 /examples/rip/simpletest/,           -f omnetpp.ini -c IPv4 -r 0,                   100s,            e4b8-5591/tplx;eede-9ed7/~tNl;9364-b90a/~tND;bac1-99b5/tyf, PASS, EthernetMac Ipv4
-/examples/rip/simpletest/,           -f omnetpp.ini -c IPv6 -r 0,                   100s,            77a2-e3c0/tplx;dc29-2ad8/~tNl;5dc5-930e/tyf, PASS, EthernetMac
+/examples/rip/simpletest/,           -f omnetpp.ini -c IPv6 -r 0,                   100s,            86c3-66f0/tplx;ce03-6f52/~tNl;883f-6d71/tyf, PASS, EthernetMac
 /examples/rip/simpletest/,           -f omnetpp.ini -c MultiIPv4 -r 0,              100s,            cd29-57b4/tplx;efe5-f82e/~tNl;9912-d6b6/~tND;26d4-796d/tyf, PASS, EthernetMac Ipv4
 
 /examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0,                500s,           3b10-2c5c/tplx;b015-6f81/~tNl;5260-d4c2/~tND;d294-df5c/tyf, PASS, igmp Ipv4
