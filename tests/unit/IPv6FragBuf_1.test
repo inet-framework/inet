@@ -29,23 +29,28 @@ typedef std::vector<Frag> FragVector;
 bool insertFragment(Ipv6FragBuf& fragbuf, Frag& f)
 {
     Packet *pk = new Packet("Ipv6");
-    const auto& frag = makeShared<Ipv6Header>();
-    frag->setSrcAddress(Ipv6Address(0,0,0,f.src));
-    frag->setDestAddress(Ipv6Address(0,0,0,f.dest));
-    Ipv6FragmentHeader *fh = new Ipv6FragmentHeader();
+    const auto& ipv6Header = makeShared<Ipv6Header>();
+    ipv6Header->setSrcAddress(Ipv6Address(0,0,0,f.src));
+    ipv6Header->setDestAddress(Ipv6Address(0,0,0,f.dest));
+    ipv6Header->setChunkLength(B(40));
+    ipv6Header->setProtocolId(IP_PROT_IPv6EXT_FRAGMENT); // base header points to the fragment header
+    ipv6Header->setPayloadLength(B(8 + f.bytes));
+
+    // In the chunk-based architecture the fragment header is a separate
+    // extension-header chunk inserted after the base header, not a member of Ipv6Header.
+    const auto& fh = makeShared<Ipv6FragmentHeader>();
     fh->setIdentification(f.id);
     fh->setFragmentOffset(f.offset);
     fh->setMoreFragments(!f.islast);
-    frag->addExtensionHeader(fh);
-//    frag->setHeaderLength(40 + 8);
-    frag->setChunkLength(B(40 + 8));
-    frag->setPayloadLength(B(8 + f.bytes));
+    fh->setNextHeaderProtocol(IP_PROT_UDP); // protocol of the fragmented payload
+
     const auto& payload = makeShared<ByteCountChunk>(B(f.bytes));
-    pk->insertAtFront(payload);
-    pk->insertAtFront(frag);
+    pk->insertAtBack(ipv6Header);
+    pk->insertAtBack(fh);
+    pk->insertAtBack(payload);
     ASSERT(pk->getByteLength() == 40+8+f.bytes);
 
-    Packet *pk2 = fragbuf.addFragment(pk, frag.get(), fh, 0);
+    Packet *pk2 = fragbuf.addFragment(pk, ipv6Header.get(), fh.get(), 0);
     delete pk2;
     return pk2!=NULL;
 }
