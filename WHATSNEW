@@ -1,6 +1,346 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-4.7 (July 2026) — feature release
+--------------------------------------
+
+This is a new feature release in the INET 4.x branch. The central theme of this
+release is the maturation of the IPv6 protocol family, bringing it substantially
+closer to feature parity with IPv4. Highlights include a new declarative IPv6
+network configurator, IPv6 multicast routing (MLD, and PIM-DM/PIM-SM over IPv6),
+node lifecycle support, Duplicate Address Detection, a modernized Mobile IPv6
+(MIPv6) model with new Proxy Mobile IPv6 (PMIPv6) support, and IPv6 support in
+BGP (MP-BGP) and IPsec. Outside the IPv6 area, the release brings satellite and
+GNSS track mobility models with geographic visualization, a substantial overhaul
+of the STP and RSTP spanning tree models, major BGP improvements, TCP Path MTU
+Discovery, and a configurable RNG grouping mechanism. The release also contains
+numerous smaller improvements and bug fixes. Requires OMNeT++ 6.4 or later.
+
+For a complete list of all added, removed, and changed folders, NED modules,
+packet chunks, packet tags, statistics, C++ classes, and signals, please refer to
+the ChangeLog file in the src folder.
+
+Notable backward incompatible changes are the following:
+
+1. Mobile IPv6 (MIPv6) modernization
+
+   The Mobile IPv6 model was substantially modernized and aligned with the rest of
+   the IPv6 stack. The module previously named xMIPv6 was renamed to Mipv6, and the
+   xMIPv6Support wrapper was flattened into Ipv6NetworkLayer, with Mobile IPv6 now
+   enabled by a hasMipv6 switch.
+
+   IPv6 tunneling was reworked to follow the same model as IPv4: a tunnel is now
+   represented as a virtual network interface rather than a dedicated mechanism,
+   and the former Ipv6Tunneling module was removed. MIPv6-specific per-interface
+   state was moved out of Ipv6InterfaceData into a separate Mipv6InterfaceData
+   class.
+
+   Several new roaming scenarios were added, and a number of latent correctness
+   bugs in binding management, return routability, and route optimization were
+   fixed along the way.
+
+   This change requires the modification of simulation models that reference the
+   xMIPv6 module type, the Ipv6Tunneling module, or the xMIPv6Support submodule
+   path, as well as C++ code that accesses MIPv6 fields through Ipv6InterfaceData.
+
+2. STP and RSTP overhaul
+
+   The Spanning Tree Protocol (STP) and Rapid Spanning Tree Protocol (RSTP) models
+   were substantially reworked for correctness and standards compliance. RSTP now
+   implements the full Proposal/Agreement handshake for rapid, timer-free
+   transition to the forwarding state. Several long-standing defects were fixed,
+   including a topology-change (TCN) BPDU storm, a hold-timer violation, and
+   incorrect timer interval assignments. The nonstandard ALTERNATE port role, which
+   had been backported from RSTP, was removed from STP.
+
+   A number of NED parameters and packet types were renamed for clarity and
+   consistency. Notably, the RSTP helloTime parameter was renamed to helloInterval,
+   and the STP maxAge parameter was renamed to configuredMaxAge (with the former
+   currentMaxAge becoming maxAge). The BPDU packet type names were also reworked
+   (e.g. stp-hello, rstp-hello).
+
+   In addition, when the port path cost is not explicitly configured,
+   L2NetworkConfigurator now derives the default from the link speed, following
+   the recommendation of IEEE 802.1D-2004.
+
+   This change requires the modification of simulation models that configure the
+   renamed parameters, and it may significantly change the statistical results of
+   spanning tree simulations due to the corrected protocol behavior.
+
+3. IPv6 Router Advertisement interval defaults
+
+   The default Router Advertisement interval was changed to follow RFC 4861.
+   Previously, the minIntervalBetweenRAs and maxIntervalBetweenRAs parameters
+   defaulted to very short, Mobile-IPv6-tuned values (30 ms and 70 ms) and were
+   additionally overridden for wireless interfaces. They now default to the
+   standard RFC 4861 values, and the wireless special-casing was removed.
+
+   This change doesn't require the modification of simulation models, but it may
+   significantly change the statistical results of IPv6 simulations that relied on
+   the previous fast Router Advertisement timing, particularly those involving
+   wireless or mobile nodes.
+
+4. IPsec generalization to IPv6
+
+   The IPsec model, introduced in the previous release for IPv4, was generalized
+   to be address family independent, and now supports IPv6 as well. Traffic
+   selectors and the security association and policy databases operate on
+   generic L3 addresses, each IPsec instance serves the address family of its
+   enclosing network layer, and Ipv6NetworkLayer gained a hasIpsec switch
+   analogous to the IPv4 one. AH and ESP headers are treated as terminal headers
+   in the IPv6 extension header chain. Two latent bugs in AH protection (a
+   zero-length header on egress, and a double header removal on ingress) were
+   fixed, and a new example demonstrates ESP over IPv6.
+
+   As part of this change, the model was moved from the networklayer/ipv4/ipsec
+   folder to networklayer/ipsec, with the NED package changing accordingly. This
+   change requires the modification of simulation models and C++ code that
+   reference the old package or include paths.
+
+5. BGP timer configuration
+
+   The BGP timers, previously configured via the <TimerParams> element of the
+   bgpConfig XML file, are now parameters of the Bgp module (connectRetryTime,
+   holdTime, keepAliveTime, startDelay). A <TimerParams> element in the XML
+   configuration is now rejected with an error message that explains how to
+   migrate.
+
+   This change requires the modification of simulation models that configure
+   BGP timers in the XML configuration file.
+
+6. ICMP error indication refactoring
+
+   The handling of ICMP error indications was refactored into a properly layered
+   architecture in which each protocol layer processes only its own header. As part
+   of this, the IcmpErrorInd indication and the IcmpErrorTag tag were each split
+   into IPv4-specific and IPv6-specific variants (Icmpv4ErrorInd / Icmpv6ErrorInd
+   and Icmpv4ErrorTag / Icmpv6ErrorTag).
+
+   These changes are backward incompatible for C++ code that directly references
+   the old combined ICMP error indication or tag types.
+
+Notable backward compatible changes are the following:
+
+1. IPv6 network configurator
+
+   A new Ipv6NetworkConfigurator, with a companion Ipv6NodeConfigurator, was added,
+   bringing the declarative, IPv4-style network configuration approach to IPv6.
+   Like its IPv4 counterpart, it assigns addresses and sets up routing tables
+   automatically based on the network topology, while allowing fine-grained control
+   through an XML configuration. Explicit per-interface addresses can be assigned
+   (e.g. using a prefix::interface-id form), overriding the default EUI-64 interface
+   identifier. Both the IPv4 and IPv6 configurators now also accept CIDR
+   "address/prefixlen" notation in static route specifications, and gained
+   addRemoteRoutes and addManualRoutes parameters that allow the individual
+   route generation steps to be enabled or disabled separately. The simpler
+   Ipv6FlatNetworkConfigurator remains available.
+
+2. IPv6 lifecycle and multicast forwarding
+
+   The IPv6 protocol stack gained node lifecycle support, so that IPv6 nodes now
+   correctly handle shutdown, restart, and crash operations the same way IPv4 nodes
+   do. In addition, IPv6 multicast packet forwarding was implemented, including a
+   multicast routing information base and forwarding information base with reverse
+   path forwarding (RPF) checks. Together with the multicast routing protocols
+   described below, this enables IPv6 multicast scenarios that were previously only
+   possible with IPv4.
+
+3. Multicast Listener Discovery (MLD)
+
+   IPv6 multicast group membership is now managed using the Multicast Listener
+   Discovery protocol. The MLDv1 router-side behavior was completed, and a new Mldv2
+   module implementing MLDv2 (RFC 3810) was added, including the corresponding
+   message set, serializer, packet dissector, and printer; the MLD version is
+   selected by module typename. Source-specific multicast (SSM) membership state was
+   added to Ipv6InterfaceData. The IPv4 IGMPv3 model was brought to lockstep parity
+   with MLDv2 (query and report retransmission, interoperation with older versions),
+   so that the IPv4 and IPv6 multicast membership implementations now mirror each
+   other.
+
+4. PIM over IPv6
+
+   The PIM-DM and PIM-SM multicast routing protocols were generalized to be address
+   family independent, operating on generic L3 addresses, and can now run over IPv6
+   in addition to IPv4, while the existing IPv4 PIM behavior is preserved unchanged.
+   The new MulticastRouter6 node type provides a ready-to-use pure-IPv6 multicast
+   router. PIM-SM can also derive the rendezvous point per group from embedded-RP
+   IPv6 addresses (RFC 3956). Source-specific multicast (SSM, RFC 4607) is now
+   fully supported on both address families: source-list memberships from
+   IGMPv3 (IPv4) and MLDv2 (IPv6) drive PIM-SM to build RP-less, source-rooted
+   (S,G) trees for groups in the SSM range, using INCLUDE-only semantics and
+   requiring no rendezvous point. The PIM packet serializer was extended to support
+   the IPv6 encoded-address forms.
+
+5. IPv6 Neighbor Discovery
+
+   IPv6 Neighbor Discovery was extended in several backward compatible ways.
+   Duplicate Address Detection (DAD) is now performed for autoconfigured global
+   addresses in accordance with RFC 4862, and ICMPv6 Redirect message sending and
+   processing was implemented (RFC 4861). Further Router Advertisement and Neighbor
+   Discovery parameters were exposed as NED parameters and XML configuration
+   attributes, and node bootstrap delays became configurable. A new sendRedirects
+   parameter on the Ipv6 module allows suppressing Redirect messages, which is
+   useful on wireless ad-hoc networks.
+
+6. Proxy Mobile IPv6
+
+   Support for Proxy Mobile IPv6 (PMIPv6, RFC 5213) was added. PMIPv6 provides
+   network-based mobility management: the network tracks the movements of a
+   mobile node and keeps its IPv6 address stable across handovers, without
+   requiring any mobility support in the mobile node itself. The new Pmipv6
+   module implements both the Local Mobility Anchor (LMA) and the Mobile Access
+   Gateway (MAG) roles, using Proxy Binding Update / Acknowledgement signaling
+   based on the Mobile IPv6 message formats, and tunneling between the MAGs and
+   the LMA. A new example demonstrates a handover in a PMIPv6 domain, with the
+   mobile node keeping its address across the move.
+
+7. IPv6 netfilter hooks
+
+   The Ipv6 module now provides the same set of netfilter-style hooks as its
+   IPv4 counterpart: the LOCALIN hook is now invoked on local delivery, the
+   FORWARD hook was added, and packets can be reinjected at all five hook points
+   after asynchronous processing. This allows C++ modules such as reactive
+   routing protocols to interpose on the IPv6 datapath in the same way as with
+   IPv4.
+
+8. BGP improvements
+
+   The BGP model received major improvements in several areas. BGP now supports
+   IPv6: sessions can be established over IPv6 TCP connections, and IPv6 routes
+   are exchanged using the multiprotocol extensions (MP-BGP, RFC 4760),
+   including multiprotocol capability negotiation in the OPEN message (RFC 5492)
+   and serialization of the MP_REACH_NLRI and MP_UNREACH_NLRI path attributes.
+   Related fixes make iBGP work over a multi-hop IGP with IPv6, and new examples
+   demonstrate EBGP over IPv6 and BGP running on top of an OSPFv3-based IGP.
+
+   BGP is now lifecycle-aware: node shutdown, restart, and crash operations are
+   handled properly, with sessions re-established and routes re-learned after a
+   restart. A new Adj-RIB-In data structure stores all routes learned from
+   peers, and the decision process is re-run when a route is withdrawn, so that
+   an alternative route can take its place. New examples demonstrate route
+   withdrawal and failover scenarios.
+
+   Session management robustness was also improved: routers now use a single
+   shared listening socket, connection collision detection was implemented
+   according to RFC 4271, several errors in connection retry and reconnection
+   handling were fixed, and BGP sessions are shut down gracefully on node
+   shutdown.
+
+   The BGP lifecycle support and the Adj-RIB-In extension were contributed by
+   Giovanni Nardini.
+
+9. Satellite mobility and geographic visualization
+
+   New mobility models and visualizers support simulating satellite networks
+   and other scenarios placed on the Earth's surface. The new SatelliteMobility
+   module computes satellite positions from standard TLE (two-line element)
+   orbital data using the SGP4 propagation model, and GnssTrackMobility replays
+   position tracks recorded by GNSS (GPS) receivers. The underlying geometry
+   library was extended with WGS84 geodesy, Earth-centered (ECEF) coordinate
+   systems, and an equirectangular map projection.
+
+   On the visualization side, the new GeoMapCanvasVisualizer draws a world map
+   with a graticule as the scene background, GeoHorizonCanvasVisualizer draws
+   the visibility footprint of satellites on the map, and
+   GeoSkyViewCanvasVisualizer displays an azimuth/elevation sky view plot next
+   to observer nodes. The mobility visualizer was extended with 3D orientation
+   display and direction projection modes, movement trails handle the
+   antimeridian correctly, and several visualizers now clip their drawings to
+   the map area. Mobile nodes can display their geographic position using the
+   {geo_position} directive of displayStringTextFormat. A new example
+   demonstrates satellites moving above a map of the Earth.
+
+10. TCP Path MTU Discovery
+
+   The TCP model now implements Path MTU Discovery (RFC 1191 and RFC 1981), allowing
+   connections to discover and adapt to the largest packet size that can traverse
+   the path without fragmentation. In addition, TCP now forwards ICMPv4 and ICMPv6
+   error indications to the application as soft notifications, and aborts
+   connections in the SYN_SENT state on hard ICMP errors.
+
+11. RNG grouping
+
+   A new GroupedRngManager was added, providing a flexible way to share random
+   number generators among simulation components. It supports grouping components by
+   module (the default, one RNG set per module), by node (a node-wide shared RNG
+   set), or network-wide (a single global RNG set), selectable via the rng-grouping
+   configuration option.
+
+12. OSPFv3 packet serializer
+
+   A packet serializer was added for OSPFv3, enabling OSPFv3 packets to be
+   recorded into PCAP files, sent through emulation interfaces, and verified
+   byte by byte in fingerprint tests. Several packet format errors (incorrect
+   packet and LSA length fields) were fixed in the process, and the Ospfv3
+   module gained a checksumMode parameter for RFC-correct checksums.
+
+13. STP/RSTP tutorial
+
+   A new tutorial introduces the Spanning Tree Protocol and Rapid Spanning Tree
+   Protocol through a progression of examples, demonstrating root bridge election,
+   port roles and states, topology change handling, and the rapid transitions
+   provided by RSTP.
+
+14. Documentation refinements
+
+   The IPv6 chapter of the User's Guide was substantially rewritten to reflect the
+   modernized IPv6 stack, including documentation of the new Ipv6NetworkConfigurator
+   and the XML routing configuration format. New User's Guide chapters describe
+   satellite mobility and geographic visualization, and the BGP documentation
+   was extended with the configuration file format and the new IPv6 (MP-BGP)
+   support. NED documentation for many IPv6 and Mobile IPv6 modules was expanded
+   and brought up to date, and several example simulations (e.g. the PIM
+   examples) received README files.
+
+15. Notable bug fixes and other changes
+
+   Most modules were migrated to the displayStringTextFormat mechanism for their
+   Qtenv display strings, replacing custom refreshDisplay() overrides; the old
+   WATCH_xxx() macros were replaced with the unified WATCH() macro, and additional
+   watches were added for computed values. This affects only the graphical runtime
+   and has no effect on results.
+
+   The LdpMplsRouter and RsvpMplsRouter modules were refactored to share a common
+   MplsRouterBase base, eliminating duplicated code. This changes the module
+   initialization order and therefore the random number draw order, so MPLS
+   simulation results may change.
+
+   Fixed two IPsec ESP correctness bugs: an incorrect block size unit in payload
+   padding, and an incorrect total length computation during decryption.
+
+   Fixed a UDP payload padding removal bug that could misdetect trailing data, and a
+   crash that occurred when combining multicast traffic with VLANs.
+
+   Fixed a memory leak in MessageDispatcher that occurred when packet delivery
+   failed.
+
+   Standardized many internal integer types in the SCTP model and across the
+   codebase, improving consistency.
+
+   A new STAGE_NETWORK_INTERFACE_CONFIGURATION stage was inserted into the
+   lifecycle start and stop operations, so that network interfaces are
+   configured before IPv6 addresses are assigned. This fixes network interfaces
+   not re-obtaining their global IPv6 address after a node restart.
+
+   Fixed L2NetworkConfigurator to configure all ports in the network instead of
+   just the first one, and added a dumpConfiguration parameter for debugging.
+
+   Fixed visualizers to subscribe to the signals of their subject module rather
+   than the visualization target module, so that the two can be fully decoupled.
+   The InfoVisualizer now supports the %N directive for displaying the display
+   name of a module.
+
+   Fixed crashes that occurred when running GPSR over IPv6.
+
+   IPv6 Neighbor Discovery packets are now created with descriptive names,
+   making logs and packet traces easier to read.
+
+   Removed several low-value or redundant IPv6 example simulations (demonetworketh,
+   ipv6bulk, and ipv6nclients).
+
+   Several additional issues reported on GitHub have also been fixed.
+
+
 INET-4.6 (February 2026) — feature release
 ------------------------------------------
 
