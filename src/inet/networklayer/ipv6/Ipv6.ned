@@ -76,6 +76,9 @@ simple Ipv6 extends SimpleModule
         @signal[packetSentToLower](type=inet::Packet);
         @signal[packetReceivedFromLower](type=inet::Packet);
         @signal[ipv6NewMulticast](type=inet::Ipv6Header);
+        @signal[ipv6DataOnNonrpf](type=inet::Ipv6Header);
+        @signal[ipv6DataOnRpf](type=inet::Ipv6Header);
+        @signal[ipv6MdataRegister](type=inet::Packet);
     gates:
         input transportIn @labels(Ipv6ControlInfo/down,TcpHeader,UdpHeader);
         output transportOut @labels(Ipv6ControlInfo/up,TcpHeader,UdpHeader);
