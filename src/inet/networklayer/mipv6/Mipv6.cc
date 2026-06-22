@@ -2307,6 +2307,12 @@ INetfilter::IHook::Result Mipv6::datagramLocalOutHook(Packet *datagram)
                 haOpt->setHomeAddress(homeAddress);
                 destOpts->getTlvOptionsForUpdate().appendTlvOption(haOpt);
                 destOpts->setNextHeaderProtocol(transportProtocol);
+                // 2-byte ext-header header + Home Address Option (2-byte option header +
+                // 16-byte home address = 18 bytes) = 20 bytes, padded to a multiple of 8
+                // octets (RFC 8200) => 24 bytes. The default chunkLength is only 8 bytes;
+                // without this the WLAN MAC's serialization fails the chunk-length check
+                // (and the payloadLength below would be 16 bytes short).
+                destOpts->setChunkLength(B(24));
 
                 header->setSrcAddress(ro.entry);
                 header->setProtocolId(static_cast<IpProtocolId>(destOpts->getExtensionType()));
