@@ -69,6 +69,7 @@ class INET_API Ipv6 : public OperationalBase, public NetfilterBase, public INetw
     ModuleRefByPar<Icmpv6> icmp;
 
     // working vars
+    bool sendRedirects = true; // whether to send ICMPv6 Redirects when forwarding back out the arrival interface (RFC 4861 8.2)
     unsigned int curFragmentId = -1; // counter, used to assign unique fragmentIds to datagrams
     Ipv6FragBuf fragbuf; // fragmentation reassembly buffer
     simtime_t lastCheckTime; // when fragbuf was last checked for state fragments

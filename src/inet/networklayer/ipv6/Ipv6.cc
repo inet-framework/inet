@@ -88,6 +88,7 @@ void Ipv6::initialize(int stage)
 
         curFragmentId = 0;
         lastCheckTime = SIMTIME_ZERO;
+        sendRedirects = par("sendRedirects");
         fragbuf.init(icmp);
 
         // NetFilter:
@@ -526,8 +527,10 @@ void Ipv6::routePacket(Packet *packet, const NetworkInterface *destIE, const Net
     // don't raise error if sent to ND or ICMP!
 
     // RFC 4861 Section 8.2: a router sends a Redirect if it is forwarding a
-    // packet back out on the same interface it arrived on, to a different next-hop
-    if (rt->isRouter() && !fromHL && fromIE && interfaceId == fromIE->getInterfaceId()) {
+    // packet back out on the same interface it arrived on, to a different next-hop.
+    // Disabled (sendRedirects=false) on wireless multi-hop/ad-hoc networks, where the
+    // next hop is not directly reachable by the source and redirects cause a storm.
+    if (sendRedirects && rt->isRouter() && !fromHL && fromIE && interfaceId == fromIE->getInterfaceId()) {
         Ipv6Address pktSrcAddr = ipv6Header->getSrcAddress();
         if (nextHop != pktSrcAddr && !pktSrcAddr.isUnspecified() && !pktSrcAddr.isMulticast()) {
             NetworkInterface *outIe = ift->getInterfaceById(interfaceId);

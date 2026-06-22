@@ -67,6 +67,7 @@ simple Ipv6 extends SimpleModule
         string ipv6NeighbourDiscoveryModule;
         string icmpv6Module;
         double procDelay @unit(s) = default(0s);
+        bool sendRedirects = default(true); // RFC 4861 Section 8.2: when a router forwards a packet back out the interface it arrived on, send the source an ICMPv6 Redirect. Disable on wireless multi-hop / ad-hoc networks (e.g. MANET routing), where the geographic next hop is not directly reachable by the source, so redirects are useless and trigger a storm.
         displayStringTextFormat = default("{ipv6StatusText}");
         @display("i=block/network2");
         @signal[packetDropped](type=inet::Packet);
