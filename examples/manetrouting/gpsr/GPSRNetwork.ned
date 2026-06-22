@@ -7,6 +7,7 @@ package inet.examples.manetrouting.gpsr;
 
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
 import inet.node.gpsr.GpsrRouter;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
@@ -19,6 +20,7 @@ network GPSRNetworkRandom
 {
     parameters:
         int numHosts;
+        bool hasIpv6Configurator = default(false); // enabled by the IPv6 configs; kept off otherwise so it does not perturb the IPv4/Generic runs
     submodules:
         radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
@@ -28,6 +30,10 @@ network GPSRNetworkRandom
             parameters:
                 config = xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.0.0'/></config>");
                 @display("p=100,100;is=s");
+        }
+        ipv6Configurator: Ipv6NetworkConfigurator if hasIpv6Configurator {
+            parameters:
+                @display("p=100,150;is=s");
         }
         routingTableRecorder: RoutingTableRecorder {
             parameters:
