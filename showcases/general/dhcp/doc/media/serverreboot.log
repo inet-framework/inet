@@ -1,0 +1,13 @@
+[51.097838284609 client[0].app[0]] T1 expired. Starting RENEWING state.
+[51.097911704609 dhcpServer.app[0]] Renewal/rebinding process failed: requested IP address 192.168.1.10 not found in the server's database!
+[51.097960444609 client[0].app[0]] DHPCNAK message arrived in RENEWING state. The renewing process was unsuccessful. Restarting the DHCP configuration process.
+[51.097960444609 client[0].app[0]] Unbinding lease on eth0.
+[51.097960444609 client[0].app[0]] Starting DHCP configuration process.
+[51.098010624609 dhcpServer.app[0]] Lease not found for MAC 0A-AA-00-00-00-06.
+[51.098010624609 dhcpServer.app[0]] Offering 0A-AA-00-00-00-06  [OFFERED], expires t=171s
+[51.098065124609 client[0].app[0]] DHCPOFFER message arrived in SELECTING state with IP address: 192.168.1.10.
+[51.098117224609 dhcpServer.app[0]] Found lease for MAC 0A-AA-00-00-00-06.
+[51.098117224609 dhcpServer.app[0]] From now 192.168.1.10 is leased to 0A-AA-00-00-00-06.
+[51.098171724609 client[0].app[0]] DHCPACK message arrived in REQUESTING state. The requested IP address is available in the server's pool of addresses.
+[51.098171724609 client[0].app[0]] DHCPACK arrived with IP: 192.168.1.10
+[51.098171724609 client[0].app[0]] The requested IP 192.168.1.10/255.255.255.0 is available. Assigning it to client[0].
