@@ -23,6 +23,7 @@
 #include "inet/networklayer/common/Icmpv6ErrorTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/L3Tools.h"
+#include "inet/networklayer/common/NextHopAddressTag_m.h"
 #include "inet/networklayer/common/TosTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv6/Ipv6SocketCommand_m.h"
@@ -239,19 +240,20 @@ void Ipv6::handleMessageWhenUp(cMessage *msg)
 
         const NetworkInterface *fromIE = getSourceInterfaceFrom(packet);
         const NetworkInterface *destIE = nullptr;
-        L3Address nextHop(Ipv6Address::UNSPECIFIED_ADDRESS);
         if (fromHL) {
             // remove control info
             delete packet->removeControlInfo();
+            // a netfilter hook (e.g. a MANET routing protocol) may set the next hop
             if (datagramLocalOutHook(packet) == INetfilter::IHook::ACCEPT)
-                datagramLocalOut(packet, destIE, nextHop.toIpv6());
+                datagramLocalOut(packet, destIE, getNextHop(packet));
         }
         else {
             // a received datagram carries no meaningful egress interface request; drop
             // any stale one from the sender so it cannot misdirect routing here
             packet->removeTagIfPresent<InterfaceReq>();
+            // a netfilter hook (e.g. a MANET routing protocol) may set the next hop
             if (datagramPreRoutingHook(packet) == INetfilter::IHook::ACCEPT)
-                preroutingFinish(packet, fromIE, destIE, nextHop.toIpv6());
+                preroutingFinish(packet, fromIE, destIE, getNextHop(packet));
         }
     }
 }
@@ -341,6 +343,12 @@ NetworkInterface *Ipv6::getSourceInterfaceFrom(Packet *packet)
     return interfaceInd != nullptr ? ift->getInterfaceById(interfaceInd->getInterfaceId()) : nullptr;
 }
 
+Ipv6Address Ipv6::getNextHop(Packet *packet)
+{
+    const auto& tag = packet->findTag<NextHopAddressReq>();
+    return tag != nullptr ? tag->getNextHopAddress().toIpv6() : Ipv6Address::UNSPECIFIED_ADDRESS;
+}
+
 void Ipv6::preroutingFinish(Packet *packet, const NetworkInterface *fromIE, const NetworkInterface *destIE, Ipv6Address nextHopAddr)
 {
     const auto& ipv6Header = packet->peekAtFront<Ipv6Header>();
@@ -414,9 +422,9 @@ void Ipv6::handleMessageFromHL(Packet *packet)
             destIE = ift->findFirstLoopbackInterface();
         ASSERT(destIE);
     }
-    L3Address nextHopAddr(Ipv6Address::UNSPECIFIED_ADDRESS);
+    // a netfilter hook (e.g. a MANET routing protocol) may set the next hop
     if (datagramLocalOutHook(packet) == INetfilter::IHook::ACCEPT)
-        datagramLocalOut(packet, destIE, nextHopAddr.toIpv6());
+        datagramLocalOut(packet, destIE, getNextHop(packet));
 }
 
 void Ipv6::datagramLocalOut(Packet *packet, const NetworkInterface *destIE, Ipv6Address requestedNextHopAddress)
@@ -1144,9 +1152,8 @@ bool Ipv6::processExtensionHeaders(Packet *packet)
                             if (!it->second->processTlvOption(packet, hopHdr.get(), opt))
                                 return false;
                         }
-                        else {
-                            throw cRuntimeError("No handler registered for Hop-by-Hop option type %d", optType);
-                        }
+                        else if (!handleUnrecognizedTlvOption(packet, optType))
+                            return false;
                     }
                 }
                 break;
@@ -1187,9 +1194,8 @@ bool Ipv6::processExtensionHeaders(Packet *packet)
                             if (!it->second->processTlvOption(packet, destOptsHdr.get(), opt))
                                 return false;
                         }
-                        else {
-                            throw cRuntimeError("No handler registered for Destination option type %d", optType);
-                        }
+                        else if (!handleUnrecognizedTlvOption(packet, optType))
+                            return false;
                     }
                 }
                 break;
@@ -1203,6 +1209,33 @@ bool Ipv6::processExtensionHeaders(Packet *packet)
     }
 
     return true;
+}
+
+bool Ipv6::handleUnrecognizedTlvOption(Packet *packet, int optType)
+{
+    // RFC 8200 Section 4.2: the two highest-order bits of the option type encode
+    // the action to take when the option is not recognized.
+    switch ((optType >> 6) & 0x3) {
+        case 0: // 00: skip over this option and continue processing the header
+            EV_INFO << "Skipping unrecognized IPv6 option type " << optType << "\n";
+            return true;
+        case 1: // 01: discard the packet
+            EV_INFO << "Discarding packet with unrecognized IPv6 option type " << optType << "\n";
+            numDropped++;
+            delete packet;
+            return false;
+        default: { // 10/11: discard and send an ICMPv6 Parameter Problem
+            // For 11 the error is suppressed when the destination is a multicast address.
+            bool dstMulticast = packet->peekAtFront<Ipv6Header>()->getDestAddress().isMulticast();
+            if (((optType >> 6) & 0x3) == 3 && dstMulticast) {
+                numDropped++;
+                delete packet;
+            }
+            else
+                sendIcmpError(packet, ICMPv6_PARAMETER_PROBLEM, UNRECOGNIZED_IPV6_OPTION);
+            return false;
+        }
+    }
 }
 
 void Ipv6::registerRoutingHeaderHandler(int routingType, IIpv6ExtensionHeaderHandler *handler)

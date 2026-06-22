@@ -117,6 +117,10 @@ class INET_API Ipv6 : public OperationalBase, public NetfilterBase, public INetw
     // utility: look up interface from getArrivalGate()
     virtual NetworkInterface *getSourceInterfaceFrom(Packet *msg);
 
+    // utility: next hop requested by a netfilter hook (e.g. a MANET routing
+    // protocol) via the NextHopAddressReq tag, or UNSPECIFIED if none
+    virtual Ipv6Address getNextHop(Packet *packet);
+
     // utility: show current statistics above the icon
     virtual std::string getIpv6StatusText() const;
 
@@ -267,6 +271,15 @@ class INET_API Ipv6 : public OperationalBase, public NetfilterBase, public INetw
      * module for further processing.
      */
     bool processExtensionHeaders(Packet *packet);
+
+    /**
+     * Applies RFC 8200 Section 4.2 handling for a Hop-by-Hop or Destination
+     * option whose type has no registered handler. The action is encoded in the
+     * two highest-order bits of the option type. Returns true if the option was
+     * skipped (processing continues), false if the packet was discarded (and
+     * possibly an ICMPv6 Parameter Problem error was sent).
+     */
+    bool handleUnrecognizedTlvOption(Packet *packet, int optType);
 
   public:
     /** @name Extension header handler registration */

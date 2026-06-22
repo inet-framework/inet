@@ -102,12 +102,15 @@ class INET_API Gpsr : public RoutingProtocolBase, public cListener, public Netfi
     void setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const NetworkHeaderBase>& networkHeader, GpsrOption *gpsrOption);
 
     // returns nullptr if not found
+    // For IPv6 the GPSR option lives in a HopByHop extension-header chunk that
+    // follows the base header (chunk-based architecture), so the packet itself
+    // is needed to locate it -- the network header alone is not enough.
     GpsrOption *findGpsrOptionInNetworkDatagramForUpdate(const Ptr<NetworkHeaderBase>& networkHeader);
-    const GpsrOption *findGpsrOptionInNetworkDatagram(const Ptr<const NetworkHeaderBase>& networkHeader) const;
+    const GpsrOption *findGpsrOptionInNetworkDatagram(Packet *packet, const Ptr<const NetworkHeaderBase>& networkHeader) const;
 
     // throws an error when not found
     GpsrOption *getGpsrOptionFromNetworkDatagramForUpdate(const Ptr<NetworkHeaderBase>& networkHeader);
-    const GpsrOption *getGpsrOptionFromNetworkDatagram(const Ptr<const NetworkHeaderBase>& networkHeader) const;
+    const GpsrOption *getGpsrOptionFromNetworkDatagram(Packet *packet, const Ptr<const NetworkHeaderBase>& networkHeader) const;
 
     // configuration
     void configureInterfaces();
@@ -126,7 +129,7 @@ class INET_API Gpsr : public RoutingProtocolBase, public cListener, public Netfi
     // address
     std::string getHostName() const;
     L3Address getSelfAddress() const;
-    L3Address getSenderNeighborAddress(const Ptr<const NetworkHeaderBase>& networkHeader) const;
+    L3Address getSenderNeighborAddress(Packet *packet, const Ptr<const NetworkHeaderBase>& networkHeader) const;
 
     // neighbor
     simtime_t getNextNeighborExpiration();

@@ -400,9 +400,9 @@ L3Address Gpsr::getSelfAddress() const
     return ret;
 }
 
-L3Address Gpsr::getSenderNeighborAddress(const Ptr<const NetworkHeaderBase>& networkHeader) const
+L3Address Gpsr::getSenderNeighborAddress(Packet *packet, const Ptr<const NetworkHeaderBase>& networkHeader) const
 {
-    const GpsrOption *gpsrOption = getGpsrOptionFromNetworkDatagram(networkHeader);
+    const GpsrOption *gpsrOption = getGpsrOptionFromNetworkDatagram(packet, networkHeader);
     return gpsrOption->getSenderAddress();
 }
 
@@ -638,8 +638,10 @@ void Gpsr::setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const Networ
         gpsrOption->setType(IPv6TLVOPTION_TLV_GPSR);
         // Check if there's already a HopByHop Options chunk right after the base header
         Ptr<Ipv6HopByHopOptionsHeader> hopHdr;
+        B oldHopLen = B(0);
         if (ipv6Header->getProtocolId() == IP_PROT_IPv6EXT_HOP && packet->getDataLength() > b(0)) {
             hopHdr = constPtrCast<Ipv6HopByHopOptionsHeader>(packet->popAtFront<Ipv6HopByHopOptionsHeader>());
+            oldHopLen = hopHdr->getChunkLength();
         }
         if (!hopHdr) {
             hopHdr = makeShared<Ipv6HopByHopOptionsHeader>();
@@ -649,6 +651,9 @@ void Gpsr::setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const Networ
         }
         hopHdr->getTlvOptionsForUpdate().appendTlvOption(gpsrOption);
         hopHdr->setChunkLength(B(utils::roundUp(2 + B(hopHdr->getTlvOptions().getLength()).get<B>(), 8)));
+        // The IPv6 payload length covers the extension headers too (RFC 8200), so
+        // account for the bytes the HopByHop header just grew by.
+        ipv6Header->setPayloadLength(ipv6Header->getPayloadLength() + (hopHdr->getChunkLength() - oldHopLen));
         packet->insertAtFront(hopHdr);
         insertNetworkProtocolHeader(packet, Protocol::ipv6, ipv6Header);
     }
@@ -670,7 +675,7 @@ void Gpsr::setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const Networ
     }
 }
 
-const GpsrOption *Gpsr::findGpsrOptionInNetworkDatagram(const Ptr<const NetworkHeaderBase>& networkHeader) const
+const GpsrOption *Gpsr::findGpsrOptionInNetworkDatagram(Packet *packet, const Ptr<const NetworkHeaderBase>& networkHeader) const
 {
     const GpsrOption *gpsrOption = nullptr;
 
@@ -682,9 +687,14 @@ const GpsrOption *Gpsr::findGpsrOptionInNetworkDatagram(const Ptr<const NetworkH
 #endif
 #ifdef INET_WITH_IPv6
     if (auto ipv6Header = dynamicPtrCast<const Ipv6Header>(networkHeader)) {
-        // GPSR option is in a HopByHop extension header chunk, not inside the Ipv6Header
-        // TODO: need packet access to peek at extension header chunks
-        (void)ipv6Header;
+        // The GPSR option lives in a HopByHop Options extension-header chunk that
+        // immediately follows the base header (see setGpsrOptionOnNetworkDatagram).
+        if (ipv6Header->getProtocolId() == IP_PROT_IPv6EXT_HOP) {
+            const auto& hopHdr = packet->peekDataAt<Ipv6HopByHopOptionsHeader>(ipv6Header->getChunkLength());
+            int i = hopHdr->getTlvOptions().findByType(IPv6TLVOPTION_TLV_GPSR);
+            if (i >= 0)
+                gpsrOption = check_and_cast<const GpsrOption *>(hopHdr->getTlvOptions().getTlvOption(i));
+        }
     }
     else
 #endif
@@ -732,9 +742,9 @@ GpsrOption *Gpsr::findGpsrOptionInNetworkDatagramForUpdate(const Ptr<NetworkHead
     return gpsrOption;
 }
 
-const GpsrOption *Gpsr::getGpsrOptionFromNetworkDatagram(const Ptr<const NetworkHeaderBase>& networkHeader) const
+const GpsrOption *Gpsr::getGpsrOptionFromNetworkDatagram(Packet *packet, const Ptr<const NetworkHeaderBase>& networkHeader) const
 {
-    const GpsrOption *gpsrOption = findGpsrOptionInNetworkDatagram(networkHeader);
+    const GpsrOption *gpsrOption = findGpsrOptionInNetworkDatagram(packet, networkHeader);
     if (gpsrOption == nullptr)
         throw cRuntimeError("Gpsr option not found in datagram!");
     return gpsrOption;
@@ -761,7 +771,7 @@ INetfilter::IHook::Result Gpsr::datagramPreRoutingHook(Packet *datagram)
         return ACCEPT;
     else {
         // KLUDGE this allows overwriting the GPSR option inside
-        auto gpsrOption = const_cast<GpsrOption *>(getGpsrOptionFromNetworkDatagram(networkHeader));
+        auto gpsrOption = const_cast<GpsrOption *>(getGpsrOptionFromNetworkDatagram(datagram, networkHeader));
         return routeDatagram(datagram, gpsrOption);
     }
 }
