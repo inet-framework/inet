@@ -1,4 +1,6 @@
 import logging
+import multiprocessing
+import os
 
 from opp_repl import *
 from inet.project.inet import *

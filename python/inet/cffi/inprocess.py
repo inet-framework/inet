@@ -1,5 +1,6 @@
 import cppyy
 import logging
+import os
 import re
 
 from omnetpp.runtime import *

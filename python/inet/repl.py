@@ -2,6 +2,7 @@ import argparse
 import IPython
 import logging
 import omnetpp
+import sys
 
 from omnetpp.scave.analysis import *
 from omnetpp.scave.results import *

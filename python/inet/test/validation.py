@@ -12,6 +12,7 @@ import math
 import numpy
 import pandas as pd
 import random
+import re
 from statistics import fmean
 
 from omnetpp.scave.results import *
