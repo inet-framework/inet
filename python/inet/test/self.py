@@ -5,7 +5,7 @@ import re
 import sys
 import time
 
-from inet.simulation import *
+from opp_repl.simulation import *
 from inet.test import *
 
 __sphinx_mock__ = True # ignore this module in documentation

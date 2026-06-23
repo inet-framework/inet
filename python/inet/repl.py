@@ -8,7 +8,7 @@ from omnetpp.scave.analysis import *
 from omnetpp.scave.results import *
 
 from inet.common import *
-from inet.simulation import *
+from opp_repl.simulation import *
 from inet.test import *
 
 __sphinx_mock__ = True # ignore this module in documentation
