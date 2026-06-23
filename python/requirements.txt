@@ -1,7 +1,7 @@
-requests >= 2.32
-dask >=2024.10.0
-ipython >= 8.29.0
-distributed >=2024.10.0
-optimparallel >=0.1.3
-sewar >=0.4.6
-py4j >=0.10.9
+# INET's Python tooling now builds on opp_repl, which declares its own dependencies
+# (cluster, optimize, IDE integration, REPL, GitHub dispatch, image metrics, etc.).
+# INET's remaining Python -- result analysis (python/inet/scave), validation tests and
+# the optional in-process runner (python/inet/cffi) -- relies on the OMNeT++ Python
+# environment (numpy, pandas, matplotlib) plus opp_repl, so nothing extra is pinned here.
+#
+# cppyy is required only when using the optional in-process simulation runner (inet/cffi).
