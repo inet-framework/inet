@@ -5,9 +5,12 @@ The main function is :py:func:`run_fingerprint_tests`. It allows running multipl
 filter criteria. Fingerprint tests check for regressions in the simulation execution trajectory.
 """
 
+import datetime
 import hashlib
+import itertools
 import logging
 import re
+import sys
 
 from opp_repl import *
 from inet.project.inet import *

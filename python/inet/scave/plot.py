@@ -12,7 +12,7 @@ import inspect
 import math
 from cycler import cycler
 import logging
-import inet.common.util
+import opp_repl.common.util
 from omnetpp.scave.utils import make_legend_label
 import logging
 from matplotlib.legend_handler import HandlerLine2D
@@ -20,9 +20,9 @@ from matplotlib.legend_handler import HandlerLine2D
 logger = logging.getLogger(__name__)
 
 BOLD = "\033[1;1m"
-COLOR_RESET = inet.common.util.COLOR_RESET
+COLOR_RESET = opp_repl.common.util.COLOR_RESET
 
-class DebugLevel(inet.common.util.LoggerLevel):
+class DebugLevel(opp_repl.common.util.LoggerLevel):
     def __init__(self):
         super().__init__(inet.scave.plot.logger, logging.DEBUG)
         
@@ -34,8 +34,8 @@ def log_chart_name(logger, props):
 
 logger = logging.getLogger(__name__)
 
-if inet.common.util.ensure_logging_initialized(logging.WARN, logging.WARN, None):
-    inet.common.util.get_logging_formatter().print_function_name = True
+if opp_repl.common.util.ensure_logging_initialized(logging.WARN, logging.WARN, None):
+    opp_repl.common.util.get_logging_formatter().print_function_name = True
 
 def scale_lightness(rgb, scale_l):
     # convert rgb to hls

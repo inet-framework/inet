@@ -1,3 +1,5 @@
+import os
+
 from inet.simulation import *
 from inet.common.util import *
 

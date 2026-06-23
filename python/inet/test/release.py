@@ -1,4 +1,5 @@
 import logging
+import os
 
 from inet.common import *
 from inet.test.all import *
@@ -10,8 +11,8 @@ def run_release_tests(clean=True, build=True, **kwargs):
        not os.path.exists(get_omnetpp_relative_path("bin/opp_run_dbg")) or \
        not os.path.exists(get_omnetpp_relative_path("bin/opp_run_sanitize")):
         raise Exception("Cannot run release tests because omnetpp must be first built in release, debug and sanitize mode")
-    logging.getLogger("inet.common.task").setLevel("INFO")
-    logging.getLogger("inet.simulation.build").setLevel("INFO")
+    logging.getLogger("opp_repl.common.task").setLevel("INFO")
+    logging.getLogger("opp_repl.simulation.build").setLevel("INFO")
     run_command_with_logging(["opp_featuretool", "enable", "all"], cwd=inet_project.get_full_path("."), error_message="Enabling all features failed")
     run_command_with_logging(["opp_featuretool", "disable", "SelfDoc"], cwd=inet_project.get_full_path("."), error_message="Disabling SelfDoc feature failed")
     make_makefiles(simulation_project=inet_project)
