@@ -2,7 +2,7 @@ import logging
 import subprocess
 
 from inet.common import *
-from inet.simulation.project import *
+from inet.simulation import *
 from inet.project.inet import *
 
 _logger = logging.getLogger(__name__)

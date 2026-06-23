@@ -2,7 +2,7 @@ import glob
 import json
 import os
 
-from inet.simulation.project import *
+from inet.simulation import *
 
 def define_omnetpp_sample_projects():
     for folder in os.listdir(get_omnetpp_relative_path("samples")):

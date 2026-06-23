@@ -16,9 +16,8 @@ from statistics import fmean
 
 from omnetpp.scave.results import *
 
+from opp_repl import *
 from inet.project.inet import *
-from inet.simulation.project import *
-from inet.test.simulation import *
 
 _logger = logging.getLogger(__name__)
 

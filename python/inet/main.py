@@ -3,10 +3,8 @@ import logging
 import socket
 import sys
 
-from inet.common.cluster import *
+from opp_repl import *
 from inet.project.omnetpp import *
-from inet.simulation.project import *
-from inet.simulation.task import *
 from inet.test import *
 
 __sphinx_mock__ = True # ignore this module in documentation

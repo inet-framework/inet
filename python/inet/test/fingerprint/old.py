@@ -5,12 +5,9 @@ import logging
 import re
 import shlex
 
-from inet.test.fingerprint import *
-
+from opp_repl import *
 from inet.common import *
 from inet.project.inet import *
-from inet.simulation.project import *
-from inet.test.fingerprint.store import *
 from inet.test.fingerprint.task import *
 
 __sphinx_mock__ = True # ignore this module in documentation

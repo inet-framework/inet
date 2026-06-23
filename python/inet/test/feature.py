@@ -4,11 +4,8 @@ import logging
 import subprocess
 import xml
 
-from inet.common.summary import *
+from opp_repl import *
 from inet.project.inet import *
-from inet.simulation.build import *
-from inet.simulation.task import *
-from inet.test.simulation import *
 
 # TODO force at least setting up interactive/emulation simulations
 # TODO add ifdefs around includes in C++ where the dependency is meant to be optional

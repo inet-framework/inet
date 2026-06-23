@@ -4,7 +4,7 @@ import webbrowser
 
 from inet.common import *
 from inet.project.inet import *
-from inet.simulation.project import *
+from inet.simulation import *
 
 _logger = logging.getLogger(__name__)
 
