@@ -6,7 +6,7 @@ import re
 from omnetpp.runtime import *
 
 from inet.common import *
-from inet.simulation import *
+from opp_repl.simulation import *
 
 _logger = logging.getLogger(__name__)
 
