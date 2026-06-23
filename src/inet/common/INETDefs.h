@@ -25,9 +25,6 @@
 // General definitions.
 //
 
-#include "inet/common/Compat.h"
-#include "inet/common/ParsimPacking.h"
-
 namespace inet {
 using namespace omnetpp;
 using omnetpp::operator<<;
@@ -47,6 +44,12 @@ using omnetpp::operator<<;
 #else // if defined(INET_EXPORT)
 #define INET_API
 #endif // if defined(INET_EXPORT)
+
+// Compat.h declares exported classes (e.g. CodeFragment) using INET_API, so it
+// must be included only after INET_API is defined above. ParsimPacking.h is
+// kept alongside it.
+#include "inet/common/Compat.h"
+#include "inet/common/ParsimPacking.h"
 
 #include "inet/common/InitStages.h"
 

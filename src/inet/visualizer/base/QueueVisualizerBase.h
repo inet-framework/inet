@@ -8,7 +8,7 @@
 #ifndef __INET_QUEUEVISUALIZERBASE_H
 #define __INET_QUEUEVISUALIZERBASE_H
 
-#include "inet/common/Compat.h"
+#include "inet/common/INETDefs.h"
 #include "inet/queueing/contract/IPacketQueue.h"
 #include "inet/visualizer/base/VisualizerBase.h"
 #include "inet/visualizer/util/Placement.h"

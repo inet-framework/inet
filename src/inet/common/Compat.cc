@@ -5,7 +5,7 @@
 //
 
 
-#include "inet/common/Compat.h"
+#include "inet/common/INETDefs.h" // pulls in Compat.h after INET_API is defined
 
 namespace inet {
 
