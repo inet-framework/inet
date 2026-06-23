@@ -19,7 +19,6 @@ def generate_html_documentation(docker=False, clean_build=False, targets=None):
     # run_command_with_logging doesn't work in docker, it adds lots of extra spaces
     env = None
     if targets is not None:
-        import os
         env = os.environ.copy()
         env["DOC_BUILD_TARGET"] = ",".join(targets)
     subprocess.run([make_cmd, "html"], cwd = get_default_simulation_project().get_full_path("doc/src/"), env=env)
