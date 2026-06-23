@@ -649,7 +649,7 @@ address.
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: [Config ServerReboot]
-   :end-before: [Config LossyDORA]
+   :end-at: leaseTime = 100s
 
 The scenario script:
 
