@@ -431,6 +431,35 @@ DHCPREQUEST and DHCPACK:
 .. figure:: media/lease_renewal.png
    :align: center
 
+The animation below shows the three clients renewing their leases at T1
+(~31 s). Each renewal is a unicast exchange: the client first ARPs for
+the server's MAC (never cached, since the DORA was all broadcast), then
+sends a DHCPREQUEST directly to the server, which replies with a DHCPACK:
+
+.. video:: media/lease_renewal.mp4
+   :align: center
+
+..
+   VIDEO RECIPE (redo via the "video-recording" skill)
+   config:   LeaseRenewal               # ../omnetpp.ini; leaseTime=60s, T1=30s
+   seed:     default
+   shows:    three clients renewing at T1 — each ARPs for the server MAC
+             (never cached, the DORA was all-broadcast), then sends a unicast
+             DHCPREQUEST answered by a DHCPACK
+   anchors:  T1 renewals cluster ~t=31s (clients bind ~t=1s, T1=0.5×60s);
+             per client ARP → DHCPREQUEST → DHCPACK. Mechanism must hold;
+             if the ~31s cluster moves, timing changed → re-tune and rewrite.
+   window:   record sim-time ~30s → ~33s (express-run to ~30s; built-in
+             Qtenv message animations are the visualization channel)
+   anim:     playback_speed=1, animation_enabled=true (default Qtenv setting)
+   capture:  fps=10, crop_area=with_padding; recording crop_rect was 732×482,
+             then PIL-cropped to 540×482 to drop the visualizer/configurator/
+             scenarioManager icon column on the left
+   encode:   ffmpeg trim=23.5:25, setpts=5*PTS (slow ×5) -vcodec libx264
+             -pix_fmt yuv420p — focuses on the renewal cluster at the end
+   post:     none
+   stamp:    recorded 2026-06, INET 4.6
+
 CleanShutdown
 ~~~~~~~~~~~~~
 
