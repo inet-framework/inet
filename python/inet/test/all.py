@@ -4,7 +4,6 @@ import os
 
 from opp_repl import *
 from inet.test.feature import *
-from inet.test.fingerprint import *
 from inet.test.validation import *
 
 __sphinx_mock__ = True # ignore this module in documentation
