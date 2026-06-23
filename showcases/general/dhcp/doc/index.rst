@@ -271,7 +271,7 @@ starts its DHCP process at a random time within the first 2 seconds.
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: [Config BasicDHCP]
-   :end-before: [Config LeaseRenewal]
+   :end-at: startTime = uniform(0s, 2s)
 
 All three clients obtain addresses starting from 192.168.1.10.
 ``numReservedAddresses=10`` reserves the first 10 addresses, counting
