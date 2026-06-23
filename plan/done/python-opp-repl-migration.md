@@ -116,29 +116,60 @@ Surviving INET-specific modules replace `from inet.<generic> import *` with `fro
 (or specific opp_repl submodule) and keep `from inet.common.util import *` / `from inet.project.inet
 import *` for INET names.
 
-## Execution steps (commit after each)
+## Execution steps (commit after each) — ALL DONE
 
-- [ ] **Step 0** — Add `opp_repl` to `python/requirements.txt`. Verify `import opp_repl` under
-  inet's PYTHONPATH. Commit.
-- [ ] **Step 1 (Bucket 1)** — `git rm` the Bucket 1 files. Rewrite the package `__init__.py`
-  facades (`common`, `simulation`, `documentation`, `test`) to pull generic API from `opp_repl`.
-  Verify `python3 -c "import inet"` succeeds. Commit: *"python: Remove generic modules now provided by opp_repl (bucket 1)"*.
-- [ ] **Step 2 (Bucket 2)** — Trim `common/util.py`, `common/github.py`; delete `simulation/task.py`,
-  `simulation/optimize.py`; repoint imports in `documentation/ned.py`, `test/all.py`,
-  `test/feature.py`, `test/release.py`, `test/fingerprint/old.py`, `test/fingerprint/task.py`,
-  `repl.py`, `main.py`. Fix G5/G6/G7 in `fingerprint/task.py`; add explicit `import multiprocessing`
-  / `import itertools` (G10/G11). Verify import + a smoke test. Commit: *"python: Reduce to INET-specific code, source generics from opp_repl (bucket 2)"*.
-- [ ] **Step 3 (rewire entry points)** — Repoint the ~26 `bin/inet_*` wrappers (they do
-  `from inet.main import *`). Keep INET-only commands (validation/packet/...) working via the
-  trimmed `inet.main`; for purely-generic ones, either keep the inet shim or point at `opp_repl`
-  equivalents. Verify each `bin/inet_*` runs `-h`. Commit: *"bin: Rewire python wrappers onto migrated package"*.
-- [ ] **Step 4 (CI)** — Update the ~8 GitHub workflows that invoke these modules, if their
-  invocation paths changed. Commit.
-- [ ] **Step 5 (verify)** — `import inet`, run `inet_run_smoke_tests` on a tiny config, run
-  `inet/test/self.py` if feasible. Record results in this plan. Move plan to `plan/done/`.
+- [x] **Step 0** — Verified `import opp_repl` under inet's PYTHONPATH. `opp_repl` is **not** a
+  released pip package — it is obtained from its GitHub repo and put on `PYTHONPATH` manually (like
+  the other workspace repos), so it is intentionally **not** listed in `python/requirements.txt`.
+- [x] **Step 1 (Bucket 1)** — `git rm`'d the Bucket 1 files (plus generic-bodied `simulation/task.py`
+  and `simulation/optimize.py`); rewrote the `common`/`simulation`/`documentation`/`test`/`test.fingerprint`
+  `__init__.py` facades onto `opp_repl`; repointed surviving files. `import inet` verified.
+  Commit `5777e77`.
+- [x] **Step 2 (Bucket 2)** — Trimmed `common/util.py` (613→108 lines, INET-only helpers);
+  `common/github.py` kept as-is (already INET-specific). Added explicit stdlib imports
+  (`os`, `re`, `sys`, `itertools`, `multiprocessing`, `builtins`, `glob`, `datetime`) that opp_repl
+  no longer leaks through `*`. Repointed `scave/plot.py` to `opp_repl.common.util`; fixed
+  `release.py` logger names to the `opp_repl.*` namespace. Commit `9d6cd3d`.
+- [x] **Step 2b (project definitions → .opp)** — *Superseded approach.* First adapted
+  `project/inet.py`/`project/omnetpp.py` to the opp_repl `SimulationProject` kwargs (commit `d931248`),
+  then — per the project owner — **removed the `inet.project` package entirely** because opp_repl
+  defines projects via `.opp` descriptor files and ships bundled `inet.opp`/`omnetpp.opp`.
+  `repl.py`/`main.py` now `load_opp_file("@opp")`; `inet_project` references became
+  `get_default_simulation_project()` (runtime) or `None`+lazy-resolve (default args). Commit `d02e726`.
+- [x] **Step 3 (entry points)** — No changes needed: the ~26 `bin/inet_*` wrappers call
+  `inet.main` / `inet.repl` / `inet.test.self`, all of which survive. Verified representative
+  wrappers run `-h` and execute.
+- [x] **Step 4 (CI)** — The `inet_run_*` wrappers are unchanged, so workflows that invoke them are
+  unaffected. However, `opp_repl` is **not** installed via `requirements.txt` (it is not a released
+  pip package), so CI must make `opp_repl` importable another way — clone its GitHub repo and add it
+  to `PYTHONPATH` (or `pip install` from the git URL) as a separate setup step. See follow-up below.
+- [x] **Step 5 (verify)** — `import inet` + all submodules OK; `py_compile` clean; all `bin/inet_*`
+  `-h` OK; **end-to-end `inet_run_smoke_tests -w ethernet/lans` → 11 PASS** with self-bootstrapped
+  inet/omnetpp projects from the bundled `.opp` files (no manual registration).
+
+## Final state
+`python/inet` now contains only INET-specific code: `cffi/`, `scave/`, `documentation/html.py`+`ned.py`,
+`test/validation.py`, `test/self.py`, the INET-specific test types in `test/all.py`/`feature.py`/`release.py`/
+`fingerprint/{old,task}.py`, `common/util.py` (INET path/type helpers) + `common/github.py`, `main.py`,
+`repl.py`, `inetgdb/`, `lldb/`. Everything generic comes from `opp_repl`; projects come from `.opp` files.
 
 ## Open questions / follow-ups (not blocking)
-- cffi `inprocess` runner: opp_repl needs a hook to use `inet.cffi.InprocessSimulationRunner`
-  instead of hardcoded `opp_repl.cffi`. Track separately.
-- Whether to upstream `get_omnetpp_relative_path` into opp_repl (its own `test/release.py` uses it).
-- G6/G7 are latent bugs present in opp_repl too — fix there as well or just in inet.
+- **opp_repl availability**: `opp_repl` is not a released pip package; it lives on GitHub and is put
+  on `PYTHONPATH` manually (like omnetpp). Therefore it is deliberately absent from
+  `python/requirements.txt`. Dev setup and CI both need a separate step to fetch opp_repl from GitHub
+  and expose it on `PYTHONPATH` (e.g. a checkout + `export PYTHONPATH=.../opp_repl:$PYTHONPATH`, or
+  `pip install git+https://github.com/omnetpp/opp_repl`). The required API includes
+  `load_opp_file("@opp")`, `define_omnetpp_project`, the `workspace` module, and
+  `update_fingerprint_test_results`, so a recent enough checkout is needed.
+- **cffi `inprocess` runner**: opp_repl `simulation/task.py` hardcodes `import opp_repl.cffi`; INET's
+  inprocess runner lives in `inet.cffi`. opp_repl needs a registration hook for a project-specific
+  inprocess runner. Default subprocess/ide runners are unaffected.
+- **inet-baseline.opp**: not bundled. `run_baseline_fingerprint_test` now lazily resolves
+  `get_simulation_project("inet-baseline")`; baseline fingerprint comparison needs an
+  `inet-baseline.opp` (e.g. in the inet-baseline checkout) before it works.
+- **Pre-existing latent bugs** (predate this migration, left untouched): `SimulationRun` (undefined,
+  should be `SimulationTask`) and `MultipleTestResults` (undefined) in `test/fingerprint/task.py`;
+  `get_all_simulation_configs(project)` called as a free function (method only) — present in opp_repl too.
+- **opp_repl bug**: `InifileContents` is referenced but not imported in `opp_repl/simulation/project.py`
+  (~line 815) on a config-listing fallback path; and its own `test/release.py` calls
+  `get_omnetpp_relative_path`, which isn't defined in opp_repl. Both are opp_repl-side issues.
