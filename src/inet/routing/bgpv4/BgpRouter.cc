@@ -78,6 +78,17 @@ void BgpRouter::recordStatistics()
     bgpModule->recordScalar("UpdateMsgRcv", statTab[5]);
 }
 
+// A node is "lifecycle-capable" if it contains a NodeStatus ("status") submodule,
+// i.e. it can be shut down, restarted or crashed at runtime. Only on such nodes does
+// the FSM re-arm a connection after a loss (see BgpFsm.cc): a restarted node must
+// reconnect, whereas a plain BGP router keeps its historical behavior of not
+// auto-reconnecting. Enabling auto-reconnect unconditionally would also re-open a
+// listening socket on an already-bound port, crashing non-lifecycle scenarios.
+bool BgpRouter::isLifecycleNode() const
+{
+    return getContainingNode(bgpModule)->getSubmodule("status") != nullptr;
+}
+
 void BgpRouter::closeSessions(bool abort)
 {
     for (auto& elem : _BGPSessions) {

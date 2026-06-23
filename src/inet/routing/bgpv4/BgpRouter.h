@@ -120,7 +120,7 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
     cMessage *getCancelEvent(cMessage *msg) { return bgpModule->cancelEvent(msg); }
     IIpv4RoutingTable *getIPRoutingTable() { return rt; }
     std::vector<BgpRoutingTableEntry *> getBGPRoutingTable() { return bgpRoutingTable; }
-    bool isLifecycleNode() const { return bgpModule->getParentModule()->getSubmodule("status") != nullptr; }
+    bool isLifecycleNode() const;
 
     /**
      * \brief active listenSocket for a given session (used by fsm)
