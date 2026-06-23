@@ -1,0 +1,5 @@
+#!/usr/bin/env python3
+
+from inet.main import *
+
+run_queueing_tests_main()
