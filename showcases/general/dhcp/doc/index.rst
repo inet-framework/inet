@@ -431,33 +431,6 @@ DHCPREQUEST and DHCPACK:
 .. figure:: media/lease_renewal.png
    :align: center
 
-The animation below shows the three clients renewing their leases at T1
-(~31 s). Unlike the broadcast DORA, each renewal is a unicast exchange:
-the client first ARPs for the server's MAC (never cached, since the DORA
-was all broadcast), then sends a DHCPREQUEST directly to the server,
-which replies with a DHCPACK:
-
-.. video:: media/lease_renewal.mp4
-   :align: center
-
-..
-   VIDEO RECIPE (redo via the "video-recording" skill)
-   config:   LeaseRenewal               # ../omnetpp.ini; leaseTime=60s, T1=30s
-   seed:     default
-   shows:    three clients renewing at T1 — each ARPs for the server MAC
-             (never cached, the DORA was all-broadcast), then sends a unicast
-             DHCPREQUEST answered by a DHCPACK
-   anchors:  T1 renewals cluster ~t=31s (clients bind ~t=1s, T1=0.5×60s);
-             per client ARP → DHCPREQUEST → DHCPACK. Mechanism must hold;
-             if the ~31s cluster moves, timing changed → re-tune and rewrite.
-   window:   record sim-time ~30s → ~33s (express-run to ~30s; no channel
-             visualizer, so no fade-out wait)
-   anim:     playback_speed=1           # set_animation_parameters, normal profile
-   capture:  fps=2, crop_area=with_padding   # re-read crop_rect; canvas was 732×482
-   encode:   ffmpeg -r 30 -vcodec libx264 -pix_fmt yuv420p (pad to even dims)
-   post:     none
-   stamp:    recorded 2026-06, INET 4.6
-
 CleanShutdown
 ~~~~~~~~~~~~~
 
@@ -685,6 +658,53 @@ clients are met with a DHCPNAK:
    capture:  open_inspector(...leased) → get_inspector_screenshot; was 720×90
    stamp:    captured 2026-06, INET 4.6
 
+The text log of ``client[0]``'s renewal at t≈51 s shows the round-trip
+in one place — the RENEWING DHCPREQUEST hits the empty database, the
+server returns a DHCPNAK, and the client falls straight into a fresh
+DORA that re-binds the same 192.168.1.10:
+
+.. literalinclude:: media/serverreboot.log
+   :language: text
+
+..
+   LOG RECIPE (redo via the "omnetpp-mcp-sim" skill)
+   config:   ServerReboot              # ../omnetpp.ini
+   seed:     default
+   shows:    client[0]'s NAK-then-re-DORA at t≈51 s
+   anchor:   T1 fires t≈51 s (50 s after bind ~t=1.1 s); messages on the
+             RENEWING → SELECTING → BOUND path
+   capture:  inet -u Cmdenv -c ServerReboot --cmdenv-express-mode=false
+             --cmdenv-log-prefix='[%t %M] ' --cmdenv-event-banners=false |
+             sed 's/\x1b\[[0-9;]*m//g' | grep '\.app\[0\]\]' |
+             range 51.097–51.099 s, client[0]/dhcpServer only
+   stamp:    captured 2026-06, INET 4.6
+
+The animation below shows the whole reboot cycle end to end. The
+``dhcpServer`` icon greys out at t=30 s (the ``<shutdown>`` event),
+clients keep their bound addresses through the downtime, the server
+returns at t=40 s, and around t≈51 s the renewal NAKs trigger the
+fresh DORAs — the per-client "Got IP …" bubbles fire again as each
+client re-binds the same address:
+
+.. video:: media/serverreboot.mp4
+   :align: center
+
+..
+   VIDEO RECIPE (redo via the "video-recording" skill)
+   config:   ServerReboot               # ../omnetpp.ini
+   seed:     default
+   shows:    server greying out at t=30 s, returning at t=40 s, the renewal
+             NAKs at t≈51 s and the back-to-back re-DORAs that follow
+   anchors:  shutdown t=30 s, startup t=40 s (ScenarioManager script);
+             T1 fires ~51 s on each client (lease 100 s, bind ~t=1.1 s)
+   window:   record sim-time 0s → ~55s (covers shutdown, restart and the
+             three NAK→DORA cycles; no channel visualizer, no fade-out wait)
+   anim:     playback_speed=1           # set_animation_parameters, normal profile
+   capture:  fps=2, crop_area=with_padding   # canvas was 732×482
+   encode:   ffmpeg -r 30 -vcodec libx264 -pix_fmt yuv420p (pad to even dims)
+   post:     none
+   stamp:    recorded 2026-06, INET 4.6
+
 LossyDORA
 ~~~~~~~~~
 
@@ -730,6 +750,28 @@ The same retransmit machinery applies to DHCPREQUEST in REQUESTING /
 REBOOTING, and to lease renewals in RENEWING / REBINDING (where
 the "half the remaining interval" rule replaces the doubled-delay
 schedule).
+
+The retransmits are not fresh DORAs — they are *the same* DHCPDISCOVER
+re-sent until a reply arrives. The client log shows all three carrying
+the same transaction ID (``xid = 398764591``); only the third one
+finds the server up, and the DHCPOFFER comes back with that same xid:
+
+.. literalinclude:: media/lossy_dora.log
+   :language: text
+
+..
+   LOG RECIPE (redo via the "omnetpp-mcp-sim" skill)
+   config:   LossyDORA                  # ../omnetpp.ini
+   seed:     default
+   shows:    same xid (398764591) across all three DHCPDISCOVERs at
+             t≈1.097 s / 5.528 s / 14.216 s, and on the eventual DHCPOFFER
+   anchor:   first DISCOVER at t≈1.1 s (client start), third one followed by
+             OFFER within microseconds — server is up at t=10 s
+   capture:  inet -u Cmdenv -c LossyDORA --cmdenv-express-mode=false
+             --cmdenv-log-prefix='[%t %M] ' --cmdenv-event-banners=false |
+             grep client[0].app[0] / dhcpServer.app[0]; trim packet-tail
+             options for readability
+   stamp:    captured 2026-06, INET 4.6
 
 Sequence chart of the entire LossyDORA run, with the three retransmits
 visible as three DHCPDISCOVER arrows fanning out to ``dhcpServer`` at
@@ -794,6 +836,65 @@ the initial DORA which used ``ap1`` / ``dhcpServer1`` on 192.168.1.x:
 
 .. figure:: media/roaming.png
    :align: center
+
+The subnet handover is also visible on the canvas. Before the roam,
+the client sits under ``ap1``'s coverage circle (left) with its
+interface labelled ``wlan0 192.168.1.10/24``:
+
+.. figure:: media/roaming_before.png
+   :align: center
+
+After the roam, the client has moved under ``ap2``'s coverage circle
+(right) and the interface-table label has flipped to ``wlan0
+192.168.2.10/24`` — confirming that the new DORA on the 192.168.2.x
+subnet has bound:
+
+.. figure:: media/roaming_after.png
+   :align: center
+
+..
+   FIGURE RECIPE (redo via the "omnetpp-mcp-sim" skill)
+   type:     canvas (two anchors)
+   config:   Roaming                   # ../omnetpp.ini
+   seed:     default
+   shows:    roaming_before: client under ap1's coverage, label
+             "wlan0 192.168.1.10/24" (before roam);
+             roaming_after: client under ap2's coverage, label
+             "wlan0 192.168.2.10/24" (after roam)
+   anchor:   before: t=10 s (client at x=200 m, well inside ap1 range);
+             after: t=25 s (client at x=500 m, inside ap2 range, after the
+             t≈17.6 s roam DORA bound 192.168.2.10). The label refreshes on
+             the next visualizer tick, so t≥20 s is safe.
+   capture:  rebuild_network → run_simulation t=10s → get_canvas_image
+             area=all_elements (before); run to t=25s → get_canvas_image
+             (after); was 778×629 and 851×630
+   stamp:    captured 2026-06, INET 4.6
+
+The animation below shows the whole run from a fresh start. The client
+DORAs on 192.168.1.x, then crosses the canvas left → right; at
+t≈17.6 s it associates with ``ap2`` and a second DORA binds
+192.168.2.10 — the interface-table label flips on the next visualizer
+tick:
+
+.. video:: media/roaming.mp4
+   :align: center
+
+..
+   VIDEO RECIPE (redo via the "video-recording" skill)
+   config:   Roaming                    # ../omnetpp.ini
+   seed:     default
+   shows:    initial DORA via ap1/dhcpServer1 (~t=0.6 s, label →
+             192.168.1.10/24), 20 m/s rectilinear motion, roam DORA via
+             ap2/dhcpServer2 at t≈17.6 s, label flip to 192.168.2.10/24
+   anchors:  first bind ~t=0.6 s; roam association t≈17.6 s; second bind
+             within microseconds of association. Mechanism must hold;
+             timing is seed-dependent.
+   window:   record sim-time 0s → ~22s
+   anim:     playback_speed=1           # set_animation_parameters, normal profile
+   capture:  fps=50, crop=670:580:870:140  # tight crop around the canvas
+   encode:   ffmpeg -r 50 -vcodec libx264 -pix_fmt yuv420p (pad to even dims)
+   post:     none
+   stamp:    recorded 2026-06, INET 4.6
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`,
 :download:`DhcpShowcase.ned <../DhcpShowcase.ned>`,
