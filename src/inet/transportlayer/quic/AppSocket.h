@@ -13,6 +13,7 @@
 #include "Quic.h"
 
 namespace inet {
+class Indication;   // inet::Indication (used only via pointer below)
 namespace quic {
 
 // Forward declarations:
