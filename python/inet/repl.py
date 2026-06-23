@@ -8,7 +8,6 @@ from omnetpp.scave.analysis import *
 from omnetpp.scave.results import *
 
 from inet.common import *
-from inet.project.omnetpp import *
 from inet.simulation import *
 from inet.test import *
 
@@ -28,7 +27,7 @@ def parse_run_repl_arguments():
 def process_run_repl_arguments(args):
     initialize_logging(args.log_level, args.external_command_log_level, None)
     logging.getLogger("distributed.deploy.ssh").setLevel(args.log_level)
-    define_omnetpp_sample_projects()
+    load_opp_file("@opp")
     simulation_project = determine_default_simulation_project(name=args.simulation_project, required=False)
 
 def run_repl_main():
