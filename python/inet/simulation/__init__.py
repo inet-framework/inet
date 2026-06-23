@@ -6,9 +6,10 @@ even completely unrelated ones that have different working directories, INI file
 and configurations. The simulations can be run sequentially or concurrently on a
 single computer or on an SSH cluster. Besides, the simulations can be run as
 separate processes and also in the same Python process loading INET as a library.
+
+The functionality is provided by the generic :py:mod:`opp_repl.simulation` package.
 """
 
-from inet.simulation.optimize import *
-from inet.simulation.project import *
+from opp_repl.simulation import *
 
 __all__ = [k for k,v in locals().items() if k[0] != "_" and v.__class__.__name__ != "module"]

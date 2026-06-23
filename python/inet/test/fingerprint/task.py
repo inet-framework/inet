@@ -9,13 +9,8 @@ import hashlib
 import logging
 import re
 
-from inet.simulation.task import *
-
-from inet.common.ide import *
+from opp_repl import *
 from inet.project.inet import *
-from inet.simulation.project import *
-from inet.test.fingerprint.store import *
-from inet.test.simulation import *
 
 _logger = logging.getLogger(__name__)
 all_fingerprint_ingredients = ["tplx", "~tNl", "~tND", "tyf"]

@@ -1,4 +1,4 @@
-from inet.simulation.project import *
+from inet.simulation import *
 from inet.common.util import *
 
 inet_project = define_simulation_project("inet", version=None,
