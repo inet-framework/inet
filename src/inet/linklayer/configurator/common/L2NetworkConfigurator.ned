@@ -27,6 +27,10 @@ import inet.common.SimpleModule;
 // </config>
 // <pre>
 //
+// When the `cost` attribute is not given for an interface, the port path cost
+// defaults to a value derived from the link speed, as recommended by
+// IEEE 802.1D-2004 (e.g. 200000 for 100 Mb/s, 20000 for 1 Gb/s).
+//
 // For more information about the usage of the selector attributes see ~Ipv4NetworkConfigurator.
 //
 simple L2NetworkConfigurator extends SimpleModule
@@ -34,6 +38,6 @@ simple L2NetworkConfigurator extends SimpleModule
     parameters:
         @class(L2NetworkConfigurator);
         @display("i=block/cogwheel");
-        xml config = default(xml("<config><interface hosts='**' ports='**' cost='19' priority='128' edge='false'/></config>"));
+        xml config = default(xml("<config><interface hosts='**' ports='**' priority='128' edge='false'/></config>"));
 }
 

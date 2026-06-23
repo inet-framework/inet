@@ -162,6 +162,9 @@ void L2NetworkConfigurator::readInterfaceConfiguration(Node *rootNode)
                             // cost
                             if (!opp_isempty(cost))
                                 currentNode->interfaceInfos[i]->portData.linkCost = atoi(cost);
+                            else
+                                // no explicit cost: derive a default from the link speed (IEEE 802.1D-2004)
+                                currentNode->interfaceInfos[i]->portData.linkCost = getRecommendedLinkCost(currentNode, ifEntry);
 
                             // priority
                             if (!opp_isempty(priority))
@@ -212,6 +215,30 @@ Topology::Link *L2NetworkConfigurator::findLinkOut(Node *node, int gateId)
             return node->getLinkOut(i);
 
     return nullptr;
+}
+
+unsigned int L2NetworkConfigurator::getRecommendedLinkCost(Node *node, NetworkInterface *networkInterface)
+{
+    // Derive a default port path cost from the link speed, as recommended by
+    // IEEE 802.1D-2004, Table 17-3 (the values for the 32-bit/long path cost).
+    Topology::Link *linkOut = findLinkOut(node, networkInterface->getNodeOutputGateId());
+    double datarate = 0; // bit/s
+    if (linkOut != nullptr) {
+        cChannel *channel = linkOut->getLinkOutLocalGate()->getChannel();
+        if (channel != nullptr)
+            datarate = channel->getNominalDatarate(); // 0 for ideal/delay channels (unknown speed)
+    }
+
+    if (datarate <= 0)      return 200000;     // unknown speed: assume classic 100 Mb/s Ethernet
+    if (datarate <= 100e3)  return 200000000;  // <= 100 kb/s
+    if (datarate <= 1e6)    return 20000000;   // <= 1 Mb/s
+    if (datarate <= 10e6)   return 2000000;    // <= 10 Mb/s
+    if (datarate <= 100e6)  return 200000;     // <= 100 Mb/s
+    if (datarate <= 1e9)    return 20000;      // <= 1 Gb/s
+    if (datarate <= 10e9)   return 2000;       // <= 10 Gb/s
+    if (datarate <= 100e9)  return 200;        // <= 100 Gb/s
+    if (datarate <= 1e12)   return 20;         // <= 1 Tb/s
+    return 2;                                  // > 1 Tb/s
 }
 
 bool L2NetworkConfigurator::linkContainsMatchingHostExcept(InterfaceInfo *currentInfo, Matcher& hostMatcher,

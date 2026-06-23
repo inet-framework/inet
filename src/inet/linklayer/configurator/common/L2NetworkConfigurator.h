@@ -114,6 +114,11 @@ class INET_API L2NetworkConfigurator : public SimpleModule
     virtual bool linkContainsMatchingHostExcept(InterfaceInfo *currentInfo, Matcher& hostMatcher, cModule *exceptModule);
     void ensureConfigurationComputed(L2Topology& topology);
     virtual Topology::Link *findLinkOut(Node *node, int gateId);
+    /**
+     * Returns the default port path cost recommended for the speed of the link
+     * attached to the given interface (IEEE 802.1D-2004, Table 17-3).
+     */
+    virtual unsigned int getRecommendedLinkCost(Node *node, NetworkInterface *networkInterface);
     void configureInterface(InterfaceInfo *interfaceInfo);
 
   public:
