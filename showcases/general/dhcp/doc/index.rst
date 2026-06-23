@@ -452,11 +452,11 @@ sends a DHCPREQUEST directly to the server, which replies with a DHCPACK:
    window:   record sim-time ~30s → ~33s (express-run to ~30s; built-in
              Qtenv message animations are the visualization channel)
    anim:     playback_speed=1, animation_enabled=true (default Qtenv setting)
-   capture:  fps=10, crop_area=with_padding; recording crop_rect was 732×482,
-             then PIL-cropped to 540×482 to drop the visualizer/configurator/
-             scenarioManager icon column on the left
-   encode:   ffmpeg trim=23.5:25, setpts=5*PTS (slow ×5) -vcodec libx264
-             -pix_fmt yuv420p — focuses on the renewal cluster at the end
+   capture:  fps=10, crop_area=with_padding; recording crop_rect was 732×482
+             (the natural with_padding bbox — same framing as basicdhcp.mp4 /
+             serverreboot.mp4 / roaming.mp4)
+   encode:   ffmpeg trim=23.1:25, setpts=3.5*PTS (slow ×3.5) -vcodec libx264
+             -pix_fmt yuv420p — output starts exactly at the first DHCPACK
    post:     none
    stamp:    recorded 2026-06, INET 4.6
 
