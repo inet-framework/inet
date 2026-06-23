@@ -524,11 +524,11 @@ def run_quic_flow_control_validation_test(test_accuracy=0.02, **kwargs):
 def get_validation_test_tasks(**kwargs):
     """
     Returns multiple validation test tasks matching the provided filter criteria. The returned tasks can be run by
-    calling the :py:meth:`run <inet.common.task.MultipleTasks.run>` method.
+    calling the :py:meth:`run <opp_repl.common.task.MultipleTasks.run>` method.
 
     Parameters:
         kwargs (dict):
-            The filter criteria parameters are inherited from the :py:meth:`get_simulation_tasks <inet.simulation.task.get_simulation_tasks>` method.
+            The filter criteria parameters are inherited from the :py:meth:`get_simulation_tasks <opp_repl.simulation.task.get_simulation_tasks>` method.
 
     Returns (:py:class:`MultipleTestTasks`):
         an object that contains a list of :py:class:`ValidationTestTask` objects matching the provided filter criteria.
