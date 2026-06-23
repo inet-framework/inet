@@ -7,7 +7,6 @@ import shlex
 
 from opp_repl import *
 from inet.common import *
-from inet.project.inet import *
 from inet.test.fingerprint.task import *
 
 __sphinx_mock__ = True # ignore this module in documentation
@@ -72,7 +71,7 @@ def update_correct_fingerprints_from_csv(csv_file, correct_fingerprints, filter=
     return entries
 
 def update_correct_fingerprints_from_csvs(**kwargs):
-    correct_fingerprints = get_correct_fingerprint_store(inet_project)
-    for csv_file in glob.glob(inet_project.get_full_path("tests/fingerprint/*.csv"), recursive=True):
+    correct_fingerprints = get_correct_fingerprint_store(get_default_simulation_project())
+    for csv_file in glob.glob(get_default_simulation_project().get_full_path("tests/fingerprint/*.csv"), recursive=True):
         update_correct_fingerprints_from_csv(csv_file, correct_fingerprints, **kwargs)
     correct_fingerprints.write()

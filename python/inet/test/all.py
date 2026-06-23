@@ -3,7 +3,6 @@ import multiprocessing
 import os
 
 from opp_repl import *
-from inet.project.inet import *
 from inet.test.feature import *
 from inet.test.fingerprint import *
 from inet.test.validation import *
@@ -13,9 +12,9 @@ __sphinx_mock__ = True # ignore this module in documentation
 _logger = logging.getLogger(__name__)
 
 class PacketTestTask(TestTask):
-    def __init__(self, simulation_project=inet_project, name="packet test", task_result_class=TestTaskResult, **kwargs):
+    def __init__(self, simulation_project=None, name="packet test", task_result_class=TestTaskResult, **kwargs):
         super().__init__(name=name, task_result_class=task_result_class, **kwargs)
-        self.simulation_project = simulation_project
+        self.simulation_project = simulation_project if simulation_project is not None else get_default_simulation_project()
 
     def get_parameters_string(self, **kwargs):
         return self.name

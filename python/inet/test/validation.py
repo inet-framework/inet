@@ -18,7 +18,6 @@ from statistics import fmean
 from omnetpp.scave.results import *
 
 from opp_repl import *
-from inet.project.inet import *
 
 _logger = logging.getLogger(__name__)
 
@@ -40,7 +39,7 @@ def compare_test_results(result1, result2, accuracy=0.01):
 # 0.6578411405295316
 def compute_frame_replication_success_rate_from_simulation_results(**kwargs):
     filter_expression = """type =~ scalar AND ((module =~ "*.destination.udp" AND name =~ packetReceived:count) OR (module =~ "*.source.udp" AND name =~ packetSent:count))"""
-    df = read_result_files(inet_project.get_full_path("tests/validation/tsn/framereplication/results/*.sca"), filter_expression=filter_expression)
+    df = read_result_files(get_default_simulation_project().get_full_path("tests/validation/tsn/framereplication/results/*.sca"), filter_expression=filter_expression)
     df = get_scalars(df)
     packetSent = float(df[df.name == "packetSent:count"].value.iloc[0])
     packetReceived = float(df[df.name == "packetReceived:count"].value.iloc[0])
@@ -110,7 +109,7 @@ def run_tsn_framereplication_validation_test(test_accuracy=0.01, **kwargs):
 # Flow 8, Best Effort  34913.16
 def compute_asynchronousshaper_icct_endtoend_delay_from_simulation_results(**kwargs):
     filter_expression = """type =~ scalar AND name =~ meanBitLifeTimePerPacket:histogram:max"""
-    df = read_result_files(inet_project.get_full_path("tests/validation/tsn/trafficshaping/asynchronousshaper/icct/results/*.sca"), filter_expression=filter_expression, include_fields_as_scalars=True)
+    df = read_result_files(get_default_simulation_project().get_full_path("tests/validation/tsn/trafficshaping/asynchronousshaper/icct/results/*.sca"), filter_expression=filter_expression, include_fields_as_scalars=True)
     df = get_scalars(df)
     df["name"] = df["name"].map(lambda name: re.sub(r".*(min|max)", "\\1", name))
     df["module"] = df["module"].map(lambda name: re.sub(r".*N6.app\[[0-4]\].*", "Flow 4, Class A", name))
@@ -156,7 +155,7 @@ def run_tsn_trafficshaping_asynchronousshaper_icct_validation_test(**kwargs):
 # Medium    535.939  247.258720   88.259  106.588325
 def compute_asynchronousshaper_core4inet_endtoend_delay_from_simulation_results(**kwargs):
     filter_expression = """type =~ scalar AND (name =~ meanBitLifeTimePerPacket:histogram:min OR name =~ meanBitLifeTimePerPacket:histogram:max OR name =~ meanBitLifeTimePerPacket:histogram:mean OR name =~ meanBitLifeTimePerPacket:histogram:stddev)"""
-    df = read_result_files(inet_project.get_full_path("tests/validation/tsn/trafficshaping/asynchronousshaper/core4inet/results/*.sca"), filter_expression=filter_expression, include_fields_as_scalars=True)
+    df = read_result_files(get_default_simulation_project().get_full_path("tests/validation/tsn/trafficshaping/asynchronousshaper/core4inet/results/*.sca"), filter_expression=filter_expression, include_fields_as_scalars=True)
     df = get_scalars(df)
     df["name"] = df["name"].map(lambda name: re.sub(r".*(min|max|mean|stddev)", "\\1", name))
     df["module"] = df["module"].map(lambda name: re.sub(r".*app\[0\].*", "Best effort", name))
@@ -171,7 +170,7 @@ def compute_asynchronousshaper_core4inet_endtoend_delay_from_simulation_results(
 # 2.0
 def compute_asynchronousshaper_core4inet_max_queuelength_from_simulation_results(**kwargs):
     filter_expression = """type =~ scalar AND module =~ \"*.switch.eth[4].macLayer.queue.queue[5..7]\" AND name =~ queueLength:max"""
-    df = read_result_files(inet_project.get_full_path("tests/validation/tsn/trafficshaping/asynchronousshaper/core4inet/results/*.sca"), filter_expression=filter_expression, include_fields_as_scalars=True)
+    df = read_result_files(get_default_simulation_project().get_full_path("tests/validation/tsn/trafficshaping/asynchronousshaper/core4inet/results/*.sca"), filter_expression=filter_expression, include_fields_as_scalars=True)
     df = get_scalars(df)
     return numpy.max(df["value"])
 
@@ -223,7 +222,7 @@ def run_tsn_trafficshaping_asynchronousshaper_core4inet_validation_test(test_acc
 # Medium    535.939  247.258720   88.259  106.588325
 def compute_creditbasedshaper_endtoend_delay_from_simulation_results(**kwargs):
     filter_expression = """type =~ scalar AND (name =~ meanBitLifeTimePerPacket:histogram:min OR name =~ meanBitLifeTimePerPacket:histogram:max OR name =~ meanBitLifeTimePerPacket:histogram:mean OR name =~ meanBitLifeTimePerPacket:histogram:stddev)"""
-    df = read_result_files(inet_project.get_full_path("tests/validation/tsn/trafficshaping/creditbasedshaper/results/*.sca"), filter_expression=filter_expression, include_fields_as_scalars=True)
+    df = read_result_files(get_default_simulation_project().get_full_path("tests/validation/tsn/trafficshaping/creditbasedshaper/results/*.sca"), filter_expression=filter_expression, include_fields_as_scalars=True)
     df = get_scalars(df)
     df["name"] = df["name"].map(lambda name: re.sub(r".*(min|max|mean|stddev)", "\\1", name))
     df["module"] = df["module"].map(lambda name: re.sub(r".*app\[0\].*", "Best effort", name))
@@ -238,7 +237,7 @@ def compute_creditbasedshaper_endtoend_delay_from_simulation_results(**kwargs):
 # 2.0
 def compute_creditbasedshaper_max_queuelength_from_simulation_results(**kwargs):
     filter_expression = """type =~ scalar AND module =~ \"*.switch.eth[4].macLayer.queue.queue[5..7]\" AND name =~ queueLength:max"""
-    df = read_result_files(inet_project.get_full_path("tests/validation/tsn/trafficshaping/creditbasedshaper/results/*.sca"), filter_expression=filter_expression, include_fields_as_scalars=True)
+    df = read_result_files(get_default_simulation_project().get_full_path("tests/validation/tsn/trafficshaping/creditbasedshaper/results/*.sca"), filter_expression=filter_expression, include_fields_as_scalars=True)
     df = get_scalars(df)
     return numpy.max(df["value"])
 
@@ -313,7 +312,7 @@ def _quic_get_throughput_from_vec_file(file, module_name, start, end):
     return tp
 
 def compute_quic_link_utilization_from_simulation_results(**kwargs):
-    results_path = inet_project.get_full_path("examples/quic/link_utilization/results/")
+    results_path = get_default_simulation_project().get_full_path("examples/quic/link_utilization/results/")
     bandwidth = 10  # Mb/s
     mtus = ['1280', '1452', '1500', '9000']  # B
     start = 4
@@ -360,7 +359,7 @@ def run_quic_link_utilization_validation_test(test_accuracy=0.02, **kwargs):
 # QUIC throughput packet loss test
 
 def compute_quic_throughput_packet_loss_from_simulation_results(**kwargs):
-    results_path = inet_project.get_full_path("examples/quic/throughput_packet_loss/results/throughput_validation_")
+    results_path = get_default_simulation_project().get_full_path("examples/quic/throughput_packet_loss/results/throughput_validation_")
     ps = [".008", ".01", ".02"]
     rtts_measured = [20, 40, 60]
     start = 4
@@ -408,7 +407,7 @@ def run_quic_throughput_packet_loss_validation_test(test_accuracy=0.15, **kwargs
 # QUIC shared link test
 
 def compute_quic_shared_link_from_simulation_results(**kwargs):
-    results_path = inet_project.get_full_path("examples/quic/shared_link/results/")
+    results_path = get_default_simulation_project().get_full_path("examples/quic/shared_link/results/")
     t0 = 3
     t1 = 13
     senders = 2
@@ -461,7 +460,7 @@ def run_quic_shared_link_validation_test(test_accuracy=0.05, **kwargs):
 # QUIC flow control limited test
 
 def compute_quic_flow_control_from_simulation_results(**kwargs):
-    results_path = inet_project.get_full_path("examples/quic/flow_control_limited/results/flow_control_validation_")
+    results_path = get_default_simulation_project().get_full_path("examples/quic/flow_control_limited/results/flow_control_validation_")
     rtts = [10, 20]
     initial_max_data_sizes = [65, 100, 140]
     start = 3

@@ -8,7 +8,6 @@ import subprocess
 import xml
 
 from opp_repl import *
-from inet.project.inet import *
 
 # TODO force at least setting up interactive/emulation simulations
 # TODO add ifdefs around includes in C++ where the dependency is meant to be optional

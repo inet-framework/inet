@@ -13,7 +13,6 @@ import re
 import sys
 
 from opp_repl import *
-from inet.project.inet import *
 
 _logger = logging.getLogger(__name__)
 all_fingerprint_ingredients = ["tplx", "~tNl", "~tND", "tyf"]
@@ -57,7 +56,9 @@ class FingerprintTestTaskResult(SimulationTestTaskResult):
         if matches_filter(self.result, test_result_filter, exclude_test_result_filter, True):
             print(self.get_description(complete_error_message=complete_error_message), file=output_stream)
 
-    def run_baseline_fingerprint_test(self, baseline_simulation_project=inet_baseline_project, **kwargs):
+    def run_baseline_fingerprint_test(self, baseline_simulation_project=None, **kwargs):
+        if baseline_simulation_project is None:
+            baseline_simulation_project = get_simulation_project("inet-baseline")
         simulation_task = self.simulation_result.simulation_task
         simulation_config = self.simulation_result.simulation_task.simulation_config
         multiple_test_tasks = get_fingerprint_test_tasks(simulation_project=baseline_simulation_project, ingredients_list=[self.task.ingredients], full_match=True,
