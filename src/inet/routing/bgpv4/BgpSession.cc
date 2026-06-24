@@ -181,6 +181,36 @@ void BgpSession::sendUpdateMessage(std::vector<BgpUpdatePathAttributes *>& conte
     _updateMsgSent++;
 }
 
+void BgpSession::sendUpdateMessage(std::vector<BgpUpdatePathAttributes *>& content)
+{
+    // MP-BGP UPDATE (RFC 4760): reachability rides in an MP_REACH_NLRI path attribute, so the
+    // legacy NLRI field is left empty.
+    const auto& updateMsg = makeShared<BgpUpdateMessage>();
+
+    updateMsg->setWithDrawnRoutesLength(0);
+
+    size_t attrLength = 0;
+    updateMsg->setPathAttributesArraySize(content.size());
+    for (size_t i = 0; i < content.size(); i++) {
+        attrLength += computePathAttributeBytes(*content[i]);
+        updateMsg->setPathAttributes(i, content[i]);
+    }
+    updateMsg->setTotalPathAttributeLength(attrLength);
+    updateMsg->addChunkLength(B(attrLength));
+    updateMsg->setTotalLength(updateMsg->getChunkLength().get<B>());
+
+    EV_INFO << "Sending BGP Update message to " << _info.peerAddr.str()
+            << " on interface " << _info.linkIntf->getInterfaceName()
+            << "[" << _info.linkIntf->getInterfaceId() << "] with contents:\n";
+    bgpRouter.printUpdateMessage(*updateMsg);
+
+    Packet *pk = new Packet("BgpUpdate");
+    pk->insertAtFront(updateMsg);
+
+    _info.socket->send(pk);
+    _updateMsgSent++;
+}
+
 void BgpSession::sendNotificationMessage()
 {
     // TODO

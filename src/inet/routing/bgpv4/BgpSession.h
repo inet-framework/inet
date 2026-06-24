@@ -76,6 +76,7 @@ public:
 
     void sendOpenMessage();
     void sendUpdateMessage(std::vector<BgpUpdatePathAttributes *>& content, BgpUpdateNlri& nlri);
+    void sendUpdateMessage(std::vector<BgpUpdatePathAttributes *>& content); // MP-BGP UPDATE (no legacy NLRI)
     void sendNotificationMessage();
     void sendKeepAliveMessage();
 

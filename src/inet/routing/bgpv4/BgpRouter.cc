@@ -561,8 +561,23 @@ void BgpRouter::processMessage(const BgpUpdateMessage& msg)
 
     BgpRouteInfo *entry = createBgpRoutingTableEntry();
     entry->setLocalPreference(bgpModule->par("localPreference").intValue());
-    entry->setDestination(msg.getNlri(0).prefix);
-    entry->setPrefixLength(msg.getNlri(0).length);
+    if (isIpv6()) {
+        // RFC 4760: IPv6 reachability and the next hop arrive in MP_REACH_NLRI, not the legacy fields
+        for (size_t i = 0; i < msg.getPathAttributesArraySize(); i++) {
+            if (msg.getPathAttributes(i)->getTypeCode() == BgpUpdateAttributeTypeCode::MP_REACH_NLRI) {
+                auto& mp = *check_and_cast<const BgpUpdatePathAttributesMpReachNlri *>(msg.getPathAttributes(i));
+                if (mp.getNlriArraySize() > 0) {
+                    entry->setDestination(mp.getNlri(0).prefix);
+                    entry->setPrefixLength(mp.getNlri(0).length);
+                }
+                entry->setNextHop(mp.getNextHop());
+            }
+        }
+    }
+    else {
+        entry->setDestination(msg.getNlri(0).prefix);
+        entry->setPrefixLength(msg.getNlri(0).length);
+    }
 
     for (size_t i = 0; i < msg.getPathAttributesArraySize(); i++) {
         if (msg.getPathAttributes(i)->getTypeCode() == BgpUpdateAttributeTypeCode::AS_PATH) {
@@ -784,7 +799,6 @@ void BgpRouter::updateSendProcess(BgpProcessResult type, SessionId sessionIndex,
             type == ROUTE_DESTINATION_CHANGED ||
             type == NEW_SESSION_ESTABLISHED)
         {
-            BgpUpdateNlri nlri;
             std::vector<BgpUpdatePathAttributes *> content;
 
             unsigned int nbAS = entry->getASCount();
@@ -823,23 +837,48 @@ void BgpRouter::updateSendProcess(BgpProcessResult type, SessionId sessionIndex,
             }
             asPath->setLength(2 + 2 * asPath->getValue(0).getAsValueArraySize());
 
-            auto nextHopAttr = new BgpUpdatePathAttributesNextHop;
-            content.push_back(nextHopAttr);
-            if (sType == EGP || _bgpSessions[sessionIndex]->getNextHopSelf()) {
-                NetworkInterface *iftEntry = (elem).second->getLinkIntf();
-                nextHopAttr->setValue(iftEntry->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
+            // next hop: our own address on the link for EGP / next-hop-self, else the learned next hop
+            L3Address nextHop = (sType == EGP || _bgpSessions[sessionIndex]->getNextHopSelf())
+                ? getInterfaceAddress((elem).second->getLinkIntf())
+                : entry->getNextHopAsGeneric();
+
+            if (isIpv6()) {
+                // RFC 4760: carry the IPv6 next hop + reachability in MP_REACH_NLRI; ORIGIN stays
+                // a normal attribute. The legacy NEXT_HOP attribute and NLRI field are not used.
+                auto originAttr = new BgpUpdatePathAttributesOrigin;
+                content.push_back(originAttr);
+                originAttr->setValue((BgpSessionType)entry->getPathType());
+
+                auto mpReach = new BgpUpdatePathAttributesMpReachNlri();
+                mpReach->setAfi(2);  // IPv6
+                mpReach->setSafi(1); // unicast
+                mpReach->setNextHop(nextHop);
+                mpReach->setNextHopLength(16);
+                BgpUpdateNlri6 nlri6;
+                nlri6.prefix = entry->getDestinationAsGeneric().getPrefix(entry->getPrefixLength());
+                nlri6.length = entry->getPrefixLength();
+                mpReach->setNlriArraySize(1);
+                mpReach->setNlri(0, nlri6);
+                mpReach->setLength(computePathAttributeBytes(*mpReach) - 3); // attribute value length (1-octet length field)
+                content.push_back(mpReach);
+
+                (elem).second->sendUpdateMessage(content);
             }
-            else
-                nextHopAttr->setValue(entry->getNextHopAsGeneric().toIpv4());
+            else {
+                auto nextHopAttr = new BgpUpdatePathAttributesNextHop;
+                content.push_back(nextHopAttr);
+                nextHopAttr->setValue(nextHop.toIpv4());
 
-            auto originAttr = new BgpUpdatePathAttributesOrigin;
-            content.push_back(originAttr);
-            originAttr->setValue((BgpSessionType)entry->getPathType());
+                auto originAttr = new BgpUpdatePathAttributesOrigin;
+                content.push_back(originAttr);
+                originAttr->setValue((BgpSessionType)entry->getPathType());
 
-            nlri.prefix = entry->getDestinationAsGeneric().getPrefix(entry->getPrefixLength()).toIpv4();
-            nlri.length = (unsigned char)entry->getPrefixLength();
+                BgpUpdateNlri nlri;
+                nlri.prefix = entry->getDestinationAsGeneric().getPrefix(entry->getPrefixLength()).toIpv4();
+                nlri.length = (unsigned char)entry->getPrefixLength();
 
-            (elem).second->sendUpdateMessage(content, nlri);
+                (elem).second->sendUpdateMessage(content, nlri);
+            }
         }
     }
 }
