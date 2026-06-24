@@ -440,8 +440,10 @@ sends a DHCPREQUEST directly to the server, which replies with a DHCPACK:
    capture:  fps=10, crop_area=with_padding; recording crop_rect was 732×482
              (the natural with_padding bbox — same framing as basicdhcp.mp4 /
              serverreboot.mp4 / roaming.mp4)
-   encode:   ffmpeg trim=23.1:25, setpts=3.5*PTS (slow ×3.5) -vcodec libx264
-             -pix_fmt yuv420p — output starts exactly at the first DHCPACK
+   encode:   ffmpeg trim=17:25, setpts=3*PTS (slow ×3) -vcodec libx264
+             -pix_fmt yuv420p — output opens on client[2]'s ARP request
+             (first activity of the renewal cluster) and runs through all
+             three clients' ARP→DHCPREQUEST→DHCPACK pairs (~24 s playback)
    post:     none
    stamp:    recorded 2026-06, INET 4.6
 
