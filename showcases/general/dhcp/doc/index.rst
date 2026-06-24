@@ -288,61 +288,46 @@ The following sequence chart shows the DORA exchange (time is non-linear):
    :align: center
 
 The sequence chart shows the message *flow*; the *contents* of one of
-those messages — the server's DHCPOFFER — are shown below in Qtenv's
-**packet inspector**. As the offer travels down the protocol stack each
-layer wraps it, so on the wire it is a complete Ethernet frame. The
-inspector's ``content`` field shows that frame as a ``SequenceChunk``
-whose ``chunks`` are the protocol layers, one nested inside the next:
+those messages — the server's DHCPOFFER ``DhcpMessage`` — are shown
+below in Qtenv's **packet inspector**:
 
 .. figure:: media/dhcp_offer_frame.png
    :align: center
 
-From outermost to innermost: an ``EthernetPhyHeader`` and
-``EthernetMacHeader`` (a broadcast ``dest``, since the client has no
-address yet, from the server's MAC), an ``Ipv4Header`` (from the server's
-192.168.1.1 to the 255.255.255.255 broadcast), a ``UdpHeader`` (source
-port 67 to destination port 68), the ``DhcpMessage`` itself (``op`` = 2,
-BOOTREPLY, ``yiaddr`` = 192.168.1.10), and an ``EthernetFcs`` trailer.
-Each chunk can be expanded further: drilling into the ``DhcpMessage``
-reveals the DHCP fields and ``options`` — the subnet mask, the gateway
-(``router`` option), the lease time (3600 s), the T1/T2 renewal/rebinding
-timers (1800 s / 3150 s) and the server identifier (192.168.1.1) that the
-offer hands the client.
+``op`` = 2 marks the message as a BOOTREPLY (the server-to-client
+direction). ``yiaddr`` = 192.168.1.10 is the address being offered;
+``giaddr`` = 192.168.1.1 echoes the server's gateway hint; and
+``chaddr`` carries the client's MAC, which the server uses as the key
+into its lease table. The ``options`` field (collapsed in the figure)
+holds the subnet mask, the ``router`` option (gateway), the lease time
+(3600 s), the T1/T2 renewal/rebinding timers (1800 s / 3150 s) and the
+server identifier (192.168.1.1) that the offer hands the client.
 
 ..
    FIGURE RECIPE (redo via the "omnetpp-mcp-sim" skill)
-   type:     inspector (packet content / chunks)
+   type:     inspector (DhcpMessage fields)
    config:   BasicDHCP                 # ../omnetpp.ini
    seed:     default
-   shows:    the server's first DHCPOFFER as a complete Ethernet frame in
-             Qtenv's object inspector — the `content` (SequenceChunk)
-             `chunks[6]`: EthernetPhyHeader, EthernetMacHeader, Ipv4Header,
-             UdpHeader, DhcpMessage (yiaddr=192.168.1.10), EthernetFcs, each
-             chunk at its summary line. Cropped to the chunks band — the
-             packet/chunk metadata rows above are left out.
-   anchor:   server's first DHCPOFFER, caught as the EthernetSignal in flight
-             to switch.eth[0].mac at ~t=1.0977s; the frame's IPv4 src is the
-             server's 192.168.1.1 and the DhcpMessage's yiaddr is 192.168.1.10.
-             If those move, the pool/topology changed.
-   capture:  the full frame only exists in flight (inside the EthernetSignal),
-             and this Qtenv build exposes no logged-packet buffer, so it is
-             caught live. Needs execute_cpp, so launch under opp_sandbox with
-             CPLUS_INCLUDE_PATH set to the Qt6 include dirs (so execute_cpp can
-             #include <QTreeView>). Then:
-             1. set_stop_condition (before_event) firing when the next event is
-                an inet::physicallayer::EthernetSignal named "DHCPOFFER";
-                run_simulation stops with the signal still in the FES.
-             2. execute_cpp: find that signal in the FES, take its
-                getEncapsulatedPacket() (the inet::Packet whole frame), dup() it
-                and re-parent the copy onto dhcpServer (cSoftOwner::take, reached
-                via a derived-class pointer-to-member) for an inspectable path.
-             3. open_inspector(type=object) on the copy, then execute_cpp drives
-                its QTreeView: collapseAll(), expand `content` then its `chunks`
-                node (chunk children left collapsed at their summaries).
-             4. get_inspector_screenshot (was 1080 wide, to fit the chunk
-                summaries incl. DhcpMessage's yiaddr), then PIL-crop to just the
-                `chunks[6]` band (its header through EthernetFcs), dropping the
-                packet/chunk metadata rows above (was ~1036x123).
+   shows:    the protocol fields of the server's first DHCPOFFER —
+             op=BOOTREPLY, htype/hlen/hops/xid/secs/broadcast/reserved,
+             then ciaddr/yiaddr=192.168.1.10/giaddr=192.168.1.1/chaddr=
+             client[0]'s MAC, sname/file (empty), options (collapsed).
+             One row per DHCP field; chunk metadata (id, raw bin, …) above
+             these rows is cropped out.
+   anchor:   server's first DHCPOFFER at ~t=1.0977s. yiaddr should be
+             192.168.1.10 and chaddr should be client[0]'s MAC; if either
+             moves, the pool/topology changed.
+   capture:  the dissector commit (see DHCP in INET) populates the Packet's
+             chunks list, so the inspector now shows the protocol fields
+             via list_logged_packets without opp_sandbox+execute_cpp:
+             1. run_simulation(mode='normal', time_limit='1.0977s')
+             2. list_logged_packets, pick the DHCPOFFER with the highest
+                tree_id at dhcpServer.eth[0].queue (the EthernetSignal-
+                wrapped copy)
+             3. open_inspector(type=object), expand_inspector_tree(depth=5)
+             4. get_inspector_screenshot at width=900, height=10000
+             5. PIL-crop to the DhcpMessage field band (from "op = 2" row
+                through the "options" row); was 900×265
    stamp:    captured 2026-06, INET 4.6, OMNeT++ 6.4.0aipre2
 
 The interface table visualizer displays the acquired addresses:
