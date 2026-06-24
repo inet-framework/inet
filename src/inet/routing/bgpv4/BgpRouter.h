@@ -47,7 +47,7 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
     // processMessageFromTcp(). RFC 4271: a BGP speaker listens for connections on port 179.
     TcpSocket *listeningSocket = nullptr;
     SessionId _currSessionId = 0;
-    std::map<SessionId, BgpSession *> _BGPSessions;
+    std::map<SessionId, BgpSession *> _bgpSessions;
     uint32_t numEgpSessions = 0;
     uint32_t numIgpSessions = 0;
     Ipv4Address internalAddress = Ipv4Address::UNSPECIFIED_ADDRESS;
@@ -69,7 +69,7 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
     RouterId getRouterId() { return rt->getRouterId(); }
     void setAsId(AsId myAsId) { this->myAsId = myAsId; }
     AsId getAsId() { return myAsId; }
-    int getNumBgpSessions() { return _BGPSessions.size(); }
+    int getNumBgpSessions() { return _bgpSessions.size(); }
     int getNumEgpSessions() { return numEgpSessions; }
     int getNumIgpSessions() { return numIgpSessions; }
     void setDefaultConfig();
@@ -127,11 +127,11 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
     /**
      * \brief active listenSocket for a given session (used by fsm)
      */
-    void listenConnectionFromPeer(SessionId sessionID);
+    void listenConnectionFromPeer(SessionId sessionId);
     /**
      * \brief active TcpConnection for a given session (used by fsm)
      */
-    void openTcpConnectionToPeer(SessionId sessionID);
+    void openTcpConnectionToPeer(SessionId sessionId);
     /**
      * \brief RFC 4271, 9.2 : Update-Send Process / Sent or not new UPDATE messages to its peers
      */

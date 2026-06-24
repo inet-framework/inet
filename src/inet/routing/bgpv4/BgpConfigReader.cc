@@ -18,7 +18,7 @@ BgpConfigReader::BgpConfigReader(cModule *bgpModule, IInterfaceTable *ift) :
 {
 }
 
-void BgpConfigReader::loadConfigFromXML(cXMLElement *bgpConfig, BgpRouter *bgpRouter)
+void BgpConfigReader::loadConfigFromXml(cXMLElement *bgpConfig, BgpRouter *bgpRouter)
 {
     this->bgpRouter = bgpRouter;
 
@@ -64,9 +64,9 @@ void BgpConfigReader::loadConfigFromXML(cXMLElement *bgpConfig, BgpRouter *bgpRo
         unsigned int routerPeerPosition = 1;
         delayTab[3] += sessionList.size() * 2;
         for (auto it = routerInSameASList.begin(); it != routerInSameASList.end(); it++, routerPeerPosition++) {
-            SessionId newSessionID = bgpRouter->createIbgpSession(*it /*peer address*/);
+            SessionId newSessionId = bgpRouter->createIbgpSession(*it /*peer address*/);
             delayTab[3] += calculateStartDelay(routerInSameASList.size(), routerPosition, routerPeerPosition);
-            bgpRouter->setTimer(newSessionID, delayTab);
+            bgpRouter->setTimer(newSessionId, delayTab);
         }
     }
 
@@ -170,8 +170,8 @@ void BgpConfigReader::loadEbgpSessionConfig(cXMLElementList& ASConfig, cXMLEleme
             }
         }
 
-        SessionId newSessionID = bgpRouter->createEbgpSession(peerAddr.str().c_str(), externalInfo);
-        bgpRouter->setTimer(newSessionID, delayTab);
+        SessionId newSessionId = bgpRouter->createEbgpSession(peerAddr.str().c_str(), externalInfo);
+        bgpRouter->setTimer(newSessionId, delayTab);
     }
 }
 

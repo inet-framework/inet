@@ -34,9 +34,9 @@ void BgpSession::setInfo(SessionInfo info)
 {
     _info.sessionType = info.sessionType;
     _info.ASValue = info.ASValue;
-    _info.routerID = info.routerID;
+    _info.routerId = info.routerId;
     _info.peerAddr = info.peerAddr;
-    _info.sessionID = info.sessionID;
+    _info.sessionId = info.sessionId;
     _info.linkIntf = info.linkIntf;
     _info.ebgpMultihop = info.ebgpMultihop;
     _info.socket = new TcpSocket();

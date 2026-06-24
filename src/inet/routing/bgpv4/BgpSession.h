@@ -79,8 +79,8 @@ public:
     void sendNotificationMessage();
     void sendKeepAliveMessage();
 
-    void listenConnectionFromPeer() { bgpRouter.listenConnectionFromPeer(_info.sessionID); }
-    void openTcpConnectionToPeer() { bgpRouter.openTcpConnectionToPeer(_info.sessionID); }
+    void listenConnectionFromPeer() { bgpRouter.listenConnectionFromPeer(_info.sessionId); }
+    void openTcpConnectionToPeer() { bgpRouter.openTcpConnectionToPeer(_info.sessionId); }
     SessionId findAndStartNextSession(BgpSessionType type) { return bgpRouter.findNextSession(type, true); }
 
     // setters for creating and editing the information in the Bgp session:
@@ -98,7 +98,7 @@ public:
     simtime_t getKeepAliveTime() const { return _keepAliveTime; }
     void getStatistics(unsigned int *statTab);
     bool isEstablished() const { return _info.sessionEstablished; }
-    SessionId getSessionId() const { return _info.sessionID; }
+    SessionId getSessionId() const { return _info.sessionId; }
     BgpSessionType getType() const { return _info.sessionType; }
     static const std::string getTypeString(BgpSessionType sessionType);
     NetworkInterface *getLinkIntf() const { return _info.linkIntf; }
@@ -111,7 +111,7 @@ public:
     IIpv4RoutingTable *getIpRoutingTable() const { return bgpRouter.getIpRoutingTable(); }
     std::vector<BgpRoutingTableEntry *> getBgpRoutingTable() const { return bgpRouter.getBgpRoutingTable(); }
     Macho::Machine<fsm::TopState>& getFsm() const { return *_fsm; }
-    void updateSendProcess(BgpRoutingTableEntry *entry) const { return bgpRouter.updateSendProcess(NEW_SESSION_ESTABLISHED, _info.sessionID, entry); }
+    void updateSendProcess(BgpRoutingTableEntry *entry) const { return bgpRouter.updateSendProcess(NEW_SESSION_ESTABLISHED, _info.sessionId, entry); }
     bool isRouteExcluded(const Ipv4Route& rtEntry) const { return bgpRouter.isRouteExcluded(rtEntry); }
 };
 

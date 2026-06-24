@@ -22,10 +22,10 @@ typedef unsigned long SessionId;
 
 struct SessionInfo
 {
-    SessionId sessionID = 0;
+    SessionId sessionId = 0;
     BgpSessionType sessionType = INCOMPLETE;
     AsId ASValue = 0;
-    Ipv4Address routerID;
+    Ipv4Address routerId;
     Ipv4Address peerAddr;
     Ipv4Address myAddr;
     bool nextHopSelf = false;

@@ -412,15 +412,15 @@ void Established::entry()
     // if it's an IGP Session, send update message with only the BGP routes learned by EGP
 
     if (session.getType() == EGP) {
-        auto IPRoutingTable = session.getIpRoutingTable();
-        for (int i = 0; i < IPRoutingTable->getNumRoutes(); i++) {
-            const Ipv4Route *rtEntry = IPRoutingTable->getRoute(i);
+        auto ipRoutingTable = session.getIpRoutingTable();
+        for (int i = 0; i < ipRoutingTable->getNumRoutes(); i++) {
+            const Ipv4Route *rtEntry = ipRoutingTable->getRoute(i);
             if (session.isRouteExcluded(*rtEntry))
                 continue;
-            BgpRoutingTableEntry *BGPEntry = new BgpRoutingTableEntry(rtEntry);
-            BGPEntry->addAS(session._info.ASValue);
-            session.updateSendProcess(BGPEntry);
-            delete BGPEntry;
+            BgpRoutingTableEntry *bgpEntry = new BgpRoutingTableEntry(rtEntry);
+            bgpEntry->addAS(session._info.ASValue);
+            session.updateSendProcess(bgpEntry);
+            delete bgpEntry;
         }
     }
 

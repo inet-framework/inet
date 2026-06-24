@@ -150,7 +150,7 @@ void Bgp::createBgpRouter()
     // read BGP configuration
     cXMLElement *bgpConfig = par("bgpConfig");
     BgpConfigReader configReader(this, ift);
-    configReader.loadConfigFromXML(bgpConfig, bgpRouter);
+    configReader.loadConfigFromXml(bgpConfig, bgpRouter);
 
     bgpRouter->printSessionSummary();
     bgpRouter->addWatches();

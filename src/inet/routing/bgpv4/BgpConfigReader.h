@@ -30,7 +30,7 @@ class INET_API BgpConfigReader
     BgpConfigReader(cModule *bgpModule, IInterfaceTable *ift);
     virtual ~BgpConfigReader() {}
 
-    void loadConfigFromXML(cXMLElement *bgpConfig, BgpRouter *bgpRouter);
+    void loadConfigFromXml(cXMLElement *bgpConfig, BgpRouter *bgpRouter);
 
   private:
     std::vector<const char *> findInternalPeers(cXMLElementList& ASConfig);

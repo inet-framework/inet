@@ -24,7 +24,7 @@ class INET_API BgpRoutingTableEntry : public Ipv4Route
     RoutingPathType _pathType = INCOMPLETE;
     std::vector<AsId> _ASList;
     int localPreference = 0;
-    bool IBGP_learned = false;
+    bool iBgpLearned = false;
 
   public:
     BgpRoutingTableEntry(void);
@@ -39,8 +39,8 @@ class INET_API BgpRoutingTableEntry : public Ipv4Route
     AsId getAS(unsigned int index) const { return _ASList[index]; }
     int getLocalPreference(void) const { return localPreference; }
     void setLocalPreference(int l) { localPreference = l; }
-    bool isIBgpLearned(void) { return IBGP_learned; }
-    void setIBgpLearned(bool i) { IBGP_learned = i; }
+    bool isIBgpLearned(void) { return iBgpLearned; }
+    void setIBgpLearned(bool i) { iBgpLearned = i; }
     virtual std::string str() const;
 };
 
@@ -127,7 +127,7 @@ inline std::string BgpRoutingTableEntry::str() const
         out << getInterfaceName();
 
     out << " origin: " << BgpRoutingTableEntry::getPathTypeString(_pathType);
-    if (IBGP_learned)
+    if (iBgpLearned)
         out << " localPref: " << getLocalPreference();
     out << " ASlist: ";
     for (auto& element : _ASList)
