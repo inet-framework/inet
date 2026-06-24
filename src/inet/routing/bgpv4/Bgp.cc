@@ -34,6 +34,14 @@ void Bgp::initialize(int stage)
         ift.reference(this, "interfaceTableModule", true);
         rt.reference(this, "routingTableModule", true);
 
+        const char *addressFamily = par("addressFamily");
+        if (!strcmp(addressFamily, "ipv4"))
+            networkProtocol = &Protocol::ipv4;
+        else if (!strcmp(addressFamily, "ipv6"))
+            networkProtocol = &Protocol::ipv6;
+        else
+            throw cRuntimeError("Bgp: invalid addressFamily '%s' (must be 'ipv4' or 'ipv6')", addressFamily);
+
         startupTimer = new cMessage("BGP-startup");
         shutdownTimer = new cMessage("BGP-shutdown");
     }
@@ -145,7 +153,7 @@ void Bgp::removeBgpRoutes()
 void Bgp::createBgpRouter()
 {
     ASSERT(bgpRouter == nullptr);
-    bgpRouter = new BgpRouter(this, ift, rt);
+    bgpRouter = new BgpRouter(this, ift, rt, networkProtocol);
 
     // read BGP configuration
     cXMLElement *bgpConfig = par("bgpConfig");

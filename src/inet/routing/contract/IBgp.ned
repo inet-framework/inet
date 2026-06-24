@@ -16,6 +16,7 @@ moduleinterface IBgp extends IApp
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
+        string addressFamily @enum("ipv4","ipv6"); // address family this BGP instance operates on
         string ospfRoutingModule;
         @display("i=block/app");
 }

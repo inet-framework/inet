@@ -7,6 +7,7 @@
 #ifndef __INET_BGP_H
 #define __INET_BGP_H
 
+#include "inet/common/Protocol.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
@@ -23,6 +24,7 @@ class INET_API Bgp : public RoutingProtocolBase, protected cListener
   private:
     ModuleRefByPar<IIpv4RoutingTable> rt;
     ModuleRefByPar<IInterfaceTable> ift;
+    const Protocol *networkProtocol = &Protocol::ipv4; // address family this BGP instance serves (set from the addressFamily parameter)
     BgpRouter *bgpRouter = nullptr; // data structure to fill in
     cMessage *startupTimer = nullptr; // timer for delayed startup
     cMessage *shutdownTimer = nullptr; // timer for graceful (delayed) shutdown
@@ -30,6 +32,7 @@ class INET_API Bgp : public RoutingProtocolBase, protected cListener
   public:
     Bgp();
     virtual ~Bgp();
+    bool isIpv6() const { return networkProtocol == &Protocol::ipv6; }
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

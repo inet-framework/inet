@@ -7,6 +7,7 @@
 #ifndef __INET_BGPROUTER_H
 #define __INET_BGPROUTER_H
 
+#include "inet/common/Protocol.h"
 #include "inet/common/socket/SocketMap.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
@@ -29,6 +30,8 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
     IInterfaceTable *ift = nullptr;
     IIpv4RoutingTable *rt = nullptr;
     cSimpleModule *bgpModule = nullptr;
+    const Protocol *networkProtocol = &Protocol::ipv4; // address family this BGP router serves
+
     ospfv2::Ospfv2 *ospfModule = nullptr;
     AsId myAsId = 0;
     bool redistributeInternal = false;
@@ -63,9 +66,10 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
 
   public:
     enum { TCP_PORT = 179 };
-    BgpRouter(cSimpleModule *bgpModule, IInterfaceTable *ift, IIpv4RoutingTable *rt);
+    BgpRouter(cSimpleModule *bgpModule, IInterfaceTable *ift, IIpv4RoutingTable *rt, const Protocol *networkProtocol);
     virtual ~BgpRouter();
 
+    bool isIpv6() const { return networkProtocol == &Protocol::ipv6; }
     RouterId getRouterId() { return rt->getRouterId(); }
     void setAsId(AsId myAsId) { this->myAsId = myAsId; }
     AsId getAsId() { return myAsId; }

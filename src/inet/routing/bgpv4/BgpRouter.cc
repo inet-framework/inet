@@ -14,11 +14,12 @@
 namespace inet {
 namespace bgp {
 
-BgpRouter::BgpRouter(cSimpleModule *bgpModule, IInterfaceTable *ift, IIpv4RoutingTable *rt)
+BgpRouter::BgpRouter(cSimpleModule *bgpModule, IInterfaceTable *ift, IIpv4RoutingTable *rt, const Protocol *networkProtocol)
 {
     this->bgpModule = bgpModule;
     this->ift = ift;
     this->rt = rt;
+    this->networkProtocol = networkProtocol;
 
     ospfModule = findModuleFromPar<ospfv2::Ospfv2>(bgpModule->par("ospfRoutingModule"), bgpModule);
 }
