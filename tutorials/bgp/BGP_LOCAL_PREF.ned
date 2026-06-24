@@ -1,6 +1,5 @@
 package inet.tutorials.bgp;
 
-import inet.common.packet.recorder.PcapRecorder;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
 import inet.node.ethernet.Eth100M;
@@ -22,9 +21,6 @@ network BGP_LOCAL_PREF
         }
         routingTableRecorder: RoutingTableRecorder {
             @display("p=426,43");
-        }
-        pcapRecorder: PcapRecorder {
-            @display("p=636,42");
         }
         RB1: Router {
             @display("p=730.935,58.275");

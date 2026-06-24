@@ -4,7 +4,6 @@
 
 package inet.tutorials.stp;
 
-import inet.common.packet.recorder.PcapRecorder;
 import inet.common.scenario.ScenarioManager;
 import inet.linklayer.configurator.common.L2NetworkConfigurator;
 import inet.linklayer.ieee8021d.tester.StpTester;
@@ -23,9 +22,6 @@ network LoopNetwork
     submodules:
         visualizer: IntegratedMultiCanvasVisualizer {
             @display("p=100,351;is=s");
-        }
-        pcapRecorder: PcapRecorder {
-            @display("p=100,415;is=s");
         }
         switch1: EthernetSwitch {
             @display("p=300,200");
@@ -68,9 +64,6 @@ network SwitchNetwork
             @display("p=100,100,col,60;g=left;is=s");
         }
         visualizer: IntegratedMultiCanvasVisualizer {
-            @display("p=100,100,col,60;g=left;is=s");
-        }
-        pcapRecorder: PcapRecorder {
             @display("p=100,100,col,60;g=left;is=s");
         }
         switch1: EthernetSwitch {
@@ -211,9 +204,6 @@ network BottleneckNetwork
         }
         visualizer: IntegratedMultiCanvasVisualizer {
             @display("p=50,260;is=s");
-        }
-        pcapRecorder: PcapRecorder {
-            @display("p=50,330;is=s");
         }
 
         // Left cluster
