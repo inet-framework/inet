@@ -78,8 +78,7 @@ void Connect::HoldTimer_Expires()
     // - changes its state to Idle.
     session._info.sessionEstablished = false;
     setState<Idle>();
-    if (session.isLifecycleNode())
-        session.startConnection();
+    session.scheduleReconnect();
 }
 
 void Connect::KeepaliveTimer_Expires()
@@ -158,8 +157,7 @@ void Active::HoldTimer_Expires()
     // - changes its state to Idle.
     session._info.sessionEstablished = false;
     setState<Idle>();
-    if (session.isLifecycleNode())
-        session.startConnection();
+    session.scheduleReconnect();
 }
 
 void Active::KeepaliveTimer_Expires()
@@ -404,6 +402,8 @@ void Established::entry()
 
     BgpSession& session = TopState::box().getModule();
     session._info.sessionEstablished = true;
+    // We are connected: drop any pending reconnect so it cannot disrupt this session later.
+    session.cancelReconnect();
 
     // if it's an EGP Session, send update messages with all routing information to BGP peer
     // if it's an IGP Session, send update message with only the BGP routes learned by EGP
@@ -448,8 +448,7 @@ void Established::ConnectRetryTimer_Expires()
     // - changes its state to Idle.
     session._info.sessionEstablished = false;
     setState<Idle>();
-    if (session.isLifecycleNode())
-        session.startConnection();
+    session.scheduleReconnect();
 }
 
 void Established::HoldTimer_Expires()
@@ -467,8 +466,7 @@ void Established::HoldTimer_Expires()
     // - changes its state to Idle.
     session._info.sessionEstablished = false;
     setState<Idle>();
-    if (session.isLifecycleNode())
-        session.startConnection();
+    session.scheduleReconnect();
 }
 
 void Established::KeepaliveTimer_Expires()
@@ -493,8 +491,7 @@ void Established::TcpConnectionFails()
     ++session._connectRetryCounter;
     session._info.sessionEstablished = false;
     setState<Idle>();
-    if (session.isLifecycleNode())
-        session.startConnection();
+    session.scheduleReconnect();
 }
 
 void Established::OpenMsgEvent()

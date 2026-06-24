@@ -83,6 +83,28 @@ void BgpSession::startConnection()
     _ptrStartEvent->setContextPointer(this);
 }
 
+void BgpSession::scheduleReconnect()
+{
+    // Re-establish a dropped session after the ConnectRetryTimer interval (RFC 4271), NOT at
+    // the same instant as the loss. An instant reconnect makes two peers that both lost the
+    // session ping-pong: each re-opens, collides with the other, drops, and re-opens again at
+    // (nearly) the same simtime — a livelock that never reconverges. The delay spaces the
+    // retries so the session can actually come back up.
+    if (_ptrStartEvent == nullptr)
+        _ptrStartEvent = new cMessage("BGP Start", START_EVENT_KIND);
+    if (!_ptrStartEvent->isScheduled())
+        bgpRouter.getScheduleAt(simTime() + _connectRetryTime, _ptrStartEvent);
+    _ptrStartEvent->setContextPointer(this);
+}
+
+void BgpSession::cancelReconnect()
+{
+    // Once (re-)established, drop any pending reconnect so a stale Start event cannot later
+    // disrupt the live session.
+    if (_ptrStartEvent != nullptr)
+        bgpRouter.getCancelEvent(_ptrStartEvent);
+}
+
 void BgpSession::restartsHoldTimer()
 {
     if (_holdTime != 0) {
