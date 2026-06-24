@@ -314,6 +314,28 @@ void BgpRouter::processMessageFromTCP(cMessage *msg)
             delete msg;
             return;
         }
+
+        // RFC 4271 §6.8 connection collision detection: if we already have a live connection to
+        // this peer, the peer connected too — keep exactly one. The BGP Identifier is the
+        // connection's local address (see BgpSession::sendOpenMessage): ours is our source
+        // address for the session, the peer's is this incoming connection's remote address
+        // (== peerAddr). The connection opened by the higher-Identifier speaker survives; both
+        // ends compute the same winner, so they agree.
+        TcpSocket *current = _BGPSessions[i]->getSocket();
+        if (current && (current->getState() == TcpSocket::CONNECTING || current->getState() == TcpSocket::CONNECTED)) {
+            Ipv4Address ourId = (_BGPSessions[i]->getType() == EGP)
+                ? _BGPSessions[i]->getLinkIntf()->getProtocolData<Ipv4InterfaceData>()->getIPAddress()
+                : internalAddress;
+            if (ourId.getInt() > peerAddr.getInt()) {
+                // we win: keep our connection, reject the peer's colliding one
+                socket->abort();
+                delete socket;
+                delete msg;
+                return;
+            }
+            // else peer wins: fall through and adopt the incoming connection (dropping ours)
+        }
+
         socket->setCallback(this);
         socket->setUserData((void *)(uintptr_t)i);
 
