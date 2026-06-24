@@ -372,7 +372,8 @@ void BgpRouter::openTCPConnectionToPeer(SessionId sessionID)
         NetworkInterface *intfEntry = _BGPSessions[sessionID]->getLinkIntf();
         if (intfEntry == nullptr)
             throw cRuntimeError("No configuration interface for external peer address: %s", _BGPSessions[sessionID]->getPeerAddr().str().c_str());
-        socket->bind(intfEntry->getProtocolData<Ipv4InterfaceData>()->getIPAddress(), 0);
+        // note: port=-1 stands for ephemeral port (=0 would be literally port 0)
+        socket->bind(intfEntry->getProtocolData<Ipv4InterfaceData>()->getIPAddress(), -1);
 
         int ebgpMH = _BGPSessions[sessionID]->getEbgpMultihop();
         if (ebgpMH > 1)
@@ -391,7 +392,8 @@ void BgpRouter::openTCPConnectionToPeer(SessionId sessionID)
         _BGPSessions[sessionID]->setlinkIntf(intfEntry);
         if (internalAddress == Ipv4Address::UNSPECIFIED_ADDRESS)
             throw cRuntimeError("Internal address is not specified for router %s", bgpModule->getOwner()->getFullName());
-        socket->bind(internalAddress, 0);
+        // note: port=-1 stands for ephemeral port (=0 would be literally port 0)
+        socket->bind(internalAddress, -1);
     }
     _socketMap.addSocket(socket);
 
