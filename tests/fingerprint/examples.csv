@@ -23,14 +23,14 @@
 /examples/aodv/,                     -f omnetpp.ini -c ShortestPath -r 0,             100s,          5d58-230f/tplx;3a72-db39/~tNl;6ee6-e8f0/~tND;1950-0f81/tyf, PASS, wireless adhoc Ipv4
 /examples/aodv/,                     -f omnetpp.ini -c StaticExternal -r 0,           100s,          42b7-89e4/tplx;5708-ba01/~tNl;f8fd-9e0f/~tND;4b41-ac19/tyf, PASS, wireless adhoc Ipv4
 
-/examples/bgpv4/Bgp2RoutersInAS/,    -f omnetpp.ini -c General -r 0,                1000s,           4757-c9ec/tplx;e6f2-6a70/~tNl;8f35-a942/~tND;7487-fbd7/tyf, PASS, ospf EthernetMac Ipv4
-/examples/bgpv4/Bgp3Routers/,        -f omnetpp.ini -c General -r 0,                1000s,           d032-c461/tplx;3c7f-3b63/~tNl;c56d-472c/~tND;4ddd-904f/tyf, PASS, ospf EthernetMac Ipv4
-/examples/bgpv4/BgpCompleteTest/,    -f omnetpp.ini -c General -r 0,                1000s,           c2ce-a557/tplx;bfb9-d470/~tNl;0b70-3f55/~tND;e974-fcf0/tyf, PASS, ospf EthernetMac Ipv4
-/examples/bgpv4/BgpLifecycle/,       -f omnetpp.ini -c General -r 0,                900s,            f589-e9d2/tplx;661c-fd5e/~tNl;2108-65fa/~tND;abb4-ba42/tyf, PASS, ospf EthernetMac Ipv4 lifecycle
+/examples/bgpv4/Bgp2RoutersInAS/,    -f omnetpp.ini -c General -r 0,                1000s,           3930-48e2/tplx;5319-01b2/~tNl;6092-282c/~tND;2ec9-a2e6/tyf, PASS, ospf EthernetMac Ipv4
+/examples/bgpv4/Bgp3Routers/,        -f omnetpp.ini -c General -r 0,                1000s,           d849-ba7b/tplx;afa4-9af2/~tNl;8307-bcb7/~tND;6015-a84e/tyf, PASS, ospf EthernetMac Ipv4
+/examples/bgpv4/BgpCompleteTest/,    -f omnetpp.ini -c General -r 0,                1000s,           d9d2-57d9/tplx;92d1-a09d/~tNl;36e2-7103/~tND;092b-95fa/tyf, PASS, ospf EthernetMac Ipv4
+/examples/bgpv4/BgpLifecycle/,       -f omnetpp.ini -c General -r 0,                900s,            c23b-0a8b/tplx;63a0-dda6/~tNl;39a7-2c71/~tND;3c73-4bff/tyf, PASS, ospf EthernetMac Ipv4 lifecycle
 /examples/bgpv4/BgpOpen/,            -f omnetpp.ini -c General -r 0,                62s,             2f45-1e34/tplx;9dce-698e/~tNl;8280-a602/~tND;083d-c5af/tyf, PASS, ospf Ipv4
 /examples/bgpv4/BgpUpdate/,          -f omnetpp.ini -c General -r 0,                30s,             9552-83f7/tplx;3a06-a4f0/~tNl;62be-5688/~tND;0573-e0b4/tyf, PASS, ospf EthernetMac Ipv4
-/examples/bgpv4/BgpAndOspf/,         -f omnetpp.ini -c General -r 0,                1000s,           f2c1-f80f/tplx;5f11-7c67/~tNl;2554-996b/~tND;bcaf-62c1/tyf, PASS, ospf EthernetMac Ipv4
-/examples/bgpv4/BgpAndOspfSimple/,   -f omnetpp.ini -c General -r 0,                1000s,           7d09-7874/tplx;2379-f919/~tNl;a1b7-8b53/~tND;3fba-605f/tyf, PASS, ospf EthernetMac Ipv4
+/examples/bgpv4/BgpAndOspf/,         -f omnetpp.ini -c General -r 0,                1000s,           1e22-36e3/tplx;2b66-00b2/~tNl;430e-7064/~tND;de89-afd7/tyf, PASS, ospf EthernetMac Ipv4
+/examples/bgpv4/BgpAndOspfSimple/,   -f omnetpp.ini -c General -r 0,                1000s,           dc15-38aa/tplx;dacd-0cbd/~tNl;46d3-bcb3/~tND;8a59-2347/tyf, PASS, ospf EthernetMac Ipv4
 
 /examples/clock/,                    -f omnetpp.ini -c General -r 0,                10ms,            35c3-8325/tplx;0000-0000/~tNl;0000-0000/~tND;a4b7-bff5/tyf, PASS,
 
