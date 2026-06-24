@@ -87,7 +87,6 @@ public:
     void setNextHopSelf(bool nextHopSelf) { _info.nextHopSelf = nextHopSelf; }
     void setLocalPreference(int localPreference) { _info.localPreference = localPreference; }
     void setSocket(TcpSocket *socket) { delete _info.socket; _info.socket = socket; }
-    void setSocketListen(TcpSocket *socket) { delete _info.socketListen; _info.socketListen = socket; }
 
     // getters for accessing session information:
     simtime_t getStartEventTime() const { return _StartEventTime; }
@@ -106,7 +105,6 @@ public:
     bool getNextHopSelf() const { return _info.nextHopSelf; }
     int getLocalPreference() const { return _info.localPreference; }
     TcpSocket *getSocket() const { return _info.socket; }
-    TcpSocket *getSocketListen() const { return _info.socketListen; }
     int getEbgpMultihop() const { return _info.ebgpMultihop; }
     IIpv4RoutingTable *getIPRoutingTable() const { return bgpRouter.getIPRoutingTable(); }
     std::vector<BgpRoutingTableEntry *> getBGPRoutingTable() const { return bgpRouter.getBGPRoutingTable(); }

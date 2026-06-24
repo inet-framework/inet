@@ -34,7 +34,6 @@ struct SessionInfo
     int ebgpMultihop = 0;
     NetworkInterface *linkIntf = nullptr;
     TcpSocket *socket = nullptr;
-    TcpSocket *socketListen = nullptr;
     bool sessionEstablished = false;
 };
 

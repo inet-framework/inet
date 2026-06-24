@@ -42,6 +42,10 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
     };
     redistributeOspfType_t redistributeOspfType = {};
     SocketMap _socketMap;
+    // A single shared listening socket per router accepts all incoming BGP connections
+    // on TCP_PORT (wildcard bind) and demuxes them to sessions by peer address in
+    // processMessageFromTCP(). RFC 4271: a BGP speaker listens for connections on port 179.
+    TcpSocket *listeningSocket = nullptr;
     SessionId _currSessionId = 0;
     std::map<SessionId, BgpSession *> _BGPSessions;
     uint32_t numEgpSessions = 0;
@@ -85,7 +89,6 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
     SessionId createEbgpSession(const char *peerAddr, SessionInfo& externalInfo);
     SessionId createIbgpSession(const char *peerAddr);
     void setTimer(SessionId id, simtime_t *delayTab);
-    void setSocketListen(SessionId id);
     void addToAdvertiseList(Ipv4Address address);
     void addToPrefixList(std::string nodeName, BgpRoutingTableEntry *entry);
     void addToAsList(std::string nodeName, AsId id);

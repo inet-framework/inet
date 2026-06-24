@@ -67,7 +67,6 @@ void BgpConfigReader::loadConfigFromXML(cXMLElement *bgpConfig, BgpRouter *bgpRo
             SessionId newSessionID = bgpRouter->createIbgpSession(*it /*peer address*/);
             delayTab[3] += calculateStartDelay(routerInSameASList.size(), routerPosition, routerPeerPosition);
             bgpRouter->setTimer(newSessionID, delayTab);
-            bgpRouter->setSocketListen(newSessionID);
         }
     }
 
@@ -173,7 +172,6 @@ void BgpConfigReader::loadEbgpSessionConfig(cXMLElementList& ASConfig, cXMLEleme
 
         SessionId newSessionID = bgpRouter->createEbgpSession(peerAddr.str().c_str(), externalInfo);
         bgpRouter->setTimer(newSessionID, delayTab);
-        bgpRouter->setSocketListen(newSessionID);
     }
 }
 

@@ -27,7 +27,6 @@ BgpSession::~BgpSession()
     bgpRouter.getCancelAndDelete(_ptrHoldTimer);
     bgpRouter.getCancelAndDelete(_ptrKeepAliveTimer);
     delete _info.socket;
-    delete _info.socketListen;
     delete _fsm;
 }
 

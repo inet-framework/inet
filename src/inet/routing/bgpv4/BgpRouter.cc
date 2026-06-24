@@ -30,6 +30,8 @@ BgpRouter::~BgpRouter(void)
 
     for (auto& elem : _prefixListINOUT)
         delete elem;
+
+    delete listeningSocket;
 }
 
 void BgpRouter::printSessionSummary()
@@ -97,11 +99,10 @@ void BgpRouter::closeSessions(bool abort)
             _socketMap.removeSocket(socket);
             abort ? socket->abort() : socket->close();
         }
-        TcpSocket *socketListen = elem.second->getSocketListen();
-        if (socketListen) {
-            _socketMap.removeSocket(socketListen);
-            abort ? socketListen->abort() : socketListen->close();
-        }
+    }
+    if (listeningSocket) {
+        _socketMap.removeSocket(listeningSocket);
+        abort ? listeningSocket->abort() : listeningSocket->close();
     }
 }
 
@@ -165,12 +166,6 @@ SessionId BgpRouter::createEbgpSession(const char *peerAddr, SessionInfo& extern
 void BgpRouter::setTimer(SessionId id, simtime_t *delayTab)
 {
     _BGPSessions[id]->setTimers(delayTab);
-}
-
-void BgpRouter::setSocketListen(SessionId id)
-{
-    TcpSocket *socketListen = new TcpSocket();
-    _BGPSessions[id]->setSocketListen(socketListen);
 }
 
 void BgpRouter::setDefaultConfig()
@@ -333,31 +328,28 @@ void BgpRouter::processMessageFromTCP(cMessage *msg)
 
 void BgpRouter::listenConnectionFromPeer(SessionId sessionID)
 {
-    if (_BGPSessions[sessionID]->getSocketListen()->getState() == TcpSocket::CLOSED) {
-        // session StartDelayTime error, it's anormal that listenSocket is closed.
-        _socketMap.removeSocket(_BGPSessions[sessionID]->getSocketListen());
-        _BGPSessions[sessionID]->getSocketListen()->abort();
-        _BGPSessions[sessionID]->getSocketListen()->renewSocket();
+    // Ensure the single shared listening socket is up. One wildcard listener per router
+    // accepts all incoming BGP connections on TCP_PORT; processMessageFromTCP() demuxes
+    // accepted connections to the right session by peer address. This replaces the former
+    // per-session listeners, which collided on the shared wildcard port when several
+    // sessions reconnected at once (see plan §4 Phase 0 result).
+    if (listeningSocket == nullptr)
+        listeningSocket = new TcpSocket();
+
+    if (listeningSocket->getState() == TcpSocket::CLOSED) {
+        _socketMap.removeSocket(listeningSocket);
+        listeningSocket->abort();
+        listeningSocket->renewSocket();
     }
 
-    if (_BGPSessions[sessionID]->getSocketListen()->getState() != TcpSocket::LISTENING) {
-        _BGPSessions[sessionID]->getSocketListen()->setOutputGate(bgpModule->gate("socketOut"));
-        if (_BGPSessions[sessionID]->getType() == EGP) {
-            NetworkInterface *intf = _BGPSessions[sessionID]->getLinkIntf();
-            ASSERT(intf);
-            Ipv4Address localAddr = intf->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
-            _BGPSessions[sessionID]->getSocketListen()->bind(localAddr, TCP_PORT);
-        }
-        else
-            _BGPSessions[sessionID]->getSocketListen()->bind(TCP_PORT);
-        _BGPSessions[sessionID]->getSocketListen()->listen();
-        _socketMap.addSocket(_BGPSessions[sessionID]->getSocketListen());
+    if (listeningSocket->getState() != TcpSocket::LISTENING) {
+        listeningSocket->setOutputGate(bgpModule->gate("socketOut"));
+        listeningSocket->bind(TCP_PORT);
+        listeningSocket->listen();
+        _socketMap.addSocket(listeningSocket);
 
-        EV_DEBUG << "Start listening to incoming TCP connections on "
-                 << _BGPSessions[sessionID]->getSocketListen()->getLocalAddress()
-                 << ":" << (int)TCP_PORT
-                 << " for " << BgpSession::getTypeString(_BGPSessions[sessionID]->getType()) << " session"
-                 << " to peer " << _BGPSessions[sessionID]->getPeerAddr() << std::endl;
+        EV_DEBUG << "Start listening for incoming BGP connections on *:" << (int)TCP_PORT
+                 << " on " << bgpModule->getOwner()->getFullName() << std::endl;
     }
 }
 
@@ -422,15 +414,9 @@ void BgpRouter::socketEstablished(TcpSocket *socket)
     }
     else {
         _BGPSessions[_currSessionId]->getFSM()->TcpConnectionConfirmed();
-        _BGPSessions[_currSessionId]->getSocketListen()->abort();
     }
-
-    if (_BGPSessions[_currSessionId]->getSocketListen()->getSocketId() != connId &&
-        _BGPSessions[_currSessionId]->getType() == EGP &&
-        this->findNextSession(EGP) != static_cast<SessionId>(-1))
-    {
-        _BGPSessions[_currSessionId]->getSocketListen()->abort();
-    }
+    // Note: the shared listening socket is intentionally left listening (it is not a
+    // per-session resource and must stay up to accept connections for other sessions).
 }
 
 void BgpRouter::socketFailure(TcpSocket *socket, int code)
