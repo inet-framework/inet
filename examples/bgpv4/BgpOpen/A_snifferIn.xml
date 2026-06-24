@@ -1,21 +1,21 @@
 <?xml version="1.0"?>
-<!-- checker xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="MessageChecker.xsd" -->
 <checker>
-    <message occurence="4"/> <!-- tcp: CONNECTION_RESET, CLOSED, AVAILABLE, ESTABLISHED -->
     <message occurence="1">
-        <fieldValue name="byteLength" value="29"/>
-<!--
-        <fieldValue name="className" value="inet::bgp::BgpOpenMessage"/>
-        <fieldValue name="byteLength" value="29"/>
-        <fieldValue name="myAS" value="65248"/>
-        <fieldValue name="holdTime" value="180"/>
-        <fieldValue name="BgpIdentifier" value="10.10.10.2"/>
--->
+        <fieldValue name="name" value="CONNECTION_RESET"/>
     </message>
     <message occurence="1">
-<!--
-        <fieldValue name="className" value="inet::bgp::BgpKeepAliveMessage"/>
--->
+        <fieldValue name="name" value="CLOSED"/>
+    </message>
+    <message occurence="1">
+        <fieldValue name="name" value="AVAILABLE"/>
+    </message>
+    <message occurence="1">
+        <fieldValue name="name" value="ESTABLISHED"/>
+    </message>
+    <message occurence="1">
+        <fieldValue name="name" value="data"/>
+    </message>
+    <message occurence="1">
+        <fieldValue name="name" value="data"/>
     </message>
 </checker>

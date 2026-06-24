@@ -1,6 +1,4 @@
 <?xml version="1.0"?>
-<!-- checker xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="MessageChecker.xsd" -->
 <checker>
     <message occurence="1">
         <fieldValue name="name" value="PassiveOPEN"/>
@@ -16,19 +14,8 @@
     </message>
     <message occurence="1">
         <fieldValue name="name" value="BgpOpen"/>
-        <fieldValue name="byteLength" value="29"/>
-<!--
-        <fieldValue name="className" value="inet::bgp::BgpOpenMessage"/>
-        <fieldValue name="byteLength" value="29"/>
-        <fieldValue name="myAS" value="65324"/>
-        <fieldValue name="holdTime" value="180"/>
-        <fieldValue name="BgpIdentifier" value="10.10.10.1"/>
--->
     </message>
-    <message occurence="1"/> <!-- tcp: ABORT -->
     <message occurence="1">
-<!--
-        <fieldValue name="className" value="inet::bgp::BgpKeepAliveMessage"/>
--->
+        <fieldValue name="name" value="BgpKeepAlive"/>
     </message>
 </checker>

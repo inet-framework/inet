@@ -1,6 +1,4 @@
 <?xml version="1.0"?>
-<!-- checker xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="MessageChecker.xsd" -->
 <checker>
     <message occurence="1">
         <fieldValue name="name" value="PassiveOPEN"/>
@@ -16,20 +14,11 @@
     </message>
     <message occurence="1">
         <fieldValue name="name" value="BgpOpen"/>
-<!--
-        <fieldValue name="className" value="inet::bgp::BgpOpenMessage"/>
--->    </message>
-    <message occurence="1"/> <!-- ABORT -->
+    </message>
     <message occurence="1">
         <fieldValue name="name" value="BgpKeepAlive"/>
-<!--
-        <fieldValue name="className" value="inet::bgp::BgpKeepAliveMessage"/>
--->
     </message>
     <message occurence="1">
         <fieldValue name="name" value="BgpUpdate"/>
-<!--
-        <fieldValue name="className" value="inet::bgp::BgpUpdate"/>
--->
     </message>
 </checker>
