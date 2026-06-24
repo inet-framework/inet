@@ -521,10 +521,7 @@ void BgpRouter::processMessage(const BgpUpdateMessage& msg)
     BgpRoutingTableEntry *entry = new BgpRoutingTableEntry();
     entry->setLocalPreference(bgpModule->par("localPreference").intValue());
     entry->setDestination(msg.getNlri(0).prefix);
-
-    Ipv4Address netMask(Ipv4Address::ALLONES_ADDRESS);
-    netMask = Ipv4Address::makeNetmask(msg.getNlri(0).length);
-    entry->setNetmask(netMask);
+    entry->setPrefixLength(msg.getNlri(0).length);
 
     for (size_t i = 0; i < msg.getPathAttributesArraySize(); i++) {
         if (msg.getPathAttributes(i)->getTypeCode() == BgpUpdateAttributeTypeCode::AS_PATH) {
@@ -798,9 +795,8 @@ void BgpRouter::updateSendProcess(BgpProcessResult type, SessionId sessionIndex,
             content.push_back(originAttr);
             originAttr->setValue((BgpSessionType)entry->getPathType());
 
-            Ipv4Address netMask = entry->getNetmask();
-            nlri.prefix = entry->getDestination().doAnd(netMask);
-            nlri.length = (unsigned char)netMask.getNetmaskLength();
+            nlri.prefix = entry->getDestinationAsGeneric().getPrefix(entry->getPrefixLength()).toIpv4();
+            nlri.length = (unsigned char)entry->getPrefixLength();
 
             (elem).second->sendUpdateMessage(content, nlri);
         }
@@ -817,8 +813,8 @@ bool BgpRouter::deleteBgpRoutingEntry(BgpRoutingTableEntry *entry)
     for (auto it = bgpRoutingTable.begin();
          it != bgpRoutingTable.end(); it++)
     {
-        if (((*it)->getDestination().getInt() & (*it)->getNetmask().getInt()) ==
-            (entry->getDestination().getInt() & entry->getNetmask().getInt()))
+        if ((*it)->getDestinationAsGeneric().getPrefix((*it)->getPrefixLength()) ==
+            entry->getDestinationAsGeneric().getPrefix(entry->getPrefixLength()))
         {
             bgpRoutingTable.erase(it);
             rt->deleteRoute(entry);
@@ -832,9 +828,9 @@ bool BgpRouter::deleteBgpRoutingEntry(BgpRoutingTableEntry *entry)
 int BgpRouter::isInRoutingTable(IRoutingTable *rtTable, Ipv4Address addr)
 {
     for (int i = 0; i < rtTable->getNumRoutes(); i++) {
-        const Ipv4Route *entry = check_and_cast<const Ipv4Route *>(rtTable->getRoute(i));
-        if (Ipv4Address::maskedAddrAreEqual(addr, entry->getDestination(), entry->getNetmask())) {
-            if (isDefaultRoute(entry) && addr.getInt() != 0)
+        const IRoute *entry = rtTable->getRoute(i);
+        if (L3Address(addr).getPrefix(entry->getPrefixLength()) == entry->getDestinationAsGeneric().getPrefix(entry->getPrefixLength())) {
+            if (isDefaultRoute(entry) && !addr.isUnspecified())
                 continue;
             else
                 return i;
@@ -859,8 +855,8 @@ unsigned long BgpRouter::isInTable(std::vector<BgpRoutingTableEntry *> rtTable, 
 {
     for (unsigned long i = 0; i < rtTable.size(); i++) {
         BgpRoutingTableEntry *entryCur = rtTable[i];
-        if ((entry->getDestination().getInt() & entry->getNetmask().getInt()) ==
-            (entryCur->getDestination().getInt() & entryCur->getNetmask().getInt()))
+        if (entry->getDestinationAsGeneric().getPrefix(entry->getPrefixLength()) ==
+            entryCur->getDestinationAsGeneric().getPrefix(entryCur->getPrefixLength()))
         {
             return i;
         }
@@ -1121,11 +1117,9 @@ bool BgpRouter::isExternalAddress(const Ipv4Route& rtEntry)
     return false;
 }
 
-bool BgpRouter::isDefaultRoute(const Ipv4Route *entry) const
+bool BgpRouter::isDefaultRoute(const IRoute *entry) const
 {
-    if (entry->getDestination().getInt() == 0 && entry->getNetmask().getInt() == 0)
-        return true;
-    return false;
+    return entry->getDestinationAsGeneric().isUnspecified() && entry->getPrefixLength() == 0;
 }
 
 bool BgpRouter::isReachable(const Ipv4Address addr) const
@@ -1134,9 +1128,9 @@ bool BgpRouter::isReachable(const Ipv4Address addr) const
         return true;
 
     for (int i = 0; i < rt->getNumRoutes(); i++) {
-        Ipv4Route *route = check_and_cast<Ipv4Route *>(rt->getRoute(i));
+        IRoute *route = rt->getRoute(i);
         if (!isDefaultRoute(route) && route->getSourceType() != IRoute::BGP) {
-            if (addr.doAnd(route->getNetmask()) == route->getDestination().doAnd(route->getNetmask()))
+            if (L3Address(addr).getPrefix(route->getPrefixLength()) == route->getDestinationAsGeneric().getPrefix(route->getPrefixLength()))
                 return true;
         }
     }

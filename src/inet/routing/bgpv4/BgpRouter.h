@@ -181,7 +181,7 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
     SessionId findIdFromPeerAddr(std::map<SessionId, BgpSession *> sessions, Ipv4Address peerAddr);
     SessionId findIdFromSocketConnId(std::map<SessionId, BgpSession *> sessions, int connId);
     bool isRouteExcluded(const Ipv4Route& rtEntry);
-    bool isDefaultRoute(const Ipv4Route *entry) const;
+    bool isDefaultRoute(const IRoute *entry) const;
     bool isReachable(const Ipv4Address addr) const;
 };
 
