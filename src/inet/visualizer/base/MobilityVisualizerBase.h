@@ -63,6 +63,7 @@ class INET_API MobilityVisualizerBase : public VisualizerBase, public cListener
     cFigure::LineStyle movementTrailLineStyle;
     double movementTrailLineWidth = NaN;
     int trailLength = -1;
+    double movementTrailSegmentHideThreshold = INFINITY; // segments longer than this (pixels) are hidden as discontinuities; +inf (default) hides nothing
     //@}
 
     std::map<int, MobilityVisualization *> mobilityVisualizations;

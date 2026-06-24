@@ -51,6 +51,7 @@ simple MobilityVisualizerBase extends VisualizerBase
         string movementTrailLineStyle = default("solid"); // Movement trail line style (solid, dashed, dotted)
         double movementTrailLineWidth = default(1); // Movement trail line width
         int trailLength = default(100); // Number of sections in the trail
+        double movementTrailSegmentHideThreshold = default(inf); // Trail segments longer than this many pixels (e.g. a node wrapping across the map on an equirectangular projection) are treated as discontinuities and hidden, so the trail shows as disjoint pieces; the default (positive infinity) hides nothing
 
         @class(MobilityVisualizerBase);
 }

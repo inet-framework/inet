@@ -61,6 +61,7 @@ void MobilityVisualizerBase::initialize(int stage)
         movementTrailLineStyle = cFigure::parseLineStyle(par("movementTrailLineStyle"));
         movementTrailLineWidth = par("movementTrailLineWidth");
         trailLength = par("trailLength");
+        movementTrailSegmentHideThreshold = par("movementTrailSegmentHideThreshold");
         if (displayMobility)
             subscribe();
     }

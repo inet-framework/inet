@@ -175,6 +175,11 @@ void MobilityCanvasVisualizer::extendMovementTrail(const IMobility *mobility, Tr
         movementLine->setLineStyle(movementTrailLineStyle);
         movementLine->setLineWidth(movementTrailLineWidth);
         movementLine->setZoomLineWidth(false);
+        // hide trail discontinuities: an over-long segment (e.g. a node wrapping across the map
+        // on an equirectangular projection) is treated as a jump and hidden, so the trail breaks
+        // into disjoint pieces; the segment is still added so the trail continues past the jump
+        if (dx * dx + dy * dy > movementTrailSegmentHideThreshold * movementTrailSegmentHideThreshold)
+            movementLine->setVisible(false);
         trailFigure->addFigure(movementLine);
     }
 }
