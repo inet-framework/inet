@@ -404,6 +404,10 @@ void Established::entry()
     session._info.sessionEstablished = true;
     // We are connected: drop any pending reconnect so it cannot disrupt this session later.
     session.cancelReconnect();
+    // RFC 4271: the ConnectRetryTimer MUST be zero in the Established state. It is (re)started
+    // during connection setup; stop it here so it cannot later fire and abort a healthy session
+    // (default arg true => cancel without rescheduling).
+    session.restartsConnectRetryTimer();
 
     // if it's an EGP Session, send update messages with all routing information to BGP peer
     // if it's an IGP Session, send update message with only the BGP routes learned by EGP
