@@ -25,6 +25,8 @@ simple Bgp extends SimpleModule like IBgp
         string routingTableModule;
         string ospfRoutingModule;
         volatile double startupTime @unit(s) = default(0s); // Delay before starting BGP
+        double shutdownTime @unit(s) = default(1s); // On graceful stop, delay before destroying BGP state so TCP can flush the session teardown (FIN)
+        double stopOperationTimeout @unit(s) = default(2s); // Timeout for the lifecycle stop operation
         xml bgpConfig;
         double ExternalPeerStartDelayOffset @unit(s) = default(0.5s);
         bool redistributeRip = default(false);        // Redistribute routes learned by RIP into BGP

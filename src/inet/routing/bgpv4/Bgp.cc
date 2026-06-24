@@ -22,6 +22,7 @@ Bgp::Bgp()
 Bgp::~Bgp()
 {
     cancelAndDelete(startupTimer);
+    cancelAndDelete(shutdownTimer);
     delete bgpRouter;
 }
 
@@ -34,6 +35,7 @@ void Bgp::initialize(int stage)
         rt.reference(this, "routingTableModule", true);
 
         startupTimer = new cMessage("BGP-startup");
+        shutdownTimer = new cMessage("BGP-shutdown");
     }
 }
 
@@ -51,6 +53,22 @@ void Bgp::handleMessageWhenUp(cMessage *msg)
 {
     if (msg == startupTimer)
         createBgpRouter();
+    else if (msg == shutdownTimer) {
+        // Graceful stop: TCP has had shutdownTime to flush the session teardown; now destroy
+        // the BGP state and let the lifecycle stop operation finish.
+        ASSERT(operationalState == State::STOPPING_OPERATION);
+        delete bgpRouter;
+        bgpRouter = nullptr;
+        finishActiveOperation();
+    }
+    else if (operationalState == State::STOPPING_OPERATION) {
+        // Graceful shutdown window: sessions are already closing and TCP finishes the teardown
+        // on its own. Ignore further BGP timers / TCP indications (no reconnect, no re-close);
+        // the BGP state is destroyed when shutdownTimer fires. Self-messages are owned by
+        // bgpRouter and cancelAndDelete'd then, so only delete foreign (TCP) messages here.
+        if (!msg->isSelfMessage())
+            delete msg;
+    }
     else {
         if (!bgpRouter) {
             if (msg->isSelfMessage())
@@ -74,7 +92,17 @@ void Bgp::handleStartOperation(LifecycleOperation *operation)
 
 void Bgp::handleStopOperation(LifecycleOperation *operation)
 {
-    stopBgp(false);
+    // Graceful shutdown: close the sessions (TCP FIN) and give TCP shutdownTime to flush the
+    // teardown before the BGP state is destroyed (in the shutdownTimer handler). The stop
+    // operation finishes asynchronously, mirroring Rip::handleStopOperation.
+    cancelEvent(startupTimer);
+    removeBgpRoutes();
+    if (bgpRouter) {
+        bgpRouter->closeSessions(false);
+        scheduleAfter(par("shutdownTime"), shutdownTimer);
+        delayActiveOperationFinish(par("stopOperationTimeout"));
+    }
+    // else: BGP not started yet, nothing to flush; the operation finishes synchronously.
 }
 
 void Bgp::handleCrashOperation(LifecycleOperation *operation)
@@ -95,6 +123,7 @@ void Bgp::startBgp()
 void Bgp::stopBgp(bool abort)
 {
     cancelEvent(startupTimer);
+    cancelEvent(shutdownTimer);
     removeBgpRoutes();
     if (bgpRouter)
         bgpRouter->closeSessions(abort);
