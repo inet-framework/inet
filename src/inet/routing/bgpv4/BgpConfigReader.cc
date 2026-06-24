@@ -7,6 +7,7 @@
 #include "inet/routing/bgpv4/BgpConfigReader.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #include "inet/routing/bgpv4/BgpSession.h"
 
 namespace inet {
@@ -101,11 +102,9 @@ AsId BgpConfigReader::findMyAS(cXMLElementList& asList, int& outRouterPosition)
         cXMLElementList routerList = (elem)->getChildrenByTagName("Router");
         outRouterPosition = 1;
         for (auto& routerList_routerListIt : routerList) {
-            Ipv4Address routerAddr = Ipv4Address((routerList_routerListIt)->getAttribute("interAddr"));
-            for (int i = 0; i < ift->getNumInterfaces(); i++) {
-                if (ift->getInterface(i)->getProtocolData<Ipv4InterfaceData>()->getIPAddress() == routerAddr)
-                    return atoi((routerList_routerListIt)->getParentNode()->getAttribute("id"));
-            }
+            L3Address routerAddr = L3Address((routerList_routerListIt)->getAttribute("interAddr"));
+            if (isInInterfaceTable(ift, routerAddr) != -1)
+                return atoi((routerList_routerListIt)->getParentNode()->getAttribute("id"));
             outRouterPosition++;
         }
     }
@@ -121,13 +120,13 @@ void BgpConfigReader::loadEbgpSessionConfig(cXMLElementList& ASConfig, cXMLEleme
         if (numRouters.size() != 2)
             throw cRuntimeError("BGP Error: Number of routers is invalid for session ID : %s", (*sessionListIt)->getAttribute("id"));
 
-        Ipv4Address routerAddr1 = Ipv4Address((*sessionListIt)->getFirstChild()->getAttribute("exterAddr"));
-        Ipv4Address routerAddr2 = Ipv4Address((*sessionListIt)->getLastChild()->getAttribute("exterAddr"));
+        L3Address routerAddr1 = L3Address((*sessionListIt)->getFirstChild()->getAttribute("exterAddr"));
+        L3Address routerAddr2 = L3Address((*sessionListIt)->getLastChild()->getAttribute("exterAddr"));
         if (isInInterfaceTable(ift, routerAddr1) == -1 && isInInterfaceTable(ift, routerAddr2) == -1)
             continue;
 
-        Ipv4Address peerAddr;
-        Ipv4Address myAddr;
+        L3Address peerAddr;
+        L3Address myAddr;
         if (isInInterfaceTable(ift, routerAddr1) != -1) {
             peerAddr = routerAddr2;
             myAddr = routerAddr1;
@@ -154,11 +153,11 @@ void BgpConfigReader::loadEbgpSessionConfig(cXMLElementList& ASConfig, cXMLEleme
 
         for (auto& elem : ASConfig) {
             if (std::string(elem->getTagName()) == "Router") {
-                if (isInInterfaceTable(ift, Ipv4Address(elem->getAttribute("interAddr"))) != -1) {
+                if (isInInterfaceTable(ift, L3Address(elem->getAttribute("interAddr"))) != -1) {
                     for (auto& entry : elem->getChildren()) {
                         if (std::string(entry->getTagName()) == "Neighbor") {
                             const char *peer = entry->getAttribute("address");
-                            if (peer && *peer && peerAddr.equals(Ipv4Address(peer))) {
+                            if (peer && *peer && peerAddr == L3Address(peer)) {
                                 externalInfo.checkConnection = getBoolAttrOrPar(*entry, "connectedCheck");
                                 externalInfo.ebgpMultihop = getIntAttrOrPar(*entry, "ebgpMultihop");
                                 if (externalInfo.ebgpMultihop > 1) // if E-BGP multi-hop is enabled, then turn off checkConnection
@@ -181,7 +180,7 @@ std::vector<const char *> BgpConfigReader::findInternalPeers(cXMLElementList& AS
     for (auto& elem : ASConfig) {
         std::string nodeName = elem->getTagName();
         if (nodeName == "Router") {
-            Ipv4Address internalAddr = Ipv4Address(elem->getAttribute("interAddr"));
+            L3Address internalAddr = L3Address(elem->getAttribute("interAddr"));
             if (isInInterfaceTable(ift, internalAddr) == -1)
                 routerInSameASList.push_back(elem->getAttribute("interAddr"));
             else
@@ -199,7 +198,7 @@ void BgpConfigReader::loadASConfig(cXMLElementList& ASConfig)
     for (auto& elem : ASConfig) {
         std::string nodeName = elem->getTagName();
         if (nodeName == "Router") {
-            Ipv4Address internalAddr = Ipv4Address(elem->getAttribute("interAddr"));
+            L3Address internalAddr = L3Address(elem->getAttribute("interAddr"));
             if (isInInterfaceTable(ift, internalAddr) != -1) {
                 bgpRouter->setRedistributeInternal(getBoolAttrOrPar(*elem, "redistributeInternal"));
                 bgpRouter->setRedistributeOspf(getStrAttrOrPar(*elem, "redistributeOspf"));
@@ -246,11 +245,22 @@ void BgpConfigReader::loadASConfig(cXMLElementList& ASConfig)
     }
 }
 
-int BgpConfigReader::isInInterfaceTable(IInterfaceTable *ifTable, Ipv4Address addr)
+int BgpConfigReader::isInInterfaceTable(IInterfaceTable *ifTable, const L3Address& addr)
 {
     for (int i = 0; i < ifTable->getNumInterfaces(); i++) {
-        if (ifTable->getInterface(i)->getProtocolData<Ipv4InterfaceData>()->getIPAddress() == addr) {
-            return i;
+        NetworkInterface *ie = ifTable->getInterface(i);
+        if (addr.getType() == L3Address::IPv6) {
+            auto data = ie->findProtocolData<Ipv6InterfaceData>();
+            if (data) {
+                for (int k = 0; k < data->getNumAddresses(); k++)
+                    if (data->getAddress(k) == addr.toIpv6())
+                        return i;
+            }
+        }
+        else {
+            auto data = ie->findProtocolData<Ipv4InterfaceData>();
+            if (data && data->getIPAddress() == addr.toIpv4())
+                return i;
         }
     }
     return -1;

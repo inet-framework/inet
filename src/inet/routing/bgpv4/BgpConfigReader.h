@@ -38,7 +38,7 @@ class INET_API BgpConfigReader
     void loadEbgpSessionConfig(cXMLElementList& ASConfig, cXMLElementList& sessionList, simtime_t *delayTab);
     AsId findMyAS(cXMLElementList& ASList, int& outRouterPosition);
     void loadTimerConfig(cXMLElementList& timerConfig, simtime_t *delayTab);
-    int isInInterfaceTable(IInterfaceTable *ifTable, Ipv4Address addr);
+    int isInInterfaceTable(IInterfaceTable *ifTable, const L3Address& addr);
     int isInInterfaceTable(IInterfaceTable *ifTable, std::string ifName);
     unsigned int calculateStartDelay(int rtListSize, unsigned char rtPosition, unsigned char rtPeerPosition);
     bool getBoolAttrOrPar(const cXMLElement& ifConfig, const char *name) const;
