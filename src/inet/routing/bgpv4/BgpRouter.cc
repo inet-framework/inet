@@ -998,6 +998,18 @@ void BgpRouter::printUpdateMessage(const BgpUpdateMessage& updateMsg)
                 EV_INFO << "    MULTI_EXIT_DISC: " << attr.getValue() << "\n";
                 break;
             }
+            case BgpUpdateAttributeTypeCode::MP_REACH_NLRI: {
+                auto& attr = *check_and_cast<const BgpUpdatePathAttributesMpReachNlri *>(updateMsg.getPathAttributes(i));
+                EV_INFO << "    MP_REACH_NLRI: afi=" << attr.getAfi() << " safi=" << (int)attr.getSafi()
+                        << " nextHop=" << attr.getNextHop().str() << " (" << attr.getNlriArraySize() << " prefixes)\n";
+                break;
+            }
+            case BgpUpdateAttributeTypeCode::MP_UNREACH_NLRI: {
+                auto& attr = *check_and_cast<const BgpUpdatePathAttributesMpUnreachNlri *>(updateMsg.getPathAttributes(i));
+                EV_INFO << "    MP_UNREACH_NLRI: afi=" << attr.getAfi() << " safi=" << (int)attr.getSafi()
+                        << " (" << attr.getWithdrawnRoutesArraySize() << " prefixes)\n";
+                break;
+            }
         }
     }
 
