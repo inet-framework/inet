@@ -9,6 +9,7 @@
 
 #include "inet/common/Protocol.h"
 #include "inet/common/socket/SocketMap.h"
+#include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/routing/bgpv4/BgpCommon.h"
@@ -28,7 +29,7 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
 {
   private:
     IInterfaceTable *ift = nullptr;
-    IIpv4RoutingTable *rt = nullptr;
+    IRoutingTable *rt = nullptr;
     cSimpleModule *bgpModule = nullptr;
     const Protocol *networkProtocol = &Protocol::ipv4; // address family this BGP router serves
 
@@ -66,11 +67,11 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
 
   public:
     enum { TCP_PORT = 179 };
-    BgpRouter(cSimpleModule *bgpModule, IInterfaceTable *ift, IIpv4RoutingTable *rt, const Protocol *networkProtocol);
+    BgpRouter(cSimpleModule *bgpModule, IInterfaceTable *ift, IRoutingTable *rt, const Protocol *networkProtocol);
     virtual ~BgpRouter();
 
     bool isIpv6() const { return networkProtocol == &Protocol::ipv6; }
-    RouterId getRouterId() { return rt->getRouterId(); }
+    RouterId getRouterId() { return rt->getRouterIdAsGeneric().toIpv4(); }
     void setAsId(AsId myAsId) { this->myAsId = myAsId; }
     AsId getAsId() { return myAsId; }
     int getNumBgpSessions() { return _bgpSessions.size(); }
@@ -125,7 +126,7 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
     void scheduleAt(simtime_t t, cMessage *msg) { bgpModule->scheduleAt(t, msg); }
     void cancelAndDelete(cMessage *msg) { bgpModule->cancelAndDelete(msg); }
     cMessage *cancelEvent(cMessage *msg) { return bgpModule->cancelEvent(msg); }
-    IIpv4RoutingTable *getIpRoutingTable() { return rt; }
+    IRoutingTable *getIpRoutingTable() { return rt; }
     std::vector<BgpRoutingTableEntry *> getBgpRoutingTable() { return bgpRoutingTable; }
 
     /**
@@ -172,11 +173,11 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
     bool isInASList(std::vector<AsId> ASList, BgpRoutingTableEntry *entry);
     unsigned long isInTable(std::vector<BgpRoutingTableEntry *> rtTable, BgpRoutingTableEntry *entry);
 
-    bool ospfExist(IIpv4RoutingTable *rtTable);
+    bool ospfExist(IRoutingTable *rtTable);
     // check if the route is in OSPF external Ipv4RoutingTable
     int checkExternalRoute(const Ipv4Route *ospfRoute) { return ospfModule->checkExternalRoute(ospfRoute->getDestination()); }
     BgpProcessResult asLoopDetection(BgpRoutingTableEntry *entry, AsId myAS);
-    int isInRoutingTable(IIpv4RoutingTable *rtTable, Ipv4Address addr);
+    int isInRoutingTable(IRoutingTable *rtTable, Ipv4Address addr);
     SessionId findIdFromPeerAddr(std::map<SessionId, BgpSession *> sessions, Ipv4Address peerAddr);
     SessionId findIdFromSocketConnId(std::map<SessionId, BgpSession *> sessions, int connId);
     bool isRouteExcluded(const Ipv4Route& rtEntry);

@@ -14,7 +14,7 @@
 namespace inet {
 namespace bgp {
 
-BgpRouter::BgpRouter(cSimpleModule *bgpModule, IInterfaceTable *ift, IIpv4RoutingTable *rt, const Protocol *networkProtocol)
+BgpRouter::BgpRouter(cSimpleModule *bgpModule, IInterfaceTable *ift, IRoutingTable *rt, const Protocol *networkProtocol)
 {
     this->bgpModule = bgpModule;
     this->ift = ift;
@@ -101,7 +101,7 @@ SessionId BgpRouter::createIbgpSession(const char *peerAddr)
     SessionInfo info;
     info.sessionType = IGP;
     info.ASValue = myAsId;
-    info.routerId = rt->getRouterId();
+    info.routerId = rt->getRouterIdAsGeneric().toIpv4();
     info.peerAddr.set(peerAddr);
     info.sessionId = info.peerAddr.getInt() + info.routerId.getInt();
 
@@ -129,14 +129,14 @@ SessionId BgpRouter::createEbgpSession(const char *peerAddr, SessionInfo& extern
 
     info.sessionType = EGP;
     info.ASValue = myAsId;
-    info.routerId = rt->getRouterId();
+    info.routerId = rt->getRouterIdAsGeneric().toIpv4();
     info.peerAddr.set(peerAddr);
-    info.linkIntf = rt->getInterfaceForDestAddr(info.peerAddr);
+    info.linkIntf = rt->getOutputInterfaceForDestination(info.peerAddr);
     if (!info.linkIntf) {
         if (info.checkConnection)
             throw cRuntimeError("BGP Error: External BGP neighbor at address %s is not directly connected to BGP router %s", peerAddr, bgpModule->getOwner()->getFullName());
         else
-            info.linkIntf = rt->getInterfaceForDestAddr(info.myAddr);
+            info.linkIntf = rt->getOutputInterfaceForDestination(info.myAddr);
     }
     ASSERT(info.linkIntf);
     info.sessionId = info.peerAddr.getInt() + info.linkIntf->getProtocolData<Ipv4InterfaceData>()->getIPAddress().getInt();
@@ -182,7 +182,7 @@ void BgpRouter::addToAdvertiseList(Ipv4Address address)
     bool routeFound = false;
     const Ipv4Route *rtEntry = nullptr;
     for (int i = 0; i < rt->getNumRoutes(); i++) {
-        rtEntry = rt->getRoute(i);
+        rtEntry = check_and_cast<const Ipv4Route *>(rt->getRoute(i));
         if (rtEntry->getDestination() == address) {
             routeFound = true;
             break;
@@ -398,7 +398,7 @@ void BgpRouter::openTcpConnectionToPeer(SessionId sessionId)
     else if (_bgpSessions[sessionId]->getType() == IGP) {
         NetworkInterface *intfEntry = _bgpSessions[sessionId]->getLinkIntf();
         if (!intfEntry)
-            intfEntry = rt->getInterfaceForDestAddr(_bgpSessions[sessionId]->getPeerAddr());
+            intfEntry = rt->getOutputInterfaceForDestination(_bgpSessions[sessionId]->getPeerAddr());
         if (intfEntry == nullptr)
             throw cRuntimeError("No configuration interface for internal peer address: %s", _bgpSessions[sessionId]->getPeerAddr().str().c_str());
         _bgpSessions[sessionId]->setlinkIntf(intfEntry);
@@ -633,7 +633,7 @@ BgpProcessResult BgpRouter::decisionProcess(const BgpUpdateMessage& msg, BgpRout
         if (rt->getRoute(indexIp)->getSourceType() != IRoute::BGP) {
             // and the Update msg is coming from IGP session
             if (_bgpSessions[sessionIndex]->getType() == IGP) {
-                Ipv4Route *oldEntry = rt->getRoute(indexIp);
+                Ipv4Route *oldEntry = check_and_cast<Ipv4Route *>(rt->getRoute(indexIp));
                 BgpRoutingTableEntry *bgpEntry = new BgpRoutingTableEntry(oldEntry);
                 bgpEntry->addAS(myAsId);
                 bgpEntry->setPathType(IGP);
@@ -829,10 +829,10 @@ bool BgpRouter::deleteBgpRoutingEntry(BgpRoutingTableEntry *entry)
 }
 
 /*return index of the Ipv4 table if the route is found, -1 else*/
-int BgpRouter::isInRoutingTable(IIpv4RoutingTable *rtTable, Ipv4Address addr)
+int BgpRouter::isInRoutingTable(IRoutingTable *rtTable, Ipv4Address addr)
 {
     for (int i = 0; i < rtTable->getNumRoutes(); i++) {
-        const Ipv4Route *entry = rtTable->getRoute(i);
+        const Ipv4Route *entry = check_and_cast<const Ipv4Route *>(rtTable->getRoute(i));
         if (Ipv4Address::maskedAddrAreEqual(addr, entry->getDestination(), entry->getNetmask())) {
             if (isDefaultRoute(entry) && addr.getInt() != 0)
                 continue;
@@ -882,7 +882,7 @@ bool BgpRouter::isInASList(std::vector<AsId> ASList, BgpRoutingTableEntry *entry
 }
 
 /*return true if OSPF exists, false else*/
-bool BgpRouter::ospfExist(IIpv4RoutingTable *rtTable)
+bool BgpRouter::ospfExist(IRoutingTable *rtTable)
 {
     for (int i = 0; i < rtTable->getNumRoutes(); i++) {
         if (rtTable->getRoute(i)->getSourceType() == IRoute::OSPF) {
@@ -905,7 +905,7 @@ SessionId BgpRouter::findNextSession(BgpSessionType type, bool startSession)
     if (startSession == true && type == IGP && sessionId != static_cast<SessionId>(-1)) {
         // note: if the internal peer is not directly-connected to us, then we should know how to reach it.
         // this is done with the help of an intra-AS routing protocol (RIP, OSPF, EIGRP).
-        NetworkInterface *linkIntf = rt->getInterfaceForDestAddr(_bgpSessions[sessionId]->getPeerAddr());
+        NetworkInterface *linkIntf = rt->getOutputInterfaceForDestination(_bgpSessions[sessionId]->getPeerAddr());
         if (linkIntf == nullptr)
             throw cRuntimeError("No configuration interface for peer address: %s", _bgpSessions[sessionId]->getPeerAddr().str().c_str());
 
@@ -1112,7 +1112,7 @@ bool BgpRouter::isExternalAddress(const Ipv4Route& rtEntry)
 {
     for (auto& session : _bgpSessions) {
         if (session.second->getType() == EGP) {
-            NetworkInterface *exIntf = rt->getInterfaceForDestAddr(session.second->getPeerAddr());
+            NetworkInterface *exIntf = rt->getOutputInterfaceForDestination(session.second->getPeerAddr());
             if (exIntf == rtEntry.getInterface())
                 return true;
         }
@@ -1134,7 +1134,7 @@ bool BgpRouter::isReachable(const Ipv4Address addr) const
         return true;
 
     for (int i = 0; i < rt->getNumRoutes(); i++) {
-        Ipv4Route *route = rt->getRoute(i);
+        Ipv4Route *route = check_and_cast<Ipv4Route *>(rt->getRoute(i));
         if (!isDefaultRoute(route) && route->getSourceType() != IRoute::BGP) {
             if (addr.doAnd(route->getNetmask()) == route->getDestination().doAnd(route->getNetmask()))
                 return true;

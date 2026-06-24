@@ -108,7 +108,7 @@ public:
     int getLocalPreference() const { return _info.localPreference; }
     TcpSocket *getSocket() const { return _info.socket; }
     int getEbgpMultihop() const { return _info.ebgpMultihop; }
-    IIpv4RoutingTable *getIpRoutingTable() const { return bgpRouter.getIpRoutingTable(); }
+    IRoutingTable *getIpRoutingTable() const { return bgpRouter.getIpRoutingTable(); }
     std::vector<BgpRoutingTableEntry *> getBgpRoutingTable() const { return bgpRouter.getBgpRoutingTable(); }
     Macho::Machine<fsm::TopState>& getFsm() const { return *_fsm; }
     void updateSendProcess(BgpRoutingTableEntry *entry) const { return bgpRouter.updateSendProcess(NEW_SESSION_ESTABLISHED, _info.sessionId, entry); }

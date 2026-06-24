@@ -8,6 +8,7 @@
 #define __INET_BGP_H
 
 #include "inet/common/Protocol.h"
+#include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
@@ -22,7 +23,7 @@ namespace bgp {
 class INET_API Bgp : public RoutingProtocolBase, protected cListener
 {
   private:
-    ModuleRefByPar<IIpv4RoutingTable> rt;
+    ModuleRefByPar<IRoutingTable> rt;
     ModuleRefByPar<IInterfaceTable> ift;
     const Protocol *networkProtocol = &Protocol::ipv4; // address family this BGP instance serves (set from the addressFamily parameter)
     BgpRouter *bgpRouter = nullptr; // data structure to fill in

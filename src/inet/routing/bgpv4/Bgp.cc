@@ -142,9 +142,10 @@ void Bgp::stopBgp(bool abort)
 void Bgp::removeBgpRoutes()
 {
     for (int i = rt->getNumRoutes() - 1; i >= 0; i--) {
-        Ipv4Route *route = rt->getRoute(i);
+        IRoute *route = rt->getRoute(i);
         if (route->getSourceType() == IRoute::BGP) {
-            EV_INFO << "Removing BGP route " << route->str() << endl;
+            EV_INFO << "Removing BGP route to " << route->getDestinationAsGeneric()
+                    << "/" << route->getPrefixLength() << endl;
             rt->deleteRoute(route);
         }
     }
