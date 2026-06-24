@@ -54,7 +54,7 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
     std::map<SessionId, BgpSession *> _bgpSessions;
     uint32_t numEgpSessions = 0;
     uint32_t numIgpSessions = 0;
-    Ipv4Address internalAddress = Ipv4Address::UNSPECIFIED_ADDRESS;
+    L3Address internalAddress;
 
     typedef std::vector<BgpRouteInfo *> RoutingTableEntryVector;
     RoutingTableEntryVector bgpRoutingTable; // The BGP routing table
@@ -78,8 +78,11 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
     int getNumEgpSessions() { return numEgpSessions; }
     int getNumIgpSessions() { return numIgpSessions; }
     void setDefaultConfig();
-    Ipv4Address getInternalAddress() { return internalAddress; }
-    void setInternalAddress(Ipv4Address x) { internalAddress = x; }
+    L3Address getInternalAddress() { return internalAddress; }
+    void setInternalAddress(L3Address x) { internalAddress = x; }
+    // the local BGP source address on the given link, per address family (routable: IPv4
+    // address, or the preferred/global IPv6 address)
+    L3Address getInterfaceAddress(NetworkInterface *ie);
     bool getRedistributeInternal() { return redistributeInternal; }
     void setRedistributeInternal(bool x) { this->redistributeInternal = x; }
     bool getRedistributeRip() { return redistributeRip; }
@@ -181,7 +184,8 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
     int checkExternalRoute(const Ipv4Route *ospfRoute) { return ospfModule->checkExternalRoute(ospfRoute->getDestination()); }
     BgpProcessResult asLoopDetection(BgpRouteInfo *entry, AsId myAS);
     int isInRoutingTable(IRoutingTable *rtTable, const L3Address& addr);
-    SessionId findIdFromPeerAddr(std::map<SessionId, BgpSession *> sessions, Ipv4Address peerAddr);
+    SessionId findIdFromPeerAddr(std::map<SessionId, BgpSession *> sessions, const L3Address& peerAddr);
+    static uint32_t addressKey(const L3Address& addr); // AF-safe key for the session id (IPv4 value preserved)
     SessionId findIdFromSocketConnId(std::map<SessionId, BgpSession *> sessions, int connId);
     bool isRouteExcluded(const Ipv4Route& rtEntry);
     bool isDefaultRoute(const IRoute *entry) const;

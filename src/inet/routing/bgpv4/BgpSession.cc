@@ -137,7 +137,7 @@ void BgpSession::sendOpenMessage()
     openMsg->setHoldTime(_holdTime);
     openMsg->setBgpIdentifier(_info.socket->getLocalAddress().toIpv4());
 
-    EV_INFO << "Sending BGP Open message to " << _info.peerAddr.str(false)
+    EV_INFO << "Sending BGP Open message to " << _info.peerAddr.str()
             << " on interface " << _info.linkIntf->getInterfaceName()
             << "[" << _info.linkIntf->getInterfaceId() << "] with contents:\n";
     bgpRouter.printOpenMessage(*openMsg);
@@ -169,7 +169,7 @@ void BgpSession::sendUpdateMessage(std::vector<BgpUpdatePathAttributes *>& conte
     updateMsg->addChunkLength(B(1 + (nlri.length + 7) / 8));
     updateMsg->setTotalLength(updateMsg->getChunkLength().get<B>());
 
-    EV_INFO << "Sending BGP Update message to " << _info.peerAddr.str(false)
+    EV_INFO << "Sending BGP Update message to " << _info.peerAddr.str()
             << " on interface " << _info.linkIntf->getInterfaceName()
             << "[" << _info.linkIntf->getInterfaceId() << "] with contents:\n";
     bgpRouter.printUpdateMessage(*updateMsg);
@@ -187,7 +187,7 @@ void BgpSession::sendNotificationMessage()
 
 //    const auto& updateMsg = makeShared<BgpNotificationMessage>();
 
-//    EV_INFO << "Sending BGP Notification message to " << _info.peerAddr.str(false)
+//    EV_INFO << "Sending BGP Notification message to " << _info.peerAddr.str()
 //            << " on interface " << _info.linkIntf->getInterfaceName()
 //            << "[" << _info.linkIntf->getInterfaceId() << "] with contents:\n";
 
@@ -202,7 +202,7 @@ void BgpSession::sendKeepAliveMessage()
 {
     const auto& keepAliveMsg = makeShared<BgpKeepAliveMessage>();
 
-    EV_INFO << "Sending BGP Keep-alive message to " << _info.peerAddr.str(false)
+    EV_INFO << "Sending BGP Keep-alive message to " << _info.peerAddr.str()
             << " on interface " << _info.linkIntf->getInterfaceName()
             << "[" << _info.linkIntf->getInterfaceId() << "] \n";
     bgpRouter.printKeepAliveMessage(*keepAliveMsg);
@@ -242,7 +242,7 @@ std::ostream& operator<<(std::ostream& out, const BgpSession& entry)
         << "sessionType: " << entry.getTypeString(entry.getType()) << " "
         << "established: " << (entry.isEstablished() == true ? "true" : "false") << " "
         << "state: " << entry.getFsm().currentState().name() << " "
-        << "peer: " << entry.getPeerAddr().str(false) << " "
+        << "peer: " << entry.getPeerAddr().str() << " "
         << "nextHopSelf: " << (entry.getNextHopSelf() == true ? "true" : "false") << " "
         << "startEventTime: " << entry.getStartEventTime() << " "
         << "connectionRetryTime: " << entry.getConnectionRetryTime() << " "

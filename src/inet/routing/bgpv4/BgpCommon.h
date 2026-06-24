@@ -7,6 +7,7 @@
 #ifndef __INET_BGPCOMMON_H
 #define __INET_BGPCOMMON_H
 
+#include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/routing/bgpv4/BgpCommon_m.h"
@@ -25,9 +26,9 @@ struct SessionInfo
     SessionId sessionId = 0;
     BgpSessionType sessionType = INCOMPLETE;
     AsId ASValue = 0;
-    Ipv4Address routerId;
-    Ipv4Address peerAddr;
-    Ipv4Address myAddr;
+    Ipv4Address routerId; // the BGP Identifier is a 4-octet router-id (RFC 4271), even for IPv6 BGP
+    L3Address peerAddr;
+    L3Address myAddr;
     bool nextHopSelf = false;
     int localPreference = 0;
     bool checkConnection = false;

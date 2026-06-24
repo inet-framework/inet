@@ -103,7 +103,7 @@ public:
     static const std::string getTypeString(BgpSessionType sessionType);
     NetworkInterface *getLinkIntf() const { return _info.linkIntf; }
     bool getCheckConnection() const { return _info.checkConnection; }
-    Ipv4Address getPeerAddr() const { return _info.peerAddr; }
+    L3Address getPeerAddr() const { return _info.peerAddr; }
     bool getNextHopSelf() const { return _info.nextHopSelf; }
     int getLocalPreference() const { return _info.localPreference; }
     TcpSocket *getSocket() const { return _info.socket; }

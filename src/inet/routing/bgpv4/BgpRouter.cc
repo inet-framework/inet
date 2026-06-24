@@ -9,6 +9,7 @@
 #include <algorithm>
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #include "inet/routing/bgpv4/BgpSession.h"
 
 namespace inet {
@@ -42,15 +43,15 @@ void BgpRouter::printSessionSummary()
         BgpSession *session = entry.second;
         BgpSessionType type = session->getType();
         if (type == IGP) {
-            EV_DEBUG << "  IGP session to internal peer '" << session->getPeerAddr().str(false)
+            EV_DEBUG << "  IGP session to internal peer '" << session->getPeerAddr().str()
                      << "' starts at " << session->getStartEventTime() << "s \n";
         }
         else if (type == EGP) {
-            EV_DEBUG << "  EGP session to external peer '" << session->getPeerAddr().str(false)
+            EV_DEBUG << "  EGP session to external peer '" << session->getPeerAddr().str()
                      << "' starts at " << session->getStartEventTime() << "s \n";
         }
         else {
-            EV_DEBUG << "  Unknown session to peer '" << session->getPeerAddr().str(false)
+            EV_DEBUG << "  Unknown session to peer '" << session->getPeerAddr().str()
                      << "' starts at " << session->getStartEventTime() << "s \n";
         }
     }
@@ -102,8 +103,8 @@ SessionId BgpRouter::createIbgpSession(const char *peerAddr)
     info.sessionType = IGP;
     info.ASValue = myAsId;
     info.routerId = rt->getRouterIdAsGeneric().toIpv4();
-    info.peerAddr.set(peerAddr);
-    info.sessionId = info.peerAddr.getInt() + info.routerId.getInt();
+    info.peerAddr = L3Address(peerAddr);
+    info.sessionId = addressKey(info.peerAddr) + info.routerId.getInt();
 
     numIgpSessions++;
 
@@ -130,7 +131,7 @@ SessionId BgpRouter::createEbgpSession(const char *peerAddr, SessionInfo& extern
     info.sessionType = EGP;
     info.ASValue = myAsId;
     info.routerId = rt->getRouterIdAsGeneric().toIpv4();
-    info.peerAddr.set(peerAddr);
+    info.peerAddr = L3Address(peerAddr);
     info.linkIntf = rt->getOutputInterfaceForDestination(info.peerAddr);
     if (!info.linkIntf) {
         if (info.checkConnection)
@@ -139,7 +140,7 @@ SessionId BgpRouter::createEbgpSession(const char *peerAddr, SessionInfo& extern
             info.linkIntf = rt->getOutputInterfaceForDestination(info.myAddr);
     }
     ASSERT(info.linkIntf);
-    info.sessionId = info.peerAddr.getInt() + info.linkIntf->getProtocolData<Ipv4InterfaceData>()->getIPAddress().getInt();
+    info.sessionId = addressKey(info.peerAddr) + addressKey(getInterfaceAddress(info.linkIntf));
     numEgpSessions++;
 
     SessionId newSessionId;
@@ -189,6 +190,26 @@ BgpRouteInfo *BgpRouter::createBgpRoutingTableEntry(const IRoute *from)
     if (isIpv6())
         return new BgpRoutingTableEntry6(from);
     return new BgpRoutingTableEntry(from);
+}
+
+uint32_t BgpRouter::addressKey(const L3Address& addr)
+{
+    // AF-safe key for the session id. For IPv4 this is exactly the 32-bit address value, so
+    // existing IPv4 session ids are unchanged; for IPv6 fold the 128-bit address into 32 bits.
+    if (addr.getType() == L3Address::IPv6) {
+        const uint32_t *w = addr.toIpv6().words();
+        return w[0] ^ w[1] ^ w[2] ^ w[3];
+    }
+    return addr.toIpv4().getInt();
+}
+
+L3Address BgpRouter::getInterfaceAddress(NetworkInterface *ie)
+{
+    // the local BGP source address on a link: IPv4 interface address, or (for IPv6) the
+    // preferred global address -- sessions need a routable address, not link-local.
+    if (isIpv6())
+        return ie->getProtocolData<Ipv6InterfaceData>()->getPreferredAddress();
+    return ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
 }
 
 void BgpRouter::addToAdvertiseList(Ipv4Address address)
@@ -308,7 +329,7 @@ void BgpRouter::processMessageFromTcp(cMessage *msg)
     if (!socket) {
         socket = new TcpSocket(msg);
         socket->setOutputGate(bgpModule->gate("socketOut"));
-        Ipv4Address peerAddr = socket->getRemoteAddress().toIpv4();
+        L3Address peerAddr = socket->getRemoteAddress();
         SessionId i = findIdFromPeerAddr(_bgpSessions, peerAddr);
         if (i == static_cast<SessionId>(-1)) {
             socket->close();
@@ -327,10 +348,13 @@ void BgpRouter::processMessageFromTcp(cMessage *msg)
         // ends compute the same winner, so they agree.
         TcpSocket *current = _bgpSessions[i]->getSocket();
         if (current && (current->getState() == TcpSocket::CONNECTING || current->getState() == TcpSocket::CONNECTED)) {
-            Ipv4Address ourId = (_bgpSessions[i]->getType() == EGP)
-                ? _bgpSessions[i]->getLinkIntf()->getProtocolData<Ipv4InterfaceData>()->getIPAddress()
+            L3Address ourId = (_bgpSessions[i]->getType() == EGP)
+                ? getInterfaceAddress(_bgpSessions[i]->getLinkIntf())
                 : internalAddress;
-            if (ourId.getInt() > peerAddr.getInt()) {
+            // higher BGP Identifier wins; keep the IPv4 comparison exact (byte-identical)
+            bool weWin = isIpv6() ? (ourId > peerAddr)
+                                  : (ourId.toIpv4().getInt() > peerAddr.toIpv4().getInt());
+            if (weWin) {
                 // we win: keep our connection, reject the peer's colliding one
                 socket->abort();
                 delete socket;
@@ -370,7 +394,10 @@ void BgpRouter::listenConnectionFromPeer(SessionId sessionId)
 
     if (listeningSocket->getState() != TcpSocket::LISTENING) {
         listeningSocket->setOutputGate(bgpModule->gate("socketOut"));
-        listeningSocket->bind(TCP_PORT);
+        if (isIpv6())
+            listeningSocket->bind(Ipv6Address::UNSPECIFIED_ADDRESS, TCP_PORT);
+        else
+            listeningSocket->bind(TCP_PORT);
         listeningSocket->listen();
         _socketMap.addSocket(listeningSocket);
 
@@ -399,7 +426,7 @@ void BgpRouter::openTcpConnectionToPeer(SessionId sessionId)
         if (intfEntry == nullptr)
             throw cRuntimeError("No configuration interface for external peer address: %s", _bgpSessions[sessionId]->getPeerAddr().str().c_str());
         // note: port=-1 stands for ephemeral port (=0 would be literally port 0)
-        socket->bind(intfEntry->getProtocolData<Ipv4InterfaceData>()->getIPAddress(), -1);
+        socket->bind(getInterfaceAddress(intfEntry), -1);
 
         int ebgpMH = _bgpSessions[sessionId]->getEbgpMultihop();
         if (ebgpMH > 1)
@@ -416,7 +443,7 @@ void BgpRouter::openTcpConnectionToPeer(SessionId sessionId)
         if (intfEntry == nullptr)
             throw cRuntimeError("No configuration interface for internal peer address: %s", _bgpSessions[sessionId]->getPeerAddr().str().c_str());
         _bgpSessions[sessionId]->setlinkIntf(intfEntry);
-        if (internalAddress == Ipv4Address::UNSPECIFIED_ADDRESS)
+        if (internalAddress.isUnspecified())
             throw cRuntimeError("Internal address is not specified for router %s", bgpModule->getOwner()->getFullName());
         // note: port=-1 stands for ephemeral port (=0 would be literally port 0)
         socket->bind(internalAddress, -1);
@@ -507,7 +534,7 @@ void BgpRouter::processMessage(const BgpOpenMessage& msg)
 {
     BgpSession *session = _bgpSessions[_currSessionId];
     EV_INFO << "Processing BGP OPEN message from "
-            << session->getPeerAddr().str(false)
+            << session->getPeerAddr().str()
             << " with contents: \n";
     printOpenMessage(msg);
     session->getFsm()->OpenMsgEvent();
@@ -517,7 +544,7 @@ void BgpRouter::processMessage(const BgpKeepAliveMessage& msg)
 {
     BgpSession *session = _bgpSessions[_currSessionId];
     EV_INFO << "Processing BGP Keep Alive message from "
-            << session->getPeerAddr().str(false)
+            << session->getPeerAddr().str()
             << " with contents: \n";
     printKeepAliveMessage(msg);
     session->getFsm()->KeepAliveMsgEvent();
@@ -527,7 +554,7 @@ void BgpRouter::processMessage(const BgpUpdateMessage& msg)
 {
     BgpSession *session = _bgpSessions[_currSessionId];
     EV_INFO << "Processing BGP Update message from "
-            << session->getPeerAddr().str(false)
+            << session->getPeerAddr().str()
             << " with contents: \n";
     printUpdateMessage(msg);
     session->getFsm()->UpdateMsgEvent();
@@ -925,10 +952,10 @@ SessionId BgpRouter::findNextSession(BgpSessionType type, bool startSession)
     return sessionId;
 }
 
-SessionId BgpRouter::findIdFromPeerAddr(std::map<SessionId, BgpSession *> sessions, Ipv4Address peerAddr)
+SessionId BgpRouter::findIdFromPeerAddr(std::map<SessionId, BgpSession *> sessions, const L3Address& peerAddr)
 {
     for (auto& session : sessions) {
-        if ((session).second->getPeerAddr().equals(peerAddr))
+        if ((session).second->getPeerAddr() == peerAddr)
             return (session).first;
     }
     return -1;
