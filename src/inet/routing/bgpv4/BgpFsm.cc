@@ -36,7 +36,7 @@ void Idle::ManualStart()
     // - listens for a connection that may be initiated by the remote BGP peer,
     session.listenConnectionFromPeer();
     // - initiates a TCP connection to the other BGP peer and,
-    session.openTCPConnectionToPeer();
+    session.openTcpConnectionToPeer();
     // - changes its state to Connect.
     setState<Connect>();
 }
@@ -53,7 +53,7 @@ void Connect::ConnectRetryTimer_Expires()
     session.stopConnectRetryTimer();
     // - initiates a TCP connection to the other BGP peer,
 //    session._info.socket->renewSocket();
-    session.openTCPConnectionToPeer();
+    session.openTcpConnectionToPeer();
     // - continues to listen for a connection that may be initiated by the remote BGP peer, and
     // - stays in the Connect state.
     setState<Connect>();
@@ -136,7 +136,7 @@ void Active::ConnectRetryTimer_Expires()
     session.stopConnectRetryTimer();
     // - initiates a TCP connection to the other BGP peer,T);
 //    session._info.socket->renewSocket();
-    session.openTCPConnectionToPeer();
+    session.openTcpConnectionToPeer();
     // - continues to listen for a TCP connection that may be initiated by a remote BGP peer, and
     // - changes its state to Connect.
     setState<Connect>();
@@ -412,7 +412,7 @@ void Established::entry()
     // if it's an IGP Session, send update message with only the BGP routes learned by EGP
 
     if (session.getType() == EGP) {
-        auto IPRoutingTable = session.getIPRoutingTable();
+        auto IPRoutingTable = session.getIpRoutingTable();
         for (int i = 0; i < IPRoutingTable->getNumRoutes(); i++) {
             const Ipv4Route *rtEntry = IPRoutingTable->getRoute(i);
             if (session.isRouteExcluded(*rtEntry))
@@ -424,7 +424,7 @@ void Established::entry()
         }
     }
 
-    for (auto& elem : session.getBGPRoutingTable())
+    for (auto& elem : session.getBgpRoutingTable())
         session.updateSendProcess(elem);
 
     // when all EGP Sessions are in established state, start IGP Session(s)

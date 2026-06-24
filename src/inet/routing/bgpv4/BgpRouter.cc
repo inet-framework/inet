@@ -287,7 +287,7 @@ void BgpRouter::setRedistributeOspf(std::string str)
     }
 }
 
-void BgpRouter::processMessageFromTCP(cMessage *msg)
+void BgpRouter::processMessageFromTcp(cMessage *msg)
 {
     TcpSocket *socket = check_and_cast_nullable<TcpSocket *>(_socketMap.findSocketFor(msg));
     if (!socket) {
@@ -340,7 +340,7 @@ void BgpRouter::processMessageFromTCP(cMessage *msg)
 void BgpRouter::listenConnectionFromPeer(SessionId sessionID)
 {
     // Ensure the single shared listening socket is up. One wildcard listener per router
-    // accepts all incoming BGP connections on TCP_PORT; processMessageFromTCP() demuxes
+    // accepts all incoming BGP connections on TCP_PORT; processMessageFromTcp() demuxes
     // accepted connections to the right session by peer address. This replaces the former
     // per-session listeners, which collided on the shared wildcard port when several
     // sessions reconnected at once (see plan §4 Phase 0 result).
@@ -364,7 +364,7 @@ void BgpRouter::listenConnectionFromPeer(SessionId sessionID)
     }
 }
 
-void BgpRouter::openTCPConnectionToPeer(SessionId sessionID)
+void BgpRouter::openTcpConnectionToPeer(SessionId sessionID)
 {
     EV_DEBUG << "Opening a TCP connection to "
              << _BGPSessions[sessionID]->getPeerAddr()
@@ -423,10 +423,10 @@ void BgpRouter::socketEstablished(TcpSocket *socket)
     if (_BGPSessions[_currSessionId]->getType() == IGP &&
         this->findNextSession(EGP) != static_cast<SessionId>(-1))
     {
-        _BGPSessions[_currSessionId]->getFSM()->TcpConnectionFails();
+        _BGPSessions[_currSessionId]->getFsm()->TcpConnectionFails();
     }
     else {
-        _BGPSessions[_currSessionId]->getFSM()->TcpConnectionConfirmed();
+        _BGPSessions[_currSessionId]->getFsm()->TcpConnectionConfirmed();
     }
     // Note: the shared listening socket is intentionally left listening (it is not a
     // per-session resource and must stay up to accept connections for other sessions).
@@ -437,7 +437,7 @@ void BgpRouter::socketFailure(TcpSocket *socket, int code)
     int connId = socket->getSocketId();
     _currSessionId = findIdFromSocketConnId(_BGPSessions, connId);
     if (_currSessionId != static_cast<SessionId>(-1)) {
-        _BGPSessions[_currSessionId]->getFSM()->TcpConnectionFails();
+        _BGPSessions[_currSessionId]->getFsm()->TcpConnectionFails();
     }
 }
 
@@ -447,7 +447,7 @@ void BgpRouter::socketPeerClosed(TcpSocket *socket)
     int connId = socket->getSocketId();
     _currSessionId = findIdFromSocketConnId(_BGPSessions, connId);
     if (_currSessionId != static_cast<SessionId>(-1))
-        _BGPSessions[_currSessionId]->getFSM()->TcpConnectionFails();
+        _BGPSessions[_currSessionId]->getFsm()->TcpConnectionFails();
 }
 
 void BgpRouter::socketDataArrived(TcpSocket *socket)
@@ -495,7 +495,7 @@ void BgpRouter::processMessage(const BgpOpenMessage& msg)
             << session->getPeerAddr().str(false)
             << " with contents: \n";
     printOpenMessage(msg);
-    session->getFSM()->OpenMsgEvent();
+    session->getFsm()->OpenMsgEvent();
 }
 
 void BgpRouter::processMessage(const BgpKeepAliveMessage& msg)
@@ -505,7 +505,7 @@ void BgpRouter::processMessage(const BgpKeepAliveMessage& msg)
             << session->getPeerAddr().str(false)
             << " with contents: \n";
     printKeepAliveMessage(msg);
-    session->getFSM()->KeepAliveMsgEvent();
+    session->getFsm()->KeepAliveMsgEvent();
 }
 
 void BgpRouter::processMessage(const BgpUpdateMessage& msg)
@@ -515,14 +515,14 @@ void BgpRouter::processMessage(const BgpUpdateMessage& msg)
             << session->getPeerAddr().str(false)
             << " with contents: \n";
     printUpdateMessage(msg);
-    session->getFSM()->UpdateMsgEvent();
+    session->getFsm()->UpdateMsgEvent();
 
     BgpRoutingTableEntry *entry = new BgpRoutingTableEntry();
     entry->setLocalPreference(bgpModule->par("localPreference").intValue());
-    entry->setDestination(msg.getNLRI(0).prefix);
+    entry->setDestination(msg.getNlri(0).prefix);
 
     Ipv4Address netMask(Ipv4Address::ALLONES_ADDRESS);
-    netMask = Ipv4Address::makeNetmask(msg.getNLRI(0).length);
+    netMask = Ipv4Address::makeNetmask(msg.getNlri(0).length);
     entry->setNetmask(netMask);
 
     for (size_t i = 0; i < msg.getPathAttributesArraySize(); i++) {
@@ -688,7 +688,7 @@ BgpProcessResult BgpRouter::decisionProcess(const BgpUpdateMessage& msg, BgpRout
 bool BgpRouter::tieBreakingProcess(BgpRoutingTableEntry *oldEntry, BgpRoutingTableEntry *entry)
 {
     if (entry->getLocalPreference() > oldEntry->getLocalPreference()) {
-        deleteBGPRoutingEntry(oldEntry);
+        deleteBgpRoutingEntry(oldEntry);
         return false;
     }
 
@@ -696,14 +696,14 @@ bool BgpRouter::tieBreakingProcess(BgpRoutingTableEntry *oldEntry, BgpRoutingTab
          having the smallest number of AS numbers present in their
          AS_PATH attributes.*/
     if (entry->getASCount() < oldEntry->getASCount()) {
-        deleteBGPRoutingEntry(oldEntry);
+        deleteBgpRoutingEntry(oldEntry);
         return false;
     }
 
     /* Remove from consideration all routes that are not tied for
          having the lowest Origin number in their Origin attribute.*/
     if (entry->getPathType() < oldEntry->getPathType()) {
-        deleteBGPRoutingEntry(oldEntry);
+        deleteBgpRoutingEntry(oldEntry);
         return false;
     }
 
@@ -745,7 +745,7 @@ void BgpRouter::updateSendProcess(BgpProcessResult type, SessionId sessionIndex,
             type == ROUTE_DESTINATION_CHANGED ||
             type == NEW_SESSION_ESTABLISHED)
         {
-            BgpUpdateNlri NLRI;
+            BgpUpdateNlri nlri;
             std::vector<BgpUpdatePathAttributes *> content;
 
             unsigned int nbAS = entry->getASCount();
@@ -798,10 +798,10 @@ void BgpRouter::updateSendProcess(BgpProcessResult type, SessionId sessionIndex,
             originAttr->setValue((BgpSessionType)entry->getPathType());
 
             Ipv4Address netMask = entry->getNetmask();
-            NLRI.prefix = entry->getDestination().doAnd(netMask);
-            NLRI.length = (unsigned char)netMask.getNetmaskLength();
+            nlri.prefix = entry->getDestination().doAnd(netMask);
+            nlri.length = (unsigned char)netMask.getNetmaskLength();
 
-            (elem).second->sendUpdateMessage(content, NLRI);
+            (elem).second->sendUpdateMessage(content, nlri);
         }
     }
 }
@@ -811,7 +811,7 @@ void BgpRouter::updateSendProcess(BgpProcessResult type, SessionId sessionIndex,
  *  Side effects when returns true:
  *      bgpRoutingTable changed, iterators on bgpRoutingTable will be invalid.
  */
-bool BgpRouter::deleteBGPRoutingEntry(BgpRoutingTableEntry *entry)
+bool BgpRouter::deleteBgpRoutingEntry(BgpRoutingTableEntry *entry)
 {
     for (auto it = bgpRoutingTable.begin();
          it != bgpRoutingTable.end(); it++)
@@ -927,7 +927,7 @@ void BgpRouter::printOpenMessage(const BgpOpenMessage& openMsg)
 {
     EV_INFO << "  My AS: " << openMsg.getMyAS() << "\n";
     EV_INFO << "  Hold time: " << openMsg.getHoldTime() << "s \n";
-    EV_INFO << "  BGP Id: " << openMsg.getBGPIdentifier() << "\n";
+    EV_INFO << "  BGP Id: " << openMsg.getBgpIdentifier() << "\n";
     if (openMsg.getOptionalParameterArraySize() == 0)
         EV_INFO << "  Optional parameters: empty \n";
     for (size_t i = 0; i < openMsg.getOptionalParameterArraySize(); i++) {
@@ -1000,11 +1000,11 @@ void BgpRouter::printUpdateMessage(const BgpUpdateMessage& updateMsg)
         }
     }
 
-    if (updateMsg.getNLRIArraySize() > 0) {
-        auto NLRI_Base = updateMsg.getNLRI(0);
+    if (updateMsg.getNlriArraySize() > 0) {
+        auto nlriBase = updateMsg.getNlri(0);
         EV_INFO << "  Network Layer Reachability Information (NLRI): \n";
-        EV_INFO << "    NLRI length: " << (int)NLRI_Base.length << "\n";
-        EV_INFO << "    NLRI prefix: " << NLRI_Base.prefix << "\n";
+        EV_INFO << "    NLRI length: " << (int)nlriBase.length << "\n";
+        EV_INFO << "    NLRI prefix: " << nlriBase.prefix << "\n";
     }
 }
 

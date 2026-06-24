@@ -79,7 +79,7 @@ void Bgp::handleMessageWhenUp(cMessage *msg)
         else if (msg->isSelfMessage()) // BGP level
             handleTimer(msg);
         else if (!strcmp(msg->getArrivalGate()->getName(), "socketIn")) // TCP level
-            bgpRouter->processMessageFromTCP(msg);
+            bgpRouter->processMessageFromTcp(msg);
         else
             delete msg;
     }
@@ -163,22 +163,22 @@ void Bgp::handleTimer(cMessage *timer)
         switch (timer->getKind()) {
             case START_EVENT_KIND:
                 EV_INFO << "Processing Start Event" << std::endl;
-                pSession->getFSM()->ManualStart();
+                pSession->getFsm()->ManualStart();
                 break;
 
             case CONNECT_RETRY_KIND:
                 EV_INFO << "Expiring Connect Retry Timer" << std::endl;
-                pSession->getFSM()->ConnectRetryTimer_Expires();
+                pSession->getFsm()->ConnectRetryTimer_Expires();
                 break;
 
             case HOLD_TIME_KIND:
                 EV_INFO << "Expiring Hold Timer" << std::endl;
-                pSession->getFSM()->HoldTimer_Expires();
+                pSession->getFsm()->HoldTimer_Expires();
                 break;
 
             case KEEP_ALIVE_KIND:
                 EV_INFO << "Expiring Keep Alive timer" << std::endl;
-                pSession->getFSM()->KeepaliveTimer_Expires();
+                pSession->getFsm()->KeepaliveTimer_Expires();
                 break;
 
             default:

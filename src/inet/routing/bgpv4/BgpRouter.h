@@ -44,7 +44,7 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
     SocketMap _socketMap;
     // A single shared listening socket per router accepts all incoming BGP connections
     // on TCP_PORT (wildcard bind) and demuxes them to sessions by peer address in
-    // processMessageFromTCP(). RFC 4271: a BGP speaker listens for connections on port 179.
+    // processMessageFromTcp(). RFC 4271: a BGP speaker listens for connections on port 179.
     TcpSocket *listeningSocket = nullptr;
     SessionId _currSessionId = 0;
     std::map<SessionId, BgpSession *> _BGPSessions;
@@ -95,7 +95,7 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
     void setNextHopSelf(Ipv4Address peer, bool nextHopSelf);
     void setLocalPreference(Ipv4Address peer, int localPref);
     bool isExternalAddress(const Ipv4Route& rtEntry);
-    void processMessageFromTCP(cMessage *msg);
+    void processMessageFromTcp(cMessage *msg);
 
     void printOpenMessage(const BgpOpenMessage& msg);
     void printUpdateMessage(const BgpUpdateMessage& msg);
@@ -118,11 +118,11 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
 
     friend class BgpSession;
     // functions used by the BgpSession class
-    void getScheduleAt(simtime_t t, cMessage *msg) { bgpModule->scheduleAt(t, msg); }
-    void getCancelAndDelete(cMessage *msg) { bgpModule->cancelAndDelete(msg); }
-    cMessage *getCancelEvent(cMessage *msg) { return bgpModule->cancelEvent(msg); }
-    IIpv4RoutingTable *getIPRoutingTable() { return rt; }
-    std::vector<BgpRoutingTableEntry *> getBGPRoutingTable() { return bgpRoutingTable; }
+    void scheduleAt(simtime_t t, cMessage *msg) { bgpModule->scheduleAt(t, msg); }
+    void cancelAndDelete(cMessage *msg) { bgpModule->cancelAndDelete(msg); }
+    cMessage *cancelEvent(cMessage *msg) { return bgpModule->cancelEvent(msg); }
+    IIpv4RoutingTable *getIpRoutingTable() { return rt; }
+    std::vector<BgpRoutingTableEntry *> getBgpRoutingTable() { return bgpRoutingTable; }
 
     /**
      * \brief active listenSocket for a given session (used by fsm)
@@ -131,7 +131,7 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
     /**
      * \brief active TcpConnection for a given session (used by fsm)
      */
-    void openTCPConnectionToPeer(SessionId sessionID);
+    void openTcpConnectionToPeer(SessionId sessionID);
     /**
      * \brief RFC 4271, 9.2 : Update-Send Process / Sent or not new UPDATE messages to its peers
      */
@@ -148,7 +148,7 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
     void processMessage(const BgpKeepAliveMessage& msg);
     void processMessage(const BgpUpdateMessage& msg);
 
-    bool deleteBGPRoutingEntry(BgpRoutingTableEntry *entry);
+    bool deleteBgpRoutingEntry(BgpRoutingTableEntry *entry);
 
     /**
      * \brief RFC 4271: 9.1. : Decision Process used when an UPDATE message is received

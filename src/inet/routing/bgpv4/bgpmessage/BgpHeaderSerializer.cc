@@ -48,7 +48,7 @@ void BgpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
             if (holdTime > 0 && holdTime < 3)
                 throw cRuntimeError("Cannot serialize BGP OPEN Message: Hold Time must be either 0 or at least 3.");
             stream.writeUint16Be(holdTime);
-            stream.writeIpv4Address(bgpOpenMessage->getBGPIdentifier());
+            stream.writeIpv4Address(bgpOpenMessage->getBgpIdentifier());
             unsigned short optionalParametersLength = bgpOpenMessage->getOptionalParametersLength();
             stream.writeByte(optionalParametersLength);
             unsigned short numOptionalParametersBytes = 0;
@@ -153,8 +153,8 @@ void BgpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
                         throw cRuntimeError("Cannot serialize BGP UPDATE Message: incorrect typeCode: %d.", typeCode);
                 }
             }
-            for (size_t i = 0; i < bgpUpdateMessage->getNLRIArraySize(); ++i) {
-                auto& nlri = bgpUpdateMessage->getNLRI(i);
+            for (size_t i = 0; i < bgpUpdateMessage->getNlriArraySize(); ++i) {
+                auto& nlri = bgpUpdateMessage->getNlri(i);
                 uint8_t length = nlri.length;
                 stream.writeByte(length);
                 stream.writeNBitsOfUint64Be(nlri.prefix.getInt() >> (32 - length), length);
@@ -206,7 +206,7 @@ const Ptr<Chunk> BgpHeaderSerializer::deserialize(MemoryInputStream& stream) con
             if (holdTime > 0 && holdTime < 3)
                 bgpOpenMessage->markIncorrect();
             bgpOpenMessage->setHoldTime(SimTime(holdTime, SIMTIME_S));
-            bgpOpenMessage->setBGPIdentifier(stream.readIpv4Address());
+            bgpOpenMessage->setBgpIdentifier(stream.readIpv4Address());
             unsigned short optionalParametersLength = stream.readByte();
             bgpOpenMessage->setOptionalParametersLength(optionalParametersLength);
             for (size_t i = 0; optionalParametersLength > 0; ++i) {
@@ -425,7 +425,7 @@ const Ptr<Chunk> BgpHeaderSerializer::deserialize(MemoryInputStream& stream) con
             int nlri_size = (totalLength - BGP_HEADER_OCTETS.get() - tmp_withdrawnRoutesLength - tmp_totalPathAttributeLength - 4);
             for (size_t i = 0; nlri_size > 0; ++i) {
                 BgpUpdateNlri *nlri = new BgpUpdateNlri();
-                bgpUpdateMessage->setNLRIArraySize(i + 1);
+                bgpUpdateMessage->setNlriArraySize(i + 1);
                 uint8_t length = stream.readByte();
                 nlri->length = length;
                 uint32_t prefix = stream.readNBitsToUint64Be(length);
@@ -436,7 +436,7 @@ const Ptr<Chunk> BgpHeaderSerializer::deserialize(MemoryInputStream& stream) con
                 }
                 else
                     nlri_size -= (1 + (length / 8));
-                bgpUpdateMessage->setNLRI(i, *nlri);
+                bgpUpdateMessage->setNlri(i, *nlri);
             }
             return bgpUpdateMessage;
         }
