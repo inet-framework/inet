@@ -7,6 +7,7 @@
 #ifndef __INET_BGPROUTINGTABLEENTRY_H
 #define __INET_BGPROUTINGTABLEENTRY_H
 
+#include "inet/networklayer/contract/IRoute.h"
 #include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
 #include "inet/routing/bgpv4/BgpCommon.h"
 
@@ -14,55 +15,91 @@ namespace inet {
 
 namespace bgp {
 
-class INET_API BgpRoutingTableEntry : public Ipv4Route
+// BGP per-route attributes, mixed into an address-family-specific route so a single object
+// can live both in the BGP RIB (bgpRoutingTable) and in the system routing table. The
+// decision process holds BgpRouteInfo* and reaches the underlying route via asRoute() (or
+// the generic forwarders below), so it is address-family agnostic; concrete entries are
+// BgpRoutingTableEntry (over Ipv4Route) and BgpRoutingTableEntry6 (over Ipv6Route).
+class INET_API BgpRouteInfo
 {
-  private:
-    enum { DEFAULT_COST = 1} ;
+  public:
+    enum { DEFAULT_COST = 1 };
     typedef unsigned char RoutingPathType;
-    // destinationID is RoutingEntry::host
-    // addressMask is RoutingEntry::netmask
+
+  protected:
     RoutingPathType _pathType = INCOMPLETE;
     std::vector<AsId> _ASList;
     int localPreference = 0;
     bool iBgpLearned = false;
 
   public:
-    BgpRoutingTableEntry(void);
-    BgpRoutingTableEntry(const Ipv4Route *entry);
-    virtual ~BgpRoutingTableEntry(void) {}
+    virtual ~BgpRouteInfo() {}
 
+    // the underlying address-family route (this object, viewed as an IRoute)
+    virtual IRoute *asRoute() = 0;
+    virtual const IRoute *asRoute() const = 0;
+
+    // BGP attributes
     void setPathType(RoutingPathType type) { _pathType = type; }
-    RoutingPathType getPathType(void) const { return _pathType; }
+    RoutingPathType getPathType() const { return _pathType; }
     static const std::string getPathTypeString(RoutingPathType type);
-    void addAS(AsId newAS) { _ASList.push_back(newAS); }
-    unsigned int getASCount(void) const { return _ASList.size(); }
+    void addAS(AsId newAs) { _ASList.push_back(newAs); }
+    unsigned int getASCount() const { return _ASList.size(); }
     AsId getAS(unsigned int index) const { return _ASList[index]; }
-    int getLocalPreference(void) const { return localPreference; }
+    int getLocalPreference() const { return localPreference; }
     void setLocalPreference(int l) { localPreference = l; }
-    bool isIBgpLearned(void) { return iBgpLearned; }
+    bool isIBgpLearned() const { return iBgpLearned; }
     void setIBgpLearned(bool i) { iBgpLearned = i; }
-    virtual std::string str() const;
+
+    // generic route accessors, forwarded to the underlying IRoute
+    L3Address getDestinationAsGeneric() const { return asRoute()->getDestinationAsGeneric(); }
+    void setDestination(const L3Address& dest) { asRoute()->setDestination(dest); }
+    int getPrefixLength() const { return asRoute()->getPrefixLength(); }
+    void setPrefixLength(int len) { asRoute()->setPrefixLength(len); }
+    L3Address getNextHopAsGeneric() const { return asRoute()->getNextHopAsGeneric(); }
+    void setNextHop(const L3Address& nextHop) { asRoute()->setNextHop(nextHop); }
+    NetworkInterface *getInterface() const { return asRoute()->getInterface(); }
+    void setInterface(NetworkInterface *ie) { asRoute()->setInterface(ie); }
+    IRoute::SourceType getSourceType() const { return asRoute()->getSourceType(); }
+    void setSourceType(IRoute::SourceType type) { asRoute()->setSourceType(type); }
+    int getMetric() const { return asRoute()->getMetric(); }
+    void setMetric(int m) { asRoute()->setMetric(m); }
+    void setAdminDist(unsigned int d) { asRoute()->setAdminDist(d); }
+
+    std::string bgpStr() const;
 };
 
-inline BgpRoutingTableEntry::BgpRoutingTableEntry(void)
+// IPv4 BGP RIB entry: an Ipv4Route carrying BGP attributes.
+class INET_API BgpRoutingTableEntry : public Ipv4Route, public BgpRouteInfo
 {
-    setNetmask(Ipv4Address::ALLONES_ADDRESS);
-    setMetric(DEFAULT_COST);
-    setSourceType(IRoute::BGP);
+  public:
+    BgpRoutingTableEntry();
+    BgpRoutingTableEntry(const IRoute *entry);
+    virtual ~BgpRoutingTableEntry() {}
+    virtual IRoute *asRoute() override { return this; }
+    virtual const IRoute *asRoute() const override { return this; }
+    virtual std::string str() const override { return bgpStr(); }
+};
+
+inline BgpRoutingTableEntry::BgpRoutingTableEntry()
+{
+    Ipv4Route::setNetmask(Ipv4Address::ALLONES_ADDRESS);
+    Ipv4Route::setMetric(DEFAULT_COST);
+    Ipv4Route::setSourceType(IRoute::BGP);
 }
 
-inline BgpRoutingTableEntry::BgpRoutingTableEntry(const Ipv4Route *entry)
+inline BgpRoutingTableEntry::BgpRoutingTableEntry(const IRoute *entry)
 {
-    setDestination(entry->getDestination());
-    setNetmask(entry->getNetmask());
-    setGateway(entry->getGateway());
-    setInterface(entry->getInterface());
-    setMetric(DEFAULT_COST);
-    setSourceType(IRoute::BGP);
-    setAdminDist(dBGPExternal);
+    Ipv4Route::setDestination(entry->getDestinationAsGeneric().toIpv4());
+    Ipv4Route::setPrefixLength(entry->getPrefixLength());
+    Ipv4Route::setNextHop(entry->getNextHopAsGeneric());
+    Ipv4Route::setInterface(entry->getInterface());
+    Ipv4Route::setMetric(DEFAULT_COST);
+    Ipv4Route::setSourceType(IRoute::BGP);
+    Ipv4Route::setAdminDist(Ipv4Route::dBGPExternal);
 }
 
-inline const std::string BgpRoutingTableEntry::getPathTypeString(RoutingPathType type)
+inline const std::string BgpRouteInfo::getPathTypeString(RoutingPathType type)
 {
     if (type == IGP)
         return "IGP";
@@ -74,21 +111,43 @@ inline const std::string BgpRoutingTableEntry::getPathTypeString(RoutingPathType
     return "Unknown";
 }
 
-inline std::ostream& operator<<(std::ostream& out, BgpRoutingTableEntry& entry)
+inline std::string BgpRouteInfo::bgpStr() const
 {
-    if (entry.getDestination().isUnspecified())
-        out << "0.0.0.0";
+    std::stringstream out;
+    out << "BGP ";
+    if (getDestinationAsGeneric().isUnspecified())
+        out << "*";
     else
-        out << entry.getDestination();
-    out << "/";
-    if (entry.getNetmask().isUnspecified())
-        out << "0";
+        out << getDestinationAsGeneric();
+    out << "/" << getPrefixLength();
+    out << " gw:";
+    if (getNextHopAsGeneric().isUnspecified())
+        out << "*  ";
     else
-        out << entry.getNetmask().getNetmaskLength();
-    out << " nextHop: " << entry.getGateway().str(false)
+        out << getNextHopAsGeneric() << "  ";
+    out << "metric:" << getMetric() << "  ";
+    out << "if:" << (getInterface() ? getInterface()->getInterfaceName() : "*");
+    out << " origin: " << getPathTypeString(_pathType);
+    if (iBgpLearned)
+        out << " localPref: " << localPreference;
+    out << " ASlist: ";
+    for (auto& element : _ASList)
+        out << element << ' ';
+
+    return out.str();
+}
+
+inline std::ostream& operator<<(std::ostream& out, const BgpRouteInfo& entry)
+{
+    if (entry.getDestinationAsGeneric().isUnspecified())
+        out << "*";
+    else
+        out << entry.getDestinationAsGeneric();
+    out << "/" << entry.getPrefixLength()
+        << " nextHop: " << entry.getNextHopAsGeneric()
         << " cost: " << entry.getMetric()
-        << " if: " << entry.getInterfaceName()
-        << " origin: " << BgpRoutingTableEntry::getPathTypeString(entry.getPathType());
+        << " if: " << (entry.getInterface() ? entry.getInterface()->getInterfaceName() : "*")
+        << " origin: " << BgpRouteInfo::getPathTypeString(entry.getPathType());
     if (entry.isIBgpLearned())
         out << " localPref: " << entry.getLocalPreference();
     out << " ASlist: ";
@@ -98,47 +157,8 @@ inline std::ostream& operator<<(std::ostream& out, BgpRoutingTableEntry& entry)
     return out;
 }
 
-inline std::string BgpRoutingTableEntry::str() const
-{
-    std::stringstream out;
-    out << getSourceTypeAbbreviation();
-    out << " ";
-    if (getDestination().isUnspecified())
-        out << "0.0.0.0";
-    else
-        out << getDestination();
-    out << "/";
-    if (getNetmask().isUnspecified())
-        out << "0";
-    else
-        out << getNetmask().getNetmaskLength();
-    out << " gw:";
-    if (getGateway().isUnspecified())
-        out << "*  ";
-    else
-        out << getGateway() << "  ";
-    if (getRoutingTable() && getRoutingTable()->isAdminDistEnabled())
-        out << "AD:" << getAdminDist() << "  ";
-    out << "metric:" << getMetric() << "  ";
-    out << "if:";
-    if (!getInterface())
-        out << "*";
-    else
-        out << getInterfaceName();
-
-    out << " origin: " << BgpRoutingTableEntry::getPathTypeString(_pathType);
-    if (iBgpLearned)
-        out << " localPref: " << getLocalPreference();
-    out << " ASlist: ";
-    for (auto& element : _ASList)
-        out << element << ' ';
-
-    return out.str();
-}
-
 } // namespace bgp
 
 } // namespace inet
 
 #endif
-

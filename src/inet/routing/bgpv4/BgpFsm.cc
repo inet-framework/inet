@@ -417,7 +417,7 @@ void Established::entry()
             const Ipv4Route *rtEntry = check_and_cast<const Ipv4Route *>(ipRoutingTable->getRoute(i));
             if (session.isRouteExcluded(*rtEntry))
                 continue;
-            BgpRoutingTableEntry *bgpEntry = new BgpRoutingTableEntry(rtEntry);
+            BgpRouteInfo *bgpEntry = session.createBgpRoutingTableEntry(rtEntry);
             bgpEntry->addAS(session._info.ASValue);
             session.updateSendProcess(bgpEntry);
             delete bgpEntry;

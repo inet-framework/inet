@@ -177,6 +177,18 @@ void BgpRouter::setDefaultConfig()
     }
 }
 
+BgpRouteInfo *BgpRouter::createBgpRoutingTableEntry()
+{
+    // 3b-2b will branch on isIpv6() to return a BgpRoutingTableEntry6 (over Ipv6Route).
+    return new BgpRoutingTableEntry();
+}
+
+BgpRouteInfo *BgpRouter::createBgpRoutingTableEntry(const IRoute *from)
+{
+    // 3b-2b will branch on isIpv6() to return a BgpRoutingTableEntry6 (over Ipv6Route).
+    return new BgpRoutingTableEntry(from);
+}
+
 void BgpRouter::addToAdvertiseList(Ipv4Address address)
 {
     bool routeFound = false;
@@ -197,14 +209,14 @@ void BgpRouter::addToAdvertiseList(Ipv4Address address)
         throw cRuntimeError("Network address '%s' is already added to the advertised list of %s", address.str(false).c_str(), bgpModule->getOwner()->getFullName());
     advertiseList.push_back(address);
 
-    BgpRoutingTableEntry *bgpEntry = new BgpRoutingTableEntry(rtEntry);
+    BgpRouteInfo *bgpEntry = createBgpRoutingTableEntry(rtEntry);
     bgpEntry->addAS(myAsId);
     bgpEntry->setPathType(IGP);
     bgpEntry->setLocalPreference(bgpModule->par("localPreference").intValue());
     bgpRoutingTable.push_back(bgpEntry);
 }
 
-void BgpRouter::addToPrefixList(std::string nodeName, BgpRoutingTableEntry *entry)
+void BgpRouter::addToPrefixList(std::string nodeName, BgpRouteInfo *entry)
 {
     if (nodeName == "DenyRouteIN") {
         _prefixListIN.push_back(entry);
@@ -518,7 +530,7 @@ void BgpRouter::processMessage(const BgpUpdateMessage& msg)
     printUpdateMessage(msg);
     session->getFsm()->UpdateMsgEvent();
 
-    BgpRoutingTableEntry *entry = new BgpRoutingTableEntry();
+    BgpRouteInfo *entry = createBgpRoutingTableEntry();
     entry->setLocalPreference(bgpModule->par("localPreference").intValue());
     entry->setDestination(msg.getNlri(0).prefix);
     entry->setPrefixLength(msg.getNlri(0).length);
@@ -548,7 +560,7 @@ void BgpRouter::processMessage(const BgpUpdateMessage& msg)
         delete entry;
 }
 
-BgpProcessResult BgpRouter::asLoopDetection(BgpRoutingTableEntry *entry, AsId myAS)
+BgpProcessResult BgpRouter::asLoopDetection(BgpRouteInfo *entry, AsId myAS)
 {
     for (unsigned int i = 1; i < entry->getASCount(); i++) {
         if (myAS == entry->getAS(i))
@@ -558,7 +570,7 @@ BgpProcessResult BgpRouter::asLoopDetection(BgpRoutingTableEntry *entry, AsId my
 }
 
 /* add entry to routing table, or delete entry */
-BgpProcessResult BgpRouter::decisionProcess(const BgpUpdateMessage& msg, BgpRoutingTableEntry *entry, SessionId sessionIndex)
+BgpProcessResult BgpRouter::decisionProcess(const BgpUpdateMessage& msg, BgpRouteInfo *entry, SessionId sessionIndex)
 {
     // Don't add the route if it exists in PrefixListINTable or in ASListINTable
     if (isInTable(_prefixListIN, entry) != (unsigned long)-1 || isInASList(_ASListIN, entry)) {
@@ -583,7 +595,7 @@ BgpProcessResult BgpRouter::decisionProcess(const BgpUpdateMessage& msg, BgpRout
             }
             case BgpUpdateAttributeTypeCode::NEXT_HOP: {
                 auto attr = check_and_cast<const BgpUpdatePathAttributesNextHop *>(msg.getPathAttributes(i));
-                entry->setGateway(attr->getValue());
+                entry->setNextHop(attr->getValue());
                 break;
             }
             case BgpUpdateAttributeTypeCode::LOCAL_PREF: {
@@ -618,12 +630,12 @@ BgpProcessResult BgpRouter::decisionProcess(const BgpUpdateMessage& msg, BgpRout
         else {
             entry->setInterface(_bgpSessions[sessionIndex]->getLinkIntf());
             bgpRoutingTable.push_back(entry);
-            rt->addRoute(entry);
+            rt->addRoute(entry->asRoute());
             return ROUTE_DESTINATION_CHANGED;
         }
     }
 
-    int indexIp = isInRoutingTable(rt, entry->getDestination());
+    int indexIp = isInRoutingTable(rt, entry->getDestinationAsGeneric());
     // if the route already exists in the IPv4 routing table
     if (indexIp != -1) {
         // and it was not added by BGP before
@@ -631,13 +643,13 @@ BgpProcessResult BgpRouter::decisionProcess(const BgpUpdateMessage& msg, BgpRout
             // and the Update msg is coming from IGP session
             if (_bgpSessions[sessionIndex]->getType() == IGP) {
                 Ipv4Route *oldEntry = check_and_cast<Ipv4Route *>(rt->getRoute(indexIp));
-                BgpRoutingTableEntry *bgpEntry = new BgpRoutingTableEntry(oldEntry);
+                BgpRouteInfo *bgpEntry = createBgpRoutingTableEntry(oldEntry);
                 bgpEntry->addAS(myAsId);
                 bgpEntry->setPathType(IGP);
                 bgpEntry->setAdminDist(Ipv4Route::dBGPInternal);
                 bgpEntry->setIBgpLearned(true);
                 bgpEntry->setLocalPreference(entry->getLocalPreference());
-                rt->addRoute(bgpEntry);
+                rt->addRoute(bgpEntry->asRoute());
                 // Note: No need to delete the existing route. Let the administrative distance decides.
 //                rt->deleteRoute(oldEntry);
             }
@@ -651,9 +663,9 @@ BgpProcessResult BgpRouter::decisionProcess(const BgpUpdateMessage& msg, BgpRout
         // and the Update msg is coming from IGP session
         if (_bgpSessions[sessionIndex]->getType() == IGP) {
             // if the next hop is reachable
-            if (isReachable(entry->getGateway())) {
+            if (isReachable(entry->getNextHopAsGeneric())) {
                 entry->setInterface(_bgpSessions[sessionIndex]->getLinkIntf());
-                rt->addRoute(entry);
+                rt->addRoute(entry->asRoute());
             }
         }
     }
@@ -662,8 +674,8 @@ BgpProcessResult BgpRouter::decisionProcess(const BgpUpdateMessage& msg, BgpRout
     bgpRoutingTable.push_back(entry);
 
     if (_bgpSessions[sessionIndex]->getType() == EGP) {
-        if (isReachable(entry->getGateway()))
-            rt->addRoute(entry);
+        if (isReachable(entry->getNextHopAsGeneric()))
+            rt->addRoute(entry->asRoute());
 
         // if redistributeInternal is true, then insert the new external route into the OSPF (if exists).
         // The OSPF module then floods AS-External LSA into the AS and lets other routers know
@@ -673,8 +685,8 @@ BgpProcessResult BgpRouter::decisionProcess(const BgpUpdateMessage& msg, BgpRout
             if (!ie)
                 throw cRuntimeError("Model error: interface entry is nullptr");
             ospfv2::Ipv4AddressRange ospfNetAddr;
-            ospfNetAddr.address = entry->getDestination();
-            ospfNetAddr.mask = entry->getNetmask();
+            ospfNetAddr.address = entry->getDestinationAsGeneric().toIpv4();
+            ospfNetAddr.mask = Ipv4Address::makeNetmask(entry->getPrefixLength());
             if (!ospfModule)
                 throw cRuntimeError("Cannot find the OSPF module on router %s", bgpModule->getFullName());
             ospfModule->insertExternalRoute(ie->getInterfaceId(), ospfNetAddr);
@@ -683,7 +695,7 @@ BgpProcessResult BgpRouter::decisionProcess(const BgpUpdateMessage& msg, BgpRout
     return NEW_ROUTE_ADDED; // FIXME model error: When returns NEW_ROUTE_ADDED then entry stored in bgpRoutingTable, but sometimes not stored in rt
 }
 
-bool BgpRouter::tieBreakingProcess(BgpRoutingTableEntry *oldEntry, BgpRoutingTableEntry *entry)
+bool BgpRouter::tieBreakingProcess(BgpRouteInfo *oldEntry, BgpRouteInfo *entry)
 {
     if (entry->getLocalPreference() > oldEntry->getLocalPreference()) {
         deleteBgpRoutingEntry(oldEntry);
@@ -708,7 +720,7 @@ bool BgpRouter::tieBreakingProcess(BgpRoutingTableEntry *oldEntry, BgpRoutingTab
     return true;
 }
 
-void BgpRouter::updateSendProcess(BgpProcessResult type, SessionId sessionIndex, BgpRoutingTableEntry *entry)
+void BgpRouter::updateSendProcess(BgpProcessResult type, SessionId sessionIndex, BgpRouteInfo *entry)
 {
     // Don't send the update Message if the route exists in listOUTTable
     // SESSION = EGP : send an update message to all BGP Peer (EGP && IGP)
@@ -725,7 +737,7 @@ void BgpRouter::updateSendProcess(BgpProcessResult type, SessionId sessionIndex,
         }
 
         // if the next hop is not reachable
-        if (!isReachable(entry->getGateway()))
+        if (!isReachable(entry->getNextHopAsGeneric()))
             continue;
 
         BgpSessionType sType = _bgpSessions[sessionIndex]->getType();
@@ -734,7 +746,7 @@ void BgpRouter::updateSendProcess(BgpProcessResult type, SessionId sessionIndex,
         // advertising it to another internal peer.
         if (entry->isIBgpLearned() && sType == IGP && elem.second->getType() == IGP) {
             EV_INFO << "BGP Split Horizon: prevent advertisement of network "
-                    << entry->getDestination() << "\\" << entry->getNetmask();
+                    << entry->getDestinationAsGeneric() << "/" << entry->getPrefixLength();
             continue;
         }
 
@@ -789,7 +801,7 @@ void BgpRouter::updateSendProcess(BgpProcessResult type, SessionId sessionIndex,
                 nextHopAttr->setValue(iftEntry->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
             }
             else
-                nextHopAttr->setValue(entry->getGateway());
+                nextHopAttr->setValue(entry->getNextHopAsGeneric().toIpv4());
 
             auto originAttr = new BgpUpdatePathAttributesOrigin;
             content.push_back(originAttr);
@@ -808,7 +820,7 @@ void BgpRouter::updateSendProcess(BgpProcessResult type, SessionId sessionIndex,
  *  Side effects when returns true:
  *      bgpRoutingTable changed, iterators on bgpRoutingTable will be invalid.
  */
-bool BgpRouter::deleteBgpRoutingEntry(BgpRoutingTableEntry *entry)
+bool BgpRouter::deleteBgpRoutingEntry(BgpRouteInfo *entry)
 {
     for (auto it = bgpRoutingTable.begin();
          it != bgpRoutingTable.end(); it++)
@@ -817,7 +829,7 @@ bool BgpRouter::deleteBgpRoutingEntry(BgpRoutingTableEntry *entry)
             entry->getDestinationAsGeneric().getPrefix(entry->getPrefixLength()))
         {
             bgpRoutingTable.erase(it);
-            rt->deleteRoute(entry);
+            rt->deleteRoute(entry->asRoute());
             return true;
         }
     }
@@ -825,11 +837,11 @@ bool BgpRouter::deleteBgpRoutingEntry(BgpRoutingTableEntry *entry)
 }
 
 /*return index of the Ipv4 table if the route is found, -1 else*/
-int BgpRouter::isInRoutingTable(IRoutingTable *rtTable, Ipv4Address addr)
+int BgpRouter::isInRoutingTable(IRoutingTable *rtTable, const L3Address& addr)
 {
     for (int i = 0; i < rtTable->getNumRoutes(); i++) {
         const IRoute *entry = rtTable->getRoute(i);
-        if (L3Address(addr).getPrefix(entry->getPrefixLength()) == entry->getDestinationAsGeneric().getPrefix(entry->getPrefixLength())) {
+        if (addr.getPrefix(entry->getPrefixLength()) == entry->getDestinationAsGeneric().getPrefix(entry->getPrefixLength())) {
             if (isDefaultRoute(entry) && !addr.isUnspecified())
                 continue;
             else
@@ -851,10 +863,10 @@ SessionId BgpRouter::findIdFromSocketConnId(std::map<SessionId, BgpSession *> se
 }
 
 /*return index of the table if the route is found, -1 else*/
-unsigned long BgpRouter::isInTable(std::vector<BgpRoutingTableEntry *> rtTable, BgpRoutingTableEntry *entry)
+unsigned long BgpRouter::isInTable(std::vector<BgpRouteInfo *> rtTable, BgpRouteInfo *entry)
 {
     for (unsigned long i = 0; i < rtTable.size(); i++) {
-        BgpRoutingTableEntry *entryCur = rtTable[i];
+        BgpRouteInfo *entryCur = rtTable[i];
         if (entry->getDestinationAsGeneric().getPrefix(entry->getPrefixLength()) ==
             entryCur->getDestinationAsGeneric().getPrefix(entryCur->getPrefixLength()))
         {
@@ -865,7 +877,7 @@ unsigned long BgpRouter::isInTable(std::vector<BgpRoutingTableEntry *> rtTable, 
 }
 
 /*return true if the AS is found, false else*/
-bool BgpRouter::isInASList(std::vector<AsId> ASList, BgpRoutingTableEntry *entry)
+bool BgpRouter::isInASList(std::vector<AsId> ASList, BgpRouteInfo *entry)
 {
     for (auto& elem : ASList) {
         for (unsigned int i = 0; i < entry->getASCount(); i++) {
@@ -1122,7 +1134,7 @@ bool BgpRouter::isDefaultRoute(const IRoute *entry) const
     return entry->getDestinationAsGeneric().isUnspecified() && entry->getPrefixLength() == 0;
 }
 
-bool BgpRouter::isReachable(const Ipv4Address addr) const
+bool BgpRouter::isReachable(const L3Address& addr) const
 {
     if (addr.isUnspecified())
         return true;
@@ -1130,7 +1142,7 @@ bool BgpRouter::isReachable(const Ipv4Address addr) const
     for (int i = 0; i < rt->getNumRoutes(); i++) {
         IRoute *route = rt->getRoute(i);
         if (!isDefaultRoute(route) && route->getSourceType() != IRoute::BGP) {
-            if (L3Address(addr).getPrefix(route->getPrefixLength()) == route->getDestinationAsGeneric().getPrefix(route->getPrefixLength()))
+            if (addr.getPrefix(route->getPrefixLength()) == route->getDestinationAsGeneric().getPrefix(route->getPrefixLength()))
                 return true;
         }
     }

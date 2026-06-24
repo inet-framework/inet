@@ -232,9 +232,9 @@ void BgpConfigReader::loadASConfig(cXMLElementList& ASConfig)
             }
         }
         else if (nodeName == "DenyRoute" || nodeName == "DenyRouteIN" || nodeName == "DenyRouteOUT") {
-            BgpRoutingTableEntry *entry = new BgpRoutingTableEntry(); // FIXME Who will delete this entry?
+            BgpRouteInfo *entry = bgpRouter->createBgpRoutingTableEntry(); // FIXME Who will delete this entry?
             entry->setDestination(Ipv4Address((elem)->getAttribute("Address")));
-            entry->setNetmask(Ipv4Address((elem)->getAttribute("Netmask")));
+            entry->setPrefixLength(Ipv4Address((elem)->getAttribute("Netmask")).getNetmaskLength());
             bgpRouter->addToPrefixList(nodeName, entry);
         }
         else if (nodeName == "DenyAS" || nodeName == "DenyASIN" || nodeName == "DenyASOUT") {

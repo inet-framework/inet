@@ -56,7 +56,7 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
     uint32_t numIgpSessions = 0;
     Ipv4Address internalAddress = Ipv4Address::UNSPECIFIED_ADDRESS;
 
-    typedef std::vector<BgpRoutingTableEntry *> RoutingTableEntryVector;
+    typedef std::vector<BgpRouteInfo *> RoutingTableEntryVector;
     RoutingTableEntryVector bgpRoutingTable; // The BGP routing table
     std::vector<Ipv4Address> advertiseList;
     RoutingTableEntryVector _prefixListIN;
@@ -95,7 +95,10 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
     SessionId createIbgpSession(const char *peerAddr);
     void setTimer(SessionId id, simtime_t *delayTab);
     void addToAdvertiseList(Ipv4Address address);
-    void addToPrefixList(std::string nodeName, BgpRoutingTableEntry *entry);
+    void addToPrefixList(std::string nodeName, BgpRouteInfo *entry);
+    // create an address-family-appropriate BGP RIB entry (Ipv4Route- or Ipv6Route-backed)
+    BgpRouteInfo *createBgpRoutingTableEntry();
+    BgpRouteInfo *createBgpRoutingTableEntry(const IRoute *from);
     void addToAsList(std::string nodeName, AsId id);
     void setNextHopSelf(Ipv4Address peer, bool nextHopSelf);
     void setLocalPreference(Ipv4Address peer, int localPref);
@@ -127,7 +130,7 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
     void cancelAndDelete(cMessage *msg) { bgpModule->cancelAndDelete(msg); }
     cMessage *cancelEvent(cMessage *msg) { return bgpModule->cancelEvent(msg); }
     IRoutingTable *getIpRoutingTable() { return rt; }
-    std::vector<BgpRoutingTableEntry *> getBgpRoutingTable() { return bgpRoutingTable; }
+    std::vector<BgpRouteInfo *> getBgpRoutingTable() { return bgpRoutingTable; }
 
     /**
      * \brief active listenSocket for a given session (used by fsm)
@@ -140,7 +143,7 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
     /**
      * \brief RFC 4271, 9.2 : Update-Send Process / Sent or not new UPDATE messages to its peers
      */
-    void updateSendProcess(BgpProcessResult decisionProcessResult, SessionId sessionIndex, BgpRoutingTableEntry *entry);
+    void updateSendProcess(BgpProcessResult decisionProcessResult, SessionId sessionIndex, BgpRouteInfo *entry);
     /**
      * \brief find the next SessionId compared to his type and start this session if boolean is true
      */
@@ -153,14 +156,14 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
     void processMessage(const BgpKeepAliveMessage& msg);
     void processMessage(const BgpUpdateMessage& msg);
 
-    bool deleteBgpRoutingEntry(BgpRoutingTableEntry *entry);
+    bool deleteBgpRoutingEntry(BgpRouteInfo *entry);
 
     /**
      * \brief RFC 4271: 9.1. : Decision Process used when an UPDATE message is received
      *  As matches, routes are sent or not to UpdateSentProcess
      *  The result can be ROUTE_DESTINATION_CHANGED, NEW_ROUTE_ADDED or 0 if no routingTable modification
      */
-    BgpProcessResult decisionProcess(const BgpUpdateMessage& msg, BgpRoutingTableEntry *entry, SessionId sessionIndex);
+    BgpProcessResult decisionProcess(const BgpUpdateMessage& msg, BgpRouteInfo *entry, SessionId sessionIndex);
 
     /**
      * \brief RFC 4271: 9.1.2.2 Breaking Ties used when BGP speaker may have several routes
@@ -168,21 +171,21 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
      *
      * \return bool, true if this process changed the route, false else
      */
-    bool tieBreakingProcess(BgpRoutingTableEntry *oldEntry, BgpRoutingTableEntry *entry);
+    bool tieBreakingProcess(BgpRouteInfo *oldEntry, BgpRouteInfo *entry);
 
-    bool isInASList(std::vector<AsId> ASList, BgpRoutingTableEntry *entry);
-    unsigned long isInTable(std::vector<BgpRoutingTableEntry *> rtTable, BgpRoutingTableEntry *entry);
+    bool isInASList(std::vector<AsId> ASList, BgpRouteInfo *entry);
+    unsigned long isInTable(std::vector<BgpRouteInfo *> rtTable, BgpRouteInfo *entry);
 
     bool ospfExist(IRoutingTable *rtTable);
     // check if the route is in OSPF external Ipv4RoutingTable
     int checkExternalRoute(const Ipv4Route *ospfRoute) { return ospfModule->checkExternalRoute(ospfRoute->getDestination()); }
-    BgpProcessResult asLoopDetection(BgpRoutingTableEntry *entry, AsId myAS);
-    int isInRoutingTable(IRoutingTable *rtTable, Ipv4Address addr);
+    BgpProcessResult asLoopDetection(BgpRouteInfo *entry, AsId myAS);
+    int isInRoutingTable(IRoutingTable *rtTable, const L3Address& addr);
     SessionId findIdFromPeerAddr(std::map<SessionId, BgpSession *> sessions, Ipv4Address peerAddr);
     SessionId findIdFromSocketConnId(std::map<SessionId, BgpSession *> sessions, int connId);
     bool isRouteExcluded(const Ipv4Route& rtEntry);
     bool isDefaultRoute(const IRoute *entry) const;
-    bool isReachable(const Ipv4Address addr) const;
+    bool isReachable(const L3Address& addr) const;
 };
 
 } // namespace bgp

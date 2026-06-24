@@ -109,9 +109,10 @@ public:
     TcpSocket *getSocket() const { return _info.socket; }
     int getEbgpMultihop() const { return _info.ebgpMultihop; }
     IRoutingTable *getIpRoutingTable() const { return bgpRouter.getIpRoutingTable(); }
-    std::vector<BgpRoutingTableEntry *> getBgpRoutingTable() const { return bgpRouter.getBgpRoutingTable(); }
+    std::vector<BgpRouteInfo *> getBgpRoutingTable() const { return bgpRouter.getBgpRoutingTable(); }
+    BgpRouteInfo *createBgpRoutingTableEntry(const IRoute *from) const { return bgpRouter.createBgpRoutingTableEntry(from); }
     Macho::Machine<fsm::TopState>& getFsm() const { return *_fsm; }
-    void updateSendProcess(BgpRoutingTableEntry *entry) const { return bgpRouter.updateSendProcess(NEW_SESSION_ESTABLISHED, _info.sessionId, entry); }
+    void updateSendProcess(BgpRouteInfo *entry) const { return bgpRouter.updateSendProcess(NEW_SESSION_ESTABLISHED, _info.sessionId, entry); }
     bool isRouteExcluded(const Ipv4Route& rtEntry) const { return bgpRouter.isRouteExcluded(rtEntry); }
 };
 
