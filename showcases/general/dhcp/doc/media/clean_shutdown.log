@@ -1,0 +1,3 @@
+[30.00000000 client[0].app[0]] Sending DHCPRELEASE for 192.168.1.10 to server 192.168.1.1.
+[30.00000000 client[0].app[0]] Sending packet ... DHCPRELEASE (259 B) ... op = 1 (BOOTREQUEST), xid = 243580376, ciaddr = 192.168.1.10, chaddr = 0A-AA-00-00-00-06, ... options = (msgType=DHCPRELEASE, clientId=0A-AA-00-00-00-06, serverId=192.168.1.1)
+[30.00007342 dhcpServer.app[0]] DHCPRELEASE received: returning 192.168.1.10 from 0A-AA-00-00-00-06 to the pool.

@@ -471,8 +471,31 @@ The scenario script:
 
 The DHCPRELEASE is visible in the server-side pcap as a single
 BOOTREQUEST with message type ``DHCPRELEASE``, and the server log
-shows the address returning to the pool the moment it arrives. With
-the pool sized generously (50 addresses) the client typically
+shows the address returning to the pool the moment it arrives:
+
+.. literalinclude:: media/clean_shutdown.log
+   :language: text
+
+..
+   LOG RECIPE (redo via the "omnetpp-mcp-sim" skill)
+   config:   CleanShutdown              # ../omnetpp.ini
+   seed:     default
+   shows:    client[0] sends DHCPRELEASE at the t=30 s graceful
+             shutdown (ciaddr = 192.168.1.10 names the address being
+             given back, options carry msgType=DHCPRELEASE +
+             serverId), and the server returns the address to the
+             pool within microseconds
+   anchor:   t=30 s shutdown (ScenarioManager script); both lines fire
+             essentially at t=30 — the server log timestamp is the
+             propagation delay through the switch / IPv4 stack
+   capture:  inet_dbg -u Cmdenv -c CleanShutdown --cmdenv-express-mode=false
+             --cmdenv-log-prefix='[%t %M] ' --cmdenv-event-banners=false
+             then grep ".app\[0\]\]" for "Sending DHCPRELEASE" /
+             "DHCPRELEASE received". The packet trailer is trimmed for
+             readability — only the DHCP-relevant fields are kept.
+   stamp:    captured 2026-06, INET 4.6
+
+With the pool sized generously (50 addresses) the client typically
 reacquires the same IP, but the path to it goes through a full DORA,
 not INIT-REBOOT.
 
