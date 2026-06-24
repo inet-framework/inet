@@ -723,14 +723,20 @@ client re-binds the same address:
    config:   ServerReboot               # ../omnetpp.ini
    seed:     default
    shows:    server greying out at t=30 s, returning at t=40 s, the renewal
-             NAKs at t≈51 s and the back-to-back re-DORAs that follow
+             NAKs at t≈51 s and the back-to-back re-DORAs that follow.
+             Qtenv's built-in message animations are the visualization
+             channel — no DataLinkVisualizer overlay enabled.
    anchors:  shutdown t=30 s, startup t=40 s (ScenarioManager script);
              T1 fires ~51 s on each client (lease 100 s, bind ~t=1.1 s)
-   window:   record sim-time 0s → ~55s (covers shutdown, restart and the
-             three NAK→DORA cycles; no channel visualizer, no fade-out wait)
-   anim:     playback_speed=1           # set_animation_parameters, normal profile
-   capture:  fps=2, crop_area=with_padding   # canvas was 732×482
-   encode:   ffmpeg -r 30 -vcodec libx264 -pix_fmt yuv420p (pad to even dims)
+   window:   express-run to t=29 then record sim-time → ~51 s (covers
+             shutdown, restart, and the three NAK→DORA cycles)
+   anim:     animation_enabled=true (default Qtenv setting); playback_speed
+             tweak is ineffective here, so the slowdown is in encode
+   capture:  fps=10, crop_area=with_padding; recording crop_rect was 732×482
+   encode:   ffmpeg -r 20 (instead of the usual 30 — every frame stays on
+             screen 50 % longer), then -ss 48 to drop the pre-shutdown
+             idle so the output opens just before the t=30 shutdown.
+             -vcodec libx264 -pix_fmt yuv420p
    post:     none
    stamp:    recorded 2026-06, INET 4.6
 
