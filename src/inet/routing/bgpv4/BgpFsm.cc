@@ -32,7 +32,7 @@ void Idle::ManualStart()
     // - sets ConnectRetryCounter to zero,
     session._connectRetryCounter = 0;
     // - starts the ConnectRetryTimer with the initial value,
-    session.restartsConnectRetryTimer();
+    session.stopConnectRetryTimer();
     // - listens for a connection that may be initiated by the remote BGP peer,
     session.listenConnectionFromPeer();
     // - initiates a TCP connection to the other BGP peer and,
@@ -50,7 +50,7 @@ void Connect::ConnectRetryTimer_Expires()
     // - drops the TCP connection,
     session._info.socket->abort();
     // - restarts the ConnectRetryTimer,
-    session.restartsConnectRetryTimer();
+    session.stopConnectRetryTimer();
     // - initiates a TCP connection to the other BGP peer,
 //    session._info.socket->renewSocket();
     session.openTCPConnectionToPeer();
@@ -66,7 +66,7 @@ void Connect::HoldTimer_Expires()
     // In response to any other events (Events 8, 10-11, 13, 19, 23, 25-28), the local system:
     // - if the ConnectRetryTimer is running, stops and resets the ConnectRetryTimer (sets to zero),
     if (session._ptrConnectRetryTimer->isScheduled()) {
-        session.restartsConnectRetryTimer(false);
+        session.restartConnectRetryTimer();
     }
     // - if the DelayOpenTimer is running, stops and resets the DelayOpenTimer (sets to zero),
     // - releases all BGP resources,
@@ -95,12 +95,12 @@ void Connect::TcpConnectionConfirmed()
     // system checks the DelayOpen attribute prior to processing.
     // If the DelayOpen attribute is set to FALSE, the local system:
     // - stops the ConnectRetryTimer (if running) and sets the ConnectRetryTimer to zero,
-    session.restartsConnectRetryTimer(false);
+    session.restartConnectRetryTimer();
     // - completes BGP initialization
     // - sends an OPEN message to its peer,
     session.sendOpenMessage();
     // - sets the HoldTimer to a large value, and
-    session.restartsHoldTimer();
+    session.restartHoldTimer();
     // - changes its state to OpenSent.
     setState<OpenSent>();
 }
@@ -133,7 +133,7 @@ void Active::ConnectRetryTimer_Expires()
     BgpSession& session = TopState::box().getModule();
     // In response to a ConnectRetryTimer_Expires event (Event 9), the local system:
     // - restarts the ConnectRetryTimer (with initial value),
-    session.restartsConnectRetryTimer();
+    session.stopConnectRetryTimer();
     // - initiates a TCP connection to the other BGP peer,T);
 //    session._info.socket->renewSocket();
     session.openTCPConnectionToPeer();
@@ -148,7 +148,7 @@ void Active::HoldTimer_Expires()
     BgpSession& session = TopState::box().getModule();
     // In response to any other event (Events 8, 10-11, 13, 19, 23, 25-28), the local system:
     // - sets the ConnectRetryTimer to zero,
-    session.restartsConnectRetryTimer(false);
+    session.restartConnectRetryTimer();
     // - releases all BGP resources,
     // - drops the TCP connection,
     session._info.socket->abort();
@@ -173,11 +173,11 @@ void Active::TcpConnectionConfirmed()
     // In response to the success of a TCP connection (Event 16 or Event
     // 17), the local system :
     // - sets the ConnectRetryTimer to zero,
-    session.restartsConnectRetryTimer(false);
+    session.restartConnectRetryTimer();
     // - sends the OPEN message to its peer,
     session.sendOpenMessage();
     // - sets its HoldTimer to a large value, and
-    session.restartsHoldTimer();
+    session.restartHoldTimer();
     // - changes its state to OpenSent.
     setState<OpenSent>();
 }
@@ -221,7 +221,7 @@ void OpenSent::ConnectRetryTimer_Expires()
     // In response to any other event (Events 9, 11-13, 20, 25-28), the local system:
     // TODO- sends the NOTIFICATION with the Error Code Finite State Machine Error,
     // - sets the ConnectRetryTimer to zero,
-    session.restartsConnectRetryTimer(false);
+    session.restartConnectRetryTimer();
     // - releases all BGP resources,
     // - drops the TCP connection,
     session._info.socket->abort();
@@ -239,7 +239,7 @@ void OpenSent::HoldTimer_Expires()
     BgpSession& session = TopState::box().getModule();
     // If the HoldTimer_Expires (Event 10), the local system:
     // - sets the ConnectRetryTimer to zero,
-    session.restartsConnectRetryTimer(false);
+    session.restartConnectRetryTimer();
     // - releases all BGP resources,
     // - drops the TCP connection,
     session._info.socket->abort();
@@ -265,7 +265,7 @@ void OpenSent::TcpConnectionFails()
     // - closes the BGP connection,
     session._info.socket->abort();
     // - restarts the ConnectRetryTimer,
-    session.restartsConnectRetryTimer();
+    session.stopConnectRetryTimer();
     // - continues to listen for a connection that may be initiated by the remote BGP peer, and
     session.listenConnectionFromPeer();
     // - changes its state to Active.
@@ -280,13 +280,13 @@ void OpenSent::OpenMsgEvent()
     // When an OPEN message is received, all fields are checked for correctness.
     // If there are no errors in the OPEN message (Event 19), the local system:
     // - sets the BGP ConnectRetryTimer to zero,
-    session.restartsConnectRetryTimer(false);
+    session.restartConnectRetryTimer();
     // - sends a KEEPALIVE message, and
     session.sendKeepAliveMessage();
     // - sets a KeepaliveTimer
-    session.restartsKeepAliveTimer();
+    session.restartKeepAliveTimer();
     // - sets the HoldTimer according to the negotiated value (see Section 4.2),
-    session.restartsHoldTimer();
+    session.restartHoldTimer();
     // - changes its state to OpenConfirm.
     setState<OpenConfirm>();
 }
@@ -315,7 +315,7 @@ void OpenConfirm::ConnectRetryTimer_Expires()
     BgpSession& session = TopState::box().getModule();
     // - sends a NOTIFICATION with a Cease,
     // - sets the ConnectRetryTimer to zero,
-    session.restartsConnectRetryTimer(false);
+    session.restartConnectRetryTimer();
     // - releases all BGP resources,
     // - drops the TCP connection (send TCP FIN),
     session._info.socket->abort();
@@ -332,7 +332,7 @@ void OpenConfirm::HoldTimer_Expires()
     BgpSession& session = TopState::box().getModule();
     // If the HoldTimer_Expires event (Event 10) occurs before a KEEPALIVE message is received, the local system:
     // - sets the ConnectRetryTimer to zero,
-    session.restartsConnectRetryTimer(false);
+    session.restartConnectRetryTimer();
     // - releases all BGP resources,
     // - drops the TCP connection,
     session._info.socket->abort();
@@ -351,7 +351,7 @@ void OpenConfirm::KeepaliveTimer_Expires()
     // - sends a KEEPALIVE message,
     session.sendKeepAliveMessage();
     // - restarts the KeepaliveTimer, and
-    session.restartsKeepAliveTimer();
+    session.restartKeepAliveTimer();
     // - remains in the OpenConfirmed state.
 }
 
@@ -382,7 +382,7 @@ void OpenConfirm::KeepAliveMsgEvent()
     session._keepAliveMsgRcv++;
     // If the local system receives a KEEPALIVE message (KeepAliveMsg Event 26)), the local system:
     // - restarts the HoldTimer and
-    session.restartsHoldTimer();
+    session.restartHoldTimer();
     // - changes its state to Established.
     setState<Established>();
 }
@@ -405,9 +405,8 @@ void Established::entry()
     // We are connected: drop any pending reconnect so it cannot disrupt this session later.
     session.cancelReconnect();
     // RFC 4271: the ConnectRetryTimer MUST be zero in the Established state. It is (re)started
-    // during connection setup; stop it here so it cannot later fire and abort a healthy session
-    // (default arg true => cancel without rescheduling).
-    session.restartsConnectRetryTimer();
+    // during connection setup; stop it here so it cannot later fire and abort a healthy session.
+    session.stopConnectRetryTimer();
 
     // if it's an EGP Session, send update messages with all routing information to BGP peer
     // if it's an IGP Session, send update message with only the BGP routes learned by EGP
@@ -443,7 +442,7 @@ void Established::ConnectRetryTimer_Expires()
     // In response to any other event (Events 9, 12-13, 20-22), the local system:
     // TODO- deletes all routes associated with this connection,
     // - sets the ConnectRetryTimer to zero,
-    session.restartsConnectRetryTimer(false);
+    session.restartConnectRetryTimer();
     // - releases all BGP resources,
     // - drops the TCP connection,
     session._info.socket->abort();
@@ -461,7 +460,7 @@ void Established::HoldTimer_Expires()
     BgpSession& session = TopState::box().getModule();
     // If the HoldTimer_Expires event occurs (Event 10), the local system:
     // - sets the ConnectRetryTimer to zero,
-    session.restartsConnectRetryTimer(false);
+    session.restartConnectRetryTimer();
     // - releases all BGP resources,
     // - drops the TCP connection,
     session._info.socket->abort();
@@ -482,7 +481,7 @@ void Established::KeepaliveTimer_Expires()
     session.sendKeepAliveMessage();
     // - restarts the KeepaliveTimer, unless the negotiated HoldTime value is zero.
     if (session._holdTime != 0) {
-        session.restartsKeepAliveTimer();
+        session.restartKeepAliveTimer();
     }
 }
 
@@ -490,7 +489,7 @@ void Established::TcpConnectionFails()
 {
     EV_TRACE << "Processing Established::TcpConnectionFails" << std::endl;
     BgpSession& session = TopState::box().getModule();
-    session.restartsConnectRetryTimer(false);
+    session.restartConnectRetryTimer();
     session._info.socket->abort();
     ++session._connectRetryCounter;
     session._info.sessionEstablished = false;
@@ -512,7 +511,7 @@ void Established::KeepAliveMsgEvent()
     session._keepAliveMsgRcv++;
     // If the local system receives a KEEPALIVE message (Event 26), the local system:
     // - restarts its HoldTimer, if the negotiated HoldTime value is non-zero, and
-    session.restartsHoldTimer();
+    session.restartHoldTimer();
     // - remains in the Established state.
 }
 
@@ -524,7 +523,7 @@ void Established::UpdateMsgEvent()
     // If the local system receives an UPDATE message (Event 27), the local system:
     // - processes the message,
     // - restarts its HoldTimer, if the negotiated HoldTime value is non-zero, and
-    session.restartsHoldTimer();
+    session.restartHoldTimer();
     // - remains in the Established state.
 }
 

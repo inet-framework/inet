@@ -105,7 +105,7 @@ void BgpSession::cancelReconnect()
         bgpRouter.getCancelEvent(_ptrStartEvent);
 }
 
-void BgpSession::restartsHoldTimer()
+void BgpSession::restartHoldTimer()
 {
     if (_holdTime != 0) {
         bgpRouter.getCancelEvent(_ptrHoldTimer);
@@ -113,18 +113,21 @@ void BgpSession::restartsHoldTimer()
     }
 }
 
-void BgpSession::restartsKeepAliveTimer()
+void BgpSession::restartKeepAliveTimer()
 {
     bgpRouter.getCancelEvent(_ptrKeepAliveTimer);
     bgpRouter.getScheduleAt(simTime() + _keepAliveTime, _ptrKeepAliveTimer);
 }
 
-void BgpSession::restartsConnectRetryTimer(bool start)
+void BgpSession::restartConnectRetryTimer()
 {
     bgpRouter.getCancelEvent(_ptrConnectRetryTimer);
-    if (!start) {
-        bgpRouter.getScheduleAt(simTime() + _connectRetryTime, _ptrConnectRetryTimer);
-    }
+    bgpRouter.getScheduleAt(simTime() + _connectRetryTime, _ptrConnectRetryTimer);
+}
+
+void BgpSession::stopConnectRetryTimer()
+{
+    bgpRouter.getCancelEvent(_ptrConnectRetryTimer);
 }
 
 void BgpSession::sendOpenMessage()

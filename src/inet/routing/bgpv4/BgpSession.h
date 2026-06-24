@@ -69,9 +69,10 @@ public:
     void startConnection();
     void scheduleReconnect();
     void cancelReconnect();
-    void restartsHoldTimer();
-    void restartsKeepAliveTimer();
-    void restartsConnectRetryTimer(bool start = true);
+    void restartHoldTimer();
+    void restartKeepAliveTimer();
+    void restartConnectRetryTimer();
+    void stopConnectRetryTimer();
 
     void sendOpenMessage();
     void sendUpdateMessage(std::vector<BgpUpdatePathAttributes *>& content, BgpUpdateNlri& NLRI);
