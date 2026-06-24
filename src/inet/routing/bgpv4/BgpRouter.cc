@@ -179,13 +179,15 @@ void BgpRouter::setDefaultConfig()
 
 BgpRouteInfo *BgpRouter::createBgpRoutingTableEntry()
 {
-    // 3b-2b will branch on isIpv6() to return a BgpRoutingTableEntry6 (over Ipv6Route).
+    if (isIpv6())
+        return new BgpRoutingTableEntry6();
     return new BgpRoutingTableEntry();
 }
 
 BgpRouteInfo *BgpRouter::createBgpRoutingTableEntry(const IRoute *from)
 {
-    // 3b-2b will branch on isIpv6() to return a BgpRoutingTableEntry6 (over Ipv6Route).
+    if (isIpv6())
+        return new BgpRoutingTableEntry6(from);
     return new BgpRoutingTableEntry(from);
 }
 

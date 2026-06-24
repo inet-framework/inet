@@ -9,6 +9,7 @@
 
 #include "inet/networklayer/contract/IRoute.h"
 #include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
+#include "inet/networklayer/ipv6/Ipv6Route.h"
 #include "inet/routing/bgpv4/BgpCommon.h"
 
 namespace inet {
@@ -97,6 +98,33 @@ inline BgpRoutingTableEntry::BgpRoutingTableEntry(const IRoute *entry)
     Ipv4Route::setMetric(DEFAULT_COST);
     Ipv4Route::setSourceType(IRoute::BGP);
     Ipv4Route::setAdminDist(Ipv4Route::dBGPExternal);
+}
+
+// IPv6 BGP RIB entry: an Ipv6Route carrying BGP attributes.
+class INET_API BgpRoutingTableEntry6 : public Ipv6Route, public BgpRouteInfo
+{
+  public:
+    BgpRoutingTableEntry6();
+    BgpRoutingTableEntry6(const IRoute *entry);
+    virtual ~BgpRoutingTableEntry6() {}
+    virtual IRoute *asRoute() override { return this; }
+    virtual const IRoute *asRoute() const override { return this; }
+    virtual std::string str() const override { return bgpStr(); }
+};
+
+inline BgpRoutingTableEntry6::BgpRoutingTableEntry6()
+    : Ipv6Route(Ipv6Address(), 128, IRoute::BGP)
+{
+    Ipv6Route::setMetric(DEFAULT_COST);
+}
+
+inline BgpRoutingTableEntry6::BgpRoutingTableEntry6(const IRoute *entry)
+    : Ipv6Route(entry->getDestinationAsGeneric().toIpv6(), entry->getPrefixLength(), IRoute::BGP)
+{
+    Ipv6Route::setNextHop(entry->getNextHopAsGeneric());
+    Ipv6Route::setInterface(entry->getInterface());
+    Ipv6Route::setMetric(DEFAULT_COST);
+    Ipv6Route::setAdminDist(Ipv6Route::dBGPExternal);
 }
 
 inline const std::string BgpRouteInfo::getPathTypeString(RoutingPathType type)
