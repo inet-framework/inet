@@ -437,8 +437,26 @@ Each phase is a milestone with its own commit(s); work in a dedicated worktree.
   - Deferred to Phase 7: wrapping these as formal `opp_test` `.test` files. Phase 1
     verification used `opp_run -c Pass/Fail/Trace` configs (equivalent).
 
-- **Phase 2 — Lambda predicates & captures.** Typed `match` lambdas; `lastObserved`/
-  `.capture`. *Exit:* assert seq/ack relationships in a TCP trace.
+- **Phase 2 — Lambda predicates & captures. ✅ DONE.** Typed `match` lambdas; `.capture`
+  + read via context. *Exit:* assert seq/ack relationships in a TCP trace.
+  - Implemented: `MatchContext{event, captures}`, a `match(MatchPredicate)` overload
+    (lambda `bool(const MatchContext&)`) beside string `match`, and `capture(name, fn)`
+    binding a `cValue` from the matched packet; the engine threads a `CaptureStore` and
+    evaluates captures on match. Captures are **string-keyed** (read with `ctx.get("isn")`).
+    `tcp_handshake_seq` → PASS (asserts `ackNo==isn+1`, `ackNo==peerIsn+1` across the two
+    endpoints); `tcp_handshake_seq_bad` → FAIL (wrong `isn+2`).
+  - **Major finding (signal coverage):** INET's `Tcp` emits **no `packetSentToLower`** —
+    a sent SYN is first observable at the *IP* layer (`ipv4.ip receivedFromUpper`), not at
+    `tcp`. Per the §15 policy the right fix is to *add* a transport-layer send signal, but
+    that is a **substantial edit to existing INET source → needs sign-off**, so it was not
+    done. Worked around by asserting from **incoming** segments correlated across nodes by
+    captures. → Candidate change to propose: emit `packetSentToLower` (or a dedicated
+    observation signal) in `Tcp` and other protocols lacking it.
+  - Robustness: lambda predicates are wrapped in try/catch like string expressions (a
+    peek of an absent chunk is a non-match). Lambda bodies are opaque in diagnostics
+    (the bad-handshake FAIL shows only the selector) — `.describe()` / Phase 8 will fix.
+  - `use()` (reading captures inside *inject* field values) is deferred to Phase 3 where
+    injection exists; in Phase 2 captures are consumed only inside predicates.
 
 - **Phase 3 — Injection (time-scheduled) + `PacketTap` (inject mode).** Builder
   `inject(...).frame(...)`, tag setup, `PacketTap` push path. Start with scheduled
