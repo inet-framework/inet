@@ -237,8 +237,13 @@ void ProtocolTester::processMatch(const PacketEvent& event)
     if (step.selHasNotBefore && event.time < anchorTime + step.selNotBefore)
         return;
     // Open-world: events that don't match the current step are simply ignored.
-    if (!step.selectorMatches(event))
+    MatchContext context{event, captureStore};
+    if (!step.selectorMatches(context))
         return;
+
+    // Bind this step's captures from the matched packet, for use by later steps.
+    for (auto& capture : step.captures)
+        captureStore[capture.first] = capture.second(event);
 
     EV_INFO << "ProtocolTest " << program->name << ": step " << currentStep
             << " matched at t=" << event.time << " by " << event.module->getFullPath() << endl;
