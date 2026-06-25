@@ -1,0 +1,50 @@
+<Devices>
+    <!-- OSPFv3 runs as the IGP inside each AS, on the intra-AS interfaces only.
+         The inter-AS link rA3<->rB1 (eth1 on rA3, eth0 on rB1) is left out of
+         OSPFv3; it carries the eBGP session instead. Interface IPv6 addresses are
+         assigned by the Ipv6NetworkConfigurator, not here. Single area 0.0.0.0. -->
+
+    <!-- ===================== AS 65001 ===================== -->
+    <Router id="rA1">
+        <Routing6><OSPFv3><Process id="100" af="IPv6"><RouterID>1.1.1.1</RouterID></Process></OSPFv3></Routing6>
+        <Interfaces>
+            <Interface name="eth0"><Process id="100"><Instance AF="IPv6"><InterfaceType>Broadcast</InterfaceType><Area>0.0.0.0</Area></Instance></Process></Interface>
+            <Interface name="eth1"><Process id="100"><Instance AF="IPv6"><InterfaceType>Broadcast</InterfaceType><Area>0.0.0.0</Area></Instance></Process></Interface>
+        </Interfaces>
+    </Router>
+    <Router id="rA2">
+        <Routing6><OSPFv3><Process id="100" af="IPv6"><RouterID>1.1.1.2</RouterID></Process></OSPFv3></Routing6>
+        <Interfaces>
+            <Interface name="eth0"><Process id="100"><Instance AF="IPv6"><InterfaceType>Broadcast</InterfaceType><Area>0.0.0.0</Area></Instance></Process></Interface>
+            <Interface name="eth1"><Process id="100"><Instance AF="IPv6"><InterfaceType>Broadcast</InterfaceType><Area>0.0.0.0</Area></Instance></Process></Interface>
+        </Interfaces>
+    </Router>
+    <Router id="rA3">
+        <Routing6><OSPFv3><Process id="100" af="IPv6"><RouterID>1.1.1.3</RouterID></Process></OSPFv3></Routing6>
+        <Interfaces>
+            <Interface name="eth0"><Process id="100"><Instance AF="IPv6"><InterfaceType>Broadcast</InterfaceType><Area>0.0.0.0</Area></Instance></Process></Interface>
+        </Interfaces>
+    </Router>
+
+    <!-- ===================== AS 65002 ===================== -->
+    <Router id="rB1">
+        <Routing6><OSPFv3><Process id="100" af="IPv6"><RouterID>2.2.2.1</RouterID></Process></OSPFv3></Routing6>
+        <Interfaces>
+            <Interface name="eth1"><Process id="100"><Instance AF="IPv6"><InterfaceType>Broadcast</InterfaceType><Area>0.0.0.0</Area></Instance></Process></Interface>
+        </Interfaces>
+    </Router>
+    <Router id="rB2">
+        <Routing6><OSPFv3><Process id="100" af="IPv6"><RouterID>2.2.2.2</RouterID></Process></OSPFv3></Routing6>
+        <Interfaces>
+            <Interface name="eth0"><Process id="100"><Instance AF="IPv6"><InterfaceType>Broadcast</InterfaceType><Area>0.0.0.0</Area></Instance></Process></Interface>
+            <Interface name="eth1"><Process id="100"><Instance AF="IPv6"><InterfaceType>Broadcast</InterfaceType><Area>0.0.0.0</Area></Instance></Process></Interface>
+        </Interfaces>
+    </Router>
+    <Router id="rB3">
+        <Routing6><OSPFv3><Process id="100" af="IPv6"><RouterID>2.2.2.3</RouterID></Process></OSPFv3></Routing6>
+        <Interfaces>
+            <Interface name="eth0"><Process id="100"><Instance AF="IPv6"><InterfaceType>Broadcast</InterfaceType><Area>0.0.0.0</Area></Instance></Process></Interface>
+            <Interface name="eth1"><Process id="100"><Instance AF="IPv6"><InterfaceType>Broadcast</InterfaceType><Area>0.0.0.0</Area></Instance></Process></Interface>
+        </Interfaces>
+    </Router>
+</Devices>

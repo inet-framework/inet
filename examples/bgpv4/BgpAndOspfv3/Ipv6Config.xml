@@ -1,0 +1,30 @@
+<config>
+    <!-- Explicit IPv6 addresses so they match the OSPFv3 and BGP configurations.
+         The configurator runs with addRemoteRoutes=false: it adds the on-link
+         (direct) routes and the host default routes, but no multi-hop routes -
+         those come from OSPFv3 (intra-AS) and BGP (inter-AS). -->
+
+    <!-- AS 65001 -->
+    <interface hosts="hostA" address="2001:db8:1:1::100"/>
+    <interface hosts="rA1" towards="hostA" address="2001:db8:1:1::1"/>
+
+    <interface hosts="rA1" towards="rA2" address="2001:db8:1:12::1"/>
+    <interface hosts="rA2" towards="rA1" address="2001:db8:1:12::2"/>
+
+    <interface hosts="rA2" towards="rA3" address="2001:db8:1:23::2"/>
+    <interface hosts="rA3" towards="rA2" address="2001:db8:1:23::3"/>
+
+    <!-- inter-AS (eBGP) link -->
+    <interface hosts="rA3" towards="rB1" address="2001:db8:0:ab::a"/>
+    <interface hosts="rB1" towards="rA3" address="2001:db8:0:ab::b"/>
+
+    <!-- AS 65002 -->
+    <interface hosts="rB1" towards="rB2" address="2001:db8:2:12::1"/>
+    <interface hosts="rB2" towards="rB1" address="2001:db8:2:12::2"/>
+
+    <interface hosts="rB2" towards="rB3" address="2001:db8:2:23::2"/>
+    <interface hosts="rB3" towards="rB2" address="2001:db8:2:23::3"/>
+
+    <interface hosts="rB3" towards="hostB" address="2001:db8:2:3::3"/>
+    <interface hosts="hostB" address="2001:db8:2:3::100"/>
+</config>
