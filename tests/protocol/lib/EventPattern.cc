@@ -20,8 +20,9 @@ EventPattern on(const char *nodeName)
     return pattern;
 }
 
-bool EventPattern::selectorMatches(const PacketEvent& event) const
+bool EventPattern::selectorMatches(const MatchContext& context) const
 {
+    const PacketEvent& event = context.event;
     if (!selNode.empty() && (event.node == nullptr || selNode != event.node->getFullName()))
         return false;
     if (selHasKind && event.kind != selKind)
@@ -32,18 +33,29 @@ bool EventPattern::selectorMatches(const PacketEvent& event) const
         return false;
     if (!selIface.empty() && selIface != event.interfaceName)
         return false;
+    if (event.packet == nullptr && (!selExpr.empty() || predicate))
+        return false;
     if (!selExpr.empty()) {
         if (!filter) {
             filter = std::make_shared<PacketFilter>();
             filter->setExpression(selExpr.c_str()); // throws on a malformed expression
         }
-        if (event.packet == nullptr)
-            return false;
         // A content expression referencing a protocol absent from this packet (e.g.
         // `udp.*` on an ARP frame) throws during evaluation; that is simply a non-match.
         // Constrain selectors by layer/kind so expressions mostly see relevant packets.
         try {
             if (!filter->matches(event.packet))
+                return false;
+        }
+        catch (const std::exception&) {
+            return false;
+        }
+    }
+    if (predicate) {
+        // Same robustness: a predicate that peeks a chunk absent from this packet
+        // throws; treat that as a non-match rather than aborting the run.
+        try {
+            if (!predicate(context))
                 return false;
         }
         catch (const std::exception&) {

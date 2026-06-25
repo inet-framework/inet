@@ -39,6 +39,7 @@ class INET_API ProtocolTester : public SimpleModule, protected cListener
     bool matchingMode = false;
     std::optional<ProtocolTest> program;
     size_t currentStep = 0;
+    CaptureStore captureStore;                     // values bound by capture(...) as steps match
     simtime_t anchorTime = 0;                      // start time of the current step's window
     cMessage *deadlineMsg = nullptr;               // fires when the current step misses its deadline
     cMessage *endMsg = nullptr;                    // ends the simulation once a verdict is reached
