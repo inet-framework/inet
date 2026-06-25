@@ -414,7 +414,7 @@ void Established::entry()
     if (session.getType() == EGP) {
         auto ipRoutingTable = session.getIpRoutingTable();
         for (int i = 0; i < ipRoutingTable->getNumRoutes(); i++) {
-            const Ipv4Route *rtEntry = check_and_cast<const Ipv4Route *>(ipRoutingTable->getRoute(i));
+            const IRoute *rtEntry = ipRoutingTable->getRoute(i);
             if (session.isRouteExcluded(*rtEntry))
                 continue;
             BgpRouteInfo *bgpEntry = session.createBgpRoutingTableEntry(rtEntry);

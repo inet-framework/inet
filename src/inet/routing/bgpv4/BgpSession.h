@@ -114,7 +114,7 @@ public:
     BgpRouteInfo *createBgpRoutingTableEntry(const IRoute *from) const { return bgpRouter.createBgpRoutingTableEntry(from); }
     Macho::Machine<fsm::TopState>& getFsm() const { return *_fsm; }
     void updateSendProcess(BgpRouteInfo *entry) const { return bgpRouter.updateSendProcess(NEW_SESSION_ESTABLISHED, _info.sessionId, entry); }
-    bool isRouteExcluded(const Ipv4Route& rtEntry) const { return bgpRouter.isRouteExcluded(rtEntry); }
+    bool isRouteExcluded(const IRoute& rtEntry) const { return bgpRouter.isRouteExcluded(rtEntry); }
 };
 
 std::ostream& operator<<(std::ostream& out, const BgpSession& entry);

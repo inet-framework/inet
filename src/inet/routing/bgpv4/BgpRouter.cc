@@ -1107,10 +1107,10 @@ void BgpRouter::printKeepAliveMessage(const BgpKeepAliveMessage& keepAliveMsg)
     // TODO add code once implemented
 }
 
-bool BgpRouter::isRouteExcluded(const Ipv4Route& rtEntry)
+bool BgpRouter::isRouteExcluded(const IRoute& rtEntry)
 {
-    // all host-specific routes are excluded
-    if (rtEntry.getNetmask() == Ipv4Address::ALLONES_ADDRESS)
+    // all host-specific routes are excluded (/32 for IPv4, /128 for IPv6)
+    if (rtEntry.getPrefixLength() == (rtEntry.getDestinationAsGeneric().getType() == L3Address::IPv6 ? 128 : 32))
         return true;
 
     // all static routes are excluded
@@ -1134,7 +1134,7 @@ bool BgpRouter::isRouteExcluded(const Ipv4Route& rtEntry)
         if (!redistributeOspf)
             return true;
 
-        auto entry = static_cast<const ospfv2::Ospfv2RoutingTableEntry *>(&rtEntry);
+        auto entry = check_and_cast<const ospfv2::Ospfv2RoutingTableEntry *>(&rtEntry);
         ASSERT(entry);
 
         if (entry->getPathType() == ospfv2::Ospfv2RoutingTableEntry::INTRAAREA) {
@@ -1151,7 +1151,7 @@ bool BgpRouter::isRouteExcluded(const Ipv4Route& rtEntry)
                 return true;
         }
 
-        int externalType = checkExternalRoute(&rtEntry);
+        int externalType = checkExternalRoute(entry);
 
         if (externalType == 1) {
             if (redistributeOspfType.externalType1)
@@ -1184,7 +1184,7 @@ bool BgpRouter::isRouteExcluded(const Ipv4Route& rtEntry)
     return true;
 }
 
-bool BgpRouter::isExternalAddress(const Ipv4Route& rtEntry)
+bool BgpRouter::isExternalAddress(const IRoute& rtEntry)
 {
     for (auto& session : _bgpSessions) {
         if (session.second->getType() == EGP) {

@@ -105,7 +105,7 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
     void addToAsList(std::string nodeName, AsId id);
     void setNextHopSelf(Ipv4Address peer, bool nextHopSelf);
     void setLocalPreference(Ipv4Address peer, int localPref);
-    bool isExternalAddress(const Ipv4Route& rtEntry);
+    bool isExternalAddress(const IRoute& rtEntry);
     void processMessageFromTcp(cMessage *msg);
 
     void printOpenMessage(const BgpOpenMessage& msg);
@@ -187,7 +187,7 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
     SessionId findIdFromPeerAddr(std::map<SessionId, BgpSession *> sessions, const L3Address& peerAddr);
     static uint32_t addressKey(const L3Address& addr); // AF-safe key for the session id (IPv4 value preserved)
     SessionId findIdFromSocketConnId(std::map<SessionId, BgpSession *> sessions, int connId);
-    bool isRouteExcluded(const Ipv4Route& rtEntry);
+    bool isRouteExcluded(const IRoute& rtEntry);
     bool isDefaultRoute(const IRoute *entry) const;
     bool isReachable(const L3Address& addr) const;
 };
