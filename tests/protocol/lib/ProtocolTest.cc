@@ -9,6 +9,13 @@
 namespace inet {
 namespace protocoltest {
 
+Injection inject(const char *nodeName)
+{
+    Injection injection;
+    injection.nodeName = nodeName;
+    return injection;
+}
+
 std::map<std::string, ProtocolTestBuilderFn>& ProtocolTestRegistry::all()
 {
     // Function-local static: safe across static-initializer registration order.
