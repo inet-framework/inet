@@ -15,6 +15,7 @@ simple ProtocolTester
     parameters:
         string testName = default(""); // name of a registered ProtocolTest program to run; empty = observe/log only
         bool logEvents = default(testName == ""); // print a one-line trace per observed packet event
+        bool printDescription = default(true); // print the program's English description at startup
         @display("i=block/cogwheel;is=s");
         @class(inet::protocoltest::ProtocolTester);
 }
