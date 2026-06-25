@@ -135,7 +135,8 @@ void BgpSession::sendOpenMessage()
     const auto& openMsg = makeShared<BgpOpenMessage>();
     openMsg->setMyAS(_info.ASValue);
     openMsg->setHoldTime(_holdTime);
-    openMsg->setBgpIdentifier(_info.socket->getLocalAddress().toIpv4());
+    // BGP Identifier is a 4-octet router id; for IPv6 it cannot be the (IPv6) local address
+    openMsg->setBgpIdentifier(bgpRouter.isIpv6() ? bgpRouter.getRouterId() : _info.socket->getLocalAddress().toIpv4());
 
     EV_INFO << "Sending BGP Open message to " << _info.peerAddr.str()
             << " on interface " << _info.linkIntf->getInterfaceName()

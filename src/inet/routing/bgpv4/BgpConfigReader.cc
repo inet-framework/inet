@@ -209,7 +209,7 @@ void BgpConfigReader::loadASConfig(cXMLElementList& ASConfig)
                     if (nodeName == "Network") {
                         const char *address = entry->getAttribute("address");
                         if (address && *address)
-                            bgpRouter->addToAdvertiseList(Ipv4Address(address));
+                            bgpRouter->addToAdvertiseList(L3Address(address));
                         else
                             throw cRuntimeError("BGP Error: attribute 'address' is mandatory in 'Network'");
                     }

@@ -32,6 +32,7 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
     IRoutingTable *rt = nullptr;
     cSimpleModule *bgpModule = nullptr;
     const Protocol *networkProtocol = &Protocol::ipv4; // address family this BGP router serves
+    Ipv4Address routerIdParam; // explicit 4-octet BGP Identifier from the 'routerId' parameter (unspecified if not set)
 
     ospfv2::Ospfv2 *ospfModule = nullptr;
     AsId myAsId = 0;
@@ -58,7 +59,7 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
 
     typedef std::vector<BgpRouteInfo *> RoutingTableEntryVector;
     RoutingTableEntryVector bgpRoutingTable; // The BGP routing table
-    std::vector<Ipv4Address> advertiseList;
+    std::vector<L3Address> advertiseList;
     RoutingTableEntryVector _prefixListIN;
     RoutingTableEntryVector _prefixListOUT;
     RoutingTableEntryVector _prefixListINOUT; // store union of pointers in _prefixListIN and _prefixListOUT
@@ -71,7 +72,15 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
     virtual ~BgpRouter();
 
     bool isIpv6() const { return networkProtocol == &Protocol::ipv6; }
-    RouterId getRouterId() { return rt->getRouterIdAsGeneric().toIpv4(); }
+    RouterId getRouterId()
+    {
+        if (!routerIdParam.isUnspecified())
+            return routerIdParam;
+        L3Address id = rt->getRouterIdAsGeneric();
+        if (id.getType() == L3Address::IPv4)
+            return id.toIpv4();
+        throw cRuntimeError("BGP: set the 'routerId' parameter (a 4-octet BGP Identifier) for IPv6 BGP");
+    }
     void setAsId(AsId myAsId) { this->myAsId = myAsId; }
     AsId getAsId() { return myAsId; }
     int getNumBgpSessions() { return _bgpSessions.size(); }
@@ -97,7 +106,7 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
     SessionId createEbgpSession(const char *peerAddr, SessionInfo& externalInfo);
     SessionId createIbgpSession(const char *peerAddr);
     void setTimer(SessionId id, simtime_t *delayTab);
-    void addToAdvertiseList(Ipv4Address address);
+    void addToAdvertiseList(const L3Address& address);
     void addToPrefixList(std::string nodeName, BgpRouteInfo *entry);
     // create an address-family-appropriate BGP RIB entry (Ipv4Route- or Ipv6Route-backed)
     BgpRouteInfo *createBgpRoutingTableEntry();

@@ -24,6 +24,7 @@ simple Bgp extends SimpleModule like IBgp
         string interfaceTableModule;
         string routingTableModule;
         string addressFamily @enum("ipv4","ipv6") = default("ipv4"); // address family this BGP instance operates on (one instance serves one family)
+        string routerId = default(""); // the 4-octet BGP Identifier (RFC 4271/6286); required for IPv6, where there is no IPv4 router id to derive it from
         string ospfRoutingModule;
         volatile double startupTime @unit(s) = default(0s); // Delay before starting BGP
         double shutdownTime @unit(s) = default(1s); // On graceful stop, delay before destroying BGP state so TCP can flush the session teardown (FIN)

@@ -22,6 +22,10 @@ BgpRouter::BgpRouter(cSimpleModule *bgpModule, IInterfaceTable *ift, IRoutingTab
     this->rt = rt;
     this->networkProtocol = networkProtocol;
 
+    const char *routerIdStr = bgpModule->par("routerId");
+    if (routerIdStr && *routerIdStr)
+        routerIdParam = Ipv4Address(routerIdStr);
+
     ospfModule = findModuleFromPar<ospfv2::Ospfv2>(bgpModule->par("ospfRoutingModule"), bgpModule);
 }
 
@@ -102,7 +106,7 @@ SessionId BgpRouter::createIbgpSession(const char *peerAddr)
     SessionInfo info;
     info.sessionType = IGP;
     info.ASValue = myAsId;
-    info.routerId = rt->getRouterIdAsGeneric().toIpv4();
+    info.routerId = getRouterId();
     info.peerAddr = L3Address(peerAddr);
     info.sessionId = addressKey(info.peerAddr) + info.routerId.getInt();
 
@@ -130,7 +134,7 @@ SessionId BgpRouter::createEbgpSession(const char *peerAddr, SessionInfo& extern
 
     info.sessionType = EGP;
     info.ASValue = myAsId;
-    info.routerId = rt->getRouterIdAsGeneric().toIpv4();
+    info.routerId = getRouterId();
     info.peerAddr = L3Address(peerAddr);
     info.linkIntf = rt->getOutputInterfaceForDestination(info.peerAddr);
     if (!info.linkIntf) {
@@ -212,24 +216,24 @@ L3Address BgpRouter::getInterfaceAddress(NetworkInterface *ie)
     return ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
 }
 
-void BgpRouter::addToAdvertiseList(Ipv4Address address)
+void BgpRouter::addToAdvertiseList(const L3Address& address)
 {
     bool routeFound = false;
-    const Ipv4Route *rtEntry = nullptr;
+    const IRoute *rtEntry = nullptr;
     for (int i = 0; i < rt->getNumRoutes(); i++) {
-        rtEntry = check_and_cast<const Ipv4Route *>(rt->getRoute(i));
-        if (rtEntry->getDestination() == address) {
+        rtEntry = rt->getRoute(i);
+        if (rtEntry->getDestinationAsGeneric() == address) {
             routeFound = true;
             break;
         }
     }
     if (!routeFound)
-        throw cRuntimeError("Network address '%s' is not found in the routing table of %s", address.str(false).c_str(), bgpModule->getOwner()->getFullName());
+        throw cRuntimeError("Network address '%s' is not found in the routing table of %s", address.str().c_str(), bgpModule->getOwner()->getFullName());
 
     auto position = std::find_if(advertiseList.begin(), advertiseList.end(),
-            [&] (const Ipv4Address m) -> bool { return m == address; });
+            [&] (const L3Address& m) -> bool { return m == address; });
     if (position != advertiseList.end())
-        throw cRuntimeError("Network address '%s' is already added to the advertised list of %s", address.str(false).c_str(), bgpModule->getOwner()->getFullName());
+        throw cRuntimeError("Network address '%s' is already added to the advertised list of %s", address.str().c_str(), bgpModule->getOwner()->getFullName());
     advertiseList.push_back(address);
 
     BgpRouteInfo *bgpEntry = createBgpRoutingTableEntry(rtEntry);
@@ -394,10 +398,7 @@ void BgpRouter::listenConnectionFromPeer(SessionId sessionId)
 
     if (listeningSocket->getState() != TcpSocket::LISTENING) {
         listeningSocket->setOutputGate(bgpModule->gate("socketOut"));
-        if (isIpv6())
-            listeningSocket->bind(Ipv6Address::UNSPECIFIED_ADDRESS, TCP_PORT);
-        else
-            listeningSocket->bind(TCP_PORT);
+        listeningSocket->bind(TCP_PORT); // wildcard (address-family-unspecified) bind accepts IPv4 and IPv6
         listeningSocket->listen();
         _socketMap.addSocket(listeningSocket);
 
