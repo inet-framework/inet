@@ -7,6 +7,8 @@
 #ifndef __INET_PROTOCOLTEST_PACKETEVENT_H
 #define __INET_PROTOCOLTEST_PACKETEVENT_H
 
+#include <string>
+
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
 
@@ -38,6 +40,7 @@ struct PacketEvent {
     cModule *node = nullptr;          // containing network node, if resolvable
     cComponent *module = nullptr;     // emitting component
     int interfaceId = -1;             // from Interface{Ind,Req} tag, else -1
+    std::string interfaceName;        // resolved from interfaceId, else empty
     Layer layer = Layer::Unknown;
     simtime_t time = 0;
     long treeId = -1;                 // packet identity, for cross-node correlation
