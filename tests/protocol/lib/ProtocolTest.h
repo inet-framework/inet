@@ -25,6 +25,29 @@ struct Step {
 };
 
 //
+// A time-scheduled packet injection (Phase 3). At `atTime` the engine resolves the
+// target gate (node -> moduleSubPath -> gateName) and sendDirect()s a packet built by
+// `builder` (which may read captures). The builder owns packet construction, so any
+// chunk/tag combination is possible -- "inject arbitrary packets".
+//
+class INET_API Injection
+{
+  public:
+    std::string nodeName;
+    std::string moduleSubPath;   // relative module path under the node, e.g. "udp"
+    std::string gateName;        // input gate to deliver to, e.g. "ipIn"
+    simtime_t atTime = 0;        // absolute injection time
+    std::function<Packet *(const CaptureStore&)> builder;
+
+    Injection& into(const char *module, const char *gate) { moduleSubPath = module; gateName = gate; return *this; }
+    Injection& at(double t) { atTime = t; return *this; }
+    Injection& packet(std::function<Packet *(const CaptureStore&)> fn) { builder = std::move(fn); return *this; }
+};
+
+// Entry point of the fluent injection chain.
+Injection inject(const char *nodeName);
+
+//
 // A protocol test program: an ordered list of steps with a name. Built with the
 // fluent API, e.g.:
 //
@@ -37,12 +60,19 @@ class INET_API ProtocolTest
   public:
     std::string name;
     std::vector<Step> steps;
+    std::vector<Injection> injections;
 
     explicit ProtocolTest(const char *name) : name(name) {}
 
     ProtocolTest& expect(const EventPattern& pattern)
     {
         steps.push_back(Step{StepType::Expect, pattern});
+        return *this;
+    }
+
+    ProtocolTest& inject(const Injection& injection)
+    {
+        injections.push_back(injection);
         return *this;
     }
 };

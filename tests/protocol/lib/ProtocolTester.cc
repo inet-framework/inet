@@ -16,6 +16,7 @@
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
 
 namespace inet {
 namespace protocoltest {
@@ -74,6 +75,14 @@ void ProtocolTester::initialize()
         program = ProtocolTestRegistry::build(testName.c_str());
         currentStep = 0;
         anchorTime = simTime();
+
+        // Schedule time-based injections (Phase 3: independent of matcher position).
+        for (size_t i = 0; i < program->injections.size(); i++) {
+            auto msg = new cMessage("inject");
+            injectionMsgs[msg] = i;
+            scheduleAt(program->injections[i].atTime, msg);
+        }
+
         if (program->steps.empty())
             decide(true, "empty program");
         else
@@ -89,6 +98,8 @@ ProtocolTester::~ProtocolTester()
     }
     cancelAndDelete(deadlineMsg);
     cancelAndDelete(endMsg);
+    for (auto& it : injectionMsgs)
+        cancelAndDelete(it.first);
 }
 
 void ProtocolTester::handleMessage(cMessage *msg)
@@ -98,6 +109,11 @@ void ProtocolTester::handleMessage(cMessage *msg)
     else if (msg == deadlineMsg) {
         const auto& step = program->steps[currentStep].pattern;
         decide(false, "deadline missed for step " + std::to_string(currentStep) + " [" + step.str() + "]");
+    }
+    else if (auto it = injectionMsgs.find(msg); it != injectionMsgs.end()) {
+        performInjection(program->injections[it->second]);
+        injectionMsgs.erase(it);
+        delete msg;
     }
     else
         throw cRuntimeError("Unexpected message");
@@ -255,6 +271,33 @@ void ProtocolTester::processMatch(const PacketEvent& event)
         decide(true, "all steps matched");
     else
         armCurrentDeadline();
+}
+
+void ProtocolTester::performInjection(const Injection& injection)
+{
+    cModule *node = getSystemModule()->getSubmodule(injection.nodeName.c_str());
+    if (node == nullptr)
+        throw cRuntimeError("inject: node '%s' not found", injection.nodeName.c_str());
+    cModule *target = injection.moduleSubPath.empty()
+                    ? node
+                    : node->getModuleByPath(("." + injection.moduleSubPath).c_str());
+    if (target == nullptr)
+        throw cRuntimeError("inject: module '%s' not found under node '%s'",
+                injection.moduleSubPath.c_str(), injection.nodeName.c_str());
+
+    auto sink = dynamic_cast<queueing::IPassivePacketSink *>(target);
+    if (sink == nullptr)
+        throw cRuntimeError("inject: module '%s' is not an IPassivePacketSink", target->getFullPath().c_str());
+    cGate *gate = target->gate(injection.gateName.c_str());
+    if (gate == nullptr)
+        throw cRuntimeError("inject: gate '%s' not found on '%s'", injection.gateName.c_str(), target->getFullPath().c_str());
+
+    Packet *packet = injection.builder(captureStore);
+    EV_INFO << "ProtocolTest " << program->name << ": injecting " << packet->getName()
+            << " into " << target->getFullPath() << "." << injection.gateName
+            << " at t=" << simTime() << endl;
+    // pushPacket() does its own Enter_Method; the interface adds InterfaceInd etc.
+    sink->pushPacket(packet, gate);
 }
 
 void ProtocolTester::armCurrentDeadline()
