@@ -39,5 +39,6 @@ simple L2NetworkConfigurator extends SimpleModule
         @class(L2NetworkConfigurator);
         @display("i=block/cogwheel");
         xml config = default(xml("<config><interface hosts='**' ports='**' priority='128' edge='false'/></config>"));
+        bool dumpConfiguration = default(false); // Print the computed per-port configuration (link cost, priority, edge flag) to the module output
 }
 

@@ -110,6 +110,13 @@ class INET_API L2NetworkConfigurator : public SimpleModule
      */
     virtual void computeConfiguration();
 
+    /**
+     * Prints the computed per-port Layer 2 configuration (link cost, priority,
+     * edge flag) for every interface to the module output. Controlled by the
+     * "dumpConfiguration" parameter.
+     */
+    virtual void dumpConfiguration();
+
     // helper functions
     virtual bool linkContainsMatchingHostExcept(InterfaceInfo *currentInfo, Matcher& hostMatcher, cModule *exceptModule);
     void ensureConfigurationComputed(L2Topology& topology);

@@ -210,7 +210,24 @@ void L2NetworkConfigurator::computeConfiguration()
     TIME(extractTopology(topology));
     // read the configuration from XML; it will serve as input for port assignment
     TIME(readInterfaceConfiguration(rootNode));
+    // optionally dump the computed per-port configuration to the module output
+    if (par("dumpConfiguration"))
+        dumpConfiguration();
     printElapsedTime("initialize", initializeStartTime);
+}
+
+void L2NetworkConfigurator::dumpConfiguration()
+{
+    for (int i = 0; i < topology.getNumNodes(); i++) {
+        Node *node = (Node *)topology.getNode(i);
+        for (auto& interfaceInfo : node->interfaceInfos) {
+            NetworkInterface *networkInterface = interfaceInfo->networkInterface;
+            EV_INFO << node->module->getFullPath() << "." << networkInterface->getInterfaceName()
+                    << ": linkCost=" << interfaceInfo->portData.linkCost
+                    << " priority=" << interfaceInfo->portData.priority
+                    << " edge=" << (interfaceInfo->portData.edge ? "true" : "false") << endl;
+        }
+    }
 }
 
 void L2NetworkConfigurator::ensureConfigurationComputed(L2Topology& topology)

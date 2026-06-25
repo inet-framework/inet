@@ -1,0 +1,70 @@
+%description:
+
+Tests that L2NetworkConfigurator configures the STP/RSTP port parameters
+(link cost, priority, edge flag) on EVERY port of EVERY switch in the network,
+not just on a single port. The default link cost is derived from the link speed
+as recommended by IEEE 802.1D-2004 (200000 for 100 Mb/s, 20000 for 1 Gb/s),
+and explicit per-port <interface> rules override it.
+
+This is a regression test for the bug where extractTopology() was triggered
+prematurely (during interface creation) and cached an incomplete topology, so
+only one port of the whole network ended up being configured.
+
+Topology:
+   switchA --Eth100M-- switchB --Eth1G-- switchC
+
+The <interface> rules:
+ - switchB's port towards switchC: explicit cost 12345
+ - every other port: cost derived from link speed; priority 100; edge false
+
+%file: test.ned
+
+import inet.linklayer.configurator.common.L2NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.Eth1G;
+import inet.node.ethernet.EthernetSwitch;
+
+network Test
+{
+    submodules:
+        l2NetworkConfigurator: L2NetworkConfigurator {
+            parameters:
+                dumpConfiguration = true;
+                config = xml("<config>\
+                    <interface hosts='switchB' towards='switchC' cost='12345' priority='100' edge='false'/>\
+                    <interface hosts='**' ports='**' priority='100' edge='false'/>\
+                    </config>");
+        }
+        switchA: EthernetSwitch { hasStp = true; }
+        switchB: EthernetSwitch { hasStp = true; }
+        switchC: EthernetSwitch { hasStp = true; }
+    connections:
+        switchA.ethg++ <--> Eth100M <--> switchB.ethg++;
+        switchB.ethg++ <--> Eth1G   <--> switchC.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+cmdenv-express-mode = false
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 0s
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+%contains: stdout
+Test.switchA.eth0: linkCost=200000 priority=100 edge=false
+Test.switchB.eth0: linkCost=200000 priority=100 edge=false
+Test.switchB.eth1: linkCost=12345 priority=100 edge=false
+Test.switchC.eth0: linkCost=20000 priority=100 edge=false
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
