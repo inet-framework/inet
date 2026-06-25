@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<BGPConfig>
+
+    <TimerParams>
+        <connectRetryTime> 120 </connectRetryTime>
+        <holdTime> 180 </holdTime>
+        <keepAliveTime> 60 </keepAliveTime>
+        <startDelay> 1 </startDelay>
+    </TimerParams>
+
+    <AS id="65001">
+        <Router interAddr="2001:db8:0:1::1"> <!-- rA -->
+            <Network address="2001:db8:0:10::"/> <!-- the network behind rA -->
+        </Router>
+    </AS>
+
+    <AS id="65002">
+        <Router interAddr="2001:db8:0:1::2"> <!-- rB -->
+            <Network address="2001:db8:0:20::"/> <!-- the network behind rB -->
+        </Router>
+    </AS>
+
+    <Session id="1">
+        <Router exterAddr="2001:db8:0:1::1"/> <!-- rA -->
+        <Router exterAddr="2001:db8:0:1::2"/> <!-- rB -->
+    </Session>
+
+</BGPConfig>

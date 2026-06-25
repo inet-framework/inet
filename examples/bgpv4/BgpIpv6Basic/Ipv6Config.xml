@@ -1,0 +1,11 @@
+<config>
+    <!-- explicit IPv6 addresses so they match the BGP configuration -->
+    <interface hosts="hostA" address="2001:db8:0:10::100"/>
+    <interface hosts="rA" towards="hostA" address="2001:db8:0:10::1"/>
+
+    <interface hosts="rA" towards="rB" address="2001:db8:0:1::1"/>
+    <interface hosts="rB" towards="rA" address="2001:db8:0:1::2"/>
+
+    <interface hosts="rB" towards="hostB" address="2001:db8:0:20::1"/>
+    <interface hosts="hostB" address="2001:db8:0:20::100"/>
+</config>
