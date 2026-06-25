@@ -244,3 +244,25 @@ Inside ``<AS>`` elements, various rules can be specified:
 
 -  DenyASOUT: deny routes learned by AS in OUT traffic (AS id must be
    specified as the body of the element.)
+
+BGP over IPv6 (MP-BGP)
+~~~~~~~~~~~~~~~~~~~~~~~
+
+BGP can also run over IPv6 and carry IPv6 routes, using the Multiprotocol
+Extensions of RFC 4760. To configure an IPv6 BGP speaker, set the
+:par:`addressFamily` parameter of the :ned:`Bgp` module to ``"ipv6"``, point its
+:par:`routingTableModule` at the node's IPv6 routing table, and set the
+:par:`routerId` parameter -- the 4-octet BGP Identifier (RFC 4271/6286), which must
+be configured explicitly because an IPv6-only router has no IPv4 address to derive it
+from. The addresses in the BGP configuration file are then IPv6 addresses, and IPv6
+reachability is exchanged in ``MP_REACH_NLRI`` / ``MP_UNREACH_NLRI`` path attributes.
+A single :ned:`Bgp` instance serves one address family.
+
+.. code-block:: ini
+
+   *.routerX.hasBgp = true
+   *.routerX.hasIpv6 = true
+   *.routerX.bgp.addressFamily = "ipv6"
+   *.routerX.bgp.routingTableModule = "^.ipv6.routingTable"
+   *.routerX.bgp.routerId = "1.1.1.1"
+
