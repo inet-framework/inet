@@ -415,10 +415,27 @@ Each phase is a milestone with its own commit(s); work in a dedicated worktree.
     Phase 1 where selectors need them; (d) some modules emit a signal twice (e.g. `udp`
     `receivedFromLower`) — matching must be robust to duplicate emissions.
 
-- **Phase 1 — Matching engine (expect-only, sequential).** `Program`/`Step`, builder
-  for `expect` with selectors + string `match` + `.within/.after`. Sequential NFA,
-  timing via self-messages, verdict + diagnostics. *Exit:* a `.test` asserting a simple
-  known UDP exchange passes; a deliberately-wrong pattern fails with a clear report.
+- **Phase 1 — Matching engine (expect-only, sequential). ✅ DONE.** `Program`/`Step`,
+  builder for `expect` with selectors + string `match` + `.within/.notBefore`. Sequential
+  timing-guarded matcher, timing via self-messages, verdict + diagnostics. *Exit:* a
+  correct UDP pattern passes; a deliberately-wrong pattern fails with a clear report.
+  - Implemented: `EventPattern` (fluent selector+timing, `PacketFilter` content
+    expression), `ProtocolTest` program + name→builder registry + `Define_ProtocolTest`
+    macro, and the engine in `ProtocolTester` (open-world: non-matching events ignored;
+    `within` deadline via self-message; PASS when all steps match, FAIL on deadline miss
+    or sim-end-with-pending; `endSimulation()` once decided). `udp_basic_pass` →
+    `PASS`; `udp_basic_fail` → `FAIL` with `deadline missed for step 0 [on host1
+    sentToLower match='udp.destPort == 9999' within=0.3]`.
+  - The two-stage `delivery()` design is corroborated: treeId-stable UDP datagram
+    matched first at `host1.udp sentToLower` then at `host2.udp receivedFromLower`.
+  - Findings: (a) **context** — `receiveSignal` runs in the *emitting* module's context;
+    the engine must `Enter_Method_Silent()` before `scheduleAt`/self-message ownership;
+    (b) **expression robustness** — a content expression naming a protocol absent from a
+    packet (`udp.*` on ARP) *throws*; caught and treated as non-match → **selectors should
+    constrain layer/kind** so expressions see relevant packets. Caveat: this also means a
+    *typo'd field name* silently never-matches; loud typo detection is a later refinement.
+  - Deferred to Phase 7: wrapping these as formal `opp_test` `.test` files. Phase 1
+    verification used `opp_run -c Pass/Fail/Trace` configs (equivalent).
 
 - **Phase 2 — Lambda predicates & captures.** Typed `match` lambdas; `lastObserved`/
   `.capture`. *Exit:* assert seq/ack relationships in a TCP trace.
