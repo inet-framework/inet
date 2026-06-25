@@ -166,11 +166,8 @@ parameter.
 
    **.bgpConfig = xmldoc("BGPConfig.xml")
 
-The configuration file may contain ``<TimerParams>``, ``<AS>``, and
-``Session`` elements at the top level.
-
--  ``<TimerParams>``: allows specifying various timing parameters for
-   the routers.
+The configuration file may contain ``<AS>`` and ``<Session>`` elements
+at the top level.
 
 -  ``<AS>``: defines Autonomous Systems, routers, and rules to be
    applied.
@@ -179,17 +176,22 @@ The configuration file may contain ``<TimerParams>``, ``<AS>``, and
    must contain exactly two ``<Router exterAddr="x.x.x.x"/>``
    elements.
 
+The BGP timers are module parameters of the :ned:`Bgp` module, not part of
+the XML: :par:`connectRetryTime` (default 120s), :par:`holdTime` (180s),
+:par:`keepAliveTime` (60s) and :par:`startDelay` (the base session-startup
+delay). For example:
+
+.. code-block:: ini
+
+   **.bgp.holdTime = 90s
+
+(Earlier versions configured these in a ``<TimerParams>`` XML element, which
+is no longer accepted.)
+
 .. code-block:: xml
 
    <BGPConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xsi:schemaLocation="BGP.xsd">
-
-     <TimerParams>
-       <connectRetryTime> 120 </connectRetryTime>
-       <holdTime> 180 </holdTime>
-       <keepAliveTime> 60 </keepAliveTime>
-       <startDelay> 15 </startDelay>
-     </TimerParams>
 
      <AS id="60111">
        <Router interAddr="172.1.10.255"/> <!--Router A1-->

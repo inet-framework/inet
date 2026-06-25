@@ -26,13 +26,22 @@ void BgpConfigReader::loadConfigFromXml(cXMLElement *bgpConfig, BgpRouter *bgpRo
     if (strcmp(bgpConfig->getTagName(), "BGPConfig"))
         throw cRuntimeError("Cannot read BGP configuration, unaccepted '%s' node at %s", bgpConfig->getTagName(), bgpConfig->getSourceLocation());
 
-    // load bgp timer parameters informations
+    // BGP timers are module parameters now; the old <TimerParams> XML element is rejected
     cXMLElement *paramNode = bgpConfig->getElementByPath("TimerParams");
-    if (paramNode == nullptr)
-        throw cRuntimeError("BGP Error: No configuration for BGP timer parameters");
-    cXMLElementList timerConfig = paramNode->getChildren();
+    if (paramNode != nullptr)
+        throw cRuntimeError("BGP: <TimerParams> in the bgpConfig XML is no longer supported; "
+                "BGP timers are module parameters now. Move them to the Bgp module (e.g. in omnetpp.ini):\n"
+                "    **.bgp.connectRetryTime = 120s\n"
+                "    **.bgp.holdTime         = 180s\n"
+                "    **.bgp.keepAliveTime    = 60s\n"
+                "    **.bgp.startDelay       = 1s     (if used)\n"
+                "then delete the <TimerParams> element at %s", paramNode->getSourceLocation());
+
     simtime_t delayTab[NB_TIMERS];
-    loadTimerConfig(timerConfig, delayTab);
+    delayTab[0] = bgpModule->par("connectRetryTime").doubleValue();
+    delayTab[1] = bgpModule->par("holdTime").doubleValue();
+    delayTab[2] = bgpModule->par("keepAliveTime").doubleValue();
+    delayTab[3] = bgpModule->par("startDelay").doubleValue();
 
     // find my AS
     cXMLElementList ASList = bgpConfig->getElementsByTagName("AS");
@@ -73,25 +82,6 @@ void BgpConfigReader::loadConfigFromXml(cXMLElement *bgpConfig, BgpRouter *bgpRo
 
     // should be called after all (E-BGP/I-BGP) sessions are created
     loadASConfig(ASConfig);
-}
-
-void BgpConfigReader::loadTimerConfig(cXMLElementList& timerConfig, simtime_t *delayTab)
-{
-    for (auto& elem : timerConfig) {
-        std::string nodeName = (elem)->getTagName();
-        if (nodeName == "connectRetryTime") {
-            delayTab[0] = (double)atoi((elem)->getNodeValue());
-        }
-        else if (nodeName == "holdTime") {
-            delayTab[1] = (double)atoi((elem)->getNodeValue());
-        }
-        else if (nodeName == "keepAliveTime") {
-            delayTab[2] = (double)atoi((elem)->getNodeValue());
-        }
-        else if (nodeName == "startDelay") {
-            delayTab[3] = (double)atoi((elem)->getNodeValue());
-        }
-    }
 }
 
 AsId BgpConfigReader::findMyAS(cXMLElementList& asList, int& outRouterPosition)

@@ -17,11 +17,9 @@ import inet.routing.contract.IBgp;
 // that apply to it (the local router is recognized by its interface addresses). The XML has
 // one `<BGPConfig>` root element containing:
 //
-// - `<TimerParams>` - the BGP timers, in seconds, applied to all sessions:
-//   - `<connectRetryTime>` - the ConnectRetryTimer interval (RFC 4271).
-//   - `<holdTime>` - the Hold Time proposed in the OPEN message.
-//   - `<keepAliveTime>` - the KeepAlive interval (typically holdTime/3).
-//   - `<startDelay>` - base delay before a router starts its sessions (staggers startup).
+// The BGP timers (ConnectRetryTime, HoldTime, KeepAliveTime and the session-startup
+// `startDelay`) are module parameters, not part of the XML; see below. (Earlier versions
+// configured them in a `<TimerParams>` XML element, which is no longer accepted.)
 //
 // - `<AS>` - an autonomous system.
 //   - `@id` - the AS number.
@@ -60,7 +58,11 @@ simple Bgp extends SimpleModule like IBgp
         volatile double startupTime @unit(s) = default(0s); // Delay before starting BGP
         double shutdownTime @unit(s) = default(1s); // On graceful stop, delay before destroying BGP state so TCP can flush the session teardown (FIN)
         double stopOperationTimeout @unit(s) = default(2s); // Timeout for the lifecycle stop operation
+        double connectRetryTime @unit(s) = default(120s); // ConnectRetryTimer interval (RFC 4271), applied to all sessions
+        double holdTime @unit(s) = default(180s); // Hold Time proposed in the OPEN message (RFC 4271); the effective hold time is negotiated to the minimum of the two peers
+        double keepAliveTime @unit(s) = default(60s); // KeepAlive interval (RFC 4271), typically holdTime/3
         xml bgpConfig;
+        double startDelay @unit(s) = default(1s); // Base delay before a router starts its sessions (staggers session startup; per-session offsets are added on top)
         double ExternalPeerStartDelayOffset @unit(s) = default(0.5s);
         bool redistributeRip = default(false);        // Redistribute routes learned by RIP into BGP
         string redistributeOspf = default("");        // Redistribute routes learned by OSPF into BGP (O IA E1 E2)

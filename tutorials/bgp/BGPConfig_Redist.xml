@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <BGPConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="BGP.xsd">
 
-    <TimerParams>
-        <connectRetryTime> 120 </connectRetryTime>
-        <holdTime>         180 </holdTime>
-        <keepAliveTime>    60  </keepAliveTime>
-        <startDelay>       50  </startDelay>   <!--long enough for the intra-AS routing protocol to converge-->
-    </TimerParams>
-
     <AS id="64500">
     	<!--router RA4-->
         <Router interAddr="10.0.0.1"/>

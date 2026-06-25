@@ -64,17 +64,6 @@
   </xsd:complexType>
 </xsd:simpleType>
 
-<xsd:element name="TimerParams">
-  <xsd:complexType>
-    <xsd:sequence>
-      <xsd:element name="connectRetryTime" type="xsd:positiveInteger" default="120"/>
-      <xsd:element name="holdTime" type="xsd:positiveInteger" default="180"/>
-      <xsd:element name="keepAliveTime" type="xsd:positiveInteger" default= "60"/>
-      <xsd:element name="startDelay" type="xsd:positiveInteger" />
-    </xsd:sequence>
-  </xsd:complexType>
-</xsd:element>
-
 <xsd:element name="AS">
   <xsd:annotation>
     <xsd:documentation xml:lang="en">

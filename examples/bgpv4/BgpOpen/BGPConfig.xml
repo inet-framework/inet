@@ -2,13 +2,6 @@
 <BGPConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               xsi:schemaLocation="BGP.xsd">
 
-    <TimerParams>
-        <connectRetryTime> 120 </connectRetryTime>
-        <holdTime> 180 </holdTime>
-        <keepAliveTime> 680 </keepAliveTime>
-        <startDelay> 2 </startDelay>
-    </TimerParams>
-
     <AS id="65324">
         <Router interAddr="10.10.10.1"/> <!--router A-->
     </AS>
