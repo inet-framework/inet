@@ -75,18 +75,7 @@ void ProtocolTester::initialize()
         program = ProtocolTestRegistry::build(testName.c_str());
         currentStep = 0;
         anchorTime = simTime();
-
-        // Schedule time-based injections (Phase 3: independent of matcher position).
-        for (size_t i = 0; i < program->injections.size(); i++) {
-            auto msg = new cMessage("inject");
-            injectionMsgs[msg] = i;
-            scheduleAt(program->injections[i].atTime, msg);
-        }
-
-        if (program->steps.empty())
-            decide(true, "empty program");
-        else
-            armCurrentDeadline();
+        enterStep();
     }
 }
 
@@ -97,9 +86,8 @@ ProtocolTester::~ProtocolTester()
             subscriptionModule->unsubscribe(it.first, this);
     }
     cancelAndDelete(deadlineMsg);
+    cancelAndDelete(injectMsg);
     cancelAndDelete(endMsg);
-    for (auto& it : injectionMsgs)
-        cancelAndDelete(it.first);
 }
 
 void ProtocolTester::handleMessage(cMessage *msg)
@@ -110,10 +98,11 @@ void ProtocolTester::handleMessage(cMessage *msg)
         const auto& step = program->steps[currentStep].pattern;
         decide(false, "deadline missed for step " + std::to_string(currentStep) + " [" + step.str() + "]");
     }
-    else if (auto it = injectionMsgs.find(msg); it != injectionMsgs.end()) {
-        performInjection(program->injections[it->second]);
-        injectionMsgs.erase(it);
-        delete msg;
+    else if (msg == injectMsg) {
+        performInjection(program->steps[currentStep].injection);
+        anchorTime = simTime();
+        currentStep++;
+        enterStep();
     }
     else
         throw cRuntimeError("Unexpected message");
@@ -123,9 +112,10 @@ void ProtocolTester::finish()
 {
     if (matchingMode) {
         if (!decided) {
-            const auto& step = program->steps[currentStep].pattern;
+            Step& step = program->steps[currentStep];
+            std::string what = step.type == StepType::Expect ? "[" + step.pattern.str() + "]" : "[inject]";
             decide(false, "simulation ended with step " + std::to_string(currentStep) +
-                          " still pending [" + step.str() + "]");
+                          " still pending " + what);
         }
     }
     else
@@ -239,6 +229,27 @@ void ProtocolTester::logEvent(const PacketEvent& event)
               << std::endl;
 }
 
+void ProtocolTester::enterStep()
+{
+    if (currentStep >= program->steps.size()) {
+        decide(true, "all steps matched");
+        return;
+    }
+    Step& step = program->steps[currentStep];
+    if (step.type == StepType::Expect)
+        armCurrentDeadline();   // wait for a matching event (see processMatch)
+    else {
+        // Inject step: schedule the injection, then advance once it fires.
+        const Injection& injection = step.injection;
+        simtime_t fireTime = injection.hasAtTime ? injection.atTime
+                           : injection.hasAfter ? anchorTime + injection.afterDelay
+                           : simTime();
+        if (injectMsg == nullptr)
+            injectMsg = new cMessage("inject");
+        scheduleAt(fireTime, injectMsg);
+    }
+}
+
 void ProtocolTester::processMatch(const PacketEvent& event)
 {
     // receiveSignal runs in the emitting module's context; switch to ours so the
@@ -247,7 +258,10 @@ void ProtocolTester::processMatch(const PacketEvent& event)
 
     if (currentStep >= program->steps.size())
         return;
-    const auto& step = program->steps[currentStep].pattern;
+    Step& current = program->steps[currentStep];
+    if (current.type != StepType::Expect)   // while an inject is pending, ignore events
+        return;
+    const EventPattern& step = current.pattern;
 
     // Earliest gate: events before the window opens cannot satisfy this step.
     if (step.selHasNotBefore && event.time < anchorTime + step.selNotBefore)
@@ -267,10 +281,7 @@ void ProtocolTester::processMatch(const PacketEvent& event)
     cancelDeadline();
     anchorTime = event.time;
     currentStep++;
-    if (currentStep >= program->steps.size())
-        decide(true, "all steps matched");
-    else
-        armCurrentDeadline();
+    enterStep();
 }
 
 void ProtocolTester::performInjection(const Injection& injection)
