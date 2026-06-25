@@ -481,9 +481,26 @@ Each phase is a milestone with its own commit(s); work in a dedicated worktree.
     intercept/drop needs inline placement); Phase 3 injection is engine-driven via
     `pushPacket`, which needs no topology changes.
 
-- **Phase 4 — Reactive injection (stimulus/response).** Wire `inject` into the engine so
-  it fires relative to matcher position; full packetdrill-style conversation. *Exit:*
-  drive a TCP 3-way handshake end-to-end against INET's TCP, peer emulated by the test.
+- **Phase 4 — Reactive injection (stimulus/response). ✅ DONE.** Wire `inject` into the
+  engine so it fires relative to matcher position; full packetdrill-style conversation.
+  *Exit:* drive a TCP 3-way handshake against INET's TCP, peer emulated by the test.
+  - Implemented: `inject` unified into the step sequence (`Step` is `Expect` or `Inject`);
+    the engine's `enterStep()` arms an expect deadline or schedules an inject. Inject timing
+    `.at(t)` absolute or `.after(d)` relative to the previous match (reactive). The inject
+    builder reads the `CaptureStore` → **`use()`-in-inject** now works.
+  - `tcp_handshake_peer` → **PASS**: host1 actively opens to a **phantom IP** (10.0.0.99,
+    ARP-blackholed so no real peer competes); the test observes the SYN at `ipv4.ip
+    receivedFromUpper` (capturing ISN + ephemeral port), reactively injects a crafted
+    SYN+ACK acking ISN+1, and observes host1's final ACK acking the peer ISN+1. Trace
+    confirms SYN(dropped)→injSYNACK→TcpAck(dropped) — a real three-way handshake driven
+    entirely by injection. Phase 3's time-scheduled inject is now an inject step with `.at()`.
+  - Findings: (a) the **phantom-IP + observe-at-IP-layer** pattern lets the test be the sole
+    peer without modifying INET or fighting a real responder — the SYN/ACK are observed
+    before ARP drops them; (b) reactive injection needs the inject to fire as a *future*
+    self-message (never re-entrantly in the matching callback) — `enterStep` schedules it,
+    matching the plan's §14 caution; (c) `TcpSessionApp` requires `sendBytes>0` even when
+    only the handshake is under test. Did **not** need the TCP send-signal addition after
+    all (IP-layer observation sufficed), so no INET edit was made.
 
 - **Phase 5 — Combinators.** `unordered/optional/repeat/anyOf/expectNo/delivery`,
   per-flow scoping, `strict()` mode. *Exit:* a multi-flow test with negative assertions.
