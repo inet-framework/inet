@@ -148,8 +148,80 @@ Define_ProtocolTest(udp_inject_echo)
 {
     return ProtocolTest("udp_inject_echo")
         .inject(inject("host2").into("eth[0]", "upperLayerOut").at(0.5).packet(buildInjectedUdpDatagram))
+        // inject is now an ordered step, so this expect is anchored at the injection.
         .expect(on("host2").sentToLower().layer(Layer::Transport)
-                  .match("udp.srcPort == 5000").notBefore(0.5).within(0.6));
+                  .match("udp.srcPort == 5000").within(0.2));
+}
+
+// --- Phase 4: reactive injection (stimulus/response) ---
+//
+// The test is the sole TCP peer. host1 actively opens a connection to a phantom IP
+// (10.0.0.99, owned by nobody), so no real peer competes. The test observes host1's
+// SYN, reactively injects a crafted SYN+ACK that acknowledges host1's ISN+1, and then
+// observes host1's final ACK -- a full three-way handshake driven by injection.
+// host1's outgoing segments are observed at the IP layer (ipv4.ip receivedFromUpper),
+// since INET's Tcp emits no send-side signal.
+
+static Packet *buildSynAck(const CaptureStore& captures)
+{
+    intval_t isn = captures.at("isn").intValue();
+    intval_t clientPort = captures.at("clientPort").intValue();
+
+    auto packet = new Packet("injSYNACK");
+    auto tcpHeader = makeShared<TcpHeader>();
+    tcpHeader->setSrcPort(1000);            // the peer's listening port (= connectPort)
+    tcpHeader->setDestPort(clientPort);     // host1's ephemeral port (captured)
+    tcpHeader->setSynBit(true);
+    tcpHeader->setAckBit(true);
+    tcpHeader->setSequenceNo(5000);         // the peer's ISN (chosen by the test)
+    tcpHeader->setAckNo(isn + 1);           // acknowledge host1's SYN
+    tcpHeader->setWindow(16384);
+    tcpHeader->setHeaderLength(B(20));
+    tcpHeader->setChecksum(0);
+    tcpHeader->setChecksumMode(CHECKSUM_DECLARED_CORRECT);
+    packet->insertAtFront(tcpHeader);
+
+    auto ipv4Header = makeShared<Ipv4Header>();
+    ipv4Header->setSrcAddress(Ipv4Address("10.0.0.99")); // phantom peer
+    ipv4Header->setDestAddress(Ipv4Address("10.0.0.1")); // host1
+    ipv4Header->setProtocolId(IP_PROT_TCP);
+    ipv4Header->setTimeToLive(64);
+    ipv4Header->setTotalLengthField(B(20) + B(20));
+    ipv4Header->setChecksum(0);
+    ipv4Header->setChecksumMode(CHECKSUM_DECLARED_CORRECT);
+    packet->insertAtFront(ipv4Header);
+
+    packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+    packet->addTag<DirectionTag>()->setDirection(DIRECTION_INBOUND);
+    auto dispatchReq = packet->addTag<DispatchProtocolReq>();
+    dispatchReq->setProtocol(&Protocol::ipv4);
+    dispatchReq->setServicePrimitive(SP_INDICATION);
+    return packet;
+}
+
+Define_ProtocolTest(tcp_handshake_peer)
+{
+    return ProtocolTest("tcp_handshake_peer")
+        // 1. host1's outgoing SYN; capture its ISN and ephemeral source port.
+        .expect(on("host1").receivedFromUpper().layer(Layer::Network)
+                  .match([](const MatchContext& m) {
+                      auto tcp = m.event.packet->peekAtFront<TcpHeader>();
+                      return tcp->getSynBit() && !tcp->getAckBit();
+                  })
+                  .capture("isn", [](const PacketEvent& e) { return cValue(tcpSeq(e)); })
+                  .capture("clientPort", [](const PacketEvent& e) {
+                      return cValue((intval_t)e.packet->peekAtFront<TcpHeader>()->getSrcPort());
+                  })
+                  .within(1.0))
+        // 2. Reactively inject a SYN+ACK acknowledging host1's ISN+1.
+        .inject(inject("host1").into("eth[0]", "upperLayerOut").after(0.001).packet(buildSynAck))
+        // 3. host1's final ACK, acknowledging the peer's ISN+1 (5000+1).
+        .expect(on("host1").receivedFromUpper().layer(Layer::Network)
+                  .match([](const MatchContext& m) {
+                      auto tcp = m.event.packet->peekAtFront<TcpHeader>();
+                      return tcp->getAckBit() && !tcp->getSynBit() && tcpAck(m.event) == 5001;
+                  })
+                  .within(1.0));
 }
 
 } // namespace protocoltest

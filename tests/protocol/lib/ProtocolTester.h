@@ -41,9 +41,9 @@ class INET_API ProtocolTester : public SimpleModule, protected cListener
     size_t currentStep = 0;
     CaptureStore captureStore;                     // values bound by capture(...) as steps match
     simtime_t anchorTime = 0;                      // start time of the current step's window
-    cMessage *deadlineMsg = nullptr;               // fires when the current step misses its deadline
+    cMessage *deadlineMsg = nullptr;               // fires when the current expect step misses its deadline
+    cMessage *injectMsg = nullptr;                 // fires when the current inject step is due
     cMessage *endMsg = nullptr;                    // ends the simulation once a verdict is reached
-    std::map<cMessage *, size_t> injectionMsgs;    // self-message -> injection index
     bool decided = false;
     bool verdictPass = false;
 
@@ -59,6 +59,7 @@ class INET_API ProtocolTester : public SimpleModule, protected cListener
     static Layer inferLayer(const cComponent *source);
 
     // matching engine
+    void enterStep();              // begin the current step (arm an expect, or schedule an inject)
     void processMatch(const PacketEvent& event);
     void performInjection(const Injection& injection);
     void armCurrentDeadline();
