@@ -6,8 +6,9 @@
 # your built INET lives elsewhere. (Proper in-tree build comes with the Phase 7
 # harness integration.)
 set -e
-INET_DIR="${INET_DIR:-/home/levy/workspace/inet}"
 cd "$(dirname "$0")"
+# Default to this worktree's own (built) INET; override INET_DIR to link elsewhere.
+INET_DIR="${INET_DIR:-$(cd ../../.. && pwd)}"
 
 printf 'LIBS += -Wl,-rpath,%s/src\n' "$INET_DIR" > makefrag
 opp_makemake -f --deep -s -o protocoltest -I"$INET_DIR/src" -L"$INET_DIR/src" -lINET
