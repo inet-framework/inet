@@ -13,7 +13,8 @@
 simple ProtocolTester
 {
     parameters:
-        bool logEvents = default(true); // print a one-line trace per observed packet event
+        string testName = default(""); // name of a registered ProtocolTest program to run; empty = observe/log only
+        bool logEvents = default(testName == ""); // print a one-line trace per observed packet event
         @display("i=block/cogwheel;is=s");
         @class(inet::protocoltest::ProtocolTester);
 }
