@@ -24,9 +24,9 @@ network BgpIpv6Basic
             parameters:
                 @display("p=100,100;is=s");
                 config = xmldoc("Ipv6Config.xml");
-                // no auto static routes: routers get only the on-link routes configured
-                // manually below, so the inter-AS routes can only come from BGP
-                addStaticRoutes = false;
+                // auto-generate the on-link (direct) routes and the host default routes,
+                // but NOT the inter-AS (remote) routes -- those can only come from BGP
+                addRemoteRoutes = false;
         }
         rA: Router {
             parameters:
