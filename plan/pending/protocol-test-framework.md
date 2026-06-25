@@ -458,10 +458,28 @@ Each phase is a milestone with its own commit(s); work in a dedicated worktree.
   - `use()` (reading captures inside *inject* field values) is deferred to Phase 3 where
     injection exists; in Phase 2 captures are consumed only inside predicates.
 
-- **Phase 3 — Injection (time-scheduled) + `PacketTap` (inject mode).** Builder
-  `inject(...).frame(...)`, tag setup, `PacketTap` push path. Start with scheduled
-  (`.at`) injection. *Exit:* inject a UDP packet that the DUT receives and responds to;
-  assert the response.
+- **Phase 3 — Injection (time-scheduled). ✅ DONE.** Builder `inject(node).into(module,
+  gate).at(t).packet(fn)`, tag setup, push path. *Exit:* inject a UDP packet that the DUT
+  receives and responds to; assert the response.
+  - Implemented: `Injection` model + `ProtocolTest::inject()`; the engine schedules
+    injections as self-messages and delivers via the **queueing push contract**
+    (`IPassivePacketSink::pushPacket`). `udp_inject_echo` crafts an IP/UDP datagram, pushes
+    it up `host2.eth[0].upperLayerOut`; host2's `UdpEchoApp` receives it up the full stack
+    (interface→IP→UDP→app) and echoes it — asserted and **PASS** (trace confirms the causal
+    chain, single treeId throughout).
+  - **Key findings (injection realism — the hard part the plan flagged):**
+    (a) `sendDirect` only works to **unconnected** gates, so it can't target `udp.ipIn`;
+    the robust seam is `pushPacket()` (a method call, no gate-connection constraint) on the
+    interface's `upperLayerOut` — the same inbound path INET emulation uses.
+    (b) Routing up requires the exact tags a decapsulated frame carries: `PacketProtocolTag`
+    **plus** `DispatchProtocolReq(protocol, SP_INDICATION)` — without the `SP_INDICATION`
+    service primitive the `MessageDispatcher` rejects it as "Unknown packet".
+    (c) Header validity matters: `checksumMode = CHECKSUM_DECLARED_CORRECT` on IP+UDP avoids
+    drops. → argues for a per-layer **inject-helper** library (Phase 6/7) so authors don't
+    hand-assemble tags. `.frame(...)` chunk-sugar and `use()`-in-inject also deferred there.
+  - **Scope note:** the inline-MITM `PacketTap` module is deferred to Phase 6 (where
+    intercept/drop needs inline placement); Phase 3 injection is engine-driven via
+    `pushPacket`, which needs no topology changes.
 
 - **Phase 4 — Reactive injection (stimulus/response).** Wire `inject` into the engine so
   it fires relative to matcher position; full packetdrill-style conversation. *Exit:*
