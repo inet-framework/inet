@@ -16,32 +16,38 @@
 namespace inet {
 namespace protocoltest {
 
-// Phase 1 has only `expect`; inject / expectNo / combinators arrive in later phases.
-enum class StepType { Expect };
-
-struct Step {
-    StepType type = StepType::Expect;
-    EventPattern pattern;
-};
+// expect: advance when a matching event is observed. inject: fire a crafted packet
+// (reactively, relative to the previous step) then advance. (expectNo / combinators later.)
+enum class StepType { Expect, Inject };
 
 //
-// A time-scheduled packet injection (Phase 3). At `atTime` the engine resolves the
-// target gate (node -> moduleSubPath -> gateName) and sendDirect()s a packet built by
-// `builder` (which may read captures). The builder owns packet construction, so any
-// chunk/tag combination is possible -- "inject arbitrary packets".
+// A packet injection. When the engine reaches an inject step it resolves the target
+// (node -> moduleSubPath -> gateName) and pushPacket()s a packet built by `builder`
+// (which may read captures from earlier steps -- the reactive `use()`). The builder
+// owns construction, so any chunk/tag combination is possible -- "inject arbitrary
+// packets". Timing: `.at(t)` absolute, or `.after(d)` relative to the previous step's
+// match (reactive); default is immediately upon reaching the step.
 //
 class INET_API Injection
 {
   public:
     std::string nodeName;
-    std::string moduleSubPath;   // relative module path under the node, e.g. "udp"
-    std::string gateName;        // input gate to deliver to, e.g. "ipIn"
-    simtime_t atTime = 0;        // absolute injection time
+    std::string moduleSubPath;   // relative module path under the node, e.g. "eth[0]"
+    std::string gateName;        // sink gate to push to, e.g. "upperLayerOut"
+    bool hasAtTime = false; simtime_t atTime = 0;
+    bool hasAfter = false; simtime_t afterDelay = 0;
     std::function<Packet *(const CaptureStore&)> builder;
 
     Injection& into(const char *module, const char *gate) { moduleSubPath = module; gateName = gate; return *this; }
-    Injection& at(double t) { atTime = t; return *this; }
+    Injection& at(double t) { hasAtTime = true; atTime = t; return *this; }
+    Injection& after(double d) { hasAfter = true; afterDelay = d; return *this; }
     Injection& packet(std::function<Packet *(const CaptureStore&)> fn) { builder = std::move(fn); return *this; }
+};
+
+struct Step {
+    StepType type = StepType::Expect;
+    EventPattern pattern;   // valid when type == Expect
+    Injection injection;    // valid when type == Inject
 };
 
 // Entry point of the fluent injection chain.
@@ -60,19 +66,18 @@ class INET_API ProtocolTest
   public:
     std::string name;
     std::vector<Step> steps;
-    std::vector<Injection> injections;
 
     explicit ProtocolTest(const char *name) : name(name) {}
 
     ProtocolTest& expect(const EventPattern& pattern)
     {
-        steps.push_back(Step{StepType::Expect, pattern});
+        steps.push_back(Step{StepType::Expect, pattern, {}});
         return *this;
     }
 
     ProtocolTest& inject(const Injection& injection)
     {
-        injections.push_back(injection);
+        steps.push_back(Step{StepType::Inject, {}, injection});
         return *this;
     }
 };
