@@ -1011,7 +1011,7 @@ void Ipv6NeighbourDiscovery::createAndSendRsPacket(NetworkInterface *ie)
     }
 
     // Construct a Router Solicitation message
-    auto packet = new Packet("RSpacket");
+    auto packet = new Packet("RouterSolicitation");
     Icmpv6::insertChecksum(checksumMode, rs, packet);
     packet->insertAtFront(rs);
     sendPacketToIpv6Module(packet, destAddr, myIPv6Address, ie->getInterfaceId());
@@ -1327,7 +1327,7 @@ void Ipv6NeighbourDiscovery::createAndSendRaPacket(const Ipv6Address& destAddr, 
             ra->addChunkLength(IPv6ND_PREFIX_INFORMATION_OPTION_LENGTH);
         }
 
-        auto packet = new Packet("RApacket");
+        auto packet = new Packet("RouterAdvertisement");
         Icmpv6::insertChecksum(checksumMode, ra, packet);
         packet->insertAtFront(ra);
         sendPacketToIpv6Module(packet, destAddr, sourceAddr, ie->getInterfaceId());
@@ -1776,7 +1776,7 @@ void Ipv6NeighbourDiscovery::createAndSendNsPacket(const Ipv6Address& nsTargetAd
         ns->getOptionsForUpdate().appendOption(sla);
         ns->addChunkLength(IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH);
     }
-    auto packet = new Packet("NSpacket");
+    auto packet = new Packet("NeighbourSolicitation");
     Icmpv6::insertChecksum(checksumMode, ns, packet);
     packet->insertAtFront(ns);
     sendPacketToIpv6Module(packet, dgDestAddr, dgSrcAddr, ie->getInterfaceId());
@@ -2030,7 +2030,7 @@ void Ipv6NeighbourDiscovery::sendSolicitedNa(Packet *packet, const Ipv6Neighbour
     // off the respective ones.
     Ipv6Address myIPv6Addr = ie->getProtocolData<Ipv6InterfaceData>()->getPreferredAddress();
 
-    auto naPacket = new Packet("NApacket");
+    auto naPacket = new Packet("NeighbourAdvertisement");
     Icmpv6::insertChecksum(checksumMode, na, packet);
     naPacket->insertAtFront(na);
     sendPacketToIpv6Module(naPacket, naDestAddr, myIPv6Addr, ie->getInterfaceId());
@@ -2103,7 +2103,7 @@ void Ipv6NeighbourDiscovery::sendUnsolicitedNa(NetworkInterface *ie)
     // Neighbor Unreachability Detection algorithm ensures that all nodes
     // obtain a reachable link-layer address, though the delay may be
     // slightly longer.
-    auto packet = new Packet("NApacket");
+    auto packet = new Packet("NeighbourAdvertisement");
     Icmpv6::insertChecksum(checksumMode, na, packet);
     packet->insertAtFront(na);
     sendPacketToIpv6Module(packet, Ipv6Address::ALL_NODES_2, myIPv6Addr, ie->getInterfaceId());

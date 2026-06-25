@@ -8,9 +8,9 @@
 # empty-shim step, which kept these fingerprints bit-for-bit identical.
 
 # MIPv6 example — the primary test
-/examples/ipv6/mipv6/,               -f omnetpp.ini -c Handover -r 0,                70s,            85e6-5d61/~tNlb, PASS, wireless EthernetMac
-/examples/ipv6/mipv6/,               -f omnetpp.ini -c RouteOptimizationTwoCNs -r 0,  60s,            af07-3741/~tNlb, PASS, wireless EthernetMac
-/examples/ipv6/mipv6roaming/,        -f omnetpp.ini -c Roaming -r 0,                 70s,            f4e4-0f9e/~tNlb, PASS, wireless EthernetMac
+/examples/ipv6/mipv6/,               -f omnetpp.ini -c Handover -r 0,                70s,            b458-831b/~tNlb, PASS, wireless EthernetMac
+/examples/ipv6/mipv6/,               -f omnetpp.ini -c RouteOptimizationTwoCNs -r 0,  60s,            40e8-2339/~tNlb, PASS, wireless EthernetMac
+/examples/ipv6/mipv6roaming/,        -f omnetpp.ini -c Roaming -r 0,                 70s,            ff00-1b0a/~tNlb, PASS, wireless EthernetMac
 
 # IPv6 examples
 # MLD example — new PASS row; ~tNl locks the MLD Report/Query/Done/MAS-Query packet exchange (traffic+lengths);
@@ -18,19 +18,19 @@
 # causes parsimPack() to abort — use ~tNl (no parsim serialization) instead; tyf excluded as unreliable
 /examples/ipv6/mld/,            -f omnetpp.ini -c MldDemo -r 0,              30s,             0afa-a0ac/~tNl, PASS, EthernetMac MLD
 /examples/ipv6/mld/,            -f omnetpp.ini -c MldV2Ssm -r 0,            30s,             c4a8-20a4/~tNl, PASS, EthernetMac MLD
-/examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           d546-2263/~tNlb, PASS, EthernetMac
-/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           f908-b0c5/~tNlb, PASS,
-/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            48f9-b74a/~tNlb, PASS,
+/examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           8e48-31ae/~tNlb, PASS, EthernetMac
+/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           ca94-a2f6/~tNlb, PASS,
+/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            06b9-ff17/~tNlb, PASS,
 
 # IPv6 networking examples
-/examples/inet/hierarchical99/,      -f networklayer.ini -c IPv6 -r 0,              10000s,          3fd2-976a/~tNlb, PASS, EthernetMac
-/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_OK_ipv6 -r 0,            10s,             7fe6-c71d/~tNlb, PASS,
-/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Port_Unav_ipv6 -r 0,     10s,             84fc-d602/~tNlb, PASS,
-/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Host_Unav_ipv6 -r 0,     10s,             b010-62f0/~tNlb, PASS,
+/examples/inet/hierarchical99/,      -f networklayer.ini -c IPv6 -r 0,              10000s,          8d4d-9e11/~tNlb, PASS, EthernetMac
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_OK_ipv6 -r 0,            10s,             8feb-3936/~tNlb, PASS,
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Port_Unav_ipv6 -r 0,     10s,             9661-c1f5/~tNlb, PASS,
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Host_Unav_ipv6 -r 0,     10s,             6360-9ed1/~tNlb, PASS,
 
 # DYMO with IPv6
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv6 -r 0,                   10s,             84e9-900a/~tNlb, PASS,  wireless adhoc
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv6 -r 0,              10s,             84e9-900a/~tNlb, PASS,  wireless adhoc
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv6 -r 0,                   10s,             bbf0-c890/~tNlb, PASS,  wireless adhoc
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv6 -r 0,              10s,             bbf0-c890/~tNlb, PASS,  wireless adhoc
 
 # EIGRP with IPv6
 /examples/eigrp/testing_scenario6/,    -f omnetpp.ini -c EIGRP-IPv6_exp1_bandwidth-change -r 0,              3min,         c645-565e/~tNlb,  PASS,  eigrp EthernetMac
