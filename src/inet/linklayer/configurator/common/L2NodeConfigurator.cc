@@ -30,7 +30,19 @@ void L2NodeConfigurator::initialize(int stage)
         nodeStatus = dynamic_cast<NodeStatus *>(host->getSubmodule("status"));
         interfaceTable.reference(this, "interfaceTableModule", true);
         networkConfigurator.reference(this, "l2ConfiguratorModule", false);
+        // The interfaceCreatedSignal is used to add protocol data to interfaces as
+        // they are created (see receiveSignal()); subscribe early enough to catch the
+        // interfaces created during initialization.
         host->subscribe(interfaceCreatedSignal, this);
+    }
+    else if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
+        // Apply the L2 configuration to all interfaces. This must happen at this stage
+        // (not from the interfaceCreatedSignal during interface creation), because the
+        // L2NetworkConfigurator extracts the network topology here, once every interface
+        // of every node has been registered. Triggering it earlier would extract an
+        // incomplete topology and leave most ports unconfigured.
+        if ((!nodeStatus || nodeStatus->getState() == NodeStatus::UP) && networkConfigurator)
+            configureNode();
     }
 }
 
@@ -85,7 +97,16 @@ void L2NodeConfigurator::receiveSignal(cComponent *source, simsignal_t signalID,
     if (signalID == interfaceCreatedSignal) {
         NetworkInterface *ie = check_and_cast<NetworkInterface *>(obj);
         prepareInterface(ie);
-        if (networkConfigurator)
+        // Interfaces created during initialization are configured later, in one pass,
+        // from initialize(INITSTAGE_NETWORK_CONFIGURATION) -- once the configurator has
+        // extracted the complete topology. Only configure interfaces that are created
+        // dynamically at runtime here (the topology is already available by then).
+#if OMNETPP_BUILDNUM < 2001
+        bool initializing = getSimulation()->getSimulationStage() == STAGE(INITIALIZE);
+#else
+        bool initializing = getSimulation()->getStage() == STAGE(INITIALIZE);
+#endif
+        if (networkConfigurator && !initializing)
             networkConfigurator->configureInterface(ie);
     }
 }

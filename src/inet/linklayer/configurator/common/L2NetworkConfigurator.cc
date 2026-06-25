@@ -127,8 +127,10 @@ void L2NetworkConfigurator::readInterfaceConfiguration(Node *rootNode)
             Matcher towardsMatcher(towardsAttr);
             Matcher portsMatcher(portsAttr);
 
+            std::set<Node *> nodesVisited;
             std::queue<Node *> Q;
             Q.push(rootNode);
+            nodesVisited.insert(rootNode);
 
             // configure port type/cost/priority constraints on matching interfaces
             while (!Q.empty()) {
@@ -137,50 +139,59 @@ void L2NetworkConfigurator::readInterfaceConfiguration(Node *rootNode)
 
                 for (unsigned int i = 0; i < currentNode->interfaceInfos.size(); i++) {
                     NetworkInterface *ifEntry = currentNode->interfaceInfos[i]->networkInterface;
-                    if (interfacesSeen.count(ifEntry) == 0 && matchedBefore.count(ifEntry) == 0) {
-                        cModule *hostModule = currentNode->module;
-                        std::string hostFullPath = hostModule->getFullPath();
-                        std::string hostShortenedFullPath = hostFullPath.substr(hostFullPath.find('.') + 1);
 
-                        // loopback interfaces
-                        if (ifEntry->getNodeInputGateId() == -1) {
-                            interfacesSeen.insert(ifEntry);
-                            continue;
-                        }
+                    // walk the topology to the neighbor regardless of whether this interface
+                    // ends up being configured by the current rule -- otherwise an interface
+                    // already matched by an earlier rule (or already seen) would cut off the
+                    // traversal and leave the rest of the network unvisited by this rule
+                    Node *childNode = currentNode->interfaceInfos[i]->childNode;
+                    if (childNode != nullptr && nodesVisited.count(childNode) == 0) {
+                        nodesVisited.insert(childNode);
+                        Q.push(childNode);
+                    }
 
-                        cGate *gate = hostModule->gate(ifEntry->getNodeInputGateId());
-                        std::stringstream ss;
-                        ss << gate->getIndex();
-                        std::string port = ss.str();
+                    if (interfacesSeen.count(ifEntry) != 0 || matchedBefore.count(ifEntry) != 0)
+                        continue;
+                    interfacesSeen.insert(ifEntry);
 
-                        // Note: "hosts", "interfaces" and "towards" must ALL match on the interface for the rule to apply
-                        if ((hostMatcher.matchesAny() || hostMatcher.matches(hostShortenedFullPath.c_str()) || hostMatcher.matches(hostFullPath.c_str()))
-                            && (interfaceMatcher.matchesAny() || interfaceMatcher.matches(ifEntry->getInterfaceName()))
-                            && (towardsMatcher.matchesAny() || linkContainsMatchingHostExcept(currentNode->interfaceInfos[i], towardsMatcher, hostModule))
-                            && (portsMatcher.matchesAny() || portsMatcher.matches(port.c_str())))
-                        {
-                            // cost
-                            if (!opp_isempty(cost))
-                                currentNode->interfaceInfos[i]->portData.linkCost = atoi(cost);
-                            else
-                                // no explicit cost: derive a default from the link speed (IEEE 802.1D-2004)
-                                currentNode->interfaceInfos[i]->portData.linkCost = getRecommendedLinkCost(currentNode, ifEntry);
+                    cModule *hostModule = currentNode->module;
+                    std::string hostFullPath = hostModule->getFullPath();
+                    std::string hostShortenedFullPath = hostFullPath.substr(hostFullPath.find('.') + 1);
 
-                            // priority
-                            if (!opp_isempty(priority))
-                                currentNode->interfaceInfos[i]->portData.priority = atoi(priority);
+                    // loopback interfaces
+                    if (ifEntry->getNodeInputGateId() == -1)
+                        continue;
 
-                            // edge
-                            if (!opp_isempty(edge))
-                                currentNode->interfaceInfos[i]->portData.edge = strcmp(edge, "true") ? false : true;
-                            EV_DEBUG << hostModule->getFullPath() << ":" << ifEntry->getInterfaceName() << endl;
+                    cGate *gate = hostModule->gate(ifEntry->getNodeInputGateId());
+                    // a scalar (non-vector) gate, e.g. a host's single ethg, has no
+                    // gate-vector index; treat it as port 0
+                    std::stringstream ss;
+                    ss << (gate->isVector() ? gate->getIndex() : 0);
+                    std::string port = ss.str();
 
-                            matchedBefore.insert(ifEntry);
-                        }
+                    // Note: "hosts", "interfaces" and "towards" must ALL match on the interface for the rule to apply
+                    if ((hostMatcher.matchesAny() || hostMatcher.matches(hostShortenedFullPath.c_str()) || hostMatcher.matches(hostFullPath.c_str()))
+                        && (interfaceMatcher.matchesAny() || interfaceMatcher.matches(ifEntry->getInterfaceName()))
+                        && (towardsMatcher.matchesAny() || linkContainsMatchingHostExcept(currentNode->interfaceInfos[i], towardsMatcher, hostModule))
+                        && (portsMatcher.matchesAny() || portsMatcher.matches(port.c_str())))
+                    {
+                        // cost
+                        if (!opp_isempty(cost))
+                            currentNode->interfaceInfos[i]->portData.linkCost = atoi(cost);
+                        else
+                            // no explicit cost: derive a default from the link speed (IEEE 802.1D-2004)
+                            currentNode->interfaceInfos[i]->portData.linkCost = getRecommendedLinkCost(currentNode, ifEntry);
 
-                        interfacesSeen.insert(ifEntry);
-                        if (currentNode->interfaceInfos[i]->childNode)
-                            Q.push(currentNode->interfaceInfos[i]->childNode);
+                        // priority
+                        if (!opp_isempty(priority))
+                            currentNode->interfaceInfos[i]->portData.priority = atoi(priority);
+
+                        // edge
+                        if (!opp_isempty(edge))
+                            currentNode->interfaceInfos[i]->portData.edge = strcmp(edge, "true") ? false : true;
+                        EV_DEBUG << hostModule->getFullPath() << ":" << ifEntry->getInterfaceName() << endl;
+
+                        matchedBefore.insert(ifEntry);
                     }
                 }
             }
