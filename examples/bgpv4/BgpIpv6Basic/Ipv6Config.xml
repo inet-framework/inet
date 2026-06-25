@@ -8,4 +8,14 @@
 
     <interface hosts="rB" towards="hostB" address="2001:db8:0:20::1"/>
     <interface hosts="hostB" address="2001:db8:0:20::100"/>
+
+    <!-- on-link (directly-connected) routes only; the inter-AS routes are left for BGP -->
+    <route hosts="rA" destination="2001:db8:0:1::"  prefixLength="64" interface="eth1"/>
+    <route hosts="rA" destination="2001:db8:0:10::" prefixLength="64" interface="eth0"/>
+    <route hosts="rB" destination="2001:db8:0:1::"  prefixLength="64" interface="eth0"/>
+    <route hosts="rB" destination="2001:db8:0:20::" prefixLength="64" interface="eth1"/>
+
+    <!-- hosts default-route to their gateway router -->
+    <route hosts="hostA" destination="::" prefixLength="0" interface="eth0" gateway="2001:db8:0:10::1"/>
+    <route hosts="hostB" destination="::" prefixLength="0" interface="eth0" gateway="2001:db8:0:20::1"/>
 </config>
