@@ -23,6 +23,11 @@ std::string InfoVisualizerBase::DirectiveResolver::resolveDirective(char directi
     switch (directive) {
         case 'n':
             return module->getFullName();
+        case 'N': {
+            // display name (the alternative name shown on the GUI), or the full name if none is set
+            const char *displayName = module->getDisplayName();
+            return displayName != nullptr && *displayName != '\0' ? displayName : module->getFullName();
+        }
         case 'p':
             return module->getFullPath();
         case 't':

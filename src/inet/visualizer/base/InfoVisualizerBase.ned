@@ -16,6 +16,7 @@ package inet.visualizer.base;
 //
 // The format string can contain the following directives:
 //  - %n module full name
+//  - %N module display name (the module full name if no display name is set)
 //  - %p module full path
 //  - %t display string text
 //  - %s `cModule`::str()
