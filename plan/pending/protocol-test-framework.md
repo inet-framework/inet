@@ -399,10 +399,21 @@ For `tcp-handshake` the renderer produces:
 
 Each phase is a milestone with its own commit(s); work in a dedicated worktree.
 
-- **Phase 0 — Skeleton & event normaliser.** `ProtocolTester` module subscribing to the
-  packet signals (PcapRecorder-style), producing `PacketEvent`s; node/iface/direction/
-  layer resolution; a trivial "log all events" mode. Validates observation end-to-end.
-  *Exit:* run on an existing INET example, print a correct normalised trace.
+- **Phase 0 — Skeleton & event normaliser. ✅ DONE.** `ProtocolTester` module subscribing
+  to the packet signals (PcapRecorder-style), producing `PacketEvent`s; node/iface/
+  direction/layer resolution; a trivial "log all events" mode. Validates observation
+  end-to-end. *Exit:* run on an INET example, print a correct normalised trace.
+  - Implemented in `tests/protocol/lib/` (`PacketEvent.h`, `ProtocolTester.{h,cc,ned}`,
+    a two-host UDP demo, `build.sh`/`run-demo.sh`). Builds against a pre-built INET at
+    the same commit (no full INET rebuild in the worktree).
+  - Verified: clean 36-event trace over a UDP exchange; node/module/kind/layer correct;
+    **treeId is stable across nodes** (confirms the `delivery()` correlation primitive).
+  - Findings feeding later phases: (a) direction must come from the **signal kind**, not
+    a `DirectionTag` (absent at these points) — fixed; (b) `InterfaceInd` is absent on
+    `receivedFromLower` at the MAC — interface resolution must tolerate `-1`; (c) interface
+    *name* resolution and precise (non-heuristic) layer classification are deferred to
+    Phase 1 where selectors need them; (d) some modules emit a signal twice (e.g. `udp`
+    `receivedFromLower`) — matching must be robust to duplicate emissions.
 
 - **Phase 1 — Matching engine (expect-only, sequential).** `Program`/`Step`, builder
   for `expect` with selectors + string `match` + `.within/.after`. Sequential NFA,
