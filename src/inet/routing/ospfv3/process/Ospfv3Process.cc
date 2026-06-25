@@ -1,6 +1,7 @@
 #include "inet/routing/ospfv3/process/Ospfv3Process.h"
 
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/routing/ospfv3/Ospfv3Checksum.h"
 
 namespace inet {
 namespace ospfv3 {
@@ -41,6 +42,7 @@ void Ospfv3Process::initialize(int stage)
 
         this->routerID = Ipv4Address(par("routerID").stringValue());
         this->processID = (int)par("processID");
+        this->checksumMode = parseChecksumMode(par("checksumMode").stringValue(), false);
         this->parseConfig(par("interfaceConfig"));
 
         registerProtocol(Protocol::ospf, gate("splitterOut"), gate("splitterIn"));
@@ -699,6 +701,15 @@ void Ospfv3Process::sendPacket(Packet *packet, Ipv6Address destination, const ch
     packet->addTagIfAbsent<L3AddressReq>()->setDestAddress(destination);
     packet->addTagIfAbsent<L3AddressReq>()->setSrcAddress(ipv6int->getLinkLocalAddress());
     packet->addTagIfAbsent<HopLimitReq>()->setHopLimit(hopLimit);
+
+    // Set the OSPFv3 packet Checksum per the checksumMode parameter. For "computed" this is the
+    // RFC 5340 2.5 checksum over the IPv6 pseudo-header + packet, which needs the addresses known
+    // here at send time; "declared" just stamps a sentinel (no serialization cost).
+    {
+        auto mutablePacket = packet->removeAtFront<Ospfv3Packet>();
+        setOspfChecksum(mutablePacket, checksumMode, ipv6int->getLinkLocalAddress(), destination);
+        packet->insertAtFront(mutablePacket);
+    }
     const auto& ospfPacket = packet->peekAtFront<Ospfv3Packet>();
 
     switch (ospfPacket->getType()) {

@@ -27,6 +27,16 @@ namespace inet {
 uint16_t internetChecksum(const uint8_t *addr, size_t count, uint32_t sum = 0);
 
 /**
+ * Computes the Fletcher checksum (ISO 8473 / RFC 1008) as used by IS-IS and the
+ * OSPF LSA "LS Checksum" field. Returns the two 8-bit check octets packed big-endian
+ * (first octet in the high byte). The two checksum octets, located at [checksumPos] and
+ * [checksumPos+1] within the checksummed region, must be set to 0 in @p buf before calling;
+ * the caller then stores the returned value into them. @p length is the size of the
+ * checksummed region (which, for an OSPF LSA, excludes the leading LS Age field).
+ */
+uint16_t fletcherChecksum(const uint8_t *buf, size_t length, size_t checksumPos);
+
+/**
  * Computes the FCS value used in 802.3 Ethernet and 802.11 Wifi as CRC32,
  * with the order of bytes reversed.
  */

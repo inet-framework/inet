@@ -19,6 +19,7 @@ simple Ospfv3Process extends SimpleModule
         string interfaceTableModule;
         string routingTableModule;
         string routingTableModule6;
+        string checksumMode @enum("declared", "computed") = default("declared"); // checksum mode for outgoing OSPFv3 packets and originated LSAs ("computed" yields RFC 5340 2.5 / RFC 2328 12.1.7 checksums, e.g. for pcap/interop)
     gates:
         input splitterIn @label(Ospfv3Packet/up);
         output splitterOut @label(Ospfv3Packet/down);

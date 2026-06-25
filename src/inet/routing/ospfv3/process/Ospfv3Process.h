@@ -6,6 +6,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
+#include "inet/common/checksum/ChecksumMode_m.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -38,6 +39,7 @@ class INET_API Ospfv3Process : protected cListener, public SimpleModule
     virtual ~Ospfv3Process();
     int getProcessID() const { return this->processID; };
     Ipv4Address getRouterID() { return this->routerID; };
+    ChecksumMode getChecksumMode() const { return this->checksumMode; };
     bool isActivated() { return this->isActive; };
     void activateProcess();
     void setTimer(cMessage *msg, double delay);
@@ -81,6 +83,7 @@ class INET_API Ospfv3Process : protected cListener, public SimpleModule
     std::map<int, Ospfv3Instance *> instancesById;
     int processID = 0;
     Ipv4Address routerID;
+    ChecksumMode checksumMode = CHECKSUM_DECLARED_CORRECT;
     bool isActive = false;
     void debugDump();
     std::vector<Ospfv3RoutingTableEntry *> routingTableIPv6;

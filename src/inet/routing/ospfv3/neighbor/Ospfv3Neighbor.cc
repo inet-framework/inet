@@ -272,6 +272,7 @@ void Ospfv3Neighbor::sendLinkStateRequestPacket()
     }
 
     requestPacket->setChunkLength(packetSize);
+    requestPacket->setPacketLengthField(packetSize.get()); // RFC 5340: OSPF header Packet Length
     // TODO - TTL and Checksum calculation  for LS Request is not implemented yet
 
     Packet *pk = new Packet();
@@ -331,7 +332,11 @@ void Ospfv3Neighbor::retransmitUpdatePacket()
 
     bool packetFull = false;
     unsigned short lsaCount = 0;
-    B packetLength = OSPFV3_HEADER_LENGTH + OSPFV3_LSA_HEADER_LENGTH;
+    // base = OSPF common header + the 4-octet "# LSAs" field (NOT a full LSA header);
+    // matches Ospfv3Interface::prepareUpdatePacket(). Using OSPFV3_LSA_HEADER_LENGTH here
+    // overcounted chunkLength by 16 octets, so the serializer padded the packet with
+    // uninitialized (non-deterministic) bytes.
+    B packetLength = OSPFV3_HEADER_LENGTH + B(sizeof(uint32_t));
     auto it = linkStateRetransmissionList.begin();
 
     while (!packetFull && (it != linkStateRetransmissionList.end())) {
@@ -502,7 +507,9 @@ void Ospfv3Neighbor::retransmitUpdatePacket()
     }
 
     EV_DEBUG << "Retransmit - packet length: " << packetLength << "\n";
+    updatePacket->setPacketLengthField(packetLength.get());
     updatePacket->setChunkLength(B(packetLength)); // IPV6 HEADER BYTES
+    updatePacket->setLsaCount(lsaCount); // RFC 5340: # LSAs field must match the LSAs actually carried
     Packet *pk = new Packet();
     pk->insertAtBack(updatePacket);
 

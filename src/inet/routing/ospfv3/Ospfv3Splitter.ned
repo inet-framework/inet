@@ -13,6 +13,7 @@ simple Ospfv3Splitter extends SimpleModule
         string interfaceTableModule;
         string routingTableModule;
         string routingTableModule6;
+        string checksumMode @enum("declared", "computed") = default("declared"); // passed on to each Ospfv3Process
     gates:
         input ipIn @labels(Ipv6ControlInfo/up);
         output ipOut @labels(Ipv6ControlInfo/down);

@@ -184,6 +184,25 @@ uint16_t internetChecksum(const uint8_t *addr, size_t count, uint32_t sum)
     return ~sum16;
 }
 
+uint16_t fletcherChecksum(const uint8_t *buf, size_t length, size_t checksumPos)
+{
+    // Fletcher checksum over GF(255), per ISO 8473 / RFC 1008, as used for OSPF LS checksums.
+    // The two check octets are chosen so that the running sums (c0, c1) come out to zero when
+    // recomputed over the whole region including the checksum field.
+    int32_t c0 = 0, c1 = 0;
+    for (size_t i = 0; i < length; i++) {
+        c0 = (c0 + buf[i]) % 255;
+        c1 = (c1 + c0) % 255;
+    }
+    int32_t x = ((int32_t)(length - checksumPos - 1) * c0 - c1) % 255;
+    if (x <= 0)
+        x += 255;
+    int32_t y = 510 - c0 - x;
+    if (y > 255)
+        y -= 255;
+    return (uint16_t)(((x & 0xFF) << 8) | (y & 0xFF));
+}
+
 inline uint32_t swapBytes(uint32_t crc)
 {
     return (crc >> 24) | ((crc >> 8) & 0x0000FF00) | ((crc << 8) & 0x00FF0000) | (crc << 24);

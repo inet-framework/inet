@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include "inet/common/stlutils.h"
+#include "inet/routing/ospfv3/Ospfv3Checksum.h"
 
 namespace inet {
 namespace ospfv3 {
@@ -721,8 +722,13 @@ RouterLSA *Ospfv3Area::originateRouterLSA()
                         routerLSABody.neighborInterfaceID = neighbor->getNeighborInterfaceID();
                         routerLSABody.neighborRouterID = neighbor->getNeighborID();
 
-                        routerLSA->setRoutersArraySize(i + 1);
-                        routerLSA->setRouters(i, routerLSABody);
+                        // append: index by the number of entries already added, not by the
+                        // interface index i (which leaves uninitialized gap entries when some
+                        // interfaces contribute none, and overwrites entries when a p2p link
+                        // has several full neighbors)
+                        unsigned int idx = routerLSA->getRoutersArraySize();
+                        routerLSA->setRoutersArraySize(idx + 1);
+                        routerLSA->setRouters(idx, routerLSABody);
                     }
                 }
                 break;
@@ -742,8 +748,9 @@ RouterLSA *Ospfv3Area::originateRouterLSA()
                     routerLSABody.neighborInterfaceID = intf->getDesignatedIntID();
                     routerLSABody.neighborRouterID = intf->getDesignatedID();
 
-                    routerLSA->setRoutersArraySize(i + 1);
-                    routerLSA->setRouters(i, routerLSABody);
+                    unsigned int idx = routerLSA->getRoutersArraySize();
+                    routerLSA->setRoutersArraySize(idx + 1);
+                    routerLSA->setRouters(idx, routerLSABody);
                 }
                 break;
             }
@@ -759,6 +766,12 @@ RouterLSA *Ospfv3Area::originateRouterLSA()
                 break;
         }
     }
+
+    // Set the LSA length so the on-wire header is correct; the deserializer derives the
+    // number of router entries from it. Without this it stays 0, which corrupts the
+    // serialize->deserialize round-trip (every other originate*LSA already sets it).
+    lsaHeader.setLsaLength(calculateLSASize(routerLSA).get<B>());
+    setLsaChecksum(*routerLSA, this->getInstance()->getProcess()->getChecksumMode());
 
     this->incrementRouterSequence();
     return routerLSA;
@@ -1014,6 +1027,7 @@ NetworkLSA *Ospfv3Area::originateNetworkLSA(Ospfv3Interface *interface)
         }
 
         lsaHeader.setLsaLength(packetLength);
+        setLsaChecksum(*networkLsa, this->getInstance()->getProcess()->getChecksumMode());
         return networkLsa;
     }
     else {
@@ -1143,6 +1157,7 @@ void Ospfv3Area::originateInterAreaPrefixLSA(Ospfv3IntraAreaPrefixLsa *lsa, Ospf
 
         B packetLength = calculateLSASize(newLsa);
         newHeader.setLsaLength(packetLength.get());
+        setLsaChecksum(*newLsa, this->getInstance()->getProcess()->getChecksumMode());
 
         int duplicateForArea = 0;
         for (int i = 0; i < this->getInstance()->getAreaCount(); i++) {
@@ -1239,6 +1254,7 @@ void Ospfv3Area::originateInterAreaPrefixLSA(const Ospfv3Lsa *prefLsa, Ospfv3Are
         newLsa->setMetric(lsa->getMetric());
 
         newHeader2.setLsaLength(calculateLSASize(newLsa).get<B>());
+        setLsaChecksum(*newLsa, this->getInstance()->getProcess()->getChecksumMode());
         if (area->installInterAreaPrefixLSA(newLsa))
             area->floodLSA(newLsa);
 
@@ -1281,6 +1297,7 @@ void Ospfv3Area::originateDefaultInterAreaPrefixLSA(Ospfv3Area *toArea)
         packetLength += B(4 * ((0 + 31) / 32)) + OSPFV3_LSA_PREFIX_HEADER_LENGTH;
     }
     newHeader.setLsaLength(calculateLSASize(newLsa).get<B>());
+    setLsaChecksum(*newLsa, this->getInstance()->getProcess()->getChecksumMode());
     toArea->installInterAreaPrefixLSA(newLsa);
     delete newLsa;
 }
@@ -1491,6 +1508,7 @@ IntraAreaPrefixLSA *Ospfv3Area::originateIntraAreaPrefixLSA() // this is for non
 //       return prefixLsa;
 //    }
     this->incrementIntraAreaPrefixSequence();
+    setLsaChecksum(*newLsa, this->getInstance()->getProcess()->getChecksumMode());
     return newLsa;
 } // originateIntraAreaPrefixLSA
 
@@ -1573,6 +1591,7 @@ IntraAreaPrefixLSA *Ospfv3Area::originateNetIntraAreaPrefixLSA(NetworkLSA *netwo
         }
     }
     this->incrementIntraAreaPrefixSequence();
+    setLsaChecksum(*newLsa, this->getInstance()->getProcess()->getChecksumMode());
     return newLsa;
 }
 

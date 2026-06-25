@@ -192,6 +192,7 @@ void Ospfv3Splitter::addNewProcess(cXMLElement *process, cXMLElement *interfaces
     newProcessModule->par("processID") = processIdNum;
     newProcessModule->par("routerID") = routerID;
     newProcessModule->par("interfaceConfig") = interfaces;
+    newProcessModule->par("checksumMode") = par("checksumMode").stringValue();
     newProcessModule->finalizeParameters();
 //    newProcessModule->callInitialize(INITSTAGE_ROUTING_PROTOCOLS);
 //    newProcessModule->buildInside();

@@ -1,0 +1,246 @@
+%description:
+Byte-exact round-trip serialization of OSPFv3 packets (RFC 5340 Appendix A): the common
+header, Hello, Database Description, Link State Request, Link State Acknowledgement, and a
+Link State Update carrying one of each supported LSA (Router, Network, Inter-Area-Prefix,
+Link, Intra-Area-Prefix). Verifies serialize->bytes->deserialize reproduces the fields and
+the expected on-wire lengths.
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/routing/ospfv3/Ospfv3Packet_m.h"
+
+using namespace inet;
+using namespace inet::ospfv3;
+using namespace inet::ospf;
+
+%global:
+
+template<typename T>
+Ptr<const T> roundTrip(const Ptr<const T>& original)
+{
+    Packet pkt("test");
+    pkt.insertAtFront(original);
+    auto bytes = pkt.peekAllAsBytes();
+    Packet pkt2("test2");
+    pkt2.insertAtFront(bytes);
+    return pkt2.popAtFront<T>(pkt2.getDataLength());
+}
+
+static void fillHeader(Ospfv3Packet *p, OspfPacketType type, int len)
+{
+    p->setType(type);
+    p->setPacketLengthField(len);
+    p->setChunkLength(B(len));
+    p->setRouterID(Ipv4Address("1.1.1.1"));
+    p->setAreaID(Ipv4Address("0.0.0.0"));
+    p->setChecksum(0);
+    p->setInstanceID(0);
+}
+
+static Ospfv3LsaHeader makeLsaHeader(int functionCode, int lsaLength)
+{
+    Ospfv3LsaHeader h;
+    h.setLsaAge(10);
+    h.setOptions(0x13);
+    h.setLsaType(functionCode);
+    h.setLinkStateID(Ipv4Address("0.0.0.5"));
+    h.setAdvertisingRouter(Ipv4Address("1.1.1.1"));
+    h.setLsaSequenceNumber(0x80000001);
+    h.setLsaChecksum(0);
+    h.setLsaLength(lsaLength);
+    return h;
+}
+
+%activity:
+
+// === 1. Hello (with one neighbor) ===
+{
+    EV << "=== Hello ===" << endl;
+    auto hello = makeShared<Ospfv3HelloPacket>();
+    fillHeader(hello.get(), HELLO_PACKET, 16 + 20 + 4);
+    hello->setInterfaceID(7);
+    hello->setRouterPriority(1);
+    hello->getOptionsForUpdate().v6Bit = true;
+    hello->getOptionsForUpdate().eBit = true;
+    hello->setHelloInterval(10);
+    hello->setDeadInterval(40);
+    hello->setDesignatedRouterID(Ipv4Address("1.1.1.1"));
+    hello->setBackupDesignatedRouterID(Ipv4Address("2.2.2.2"));
+    hello->setNeighborIDArraySize(1);
+    hello->setNeighborID(0, Ipv4Address("2.2.2.2"));
+
+    Packet pkt("sz"); pkt.insertAtFront(hello);
+    ASSERT(pkt.getDataLength() == B(40));
+    auto h2 = dynamicPtrCast<const Ospfv3HelloPacket>(roundTrip(staticPtrCast<const Ospfv3Packet>(hello)));
+    ASSERT(h2 != nullptr);
+    ASSERT(h2->getInterfaceID() == 7);
+    ASSERT(h2->getHelloInterval() == 10 && h2->getDeadInterval() == 40);
+    ASSERT(h2->getOptions().v6Bit == true && h2->getOptions().eBit == true);
+    ASSERT(h2->getDesignatedRouterID() == Ipv4Address("1.1.1.1"));
+    ASSERT(h2->getNeighborIDArraySize() == 1 && h2->getNeighborID(0) == Ipv4Address("2.2.2.2"));
+    EV << "  PASS" << endl;
+}
+
+// === 2. Database Description (one LSA header) ===
+{
+    EV << "=== DatabaseDescription ===" << endl;
+    auto dd = makeShared<Ospfv3DatabaseDescriptionPacket>();
+    fillHeader(dd.get(), DATABASE_DESCRIPTION_PACKET, 16 + 12 + 20);
+    dd->setInterfaceMTU(1500);
+    dd->getDdOptionsForUpdate().iBit = true;
+    dd->getDdOptionsForUpdate().mBit = true;
+    dd->getDdOptionsForUpdate().msBit = true;
+    dd->setSequenceNumber(42);
+    dd->setLsaHeadersArraySize(1);
+    dd->setLsaHeaders(0, makeLsaHeader(ROUTER_LSA, 24));
+
+    Packet pkt("sz"); pkt.insertAtFront(dd);
+    ASSERT(pkt.getDataLength() == B(48));
+    auto d2 = dynamicPtrCast<const Ospfv3DatabaseDescriptionPacket>(roundTrip(staticPtrCast<const Ospfv3Packet>(dd)));
+    ASSERT(d2 != nullptr);
+    ASSERT(d2->getInterfaceMTU() == 1500);
+    ASSERT(d2->getDdOptions().iBit && d2->getDdOptions().mBit && d2->getDdOptions().msBit);
+    ASSERT(d2->getSequenceNumber() == 42);
+    ASSERT(d2->getLsaHeadersArraySize() == 1);
+    ASSERT(d2->getLsaHeaders(0).getLsaType() == ROUTER_LSA);
+    ASSERT(d2->getLsaHeaders(0).getAdvertisingRouter() == Ipv4Address("1.1.1.1"));
+    EV << "  PASS" << endl;
+}
+
+// === 3. Link State Request (one request) ===
+{
+    EV << "=== LinkStateRequest ===" << endl;
+    auto req = makeShared<Ospfv3LinkStateRequestPacket>();
+    fillHeader(req.get(), LINKSTATE_REQUEST_PACKET, 16 + 12);
+    req->setRequestsArraySize(1);
+    Ospfv3LsRequest r;
+    r.lsaType = LINK_LSA;
+    r.lsaID = Ipv4Address("0.0.0.1");
+    r.advertisingRouter = Ipv4Address("3.3.3.3");
+    req->setRequests(0, r);
+
+    Packet pkt("sz"); pkt.insertAtFront(req);
+    ASSERT(pkt.getDataLength() == B(28));
+    auto r2 = dynamicPtrCast<const Ospfv3LinkStateRequestPacket>(roundTrip(staticPtrCast<const Ospfv3Packet>(req)));
+    ASSERT(r2 != nullptr && r2->getRequestsArraySize() == 1);
+    ASSERT(r2->getRequests(0).lsaType == LINK_LSA);
+    ASSERT(r2->getRequests(0).advertisingRouter == Ipv4Address("3.3.3.3"));
+    EV << "  PASS" << endl;
+}
+
+// === 4. Link State Acknowledgement (one LSA header) ===
+{
+    EV << "=== LinkStateAck ===" << endl;
+    auto ack = makeShared<Ospfv3LinkStateAcknowledgementPacket>();
+    fillHeader(ack.get(), LINKSTATE_ACKNOWLEDGEMENT_PACKET, 16 + 20);
+    ack->setLsaHeadersArraySize(1);
+    ack->setLsaHeaders(0, makeLsaHeader(NETWORK_LSA, 32));
+
+    Packet pkt("sz"); pkt.insertAtFront(ack);
+    ASSERT(pkt.getDataLength() == B(36));
+    auto a2 = dynamicPtrCast<const Ospfv3LinkStateAcknowledgementPacket>(roundTrip(staticPtrCast<const Ospfv3Packet>(ack)));
+    ASSERT(a2 != nullptr && a2->getLsaHeadersArraySize() == 1);
+    ASSERT(a2->getLsaHeaders(0).getLsaType() == NETWORK_LSA);
+    EV << "  PASS" << endl;
+}
+
+// === 5. Link State Update with one of each LSA type ===
+{
+    EV << "=== LinkStateUpdate ===" << endl;
+    auto upd = makeShared<Ospfv3LinkStateUpdatePacket>();
+    int routerLen = 20 + 4 + 16;     // 40
+    int networkLen = 20 + 4 + 4 * 2; // 32
+    // prefix LSAs carry an RFC 5340 A.4.1 variable-length address: 4-octet fixed part +
+    // ((prefixLen + 31) / 32) 32-bit words, i.e. 8 octets for the /64 prefixes below.
+    int iapLen = 20 + 4 + 12;        // 36
+    int linkLen = 20 + 24 + 12;      // 56
+    int intraLen = 20 + 12 + 12;     // 44
+    fillHeader(upd.get(), LINKSTATE_UPDATE_PACKET, 16 + 4 + routerLen + networkLen + iapLen + linkLen + intraLen);
+    upd->setLsaCount(5);
+
+    // Router LSA
+    Ospfv3RouterLsa rlsa;
+    rlsa.setHeader(makeLsaHeader(ROUTER_LSA, routerLen));
+    rlsa.setBBit(true);
+    rlsa.getOspfOptionsForUpdate().v6Bit = true;
+    rlsa.setRoutersArraySize(1);
+    Ospfv3RouterLsaBody rb;
+    rb.type = POINT_TO_POINT; rb.metric = 5; rb.interfaceID = 11;
+    rb.neighborInterfaceID = 22; rb.neighborRouterID = Ipv4Address("2.2.2.2");
+    rlsa.setRouters(0, rb);
+    upd->setRouterLSAsArraySize(1); upd->setRouterLSAs(0, rlsa);
+
+    // Network LSA
+    Ospfv3NetworkLsa nlsa;
+    nlsa.setHeader(makeLsaHeader(NETWORK_LSA, networkLen));
+    nlsa.setAttachedRouterArraySize(2);
+    nlsa.setAttachedRouter(0, Ipv4Address("1.1.1.1"));
+    nlsa.setAttachedRouter(1, Ipv4Address("2.2.2.2"));
+    upd->setNetworkLSAsArraySize(1); upd->setNetworkLSAs(0, nlsa);
+
+    // Inter-Area-Prefix LSA
+    Ospfv3InterAreaPrefixLsa ialsa;
+    ialsa.setHeader(makeLsaHeader(INTER_AREA_PREFIX_LSA, iapLen));
+    ialsa.setMetric(100);
+    ialsa.getPrefixForUpdate().prefixLen = 64;
+    ialsa.getPrefixForUpdate().addressPrefix = L3Address(Ipv6Address("2001:db8:1::"));
+    upd->setInterAreaPrefixLSAsArraySize(1); upd->setInterAreaPrefixLSAs(0, ialsa);
+
+    // Link LSA
+    Ospfv3LinkLsa llsa;
+    llsa.setHeader(makeLsaHeader(LINK_LSA, linkLen));
+    llsa.setRouterPriority(1);
+    llsa.setLinkLocalInterfaceAdd(L3Address(Ipv6Address("fe80::1")));
+    llsa.setNumPrefixes(1);
+    llsa.setPrefixesArraySize(1);
+    Ospfv3LsaPrefix0 p0;
+    p0.prefixLen = 64; p0.addressPrefix = L3Address(Ipv6Address("2001:db8:2::"));
+    llsa.setPrefixes(0, p0);
+    upd->setLinkLSAsArraySize(1); upd->setLinkLSAs(0, llsa);
+
+    // Intra-Area-Prefix LSA
+    Ospfv3IntraAreaPrefixLsa iplsa;
+    iplsa.setHeader(makeLsaHeader(INTRA_AREA_PREFIX_LSA, intraLen));
+    iplsa.setNumPrefixes(1);
+    iplsa.setReferencedLSType(ROUTER_LSA);
+    iplsa.setReferencedLSID(Ipv4Address("0.0.0.0"));
+    iplsa.setReferencedAdvRtr(Ipv4Address("1.1.1.1"));
+    iplsa.setPrefixesArraySize(1);
+    Ospfv3LsaPrefixMetric pm;
+    pm.prefixLen = 64; pm.metric = 7; pm.addressPrefix = L3Address(Ipv6Address("2001:db8:3::"));
+    iplsa.setPrefixes(0, pm);
+    upd->setIntraAreaPrefixLSAsArraySize(1); upd->setIntraAreaPrefixLSAs(0, iplsa);
+
+    Packet pkt("sz"); pkt.insertAtFront(upd);
+    EV << "  serializedLength: " << pkt.getDataLength().get() << endl;
+    ASSERT(pkt.getDataLength() == B(16 + 4 + 40 + 32 + 36 + 56 + 44));
+
+    auto u2 = dynamicPtrCast<const Ospfv3LinkStateUpdatePacket>(roundTrip(staticPtrCast<const Ospfv3Packet>(upd)));
+    ASSERT(u2 != nullptr);
+    ASSERT(u2->getLsaCount() == 5);
+    ASSERT(u2->getRouterLSAsArraySize() == 1);
+    ASSERT(u2->getRouterLSAs(0).getBBit() == true);
+    ASSERT(u2->getRouterLSAs(0).getRoutersArraySize() == 1);
+    ASSERT(u2->getRouterLSAs(0).getRouters(0).neighborRouterID == Ipv4Address("2.2.2.2"));
+    ASSERT(u2->getRouterLSAs(0).getRouters(0).metric == 5);
+    ASSERT(u2->getNetworkLSAsArraySize() == 1);
+    ASSERT(u2->getNetworkLSAs(0).getAttachedRouterArraySize() == 2);
+    ASSERT(u2->getNetworkLSAs(0).getAttachedRouter(1) == Ipv4Address("2.2.2.2"));
+    ASSERT(u2->getInterAreaPrefixLSAsArraySize() == 1);
+    ASSERT(u2->getInterAreaPrefixLSAs(0).getMetric() == 100);
+    ASSERT(u2->getInterAreaPrefixLSAs(0).getPrefix().addressPrefix == L3Address(Ipv6Address("2001:db8:1::")));
+    ASSERT(u2->getLinkLSAsArraySize() == 1);
+    ASSERT(u2->getLinkLSAs(0).getLinkLocalInterfaceAdd() == L3Address(Ipv6Address("fe80::1")));
+    ASSERT(u2->getLinkLSAs(0).getPrefixesArraySize() == 1);
+    ASSERT(u2->getLinkLSAs(0).getPrefixes(0).addressPrefix == L3Address(Ipv6Address("2001:db8:2::")));
+    ASSERT(u2->getIntraAreaPrefixLSAsArraySize() == 1);
+    ASSERT(u2->getIntraAreaPrefixLSAs(0).getPrefixes(0).metric == 7);
+    ASSERT(u2->getIntraAreaPrefixLSAs(0).getPrefixes(0).addressPrefix == L3Address(Ipv6Address("2001:db8:3::")));
+    EV << "  PASS" << endl;
+}
+
+EV << "All OSPFv3 serializer round-trips passed." << endl;
+
+%contains: stdout
+All OSPFv3 serializer round-trips passed.

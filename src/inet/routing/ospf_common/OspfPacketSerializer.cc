@@ -12,6 +12,9 @@
 #ifdef INET_WITH_OSPFv2
 #include "inet/routing/ospfv2/Ospfv2PacketSerializer.h"
 #endif // #ifdef INET_WITH_OSPFv2
+#ifdef INET_WITH_OSPFv3
+#include "inet/routing/ospfv3/Ospfv3PacketSerializer.h"
+#endif // #ifdef INET_WITH_OSPFv3
 
 namespace inet {
 namespace ospf {
@@ -37,8 +40,8 @@ const Ptr<Chunk> OspfPacketSerializer::deserialize(MemoryInputStream& stream) co
 #endif // #ifdef INET_WITH_OSPFv2
 #ifdef INET_WITH_OSPFv3
         case 3:
-            // TODO stream.seek(startPos);
-            // TODO return ospfv3::Ospfv3PacketSerializer().deserialize(stream);
+            stream.seek(startPos);
+            return ospfv3::Ospfv3PacketSerializer().deserialize(stream);
 #endif // #ifdef INET_WITH_OSPFv3
         default: {
             auto ospfPacket = makeShared<OspfPacketBase>();

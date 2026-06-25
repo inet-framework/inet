@@ -2,6 +2,7 @@
 
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/ipv6/Ipv6Header_m.h"
+#include "inet/routing/ospfv3/Ospfv3Checksum.h"
 #include "inet/routing/ospfv3/interface/Ospfv3InterfaceState.h"
 #include "inet/routing/ospfv3/interface/Ospfv3InterfaceStateDown.h"
 
@@ -924,12 +925,15 @@ Packet *Ospfv3Interface::prepareUpdatePacket(std::vector<Ospfv3Lsa *> lsas)
 
     updatePacket->setLsaCount(0);
 
+    // OSPF header (16) + the 4-octet "# LSAs" field; each LSA's size accumulates onto this across
+    // the loop. (This used to be re-initialized inside the loop, so the packet length / chunk
+    // length ended up reflecting only the last LSA, corrupting multi-LSA updates on the wire.)
+    B packetLength = OSPFV3_HEADER_LENGTH + B(sizeof(uint32_t));
+
     for (size_t j = 0; j < lsas.size(); j++) {
         Ospfv3Lsa *lsa = lsas[j];
 
         int count = updatePacket->getLsaCount();
-//        B packetLength = updatePacket->getPacketLength();
-        B packetLength = OSPFV3_HEADER_LENGTH + B(sizeof(uint32_t));
 
 //        Ospfv3LsaHeader header = lsa->getHeader();
         uint16_t code = lsa->getHeader().getLsaType();
@@ -1373,6 +1377,7 @@ void Ospfv3Interface::acknowledgeLSA(const Ospfv3LsaHeader& lsaHeader,
         ackPacket->setLsaHeaders(0, lsaHeader);
 
         ackPacket->setChunkLength(B(OSPFV3_HEADER_LENGTH + OSPFV3_LSA_HEADER_LENGTH));
+        ackPacket->setPacketLengthField((OSPFV3_HEADER_LENGTH + OSPFV3_LSA_HEADER_LENGTH).get()); // RFC 5340: OSPF header Packet Length
         int hopLimit = (this->getType() == Ospfv3Interface::VIRTUAL_TYPE) ? VIRTUAL_LINK_TTL : 1;
 
         Packet *pk = new Packet();
@@ -1417,6 +1422,7 @@ void Ospfv3Interface::sendLSAcknowledgement(const Ospfv3LsaHeader *lsaHeader, Ip
     lsAckPacket->setLsaHeaders(0, *lsaHeader);
 
     lsAckPacket->setChunkLength(B(OSPFV3_HEADER_LENGTH + OSPFV3_LSA_HEADER_LENGTH));
+    lsAckPacket->setPacketLengthField((OSPFV3_HEADER_LENGTH + OSPFV3_LSA_HEADER_LENGTH).get()); // RFC 5340: OSPF header Packet Length
 
     int hopLimit = (interfaceType == Ospfv3Interface::VIRTUAL_TYPE) ? VIRTUAL_LINK_TTL : 1;
 
@@ -1802,6 +1808,7 @@ LinkLSA *Ospfv3Interface::originateLinkLSA()
     }
 
     lsaHeader.setLsaLength(packetLength);
+    setLsaChecksum(*linkLSA, this->getArea()->getInstance()->getProcess()->getChecksumMode());
 
     return linkLSA;
 }
