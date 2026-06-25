@@ -7,8 +7,12 @@
 #ifndef __INET_PROTOCOLTEST_EVENTPATTERN_H
 #define __INET_PROTOCOLTEST_EVENTPATTERN_H
 
+#include <functional>
+#include <map>
 #include <memory>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "PacketEvent.h"
 
@@ -16,6 +20,27 @@ namespace inet { class PacketFilter; }
 
 namespace inet {
 namespace protocoltest {
+
+// Values captured from earlier matched events, keyed by name.
+typedef std::map<std::string, cValue> CaptureStore;
+
+// Context handed to a lambda predicate: the event under test plus the values
+// captured by earlier steps (read with get()).
+struct MatchContext {
+    const PacketEvent& event;
+    const CaptureStore& captures;
+
+    cValue get(const char *name) const
+    {
+        auto it = captures.find(name);
+        if (it == captures.end())
+            throw cRuntimeError("ProtocolTest: capture '%s' is not set yet", name);
+        return it->second;
+    }
+};
+
+typedef std::function<bool(const MatchContext&)> MatchPredicate;
+typedef std::function<cValue(const PacketEvent&)> CaptureFn;
 
 //
 // A fluent selector + timing clause, as produced by on("node").sentToLower()...
@@ -32,7 +57,9 @@ class INET_API EventPattern
     bool selHasKind = false; EventKind selKind = EventKind::Other;
     bool selHasDirection = false; int selDirection = -1;  // 0=IN, 1=OUT
     bool selHasLayer = false; Layer selLayer = Layer::Unknown;
-    std::string selExpr;                                  // "" = no content predicate
+    std::string selExpr;                                  // "" = no content expression
+    MatchPredicate predicate;                             // optional typed lambda predicate
+    std::vector<std::pair<std::string, CaptureFn>> captures; // values to bind when this step matches
     // timing (relative to the step anchor)
     bool selHasWithin = false; simtime_t selWithin = 0;       // deadline
     bool selHasNotBefore = false; simtime_t selNotBefore = 0; // earliest
@@ -50,12 +77,14 @@ class INET_API EventPattern
     EventPattern& outbound() { selHasDirection = true; selDirection = 1; return *this; }
     EventPattern& layer(Layer l) { selHasLayer = true; selLayer = l; return *this; }
     EventPattern& match(const char *expression) { selExpr = expression; return *this; }
+    EventPattern& match(MatchPredicate p) { predicate = std::move(p); return *this; }
+    EventPattern& capture(const char *name, CaptureFn fn) { captures.emplace_back(name, std::move(fn)); return *this; }
     EventPattern& within(double t) { selHasWithin = true; selWithin = t; return *this; }
     EventPattern& after(double t) { selHasNotBefore = true; selNotBefore = t; return *this; }
     EventPattern& notBefore(double t) { selHasNotBefore = true; selNotBefore = t; return *this; }
 
-    // True if the (non-timing) selector part matches this event.
-    bool selectorMatches(const PacketEvent& event) const;
+    // True if the (non-timing) selector + content + predicate parts match.
+    bool selectorMatches(const MatchContext& context) const;
     // Human-readable form for diagnostics (full English rendering is Phase 8).
     std::string str() const;
 };
