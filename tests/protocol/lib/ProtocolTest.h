@@ -36,11 +36,13 @@ class INET_API Injection
     std::string gateName;        // sink gate to push to, e.g. "upperLayerOut"
     bool hasAtTime = false; simtime_t atTime = 0;
     bool hasAfter = false; simtime_t afterDelay = 0;
+    std::string description;     // optional human phrase for the injected packet
     std::function<Packet *(const CaptureStore&)> builder;
 
     Injection& into(const char *module, const char *gate) { moduleSubPath = module; gateName = gate; return *this; }
     Injection& at(double t) { hasAtTime = true; atTime = t; return *this; }
     Injection& after(double d) { hasAfter = true; afterDelay = d; return *this; }
+    Injection& describe(const char *phrase) { description = phrase; return *this; }
     Injection& packet(std::function<Packet *(const CaptureStore&)> fn) { builder = std::move(fn); return *this; }
 };
 
