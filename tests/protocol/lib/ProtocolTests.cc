@@ -147,7 +147,8 @@ static Packet *buildInjectedUdpDatagram(const CaptureStore&)
 Define_ProtocolTest(udp_inject_echo)
 {
     return ProtocolTest("udp_inject_echo")
-        .inject(inject("host2").into("eth[0]", "upperLayerOut").at(0.5).packet(buildInjectedUdpDatagram))
+        .inject(inject("host2").into("eth[0]", "upperLayerOut").at(0.5)
+                  .describe("a UDP datagram to port 5000").packet(buildInjectedUdpDatagram))
         // inject is now an ordered step, so this expect is anchored at the injection.
         .expect(on("host2").sentToLower().layer(Layer::Transport)
                   .match("udp.srcPort == 5000").within(0.2));
@@ -208,19 +209,22 @@ Define_ProtocolTest(tcp_handshake_peer)
                       auto tcp = m.event.packet->peekAtFront<TcpHeader>();
                       return tcp->getSynBit() && !tcp->getAckBit();
                   })
+                  .describe("host1's SYN (SYN set, ACK clear)")
                   .capture("isn", [](const PacketEvent& e) { return cValue(tcpSeq(e)); })
                   .capture("clientPort", [](const PacketEvent& e) {
                       return cValue((intval_t)e.packet->peekAtFront<TcpHeader>()->getSrcPort());
                   })
                   .within(1.0))
         // 2. Reactively inject a SYN+ACK acknowledging host1's ISN+1.
-        .inject(inject("host1").into("eth[0]", "upperLayerOut").after(0.001).packet(buildSynAck))
+        .inject(inject("host1").into("eth[0]", "upperLayerOut").after(0.001)
+                  .describe("a SYN+ACK acknowledging host1's ISN+1").packet(buildSynAck))
         // 3. host1's final ACK, acknowledging the peer's ISN+1 (5000+1).
         .expect(on("host1").receivedFromUpper().layer(Layer::Network)
                   .match([](const MatchContext& m) {
                       auto tcp = m.event.packet->peekAtFront<TcpHeader>();
                       return tcp->getAckBit() && !tcp->getSynBit() && tcpAck(m.event) == 5001;
                   })
+                  .describe("host1's final ACK (acknowledging the peer's ISN+1)")
                   .within(1.0));
 }
 

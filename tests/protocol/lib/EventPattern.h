@@ -59,6 +59,7 @@ class INET_API EventPattern
     bool selHasLayer = false; Layer selLayer = Layer::Unknown;
     std::string selExpr;                                  // "" = no content expression
     MatchPredicate predicate;                             // optional typed lambda predicate
+    std::string description;                              // optional human phrase for the content (esp. a lambda)
     std::vector<std::pair<std::string, CaptureFn>> captures; // values to bind when this step matches
     // timing (relative to the step anchor)
     bool selHasWithin = false; simtime_t selWithin = 0;       // deadline
@@ -78,6 +79,7 @@ class INET_API EventPattern
     EventPattern& layer(Layer l) { selHasLayer = true; selLayer = l; return *this; }
     EventPattern& match(const char *expression) { selExpr = expression; return *this; }
     EventPattern& match(MatchPredicate p) { predicate = std::move(p); return *this; }
+    EventPattern& describe(const char *phrase) { description = phrase; return *this; }
     EventPattern& capture(const char *name, CaptureFn fn) { captures.emplace_back(name, std::move(fn)); return *this; }
     EventPattern& within(double t) { selHasWithin = true; selWithin = t; return *this; }
     EventPattern& after(double t) { selHasNotBefore = true; selNotBefore = t; return *this; }

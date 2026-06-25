@@ -5,6 +5,7 @@
 //
 
 #include "ProtocolTester.h"
+#include "ProtocolTestDescriber.h"
 
 #include <iostream>
 
@@ -73,6 +74,8 @@ void ProtocolTester::initialize()
     if (!testName.empty()) {
         matchingMode = true;
         program = ProtocolTestRegistry::build(testName.c_str());
+        if (par("printDescription").boolValue())
+            std::cout << describe(*program);
         currentStep = 0;
         anchorTime = simTime();
         enterStep();
