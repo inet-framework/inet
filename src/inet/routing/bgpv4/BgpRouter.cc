@@ -687,7 +687,9 @@ BgpProcessResult BgpRouter::decisionProcess(const BgpUpdateMessage& msg, BgpRout
         if (rt->getRoute(indexIp)->getSourceType() != IRoute::BGP) {
             // and the Update msg is coming from IGP session
             if (_bgpSessions[sessionIndex]->getType() == IGP) {
-                Ipv4Route *oldEntry = check_and_cast<Ipv4Route *>(rt->getRoute(indexIp));
+                // works for both IPv4 and IPv6: createBgpRoutingTableEntry() takes the
+                // generic IRoute and builds the right (v4/v6) BGP entry
+                IRoute *oldEntry = rt->getRoute(indexIp);
                 BgpRouteInfo *bgpEntry = createBgpRoutingTableEntry(oldEntry);
                 bgpEntry->addAS(myAsId);
                 bgpEntry->setPathType(IGP);
@@ -709,6 +711,14 @@ BgpProcessResult BgpRouter::decisionProcess(const BgpUpdateMessage& msg, BgpRout
         if (_bgpSessions[sessionIndex]->getType() == IGP) {
             // if the next hop is reachable
             if (isReachable(entry->getNextHopAsGeneric())) {
+                // Resolve the (i)BGP next hop recursively through the IGP. An installed route
+                // must point at an on-link next hop, but an iBGP next hop can be several IGP
+                // hops away (e.g. behind an OSPF/OSPFv3 path); in that case replace it with the
+                // IGP's immediate next hop. A directly-connected next hop resolves to
+                // "unspecified" here and is kept as-is (so directly-connected iBGP is unchanged).
+                L3Address onLinkNextHop = rt->getNextHopForDestination(entry->getNextHopAsGeneric());
+                if (!onLinkNextHop.isUnspecified())
+                    entry->setNextHop(onLinkNextHop);
                 entry->setInterface(_bgpSessions[sessionIndex]->getLinkIntf());
                 rt->addRoute(entry->asRoute());
             }
@@ -844,6 +854,12 @@ void BgpRouter::updateSendProcess(BgpProcessResult type, SessionId sessionIndex,
                 : entry->getNextHopAsGeneric();
 
             if (isIpv6()) {
+                // a locally-originated route is built from a connected route and carries no
+                // learned next hop; advertise our own address on the link so that iBGP peers
+                // can resolve it via the IGP (RFC 4271: a router uses itself as the next hop
+                // for the networks it originates)
+                if (nextHop.isUnspecified())
+                    nextHop = getInterfaceAddress((elem).second->getLinkIntf());
                 // RFC 4760: carry the IPv6 next hop + reachability in MP_REACH_NLRI; ORIGIN stays
                 // a normal attribute. The legacy NEXT_HOP attribute and NLRI field are not used.
                 auto originAttr = new BgpUpdatePathAttributesOrigin;
@@ -983,8 +999,12 @@ SessionId BgpRouter::findNextSession(BgpSessionType type, bool startSession)
         // note: if the internal peer is not directly-connected to us, then we should know how to reach it.
         // this is done with the help of an intra-AS routing protocol (RIP, OSPF, EIGRP).
         NetworkInterface *linkIntf = rt->getOutputInterfaceForDestination(_bgpSessions[sessionId]->getPeerAddr());
-        if (linkIntf == nullptr)
-            throw cRuntimeError("No configuration interface for peer address: %s", _bgpSessions[sessionId]->getPeerAddr().str().c_str());
+        if (linkIntf == nullptr) {
+            // The IGP has not installed a route to this internal peer yet (it may still be
+            // converging). Defer the session start and retry, instead of failing.
+            _bgpSessions[sessionId]->scheduleStartRetry();
+            return sessionId;
+        }
 
         _bgpSessions[sessionId]->setlinkIntf(linkIntf);
         _bgpSessions[sessionId]->startConnection();

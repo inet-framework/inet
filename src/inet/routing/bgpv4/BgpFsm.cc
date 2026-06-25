@@ -33,6 +33,13 @@ void Idle::ManualStart()
     session._connectRetryCounter = 0;
     // - starts the ConnectRetryTimer with the initial value,
     session.stopConnectRetryTimer();
+    // For an internal (iBGP) session, the peer may not be reachable yet if the IGP
+    // (e.g. OSPFv3) has not converged. Defer the connection until a route to the peer
+    // exists, instead of failing in openTcpConnectionToPeer().
+    if (session.getType() == IGP && !session.isPeerReachable()) {
+        session.scheduleStartRetry();
+        return;
+    }
     // - listens for a connection that may be initiated by the remote BGP peer,
     session.listenConnectionFromPeer();
     // - initiates a TCP connection to the other BGP peer and,

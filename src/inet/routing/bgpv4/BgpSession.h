@@ -68,6 +68,11 @@ public:
 
     void startConnection();
     void scheduleReconnect();
+    // Retry starting this session shortly; used for an iBGP session whose peer is not
+    // reachable yet because the IGP (e.g. OSPFv3) has not finished converging.
+    void scheduleStartRetry();
+    // True if the routing table currently has a route towards this session's peer.
+    bool isPeerReachable() const { return bgpRouter.getIpRoutingTable()->getOutputInterfaceForDestination(_info.peerAddr) != nullptr; }
     void cancelReconnect();
     void restartHoldTimer();
     void restartKeepAliveTimer();

@@ -97,6 +97,18 @@ void BgpSession::scheduleReconnect()
     _ptrStartEvent->setContextPointer(this);
 }
 
+void BgpSession::scheduleStartRetry()
+{
+    // The internal (iBGP) peer is not reachable yet because the IGP has not finished
+    // converging. Re-attempt the session start after a short delay instead of failing;
+    // each retry re-checks reachability (see Idle::ManualStart).
+    if (_ptrStartEvent == nullptr)
+        _ptrStartEvent = new cMessage("BGP Start", START_EVENT_KIND);
+    if (!_ptrStartEvent->isScheduled())
+        bgpRouter.scheduleAt(simTime() + 1, _ptrStartEvent);
+    _ptrStartEvent->setContextPointer(this);
+}
+
 void BgpSession::cancelReconnect()
 {
     // Once (re-)established, drop any pending reconnect so a stale Start event cannot later
