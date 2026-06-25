@@ -64,7 +64,9 @@ void Ipv4NetworkConfigurator::initialize(int stage)
         addSubnetRoutesParameter = par("addSubnetRoutes");
         addDefaultRoutesParameter = par("addDefaultRoutes");
         addDirectRoutesParameter = par("addDirectRoutes");
+        addRemoteRoutesParameter = par("addRemoteRoutes");
         optimizeRoutesParameter = par("optimizeRoutes");
+        addManualRoutesParameter = par("addManualRoutes");
         updateRoutesParameter = par("updateRoutes");
     }
     else if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
@@ -91,7 +93,9 @@ void Ipv4NetworkConfigurator::computeConfiguration()
     // read and configure multicast groups from the XML configuration
     TIME(readMulticastGroupConfiguration(topology));
     // read and configure manual routes from the XML configuration
-    readManualRouteConfiguration(topology);
+    // (independent of addStaticRoutes)
+    if (addManualRoutesParameter)
+        readManualRouteConfiguration(topology);
     // read and configure manual multicast routes from the XML configuration
     readManualMulticastRouteConfiguration(topology);
     // calculate shortest paths, and add corresponding static routes
@@ -1582,6 +1586,8 @@ void Ipv4NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
                             if (containsRoute(sourceNode->staticRoutes, route))
                                 delete route;
                             else if (!addDirectRoutesParameter && route->getGateway().isUnspecified())
+                                delete route;
+                            else if (!addRemoteRoutesParameter && !route->getGateway().isUnspecified())
                                 delete route;
                             else {
                                 sourceNode->staticRoutes.push_back(route);

@@ -86,6 +86,8 @@ class INET_API Ipv6NetworkConfigurator : public L3NetworkConfiguratorBase, publi
     bool addStaticRoutesParameter = false;
     bool addDefaultRoutesParameter = false;
     bool addDirectRoutesParameter = false;
+    bool addRemoteRoutesParameter = false;
+    bool addManualRoutesParameter = false;
 
     // internal state
     Topology topology;

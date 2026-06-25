@@ -121,7 +121,9 @@ class INET_API Ipv4NetworkConfigurator : public L3NetworkConfiguratorBase, publi
     bool addSubnetRoutesParameter = false;
     bool addDefaultRoutesParameter = false;
     bool addDirectRoutesParameter = false;
+    bool addRemoteRoutesParameter = false;
     bool optimizeRoutesParameter = false;
+    bool addManualRoutesParameter = false;
     bool updateRoutesParameter = false;
 
     // internal state

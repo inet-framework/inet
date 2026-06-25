@@ -36,6 +36,8 @@ void Ipv6NetworkConfigurator::initialize(int stage)
         addStaticRoutesParameter = par("addStaticRoutes");
         addDefaultRoutesParameter = par("addDefaultRoutes");
         addDirectRoutesParameter = par("addDirectRoutes");
+        addRemoteRoutesParameter = par("addRemoteRoutes");
+        addManualRoutesParameter = par("addManualRoutes");
     }
     else if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
         ensureConfigurationComputed(topology);
@@ -57,7 +59,9 @@ void Ipv6NetworkConfigurator::computeConfiguration()
     if (assignAddressesParameter)
         TIME(assignAddresses(topology));
     // read and configure manual routes from the XML configuration
-    readManualRouteConfiguration(topology);
+    // (independent of addStaticRoutes)
+    if (addManualRoutesParameter)
+        readManualRouteConfiguration(topology);
     // read and configure manual multicast routes from the XML configuration
     readManualMulticastRouteConfiguration(topology);
     // calculate shortest paths, and add corresponding static routes
@@ -1036,6 +1040,9 @@ void Ipv6NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
 
                         // Skip direct (on-link) routes when direct routes are disabled
                         if (!addDirectRoutesParameter && nextHop.isUnspecified())
+                            continue;
+                        // Skip remote routes (via a next hop) when remote routes are disabled
+                        if (!addRemoteRoutesParameter && !nextHop.isUnspecified())
                             continue;
 
                         // Check for duplicate routes
