@@ -513,10 +513,21 @@ Each phase is a milestone with its own commit(s); work in a dedicated worktree.
   runner network, fingerprint hookup, `protocoltest-base.ini`, authoring guide +
   cookbook (handshake, retransmission, ARP, DHCP, fragmentation examples).
 
-- **Phase 8 — Description generator (§13).** AST→English renderer, per-protocol
-  phrasebook, `describe()` + `--describe` mode, golden-file CI hook, Qtenv panel. Can be
-  started incrementally from Phase 1 (render the constructs that exist), so each later
-  phase adds its constructs' templates as it lands.
+- **Phase 8 — Description generator (§13). ✅ DONE (early, brought forward before Phase 5).**
+  AST→English renderer, phrasebook, `describe()`. Qtenv panel / golden-file CI hook remain
+  for Phase 7.
+  - Implemented `ProtocolTestDescriber` (`describe(const ProtocolTest&)`): a phrasebook maps
+    event kinds (sentToLower→"send a packet to the lower layer", …) and layers to prose;
+    timing (`within`/`after`/`at`), captures ("remembering isn, clientPort"), and inject
+    targets are rendered; an optional `.describe("…")` on `EventPattern`/`Injection` supplies
+    readable text for otherwise-opaque lambda predicates and packet builders (fixes the
+    lambda-opacity limitation). `ProtocolTester` prints it at startup (`printDescription`).
+  - Sample output (tcp_handshake_peer): "1. Within 1s, host1 must receive a packet from the
+    upper layer at the network layer -- host1's SYN (SYN set, ACK clear), remembering isn,
+    clientPort. 2. 0.001s after the previous step, inject a SYN+ACK acknowledging host1's
+    ISN+1 into host1's eth[0] (upperLayerOut). 3. …host1's final ACK…".
+  - As each later phase adds constructs (combinators, intercept actions), it extends the
+    renderer with their templates.
 
 ## 15. Risks & open questions
 
