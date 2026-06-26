@@ -30,9 +30,8 @@ EventPattern on(const char *nodeName)
     return pattern;
 }
 
-bool EventPattern::selectorMatches(const MatchContext& context) const
+bool EventPattern::scopeMatches(const PacketEvent& event) const
 {
-    const PacketEvent& event = context.event;
     if (!selNode.empty() && (event.node == nullptr || selNode != event.node->getFullName()))
         return false;
     if (selHasKind && event.kind != selKind)
@@ -42,6 +41,14 @@ bool EventPattern::selectorMatches(const MatchContext& context) const
     if (selHasLayer && event.layer != selLayer)
         return false;
     if (!selIface.empty() && selIface != event.interfaceName)
+        return false;
+    return true;
+}
+
+bool EventPattern::selectorMatches(const MatchContext& context) const
+{
+    const PacketEvent& event = context.event;
+    if (!scopeMatches(event))
         return false;
     if (event.packet == nullptr && (!selExpr.empty() || predicate))
         return false;

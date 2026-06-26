@@ -228,5 +228,47 @@ Define_ProtocolTest(optional_skip)
                   .match("udp.destPort == 5000").describe("a datagram to port 5000").within(2.0));
 }
 
+// delivery: the datagram host1 sends to port 5000 is received by host2 -- the same
+// packet (correlated by treeId) -- within 0.1s. Should PASS.
+Define_ProtocolTest(udp_delivery)
+{
+    return ProtocolTest("udp_delivery")
+        .delivery(on("host1").sentToLower().layer(Layer::Transport)
+                    .match("udp.destPort == 5000").describe("a datagram to port 5000"),
+                  on("host2").receivedFromLower().layer(Layer::Transport)
+                    .match("udp.destPort == 5000"),
+                  0.1);
+}
+
+// anyOf: host1 sends to port 5000 or 9999 -- the 5000 alternative matches. Should PASS.
+Define_ProtocolTest(udp_anyof)
+{
+    return ProtocolTest("udp_anyof")
+        .anyOf({
+            on("host1").sentToLower().layer(Layer::Transport)
+              .match("udp.destPort == 9999").describe("a datagram to port 9999").within(1.0),
+            on("host1").sentToLower().layer(Layer::Transport)
+              .match("udp.destPort == 5000").describe("a datagram to port 5000").within(1.0)
+        });
+}
+
+// repeat: host1 sends three datagrams to port 5000 within 2s. Should PASS.
+Define_ProtocolTest(udp_repeat)
+{
+    return ProtocolTest("udp_repeat")
+        .repeat(on("host1").sentToLower().layer(Layer::Transport)
+                  .match("udp.destPort == 5000").describe("a datagram to port 5000").within(2.0), 3);
+}
+
+// strict: closed-world. host1 sends to port 5000 at the transport layer, but this strict
+// expect wants port 9999 there -- the in-scope-but-wrong packet fails. Should FAIL.
+Define_ProtocolTest(udp_strict_bad)
+{
+    return ProtocolTest("udp_strict_bad")
+        .strict()
+        .expect(on("host1").sentToLower().layer(Layer::Transport)
+                  .match("udp.destPort == 9999").describe("a datagram to port 9999").within(1.0));
+}
+
 } // namespace protocoltest
 } // namespace inet

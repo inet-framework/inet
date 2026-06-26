@@ -42,6 +42,9 @@ class INET_API ProtocolTester : public SimpleModule, protected cListener
     CaptureStore captureStore;                     // values bound by capture(...) as steps match
     std::vector<char> groupMatched;                // per-pattern matched flags for an Unordered step
     int groupRemaining = 0;                        // unmatched patterns left in the Unordered group
+    int repeatRemaining = 0;                       // occurrences left for a Repeat step
+    int deliveryStage = 0;                         // 0 = awaiting send, 1 = awaiting matching receive
+    long deliveryTreeId = -1;                      // treeId of the sent packet to correlate
     simtime_t anchorTime = 0;                      // start time of the current step's window
     cMessage *deadlineMsg = nullptr;               // fires when the current expect step misses its deadline
     cMessage *injectMsg = nullptr;                 // fires when the current inject step is due
