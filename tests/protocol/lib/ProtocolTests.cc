@@ -270,5 +270,37 @@ Define_ProtocolTest(udp_strict_bad)
                   .match("udp.destPort == 9999").describe("a datagram to port 9999").within(1.0));
 }
 
+// WiFi 802.11 frame-sequence tests. Frame types use the Ieee80211 MAC header `type`
+// field: ST_ACTION=13 (ADDBA action frames), ST_BLOCKACK_REQ=24, ST_BLOCKACK=25,
+// ST_DATA_WITH_QOS=40. (A-MSDU aggregation and Block Ack are exercised by separate
+// scenarios: with A-MSDU each aggregate is a single MPDU acked normally, whereas the
+// Block Ack agreement is used on the non-aggregated multi-MPDU path.)
+
+// Block Ack establishment + use: host1 sets up a Block Ack agreement with host2 (ADDBA
+// request/response) and then runs a Block-Ack-Request / Block-Ack exchange.
+Define_ProtocolTest(wifi_block_ack)
+{
+    return ProtocolTest("wifi_block_ack")
+        // ADDBA setup: host1 sends the ADDBA request, then receives the ADDBA response.
+        .expect(on("host1").sentToLower().layer(Layer::Link)
+                  .match("ieee80211mac.type == 13").describe("an ADDBA request (action frame)").within(0.1))
+        .expect(on("host1").receivedFromLower().layer(Layer::Link)
+                  .match("ieee80211mac.type == 13").describe("the ADDBA response").within(0.5))
+        // Block Ack in use: host1 sends a Block Ack Request and receives the Block Ack.
+        .expect(on("host1").sentToLower().layer(Layer::Link)
+                  .match("ieee80211mac.type == 24").describe("a Block Ack Request").within(0.5))
+        .expect(on("host1").receivedFromLower().layer(Layer::Link)
+                  .match("ieee80211mac.type == 25").describe("the Block Ack").within(0.5));
+}
+
+// A-MSDU aggregation: host1 sends a QoS data frame carrying an aggregated A-MSDU.
+Define_ProtocolTest(wifi_aggregation)
+{
+    return ProtocolTest("wifi_aggregation")
+        .expect(on("host1").sentToLower().layer(Layer::Link)
+                  .match("ieee80211mac.type == 40 && Ieee80211DataHeader.aMsduPresent == true")
+                  .describe("an A-MSDU aggregated QoS data frame").within(0.2));
+}
+
 } // namespace protocoltest
 } // namespace inet
