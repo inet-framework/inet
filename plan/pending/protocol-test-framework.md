@@ -172,7 +172,7 @@ auto t = ProtocolTest("tcp-handshake")
               .within(0.5))
 
     // 4. Negative: no RST should appear in the next 0.5s.
-    .expectNo(on("client").sentToLower().match("tcp.flags_RST == true").within(0.5));
+    .never(on("client").sentToLower().match("tcp.flags_RST == true").within(0.5));
 ```
 
 ### 7.2 Selector grammar (builder methods)
@@ -212,18 +212,29 @@ genuine arrival at the chosen layer/interface.
 
 - `.at(t)` absolute; `.after(Δ)` relative to the previous matched/fired step;
   `.within(Δ)` deadline (fail if not satisfied in time); `.notBefore(Δ)` earliest;
-  `.tolerance(±ε)`. Negative windows for `expectNo`.
+  `.tolerance(±ε)`. Negative windows for `never`.
 
 ### 7.6 Structural combinators (regex-over-packets)
 
 ```cpp
-.sequence(a, b, c)          // ordered (default between consecutive .expect())
+.sequence(a, b, c)          // ordered (default between consecutive steps)
 .unordered({a, b})          // any interleaving; all must occur
-.optional(a)                // 0 or 1
-.repeat(a, n) / .repeatUntil(a, cond)
 .anyOf({a, b})              // alternation
-.expectNo(sel...within)     // must NOT occur in the window (negative)
 .delivery(from("A"), to("B"), within)   // correlated send@A → receive@B by treeId
+
+// Cardinality family (regex-quantifier style). Fixed-count kinds advance as soon as the
+// count is reached; the greedy *Times kinds consume every match within the within()
+// window, then check the range (an overflow past the upper bound fails immediately).
+// Parameterized kinds take the count first.
+.never(a)                   // 0      (must NOT occur in the window — negative)
+.once(a)                    // 1      (the default between consecutive steps)
+.atMostOnce(a)              // 0..1   (match-or-skip)
+.oneOrMoreTimes(a)          // 1..*   (greedy)
+.anyNumberOfTimes(a)        // 0..*   (greedy)
+.exactlyTimes(n, a)         // n
+.atLeastTimes(n, a)         // n..*   (greedy)
+.atMostTimes(n, a)          // 0..n   (greedy)
+.betweenTimes(a, b, sel)    // a..b   (greedy)
 ```
 
 `.delivery(...)` is sugar over two primitive events correlated by `treeId` — expresses
@@ -337,7 +348,7 @@ render(step):
       → "Within T, N must {KIND} on I a packet that {phrase(M)}{captures}."
   inject(to N .iface I .asInbound .after D .frame C...)
       → "{D} later, send to N on I (appearing as a received packet): {phrase(C...)}."
-  expectNo(sel .within T)
+  never(sel .within T)
       → "For the next T, N must not {KIND} {phrase(M)}."
   delivery(from A, to B, within T)
       → "That packet must reach B within T."
@@ -356,8 +367,13 @@ Combinators become connectives:
 |---|---|
 | `sequence` | numbered list (default) |
 | `unordered{a,b}` | "in any order: a; b" |
-| `optional(a)` | "optionally, a" |
-| `repeat(a,n)` / `repeatUntil` | "n times: a" / "repeat a until …" |
+| `once(a)` | "a must …" (the default step) |
+| `atMostOnce(a)` | "a may …" |
+| `never(a)` | "a must not …" |
+| `exactlyTimes(n,a)` | "n times: a" |
+| `atLeastTimes(n,a)` / `oneOrMoreTimes` | "at least n times: a" / "one or more times: a" |
+| `atMostTimes(n,a)` / `betweenTimes(a,b,…)` | "at most n times: …" / "between a and b times: …" |
+| `anyNumberOfTimes(a)` | "any number of times: a" |
 | `anyOf{a,b}` | "either a, or b" |
 | `delivery` / `onMatch` | atom / "When …" side-rule |
 
@@ -511,26 +527,38 @@ Each phase is a milestone with its own commit(s); work in a dedicated worktree.
     once `Tcp` gained `packetSentToLower` (see Phase 2 finding), `tcp_handshake_peer` was
     switched to observe at `tcp sentToLower` like `tcp_handshake_seq`.)
 
-- **Phase 5 — Combinators. ✅ DONE.** `unordered/optional/repeat/anyOf/expectNo/delivery`,
-  `strict()` mode. *Exit:* a multi-flow test with negative assertions — met.
+- **Phase 5 — Combinators. ✅ DONE.** `unordered/anyOf/delivery`, the cardinality family
+  (`never/once/atMostOnce/exactlyTimes` + greedy `oneOrMoreTimes/anyNumberOfTimes/
+  atLeastTimes/atMostTimes/betweenTimes`), `strict()` mode. *Exit:* a multi-flow test with
+  negative assertions — met.
   - Engine generalised from a single cursor to a group/stage-aware matcher: `enterStep`
     arms a window per kind; deadline expiry means fail / skip / pass by kind.
-    - `expectNo` — negative window (fail on match, else advance); `optional` — match-or-skip;
+    - `never` — negative window (fail on match, else advance); `atMostOnce` — match-or-skip;
       `unordered({...})` — all patterns, any order (window = longest sub-`within`); `anyOf({...})`
-      — first matching alternative wins; `repeat(p, n)` — n occurrences within the window;
-      `delivery(from, to, window)` — send correlated to receive of the **same packet by treeId**,
-      window measures send→receive latency (armed at the send); `strict()` — closed-world,
-      an in-scope-but-wrong packet fails an Expect (`EventPattern::scopeMatches` splits scope
-      from content). `finish()` treats trailing `ExpectNo`/`Optional` as satisfied.
+      — first matching alternative wins; `exactlyTimes(n, p)` — advance on the nth match within
+      the window; `delivery(from, to, window)` — send correlated to receive of the **same packet
+      by treeId**, window measures send→receive latency (armed at the send); `strict()` —
+      closed-world, an in-scope-but-wrong packet fails a `Once` step (`EventPattern::scopeMatches`
+      splits scope from content). `finish()` treats trailing `Never`/`AtMostOnce`/range-satisfied
+      `Count` as satisfied.
+    - **Greedy `Count` kind** (added in the cardinality rename): models a count range
+      `[cardMin, cardMax]` (`cardMax < 0` = unbounded). It consumes *every* match within the
+      `within()` window, fails immediately on an overflow past `cardMax`, and at the window
+      close passes iff `cardCount ≥ cardMin`. Fixed-count kinds (`once`, `exactlyTimes`) keep
+      their advance-on-reach semantics so ordered sequences are unaffected.
   - Describer extended for every kind: "must/may/must not", "In any order: …", "One of: …",
-    "N times: …", and the delivery sentence.
-  - Verified (13 configs total): `multi_flow`, `udp_delivery`, `udp_anyof`, `udp_repeat`,
-    `optional_skip` PASS; `multi_flow_bad` FAIL (`forbidden event occurred at t=0.1 …`),
-    `udp_strict_bad` FAIL (`strict: unexpected in-scope packet at t=0.1 …`).
+    "N times: …", the greedy "at least/at most/between/any number of times: …", and the
+    delivery sentence.
+  - Verified (15 configs total): `multi_flow`, `udp_delivery`, `udp_anyof`, `udp_repeat`,
+    `udp_count_pass`, `optional_skip` PASS; `multi_flow_bad` FAIL (`forbidden event occurred at
+    t=0.1 …`), `udp_strict_bad` FAIL (`strict: unexpected in-scope packet …`),
+    `udp_count_overflow` FAIL (`count step 0: more than 2 occurrence(s) …`).
+  - **Naming note:** `expect/optional/expectNo/repeat(p,n)` were renamed to
+    `once/atMostOnce/never/exactlyTimes(n,p)` (count-first) for a single, consistent
+    cardinality vocabulary; no back-compat aliases (all call sites are in-repo).
   - **Deferred (not blocking):** explicit auto **per-flow scoping** (concurrent flow-cursors)
     — the most NFA-heavy piece; `unordered` already covers explicit interleaving, and
-    specific selectors keep flows separated. `repeatUntil(cond)` also deferred (only fixed-
-    count `repeat`).
+    specific selectors keep flows separated. `repeatUntil(cond)` also deferred.
 
 - **Phase 6 — MITM/intercept & peer-node shapes.** `PacketTap` drop/delay/mutate;
   standalone peer node wiring; fault-injection example. *Exit:* a retransmission test
@@ -565,7 +593,7 @@ Each phase is a milestone with its own commit(s); work in a dedicated worktree.
   packet flow or timing) and are reused by statistics/visualizers/other tests, whereas a
   `PacketTap` is *in-band* — it alters the NED topology away from the production network
   and can perturb behaviour. Mechanics:
-  - At program-build/resolve time the framework checks that each `expect`/`expectNo`
+  - At program-build/resolve time the framework checks that each `once`/`never`
     selector maps to an available signal; if not, it **fails fast with a concrete
     suggestion** — the exact module path and a recommended signal (name + emission site)
     to add — rather than silently substituting a tap.
