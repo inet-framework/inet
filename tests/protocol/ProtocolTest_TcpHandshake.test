@@ -1,0 +1,42 @@
+%description:
+
+Protocol Test Framework -- example opp_test wrapper.
+
+Runs the `tcp_handshake_seq` ProtocolTest program: it observes host1's TCP three-way
+handshake at the transport layer (SYN sent, SYN+ACK received acknowledging ISN+1, final
+ACK sent) and emits a PASS/FAIL verdict line. The test passes when the framework prints
+"PROTOCOLTEST tcp_handshake_seq: PASS".
+
+This file illustrates how a ProtocolTest is wrapped as an opp_test `.test` case for a CI
+run: select a scenario + the program name via the ProtocolTester's `testName`, then assert
+the verdict line with a contains-check. The prebuilt framework library and its NED are loaded
+with the -l/-n arguments (adjust the paths to your build); wiring this into INET's
+fingerprint/CI runner is the separate harness step.
+
+%extraargs: -l ../lib/libprotocoltest.so -n ../../../src;../lib
+
+%inifile: omnetpp.ini
+
+[General]
+network = ProtocolTestDemo
+sim-time-limit = 1s
+seed-set = 0
+
+# host1 opens a TCP connection to host2's echo server.
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+*.host1.app[0].tSend = 0.2s
+*.host1.app[0].sendBytes = 100B
+*.host1.app[0].tClose = 2s
+*.host2.numApps = 1
+*.host2.app[0].typename = "TcpEchoApp"
+*.host2.app[0].localPort = 1000
+
+# select the protocol-test program to run
+*.tester.testName = "tcp_handshake_seq"
+
+%contains: stdout
+PROTOCOLTEST tcp_handshake_seq: PASS
