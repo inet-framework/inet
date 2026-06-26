@@ -212,6 +212,7 @@ simple Tcp extends SimpleModule like ITcp
         @signal[tcpConnectionRemoved];
         @signal[packetReceivedFromUpper](type=cPacket);
         @signal[packetReceivedFromLower](type=cPacket);
+        @signal[packetSentToLower](type=cPacket);
         @signal[packetDropped](type=inet::Packet);
     gates:
         input appIn @labels(TcpCommand/down) @messageKinds(inet::TcpCommandCode);
