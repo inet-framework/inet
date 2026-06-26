@@ -21,8 +21,51 @@ moduleinterface IGeographicCoordinateSystem
 }
 
 //
-// Provides a very simple and less accurate geographic coordinate
-// system without using OSG. It doesn't support orientation.
+// Provides an accurate geographic coordinate system: the scene coordinate
+// frame is a local tangent plane pinned to a geographic anchor point and
+// optionally rotated. Scene coordinates are in meters relative to that anchor.
+//
+// The scene frame follows INET's convention: by default
+// (sceneHeading = 90deg) the X axis points east, the Y axis points south and the Z
+// axis points up at the anchor. Unlike ~Wgs84EcefGeographicCoordinateSystem, whose
+// scene frame is the global ECEF frame, scene coordinates here stay small and
+// centered on the anchor, which is convenient for local scenes.
+//
+simple Wgs84AnchoredGeographicCoordinateSystem extends SimpleModule like IGeographicCoordinateSystem
+{
+    parameters:
+        @class(Wgs84AnchoredGeographicCoordinateSystem);
+        @display("i=block/table2");
+        double sceneLatitude @unit(deg); // Latitude coordinate of the scene origin
+        double sceneLongitude @unit(deg); // Longitude coordinate of the scene origin
+        double sceneAltitude @unit(m) = default(0m); // Altitude coordinate of the scene origin
+        double sceneHeading @unit(deg) = default(90deg); // Geographic heading of the scene (0deg means X axis points north, 90deg means X axis points east)
+        double sceneElevation @unit(deg) = default(0deg); // Geographic elevation of the scene (0deg means X axis is horizontal, positive rotates X axis towards the sky)
+        double sceneBank @unit(deg) = default(0deg); // Bank of the scene
+}
+
+//
+// Provides an accurate geographic coordinate system in which the scene
+// coordinate frame coincides with the Earth-Centered Earth-Fixed (ECEF) frame
+// (origin at the center of the Earth, Z towards the north pole, meters), using
+// the WGS84 ellipsoid.
+//
+simple Wgs84EcefGeographicCoordinateSystem extends SimpleModule like IGeographicCoordinateSystem
+{
+    parameters:
+        @class(Wgs84EcefGeographicCoordinateSystem);
+        @display("i=block/table2");
+}
+
+//
+// Provides a very simple and less accurate geographic coordinate system.
+// The Earth is modeled as a sphere so you may get inaccuracies if you compare
+// it to other wgs84 coordinates. Scene coordinates are in meter and are relative 
+// to the scene anchor point. It doesn't support rotation so the X axis always points
+// east and the Y axis always points south (to have the same handedness as the scene coordinate system)!
+//
+// Usage is discouraged because of these inaccuracies. 
+// Use ~Wgs84AnchoredGeographicCoordinateSystem instead.
 //
 simple SimpleGeographicCoordinateSystem extends SimpleModule like IGeographicCoordinateSystem
 {
@@ -36,7 +79,9 @@ simple SimpleGeographicCoordinateSystem extends SimpleModule like IGeographicCoo
 
 //
 // Provides an accurate geographic coordinate system using the
-// built-in OSG API.
+// built-in OSG API. This is mostly useful for local 3D visualizations
+// created with osgEarth. Scene coordiantes are in meters relative to the
+// scene origin.
 //
 simple OsgGeographicCoordinateSystem extends SimpleModule like IGeographicCoordinateSystem
 {

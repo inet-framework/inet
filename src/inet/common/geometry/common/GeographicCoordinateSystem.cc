@@ -7,6 +7,8 @@
 
 #include "inet/common/geometry/common/GeographicCoordinateSystem.h"
 
+#include "inet/common/geometry/common/Wgs84.h"
+
 #if defined(WITH_OSGEARTH) && defined(INET_WITH_VISUALIZATIONOSG)
 #include <osg/PositionAttitudeTransform>
 #include <osgEarth/GeoTransform>
@@ -40,6 +42,71 @@ GeoCoord SimpleGeographicCoordinateSystem::computeGeographicCoordinate(const Coo
     auto geograpicLatitude = sceneLatitude - deg(sceneCoordinate.y / metersPerDegree);
     auto geograpicLongitude = sceneLongitude + deg(sceneCoordinate.x / metersPerDegree / cos(fabs(sceneLatitude.get<rad>())));
     return GeoCoord(geograpicLatitude, geograpicLongitude, m(sceneCoordinate.z) - sceneAltitude);
+}
+
+Define_Module(Wgs84EcefGeographicCoordinateSystem);
+
+GeoCoord Wgs84EcefGeographicCoordinateSystem::getScenePosition() const
+{
+    // The scene origin is the center of the Earth, which has no meaningful
+    // geodetic position; report the sub-origin point on the prime meridian.
+    return GeoCoord(deg(0), deg(0), m(-wgs84::SEMI_MAJOR_AXIS));
+}
+
+Coord Wgs84EcefGeographicCoordinateSystem::computeSceneCoordinate(const GeoCoord& geographicCoordinate) const
+{
+    return wgs84::geodeticToEcef(geographicCoordinate);
+}
+
+GeoCoord Wgs84EcefGeographicCoordinateSystem::computeGeographicCoordinate(const Coord& sceneCoordinate) const
+{
+    return wgs84::ecefToGeodetic(sceneCoordinate);
+}
+
+Define_Module(Wgs84AnchoredGeographicCoordinateSystem);
+
+void Wgs84AnchoredGeographicCoordinateSystem::initialize(int stage)
+{
+    if (stage == INITSTAGE_LOCAL) {
+        auto sceneLatitude = deg(par("sceneLatitude"));
+        auto sceneLongitude = deg(par("sceneLongitude"));
+        auto sceneAltitude = m(par("sceneAltitude"));
+        auto sceneHeading = deg(par("sceneHeading"));
+        auto sceneElevation = deg(par("sceneElevation"));
+        auto sceneBank = deg(par("sceneBank"));
+        scenePosition = GeoCoord(sceneLatitude, sceneLongitude, sceneAltitude);
+
+        // The parameter is the conventional direction of heading and elevation (positive heading
+        // turns left, positive elevation lifts the nose), matching OsgGeographicCoordinateSystem,
+        // but the EulerAngles class has different expectations.
+        sceneOrientation = Quaternion(EulerAngles(-rad(sceneHeading - deg(90)), -rad(sceneElevation), rad(sceneBank)));
+
+        // (oriented) East-North-Up frame <-> ECEF: first apply the scene orientation, then the
+        // local ENU -> ECEF rotation at the anchor, then translate by the anchor's ECEF position
+        originEcef = wgs84::geodeticToEcef(scenePosition);
+        localToEcefRotation = wgs84::enuToEcefRotation(scenePosition) * sceneOrientation;
+        ecefToLocalRotation = localToEcefRotation.inverse();
+        WATCH(originEcef);
+        WATCH(localToEcefRotation);
+        WATCH(sceneOrientation);
+    }
+}
+
+// ENU is right-handed (X=east, Y=north, Z=up), but the INET scene frame is X=east, Y=south, Z=up
+// (the default 2D view draws +Y downward, so north must map to -Y); negating the north component
+// converts between the two. Without this the latitude axis is mirrored on the flat canvas.
+Coord Wgs84AnchoredGeographicCoordinateSystem::computeSceneCoordinate(const GeoCoord& geographicCoordinate) const
+{
+    Coord ecef = wgs84::geodeticToEcef(geographicCoordinate);
+    Coord enu = ecefToLocalRotation.rotate(ecef - originEcef);
+    return Coord(enu.x, -enu.y, enu.z); // ENU (Y=north) -> scene (Y=south)
+}
+
+GeoCoord Wgs84AnchoredGeographicCoordinateSystem::computeGeographicCoordinate(const Coord& sceneCoordinate) const
+{
+    Coord enu(sceneCoordinate.x, -sceneCoordinate.y, sceneCoordinate.z); // scene (Y=south) -> ENU (Y=north)
+    Coord ecef = originEcef + localToEcefRotation.rotate(enu);
+    return wgs84::ecefToGeodetic(ecef);
 }
 
 #if defined(WITH_OSGEARTH) && defined(INET_WITH_VISUALIZATIONOSG)
