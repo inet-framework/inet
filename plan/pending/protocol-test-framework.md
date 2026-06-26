@@ -1,7 +1,9 @@
 # Protocol Test Suite Framework for INET — Design & Implementation Plan
 
-Status: **in progress** — Phases 0–5 and 8 implemented; Phases 6 (MITM/intercept) and 7
-(harness/CI/docs) remain. See the per-phase status in §14.
+Status: **in progress** — Phases 0–5 and 8 done; Phase 6 (MITM/intercept) partial — the
+inline `PacketTap` drop/delay and the retransmission exit criterion are met, with mutate /
+builder-driven `intercept()` / peer-node shapes remaining; Phase 7 (harness/CI/docs) not
+started. See the per-phase status in §14.
 Author: brainstormed with Claude, 2026-06-25
 
 ## 1. Purpose
@@ -561,9 +563,34 @@ Each phase is a milestone with its own commit(s); work in a dedicated worktree.
     — the most NFA-heavy piece; `unordered` already covers explicit interleaving, and
     specific selectors keep flows separated. `repeatUntil(cond)` also deferred.
 
-- **Phase 6 — MITM/intercept & peer-node shapes.** `PacketTap` drop/delay/mutate;
-  standalone peer node wiring; fault-injection example. *Exit:* a retransmission test
-  driven by dropping a frame.
+- **Phase 6 — MITM/intercept & peer-node shapes. 🟡 PARTIAL (drop done; exit met).**
+  `PacketTap` inline man-in-the-middle on a link; fault-injection example. *Exit: a
+  retransmission test driven by dropping a frame — MET (`tcp_retransmit` PASSes).*
+  - `PacketTap` (`PacketTap.{ned,h,cc}`): a `SimpleModule` with two inout gates `a`/`b`,
+    spliced onto an existing link in the demo network (`ProtocolTestMitmDemo`:
+    `host1.ethg <--> Eth100M <--> tap.a; tap.b <--> Eth100M <--> host2.ethg`). It is a
+    **store-and-forward relay** (per-direction `cPacketQueue` + a transmit timer keyed off
+    `cGate::getTransmissionChannel()->getTransmissionFinishTime()`), because the Ethernet
+    sides are datarate channels — a naive `send()` hits "channel busy". Self-contained:
+    configured by params (`matchExpression` PacketFilter + `minPacketBytes` + `occurrence`
+    + `action` = drop/delay/pass + `delayTime`), independent of the ProtocolTest program.
+  - On the Ethernet PHY gate the message is an `EthernetSignal` encapsulating the frame
+    `Packet`; the tap unwraps it to run the filter, but forwards the whole signal (preserving
+    the transmission). Zero INET source changes.
+  - **Key integration findings (for Phase 7 docs):** (a) a top-level tap *splits the link*,
+    so the `Ipv4NetworkConfigurator` saw two separate links and address assignment failed —
+    fixed by giving the tap **`@networkNode()`** so the configurator traverses it and merges
+    both sides into one link (the same marker `ThruputMeter` carries); (b) `GlobalArp` keeps
+    the wire to just the TCP/IP frames; (c) INET's initial TCP RTO is ~3s, so the
+    retransmission window must clear that (the demo uses `within(5)` and `sim-time-limit=8s`).
+  - **`tcp_retransmit` test** (`MitmRetransmit` config): the tap drops host1's first data
+    segment (`tcp.destPort==1000 && synBit==false`, `minPacketBytes=100`, `occurrence=1`);
+    the test captures the dropped segment's `sequenceNo` and asserts host1 re-sends a segment
+    with the same seq after the RTO. PASS.
+  - **Remaining for this phase (deferred):** `mutate` action (drop/delay/pass implemented;
+    mutate not yet); engine/builder-driven `intercept(on(...).match(...)).drop()` surface
+    (today the tap is configured by params, not from the ProtocolTest program); standalone
+    **peer-node** wiring shape; describer rendering for intercept steps.
 
 - **Phase 7 — Harness, CI, docs.** `tests/protocol/` dir, `Define_ProtocolTest` registry,
   runner network, fingerprint hookup, `protocoltest-base.ini`, authoring guide +

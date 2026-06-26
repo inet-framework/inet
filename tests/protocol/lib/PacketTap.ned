@@ -1,0 +1,34 @@
+//
+// Protocol Test Framework for INET -- Phase 6: inline MITM packet tap.
+//
+// SPDX-License-Identifier: LGPL-3.0-or-later
+//
+
+//
+// A man-in-the-middle tap spliced onto an existing link (e.g. between two hosts'
+// Ethernet gates). It forwards every frame transparently in both directions, except
+// frames selected by `matchExpression` (an INET PacketFilter expression evaluated over
+// the dissected frame) and `occurrence`, to which it applies `action`:
+//
+//   pass   -- forward unchanged (the default for non-selected frames)
+//   drop   -- discard the frame (fault injection: e.g. force a retransmission)
+//   delay  -- forward after `delayTime`
+//
+// Self-contained: configured entirely by its parameters, independent of the running
+// ProtocolTest program. The ProtocolTester observes the resulting trace as usual.
+//
+simple PacketTap
+{
+    parameters:
+        string matchExpression = default(""); // PacketFilter expression selecting candidate frames ("" = all)
+        int minPacketBytes = default(0);      // additionally require the (inner) frame to be at least this many bytes
+        string action = default("drop");      // action on a selected frame: "drop" | "delay" | "pass"
+        int occurrence = default(0);          // act on the Nth selected frame (1-based); 0 = every selected frame
+        double delayTime @unit(s) = default(0s); // hold time for action == "delay"
+        @networkNode(); // let the Ipv4 configurator traverse the tap (join both sides into one link)
+        @display("i=block/tunnel");
+        @class(inet::protocoltest::PacketTap);
+    gates:
+        inout a;   // one side of the spliced link
+        inout b;   // the other side
+}
