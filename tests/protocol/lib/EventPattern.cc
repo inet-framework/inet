@@ -13,6 +13,16 @@
 namespace inet {
 namespace protocoltest {
 
+static std::string formatCaptureValue(const cValue& value)
+{
+    switch (value.getType()) {
+        case cValue::INT: return std::to_string(value.intValue());
+        case cValue::BOOL: return value.boolValue() ? "true" : "false";
+        case cValue::DOUBLE: { std::ostringstream os; os << value.doubleValue(); return os.str(); }
+        default: return value.str();
+    }
+}
+
 EventPattern on(const char *nodeName)
 {
     EventPattern pattern;
@@ -35,22 +45,8 @@ bool EventPattern::selectorMatches(const MatchContext& context) const
         return false;
     if (event.packet == nullptr && (!selExpr.empty() || predicate))
         return false;
-    if (!selExpr.empty()) {
-        if (!filter) {
-            filter = std::make_shared<PacketFilter>();
-            filter->setExpression(selExpr.c_str()); // throws on a malformed expression
-        }
-        // A content expression referencing a protocol absent from this packet (e.g.
-        // `udp.*` on an ARP frame) throws during evaluation; that is simply a non-match.
-        // Constrain selectors by layer/kind so expressions mostly see relevant packets.
-        try {
-            if (!filter->matches(event.packet))
-                return false;
-        }
-        catch (const std::exception&) {
-            return false;
-        }
-    }
+    if (!selExpr.empty() && !matchesExpression(context))
+        return false;
     if (predicate) {
         // Same robustness: a predicate that peeks a chunk absent from this packet
         // throws; treat that as a non-match rather than aborting the run.
@@ -63,6 +59,48 @@ bool EventPattern::selectorMatches(const MatchContext& context) const
         }
     }
     return true;
+}
+
+bool EventPattern::matchesExpression(const MatchContext& context) const
+{
+    const Packet *packet = context.event.packet;
+
+    // Static expression (no {capture} placeholders): compile once and cache.
+    if (selExpr.find('{') == std::string::npos) {
+        if (!filter) {
+            filter = std::make_shared<PacketFilter>();
+            filter->setExpression(selExpr.c_str()); // throws on a malformed expression
+        }
+        // A content expression referencing a protocol absent from this packet (e.g.
+        // `udp.*` on an ARP frame) throws during evaluation; that is simply a non-match.
+        // Constrain selectors by layer/kind so expressions mostly see relevant packets.
+        try {
+            return filter->matches(packet);
+        }
+        catch (const std::exception&) {
+            return false;
+        }
+    }
+
+    // Dynamic expression: substitute {name} with captured values, then compile fresh.
+    std::string expression = selExpr;
+    for (auto& capture : context.captures) {
+        std::string placeholder = "{" + capture.first + "}";
+        std::string value = formatCaptureValue(capture.second);
+        size_t pos;
+        while ((pos = expression.find(placeholder)) != std::string::npos)
+            expression.replace(pos, placeholder.size(), value);
+    }
+    if (expression.find('{') != std::string::npos)
+        return false; // an unresolved {capture} -- not satisfiable yet
+    try {
+        PacketFilter dynamicFilter;
+        dynamicFilter.setExpression(expression.c_str());
+        return dynamicFilter.matches(packet);
+    }
+    catch (const std::exception&) {
+        return false;
+    }
 }
 
 std::string EventPattern::str() const
