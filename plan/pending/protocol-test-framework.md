@@ -1,7 +1,8 @@
 # Protocol Test Suite Framework for INET — Design & Implementation Plan
 
-Status: **in progress** — Phases 0–6 and 8 done; only Phase 7 (harness/CI/docs) remains.
-See the per-phase status in §14.
+Status: **in progress** — Phases 0–6 and 8 done; Phase 7 docs/examples done, only the
+opp_test/opp_ci CI *harness wiring* (linking the `.test` cases into INET's regression runner
++ fingerprint hookup) remains. See the per-phase status in §14.
 Author: brainstormed with Claude, 2026-06-25
 
 ## 1. Purpose
@@ -605,9 +606,28 @@ Each phase is a milestone with its own commit(s); work in a dedicated worktree.
     tap's wire-level filter, so one could write `intercept(on("host1")...).drop()` instead of a
     raw `match("tcp...")` string; multiple simultaneous rules per tap.
 
-- **Phase 7 — Harness, CI, docs.** `tests/protocol/` dir, `Define_ProtocolTest` registry,
-  runner network, fingerprint hookup, `protocoltest-base.ini`, authoring guide +
-  cookbook (handshake, retransmission, ARP, DHCP, fragmentation examples).
+- **Phase 7 — Harness, CI, docs. 🟡 PARTIAL (docs + examples done; CI wiring deferred).**
+  - **Authoring guide + cookbook** (`tests/protocol/lib/AUTHORING.md`): the full vocabulary
+    reference (selectors, cardinality, content/captures, combinators, injection, interception,
+    self-description, running tests) plus worked cookbook entries — TCP handshake, TCP
+    retransmission (drop + mutate), reactive-injection peer, ARP, IPv4 fragmentation, 802.11
+    Block Ack, and DHCP as a documented pattern.
+  - **`protocoltest-base.ini`** (`tests/protocol/lib/`): reusable `[General]` base (seed,
+    sim-time-limit, `printDescription`, `GlobalArp`) for new suites to `include`.
+  - **New cookbook tests** added and passing: `arp_resolution` (`ArpResolution` config — ARP
+    request/reply via `arp.opcode`) and `ipv4_fragmentation` (`Fragmentation` config — a
+    4000 B datagram over the 1500 B MTU, asserting `ipv4.moreFragments` / `fragmentOffset`).
+  - **`.test` examples** (`tests/protocol/`): `ProtocolTest_TcpHandshake.test` (PASS),
+    `ProtocolTest_TcpRetransmit.test` (MITM PASS), `ProtocolTest_ViolationDetected.test`
+    (asserts the framework reports a FAIL on a wrong assertion). Each inlines its scenario,
+    loads the prebuilt lib + NED via `-l`/`-n`, and asserts the verdict line with `%contains`.
+    Validated: `opp_test gen` parses all three, and a generated case runs end-to-end to the
+    expected `PROTOCOLTEST ...: PASS` line.
+  - Full suite: **22 configs, 17 PASS + 5 intentional FAIL**, no errors.
+  - **Deferred (the opp_test / opp_ci CI *harness* itself):** wiring these `.test` cases into
+    INET's regression runner (Makefile/runner that links `libprotocoltest.so`), the
+    fingerprint hookup, and a golden-file CI check on `describe()` output. The `.test` files
+    are correct and runnable by hand; only the automated CI plumbing remains.
 
 - **Phase 8 — Description generator (§13). ✅ DONE (early, brought forward before Phase 5).**
   AST→English renderer, phrasebook, `describe()`. Qtenv panel / golden-file CI hook remain
