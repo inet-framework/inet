@@ -16,16 +16,21 @@
 namespace inet {
 namespace protocoltest {
 
-// Step kinds:
-//  Expect    -- advance when a matching event is observed (fail on deadline)
-//  Optional  -- advance on a matching event, or skip when the deadline passes
-//  ExpectNo  -- fail if a matching event occurs within the window; else advance
-//  Inject    -- fire a crafted packet (reactively), then advance
-//  Unordered -- a group of patterns that must all match, in any order
-//  AnyOf     -- a group of patterns; the first to match wins
-//  Repeat    -- a pattern that must match `count` times within its window
-//  Delivery  -- a "from" send correlated to a "to" receive of the same packet (treeId)
-enum class StepType { Expect, Optional, ExpectNo, Inject, Unordered, AnyOf, Repeat, Delivery };
+// Step kinds. The cardinality kinds count how many times a pattern matches; they
+// model a count range [min, max] (regex-quantifier style):
+//  Once         -- exactly 1: advance when a matching event is observed (fail on deadline)
+//  AtMostOnce   -- 0..1: advance on a matching event, or skip when the deadline passes
+//  Never        -- 0: fail if a matching event occurs within the window; else advance
+//  ExactlyTimes -- exactly n: advance when the nth matching event is observed
+//  Count        -- a greedy, window-bounded range [cardMin, cardMax] (cardMax < 0 =
+//                  unbounded): consume every match in the window, then require the
+//                  total to fall in range; a match beyond cardMax fails immediately.
+//                  Backs oneOrMoreTimes/anyNumberOfTimes/atLeastTimes/atMostTimes/betweenTimes.
+//  Inject       -- fire a crafted packet (reactively), then advance
+//  Unordered    -- a group of patterns that must all match, in any order
+//  AnyOf        -- a group of patterns; the first to match wins
+//  Delivery     -- a "from" send correlated to a "to" receive of the same packet (treeId)
+enum class StepType { Once, AtMostOnce, Never, ExactlyTimes, Count, Inject, Unordered, AnyOf, Delivery };
 
 //
 // A packet injection. When the engine reaches an inject step it resolves the target
@@ -54,12 +59,13 @@ class INET_API Injection
 };
 
 struct Step {
-    StepType type = StepType::Expect;
-    EventPattern pattern;              // Expect / Optional / ExpectNo / Repeat / Delivery "from"
+    StepType type = StepType::Once;
+    EventPattern pattern;              // Once / AtMostOnce / Never / ExactlyTimes / Count / Delivery "from"
     Injection injection;               // Inject
     std::vector<EventPattern> group;   // Unordered / AnyOf
     EventPattern pattern2;             // Delivery "to" (holds the delivery window in its within)
-    int count = 0;                     // Repeat
+    int count = 0;                     // ExactlyTimes
+    int cardMin = 0, cardMax = 0;      // Count: required occurrences [min, max]; max < 0 = unbounded
 };
 
 // Entry point of the fluent injection chain.
@@ -86,25 +92,42 @@ class INET_API ProtocolTest
     // (node/kind/layer/iface) but not its content predicate is a failure.
     ProtocolTest& strict() { strictMode = true; return *this; }
 
-    ProtocolTest& expect(const EventPattern& pattern)
+    // Exactly 1: advance when one matching event is observed (fail on deadline).
+    ProtocolTest& once(const EventPattern& pattern)
     {
-        steps.push_back(Step{StepType::Expect, pattern, {}, {}});
+        steps.push_back(Step{StepType::Once, pattern, {}, {}});
         return *this;
     }
 
-    // 0-or-1: match if it occurs within the window, otherwise skip and advance.
-    ProtocolTest& optional(const EventPattern& pattern)
+    // 0 or 1: match if it occurs within the window, otherwise skip and advance.
+    ProtocolTest& atMostOnce(const EventPattern& pattern)
     {
-        steps.push_back(Step{StepType::Optional, pattern, {}, {}});
+        steps.push_back(Step{StepType::AtMostOnce, pattern, {}, {}});
         return *this;
     }
 
-    // Negative: fail if a matching event occurs within the window, else advance.
-    ProtocolTest& expectNo(const EventPattern& pattern)
+    // 0: fail if a matching event occurs within the window, else advance.
+    ProtocolTest& never(const EventPattern& pattern)
     {
-        steps.push_back(Step{StepType::ExpectNo, pattern, {}, {}});
+        steps.push_back(Step{StepType::Never, pattern, {}, {}});
         return *this;
     }
+
+    // Exactly n: advance when the nth matching event is observed (fail on deadline).
+    ProtocolTest& exactlyTimes(int n, const EventPattern& pattern)
+    {
+        steps.push_back(Step{StepType::ExactlyTimes, pattern, {}, {}, {}, n});
+        return *this;
+    }
+
+    // Greedy, window-bounded cardinalities. Each consumes every matching event within
+    // the pattern's within() window, then requires the total in the given range; a
+    // match beyond the upper bound fails immediately. The count argument comes first.
+    ProtocolTest& oneOrMoreTimes(const EventPattern& pattern)             { return addCount(pattern, 1, -1); }  // 1..*
+    ProtocolTest& anyNumberOfTimes(const EventPattern& pattern)          { return addCount(pattern, 0, -1); }  // 0..*
+    ProtocolTest& atLeastTimes(int n, const EventPattern& pattern)       { return addCount(pattern, n, -1); }  // n..*
+    ProtocolTest& atMostTimes(int n, const EventPattern& pattern)        { return addCount(pattern, 0, n); }   // 0..n
+    ProtocolTest& betweenTimes(int a, int b, const EventPattern& pattern) { return addCount(pattern, a, b); }  // a..b
 
     // All patterns must match, in any order, before advancing. The group window is
     // the longest within() among its patterns.
@@ -121,13 +144,6 @@ class INET_API ProtocolTest
         return *this;
     }
 
-    // The pattern must match `count` times within its window.
-    ProtocolTest& repeat(const EventPattern& pattern, int count)
-    {
-        steps.push_back(Step{StepType::Repeat, pattern, {}, {}, {}, count});
-        return *this;
-    }
-
     // A packet matching `from` (a send) is then received matching `to` -- the same
     // packet (correlated by treeId) -- within `window`.
     ProtocolTest& delivery(const EventPattern& from, const EventPattern& to, double window)
@@ -141,6 +157,16 @@ class INET_API ProtocolTest
     ProtocolTest& inject(const Injection& injection)
     {
         steps.push_back(Step{StepType::Inject, {}, injection, {}});
+        return *this;
+    }
+
+  private:
+    ProtocolTest& addCount(const EventPattern& pattern, int cardMin, int cardMax)
+    {
+        Step step{StepType::Count, pattern, {}, {}};
+        step.cardMin = cardMin;
+        step.cardMax = cardMax;
+        steps.push_back(step);
         return *this;
     }
 };

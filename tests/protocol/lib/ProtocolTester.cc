@@ -108,7 +108,7 @@ void ProtocolTester::handleMessage(cMessage *msg)
         // Deadline expiry means different things per step kind.
         Step& step = program->steps[currentStep];
         switch (step.type) {
-            case StepType::Expect:
+            case StepType::Once:
                 decide(false, "deadline missed for step " + std::to_string(currentStep) + " [" + step.pattern.str() + "]");
                 break;
             case StepType::Unordered:
@@ -119,17 +119,25 @@ void ProtocolTester::handleMessage(cMessage *msg)
             case StepType::AnyOf:
                 decide(false, "anyOf step " + std::to_string(currentStep) + ": no alternative matched within the window");
                 break;
-            case StepType::Repeat:
-                decide(false, "repeat step " + std::to_string(currentStep) + ": " +
+            case StepType::ExactlyTimes:
+                decide(false, "exactlyTimes step " + std::to_string(currentStep) + ": " +
                               std::to_string(step.count - repeatRemaining) + " of " + std::to_string(step.count) +
                               " occurrences within the window [" + step.pattern.str() + "]");
+                break;
+            case StepType::Count:  // window closed: pass iff enough matches were seen (overflow already failed earlier)
+                if (cardCount >= step.cardMin)
+                    advance(simTime());
+                else
+                    decide(false, "count step " + std::to_string(currentStep) + ": " +
+                                  std::to_string(cardCount) + " occurrence(s), need at least " +
+                                  std::to_string(step.cardMin) + " [" + step.pattern.str() + "]");
                 break;
             case StepType::Delivery:
                 decide(false, "delivery step " + std::to_string(currentStep) +
                               ": the matching receive did not arrive within the window after the send");
                 break;
-            case StepType::ExpectNo:  // window passed with no violation -> success
-            case StepType::Optional:  // window passed with no match -> skip
+            case StepType::Never:       // window passed with no violation -> success
+            case StepType::AtMostOnce:  // window passed with no match -> skip
                 advance(simTime());
                 break;
             default:
@@ -150,12 +158,23 @@ void ProtocolTester::finish()
     if (decided)
         return;
 
-    // ExpectNo/Optional steps are satisfied by reaching end-of-sim without a
-    // violation/match, so skip any trailing run of them.
-    while (currentStep < program->steps.size() &&
-           (program->steps[currentStep].type == StepType::ExpectNo ||
-            program->steps[currentStep].type == StepType::Optional))
+    // Steps satisfied by reaching end-of-sim without a violation/match resolve as
+    // success: Never (no forbidden event), AtMostOnce (a skipped optional), and any
+    // Count whose accumulated occurrences already satisfy its range. The current
+    // step carries the live cardCount; trailing steps have observed nothing, so reset
+    // it to 0 as we walk past them.
+    while (currentStep < program->steps.size()) {
+        const Step& step = program->steps[currentStep];
+        bool satisfied = step.type == StepType::Never ||
+                         step.type == StepType::AtMostOnce ||
+                         (step.type == StepType::Count &&
+                          cardCount >= step.cardMin &&
+                          (step.cardMax < 0 || cardCount <= step.cardMax));
+        if (!satisfied)
+            break;
         currentStep++;
+        cardCount = 0;
+    }
 
     if (currentStep >= program->steps.size())
         decide(true, "all steps satisfied at end of simulation");
@@ -284,9 +303,9 @@ void ProtocolTester::enterStep()
     }
     Step& step = program->steps[currentStep];
     switch (step.type) {
-        case StepType::Expect:
-        case StepType::Optional:
-        case StepType::ExpectNo:
+        case StepType::Once:
+        case StepType::AtMostOnce:
+        case StepType::Never:
             // Wait for a matching event (see processMatch); the deadline resolves the
             // step if it expires (fail / skip / pass, depending on the kind).
             armDeadline(step.pattern.selHasWithin ? step.pattern.selWithin : simtime_t(0));
@@ -304,11 +323,17 @@ void ProtocolTester::enterStep()
                 advance(simTime());
             break;
         }
-        case StepType::Repeat:
+        case StepType::ExactlyTimes:
             repeatRemaining = step.count;
             armDeadline(step.pattern.selHasWithin ? step.pattern.selWithin : simtime_t(0));
             if (repeatRemaining <= 0)
                 advance(simTime());
+            break;
+        case StepType::Count:
+            // Greedy: accumulate matches for the whole window, then resolve at the
+            // deadline (see handleMessage). An overflow past cardMax fails earlier.
+            cardCount = 0;
+            armDeadline(step.pattern.selHasWithin ? step.pattern.selWithin : simtime_t(0));
             break;
         case StepType::Delivery:
             // Wait (unbounded) for the send; the window applies to send->receive and is
@@ -362,8 +387,8 @@ void ProtocolTester::processMatch(const PacketEvent& event)
     Step& step = program->steps[currentStep];
 
     switch (step.type) {
-        case StepType::Expect:
-        case StepType::Optional:
+        case StepType::Once:
+        case StepType::AtMostOnce:
             // Open-world: non-matching events are ignored.
             if (patternMatches(step.pattern, event)) {
                 runCaptures(step.pattern, event);
@@ -372,7 +397,7 @@ void ProtocolTester::processMatch(const PacketEvent& event)
                 advance(event.time);
             }
             // strict (closed-world): an in-scope packet that isn't the expected one fails.
-            else if (program->strictMode && step.type == StepType::Expect
+            else if (program->strictMode && step.type == StepType::Once
                      && !(step.pattern.selHasNotBefore && event.time < anchorTime + step.pattern.selNotBefore)
                      && step.pattern.scopeMatches(event)) {
                 decide(false, "strict: unexpected in-scope packet at t=" + event.time.str() +
@@ -389,11 +414,22 @@ void ProtocolTester::processMatch(const PacketEvent& event)
                 }
             }
             break;
-        case StepType::Repeat:
+        case StepType::ExactlyTimes:
             if (patternMatches(step.pattern, event)) {
                 runCaptures(step.pattern, event);
                 if (--repeatRemaining <= 0)
                     advance(event.time);
+            }
+            break;
+        case StepType::Count:
+            // Greedy: count every match; an overflow past cardMax fails immediately,
+            // otherwise keep consuming until the window closes (see handleMessage).
+            if (patternMatches(step.pattern, event)) {
+                runCaptures(step.pattern, event);
+                cardCount++;
+                if (step.cardMax >= 0 && cardCount > step.cardMax)
+                    decide(false, "count step " + std::to_string(currentStep) + ": more than " +
+                                  std::to_string(step.cardMax) + " occurrence(s) [" + step.pattern.str() + "]");
             }
             break;
         case StepType::Delivery:
@@ -411,7 +447,7 @@ void ProtocolTester::processMatch(const PacketEvent& event)
                 advance(event.time);
             }
             break;
-        case StepType::ExpectNo:
+        case StepType::Never:
             // A match within the window is a violation.
             if (patternMatches(step.pattern, event))
                 decide(false, "forbidden event occurred at t=" + event.time.str() +
