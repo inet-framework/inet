@@ -55,9 +55,9 @@ The Scene
 
 Many mobility models allow the user to define a cubic volume that the
 node cannot leave. The volume is configured by setting the
-:par:`constraintAreaX`, :par:`constraintAreaY`, :par:`constraintAreaZ`,
-:par:`constraintAreaWidth`, :par:`constraintAreaHeight`, and
-:par:`constraintAreaDepth` parameters.
+:par:`constraintAreaMinX`, :par:`constraintAreaMinY`,
+:par:`constraintAreaMinZ`, :par:`constraintAreaMaxX`,
+:par:`constraintAreaMaxY`, and :par:`constraintAreaMaxZ` parameters.
 
 If the :par:`initFromDisplayString` parameter is set, the initial position is
 taken from the display string. Otherwise, the position can be given in
@@ -87,8 +87,8 @@ Built-In Mobility Models
 List of Mobility Models
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-The following potentially list contains the mobility models available
-in INET. Nearly all of these models are single mobility models; group
+The following (possibly incomplete) list contains the mobility models
+available in INET. Nearly all of these models are single mobility models; group
 mobility can be implemented, for example, by combining other mobility models.
 
 Stationary
@@ -101,6 +101,9 @@ Stationary models only define position (and orientation), but no motion.
 
 -  :ned:`StaticGridMobility` places several mobility models in a
    rectangular grid.
+
+-  :ned:`StaticLinearMobility` places several mobility models evenly
+   spaced along a line.
 
 -  :ned:`StaticConcentricMobility` places several models in a set of
    concentric circles.
@@ -183,6 +186,37 @@ superposition and other ways.
    affected by the respective quantities and also the orientation of the
    referenced mobility.
 
+Satellite and Geographic
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+These models position and move nodes using geographic coordinates
+(latitude, longitude, altitude). They rely on a geographic coordinate
+system module in the network, referenced through their
+:par:`coordinateSystemModule` parameter. For global, Earth-scale scenarios
+this is typically a :ned:`Wgs84EcefGeographicCoordinateSystem`, whose scene
+frame is the geocentric WGS84/ECEF frame. Both models default to showing the
+current geographic position (latitude, longitude, altitude) above the node
+through the ``{geo_position}`` display-string directive.
+
+-  :ned:`SatelliteMobility` propagates a satellite orbit from a TLE
+   (two-line element) set using an embedded SGP4 model, and reports the
+   resulting sub-satellite position.
+
+-  :ned:`GnssTrackMobility` follows a recorded GNSS (WGS84) track read from
+   a CSV, GPX, or GeoJSON source, mapping the geographic positions into the
+   scene. It is useful for replaying real car, aircraft, or UAV routes.
+
+Stationary geographic nodes, such as ground stations, do not need a
+dedicated model: the ordinary :ned:`StationaryMobility` accepts geographic
+positioning through its :par:`coordinateSystemModule` together with the
+:par:`initialLatitude`, :par:`initialLongitude`, and :par:`initialAltitude`
+parameters.
+
+To place a *local* scene at a geographic anchor (so a terrestrial scenario,
+e.g. a car or a UAV moving over a small area, can sit anywhere on the globe
+while its mobility model keeps using small local scene coordinates), use a
+:ned:`Wgs84AnchoredGeographicCoordinateSystem` as the coordinate system.
+
 .. _ug:sec:mobility:more-information-on-some-mobility-models:
 
 More Information on Some Mobility Models
@@ -238,7 +272,7 @@ of the speed of the node at the :math:`n`\ th time step be :math:`s_n` and
 
 .. math::
 
-   d_{n+1} = \alpha s_n + (1 - \alpha) \bar{d} + \sqrt{(1-\alpha^2)} d_{x_n}
+   d_{n+1} = \alpha d_n + (1 - \alpha) \bar{d} + \sqrt{(1-\alpha^2)} d_{x_n}
 
 where :math:`\bar{s}` and :math:`\bar{d}` are constants representing the
 mean value of speed and direction as :math:`n \to \infty`; and
@@ -276,16 +310,19 @@ one used in :raw-latex:`\cite{Perkins99optimizedsmooth}`.
    the wall at the same angle; in our simulated world, there is little
    other choice."
 
-This implementation can be parameterized a bit more, via the
-:par:`changeInterval`, :par:`changeAngleBy`, and :par:`changeSpeedBy`
-parameters. The parameters described above correspond to the following
-settings:
+This implementation can be parameterized further, via the
+:par:`changeInterval` and :par:`angleDelta` parameters (and the
+:par:`speed` parameter, which can be given as a variate). The parameters
+described above correspond to the following settings:
 
 -  changeInterval = normal(5, 0.1)
 
--  changeAngleBy = normal(0, 30)
+-  angleDelta = normal(0, 30)
 
 -  speed = normal(avgSpeed, 0.01)
+
+3D (spatial) movement is also supported, via the :par:`rotationAxisAngle`
+parameter.
 
 ChiangMobility
 ^^^^^^^^^^^^^^
@@ -312,6 +349,43 @@ probability that the state changes from :math:`i` to :math:`j`:
      0.3 & 0 & 0.7
    \end{array}
    \right)
+
+SatelliteMobility
+^^^^^^^^^^^^^^^^^
+
+:ned:`SatelliteMobility` models the motion of an Earth-orbiting satellite.
+The orbit is given as a TLE (two-line element) set, the standard format
+published for tracked objects, and is propagated with an embedded SGP4
+analytical model. At each update the model computes the satellite state in
+the TEME inertial frame, rotates it to the Earth-fixed frame using the
+Greenwich sidereal time, and converts it to WGS84 geodetic coordinates
+(latitude, longitude, altitude), which are finally mapped to the scene by
+the :ned:`Wgs84EcefGeographicCoordinateSystem`.
+
+The TLE data is supplied as raw text in the :par:`tleData` parameter,
+typically loaded with ``readFile("satellites.tle")``. When the data
+contains more than one object, the satellite is selected by
+:par:`satelliteIndex`, :par:`satelliteName`, or
+:par:`satelliteCatalogNumber`. The :par:`epoch` parameter is the absolute
+UTC time (ISO-8601, e.g. ``2026-06-02T00:00:00Z``) mapped to simulation
+time zero; if left empty, the satellite's own TLE epoch is used. The
+:par:`attitudeMode` parameter controls the body orientation by aiming the
+body +X axis: ``earth_fixed`` (held fixed in the rotating ECEF frame),
+``star_fixed`` (held fixed in the inertial frame, i.e. star-pointing),
+``nadir`` (toward the Earth center), ``zenith`` (radially outward), or
+``velocity`` (along the velocity vector).
+
+Each satellite is an ordinary network node with a :ned:`SatelliteMobility`
+submodule. In a multi-satellite scenario the nodes typically share their
+settings (TLE data, update interval, attitude) via a wildcard, while the
+TLE selection (and, if needed, the epoch) is set individually per node.
+
+.. note::
+
+   The Earth-orientation model is GMST-only: nutation, polar motion, and
+   the UT1-UTC difference are neglected. This yields a ground-track error
+   on the order of tens of meters, which is adequate for network simulation
+   but not for precision orbit determination.
 
 .. _ug:sec:mobility:replaying-trace-files:
 

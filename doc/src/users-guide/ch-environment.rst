@@ -169,6 +169,24 @@ OMNeT++ simple module:
 -  :ned:`OsgGeographicCoordinateSystem` provides an accurate mapping
    using the external library.
 
+-  :ned:`Wgs84EcefGeographicCoordinateSystem` maps geographic coordinates to a
+   geocentric (Earth-Centered, Earth-Fixed) scene based on the WGS84
+   ellipsoid, without any external dependency. The scene origin is the
+   center of the Earth, the Z axis points to the geographic North pole,
+   and the X axis lies in the equatorial plane at the prime meridian. It
+   is the coordinate system used for satellite scenarios, where node
+   positions span the whole globe.
+
+-  :ned:`Wgs84AnchoredGeographicCoordinateSystem` maps geographic coordinates
+   to a *local* tangent-plane scene pinned to an anchor point
+   (:par:`sceneLatitude`, :par:`sceneLongitude`, :par:`sceneAltitude`) and an
+   optional orientation (:par:`sceneHeading`, :par:`sceneElevation`,
+   :par:`sceneBank`), using the WGS84 ellipsoid and no external dependency.
+   Scene coordinates stay small and centered on the anchor; with the default
+   :par:`sceneHeading` of 90 degrees the X axis points east, the Y axis points
+   south, and the Z axis points up. This is convenient for local scenarios that
+   may be placed anywhere on the globe.
+
 In order to use geographic coordinates in a simulation, a geographic
 coordinate system module must be included in the network. The desired
 physical environment module and mobility modules must be configured

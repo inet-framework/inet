@@ -88,8 +88,8 @@ Color, fading time and other graphical properties can be changed with
 parameters of the visualizer.
 
 By default, all packets and nodes are considered for the visualization.
-This selection can be narrowed with the visualizer's packetFilter and
-nodeFilter parameters.
+This selection can be narrowed with the visualizer's :par:`packetFilter` and
+:par:`nodeFilter` parameters.
 
 .. _ug:sec:visualization:network-path-activity:
 
@@ -119,8 +119,8 @@ and other graphical properties can be changed with parameters of the
 visualizer.
 
 By default, all packets and nodes are considered for the visualization.
-This selection can be narrowed with the visualizer's packetFilter and
-nodeFilter parameters.
+This selection can be narrowed with the visualizer's :par:`packetFilter` and
+:par:`nodeFilter` parameters.
 
 .. _ug:sec:visualization:data-link-activity:
 
@@ -132,7 +132,7 @@ Data link activity (layer 2 traffic) can be visualized by adding a
 :ned:`IntegratedVisualizer` module is also an option, because it
 includes a :ned:`DataLinkVisualizer` module. Data link visualization is
 disabled by default, it can be enabled by setting the visualizer's
-displayLinks parameter to true.
+:par:`displayLinks` parameter to true.
 
 :ned:`DataLinkVisualizer` currently observes packets that pass through
 the data link layer (i.e. carry data from/to higher layers), but not
@@ -385,7 +385,7 @@ like speed and direction.
 Node mobility can be visualized by the :ned:`MobilityVisualizer` module
 (included in the network as part of :ned:`IntegratedVisualizer`). By default,
 mobility visualization is enabled, but it can be disabled by setting the
-:par:`displayMovements` parameter to false.
+:par:`displayMobility` parameter to false.
 
 By default, all mobilities are considered for the visualization. This selection
 can be narrowed with the visualizer's :par:`moduleFilter` parameter.
@@ -400,12 +400,110 @@ The visualizer has several important features:
   point is the node, and its direction coincides with the movement's direction.
   The arrow's length is proportional to the node's speed.
 
-- Orientation Arc: Node orientation is represented by an arc whose size is
-  specified by the :par:`orientationArcSize` parameter. This value is the
-  relative size of the arc compared to a full circle. The default arc size is
-  0.25, meaning a quarter of a circle.
+- Orientation Cone: Node orientation is represented as a 3D cone whose axis
+  points along the node's facing direction, drawn as its (projected) base disc
+  plus two side lines. The cone's angular width relative to a full circle is set
+  by the :par:`orientationPieSize` parameter (default 0.2) and its on-screen
+  radius by :par:`orientationPieRadius`. As a depth cue, the base disc is filled
+  with :par:`orientationFillColorUp` when the cone points toward the viewer and
+  with :par:`orientationFillColorDown` when it points away.
 
 These features are disabled by default but can be enabled by setting the
 visualizer's :par:`displayMovementTrails`, :par:`displayVelocities`, and
 :par:`displayOrientations` parameters to true.
+
+On an equirectangular world map (see :ref:`ug:sec:visualization:geographic-map`),
+the velocity arrow and the orientation cone are direction indicators, and their
+appearance under the map's distortion is controlled by the
+:par:`velocityProjection` and :par:`orientationProjection` parameters:
+``projected`` follows the full map distortion, ``trueLength`` keeps the true
+length along the (sheared) map heading, and ``isometric`` preserves both true
+heading and length. These parameters have no effect without a geographic
+projection.
+
+.. _ug:sec:visualization:geographic-scenarios:
+
+Visualizing Satellite and Geographic Scenarios
+----------------------------------------------
+
+INET can run global, map-based scenarios in which network nodes (satellites,
+ground stations) are positioned by geographic coordinates in a geocentric
+scene (see :ned:`Wgs84EcefGeographicCoordinateSystem`). Because such a scene
+spans the whole Earth, the default 2D scene view is not useful; INET provides
+several dedicated canvas visualizers for these scenarios: a world map
+background, a satellite visibility footprint overlay, and a sky view. They all
+share a common map projection so that the nodes drawn by the ordinary
+visualizers (node icons, mobility trails, etc.) line up with the map.
+
+.. _ug:sec:visualization:geographic-map:
+
+Visualizing the World Map
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The :ned:`GeoMapCanvasVisualizer` draws a 2D world map on the canvas: a
+background map image overlaid with an optional latitude/longitude graticule,
+and an optional absolute UTC wall-clock in the lower-left corner. The map
+image is configured with the :par:`mapImage` parameter (an image name looked
+up on the image path), and the visible window is given by the
+:par:`minLatitude`, :par:`maxLatitude`, :par:`minLongitude`, and
+:par:`maxLongitude` parameters, sized to :par:`mapWidth` by :par:`mapHeight`
+pixels. The map uses an equirectangular (plate-carrée) projection, so the
+:par:`mapImage` must be an equirectangular rendering of that window. The
+wall-clock is enabled by setting the :par:`epoch` parameter to the absolute
+UTC time (ISO-8601) that corresponds to simulation time zero.
+
+Crucially, this visualizer also configures the shared canvas projection from
+the same window, so that every other canvas visualizer that draws scene
+coordinates — the node icons of the :ned:`NetworkNodeVisualizer`, the markers,
+movement trails, velocity and orientation indicators of the
+:ned:`MobilityVisualizer`, and the footprint overlay below — appears at the
+correct place on the map. The map visualizer itself does not draw any per-node
+markers.
+
+When the window covers only part of the globe (a regional map), the
+:par:`clipFigures` parameter (enabled by default) clips those other visualizers'
+figures — node icons, mobility markers and trails, links, and routes — to the
+map area, so nothing is drawn projected outside the visible window.
+
+.. _ug:sec:visualization:geographic-horizon:
+
+Visualizing Satellite Visibility Footprints
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The :ned:`GeoHorizonCanvasVisualizer` draws the visibility footprint of each
+tracked node on the map: the area on the Earth's surface from which the node
+is seen at or above a configurable elevation angle. This is the region within
+which a satellite is in view of a ground station. The footprint is recomputed
+every refresh from the node's current position.
+
+The nodes to track are selected with the :par:`moduleFilter` parameter, and
+their geographic positions are computed through the geocentric/ECEF coordinate
+system given by :par:`coordinateSystemModule`. The visualizer takes its map
+window from the map visualizer named by its :par:`mapVisualizer` parameter, so
+the footprint automatically lines up with the background and needs no separate
+window configuration. The minimum elevation angle is set with :par:`elevationMask`.
+
+.. _ug:sec:visualization:sky-view:
+
+Visualizing the Sky View
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The :ned:`GeoSkyViewCanvasVisualizer` draws an azimuth/elevation polar
+plot, the "sky view", next to each observer node, showing where the target
+nodes currently are in the observer's sky. It is primarily intended for
+ground stations observing satellites.
+
+The nodes that get a plot are selected with the :par:`observerFilter`
+parameter, and the nodes drawn in each plot with the :par:`targetFilter`
+parameter. For every observer-target pair, the visualizer computes the
+topocentric look angles (azimuth, elevation, and range) from their geographic
+positions.
+
+In the plot, the center is the zenith (90 degrees elevation) and the outer rim
+is the horizon (0 degrees); North is up and East is to the right. Concentric
+rings mark the elevation, the N/E/S/W cardinal directions are drawn, and the
+band below the :par:`elevationMask` parameter is shaded with a translucent
+mask. Each visible target is shown as a colored dot, optionally with its name
+and a fading "sky trail" of its recent path; a target that drops below the
+horizon is hidden.
 
