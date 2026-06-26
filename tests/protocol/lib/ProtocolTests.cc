@@ -82,6 +82,28 @@ Define_ProtocolTest(tcp_handshake_seq_bad)
                   .within(0.5));
 }
 
+// Phase 6 fault injection: a PacketTap spliced on the wire drops host1's first TCP data
+// segment, so host1's TCP retransmits the same segment (same sequence number) after the
+// retransmission timeout. The tester only observes -- the drop is done by the tap.
+Define_ProtocolTest(tcp_retransmit)
+{
+    return ProtocolTest("tcp_retransmit")
+        // host1 sends the data segment after the handshake; remember its sequence number.
+        .once(on("host1").sentToLower().layer(Layer::Transport)
+                  .match("tcp.destPort == 1000 && tcp.synBit == false")
+                  .after(0.15)
+                  .capture("dataSeq", "tcp.sequenceNo")
+                  .describe("the data segment")
+                  .within(0.3))
+        // the tap drops it on the wire, so host1 retransmits the same segment (same
+        // sequence number) once the retransmission timer fires.
+        .once(on("host1").sentToLower().layer(Layer::Transport)
+                  .match("tcp.sequenceNo == {dataSeq} && tcp.synBit == false")
+                  .notBefore(0.3)
+                  .describe("the retransmitted data segment (same sequence number)")
+                  .within(5.0));
+}
+
 // Time-scheduled injection: craft an IP/UDP datagram and push it up host2's Ethernet
 // interface as if it arrived from the wire (the interface's inbound seam, as INET
 // emulation uses). host2 runs a UdpEchoApp, so it echoes the datagram back; the program
