@@ -12,6 +12,9 @@ import inet.visualizer.contract.IDataLinkVisualizer;
 import inet.visualizer.contract.IEnergyStorageVisualizer;
 import inet.visualizer.contract.IFailureProtectionConfigurationVisualizer;
 import inet.visualizer.contract.IGateScheduleVisualizer;
+import inet.visualizer.contract.IGeoHorizonVisualizer;
+import inet.visualizer.contract.IGeoMapVisualizer;
+import inet.visualizer.contract.IGeoSkyViewVisualizer;
 import inet.visualizer.contract.IIeee80211Visualizer;
 import inet.visualizer.contract.IInfoVisualizer;
 import inet.visualizer.contract.IIntegratedVisualizer;
@@ -73,6 +76,11 @@ module IntegratedMultiCanvasVisualizer like IIntegratedVisualizer
         int numFailureProtectionConfigurationVisualizers = default(1);
         int numStreamRedundancyConfigurationVisualizers = default(1);
         int numChannelVisualizers = default(1);
+        // the geographic visualizers are opt-in (0 by default): a GeoMap would otherwise hijack the
+        // shared canvas projection, and GeoSkyView/GeoHorizon require a coordinate system to be set
+        int numGeoMapVisualizers = default(0);
+        int numGeoSkyViewVisualizers = default(0);
+        int numGeoHorizonVisualizers = default(0);
         *.visualizationTargetModule = default("^.^");
         *.visualizationSubjectModule = default("^.^");
         *.networkNodeVisualizerModule = default(absPath(".networkNodeVisualizer[0]"));
@@ -180,6 +188,21 @@ module IntegratedMultiCanvasVisualizer like IIntegratedVisualizer
         channelVisualizer[numChannelVisualizers]: <default("ChannelCanvasVisualizer")> like IChannelVisualizer {
             parameters:
                 @display("p=750,300");
+        }
+        geoMapVisualizer[numGeoMapVisualizers]: <default("")> like IGeoMapVisualizer {
+            parameters:
+                @display("p=750,400");
+        }
+        geoSkyViewVisualizer[numGeoSkyViewVisualizers]: <default("")> like IGeoSkyViewVisualizer {
+            parameters:
+                @display("p=750,500");
+        }
+        geoHorizonVisualizer[numGeoHorizonVisualizers]: <default("")> like IGeoHorizonVisualizer {
+            parameters:
+                // pair each horizon overlay with the map of the same index; the scalar default
+                // "^.geoMapVisualizer" would not resolve against this vector submodule
+                mapVisualizer = default("^.geoMapVisualizer[" + string(index) + "]");
+                @display("p=750,600");
         }
 }
 

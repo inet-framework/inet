@@ -12,6 +12,9 @@ import inet.visualizer.contract.IDataLinkVisualizer;
 import inet.visualizer.contract.IEnergyStorageVisualizer;
 import inet.visualizer.contract.IFailureProtectionConfigurationVisualizer;
 import inet.visualizer.contract.IGateScheduleVisualizer;
+import inet.visualizer.contract.IGeoHorizonVisualizer;
+import inet.visualizer.contract.IGeoMapVisualizer;
+import inet.visualizer.contract.IGeoSkyViewVisualizer;
 import inet.visualizer.contract.IIeee80211Visualizer;
 import inet.visualizer.contract.IInfoVisualizer;
 import inet.visualizer.contract.IIntegratedVisualizer;
@@ -157,6 +160,18 @@ module IntegratedCanvasVisualizer like IIntegratedVisualizer
         channelVisualizer: <default("ChannelCanvasVisualizer")> like IChannelVisualizer if typename != "" {
             parameters:
                 @display("p=750,300");
+        }
+        geoMapVisualizer: <default("")> like IGeoMapVisualizer if typename != "" {
+            parameters:
+                @display("p=750,400");
+        }
+        geoSkyViewVisualizer: <default("")> like IGeoSkyViewVisualizer if typename != "" {
+            parameters:
+                @display("p=750,500");
+        }
+        geoHorizonVisualizer: <default("")> like IGeoHorizonVisualizer if typename != "" {
+            parameters:
+                @display("p=750,600");
         }
 }
 
