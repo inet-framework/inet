@@ -406,6 +406,7 @@
 /examples/mobility/,                 -f omnetpp.ini -c RandomWaypointMobility1 -r 0, 5000s,          5cb8-f4a6/tplx;0000-0000/~tNl;0000-0000/~tND;d6d8-2a17/tyf, PASS,
 /examples/mobility/,                 -f omnetpp.ini -c RandomWaypointMobility2 -r 0, 5000s,          089c-8dea/tplx;0000-0000/~tNl;0000-0000/~tND;9f55-6716/tyf, PASS,
 /examples/mobility/,                 -f omnetpp.ini -c RectangleMobility -r 0,      10000s,          4860-beb1/tplx;0000-0000/~tNl;0000-0000/~tND;6e6d-7185/tyf, PASS,
+/examples/mobility/,                 -f omnetpp.ini -c SatelliteMobility -r 0,     3600s,           6a9a-f606/tplx;0000-0000/~tNl;0000-0000/~tND;772e-b194/tyf, PASS,         # SGP4 satellites + GNSS-track aircraft (sim-time-limit shortened from the example's 48h)
 /examples/mobility/,                 -f omnetpp.ini -c StaticGridMobility -r 0,     0s,              0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND;0000-0000/tyf, PASS,         # (zero time simulated)
 /examples/mobility/,                 -f omnetpp.ini -c StationaryMobility -r 0,     0s,              0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND;0000-0000/tyf, PASS,         # (zero time simulated)
 /examples/mobility/,                 -f omnetpp.ini -c SuperpositioningMobility,    10s,             4700-bd90/tplx;0000-0000/~tNl;0000-0000/~tND;8e2e-8660/tyf, PASS,

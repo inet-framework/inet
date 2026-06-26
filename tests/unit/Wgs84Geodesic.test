@@ -1,0 +1,89 @@
+%description:
+Test the great-circle geodesic helpers in inet::wgs84 (greatCircleDistance and
+interpolateGreatCircle), including pole-crossing and antimeridian cases.
+
+%includes:
+#include <cmath>
+#include "inet/common/geometry/common/Wgs84.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::wgs84;
+
+static int failures = 0;
+
+static void check(bool ok, const char *what)
+{
+    if (!ok) {
+        EV << "FAILED: " << what << endl;
+        failures++;
+    }
+}
+
+static bool close(double a, double b, double tol) { return std::fabs(a - b) <= tol; }
+
+static GeoCoord G(double latDeg, double lonDeg, double altM = 0)
+{
+    return GeoCoord(deg(latDeg), deg(lonDeg), m(altM));
+}
+
+%activity:
+
+const double quarter = MEAN_RADIUS * M_PI / 2; // distance spanning 90 degrees of arc
+
+// distance: identical points -> 0
+check(close(greatCircleDistance(G(0, 0), G(0, 0)), 0, 1e-6), "distance of a point to itself is zero");
+
+// distance: a quarter of the equator (0,0) -> (0,90)
+check(close(greatCircleDistance(G(0, 0), G(0, 90)), quarter, 1.0), "equator quarter distance");
+
+// distance: a quarter along a meridian (0,0) -> (90,0)
+check(close(greatCircleDistance(G(0, 0), G(90, 0)), quarter, 1.0), "meridian quarter distance");
+
+// distance is symmetric
+check(close(greatCircleDistance(G(10, 20), G(-30, 140)), greatCircleDistance(G(-30, 140), G(10, 20)), 1e-6), "distance is symmetric");
+
+// interpolation endpoints
+{
+    GeoCoord a = G(12, 34, 100), b = G(-56, 78, 900);
+    GeoCoord p0 = interpolateGreatCircle(a, b, 0.0);
+    GeoCoord p1 = interpolateGreatCircle(a, b, 1.0);
+    check(close(p0.latitude.get<deg>(), 12, 1e-6) && close(p0.longitude.get<deg>(), 34, 1e-6) && close(p0.altitude.get<m>(), 100, 1e-6), "interpolation at t=0 returns a");
+    check(close(p1.latitude.get<deg>(), -56, 1e-6) && close(p1.longitude.get<deg>(), 78, 1e-6) && close(p1.altitude.get<m>(), 900, 1e-6), "interpolation at t=1 returns b");
+}
+
+// short-arc midpoint along the equator: (0,0) -> (0,90) midpoint is (0,45)
+{
+    GeoCoord mid = interpolateGreatCircle(G(0, 0), G(0, 90), 0.5);
+    check(close(mid.latitude.get<deg>(), 0, 1e-6) && close(mid.longitude.get<deg>(), 45, 1e-6), "equator midpoint is (0,45)");
+}
+
+// altitude is interpolated linearly
+{
+    GeoCoord mid = interpolateGreatCircle(G(0, 0, 0), G(0, 90, 1000), 0.5);
+    check(close(mid.altitude.get<m>(), 500, 1e-6), "altitude interpolated linearly");
+}
+
+// pole-crossing: (80,0) -> (80,180) goes over the north pole; midpoint is at lat 90
+{
+    GeoCoord mid = interpolateGreatCircle(G(80, 0), G(80, 180), 0.5);
+    check(close(mid.latitude.get<deg>(), 90, 1e-4), "pole-crossing midpoint reaches the pole");
+}
+
+// antimeridian: (10,170) -> (10,-170) takes the short way across +/-180, not back across 0
+{
+    GeoCoord mid = interpolateGreatCircle(G(10, 170), G(10, -170), 0.5);
+    check(close(std::fabs(mid.longitude.get<deg>()), 180, 1e-4), "antimeridian midpoint stays near +/-180 longitude");
+    check(mid.latitude.get<deg>() >= 10 - 1e-6, "antimeridian great circle bulges toward the pole");
+}
+
+EV << "failures=" << failures << endl;
+EV << "done" << endl;
+
+%contains: stdout
+failures=0
+done
+
+%not-contains: stdout
+FAILED

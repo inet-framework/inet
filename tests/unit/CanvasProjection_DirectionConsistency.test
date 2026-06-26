@@ -1,0 +1,195 @@
+%description:
+Verify that CanvasProjection projects direction (tangent) vectors consistently with how it projects
+points: the optional equirectangular projection is applied to the direction FIRST, and the view
+rotation/scale only AFTER that (translation drops out for directions).
+
+TEST 1 (order, exact) proves the "rotate/scale after project" order: the PROJECTED direction
+computed with a view rotation R and scale S must equal R,S applied to the PROJECTED direction
+computed with no view transform. This isolates and verifies the order independently of the
+projection magnitude. TEST 2 checks that the PROJECTED magnitude tracks the numerical Jacobian of
+computeCanvasPoint (exact WGS84 ellipsoid + altitude). TEST 3 checks the conformal/isometric
+properties of the three modes. The equirectangular logic now lives in EquirectangularProjection,
+attached to CanvasProjection as its first projection stage.
+
+%includes:
+#include <cmath>
+#include "inet/common/geometry/common/CanvasProjection.h"
+#include "inet/common/geometry/common/EquirectangularProjection.h"
+#include "inet/common/geometry/common/Wgs84.h"
+
+%global:
+
+using namespace inet;
+
+// attaches an equirectangular map projection (the window) to a CanvasProjection and sets the matching
+// affine, mirroring EquirectangularProjection::configureCanvasProjection() but without a canvas
+static void attachEquirect(CanvasProjection& cp, double minLat, double maxLat, double minLon, double maxLon, double mapW, double mapH)
+{
+    EquirectangularProjection proj;
+    proj.setWindow(minLat, maxLat, minLon, maxLon, mapW, mapH);
+    cp.setMapProjection(new EquirectangularProjection(proj));
+    double lonSpan = proj.getLongitudeSpan(), latSpan = maxLat - minLat;
+    cp.setScale(cFigure::Point(mapW / lonSpan, -mapH / latSpan));
+    cp.setTranslation(cFigure::Point(-minLon * mapW / lonSpan, maxLat * mapH / latSpan));
+}
+
+static int failures = 0;
+
+static void check(bool ok, const char *what)
+{
+    if (!ok) {
+        EV << "FAILED: " << what << endl;
+        failures++;
+    }
+}
+
+static bool close(double a, double b, double tol) { return std::fabs(a - b) <= tol; }
+static double len(const cFigure::Point& a) { return std::sqrt(a.x * a.x + a.y * a.y); }
+
+// relative-error comparison of two canvas vectors
+static bool closeVec(const cFigure::Point& a, const cFigure::Point& b, double tol)
+{
+    double dx = a.x - b.x, dy = a.y - b.y;
+    double d = std::sqrt(dx * dx + dy * dy);
+    double n = len(b);
+    return d <= tol * (n > 1e-9 ? n : 1.0);
+}
+
+// apply a view rotation R and scale S to a 2D (post-projection) vector, the way computeCanvasPoint
+// does to the projected scene coordinate (translation drops out for a direction)
+static cFigure::Point rotateScale(const cFigure::Point& v, const RotationMatrix& rotation, const cFigure::Point& scale)
+{
+    Coord r = rotation.rotateVector(Coord(v.x, v.y, 0));
+    return cFigure::Point(r.x * scale.x, r.y * scale.y);
+}
+
+static Coord ecefOf(double lat, double lon, double alt)
+{
+    return wgs84::geodeticToEcef(GeoCoord(deg(lat), deg(lon), m(alt)));
+}
+
+// central finite difference of computeCanvasPoint along dir => numerical Jacobian applied to dir
+static cFigure::Point fd(const CanvasProjection& cp, const Coord& p, const Coord& dir, double L)
+{
+    cFigure::Point a = cp.computeCanvasPoint(p + dir * L);
+    cFigure::Point b = cp.computeCanvasPoint(p - dir * L);
+    return cFigure::Point((a.x - b.x) / (2 * L), (a.y - b.y) / (2 * L));
+}
+
+%activity:
+
+double pts[][3] = {{0, 0, 0}, {45, 20, 500000}, {-30, -100, 0}, {60, 170, 800000}, {12, -3, 0}};
+int np = sizeof(pts) / sizeof(pts[0]);
+
+// ---- TEST 1: order (exact). The PROJECTED direction with a view rotation/scale must equal the
+// rotation/scale applied to the PROJECTED direction WITHOUT a view transform - i.e. the rotation and
+// scale are applied AFTER the equirectangular projection. This holds for any point/direction/altitude
+// because the (identical) equirectangular Jacobian part cancels out. ----
+{
+    CanvasProjection base; // equirectangular projection only, no view transform
+    base.setMapProjection(new EquirectangularProjection());
+    base.setRotation(RotationMatrix());
+    base.setScale(cFigure::Point(1, 1));
+    base.setTranslation(cFigure::Point(0, 0));
+
+    RotationMatrix rots[] = {RotationMatrix(),
+                             RotationMatrix(EulerAngles(deg(0), deg(0), deg(35))),     // in-plane spin
+                             RotationMatrix(EulerAngles(deg(25), deg(40), deg(15)))};  // general 3D tilt
+    cFigure::Point scales[] = {cFigure::Point(2, -2), cFigure::Point(1.5, -3), cFigure::Point(1, 1)};
+
+    for (int i = 0; i < np; i++) {
+        Coord p = ecefOf(pts[i][0], pts[i][1], pts[i][2]);
+        GeoCoord g{deg(pts[i][0]), deg(pts[i][1]), m(pts[i][2])};
+        Coord E = wgs84::enuVectorToEcef(g, Coord(1, 0, 0));
+        Coord N = wgs84::enuVectorToEcef(g, Coord(0, 1, 0));
+        Coord U = wgs84::enuVectorToEcef(g, Coord(0, 0, 1));
+        Coord dirs[] = {E, N, U, E * 0.6 + N * 0.8, E * 0.5 + N * 0.5 + U * 0.7};
+        for (auto& d : dirs) {
+            cFigure::Point noView = base.computeCanvasDirection(p, d, CanvasProjection::DIRECTION_PROJECTED);
+            for (auto& rotation : rots) {
+                for (auto& scale : scales) {
+                    CanvasProjection cp;
+                    cp.setMapProjection(new EquirectangularProjection());
+                    cp.setRotation(rotation);
+                    cp.setScale(scale);
+                    cp.setTranslation(cFigure::Point(7, 9)); // must not affect the direction
+                    cFigure::Point withView = cp.computeCanvasDirection(p, d, CanvasProjection::DIRECTION_PROJECTED);
+                    check(closeVec(withView, rotateScale(noView, rotation, scale), 1e-9),
+                          "view rotation/scale is applied AFTER the equirectangular projection (and translation drops out)");
+                }
+            }
+        }
+    }
+}
+
+// ---- TEST 2: exact magnitude consistency with the point pipeline. The PROJECTED direction equals
+// the numerical Jacobian of computeCanvasPoint (WGS84 ellipsoid + altitude), for every point
+// (including 500/800 km altitude) and direction, under an identity view rotation (where the dropped
+// vertical/up component cannot affect canvas x/y). ----
+{
+    const double mapW = 720, mapH = 360, minLon = -180, maxLon = 180, minLat = -90, maxLat = 90;
+    CanvasProjection cp;
+    attachEquirect(cp, minLat, maxLat, minLon, maxLon, mapW, mapH);
+
+    for (int i = 0; i < np; i++) {
+        Coord p = ecefOf(pts[i][0], pts[i][1], pts[i][2]);
+        GeoCoord g{deg(pts[i][0]), deg(pts[i][1]), m(pts[i][2])};
+        Coord E = wgs84::enuVectorToEcef(g, Coord(1, 0, 0));
+        Coord N = wgs84::enuVectorToEcef(g, Coord(0, 1, 0));
+        Coord U = wgs84::enuVectorToEcef(g, Coord(0, 0, 1));
+        Coord dirs[] = {E, N, U, E * 0.6 + N * 0.8, E * 0.5 + N * 0.5 + U * 0.7};
+        for (auto& d : dirs) {
+            cFigure::Point analytic = cp.computeCanvasDirection(p, d, CanvasProjection::DIRECTION_PROJECTED);
+            check(closeVec(analytic, fd(cp, p, d, 1000), 1e-4),
+                  "PROJECTED direction equals the WGS84 numerical Jacobian of computeCanvasPoint (ellipsoid + altitude)");
+        }
+    }
+}
+
+// ---- TEST 3: properties of the three modes (standard world map, identity rotation). ----
+{
+    const double mapW = 720, mapH = 360, minLon = -180, maxLon = 180, minLat = -90, maxLat = 90;
+    CanvasProjection cp;
+    attachEquirect(cp, minLat, maxLat, minLon, maxLon, mapW, mapH);
+    auto eastAt = [&](double lat) { return wgs84::enuVectorToEcef(GeoCoord(deg(lat), deg(0), m(0)), Coord(1, 0, 0)); };
+    auto northAt = [&](double lat) { return wgs84::enuVectorToEcef(GeoCoord(deg(lat), deg(0), m(0)), Coord(0, 1, 0)); };
+
+    // ISOMETRIC: on-screen length per true meter is the SAME at the equator and at 60 deg (global scale)
+    double isoLen0 = len(cp.computeCanvasDirection(ecefOf(0, 0, 0), eastAt(0), CanvasProjection::DIRECTION_ISOMETRIC));
+    double isoLen60 = len(cp.computeCanvasDirection(ecefOf(60, 0, 0), eastAt(60), CanvasProjection::DIRECTION_ISOMETRIC));
+    check(close(isoLen0, isoLen60, 1e-6 * isoLen0), "ISOMETRIC length is latitude-independent (isometric)");
+
+    // PROJECTED: east stretches toward the poles by 1/((N+h)*cos lat) - i.e. ~1/cos(lat) with the
+    // WGS84 prime-vertical-radius correction (non-isometric)
+    double prLen0 = len(cp.computeCanvasDirection(ecefOf(0, 0, 0), eastAt(0), CanvasProjection::DIRECTION_PROJECTED));
+    double prLen60 = len(cp.computeCanvasDirection(ecefOf(60, 0, 0), eastAt(60), CanvasProjection::DIRECTION_PROJECTED));
+    auto primeVertical = [&](double latDeg) { double s = std::sin(latDeg * M_PI / 180); return wgs84::SEMI_MAJOR_AXIS / std::sqrt(1 - wgs84::ECCENTRICITY_SQUARED * s * s); };
+    double expectedRatio = (primeVertical(0) / primeVertical(60)) / std::cos(60 * M_PI / 180);
+    check(close(prLen60 / prLen0, expectedRatio, 1e-4), "PROJECTED east stretches by 1/((N+h)*cos lat) (~1/cos lat with WGS84 correction)");
+
+    // ISOMETRIC: the east/north right angle is preserved (conformal)
+    cFigure::Point iE = cp.computeCanvasDirection(ecefOf(0, 0, 0), eastAt(0), CanvasProjection::DIRECTION_ISOMETRIC);
+    cFigure::Point iN = cp.computeCanvasDirection(ecefOf(0, 0, 0), northAt(0), CanvasProjection::DIRECTION_ISOMETRIC);
+    check(close(iE.x * iN.x + iE.y * iN.y, 0, 1e-6 * len(iE) * len(iN) + 1e-9), "ISOMETRIC preserves the east/north right angle (conformal)");
+
+    // TRUE_LENGTH at 60 deg with a NE direction: same heading as PROJECTED, same magnitude as ISOMETRIC
+    Coord ne = eastAt(60) * 0.6 + northAt(60) * 0.8; // unit horizontal
+    Coord pt60 = ecefOf(60, 0, 0);
+    cFigure::Point tl = cp.computeCanvasDirection(pt60, ne, CanvasProjection::DIRECTION_TRUE_LENGTH);
+    cFigure::Point iso = cp.computeCanvasDirection(pt60, ne, CanvasProjection::DIRECTION_ISOMETRIC);
+    cFigure::Point pr = cp.computeCanvasDirection(pt60, ne, CanvasProjection::DIRECTION_PROJECTED);
+    check(close(len(tl), len(iso), 1e-6 * len(iso)), "TRUE_LENGTH magnitude equals ISOMETRIC magnitude");
+    check(close(tl.x * pr.y - tl.y * pr.x, 0, 1e-6 * len(tl) * len(pr) + 1e-9), "TRUE_LENGTH heading matches the PROJECTED (map) heading");
+    // sanity: off the equator the PROJECTED heading really does differ from the ISOMETRIC heading
+    check(std::fabs(pr.x * iso.y - pr.y * iso.x) > 1e-3 * len(pr) * len(iso), "off-equator PROJECTED heading differs from ISOMETRIC heading");
+}
+
+EV << "failures=" << failures << endl;
+EV << "done" << endl;
+
+%contains: stdout
+failures=0
+done
+
+%not-contains: stdout
+FAILED

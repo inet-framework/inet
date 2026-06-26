@@ -1,0 +1,58 @@
+%description:
+Test the pure earth-surface projection geometry used by
+GeoHorizonCanvasVisualizer: the satellite visibility ring.
+
+%includes:
+#include <cmath>
+#include "inet/common/geometry/common/Wgs84.h"
+#include "inet/visualizer/canvas/scene/GeoHorizonCanvasVisualizer.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::visualizer;
+
+static int failures = 0;
+
+static void check(bool ok, const char *what)
+{
+    if (!ok) {
+        EV << "FAILED: " << what << endl;
+        failures++;
+    }
+}
+
+static bool close(double a, double b, double tol) { return std::fabs(a - b) <= tol; }
+
+%activity:
+
+const double h = 550000; // 550 km altitude
+
+// --- visibility ring ---
+{
+    GeoCoord sub(deg(0), deg(0), m(h));
+    auto ring = GeoHorizonCanvasVisualizer::visibilityRing(sub, h, 0, 72);
+    check((int)ring.size() == 72, "visibility ring has the requested number of points");
+    // first sample is due north of the sub-point: lon ~ 0, lat = central angle delta
+    double R = wgs84::MEAN_RADIUS;
+    double deltaDeg = std::acos(R / (R + h)) * 180.0 / M_PI;
+    check(close(ring[0].latitude.get<deg>(), deltaDeg, 1e-3), "visibility ring north point sits at the central angle");
+    check(close(ring[0].longitude.get<deg>(), 0, 1e-3), "visibility ring north point is at the sub-point longitude");
+    bool allOnSurface = true;
+    for (auto& g : ring)
+        if (!close(g.altitude.get<m>(), 0, 1e-6)) allOnSurface = false;
+    check(allOnSurface, "visibility ring points lie on the surface");
+
+    // a non-positive altitude yields no footprint
+    check(GeoHorizonCanvasVisualizer::visibilityRing(GeoCoord(deg(0), deg(0), m(0)), 0, 0, 72).empty(), "no visibility footprint at zero altitude");
+}
+
+EV << "failures=" << failures << endl;
+EV << "done" << endl;
+
+%contains: stdout
+failures=0
+done
+
+%not-contains: stdout
+FAILED

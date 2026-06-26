@@ -1,0 +1,100 @@
+%description:
+Test GnssTrackMobility::Track playback: constant-speed and timestamped timing, the
+start-time offset, the loop modes (none/repeat/pingPong), and great-circle interpolation.
+
+%includes:
+#include <cmath>
+#include "inet/mobility/single/GnssTrackMobility.h"
+
+%global:
+
+using namespace inet;
+
+static int failures = 0;
+
+static void check(bool ok, const char *what)
+{
+    if (!ok) {
+        EV << "FAILED: " << what << endl;
+        failures++;
+    }
+}
+
+static bool close(double a, double b, double tol) { return std::fabs(a - b) <= tol; }
+
+%activity:
+
+const double startTime = 100;
+
+// three waypoints along the equator, traversed at constant ground speed
+GnssTrackMobility::Track track;
+track.waypoints = { GeoCoord(deg(0), deg(0), m(0)), GeoCoord(deg(0), deg(10), m(0)), GeoCoord(deg(0), deg(20), m(0)) };
+track.startTime = startTime;
+track.loopMode = GnssTrackMobility::Track::LOOP_NONE;
+track.computeTimesFromSpeed(1000); // m/s
+double duration = track.getDuration();
+double t1 = track.times[1];
+
+check(track.times[0] == 0, "constant-speed timing starts at 0");
+check(duration > 0, "track has a positive duration");
+check(close(track.getMaxSpeed(), 1000, 1.0), "max speed matches the configured ground speed");
+
+// endpoints and a midpoint
+check(close(track.positionAt(startTime).longitude.get<deg>(), 0, 1e-6), "before/at start sits on the first waypoint");
+check(close(track.positionAt(startTime + duration).longitude.get<deg>(), 20, 1e-4), "at end sits on the last waypoint");
+check(close(track.positionAt(startTime + t1).longitude.get<deg>(), 10, 1e-4), "reaches the middle waypoint at its time");
+check(close(track.positionAt(startTime + t1 / 2).longitude.get<deg>(), 5, 1e-4), "great-circle midpoint of the first segment is at lon 5");
+
+// start-time offset and end-of-track: stationary outside the playing interval (LOOP_NONE)
+check(!track.isMoving(startTime - 10), "not moving before the start time");
+check(track.isMoving(startTime + t1 / 2), "moving during playback");
+check(!track.isMoving(startTime + duration + 10), "not moving after the end (LOOP_NONE)");
+check(close(track.positionAt(startTime - 10).longitude.get<deg>(), 0, 1e-6), "holds the first waypoint before the start");
+check(close(track.positionAt(startTime + duration + 10).longitude.get<deg>(), 20, 1e-4), "holds the last waypoint after the end");
+
+// repeat: one full duration later, the position wraps back to the start of the track
+{
+    track.loopMode = GnssTrackMobility::Track::LOOP_REPEAT;
+    check(close(track.positionAt(startTime + duration + t1 / 2).longitude.get<deg>(), 5, 1e-4), "repeat wraps end to start");
+    check(track.isMoving(startTime + duration + t1 / 2), "still moving while repeating");
+}
+
+// ping-pong: time past the end reflects back symmetrically
+{
+    track.loopMode = GnssTrackMobility::Track::LOOP_PINGPONG;
+    double forward = track.positionAt(startTime + duration - t1 / 2).longitude.get<deg>();
+    double reflected = track.positionAt(startTime + duration + t1 / 2).longitude.get<deg>();
+    check(close(forward, reflected, 1e-4), "ping-pong reflects symmetrically around the end");
+}
+
+// timestamped track: per-point times drive the motion
+{
+    GnssTrackMobility::Track timed;
+    timed.waypoints = { GeoCoord(deg(0), deg(0), m(0)), GeoCoord(deg(0), deg(10), m(0)), GeoCoord(deg(0), deg(30), m(0)) };
+    timed.times = { 1000, 1010, 1030 }; // not starting at 0
+    timed.normalizeTimes();
+    timed.startTime = 0;
+    check(timed.times[0] == 0 && timed.times[2] == 30, "timestamps are normalized to start at 0");
+    check(close(timed.positionAt(10).longitude.get<deg>(), 10, 1e-4), "timestamped track reaches wp1 at t=10");
+    check(close(timed.positionAt(20).longitude.get<deg>(), 20, 1e-4), "timestamped track is mid-second-segment at t=20");
+}
+
+// great-circle (not lat/lon-linear): a segment across the antimeridian bulges poleward
+{
+    GnssTrackMobility::Track arc;
+    arc.waypoints = { GeoCoord(deg(10), deg(170), m(0)), GeoCoord(deg(10), deg(-170), m(0)) };
+    arc.startTime = 0;
+    arc.computeTimesFromSpeed(1000);
+    double midLat = arc.positionAt(arc.getDuration() / 2).latitude.get<deg>();
+    check(midLat > 10 + 1e-3, "great-circle segment bulges toward the pole (not a straight lat line)");
+}
+
+EV << "failures=" << failures << endl;
+EV << "done" << endl;
+
+%contains: stdout
+failures=0
+done
+
+%not-contains: stdout
+FAILED

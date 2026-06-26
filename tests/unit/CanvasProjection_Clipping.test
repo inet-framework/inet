@@ -1,0 +1,111 @@
+%description:
+Verify the figure-clipping helpers on CanvasProjection used to keep canvas visualizers inside a
+limited map area (e.g. a regional GeoMap window). Checks: the helpers are no-ops when no clip rect is
+set; point-inside and rect-overlap ("any part inside") tests; line clipping (inside / straddling /
+crossing with both ends out / fully outside); and polygon clipping.
+
+%includes:
+#include <cmath>
+#include "inet/common/geometry/common/CanvasProjection.h"
+
+%global:
+
+using namespace inet;
+
+static int failures = 0;
+
+static void check(bool ok, const char *what)
+{
+    if (!ok) {
+        EV << "FAILED: " << what << endl;
+        failures++;
+    }
+}
+
+static bool eq(const cFigure::Point& a, double x, double y) { return std::fabs(a.x - x) < 1e-9 && std::fabs(a.y - y) < 1e-9; }
+
+%activity:
+
+// ---- no clip rect set: every helper is a no-op ----
+{
+    CanvasProjection cp;
+    check(!cp.hasClipRect(), "no clip rect by default");
+    check(cp.isPointInsideClip(cFigure::Point(1000, 1000)), "isPointInsideClip is true when unset");
+    check(cp.isRectVisibleInClip(cFigure::Rectangle(1000, 1000, 1, 1)), "isRectVisibleInClip is true when unset");
+    cFigure::Point a(-50, -50), b(500, 500);
+    check(cp.clipLine(a, b), "clipLine returns true when unset");
+    check(eq(a, -50, -50) && eq(b, 500, 500), "clipLine leaves endpoints unchanged when unset");
+}
+
+// ---- with a clip rect [0,0,100,100] ----
+{
+    CanvasProjection cp;
+    cp.setClipRect(cFigure::Rectangle(0, 0, 100, 100));
+    check(cp.hasClipRect(), "clip rect is set");
+
+    // point inside / outside
+    check(cp.isPointInsideClip(cFigure::Point(50, 50)), "interior point is inside");
+    check(cp.isPointInsideClip(cFigure::Point(0, 0)), "corner point is inside (boundary inclusive)");
+    check(!cp.isPointInsideClip(cFigure::Point(-1, 50)), "point left of the rect is outside");
+    check(!cp.isPointInsideClip(cFigure::Point(50, 101)), "point below the rect is outside");
+
+    // rect overlap ("any part inside" - used to hide a figure only when fully outside)
+    check(cp.isRectVisibleInClip(cFigure::Rectangle(90, 90, 20, 20)), "a box straddling the corner is visible");
+    check(cp.isRectVisibleInClip(cFigure::Rectangle(-5, -5, 10, 10)), "a box overlapping the top-left is visible");
+    check(!cp.isRectVisibleInClip(cFigure::Rectangle(200, 200, 10, 10)), "a box fully outside is not visible");
+    check(!cp.isRectVisibleInClip(cFigure::Rectangle(-20, 40, 10, 10)), "a box fully left of the rect is not visible");
+
+    // line fully inside: unchanged
+    {
+        cFigure::Point a(10, 10), b(80, 80);
+        check(cp.clipLine(a, b), "fully-inside line is visible");
+        check(eq(a, 10, 10) && eq(b, 80, 80), "fully-inside line is unchanged");
+    }
+    // line straddling the right edge: end clipped to x=100
+    {
+        cFigure::Point a(50, 50), b(150, 50);
+        check(cp.clipLine(a, b), "straddling line is visible");
+        check(eq(a, 50, 50) && eq(b, 100, 50), "straddling line end clipped to the right edge");
+    }
+    // line crossing the rect with BOTH endpoints outside: clipped to both edges
+    {
+        cFigure::Point a(-50, 50), b(150, 50);
+        check(cp.clipLine(a, b), "crossing line (both ends out) is visible");
+        check(eq(a, 0, 50) && eq(b, 100, 50), "crossing line clipped to both vertical edges");
+    }
+    // line fully outside: not visible
+    {
+        cFigure::Point a(200, 200), b(300, 300);
+        check(!cp.clipLine(a, b), "fully-outside line is hidden");
+    }
+
+    // polygon clipping: a big square covering the rect clips to the rect itself
+    {
+        std::vector<cFigure::Point> poly = { {-50, -50}, {150, -50}, {150, 150}, {-50, 150} };
+        auto clipped = cp.clipPolygon(poly);
+        check(clipped.size() == 4, "polygon covering the rect clips to 4 corners");
+        double minx = 1e9, miny = 1e9, maxx = -1e9, maxy = -1e9;
+        for (auto& p : clipped) { minx = std::min(minx, p.x); miny = std::min(miny, p.y); maxx = std::max(maxx, p.x); maxy = std::max(maxy, p.y); }
+        check(std::fabs(minx) < 1e-9 && std::fabs(miny) < 1e-9 && std::fabs(maxx - 100) < 1e-9 && std::fabs(maxy - 100) < 1e-9, "clipped polygon spans exactly the clip rect");
+    }
+    // polygon fully outside clips to empty
+    {
+        std::vector<cFigure::Point> poly = { {200, 200}, {250, 200}, {250, 250} };
+        check(cp.clipPolygon(poly).empty(), "polygon fully outside clips to empty");
+    }
+
+    // clearing the clip rect restores no-op behavior
+    cp.clearClipRect();
+    check(!cp.hasClipRect(), "clip rect cleared");
+    check(cp.isPointInsideClip(cFigure::Point(-100, -100)), "isPointInsideClip true again after clear");
+}
+
+EV << "failures=" << failures << endl;
+EV << "done" << endl;
+
+%contains: stdout
+failures=0
+done
+
+%not-contains: stdout
+FAILED
