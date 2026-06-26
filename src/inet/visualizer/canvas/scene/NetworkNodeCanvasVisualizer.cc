@@ -50,6 +50,9 @@ void NetworkNodeCanvasVisualizer::refreshDisplay() const
         auto visualization = it.second;
         auto position = canvasProjection->computeCanvasPoint(getPosition(networkNode));
         visualization->setTransform(cFigure::Transform().translate(position.x, position.y));
+        // on a limited map area, hide the node marker once its icon/label box is fully outside
+        const cFigure::Rectangle& b = visualization->getSubmoduleBounds();
+        visualization->setVisible(canvasProjection->isRectVisibleInClip(cFigure::Rectangle(position.x + b.x, position.y + b.y, b.width, b.height)));
         auto imageFigure = visualization->getImageFigure();
         if (imageFigure != nullptr) {
             auto orientation = getOrientation(networkNode);

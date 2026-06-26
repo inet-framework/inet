@@ -53,6 +53,10 @@ class INET_API NetworkNodeCanvasVisualization : public NetworkNodeVisualizerBase
 
     virtual cImageFigure *getImageFigure() { return imageFigure; }
 
+    // The node's icon/label bounding box, centered on the node origin (canvas pixels, before the
+    // group's position transform); used to clip the node marker to a limited map area.
+    virtual const cFigure::Rectangle& getSubmoduleBounds() const { return submoduleBounds; }
+
     virtual int getNumAnnotations() const { return annotations.size(); }
     virtual void addAnnotation(cFigure *figure, cFigure::Rectangle bounds, Placement placement = PLACEMENT_ANY, double placementPriority = 0);
     virtual void removeAnnotation(cFigure *figure);

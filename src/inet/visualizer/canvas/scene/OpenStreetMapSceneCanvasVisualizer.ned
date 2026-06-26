@@ -25,7 +25,7 @@ simple OpenStreetMapSceneCanvasVisualizer extends SceneVisualizerBase like IScen
 
         xml mapFile; // OpenStreetMap map file, e.g. one exported from openstreetmap.org
 
-        double zIndex = default(0); // Determines the drawing order of figures relative to other visualizers
+        double zIndex = default(-17); // Determines the drawing order of figures relative to other visualizers (below GeoMapCanvasVisualizer's -16 so the two backgrounds do not share a z-level)
         bool adjustBackgroundBox = default(true); // If true, sets the background box (bgb tag) to match map bounds
 }
 

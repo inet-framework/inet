@@ -31,8 +31,12 @@ void NetworkConnectionCanvasVisualizer::createNetworkConnectionVisualization(cMo
     lineFigure->setLineColor(lineColor);
     lineFigure->setLineStyle(lineStyle);
     lineFigure->setLineWidth(lineWidth);
-    lineFigure->setStart(canvasProjection->computeCanvasPoint(getPosition(startNetworkNode)));
-    lineFigure->setEnd(canvasProjection->computeCanvasPoint(getPosition(endNetworkNode)));
+    cFigure::Point start = canvasProjection->computeCanvasPoint(getPosition(startNetworkNode));
+    cFigure::Point end = canvasProjection->computeCanvasPoint(getPosition(endNetworkNode));
+    bool visible = canvasProjection->clipLine(start, end); // clip to the map area, hide if fully outside
+    lineFigure->setStart(start);
+    lineFigure->setEnd(end);
+    lineFigure->setVisible(visible);
     lineFigure->setEndArrowhead(cFigure::ARROW_BARBED);
     lineFigure->setZIndex(zIndex);
     visualizationTargetModule->getCanvas()->addFigure(lineFigure);
